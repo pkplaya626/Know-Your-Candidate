@@ -10,9 +10,8 @@ import shutil
 
 def build_website():
     def get_latest_csv(prefix):
-        for opt in [f"{prefix}_5.csv", f"{prefix}_4.csv", f"{prefix}_3.csv", f"{prefix}_2.csv", f"{prefix}.csv"]:
-            if os.path.exists(opt): return opt
-        return None
+        filename = f"{prefix}.csv"
+        return filename if os.path.exists(filename) else None
 
     def read_csv_dict(filepath):
         if not filepath or not os.path.exists(filepath): return []
@@ -29,9 +28,6 @@ def build_website():
     current_rows = []
     if house_csv: current_rows.extend(read_csv_dict(house_csv))
     if senate_csv: current_rows.extend(read_csv_dict(senate_csv))
-    if not current_rows:
-        fallback_curr = get_latest_csv('Congressional_Current_Congress_119th')
-        if fallback_curr: current_rows = read_csv_dict(fallback_curr)
 
     # Deduplicate current members
     dedup_current = {}
@@ -356,14 +352,7 @@ def build_website():
         print(f"[OK] Updated {filepath}")
 
     update_index_file(index_file_path)
-
-    # Rebuild map.html using the dedicated builder
-    import sys
-    sys.path.insert(0, os.path.dirname(__file__))
-    scratch_rebuild = os.path.join(os.path.dirname(__file__), '..', '.gemini', 'antigravity-ide', 'brain', '194078bd-5c70-4c13-bfee-911f71057f7f', 'scratch', 'rebuild_map_html.py')
-    if os.path.exists(scratch_rebuild):
-        import subprocess
-        subprocess.run(['python', scratch_rebuild], check=True)
+    update_index_file(map_file_path)
 
 if __name__ == '__main__':
     build_website()
