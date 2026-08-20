@@ -19,3 +19,7 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 .DS_Store
+
+# Pipeline
+*.csv.tmp
+candidate_profiles_site/data/*.tmp
