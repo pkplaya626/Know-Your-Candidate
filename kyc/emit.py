@@ -28,7 +28,7 @@ def _atomic_write(path, text):
     os.replace(tmp, path)
 
 
-def write_profiles(profiles, stats, root="."):
+def write_profiles(profiles, stats, root=".", races=None):
     """Emit ``candidate_profiles_site/data/profiles.js``.
 
     A plain script assignment rather than JSON + ``fetch`` so the pages keep
@@ -39,7 +39,15 @@ def write_profiles(profiles, stats, root="."):
     os.makedirs(data_dir, exist_ok=True)
     path = os.path.join(root, DATA_FILE)
 
-    built = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+    # SOURCE_DATE_EPOCH makes the output byte-for-byte reproducible, which is
+    # what lets CI assert that a rebuild changes nothing.
+    epoch = os.environ.get("SOURCE_DATE_EPOCH")
+    now = (
+        datetime.datetime.fromtimestamp(int(epoch), datetime.timezone.utc)
+        if epoch and epoch.isdigit()
+        else datetime.datetime.now(datetime.timezone.utc)
+    )
+    built = now.isoformat(timespec="seconds")
     payload = json.dumps(profiles, ensure_ascii=False, separators=(",", ":"))
     # Defensive: a profile field containing "</script>" would otherwise close
     # the tag early and break the page.
@@ -48,10 +56,13 @@ def write_profiles(profiles, stats, root="."):
     meta = json.dumps(
         {"built": built, "counts": stats}, ensure_ascii=False, separators=(",", ":")
     )
+    race_payload = json.dumps(races or [], ensure_ascii=False, separators=(",", ":"))
+    race_payload = race_payload.replace("</script>", "<\\/script>")
 
     text = (
         _BANNER.format(built=built, count=len(profiles))
         + f"window.legislatorsData = {payload};\n"
+        + f"window.kycRaces = {race_payload};\n"
         + f"window.kycBuildMeta = {meta};\n"
     )
     _atomic_write(path, text)

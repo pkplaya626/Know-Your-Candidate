@@ -23,3 +23,5 @@ $RECYCLE.BIN/
 # Pipeline
 *.csv.tmp
 candidate_profiles_site/data/*.tmp
+node_modules/
+package-lock.json

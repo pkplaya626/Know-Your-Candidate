@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pipeline:
+    name: Pipeline tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The pipeline is standard-library only; check the range we claim.
+        python-version: ["3.9", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Confirm no third-party dependencies are needed
+        run: |
+          test ! -f requirements.txt || (echo "requirements.txt appeared; the pipeline is meant to stay dependency-free" && exit 1)
+
+      - name: Unit tests
+        run: python -m unittest discover tests -v
+
+      - name: Validate the data (no network)
+        run: python build_profile_site.py build --check --strict --verbose
+
+      - name: Rebuild and confirm the output is reproducible
+        env:
+          SOURCE_DATE_EPOCH: "1000000000"
+        run: |
+          python build_profile_site.py
+          SOURCE_DATE_EPOCH=1000000000 python build_profile_site.py
+          git diff --exit-code -- candidate_profiles_site/data/profiles.js || (echo "A rebuild changed the output; commit the regenerated data." && exit 1)
+
+  pages:
+    name: Page render tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Check every inline script parses
+        run: |
+          python3 - <<'PY'
+          import re, pathlib
+          out = pathlib.Path("_inline"); out.mkdir(exist_ok=True)
+          for page in ("index.html", "map.html"):
+              src = pathlib.Path("candidate_profiles_site") / page
+              blocks = re.findall(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>",
+                                  src.read_text(encoding="utf-8"), re.S)
+              for i, b in enumerate(blocks):
+                  (out / f"{page}.{i}.js").write_text(b, encoding="utf-8")
+          PY
+          for f in _inline/*.js candidate_profiles_site/assets/kyc.js; do
+            node --check "$f" || exit 1
+          done
+
+      - name: Render the pages and exercise the UI
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-fund --no-audit jsdom
+          node tests/render_test.js index.html
+          node tests/render_test.js map.html

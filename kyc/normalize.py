@@ -163,3 +163,86 @@ def office_label(chamber, state, district_label):
             return f"House • {state}-{district_label}"
         return f"House • {state}".strip() if state else "House"
     return chamber
+
+
+# --------------------------------------------------------------- provenance
+#
+# The rosters carry three different things in the same column, and the site
+# used to render all three identically:
+#
+#   "$3,161,009"                                  -> a real, sourced figure
+#   "N/A (No net worth disclosure provided...)"   -> filed nothing / no duty to
+#   ""                                            -> nobody has researched it
+#
+# Collapsing those into one display value is the core credibility problem on a
+# transparency site, so classify() keeps them apart.
+
+# Prose that means "there is no disclosure", not "we have no data".
+_NOT_DISCLOSED = re.compile(
+    r"^\s*(n/?a\b|no\s+\w+\s+(disclosure|filing|record)|not\s+disclosed"
+    r"|none\s+disclosed|pending\b|awaiting\b|tbd\b)",
+    re.IGNORECASE,
+)
+
+# Values so generic they carry no information. True of nearly everyone, so
+# showing them implies research that did not happen.
+GENERIC_VALUES = {
+    "individual/pac contributions",
+    "individual contributions",
+    "general legislative priorities",
+    "public service",
+    "nominee candidate",
+    "various",
+    "n/a",
+}
+
+OK = "ok"
+NOT_DISCLOSED = "not_disclosed"
+UNKNOWN = "unknown"
+GENERIC = "generic"
+
+# What to show instead of a long placeholder sentence.
+STATUS_LABELS = {
+    NOT_DISCLOSED: "Not disclosed",
+    UNKNOWN: "No data",
+    GENERIC: None,  # keep the original text, but mark it low-information
+}
+
+
+def classify(val):
+    """Return ``(display_value, status)`` for one roster field.
+
+    ``status`` is one of :data:`OK`, :data:`NOT_DISCLOSED`, :data:`UNKNOWN`
+    or :data:`GENERIC`.
+    """
+    if is_missing(val):
+        return STATUS_LABELS[UNKNOWN], UNKNOWN
+
+    text = str(val).strip()
+    if text.lower() in GENERIC_VALUES:
+        return text, GENERIC
+    if _NOT_DISCLOSED.match(text):
+        return STATUS_LABELS[NOT_DISCLOSED], NOT_DISCLOSED
+    return text, OK
+
+
+# Accepted date shapes for a birthdate. The rosters use ISO exclusively; the
+# alternatives are there so a future import does not silently fail this check.
+_DATE_LIKE = re.compile(
+    r"""^\s*(
+        \d{4}-\d{2}-\d{2}            # 1966-09-26
+      | \d{1,2}/\d{1,2}/\d{2,4}      # 9/26/1966
+      | [A-Z][a-z]{2,8}\.?\s+\d{1,2},\s*\d{4}   # Sept. 26, 1966
+      | \d{4}                        # 1966
+    )\s*$""",
+    re.VERBOSE,
+)
+
+
+def looks_like_date(val):
+    """True when *val* is a date rather than prose that happens to hold digits.
+
+    ``"2026 Primary"`` is a race marker parked in the Birthdate column; it
+    contains a four-digit year, so a bare digit check waves it through.
+    """
+    return bool(_DATE_LIKE.match(str(val or "")))

@@ -2,7 +2,7 @@
 
 A non-partisan, data-driven directory of the 119th U.S. Congress and the 2026
 midterm races. Static site, no backend, no build toolchain — a Python pipeline
-turns curated CSV rosters into one JavaScript data file that two HTML pages read.
+turns curated CSV rosters into JavaScript data files that two HTML pages read.
 
 ## Quick start
 
@@ -11,117 +11,179 @@ python build_profile_site.py            # rebuild the site data from the CSVs
 open candidate_profiles_site/index.html # or just double-click it
 ```
 
-There are no third-party dependencies. Python 3.8+ and the standard library.
+No third-party dependencies. Python 3.9+ and the standard library.
 
 ## Commands
 
 | Command | What it does |
 |---|---|
 | `python build_profile_site.py` | Build `candidate_profiles_site/data/profiles.js` |
-| `python build_profile_site.py build --check` | Validate only; write nothing |
-| `python build_profile_site.py build --strict` | Refuse to write if validation finds an error |
-| `python build_profile_site.py fetch` | Refresh DW-NOMINATE scores from Voteview into the roster CSVs |
-| `python build_profile_site.py refresh` | `fetch`, then `build` |
-| `python -m unittest discover tests` | Run the test suite |
+| `… build --check` | Validate only; write nothing |
+| `… build --strict` | Refuse to write if validation finds an error |
+| `… fetch` | Refresh DW-NOMINATE scores from Voteview into the roster CSVs |
+| `… portraits` | Resolve and check a portrait URL for every profile |
+| `… portraits --refresh` | Re-resolve every portrait, not just the missing ones |
+| `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`) |
+| `… refresh` | `fetch`, then `build` |
+| `python -m unittest discover tests` | 65 pipeline tests |
+| `node tests/render_test.js index.html` | Render the page and exercise the UI (needs `npm install jsdom`) |
 
-Add `--verbose` to see every item behind a validation finding rather than the
-first five. `fetch_voting_data.py` still works and is an alias for `fetch`.
+`--root` and `--verbose` go before the subcommand: `python build_profile_site.py --verbose portraits`.
+
+The three enrichment commands (`fetch`, `portraits`, `finance`) are the only
+ones that touch the network. `build` is fully offline and reads their caches.
 
 ## How the data flows
 
 ```
-Cleaned_House_119th.csv      ─┐
-Cleaned_Senate_119th.csv     ─┤
-Congressional_Candidates_2026.csv        ├─> kyc/ ─> candidate_profiles_site/data/profiles.js
-Completed_Primary_Candidates_2026.csv    ─┤                    │
-Late_Primary_Candidates_2026.csv         ─┘                    ├─> index.html  (profile grid)
-                                                               └─> map.html    (partisan map)
+Cleaned_House_119th.csv                  ─┐
+Cleaned_Senate_119th.csv                 ─┤
+Congressional_Candidates_2026.csv        ─┼─> kyc/ ─> data/profiles.js  ─┬─> index.html
+Completed_Primary_Candidates_2026.csv    ─┤           data/portraits.json │   (grid + races)
+Late_Primary_Candidates_2026.csv         ─┘           data/finance.json   └─> map.html
 ```
 
-The CSVs at the repo root are the source of truth. `data/profiles.js` is
-generated — never edit it by hand. It is committed so the site can be served
-straight from GitHub Pages with no build step.
+The CSVs at the repo root are the source of truth. Everything under
+`candidate_profiles_site/data/` is generated — never edit `profiles.js` by hand.
+It is committed so the site serves straight from GitHub Pages with no build step.
 
-Both pages load the data with `<script src="data/profiles.js">` rather than
-`fetch()`, so opening the HTML directly off disk still works (`file://` blocks
-`fetch`, but not `<script src>`).
+Both pages load the data with `<script src>` rather than `fetch()`, so opening
+the HTML directly off disk still works (`file://` blocks `fetch`, not `<script src>`).
 
-### Candidate roster precedence
-
-`Congressional_Candidates_2026.csv` → `Completed_Primary_Candidates_2026.csv` →
-`Late_Primary_Candidates_2026.csv`. Later files win, so a resolved primary
-overrides the broad roster. Records are keyed on **(name, state, chamber)** —
-keying on name alone merges different people who happen to share one.
+Builds honour `SOURCE_DATE_EPOCH`, so output is byte-for-byte reproducible and
+CI can assert that a rebuild changes nothing.
 
 ## The `kyc` package
 
 | Module | Responsibility |
 |---|---|
 | `sources.py` | Find and read the roster CSVs |
-| `normalize.py` | Clean values; parse states, districts, ages, currency |
-| `overrides.py` | Hand-curated corrections (photos, statuses, 2026 Senate seats) |
-| `photos.py` | Build the portrait fallback chain |
-| `profiles.py` | Assemble unified profiles; derive all 2026 election flags |
+| `normalize.py` | Clean values; parse states, districts, ages, currency; classify provenance |
+| `overrides.py` | Hand-curated corrections (statuses, 2026 Senate seats) |
+| `photos.py` | Runtime portrait fallback chain (safety net) |
+| `portraits.py` | Build-time portrait resolution and checking |
+| `fec.py` | Campaign finance from the OpenFEC API |
+| `voteview.py` | DW-NOMINATE ideology scores |
+| `profiles.py` | Assemble profiles; derive 2026 election flags and field provenance |
+| `races.py` | Group profiles into the seats they contest |
 | `validate.py` | Data-quality checks |
-| `emit.py` | Write `profiles.js` atomically; verify the pages are wired up |
-| `voteview.py` | Download and apply DW-NOMINATE scores |
+| `emit.py` | Write the data files atomically; verify the pages are wired up |
 | `cli.py` | Argument parsing and command wiring |
 
-## Election flags
+## Portraits
 
-Derived in `kyc/profiles.py` and shipped in the data. They used to be computed
-in the browser, duplicated verbatim in both HTML files.
+Portraits are resolved **at build time** and cached in
+`candidate_profiles_site/data/portraits.json`, which is committed and
+hand-editable. Coverage is currently **571/594 (96%)**; of the 23 without one,
+9 are placeholder rows for unresolved primaries, so 14 real people lack a
+portrait because no public source has one.
+
+Resolution order: Congress.gov official portrait → Wikipedia via the
+`congress-legislators` Bioguide↔title mapping → a bare Wikipedia title guess →
+a Wikipedia search. A member and their own 2026 candidacy share a portrait.
+
+Set `"pinned": true` on a cache entry to stop the resolver overwriting a
+hand-corrected URL.
+
+Two rules are load-bearing here, both learned the hard way:
+
+- **Never discard on an inconclusive check.** Wikipedia returns HTTP 429 freely
+  during a full run. Treating "could not tell" as "broken" silently threw away
+  about 160 working portraits.
+- **Never search with a topical hint.** Searching `Dan Osborn NE politician`
+  pushes his own article out of the top results; `Dan Osborn` returns it first.
+
+## Campaign finance
+
+`finance` fills receipts, disbursements, cash on hand and a real funding
+breakdown from the FEC, replacing the roster's generic
+`"Individual/PAC contributions"` text. Figures carry the FEC coverage date.
+
+Get a free key at <https://api.data.gov/signup/> and set `FEC_API_KEY`. Without
+one the module falls back to `DEMO_KEY`, which the FEC throttles after a handful
+of requests — enough to try it, not enough to fill 594 profiles. Results cache
+per profile, so a throttled run stops cleanly and the next one resumes.
+
+## Data provenance
+
+The rosters carry three different things in one column, and the site used to
+render all three identically:
+
+| Value | Means | Now shows as |
+|---|---|---|
+| `$3,161,009` | a sourced figure | the figure, with a source badge where known |
+| `N/A (No net worth disclosure provided…)` | no filing exists | *Not disclosed* (muted) |
+| `""` | nobody has researched it | *No data* (muted) |
+| `Individual/PAC contributions` | true of everyone; no information | dotted underline, marked generic |
+
+`profiles.js` carries a `quality` map per profile listing only the fields that
+are *not* real data. About **31% of surfaced fields** fall into one of those
+categories — that is the honest picture, and the page now shows it as such.
+Absent values are excluded from search, so "not disclosed" does not match
+everyone.
+
+## Election flags and races
+
+Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data. They used
+to be computed in the browser, duplicated verbatim in both HTML files.
 
 | Field | Meaning |
 |---|---|
 | `isCandidate` | A 2026 challenger, not a sitting member |
 | `seatUp2026` | This seat is on the 2026 ballot |
 | `seekingReelection2026` | Seat is up **and** the incumbent is running |
-| `termEndYear` / `electionYear` | Derived term boundaries |
-| `alsoRunningId` / `incumbentId` | Cross-link between a member and their own 2026 candidacy |
-
-`isUpIn2026` is retained as an alias of `seatUp2026` for the existing page code.
+| `raceId` | The 2026 contest this profile is competing in |
+| `alsoRunningId` / `incumbentId` | Cross-link between a member and their own candidacy |
 
 All 435 House seats are two-year terms, so every House member has
 `seatUp2026 = true`. Use `seekingReelection2026` to find who is actually
-running — retiring members have the seat up but are not on the ballot.
+running. `isUpIn2026` remains as an alias of `seatUp2026`.
 
-### Portraits
+`window.kycRaces` holds **472 seats** on the 2026 ballot (435 voting House + 6
+territory delegates + 35 Senate), of which 38 have a declared challenger in the
+rosters and 13 are open seats. The 65 senators whose terms run past 2026 belong
+to no race. The **By Race** toggle on the grid groups an incumbent with
+everyone challenging them.
 
-Tried in order, falling back on load error to an inline silhouette:
-Congress.gov → theunitedstates.io (450×550, then 225×275) → Bioguide Retro →
-Wikipedia. Candidates have no Bioguide ID, so they start at Wikipedia.
+## The pages
 
-Curated overrides in `overrides.CANDIDATE_PHOTOS` are keyed on
-**(name, state)** and apply only to candidates. Rep. Mike Rogers (AL-3) and
-2026 Senate candidate Mike Rogers (MI) are different people; a name-only key
-put one man's portrait on the other's profile.
+`index.html` and `map.html` are hand-maintained templates. The build only
+writes into `data/`; it never rewrites the HTML. Shared styling and behaviour
+live in `assets/kyc.css` and `assets/kyc.js` — themes, the portrait fallback,
+the accessible modal, the hash router, provenance rendering and the election
+countdown. Keep the `<script src="assets/kyc.js">` and
+`<script src="data/profiles.js">` tags; the build warns if a page drops them.
+
+Every view has a URL: `#/profile/<id>` for a person, `#/?state=TX&chamber=Senate`
+for a filtered list, so any view can be linked and shared.
+
+Accessibility: skip link, labelled search, live region on the result count,
+focus-visible outlines, and a modal with a focus trap, Escape handling and
+focus restore. The sidebar becomes an off-canvas drawer under 900px.
 
 ## Validation
 
-`build --check` reports data-quality findings. Errors are structural
-(wrong chamber size, duplicate districts, a 2026 Senate seat matching no
-incumbent). Warnings are advisory — including **stale curation**: overrides
-in `overrides.py` that no longer match any profile. That check is what caught
-a retirement note keyed to `"Dick Durbin"` while the roster says
-`"Richard Durbin"`, which meant his retirement never showed on the site.
+`build --check` reports data-quality findings. Errors are structural (wrong
+chamber size, duplicate districts, a 2026 Senate seat matching no incumbent).
+Warnings are advisory, including **stale curation** — overrides that no longer
+match any profile. That check is what caught a retirement note keyed to
+`"Dick Durbin"` while the roster says `"Richard Durbin"`, which meant his
+retirement never showed on the site.
 
-Current known warnings, all expected:
+Current warnings, all expected:
 
 - 431 of 435 voting House seats — real mid-term vacancies.
-- 9 placeholder rows (`"Democratic Nominee"`, `"Republican Nominee"`) standing
-  in for states whose primary has not resolved.
+- 9 placeholder rows standing in for unresolved primaries.
 - 3 stale exclusions — members already removed from the cleaned rosters.
-- 5 dual-role members, sitting House members running for Senate.
+- 5 dual-role members: sitting House members running for Senate.
 
-## Editing the site
+## Known gaps
 
-`index.html` and `map.html` are hand-maintained templates. The build only
-writes `data/profiles.js`; it never rewrites the HTML. Keep the
-`<script src="data/profiles.js"></script>` tag — the build warns if a page
-stops loading it.
-
-To sanity-check a page change without a browser, `node --check` each inline
-`<script>` block. A fuller render test using `jsdom` (exercising the filter
-chips, sidebar counts, and modal cross-links) is straightforward to run if
-you install `jsdom` locally; it is not a project dependency.
+- **Campaign finance is only as complete as your FEC key allows.** With
+  `DEMO_KEY` you get a handful of profiles.
+- **No state primary dates.** The countdown covers the general election, which
+  is computed (first Tuesday after the first Monday in November). Per-state
+  primary dates are not in the data and are deliberately not invented.
+- **Candidate coverage is thin** — 57 challengers across 472 seats. Most races
+  show an incumbent with no declared opponent, which reflects the rosters
+  rather than the field.

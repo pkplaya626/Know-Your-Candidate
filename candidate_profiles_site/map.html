@@ -11,106 +11,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Slab:wght@700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: ['class', '[data-theme="amoled"]'],
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Roboto', 'sans-serif'],
-                        slab: ['Roboto Slab', 'serif']
-                    },
-                    colors: {
-                        yt: {
-                            bg: 'var(--bg-main)',
-                            elevated: 'var(--bg-elevated)',
-                            input: 'var(--bg-input)',
-                            hover: 'var(--bg-hover)',
-                            border: 'var(--border-main)',
-                            borderHover: 'var(--border-hover)',
-                            text: 'var(--text-main)',
-                            textMuted: 'var(--text-muted)',
-                            textFaint: 'var(--text-faint)',
-                            inverse: 'var(--text-inverse)'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        :root {
-            --bg-main: #0f0f0f;
-            --bg-elevated: #181818;
-            --bg-input: #121212;
-            --bg-hover: #272727;
-            --border-main: #303030;
-            --border-hover: #3f3f3f;
-            --text-main: #f1f1f1;
-            --text-muted: #aaaaaa;
-            --text-faint: #717171;
-            --text-inverse: #0f0f0f;
-        }
-        [data-theme="amoled"] {
-            --bg-main: #000000;
-            --bg-elevated: #0a0a0a;
-            --bg-input: #050505;
-            --bg-hover: #1a1a1a;
-            --border-main: #222222;
-            --border-hover: #333333;
-            --text-main: #ffffff;
-            --text-muted: #888888;
-            --text-faint: #555555;
-            --text-inverse: #000000;
-        }
-        [data-theme="light"] {
-            --bg-main: #f9f9f9;
-            --bg-elevated: #ffffff;
-            --bg-input: #f0f0f0;
-            --bg-hover: #e5e5e5;
-            --border-main: #cccccc;
-            --border-hover: #aaaaaa;
-            --text-main: #0f0f0f;
-            --text-muted: #606060;
-            --text-faint: #909090;
-            --text-inverse: #ffffff;
-        }
-        html, body { 
-            height: 100%; 
-            width: 100%; 
-            margin: 0; 
-            padding: 0; 
-            overflow: hidden; 
-            touch-action: manipulation;
-            -webkit-text-size-adjust: 100%;
-        }
-        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-main); color: var(--text-main); }
-        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--text-faint); border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-        #us-map {
-            width: 100%;
-            height: 100%;
-            max-width: 100%;
-            max-height: 100%;
-            display: block;
-            touch-action: manipulation;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        .state-path { transition: fill 0.2s ease, opacity 0.2s ease; }
-        .state-path:hover { opacity: 0.85; }
-    </style>
-    <script>
-        (function() {
-            const saved = localStorage.getItem('ytTheme') || 'dark';
-            document.documentElement.setAttribute('data-theme', saved);
-        })();
-    </script>
+    <link rel="stylesheet" href="assets/kyc.css">
+    <script src="assets/kyc.js"></script>
 </head>
 <body class="h-full w-full flex flex-col antialiased overflow-hidden select-none">
-    
+
     <header class="h-14 flex-shrink-0 flex items-center justify-between px-6 border-b border-yt-border bg-yt-bg z-40">
         <div class="flex items-center space-x-6">
             <div class="flex items-center text-yt-text">
@@ -133,7 +38,7 @@
     </header>
 
     <div class="flex flex-1 overflow-hidden h-[calc(100vh-3.5rem)] min-h-0">
-        
+
         <aside class="w-60 flex-shrink-0 border-r border-yt-border bg-yt-bg flex flex-col h-full overflow-y-auto custom-scrollbar">
             <div class="p-3">
                 <a href="index.html" class="flex items-center px-3 py-2.5 rounded text-yt-text hover:bg-yt-hover font-medium text-sm transition-colors">
@@ -143,33 +48,33 @@
                     <i data-lucide="map" class="w-5 h-5 mr-4 text-yt-textMuted"></i> Partisan Map
                 </a>
             </div>
-            
+
             <hr class="border-yt-border my-2 mx-4">
-            
+
             <div class="px-4 py-2">
                 <h3 class="text-xs font-bold text-yt-textMuted uppercase tracking-wider mb-3">119th Congress</h3>
                 <div class="text-xs font-bold text-yt-textMuted mb-1">SENATE</div>
                 <div class="text-sm font-bold text-yt-text mb-4"><span class="text-[#ff4e45]">53 R</span> <span class="text-yt-textFaint mx-1">|</span> <span class="text-[#3ea6ff]">47 D/I</span></div>
-                
+
                 <div class="text-xs font-bold text-yt-textMuted mb-1">HOUSE</div>
                 <div class="text-sm font-bold text-yt-text mb-4" id="sidebarHouseStats"><span class="text-yt-textFaint">Loading...</span></div>
             </div>
 
             <hr class="border-yt-border my-2 mx-4">
-            
+
             <div class="px-4 py-2">
                 <h3 class="text-xs font-bold text-yt-text flex items-center mb-3"><i data-lucide="flag" class="w-3.5 h-3.5 mr-2 text-[#ffb000]"></i> 2026 Elections</h3>
-                
+
                 <div class="flex justify-between text-xs mb-1.5 text-yt-textMuted"><span class="font-medium">Senate Seats Up</span><span class="font-bold text-yt-text">35</span></div>
                 <div class="flex justify-between text-xs mb-4 text-yt-textMuted"><span class="font-medium">Defending</span><span class="font-bold" id="senateDefendingCount"><span class="text-yt-textFaint">Loading...</span></span></div>
-                
+
                 <div class="flex justify-between text-xs mb-1 text-yt-textMuted"><span class="font-medium">House Seats Up</span><span class="font-bold text-yt-text">435</span></div>
                 <div class="text-[10px] text-yt-textFaint">(All 2-Year Terms)</div>
             </div>
         </aside>
 
         <main class="flex-1 flex flex-col relative bg-yt-bg overflow-hidden min-h-0 h-full">
-            
+
             <div class="h-14 flex-shrink-0 flex justify-between items-center px-4 sm:px-6 border-b border-yt-border w-full bg-yt-bg z-10 relative">
                  <div class="flex items-center gap-4">
                      <h2 class="text-base font-bold text-yt-text">Geographic Partisan Map</h2>
@@ -187,7 +92,7 @@
             <div class="flex-1 w-full h-full min-h-0 relative flex items-center justify-center p-2 sm:p-4 overflow-hidden select-none">
                 <!-- SVG map rendering cleanly scaling to container viewport -->
                 <svg id="us-map" class="w-full h-full block" viewBox="0 0 975 680" preserveAspectRatio="xMidYMid meet"></svg>
-                
+
                 <div class="absolute bottom-3 left-1/2 -translate-x-1/2 pointer-events-none z-10">
                     <span class="bg-yt-elevated/90 backdrop-blur text-[11px] font-bold text-yt-textMuted px-3 py-1.5 rounded-full border border-yt-border shadow inline-flex items-center">
                         <i data-lucide="info" class="w-3.5 h-3.5 mr-1.5 text-[#3ea6ff]"></i> Click any state or territory to view its delegation
@@ -222,7 +127,7 @@
             <div class="fixed inset-0 bg-black bg-opacity-80 transition-opacity" onclick="closeModal()"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
             <div class="inline-block align-bottom bg-yt-bg text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-yt-borderHover">
-                
+
                 <div class="absolute top-4 right-4 z-10">
                     <button onclick="closeModal()" class="p-2 bg-yt-hover hover:bg-yt-border text-yt-textMuted hover:text-yt-text rounded-full transition-colors focus:outline-none">
                         <i data-lucide="x" class="w-5 h-5"></i>
@@ -327,11 +232,11 @@
         }
 
         const fipsToState = {
-            "01": "AL", "02": "AK", "04": "AZ", "05": "AR", "06": "CA", "08": "CO", "09": "CT", "10": "DE", "11": "DC", 
-            "12": "FL", "13": "GA", "15": "HI", "16": "ID", "17": "IL", "18": "IN", "19": "IA", "20": "KS", "21": "KY", 
-            "22": "LA", "23": "ME", "24": "MD", "25": "MA", "26": "MI", "27": "MN", "28": "MS", "29": "MO", "30": "MT", 
-            "31": "NE", "32": "NV", "33": "NH", "34": "NJ", "35": "NM", "36": "NY", "37": "NC", "38": "ND", "39": "OH", 
-            "40": "OK", "41": "OR", "42": "PA", "44": "RI", "45": "SC", "46": "SD", "47": "TN", "48": "TX", "49": "UT", 
+            "01": "AL", "02": "AK", "04": "AZ", "05": "AR", "06": "CA", "08": "CO", "09": "CT", "10": "DE", "11": "DC",
+            "12": "FL", "13": "GA", "15": "HI", "16": "ID", "17": "IL", "18": "IN", "19": "IA", "20": "KS", "21": "KY",
+            "22": "LA", "23": "ME", "24": "MD", "25": "MA", "26": "MI", "27": "MN", "28": "MS", "29": "MO", "30": "MT",
+            "31": "NE", "32": "NV", "33": "NH", "34": "NJ", "35": "NM", "36": "NY", "37": "NC", "38": "ND", "39": "OH",
+            "40": "OK", "41": "OR", "42": "PA", "44": "RI", "45": "SC", "46": "SD", "47": "TN", "48": "TX", "49": "UT",
             "50": "VT", "51": "VA", "53": "WA", "54": "WV", "55": "WI", "56": "WY", "72": "PR", "78": "VI"
         };
 
@@ -349,7 +254,7 @@
             const senateUp = legislatorsData.filter(i => i.isUpIn2026 && i.chamber.includes('Senate') && !i.isCandidate);
             const dUp = senateUp.filter(i => i.party.includes('Democrat') || i.party === 'Independent').length;
             const rUp = senateUp.filter(i => i.party === 'Republican').length;
-            
+
             const territories = ['AS', 'DC', 'GU', 'MP', 'PR', 'VI'];
             const votingHouseMembers = legislatorsData.filter(i => i.chamber === 'House' && !territories.includes(i.state));
 
@@ -364,7 +269,7 @@
                 let iStr = hI > 0 ? ` <span class="text-yt-textFaint font-normal mx-1">|</span> <span class="text-[#ffb000]">${hI} I</span>` : '';
                 sStats.innerHTML = `<span class="text-[#ff4e45]">${hR} R</span> <span class="text-yt-textFaint font-normal mx-1">|</span> <span class="text-[#3ea6ff]">${hD} D</span>${iStr}${vStr}`;
             }
-            
+
             const senDef = document.getElementById('senateDefendingCount');
             if(senDef) {
                 senDef.innerHTML = `<span class="text-[#3ea6ff]">${dUp} D</span> / <span class="text-[#ff4e45]">${rUp} R</span>`;
@@ -376,7 +281,7 @@
             document.getElementById('btnSenateMode').className = mode === 'Senate' ? "px-4 py-1.5 text-xs font-bold rounded transition-colors bg-yt-hover text-yt-text" : "px-4 py-1.5 text-xs font-bold rounded transition-colors text-yt-textMuted hover:text-yt-text";
             document.getElementById('btnSenate2026Mode').className = mode === 'Senate2026' ? "px-4 py-1.5 text-xs font-bold rounded transition-colors bg-yt-hover text-yt-text flex items-center" : "px-4 py-1.5 text-xs font-bold rounded transition-colors text-yt-textMuted hover:text-yt-text flex items-center";
             document.getElementById('btnHouseMode').className = mode === 'House' ? "px-4 py-1.5 text-xs font-bold rounded transition-colors bg-yt-hover text-yt-text border-l border-yt-border ml-1 pl-4" : "px-4 py-1.5 text-xs font-bold rounded transition-colors text-yt-textMuted hover:text-yt-text border-l border-yt-border ml-1 pl-4";
-            
+
             const legendContainer = document.getElementById('mapLegend');
             if (mode === 'House') {
                 legendContainer.innerHTML = `
@@ -414,7 +319,7 @@
         function renderMap() {
             const svg = d3.select("#us-map");
             svg.selectAll("*").remove();
-            
+
             const states = svg.selectAll("g.state-group")
                 .data(geoData, d => d.id);
 
@@ -472,7 +377,7 @@
         function renderTerritories() {
             const svg = d3.select("#us-map");
             const container = svg.append("g").attr("id", "territories-layer");
-            
+
             container.append("text")
                 .attr("x", 510)
                 .attr("y", 610)
@@ -490,7 +395,7 @@
                 'AS': 'M 6 14 C 14 10 26 12 30 14 C 22 18 12 18 6 14 Z M 34 16 A 1.5 1.5 0 1 0 34 19 A 1.5 1.5 0 1 0 34 16',
                 'MP': 'M 24 4 C 26 4 26 8 24 10 C 22 8 22 4 24 4 Z M 22 12 C 24 12 24 16 22 18 C 20 16 20 12 22 12 Z M 16 20 C 19 20 19 24 16 26 C 13 24 13 20 16 20 Z'
             };
-            
+
             const boxes = container.selectAll("g.territory-group")
                 .data(territoryList)
                 .enter()
@@ -533,22 +438,22 @@
 
         function getVisualStyles(stateAbbrev, colorScale) {
             const p = getStateRatios(stateAbbrev);
-            let fill = "var(--bg-hover)"; 
+            let fill = "var(--bg-hover)";
             let hoverText = '';
 
             if (mapMode === 'Senate') {
                 if (p.senGop === 2) fill = "#ff4e45";
                 else if (p.senDem + p.senInd === 2) fill = "#3ea6ff";
                 else if (p.senGop === 1 && (p.senDem === 1 || p.senInd === 1)) fill = "#a855f7";
-                else if (p.senInd === 2) fill = "#ffb000"; 
+                else if (p.senInd === 2) fill = "#ffb000";
                 hoverText = `${stateAbbrev} Senate: ${p.senGop}R - ${p.senDem}D - ${p.senInd}I`;
             } else if (mapMode === 'House') {
-                const total = p.houseDem + p.houseGop + p.houseInd; 
+                const total = p.houseDem + p.houseGop + p.houseInd;
                 const totalWithVacancies = total + p.houseVacant;
-                
+
                 if (totalWithVacancies > 0) {
                     if (total === 0 && p.houseVacant > 0) {
-                        fill = "var(--text-faint)"; 
+                        fill = "var(--text-faint)";
                     } else if (p.houseInd === total) {
                         fill = "#ffb000";
                     } else if (p.houseDem + p.houseGop === 0) {
@@ -562,7 +467,7 @@
             } else if (mapMode === 'Senate2026') {
                 const senUpMembers = legislatorsData.filter(x => x.state === stateAbbrev && x.chamber.includes('Senate') && x.isUpIn2026 && !x.isCandidate);
                 if (senUpMembers.length === 0) {
-                    fill = "var(--bg-elevated)"; 
+                    fill = "var(--bg-elevated)";
                     hoverText = `${stateAbbrev}: No Senate Race in 2026`;
                 } else {
                     const party = senUpMembers[0].party;
@@ -587,16 +492,16 @@
                     const group = d3.select(this);
                     const pathEl = group.select(".state-path");
                     const titleEl = group.select("title");
-                    
+
                     const stateAbbrev = typeof d === 'string' ? d : fipsToState[d.id];
-                    
+
                     if (!stateAbbrev) {
                         group.style("display", "none");
                         return;
                     }
 
                     const styles = getVisualStyles(stateAbbrev, colorScale);
-                    
+
                     titleEl.text(styles.hoverText);
                     pathEl.attr("fill", styles.fill);
 
@@ -665,9 +570,9 @@
                 display = allMembers.filter(x => x.chamber.includes('Senate') && (x.isUpIn2026 || x.isCandidate));
                 document.getElementById('selectedStateSubtitle').textContent = `2026 SENATE RACE CANDIDATES FOR ${state}`;
             }
-            
+
             document.getElementById('selectedStateLabel').textContent = `State: ${state}`;
-            
+
             const p = getStateRatios(state);
             let badgeHTML = '';
             if (mapMode === 'Senate') {
@@ -717,7 +622,7 @@
 
             list.innerHTML = display.map(item => {
                 let partyColor = item.party.includes('Democrat') ? 'text-[#3ea6ff]' : (item.party === 'Republican' ? 'text-[#ff4e45]' : (item.party === 'Vacant' ? 'text-yt-textMuted' : 'text-[#ffb000]'));
-                
+
                 let imgSrc = item.photos && item.photos.length > 0 ? item.photos[0] : 'placeholder';
                 if (imgSrc === 'placeholder') imgSrc = defaultSilhouette;
 
@@ -745,10 +650,11 @@
                 return `
                     <div class="p-3 rounded bg-yt-elevated hover:bg-yt-hover border border-yt-border flex items-center space-x-3 group transition-colors">
                         <div class="w-10 h-10 rounded-full overflow-hidden bg-yt-hover border border-yt-border shrink-0 cursor-pointer" onclick="openProfile('${item.id}')">
-                            <img src="${imgSrc}" 
+                            <img src="${imgSrc}"
                                  data-photo-idx="0"
-                                 class="w-full h-full object-cover" 
-                                 onerror="window.handleImageFallback(this, '${item.id}')" 
+                                 class="w-full h-full object-cover"
+                                 loading="lazy" decoding="async"
+                                 onerror="window.handleImageFallback(this, '${item.id}')"
                                  alt="${item.name}">
                         </div>
                         <div class="min-w-0 flex-1">
@@ -766,40 +672,14 @@
             lucide.createIcons();
         }
 
-        const defaultSilhouette = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23aaaaaa' style='background-color:transparent'%3E%3Ccircle cx='50' cy='35' r='20'/%3E%3Cpath d='M20,80 C20,55 80,55 80,80 Z'/%3E%3C/svg%3E";
-
-        window.handleImageFallback = function(img, profileId) {
-            const item = legislatorsData.find(x => x.id === profileId);
-            if (!item || !item.photos || item.photos.length === 0) {
-                img.onerror = null;
-                img.src = defaultSilhouette;
-                return;
-            }
-            
-            let currentIdx = parseInt(img.dataset.photoIdx || "0");
-            currentIdx++;
-            
-            if (currentIdx < item.photos.length) {
-                img.dataset.photoIdx = currentIdx;
-                let nextUrl = item.photos[currentIdx];
-                if (nextUrl === "placeholder") {
-                    img.onerror = null;
-                    img.src = defaultSilhouette;
-                } else {
-                    img.src = nextUrl;
-                }
-            } else {
-                img.onerror = null;
-                img.src = defaultSilhouette;
-            }
-        };
+        // defaultSilhouette + handleImageFallback now live in assets/kyc.js
 
         function openProfile(id) {
             const item = legislatorsData.find(x => x.id === id);
             if (!item) return;
 
             document.getElementById('modalName').textContent = item.name;
-            
+
             let officeLabel = item.chamber;
             if (item.chamber.includes('House')) {
                 let dist = (item.district && item.district !== 'N/A' && item.district !== 'nan') ? item.district : '';
@@ -808,10 +688,10 @@
             } else if (item.chamber.includes('Senate')) {
                 officeLabel = `Senate • ${item.state}`;
             }
-            
+
             document.getElementById('modalRegion').textContent = officeLabel;
             document.getElementById('modalTerm').textContent = item.term_start || "N/A";
-            
+
             const chamberTag = document.getElementById('modalChamberTag');
             chamberTag.textContent = item.chamber;
             if (item.chamber.includes('Senate')) {
@@ -833,8 +713,8 @@
             }
 
             const photoImg = document.getElementById('modalPhoto');
-            photoImg.dataset.photoIdx = "0"; 
-            
+            photoImg.dataset.photoIdx = "0";
+
             if (item.photos && item.photos.length > 0 && item.photos[0] !== 'placeholder') {
                 photoImg.src = item.photos[0];
                 photoImg.onerror = function() {
@@ -848,7 +728,7 @@
             let ageBirthText = "Unknown";
             if (item.age && item.age !== 'Unknown') {
                 ageBirthText = (item.birthdate && item.birthdate !== 'Unknown')
-                    ? `${item.age} years old (${item.birthdate})` 
+                    ? `${item.age} years old (${item.birthdate})`
                     : `${item.age} years old`;
             } else if (item.birthdate && item.birthdate !== 'Unknown') {
                 ageBirthText = item.birthdate;
@@ -891,10 +771,10 @@
             document.getElementById('modalReceipts').textContent = receiptsVal;
             document.getElementById('modalDisbursements').textContent = disbVal;
             document.getElementById('modalFunding').textContent = (item.funding_sources && item.funding_sources !== 'nan') ? item.funding_sources : 'N/A';
-            
+
             const votingDiv = document.getElementById('modalVoting');
             const alignmentText = item.voting_alignment || "N/A";
-            
+
             if (!alignmentText || alignmentText === 'N/A' || alignmentText === 'nan') {
                 votingDiv.innerHTML = `<span class="text-sm font-normal text-yt-textMuted leading-relaxed">No historical congressional voting record available (Candidate).</span>`;
             } else {
@@ -903,10 +783,10 @@
                     const score = parseFloat(match[1]);
                     let pct = ((score + 1.0) / 2.0) * 100;
                     pct = Math.max(0, Math.min(100, pct));
-                    
+
                     const labelMatch = alignmentText.match(/\(([^)]+)\)/);
                     const label = labelMatch ? labelMatch[1] : '';
-                    
+
                     const loyaltyMatch = alignmentText.match(/•\s*(.*)/);
                     const loyalty = loyaltyMatch ? loyaltyMatch[1].trim() : '';
 
@@ -942,7 +822,7 @@
                     votingDiv.innerHTML = `<span class="text-sm font-normal text-yt-textMuted leading-relaxed">${alignmentText}</span>`;
                 }
             }
-            
+
             const commDiv = document.getElementById('modalCommittees');
             const commsText = item.committees || "None";
             if (!commsText || commsText === 'None' || commsText === 'None (Candidate)' || commsText === 'N/A' || commsText === 'nan') {
@@ -963,16 +843,21 @@
             lucide.createIcons();
         }
 
+        const profileDialog = KYC.createModal(document.getElementById('profileModal'));
+
         function closeModal() {
             document.getElementById('profileModal').classList.add('hidden');
             document.body.classList.remove('overflow-hidden');
         }
-        
-        function setTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('ytTheme', theme);
-            if(typeof updateMapVisuals === 'function') updateMapVisuals();
-        }
+
+        // setTheme lives in assets/kyc.js; the map repaints on top of it.
+        (function () {
+            const shared = KYC.setTheme;
+            window.setTheme = function (theme) {
+                shared(theme);
+                if (typeof updateMapVisuals === 'function') updateMapVisuals();
+            };
+        })();
 
         // Prevent accidental double click/tap zooming
         document.addEventListener('dblclick', function(e) {

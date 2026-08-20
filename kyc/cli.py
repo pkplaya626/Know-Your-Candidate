@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-from . import emit, sources, validate, voteview
+from . import emit, fec, portraits, races as races_mod, sources, validate, voteview
 from .profiles import build_profiles
 
 
@@ -20,6 +20,25 @@ def _build(args):
         print(f"  [warn] {name} not found - skipped")
 
     profiles, stats = build_profiles(raw)
+
+    finance = fec.load_cache(args.root)
+    if finance:
+        applied = fec.apply_cache(profiles, finance)
+        stats["fec"] = applied
+        print(f"  finance: {applied}/{len(profiles)} with FEC totals")
+    else:
+        stats["fec"] = 0
+
+    cache = portraits.load_cache(args.root)
+    if cache:
+        hits = portraits.apply_cache(profiles, cache)
+        stats["portraits"] = hits
+        print(f"  portraits: {hits}/{len(profiles)} verified "
+              f"({100 * hits / max(len(profiles), 1):.0f}%)")
+    else:
+        stats["portraits"] = 0
+        print("  [warn] no portrait cache; run 'portraits' to resolve them")
+
     print(
         f"\n[+] {stats['total']} profiles "
         f"({stats['members']} sitting members, {stats['candidates']} candidates)"
@@ -29,6 +48,14 @@ def _build(args):
         f"{stats['voting_house']} voting House seats | "
         f"{stats['not_seeking']} incumbents not seeking re-election | "
         f"{stats['cross_linked']} members cross-linked to their own candidacy"
+    )
+
+    race_list = races_mod.build(profiles)
+    stats.update(races_mod.stats(race_list))
+    print(
+        f"    {stats['races']} seats on the 2026 ballot | "
+        f"{stats['contested']} with a declared challenger | "
+        f"{stats['open_seats']} open (incumbent not running)"
     )
 
     issues = validate.run(profiles, raw)
@@ -45,7 +72,7 @@ def _build(args):
         print("\n[check] validation only, nothing written.")
         return 1 if errors else 0
 
-    path, size = emit.write_profiles(profiles, stats, args.root)
+    path, size = emit.write_profiles(profiles, stats, args.root, races=race_list)
     print(f"\n[ok] wrote {path} ({size / 1024:.0f} KB)")
 
     for page, ok, note in emit.check_pages(args.root):
@@ -82,6 +109,43 @@ def _fetch(args):
     return 0
 
 
+def _portraits(args):
+    try:
+        raw = sources.load_all(args.root)
+    except sources.MissingRosterError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 2
+    profiles, _ = build_profiles(raw)
+    cache, summary = portraits.resolve_all(
+        profiles, root=args.root, refresh=args.refresh
+    )
+    unresolved = sorted(
+        r.get("name", key) for key, r in cache.items() if not r.get("url")
+    )
+    if unresolved:
+        print(f"\n  {len(unresolved)} without a portrait:")
+        for name in unresolved[: 40 if args.verbose else 10]:
+            print(f"    - {name}")
+        if not args.verbose and len(unresolved) > 10:
+            print(f"    ... {len(unresolved) - 10} more (--verbose)")
+    print(f"\n[ok] portrait cache: {portraits.CACHE_PATH}")
+    return 0
+
+
+def _finance(args):
+    try:
+        raw = sources.load_all(args.root)
+    except sources.MissingRosterError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 2
+    profiles, _ = build_profiles(raw)
+    _, summary = fec.resolve_all(
+        profiles, root=args.root, limit=args.limit, refresh=args.refresh
+    )
+    print(f"\n[ok] finance cache: {fec.CACHE_PATH}")
+    return 0
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         prog="build_profile_site.py",
@@ -101,6 +165,16 @@ def main(argv=None):
 
     sub.add_parser("fetch", help="refresh DW-NOMINATE scores from Voteview")
 
+    pics = sub.add_parser("portraits", help="resolve and verify portrait URLs")
+    pics.add_argument("--refresh", action="store_true",
+                      help="re-verify every portrait, not just missing ones")
+
+    money = sub.add_parser("finance", help="look up FEC campaign finance totals")
+    money.add_argument("--limit", type=int, default=None,
+                       help="stop after N lookups (useful on a rate-limited key)")
+    money.add_argument("--refresh", action="store_true",
+                       help="re-query profiles already cached")
+
     refresh = sub.add_parser("refresh", help="fetch, then build")
     refresh.add_argument("--check", action="store_true")
     refresh.add_argument("--strict", action="store_true")
@@ -114,6 +188,10 @@ def main(argv=None):
 
     if args.command == "fetch":
         return _fetch(args)
+    if args.command == "portraits":
+        return _portraits(args)
+    if args.command == "finance":
+        return _finance(args)
     if args.command == "refresh":
         code = _fetch(args)
         if code:

@@ -10,11 +10,17 @@ import unicodedata
 
 from . import overrides
 from .normalize import (
+    GENERIC,
+    NOT_DISCLOSED,
+    OK,
     TERRITORIES,
+    UNKNOWN,
+    classify,
     clean_str,
     first_present,
     fmt_curr,
     is_missing,
+    looks_like_date,
     office_label,
     parse_age,
     parse_district,
@@ -70,6 +76,42 @@ def _senate_term_end(term_start):
     if end % 2 == 0:
         end += 1
     return end
+
+
+# Fields whose provenance the page surfaces. Finance absences are "we have no
+# filing on hand" rather than "they disclosed nothing", so they map to UNKNOWN.
+_QUALITY_FIELDS = (
+    "net_worth", "funding_sources", "platforms", "committees",
+    "education", "previous_professions", "voting_alignment",
+    "receipts", "disbursements", "birthdate",
+)
+_FINANCE_FIELDS = {"receipts", "disbursements"}
+
+
+def apply_quality(profile):
+    """Classify each surfaced field and record anything that is not real data.
+
+    Rewrites long placeholder sentences down to a short label and stores the
+    non-OK statuses in ``profile["quality"]`` so the page can render them as
+    an explicit absence instead of as a finding.
+    """
+    quality = {}
+    for field in _QUALITY_FIELDS:
+        value, status = classify(profile.get(field))
+
+        if field in _FINANCE_FIELDS and status == NOT_DISCLOSED:
+            value, status = "No data", UNKNOWN
+        elif field == "birthdate" and status == OK and not looks_like_date(value):
+            # "2026 Primary" is a race marker parked in a date column.
+            value, status = "No data", UNKNOWN
+
+        profile[field] = value
+        if status != OK:
+            quality[field] = status
+
+    profile["quality"] = quality
+    profile["hasRealFinance"] = "receipts" not in quality
+    return profile
 
 
 def _dedup_members(rows):
@@ -280,6 +322,9 @@ def build_profiles(data):
     for index, row in enumerate(candidates):
         profiles.append(_build_candidate(row, index))
 
+    for profile in profiles:
+        apply_quality(profile)
+
     links = _cross_link(profiles)
 
     # The page reads photo_url for the initial <img src>; keep it in step
@@ -301,6 +346,13 @@ def build_profiles(data):
             if p["seatUp2026"] and not p["isCandidate"] and "Senate" in p["chamber"]
         ),
         "voting_house": len(voting_house),
+        "generic_fields": sum(
+            1 for p in profiles for st in p["quality"].values() if st == GENERIC
+        ),
+        "undisclosed_fields": sum(
+            1 for p in profiles for st in p["quality"].values()
+            if st in (NOT_DISCLOSED, UNKNOWN)
+        ),
         "not_seeking": sum(
             1 for p in profiles
             if p["seatUp2026"] and not p["isCandidate"] and not p["seekingReelection2026"]
