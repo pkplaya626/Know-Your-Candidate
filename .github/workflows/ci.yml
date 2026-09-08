@@ -88,11 +88,31 @@ jobs:
       # working offline and from a file:// URL.
       - name: No third-party runtime dependencies
         run: |
-          if grep -rnE '(<script[^>]+src="https?:|<link[^>]+href="https?:)' \
-               candidate_profiles_site/*.html; then
-            echo "A page loads a remote asset."
-            exit 1
-          fi
+          # In Python rather than grep, because the test is "does this tag
+          # *load* something remote", which depends on rel= as well as href=
+          # and cannot assume attribute order. The original grep matched every
+          # <link> with an https href and so failed on rel="canonical", a tag
+          # that loads nothing at all.
+          python3 - <<'PY'
+          import pathlib, re, sys
+
+          LOADS = {"stylesheet", "preload", "preconnect", "dns-prefetch", "icon"}
+          offenders = []
+          for page in pathlib.Path("candidate_profiles_site").glob("*.html"):
+              html = page.read_text(encoding="utf-8")
+              for tag in re.findall(r"<script\b[^>]*>", html):
+                  if re.search(r'src="https?:', tag):
+                      offenders.append(f"{page.name}: {tag}")
+              for tag in re.findall(r"<link\b[^>]*>", html):
+                  if not re.search(r'href="https?:', tag):
+                      continue
+                  rel = re.search(r'rel="([^"]+)"', tag)
+                  if rel and LOADS & set(rel.group(1).split()):
+                      offenders.append(f"{page.name}: {tag}")
+          if offenders:
+              sys.exit("A page loads a remote asset:\n  " + "\n  ".join(offenders))
+          print("ok: no remote assets loaded")
+          PY
           # Match a real URL, not the comments that record why these are gone.
           if grep -rniE '//(cdn\.tailwindcss\.com|unpkg\.com|cdnjs\.cloudflare\.com|d3js\.org|cdn\.jsdelivr\.net|fonts\.googleapis\.com)' \
                candidate_profiles_site/; then

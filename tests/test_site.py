@@ -268,6 +268,77 @@ class TestPageWiring(unittest.TestCase):
         self.assertIn("out of order", result["index.html"][1])
 
 
+class TestHostnameConsistency(unittest.TestCase):
+    """One hostname, six places, five files.
+
+    GitHub Pages serves from CNAME; everything else has to agree with it or
+    the site tells search engines and social networks it lives somewhere it
+    does not. Nothing about a rename would look wrong locally.
+    """
+
+    def site(self, tmp, host="example.test", robots_host=None, sitemap_host=None,
+             page_host=None):
+        site = os.path.join(tmp, emit.SITE_DIR)
+        os.makedirs(site, exist_ok=True)
+        with open(os.path.join(site, "CNAME"), "w", encoding="utf-8") as f:
+            f.write(host + "\n")
+        for page in ("index.html", "map.html"):
+            with open(os.path.join(site, page), "w", encoding="utf-8") as f:
+                f.write('<link rel="canonical" href="https://%s/">' % (page_host or host))
+        with open(os.path.join(site, "robots.txt"), "w", encoding="utf-8") as f:
+            f.write("Sitemap: https://%s/sitemap.xml\n" % (robots_host or host))
+        with open(os.path.join(site, "sitemap.xml"), "w", encoding="utf-8") as f:
+            f.write("<loc>https://%s/</loc>" % (sitemap_host or host))
+        return tmp
+
+    def problems(self, root):
+        return [f"{n}: {note}" for n, ok, note in emit.check_hostname(root) if not ok]
+
+    def test_a_consistent_site_passes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(self.problems(self.site(tmp)), [])
+
+    def test_a_stale_robots_host_is_caught(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            found = self.problems(self.site(tmp, robots_host="old.test"))
+            self.assertEqual(len(found), 1)
+            self.assertIn("robots.txt", found[0])
+
+    def test_a_stale_canonical_is_caught(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            found = self.problems(self.site(tmp, page_host="old.test"))
+            self.assertEqual(len(found), 2, found)   # both pages
+
+    def test_a_stale_sitemap_is_caught(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            found = self.problems(self.site(tmp, sitemap_host="old.test"))
+            self.assertIn("sitemap.xml", found[0])
+
+    def test_no_cname_means_no_custom_domain_and_no_findings(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            os.makedirs(os.path.join(tmp, emit.SITE_DIR))
+            self.assertIsNone(emit.canonical_host(tmp))
+            self.assertEqual(self.problems(tmp), [])
+
+    def test_a_missing_file_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.site(tmp)
+            os.remove(os.path.join(tmp, emit.SITE_DIR, "sitemap.xml"))
+            self.assertTrue(any("missing" in p for p in self.problems(tmp)))
+
+    def test_the_real_site_agrees_with_its_cname(self):
+        self.assertEqual(self.problems(ROOT), [])
+
+    def test_the_cname_is_a_bare_hostname(self):
+        # GitHub Pages wants "host.example", not a URL and not a trailing slash.
+        host = emit.canonical_host(ROOT)
+        if host is None:
+            self.skipTest("no custom domain configured")
+        self.assertNotIn("/", host)
+        self.assertNotIn(":", host)
+        self.assertIn(".", host)
+
+
 class TestNewValidators(unittest.TestCase):
     def test_duplicate_ids_are_an_error(self):
         issues = validate.check_identity([member(id="A"), member(id="A")])

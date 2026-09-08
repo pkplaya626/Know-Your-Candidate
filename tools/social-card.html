@@ -1,0 +1,62 @@
+<!doctype html><meta charset="utf-8">
+<title>Social card source</title>
+<!--
+  Source for candidate_profiles_site/assets/social-card.png (og:image).
+
+  Deliberately carries no figures. An earlier draft printed the chamber split
+  and the profile count, which is exactly the kind of literal text that drifts:
+  the card cannot be regenerated on every data refresh (it needs a browser, and
+  the pipeline has no dependencies), so any number on it is guaranteed to be
+  wrong eventually. The sidebar used to have the same problem.
+
+  Regenerate after editing:
+
+    chrome --headless --disable-gpu --window-size=1200,630 \
+      --force-device-scale-factor=1 --hide-scrollbars \
+      --default-background-color=0d0f12ff \
+      --screenshot=candidate_profiles_site/assets/social-card.png \
+      --virtual-time-budget=3000 tools/social-card.html
+-->
+<style>
+  * { box-sizing:border-box; margin:0 }
+  body { width:1200px; height:630px; overflow:hidden;
+         background:#0d0f12; color:#e9edf2;
+         font-family:"Segoe UI", system-ui, sans-serif;
+         display:flex; flex-direction:column; padding:56px 68px;
+         background-image:radial-gradient(880px 400px at 90% -10%, rgba(77,163,255,.17), transparent 62%); }
+  .brand { display:flex; align-items:center; gap:15px }
+  .brand svg { width:42px; height:42px }
+  .brand span { font-size:21px; font-weight:700; letter-spacing:.15em;
+                text-transform:uppercase; color:#9aa5b4 }
+  .mid { flex:1; display:flex; flex-direction:column; justify-content:center }
+  h1 { font-size:66px; line-height:1.06; font-weight:800; letter-spacing:-.03em; max-width:19ch }
+  h1 em { font-style:normal; color:#4da3ff }
+  p.sub { margin-top:20px; font-size:25px; color:#9aa5b4; max-width:52ch; line-height:1.4 }
+  footer { display:flex; justify-content:space-between; align-items:center;
+           border-top:1px solid #262c35; padding-top:26px }
+  .sources { display:flex; align-items:center; gap:14px; font-size:17px;
+             color:#6d7888; font-weight:600; letter-spacing:.03em }
+  .sources i { font-style:normal; color:#38424f }
+  .host { font-size:19px; color:#9aa5b4; font-weight:700 }
+</style>
+<div class="brand">
+  <svg viewBox="0 0 32 32" fill="none">
+    <path d="M16 3 L28 8.4 v9.6c0 6.4-4.9 9.5-12 10.7C8.9 27.5 4 24.4 4 18V8.4z"
+          stroke="#4da3ff" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="M10.6 16.2 l3.6 3.6 7-7.3" stroke="#4da3ff" stroke-width="3"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <span>Know Your Candidate</span>
+</div>
+<div class="mid">
+  <h1>The 119th Congress and the <em>2026 midterms</em></h1>
+  <p class="sub">Every member, every declared candidate, and every gap in the data
+     labelled as a gap. Non-partisan.</p>
+</div>
+<footer>
+  <div class="sources">
+    Congress.gov <i>&middot;</i> Federal Election Commission <i>&middot;</i>
+    Voteview DW&#8209;NOMINATE
+  </div>
+  <div class="host">candidates.radicalrelay.us</div>
+</footer>

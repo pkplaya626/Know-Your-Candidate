@@ -164,6 +164,60 @@ def script_sources(html):
     return re.findall(r'<script[^>]*\bsrc="([^"]+)"', html)
 
 
+# ------------------------------------------------------------------ hostname
+
+CNAME_FILE = os.path.join(SITE_DIR, "CNAME")
+
+# Files that name the public hostname, and how to find it in each. GitHub
+# Pages takes it from CNAME; everything else has to agree with that file or
+# the site tells search engines and social networks it lives somewhere it
+# does not. Six copies of a hostname across five files is precisely the kind
+# of thing that drifts silently after a rename.
+_HOST_REFERENCES = {
+    os.path.join(SITE_DIR, "index.html"): r'rel="canonical" href="https://([^/"]+)',
+    os.path.join(SITE_DIR, "map.html"): r'rel="canonical" href="https://([^/"]+)',
+    os.path.join(SITE_DIR, "robots.txt"): r"Sitemap:\s*https://([^/\s]+)",
+    os.path.join(SITE_DIR, "sitemap.xml"): r"<loc>https://([^/<]+)",
+}
+
+
+def canonical_host(root="."):
+    """The hostname GitHub Pages will serve from, or ``None``."""
+    path = os.path.join(root, CNAME_FILE)
+    if not os.path.exists(path):
+        return None
+    with open(path, "r", encoding="utf-8") as handle:
+        return handle.read().strip() or None
+
+
+def check_hostname(root="."):
+    """Report files whose hostname disagrees with CNAME.
+
+    Returns a list of ``(file, ok, note)``.
+    """
+    expected = canonical_host(root)
+    if expected is None:
+        return [(CNAME_FILE, True, "no custom domain configured")]
+
+    results = [(CNAME_FILE, True, expected)]
+    for relative, pattern in _HOST_REFERENCES.items():
+        path = os.path.join(root, relative)
+        if not os.path.exists(path):
+            results.append((relative, False, "missing"))
+            continue
+        with open(path, "r", encoding="utf-8") as handle:
+            found = set(re.findall(pattern, handle.read()))
+        if not found:
+            results.append((relative, False, f"names no host; expected {expected}"))
+        elif found != {expected}:
+            results.append(
+                (relative, False, f"names {', '.join(sorted(found))}; CNAME says {expected}")
+            )
+        else:
+            results.append((relative, True, "ok"))
+    return results
+
+
 def check_pages(root="."):
     """Report which pages are wired up to the scripts they need.
 

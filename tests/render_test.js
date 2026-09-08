@@ -105,7 +105,13 @@ async function testShared(page) {
     const external = sources.filter((s) => /^https?:/.test(s));
     check("no remote <script src>", external.length === 0, external.join(", "));
     const raw = fs.readFileSync(path.join(SITE, page), "utf8");
-    check("no remote stylesheet", !/<link[^>]+href="https?:/.test(raw));
+    // Specifically a *stylesheet*, not any remote <link>. The original test
+    // matched every https href and so failed the moment rel="canonical" was
+    // added, which loads nothing at all.
+    const remoteLinks = [...raw.matchAll(/<link[^>]*>/g)].map((m) => m[0])
+      .filter((tag) => /href="https?:/.test(tag))
+      .filter((tag) => /rel="(stylesheet|preload|preconnect|dns-prefetch)"/.test(tag));
+    check("no remote stylesheet or font", remoteLinks.length === 0, remoteLinks.join(" "));
     check("no tailwind", !/tailwind/i.test(raw));
     check("no d3 / topojson / lucide", !/\b(d3|topojson|lucide)\b/i.test(raw));
   });

@@ -1,18 +1,20 @@
-# Publish candidate_profiles_site/ to GitHub Pages.
+# Publish candidate_profiles_site/ to GitHub Pages at
+# https://candidates.radicalrelay.us (see candidate_profiles_site/CNAME).
 #
-# Deliberately manual (workflow_dispatch only). Nothing is published until
-# someone triggers this from the Actions tab, and the custom domain is not
-# wired up yet - see "Publishing" in README.md. To publish automatically on
-# every push to main, add:
-#
-#   push:
-#     branches: [main]
-#
-# to the `on:` block below.
+# Runs on every push to main that touches the site, plus on demand. The
+# validation gate below is the point: a deploy must never publish data the
+# validator rejects, or data that no longer matches the CSVs it came from.
 
 name: Deploy
 
 on:
+  push:
+    branches: [main]
+    # Documentation and pipeline-internal changes do not change what is
+    # served, so they do not need to redeploy the site.
+    paths:
+      - "candidate_profiles_site/**"
+      - ".github/workflows/deploy.yml"
   workflow_dispatch:
     inputs:
       reason:
@@ -47,13 +49,11 @@ jobs:
       - name: Validate the data
         run: python build_profile_site.py build --check --strict
 
-      - name: Confirm the committed data matches the CSVs
-        env:
-          SOURCE_DATE_EPOCH: "1000000000"
-        run: |
-          python build_profile_site.py
-          git diff --exit-code -- candidate_profiles_site/data/ \
-            || { echo "The committed data is stale; rebuild and commit before deploying."; exit 1; }
+      # Also checks that CNAME, both pages, robots.txt and sitemap.xml name
+      # the same host. A rename that updated only some of them would publish a
+      # site advertising a hostname it is not served from.
+      - name: Confirm the committed site is self-consistent
+        run: python build_profile_site.py verify
 
       - name: Disable Jekyll processing
         run: touch candidate_profiles_site/.nojekyll
