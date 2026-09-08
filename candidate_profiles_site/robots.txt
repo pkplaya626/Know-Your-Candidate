@@ -1,0 +1,8 @@
+# Know Your Candidate - a non-partisan directory of the 119th U.S. Congress
+# and the 2026 midterm races. Everything here is public-record data.
+#
+# No Sitemap: line yet - a sitemap needs absolute URLs, and the site has no
+# canonical domain until it is published.
+
+User-agent: *
+Allow: /

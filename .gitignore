@@ -6,6 +6,9 @@ __pycache__/
 env/
 venv/
 *.env
+*.egg-info/
+build/
+dist/
 
 # IDE / Editor
 .vscode/
@@ -20,8 +23,14 @@ Desktop.ini
 $RECYCLE.BIN/
 .DS_Store
 
-# Pipeline
-*.csv.tmp
-candidate_profiles_site/data/*.tmp
+# Test tooling. package.json is committed (it declares the jsdom dev
+# dependency); the lock file is not, because nothing here pins a build.
 node_modules/
 package-lock.json
+
+# Pipeline scratch. The generated files under candidate_profiles_site/data/
+# ARE committed - the site serves straight from the repository with no build
+# step - but their temp files are not.
+*.csv.tmp
+candidate_profiles_site/data/*.tmp
+_inline/

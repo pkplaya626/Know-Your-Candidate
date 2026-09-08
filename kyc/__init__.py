@@ -7,4 +7,4 @@ data file consumed by ``candidate_profiles_site/``.
 Entry point: ``python build_profile_site.py`` (see :mod:`kyc.cli`).
 """
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"

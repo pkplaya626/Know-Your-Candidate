@@ -6,15 +6,18 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   pipeline:
-    name: Pipeline tests
+    name: Pipeline (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         # The pipeline is standard-library only; check the range we claim.
-        python-version: ["3.9", "3.12"]
+        python-version: ["3.9", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
 
@@ -22,9 +25,18 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Confirm no third-party dependencies are needed
+      - name: Confirm the pipeline still needs no third-party packages
         run: |
-          test ! -f requirements.txt || (echo "requirements.txt appeared; the pipeline is meant to stay dependency-free" && exit 1)
+          test ! -f requirements.txt \
+            || { echo "requirements.txt appeared; the pipeline is meant to stay dependency-free"; exit 1; }
+          python - <<'PY'
+          import pathlib, re, sys
+          text = pathlib.Path("pyproject.toml").read_text(encoding="utf-8")
+          block = re.search(r"^dependencies\s*=\s*\[(.*?)\]", text, re.S | re.M)
+          if block and block.group(1).strip():
+              sys.exit("pyproject.toml declares runtime dependencies; the pipeline is meant to stay dependency-free")
+          print("ok: no runtime dependencies declared")
+          PY
 
       - name: Unit tests
         run: python -m unittest discover tests -v
@@ -37,11 +49,12 @@ jobs:
           SOURCE_DATE_EPOCH: "1000000000"
         run: |
           python build_profile_site.py
-          SOURCE_DATE_EPOCH=1000000000 python build_profile_site.py
-          git diff --exit-code -- candidate_profiles_site/data/profiles.js || (echo "A rebuild changed the output; commit the regenerated data." && exit 1)
+          python build_profile_site.py
+          git diff --exit-code -- candidate_profiles_site/data/ \
+            || { echo "A rebuild changed the generated data; commit the regenerated files."; exit 1; }
 
-  pages:
-    name: Page render tests
+  site:
+    name: Site
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -50,25 +63,67 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Check every inline script parses
+      - name: Every shipped script parses
         run: |
-          python3 - <<'PY'
-          import re, pathlib
-          out = pathlib.Path("_inline"); out.mkdir(exist_ok=True)
-          for page in ("index.html", "map.html"):
-              src = pathlib.Path("candidate_profiles_site") / page
-              blocks = re.findall(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>",
-                                  src.read_text(encoding="utf-8"), re.S)
-              for i, b in enumerate(blocks):
-                  (out / f"{page}.{i}.js").write_text(b, encoding="utf-8")
-          PY
-          for f in _inline/*.js candidate_profiles_site/assets/kyc.js; do
+          for f in candidate_profiles_site/assets/*.js candidate_profiles_site/data/*.js; do
             node --check "$f" || exit 1
           done
 
-      - name: Render the pages and exercise the UI
+      # The site deliberately ships no third-party CSS or JavaScript. It used
+      # to pull Tailwind's play CDN, an unpinned lucide build, d3 and
+      # topojson-client - four runtime dependencies for a page that must keep
+      # working offline and from a file:// URL.
+      - name: No third-party runtime dependencies
         run: |
-          npm init -y >/dev/null 2>&1
-          npm install --no-fund --no-audit jsdom
-          node tests/render_test.js index.html
-          node tests/render_test.js map.html
+          if grep -rnE '(<script[^>]+src="https?:|<link[^>]+href="https?:)' \
+               candidate_profiles_site/*.html; then
+            echo "A page loads a remote asset."
+            exit 1
+          fi
+          # Match a real URL, not the comments that record why these are gone.
+          if grep -rniE '//(cdn\.tailwindcss\.com|unpkg\.com|cdnjs\.cloudflare\.com|d3js\.org|cdn\.jsdelivr\.net|fonts\.googleapis\.com)' \
+               candidate_profiles_site/; then
+            echo "A CDN reference came back."
+            exit 1
+          fi
+          echo "ok: no remote assets"
+
+      # Everything user-visible goes through KYC.renderField or
+      # KYC.escapeHtml. These pages describe real, named people.
+      - name: No inline event handlers in the markup
+        run: |
+          if grep -rnE '\son(click|error|load|change|submit)=' \
+               candidate_profiles_site/*.html candidate_profiles_site/assets/*.js; then
+            echo "An inline event handler is back; use delegated listeners."
+            exit 1
+          fi
+          echo "ok: no inline handlers"
+
+      - name: Render both pages and exercise the UI
+        run: |
+          npm install --no-fund --no-audit
+          npm test
+
+  links:
+    name: Local asset references resolve
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Every href/src on a page exists on disk
+        run: |
+          python3 - <<'PY'
+          import pathlib, re, sys
+
+          site = pathlib.Path("candidate_profiles_site")
+          missing = []
+          for page in site.glob("*.html"):
+              html = page.read_text(encoding="utf-8")
+              for ref in re.findall(r'(?:src|href)="([^"#?][^"]*)"', html):
+                  if ref.startswith(("http:", "https:", "data:", "mailto:", "#")):
+                      continue
+                  if not (site / ref).exists():
+                      missing.append(f"{page.name} -> {ref}")
+          if missing:
+              sys.exit("Broken local references:\n  " + "\n  ".join(missing))
+          print("ok: every local reference resolves")
+          PY

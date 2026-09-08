@@ -1,17 +1,37 @@
 """Command-line entry point for the Know Your Candidate pipeline."""
 
 import argparse
+import json
 import sys
 
-from . import emit, fec, portraits, races as races_mod, sources, validate, voteview
+from . import (
+    __version__,
+    emit,
+    fec,
+    geo as geo_mod,
+    portraits,
+    races as races_mod,
+    sources,
+    summary as summary_mod,
+    validate,
+    voteview,
+)
 from .profiles import build_profiles
 
 
-def _build(args):
+def _load(args):
+    """Read the rosters, or report why we cannot."""
     try:
         raw = sources.load_all(args.root)
     except sources.MissingRosterError as exc:
         print(f"[error] {exc}", file=sys.stderr)
+        return None
+    return raw
+
+
+def _build(args):
+    raw = _load(args)
+    if raw is None:
         return 2
 
     for name, count in raw["found"]:
@@ -22,22 +42,30 @@ def _build(args):
     profiles, stats = build_profiles(raw)
 
     finance = fec.load_cache(args.root)
+    stats["fec"] = fec.apply_cache(profiles, finance) if finance else 0
     if finance:
-        applied = fec.apply_cache(profiles, finance)
-        stats["fec"] = applied
-        print(f"  finance: {applied}/{len(profiles)} with FEC totals")
-    else:
-        stats["fec"] = 0
+        print(f"  finance: {stats['fec']}/{len(profiles)} with FEC totals")
 
     cache = portraits.load_cache(args.root)
     if cache:
-        hits = portraits.apply_cache(profiles, cache)
-        stats["portraits"] = hits
-        print(f"  portraits: {hits}/{len(profiles)} verified "
-              f"({100 * hits / max(len(profiles), 1):.0f}%)")
+        stats["portraits"] = portraits.apply_cache(profiles, cache)
+        print(f"  portraits: {stats['portraits']}/{len(profiles)} verified "
+              f"({100 * stats['portraits'] / max(len(profiles), 1):.0f}%)")
     else:
         stats["portraits"] = 0
         print("  [warn] no portrait cache; run 'portraits' to resolve them")
+
+    race_list = races_mod.build(profiles)
+    stats.update(races_mod.stats(race_list))
+
+    # The map geometry is a separate artefact with a separate source, so a
+    # missing atlas degrades the map rather than failing the whole build.
+    geo = None
+    try:
+        geo = geo_mod.build(args.root)
+        stats.update(geo_mod.stats(geo))
+    except geo_mod.AtlasError as exc:
+        print(f"  [warn] map geometry unavailable: {exc}")
 
     print(
         f"\n[+] {stats['total']} profiles "
@@ -49,31 +77,43 @@ def _build(args):
         f"{stats['not_seeking']} incumbents not seeking re-election | "
         f"{stats['cross_linked']} members cross-linked to their own candidacy"
     )
-
-    race_list = races_mod.build(profiles)
-    stats.update(races_mod.stats(race_list))
     print(
         f"    {stats['races']} seats on the 2026 ballot | "
         f"{stats['contested']} with a declared challenger | "
         f"{stats['open_seats']} open (incumbent not running)"
     )
+    if geo:
+        print(f"    {stats['geo_states']} state shapes | "
+              f"{stats['geo_territories']} territories")
 
-    issues = validate.run(profiles, raw)
+    issues = validate.run(profiles, raw, races=race_list, geo=geo)
     errors = [i for i in issues if i.level == "error"]
-    if issues:
+
+    if args.json:
+        print(json.dumps(validate.as_dict(issues, stats), indent=2))
+    elif issues:
         print()
         print(validate.format_report(issues, verbose=args.verbose))
 
     if errors and args.strict:
-        print("\n[error] --strict set and errors found; not writing output.", file=sys.stderr)
+        print("\n[error] --strict set and errors found; not writing output.",
+              file=sys.stderr)
         return 1
 
     if args.check:
-        print("\n[check] validation only, nothing written.")
+        if not args.json:
+            print("\n[check] validation only, nothing written.")
         return 1 if errors else 0
 
-    path, size = emit.write_profiles(profiles, stats, args.root, races=race_list)
+    summary = summary_mod.build(profiles, races=race_list)
+    path, size = emit.write_profiles(
+        profiles, stats, args.root, races=race_list, summary=summary
+    )
     print(f"\n[ok] wrote {path} ({size / 1024:.0f} KB)")
+
+    if geo:
+        geo_path, geo_size = emit.write_geo(geo, args.root)
+        print(f"[ok] wrote {geo_path} ({geo_size / 1024:.0f} KB)")
 
     for page, ok, note in emit.check_pages(args.root):
         print(f"     {'ok  ' if ok else 'WARN'} {page}: {note}")
@@ -110,43 +150,60 @@ def _fetch(args):
 
 
 def _portraits(args):
-    try:
-        raw = sources.load_all(args.root)
-    except sources.MissingRosterError as exc:
-        print(f"[error] {exc}", file=sys.stderr)
+    raw = _load(args)
+    if raw is None:
         return 2
     profiles, _ = build_profiles(raw)
-    cache, summary = portraits.resolve_all(
+    cache, _summary = portraits.resolve_all(
         profiles, root=args.root, refresh=args.refresh
     )
     unresolved = sorted(
-        r.get("name", key) for key, r in cache.items() if not r.get("url")
+        record.get("name", key) for key, record in cache.items()
+        if not record.get("url")
     )
     if unresolved:
         print(f"\n  {len(unresolved)} without a portrait:")
-        for name in unresolved[: 40 if args.verbose else 10]:
+        shown = unresolved if args.verbose else unresolved[:10]
+        for name in shown:
             print(f"    - {name}")
-        if not args.verbose and len(unresolved) > 10:
-            print(f"    ... {len(unresolved) - 10} more (--verbose)")
+        if len(shown) < len(unresolved):
+            print(f"    ... {len(unresolved) - len(shown)} more (--verbose)")
     print(f"\n[ok] portrait cache: {portraits.CACHE_PATH}")
     return 0
 
 
 def _finance(args):
-    try:
-        raw = sources.load_all(args.root)
-    except sources.MissingRosterError as exc:
-        print(f"[error] {exc}", file=sys.stderr)
+    raw = _load(args)
+    if raw is None:
         return 2
     profiles, _ = build_profiles(raw)
-    _, summary = fec.resolve_all(
-        profiles, root=args.root, limit=args.limit, refresh=args.refresh
-    )
+    fec.resolve_all(profiles, root=args.root, limit=args.limit, refresh=args.refresh)
     print(f"\n[ok] finance cache: {fec.CACHE_PATH}")
     return 0
 
 
-def main(argv=None):
+def _geo(args):
+    try:
+        geo = geo_mod.build(args.root)
+    except geo_mod.AtlasError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 2
+    path, size = emit.write_geo(geo, args.root)
+    print(f"[ok] wrote {path} ({size / 1024:.0f} KB) "
+          f"- {len(geo['states'])} states, {len(geo['territories'])} territories")
+    return 0
+
+
+def _add_build_flags(parser):
+    parser.add_argument("--check", action="store_true",
+                        help="validate only; do not write output")
+    parser.add_argument("--strict", action="store_true",
+                        help="refuse to write when validation reports an error")
+    parser.add_argument("--json", action="store_true",
+                        help="print the validation report as JSON")
+
+
+def build_parser():
     parser = argparse.ArgumentParser(
         prog="build_profile_site.py",
         description="Build the Know Your Candidate site data from the roster CSVs.",
@@ -154,16 +211,17 @@ def main(argv=None):
     parser.add_argument("--root", default=".", help="repository root (default: .)")
     parser.add_argument("--verbose", action="store_true",
                         help="list every item in a validation finding")
+    parser.add_argument("--version", action="version",
+                        version=f"know-your-candidate {__version__}")
 
     sub = parser.add_subparsers(dest="command")
 
-    build = sub.add_parser("build", help="generate candidate_profiles_site/data/profiles.js")
-    build.add_argument("--check", action="store_true",
-                       help="validate only; do not write output")
-    build.add_argument("--strict", action="store_true",
-                       help="refuse to write when validation reports an error")
+    _add_build_flags(
+        sub.add_parser("build", help="generate candidate_profiles_site/data/*.js")
+    )
 
     sub.add_parser("fetch", help="refresh DW-NOMINATE scores from Voteview")
+    sub.add_parser("geo", help="regenerate the map geometry from the state atlas")
 
     pics = sub.add_parser("portraits", help="resolve and verify portrait URLs")
     pics.add_argument("--refresh", action="store_true",
@@ -175,19 +233,23 @@ def main(argv=None):
     money.add_argument("--refresh", action="store_true",
                        help="re-query profiles already cached")
 
-    refresh = sub.add_parser("refresh", help="fetch, then build")
-    refresh.add_argument("--check", action="store_true")
-    refresh.add_argument("--strict", action="store_true")
+    _add_build_flags(sub.add_parser("refresh", help="fetch, then build"))
+    return parser
 
-    # Bare invocation keeps the historical behaviour: just build.
-    args = parser.parse_args(argv)
+
+def main(argv=None):
+    args = build_parser().parse_args(argv)
+
+    # A bare invocation keeps the historical behaviour: just build.
     if args.command is None:
         args.command = "build"
-        args.check = getattr(args, "check", False)
-        args.strict = getattr(args, "strict", False)
+        for flag in ("check", "strict", "json"):
+            setattr(args, flag, False)
 
     if args.command == "fetch":
         return _fetch(args)
+    if args.command == "geo":
+        return _geo(args)
     if args.command == "portraits":
         return _portraits(args)
     if args.command == "finance":

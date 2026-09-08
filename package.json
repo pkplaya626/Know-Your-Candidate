@@ -1,0 +1,15 @@
+{
+  "name": "know-your-candidate",
+  "version": "2.1.0",
+  "private": true,
+  "description": "Render tests for the Know Your Candidate static site.",
+  "scripts": {
+    "test": "node tests/render_test.js",
+    "test:index": "node tests/render_test.js index.html",
+    "test:map": "node tests/render_test.js map.html"
+  },
+  "//": "jsdom is a test-only dependency. The site itself ships no JavaScript dependencies at all - see assets/kyc.js.",
+  "devDependencies": {
+    "jsdom": "^30.0.0"
+  }
+}

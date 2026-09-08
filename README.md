@@ -1,57 +1,66 @@
 # Know Your Candidate
 
 A non-partisan, data-driven directory of the 119th U.S. Congress and the 2026
-midterm races. Static site, no backend, no build toolchain — a Python pipeline
-turns curated CSV rosters into JavaScript data files that two HTML pages read.
+midterm races. A Python pipeline turns curated CSV rosters into JavaScript data
+files that two static HTML pages read.
+
+The site ships **no third-party CSS or JavaScript**. No framework, no bundler,
+no CDN, no web fonts — open `index.html` off disk and it works.
 
 ## Quick start
 
 ```bash
-python build_profile_site.py            # rebuild the site data from the CSVs
-open candidate_profiles_site/index.html # or just double-click it
+python build_profile_site.py                    # rebuild the site data
+open candidate_profiles_site/index.html         # or just double-click it
 ```
 
-No third-party dependencies. Python 3.9+ and the standard library.
+Python 3.9+ and the standard library. Nothing to install.
 
 ## Commands
 
 | Command | What it does |
 |---|---|
-| `python build_profile_site.py` | Build `candidate_profiles_site/data/profiles.js` |
+| `python build_profile_site.py` | Build `data/profiles.js` and `data/geo.js` |
 | `… build --check` | Validate only; write nothing |
 | `… build --strict` | Refuse to write if validation finds an error |
+| `… build --json` | Emit the validation report as JSON |
+| `… geo` | Regenerate only the map geometry |
 | `… fetch` | Refresh DW-NOMINATE scores from Voteview into the roster CSVs |
 | `… portraits` | Resolve and check a portrait URL for every profile |
 | `… portraits --refresh` | Re-resolve every portrait, not just the missing ones |
 | `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`) |
 | `… refresh` | `fetch`, then `build` |
-| `python -m unittest discover tests` | 65 pipeline tests |
-| `node tests/render_test.js index.html` | Render the page and exercise the UI (needs `npm install jsdom`) |
+| `python -m unittest discover tests` | 126 pipeline tests |
+| `npm install && npm test` | Render both pages in jsdom and drive the UI (129 checks) |
 
-`--root` and `--verbose` go before the subcommand: `python build_profile_site.py --verbose portraits`.
+`--root`, `--verbose` and `--version` go before the subcommand:
+`python build_profile_site.py --verbose portraits`.
 
-The three enrichment commands (`fetch`, `portraits`, `finance`) are the only
-ones that touch the network. `build` is fully offline and reads their caches.
+Only `fetch`, `portraits` and `finance` touch the network. `build` is fully
+offline and reads their caches.
 
 ## How the data flows
 
-```
+```text
 Cleaned_House_119th.csv                  ─┐
 Cleaned_Senate_119th.csv                 ─┤
-Congressional_Candidates_2026.csv        ─┼─> kyc/ ─> data/profiles.js  ─┬─> index.html
-Completed_Primary_Candidates_2026.csv    ─┤           data/portraits.json │   (grid + races)
-Late_Primary_Candidates_2026.csv         ─┘           data/finance.json   └─> map.html
+Congressional_Candidates_2026.csv        ─┼─> kyc/ ─> data/profiles.js ─┬─> index.html
+Completed_Primary_Candidates_2026.csv    ─┤          data/geo.js       ─┤   (grid + races)
+Late_Primary_Candidates_2026.csv         ─┘          portraits.json     └─> map.html
+us_atlas_states_topo.json                ──> kyc/geo.py                     (partisan map)
 ```
 
-The CSVs at the repo root are the source of truth. Everything under
-`candidate_profiles_site/data/` is generated — never edit `profiles.js` by hand.
-It is committed so the site serves straight from GitHub Pages with no build step.
+The CSVs and the state atlas at the repo root are the source of truth.
+Everything under `candidate_profiles_site/data/` is **generated** — never edit
+`profiles.js` or `geo.js` by hand. They are committed so the site serves
+straight from GitHub Pages with no build step.
 
-Both pages load the data with `<script src>` rather than `fetch()`, so opening
-the HTML directly off disk still works (`file://` blocks `fetch`, not `<script src>`).
+Both pages load their data with `<script src>` rather than `fetch()`, so
+opening the HTML directly off disk still works (`file://` blocks `fetch`, not
+`<script src>`).
 
 Builds honour `SOURCE_DATE_EPOCH`, so output is byte-for-byte reproducible and
-CI can assert that a rebuild changes nothing.
+CI asserts that a rebuild changes nothing.
 
 ## The `kyc` package
 
@@ -66,17 +75,98 @@ CI can assert that a rebuild changes nothing.
 | `voteview.py` | DW-NOMINATE ideology scores |
 | `profiles.py` | Assemble profiles; derive 2026 election flags and field provenance |
 | `races.py` | Group profiles into the seats they contest |
+| `geo.py` | Decode the state atlas into SVG path data |
+| `summary.py` | Chamber balance and election headline figures |
 | `validate.py` | Data-quality checks |
 | `emit.py` | Write the data files atomically; verify the pages are wired up |
 | `cli.py` | Argument parsing and command wiring |
+
+## The front end
+
+`index.html` and `map.html` are hand-maintained templates. The build only
+writes into `data/`; it never rewrites the HTML. It does check that each page
+loads the scripts it needs, **in the right order** — every generated file
+assigns a global that the page modules read as they initialise, so the wrong
+order renders an empty site with no error anywhere.
+
+| File | Responsibility |
+|---|---|
+| `assets/kyc.css` | The entire stylesheet: tokens, three themes, every component |
+| `assets/kyc.js` | Theme, icon sprite, escaping, provenance, router, dialog helper, shell |
+| `assets/kyc-profile.js` | The profile dialog, shared by both pages |
+| `assets/kyc-directory.js` | The grid: filtering, sorting, races |
+| `assets/kyc-map.js` | The map: rendering, modes, delegation panel |
+
+Every view has a URL: `#/profile/<id>` for a person,
+`#/?state=TX&chamber=Senate` for a filtered list, so any view can be linked and
+shared.
+
+### No third-party runtime dependencies
+
+The pages previously loaded four: Tailwind's play CDN, an unpinned
+`lucide@latest`, d3 and topojson-client — roughly 700 KB of JavaScript, one
+unpinned, on a site whose Python side deliberately has none. The play CDN in
+particular compiled CSS *in the browser* on every visit, which meant an
+unstyled first paint and a page that could not be read offline. Tailwind's own
+documentation says not to use it in production.
+
+They are gone:
+
+| Was | Now |
+|---|---|
+| `cdn.tailwindcss.com` | `assets/kyc.css`, hand-written |
+| `unpkg.com/lucide@latest` | An inline SVG sprite in `kyc.js` (~20 icons) |
+| `d3` + `topojson-client` + 82 KB inline TopoJSON | `data/geo.js`, decoded at build time by `kyc/geo.py` |
+| Google Fonts (Roboto) | The system font stack |
+
+CI fails if any of them come back.
+
+### Accessibility
+
+- No `user-scalable=no`. Blocking pinch-zoom fails WCAG 1.4.4.
+- Cards, delegation rows and map states are real buttons with visible focus,
+  keyboard activation and `aria-pressed` state. They used to be `<div onclick>`.
+- The theme picker is a click-opened menu with Escape handling. It used to be a
+  CSS `:hover` popup — unreachable by keyboard, erratic under touch.
+- The map has a state picker in the sidebar, so its content is reachable
+  without using the map.
+- Skip link, labelled controls, live region on the result count, focus-trapped
+  dialog with focus restore, `prefers-reduced-motion` honoured.
+- The sidebar becomes an off-canvas drawer under 1000px.
+
+### Escaping
+
+Everything user-visible from the data goes through `KYC.renderField` (which
+escapes and renders provenance) or `KYC.escapeHtml`. There are no inline event
+handlers anywhere; both pages use delegated listeners keyed on `data-` attributes.
+CI greps for `onclick=` and friends and fails if one returns.
+
+## The map
+
+`kyc/geo.py` decodes `us_atlas_states_topo.json` — an already-projected Albers
+USA atlas — into SVG path strings, once, at build time. Nothing about
+cartography happens at runtime, and no mapping library is loaded.
+
+Coordinates are rounded to 0.1 px (sub-pixel in a 975-wide viewBox) and emitted
+as relative moves, which halves the file. Every delta is the difference between
+two already-rounded absolute points, so replaying them reproduces those points
+exactly; `tests/test_geo.py` replays every state's path and asserts it.
+
+Fills use `color-mix()` against the theme's own party custom properties, so
+switching theme recolours the map through CSS with no repaint pass.
+
+Puerto Rico and the U.S. Virgin Islands are not in the atlas, and Guam,
+American Samoa and the Northern Marianas are thousands of miles outside the
+frame. All six territories plus D.C. render as a labelled strip beneath the
+map, captioned "not to scale", so every delegation is reachable.
 
 ## Portraits
 
 Portraits are resolved **at build time** and cached in
 `candidate_profiles_site/data/portraits.json`, which is committed and
-hand-editable. Coverage is currently **571/594 (96%)**; of the 23 without one,
-9 are placeholder rows for unresolved primaries, so 14 real people lack a
-portrait because no public source has one.
+hand-editable. Coverage is **571/594 (96%)**; of the 23 without one, 9 are
+placeholder rows for unresolved primaries, so 14 real people lack a portrait
+because no public source has one.
 
 Resolution order: Congress.gov official portrait → Wikipedia via the
 `congress-legislators` Bioguide↔title mapping → a bare Wikipedia title guess →
@@ -118,14 +208,12 @@ render all three identically:
 
 `profiles.js` carries a `quality` map per profile listing only the fields that
 are *not* real data. About **31% of surfaced fields** fall into one of those
-categories — that is the honest picture, and the page now shows it as such.
-Absent values are excluded from search, so "not disclosed" does not match
-everyone.
+categories — that is the honest picture, and the page shows it as such. Absent
+values are excluded from search, so "not disclosed" does not match everyone.
 
 ## Election flags and races
 
-Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data. They used
-to be computed in the browser, duplicated verbatim in both HTML files.
+Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
 
 | Field | Meaning |
 |---|---|
@@ -142,29 +230,26 @@ running. `isUpIn2026` remains as an alias of `seatUp2026`.
 `window.kycRaces` holds **472 seats** on the 2026 ballot (435 voting House + 6
 territory delegates + 35 Senate), of which 38 have a declared challenger in the
 rosters and 13 are open seats. The 65 senators whose terms run past 2026 belong
-to no race. The **By Race** toggle on the grid groups an incumbent with
+to no race. The **Group by race** toggle on the grid groups an incumbent with
 everyone challenging them.
 
-## The pages
+## Headline figures
 
-`index.html` and `map.html` are hand-maintained templates. The build only
-writes into `data/`; it never rewrites the HTML. Shared styling and behaviour
-live in `assets/kyc.css` and `assets/kyc.js` — themes, the portrait fallback,
-the accessible modal, the hash router, provenance rendering and the election
-countdown. Keep the `<script src="assets/kyc.js">` and
-`<script src="data/profiles.js">` tags; the build warns if a page drops them.
+`kyc/summary.py` counts the chamber balance, the seats on the ballot and the
+defending split, and ships them in `window.kycBuildMeta`. The sidebars read
+them at runtime.
 
-Every view has a URL: `#/profile/<id>` for a person, `#/?state=TX&chamber=Senate`
-for a filtered list, so any view can be linked and shared.
-
-Accessibility: skip link, labelled search, live region on the result count,
-focus-visible outlines, and a modal with a focus trap, Escape handling and
-focus restore. The sidebar becomes an off-canvas drawer under 900px.
+They used to be literal text in both pages — `53 R | 47 D/I`, `35`, `435` —
+with a copy-pasted counting function per page and nothing tying either to the
+rosters they described.
 
 ## Validation
 
-`build --check` reports data-quality findings. Errors are structural (wrong
-chamber size, duplicate districts, a 2026 Senate seat matching no incumbent).
+`build --check` reports data-quality findings. Errors are structural: wrong
+chamber size, duplicate districts, a duplicate profile id, a race naming a
+profile that does not exist, a state with members but no shape on the map, a
+2026 Senate seat matching no incumbent.
+
 Warnings are advisory, including **stale curation** — overrides that no longer
 match any profile. That check is what caught a retirement note keyed to
 `"Dick Durbin"` while the roster says `"Richard Durbin"`, which meant his
@@ -177,6 +262,19 @@ Current warnings, all expected:
 - 3 stale exclusions — members already removed from the cleaned rosters.
 - 5 dual-role members: sitting House members running for Senate.
 
+## Publishing
+
+`.github/workflows/deploy.yml` publishes `candidate_profiles_site/` to GitHub
+Pages. It is **manual only** (`workflow_dispatch`) — nothing goes live until
+someone triggers it from the Actions tab. The deploy re-runs validation and
+refuses to publish if the committed data is stale or the validator reports an
+error.
+
+No custom domain is configured yet. To add one, put the hostname in
+`candidate_profiles_site/CNAME`, point a DNS `CNAME` record at
+`<user>.github.io`, and add the absolute URLs to `robots.txt` and a
+`sitemap.xml`.
+
 ## Known gaps
 
 - **Campaign finance is only as complete as your FEC key allows.** With
@@ -187,3 +285,5 @@ Current warnings, all expected:
 - **Candidate coverage is thin** — 57 challengers across 472 seats. Most races
   show an incumbent with no declared opponent, which reflects the rosters
   rather than the field.
+- **No social preview image.** `og:image` needs a raster asset and an absolute
+  URL, so it waits on a canonical domain.

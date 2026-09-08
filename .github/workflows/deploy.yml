@@ -1,0 +1,76 @@
+# Publish candidate_profiles_site/ to GitHub Pages.
+#
+# Deliberately manual (workflow_dispatch only). Nothing is published until
+# someone triggers this from the Actions tab, and the custom domain is not
+# wired up yet - see "Publishing" in README.md. To publish automatically on
+# every push to main, add:
+#
+#   push:
+#     branches: [main]
+#
+# to the `on:` block below.
+
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Why this deploy is happening"
+        required: false
+        default: "manual publish"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time. Never cancel one in flight: a half-finished upload
+# would leave the live site serving a mix of two builds.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Verify, then package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # A deploy must never publish data that the validator rejects. This is
+      # the same gate CI runs, repeated here so a manual deploy cannot skip it.
+      - name: Validate the data
+        run: python build_profile_site.py build --check --strict
+
+      - name: Confirm the committed data matches the CSVs
+        env:
+          SOURCE_DATE_EPOCH: "1000000000"
+        run: |
+          python build_profile_site.py
+          git diff --exit-code -- candidate_profiles_site/data/ \
+            || { echo "The committed data is stale; rebuild and commit before deploying."; exit 1; }
+
+      - name: Disable Jekyll processing
+        run: touch candidate_profiles_site/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: candidate_profiles_site
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
