@@ -61,7 +61,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # jsdom 30 requires ^22.22.2 || ^24.15.0 || >=26. Node 20 installed
+          # it happily and then died inside undici at require() time.
+          node-version: "24"
 
       - name: Every shipped script parses
         run: |

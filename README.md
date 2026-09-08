@@ -33,8 +33,8 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python -m unittest discover tests` | 126 pipeline tests |
 | `npm install && npm test` | Render both pages in jsdom and drive the UI (129 checks) |
 
-`--root`, `--verbose` and `--version` go before the subcommand:
-`python build_profile_site.py --verbose portraits`.
+`--root` and `--verbose` work on either side of the subcommand, so both
+`--verbose portraits` and `portraits --verbose` do the same thing.
 
 Only `fetch`, `portraits` and `finance` touch the network. `build` is fully
 offline and reads their caches.

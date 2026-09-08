@@ -11,5 +11,8 @@
   "//": "jsdom is a test-only dependency. The site itself ships no JavaScript dependencies at all - see assets/kyc.js.",
   "devDependencies": {
     "jsdom": "^30.0.0"
+  },
+  "engines": {
+    "node": ">=22.22.2"
   }
 }

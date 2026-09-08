@@ -203,6 +203,31 @@ def _add_build_flags(parser):
                         help="print the validation report as JSON")
 
 
+def _subcommand_flags():
+    """``--root`` / ``--verbose`` again, for use *after* the subcommand.
+
+    ``build --check --strict --verbose`` is the obvious thing to type, and it
+    used to fail with "unrecognized arguments: --verbose" because the flag
+    existed only on the top-level parser.
+
+    Two details here are load-bearing:
+
+    * The defaults are ``SUPPRESS`` so that ``--verbose build`` is not undone
+      by the subparser writing its own default back over the namespace.
+    * These are a *separate* parser from the top-level flags rather than one
+      shared parent, because ``parents=`` shares the action objects and
+      ``set_defaults`` mutates ``action.default`` in place - so seeding a
+      default on the top-level parser silently replaced the SUPPRESS in every
+      subparser and reintroduced exactly the bug it was meant to prevent.
+    """
+    shared = argparse.ArgumentParser(add_help=False)
+    shared.add_argument("--root", default=argparse.SUPPRESS,
+                        help="repository root (default: .)")
+    shared.add_argument("--verbose", action="store_true", default=argparse.SUPPRESS,
+                        help="list every item in a validation finding")
+    return shared
+
+
 def build_parser():
     parser = argparse.ArgumentParser(
         prog="build_profile_site.py",
@@ -214,26 +239,28 @@ def build_parser():
     parser.add_argument("--version", action="version",
                         version=f"know-your-candidate {__version__}")
 
+    shared = _subcommand_flags()
     sub = parser.add_subparsers(dest="command")
 
-    _add_build_flags(
-        sub.add_parser("build", help="generate candidate_profiles_site/data/*.js")
-    )
+    def add(name, **kwargs):
+        return sub.add_parser(name, parents=[shared], **kwargs)
 
-    sub.add_parser("fetch", help="refresh DW-NOMINATE scores from Voteview")
-    sub.add_parser("geo", help="regenerate the map geometry from the state atlas")
+    _add_build_flags(add("build", help="generate candidate_profiles_site/data/*.js"))
 
-    pics = sub.add_parser("portraits", help="resolve and verify portrait URLs")
+    add("fetch", help="refresh DW-NOMINATE scores from Voteview")
+    add("geo", help="regenerate the map geometry from the state atlas")
+
+    pics = add("portraits", help="resolve and verify portrait URLs")
     pics.add_argument("--refresh", action="store_true",
                       help="re-verify every portrait, not just missing ones")
 
-    money = sub.add_parser("finance", help="look up FEC campaign finance totals")
+    money = add("finance", help="look up FEC campaign finance totals")
     money.add_argument("--limit", type=int, default=None,
                        help="stop after N lookups (useful on a rate-limited key)")
     money.add_argument("--refresh", action="store_true",
                        help="re-query profiles already cached")
 
-    _add_build_flags(sub.add_parser("refresh", help="fetch, then build"))
+    _add_build_flags(add("refresh", help="fetch, then build"))
     return parser
 
 

@@ -10,7 +10,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from kyc import emit, races as races_mod, sources, summary, validate  # noqa: E402
+from kyc import cli, emit, races as races_mod, sources, summary, validate  # noqa: E402
 from kyc.profiles import build_profiles  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -256,6 +256,53 @@ class TestNewValidators(unittest.TestCase):
 
     def test_no_geometry_means_no_geometry_findings(self):
         self.assertEqual(validate.check_geometry([member(state="CA")], None), [])
+
+
+class TestCliFlags(unittest.TestCase):
+    """--root and --verbose must work on either side of the subcommand.
+
+    CI ran `build --check --strict --verbose` and got
+    "unrecognized arguments: --verbose", because the flags existed only on the
+    top-level parser. The fix has a trap of its own: argparse's `parents=`
+    shares action objects, and `set_defaults` mutates `action.default` in
+    place, so seeding a top-level default silently overwrote the SUPPRESS in
+    every subparser and reintroduced the bug.
+    """
+
+    def parse(self, argv):
+        return cli.build_parser().parse_args(argv)
+
+    def test_verbose_after_the_subcommand(self):
+        self.assertTrue(self.parse(["build", "--check", "--verbose"]).verbose)
+
+    def test_verbose_before_the_subcommand(self):
+        self.assertTrue(self.parse(["--verbose", "build", "--check"]).verbose)
+
+    def test_verbose_defaults_off(self):
+        self.assertFalse(self.parse(["build"]).verbose)
+
+    def test_root_on_either_side(self):
+        self.assertEqual(self.parse(["--root", "/tmp", "build"]).root, "/tmp")
+        self.assertEqual(self.parse(["build", "--root", "/tmp"]).root, "/tmp")
+
+    def test_root_defaults_to_here(self):
+        self.assertEqual(self.parse(["build"]).root, ".")
+
+    def test_every_subcommand_accepts_the_shared_flags(self):
+        for command in ("build", "fetch", "geo", "portraits", "finance", "refresh"):
+            with self.subTest(command=command):
+                args = self.parse([command, "--verbose", "--root", "/tmp"])
+                self.assertTrue(args.verbose)
+                self.assertEqual(args.root, "/tmp")
+                self.assertEqual(args.command, command)
+
+    def test_bare_invocation_still_builds(self):
+        args = self.parse([])
+        self.assertIsNone(args.command)
+
+    def test_build_flags_parse(self):
+        args = self.parse(["build", "--check", "--strict", "--json"])
+        self.assertTrue(args.check and args.strict and args.json)
 
 
 class TestValidationReport(unittest.TestCase):
