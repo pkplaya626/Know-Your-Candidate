@@ -1,0 +1,27 @@
+# Line endings.
+#
+# The pipeline writes its output with an explicit "\n", and both CI and
+# `cmp` assert that rebuilding produces a byte-identical file. On a Windows
+# checkout with core.autocrlf=true git would rewrite those files to CRLF on
+# the way out, so every rebuild would look like a change to the whole file
+# and the reproducibility check would never pass locally.
+*           text=auto eol=lf
+
+# Except the roster CSVs. Python's csv module writes \r\n by definition
+# (RFC 4180), so these are CRLF on disk and normalising them would produce a
+# diff on every `fetch`.
+*.csv       text eol=crlf
+
+# Generated. Collapse them in review; they are the build's output, not
+# something anyone edits.
+candidate_profiles_site/data/profiles.js  linguist-generated=true -diff
+candidate_profiles_site/data/geo.js       linguist-generated=true -diff
+
+# Vendored, not generated: the us-atlas 10m state boundaries, already
+# projected. Nobody reviews 82 KB of coordinates, so keep it out of diffs,
+# but it is a source input rather than build output.
+us_atlas_states_topo.json                 linguist-vendored=true -diff
+
+*.png       binary
+*.jpg       binary
+*.ico       binary

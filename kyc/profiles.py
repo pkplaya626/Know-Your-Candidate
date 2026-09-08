@@ -152,7 +152,7 @@ def _dedup_candidates(rows):
     return list(people.values())
 
 
-def _build_member(row, index):
+def _build_member(row, index, seats_up=None, term_ends=None):
     name = clean_str(row.get("Name"), "")
     bioguide = row.get("Bioguide ID")
     profile_id = clean_str(bioguide, "") or f"CURR_{index}"
@@ -177,12 +177,26 @@ def _build_member(row, index):
         seat_up = True
         end_year = ELECTION_YEAR + 1
     elif kind == "Senate":
-        defender = overrides.SENATE_SEATS_UP_2026.get(state)
-        if defender and defender.lower() in _fold(name).lower():
-            seat_up = True
+        # Prefer the authoritative snapshot, keyed on bioguide id. The
+        # fallback matches a hand-typed surname against the member's name,
+        # which is only ever approximately right: the table said "Graham" for
+        # South Carolina meaning Lindsey Graham, and kept matching after the
+        # seat changed hands purely because the new senator shares the name.
+        if seats_up is not None:
+            seat_up = profile_id in seats_up
+        else:
+            defender = overrides.SENATE_SEATS_UP_2026.get(state)
+            seat_up = bool(defender and defender.lower() in _fold(name).lower())
+
+        if seat_up:
             end_year = ELECTION_YEAR + 1
         else:
-            end_year = _senate_term_end(row.get("Term Start"))
+            # The snapshot knows when the term actually ends. The fallback
+            # steps forward from Term Start in six-year hops, which is wrong
+            # for anyone appointed mid-term.
+            end_year = (term_ends or {}).get(profile_id) or _senate_term_end(
+                row.get("Term Start")
+            )
 
     return {
         "id": profile_id,
@@ -303,11 +317,28 @@ def _cross_link(profiles):
     return links
 
 
-def build_profiles(data):
+def build_profiles(data, snapshot=None):
     """Build the unified profile list from loaded roster rows.
+
+    *snapshot* is the authoritative ``congress-legislators`` extract from
+    :mod:`kyc.legislators`. When present, the 2026 Senate class and every
+    senator's term-end year come from it instead of from the hand-typed
+    override table and a six-year-hop heuristic. It is optional so that
+    ``build`` still works from the CSVs alone.
 
     Returns ``(profiles, stats)``.
     """
+    seats_up = term_ends = None
+    if snapshot:
+        from . import legislators
+
+        seats_up = legislators.seats_up_ids(snapshot, ELECTION_YEAR)
+        term_ends = {
+            person["bioguide"]: int(person["termEnd"][:4])
+            for person in snapshot.get("legislators", [])
+            if (person.get("termEnd") or "")[:4].isdigit()
+        }
+
     members = _dedup_members(data["members"])
     candidates = _dedup_candidates(data["candidates"])
 
@@ -315,7 +346,7 @@ def build_profiles(data):
     for index, row in enumerate(members):
         if clean_str(row.get("Name"), "") in overrides.EXCLUDED_MEMBERS:
             continue
-        profiles.append(_build_member(row, index))
+        profiles.append(_build_member(row, index, seats_up, term_ends))
 
     member_count = len(profiles)
 

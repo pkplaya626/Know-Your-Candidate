@@ -1,0 +1,9181 @@
+{
+ "count": 539,
+ "fetched": "2026-09-08T19:56:45+00:00",
+ "legislators": [
+  {
+   "bioguide": "A000055",
+   "birthday": "1965-07-22",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H6AL04098"
+   ],
+   "last": "Aderholt",
+   "name": "Robert B. Aderholt",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "AL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Robert Aderholt"
+  },
+  {
+   "bioguide": "A000148",
+   "birthday": "1988-01-29",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H0MA04192"
+   ],
+   "last": "Auchincloss",
+   "name": "Jake Auchincloss",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jake Auchincloss"
+  },
+  {
+   "bioguide": "A000369",
+   "birthday": "1958-06-12",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H2NV02395",
+    "H1NV02017"
+   ],
+   "last": "Amodei",
+   "name": "Mark E. Amodei",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NV",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mark Amodei"
+  },
+  {
+   "bioguide": "A000370",
+   "birthday": "1946-05-27",
+   "chamber": "House",
+   "district": 12,
+   "fec": [
+    "H4NC12100"
+   ],
+   "last": "Adams",
+   "name": "Alma S. Adams",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Alma Adams"
+  },
+  {
+   "bioguide": "A000371",
+   "birthday": "1979-06-19",
+   "chamber": "House",
+   "district": 33,
+   "fec": [
+    "H2CA31125"
+   ],
+   "last": "Aguilar",
+   "name": "Pete Aguilar",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Pete Aguilar"
+  },
+  {
+   "bioguide": "A000372",
+   "birthday": "1951-11-07",
+   "chamber": "House",
+   "district": 12,
+   "fec": [
+    "H2GA12121"
+   ],
+   "last": "Allen",
+   "name": "Rick W. Allen",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "GA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Rick Allen (politician)"
+  },
+  {
+   "bioguide": "A000375",
+   "birthday": "1972-03-09",
+   "chamber": "House",
+   "district": 19,
+   "fec": [
+    "H6TX19099"
+   ],
+   "last": "Arrington",
+   "name": "Jodey C. Arrington",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jodey Arrington"
+  },
+  {
+   "bioguide": "A000379",
+   "birthday": "1963-10-04",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H2MO04207"
+   ],
+   "last": "Alford",
+   "name": "Mark Alford",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MO",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mark Alford"
+  },
+  {
+   "bioguide": "A000380",
+   "birthday": "1987-12-11",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H4RI01265"
+   ],
+   "last": "Amo",
+   "name": "Gabe Amo",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "RI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Gabe Amo"
+  },
+  {
+   "bioguide": "A000381",
+   "birthday": "1992-04-07",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H4AZ03109"
+   ],
+   "last": "Ansari",
+   "name": "Yassamin Ansari",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "AZ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Yassamin Ansari"
+  },
+  {
+   "bioguide": "A000382",
+   "birthday": "1971-02-23",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4MD00327"
+   ],
+   "last": "Alsobrooks",
+   "name": "Angela D. Alsobrooks",
+   "party": "Democrat",
+   "senateClass": 1,
+   "state": "MD",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Angela Alsobrooks"
+  },
+  {
+   "bioguide": "A000383",
+   "birthday": "1962-07-11",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [],
+   "last": "Armstrong",
+   "name": "Alan Armstrong",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "OK",
+   "termEnd": "2027-01-03",
+   "termStart": "2026-03-24",
+   "wikipedia": "Alan S. Armstrong"
+  },
+  {
+   "bioguide": "B000490",
+   "birthday": "1947-02-04",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H2GA02031"
+   ],
+   "last": "Bishop",
+   "name": "Sanford D. Bishop, Jr.",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "GA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Sanford Bishop"
+  },
+  {
+   "bioguide": "B000668",
+   "birthday": "1952-01-12",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H0OR02127"
+   ],
+   "last": "Bentz",
+   "name": "Cliff Bentz",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "OR",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Cliff Bentz"
+  },
+  {
+   "bioguide": "B000740",
+   "birthday": "1973-11-11",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H0OK05205"
+   ],
+   "last": "Bice",
+   "name": "Stephanie I. Bice",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "OK",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Stephanie Bice"
+  },
+  {
+   "bioguide": "B000825",
+   "birthday": "1986-12-15",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H0CO03165"
+   ],
+   "last": "Boebert",
+   "name": "Lauren Boebert",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "CO",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Lauren Boebert"
+  },
+  {
+   "bioguide": "B001230",
+   "birthday": "1962-02-11",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2WI00219"
+   ],
+   "last": "Baldwin",
+   "name": "Tammy Baldwin",
+   "party": "Democrat",
+   "senateClass": 1,
+   "state": "WI",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Tammy Baldwin"
+  },
+  {
+   "bioguide": "B001236",
+   "birthday": "1950-12-10",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0AR00150"
+   ],
+   "last": "Boozman",
+   "name": "John Boozman",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "AR",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "John Boozman"
+  },
+  {
+   "bioguide": "B001243",
+   "birthday": "1952-06-06",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S8TN00337"
+   ],
+   "last": "Blackburn",
+   "name": "Marsha Blackburn",
+   "party": "Republican",
+   "senateClass": 1,
+   "state": "TN",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Marsha Blackburn"
+  },
+  {
+   "bioguide": "B001257",
+   "birthday": "1963-02-08",
+   "chamber": "House",
+   "district": 12,
+   "fec": [
+    "H6FL09070"
+   ],
+   "last": "Bilirakis",
+   "name": "Gus M. Bilirakis",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Gus Bilirakis"
+  },
+  {
+   "bioguide": "B001260",
+   "birthday": "1951-05-08",
+   "chamber": "House",
+   "district": 16,
+   "fec": [
+    "H6FL13148"
+   ],
+   "last": "Buchanan",
+   "name": "Vern Buchanan",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Vern Buchanan"
+  },
+  {
+   "bioguide": "B001261",
+   "birthday": "1952-07-21",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S6WY00068"
+   ],
+   "last": "Barrasso",
+   "name": "John Barrasso",
+   "party": "Republican",
+   "senateClass": 1,
+   "state": "WY",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "John Barrasso"
+  },
+  {
+   "bioguide": "B001267",
+   "birthday": "1964-11-28",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0CO00211"
+   ],
+   "last": "Bennet",
+   "name": "Michael F. Bennet",
+   "party": "Democrat",
+   "senateClass": 3,
+   "state": "CO",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Michael Bennet"
+  },
+  {
+   "bioguide": "B001277",
+   "birthday": "1946-02-13",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0CT00177"
+   ],
+   "last": "Blumenthal",
+   "name": "Richard Blumenthal",
+   "party": "Democrat",
+   "senateClass": 3,
+   "state": "CT",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Richard Blumenthal"
+  },
+  {
+   "bioguide": "B001278",
+   "birthday": "1954-10-14",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H2OR01133"
+   ],
+   "last": "Bonamici",
+   "name": "Suzanne Bonamici",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "OR",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Suzanne Bonamici"
+  },
+  {
+   "bioguide": "B001281",
+   "birthday": "1950-03-12",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H2OH03125"
+   ],
+   "last": "Beatty",
+   "name": "Joyce Beatty",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "OH",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Joyce Beatty"
+  },
+  {
+   "bioguide": "B001282",
+   "birthday": "1973-07-24",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H0KY06104"
+   ],
+   "last": "Barr",
+   "name": "Andy Barr",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "KY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Andy Barr"
+  },
+  {
+   "bioguide": "B001285",
+   "birthday": "1952-08-28",
+   "chamber": "House",
+   "district": 26,
+   "fec": [
+    "H2CA00120"
+   ],
+   "last": "Brownley",
+   "name": "Julia Brownley",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Julia Brownley"
+  },
+  {
+   "bioguide": "B001287",
+   "birthday": "1965-03-02",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H0CA03078"
+   ],
+   "last": "Bera",
+   "name": "Ami Bera",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Ami Bera"
+  },
+  {
+   "bioguide": "B001288",
+   "birthday": "1969-04-27",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4NJ00185"
+   ],
+   "last": "Booker",
+   "name": "Cory A. Booker",
+   "party": "Democrat",
+   "senateClass": 2,
+   "state": "NJ",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Cory Booker"
+  },
+  {
+   "bioguide": "B001291",
+   "birthday": "1948-03-23",
+   "chamber": "House",
+   "district": 36,
+   "fec": [
+    "H6TX02079"
+   ],
+   "last": "Babin",
+   "name": "Brian Babin",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Brian Babin"
+  },
+  {
+   "bioguide": "B001292",
+   "birthday": "1950-06-20",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H4VA08224"
+   ],
+   "last": "Beyer",
+   "name": "Donald S. Beyer, Jr.",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "VA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Don Beyer"
+  },
+  {
+   "bioguide": "B001295",
+   "birthday": "1960-12-30",
+   "chamber": "House",
+   "district": 12,
+   "fec": [
+    "H4IL12060"
+   ],
+   "last": "Bost",
+   "name": "Mike Bost",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "IL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mike Bost"
+  },
+  {
+   "bioguide": "B001296",
+   "birthday": "1977-02-06",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H4PA13199"
+   ],
+   "last": "Boyle",
+   "name": "Brendan F. Boyle",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "PA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Brendan Boyle"
+  },
+  {
+   "bioguide": "B001298",
+   "birthday": "1963-08-16",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H6NE02125"
+   ],
+   "last": "Bacon",
+   "name": "Don Bacon",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NE",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Don Bacon"
+  },
+  {
+   "bioguide": "B001299",
+   "birthday": "1979-07-16",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4IN00196"
+   ],
+   "last": "Banks",
+   "name": "Jim Banks",
+   "party": "Republican",
+   "senateClass": 1,
+   "state": "IN",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jim Banks"
+  },
+  {
+   "bioguide": "B001300",
+   "birthday": "1976-09-15",
+   "chamber": "House",
+   "district": 44,
+   "fec": [
+    "H6CA44103"
+   ],
+   "last": "Barragán",
+   "name": "Nanette Diaz Barragán",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Nanette Barragán"
+  },
+  {
+   "bioguide": "B001301",
+   "birthday": "1947-02-02",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H6MI01226"
+   ],
+   "last": "Bergman",
+   "name": "Jack Bergman",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jack Bergman"
+  },
+  {
+   "bioguide": "B001302",
+   "birthday": "1958-11-07",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H6AZ05083"
+   ],
+   "last": "Biggs",
+   "name": "Andy Biggs",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "AZ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Andy Biggs"
+  },
+  {
+   "bioguide": "B001303",
+   "birthday": "1962-02-10",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4DE00060"
+   ],
+   "last": "Blunt Rochester",
+   "name": "Lisa Blunt Rochester",
+   "party": "Democrat",
+   "senateClass": 1,
+   "state": "DE",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Lisa Blunt Rochester"
+  },
+  {
+   "bioguide": "B001305",
+   "birthday": "1971-10-21",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2NC00505"
+   ],
+   "last": "Budd",
+   "name": "Ted Budd",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "NC",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Ted Budd"
+  },
+  {
+   "bioguide": "B001306",
+   "birthday": "1962-01-16",
+   "chamber": "House",
+   "district": 12,
+   "fec": [
+    "H8OH12180"
+   ],
+   "last": "Balderson",
+   "name": "Troy Balderson",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "OH",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Troy Balderson"
+  },
+  {
+   "bioguide": "B001307",
+   "birthday": "1945-06-04",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H8IN04199"
+   ],
+   "last": "Baird",
+   "name": "James R. Baird",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "IN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jim Baird (politician)"
+  },
+  {
+   "bioguide": "B001309",
+   "birthday": "1964-08-25",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H8TN02119"
+   ],
+   "last": "Burchett",
+   "name": "Tim Burchett",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Tim Burchett"
+  },
+  {
+   "bioguide": "B001313",
+   "birthday": "1975-06-24",
+   "chamber": "House",
+   "district": 11,
+   "fec": [
+    "H2OH11169"
+   ],
+   "last": "Brown",
+   "name": "Shontel M. Brown",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "OH",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Shontel Brown"
+  },
+  {
+   "bioguide": "B001314",
+   "birthday": "1967-01-25",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H2FL04211"
+   ],
+   "last": "Bean",
+   "name": "Aaron Bean",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Aaron Bean"
+  },
+  {
+   "bioguide": "B001315",
+   "birthday": "1977-03-11",
+   "chamber": "House",
+   "district": 13,
+   "fec": [
+    "H2IL13153"
+   ],
+   "last": "Budzinski",
+   "name": "Nikki Budzinski",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "IL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Nikki Budzinski"
+  },
+  {
+   "bioguide": "B001316",
+   "birthday": "1976-10-02",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H2MO07143"
+   ],
+   "last": "Burlison",
+   "name": "Eric Burlison",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MO",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Eric Burlison"
+  },
+  {
+   "bioguide": "B001317",
+   "birthday": "1979-06-19",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H2OK02315"
+   ],
+   "last": "Brecheen",
+   "name": "Josh Brecheen",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "OK",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Josh Brecheen"
+  },
+  {
+   "bioguide": "B001318",
+   "birthday": "1968-05-04",
+   "chamber": "House",
+   "district": 0,
+   "fec": [
+    "H2VT01076"
+   ],
+   "last": "Balint",
+   "name": "Becca Balint",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "VT",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Becca Balint"
+  },
+  {
+   "bioguide": "B001319",
+   "birthday": "1982-02-02",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2AL00145"
+   ],
+   "last": "Britt",
+   "name": "Katie Boyd Britt",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "AL",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Katie Britt"
+  },
+  {
+   "bioguide": "B001321",
+   "birthday": "1981-04-30",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H2MI07123"
+   ],
+   "last": "Barrett",
+   "name": "Tom Barrett",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Tom Barrett (Michigan politician)"
+  },
+  {
+   "bioguide": "B001322",
+   "birthday": "1975-12-13",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H4WA05234"
+   ],
+   "last": "Baumgartner",
+   "name": "Michael Baumgartner",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "WA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Michael Baumgartner"
+  },
+  {
+   "bioguide": "B001323",
+   "birthday": "1977-10-21",
+   "chamber": "House",
+   "district": 0,
+   "fec": [
+    "H2AK01083"
+   ],
+   "last": "Begich",
+   "name": "Nicholas J. Begich III",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "AK",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Nick Begich III"
+  },
+  {
+   "bioguide": "B001324",
+   "birthday": "1974-11-05",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H4MO01134"
+   ],
+   "last": "Bell",
+   "name": "Wesley Bell",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MO",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Wesley Bell"
+  },
+  {
+   "bioguide": "B001325",
+   "birthday": "1970-03-28",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H4SC01313"
+   ],
+   "last": "Biggs",
+   "name": "Sheri Biggs",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "SC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Sheri Biggs"
+  },
+  {
+   "bioguide": "B001326",
+   "birthday": "1975-01-31",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H4OR05304"
+   ],
+   "last": "Bynum",
+   "name": "Janelle S. Bynum",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "OR",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Janelle Bynum"
+  },
+  {
+   "bioguide": "B001327",
+   "birthday": "1990-04-22",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H4PA08124"
+   ],
+   "last": "Bresnahan",
+   "name": "Robert P. Bresnahan, Jr.",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "PA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Rob Bresnahan"
+  },
+  {
+   "bioguide": "B001328",
+   "birthday": "1992-04-23",
+   "chamber": "House",
+   "district": 13,
+   "fec": [
+    "H6GA13062"
+   ],
+   "last": "Blair",
+   "name": "Everton Blair Jr.",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "GA",
+   "termEnd": "2027-01-03",
+   "termStart": "2026-09-01",
+   "wikipedia": "Everton Blair"
+  },
+  {
+   "bioguide": "C000059",
+   "birthday": "1953-06-08",
+   "chamber": "House",
+   "district": 41,
+   "fec": [
+    "H2CA37023"
+   ],
+   "last": "Calvert",
+   "name": "Ken Calvert",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Ken Calvert"
+  },
+  {
+   "bioguide": "C000127",
+   "birthday": "1958-10-13",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S8WA00194"
+   ],
+   "last": "Cantwell",
+   "name": "Maria Cantwell",
+   "party": "Democrat",
+   "senateClass": 1,
+   "state": "WA",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Maria Cantwell"
+  },
+  {
+   "bioguide": "C000537",
+   "birthday": "1940-07-21",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H2SC02042"
+   ],
+   "last": "Clyburn",
+   "name": "James E. Clyburn",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "SC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jim Clyburn"
+  },
+  {
+   "bioguide": "C000880",
+   "birthday": "1951-05-20",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S8ID00027"
+   ],
+   "last": "Crapo",
+   "name": "Mike Crapo",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "ID",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Mike Crapo"
+  },
+  {
+   "bioguide": "C001035",
+   "birthday": "1952-12-07",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S6ME00159"
+   ],
+   "last": "Collins",
+   "name": "Susan M. Collins",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "ME",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Susan Collins"
+  },
+  {
+   "bioguide": "C001039",
+   "birthday": "1988-02-16",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H0FL03175"
+   ],
+   "last": "Cammack",
+   "name": "Kat Cammack",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Kat Cammack"
+  },
+  {
+   "bioguide": "C001047",
+   "birthday": "1953-11-26",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4WV00159"
+   ],
+   "last": "Capito",
+   "name": "Shelley Moore Capito",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "WV",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Shelley Moore Capito"
+  },
+  {
+   "bioguide": "C001051",
+   "birthday": "1941-11-06",
+   "chamber": "House",
+   "district": 31,
+   "fec": [
+    "H2TX31044"
+   ],
+   "last": "Carter",
+   "name": "John R. Carter",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "John Carter (Texas politician)"
+  },
+  {
+   "bioguide": "C001053",
+   "birthday": "1949-04-28",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H2OK04055"
+   ],
+   "last": "Cole",
+   "name": "Tom Cole",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "OK",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Tom Cole"
+  },
+  {
+   "bioguide": "C001055",
+   "birthday": "1952-09-27",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H2HI02128"
+   ],
+   "last": "Case",
+   "name": "Ed Case",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "HI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Ed Case"
+  },
+  {
+   "bioguide": "C001056",
+   "birthday": "1952-02-02",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2TX00106"
+   ],
+   "last": "Cornyn",
+   "name": "John Cornyn",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "John Cornyn"
+  },
+  {
+   "bioguide": "C001059",
+   "birthday": "1952-04-13",
+   "chamber": "House",
+   "district": 21,
+   "fec": [
+    "H4CA20082"
+   ],
+   "last": "Costa",
+   "name": "Jim Costa",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jim Costa"
+  },
+  {
+   "bioguide": "C001061",
+   "birthday": "1944-10-26",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H4MO05234"
+   ],
+   "last": "Cleaver",
+   "name": "Emanuel Cleaver",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MO",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Emanuel Cleaver"
+  },
+  {
+   "bioguide": "C001063",
+   "birthday": "1955-09-19",
+   "chamber": "House",
+   "district": 28,
+   "fec": [
+    "H2TX23082"
+   ],
+   "last": "Cuellar",
+   "name": "Henry Cuellar",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Henry Cuellar"
+  },
+  {
+   "bioguide": "C001066",
+   "birthday": "1966-08-20",
+   "chamber": "House",
+   "district": 14,
+   "fec": [
+    "H6FL11126",
+    "H6FL11134"
+   ],
+   "last": "Castor",
+   "name": "Kathy Castor",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Kathy Castor"
+  },
+  {
+   "bioguide": "C001067",
+   "birthday": "1964-11-21",
+   "chamber": "House",
+   "district": 9,
+   "fec": [
+    "H4NY11138"
+   ],
+   "last": "Clarke",
+   "name": "Yvette D. Clarke",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Yvette Clarke"
+  },
+  {
+   "bioguide": "C001068",
+   "birthday": "1949-05-24",
+   "chamber": "House",
+   "district": 9,
+   "fec": [
+    "H6TN09068"
+   ],
+   "last": "Cohen",
+   "name": "Steve Cohen",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "TN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Steve Cohen (politician)"
+  },
+  {
+   "bioguide": "C001069",
+   "birthday": "1953-04-06",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H2CT02112"
+   ],
+   "last": "Courtney",
+   "name": "Joe Courtney",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CT",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Joe Courtney (politician)"
+  },
+  {
+   "bioguide": "C001072",
+   "birthday": "1974-10-16",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H8IN07184"
+   ],
+   "last": "Carson",
+   "name": "André Carson",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "IN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "André Carson"
+  },
+  {
+   "bioguide": "C001075",
+   "birthday": "1957-09-28",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4LA00107"
+   ],
+   "last": "Cassidy",
+   "name": "Bill Cassidy",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "LA",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Bill Cassidy"
+  },
+  {
+   "bioguide": "C001080",
+   "birthday": "1953-07-07",
+   "chamber": "House",
+   "district": 28,
+   "fec": [
+    "H0CA32101"
+   ],
+   "last": "Chu",
+   "name": "Judy Chu",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Judy Chu"
+  },
+  {
+   "bioguide": "C001087",
+   "birthday": "1966-01-22",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H0AR01083"
+   ],
+   "last": "Crawford",
+   "name": "Eric A. \"Rick\" Crawford",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "AR",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Rick Crawford (politician)"
+  },
+  {
+   "bioguide": "C001088",
+   "birthday": "1963-09-09",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0DE00092"
+   ],
+   "last": "Coons",
+   "name": "Christopher A. Coons",
+   "party": "Democrat",
+   "senateClass": 2,
+   "state": "DE",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Chris Coons"
+  },
+  {
+   "bioguide": "C001091",
+   "birthday": "1974-09-16",
+   "chamber": "House",
+   "district": 20,
+   "fec": [
+    "H2TX35011"
+   ],
+   "last": "Castro",
+   "name": "Joaquin Castro",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Joaquin Castro"
+  },
+  {
+   "bioguide": "C001095",
+   "birthday": "1977-05-13",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4AR00103"
+   ],
+   "last": "Cotton",
+   "name": "Tom Cotton",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "AR",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Tom Cotton"
+  },
+  {
+   "bioguide": "C001096",
+   "birthday": "1961-01-21",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S8ND00120"
+   ],
+   "last": "Cramer",
+   "name": "Kevin Cramer",
+   "party": "Republican",
+   "senateClass": 1,
+   "state": "ND",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Kevin Cramer"
+  },
+  {
+   "bioguide": "C001098",
+   "birthday": "1970-12-22",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2TX00312"
+   ],
+   "last": "Cruz",
+   "name": "Ted Cruz",
+   "party": "Republican",
+   "senateClass": 1,
+   "state": "TX",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Ted Cruz"
+  },
+  {
+   "bioguide": "C001101",
+   "birthday": "1963-07-17",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H4MA05084"
+   ],
+   "last": "Clark",
+   "name": "Katherine M. Clark",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Katherine Clark"
+  },
+  {
+   "bioguide": "C001103",
+   "birthday": "1957-09-06",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H4GA01039"
+   ],
+   "last": "Carter",
+   "name": "Earl L. \"Buddy\" Carter",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "GA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Buddy Carter"
+  },
+  {
+   "bioguide": "C001108",
+   "birthday": "1972-08-19",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H6KY01110"
+   ],
+   "last": "Comer",
+   "name": "James Comer",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "KY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "James Comer"
+  },
+  {
+   "bioguide": "C001110",
+   "birthday": "1958-01-24",
+   "chamber": "House",
+   "district": 46,
+   "fec": [
+    "H6CA46116"
+   ],
+   "last": "Correa",
+   "name": "J. Luis Correa",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Lou Correa"
+  },
+  {
+   "bioguide": "C001112",
+   "birthday": "1964-11-18",
+   "chamber": "House",
+   "district": 24,
+   "fec": [
+    "H6CA24303"
+   ],
+   "last": "Carbajal",
+   "name": "Salud O. Carbajal",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Salud Carbajal"
+  },
+  {
+   "bioguide": "C001113",
+   "birthday": "1964-03-29",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S6NV00200"
+   ],
+   "last": "Cortez Masto",
+   "name": "Catherine Cortez Masto",
+   "party": "Democrat",
+   "senateClass": 3,
+   "state": "NV",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Catherine Cortez Masto"
+  },
+  {
+   "bioguide": "C001114",
+   "birthday": "1960-05-10",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4UT00282"
+   ],
+   "last": "Curtis",
+   "name": "John R. Curtis",
+   "party": "Republican",
+   "senateClass": 1,
+   "state": "UT",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "John Curtis"
+  },
+  {
+   "bioguide": "C001115",
+   "birthday": "1975-05-13",
+   "chamber": "House",
+   "district": 27,
+   "fec": [
+    "H8TX27049"
+   ],
+   "last": "Cloud",
+   "name": "Michael Cloud",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Michael Cloud"
+  },
+  {
+   "bioguide": "C001116",
+   "birthday": "1963-11-22",
+   "chamber": "House",
+   "district": 9,
+   "fec": [
+    "H0GA09246"
+   ],
+   "last": "Clyde",
+   "name": "Andrew S. Clyde",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "GA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Andrew Clyde"
+  },
+  {
+   "bioguide": "C001117",
+   "birthday": "1971-11-23",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H8IL06139"
+   ],
+   "last": "Casten",
+   "name": "Sean Casten",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "IL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Sean Casten"
+  },
+  {
+   "bioguide": "C001118",
+   "birthday": "1972-02-29",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H8VA06104"
+   ],
+   "last": "Cline",
+   "name": "Ben Cline",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "VA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Ben Cline"
+  },
+  {
+   "bioguide": "C001119",
+   "birthday": "1972-02-14",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H6MN02131"
+   ],
+   "last": "Craig",
+   "name": "Angie Craig",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Angie Craig"
+  },
+  {
+   "bioguide": "C001120",
+   "birthday": "1984-03-14",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H8TX02166"
+   ],
+   "last": "Crenshaw",
+   "name": "Dan Crenshaw",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Dan Crenshaw"
+  },
+  {
+   "bioguide": "C001121",
+   "birthday": "1979-03-15",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H8CO06229"
+   ],
+   "last": "Crow",
+   "name": "Jason Crow",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CO",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jason Crow"
+  },
+  {
+   "bioguide": "C001123",
+   "birthday": "1971-02-12",
+   "chamber": "House",
+   "district": 31,
+   "fec": [
+    "H8CA39174",
+    "H4CA31170"
+   ],
+   "last": "Cisneros",
+   "name": "Gilbert Ray Cisneros, Jr.",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Gil Cisneros"
+  },
+  {
+   "bioguide": "C001125",
+   "birthday": "1963-10-26",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H2LA02149"
+   ],
+   "last": "Carter",
+   "name": "Troy A. Carter",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "LA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Troy Carter (politician)"
+  },
+  {
+   "bioguide": "C001126",
+   "birthday": "1971-03-13",
+   "chamber": "House",
+   "district": 15,
+   "fec": [
+    "H2OH15228"
+   ],
+   "last": "Carey",
+   "name": "Mike Carey",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "OH",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mike Carey (politician)"
+  },
+  {
+   "bioguide": "C001129",
+   "birthday": "1967-07-02",
+   "chamber": "House",
+   "district": 10,
+   "fec": [
+    "H4GA10071"
+   ],
+   "last": "Collins",
+   "name": "Mike Collins",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "GA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mike Collins (politician)"
+  },
+  {
+   "bioguide": "C001130",
+   "birthday": "1981-03-29",
+   "chamber": "House",
+   "district": 30,
+   "fec": [
+    "H2TX30178"
+   ],
+   "last": "Crockett",
+   "name": "Jasmine Crockett",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jasmine Crockett"
+  },
+  {
+   "bioguide": "C001131",
+   "birthday": "1989-05-04",
+   "chamber": "House",
+   "district": 35,
+   "fec": [
+    "H2TX35144"
+   ],
+   "last": "Casar",
+   "name": "Greg Casar",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Greg Casar"
+  },
+  {
+   "bioguide": "C001132",
+   "birthday": "1980-01-03",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H2AZ01354"
+   ],
+   "last": "Crane",
+   "name": "Elijah Crane",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "AZ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Eli Crane"
+  },
+  {
+   "bioguide": "C001133",
+   "birthday": "1982-08-30",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H2AZ02360"
+   ],
+   "last": "Ciscomani",
+   "name": "Juan Ciscomani",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "AZ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Juan Ciscomani"
+  },
+  {
+   "bioguide": "C001136",
+   "birthday": "1963-01-30",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H4NJ03080"
+   ],
+   "last": "Conaway",
+   "name": "Herbert C. Conaway, Jr.",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NJ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Herb Conaway"
+  },
+  {
+   "bioguide": "C001137",
+   "birthday": "1967-01-28",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H6CO05142"
+   ],
+   "last": "Crank",
+   "name": "Jeff Crank",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "CO",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jeff Crank"
+  },
+  {
+   "bioguide": "D000032",
+   "birthday": "1978-10-28",
+   "chamber": "House",
+   "district": 19,
+   "fec": [
+    "H2FL14186"
+   ],
+   "last": "Donalds",
+   "name": "Byron Donalds",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Byron Donalds"
+  },
+  {
+   "bioguide": "D000096",
+   "birthday": "1941-09-06",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H4IL07037"
+   ],
+   "last": "Davis",
+   "name": "Danny K. Davis",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "IL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Danny Davis (Illinois politician)"
+  },
+  {
+   "bioguide": "D000197",
+   "birthday": "1957-07-29",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H6CO01141"
+   ],
+   "last": "DeGette",
+   "name": "Diana DeGette",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CO",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Diana DeGette"
+  },
+  {
+   "bioguide": "D000216",
+   "birthday": "1943-03-02",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H0CT03072"
+   ],
+   "last": "DeLauro",
+   "name": "Rosa L. DeLauro",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CT",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Rosa DeLauro"
+  },
+  {
+   "bioguide": "D000230",
+   "birthday": "1971-08-29",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H2NC02287"
+   ],
+   "last": "Davis",
+   "name": "Donald G. Davis",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Don Davis (North Carolina politician)"
+  },
+  {
+   "bioguide": "D000399",
+   "birthday": "1946-10-06",
+   "chamber": "House",
+   "district": 37,
+   "fec": [
+    "H4TX10028"
+   ],
+   "last": "Doggett",
+   "name": "Lloyd Doggett",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Lloyd Doggett"
+  },
+  {
+   "bioguide": "D000530",
+   "birthday": "1984-07-13",
+   "chamber": "House",
+   "district": 17,
+   "fec": [
+    "H2PA17103"
+   ],
+   "last": "Deluzio",
+   "name": "Christopher R. Deluzio",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "PA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Chris Deluzio"
+  },
+  {
+   "bioguide": "D000563",
+   "birthday": "1944-11-21",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S6IL00151"
+   ],
+   "last": "Durbin",
+   "name": "Richard J. Durbin",
+   "party": "Democrat",
+   "senateClass": 2,
+   "state": "IL",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Dick Durbin"
+  },
+  {
+   "bioguide": "D000594",
+   "birthday": "1974-11-11",
+   "chamber": "House",
+   "district": 15,
+   "fec": [
+    "H0TX15124"
+   ],
+   "last": "De La Cruz",
+   "name": "Monica De La Cruz",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Monica De La Cruz"
+  },
+  {
+   "bioguide": "D000600",
+   "birthday": "1961-09-25",
+   "chamber": "House",
+   "district": 26,
+   "fec": [
+    "H2FL25018"
+   ],
+   "last": "Diaz-Balart",
+   "name": "Mario Diaz-Balart",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mario Díaz-Balart"
+  },
+  {
+   "bioguide": "D000616",
+   "birthday": "1964-02-21",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H0TN04195"
+   ],
+   "last": "DesJarlais",
+   "name": "Scott DesJarlais",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Scott DesJarlais"
+  },
+  {
+   "bioguide": "D000617",
+   "birthday": "1962-02-17",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H0WA08046"
+   ],
+   "last": "DelBene",
+   "name": "Suzan K. DelBene",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "WA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Suzan DelBene"
+  },
+  {
+   "bioguide": "D000618",
+   "birthday": "1962-08-20",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2MT00096"
+   ],
+   "last": "Daines",
+   "name": "Steve Daines",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "MT",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Steve Daines"
+  },
+  {
+   "bioguide": "D000622",
+   "birthday": "1968-03-12",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S6IL00292"
+   ],
+   "last": "Duckworth",
+   "name": "Tammy Duckworth",
+   "party": "Democrat",
+   "senateClass": 3,
+   "state": "IL",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Tammy Duckworth"
+  },
+  {
+   "bioguide": "D000623",
+   "birthday": "1952-03-31",
+   "chamber": "House",
+   "district": 10,
+   "fec": [
+    "H0CA10073"
+   ],
+   "last": "DeSaulnier",
+   "name": "Mark DeSaulnier",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mark DeSaulnier"
+  },
+  {
+   "bioguide": "D000624",
+   "birthday": "1953-11-23",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H4MI12079"
+   ],
+   "last": "Dingell",
+   "name": "Debbie Dingell",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Debbie Dingell"
+  },
+  {
+   "bioguide": "D000626",
+   "birthday": "1970-03-01",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H6OH08315"
+   ],
+   "last": "Davidson",
+   "name": "Warren Davidson",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "OH",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Warren Davidson"
+  },
+  {
+   "bioguide": "D000628",
+   "birthday": "1953-02-16",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H6FL02208"
+   ],
+   "last": "Dunn",
+   "name": "Neal P. Dunn",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Neal Dunn"
+  },
+  {
+   "bioguide": "D000629",
+   "birthday": "1980-05-22",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H8KS03155"
+   ],
+   "last": "Davids",
+   "name": "Sharice Davids",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "KS",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Sharice Davids"
+  },
+  {
+   "bioguide": "D000631",
+   "birthday": "1959-06-06",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H8PA04116"
+   ],
+   "last": "Dean",
+   "name": "Madeleine Dean",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "PA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Madeleine Dean"
+  },
+  {
+   "bioguide": "D000634",
+   "birthday": "1967-03-04",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H4MT02098"
+   ],
+   "last": "Downing",
+   "name": "Troy Downing",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MT",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Troy Downing"
+  },
+  {
+   "bioguide": "D000635",
+   "birthday": "1972-12-05",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H4OR03192"
+   ],
+   "last": "Dexter",
+   "name": "Maxine Dexter",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "OR",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Maxine Dexter"
+  },
+  {
+   "bioguide": "E000071",
+   "birthday": "1970-01-24",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H8TX06266"
+   ],
+   "last": "Ellzey",
+   "name": "Jake Ellzey",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jake Ellzey"
+  },
+  {
+   "bioguide": "E000235",
+   "birthday": "1959-04-06",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H2MS04258"
+   ],
+   "last": "Ezell",
+   "name": "Mike Ezell",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MS",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mike Ezell"
+  },
+  {
+   "bioguide": "E000246",
+   "birthday": "1960-09-13",
+   "chamber": "House",
+   "district": 11,
+   "fec": [
+    "H2NC14050"
+   ],
+   "last": "Edwards",
+   "name": "Chuck Edwards",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Chuck Edwards"
+  },
+  {
+   "bioguide": "E000294",
+   "birthday": "1961-03-03",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H4MN06087"
+   ],
+   "last": "Emmer",
+   "name": "Tom Emmer",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Tom Emmer"
+  },
+  {
+   "bioguide": "E000295",
+   "birthday": "1970-07-01",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4IA00129"
+   ],
+   "last": "Ernst",
+   "name": "Joni Ernst",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "IA",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Joni Ernst"
+  },
+  {
+   "bioguide": "E000296",
+   "birthday": "1954-05-16",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H6PA02171"
+   ],
+   "last": "Evans",
+   "name": "Dwight Evans",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "PA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Dwight Evans (politician)"
+  },
+  {
+   "bioguide": "E000297",
+   "birthday": "1954-09-27",
+   "chamber": "House",
+   "district": 13,
+   "fec": [
+    "H2NY13096"
+   ],
+   "last": "Espaillat",
+   "name": "Adriano Espaillat",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Adriano Espaillat"
+  },
+  {
+   "bioguide": "E000298",
+   "birthday": "1956-07-19",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H8KS04112"
+   ],
+   "last": "Estes",
+   "name": "Ron Estes",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "KS",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Ron Estes"
+  },
+  {
+   "bioguide": "E000299",
+   "birthday": "1969-09-15",
+   "chamber": "House",
+   "district": 16,
+   "fec": [
+    "H8TX16109"
+   ],
+   "last": "Escobar",
+   "name": "Veronica Escobar",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Veronica Escobar"
+  },
+  {
+   "bioguide": "E000300",
+   "birthday": "1986-07-28",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H4CO08034"
+   ],
+   "last": "Evans",
+   "name": "Gabe Evans",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "CO",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Gabe Evans"
+  },
+  {
+   "bioguide": "E000301",
+   "birthday": "1988-09-09",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H4MD03156"
+   ],
+   "last": "Elfreth",
+   "name": "Sarah Elfreth",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MD",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Sarah Elfreth"
+  },
+  {
+   "bioguide": "F000110",
+   "birthday": "1962-11-22",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H4LA06211"
+   ],
+   "last": "Fields",
+   "name": "Cleo Fields",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "LA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Cleo Fields"
+  },
+  {
+   "bioguide": "F000246",
+   "birthday": "1967-12-19",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H0TX04219"
+   ],
+   "last": "Fallon",
+   "name": "Pat Fallon",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Pat Fallon"
+  },
+  {
+   "bioguide": "F000446",
+   "birthday": "1969-01-14",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H0IA04145"
+   ],
+   "last": "Feenstra",
+   "name": "Randy Feenstra",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "IA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Randy Feenstra"
+  },
+  {
+   "bioguide": "F000450",
+   "birthday": "1943-06-29",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H4NC05146"
+   ],
+   "last": "Foxx",
+   "name": "Virginia Foxx",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Virginia Foxx"
+  },
+  {
+   "bioguide": "F000454",
+   "birthday": "1955-10-07",
+   "chamber": "House",
+   "district": 11,
+   "fec": [
+    "H8IL14067",
+    "H2IL11124"
+   ],
+   "last": "Foster",
+   "name": "Bill Foster",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "IL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Bill Foster (politician)"
+  },
+  {
+   "bioguide": "F000459",
+   "birthday": "1962-10-11",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H0TN03254"
+   ],
+   "last": "Fleischmann",
+   "name": "Charles J. \"Chuck\" Fleischmann",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Chuck Fleischmann"
+  },
+  {
+   "bioguide": "F000462",
+   "birthday": "1948-05-16",
+   "chamber": "House",
+   "district": 22,
+   "fec": [
+    "H2FL14053",
+    "H2FL22080"
+   ],
+   "last": "Frankel",
+   "name": "Lois Frankel",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Lois Frankel"
+  },
+  {
+   "bioguide": "F000463",
+   "birthday": "1951-03-01",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2NE00094"
+   ],
+   "last": "Fischer",
+   "name": "Deb Fischer",
+   "party": "Republican",
+   "senateClass": 1,
+   "state": "NE",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Deb Fischer"
+  },
+  {
+   "bioguide": "F000466",
+   "birthday": "1973-12-17",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H6PA08277"
+   ],
+   "last": "Fitzpatrick",
+   "name": "Brian K. Fitzpatrick",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "PA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Brian Fitzpatrick (American politician)"
+  },
+  {
+   "bioguide": "F000468",
+   "birthday": "1975-02-13",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H8TX07140"
+   ],
+   "last": "Fletcher",
+   "name": "Lizzie Fletcher",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Lizzie Fletcher"
+  },
+  {
+   "bioguide": "F000469",
+   "birthday": "1962-03-09",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H8ID01124"
+   ],
+   "last": "Fulcher",
+   "name": "Russ Fulcher",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "ID",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Russ Fulcher"
+  },
+  {
+   "bioguide": "F000470",
+   "birthday": "1965-11-03",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H0MN07091"
+   ],
+   "last": "Fischbach",
+   "name": "Michelle Fischbach",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Michelle Fischbach"
+  },
+  {
+   "bioguide": "F000471",
+   "birthday": "1963-11-16",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H0WI05113"
+   ],
+   "last": "Fitzgerald",
+   "name": "Scott Fitzgerald",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "WI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Scott Fitzgerald (politician)"
+  },
+  {
+   "bioguide": "F000472",
+   "birthday": "1964-08-23",
+   "chamber": "House",
+   "district": 18,
+   "fec": [
+    "H0FL15104"
+   ],
+   "last": "Franklin",
+   "name": "Scott Franklin",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Scott Franklin (politician)"
+  },
+  {
+   "bioguide": "F000474",
+   "birthday": "1975-02-23",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H2NE01118"
+   ],
+   "last": "Flood",
+   "name": "Mike Flood",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NE",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mike Flood (politician)"
+  },
+  {
+   "bioguide": "F000475",
+   "birthday": "1976-05-30",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H2MN01223"
+   ],
+   "last": "Finstad",
+   "name": "Brad Finstad",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Brad Finstad"
+  },
+  {
+   "bioguide": "F000476",
+   "birthday": "1997-01-17",
+   "chamber": "House",
+   "district": 10,
+   "fec": [
+    "H2FL10259"
+   ],
+   "last": "Frost",
+   "name": "Maxwell Frost",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Maxwell Frost"
+  },
+  {
+   "bioguide": "F000477",
+   "birthday": "1956-05-07",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H2NC06114"
+   ],
+   "last": "Foushee",
+   "name": "Valerie P. Foushee",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Valerie Foushee"
+  },
+  {
+   "bioguide": "F000478",
+   "birthday": "1985-01-31",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H2SC07280"
+   ],
+   "last": "Fry",
+   "name": "Russell Fry",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "SC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Russell Fry"
+  },
+  {
+   "bioguide": "F000479",
+   "birthday": "1969-08-15",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S6PA00274"
+   ],
+   "last": "Fetterman",
+   "name": "John Fetterman",
+   "party": "Democrat",
+   "senateClass": 3,
+   "state": "PA",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "John Fetterman"
+  },
+  {
+   "bioguide": "F000480",
+   "birthday": "1979-10-24",
+   "chamber": "House",
+   "district": 20,
+   "fec": [
+    "H4CA20181"
+   ],
+   "last": "Fong",
+   "name": "Vince Fong",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Vince Fong"
+  },
+  {
+   "bioguide": "F000481",
+   "birthday": "1985-09-03",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H4AL02170"
+   ],
+   "last": "Figures",
+   "name": "Shomari Figures",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "AL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Shomari Figures"
+  },
+  {
+   "bioguide": "F000482",
+   "birthday": "1968-09-28",
+   "chamber": "House",
+   "district": 0,
+   "fec": [
+    "H4ND00061"
+   ],
+   "last": "Fedorchak",
+   "name": "Julie Fedorchak",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "ND",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Julie Fedorchak"
+  },
+  {
+   "bioguide": "F000483",
+   "birthday": "1966-12-03",
+   "chamber": "House",
+   "district": 30,
+   "fec": [
+    "H4CA30149"
+   ],
+   "last": "Friedman",
+   "name": "Laura Friedman",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Laura Friedman"
+  },
+  {
+   "bioguide": "F000484",
+   "birthday": "1974-04-20",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H6FL06258"
+   ],
+   "last": "Fine",
+   "name": "Randy Fine",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-04-02",
+   "wikipedia": "Randy Fine"
+  },
+  {
+   "bioguide": "F000485",
+   "birthday": "1981-04-09",
+   "chamber": "House",
+   "district": 14,
+   "fec": [
+    "H0GA14030"
+   ],
+   "last": "Fuller",
+   "name": "Clay Fuller",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "GA",
+   "termEnd": "2027-01-03",
+   "termStart": "2026-04-14",
+   "wikipedia": "Clay Fuller"
+  },
+  {
+   "bioguide": "G000386",
+   "birthday": "1933-09-17",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0IA00028"
+   ],
+   "last": "Grassley",
+   "name": "Chuck Grassley",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "IA",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Chuck Grassley"
+  },
+  {
+   "bioguide": "G000546",
+   "birthday": "1963-11-07",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H0MO06073"
+   ],
+   "last": "Graves",
+   "name": "Sam Graves",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MO",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Sam Graves"
+  },
+  {
+   "bioguide": "G000553",
+   "birthday": "1947-09-01",
+   "chamber": "House",
+   "district": 9,
+   "fec": [
+    "H4TX09095"
+   ],
+   "last": "Green",
+   "name": "Al Green",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Al Green (politician)"
+  },
+  {
+   "bioguide": "G000555",
+   "birthday": "1966-12-09",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0NY00410"
+   ],
+   "last": "Gillibrand",
+   "name": "Kirsten E. Gillibrand",
+   "party": "Democrat",
+   "senateClass": 1,
+   "state": "NY",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Kirsten Gillibrand"
+  },
+  {
+   "bioguide": "G000558",
+   "birthday": "1964-02-18",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H8KY02031"
+   ],
+   "last": "Guthrie",
+   "name": "Brett Guthrie",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "KY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Brett Guthrie"
+  },
+  {
+   "bioguide": "G000559",
+   "birthday": "1945-01-24",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H0CA10149"
+   ],
+   "last": "Garamendi",
+   "name": "John Garamendi",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "John Garamendi"
+  },
+  {
+   "bioguide": "G000565",
+   "birthday": "1958-11-22",
+   "chamber": "House",
+   "district": 9,
+   "fec": [
+    "H0AZ01259"
+   ],
+   "last": "Gosar",
+   "name": "Paul A. Gosar",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "AZ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Paul Gosar"
+  },
+  {
+   "bioguide": "G000568",
+   "birthday": "1958-03-15",
+   "chamber": "House",
+   "district": 9,
+   "fec": [
+    "H0VA09055"
+   ],
+   "last": "Griffith",
+   "name": "H. Morgan Griffith",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "VA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Morgan Griffith"
+  },
+  {
+   "bioguide": "G000574",
+   "birthday": "1979-11-20",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4AZ00139"
+   ],
+   "last": "Gallego",
+   "name": "Ruben Gallego",
+   "party": "Democrat",
+   "senateClass": 1,
+   "state": "AZ",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Ruben Gallego"
+  },
+  {
+   "bioguide": "G000576",
+   "birthday": "1955-07-03",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H4WI06048"
+   ],
+   "last": "Grothman",
+   "name": "Glenn Grothman",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "WI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Glenn Grothman"
+  },
+  {
+   "bioguide": "G000581",
+   "birthday": "1967-09-04",
+   "chamber": "House",
+   "district": 34,
+   "fec": [
+    "H6TX15162"
+   ],
+   "last": "Gonzalez",
+   "name": "Vicente Gonzalez",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Vicente Gonzalez (American politician)"
+  },
+  {
+   "bioguide": "G000583",
+   "birthday": "1975-03-08",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H6NJ05171"
+   ],
+   "last": "Gottheimer",
+   "name": "Josh Gottheimer",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NJ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Josh Gottheimer"
+  },
+  {
+   "bioguide": "G000585",
+   "birthday": "1974-11-25",
+   "chamber": "House",
+   "district": 34,
+   "fec": [
+    "H8CA34266"
+   ],
+   "last": "Gomez",
+   "name": "Jimmy Gomez",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jimmy Gomez"
+  },
+  {
+   "bioguide": "G000586",
+   "birthday": "1956-04-12",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H8IL04134"
+   ],
+   "last": "García",
+   "name": "Jesús G. \"Chuy\" García",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "IL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Chuy García"
+  },
+  {
+   "bioguide": "G000587",
+   "birthday": "1950-09-06",
+   "chamber": "House",
+   "district": 29,
+   "fec": [
+    "H8TX29052"
+   ],
+   "last": "Garcia",
+   "name": "Sylvia R. Garcia",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Sylvia Garcia"
+  },
+  {
+   "bioguide": "G000589",
+   "birthday": "1982-12-01",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H8TX05144"
+   ],
+   "last": "Gooden",
+   "name": "Lance Gooden",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Lance Gooden"
+  },
+  {
+   "bioguide": "G000591",
+   "birthday": "1970-02-04",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H8MS03125"
+   ],
+   "last": "Guest",
+   "name": "Michael Guest",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MS",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Michael Guest (politician)"
+  },
+  {
+   "bioguide": "G000592",
+   "birthday": "1982-07-25",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H8ME02185"
+   ],
+   "last": "Golden",
+   "name": "Jared F. Golden",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "ME",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jared Golden"
+  },
+  {
+   "bioguide": "G000593",
+   "birthday": "1954-01-17",
+   "chamber": "House",
+   "district": 28,
+   "fec": [
+    "H0FL26036"
+   ],
+   "last": "Gimenez",
+   "name": "Carlos A. Gimenez",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Carlos A. Giménez"
+  },
+  {
+   "bioguide": "G000597",
+   "birthday": "1984-09-27",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H0NY02234"
+   ],
+   "last": "Garbarino",
+   "name": "Andrew R. Garbarino",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Andrew Garbarino"
+  },
+  {
+   "bioguide": "G000598",
+   "birthday": "1977-12-02",
+   "chamber": "House",
+   "district": 42,
+   "fec": [
+    "H2CA47188"
+   ],
+   "last": "Garcia",
+   "name": "Robert Garcia",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Robert Garcia (California congressman)"
+  },
+  {
+   "bioguide": "G000599",
+   "birthday": "1976-02-26",
+   "chamber": "House",
+   "district": 10,
+   "fec": [
+    "H2NY10308"
+   ],
+   "last": "Goldman",
+   "name": "Daniel S. Goldman",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Dan Goldman"
+  },
+  {
+   "bioguide": "G000600",
+   "birthday": "1988-06-06",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H2WA03217"
+   ],
+   "last": "Gluesenkamp Perez",
+   "name": "Marie Gluesenkamp Perez",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "WA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Marie Gluesenkamp Perez"
+  },
+  {
+   "bioguide": "G000601",
+   "birthday": "1968-10-03",
+   "chamber": "House",
+   "district": 12,
+   "fec": [
+    "H4TX12065"
+   ],
+   "last": "Goldman",
+   "name": "Craig A. Goldman",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Craig Goldman"
+  },
+  {
+   "bioguide": "G000602",
+   "birthday": "1969-07-10",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H4NY04158",
+    "H2NY04244"
+   ],
+   "last": "Gillen",
+   "name": "Laura Gillen",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Laura Gillen"
+  },
+  {
+   "bioguide": "G000603",
+   "birthday": "1994-02-26",
+   "chamber": "House",
+   "district": 26,
+   "fec": [
+    "H4TX26149"
+   ],
+   "last": "Gill",
+   "name": "Brandon Gill",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Brandon Gill"
+  },
+  {
+   "bioguide": "G000604",
+   "birthday": "1986-11-04",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H4NH02399"
+   ],
+   "last": "Goodlander",
+   "name": "Maggie Goodlander",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NH",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Maggie Goodlander"
+  },
+  {
+   "bioguide": "G000605",
+   "birthday": "1977-09-23",
+   "chamber": "House",
+   "district": 13,
+   "fec": [
+    "H2CA13115"
+   ],
+   "last": "Gray",
+   "name": "Adam Gray",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Adam Gray"
+  },
+  {
+   "bioguide": "G000606",
+   "birthday": "1970-10-30",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H6AZ07121"
+   ],
+   "last": "Grijalva",
+   "name": "Adelita S. Grijalva",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "AZ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-11-12",
+   "wikipedia": "Adelita Grijalva"
+  },
+  {
+   "bioguide": "G000607",
+   "birthday": "1981-03-07",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H6CA01285"
+   ],
+   "last": "Gallagher",
+   "name": "James Gallagher",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2026-06-10",
+   "wikipedia": null
+  },
+  {
+   "bioguide": "G000608",
+   "birthday": "1964-06-12",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [],
+   "last": "Graham Nordone",
+   "name": "Darline Graham",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "SC",
+   "termEnd": "2027-01-03",
+   "termStart": "2026-07-14",
+   "wikipedia": "Darline Graham Nordone"
+  },
+  {
+   "bioguide": "H000273",
+   "birthday": "1952-02-07",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0CO00575"
+   ],
+   "last": "Hickenlooper",
+   "name": "John W. Hickenlooper",
+   "party": "Democrat",
+   "senateClass": 2,
+   "state": "CO",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "John Hickenlooper"
+  },
+  {
+   "bioguide": "H000601",
+   "birthday": "1959-08-14",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0TN00169"
+   ],
+   "last": "Hagerty",
+   "name": "Bill Hagerty",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "TN",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Bill Hagerty"
+  },
+  {
+   "bioguide": "H000874",
+   "birthday": "1939-06-14",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H2MD05155"
+   ],
+   "last": "Hoyer",
+   "name": "Steny H. Hoyer",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MD",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Steny Hoyer"
+  },
+  {
+   "bioguide": "H001042",
+   "birthday": "1947-11-03",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2HI00106"
+   ],
+   "last": "Hirono",
+   "name": "Mazie K. Hirono",
+   "party": "Democrat",
+   "senateClass": 1,
+   "state": "HI",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mazie Hirono"
+  },
+  {
+   "bioguide": "H001046",
+   "birthday": "1971-10-17",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2NM00088"
+   ],
+   "last": "Heinrich",
+   "name": "Martin Heinrich",
+   "party": "Democrat",
+   "senateClass": 1,
+   "state": "NM",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Martin Heinrich"
+  },
+  {
+   "bioguide": "H001047",
+   "birthday": "1966-07-05",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H8CT04172"
+   ],
+   "last": "Himes",
+   "name": "James A. Himes",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CT",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jim Himes"
+  },
+  {
+   "bioguide": "H001052",
+   "birthday": "1957-01-25",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H8MD01094"
+   ],
+   "last": "Harris",
+   "name": "Andy Harris",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MD",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Andy Harris (politician)"
+  },
+  {
+   "bioguide": "H001058",
+   "birthday": "1969-01-31",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H0MI02094"
+   ],
+   "last": "Huizenga",
+   "name": "Bill Huizenga",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Bill Huizenga"
+  },
+  {
+   "bioguide": "H001061",
+   "birthday": "1957-03-13",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0ND00093"
+   ],
+   "last": "Hoeven",
+   "name": "John Hoeven",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "ND",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "John Hoeven"
+  },
+  {
+   "bioguide": "H001066",
+   "birthday": "1973-04-29",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H2NV04011"
+   ],
+   "last": "Horsford",
+   "name": "Steven Horsford",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NV",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Steven Horsford"
+  },
+  {
+   "bioguide": "H001067",
+   "birthday": "1971-11-04",
+   "chamber": "House",
+   "district": 9,
+   "fec": [
+    "H2NC08185"
+   ],
+   "last": "Hudson",
+   "name": "Richard Hudson",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Richard Hudson (American politician)"
+  },
+  {
+   "bioguide": "H001068",
+   "birthday": "1964-02-18",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H2CA06259"
+   ],
+   "last": "Huffman",
+   "name": "Jared Huffman",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jared Huffman"
+  },
+  {
+   "bioguide": "H001072",
+   "birthday": "1956-12-05",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H4AR02141"
+   ],
+   "last": "Hill",
+   "name": "J. French Hill",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "AR",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "French Hill (politician)"
+  },
+  {
+   "bioguide": "H001076",
+   "birthday": "1958-02-27",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S6NH00091"
+   ],
+   "last": "Hassan",
+   "name": "Margaret Wood Hassan",
+   "party": "Democrat",
+   "senateClass": 3,
+   "state": "NH",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Maggie Hassan"
+  },
+  {
+   "bioguide": "H001077",
+   "birthday": "1961-08-24",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H6LA03148"
+   ],
+   "last": "Higgins",
+   "name": "Clay Higgins",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "LA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Clay Higgins"
+  },
+  {
+   "bioguide": "H001079",
+   "birthday": "1959-05-10",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S8MS00261"
+   ],
+   "last": "Hyde-Smith",
+   "name": "Cindy Hyde-Smith",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "MS",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Cindy Hyde-Smith"
+  },
+  {
+   "bioguide": "H001081",
+   "birthday": "1973-03-08",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H8CT05245"
+   ],
+   "last": "Hayes",
+   "name": "Jahana Hayes",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CT",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jahana Hayes"
+  },
+  {
+   "bioguide": "H001082",
+   "birthday": "1961-12-04",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H8OK01157"
+   ],
+   "last": "Hern",
+   "name": "Kevin Hern",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "OK",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Kevin Hern"
+  },
+  {
+   "bioguide": "H001085",
+   "birthday": "1967-06-05",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H8PA06087"
+   ],
+   "last": "Houlahan",
+   "name": "Chrissy Houlahan",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "PA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Chrissy Houlahan"
+  },
+  {
+   "bioguide": "H001086",
+   "birthday": "1960-01-01",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H0TN01118"
+   ],
+   "last": "Harshbarger",
+   "name": "Diana Harshbarger",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Diana Harshbarger"
+  },
+  {
+   "bioguide": "H001089",
+   "birthday": "1979-12-31",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S8MO00160"
+   ],
+   "last": "Hawley",
+   "name": "Josh Hawley",
+   "party": "Republican",
+   "senateClass": 1,
+   "state": "MO",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Josh Hawley"
+  },
+  {
+   "bioguide": "H001090",
+   "birthday": "1986-08-01",
+   "chamber": "House",
+   "district": 9,
+   "fec": [
+    "H8CA10126"
+   ],
+   "last": "Harder",
+   "name": "Josh Harder",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Josh Harder"
+  },
+  {
+   "bioguide": "H001091",
+   "birthday": "1983-06-27",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H0IA01174"
+   ],
+   "last": "Hinson",
+   "name": "Ashley Hinson",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "IA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Ashley Hinson"
+  },
+  {
+   "bioguide": "H001093",
+   "birthday": "1976-09-24",
+   "chamber": "House",
+   "district": 9,
+   "fec": [
+    "H6IN09143"
+   ],
+   "last": "Houchin",
+   "name": "Erin Houchin",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "IN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Erin Houchin"
+  },
+  {
+   "bioguide": "H001094",
+   "birthday": "1964-02-14",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H2OR04095"
+   ],
+   "last": "Hoyle",
+   "name": "Val T. Hoyle",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "OR",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Val Hoyle"
+  },
+  {
+   "bioguide": "H001095",
+   "birthday": "1981-11-13",
+   "chamber": "House",
+   "district": 38,
+   "fec": [
+    "H0TX07170"
+   ],
+   "last": "Hunt",
+   "name": "Wesley Hunt",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Wesley Hunt"
+  },
+  {
+   "bioguide": "H001096",
+   "birthday": "1962-10-18",
+   "chamber": "House",
+   "district": 0,
+   "fec": [
+    "H2WY00166"
+   ],
+   "last": "Hageman",
+   "name": "Harriet M. Hageman",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "WY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Harriet Hageman"
+  },
+  {
+   "bioguide": "H001098",
+   "birthday": "1991-05-15",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H4AZ08108"
+   ],
+   "last": "Hamadeh",
+   "name": "Abraham J. Hamadeh",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "AZ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Abraham Hamadeh"
+  },
+  {
+   "bioguide": "H001099",
+   "birthday": "1970-03-15",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H4FL08168"
+   ],
+   "last": "Haridopolos",
+   "name": "Mike Haridopolos",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mike Haridopolos"
+  },
+  {
+   "bioguide": "H001100",
+   "birthday": "1979-08-15",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H4CO03357"
+   ],
+   "last": "Hurd",
+   "name": "Jeff Hurd",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "CO",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jeff Hurd"
+  },
+  {
+   "bioguide": "H001101",
+   "birthday": "1987-06-21",
+   "chamber": "House",
+   "district": 10,
+   "fec": [
+    "H2NC13243"
+   ],
+   "last": "Harrigan",
+   "name": "Pat Harrigan",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Pat Harrigan"
+  },
+  {
+   "bioguide": "H001102",
+   "birthday": "1966-04-24",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H6NC09200",
+    "H4NC08066"
+   ],
+   "last": "Harris",
+   "name": "Mark Harris",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mark Harris (North Carolina politician)"
+  },
+  {
+   "bioguide": "H001103",
+   "birthday": "1991-05-11",
+   "chamber": "House",
+   "district": 0,
+   "fec": [
+    "H4PR01010"
+   ],
+   "last": "Hernández Rivera",
+   "name": "Pablo José Hernández",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "PR",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Pablo Hernández Rivera"
+  },
+  {
+   "bioguide": "H001104",
+   "birthday": "1967-08-25",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S6OH00304"
+   ],
+   "last": "Husted",
+   "name": "Jon Husted",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "OH",
+   "termEnd": "2026-11-03",
+   "termStart": "2025-01-21",
+   "wikipedia": "Jon Husted"
+  },
+  {
+   "bioguide": "I000056",
+   "birthday": "1953-11-01",
+   "chamber": "House",
+   "district": 48,
+   "fec": [
+    "H0CA48024"
+   ],
+   "last": "Issa",
+   "name": "Darrell Issa",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Darrell Issa"
+  },
+  {
+   "bioguide": "I000058",
+   "birthday": "1961-02-27",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H2MD04315",
+    "H2MD04232"
+   ],
+   "last": "Ivey",
+   "name": "Glenn Ivey",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MD",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Glenn Ivey"
+  },
+  {
+   "bioguide": "J000288",
+   "birthday": "1954-10-02",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H6GA04129"
+   ],
+   "last": "Johnson",
+   "name": "Henry C. \"Hank\" Johnson, Jr.",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "GA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Hank Johnson"
+  },
+  {
+   "bioguide": "J000289",
+   "birthday": "1964-02-17",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H6OH04082"
+   ],
+   "last": "Jordan",
+   "name": "Jim Jordan",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "OH",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jim Jordan"
+  },
+  {
+   "bioguide": "J000293",
+   "birthday": "1955-04-08",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0WI00197"
+   ],
+   "last": "Johnson",
+   "name": "Ron Johnson",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "WI",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Ron Johnson"
+  },
+  {
+   "bioguide": "J000294",
+   "birthday": "1970-08-04",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H2NY10092"
+   ],
+   "last": "Jeffries",
+   "name": "Hakeem S. Jeffries",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Hakeem Jeffries"
+  },
+  {
+   "bioguide": "J000295",
+   "birthday": "1957-03-17",
+   "chamber": "House",
+   "district": 14,
+   "fec": [
+    "H2OH14064"
+   ],
+   "last": "Joyce",
+   "name": "David P. Joyce",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "OH",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "David Joyce (politician)"
+  },
+  {
+   "bioguide": "J000298",
+   "birthday": "1965-09-21",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H6WA07458"
+   ],
+   "last": "Jayapal",
+   "name": "Pramila Jayapal",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "WA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Pramila Jayapal"
+  },
+  {
+   "bioguide": "J000299",
+   "birthday": "1972-01-30",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H6LA04138"
+   ],
+   "last": "Johnson",
+   "name": "Mike Johnson",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "LA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mike Johnson"
+  },
+  {
+   "bioguide": "J000301",
+   "birthday": "1976-09-30",
+   "chamber": "House",
+   "district": 0,
+   "fec": [
+    "H8SD01055"
+   ],
+   "last": "Johnson",
+   "name": "Dusty Johnson",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "SD",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Dusty Johnson"
+  },
+  {
+   "bioguide": "J000302",
+   "birthday": "1957-02-08",
+   "chamber": "House",
+   "district": 13,
+   "fec": [
+    "H8PA13125"
+   ],
+   "last": "Joyce",
+   "name": "John Joyce",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "PA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "John Joyce (American politician)"
+  },
+  {
+   "bioguide": "J000304",
+   "birthday": "1967-05-04",
+   "chamber": "House",
+   "district": 13,
+   "fec": [
+    "H0TX13228"
+   ],
+   "last": "Jackson",
+   "name": "Ronny Jackson",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Ronny Jackson"
+  },
+  {
+   "bioguide": "J000305",
+   "birthday": "1989-02-01",
+   "chamber": "House",
+   "district": 51,
+   "fec": [
+    "H8CA49074"
+   ],
+   "last": "Jacobs",
+   "name": "Sara Jacobs",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Sara Jacobs"
+  },
+  {
+   "bioguide": "J000307",
+   "birthday": "1981-06-08",
+   "chamber": "House",
+   "district": 10,
+   "fec": [
+    "H2MI10150"
+   ],
+   "last": "James",
+   "name": "John James",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "John James (Michigan politician)"
+  },
+  {
+   "bioguide": "J000309",
+   "birthday": "1966-01-07",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H2IL01349"
+   ],
+   "last": "Jackson",
+   "name": "Jonathan L. Jackson",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "IL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jonathan Jackson (Illinois politician)"
+  },
+  {
+   "bioguide": "J000310",
+   "birthday": "1966-05-02",
+   "chamber": "House",
+   "district": 32,
+   "fec": [
+    "H4TX32089"
+   ],
+   "last": "Johnson",
+   "name": "Julie Johnson",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Julie Johnson (politician)"
+  },
+  {
+   "bioguide": "J000311",
+   "birthday": "1988-02-17",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H4GA03126"
+   ],
+   "last": "Jack",
+   "name": "Brian Jack",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "GA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Brian Jack"
+  },
+  {
+   "bioguide": "J000312",
+   "birthday": "1951-04-27",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4WV00332"
+   ],
+   "last": "Justice",
+   "name": "James C. Justice",
+   "party": "Republican",
+   "senateClass": 1,
+   "state": "WV",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-14",
+   "wikipedia": "Jim Justice"
+  },
+  {
+   "bioguide": "K000009",
+   "birthday": "1946-06-17",
+   "chamber": "House",
+   "district": 9,
+   "fec": [
+    "H2OH09031"
+   ],
+   "last": "Kaptur",
+   "name": "Marcy Kaptur",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "OH",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Marcy Kaptur"
+  },
+  {
+   "bioguide": "K000367",
+   "birthday": "1960-05-25",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S6MN00267"
+   ],
+   "last": "Klobuchar",
+   "name": "Amy Klobuchar",
+   "party": "Democrat",
+   "senateClass": 1,
+   "state": "MN",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Amy Klobuchar"
+  },
+  {
+   "bioguide": "K000375",
+   "birthday": "1952-09-06",
+   "chamber": "House",
+   "district": 9,
+   "fec": [
+    "H0MA10082"
+   ],
+   "last": "Keating",
+   "name": "William R. Keating",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Bill Keating"
+  },
+  {
+   "bioguide": "K000376",
+   "birthday": "1948-05-10",
+   "chamber": "House",
+   "district": 16,
+   "fec": [
+    "H0PA03271"
+   ],
+   "last": "Kelly",
+   "name": "Mike Kelly",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "PA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mike Kelly (Pennsylvania politician)"
+  },
+  {
+   "bioguide": "K000377",
+   "birthday": "1964-02-21",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0AZ00350"
+   ],
+   "last": "Kelly",
+   "name": "Mark Kelly",
+   "party": "Democrat",
+   "senateClass": 3,
+   "state": "AZ",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Mark Kelly"
+  },
+  {
+   "bioguide": "K000383",
+   "birthday": "1944-03-31",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2ME00109"
+   ],
+   "last": "King",
+   "name": "Angus S. King, Jr.",
+   "party": "Independent",
+   "senateClass": 1,
+   "state": "ME",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Angus King"
+  },
+  {
+   "bioguide": "K000384",
+   "birthday": "1958-02-26",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2VA00142"
+   ],
+   "last": "Kaine",
+   "name": "Tim Kaine",
+   "party": "Democrat",
+   "senateClass": 1,
+   "state": "VA",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Tim Kaine"
+  },
+  {
+   "bioguide": "K000385",
+   "birthday": "1956-04-30",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H2IL02172"
+   ],
+   "last": "Kelly",
+   "name": "Robin L. Kelly",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "IL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Robin Kelly"
+  },
+  {
+   "bioguide": "K000388",
+   "birthday": "1966-03-01",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H6MS01131"
+   ],
+   "last": "Kelly",
+   "name": "Trent Kelly",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MS",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Trent Kelly"
+  },
+  {
+   "bioguide": "K000389",
+   "birthday": "1976-09-13",
+   "chamber": "House",
+   "district": 17,
+   "fec": [
+    "H4CA12055"
+   ],
+   "last": "Khanna",
+   "name": "Ro Khanna",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Ro Khanna"
+  },
+  {
+   "bioguide": "K000391",
+   "birthday": "1973-07-19",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H6IL08147"
+   ],
+   "last": "Krishnamoorthi",
+   "name": "Raja Krishnamoorthi",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "IL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Raja Krishnamoorthi"
+  },
+  {
+   "bioguide": "K000392",
+   "birthday": "1966-10-08",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H2TN07103"
+   ],
+   "last": "Kustoff",
+   "name": "David Kustoff",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "David Kustoff"
+  },
+  {
+   "bioguide": "K000393",
+   "birthday": "1951-11-21",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4LA00065"
+   ],
+   "last": "Kennedy",
+   "name": "John Kennedy",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "LA",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "John Kennedy (Louisiana politician)"
+  },
+  {
+   "bioguide": "K000394",
+   "birthday": "1982-07-12",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4NJ00466"
+   ],
+   "last": "Kim",
+   "name": "Andy Kim",
+   "party": "Democrat",
+   "senateClass": 1,
+   "state": "NJ",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Andy Kim"
+  },
+  {
+   "bioguide": "K000397",
+   "birthday": "1962-10-18",
+   "chamber": "House",
+   "district": 40,
+   "fec": [
+    "H8CA39240"
+   ],
+   "last": "Kim",
+   "name": "Young Kim",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Young Kim"
+  },
+  {
+   "bioguide": "K000398",
+   "birthday": "1968-09-05",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H0NJ07261"
+   ],
+   "last": "Kean",
+   "name": "Thomas H. Kean, Jr.",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NJ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Thomas Kean Jr."
+  },
+  {
+   "bioguide": "K000399",
+   "birthday": "1971-06-18",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H2VA02064"
+   ],
+   "last": "Kiggans",
+   "name": "Jennifer A. Kiggans",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "VA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jen Kiggans"
+  },
+  {
+   "bioguide": "K000400",
+   "birthday": "1972-07-20",
+   "chamber": "House",
+   "district": 37,
+   "fec": [
+    "H2CA37304"
+   ],
+   "last": "Kamlager-Dove",
+   "name": "Sydney Kamlager-Dove",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Sydney Kamlager-Dove"
+  },
+  {
+   "bioguide": "K000401",
+   "birthday": "1985-01-30",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H2CA03157"
+   ],
+   "last": "Kiley",
+   "name": "Kevin Kiley",
+   "party": "Independent",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Kevin Kiley (politician)"
+  },
+  {
+   "bioguide": "K000402",
+   "birthday": "1976-10-20",
+   "chamber": "House",
+   "district": 26,
+   "fec": [
+    "H4NY26078"
+   ],
+   "last": "Kennedy",
+   "name": "Timothy M. Kennedy",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Tim Kennedy (politician)"
+  },
+  {
+   "bioguide": "K000403",
+   "birthday": "1969-02-02",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H4UT03260"
+   ],
+   "last": "Kennedy",
+   "name": "Mike Kennedy",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "UT",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mike Kennedy"
+  },
+  {
+   "bioguide": "K000404",
+   "birthday": "1975-04-10",
+   "chamber": "House",
+   "district": 0,
+   "fec": [
+    "H4MP01022"
+   ],
+   "last": "King-Hinds",
+   "name": "Kimberlyn King-Hinds",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MP",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Kimberlyn King-Hinds"
+  },
+  {
+   "bioguide": "K000405",
+   "birthday": "1986-04-17",
+   "chamber": "House",
+   "district": 13,
+   "fec": [
+    "H4NC13116"
+   ],
+   "last": "Knott",
+   "name": "Brad Knott",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Brad Knott"
+  },
+  {
+   "bioguide": "L000273",
+   "birthday": "1959-07-01",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H0NM03102"
+   ],
+   "last": "Leger Fernandez",
+   "name": "Teresa Leger Fernandez",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NM",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Teresa Leger Fernández"
+  },
+  {
+   "bioguide": "L000397",
+   "birthday": "1947-12-21",
+   "chamber": "House",
+   "district": 18,
+   "fec": [
+    "H4CA16049"
+   ],
+   "last": "Lofgren",
+   "name": "Zoe Lofgren",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Zoe Lofgren"
+  },
+  {
+   "bioguide": "L000491",
+   "birthday": "1960-01-06",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H4OK06056"
+   ],
+   "last": "Lucas",
+   "name": "Frank D. Lucas",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "OK",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Frank Lucas (Oklahoma politician)"
+  },
+  {
+   "bioguide": "L000557",
+   "birthday": "1948-07-22",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H8CT01046"
+   ],
+   "last": "Larson",
+   "name": "John B. Larson",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CT",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "John B. Larson"
+  },
+  {
+   "bioguide": "L000560",
+   "birthday": "1965-06-15",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H0WA02080"
+   ],
+   "last": "Larsen",
+   "name": "Rick Larsen",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "WA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Rick Larsen"
+  },
+  {
+   "bioguide": "L000562",
+   "birthday": "1955-03-31",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H2MA09072"
+   ],
+   "last": "Lynch",
+   "name": "Stephen F. Lynch",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Stephen Lynch (politician)"
+  },
+  {
+   "bioguide": "L000566",
+   "birthday": "1956-04-18",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H8OH05036"
+   ],
+   "last": "Latta",
+   "name": "Robert E. Latta",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "OH",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Bob Latta"
+  },
+  {
+   "bioguide": "L000570",
+   "birthday": "1972-06-07",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0NM00058"
+   ],
+   "last": "Luján",
+   "name": "Ben Ray Luján",
+   "party": "Democrat",
+   "senateClass": 2,
+   "state": "NM",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Ben Ray Luján"
+  },
+  {
+   "bioguide": "L000571",
+   "birthday": "1954-09-10",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0WY00137"
+   ],
+   "last": "Lummis",
+   "name": "Cynthia M. Lummis",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "WY",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Cynthia Lummis"
+  },
+  {
+   "bioguide": "L000575",
+   "birthday": "1968-03-04",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4OK00232"
+   ],
+   "last": "Lankford",
+   "name": "James Lankford",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "OK",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "James Lankford"
+  },
+  {
+   "bioguide": "L000577",
+   "birthday": "1971-06-04",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0UT00165"
+   ],
+   "last": "Lee",
+   "name": "Mike Lee",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "UT",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Mike Lee"
+  },
+  {
+   "bioguide": "L000582",
+   "birthday": "1969-03-29",
+   "chamber": "House",
+   "district": 36,
+   "fec": [
+    "H4CA33119"
+   ],
+   "last": "Lieu",
+   "name": "Ted Lieu",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Ted Lieu"
+  },
+  {
+   "bioguide": "L000583",
+   "birthday": "1963-12-22",
+   "chamber": "House",
+   "district": 11,
+   "fec": [
+    "H4GA11061"
+   ],
+   "last": "Loudermilk",
+   "name": "Barry Loudermilk",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "GA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Barry Loudermilk"
+  },
+  {
+   "bioguide": "L000585",
+   "birthday": "1968-07-05",
+   "chamber": "House",
+   "district": 16,
+   "fec": [
+    "H6IL18088"
+   ],
+   "last": "LaHood",
+   "name": "Darin LaHood",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "IL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Darin LaHood"
+  },
+  {
+   "bioguide": "L000590",
+   "birthday": "1966-11-07",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H6NV04020"
+   ],
+   "last": "Lee",
+   "name": "Susie Lee",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NV",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Susie Lee"
+  },
+  {
+   "bioguide": "L000593",
+   "birthday": "1978-10-28",
+   "chamber": "House",
+   "district": 49,
+   "fec": [
+    "H8CA49058"
+   ],
+   "last": "Levin",
+   "name": "Mike Levin",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mike Levin"
+  },
+  {
+   "bioguide": "L000595",
+   "birthday": "1981-03-16",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H2LA05126"
+   ],
+   "last": "Letlow",
+   "name": "Julia Letlow",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "LA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Julia Letlow"
+  },
+  {
+   "bioguide": "L000596",
+   "birthday": "1989-05-06",
+   "chamber": "House",
+   "district": 13,
+   "fec": [
+    "H0FL13158"
+   ],
+   "last": "Luna",
+   "name": "Anna Paulina Luna",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Anna Paulina Luna"
+  },
+  {
+   "bioguide": "L000597",
+   "birthday": "1974-03-26",
+   "chamber": "House",
+   "district": 15,
+   "fec": [
+    "H2FL15241"
+   ],
+   "last": "Lee",
+   "name": "Laurel M. Lee",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Laurel Lee"
+  },
+  {
+   "bioguide": "L000598",
+   "birthday": "1978-06-23",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H2NY01190"
+   ],
+   "last": "LaLota",
+   "name": "Nick LaLota",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Nick LaLota"
+  },
+  {
+   "bioguide": "L000599",
+   "birthday": "1986-09-09",
+   "chamber": "House",
+   "district": 17,
+   "fec": [
+    "H2NY17162"
+   ],
+   "last": "Lawler",
+   "name": "Michael Lawler",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mike Lawler"
+  },
+  {
+   "bioguide": "L000600",
+   "birthday": "1981-02-27",
+   "chamber": "House",
+   "district": 23,
+   "fec": [
+    "H2NY23228"
+   ],
+   "last": "Langworthy",
+   "name": "Nicholas A. Langworthy",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Nick Langworthy"
+  },
+  {
+   "bioguide": "L000601",
+   "birthday": "1976-12-04",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H2OH01194"
+   ],
+   "last": "Landsman",
+   "name": "Greg Landsman",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "OH",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Greg Landsman"
+  },
+  {
+   "bioguide": "L000602",
+   "birthday": "1987-11-26",
+   "chamber": "House",
+   "district": 12,
+   "fec": [
+    "H2PA18200"
+   ],
+   "last": "Lee",
+   "name": "Summer L. Lee",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "PA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Summer Lee"
+  },
+  {
+   "bioguide": "L000603",
+   "birthday": "1975-11-07",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H2TX08182"
+   ],
+   "last": "Luttrell",
+   "name": "Morgan Luttrell",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Morgan Luttrell"
+  },
+  {
+   "bioguide": "L000606",
+   "birthday": "1953-11-22",
+   "chamber": "House",
+   "district": 16,
+   "fec": [
+    "H4NY16087"
+   ],
+   "last": "Latimer",
+   "name": "George Latimer",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "George Latimer (New York politician)"
+  },
+  {
+   "bioguide": "L000607",
+   "birthday": "1970-04-16",
+   "chamber": "House",
+   "district": 16,
+   "fec": [
+    "H4CA16197"
+   ],
+   "last": "Liccardo",
+   "name": "Sam T. Liccardo",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Sam Liccardo"
+  },
+  {
+   "bioguide": "M000133",
+   "birthday": "1946-07-11",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4MA00028"
+   ],
+   "last": "Markey",
+   "name": "Edward J. Markey",
+   "party": "Democrat",
+   "senateClass": 2,
+   "state": "MA",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Ed Markey"
+  },
+  {
+   "bioguide": "M000194",
+   "birthday": "1977-12-04",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H0SC01394"
+   ],
+   "last": "Mace",
+   "name": "Nancy Mace",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "SC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Nancy Mace"
+  },
+  {
+   "bioguide": "M000312",
+   "birthday": "1959-11-20",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H4MA03022"
+   ],
+   "last": "McGovern",
+   "name": "James P. McGovern",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jim McGovern (American politician)"
+  },
+  {
+   "bioguide": "M000317",
+   "birthday": "1980-11-11",
+   "chamber": "House",
+   "district": 11,
+   "fec": [
+    "H0NY11078"
+   ],
+   "last": "Malliotakis",
+   "name": "Nicole Malliotakis",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Nicole Malliotakis"
+  },
+  {
+   "bioguide": "M000355",
+   "birthday": "1942-02-20",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2KY00012"
+   ],
+   "last": "McConnell",
+   "name": "Mitch McConnell",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "KY",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Mitch McConnell"
+  },
+  {
+   "bioguide": "M000687",
+   "birthday": "1948-10-24",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H6MD07020",
+    "H0MD07114"
+   ],
+   "last": "Mfume",
+   "name": "Kweisi Mfume",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MD",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Kweisi Mfume"
+  },
+  {
+   "bioguide": "M000871",
+   "birthday": "1976-12-17",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H0KS01123"
+   ],
+   "last": "Mann",
+   "name": "Tracey Mann",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "KS",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Tracey Mann"
+  },
+  {
+   "bioguide": "M000934",
+   "birthday": "1954-05-29",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0KS00091"
+   ],
+   "last": "Moran",
+   "name": "Jerry Moran",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "KS",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Jerry Moran"
+  },
+  {
+   "bioguide": "M001111",
+   "birthday": "1950-10-11",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2WA00189"
+   ],
+   "last": "Murray",
+   "name": "Patty Murray",
+   "party": "Democrat",
+   "senateClass": 3,
+   "state": "WA",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Patty Murray"
+  },
+  {
+   "bioguide": "M001136",
+   "birthday": "1966-04-07",
+   "chamber": "House",
+   "district": 9,
+   "fec": [
+    "H0MI10287"
+   ],
+   "last": "McClain",
+   "name": "Lisa C. McClain",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Lisa McClain"
+  },
+  {
+   "bioguide": "M001137",
+   "birthday": "1953-09-25",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H8NY06048"
+   ],
+   "last": "Meeks",
+   "name": "Gregory W. Meeks",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Gregory Meeks"
+  },
+  {
+   "bioguide": "M001143",
+   "birthday": "1954-07-12",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H0MN04049"
+   ],
+   "last": "McCollum",
+   "name": "Betty McCollum",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Betty McCollum"
+  },
+  {
+   "bioguide": "M001153",
+   "birthday": "1957-05-22",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4AK00099"
+   ],
+   "last": "Murkowski",
+   "name": "Lisa Murkowski",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "AK",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Lisa Murkowski"
+  },
+  {
+   "bioguide": "M001157",
+   "birthday": "1962-01-14",
+   "chamber": "House",
+   "district": 10,
+   "fec": [
+    "H4TX10093"
+   ],
+   "last": "McCaul",
+   "name": "Michael T. McCaul",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Michael McCaul"
+  },
+  {
+   "bioguide": "M001160",
+   "birthday": "1951-04-18",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H4WI04183"
+   ],
+   "last": "Moore",
+   "name": "Gwen Moore",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "WI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Gwen Moore"
+  },
+  {
+   "bioguide": "M001163",
+   "birthday": "1944-09-25",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H6CA05195"
+   ],
+   "last": "Matsui",
+   "name": "Doris O. Matsui",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Doris Matsui"
+  },
+  {
+   "bioguide": "M001169",
+   "birthday": "1973-08-03",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2CT00132"
+   ],
+   "last": "Murphy",
+   "name": "Christopher Murphy",
+   "party": "Democrat",
+   "senateClass": 1,
+   "state": "CT",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Chris Murphy"
+  },
+  {
+   "bioguide": "M001176",
+   "birthday": "1956-10-24",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S8OR00207"
+   ],
+   "last": "Merkley",
+   "name": "Jeff Merkley",
+   "party": "Democrat",
+   "senateClass": 2,
+   "state": "OR",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Jeff Merkley"
+  },
+  {
+   "bioguide": "M001177",
+   "birthday": "1956-07-10",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H8CA04152",
+    "H6CA21135"
+   ],
+   "last": "McClintock",
+   "name": "Tom McClintock",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Tom McClintock"
+  },
+  {
+   "bioguide": "M001184",
+   "birthday": "1971-01-13",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H2KY04121"
+   ],
+   "last": "Massie",
+   "name": "Thomas Massie",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "KY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Thomas Massie"
+  },
+  {
+   "bioguide": "M001188",
+   "birthday": "1975-10-01",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H2NY06116"
+   ],
+   "last": "Meng",
+   "name": "Grace Meng",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Grace Meng"
+  },
+  {
+   "bioguide": "M001194",
+   "birthday": "1961-05-08",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H4MI04126"
+   ],
+   "last": "Moolenaar",
+   "name": "John R. Moolenaar",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "John Moolenaar"
+  },
+  {
+   "bioguide": "M001196",
+   "birthday": "1978-10-24",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H4MA06090"
+   ],
+   "last": "Moulton",
+   "name": "Seth Moulton",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Seth Moulton"
+  },
+  {
+   "bioguide": "M001198",
+   "birthday": "1960-08-09",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0KS00315"
+   ],
+   "last": "Marshall",
+   "name": "Roger Marshall",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "KS",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Roger Marshall"
+  },
+  {
+   "bioguide": "M001199",
+   "birthday": "1980-07-10",
+   "chamber": "House",
+   "district": 21,
+   "fec": [
+    "H6FL18097"
+   ],
+   "last": "Mast",
+   "name": "Brian J. Mast",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Brian Mast"
+  },
+  {
+   "bioguide": "M001204",
+   "birthday": "1964-02-10",
+   "chamber": "House",
+   "district": 9,
+   "fec": [
+    "H8PA10147"
+   ],
+   "last": "Meuser",
+   "name": "Daniel Meuser",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "PA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Dan Meuser"
+  },
+  {
+   "bioguide": "M001205",
+   "birthday": "1950-11-04",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H8WV03097"
+   ],
+   "last": "Miller",
+   "name": "Carol D. Miller",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "WV",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Carol Miller (politician)"
+  },
+  {
+   "bioguide": "M001206",
+   "birthday": "1957-04-29",
+   "chamber": "House",
+   "district": 25,
+   "fec": [
+    "H8NY25105"
+   ],
+   "last": "Morelle",
+   "name": "Joseph D. Morelle",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Joseph Morelle"
+  },
+  {
+   "bioguide": "M001208",
+   "birthday": "1960-06-01",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H8GA06393"
+   ],
+   "last": "McBath",
+   "name": "Lucy McBath",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "GA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Lucy McBath"
+  },
+  {
+   "bioguide": "M001210",
+   "birthday": "1963-03-05",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H0NC03172"
+   ],
+   "last": "Murphy",
+   "name": "Gregory F. Murphy",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Greg Murphy (politician)"
+  },
+  {
+   "bioguide": "M001211",
+   "birthday": "1959-08-27",
+   "chamber": "House",
+   "district": 15,
+   "fec": [
+    "H0IL15129"
+   ],
+   "last": "Miller",
+   "name": "Mary E. Miller",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "IL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mary Miller (politician)"
+  },
+  {
+   "bioguide": "M001212",
+   "birthday": "1966-09-26",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H8AL02171"
+   ],
+   "last": "Moore",
+   "name": "Barry Moore",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "AL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Barry Moore (American politician)"
+  },
+  {
+   "bioguide": "M001213",
+   "birthday": "1980-06-22",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H0UT01205"
+   ],
+   "last": "Moore",
+   "name": "Blake D. Moore",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "UT",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Blake Moore"
+  },
+  {
+   "bioguide": "M001214",
+   "birthday": "1969-04-16",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H0IN01150"
+   ],
+   "last": "Mrvan",
+   "name": "Frank J. Mrvan",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "IN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Frank J. Mrvan"
+  },
+  {
+   "bioguide": "M001215",
+   "birthday": "1955-09-06",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H8IA02043"
+   ],
+   "last": "Miller-Meeks",
+   "name": "Mariannette Miller-Meeks",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "IA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mariannette Miller-Meeks"
+  },
+  {
+   "bioguide": "M001216",
+   "birthday": "1980-07-30",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H2FL07156"
+   ],
+   "last": "Mills",
+   "name": "Cory Mills",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Cory Mills"
+  },
+  {
+   "bioguide": "M001217",
+   "birthday": "1980-12-18",
+   "chamber": "House",
+   "district": 23,
+   "fec": [
+    "H2FL22171"
+   ],
+   "last": "Moskowitz",
+   "name": "Jared Moskowitz",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jared Moskowitz"
+  },
+  {
+   "bioguide": "M001218",
+   "birthday": "1968-10-07",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H0GA07273"
+   ],
+   "last": "McCormick",
+   "name": "Richard McCormick",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "GA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Rich McCormick"
+  },
+  {
+   "bioguide": "M001219",
+   "birthday": "1962-07-18",
+   "chamber": "House",
+   "district": 0,
+   "fec": [
+    "H2GU01031"
+   ],
+   "last": "Moylan",
+   "name": "James C. Moylan",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "GU",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "James Moylan"
+  },
+  {
+   "bioguide": "M001220",
+   "birthday": "1979-12-23",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H2KY03206"
+   ],
+   "last": "McGarvey",
+   "name": "Morgan McGarvey",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "KY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Morgan McGarvey"
+  },
+  {
+   "bioguide": "M001222",
+   "birthday": "1988-11-13",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H2OH16051"
+   ],
+   "last": "Miller",
+   "name": "Max L. Miller",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "OH",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Max Miller (politician)"
+  },
+  {
+   "bioguide": "M001223",
+   "birthday": "1983-07-22",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H2RI02184"
+   ],
+   "last": "Magaziner",
+   "name": "Seth Magaziner",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "RI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Seth Magaziner"
+  },
+  {
+   "bioguide": "M001224",
+   "birthday": "1974-07-22",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H2TX01112"
+   ],
+   "last": "Moran",
+   "name": "Nathaniel Moran",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Nathaniel Moran"
+  },
+  {
+   "bioguide": "M001225",
+   "birthday": "1970-06-15",
+   "chamber": "House",
+   "district": 15,
+   "fec": [
+    "H2CA14162"
+   ],
+   "last": "Mullin",
+   "name": "Kevin Mullin",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Kevin Mullin"
+  },
+  {
+   "bioguide": "M001226",
+   "birthday": "1985-07-12",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H2NJ08232"
+   ],
+   "last": "Menendez",
+   "name": "Robert Menendez",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NJ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Rob Menendez"
+  },
+  {
+   "bioguide": "M001227",
+   "birthday": "1972-12-28",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H4VA04066"
+   ],
+   "last": "McClellan",
+   "name": "Jennifer L. McClellan",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "VA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jennifer McClellan"
+  },
+  {
+   "bioguide": "M001228",
+   "birthday": "1981-05-22",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H4UT02296"
+   ],
+   "last": "Maloy",
+   "name": "Celeste Maloy",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "UT",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Celeste Maloy"
+  },
+  {
+   "bioguide": "M001229",
+   "birthday": "1986-06-20",
+   "chamber": "House",
+   "district": 10,
+   "fec": [
+    "H4NJ10176"
+   ],
+   "last": "McIver",
+   "name": "LaMonica McIver",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NJ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "LaMonica McIver"
+  },
+  {
+   "bioguide": "M001230",
+   "birthday": "1982-08-03",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H8PA15195"
+   ],
+   "last": "Mackenzie",
+   "name": "Ryan Mackenzie",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "PA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Ryan Mackenzie"
+  },
+  {
+   "bioguide": "M001231",
+   "birthday": "1968-07-08",
+   "chamber": "House",
+   "district": 22,
+   "fec": [
+    "H4NY22085"
+   ],
+   "last": "Mannion",
+   "name": "John W. Mannion",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "John Mannion (American politician)"
+  },
+  {
+   "bioguide": "M001232",
+   "birthday": "1964-05-28",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H4MD06340"
+   ],
+   "last": "McClain Delaney",
+   "name": "April McClain Delaney",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MD",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "April McClain Delaney"
+  },
+  {
+   "bioguide": "M001233",
+   "birthday": "1967-12-16",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H4IN08249"
+   ],
+   "last": "Messmer",
+   "name": "Mark B. Messmer",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "IN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mark Messmer"
+  },
+  {
+   "bioguide": "M001234",
+   "birthday": "1969-02-02",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H4MN03118"
+   ],
+   "last": "Morrison",
+   "name": "Kelly Morrison",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Kelly Morrison"
+  },
+  {
+   "bioguide": "M001235",
+   "birthday": "1980-07-01",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H4WV02205"
+   ],
+   "last": "Moore",
+   "name": "Riley M. Moore",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "WV",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Riley Moore"
+  },
+  {
+   "bioguide": "M001236",
+   "birthday": "1970-10-02",
+   "chamber": "House",
+   "district": 14,
+   "fec": [
+    "H4NC14015"
+   ],
+   "last": "Moore",
+   "name": "Tim Moore",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Tim Moore (North Carolina politician)"
+  },
+  {
+   "bioguide": "M001237",
+   "birthday": "1970-07-11",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H4MI08218"
+   ],
+   "last": "McDonald Rivet",
+   "name": "Kristen McDonald Rivet",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Kristen McDonald Rivet"
+  },
+  {
+   "bioguide": "M001238",
+   "birthday": "1990-08-09",
+   "chamber": "House",
+   "district": 0,
+   "fec": [
+    "H4DE00045"
+   ],
+   "last": "McBride",
+   "name": "Sarah McBride",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "DE",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Sarah McBride"
+  },
+  {
+   "bioguide": "M001239",
+   "birthday": "1968-08-24",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H2VA07196",
+    "H0VA07133"
+   ],
+   "last": "McGuire",
+   "name": "John J. McGuire III",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "VA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "John McGuire (Virginia politician)"
+  },
+  {
+   "bioguide": "M001240",
+   "birthday": "1994-01-21",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H4NC06177"
+   ],
+   "last": "McDowell",
+   "name": "Addison P. McDowell",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Addison McDowell"
+  },
+  {
+   "bioguide": "M001241",
+   "birthday": "1976-03-05",
+   "chamber": "House",
+   "district": 47,
+   "fec": [
+    "H4CA47085"
+   ],
+   "last": "Min",
+   "name": "Dave Min",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Dave Min"
+  },
+  {
+   "bioguide": "M001242",
+   "birthday": "1967-02-14",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4OH00192"
+   ],
+   "last": "Moreno",
+   "name": "Bernie Moreno",
+   "party": "Republican",
+   "senateClass": 1,
+   "state": "OH",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Bernie Moreno"
+  },
+  {
+   "bioguide": "M001243",
+   "birthday": "1965-08-17",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2PA00661"
+   ],
+   "last": "McCormick",
+   "name": "David McCormick",
+   "party": "Republican",
+   "senateClass": 1,
+   "state": "PA",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Dave McCormick"
+  },
+  {
+   "bioguide": "M001244",
+   "birthday": "1975-03-28",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S6FL00640"
+   ],
+   "last": "Moody",
+   "name": "Ashley Moody",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "FL",
+   "termEnd": "2026-11-03",
+   "termStart": "2025-01-21",
+   "wikipedia": "Ashley Moody"
+  },
+  {
+   "bioguide": "M001245",
+   "birthday": "1988-04-18",
+   "chamber": "House",
+   "district": 18,
+   "fec": [
+    "H6TX18232"
+   ],
+   "last": "Menefee",
+   "name": "Christian D. Menefee",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2026-02-02",
+   "wikipedia": "Christian Menefee"
+  },
+  {
+   "bioguide": "M001246",
+   "birthday": "1977-08-19",
+   "chamber": "House",
+   "district": 11,
+   "fec": [
+    "H6NJ11286"
+   ],
+   "last": "Mejia",
+   "name": "Analilia Mejia",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NJ",
+   "termEnd": "2027-01-03",
+   "termStart": "2026-04-20",
+   "wikipedia": "Analilia Mejia"
+  },
+  {
+   "bioguide": "N000002",
+   "birthday": "1947-06-13",
+   "chamber": "House",
+   "district": 12,
+   "fec": [
+    "H2NY17071"
+   ],
+   "last": "Nadler",
+   "name": "Jerrold Nadler",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jerry Nadler"
+  },
+  {
+   "bioguide": "N000015",
+   "birthday": "1949-02-14",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H8MA02041"
+   ],
+   "last": "Neal",
+   "name": "Richard E. Neal",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Richard Neal"
+  },
+  {
+   "bioguide": "N000026",
+   "birthday": "1968-04-07",
+   "chamber": "House",
+   "district": 22,
+   "fec": [
+    "H0TX22302"
+   ],
+   "last": "Nehls",
+   "name": "Troy E. Nehls",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Troy Nehls"
+  },
+  {
+   "bioguide": "N000147",
+   "birthday": "1937-06-13",
+   "chamber": "House",
+   "district": 0,
+   "fec": [
+    "H0DC00058"
+   ],
+   "last": "Norton",
+   "name": "Eleanor Holmes Norton",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "DC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Eleanor Holmes Norton"
+  },
+  {
+   "bioguide": "N000188",
+   "birthday": "1958-12-13",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H4NJ01084"
+   ],
+   "last": "Norcross",
+   "name": "Donald Norcross",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NJ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Donald Norcross"
+  },
+  {
+   "bioguide": "N000189",
+   "birthday": "1955-07-10",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H4WA04104"
+   ],
+   "last": "Newhouse",
+   "name": "Dan Newhouse",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "WA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Dan Newhouse"
+  },
+  {
+   "bioguide": "N000190",
+   "birthday": "1953-06-20",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H8SC05158"
+   ],
+   "last": "Norman",
+   "name": "Ralph Norman",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "SC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Ralph Norman"
+  },
+  {
+   "bioguide": "N000191",
+   "birthday": "1984-05-13",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H8CO02160"
+   ],
+   "last": "Neguse",
+   "name": "Joe Neguse",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CO",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Joe Neguse"
+  },
+  {
+   "bioguide": "N000193",
+   "birthday": "1979-05-04",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H2IA03119"
+   ],
+   "last": "Nunn",
+   "name": "Zachary Nunn",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "IA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Zach Nunn"
+  },
+  {
+   "bioguide": "O000019",
+   "birthday": "1970-08-18",
+   "chamber": "House",
+   "district": 23,
+   "fec": [
+    "H0CA08135"
+   ],
+   "last": "Obernolte",
+   "name": "Jay Obernolte",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jay Obernolte"
+  },
+  {
+   "bioguide": "O000086",
+   "birthday": "1951-08-02",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H0UT04076"
+   ],
+   "last": "Owens",
+   "name": "Burgess Owens",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "UT",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Burgess Owens"
+  },
+  {
+   "bioguide": "O000172",
+   "birthday": "1989-10-13",
+   "chamber": "House",
+   "district": 14,
+   "fec": [
+    "H8NY15148"
+   ],
+   "last": "Ocasio-Cortez",
+   "name": "Alexandria Ocasio-Cortez",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Alexandria Ocasio-Cortez"
+  },
+  {
+   "bioguide": "O000173",
+   "birthday": "1981-10-04",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H8MN05239"
+   ],
+   "last": "Omar",
+   "name": "Ilhan Omar",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Ilhan Omar"
+  },
+  {
+   "bioguide": "O000174",
+   "birthday": "1987-02-16",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S8GA00180"
+   ],
+   "last": "Ossoff",
+   "name": "Jon Ossoff",
+   "party": "Democrat",
+   "senateClass": 2,
+   "state": "GA",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-20",
+   "wikipedia": "Jon Ossoff"
+  },
+  {
+   "bioguide": "O000175",
+   "birthday": "1971-06-18",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H2TN05446"
+   ],
+   "last": "Ogles",
+   "name": "Andrew Ogles",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Andy Ogles"
+  },
+  {
+   "bioguide": "O000176",
+   "birthday": "1982-09-10",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H4MD02232"
+   ],
+   "last": "Olszewski",
+   "name": "Johnny Olszewski, Jr.",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MD",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Johnny Olszewski"
+  },
+  {
+   "bioguide": "O000177",
+   "birthday": "1962-01-06",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H8MO09146",
+    "H4MO03221"
+   ],
+   "last": "Onder",
+   "name": "Robert F. Onder, Jr.",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MO",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Bob Onder"
+  },
+  {
+   "bioguide": "P000034",
+   "birthday": "1951-10-30",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H8NJ03073"
+   ],
+   "last": "Pallone",
+   "name": "Frank Pallone, Jr.",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NJ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Frank Pallone"
+  },
+  {
+   "bioguide": "P000048",
+   "birthday": "1978-12-28",
+   "chamber": "House",
+   "district": 11,
+   "fec": [
+    "H0TX11230"
+   ],
+   "last": "Pfluger",
+   "name": "August Pfluger",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "August Pfluger"
+  },
+  {
+   "bioguide": "P000145",
+   "birthday": "1973-03-22",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2CA00955"
+   ],
+   "last": "Padilla",
+   "name": "Alex Padilla",
+   "party": "Democrat",
+   "senateClass": 3,
+   "state": "CA",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Alex Padilla"
+  },
+  {
+   "bioguide": "P000197",
+   "birthday": "1940-03-26",
+   "chamber": "House",
+   "district": 11,
+   "fec": [
+    "H8CA05035"
+   ],
+   "last": "Pelosi",
+   "name": "Nancy Pelosi",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Nancy Pelosi"
+  },
+  {
+   "bioguide": "P000595",
+   "birthday": "1958-12-01",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4MI00355"
+   ],
+   "last": "Peters",
+   "name": "Gary C. Peters",
+   "party": "Democrat",
+   "senateClass": 2,
+   "state": "MI",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Gary Peters"
+  },
+  {
+   "bioguide": "P000597",
+   "birthday": "1955-04-02",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H8ME01120"
+   ],
+   "last": "Pingree",
+   "name": "Chellie Pingree",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "ME",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Chellie Pingree"
+  },
+  {
+   "bioguide": "P000603",
+   "birthday": "1963-01-07",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0KY00156"
+   ],
+   "last": "Paul",
+   "name": "Rand Paul",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "KY",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Rand Paul"
+  },
+  {
+   "bioguide": "P000605",
+   "birthday": "1962-05-27",
+   "chamber": "House",
+   "district": 10,
+   "fec": [
+    "H2PA04135"
+   ],
+   "last": "Perry",
+   "name": "Scott Perry",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "PA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Scott Perry"
+  },
+  {
+   "bioguide": "P000607",
+   "birthday": "1964-08-14",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H2WI02124"
+   ],
+   "last": "Pocan",
+   "name": "Mark Pocan",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "WI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mark Pocan"
+  },
+  {
+   "bioguide": "P000608",
+   "birthday": "1958-06-17",
+   "chamber": "House",
+   "district": 50,
+   "fec": [
+    "H2CA52089"
+   ],
+   "last": "Peters",
+   "name": "Scott H. Peters",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Scott Peters (politician)"
+  },
+  {
+   "bioguide": "P000609",
+   "birthday": "1954-05-14",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H4AL06098"
+   ],
+   "last": "Palmer",
+   "name": "Gary J. Palmer",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "AL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Gary Palmer"
+  },
+  {
+   "bioguide": "P000610",
+   "birthday": "1966-05-13",
+   "chamber": "House",
+   "district": 0,
+   "fec": [
+    "H2VI00082"
+   ],
+   "last": "Plaskett",
+   "name": "Stacey E. Plaskett",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "VI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Stacey Plaskett"
+  },
+  {
+   "bioguide": "P000613",
+   "birthday": "1969-10-01",
+   "chamber": "House",
+   "district": 19,
+   "fec": [
+    "H6CA20152"
+   ],
+   "last": "Panetta",
+   "name": "Jimmy Panetta",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jimmy Panetta"
+  },
+  {
+   "bioguide": "P000614",
+   "birthday": "1980-06-04",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H8NH01210"
+   ],
+   "last": "Pappas",
+   "name": "Chris Pappas",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NH",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Chris Pappas (American politician)"
+  },
+  {
+   "bioguide": "P000617",
+   "birthday": "1974-02-03",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H8MA07032"
+   ],
+   "last": "Pressley",
+   "name": "Ayanna Pressley",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Ayanna Pressley"
+  },
+  {
+   "bioguide": "P000620",
+   "birthday": "1981-12-06",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H8CO07045"
+   ],
+   "last": "Pettersen",
+   "name": "Brittany Pettersen",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CO",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Brittany Pettersen"
+  },
+  {
+   "bioguide": "P000621",
+   "birthday": "1956-05-20",
+   "chamber": "House",
+   "district": 9,
+   "fec": [
+    "H4NJ09194"
+   ],
+   "last": "Pou",
+   "name": "Nellie Pou",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NJ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Nellie Pou"
+  },
+  {
+   "bioguide": "P000622",
+   "birthday": "1972-04-13",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H6FL01390"
+   ],
+   "last": "Patronis",
+   "name": "Jimmy Patronis",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-04-02",
+   "wikipedia": "Jimmy Patronis"
+  },
+  {
+   "bioguide": "Q000023",
+   "birthday": "1958-10-17",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H0IL05096"
+   ],
+   "last": "Quigley",
+   "name": "Mike Quigley",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "IL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mike Quigley"
+  },
+  {
+   "bioguide": "R000122",
+   "birthday": "1949-11-12",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S6RI00163"
+   ],
+   "last": "Reed",
+   "name": "Jack Reed",
+   "party": "Democrat",
+   "senateClass": 2,
+   "state": "RI",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Jack Reed (Rhode Island politician)"
+  },
+  {
+   "bioguide": "R000305",
+   "birthday": "1963-06-20",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H0NC02125"
+   ],
+   "last": "Ross",
+   "name": "Deborah K. Ross",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Deborah Ross (politician)"
+  },
+  {
+   "bioguide": "R000395",
+   "birthday": "1937-12-31",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H0KY05015"
+   ],
+   "last": "Rogers",
+   "name": "Harold Rogers",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "KY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Hal Rogers"
+  },
+  {
+   "bioguide": "R000575",
+   "birthday": "1958-07-16",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H2AL03032"
+   ],
+   "last": "Rogers",
+   "name": "Mike Rogers",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "AL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mike Rogers (Alabama politician)"
+  },
+  {
+   "bioguide": "R000579",
+   "birthday": "1982-03-28",
+   "chamber": "House",
+   "district": 18,
+   "fec": [
+    "H8NY19223"
+   ],
+   "last": "Ryan",
+   "name": "Patrick Ryan",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Pat Ryan (politician)"
+  },
+  {
+   "bioguide": "R000584",
+   "birthday": "1943-05-03",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S8ID00092"
+   ],
+   "last": "Risch",
+   "name": "James E. Risch",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "ID",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Jim Risch"
+  },
+  {
+   "bioguide": "R000599",
+   "birthday": "1972-08-25",
+   "chamber": "House",
+   "district": 25,
+   "fec": [
+    "H2CA36439"
+   ],
+   "last": "Ruiz",
+   "name": "Raul Ruiz",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Raul Ruiz (politician)"
+  },
+  {
+   "bioguide": "R000600",
+   "birthday": "1947-12-29",
+   "chamber": "House",
+   "district": 0,
+   "fec": [
+    "H4AS00036"
+   ],
+   "last": "Radewagen",
+   "name": "Aumua Amata Coleman Radewagen",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "AS",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Amata Coleman Radewagen"
+  },
+  {
+   "bioguide": "R000603",
+   "birthday": "1972-02-16",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H2NC07096"
+   ],
+   "last": "Rouzer",
+   "name": "David Rouzer",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "David Rouzer"
+  },
+  {
+   "bioguide": "R000605",
+   "birthday": "1954-10-24",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4SD00049"
+   ],
+   "last": "Rounds",
+   "name": "Mike Rounds",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "SD",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Mike Rounds"
+  },
+  {
+   "bioguide": "R000606",
+   "birthday": "1962-12-13",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H6MD08457"
+   ],
+   "last": "Raskin",
+   "name": "Jamie Raskin",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MD",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jamie Raskin"
+  },
+  {
+   "bioguide": "R000608",
+   "birthday": "1957-08-02",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S8NV00156"
+   ],
+   "last": "Rosen",
+   "name": "Jacky Rosen",
+   "party": "Democrat",
+   "senateClass": 1,
+   "state": "NV",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jacky Rosen"
+  },
+  {
+   "bioguide": "R000609",
+   "birthday": "1952-09-02",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H6FL04105"
+   ],
+   "last": "Rutherford",
+   "name": "John H. Rutherford",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "John Rutherford (Florida politician)"
+  },
+  {
+   "bioguide": "R000610",
+   "birthday": "1983-04-17",
+   "chamber": "House",
+   "district": 14,
+   "fec": [
+    "H8PA18199"
+   ],
+   "last": "Reschenthaler",
+   "name": "Guy Reschenthaler",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "PA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Guy Reschenthaler"
+  },
+  {
+   "bioguide": "R000612",
+   "birthday": "1965-02-23",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H8TN06094"
+   ],
+   "last": "Rose",
+   "name": "John W. Rose",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "John Rose (Tennessee politician)"
+  },
+  {
+   "bioguide": "R000614",
+   "birthday": "1972-08-07",
+   "chamber": "House",
+   "district": 21,
+   "fec": [
+    "H8TX21307"
+   ],
+   "last": "Roy",
+   "name": "Chip Roy",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Chip Roy"
+  },
+  {
+   "bioguide": "R000617",
+   "birthday": "1983-06-02",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H2IL03162"
+   ],
+   "last": "Ramirez",
+   "name": "Delia C. Ramirez",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "IL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Delia Ramirez"
+  },
+  {
+   "bioguide": "R000618",
+   "birthday": "1964-08-19",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S6NE00129"
+   ],
+   "last": "Ricketts",
+   "name": "Pete Ricketts",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "NE",
+   "termEnd": "2027-01-03",
+   "termStart": "2024-11-05",
+   "wikipedia": "Pete Ricketts"
+  },
+  {
+   "bioguide": "R000619",
+   "birthday": "1969-03-11",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H4OH06165"
+   ],
+   "last": "Rulli",
+   "name": "Michael A. Rulli",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "OH",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Michael Rulli"
+  },
+  {
+   "bioguide": "R000620",
+   "birthday": "1974-02-06",
+   "chamber": "House",
+   "district": 29,
+   "fec": [
+    "H4CA29141"
+   ],
+   "last": "Rivas",
+   "name": "Luz M. Rivas",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Luz Rivas"
+  },
+  {
+   "bioguide": "R000621",
+   "birthday": "1985-10-30",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H4WA06117"
+   ],
+   "last": "Randall",
+   "name": "Emily Randall",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "WA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Emily Randall"
+  },
+  {
+   "bioguide": "R000622",
+   "birthday": "1981-01-21",
+   "chamber": "House",
+   "district": 19,
+   "fec": [
+    "H8NY22177"
+   ],
+   "last": "Riley",
+   "name": "Josh Riley",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Josh Riley"
+  },
+  {
+   "bioguide": "S000033",
+   "birthday": "1941-09-08",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4VT00033"
+   ],
+   "last": "Sanders",
+   "name": "Bernard Sanders",
+   "party": "Independent",
+   "senateClass": 1,
+   "state": "VT",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Bernie Sanders"
+  },
+  {
+   "bioguide": "S000148",
+   "birthday": "1950-11-23",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S8NY00082"
+   ],
+   "last": "Schumer",
+   "name": "Charles E. Schumer",
+   "party": "Democrat",
+   "senateClass": 3,
+   "state": "NY",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Chuck Schumer"
+  },
+  {
+   "bioguide": "S000168",
+   "birthday": "1961-11-01",
+   "chamber": "House",
+   "district": 27,
+   "fec": [
+    "H8FL27185"
+   ],
+   "last": "Salazar",
+   "name": "Maria Elvira Salazar",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "María Elvira Salazar"
+  },
+  {
+   "bioguide": "S000185",
+   "birthday": "1947-04-30",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H6VA01117"
+   ],
+   "last": "Scott",
+   "name": "Robert C. \"Bobby\" Scott",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "VA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Bobby Scott (politician)"
+  },
+  {
+   "bioguide": "S000250",
+   "birthday": "1955-03-22",
+   "chamber": "House",
+   "district": 17,
+   "fec": [
+    "H2TX03126"
+   ],
+   "last": "Sessions",
+   "name": "Pete Sessions",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Pete Sessions"
+  },
+  {
+   "bioguide": "S000344",
+   "birthday": "1954-10-24",
+   "chamber": "House",
+   "district": 32,
+   "fec": [
+    "H6CA24113"
+   ],
+   "last": "Sherman",
+   "name": "Brad Sherman",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Brad Sherman"
+  },
+  {
+   "bioguide": "S000510",
+   "birthday": "1965-06-15",
+   "chamber": "House",
+   "district": 9,
+   "fec": [
+    "H6WA09025"
+   ],
+   "last": "Smith",
+   "name": "Adam Smith",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "WA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Adam Smith (Washington politician)"
+  },
+  {
+   "bioguide": "S000522",
+   "birthday": "1953-03-04",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H8NJ04014"
+   ],
+   "last": "Smith",
+   "name": "Christopher H. Smith",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NJ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Chris Smith (New Jersey politician)"
+  },
+  {
+   "bioguide": "S000929",
+   "birthday": "1978-10-06",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H0IN05326"
+   ],
+   "last": "Spartz",
+   "name": "Victoria Spartz",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "IN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Victoria Spartz"
+  },
+  {
+   "bioguide": "S001145",
+   "birthday": "1944-05-26",
+   "chamber": "House",
+   "district": 9,
+   "fec": [
+    "H8IL09067"
+   ],
+   "last": "Schakowsky",
+   "name": "Janice D. Schakowsky",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "IL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jan Schakowsky"
+  },
+  {
+   "bioguide": "S001148",
+   "birthday": "1950-09-08",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H8ID02064"
+   ],
+   "last": "Simpson",
+   "name": "Michael K. Simpson",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "ID",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mike Simpson"
+  },
+  {
+   "bioguide": "S001150",
+   "birthday": "1960-06-22",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4CA00555"
+   ],
+   "last": "Schiff",
+   "name": "Adam B. Schiff",
+   "party": "Democrat",
+   "senateClass": 1,
+   "state": "CA",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Adam Schiff"
+  },
+  {
+   "bioguide": "S001156",
+   "birthday": "1969-01-28",
+   "chamber": "House",
+   "district": 38,
+   "fec": [
+    "H2CA39078"
+   ],
+   "last": "Sánchez",
+   "name": "Linda T. Sánchez",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Linda Sánchez"
+  },
+  {
+   "bioguide": "S001159",
+   "birthday": "1962-09-25",
+   "chamber": "House",
+   "district": 10,
+   "fec": [
+    "H0WA10034"
+   ],
+   "last": "Strickland",
+   "name": "Marilyn Strickland",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "WA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Marilyn Strickland"
+  },
+  {
+   "bioguide": "S001172",
+   "birthday": "1970-12-19",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H6NE03115"
+   ],
+   "last": "Smith",
+   "name": "Adrian Smith",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NE",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Adrian Smith (politician)"
+  },
+  {
+   "bioguide": "S001176",
+   "birthday": "1965-10-06",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H0LA01087"
+   ],
+   "last": "Scalise",
+   "name": "Steve Scalise",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "LA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Steve Scalise"
+  },
+  {
+   "bioguide": "S001181",
+   "birthday": "1947-01-28",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0NH00219"
+   ],
+   "last": "Shaheen",
+   "name": "Jeanne Shaheen",
+   "party": "Democrat",
+   "senateClass": 2,
+   "state": "NH",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Jeanne Shaheen"
+  },
+  {
+   "bioguide": "S001183",
+   "birthday": "1962-03-03",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H4AZ06045",
+    "H8AZ05097"
+   ],
+   "last": "Schweikert",
+   "name": "David Schweikert",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "AZ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "David Schweikert"
+  },
+  {
+   "bioguide": "S001184",
+   "birthday": "1965-09-19",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4SC00240"
+   ],
+   "last": "Scott",
+   "name": "Tim Scott",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "SC",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Tim Scott"
+  },
+  {
+   "bioguide": "S001185",
+   "birthday": "1965-01-01",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H0AL07086"
+   ],
+   "last": "Sewell",
+   "name": "Terri A. Sewell",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "AL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Terri Sewell"
+  },
+  {
+   "bioguide": "S001188",
+   "birthday": "1976-08-31",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H0IN03198"
+   ],
+   "last": "Stutzman",
+   "name": "Marlin A. Stutzman",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "IN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Marlin Stutzman"
+  },
+  {
+   "bioguide": "S001189",
+   "birthday": "1969-12-10",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H0GA08099"
+   ],
+   "last": "Scott",
+   "name": "Austin Scott",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "GA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Austin Scott"
+  },
+  {
+   "bioguide": "S001190",
+   "birthday": "1961-08-20",
+   "chamber": "House",
+   "district": 10,
+   "fec": [
+    "H2IL10068"
+   ],
+   "last": "Schneider",
+   "name": "Bradley Scott Schneider",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "IL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Brad Schneider"
+  },
+  {
+   "bioguide": "S001194",
+   "birthday": "1972-10-20",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4HI00136"
+   ],
+   "last": "Schatz",
+   "name": "Brian Schatz",
+   "party": "Democrat",
+   "senateClass": 3,
+   "state": "HI",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Brian Schatz"
+  },
+  {
+   "bioguide": "S001195",
+   "birthday": "1980-06-16",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H4MO08162"
+   ],
+   "last": "Smith",
+   "name": "Jason Smith",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MO",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jason Smith (American politician)"
+  },
+  {
+   "bioguide": "S001196",
+   "birthday": "1984-07-02",
+   "chamber": "House",
+   "district": 21,
+   "fec": [
+    "H4NY21079"
+   ],
+   "last": "Stefanik",
+   "name": "Elise M. Stefanik",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Elise Stefanik"
+  },
+  {
+   "bioguide": "S001198",
+   "birthday": "1964-11-13",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4AK00214"
+   ],
+   "last": "Sullivan",
+   "name": "Dan Sullivan",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "AK",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Dan Sullivan (U.S. senator)"
+  },
+  {
+   "bioguide": "S001199",
+   "birthday": "1964-01-23",
+   "chamber": "House",
+   "district": 11,
+   "fec": [
+    "H6PA16320"
+   ],
+   "last": "Smucker",
+   "name": "Lloyd Smucker",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "PA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Lloyd Smucker"
+  },
+  {
+   "bioguide": "S001200",
+   "birthday": "1978-02-25",
+   "chamber": "House",
+   "district": 9,
+   "fec": [
+    "H6FL09179"
+   ],
+   "last": "Soto",
+   "name": "Darren Soto",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Darren Soto"
+  },
+  {
+   "bioguide": "S001201",
+   "birthday": "1962-08-31",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H6NY03247"
+   ],
+   "last": "Suozzi",
+   "name": "Thomas R. Suozzi",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Tom Suozzi"
+  },
+  {
+   "bioguide": "S001203",
+   "birthday": "1958-03-04",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S8MN00578"
+   ],
+   "last": "Smith",
+   "name": "Tina Smith",
+   "party": "Democrat",
+   "senateClass": 2,
+   "state": "MN",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Tina Smith"
+  },
+  {
+   "bioguide": "S001205",
+   "birthday": "1959-08-30",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H8PA07200"
+   ],
+   "last": "Scanlon",
+   "name": "Mary Gay Scanlon",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "PA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mary Gay Scanlon"
+  },
+  {
+   "bioguide": "S001208",
+   "birthday": "1976-07-10",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4MI00470"
+   ],
+   "last": "Slotkin",
+   "name": "Elissa Slotkin",
+   "party": "Democrat",
+   "senateClass": 1,
+   "state": "MI",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Elissa Slotkin"
+  },
+  {
+   "bioguide": "S001211",
+   "birthday": "1970-03-08",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H8AZ09040"
+   ],
+   "last": "Stanton",
+   "name": "Greg Stanton",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "AZ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Greg Stanton"
+  },
+  {
+   "bioguide": "S001212",
+   "birthday": "1966-05-10",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H8MN08043"
+   ],
+   "last": "Stauber",
+   "name": "Pete Stauber",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Pete Stauber"
+  },
+  {
+   "bioguide": "S001213",
+   "birthday": "1981-03-30",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H8WI01156"
+   ],
+   "last": "Steil",
+   "name": "Bryan Steil",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "WI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Bryan Steil"
+  },
+  {
+   "bioguide": "S001214",
+   "birthday": "1978-05-19",
+   "chamber": "House",
+   "district": 17,
+   "fec": [
+    "H8FL17053"
+   ],
+   "last": "Steube",
+   "name": "W. Gregory Steube",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Greg Steube"
+  },
+  {
+   "bioguide": "S001215",
+   "birthday": "1983-06-24",
+   "chamber": "House",
+   "district": 11,
+   "fec": [
+    "H8MI11254"
+   ],
+   "last": "Stevens",
+   "name": "Haley M. Stevens",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Haley Stevens"
+  },
+  {
+   "bioguide": "S001216",
+   "birthday": "1968-08-23",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H8WA08189"
+   ],
+   "last": "Schrier",
+   "name": "Kim Schrier",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "WA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Kim Schrier"
+  },
+  {
+   "bioguide": "S001217",
+   "birthday": "1952-12-01",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S8FL00273"
+   ],
+   "last": "Scott",
+   "name": "Rick Scott",
+   "party": "Republican",
+   "senateClass": 1,
+   "state": "FL",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Rick Scott"
+  },
+  {
+   "bioguide": "S001218",
+   "birthday": "1979-01-31",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H2NM01144"
+   ],
+   "last": "Stansbury",
+   "name": "Melanie A. Stansbury",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NM",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Melanie Stansbury"
+  },
+  {
+   "bioguide": "S001220",
+   "birthday": "1970-05-08",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H2AL05102"
+   ],
+   "last": "Strong",
+   "name": "Dale W. Strong",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "AL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Dale Strong"
+  },
+  {
+   "bioguide": "S001221",
+   "birthday": "1982-02-22",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H0MI03316"
+   ],
+   "last": "Scholten",
+   "name": "Hillary J. Scholten",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Hillary Scholten"
+  },
+  {
+   "bioguide": "S001223",
+   "birthday": "1986-01-04",
+   "chamber": "House",
+   "district": 13,
+   "fec": [
+    "H2OH13264"
+   ],
+   "last": "Sykes",
+   "name": "Emilia Strong Sykes",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "OH",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Emilia Sykes"
+  },
+  {
+   "bioguide": "S001224",
+   "birthday": "1953-03-20",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H2TX03290",
+    "H2TX00064"
+   ],
+   "last": "Self",
+   "name": "Keith Self",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Keith Self"
+  },
+  {
+   "bioguide": "S001225",
+   "birthday": "1976-03-18",
+   "chamber": "House",
+   "district": 17,
+   "fec": [
+    "H2IL17147"
+   ],
+   "last": "Sorensen",
+   "name": "Eric Sorensen",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "IL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Eric Sorensen (politician)"
+  },
+  {
+   "bioguide": "S001226",
+   "birthday": "1969-12-06",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H2OR06066"
+   ],
+   "last": "Salinas",
+   "name": "Andrea Salinas",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "OR",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Andrea Salinas"
+  },
+  {
+   "bioguide": "S001227",
+   "birthday": "1975-06-20",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2MO00544"
+   ],
+   "last": "Schmitt",
+   "name": "Eric Schmitt",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "MO",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Eric Schmitt"
+  },
+  {
+   "bioguide": "S001228",
+   "birthday": "1968-01-23",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H4KS02164"
+   ],
+   "last": "Schmidt",
+   "name": "Derek Schmidt",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "KS",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Derek Schmidt"
+  },
+  {
+   "bioguide": "S001229",
+   "birthday": "1965-09-24",
+   "chamber": "House",
+   "district": 6,
+   "fec": [
+    "H4IN06185"
+   ],
+   "last": "Shreve",
+   "name": "Jefferson Shreve",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "IN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jefferson Shreve"
+  },
+  {
+   "bioguide": "S001230",
+   "birthday": "1986-09-26",
+   "chamber": "House",
+   "district": 10,
+   "fec": [
+    "H4VA10279"
+   ],
+   "last": "Subramanyam",
+   "name": "Suhas Subramanyam",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "VA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Suhas Subramanyam"
+  },
+  {
+   "bioguide": "S001231",
+   "birthday": "1977-01-29",
+   "chamber": "House",
+   "district": 12,
+   "fec": [
+    "H4CA12154"
+   ],
+   "last": "Simon",
+   "name": "Lateefah Simon",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Lateefah Simon"
+  },
+  {
+   "bioguide": "S001232",
+   "birthday": "1985-11-18",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4MT00183"
+   ],
+   "last": "Sheehy",
+   "name": "Tim Sheehy",
+   "party": "Republican",
+   "senateClass": 1,
+   "state": "MT",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Tim Sheehy"
+  },
+  {
+   "bioguide": "T000165",
+   "birthday": "1957-12-30",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H0WI07101"
+   ],
+   "last": "Tiffany",
+   "name": "Thomas P. Tiffany",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "WI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Tom Tiffany"
+  },
+  {
+   "bioguide": "T000193",
+   "birthday": "1948-01-28",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H4MS02068"
+   ],
+   "last": "Thompson",
+   "name": "Bennie G. Thompson",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MS",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Bennie Thompson"
+  },
+  {
+   "bioguide": "T000250",
+   "birthday": "1961-01-07",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2SD00068"
+   ],
+   "last": "Thune",
+   "name": "John Thune",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "SD",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "John Thune"
+  },
+  {
+   "bioguide": "T000278",
+   "birthday": "1954-09-18",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0AL00230"
+   ],
+   "last": "Tuberville",
+   "name": "Tommy Tuberville",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "AL",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Tommy Tuberville"
+  },
+  {
+   "bioguide": "T000460",
+   "birthday": "1951-01-24",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H8CA01109"
+   ],
+   "last": "Thompson",
+   "name": "Mike Thompson",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mike Thompson"
+  },
+  {
+   "bioguide": "T000463",
+   "birthday": "1960-01-11",
+   "chamber": "House",
+   "district": 10,
+   "fec": [
+    "H2OH03067",
+    "H2OH03091"
+   ],
+   "last": "Turner",
+   "name": "Michael R. Turner",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "OH",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mike Turner"
+  },
+  {
+   "bioguide": "T000467",
+   "birthday": "1959-07-27",
+   "chamber": "House",
+   "district": 15,
+   "fec": [
+    "H8PA05071"
+   ],
+   "last": "Thompson",
+   "name": "Glenn Thompson",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "PA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Glenn Thompson (politician)"
+  },
+  {
+   "bioguide": "T000468",
+   "birthday": "1950-05-23",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H8NV03036"
+   ],
+   "last": "Titus",
+   "name": "Dina Titus",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NV",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Dina Titus"
+  },
+  {
+   "bioguide": "T000469",
+   "birthday": "1949-06-18",
+   "chamber": "House",
+   "district": 20,
+   "fec": [
+    "H8NY21203"
+   ],
+   "last": "Tonko",
+   "name": "Paul Tonko",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Paul Tonko"
+  },
+  {
+   "bioguide": "T000472",
+   "birthday": "1960-12-10",
+   "chamber": "House",
+   "district": 39,
+   "fec": [
+    "H2CA43245"
+   ],
+   "last": "Takano",
+   "name": "Mark Takano",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Mark Takano"
+  },
+  {
+   "bioguide": "T000474",
+   "birthday": "1965-04-04",
+   "chamber": "House",
+   "district": 35,
+   "fec": [
+    "H4CA35031"
+   ],
+   "last": "Torres",
+   "name": "Norma J. Torres",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Norma Torres"
+  },
+  {
+   "bioguide": "T000476",
+   "birthday": "1960-08-30",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S4NC00162"
+   ],
+   "last": "Tillis",
+   "name": "Thom Tillis",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "NC",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Thom Tillis"
+  },
+  {
+   "bioguide": "T000478",
+   "birthday": "1961-02-04",
+   "chamber": "House",
+   "district": 24,
+   "fec": [
+    "H4NY22051"
+   ],
+   "last": "Tenney",
+   "name": "Claudia Tenney",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Claudia Tenney"
+  },
+  {
+   "bioguide": "T000480",
+   "birthday": "1984-04-30",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H8SC04250"
+   ],
+   "last": "Timmons",
+   "name": "William R. Timmons IV",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "SC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "William Timmons"
+  },
+  {
+   "bioguide": "T000481",
+   "birthday": "1976-07-24",
+   "chamber": "House",
+   "district": 12,
+   "fec": [
+    "H8MI13250"
+   ],
+   "last": "Tlaib",
+   "name": "Rashida Tlaib",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Rashida Tlaib"
+  },
+  {
+   "bioguide": "T000482",
+   "birthday": "1973-10-27",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H8MA03106"
+   ],
+   "last": "Trahan",
+   "name": "Lori Trahan",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Lori Trahan"
+  },
+  {
+   "bioguide": "T000486",
+   "birthday": "1988-03-12",
+   "chamber": "House",
+   "district": 15,
+   "fec": [
+    "H0NY15160"
+   ],
+   "last": "Torres",
+   "name": "Ritchie Torres",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Ritchie Torres"
+  },
+  {
+   "bioguide": "T000487",
+   "birthday": "1976-03-28",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H2HI02581"
+   ],
+   "last": "Tokuda",
+   "name": "Jill N. Tokuda",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "HI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jill Tokuda"
+  },
+  {
+   "bioguide": "T000488",
+   "birthday": "1955-02-22",
+   "chamber": "House",
+   "district": 13,
+   "fec": [
+    "H2MI13204"
+   ],
+   "last": "Thanedar",
+   "name": "Shri Thanedar",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "MI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Shri Thanedar"
+  },
+  {
+   "bioguide": "T000490",
+   "birthday": "1969-11-16",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H4OH02248"
+   ],
+   "last": "Taylor",
+   "name": "David J. Taylor",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "OH",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "David Taylor (Ohio politician)"
+  },
+  {
+   "bioguide": "T000491",
+   "birthday": "1980-12-22",
+   "chamber": "House",
+   "district": 45,
+   "fec": [
+    "H4CA45170"
+   ],
+   "last": "Tran",
+   "name": "Derek Tran",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Derek Tran"
+  },
+  {
+   "bioguide": "U000040",
+   "birthday": "1986-10-04",
+   "chamber": "House",
+   "district": 14,
+   "fec": [
+    "H8IL14174"
+   ],
+   "last": "Underwood",
+   "name": "Lauren Underwood",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "IL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Lauren Underwood"
+  },
+  {
+   "bioguide": "V000081",
+   "birthday": "1953-03-28",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H2NY00010"
+   ],
+   "last": "Velázquez",
+   "name": "Nydia M. Velázquez",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NY",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Nydia Velázquez"
+  },
+  {
+   "bioguide": "V000128",
+   "birthday": "1959-01-10",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S6MD03441"
+   ],
+   "last": "Van Hollen",
+   "name": "Chris Van Hollen",
+   "party": "Democrat",
+   "senateClass": 3,
+   "state": "MD",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Chris Van Hollen"
+  },
+  {
+   "bioguide": "V000129",
+   "birthday": "1977-04-14",
+   "chamber": "House",
+   "district": 22,
+   "fec": [
+    "H2CA20094"
+   ],
+   "last": "Valadao",
+   "name": "David G. Valadao",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "David Valadao"
+  },
+  {
+   "bioguide": "V000130",
+   "birthday": "1961-03-07",
+   "chamber": "House",
+   "district": 52,
+   "fec": [
+    "H2CA50026"
+   ],
+   "last": "Vargas",
+   "name": "Juan Vargas",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Juan Vargas"
+  },
+  {
+   "bioguide": "V000131",
+   "birthday": "1971-01-03",
+   "chamber": "House",
+   "district": 33,
+   "fec": [
+    "H2TX33073"
+   ],
+   "last": "Veasey",
+   "name": "Marc A. Veasey",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Marc Veasey"
+  },
+  {
+   "bioguide": "V000133",
+   "birthday": "1953-02-23",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H8NJ02166"
+   ],
+   "last": "Van Drew",
+   "name": "Jefferson Van Drew",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "NJ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Jeff Van Drew"
+  },
+  {
+   "bioguide": "V000134",
+   "birthday": "1970-11-16",
+   "chamber": "House",
+   "district": 24,
+   "fec": [
+    "H0TX24209"
+   ],
+   "last": "Van Duyne",
+   "name": "Beth Van Duyne",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Beth Van Duyne"
+  },
+  {
+   "bioguide": "V000135",
+   "birthday": "1969-09-15",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H0WI03175"
+   ],
+   "last": "Van Orden",
+   "name": "Derrick Van Orden",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "WI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Derrick Van Orden"
+  },
+  {
+   "bioguide": "V000136",
+   "birthday": "1984-08-03",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H2NM02191"
+   ],
+   "last": "Vasquez",
+   "name": "Gabe Vasquez",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NM",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Gabe Vasquez"
+  },
+  {
+   "bioguide": "V000138",
+   "birthday": "1975-06-06",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H4VA07234"
+   ],
+   "last": "Vindman",
+   "name": "Eugene Simon Vindman",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "VA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Eugene Vindman"
+  },
+  {
+   "bioguide": "V000139",
+   "birthday": "1983-03-29",
+   "chamber": "House",
+   "district": 7,
+   "fec": [
+    "H6TN07161"
+   ],
+   "last": "Van Epps",
+   "name": "Matt Van Epps",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-12-04",
+   "wikipedia": "Matt Van Epps"
+  },
+  {
+   "bioguide": "W000187",
+   "birthday": "1938-08-15",
+   "chamber": "House",
+   "district": 43,
+   "fec": [
+    "H4CA23011"
+   ],
+   "last": "Waters",
+   "name": "Maxine Waters",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Maxine Waters"
+  },
+  {
+   "bioguide": "W000437",
+   "birthday": "1951-07-05",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S8MS00196"
+   ],
+   "last": "Wicker",
+   "name": "Roger F. Wicker",
+   "party": "Republican",
+   "senateClass": 1,
+   "state": "MS",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Roger Wicker"
+  },
+  {
+   "bioguide": "W000779",
+   "birthday": "1949-05-03",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S6OR00110"
+   ],
+   "last": "Wyden",
+   "name": "Ron Wyden",
+   "party": "Democrat",
+   "senateClass": 3,
+   "state": "OR",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Ron Wyden"
+  },
+  {
+   "bioguide": "W000788",
+   "birthday": "1978-07-30",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H0GA05301"
+   ],
+   "last": "Williams",
+   "name": "Nikema Williams",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "GA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Nikema Williams"
+  },
+  {
+   "bioguide": "W000790",
+   "birthday": "1969-07-23",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S0GA00559"
+   ],
+   "last": "Warnock",
+   "name": "Raphael G. Warnock",
+   "party": "Democrat",
+   "senateClass": 3,
+   "state": "GA",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Raphael Warnock"
+  },
+  {
+   "bioguide": "W000795",
+   "birthday": "1947-07-31",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H2SC02059"
+   ],
+   "last": "Wilson",
+   "name": "Joe Wilson",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "SC",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Joe Wilson"
+  },
+  {
+   "bioguide": "W000797",
+   "birthday": "1966-09-27",
+   "chamber": "House",
+   "district": 25,
+   "fec": [
+    "H4FL20023"
+   ],
+   "last": "Wasserman Schultz",
+   "name": "Debbie Wasserman Schultz",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Debbie Wasserman Schultz"
+  },
+  {
+   "bioguide": "W000798",
+   "birthday": "1951-04-12",
+   "chamber": "House",
+   "district": 5,
+   "fec": [
+    "H4MI07103"
+   ],
+   "last": "Walberg",
+   "name": "Tim Walberg",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Tim Walberg"
+  },
+  {
+   "bioguide": "W000800",
+   "birthday": "1947-05-02",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2VT00235"
+   ],
+   "last": "Welch",
+   "name": "Peter Welch",
+   "party": "Democrat",
+   "senateClass": 3,
+   "state": "VT",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Peter Welch"
+  },
+  {
+   "bioguide": "W000802",
+   "birthday": "1955-10-20",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S6RI00221"
+   ],
+   "last": "Whitehouse",
+   "name": "Sheldon Whitehouse",
+   "party": "Democrat",
+   "senateClass": 1,
+   "state": "RI",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Sheldon Whitehouse"
+  },
+  {
+   "bioguide": "W000804",
+   "birthday": "1959-02-03",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H8VA01147"
+   ],
+   "last": "Wittman",
+   "name": "Robert J. Wittman",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "VA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Rob Wittman"
+  },
+  {
+   "bioguide": "W000805",
+   "birthday": "1954-12-15",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S6VA00093"
+   ],
+   "last": "Warner",
+   "name": "Mark R. Warner",
+   "party": "Democrat",
+   "senateClass": 2,
+   "state": "VA",
+   "termEnd": "2027-01-03",
+   "termStart": "2021-01-03",
+   "wikipedia": "Mark Warner"
+  },
+  {
+   "bioguide": "W000806",
+   "birthday": "1949-04-27",
+   "chamber": "House",
+   "district": 11,
+   "fec": [
+    "H0FL08208"
+   ],
+   "last": "Webster",
+   "name": "Daniel Webster",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Daniel Webster (Florida politician)"
+  },
+  {
+   "bioguide": "W000808",
+   "birthday": "1942-11-05",
+   "chamber": "House",
+   "district": 24,
+   "fec": [
+    "H0FL17068"
+   ],
+   "last": "Wilson",
+   "name": "Frederica S. Wilson",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "FL",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Frederica Wilson"
+  },
+  {
+   "bioguide": "W000809",
+   "birthday": "1957-02-18",
+   "chamber": "House",
+   "district": 3,
+   "fec": [
+    "H0AR03055"
+   ],
+   "last": "Womack",
+   "name": "Steve Womack",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "AR",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Steve Womack"
+  },
+  {
+   "bioguide": "W000812",
+   "birthday": "1962-09-13",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H2MO02102"
+   ],
+   "last": "Wagner",
+   "name": "Ann Wagner",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MO",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Ann Wagner"
+  },
+  {
+   "bioguide": "W000814",
+   "birthday": "1953-07-02",
+   "chamber": "House",
+   "district": 14,
+   "fec": [
+    "H2TX14149"
+   ],
+   "last": "Weber",
+   "name": "Randy K. Weber, Sr.",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Randy Weber"
+  },
+  {
+   "bioguide": "W000816",
+   "birthday": "1949-09-13",
+   "chamber": "House",
+   "district": 25,
+   "fec": [
+    "H2TX33040"
+   ],
+   "last": "Williams",
+   "name": "Roger Williams",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "TX",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Roger Williams (Texas politician)"
+  },
+  {
+   "bioguide": "W000817",
+   "birthday": "1949-06-22",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S2MA00170"
+   ],
+   "last": "Warren",
+   "name": "Elizabeth Warren",
+   "party": "Democrat",
+   "senateClass": 1,
+   "state": "MA",
+   "termEnd": "2031-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Elizabeth Warren"
+  },
+  {
+   "bioguide": "W000821",
+   "birthday": "1967-11-18",
+   "chamber": "House",
+   "district": 4,
+   "fec": [
+    "H4AR04048"
+   ],
+   "last": "Westerman",
+   "name": "Bruce Westerman",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "AR",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Bruce Westerman"
+  },
+  {
+   "bioguide": "W000822",
+   "birthday": "1945-02-06",
+   "chamber": "House",
+   "district": 12,
+   "fec": [
+    "H4NJ12149"
+   ],
+   "last": "Watson Coleman",
+   "name": "Bonnie Watson Coleman",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "NJ",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Bonnie Watson Coleman"
+  },
+  {
+   "bioguide": "W000829",
+   "birthday": "1976-05-03",
+   "chamber": "House",
+   "district": 8,
+   "fec": [
+    "H4WI08119"
+   ],
+   "last": "Wied",
+   "name": "Tony Wied",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "WI",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Tony Wied"
+  },
+  {
+   "bioguide": "W000830",
+   "birthday": "1974-03-03",
+   "chamber": "House",
+   "district": 27,
+   "fec": [
+    "H4CA27111"
+   ],
+   "last": "Whitesides",
+   "name": "George Whitesides",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "George T. Whitesides"
+  },
+  {
+   "bioguide": "W000831",
+   "birthday": "1982-10-22",
+   "chamber": "House",
+   "district": 11,
+   "fec": [
+    "H6VA11066"
+   ],
+   "last": "Walkinshaw",
+   "name": "James R. Walkinshaw",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "VA",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-09-10",
+   "wikipedia": "James Walkinshaw"
+  },
+  {
+   "bioguide": "W000832",
+   "birthday": "1987-01-11",
+   "chamber": "House",
+   "district": 14,
+   "fec": [
+    "H0CA15213"
+   ],
+   "last": "Wahab",
+   "name": "Aisha Wahab",
+   "party": "Democrat",
+   "senateClass": null,
+   "state": "CA",
+   "termEnd": "2027-01-03",
+   "termStart": "2026-09-02",
+   "wikipedia": "Aisha Wahab"
+  },
+  {
+   "bioguide": "Y000064",
+   "birthday": "1972-08-24",
+   "chamber": "Senate",
+   "district": null,
+   "fec": [
+    "S6IN00191"
+   ],
+   "last": "Young",
+   "name": "Todd Young",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "IN",
+   "termEnd": "2029-01-03",
+   "termStart": "2023-01-03",
+   "wikipedia": "Todd Young"
+  },
+  {
+   "bioguide": "Y000067",
+   "birthday": "1984-02-24",
+   "chamber": "House",
+   "district": 2,
+   "fec": [
+    "H2IN02295"
+   ],
+   "last": "Yakym",
+   "name": "Rudy Yakym III",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "IN",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Rudy Yakym"
+  },
+  {
+   "bioguide": "Z000018",
+   "birthday": "1961-11-01",
+   "chamber": "House",
+   "district": 1,
+   "fec": [
+    "H4MT01041"
+   ],
+   "last": "Zinke",
+   "name": "Ryan K. Zinke",
+   "party": "Republican",
+   "senateClass": null,
+   "state": "MT",
+   "termEnd": "2027-01-03",
+   "termStart": "2025-01-03",
+   "wikipedia": "Ryan Zinke"
+  }
+ ],
+ "source": "https://unitedstates.github.io/congress-legislators/legislators-current.json"
+}

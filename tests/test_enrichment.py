@@ -12,7 +12,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from kyc import fec, normalize, portraits, races  # noqa: E402
-from kyc.normalize import classify  # noqa: E402
+from kyc.normalize import TERRITORIES, classify  # noqa: E402
 from kyc.profiles import apply_quality, build_profiles  # noqa: E402
 from kyc.sources import load_all  # noqa: E402
 
@@ -179,9 +179,30 @@ class TestRaces(unittest.TestCase):
         cls.races = races.build(cls.profiles)
         cls.by_id = {p["id"]: p for p in cls.profiles}
 
-    def test_every_seat_on_the_ballot_has_a_race(self):
-        # 435 voting House seats + 6 territory delegates + 35 Senate seats up.
-        self.assertEqual(len(self.races), 472)
+    def test_the_race_list_is_every_seat_we_know_an_occupant_for(self):
+        # This used to assert a bare 472 against a comment that said
+        # "435 + 6 + 35" - which is 476. The gap was never explained, and the
+        # number moved the moment two vacant seats were filled. Assert the
+        # structure and account for the shortfall instead of typing a total.
+        senate = [r for r in self.races if r["chamber"] == "Senate"]
+        house = [r for r in self.races if r["chamber"] == "House"]
+        delegates = [r for r in house if r["isTerritory"]]
+        voting = [r for r in house if not r["isTerritory"]]
+
+        self.assertEqual(len(senate), 35, "Senate seats on the 2026 ballot")
+        self.assertEqual(len(delegates), 6, "territory delegates")
+        self.assertEqual(len(self.races), len(senate) + len(house))
+
+        # Every one of the 435 House seats is on the ballot, but a seat nobody
+        # currently holds has no roster row and so produces no race. The
+        # shortfall is exactly the vacancies, and never anything else.
+        seated = {
+            (p["state"], p["districtNum"]) for p in self.profiles
+            if not p["isCandidate"] and p["chamber"] == "House"
+            and p["state"] not in TERRITORIES
+        }
+        self.assertEqual(len(voting), len(seated))
+        self.assertLessEqual(len(voting), 435)
 
     def test_senators_not_up_belong_to_no_race(self):
         idle = [

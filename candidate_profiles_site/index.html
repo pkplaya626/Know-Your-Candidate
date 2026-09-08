@@ -1,809 +1,212 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" class="h-full w-full">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Know Your Candidate</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Slab:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/kyc.css">
-    <script src="assets/kyc.js"></script>
+<meta charset="utf-8">
+<!-- No maximum-scale / user-scalable=no: blocking pinch-zoom fails WCAG 1.4.4
+     and makes small print unreadable for anyone who needs to magnify it. -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Know Your Candidate — the 119th Congress and the 2026 midterms</title>
+<meta name="description" content="A non-partisan directory of every member of the 119th U.S. Congress and the declared candidates for the 2026 midterms: seats, terms, committees, campaign finance and roll-call ideology, with every gap in the data labelled as a gap.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Know Your Candidate">
+<meta property="og:description" content="A non-partisan directory of the 119th U.S. Congress and the 2026 midterm races.">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/kyc.css">
+<script src="assets/kyc.js"></script>
 </head>
-<body class="h-full w-full flex flex-col antialiased overflow-hidden">
-    <a href="#mainContent" class="skip-link">Skip to results</a>
-    <div id="sidebarScrim" aria-hidden="true"></div>
+<body>
 
-    <header class="h-14 flex-shrink-0 flex items-center justify-between px-4 sm:px-6 border-b border-yt-border bg-yt-bg z-40">
-        <div class="flex items-center space-x-3 sm:space-x-6">
-            <button id="sidebarToggle" class="hidden p-2 -ml-1 text-yt-textMuted hover:text-yt-text hover:bg-yt-hover rounded-full"
-                    aria-label="Toggle filters sidebar" aria-expanded="false" aria-controls="sidebar">
-                <i data-lucide="menu" class="w-5 h-5"></i>
+<a href="#results" class="skip-link">Skip to results</a>
+<button type="button" class="sidebar-scrim" tabindex="-1" aria-hidden="true"></button>
+
+<header class="app-header">
+    <button type="button" class="btn-icon sidebar-toggle" aria-expanded="false"
+            aria-controls="sidebar" aria-label="Show filters">
+        <svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg>
+    </button>
+
+    <a class="brand" href="index.html">
+        <svg class="icon" aria-hidden="true"><use href="#i-vote"/></svg>
+        <span class="brand-name">Know Your Candidate</span>
+        <span class="brand-sub">119th Congress</span>
+    </a>
+
+    <div class="search">
+        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <label class="sr-only" for="searchInput">Search profiles</label>
+        <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
+               placeholder="Search name, state, committee, education…">
+    </div>
+
+    <div class="header-actions">
+        <label class="sr-only" for="sortBy">Sort results</label>
+        <select id="sortBy" class="select select-bare">
+            <option value="region">Sort: by region</option>
+            <option value="senate26">Sort: 2026 Senate races</option>
+            <option value="name">Sort: by name</option>
+            <option value="age-desc">Sort: oldest first</option>
+            <option value="age-asc">Sort: youngest first</option>
+        </select>
+
+        <div class="menu">
+            <button type="button" class="btn-icon" id="themeButton"
+                    aria-haspopup="true" aria-label="Change theme">
+                <svg class="icon" aria-hidden="true"><use href="#i-palette"/></svg>
             </button>
-            <div class="flex items-center text-yt-text">
-                <i data-lucide="vote" class="w-6 h-6 mr-3 text-[#3ea6ff]"></i>
-                <h1 class="text-xl font-bold tracking-tight font-slab">KYC Directory</h1>
-            </div>
-        </div>
-
-        <div id="searchWrap" class="flex-1 flex justify-center max-w-2xl mx-auto px-2 sm:px-4">
-            <div class="flex w-full">
-                <div class="flex-1 border border-yt-border bg-yt-input rounded-l-full flex items-center px-4 overflow-hidden focus-within:border-[#1c62b9]">
-                    <i data-lucide="search" class="w-4 h-4 text-yt-textMuted hidden sm:block mr-2"></i>
-                    <label for="searchInput" class="sr-only">Search profiles</label>
-                    <input type="search" id="searchInput" placeholder="Search name, state, committee, education&hellip;"
-                           autocomplete="off" class="w-full bg-transparent border-none outline-none text-yt-text text-sm py-2">
-                </div>
-                <button class="px-5 border border-l-0 border-yt-border bg-yt-hover rounded-r-full hover:bg-yt-border transition-colors flex items-center justify-center">
-                    <i data-lucide="search" class="w-4 h-4 text-yt-text"></i>
+            <div class="menu-panel" id="themePanel" role="menu" hidden>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="system" aria-checked="true">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Match system
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="dark" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Dark
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="amoled" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    AMOLED black
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="light" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Light
                 </button>
             </div>
         </div>
+    </div>
+</header>
 
-        <div class="flex items-center space-x-2 w-auto justify-end">
-            <div class="relative group mr-2">
-                <button class="p-2 text-yt-textMuted hover:text-yt-text hover:bg-yt-hover rounded-full transition-colors flex items-center">
-                    <i data-lucide="sun-moon" class="w-5 h-5"></i>
-                </button>
-                <div class="absolute right-0 mt-2 w-40 bg-yt-elevated border border-yt-border rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                    <button onclick="setTheme('dark')" class="w-full text-left px-4 py-2 text-sm text-yt-text hover:bg-yt-hover">Dark Theme</button>
-                    <button onclick="setTheme('amoled')" class="w-full text-left px-4 py-2 text-sm text-yt-text hover:bg-yt-hover">AMOLED Dark</button>
-                    <button onclick="setTheme('light')" class="w-full text-left px-4 py-2 text-sm text-yt-text hover:bg-yt-hover">Light Theme</button>
-                </div>
-            </div>
-            <select id="sortBy" onchange="sortAndRender()" class="hidden sm:block bg-transparent text-yt-textMuted font-medium text-sm outline-none cursor-pointer py-1.5 px-2 hover:text-yt-text rounded border border-transparent hover:border-yt-border">
-                <option value="state-district" class="bg-yt-input">Sort: Region</option>
-                <option value="senate-26" class="bg-yt-input">2026 Senate Races</option>
-                <option value="name" class="bg-yt-input">Sort: Name</option>
-                <option value="age-desc" class="bg-yt-input">Sort: Oldest</option>
-                <option value="age-asc" class="bg-yt-input">Sort: Youngest</option>
+<div class="app-body">
+
+    <!-- Numbers in this sidebar are filled from the build metadata by
+         KYC.renderSummary. They used to be typed in as literal text. -->
+    <aside class="sidebar scroll-y" id="sidebar" aria-label="Navigation and summary">
+        <nav class="sidebar-section" aria-label="Views">
+            <a class="nav-link" href="index.html" aria-current="page">
+                <svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg>
+                Profile grid
+            </a>
+            <a class="nav-link" href="map.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-map"/></svg>
+                Partisan map
+            </a>
+        </nav>
+
+        <div class="sidebar-section">
+            <h2 class="sidebar-heading">119th Congress</h2>
+            <div class="balance-label">Senate</div>
+            <div class="balance" id="senateBalance"></div>
+            <div class="balance-label">House</div>
+            <div class="balance" id="houseBalance"></div>
+        </div>
+
+        <div class="sidebar-section">
+            <h2 class="sidebar-heading">
+                <svg class="icon icon-sm" aria-hidden="true"><use href="#i-flag"/></svg>
+                2026 midterms
+            </h2>
+            <time id="electionCountdown" class="badge badge-warn countdown"></time>
+            <div class="stat-row"><span>Senate seats up</span>
+                <span class="value" id="senateSeatsUp"></span></div>
+            <div class="stat-row"><span>Defending</span>
+                <span class="value" id="senateDefending"></span></div>
+            <div class="stat-row"><span>House seats up</span>
+                <span class="value" id="houseSeatsUp"></span></div>
+            <div class="stat-row"><span>Declared challengers</span>
+                <span class="value" id="challengerCount"></span></div>
+            <p class="sidebar-note">
+                Every House seat is a two-year term, so the whole chamber is on
+                the ballot each cycle.
+            </p>
+        </div>
+
+        <div class="sidebar-section push">
+            <h2 class="sidebar-heading">Filter by state</h2>
+            <label class="sr-only" for="stateSelect">Filter by state or territory</label>
+            <select id="stateSelect" class="select">
+                <option value="all">All states &amp; territories</option>
             </select>
         </div>
-    </header>
+    </aside>
 
-    <div class="flex flex-1 overflow-hidden">
+    <main class="app-main" id="mainContent">
 
-        <aside id="sidebar" class="w-60 flex-shrink-0 border-r border-yt-border bg-yt-bg flex flex-col h-full overflow-y-auto custom-scrollbar" aria-label="Filters and chamber summary">
-            <div class="p-3">
-                <a href="index.html" class="flex items-center px-3 py-2.5 rounded bg-yt-hover text-yt-text font-medium text-sm">
-                    <i data-lucide="layout-grid" class="w-5 h-5 mr-4 text-yt-textMuted"></i> Profile Grid
-                </a>
-                <a href="map.html" class="flex items-center px-3 py-2.5 rounded text-yt-text hover:bg-yt-hover font-medium text-sm mt-1 transition-colors">
-                    <i data-lucide="map" class="w-5 h-5 mr-4 text-yt-textMuted"></i> Partisan Map
-                </a>
-            </div>
+        <div class="toolbar" role="group" aria-label="Filters">
+            <button type="button" class="chip" data-group="chamber" data-value="all"
+                    aria-pressed="true">All</button>
+            <button type="button" class="chip" data-group="chamber" data-value="Senate"
+                    aria-pressed="false">Senate</button>
+            <button type="button" class="chip" data-group="chamber" data-value="House"
+                    aria-pressed="false">House</button>
 
-            <hr class="border-yt-border my-2 mx-4">
+            <span class="toolbar-divider" aria-hidden="true"></span>
 
-            <div class="px-4 py-2">
-                <h3 class="text-xs font-bold text-yt-textMuted uppercase tracking-wider mb-3">119th Congress</h3>
-                <div class="text-xs font-bold text-yt-textMuted mb-1">SENATE</div>
-                <div class="text-sm font-bold text-yt-text mb-4"><span class="text-[#ff4e45]">53 R</span> <span class="text-yt-textFaint mx-1">|</span> <span class="text-[#3ea6ff]">47 D/I</span></div>
+            <button type="button" class="chip" data-group="party" data-value="Democrat"
+                    data-optional aria-pressed="false">Democratic</button>
+            <button type="button" class="chip" data-group="party" data-value="Republican"
+                    data-optional aria-pressed="false">Republican</button>
+            <button type="button" class="chip" data-group="party" data-value="Independent"
+                    data-optional aria-pressed="false">Independent</button>
 
-                <div class="text-xs font-bold text-yt-textMuted mb-1">HOUSE</div>
-                <div class="text-sm font-bold text-yt-text mb-4" id="sidebarHouseStats"><span class="text-yt-textFaint">Loading...</span></div>
-            </div>
+            <span class="toolbar-divider" aria-hidden="true"></span>
 
-            <hr class="border-yt-border my-2 mx-4">
+            <button type="button" class="chip" data-group="election" data-value="senateUp26"
+                    data-optional aria-pressed="false">Senate seats up ’26</button>
+            <button type="button" class="chip" data-group="election" data-value="notSeeking"
+                    data-optional aria-pressed="false">Retiring / not seeking</button>
+            <button type="button" class="chip" data-group="election" data-value="candidate"
+                    data-optional aria-pressed="false">2026 challengers</button>
+            <button type="button" class="chip" data-group="election" data-value="contested"
+                    data-optional aria-pressed="false">Contested races</button>
 
-            <div class="px-4 py-2">
-                <h3 class="text-xs font-bold text-yt-text flex items-center mb-2"><i data-lucide="flag" class="w-3.5 h-3.5 mr-2 text-[#ffb000]"></i> 2026 Elections</h3>
-                <time id="electionCountdown" class="block text-[11px] font-bold text-[#ffb000] mb-3"></time>
+            <span class="toolbar-divider" aria-hidden="true"></span>
 
-                <div class="flex justify-between text-xs mb-1.5 text-yt-textMuted"><span class="font-medium">Senate Seats Up</span><span class="font-bold text-yt-text">35</span></div>
-                <div class="flex justify-between text-xs mb-4 text-yt-textMuted"><span class="font-medium">Defending</span><span class="font-bold" id="senateDefendingCount"><span class="text-yt-textFaint">Loading...</span></span></div>
-
-                <div class="flex justify-between text-xs mb-1 text-yt-textMuted"><span class="font-medium">House Seats Up</span><span class="font-bold text-yt-text">435</span></div>
-                <div class="text-[10px] text-yt-textFaint">(All 2-Year Terms)</div>
-            </div>
-
-            <hr class="border-yt-border my-2 mx-4 mt-auto">
-
-            <div class="p-4">
-                <h3 class="text-xs font-bold text-yt-textMuted uppercase tracking-wider mb-2">Filter by State</h3>
-                <select id="stateSelect" onchange="filterData()" class="w-full bg-yt-input border border-yt-border text-yt-text font-medium text-sm rounded px-2 py-1.5 outline-none focus:border-[#3ea6ff] appearance-none">
-                    <option value="all">All States & Territories</option>
-                </select>
-            </div>
-        </aside>
-
-        <main id="mainContent" class="flex-1 flex flex-col h-full bg-yt-bg relative overflow-hidden" tabindex="-1">
-
-            <div class="h-14 flex-shrink-0 flex items-center px-6 border-b border-yt-border gap-3 overflow-x-auto custom-scrollbar">
-                <button class="chip active" data-filter="all" onclick="setFilter(this, 'chamber')">All</button>
-                <button class="chip" data-filter="Senate" onclick="setFilter(this, 'chamber')">Senate</button>
-                <button class="chip" data-filter="House" onclick="setFilter(this, 'chamber')">House</button>
-                <div class="w-px h-6 bg-yt-border mx-1"></div>
-                <button class="chip" data-filter="Democrat" onclick="setFilter(this, 'party')">Democrat</button>
-                <button class="chip" data-filter="Republican" onclick="setFilter(this, 'party')">Republican</button>
-                <div class="w-px h-6 bg-yt-border mx-1"></div>
-                <button class="chip" data-filter="senateUp26" onclick="setFilter(this, 'election')">Senate Seats Up '26</button>
-                <button class="chip" data-filter="notSeeking" onclick="setFilter(this, 'election')">Retiring / Not Seeking</button>
-                <button class="chip" data-filter="Candidate" onclick="setFilter(this, 'election')">2026 Challengers</button>
-                <div class="w-px h-6 bg-yt-border mx-1"></div>
-                <button class="chip" id="raceViewToggle" onclick="toggleRaceView()" aria-pressed="false"
-                        title="Group profiles by the seat they are contesting">By Race</button>
-            </div>
-
-            <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
-                <p class="text-sm text-yt-textMuted mb-4 font-medium" id="resultsLabel" role="status" aria-live="polite">Showing all profiles</p>
-
-                <div id="cardsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-x-4 gap-y-8"></div>
-
-                <footer class="mt-10 pt-5 border-t border-yt-border text-[11px] text-yt-textFaint leading-relaxed">
-                    <p><strong class="text-yt-textMuted">Sources:</strong>
-                        roll-call ideology from <span class="text-yt-textMuted">Voteview DW-NOMINATE</span>;
-                        campaign finance from the <span class="text-yt-textMuted">FEC</span>;
-                        rosters and portraits from <span class="text-yt-textMuted">Congress.gov</span>,
-                        <span class="text-yt-textMuted">congress-legislators</span> and
-                        <span class="text-yt-textMuted">Wikipedia</span>.</p>
-                    <p class="mt-1">Fields shown as <span class="kyc-absent">Not disclosed</span> have no public filing;
-                        <span class="kyc-generic">dotted</span> values are generic placeholders, not researched detail.
-                        Data built <span id="buildStamp" class="text-yt-textMuted">&mdash;</span>.</p>
-                </footer>
-
-                <div id="noResults" class="hidden flex-col items-center justify-center h-64 text-center mt-10">
-                    <i data-lucide="search-x" class="w-16 h-16 text-yt-border mb-4"></i>
-                    <h3 class="text-xl font-bold text-yt-text">No profiles found</h3>
-                    <p class="text-yt-textMuted mt-2 text-sm font-medium">Try adjusting your search or filters to find what you're looking for.</p>
-                </div>
-            </div>
-        </main>
-    </div>
-
-
-    <!-- Candidate Immersive Profile Modal -->
-    <div id="profileModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-black bg-opacity-80 transition-opacity" onclick="closeModal()"></div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-yt-bg text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-yt-borderHover">
-
-                <div class="absolute top-4 right-4 z-10">
-                    <button onclick="closeModal()" class="p-2 bg-yt-hover hover:bg-yt-border text-yt-textMuted hover:text-yt-text rounded-full transition-colors focus:outline-none">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
-                </div>
-
-                <div id="modalHeader" class="relative overflow-hidden px-6 py-8 sm:p-10 border-b border-yt-border bg-yt-elevated">
-                    <div class="flex flex-col sm:flex-row gap-6 items-center">
-                        <div class="relative shrink-0">
-                            <img id="modalPhoto" data-photo-idx="0" class="w-32 h-40 object-cover rounded shadow-md border border-yt-border bg-yt-hover" src="" alt="Candidate Photo">
-                            <span id="modalPartyBadge" class="absolute -bottom-2 -right-2 px-3 py-1 text-xs font-bold rounded text-yt-text shadow border border-opacity-20"></span>
-                        </div>
-                        <div class="text-center sm:text-left space-y-2">
-                            <span id="modalChamberTag" class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border"></span>
-                            <h2 class="text-3xl font-bold text-yt-text" id="modalName"></h2>
-                            <p class="text-sm font-medium text-yt-textMuted flex flex-wrap justify-center sm:justify-start gap-x-4 gap-y-1">
-                                <span class="flex items-center"><i data-lucide="map-pin" class="w-4 h-4 mr-1"></i> Representing: <strong id="modalRegion" class="text-yt-text ml-1"></strong></span>
-                                <span class="flex items-center"><i data-lucide="calendar" class="w-4 h-4 mr-1"></i> Term: <strong id="modalTerm" class="text-yt-text ml-1"></strong></span>
-                                <span id="modalCrossLink" class="hidden items-center"></span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="px-6 py-8 sm:p-10 grid grid-cols-1 md:grid-cols-2 gap-8 max-h-[60vh] overflow-y-auto custom-scrollbar bg-yt-bg">
-                    <div class="space-y-6">
-                        <div class="bg-yt-elevated p-5 rounded border border-yt-border shadow-sm">
-                            <h4 class="text-[11px] font-bold text-yt-textMuted uppercase tracking-wider mb-3 flex items-center"><i data-lucide="user" class="w-4 h-4 mr-1.5 text-[#3ea6ff]"></i> Biographical Info</h4>
-                            <div class="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <span class="block text-xs font-semibold text-yt-textFaint">Age / Birthday</span>
-                                    <span class="font-bold text-yt-text" id="modalAgeBirth"></span>
-                                </div>
-                                <div>
-                                    <span class="block text-xs font-semibold text-yt-textFaint">Est. Net Worth</span>
-                                    <span class="font-bold text-[#3ea6ff]" id="modalNetWorth"></span>
-                                </div>
-                                <div class="col-span-2">
-                                    <span class="block text-xs font-semibold text-yt-textFaint">Education</span>
-                                    <span class="font-medium text-yt-textMuted" id="modalEducation"></span>
-                                </div>
-                                <div class="col-span-2">
-                                    <span class="block text-xs font-semibold text-yt-textFaint">Previous Careers</span>
-                                    <span class="font-medium text-yt-textMuted" id="modalProfessions"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="p-5 rounded border border-[#3ea6ff]/30 bg-[#3ea6ff]/5 shadow-sm">
-                            <h4 class="text-[11px] font-bold text-[#3ea6ff] uppercase tracking-wider mb-3 flex items-center"><i data-lucide="scroll" class="w-4 h-4 mr-1.5"></i> Platform & Priorities</h4>
-                            <div class="text-sm font-normal text-yt-textMuted leading-relaxed custom-scrollbar max-h-48 overflow-y-auto pr-2" id="modalPlatform">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-6">
-                        <div class="bg-yt-elevated p-5 rounded border border-yt-border shadow-sm">
-                            <h4 class="text-[11px] font-bold text-yt-textMuted uppercase tracking-wider mb-3 flex items-center"><i data-lucide="dollar-sign" class="w-4 h-4 mr-1.5 text-[#2ba640]"></i> FEC Campaign Finance</h4>
-                            <div class="grid grid-cols-2 gap-4 text-sm mb-4">
-                                <div class="bg-yt-input p-3 rounded border border-yt-border text-center">
-                                    <span class="block text-[10px] font-bold text-yt-textFaint uppercase tracking-wider">Total Raised</span>
-                                    <span class="font-bold text-[#2ba640] text-sm mt-0.5 block" id="modalReceipts"></span>
-                                </div>
-                                <div class="bg-yt-input p-3 rounded border border-yt-border text-center">
-                                    <span class="block text-[10px] font-bold text-yt-textFaint uppercase tracking-wider">Disbursements</span>
-                                    <span class="font-bold text-[#ff4e45] text-sm mt-0.5 block" id="modalDisbursements"></span>
-                                </div>
-                            </div>
-                            <div>
-                                <span class="block text-[10px] font-bold text-yt-textFaint uppercase tracking-wider mb-1.5">Main Funding Sources</span>
-                                <p class="text-xs font-medium text-yt-textMuted bg-yt-input p-3 rounded border border-yt-border shadow-sm leading-relaxed max-h-32 overflow-y-auto custom-scrollbar" id="modalFunding"></p>
-                            </div>
-                        </div>
-
-                        <div class="bg-yt-elevated p-5 rounded border border-yt-border shadow-sm">
-                            <div class="mb-4">
-                                <h4 class="text-[11px] font-bold text-yt-textMuted uppercase tracking-wider mb-2 flex items-center"><i data-lucide="bar-chart-2" class="w-4 h-4 mr-1.5 text-[#3ea6ff]"></i> Voting Alignment</h4>
-                                <div class="bg-yt-input p-4 rounded border border-yt-border shadow-sm w-full" id="modalVoting"></div>
-                            </div>
-                            <div>
-                                <h4 class="text-[11px] font-bold text-yt-textMuted uppercase tracking-wider mb-2 flex items-center"><i data-lucide="layers" class="w-4 h-4 mr-1.5 text-[#3ea6ff]"></i> Committee Assignments</h4>
-                                <div class="text-xs font-medium text-yt-textMuted bg-yt-input p-3 rounded border border-yt-border shadow-sm max-h-40 overflow-y-auto custom-scrollbar leading-relaxed" id="modalCommittees"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-yt-elevated px-6 py-4 sm:px-10 flex justify-end border-t border-yt-border">
-                    <button type="button" onclick="closeModal()" class="w-full sm:w-auto inline-flex justify-center rounded border border-yt-borderHover shadow-sm px-4 py-2 bg-yt-hover text-sm font-medium text-yt-text hover:bg-yt-border focus:outline-none">
-                        Close Profile
-                    </button>
-                </div>
-            </div>
+            <button type="button" class="chip" id="raceViewToggle" aria-pressed="false"
+                    title="Group each incumbent with everyone challenging them">
+                Group by race
+            </button>
         </div>
-    </div>
 
-
-    <script src="data/profiles.js"></script>
-    <script>
-        const legislatorsData = window.legislatorsData || [];
-        if (!legislatorsData.length) {
-            console.error('KYC: data/profiles.js did not load. Run: python build_profile_site.py');
-        }
-        let activeChamber = 'all', activeParty = 'all', activeState = 'all', activeElection = 'all', searchQuery = '';
-
-        window.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('searchInput')
-                .addEventListener('input', KYC.debounce(filterData, 140));
-            document.getElementById('stateSelect')
-                .addEventListener('change', filterData);
-            updateElectionWatchBadge();
-            initializeStateFilter();
-            applyRoute(KYC.router.read());
-        });
-
-        function initializeStateFilter() {
-            const stateSelect = document.getElementById('stateSelect');
-            const states = [...new Set(legislatorsData.map(item => item.state))].sort();
-            states.forEach(state => {
-                if(state && state !== 'N/A' && state !== 'nan') {
-                    const opt = document.createElement('option');
-                    opt.value = state;
-                    opt.textContent = state;
-                    stateSelect.appendChild(opt);
-                }
-            });
-        }
-
-        window.setFilter = function(element, type) {
-            if(type === 'chamber') {
-                document.querySelectorAll('button[data-filter="all"][onclick*="chamber"], button[data-filter="Senate"], button[data-filter="House"]').forEach(b => {
-                    b.classList.remove('active');
-                });
-                activeChamber = element.dataset.filter;
-            } else if (type === 'party') {
-                if(element.classList.contains('active')) {
-                    element.classList.remove('active');
-                    activeParty = 'all';
-                } else {
-                    document.querySelectorAll('button[data-filter="Democrat"], button[data-filter="Republican"]').forEach(b => {
-                        b.classList.remove('active');
-                    });
-                    activeParty = element.dataset.filter;
-                }
-            } else if (type === 'election') {
-                if(element.classList.contains('active')) {
-                    element.classList.remove('active');
-                    activeElection = 'all';
-                } else {
-                    document.querySelectorAll('button[data-filter="senateUp26"], button[data-filter="notSeeking"], button[data-filter="Candidate"]').forEach(b => {
-                        b.classList.remove('active');
-                    });
-                    activeElection = element.dataset.filter;
-                }
-            }
-
-            if (type === 'chamber' || (type !== 'chamber' && activeParty !== 'all' && element.dataset.filter === activeParty) || (type !== 'chamber' && activeElection !== 'all' && element.dataset.filter === activeElection)) {
-                 element.classList.add('active');
-            }
-
-            filterData();
-        }
-
-        function filterData() {
-            searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
-            activeState = document.getElementById('stateSelect').value;
-            KYC.router.writeFilters(currentFilterParams());
-
-            const filtered = legislatorsData.filter(item => {
-                // Matches across committees, education, professions and platform
-                // too - searching "Armed Services" or "veteran" used to find nothing.
-                const searchMatch = KYC.matchesQuery(item, searchQuery);
-
-                let chamberMatch = true;
-                if (activeChamber === 'Senate') chamberMatch = item.chamber.includes('Senate');
-                else if (activeChamber === 'House') chamberMatch = item.chamber.includes('House');
-
-                let partyMatch = true;
-                if (activeParty === 'Democrat') partyMatch = item.party === 'Democrat' || item.party === 'Democratic' || item.party === 'Democratic-Farmer Labor';
-                else if (activeParty === 'Republican') partyMatch = item.party === 'Republican';
-
-                const stateMatch = activeState === 'all' || item.state === activeState;
-
-                let electionMatch = true;
-                if (activeElection === 'senateUp26') {
-                    // The 35 Senate seats on the 2026 ballot.
-                    electionMatch = item.seatUp2026 && !item.isCandidate && item.chamber.includes('Senate');
-                } else if (activeElection === 'notSeeking') {
-                    // Incumbents whose seat is up but who are not running again.
-                    electionMatch = item.seatUp2026 && !item.isCandidate && !item.seekingReelection2026;
-                } else if (activeElection === 'Candidate') {
-                    electionMatch = item.isCandidate;
-                }
-
-                return searchMatch && chamberMatch && partyMatch && stateMatch && electionMatch;
-            });
-
-            document.getElementById('resultsLabel').textContent = `Showing ${filtered.length} profiles`;
-            window.filteredData = filtered;
-            sortAndRender();
-        }
-
-        let raceView = false;
-
-        function toggleRaceView() {
-            raceView = !raceView;
-            const btn = document.getElementById('raceViewToggle');
-            btn.classList.toggle('active', raceView);
-            btn.setAttribute('aria-pressed', String(raceView));
-            sortAndRender();
-        }
-
-        // A voter's question is "who is running for my seat", which a flat grid
-        // of 594 cards cannot answer. Races group an incumbent with everyone
-        // challenging them.
-        function renderRaces(data) {
-            const visible = new Set(data.map(x => x.id));
-            const byId = new Map(legislatorsData.map(x => [x.id, x]));
-            const races = (window.kycRaces || [])
-                .map(race => ({
-                    race,
-                    people: race.incumbentIds.concat(race.candidateIds)
-                        .filter(id => visible.has(id))
-                        .map(id => byId.get(id))
-                        .filter(Boolean),
-                }))
-                .filter(entry => entry.people.length);
-
-            if (!races.length) return '';
-
-            return races.map(({ race, people }) => {
-                const badges = [];
-                if (race.openSeat) badges.push('<span class="kyc-badge kyc-badge--estimate">Open seat</span>');
-                if (race.contested) badges.push(
-                    `<span class="kyc-badge kyc-badge--source">${race.candidateCount} challenger${race.candidateCount === 1 ? '' : 's'}</span>`
-                );
-                return `
-                    <section class="mb-8" aria-label="${KYC.escapeHtml(race.label)}">
-                        <div class="flex items-center gap-3 mb-3 pb-2 border-b border-yt-border">
-                            <h3 class="text-sm font-bold text-yt-text">${KYC.escapeHtml(race.label)}</h3>
-                            ${badges.join(' ')}
-                        </div>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-x-4 gap-y-8">
-                            ${people.map(cardHtml).join('')}
-                        </div>
-                    </section>`;
-            }).join('');
-        }
-
-        function sortAndRender() {
-            const sortBy = document.getElementById('sortBy').value;
-            const data = window.filteredData || [];
-            const cardsGrid = document.getElementById('cardsGrid');
-            const noResults = document.getElementById('noResults');
-
-            if (data.length === 0) {
-                cardsGrid.innerHTML = '';
-                noResults.classList.remove('hidden');
-                return;
-            } else {
-                noResults.classList.add('hidden');
-            }
-
-            data.sort((a, b) => {
-                if (sortBy === 'name') return a.name.localeCompare(b.name);
-                else if (sortBy === 'age-desc') return (typeof b.age === 'number' ? b.age : 0) - (typeof a.age === 'number' ? a.age : 0);
-                else if (sortBy === 'age-asc') return (typeof a.age === 'number' ? a.age : 999) - (typeof b.age === 'number' ? b.age : 999);
-                else if (sortBy === 'senate-26') {
-                    const aUp = (a.chamber.includes('Senate') && (a.isUpIn2026 || a.isCandidate)) ? 0 : 1;
-                    const bUp = (b.chamber.includes('Senate') && (b.isUpIn2026 || b.isCandidate)) ? 0 : 1;
-                    if (aUp !== bUp) return aUp - bUp;
-                    const stateComp = a.state.localeCompare(b.state);
-                    if (stateComp !== 0) return stateComp;
-                    const aCand = a.isCandidate ? 1 : 0;
-                    const bCand = b.isCandidate ? 1 : 0;
-                    return aCand - bCand;
-                }
-                else {
-                    const isA_Sen = a.chamber.includes('Senate') ? 1 : 2;
-                    const isB_Sen = b.chamber.includes('Senate') ? 1 : 2;
-                    if (isA_Sen !== isB_Sen) return isA_Sen - isB_Sen;
-                    const stateComp = a.state.localeCompare(b.state);
-                    if (stateComp !== 0) return stateComp;
-                    return parseDistrictNum(a.district) - parseDistrictNum(b.district);
-                }
-            });
-
-            if (raceView) {
-                cardsGrid.className = '';
-                cardsGrid.innerHTML = renderRaces(data);
-                lucide.createIcons();
-                return;
-            }
-            cardsGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-x-4 gap-y-8';
-            cardsGrid.innerHTML = data.map(cardHtml).join('');
-        }
-
-        function cardHtml(item) {
-            {
-                let partyColor = item.party.includes('Democrat') ? 'text-[#3ea6ff]' : (item.party === 'Republican' ? 'text-[#ff4e45]' : 'text-[#ffb000]');
-                if (item.party === 'Vacant' || item.status === 'Vacant') partyColor = 'text-yt-text';
-
-                let imgSrc = item.photos && item.photos.length > 0 ? item.photos[0] : 'placeholder';
-                if (imgSrc === 'placeholder') imgSrc = defaultSilhouette;
-
-                let officeLabel = item.chamber;
-                if (item.chamber.includes('House')) {
-                    let dist = (item.district && item.district !== 'N/A' && item.district !== 'nan') ? item.district : '';
-                    if (dist.toLowerCase() === 'at-large' || dist === '0') dist = 'AL';
-                    officeLabel = dist ? `House • ${item.state}-${dist}` : `House • ${item.state}`;
-                } else if (item.chamber.includes('Senate')) {
-                    officeLabel = `Senate • ${item.state}`;
-                }
-
-                let customStatusBadge = "";
-                const lowerStatus = item.status ? item.status.toLowerCase() : '';
-                const isLeaving = lowerStatus.includes('retiring') || lowerStatus.includes('not running') || lowerStatus.includes('defeated') || lowerStatus.includes('ineligible');
-
-                if (isLeaving) {
-                    customStatusBadge = `<span class="bg-[#ff4e45]/10 text-[#ff4e45] px-1.5 py-0.5 rounded text-[10px] font-bold w-fit mt-1">Leaving '26</span>`;
-                } else if (item.chamber.includes('Senate') && item.isUpIn2026 && !item.isCandidate) {
-                    customStatusBadge = `<span class="bg-[#ffb000]/10 text-[#ffb000] px-1.5 py-0.5 rounded text-[10px] font-bold w-fit mt-1">Seat Up '26</span>`;
-                } else if (item.isCandidate) {
-                    customStatusBadge = `<span class="bg-[#2ba640]/10 text-[#2ba640] px-1.5 py-0.5 rounded text-[10px] font-bold w-fit mt-1">Challenger '26</span>`;
-                } else if (item.party === 'Vacant' || item.status === 'Vacant') {
-                    customStatusBadge = `<span class="bg-yt-hover text-yt-text px-1.5 py-0.5 rounded text-[10px] border border-yt-border font-bold w-fit mt-1">VACANT SEAT</span>`;
-                } else if (item.chamber.includes('Senate') && item.electionYear) {
-                    customStatusBadge = `<span class="bg-yt-hover text-yt-textMuted px-1.5 py-0.5 rounded text-[10px] border border-yt-border font-bold w-fit mt-1">Up In '${item.electionYear.toString().substring(2)}</span>`;
-                }
-
-                return `
-                    <div class="group cursor-pointer flex flex-col gap-2" onclick="openProfile('${item.id}')">
-                        <div class="relative w-full aspect-[4/5] rounded overflow-hidden bg-yt-hover border border-yt-border group-hover:border-yt-text transition-colors">
-                            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                                 src="${imgSrc}"
-                                 loading="lazy"
-                                 data-photo-idx="0"
-                                 decoding="async"
-                                 onerror="window.handleImageFallback(this, '${item.id}')"
-                                 alt="${item.name}">
-                        </div>
-                        <div class="flex flex-col px-1">
-                            <h3 class="text-sm font-bold text-yt-text leading-tight line-clamp-2">${item.name}</h3>
-                            <p class="text-xs text-yt-textMuted mt-1 line-clamp-1 font-medium">${officeLabel}</p>
-                            <p class="text-[11px] ${partyColor} font-bold line-clamp-1 mt-0.5">${item.party}</p>
-                            ${customStatusBadge}
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
-        function parseDistrictNum(val) {
-            if (!val || val === 'N/A' || val === 'nan') return 999;
-            if (val.toLowerCase().includes('at-large')) return 0;
-            const matchSimple = val.match(/\d+/);
-            return matchSimple ? parseInt(matchSimple[0]) : 999;
-        }
-
-
-        // Election flags (isCandidate, seatUp2026 / isUpIn2026,
-        // seekingReelection2026, termEndYear, electionYear) are computed by
-        // the build in kyc/profiles.py and arrive in data/profiles.js.
-
-        function updateElectionWatchBadge() {
-            const senateUp = legislatorsData.filter(i => i.isUpIn2026 && i.chamber.includes('Senate') && !i.isCandidate);
-            const dUp = senateUp.filter(i => i.party.includes('Democrat') || i.party === 'Independent').length;
-            const rUp = senateUp.filter(i => i.party === 'Republican').length;
-
-            const territories = ['AS', 'DC', 'GU', 'MP', 'PR', 'VI'];
-            const votingHouseMembers = legislatorsData.filter(i => i.chamber === 'House' && !territories.includes(i.state));
-
-            const hR = votingHouseMembers.filter(i => i.party === 'Republican').length;
-            const hD = votingHouseMembers.filter(i => i.party.includes('Democrat') || i.party === 'Democratic-Farmer Labor').length;
-            const hI = votingHouseMembers.filter(i => i.party !== 'Republican' && !i.party.includes('Democrat') && i.party !== 'Vacant' && i.party !== 'Democratic-Farmer Labor').length;
-            const hV = votingHouseMembers.filter(i => i.party === 'Vacant' || i.status === 'Vacant').length;
-
-            const hStats = document.getElementById('navHouseStats');
-            if (hStats) {
-                let vStr = hV > 0 ? `<span class="text-yt-textFaint font-normal mx-1.5">|</span> <span class="inline-flex items-center font-bold text-yt-text mr-1.5">${hV} Vacant</span>` : '';
-                let iStr = hI > 0 ? `<span class="text-yt-textFaint font-normal mx-1.5">|</span> <span class="inline-flex items-center font-bold text-[#ffb000] mr-1.5">${hI} Ind</span>` : '';
-                hStats.innerHTML = `<span class="font-bold text-yt-text mr-2 flex items-center"><i data-lucide="columns" class="w-3.5 h-3.5 mr-1 text-yt-textMuted"></i> HOUSE:</span>
-                        <span class="inline-flex items-center font-bold text-[#ff4e45] mr-1.5">${hR} R</span>
-                        <span class="text-yt-textFaint font-normal mx-1.5">|</span>
-                        <span class="inline-flex items-center font-bold text-[#3ea6ff] mr-1.5">${hD} D</span>
-                        ${iStr}
-                        ${vStr}`;
-            }
-
-            const sStats = document.getElementById('sidebarHouseStats');
-            if (sStats) {
-                let vStr = hV > 0 ? ` <span class="text-yt-textFaint font-normal mx-1">|</span> <span class="text-yt-text">${hV} Vacant</span>` : '';
-                let iStr = hI > 0 ? ` <span class="text-yt-textFaint font-normal mx-1">|</span> <span class="text-[#ffb000]">${hI} I</span>` : '';
-                sStats.innerHTML = `<span class="text-[#ff4e45]">${hR} R</span> <span class="text-yt-textFaint font-normal mx-1">|</span> <span class="text-[#3ea6ff]">${hD} D</span>${iStr}${vStr}`;
-            }
-
-            const senDef = document.getElementById('senateDefendingCount');
-            if(senDef) {
-                senDef.innerHTML = `<span class="text-[#3ea6ff]">${dUp} D</span> / <span class="text-[#ff4e45]">${rUp} R</span>`;
-            }
-        }
-
-        // defaultSilhouette + handleImageFallback now live in assets/kyc.js
-
-        function openProfile(id, opts) {
-            const item = legislatorsData.find(x => x.id === id);
-            if (!item) return;
-            if (!(opts && opts.fromRoute)) KYC.router.writeProfile(id);
-
-            document.getElementById('modalName').textContent = item.name;
-
-            let officeLabel = item.chamber;
-            if (item.chamber.includes('House')) {
-                let dist = (item.district && item.district !== 'N/A' && item.district !== 'nan') ? item.district : '';
-                if (dist.toLowerCase() === 'at-large' || dist === '0') dist = 'AL';
-                officeLabel = dist ? `House • ${item.state}-${dist}` : `House • ${item.state}`;
-            } else if (item.chamber.includes('Senate')) {
-                officeLabel = `Senate • ${item.state}`;
-            }
-
-            document.getElementById('modalRegion').textContent = officeLabel;
-            document.getElementById('modalTerm').textContent = item.term_start || "N/A";
-
-            // A sitting member running for a different seat has two profiles;
-            // link them so the pair reads as deliberate rather than duplicated.
-            const cross = document.getElementById('modalCrossLink');
-            const linkId = item.alsoRunningId || item.incumbentId;
-            const linkSeat = item.alsoRunningSeat || item.incumbentSeat;
-            if (linkId && linkSeat) {
-                const verb = item.alsoRunningId ? 'Also running' : 'Currently holds';
-                cross.className = "flex items-center";
-                cross.innerHTML = `<i data-lucide="git-branch" class="w-4 h-4 mr-1"></i> ${verb}:
-                    <button class="ml-1 font-bold text-[#3ea6ff] hover:underline" onclick="openProfile('${linkId}')">${linkSeat}</button>`;
-            } else {
-                cross.className = "hidden items-center";
-                cross.innerHTML = '';
-            }
-
-            const chamberTag = document.getElementById('modalChamberTag');
-            chamberTag.textContent = item.chamber;
-            if (item.chamber.includes('Senate')) {
-                chamberTag.className = "inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-[#3ea6ff]/10 text-[#3ea6ff] border border-[#3ea6ff]/30";
-            } else {
-                chamberTag.className = "inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-yt-hover text-yt-textMuted border border-yt-border";
-            }
-
-            const partyBadge = document.getElementById('modalPartyBadge');
-            partyBadge.textContent = item.party;
-            if (item.party === 'Democrat' || item.party === 'Democratic' || item.party === 'Democratic-Farmer Labor') {
-                partyBadge.className = "absolute -bottom-2 -right-2 px-3 py-1 text-xs font-bold rounded text-[#ffffff] bg-[#3ea6ff] shadow border border-opacity-20";
-            } else if (item.party === 'Republican') {
-                partyBadge.className = "absolute -bottom-2 -right-2 px-3 py-1 text-xs font-bold rounded text-[#ffffff] bg-[#ff4e45] shadow border border-opacity-20";
-            } else if (item.party === 'Vacant' || item.status === 'Vacant') {
-                partyBadge.className = "absolute -bottom-2 -right-2 px-3 py-1 text-xs font-bold rounded text-yt-inverse bg-yt-text shadow border border-opacity-20";
-            } else {
-                partyBadge.className = "absolute -bottom-2 -right-2 px-3 py-1 text-xs font-bold rounded text-[#ffffff] bg-[#ffb000] shadow border border-opacity-20";
-            }
-
-            const photoImg = document.getElementById('modalPhoto');
-            photoImg.dataset.photoIdx = "0";
-
-            if (item.photos && item.photos.length > 0 && item.photos[0] !== 'placeholder') {
-                photoImg.src = item.photos[0];
-                photoImg.onerror = function() {
-                    window.handleImageFallback(this, item.id);
-                };
-            } else {
-                photoImg.onerror = null;
-                photoImg.src = defaultSilhouette;
-            }
-
-            let ageBirthText = "Unknown";
-            if (item.age && item.age !== 'Unknown') {
-                ageBirthText = (item.birthdate && item.birthdate !== 'Unknown')
-                    ? `${item.age} years old (${item.birthdate})`
-                    : `${item.age} years old`;
-            } else if (item.birthdate && item.birthdate !== 'Unknown') {
-                ageBirthText = item.birthdate;
-            }
-            document.getElementById('modalAgeBirth').textContent = ageBirthText;
-            // renderField distinguishes a real value from "no disclosure exists"
-            // from "nobody has researched this", instead of showing all three
-            // as if they were findings.
-            document.getElementById('modalNetWorth').innerHTML = KYC.renderField(item, 'net_worth');
-            document.getElementById('modalEducation').innerHTML = KYC.renderField(item, 'education');
-            document.getElementById('modalProfessions').innerHTML = KYC.renderField(item, 'previous_professions');
-
-            const platformDiv = document.getElementById('modalPlatform');
-            platformDiv.innerHTML = '';
-            let cleanPlatforms = item.platforms;
-            if (!cleanPlatforms || cleanPlatforms === 'N/A' || cleanPlatforms === 'nan') {
-                platformDiv.innerHTML = '<span class="text-sm font-normal text-yt-textMuted leading-relaxed">Platform priorities not specified or pending campaign filing.</span>';
-            } else {
-                if (cleanPlatforms.startsWith('[') && cleanPlatforms.endsWith(']')) {
-                    try {
-                        const arr = JSON.parse(cleanPlatforms.replace(/'/g, '"'));
-                        if (Array.isArray(arr)) {
-                            platformDiv.innerHTML = `<ul class="list-disc pl-4 space-y-2">` + arr.map(x => `<li>${x}</li>`).join('') + `</ul>`;
-                            cleanPlatforms = '';
-                        }
-                    } catch {}
-                }
-                if (cleanPlatforms) {
-                    const bullets = cleanPlatforms.split(', ');
-                    if (bullets.length > 1) {
-                        platformDiv.innerHTML = `<ul class="list-disc pl-4 space-y-2">` + bullets.map(x => `<li>${x}</li>`).join('') + `</ul>`;
-                    } else {
-                        platformDiv.innerHTML = `<p>${cleanPlatforms}</p>`;
-                    }
-                }
-            }
-
-            document.getElementById('modalReceipts').innerHTML =
-                KYC.renderField(item, 'receipts', { source: true });
-            document.getElementById('modalDisbursements').innerHTML =
-                KYC.renderField(item, 'disbursements');
-            document.getElementById('modalFunding').innerHTML =
-                KYC.renderField(item, 'funding_sources');
-
-            const cashEl = document.getElementById('modalCash');
-            if (cashEl) {
-                cashEl.textContent = item.cashOnHand || '—';
-                cashEl.parentElement.classList.toggle('hidden', !item.cashOnHand);
-            }
-
-            const votingDiv = document.getElementById('modalVoting');
-            const alignmentText = item.voting_alignment || "N/A";
-
-            if (!alignmentText || alignmentText === 'N/A' || alignmentText === 'nan') {
-                votingDiv.innerHTML = `<span class="text-sm font-normal text-yt-textMuted leading-relaxed">No historical congressional voting record available (Candidate).</span>`;
-            } else {
-                const match = alignmentText.match(/DW-NOMINATE:\s*([+-]?\d+\.?\d*)/i);
-                if (match) {
-                    const score = parseFloat(match[1]);
-                    let pct = ((score + 1.0) / 2.0) * 100;
-                    pct = Math.max(0, Math.min(100, pct));
-
-                    const labelMatch = alignmentText.match(/\(([^)]+)\)/);
-                    const label = labelMatch ? labelMatch[1] : '';
-
-                    const loyaltyMatch = alignmentText.match(/•\s*(.*)/);
-                    const loyalty = loyaltyMatch ? loyaltyMatch[1].trim() : '';
-
-                    let scoreColor = "text-[#3ea6ff]";
-                    if (score <= -0.1) scoreColor = "text-[#3ea6ff]";
-                    else if (score >= 0.1) scoreColor = "text-[#ff4e45]";
-                    else scoreColor = "text-[#a855f7]";
-
-                    const signStr = score > 0 ? "+" + score.toFixed(2) : score.toFixed(2);
-
-                    votingDiv.innerHTML = `
-                        <div class="space-y-3 w-full">
-                            <div class="flex justify-between items-center text-xs w-full">
-                                <span class="font-bold text-yt-text text-sm">
-                                    <span class="${scoreColor}">${signStr}</span>
-                                    ${label ? `<span class="text-yt-textMuted font-medium ml-1">(${label})</span>` : ''}
-                                </span>
-                                ${loyalty ? `<span class="text-[10px] font-bold text-yt-textMuted bg-yt-bg px-2 py-1 rounded border border-yt-borderHover whitespace-nowrap ml-2">${loyalty}</span>` : ''}
-                            </div>
-                            <div class="relative w-full pt-1 pb-1">
-                                <div class="w-full h-2 rounded-full bg-gradient-to-r from-[#3ea6ff] via-[#a855f7] to-[#ff4e45] shadow-inner relative border border-yt-border">
-                                    <div class="absolute -top-1 w-2 h-4 bg-yt-text border border-yt-inverse rounded-sm shadow-md transition-all -ml-1 transform z-10" style="left: ${pct}%;"></div>
-                                </div>
-                                <div class="flex justify-between text-[9px] font-bold uppercase text-yt-textFaint mt-2">
-                                    <span class="text-[#3ea6ff]/80 tracking-wider">-1.0 (Prog)</span>
-                                    <span class="text-yt-textFaint tracking-wider text-center">Moderate</span>
-                                    <span class="text-[#ff4e45]/80 tracking-wider">+1.0 (Cons)</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    votingDiv.innerHTML = `<span class="text-sm font-normal text-yt-textMuted leading-relaxed">${alignmentText}</span>`;
-                }
-            }
-
-            const commDiv = document.getElementById('modalCommittees');
-            const commsText = item.committees || "None";
-            if (!commsText || commsText === 'None' || commsText === 'None (Candidate)' || commsText === 'N/A' || commsText === 'nan') {
-                commDiv.innerHTML = `<div class="py-1.5 flex items-start text-yt-textFaint italic"><span>No formal congressional committee assignments (Candidate / Non-incumbent).</span></div>`;
-            } else {
-                const comms = commsText.split('; ');
-                commDiv.innerHTML = comms.map(c => `
-                    <div class="py-1.5 border-b border-yt-border last:border-0 flex items-start">
-                        <span class="w-1 h-1 mt-2 bg-[#3ea6ff] rounded-full shrink-0 mr-2"></span>
-                        <span>${c}</span>
-                    </div>
-                `).join('');
-            }
-
-            const modal = document.getElementById('profileModal');
-            modal.classList.remove('hidden');
-            profileDialog.open();
-            lucide.createIcons();
-        }
-
-        // Focus trap, Escape handling and focus restore come from assets/kyc.js.
-        const profileDialog = KYC.createModal(
-            document.getElementById('profileModal'),
-            { onClose: () => KYC.router.clearProfile() }
-        );
-
-        function closeModal() {
-            profileDialog.close();
-        }
-
-        // --- deep linking -------------------------------------------------
-        // Every view has a URL: "#/profile/<id>" for a person, "#/?state=TX"
-        // for a filtered list, so any view can be linked to and shared.
-        function currentFilterParams() {
-            return {
-                q: searchQuery,
-                chamber: activeChamber,
-                party: activeParty,
-                state: activeState,
-                election: activeElection,
-                sort: document.getElementById('sortBy').value,
-            };
-        }
-
-        function applyRoute(route) {
-            if (route.view === 'profile') {
-                const known = legislatorsData.some(x => x.id === route.id);
-                if (known) { openProfile(route.id, { fromRoute: true }); return; }
-            }
-            if (profileDialog.isOpen()) profileDialog.close();
-
-            const p = route.params || {};
-            const chip = (filter, group) => {
-                const btn = document.querySelector(`button[data-filter="${filter}"]`);
-                if (btn && !btn.classList.contains('active')) setFilter(btn, group);
-            };
-            if (p.q) document.getElementById('searchInput').value = p.q;
-            if (p.state) document.getElementById('stateSelect').value = p.state;
-            if (p.sort) document.getElementById('sortBy').value = p.sort;
-            if (p.chamber) chip(p.chamber, 'chamber');
-            if (p.party) chip(p.party, 'party');
-            if (p.election) chip(p.election, 'election');
-            filterData();
-        }
-
-        KYC.router.onChange(() => applyRoute(KYC.router.read()));
-
-    </script>
+        <div class="content scroll-y">
+            <p class="results-bar" id="resultsLabel" role="status" aria-live="polite">
+                Loading profiles…
+            </p>
+
+            <div id="results" class="card-grid"></div>
+
+            <div id="noResults" class="empty-state" hidden>
+                <svg class="icon" aria-hidden="true"><use href="#i-search-x"/></svg>
+                <h3>No profiles found</h3>
+                <p>Nothing matches this combination of search terms and filters.
+                   Try clearing a filter or searching for a state code.</p>
+            </div>
+
+            <footer class="site-footer">
+                <p><strong>Sources:</strong>
+                    roll-call ideology from Voteview DW-NOMINATE;
+                    campaign finance from the Federal Election Commission;
+                    rosters and portraits from Congress.gov,
+                    the <code>congress-legislators</code> dataset and Wikipedia.</p>
+                <p>Fields shown as <span class="kyc-absent">Not disclosed</span> have no
+                    public filing behind them; <span class="kyc-generic">dotted</span>
+                    values are generic placeholders rather than researched detail.
+                    Neither is counted as a finding, and neither is searchable.</p>
+                <p>Non-partisan and independent. Data built
+                    <time id="buildStamp">—</time>.</p>
+            </footer>
+        </div>
+    </main>
+</div>
+
+<script src="data/profiles.js"></script>
+<script src="assets/kyc-profile.js"></script>
+<script src="assets/kyc-directory.js"></script>
 </body>
 </html>

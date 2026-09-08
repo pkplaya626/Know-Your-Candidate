@@ -316,6 +316,12 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Rep._Rob_Bresnahan_official_photo%2C_119th_Congress.jpg/960px-Rep._Rob_Bresnahan_official_photo%2C_119th_Congress.jpg",
   "via": "wikipedia"
  },
+ "bioguide:B001328": {
+  "name": "Everton Blair Jr.",
+  "title": "Everton Blair",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Everton_Blair%2C_official_portrait_%28119th_Congress%29.jpg",
+  "via": "wikipedia"
+ },
  "bioguide:C000059": {
   "name": "Ken Calvert",
   "url": "https://www.congress.gov/img/member/c000059_200.jpg",
@@ -2875,6 +2881,12 @@
   "title": "James Walkinshaw",
   "unverified": true,
   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Congressman_Walkinshaw_Official_Portrait.jpg/960px-Congressman_Walkinshaw_Official_Portrait.jpg",
+  "via": "wikipedia"
+ },
+ "bioguide:W000832": {
+  "name": "Aisha Wahab",
+  "title": "Aisha Wahab",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/3/3e/Aisha_Wahab%2C_official_portrait_-_2026.jpg",
   "via": "wikipedia"
  },
  "bioguide:Y000064": {
