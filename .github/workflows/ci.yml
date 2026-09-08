@@ -44,14 +44,25 @@ jobs:
       - name: Validate the data (no network)
         run: python build_profile_site.py build --check --strict --verbose
 
-      - name: Rebuild and confirm the output is reproducible
+      # Two separate questions, and conflating them is what broke this step
+      # before: a rebuild always stamps a fresh timestamp, so `git diff` could
+      # only be kept quiet by committing the fixed SOURCE_DATE_EPOCH date and
+      # showing 2001 to readers as the site's freshness stamp.
+      - name: The committed data still matches the sources
+        run: python build_profile_site.py verify
+
+      - name: A rebuild is byte-for-byte reproducible
         env:
           SOURCE_DATE_EPOCH: "1000000000"
         run: |
-          python build_profile_site.py
-          python build_profile_site.py
-          git diff --exit-code -- candidate_profiles_site/data/ \
-            || { echo "A rebuild changed the generated data; commit the regenerated files."; exit 1; }
+          python build_profile_site.py > /dev/null
+          cp candidate_profiles_site/data/profiles.js "$RUNNER_TEMP/profiles.1.js"
+          cp candidate_profiles_site/data/geo.js "$RUNNER_TEMP/geo.1.js"
+          python build_profile_site.py > /dev/null
+          cmp "$RUNNER_TEMP/profiles.1.js" candidate_profiles_site/data/profiles.js
+          cmp "$RUNNER_TEMP/geo.1.js" candidate_profiles_site/data/geo.js
+          echo "ok: two builds at the same epoch are identical"
+          git checkout -- candidate_profiles_site/data/
 
   site:
     name: Site

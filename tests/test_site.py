@@ -2,6 +2,8 @@
 page wiring, and the validation checks added alongside them.
 """
 
+import contextlib
+import io
 import json
 import os
 import sys
@@ -164,6 +166,62 @@ class TestEmit(unittest.TestCase):
             self.assertTrue(os.path.exists(path))
             self.assertFalse(os.path.exists(path + ".tmp"))
             self.assertGreater(size, 0)
+
+
+class TestDataSignature(unittest.TestCase):
+    """The committed data carries a content hash of what produced it.
+
+    `git diff --exit-code` conflated "is the data in sync?" with "when was it
+    built?". A rebuild always stamps a fresh timestamp, so the only way to keep
+    the diff quiet was to commit the fixed SOURCE_DATE_EPOCH date - and then
+    show 2001 to readers as the site's freshness stamp.
+    """
+
+    def test_signature_ignores_the_build_timestamp(self):
+        first = emit.data_signature([member()], [], {"a": 1})
+        os.environ["SOURCE_DATE_EPOCH"] = "1000000000"
+        try:
+            second = emit.data_signature([member()], [], {"a": 1})
+        finally:
+            os.environ.pop("SOURCE_DATE_EPOCH", None)
+        self.assertEqual(first, second)
+
+    def test_signature_changes_with_the_data(self):
+        self.assertNotEqual(
+            emit.data_signature([member(name="A")]),
+            emit.data_signature([member(name="B")]),
+        )
+
+    def test_signature_covers_races_and_summary(self):
+        base = [member()]
+        self.assertNotEqual(emit.data_signature(base, [], {}),
+                            emit.data_signature(base, [{"id": "S-TX-2026"}], {}))
+        self.assertNotEqual(emit.data_signature(base, [], {}),
+                            emit.data_signature(base, [], {"senate": {"R": 1}}))
+
+    def test_written_file_records_its_signature(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            emit.write_profiles([member()], {}, root=tmp, races=[], summary={"x": 1})
+            recorded = emit.read_signature(tmp)
+        self.assertEqual(recorded, emit.data_signature([member()], [], {"x": 1}))
+
+    def test_read_signature_handles_a_missing_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertIsNone(emit.read_signature(tmp))
+
+    def test_geo_file_records_a_signature_too(self):
+        geo = {"states": {"TX": {"d": "M0,0l1,1Z"}}, "territories": []}
+        with tempfile.TemporaryDirectory() as tmp:
+            emit.write_geo(geo, root=tmp)
+            recorded = emit.read_signature(path=os.path.join(tmp, emit.GEO_FILE))
+        self.assertEqual(recorded, emit.geo_signature(geo))
+
+    def test_the_committed_data_is_in_sync(self):
+        # The same assertion CI makes, so a stale commit fails locally first.
+        buffer = io.StringIO()
+        with contextlib.redirect_stdout(buffer):
+            code = cli.main(["--root", ROOT, "verify"])
+        self.assertEqual(code, 0, buffer.getvalue())
 
 
 class TestPageWiring(unittest.TestCase):

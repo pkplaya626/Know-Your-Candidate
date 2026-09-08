@@ -1,6 +1,7 @@
 """Write the generated data files out for the site to load."""
 
 import datetime
+import hashlib
 import json
 import os
 import re
@@ -77,6 +78,38 @@ def _json(value):
     return text.replace("</", "<\\/").replace("<!--", "<\\!--")
 
 
+def data_signature(profiles, races=None, summary=None):
+    """A content hash of everything the build derives from the sources.
+
+    Deliberately excludes the build timestamp. "Is the committed data still in
+    sync with the CSVs?" and "when was this built?" are different questions,
+    and answering the first by diffing whole files forced the second to be a
+    lie: CI rebuilt with a fixed SOURCE_DATE_EPOCH, so keeping `git diff`
+    quiet would have meant committing a 2001 timestamp and showing it to
+    readers in the page footer as the freshness stamp.
+    """
+    payload = _json([profiles, races or [], summary or {}])
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+_SIGNATURE_RE = re.compile(r'"signature":"([0-9a-f]{64})"')
+
+
+def read_signature(root=".", path=None):
+    """The signature recorded in a generated file, or ``None``."""
+    target = path or os.path.join(root, DATA_FILE)
+    if not os.path.exists(target):
+        return None
+    with open(target, "r", encoding="utf-8") as handle:
+        # The signature lives in the metadata line at the end of the file;
+        # reading the whole 1 MB payload to find it would be wasteful.
+        for line in handle:
+            match = _SIGNATURE_RE.search(line)
+            if match:
+                return match.group(1)
+    return None
+
+
 def write_profiles(profiles, stats, root=".", races=None, summary=None):
     """Emit ``candidate_profiles_site/data/profiles.js``.
 
@@ -88,7 +121,8 @@ def write_profiles(profiles, stats, root=".", races=None, summary=None):
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
     built = build_timestamp()
-    meta = {"built": built, "counts": stats}
+    meta = {"built": built, "counts": stats,
+            "signature": data_signature(profiles, races, summary)}
     if summary:
         meta.update(summary)
 
@@ -115,8 +149,14 @@ def write_geo(geo, root="."):
         _BANNER.format(source="us_atlas_states_topo.json", built=build_timestamp())
         + f"// States: {len(geo.get('states', {}))}\n"
         + f"window.kycGeo = {_json(geo)};\n"
+        + 'window.kycGeoMeta = {"signature":"' + geo_signature(geo) + '"};\n'
     )
     return path, _atomic_write(path, text)
+
+
+def geo_signature(geo):
+    """Content hash of the map geometry, excluding the build timestamp."""
+    return hashlib.sha256(_json(geo).encode("utf-8")).hexdigest()
 
 
 def script_sources(html):

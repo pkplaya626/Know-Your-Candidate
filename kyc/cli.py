@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import os
 import sys
 
 from . import (
@@ -182,6 +183,81 @@ def _finance(args):
     return 0
 
 
+def _verify(args):
+    """Assert the committed data files still match the sources.
+
+    CI used to answer this by rebuilding and running `git diff --exit-code`.
+    That conflates two questions: whether the data is in sync, and when it was
+    built. Because a rebuild stamps a fresh timestamp, keeping the diff quiet
+    would have meant committing the fixed SOURCE_DATE_EPOCH date and showing
+    2001 to readers as the site's freshness stamp.
+
+    Comparing content signatures answers only the first question, works
+    without git, and tells a contributor what to run.
+    """
+    raw = _load(args)
+    if raw is None:
+        return 2
+
+    profiles, stats = build_profiles(raw)
+    finance = fec.load_cache(args.root)
+    stats["fec"] = fec.apply_cache(profiles, finance) if finance else 0
+    cache = portraits.load_cache(args.root)
+    stats["portraits"] = portraits.apply_cache(profiles, cache) if cache else 0
+
+    race_list = races_mod.build(profiles)
+    stats.update(races_mod.stats(race_list))
+    summary = summary_mod.build(profiles, races=race_list)
+
+    problems = []
+
+    expected = emit.data_signature(profiles, race_list, summary)
+    committed = emit.read_signature(args.root)
+    if committed is None:
+        problems.append(f"{emit.DATA_FILE} is missing or carries no signature")
+    elif committed != expected:
+        problems.append(
+            f"{emit.DATA_FILE} is stale\n"
+            f"       committed {committed[:16]}...\n"
+            f"       rebuilt   {expected[:16]}..."
+        )
+    else:
+        print(f"  ok  {emit.DATA_FILE} matches the rosters ({expected[:16]}...)")
+
+    try:
+        geo = geo_mod.build(args.root)
+    except geo_mod.AtlasError as exc:
+        problems.append(f"map geometry unavailable: {exc}")
+    else:
+        geo_expected = emit.geo_signature(geo)
+        geo_committed = emit.read_signature(
+            path=os.path.join(args.root, emit.GEO_FILE)
+        )
+        if geo_committed is None:
+            problems.append(f"{emit.GEO_FILE} is missing or carries no signature")
+        elif geo_committed != geo_expected:
+            problems.append(f"{emit.GEO_FILE} is stale")
+        else:
+            print(f"  ok  {emit.GEO_FILE} matches the atlas ({geo_expected[:16]}...)")
+
+    for page, ok, note in emit.check_pages(args.root):
+        if ok:
+            print(f"  ok  {page} loads its data in the right order")
+        else:
+            problems.append(f"{page}: {note}")
+
+    if problems:
+        print("\n[error] the committed site data is out of date:", file=sys.stderr)
+        for problem in problems:
+            print(f"  - {problem}", file=sys.stderr)
+        print("\nRun `python build_profile_site.py` and commit the result.",
+              file=sys.stderr)
+        return 1
+
+    print("\n[ok] committed data is in sync with the sources.")
+    return 0
+
+
 def _geo(args):
     try:
         geo = geo_mod.build(args.root)
@@ -249,6 +325,7 @@ def build_parser():
 
     add("fetch", help="refresh DW-NOMINATE scores from Voteview")
     add("geo", help="regenerate the map geometry from the state atlas")
+    add("verify", help="check the committed data still matches the sources")
 
     pics = add("portraits", help="resolve and verify portrait URLs")
     pics.add_argument("--refresh", action="store_true",
@@ -277,6 +354,8 @@ def main(argv=None):
         return _fetch(args)
     if args.command == "geo":
         return _geo(args)
+    if args.command == "verify":
+        return _verify(args)
     if args.command == "portraits":
         return _portraits(args)
     if args.command == "finance":
