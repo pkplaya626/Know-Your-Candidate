@@ -409,16 +409,51 @@ merges.
 
 ## Publishing
 
-`.github/workflows/deploy.yml` publishes `candidate_profiles_site/` to GitHub
-Pages. It is **manual only** (`workflow_dispatch`) — nothing goes live until
-someone triggers it from the Actions tab. The deploy re-runs validation and
-refuses to publish if the committed data is stale or the validator reports an
-error.
+The site is served by GitHub Pages at **<https://candidates.radicalrelay.us>**.
 
-No custom domain is configured yet. To add one, put the hostname in
-`candidate_profiles_site/CNAME`, point a DNS `CNAME` record at
-`<user>.github.io`, and add the absolute URLs to `robots.txt` and a
-`sitemap.xml`.
+`.github/workflows/deploy.yml` publishes `candidate_profiles_site/` on every
+push to `main` that touches the site, and on demand. It refuses to publish if
+`build --check --strict` reports an error or if `verify` finds the committed
+data out of step with the CSVs, so a broken build cannot reach readers.
+
+### The hostname lives in one place
+
+`candidate_profiles_site/CNAME` is what GitHub Pages actually serves from.
+Five other spots repeat it — the canonical link and `og:url` on both pages,
+the `Sitemap:` line in `robots.txt`, and `<loc>` in `sitemap.xml` — and
+`verify` fails if any of them disagree:
+
+```
+[error] the committed site is not self-consistent:
+  - candidate_profiles_site/robots.txt: names kyc.radicalrelay.us;
+    CNAME says candidates.radicalrelay.us
+```
+
+Nothing about a half-finished rename looks wrong locally; the site would just
+quietly tell search engines and social networks it lives somewhere it does not.
+
+### DNS
+
+One record, on Cloudflare, where `radicalrelay.us` is hosted:
+
+| Type | Name | Content | Proxy |
+|---|---|---|---|
+| `CNAME` | `candidates` | `pkplaya626.github.io` | **DNS only** (grey cloud) |
+
+It must be **DNS only**. Proxying it puts Cloudflare's certificate in front of
+GitHub's and blocks Pages from provisioning its own, which breaks HTTPS.
+
+This does not touch `subscribe.radicalrelay.us`, which is a separate Cloudflare
+Worker custom domain serving the Morning Digest newsletter, nor the apex, which
+has no record at all.
+
+### Social preview
+
+`assets/social-card.png` is the `og:image`, generated from
+`tools/social-card.html` with headless Chrome (the command is in that file).
+It deliberately carries no figures: the card cannot be regenerated on every
+data refresh, so any number on it would eventually be wrong — the same reason
+the sidebar counts moved into the build metadata.
 
 ## Known gaps
 

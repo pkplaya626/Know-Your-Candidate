@@ -346,12 +346,26 @@ def _verify(args):
         else:
             problems.append(f"{page}: {note}")
 
+    for name, ok, note in emit.check_hostname(args.root):
+        if ok:
+            print(f"  ok  {name}: {note}")
+        else:
+            problems.append(f"{name}: {note}")
+
     if problems:
-        print("\n[error] the committed site data is out of date:", file=sys.stderr)
+        print("\n[error] the committed site is not self-consistent:", file=sys.stderr)
         for problem in problems:
             print(f"  - {problem}", file=sys.stderr)
-        print("\nRun `python build_profile_site.py` and commit the result.",
-              file=sys.stderr)
+        # Only the generated files are fixed by rebuilding. The pages, CNAME,
+        # robots.txt and sitemap.xml are hand-maintained, and telling someone
+        # to run a build that cannot touch them wastes their time.
+        if any("is stale" in p or "signature" in p for p in problems):
+            print("\nFor stale data: run `python build_profile_site.py` and commit "
+                  "the result.", file=sys.stderr)
+        if any("CNAME says" in p or "names no host" in p for p in problems):
+            print("\nFor the hostname: candidate_profiles_site/CNAME is the source "
+                  "of truth. Update the pages, robots.txt and sitemap.xml to match "
+                  "it.", file=sys.stderr)
         return 1
 
     print("\n[ok] committed data is in sync with the sources.")

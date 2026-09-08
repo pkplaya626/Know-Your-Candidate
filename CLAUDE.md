@@ -55,6 +55,7 @@ python build_profile_site.py verify           # committed data matches sources
 python build_profile_site.py congress --check # roster vs Congress (offline)
 python build_profile_site.py congress --apply # write newly seated members in
 python build_profile_site.py geo              # regenerate map geometry only
+python build_profile_site.py congress         # refresh membership (network)
 python -m unittest discover tests             # 195 tests, no dependencies
 npm install && npm test                       # 133 real-DOM checks (needs jsdom)
 ```
@@ -171,7 +172,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     against the profile it is about to appear on. Money shown against the
     wrong person looks entirely normal on the page.
 
-21. **Only write fields the source actually knows.** `congress --apply` fills
+21. **The public hostname has one source of truth.** `CNAME` is what GitHub
+    Pages serves from; the canonical links, `og:url`, `robots.txt` and
+    `sitemap.xml` must agree, and `verify` fails when they do not. A
+    half-finished rename looks completely normal locally. Never put a hostname
+    in a new file without adding it to `emit._HOST_REFERENCES`.
+
+22. **Only write fields the source actually knows.** `congress --apply` fills
     name, party, state, district, term and birthday. Education, net worth,
     committees and platform stay empty, because the provenance layer reporting
     "No data" is true and a plausible invention is not.

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Only the two real pages are listed. Individual profiles live behind hash
+  fragments ("#/profile/<id>"), which crawlers do not treat as separate URLs,
+  so listing 596 of them would be listing URLs that do not exist.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://candidates.radicalrelay.us/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://candidates.radicalrelay.us/map.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>
