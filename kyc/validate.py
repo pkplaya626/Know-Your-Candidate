@@ -413,7 +413,69 @@ def check_snapshot(profiles, raw, snapshot):
     return issues
 
 
-def run(profiles, raw, races=None, geo=None, snapshot=None):
+# An FEC candidate id encodes the office and state it was filed for:
+# S2NM00088 is a New Mexico Senate campaign, H6GA13062 a Georgia House one.
+_FEC_ID = re.compile(r"^([HSP])\d([A-Z]{2})")
+
+
+def check_finance(profiles, finance):
+    """Every FEC figure must belong to the seat it is displayed under.
+
+    Money attributed to the wrong person is the worst thing this site could
+    do, and it would look completely normal on the page. The candidate id
+    carries its own office and state, so the attribution can be checked
+    against the profile rather than trusted.
+    """
+    if not finance:
+        return []
+
+    from . import fec
+
+    issues = []
+    wrong, unparsed = [], []
+
+    for profile in profiles:
+        record = finance.get(fec.profile_key(profile)) or {}
+        candidate_id = record.get("candidate_id")
+        if not candidate_id or record.get("receipts") is None:
+            continue
+
+        match = _FEC_ID.match(candidate_id)
+        if not match:
+            unparsed.append(f"{profile['name']}: {candidate_id}")
+            continue
+
+        office, state = match.groups()
+        expected = "S" if "Senate" in profile["chamber"] else "H"
+        if office != expected or state != profile["state"]:
+            wrong.append(
+                f"{profile['name']} ({profile['officeLabel']}) shows "
+                f"{candidate_id}, filed as {office}-{state}"
+                + (f" for {record.get('filed_name')}" if record.get("filed_name") else "")
+            )
+
+    if wrong:
+        issues.append(Issue("error", "fec-attribution",
+                            f"{len(wrong)} profiles show finance filed for another seat",
+                            wrong))
+    if unparsed:
+        issues.append(Issue("warn", "fec-unparsed-id",
+                            f"{len(unparsed)} FEC ids could not be read", unparsed))
+
+    searched = [
+        profile["name"] for profile in profiles
+        if (finance.get(fec.profile_key(profile)) or {}).get("via") == "fec-search"
+    ]
+    if searched:
+        # Not a problem, but worth seeing: these are the only ones matched by
+        # a fuzzy name search rather than an authoritative id.
+        issues.append(Issue("warn", "fec-name-matched",
+                            f"{len(searched)} profiles were matched to the FEC by name, "
+                            f"not by an authoritative id", sorted(searched)))
+    return issues
+
+
+def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_identity(profiles)
@@ -426,6 +488,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None):
     issues += check_markup(profiles)
     issues += check_geometry(profiles, geo)
     issues += check_snapshot(profiles, raw, snapshot)
+    issues += check_finance(profiles, finance)
     return issues
 
 

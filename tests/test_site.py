@@ -344,7 +344,7 @@ class TestFecKey(unittest.TestCase):
     def test_falls_back_to_demo_key(self):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertEqual(fec.api_key(tmp), "DEMO_KEY")
-            self.assertTrue(fec.using_demo_key())
+            self.assertTrue(fec.using_demo_key(tmp))
 
     def test_a_malformed_env_file_is_not_fatal(self):
         with tempfile.TemporaryDirectory() as tmp:

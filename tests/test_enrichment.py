@@ -11,7 +11,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from kyc import fec, normalize, portraits, races  # noqa: E402
+from kyc import fec, normalize, portraits, races, validate  # noqa: E402
 from kyc.normalize import TERRITORIES, classify  # noqa: E402
 from kyc.profiles import apply_quality, build_profiles  # noqa: E402
 from kyc.sources import load_all  # noqa: E402
@@ -169,6 +169,105 @@ class TestFec(unittest.TestCase):
         fec.apply_cache([profile], {fec.profile_key(profile): {"found": False}})
         self.assertEqual(profile["receipts"], "No data")
         self.assertEqual(profile["quality"]["receipts"], "unknown")
+
+
+class TestNoFilingIsNotNoData(unittest.TestCase):
+    """Four kinds of absence, and only one of them reports work we did.
+
+    "No data" is a claim about us: it says nobody looked. Once the pipeline
+    queries the FEC for every profile, using that label for a member the FEC
+    was asked about and holds no filing for throws away the more informative
+    fact - and several of them are sitting members running for a different
+    seat, whose money is simply in another committee.
+    """
+
+    def profile(self, **kwargs):
+        base = {"name": "A B", "state": "TX", "chamber": "House",
+                "receipts": "No data", "disbursements": "No data",
+                "quality": {"receipts": "unknown", "disbursements": "unknown"}}
+        base.update(kwargs)
+        return base
+
+    def test_checked_but_no_filing_is_its_own_status(self):
+        profile = self.profile()
+        cache = {fec.profile_key(profile): {
+            "found": False, "candidate_id": "H4TX01234", "via": "congress-legislators"}}
+        fec.apply_cache([profile], cache)
+        self.assertEqual(profile["quality"]["receipts"], normalize.NO_FILING)
+        self.assertEqual(profile["receipts"], "No filing this cycle")
+        self.assertEqual(profile["financeCycle"], fec.CYCLE)
+
+    def test_never_looked_up_stays_unknown(self):
+        # No candidate_id means we never identified them at the FEC at all.
+        profile = self.profile()
+        fec.apply_cache([profile], {fec.profile_key(profile): {"found": False}})
+        self.assertEqual(profile["quality"]["receipts"], "unknown")
+        self.assertEqual(profile["receipts"], "No data")
+
+    def test_a_profile_with_totals_is_untouched_by_the_new_branch(self):
+        profile = self.profile()
+        cache = {fec.profile_key(profile): {
+            "found": True, "candidate_id": "H4TX01234", "receipts": 100.0}}
+        fec.apply_cache([profile], cache)
+        self.assertEqual(profile["receipts"], "$100.00")
+        self.assertNotIn("receipts", profile["quality"])
+
+    def test_the_label_is_defined_once(self):
+        self.assertEqual(normalize.STATUS_LABELS[normalize.NO_FILING],
+                         "No filing this cycle")
+
+
+class TestFecAttribution(unittest.TestCase):
+    """Money shown against the wrong person would look entirely normal."""
+
+    def profile(self, **kwargs):
+        base = {"name": "A B", "state": "TX", "chamber": "House",
+                "officeLabel": "House - TX-1", "quality": {}}
+        base.update(kwargs)
+        return base
+
+    def test_an_id_from_another_state_is_an_error(self):
+        profile = self.profile()
+        cache = {fec.profile_key(profile): {"candidate_id": "H4CA01234",
+                                            "receipts": 1.0, "filed_name": "SOMEONE ELSE"}}
+        issues = validate.check_finance([profile], cache)
+        self.assertEqual([i.code for i in issues], ["fec-attribution"])
+        self.assertEqual(issues[0].level, "error")
+
+    def test_a_senate_id_on_a_house_profile_is_an_error(self):
+        profile = self.profile()
+        cache = {fec.profile_key(profile): {"candidate_id": "S4TX00123", "receipts": 1.0}}
+        codes = [i.code for i in validate.check_finance([profile], cache)]
+        self.assertIn("fec-attribution", codes)
+
+    def test_a_matching_id_passes(self):
+        profile = self.profile()
+        cache = {fec.profile_key(profile): {"candidate_id": "H4TX01234", "receipts": 1.0,
+                                            "via": "congress-legislators"}}
+        self.assertEqual(validate.check_finance([profile], cache), [])
+
+    def test_an_unreadable_id_is_reported(self):
+        profile = self.profile()
+        cache = {fec.profile_key(profile): {"candidate_id": "???", "receipts": 1.0}}
+        codes = [i.code for i in validate.check_finance([profile], cache)]
+        self.assertIn("fec-unparsed-id", codes)
+
+    def test_name_matched_profiles_are_surfaced(self):
+        profile = self.profile()
+        cache = {fec.profile_key(profile): {"candidate_id": "H4TX01234", "receipts": 1.0,
+                                            "via": "fec-search"}}
+        codes = [i.code for i in validate.check_finance([profile], cache)]
+        self.assertIn("fec-name-matched", codes)
+
+    def test_no_cache_means_no_findings(self):
+        self.assertEqual(validate.check_finance([self.profile()], None), [])
+
+    def test_the_real_data_attributes_every_figure_correctly(self):
+        raw = load_all(ROOT)
+        profiles, _ = build_profiles(raw)
+        issues = validate.check_finance(profiles, fec.load_cache(ROOT))
+        errors = [f"{i.code}: {i.detail}" for i in issues if i.level == "error"]
+        self.assertEqual(errors, [])
 
 
 class TestRaces(unittest.TestCase):

@@ -100,7 +100,7 @@ def _build(args):
               f"{stats['geo_territories']} territories")
 
     issues = validate.run(profiles, raw, races=race_list, geo=geo,
-                          snapshot=snapshot)
+                          snapshot=snapshot, finance=finance)
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:

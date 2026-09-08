@@ -159,7 +159,19 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     shows to readers as the freshness stamp. Generated files carry a content
     signature and `verify` compares that.
 
-19. **Only write fields the source actually knows.** `congress --apply` fills
+19. **Distinguish "we did not look" from "we looked and it is not there".**
+    `normalize.NO_FILING` exists because "No data" is a claim about us. The
+    FEC is queried for every profile, and 17 sitting members have no filing
+    this cycle because they are running for a different seat - which is
+    information, not an absence of it. Never fill that gap with the previous
+    cycle's figures; 2024 receipts on a 2026 page read as current money.
+
+20. **Check attribution, do not trust it.** An FEC candidate id encodes its
+    own office and state, so `validate.check_finance` compares every figure
+    against the profile it is about to appear on. Money shown against the
+    wrong person looks entirely normal on the page.
+
+21. **Only write fields the source actually knows.** `congress --apply` fills
     name, party, state, district, term and birthday. Education, net worth,
     committees and platform stay empty, because the provenance layer reporting
     "No data" is true and a plausible invention is not.

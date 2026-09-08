@@ -273,11 +273,23 @@ match that lands on the wrong person puts someone else's money on a profile
 with nothing looking out of place. Using the id also halves the request count,
 because finding the candidate no longer costs a round trip.
 
-This is the largest accuracy gap still open. `funding_sources` is real data for
-only **2%** of sitting members — the other 98% is the generic
-`"Individual/PAC contributions"` filler — and receipts and disbursements are
-real for 33%. One full `finance` run with a real key fills all three from the
-FEC, with a coverage date attached.
+One full run fills the site's largest gap. Before it, `funding_sources` was
+real data for **2%** of sitting members — the other 98% was the generic
+`"Individual/PAC contributions"` filler — and receipts were real for 33%:
+
+| Field | Before | After |
+|---|---|---|
+| `funding_sources` | 12/539 (2%) | **524/539 (97%)** |
+| `receipts` | 176/539 (33%) | **523/539 (97%)** |
+| `disbursements` | 175/539 (33%) | **522/539 (97%)** |
+| Real data across all surfaced fields | 69% | **89%** |
+
+533 of those were matched by authoritative id and 40 by name search. Every
+attribution is checked: an FEC candidate id encodes its own office and state
+(`S2NM00088` is a New Mexico Senate campaign), so `validate.check_finance`
+compares it against the profile it is about to appear on. Money shown against
+the wrong person would look entirely normal on the page, which is exactly why
+it is checked rather than trusted.
 
 ## Data provenance
 
@@ -290,9 +302,19 @@ render all three identically:
 | `N/A (No net worth disclosure provided…)` | no filing exists | *Not disclosed* (muted) |
 | `""` | nobody has researched it | *No data* (muted) |
 | `Individual/PAC contributions` | true of everyone; no information | dotted underline, marked generic |
+| — | the FEC was queried and holds no filing for this cycle | *No filing this cycle* (muted) |
+
+That last row is the only absence that reports work actually done. "No data"
+is a claim about us: it says nobody looked. Once the pipeline queries the FEC
+for all 596 profiles, using the same label for "we never checked" and "we
+checked and there is no filing" discards the more informative of the two — and
+17 of them are sitting members running for a *different* seat, whose money is
+in another committee entirely. Showing their last cycle's figures instead
+would be worse than either: a member's 2024 receipts on a page about the 2026
+midterms reads as current money.
 
 `profiles.js` carries a `quality` map per profile listing only the fields that
-are *not* real data. About **31% of surfaced fields** fall into one of those
+are *not* real data. About **11% of surfaced fields** fall into one of those
 categories — that is the honest picture, and the page shows it as such. Absent
 values are excluded from search, so "not disclosed" does not match everyone.
 

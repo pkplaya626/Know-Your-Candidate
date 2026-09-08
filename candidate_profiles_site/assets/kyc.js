@@ -217,10 +217,18 @@
 
   /* =========================================================== provenance */
 
-  var ABSENT = { not_disclosed: "Not disclosed", unknown: "No data" };
+  var ABSENT = {
+    not_disclosed: "Not disclosed",
+    unknown: "No data",
+    no_filing: "No filing this cycle",
+  };
   var ABSENT_TITLE = {
     not_disclosed: "No public disclosure exists for this field.",
     unknown: "No source has been recorded for this field yet.",
+    // The only absence that reports work we actually did.
+    no_filing: "Checked with the FEC: this candidate has no filing for the "
+      + "current cycle. Members running for a different seat file under a "
+      + "separate committee.",
   };
 
   /** Render one profile field so an absence never reads as a finding.
@@ -234,7 +242,7 @@
     var status = (item.quality || {})[field];
     var value = item[field];
 
-    if (status === "not_disclosed" || status === "unknown") {
+    if (ABSENT[status]) {
       return (
         '<span class="kyc-absent" title="' + escapeAttr(ABSENT_TITLE[status]) +
         '">' + escapeHtml(ABSENT[status]) + "</span>"
@@ -259,8 +267,7 @@
 
   /** True when a field carries something worth showing at all. */
   function hasValue(item, field) {
-    var status = (item.quality || {})[field];
-    return status !== "unknown" && status !== "not_disclosed";
+    return !ABSENT[(item.quality || {})[field]];
   }
 
   /* ============================================================= election */

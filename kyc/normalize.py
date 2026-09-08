@@ -201,10 +201,22 @@ NOT_DISCLOSED = "not_disclosed"
 UNKNOWN = "unknown"
 GENERIC = "generic"
 
+# A fourth kind of absence, and the only one that reflects work we actually
+# did: the FEC was queried for this person and holds no filing for this cycle.
+#
+# It exists because "No data" is a claim about us, not about them - it says
+# nobody looked. Once the pipeline queries the FEC for all 596 profiles, using
+# the same label for "we never checked" and "we checked and the filing does
+# not exist" throws away the more informative of the two. The alternative,
+# showing the last cycle's figures, would be worse than either: a member's
+# 2024 receipts on a page about the 2026 midterms reads as current money.
+NO_FILING = "no_filing"
+
 # What to show instead of a long placeholder sentence.
 STATUS_LABELS = {
     NOT_DISCLOSED: "Not disclosed",
     UNKNOWN: "No data",
+    NO_FILING: "No filing this cycle",
     GENERIC: None,  # keep the original text, but mark it low-information
 }
 
