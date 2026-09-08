@@ -61,6 +61,19 @@ jobs:
         if: inputs.portraits != false
         run: python build_profile_site.py portraits
 
+      # Optional. Without the secret this is skipped entirely rather than
+      # burning the run on DEMO_KEY, which the FEC throttles after a handful
+      # of requests. Add it at Settings -> Secrets -> Actions -> FEC_API_KEY.
+      #
+      # The condition tests `env`, not `secrets`: the secrets context is not
+      # available in a step-level `if`, so the obvious spelling would never be
+      # true and the step would silently never run.
+      - name: Refresh campaign finance
+        env:
+          FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
+        if: env.FEC_API_KEY != ''
+        run: python build_profile_site.py finance
+
       - name: Rebuild the site data
         run: python build_profile_site.py
 

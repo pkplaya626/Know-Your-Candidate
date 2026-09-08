@@ -39,8 +39,41 @@ class FecError(RuntimeError):
     pass
 
 
-def api_key():
-    return os.environ.get("FEC_API_KEY", "").strip() or "DEMO_KEY"
+ENV_FILE = ".env"
+
+
+def _key_from_env_file(root="."):
+    """Read ``FEC_API_KEY`` from a local ``.env``, if there is one.
+
+    A convenience so the key can live in one gitignored file instead of a
+    shell profile. ``.gitignore`` already covers ``*.env``; there is a test
+    that asserts it, because committing an API key is the kind of mistake
+    that is trivial to make once and permanent afterwards.
+    """
+    path = os.path.join(root, ENV_FILE)
+    if not os.path.exists(path):
+        return ""
+    try:
+        with open(path, "r", encoding="utf-8") as handle:
+            for line in handle:
+                line = line.strip()
+                if line.startswith("#") or "=" not in line:
+                    continue
+                name, _, value = line.partition("=")
+                if name.strip() == "FEC_API_KEY":
+                    return value.strip().strip("'\"")
+    except OSError:
+        return ""
+    return ""
+
+
+def api_key(root="."):
+    """The FEC key: the environment first, then ``.env``, then ``DEMO_KEY``."""
+    return (
+        os.environ.get("FEC_API_KEY", "").strip()
+        or _key_from_env_file(root)
+        or "DEMO_KEY"
+    )
 
 
 def using_demo_key():

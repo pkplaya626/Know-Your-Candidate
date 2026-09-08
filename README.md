@@ -249,8 +249,18 @@ Two rules are load-bearing here, both learned the hard way:
 breakdown from the FEC, replacing the roster's generic
 `"Individual/PAC contributions"` text. Figures carry the FEC coverage date.
 
-Get a free key at <https://api.data.gov/signup/> and set `FEC_API_KEY`. Without
-one the module falls back to `DEMO_KEY`, which the FEC throttles after a handful
+Get a free key at <https://api.data.gov/signup/>, then supply it either way:
+
+```bash
+export FEC_API_KEY=...                 # environment wins
+echo 'FEC_API_KEY=...' > .env          # or a local file; .gitignore covers *.env
+```
+
+For the weekly `refresh` workflow, add it at **Settings → Secrets → Actions →
+`FEC_API_KEY`**; the finance step is skipped when the secret is absent rather
+than wasting the run on `DEMO_KEY`.
+
+Without a key the module falls back to `DEMO_KEY`, which the FEC throttles after a handful
 of requests — enough to try it, not enough to fill 596 profiles. Results cache
 per profile, so a throttled run stops cleanly and the next one resumes.
 

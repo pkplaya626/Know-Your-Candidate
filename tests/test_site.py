@@ -12,7 +12,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from kyc import cli, emit, races as races_mod, sources, summary, validate  # noqa: E402
+from kyc import cli, emit, fec, races as races_mod, sources, summary, validate  # noqa: E402
 from kyc.profiles import build_profiles  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -314,6 +314,52 @@ class TestNewValidators(unittest.TestCase):
 
     def test_no_geometry_means_no_geometry_findings(self):
         self.assertEqual(validate.check_geometry([member(state="CA")], None), [])
+
+
+class TestFecKey(unittest.TestCase):
+    """Where the FEC key comes from, and where it must never end up."""
+
+    def setUp(self):
+        self.previous = os.environ.pop("FEC_API_KEY", None)
+
+    def tearDown(self):
+        if self.previous is not None:
+            os.environ["FEC_API_KEY"] = self.previous
+        else:
+            os.environ.pop("FEC_API_KEY", None)
+
+    def test_environment_wins(self):
+        os.environ["FEC_API_KEY"] = "from-env"
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, ".env"), "w", encoding="utf-8") as f:
+                f.write("FEC_API_KEY=from-file\n")
+            self.assertEqual(fec.api_key(tmp), "from-env")
+
+    def test_falls_back_to_a_local_env_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, ".env"), "w", encoding="utf-8") as f:
+                f.write("# a comment\nFEC_API_KEY = 'quoted-key'\nOTHER=x\n")
+            self.assertEqual(fec.api_key(tmp), "quoted-key")
+
+    def test_falls_back_to_demo_key(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(fec.api_key(tmp), "DEMO_KEY")
+            self.assertTrue(fec.using_demo_key())
+
+    def test_a_malformed_env_file_is_not_fatal(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, ".env"), "w", encoding="utf-8") as f:
+                f.write("no equals sign here\n")
+            self.assertEqual(fec.api_key(tmp), "DEMO_KEY")
+
+    def test_dotenv_is_gitignored(self):
+        # Committing an API key is trivial to do once and permanent after.
+        with open(os.path.join(ROOT, ".gitignore"), encoding="utf-8") as handle:
+            patterns = {line.strip() for line in handle}
+        self.assertTrue(
+            {"*.env", ".env"} & patterns,
+            ".gitignore must cover .env or an API key can be committed",
+        )
 
 
 class TestCliFlags(unittest.TestCase):
