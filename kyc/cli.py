@@ -10,7 +10,10 @@ from . import (
     emit,
     fec,
     geo as geo_mod,
+    legislators,
+    overrides,
     portraits,
+    profiles as profiles_mod,
     races as races_mod,
     sources,
     summary as summary_mod,
@@ -40,7 +43,16 @@ def _build(args):
     for name in raw["missing"]:
         print(f"  [warn] {name} not found - skipped")
 
-    profiles, stats = build_profiles(raw)
+    snapshot = legislators.load_snapshot(args.root)
+    if snapshot:
+        age = legislators.snapshot_age_days(snapshot)
+        print(f"  read {legislators.SNAPSHOT_FILE} ({snapshot['count']} legislators"
+              + (f", {age} days old)" if age is not None else ")"))
+    else:
+        print(f"  [warn] no {legislators.SNAPSHOT_FILE}; falling back to the "
+              "curated 2026 Senate table. Run 'congress' to fetch one.")
+
+    profiles, stats = build_profiles(raw, snapshot=snapshot)
 
     finance = fec.load_cache(args.root)
     stats["fec"] = fec.apply_cache(profiles, finance) if finance else 0
@@ -87,7 +99,8 @@ def _build(args):
         print(f"    {stats['geo_states']} state shapes | "
               f"{stats['geo_territories']} territories")
 
-    issues = validate.run(profiles, raw, races=race_list, geo=geo)
+    issues = validate.run(profiles, raw, races=race_list, geo=geo,
+                          snapshot=snapshot)
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -177,9 +190,96 @@ def _finance(args):
     raw = _load(args)
     if raw is None:
         return 2
-    profiles, _ = build_profiles(raw)
-    fec.resolve_all(profiles, root=args.root, limit=args.limit, refresh=args.refresh)
+    snapshot = legislators.load_snapshot(args.root)
+    profiles, _ = build_profiles(raw, snapshot=snapshot)
+    fec.resolve_all(profiles, root=args.root, limit=args.limit,
+                    refresh=args.refresh, snapshot=snapshot)
     print(f"\n[ok] finance cache: {fec.CACHE_PATH}")
+    return 0
+
+
+def _congress(args):
+    """Reconcile the roster CSVs against the authoritative membership."""
+    raw = _load(args)
+    if raw is None:
+        return 2
+
+    if args.check:
+        snapshot = legislators.load_snapshot(args.root)
+        if snapshot is None:
+            print(f"[error] no {legislators.SNAPSHOT_FILE}; run 'congress' first.",
+                  file=sys.stderr)
+            return 2
+        age = legislators.snapshot_age_days(snapshot)
+        print(f"  snapshot: {snapshot['count']} legislators, fetched "
+              f"{snapshot.get('fetched', '?')}"
+              + (f" ({age} days ago)" if age is not None else ""))
+    else:
+        print(f"Downloading the current roster from {legislators.SOURCE_URL} ...")
+        try:
+            snapshot = legislators.build_snapshot(legislators.fetch())
+        except legislators.LegislatorsError as exc:
+            print(f"[error] {exc}", file=sys.stderr)
+            return 2
+        path = legislators.save_snapshot(snapshot, args.root)
+        print(f"  wrote {path} ({snapshot['count']} legislators)")
+
+    drift = legislators.reconcile(raw["members"], snapshot)
+    print(f"\n  reconciliation: {drift.summary()}")
+
+    for person in drift.missing:
+        seat = (
+            f"{person['state']}-{person['district']}"
+            if person["chamber"] == "House" else person["state"]
+        )
+        print(f"    + serving but not in the roster: {person['name']} "
+              f"({person['chamber']} {seat}, {person['party']}, "
+              f"since {person['termStart']})")
+
+    for person in drift.departed:
+        print(f"    - in the roster but no longer serving: {person['name']} "
+              f"({person['bioguide']})")
+
+    shown = drift.changed if args.verbose else drift.changed[:10]
+    for change in shown:
+        print(f"    ~ {change['name']}: {change['field']} "
+              f"roster={change['roster']!r} authoritative={change['authoritative']!r}")
+    if len(shown) < len(drift.changed):
+        print(f"    ... {len(drift.changed) - len(shown)} more (--verbose)")
+
+    # Cross-check the curated 2026 Senate table against the real term dates.
+    derived = legislators.seats_up(snapshot, profiles_mod.ELECTION_YEAR)
+    curated = overrides.SENATE_SEATS_UP_2026
+    only_derived = sorted(set(derived) - set(curated))
+    only_curated = sorted(set(curated) - set(derived))
+    if only_derived or only_curated:
+        print(f"\n  [warn] 2026 Senate seats disagree with {len(curated)} curated entries:")
+        if only_derived:
+            print(f"    on the ballot but not curated: {', '.join(only_derived)}")
+        if only_curated:
+            print(f"    curated but not on the ballot: {', '.join(only_curated)}")
+    else:
+        print(f"\n  ok  all {len(derived)} 2026 Senate seats agree with the curated table")
+
+    if args.apply:
+        if not drift.missing:
+            print("\n[ok] nothing to add.")
+        else:
+            added = legislators.apply_missing(drift, args.root)
+            for roster, names in sorted(added.items()):
+                print(f"\n[ok] added {len(names)} row(s) to {roster}:")
+                for name in names:
+                    print(f"       {name}")
+            print("\nOnly the fields the dataset actually knows were filled. "
+                  "Run `python build_profile_site.py` to regenerate the site.")
+        if drift.departed:
+            print("\n[note] departed members are not removed automatically. Add them "
+                  "to overrides.EXCLUDED_MEMBERS if the seat is genuinely gone.")
+        return 0
+
+    if not drift.clean:
+        print("\n[warn] the roster has drifted. Run `congress --apply` to add the "
+              "missing members, or `--verbose` to see every difference.")
     return 0
 
 
@@ -199,7 +299,7 @@ def _verify(args):
     if raw is None:
         return 2
 
-    profiles, stats = build_profiles(raw)
+    profiles, stats = build_profiles(raw, snapshot=legislators.load_snapshot(args.root))
     finance = fec.load_cache(args.root)
     stats["fec"] = fec.apply_cache(profiles, finance) if finance else 0
     cache = portraits.load_cache(args.root)
@@ -327,6 +427,13 @@ def build_parser():
     add("geo", help="regenerate the map geometry from the state atlas")
     add("verify", help="check the committed data still matches the sources")
 
+    congress = add("congress",
+                   help="reconcile the rosters against the authoritative membership")
+    congress.add_argument("--check", action="store_true",
+                          help="use the committed snapshot; make no network call")
+    congress.add_argument("--apply", action="store_true",
+                          help="add newly seated members to the roster CSVs")
+
     pics = add("portraits", help="resolve and verify portrait URLs")
     pics.add_argument("--refresh", action="store_true",
                       help="re-verify every portrait, not just missing ones")
@@ -356,6 +463,8 @@ def main(argv=None):
         return _geo(args)
     if args.command == "verify":
         return _verify(args)
+    if args.command == "congress":
+        return _congress(args)
     if args.command == "portraits":
         return _portraits(args)
     if args.command == "finance":

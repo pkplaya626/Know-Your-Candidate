@@ -21,7 +21,8 @@ if a page loads a remote script, stylesheet or font.
 
 ```text
 *.csv (repo root)           ──┐
-us_atlas_states_topo.json   ──┴─> kyc/ ──> candidate_profiles_site/
+us_atlas_states_topo.json   ──┤
+congress_snapshot.json      ──┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
                                              ├──> index.html    (grid, races, profiles)
@@ -33,7 +34,9 @@ us_atlas_states_topo.json   ──┴─> kyc/ ──> candidate_profiles_site/
                                              assets/kyc-map.js
 ```
 
-- The root CSVs and the state atlas are the source of truth.
+- The root CSVs are the editorial source of truth. The state atlas and
+  `congress_snapshot.json` are vendored inputs: refreshed by a command, never
+  hand-edited.
 - Everything in `data/` is **generated**. Never edit `profiles.js` or `geo.js`
   by hand. `portraits.json` and `finance.json` are caches, but they *are*
   hand-editable.
@@ -46,16 +49,20 @@ us_atlas_states_topo.json   ──┴─> kyc/ ──> candidate_profiles_site/
 ## Commands
 
 ```bash
-python build_profile_site.py               # build (offline)
-python build_profile_site.py build --check # validate only
-python build_profile_site.py geo           # regenerate map geometry only
-python -m unittest discover tests          # 126 tests, no dependencies
-npm install && npm test                    # 129 real-DOM checks (needs jsdom)
+python build_profile_site.py                  # build (offline)
+python build_profile_site.py build --check    # validate only
+python build_profile_site.py verify           # committed data matches sources
+python build_profile_site.py congress --check # roster vs Congress (offline)
+python build_profile_site.py congress --apply # write newly seated members in
+python build_profile_site.py geo              # regenerate map geometry only
+python -m unittest discover tests             # 195 tests, no dependencies
+npm install && npm test                       # 133 real-DOM checks (needs jsdom)
 ```
 
-Only `fetch`, `portraits` and `finance` touch the network. Run the unit tests
-and `build --check` after touching the pipeline; run `npm test` after touching
-a page or anything in `assets/`.
+Only `fetch`, `portraits`, `finance` and `congress` touch the network. Run the
+unit tests and `build --check` after touching the pipeline; run `npm test`
+after touching a page or anything in `assets/`. Run `verify` before committing
+generated data.
 
 ## Rules that exist because of real bugs
 
@@ -130,6 +137,33 @@ Each of these was a shipped defect found by measurement. Do not undo them.
 15. **Do not block pinch-zoom.** `user-scalable=no, maximum-scale=1` was in
     both viewport tags. It fails WCAG 1.4.4.
 
+16. **A roster cannot notice that Congress changed.** The CSVs are accurate -
+    checked field by field against `congress-legislators` they disagree about
+    nobody - but two representatives seated in September 2026 were absent from
+    the site and nothing said so. `congress_snapshot.json` is the
+    authoritative membership; `validate.check_snapshot` makes any drift a
+    build error. Never "fix" a drift finding by deleting the check.
+
+17. **Match people on ids, never on surnames.** `SENATE_SEATS_UP_2026` said
+    `"SC": "Graham"` for Lindsey Graham; that seat is now Darline Graham
+    Nordone's, and the entry kept matching only because she shares the
+    surname. The 2026 Senate class is derived from real term dates and matched
+    on bioguide id. The same rule sends FEC lookups through the authoritative
+    candidate id rather than a name search - the FEC files people under their
+    legal name, and a loose match puts someone else's money on a profile.
+
+18. **Do not answer "is this in sync?" by diffing whole files.** CI used to
+    rebuild and `git diff --exit-code`, which conflates sync with build time.
+    A rebuild always restamps the timestamp, so keeping the diff quiet meant
+    committing the fixed `SOURCE_DATE_EPOCH` date - which the page footer
+    shows to readers as the freshness stamp. Generated files carry a content
+    signature and `verify` compares that.
+
+19. **Only write fields the source actually knows.** `congress --apply` fills
+    name, party, state, district, term and birthday. Education, net worth,
+    committees and platform stay empty, because the provenance layer reporting
+    "No data" is true and a plausible invention is not.
+
 ## Curated data
 
 `kyc/overrides.py` holds every editorial judgement. Keep the CSVs authoritative
@@ -173,3 +207,7 @@ That check found a retirement note keyed `"Dick Durbin"` when the roster says
 - When changing profile fields, update the field tables in `README.md`.
 - Builds must stay reproducible under `SOURCE_DATE_EPOCH`, for `geo.js` as
   well as `profiles.js`.
+- Do not hard-code a total that the data determines. A test asserting `472`
+  races carried a comment reading "435 + 6 + 35", which is 476; nobody had
+  reconciled the two, and the number moved the moment a vacant seat was
+  filled. Assert the structure and account for the difference.

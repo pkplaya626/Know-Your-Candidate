@@ -336,7 +336,84 @@ def check_geometry(profiles, geo):
     return []
 
 
-def run(profiles, raw, races=None, geo=None):
+# A snapshot older than this is reported. Congress changes often enough that
+# a month-old membership list is a claim worth re-checking, and the whole
+# point of committing the snapshot is that nothing silently goes stale.
+SNAPSHOT_STALE_DAYS = 30
+
+
+def check_snapshot(profiles, raw, snapshot):
+    """Compare the rosters against the authoritative membership.
+
+    The rosters are hand-curated and, measured field by field, accurate. What
+    they cannot be on their own is current: two representatives seated in the
+    week before this check was written were simply missing from the site, and
+    nothing anywhere said so.
+    """
+    from . import legislators
+
+    if not snapshot:
+        return [Issue("warn", "no-snapshot",
+                      "No congress_snapshot.json; membership was not checked "
+                      "against the authoritative roster. Run 'congress'.")]
+
+    issues = []
+
+    age = legislators.snapshot_age_days(snapshot)
+    if age is not None and age > SNAPSHOT_STALE_DAYS:
+        issues.append(Issue(
+            "warn", "stale-snapshot",
+            f"The membership snapshot is {age} days old; run 'congress' to refresh it",
+        ))
+
+    drift = legislators.reconcile(raw["members"], snapshot)
+
+    if drift.missing:
+        issues.append(Issue(
+            "error", "missing-member",
+            f"{len(drift.missing)} people are serving in Congress but are not in "
+            f"the roster",
+            [f"{p['name']} ({p['chamber']} {p['state']}"
+             + (f"-{p['district']}" if p["chamber"] == "House" else "")
+             + f", seated {p['termStart']})" for p in drift.missing],
+        ))
+
+    if drift.departed:
+        known = {n.lower() for n in overrides.EXCLUDED_MEMBERS}
+        unexpected = [p for p in drift.departed if p["name"].lower() not in known]
+        if unexpected:
+            issues.append(Issue(
+                "error", "departed-member",
+                f"{len(unexpected)} roster entries are no longer serving",
+                [f"{p['name']} ({p['bioguide']})" for p in unexpected],
+            ))
+
+    if drift.changed:
+        issues.append(Issue(
+            "error", "roster-disagrees",
+            f"{len(drift.changed)} roster fields disagree with the authoritative roster",
+            [f"{c['name']}: {c['field']} roster={c['roster']!r} "
+             f"authoritative={c['authoritative']!r}" for c in drift.changed],
+        ))
+
+    # The curated 2026 Senate table against the terms senators are serving.
+    derived = legislators.seats_up(snapshot, 2026)
+    curated = overrides.SENATE_SEATS_UP_2026
+    mismatched = sorted(set(derived) ^ set(curated))
+    if mismatched:
+        issues.append(Issue(
+            "warn", "senate-table-drift",
+            f"{len(mismatched)} states differ between the curated 2026 Senate "
+            f"table and the real term dates",
+            [f"{st}: curated={curated.get(st, '-')!r} "
+             f"authoritative={derived.get(st, '-')!r}" for st in mismatched],
+        ))
+
+    _ = profiles
+    return issues
+
+
+def run(profiles, raw, races=None, geo=None, snapshot=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_identity(profiles)
@@ -348,6 +425,7 @@ def run(profiles, raw, races=None, geo=None):
     issues += check_races(profiles, races)
     issues += check_markup(profiles)
     issues += check_geometry(profiles, geo)
+    issues += check_snapshot(profiles, raw, snapshot)
     return issues
 
 

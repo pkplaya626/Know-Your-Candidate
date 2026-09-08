@@ -1,0 +1,114 @@
+# Keep the rosters in step with Congress.
+#
+# The roster CSVs are accurate but cannot stay current on their own. Members
+# resign, die, and win special elections between builds, and a hand-maintained
+# CSV has no way to notice: two representatives seated in September 2026 were
+# simply absent from the site until this reconciliation was written.
+#
+# This opens a pull request. It never pushes to main and never deploys, so a
+# change in the membership of Congress arrives as something a person reads and
+# merges.
+
+name: Refresh
+
+on:
+  schedule:
+    # Mondays, 07:20 UTC. Off the hour because GitHub's scheduler queues
+    # heavily at :00 and skips runs it cannot start.
+    - cron: "20 7 * * 1"
+  workflow_dispatch:
+    inputs:
+      portraits:
+        description: "Also resolve portraits for anyone new"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: Reconcile against congress-legislators
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Refresh the membership snapshot and apply any drift
+        id: reconcile
+        run: |
+          python build_profile_site.py congress --apply --verbose | tee reconcile.log
+          # Surface the summary line in the PR body rather than making a
+          # reviewer open the run log.
+          {
+            echo 'summary<<REPORT'
+            grep -E '^\s+(reconciliation:|\+|-|~)' reconcile.log || echo "  no drift"
+            echo REPORT
+          } >> "$GITHUB_OUTPUT"
+          rm reconcile.log
+
+      # A member with no portrait shows a silhouette. Resolving here means the
+      # PR arrives complete rather than needing a second pass.
+      - name: Resolve portraits for anyone new
+        if: inputs.portraits != false
+        run: python build_profile_site.py portraits
+
+      - name: Rebuild the site data
+        run: python build_profile_site.py
+
+      - name: Confirm the result is valid and self-consistent
+        run: |
+          python build_profile_site.py build --check --strict --verbose
+          python build_profile_site.py verify
+          python -m unittest discover tests
+
+      - name: Open a pull request if anything changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet; then
+            echo "Congress has not changed and no source has been updated."
+            exit 0
+          fi
+
+          branch="refresh/congress-$(date -u +%Y-%m-%d)"
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add -A
+          git commit -m "Reconcile the rosters with the current Congress
+
+          Opened automatically by .github/workflows/refresh.yml against
+          congress-legislators. Every field written here comes from that
+          dataset; education, net worth, committees and platform are editorial
+          research and are left empty rather than invented."
+          git push -u origin "$branch"
+
+          gh pr create \
+            --base "${{ github.ref_name }}" \
+            --head "$branch" \
+            --title "Reconcile the rosters with the current Congress" \
+            --body "$(cat <<BODY
+          Automated weekly reconciliation against
+          [congress-legislators](https://github.com/unitedstates/congress-legislators).
+
+          \`\`\`
+          ${{ steps.reconcile.outputs.summary }}
+          \`\`\`
+
+          Only fields the dataset actually knows are written. Education, net
+          worth, committees and platform stay empty for anyone new, so the
+          provenance layer reports them as *No data* rather than showing an
+          invention.
+
+          Validation, \`verify\` and the unit tests all ran before this was opened.
+          BODY
+          )"

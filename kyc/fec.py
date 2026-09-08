@@ -161,11 +161,33 @@ def save_cache(cache, root="."):
     return path
 
 
-def resolve_all(profiles, root=".", limit=None, refresh=False, log=print):
+def known_ids(snapshot):
+    """``{bioguide: fec_candidate_id}`` from the authoritative membership.
+
+    ``congress-legislators`` records the FEC candidate id for 537 of the 539
+    sitting members, already scoped to the seat they currently hold. Using it
+    removes the name search for every incumbent, which is where the risk
+    lives: the FEC files people under their legal name - Ashley Hinson appears
+    as "ARENHOLZ, ASHLEY HINSON" - so matching is fuzzy by necessity, and a
+    fuzzy match that lands on the wrong person puts someone else's money on a
+    profile without anything looking wrong.
+    """
+    ids = {}
+    for person in (snapshot or {}).get("legislators", []):
+        candidate_ids = person.get("fec") or []
+        if candidate_ids:
+            ids[person["bioguide"]] = candidate_ids[0]
+    return ids
+
+
+def resolve_all(profiles, root=".", limit=None, refresh=False, snapshot=None,
+                log=print):
     """Look up finance totals, resuming from the cache.
 
     Requests are sequential and rate-limited on purpose; the FEC key allows
-    1000 requests an hour and each profile costs two.
+    1000 requests an hour. A profile with a known FEC id costs one request
+    instead of two, so passing *snapshot* roughly halves a full run as well as
+    making it exact.
     """
     cache = load_cache(root)
     todo = [p for p in profiles if refresh or profile_key(p) not in cache]
@@ -181,17 +203,33 @@ def resolve_all(profiles, root=".", limit=None, refresh=False, log=print):
         log("  [warn] using DEMO_KEY - the FEC will throttle after a few requests.")
         log("         Set FEC_API_KEY from https://api.data.gov/signup/ for a full run.")
 
+    authoritative = known_ids(snapshot)
+    if authoritative:
+        covered = sum(1 for p in todo if p["id"] in authoritative)
+        log(f"  finance: {covered} of {len(todo)} have an authoritative FEC id")
+
     log(f"  finance: looking up {len(todo)} profile(s) ...")
-    found = stopped = 0
+    found = stopped = by_id = 0
 
     for profile in todo:
         key = profile_key(profile)
         try:
-            match = find_candidate(profile["name"], profile["state"], profile["chamber"])
-            time.sleep(_GAP)
+            candidate_id = authoritative.get(profile["id"])
+            if candidate_id:
+                match = {"candidate_id": candidate_id, "via": "congress-legislators"}
+                by_id += 1
+            else:
+                match = find_candidate(
+                    profile["name"], profile["state"], profile["chamber"]
+                )
+                time.sleep(_GAP)
+                if match:
+                    match["via"] = "fec-search"
+
             if not match:
                 cache[key] = {"found": False, "name": profile["name"]}
                 continue
+
             figures = totals(match["candidate_id"])
             time.sleep(_GAP)
             cache[key] = {
@@ -209,8 +247,10 @@ def resolve_all(profiles, root=".", limit=None, refresh=False, log=print):
 
     save_cache(cache, root)
     hits = sum(1 for r in cache.values() if r.get("receipts") is not None)
-    log(f"  finance: {hits}/{len(cache)} cached profiles have FEC totals")
-    return cache, {"cached": len(cache), "found": found, "stopped": stopped}
+    log(f"  finance: {hits}/{len(cache)} cached profiles have FEC totals"
+        + (f" ({by_id} matched by authoritative id)" if by_id else ""))
+    return cache, {"cached": len(cache), "found": found, "stopped": stopped,
+                   "by_id": by_id}
 
 
 def _money(value):
