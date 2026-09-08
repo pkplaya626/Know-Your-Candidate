@@ -100,6 +100,11 @@ def apply_quality(profile):
         value, status = classify(profile.get(field))
 
         if field in _FINANCE_FIELDS and status == NOT_DISCLOSED:
+            # Before the FEC lookup existed, an absent finance figure only
+            # ever meant "we have no filing on hand", never "they disclosed
+            # nothing" - so it was demoted to UNKNOWN. fec.apply_cache
+            # promotes it again to NO_FILING for anyone the FEC was actually
+            # queried about.
             value, status = "No data", UNKNOWN
         elif field == "birthdate" and status == OK and not looks_like_date(value):
             # "2026 Primary" is a race marker parked in a date column.

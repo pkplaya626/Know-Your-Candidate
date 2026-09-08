@@ -39,12 +39,45 @@ class FecError(RuntimeError):
     pass
 
 
-def api_key():
-    return os.environ.get("FEC_API_KEY", "").strip() or "DEMO_KEY"
+ENV_FILE = ".env"
 
 
-def using_demo_key():
-    return api_key() == "DEMO_KEY"
+def _key_from_env_file(root="."):
+    """Read ``FEC_API_KEY`` from a local ``.env``, if there is one.
+
+    A convenience so the key can live in one gitignored file instead of a
+    shell profile. ``.gitignore`` already covers ``*.env``; there is a test
+    that asserts it, because committing an API key is the kind of mistake
+    that is trivial to make once and permanent afterwards.
+    """
+    path = os.path.join(root, ENV_FILE)
+    if not os.path.exists(path):
+        return ""
+    try:
+        with open(path, "r", encoding="utf-8") as handle:
+            for line in handle:
+                line = line.strip()
+                if line.startswith("#") or "=" not in line:
+                    continue
+                name, _, value = line.partition("=")
+                if name.strip() == "FEC_API_KEY":
+                    return value.strip().strip("'\"")
+    except OSError:
+        return ""
+    return ""
+
+
+def api_key(root="."):
+    """The FEC key: the environment first, then ``.env``, then ``DEMO_KEY``."""
+    return (
+        os.environ.get("FEC_API_KEY", "").strip()
+        or _key_from_env_file(root)
+        or "DEMO_KEY"
+    )
+
+
+def using_demo_key(root="."):
+    return api_key(root) == "DEMO_KEY"
 
 
 def _get(path, params, retries=4):
@@ -211,7 +244,14 @@ def resolve_all(profiles, root=".", limit=None, refresh=False, snapshot=None,
     log(f"  finance: looking up {len(todo)} profile(s) ...")
     found = stopped = by_id = 0
 
-    for profile in todo:
+    # A full run is several hundred requests over several minutes. The cache
+    # used to be written once at the end, so the documented promise that a run
+    # "resumes exactly where the previous one stopped" only held for a clean
+    # rate-limit stop - a Ctrl-C or a dropped connection threw the whole run
+    # away. Checkpointing costs one small write per 25 lookups.
+    CHECKPOINT = 25
+
+    for done, profile in enumerate(todo, start=1):
         key = profile_key(profile)
         try:
             candidate_id = authoritative.get(profile["id"])
@@ -244,6 +284,14 @@ def resolve_all(profiles, root=".", limit=None, refresh=False, snapshot=None,
             log(f"  [stop] {exc}")
             stopped = 1
             break
+        except KeyboardInterrupt:
+            log(f"  [stop] interrupted after {done} of {len(todo)}")
+            stopped = 1
+            break
+
+        if done % CHECKPOINT == 0:
+            save_cache(cache, root)
+            log(f"    {done}/{len(todo)} looked up ({found} with totals)")
 
     save_cache(cache, root)
     hits = sum(1 for r in cache.values() if r.get("receipts") is not None)
@@ -259,10 +307,25 @@ def _money(value):
 
 def apply_cache(profiles, cache):
     """Overlay FEC figures onto profiles, replacing roster estimates."""
-    applied = 0
+    from .normalize import NO_FILING, STATUS_LABELS
+
+    applied = checked = 0
     for profile in profiles:
         record = cache.get(profile_key(profile)) or {}
+
         if record.get("receipts") is None:
+            # We identified this person at the FEC and it holds nothing for
+            # this cycle. That is a different fact from "nobody has looked",
+            # and the reader is entitled to the difference: several sitting
+            # members here are running for a *different* seat, so their money
+            # is in another committee entirely.
+            if record.get("candidate_id") and not record.get("found"):
+                quality = profile.setdefault("quality", {})
+                for field in ("receipts", "disbursements"):
+                    quality[field] = NO_FILING
+                    profile[field] = STATUS_LABELS[NO_FILING]
+                profile["financeCycle"] = CYCLE
+                checked += 1
             continue
 
         profile["receipts"] = _money(record["receipts"])
