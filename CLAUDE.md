@@ -22,7 +22,9 @@ if a page loads a remote script, stylesheet or font.
 ```text
 *.csv (repo root)           ──┐
 us_atlas_states_topo.json   ──┤
-congress_snapshot.json      ──┴─> kyc/ ──> candidate_profiles_site/
+congress_snapshot.json      ──┤
+data/fec_field.json         ──┤   (the FEC's 2026 candidate register)
+data/disclosures.json       ──┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
                                              ├──> index.html    (grid, races, profiles)
@@ -56,6 +58,8 @@ python build_profile_site.py congress --check # roster vs Congress (offline)
 python build_profile_site.py congress --apply # write newly seated members in
 python build_profile_site.py geo              # regenerate map geometry only
 python build_profile_site.py congress         # refresh membership (network)
+python build_profile_site.py field --check    # who is running, from the FEC
+python build_profile_site.py disclosures      # House financial disclosure links
 python -m unittest discover tests             # 195 tests, no dependencies
 npm install && npm test                       # 133 real-DOM checks (needs jsdom)
 ```
@@ -178,7 +182,37 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     half-finished rename looks completely normal locally. Never put a hostname
     in a new file without adding it to `emit._HOST_REFERENCES`.
 
-22. **Only write fields the source actually knows.** `congress --apply` fills
+22. **A roster of challengers is not the field.** 57 curated challengers made
+    the site report 436 of 474 races as having no declared challenger when
+    only four of them did. The field comes from the FEC. `filedCount` on each
+    race counts *everyone* who has filed, at any funding level, so a seat is
+    never called uncontested because the people running are under a threshold.
+
+23. **The candidate threshold is statutory, not editorial.** The receipts
+    distribution has no natural cliff, so `candidates.STATUTORY_THRESHOLD` is
+    the $5,000 at which 52 U.S.C. 30101(2) makes someone a candidate. If it
+    ever needs to move, move it to another legal definition, not to a number
+    that makes the page look tidy.
+
+24. **Do not guess portraits for filed candidates.** The bioguide -> Wikipedia
+    mapping cannot pick the wrong person; a title guess for one of 1,979
+    largely unknown people can, and "Michael Smith" resolves to a stranger.
+    `portraits.resolve_all` skips `source == "fec-field"` and
+    `title_is_about` rejects a resolved title that does not contain the
+    person's surname - which is how a photograph of an Iran war protest ended
+    up on Brian McGinnis's profile via a redirect.
+
+25. **Report look-alike people; never merge them.** Alaska's Senate race holds
+    both Dan Sullivan and a different Daniel J Sullivan.
+    `validate.check_duplicate_people` warns and stops there. Only two exact
+    signals deduplicate automatically: a shared FEC candidate id, and an exact
+    first-and-last-name match against the sitting member of that same seat.
+
+26. **Net worth is not derived from a disclosure.** The forms report assets in
+    bands; one figure from them is an estimate dressed as a fact.
+    `disclosures.py` links the filing instead and never writes `net_worth`.
+
+27. **Only write fields the source actually knows.** `congress --apply` fills
     name, party, state, district, term and birthday. Education, net worth,
     committees and platform stay empty, because the provenance layer reporting
     "No data" is true and a plausible invention is not.

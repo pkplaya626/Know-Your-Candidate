@@ -161,12 +161,37 @@
         if (race.openSeat) {
           badges.push('<span class="badge badge-warn">Open seat</span>');
         }
-        badges.push(
-          race.contested
-            ? '<span class="badge badge-money">' + race.candidateCount +
-              " challenger" + (race.candidateCount === 1 ? "" : "s") + "</span>"
-            : '<span class="badge badge-neutral">No declared challenger</span>'
-        );
+
+        /* "No declared challenger" was a claim about our roster dressed up as
+         * a fact about the race, and it was wrong for 372 of them. filedCount
+         * is how many people have actually filed with the FEC for the seat. */
+        if (race.contested) {
+          badges.push(
+            '<span class="badge badge-money">' + race.candidateCount +
+            " challenger" + (race.candidateCount === 1 ? "" : "s") + "</span>"
+          );
+        } else if (race.filedCount) {
+          badges.push(
+            '<span class="badge badge-neutral" title="' +
+            KYC.escapeAttr(
+              race.filedCount + " people have filed with the FEC for this seat, " +
+              "but none has yet reported raising $5,000 - the point at which " +
+              "federal law treats someone as a candidate."
+            ) + '">' + race.filedCount + " filed, none past $5k</span>"
+          );
+        } else {
+          badges.push('<span class="badge badge-neutral">Nobody has filed</span>');
+        }
+
+        if (race.contested && race.filedCount) {
+          badges.push(
+            '<span class="badge badge-neutral" title="' +
+            KYC.escapeAttr(
+              "Total filings with the FEC for this seat, including the sitting " +
+              "member and everyone below the $5,000 threshold."
+            ) + '">' + race.filedCount + " filed in total</span>"
+          );
+        }
         return [
           '<section class="race">',
           '<div class="race-head"><h3 class="race-title">',

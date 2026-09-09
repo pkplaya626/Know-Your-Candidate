@@ -475,6 +475,48 @@ def check_finance(profiles, finance):
     return issues
 
 
+def check_duplicate_people(profiles):
+    """Flag pairs in one race that look like the same person filed twice.
+
+    Reported, never merged. Deciding automatically is not safe: Alaska's
+    Senate race really does contain both Senator Dan Sullivan and a different
+    Daniel J Sullivan, and a name-keyed merge once silently deleted six
+    candidate records (rule 3). What the FEC gives us is two registrations,
+    and two registrations is the honest thing to show until a person says
+    otherwise.
+    """
+    import unicodedata
+
+    def fold(text):
+        normal = unicodedata.normalize("NFD", str(text))
+        return "".join(c for c in normal if unicodedata.category(c) != "Mn").lower()
+
+    by_race = collections.defaultdict(list)
+    for profile in profiles:
+        if profile.get("raceId"):
+            by_race[profile["raceId"]].append(profile)
+
+    pairs = []
+    for rid, people in sorted(by_race.items()):
+        for i, first in enumerate(people):
+            for second in people[i + 1:]:
+                a, b = fold(first["name"]).split(), fold(second["name"]).split()
+                if not a or not b or a[-1] != b[-1]:
+                    continue
+                # Same surname, and one given name is a prefix of the other:
+                # "Dan"/"Daniel", "Stephen"/"Stephen Edward".
+                if a[0] == b[0] or a[0].startswith(b[0]) or b[0].startswith(a[0]):
+                    pairs.append(
+                        f"{rid}: {first['name']} ({first['id']}) / "
+                        f"{second['name']} ({second['id']})"
+                    )
+    if not pairs:
+        return []
+    return [Issue("warn", "possible-duplicate-person",
+                  f"{len(pairs)} pairs in one race may be the same person filed twice",
+                  pairs)]
+
+
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
@@ -489,6 +531,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None):
     issues += check_geometry(profiles, geo)
     issues += check_snapshot(profiles, raw, snapshot)
     issues += check_finance(profiles, finance)
+    issues += check_duplicate_people(profiles)
     return issues
 
 

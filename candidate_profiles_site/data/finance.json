@@ -2674,9 +2674,17 @@
   "via": "congress-legislators"
  },
  "glenn ivey|MD|H": {
-  "candidate_id": "H2MD04315",
-  "found": false,
+  "candidate_id": "H2MD04232",
+  "cash_on_hand": 459226.49,
+  "coverage_end": "2026-06-30",
+  "disbursements": 520568.33,
+  "found": true,
+  "individual_contributions": 335894.63,
   "name": "Glenn Ivey",
+  "pac_contributions": 338250.0,
+  "party_contributions": 0.0,
+  "receipts": 674406.5,
+  "self_funding": 0.0,
   "via": "congress-legislators"
  },
  "glenn thompson|PA|H": {
@@ -3937,9 +3945,17 @@
   "via": "congress-legislators"
  },
  "john mcguire|VA|H": {
-  "candidate_id": "H2VA07196",
-  "found": false,
+  "candidate_id": "H0VA07133",
+  "cash_on_hand": 524345.91,
+  "coverage_end": "2026-07-15",
+  "disbursements": 1291712.94,
+  "found": true,
+  "individual_contributions": 1117597.61,
   "name": "John McGuire",
+  "pac_contributions": 415800.55,
+  "party_contributions": 0.0,
+  "receipts": 1781840.34,
+  "self_funding": 0.0,
   "via": "congress-legislators"
  },
  "john moolenaar|MI|H": {
@@ -4407,9 +4423,17 @@
   "via": "congress-legislators"
  },
  "keith self|TX|H": {
-  "candidate_id": "H2TX03290",
-  "found": false,
+  "candidate_id": "H2TX00064",
+  "cash_on_hand": 212694.22,
+  "coverage_end": "2026-06-30",
+  "disbursements": 542149.44,
+  "found": true,
+  "individual_contributions": 460593.15,
   "name": "Keith Self",
+  "pac_contributions": 178673.45,
+  "party_contributions": 0.0,
+  "receipts": 645502.77,
+  "self_funding": 1850.94,
   "via": "congress-legislators"
  },
  "kelly morrison|MN|H": {
@@ -4695,9 +4719,17 @@
   "via": "congress-legislators"
  },
  "laura gillen|NY|H": {
-  "candidate_id": "H4NY04158",
-  "found": false,
+  "candidate_id": "H2NY04244",
+  "cash_on_hand": 3843823.75,
+  "coverage_end": "2026-06-30",
+  "disbursements": 1276601.72,
+  "found": true,
+  "individual_contributions": 3004110.1,
   "name": "Laura Gillen",
+  "pac_contributions": 1027036.67,
+  "party_contributions": 5022.48,
+  "receipts": 5097222.15,
+  "self_funding": 0.0,
   "via": "congress-legislators"
  },
  "laurel lee|FL|H": {

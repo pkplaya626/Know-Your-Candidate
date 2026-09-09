@@ -73,7 +73,8 @@
       '          <div class="field"><span class="field-label">Age / born</span>',
       '            <span class="field-value" id="profileModalAge"></span></div>',
       '          <div class="field"><span class="field-label">Est. net worth</span>',
-      '            <span class="field-value" id="profileModalWorth"></span></div>',
+      '            <span class="field-value" id="profileModalWorth"></span>',
+      '            <span id="profileModalDisclosure"></span></div>',
       '          <div class="field span-2"><span class="field-label">Education</span>',
       '            <span class="field-value subtle" id="profileModalEducation"></span></div>',
       '          <div class="field span-2"><span class="field-label">Previous careers</span>',
@@ -301,6 +302,24 @@
 
     el("profileModalAge").innerHTML = renderAge(item);
     el("profileModalWorth").innerHTML = KYC.renderField(item, "net_worth");
+
+    /* No free source publishes a computed net worth, and a disclosure reports
+     * assets in broad value bands, so deriving one figure from it would be an
+     * estimate dressed as a fact. Link the filing instead and let the reader
+     * see what was actually submitted. */
+    var disclosure = el("profileModalDisclosure");
+    if (item.disclosureUrl) {
+      disclosure.innerHTML =
+        '<a class="disclosure-link" target="_blank" rel="noopener noreferrer" href="' +
+        KYC.escapeAttr(item.disclosureUrl) + '" title="' +
+        KYC.escapeAttr(
+          "Annual financial disclosure filed with the Clerk of the House" +
+          (item.disclosureFiled ? " on " + item.disclosureFiled : "") + " (PDF)"
+        ) + '">' + KYC.icon("link") + " " +
+        KYC.escapeHtml(item.disclosureYear || "") + " disclosure (PDF)</a>";
+    } else {
+      disclosure.innerHTML = "";
+    }
     el("profileModalEducation").innerHTML = KYC.renderField(item, "education");
     el("profileModalCareers").innerHTML = KYC.renderField(item, "previous_professions");
     el("profileModalReceipts").innerHTML = KYC.renderField(item, "receipts", { source: true });

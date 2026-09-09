@@ -43,12 +43,14 @@ def assign(profiles):
     return profiles
 
 
-def build(profiles):
+def build(profiles, filed_counts=None):
     """Return the race list, most contested first.
 
-    Only races with at least one declared challenger are marked ``contested``;
-    the rest are seats where the roster has no opponent on file yet, which is
-    a fact about our data as much as about the race.
+    ``contested`` means we hold a profile for at least one challenger.
+    ``filedCount`` is how many people have filed with the FEC for the seat at
+    any funding level, which is a fact about the race rather than about our
+    coverage - the two used to be conflated, and a race with eight filers and
+    no profile read as "No declared challenger".
     """
     assign(profiles)
 
@@ -82,6 +84,8 @@ def build(profiles):
         race["candidateCount"] = len(race["candidateIds"])
         race["contested"] = race["candidateCount"] > 0
         race["isTerritory"] = race["state"] in TERRITORIES
+        if filed_counts is not None:
+            race["filedCount"] = filed_counts.get(race["id"], 0)
 
     ordered = sorted(
         races.values(),
@@ -94,6 +98,8 @@ def build(profiles):
 def stats(races):
     contested = [r for r in races if r["contested"]]
     return {
+        "filed_total": sum(r.get("filedCount", 0) for r in races),
+        "races_with_filings": sum(1 for r in races if r.get("filedCount")),
         "races": len(races),
         "contested": len(contested),
         "open_seats": sum(1 for r in races if r["openSeat"]),

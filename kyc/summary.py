@@ -78,6 +78,9 @@ def build(profiles, races=None):
                 if not p.get("seekingReelection2026")
             ),
             "challengers": sum(1 for p in profiles if p.get("isCandidate")),
+            "filedCandidates": sum(
+                1 for p in profiles if p.get("source") == "fec-field"
+            ),
         },
     }
 
