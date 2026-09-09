@@ -311,6 +311,50 @@ async function testDirectoryAsync() {
 
   await new Promise((r) => setTimeout(r, 250));
 
+  suite("index.html — sitting members vs challengers", () => {
+    // Since the field came from the FEC, 79% of profiles are people who do
+    // not hold the seat. "Who represents me" has to be one click.
+    const cards = () => D.getElementById("results").querySelectorAll(".card");
+    const total = cards().length;
+
+    D.querySelector('[data-group="role"][data-value="member"]').click();
+    const members = [...cards()];
+    check("sitting members filter narrows the grid", members.length < total,
+      `${members.length} of ${total}`);
+    check("every card is someone currently in Congress",
+      members.every((c) => !KYC.byId(c.getAttribute("data-id")).isCandidate));
+    check("the filter is in the URL", /role=member/.test(window.location.hash),
+      window.location.hash);
+
+    D.querySelector('[data-group="chamber"][data-value="Senate"]').click();
+    check("it composes with chamber", cards().length === 100,
+      `${cards().length} senators`);
+    D.querySelector('[data-group="chamber"][data-value="all"]').click();
+
+    D.querySelector('[data-group="role"][data-value="candidate"]').click();
+    check("challengers filter is the complement",
+      cards().length === total - members.length, `${cards().length}`);
+    check("every card is a challenger",
+      [...cards()].every((c) => KYC.byId(c.getAttribute("data-id")).isCandidate));
+
+    D.querySelector('[data-group="role"][data-value="candidate"]').click();
+    check("clicking the active chip clears it", cards().length === total);
+  });
+
+  suite("index.html — links shared before the filter moved", () => {
+    // The challenger filter used to live in the election group.
+    window.location.hash = "#/?election=candidate";
+    window.dispatchEvent(new window.Event("hashchange"));
+    const shown = [...D.getElementById("results").querySelectorAll(".card")];
+    check("a legacy challenger link still filters", shown.length > 0 &&
+      shown.every((c) => KYC.byId(c.getAttribute("data-id")).isCandidate),
+      `${shown.length} cards`);
+    check("and is rewritten to the new parameter",
+      /role=candidate/.test(window.location.hash), window.location.hash);
+    window.location.hash = "#/";
+    window.dispatchEvent(new window.Event("hashchange"));
+  });
+
   suite("index.html — races", () => {
     const toggle = D.getElementById("raceViewToggle");
     toggle.click();
@@ -447,6 +491,36 @@ async function testMap() {
     check("House mode lists the whole delegation",
       D.querySelectorAll("#delegation .person-row").length > 20,
       `${D.querySelectorAll("#delegation .person-row").length} rows`);
+  });
+
+  suite("map.html — the delegation panel leads with who holds the seat", () => {
+    // Texas has 37 representatives and 191 filed challengers; listing all 228
+    // buries the delegation the reader clicked the state to see.
+    D.querySelector('[data-mode="house"]').click();
+    D.querySelector('[data-state="TX"]').dispatchEvent(
+      new window.MouseEvent("click", { bubbles: true }));
+
+    const visible = () => [...D.querySelectorAll("#delegation .person-row")]
+      .filter((row) => !row.closest("[hidden]")).length;
+    const seated = visible();
+    check("only seated members show at first", seated > 0 && seated < 60,
+      `${seated} rows`);
+    check("every visible row is a sitting member",
+      [...D.querySelectorAll("#delegation .person-row")]
+        .filter((r) => !r.closest("[hidden]"))
+        .every((r) => !KYC.byId(r.getAttribute("data-id")).isCandidate));
+
+    const toggle = D.getElementById("showChallengers");
+    check("challengers are behind a labelled expander", !!toggle &&
+      /challenger/i.test(toggle.textContent), toggle && toggle.textContent.trim());
+    check("the expander reports its state",
+      toggle.getAttribute("aria-expanded") === "false");
+    toggle.click();
+    check("expanding reveals them", visible() > seated, `${visible()} rows`);
+    check("and updates aria-expanded",
+      toggle.getAttribute("aria-expanded") === "true");
+
+    D.querySelector('[data-mode="senate"]').click();
   });
 
   suite("map.html — keyboard and picker", () => {

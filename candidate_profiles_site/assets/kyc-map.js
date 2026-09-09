@@ -330,15 +330,46 @@
       return;
     }
 
-    people.sort(function (a, b) {
+    var order = function (a, b) {
       return (
-        (a.isCandidate ? 1 : 0) - (b.isCandidate ? 1 : 0) ||
         KYC.districtOrder(a) - KYC.districtOrder(b) ||
         a.name.localeCompare(b.name)
       );
-    });
-    list.innerHTML = people.map(personRow).join("");
+    };
+    var seated = people.filter(function (x) { return !x.isCandidate; }).sort(order);
+    var running = people.filter(function (x) { return x.isCandidate; }).sort(order);
+
+    /* Texas has 37 representatives and 191 filed challengers. Listing all 228
+     * in one scroll buries the delegation the reader clicked the state to
+     * see, so the challengers sit behind a count they can open. */
+    var html = "";
+    if (seated.length) {
+      html += '<p class="panel-subhead">' +
+        (mode === "senate2026" ? "Seat held by" : "Currently seated") +
+        " <span>" + seated.length + "</span></p>" +
+        seated.map(personRow).join("");
+    }
+    if (running.length) {
+      html +=
+        '<button type="button" class="panel-subhead expander" id="showChallengers"' +
+        ' aria-expanded="false" aria-controls="challengerRows">' +
+        KYC.icon("chevron") + " 2026 challengers <span>" + running.length + "</span>" +
+        "</button>" +
+        '<div id="challengerRows" hidden>' + running.map(personRow).join("") + "</div>";
+    }
+    list.innerHTML = html;
     list.scrollTop = 0;
+
+    var toggle = doc.getElementById("showChallengers");
+    if (toggle) {
+      toggle.addEventListener("click", function () {
+        var rows = doc.getElementById("challengerRows");
+        var open = rows.hidden;
+        rows.hidden = !open;
+        toggle.setAttribute("aria-expanded", String(open));
+        toggle.classList.toggle("open", open);
+      });
+    }
   }
 
   function select(code) {

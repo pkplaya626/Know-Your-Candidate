@@ -1332,6 +1332,38 @@ svg { flex: none; }
   gap: var(--s-2);
 }
 
+.panel-subhead {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  width: 100%;
+  margin: var(--s-2) 0 var(--s-1);
+  padding: 0 var(--s-1);
+  border: 0;
+  background: none;
+  font-size: var(--t-xs);
+  font-weight: 700;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  text-align: left;
+}
+.panel-subhead span {
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  color: var(--text-muted);
+  letter-spacing: 0;
+}
+.panel-subhead.expander { cursor: pointer; }
+.panel-subhead.expander:hover { color: var(--text-muted); }
+.panel-subhead.expander .icon {
+  width: 0.9em;
+  height: 0.9em;
+  transition: transform 0.18s var(--ease);
+}
+.panel-subhead.expander.open .icon { transform: rotate(90deg); }
+
 .person-row {
   display: flex;
   align-items: center;

@@ -212,7 +212,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     bands; one figure from them is an estimate dressed as a fact.
     `disclosures.py` links the filing instead and never writes `net_worth`.
 
-27. **Only write fields the source actually knows.** `congress --apply` fills
+27. **A challenger is not a member, and the page must let a reader say so.**
+    The FEC field made 79% of profiles people who do not hold the seat. The
+    grid has a `role` filter and the map's delegation panel leads with who is
+    seated. Any new view that lists people needs the same distinction, or it
+    answers "who is running" when the reader asked "who represents me".
+
+28. **Only write fields the source actually knows.** `congress --apply` fills
     name, party, state, district, term and birthday. Education, net worth,
     committees and platform stay empty, because the provenance layer reporting
     "No data" is true and a plausible invention is not.

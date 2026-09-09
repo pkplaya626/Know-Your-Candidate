@@ -258,6 +258,18 @@ people have filed at any funding level — so a seat is never described as
 uncontested when somebody has filed for it. Of the 28 races with no profiled
 challenger, 26 show a filing count and only **2** are genuinely empty.
 
+### Telling them apart
+
+Adding the field made 79% of profiles people who do **not** hold the seat, so
+the grid carries a **Sitting members / Challengers** filter and the URL keeps
+it (`#/?role=member`). It composes with everything else, so
+`#/?role=member&state=TX` is the 39 people who actually represent Texas.
+
+The map's delegation panel leads with who holds the seat and puts the
+challengers behind a count: Texas has 37 representatives and 191 filed
+challengers, and listing all 228 buried the delegation the reader clicked the
+state to see.
+
 ### What these profiles do and do not contain
 
 Name, party, seat, receipts, disbursements and cash on hand, all from the FEC

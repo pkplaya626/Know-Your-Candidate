@@ -12,6 +12,7 @@
     q: "",
     chamber: "all",
     party: "all",
+    role: "all",
     election: "all",
     state: "all",
     sort: "region",
@@ -28,6 +29,14 @@
     Independent: function (item) { return KYC.partyKey(item) === "i"; },
   };
 
+  /* Who is actually in Congress. Since the field came from the FEC, 79% of
+   * profiles are people who do not hold the seat, so "show me my
+   * representatives" needs to be one click rather than a search. */
+  var ROLE_TEST = {
+    member: function (item) { return !item.isCandidate; },
+    candidate: function (item) { return !!item.isCandidate; },
+  };
+
   var ELECTION_TEST = {
     // The 35 Senate seats on the 2026 ballot.
     senateUp26: function (item) {
@@ -38,7 +47,6 @@
     notSeeking: function (item) {
       return item.seatUp2026 && !item.isCandidate && !item.seekingReelection2026;
     },
-    candidate: function (item) { return !!item.isCandidate; },
     contested: function (item) {
       return !!item.raceId && contestedRaces.has(item.raceId);
     },
@@ -55,6 +63,7 @@
       return false;
     }
     if (state.party !== "all" && !PARTY_TEST[state.party](item)) return false;
+    if (state.role !== "all" && !ROLE_TEST[state.role](item)) return false;
     if (state.state !== "all" && item.state !== state.state) return false;
     if (state.election !== "all" && !ELECTION_TEST[state.election](item)) return false;
     return true;
@@ -236,6 +245,7 @@
       q: state.q,
       chamber: state.chamber,
       party: state.party,
+      role: state.role,
       state: state.state,
       election: state.election,
       sort: state.sort === "region" ? "" : state.sort,
@@ -339,7 +349,15 @@
     state.q = params.q || "";
     state.chamber = params.chamber || "all";
     state.party = params.party || "all";
+    state.role = ROLE_TEST[params.role] ? params.role : "all";
     state.election = params.election || "all";
+
+    /* The challenger filter used to live in the election group. Links shared
+     * before it moved still work. */
+    if (params.election === "candidate") {
+      state.role = "candidate";
+      state.election = "all";
+    }
     state.state = params.state || "all";
     state.sort = SORTS[params.sort] ? params.sort : "region";
     state.view = params.view === "race" ? "race" : "grid";
