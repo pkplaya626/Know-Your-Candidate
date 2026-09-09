@@ -235,10 +235,53 @@ def wiki_search_title(name):
 # ------------------------------------------------------------------- cache
 
 def profile_key(profile):
-    """Bioguide for members, name+state for candidates."""
+    """Bioguide for members, name+state+chamber for candidates.
+
+    The chamber is part of the key because ``(name, state)`` alone is not an
+    identity. Colin Allred appears in Texas as both a former House member and
+    a Senate candidate, and Brian McGinnis appears in North Carolina twice for
+    two different offices - so one cache entry was being served to two
+    profiles. Rule 3 in CLAUDE.md is about exactly this, and the fix is the
+    same: key on enough to tell people apart.
+    """
     if not profile["isCandidate"] and not profile["id"].startswith("CURR_"):
         return f"bioguide:{profile['id']}"
-    return f"person:{profile['name'].lower()}|{profile['state']}"
+    chamber = "S" if "Senate" in profile.get("chamber", "") else "H"
+    return f"person:{profile['name'].lower()}|{profile['state']}|{chamber}"
+
+
+def surname_of(name):
+    """Last word of a name, accents folded, for matching article titles."""
+    import unicodedata
+
+    parts = [p for p in str(name).split() if p]
+    if not parts:
+        return ""
+    word = parts[-1]
+    folded = unicodedata.normalize("NFD", word)
+    return "".join(c for c in folded if unicodedata.category(c) != "Mn").lower()
+
+
+def title_is_about(title, name):
+    """True when a Wikipedia title plausibly names this person.
+
+    Wikipedia redirects a person's name to whatever article mentions them, so
+    a bare title guess can land on a topic page: "Brian McGinnis" redirected
+    to "Protests against the 2026 Iran war", and his profile carried a
+    photograph of a demonstration. Nothing about that looks wrong on the page,
+    which is the whole problem.
+
+    Requiring the person's surname to appear in the resolved title is a crude
+    test, but it is the one that would have caught it.
+    """
+    surname = surname_of(name)
+    if not surname:
+        return False
+    import unicodedata
+
+    folded = unicodedata.normalize("NFD", str(title))
+    clean = "".join(c for c in folded if unicodedata.category(c) != "Mn").lower()
+    return surname in clean
 
 
 def load_cache(root="."):
@@ -273,6 +316,18 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
     escape hatch for hand-corrections.
     """
     cache = load_cache(root)
+
+    # Candidates imported from the FEC's filing register are deliberately not
+    # resolved. Portrait resolution for a member goes through the
+    # authoritative bioguide -> Wikipedia mapping, which cannot pick the wrong
+    # person. For a filed candidate it is a bare title guess and a search, and
+    # the field contains 1,979 largely unknown people with ordinary names -
+    # "Michael Smith" resolves to an article about somebody else entirely.
+    # A silhouette says "we have no portrait", which is true. A stranger's
+    # face on a candidate's profile is the exact failure rule 3 exists for,
+    # and nothing on the page would look wrong.
+    profiles = [p for p in profiles if p.get("source") != "fec-field"]
+
     todo = [p for p in profiles if refresh or profile_key(p) not in cache]
     todo = [p for p in todo if not cache.get(profile_key(p), {}).get("pinned")]
 
@@ -328,14 +383,22 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
     still = []
     for profile in remaining:
         key = profile_key(profile)
-        for title in ([wanted[key]] if key in wanted else guesses.get(key, [])):
+        from_mapping = key in wanted
+        for title in ([wanted[key]] if from_mapping else guesses.get(key, [])):
             found = thumbs.get(title)
-            if found:
-                resolved[key] = {
-                    "url": found[1], "via": "wikipedia",
-                    "title": found[0], "name": profile["name"],
-                }
-                break
+            if not found:
+                continue
+            # The bioguide -> Wikipedia mapping is authoritative and its title
+            # need not contain the surname (married names, pen names). A bare
+            # guess is not, and a redirect can land it on a topic page.
+            if not from_mapping and not title_is_about(found[0], profile["name"]):
+                log(f"    [skip] {profile['name']} -> {found[0]!r} (not about them)")
+                continue
+            resolved[key] = {
+                "url": found[1], "via": "wikipedia",
+                "title": found[0], "name": profile["name"],
+            }
+            break
         else:
             still.append(profile)
 
@@ -351,7 +414,7 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
         for profile in still:
             key = profile_key(profile)
             hit = extra.get(found_titles.get(key, ""))
-            if hit:
+            if hit and title_is_about(hit[0], profile["name"]):
                 resolved[key] = {
                     "url": hit[1], "via": "wikipedia-search",
                     "title": hit[0], "name": profile["name"],

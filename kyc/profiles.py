@@ -322,7 +322,7 @@ def _cross_link(profiles):
     return links
 
 
-def build_profiles(data, snapshot=None):
+def build_profiles(data, snapshot=None, field=None, finance=None):
     """Build the unified profile list from loaded roster rows.
 
     *snapshot* is the authoritative ``congress-legislators`` extract from
@@ -330,6 +330,11 @@ def build_profiles(data, snapshot=None):
     senator's term-end year come from it instead of from the hand-typed
     override table and a six-year-hop heuristic. It is optional so that
     ``build`` still works from the CSVs alone.
+
+    *field* is the FEC's register of who has filed for the cycle
+    (:mod:`kyc.candidates`). The roster carried 57 hand-curated challengers,
+    which made the site report 436 races as having no declared challenger when
+    only four of them actually did.
 
     Returns ``(profiles, stats)``.
     """
@@ -358,6 +363,26 @@ def build_profiles(data, snapshot=None):
     for index, row in enumerate(candidates):
         profiles.append(_build_candidate(row, index))
 
+    roster_count = len(profiles)
+    if field:
+        from . import candidates as field_mod, fec as fec_mod
+
+        # The FEC candidate id is the only exact identity we have, and it
+        # reaches a roster profile through the finance cache - which is
+        # applied *after* assembly. Without seeding it here the dedup falls
+        # back to names, and the FEC's filed name is often not the one the
+        # roster uses: "TUREK, JOSHUA" against "Josh Turek", "ARENHOLZ,
+        # ASHLEY HINSON" against "Ashley Hinson". Both appeared twice in the
+        # same race, once with a portrait and once without.
+        claimed = set()
+        for profile in profiles:
+            record = (finance or {}).get(fec_mod.profile_key(profile)) or {}
+            if record.get("candidate_id"):
+                claimed.add(record["candidate_id"])
+
+        extra, _skipped = field_mod.to_profiles(field, profiles, claimed=claimed)
+        profiles.extend(extra)
+
     for profile in profiles:
         apply_quality(profile)
 
@@ -375,6 +400,8 @@ def build_profiles(data, snapshot=None):
     stats = {
         "members": member_count,
         "candidates": len(profiles) - member_count,
+        "roster_candidates": roster_count - member_count,
+        "filed_candidates": len(profiles) - roster_count,
         "total": len(profiles),
         "cross_linked": links,
         "senate_seats_up": sum(

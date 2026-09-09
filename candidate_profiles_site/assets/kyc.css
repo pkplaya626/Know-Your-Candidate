@@ -854,6 +854,16 @@ svg { flex: none; }
 }
 .field-value.subtle { font-weight: 400; color: var(--text-muted); }
 
+.disclosure-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  margin-top: 2px;
+  font-size: var(--t-xs);
+  font-weight: 600;
+}
+.disclosure-link .icon { width: 0.9em; height: 0.9em; }
+
 .field-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

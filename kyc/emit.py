@@ -88,7 +88,16 @@ def data_signature(profiles, races=None, summary=None):
     quiet would have meant committing a 2001 timestamp and showing it to
     readers in the page footer as the freshness stamp.
     """
-    payload = _json([profiles, races or [], summary or {}])
+    # sort_keys, unlike the emitted file. json.dumps preserves insertion
+    # order, so two builds that attach the same enrichments in a different
+    # sequence produced different signatures for identical data - which is
+    # exactly what happened when `verify` applied the disclosure cache after
+    # portraits and `build` applied it before. A signature has to describe
+    # content, not the order the dict happened to be filled in.
+    payload = json.dumps(
+        [profiles, races or [], summary or {}],
+        ensure_ascii=False, separators=(",", ":"), sort_keys=True,
+    )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 

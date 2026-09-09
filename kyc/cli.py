@@ -10,6 +10,8 @@ from . import (
     emit,
     fec,
     geo as geo_mod,
+    candidates,
+    disclosures,
     legislators,
     overrides,
     portraits,
@@ -52,12 +54,24 @@ def _build(args):
         print(f"  [warn] no {legislators.SNAPSHOT_FILE}; falling back to the "
               "curated 2026 Senate table. Run 'congress' to fetch one.")
 
-    profiles, stats = build_profiles(raw, snapshot=snapshot)
+    field = candidates.load_cache(args.root)
+    if field:
+        print(f"  read {candidates.CACHE_PATH} ({field['count']} FEC filers)")
+    else:
+        print(f"  [warn] no FEC candidate field; run 'field'. Races will report "
+              "only the roster's challengers.")
 
     finance = fec.load_cache(args.root)
+    profiles, stats = build_profiles(raw, snapshot=snapshot, field=field,
+                                     finance=finance)
     stats["fec"] = fec.apply_cache(profiles, finance) if finance else 0
     if finance:
         print(f"  finance: {stats['fec']}/{len(profiles)} with FEC totals")
+
+    filings = disclosures.load_cache(args.root)
+    stats["disclosures"] = disclosures.apply_cache(profiles, filings) if filings else 0
+    if filings:
+        print(f"  disclosures: {stats['disclosures']} members linked to a filing")
 
     cache = portraits.load_cache(args.root)
     if cache:
@@ -68,7 +82,7 @@ def _build(args):
         stats["portraits"] = 0
         print("  [warn] no portrait cache; run 'portraits' to resolve them")
 
-    race_list = races_mod.build(profiles)
+    race_list = races_mod.build(profiles, candidates.filing_counts(field))
     stats.update(races_mod.stats(race_list))
 
     # The map geometry is a separate artefact with a separate source, so a
@@ -192,8 +206,10 @@ def _finance(args):
         return 2
     snapshot = legislators.load_snapshot(args.root)
     profiles, _ = build_profiles(raw, snapshot=snapshot)
+    field = candidates.load_cache(args.root)
+    active = {r["candidate_id"] for r in (field or {}).get("candidates", [])}
     fec.resolve_all(profiles, root=args.root, limit=args.limit,
-                    refresh=args.refresh, snapshot=snapshot)
+                    refresh=args.refresh, snapshot=snapshot, active_ids=active)
     print(f"\n[ok] finance cache: {fec.CACHE_PATH}")
     return 0
 
@@ -283,6 +299,81 @@ def _congress(args):
     return 0
 
 
+def _field(args):
+    """Refresh the FEC's register of who has filed for the cycle."""
+    if args.check:
+        cache = candidates.load_cache(args.root)
+        if cache is None:
+            print(f"[error] no {candidates.CACHE_PATH}; run 'field' first.",
+                  file=sys.stderr)
+            return 2
+    else:
+        print("Downloading the 2026 candidate field from the FEC ...")
+        try:
+            cache = candidates.build_cache(candidates.fetch(log=print))
+        except (candidates.FieldError, fec.FecError) as exc:
+            print(f"[error] {exc}", file=sys.stderr)
+            return 2
+        path = candidates.save_cache(cache, args.root)
+        print(f"  wrote {path}")
+
+    counts = candidates.filing_counts(cache)
+    keep = candidates.eligible(cache)
+    print(f"\n  {cache['count']} people have filed for {cache['cycle']}")
+    print(f"  {len(counts)} seats have at least one filing")
+    print(f"  {len(keep)} are past the ${candidates.STATUTORY_THRESHOLD:,} "
+          f"statutory threshold and are not the sitting member")
+
+    busiest = sorted(counts.items(), key=lambda kv: -kv[1])[:8]
+    print("\n  most contested seats by filings:")
+    for rid, n in busiest:
+        print(f"    {rid:18} {n:>3} filed")
+    return 0
+
+
+def _disclosures(args):
+    """Link members to their filed financial disclosures."""
+    import datetime
+
+    raw = _load(args)
+    if raw is None:
+        return 2
+    profiles, _ = build_profiles(
+        raw, snapshot=legislators.load_snapshot(args.root)
+    )
+
+    if args.check:
+        found = disclosures.load_cache(args.root)
+        if not found:
+            print(f"[error] no {disclosures.CACHE_PATH}; run 'disclosures' first.",
+                  file=sys.stderr)
+            return 2
+    else:
+        year = datetime.date.today().year
+        filings = []
+        for which in (year, year - 1):
+            print(f"Downloading the {which} House disclosure index ...")
+            try:
+                got = disclosures.fetch_year(which)
+            except disclosures.DisclosureError as exc:
+                print(f"  [warn] {exc}")
+                continue
+            print(f"  {len(got)} filings")
+            filings.extend(got)
+        if not filings:
+            print("[error] no disclosure index could be read.", file=sys.stderr)
+            return 2
+        found = disclosures.match(profiles, filings)
+        print(f"  wrote {disclosures.save_cache(found, args.root)}")
+
+    house = [p for p in profiles if not p["isCandidate"] and p["chamber"] == "House"]
+    print(f"\n  {len(found)} of {len(house)} House members have an annual "
+          "report on file")
+    print("  Senators have none: the Senate's disclosure search sits behind a "
+          "session gate that\n  would have to be scraped, so it is left alone.")
+    return 0
+
+
 def _verify(args):
     """Assert the committed data files still match the sources.
 
@@ -299,13 +390,22 @@ def _verify(args):
     if raw is None:
         return 2
 
-    profiles, stats = build_profiles(raw, snapshot=legislators.load_snapshot(args.root))
     finance = fec.load_cache(args.root)
+    profiles, stats = build_profiles(
+        raw,
+        snapshot=legislators.load_snapshot(args.root),
+        field=candidates.load_cache(args.root),
+        finance=finance,
+    )
     stats["fec"] = fec.apply_cache(profiles, finance) if finance else 0
     cache = portraits.load_cache(args.root)
     stats["portraits"] = portraits.apply_cache(profiles, cache) if cache else 0
+    filings = disclosures.load_cache(args.root)
+    stats["disclosures"] = disclosures.apply_cache(profiles, filings) if filings else 0
 
-    race_list = races_mod.build(profiles)
+    race_list = races_mod.build(
+        profiles, candidates.filing_counts(candidates.load_cache(args.root))
+    )
     stats.update(races_mod.stats(race_list))
     summary = summary_mod.build(profiles, races=race_list)
 
@@ -441,6 +541,14 @@ def build_parser():
     add("geo", help="regenerate the map geometry from the state atlas")
     add("verify", help="check the committed data still matches the sources")
 
+    disc = add("disclosures", help="link members to their filed financial disclosures")
+    disc.add_argument("--check", action="store_true",
+                      help="use the committed cache; make no network call")
+
+    field = add("field", help="refresh the FEC register of 2026 candidates")
+    field.add_argument("--check", action="store_true",
+                       help="use the committed cache; make no network call")
+
     congress = add("congress",
                    help="reconcile the rosters against the authoritative membership")
     congress.add_argument("--check", action="store_true",
@@ -479,6 +587,10 @@ def main(argv=None):
         return _verify(args)
     if args.command == "congress":
         return _congress(args)
+    if args.command == "field":
+        return _field(args)
+    if args.command == "disclosures":
+        return _disclosures(args)
     if args.command == "portraits":
         return _portraits(args)
     if args.command == "finance":

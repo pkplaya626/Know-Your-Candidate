@@ -28,6 +28,9 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… congress` | Refresh the membership snapshot and report roster drift |
 | `… congress --check` | Report drift from the committed snapshot; no network |
 | `… congress --apply` | Add newly seated members to the roster CSVs |
+| `… field` | Refresh the FEC register of everyone running in 2026 |
+| `… field --check` | Report the field from the committed cache; no network |
+| `… disclosures` | Link House members to their filed financial disclosures |
 | `… geo` | Regenerate only the map geometry |
 | `… fetch` | Refresh DW-NOMINATE scores from Voteview into the roster CSVs |
 | `… portraits` | Resolve and check a portrait URL for every profile |
@@ -82,6 +85,8 @@ CI asserts that a rebuild changes nothing.
 | `profiles.py` | Assemble profiles; derive 2026 election flags and field provenance |
 | `races.py` | Group profiles into the seats they contest |
 | `legislators.py` | The authoritative membership, and reconciliation against it |
+| `candidates.py` | The FEC's register of who is running in 2026 |
+| `disclosures.py` | Links to House members' filed financial disclosures |
 | `geo.py` | Decode the state atlas into SVG path data |
 | `summary.py` | Chamber balance and election headline figures |
 | `validate.py` | Data-quality checks |
@@ -220,6 +225,76 @@ itself, which is why the window opens in January of the election year rather
 than testing a single date. Both routes agree on all 35 seats today, and
 `build --check` reports it as a warning if they ever stop agreeing.
 
+## Who is running
+
+The roster carried 57 hand-curated challengers. Measured against the FEC that
+was not merely thin — it made the site say something false. **436 of 474 races
+rendered as "No declared challenger", and only four of them actually were.**
+372 had a challenger who had already raised $25,000 or more. A voter reading
+their own district was told nobody was running against the incumbent when
+somebody plainly was.
+
+The field now comes from the FEC, the authoritative register of who is running
+for federal office, and the roster keeps its role as editorial detail on top.
+
+| | Before | After |
+|---|---|---|
+| Profiles | 596 | **2,575** |
+| Races with a declared challenger | 38 | **451 of 479** |
+| Races falsely reading "no challenger" | 372 | **0** |
+
+### Where the line is drawn
+
+The receipts distribution is smooth — there is no natural cliff, and picking a
+number would be inventing an editorial judgement and presenting it as a fact.
+
+So the line is the statutory one. Under **52 U.S.C. §30101(2)** a person
+*becomes* a candidate for federal office once they raise or spend more than
+**$5,000**. That is the legal definition of the word this site uses. Above it:
+2,054 filings holding 100% of all money raised in the field.
+
+Everyone below it is still counted. Each race carries `filedCount` — how many
+people have filed at any funding level — so a seat is never described as
+uncontested when somebody has filed for it. Of the 28 races with no profiled
+challenger, 26 show a filing count and only **2** are genuinely empty.
+
+### What these profiles do and do not contain
+
+Name, party, seat, receipts, disbursements and cash on hand, all from the FEC
+with a coverage date. Education, platform, committees and net worth are
+editorial research that no dataset supplies, so they stay empty and the
+provenance layer reports them as *No data*.
+
+They also carry **no portrait**. Portrait resolution for a member goes through
+the authoritative bioguide→Wikipedia mapping and cannot pick the wrong person.
+For a filed candidate it is a bare title guess and a search, and the field
+holds 1,979 largely unknown people with ordinary names — "Michael Smith"
+resolves to an article about somebody else. A silhouette says "we have no
+portrait", which is true; a stranger's face on a candidate's profile is the
+exact failure rule 3 exists for, and nothing on the page would look wrong.
+Guessing also cost about 4,000 requests that 404, which took the page's load
+event to 59 seconds.
+
+### Duplicates are reported, never merged
+
+The FEC's register is keyed by candidate id, and one person can hold two
+committee registrations. Deciding automatically which pairs are one person is
+not safe: Alaska's Senate race really does contain both Senator **Dan
+Sullivan** and a different **Daniel J Sullivan**. `build --check` reports the
+six current look-alike pairs as a warning for a person to judge.
+
+Two cases *are* resolved automatically, because both are exact:
+
+- A filing whose FEC candidate id already belongs to a roster profile. This
+  runs through the finance cache, which is why `build_profiles` takes it —
+  without that, "TUREK, JOSHUA" and "Josh Turek" appeared twice in the same
+  race, once with a portrait and once without.
+- A filing matching a sitting member of that same seat on **both** first and
+  last name. The FEC's incumbent flag is not always current: South Carolina's
+  class-2 seat changed hands in July 2026 and the FEC still marks Lindsey
+  Graham as the incumbent, so Darline Graham's own committee arrived looking
+  like a challenger to herself.
+
 ## Portraits
 
 Portraits are resolved **at build time** and cached in
@@ -290,6 +365,26 @@ attribution is checked: an FEC candidate id encodes its own office and state
 compares it against the profile it is about to appear on. Money shown against
 the wrong person would look entirely normal on the page, which is exactly why
 it is checked rather than trusted.
+
+## Net worth and financial disclosures
+
+The site shows an "Estimated Net Worth" for 144 of 539 sitting members and
+nothing for the rest, and the figures it does show carry no source.
+
+**This is not filled in, deliberately.** No free service publishes a computed
+net worth for members of Congress, and deriving one from a disclosure is not a
+small step: the forms report assets in broad value *bands*, so any single
+figure from them is an estimate dressed as a fact — the exact thing the
+provenance layer exists to prevent.
+
+What is available is the filing itself. The Clerk of the House publishes an
+annual ZIP containing an XML index of every disclosure, and **396 of 439 House
+members** now carry a link to their own annual report (PDF) beside the
+net-worth field.
+
+Senators have none. The Senate's equivalent sits behind a session-based search
+that must be agreed to before it returns anything; scraping it would be fragile
+and against the spirit of that gate.
 
 ## Data provenance
 
@@ -462,10 +557,6 @@ the sidebar counts moved into the build metadata.
 - **No state primary dates.** The countdown covers the general election, which
   is computed (first Tuesday after the first Monday in November). Per-state
   primary dates are not in the data and are deliberately not invented.
-- **Candidate coverage is thin** — 57 challengers across 474 seats. Most races
-  show an incumbent with no declared opponent, which reflects the rosters
-  rather than the field. The FEC publishes every filed federal candidate for
-  the cycle, so this is fillable from the same key the finance lookup needs.
 - **Caucus membership is not in the data.** Both independent senators caucus
   with the Democrats, which is why "53 R / 47 D/I" is the usual way to report
   the chamber. The rosters do not record it, so the site reports `53 R / 45 D /

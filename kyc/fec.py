@@ -82,7 +82,9 @@ def using_demo_key(root="."):
 
 def _get(path, params, retries=4):
     params = dict(params, api_key=api_key())
-    url = f"{API_ROOT}{path}?{urllib.parse.urlencode(params)}"
+    # doseq: several OpenFEC parameters are repeatable (office=H&office=S).
+    # Without it a list is encoded as its Python repr and the API returns 422.
+    url = f"{API_ROOT}{path}?{urllib.parse.urlencode(params, doseq=True)}"
     delay = 1.5
     last = None
     for attempt in range(retries):
@@ -194,7 +196,7 @@ def save_cache(cache, root="."):
     return path
 
 
-def known_ids(snapshot):
+def known_ids(snapshot, active_ids=None):
     """``{bioguide: fec_candidate_id}`` from the authoritative membership.
 
     ``congress-legislators`` records the FEC candidate id for 537 of the 539
@@ -204,17 +206,31 @@ def known_ids(snapshot):
     as "ARENHOLZ, ASHLEY HINSON" - so matching is fuzzy by necessity, and a
     fuzzy match that lands on the wrong person puts someone else's money on a
     profile without anything looking wrong.
+
+    *active_ids* is the set of candidate ids the FEC lists for the current
+    cycle. Fifteen members carry more than one id, and simply taking the first
+    was wrong for four of them: Glenn Ivey's committee for this cycle is his
+    second id, so the lookup asked about a committee with no 2026 activity and
+    the profile reported "No filing this cycle" while $674,406 sat under the
+    other one. An old committee id looks exactly as authoritative as a current
+    one, which is why the cycle has to be the tie-breaker.
     """
     ids = {}
     for person in (snapshot or {}).get("legislators", []):
         candidate_ids = person.get("fec") or []
-        if candidate_ids:
-            ids[person["bioguide"]] = candidate_ids[0]
+        if not candidate_ids:
+            continue
+        if active_ids:
+            live = [i for i in candidate_ids if i in active_ids]
+            if live:
+                ids[person["bioguide"]] = live[0]
+                continue
+        ids[person["bioguide"]] = candidate_ids[0]
     return ids
 
 
 def resolve_all(profiles, root=".", limit=None, refresh=False, snapshot=None,
-                log=print):
+                active_ids=None, log=print):
     """Look up finance totals, resuming from the cache.
 
     Requests are sequential and rate-limited on purpose; the FEC key allows
@@ -236,7 +252,7 @@ def resolve_all(profiles, root=".", limit=None, refresh=False, snapshot=None,
         log("  [warn] using DEMO_KEY - the FEC will throttle after a few requests.")
         log("         Set FEC_API_KEY from https://api.data.gov/signup/ for a full run.")
 
-    authoritative = known_ids(snapshot)
+    authoritative = known_ids(snapshot, active_ids)
     if authoritative:
         covered = sum(1 for p in todo if p["id"] in authoritative)
         log(f"  finance: {covered} of {len(todo)} have an authoritative FEC id")
@@ -320,6 +336,10 @@ def apply_cache(profiles, cache):
             # members here are running for a *different* seat, so their money
             # is in another committee entirely.
             if record.get("candidate_id") and not record.get("found"):
+                # Record the id even with no totals: it is how the FEC field
+                # import recognises that this person already has a profile.
+                # Omitting it duplicated four sitting members.
+                profile["fecCandidateId"] = record["candidate_id"]
                 quality = profile.setdefault("quality", {})
                 for field in ("receipts", "disbursements"):
                     quality[field] = NO_FILING

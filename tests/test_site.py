@@ -186,6 +186,19 @@ class TestDataSignature(unittest.TestCase):
             os.environ.pop("SOURCE_DATE_EPOCH", None)
         self.assertEqual(first, second)
 
+    def test_signature_ignores_key_insertion_order(self):
+        # json.dumps preserves insertion order, so two builds that attached
+        # the same enrichments in a different sequence produced different
+        # signatures for identical data - which is what happened when verify
+        # applied the disclosure cache after portraits and build applied it
+        # before. A signature describes content, not fill order.
+        first = dict(member())
+        second = {}
+        for key in reversed(list(first)):
+            second[key] = first[key]
+        self.assertNotEqual(list(first), list(second))
+        self.assertEqual(emit.data_signature([first]), emit.data_signature([second]))
+
     def test_signature_changes_with_the_data(self):
         self.assertNotEqual(
             emit.data_signature([member(name="A")]),
