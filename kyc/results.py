@@ -634,37 +634,67 @@ _TITLE_TOKENS = {"mr", "mrs", "ms", "miss", "dr", "hon", "rev", "sen", "rep",
 # the pairing is used one way: a filed name and a ballot name match when
 # either is the other's nickname, never on a guess about an unlisted one.
 NICKNAMES = {
-    "abraham": ("abe",), "albert": ("al", "bert"), "alexander": ("alex", "al"),
-    "alexandra": ("alex", "lexy", "lexi", "sasha"), "alfred": ("al", "fred"),
-    "andrew": ("andy", "drew"), "anthony": ("tony",), "arthur": ("art",),
-    "benjamin": ("ben", "benny"), "bernard": ("bernie", "berney", "bern"),
+    "abraham": ("abe",), "albert": ("al", "bert"), "alexander": ("alex", "al", "sandy", "xander"),
+    "alexandra": ("alex", "lexy", "lexi", "sasha", "sandy"), "alexandria": ("alex", "lexi"),
+    "alexis": ("lexi",), "alfred": ("al", "fred"), "andrew": ("andy", "drew"),
+    "angela": ("angie",), "anthony": ("tony",), "arthur": ("art",), "augustus": ("gus",),
+    "barbara": ("barb", "barbie"), "benjamin": ("ben", "benny", "benji"),
+    "bernard": ("bernie", "berney", "bern"), "beverly": ("bev",), "bradley": ("brad",),
+    "calvin": ("cal",), "cameron": ("cam",), "caroline": ("carrie",), "carolyn": ("carrie",),
     "catherine": ("cathy", "kate", "katie", "cat"), "charles": ("chuck", "charlie", "chas"),
-    "christopher": ("chris",), "christine": ("chris", "chrissy"),
-    "daniel": ("dan", "danny"), "david": ("dave", "davey"), "deborah": ("debbie", "deb"),
-    "dennis": ("denny",), "donald": ("don", "donnie"), "douglas": ("doug",),
-    "edward": ("ed", "eddie", "ted", "ned"), "eleanor": ("ellie", "nell"),
-    "elinor": ("ellie",), "elizabeth": ("liz", "beth", "betsy", "eliza", "lisa", "libby"),
-    "eugene": ("gene",), "francis": ("frank",), "franklin": ("frank",),
-    "frederick": ("fred", "rick"), "gerald": ("jerry", "gerry"), "gregory": ("greg",),
-    "gregorio": ("greg",), "harold": ("hal", "harry"), "henry": ("hank", "harry"),
-    "herbert": ("herb",), "howard": ("howie",), "jacob": ("jake",),
-    "james": ("jim", "jimmy", "jamie"), "jeffrey": ("jeff",), "jennifer": ("jen", "jenny", "jennie"),
-    "jessica": ("jess", "jessie"), "john": ("jack", "johnny", "jon"), "jonathan": ("jon", "jonny"),
-    "joseph": ("joe", "joey"), "joshua": ("josh",), "judith": ("judy",),
-    "katherine": ("kathy", "kate", "katie", "kat"), "kathryn": ("kathy", "kate", "katie"),
+    "charlotte": ("charlie", "lottie"), "christina": ("chris", "tina"),
+    "christine": ("chris", "chrissy"), "christopher": ("chris", "kit"), "clifford": ("cliff",),
+    "clinton": ("clint",), "cynthia": ("cindy",), "daniel": ("dan", "danny"),
+    "danielle": ("dani",), "david": ("dave", "davey"), "deborah": ("debbie", "deb"),
+    "debra": ("debbie", "deb"), "dennis": ("denny",), "dominic": ("dom",),
+    "donald": ("don", "donnie"), "dorothy": ("dot", "dottie"), "douglas": ("doug",),
+    "edmund": ("ed", "ned"), "edward": ("ed", "eddie", "ted", "ned"), "edwin": ("ed",),
+    "eleanor": ("ellie", "nell"), "elinor": ("ellie",),
+    "elizabeth": ("liz", "beth", "betsy", "eliza", "lisa", "libby", "betty"),
+    "emanuel": ("manny",), "ernest": ("ernie",), "eugene": ("gene",), "ezekiel": ("zeke",),
+    "frances": ("fran", "frankie"), "francis": ("frank",), "francisco": ("frank", "paco"),
+    "franklin": ("frank",), "frederick": ("fred", "rick"), "gabriel": ("gabe",),
+    "gabriela": ("gabby",), "gabriella": ("gabby",), "geoffrey": ("geoff", "jeff"),
+    "gerald": ("jerry", "gerry"), "gerard": ("gerry",), "gilbert": ("gil",),
+    "gregory": ("greg",), "gregorio": ("greg",), "harold": ("hal", "harry"),
+    "harrison": ("harry",), "henry": ("hank", "harry"), "herbert": ("herb",),
+    "howard": ("howie",), "irving": ("irv",), "isaac": ("ike",), "jacob": ("jake",),
+    "jacqueline": ("jackie",), "james": ("jim", "jimmy", "jamie", "jay"), "janet": ("jan",),
+    "janice": ("jan",), "jeffrey": ("jeff",), "jennifer": ("jen", "jenny", "jennie"),
+    "jeremiah": ("jerry",), "jerome": ("jerry",), "jessica": ("jess", "jessie"),
+    "joanne": ("jo",), "john": ("jack", "johnny", "jon"), "jonathan": ("jon", "jonny"),
+    "joseph": ("joe", "joey"), "josephine": ("jo", "josie"), "joshua": ("josh",),
+    "judith": ("judy",), "julius": ("jules",), "katherine": ("kathy", "kate", "katie", "kat"),
+    "kathleen": ("kathy", "kate", "katie"), "kathryn": ("kathy", "kate", "katie"),
     "kenneth": ("ken", "kenny"), "kimberly": ("kim",), "lawrence": ("larry",),
-    "leonard": ("len", "lenny", "leo"), "margaret": ("peggy", "meg", "maggie", "marge"),
-    "martin": ("marty",), "matthew": ("matt",), "michael": ("mike", "mikey", "mick"),
-    "mitchell": ("mitch",), "nathan": ("nate",), "nathaniel": ("nate",),
-    "nicholas": ("nick",), "patricia": ("pat", "patty", "tricia", "trish"),
-    "patrick": ("pat", "paddy"), "peter": ("pete",), "philip": ("phil",),
-    "phillip": ("phil",), "raymond": ("ray",), "rebecca": ("becky", "becca"),
-    "richard": ("rick", "dick", "rich", "richie", "ricky"), "robert": ("bob", "rob", "bobby", "robby", "robbie"),
-    "ronald": ("ron", "ronnie"), "rudolph": ("rudy",), "russell": ("russ",),
-    "samuel": ("sam", "sammy"), "stephen": ("steve",), "steven": ("steve",),
-    "susan": ("sue", "susie"), "theodore": ("ted", "teddy"), "thomas": ("tom", "tommy"),
-    "timothy": ("tim",), "vincent": ("vince",), "walter": ("walt",),
-    "william": ("bill", "will", "billy", "willie", "liam"), "zachary": ("zach", "zack"),
+    "leonard": ("len", "lenny", "leo"), "lester": ("les",), "louis": ("lou",),
+    "louise": ("lou",), "lucille": ("lucy",), "madeline": ("maddie",), "malcolm": ("mal",),
+    "manuel": ("manny",), "marcus": ("mark", "marc"), "margaret": ("peggy", "meg", "maggie", "marge"),
+    "marjorie": ("margie",), "martha": ("marty",), "martin": ("marty",),
+    "matthew": ("matt",), "maximilian": ("max",), "maxwell": ("max",), "melissa": ("mel", "missy"),
+    "melvin": ("mel",), "michael": ("mike", "mikey", "mick"), "mitchell": ("mitch",),
+    "montgomery": ("monty",), "nancy": ("nan",), "natalie": ("nat",), "nathan": ("nate",),
+    "nathaniel": ("nate",), "nicholas": ("nick",), "nicole": ("nikki",), "norman": ("norm",),
+    "oliver": ("ollie",), "pamela": ("pam",), "patricia": ("pat", "patty", "tricia", "trish"),
+    "patrick": ("pat", "paddy"), "penelope": ("penny",), "peter": ("pete",),
+    "philip": ("phil",), "phillip": ("phil",), "randall": ("randy",), "randolph": ("randy",),
+    "raymond": ("ray",), "rebecca": ("becky", "becca"), "reginald": ("reggie",),
+    "regina": ("gina",), "ricardo": ("rick",), "richard": ("rick", "dick", "rich", "richie", "ricky"),
+    "robert": ("bob", "rob", "bobby", "robby", "robbie"), "roberta": ("bobbie",),
+    "roderick": ("rod",), "rodney": ("rod",), "ronald": ("ron", "ronnie"),
+    "rosemary": ("rosie",), "rudolph": ("rudy",), "russell": ("russ",),
+    "salvatore": ("sal",), "samuel": ("sam", "sammy"), "sandra": ("sandy",),
+    "sebastian": ("seb",), "sidney": ("sid",), "solomon": ("sol",), "stanley": ("stan",),
+    "stephanie": ("steph",), "stephen": ("steve",), "steven": ("steve",),
+    "susan": ("sue", "susie"), "suzanne": ("sue", "suzy", "suzie"), "tamara": ("tammy", "tamie"),
+    "terrence": ("terry",),
+    "terence": ("terry",), "theresa": ("terry", "tess"), "theodore": ("ted", "teddy"),
+    "thaddeus": ("tad", "thad"), "thomas": ("tom", "tommy"), "timothy": ("tim",),
+    "tobias": ("toby",), "valerie": ("val",), "vernon": ("vern",), "victor": ("vic",),
+    "victoria": ("vicky", "tori"), "vincent": ("vince",), "virginia": ("ginny",),
+    "wallace": ("wally",), "walter": ("walt",), "wesley": ("wes",),
+    "william": ("bill", "will", "billy", "willie", "liam"), "woodrow": ("woody",),
+    "zachary": ("zach", "zack"), "zachariah": ("zach",),
 }
 _FORMAL = {}
 for _formal, _shorts in NICKNAMES.items():
@@ -681,6 +711,7 @@ def _tokens(name):
     the ballot uses.
     """
     text = _fold(name).replace(".", " ").replace('"', " ").replace("'", " ")
+    text = text.replace("(", " ").replace(")", " ")     # "(RANDY)", "(J.D.)"
     words = [w for w in text.split() if w]
     while len(words) > 1 and words[-1] in _SUFFIX_TOKENS:
         words.pop()
@@ -709,8 +740,12 @@ def _middle_conflict(ballot, filed):
     "SULLIVAN, DAN" and a different "SULLIVAN, DANIEL J". The J rules the
     second one out, which is what lets the first stand as the only fit.
     """
-    if len(ballot) < 3 or len(filed) < 3:
-        return False
+    # Only a bare initial on the ballot side counts: 'Ergin "Batman" Tek'
+    # against "TEK, ERGIN AKA BATMAN" is not a conflict, and a quoted
+    # nickname of two initials ('LaShonda "L.J." Holloway') is not a middle
+    # name at all.
+    if len(ballot) != 3 or len(filed) < 3 or len(ballot[1]) != 1 or len(ballot[0]) == 1:
+        return False                      # "J.D. Ford" is two initials, not a middle
     return ballot[1][0] != filed[1][0]
 
 

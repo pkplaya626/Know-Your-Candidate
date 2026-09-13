@@ -397,8 +397,11 @@ class TestAgainstTheRealCache(unittest.TestCase):
             parties = {}
             for cid, status in race["status"].items():
                 if status == results.NOMINEE and cid in by_id:
-                    party = by_id[cid].get("party")
-                    if party in ("DEM", "REP"):
+                    # The ballot's party wins over the filing's: Tamie Wilson
+                    # filed as a Democrat and is on Ohio's 4th ballot as an
+                    # independent beside the Democratic nominee.
+                    party = (race.get("party") or {}).get(cid) or                         results.party_key(by_id[cid].get("party"))
+                    if party in ("democratic", "republican"):
                         # One person registered twice is one nominee.
                         parties.setdefault(party, set()).add(
                             results._fold(by_id[cid].get("name")))
