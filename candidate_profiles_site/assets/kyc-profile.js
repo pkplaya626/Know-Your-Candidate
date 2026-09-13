@@ -115,6 +115,10 @@
       '        <h3 class="panel-head">' + KYC.icon("layers") + " Committees</h3>",
       '        <div class="scroll-y scroll-box list-rows" id="profileModalCommittees"></div>',
       "      </section>",
+      '      <section class="panel" id="profileModalRacePanel" hidden>',
+      '        <h3 class="panel-head">' + KYC.icon("flag") + ' <span id="profileModalRaceTitle">In this race</span></h3>',
+      '        <div class="list-rows race-mates" id="profileModalRace"></div>',
+      "      </section>",
       "    </div>",
       "  </div>",
       '  <footer class="modal-footer">',
@@ -265,6 +269,66 @@
           KYC.escapeHtml(name) + "</span></div>";
       })
       .join("");
+  }
+
+  /* Who else is in this person's 2026 race - the way a video page lists what
+   * to watch next. A reader who opened a member sees their challengers one
+   * click away; a reader who opened a challenger sees the incumbent. */
+  var MATE_STATUS = {
+    nominee: "On the ballot", advanced: "In runoff", eliminated: "Lost primary",
+    withdrawn: "Withdrew", unlisted: "Not on ballot",
+  };
+
+  function renderRace(item) {
+    var panel = el("profileModalRacePanel");
+    var target = el("profileModalRace");
+    var raceId = item.contestRaceId || item.raceId;
+    var race = null;
+    (global.kycRaces || []).some(function (r) {
+      if (r.id === raceId) { race = r; return true; }
+      return false;
+    });
+    if (!race) {
+      panel.hidden = true;
+      target.innerHTML = "";
+      return;
+    }
+    var others = race.incumbentIds.concat(race.candidateIds)
+      .filter(function (id) { return id !== item.id; })
+      .map(KYC.byId).filter(Boolean);
+    var order = { nominee: 0, advanced: 1, undefined: 2, eliminated: 3, withdrawn: 4, unlisted: 5 };
+    others.sort(function (a, b) {
+      var ra = a.isCandidate ? 1 : 0, rb = b.isCandidate ? 1 : 0;
+      if (ra !== rb) return ra - rb;
+      var sa = order[a.raceStatus], sb = order[b.raceStatus];
+      if (sa !== sb) return (sa === undefined ? 2 : sa) - (sb === undefined ? 2 : sb);
+      return a.name.localeCompare(b.name);
+    });
+    var out = others.filter(function (p) { return KYC.cards && KYC.cards.offBallot(p); });
+    var shown = others.filter(function (p) { return !(KYC.cards && KYC.cards.offBallot(p)); });
+    el("profileModalRaceTitle").textContent = race.label;
+    var row = function (p) {
+      var role = p.isCandidate ? "" : '<span class="badge badge-neutral">Member</span> ';
+      var status = MATE_STATUS[p.raceStatus]
+        ? '<span class="badge ' + (p.raceStatus === "nominee" ? "badge-money" :
+            p.raceStatus === "advanced" ? "badge-warn" : "badge-neutral") + '">' +
+          KYC.escapeHtml(MATE_STATUS[p.raceStatus]) + "</span>"
+        : "";
+      return '<button type="button" class="race-mate" data-goto="' + KYC.escapeAttr(p.id) + '">' +
+        '<img src="' + KYC.escapeAttr(KYC.portraitSrc(p)) + '" alt="" loading="lazy" ' +
+        'data-photo-idx="0" data-profile="' + KYC.escapeAttr(p.id) + '">' +
+        '<span class="race-mate-body"><span class="race-mate-name">' + KYC.escapeHtml(p.name) +
+        '</span><span class="race-mate-meta"><span class="' + KYC.partyClass(p) + '">' +
+        KYC.escapeHtml(p.party) + "</span> " + role + status + "</span></span></button>";
+    };
+    var html = shown.map(row).join("");
+    if (out.length) {
+      html += '<details class="race-out"><summary>' + out.length +
+        " no longer in this race</summary>" + out.map(row).join("") + "</details>";
+    }
+    if (!others.length) html = '<span class="kyc-absent">Nobody else has filed for this seat</span>';
+    panel.hidden = false;
+    target.innerHTML = html;
   }
 
   /* Every link is built from an id the source dataset holds - never from a
@@ -531,6 +595,7 @@
     renderVoting(item);
     renderCommittees(item);
     renderContact(item);
+    renderRace(item);
 
     el("profileModalSource").textContent = item.financeSource
       ? "Finance figures from the FEC" +

@@ -581,6 +581,29 @@
     return siteRoot() + "states/" + String(code).toLowerCase() + ".html";
   }
 
+  /* The last state a reader looked at, so the sidebar can offer it back -
+   * a per-viewer convenience, kept in this browser only. */
+  var STATE_KEY = "kycState";
+
+  function rememberState(code) {
+    try { localStorage.setItem(STATE_KEY, code); } catch (e) { /* private mode */ }
+  }
+
+  function rememberedState() {
+    try { return localStorage.getItem(STATE_KEY) || ""; } catch (e) { return ""; }
+  }
+
+  function renderRememberedState() {
+    var slot = doc.getElementById("yourState");
+    if (!slot) return;
+    var code = rememberedState();
+    var states = meta().states || {};
+    if (!code || !states[code]) { slot.hidden = true; return; }
+    slot.hidden = false;
+    slot.innerHTML = '<a class="nav-link" href="' + escapeAttr(stateUrl(code)) + '">' +
+      icon("pin") + " " + escapeHtml(states[code].name) + "</a>";
+  }
+
   /** Fill the chamber-balance readouts from the build metadata.
    *
    *  These were literal text in both sidebars ("53 R | 47 D/I", "35", "435")
@@ -698,11 +721,34 @@
     }
 
     renderSummary();
+    renderRememberedState();
+    var here = doc.body && doc.body.getAttribute("data-state");
+    if (here) rememberState(here);
 
     // "/" focuses the search box from anywhere, as it does on YouTube and
     // GitHub; Escape hands focus back and clears an empty-result search.
     var search = doc.querySelector('input[type="search"]');
     if (search) {
+      // Name suggestions, built once on first focus so 2,500 options never
+      // sit in the DOM of a page nobody searches.
+      search.addEventListener("focus", function build() {
+        search.removeEventListener("focus", build);
+        var people = global.legislatorsData || [];
+        if (!people.length || doc.getElementById("kycNames")) return;
+        var list = doc.createElement("datalist");
+        list.id = "kycNames";
+        var names = {};
+        people.forEach(function (p) {
+          if (p.raceStatus && p.raceStatus !== "nominee" && p.raceStatus !== "advanced" &&
+              p.isCandidate) return;      // off-ballot filers would swamp the list
+          names[p.name] = true;
+        });
+        list.innerHTML = Object.keys(names).sort().map(function (name) {
+          return '<option value="' + escapeAttr(name) + '"></option>';
+        }).join("");
+        doc.body.appendChild(list);
+        search.setAttribute("list", "kycNames");
+      });
       doc.addEventListener("keydown", function (event) {
         if (event.key !== "/" || event.altKey || event.ctrlKey || event.metaKey) return;
         var target = event.target;
@@ -784,5 +830,7 @@
     stateName: stateName,
     stateUrl: stateUrl,
     siteRoot: siteRoot,
+    rememberState: rememberState,
+    renderRememberedState: renderRememberedState,
   };
 })(window);

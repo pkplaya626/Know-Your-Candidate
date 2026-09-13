@@ -1688,3 +1688,35 @@ svg { flex: none; }
   background: transparent;
 }
 .race { scroll-margin-top: var(--s-6); }
+
+/* "In this race" inside the dialog: the race-mates, like an up-next list. */
+.race-mates > * { padding: var(--s-2) 0; }
+.race-mate {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  width: 100%;
+  padding: var(--s-2) 0;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.race-mate:hover .race-mate-name { color: var(--accent); }
+.race-mate img {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--surface-3);
+}
+.race-mate-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.race-mate-name { font-weight: 600; }
+.race-mate-meta { display: flex; flex-wrap: wrap; gap: var(--s-1); align-items: center; font-size: var(--t-xs); }
+.race-mates .race-out { border-top: 0; }
+.race-mates .race-out > summary { padding: var(--s-2) 0; }
+#yourState .nav-link { color: var(--accent); }
