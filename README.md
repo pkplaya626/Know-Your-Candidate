@@ -721,5 +721,9 @@ the sidebar counts moved into the build metadata.
   the chamber. The rosters do not record it, so the site reports `53 R / 45 D /
   2 I` and leaves the arithmetic to the reader rather than asserting something
   it cannot source.
-- **No social preview image.** `og:image` needs a raster asset and an absolute
-  URL, so it waits on a canonical domain.
+- **Campaign websites are as the treasurer typed them.** The FEC's committee
+  register holds a site for 856 of the 1,035 people on a ballot; the rest
+  filed none, and nothing is guessed for them. Off-ballot filers are not
+  looked up.
+- **Senators have no financial-disclosure link.** The Senate's search sits
+  behind a session gate that would have to be scraped.
