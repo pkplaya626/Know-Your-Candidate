@@ -517,6 +517,176 @@ def check_duplicate_people(profiles):
                   pairs)]
 
 
+# States whose primaries send more than one person per party to November.
+# California and Washington run top-two primaries; Alaska sends four through.
+# Everywhere else, two nominees from one party is a parsing error.
+MULTI_NOMINEE_STATES = frozenset({"CA", "WA", "AK"})
+
+# No primary decides who these are, so several can share a November ballot.
+UNPRIMARIED_PARTIES = frozenset({"independent", "unaffiliated", "no party",
+                                 "nonpartisan", "other", "write-in", "none"})
+
+RACE_STATUSES = frozenset({"nominee", "eliminated", "withdrawn", "advanced", "unlisted"})
+
+
+def _fold(text):
+    import unicodedata
+    normal = unicodedata.normalize("NFD", str(text or ""))
+    return "".join(c for c in normal if unicodedata.category(c) != "Mn").lower()
+
+
+def contest_of(profile):
+    """The race a person is actually in: the seat they are contesting."""
+    return profile.get("contestRaceId") or profile.get("raceId")
+
+
+def check_results(profiles, races):
+    """Primary outcomes must be internally consistent with the roster.
+
+    The outcomes are read off Wikipedia election boxes and matched to FEC
+    filers by name, and both steps can go quietly wrong: a mis-parsed box
+    makes two people the Republican nominee for one seat, a loose name match
+    marks a sitting member as beaten in a primary they won. Neither looks
+    unusual on the page, so this is where it has to be caught.
+    """
+    if races is None:
+        return []
+
+    issues = []
+    by_id = {p["id"]: p for p in profiles}
+
+    unknown = sorted(
+        f"{p['name']}: {p['raceStatus']!r}" for p in profiles
+        if p.get("raceStatus") and p["raceStatus"] not in RACE_STATUSES
+    )
+    if unknown:
+        issues.append(Issue("error", "unknown-race-status",
+                            f"{len(unknown)} profiles carry a race status the "
+                            f"page does not know", unknown[:15]))
+
+    contesting = collections.defaultdict(list)
+    for profile in profiles:
+        rid = contest_of(profile)
+        if rid:
+            contesting[rid].append(profile)
+
+    crowded, empty, beaten, retired = [], [], [], []
+    for race in races:
+        if not race.get("settled"):
+            continue
+        people = contesting.get(race["id"], [])
+        nominees = collections.defaultdict(dict)
+        for p in people:
+            if p.get("raceStatus") == "nominee":
+                # Keyed on the folded name: one person registered twice with
+                # the FEC is one nominee, and is reported separately.
+                nominees[p["party"]].setdefault(_fold(p["name"]), p)
+        if race["state"] not in MULTI_NOMINEE_STATES:
+            for party, found in sorted(nominees.items()):
+                if len(found) > 1 and str(party).lower() not in UNPRIMARIED_PARTIES:
+                    crowded.append(f"{race['id']}: {len(found)} {party} nominees - " +
+                                   ", ".join(f"{p['name']} ({p['id']})"
+                                             for p in found.values()))
+        summary = race.get("results") or {}
+        if (not nominees and not summary.get("advanced")
+                and not summary.get("otherNominees")):
+            empty.append(race["id"])
+        for pid in race["incumbentIds"]:
+            member = by_id[pid]
+            if member.get("contestRaceId") not in (None, race["id"]):
+                continue           # judged in the race they are contesting
+            status = member.get("raceStatus")
+            if status in ("eliminated", "withdrawn") and member.get("seekingReelection2026"):
+                beaten.append(f"{race['id']}: {member['name']} is {status} yet "
+                              f"still marked as seeking re-election")
+            if status == "nominee" and not member.get("seekingReelection2026"):
+                retired.append(f"{race['id']}: {member['name']} is the nominee "
+                               f"but the roster says not seeking re-election")
+
+    if crowded:
+        issues.append(Issue("error", "multiple-nominees",
+                            f"{len(crowded)} races give one party more than one "
+                            f"nominee outside a top-two state", crowded))
+    if empty:
+        issues.append(Issue("warn", "settled-race-without-nominee",
+                            f"{len(empty)} races are marked settled but nobody "
+                            f"in them is a nominee or advanced to a runoff",
+                            empty[:20]))
+    if beaten:
+        issues.append(Issue("error", "eliminated-incumbent-still-running",
+                            f"{len(beaten)} sitting members lost or left their "
+                            f"primary but still read as seeking re-election",
+                            beaten))
+    absent = sorted(
+        f"{p['name']} ({p['officeLabel']}, {p['party']}): roster status {p['status']!r}"
+        for p in profiles
+        if not p["isCandidate"] and p.get("raceStatus") == "unlisted"
+    )
+    if absent:
+        issues.append(Issue("warn", "member-not-on-ballot",
+                            f"{len(absent)} sitting members are absent from their "
+                            f"own party's decided primary and the November ballot; "
+                            f"shown as not seeking re-election", absent))
+    if retired:
+        issues.append(Issue("warn", "nominee-marked-retiring",
+                            f"{len(retired)} sitting members are nominees but the "
+                            f"roster says they are not seeking re-election",
+                            retired))
+    return issues
+
+
+def check_seats_contested(profiles):
+    """Where the FEC and the roster disagree about who is running for what.
+
+    A re-seated challenger is a roster row to correct; a member linked to a
+    candidacy of a different party is almost certainly two people who share
+    a name, and the link would mark the wrong seat open.
+    """
+    issues = []
+    by_id = {p["id"]: p for p in profiles}
+
+    reseated = sorted(
+        f"{p['name']}: roster says {p['rosterSeat']}, FEC filing is for {p['officeLabel']}"
+        for p in profiles if p.get("rosterSeat")
+    )
+    if reseated:
+        issues.append(Issue("warn", "roster-seat-disagrees-with-fec",
+                            f"{len(reseated)} roster challengers are filed for a "
+                            f"different seat than the roster gives them; the "
+                            f"filing was used", reseated))
+
+    from .results import party_key
+
+    switched = sorted(
+        f"{p['name']} ({p['officeLabel']}): roster/FEC say {p['party']}, "
+        f"the ballot says {p['ballotParty']}"
+        for p in profiles
+        if p.get("ballotParty") and party_key(p["party"]) != p["ballotParty"]
+        and p["ballotParty"] in ("democratic", "republican", "libertarian",
+                                 "green", "independent")
+        and party_key(p["party"]) in ("democratic", "republican", "libertarian",
+                                      "green", "independent")
+    )
+    if switched:
+        issues.append(Issue("warn", "ballot-party-disagrees",
+                            f"{len(switched)} profiles carry a party the ballot "
+                            f"does not; the roster row or FEC record is stale",
+                            switched))
+
+    crossed = []
+    for member in profiles:
+        other = by_id.get(member.get("alsoRunningId"))
+        if other and other["party"] != member["party"]:
+            crossed.append(f"{member['name']} ({member['officeLabel']}, {member['party']}) "
+                           f"-> {other['name']} ({other['officeLabel']}, {other['party']})")
+    if crossed:
+        issues.append(Issue("error", "cross-party-link",
+                            f"{len(crossed)} members are linked to a candidacy under "
+                            f"a different party - likely two people with one name",
+                            crossed))
+    return issues
+
+
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
@@ -532,6 +702,8 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None):
     issues += check_snapshot(profiles, raw, snapshot)
     issues += check_finance(profiles, finance)
     issues += check_duplicate_people(profiles)
+    issues += check_results(profiles, races)
+    issues += check_seats_contested(profiles)
     return issues
 
 

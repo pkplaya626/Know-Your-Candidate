@@ -31,14 +31,16 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… field` | Refresh the FEC register of everyone running in 2026 |
 | `… field --check` | Report the field from the committed cache; no network |
 | `… disclosures` | Link House members to their filed financial disclosures |
+| `… results` | Read each state's primary results from Wikipedia: who is still in |
+| `… results --check` | Report the results from the committed cache; no network |
 | `… geo` | Regenerate only the map geometry |
 | `… fetch` | Refresh DW-NOMINATE scores from Voteview into the roster CSVs |
 | `… portraits` | Resolve and check a portrait URL for every profile |
 | `… portraits --refresh` | Re-resolve every portrait, not just the missing ones |
 | `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`) |
 | `… refresh` | `fetch`, then `build` |
-| `python -m unittest discover tests` | 195 pipeline tests |
-| `npm install && npm test` | Render both pages in jsdom and drive the UI (133 checks) |
+| `python -m unittest discover tests` | 348 pipeline tests |
+| `npm install && npm test` | Render both pages in jsdom and drive the UI (148 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -307,6 +309,67 @@ Two cases *are* resolved automatically, because both are exact:
   Graham as the incumbent, so Darline Graham's own committee arrived looking
   like a challenger to herself.
 
+## Who is still in the race
+
+The FEC's register says who *filed*. It does not say who lost. By September
+of an election year most primaries have been held, and a page that listed
+every filer as a live challenger was wrong about most of them: 858 of the
+people it showed as running had already been eliminated.
+
+`python build_profile_site.py results` reads each state's Wikipedia election
+page and writes `data/primary_results.json`. Three things keep it honest:
+
+- **A calendar gate.** The FEC's election calendar says when each state's
+  primary (and runoff) is. Nothing is read for a race whose primary has not
+  happened, however complete the page looks.
+- **Winners come from the markup, never from the count.** A row is a winner
+  only when it uses the `Election box winning candidate` template. A table
+  with nobody marked decides nothing — it is a candidate list, not a result.
+- **The general-election table is the authority** when the page has one; a
+  party's runoff table decides for the people in it; otherwise a primary's
+  marked winner is the nominee. In a runoff state a primary with two marked
+  winners means both only *advanced*. The page's infobox, which editors keep
+  current before the tables, can add a nominee but never overrule a table.
+
+Names are matched to filings inside one race only: exact surname, a given
+name that fits — exactly, as a common nickname (`NICKNAMES`: "Nick" for
+"Nicholas", "Hank" for "Henry"), or as a prefix of two letters or more — with
+honorifics and suffixes ignored. Two different people that both fit are left
+alone and reported; a sitting member's roster name and Wikipedia title are
+fed in as aliases so the match does not depend on how the FEC spells them.
+
+### What the results change
+
+- A candidate the page says lost, withdrew, or was never on the ballot keeps
+  their profile and gains a status. The grid hides them by default behind
+  **Include eliminated**; nothing is deleted.
+- A candidate the page does not name is `unlisted` only once the page has
+  decided *their* contest — their own party's primary, a nonpartisan primary,
+  or the November ballot. A Democrat is not struck out because the Republican
+  table is complete.
+- **The seat a person is contesting comes from their FEC filing.** Texas,
+  Florida, California and Utah redrew their maps for 2026, and thirteen
+  sitting members now hold one district number and run in another. A member
+  filed elsewhere carries `contestRaceId`, is listed in that race, and is not
+  "seeking re-election" to the seat they hold, which is open. A curated
+  challenger whose roster row disagrees with their filing is re-seated and
+  reported.
+- **A member absent from their own party's decided primary is not on the
+  ballot.** Thirty-nine representatives retiring or running for state office
+  were still "Active Member" in the roster, which cannot notice a retirement.
+  They are shown as not seeking re-election, the seat as open, and
+  `build --check` lists every one under `member-not-on-ballot` so a matching
+  failure would be seen. Nobody whose name fitted two filings is ever inferred
+  absent.
+- **The ballot's party wins.** Seth Bodnar, Brian Bengs and Todd Achilles are
+  on their states' Senate ballots as independents; the roster had all three as
+  Democrats. A filed candidate takes the ballot party (the FEC record stays as
+  `fecParty`); a roster row is reported for a person to correct.
+
+Race headers show the primary date, who is on the November ballot, how many
+filers are out, and anyone the results put on the ballot with no FEC filing
+over $5,000 — leaving them off would make the header lie.
+
 ## Portraits
 
 Portraits are resolved **at build time** and cached in
@@ -433,9 +496,13 @@ Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
 |---|---|
 | `isCandidate` | A 2026 challenger, not a sitting member |
 | `seatUp2026` | This seat is on the 2026 ballot |
-| `seekingReelection2026` | Seat is up **and** the incumbent is running |
-| `raceId` | The 2026 contest this profile is competing in |
-| `alsoRunningId` / `incumbentId` | Cross-link between a member and their own candidacy |
+| `seekingReelection2026` | Seat is up **and** the incumbent is on the ballot for it |
+| `raceId` | For a member, the seat they hold; for a challenger, the seat they filed for |
+| `contestRaceId` / `contestLabel` | A member contesting a *different* seat: a redrawn district, the other chamber |
+| `alsoRunningId` / `incumbentId` | Cross-link between a member and a separate profile for their own candidacy |
+| `raceStatus` / `raceStatusRace` | `nominee`, `advanced`, `eliminated`, `withdrawn` or `unlisted`, and the race it refers to |
+| `ballotParty` / `fecParty` | The party the ballot lists, when it differs from the roster or FEC record |
+| `rosterSeat` | For a curated challenger, the seat the roster gave them when the FEC filing says otherwise |
 
 All 435 House seats are two-year terms, so every House member has
 `seatUp2026 = true`. Use `seekingReelection2026` to find who is actually
@@ -566,9 +633,13 @@ the sidebar counts moved into the build metadata.
 
 - **Campaign finance is only as complete as your FEC key allows.** With
   `DEMO_KEY` you get a handful of profiles.
-- **No state primary dates.** The countdown covers the general election, which
-  is computed (first Tuesday after the first Monday in November). Per-state
-  primary dates are not in the data and are deliberately not invented.
+- **Primary results depend on Wikipedia's state pages.** They are the only
+  free, structured, current source; the resolver reads only the results
+  tables and infobox and treats an unmarked table as undecided. Pages for the
+  District of Columbia and the Virgin Islands delegate races do not exist, so
+  those two races are never settled. The FEC field also lacks a handful of
+  incumbents who have not amended their statement of candidacy for 2026;
+  those members are matched through their roster name instead.
 - **Caucus membership is not in the data.** Both independent senators caucus
   with the Democrats, which is why "53 R / 47 D/I" is the usual way to report
   the chamber. The rosters do not record it, so the site reports `53 R / 45 D /

@@ -764,6 +764,29 @@ svg { flex: none; }
   font-weight: 700;
 }
 
+.race-out {
+  margin-top: var(--s-4);
+}
+.race-out > summary {
+  cursor: pointer;
+  padding: var(--s-2) var(--s-3);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  font-size: var(--t-sm);
+  color: var(--text-muted);
+  list-style: none;
+}
+.race-out > summary::-webkit-details-marker { display: none; }
+.race-out > summary::before {
+  content: "B8";
+  display: inline-block;
+  margin-right: var(--s-2);
+  transition: transform 0.18s var(--ease);
+}
+.race-out[open] > summary::before { transform: rotate(90deg); }
+.race-out[open] > summary { margin-bottom: var(--s-4); }
+.race-out .card { opacity: 0.72; }
+
 /* ============================================================ 10. panels */
 
 .panel {

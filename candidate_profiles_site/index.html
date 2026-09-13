@@ -126,7 +126,7 @@
                 <span class="value" id="senateDefending"></span></div>
             <div class="stat-row"><span>House seats up</span>
                 <span class="value" id="houseSeatsUp"></span></div>
-            <div class="stat-row"><span>Declared challengers</span>
+            <div class="stat-row"><span>Challengers on the ballot</span>
                 <span class="value" id="challengerCount"></span></div>
             <p class="sidebar-note">
                 Every House seat is a two-year term, so the whole chamber is on
@@ -179,6 +179,14 @@
                     data-optional aria-pressed="false">Retiring / not seeking</button>
             <button type="button" class="chip" data-group="election" data-value="contested"
                     data-optional aria-pressed="false">Contested races</button>
+
+            <span class="toolbar-divider" aria-hidden="true"></span>
+
+            <button type="button" class="chip" data-group="eliminated" data-value="show"
+                    data-optional aria-pressed="false"
+                    title="Also show candidates the primary removed: those who lost, withdrew, or were never on the primary ballot">
+                Include eliminated
+            </button>
 
             <span class="toolbar-divider" aria-hidden="true"></span>
 

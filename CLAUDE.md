@@ -24,7 +24,8 @@ if a page loads a remote script, stylesheet or font.
 us_atlas_states_topo.json   ──┤
 congress_snapshot.json      ──┤
 data/fec_field.json         ──┤   (the FEC's 2026 candidate register)
-data/disclosures.json       ──┴─> kyc/ ──> candidate_profiles_site/
+data/disclosures.json       ──┤
+data/primary_results.json   ──┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
                                              ├──> index.html    (grid, races, profiles)
@@ -40,7 +41,8 @@ data/disclosures.json       ──┴─> kyc/ ──> candidate_profiles_site/
   `congress_snapshot.json` are vendored inputs: refreshed by a command, never
   hand-edited.
 - Everything in `data/` is **generated**. Never edit `profiles.js` or `geo.js`
-  by hand. `portraits.json` and `finance.json` are caches, but they *are*
+  by hand. `portraits.json`, `finance.json`, `fec_field.json`,
+  `disclosures.json` and `primary_results.json` are caches, but they *are*
   hand-editable.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them only to check they load the right scripts in the right order; it never
@@ -60,11 +62,13 @@ python build_profile_site.py geo              # regenerate map geometry only
 python build_profile_site.py congress         # refresh membership (network)
 python build_profile_site.py field --check    # who is running, from the FEC
 python build_profile_site.py disclosures      # House financial disclosure links
-python -m unittest discover tests             # 195 tests, no dependencies
-npm install && npm test                       # 133 real-DOM checks (needs jsdom)
+python build_profile_site.py results          # who is still in, from Wikipedia
+python -m unittest discover tests             # 348 tests, no dependencies
+npm install && npm test                       # 148 real-DOM checks (needs jsdom)
 ```
 
-Only `fetch`, `portraits`, `finance` and `congress` touch the network. Run the
+Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results` and
+`congress` touch the network. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -222,6 +226,32 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     name, party, state, district, term and birthday. Education, net worth,
     committees and platform stay empty, because the provenance layer reporting
     "No data" is true and a plausible invention is not.
+
+29. **The FEC says who filed; it does not say who lost.** By September of an
+    election year the register listed 858 people as running who had already
+    been eliminated. `results.py` reads the state results pages behind a
+    calendar gate, takes winners only from the `winning candidate` template,
+    treats a table with no marked winner as undecided, and strikes an unnamed
+    filer out only once the page has decided *their* contest. Eliminated
+    people are hidden behind a toggle; nothing is deleted.
+
+30. **The seat a person is contesting comes from their filing, and whether
+    they are on the ballot comes from the results page.** The roster seats a
+    member where they sit. After the 2025 redistricting thirteen members run
+    in a different district number, seven House members run for the Senate,
+    and thirty-nine more retired without the roster noticing; every one read
+    as "seeking re-election" to a seat they are not contesting, and TX-35
+    reported two Democratic nominees. `contestRaceId` and the absence rule in
+    `results.apply_cache` derive both; `validate` lists every inference so a
+    matching failure is seen. Nobody whose name fitted two filings is ever
+    inferred absent.
+
+31. **Split template parameters on the pipes that separate them.** A
+    line-based field regex read Michigan's one-line rows as a candidate named
+    `"Haley Stevens|party=Democratic Party |votes=731,160"`, and every result
+    in that state went unread while nothing failed. `template_fields` walks
+    the text and splits only at depth zero, so piped links and nested
+    templates inside a value survive.
 
 ## Curated data
 

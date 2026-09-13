@@ -296,30 +296,114 @@ def _build_candidate(row, index):
     }
 
 
-def _cross_link(profiles):
-    """Link a sitting member to their own 2026 candidacy.
+def _link_key(profile):
+    """First and last name, folded, plus the state.
 
-    Matched on folded name *and* state, so Rep. Mike Rogers (AL) is never
-    linked to Senate candidate Mike Rogers (MI).
+    Middle names and suffixes are dropped: the FEC files Buddy Carter's
+    Senate run as "Earl Leroy Carter" and the roster seats him as "Earl
+    Carter", and they are one person. Two different people sharing a first
+    and last name, a state and a cycle - but not a chamber - is the risk
+    accepted here, and ``validate`` reports any member linked to a candidate
+    of another party so it would be seen.
     """
+    from .results import _tokens
+
+    words = _tokens(profile["name"])
+    if len(words) < 2:
+        return None
+    return (words[0], words[-1], profile["state"])
+
+
+def _cross_link(profiles):
+    """Link a sitting member to their own 2026 candidacy for another seat.
+
+    Matched on name *and* state, so Rep. Mike Rogers (AL) is never linked to
+    Senate candidate Mike Rogers (MI). A member with a candidacy elsewhere is
+    not seeking re-election to the seat they hold - no state lets a person
+    run for two federal offices at once - so the seat is open. Seven House
+    members running for the Senate read as "seeking re-election" before this
+    was derived.
+    """
+    from . import races
+
     members = {}
     for profile in profiles:
         if not profile["isCandidate"]:
-            members[(_fold(profile["name"]).lower(), profile["state"])] = profile
+            key = _link_key(profile)
+            if key:
+                members[key] = profile
 
     links = 0
     for profile in profiles:
         if not profile["isCandidate"]:
             continue
-        held = members.get((_fold(profile["name"]).lower(), profile["state"]))
+        held = members.get(_link_key(profile))
         if held is None or held["chamber"] == profile["chamber"]:
             continue
         profile["incumbentId"] = held["id"]
         profile["incumbentSeat"] = held["officeLabel"]
         held["alsoRunningId"] = profile["id"]
         held["alsoRunningSeat"] = profile["officeLabel"]
+        held["contestRaceId"] = races.race_id(profile["chamber"], profile["state"],
+                                              profile.get("districtNum"))
+        held["contestLabel"] = profile["officeLabel"]
+        if held.get("seatUp2026"):
+            held["seekingReelection2026"] = False
         links += 1
     return links
+
+
+def _apply_filings(profiles, field, finance):
+    """Take the seat each person is contesting from their FEC filing.
+
+    The roster seats a member at the district they hold and a curated
+    challenger at the district the editor typed. The 2025 redistricting in
+    Texas, Florida, California and Utah moved thirteen sitting members into
+    new district numbers, and Colin Allred's roster row still said TX-32
+    after his filing moved to TX-33. The filing is what a person has sworn
+    they are running for, so it wins: a member gets ``contestRaceId`` (and
+    stops "seeking re-election" to a seat they are not contesting), a roster
+    challenger is re-seated, and ``validate`` reports both.
+
+    Returns ``(moved, reseated)`` - lists of ``(name, from, to)``.
+    """
+    from . import fec as fec_mod, races
+    from .candidates import district_number, race_id
+
+    rows = {r["candidate_id"]: r for r in (field or {}).get("candidates", [])}
+    moved, reseated = [], []
+    for profile in profiles:
+        if not profile.get("fecCandidateId"):
+            record = (finance or {}).get(fec_mod.profile_key(profile)) or {}
+            if record.get("candidate_id"):
+                profile["fecCandidateId"] = record["candidate_id"]
+        row = rows.get(profile.get("fecCandidateId"))
+        if not row:
+            continue
+        contest = race_id(row)
+        if not contest:
+            continue
+        seat = races.race_id(profile["chamber"], profile["state"], profile.get("districtNum"))
+        if contest == seat:
+            continue
+        if profile["isCandidate"]:
+            before = profile["officeLabel"]
+            district = district_number(row)
+            profile["state"] = row["state"]
+            profile["districtNum"] = district
+            profile["district"] = (
+                "N/A" if district is None else "AL" if district == 0 else str(district)
+            )
+            profile["officeLabel"] = races.seat_label(contest)
+            profile["rosterSeat"] = before
+            reseated.append((profile["name"], before, profile["officeLabel"]))
+        else:
+            profile["contestRaceId"] = contest
+            profile["contestLabel"] = races.seat_label(contest)
+            if profile.get("seatUp2026"):
+                profile["seekingReelection2026"] = False
+            moved.append((profile["name"], profile["officeLabel"], profile["contestLabel"]))
+    return moved, reseated
 
 
 def build_profiles(data, snapshot=None, field=None, finance=None):
@@ -386,6 +470,7 @@ def build_profiles(data, snapshot=None, field=None, finance=None):
     for profile in profiles:
         apply_quality(profile)
 
+    moved, reseated = _apply_filings(profiles, field, finance)
     links = _cross_link(profiles)
 
     # The page reads photo_url for the initial <img src>; keep it in step
@@ -404,6 +489,8 @@ def build_profiles(data, snapshot=None, field=None, finance=None):
         "filed_candidates": len(profiles) - roster_count,
         "total": len(profiles),
         "cross_linked": links,
+        "contesting_elsewhere": moved,
+        "reseated": reseated,
         "senate_seats_up": sum(
             1 for p in profiles
             if p["seatUp2026"] and not p["isCandidate"] and "Senate" in p["chamber"]

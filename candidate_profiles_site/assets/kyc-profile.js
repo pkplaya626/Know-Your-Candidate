@@ -235,6 +235,16 @@
     var seat = item.alsoRunningSeat || item.incumbentSeat;
 
     if (!id || !seat) {
+      /* A member contesting a different seat under the same name - a
+       * redrawn district - has no second profile to jump to; the seat they
+       * are running for is on this one. */
+      if (item.contestLabel && !item.isCandidate) {
+        link.hidden = false;
+        link.innerHTML = KYC.icon("branch") + " Running in 2026 for <strong>" +
+          KYC.escapeHtml(item.contestLabel) + "</strong>, not for " +
+          KYC.escapeHtml(item.officeLabel);
+        return;
+      }
       link.hidden = true;
       link.innerHTML = "";
       return;
@@ -247,19 +257,57 @@
       KYC.escapeHtml(seat) + "</button>";
   }
 
+  var RACE_STATUS = {
+    nominee: ["badge-money", "On the November ballot",
+      "Won the 2026 primary. Source: the state's Wikipedia election results page."],
+    eliminated: ["badge-danger", "Lost the 2026 primary",
+      "Did not win the primary. Source: the state's Wikipedia election results page."],
+    withdrawn: ["badge-neutral", "Withdrew from the 2026 race",
+      "Listed as withdrawn in the published primary results."],
+    unlisted: ["badge-neutral", "Not on the 2026 primary ballot",
+      "Filed with the FEC, but not listed in the primary results for this seat."],
+    advanced: ["badge-warn", "In a primary runoff",
+      "Advanced to a runoff that has not yet been decided."],
+  };
+
+  /* The same facts read differently for a sitting member: "not on the
+   * primary ballot" is a retirement, and a primary win is a renomination. */
+  var MEMBER_RACE_STATUS = {
+    nominee: ["badge-money", "Renominated for 2026",
+      "Won the 2026 primary for this seat. Source: the state's Wikipedia election results page."],
+    unlisted: ["badge-danger", "Not on the 2026 ballot",
+      "Not named in the primary results or on the November ballot for this seat; " +
+      "not seeking re-election."],
+  };
+
   function renderStatus(item) {
     var target = el("profileModalStatus");
-    var text = String(item.status || "").trim();
-    if (!text || text === "Active Member" || text === "N/A") {
-      target.hidden = true;
-      target.innerHTML = "";
-      return;
+    var pieces = [];
+
+    var table = item.isCandidate ? RACE_STATUS :
+      Object.assign({}, RACE_STATUS, MEMBER_RACE_STATUS);
+    var race = table[item.raceStatus];
+    if (race) {
+      var label = race[1];
+      // A member's result belongs to the seat they are contesting.
+      if (!item.isCandidate && item.contestLabel) {
+        label = label.replace("for 2026", "for " + item.contestLabel)
+          .replace("the November ballot", "the November ballot for " + item.contestLabel);
+      }
+      pieces.push('<span class="badge ' + race[0] + '" title="' +
+        KYC.escapeAttr(race[2]) + '">' + KYC.escapeHtml(label) + "</span>");
     }
-    var leaving = /retiring|not running|defeated|ineligible|resigned/i.test(text);
-    target.hidden = false;
-    target.innerHTML =
-      '<span class="badge ' + (leaving ? "badge-danger" : "badge-warn") + '">' +
-      KYC.escapeHtml(text) + "</span>";
+
+    var text = String(item.status || "").trim();
+    if (text && text !== "Active Member" && text !== "N/A" &&
+        text !== "Filed with the FEC") {
+      var leaving = /retiring|not running|defeated|ineligible|resigned/i.test(text);
+      pieces.push('<span class="badge ' + (leaving ? "badge-danger" : "badge-warn") +
+        '">' + KYC.escapeHtml(text) + "</span>");
+    }
+
+    target.hidden = !pieces.length;
+    target.innerHTML = pieces.join(" ");
   }
 
   function renderAge(item) {
