@@ -73,7 +73,7 @@ python build_profile_site.py disclosures      # House financial disclosure links
 python build_profile_site.py results          # who is still in, from Wikipedia
 python build_profile_site.py campaigns        # campaign websites from FEC committees
 python -m unittest discover tests             # 372 tests, no dependencies
-npm install && npm test                       # 260 real-DOM checks (needs jsdom)
+npm install && npm test                       # 271 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,

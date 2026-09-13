@@ -131,6 +131,7 @@ _PAGE = string.Template("""\
                 <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
                 States &amp; territories
             </a>
+            <div id="yourState" hidden></div>
         </nav>
 
         <div class="sidebar-section">

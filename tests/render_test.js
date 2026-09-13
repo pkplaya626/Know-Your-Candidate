@@ -461,6 +461,51 @@ async function testDirectoryAsync() {
     window.legislatorsData.pop();
   });
 
+  suite("index.html — in this race", () => {
+    // A member with challengers still on the ballot: the dialog lists them.
+    const race = window.kycRaces.find((r) => r.incumbentIds.length && r.candidateCount > 1 && r.settled);
+    check("a contested, settled race exists to test", !!race);
+    if (race) {
+      KYC.profile.open(race.incumbentIds[0]);
+      const panel = D.getElementById("profileModalRacePanel");
+      check("the race panel is shown", panel && !panel.hidden);
+      check("it is titled with the race", D.getElementById("profileModalRaceTitle").textContent === race.label);
+      const rows = [...D.querySelectorAll("#profileModalRace .race-mate")];
+      const everyone = race.incumbentIds.concat(race.candidateIds).filter((id) => id !== race.incumbentIds[0]);
+      check("every other person in the race is listed", rows.length === everyone.length,
+        `${rows.length} of ${everyone.length}`);
+      const onBallot = [...D.querySelectorAll("#profileModalRace > .race-mate")];
+      check("people still on the ballot come first, the rest are folded",
+        onBallot.every((r) => !KYC.cards.offBallot(KYC.byId(r.getAttribute("data-goto")))));
+      const first = rows[0];
+      first.click();
+      check("clicking a race-mate opens their profile",
+        D.getElementById("profileModalName").textContent === KYC.byId(first.getAttribute("data-goto")).name);
+      KYC.profile.close();
+    }
+  });
+
+  suite("index.html — search suggestions and remembered state", () => {
+    const search = D.getElementById("searchInput");
+    search.dispatchEvent(new window.Event("focus"));
+    const list = D.getElementById("kycNames");
+    check("focusing search builds the name list once", !!list && list.options.length > 500,
+      list ? `${list.options.length} names` : "no list");
+    check("the input points at it", search.getAttribute("list") === "kycNames");
+    check("an off-ballot filer is not suggested", (() => {
+      const out = window.legislatorsData.find((p) => p.isCandidate && p.raceStatus === "eliminated");
+      return out && ![...list.options].some((o) => o.value === out.name);
+    })());
+    D.getElementById("stateSelect").value = "TX";
+    D.getElementById("stateSelect").dispatchEvent(new window.Event("change"));
+    const slot = D.getElementById("yourState");
+    check("filtering by a state remembers it in the sidebar",
+      slot && !slot.hidden && /Texas/.test(slot.textContent), slot && slot.textContent);
+    check("and links to its page", /states\/tx\.html$/.test(slot.querySelector("a").getAttribute("href")));
+    D.getElementById("stateSelect").value = "all";
+    D.getElementById("stateSelect").dispatchEvent(new window.Event("change"));
+  });
+
   suite("index.html — the map's old bug, checked on both pages", () => {
     // map.html rendered `item.net_worth` with textContent, so a profile with
     // no filing showed the literal placeholder sentence as if it were data.

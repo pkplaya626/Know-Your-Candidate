@@ -42,7 +42,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`) |
 | `… refresh` | `fetch`, then `build` |
 | `python -m unittest discover tests` | 372 pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (260 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (271 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -167,6 +167,12 @@ CI fails if any of them come back.
   to the state page too; a state page has a jump row for its districts.
 - Cards, rows and map states open the same profile dialog everywhere; a
   `#/profile/<id>` link opens it on whichever page it is pasted into.
+- The dialog ends with **In this race**: everyone else contesting the same
+  seat, people still on the ballot first and the rest folded, each one click
+  away - the way a video page lists what to watch next.
+- The search box suggests names on focus (people on a ballot; off-ballot
+  filers would swamp the list), and the sidebar remembers the last state you
+  looked at, in this browser only.
 
 ### Escaping
 

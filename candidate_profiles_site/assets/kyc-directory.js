@@ -286,6 +286,8 @@
       link.hidden = false;
       link.href = KYC.stateUrl(state.state);
       link.textContent = "Open the " + KYC.stateName(state.state) + " page \u203a";
+      KYC.rememberState(state.state);
+      KYC.renderRememberedState();
     } else {
       link.hidden = true;
     }
