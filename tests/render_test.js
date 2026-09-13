@@ -651,6 +651,25 @@ async function testMap() {
       D.getElementById("panelState").textContent);
   });
 
+  suite("map.html — every view has a URL", () => {
+    const picker = D.getElementById("mapStateSelect");
+    picker.value = "TX";
+    picker.dispatchEvent(new window.Event("change"));
+    check("selecting a state writes it to the URL", /state=TX/.test(window.location.hash),
+      window.location.hash);
+    const houseButton = D.querySelector('[data-mode="house"]');
+    if (houseButton) {
+      houseButton.click();
+      check("the mode is in the URL too", /mode=house/.test(window.location.hash),
+        window.location.hash);
+    }
+    window.location.hash = "#/?state=AK&mode=senate2026";
+    window.dispatchEvent(new window.Event("hashchange"));
+    check("a pasted URL restores the state", D.getElementById("panelState").textContent === "Alaska",
+      D.getElementById("panelState").textContent);
+    check("and the mode", D.querySelector('[data-mode="senate2026"]').getAttribute("aria-pressed") === "true");
+  });
+
   suite("map.html — the shared dialog", () => {
     // The map had its own copy of the dialog with no focus trap at all.
     D.querySelector('[data-state="TX"]').dispatchEvent(
@@ -707,6 +726,10 @@ async function testStates() {
     })());
     check("race sections carry no self-link to the state",
       !content.querySelector(".race-state-link"));
+    check("the map link uses the route the map understands", (() => {
+      const a = [...content.querySelectorAll(".state-links a")].find((x) => /map\.html/.test(x.getAttribute("href")));
+      return a && /map\.html#\/\?state=TX$/.test(a.getAttribute("href"));
+    })());
     check("nothing under the page is unescaped markup from the data",
       !/<script/i.test(content.innerHTML));
     const first = content.querySelector(".card");

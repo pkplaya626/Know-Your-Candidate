@@ -92,7 +92,7 @@
       '<h1 class="state-title">' + KYC.escapeHtml(name) + "</h1>",
       '<p class="state-summary">' + summaryStrip(info) + "</p>",
       '<p class="state-links">',
-      '<a class="btn" href="' + KYC.escapeAttr(KYC.siteRoot() + "map.html#/state/" + code) + '">' +
+      '<a class="btn" href="' + KYC.escapeAttr(KYC.siteRoot() + "map.html#/?state=" + code) + '">' +
         KYC.icon("map") + " See on the map</a> ",
       '<a class="btn" href="' + KYC.escapeAttr(KYC.siteRoot() + "index.html#/?state=" + code) + '">' +
         KYC.icon("grid") + " All " + KYC.escapeHtml(name) + " profiles</a>",
