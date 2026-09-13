@@ -31,6 +31,12 @@ STATE_CODES = frozenset(US_STATES.values())
 # Territories send non-voting delegates; excluded from chamber balance counts.
 TERRITORIES = frozenset({"AS", "DC", "GU", "MP", "PR", "VI"})
 
+# One House seat each. The FEC numbers these districts 0 or, for the
+# Northern Mariana Islands, 1; the rosters write "At-Large". They are the same
+# seat, and the incumbent and the challengers were in different races until
+# every spelling was folded to district 0.
+AT_LARGE = frozenset({"AK", "DE", "ND", "SD", "VT", "WY"}) | TERRITORIES
+
 # Longest first so "WEST VIRGINIA" is tested before "VIRGINIA".
 _STATES_BY_LENGTH = sorted(US_STATES.items(), key=lambda kv: -len(kv[0]))
 

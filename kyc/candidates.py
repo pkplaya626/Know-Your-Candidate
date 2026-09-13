@@ -159,11 +159,27 @@ def race_id(row, year=CYCLE):
         return None
     if row.get("office") == "S":
         return f"S-{state}-{year}"
-    try:
-        district = int(row.get("district_number"))
-    except (TypeError, ValueError):
+    district = district_number(row)
+    if district is None:
         return None
     return f"H-{state}-{district:02d}-{year}"
+
+
+def district_number(row):
+    """The House district a filing is for, with at-large seats as ``0``.
+
+    Returns ``None`` for a Senate filing or a row with no usable district.
+    """
+    from .normalize import AT_LARGE
+
+    if row.get("office") == "S":
+        return None
+    if row.get("state") in AT_LARGE:
+        return 0
+    try:
+        return int(row.get("district_number"))
+    except (TypeError, ValueError):
+        return None
 
 
 def filing_counts(cache, year=CYCLE):
@@ -347,7 +363,7 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
         seen_ids.add(candidate_id)
         seen_people.add(key)
 
-        district_num = None if senate else int(row.get("district_number") or 0)
+        district_num = None if senate else (district_number(row) or 0)
         district_label = None
         if not senate:
             district_label = "AL" if district_num == 0 else str(district_num)

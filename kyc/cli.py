@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+import re
 import sys
 
 from . import (
@@ -17,6 +18,7 @@ from . import (
     portraits,
     profiles as profiles_mod,
     races as races_mod,
+    results as results_mod,
     sources,
     summary as summary_mod,
     validate,
@@ -65,8 +67,13 @@ def _build(args):
     profiles, stats = build_profiles(raw, snapshot=snapshot, field=field,
                                      finance=finance)
     stats["fec"] = fec.apply_cache(profiles, finance) if finance else 0
+    # Filed candidates arrive with their totals from the field register, so
+    # the finance cache covers only the roster. Count what the page shows.
+    stats["with_finance"] = sum(1 for p in profiles if p.get("financeSource") == "FEC")
     if finance:
-        print(f"  finance: {stats['fec']}/{len(profiles)} with FEC totals")
+        print(f"  finance: {stats['with_finance']}/{len(profiles)} with FEC totals "
+              f"({stats['fec']} roster profiles from the finance cache, the rest "
+              f"from the candidate field)")
 
     filings = disclosures.load_cache(args.root)
     stats["disclosures"] = disclosures.apply_cache(profiles, filings) if filings else 0
@@ -82,8 +89,23 @@ def _build(args):
         stats["portraits"] = 0
         print("  [warn] no portrait cache; run 'portraits' to resolve them")
 
-    race_list = races_mod.build(profiles, candidates.filing_counts(field))
+    outcomes = results_mod.load_cache(args.root)
+    stats["results"] = results_mod.apply_cache(profiles, outcomes) if outcomes else 0
+    if outcomes:
+        print(f"  results: {stats['results']} candidates with a primary outcome "
+              f"(as of {outcomes.get('asOf')})")
+    else:
+        print("  [warn] no primary results; run 'results'. Eliminated candidates "
+              "will still show as running.")
+
+    race_list = races_mod.build(profiles, candidates.filing_counts(field),
+                                results=outcomes, dates=results_mod.load_dates(args.root))
     stats.update(races_mod.stats(race_list))
+    # The results settle who is on the ballot, so count after applying them.
+    stats["not_seeking"] = sum(
+        1 for p in profiles
+        if p["seatUp2026"] and not p["isCandidate"] and not p["seekingReelection2026"]
+    )
 
     # The map geometry is a separate artefact with a separate source, so a
     # missing atlas degrades the map rather than failing the whole build.
@@ -374,6 +396,100 @@ def _disclosures(args):
     return 0
 
 
+def _results(args):
+    """Resolve primary results: who is still in each race."""
+    import datetime
+
+    field = candidates.load_cache(args.root)
+    if field is None:
+        print(f"[error] no {candidates.CACHE_PATH}; run 'field' first.", file=sys.stderr)
+        return 2
+
+    if args.check:
+        cache = results_mod.load_cache(args.root)
+        if cache is None:
+            print(f"[error] no {results_mod.CACHE_PATH}; run 'results' first.",
+                  file=sys.stderr)
+            return 2
+        print(f"  results as of {cache.get('asOf')}")
+    else:
+        print("Fetching the 2026 election calendar from the FEC ...")
+        try:
+            dates = results_mod.fetch_dates()
+        except (results_mod.ResultsError, fec.FecError) as exc:
+            print(f"[error] {exc}", file=sys.stderr)
+            return 2
+        print(f"  {len(dates)} state/office calendars")
+        # Curated roster candidates carry a display name the FEC does not use
+        # ("Ken Paxton" for "PAXTON, WARREN KENNETH JR."), and the finance
+        # lookup has already tied that name to a candidate id.
+        aliases = {}
+        raw = _load(args)
+        if raw is not None:
+            snapshot = legislators.load_snapshot(args.root)
+            profiles, _ = build_profiles(raw, snapshot=snapshot)
+            fec.apply_cache(profiles, fec.load_cache(args.root))
+            filed = {row["candidate_id"]: row for row in field["candidates"]}
+            known = {person["bioguide"]: person
+                     for person in (snapshot or {}).get("legislators", [])}
+            for profile in profiles:
+                cid = profile.get("fecCandidateId")
+                # A member with no filing this cycle is keyed on their
+                # bioguide id instead, so the page can still say whether they
+                # are on the ballot: the FEC field lacked Nick LaLota while
+                # New York's page had him on the November ballot.
+                key = cid if cid in filed else (
+                    profile["id"] if not profile["isCandidate"] else cid)
+                if not key:
+                    continue
+                # The alias belongs to the race the filing is for, which is
+                # not always the seat the roster gives: after redistricting
+                # Ami Bera holds CA-6 and is filed for CA-3, and the CA-3
+                # results name him.
+                rid = candidates.race_id(filed[cid]) if cid in filed else candidates.race_id({
+                    "state": profile["state"],
+                    "office": "S" if "Senate" in profile["chamber"] else "H",
+                    "district_number": profile.get("districtNum"),
+                })
+                if not rid:
+                    continue
+                names = {profile["name"]}
+                person = known.get(profile["id"])
+                if person:
+                    # The article title is the spelling the election page
+                    # links to: "Andy Barr", not the roster's "Garland Barr".
+                    names.update(
+                        re.sub(r"\s*\([^)]*\)\s*$", "", n)      # "Dan Sullivan (U.S. senator)"
+                        for n in (person.get("name"), person.get("wikipedia")) if n
+                    )
+                for name in sorted(names):
+                    aliases.setdefault(rid, []).append((name, key))
+        print("Reading primary results from Wikipedia ...")
+        cache = results_mod.build(field, dates, today=datetime.date.today(), log=print,
+                                  aliases=aliases)
+        print(f"  wrote {results_mod.save_cache(cache, args.root)}")
+
+    import collections
+    tally = collections.Counter(
+        status for race in cache["races"].values() for status in race["status"].values()
+    )
+    print(f"\n  races with results: {len(cache['races'])}   "
+          f"primaries still to come: {len(cache.get('pending', []))}")
+    for status, n in sorted(tally.items()):
+        print(f"    {status:12} {n:>5}")
+    unmatched = sum(len(r.get("unmatched") or ()) for r in cache["races"].values())
+    ambiguous = sum(len(r.get("ambiguous", [])) for r in cache["races"].values())
+    print(f"    names on Wikipedia with no matching filing: {unmatched}")
+    print(f"    names left alone as ambiguous:              {ambiguous}")
+    if cache.get("missingPages"):
+        print(f"    state pages not found: {', '.join(cache['missingPages'])}")
+    if args.verbose:
+        for rid, race in sorted(cache["races"].items()):
+            if race.get("ambiguous"):
+                print(f"    ~ {rid}: ambiguous {race['ambiguous']}")
+    return 0
+
+
 def _verify(args):
     """Assert the committed data files still match the sources.
 
@@ -403,8 +519,11 @@ def _verify(args):
     filings = disclosures.load_cache(args.root)
     stats["disclosures"] = disclosures.apply_cache(profiles, filings) if filings else 0
 
+    outcomes = results_mod.load_cache(args.root)
+    stats["results"] = results_mod.apply_cache(profiles, outcomes) if outcomes else 0
     race_list = races_mod.build(
-        profiles, candidates.filing_counts(candidates.load_cache(args.root))
+        profiles, candidates.filing_counts(candidates.load_cache(args.root)),
+        results=outcomes, dates=results_mod.load_dates(args.root),
     )
     stats.update(races_mod.stats(race_list))
     summary = summary_mod.build(profiles, races=race_list)
@@ -545,6 +664,10 @@ def build_parser():
     disc.add_argument("--check", action="store_true",
                       help="use the committed cache; make no network call")
 
+    res = add("results", help="resolve primary results: who is still in each race")
+    res.add_argument("--check", action="store_true",
+                     help="use the committed cache; make no network call")
+
     field = add("field", help="refresh the FEC register of 2026 candidates")
     field.add_argument("--check", action="store_true",
                        help="use the committed cache; make no network call")
@@ -591,6 +714,8 @@ def main(argv=None):
         return _field(args)
     if args.command == "disclosures":
         return _disclosures(args)
+    if args.command == "results":
+        return _results(args)
     if args.command == "portraits":
         return _portraits(args)
     if args.command == "finance":

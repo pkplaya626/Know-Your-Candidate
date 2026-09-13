@@ -78,6 +78,12 @@ def build(profiles, races=None):
                 if not p.get("seekingReelection2026")
             ),
             "challengers": sum(1 for p in profiles if p.get("isCandidate")),
+            # Still in the race: nominees plus everyone whose primary is yet
+            # to come. Off-ballot people are counted but not "declared".
+            "challengersOnBallot": sum(
+                1 for p in profiles if p.get("isCandidate")
+                and p.get("raceStatus") not in ("eliminated", "withdrawn", "unlisted")
+            ),
             "filedCandidates": sum(
                 1 for p in profiles if p.get("source") == "fec-field"
             ),

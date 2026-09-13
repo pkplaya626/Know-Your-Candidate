@@ -123,7 +123,10 @@
     return {
       fill: key === "vacant" ? VACANT_FILL : "var(--party-" + key + ")",
       text: code + ": 2026 Senate race — " + defender.party + " seat (" +
-        defender.name + (defender.seekingReelection2026 ? " running" : " not running") + ")",
+        defender.name + (defender.seekingReelection2026 ? " running" :
+          defender.contestLabel ? " running for " + defender.contestLabel :
+          defender.alsoRunningSeat ? " running for " + defender.alsoRunningSeat :
+          " not running") + ")",
     };
   }
 
@@ -270,8 +273,25 @@
     });
   }
 
+  var RACE_BADGE = {
+    nominee: "badge-money|Nominee", eliminated: "badge-danger|Lost primary",
+    withdrawn: "badge-neutral|Withdrew", unlisted: "badge-neutral|Not on ballot",
+    advanced: "badge-warn|In runoff",
+  };
+
   function rowBadge(item) {
     var status = String(item.status || "").toLowerCase();
+    if (!item.isCandidate && item.contestLabel) {
+      return '<span class="badge badge-warn">Running for ' +
+        KYC.escapeHtml(item.contestLabel.replace(/ • /, " ")) + "</span>";
+    }
+    var race = RACE_BADGE[item.raceStatus];
+    if (race) {
+      var bits = race.split("|");
+      if (!item.isCandidate && item.raceStatus === "nominee") bits[1] = "Renominated";
+      if (!item.isCandidate && item.raceStatus === "unlisted") bits = ["badge-danger", "Not on ballot"];
+      return '<span class="badge ' + bits[0] + '">' + bits[1] + "</span>";
+    }
     if (item.isCandidate) return '<span class="badge badge-money">Challenger</span>';
     if (/retiring|not running|defeated|ineligible|resigned/.test(status)) {
       return '<span class="badge badge-danger">Departing</span>';
@@ -336,8 +356,12 @@
         a.name.localeCompare(b.name)
       );
     };
+    var OFF = { eliminated: true, withdrawn: true, unlisted: true };
     var seated = people.filter(function (x) { return !x.isCandidate; }).sort(order);
-    var running = people.filter(function (x) { return x.isCandidate; }).sort(order);
+    var running = people.filter(function (x) {
+      return x.isCandidate && !OFF[x.raceStatus];
+    }).sort(order);
+    var out = people.filter(function (x) { return x.isCandidate && OFF[x.raceStatus]; });
 
     /* Texas has 37 representatives and 191 filed challengers. Listing all 228
      * in one scroll buries the delegation the reader clicked the state to
@@ -354,8 +378,16 @@
         '<button type="button" class="panel-subhead expander" id="showChallengers"' +
         ' aria-expanded="false" aria-controls="challengerRows">' +
         KYC.icon("chevron") + " 2026 challengers <span>" + running.length + "</span>" +
+        (out.length
+          ? ' <span class="faint" title="Lost the primary, withdrew, or were not on the primary ballot">' +
+            out.length + " out</span>"
+          : "") +
         "</button>" +
         '<div id="challengerRows" hidden>' + running.map(personRow).join("") + "</div>";
+    } else if (out.length) {
+      html += '<p class="panel-subhead">No challenger still on the ballot ' +
+        '<span title="Lost the primary, withdrew, or were not on the primary ballot">' +
+        out.length + " out</span></p>";
     }
     list.innerHTML = html;
     list.scrollTop = 0;

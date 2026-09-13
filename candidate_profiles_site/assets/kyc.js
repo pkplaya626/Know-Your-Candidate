@@ -613,7 +613,17 @@
     ]));
 
     var challengers = doc.getElementById("challengerCount");
-    if (challengers) challengers.textContent = String(election.challengers || 0);
+    if (challengers) {
+      var running = election.challengersOnBallot;
+      challengers.textContent = String(
+        running !== undefined ? running : (election.challengers || 0)
+      );
+      if (running !== undefined && election.challengers) {
+        challengers.title = election.challengers + " filed with the FEC; " +
+          (election.challengers - running) + " lost a primary, withdrew, or were " +
+          "not on the primary ballot";
+      }
+    }
   }
 
   function initShell() {

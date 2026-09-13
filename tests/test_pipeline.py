@@ -220,13 +220,22 @@ class TestBuild(unittest.TestCase):
             self.assertEqual(partner["state"], profile["state"])
             self.assertNotEqual(partner["chamber"], profile["chamber"])
 
-    def test_placeholder_nominees_kept_per_state(self):
-        """Bare-name dedup used to collapse these into a single card."""
-        nominees = [
-            p for p in self.profiles if p["name"] == "Republican Nominee"
+    def test_same_name_in_two_states_is_two_people(self):
+        """Bare-name dedup used to collapse these into a single card.
+
+        The roster once carried a "Republican Nominee" placeholder per state
+        and lost all but one of them; the placeholders are gone now that the
+        primaries have named real people, so the rule is pinned directly.
+        """
+        from kyc.profiles import _dedup_candidates
+        rows = [
+            {"Name": "Mike Rogers", "Chamber": "Senate (Candidate)", "Office / District": "MI"},
+            {"Name": "Mike Rogers", "Chamber": "House (Candidate)", "Office / District": "AL-3"},
+            {"Name": "Mike Rogers", "Chamber": "Senate (Candidate)", "Office / District": "MI"},
         ]
-        self.assertGreater(len(nominees), 1)
-        self.assertEqual(len({p["state"] for p in nominees}), len(nominees))
+        kept = _dedup_candidates(rows)
+        self.assertEqual(len(kept), 2)
+        self.assertEqual({r["Office / District"] for r in kept}, {"MI", "AL-3"})
 
     def test_validation_reports_no_errors(self):
         issues = validate.run(self.profiles, self.raw)

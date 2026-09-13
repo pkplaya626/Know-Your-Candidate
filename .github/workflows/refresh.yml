@@ -74,6 +74,18 @@ jobs:
         if: env.FEC_API_KEY != ''
         run: python build_profile_site.py finance
 
+      # Who has filed, and - from the state election pages - who is still in.
+      - name: Refresh the candidate field and primary results
+        env:
+          FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
+        if: env.FEC_API_KEY != ''
+        run: |
+          python build_profile_site.py field
+          python build_profile_site.py results
+
+      - name: Refresh House financial disclosure links
+        run: python build_profile_site.py disclosures
+
       - name: Rebuild the site data
         run: python build_profile_site.py
 
