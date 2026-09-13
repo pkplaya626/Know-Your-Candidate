@@ -38,19 +38,8 @@
     candidate: function (item) { return !!item.isCandidate; },
   };
 
-  /* Primary results settle who is still running. Someone the results say
-   * lost, withdrew, or was never on the primary ballot is not "in the race",
-   * and showing them as though they were is the opposite mistake from the
-   * one the FEC field fixed. They stay in the data - nothing is deleted -
-   * behind a toggle. */
-  var OFF_BALLOT = { eliminated: true, withdrawn: true, unlisted: true };
-
-  function offBallot(item) {
-    return !!OFF_BALLOT[item.raceStatus];
-  }
-
-  /* A sitting member of this seat who is contesting another one belongs in
-   * the race's story as the departing incumbent, not as someone "out". */
+  var OFF_BALLOT = KYC.cards.OFF_BALLOT;
+  var offBallot = KYC.cards.offBallot;
 
   var ELECTION_TEST = {
     // The 35 Senate seats on the 2026 ballot.
@@ -127,93 +116,7 @@
 
   /* ------------------------------------------------------------ rendering */
 
-  var RACE_BADGE = {
-    nominee: ['badge-money', 'On the November ballot',
-      'Won the primary; will appear on the general election ballot.'],
-    eliminated: ['badge-danger', 'Lost primary',
-      'Did not win the primary, per the published results.'],
-    withdrawn: ['badge-neutral', 'Withdrew',
-      'Withdrew from the race, per the published results.'],
-    unlisted: ['badge-neutral', 'Not on primary ballot',
-      'Filed with the FEC but was not listed in the primary results.'],
-    advanced: ['badge-warn', 'In runoff',
-      'Advanced to a primary runoff that has not yet been decided.'],
-  };
-
-  /* For a sitting member the same facts read differently: no primary line
-   * is a retirement, and a primary win is a renomination. */
-  var MEMBER_RACE_BADGE = {
-    nominee: ['badge-money', 'Renominated',
-      'Won the 2026 primary for this seat.'],
-    unlisted: ['badge-danger', 'Not on the ballot',
-      'Not named in the primary results or on the November ballot; not seeking re-election.'],
-  };
-
-  function raceBadge(item) {
-    var spec = (!item.isCandidate && MEMBER_RACE_BADGE[item.raceStatus]) ||
-      RACE_BADGE[item.raceStatus];
-    if (!spec) return "";
-    return '<span class="badge ' + spec[0] + '" title="' + KYC.escapeAttr(spec[2]) +
-      '">' + KYC.escapeHtml(spec[1]) + "</span>";
-  }
-
-  function statusBadge(item) {
-    var status = String(item.status || "").toLowerCase();
-
-    /* A member contesting another seat - the other chamber, or a redrawn
-     * district - is leaving this one, and the reader should see where they
-     * went before anything else. */
-    if (!item.isCandidate && item.contestLabel) {
-      return '<span class="badge badge-warn" title="' + KYC.escapeAttr(
-        "Filed for " + item.contestLabel + " in 2026; not seeking re-election to " +
-        item.officeLabel + "."
-      ) + '">Running for ' + KYC.escapeHtml(item.contestLabel.replace(/ \u2022 /, " ")) +
-        "</span>" + (raceBadge(item) ? " " + raceBadge(item) : "");
-    }
-    /* A sitting member the primary eliminated is leaving too, and a reader
-     * should see that before "seat up". */
-    if (!item.isCandidate && OFF_BALLOT[item.raceStatus]) {
-      return raceBadge(item);
-    }
-    if (/retiring|not running|defeated|ineligible|resigned/.test(status)) {
-      return '<span class="badge badge-danger">Leaving in ’26</span>';
-    }
-    if (item.isCandidate) {
-      return raceBadge(item) ||
-        '<span class="badge badge-money" title="Filed with the FEC; the primary has not been held yet.">2026 challenger</span>';
-    }
-    if (KYC.partyKey(item) === "vacant") {
-      return '<span class="badge badge-neutral">Vacant seat</span>';
-    }
-    if (item.chamber.indexOf("Senate") !== -1 && item.seatUp2026) {
-      return '<span class="badge badge-warn">Seat up in ’26</span>';
-    }
-    if (item.chamber.indexOf("Senate") !== -1 && item.electionYear) {
-      return '<span class="badge badge-neutral">Up in ’' +
-        String(item.electionYear).slice(2) + "</span>";
-    }
-    return "";
-  }
-
-  /* Every interpolation is escaped. The previous version put item.name,
-   * item.party and the office label straight into innerHTML. */
-  function card(item) {
-    return [
-      '<button type="button" class="card" data-id="', KYC.escapeAttr(item.id), '">',
-      '<span class="card-photo">',
-      '<img src="', KYC.escapeAttr(KYC.portraitSrc(item)),
-      '" alt="" loading="lazy" decoding="async" data-photo-idx="0" data-profile="',
-      KYC.escapeAttr(item.id), '">',
-      "</span>",
-      '<span class="card-body">',
-      '<span class="card-name clamp-2">', KYC.escapeHtml(item.name), "</span>",
-      '<span class="card-office truncate">', KYC.escapeHtml(item.officeLabel), "</span>",
-      '<span class="card-party ', KYC.partyClass(item), '">',
-      KYC.escapeHtml(item.party), "</span>",
-      statusBadge(item),
-      "</span></button>",
-    ].join("");
-  }
+  var card = KYC.cards.card;
 
   /* A flat grid of 594 cards answers "who is in Congress". It does not answer
    * the question a voter actually has, which is "who is running for my seat". */
@@ -225,117 +128,14 @@
       if (item.isCandidate && offBallot(item) && matchesFilters(item)) shown.add(item.id);
     });
 
-    var groups = races
+    return races
       .map(function (race) {
         var people = race.incumbentIds
           .concat(race.candidateIds)
           .filter(function (id) { return shown.has(id); })
           .map(KYC.byId)
           .filter(Boolean);
-        return { race: race, people: people };
-      })
-      .filter(function (group) { return group.people.length; });
-
-    if (!groups.length) return "";
-
-    return groups
-      .map(function (group) {
-        var race = group.race;
-        var badges = [];
-        if (race.openSeat) {
-          var holder = race.incumbentIds.map(KYC.byId).filter(Boolean)[0];
-          var why = !holder ? "A newly drawn seat with no sitting member." :
-            holder.contestLabel ? holder.name + " is running for " + holder.contestLabel + "." :
-            holder.alsoRunningSeat ? holder.name + " is running for " + holder.alsoRunningSeat + "." :
-            OFF_BALLOT[holder.raceStatus] ? holder.name + " is not on the November ballot." :
-            holder.name + " is not seeking re-election.";
-          badges.push('<span class="badge badge-warn" title="' + KYC.escapeAttr(why) +
-            '">Open seat</span>');
-        }
-        if (race.primaryDate) {
-          var held = race.settled;
-          badges.push(
-            '<span class="badge badge-neutral" title="' +
-            KYC.escapeAttr(held
-              ? "Primary held " + race.primaryDate +
-                (race.runoffDate ? "; runoff " + race.runoffDate : "") +
-                ". Results from the state's Wikipedia election page."
-              : "Primary scheduled for " + race.primaryDate + ".") + '">' +
-            (held ? "Primary held " : "Primary ") + KYC.escapeHtml(race.primaryDate) +
-            "</span>"
-          );
-        }
-
-        /* "No declared challenger" was a claim about our roster dressed up as
-         * a fact about the race, and it was wrong for 372 of them. filedCount
-         * is how many people have actually filed with the FEC for the seat. */
-        var res = race.results || null;
-        if (race.contested) {
-          badges.push(
-            '<span class="badge badge-money">' + race.candidateCount +
-            " challenger" + (race.candidateCount === 1 ? "" : "s") +
-            (race.settled ? " on the ballot" : "") + "</span>"
-          );
-        } else if (race.settled && res) {
-          var gone = res.eliminated + res.withdrawn + res.unlisted;
-          badges.push(
-            '<span class="badge badge-neutral" title="' + KYC.escapeAttr(
-              "The primary has been held. Of those who filed with the FEC, " +
-              res.eliminated + " lost, " + res.withdrawn + " withdrew and " +
-              res.unlisted + " were not on the primary ballot."
-            ) + '">No challenger on the ballot' +
-            (gone ? " &middot; " + gone + " out" : "") + "</span>"
-          );
-        } else if (race.filedCount) {
-          badges.push(
-            '<span class="badge badge-neutral" title="' +
-            KYC.escapeAttr(
-              race.filedCount + " people have filed with the FEC for this seat, " +
-              "but none has yet reported raising $5,000 - the point at which " +
-              "federal law treats someone as a candidate."
-            ) + '">' + race.filedCount + " filed, none past $5k</span>"
-          );
-        } else {
-          badges.push('<span class="badge badge-neutral">Nobody has filed</span>');
-        }
-
-        /* People the results page puts on the ballot but the FEC has no
-         * filing for. Leaving them off would make the header lie. */
-        if (res && res.otherNominees && res.otherNominees.length) {
-          badges.push(
-            '<span class="badge badge-warn" title="' + KYC.escapeAttr(
-              "Also on the November ballot per the published results, but with no " +
-              "FEC filing over $5,000, so no profile: " + res.otherNominees.join(", ")
-            ) + '">+ ' + res.otherNominees.length + " on ballot without a filing</span>"
-          );
-        }
-
-        if (race.contested && race.filedCount) {
-          badges.push(
-            '<span class="badge badge-neutral" title="' +
-            KYC.escapeAttr(
-              "Total filings with the FEC for this seat, including the sitting " +
-              "member and everyone below the $5,000 threshold."
-            ) + '">' + race.filedCount + " filed in total</span>"
-          );
-        }
-        var running = group.people.filter(function (p) { return !offBallot(p); });
-        var out = group.people.filter(offBallot);
-        var body = '<div class="card-grid">' + running.map(card).join("") + "</div>";
-        if (out.length) {
-          body +=
-            '<details class="race-out"><summary>' + out.length +
-            " no longer in this race &mdash; lost the primary, withdrew, or were " +
-            "not on the primary ballot</summary>" +
-            '<div class="card-grid">' + out.map(card).join("") + "</div></details>";
-        }
-        return [
-          '<section class="race">',
-          '<div class="race-head"><h3 class="race-title">',
-          KYC.escapeHtml(race.label), "</h3>", badges.join(""), "</div>",
-          body,
-          "</section>",
-        ].join("");
+        return people.length ? KYC.cards.raceSection(race, people) : "";
       })
       .join("");
   }
@@ -360,13 +160,50 @@
     if (state.view === "race") {
       grid.className = "";
       grid.innerHTML = raceSections(visible);
+      return;
+    }
+    grid.className = "card-grid";
+    renderWindow(grid, visible, 0);
+  }
+
+  /* The grid can hold 2,500 cards with every filter off. Building them all
+   * at once made the first paint wait on 2,500 image elements; the page now
+   * renders a screenful and appends the rest as the reader scrolls, the way
+   * a feed does, with a button for anyone whose browser lacks the observer. */
+  var PAGE = 120;
+  var observer = null;
+
+  function renderWindow(grid, items, from) {
+    var slice = items.slice(from, from + PAGE);
+    var html = slice.map(card).join("");
+    var more = from + PAGE < items.length;
+    if (from === 0) {
+      grid.innerHTML = html;
     } else {
-      grid.className = "card-grid";
-      grid.innerHTML = visible.map(card).join("");
+      var old = doc.getElementById("gridMore");
+      if (old) old.remove();
+      grid.insertAdjacentHTML("beforeend", html);
+    }
+    if (observer) { observer.disconnect(); observer = null; }
+    if (!more) return;
+    var remaining = items.length - from - PAGE;
+    grid.insertAdjacentHTML("beforeend",
+      '<button type="button" class="btn grid-more" id="gridMore" data-from="' +
+      (from + PAGE) + '">Show ' + Math.min(PAGE, remaining) + " more of " +
+      remaining.toLocaleString() + "</button>");
+    var sentinel = doc.getElementById("gridMore");
+    if (global.IntersectionObserver) {
+      observer = new global.IntersectionObserver(function (entries) {
+        if (entries.some(function (e) { return e.isIntersecting; })) {
+          renderWindow(grid, items, from + PAGE);
+        }
+      }, { rootMargin: "600px 0px" });
+      observer.observe(sentinel);
     }
   }
 
   function apply() {
+    syncStateLink();
     visible = data.filter(matches);
     visible.sort(SORTS[state.sort] || SORTS.region);
     KYC.router.writeFilters({
@@ -427,16 +264,31 @@
     data.forEach(function (item) {
       if (item.state && item.state !== "N/A") seen[item.state] = true;
     });
-    Object.keys(seen).sort().forEach(function (code) {
+    Object.keys(seen).sort(function (a, b) {
+      return KYC.stateName(a).localeCompare(KYC.stateName(b));
+    }).forEach(function (code) {
       var option = doc.createElement("option");
       option.value = code;
-      option.textContent = code;
+      option.textContent = KYC.stateName(code) + " (" + code + ")";
       select.appendChild(option);
     });
     select.addEventListener("change", function () {
       state.state = select.value;
       apply();
     });
+  }
+
+  /* A filtered state is one click from its own page. */
+  function syncStateLink() {
+    var link = doc.getElementById("stateSelectLink");
+    if (!link) return;
+    if (state.state && state.state !== "all") {
+      link.hidden = false;
+      link.href = KYC.stateUrl(state.state);
+      link.textContent = "Open the " + KYC.stateName(state.state) + " page \u203a";
+    } else {
+      link.hidden = true;
+    }
   }
 
   function initSearch() {
@@ -462,6 +314,12 @@
    * with a profile id interpolated into every one of 594 cards. */
   function initCards() {
     doc.getElementById("results").addEventListener("click", function (event) {
+      var more = event.target.closest("#gridMore");
+      if (more) {
+        renderWindow(doc.getElementById("results"), visible,
+                     parseInt(more.getAttribute("data-from"), 10) || 0);
+        return;
+      }
       var card = event.target.closest("[data-id]");
       if (card) KYC.profile.open(card.getAttribute("data-id"));
     });

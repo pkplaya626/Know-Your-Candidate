@@ -396,6 +396,9 @@
  "races": {
   "H-AK-00-2026": {
    "ambiguous": [],
+   "article": {
+    "H2AK01083": "Nick Begich III"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -435,6 +438,9 @@
   },
   "H-AL-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H0AL01055": "Jerry Carl"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -465,6 +471,10 @@
   },
   "H-AL-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H4AL02170": "Shomari Figures",
+    "H6AL01086": "Rhett Marques"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -495,6 +505,9 @@
   },
   "H-AL-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H2AL03032": "Mike Rogers (Alabama politician)"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -517,6 +530,9 @@
   },
   "H-AL-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H6AL04098": "Robert Aderholt"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -542,6 +558,9 @@
   },
   "H-AL-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H2AL05102": "Dale Strong"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -566,6 +585,9 @@
   },
   "H-AL-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H4AL06098": "Gary Palmer (politician)"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -595,6 +617,9 @@
   },
   "H-AL-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H0AL07086": "Terri Sewell"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -617,6 +642,9 @@
   },
   "H-AR-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H0AR01083": "Rick Crawford (politician)"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -637,6 +665,10 @@
   },
   "H-AR-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H4AR02141": "French Hill (politician)",
+    "H6AR02286": "Chris Jones (Arkansas politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -662,6 +694,9 @@
   },
   "H-AR-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H0AR03055": "Steve Womack"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -682,6 +717,9 @@
   },
   "H-AR-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H4AR04048": "Bruce Westerman"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -704,6 +742,9 @@
   },
   "H-AZ-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H4AZ01194": "Amish Shah"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -738,6 +779,10 @@
   },
   "H-AZ-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H2AZ01354": "Eli Crane",
+    "H4AZ02184": "Jonathan Nez"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -763,6 +808,9 @@
   },
   "H-AZ-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H4AZ03109": "Yassamin Ansari"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -787,6 +835,11 @@
   },
   "H-AZ-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H4AZ04115": "Zuhdi Jasser",
+    "H6AZ04250": "Kai Newkirk",
+    "H8AZ09040": "Greg Stanton"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -814,6 +867,9 @@
   },
   "H-AZ-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H6AZ05265": "Mark Lamb (sheriff)"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -841,6 +897,9 @@
   },
   "H-AZ-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H2AZ02360": "Juan Ciscomani"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -868,6 +927,9 @@
   },
   "H-AZ-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H6AZ07121": "Adelita Grijalva"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -889,6 +951,9 @@
   },
   "H-AZ-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H4AZ08108": "Abraham Hamadeh"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -912,6 +977,9 @@
   },
   "H-AZ-09-2026": {
    "ambiguous": [],
+   "article": {
+    "H0AZ01259": "Paul Gosar"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -933,6 +1001,10 @@
   },
   "H-CA-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H6CA01269": "Mike McGuire (politician)",
+    "H6CA01285": "James Gallagher (California politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -960,6 +1032,9 @@
   },
   "H-CA-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H2CA06259": "Jared Huffman"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -992,6 +1067,9 @@
   },
   "H-CA-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H0CA03078": "Ami Bera"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1023,6 +1101,9 @@
   },
   "H-CA-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H8CA01109": "Mike Thompson"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1057,6 +1138,9 @@
   },
   "H-CA-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H8CA04152": "Tom McClintock"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1081,6 +1165,10 @@
   },
   "H-CA-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H2CA03157": "Kevin Kiley (politician)",
+    "H6CA03158": "Richard Pan"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1111,6 +1199,10 @@
   },
   "H-CA-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H6CA05195": "Doris Matsui",
+    "H6CA07175": "Mai Vang"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1139,6 +1231,9 @@
   },
   "H-CA-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H0CA10149": "John Garamendi"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1163,6 +1258,9 @@
   },
   "H-CA-09-2026": {
    "ambiguous": [],
+   "article": {
+    "H8CA10126": "Josh Harder"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1188,6 +1286,9 @@
   },
   "H-CA-10-2026": {
    "ambiguous": [],
+   "article": {
+    "H0CA10073": "Mark DeSaulnier"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1218,6 +1319,11 @@
   },
   "H-CA-11-2026": {
    "ambiguous": [],
+   "article": {
+    "H6CA11219": "Saikat Chakrabarti",
+    "H6CA11268": "Connie Chan (politician)",
+    "H8CA11116": "Scott Wiener"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1255,6 +1361,9 @@
   },
   "H-CA-12-2026": {
    "ambiguous": [],
+   "article": {
+    "H4CA12154": "Lateefah Simon"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1277,6 +1386,10 @@
   },
   "H-CA-13-2026": {
    "ambiguous": [],
+   "article": {
+    "H2CA13115": "Adam Gray",
+    "H4CA09093": "Kevin Lincoln (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1301,6 +1414,9 @@
   },
   "H-CA-14-2026": {
    "ambiguous": [],
+   "article": {
+    "H0CA15213": "Aisha Wahab"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1334,6 +1450,9 @@
   },
   "H-CA-15-2026": {
    "ambiguous": [],
+   "article": {
+    "H2CA14162": "Kevin Mullin"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1360,6 +1479,9 @@
   },
   "H-CA-16-2026": {
    "ambiguous": [],
+   "article": {
+    "H4CA16197": "Sam Liccardo"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1384,6 +1506,9 @@
   },
   "H-CA-17-2026": {
    "ambiguous": [],
+   "article": {
+    "H4CA12055": "Ro Khanna"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1412,6 +1537,9 @@
   },
   "H-CA-18-2026": {
    "ambiguous": [],
+   "article": {
+    "H4CA16049": "Zoe Lofgren"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1436,6 +1564,9 @@
   },
   "H-CA-19-2026": {
    "ambiguous": [],
+   "article": {
+    "H6CA20152": "Jimmy Panetta"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1464,6 +1595,9 @@
   },
   "H-CA-20-2026": {
    "ambiguous": [],
+   "article": {
+    "H4CA20181": "Vince Fong"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1488,6 +1622,9 @@
   },
   "H-CA-21-2026": {
    "ambiguous": [],
+   "article": {
+    "H4CA20082": "Jim Costa"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1516,6 +1653,10 @@
   },
   "H-CA-22-2026": {
    "ambiguous": [],
+   "article": {
+    "H2CA20094": "David Valadao",
+    "H6CA22208": "Jasmeet Bains"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1538,6 +1679,9 @@
   },
   "H-CA-23-2026": {
    "ambiguous": [],
+   "article": {
+    "H0CA08135": "Jay Obernolte"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1567,6 +1711,9 @@
   },
   "H-CA-24-2026": {
    "ambiguous": [],
+   "article": {
+    "H6CA24303": "Salud Carbajal"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1591,6 +1738,9 @@
   },
   "H-CA-25-2026": {
    "ambiguous": [],
+   "article": {
+    "H2CA36439": "Raul Ruiz (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1615,6 +1765,9 @@
   },
   "H-CA-26-2026": {
    "ambiguous": [],
+   "article": {
+    "H6CA26266": "Jacqui Irwin"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1647,6 +1800,9 @@
   },
   "H-CA-27-2026": {
    "ambiguous": [],
+   "article": {
+    "H4CA27111": "George T. Whitesides"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1671,6 +1827,9 @@
   },
   "H-CA-28-2026": {
    "ambiguous": [],
+   "article": {
+    "H0CA32101": "Judy Chu"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1693,6 +1852,9 @@
   },
   "H-CA-29-2026": {
    "ambiguous": [],
+   "article": {
+    "H4CA29141": "Luz Maria Rivas"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1715,6 +1877,9 @@
   },
   "H-CA-30-2026": {
    "ambiguous": [],
+   "article": {
+    "H4CA30149": "Laura Friedman"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1745,6 +1910,9 @@
   },
   "H-CA-31-2026": {
    "ambiguous": [],
+   "article": {
+    "H8CA39174": "Gil Cisneros"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1767,6 +1935,10 @@
   },
   "H-CA-32-2026": {
    "ambiguous": [],
+   "article": {
+    "H4CA32137": "Larry A. Thompson",
+    "H6CA24113": "Brad Sherman"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1801,6 +1973,9 @@
   },
   "H-CA-33-2026": {
    "ambiguous": [],
+   "article": {
+    "H2CA31125": "Pete Aguilar"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1831,6 +2006,10 @@
   },
   "H-CA-34-2026": {
    "ambiguous": [],
+   "article": {
+    "H6CA34286": "Angela Gonzales-Torres",
+    "H8CA34266": "Jimmy Gomez"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1859,6 +2038,9 @@
   },
   "H-CA-35-2026": {
    "ambiguous": [],
+   "article": {
+    "H4CA35031": "Norma J. Torres"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1881,6 +2063,9 @@
   },
   "H-CA-36-2026": {
    "ambiguous": [],
+   "article": {
+    "H4CA33119": "Ted W. Lieu"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1911,6 +2096,9 @@
   },
   "H-CA-37-2026": {
    "ambiguous": [],
+   "article": {
+    "H2CA37304": "Sydney Kamlager-Dove"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1943,6 +2131,9 @@
   },
   "H-CA-38-2026": {
    "ambiguous": [],
+   "article": {
+    "H6CA38139": "Hilda Solis"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1967,6 +2158,9 @@
   },
   "H-CA-39-2026": {
    "ambiguous": [],
+   "article": {
+    "H2CA43245": "Mark Takano"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -1987,6 +2181,10 @@
   },
   "H-CA-40-2026": {
    "ambiguous": [],
+   "article": {
+    "H2CA37023": "Ken Calvert",
+    "H8CA39240": "Young Kim"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2021,6 +2219,10 @@
    "ambiguous": [
     "Mitch Clemmons"
    ],
+   "article": {
+    "H2CA39078": "Linda Sánchez",
+    "H2CA39086": "Hector De La Torre"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2050,6 +2252,9 @@
    "ambiguous": [
     "Long Pham"
    ],
+   "article": {
+    "H2CA47188": "Robert Garcia (California congressman)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2078,6 +2283,9 @@
   },
   "H-CA-43-2026": {
    "ambiguous": [],
+   "article": {
+    "H4CA23011": "Maxine Waters"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2102,6 +2310,9 @@
   },
   "H-CA-44-2026": {
    "ambiguous": [],
+   "article": {
+    "H6CA44103": "Nanette Barragán"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2124,6 +2335,9 @@
   },
   "H-CA-45-2026": {
    "ambiguous": [],
+   "article": {
+    "H4CA45170": "Derek Tran"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2152,6 +2366,10 @@
   },
   "H-CA-46-2026": {
    "ambiguous": [],
+   "article": {
+    "H4CA46137": "David Pan",
+    "H6CA46116": "Lou Correa"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2178,6 +2396,10 @@
   },
   "H-CA-47-2026": {
    "ambiguous": [],
+   "article": {
+    "H4CA47085": "Dave Min",
+    "H6CA47122": "Bill Brough"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2212,6 +2434,11 @@
   },
   "H-CA-48-2026": {
    "ambiguous": [],
+   "article": {
+    "H6CA48310": "Marni von Wilpert",
+    "H6CA49128": "Jim Desmond",
+    "H8CA50098": "Ammar Campa-Najjar"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2249,6 +2476,9 @@
   },
   "H-CA-49-2026": {
    "ambiguous": [],
+   "article": {
+    "H8CA49058": "Mike Levin"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2273,6 +2503,9 @@
    "ambiguous": [
     "Lucinda KWH Jahn"
    ],
+   "article": {
+    "H2CA52089": "Scott Peters (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2303,6 +2536,9 @@
   },
   "H-CA-51-2026": {
    "ambiguous": [],
+   "article": {
+    "H8CA49074": "Sara Jacobs"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2327,6 +2563,9 @@
   },
   "H-CA-52-2026": {
    "ambiguous": [],
+   "article": {
+    "H2CA50026": "Juan Vargas"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2351,6 +2590,11 @@
   },
   "H-CO-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H6CO01141": "Diana DeGette",
+    "H6CO01273": "Melat Kiros",
+    "H6CO01299": "Wanda James"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2376,6 +2620,9 @@
   },
   "H-CO-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H8CO02160": "Joe Neguse"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2399,6 +2646,10 @@
   },
   "H-CO-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H4CO03357": "Jeff Hurd",
+    "H6CO03279": "Ron Hanks"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2424,6 +2675,10 @@
   },
   "H-CO-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H0CO03165": "Lauren Boebert",
+    "H6CO04202": "Eileen Laubacher"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2445,6 +2700,9 @@
   },
   "H-CO-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H6CO05142": "Jeff Crank"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2468,6 +2726,9 @@
   },
   "H-CO-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H8CO06229": "Jason Crow"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2489,6 +2750,9 @@
   },
   "H-CO-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H8CO07045": "Brittany Pettersen"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2510,6 +2774,11 @@
   },
   "H-CO-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H4CO08034": "Gabe Evans",
+    "H6CO08013": "Manny Rutinel",
+    "H6CO08047": "Shannon Bird"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2535,6 +2804,11 @@
   },
   "H-CT-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H6CT01206": "Luke Bronin",
+    "H6CT01222": "Jillian Gilchrest",
+    "H8CT01046": "John B. Larson"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -2561,6 +2835,9 @@
   },
   "H-CT-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H2CT02112": "Joe Courtney (politician)"
+   },
    "decided": {
     "general": false,
     "parties": []
@@ -2579,6 +2856,9 @@
   },
   "H-CT-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H0CT03072": "Rosa DeLauro"
+   },
    "decided": {
     "general": false,
     "parties": []
@@ -2601,6 +2881,9 @@
    "ambiguous": [
     "Daniel Miressi"
    ],
+   "article": {
+    "H8CT04172": "Jim Himes"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -2626,6 +2909,9 @@
   },
   "H-CT-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H8CT05245": "Jahana Hayes"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -2648,6 +2934,9 @@
   },
   "H-FL-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H6FL01390": "Jimmy Patronis"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2674,6 +2963,9 @@
   },
   "H-FL-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H6FL02315": "Evan Power"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2715,6 +3007,9 @@
   },
   "H-FL-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H0FL03175": "Kat Cammack"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2743,6 +3038,9 @@
   },
   "H-FL-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H2FL04211": "Aaron Bean"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -2767,6 +3065,9 @@
   },
   "H-FL-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H6FL04105": "John Rutherford (Florida politician)"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -2794,6 +3095,10 @@
   },
   "H-FL-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H6FL06258": "Randy Fine",
+    "H6FL06415": "Dan Bilzerian"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -2829,6 +3134,10 @@
   },
   "H-FL-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H2FL07156": "Cory Mills",
+    "H6FL08213": "Alan Grayson"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2862,6 +3171,9 @@
   },
   "H-FL-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H4FL08168": "Mike Haridopolos"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -2880,6 +3192,10 @@
   },
   "H-FL-09-2026": {
    "ambiguous": [],
+   "article": {
+    "H6FL09179": "Darren Soto",
+    "H6FL09294": "Dan Green (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2912,6 +3228,9 @@
   },
   "H-FL-10-2026": {
    "ambiguous": [],
+   "article": {
+    "H2FL10259": "Maxwell Frost"
+   },
    "decided": {
     "general": false,
     "parties": []
@@ -2928,6 +3247,9 @@
   },
   "H-FL-11-2026": {
    "ambiguous": [],
+   "article": {
+    "H6FL11340": "Carey Baker"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -2941,6 +3263,7 @@
     "H6FL11241": "democratic",
     "H6FL11266": "republican",
     "H6FL11282": "republican",
+    "H6FL11316": "republican",
     "H6FL11332": "republican",
     "H6FL11340": "republican",
     "H6FL11357": "democratic"
@@ -2950,17 +3273,19 @@
     "H6FL11241": "eliminated",
     "H6FL11266": "eliminated",
     "H6FL11282": "eliminated",
+    "H6FL11316": "eliminated",
     "H6FL11332": "nominee",
     "H6FL11340": "eliminated",
     "H6FL11357": "nominee"
    },
-   "unmatched": {
-    "Nizam Razack": "eliminated"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-FL-12-2026": {
    "ambiguous": [],
+   "article": {
+    "H6FL09070": "Gus Bilirakis"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -2983,6 +3308,9 @@
   },
   "H-FL-13-2026": {
    "ambiguous": [],
+   "article": {
+    "H0FL13158": "Anna Paulina Luna"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -3007,6 +3335,11 @@
   },
   "H-FL-14-2026": {
    "ambiguous": [],
+   "article": {
+    "H6FL11126": "Kathy Castor",
+    "H6FL14229": "Kevin Steele",
+    "H6FL14237": "Mike Beltran"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -3042,6 +3375,9 @@
   },
   "H-FL-15-2026": {
    "ambiguous": [],
+   "article": {
+    "H2FL15241": "Laurel Lee"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -3064,6 +3400,7 @@
   },
   "H-FL-16-2026": {
    "ambiguous": [],
+   "article": {},
    "decided": {
     "general": false,
     "parties": [
@@ -3097,6 +3434,9 @@
   },
   "H-FL-17-2026": {
    "ambiguous": [],
+   "article": {
+    "H8FL17053": "Greg Steube"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -3119,6 +3459,9 @@
   },
   "H-FL-18-2026": {
    "ambiguous": [],
+   "article": {
+    "H0FL15104": "Scott Franklin (politician)"
+   },
    "decided": {
     "general": false,
     "parties": []
@@ -3137,6 +3480,11 @@
   },
   "H-FL-19-2026": {
    "ambiguous": [],
+   "article": {
+    "H6FL19129": "Jim Oberweis",
+    "H6FL19178": "Madison Cawthorn",
+    "H6FL19228": "Chris Collins (New York politician)"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -3182,6 +3530,9 @@
    "ambiguous": [
     "Carla Spalding"
    ],
+   "article": {
+    "H4FL20023": "Debbie Wasserman Schultz"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -3211,6 +3562,9 @@
   },
   "H-FL-21-2026": {
    "ambiguous": [],
+   "article": {
+    "H6FL18097": "Brian Mast"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -3233,6 +3587,7 @@
   },
   "H-FL-22-2026": {
    "ambiguous": [],
+   "article": {},
    "decided": {
     "general": true,
     "parties": [
@@ -3268,6 +3623,9 @@
   },
   "H-FL-23-2026": {
    "ambiguous": [],
+   "article": {
+    "H2FL14053": "Lois Frankel"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -3295,6 +3653,11 @@
   },
   "H-FL-24-2026": {
    "ambiguous": [],
+   "article": {
+    "H0FL17118": "Rudy Moise",
+    "H6FL24087": "Shevrin Jones",
+    "H6FL24095": "Oliver Gilbert"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -3327,6 +3690,10 @@
   },
   "H-FL-25-2026": {
    "ambiguous": [],
+   "article": {
+    "H2FL22171": "Jared Moskowitz",
+    "H6FL23147": "George Moraitis"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -3360,6 +3727,9 @@
   },
   "H-FL-26-2026": {
    "ambiguous": [],
+   "article": {
+    "H2FL25018": "Mario Díaz-Balart"
+   },
    "decided": {
     "general": false,
     "parties": []
@@ -3378,6 +3748,10 @@
   },
   "H-FL-27-2026": {
    "ambiguous": [],
+   "article": {
+    "H6FL27098": "Eliott Rodriguez",
+    "H8FL27185": "Maria Elvira Salazar"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -3403,6 +3777,9 @@
   },
   "H-FL-28-2026": {
    "ambiguous": [],
+   "article": {
+    "H0FL26036": "Carlos A. Giménez"
+   },
    "decided": {
     "general": false,
     "parties": []
@@ -3421,6 +3798,7 @@
   },
   "H-GA-01-2026": {
    "ambiguous": [],
+   "article": {},
    "decided": {
     "general": true,
     "parties": [
@@ -3466,6 +3844,9 @@
   },
   "H-GA-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H2GA02031": "Sanford Bishop"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -3487,6 +3868,9 @@
   },
   "H-GA-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H4GA03126": "Brian Jack"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -3510,6 +3894,9 @@
   },
   "H-GA-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H6GA04129": "Hank Johnson"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -3537,6 +3924,9 @@
   },
   "H-GA-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H0GA05301": "Nikema Williams"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -3561,6 +3951,9 @@
   },
   "H-GA-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H8GA06393": "Lucy McBath"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -3584,6 +3977,9 @@
   },
   "H-GA-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H0GA07273": "Rich McCormick"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -3611,6 +4007,9 @@
   },
   "H-GA-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H0GA08099": "Austin Scott"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -3635,6 +4034,9 @@
   },
   "H-GA-09-2026": {
    "ambiguous": [],
+   "article": {
+    "H0GA09246": "Andrew Clyde"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -3664,6 +4066,9 @@
   },
   "H-GA-10-2026": {
    "ambiguous": [],
+   "article": {
+    "H6GA10175": "Houston Gaines"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -3693,6 +4098,11 @@
   },
   "H-GA-11-2026": {
    "ambiguous": [],
+   "article": {
+    "H0GA14048": "John Cowan (Georgia politician)",
+    "H4GA11087": "Tricia Pridemore",
+    "H6GA11207": "Tricia Pridemore"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -3731,6 +4141,9 @@
   },
   "H-GA-12-2026": {
    "ambiguous": [],
+   "article": {
+    "H2GA12121": "Rick W. Allen"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -3762,6 +4175,11 @@
   },
   "H-GA-13-2026": {
    "ambiguous": [],
+   "article": {
+    "H6GA13039": "Emanuel Jones",
+    "H6GA13062": "Everton Blair",
+    "H6GA13070": "Jasmine Clark"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -3795,6 +4213,10 @@
   },
   "H-GA-14-2026": {
    "ambiguous": [],
+   "article": {
+    "H0GA14030": "Clay Fuller",
+    "H6GA14193": "Colton Moore"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -3832,6 +4254,11 @@
   },
   "H-GU-00-2026": {
    "ambiguous": [],
+   "article": {
+    "H2GU01031": "James Moylan",
+    "H6GU00059": "Mary Camacho Torres",
+    "H6GU01032": "Alicia Limtiaco"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -3855,6 +4282,10 @@
   },
   "H-HI-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H2HI02128": "Ed Case",
+    "H6HI01311": "Jarrett Keohokalole"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -3884,6 +4315,10 @@
   },
   "H-HI-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H2HI02581": "Jill Tokuda",
+    "H6HI02426": "Brenton Awa"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -3909,6 +4344,10 @@
   },
   "H-IA-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H2IA02111": "Christina Bohannan",
+    "H8IA02043": "Mariannette Miller-Meeks"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -3935,6 +4374,11 @@
   },
   "H-IA-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H6IA02211": "Lindsay James (politician)",
+    "H6IA02229": "Charlie McClintock",
+    "H6IA02237": "Joe Mitchell (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -3962,6 +4406,10 @@
   },
   "H-IA-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H2IA03119": "Zach Nunn",
+    "H6IA03268": "Sarah Trone Garriott"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -3983,6 +4431,9 @@
   },
   "H-IA-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H6IA04217": "David Dawson (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4008,6 +4459,9 @@
   },
   "H-ID-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H8ID01124": "Russ Fulcher"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4036,6 +4490,9 @@
   },
   "H-ID-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H8ID02064": "Mike Simpson"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4068,6 +4525,9 @@
   },
   "H-IL-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H2IL01349": "Jonathan Jackson (Illinois politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4091,6 +4551,12 @@
   },
   "H-IL-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H6IL02124": "Jesse Jackson Jr.",
+    "H6IL02298": "Robert Peters (Illinois politician)",
+    "H6IL02355": "Donna Miller",
+    "H6IL02363": "Willie Preston"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4130,6 +4596,9 @@
   },
   "H-IL-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H2IL03162": "Delia Ramirez"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4151,6 +4620,7 @@
   },
   "H-IL-04-2026": {
    "ambiguous": [],
+   "article": {},
    "decided": {
     "general": true,
     "parties": [
@@ -4178,6 +4648,9 @@
   },
   "H-IL-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H0IL05096": "Mike Quigley"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4206,6 +4679,9 @@
   },
   "H-IL-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H8IL06139": "Sean Casten"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4231,6 +4707,11 @@
   },
   "H-IL-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H6IL07354": "La Shawn Ford",
+    "H6IL07370": "Richard Boykin",
+    "H6IL07511": "Kina Collins"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4278,6 +4759,9 @@
   },
   "H-IL-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H6IL08329": "Melissa Bean"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4319,6 +4803,13 @@
   },
   "H-IL-09-2026": {
    "ambiguous": [],
+   "article": {
+    "H6IL09178": "Kat Abughazaleh",
+    "H6IL09194": "Laura Fine",
+    "H6IL09228": "Daniel Biss",
+    "H6IL09236": "Bushra Amiwala",
+    "H6IL09293": "Mike Simmons"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4370,6 +4861,9 @@
   },
   "H-IL-10-2026": {
    "ambiguous": [],
+   "article": {
+    "H2IL10068": "Brad Schneider"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4393,6 +4887,9 @@
   },
   "H-IL-11-2026": {
    "ambiguous": [],
+   "article": {
+    "H8IL14067": "Bill Foster (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4420,6 +4917,9 @@
   },
   "H-IL-12-2026": {
    "ambiguous": [],
+   "article": {
+    "H4IL12060": "Mike Bost"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4441,6 +4941,9 @@
   },
   "H-IL-13-2026": {
    "ambiguous": [],
+   "article": {
+    "H2IL13153": "Nikki Budzinski"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4466,6 +4969,9 @@
   },
   "H-IL-14-2026": {
    "ambiguous": [],
+   "article": {
+    "H8IL14174": "Lauren Underwood"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4489,6 +4995,9 @@
   },
   "H-IL-15-2026": {
    "ambiguous": [],
+   "article": {
+    "H0IL15129": "Mary Miller (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4519,6 +5028,9 @@
   },
   "H-IL-16-2026": {
    "ambiguous": [],
+   "article": {
+    "H6IL18088": "Darin LaHood"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4540,6 +5052,9 @@
   },
   "H-IL-17-2026": {
    "ambiguous": [],
+   "article": {
+    "H2IL17147": "Eric Sorensen (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4563,6 +5078,9 @@
   },
   "H-IN-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H0IN01150": "Frank Mrvan"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -4590,6 +5108,9 @@
   },
   "H-IN-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H2IN02295": "Rudy Yakym"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -4613,6 +5134,9 @@
   },
   "H-IN-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H0IN03198": "Marlin Stutzman"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4636,6 +5160,10 @@
   },
   "H-IN-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H4IN04248": "Craig Haggard",
+    "H8IN04199": "Jim Baird (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4671,6 +5199,9 @@
   },
   "H-IN-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H0IN05326": "Victoria Spartz"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4704,6 +5235,9 @@
   },
   "H-IN-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H4IN06185": "Jefferson Shreve"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4735,6 +5269,9 @@
   },
   "H-IN-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H8IN07184": "André Carson"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4766,6 +5303,9 @@
   },
   "H-IN-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H4IN08249": "Mark Messmer"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4792,6 +5332,9 @@
   },
   "H-IN-09-2026": {
    "ambiguous": [],
+   "article": {
+    "H6IN09143": "Erin Houchin"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4823,6 +5366,9 @@
   },
   "H-KS-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H0KS01123": "Tracey Mann"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4848,6 +5394,9 @@
   },
   "H-KS-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H4KS02164": "Derek Schmidt"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4871,6 +5420,9 @@
   },
   "H-KS-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H8KS03155": "Sharice Davids"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4896,6 +5448,9 @@
   },
   "H-KS-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H8KS04112": "Ron Estes"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4924,6 +5479,9 @@
   },
   "H-KY-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H6KY01110": "James R. Comer"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4948,6 +5506,9 @@
   },
   "H-KY-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H8KY02031": "S. Brett Guthrie"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -4981,6 +5542,9 @@
   },
   "H-KY-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H2KY03206": "Morgan McGarvey"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5006,6 +5570,10 @@
   },
   "H-KY-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H2KY04121": "Thomas Massie",
+    "H6KY04171": "Ed Gallrein"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5035,6 +5603,9 @@
   },
   "H-KY-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H0KY05015": "Hal Rogers"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5065,6 +5636,11 @@
   },
   "H-KY-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H6KY06143": "Ryan Dotson",
+    "H6KY06150": "Cherlynn Stevenson",
+    "H6KY06192": "Ralph Alvarado"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5106,6 +5682,10 @@
   },
   "H-MA-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H4MA01091": "Nadia Milleron",
+    "H8MA02041": "Richard Neal"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -5128,6 +5708,9 @@
   },
   "H-MA-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H4MA03022": "Jim McGovern (American politician)"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -5146,6 +5729,9 @@
   },
   "H-MA-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H8MA03106": "Lori Trahan"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -5167,6 +5753,9 @@
   },
   "H-MA-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H0MA04192": "Jake Auchincloss"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -5177,19 +5766,22 @@
    "page": "2026 United States House of Representatives elections in Massachusetts",
    "party": {
     "H0MA04192": "democratic",
-    "H6MA04132": "democratic"
+    "H6MA04132": "democratic",
+    "H6MA04140": "republican"
    },
    "status": {
     "H0MA04192": "nominee",
-    "H6MA04132": "eliminated"
+    "H6MA04132": "eliminated",
+    "H6MA04140": "nominee"
    },
-   "unmatched": {
-    "Tom Stalcup": "nominee"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-MA-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H4MA05084": "Katherine Clark"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -5212,6 +5804,11 @@
   },
   "H-MA-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H0MA06098": "Jamie Belsito",
+    "H6MA06160": "Tram Nguyen",
+    "H8MA03072": "Dan Koh"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -5243,6 +5840,9 @@
   },
   "H-MA-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H8MA07032": "Ayanna Pressley"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -5261,6 +5861,9 @@
   },
   "H-MA-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H2MA09072": "Stephen F. Lynch"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -5284,6 +5887,9 @@
   },
   "H-MA-09-2026": {
    "ambiguous": [],
+   "article": {
+    "H0MA10082": "Bill Keating (politician)"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -5307,6 +5913,9 @@
   },
   "H-MD-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H8MD01094": "Andy Harris (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5336,6 +5945,9 @@
   },
   "H-MD-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H4MD02232": "Johnny Olszewski"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5361,6 +5973,9 @@
   },
   "H-MD-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H4MD03156": "Sarah Elfreth"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5391,6 +6006,9 @@
   },
   "H-MD-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H2MD04232": "Glenn Ivey"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5420,6 +6038,12 @@
   },
   "H-MD-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H6MD05321": "Adrian Boafo",
+    "H6MD05354": "Nicole A. Williams",
+    "H6MD05388": "Arthur Ellis (Maryland politician)",
+    "H6MD05404": "Rushern Baker"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5482,6 +6106,12 @@
   },
   "H-MD-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H4MD06340": "April McClain Delaney",
+    "H6MD06287": "Robin Ficker",
+    "H6MD06303": "Alexis Goldstein",
+    "H6MD08549": "David Trone"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5519,6 +6149,10 @@
   },
   "H-MD-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H6MD07020": "Kweisi Mfume",
+    "H6MD07509": "Mark Conway (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5544,6 +6178,9 @@
   },
   "H-MD-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H6MD08457": "Jamie Raskin"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5574,6 +6211,9 @@
   },
   "H-ME-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H8ME01120": "Chellie Pingree"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5597,6 +6237,10 @@
   },
   "H-ME-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H6ME02148": "Paul LePage",
+    "H6ME02171": "Matthew Dunlap"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5617,6 +6261,9 @@
   },
   "H-MI-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H6MI01226": "Jack Bergman"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5654,6 +6301,9 @@
   },
   "H-MI-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H4MI04126": "John Moolenaar"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5679,6 +6329,9 @@
   },
   "H-MI-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H0MI03316": "Hillary Scholten"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5702,6 +6355,10 @@
   },
   "H-MI-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H0MI02094": "Bill Huizenga",
+    "H6MI04204": "Sean McCann (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5727,6 +6384,9 @@
   },
   "H-MI-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H4MI07103": "Tim Walberg"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5748,6 +6408,9 @@
   },
   "H-MI-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H4MI12079": "Debbie Dingell"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -5769,6 +6432,11 @@
   },
   "H-MI-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H2MI07123": "Tom Barrett (Michigan politician)",
+    "H6MI07256": "Bridget Brink",
+    "H6MI07298": "William Lawrence (activist)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5794,6 +6462,9 @@
   },
   "H-MI-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H4MI08218": "Kristen McDonald Rivet"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5818,6 +6489,9 @@
   },
   "H-MI-09-2026": {
    "ambiguous": [],
+   "article": {
+    "H0MI10287": "Lisa McClain"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5839,6 +6513,9 @@
   },
   "H-MI-10-2026": {
    "ambiguous": [],
+   "article": {
+    "H6MI10284": "Tim Greimel"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5870,6 +6547,9 @@
   },
   "H-MI-11-2026": {
    "ambiguous": [],
+   "article": {
+    "H6MI11191": "Jeremy Moss"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -5897,6 +6577,10 @@
   },
   "H-MI-12-2026": {
    "ambiguous": [],
+   "article": {
+    "H2MI13154": "Shanelle Jackson",
+    "H8MI13250": "Rashida Tlaib"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -5922,6 +6606,10 @@
   },
   "H-MI-13-2026": {
    "ambiguous": [],
+   "article": {
+    "H2MI13204": "Shri Thanedar",
+    "H6MI13254": "Donavan McKinney"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -5945,6 +6633,9 @@
   },
   "H-MN-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H2MN01223": "Brad Finstad"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -5972,6 +6663,12 @@
   },
   "H-MN-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H6MN02230": "Matt Little",
+    "H6MN02248": "Matt Klein",
+    "H6MN02263": "Eric Pratt",
+    "H6MN02271": "Kaela Berg"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -6002,6 +6699,9 @@
   },
   "H-MN-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H4MN03118": "Kelly Morrison"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -6025,6 +6725,9 @@
   },
   "H-MN-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H0MN04049": "Betty McCollum"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -6052,6 +6755,9 @@
   },
   "H-MN-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H8MN05239": "Ilhan Omar"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -6084,6 +6790,9 @@
   },
   "H-MN-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H4MN06087": "Tom Emmer"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -6109,6 +6818,9 @@
   },
   "H-MN-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H0MN07091": "Michelle Fischbach"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -6132,6 +6844,9 @@
   },
   "H-MN-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H8MN08043": "Pete Stauber"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -6158,6 +6873,10 @@
   },
   "H-MO-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H4MO01134": "Wesley Bell",
+    "H8MO01143": "Cori Bush"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -6192,6 +6911,9 @@
   },
   "H-MO-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H2MO02102": "Ann Wagner"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -6226,6 +6948,9 @@
   },
   "H-MO-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H8MO09146": "Bob Onder"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -6256,6 +6981,9 @@
   },
   "H-MO-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H2MO04207": "Mark Alford"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -6293,6 +7021,10 @@
   },
   "H-MO-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H2MO04199": "Rick Brattin",
+    "H4MO05234": "Emanuel Cleaver"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -6325,6 +7057,9 @@
   },
   "H-MO-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H6MO06310": "Chris Stigall"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -6361,6 +7096,9 @@
   },
   "H-MO-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H2MO07143": "Eric Burlison"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -6389,6 +7127,10 @@
   },
   "H-MO-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H4MO08162": "Jason Smith (American politician)",
+    "H6MO08191": "Frank Barnitz"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -6418,6 +7160,10 @@
   },
   "H-MS-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H6MS01131": "Trent Kelly",
+    "H6MS01305": "Kelvin Buck"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6441,6 +7187,9 @@
   },
   "H-MS-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H4MS02068": "Bennie Thompson"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6468,6 +7217,9 @@
   },
   "H-MS-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H8MS03125": "Michael Guest (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6491,6 +7243,10 @@
   },
   "H-MS-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H2MS04258": "Mike Ezell",
+    "H6MS04242": "Jeffrey Hulum III"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6519,6 +7275,11 @@
   },
   "H-MT-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H2MT02084": "Al Olszewski",
+    "H6MT01137": "Sam Forstag",
+    "H6MT01160": "Christi Jacobsen"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6554,6 +7315,10 @@
   },
   "H-MT-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H4MT02098": "Troy Downing",
+    "H6MT02226": "Jonathan Windy Boy"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6584,6 +7349,11 @@
   },
   "H-NC-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NC02287": "Don Davis (North Carolina politician)",
+    "H4NC01137": "Laurie Buckhout",
+    "H6NC01132": "Bobby Hanig"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6614,6 +7384,10 @@
   },
   "H-NC-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H0NC02125": "Deborah Ross (politician)",
+    "H6NC02213": "Brian McGinnis"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -6636,6 +7410,10 @@
   },
   "H-NC-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H0NC03172": "Greg Murphy (politician)",
+    "H6NC03229": "Raymond Smith Jr."
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6660,6 +7438,10 @@
   },
   "H-NC-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NC06098": "Nida Allam",
+    "H2NC06114": "Valerie Foushee"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6685,6 +7467,9 @@
   },
   "H-NC-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H4NC05146": "Virginia Foxx"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6716,6 +7501,9 @@
   },
   "H-NC-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H4NC06177": "Addison McDowell"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6742,6 +7530,9 @@
   },
   "H-NC-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NC07096": "David Rouzer"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6766,6 +7557,9 @@
   },
   "H-NC-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H6NC09200": "Mark Harris (North Carolina politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6792,6 +7586,10 @@
   },
   "H-NC-09-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NC08185": "Richard Hudson (North Carolina politician)",
+    "H6NC09218": "Richard Ojeda"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6818,6 +7616,9 @@
   },
   "H-NC-10-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NC13243": "Pat Harrigan"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6853,6 +7654,9 @@
   },
   "H-NC-11-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NC14050": "Chuck Edwards"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6888,6 +7692,9 @@
   },
   "H-NC-12-2026": {
    "ambiguous": [],
+   "article": {
+    "H4NC12100": "Alma Adams"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6913,6 +7720,9 @@
   },
   "H-NC-13-2026": {
    "ambiguous": [],
+   "article": {
+    "H4NC13116": "Brad Knott"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6942,6 +7752,9 @@
   },
   "H-NC-14-2026": {
    "ambiguous": [],
+   "article": {
+    "H4NC14015": "Tim Moore (North Carolina politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6969,6 +7782,9 @@
   },
   "H-ND-00-2026": {
    "ambiguous": [],
+   "article": {
+    "H4ND00061": "Julie Fedorchak"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6992,6 +7808,9 @@
   },
   "H-NE-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NE01118": "Mike Flood (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7019,6 +7838,10 @@
   },
   "H-NE-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H6NE02190": "John Cavanaugh (politician)",
+    "H6NE02257": "Crystal Rhoades"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7055,6 +7878,9 @@
   },
   "H-NE-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H6NE03115": "Adrian Smith (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7085,6 +7911,12 @@
   },
   "H-NH-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H6NH01321": "Stefany Shaheen",
+    "H6NH01370": "Heath Howard",
+    "H6NH01388": "Brian Cole (politician)",
+    "H8NH01186": "Maura Sullivan"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -7128,6 +7960,11 @@
   },
   "H-NH-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NH02260": "Lily Tang Williams",
+    "H4NH02399": "Maggie Goodlander",
+    "H6NH02261": "Paige Beauchemin"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -7157,6 +7994,9 @@
   },
   "H-NJ-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H4NJ01084": "Donald Norcross"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7178,6 +8018,9 @@
   },
   "H-NJ-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H8NJ02166": "Jeff Van Drew"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7207,6 +8050,9 @@
   },
   "H-NJ-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H4NJ03080": "Herb Conaway"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7232,6 +8078,9 @@
   },
   "H-NJ-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H8NJ04014": "Chris Smith (New Jersey politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7259,6 +8108,9 @@
   },
   "H-NJ-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H6NJ05171": "Josh Gottheimer"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7282,6 +8134,9 @@
   },
   "H-NJ-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H8NJ03073": "Frank Pallone"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7309,6 +8164,9 @@
   },
   "H-NJ-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H0NJ07261": "Thomas Kean Jr."
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7338,6 +8196,10 @@
   },
   "H-NJ-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NJ08232": "Rob Menendez",
+    "H6NJ08209": "Mussab Ali"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7363,6 +8225,9 @@
   },
   "H-NJ-09-2026": {
    "ambiguous": [],
+   "article": {
+    "H4NJ09194": "Nellie Pou"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7386,6 +8251,9 @@
   },
   "H-NJ-10-2026": {
    "ambiguous": [],
+   "article": {
+    "H4NJ10176": "LaMonica McIver"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7409,6 +8277,10 @@
   },
   "H-NJ-11-2026": {
    "ambiguous": [],
+   "article": {
+    "H6NJ11286": "Analilia Mejia",
+    "H6NJ11344": "Donald Cresitello"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7436,6 +8308,11 @@
   },
   "H-NJ-12-2026": {
    "ambiguous": [],
+   "article": {
+    "H6NJ12300": "Verlina Reynolds-Jackson",
+    "H6NJ12391": "Sam Wang (neuroscientist)",
+    "H6NJ12417": "Adam Hamawy"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7483,6 +8360,9 @@
   },
   "H-NM-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NM01144": "Melanie Stansbury"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7505,6 +8385,9 @@
   },
   "H-NM-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NM02191": "Gabe Vasquez"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7528,6 +8411,10 @@
   },
   "H-NM-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H0NM03102": "Teresa Leger Fernández",
+    "H6NM03083": "Martin R. Zamora"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7548,6 +8435,10 @@
   },
   "H-NV-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H6NV01331": "Carrie A. Buck",
+    "H8NV03036": "Dina Titus"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7583,6 +8474,11 @@
   },
   "H-NV-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H4NV04108": "David Flippo",
+    "H6NV02362": "Teresa Benitez-Thompson",
+    "H6NV02396": "James Settelmeyer"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7643,6 +8539,12 @@
   },
   "H-NV-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H4NV03225": "Martin O'Donnell",
+    "H6NV03204": "Martin O'Donnell",
+    "H6NV03287": "Jeffrey Ross Gunter",
+    "H6NV04020": "Susie Lee"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7678,6 +8580,9 @@
   },
   "H-NV-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NV04011": "Steven Horsford"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7702,6 +8607,9 @@
   },
   "H-NY-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NY01190": "Nick LaLota"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7724,6 +8632,10 @@
   },
   "H-NY-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H0NY02234": "Andrew Garbarino",
+    "H6NY02140": "Patrick G. Halpin"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -7742,6 +8654,10 @@
   },
   "H-NY-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H0NY02267": "Mike LiPetri",
+    "H6NY03247": "Tom Suozzi"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7767,6 +8683,9 @@
   },
   "H-NY-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NY04244": "Laura Gillen"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7789,6 +8708,9 @@
   },
   "H-NY-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H8NY06048": "Gregory Meeks"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -7807,6 +8729,9 @@
   },
   "H-NY-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NY06116": "Grace Meng"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7829,6 +8754,11 @@
   },
   "H-NY-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H6NY07164": "Antonio Reynoso",
+    "H6NY07214": "Claire Valdez",
+    "H6NY07248": "Julie Won"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7855,6 +8785,9 @@
   },
   "H-NY-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NY10092": "Hakeem Jeffries"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -7873,6 +8806,9 @@
   },
   "H-NY-09-2026": {
    "ambiguous": [],
+   "article": {
+    "H4NY11138": "Yvette Clarke"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7896,6 +8832,10 @@
   },
   "H-NY-10-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NY10308": "Dan Goldman",
+    "H6NY10176": "Brad Lander"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7918,6 +8858,9 @@
   },
   "H-NY-11-2026": {
    "ambiguous": [],
+   "article": {
+    "H0NY11078": "Nicole Malliotakis"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7940,6 +8883,13 @@
   },
   "H-NY-12-2026": {
    "ambiguous": [],
+   "article": {
+    "H6NY12172": "Micah Lasher",
+    "H6NY12214": "Alex Bores",
+    "H6NY12255": "Jack Schlossberg",
+    "H6NY12347": "George Conway",
+    "H6NY12388": "Nina Schwalbe"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7974,6 +8924,10 @@
   },
   "H-NY-13-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NY13096": "Adriano Espaillat",
+    "H6NY13279": "Darializa Avila Chevalier"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7999,6 +8953,9 @@
   },
   "H-NY-14-2026": {
    "ambiguous": [],
+   "article": {
+    "H8NY15148": "Alexandria Ocasio-Cortez"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -8021,6 +8978,10 @@
   },
   "H-NY-15-2026": {
    "ambiguous": [],
+   "article": {
+    "H0NY15160": "Ritchie Torres",
+    "H0NY15194": "Michael Blake (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8048,6 +9009,9 @@
   },
   "H-NY-16-2026": {
    "ambiguous": [],
+   "article": {
+    "H4NY16087": "George Latimer (New York politician)"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -8066,6 +9030,10 @@
   },
   "H-NY-17-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NY17162": "Mike Lawler",
+    "H6NY17171": "Cait Conley"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8094,6 +9062,9 @@
   },
   "H-NY-18-2026": {
    "ambiguous": [],
+   "article": {
+    "H8NY19223": "Pat Ryan"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -8112,6 +9083,10 @@
   },
   "H-NY-19-2026": {
    "ambiguous": [],
+   "article": {
+    "H6NY19268": "Peter Oberacker",
+    "H8NY22177": "Josh Riley"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8134,6 +9109,9 @@
   },
   "H-NY-20-2026": {
    "ambiguous": [],
+   "article": {
+    "H8NY21203": "Paul Tonko"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -8152,6 +9130,9 @@
   },
   "H-NY-21-2026": {
    "ambiguous": [],
+   "article": {
+    "H6NY21215": "Robert Smullen"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8177,6 +9158,9 @@
   },
   "H-NY-22-2026": {
    "ambiguous": [],
+   "article": {
+    "H4NY22085": "John Mannion (American politician)"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -8195,6 +9179,9 @@
   },
   "H-NY-23-2026": {
    "ambiguous": [],
+   "article": {
+    "H2NY23228": "Nick Langworthy"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8217,6 +9204,9 @@
   },
   "H-NY-24-2026": {
    "ambiguous": [],
+   "article": {
+    "H4NY22051": "Claudia Tenney"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8239,6 +9229,9 @@
   },
   "H-NY-25-2026": {
    "ambiguous": [],
+   "article": {
+    "H8NY25105": "Joseph Morelle"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8263,6 +9256,9 @@
   },
   "H-NY-26-2026": {
    "ambiguous": [],
+   "article": {
+    "H4NY26078": "Tim Kennedy (politician)"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -8281,6 +9277,9 @@
   },
   "H-OH-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H2OH01194": "Greg Landsman"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8313,6 +9312,9 @@
   },
   "H-OH-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H4OH02248": "David Taylor (Ohio politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8337,6 +9339,9 @@
   },
   "H-OH-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H2OH03125": "Joyce Beatty"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8360,6 +9365,9 @@
   },
   "H-OH-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H6OH04082": "Jim Jordan"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8384,6 +9392,9 @@
   },
   "H-OH-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H8OH05036": "Bob Latta"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8412,6 +9423,9 @@
   },
   "H-OH-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H4OH06165": "Michael Rulli"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8446,6 +9460,10 @@
   },
   "H-OH-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H2OH16051": "Max Miller (politician)",
+    "H6OH07143": "Ed FitzGerald"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8482,6 +9500,9 @@
   },
   "H-OH-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H6OH08315": "Warren Davidson"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8505,6 +9526,12 @@
   },
   "H-OH-09-2026": {
    "ambiguous": [],
+   "article": {
+    "H2OH09031": "Marcy Kaptur",
+    "H4OH09169": "Derek Merrin",
+    "H6OH09131": "Josh Williams (politician)",
+    "H6OH09172": "Madison Sheahan"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8539,6 +9566,9 @@
   },
   "H-OH-10-2026": {
    "ambiguous": [],
+   "article": {
+    "H2OH03067": "Mike Turner"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8572,6 +9602,9 @@
   },
   "H-OH-11-2026": {
    "ambiguous": [],
+   "article": {
+    "H2OH11169": "Shontel Brown"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8601,6 +9634,9 @@
   },
   "H-OH-12-2026": {
    "ambiguous": [],
+   "article": {
+    "H8OH12180": "Troy Balderson"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8626,6 +9662,9 @@
   },
   "H-OH-13-2026": {
    "ambiguous": [],
+   "article": {
+    "H2OH13264": "Emilia Sykes"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8654,6 +9693,9 @@
   },
   "H-OH-14-2026": {
    "ambiguous": [],
+   "article": {
+    "H2OH14064": "David Joyce (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8680,6 +9722,10 @@
   },
   "H-OH-15-2026": {
    "ambiguous": [],
+   "article": {
+    "H2OH15228": "Mike Carey (politician)",
+    "H4OH15083": "Adam Miller (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8706,6 +9752,10 @@
   },
   "H-OK-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H6OK01235": "Mark Tedford",
+    "H6OK01250": "Kim David"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8744,6 +9794,9 @@
   },
   "H-OK-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H2OK02315": "Josh Brecheen"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8770,6 +9823,9 @@
   },
   "H-OK-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H4OK06056": "Frank Lucas (Oklahoma politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8794,6 +9850,9 @@
   },
   "H-OK-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H2OK04055": "Tom Cole"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8820,6 +9879,9 @@
   },
   "H-OK-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H0OK05205": "Stephanie Bice"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8846,6 +9908,9 @@
   },
   "H-OR-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H2OR01133": "Suzanne Bonamici"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8870,6 +9935,10 @@
   },
   "H-OR-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H0OR02127": "Cliff Bentz",
+    "H6OR02322": "Chris Beck (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8905,6 +9974,9 @@
   },
   "H-OR-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H4OR03192": "Maxine Dexter"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8929,6 +10001,9 @@
   },
   "H-OR-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H2OR04095": "Val Hoyle"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8957,6 +10032,9 @@
   },
   "H-OR-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H4OR05304": "Janelle Bynum"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -8984,6 +10062,9 @@
   },
   "H-OR-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H2OR06066": "Andrea Salinas"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9005,6 +10086,9 @@
   },
   "H-PA-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H6PA08277": "Brian Fitzpatrick (American politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9028,6 +10112,9 @@
   },
   "H-PA-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H4PA13199": "Brendan Boyle"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9049,6 +10136,11 @@
   },
   "H-PA-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H6PA03195": "Sharif Street",
+    "H6PA03203": "Chris Rabb",
+    "H6PA03245": "Ala Stanford"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9075,6 +10167,9 @@
   },
   "H-PA-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H8PA04116": "Madeleine Dean"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9096,6 +10191,9 @@
   },
   "H-PA-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H8PA07200": "Mary Gay Scanlon"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9117,6 +10215,9 @@
   },
   "H-PA-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H8PA06087": "Chrissy Houlahan"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9138,6 +10239,10 @@
   },
   "H-PA-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H6PA07162": "Ryan Crosswell",
+    "H8PA15195": "Ryan Mackenzie"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9165,6 +10270,10 @@
   },
   "H-PA-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H4PA08124": "Rob Bresnahan",
+    "H6PA08293": "Paige Cognetti"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9186,6 +10295,9 @@
   },
   "H-PA-09-2026": {
    "ambiguous": [],
+   "article": {
+    "H8PA10147": "Dan Meuser"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9207,6 +10319,10 @@
   },
   "H-PA-10-2026": {
    "ambiguous": [],
+   "article": {
+    "H2PA04135": "Scott Perry",
+    "H4PA10104": "Janelle Stelson"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9230,6 +10346,9 @@
   },
   "H-PA-11-2026": {
    "ambiguous": [],
+   "article": {
+    "H6PA16320": "Lloyd Smucker"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9251,6 +10370,9 @@
   },
   "H-PA-12-2026": {
    "ambiguous": [],
+   "article": {
+    "H2PA18200": "Summer Lee"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9274,6 +10396,9 @@
   },
   "H-PA-13-2026": {
    "ambiguous": [],
+   "article": {
+    "H8PA13125": "John Joyce (American politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9295,6 +10420,9 @@
   },
   "H-PA-14-2026": {
    "ambiguous": [],
+   "article": {
+    "H8PA18199": "Guy Reschenthaler"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9316,6 +10444,9 @@
   },
   "H-PA-15-2026": {
    "ambiguous": [],
+   "article": {
+    "H8PA05071": "Glenn Thompson (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9337,6 +10468,9 @@
   },
   "H-PA-16-2026": {
    "ambiguous": [],
+   "article": {
+    "H0PA03271": "Mike Kelly (Pennsylvania politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9358,6 +10492,9 @@
   },
   "H-PA-17-2026": {
    "ambiguous": [],
+   "article": {
+    "H2PA17103": "Chris Deluzio"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9381,6 +10518,9 @@
   },
   "H-RI-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H4RI01265": "Gabe Amo"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -9402,6 +10542,9 @@
   },
   "H-RI-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H2RI02184": "Seth Magaziner"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -9425,6 +10568,11 @@
   },
   "H-SC-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H6SC01136": "Ben Frasier",
+    "H6SC01250": "Mark Smith (South Carolina politician)",
+    "H6SC01359": "Nancy Lacore"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9478,6 +10626,9 @@
   },
   "H-SC-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H2SC02059": "Joe Wilson"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9511,6 +10662,9 @@
   },
   "H-SC-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H4SC01313": "Sheri Biggs"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9533,6 +10687,9 @@
   },
   "H-SC-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H8SC04250": "William Timmons"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9557,6 +10714,9 @@
   },
   "H-SC-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H6SC05202": "Wes Climer"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9579,6 +10739,9 @@
   },
   "H-SC-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H2SC02042": "Jim Clyburn"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9603,6 +10766,9 @@
   },
   "H-SC-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H2SC07280": "Russell Fry"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -9621,6 +10787,9 @@
   },
   "H-SD-00-2026": {
    "ambiguous": [],
+   "article": {
+    "H6SD01109": "Marty Jackley"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9645,6 +10814,9 @@
   },
   "H-TN-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H0TN01118": "Diana Harshbarger"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -9669,6 +10841,9 @@
   },
   "H-TN-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H8TN02119": "Tim Burchett"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -9690,6 +10865,9 @@
   },
   "H-TN-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H0TN03254": "Chuck Fleischmann"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -9713,6 +10891,9 @@
   },
   "H-TN-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H0TN04195": "Scott DesJarlais"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -9747,6 +10928,11 @@
   },
   "H-TN-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H2TN05446": "Andy Ogles",
+    "H6TN05397": "Chaz Molder",
+    "H6TN05405": "Charlie Hatcher"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -9778,6 +10964,9 @@
   },
   "H-TN-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H6TN06213": "Johnny Garrett (politician)"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -9811,6 +11000,10 @@
   },
   "H-TN-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H6TN07161": "Matt Van Epps",
+    "H6TN07229": "Vincent B. Dixie"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -9838,6 +11031,9 @@
   },
   "H-TN-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H2TN07103": "David Kustoff"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -9865,6 +11061,12 @@
   },
   "H-TN-09-2026": {
    "ambiguous": [],
+   "article": {
+    "H6TN09449": "Justin J. Pearson",
+    "H6TN09464": "Brent Taylor (Tennessee politician)",
+    "H6TN09472": "Todd Warner",
+    "H6TN09498": "London Lamar"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -9875,6 +11077,7 @@
    "page": "2026 United States House of Representatives elections in Tennessee",
    "party": {
     "H0TN09061": "republican",
+    "H6TN05355": "democratic",
     "H6TN09449": "democratic",
     "H6TN09464": "republican",
     "H6TN09472": "republican",
@@ -9883,6 +11086,7 @@
    },
    "status": {
     "H0TN09061": "eliminated",
+    "H6TN05355": "eliminated",
     "H6TN09449": "nominee",
     "H6TN09464": "nominee",
     "H6TN09472": "eliminated",
@@ -9890,13 +11094,15 @@
     "H6TN09498": "eliminated"
    },
    "unmatched": {
-    "Jim Torino": "eliminated",
     "M. LaTroy Alexandria-Williams": "eliminated"
    },
    "unsure": []
   },
   "H-TX-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H2TX01112": "Nathaniel Moran"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9925,6 +11131,10 @@
   },
   "H-TX-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H6TX08175": "Steve Toth",
+    "H8TX02166": "Dan Crenshaw"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9952,6 +11162,9 @@
   },
   "H-TX-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H2TX00064": "Keith Self"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -9975,6 +11188,9 @@
   },
   "H-TX-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H0TX04219": "Pat Fallon"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10000,6 +11216,9 @@
   },
   "H-TX-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H8TX05144": "Lance Gooden"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10027,6 +11246,9 @@
   },
   "H-TX-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H8TX06266": "Jake Ellzey"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10052,6 +11274,9 @@
   },
   "H-TX-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H8TX07140": "Lizzie Fletcher"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10081,6 +11306,7 @@
   },
   "H-TX-08-2026": {
    "ambiguous": [],
+   "article": {},
    "decided": {
     "general": true,
     "parties": [
@@ -10114,6 +11340,12 @@
   },
   "H-TX-09-2026": {
    "ambiguous": [],
+   "article": {
+    "H0TX09077": "Steve Stockman",
+    "H6TX09124": "Briscoe Cain",
+    "H6TX09140": "Alex Mealer",
+    "H6TX09207": "Terry Virts"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10159,6 +11391,7 @@
   },
   "H-TX-10-2026": {
    "ambiguous": [],
+   "article": {},
    "decided": {
     "general": true,
     "parties": [
@@ -10204,6 +11437,9 @@
   },
   "H-TX-11-2026": {
    "ambiguous": [],
+   "article": {
+    "H0TX11230": "August Pfluger"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10227,6 +11463,9 @@
   },
   "H-TX-12-2026": {
    "ambiguous": [],
+   "article": {
+    "H4TX12065": "Craig Goldman"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10250,6 +11489,9 @@
   },
   "H-TX-13-2026": {
    "ambiguous": [],
+   "article": {
+    "H0TX13228": "Ronny Jackson"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10273,6 +11515,9 @@
   },
   "H-TX-14-2026": {
    "ambiguous": [],
+   "article": {
+    "H2TX14149": "Randy Weber"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10302,6 +11547,10 @@
   },
   "H-TX-15-2026": {
    "ambiguous": [],
+   "article": {
+    "H0TX15124": "Monica De La Cruz",
+    "H6TX15246": "Bobby Pulido"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10325,6 +11574,9 @@
   },
   "H-TX-16-2026": {
    "ambiguous": [],
+   "article": {
+    "H8TX16109": "Veronica Escobar"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10353,6 +11605,9 @@
   },
   "H-TX-17-2026": {
    "ambiguous": [],
+   "article": {
+    "H2TX03126": "Pete Sessions"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10378,6 +11633,11 @@
   },
   "H-TX-18-2026": {
    "ambiguous": [],
+   "article": {
+    "H4TX09095": "Al Green (politician)",
+    "H4TX18138": "Amanda Edwards",
+    "H6TX18232": "Christian Menefee"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10409,6 +11669,7 @@
    "ambiguous": [
     "Donald May"
    ],
+   "article": {},
    "decided": {
     "general": true,
     "parties": [
@@ -10445,6 +11706,9 @@
   },
   "H-TX-20-2026": {
    "ambiguous": [],
+   "article": {
+    "H2TX35011": "Joaquin Castro"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10469,6 +11733,9 @@
   },
   "H-TX-21-2026": {
    "ambiguous": [],
+   "article": {
+    "H6TX21301": "Mark Teixeira"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10514,6 +11781,7 @@
   },
   "H-TX-22-2026": {
    "ambiguous": [],
+   "article": {},
    "decided": {
     "general": true,
     "parties": [
@@ -10544,6 +11812,10 @@
   },
   "H-TX-23-2026": {
    "ambiguous": [],
+   "article": {
+    "H4TX23120": "Brandon Herrera",
+    "H4TX28046": "Quico Canseco"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10577,6 +11849,9 @@
   },
   "H-TX-24-2026": {
    "ambiguous": [],
+   "article": {
+    "H0TX24209": "Beth Van Duyne"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10602,6 +11877,9 @@
   },
   "H-TX-25-2026": {
    "ambiguous": [],
+   "article": {
+    "H2TX33040": "Roger Williams (Texas politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10625,6 +11903,9 @@
   },
   "H-TX-26-2026": {
    "ambiguous": [],
+   "article": {
+    "H4TX26149": "Brandon Gill"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10650,6 +11931,9 @@
   },
   "H-TX-27-2026": {
    "ambiguous": [],
+   "article": {
+    "H8TX27049": "Michael Cloud"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10681,6 +11965,9 @@
   },
   "H-TX-28-2026": {
    "ambiguous": [],
+   "article": {
+    "H2TX23082": "Henry Cuellar"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10708,6 +11995,10 @@
   },
   "H-TX-29-2026": {
    "ambiguous": [],
+   "article": {
+    "H6TX18406": "Jarvis Johnson",
+    "H8TX29052": "Sylvia Garcia"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10733,6 +12024,11 @@
   },
   "H-TX-30-2026": {
    "ambiguous": [],
+   "article": {
+    "H0TX30073": "Barbara Mallory Caraway",
+    "H6TX30245": "Frederick Haynes III",
+    "H6TX30252": "Barbara Mallory Caraway"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10766,6 +12062,10 @@
   },
   "H-TX-31-2026": {
    "ambiguous": [],
+   "article": {
+    "H2TX31044": "John Carter (Texas politician)",
+    "H6TX31078": "Valentina Gomez"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10806,6 +12106,9 @@
   },
   "H-TX-32-2026": {
    "ambiguous": [],
+   "article": {
+    "H6TX32159": "Ryan Binkley"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10845,6 +12148,10 @@
   },
   "H-TX-33-2026": {
    "ambiguous": [],
+   "article": {
+    "H4TX32089": "Julie Johnson (politician)",
+    "H8TX32098": "Colin Allred"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10876,6 +12183,10 @@
   },
   "H-TX-34-2026": {
    "ambiguous": [],
+   "article": {
+    "H2TX34113": "Mayra Flores",
+    "H6TX15162": "Vicente Gonzalez (American politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10912,6 +12223,9 @@
   },
   "H-TX-35-2026": {
    "ambiguous": [],
+   "article": {
+    "H6TX35053": "John Lujan"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10956,6 +12270,9 @@
   },
   "H-TX-36-2026": {
    "ambiguous": [],
+   "article": {
+    "H6TX02079": "Brian Babin"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -10980,6 +12297,9 @@
   },
   "H-TX-37-2026": {
    "ambiguous": [],
+   "article": {
+    "H2TX35144": "Greg Casar"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11007,6 +12327,10 @@
   },
   "H-TX-38-2026": {
    "ambiguous": [],
+   "article": {
+    "H2TX18207": "Carmen María Montiel",
+    "H6TX38115": "Larry Rubin"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11049,6 +12373,10 @@
   },
   "H-UT-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H6UT01178": "Nate Blouin",
+    "H8UT04053": "Ben McAdams"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11075,6 +12403,10 @@
   },
   "H-UT-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H0UT01205": "Blake Moore",
+    "H6UT02523": "Karianne Lisonbee"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11097,6 +12429,10 @@
   },
   "H-UT-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H4UT02296": "Celeste Maloy",
+    "H6UT03208": "Phil Lyman"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11119,6 +12455,9 @@
   },
   "H-UT-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H4UT03260": "Mike Kennedy"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -11137,6 +12476,10 @@
   },
   "H-VA-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H6VA01299": "Shannon Taylor (attorney)",
+    "H8VA01147": "Rob Wittman"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11169,6 +12512,10 @@
   },
   "H-VA-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H2VA02064": "Jen Kiggans",
+    "H6VA02198": "Elaine Luria"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11199,6 +12546,9 @@
   },
   "H-VA-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H6VA01117": "Bobby Scott (politician)"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -11221,6 +12571,9 @@
   },
   "H-VA-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H4VA04066": "Jennifer McClellan"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -11241,6 +12594,10 @@
   },
   "H-VA-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H0VA07133": "John McGuire (Virginia politician)",
+    "H6VA05217": "Tom Perriello"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11269,6 +12626,10 @@
   },
   "H-VA-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H6VA06173": "Beth Macy",
+    "H8VA06104": "Ben Cline"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -11287,6 +12648,9 @@
   },
   "H-VA-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H4VA07234": "Eugene Vindman"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11316,6 +12680,9 @@
   },
   "H-VA-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H4VA08224": "Don Beyer"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11348,6 +12715,9 @@
   },
   "H-VA-09-2026": {
    "ambiguous": [],
+   "article": {
+    "H0VA09055": "Morgan Griffith"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11372,6 +12742,9 @@
   },
   "H-VA-10-2026": {
    "ambiguous": [],
+   "article": {
+    "H4VA10279": "Suhas Subramanyam"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11400,6 +12773,9 @@
   },
   "H-VA-11-2026": {
    "ambiguous": [],
+   "article": {
+    "H6VA11066": "James Walkinshaw"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -11420,6 +12796,9 @@
   },
   "H-VT-00-2026": {
    "ambiguous": [],
+   "article": {
+    "H2VT01076": "Becca Balint"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11443,6 +12822,9 @@
   },
   "H-WA-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H0WA08046": "Suzan DelBene"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11473,6 +12855,9 @@
   },
   "H-WA-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H0WA02080": "Rick Larsen"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11497,6 +12882,10 @@
   },
   "H-WA-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H2WA03217": "Marie Gluesenkamp Perez",
+    "H6WA03275": "John Braun"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11528,6 +12917,9 @@
   },
   "H-WA-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H6WA04224": "Matt Boehnke"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11564,6 +12956,10 @@
   },
   "H-WA-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H4WA05168": "Carmela Conroy",
+    "H4WA05234": "Michael Baumgartner"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11606,6 +13002,9 @@
   },
   "H-WA-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H4WA06117": "Emily Randall"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11629,6 +13028,9 @@
   },
   "H-WA-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H6WA07458": "Pramila Jayapal"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11651,6 +13053,9 @@
   },
   "H-WA-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H8WA08189": "Kim Schrier"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11679,6 +13084,10 @@
   },
   "H-WA-09-2026": {
    "ambiguous": [],
+   "article": {
+    "H6WA09025": "Adam Smith (Washington politician)",
+    "H6WA09082": "Kshama Sawant"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11705,6 +13114,9 @@
   },
   "H-WA-10-2026": {
    "ambiguous": [],
+   "article": {
+    "H0WA10034": "Marilyn Strickland"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11731,6 +13143,9 @@
   },
   "H-WI-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H8WI01156": "Bryan Steil"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -11758,6 +13173,9 @@
   },
   "H-WI-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H2WI02124": "Mark Pocan"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -11778,6 +13196,10 @@
   },
   "H-WI-03-2026": {
    "ambiguous": [],
+   "article": {
+    "H0WI03175": "Derrick Van Orden",
+    "H4WI03169": "Rebecca Cooke (politician)"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -11801,6 +13223,9 @@
   },
   "H-WI-04-2026": {
    "ambiguous": [],
+   "article": {
+    "H4WI04183": "Gwen Moore"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -11826,6 +13251,9 @@
   },
   "H-WI-05-2026": {
    "ambiguous": [],
+   "article": {
+    "H0WI05113": "Scott Fitzgerald (politician)"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -11847,6 +13275,9 @@
   },
   "H-WI-06-2026": {
    "ambiguous": [],
+   "article": {
+    "H4WI06048": "Glenn Grothman"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -11872,6 +13303,9 @@
   },
   "H-WI-07-2026": {
    "ambiguous": [],
+   "article": {
+    "H6WI07207": "Fred Clark (politician)"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -11904,6 +13338,9 @@
   },
   "H-WI-08-2026": {
    "ambiguous": [],
+   "article": {
+    "H4WI08119": "Tony Wied"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -11929,6 +13366,9 @@
   },
   "H-WV-01-2026": {
    "ambiguous": [],
+   "article": {
+    "H8WV03097": "Carol Miller (politician)"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11956,6 +13396,9 @@
   },
   "H-WV-02-2026": {
    "ambiguous": [],
+   "article": {
+    "H4WV02205": "Riley Moore"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -11981,6 +13424,13 @@
   },
   "H-WY-00-2026": {
    "ambiguous": [],
+   "article": {
+    "H6WY00217": "Chuck Gray (Wyoming politician)",
+    "H6WY00225": "Jillian Balow",
+    "H6WY00241": "Bo Biteman",
+    "H6WY01173": "Lisa F. Kinney",
+    "H6WY01207": "Keith Goodenough"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12019,6 +13469,11 @@
   },
   "S-AK-2026": {
    "ambiguous": [],
+   "article": {
+    "S4AK00214": "Dan Sullivan (U.S. senator)",
+    "S6AK00276": "Mary Peltola",
+    "S6AK00284": "Carol Hafner"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12058,6 +13513,12 @@
   },
   "S-AL-2026": {
    "ambiguous": [],
+   "article": {
+    "S6AL00435": "Kyle Sweetser",
+    "S6AL00450": "Steve Marshall",
+    "S6AL00476": "Barry Moore (American politician)",
+    "S6AL00484": "Morgan Murphy (food critic)"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12097,6 +13558,9 @@
   },
   "S-AR-2026": {
    "ambiguous": [],
+   "article": {
+    "S4AR00103": "Tom Cotton"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12122,6 +13586,11 @@
    "ambiguous": [
     "Bob Chew"
    ],
+   "article": {
+    "S0CO00575": "John Hickenlooper",
+    "S6CO00499": "Julie Gonzales",
+    "S6CO00507": "Mark Baisley"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -12154,6 +13623,10 @@
   },
   "S-FL-2026": {
    "ambiguous": [],
+   "article": {
+    "S6FL00640": "Ashley Moody",
+    "S6FL00855": "Alex Vindman"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -12186,6 +13659,11 @@
   },
   "S-GA-2026": {
    "ambiguous": [],
+   "article": {
+    "S6GA00390": "Mike Collins (politician)",
+    "S6GA00408": "Derek Dooley (American football)",
+    "S8GA00180": "Jon Ossoff"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -12214,6 +13692,12 @@
   },
   "S-IA-2026": {
    "ambiguous": [],
+   "article": {
+    "S6IA00249": "Jim Carlin (politician)",
+    "S6IA00272": "Zach Wahls",
+    "S6IA00298": "Josh Turek",
+    "S6IA00314": "Ashley Hinson"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -12241,6 +13725,10 @@
   },
   "S-ID-2026": {
    "ambiguous": [],
+   "article": {
+    "S6ID00146": "Todd Achilles",
+    "S8ID00092": "Jim Risch"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12275,6 +13763,11 @@
   },
   "S-IL-2026": {
    "ambiguous": [],
+   "article": {
+    "S6IL00458": "Juliana Stratton",
+    "S6IL00474": "Robin Kelly",
+    "S6IL00615": "Don Tracy"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12322,6 +13815,11 @@
   },
   "S-KS-2026": {
    "ambiguous": [],
+   "article": {
+    "S0KS00315": "Roger Marshall",
+    "S6KS00288": "Patrick Schmidt (politician)",
+    "S6KS00312": "Adam Hamilton (pastor)"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12366,6 +13864,14 @@
    "ambiguous": [
     "Michael James Faris"
    ],
+   "article": {
+    "S0KY00339": "Amy McGrath",
+    "S6KY00211": "Pamela Stevenson",
+    "S6KY00237": "Daniel Cameron (American politician)",
+    "S6KY00286": "Andy Barr",
+    "S6KY00369": "Dale Lewis Romans",
+    "S6KY00385": "Charles Booker (American politician)"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12412,6 +13918,11 @@
   },
   "S-LA-2026": {
    "ambiguous": [],
+   "article": {
+    "S4LA00107": "Bill Cassidy",
+    "S6LA00318": "John Fleming (Louisiana politician)",
+    "S6LA00664": "Julia Letlow"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12443,6 +13954,11 @@
   },
   "S-MA-2026": {
    "ambiguous": [],
+   "article": {
+    "S4MA00028": "Ed Markey",
+    "S6MA00296": "Seth Moulton",
+    "S6MA00304": "John Deaton"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12466,6 +13982,12 @@
   },
   "S-ME-2026": {
    "ambiguous": [],
+   "article": {
+    "S6ME00159": "Susan Collins",
+    "S6ME00373": "Graham Platner",
+    "S6ME00407": "Janet Mills",
+    "S6ME00464": "Troy Jackson"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -12497,6 +14019,12 @@
   },
   "S-MI-2026": {
    "ambiguous": [],
+   "article": {
+    "S4MI00595": "Mike Rogers (Michigan politician)",
+    "S6MI00392": "Mallory McMorrow",
+    "S6MI00418": "Abdul El-Sayed",
+    "S6MI00426": "Haley Stevens"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -12528,6 +14056,12 @@
   },
   "S-MN-2026": {
    "ambiguous": [],
+   "article": {
+    "S4MN00502": "Royce White",
+    "S6MN00440": "Peggy Flanagan",
+    "S6MN00499": "Angie Craig",
+    "S6MN00556": "Michele Tafoya"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12568,6 +14102,10 @@
   },
   "S-MS-2026": {
    "ambiguous": [],
+   "article": {
+    "S6MS00133": "Scott Colom",
+    "S8MS00261": "Cindy Hyde-Smith"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12597,6 +14135,11 @@
   },
   "S-MT-2026": {
    "ambiguous": [],
+   "article": {
+    "S6MT00238": "Reilly Neill",
+    "S6MT00287": "Seth Bodnar",
+    "S6MT00295": "Kurt Alme"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -12637,6 +14180,11 @@
   },
   "S-NC-2026": {
    "ambiguous": [],
+   "article": {
+    "S6NC00373": "Don Brown (author, born 1960)",
+    "S6NC00407": "Roy Cooper",
+    "S6NC00415": "Michael Whatley"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -12678,6 +14226,10 @@
   },
   "S-NE-2026": {
    "ambiguous": [],
+   "article": {
+    "S4NE00207": "Dan Osborn",
+    "S6NE00129": "Pete Ricketts"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12713,6 +14265,12 @@
   },
   "S-NH-2026": {
    "ambiguous": [],
+   "article": {
+    "S4NH00096": "Andy Martin",
+    "S6NH00141": "Chris Pappas (American politician)",
+    "S6NH00166": "Scott Brown (politician)",
+    "S6NH00208": "John E. Sununu"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12750,6 +14308,9 @@
   },
   "S-NJ-2026": {
    "ambiguous": [],
+   "article": {
+    "S4NJ00185": "Cory Booker"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12783,6 +14344,9 @@
   },
   "S-NM-2026": {
    "ambiguous": [],
+   "article": {
+    "S0NM00058": "Ben Ray Luján"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12806,6 +14370,10 @@
   },
   "S-OH-2026": {
    "ambiguous": [],
+   "article": {
+    "S6OH00163": "Sherrod Brown",
+    "S6OH00304": "Jon Husted"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -12834,6 +14402,11 @@
   },
   "S-OK-2026": {
    "ambiguous": [],
+   "article": {
+    "S6OK04247": "Kevin Hern",
+    "S6OK04270": "Ervin Yen",
+    "S6OK04288": "Ty England"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12873,6 +14446,11 @@
   },
   "S-OR-2026": {
    "ambiguous": [],
+   "article": {
+    "S4OR00156": "Jo Rae Perkins",
+    "S6OR05218": "David Brock Smith",
+    "S8OR00207": "Jeff Merkley"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12905,6 +14483,13 @@
   },
   "S-SC-2026": {
    "ambiguous": [],
+   "article": {
+    "S0SC00149": "Lindsey Graham",
+    "S6SC04239": "Annie Andrews (physician)",
+    "S6SC04403": "Russell Fry",
+    "S6SC04437": "Darline Graham",
+    "S6SC04445": "Ralph Norman"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -12958,6 +14543,9 @@
   },
   "S-SD-2026": {
    "ambiguous": [],
+   "article": {
+    "S4SD00049": "Mike Rounds"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -12980,6 +14568,10 @@
   },
   "S-TN-2026": {
    "ambiguous": [],
+   "article": {
+    "S0TN00169": "Bill Hagerty",
+    "S4TN00542": "Marquita Bradshaw"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -13009,6 +14601,13 @@
   },
   "S-TX-2026": {
    "ambiguous": [],
+   "article": {
+    "S2TX00106": "John Cornyn",
+    "S6TX00388": "Ken Paxton",
+    "S6TX00479": "James Talarico",
+    "S6TX00511": "Wesley Hunt",
+    "S6TX00552": "Jasmine Crockett"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -13049,6 +14648,10 @@
   },
   "S-VA-2026": {
    "ambiguous": [],
+   "article": {
+    "S6VA00093": "Mark Warner",
+    "S8VA00321": "Bert Mizusawa"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -13073,6 +14676,11 @@
   },
   "S-WV-2026": {
    "ambiguous": [],
+   "article": {
+    "S4WV00159": "Shelley Moore Capito",
+    "S6WV00162": "Tom Willis (politician)",
+    "S6WV00196": "Jeff Kessler"
+   },
    "decided": {
     "general": false,
     "parties": [
@@ -13110,6 +14718,10 @@
   },
   "S-WY-2026": {
    "ambiguous": [],
+   "article": {
+    "S6WY00209": "Harriet Hageman",
+    "S6WY00217": "James W. Byrd"
+   },
    "decided": {
     "general": false,
     "parties": [

@@ -250,11 +250,21 @@ def profile_key(profile):
     return f"person:{profile['name'].lower()}|{profile['state']}|{chamber}"
 
 
+_GENERATIONAL = {"jr", "sr", "ii", "iii", "iv", "v"}
+
+
 def surname_of(name):
-    """Last word of a name, accents folded, for matching article titles."""
+    """Last name word, accents folded, for matching article titles.
+
+    A generational suffix is skipped: "Briscoe Rowell Cain III" is about
+    "Briscoe Cain", and treating "III" as the surname rejected twelve
+    correct titles.
+    """
     import unicodedata
 
-    parts = [p for p in str(name).split() if p]
+    parts = [p for p in str(name).replace(".", "").split() if p]
+    while parts and parts[-1].lower() in _GENERATIONAL:
+        parts.pop()
     if not parts:
         return ""
     word = parts[-1]
@@ -281,7 +291,12 @@ def title_is_about(title, name):
 
     folded = unicodedata.normalize("NFD", str(title))
     clean = "".join(c for c in folded if unicodedata.category(c) != "Mn").lower()
-    return surname in clean
+    if surname in clean:
+        return True
+    # A double surname on the filing and one of them in the title:
+    # "Valentina Gomez Noriega" is the article "Valentina Gomez".
+    words = [w for w in str(name).replace(".", "").split() if w.lower() not in _GENERATIONAL]
+    return len(words) >= 3 and surname_of(" ".join(words[:-1])) in clean
 
 
 def load_cache(root="."):
@@ -326,7 +341,12 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
     # A silhouette says "we have no portrait", which is true. A stranger's
     # face on a candidate's profile is the exact failure rule 3 exists for,
     # and nothing on the page would look wrong.
-    profiles = [p for p in profiles if p.get("source") != "fec-field"]
+    # The one exception is a filing the state's election page links to an
+    # article: that link is an editor's assertion about this person on this
+    # ballot, the same kind of authority as the bioguide mapping. Those are
+    # resolved through the title alone - never guessed, never searched.
+    profiles = [p for p in profiles
+                if p.get("source") != "fec-field" or p.get("wikipedia")]
 
     todo = [p for p in profiles if refresh or profile_key(p) not in cache]
     todo = [p for p in todo if not cache.get(profile_key(p), {}).get("pinned")]
@@ -365,15 +385,17 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
 
     wanted = {}
     for profile in remaining:
-        title = titles_by_bioguide.get(profile["id"].upper())
+        title = titles_by_bioguide.get(profile["id"].upper()) or (
+            profile.get("wikipedia") if profile.get("source") == "fec-field" else None)
         if title:
             wanted[profile_key(profile)] = title
 
-    # --- Stage 3: guess the obvious article titles for everyone else.
+    # --- Stage 3: guess the obvious article titles for everyone else. Never
+    # for a filed candidate: their only route is the ballot's own link.
     guesses = {}
     for profile in remaining:
         key = profile_key(profile)
-        if key not in wanted:
+        if key not in wanted and profile.get("source") != "fec-field":
             guesses[key] = [profile["name"], f"{profile['name']} (politician)"]
 
     lookup = list(wanted.values()) + [t for v in guesses.values() for t in v]
@@ -390,8 +412,11 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
                 continue
             # The bioguide -> Wikipedia mapping is authoritative and its title
             # need not contain the surname (married names, pen names). A bare
-            # guess is not, and a redirect can land it on a topic page.
-            if not from_mapping and not title_is_about(found[0], profile["name"]):
+            # guess is not, and a redirect can land it on a topic page. A
+            # ballot page's link is trusted for the title but still checked
+            # after redirects, the way McGinnis's protest photo taught.
+            trusted = from_mapping and profile.get("source") != "fec-field"
+            if not trusted and not title_is_about(found[0], profile["name"]):
                 log(f"    [skip] {profile['name']} -> {found[0]!r} (not about them)")
                 continue
             resolved[key] = {
@@ -402,7 +427,8 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
         else:
             still.append(profile)
 
-    # --- Stage 4: search Wikipedia for whoever is left.
+    # --- Stage 4: search Wikipedia for whoever is left - roster people only.
+    still = [p for p in still if p.get("source") != "fec-field"]
     if still:
         log(f"    searching wikipedia for {len(still)} remaining ...")
         found_titles = {}

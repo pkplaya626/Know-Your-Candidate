@@ -35,6 +35,23 @@ SNAPSHOT_FILE = "congress_snapshot.json"
 SOURCE_URL = (
     "https://unitedstates.github.io/congress-legislators/legislators-current.json"
 )
+# The same project's companion files: verified social-media accounts, and
+# committee rosters with each member's rank and title.
+SOCIAL_URL = (
+    "https://unitedstates.github.io/congress-legislators/legislators-social-media.json"
+)
+MEMBERSHIP_URL = (
+    "https://unitedstates.github.io/congress-legislators/committee-membership-current.json"
+)
+COMMITTEES_URL = (
+    "https://unitedstates.github.io/congress-legislators/committees-current.json"
+)
+COMMITTEES_FILE = os.path.join("candidate_profiles_site", "data", "committees.json")
+
+# The handles the page links. Ids (twitter_id, youtube_id) are kept for the
+# YouTube channel URL, which needs one; everything else links by handle.
+SOCIAL_KEYS = ("twitter", "facebook", "instagram", "youtube", "youtube_id",
+               "bluesky", "mastodon")
 
 _UA = {"User-Agent": "know-your-candidate/2.1 (open-source civic data project)"}
 _TIMEOUT = 60
@@ -71,6 +88,32 @@ def fetch(url=SOURCE_URL, timeout=_TIMEOUT):
     return rows
 
 
+def fetch_json(url, timeout=_TIMEOUT):
+    """Download one of the companion datasets; raises :class:`LegislatorsError`."""
+    request = urllib.request.Request(url, headers=_UA)
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            raw = response.read()
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError) as exc:
+        raise LegislatorsError(f"Could not download {url}: {exc}") from exc
+    try:
+        return json.loads(raw.decode("utf-8"))
+    except ValueError as exc:
+        raise LegislatorsError(f"{url} did not return JSON: {exc}") from exc
+
+
+def social_by_bioguide(rows):
+    """``{bioguide: {twitter, facebook, ...}}`` from the social-media file."""
+    out = {}
+    for entry in rows or []:
+        bioguide = ((entry.get("id") or {}).get("bioguide") or "").upper()
+        social = entry.get("social") or {}
+        kept = {k: social[k] for k in SOCIAL_KEYS if social.get(k)}
+        if bioguide and kept:
+            out[bioguide] = kept
+    return out
+
+
 def full_name(name):
     """Display name, tolerating entries with no ``official_full``."""
     if not isinstance(name, dict):
@@ -98,13 +141,16 @@ def _fec_ids(entry, chamber):
     return matching or list(ids)
 
 
-def trim(entry):
+def trim(entry, social=None):
     """Keep only the fields the pipeline actually reads.
 
     The full dataset is 1.4 MB of contact details and historical terms. The
     trimmed snapshot is small enough to commit and read in review, which is
     the point: a change in the membership of Congress should be a diff
-    somebody can look at.
+    somebody can look at. The current term's contact details and the
+    reference ids are kept because a voter's next question after "who
+    represents me" is "how do I reach them" - and those change rarely, so
+    the diff stays about membership.
     """
     terms = entry.get("terms") or []
     if not terms:
@@ -116,7 +162,7 @@ def trim(entry):
         return None
 
     chamber = "Senate" if term.get("type") == "sen" else "House"
-    return {
+    person = {
         "bioguide": bioguide.upper(),
         "name": full_name(entry.get("name", {})),
         "last": (entry.get("name") or {}).get("last", ""),
@@ -130,12 +176,32 @@ def trim(entry):
         "birthday": (entry.get("bio") or {}).get("birthday"),
         "wikipedia": ids.get("wikipedia"),
         "fec": _fec_ids(entry, chamber),
+        # How to reach the office, as the member's own term record states it.
+        "url": term.get("url"),
+        "phone": term.get("phone"),
+        "office": term.get("office"),
+        "contactForm": term.get("contact_form"),
+        # Reference ids, so the page can link the record elsewhere without
+        # guessing a URL from a name.
+        "govtrack": ids.get("govtrack"),
+        "opensecrets": ids.get("opensecrets"),
+        "votesmart": ids.get("votesmart"),
+        "ballotpedia": ids.get("ballotpedia"),
     }
+    handles = (social or {}).get(person["bioguide"])
+    if handles:
+        person["social"] = handles
+    return person
 
 
-def build_snapshot(rows, url=SOURCE_URL, fetched=None):
-    """Assemble the committed snapshot from raw dataset rows."""
-    people = [t for t in (trim(e) for e in rows) if t]
+def build_snapshot(rows, url=SOURCE_URL, fetched=None, social=None):
+    """Assemble the committed snapshot from raw dataset rows.
+
+    *social* is the parsed social-media file, or ``None`` when it could not
+    be fetched - the snapshot is still valid without it.
+    """
+    handles = social_by_bioguide(social) if social else {}
+    people = [t for t in (trim(e, handles) for e in rows) if t]
     if not people:
         raise LegislatorsError("no usable legislators in the dataset")
     people.sort(key=lambda p: p["bioguide"])
@@ -147,6 +213,107 @@ def build_snapshot(rows, url=SOURCE_URL, fetched=None):
         "count": len(people),
         "legislators": people,
     }
+
+
+# ---------------------------------------------------------------- committees
+
+def build_committees(membership, committees, fetched=None):
+    """``{"committees": {code: {...}}, "members": {bioguide: [assignments]}}``.
+
+    *membership* is ``committee-membership-current`` (``{code: [members]}``,
+    where a subcommittee code is its parent's code plus a two-digit suffix),
+    *committees* is ``committees-current`` (a list with nested
+    ``subcommittees``). The roster CSV carries a hand-typed committee column;
+    this is the authoritative one, with rank and title.
+    """
+    names = {}
+    for committee in committees or []:
+        code = committee.get("thomas_id")
+        if not code:
+            continue
+        names[code] = {
+            "name": committee.get("name"),
+            "chamber": committee.get("type"),
+            "url": committee.get("url"),
+        }
+        for sub in committee.get("subcommittees") or []:
+            sub_code = f"{code}{sub.get('thomas_id')}"
+            names[sub_code] = {
+                "name": sub.get("name"),
+                "chamber": committee.get("type"),
+                "parent": code,
+            }
+
+    members = {}
+    for code, roster in (membership or {}).items():
+        for seat in roster or []:
+            bioguide = (seat.get("bioguide") or "").upper()
+            if not bioguide:
+                continue
+            members.setdefault(bioguide, []).append({
+                "code": code,
+                "rank": seat.get("rank"),
+                "party": seat.get("party"),
+                "title": seat.get("title"),
+            })
+    for roster in members.values():
+        # Full committees first, then by rank, so the page can print them in
+        # the order the member's own biography would.
+        roster.sort(key=lambda a: (a["code"] in names and "parent" in names[a["code"]],
+                                   a["code"], a["rank"] or 999))
+
+    return {
+        "source": MEMBERSHIP_URL,
+        "fetched": fetched or datetime.datetime.now(
+            datetime.timezone.utc
+        ).isoformat(timespec="seconds"),
+        "committees": names,
+        "members": members,
+    }
+
+
+def save_committees(data, root="."):
+    path = os.path.join(root, COMMITTEES_FILE)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = f"{path}.tmp"
+    with open(tmp, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(data, handle, indent=1, ensure_ascii=False, sort_keys=True)
+        handle.write("\n")
+    os.replace(tmp, path)
+    return path
+
+
+def load_committees(root="."):
+    path = os.path.join(root, COMMITTEES_FILE)
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, "r", encoding="utf-8") as handle:
+            data = json.load(handle)
+    except (ValueError, OSError):
+        return None
+    return data if data.get("members") else None
+
+
+def assignments(committees, bioguide):
+    """A member's committees as ``[{name, title, rank, sub, parent, url}]``."""
+    if not committees:
+        return []
+    names = committees.get("committees") or {}
+    out = []
+    for seat in (committees.get("members") or {}).get((bioguide or "").upper(), []):
+        info = names.get(seat["code"]) or {}
+        parent = names.get(info.get("parent") or "", {})
+        out.append({
+            "code": seat["code"],
+            "name": info.get("name") or seat["code"],
+            "title": seat.get("title"),
+            "rank": seat.get("rank"),
+            "sub": bool(info.get("parent")),
+            "parent": parent.get("name"),
+            "url": info.get("url") or parent.get("url"),
+        })
+    return out
 
 
 # --------------------------------------------------------------------- store

@@ -235,6 +235,23 @@ _PLACEHOLDER = re.compile(
     r"scattering|blank|no candidate|nominee)\b", re.I)
 
 
+def link_target(raw):
+    """The article a ballot line links to, or ``None``.
+
+    ``[[Al Green (politician)|Al Green]]`` -> ``Al Green (politician)``. The
+    state's election page linking a candidate to an article is the same kind
+    of authority as the bioguide -> Wikipedia mapping for members: an editor
+    asserted that this article is about this person on this ballot. It is
+    what lets a filed candidate carry a portrait (rule 24 forbids guessing
+    one) and a link to their article.
+    """
+    for match in _LINK.finditer(raw or ""):
+        target = match.group(1).split("#")[0].strip()
+        if target and ":" not in target:   # skip File:, Category:, wikt: ...
+            return target[0].upper() + target[1:]
+    return None
+
+
 def clean_name(raw):
     """``[[Al Green (politician)|Al Green]] (incumbent)`` -> ``Al Green``."""
     text = _LINK.sub(lambda m: m.group(2) or m.group(1), raw or "")
@@ -271,6 +288,7 @@ def parse_boxes(text):
                 # "Democratic Party (United States)", "[[Independent
                 # politician|Independent]]" - the ballot's word on party.
                 "party": clean_name(fields.get("party", "")) or None,
+                "article": link_target(raw),
             })
         if rows:
             boxes.append((title, rows))
@@ -325,7 +343,7 @@ def infobox_nominees(text):
         number = re.sub(r"\D", "", key)
         party = clean_name(fields.get(f"party{number}", "")) or None
         rows.append({"name": name, "won": False, "withdrawn": False,
-                     "votes": None, "party": party})
+                     "votes": None, "party": party, "article": link_target(value)})
     return rows
 
 
@@ -503,6 +521,16 @@ def _resolve_tables(primaries, runoffs, generals, has_runoff):
             else:
                 status[row["name"]] = NOMINEE
     return status
+
+
+def ballot_articles(boxes):
+    """``{name: article title}`` for every ballot line that links one."""
+    articles = {}
+    for _, rows in _canonical(boxes):
+        for row in rows:
+            if row.get("article"):
+                articles.setdefault(row["name"], row["article"])
+    return articles
 
 
 def ballot_parties(boxes):
@@ -846,17 +874,22 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         if not outcome:
             continue
         matched, ambiguous = match_names(list(outcome), rows, (aliases or {}).get(rid))
-        status, party = {}, {}
+        status, party, article = {}, {}, {}
         listed = ballot_parties(boxes)
+        linked = ballot_articles(boxes)
         for name, cids in matched.items():
             for cid in cids:
                 status[cid] = outcome[name]
                 if listed.get(name):
                     party[cid] = listed[name]
+                if linked.get(name):
+                    article[cid] = linked[name]
         races[rid] = {
             "page": title,
             "status": status,
             "party": party,
+            # The article the ballot line links to, per filing.
+            "article": article,
             # Ids a Wikipedia name fitted but could not be told apart. No
             # status, and no inference from their absence either.
             "unsure": match_names.unsure,
@@ -928,12 +961,13 @@ def apply_cache(profiles, cache):
     """
     if not cache:
         return 0
-    by_id, party_of, unsure = {}, {}, set()
+    by_id, party_of, article_of, unsure = {}, {}, {}, set()
     races = cache.get("races", {})
     for rid, race in races.items():
         for cid, status in race.get("status", {}).items():
             by_id[cid] = (rid, status)
         party_of.update(race.get("party") or {})
+        article_of.update(race.get("article") or {})
         unsure.update(race.get("unsure") or [])
     from .candidates import race_id
     from .races import race_id as seat_id, seat_label
@@ -947,6 +981,11 @@ def apply_cache(profiles, cache):
             rid, status = by_id[candidate_id]
             profile["raceStatus"] = status
             profile["raceStatusRace"] = rid
+            if candidate_id in article_of and not profile.get("wikipedia"):
+                # A member's title comes from the bioguide mapping; for a
+                # filed candidate the ballot's own link is the authority.
+                profile["wikipedia"] = article_of[candidate_id]
+                profile["wikipediaVia"] = "election-page"
             if candidate_id in party_of:
                 profile["ballotParty"] = party_of[candidate_id]
                 # The FEC record's party is what the person typed when they

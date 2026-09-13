@@ -84,6 +84,10 @@
                 <svg class="icon" aria-hidden="true"><use href="#i-map"/></svg>
                 Partisan map
             </a>
+            <a class="nav-link" href="states/index.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
+                States &amp; territories
+            </a>
         </nav>
 
         <div class="sidebar-section">
@@ -152,6 +156,7 @@
                 <span class="badge badge-neutral" id="panelCounts"></span>
             </div>
             <p class="detail-sub" id="panelMode">No delegation selected</p>
+            <a class="sidebar-link" id="panelStateLink" href="states/index.html" hidden></a>
         </div>
         <div class="delegation scroll-y" id="delegation" aria-live="polite">
             <div class="empty-state">
@@ -165,6 +170,7 @@
 
 <script src="data/profiles.js"></script>
 <script src="data/geo.js"></script>
+<script src="assets/kyc-cards.js"></script>
 <script src="assets/kyc-profile.js"></script>
 <script src="assets/kyc-map.js"></script>
 </body>

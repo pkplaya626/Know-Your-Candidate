@@ -63,8 +63,19 @@ class TestDisplayName(unittest.TestCase):
     def test_particles_stay_lowercase_inside_a_name(self):
         self.check("VAN DER BERG, PIETER", "Pieter van der Berg")
 
-    def test_professional_suffixes(self):
-        self.check("SMITH, JANE MD", "Jane Smith M.D.")
+    def test_credentials_and_titles_are_dropped_wherever_they_sit(self):
+        # Treasurers type them into the given-name field, in any position:
+        # the field held "Rudolph Dr. Moise", "M.D. Jd Razack Nizam" and
+        # "Joseph Dr. Joe Ph.d. Arminio" before this.
+        self.check("SMITH, JANE MD", "Jane Smith")
+        self.check("MOISE, RUDOLPH DR.", "Rudolph Moise")
+        self.check("RAZACK, MD JD, NIZAM", "Nizam Razack")
+        self.check("ARMINIO, JOSEPH DR. JOE PH.D.", "Joseph Joe Arminio")
+        self.check("GOOD, ROBERT G. HON.", "Robert G. Good")
+        # A generational suffix is part of the name and stays.
+        self.check("DAVIS, PAUL R DR. JR.", "Paul R Davis Jr.")
+        # A name that is nothing but titles is not rendered down to nothing.
+        self.check("DR. WHO", "Who")
 
     def test_empty_and_single_token(self):
         self.check("", "")

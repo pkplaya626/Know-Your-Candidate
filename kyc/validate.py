@@ -122,9 +122,14 @@ def check_fields(profiles):
                             f"{len(no_district)} House profiles have no district number",
                             sorted(no_district)[:15]))
 
+    # A filed candidate the ballot page does not link to an article has no
+    # portrait by design (rule 24), so they are not a finding. A member, a
+    # curated challenger, or a filer with an article title and still no
+    # portrait is.
     only_placeholder = [
         p["name"] for p in profiles
         if all(u == PLACEHOLDER for u in p["photos"])
+        and (p.get("source") != "fec-field" or p.get("wikipedia"))
     ]
     if only_placeholder:
         issues.append(Issue("warn", "no-photo-sources",

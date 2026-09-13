@@ -273,6 +273,8 @@
     });
   }
 
+  /* The panel's rows are narrow, so the shared badges' labels are shortened
+   * here; the statuses themselves are the shared module's. */
   var RACE_BADGE = {
     nominee: "badge-money|Nominee", eliminated: "badge-danger|Lost primary",
     withdrawn: "badge-neutral|Withdrew", unlisted: "badge-neutral|Not on ballot",
@@ -288,7 +290,7 @@
     var race = RACE_BADGE[item.raceStatus];
     if (race) {
       var bits = race.split("|");
-      if (!item.isCandidate && item.raceStatus === "nominee") bits[1] = "Renominated";
+      if (!item.isCandidate && !item.contestLabel && item.raceStatus === "nominee") bits[1] = "Renominated";
       if (!item.isCandidate && item.raceStatus === "unlisted") bits = ["badge-danger", "Not on ballot"];
       return '<span class="badge ' + bits[0] + '">' + bits[1] + "</span>";
     }
@@ -331,6 +333,12 @@
       ((geo.territories || []).filter(function (t) { return t.code === code; })[0] || {}).name ||
       code;
     doc.getElementById("panelMode").textContent = MODE_TITLE[mode];
+    var pageLink = doc.getElementById("panelStateLink");
+    if (pageLink) {
+      pageLink.hidden = false;
+      pageLink.href = KYC.stateUrl(code);
+      pageLink.textContent = "Open the " + KYC.stateName(code) + " page \u203a";
+    }
 
     var group = mode === "house" ? counts.house : counts.senate;
     var pill = function (n, cls, label) {
@@ -356,7 +364,7 @@
         a.name.localeCompare(b.name)
       );
     };
-    var OFF = { eliminated: true, withdrawn: true, unlisted: true };
+    var OFF = KYC.cards.OFF_BALLOT;
     var seated = people.filter(function (x) { return !x.isCandidate; }).sort(order);
     var running = people.filter(function (x) {
       return x.isCandidate && !OFF[x.raceStatus];

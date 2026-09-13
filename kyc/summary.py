@@ -45,7 +45,24 @@ def _split(profiles):
     return counts
 
 
-def build(profiles, races=None):
+def committee_table(committees, profiles):
+    """``{code: {name, url, parent}}`` for every committee a profile sits on."""
+    names = (committees or {}).get("committees") or {}
+    used = {seat["code"] for p in profiles for seat in p.get("committeeList") or []}
+    table = {}
+    for code in sorted(used):
+        info = names.get(code) or {}
+        parent = names.get(info.get("parent") or "") or {}
+        entry = {"name": info.get("name") or code}
+        if info.get("url") or parent.get("url"):
+            entry["url"] = info.get("url") or parent.get("url")
+        if info.get("parent"):
+            entry["parent"] = info["parent"]
+        table[code] = entry
+    return table
+
+
+def build(profiles, races=None, committees=None):
     """Chamber balance and 2026 election headline figures."""
     members = [p for p in profiles if not p.get("isCandidate")]
 
@@ -96,4 +113,50 @@ def build(profiles, races=None):
             "contested": sum(1 for r in races if r.get("contested")),
             "open": sum(1 for r in races if r.get("openSeat")),
         }
+    summary["states"] = by_state(profiles, races)
+    if committees:
+        summary["committees"] = committee_table(committees, profiles)
     return summary
+
+
+def by_state(profiles, races=None):
+    """``{code: {...}}`` - the headline figures each state page opens with.
+
+    Names come from ``pages.STATE_NAMES`` so the page and the pipeline agree
+    on the spelling; everything else is counted from the same profiles the
+    page renders.
+    """
+    from .pages import state_name
+
+    out = {}
+    for p in profiles:
+        code = p.get("state")
+        if not code or code == "N/A":
+            continue
+        entry = out.setdefault(code, {
+            "name": state_name(code), "senators": 0, "house": 0, "delegates": 0,
+            "seatsUp": 0, "open": 0, "challengersOnBallot": 0, "challengersOut": 0,
+            "races": 0, "territory": code in TERRITORIES,
+        })
+        if p.get("isCandidate"):
+            if p.get("raceStatus") in ("eliminated", "withdrawn", "unlisted"):
+                entry["challengersOut"] += 1
+            else:
+                entry["challengersOnBallot"] += 1
+            continue
+        if "Senate" in p["chamber"]:
+            entry["senators"] += 1
+        elif code in TERRITORIES:
+            entry["delegates"] += 1
+        else:
+            entry["house"] += 1
+        if p.get("seatUp2026"):
+            entry["seatsUp"] += 1
+    for race in races or []:
+        entry = out.get(race.get("state"))
+        if entry is None:
+            continue
+        entry["races"] += 1
+        if race.get("openSeat"):
+            entry["open"] += 1
+    return out

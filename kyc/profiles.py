@@ -157,7 +157,39 @@ def _dedup_candidates(rows):
     return list(people.values())
 
 
-def _build_member(row, index, seats_up=None, term_ends=None):
+def _contact(person):
+    """Contact details and reference ids from the member's own term record.
+
+    Only fields the dataset holds are written (rule 28): an absent Twitter
+    handle is an absence, never an empty string the page has to guess at.
+    """
+    out = {}
+    for src, dst in (("url", "website"), ("phone", "phone"), ("office", "office"),
+                     ("contactForm", "contactForm"), ("wikipedia", "wikipedia")):
+        if person.get(src):
+            out[dst] = person[src]
+    refs = {k: person[k] for k in ("govtrack", "opensecrets", "votesmart", "ballotpedia")
+            if person.get(k)}
+    if refs:
+        out["refs"] = refs
+    if person.get("social"):
+        out["social"] = dict(person["social"])
+    return out
+
+
+def _committee_text(assignments):
+    """``"House Committee on Agriculture (Chair); ..."`` - the roster column's
+    shape, from the authoritative rosters, so every reader of the field keeps
+    working. Full committees only; subcommittees travel in ``committeeList``."""
+    parts = []
+    for seat in assignments:
+        if seat["sub"]:
+            continue
+        parts.append(f"{seat['name']} ({seat['title']})" if seat.get("title") else seat["name"])
+    return "; ".join(parts)
+
+
+def _build_member(row, index, seats_up=None, term_ends=None, person=None, assignments=None):
     name = clean_str(row.get("Name"), "")
     bioguide = row.get("Bioguide ID")
     profile_id = clean_str(bioguide, "") or f"CURR_{index}"
@@ -203,7 +235,7 @@ def _build_member(row, index, seats_up=None, term_ends=None):
                 row.get("Term Start")
             )
 
-    return {
+    profile = {
         "id": profile_id,
         "name": name,
         "chamber": chamber,
@@ -234,6 +266,21 @@ def _build_member(row, index, seats_up=None, term_ends=None):
         "net_worth": clean_str(row.get("Estimated Net Worth"), "N/A"),
         "photos": member_photos(name, bioguide),
     }
+    if person:
+        profile.update(_contact(person))
+    if assignments:
+        # The roster column was typed by hand and is what "No data" would
+        # replace; the committee rosters are maintained with each Congress
+        # and carry rank and title, so they win when present.
+        profile["committees"] = _committee_text(assignments) or profile["committees"]
+        # Codes and titles only; the names, URLs and parents travel once in
+        # the build metadata rather than 539 times in the profiles.
+        profile["committeeList"] = [
+            dict({"code": seat["code"]}, **({"title": seat["title"]} if seat.get("title") else {}))
+            for seat in assignments
+        ]
+        profile["committeesSource"] = "congress-legislators"
+    return profile
 
 
 def _build_candidate(row, index):
@@ -406,7 +453,7 @@ def _apply_filings(profiles, field, finance):
     return moved, reseated
 
 
-def build_profiles(data, snapshot=None, field=None, finance=None):
+def build_profiles(data, snapshot=None, field=None, finance=None, committees=None):
     """Build the unified profile list from loaded roster rows.
 
     *snapshot* is the authoritative ``congress-legislators`` extract from
@@ -423,6 +470,7 @@ def build_profiles(data, snapshot=None, field=None, finance=None):
     Returns ``(profiles, stats)``.
     """
     seats_up = term_ends = None
+    people = {}
     if snapshot:
         from . import legislators
 
@@ -432,6 +480,7 @@ def build_profiles(data, snapshot=None, field=None, finance=None):
             for person in snapshot.get("legislators", [])
             if (person.get("termEnd") or "")[:4].isdigit()
         }
+        people = legislators.by_bioguide(snapshot)
 
     members = _dedup_members(data["members"])
     candidates = _dedup_candidates(data["candidates"])
@@ -440,7 +489,13 @@ def build_profiles(data, snapshot=None, field=None, finance=None):
     for index, row in enumerate(members):
         if clean_str(row.get("Name"), "") in overrides.EXCLUDED_MEMBERS:
             continue
-        profiles.append(_build_member(row, index, seats_up, term_ends))
+        bioguide = clean_str(row.get("Bioguide ID"), "").upper()
+        seats = None
+        if committees and bioguide:
+            from . import legislators as legislators_mod
+            seats = legislators_mod.assignments(committees, bioguide)
+        profiles.append(_build_member(row, index, seats_up, term_ends,
+                                      person=people.get(bioguide), assignments=seats))
 
     member_count = len(profiles)
 
