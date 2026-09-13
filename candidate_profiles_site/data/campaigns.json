@@ -19,6 +19,16 @@
   "url": "https://www.meetrickcrawford.com",
   "website": "WWW.MEETRICKCRAWFORD.COM"
  },
+ "H0AZ01259": {
+  "committee_id": "C00461806",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-21",
+  "name": "GOSAR FOR CONGRESS",
+  "person": "Paul Gosar",
+  "url": "https://www.drpaulgosar.com",
+  "website": "WWW.DRPAULGOSAR.COM"
+ },
  "H0CA03078": {
   "committee_id": "C00461061",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -139,6 +149,16 @@
   "url": "https://carlosgimenezforcongress.com",
   "website": "HTTPS://CARLOSGIMENEZFORCONGRESS.COM"
  },
+ "H0GA05301": {
+  "committee_id": "C00752584",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "NIKEMA FOR CONGRESS, INC",
+  "person": "Nikema Williams",
+  "url": "https://nikemaforcongress.com",
+  "website": "NIKEMAFORCONGRESS.COM"
+ },
  "H0GA08099": {
   "committee_id": "C00482737",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -178,6 +198,26 @@
   "person": "John Cowan",
   "url": "https://cowanforcongress.com",
   "website": "COWANFORCONGRESS.COM"
+ },
+ "H0IL05096": {
+  "committee_id": "C00457556",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "QUIGLEY FOR CONGRESS",
+  "person": "Mike Quigley",
+  "url": "http://www.quigleyforcongress.com",
+  "website": "HTTP://WWW.QUIGLEYFORCONGRESS.COM"
+ },
+ "H0IL15129": {
+  "committee_id": "C00723916",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-09-03",
+  "name": "MARY MILLER FOR CONGRESS",
+  "person": "Mary Miller",
+  "url": "https://marymillerforcongress.com",
+  "website": "HTTPS://MARYMILLERFORCONGRESS.COM"
  },
  "H0IN01150": {
   "committee_id": "C00727529",
@@ -259,6 +299,16 @@
   "url": "https://www.mccollumforcongress.com",
   "website": "WWW.MCCOLLUMFORCONGRESS.COM"
  },
+ "H0MN07091": {
+  "committee_id": "C00717959",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-07",
+  "name": "FISCHBACH FOR CONGRESS",
+  "person": "Michelle Fischbach",
+  "url": "https://www.fischbachforcongress.com",
+  "website": "WWW.FISCHBACHFORCONGRESS.COM"
+ },
  "H0NC02125": {
   "committee_id": "C00729277",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -289,6 +339,26 @@
   "url": "https://www.garbarinoforny.com",
   "website": "WWW.GARBARINOFORNY.COM"
  },
+ "H0NY02267": {
+  "committee_id": "C00937490",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "MIKE LIPETRI FOR CONGRESS",
+  "person": "Mike Lipetri",
+  "url": null,
+  "website": null
+ },
+ "H0NY11078": {
+  "committee_id": "C00694778",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-05",
+  "name": "NICOLE FOR NEW YORK",
+  "person": "Nicole Malliotakis",
+  "url": "https://nicolemalliotakis.com",
+  "website": "NICOLEMALLIOTAKIS.COM"
+ },
  "H0OR02127": {
   "committee_id": "C00725465",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -298,6 +368,16 @@
   "person": "Cliff Bentz",
   "url": "https://www.cliffbentz.com",
   "website": "HTTPS://WWW.CLIFFBENTZ.COM"
+ },
+ "H0PA03271": {
+  "committee_id": "C00474189",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-28",
+  "name": "MIKE KELLY FOR CONGRESS",
+  "person": "Mike Kelly",
+  "url": "https://www.mikekellyforcongress.com",
+  "website": "WWW.MIKEKELLYFORCONGRESS.COM"
  },
  "H0TN01118": {
   "committee_id": "C00741090",
@@ -319,6 +399,16 @@
   "url": "https://www.chuckforcongress.com",
   "website": "WWW.CHUCKFORCONGRESS.COM"
  },
+ "H0TX04219": {
+  "committee_id": "C00750307",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-22",
+  "name": "FALLON FOR CONGRESS",
+  "person": "Patrick Fallon",
+  "url": "https://www.fallonforcongress.com",
+  "website": "WWW.FALLONFORCONGRESS.COM"
+ },
  "H0TX08145": {
   "committee_id": "C00721597",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -338,6 +428,16 @@
   "person": "August Pfluger",
   "url": "https://www.augustpfluger.com",
   "website": "WWW.AUGUSTPFLUGER.COM"
+ },
+ "H0TX15124": {
+  "committee_id": "C00765719",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-22",
+  "name": "MONICA FOR CONGRESS",
+  "person": "Mónica De La Cruz",
+  "url": "https://monicaforcongress.us",
+  "website": "MONICAFORCONGRESS.US"
  },
  "H0TX24209": {
   "committee_id": "C00714865",
@@ -398,6 +498,26 @@
   "person": "Derrick Van Orden",
   "url": "https://www.vanordenforcongress.com",
   "website": "WWW.VANORDENFORCONGRESS.COM"
+ },
+ "H2AK01083": {
+  "committee_id": "C00792341",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-15",
+  "name": "ALASKANS FOR NICK BEGICH",
+  "person": "Nicholas Begich",
+  "url": "https://alaskansfornickbegich.com",
+  "website": "ALASKANSFORNICKBEGICH.COM"
+ },
+ "H2AL03032": {
+  "committee_id": "C00367862",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "MIKE ROGERS FOR CONGRESS",
+  "person": "Mike Rogers",
+  "url": "https://www.mikerogersforcongress.com",
+  "website": "WWW.MIKEROGERSFORCONGRESS.COM"
  },
  "H2AL05102": {
   "committee_id": "C00774281",
@@ -479,6 +599,16 @@
   "url": null,
   "website": null
  },
+ "H2CA31125": {
+  "committee_id": "C00510461",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "PETE AGUILAR FOR CONGRESS",
+  "person": "Pete Aguilar",
+  "url": "http://www.peteaguilar.com",
+  "website": "HTTP://WWW.PETEAGUILAR.COM"
+ },
  "H2CA37023": {
   "committee_id": "C00257337",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -558,6 +688,16 @@
   "person": "Aaron Bean",
   "url": "https://www.aaronbean.com",
   "website": "WWW.AARONBEAN.COM"
+ },
+ "H2FL10259": {
+  "committee_id": "C00786822",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-16",
+  "name": "MAXWELL ALEJANDRO FROST FOR CONGRESS",
+  "person": "Maxwell Frost",
+  "url": "https://www.frostforcongress.com",
+  "website": "WWW.FROSTFORCONGRESS.COM"
  },
  "H2FL14053": {
   "committee_id": "C00494856",
@@ -679,6 +819,16 @@
   "url": "https://www.deliaforcongress.com/",
   "website": "HTTPS://WWW.DELIAFORCONGRESS.COM/"
  },
+ "H2IL06090": {
+  "committee_id": "C00844308",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-09",
+  "name": "CONFORTI FOR CONGRESS",
+  "person": "Niki Conforti",
+  "url": null,
+  "website": null
+ },
  "H2IL08203": {
   "committee_id": "C00911453",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -699,6 +849,16 @@
   "url": "http://www.schneiderforcongress.com",
   "website": "HTTP://WWW.SCHNEIDERFORCONGRESS.COM"
  },
+ "H2IL13153": {
+  "committee_id": "C00787812",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "NIKKI FOR CONGRESS",
+  "person": "Nicole (Nikki) Budzinski",
+  "url": "https://nikkiforcongress.com/",
+  "website": "HTTPS://NIKKIFORCONGRESS.COM/"
+ },
  "H2IL17147": {
   "committee_id": "C00793935",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -708,6 +868,16 @@
   "person": "Eric Sorensen",
   "url": "http://www.ericforillinois.com/",
   "website": "HTTP://WWW.ERICFORILLINOIS.COM/"
+ },
+ "H2KY03206": {
+  "committee_id": "C00791392",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "MORGAN MCGARVEY FOR CONGRESS",
+  "person": "Morgan McGarvey",
+  "url": "https://www.morganmcgarvey.com",
+  "website": "WWW.MORGANMCGARVEY.COM"
  },
  "H2MD04232": {
   "committee_id": "C00792283",
@@ -779,6 +949,16 @@
   "url": null,
   "website": null
  },
+ "H2MS04258": {
+  "committee_id": "C00776393",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-14",
+  "name": "COMMITTEE TO ELECT MIKE EZELL",
+  "person": "Mike Ezell",
+  "url": "https://mikeezell.ms",
+  "website": "MIKEEZELL.MS"
+ },
  "H2NC02287": {
   "committee_id": "C00795211",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -798,6 +978,26 @@
   "person": "David Rouzer",
   "url": "https://www.davidrouzer.com",
   "website": "WWW.DAVIDROUZER.COM"
+ },
+ "H2NC13243": {
+  "committee_id": "C00802298",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "THE PAT HARRIGAN COMMITTEE",
+  "person": "Pat Harrigan",
+  "url": "http://www.harriganforcongress.com/",
+  "website": "HTTP://WWW.HARRIGANFORCONGRESS.COM/"
+ },
+ "H2NE01118": {
+  "committee_id": "C00801241",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-31",
+  "name": "MIKE FLOOD FOR CONGRESS",
+  "person": "Mike Flood",
+  "url": null,
+  "website": null
  },
  "H2NH02260": {
   "committee_id": "C00800458",
@@ -829,6 +1029,16 @@
   "url": "https://www.mele4america.com",
   "website": "WWW.MELE4AMERICA.COM"
  },
+ "H2NM01144": {
+  "committee_id": "C00765099",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "MELANIE FOR NEW MEXICO",
+  "person": "Melanie Stansbury",
+  "url": "https://melaniefornm.com",
+  "website": "MELANIEFORNM.COM"
+ },
  "H2NM02191": {
   "committee_id": "C00789404",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -838,6 +1048,16 @@
   "person": "Gabriel (Gabe) Vasquez",
   "url": "https://gabeforcongress.com",
   "website": "HTTPS://GABEFORCONGRESS.COM"
+ },
+ "H2NY01190": {
+  "committee_id": "C00806018",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-18",
+  "name": "LALOTA FOR CONGRESS",
+  "person": "Nicolas LaLota",
+  "url": "https://nicklalota.com",
+  "website": "NICKLALOTA.COM"
  },
  "H2NY04244": {
   "committee_id": "C00840165",
@@ -869,6 +1089,26 @@
   "url": "https://hakeemjeffries.com",
   "website": "HAKEEMJEFFRIES.COM"
  },
+ "H2NY17162": {
+  "committee_id": "C00815415",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-21",
+  "name": "LAWLER FOR CONGRESS, INC.",
+  "person": "Michael Lawler",
+  "url": null,
+  "website": null
+ },
+ "H2NY23228": {
+  "committee_id": "C00817932",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-06",
+  "name": "LANGWORTHY FOR CONGRESS",
+  "person": "Nicholas Langworthy",
+  "url": "https://www.nicklangworthy.com",
+  "website": "WWW.NICKLANGWORTHY.COM"
+ },
  "H2OH01194": {
   "committee_id": "C00800276",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -878,6 +1118,16 @@
   "person": "Greg Landsman",
   "url": "https://landsmanforcongress.com/",
   "website": "HTTPS://LANDSMANFORCONGRESS.COM/"
+ },
+ "H2OH03067": {
+  "committee_id": "C00373001",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "CITIZENS FOR TURNER",
+  "person": "Michael Turner",
+  "url": null,
+  "website": null
  },
  "H2OH03125": {
   "committee_id": "C00507368",
@@ -918,6 +1168,26 @@
   "person": "David Joyce",
   "url": "https://www.joyceforcongress.com",
   "website": "WWW.JOYCEFORCONGRESS.COM"
+ },
+ "H2OH15228": {
+  "committee_id": "C00779603",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "CAREY FOR CONGRESS",
+  "person": "Mike Carey",
+  "url": "https://www.careyforcongress.com",
+  "website": "WWW.CAREYFORCONGRESS.COM"
+ },
+ "H2OH16051": {
+  "committee_id": "C00770818",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-14",
+  "name": "MAX MILLER FOR CONGRESS",
+  "person": "Max Miller",
+  "url": "https://www.votemaxmiller.com",
+  "website": "WWW.VOTEMAXMILLER.COM"
  },
  "H2OK02315": {
   "committee_id": "C00812974",
@@ -998,6 +1268,26 @@
   "person": "Keith Self",
   "url": "https://selfforcongress.com",
   "website": "SELFFORCONGRESS.COM"
+ },
+ "H2TX01112": {
+  "committee_id": "C00796086",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "NATHANIEL MORAN FOR CONGRESS",
+  "person": "Nathaniel Moran",
+  "url": "https://nathanielmoran.com",
+  "website": "NATHANIELMORAN.COM"
+ },
+ "H2TX03126": {
+  "committee_id": "C00303305",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-28",
+  "name": "PETE SESSIONS FOR CONGRESS",
+  "person": "Pete Sessions",
+  "url": "https://www.petesessions.com",
+  "website": "WWW.PETESESSIONS.COM"
  },
  "H2TX23082": {
   "committee_id": "C00371302",
@@ -1209,6 +1499,16 @@
   "url": "https://www.jimcosta.com/",
   "website": "HTTPS://WWW.JIMCOSTA.COM/"
  },
+ "H4CA23011": {
+  "committee_id": "C00167585",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-09-07",
+  "name": "CITIZENS FOR WATERS",
+  "person": "Maxine Waters",
+  "url": "https://maxinewatersforcongress.com",
+  "website": "MAXINEWATERSFORCONGRESS.COM"
+ },
  "H4CA27111": {
   "committee_id": "C00834028",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -1248,6 +1548,16 @@
   "person": "Larry Thompson",
   "url": "https://www.larrythompsonforcongress.com",
   "website": "WWW.LARRYTHOMPSONFORCONGRESS.COM"
+ },
+ "H4CA35031": {
+  "committee_id": "C00557652",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "NORMA TORRES FOR CONGRESS",
+  "person": "Norma Torres",
+  "url": "https://normatorres.com",
+  "website": "NORMATORRES.COM"
  },
  "H4CA45170": {
   "committee_id": "C00851790",
@@ -1309,6 +1619,26 @@
   "url": "https://www.gayforcongress.com",
   "website": "WWW.GAYFORCONGRESS.COM"
  },
+ "H4FL08168": {
+  "committee_id": "C00877324",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-24",
+  "name": "MIKE HARIDOPOLOS FOR CONGRESS",
+  "person": "Mike Haridopolos",
+  "url": null,
+  "website": null
+ },
+ "H4FL17060": {
+  "committee_id": "C00924787",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-05",
+  "name": "MONTAVON FOR CONGRESS",
+  "person": "Matthew Montavon",
+  "url": "https://www.montavonforcongress.com",
+  "website": "WWW.MONTAVONFORCONGRESS.COM"
+ },
  "H4FL20023": {
   "committee_id": "C00385773",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -1319,6 +1649,26 @@
   "url": "https://www.dwsforcongress.com",
   "website": "WWW.DWSFORCONGRESS.COM"
  },
+ "H4FL28042": {
+  "committee_id": "C00904128",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-21",
+  "name": "EHR FORCE INC.",
+  "person": "Phil Ehr",
+  "url": "https://ehrforcongress.us",
+  "website": "EHRFORCONGRESS.US"
+ },
+ "H4GA03100": {
+  "committee_id": "C00903609",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-31",
+  "name": "MAURA KELLER FOR CONGRESS",
+  "person": "Maura Keller",
+  "url": "https://www.maurakeller.com",
+  "website": "WWW.MAURAKELLER.COM"
+ },
  "H4GA03126": {
   "committee_id": "C00872473",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -1328,6 +1678,16 @@
   "person": "Brian Jack",
   "url": "https://brianjack.com",
   "website": "HTTPS://BRIANJACK.COM"
+ },
+ "H4IL12060": {
+  "committee_id": "C00546499",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-27",
+  "name": "MIKE BOST FOR CONGRESS COMMITTEE",
+  "person": "Mike Bost",
+  "url": "http://bostforcongress.com",
+  "website": "HTTP://BOSTFORCONGRESS.COM"
  },
  "H4IN06185": {
   "committee_id": "C00870949",
@@ -1358,6 +1718,16 @@
   "person": "Derek Schmidt",
   "url": "https://derekschmidt.com",
   "website": "DEREKSCHMIDT.COM"
+ },
+ "H4MA01091": {
+  "committee_id": "C00868927",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-09",
+  "name": "NADIA FOR CONGRESS",
+  "person": "Nadia D Milleron",
+  "url": "https://nadiaforcongress.com",
+  "website": "NADIAFORCONGRESS.COM"
  },
  "H4MA03022": {
   "committee_id": "C00285171",
@@ -1479,6 +1849,16 @@
   "url": "https://www.cleaver4congress.com",
   "website": "WWW.CLEAVER4CONGRESS.COM"
  },
+ "H4MO07156": {
+  "committee_id": "C00859140",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "COMMITTEE TO ELECT MISSI HESKETH FOR CONGRESS",
+  "person": "Missi Hesketh",
+  "url": "https://missiheskethforcongress.com",
+  "website": "MISSIHESKETHFORCONGRESS.COM"
+ },
  "H4MO08162": {
   "committee_id": "C00541862",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -1589,6 +1969,16 @@
   "url": "https://herbforcongress.com",
   "website": "HERBFORCONGRESS.COM"
  },
+ "H4NJ09194": {
+  "committee_id": "C00887547",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-17",
+  "name": "NELLIE POU FOR CONGRESS",
+  "person": "Nellie Pou",
+  "url": "https://www.nelliepoufornewjersey.com",
+  "website": "HTTPS://WWW.NELLIEPOUFORNEWJERSEY.COM"
+ },
  "H4NJ10176": {
   "committee_id": "C00878603",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -1598,6 +1988,16 @@
   "person": "LaMonica McIver",
   "url": null,
   "website": null
+ },
+ "H4NV03225": {
+  "committee_id": "C00900910",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-10",
+  "name": "MARTY FOR CONGRESS",
+  "person": "Marty O'Donnell",
+  "url": "https://martyforcongress.vote",
+  "website": "MARTYFORCONGRESS.VOTE"
  },
  "H4NV04108": {
   "committee_id": "C00953844",
@@ -1649,6 +2049,16 @@
   "url": "https://www.davetaylorforcongrss.com",
   "website": "WWW.DAVETAYLORFORCONGRSS.COM"
  },
+ "H4OH06165": {
+  "committee_id": "C00858415",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-17",
+  "name": "RULLI FOR OHIO",
+  "person": "Michael Rulli",
+  "url": "https://michaelrulli.com",
+  "website": "MICHAELRULLI.COM"
+ },
  "H4OH09169": {
   "committee_id": "C00909630",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -1678,6 +2088,16 @@
   "person": "Frank Lucas",
   "url": "https://www.frankdlucas.com",
   "website": "WWW.FRANKDLUCAS.COM"
+ },
+ "H4OR03192": {
+  "committee_id": "C00859108",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "MAXINE FOR CONGRESS",
+  "person": "Maxine Dexter",
+  "url": "https://www.maxinefororegon.com",
+  "website": "WWW.MAXINEFOROREGON.COM"
  },
  "H4OR05304": {
   "committee_id": "C00843425",
@@ -1759,6 +2179,16 @@
   "url": "https://www.drkristinhook.org",
   "website": "WWW.DRKRISTINHOOK.ORG"
  },
+ "H4TX22197": {
+  "committee_id": "C00856872",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-20",
+  "name": "MARQUETTE GREENE-SCOTT FOR CONGRESS",
+  "person": "Marquette Greene-Scott",
+  "url": null,
+  "website": null
+ },
  "H4TX23120": {
   "committee_id": "C00844324",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -1779,6 +2209,16 @@
   "url": null,
   "website": null
  },
+ "H4TX38011": {
+  "committee_id": "C00836940",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "MELISSA MCDONOUGH FOR CONGRESS",
+  "person": "Melissa A McDonough",
+  "url": "https://www.melissaforcongress.com",
+  "website": "WWW.MELISSAFORCONGRESS.COM"
+ },
  "H4UT02296": {
   "committee_id": "C00842765",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -1788,6 +2228,16 @@
   "person": "Celeste Maloy",
   "url": "http://www.celesteforutah.com/",
   "website": "HTTP://WWW.CELESTEFORUTAH.COM/"
+ },
+ "H4UT03260": {
+  "committee_id": "C00864488",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-28",
+  "name": "MIKE KENNEDY FOR UTAH",
+  "person": "Mike Kennedy",
+  "url": null,
+  "website": null
  },
  "H4VA04066": {
   "committee_id": "C00829812",
@@ -1829,6 +2279,16 @@
   "url": "https://conroy4congress.com",
   "website": "CONROY4CONGRESS.COM"
  },
+ "H4WA05234": {
+  "committee_id": "C00870758",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-03",
+  "name": "VOTE BAUMGARTNER FOR CONGRESS",
+  "person": "Michael Baumgartner",
+  "url": "https://votebaumgartner.com",
+  "website": "VOTEBAUMGARTNER.COM"
+ },
  "H4WA06117": {
   "committee_id": "C00857094",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -1838,6 +2298,16 @@
   "person": "Emily Randall",
   "url": "https://www.electemilyrandall.com",
   "website": "WWW.ELECTEMILYRANDALL.COM"
+ },
+ "H4WA08147": {
+  "committee_id": "C00845354",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-22",
+  "name": "SHETH FOR CONGRESS",
+  "person": "Nirav Sheth",
+  "url": "https://www.shethforcongress.com",
+  "website": "WWW.SHETHFORCONGRESS.COM"
  },
  "H4WA09061": {
   "committee_id": "C00566232",
@@ -1909,6 +2379,16 @@
   "url": "https://www.sneedforcongress.com/",
   "website": "HTTPS://WWW.SNEEDFORCONGRESS.COM/"
  },
+ "H6AL06184": {
+  "committee_id": "C00951533",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "FRIENDS TO ELECT MERCER",
+  "person": "Maurice Mercer",
+  "url": "https://mauricemercer.com",
+  "website": "MAURICEMERCER.COM"
+ },
  "H6AL07208": {
   "committee_id": "C00953315",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -1938,6 +2418,16 @@
   "person": "James Richard Russell III",
   "url": "https://www.russellforar.com",
   "website": "WWW.RUSSELLFORAR.COM"
+ },
+ "H6AZ01488": {
+  "committee_id": "C00945287",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-02",
+  "name": "MONICA ALPONTE FOR CONGRESS",
+  "person": "Monica Maria Alponte",
+  "url": "https://monicaalponteaz.com",
+  "website": "HTTPS://MONICAALPONTEAZ.COM"
  },
  "H6AZ05240": {
   "committee_id": "C00915983",
@@ -1999,6 +2489,16 @@
   "url": "https://sterbinskyforcongress.com",
   "website": "STERBINSKYFORCONGRESS.COM"
  },
+ "H6CA01269": {
+  "committee_id": "C00926519",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "MIKE MCGUIRE FOR CONGRESS",
+  "person": "Mike McGuire",
+  "url": "https://www.votemikemcguire.com",
+  "website": "WWW.VOTEMIKEMCGUIRE.COM"
+ },
  "H6CA01285": {
   "committee_id": "C00942458",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -2028,6 +2528,16 @@
   "person": "Doris Matsui",
   "url": "https://www.matsuiforcongress.com",
   "website": "WWW.MATSUIFORCONGRESS.COM"
+ },
+ "H6CA05377": {
+  "committee_id": "C00905133",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-09-11",
+  "name": "MICHAEL MASUDA FOR CONGRESS",
+  "person": "Michael Masuda",
+  "url": "https://www.votemasuda.com",
+  "website": "WWW.VOTEMASUDA.COM"
  },
  "H6CA07175": {
   "committee_id": "C00918037",
@@ -2068,6 +2578,26 @@
   "person": "Kyle Kirkland",
   "url": "https://kirkland2026.com",
   "website": "KIRKLAND2026.COM"
+ },
+ "H6CA14163": {
+  "committee_id": "C00932541",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-09-09",
+  "name": "MELISSA HERNANDEZ FOR CONGRESS",
+  "person": "Melissa Hernandez",
+  "url": "https://melissahernandez2026.com/",
+  "website": "HTTPS://MELISSAHERNANDEZ2026.COM/"
+ },
+ "H6CA19154": {
+  "committee_id": "C00902841",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-08",
+  "name": "VERBICA FOR CONGRESS",
+  "person": "Peter Coe Verbica",
+  "url": "https://www.peterverbica.com",
+  "website": "HTTPS://WWW.PETERVERBICA.COM"
  },
  "H6CA20152": {
   "committee_id": "C00592154",
@@ -2146,6 +2676,16 @@
   "last_file_date": "2026-07-15",
   "name": "HILDA SOLIS FOR CONGRESS",
   "person": "Hilda Solis",
+  "url": null,
+  "website": null
+ },
+ "H6CA44103": {
+  "committee_id": "C00577353",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-14",
+  "name": "BARRAGAN FOR CONGRESS",
+  "person": "Nanette Barragán",
   "url": null,
   "website": null
  },
@@ -2228,6 +2768,16 @@
   "person": "Jeffery Belle",
   "url": null,
   "website": null
+ },
+ "H6CO01273": {
+  "committee_id": "C00909481",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-18",
+  "name": "KIROS FOR CONGRESS",
+  "person": "Melat Kiros",
+  "url": "https://www.kirosforco.com",
+  "website": "WWW.KIROSFORCO.COM"
  },
  "H6CO03253": {
   "committee_id": "C00941526",
@@ -2319,6 +2869,16 @@
   "url": "https://www.riceforct.com",
   "website": "WWW.RICEFORCT.COM"
  },
+ "H6CT04143": {
+  "committee_id": "C00935031",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-30",
+  "name": "MICHAEL GOLDSTEIN FOR CONGRESS 2026",
+  "person": "Michael Goldstein",
+  "url": null,
+  "website": null
+ },
  "H6CT05231": {
   "committee_id": "C00935692",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -2358,6 +2918,16 @@
   "person": "Austin Rogers",
   "url": "https://rogersforflorida.com",
   "website": "ROGERSFORFLORIDA.COM"
+ },
+ "H6FL03149": {
+  "committee_id": "C00946459",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-17",
+  "name": "MIKE KLEIN FOR CONGRESS",
+  "person": "Mike Klein",
+  "url": "https://www.mikeklein4congress.com",
+  "website": "WWW.MIKEKLEIN4CONGRESS.COM"
  },
  "H6FL04105": {
   "committee_id": "C00615294",
@@ -2479,6 +3049,16 @@
   "url": "https://leelagray.com",
   "website": "LEELAGRAY.COM"
  },
+ "H6FL14237": {
+  "committee_id": "C00950832",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-09-02",
+  "name": "MIKE BELTRAN FOR CONGRESS",
+  "person": "Mike Beltran",
+  "url": "https://www.electmikebeltran.com",
+  "website": "WWW.ELECTMIKEBELTRAN.COM"
+ },
  "H6FL14245": {
   "committee_id": "C00953992",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -2549,6 +3129,16 @@
   "url": null,
   "website": null
  },
+ "H6FL21059": {
+  "committee_id": "C00906883",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-15",
+  "name": "PIA DANDIYA FOR CONGRESS",
+  "person": "Pia Dandiya",
+  "url": "https://www.piaforcongress.com",
+  "website": "WWW.PIAFORCONGRESS.COM"
+ },
  "H6FL21075": {
   "committee_id": "C00921601",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -2568,6 +3158,36 @@
   "person": "Casey Askar",
   "url": null,
   "website": null
+ },
+ "H6FL24095": {
+  "committee_id": "C00952598",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-15",
+  "name": "OLIVER GILBERT FOR CONGRESS",
+  "person": "Oliver G. Gilbert III",
+  "url": "https://olivergilbert.vote",
+  "website": "OLIVERGILBERT.VOTE"
+ },
+ "H6FL25068": {
+  "committee_id": "C00953877",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-21",
+  "name": "PETER JASSENOFF FOR CONGRESS",
+  "person": "Peter Jassenoff",
+  "url": null,
+  "website": null
+ },
+ "H6FL26058": {
+  "committee_id": "C00938530",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-16",
+  "name": "FRIENDS OF NICOLE LOCKLIN",
+  "person": "Nicole Locklin",
+  "url": "https://locklinforcongress.com",
+  "website": "LOCKLINFORCONGRESS.COM"
  },
  "H6FL27098": {
   "committee_id": "C00942581",
@@ -2598,6 +3218,16 @@
   "person": "Amanda Hollowell",
   "url": "https://amandaforga.com",
   "website": "AMANDAFORGA.COM"
+ },
+ "H6GA01182": {
+  "committee_id": "C00917450",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-09-04",
+  "name": "MATT DAY FOR CONGRESS",
+  "person": "Matt Day",
+  "url": null,
+  "website": null
  },
  "H6GA04129": {
   "committee_id": "C00418293",
@@ -2649,6 +3279,16 @@
   "url": "https://www.houstongaines.com",
   "website": "WWW.HOUSTONGAINES.COM"
  },
+ "H6GA10183": {
+  "committee_id": "C00933283",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-14",
+  "name": "COMMITTEE TO ELECT PAMELA DELANCY FOR CONGRESS",
+  "person": "Pamela Delancy",
+  "url": "https://votepamdelancy.com",
+  "website": "VOTEPAMDELANCY.COM"
+ },
  "H6GA11116": {
   "committee_id": "C00923573",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -2698,6 +3338,16 @@
   "person": "Brenton Awa",
   "url": "https://secure.winred.com/SENATOR-AWA-FOR-CONGRESS/DONATE-HERE",
   "website": "HTTPS://SECURE.WINRED.COM/SENATOR-AWA-FOR-CONGRESS/DONATE-HERE"
+ },
+ "H6IA01213": {
+  "committee_id": "C00947432",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "BRIDGFORD FOR IOWA",
+  "person": "Michael Bridgford",
+  "url": "https://www.bridgfordforiowa.com",
+  "website": "WWW.BRIDGFORDFORIOWA.COM"
  },
  "H6IA02211": {
   "committee_id": "C00916452",
@@ -2779,6 +3429,16 @@
   "url": "https://libertyangel.us",
   "website": "LIBERTYANGEL.US"
  },
+ "H6IL04153": {
+  "committee_id": "C00925495",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "PATTY GARCIA FOR CONGRESS",
+  "person": "Patty Garcia",
+  "url": "https://pattyforillinois.com",
+  "website": "HTTPS://PATTYFORILLINOIS.COM"
+ },
  "H6IL04187": {
   "committee_id": "C00934364",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -2816,6 +3476,16 @@
   "last_file_date": "2026-08-09",
   "name": "JENNIFER DAVIS FOR CONGRESS",
   "person": "Jennifer Davis",
+  "url": null,
+  "website": null
+ },
+ "H6IL08329": {
+  "committee_id": "C00919183",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "MELISSA BEAN FOR CONGRESS",
+  "person": "Melissa Luburich Bean",
   "url": null,
   "website": null
  },
@@ -2868,6 +3538,16 @@
   "person": "Jennifer Ann Todd",
   "url": "https://jentodd2026.us",
   "website": "JENTODD2026.US"
+ },
+ "H6IL16108": {
+  "committee_id": "C00900399",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "NOLLEY FOR CONGRESS",
+  "person": "Paul Nolley",
+  "url": "https://nolleyforcongress.com",
+  "website": "NOLLEYFORCONGRESS.COM"
  },
  "H6IL17247": {
   "committee_id": "C00893446",
@@ -2939,6 +3619,16 @@
   "url": "https://www.wirth4congress.com",
   "website": "WWW.WIRTH4CONGRESS.COM"
  },
+ "H6IN08293": {
+  "committee_id": "C00914556",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-13",
+  "name": "MARY ALLEN FOR CONGRESS",
+  "person": "Mary Theresa Allen",
+  "url": "https://www.maryallenforcongress.com",
+  "website": "WWW.MARYALLENFORCONGRESS.COM"
+ },
  "H6IN09143": {
   "committee_id": "C00800649",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -3009,6 +3699,16 @@
   "url": "https://www.jamescomer.com",
   "website": "WWW.JAMESCOMER.COM"
  },
+ "H6KY02068": {
+  "committee_id": "C00902130",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-14",
+  "name": "WINGFIELDFORCONGRESS",
+  "person": "Megan Wingfield",
+  "url": "https://www.wingfieldforcongress.com",
+  "website": "WWW.WINGFIELDFORCONGRESS.COM"
+ },
  "H6KY03223": {
   "committee_id": "C00938209",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -3029,6 +3729,16 @@
   "url": "https://edgallrein.com",
   "website": "EDGALLREIN.COM"
  },
+ "H6KY04189": {
+  "committee_id": "C00925917",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "CITIZENS FOR MELISSA STRANGE",
+  "person": "Melissa Claire Strange",
+  "url": "https://www.strangeforky.com",
+  "website": "WWW.STRANGEFORKY.COM"
+ },
  "H6KY04205": {
   "committee_id": "C00954834",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -3039,6 +3749,16 @@
   "url": "https://www.jeremy-todd.com",
   "website": "WWW.JEREMY-TODD.COM"
  },
+ "H6KY05152": {
+  "committee_id": "C00907055",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-28",
+  "name": "NED FOR CONGRESS",
+  "person": "Ned Pillersdorf",
+  "url": null,
+  "website": null
+ },
  "H6MA03100": {
   "committee_id": "C00941054",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -3048,6 +3768,16 @@
   "person": "Gary J. Grossi",
   "url": "https://www.garygrossi.org",
   "website": "HTTPS://WWW.GARYGROSSI.ORG"
+ },
+ "H6MA06202": {
+  "committee_id": "C00937755",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-30",
+  "name": "MICAH Q. JONES FOR CONGRESS",
+  "person": "Micah Q. Jones",
+  "url": "https://micahqjones.com",
+  "website": "MICAHQJONES.COM"
  },
  "H6MD01320": {
   "committee_id": "C00902957",
@@ -3089,6 +3819,26 @@
   "url": "https://www.jamieraskin.com",
   "website": "WWW.JAMIERASKIN.COM"
  },
+ "H6ME02148": {
+  "committee_id": "C00904094",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "PAUL LEPAGE FOR CONGRESS",
+  "person": "Paul Lepage",
+  "url": "https://lepageforcongress.com",
+  "website": "LEPAGEFORCONGRESS.COM"
+ },
+ "H6ME02171": {
+  "committee_id": "C00922377",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-28",
+  "name": "DUNLAP FOR CONGRESS",
+  "person": "Matt Dunlap",
+  "url": "https://www.mattdunlapforuscongress.com",
+  "website": "WWW.MATTDUNLAPFORUSCONGRESS.COM"
+ },
  "H6MI01226": {
   "committee_id": "C00614214",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -3128,6 +3878,16 @@
   "person": "Christina Hines",
   "url": null,
   "website": null
+ },
+ "H6MI10359": {
+  "committee_id": "C00925743",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-09-01",
+  "name": "FRIENDS OF MICHAEL BOUCHARD INC",
+  "person": "Michael Bouchard",
+  "url": "https://friendsofmichaelbouchard.com",
+  "website": "HTTPS://FRIENDSOFMICHAELBOUCHARD.COM"
  },
  "H6MI11191": {
   "committee_id": "C00904581",
@@ -3169,6 +3929,16 @@
   "url": "https://jakejohnsonforcongress.com",
   "website": "JAKEJOHNSONFORCONGRESS.COM"
  },
+ "H6MN02230": {
+  "committee_id": "C00903807",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-08",
+  "name": "MATT LITTLE FOR CONGRESS",
+  "person": "Matt Little",
+  "url": null,
+  "website": null
+ },
  "H6MN02263": {
   "committee_id": "C00912824",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -3178,6 +3948,16 @@
   "person": "Eric Pratt",
   "url": "https://www.ericprattmn.com",
   "website": "WWW.ERICPRATTMN.COM"
+ },
+ "H6MN04293": {
+  "committee_id": "C00939181",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-30",
+  "name": "WIKSTROM FOR CONGRESS",
+  "person": "Paul Wikstrom",
+  "url": "https://wikstromforcongress.com",
+  "website": "WIKSTROMFORCONGRESS.COM"
  },
  "H6MN05357": {
   "committee_id": "C00924639",
@@ -3269,6 +4049,16 @@
   "url": "https://www.cliffjohnsonforcongress.com/",
   "website": "HTTPS://WWW.CLIFFJOHNSONFORCONGRESS.COM/"
  },
+ "H6MS03228": {
+  "committee_id": "C00907386",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-29",
+  "name": "MICHAEL A. CHIARADIO FOR CONGRESS 2026, INC.",
+  "person": "Michael Alexis Chiaradio",
+  "url": "https://michaelachiaradio.com",
+  "website": "HTTPS://MICHAELACHIARADIO.COM"
+ },
  "H6MS04242": {
   "committee_id": "C00931386",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -3298,6 +4088,16 @@
   "person": "Brian James Miller",
   "url": "https://www.miller4congress.com",
   "website": "WWW.MILLER4CONGRESS.COM"
+ },
+ "H6MT02168": {
+  "committee_id": "C00930750",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "EISENHAUER FOR CONGRESS",
+  "person": "Michael D. Eisenhauer",
+  "url": "https://www.eisenhauerforcongress.com",
+  "website": "WWW.EISENHAUERFORCONGRESS.COM"
  },
  "H6NC02213": {
   "committee_id": "C00925792",
@@ -3389,6 +4189,16 @@
   "url": "https://codigaforcongress.com",
   "website": "CODIGAFORCONGRESS.COM"
  },
+ "H6NC13228": {
+  "committee_id": "C00906057",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "PAUL BARRINGER FOR CONGRESS",
+  "person": "Paul Barringer",
+  "url": "https://www.paulbarringer.com",
+  "website": "WWW.PAULBARRINGER.COM"
+ },
  "H6NC14069": {
   "committee_id": "C00929034",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -3469,6 +4279,16 @@
   "url": "https://www.dilorenzoforcongress.com",
   "website": "WWW.DILORENZOFORCONGRESS.COM"
  },
+ "H6NJ03184": {
+  "committee_id": "C00932319",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "FRIENDS OF MICHAEL MCGUIRE",
+  "person": "Michael Patrick McGuire",
+  "url": null,
+  "website": null
+ },
  "H6NJ05171": {
   "committee_id": "C00573949",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -3529,6 +4349,16 @@
   "url": "https://www.cunninghamfornm.com",
   "website": "WWW.CUNNINGHAMFORNM.COM"
  },
+ "H6NM03083": {
+  "committee_id": "C00914010",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "ZAMORA FOR NEW MEXICO",
+  "person": "Martin R Zamora",
+  "url": null,
+  "website": null
+ },
  "H6NV01331": {
   "committee_id": "C00914804",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -3559,6 +4389,16 @@
   "url": "https://gallantny.com",
   "website": "HTTPS://GALLANTNY.COM"
  },
+ "H6NY02140": {
+  "committee_id": "C00911958",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "HALPIN FOR CONGRESS",
+  "person": "Patrick Halpin",
+  "url": "https://www.halpinforcongress.com",
+  "website": "WWW.HALPINFORCONGRESS.COM"
+ },
  "H6NY04211": {
   "committee_id": "C00948034",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -3588,6 +4428,26 @@
   "person": "Brad Lander",
   "url": "https://landerfornyc.com",
   "website": "LANDERFORNYC.COM"
+ },
+ "H6NY11265": {
+  "committee_id": "C00935742",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "DECILLIS FOR NY",
+  "person": "Michael Decillis",
+  "url": "https://decillisforcongress.com",
+  "website": "DECILLISFORCONGRESS.COM"
+ },
+ "H6NY12172": {
+  "committee_id": "C00918565",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "LASHER FOR CONGRESS",
+  "person": "Micah Charles Lasher",
+  "url": null,
+  "website": null
  },
  "H6NY12404": {
   "committee_id": "C00937920",
@@ -3638,6 +4498,16 @@
   "person": "Cait Conley",
   "url": "https://www.caitconley.com",
   "website": "WWW.CAITCONLEY.COM"
+ },
+ "H6NY19268": {
+  "committee_id": "C00921668",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-14",
+  "name": "PETER FOR NY INC",
+  "person": "Peter Karl Oberacker Jr.",
+  "url": "https://www.peterforny19.com",
+  "website": "WWW.PETERFORNY19.COM"
  },
  "H6NY21157": {
   "committee_id": "C00892737",
@@ -3799,6 +4669,16 @@
   "url": "https://www.tedfordforcongress.com",
   "website": "WWW.TEDFORDFORCONGRESS.COM"
  },
+ "H6OK04155": {
+  "committee_id": "C00914135",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-13",
+  "name": "MITCHELL JACOB FOR CONGRESS",
+  "person": "Mitchell Leigh Jacob",
+  "url": "https://mitchelljacob.com",
+  "website": "HTTPS://MITCHELLJACOB.COM"
+ },
  "H6OK05293": {
   "committee_id": "C00911982",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -3818,6 +4698,26 @@
   "person": "Chris Beck",
   "url": "https://chrisbeckforcongress.com",
   "website": "CHRISBECKFORCONGRESS.COM"
+ },
+ "H6OR04260": {
+  "committee_id": "C00921544",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "MONIQUE FOR CONGRESS",
+  "person": "Monique Despain",
+  "url": "https://www.moniqueforcongress.com",
+  "website": "WWW.MONIQUEFORCONGRESS.COM"
+ },
+ "H6OR05242": {
+  "committee_id": "C00927228",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-31",
+  "name": "PATTI ADAIR FOR CONGRESS",
+  "person": "Patti Adair",
+  "url": null,
+  "website": null
  },
  "H6PA03203": {
   "committee_id": "C00852475",
@@ -3839,6 +4739,26 @@
   "url": null,
   "website": null
  },
+ "H6PA05216": {
+  "committee_id": "C00944553",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "MANGANARO FOR CONGRESS",
+  "person": "Nicholas Waln Morris Manganaro",
+  "url": "https://manganaro4congress.net",
+  "website": "MANGANARO4CONGRESS.NET"
+ },
+ "H6PA06156": {
+  "committee_id": "C00910059",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "MARTY YOUNG FOR CONGRESS",
+  "person": "Martin Young",
+  "url": "https://voteyoung.com",
+  "website": "VOTEYOUNG.COM"
+ },
  "H6PA07188": {
   "committee_id": "C00917096",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -3858,6 +4778,26 @@
   "person": "Brian Fitzpatrick",
   "url": "https://brianfitzpatrick.com",
   "website": "BRIANFITZPATRICK.COM"
+ },
+ "H6PA08293": {
+  "committee_id": "C00918151",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "PAIGE FOR PA",
+  "person": "Paige Cognetti",
+  "url": "https://paigeforpa.com",
+  "website": "PAIGEFORPA.COM"
+ },
+ "H6PA11099": {
+  "committee_id": "C00910943",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "CITIZENS FOR NANCY MANNION",
+  "person": "Nancy Mannion",
+  "url": "https://www.nancymannion.com",
+  "website": "WWW.NANCYMANNION.COM"
  },
  "H6PA14200": {
   "committee_id": "C00913376",
@@ -3909,6 +4849,16 @@
   "url": "https://www.jennycostahoneycutt.com",
   "website": "WWW.JENNYCOSTAHONEYCUTT.COM"
  },
+ "H6SC01359": {
+  "committee_id": "C00935379",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-26",
+  "name": "NANCY LACORE FOR CONGRESS",
+  "person": "Nancy Lacore",
+  "url": "https://nancylacore.com",
+  "website": "NANCYLACORE.COM"
+ },
  "H6SC03090": {
   "committee_id": "C00930313",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -3949,6 +4899,26 @@
   "url": "https://vincent4congress.org",
   "website": "VINCENT4CONGRESS.ORG"
  },
+ "H6SD01109": {
+  "committee_id": "C00909689",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-25",
+  "name": "MARTY JACKLEY FOR CONGRESS",
+  "person": "Marty Jackley",
+  "url": "https://www.martyjackley.com",
+  "website": "WWW.MARTYJACKLEY.COM"
+ },
+ "H6SD01141": {
+  "committee_id": "C00918961",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "NIKKI G FOR SD",
+  "person": "Nicole Gronli",
+  "url": "https://www.nikkigforsd.com",
+  "website": "WWW.NIKKIGFORSD.COM"
+ },
  "H6TN01537": {
   "committee_id": "C00934778",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -3958,6 +4928,16 @@
   "person": "Kristi Burke",
   "url": "https://www.votekristiburke.com/",
   "website": "HTTPS://WWW.VOTEKRISTIBURKE.COM/"
+ },
+ "H6TN02170": {
+  "committee_id": "C00920520",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-01",
+  "name": "MICHAELA FOR TENNESSEE",
+  "person": "Michaela Barnett",
+  "url": "https://michaelafortennessee.com",
+  "website": "MICHAELAFORTENNESSEE.COM"
  },
  "H6TN03228": {
   "committee_id": "C00936971",
@@ -3989,6 +4969,16 @@
   "url": "https://www.charliehatcher.com",
   "website": "WWW.CHARLIEHATCHER.COM"
  },
+ "H6TN06171": {
+  "committee_id": "C00902239",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-12",
+  "name": "CROLEY FOR CONGRESS",
+  "person": "Mike Croley",
+  "url": "https://croleyforcongress.com",
+  "website": "CROLEYFORCONGRESS.COM"
+ },
  "H6TN06213": {
   "committee_id": "C00910935",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -3998,6 +4988,16 @@
   "person": "Johnny Garrett",
   "url": "https://www.johnnygarrettforcongress.com",
   "website": "WWW.JOHNNYGARRETTFORCONGRESS.COM"
+ },
+ "H6TN07161": {
+  "committee_id": "C00908202",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-18",
+  "name": "MATT VAN EPPS FOR CONGRESS",
+  "person": "Matt Van Epps",
+  "url": null,
+  "website": null
  },
  "H6TN07286": {
   "committee_id": "C00913301",
@@ -4349,6 +5349,16 @@
   "url": "https://votejohnnygarcia.com",
   "website": "VOTEJOHNNYGARCIA.COM"
  },
+ "H6UT01160": {
+  "committee_id": "C00913582",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-10",
+  "name": "PETER CROSBY FOR CONGRESS",
+  "person": "Peter Crosby",
+  "url": null,
+  "website": null
+ },
  "H6UT02424": {
   "committee_id": "C00904714",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -4479,6 +5489,16 @@
   "url": "https://www.mckinneyforwashington.com",
   "website": "WWW.MCKINNEYFORWASHINGTON.COM"
  },
+ "H6WA07458": {
+  "committee_id": "C00605592",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-29",
+  "name": "PRAMILA FOR CONGRESS",
+  "person": "Pramila Jayapal",
+  "url": "https://www.pramilaforcongress.com",
+  "website": "WWW.PRAMILAFORCONGRESS.COM"
+ },
  "H6WA09025": {
   "committee_id": "C00304709",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -4488,6 +5508,16 @@
   "person": "Adam Smith",
   "url": "https://www.electadamsmith.com",
   "website": "WWW.ELECTADAMSMITH.COM"
+ },
+ "H6WI01283": {
+  "committee_id": "C00915637",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-21",
+  "name": "MITCHELL BERMAN FOR CONGRESS",
+  "person": "Mitchell Berman",
+  "url": "https://www.bermanforcongress.com",
+  "website": "WWW.BERMANFORCONGRESS.COM"
  },
  "H6WI05136": {
   "committee_id": "C00872697",
@@ -4519,6 +5549,16 @@
   "url": "https://www.clarkforwi.com",
   "website": "WWW.CLARKFORWI.COM"
  },
+ "H6WI07223": {
+  "committee_id": "C00924902",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-09",
+  "name": "ALFONSO FOR CONGRESS",
+  "person": "Michael Alfonso",
+  "url": "https://www.alfonsoforwisconsin.com",
+  "website": "WWW.ALFONSOFORWISCONSIN.COM"
+ },
  "H6WY00217": {
   "committee_id": "C00932244",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -4548,6 +5588,16 @@
   "person": "Greg Stanton",
   "url": "https://stantonforarizona.com",
   "website": "STANTONFORARIZONA.COM"
+ },
+ "H8CA01109": {
+  "committee_id": "C00326363",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-28",
+  "name": "MIKE THOMPSON FOR CONGRESS",
+  "person": "Mike Thompson",
+  "url": "https://mikethompsonforcongress.com",
+  "website": "MIKETHOMPSONFORCONGRESS.COM"
  },
  "H8CA10126": {
   "committee_id": "C00639146",
@@ -4588,6 +5638,16 @@
   "person": "Gilbert Cisneros",
   "url": "http://cisnerosforcongress.com/",
   "website": "HTTP://CISNEROSFORCONGRESS.COM/"
+ },
+ "H8CA49058": {
+  "committee_id": "C00634253",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "MIKE LEVIN FOR CONGRESS",
+  "person": "Mike Levin",
+  "url": "http://mikelevin.org",
+  "website": "HTTP://MIKELEVIN.ORG"
  },
  "H8CO02160": {
   "committee_id": "C00648253",
@@ -4668,6 +5728,16 @@
   "person": "Mariannette Miller-Meeks",
   "url": "https://drmillermeeks.com",
   "website": "DRMILLERMEEKS.COM"
+ },
+ "H8ID02064": {
+  "committee_id": "C00331397",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-09",
+  "name": "SIMPSON FOR CONGRESS",
+  "person": "Michael Simpson",
+  "url": null,
+  "website": null
  },
  "H8IL14067": {
   "committee_id": "C00435099",
@@ -4789,6 +5859,26 @@
   "url": "https://ilhanomar.com",
   "website": "ILHANOMAR.COM"
  },
+ "H8MN08043": {
+  "committee_id": "C00650697",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-06",
+  "name": "PETE STAUBER FOR CONGRESS",
+  "person": "Pete Stauber",
+  "url": "https://petestauberforcongress.com",
+  "website": "PETESTAUBERFORCONGRESS.COM"
+ },
+ "H8MS03125": {
+  "committee_id": "C00665752",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "FRIENDS OF MICHAEL GUEST",
+  "person": "Michael Guest",
+  "url": "https://www.michaelguest.ms",
+  "website": "WWW.MICHAELGUEST.MS"
+ },
  "H8NJ02166": {
   "committee_id": "C00661868",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -4849,6 +5939,26 @@
   "url": "https://www.ocasiocortez.com",
   "website": "WWW.OCASIOCORTEZ.COM"
  },
+ "H8NY19223": {
+  "committee_id": "C00815290",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-24",
+  "name": "PAT RYAN FOR CONGRESS",
+  "person": "Patrick Ryan",
+  "url": "https://patryanforcongress.com",
+  "website": "PATRYANFORCONGRESS.COM"
+ },
+ "H8NY21203": {
+  "committee_id": "C00450049",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "PAUL TONKO FOR CONGRESS",
+  "person": "Paul Tonko",
+  "url": "http://www.paultonko.com",
+  "website": "HTTP://WWW.PAULTONKO.COM"
+ },
  "H8NY22177": {
   "committee_id": "C00793760",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -4898,6 +6008,16 @@
   "person": "Chrissy Houlahan",
   "url": "https://www.chrissyhoulahanforcongress.com",
   "website": "HTTPS://WWW.CHRISSYHOULAHANFORCONGRESS.COM"
+ },
+ "H8PA07200": {
+  "committee_id": "C00669358",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "SCANLON FOR CONGRESS",
+  "person": "Mary Scanlon",
+  "url": "https://www.scanlonforcongress.com/",
+  "website": "HTTPS://WWW.SCANLONFORCONGRESS.COM/"
  },
  "H8PA10147": {
   "committee_id": "C00654723",
@@ -4958,6 +6078,16 @@
   "person": "Lizzie Fletcher",
   "url": "https://www.lizziefletcher.com/",
   "website": "HTTPS://WWW.LIZZIEFLETCHER.COM/"
+ },
+ "H8TX27049": {
+  "committee_id": "C00655332",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "CLOUD FOR CONGRESS",
+  "person": "Michael Cloud",
+  "url": "https://cloudforcongress.com",
+  "website": "CLOUDFORCONGRESS.COM"
  },
  "H8TX32098": {
   "committee_id": "C00929844",
@@ -5069,6 +6199,16 @@
   "url": "http://www.edmarkey.com",
   "website": "HTTP://WWW.EDMARKEY.COM"
  },
+ "S4MI00595": {
+  "committee_id": "C00849810",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-03",
+  "name": "ROGERS FOR SENATE",
+  "person": "Michael J Rogers",
+  "url": "https://rogersforsenate.com",
+  "website": "ROGERSFORSENATE.COM"
+ },
  "S4NE00207": {
   "committee_id": "C00901355",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -5098,6 +6238,36 @@
   "person": "Justin Murphy",
   "url": "https://www.jerseyjustin4senate.org",
   "website": "WWW.JERSEYJUSTIN4SENATE.ORG"
+ },
+ "S4SD00049": {
+  "committee_id": "C00532465",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "ROUNDS FOR SENATE",
+  "person": "Mike Rounds",
+  "url": "https://www.roundsforsenate.com",
+  "website": "WWW.ROUNDSFORSENATE.COM"
+ },
+ "S4TN00542": {
+  "committee_id": "C00846048",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-25",
+  "name": "MARQUITA BRADSHAW FOR U S SENATE",
+  "person": "Marquita Bradshaw",
+  "url": "https://www.marquitabradshaw.com",
+  "website": "WWW.MARQUITABRADSHAW.COM"
+ },
+ "S6AK00276": {
+  "committee_id": "C00933978",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-16",
+  "name": "ALASKANS FOR MARY",
+  "person": "Mary Peltola",
+  "url": "https://www.marypeltola.com",
+  "website": "WWW.MARYPELTOLA.COM"
  },
  "S6AL00476": {
   "committee_id": "C00954974",
@@ -5148,6 +6318,16 @@
   "person": "Ashley Moody",
   "url": null,
   "website": null
+ },
+ "S6GA00390": {
+  "committee_id": "C00544684",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-07",
+  "name": "MIKE COLLINS FOR SENATE",
+  "person": "Michael A Collins Jr.",
+  "url": "https://mikecollinsga.com/",
+  "website": "HTTPS://MIKECOLLINSGA.COM/"
  },
  "S6IA00298": {
   "committee_id": "C00915645",
@@ -5279,6 +6459,16 @@
   "url": "https://peggyflanagan.com/",
   "website": "HTTPS://PEGGYFLANAGAN.COM/"
  },
+ "S6MN00556": {
+  "committee_id": "C00935528",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-09-03",
+  "name": "TAFOYA FOR SENATE",
+  "person": "Michele Tafoya",
+  "url": "https://micheletafoya.com",
+  "website": "HTTPS://MICHELETAFOYA.COM"
+ },
  "S6MT00253": {
   "committee_id": "C00937201",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -5309,6 +6499,31 @@
   "url": "https://almeforsenate.com",
   "website": "ALMEFORSENATE.COM"
  },
+ "S6NC00415": {
+  "committee_id": "C00913996",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-20",
+  "name": "WHATLEY FOR SENATE",
+  "person": "Michael Whatley",
+  "url": "https://www.michaelwhatley.com",
+  "website": "WWW.MICHAELWHATLEY.COM"
+ },
+ "S6NC00563": {
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": false,
+  "person": "Michael Louis Dublin Jr."
+ },
+ "S6NE00129": {
+  "committee_id": "C00832436",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-07-15",
+  "name": "PETE RICKETTS FOR SENATE",
+  "person": "Pete Ricketts",
+  "url": "https://www.petericketts.com",
+  "website": "WWW.PETERICKETTS.COM"
+ },
  "S6NE00145": {
   "committee_id": "C00941641",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -5318,6 +6533,16 @@
   "person": "Cindy Burbank",
   "url": "https://cindyburbank.com",
   "website": "CINDYBURBANK.COM"
+ },
+ "S6NE00152": {
+  "committee_id": "C00944199",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-09-11",
+  "name": "MARVIN FOR CONGRESS",
+  "person": "Mike Marvin",
+  "url": "https://marvinforsenate.com",
+  "website": "MARVINFORSENATE.COM"
  },
  "S6NH00141": {
   "committee_id": "C00660464",
@@ -5368,6 +6593,16 @@
   "person": "Gregory Levy",
   "url": null,
   "website": null
+ },
+ "S6OK04163": {
+  "committee_id": "C00899559",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-10",
+  "name": "NKIYLA FOR OK",
+  "person": "N'Kiyla Jasmine - Ann Thomas",
+  "url": "https://www.jasmineforok.com/",
+  "website": "HTTPS://WWW.JASMINEFOROK.COM/"
  },
  "S6OK04247": {
   "committee_id": "C00943142",
@@ -5458,6 +6693,16 @@
   "person": "Mark Warner",
   "url": "https://markwarnerva.com/",
   "website": "HTTPS://MARKWARNERVA.COM/"
+ },
+ "S6WV00188": {
+  "committee_id": "C00932459",
+  "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-08-11",
+  "name": "ELECT FETTY ANDERSON SENATE CAMPAIGN",
+  "person": "Rachel Fetty Anderson",
+  "url": null,
+  "website": null
  },
  "S6WY00209": {
   "committee_id": "C00788943",

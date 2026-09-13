@@ -412,16 +412,23 @@
     }
   }
 
-  function select(code) {
+  function select(code, opts) {
     if (!code) return;
     selected = code;
     paint();
     showPanel(code);
     var picker = doc.getElementById("mapStateSelect");
     if (picker && picker.value !== code) picker.value = code;
+    // Every view needs a URL: a selected state is shareable as #/?state=TX.
+    if (!(opts && opts.fromRoute)) {
+      KYC.router.writeFilters({ state: code, mode: mode === "senate" ? "" : mode });
+    }
+    KYC.rememberState(code);
+    KYC.renderRememberedState();
   }
 
-  function setMode(next) {
+  function setMode(next, opts) {
+    if (!MODE_TITLE[next]) return;
     mode = next;
     Array.prototype.forEach.call(
       doc.querySelectorAll("[data-mode]"),
@@ -434,6 +441,9 @@
     drawLegend();
     paint();
     if (selected) showPanel(selected);
+    if (!(opts && opts.fromRoute)) {
+      KYC.router.writeFilters({ state: selected, mode: mode === "senate" ? "" : mode });
+    }
   }
 
   /* ----------------------------------------------------------------- boot */
@@ -496,14 +506,25 @@
 
     KYC.router.onChange(function () {
       var route = KYC.router.read();
-      if (route.view === "profile") KYC.profile.open(route.id, { fromRoute: true });
-      else if (KYC.profile.isOpen()) KYC.profile.close();
+      if (route.view === "profile") {
+        KYC.profile.open(route.id, { fromRoute: true });
+        return;
+      }
+      if (KYC.profile.isOpen()) KYC.profile.close();
+      var wanted = route.params.mode || "senate";
+      if (wanted !== mode) setMode(wanted, { fromRoute: true });
+      if (route.params.state && route.params.state !== selected) {
+        select(route.params.state, { fromRoute: true });
+      }
     });
     var initial = KYC.router.read();
+    if (initial.params.mode && initial.params.mode !== mode) {
+      setMode(initial.params.mode, { fromRoute: true });
+    }
     if (initial.view === "profile") {
       KYC.profile.open(initial.id, { fromRoute: true });
     } else if (initial.params.state) {
-      select(initial.params.state);
+      select(initial.params.state, { fromRoute: true });
     }
   });
 })(window);
