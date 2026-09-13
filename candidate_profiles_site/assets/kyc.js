@@ -562,6 +562,25 @@
     return global.kycBuildMeta || {};
   }
 
+  /* ================================================================ states */
+
+  /** "TX" -> "Texas", from the build metadata (one table, in kyc/pages.py). */
+  function stateName(code) {
+    var states = meta().states || {};
+    return (states[code] && states[code].name) || code;
+  }
+
+  /** Where the page for a state lives, relative to the current page. The
+   *  state pages sit one directory down, so they reach everything through
+   *  "../"; the root pages declare no prefix. */
+  function siteRoot() {
+    return (doc.body && doc.body.getAttribute("data-root")) || "";
+  }
+
+  function stateUrl(code) {
+    return siteRoot() + "states/" + String(code).toLowerCase() + ".html";
+  }
+
   /** Fill the chamber-balance readouts from the build metadata.
    *
    *  These were literal text in both sidebars ("53 R | 47 D/I", "35", "435")
@@ -680,6 +699,25 @@
 
     renderSummary();
 
+    // "/" focuses the search box from anywhere, as it does on YouTube and
+    // GitHub; Escape hands focus back and clears an empty-result search.
+    var search = doc.querySelector('input[type="search"]');
+    if (search) {
+      doc.addEventListener("keydown", function (event) {
+        if (event.key !== "/" || event.altKey || event.ctrlKey || event.metaKey) return;
+        var target = event.target;
+        var typing = target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" ||
+          target.isContentEditable);
+        if (typing) return;
+        event.preventDefault();
+        search.focus();
+        search.select();
+      });
+      search.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") search.blur();
+      });
+    }
+
     // Footer freshness stamp, from the build metadata.
     var stamp = doc.getElementById("buildStamp");
     if (stamp && meta().built) {
@@ -742,5 +780,9 @@
     districtOrder: districtOrder,
     debounce: debounce,
     ready: ready,
+    // states
+    stateName: stateName,
+    stateUrl: stateUrl,
+    siteRoot: siteRoot,
   };
 })(window);

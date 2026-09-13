@@ -57,7 +57,8 @@
       '      <h2 class="modal-name" id="profileModalName"></h2>',
       '      <p class="modal-meta">',
       '        <span>' + KYC.icon("pin") +
-      '          Represents <strong id="profileModalRegion"></strong></span>',
+      '          Represents <strong id="profileModalRegion"></strong>' +
+      '          <a id="profileModalStateLink" class="state-link" href="#"></a></span>',
       '        <span>' + KYC.icon("calendar") +
       '          Term <strong id="profileModalTerm"></strong></span>',
       '        <span id="profileModalCrossLink" hidden></span>',
@@ -80,6 +81,10 @@
       '          <div class="field span-2"><span class="field-label">Previous careers</span>',
       '            <span class="field-value subtle" id="profileModalCareers"></span></div>',
       "        </div>",
+      "      </section>",
+      '      <section class="panel" id="profileModalContactPanel" hidden>',
+      '        <h3 class="panel-head">' + KYC.icon("link") + " Contact &amp; links</h3>",
+      '        <div id="profileModalContact"></div>',
       "      </section>",
       '      <section class="panel panel-accent">',
       '        <h3 class="panel-head">' + KYC.icon("scroll") + " Platform &amp; priorities</h3>",
@@ -212,6 +217,39 @@
     var target = el("profileModalCommittees");
     var text = String(item.committees || "").trim();
 
+    /* The committee rosters carry rank and title; the roster column was
+     * typed by hand. When the structured list exists it is rendered as a
+     * hierarchy: each full committee with the member's subcommittees under
+     * it, and any chair or ranking-member title called out. */
+    var table = KYC.meta().committees || {};
+    var seats = (item.committeeList || []).map(function (seat) {
+      var info = table[seat.code] || {};
+      return { code: seat.code, title: seat.title, name: info.name || seat.code,
+               url: info.url, parent: info.parent };
+    });
+    if (seats.length) {
+      var full = seats.filter(function (x) { return !x.parent; });
+      var subs = seats.filter(function (x) { return x.parent; });
+      target.innerHTML = full.map(function (seat) {
+        var under = subs.filter(function (x) { return x.parent === seat.code; });
+        return '<div class="committee">' +
+          '<span class="dot"></span><span>' +
+          (seat.url
+            ? '<a href="' + KYC.escapeAttr(seat.url) + '" target="_blank" rel="noopener noreferrer">' +
+              KYC.escapeHtml(seat.name) + "</a>"
+            : KYC.escapeHtml(seat.name)) +
+          (seat.title ? ' <span class="badge badge-accent">' + KYC.escapeHtml(seat.title) + "</span>" : "") +
+          (under.length
+            ? '<span class="committee-subs">' + under.map(function (x) {
+                return KYC.escapeHtml(x.name) +
+                  (x.title ? " (" + KYC.escapeHtml(x.title) + ")" : "");
+              }).join(" &middot; ") + "</span>"
+            : "") +
+          "</span></div>";
+      }).join("");
+      return;
+    }
+
     if (!KYC.hasValue(item, "committees") || !text || text === "None" ||
         text === "None (Candidate)") {
       target.innerHTML =
@@ -227,6 +265,106 @@
           KYC.escapeHtml(name) + "</span></div>";
       })
       .join("");
+  }
+
+  /* Every link is built from an id the source dataset holds - never from a
+   * name. A Ballotpedia page guessed from "Mike Rogers" is the wrong Mike
+   * Rogers half the time, and nothing on the page would look wrong. */
+  var REFERENCE = [
+    ["wikipedia", "Wikipedia", function (v) {
+      return "https://en.wikipedia.org/wiki/" + encodeURIComponent(String(v).replace(/ /g, "_"));
+    }],
+    ["ballotpedia", "Ballotpedia", function (v) {
+      return "https://ballotpedia.org/" + encodeURIComponent(String(v).replace(/ /g, "_"));
+    }],
+    ["govtrack", "GovTrack", function (v) {
+      return "https://www.govtrack.us/congress/members/" + encodeURIComponent(v);
+    }],
+    ["opensecrets", "OpenSecrets", function (v) {
+      return "https://www.opensecrets.org/members-of-congress/summary?cid=" + encodeURIComponent(v);
+    }],
+    ["votesmart", "Vote Smart", function (v) {
+      return "https://justfacts.votesmart.org/candidate/" + encodeURIComponent(v);
+    }],
+  ];
+
+  var SOCIAL = [
+    ["twitter", "X", function (v) { return "https://x.com/" + encodeURIComponent(v); }],
+    ["facebook", "Facebook", function (v) { return "https://www.facebook.com/" + encodeURIComponent(v); }],
+    ["instagram", "Instagram", function (v) { return "https://www.instagram.com/" + encodeURIComponent(v); }],
+    ["youtube_id", "YouTube", function (v) { return "https://www.youtube.com/channel/" + encodeURIComponent(v); }],
+    ["youtube", "YouTube", function (v) { return "https://www.youtube.com/user/" + encodeURIComponent(v); }],
+    ["bluesky", "Bluesky", function (v) { return "https://bsky.app/profile/" + encodeURIComponent(v); }],
+  ];
+
+  function linkChip(url, label, title) {
+    return '<a class="link-chip" href="' + KYC.escapeAttr(url) +
+      '" target="_blank" rel="noopener noreferrer"' +
+      (title ? ' title="' + KYC.escapeAttr(title) + '"' : "") + ">" +
+      KYC.escapeHtml(label) + KYC.icon("share", "link-chip-icon") + "</a>";
+  }
+
+  function renderContact(item) {
+    var panel = el("profileModalContactPanel");
+    var target = el("profileModalContact");
+    var rows = [];
+
+    var sites = [];
+    if (item.website) sites.push(linkChip(item.website, "Official website", item.website));
+    if (item.campaignSite) {
+      sites.push(linkChip(item.campaignSite, "Campaign website",
+        (item.campaignCommittee ? item.campaignCommittee + " - " : "") +
+        "as filed with the FEC"));
+    }
+    if (item.contactForm) sites.push(linkChip(item.contactForm, "Contact form"));
+    if (sites.length) rows.push('<div class="links-row">' + sites.join("") + "</div>");
+
+    var office = [];
+    if (item.phone) {
+      office.push('<span>' + KYC.icon("pin") + ' <a href="tel:' +
+        KYC.escapeAttr(String(item.phone).replace(/[^\d+]/g, "")) + '">' +
+        KYC.escapeHtml(item.phone) + "</a></span>");
+    }
+    if (item.office) office.push("<span>" + KYC.escapeHtml(item.office) + "</span>");
+    if (office.length) rows.push('<p class="modal-meta contact-office">' + office.join("") + "</p>");
+
+    var social = [];
+    var seenYouTube = false;
+    SOCIAL.forEach(function (spec) {
+      var value = item.social && item.social[spec[0]];
+      if (!value) return;
+      if (spec[1] === "YouTube") {
+        if (seenYouTube) return;
+        seenYouTube = true;
+      }
+      social.push(linkChip(spec[2](value), spec[1], "@" + value));
+    });
+    if (social.length) {
+      rows.push('<span class="field-label">Official accounts</span>' +
+        '<div class="links-row">' + social.join("") + "</div>");
+    }
+
+    var refs = [];
+    REFERENCE.forEach(function (spec) {
+      var value = spec[0] === "wikipedia" ? item.wikipedia : (item.refs || {})[spec[0]];
+      if (value) refs.push(linkChip(spec[2](value), spec[1]));
+    });
+    if (item.fecCandidateId) {
+      refs.push(linkChip("https://www.fec.gov/data/candidate/" +
+        encodeURIComponent(item.fecCandidateId) + "/", "FEC filings",
+        "Candidate " + item.fecCandidateId + " at the Federal Election Commission"));
+    }
+    if (!item.isCandidate && /^[A-Z]\d{6}$/.test(item.id)) {
+      refs.push(linkChip("https://bioguide.congress.gov/search/bio/" +
+        encodeURIComponent(item.id), "Biographical Directory"));
+    }
+    if (refs.length) {
+      rows.push('<span class="field-label">Elsewhere</span>' +
+        '<div class="links-row">' + refs.join("") + "</div>");
+    }
+
+    panel.hidden = !rows.length;
+    target.innerHTML = rows.join("");
   }
 
   function renderCrossLink(item) {
@@ -330,6 +468,15 @@
     // it from chamber + state + district in three separate places, which is
     // how "House • AL-District 3" and "House • TX-TX-32" once shipped.
     el("profileModalRegion").textContent = item.officeLabel;
+    var stateLink = el("profileModalStateLink");
+    if (item.state && item.state !== "N/A") {
+      stateLink.hidden = false;
+      stateLink.href = KYC.stateUrl(item.state);
+      stateLink.textContent = KYC.stateName(item.state) + " \u203a";
+      stateLink.title = "Everything about " + KYC.stateName(item.state) + ": its delegation and 2026 races";
+    } else {
+      stateLink.hidden = true;
+    }
     el("profileModalTerm").textContent = item.term_start || "N/A";
 
     var chamber = el("profileModalChamber");
@@ -383,6 +530,7 @@
     renderPlatform(item);
     renderVoting(item);
     renderCommittees(item);
+    renderContact(item);
 
     el("profileModalSource").textContent = item.financeSource
       ? "Finance figures from the FEC" +

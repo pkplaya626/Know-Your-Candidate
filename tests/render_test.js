@@ -28,7 +28,8 @@ function buildPage(page) {
   let html = fs.readFileSync(path.join(SITE, page), "utf8");
   const sources = [...html.matchAll(/<script[^>]*\bsrc="([^"]+)"[^>]*><\/script>/g)];
   for (const [tag, src] of sources) {
-    const file = path.join(SITE, ...src.split("/"));
+    // Relative to the page: the state pages sit one directory down.
+    const file = path.join(path.dirname(path.join(SITE, page)), ...src.split("/"));
     if (!fs.existsSync(file)) throw new Error(`${page} references a missing ${src}`);
     html = html.replace(tag, () => "<script>\n" + fs.readFileSync(file, "utf8") + "\n</script>");
   }
@@ -148,7 +149,7 @@ async function testShared(page) {
     check("[hidden] wins over component display rules",
       /\[hidden\]\s*\{[^}]*display:\s*none\s*!important/.test(css));
     check("the page hides with the property, not a class", (() => {
-      const js = ["kyc.js", "kyc-profile.js", "kyc-directory.js", "kyc-map.js"]
+      const js = ["kyc.js", "kyc-cards.js", "kyc-profile.js", "kyc-directory.js", "kyc-map.js", "kyc-state.js"]
         .filter((f) => fs.existsSync(path.join(SITE, "assets", f)))
         .map((f) => fs.readFileSync(path.join(SITE, "assets", f), "utf8"))
         .join("\n");
@@ -218,13 +219,28 @@ async function testShared(page) {
 
 /* ============================================================== index.html */
 
+/* The grid renders a screenful and appends the rest on scroll, so the DOM
+ * holds at most a page of cards; the announced count is the real total. */
+function announced(D) {
+  const m = D.getElementById("resultsLabel").textContent.match(/Showing ([\d,]+)/);
+  return m ? parseInt(m[1].replace(/,/g, ""), 10) : 0;
+}
+
 async function testDirectory() {
   const { window, D, KYC } = await testShared("index.html");
   const grid = D.getElementById("results");
   const cards = () => grid.querySelectorAll(".card");
 
   suite("index.html — grid", () => {
-    check("cards rendered", cards().length > 400, `${cards().length} cards`);
+    check("a screenful of cards rendered", cards().length > 100, `${cards().length} cards`);
+    check("the full count is announced", announced(D) > 400, `${announced(D)}`);
+    check("the rest is one click away", (() => {
+      const more = D.getElementById("gridMore");
+      if (!more) return false;
+      const before = cards().length;
+      more.click();
+      return cards().length > before;
+    })(), `${cards().length} after Show more`);
     check("portraits lazy-load",
       grid.querySelectorAll('img[loading="lazy"]').length === cards().length);
     check("cards are buttons, not clickable divs",
@@ -254,10 +270,10 @@ async function testDirectory() {
 
   suite("index.html — filtering", () => {
     const label = D.getElementById("resultsLabel");
-    const total = cards().length;
+    const total = announced(D);
 
     D.querySelector('[data-group="chamber"][data-value="Senate"]').click();
-    const senate = cards().length;
+    const senate = announced(D);
     check("chamber filter narrows the grid", senate > 0 && senate < total,
       `${senate} of ${total}`);
     check("chamber filter is reflected in the URL",
@@ -265,12 +281,12 @@ async function testDirectory() {
     check("results count is announced", /Showing/.test(label.textContent), label.textContent);
 
     D.querySelector('[data-group="party"][data-value="Republican"]').click();
-    check("filters compose", cards().length < senate, `${cards().length}`);
+    check("filters compose", announced(D) < senate, `${announced(D)}`);
     D.querySelector('[data-group="party"][data-value="Republican"]').click();
-    check("clicking an active optional chip clears it", cards().length === senate);
+    check("clicking an active optional chip clears it", announced(D) === senate);
 
     D.querySelector('[data-group="chamber"][data-value="all"]').click();
-    check("chamber resets", cards().length === total);
+    check("chamber resets", announced(D) === total);
 
     const search = D.getElementById("searchInput");
     search.value = "Armed Services";
@@ -315,12 +331,13 @@ async function testDirectoryAsync() {
     // Since the field came from the FEC, 79% of profiles are people who do
     // not hold the seat. "Who represents me" has to be one click.
     const cards = () => D.getElementById("results").querySelectorAll(".card");
-    const total = cards().length;
+    const total = announced(D);
 
     D.querySelector('[data-group="role"][data-value="member"]').click();
     const members = [...cards()];
-    check("sitting members filter narrows the grid", members.length < total,
-      `${members.length} of ${total}`);
+    const memberTotal = announced(D);
+    check("sitting members filter narrows the grid", memberTotal < total,
+      `${memberTotal} of ${total}`);
     check("every card is someone currently in Congress",
       members.every((c) => !KYC.byId(c.getAttribute("data-id")).isCandidate));
     check("the filter is in the URL", /role=member/.test(window.location.hash),
@@ -333,12 +350,12 @@ async function testDirectoryAsync() {
 
     D.querySelector('[data-group="role"][data-value="candidate"]').click();
     check("challengers filter is the complement",
-      cards().length === total - members.length, `${cards().length}`);
+      announced(D) === total - memberTotal, `${announced(D)}`);
     check("every card is a challenger",
       [...cards()].every((c) => KYC.byId(c.getAttribute("data-id")).isCandidate));
 
     D.querySelector('[data-group="role"][data-value="candidate"]').click();
-    check("clicking the active chip clears it", cards().length === total);
+    check("clicking the active chip clears it", announced(D) === total);
   });
 
   suite("index.html — links shared before the filter moved", () => {
@@ -392,6 +409,56 @@ async function testDirectoryAsync() {
       D.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
       return modal.hidden;
     })());
+  });
+
+  suite("index.html — contact & links", () => {
+    const member = window.legislatorsData.find(
+      (p) => !p.isCandidate && p.website && p.social && p.social.twitter &&
+        p.committeeList && p.committeeList.length && (p.refs || {}).govtrack);
+    check("a member with a site, accounts, committees and ids exists", !!member);
+    if (member) {
+      KYC.profile.open(member.id);
+      const panel = D.getElementById("profileModalContactPanel");
+      check("contact panel shows for a member", panel && !panel.hidden);
+      const links = [...D.getElementById("profileModalContact").querySelectorAll("a")];
+      check("official website is linked",
+        links.some((a) => a.href === member.website || a.href === member.website + "/"));
+      check("X account is linked from the handle",
+        links.some((a) => a.href === "https://x.com/" + encodeURIComponent(member.social.twitter)));
+      check("GovTrack is linked from the id, not the name",
+        links.some((a) => a.href.endsWith("/congress/members/" + member.refs.govtrack)));
+      check("every outbound link opens safely",
+        links.filter((a) => /^https?:/.test(a.href))
+          .every((a) => a.target === "_blank" && /noopener/.test(a.rel)));
+      const committees = D.getElementById("profileModalCommittees");
+      const table = KYC.meta().committees || {};
+      check("committees come from the structured rosters",
+        committees.querySelectorAll(".committee").length ===
+          member.committeeList.filter((c) => !(table[c.code] || {}).parent).length);
+      KYC.profile.close();
+    }
+    const runner = window.legislatorsData.find((p) => p.isCandidate && p.campaignSite);
+    check("a candidate with a campaign site exists", !!runner);
+    if (runner) {
+      KYC.profile.open(runner.id);
+      const links = [...D.getElementById("profileModalContact").querySelectorAll("a")];
+      check("campaign website is linked",
+        links.some((a) => a.href.replace(/\/$/, "") === runner.campaignSite.replace(/\/$/, "")));
+      check("FEC filings are linked from the candidate id",
+        links.some((a) => a.href === "https://www.fec.gov/data/candidate/" +
+          encodeURIComponent(runner.fecCandidateId) + "/"));
+      KYC.profile.close();
+    }
+    const hostile = { id: "X_TEST", name: "Test", website: 'https://example.com/"><img src=x onerror=alert(1)>',
+      isCandidate: true, social: { twitter: '"><b>x' } };
+    // The renderer only ever sees data through the escaper; push one bad row
+    // through it and make sure nothing executes.
+    window.legislatorsData.push(hostile);
+    KYC.profile.open("X_TEST");
+    const html = D.getElementById("profileModalContact").innerHTML;
+    check("hostile URLs are escaped, not interpreted", !/<img/.test(html) && !/<b>/.test(html));
+    KYC.profile.close();
+    window.legislatorsData.pop();
   });
 
   suite("index.html — the map's old bug, checked on both pages", () => {
@@ -561,12 +628,109 @@ async function testMap() {
   });
 }
 
+/* ============================================================ state pages */
+
+async function testStates() {
+  const { window, D, KYC } = await testShared("states/tx.html");
+
+  suite("states/tx.html — one state's page", () => {
+    const content = D.getElementById("stateContent");
+    check("the page is about Texas", /Texas/.test(D.querySelector(".state-title").textContent));
+    check("the document title names the state", /^Texas/.test(D.title), D.title);
+    const members = window.legislatorsData.filter((p) => !p.isCandidate && p.state === "TX");
+    const senators = members.filter((p) => /Senate/.test(p.chamber));
+    const heads = [...content.querySelectorAll(".state-heading")];
+    check("senators come first", /senators/i.test(heads[0].textContent), heads[0].textContent);
+    const grids = [...content.querySelectorAll(".state-section > .card-grid")];
+    check("both senators are shown", grids[0].querySelectorAll(".card").length === senators.length);
+    check("the whole delegation is shown",
+      grids[1].querySelectorAll(".card").length === members.length - senators.length,
+      `${grids[1].querySelectorAll(".card").length} of ${members.length - senators.length}`);
+    check("the delegation is in district order", (() => {
+      const nums = [...grids[1].querySelectorAll(".card")]
+        .map((c) => KYC.districtOrder(KYC.byId(c.getAttribute("data-id"))));
+      return nums.every((n, i) => i === 0 || n >= nums[i - 1]);
+    })());
+    const txRaces = window.kycRaces.filter((r) => r.state === "TX");
+    const sections = [...content.querySelectorAll("section.race")];
+    check("every Texas race has a section", sections.length === txRaces.length,
+      `${sections.length} of ${txRaces.length}`);
+    check("races are in ballot order: Senate, then districts", (() => {
+      const titles = sections.map((s) => s.querySelector(".race-title").textContent.trim());
+      const nums = titles.map((t) => (t.match(/District (\d+)/) || [0, 0])[1]).map(Number);
+      return /Senate/.test(titles[0]) && nums.slice(1).every((n, i) => i === 0 || n >= nums[i]);
+    })());
+    check("race sections carry no self-link to the state",
+      !content.querySelector(".race-state-link"));
+    check("nothing under the page is unescaped markup from the data",
+      !/<script/i.test(content.innerHTML));
+    const first = content.querySelector(".card");
+    first.click();
+    check("a card opens the shared dialog",
+      !D.getElementById("profileModal").hidden &&
+      D.getElementById("profileModalName").textContent === KYC.byId(first.getAttribute("data-id")).name);
+    check("the dialog links back to the state page", (() => {
+      const a = D.getElementById("profileModalStateLink");
+      return a && !a.hidden && /tx\.html$/.test(a.getAttribute("href"));
+    })());
+    KYC.profile.close();
+    const jump = D.getElementById("stateJump");
+    check("the jump list names every state", jump.options.length > 50, `${jump.options.length}`);
+    check("the jump list has Texas selected", jump.value === "TX");
+    check("search narrows the cards", (() => {
+      const input = D.getElementById("stateSearch");
+      input.value = "zzzz-no-such-person";
+      input.dispatchEvent(new window.Event("input", { bubbles: true }));
+      return true; // debounced; asserted below after a tick
+    })());
+  });
+
+  await new Promise((r) => setTimeout(r, 200));
+  suite("states/tx.html — search (after debounce)", () => {
+    const cards = [...D.querySelectorAll("#stateContent .card")];
+    check("no card matches nonsense", cards.every((c) => c.hidden), `${cards.filter((c) => !c.hidden).length} shown`);
+  });
+
+  const index = await testShared("states/index.html");
+  suite("states/index.html — the directory of states", () => {
+    const rows = [...index.D.querySelectorAll(".state-row")];
+    const states = Object.keys(index.KYC.meta().states || {});
+    check("one row per state and territory", rows.length === states.length,
+      `${rows.length} of ${states.length}`);
+    check("every row links to a page that exists", rows.every((r) => {
+      const href = r.getAttribute("href");
+      return fs.existsSync(path.join(SITE, "states", href));
+    }));
+    check("rows are alphabetical by name", (() => {
+      const names = rows.map((r) => r.querySelector(".state-row-name").textContent.trim());
+      return names.every((n, i) => i === 0 || n.localeCompare(names[i - 1]) >= 0);
+    })());
+    check("Texas is one of them", rows.some((r) => r.getAttribute("data-state") === "TX"));
+  });
+
+  suite("state pages — every generated page is wired", () => {
+    const files = fs.readdirSync(path.join(SITE, "states")).filter((f) => f.endsWith(".html"));
+    check("57 pages: 50 states, DC and 5 territories, plus the index",
+      files.length === 57, `${files.length}`);
+    const bad = files.filter((f) => {
+      const raw = fs.readFileSync(path.join(SITE, "states", f), "utf8");
+      return !/<link rel="canonical" href="https:\/\/[^"]+\/states\/[a-z]+\.html">/.test(raw) ||
+        !/data-root="\.\.\/"/.test(raw);
+    });
+    check("each has a canonical URL and declares its depth", bad.length === 0, bad.join(", "));
+    const sitemap = fs.readFileSync(path.join(SITE, "sitemap.xml"), "utf8");
+    check("the sitemap lists every state page",
+      files.filter((f) => f !== "index.html").every((f) => sitemap.includes("/states/" + f)));
+  });
+}
+
 /* ================================================================== report */
 
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "index.html") await testDirectoryAsync();
   if (!only || only === "map.html") await testMap();
+  if (!only || only === "states") await testStates();
 
   let failed = 0;
   for (const r of results) {

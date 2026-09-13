@@ -83,6 +83,15 @@ jobs:
           python build_profile_site.py field
           python build_profile_site.py results
 
+      # Campaign websites, one committee lookup each. Capped so the weekly
+      # run stays inside the key's hourly budget alongside the steps above;
+      # the cache resumes where it left off next week.
+      - name: Look up campaign websites for anyone new on a ballot
+        env:
+          FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
+        if: env.FEC_API_KEY != ''
+        run: python build_profile_site.py campaigns --limit 250 || true
+
       - name: Refresh House financial disclosure links
         run: python build_profile_site.py disclosures
 

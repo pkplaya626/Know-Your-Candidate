@@ -281,6 +281,96 @@ class TestPageWiring(unittest.TestCase):
         self.assertIn("out of order", result["index.html"][1])
 
 
+class TestStatePages(unittest.TestCase):
+    """Fifty-seven pages from one template, checked the way the data is."""
+
+    def test_a_state_page_carries_its_code_and_relative_paths(self):
+        from kyc import pages
+        html = pages.render_state("TX", "example.org",
+                                  {"states": {"TX": {"name": "Texas", "seatsUp": 40, "house": 38}}})
+        self.assertIn('data-state="TX"', html)
+        self.assertIn('data-root="../"', html)
+        self.assertIn("<title>Texas — Know Your Candidate</title>", html)
+        self.assertIn('rel="canonical" href="https://example.org/states/tx.html"', html)
+        self.assertIn('src="../data/profiles.js"', html)
+        self.assertIn("40 seats", html)
+        self.assertNotIn("$title", html)          # every placeholder filled
+
+    def test_a_territory_reads_as_a_delegate(self):
+        from kyc import pages
+        html = pages.render_state("GU", "example.org",
+                                  {"states": {"GU": {"name": "Guam", "seatsUp": 1, "house": 1}}})
+        self.assertIn("delegate to the U.S. House", html)
+
+    def test_state_names_agree_with_the_pipeline(self):
+        from kyc import pages
+        from kyc.normalize import US_STATES
+        self.assertEqual(pages.state_name("TX"), "Texas")
+        self.assertEqual(pages.state_name("DC"), "District of Columbia")
+        self.assertEqual(set(pages.STATE_NAMES), set(US_STATES.values()))
+
+    def test_the_sitemap_lists_every_state_after_the_two_pages(self):
+        from kyc import pages
+        xml = pages.sitemap("example.org", ["TX", "AK"])
+        locs = [line.strip() for line in xml.splitlines() if "<loc>" in line]
+        self.assertEqual(locs, [
+            "<loc>https://example.org/</loc>",
+            "<loc>https://example.org/map.html</loc>",
+            "<loc>https://example.org/states/index.html</loc>",
+            "<loc>https://example.org/states/ak.html</loc>",
+            "<loc>https://example.org/states/tx.html</loc>",
+        ])
+
+    def test_pages_are_written_and_a_hand_edit_is_reported(self):
+        people = [member(id="X1", state="TX"), member(id="X2", state="AK"),
+                  member(id="C1", state="TX", isCandidate=True)]
+        with tempfile.TemporaryDirectory() as tmp:
+            os.makedirs(os.path.join(tmp, emit.SITE_DIR))
+            with open(os.path.join(tmp, emit.CNAME_FILE), "w", encoding="utf-8") as f:
+                f.write("example.org\n")
+            written = emit.write_state_pages(people, tmp, summary={"states": {}})
+            self.assertEqual(sorted(os.path.basename(w) for w in written),
+                             ["ak.html", "index.html", "tx.html"])
+            self.assertEqual(emit.check_state_pages(people, tmp, summary={"states": {}}), [])
+            with open(os.path.join(tmp, emit.STATES_DIR, "tx.html"), "a", encoding="utf-8") as f:
+                f.write("<!-- edited by hand -->")
+            stale = emit.check_state_pages(people, tmp, summary={"states": {}})
+            self.assertEqual([os.path.basename(rel) for rel, _ in stale], ["tx.html"])
+            self.assertEqual(stale[0][1], "stale")
+            path = emit.write_sitemap(people, tmp)
+            with open(path, encoding="utf-8") as f:
+                self.assertIn("/states/ak.html", f.read())
+
+    def test_the_committed_state_pages_are_wired(self):
+        results = {p: (ok, note) for p, ok, note in emit.check_pages(ROOT)}
+        state_pages = [p for p in results if p.startswith("states/")]
+        self.assertGreaterEqual(len(state_pages), 50)
+        for page in state_pages:
+            self.assertTrue(results[page][0], f"{page}: {results[page][1]}")
+
+    def test_per_state_summary_counts_the_delegation(self):
+        people = [
+            member(id="S1", state="TX", seatUp2026=True),
+            member(id="S2", state="TX"),
+            member(id="H1", state="TX", chamber="House", districtNum=3, seatUp2026=True),
+            member(id="C1", state="TX", isCandidate=True, raceStatus="nominee"),
+            member(id="C2", state="TX", isCandidate=True, raceStatus="eliminated"),
+            member(id="D1", state="GU", chamber="House", districtNum=0, seatUp2026=True),
+        ]
+        races = [{"id": "S-TX-2026", "state": "TX", "openSeat": True},
+                 {"id": "H-TX-03-2026", "state": "TX", "openSeat": False}]
+        by_state = summary.by_state(people, races)
+        self.assertEqual(by_state["TX"]["senators"], 2)
+        self.assertEqual(by_state["TX"]["house"], 1)
+        self.assertEqual(by_state["TX"]["seatsUp"], 2)
+        self.assertEqual(by_state["TX"]["open"], 1)
+        self.assertEqual(by_state["TX"]["challengersOnBallot"], 1)
+        self.assertEqual(by_state["TX"]["challengersOut"], 1)
+        self.assertEqual(by_state["TX"]["name"], "Texas")
+        self.assertEqual(by_state["GU"]["delegates"], 1)
+        self.assertTrue(by_state["GU"]["territory"])
+
+
 class TestHostnameConsistency(unittest.TestCase):
     """One hostname, six places, five files.
 

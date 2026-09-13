@@ -877,6 +877,41 @@ svg { flex: none; }
 }
 .field-value.subtle { font-weight: 400; color: var(--text-muted); }
 
+/* Contact & links: every chip is an outbound link built from a source id. */
+.links-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin: var(--s-2) 0 var(--s-3);
+}
+.link-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  padding: var(--s-1) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  color: var(--text);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.15s var(--ease), border-color 0.15s var(--ease);
+}
+.link-chip:hover { background: var(--surface-1); border-color: var(--border-strong); }
+.link-chip-icon { width: 0.85em; height: 0.85em; opacity: 0.7; }
+.contact-office { margin: 0 0 var(--s-2); }
+.contact-office a { color: inherit; }
+
+.committee { align-items: flex-start; }
+.committee .badge { margin-left: var(--s-2); vertical-align: middle; }
+.committee-subs {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+
 .disclosure-link {
   display: inline-flex;
   align-items: center;
@@ -1539,3 +1574,117 @@ svg { flex: none; }
   .modal { position: static; padding: 0; }
   .modal-dialog { max-height: none; border: 0; box-shadow: none; }
 }
+
+/* ------------------------------------------------------------ state pages */
+
+.sidebar-link {
+  display: inline-block;
+  margin-top: var(--s-2);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+.sidebar-link:hover { text-decoration: underline; }
+
+.state-link {
+  margin-left: var(--s-2);
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.state-link:hover { text-decoration: underline; }
+
+.race-state-link {
+  margin-left: var(--s-2);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+.race-state-link:hover { text-decoration: underline; }
+
+.state-page { padding-bottom: var(--s-6); }
+.state-hero { padding: var(--s-4) 0 var(--s-5); }
+.state-kicker {
+  margin: 0 0 var(--s-1);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.state-title {
+  margin: 0 0 var(--s-3);
+  font-size: var(--t-2xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.state-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin: 0 0 var(--s-4);
+}
+.state-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin: 0;
+}
+.state-links .btn { text-decoration: none; }
+.state-section { margin-bottom: var(--s-6); }
+.state-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  margin: 0 0 var(--s-3);
+  font-size: var(--t-lg);
+  font-weight: 700;
+}
+.state-heading .balance { font-size: var(--t-sm); font-weight: 600; }
+.state-note {
+  margin: 0 0 var(--s-4);
+  font-size: var(--t-sm);
+  color: var(--text-muted);
+}
+.state-section .race { margin-bottom: var(--s-4); }
+
+.state-list { display: grid; gap: var(--s-2); }
+.state-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1.4fr 1fr 1fr;
+  gap: var(--s-3);
+  align-items: center;
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.15s var(--ease), background-color 0.15s var(--ease);
+}
+.state-row:hover { border-color: var(--border-strong); background: var(--surface-3); }
+.state-row-name { font-weight: 700; }
+.state-row-code { margin-left: var(--s-1); font-weight: 600; color: var(--text-muted); }
+.state-row-meta { font-size: var(--t-sm); color: var(--text-muted); }
+@media (max-width: 720px) {
+  .state-row { grid-template-columns: 1fr 1fr; }
+}
+
+.grid-more {
+  grid-column: 1 / -1;
+  justify-self: center;
+  margin: var(--s-4) 0;
+}
+.chip-link { text-decoration: none; }
+.jump-row {
+  position: static;
+  margin: 0 0 var(--s-4);
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.race { scroll-margin-top: var(--s-6); }

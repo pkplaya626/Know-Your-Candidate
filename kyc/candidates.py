@@ -197,14 +197,20 @@ def filing_counts(cache, year=CYCLE):
     return counts
 
 
-# Generational and professional suffixes move to the end of a display name.
+# Generational suffixes are part of the name and move to its end.
 _SUFFIXES = {"JR": "Jr.", "SR": "Sr.", "II": "II", "III": "III", "IV": "IV",
-             "V": "V", "MD": "M.D.", "PHD": "Ph.D.", "DDS": "D.D.S.",
-             "ESQ": "Esq.", "DVM": "D.V.M."}
+             "V": "V"}
 
-# Titles carry no information about who the person is and read as noise in
-# the middle of a name ("Brian J Mr. Burley").
-_HONORIFICS = {"MR", "MRS", "MS", "MISS"}
+# Credentials and titles carry no information about who the person is and
+# read as noise wherever the treasurer typed them: "Rudolph Dr. Moise",
+# "M.D. Jd Razack Nizam", "Joseph Dr. Joe Ph.d. Arminio". They are dropped
+# from the display name; the filed form stays on the profile as filedName.
+_HONORIFICS = {"MR", "MRS", "MS", "MISS", "DR", "HON", "REV", "SEN", "REP",
+               "PROF", "CAPT", "COL", "GEN", "LT", "MAJ", "SGT", "CMDR",
+               "MAYOR", "JUDGE", "GOV", "ATTY", "RABBI", "PASTOR", "FR",
+               "MD", "PHD", "DDS", "DVM", "ESQ", "JD", "MBA", "CPA", "RN",
+               "OD", "DO", "PA", "MPH", "MPA", "MSW", "LPC", "DMD", "PE",
+               "RET", "USAF", "USMC", "USN", "USA", "USCG"}
 
 # Surname particles stay lowercase: "Van Der Berg" is wrong, "van der Berg"
 # is what people actually write.
@@ -215,8 +221,8 @@ _PARTICLES = {"VAN", "VON", "DER", "DEN", "DE", "DEL", "DELLA", "DI", "DA",
 def _cap(word):
     """Capitalise one name token, respecting the shapes that break .title()."""
     upper = word.upper()
-    if upper.rstrip(".") in _SUFFIXES:
-        return _SUFFIXES[upper.rstrip(".")]
+    if upper.replace(".", "") in _SUFFIXES:
+        return _SUFFIXES[upper.replace(".", "")]
     if "-" in word:
         return "-".join(_cap(part) for part in word.split("-"))
     if "'" in word:
@@ -244,10 +250,25 @@ def display_name(filed_name):
         return ""
 
     parts = [p.strip() for p in text.split(",") if p.strip()]
+
+    def bare(word):
+        return word.upper().replace(".", "")
+
+    def noise(part):
+        """A comma part made only of titles and credentials: "MD JD"."""
+        words = part.split()
+        return bool(words) and all(bare(w) in _HONORIFICS for w in words)
+
     suffix = ""
     if len(parts) >= 3:
-        # LAST, FIRST MIDDLE, SUFFIX
-        surname, given, suffix = parts[0], parts[1], parts[2]
+        # Usually LAST, FIRST MIDDLE, SUFFIX - but "RAZACK, MD JD, NIZAM"
+        # puts the credentials in the middle and the given name last.
+        surname = parts[0]
+        rest = parts[1:]
+        suffixes = [q for q in rest if bare(q) in _SUFFIXES]
+        given_parts = [q for q in rest if bare(q) not in _SUFFIXES and not noise(q)]
+        suffix = suffixes[0] if suffixes else ""
+        given = " ".join(given_parts) if given_parts else rest[0]
     elif len(parts) == 2:
         surname, given = parts
     else:
@@ -255,9 +276,11 @@ def display_name(filed_name):
 
     words = given.split()
     # A suffix can also trail the given names: "DOE, JOHN JR".
-    while words and words[-1].upper().rstrip(".") in _SUFFIXES:
+    while words and bare(words[-1]) in _SUFFIXES:
         suffix = words.pop()
-    words = [w for w in words if w.upper().rstrip(".") not in _HONORIFICS]
+    words = [w for w in words if bare(w) not in _HONORIFICS]
+    if not words:
+        words = given.split()      # never render a name down to nothing
 
     ordered = words + surname.split()
     rendered = []
@@ -269,7 +292,7 @@ def display_name(filed_name):
             rendered.append(_cap(word))
 
     if suffix:
-        rendered.append(_SUFFIXES.get(suffix.upper().rstrip("."), _cap(suffix)))
+        rendered.append(_SUFFIXES.get(bare(suffix), _cap(suffix)))
     return " ".join(rendered)
 
 

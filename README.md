@@ -25,7 +25,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… build --strict` | Refuse to write if validation finds an error |
 | `… build --json` | Emit the validation report as JSON |
 | `… verify` | Check the committed data still matches the sources |
-| `… congress` | Refresh the membership snapshot and report roster drift |
+| `… congress` | Refresh the membership snapshot (with contact details, accounts and committee rosters) and report roster drift |
 | `… congress --check` | Report drift from the committed snapshot; no network |
 | `… congress --apply` | Add newly seated members to the roster CSVs |
 | `… field` | Refresh the FEC register of everyone running in 2026 |
@@ -33,14 +33,16 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… disclosures` | Link House members to their filed financial disclosures |
 | `… results` | Read each state's primary results from Wikipedia: who is still in |
 | `… results --check` | Report the results from the committed cache; no network |
+| `… campaigns` | Look up campaign websites from each candidate's FEC committee (needs `FEC_API_KEY`) |
+| `… campaigns --check` | Report campaign-site coverage from the committed cache; no network |
 | `… geo` | Regenerate only the map geometry |
 | `… fetch` | Refresh DW-NOMINATE scores from Voteview into the roster CSVs |
 | `… portraits` | Resolve and check a portrait URL for every profile |
 | `… portraits --refresh` | Re-resolve every portrait, not just the missing ones |
 | `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`) |
 | `… refresh` | `fetch`, then `build` |
-| `python -m unittest discover tests` | 348 pipeline tests |
-| `npm install && npm test` | Render both pages in jsdom and drive the UI (148 checks) |
+| `python -m unittest discover tests` | 372 pipeline tests |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (260 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -90,7 +92,9 @@ CI asserts that a rebuild changes nothing.
 | `candidates.py` | The FEC's register of who is running in 2026 |
 | `disclosures.py` | Links to House members' filed financial disclosures |
 | `geo.py` | Decode the state atlas into SVG path data |
-| `summary.py` | Chamber balance and election headline figures |
+| `summary.py` | Chamber balance, election headline figures, per-state figures |
+| `pages.py` | The state-page template, the states directory and the sitemap |
+| `campaigns.py` | Campaign websites from each candidate's FEC committee |
 | `validate.py` | Data-quality checks |
 | `emit.py` | Write the data files atomically; verify the pages are wired up |
 | `cli.py` | Argument parsing and command wiring |
@@ -108,8 +112,10 @@ order renders an empty site with no error anywhere.
 | `assets/kyc.css` | The entire stylesheet: tokens, three themes, every component |
 | `assets/kyc.js` | Theme, icon sprite, escaping, provenance, router, dialog helper, shell |
 | `assets/kyc-profile.js` | The profile dialog, shared by both pages |
+| `assets/kyc-cards.js` | Profile cards and race sections, shared by the grid and the state pages |
 | `assets/kyc-directory.js` | The grid: filtering, sorting, races |
 | `assets/kyc-map.js` | The map: rendering, modes, delegation panel |
+| `assets/kyc-state.js` | A state's page, and the directory of states |
 
 Every view has a URL: `#/profile/<id>` for a person,
 `#/?state=TX&chamber=Senate` for a filtered list, so any view can be linked and
@@ -147,6 +153,20 @@ CI fails if any of them come back.
 - Skip link, labelled controls, live region on the result count, focus-trapped
   dialog with focus restore, `prefers-reduced-motion` honoured.
 - The sidebar becomes an off-canvas drawer under 1000px.
+
+### Getting around
+
+- `/` focuses the search box from anywhere on any page; Escape hands focus
+  back.
+- The grid renders a screenful of cards and appends the rest as you scroll
+  (a **Show more** button does the same without the observer), so the first
+  paint no longer waits on 2,500 image elements. The result count is always
+  the full figure.
+- The state filter lists states by name, and a filtered state is one click
+  from its own page. Race headers, the profile dialog and the map panel link
+  to the state page too; a state page has a jump row for its districts.
+- Cards, rows and map states open the same profile dialog everywhere; a
+  `#/profile/<id>` link opens it on whichever page it is pasted into.
 
 ### Escaping
 
@@ -503,6 +523,56 @@ Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
 | `raceStatus` / `raceStatusRace` | `nominee`, `advanced`, `eliminated`, `withdrawn` or `unlisted`, and the race it refers to |
 | `ballotParty` / `fecParty` | The party the ballot lists, when it differs from the roster or FEC record |
 | `rosterSeat` | For a curated challenger, the seat the roster gave them when the FEC filing says otherwise |
+
+## State pages
+
+Every state and territory has its own page - `states/tx.html`, and
+`states/index.html` listing all fifty-seven - written by the build from one
+template in `kyc/pages.py`. A page opens with the state's headline figures,
+then who holds its seats (senators first, then the House by district), then
+every 2026 race in ballot order with the sitting member, everyone on the
+November ballot, and the people the primary removed folded under each race.
+The same profile dialog opens from every card.
+
+The pages carry nothing but the state code; `assets/kyc-state.js` renders
+them from the same `profiles.js` the grid and map load, so a state page can
+never disagree with the grid about who represents a district. They are
+generated, so `verify` regenerates them in memory and fails when a page on
+disk is not what the template would write.
+
+They are linked from everywhere a state is named: the race headers in the
+grid, the profile dialog's "Represents" line, the state filter in the sidebar,
+the map's delegation panel, the footer, and `sitemap.xml`.
+
+## Contact and links
+
+| Field | Source | Who has it |
+|---|---|---|
+| `website`, `phone`, `office`, `contactForm` | The member's current term record in `congress-legislators` | Sitting members |
+| `social` (`twitter`, `facebook`, `instagram`, `youtube_id`, `bluesky`) | `legislators-social-media`, the project's verified account list | Sitting members |
+| `refs` (`govtrack`, `opensecrets`, `votesmart`, `ballotpedia`) | Reference ids from `congress-legislators` | Sitting members |
+| `wikipedia` | The bioguide mapping for members; the state ballot page's own link for filed candidates (`wikipediaVia`) | Members, and candidates the ballot page links |
+| `campaignSite`, `campaignCommittee` | The principal campaign committee's Form 1 at the FEC (`data/campaigns.json`) | Everyone on a ballot with an FEC id |
+| `committeeList`, `committeesSource` | `committee-membership-current`, with rank and title (`data/committees.json`) | Sitting members |
+| `fecCandidateId` | Links the FEC's own candidate page | Everyone the FEC knows |
+
+Every link on the page is built from one of those ids. Nothing is guessed
+from a name: a Ballotpedia page derived from "Mike Rogers" is the wrong Mike
+Rogers half the time, and nothing on the page would look wrong.
+
+The **Contact & links** panel in the profile dialog shows the official and
+campaign websites, phone and office, the verified accounts, and the
+reference links. Committees render as a hierarchy from the rosters - each
+full committee with the member's subcommittees under it and any chair or
+ranking-member title called out - and fall back to the roster's typed column
+only for the handful of members the rosters do not list.
+
+Filed candidates the state's ballot page links to an article also get a
+portrait from it. That link is an editor's assertion about this person on
+this ballot, the same kind of authority as the bioguide mapping for
+members, so it is the one exception to the rule that portraits are never
+guessed for the field - and the resolved title is still checked against the
+surname after redirects. Portrait coverage went from 572 to 773 profiles.
 
 All 435 House seats are two-year terms, so every House member has
 `seatUp2026 = true`. Use `seekingReelection2026` to find who is actually

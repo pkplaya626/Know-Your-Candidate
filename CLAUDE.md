@@ -25,16 +25,22 @@ us_atlas_states_topo.json   ──┤
 congress_snapshot.json      ──┤
 data/fec_field.json         ──┤   (the FEC's 2026 candidate register)
 data/disclosures.json       ──┤
-data/primary_results.json   ──┴─> kyc/ ──> candidate_profiles_site/
+data/primary_results.json   ──┤
+data/committees.json        ──┤   (committee rosters, with rank and title)
+data/campaigns.json         ──┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
+                                             states/*.html      (generated, one per state)
+                                             sitemap.xml        (generated)
                                              ├──> index.html    (grid, races, profiles)
                                              └──> map.html      (partisan map)
                                              assets/kyc.css
                                              assets/kyc.js
+                                             assets/kyc-cards.js
                                              assets/kyc-profile.js
                                              assets/kyc-directory.js
                                              assets/kyc-map.js
+                                             assets/kyc-state.js
 ```
 
 - The root CSVs are the editorial source of truth. The state atlas and
@@ -42,11 +48,13 @@ data/primary_results.json   ──┴─> kyc/ ──> candidate_profiles_site/
   hand-edited.
 - Everything in `data/` is **generated**. Never edit `profiles.js` or `geo.js`
   by hand. `portraits.json`, `finance.json`, `fec_field.json`,
-  `disclosures.json` and `primary_results.json` are caches, but they *are*
-  hand-editable.
+  `disclosures.json`, `primary_results.json`, `committees.json` and
+  `campaigns.json` are caches, but they *are* hand-editable.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them only to check they load the right scripts in the right order; it never
-  rewrites them.
+  rewrites them. `states/*.html` and `sitemap.xml` are the opposite: generated
+  from `kyc/pages.py` on every build, never edited by hand, and `verify`
+  fails when one on disk is not what the template would write.
 - Shared page behaviour belongs in `assets/`, not in a page. Neither page
   contains an inline `<script>` block.
 
@@ -63,12 +71,13 @@ python build_profile_site.py congress         # refresh membership (network)
 python build_profile_site.py field --check    # who is running, from the FEC
 python build_profile_site.py disclosures      # House financial disclosure links
 python build_profile_site.py results          # who is still in, from Wikipedia
-python -m unittest discover tests             # 348 tests, no dependencies
-npm install && npm test                       # 148 real-DOM checks (needs jsdom)
+python build_profile_site.py campaigns        # campaign websites from FEC committees
+python -m unittest discover tests             # 372 tests, no dependencies
+npm install && npm test                       # 260 real-DOM checks (needs jsdom)
 ```
 
-Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results` and
-`congress` touch the network. Run the
+Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
+`campaigns` and `congress` touch the network. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -252,6 +261,28 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     in that state went unread while nothing failed. `template_fields` walks
     the text and splits only at depth zero, so piped links and nested
     templates inside a value survive.
+
+32. **Build every outbound link from an id the source holds, never from a
+    name.** Members link to GovTrack, OpenSecrets, Vote Smart and
+    Ballotpedia through the ids in `congress-legislators`; everyone links to
+    the FEC through their candidate id; a campaign site comes from the
+    committee's own Form 1. A Ballotpedia URL guessed from "Mike Rogers" is
+    the wrong Mike Rogers half the time and looks entirely normal.
+
+33. **A ballot page's link is an authority; a search is not.** Rule 24 stands
+    - the field's portraits are never guessed - but a filing the state's
+    election page links to an article carries that title (`wikipediaVia:
+    "election-page"`), resolved through the title alone and still checked
+    against the surname after redirects. That is how 201 challengers got a
+    portrait without a single guess, and how Brian McGinnis's protest photo
+    was rejected a second time.
+
+34. **Fifty-seven near-identical pages are generated, not maintained.** The
+    state pages come from one template and carry nothing but a state code;
+    `assets/kyc-state.js` renders them from the same `profiles.js` as the
+    grid. A hand-edited copy per state would drift the first time one was
+    touched, and a state page that disagreed with the grid about who holds
+    a district would look entirely normal.
 
 ## Curated data
 

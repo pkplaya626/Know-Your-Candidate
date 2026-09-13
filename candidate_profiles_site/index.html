@@ -104,6 +104,10 @@
                 <svg class="icon" aria-hidden="true"><use href="#i-map"/></svg>
                 Partisan map
             </a>
+            <a class="nav-link" href="states/index.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
+                States &amp; territories
+            </a>
         </nav>
 
         <div class="sidebar-section">
@@ -140,6 +144,7 @@
             <select id="stateSelect" class="select">
                 <option value="all">All states &amp; territories</option>
             </select>
+            <a class="sidebar-link" id="stateSelectLink" href="states/index.html" hidden></a>
         </div>
     </aside>
 
@@ -176,7 +181,8 @@
             <button type="button" class="chip" data-group="election" data-value="senateUp26"
                     data-optional aria-pressed="false">Senate seats up ’26</button>
             <button type="button" class="chip" data-group="election" data-value="notSeeking"
-                    data-optional aria-pressed="false">Retiring / not seeking</button>
+                    data-optional aria-pressed="false"
+                    title="Sitting members not on the November ballot for the seat they hold: retiring, running for another office, or beaten in a primary">Not seeking re-election</button>
             <button type="button" class="chip" data-group="election" data-value="contested"
                     data-optional aria-pressed="false">Contested races</button>
 
@@ -226,7 +232,8 @@
                     (52&nbsp;U.S.C.&nbsp;&sect;30101(2)). Filings below that are still
                     counted per race, so a seat is never described as uncontested
                     when somebody has filed for it.</p>
-                <p>Non-partisan and independent. Data built
+                <p>One page per state: <a href="states/index.html">states &amp; territories</a>.
+                    Non-partisan and independent. Data built
                     <time id="buildStamp">—</time>.</p>
             </footer>
         </div>
@@ -234,6 +241,7 @@
 </div>
 
 <script src="data/profiles.js"></script>
+<script src="assets/kyc-cards.js"></script>
 <script src="assets/kyc-profile.js"></script>
 <script src="assets/kyc-directory.js"></script>
 </body>

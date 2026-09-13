@@ -8,6 +8,7 @@ import sys
 
 from . import (
     __version__,
+    campaigns,
     emit,
     fec,
     geo as geo_mod,
@@ -64,8 +65,12 @@ def _build(args):
               "only the roster's challengers.")
 
     finance = fec.load_cache(args.root)
+    committees = legislators.load_committees(args.root)
+    if committees:
+        print(f"  read {legislators.COMMITTEES_FILE} "
+              f"({len(committees['members'])} members with assignments)")
     profiles, stats = build_profiles(raw, snapshot=snapshot, field=field,
-                                     finance=finance)
+                                     finance=finance, committees=committees)
     stats["fec"] = fec.apply_cache(profiles, finance) if finance else 0
     # Filed candidates arrive with their totals from the field register, so
     # the finance cache covers only the roster. Count what the page shows.
@@ -79,6 +84,11 @@ def _build(args):
     stats["disclosures"] = disclosures.apply_cache(profiles, filings) if filings else 0
     if filings:
         print(f"  disclosures: {stats['disclosures']} members linked to a filing")
+
+    sites = campaigns.load_cache(args.root)
+    stats["campaign_sites"] = campaigns.apply_cache(profiles, sites) if sites else 0
+    if sites:
+        print(f"  campaigns: {stats['campaign_sites']} profiles with a campaign website")
 
     cache = portraits.load_cache(args.root)
     if cache:
@@ -155,7 +165,8 @@ def _build(args):
             print("\n[check] validation only, nothing written.")
         return 1 if errors else 0
 
-    summary = summary_mod.build(profiles, races=race_list)
+    summary = summary_mod.build(profiles, races=race_list,
+                                committees=legislators.load_committees(args.root))
     path, size = emit.write_profiles(
         profiles, stats, args.root, races=race_list, summary=summary
     )
@@ -165,7 +176,15 @@ def _build(args):
         geo_path, geo_size = emit.write_geo(geo, args.root)
         print(f"[ok] wrote {geo_path} ({geo_size / 1024:.0f} KB)")
 
+    written = emit.write_state_pages(profiles, args.root, summary=summary)
+    print(f"[ok] wrote {len(written)} state pages under {emit.STATES_DIR}")
+    sitemap_path = emit.write_sitemap(profiles, args.root)
+    if sitemap_path:
+        print(f"[ok] wrote {sitemap_path}")
+
     for page, ok, note in emit.check_pages(args.root):
+        if ok and page.startswith("states/"):
+            continue                    # 57 identical "ok" lines say nothing
         print(f"     {'ok  ' if ok else 'WARN'} {page}: {note}")
 
     return 0
@@ -203,7 +222,14 @@ def _portraits(args):
     raw = _load(args)
     if raw is None:
         return 2
-    profiles, _ = build_profiles(raw)
+    # The whole field, with results applied: a filed candidate is only
+    # resolvable through the article their state's ballot page links to,
+    # and that title arrives with the primary results.
+    finance = fec.load_cache(args.root)
+    profiles, _ = build_profiles(raw, snapshot=legislators.load_snapshot(args.root),
+                                 field=candidates.load_cache(args.root), finance=finance)
+    fec.apply_cache(profiles, finance)
+    results_mod.apply_cache(profiles, results_mod.load_cache(args.root))
     cache, _summary = portraits.resolve_all(
         profiles, root=args.root, refresh=args.refresh
     )
@@ -220,6 +246,36 @@ def _portraits(args):
             print(f"    ... {len(unresolved) - len(shown)} more (--verbose)")
     print(f"\n[ok] portrait cache: {portraits.CACHE_PATH}")
     return 0
+
+
+def _campaigns(args):
+    """Look up campaign websites from each candidate's principal committee."""
+    raw = _load(args)
+    if raw is None:
+        return 2
+    field = candidates.load_cache(args.root)
+    finance = fec.load_cache(args.root)
+    profiles, _ = build_profiles(raw, snapshot=legislators.load_snapshot(args.root),
+                                 field=field, finance=finance)
+    fec.apply_cache(profiles, finance)
+    # Statuses decide who is worth a request: nobody the primary removed.
+    results_mod.apply_cache(profiles, results_mod.load_cache(args.root))
+    if args.check:
+        cache = campaigns.load_cache(args.root)
+        if not cache:
+            print(f"[error] no {campaigns.CACHE_PATH}; run 'campaigns' first.",
+                  file=sys.stderr)
+            return 2
+        on_ballot = campaigns.wanted(profiles)
+        known = sum(1 for p in on_ballot if p["fecCandidateId"] in cache)
+        sites = sum(1 for p in on_ballot if (cache.get(p["fecCandidateId"]) or {}).get("url"))
+        print(f"  campaigns: {known} of {len(on_ballot)} people on a ballot looked up, "
+              f"{sites} with a website")
+        return 0
+    _, stats = campaigns.resolve_all(profiles, root=args.root, limit=args.limit,
+                                     refresh=args.refresh)
+    print(f"\n[ok] campaigns cache: {campaigns.CACHE_PATH}")
+    return 1 if stats.get("stopped") else 0
 
 
 def _finance(args):
@@ -255,12 +311,32 @@ def _congress(args):
     else:
         print(f"Downloading the current roster from {legislators.SOURCE_URL} ...")
         try:
-            snapshot = legislators.build_snapshot(legislators.fetch())
+            rows = legislators.fetch()
         except legislators.LegislatorsError as exc:
             print(f"[error] {exc}", file=sys.stderr)
             return 2
+        # The companion files are supplementary: a failure is reported and
+        # the membership snapshot is still written, because a missing
+        # Twitter handle is an absence and a missing member is an error.
+        social = None
+        try:
+            social = legislators.fetch_json(legislators.SOCIAL_URL)
+            print(f"  social media: {len(social)} accounts")
+        except legislators.LegislatorsError as exc:
+            print(f"  [warn] {exc}")
+        snapshot = legislators.build_snapshot(rows, social=social)
         path = legislators.save_snapshot(snapshot, args.root)
         print(f"  wrote {path} ({snapshot['count']} legislators)")
+        try:
+            membership = legislators.fetch_json(legislators.MEMBERSHIP_URL)
+            committees = legislators.fetch_json(legislators.COMMITTEES_URL)
+        except legislators.LegislatorsError as exc:
+            print(f"  [warn] {exc}")
+        else:
+            data = legislators.build_committees(membership, committees)
+            path = legislators.save_committees(data, args.root)
+            print(f"  wrote {path} ({len(data['committees'])} committees, "
+                  f"{len(data['members'])} members with assignments)")
 
     drift = legislators.reconcile(raw["members"], snapshot)
     print(f"\n  reconciliation: {drift.summary()}")
@@ -512,12 +588,14 @@ def _verify(args):
         snapshot=legislators.load_snapshot(args.root),
         field=candidates.load_cache(args.root),
         finance=finance,
+        committees=legislators.load_committees(args.root),
     )
     stats["fec"] = fec.apply_cache(profiles, finance) if finance else 0
     cache = portraits.load_cache(args.root)
     stats["portraits"] = portraits.apply_cache(profiles, cache) if cache else 0
     filings = disclosures.load_cache(args.root)
     stats["disclosures"] = disclosures.apply_cache(profiles, filings) if filings else 0
+    stats["campaign_sites"] = campaigns.apply_cache(profiles, campaigns.load_cache(args.root))
 
     outcomes = results_mod.load_cache(args.root)
     stats["results"] = results_mod.apply_cache(profiles, outcomes) if outcomes else 0
@@ -526,7 +604,8 @@ def _verify(args):
         results=outcomes, dates=results_mod.load_dates(args.root),
     )
     stats.update(races_mod.stats(race_list))
-    summary = summary_mod.build(profiles, races=race_list)
+    summary = summary_mod.build(profiles, races=race_list,
+                                committees=legislators.load_committees(args.root))
 
     problems = []
 
@@ -542,6 +621,14 @@ def _verify(args):
         )
     else:
         print(f"  ok  {emit.DATA_FILE} matches the rosters ({expected[:16]}...)")
+
+    stale_pages = emit.check_state_pages(profiles, args.root, summary=summary)
+    if stale_pages:
+        problems.append(f"{len(stale_pages)} state page(s) are {stale_pages[0][1]}: "
+                        + ", ".join(rel for rel, _ in stale_pages[:5])
+                        + (" ..." if len(stale_pages) > 5 else ""))
+    else:
+        print(f"  ok  {emit.STATES_DIR} pages match the template")
 
     try:
         geo = geo_mod.build(args.root)
@@ -668,6 +755,14 @@ def build_parser():
     res.add_argument("--check", action="store_true",
                      help="use the committed cache; make no network call")
 
+    camp = add("campaigns", help="look up campaign websites from FEC committee filings")
+    camp.add_argument("--check", action="store_true",
+                      help="report coverage from the committed cache; no network")
+    camp.add_argument("--limit", type=int, default=None,
+                      help="look up at most N committees this run")
+    camp.add_argument("--refresh", action="store_true",
+                      help="look everyone up again, not just the uncached")
+
     field = add("field", help="refresh the FEC register of 2026 candidates")
     field.add_argument("--check", action="store_true",
                        help="use the committed cache; make no network call")
@@ -716,6 +811,8 @@ def main(argv=None):
         return _disclosures(args)
     if args.command == "results":
         return _results(args)
+    if args.command == "campaigns":
+        return _campaigns(args)
     if args.command == "portraits":
         return _portraits(args)
     if args.command == "finance":

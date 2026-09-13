@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>American Samoa — Know Your Candidate</title>
+<meta name="description" content="American Samoa&#x27;s delegate to the U.S. House, the 2026 race for the seat, and every candidate who has filed - who is on the ballot and who is out.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://candidates.radicalrelay.us/states/as.html">
+<meta property="og:url" content="https://candidates.radicalrelay.us/states/as.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="American Samoa: Congress and the 2026 midterms">
+<meta property="og:description" content="American Samoa&#x27;s delegate to the U.S. House, the 2026 race for the seat, and every candidate who has filed - who is on the ballot and who is out.">
+<meta property="og:image" content="https://candidates.radicalrelay.us/assets/social-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Know Your Candidate">
+<meta property="og:site_name" content="Know Your Candidate">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/kyc.css">
+<script src="../assets/kyc.js"></script>
+</head>
+<body data-root="../" data-state="AS" data-page="state">
+
+<a href="#stateMain" class="skip-link">Skip to content</a>
+<button type="button" class="sidebar-scrim" tabindex="-1" aria-hidden="true"></button>
+
+<header class="app-header">
+    <button type="button" class="btn-icon sidebar-toggle" aria-expanded="false"
+            aria-controls="sidebar" aria-label="Show navigation">
+        <svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg>
+    </button>
+
+    <a class="brand" href="../index.html">
+        <svg class="icon" aria-hidden="true"><use href="#i-vote"/></svg>
+        <span class="brand-name">Know Your Candidate</span>
+        <span class="brand-sub">119th Congress</span>
+    </a>
+
+    <div class="search">
+        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <label class="sr-only" for="stateSearch">Search this page</label>
+        <input type="search" id="stateSearch" autocomplete="off" spellcheck="false"
+               placeholder="Search American Samoa profiles…">
+    </div>
+
+    <div class="header-actions">
+        <div class="menu">
+            <button type="button" class="btn-icon" id="themeButton"
+                    aria-haspopup="true" aria-label="Change theme">
+                <svg class="icon" aria-hidden="true"><use href="#i-palette"/></svg>
+            </button>
+            <div class="menu-panel" id="themePanel" role="menu" hidden>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="system" aria-checked="true">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Match system
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="dark" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Dark
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="amoled" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    AMOLED black
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="light" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Light
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="app-body">
+    <aside class="sidebar scroll-y" id="sidebar" aria-label="Navigation and summary">
+        <nav class="sidebar-section" aria-label="Views">
+            <a class="nav-link" href="../index.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg>
+                Profile grid
+            </a>
+            <a class="nav-link" href="../map.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-map"/></svg>
+                Partisan map
+            </a>
+            <a class="nav-link" href="index.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
+                States &amp; territories
+            </a>
+        </nav>
+
+        <div class="sidebar-section">
+            <h2 class="sidebar-heading">119th Congress</h2>
+            <div class="balance-label">Senate</div>
+            <div class="balance" id="senateBalance"></div>
+            <div class="balance-label">House</div>
+            <div class="balance" id="houseBalance"></div>
+        </div>
+
+        <div class="sidebar-section">
+            <h2 class="sidebar-heading">
+                <svg class="icon icon-sm" aria-hidden="true"><use href="#i-flag"/></svg>
+                2026 midterms
+            </h2>
+            <time id="electionCountdown" class="badge badge-warn countdown"></time>
+            <div class="stat-row"><span>Senate seats up</span>
+                <span class="value" id="senateSeatsUp"></span></div>
+            <div class="stat-row"><span>House seats up</span>
+                <span class="value" id="houseSeatsUp"></span></div>
+            <div class="stat-row"><span>Challengers on the ballot</span>
+                <span class="value" id="challengerCount"></span></div>
+        </div>
+
+        <nav class="sidebar-section push" aria-label="Jump to a state">
+            <h2 class="sidebar-heading">Jump to</h2>
+            <label class="sr-only" for="stateJump">Jump to a state or territory</label>
+            <select id="stateJump" class="select">
+                <option value="">Choose a state&hellip;</option>
+            </select>
+        </nav>
+    </aside>
+
+    <main class="app-main" id="stateMain">
+        <div class="content scroll-y">
+            <div id="stateContent" class="state-page">
+                <p class="results-bar" role="status">Loading&hellip;</p>
+            </div>
+
+            <footer class="site-footer">
+                <p><strong>Sources:</strong>
+                    membership, contact details and committee rosters from the
+                    <code>congress-legislators</code> dataset; the candidate field and
+                    campaign finance from the Federal Election Commission; primary results
+                    from each state's Wikipedia election page; portraits from Congress.gov
+                    and Wikipedia.</p>
+                <p><strong>Who counts as a candidate:</strong> everyone the FEC records
+                    as having raised or spent more than $5,000 for the 2026 cycle
+                    (52&nbsp;U.S.C.&nbsp;&sect;30101(2)). People the primary removed stay on
+                    record and are shown under each race.</p>
+                <p>Non-partisan and independent. Data built
+                    <time id="buildStamp">&mdash;</time>.</p>
+            </footer>
+        </div>
+    </main>
+</div>
+
+<script src="../data/profiles.js"></script>
+<script src="../assets/kyc-cards.js"></script>
+<script src="../assets/kyc-profile.js"></script>
+<script src="../assets/kyc-state.js"></script>
+</body>
+</html>
