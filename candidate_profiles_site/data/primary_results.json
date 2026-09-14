@@ -1,5 +1,5 @@
 {
- "asOf": "2026-09-13",
+ "asOf": "2026-09-14",
  "cycle": 2026,
  "dates": {
   "AK-H": {
@@ -377,21 +377,22 @@
   "H-DE-00-2026",
   "H-MP-00-2026",
   "S-AS-2026",
-  "S-AZ-2026",
   "S-CA-2026",
+  "S-CT-2026",
   "S-DC-2026",
   "S-DE-2026",
   "S-HI-2026",
   "S-IN-2026",
   "S-MD-2026",
+  "S-MO-2026",
+  "S-ND-2026",
   "S-NV-2026",
   "S-NY-2026",
   "S-PA-2026",
   "S-PR-2026",
   "S-RI-2026",
   "S-UT-2026",
-  "S-WA-2026",
-  "S-WI-2026"
+  "S-WA-2026"
  ],
  "races": {
   "H-AK-00-2026": {
@@ -410,19 +411,21 @@
     "H2AK00556": "independent",
     "H2AK01083": "republican",
     "H2AK01182": "independent",
-    "H6AK01068": "democratic",
     "H6AK01084": "democratic",
     "H6AK01092": "independent",
-    "H6AK01118": "independent"
+    "H6AK01100": "independent",
+    "H6AK01118": "independent",
+    "H6AK01134": "independent"
    },
    "status": {
     "H2AK00556": "eliminated",
     "H2AK01083": "nominee",
     "H2AK01182": "eliminated",
-    "H6AK01068": "withdrawn",
     "H6AK01084": "withdrawn",
     "H6AK01092": "nominee",
-    "H6AK01118": "eliminated"
+    "H6AK01100": "eliminated",
+    "H6AK01118": "eliminated",
+    "H6AK01134": "eliminated"
    },
    "unmatched": {
     "Clay Strickland": "withdrawn",
@@ -430,8 +433,8 @@
     "Eddie Goldfarb": "eliminated",
     "Eric Hafner": "eliminated",
     "James C. \"Jim\" McDermott": "eliminated",
+    "John B. Williams": "withdrawn",
     "John E. Foddrill Sr.": "eliminated",
-    "Matthew \"Bronco\" Williams": "eliminated",
     "Yaquelin Reynoso": "withdrawn"
    },
    "unsure": []
@@ -452,16 +455,17 @@
     "H0AL01055": "republican",
     "H6AL01094": "democratic",
     "H6AL01102": "republican",
+    "H6AL01110": "republican",
     "H6AL01136": "republican"
    },
    "status": {
     "H0AL01055": "nominee",
     "H6AL01094": "nominee",
     "H6AL01102": "eliminated",
+    "H6AL01110": "eliminated",
     "H6AL01136": "eliminated"
    },
    "unmatched": {
-    "James Dees": "eliminated",
     "James Richardson": "eliminated",
     "Joshua McKee": "eliminated",
     "Lucas Burger": "eliminated",
@@ -485,7 +489,6 @@
    "party": {
     "H4AL02139": "republican",
     "H4AL02170": "democratic",
-    "H4AL07120": "republican",
     "H6AL01086": "republican",
     "H6AL01128": "republican",
     "H6AL02175": "republican",
@@ -494,13 +497,14 @@
    "status": {
     "H4AL02139": "eliminated",
     "H4AL02170": "nominee",
-    "H4AL07120": "eliminated",
     "H6AL01086": "nominee",
     "H6AL01128": "eliminated",
     "H6AL02175": "eliminated",
     "H6AL02217": "eliminated"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Christian Horn": "eliminated"
+   },
    "unsure": []
   },
   "H-AL-03-2026": {
@@ -599,19 +603,18 @@
    "party": {
     "H4AL06098": "republican",
     "H6AL06135": "republican",
-    "H6AL06143": "democratic",
     "H6AL06150": "democratic",
     "H6AL06184": "democratic"
    },
    "status": {
     "H4AL06098": "nominee",
     "H6AL06135": "eliminated",
-    "H6AL06143": "eliminated",
     "H6AL06150": "eliminated",
     "H6AL06184": "nominee"
    },
    "unmatched": {
-    "Ashtyn Kenendy": "eliminated"
+    "Ashtyn Kenendy": "eliminated",
+    "Keith Pilkington": "eliminated"
    },
    "unsure": []
   },
@@ -652,15 +655,15 @@
    "page": "2026 United States House of Representatives elections in Arkansas",
    "party": {
     "H0AR01083": "republican",
-    "H4AR01085": "libertarian",
     "H6AR01155": "democratic"
    },
    "status": {
     "H0AR01083": "nominee",
-    "H4AR01085": "nominee",
     "H6AR01155": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Steve Parsons": "nominee"
+   },
    "unsure": []
   },
   "H-AR-02-2026": {
@@ -704,15 +707,15 @@
    "page": "2026 United States House of Representatives elections in Arkansas",
    "party": {
     "H0AR03055": "republican",
-    "H4AR03081": "libertarian",
     "H6AR03128": "democratic"
    },
    "status": {
     "H0AR03055": "nominee",
-    "H4AR03081": "nominee",
     "H6AR03128": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Bobby Wilson": "nominee"
+   },
    "unsure": []
   },
   "H-AR-04-2026": {
@@ -823,15 +826,15 @@
    "page": "2026 United States House of Representatives elections in Arizona",
    "party": {
     "H4AZ03109": "democratic",
-    "H4AZ03174": "no labels party",
-    "H6AZ01322": "green"
+    "H4AZ03174": "no labels party"
    },
    "status": {
     "H4AZ03109": "nominee",
-    "H4AZ03174": "nominee",
-    "H6AZ01322": "nominee"
+    "H4AZ03174": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "David Redkey": "nominee"
+   },
    "unsure": []
   },
   "H-AZ-04-2026": {
@@ -914,16 +917,16 @@
    "party": {
     "H2AZ02360": "republican",
     "H6AZ06099": "democratic",
+    "H6AZ06164": "green",
     "H6AZ06214": "libertarian"
    },
    "status": {
     "H2AZ02360": "nominee",
     "H6AZ06099": "nominee",
+    "H6AZ06164": "nominee",
     "H6AZ06214": "nominee"
    },
-   "unmatched": {
-    "Gary Swing": "nominee"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-AZ-07-2026": {
@@ -1049,8 +1052,7 @@
     "H2CA01268": "democratic",
     "H2CA06259": "democratic",
     "H6CA01277": "republican",
-    "H6CA02291": "independent",
-    "H6CA02309": "republican"
+    "H6CA02291": "independent"
    },
    "status": {
     "H0CA01205": "eliminated",
@@ -1058,11 +1060,11 @@
     "H2CA01268": "eliminated",
     "H2CA06259": "nominee",
     "H6CA01277": "eliminated",
-    "H6CA02291": "eliminated",
-    "H6CA02309": "nominee"
+    "H6CA02291": "eliminated"
    },
    "unmatched": {
-    "Nicolette Niman": "eliminated"
+    "Nicolette Niman": "eliminated",
+    "Robin Littau": "nominee"
    },
    "unsure": []
   },
@@ -1118,7 +1120,6 @@
     "H6CA04198": "republican",
     "H6CA04206": "republican",
     "H6CA04222": "democratic",
-    "H6CA04248": "republican",
     "H6CA08223": "republican",
     "H8CA01109": "democratic"
    },
@@ -1128,11 +1129,11 @@
     "H6CA04198": "eliminated",
     "H6CA04206": "eliminated",
     "H6CA04222": "nominee",
-    "H6CA04248": "eliminated",
     "H6CA08223": "eliminated",
     "H8CA01109": "nominee"
    },
    "unmatched": {
+    "Chuck Uribe": "eliminated",
     "Thomas Roach": "eliminated"
    },
    "unsure": []
@@ -1214,19 +1215,17 @@
    "party": {
     "H6CA05195": "democratic",
     "H6CA07159": "democratic",
-    "H6CA07167": "democratic",
-    "H6CA07175": "democratic",
-    "H6CA07191": "republican"
+    "H6CA07175": "democratic"
    },
    "status": {
     "H6CA05195": "nominee",
     "H6CA07159": "eliminated",
-    "H6CA07167": "eliminated",
-    "H6CA07175": "nominee",
-    "H6CA07191": "eliminated"
+    "H6CA07175": "nominee"
    },
    "unmatched": {
-    "Ralph Nwobi": "eliminated"
+    "Enayat Nazhat": "eliminated",
+    "Ralph Nwobi": "eliminated",
+    "Zachariah Wooden": "eliminated"
    },
    "unsure": []
   },
@@ -1270,17 +1269,18 @@
    },
    "page": "2026 United States House of Representatives elections in California",
    "party": {
+    "H0CA43074": "republican",
     "H4CA09101": "republican",
     "H6CA09130": "republican",
     "H8CA10126": "democratic"
    },
    "status": {
+    "H0CA43074": "eliminated",
     "H4CA09101": "nominee",
     "H6CA09130": "eliminated",
     "H8CA10126": "nominee"
    },
    "unmatched": {
-    "Khalid Jeffrey Jafri": "eliminated",
     "Martin \"Vmann\" Veprauskas": "eliminated"
    },
    "unsure": []
@@ -1302,7 +1302,6 @@
     "H4CA10109": "republican",
     "H6CA10161": "democratic",
     "H6CA10179": "democratic",
-    "H6CA10187": "republican",
     "H6CA10195": "republican"
    },
    "status": {
@@ -1310,11 +1309,11 @@
     "H4CA10109": "eliminated",
     "H6CA10161": "eliminated",
     "H6CA10179": "eliminated",
-    "H6CA10187": "nominee",
     "H6CA10195": "eliminated"
    },
    "unmatched": {
-    "Bob Rowland": "eliminated"
+    "Bob Rowland": "eliminated",
+    "Jeff Frese": "nominee"
    },
    "unsure": []
   },
@@ -1333,6 +1332,8 @@
    },
    "page": "2026 United States House of Representatives elections in California",
    "party": {
+    "H6CA11193": "republican",
+    "H6CA11201": "republican",
     "H6CA11219": "democratic",
     "H6CA11235": "republican",
     "H6CA11268": "democratic",
@@ -1343,6 +1344,8 @@
     "H8CA11116": "democratic"
    },
    "status": {
+    "H6CA11193": "eliminated",
+    "H6CA11201": "eliminated",
     "H6CA11219": "eliminated",
     "H6CA11235": "eliminated",
     "H6CA11268": "nominee",
@@ -1431,8 +1434,7 @@
     "H6CA14155": "democratic",
     "H6CA14163": "democratic",
     "H6CA14189": "democratic",
-    "H6CA14205": "independent",
-    "H6CA14213": "republican"
+    "H6CA14205": "independent"
    },
    "status": {
     "H0CA15213": "nominee",
@@ -1440,10 +1442,10 @@
     "H6CA14155": "eliminated",
     "H6CA14163": "nominee",
     "H6CA14189": "eliminated",
-    "H6CA14205": "eliminated",
-    "H6CA14213": "withdrawn"
+    "H6CA14205": "eliminated"
    },
    "unmatched": {
+    "Dena Maldonado": "withdrawn",
     "Rakhi Israni Singh": "eliminated",
     "Victor Aguilar Jr.": "eliminated"
    },
@@ -1464,17 +1466,17 @@
    "party": {
     "H2CA14162": "democratic",
     "H6CA15186": "democratic",
-    "H6CA15194": "republican",
-    "H6CA15202": "democratic"
+    "H6CA15202": "democratic",
+    "H6CA15210": "independent"
    },
    "status": {
     "H2CA14162": "nominee",
     "H6CA15186": "eliminated",
-    "H6CA15194": "nominee",
-    "H6CA15202": "eliminated"
+    "H6CA15202": "eliminated",
+    "H6CA15210": "eliminated"
    },
    "unmatched": {
-    "Jim Garrity": "eliminated"
+    "Charles Hoelter": "nominee"
    },
    "unsure": []
   },
@@ -1493,16 +1495,16 @@
    "party": {
     "H4CA16197": "democratic",
     "H6CA16143": "independent",
-    "H6CA16150": "republican",
     "H6CA16176": "republican"
    },
    "status": {
     "H4CA16197": "nominee",
     "H6CA16143": "eliminated",
-    "H6CA16150": "eliminated",
     "H6CA16176": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Kevin Johnson": "eliminated"
+   },
    "unsure": []
   },
   "H-CA-17-2026": {
@@ -1579,18 +1581,19 @@
     "H4CA19118": "democratic",
     "H6CA19154": "republican",
     "H6CA19170": "independent",
+    "H6CA19188": "republican",
     "H6CA20152": "democratic"
    },
    "status": {
     "H4CA19118": "eliminated",
     "H6CA19154": "nominee",
     "H6CA19170": "eliminated",
+    "H6CA19188": "eliminated",
     "H6CA20152": "nominee"
    },
    "unmatched": {
     "Lars Mapstead": "eliminated",
-    "Thomas Coxe": "eliminated",
-    "Tuka Gafari": "eliminated"
+    "Thomas Coxe": "eliminated"
    },
    "unsure": []
   },
@@ -1638,7 +1641,6 @@
     "H4CA20082": "democratic",
     "H6CA13199": "republican",
     "H6CA21234": "republican",
-    "H6CA21259": "democratic",
     "H6CA21275": "independent"
    },
    "status": {
@@ -1646,10 +1648,11 @@
     "H4CA20082": "nominee",
     "H6CA13199": "nominee",
     "H6CA21234": "eliminated",
-    "H6CA21259": "eliminated",
     "H6CA21275": "eliminated"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Lourin Hubbard": "eliminated"
+   },
    "unsure": []
   },
   "H-CA-22-2026": {
@@ -1694,16 +1697,17 @@
     "H0CA08135": "republican",
     "H6CA23230": "democratic",
     "H6CA23289": "independent",
-    "H6CA23305": "democratic"
+    "H6CA23305": "democratic",
+    "H6CA25235": "independent"
    },
    "status": {
     "H0CA08135": "nominee",
     "H6CA23230": "nominee",
     "H6CA23289": "eliminated",
-    "H6CA23305": "eliminated"
+    "H6CA23305": "eliminated",
+    "H6CA25235": "eliminated"
    },
    "unmatched": {
-    "Eli C. Owens": "eliminated",
     "Karsten Scott Nicholson": "eliminated",
     "Renee Longshore": "eliminated",
     "Robert Matthew Riter": "eliminated"
@@ -1782,7 +1786,8 @@
     "H6CA26241": "republican",
     "H6CA26258": "republican",
     "H6CA26266": "democratic",
-    "H6CA26308": "democratic"
+    "H6CA26308": "democratic",
+    "H6CA26324": "democratic"
    },
    "status": {
     "H2CA26190": "eliminated",
@@ -1790,10 +1795,10 @@
     "H6CA26241": "nominee",
     "H6CA26258": "eliminated",
     "H6CA26266": "nominee",
-    "H6CA26308": "eliminated"
+    "H6CA26308": "eliminated",
+    "H6CA26324": "eliminated"
    },
    "unmatched": {
-    "Liam Andres O'Neill Hernandez": "eliminated",
     "Sonia Kacker": "eliminated",
     "Susan Samadzadeh": "eliminated"
    },
@@ -1814,16 +1819,16 @@
    "party": {
     "H4CA27111": "democratic",
     "H6CA27306": "republican",
+    "H6CA27322": "democratic",
     "H6CA27330": "democratic"
    },
    "status": {
     "H4CA27111": "nominee",
     "H6CA27306": "nominee",
+    "H6CA27322": "eliminated",
     "H6CA27330": "eliminated"
    },
-   "unmatched": {
-    "Roberto Ramos": "eliminated"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-CA-28-2026": {
@@ -1950,6 +1955,7 @@
    "party": {
     "H4CA32137": "republican",
     "H4CA32145": "democratic",
+    "H4CA32178": "independent",
     "H6CA24113": "democratic",
     "H6CA32207": "democratic",
     "H6CA32215": "democratic",
@@ -1960,6 +1966,7 @@
    "status": {
     "H4CA32137": "nominee",
     "H4CA32145": "eliminated",
+    "H4CA32178": "eliminated",
     "H6CA24113": "nominee",
     "H6CA32207": "eliminated",
     "H6CA32215": "eliminated",
@@ -1967,9 +1974,7 @@
     "H6CA32231": "eliminated",
     "H6CA32256": "eliminated"
    },
-   "unmatched": {
-    "Doug Smith": "eliminated"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-CA-33-2026": {
@@ -1987,21 +1992,19 @@
    "party": {
     "H2CA31125": "democratic",
     "H2CA33246": "republican",
-    "H4CA33267": "republican",
-    "H6CA33114": "republican",
     "H6CA33122": "republican",
     "H6CA33130": "democratic"
    },
    "status": {
     "H2CA31125": "nominee",
     "H2CA33246": "eliminated",
-    "H4CA33267": "eliminated",
-    "H6CA33114": "nominee",
     "H6CA33122": "eliminated",
     "H6CA33130": "eliminated"
    },
    "unmatched": {
-    "Ling Ling Shi": "eliminated"
+    "Ling Ling Shi": "eliminated",
+    "Stephanie M. Vargas": "nominee",
+    "Tom Herman": "eliminated"
    },
    "unsure": []
   },
@@ -2019,6 +2022,7 @@
    },
    "page": "2026 United States House of Representatives elections in California",
    "party": {
+    "H4CA34091": "republican",
     "H6CA34278": "independent",
     "H6CA34286": "democratic",
     "H6CA34294": "democratic",
@@ -2026,15 +2030,14 @@
     "H8CA34266": "democratic"
    },
    "status": {
+    "H4CA34091": "eliminated",
     "H6CA34278": "eliminated",
     "H6CA34286": "nominee",
     "H6CA34294": "eliminated",
     "H6CA34302": "eliminated",
     "H8CA34266": "nominee"
    },
-   "unmatched": {
-    "Calvin Lee": "eliminated"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-CA-35-2026": {
@@ -2113,7 +2116,9 @@
     "H2CA37320": "republican",
     "H4CA37102": "peace and freedom party",
     "H6CA37321": "democratic",
-    "H6CA37339": "democratic"
+    "H6CA37339": "democratic",
+    "H6CA37347": "democratic",
+    "H6CA37354": "democratic"
    },
    "status": {
     "H2CA25234": "eliminated",
@@ -2121,12 +2126,12 @@
     "H2CA37320": "eliminated",
     "H4CA37102": "eliminated",
     "H6CA37321": "eliminated",
-    "H6CA37339": "nominee"
+    "H6CA37339": "nominee",
+    "H6CA37347": "eliminated",
+    "H6CA37354": "eliminated"
    },
    "unmatched": {
-    "Elizabeth Fenner": "eliminated",
-    "Juan Rey": "eliminated",
-    "Ryan Duckett": "eliminated"
+    "Juan Rey": "eliminated"
    },
    "unsure": []
   },
@@ -2143,18 +2148,18 @@
    },
    "page": "2026 United States House of Representatives elections in California",
    "party": {
+    "H4CA31212": "republican",
     "H6CA38139": "democratic",
     "H6CA38147": "democratic",
     "H6CA38154": "democratic"
    },
    "status": {
+    "H4CA31212": "nominee",
     "H6CA38139": "nominee",
     "H6CA38147": "eliminated",
     "H6CA38154": "eliminated"
    },
-   "unmatched": {
-    "Pedro Antonio Casas": "nominee"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-CA-39-2026": {
@@ -2170,14 +2175,14 @@
    },
    "page": "2026 United States House of Representatives elections in California",
    "party": {
-    "H2CA43245": "democratic",
-    "H6CA39145": "republican"
+    "H2CA43245": "democratic"
    },
    "status": {
-    "H2CA43245": "nominee",
-    "H6CA39145": "nominee"
+    "H2CA43245": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Steve Manos": "nominee"
+   },
    "unsure": []
   },
   "H-CA-40-2026": {
@@ -2278,6 +2283,7 @@
     "Long Pham": "eliminated"
    },
    "unsure": [
+    "H2CA45208",
     "H4CA47192",
     "H8CA45056"
    ]
@@ -2297,16 +2303,16 @@
    "party": {
     "H4CA23011": "democratic",
     "H6CA43170": "democratic",
+    "H6CA43188": "republican",
     "H6CA43196": "democratic"
    },
    "status": {
     "H4CA23011": "nominee",
     "H6CA43170": "eliminated",
+    "H6CA43188": "nominee",
     "H6CA43196": "eliminated"
    },
-   "unmatched": {
-    "Cristian Morales": "nominee"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-CA-44-2026": {
@@ -2381,16 +2387,17 @@
    "party": {
     "H4CA46137": "republican",
     "H6CA40366": "democratic",
-    "H6CA46116": "democratic"
+    "H6CA46116": "democratic",
+    "H6CA46199": "democratic"
    },
    "status": {
     "H4CA46137": "nominee",
     "H6CA40366": "eliminated",
-    "H6CA46116": "nominee"
+    "H6CA46116": "nominee",
+    "H6CA46199": "eliminated"
    },
    "unmatched": {
     "Armando \"Mando\" Perez-Serrato": "eliminated",
-    "Frank Bahena": "eliminated",
     "Tony S. Castro": "eliminated"
    },
    "unsure": []
@@ -2453,6 +2460,7 @@
     "H6CA41265": "democratic",
     "H6CA48310": "democratic",
     "H6CA48344": "democratic",
+    "H6CA48351": "democratic",
     "H6CA48427": "democratic",
     "H6CA49128": "republican",
     "H8CA50098": "democratic"
@@ -2463,6 +2471,7 @@
     "H6CA41265": "eliminated",
     "H6CA48310": "nominee",
     "H6CA48344": "eliminated",
+    "H6CA48351": "eliminated",
     "H6CA48427": "eliminated",
     "H6CA49128": "nominee",
     "H8CA50098": "eliminated"
@@ -2470,14 +2479,14 @@
    "unmatched": {
     "Kevin Patrick O'Neil": "eliminated",
     "Luis F. Reyna": "eliminated",
-    "Mike Schaefer": "eliminated",
-    "Stephen Clemons": "eliminated"
+    "Mike Schaefer": "eliminated"
    },
    "unsure": []
   },
   "H-CA-49-2026": {
    "ambiguous": [],
    "article": {
+    "H6CA49151": "Star Parker",
     "H8CA49058": "Mike Levin"
    },
    "decided": {
@@ -2488,16 +2497,16 @@
    },
    "page": "2026 United States House of Representatives elections in California",
    "party": {
+    "H6CA49151": "republican",
     "H6CA49169": "republican",
     "H8CA49058": "democratic"
    },
    "status": {
+    "H6CA49151": "eliminated",
     "H6CA49169": "nominee",
     "H8CA49058": "nominee"
    },
-   "unmatched": {
-    "Star Parker": "eliminated"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-CA-50-2026": {
@@ -2548,17 +2557,20 @@
    },
    "page": "2026 United States House of Representatives elections in California",
    "party": {
+    "H2CA51206": "democratic",
+    "H4CA51103": "democratic",
     "H6CA51140": "republican",
     "H8CA49074": "democratic"
    },
    "status": {
+    "H2CA51206": "eliminated",
+    "H4CA51103": "eliminated",
     "H6CA51140": "nominee",
     "H8CA49074": "nominee"
    },
    "unmatched": {
     "David W. Engel": "eliminated",
-    "Richardo Cabrera": "nominee",
-    "Stan Caplan": "eliminated"
+    "Richardo Cabrera": "nominee"
    },
    "unsure": []
   },
@@ -2634,15 +2646,15 @@
    "page": "2026 United States House of Representatives elections in Colorado",
    "party": {
     "H6CO02198": "republican",
-    "H6CO02206": "republican",
     "H8CO02160": "democratic"
    },
    "status": {
     "H6CO02198": "eliminated",
-    "H6CO02206": "nominee",
     "H8CO02160": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Kelley Dennison": "nominee"
+   },
    "unsure": []
   },
   "H-CO-03-2026": {
@@ -2949,17 +2961,17 @@
     "H4FL01197": "democratic",
     "H6FL01390": "republican",
     "H6FL01515": "republican",
-    "H6FL01523": "republican"
+    "H6FL01523": "republican",
+    "H6FL01549": "independent"
    },
    "status": {
     "H4FL01197": "nominee",
     "H6FL01390": "nominee",
     "H6FL01515": "eliminated",
-    "H6FL01523": "eliminated"
+    "H6FL01523": "eliminated",
+    "H6FL01549": "nominee"
    },
-   "unmatched": {
-    "Tyler Davis": "nominee"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-FL-02-2026": {
@@ -3260,7 +3272,6 @@
    },
    "page": "2026 United States House of Representatives elections in Florida",
    "party": {
-    "H6FL11233": "democratic",
     "H6FL11241": "democratic",
     "H6FL11266": "republican",
     "H6FL11282": "republican",
@@ -3270,7 +3281,6 @@
     "H6FL11357": "democratic"
    },
    "status": {
-    "H6FL11233": "eliminated",
     "H6FL11241": "eliminated",
     "H6FL11266": "eliminated",
     "H6FL11282": "eliminated",
@@ -3279,7 +3289,9 @@
     "H6FL11340": "eliminated",
     "H6FL11357": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Dan Williams": "eliminated"
+   },
    "unsure": []
   },
   "H-FL-12-2026": {
@@ -3908,18 +3920,17 @@
    },
    "page": "2026 United States House of Representatives elections in Georgia",
    "party": {
-    "H4GA04132": "democratic",
     "H6GA04129": "democratic",
     "H6GA04160": "democratic",
     "H6GA04194": "republican"
    },
    "status": {
-    "H4GA04132": "eliminated",
     "H6GA04129": "nominee",
     "H6GA04160": "eliminated",
     "H6GA04194": "eliminated"
    },
    "unmatched": {
+    "Ansel Postell": "eliminated",
     "James Duffe": "nominee"
    },
    "unsure": []
@@ -4022,14 +4033,15 @@
    "page": "2026 United States House of Representatives elections in Georgia",
    "party": {
     "H0GA08099": "republican",
-    "H6GA08138": "democratic"
+    "H6GA08138": "democratic",
+    "H6GA08146": "democratic"
    },
    "status": {
     "H0GA08099": "nominee",
-    "H6GA08138": "nominee"
+    "H6GA08138": "nominee",
+    "H6GA08146": "eliminated"
    },
    "unmatched": {
-    "Justin Lucas": "eliminated",
     "Kelly Etsi": "nominee"
    },
    "unsure": []
@@ -4083,17 +4095,16 @@
     "H4GA10113": "democratic",
     "H6GA10175": "republican",
     "H6GA10183": "democratic",
-    "H6GA10191": "republican",
-    "H6GA10209": "republican"
+    "H6GA10191": "republican"
    },
    "status": {
     "H4GA10113": "eliminated",
     "H6GA10175": "nominee",
     "H6GA10183": "nominee",
-    "H6GA10191": "eliminated",
-    "H6GA10209": "eliminated"
+    "H6GA10191": "eliminated"
    },
    "unmatched": {
+    "Jeffrey Baker": "eliminated",
     "John Dority": "eliminated"
    },
    "unsure": []
@@ -4116,7 +4127,6 @@
    "party": {
     "H0GA14048": "republican",
     "H4GA11087": "republican",
-    "H6GA03170": "republican",
     "H6GA11116": "democratic",
     "H6GA11124": "democratic",
     "H6GA11132": "republican",
@@ -4127,7 +4137,6 @@
    "status": {
     "H0GA14048": "nominee",
     "H4GA11087": "eliminated",
-    "H6GA03170": "eliminated",
     "H6GA11116": "nominee",
     "H6GA11124": "eliminated",
     "H6GA11132": "eliminated",
@@ -4192,7 +4201,6 @@
    "page": "2026 United States House of Representatives elections in Georgia",
    "party": {
     "H2GA03120": "democratic",
-    "H2GA04201": "republican",
     "H6GA13039": "democratic",
     "H6GA13062": "democratic",
     "H6GA13070": "democratic",
@@ -4201,7 +4209,6 @@
    },
    "status": {
     "H2GA03120": "eliminated",
-    "H2GA04201": "nominee",
     "H6GA13039": "eliminated",
     "H6GA13062": "eliminated",
     "H6GA13070": "nominee",
@@ -4209,6 +4216,7 @@
     "H6GA13120": "eliminated"
    },
    "unmatched": {
+    "Jonathan Chavez": "nominee",
     "{{nowrap|Jonathan Chavez}}": "nominee"
    },
    "unsure": []
@@ -4300,17 +4308,18 @@
    "party": {
     "H2HI02128": "democratic",
     "H6HI01311": "democratic",
-    "H6HI01352": "democratic"
+    "H6HI01360": "republican",
+    "H6HI01394": "green"
    },
    "status": {
     "H2HI02128": "nominee",
     "H6HI01311": "eliminated",
-    "H6HI01352": "eliminated"
+    "H6HI01360": "nominee",
+    "H6HI01394": "nominee"
    },
    "unmatched": {
-    "Adriel Lam": "nominee",
+    "Ben Fatula": "eliminated",
     "Jennifer Booker": "eliminated",
-    "Jordan Conley": "nominee",
     "Nicholas Kiswanto": "eliminated"
    },
    "unsure": []
@@ -4474,17 +4483,19 @@
    "page": "2026 United States House of Representatives elections in Idaho",
    "party": {
     "H2ID01192": "democratic",
+    "H4ID01149": "constitution party",
     "H6ID01292": "democratic",
+    "H6ID01326": "republican",
     "H8ID01124": "republican"
    },
    "status": {
     "H2ID01192": "nominee",
+    "H4ID01149": "nominee",
     "H6ID01292": "eliminated",
+    "H6ID01326": "eliminated",
     "H8ID01124": "nominee"
    },
    "unmatched": {
-    "Andy Briner": "eliminated",
-    "Brendan Gomez": "nominee",
     "Joseph Morrison": "eliminated",
     "Sarah Zabel Peterson": "nominee"
    },
@@ -4508,6 +4519,7 @@
     "H6ID02233": "republican",
     "H6ID02241": "independent",
     "H6ID02274": "democratic",
+    "H6ID02282": "independent",
     "H8ID02064": "republican"
    },
    "status": {
@@ -4515,12 +4527,12 @@
     "H6ID02233": "eliminated",
     "H6ID02241": "nominee",
     "H6ID02274": "nominee",
+    "H6ID02282": "nominee",
     "H8ID02064": "nominee"
    },
    "unmatched": {
     "Brian Keene": "eliminated",
     "Carta Sierra Peterson": "nominee",
-    "Emre Houser": "nominee",
     "Will Johanson": "nominee"
    },
    "unsure": []
@@ -4575,7 +4587,7 @@
     "H6IL02330": "democratic",
     "H6IL02355": "democratic",
     "H6IL02363": "democratic",
-    "H6IL02389": "republican",
+    "H6IL02371": "independent",
     "H6IL02397": "democratic"
    },
    "status": {
@@ -4586,11 +4598,11 @@
     "H6IL02330": "eliminated",
     "H6IL02355": "nominee",
     "H6IL02363": "eliminated",
-    "H6IL02389": "nominee",
+    "H6IL02371": "nominee",
     "H6IL02397": "eliminated"
    },
    "unmatched": {
-    "Ashley Banks": "nominee",
+    "Michael Noack": "nominee",
     "Sidney Moore": "eliminated",
     "Toni Brown": "eliminated"
    },
@@ -4632,20 +4644,20 @@
    },
    "page": "2026 United States House of Representatives elections in Illinois",
    "party": {
+    "H2IL04178": "working class party",
     "H4IL04117": "republican",
     "H6IL04153": "democratic",
     "H6IL04187": "independent",
     "H6IL04195": "independent"
    },
    "status": {
+    "H2IL04178": "nominee",
     "H4IL04117": "nominee",
     "H6IL04153": "nominee",
     "H6IL04187": "nominee",
     "H6IL04195": "nominee"
    },
-   "unmatched": {
-    "Ed Hershey": "nominee"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-IL-05-2026": {
@@ -4662,18 +4674,16 @@
    },
    "page": "2026 United States House of Representatives elections in Illinois",
    "party": {
-    "H0IL05096": "democratic",
-    "H4IL05130": "republican",
-    "H6IL05200": "republican"
+    "H0IL05096": "democratic"
    },
    "status": {
-    "H0IL05096": "nominee",
-    "H4IL05130": "eliminated",
-    "H6IL05200": "eliminated"
+    "H0IL05096": "nominee"
    },
    "unmatched": {
     "Anthony Tamez": "eliminated",
+    "Barry Wicker": "eliminated",
     "Ellen Corley": "eliminated",
+    "Kimball Ladien": "eliminated",
     "Matt Conroy": "eliminated",
     "Tommy Hanson": "nominee"
    },
@@ -4782,8 +4792,7 @@
     "H6IL08287": "democratic",
     "H6IL08295": "democratic",
     "H6IL08311": "republican",
-    "H6IL08329": "democratic",
-    "H6IL08337": "republican"
+    "H6IL08329": "democratic"
    },
    "status": {
     "H2IL08146": "eliminated",
@@ -4795,16 +4804,18 @@
     "H6IL08287": "eliminated",
     "H6IL08295": "eliminated",
     "H6IL08311": "nominee",
-    "H6IL08329": "nominee",
-    "H6IL08337": "eliminated"
+    "H6IL08329": "nominee"
    },
    "unmatched": {
-    "Herbert Hebein": "eliminated"
+    "Herbert Hebein": "eliminated",
+    "Kevin Ake": "eliminated"
    },
    "unsure": []
   },
   "H-IL-09-2026": {
-   "ambiguous": [],
+   "ambiguous": [
+    "John Elleson"
+   ],
    "article": {
     "H6IL09178": "Kat Abughazaleh",
     "H6IL09194": "Laura Fine",
@@ -4822,6 +4833,7 @@
    "page": "2026 United States House of Representatives elections in Illinois",
    "party": {
     "H2IL05142": "democratic",
+    "H6IL09160": "republican",
     "H6IL09178": "democratic",
     "H6IL09194": "democratic",
     "H6IL09228": "democratic",
@@ -4838,6 +4850,7 @@
    },
    "status": {
     "H2IL05142": "eliminated",
+    "H6IL09160": "eliminated",
     "H6IL09178": "eliminated",
     "H6IL09194": "eliminated",
     "H6IL09228": "nominee",
@@ -4856,10 +4869,12 @@
     "Hoan Huynh": "eliminated",
     "John Elleson": "nominee",
     "Mark Su": "eliminated",
-    "Patricia Brown": "eliminated",
-    "Rocío Cleveland": "eliminated"
+    "Patricia Brown": "eliminated"
    },
-   "unsure": []
+   "unsure": [
+    "H8IL09208",
+    "H8IL09224"
+   ]
   },
   "H-IL-10-2026": {
    "ambiguous": [],
@@ -5123,15 +5138,15 @@
    "page": "2026 United States House of Representatives elections in Indiana",
    "party": {
     "H2IN02295": "republican",
-    "H6IN02189": "democratic",
-    "H6IN02197": "democratic"
+    "H6IN02189": "democratic"
    },
    "status": {
     "H2IN02295": "nominee",
-    "H6IN02189": "nominee",
-    "H6IN02197": "eliminated"
+    "H6IN02189": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Shaun Maeyens": "eliminated"
+   },
    "unsure": []
   },
   "H-IN-03-2026": {
@@ -5176,7 +5191,9 @@
    "page": "2026 United States House of Representatives elections in Indiana",
    "party": {
     "H4IN04248": "republican",
+    "H6IN04177": "democratic",
     "H6IN04193": "democratic",
+    "H6IN04219": "democratic",
     "H6IN04227": "democratic",
     "H6IN04235": "democratic",
     "H8IN04140": "democratic",
@@ -5184,7 +5201,9 @@
    },
    "status": {
     "H4IN04248": "eliminated",
+    "H6IN04177": "eliminated",
     "H6IN04193": "nominee",
+    "H6IN04219": "eliminated",
     "H6IN04227": "eliminated",
     "H6IN04235": "eliminated",
     "H8IN04140": "eliminated",
@@ -5193,9 +5212,7 @@
    "unmatched": {
     "Darin Patrick Griesey": "eliminated",
     "John Piper": "eliminated",
-    "John Whetstone": "eliminated",
-    "Roger Day": "eliminated",
-    "Thomas Hall": "eliminated"
+    "Roger Day": "eliminated"
    },
    "unsure": []
   },
@@ -5255,21 +5272,20 @@
    "page": "2026 United States House of Representatives elections in Indiana",
    "party": {
     "H4IN06185": "republican",
-    "H6IN05281": "democratic",
     "H6IN06255": "democratic",
     "H6IN06263": "republican",
     "H6IN06271": "democratic"
    },
    "status": {
     "H4IN06185": "nominee",
-    "H6IN05281": "eliminated",
     "H6IN06255": "eliminated",
     "H6IN06263": "eliminated",
     "H6IN06271": "eliminated"
    },
    "unmatched": {
     "Cinde Wirth": "eliminated",
-    "Cynthia Wirth": "nominee"
+    "Cynthia Wirth": "nominee",
+    "Kory Amyx": "eliminated"
    },
    "unsure": [
     "H6IN06230"
@@ -5289,23 +5305,23 @@
    },
    "page": "2026 United States House of Representatives elections in Indiana",
    "party": {
-    "H4IN06219": "libertarian",
     "H6IN07394": "democratic",
     "H6IN07428": "republican",
     "H6IN07444": "republican",
     "H6IN07469": "democratic",
+    "H6IN07493": "democratic",
     "H8IN07184": "democratic"
    },
    "status": {
-    "H4IN06219": "nominee",
     "H6IN07394": "eliminated",
     "H6IN07428": "eliminated",
     "H6IN07444": "nominee",
     "H6IN07469": "eliminated",
+    "H6IN07493": "eliminated",
     "H8IN07184": "nominee"
    },
    "unmatched": {
-    "Denise Paul Hatch": "eliminated"
+    "James Sceniak": "nominee"
    },
    "unsure": []
   },
@@ -5325,15 +5341,16 @@
    "party": {
     "H4IN08249": "republican",
     "H6IN08293": "democratic",
+    "H6IN08301": "democratic",
     "H6IN08327": "democratic"
    },
    "status": {
     "H4IN08249": "nominee",
     "H6IN08293": "nominee",
+    "H6IN08301": "eliminated",
     "H6IN08327": "eliminated"
    },
    "unmatched": {
-    "Christopher Rector": "eliminated",
     "Mario Foradori": "eliminated"
    },
    "unsure": []
@@ -5388,16 +5405,16 @@
    "party": {
     "H0KS01123": "republican",
     "H6KS01195": "democratic",
-    "H6KS01203": "democratic",
-    "H6KS01211": "republican"
+    "H6KS01203": "democratic"
    },
    "status": {
     "H0KS01123": "nominee",
     "H6KS01195": "eliminated",
-    "H6KS01203": "nominee",
-    "H6KS01211": "eliminated"
+    "H6KS01203": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Craig Musser": "eliminated"
+   },
    "unsure": []
   },
   "H-KS-02-2026": {
@@ -5440,13 +5457,13 @@
    },
    "page": "2026 United States House of Representatives elections in Kansas",
    "party": {
-    "H6KS03258": "republican",
+    "H6KS03274": "republican",
     "H6KS03290": "democratic",
     "H6KS03308": "republican",
     "H8KS03155": "democratic"
    },
    "status": {
-    "H6KS03258": "eliminated",
+    "H6KS03274": "eliminated",
     "H6KS03290": "eliminated",
     "H6KS03308": "nominee",
     "H8KS03155": "nominee"
@@ -5500,16 +5517,17 @@
    "party": {
     "H6KY01110": "republican",
     "H6KY01169": "democratic",
-    "H6KY01177": "republican"
+    "H6KY01177": "republican",
+    "H6KY01185": "republican"
    },
    "status": {
     "H6KY01110": "nominee",
     "H6KY01169": "nominee",
-    "H6KY01177": "eliminated"
+    "H6KY01177": "eliminated",
+    "H6KY01185": "eliminated"
    },
    "unmatched": {
-    "Penny Arcos": "eliminated",
-    "Robert James Sutherby": "eliminated"
+    "Penny Arcos": "eliminated"
    },
    "unsure": []
   },
@@ -5596,16 +5614,14 @@
     "H6KY04148": "democratic",
     "H6KY04171": "republican",
     "H6KY04189": "democratic",
-    "H6KY04205": "libertarian",
-    "H6KY04213": "libertarian"
+    "H6KY04205": "libertarian"
    },
    "status": {
     "H2KY04121": "eliminated",
     "H6KY04148": "eliminated",
     "H6KY04171": "nominee",
     "H6KY04189": "nominee",
-    "H6KY04205": "nominee",
-    "H6KY04213": "nominee"
+    "H6KY04205": "nominee"
    },
    "unmatched": {},
    "unsure": []
@@ -5666,8 +5682,9 @@
     "H6KY06192": "republican",
     "H6KY06218": "democratic",
     "H6KY06226": "republican",
+    "H6KY06242": "kentucky party",
     "H6KY06259": "republican",
-    "H6KY06275": "democratic"
+    "H6KY06267": "republican"
    },
    "status": {
     "H6KY06143": "eliminated",
@@ -5677,15 +5694,15 @@
     "H6KY06192": "nominee",
     "H6KY06218": "eliminated",
     "H6KY06226": "eliminated",
+    "H6KY06242": "nominee",
     "H6KY06259": "withdrawn",
-    "H6KY06275": "eliminated"
+    "H6KY06267": "eliminated"
    },
    "unmatched": {
+    "Corey Edwards": "eliminated",
     "Harvey Carroll Jr.": "eliminated",
     "Jay J. Bowman": "nominee",
-    "Jimmy Clifton Ausbrooks": "eliminated",
-    "Pete Lynch": "nominee",
-    "Steve Shannon": "eliminated"
+    "Jimmy Clifton Ausbrooks": "eliminated"
    },
    "unsure": []
   },
@@ -5937,18 +5954,17 @@
     "H6MD01320": "democratic",
     "H6MD01338": "democratic",
     "H6MD01346": "democratic",
-    "H6MD01353": "democratic",
     "H8MD01094": "republican"
    },
    "status": {
     "H6MD01320": "nominee",
     "H6MD01338": "eliminated",
     "H6MD01346": "eliminated",
-    "H6MD01353": "eliminated",
     "H8MD01094": "nominee"
    },
    "unmatched": {
-    "Chris Bruneau": "eliminated"
+    "Chris Bruneau": "eliminated",
+    "Victor Allen Guidice": "eliminated"
    },
    "unsure": []
   },
@@ -5967,16 +5983,15 @@
    "page": "2026 United States House of Representatives elections in Maryland",
    "party": {
     "H2MD06138": "republican",
-    "H4MD02232": "democratic",
-    "H6MD02310": "republican"
+    "H4MD02232": "democratic"
    },
    "status": {
     "H2MD06138": "nominee",
-    "H4MD02232": "nominee",
-    "H6MD02310": "eliminated"
+    "H4MD02232": "nominee"
    },
    "unmatched": {
-    "Clint Spellman, Jr.": "eliminated"
+    "Clint Spellman, Jr.": "eliminated",
+    "Nnabu Eze": "eliminated"
    },
    "unsure": []
   },
@@ -5996,16 +6011,17 @@
    "party": {
     "H4MD03149": "republican",
     "H4MD03156": "democratic",
-    "H6MD03482": "republican"
+    "H6MD03482": "republican",
+    "H6MD05362": "democratic"
    },
    "status": {
     "H4MD03149": "nominee",
     "H4MD03156": "nominee",
-    "H6MD03482": "eliminated"
+    "H6MD03482": "eliminated",
+    "H6MD05362": "eliminated"
    },
    "unmatched": {
     "Austin Dyches": "eliminated",
-    "Jennifer Cross": "eliminated",
     "John White": "eliminated",
     "Ray Bly": "eliminated",
     "Robert Gerald Morrison": "eliminated",
@@ -6048,6 +6064,7 @@
   "H-MD-05-2026": {
    "ambiguous": [],
    "article": {
+    "H4MD03263": "Harry Dunn (police officer)",
     "H6MD05321": "Adrian Boafo",
     "H6MD05354": "Nicole A. Williams",
     "H6MD05388": "Arthur Ellis (Maryland politician)",
@@ -6062,6 +6079,8 @@
    },
    "page": "2026 United States House of Representatives elections in Maryland",
    "party": {
+    "H4MD03263": "democratic",
+    "H4MD05144": "democratic",
     "H4MD05219": "republican",
     "H4MD05235": "democratic",
     "H6MD05255": "democratic",
@@ -6081,6 +6100,8 @@
     "H6MD05420": "democratic"
    },
    "status": {
+    "H4MD03263": "eliminated",
+    "H4MD05144": "withdrawn",
     "H4MD05219": "eliminated",
     "H4MD05235": "eliminated",
     "H6MD05255": "eliminated",
@@ -6105,10 +6126,8 @@
     "Elldwnia English": "eliminated",
     "Ellis D. Colvin": "eliminated",
     "Harold Tolbert": "eliminated",
-    "Harry Dunn": "eliminated",
     "James Anderson Makle, Jr.": "eliminated",
     "Keith Salkowski": "eliminated",
-    "Mark Arness": "withdrawn",
     "Reuben B. Collins, II": "eliminated"
    },
    "unsure": []
@@ -6172,17 +6191,19 @@
    },
    "page": "2026 United States House of Representatives elections in Maryland",
    "party": {
+    "H0MD02255": "republican",
     "H6MD07020": "democratic",
-    "H6MD07509": "democratic"
+    "H6MD07509": "democratic",
+    "H6MD07525": "democratic"
    },
    "status": {
+    "H0MD02255": "nominee",
     "H6MD07020": "nominee",
-    "H6MD07509": "eliminated"
+    "H6MD07509": "eliminated",
+    "H6MD07525": "eliminated"
    },
    "unmatched": {
-    "Scott Collier": "nominee",
-    "Tashi Davis": "eliminated",
-    "Theo Gillespie": "eliminated"
+    "Tashi Davis": "eliminated"
    },
    "unsure": []
   },
@@ -6288,9 +6309,7 @@
     "H6MI01226": "republican",
     "H6MI01242": "republican",
     "H6MI01259": "democratic",
-    "H6MI01267": "democratic",
-    "H6MI01275": "independent",
-    "H6MI01283": "libertarian"
+    "H6MI01267": "democratic"
    },
    "status": {
     "H2MI11232": "eliminated",
@@ -6298,14 +6317,14 @@
     "H6MI01226": "nominee",
     "H6MI01242": "eliminated",
     "H6MI01259": "eliminated",
-    "H6MI01267": "eliminated",
-    "H6MI01275": "nominee",
-    "H6MI01283": "nominee"
+    "H6MI01267": "eliminated"
    },
    "unmatched": {
+    "Arnett Satterla": "nominee",
     "Doc Kovaly": "nominee",
     "LaVeta Davenport": "nominee",
-    "Liz Hakola": "nominee"
+    "Liz Hakola": "nominee",
+    "Zebulon Featherly": "nominee"
    },
    "unsure": []
   },
@@ -6630,15 +6649,15 @@
    "page": "2026 United States House of Representatives elections in Michigan",
    "party": {
     "H2MI13204": "democratic",
-    "H6MI13254": "democratic",
-    "H6MI13312": "republican"
+    "H6MI13254": "democratic"
    },
    "status": {
     "H2MI13204": "eliminated",
-    "H6MI13254": "nominee",
-    "H6MI13312": "nominee"
+    "H6MI13254": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "T.P. Nykoriak": "nominee"
+   },
    "unsure": []
   },
   "H-MN-01-2026": {
@@ -6692,6 +6711,7 @@
     "H6MN02248": "democratic",
     "H6MN02263": "republican",
     "H6MN02271": "democratic",
+    "H6MN02289": "democratic",
     "H6MN02297": "democratic"
    },
    "status": {
@@ -6699,10 +6719,10 @@
     "H6MN02248": "eliminated",
     "H6MN02263": "nominee",
     "H6MN02271": "eliminated",
+    "H6MN02289": "eliminated",
     "H6MN02297": "eliminated"
    },
    "unmatched": {
-    "Abdisallam Abdulle": "eliminated",
     "Christopher Mosel": "eliminated"
    },
    "unsure": []
@@ -6722,15 +6742,15 @@
    "page": "2026 United States House of Representatives elections in Minnesota",
    "party": {
     "H4MN03118": "democratic",
+    "H6MN03170": "republican",
     "H6MN03188": "republican"
    },
    "status": {
     "H4MN03118": "nominee",
+    "H6MN03170": "nominee",
     "H6MN03188": "eliminated"
    },
-   "unmatched": {
-    "Tyler Bass": "nominee"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-MN-04-2026": {
@@ -6780,6 +6800,7 @@
     "H0MN05251": "republican",
     "H6MN05357": "republican",
     "H6MN05365": "democratic",
+    "H6MN05381": "republican",
     "H6MN05399": "democratic",
     "H8MN05239": "democratic"
    },
@@ -6787,13 +6808,13 @@
     "H0MN05251": "eliminated",
     "H6MN05357": "nominee",
     "H6MN05365": "eliminated",
+    "H6MN05381": "eliminated",
     "H6MN05399": "eliminated",
     "H8MN05239": "nominee"
    },
    "unmatched": {
     "Abbey Zieska": "eliminated",
     "Abena McKenzie": "eliminated",
-    "Angie Windhauser": "eliminated",
     "Nate Schluter": "eliminated"
    },
    "unsure": []
@@ -6868,15 +6889,16 @@
    "party": {
     "H6MN08179": "democratic",
     "H6MN08195": "democratic",
+    "H6MN08203": "republican",
     "H8MN08043": "republican"
    },
    "status": {
     "H6MN08179": "nominee",
     "H6MN08195": "eliminated",
+    "H6MN08203": "eliminated",
     "H8MN08043": "nominee"
    },
    "unmatched": {
-    "Anthony Hamilton": "eliminated",
     "John Munter": "eliminated"
    },
    "unsure": []
@@ -6897,25 +6919,23 @@
    },
    "page": "2026 United States House of Representatives elections in Missouri",
    "party": {
-    "H0MO08285": "libertarian",
     "H2MO01146": "democratic",
-    "H2MO02219": "republican",
     "H4MO01134": "democratic",
     "H4MO01142": "republican",
-    "H6MO01311": "democratic",
+    "H6MO01261": "republican",
     "H8MO01143": "democratic"
    },
    "status": {
-    "H0MO08285": "nominee",
     "H2MO01146": "eliminated",
-    "H2MO02219": "nominee",
     "H4MO01134": "nominee",
     "H4MO01142": "eliminated",
-    "H6MO01311": "eliminated",
+    "H6MO01261": "nominee",
     "H8MO01143": "eliminated"
    },
    "unmatched": {
-    "Carl E. Henderson": "eliminated"
+    "Alissa Murphy": "eliminated",
+    "Carl E. Henderson": "eliminated",
+    "Tom Schmitz": "nominee"
    },
    "unsure": []
   },
@@ -6971,7 +6991,6 @@
    },
    "page": "2026 United States House of Representatives elections in Missouri",
    "party": {
-    "H2MO02078": "libertarian",
     "H2MO03167": "democratic",
     "H6MO03382": "democratic",
     "H6MO03390": "republican",
@@ -6979,14 +6998,15 @@
     "H8MO09146": "republican"
    },
    "status": {
-    "H2MO02078": "nominee",
     "H2MO03167": "nominee",
     "H6MO03382": "withdrawn",
     "H6MO03390": "eliminated",
     "H6MO03416": "eliminated",
     "H8MO09146": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Jim Higgins": "nominee"
+   },
    "unsure": []
   },
   "H-MO-04-2026": {
@@ -7047,23 +7067,24 @@
    "party": {
     "H2MO04199": "republican",
     "H4MO05234": "democratic",
+    "H4MO05333": "republican",
     "H6MO05197": "libertarian",
     "H6MO05270": "republican",
     "H6MO05304": "republican",
-    "H6MO05312": "republican"
+    "H6MO05312": "republican",
+    "H6MO05338": "republican"
    },
    "status": {
     "H2MO04199": "nominee",
     "H4MO05234": "nominee",
+    "H4MO05333": "eliminated",
     "H6MO05197": "nominee",
     "H6MO05270": "eliminated",
     "H6MO05304": "eliminated",
-    "H6MO05312": "eliminated"
+    "H6MO05312": "eliminated",
+    "H6MO05338": "eliminated"
    },
-   "unmatched": {
-    "Berton A. Knox": "eliminated",
-    "Micah Beebe": "eliminated"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-MO-06-2026": {
@@ -7081,6 +7102,7 @@
    },
    "page": "2026 United States House of Representatives elections in Missouri",
    "party": {
+    "H2MO06269": "libertarian",
     "H6MO06252": "republican",
     "H6MO06260": "democratic",
     "H6MO06278": "democratic",
@@ -7091,6 +7113,7 @@
     "H6MO06344": "democratic"
    },
    "status": {
+    "H2MO06269": "nominee",
     "H6MO06252": "eliminated",
     "H6MO06260": "nominee",
     "H6MO06278": "eliminated",
@@ -7100,9 +7123,7 @@
     "H6MO06328": "eliminated",
     "H6MO06344": "eliminated"
    },
-   "unmatched": {
-    "Andy Maidment": "nominee"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-MO-07-2026": {
@@ -7121,19 +7142,18 @@
    "page": "2026 United States House of Representatives elections in Missouri",
    "party": {
     "H2MO07143": "republican",
-    "H4MO07107": "libertarian",
     "H4MO07156": "democratic",
-    "H6MO07318": "republican",
-    "H6MO07326": "republican"
+    "H6MO07318": "republican"
    },
    "status": {
     "H2MO07143": "nominee",
-    "H4MO07107": "nominee",
     "H4MO07156": "nominee",
-    "H6MO07318": "eliminated",
-    "H6MO07326": "eliminated"
+    "H6MO07318": "eliminated"
    },
-   "unmatched": {},
+   "unmatched": {
+    "John Casey": "eliminated",
+    "Kevin Craig": "nominee"
+   },
    "unsure": []
   },
   "H-MO-08-2026": {
@@ -7213,17 +7233,17 @@
     "H2MS02203": "republican",
     "H4MS02068": "democratic",
     "H6MS02220": "democratic",
-    "H6MS02238": "republican"
+    "H6MS02238": "republican",
+    "H6MS02246": "democratic"
    },
    "status": {
     "H2MS02203": "nominee",
     "H4MS02068": "nominee",
     "H6MS02220": "eliminated",
-    "H6MS02238": "eliminated"
+    "H6MS02238": "eliminated",
+    "H6MS02246": "eliminated"
    },
-   "unmatched": {
-    "Pertis Herman Williams III": "eliminated"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-MS-03-2026": {
@@ -7241,15 +7261,15 @@
    "page": "2026 United States House of Representatives elections in Mississippi",
    "party": {
     "H6MS03228": "democratic",
+    "H6MS03236": "libertarian",
     "H8MS03125": "republican"
    },
    "status": {
     "H6MS03228": "nominee",
+    "H6MS03236": "nominee",
     "H8MS03125": "nominee"
    },
-   "unmatched": {
-    "Erik Kiehle": "nominee"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-MS-04-2026": {
@@ -7268,19 +7288,20 @@
    "page": "2026 United States House of Representatives elections in Mississippi",
    "party": {
     "H2MS04258": "republican",
+    "H6MS04218": "democratic",
     "H6MS04242": "democratic",
     "H6MS04267": "democratic",
     "H6MS04275": "republican"
    },
    "status": {
     "H2MS04258": "nominee",
+    "H6MS04218": "eliminated",
     "H6MS04242": "nominee",
     "H6MS04267": "eliminated",
     "H6MS04275": "eliminated"
    },
    "unmatched": {
-    "Carl Boyanton": "nominee",
-    "Paul Blackman": "eliminated"
+    "Carl Boyanton": "nominee"
    },
    "unsure": []
   },
@@ -7344,7 +7365,6 @@
     "H6MT02143": "democratic",
     "H6MT02150": "democratic",
     "H6MT02168": "independent",
-    "H6MT02176": "libertarian",
     "H6MT02226": "democratic"
    },
    "status": {
@@ -7352,10 +7372,11 @@
     "H6MT02143": "eliminated",
     "H6MT02150": "nominee",
     "H6MT02168": "nominee",
-    "H6MT02176": "eliminated",
     "H6MT02226": "eliminated"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Patrick McCracken": "eliminated"
+   },
    "unsure": []
   },
   "H-NC-01-2026": {
@@ -7406,15 +7427,14 @@
    "page": "2026 United States House of Representatives elections in North Carolina",
    "party": {
     "H0NC02125": "democratic",
-    "H4NC02135": "republican",
     "H6NC02213": "none"
    },
    "status": {
     "H0NC02125": "nominee",
-    "H4NC02135": "nominee",
     "H6NC02213": "nominee"
    },
    "unmatched": {
+    "Eugene Douglass": "nominee",
     "Matthew Laszacs": "nominee"
    },
    "unsure": []
@@ -7463,15 +7483,16 @@
    "party": {
     "H2NC06098": "democratic",
     "H2NC06114": "democratic",
+    "H4NC04149": "libertarian",
     "H6NC04185": "democratic"
    },
    "status": {
     "H2NC06098": "eliminated",
     "H2NC06114": "nominee",
+    "H4NC04149": "nominee",
     "H6NC04185": "eliminated"
    },
    "unmatched": {
-    "Guy Meilleur": "nominee",
     "Max Ganorkar": "nominee"
    },
    "unsure": []
@@ -7490,6 +7511,7 @@
    },
    "page": "2026 United States House of Representatives elections in North Carolina",
    "party": {
+    "H0NC11241": "republican",
     "H4NC05146": "republican",
     "H4NC05294": "democratic",
     "H6NC05141": "democratic",
@@ -7498,6 +7520,7 @@
     "H6NC05174": "libertarian"
    },
    "status": {
+    "H0NC11241": "eliminated",
     "H4NC05146": "nominee",
     "H4NC05294": "nominee",
     "H6NC05141": "eliminated",
@@ -7505,9 +7528,7 @@
     "H6NC05166": "eliminated",
     "H6NC05174": "nominee"
    },
-   "unmatched": {
-    "Joey Osborne": "eliminated"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-NC-06-2026": {
@@ -7666,7 +7687,8 @@
   "H-NC-11-2026": {
    "ambiguous": [],
    "article": {
-    "H2NC14050": "Chuck Edwards"
+    "H2NC14050": "Chuck Edwards",
+    "H6NC11321": "Jennifer Balkcom"
    },
    "decided": {
     "general": true,
@@ -7682,9 +7704,8 @@
     "H6NC11248": "democratic",
     "H6NC11255": "democratic",
     "H6NC11263": "republican",
-    "H6NC11271": "democratic",
     "H6NC11289": "democratic",
-    "H6NC11313": "libertarian"
+    "H6NC11321": "republican"
    },
    "status": {
     "H2NC14050": "eliminated",
@@ -7692,12 +7713,12 @@
     "H6NC11248": "nominee",
     "H6NC11255": "eliminated",
     "H6NC11263": "eliminated",
-    "H6NC11271": "eliminated",
     "H6NC11289": "eliminated",
-    "H6NC11313": "nominee"
+    "H6NC11321": "nominee"
    },
    "unmatched": {
-    "Jennifer Balkcom": "nominee"
+    "Paul Maddox": "eliminated",
+    "Travis Groo": "nominee"
    },
    "unsure": []
   },
@@ -7743,6 +7764,7 @@
    },
    "page": "2026 United States House of Representatives elections in North Carolina",
    "party": {
+    "H4NC13108": "republican",
     "H4NC13116": "republican",
     "H4NC13157": "democratic",
     "H6NC13228": "democratic",
@@ -7750,15 +7772,14 @@
     "H6NC13251": "libertarian"
    },
    "status": {
+    "H4NC13108": "eliminated",
     "H4NC13116": "nominee",
     "H4NC13157": "eliminated",
     "H6NC13228": "nominee",
     "H6NC13236": "eliminated",
     "H6NC13251": "nominee"
    },
-   "unmatched": {
-    "Sid Sharma": "eliminated"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-NC-14-2026": {
@@ -7778,17 +7799,17 @@
     "H4NC14015": "republican",
     "H6NC14036": "democratic",
     "H6NC14044": "republican",
-    "H6NC14051": "democratic",
     "H6NC14069": "democratic"
    },
    "status": {
     "H4NC14015": "nominee",
     "H6NC14036": "eliminated",
     "H6NC14044": "eliminated",
-    "H6NC14051": "eliminated",
     "H6NC14069": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Ahmid Kargbo": "eliminated"
+   },
    "unsure": []
   },
   "H-ND-00-2026": {
@@ -7902,20 +7923,19 @@
    },
    "page": "2026 United States House of Representatives elections in Nebraska",
    "party": {
-    "H0NE03217": "legal marijuana now party",
     "H6NE03115": "republican",
     "H6NE03172": "republican",
     "H6NE03180": "democratic",
     "H6NE03198": "independent"
    },
    "status": {
-    "H0NE03217": "nominee",
     "H6NE03115": "nominee",
     "H6NE03172": "eliminated",
     "H6NE03180": "nominee",
     "H6NE03198": "nominee"
    },
    "unmatched": {
+    "David Else": "nominee",
     "Macey Budke": "nominee"
    },
    "unsure": []
@@ -8041,7 +8061,6 @@
    },
    "page": "2026 United States House of Representatives elections in New Jersey",
    "party": {
-    "H6NJ01220": "democratic",
     "H6NJ02228": "democratic",
     "H6NJ02236": "democratic",
     "H6NJ02244": "democratic",
@@ -8049,14 +8068,15 @@
     "H8NJ02166": "republican"
    },
    "status": {
-    "H6NJ01220": "eliminated",
     "H6NJ02228": "eliminated",
     "H6NJ02236": "eliminated",
     "H6NJ02244": "eliminated",
     "H6NJ02251": "nominee",
     "H8NJ02166": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Bill Finn": "eliminated"
+   },
    "unsure": []
   },
   "H-NJ-03-2026": {
@@ -8074,17 +8094,17 @@
    "page": "2026 United States House of Representatives elections in New Jersey",
    "party": {
     "H4NJ03080": "democratic",
+    "H4NJ03288": "republican",
     "H6NJ03176": "republican",
     "H6NJ03184": "republican"
    },
    "status": {
     "H4NJ03080": "nominee",
+    "H4NJ03288": "eliminated",
     "H6NJ03176": "eliminated",
     "H6NJ03184": "nominee"
    },
-   "unmatched": {
-    "Justin Barbera": "eliminated"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-NJ-04-2026": {
@@ -8101,20 +8121,20 @@
    },
    "page": "2026 United States House of Representatives elections in New Jersey",
    "party": {
+    "H6NJ04216": "democratic",
     "H6NJ04224": "democratic",
     "H6NJ04257": "democratic",
     "H6NJ04265": "democratic",
     "H8NJ04014": "republican"
    },
    "status": {
+    "H6NJ04216": "eliminated",
     "H6NJ04224": "eliminated",
     "H6NJ04257": "nominee",
     "H6NJ04265": "eliminated",
     "H8NJ04014": "nominee"
    },
-   "unmatched": {
-    "Julie Flynn": "eliminated"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-NJ-05-2026": {
@@ -8462,8 +8482,6 @@
     "H4NV01237": "republican",
     "H6NV01331": "republican",
     "H6NV01356": "democratic",
-    "H6NV01380": "democratic",
-    "H6NV01406": "republican",
     "H6NV01422": "democratic",
     "H8NV01113": "republican",
     "H8NV03036": "democratic"
@@ -8472,13 +8490,13 @@
     "H4NV01237": "eliminated",
     "H6NV01331": "nominee",
     "H6NV01356": "eliminated",
-    "H6NV01380": "eliminated",
-    "H6NV01406": "eliminated",
     "H6NV01422": "eliminated",
     "H8NV01113": "eliminated",
     "H8NV03036": "nominee"
    },
    "unmatched": {
+    "Gabriel Cornejo": "eliminated",
+    "Marie Encar Arnold": "eliminated",
     "Rick Saga": "eliminated"
    },
    "unsure": []
@@ -8506,7 +8524,7 @@
     "H6NV02289": "democratic",
     "H6NV02297": "democratic",
     "H6NV02305": "democratic",
-    "H6NV02339": "democratic",
+    "H6NV02313": "republican",
     "H6NV02347": "democratic",
     "H6NV02362": "democratic",
     "H6NV02388": "republican",
@@ -8514,7 +8532,6 @@
     "H6NV02404": "republican",
     "H6NV02412": "republican",
     "H6NV02420": "republican",
-    "H6NV02438": "republican",
     "H6NV02446": "republican"
    },
    "status": {
@@ -8525,7 +8542,7 @@
     "H6NV02289": "eliminated",
     "H6NV02297": "eliminated",
     "H6NV02305": "eliminated",
-    "H6NV02339": "withdrawn",
+    "H6NV02313": "eliminated",
     "H6NV02347": "withdrawn",
     "H6NV02362": "nominee",
     "H6NV02388": "eliminated",
@@ -8533,7 +8550,6 @@
     "H6NV02404": "eliminated",
     "H6NV02412": "eliminated",
     "H6NV02420": "eliminated",
-    "H6NV02438": "withdrawn",
     "H6NV02446": "eliminated"
    },
    "unmatched": {
@@ -8541,8 +8557,9 @@
     "Gamaliel Zavala Enriquez": "eliminated",
     "Gerold Gorman": "eliminated",
     "Jerry Olsen": "eliminated",
+    "Jesse Watts": "withdrawn",
     "Johnny E. Kerns": "eliminated",
-    "Rick Shepherd": "eliminated",
+    "Mark Jolle": "withdrawn",
     "Samuel White": "withdrawn",
     "Sherman Tylawsky": "eliminated"
    },
@@ -8569,7 +8586,6 @@
     "H6NV03204": "republican",
     "H6NV03212": "republican",
     "H6NV03220": "republican",
-    "H6NV03246": "democratic",
     "H6NV03287": "republican",
     "H6NV03295": "democratic",
     "H6NV03311": "democratic",
@@ -8580,13 +8596,14 @@
     "H6NV03204": "nominee",
     "H6NV03212": "eliminated",
     "H6NV03220": "eliminated",
-    "H6NV03246": "eliminated",
     "H6NV03287": "eliminated",
     "H6NV03295": "eliminated",
     "H6NV03311": "eliminated",
     "H6NV04020": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "James Lally": "eliminated"
+   },
    "unsure": []
   },
   "H-NV-04-2026": {
@@ -8829,16 +8846,17 @@
    "page": "2026 United States House of Representatives elections in New York",
    "party": {
     "H4NY11138": "democratic",
-    "H6NY09152": "democratic"
+    "H6NY09145": "republican",
+    "H6NY09152": "democratic",
+    "H6NY10168": "democratic"
    },
    "status": {
     "H4NY11138": "nominee",
-    "H6NY09152": "eliminated"
+    "H6NY09145": "nominee",
+    "H6NY09152": "eliminated",
+    "H6NY10168": "eliminated"
    },
-   "unmatched": {
-    "Joel Anabilah-Azumah": "nominee",
-    "Joshua Bristol": "eliminated"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-NY-10-2026": {
@@ -8856,15 +8874,15 @@
    "page": "2026 United States House of Representatives elections in New York",
    "party": {
     "H2NY10308": "democratic",
-    "H6NY10176": "democratic",
-    "H6NY10218": "republican"
+    "H6NY10176": "democratic"
    },
    "status": {
     "H2NY10308": "eliminated",
-    "H6NY10176": "nominee",
-    "H6NY10218": "nominee"
+    "H6NY10176": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Jennifer Moore": "nominee"
+   },
    "unsure": []
   },
   "H-NY-11-2026": {
@@ -8948,17 +8966,18 @@
    "page": "2026 United States House of Representatives elections in New York",
    "party": {
     "H2NY13096": "democratic",
+    "H6NY13212": "democratic",
     "H6NY13253": "democratic",
     "H6NY13279": "democratic"
    },
    "status": {
     "H2NY13096": "eliminated",
+    "H6NY13212": "eliminated",
     "H6NY13253": "eliminated",
     "H6NY13279": "nominee"
    },
    "unmatched": {
-    "Manual \"Jomo\" Williams": "nominee",
-    "Theo Chino-Tavarez": "eliminated"
+    "Manual \"Jomo\" Williams": "nominee"
    },
    "unsure": []
   },
@@ -9306,7 +9325,8 @@
     "H6OH01146": "republican",
     "H6OH01179": "libertarian",
     "H6OH01187": "democratic",
-    "H6OH01195": "republican"
+    "H6OH01195": "republican",
+    "H6OH01203": "libertarian"
    },
    "status": {
     "H2OH01194": "nominee",
@@ -9314,11 +9334,10 @@
     "H6OH01146": "eliminated",
     "H6OH01179": "nominee",
     "H6OH01187": "eliminated",
-    "H6OH01195": "eliminated"
+    "H6OH01195": "eliminated",
+    "H6OH01203": "eliminated"
    },
-   "unmatched": {
-    "Jason Stoops": "eliminated"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-OH-02-2026": {
@@ -9362,14 +9381,13 @@
    },
    "page": "2026 United States House of Representatives elections in Ohio",
    "party": {
-    "H0OH03137": "republican",
     "H2OH03125": "democratic"
    },
    "status": {
-    "H0OH03137": "nominee",
     "H2OH03125": "nominee"
    },
    "unmatched": {
+    "Cleophus Dulaney": "nominee",
     "Joe Gerard": "eliminated"
    },
    "unsure": []
@@ -9492,7 +9510,9 @@
     "H6OH07143": "democratic",
     "H6OH07150": "democratic",
     "H6OH07168": "democratic",
-    "H6OH07176": "democratic"
+    "H6OH07176": "democratic",
+    "H6OH07184": "democratic",
+    "H6OH07192": "write-in"
    },
    "status": {
     "H2OH16051": "nominee",
@@ -9500,15 +9520,15 @@
     "H6OH07143": "eliminated",
     "H6OH07150": "eliminated",
     "H6OH07168": "nominee",
-    "H6OH07176": "eliminated"
+    "H6OH07176": "eliminated",
+    "H6OH07184": "eliminated",
+    "H6OH07192": "nominee"
    },
    "unmatched": {
     "Andrey Martinichin": "nominee",
-    "Ann Marie Donegan": "eliminated",
     "Brian Duvall-Gambino": "eliminated",
     "John Butchko": "eliminated",
-    "Keith Mundy": "eliminated",
-    "Thahbia Asad": "nominee"
+    "Keith Mundy": "eliminated"
    },
    "unsure": []
   },
@@ -9595,22 +9615,22 @@
    "party": {
     "H2OH03067": "republican",
     "H4OH10191": "democratic",
+    "H6OH10113": "libertarian",
     "H6OH10121": "democratic",
     "H6OH10139": "democratic",
-    "H6OH10147": "democratic",
-    "H8OH03098": "democratic"
+    "H6OH10147": "democratic"
    },
    "status": {
     "H2OH03067": "nominee",
     "H4OH10191": "eliminated",
+    "H6OH10113": "nominee",
     "H6OH10121": "nominee",
     "H6OH10139": "eliminated",
-    "H6OH10147": "eliminated",
-    "H8OH03098": "eliminated"
+    "H6OH10147": "eliminated"
    },
    "unmatched": {
-    "Manuel Foggie": "eliminated",
-    "Thomas McMasters": "nominee"
+    "David Esrati": "eliminated",
+    "Manuel Foggie": "eliminated"
    },
    "unsure": []
   },
@@ -9629,19 +9649,18 @@
    "page": "2026 United States House of Representatives elections in Ohio",
    "party": {
     "H2OH11169": "democratic",
-    "H2OH11250": "republican",
     "H6OH11194": "democratic",
     "H6OH11202": "democratic",
     "H6OH11210": "republican"
    },
    "status": {
     "H2OH11169": "nominee",
-    "H2OH11250": "eliminated",
     "H6OH11194": "eliminated",
     "H6OH11202": "eliminated",
     "H6OH11210": "eliminated"
    },
    "unmatched": {
+    "James Hemphill": "eliminated",
     "Mike Krichner": "nominee"
    },
    "unsure": []
@@ -9778,6 +9797,7 @@
    },
    "page": "2026 United States House of Representatives elections in Oklahoma",
    "party": {
+    "H4OK01123": "republican",
     "H6OK01201": "democratic",
     "H6OK01235": "republican",
     "H6OK01243": "republican",
@@ -9789,6 +9809,7 @@
     "H6OK01326": "republican"
    },
    "status": {
+    "H4OK01123": "eliminated",
     "H6OK01201": "nominee",
     "H6OK01235": "nominee",
     "H6OK01243": "eliminated",
@@ -9801,8 +9822,7 @@
    },
    "unmatched": {
     "Kelly B. Walsh": "eliminated",
-    "Nancy Dyson": "eliminated",
-    "Paul Royse": "eliminated"
+    "Nancy Dyson": "eliminated"
    },
    "unsure": []
   },
@@ -9822,17 +9842,18 @@
    "party": {
     "H2OK02315": "republican",
     "H4OK02196": "democratic",
-    "H6OK02266": "democratic"
+    "H4OK02204": "independent",
+    "H6OK02266": "democratic",
+    "H6OK02274": "republican"
    },
    "status": {
     "H2OK02315": "nominee",
     "H4OK02196": "nominee",
-    "H6OK02266": "eliminated"
+    "H4OK02204": "nominee",
+    "H6OK02266": "eliminated",
+    "H6OK02274": "eliminated"
    },
-   "unmatched": {
-    "Ronnie Hopkins": "nominee",
-    "Will Webb": "eliminated"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-OK-03-2026": {
@@ -9906,19 +9927,19 @@
    "page": "2026 United States House of Representatives elections in Oklahoma",
    "party": {
     "H0OK05205": "republican",
+    "H4OK04176": "independent",
     "H6OK05293": "democratic",
     "H6OK05301": "independent",
     "H6OK05319": "democratic"
    },
    "status": {
     "H0OK05205": "nominee",
+    "H4OK04176": "nominee",
     "H6OK05293": "nominee",
     "H6OK05301": "nominee",
     "H6OK05319": "eliminated"
    },
-   "unmatched": {
-    "Austin Nieves": "nominee"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-OR-01-2026": {
@@ -10002,15 +10023,16 @@
    "page": "2026 United States House of Representatives elections in Oregon",
    "party": {
     "H4OR03192": "democratic",
-    "H6OR03189": "democratic"
+    "H6OR03189": "democratic",
+    "H6OR03197": "republican"
    },
    "status": {
     "H4OR03192": "nominee",
-    "H6OR03189": "eliminated"
+    "H6OR03189": "eliminated",
+    "H6OR03197": "nominee"
    },
    "unmatched": {
-    "Andrew Castilleja": "eliminated",
-    "Loran Ayles": "nominee"
+    "Andrew Castilleja": "eliminated"
    },
    "unsure": []
   },
@@ -10029,18 +10051,17 @@
    "page": "2026 United States House of Representatives elections in Oregon",
    "party": {
     "H2OR04095": "democratic",
-    "H4OR04141": "green",
     "H6OR04245": "democratic",
     "H6OR04260": "republican"
    },
    "status": {
     "H2OR04095": "nominee",
-    "H4OR04141": "nominee",
     "H6OR04245": "eliminated",
     "H6OR04260": "nominee"
    },
    "unmatched": {
     "Daniel Bahlen": "eliminated",
+    "Justin Filip": "nominee",
     "Stefan Strek": "eliminated"
    },
    "unsure": []
@@ -10139,14 +10160,14 @@
    },
    "page": "2026 United States House of Representatives elections in Pennsylvania",
    "party": {
-    "H4PA13199": "democratic",
-    "H6PA02205": "republican"
+    "H4PA13199": "democratic"
    },
    "status": {
-    "H4PA13199": "nominee",
-    "H6PA02205": "nominee"
+    "H4PA13199": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Jessica Arriaga": "nominee"
+   },
    "unsure": []
   },
   "H-PA-03-2026": {
@@ -10584,7 +10605,6 @@
   "H-SC-01-2026": {
    "ambiguous": [],
    "article": {
-    "H6SC01136": "Ben Frasier",
     "H6SC01250": "Mark Smith (South Carolina politician)",
     "H6SC01359": "Nancy Lacore"
    },
@@ -10597,7 +10617,6 @@
    },
    "page": "2026 United States House of Representatives elections in South Carolina",
    "party": {
-    "H6SC01136": "democratic",
     "H6SC01201": "democratic",
     "H6SC01227": "democratic",
     "H6SC01243": "democratic",
@@ -10613,10 +10632,10 @@
     "H6SC01342": "libertarian",
     "H6SC01359": "democratic",
     "H6SC01383": "democratic",
+    "H6SC01391": "republican",
     "H6SC01409": "republican"
    },
    "status": {
-    "H6SC01136": "eliminated",
     "H6SC01201": "eliminated",
     "H6SC01227": "eliminated",
     "H6SC01243": "eliminated",
@@ -10632,10 +10651,11 @@
     "H6SC01342": "nominee",
     "H6SC01359": "nominee",
     "H6SC01383": "eliminated",
+    "H6SC01391": "eliminated",
     "H6SC01409": "eliminated"
    },
    "unmatched": {
-    "Cindy Wagers Riley": "eliminated",
+    "Ben Frasier": "eliminated",
     "Mark Sanford": "withdrawn"
    },
    "unsure": []
@@ -10657,6 +10677,7 @@
     "H2SC02059": "republican",
     "H4SC02071": "republican",
     "H4SC02089": "democratic",
+    "H4SC02105": "democratic",
     "H6SC02134": "democratic",
     "H6SC02142": "republican",
     "H6SC02159": "democratic",
@@ -10666,14 +10687,13 @@
     "H2SC02059": "nominee",
     "H4SC02071": "eliminated",
     "H4SC02089": "eliminated",
+    "H4SC02105": "eliminated",
     "H6SC02134": "eliminated",
     "H6SC02142": "eliminated",
     "H6SC02159": "nominee",
     "H6SC02167": "nominee"
    },
-   "unmatched": {
-    "Daniel Shrief": "eliminated"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-SC-03-2026": {
@@ -10768,16 +10788,17 @@
    "page": "2026 United States House of Representatives elections in South Carolina",
    "party": {
     "H2SC02042": "democratic",
-    "H6SC06168": "republican"
+    "H6SC06168": "republican",
+    "H6SC06176": "democratic",
+    "H6SC06184": "republican"
    },
    "status": {
     "H2SC02042": "nominee",
-    "H6SC06168": "eliminated"
+    "H6SC06168": "eliminated",
+    "H6SC06176": "eliminated",
+    "H6SC06184": "nominee"
    },
-   "unmatched": {
-    "Frederick Goodwin": "eliminated",
-    "John Peterson": "nominee"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-SC-07-2026": {
@@ -10892,15 +10913,15 @@
    "page": "2026 United States House of Representatives elections in Tennessee",
    "party": {
     "H0TN03254": "republican",
-    "H6TN03228": "democratic",
-    "H6TN03236": "democratic"
+    "H6TN03228": "democratic"
    },
    "status": {
     "H0TN03254": "nominee",
-    "H6TN03228": "nominee",
-    "H6TN03236": "eliminated"
+    "H6TN03228": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Bryan Martin": "eliminated"
+   },
    "unsure": []
   },
   "H-TN-04-2026": {
@@ -10920,6 +10941,7 @@
     "H0TN04195": "republican",
     "H4TN04247": "republican",
     "H4TN04270": "democratic",
+    "H6TN04259": "republican",
     "H6TN04267": "democratic",
     "H6TN04275": "republican",
     "H6TN05363": "democratic",
@@ -10929,14 +10951,14 @@
     "H0TN04195": "nominee",
     "H4TN04247": "eliminated",
     "H4TN04270": "nominee",
+    "H6TN04259": "eliminated",
     "H6TN04267": "eliminated",
     "H6TN04275": "eliminated",
     "H6TN05363": "eliminated",
     "H6TN05371": "eliminated"
    },
    "unmatched": {
-    "Cliff Huffman": "eliminated",
-    "Harold \"Rocky\" Jones": "eliminated"
+    "Cliff Huffman": "eliminated"
    },
    "unsure": []
   },
@@ -10959,7 +10981,6 @@
     "H2TN05446": "republican",
     "H6TN05397": "democratic",
     "H6TN05405": "republican",
-    "H6TN05413": "democratic",
     "H6TN05439": "democratic",
     "H6TN05454": "democratic"
    },
@@ -10967,12 +10988,12 @@
     "H2TN05446": "eliminated",
     "H6TN05397": "nominee",
     "H6TN05405": "nominee",
-    "H6TN05413": "eliminated",
     "H6TN05439": "eliminated",
     "H6TN05454": "eliminated"
    },
    "unmatched": {
-    "DeVante R. Hill": "eliminated"
+    "DeVante R. Hill": "eliminated",
+    "Yolanda Cooper-Sutton": "eliminated"
    },
    "unsure": []
   },
@@ -11030,17 +11051,17 @@
     "H6TN07161": "republican",
     "H6TN07229": "democratic",
     "H6TN07286": "democratic",
+    "H6TN07328": "democratic",
     "H6TN07344": "democratic"
    },
    "status": {
     "H6TN07161": "nominee",
     "H6TN07229": "eliminated",
     "H6TN07286": "nominee",
+    "H6TN07328": "eliminated",
     "H6TN07344": "eliminated"
    },
-   "unmatched": {
-    "Joshua Warren Sales": "eliminated"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-TN-08-2026": {
@@ -11060,17 +11081,17 @@
     "H2TN07103": "republican",
     "H4TN08115": "democratic",
     "H6TN08359": "democratic",
-    "H6TN08367": "democratic",
-    "H6TN08375": "democratic"
+    "H6TN08367": "democratic"
    },
    "status": {
     "H2TN07103": "nominee",
     "H4TN08115": "eliminated",
     "H6TN08359": "eliminated",
-    "H6TN08367": "nominee",
-    "H6TN08375": "eliminated"
+    "H6TN08367": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Jordan D. Hinders": "eliminated"
+   },
    "unsure": []
   },
   "H-TN-09-2026": {
@@ -11128,18 +11149,19 @@
    "party": {
     "H2TX01112": "republican",
     "H6TX01303": "democratic",
+    "H6TX01311": "democratic",
     "H6TX01337": "democratic",
     "H6TX01352": "democratic"
    },
    "status": {
     "H2TX01112": "nominee",
     "H6TX01303": "eliminated",
+    "H6TX01311": "eliminated",
     "H6TX01337": "eliminated",
     "H6TX01352": "nominee"
    },
    "unmatched": {
-    "Sonia Canciola": "nominee",
-    "Tracy Andrus": "eliminated"
+    "Sonia Canciola": "nominee"
    },
    "unsure": []
   },
@@ -11215,17 +11237,17 @@
    "page": "2026 United States House of Representatives elections in Texas",
    "party": {
     "H0TX04219": "republican",
-    "H4TX04179": "republican",
     "H6TX04166": "democratic",
     "H6TX04174": "democratic"
    },
    "status": {
     "H0TX04219": "nominee",
-    "H4TX04179": "eliminated",
     "H6TX04166": "eliminated",
     "H6TX04174": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Don Horn": "eliminated"
+   },
    "unsure": []
   },
   "H-TX-05-2026": {
@@ -11300,20 +11322,19 @@
    },
    "page": "2026 United States House of Representatives elections in Texas",
    "party": {
-    "H2TX07101": "republican",
     "H2TX07119": "republican",
     "H6TX07151": "republican",
     "H6TX07169": "republican",
     "H8TX07140": "democratic"
    },
    "status": {
-    "H2TX07101": "eliminated",
     "H2TX07119": "eliminated",
     "H6TX07151": "nominee",
     "H6TX07169": "eliminated",
     "H8TX07140": "nominee"
    },
    "unmatched": {
+    "Erin Montgomery": "eliminated",
     "Ngabo Espoir": "nominee"
    },
    "unsure": []
@@ -11335,7 +11356,6 @@
     "H6TX08209": "republican",
     "H6TX08225": "democratic",
     "H6TX08233": "republican",
-    "H6TX08241": "republican",
     "H6TX08258": "republican",
     "H6TX09090": "republican"
    },
@@ -11345,11 +11365,12 @@
     "H6TX08209": "nominee",
     "H6TX08225": "eliminated",
     "H6TX08233": "withdrawn",
-    "H6TX08241": "eliminated",
     "H6TX08258": "eliminated",
     "H6TX09090": "eliminated"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Jay Fondren": "eliminated"
+   },
    "unsure": []
   },
   "H-TX-09-2026": {
@@ -11464,15 +11485,15 @@
    "page": "2026 United States House of Representatives elections in Texas",
    "party": {
     "H0TX11230": "republican",
+    "H6TX11104": "democratic",
     "H6TX11112": "democratic"
    },
    "status": {
     "H0TX11230": "nominee",
+    "H6TX11104": "eliminated",
     "H6TX11112": "nominee"
    },
-   "unmatched": {
-    "Pedro Ruiz": "eliminated"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-TX-12-2026": {
@@ -11601,19 +11622,22 @@
    "page": "2026 United States House of Representatives elections in Texas",
    "party": {
     "H2TX16250": "republican",
+    "H6TX16152": "republican",
+    "H6TX16194": "republican",
     "H6TX16202": "republican",
+    "H6TX16210": "republican",
     "H8TX16109": "democratic"
    },
    "status": {
     "H2TX16250": "eliminated",
+    "H6TX16152": "nominee",
+    "H6TX16194": "eliminated",
     "H6TX16202": "eliminated",
+    "H6TX16210": "eliminated",
     "H8TX16109": "nominee"
    },
    "unmatched": {
-    "Adam Bauman": "nominee",
-    "Marisela Chavez": "eliminated",
-    "Raul Castaneda": "eliminated",
-    "Ruben Rios": "eliminated"
+    "Marisela Chavez": "eliminated"
    },
    "unsure": []
   },
@@ -11664,17 +11688,16 @@
     "H4TX09095": "democratic",
     "H4TX18138": "democratic",
     "H6TX18232": "democratic",
-    "H6TX18471": "democratic",
-    "H6TX18489": "republican"
+    "H6TX18471": "democratic"
    },
    "status": {
     "H4TX09095": "eliminated",
     "H4TX18138": "withdrawn",
     "H6TX18232": "nominee",
-    "H6TX18471": "eliminated",
-    "H6TX18489": "eliminated"
+    "H6TX18471": "eliminated"
    },
    "unmatched": {
+    "Elizabeth Vences": "eliminated",
     "Ronald Whitfield": "nominee"
    },
    "unsure": []
@@ -11733,15 +11756,16 @@
    "page": "2026 United States House of Representatives elections in Texas",
    "party": {
     "H2TX35011": "democratic",
-    "H6TX20113": "republican"
+    "H6TX20113": "republican",
+    "H6TX20121": "democratic"
    },
    "status": {
     "H2TX35011": "nominee",
-    "H6TX20113": "nominee"
+    "H6TX20113": "nominee",
+    "H6TX20121": "eliminated"
    },
    "unmatched": {
-    "John Atwood": "eliminated",
-    "Kendra Wilkerson": "eliminated"
+    "John Atwood": "eliminated"
    },
    "unsure": []
   },
@@ -11767,10 +11791,8 @@
     "H6TX21319": "republican",
     "H6TX21335": "republican",
     "H6TX21350": "republican",
-    "H6TX21368": "republican",
     "H6TX21384": "republican",
     "H6TX21426": "republican",
-    "H6TX21434": "republican",
     "H6TX23216": "republican"
    },
    "status": {
@@ -11782,13 +11804,13 @@
     "H6TX21319": "eliminated",
     "H6TX21335": "eliminated",
     "H6TX21350": "eliminated",
-    "H6TX21368": "withdrawn",
     "H6TX21384": "eliminated",
     "H6TX21426": "eliminated",
-    "H6TX21434": "eliminated",
     "H6TX23216": "eliminated"
    },
    "unmatched": {
+    "Heather Tessmer": "eliminated",
+    "Kyle Sinclair": "withdrawn",
     "Peggy Wardlaw": "eliminated",
     "Trey Trainor": "eliminated"
    },
@@ -11843,7 +11865,6 @@
     "H4TX23120": "republican",
     "H4TX23138": "democratic",
     "H4TX28046": "republican",
-    "H6TX23240": "democratic",
     "H6TX23257": "democratic",
     "H6TX23273": "democratic",
     "H6TX23281": "republican"
@@ -11852,12 +11873,12 @@
     "H4TX23120": "nominee",
     "H4TX23138": "eliminated",
     "H4TX28046": "eliminated",
-    "H6TX23240": "eliminated",
     "H6TX23257": "eliminated",
     "H6TX23273": "nominee",
     "H6TX23281": "eliminated"
    },
    "unmatched": {
+    "Bruce Richardson": "eliminated",
     "Tony Gonzales": "eliminated"
    },
    "unsure": []
@@ -11905,15 +11926,15 @@
    "page": "2026 United States House of Representatives elections in Texas",
    "party": {
     "H2TX33040": "republican",
-    "H6TX25211": "democratic"
+    "H6TX25211": "democratic",
+    "H6TX25237": "democratic"
    },
    "status": {
     "H2TX33040": "nominee",
-    "H6TX25211": "eliminated"
+    "H6TX25211": "eliminated",
+    "H6TX25237": "nominee"
    },
-   "unmatched": {
-    "Dione Sims": "nominee"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-TX-26-2026": {
@@ -11960,21 +11981,18 @@
    "party": {
     "H2TX05170": "democratic",
     "H4TX27089": "democratic",
-    "H6TX27068": "democratic",
     "H6TX27126": "republican",
-    "H6TX27134": "democratic",
     "H8TX27049": "republican"
    },
    "status": {
     "H2TX05170": "eliminated",
     "H4TX27089": "nominee",
-    "H6TX27068": "eliminated",
     "H6TX27126": "eliminated",
-    "H6TX27134": "eliminated",
     "H8TX27049": "nominee"
    },
    "unmatched": {
-    "Dan McQueen": "nominee"
+    "Dan McQueen": "nominee",
+    "Eustaquio Castro-Mendoza": "eliminated"
    },
    "unsure": []
   },
@@ -12178,6 +12196,7 @@
    },
    "page": "2026 United States House of Representatives elections in Texas",
    "party": {
+    "H2TX33248": "republican",
     "H4TX32089": "democratic",
     "H6TX33041": "republican",
     "H6TX33066": "republican",
@@ -12185,6 +12204,7 @@
     "H8TX32098": "democratic"
    },
    "status": {
+    "H2TX33248": "nominee",
     "H4TX32089": "eliminated",
     "H6TX33041": "eliminated",
     "H6TX33066": "eliminated",
@@ -12193,8 +12213,7 @@
    },
    "unmatched": {
     "Carlos Quintanilla": "eliminated",
-    "Monte Mitchell": "eliminated",
-    "Patrick Gillespie": "nominee"
+    "Monte Mitchell": "eliminated"
    },
    "unsure": []
   },
@@ -12299,17 +12318,18 @@
    },
    "page": "2026 United States House of Representatives elections in Texas",
    "party": {
+    "H2TX08125": "republican",
+    "H4TX14111": "democratic",
     "H6TX02079": "republican",
     "H6TX36028": "democratic"
    },
    "status": {
+    "H2TX08125": "eliminated",
+    "H4TX14111": "nominee",
     "H6TX02079": "nominee",
     "H6TX36028": "eliminated"
    },
-   "unmatched": {
-    "Jonathan Mitchell": "eliminated",
-    "Rhonda Hart": "nominee"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-TX-37-2026": {
@@ -12346,7 +12366,8 @@
    "ambiguous": [],
    "article": {
     "H2TX18207": "Carmen María Montiel",
-    "H6TX38115": "Larry Rubin"
+    "H6TX38115": "Larry Rubin",
+    "H8TX29102": "Carmen María Montiel"
    },
    "decided": {
     "general": true,
@@ -12358,33 +12379,35 @@
    "page": "2026 United States House of Representatives elections in Texas",
    "party": {
     "H2TX18207": "republican",
+    "H2TX35193": "republican",
     "H4TX38011": "democratic",
     "H6TX02244": "republican",
     "H6TX08217": "republican",
     "H6TX38024": "democratic",
     "H6TX38040": "democratic",
-    "H6TX38057": "republican",
     "H6TX38065": "republican",
     "H6TX38073": "republican",
     "H6TX38081": "republican",
-    "H6TX38115": "republican"
+    "H6TX38115": "republican",
+    "H8TX29102": "republican"
    },
    "status": {
     "H2TX18207": "eliminated",
+    "H2TX35193": "eliminated",
     "H4TX38011": "nominee",
     "H6TX02244": "nominee",
     "H6TX08217": "eliminated",
     "H6TX38024": "eliminated",
     "H6TX38040": "eliminated",
-    "H6TX38057": "eliminated",
     "H6TX38065": "eliminated",
     "H6TX38073": "eliminated",
     "H6TX38081": "eliminated",
-    "H6TX38115": "eliminated"
+    "H6TX38115": "eliminated",
+    "H8TX29102": "eliminated"
    },
    "unmatched": {
     "Avery Ayers": "eliminated",
-    "Jennifer Sundt": "eliminated"
+    "Barrett McNabb": "eliminated"
    },
    "unsure": []
   },
@@ -12545,19 +12568,18 @@
     "H6VA02164": "democratic",
     "H6VA02172": "democratic",
     "H6VA02198": "democratic",
-    "H6VA02255": "democratic",
-    "H6VA02263": "independent"
+    "H6VA02255": "democratic"
    },
    "status": {
     "H2VA02064": "nominee",
     "H6VA02164": "eliminated",
     "H6VA02172": "eliminated",
     "H6VA02198": "nominee",
-    "H6VA02255": "eliminated",
-    "H6VA02263": "nominee"
+    "H6VA02255": "eliminated"
    },
    "unmatched": {
-    "Bishop Staten": "nominee"
+    "Bishop Staten": "nominee",
+    "Matt Baker": "nominee"
    },
    "unsure": []
   },
@@ -12678,19 +12700,20 @@
    "party": {
     "H4VA07234": "democratic",
     "H6VA07205": "republican",
+    "H6VA07338": "republican",
     "H6VA07346": "independent",
     "H6VA07353": "independent"
    },
    "status": {
     "H4VA07234": "nominee",
     "H6VA07205": "nominee",
+    "H6VA07338": "eliminated",
     "H6VA07346": "nominee",
     "H6VA07353": "nominee"
    },
    "unmatched": {
     "Phillip Harding": "eliminated",
     "Randall Terry": "nominee",
-    "Ricky Smithers": "eliminated",
     "Taner Lopez": "nominee"
    },
    "unsure": []
@@ -12713,8 +12736,7 @@
     "H6VA08278": "democratic",
     "H6VA08286": "democratic",
     "H6VA08328": "democratic",
-    "H6VA08336": "independent",
-    "H6VA08344": "democratic"
+    "H6VA08336": "independent"
    },
    "status": {
     "H4VA08224": "nominee",
@@ -12722,10 +12744,10 @@
     "H6VA08278": "eliminated",
     "H6VA08286": "eliminated",
     "H6VA08328": "eliminated",
-    "H6VA08336": "nominee",
-    "H6VA08344": "eliminated"
+    "H6VA08336": "nominee"
    },
    "unmatched": {
+    "Lorena Thorne Bruner": "eliminated",
     "Shelly Arnoldi": "nominee"
    },
    "unsure": []
@@ -12774,18 +12796,18 @@
     "H4VA10279": "democratic",
     "H6VA10225": "republican",
     "H6VA10233": "republican",
-    "H6VA10258": "republican"
+    "H6VA10258": "republican",
+    "H6VA10274": "independent"
    },
    "status": {
     "H2VA10273": "nominee",
     "H4VA10279": "nominee",
     "H6VA10225": "eliminated",
     "H6VA10233": "withdrawn",
-    "H6VA10258": "eliminated"
+    "H6VA10258": "eliminated",
+    "H6VA10274": "nominee"
    },
-   "unmatched": {
-    "Ahsen Malik": "nominee"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-VA-11-2026": {
@@ -12854,7 +12876,6 @@
     "H4WA01282": "republican",
     "H6WA01212": "democratic",
     "H6WA01220": "independent",
-    "H6WA01238": "democratic",
     "H6WA01246": "democratic"
    },
    "status": {
@@ -12862,10 +12883,10 @@
     "H4WA01282": "nominee",
     "H6WA01212": "eliminated",
     "H6WA01220": "eliminated",
-    "H6WA01238": "eliminated",
     "H6WA01246": "eliminated"
    },
    "unmatched": {
+    "Benjamin Kincaid": "eliminated",
     "Bryce Nickel": "eliminated"
    },
    "unsure": []
@@ -12915,6 +12936,7 @@
     "H2WA03217": "democratic",
     "H6WA03267": "cascade party of washington",
     "H6WA03275": "republican",
+    "H6WA03309": "republican",
     "H6WA03317": "democratic"
    },
    "status": {
@@ -12922,13 +12944,13 @@
     "H2WA03217": "nominee",
     "H6WA03267": "eliminated",
     "H6WA03275": "nominee",
+    "H6WA03309": "eliminated",
     "H6WA03317": "eliminated"
    },
    "unmatched": {
     "Austin Braswell": "eliminated",
     "John P. Roco": "eliminated",
-    "John Saulie-Rohman": "eliminated",
-    "Lawrence Kellogg": "eliminated"
+    "John Saulie-Rohman": "eliminated"
    },
    "unsure": []
   },
@@ -12947,24 +12969,22 @@
    "party": {
     "H2WA04165": "republican",
     "H6WA04190": "democratic",
-    "H6WA04208": "cascade party of washington",
     "H6WA04216": "republican",
     "H6WA04224": "republican",
     "H6WA04232": "republican",
-    "H6WA04257": "independent",
-    "H6WA04265": "republican"
+    "H6WA04257": "independent"
    },
    "status": {
     "H2WA04165": "eliminated",
     "H6WA04190": "nominee",
-    "H6WA04208": "eliminated",
     "H6WA04216": "nominee",
     "H6WA04224": "eliminated",
     "H6WA04232": "eliminated",
-    "H6WA04257": "eliminated",
-    "H6WA04265": "eliminated"
+    "H6WA04257": "eliminated"
    },
    "unmatched": {
+    "Devin Pooré": "eliminated",
+    "Elpidia Saavedra": "eliminated",
     "Jacek Kobiesa": "eliminated",
     "Ken Vaz": "eliminated",
     "Zac Rossi": "eliminated"
@@ -12994,7 +13014,6 @@
     "H6WA05247": "democratic",
     "H6WA05254": "independent",
     "H6WA05262": "independent",
-    "H6WA05270": "independent",
     "H6WA05288": "democratic",
     "H6WA05296": "independent"
    },
@@ -13008,7 +13027,6 @@
     "H6WA05247": "eliminated",
     "H6WA05254": "eliminated",
     "H6WA05262": "eliminated",
-    "H6WA05270": "eliminated",
     "H6WA05288": "eliminated",
     "H6WA05296": "eliminated"
    },
@@ -13201,14 +13219,14 @@
    },
    "page": "2026 United States House of Representatives elections in Wisconsin",
    "party": {
-    "H2WI02124": "democratic",
-    "H2WI02199": "democratic"
+    "H2WI02124": "democratic"
    },
    "status": {
-    "H2WI02124": "nominee",
-    "H2WI02199": "eliminated"
+    "H2WI02124": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Douglas Alexander": "eliminated"
+   },
    "unsure": []
   },
   "H-WI-03-2026": {
@@ -13464,7 +13482,6 @@
     "H6WY01140": "republican",
     "H6WY01165": "republican",
     "H6WY01173": "democratic",
-    "H6WY01181": "republican",
     "H6WY01207": "republican"
    },
    "status": {
@@ -13475,12 +13492,12 @@
     "H6WY01140": "eliminated",
     "H6WY01165": "eliminated",
     "H6WY01173": "nominee",
-    "H6WY01181": "eliminated",
     "H6WY01207": "eliminated"
    },
    "unmatched": {
     "Elena del Real": "eliminated",
-    "Reid Rasner": "eliminated"
+    "Reid Rasner": "eliminated",
+    "Richard Dodson": "eliminated"
    },
    "unsure": []
   },
@@ -13500,29 +13517,27 @@
    "page": "2026 United States Senate election in Alaska",
    "party": {
     "S4AK00214": "republican",
+    "S6AK00268": "republican",
     "S6AK00276": "democratic",
     "S6AK00284": "democratic",
-    "S6AK00292": "republican",
-    "S6AK00300": "democratic",
-    "S6AK00318": "independent",
-    "S8AK00140": "republican"
+    "S8AK00066": "libertarian"
    },
    "status": {
     "S4AK00214": "nominee",
+    "S6AK00268": "eliminated",
     "S6AK00276": "nominee",
     "S6AK00284": "eliminated",
-    "S6AK00292": "eliminated",
-    "S6AK00300": "withdrawn",
-    "S6AK00318": "eliminated",
-    "S8AK00140": "nominee"
+    "S8AK00066": "eliminated"
    },
    "unmatched": {
-    "Dustin Darden": "eliminated",
+    "David Leslie": "withdrawn",
     "Earl D. \"Skip\" Southworth": "eliminated",
     "Fred C. Grauberger": "eliminated",
+    "Gerald L. Heikes": "nominee",
+    "Heather McElwain": "eliminated",
+    "Reece Roberts": "eliminated",
     "Richard Benedict Mayers": "eliminated",
     "Richard Grayson": "eliminated",
-    "Scott Kohlhaas": "eliminated",
     "Shirley Saucerman": "eliminated",
     "Sid Hill": "eliminated"
    },
@@ -13660,6 +13675,7 @@
     "S6FL00830": "democratic",
     "S6FL00848": "republican",
     "S6FL00855": "democratic",
+    "S6FL00871": "republican",
     "S6FL00897": "republican"
    },
    "status": {
@@ -13669,6 +13685,7 @@
     "S6FL00830": "nominee",
     "S6FL00848": "eliminated",
     "S6FL00855": "eliminated",
+    "S6FL00871": "eliminated",
     "S6FL00897": "eliminated"
    },
    "unmatched": {
@@ -13680,7 +13697,6 @@
    "ambiguous": [],
    "article": {
     "S6GA00390": "Mike Collins (politician)",
-    "S6GA00408": "Derek Dooley (American football)",
     "S8GA00180": "Jon Ossoff"
    },
    "decided": {
@@ -13693,19 +13709,19 @@
    "page": "2026 United States Senate election in Georgia",
    "party": {
     "S2GA00282": "republican",
+    "S4GA11202": "republican",
     "S6GA00390": "republican",
-    "S6GA00408": "republican",
     "S8GA00180": "democratic"
    },
    "status": {
     "S2GA00282": "eliminated",
+    "S4GA11202": "eliminated",
     "S6GA00390": "nominee",
-    "S6GA00408": "eliminated",
     "S8GA00180": "nominee"
    },
    "unmatched": {
     "Buddy Carter": "eliminated",
-    "John F. Coyne III": "eliminated"
+    "Derek Dooley": "eliminated"
    },
    "unsure": []
   },
@@ -13904,31 +13920,32 @@
     "S6KY00211": "democratic",
     "S6KY00237": "republican",
     "S6KY00286": "republican",
+    "S6KY00310": "democratic",
     "S6KY00328": "democratic",
     "S6KY00369": "democratic",
     "S6KY00385": "democratic",
-    "S6KY00401": "republican"
+    "S6KY00419": "republican"
    },
    "status": {
     "S0KY00339": "eliminated",
     "S6KY00211": "eliminated",
     "S6KY00237": "eliminated",
     "S6KY00286": "nominee",
+    "S6KY00310": "eliminated",
     "S6KY00328": "eliminated",
     "S6KY00369": "eliminated",
     "S6KY00385": "nominee",
-    "S6KY00401": "eliminated"
+    "S6KY00419": "eliminated"
    },
    "unmatched": {
     "A. Nick Shelley": "eliminated",
+    "Anissa Catlett": "eliminated",
     "George Washington": "eliminated",
-    "James D. Duncan": "eliminated",
     "Jimmy I. Leon": "eliminated",
     "Jonathan M. Holliday": "eliminated",
     "Joshua Blanton Sr.": "eliminated",
     "Michael James Faris": "eliminated",
-    "Valerie \"Dr Val\" Fredrick": "eliminated",
-    "Vincent Anthony Thompson": "eliminated"
+    "Valerie \"Dr Val\" Fredrick": "eliminated"
    },
    "unsure": [
     "S6KY00260",
@@ -14021,8 +14038,7 @@
     "S6ME00340": "democratic",
     "S6ME00373": "democratic",
     "S6ME00407": "democratic",
-    "S6ME00464": "democratic",
-    "S6ME00498": "democratic"
+    "S6ME00464": "democratic"
    },
    "status": {
     "S4ME00113": "eliminated",
@@ -14030,10 +14046,11 @@
     "S6ME00340": "eliminated",
     "S6ME00373": "eliminated",
     "S6ME00407": "withdrawn",
-    "S6ME00464": "nominee",
-    "S6ME00498": "eliminated"
+    "S6ME00464": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Saundra Pelletier": "eliminated"
+   },
    "unsure": []
   },
   "S-MI-2026": {
@@ -14093,7 +14110,6 @@
     "S4MN00502": "republican",
     "S6MN00440": "democratic",
     "S6MN00457": "republican",
-    "S6MN00473": "democratic",
     "S6MN00499": "democratic",
     "S6MN00515": "republican",
     "S6MN00556": "republican"
@@ -14102,13 +14118,13 @@
     "S4MN00502": "eliminated",
     "S6MN00440": "nominee",
     "S6MN00457": "eliminated",
-    "S6MN00473": "eliminated",
     "S6MN00499": "eliminated",
     "S6MN00515": "eliminated",
     "S6MN00556": "nominee"
    },
    "unmatched": {
     "Ahmad R. Hassan": "eliminated",
+    "Billy Nord": "eliminated",
     "Bob Carney Jr.": "eliminated",
     "Cynthia Gail": "eliminated",
     "George H. Kalberer": "eliminated",
@@ -14213,10 +14229,12 @@
    },
    "page": "2026 United States Senate election in North Carolina",
    "party": {
+    "S0NC00335": "libertarian",
     "S6NC00373": "republican",
     "S6NC00407": "democratic",
     "S6NC00415": "republican",
     "S6NC00423": "democratic",
+    "S6NC00449": "republican",
     "S6NC00472": "republican",
     "S6NC00480": "republican",
     "S6NC00522": "republican",
@@ -14224,10 +14242,12 @@
     "S8NC00270": "democratic"
    },
    "status": {
+    "S0NC00335": "nominee",
     "S6NC00373": "eliminated",
     "S6NC00407": "nominee",
     "S6NC00415": "nominee",
     "S6NC00423": "eliminated",
+    "S6NC00449": "eliminated",
     "S6NC00472": "eliminated",
     "S6NC00480": "eliminated",
     "S6NC00522": "eliminated",
@@ -14237,9 +14257,7 @@
    "unmatched": {
     "Elizabeth Temple": "eliminated",
     "Justin Dues": "eliminated",
-    "Margot Dupre": "eliminated",
-    "Robert Colon": "eliminated",
-    "Shannon W. Bray": "nominee"
+    "Robert Colon": "eliminated"
    },
    "unsure": []
   },
@@ -14260,7 +14278,6 @@
    "page": "2026 United States Senate election in Nebraska",
    "party": {
     "S4NE00207": "independent",
-    "S4NE00264": "republican",
     "S6NE00129": "republican",
     "S6NE00145": "democratic",
     "S6NE00152": "legal marijuana now party",
@@ -14269,7 +14286,6 @@
    },
    "status": {
     "S4NE00207": "nominee",
-    "S4NE00264": "eliminated",
     "S6NE00129": "nominee",
     "S6NE00145": "nominee",
     "S6NE00152": "nominee",
@@ -14279,6 +14295,7 @@
    "unmatched": {
     "Earl Starkey": "eliminated",
     "Eric Mortimore": "eliminated",
+    "Mac Stevens": "eliminated",
     "Todd Knobel": "eliminated"
    },
    "unsure": []
@@ -14286,7 +14303,6 @@
   "S-NH-2026": {
    "ambiguous": [],
    "article": {
-    "S4NH00096": "Andy Martin",
     "S6NH00141": "Chris Pappas (American politician)",
     "S6NH00166": "Scott Brown (politician)",
     "S6NH00208": "John E. Sununu"
@@ -14300,25 +14316,25 @@
    },
    "page": "2026 United States Senate election in New Hampshire",
    "party": {
-    "S4NH00096": "republican",
     "S6NH00141": "democratic",
     "S6NH00166": "republican",
     "S6NH00182": "democratic",
     "S6NH00208": "republican",
-    "S6NH00224": "democratic"
+    "S6NH00224": "democratic",
+    "S6NH00232": "republican"
    },
    "status": {
-    "S4NH00096": "eliminated",
     "S6NH00141": "nominee",
     "S6NH00166": "eliminated",
     "S6NH00182": "eliminated",
     "S6NH00208": "nominee",
-    "S6NH00224": "eliminated"
+    "S6NH00224": "eliminated",
+    "S6NH00232": "eliminated"
    },
    "unmatched": {
+    "Andy Martin": "eliminated",
     "David Jarvis": "eliminated",
     "John Vail": "eliminated",
-    "Mary Maxwell": "eliminated",
     "Richard A. McMenamon II": "eliminated",
     "Sabrina Ann Smith": "eliminated",
     "Sky Danley": "eliminated",
@@ -14342,7 +14358,6 @@
    "party": {
     "S4NJ00185": "democratic",
     "S4NJ00532": "republican",
-    "S6NJ00388": "democratic",
     "S6NJ00396": "republican",
     "S6NJ00404": "democratic",
     "S6NJ00412": "republican",
@@ -14352,14 +14367,15 @@
    "status": {
     "S4NJ00185": "nominee",
     "S4NJ00532": "nominee",
-    "S6NJ00388": "eliminated",
     "S6NJ00396": "eliminated",
     "S6NJ00404": "eliminated",
     "S6NJ00412": "eliminated",
     "S6NJ00420": "eliminated",
     "S6NJ00438": "eliminated"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Lisa McCormick": "eliminated"
+   },
    "unsure": []
   },
   "S-NM-2026": {
@@ -14377,15 +14393,15 @@
    "page": "2026 United States Senate election in New Mexico",
    "party": {
     "S0NM00058": "democratic",
-    "S6NM01145": "democratic",
     "S6NM01186": "republican"
    },
    "status": {
     "S0NM00058": "nominee",
-    "S6NM01145": "eliminated",
     "S6NM01186": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Matt Dodson": "eliminated"
+   },
    "unsure": []
   },
   "S-OH-2026": {
@@ -14436,32 +14452,31 @@
    },
    "page": "2026 United States Senate election in Oklahoma",
    "party": {
-    "S0OK00420": "democratic",
     "S6OK04163": "democratic",
     "S6OK04171": "democratic",
     "S6OK04197": "democratic",
     "S6OK04213": "republican",
     "S6OK04239": "republican",
     "S6OK04247": "republican",
-    "S6OK04254": "republican",
     "S6OK04262": "republican",
     "S6OK04270": "democratic",
     "S6OK04288": "republican"
    },
    "status": {
-    "S0OK00420": "eliminated",
     "S6OK04163": "nominee",
     "S6OK04171": "eliminated",
     "S6OK04197": "eliminated",
     "S6OK04213": "eliminated",
     "S6OK04239": "eliminated",
     "S6OK04247": "nominee",
-    "S6OK04254": "eliminated",
     "S6OK04262": "eliminated",
     "S6OK04270": "eliminated",
     "S6OK04288": "eliminated"
    },
-   "unmatched": {},
+   "unmatched": {
+    "R.O. Joe Cassity Jr.": "eliminated",
+    "William Sean Buckner": "eliminated"
+   },
    "unsure": []
   },
   "S-OR-2026": {
@@ -14505,6 +14520,8 @@
    "ambiguous": [],
    "article": {
     "S0SC00149": "Lindsey Graham",
+    "S2SC00145": "Catherine Fleming Bruce",
+    "S4SC00117": "Mark Struthers McBride",
     "S6SC04239": "Annie Andrews (physician)",
     "S6SC04403": "Russell Fry",
     "S6SC04437": "Darline Graham",
@@ -14520,6 +14537,8 @@
    "page": "2026 United States Senate election in South Carolina",
    "party": {
     "S0SC00149": "republican",
+    "S2SC00145": "write-in",
+    "S4SC00117": "republican",
     "S6SC04197": "democratic",
     "S6SC04213": "republican",
     "S6SC04239": "democratic",
@@ -14528,6 +14547,7 @@
     "S6SC04346": "republican",
     "S6SC04361": "republican",
     "S6SC04379": "republican",
+    "S6SC04387": "republican",
     "S6SC04395": "republican",
     "S6SC04403": "republican",
     "S6SC04437": "republican",
@@ -14536,6 +14556,8 @@
    },
    "status": {
     "S0SC00149": "eliminated",
+    "S2SC00145": "nominee",
+    "S4SC00117": "eliminated",
     "S6SC04197": "eliminated",
     "S6SC04213": "eliminated",
     "S6SC04239": "nominee",
@@ -14544,6 +14566,7 @@
     "S6SC04346": "eliminated",
     "S6SC04361": "eliminated",
     "S6SC04379": "eliminated",
+    "S6SC04387": "eliminated",
     "S6SC04395": "eliminated",
     "S6SC04403": "eliminated",
     "S6SC04437": "nominee",
@@ -14551,11 +14574,8 @@
     "S6SC04460": "eliminated"
    },
    "unmatched": {
-    "Catherine Fleming Bruce": "nominee",
     "Danny Ford II": "eliminated",
-    "Darius Mitchell": "eliminated",
     "Mark Hackett": "nominee",
-    "Mark McBride": "eliminated",
     "Mark Sanford": "eliminated",
     "Samuel Shepherd": "eliminated"
    },
@@ -14639,30 +14659,31 @@
    "party": {
     "S0TX00365": "republican",
     "S2TX00106": "republican",
-    "S4TX00821": "democratic",
     "S4TX00888": "libertarian",
     "S6TX00362": "republican",
     "S6TX00388": "republican",
     "S6TX00479": "democratic",
     "S6TX00511": "republican",
     "S6TX00545": "republican",
-    "S6TX00552": "democratic"
+    "S6TX00552": "democratic",
+    "S6TX00560": "republican",
+    "S6TX00578": "republican"
    },
    "status": {
     "S0TX00365": "eliminated",
     "S2TX00106": "eliminated",
-    "S4TX00821": "eliminated",
     "S4TX00888": "nominee",
     "S6TX00362": "eliminated",
     "S6TX00388": "nominee",
     "S6TX00479": "nominee",
     "S6TX00511": "eliminated",
     "S6TX00545": "eliminated",
-    "S6TX00552": "eliminated"
+    "S6TX00552": "eliminated",
+    "S6TX00560": "eliminated",
+    "S6TX00578": "eliminated"
    },
    "unmatched": {
-    "Anna Bender": "eliminated",
-    "John Adefope": "eliminated"
+    "Ahmad Hassan": "eliminated"
    },
    "unsure": []
   },
@@ -14698,8 +14719,7 @@
    "ambiguous": [],
    "article": {
     "S4WV00159": "Shelley Moore Capito",
-    "S6WV00162": "Tom Willis (politician)",
-    "S6WV00196": "Jeff Kessler"
+    "S6WV00162": "Tom Willis (politician)"
    },
    "decided": {
     "general": false,
@@ -14712,26 +14732,26 @@
    "party": {
     "S4WV00159": "republican",
     "S4WV00357": "democratic",
+    "S4WV00365": "republican",
     "S4WV00407": "republican",
     "S6WV00154": "republican",
     "S6WV00162": "republican",
     "S6WV00170": "democratic",
-    "S6WV00188": "democratic",
-    "S6WV00196": "democratic"
+    "S6WV00188": "democratic"
    },
    "status": {
     "S4WV00159": "nominee",
     "S4WV00357": "eliminated",
+    "S4WV00365": "eliminated",
     "S4WV00407": "eliminated",
     "S6WV00154": "eliminated",
     "S6WV00162": "eliminated",
     "S6WV00170": "eliminated",
-    "S6WV00188": "nominee",
-    "S6WV00196": "eliminated"
+    "S6WV00188": "nominee"
    },
    "unmatched": {
-    "Bryan McKinney": "eliminated",
     "David Purkey": "eliminated",
+    "Jeff Kessler": "eliminated",
     "Thornton Cooper": "eliminated"
    },
    "unsure": []
@@ -14754,20 +14774,18 @@
     "S6WY00191": "republican",
     "S6WY00209": "republican",
     "S6WY00217": "democratic",
-    "S6WY00225": "republican",
-    "S6WY00258": "democratic",
-    "S8WY00213": "republican"
+    "S6WY00225": "republican"
    },
    "status": {
     "S6WY00191": "eliminated",
     "S6WY00209": "nominee",
     "S6WY00217": "nominee",
-    "S6WY00225": "eliminated",
-    "S6WY00258": "eliminated",
-    "S8WY00213": "eliminated"
+    "S6WY00225": "eliminated"
    },
    "unmatched": {
-    "Jill M. Edwards": "eliminated"
+    "Billy Benavidez": "eliminated",
+    "Jill M. Edwards": "eliminated",
+    "John A. Holtz": "eliminated"
    },
    "unsure": []
   }
