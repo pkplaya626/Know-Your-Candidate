@@ -731,6 +731,13 @@ svg { flex: none; }
   gap: 2px;
   padding: 0 2px;
 }
+/* A badge may carry a ballot line ("On the November ballot – Party for
+   Socialism and Liberation line"); inside a card it wraps rather than
+   running past the card's edge, which a real browser showed it doing. */
+.card-body .badge {
+  max-width: 100%;
+  white-space: normal;
+}
 .card-name {
   font-size: var(--t-md);
   font-weight: 700;
@@ -829,6 +836,17 @@ svg { flex: none; }
   color: var(--text-muted);
 }
 .senate-out .card { opacity: 0.72; }
+.senate-seat-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 180px) minmax(0, 1fr);
+  gap: 0 var(--s-6);
+  align-items: start;
+}
+.senate-seat-row > :only-child { grid-column: 1 / -1; }
+.senate-holder .card-grid { grid-template-columns: minmax(150px, 180px); }
+@media (max-width: 560px) {
+  .senate-seat-row { grid-template-columns: minmax(0, 1fr); }
+}
 
 /* ============================================================ 10. panels */
 

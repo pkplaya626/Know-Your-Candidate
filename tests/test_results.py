@@ -176,6 +176,20 @@ class TestResolving(unittest.TestCase):
         self.assertEqual(out["Al Green"], "eliminated")
         self.assertEqual(out["Gretchen Brown"], "eliminated")
 
+    def test_an_unreported_runoff_eliminates_nobody(self):
+        # An editor posts the runoff box before the count: no winner marked.
+        # Both qualifiers are still in the race, not both beaten.
+        text = "\n".join([
+            box("Democratic primary results",
+                ("Christian Menefee", 43, True), ("Al Green", 42, True), ("Gretchen Brown", 1, False)),
+            box("Democratic primary runoff results",
+                ("Christian Menefee", 0, False), ("Al Green", 0, False)),
+        ])
+        out = results.resolve_race(results.parse_boxes(text), has_runoff=True)
+        self.assertEqual(out["Christian Menefee"], "advanced")
+        self.assertEqual(out["Al Green"], "advanced")
+        self.assertEqual(out["Gretchen Brown"], "eliminated")
+
     def test_the_general_election_table_is_the_authority(self):
         # No runoff table on the page, but the general ballot names the
         # nominee - so the other first-round "winner" is out.

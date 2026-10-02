@@ -41,8 +41,8 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… portraits --refresh` | Re-resolve every portrait, not just the missing ones |
 | `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`) |
 | `… refresh` | `fetch`, then `build` |
-| `python -m unittest discover tests` | 499 pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (453 checks) |
+| `python -m unittest discover tests` | 509 pipeline tests |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (466 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -603,6 +603,7 @@ the map's delegation panel, the footer, and `sitemap.xml`.
 | `campaignSite`, `campaignCommittee` | The principal campaign committee's Form 1 at the FEC (`data/campaigns.json`) | Everyone on a ballot with an FEC id |
 | `committeeList`, `committeesSource` | `committee-membership-current`, with rank and title (`data/committees.json`) | Sitting members |
 | `fecCandidateId` | Links the FEC's own candidate page | Everyone the FEC knows |
+| `otherFecIds` | The same person's other FEC registrations (one committee's money reported under several ids, or a curated pair in `overrides.SAME_PERSON_FILINGS`); a link shared under any of them opens this profile | People registered more than once |
 
 Every link on the page is built from one of those ids. Nothing is guessed
 from a name: a Ballotpedia page derived from "Mike Rogers" is the wrong Mike

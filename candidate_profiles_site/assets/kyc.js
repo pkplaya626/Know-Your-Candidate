@@ -167,8 +167,19 @@
   function byId(id) {
     if (profileIndex === null) {
       profileIndex = new Map();
-      (global.legislatorsData || []).forEach(function (item) {
+      var data = global.legislatorsData || [];
+      data.forEach(function (item) {
         profileIndex.set(item.id, item);
+      });
+      // A person registered with the FEC under several ids has one profile;
+      // the others are kept as otherFecIds (derived in the pipeline). A link
+      // shared under one of them still opens that person, never a stranger:
+      // a real profile id always wins over an alias.
+      data.forEach(function (item) {
+        (item.otherFecIds || []).forEach(function (other) {
+          var alias = "FEC_" + other;
+          if (!profileIndex.has(alias)) profileIndex.set(alias, item);
+        });
       });
     }
     return profileIndex.get(id);

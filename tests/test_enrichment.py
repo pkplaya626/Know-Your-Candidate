@@ -551,3 +551,67 @@ class TestFecRateLimit(unittest.TestCase):
     def test_a_429_that_names_no_wait_waits_the_whole_window(self):
         silent = type("Silent429", (), {"headers": {}})()
         self.assertEqual(fec._retry_after(silent), fec.RATE_WINDOW)
+
+
+class TestPinnedFinanceRefresh(unittest.TestCase):
+    """A pin fixes who a profile is, not what they have raised.
+
+    Darline Graham Nordone filed as "GRAHAM, DARLINE", so her FEC id is
+    pinned by hand. resolve_all skipped pinned records outright, which froze
+    her July figures through every refresh and left them labelled a two-year
+    total.
+    """
+
+    PERSON = {"id": "G000608", "name": "Darline Graham Nordone", "state": "SC",
+              "chamber": "Senate"}
+    PIN = {"candidate_id": "S6SC04437", "pinned": True, "via": "pinned", "found": True,
+           "note": "Filed as GRAHAM, DARLINE", "receipts": 1.0, "name": "Darline Graham Nordone"}
+
+    def run_with(self, figures):
+        from unittest import mock
+        cache = {fec.profile_key(self.PERSON): dict(self.PIN)}
+        asked = []
+
+        def totals(candidate_id, election_year=fec.CYCLE):
+            asked.append(candidate_id)
+            return figures
+
+        def no_search(*args, **kwargs):
+            raise AssertionError("a pinned profile must not be searched for by name")
+
+        with mock.patch.object(fec, "load_cache", lambda root=".": cache), \
+                mock.patch.object(fec, "save_cache", lambda c, root=".": None), \
+                mock.patch.object(fec, "totals", totals), \
+                mock.patch.object(fec, "find_candidate", no_search), \
+                mock.patch.object(fec, "using_demo_key", lambda root=".": False), \
+                mock.patch.object(fec, "known_ids", lambda *a, **k: {}), \
+                mock.patch.object(fec.time, "sleep", lambda s: None):
+            out, stats = fec.resolve_all([self.PERSON], refresh=True, log=lambda *a: None)
+        return out[fec.profile_key(self.PERSON)], asked, stats
+
+    def test_a_pinned_record_is_refreshed_through_its_pinned_id(self):
+        figures = {"election_year": 2026, "coverage_start": "2026-07-23",
+                   "coverage_end": "2026-09-30", "receipts": 500000.0}
+        record, asked, stats = self.run_with(figures)
+        self.assertEqual(asked, ["S6SC04437"])
+        self.assertEqual(record["receipts"], 500000.0)
+        self.assertEqual(record["election_year"], 2026)
+        self.assertTrue(record["pinned"])
+        self.assertEqual(record["note"], "Filed as GRAHAM, DARLINE")
+        self.assertEqual(stats["found"], 1)
+
+    def test_an_empty_answer_for_a_pinned_id_discards_nothing(self):
+        record, asked, _ = self.run_with(None)
+        self.assertEqual(asked, ["S6SC04437"])
+        self.assertEqual(record, self.PIN)
+
+
+class TestFinancePeriodWarning(unittest.TestCase):
+    def test_a_two_year_total_left_after_a_refresh_is_reported(self):
+        people = [{"name": "A", "officeLabel": "Senate • SC", "financePeriod": "cycle"},
+                  {"name": "B", "officeLabel": "Senate • DE", "financePeriod": "election"},
+                  {"name": "C", "officeLabel": "House • TX-1"}]
+        issues = validate.check_finance_periods(people)
+        self.assertEqual([i.code for i in issues], ["finance-cycle-period"])
+        self.assertEqual(issues[0].detail, ["A (Senate • SC)"])
+        self.assertEqual(validate.check_finance_periods(people[1:]), [])

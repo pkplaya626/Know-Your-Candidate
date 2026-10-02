@@ -1426,13 +1426,79 @@ async function testSenate() {
   window.close();
 }
 
+/* A person registered with the FEC under several ids has one profile; a link
+ * shared under a folded id opens them and the address moves to the current
+ * id. A real profile id must never be shadowed by an alias. */
+async function testFoldedIds() {
+  const probe = await buildPage("index.html");
+  const people = probe.window.legislatorsData;
+  const person = people.find((p) => (p.otherFecIds || []).length);
+  const ids = new Set(people.map((p) => p.id));
+  probe.window.close();
+  suite("folded FEC registrations — old links keep working", () => {
+    check("the data has a person with folded registrations", !!person);
+  });
+  if (!person) return;
+  const alias = "FEC_" + person.otherFecIds[0];
+  const { window, D, errors, KYC } = await buildPage("index.html", { hash: "#/profile/" + alias });
+  await settle();
+  const modal = D.getElementById("profileModal");
+  suite("folded FEC registrations — landing on an old id", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("the alias is not a profile of its own", !ids.has(alias), alias);
+    check("the person's profile opens", modal && !modal.hidden &&
+      D.getElementById("profileModalName").textContent === person.name,
+      D.getElementById("profileModalName") && D.getElementById("profileModalName").textContent);
+    check("the address moves to the current id",
+      window.location.hash === "#/profile/" + encodeURIComponent(person.id), window.location.hash);
+    check("lookups by the alias resolve to the same record",
+      (window.KYC || KYC).byId(alias) === (window.KYC || KYC).byId(person.id));
+    check("no profile id is shadowed by an alias",
+      window.legislatorsData.every((p) => (window.KYC || KYC).byId(p.id) === p));
+  });
+  window.close();
+}
+
+/* Each 2026 Senate seat is one row - the senator, then the people running -
+ * and a sitting member renominated for their own seat says so on the card
+ * instead of the bare "seat up" a real-browser look caught. */
+async function testSeatRows() {
+  const { window, D, errors } = await buildPage("index.html", { hash: "#/?view=senate" });
+  await settle();
+  const people = window.legislatorsData;
+  const renominated = people.find((p) => !p.isCandidate && p.chamber === "Senate" &&
+    p.raceStatus === "nominee" && !p.contestLabel);
+  const races = window.kycRaces;
+  suite("Senate view — one row per seat", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const rows = D.querySelectorAll(".senate-seat .senate-seat-row");
+    check("2026 seats are drawn as rows", rows.length > 0, String(rows.length));
+    const both = [...rows].filter((r) => r.querySelector(".senate-holder") && r.querySelector(".senate-running"));
+    check("a row holds the senator and the people running side by side", both.length > 0);
+    check("the senator comes first in the row", both.every((r) =>
+      r.firstElementChild.classList.contains("senate-holder")));
+    if (renominated) {
+      // The id is on the seat's heading; the section is labelled by it.
+      const heading = D.getElementById("senate-seat-" + renominated.raceId);
+      const block = heading && heading.closest("section");
+      const holderCard = block && block.querySelector('.senate-holder .card[data-id="' + renominated.id + '"]');
+      check("a renominated senator is in their seat's row", !!holderCard, renominated.id);
+      check("their card says Renominated, not just seat up",
+        holderCard && /Renominated/.test(holderCard.textContent), holderCard && holderCard.textContent);
+    }
+  });
+  window.close();
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "index.html") await testDirectoryAsync();
   if (!only || only === "index.html") await testSenate();
+  if (!only || only === "index.html") await testSeatRows();
   if (!only || only === "map.html") await testMap();
   if (!only || only === "states") await testStates();
   if (!only || only === "links") await testDeepLinks();
+  if (!only || only === "links") await testFoldedIds();
   if (!only || only === "links") await testRunningElsewhere();
   if (!only || only === "contrast") testContrast();
 

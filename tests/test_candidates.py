@@ -614,3 +614,63 @@ class TestFieldPagination(unittest.TestCase):
                "election_date": "2026-09-09T00:00:00"}
         self.fec.fetch_pages = lambda path, params, sort: ([row], 1)
         self.assertEqual(results.fetch_dates()[("RI", "S")]["primary"], "2026-09-09")
+
+
+class TestRegistrations(unittest.TestCase):
+    """One person, several FEC ids - and two people, one name (rule 25)."""
+
+    @staticmethod
+    def filing(cid, district, receipts, f2, name="DOE, JANE", disb=100.0, end="2026-06-30"):
+        return {"candidate_id": cid, "name": name, "office": "H", "state": "NV",
+                "district_number": district, "receipts": receipts, "disbursements": disb,
+                "coverage_end_date": end, "last_f2_date": f2, "incumbent_challenge": "C"}
+
+    def test_one_committee_under_two_ids_is_one_person_in_the_latest_seat(self):
+        # Ronda Kennedy: NV-3 statement in 2025, NV-4 statement in 2026.
+        rows = [self.filing("H6NV03238", 3, 350000.0, "2025-06-09"),
+                self.filing("H6NV04137", 4, 350000.0, "2026-03-18")]
+        self.assertEqual(candidates.registrations(rows), {"H6NV04137": ["H6NV03238"]})
+
+    def test_a_shared_name_with_different_money_is_two_people(self):
+        # Two Michael Thompsons in Florida: FL-1 in 2025, FL-22 in 2026.
+        rows = [self.filing("H6FL01275", 1, 86975.7, "2024-11-15", end="2025-06-30"),
+                self.filing("H6FL22180", 22, 23613.0, "2026-05-08", end="2026-07-29")]
+        self.assertEqual(candidates.registrations(rows), {})
+
+    def test_the_choice_is_stable_when_statements_tie(self):
+        rows = [self.filing("H6TX10262", 10, 9000.0, "2026-01-02"),
+                self.filing("H6TX10254", 10, 9000.0, "2026-01-02")]
+        self.assertEqual(candidates.registrations(rows), {"H6TX10254": ["H6TX10262"]})
+
+    def test_a_curated_pair_folds_registrations_whose_totals_differ(self):
+        from kyc import overrides
+        other, (target, _why) = next(iter(overrides.SAME_PERSON_FILINGS.items()))
+        rows = [self.filing(target, 3, 4026577.61, "2026-08-10", name="O'DONNELL, MARTY"),
+                self.filing(other, 3, 4055410.28, "2026-05-06", name="O'DONNELL, MARTY")]
+        self.assertEqual(candidates.registrations(rows), {target: [other]})
+
+    def test_profiles_keep_strangers_apart_and_remember_folded_ids(self):
+        cache = {"candidates": [
+            self.filing("H6NV03238", 3, 350000.0, "2025-06-09", name="KENNEDY, RONDA"),
+            self.filing("H6NV04137", 4, 350000.0, "2026-03-18", name="KENNEDY, RONDA"),
+            self.filing("H6NV01001", 1, 8000.0, "2026-02-01", name="SMITH, JOHN"),
+            self.filing("H6NV02002", 2, 9000.0, "2026-02-01", name="SMITH, JOHN"),
+        ]}
+        out, skipped = candidates.to_profiles(cache, [])
+        by_id = {p["id"]: p for p in out}
+        self.assertEqual(sorted(by_id), ["FEC_H6NV01001", "FEC_H6NV02002", "FEC_H6NV04137"])
+        self.assertEqual(by_id["FEC_H6NV04137"]["otherFecIds"], ["H6NV03238"])
+        self.assertNotIn("otherFecIds", by_id["FEC_H6NV01001"])
+        self.assertEqual(skipped, 1)
+
+    def test_validate_names_people_registered_for_two_seats(self):
+        field = {"candidates": [
+            self.filing("H2FL21108", 25, 1.0, "2026-05-08"),
+            self.filing("H6FL22149", 22, 1.0, "2026-01-02"),
+        ]}
+        for row in field["candidates"]:
+            row["state"] = "FL"
+        profiles = [{"name": "Daniel John Franzese", "fecCandidateId": "H2FL21108",
+                     "otherFecIds": ["H6FL22149"]}]
+        codes = [i.code for i in validate.check_registrations(profiles, field)]
+        self.assertIn("registrations-disagree", codes)

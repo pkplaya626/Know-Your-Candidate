@@ -160,13 +160,18 @@
       race ? KYC.cards.raceBadges(race) : "",
       "</div>",
     ];
+    // One row per seat: the senator, then the people running for the seat,
+    // side by side - stacked, each seat took a screen of mostly empty width.
+    var row = [];
     if (holder.length) {
-      html.push('<p class="senate-role">Holds the seat</p>', cards(holder));
+      row.push('<div class="senate-side senate-holder"><p class="senate-role">Holds the seat</p>' +
+               cards(holder) + "</div>");
     }
     if (running.length) {
-      html.push('<p class="senate-role">Running for this seat (' + running.length + ")</p>",
-                cards(running));
+      row.push('<div class="senate-side senate-running"><p class="senate-role">' +
+               "Running for this seat (" + running.length + ")</p>" + cards(running) + "</div>");
     }
+    if (row.length) html.push('<div class="senate-seat-row">', row.join(""), "</div>");
     if (out.length) {
       html.push('<div class="race-out senate-out"><p class="senate-role">No longer running ' +
                 "for this seat (" + out.length + ") &mdash; lost the primary, withdrew, or " +

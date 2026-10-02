@@ -365,8 +365,12 @@ def resolve_all(profiles, root=".", limit=None, refresh=False, snapshot=None,
     making it exact.
     """
     cache = load_cache(root)
+    # A pin fixes WHO a profile is - a filing that both the id lookup and the
+    # name search miss - not what they have raised. Pinned records used to be
+    # skipped outright, which froze Darline Graham Nordone's July figures
+    # through every refresh and left them labelled a two-year total. They are
+    # now refreshed like any other record, through the pinned id.
     todo = [p for p in profiles if refresh or profile_key(p) not in cache]
-    todo = [p for p in todo if not (cache.get(profile_key(p)) or {}).get("pinned")]
 
     if limit:
         todo = todo[:limit]
@@ -395,18 +399,22 @@ def resolve_all(profiles, root=".", limit=None, refresh=False, snapshot=None,
 
     for done, profile in enumerate(todo, start=1):
         key = profile_key(profile)
+        pinned = cache.get(key) if (cache.get(key) or {}).get("pinned") else None
         try:
-            candidate_id = authoritative.get(profile["id"])
-            if candidate_id:
-                match = {"candidate_id": candidate_id, "via": "congress-legislators"}
-                by_id += 1
+            if pinned:
+                match = {"candidate_id": pinned["candidate_id"], "via": "pinned"}
             else:
-                match = find_candidate(
-                    profile["name"], profile["state"], profile["chamber"]
-                )
-                time.sleep(_GAP)
-                if match:
-                    match["via"] = "fec-search"
+                candidate_id = authoritative.get(profile["id"])
+                if candidate_id:
+                    match = {"candidate_id": candidate_id, "via": "congress-legislators"}
+                    by_id += 1
+                else:
+                    match = find_candidate(
+                        profile["name"], profile["state"], profile["chamber"]
+                    )
+                    time.sleep(_GAP)
+                    if match:
+                        match["via"] = "fec-search"
 
             if not match:
                 cache[key] = {"found": False, "name": profile["name"]}
@@ -414,14 +422,21 @@ def resolve_all(profiles, root=".", limit=None, refresh=False, snapshot=None,
 
             figures = totals(match["candidate_id"])
             time.sleep(_GAP)
-            cache[key] = {
-                "found": bool(figures),
-                "name": profile["name"],
-                **match,
-                **(figures or {}),
-            }
-            if figures:
-                found += 1
+            if pinned:
+                # The pin and its note stay; only the figures move. An empty
+                # answer for a pinned id discards nothing (rule 8).
+                if figures:
+                    cache[key] = {**pinned, **figures, "found": True}
+                    found += 1
+            else:
+                cache[key] = {
+                    "found": bool(figures),
+                    "name": profile["name"],
+                    **match,
+                    **(figures or {}),
+                }
+                if figures:
+                    found += 1
         except FecError as exc:
             log(f"  [stop] {exc}")
             stopped = 1

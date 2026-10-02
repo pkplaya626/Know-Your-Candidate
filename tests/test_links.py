@@ -128,8 +128,8 @@ class TestMemberProfile(unittest.TestCase):
     def test_every_id_keyed_status_is_sourced_and_parses(self):
         for member_id, (status, source) in overrides.MEMBER_STATUS_BY_ID.items():
             self.assertRegex(member_id, r"^[A-Z]\d{6}$")
-            self.assertTrue(source.startswith("https://")
-                            or source == overrides.CURATED_ROSTER_STATUS, member_id)
+            # Every note cites where it was checked; none rests on memory.
+            self.assertTrue(source.startswith("https://"), member_id)
             self.assertEqual(overrides.is_not_seeking(status),
                              member_id not in self.ON_THE_BALLOT, member_id)
 

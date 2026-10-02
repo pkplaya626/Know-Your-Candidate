@@ -73,8 +73,8 @@ python build_profile_site.py field --check    # who is running, from the FEC
 python build_profile_site.py disclosures      # House financial disclosure links
 python build_profile_site.py results          # who is still in, from Wikipedia
 python build_profile_site.py campaigns        # campaign websites from FEC committees
-python -m unittest discover tests             # 499 tests, no dependencies
-npm install && npm test                       # 453 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 509 tests, no dependencies
+npm install && npm test                       # 466 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -218,9 +218,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
 
 25. **Report look-alike people; never merge them.** Alaska's Senate race holds
     both Dan Sullivan and a different Daniel J Sullivan.
-    `validate.check_duplicate_people` warns and stops there. Only two exact
-    signals deduplicate automatically: a shared FEC candidate id, and an exact
-    first-and-last-name match against the sitting member of that same seat.
+    `validate.check_duplicate_people` warns and stops there. Only exact
+    signals deduplicate automatically: a shared FEC candidate id; an exact
+    first-and-last-name match against the sitting member of that same seat;
+    and one committee's money reported under two registrations of the same
+    name (`candidates.same_committee`: identical receipts, disbursements and
+    coverage end). A shared name alone merged two Michael Thompsons in
+    Florida and erased the FL-22 one from his race. Anything weaker is a
+    curated, evidenced entry in `overrides.SAME_PERSON_FILINGS`. The merged
+    ids stay on the profile as `otherFecIds`, so old links still open it.
 
 26. **Net worth is not derived from a disclosure.** The forms report assets in
     bands; one figure from them is an estimate dressed as a fact.
