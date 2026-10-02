@@ -248,8 +248,7 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
     if kind == "House":
         district_num, district_label = parse_district(row.get("District"), state)
 
-    status = overrides.status_override(name, clean_str(row.get("Status"), "Active Member"),
-                                       member_id=profile_id)
+    status = overrides.status_override(profile_id, clean_str(row.get("Status"), "Active Member"))
     not_seeking = overrides.is_not_seeking(status)
 
     # --- 2026 election derivation -------------------------------------

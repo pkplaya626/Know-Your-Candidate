@@ -170,8 +170,6 @@ def check_overrides(profiles, raw):
     """
     issues = []
 
-    all_names = {p["name"] for p in profiles}
-
     dead_exclusions = sorted(
         n for n in overrides.EXCLUDED_MEMBERS
         if n not in {clean_str(r.get("Name"), "") for r in raw["members"]}
@@ -181,15 +179,8 @@ def check_overrides(profiles, raw):
                             f"{len(dead_exclusions)} excluded members are not in the roster",
                             dead_exclusions))
 
-    dead_status = sorted(
-        key for key in overrides.STATUS_OVERRIDES
-        if not any(key.lower() in n.lower() for n in all_names)
-    )
-    if dead_status:
-        issues.append(Issue("warn", "stale-status-override",
-                            f"{len(dead_status)} status overrides match no profile",
-                            dead_status))
-
+    # Status notes are keyed on bioguide id only; one whose id is no longer
+    # a sitting member is invisible on the page but quietly wrong.
     member_ids = {p["id"] for p in profiles if not p.get("isCandidate")}
     dead_ids = sorted(k for k in overrides.MEMBER_STATUS_BY_ID if k not in member_ids)
     if dead_ids:

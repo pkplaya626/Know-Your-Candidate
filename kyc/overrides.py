@@ -49,32 +49,51 @@ CANDIDATE_PHOTOS = {
 # exact name against the member rosters only.
 EXCLUDED_MEMBERS = frozenset({"Marco Rubio", "J.D. Vance", "Markwayne Mullin"})
 
-# Seat-status notes that the roster "Status" column does not carry.
-# Matched as a case-insensitive substring of the member's name.
-STATUS_OVERRIDES = {
-    "Ashley Moody": "2026 special election for final two years of Marco Rubio's term",
-    "Joni Ernst": "Incumbent not running for re-election in 2026.",
-    "Gary Peters": "Incumbent not running for re-election in 2026.",
-    "Tina Smith": "Incumbent not running for re-election in 2026.",
-    "Steve Daines": "Incumbent not running for re-election in 2026.",
-    "Thom Tillis": "Incumbent not running for re-election in 2026.",
-    "Jeanne Shaheen": "Incumbent not running for re-election in 2026.",
-    "Jon Husted": "2026 special election for final two years of JD Vance's term",
-    "John Cornyn": "Incumbent defeated in primary for 2026 election.",
-    "Tommy Tuberville": "Retiring to run for governor",
-    # The rosters use his legal name; he is usually reported as "Dick Durbin".
-    "Richard Durbin": "Incumbent not running for re-election in 2026.",
-    "Mitch McConnell": "Incumbent not running for re-election in 2026.",
-    "Bill Cassidy": "Incumbent defeated in primary for 2026 election.",
-    "Alan Armstrong": "Ineligible to run for a full term this year.",
-    "Cynthia Lummis": "Incumbent not running for re-election in 2026.",
-}
+# Source label for a status note carried over from the roster's own Status
+# column or the curated notes that sat beside it, where no citation was ever
+# recorded. Kept distinct from a URL so it is visible which notes still want one.
+CURATED_ROSTER_STATUS = "roster status (curated)"
 
 # Seat-status notes keyed on bioguide id, the only safe key for a person
-# (rules 3 and 17). STATUS_OVERRIDES above matches a name substring; put new
-# entries here instead. Each value is (status line, source). A member who is
-# leaving the seat needs a NOT_SEEKING_MARKERS phrase in the status line.
+# (rules 3 and 17). These used to sit in a second table matched as a
+# case-insensitive substring of the member's name, which only worked while the
+# roster spelled every name the way the table did. Each value is (status line,
+# source). A member who is leaving the seat needs a NOT_SEEKING_MARKERS phrase
+# in the status line; the two special-election notes are for members who are
+# on the ballot.
 MEMBER_STATUS_BY_ID = {
+    "M001244": ("2026 special election for final two years of Marco Rubio's term",
+                CURATED_ROSTER_STATUS),                                   # Ashley Moody, FL
+    "E000295": ("Incumbent not running for re-election in 2026.",
+                CURATED_ROSTER_STATUS),                                   # Joni Ernst, IA
+    "P000595": ("Incumbent not running for re-election in 2026.",
+                CURATED_ROSTER_STATUS),                                   # Gary Peters, MI
+    "S001203": ("Incumbent not running for re-election in 2026.",
+                CURATED_ROSTER_STATUS),                                   # Tina Smith, MN
+    "D000618": ("Incumbent not running for re-election in 2026.",
+                CURATED_ROSTER_STATUS),                                   # Steve Daines, MT
+    "T000476": ("Incumbent not running for re-election in 2026.",
+                CURATED_ROSTER_STATUS),                                   # Thom Tillis, NC
+    "S001181": ("Incumbent not running for re-election in 2026.",
+                CURATED_ROSTER_STATUS),                                   # Jeanne Shaheen, NH
+    "H001104": ("2026 special election for final two years of JD Vance's term",
+                CURATED_ROSTER_STATUS),                                   # Jon Husted, OH
+    "C001056": ("Incumbent defeated in primary for 2026 election.",
+                CURATED_ROSTER_STATUS),                                   # John Cornyn, TX
+    "T000278": ("Retiring to run for governor",
+                CURATED_ROSTER_STATUS),                                   # Tommy Tuberville, AL
+    # The rosters use his legal name; he is usually reported as "Dick Durbin".
+    # Keyed on the id, the spelling no longer matters.
+    "D000563": ("Incumbent not running for re-election in 2026.",
+                CURATED_ROSTER_STATUS),                                   # Richard Durbin, IL
+    "M000355": ("Incumbent not running for re-election in 2026.",
+                CURATED_ROSTER_STATUS),                                   # Mitch McConnell, KY
+    "C001075": ("Incumbent defeated in primary for 2026 election.",
+                CURATED_ROSTER_STATUS),                                   # Bill Cassidy, LA
+    "A000383": ("Ineligible to run for a full term this year.",
+                CURATED_ROSTER_STATUS),                                   # Alan Armstrong, OK
+    "L000571": ("Incumbent not running for re-election in 2026.",
+                CURATED_ROSTER_STATUS),                                   # Cynthia Lummis, WY
     # The DC article is titled "... election in the District of Columbia",
     # which results.page_titles never asks for, so no outcome was ever read.
     "N000147": ("Not running for re-election in 2026 (announced January 2026).",
@@ -164,17 +183,12 @@ OPEN_PRIMARY_SEATS = {
 NOT_SEEKING_MARKERS = ("retiring", "not running", "defeated", "ineligible", "resigned")
 
 
-def status_override(name, current, member_id=None):
+def status_override(member_id, current):
     """Return the curated status for a member, falling back to *current*.
 
-    The bioguide-keyed table wins over the older name-substring one."""
-    if member_id and member_id in MEMBER_STATUS_BY_ID:
-        return MEMBER_STATUS_BY_ID[member_id][0]
-    lowered = str(name).lower()
-    for key, val in STATUS_OVERRIDES.items():
-        if key.lower() in lowered:
-            return val
-    return current
+    Keyed on bioguide id only (rules 3 and 17): a name never selects a note."""
+    entry = MEMBER_STATUS_BY_ID.get(member_id) if member_id else None
+    return entry[0] if entry else current
 
 
 def is_not_seeking(status):
