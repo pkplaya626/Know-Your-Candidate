@@ -303,12 +303,64 @@
 
     var html = escapeHtml(value);
     if (opts.source && item.financeSource) {
+      var period = financePeriod(item);
       html +=
         ' <span class="badge badge-money" title="Filed with the FEC' +
-        escapeAttr(item.financeAsOf ? ", coverage through " + item.financeAsOf : "") +
+        escapeAttr(period ? ". " + period : "") +
         '">' + escapeHtml(item.financeSource) + "</span>";
     }
     return html;
+  }
+
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  /** "2024-10-01" -> "Oct 2024"; anything that is not an ISO date -> "". */
+  function monthYear(iso) {
+    var m = /^(\d{4})-(\d{2})/.exec(String(iso || ""));
+    if (!m || +m[2] < 1 || +m[2] > 12) return "";
+    return MONTHS[+m[2] - 1] + " " + m[1];
+  }
+
+  /** Plain text saying what period a profile's money covers, or "".
+   *
+   *  Every figure is an FEC total, but over which months matters as much as
+   *  the amount: a senator's election period is the whole six-year term, so
+   *  the same "Raised" tile can hold six years beside a challenger's two.
+   *  The pipeline records the period (financePeriod, financeElection,
+   *  financeSince, financeAsOf); this only words it, and never fills a
+   *  missing start date in. Plain text - callers escape it. */
+  function financePeriod(item) {
+    if (!item || !item.financeSource) return "";
+    var since = monthYear(item.financeSince);
+    var through = monthYear(item.financeAsOf);
+    var range = since && through ? ", " + since + " – " + through
+      : through ? ", through " + through
+      : since ? ", from " + since : "";
+
+    if (item.financePeriod === "cycle") {
+      // Cached before every figure moved to the election period: the
+      // two-year cycle, which for a senator is not their whole campaign.
+      return "Raised in the 2025–26 two-year cycle" + range +
+        // Sitting senators only: for them two years is a third of the
+        // election period their challengers' totals are measured over.
+        (item.chamber === "Senate"
+          ? ". That is not a senator's whole six-year election period, so it is not comparable with a challenger's total"
+          : "");
+    }
+    if (!item.financeElection) return through ? "FEC figures through " + through : "";
+
+    var text = "Raised for the " + item.financeElection + " election" + range;
+    var startYear = +(String(item.financeSince || "").slice(0, 4));
+    // A period opening more than two calendar years before its election
+    // spans a Senate term, not a House cycle. Say so rather than let it read
+    // as two years of money.
+    if (startYear && item.financeElection - startYear >= 2) {
+      text += /^Senate/.test(String(item.chamber || ""))
+        ? ". A Senate election period runs the whole six-year term, so this total goes back to " + startYear
+        : ". This election period goes back to " + startYear;
+    }
+    return text;
   }
 
   /** True when a field carries something worth showing at all. */
@@ -895,6 +947,8 @@
     escapeHtml: escapeHtml,
     escapeAttr: escapeAttr,
     renderField: renderField,
+    financePeriod: financePeriod,
+    monthYear: monthYear,
     hasValue: hasValue,
     partyKey: partyKey,
     partyClass: partyClass,

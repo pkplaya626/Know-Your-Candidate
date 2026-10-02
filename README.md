@@ -41,8 +41,8 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… portraits --refresh` | Re-resolve every portrait, not just the missing ones |
 | `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`) |
 | `… refresh` | `fetch`, then `build` |
-| `python -m unittest discover tests` | 485 pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (414 checks) |
+| `python -m unittest discover tests` | 495 pipeline tests |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (453 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -438,6 +438,28 @@ Two rules are load-bearing here, both learned the hard way:
 `finance` fills receipts, disbursements, cash on hand and a real funding
 breakdown from the FEC, replacing the roster's generic
 `"Individual/PAC contributions"` text. Figures carry the FEC coverage date.
+
+**Every figure is an election-period total.** The FEC reports money per
+two-year cycle and per *election period* - from the end of a candidate's last
+election for the office to the next one. For the House the two are normally
+the same; for the Senate the election period is the whole six-year term. The
+field (`/candidates/totals/?election_year=2026`) and the FEC's own candidate
+pages report the election period, and sitting members are looked up the same
+way (`/candidate/{id}/totals/?election_full=true`, taking the period for the
+next election at or after 2026). Before that, members were read per cycle:
+Chris Coons showed $4,168,081 (2025-26) beside challengers measured from
+2021, against $6,897,138 for his own 2026 election period.
+
+| Field | Meaning |
+|---|---|
+| `financeAsOf` | The FEC's coverage end date for the figures |
+| `financeSince` | The FEC's coverage start date; `null` when the cache predates it - never filled in |
+| `financePeriod` | `election` for an election-period total, `cycle` for a member record cached before the election-period lookup (the 2025-26 cycle), until the next `finance` refresh replaces it |
+| `financeElection` | The election an election-period total is for: 2026 for anyone on this year's ballot, 2028 or 2030 for a senator not up this year |
+
+The profile dialog words these under the money ("Raised for the 2026
+election, Jan 2021 - Aug 2026") and says when a Senate period spans the
+six-year term.
 
 Get a free key at <https://api.data.gov/signup/>, then supply it either way:
 

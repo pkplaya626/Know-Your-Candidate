@@ -171,6 +171,125 @@ class TestFec(unittest.TestCase):
         self.assertEqual(profile["quality"]["receipts"], "unknown")
 
 
+def _period(year, start, end, receipts):
+    """One /candidate/{id}/totals/?election_full=true row, as the API sends it."""
+    return {"candidate_election_year": str(year), "cycle": None, "election_full": True,
+            "coverage_start_date": start + "T00:00:00", "coverage_end_date": end + "T00:00:00",
+            "receipts": receipts, "disbursements": 1.0,
+            "last_cash_on_hand_end_period": 2.0}
+
+
+class TestFinancePeriod(unittest.TestCase):
+    """Members and challengers are measured over the same period.
+
+    The member lookup asked for cycle=2026 and got the endpoint's default,
+    election_full=false: Chris Coons's 2025-26 cycle, $4,168,081. The field
+    query for every challenger beside him returns the 2026 *election period*,
+    which for a senator starts in 2021: $6,897,138 for Coons himself. Measured
+    live, 21 of 21 Senate incumbents in both caches differed this way.
+    """
+
+    def _totals(self, rows):
+        calls = []
+
+        def fake_get(path, params):
+            calls.append((path, params))
+            return {"results": rows}
+
+        original = fec._get
+        fec._get = fake_get
+        try:
+            return fec.totals("S0DE00092"), calls
+        finally:
+            fec._get = original
+
+    def test_member_lookup_asks_for_the_election_period(self):
+        _, calls = self._totals([])
+        self.assertEqual(len(calls), 1)
+        path, params = calls[0]
+        self.assertEqual(path, "/candidate/S0DE00092/totals/")
+        self.assertEqual(params.get("election_full"), "true")
+        # cycle=2026 with election_full returns nothing for a senator next up
+        # in 2028, so the period is chosen from the rows, not filtered for.
+        self.assertNotIn("cycle", params)
+        self.assertGreaterEqual(params.get("per_page", 0), 20)
+
+    def test_the_2026_period_is_taken_with_its_start_date(self):
+        figures, _ = self._totals([
+            _period(2020, "2015-01-01", "2020-12-31", 7217773.49),
+            _period(2026, "2021-01-01", "2026-08-26", 6897138.12),
+        ])
+        self.assertEqual(figures["receipts"], 6897138.12)
+        self.assertEqual(figures["election_year"], 2026)
+        self.assertEqual(figures["coverage_start"], "2021-01-01")
+        self.assertEqual(figures["coverage_end"], "2026-08-26")
+
+    def test_a_senator_not_up_in_2026_gets_their_current_period_never_a_past_one(self):
+        figures, _ = self._totals([
+            _period(2022, "2020-01-01", "2022-12-31", 12026093.21),
+            _period(2028, "2023-01-01", "2026-06-30", 2256851.26),
+        ])
+        self.assertEqual(figures["election_year"], 2028)
+        self.assertEqual(figures["receipts"], 2256851.26)
+
+    def test_only_past_periods_is_no_filing(self):
+        figures, _ = self._totals([_period(2024, "2023-01-01", "2024-12-31", 5.0)])
+        self.assertIsNone(figures)
+
+    def test_the_field_lookup_is_the_same_election_period(self):
+        """/candidates/totals/?election_year= is election-period by definition."""
+        from kyc import candidates
+        captured = []
+        original = fec.fetch_pages
+
+        def fake_pages(path, params, sort, **kw):
+            captured.append((path, params))
+            return [{"candidate_id": "S4NE00207", "cycle": 2026}], 1
+
+        fec.fetch_pages = fake_pages
+        try:
+            rows = candidates.fetch(log=lambda *a: None)
+        finally:
+            fec.fetch_pages = original
+        self.assertEqual({p for p, _ in captured}, {"/candidates/totals/"})
+        for _, params in captured:
+            self.assertEqual(params["election_year"], fec.CYCLE)
+            self.assertNotIn("cycle", params)
+        # The start of the period is kept so the page can show it.
+        self.assertIn("coverage_start_date", rows[0])
+
+    def test_apply_cache_records_the_period(self):
+        profile = {"name": "Chris Coons", "state": "DE", "chamber": "Senate", "quality": {}}
+        cache = {fec.profile_key(profile): {
+            "receipts": 6897138.12, "candidate_id": "S0DE00092", "found": True,
+            "coverage_start": "2021-01-01", "coverage_end": "2026-08-26",
+            "election_year": 2026}}
+        fec.apply_cache([profile], cache)
+        self.assertEqual(profile["financeSince"], "2021-01-01")
+        self.assertEqual(profile["financeAsOf"], "2026-08-26")
+        self.assertEqual(profile["financePeriod"], "election")
+        self.assertEqual(profile["financeElection"], 2026)
+
+    def test_a_record_cached_before_the_change_is_called_a_cycle_total(self):
+        """Old member records measured the 2025-26 cycle; never relabel them."""
+        profile = {"name": "Chris Coons", "state": "DE", "chamber": "Senate", "quality": {}}
+        cache = {fec.profile_key(profile): {
+            "receipts": 4168081.31, "candidate_id": "S0DE00092", "found": True,
+            "coverage_end": "2026-08-26"}}
+        fec.apply_cache([profile], cache)
+        self.assertEqual(profile["financePeriod"], "cycle")
+        self.assertNotIn("financeElection", profile)
+        self.assertIsNone(profile["financeSince"])  # not invented
+        self.assertEqual(profile["financeAsOf"], "2026-08-26")
+
+    def test_period_fields_never_invent_a_start(self):
+        self.assertIsNone(fec.period_fields(2026, "", "2026-06-30")["financeSince"])
+        self.assertIsNone(fec.period_fields(2026, None, None)["financeAsOf"])
+        self.assertEqual(
+            fec.period_fields("2026", "2024-10-01T00:00:00", "2025-01-28")["financeSince"],
+            "2024-10-01")
+
+
 class TestNoFilingIsNotNoData(unittest.TestCase):
     """Four kinds of absence, and only one of them reports work we did.
 

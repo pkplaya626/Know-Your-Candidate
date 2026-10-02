@@ -50,7 +50,7 @@ INCUMBENT = "I"
 _FIELDS = (
     "candidate_id", "name", "office", "state", "district_number", "party",
     "party_full", "receipts", "disbursements", "cash_on_hand_end_period",
-    "coverage_end_date", "incumbent_challenge", "candidate_status",
+    "coverage_start_date", "coverage_end_date", "incumbent_challenge", "candidate_status",
     "has_raised_funds",
 )
 
@@ -401,6 +401,7 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
     running for a different seat (a House member seeking a Senate seat) is the
     case that exercises all of them at once.
     """
+    from . import fec
     from .normalize import fmt_curr, office_label
     from .photos import PLACEHOLDER
 
@@ -499,7 +500,13 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
             "disbursements": fmt_curr(row.get("disbursements")),
             "cashOnHand": fmt_curr(row.get("cash_on_hand_end_period")),
             "financeSource": "FEC",
-            "financeAsOf": (row.get("coverage_end_date") or "")[:10],
+            # /candidates/totals/?election_year= reports the election period,
+            # the same definition fec.totals uses for sitting members, so
+            # the two can sit side by side. A cache written before
+            # coverage_start_date was kept has no start: financeSince is
+            # then None rather than a date the FEC never gave us.
+            **fec.period_fields(
+                CYCLE, row.get("coverage_start_date"), row.get("coverage_end_date")),
             "fecCandidateId": candidate_id,
             "source": "fec-field",
             # No speculative URL chain. For a roster candidate, guessing

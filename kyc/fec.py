@@ -176,14 +176,64 @@ def find_candidate(name, state, chamber, cycle=CYCLE):
     return None
 
 
-def totals(candidate_id, cycle=CYCLE):
-    """Receipts/disbursements/cash for one candidate in *cycle*."""
-    payload = _get(f"/candidate/{candidate_id}/totals/", {"cycle": cycle, "per_page": 1})
-    results = payload.get("results") or []
-    if not results:
+# The single definition of "how much has this person raised". The FEC reports
+# a candidate's money two ways: per two-year cycle, and per *election period*
+# (election_full), which runs from the end of their last election for this
+# office to the next one. A House election period is normally the two-year
+# cycle; a Senate one is the whole six-year term. The field endpoint,
+# /candidates/totals/?election_year=2026, returns election-period totals, and
+# so do the FEC's own candidate pages. The per-candidate endpoint defaults to
+# election_full=false - the two-year cycle - so it measured Chris Coons over
+# 2025-26 ($4,168,081) while the field query beside it measured the 2026
+# election period from 2021 ($6,897,138 for Coons himself). An incumbent and a
+# challenger shown side by side were counted over different periods, and
+# nothing on the page said so. Every figure now comes from the election period.
+ELECTION_FULL = {"election_full": "true", "sort": "-cycle", "per_page": 100}
+
+# What a finance record measured. Records cached before the election-period
+# lookup carry no ``election_year``: they are two-year cycle totals, and the
+# page says so rather than relabelling them.
+PERIOD_ELECTION = "election"
+PERIOD_CYCLE = "cycle"
+
+
+def election_row(rows, election_year=CYCLE):
+    """``(year, row)`` for the next election at or after *election_year*.
+
+    Someone on the 2026 ballot gets their 2026 period, which is exactly what
+    the field endpoint reports for them. A senator next up in 2028 or 2030 has
+    no 2026 period at all; the honest figure is the period they are raising
+    in now, and the profile says which election it is for. A period for an
+    election already held is never used: 2024 receipts on a 2026 page read as
+    current money (rule 19). ``None`` when there is no such period.
+    """
+    best = None
+    for row in rows:
+        try:
+            year = int(row.get("candidate_election_year"))
+        except (TypeError, ValueError):
+            continue
+        if year >= election_year and (best is None or year < best[0]):
+            best = (year, row)
+    return best
+
+
+def totals(candidate_id, election_year=CYCLE):
+    """Receipts/disbursements/cash for one candidate's election period.
+
+    See :data:`ELECTION_FULL`. ``election_year`` is not a filter on this
+    endpoint - it returns every period whatever it is given, and
+    ``cycle=2026`` with ``election_full`` returns nothing for a senator next
+    up in 2028 - so the period is chosen here by :func:`election_row`.
+    """
+    payload = _get(f"/candidate/{candidate_id}/totals/", dict(ELECTION_FULL))
+    picked = election_row(payload.get("results") or [], election_year)
+    if not picked:
         return None
-    row = results[0]
+    year, row = picked
     return {
+        "election_year": year,
+        "coverage_start": (row.get("coverage_start_date") or "")[:10],
         "receipts": row.get("receipts"),
         "disbursements": row.get("disbursements"),
         "cash_on_hand": row.get("last_cash_on_hand_end_period"),
@@ -352,6 +402,35 @@ def resolve_all(profiles, root=".", limit=None, refresh=False, snapshot=None,
                    "by_id": by_id}
 
 
+def period_fields(election_year, start, end):
+    """The profile fields that say what period a money figure covers.
+
+    ``financePeriod`` is ``"election"`` for an election-period total, with
+    ``financeElection`` naming the election, or ``"cycle"`` for a record
+    cached before the election-period lookup, which measured the two-year
+    2025-26 cycle. ``financeSince`` is the FEC's own coverage start date and
+    is ``None`` when the cache never recorded one - it is not reconstructed
+    from the period's nominal start, because a committee's first report can
+    begin later than that, or earlier (H0FL01146's 2026 period starts
+    2024-10-01).
+    """
+    fields = {
+        "financeSince": (start or "")[:10] or None,
+        "financeAsOf": (end or "")[:10] or None,
+    }
+    try:
+        year = int(election_year)
+    except (TypeError, ValueError):
+        year = None
+    if year:
+        fields["financePeriod"] = PERIOD_ELECTION
+        fields["financeElection"] = year
+    else:
+        fields["financePeriod"] = PERIOD_CYCLE
+        fields["financeCycle"] = CYCLE
+    return fields
+
+
 def _money(value):
     return f"${float(value):,.2f}" if value is not None else None
 
@@ -387,7 +466,9 @@ def apply_cache(profiles, cache):
         profile["disbursements"] = _money(record.get("disbursements"))
         profile["cashOnHand"] = _money(record.get("cash_on_hand"))
         profile["financeSource"] = "FEC"
-        profile["financeAsOf"] = record.get("coverage_end")
+        profile.update(period_fields(
+            record.get("election_year"), record.get("coverage_start"),
+            record.get("coverage_end")))
         profile["fecCandidateId"] = record.get("candidate_id")
 
         breakdown = {
