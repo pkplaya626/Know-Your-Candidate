@@ -198,7 +198,15 @@ def totals(candidate_id, cycle=CYCLE):
 # --------------------------------------------------------------------- cache
 
 def profile_key(profile):
-    return f"{profile['name'].lower()}|{profile['state']}|{'S' if 'Senate' in profile['chamber'] else 'H'}"
+    """Cache key: the roster spelling, state and chamber.
+
+    ``rosterName`` is set only where the displayed name was replaced by the
+    one the member goes by ("C. Franklin" shows as Scott Franklin); keying on
+    the roster spelling keeps the cached filing attached to the same person
+    instead of reading as "nobody has looked".
+    """
+    name = profile.get("rosterName") or profile["name"]
+    return f"{name.lower()}|{profile['state']}|{'S' if 'Senate' in profile['chamber'] else 'H'}"
 
 
 def load_cache(root="."):

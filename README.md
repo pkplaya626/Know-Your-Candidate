@@ -572,6 +572,8 @@ the map's delegation panel, the footer, and `sitemap.xml`.
 | `social` (`twitter`, `facebook`, `instagram`, `youtube_id`, `bluesky`) | `legislators-social-media`, the project's verified account list | Sitting members |
 | `refs` (`govtrack`, `opensecrets`, `votesmart`, `ballotpedia`) | Reference ids from `congress-legislators` | Sitting members |
 | `wikipedia` | The bioguide mapping for members; the state ballot page's own link for filed candidates (`wikipediaVia`) | Members, and candidates the ballot page links |
+| `aliases` | Other names a voter may search by, all from the member's own `congress-legislators` record (matched on bioguide id): `official_full` without its quoted nickname, nickname + surname (+ suffix), and the Wikipedia title without its disambiguator ("Jim Clyburn", "Hank Johnson"). Names that fold to the display name are dropped. Searched, never displayed as the name | Sitting members whose record adds a name |
+| `rosterName` | The roster CSV's spelling, set only when it opens with a bare initial ("C. Franklin") and `name` was replaced by the name the record says they go by (nickname + surname, else a real middle name + surname). Keys the finance cache and stays searchable | Five sitting members |
 | `campaignSite`, `campaignCommittee` | The principal campaign committee's Form 1 at the FEC (`data/campaigns.json`) | Everyone on a ballot with an FEC id |
 | `committeeList`, `committeesSource` | `committee-membership-current`, with rank and title (`data/committees.json`) | Sitting members |
 | `fecCandidateId` | Links the FEC's own candidate page | Everyone the FEC knows |
