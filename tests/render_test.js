@@ -992,6 +992,39 @@ async function testRunningElsewhere() {
       undecided.every((p) => KYC.contestStatus(p) === "" ||
         (filingOf(p) && filingOf(p).raceId === p.contestRaceId)));
   });
+
+  /* "Nobody else has filed for this seat" was printed whenever no other
+   * profile was in the race - for Hank Johnson with five filings and a named
+   * November opponent. It may say so only when filedCount does. */
+  suite("in this race — alone among the profiles", () => {
+    const raceOf = (p) => window.kycRaces.find((r) => r.id === (p.contestRaceId || p.raceId));
+    const alone = people.filter((p) => {
+      const r = raceOf(p);
+      return r && !r.incumbentIds.concat(r.candidateIds).some((id) => id !== p.id && KYC.byId(id));
+    });
+    const panelText = (p) => {
+      KYC.profile.open(p.id, { fromRoute: true });
+      const t = D.getElementById("profileModalRace").textContent;
+      KYC.profile.close();
+      return t;
+    };
+    check("the data has people alone among the profiles in their race", alone.length > 0,
+      `${alone.length}`);
+    const lies = alone.filter((p) => /Nobody else has filed/.test(panelText(p)) && raceOf(p).filedCount > 0);
+    check("never 'nobody else has filed' when people have filed", lies.length === 0,
+      lies.map((p) => `${p.name} (${raceOf(p).filedCount} filed)`).join(", "));
+    const named = alone.filter((p) => ((raceOf(p).results || {}).otherNominees || []).length);
+    check("a named November opponent without a profile is listed",
+      named.length > 0 && named.every((p) => raceOf(p).results.otherNominees.every((n) => panelText(p).includes(n))),
+      named.length ? panelText(named[0]) : "none in the data");
+    const filedOnly = alone.find((p) => !raceOf(p).settled && raceOf(p).filedCount > 0);
+    check("an unsettled race says how many filed",
+      !filedOnly || panelText(filedOnly).includes(raceOf(filedOnly).filedCount + " ha"),
+      filedOnly ? panelText(filedOnly) : "none in the data");
+    const none = alone.find((p) => !raceOf(p).filedCount && !(raceOf(p).settled && raceOf(p).results));
+    check("nobody filed is said only when nobody did",
+      !none || /Nobody else has filed/.test(panelText(none)), none ? panelText(none) : "none in the data");
+  });
   window.close();
 
   const map = await buildPage("map.html");

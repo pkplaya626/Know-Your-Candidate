@@ -1718,5 +1718,10 @@ svg { flex: none; }
 .race-mate-name { font-weight: 600; }
 .race-mate-meta { display: flex; flex-wrap: wrap; gap: var(--s-1); align-items: center; font-size: var(--t-xs); }
 .race-mates .race-out { border-top: 0; }
+.race-mates .race-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--t-sm);
+}
 .race-mates .race-out > summary { padding: var(--s-2) 0; }
 #yourState .nav-link { color: var(--accent); }
