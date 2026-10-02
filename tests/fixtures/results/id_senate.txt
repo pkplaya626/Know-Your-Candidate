@@ -1,0 +1,103 @@
+{{Infobox election
+| nominee1 = [[Jim Risch]]
+| party1 = Republican Party (United States)
+| nominee2 = [[Todd Achilles]]
+| party2 = Independent politician
+}}
+== Republican primary ==
+=== Candidates ===
+==== Nominee ====
+*[[Jim Risch]], incumbent [[United States Senate|U.S. senator]]
+==== Eliminated in primary ====
+*Joe Evans, data engineer and [[Libertarian Party (United States)|Libertarian]] nominee for [[Idaho's 1st congressional district|ID-1]] in [[2020 United States House of Representatives elections in Id
+*Denny LaVe, entrepreneur
+*Josh Roy, engineer
+===Endorsements===
+===Fundraising===
+===Results===
+{{Election box begin no change
+ | title=Republican primary results}}
+{{Election box winning candidate with party link no change
+ | party=Republican Party (United States)
+ | candidate=[[Jim Risch]] (incumbent)
+ | votes=156,140
+ | percentage=67.3}}
+{{Election box candidate with party link no change
+ | party=Republican Party (United States)
+ | candidate=Josh Roy
+ | votes=33,188
+ | percentage=14.3}}
+{{Election box candidate with party link no change
+ | party=Republican Party (United States)
+ | candidate=Joe Evans
+ | votes=32,636
+ | percentage=14.1}}
+{{Election box candidate with party link no change
+ | party=Republican Party (United States)
+ | candidate=Denny LaVe
+ | votes=10,182
+ | percentage=4.4}}
+{{Election box total no change
+ | votes=232,146
+ | percentage=100.0}}
+{{Election box end}}
+== Democratic primary ==
+=== Candidates ===
+==== Withdrew after nomination ====
+*David Roth, realtor, nominee for [[U.S. Senate]] in [[2022 United States Senate election in Idaho|2022]], and nominee for [[Idaho's 2nd congressional district|ID-2]] in [[2024 United States House of 
+==== Eliminated in primary ====
+*Nickolas Bonds, estate executive
+*Brad Moore
+===Endorsements===
+===Fundraising===
+===Results===
+{{Election box begin no change
+ | title=Democratic primary results}}
+{{Election box winning candidate with party link no change
+ | party=Democratic Party (United States)
+ | candidate=David Roth
+ | votes=29,534
+ | percentage=61.9}}
+{{Election box candidate with party link no change
+ | party=Democratic Party (United States)
+ | candidate=Brad Moore
+ | votes=14,863
+ | percentage=31.1}}
+{{Election box candidate with party link no change
+ | party=Democratic Party (United States)
+ | candidate=Nickolas Bonds
+ | votes=3,344
+ | percentage=7.0}}
+{{Election box total no change
+ | votes=47,741
+ | percentage=100.0}}
+{{Election box end}}
+== Libertarian primary ==
+=== Candidates ===
+==== Nominee ====
+*Matt Loesby, nominee for {{ushr|ID|1}} in [[2024 United States House of Representatives elections in Idaho#District 1|2024]]
+=== Results ===
+{{Election box begin no change
+ | title=Libertarian primary results}}
+{{Election box winning candidate with party link no change
+ | party=Libertarian Party (United States)
+ | candidate=Matt Loesby
+ | votes=855
+ | percentage=100.0}}
+{{Election box total no change
+ | votes=855
+ | percentage=100.0}}
+{{Election box end}}
+== Independents ==
+===Candidates===
+==== Declared ====
+=== Fundraising ===
+== General election ==
+=== Campaign ===
+=== Predictions ===
+===Endorsements===
+===Fundraising===
+===Polling===
+== Notes ==
+== References ==
+== External links ==

@@ -1,0 +1,99 @@
+==District 15==
+{{Infobox election
+| nominee1 = [[Ritchie Torres]]
+| party1 = Democratic Party (United States)
+| nominee2 = Stylo Sapaskis
+| party2 = Republican Party (United States)
+}}
+===Democratic primary===
+====Nominee====
+*[[Ritchie Torres]], incumbent U.S. representative
+====Eliminated in primary====
+*[[Michael Blake (politician)|Michael Blake]], former [[New York state assembly|state assemblymember]] from the [[New York's 79th State Assembly district|79th district]] (2015–2021), former [[Democrat
+*Jose Vega, [[Worldwide LaRouche Youth Movement|LaRouche Youth Movement]] activist and independent candidate for this seat in [[2024 United States House of Representatives elections in New York#Distri
+====Withdrawn====
+*Dalourny Nemorin, member of [[Bronx Community Board 1]]
+*[[Amanda Septimo]], [[New York state assembly|state assemblymember]] from the [[New York's 84th State Assembly district|84th district]] (2021–present) ''([[2026 New York State Assembly election|runni
+====Declined====
+====Endorsements====
+====Fundraising====
+====Polling====
+====Results====
+{{Election box begin no change
+| title = Democratic primary results
+}}
+{{Election box winning candidate with party link no change
+| candidate = [[Ritchie Torres]] (incumbent)
+| party = Democratic Party (United States)
+| votes = 24,598
+| percentage = 71.8
+}}
+{{Election box candidate with party link no change
+| candidate = [[Michael Blake (politician)|Michael Blake]]
+| party = Democratic Party (United States)
+| votes = 7,474
+| percentage = 21.8
+}}
+{{Election box candidate with party link no change
+| candidate = Jose Vega
+| party = Democratic Party (United States)
+| votes = 1,939
+| percentage = 5.7
+}}
+{{Election box write-in with party link no change
+| votes = 229
+| percentage = 0.7
+}}
+{{Election box total no change
+| votes = 34,240
+| percentage = 100.0
+}}
+{{Election box end}}
+===Third party and independent candidates===
+====Declared====
+====Fundraising====
+===General election===
+====Predictions====
+====Fundraising====
+====Results====
+{{Election box begin|title=2026 New York's 15th congressional district election}}
+{{Election box candidate with party link
+  |party      = Democratic Party (United States)
+  |candidate  = [[Ritchie Torres]] (incumbent)
+  |votes      = 
+  |percentage = 
+  |change = 
+}}
+{{Election box candidate with party link
+  |party      = Republican Party (United States)
+  |candidate  = Stylo Sapaskis
+  |votes      = 
+  |percentage = 
+  |change = 
+}}
+{{Election box candidate with party link
+  |party      = Conservative Party of New York State
+  |candidate  = Gonzalo Duran
+  |votes      = 
+  |percentage = 
+  |change = 
+}}
+{{Election box candidate with party link
+  |party      = Party for Socialism and Liberation
+  |candidate  = Andre Easton
+  |votes      = 
+  |percentage = 
+  |change = 
+}}
+{{Election box candidate
+  |party      = Speak The Truth
+  |candidate  = Jose Vega
+  |votes      = 
+  |percentage = 
+  |change = 
+}}
+{{Election box total no change
+  |votes      = 
+  |percentage = 
+}}
+{{Election box end}}

@@ -1,0 +1,160 @@
+{{Infobox election
+| nominee1 = [[Susan Collins]]
+| party1 = Republican Party (United States)
+| nominee2 = [[Troy Jackson]] (replacing [[Graham Platner]])
+| party2 = Democratic Party (United States)
+}}
+== Background ==
+==Republican primary==
+===Candidates===
+====Nominee====
+* [[Susan Collins]], incumbent U.S. senator (1997–present)
+====Withdrawn====
+* Carmen Calabrese, restaurant owner
+* Bill Clarke, entrepreneur and [[Constitution Party (United States)|Constitution Party]] nominee for U.S. Senate in [[1996 United States Senate election in Maine|1996]] and for governor in [[1998 Mai
+* Dan Smeriglio, former police officer
+=== Endorsements ===
+===Fundraising===
+===Polling===
+===Results===
+{{Election box begin no change
+| title = Republican primary results
+}}
+{{Election box winning candidate with party link no change
+| party = Republican Party (United States)
+| candidate = [[Susan Collins]] (incumbent)
+| votes = 126,398
+| percentage = 100.0
+}}
+{{Election box total no change
+| votes = 126,398
+| percentage = 100.0
+}}
+{{Election box end}}
+==Democratic primary==
+=== Platner misconduct controversies ===
+===Candidates===
+====Withdrew after nomination====
+* [[Graham Platner]], [[Sullivan, Maine|Sullivan]] harbor master
+====Eliminated in primary====
+* David Costello, former deputy secretary of the [[Maryland Department of the Environment]] and nominee for U.S. Senate in [[2024 United States Senate election in Maine|2024]]
+* Andrea LaFlamme, adjunct professor at the [[University of Maine]] ''(write-in candidate)''
+* [[Janet Mills]], [[governor of Maine]] (2019–present) ''(suspended campaign)''
+==== Withdrawn ====
+* Natasha Alcala, fashion designer
+* David Evans, former [[U.S. Department of Defense|Department of Defense]] policy writer
+* Tucker Favreau, cybersecurity professional
+* Dan Kleban, brewery owner ''(endorsed Mills)''
+* Daira Smith-Rodriguez, former civilian contracting officer for the [[U.S. Air Force]] ''(endorsed Mills)''
+* Jordan Wood, former chief of staff to former U.S. Representative [[Katie Porter]] ''([[2026 United States House of Representatives elections in Maine#District 2|ran for U.S. House]]; endorsed Platne
+====Declined====
+===Endorsements===
+===Fundraising===
+===Polling===
+===Results===
+{{Election box begin no change
+| title = Democratic primary results
+}}
+{{Election box winning candidate with party link no change
+| party = Democratic Party (United States)
+| candidate = [[Graham Platner]]
+| votes = 156,084
+| percentage = 72.1
+}}
+{{Election box candidate with party link no change
+| party = Democratic Party (United States)
+| candidate = [[Janet Mills]] ''(withdrawn)''
+| votes = 41,644
+| percentage = 19.3
+}}
+{{Election box candidate with party link no change
+| party = Democratic Party (United States)
+| candidate = David Costello
+| votes = 17,560
+| percentage = 8.1
+}}
+{{Election box candidate with party link no change
+| party = Democratic Party (United States)
+| candidate = Andrea LaFlamme ''(write-in)''
+| votes = 1,114
+| percentage = 0.5
+}}
+{{Election box total no change
+| votes = 216,402
+| percentage = 100.0
+}}
+{{Election box end}}{{Clear}}
+== Platner's withdrawal ==
+== Democratic nominating convention ==
+===Process===
+=== Campaign and convention ===
+=== Candidates ===
+==== Nominee ====
+* [[Troy Jackson]], former [[president of the Maine Senate]] (2018–2024), candidate for [[Maine's 2nd congressional district|ME-02]] in [[2014 United States House of Representatives elections in Maine
+==== Eliminated at convention ====
+* Saundra Pelletier, healthcare executive
+==== Failed to qualify ====
+====Withdrawn====
+* [[Shenna Bellows]], [[Maine Secretary of State|Maine secretary of state]] (2021–present), nominee for U.S. Senate in [[2014 United States Senate election in Maine|2014]], and candidate for governor 
+* David Costello, former deputy secretary of the [[Maryland Department of the Environment]], nominee for U.S. Senate in [[2024 United States Senate election in Maine|2024]], and primary candidate for 
+* Elizabeth Dickerson, former [[Maine House of Representatives|state representative]] from the 93rd district (2012–2015)
+* Dan Kleban, brewery owner and former primary candidate for this seat ''(endorsed Jackson)''
+* Andrea LaFlamme, adjunct professor at the [[University of Maine]] and primary candidate for this seat
+* Kristina Libby, writer, actor, and organizer
+* Paige Loud, social worker and candidate for [[Maine's 2nd congressional district|ME-02]] in [[2026 United States House of Representatives elections in Maine#District 2|2026]]
+* [[Nirav D. Shah|Nirav Shah]], former principal deputy director of the [[Centers for Disease Control and Prevention]] (2023–2025), former director of the Maine CDC (2019–2023), and candidate for gove
+* Jordan Wood, former chief of staff to former U.S. representative [[Katie Porter]], former primary candidate for this seat, and candidate for [[Maine's 2nd congressional district|ME-02]] in [[2026 Un
+==== Declined ====
+===Endorsements===
+===Polling===
+===Debates===
+=== Results ===
+{{Election box begin no change | title=Democratic convention results}}
+{{Election box winning candidate with party link no change
+  |party      = Democratic Party (United States)
+  |candidate  = Troy Jackson
+  |votes      = 566
+  |percentage = 99.1
+  }}
+{{Election box candidate with party link no change
+  |party      = Democratic Party (United States)
+  |candidate  = Saundra Pelletier
+  |votes      = 5
+  |percentage = 0.9
+  }}
+{{Election box total no change
+  | votes = 571
+  | percentage = 100.0
+}}
+{{Election box end}}
+==Independents==
+===Candidates===
+====Did not qualify====
+====Withdrawn====
+* Phillip Rench, former member of the [[Maine Space Corporation]] Board of Directors (2023–2025)
+===Fundraising===
+== General election ==
+=== Predictions ===
+=== Post-primary endorsements ===
+===Fundraising===
+===Polling===
+===Results===
+{{Election box begin no change
+ | title=2026 United States Senate election in Maine}}
+{{Election box candidate with party link no change
+ | party=Republican Party (United States)
+ | candidate= [[Susan Collins]] (incumbent)
+ | votes=
+ | percentage=}}
+{{Election box candidate with party link no change
+ | party=Democratic Party (United States)
+ | candidate=[[Troy Jackson]]
+ | votes= 
+ | percentage=}}
+{{Election box total no change
+ | votes= 
+ | percentage=}}
+{{Election box end}}
+==Notes==
+==References==
+== External links ==

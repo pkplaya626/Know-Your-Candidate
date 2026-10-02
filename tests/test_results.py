@@ -40,6 +40,27 @@ def box(title, *rows):
     return "\n".join(out)
 
 
+FIXTURES = os.path.join(os.path.dirname(__file__), "fixtures", "results")
+
+
+def fixture(name):
+    """Real wikitext, as read on 2026-10-01, trimmed to headings, candidate
+    lists, results tables and infobox nominee fields."""
+    with open(os.path.join(FIXTURES, name), encoding="utf-8") as handle:
+        return "\n" + handle.read()
+
+
+def page_statuses(text, district=None, **kw):
+    """Run one race's section through the same steps ``build`` does."""
+    section = text if district is None else results.house_sections(text)[district]
+    boxes = results.parse_boxes(section)
+    nominees = results.infobox_nominees(section)
+    if nominees:
+        boxes.append((results.INFOBOX_TITLE, nominees))
+    boxes.extend(results.candidate_lists(section))
+    return results.resolve_race(boxes, **kw)
+
+
 class TestParsing(unittest.TestCase):
     def test_winner_comes_from_the_template_name_not_the_count(self):
         # Two winners with fewer votes than a loser would be nonsense; the
@@ -98,7 +119,13 @@ class TestParsing(unittest.TestCase):
         self.assertIn("B", sections[12])
 
     def test_an_at_large_page_is_one_section(self):
-        self.assertEqual(list(results.house_sections("no headings here")), [0])
+        self.assertEqual(list(results.house_sections("no headings here", at_large=True)), [0])
+
+    def test_a_districted_page_without_district_headings_is_not_at_large(self):
+        # California's main page after the 2026-09-20 split: no "District N"
+        # headings, only {{main}} links. Reading it as one at-large race
+        # silently dropped all 52 races.
+        self.assertEqual(results.house_sections(fixture("ca_main.txt")), {})
 
 
 class TestResolving(unittest.TestCase):
@@ -390,7 +417,9 @@ class TestAgainstTheRealCache(unittest.TestCase):
         from kyc import candidates
         field = candidates.load_cache(ROOT)
         by_id = {r["candidate_id"]: r for r in field["candidates"]}
-        top_two = {"CA", "WA", "LA", "AK"}
+        # Louisiana is not here: its Senate race used closed primaries, and
+        # its House races are an open primary the cache now holds as pending.
+        top_two = {"CA", "WA", "AK"}
         for rid, race in self.cache["races"].items():
             if rid.split("-")[1] in top_two:
                 continue
@@ -411,3 +440,339 @@ class TestAgainstTheRealCache(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+CA_TITLE = "2026 United States House of Representatives elections in California"
+CA_PAGES = {
+    CA_TITLE: "ca_main.txt",
+    f"{CA_TITLE} (districts 1–26)": "ca_1_26.txt",
+    f"{CA_TITLE} (districts 27–52)": "ca_27_52.txt",
+}
+
+
+def fake_fetch(pages):
+    def fetch(title):
+        if title not in pages:
+            raise results.PageMissing(title)
+        return fixture(pages[title])
+    return fetch
+
+
+def row(cid, name, state, office, district, party):
+    return {"candidate_id": cid, "name": name, "state": state, "office": office,
+            "district_number": district, "party": party}
+
+
+class NoGap(unittest.TestCase):
+    def setUp(self):
+        self._gap, results._GAP = results._GAP, 0
+
+    def tearDown(self):
+        results._GAP = self._gap
+
+
+class TestSplitPages(NoGap):
+    """California's House page was split into two sub-articles on 2026-09-20."""
+
+    field = {"candidates": [
+        row("H6CA01285", "GALLAGHER, JAMES", "CA", "H", 1, "REP"),
+        row("H6CA01269", "MCGUIRE, MIKE", "CA", "H", 1, "DEM"),
+        row("H6CA01251", "DENNEY, AUDREY", "CA", "H", 1, "DEM"),
+        row("H4CA27111", "WHITESIDES, GEORGE", "CA", "H", 27, "DEM"),
+        row("H6CA27330", "NORWOOD, CALEB GABRIEL", "CA", "H", 27, "DEM"),
+    ]}
+    dates = {("CA", "H"): {"primary": "2026-06-02", "runoff": None}}
+
+    def run_build(self, pages):
+        logged = []
+        cache = results.build(self.field, self.dates, today=datetime.date(2026, 10, 1),
+                              log=logged.append, fetch=fake_fetch(pages))
+        return cache, logged
+
+    def test_sub_articles_are_found_from_main_links(self):
+        self.assertEqual(results.sub_articles(fixture("ca_main.txt"), CA_TITLE),
+                         [f"{CA_TITLE} (districts 1–26)", f"{CA_TITLE} (districts 27–52)"])
+
+    def test_build_reads_districts_from_the_sub_articles(self):
+        cache, _ = self.run_build(CA_PAGES)
+        self.assertEqual(set(cache["races"]), {"H-CA-01-2026", "H-CA-27-2026"})
+        one = cache["races"]["H-CA-01-2026"]
+        self.assertEqual(one["page"], f"{CA_TITLE} (districts 1–26)")
+        self.assertEqual(one["status"], {"H6CA01285": "nominee", "H6CA01269": "nominee",
+                                         "H6CA01251": "eliminated"})
+        self.assertEqual(cache["races"]["H-CA-27-2026"]["status"],
+                         {"H4CA27111": "nominee", "H6CA27330": "eliminated"})
+        self.assertEqual(cache["unparsedPages"], [])
+
+    def test_a_districted_page_with_no_districts_fails_loudly(self):
+        # The sub-articles are gone: the main page must not be read as one
+        # at-large race, and the failure must be recorded for validate.
+        cache, logged = self.run_build({CA_TITLE: "ca_main.txt"})
+        self.assertEqual(cache["races"], {})
+        self.assertEqual(cache["unparsedPages"], [f"CA-H: {CA_TITLE}"])
+        self.assertTrue(any("[ERROR]" in line for line in logged))
+
+
+class TestTerritoryTitles(NoGap):
+    def test_the_definite_article_forms_are_asked_for(self):
+        house = "2026 United States House of Representatives election in "
+        self.assertIn(house + "the District of Columbia", results.page_titles("DC", "H"))
+        self.assertIn(house + "the United States Virgin Islands", results.page_titles("VI", "H"))
+        self.assertIn(house + "the Northern Mariana Islands", results.page_titles("MP", "H"))
+        # A state's own title is still asked for first.
+        self.assertEqual(results.page_titles("TX", "H")[0],
+                         "2026 United States House of Representatives elections in Texas")
+
+    def test_dc_is_read_and_norton_is_off_the_ballot(self):
+        title = "2026 United States House of Representatives election in the District of Columbia"
+        field = {"candidates": [
+            row("H0DC00058", "NORTON, ELEANOR HOLMES", "DC", "H", 0, "DEM"),
+            row("H6DC00111", "WHITE, ROBERT", "DC", "H", 0, "DEM"),
+        ]}
+        cache = results.build(field, {("DC", "H"): {"primary": "2026-06-16", "runoff": None}},
+                              today=datetime.date(2026, 10, 1), log=lambda *_: None,
+                              fetch=fake_fetch({title: "dc.txt"}))
+        self.assertEqual(cache["missingPages"], [])
+        race = cache["races"]["H-DC-00-2026"]
+        self.assertEqual(race["page"], title)
+        self.assertEqual(race["status"]["H0DC00058"], "withdrawn")
+        self.assertEqual(race["status"]["H6DC00111"], "nominee")
+        # Vote-tally lines are not people.
+        self.assertNotIn("Overvotes", race["unmatched"])
+
+
+class TestWithdrawals(unittest.TestCase):
+    """Leaving a race is not losing it; losing is not leaving. Each case was
+    read wrongly from the live page on 2026-10-01."""
+
+    def test_nc11_primary_winner_who_ended_his_bid_is_withdrawn(self):
+        out = page_statuses(fixture("nc_11.txt"), 11)
+        self.assertEqual(out["Chuck Edwards"], "withdrawn")      # won with 70.1%
+        self.assertEqual(out["Jennifer Balkcom"], "nominee")     # the replacement
+        self.assertEqual(out["Adam Smith"], "eliminated")
+
+    def test_maine_winner_withdrew_and_the_governor_lost(self):
+        out = page_statuses(fixture("me_senate.txt"))
+        self.assertEqual(out["Graham Platner"], "withdrawn")
+        # Suspended her campaign but stayed on the ballot and lost: her row
+        # says ''(withdrawn)'', she is listed under "Eliminated in primary".
+        self.assertEqual(out["Janet Mills"], "eliminated")
+        # Lost the primary; the later convention's "Withdrawn" list does not
+        # undo that.
+        self.assertEqual(out["David Costello"], "eliminated")
+        self.assertEqual(out["Troy Jackson"], "nominee")
+        self.assertEqual(out["Susan Collins"], "nominee")
+
+    def test_nebraska_withdrawn_winner_and_struck_general_line(self):
+        out = page_statuses(fixture("ne_senate.txt"))
+        self.assertEqual(out["Cindy Burbank"], "withdrawn")
+        self.assertEqual(out["Mike Marvin"], "withdrawn")       # ''(withdrawn)'' in the general box
+        self.assertEqual(out["Dan Osborn"], "nominee")
+        self.assertEqual(out["William Forbes"], "eliminated")
+
+    def test_withdrew_after_nomination_lists(self):
+        self.assertEqual(page_statuses(fixture("id_senate.txt"))["David Roth"], "withdrawn")
+        self.assertEqual(page_statuses(fixture("sd_senate.txt"))["Julian Beaudion"], "withdrawn")
+        self.assertEqual(page_statuses(fixture("oh_4.txt"), 4)["Tamie Wilson"], "withdrawn")
+
+    def test_a_winner_missing_from_the_general_ballot_withdrew(self):
+        text = "\n".join([
+            box("Democratic primary results", ("Ann Winner", 9, True), ("Bob Loser", 5, False)),
+            box("2026 Somewhere's 1st congressional district election", ("Cal Other", 0, False)),
+        ])
+        out = results.resolve_race(results.parse_boxes(text))
+        self.assertEqual(out, {"Ann Winner": "withdrawn", "Bob Loser": "eliminated",
+                               "Cal Other": "nominee"})
+
+    def test_a_primary_loser_on_another_line_in_november_is_a_nominee(self):
+        # NY-15: Jose Vega lost the Democratic primary and is on the ballot
+        # on another party's line.
+        out = page_statuses(fixture("ny_15.txt"), 15)
+        self.assertEqual(out["Jose Vega"], "nominee")
+        self.assertEqual(out["Michael Blake"], "eliminated")
+
+    def test_a_generic_withdrawn_list_does_not_outrank_the_ballot(self):
+        text = "\n".join([
+            "===Democratic primary===", "====Withdrawn====", "* [[Dee Switcher]], lawyer",
+            box("2026 Somewhere's 1st congressional district election", ("Dee Switcher", 0, False)),
+        ])
+        boxes = results.parse_boxes(text) + results.candidate_lists(text)
+        self.assertEqual(results.resolve_race(boxes), {"Dee Switcher": "nominee"})
+
+    def test_list_names_are_read_from_bullets(self):
+        text = ("====Withdrew after nomination====\n"
+                "* [[Graham Platner]], [[Sullivan, Maine|Sullivan]] harbor master<ref>x</ref>\n"
+                "* David Costello, former deputy secretary\n"
+                "====Declined====\n* [[Nobody Here]], ignored\n")
+        lists = dict(results.candidate_lists(text))
+        self.assertEqual([r["name"] for r in lists[results.WITHDREW_NOMINEE_LIST]],
+                         ["Graham Platner", "David Costello"])
+        self.assertEqual(len(lists), 1)
+
+
+class TestNames(unittest.TestCase):
+    def test_formatting_templates_are_unwrapped(self):
+        self.assertEqual(results.clean_name("{{nowrap|John Salvesen}}"), "John Salvesen")
+        self.assertEqual(results.clean_name("{{nowrap|[[Al Green (politician)|Al Green]]}}"),
+                         "Al Green")
+        self.assertEqual(results.clean_name("{{sortname|Jane|Doe}}"), "Jane Doe")
+        self.assertEqual(results.clean_name("Jane Doe{{efn|a note}}"), "Jane Doe")
+
+    def test_ga5_lists_salvesen_once(self):
+        out = page_statuses(fixture("ga_5.txt"), 5)
+        self.assertEqual(sorted(n for n in out if "Salvesen" in n), ["John Salvesen"])
+        self.assertFalse(any("{" in n or "}" in n for n in out))
+
+
+class TestOpenPrimary(unittest.TestCase):
+    """Louisiana's 2026 House races: a nonpartisan primary on November 3."""
+
+    november = "2026 Louisiana's 1st congressional district election"
+    december = "2026 Louisiana's 1st congressional district runoff election"
+
+    def resolve(self, *tables):
+        return results.resolve_race(results.parse_boxes("\n".join(tables)),
+                                    has_runoff=True, open_primary=True)
+
+    def test_a_november_box_without_winners_decides_nothing(self):
+        out = self.resolve(box(self.november, ("A One", 0, False), ("B Two", 0, False)))
+        self.assertEqual(out, {})
+        coverage = results.coverage(results.parse_boxes(box(self.november, ("A One", 0, False))),
+                                    open_primary=True)
+        self.assertEqual(coverage, {"general": False, "parties": []})
+
+    def test_the_real_page_today_names_no_nominee(self):
+        out = page_statuses(fixture("la_1.txt"), 1, has_runoff=True, open_primary=True)
+        self.assertNotIn("nominee", out.values())
+        self.assertNotIn("advanced", out.values())
+
+    def test_marked_winners_advance_and_the_rest_are_out(self):
+        out = self.resolve(box(self.november, ("A One", 40, True), ("B Two", 35, True),
+                               ("C Three", 25, False)))
+        self.assertEqual(out, {"A One": "advanced", "B Two": "advanced", "C Three": "eliminated"})
+
+    def test_an_outright_majority_wins(self):
+        out = self.resolve(box(self.november, ("A One", 60, True), ("B Two", 40, False)))
+        self.assertEqual(out, {"A One": "nominee", "B Two": "eliminated"})
+
+    def test_the_december_runoff_decides(self):
+        out = self.resolve(
+            box(self.november, ("A One", 40, True), ("B Two", 35, True), ("C Three", 25, False)),
+            box(self.december, ("A One", 45, False), ("B Two", 55, True)))
+        self.assertEqual(out, {"A One": "eliminated", "B Two": "nominee", "C Three": "eliminated"})
+
+    def test_the_override_replaces_the_fec_calendar(self):
+        fec = {("LA", "H"): {"primary": "2026-08-07", "runoff": None},
+               ("LA", "S"): {"primary": "2026-05-16", "runoff": "2026-06-27"}}
+        dates, notes = results.effective_dates(fec, {"LA"})
+        self.assertEqual(dates[("LA", "H")], {"primary": "2026-11-03", "runoff": "2026-12-12"})
+        self.assertEqual(dates[("LA", "S")], fec[("LA", "S")])     # closed primaries kept
+        self.assertEqual([n["kind"] for n in notes], ["open-primary"])
+        self.assertFalse(results.primary_settled(dates, "LA", "H", datetime.date(2026, 10, 1)))
+        self.assertTrue(results.primary_settled(dates, "LA", "S", datetime.date(2026, 10, 1)))
+        self.assertTrue(results.open_primary("LA", "H"))
+        self.assertFalse(results.open_primary("LA", "S"))
+
+    def test_an_older_cache_gives_up_its_louisiana_house_results(self):
+        cache = {"asOf": "2026-10-01", "cycle": 2026, "pending": [],
+                 "races": {"H-LA-01-2026": {"status": {"X": "nominee"}},
+                           "S-LA-2026": {"status": {"Y": "nominee"}}},
+                 "dates": {"LA-H": {"primary": "2026-08-07", "runoff": None}}}
+        cache = results.respect_open_primaries(cache)
+        self.assertEqual(set(cache["races"]), {"S-LA-2026"})
+        self.assertEqual(cache["pending"], ["H-LA-01-2026"])
+        self.assertEqual(cache["dates"]["LA-H"], {"primary": "2026-11-03", "runoff": "2026-12-12"})
+
+
+class TestSenateDateFallback(unittest.TestCase):
+    def test_a_senate_race_without_a_primary_date_takes_the_house_date(self):
+        # The FEC calendar lists Rhode Island's House primary (2026-09-09)
+        # and no Senate one; the primary was statewide, so S-RI-2026 settles.
+        fec = {("RI", "H"): {"primary": "2026-09-09", "runoff": None},
+               ("RI", "S"): {"primary": None, "runoff": None}}
+        logged = []
+        dates, notes = results.effective_dates(fec, {"RI"}, log=logged.append)
+        self.assertEqual(dates[("RI", "S")]["primary"], "2026-09-09")
+        self.assertTrue(results.primary_settled(dates, "RI", "S", datetime.date(2026, 10, 1)))
+        self.assertEqual(notes[0]["kind"], "senate-from-house")
+        self.assertIn("RI", logged[0])
+        self.assertIn("2026-09-09", logged[0])
+
+    def test_a_state_with_no_senate_election_borrows_nothing(self):
+        # People file for Arizona's Senate seats, which are not up in 2026;
+        # the FEC calendar has no AZ Senate slot, and none is invented.
+        fec = {("AZ", "H"): {"primary": "2026-07-21", "runoff": None}}
+        dates, notes = results.effective_dates(fec, {"AZ"})
+        self.assertNotIn(("AZ", "S"), dates)
+        self.assertEqual([n for n in notes if n["seat"] == "AZ-S"], [])
+
+    def test_a_senate_date_of_its_own_is_kept(self):
+        fec = {("RI", "H"): {"primary": "2026-09-09", "runoff": None},
+               ("RI", "S"): {"primary": "2026-09-10", "runoff": None}}
+        dates, notes = results.effective_dates(fec, {"RI"})
+        self.assertEqual(dates[("RI", "S")]["primary"], "2026-09-10")
+        self.assertEqual([n for n in notes if n["seat"].startswith("RI")], [])
+
+
+class TestValidateResults(unittest.TestCase):
+    """validate.check_results groups nominees by the line they are on."""
+
+    race = {"id": "H-NY-15-2026", "state": "NY", "settled": True,
+            "incumbentIds": [], "results": {}}
+
+    def person(self, pid, name, party, ballot=None):
+        p = {"id": pid, "name": name, "party": party, "raceStatus": "nominee",
+             "raceId": "H-NY-15-2026", "isCandidate": True}
+        if ballot:
+            p["ballotParty"] = ballot
+        return p
+
+    def codes(self, people):
+        from kyc import validate
+        return [i.code for i in validate.check_results(people, [self.race])]
+
+    def test_a_primary_loser_on_another_line_is_not_a_second_nominee(self):
+        # NY-15 on 2026-10-01: Ritchie Torres (Democratic) and Jose Vega, who
+        # lost that primary and is on the "Speak The Truth" line.
+        people = [self.person("a", "Ritchie Torres", "Democrat", "democratic"),
+                  self.person("b", "Jose Vega", "Democrat", "speak the truth")]
+        self.assertNotIn("multiple-nominees", self.codes(people))
+
+    def test_two_nominees_on_one_ballot_line_are_still_an_error(self):
+        people = [self.person("a", "Ritchie Torres", "Democrat", "democratic"),
+                  self.person("b", "Jose Vega", "Democrat", "democratic")]
+        self.assertIn("multiple-nominees", self.codes(people))
+        # Same with no ballot line at all: the roster party, normalised.
+        people = [self.person("a", "Ritchie Torres", "Democrat"),
+                  self.person("b", "Jose Vega", "DEM")]
+        self.assertIn("multiple-nominees", self.codes(people))
+
+    def test_independents_share_a_ballot(self):
+        people = [self.person("a", "Ann One", "Independent"),
+                  self.person("b", "Bob Two", "unaffiliated", "independent")]
+        self.assertNotIn("multiple-nominees", self.codes(people))
+
+
+class TestValidateResultsPages(unittest.TestCase):
+    def issues(self, cache):
+        from kyc import validate
+        return {i.code: i for i in validate.check_results_pages(cache)}
+
+    def test_an_unparsed_page_is_an_error(self):
+        found = self.issues({"unparsedPages": ["CA-H: 2026 ... in California"]})
+        self.assertEqual(found["results-page-unparsed"].level, "error")
+
+    def test_a_missing_page_is_a_warning(self):
+        found = self.issues({"missingPages": ["VI-H"], "fetchFailed": ["TX-H"]})
+        self.assertEqual(found["results-page-missing"].level, "warn")
+        self.assertEqual(list(found["results-page-missing"].detail), ["VI-H"])
+        self.assertEqual(found["results-fetch-failed"].level, "warn")
+
+    def test_an_override_the_fec_disagrees_with_is_reported(self):
+        _, notes = results.effective_dates({("LA", "H"): {"primary": "2026-08-07", "runoff": None}})
+        found = self.issues({"calendarNotes": notes})
+        self.assertIn("2026-08-07", found["calendar-override-disagrees"].detail[0])
+
+    def test_a_clean_run_reports_nothing(self):
+        self.assertEqual(self.issues({"missingPages": [], "unparsedPages": []}), {})
+        self.assertEqual(self.issues(None), {})

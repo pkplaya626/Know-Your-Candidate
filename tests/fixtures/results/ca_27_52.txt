@@ -1,0 +1,71 @@
+==District 27==
+{{Infobox election
+| party1 = Democratic Party (United States)
+| party2 = Republican Party (United States)
+}}
+===Primary===
+====Advanced to general====
+* Jason Gibbs (Republican), [[Santa Clarita, California|Santa Clarita]] city councilor (2020–present)
+* [[George T. Whitesides|George Whitesides]] (Democratic), incumbent U.S. representative
+====Eliminated in primary====
+* Caleb Norwood (Democratic)
+* Roberto Ramos (Democratic), retired military analyst
+====Endorsements====
+====Fundraising====
+====Results====
+{{Election box begin no change
+| title = Primary results
+}}
+{{Election box winning candidate with party link no change
+| party = Republican Party (United States)
+| candidate = Jason Gibbs
+| votes = 62,758
+| percentage = 40.98
+}}
+{{Election box winning candidate with party link no change
+| party = Democratic Party (United States)
+| candidate = [[George T. Whitesides|George Whitesides]] (incumbent)
+| votes = 62,214
+| percentage = 40.63
+}}
+{{Election box candidate with party link no change
+| party = Democratic Party (United States)
+| candidate = Roberto Ramos
+| votes = 14,868
+| percentage = 9.71
+}}
+{{Election box candidate with party link no change
+| party = Democratic Party (United States)
+| candidate = Caleb Norwood
+| votes = 13,293
+| percentage = 8.68
+}}
+{{Election box total no change
+| votes = 153,133
+| percentage = 100.0
+}}
+{{Election box end}}
+===General election===
+====Predictions====
+====Fundraising====
+====Results====
+{{Election box begin|title=2026 California's 27th congressional district election}}
+{{Election box candidate with party link
+  |party      = Democratic Party (United States)
+  |candidate  = [[George T. Whitesides|George Whitesides]] (incumbent)
+  |votes      = 
+  |percentage = 
+  |change = 
+}}
+{{Election box candidate with party link
+  |party      = Republican Party (United States)
+  |candidate  = Jason Gibbs
+  |votes      = 
+  |percentage = 
+  |change = 
+}}
+{{Election box total no change
+  |votes      = 
+  |percentage = 
+}}
+{{Election box end}}

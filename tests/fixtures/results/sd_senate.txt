@@ -1,0 +1,40 @@
+{{Infobox election
+| nominee1 = [[Mike Rounds]]
+| party1 = Republican Party (United States)
+| nominee2 = Brian Bengs
+| party2 = Independent politician
+| nominee3 =
+| party3 =
+}}
+== Republican primary ==
+=== Candidates ===
+==== Nominee ====
+* [[Mike Rounds]], incumbent U.S. senator (2015–present)
+==== Eliminated in primary ====
+*Justin McNeal, Navy veteran and businessman
+=== Endorsements ===
+===Fundraising===
+=== Polling ===
+===Results===
+{{Election box begin no change |title=Republican primary results}}
+{{Election box winning candidate with party link no change|party=Republican Party (United States)|candidate=[[Mike Rounds]] (incumbent)|votes=101,284|percentage=75.8}}
+{{Election box candidate with party link no change|party=Republican Party (United States)|candidate=Justin McNeal|votes=32,341|percentage=24.2}}
+{{Election box total no change|votes=133,625|percentage=100.0}}
+{{Election box end}}
+== Democratic primary ==
+=== Candidates ===
+==== Withdrew after nomination ====
+* Julian Beaudion, former [[South Dakota Highway Patrol|South Dakota state trooper]], activist, and businessman
+=== Fundraising ===
+== Independents ==
+=== Candidates ===
+==== Declared ====
+===Fundraising===
+== General election ==
+=== Predictions ===
+=== Post-primary endorsements ===
+===Fundraising===
+===Polling===
+== Notes ==
+== References ==
+== External links ==

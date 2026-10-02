@@ -1,0 +1,180 @@
+{{Infobox election
+| nominee1 = [[Robert White (Washington, D.C., politician)|Robert White]]
+| party1 = Democratic Party (United States)
+| nominee2 = Kymone Freeman
+| party2 = D.C. Statehood Green Party
+| nominee3 = Denise Rosado
+| party3 = Republican Party (United States)
+}}
+==Democratic primary==
+===Candidates===
+====Nominee====
+*[[Robert White (Washington, D.C., politician)|Robert White]], at-large councilmember (2016–present) and candidate for [[Mayor of the District of Columbia|mayor]] in [[2022 Washington, D.C., mayoral e
+====Eliminated in primary====
+*Trent Holbrook, former senior legislative counsel for incumbent [[Eleanor Holmes Norton]]
+*[[Gregory Jaczko]], former chairman of the [[Nuclear Regulatory Commission]] (2009–2012)
+*[[Brooke Pinto]], [[Council of the District of Columbia|councilmember]] from Ward 2 (2020–present)
+*Kinney Zalesne, deputy national finance chair of the [[Democratic National Committee]] and former counsel at the [[Department of Justice]]
+====Withdrawn====
+*Deirdre Brown, former [[Advisory Neighborhood Commission]]er
+*Gordon Chaffin, former congressional staffer
+*Robert Matthews, director of the [[Government of the District of Columbia|District of Columbia Child and Family Services Agency]]
+*Greg Maye, candidate for this seat in [[2022 United States House of Representatives election in the District of Columbia|2022]]
+*Vincent Morris, former spokesperson to Senator [[Bernie Sanders]] and former mayor [[Anthony A. Williams|Tony Williams]]
+*[[Eleanor Holmes Norton]], incumbent delegate
+*Jacque Patterson, president of the [[District of Columbia State Board of Education]] (''running for [[2026 Council of the District of Columbia special election|council]]'')
+*Sandi Stevens
+*Kelly Mikel Williams, podcast host and candidate for this seat in [[2022 United States House of Representatives election in the District of Columbia|2022]] and [[2024 United States House of Represent
+===Endorsements===
+===Fundraising===
+=== Polling ===
+===Results===
+{{Election box begin no change
+|title=Democratic primary results
+}}
+{{Election box winning candidate with party link no change|
+  |party      = District of Columbia Democratic State Committee
+  |candidate  = [[Robert White (Washington, D.C., politician)|Robert White]]
+  |votes      = 86,871
+  |percentage = 63.61
+}}
+{{Election box candidate with party link no change|
+  |party      = District of Columbia Democratic State Committee
+  |candidate  = [[Brooke Pinto]]
+  |votes      = 28,550
+  |percentage = 20.90
+}}
+{{Election box candidate with party link no change|
+  |party      = District of Columbia Democratic State Committee
+  |candidate  = Kinney Zalesne
+  |votes      = 10,666
+  |percentage = 7.81
+}}
+{{Election box candidate with party link no change|
+  |party      = District of Columbia Democratic State Committee
+  |candidate  = Trent Holbrook
+  |votes      = 6,100
+  |percentage = 4.47
+}}
+{{Election box candidate with party link no change|
+  |party      = District of Columbia Democratic State Committee
+  |candidate  = [[Gregory Jaczko|Greg Jaczko]]
+  |votes      = 3,936
+  |percentage = 2.88
+}}
+{{Election box write-in with party link no change
+  |votes      = 455
+  |percentage = 0.33
+}}
+{{Election box total no change
+  |votes      = 136,578
+  |percentage = 100.00
+}}
+{{Election box candidate with party link no change
+  |party      = n/a
+  |candidate  = [[Overvote]]s
+  |votes      = 539
+  |percentage = 
+}}
+{{Election box candidate with party link no change
+  |party      = n/a
+  |candidate  = [[Undervote]]s
+  |votes      = 4,961
+  |percentage = 
+}}
+{{Election box end}}
+==Statehood Green primary==
+===Candidates===
+====Nominee====
+*Kymone Freeman, radio host and nominee for this seat in [[2024 United States House of Representatives election in the District of Columbia|2024]]
+===Results===
+{{Election box begin no change
+ | title=Statehood Green primary}}
+{{Election box winning candidate with party link no change
+ | party=D.C. Statehood Green Party
+ | candidate=Kymone Freeman
+ | votes=607
+ | percentage=77.72}}
+{{Election box write-in with party link no change
+ | votes=174
+ | percentage=22.28}}
+{{Election box total no change
+ | votes=781
+ | percentage=100.00}}
+{{Election box candidate with party link no change
+  |party      = n/a
+  |candidate  = [[Overvote]]s
+  |votes      = 3
+  |percentage = 
+}}
+{{Election box candidate with party link no change
+  |party      = n/a
+  |candidate  = [[Undervote]]s
+  |votes      = 96
+  |percentage = 
+}}
+{{Election box end}}
+==Republican primary==
+===Candidates===
+====Nominee====
+*Denise Rosado, attorney
+====Did not make ballot====
+===Fundraising===
+===Results===
+{{Election box begin no change
+ | title=Republican primary results}}
+{{Election box winning candidate with party link no change|
+  |party      = District of Columbia Republican Party
+  |candidate  = Denise Rosado
+  |votes      = 2,501
+  |percentage = 88.50
+}}
+{{Election box write-in with party link no change
+ | votes=325
+ | percentage=11.50}}
+{{Election box total no change
+ | votes=2,826
+ | percentage=100.00}}
+{{Election box candidate with party link no change
+  |party      = n/a
+  |candidate  = [[Overvote]]s
+  |votes      = 13
+  |percentage = 
+}}
+{{Election box candidate with party link no change
+  |party      = n/a
+  |candidate  = [[Undervote]]s
+  |votes      = 415
+  |percentage = 
+}}
+{{Election box end}}
+==General election==
+===Results===
+{{Election box begin no change
+ | title=2026 United States House of Representatives election in the District of Columbia}}
+{{Election box candidate with party link no change
+ | party=District of Columbia Democratic State Committee
+ | candidate=[[Robert White (Washington, D.C., politician)|Robert White]]
+ | votes=
+ | percentage=}}
+{{Election box candidate with party link no change
+ | party=D.C. Statehood Green Party
+ | candidate=Kymone Freeman
+ | votes=
+ | percentage=}}
+{{Election box candidate with party link no change
+ | party=District of Columbia Republican Party
+ | candidate=Denise Rosado
+ | votes=
+ | percentage=}}
+{{Election box write-in with party link no change
+ | votes=
+ | percentage=}}
+{{Election box total no change
+ | votes=
+ | percentage=100.00}}
+{{Election box end}}
+==See also==
+==Notes==
+==References==
+==External links==

@@ -1,0 +1,140 @@
+==District 11==
+{{Infobox election
+| nominee1 = [[Jennifer Balkcom]]
+| party1 = Republican Party (United States)
+| nominee2 = Jamie Ager
+| party2 = Democratic Party (United States)
+}}
+===Republican primary===
+====Withdrew after nomination ====
+*[[Chuck Edwards]], incumbent U.S. representative
+====Eliminated in primary====
+*Adam Smith, nonprofit CEO
+====Endorsements====
+====Fundraising====
+====Results====
+{{Election box begin no change
+| title = Republican primary results
+}}
+{{Election box winning candidate with party link no change
+| party = Republican Party (United States)
+| candidate = [[Chuck Edwards]] (incumbent)
+| votes = 47795
+| percentage = 70.1
+}}
+{{Election box candidate with party link no change
+| party = Republican Party (United States)
+| candidate = Adam Smith
+| votes = 20389
+| percentage = 29.9
+}}
+{{Election box total no change
+| votes = 68184
+| percentage = 100.0
+}}
+{{Election box end}}
+===Replacement nominee selection===
+====Nominee====
+*[[Jennifer Balkcom]], [[North Carolina House of Representatives|state representative]] from the [[North Carolina's 117th House district|117th district]] (2023–present) ''(previously declined, endorse
+====Eliminated at committee meeting====
+*Matthew Burril, financial advisor and candidate for this district in [[2022 United States House of Representatives elections in North Carolina#District 11|2022]]
+*Ken McKim, real estate agent, nominee for [[Texas's 3rd House of Representatives district]] in [[1994 Texas House of Representatives election|1994]], nominee for [[North Carolina's 50th Senate distri
+*Chad Nesbitt, activist and journalist
+*Christian Reagan, mortgage broker and candidate for this district in [[2024 United States House of Representatives elections in North Carolina#District 11|2024]]
+*Kristie Sluder, crisis clinician and nominee for [[North Carolina's 49th Senate district]] in [[2024 North Carolina Senate election#District 49|2024]]
+====Declined====
+====Endorsements====
+===Democratic primary===
+====Nominee====
+*Jamie Ager, farmer and grandson of former U.S. representative [[James M. Clarke|Jamie Clarke]]
+====Eliminated in primary====
+*Zelda Briarwood, field services technician
+*Richard Hudspeth, physician
+*Paul Maddox, cancer researcher
+*Lee Whipple, civil engineer
+====Withdrawn====
+*[[Moe Davis]], retired U.S. Air Force colonel and nominee for this district in [[2020 United States House of Representatives elections in North Carolina#District 11|2020]]
+*Chris Harjes, real estate investor
+*Jacob Lawrence, former [[World Food Programme]] project manager
+====Endorsements====
+====Fundraising====
+====Results====
+{{Election box begin no change
+| title = Democratic primary results
+}}
+{{Election box winning candidate with party link no change
+| party = Democratic Party (United States)
+| candidate = Jamie Ager
+| votes = 49,193
+| percentage = 64.7
+}}
+{{Election box candidate with party link no change
+| party = Democratic Party (United States)
+| candidate = Richard Hudspeth
+| votes = 12,063
+| percentage = 15.9
+}}
+{{Election box candidate with party link no change
+| party = Democratic Party (United States)
+| candidate = Zelda Briarwood
+| votes = 9,893
+| percentage = 13.0
+}}
+{{Election box candidate with party link no change
+| party = Democratic Party (United States)
+| candidate = Paul Maddox
+| votes = 3,857
+| percentage = 5.1
+}}
+{{Election box candidate with party link no change
+| party = Democratic Party (United States)
+| candidate = Lee Whipple
+| votes = 1,078
+| percentage = 1.4
+}}
+{{Election box total no change
+| votes = 76,084
+| percentage = 100.0
+}}
+{{Election box end}}
+===Libertarian primary===
+====Nominee====
+*Travis Groo, safety specialist, former executive committee member for the [[Wake County, North Carolina|Wake County]] Libertarian Party and perennial candidate
+====Disqualified====
+===Independents===
+====Withdrawn====
+*John Rogers, attorney
+====Disqualified====
+===General election===
+====Predictions====
+====Post-primary endorsements====
+====Fundraising====
+====Polling====
+====Results====
+{{Election box begin|title=2026 North Carolina's 11th congressional district election}}
+{{Election box candidate with party link 
+  |party      = Republican Party (United States)
+  |candidate  = [[Jennifer Balkcom]]
+  |votes      = 
+  |percentage = 
+  |change = 
+}}
+{{Election box candidate with party link 
+  |party      = Democratic Party (United States)
+  |candidate  = Jamie Ager 
+  |votes      = 
+  |percentage = 
+  |change = 
+}}
+{{Election box candidate with party link 
+  |party      = Libertarian Party (United States)
+  |candidate  = Travis Groo 
+  |votes      = 
+  |percentage = 
+  |change = 
+}}
+{{Election box total no change
+  |votes      = 
+  |percentage = 
+}}
+{{Election box end}}
