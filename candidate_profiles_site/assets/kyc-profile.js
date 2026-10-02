@@ -658,7 +658,14 @@
     ensure();
     current = item;
     render(item);
-    if (!(opts && opts.fromRoute)) KYC.router.writeProfile(id);
+    if (!(opts && opts.fromRoute)) {
+      KYC.router.writeProfile(item.id);
+    } else if (item.id !== id) {
+      // Arrived under one of the person's other FEC ids: show the canonical
+      // one, so the link a reader copies onward is the current id.
+      global.history.replaceState(global.history.state, "",
+        global.location.pathname + "#/profile/" + encodeURIComponent(item.id));
+    }
     dialog.open();
     return true;
   }

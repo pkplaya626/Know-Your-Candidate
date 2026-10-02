@@ -86,6 +86,13 @@
       return raceBadge(item) ||
         '<span class="badge badge-money" title="Filed with the FEC; the primary has not been held yet.">2026 challenger</span>';
     }
+    /* Won (or is in the runoff for) the primary for the seat they hold:
+     * "Renominated" says more than "seat up". Before any result, the seat
+     * badge below still shows. */
+    if (!item.isCandidate && (item.raceStatus === "nominee" || item.raceStatus === "advanced")) {
+      var renominated = raceBadge(item);
+      if (renominated) return renominated;
+    }
     if (KYC.partyKey(item) === "vacant") {
       return '<span class="badge badge-neutral">Vacant seat</span>';
     }

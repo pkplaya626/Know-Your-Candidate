@@ -939,11 +939,19 @@ def _resolve_tables(primaries, runoffs, generals, has_runoff):
 
     runoff_names = set()
     for rows in runoffs.values():
+        # A runoff table nobody has marked is a runoff the page has not
+        # reported yet, not one everybody lost: reading it that way knocked
+        # both runoff candidates out of a race the moment an editor posted the
+        # empty box. They are still in it until a winner is marked.
+        decided = any(r["won"] for r in rows)
         for row in rows:
             runoff_names.add(row["name"])
-            status[row["name"]] = (
-                WITHDRAWN if row["withdrawn"] else NOMINEE if row["won"] else ELIMINATED
-            )
+            if row["withdrawn"]:
+                status[row["name"]] = WITHDRAWN
+            elif not decided:
+                status[row["name"]] = ADVANCED
+            else:
+                status[row["name"]] = NOMINEE if row["won"] else ELIMINATED
 
     for title, rows in primaries.items():
         party_runoff = any(_party_of(title) == _party_of(rt) for rt in runoffs)

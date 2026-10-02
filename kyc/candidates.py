@@ -32,6 +32,7 @@ race regardless of money, so a race is never described as uncontested when it
 is not - which was the actual defect.
 """
 
+import collections
 import json
 import os
 
@@ -51,7 +52,7 @@ _FIELDS = (
     "candidate_id", "name", "office", "state", "district_number", "party",
     "party_full", "receipts", "disbursements", "cash_on_hand_end_period",
     "coverage_start_date", "coverage_end_date", "incumbent_challenge", "candidate_status",
-    "has_raised_funds",
+    "has_raised_funds", "last_f2_date",
 )
 
 # Deliberately NOT carried into a funding breakdown. This endpoint reports
@@ -392,6 +393,62 @@ def _fold(text):
     return "".join(c for c in normalized if unicodedata.category(c) != "Mn").lower()
 
 
+def same_committee(a, b):
+    """True when the FEC reports one committee's money under two candidate ids.
+
+    Identical receipts and disbursements to the cent over the same coverage
+    period: that is one set of reports filed against two registrations, an
+    exact signal in the sense of rule 25. A shared name is not: two Michael
+    Thompsons in Florida, one in FL-1 in 2025 and one in FL-22 in 2026, were
+    being merged into one profile and the second disappeared from his race.
+    """
+    if a.get("receipts") is None:
+        return False
+    return all(a.get(k) == b.get(k) for k in ("receipts", "disbursements",
+                                               "coverage_end_date"))
+
+
+def registrations(rows):
+    """``{kept id: [other ids]}`` for people registered under several ids.
+
+    Within one name, state and office, filings that report the same
+    committee's money are one person. The registration kept is the one with
+    the latest statement of candidacy (last_f2_date) - Ronda Kennedy filed for
+    NV-3 in 2025 and NV-4 in 2026, and the lower id had put her in the wrong
+    race - then the lowest id, so the choice never flips between refreshes.
+    """
+    groups = collections.defaultdict(list)
+    for row in rows:
+        key = (_fold(display_name(row.get("name"))), row.get("state"), row.get("office"))
+        groups[key].append(row)
+    kept = {}
+    for members in groups.values():
+        clusters = []
+        for row in sorted(members, key=lambda r: r["candidate_id"]):
+            for cluster in clusters:
+                if same_committee(cluster[0], row):
+                    cluster.append(row)
+                    break
+            else:
+                clusters.append([row])
+        for cluster in clusters:
+            if len(cluster) < 2:
+                continue
+            best = sorted(cluster, key=lambda r: (
+                -int((r.get("last_f2_date") or "0000-00-00")[:10].replace("-", "")),
+                r["candidate_id"]))[0]
+            kept[best["candidate_id"]] = sorted(
+                r["candidate_id"] for r in cluster if r is not best)
+    # Curated same-person pairs, each with its evidence (overrides).
+    from . import overrides
+    present = {r["candidate_id"] for r in rows}
+    for other, (target, _why) in overrides.SAME_PERSON_FILINGS.items():
+        if other in present and target in present:
+            moved = kept.pop(other, [])
+            kept[target] = sorted(set(kept.get(target, [])) | {other} | set(moved))
+    return kept
+
+
 def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
     """Profile records for filed candidates the roster does not already have.
 
@@ -439,9 +496,16 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
             if rid:
                 incumbents.add((rid, words[0], words[-1]))
 
+    rows = eligible(cache, threshold)
+    merged = registrations(rows)
+    folded = {other for others in merged.values() for other in others}
+
     profiles, skipped = [], 0
-    for row in eligible(cache, threshold):
+    for row in rows:
         candidate_id = row["candidate_id"]
+        if candidate_id in folded:
+            skipped += 1        # one person's second registration
+            continue
         senate = row.get("office") == "S"
         name = display_name(row.get("name"))
         key = (_fold(name), row["state"], "S" if senate else "H")
@@ -451,11 +515,12 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
             len(words) >= 2
             and (race_id(row), words[0], words[-1]) in incumbents
         )
+        # seen_people holds the roster's own people only. Two filers who
+        # merely share a name are reported by validate, never merged here.
         if candidate_id in seen_ids or key in seen_people or same_seat_member:
             skipped += 1
             continue
         seen_ids.add(candidate_id)
-        seen_people.add(key)
 
         district_num = None if senate else (district_number(row) or 0)
         district_label = None
@@ -508,6 +573,9 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
             **fec.period_fields(
                 CYCLE, row.get("coverage_start_date"), row.get("coverage_end_date")),
             "fecCandidateId": candidate_id,
+            # The same person's other registrations, so a link shared under
+            # an id the build no longer shows still opens this profile.
+            **({"otherFecIds": merged[candidate_id]} if candidate_id in merged else {}),
             "source": "fec-field",
             # No speculative URL chain. For a roster candidate, guessing
             # "en.wikipedia.org/.../Special:FilePath/Jane_Doe.jpg" is a cheap

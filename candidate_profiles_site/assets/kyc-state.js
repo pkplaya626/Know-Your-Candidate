@@ -212,8 +212,10 @@
     var run = KYC.debounce(function () {
       var q = input.value.trim().toLowerCase();
       if (kind === "states") {
+        // Folded like every other search on the site (KYC.foldText).
+        var folded = KYC.foldText(q);
         Array.prototype.forEach.call(doc.querySelectorAll(".state-row"), function (row) {
-          row.hidden = !!q && row.textContent.toLowerCase().indexOf(q) === -1;
+          row.hidden = !!folded && KYC.foldText(row.textContent).indexOf(folded) === -1;
         });
         return;
       }

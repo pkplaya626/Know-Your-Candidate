@@ -49,10 +49,9 @@ CANDIDATE_PHOTOS = {
 # exact name against the member rosters only.
 EXCLUDED_MEMBERS = frozenset({"Marco Rubio", "J.D. Vance", "Markwayne Mullin"})
 
-# Source label for a status note carried over from the roster's own Status
-# column or the curated notes that sat beside it, where no citation was ever
-# recorded. Kept distinct from a URL so it is visible which notes still want one.
-CURATED_ROSTER_STATUS = "roster status (curated)"
+# Where the Senate notes below were checked (2026-10-02). Each is the section
+# that states the fact, read from the live article, never from memory.
+_SENATE_2026 = "https://en.wikipedia.org/wiki/2026_United_States_Senate_elections"
 
 # Seat-status notes keyed on bioguide id, the only safe key for a person
 # (rules 3 and 17). These used to sit in a second table matched as a
@@ -62,38 +61,49 @@ CURATED_ROSTER_STATUS = "roster status (curated)"
 # in the status line; the two special-election notes are for members who are
 # on the ballot.
 MEMBER_STATUS_BY_ID = {
+    # Interim appointees running in the specials (the article's seat count
+    # footnote: "the interim appointees from Florida and Ohio running").
     "M001244": ("2026 special election for final two years of Marco Rubio's term",
-                CURATED_ROSTER_STATUS),                                   # Ashley Moody, FL
-    "E000295": ("Incumbent not running for re-election in 2026.",
-                CURATED_ROSTER_STATUS),                                   # Joni Ernst, IA
-    "P000595": ("Incumbent not running for re-election in 2026.",
-                CURATED_ROSTER_STATUS),                                   # Gary Peters, MI
-    "S001203": ("Incumbent not running for re-election in 2026.",
-                CURATED_ROSTER_STATUS),                                   # Tina Smith, MN
-    "D000618": ("Incumbent not running for re-election in 2026.",
-                CURATED_ROSTER_STATUS),                                   # Steve Daines, MT
-    "T000476": ("Incumbent not running for re-election in 2026.",
-                CURATED_ROSTER_STATUS),                                   # Thom Tillis, NC
-    "S001181": ("Incumbent not running for re-election in 2026.",
-                CURATED_ROSTER_STATUS),                                   # Jeanne Shaheen, NH
+                _SENATE_2026 + "#Seats"),                                   # Ashley Moody, FL
     "H001104": ("2026 special election for final two years of JD Vance's term",
-                CURATED_ROSTER_STATUS),                                   # Jon Husted, OH
-    "C001056": ("Incumbent defeated in primary for 2026 election.",
-                CURATED_ROSTER_STATUS),                                   # John Cornyn, TX
+                _SENATE_2026 + "#Seats"),                                   # Jon Husted, OH
+    # Listed in the article's Retirements table.
     "T000278": ("Retiring to run for governor",
-                CURATED_ROSTER_STATUS),                                   # Tommy Tuberville, AL
+                _SENATE_2026 + "#Retirements"),                             # Tommy Tuberville, AL
+    "E000295": ("Incumbent not running for re-election in 2026.",
+                _SENATE_2026 + "#Retirements"),                             # Joni Ernst, IA
     # The rosters use his legal name; he is usually reported as "Dick Durbin".
     # Keyed on the id, the spelling no longer matters.
     "D000563": ("Incumbent not running for re-election in 2026.",
-                CURATED_ROSTER_STATUS),                                   # Richard Durbin, IL
+                _SENATE_2026 + "#Retirements"),                             # Richard Durbin, IL
     "M000355": ("Incumbent not running for re-election in 2026.",
-                CURATED_ROSTER_STATUS),                                   # Mitch McConnell, KY
-    "C001075": ("Incumbent defeated in primary for 2026 election.",
-                CURATED_ROSTER_STATUS),                                   # Bill Cassidy, LA
-    "A000383": ("Ineligible to run for a full term this year.",
-                CURATED_ROSTER_STATUS),                                   # Alan Armstrong, OK
+                _SENATE_2026 + "#Retirements"),                             # Mitch McConnell, KY
+    "S001181": ("Incumbent not running for re-election in 2026.",
+                _SENATE_2026 + "#Retirements"),                             # Jeanne Shaheen, NH
     "L000571": ("Incumbent not running for re-election in 2026.",
-                CURATED_ROSTER_STATUS),                                   # Cynthia Lummis, WY
+                _SENATE_2026 + "#Retirements"),                             # Cynthia Lummis, WY
+    # "where incumbent Gary Peters is not running for reelection".
+    "P000595": ("Incumbent not running for re-election in 2026.",
+                _SENATE_2026 + "#Democratic_incumbents"),                   # Gary Peters, MI
+    # Marked "(retiring)" in the article's ratings table.
+    "D000618": ("Incumbent not running for re-election in 2026.",
+                _SENATE_2026 + "#Predictions"),                             # Steve Daines, MT
+    # "Republican Thom Tillis of North Carolina is retiring from the Senate".
+    "T000476": ("Incumbent not running for re-election in 2026.",
+                _SENATE_2026),                                              # Thom Tillis, NC
+    # "Democratic incumbent Tina Smith is not seeking a second full term."
+    "S001203": ("Incumbent not running for re-election in 2026.",
+                "https://en.wikipedia.org/wiki/"
+                "2026_United_States_Senate_election_in_Minnesota"),         # Tina Smith, MN
+    # The article's Defeats section: both lost renomination in their primaries.
+    "C001056": ("Incumbent defeated in primary for 2026 election.",
+                _SENATE_2026 + "#Defeats"),                                 # John Cornyn, TX
+    "C001075": ("Incumbent defeated in primary for 2026 election.",
+                _SENATE_2026 + "#Defeats"),                                 # Bill Cassidy, LA
+    # "Armstrong was sworn in on March 24 and was required to sign an oath
+    # stating that he would not run in the 2026 election."
+    "A000383": ("Not running in 2026: appointed in March 2026 on an oath not to seek the seat.",
+                _SENATE_2026 + "#Oklahoma"),                                # Alan Armstrong, OK
     # The DC article is titled "... election in the District of Columbia",
     # which results.page_titles never asks for, so no outcome was ever read.
     "N000147": ("Not running for re-election in 2026 (announced January 2026).",
@@ -106,6 +116,19 @@ MEMBER_STATUS_BY_ID = {
     # Withdrew 2026-07-21, before Wikipedia's LA-6 box existed to say so.
     "F000110": ("Not running for re-election in 2026; running for the Louisiana State Senate.",
                 "https://www.thegreenpapers.com/G26/LA"),
+}
+
+# FEC registrations that are one person although their totals differ, so the
+# exact same-committee signal (candidates.same_committee) cannot see it. Each
+# entry maps the registration folded away to (the one kept, the evidence).
+# Rule 25 still holds: a shared name alone never earns an entry here.
+SAME_PERSON_FILINGS = {
+    # NV-3: the results page links both registrations to one article,
+    # [[Martin O'Donnell]], and their receipts and disbursements differ by the
+    # same $28,832.67 - one transfer counted under one id only. Checked
+    # 2026-10-02.
+    "H6NV03204": ("H4NV03225", "one article on the results page; totals differ by "
+                               "a single $28,832.67 transfer"),
 }
 
 # Campaign websites that must never be linked, keyed on the host the FEC

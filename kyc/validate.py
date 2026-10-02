@@ -865,6 +865,63 @@ def check_senate_classes(profiles, snapshot=None):
     return issues
 
 
+def check_finance_periods(profiles):
+    """Money still measured over the old two-year cycle, after a refresh.
+
+    Every figure is meant to be an election-period total (fec.ELECTION_FULL).
+    A record that never got the election-period lookup - a refresh that
+    stopped part-way, or a pinned record skipped by older code - still shows
+    the 2025-26 cycle beside challengers' whole election periods. The page
+    labels it honestly, but it should not survive a full refresh unnoticed.
+    """
+    stale = sorted(
+        f"{p['name']} ({p['officeLabel']})" for p in profiles
+        if p.get("financePeriod") == "cycle"
+    )
+    if not stale:
+        return []
+    return [Issue("warn", "finance-cycle-period",
+                  f"{len(stale)} profiles still show a two-year cycle total rather than "
+                  f"their election period; run 'finance --refresh'", stale)]
+
+
+def check_registrations(profiles, field):
+    """One person's several FEC registrations, folded into one profile.
+
+    The kept registration is the one with the latest statement of candidacy;
+    when the folded ones name a different seat, that choice is worth a human
+    look (Daniel Franzese filed for FL-22 and FL-25; the results page confirms
+    FL-25). A curated pair that no longer matches two filings is stale.
+    """
+    if not field:
+        return []
+    from .candidates import race_id
+
+    rows = {r.get("candidate_id"): r for r in field.get("candidates", [])}
+    issues = []
+    split = []
+    for p in profiles:
+        others = p.get("otherFecIds") or []
+        kept = rows.get(p.get("fecCandidateId"))
+        if not others or not kept:
+            continue
+        seats = sorted({race_id(rows[o]) for o in others if o in rows} - {race_id(kept)})
+        if seats:
+            split.append(f"{p['name']}: kept {p['fecCandidateId']} ({race_id(kept)}); "
+                         f"also registered for {', '.join(str(s) for s in seats)}")
+    if split:
+        issues.append(Issue("warn", "registrations-disagree",
+                            f"{len(split)} people registered for more than one seat; "
+                            f"shown in the one their latest statement names", sorted(split)))
+    stale = sorted(f"{other} -> {target}" for other, (target, _w)
+                   in overrides.SAME_PERSON_FILINGS.items()
+                   if other not in rows or target not in rows)
+    if stale:
+        issues.append(Issue("warn", "stale-same-person",
+                            f"{len(stale)} curated same-person pairs match no filing", stale))
+    return issues
+
+
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
         results=None, field=None):
     """Run every check. Returns a list of :class:`Issue`."""
@@ -882,7 +939,9 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_snapshot(profiles, raw, snapshot)
     issues += check_senate_classes(profiles, snapshot)
     issues += check_finance(profiles, finance)
+    issues += check_finance_periods(profiles)
     issues += check_field_screen(field)
+    issues += check_registrations(profiles, field)
     issues += check_duplicate_people(profiles)
     issues += check_results(profiles, races)
     issues += check_results_pages(results)
