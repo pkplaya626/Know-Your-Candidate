@@ -30,7 +30,9 @@
 
   --text: #e9edf2;
   --text-muted: #9aa5b4;
-  --text-faint: #6d7888;
+  /* Faint text is still text: >= 4.5:1 on surfaces 0-2 in every theme
+     (render_test.js checks it). It was 4.0-4.3 here and 3.4-3.9 in light. */
+  --text-faint: #778291;
   --text-inverse: #0d0f12;
 
   --accent: #4da3ff;
@@ -98,7 +100,7 @@
   --border-strong: #2f343d;
   --text: #ffffff;
   --text-muted: #97a0ad;
-  --text-faint: #6a7280;
+  --text-faint: #737b89;
   --text-inverse: #000000;
 }
 
@@ -113,7 +115,7 @@
 
   --text: #10141a;
   --text-muted: #515c6b;
-  --text-faint: #78838f;
+  --text-faint: #616c7a;
   --text-inverse: #ffffff;
 
   --accent: #0b57d0;
@@ -1051,6 +1053,10 @@ svg { flex: none; }
   font-weight: 700;
   white-space: nowrap;
   box-shadow: var(--shadow-1);
+  /* The tag's fill is the party colour, which is light on the dark themes
+     and dark on the light one; a fixed near-black label was 2.6-3.0:1 on
+     light. The inverse text token flips with it. */
+  color: var(--text-inverse);
 }
 
 .modal-identity {

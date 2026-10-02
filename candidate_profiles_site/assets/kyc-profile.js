@@ -583,7 +583,6 @@
     var party = el("profileModalParty");
     party.textContent = item.party;
     party.style.background = PARTY_LABEL_BG[KYC.partyKey(item)];
-    party.style.color = "#0b0d10";
 
     var photo = el("profileModalPhoto");
     photo.setAttribute("data-photo-idx", "0");

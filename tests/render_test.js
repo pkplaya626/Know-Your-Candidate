@@ -1047,6 +1047,50 @@ async function testRunningElsewhere() {
   map.window.close();
 }
 
+/* ============================================================== contrast */
+
+/* WCAG AA for text is 4.5:1. --text-faint labels fields, footers and every
+ * absence, and was 3.4-4.3:1; the profile's party tag put near-black on the
+ * light theme's dark party colours at 2.6-3.0:1. Checked from the tokens
+ * themselves, so a new value cannot quietly regress. */
+function testContrast() {
+  const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+  const block = (sel) => {
+    const i = css.indexOf(sel + " {");
+    const out = {};
+    for (const m of css.slice(i, css.indexOf("\n}", i)).matchAll(/--([\w-]+):\s*(#[0-9a-fA-F]{6})\s*;/g)) {
+      out[m[1]] = m[2];
+    }
+    return out;
+  };
+  const base = block(":root");
+  const themes = {
+    dark: base,
+    amoled: Object.assign({}, base, block('[data-theme="amoled"]')),
+    light: Object.assign({}, base, block('[data-theme="light"]')),
+  };
+  const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const lum = (h) => {
+    const c = rgb(h).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  };
+  const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+
+  suite("kyc.css — text contrast (WCAG AA, 4.5:1)", () => {
+    for (const [name, t] of Object.entries(themes)) {
+      const faint = ["surface-0", "surface-1", "surface-2"].map((s) => ratio(t["text-faint"], t[s]));
+      check(`${name}: faint text on surfaces 0-2`, faint.every((r) => r >= 4.5),
+        faint.map((r) => r.toFixed(2)).join(" / "));
+      const tags = ["party-d", "party-r", "party-i", "text-muted"].map((p) => ratio(t["text-inverse"], t[p]));
+      check(`${name}: party tag label on its party colour`, tags.every((r) => r >= 4.5),
+        tags.map((r) => r.toFixed(2)).join(" / "));
+    }
+    const js = fs.readFileSync(path.join(SITE, "assets", "kyc-profile.js"), "utf8");
+    check("the party tag's label colour comes from the theme, not a literal",
+      !/style\.color\s*=\s*["']#/.test(js) && /\.party-tag\s*\{[^}]*color:\s*var\(--text-inverse\)/.test(css));
+  });
+}
+
 /* ================================================================== report */
 
 (async function main() {
@@ -1056,6 +1100,7 @@ async function testRunningElsewhere() {
   if (!only || only === "states") await testStates();
   if (!only || only === "links") await testDeepLinks();
   if (!only || only === "links") await testRunningElsewhere();
+  if (!only || only === "contrast") testContrast();
 
   let failed = 0;
   for (const r of results) {
