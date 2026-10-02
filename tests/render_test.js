@@ -209,6 +209,27 @@ async function testShared(page) {
     check("phase during campaign", es.phase === "campaign", es.phase);
     check("phase after the vote",
       KYC.electionStatus(2026, new Date("2026-12-01T12:00:00Z")).phase === "post-election");
+    // The reader's calendar, not UTC's. Dates are built from local
+    // components so the check means the same thing in every time zone: the
+    // old UTC arithmetic said "Election Day" from Sunday evening in the
+    // East and "has passed" while the West was still voting.
+    const at = (m, d, h, min) => KYC.electionStatus(2026, new Date(2026, m - 1, d, h, min || 0));
+    check("Sunday 1 Nov, late evening: still two days out",
+      at(11, 1, 23, 30).phase === "campaign" && at(11, 1, 23, 30).days === 2,
+      at(11, 1, 23, 30).label);
+    check("Monday 2 Nov, all day: one day out, not Election Day",
+      [0, 12, 19, 23].every((h) => at(11, 2, h).phase === "campaign" && at(11, 2, h).days === 1) &&
+        at(11, 2, 20).label === "1 day to the 2026 election",
+      at(11, 2, 20).label);
+    check("Tuesday 3 Nov, midnight to midnight: Election Day",
+      [0, 7, 19, 20, 23].every((h) => at(11, 3, h).phase === "election-day") &&
+        at(11, 3, 23, 59).label === "Election Day",
+      at(11, 3, 21).label);
+    check("Wednesday 4 Nov from midnight: the election has passed",
+      at(11, 4, 0, 1).phase === "post-election" &&
+        at(11, 4, 0, 1).label === "2026 general election has passed",
+      at(11, 4, 0, 1).label);
+    check("1 October reads 33 days", at(10, 1, 12).days === 33, at(10, 1, 12).label);
     // 2028: first Monday is the 6th, so election day is the 7th.
     check("election day generalises to 2028",
       KYC.electionStatus(2028, new Date("2028-01-01Z")).iso === "2028-11-07");

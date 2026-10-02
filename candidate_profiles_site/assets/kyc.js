@@ -282,15 +282,23 @@
     return d;
   }
 
+  /* Counted in the reader's own calendar, not in UTC. Election Day is a
+   * local date - polls open and close on local clocks - and measuring to
+   * UTC midnight called it "Election Day" from 7 pm Eastern on the Sunday
+   * before, then "the election has passed" from 7 pm Eastern on the day
+   * itself, while every polling place west of the Mississippi was open.
+   * Both sides are reduced to a calendar date (the reader's local
+   * year/month/day, the election's civil date) and compared as whole days. */
   function electionStatus(year, now) {
     year = year || 2026;
     now = now || new Date();
     var day = generalElectionDay(year);
-    var days = Math.ceil((day.getTime() - now.getTime()) / 86400000);
+    var today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    var days = Math.round((day.getTime() - today) / 86400000);
 
     var phase;
-    if (days > 1) phase = "campaign";
-    else if (days >= 0) phase = "election-day";
+    if (days > 0) phase = "campaign";
+    else if (days === 0) phase = "election-day";
     else phase = "post-election";
 
     return {
