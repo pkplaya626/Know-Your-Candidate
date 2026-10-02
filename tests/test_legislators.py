@@ -425,5 +425,124 @@ class TestAgainstTheRealSnapshot(unittest.TestCase):
         self.assertEqual(ids, sorted(ids))
 
 
+def person_named(wikipedia=None, **name):
+    """A trimmed snapshot record carrying only what the name helpers read."""
+    return {"bioguide": "X000001", "wikipedia": wikipedia,
+            "nameParts": legislators.name_parts(name)}
+
+
+class TestNames(unittest.TestCase):
+    """The roster holds legal names; voters type the names members go by.
+
+    56 sitting members could not be found under their Wikipedia name ("Jim
+    Clyburn", "Hank Johnson"), and five displayed as a bare initial and a
+    surname ("C. Franklin" for Scott Franklin)."""
+
+    def test_trim_keeps_the_recorded_name_parts(self):
+        raw = entry()
+        raw["name"] = {"first": "Earl", "middle": "L.", "last": "Carter",
+                       "nickname": "Buddy", "official_full": 'Earl L. "Buddy" Carter'}
+        parts = legislators.trim(raw)["nameParts"]
+        self.assertEqual(parts["nickname"], "Buddy")
+        self.assertNotIn("suffix", parts)
+
+    def test_official_full_loses_its_quoted_nickname(self):
+        person = person_named(first="Earl", middle="L.", last="Carter", nickname="Buddy",
+                              official_full='Earl L. "Buddy" Carter', wikipedia="Buddy Carter")
+        self.assertEqual(legislators.aliases(person, "Earl Carter"),
+                         ["Earl L. Carter", "Buddy Carter"])
+
+    def test_nickname_carries_the_suffix(self):
+        person = person_named(first="Henry", middle="C.", last="Johnson", suffix="Jr.",
+                              nickname="Hank", official_full='Henry C. "Hank" Johnson, Jr.',
+                              wikipedia="Hank Johnson")
+        found = legislators.aliases(person, "Henry Johnson")
+        self.assertEqual(found, ["Henry C. Johnson, Jr.", "Hank Johnson, Jr.", "Hank Johnson"])
+
+    def test_wikipedia_disambiguator_is_dropped(self):
+        person = person_named(first="John", last="Reed", nickname="Jack",
+                              official_full="Jack Reed",
+                              wikipedia="Jack Reed (Rhode Island politician)")
+        self.assertEqual(legislators.aliases(person, "John Reed"), ["Jack Reed"])
+
+    def test_aliases_that_fold_to_the_display_name_are_dropped(self):
+        person = person_named(first="Mario", last="Díaz-Balart",
+                              official_full="Mario Díaz-Balart",
+                              wikipedia="Mario Díaz-Balart")
+        self.assertEqual(legislators.aliases(person, "Mario Diaz-Balart"), [])
+
+    def test_no_record_means_no_aliases(self):
+        self.assertEqual(legislators.aliases(None, "Pat Smith"), [])
+
+    def test_goes_by_prefers_the_nickname(self):
+        person = person_named(first="J.", middle="Luis", last="Correa", nickname="Lou")
+        self.assertEqual(legislators.goes_by(person), "Lou Correa")
+
+    def test_goes_by_falls_back_to_a_real_middle_name(self):
+        person = person_named(first="W.", middle="Gregory", last="Steube")
+        self.assertEqual(legislators.goes_by(person), "Gregory Steube")
+
+    def test_goes_by_never_returns_another_initial(self):
+        person = person_named(first="C.", middle="S.", last="Franklin")
+        self.assertIsNone(legislators.goes_by(person))
+        self.assertIsNone(legislators.goes_by(None))
+
+    def test_fold_name_ignores_case_and_accents(self):
+        self.assertEqual(legislators.fold_name("Jesús GARCÍA"), "jesus garcia")
+
+
+class TestNamesOnTheRealRoster(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.snapshot = legislators.load_snapshot(ROOT)
+        raw = sources.load_all(ROOT)
+        profiles, _ = build_profiles(raw, snapshot=cls.snapshot)
+        cls.members = {p["id"]: p for p in profiles if not p["isCandidate"]}
+        cls.roster = {r.get("Bioguide ID"): r.get("Name") for r in raw["members"]}
+
+    def test_the_snapshot_carries_name_parts(self):
+        people = self.snapshot["legislators"]
+        self.assertTrue(all(p.get("nameParts", {}).get("last") for p in people))
+
+    def test_no_member_displays_as_a_bare_initial(self):
+        initial_first = [p["name"] for p in self.members.values()
+                         if legislators.is_initial(p["name"].split()[0])]
+        self.assertEqual(initial_first, [])
+
+    def test_only_initial_first_names_are_redisplayed(self):
+        changed = 0
+        for member_id, profile in self.members.items():
+            roster = self.roster.get(member_id)
+            if profile["name"] == roster:
+                self.assertNotIn("rosterName", profile)
+                continue
+            changed += 1
+            self.assertTrue(legislators.is_initial(roster.split()[0]), roster)
+            self.assertEqual(profile["rosterName"], roster)
+            self.assertIn(roster, profile["aliases"])
+        self.assertGreater(changed, 0)
+
+    def test_scott_franklin_and_french_hill(self):
+        self.assertEqual(self.members["F000472"]["name"], "Scott Franklin")
+        self.assertEqual(self.members["H001072"]["name"], "French Hill")
+
+    def test_the_finance_cache_still_keys_on_the_roster_spelling(self):
+        # A changed key would read as "nobody has looked" for every
+        # re-displayed member.
+        self.assertEqual(fec.profile_key(self.members["F000472"]), "c. franklin|FL|H")
+
+    def test_voters_names_are_aliases(self):
+        self.assertIn("Jim Clyburn", self.members["C000537"]["aliases"])
+        self.assertIn("Hank Johnson", self.members["J000288"]["aliases"])
+        self.assertIn("Lou Correa", self.members["C001110"]["aliases"])
+
+    def test_aliases_never_repeat_the_display_name(self):
+        for profile in self.members.values():
+            found = profile.get("aliases", [])
+            folded = {legislators.fold_name(a) for a in found}
+            self.assertNotIn(legislators.fold_name(profile["name"]), folded)
+            self.assertEqual(len(folded), len(found))
+
+
 if __name__ == "__main__":
     unittest.main()

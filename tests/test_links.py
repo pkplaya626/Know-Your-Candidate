@@ -121,11 +121,31 @@ class TestMemberProfile(unittest.TestCase):
         other = dict(row, **{"Bioguide ID": "X000001"})
         self.assertTrue(_build_member(other, 1)["seekingReelection2026"])
 
+    # Members whose note says they are on the ballot, not leaving the seat:
+    # the special elections for the rest of Rubio's and Vance's terms.
+    ON_THE_BALLOT = {"M001244", "H001104"}
+
     def test_every_id_keyed_status_is_sourced_and_parses(self):
         for member_id, (status, source) in overrides.MEMBER_STATUS_BY_ID.items():
             self.assertRegex(member_id, r"^[A-Z]\d{6}$")
-            self.assertTrue(source.startswith("https://"), member_id)
-            self.assertTrue(overrides.is_not_seeking(status), member_id)
+            self.assertTrue(source.startswith("https://")
+                            or source == overrides.CURATED_ROSTER_STATUS, member_id)
+            self.assertEqual(overrides.is_not_seeking(status),
+                             member_id not in self.ON_THE_BALLOT, member_id)
+
+    def test_status_notes_are_never_matched_on_a_name(self):
+        # STATUS_OVERRIDES matched "Richard Durbin" as a substring of the
+        # member's name, so a second "Richard Durbin" - or a roster respelling
+        # to "Dick Durbin" - would have moved the note to the wrong person or
+        # dropped it. Only the bioguide id selects a note now.
+        self.assertFalse(hasattr(overrides, "STATUS_OVERRIDES"))
+        row = {"Bioguide ID": "X000001", "Name": "Richard Durbin", "Chamber": "Senate",
+               "Party": "Democrat", "State": "IL", "Status": "Active Member",
+               "Term Start": "2021-01-03"}
+        self.assertEqual(_build_member(row, 0)["status"], "Active Member")
+        held = dict(row, **{"Bioguide ID": "D000563", "Name": "Dick Durbin"})
+        self.assertIn("not running", _build_member(held, 1)["status"])
+        self.assertEqual(overrides.status_override(None, "Active Member"), "Active Member")
 
     def test_nothing_is_written_without_a_source(self):
         profile = _build_member(self.row, 0)

@@ -573,6 +573,48 @@ async function testDirectoryAsync() {
     D.getElementById("stateSelect").dispatchEvent(new window.Event("change"));
   });
 
+  suite("index.html — members are found by the names voters use", () => {
+    // The roster holds legal names: 56 sitting members could not be found
+    // as "Jim Clyburn" or "Hank Johnson", accented queries missed unaccented
+    // names, and five displayed as "C. Franklin"-style initials.
+    const byId = (id) => window.legislatorsData.find((p) => p.id === id);
+    const finds = (id, q) => KYC.matchesQuery(byId(id), q.toLowerCase());
+    check("'Jim Clyburn' finds James Clyburn", finds("C000537", "Jim Clyburn"));
+    check("'Hank Johnson' finds Henry Johnson", finds("J000288", "Hank Johnson"));
+    check("'Chuy Garcia' finds him without the accent", finds("G000586", "Chuy Garcia"));
+    check("'Mario Díaz-Balart' finds the unaccented name", finds("D000600", "Mario Díaz-Balart"));
+    check("'Diaz-Balart' still finds it", finds("D000600", "Diaz-Balart"));
+    check("an alias does not match everyone",
+      window.legislatorsData.filter((p) => KYC.matchesQuery(p, "jim clyburn")).length === 1);
+    check("folding is exposed and total", KYC.foldText("JESÚS") === "jesus" && KYC.foldText(null) === "");
+
+    const franklin = byId("F000472");
+    check("an initial-first roster name displays as the name he goes by",
+      franklin.name === "Scott Franklin", franklin.name);
+    check("the roster spelling stays searchable", finds("F000472", "C. Franklin"));
+    const list = D.getElementById("kycNames");
+    const option = [...list.options].find((o) => o.value === "James Clyburn");
+    check("suggestions keep the display name and carry the alias as a label",
+      !!option && /Jim Clyburn/.test(option.getAttribute("label") || ""),
+      option && option.getAttribute("label"));
+    check("the initial-first roster spelling is not suggested; the display name is",
+      ![...list.options].some((o) => o.value === "C. Franklin") &&
+      [...list.options].some((o) => o.value === "Scott Franklin"));
+  });
+
+  suite("index.html — alias search through the directory", () => {
+    window.location.hash = "#/?q=" + encodeURIComponent("Jim Clyburn");
+    window.dispatchEvent(new window.Event("hashchange"));
+    const ids = [...D.getElementById("results").querySelectorAll(".card")]
+      .map((c) => c.getAttribute("data-id"));
+    check("a 'Jim Clyburn' search shows his card, and only his", ids.length === 1 && ids[0] === "C000537",
+      ids.slice(0, 5).join(","));
+    const card = D.querySelector('#results .card[data-id="C000537"]');
+    check("and the card shows the display name", !!card && /James Clyburn/.test(card.textContent));
+    window.location.hash = "#/";
+    window.dispatchEvent(new window.Event("hashchange"));
+  });
+
   suite("index.html — the map's old bug, checked on both pages", () => {
     // map.html rendered `item.net_worth` with textContent, so a profile with
     // no filing showed the literal placeholder sentence as if it were data.

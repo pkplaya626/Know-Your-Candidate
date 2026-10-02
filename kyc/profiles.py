@@ -225,9 +225,20 @@ def _committee_text(assignments):
 
 def _build_member(row, index, seats_up=None, term_ends=None, person=None, assignments=None,
                   as_of=None):
+    from . import legislators
+
     name = clean_str(row.get("Name"), "")
     bioguide = row.get("Bioguide ID")
     profile_id = clean_str(bioguide, "") or f"CURR_{index}"
+
+    # The roster holds legal names, and five of them open with a bare initial
+    # ("C. Franklin" is Scott Franklin). Only those are re-displayed, as the
+    # name the member's own congress-legislators record says they go by; the
+    # roster spelling stays searchable and keeps keying the name-keyed caches.
+    display = name
+    words = name.split()
+    if person and words and legislators.is_initial(words[0]):
+        display = legislators.goes_by(person) or name
 
     chamber = clean_str(row.get("Chamber"), "")
     kind = _chamber_kind(chamber)
@@ -237,8 +248,7 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
     if kind == "House":
         district_num, district_label = parse_district(row.get("District"), state)
 
-    status = overrides.status_override(name, clean_str(row.get("Status"), "Active Member"),
-                                       member_id=profile_id)
+    status = overrides.status_override(profile_id, clean_str(row.get("Status"), "Active Member"))
     not_seeking = overrides.is_not_seeking(status)
 
     # --- 2026 election derivation -------------------------------------
@@ -276,7 +286,7 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
 
     profile = {
         "id": profile_id,
-        "name": name,
+        "name": display,
         "chamber": chamber,
         "party": clean_str(row.get("Party"), "Independent"),
         "state": state,
@@ -305,8 +315,16 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
         "net_worth": clean_str(row.get("Estimated Net Worth"), "N/A"),
         "photos": member_photos(name, bioguide),
     }
+    if display != name:
+        profile["rosterName"] = name
     if person:
         profile.update(_contact(person))
+        # Names a voter may type instead: "Jim Clyburn" for James Clyburn.
+        # Taken from the record matched on bioguide id, never from a name.
+        found = legislators.aliases(person, display,
+                                    extra=(name,) if display != name else ())
+        if found:
+            profile["aliases"] = found
     if assignments:
         # The roster column was typed by hand and is what "No data" would
         # replace; the committee rosters are maintained with each Congress

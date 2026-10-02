@@ -27,6 +27,8 @@ shift in the output.
 import datetime
 import json
 import os
+import re
+import unicodedata
 import urllib.error
 import urllib.request
 
@@ -125,6 +127,96 @@ def full_name(name):
     return " ".join(p for p in parts if p)
 
 
+NAME_PART_KEYS = ("first", "middle", "last", "nickname", "suffix", "official_full")
+
+_INITIAL = re.compile(r"^[A-Z]\.$")
+_PARENTHETICAL = re.compile(r"\s*\([^)]*\)\s*$")
+_QUOTED = re.compile(r'\s*"([^"]+)"')
+
+
+def name_parts(name):
+    """The recorded parts of a ``name`` block, absent keys left out."""
+    if not isinstance(name, dict):
+        return {}
+    return {k: name[k].strip() for k in NAME_PART_KEYS
+            if isinstance(name.get(k), str) and name[k].strip()}
+
+
+def fold_name(text):
+    """Case- and accent-insensitive form, so "Díaz-Balart" equals "Diaz-Balart"."""
+    normalized = unicodedata.normalize("NFD", str(text or ""))
+    stripped = "".join(ch for ch in normalized if unicodedata.category(ch) != "Mn")
+    return " ".join(stripped.lower().split())
+
+
+def is_initial(word):
+    """True for a bare initial such as ``"C."``."""
+    return bool(_INITIAL.match(str(word or "").strip()))
+
+
+def _with_suffix(base, suffix):
+    return f"{base}, {suffix}" if suffix else base
+
+
+def goes_by(person):
+    """The name congress-legislators says a member goes by, or ``None``.
+
+    Used only for roster names that open with a bare initial ("C. Franklin"):
+    the nickname with the surname when a nickname is recorded, otherwise the
+    middle name with the surname when the middle name is a real name rather
+    than another initial. Nothing is guessed - a member whose record holds
+    neither keeps the roster spelling.
+    """
+    parts = (person or {}).get("nameParts") or {}
+    last = parts.get("last")
+    if not last:
+        return None
+    if parts.get("nickname"):
+        return _with_suffix(f"{parts['nickname']} {last}", parts.get("suffix"))
+    middle = parts.get("middle")
+    if middle and not is_initial(middle.split()[0]):
+        return _with_suffix(f"{middle} {last}", parts.get("suffix"))
+    return None
+
+
+def aliases(person, display, extra=()):
+    """Other names a voter may search a member by, from their record only.
+
+    * ``official_full`` with any quoted nickname removed
+      ('Earl L. "Buddy" Carter' -> "Earl L. Carter");
+    * the nickname with the surname (and suffix): "Buddy Carter";
+    * the Wikipedia article title without its disambiguator
+      ("Jack Reed (Rhode Island politician)" -> "Jack Reed");
+    * anything in *extra*, such as a roster spelling that is no longer the
+      display name.
+
+    The caller looks *person* up by bioguide id (rules 3 and 17), never by a
+    name match. Aliases that fold to the display name, or to an earlier
+    alias, are dropped, so the list only carries names that add something.
+    """
+    person = person or {}
+    parts = person.get("nameParts") or {}
+    found = []
+    official = parts.get("official_full")
+    if official:
+        found.append(_QUOTED.sub("", official))
+    if parts.get("nickname") and parts.get("last"):
+        found.append(_with_suffix(f"{parts['nickname']} {parts['last']}", parts.get("suffix")))
+    if person.get("wikipedia"):
+        found.append(_PARENTHETICAL.sub("", person["wikipedia"]))
+    found.extend(extra)
+
+    seen = {fold_name(display)}
+    out = []
+    for alias in found:
+        alias = " ".join(str(alias or "").split())
+        key = fold_name(alias)
+        if alias and key not in seen:
+            seen.add(key)
+            out.append(alias)
+    return out
+
+
 def _fec_ids(entry, chamber):
     """FEC candidate ids for the seat this person currently holds.
 
@@ -166,6 +258,9 @@ def trim(entry, social=None):
         "bioguide": bioguide.upper(),
         "name": full_name(entry.get("name", {})),
         "last": (entry.get("name") or {}).get("last", ""),
+        # The parts of the name the dataset records, so the pipeline can
+        # derive the names a voter actually types (see aliases()).
+        "nameParts": name_parts(entry.get("name")),
         "chamber": chamber,
         "state": term.get("state"),
         "district": term.get("district") if chamber == "House" else None,

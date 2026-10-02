@@ -15,6 +15,12 @@
    "govtrack": 400004,
    "last": "Aderholt",
    "name": "Robert B. Aderholt",
+   "nameParts": {
+    "first": "Robert",
+    "last": "Aderholt",
+    "middle": "B.",
+    "official_full": "Robert B. Aderholt"
+   },
    "office": "272 Cannon House Office Building",
    "opensecrets": "N00003028",
    "party": "Republican",
@@ -46,6 +52,12 @@
    "govtrack": 456825,
    "last": "Auchincloss",
    "name": "Jake Auchincloss",
+   "nameParts": {
+    "first": "Jake",
+    "last": "Auchincloss",
+    "middle": "Daniel",
+    "official_full": "Jake Auchincloss"
+   },
    "office": "1524 Longworth House Office Building",
    "opensecrets": "N00045506",
    "party": "Democrat",
@@ -77,6 +89,12 @@
    "govtrack": 412500,
    "last": "Amodei",
    "name": "Mark E. Amodei",
+   "nameParts": {
+    "first": "Mark",
+    "last": "Amodei",
+    "middle": "E.",
+    "official_full": "Mark E. Amodei"
+   },
    "office": "104 Cannon House Office Building",
    "opensecrets": "N00031177",
    "party": "Republican",
@@ -109,6 +127,12 @@
    "govtrack": 412607,
    "last": "Adams",
    "name": "Alma S. Adams",
+   "nameParts": {
+    "first": "Alma",
+    "last": "Adams",
+    "middle": "S.",
+    "official_full": "Alma S. Adams"
+   },
    "office": "2436 Rayburn House Office Building",
    "opensecrets": "N00035451",
    "party": "Democrat",
@@ -141,6 +165,11 @@
    "govtrack": 412615,
    "last": "Aguilar",
    "name": "Pete Aguilar",
+   "nameParts": {
+    "first": "Pete",
+    "last": "Aguilar",
+    "official_full": "Pete Aguilar"
+   },
    "office": "108 Cannon House Office Building",
    "opensecrets": "N00033997",
    "party": "Democrat",
@@ -171,6 +200,12 @@
    "govtrack": 412625,
    "last": "Allen",
    "name": "Rick W. Allen",
+   "nameParts": {
+    "first": "Rick",
+    "last": "Allen",
+    "middle": "W.",
+    "official_full": "Rick W. Allen"
+   },
    "office": "462 Cannon House Office Building",
    "opensecrets": "N00033720",
    "party": "Republican",
@@ -202,6 +237,12 @@
    "govtrack": 412726,
    "last": "Arrington",
    "name": "Jodey C. Arrington",
+   "nameParts": {
+    "first": "Jodey",
+    "last": "Arrington",
+    "middle": "C.",
+    "official_full": "Jodey C. Arrington"
+   },
    "office": "1111 Longworth House Office Building",
    "opensecrets": "N00038285",
    "party": "Republican",
@@ -233,6 +274,12 @@
    "govtrack": 456909,
    "last": "Alford",
    "name": "Mark Alford",
+   "nameParts": {
+    "first": "Mark",
+    "last": "Alford",
+    "middle": "Allen",
+    "official_full": "Mark Alford"
+   },
    "office": "328 Cannon House Office Building",
    "opensecrets": "N00049617",
    "party": "Republican",
@@ -264,6 +311,11 @@
    "govtrack": 456955,
    "last": "Amo",
    "name": "Gabe Amo",
+   "nameParts": {
+    "first": "Gabe",
+    "last": "Amo",
+    "official_full": "Gabe Amo"
+   },
    "office": "1119 Longworth House Office Building",
    "opensecrets": "N00052615",
    "party": "Democrat",
@@ -294,6 +346,11 @@
    "govtrack": 456972,
    "last": "Ansari",
    "name": "Yassamin Ansari",
+   "nameParts": {
+    "first": "Yassamin",
+    "last": "Ansari",
+    "official_full": "Yassamin Ansari"
+   },
    "office": "1432 Longworth House Office Building",
    "opensecrets": "N00052497",
    "party": "Democrat",
@@ -324,6 +381,12 @@
    "govtrack": 456965,
    "last": "Alsobrooks",
    "name": "Angela D. Alsobrooks",
+   "nameParts": {
+    "first": "Angela",
+    "last": "Alsobrooks",
+    "middle": "Deneece",
+    "official_full": "Angela D. Alsobrooks"
+   },
    "office": "374 Russell Senate Office Building",
    "opensecrets": "N00053033",
    "party": "Democrat",
@@ -351,6 +414,11 @@
    "govtrack": 457040,
    "last": "Armstrong",
    "name": "Alan Armstrong",
+   "nameParts": {
+    "first": "Alan",
+    "last": "Armstrong",
+    "official_full": "Alan Armstrong"
+   },
    "office": "330 Hart Senate Office Building",
    "opensecrets": null,
    "party": "Republican",
@@ -376,6 +444,13 @@
    "govtrack": 400030,
    "last": "Bishop",
    "name": "Sanford D. Bishop, Jr.",
+   "nameParts": {
+    "first": "Sanford",
+    "last": "Bishop",
+    "middle": "D.",
+    "official_full": "Sanford D. Bishop, Jr.",
+    "suffix": "Jr."
+   },
    "office": "2407 Rayburn House Office Building",
    "opensecrets": "N00002674",
    "party": "Democrat",
@@ -407,6 +482,12 @@
    "govtrack": 456842,
    "last": "Bentz",
    "name": "Cliff Bentz",
+   "nameParts": {
+    "first": "Cliff",
+    "last": "Bentz",
+    "middle": "Stewart",
+    "official_full": "Cliff Bentz"
+   },
    "office": "409 Cannon House Office Building",
    "opensecrets": "N00045773",
    "party": "Republican",
@@ -437,6 +518,12 @@
    "govtrack": 456841,
    "last": "Bice",
    "name": "Stephanie I. Bice",
+   "nameParts": {
+    "first": "Stephanie",
+    "last": "Bice",
+    "middle": "I.",
+    "official_full": "Stephanie I. Bice"
+   },
    "office": "2402 Rayburn House Office Building",
    "opensecrets": "N00044579",
    "party": "Republican",
@@ -466,6 +553,12 @@
    "govtrack": 456805,
    "last": "Boebert",
    "name": "Lauren Boebert",
+   "nameParts": {
+    "first": "Lauren",
+    "last": "Boebert",
+    "middle": "Opal",
+    "official_full": "Lauren Boebert"
+   },
    "office": "1713 Longworth House Office Building",
    "opensecrets": "N00045974",
    "party": "Republican",
@@ -495,6 +588,11 @@
    "govtrack": 400013,
    "last": "Baldwin",
    "name": "Tammy Baldwin",
+   "nameParts": {
+    "first": "Tammy",
+    "last": "Baldwin",
+    "official_full": "Tammy Baldwin"
+   },
    "office": "141 Hart Senate Office Building",
    "opensecrets": "N00004367",
    "party": "Democrat",
@@ -527,6 +625,11 @@
    "govtrack": 400040,
    "last": "Boozman",
    "name": "John Boozman",
+   "nameParts": {
+    "first": "John",
+    "last": "Boozman",
+    "official_full": "John Boozman"
+   },
    "office": "555 Dirksen Senate Office Building",
    "opensecrets": "N00013873",
    "party": "Republican",
@@ -559,6 +662,12 @@
    "govtrack": 400032,
    "last": "Blackburn",
    "name": "Marsha Blackburn",
+   "nameParts": {
+    "first": "Marsha",
+    "last": "Blackburn",
+    "middle": "W.",
+    "official_full": "Marsha Blackburn"
+   },
    "office": "357 Dirksen Senate Office Building",
    "opensecrets": "N00003105",
    "party": "Republican",
@@ -591,6 +700,12 @@
    "govtrack": 412250,
    "last": "Bilirakis",
    "name": "Gus M. Bilirakis",
+   "nameParts": {
+    "first": "Gus",
+    "last": "Bilirakis",
+    "middle": "M.",
+    "official_full": "Gus M. Bilirakis"
+   },
    "office": "2306 Rayburn House Office Building",
    "opensecrets": "N00027462",
    "party": "Republican",
@@ -623,6 +738,11 @@
    "govtrack": 412196,
    "last": "Buchanan",
    "name": "Vern Buchanan",
+   "nameParts": {
+    "first": "Vern",
+    "last": "Buchanan",
+    "official_full": "Vern Buchanan"
+   },
    "office": "2409 Rayburn House Office Building",
    "opensecrets": "N00027626",
    "party": "Republican",
@@ -655,6 +775,12 @@
    "govtrack": 412251,
    "last": "Barrasso",
    "name": "John Barrasso",
+   "nameParts": {
+    "first": "John",
+    "last": "Barrasso",
+    "middle": "A.",
+    "official_full": "John Barrasso"
+   },
    "office": "307 Dirksen Senate Office Building",
    "opensecrets": "N00006236",
    "party": "Republican",
@@ -686,6 +812,12 @@
    "govtrack": 412330,
    "last": "Bennet",
    "name": "Michael F. Bennet",
+   "nameParts": {
+    "first": "Michael",
+    "last": "Bennet",
+    "middle": "F.",
+    "official_full": "Michael F. Bennet"
+   },
    "office": "261 Russell Senate Office Building",
    "opensecrets": "N00030608",
    "party": "Democrat",
@@ -718,6 +850,11 @@
    "govtrack": 412490,
    "last": "Blumenthal",
    "name": "Richard Blumenthal",
+   "nameParts": {
+    "first": "Richard",
+    "last": "Blumenthal",
+    "official_full": "Richard Blumenthal"
+   },
    "office": "503 Hart Senate Office Building",
    "opensecrets": "N00031685",
    "party": "Democrat",
@@ -750,6 +887,11 @@
    "govtrack": 412501,
    "last": "Bonamici",
    "name": "Suzanne Bonamici",
+   "nameParts": {
+    "first": "Suzanne",
+    "last": "Bonamici",
+    "official_full": "Suzanne Bonamici"
+   },
    "office": "2231 Rayburn House Office Building",
    "opensecrets": "N00033474",
    "party": "Democrat",
@@ -782,6 +924,11 @@
    "govtrack": 412565,
    "last": "Beatty",
    "name": "Joyce Beatty",
+   "nameParts": {
+    "first": "Joyce",
+    "last": "Beatty",
+    "official_full": "Joyce Beatty"
+   },
    "office": "2079 Rayburn House Office Building",
    "opensecrets": "N00033904",
    "party": "Democrat",
@@ -813,6 +960,12 @@
    "govtrack": 412541,
    "last": "Barr",
    "name": "Andy Barr",
+   "nameParts": {
+    "first": "Garland",
+    "last": "Barr",
+    "nickname": "Andy",
+    "official_full": "Andy Barr"
+   },
    "office": "2430 Rayburn House Office Building",
    "opensecrets": "N00031233",
    "party": "Republican",
@@ -845,6 +998,11 @@
    "govtrack": 412516,
    "last": "Brownley",
    "name": "Julia Brownley",
+   "nameParts": {
+    "first": "Julia",
+    "last": "Brownley",
+    "official_full": "Julia Brownley"
+   },
    "office": "2262 Rayburn House Office Building",
    "opensecrets": "N00034254",
    "party": "Democrat",
@@ -877,6 +1035,11 @@
    "govtrack": 412512,
    "last": "Bera",
    "name": "Ami Bera",
+   "nameParts": {
+    "first": "Ami",
+    "last": "Bera",
+    "official_full": "Ami Bera"
+   },
    "office": "172 Cannon House Office Building",
    "opensecrets": "N00030717",
    "party": "Democrat",
@@ -909,6 +1072,12 @@
    "govtrack": 412598,
    "last": "Booker",
    "name": "Cory A. Booker",
+   "nameParts": {
+    "first": "Cory",
+    "last": "Booker",
+    "middle": "Anthony",
+    "official_full": "Cory A. Booker"
+   },
    "office": "306 Hart Senate Office Building",
    "opensecrets": "N00035267",
    "party": "Democrat",
@@ -941,6 +1110,11 @@
    "govtrack": 412655,
    "last": "Babin",
    "name": "Brian Babin",
+   "nameParts": {
+    "first": "Brian",
+    "last": "Babin",
+    "official_full": "Brian Babin"
+   },
    "office": "2236 Rayburn House Office Building",
    "opensecrets": "N00005736",
    "party": "Republican",
@@ -971,6 +1145,13 @@
    "govtrack": 412657,
    "last": "Beyer",
    "name": "Donald S. Beyer, Jr.",
+   "nameParts": {
+    "first": "Donald",
+    "last": "Beyer",
+    "middle": "S.",
+    "official_full": "Donald S. Beyer, Jr.",
+    "suffix": "Jr."
+   },
    "office": "1226 Longworth House Office Building",
    "opensecrets": "N00036018",
    "party": "Democrat",
@@ -1003,6 +1184,11 @@
    "govtrack": 412629,
    "last": "Bost",
    "name": "Mike Bost",
+   "nameParts": {
+    "first": "Mike",
+    "last": "Bost",
+    "official_full": "Mike Bost"
+   },
    "office": "352 Cannon House Office Building",
    "opensecrets": "N00035420",
    "party": "Republican",
@@ -1033,6 +1219,12 @@
    "govtrack": 412652,
    "last": "Boyle",
    "name": "Brendan F. Boyle",
+   "nameParts": {
+    "first": "Brendan",
+    "last": "Boyle",
+    "middle": "F.",
+    "official_full": "Brendan F. Boyle"
+   },
    "office": "1502 Longworth House Office Building",
    "opensecrets": "N00035307",
    "party": "Democrat",
@@ -1063,6 +1255,11 @@
    "govtrack": 412713,
    "last": "Bacon",
    "name": "Don Bacon",
+   "nameParts": {
+    "first": "Don",
+    "last": "Bacon",
+    "official_full": "Don Bacon"
+   },
    "office": "2104 Rayburn House Office Building",
    "opensecrets": "N00037049",
    "party": "Republican",
@@ -1094,6 +1291,11 @@
    "govtrack": 412702,
    "last": "Banks",
    "name": "Jim Banks",
+   "nameParts": {
+    "first": "Jim",
+    "last": "Banks",
+    "official_full": "Jim Banks"
+   },
    "office": "303 Hart Senate Office Building",
    "opensecrets": "N00037185",
    "party": "Republican",
@@ -1125,6 +1327,12 @@
    "govtrack": 412687,
    "last": "Barragán",
    "name": "Nanette Diaz Barragán",
+   "nameParts": {
+    "first": "Nanette",
+    "last": "Barragán",
+    "middle": "Diaz",
+    "official_full": "Nanette Diaz Barragán"
+   },
    "office": "2312 Rayburn House Office Building",
    "opensecrets": "N00037019",
    "party": "Democrat",
@@ -1155,6 +1363,11 @@
    "govtrack": 412709,
    "last": "Bergman",
    "name": "Jack Bergman",
+   "nameParts": {
+    "first": "Jack",
+    "last": "Bergman",
+    "official_full": "Jack Bergman"
+   },
    "office": "566 Cannon House Office Building",
    "opensecrets": "N00039533",
    "party": "Republican",
@@ -1186,6 +1399,11 @@
    "govtrack": 412683,
    "last": "Biggs",
    "name": "Andy Biggs",
+   "nameParts": {
+    "first": "Andy",
+    "last": "Biggs",
+    "official_full": "Andy Biggs"
+   },
    "office": "464 Cannon House Office Building",
    "opensecrets": "N00039293",
    "party": "Republican",
@@ -1217,6 +1435,11 @@
    "govtrack": 412689,
    "last": "Blunt Rochester",
    "name": "Lisa Blunt Rochester",
+   "nameParts": {
+    "first": "Lisa",
+    "last": "Blunt Rochester",
+    "official_full": "Lisa Blunt Rochester"
+   },
    "office": "513 Hart Senate Office Building",
    "opensecrets": "N00038414",
    "party": "Democrat",
@@ -1247,6 +1470,11 @@
    "govtrack": 412712,
    "last": "Budd",
    "name": "Ted Budd",
+   "nameParts": {
+    "first": "Ted",
+    "last": "Budd",
+    "official_full": "Ted Budd"
+   },
    "office": "354 Russell Senate Office Building",
    "opensecrets": "N00039551",
    "party": "Republican",
@@ -1278,6 +1506,11 @@
    "govtrack": 412747,
    "last": "Balderson",
    "name": "Troy Balderson",
+   "nameParts": {
+    "first": "Troy",
+    "last": "Balderson",
+    "official_full": "Troy Balderson"
+   },
    "office": "2429 Rayburn House Office Building",
    "opensecrets": "N00042194",
    "party": "Republican",
@@ -1308,6 +1541,12 @@
    "govtrack": 412777,
    "last": "Baird",
    "name": "James R. Baird",
+   "nameParts": {
+    "first": "James",
+    "last": "Baird",
+    "middle": "R.",
+    "official_full": "James R. Baird"
+   },
    "office": "2303 Rayburn House Office Building",
    "opensecrets": "N00041954",
    "party": "Republican",
@@ -1338,6 +1577,11 @@
    "govtrack": 412817,
    "last": "Burchett",
    "name": "Tim Burchett",
+   "nameParts": {
+    "first": "Tim",
+    "last": "Burchett",
+    "official_full": "Tim Burchett"
+   },
    "office": "1122 Longworth House Office Building",
    "opensecrets": "N00041594",
    "party": "Republican",
@@ -1366,6 +1610,12 @@
    "govtrack": 456863,
    "last": "Brown",
    "name": "Shontel M. Brown",
+   "nameParts": {
+    "first": "Shontel",
+    "last": "Brown",
+    "middle": "M.",
+    "official_full": "Shontel M. Brown"
+   },
    "office": "2455 Rayburn House Office Building",
    "opensecrets": "N00047875",
    "party": "Democrat",
@@ -1396,6 +1646,12 @@
    "govtrack": 456888,
    "last": "Bean",
    "name": "Aaron Bean",
+   "nameParts": {
+    "first": "Aaron",
+    "last": "Bean",
+    "middle": "Paul",
+    "official_full": "Aaron Bean"
+   },
    "office": "2459 Rayburn House Office Building",
    "opensecrets": "N00051369",
    "party": "Republican",
@@ -1426,6 +1682,12 @@
    "govtrack": 456901,
    "last": "Budzinski",
    "name": "Nikki Budzinski",
+   "nameParts": {
+    "first": "Nicole (Nikki)",
+    "last": "Budzinski",
+    "middle": "Jai",
+    "official_full": "Nikki Budzinski"
+   },
    "office": "1717 Longworth House Office Building",
    "opensecrets": "N00049102",
    "party": "Democrat",
@@ -1457,6 +1719,12 @@
    "govtrack": 456910,
    "last": "Burlison",
    "name": "Eric Burlison",
+   "nameParts": {
+    "first": "Eric",
+    "last": "Burlison",
+    "middle": "Wayne",
+    "official_full": "Eric Burlison"
+   },
    "office": "1108 Longworth House Office Building",
    "opensecrets": "N00049123",
    "party": "Republican",
@@ -1488,6 +1756,12 @@
    "govtrack": 456931,
    "last": "Brecheen",
    "name": "Josh Brecheen",
+   "nameParts": {
+    "first": "Josh",
+    "last": "Brecheen",
+    "middle": "Chad",
+    "official_full": "Josh Brecheen"
+   },
    "office": "351 Cannon House Office Building",
    "opensecrets": "N00051106",
    "party": "Republican",
@@ -1519,6 +1793,12 @@
    "govtrack": 456948,
    "last": "Balint",
    "name": "Becca Balint",
+   "nameParts": {
+    "first": "Becca",
+    "last": "Balint",
+    "middle": "A.",
+    "official_full": "Becca Balint"
+   },
    "office": "1510 Longworth House Office Building",
    "opensecrets": "N00049900",
    "party": "Democrat",
@@ -1550,6 +1830,12 @@
    "govtrack": 456874,
    "last": "Britt",
    "name": "Katie Boyd Britt",
+   "nameParts": {
+    "first": "Katie",
+    "last": "Britt",
+    "middle": "Elizabeth",
+    "official_full": "Katie Boyd Britt"
+   },
    "office": "416 Russell Senate Office Building",
    "opensecrets": "N00048812",
    "party": "Republican",
@@ -1581,6 +1867,12 @@
    "govtrack": 456994,
    "last": "Barrett",
    "name": "Tom Barrett",
+   "nameParts": {
+    "first": "Tom",
+    "last": "Barrett",
+    "middle": "More",
+    "official_full": "Tom Barrett"
+   },
    "office": "1232 Longworth House Office Building",
    "opensecrets": "N00049596",
    "party": "Republican",
@@ -1610,6 +1902,12 @@
    "govtrack": 457029,
    "last": "Baumgartner",
    "name": "Michael Baumgartner",
+   "nameParts": {
+    "first": "Michael",
+    "last": "Baumgartner",
+    "middle": "James",
+    "official_full": "Michael Baumgartner"
+   },
    "office": "124 Cannon House Office Building",
    "opensecrets": "N00033716",
    "party": "Republican",
@@ -1640,6 +1938,13 @@
    "govtrack": 456970,
    "last": "Begich",
    "name": "Nicholas J. Begich III",
+   "nameParts": {
+    "first": "Nicholas",
+    "last": "Begich",
+    "middle": "Joseph",
+    "official_full": "Nicholas J. Begich III",
+    "suffix": "III"
+   },
    "office": "153 Cannon House Office Building",
    "opensecrets": "N00049408",
    "party": "Republican",
@@ -1670,6 +1975,12 @@
    "govtrack": 456997,
    "last": "Bell",
    "name": "Wesley Bell",
+   "nameParts": {
+    "first": "Wesley",
+    "last": "Bell",
+    "middle": "Jonell-Cleavon",
+    "official_full": "Wesley Bell"
+   },
    "office": "1429 Longworth House Office Building",
    "opensecrets": "N00053042",
    "party": "Democrat",
@@ -1699,6 +2010,12 @@
    "govtrack": 457020,
    "last": "Biggs",
    "name": "Sheri Biggs",
+   "nameParts": {
+    "first": "Sheri",
+    "last": "Biggs",
+    "middle": "Lynn",
+    "official_full": "Sheri Biggs"
+   },
    "office": "1530 Longworth House Office Building",
    "opensecrets": "N00054222",
    "party": "Republican",
@@ -1729,6 +2046,12 @@
    "govtrack": 457016,
    "last": "Bynum",
    "name": "Janelle S. Bynum",
+   "nameParts": {
+    "first": "Janelle",
+    "last": "Bynum",
+    "middle": "S.",
+    "official_full": "Janelle S. Bynum"
+   },
    "office": "1508 Longworth House Office Building",
    "opensecrets": "N00052777",
    "party": "Democrat",
@@ -1759,6 +2082,13 @@
    "govtrack": 457018,
    "last": "Bresnahan",
    "name": "Robert P. Bresnahan, Jr.",
+   "nameParts": {
+    "first": "Robert",
+    "last": "Bresnahan",
+    "middle": "P.",
+    "official_full": "Robert P. Bresnahan, Jr.",
+    "suffix": "Jr."
+   },
    "office": "1133 Longworth House Office Building",
    "opensecrets": "N00053588",
    "party": "Republican",
@@ -1789,6 +2119,12 @@
    "govtrack": 457045,
    "last": "Blair",
    "name": "Everton Blair Jr.",
+   "nameParts": {
+    "first": "Everton",
+    "last": "Blair",
+    "official_full": "Everton Blair Jr.",
+    "suffix": "Jr."
+   },
    "office": "468 Cannon House Office Building",
    "opensecrets": null,
    "party": "Democrat",
@@ -1814,6 +2150,12 @@
    "govtrack": 400057,
    "last": "Calvert",
    "name": "Ken Calvert",
+   "nameParts": {
+    "first": "Ken",
+    "last": "Calvert",
+    "middle": "S.",
+    "official_full": "Ken Calvert"
+   },
    "office": "2205 Rayburn House Office Building",
    "opensecrets": "N00007099",
    "party": "Republican",
@@ -1846,6 +2188,11 @@
    "govtrack": 300018,
    "last": "Cantwell",
    "name": "Maria Cantwell",
+   "nameParts": {
+    "first": "Maria",
+    "last": "Cantwell",
+    "official_full": "Maria Cantwell"
+   },
    "office": "511 Hart Senate Office Building",
    "opensecrets": "N00007836",
    "party": "Democrat",
@@ -1877,6 +2224,13 @@
    "govtrack": 400075,
    "last": "Clyburn",
    "name": "James E. Clyburn",
+   "nameParts": {
+    "first": "James",
+    "last": "Clyburn",
+    "middle": "E.",
+    "nickname": "Jim",
+    "official_full": "James E. Clyburn"
+   },
    "office": "274 Cannon House Office Building",
    "opensecrets": "N00002408",
    "party": "Democrat",
@@ -1909,6 +2263,13 @@
    "govtrack": 300030,
    "last": "Crapo",
    "name": "Mike Crapo",
+   "nameParts": {
+    "first": "Michael",
+    "last": "Crapo",
+    "middle": "D.",
+    "nickname": "Mike",
+    "official_full": "Mike Crapo"
+   },
    "office": "239 Dirksen Senate Office Building",
    "opensecrets": "N00006267",
    "party": "Republican",
@@ -1941,6 +2302,12 @@
    "govtrack": 300025,
    "last": "Collins",
    "name": "Susan M. Collins",
+   "nameParts": {
+    "first": "Susan",
+    "last": "Collins",
+    "middle": "M.",
+    "official_full": "Susan M. Collins"
+   },
    "office": "413 Dirksen Senate Office Building",
    "opensecrets": "N00000491",
    "party": "Republican",
@@ -1973,6 +2340,12 @@
    "govtrack": 456806,
    "last": "Cammack",
    "name": "Kat Cammack",
+   "nameParts": {
+    "first": "Katherine",
+    "last": "Cammack",
+    "nickname": "Kat",
+    "official_full": "Kat Cammack"
+   },
    "office": "2421 Rayburn House Office Building",
    "opensecrets": "N00045978",
    "party": "Republican",
@@ -2003,6 +2376,12 @@
    "govtrack": 400061,
    "last": "Capito",
    "name": "Shelley Moore Capito",
+   "nameParts": {
+    "first": "Shelley",
+    "last": "Capito",
+    "middle": "Moore",
+    "official_full": "Shelley Moore Capito"
+   },
    "office": "170 Russell Senate Office Building",
    "opensecrets": "N00009771",
    "party": "Republican",
@@ -2034,6 +2413,12 @@
    "govtrack": 400068,
    "last": "Carter",
    "name": "John R. Carter",
+   "nameParts": {
+    "first": "John",
+    "last": "Carter",
+    "middle": "R.",
+    "official_full": "John R. Carter"
+   },
    "office": "2208 Rayburn House Office Building",
    "opensecrets": "N00025095",
    "party": "Republican",
@@ -2066,6 +2451,11 @@
    "govtrack": 400077,
    "last": "Cole",
    "name": "Tom Cole",
+   "nameParts": {
+    "first": "Tom",
+    "last": "Cole",
+    "official_full": "Tom Cole"
+   },
    "office": "2207 Rayburn House Office Building",
    "opensecrets": "N00025726",
    "party": "Republican",
@@ -2098,6 +2488,11 @@
    "govtrack": 400069,
    "last": "Case",
    "name": "Ed Case",
+   "nameParts": {
+    "first": "Ed",
+    "last": "Case",
+    "official_full": "Ed Case"
+   },
    "office": "2210 Rayburn House Office Building",
    "opensecrets": "N00025882",
    "party": "Democrat",
@@ -2129,6 +2524,11 @@
    "govtrack": 300027,
    "last": "Cornyn",
    "name": "John Cornyn",
+   "nameParts": {
+    "first": "John",
+    "last": "Cornyn",
+    "official_full": "John Cornyn"
+   },
    "office": "517 Hart Senate Office Building",
    "opensecrets": "N00024852",
    "party": "Republican",
@@ -2160,6 +2560,11 @@
    "govtrack": 400618,
    "last": "Costa",
    "name": "Jim Costa",
+   "nameParts": {
+    "first": "Jim",
+    "last": "Costa",
+    "official_full": "Jim Costa"
+   },
    "office": "2081 Rayburn House Office Building",
    "opensecrets": "N00026341",
    "party": "Democrat",
@@ -2191,6 +2596,12 @@
    "govtrack": 400639,
    "last": "Cleaver",
    "name": "Emanuel Cleaver",
+   "nameParts": {
+    "first": "Emanuel",
+    "last": "Cleaver",
+    "official_full": "Emanuel Cleaver",
+    "suffix": "II"
+   },
    "office": "2217 Rayburn House Office Building",
    "opensecrets": "N00026790",
    "party": "Democrat",
@@ -2223,6 +2634,11 @@
    "govtrack": 400657,
    "last": "Cuellar",
    "name": "Henry Cuellar",
+   "nameParts": {
+    "first": "Henry",
+    "last": "Cuellar",
+    "official_full": "Henry Cuellar"
+   },
    "office": "2308 Rayburn House Office Building",
    "opensecrets": "N00024978",
    "party": "Democrat",
@@ -2256,6 +2672,11 @@
    "govtrack": 412195,
    "last": "Castor",
    "name": "Kathy Castor",
+   "nameParts": {
+    "first": "Kathy",
+    "last": "Castor",
+    "official_full": "Kathy Castor"
+   },
    "office": "2188 Rayburn House Office Building",
    "opensecrets": "N00027514",
    "party": "Democrat",
@@ -2288,6 +2709,12 @@
    "govtrack": 412221,
    "last": "Clarke",
    "name": "Yvette D. Clarke",
+   "nameParts": {
+    "first": "Yvette",
+    "last": "Clarke",
+    "middle": "D.",
+    "official_full": "Yvette D. Clarke"
+   },
    "office": "2058 Rayburn House Office Building",
    "opensecrets": "N00026961",
    "party": "Democrat",
@@ -2320,6 +2747,11 @@
    "govtrack": 412236,
    "last": "Cohen",
    "name": "Steve Cohen",
+   "nameParts": {
+    "first": "Steve",
+    "last": "Cohen",
+    "official_full": "Steve Cohen"
+   },
    "office": "2268 Rayburn House Office Building",
    "opensecrets": "N00003225",
    "party": "Democrat",
@@ -2352,6 +2784,11 @@
    "govtrack": 412193,
    "last": "Courtney",
    "name": "Joe Courtney",
+   "nameParts": {
+    "first": "Joe",
+    "last": "Courtney",
+    "official_full": "Joe Courtney"
+   },
    "office": "2449 Rayburn House Office Building",
    "opensecrets": "N00024842",
    "party": "Democrat",
@@ -2384,6 +2821,11 @@
    "govtrack": 412258,
    "last": "Carson",
    "name": "André Carson",
+   "nameParts": {
+    "first": "André",
+    "last": "Carson",
+    "official_full": "André Carson"
+   },
    "office": "2135 Rayburn House Office Building",
    "opensecrets": "N00029513",
    "party": "Democrat",
@@ -2416,6 +2858,11 @@
    "govtrack": 412269,
    "last": "Cassidy",
    "name": "Bill Cassidy",
+   "nameParts": {
+    "first": "Bill",
+    "last": "Cassidy",
+    "official_full": "Bill Cassidy"
+   },
    "office": "455 Dirksen Senate Office Building",
    "opensecrets": "N00030245",
    "party": "Republican",
@@ -2448,6 +2895,12 @@
    "govtrack": 412379,
    "last": "Chu",
    "name": "Judy Chu",
+   "nameParts": {
+    "first": "Judy",
+    "last": "Chu",
+    "middle": "M.",
+    "official_full": "Judy Chu"
+   },
    "office": "2423 Rayburn House Office Building",
    "opensecrets": "N00030600",
    "party": "Democrat",
@@ -2480,6 +2933,13 @@
    "govtrack": 412400,
    "last": "Crawford",
    "name": "Eric A. \"Rick\" Crawford",
+   "nameParts": {
+    "first": "Eric",
+    "last": "Crawford",
+    "middle": "A.",
+    "nickname": "Rick",
+    "official_full": "Eric A. \"Rick\" Crawford"
+   },
    "office": "2422 Rayburn House Office Building",
    "opensecrets": "N00030770",
    "party": "Republican",
@@ -2512,6 +2972,12 @@
    "govtrack": 412390,
    "last": "Coons",
    "name": "Christopher A. Coons",
+   "nameParts": {
+    "first": "Christopher",
+    "last": "Coons",
+    "middle": "Andrew",
+    "official_full": "Christopher A. Coons"
+   },
    "office": "218 Russell Senate Office Building",
    "opensecrets": "N00031820",
    "party": "Democrat",
@@ -2544,6 +3010,11 @@
    "govtrack": 412576,
    "last": "Castro",
    "name": "Joaquin Castro",
+   "nameParts": {
+    "first": "Joaquin",
+    "last": "Castro",
+    "official_full": "Joaquin Castro"
+   },
    "office": "2241 Rayburn House Office Building",
    "opensecrets": "N00033316",
    "party": "Democrat",
@@ -2577,6 +3048,11 @@
    "govtrack": 412508,
    "last": "Cotton",
    "name": "Tom Cotton",
+   "nameParts": {
+    "first": "Tom",
+    "last": "Cotton",
+    "official_full": "Tom Cotton"
+   },
    "office": "326 Russell Senate Office Building",
    "opensecrets": "N00033363",
    "party": "Republican",
@@ -2608,6 +3084,11 @@
    "govtrack": 412555,
    "last": "Cramer",
    "name": "Kevin Cramer",
+   "nameParts": {
+    "first": "Kevin",
+    "last": "Cramer",
+    "official_full": "Kevin Cramer"
+   },
    "office": "313 Hart Senate Office Building",
    "opensecrets": "N00004614",
    "party": "Republican",
@@ -2640,6 +3121,11 @@
    "govtrack": 412573,
    "last": "Cruz",
    "name": "Ted Cruz",
+   "nameParts": {
+    "first": "Ted",
+    "last": "Cruz",
+    "official_full": "Ted Cruz"
+   },
    "office": "167 Russell Senate Office Building",
    "opensecrets": "N00033085",
    "party": "Republican",
@@ -2672,6 +3158,12 @@
    "govtrack": 412600,
    "last": "Clark",
    "name": "Katherine M. Clark",
+   "nameParts": {
+    "first": "Katherine",
+    "last": "Clark",
+    "middle": "M.",
+    "official_full": "Katherine M. Clark"
+   },
    "office": "2368 Rayburn House Office Building",
    "opensecrets": "N00035278",
    "party": "Democrat",
@@ -2703,6 +3195,13 @@
    "govtrack": 412622,
    "last": "Carter",
    "name": "Earl L. \"Buddy\" Carter",
+   "nameParts": {
+    "first": "Earl",
+    "last": "Carter",
+    "middle": "L.",
+    "nickname": "Buddy",
+    "official_full": "Earl L. \"Buddy\" Carter"
+   },
    "office": "2432 Rayburn House Office Building",
    "opensecrets": "N00035346",
    "party": "Republican",
@@ -2734,6 +3233,11 @@
    "govtrack": 412676,
    "last": "Comer",
    "name": "James Comer",
+   "nameParts": {
+    "first": "James",
+    "last": "Comer",
+    "official_full": "James Comer"
+   },
    "office": "2410 Rayburn House Office Building",
    "opensecrets": "N00038260",
    "party": "Republican",
@@ -2764,6 +3268,12 @@
    "govtrack": 412688,
    "last": "Correa",
    "name": "J. Luis Correa",
+   "nameParts": {
+    "first": "J.",
+    "last": "Correa",
+    "middle": "Luis",
+    "official_full": "J. Luis Correa"
+   },
    "office": "2082 Rayburn House Office Building",
    "opensecrets": "N00037260",
    "party": "Democrat",
@@ -2795,6 +3305,12 @@
    "govtrack": 412686,
    "last": "Carbajal",
    "name": "Salud O. Carbajal",
+   "nameParts": {
+    "first": "Salud",
+    "last": "Carbajal",
+    "middle": "O.",
+    "official_full": "Salud O. Carbajal"
+   },
    "office": "2331 Rayburn House Office Building",
    "opensecrets": "N00037015",
    "party": "Democrat",
@@ -2826,6 +3342,11 @@
    "govtrack": 412681,
    "last": "Cortez Masto",
    "name": "Catherine Cortez Masto",
+   "nameParts": {
+    "first": "Catherine",
+    "last": "Cortez Masto",
+    "official_full": "Catherine Cortez Masto"
+   },
    "office": "309 Hart Senate Office Building",
    "opensecrets": "N00037161",
    "party": "Democrat",
@@ -2857,6 +3378,12 @@
    "govtrack": 412740,
    "last": "Curtis",
    "name": "John R. Curtis",
+   "nameParts": {
+    "first": "John",
+    "last": "Curtis",
+    "middle": "R.",
+    "official_full": "John R. Curtis"
+   },
    "office": "502 Hart Senate Office Building",
    "opensecrets": "N00041221",
    "party": "Republican",
@@ -2888,6 +3415,11 @@
    "govtrack": 412746,
    "last": "Cloud",
    "name": "Michael Cloud",
+   "nameParts": {
+    "first": "Michael",
+    "last": "Cloud",
+    "official_full": "Michael Cloud"
+   },
    "office": "304 Cannon House Office Building",
    "opensecrets": "N00041882",
    "party": "Republican",
@@ -2919,6 +3451,12 @@
    "govtrack": 456813,
    "last": "Clyde",
    "name": "Andrew S. Clyde",
+   "nameParts": {
+    "first": "Andrew",
+    "last": "Clyde",
+    "middle": "S.",
+    "official_full": "Andrew S. Clyde"
+   },
    "office": "445 Cannon House Office Building",
    "opensecrets": "N00046654",
    "party": "Republican",
@@ -2950,6 +3488,11 @@
    "govtrack": 412775,
    "last": "Casten",
    "name": "Sean Casten",
+   "nameParts": {
+    "first": "Sean",
+    "last": "Casten",
+    "official_full": "Sean Casten"
+   },
    "office": "2440 Rayburn House Office Building",
    "opensecrets": "N00041338",
    "party": "Democrat",
@@ -2981,6 +3524,11 @@
    "govtrack": 412832,
    "last": "Cline",
    "name": "Ben Cline",
+   "nameParts": {
+    "first": "Ben",
+    "last": "Cline",
+    "official_full": "Ben Cline"
+   },
    "office": "2443 Rayburn House Office Building",
    "opensecrets": "N00042296",
    "party": "Republican",
@@ -3012,6 +3560,11 @@
    "govtrack": 412789,
    "last": "Craig",
    "name": "Angie Craig",
+   "nameParts": {
+    "first": "Angie",
+    "last": "Craig",
+    "official_full": "Angie Craig"
+   },
    "office": "2052 Rayburn House Office Building",
    "opensecrets": "N00037039",
    "party": "Democrat",
@@ -3041,6 +3594,11 @@
    "govtrack": 412820,
    "last": "Crenshaw",
    "name": "Dan Crenshaw",
+   "nameParts": {
+    "first": "Dan",
+    "last": "Crenshaw",
+    "official_full": "Dan Crenshaw"
+   },
    "office": "248 Cannon House Office Building",
    "opensecrets": "N00042224",
    "party": "Republican",
@@ -3072,6 +3630,11 @@
    "govtrack": 412762,
    "last": "Crow",
    "name": "Jason Crow",
+   "nameParts": {
+    "first": "Jason",
+    "last": "Crow",
+    "official_full": "Jason Crow"
+   },
    "office": "1323 Longworth House Office Building",
    "opensecrets": "N00040876",
    "party": "Democrat",
@@ -3102,6 +3665,12 @@
    "govtrack": 412757,
    "last": "Cisneros",
    "name": "Gilbert Ray Cisneros, Jr.",
+   "nameParts": {
+    "first": "Gilbert",
+    "last": "Cisneros",
+    "middle": "Ray",
+    "official_full": "Gilbert Ray Cisneros, Jr."
+   },
    "office": "2463 Rayburn House Office Building",
    "opensecrets": "N00041464",
    "party": "Democrat",
@@ -3131,6 +3700,12 @@
    "govtrack": 456860,
    "last": "Carter",
    "name": "Troy A. Carter",
+   "nameParts": {
+    "first": "Troy",
+    "last": "Carter",
+    "middle": "Anthony",
+    "official_full": "Troy A. Carter"
+   },
    "office": "442 Cannon House Office Building",
    "opensecrets": "N00025766",
    "party": "Democrat",
@@ -3160,6 +3735,11 @@
    "govtrack": 456864,
    "last": "Carey",
    "name": "Mike Carey",
+   "nameParts": {
+    "first": "Mike",
+    "last": "Carey",
+    "official_full": "Mike Carey"
+   },
    "office": "1433 Longworth House Office Building",
    "opensecrets": "N00048568",
    "party": "Republican",
@@ -3190,6 +3770,13 @@
    "govtrack": 456895,
    "last": "Collins",
    "name": "Mike Collins",
+   "nameParts": {
+    "first": "Mike",
+    "last": "Collins",
+    "middle": "Allen",
+    "official_full": "Mike Collins",
+    "suffix": "Jr."
+   },
    "office": "2351 Rayburn House Office Building",
    "opensecrets": "N00035370",
    "party": "Republican",
@@ -3220,6 +3807,12 @@
    "govtrack": 456944,
    "last": "Crockett",
    "name": "Jasmine Crockett",
+   "nameParts": {
+    "first": "Jasmine",
+    "last": "Crockett",
+    "middle": "Felicia",
+    "official_full": "Jasmine Crockett"
+   },
    "office": "1616 Longworth House Office Building",
    "opensecrets": "N00049840",
    "party": "Democrat",
@@ -3250,6 +3843,12 @@
    "govtrack": 456945,
    "last": "Casar",
    "name": "Greg Casar",
+   "nameParts": {
+    "first": "Gregorio",
+    "last": "Casar",
+    "middle": "Eduardo",
+    "official_full": "Greg Casar"
+   },
    "office": "446 Cannon House Office Building",
    "opensecrets": "N00049855",
    "party": "Democrat",
@@ -3280,6 +3879,11 @@
    "govtrack": 456879,
    "last": "Crane",
    "name": "Elijah Crane",
+   "nameParts": {
+    "first": "Eli",
+    "last": "Crane",
+    "official_full": "Elijah Crane"
+   },
    "office": "307 Cannon House Office Building",
    "opensecrets": "N00048953",
    "party": "Republican",
@@ -3310,6 +3914,12 @@
    "govtrack": 456880,
    "last": "Ciscomani",
    "name": "Juan Ciscomani",
+   "nameParts": {
+    "first": "Juan",
+    "last": "Ciscomani",
+    "middle": "Guadaloupe",
+    "official_full": "Juan Ciscomani"
+   },
    "office": "461 Cannon House Office Building",
    "opensecrets": "N00049039",
    "party": "Republican",
@@ -3341,6 +3951,13 @@
    "govtrack": 457008,
    "last": "Conaway",
    "name": "Herbert C. Conaway, Jr.",
+   "nameParts": {
+    "first": "Herbert",
+    "last": "Conaway",
+    "middle": "Clark Hoover",
+    "official_full": "Herbert C. Conaway, Jr.",
+    "suffix": "Jr."
+   },
    "office": "1022 Longworth House Office Building",
    "opensecrets": "N00026951",
    "party": "Democrat",
@@ -3369,6 +3986,12 @@
    "govtrack": 456983,
    "last": "Crank",
    "name": "Jeff Crank",
+   "nameParts": {
+    "first": "Jeff",
+    "last": "Crank",
+    "middle": "George",
+    "official_full": "Jeff Crank"
+   },
    "office": "1029 Longworth House Office Building",
    "opensecrets": "N00028132",
    "party": "Republican",
@@ -3399,6 +4022,12 @@
    "govtrack": 456808,
    "last": "Donalds",
    "name": "Byron Donalds",
+   "nameParts": {
+    "first": "Byron",
+    "last": "Donalds",
+    "middle": "Lowell",
+    "official_full": "Byron Donalds"
+   },
    "office": "1710 Longworth House Office Building",
    "opensecrets": "N00034016",
    "party": "Republican",
@@ -3429,6 +4058,12 @@
    "govtrack": 400093,
    "last": "Davis",
    "name": "Danny K. Davis",
+   "nameParts": {
+    "first": "Danny",
+    "last": "Davis",
+    "middle": "K.",
+    "official_full": "Danny K. Davis"
+   },
    "office": "2159 Rayburn House Office Building",
    "opensecrets": "N00004884",
    "party": "Democrat",
@@ -3460,6 +4095,12 @@
    "govtrack": 400101,
    "last": "DeGette",
    "name": "Diana DeGette",
+   "nameParts": {
+    "first": "Diana",
+    "last": "DeGette",
+    "middle": "L.",
+    "official_full": "Diana DeGette"
+   },
    "office": "2111 Rayburn House Office Building",
    "opensecrets": "N00006134",
    "party": "Democrat",
@@ -3491,6 +4132,12 @@
    "govtrack": 400103,
    "last": "DeLauro",
    "name": "Rosa L. DeLauro",
+   "nameParts": {
+    "first": "Rosa",
+    "last": "DeLauro",
+    "middle": "L.",
+    "official_full": "Rosa L. DeLauro"
+   },
    "office": "2413 Rayburn House Office Building",
    "opensecrets": "N00000615",
    "party": "Democrat",
@@ -3522,6 +4169,12 @@
    "govtrack": 456912,
    "last": "Davis",
    "name": "Donald G. Davis",
+   "nameParts": {
+    "first": "Donald",
+    "last": "Davis",
+    "middle": "Gene",
+    "official_full": "Donald G. Davis"
+   },
    "office": "1123 Longworth House Office Building",
    "opensecrets": "N00049636",
    "party": "Democrat",
@@ -3552,6 +4205,12 @@
    "govtrack": 400111,
    "last": "Doggett",
    "name": "Lloyd Doggett",
+   "nameParts": {
+    "first": "Lloyd",
+    "last": "Doggett",
+    "middle": "A.",
+    "official_full": "Lloyd Doggett"
+   },
    "office": "2307 Rayburn House Office Building",
    "opensecrets": "N00006023",
    "party": "Democrat",
@@ -3584,6 +4243,12 @@
    "govtrack": 456936,
    "last": "Deluzio",
    "name": "Christopher R. Deluzio",
+   "nameParts": {
+    "first": "Chris",
+    "last": "Deluzio",
+    "middle": "Raphael",
+    "official_full": "Christopher R. Deluzio"
+   },
    "office": "1222 Longworth House Office Building",
    "opensecrets": "N00049160",
    "party": "Democrat",
@@ -3614,6 +4279,12 @@
    "govtrack": 300038,
    "last": "Durbin",
    "name": "Richard J. Durbin",
+   "nameParts": {
+    "first": "Richard",
+    "last": "Durbin",
+    "middle": "J.",
+    "official_full": "Richard J. Durbin"
+   },
    "office": "711 Hart Senate Office Building",
    "opensecrets": "N00004981",
    "party": "Democrat",
@@ -3645,6 +4316,11 @@
    "govtrack": 456943,
    "last": "De La Cruz",
    "name": "Monica De La Cruz",
+   "nameParts": {
+    "first": "Mónica",
+    "last": "De La Cruz",
+    "official_full": "Monica De La Cruz"
+   },
    "office": "1415 Longworth House Office Building",
    "opensecrets": "N00045793",
    "party": "Republican",
@@ -3676,6 +4352,11 @@
    "govtrack": 400108,
    "last": "Diaz-Balart",
    "name": "Mario Diaz-Balart",
+   "nameParts": {
+    "first": "Mario",
+    "last": "Diaz-Balart",
+    "official_full": "Mario Diaz-Balart"
+   },
    "office": "374 Cannon House Office Building",
    "opensecrets": "N00025337",
    "party": "Republican",
@@ -3708,6 +4389,11 @@
    "govtrack": 412477,
    "last": "DesJarlais",
    "name": "Scott DesJarlais",
+   "nameParts": {
+    "first": "Scott",
+    "last": "DesJarlais",
+    "official_full": "Scott DesJarlais"
+   },
    "office": "2304 Rayburn House Office Building",
    "opensecrets": "N00030957",
    "party": "Republican",
@@ -3740,6 +4426,12 @@
    "govtrack": 412505,
    "last": "DelBene",
    "name": "Suzan K. DelBene",
+   "nameParts": {
+    "first": "Suzan",
+    "last": "DelBene",
+    "middle": "K.",
+    "official_full": "Suzan K. DelBene"
+   },
    "office": "2311 Rayburn House Office Building",
    "opensecrets": "N00030693",
    "party": "Democrat",
@@ -3771,6 +4463,11 @@
    "govtrack": 412549,
    "last": "Daines",
    "name": "Steve Daines",
+   "nameParts": {
+    "first": "Steve",
+    "last": "Daines",
+    "official_full": "Steve Daines"
+   },
    "office": "320 Hart Senate Office Building",
    "opensecrets": "N00033054",
    "party": "Republican",
@@ -3803,6 +4500,11 @@
    "govtrack": 412533,
    "last": "Duckworth",
    "name": "Tammy Duckworth",
+   "nameParts": {
+    "first": "Tammy",
+    "last": "Duckworth",
+    "official_full": "Tammy Duckworth"
+   },
    "office": "524 Hart Senate Office Building",
    "opensecrets": "N00027860",
    "party": "Democrat",
@@ -3835,6 +4537,11 @@
    "govtrack": 412613,
    "last": "DeSaulnier",
    "name": "Mark DeSaulnier",
+   "nameParts": {
+    "first": "Mark",
+    "last": "DeSaulnier",
+    "official_full": "Mark DeSaulnier"
+   },
    "office": "2134 Rayburn House Office Building",
    "opensecrets": "N00030709",
    "party": "Democrat",
@@ -3865,6 +4572,11 @@
    "govtrack": 412637,
    "last": "Dingell",
    "name": "Debbie Dingell",
+   "nameParts": {
+    "first": "Debbie",
+    "last": "Dingell",
+    "official_full": "Debbie Dingell"
+   },
    "office": "102 Cannon House Office Building",
    "opensecrets": "N00036149",
    "party": "Democrat",
@@ -3896,6 +4608,11 @@
    "govtrack": 412675,
    "last": "Davidson",
    "name": "Warren Davidson",
+   "nameParts": {
+    "first": "Warren",
+    "last": "Davidson",
+    "official_full": "Warren Davidson"
+   },
    "office": "2113 Rayburn House Office Building",
    "opensecrets": "N00038767",
    "party": "Republican",
@@ -3927,6 +4644,12 @@
    "govtrack": 412691,
    "last": "Dunn",
    "name": "Neal P. Dunn",
+   "nameParts": {
+    "first": "Neal",
+    "last": "Dunn",
+    "middle": "P.",
+    "official_full": "Neal P. Dunn"
+   },
    "office": "466 Cannon House Office Building",
    "opensecrets": "N00037442",
    "party": "Republican",
@@ -3957,6 +4680,11 @@
    "govtrack": 412780,
    "last": "Davids",
    "name": "Sharice Davids",
+   "nameParts": {
+    "first": "Sharice",
+    "last": "Davids",
+    "official_full": "Sharice Davids"
+   },
    "office": "2435 Rayburn House Office Building",
    "opensecrets": "N00042626",
    "party": "Democrat",
@@ -3985,6 +4713,11 @@
    "govtrack": 412809,
    "last": "Dean",
    "name": "Madeleine Dean",
+   "nameParts": {
+    "first": "Madeleine",
+    "last": "Dean",
+    "official_full": "Madeleine Dean"
+   },
    "office": "150 Cannon House Office Building",
    "opensecrets": "N00042894",
    "party": "Democrat",
@@ -4016,6 +4749,12 @@
    "govtrack": 457000,
    "last": "Downing",
    "name": "Troy Downing",
+   "nameParts": {
+    "first": "Troy",
+    "last": "Downing",
+    "middle": "Bryan",
+    "official_full": "Troy Downing"
+   },
    "office": "1529 Longworth House Office Building",
    "opensecrets": "N00041283",
    "party": "Republican",
@@ -4046,6 +4785,12 @@
    "govtrack": 457015,
    "last": "Dexter",
    "name": "Maxine Dexter",
+   "nameParts": {
+    "first": "Maxine",
+    "last": "Dexter",
+    "middle": "Elizabeth",
+    "official_full": "Maxine Dexter"
+   },
    "office": "1207 Longworth House Office Building",
    "opensecrets": "N00054144",
    "party": "Democrat",
@@ -4076,6 +4821,11 @@
    "govtrack": 456862,
    "last": "Ellzey",
    "name": "Jake Ellzey",
+   "nameParts": {
+    "first": "Jake",
+    "last": "Ellzey",
+    "official_full": "Jake Ellzey"
+   },
    "office": "1721 Longworth House Office Building",
    "opensecrets": "N00042243",
    "party": "Republican",
@@ -4105,6 +4855,11 @@
    "govtrack": 456911,
    "last": "Ezell",
    "name": "Mike Ezell",
+   "nameParts": {
+    "first": "Mike",
+    "last": "Ezell",
+    "official_full": "Mike Ezell"
+   },
    "office": "443 Cannon House Office Building",
    "opensecrets": "N00048240",
    "party": "Republican",
@@ -4136,6 +4891,12 @@
    "govtrack": 456914,
    "last": "Edwards",
    "name": "Chuck Edwards",
+   "nameParts": {
+    "first": "Charles (Chuck)",
+    "last": "Edwards",
+    "middle": "Marion",
+    "official_full": "Chuck Edwards"
+   },
    "office": "1505 Longworth House Office Building",
    "opensecrets": "N00049670",
    "party": "Republican",
@@ -4166,6 +4927,11 @@
    "govtrack": 412639,
    "last": "Emmer",
    "name": "Tom Emmer",
+   "nameParts": {
+    "first": "Tom",
+    "last": "Emmer",
+    "official_full": "Tom Emmer"
+   },
    "office": "326 Cannon House Office Building",
    "opensecrets": "N00035440",
    "party": "Republican",
@@ -4197,6 +4963,11 @@
    "govtrack": 412667,
    "last": "Ernst",
    "name": "Joni Ernst",
+   "nameParts": {
+    "first": "Joni",
+    "last": "Ernst",
+    "official_full": "Joni Ernst"
+   },
    "office": "260 Russell Senate Office Building",
    "opensecrets": "N00035483",
    "party": "Republican",
@@ -4228,6 +4999,11 @@
    "govtrack": 412677,
    "last": "Evans",
    "name": "Dwight Evans",
+   "nameParts": {
+    "first": "Dwight",
+    "last": "Evans",
+    "official_full": "Dwight Evans"
+   },
    "office": "1105 Longworth House Office Building",
    "opensecrets": "N00038450",
    "party": "Democrat",
@@ -4258,6 +5034,11 @@
    "govtrack": 412718,
    "last": "Espaillat",
    "name": "Adriano Espaillat",
+   "nameParts": {
+    "first": "Adriano",
+    "last": "Espaillat",
+    "official_full": "Adriano Espaillat"
+   },
    "office": "2332 Rayburn House Office Building",
    "opensecrets": "N00034549",
    "party": "Democrat",
@@ -4289,6 +5070,11 @@
    "govtrack": 412735,
    "last": "Estes",
    "name": "Ron Estes",
+   "nameParts": {
+    "first": "Ron",
+    "last": "Estes",
+    "official_full": "Ron Estes"
+   },
    "office": "2234 Rayburn House Office Building",
    "opensecrets": "N00040712",
    "party": "Republican",
@@ -4320,6 +5106,11 @@
    "govtrack": 412825,
    "last": "Escobar",
    "name": "Veronica Escobar",
+   "nameParts": {
+    "first": "Veronica",
+    "last": "Escobar",
+    "official_full": "Veronica Escobar"
+   },
    "office": "2448 Rayburn House Office Building",
    "opensecrets": "N00041702",
    "party": "Democrat",
@@ -4351,6 +5142,11 @@
    "govtrack": 456984,
    "last": "Evans",
    "name": "Gabe Evans",
+   "nameParts": {
+    "first": "Gabe",
+    "last": "Evans",
+    "official_full": "Gabe Evans"
+   },
    "office": "1229 Longworth House Office Building",
    "opensecrets": "N00053312",
    "party": "Republican",
@@ -4381,6 +5177,12 @@
    "govtrack": 456992,
    "last": "Elfreth",
    "name": "Sarah Elfreth",
+   "nameParts": {
+    "first": "Sarah",
+    "last": "Elfreth",
+    "middle": "Kelly",
+    "official_full": "Sarah Elfreth"
+   },
    "office": "1213 Longworth House Office Building",
    "opensecrets": "N00053710",
    "party": "Democrat",
@@ -4411,6 +5213,11 @@
    "govtrack": 404067,
    "last": "Fields",
    "name": "Cleo Fields",
+   "nameParts": {
+    "first": "Cleo",
+    "last": "Fields",
+    "official_full": "Cleo Fields"
+   },
    "office": "2349 Rayburn House Office Building",
    "opensecrets": "N00005398",
    "party": "Democrat",
@@ -4441,6 +5248,13 @@
    "govtrack": 456845,
    "last": "Fallon",
    "name": "Pat Fallon",
+   "nameParts": {
+    "first": "Patrick",
+    "last": "Fallon",
+    "middle": "Edward",
+    "nickname": "Pat",
+    "official_full": "Pat Fallon"
+   },
    "office": "2416 Rayburn House Office Building",
    "opensecrets": "N00047264",
    "party": "Republican",
@@ -4472,6 +5286,12 @@
    "govtrack": 456818,
    "last": "Feenstra",
    "name": "Randy Feenstra",
+   "nameParts": {
+    "first": "Randy",
+    "last": "Feenstra",
+    "middle": "L.",
+    "official_full": "Randy Feenstra"
+   },
    "office": "2434 Rayburn House Office Building",
    "opensecrets": "N00044011",
    "party": "Republican",
@@ -4501,6 +5321,11 @@
    "govtrack": 400643,
    "last": "Foxx",
    "name": "Virginia Foxx",
+   "nameParts": {
+    "first": "Virginia",
+    "last": "Foxx",
+    "official_full": "Virginia Foxx"
+   },
    "office": "2462 Rayburn House Office Building",
    "opensecrets": "N00026166",
    "party": "Republican",
@@ -4534,6 +5359,11 @@
    "govtrack": 412257,
    "last": "Foster",
    "name": "Bill Foster",
+   "nameParts": {
+    "first": "Bill",
+    "last": "Foster",
+    "official_full": "Bill Foster"
+   },
    "office": "2366 Rayburn House Office Building",
    "opensecrets": "N00029139",
    "party": "Democrat",
@@ -4565,6 +5395,13 @@
    "govtrack": 412476,
    "last": "Fleischmann",
    "name": "Charles J. \"Chuck\" Fleischmann",
+   "nameParts": {
+    "first": "Charles",
+    "last": "Fleischmann",
+    "middle": "J.",
+    "nickname": "Chuck",
+    "official_full": "Charles J. \"Chuck\" Fleischmann"
+   },
    "office": "2187 Rayburn House Office Building",
    "opensecrets": "N00030815",
    "party": "Republican",
@@ -4597,6 +5434,11 @@
    "govtrack": 412529,
    "last": "Frankel",
    "name": "Lois Frankel",
+   "nameParts": {
+    "first": "Lois",
+    "last": "Frankel",
+    "official_full": "Lois Frankel"
+   },
    "office": "2305 Rayburn House Office Building",
    "opensecrets": "N00002893",
    "party": "Democrat",
@@ -4629,6 +5471,11 @@
    "govtrack": 412556,
    "last": "Fischer",
    "name": "Deb Fischer",
+   "nameParts": {
+    "first": "Deb",
+    "last": "Fischer",
+    "official_full": "Deb Fischer"
+   },
    "office": "448 Russell Senate Office Building",
    "opensecrets": "N00033443",
    "party": "Republican",
@@ -4661,6 +5508,12 @@
    "govtrack": 412721,
    "last": "Fitzpatrick",
    "name": "Brian K. Fitzpatrick",
+   "nameParts": {
+    "first": "Brian",
+    "last": "Fitzpatrick",
+    "middle": "K.",
+    "official_full": "Brian K. Fitzpatrick"
+   },
    "office": "271 Cannon House Office Building",
    "opensecrets": "N00038779",
    "party": "Republican",
@@ -4692,6 +5545,11 @@
    "govtrack": 412824,
    "last": "Fletcher",
    "name": "Lizzie Fletcher",
+   "nameParts": {
+    "first": "Lizzie",
+    "last": "Fletcher",
+    "official_full": "Lizzie Fletcher"
+   },
    "office": "2004 Rayburn House Office Building",
    "opensecrets": "N00041194",
    "party": "Democrat",
@@ -4723,6 +5581,11 @@
    "govtrack": 412773,
    "last": "Fulcher",
    "name": "Russ Fulcher",
+   "nameParts": {
+    "first": "Russ",
+    "last": "Fulcher",
+    "official_full": "Russ Fulcher"
+   },
    "office": "1514 Longworth House Office Building",
    "opensecrets": "N00041335",
    "party": "Republican",
@@ -4754,6 +5617,12 @@
    "govtrack": 456828,
    "last": "Fischbach",
    "name": "Michelle Fischbach",
+   "nameParts": {
+    "first": "Michelle",
+    "last": "Fischbach",
+    "middle": "Louise Helene",
+    "official_full": "Michelle Fischbach"
+   },
    "office": "2229 Rayburn House Office Building",
    "opensecrets": "N00045251",
    "party": "Republican",
@@ -4785,6 +5654,12 @@
    "govtrack": 456855,
    "last": "Fitzgerald",
    "name": "Scott Fitzgerald",
+   "nameParts": {
+    "first": "Scott",
+    "last": "Fitzgerald",
+    "middle": "L.",
+    "official_full": "Scott Fitzgerald"
+   },
    "office": "2444 Rayburn House Office Building",
    "opensecrets": "N00045434",
    "party": "Republican",
@@ -4814,6 +5689,12 @@
    "govtrack": 456807,
    "last": "Franklin",
    "name": "Scott Franklin",
+   "nameParts": {
+    "first": "C.",
+    "last": "Franklin",
+    "middle": "Scott",
+    "official_full": "Scott Franklin"
+   },
    "office": "2301 Rayburn House Office Building",
    "opensecrets": "N00046760",
    "party": "Republican",
@@ -4845,6 +5726,11 @@
    "govtrack": 456868,
    "last": "Flood",
    "name": "Mike Flood",
+   "nameParts": {
+    "first": "Mike",
+    "last": "Flood",
+    "official_full": "Mike Flood"
+   },
    "office": "343 Cannon House Office Building",
    "opensecrets": "N00050145",
    "party": "Republican",
@@ -4874,6 +5760,11 @@
    "govtrack": 456869,
    "last": "Finstad",
    "name": "Brad Finstad",
+   "nameParts": {
+    "first": "Brad",
+    "last": "Finstad",
+    "official_full": "Brad Finstad"
+   },
    "office": "2418 Rayburn House Office Building",
    "opensecrets": "N00050649",
    "party": "Republican",
@@ -4905,6 +5796,12 @@
    "govtrack": 456890,
    "last": "Frost",
    "name": "Maxwell Frost",
+   "nameParts": {
+    "first": "Maxwell",
+    "last": "Frost",
+    "middle": "Alejandro",
+    "official_full": "Maxwell Frost"
+   },
    "office": "1224 Longworth House Office Building",
    "opensecrets": "N00049075",
    "party": "Democrat",
@@ -4935,6 +5832,12 @@
    "govtrack": 456913,
    "last": "Foushee",
    "name": "Valerie P. Foushee",
+   "nameParts": {
+    "first": "Valerie",
+    "last": "Foushee",
+    "middle": "Jean",
+    "official_full": "Valerie P. Foushee"
+   },
    "office": "2452 Rayburn House Office Building",
    "opensecrets": "N00049652",
    "party": "Democrat",
@@ -4966,6 +5869,12 @@
    "govtrack": 456938,
    "last": "Fry",
    "name": "Russell Fry",
+   "nameParts": {
+    "first": "Russell",
+    "last": "Fry",
+    "middle": "William",
+    "official_full": "Russell Fry"
+   },
    "office": "345 Cannon House Office Building",
    "opensecrets": "N00049165",
    "party": "Republican",
@@ -4997,6 +5906,12 @@
    "govtrack": 456877,
    "last": "Fetterman",
    "name": "John Fetterman",
+   "nameParts": {
+    "first": "John",
+    "last": "Fetterman",
+    "middle": "Karl",
+    "official_full": "John Fetterman"
+   },
    "office": "142 Russell Senate Office Building",
    "opensecrets": "N00038201",
    "party": "Democrat",
@@ -5026,6 +5941,11 @@
    "govtrack": 456958,
    "last": "Fong",
    "name": "Vince Fong",
+   "nameParts": {
+    "first": "Vince",
+    "last": "Fong",
+    "official_full": "Vince Fong"
+   },
    "office": "243 Cannon House Office Building",
    "opensecrets": "N00054216",
    "party": "Republican",
@@ -5055,6 +5975,12 @@
    "govtrack": 456971,
    "last": "Figures",
    "name": "Shomari Figures",
+   "nameParts": {
+    "first": "Shomari",
+    "last": "Figures",
+    "middle": "Coleman",
+    "official_full": "Shomari Figures"
+   },
    "office": "225 Cannon House Office Building",
    "opensecrets": "N00053909",
    "party": "Democrat",
@@ -5085,6 +6011,12 @@
    "govtrack": 457006,
    "last": "Fedorchak",
    "name": "Julie Fedorchak",
+   "nameParts": {
+    "first": "Julie",
+    "last": "Fedorchak",
+    "middle": "Ann",
+    "official_full": "Julie Fedorchak"
+   },
    "office": "1607 Longworth House Office Building",
    "opensecrets": "N00054800",
    "party": "Republican",
@@ -5115,6 +6047,12 @@
    "govtrack": 456979,
    "last": "Friedman",
    "name": "Laura Friedman",
+   "nameParts": {
+    "first": "Laura",
+    "last": "Friedman",
+    "middle": "Syril",
+    "official_full": "Laura Friedman"
+   },
    "office": "1517 Longworth House Office Building",
    "opensecrets": "N00052209",
    "party": "Democrat",
@@ -5145,6 +6083,13 @@
    "govtrack": 457035,
    "last": "Fine",
    "name": "Randy Fine",
+   "nameParts": {
+    "first": "Randall",
+    "last": "Fine",
+    "middle": "Adam",
+    "nickname": "Randy",
+    "official_full": "Randy Fine"
+   },
    "office": "244 Cannon House Office Building",
    "opensecrets": null,
    "party": "Republican",
@@ -5170,6 +6115,11 @@
    "govtrack": 457041,
    "last": "Fuller",
    "name": "Clay Fuller",
+   "nameParts": {
+    "first": "Clay",
+    "last": "Fuller",
+    "official_full": "Clay Fuller"
+   },
    "office": "2201 Rayburn House Office Building",
    "opensecrets": null,
    "party": "Republican",
@@ -5195,6 +6145,13 @@
    "govtrack": 300048,
    "last": "Grassley",
    "name": "Chuck Grassley",
+   "nameParts": {
+    "first": "Charles",
+    "last": "Grassley",
+    "middle": "E.",
+    "nickname": "Chuck",
+    "official_full": "Chuck Grassley"
+   },
    "office": "135 Hart Senate Office Building",
    "opensecrets": "N00001758",
    "party": "Republican",
@@ -5227,6 +6184,12 @@
    "govtrack": 400158,
    "last": "Graves",
    "name": "Sam Graves",
+   "nameParts": {
+    "first": "Sam",
+    "last": "Graves",
+    "middle": "B.",
+    "official_full": "Sam Graves"
+   },
    "office": "1135 Longworth House Office Building",
    "opensecrets": "N00013323",
    "party": "Republican",
@@ -5258,6 +6221,11 @@
    "govtrack": 400653,
    "last": "Green",
    "name": "Al Green",
+   "nameParts": {
+    "first": "Al",
+    "last": "Green",
+    "official_full": "Al Green"
+   },
    "office": "2347 Rayburn House Office Building",
    "opensecrets": "N00026686",
    "party": "Democrat",
@@ -5290,6 +6258,12 @@
    "govtrack": 412223,
    "last": "Gillibrand",
    "name": "Kirsten E. Gillibrand",
+   "nameParts": {
+    "first": "Kirsten",
+    "last": "Gillibrand",
+    "middle": "E.",
+    "official_full": "Kirsten E. Gillibrand"
+   },
    "office": "478 Russell Senate Office Building",
    "opensecrets": "N00027658",
    "party": "Democrat",
@@ -5322,6 +6296,11 @@
    "govtrack": 412278,
    "last": "Guthrie",
    "name": "Brett Guthrie",
+   "nameParts": {
+    "first": "Brett",
+    "last": "Guthrie",
+    "official_full": "Brett Guthrie"
+   },
    "office": "2161 Rayburn House Office Building",
    "opensecrets": "N00029675",
    "party": "Republican",
@@ -5354,6 +6333,11 @@
    "govtrack": 412382,
    "last": "Garamendi",
    "name": "John Garamendi",
+   "nameParts": {
+    "first": "John",
+    "last": "Garamendi",
+    "official_full": "John Garamendi"
+   },
    "office": "2428 Rayburn House Office Building",
    "opensecrets": "N00030856",
    "party": "Democrat",
@@ -5386,6 +6370,12 @@
    "govtrack": 412397,
    "last": "Gosar",
    "name": "Paul A. Gosar",
+   "nameParts": {
+    "first": "Paul",
+    "last": "Gosar",
+    "middle": "A.",
+    "official_full": "Paul A. Gosar"
+   },
    "office": "2057 Rayburn House Office Building",
    "opensecrets": "N00030771",
    "party": "Republican",
@@ -5418,6 +6408,12 @@
    "govtrack": 412485,
    "last": "Griffith",
    "name": "H. Morgan Griffith",
+   "nameParts": {
+    "first": "H.",
+    "last": "Griffith",
+    "middle": "Morgan",
+    "official_full": "H. Morgan Griffith"
+   },
    "office": "2110 Rayburn House Office Building",
    "opensecrets": "N00032029",
    "party": "Republican",
@@ -5450,6 +6446,11 @@
    "govtrack": 412612,
    "last": "Gallego",
    "name": "Ruben Gallego",
+   "nameParts": {
+    "first": "Ruben",
+    "last": "Gallego",
+    "official_full": "Ruben Gallego"
+   },
    "office": "302 Hart Senate Office Building",
    "opensecrets": "N00036097",
    "party": "Democrat",
@@ -5480,6 +6481,11 @@
    "govtrack": 412661,
    "last": "Grothman",
    "name": "Glenn Grothman",
+   "nameParts": {
+    "first": "Glenn",
+    "last": "Grothman",
+    "official_full": "Glenn Grothman"
+   },
    "office": "1211 Longworth House Office Building",
    "opensecrets": "N00036409",
    "party": "Republican",
@@ -5511,6 +6517,11 @@
    "govtrack": 412725,
    "last": "Gonzalez",
    "name": "Vicente Gonzalez",
+   "nameParts": {
+    "first": "Vicente",
+    "last": "Gonzalez",
+    "official_full": "Vicente Gonzalez"
+   },
    "office": "1201 Longworth House Office Building",
    "opensecrets": "N00038809",
    "party": "Democrat",
@@ -5542,6 +6553,11 @@
    "govtrack": 412714,
    "last": "Gottheimer",
    "name": "Josh Gottheimer",
+   "nameParts": {
+    "first": "Josh",
+    "last": "Gottheimer",
+    "official_full": "Josh Gottheimer"
+   },
    "office": "106 Cannon House Office Building",
    "opensecrets": "N00036944",
    "party": "Democrat",
@@ -5572,6 +6588,11 @@
    "govtrack": 412739,
    "last": "Gomez",
    "name": "Jimmy Gomez",
+   "nameParts": {
+    "first": "Jimmy",
+    "last": "Gomez",
+    "official_full": "Jimmy Gomez"
+   },
    "office": "506 Cannon House Office Building",
    "opensecrets": "N00040597",
    "party": "Democrat",
@@ -5603,6 +6624,13 @@
    "govtrack": 412774,
    "last": "García",
    "name": "Jesús G. \"Chuy\" García",
+   "nameParts": {
+    "first": "Jesús",
+    "last": "García",
+    "middle": "G.",
+    "nickname": "Chuy",
+    "official_full": "Jesús G. \"Chuy\" García"
+   },
    "office": "2334 Rayburn House Office Building",
    "opensecrets": "N00042114",
    "party": "Democrat",
@@ -5632,6 +6660,12 @@
    "govtrack": 412827,
    "last": "Garcia",
    "name": "Sylvia R. Garcia",
+   "nameParts": {
+    "first": "Sylvia",
+    "last": "Garcia",
+    "middle": "R.",
+    "official_full": "Sylvia R. Garcia"
+   },
    "office": "2419 Rayburn House Office Building",
    "opensecrets": "N00042282",
    "party": "Democrat",
@@ -5661,6 +6695,11 @@
    "govtrack": 412822,
    "last": "Gooden",
    "name": "Lance Gooden",
+   "nameParts": {
+    "first": "Lance",
+    "last": "Gooden",
+    "official_full": "Lance Gooden"
+   },
    "office": "2431 Rayburn House Office Building",
    "opensecrets": "N00042237",
    "party": "Republican",
@@ -5689,6 +6728,11 @@
    "govtrack": 412793,
    "last": "Guest",
    "name": "Michael Guest",
+   "nameParts": {
+    "first": "Michael",
+    "last": "Guest",
+    "official_full": "Michael Guest"
+   },
    "office": "450 Cannon House Office Building",
    "opensecrets": "N00042458",
    "party": "Republican",
@@ -5718,6 +6762,12 @@
    "govtrack": 412842,
    "last": "Golden",
    "name": "Jared F. Golden",
+   "nameParts": {
+    "first": "Jared",
+    "last": "Golden",
+    "middle": "Forrest",
+    "official_full": "Jared F. Golden"
+   },
    "office": "1107 Longworth House Office Building",
    "opensecrets": "N00041668",
    "party": "Democrat",
@@ -5746,6 +6796,12 @@
    "govtrack": 456809,
    "last": "Gimenez",
    "name": "Carlos A. Gimenez",
+   "nameParts": {
+    "first": "Carlos",
+    "last": "Gimenez",
+    "middle": "A.",
+    "official_full": "Carlos A. Gimenez"
+   },
    "office": "448 Cannon House Office Building",
    "opensecrets": "N00046394",
    "party": "Republican",
@@ -5776,6 +6832,12 @@
    "govtrack": 456836,
    "last": "Garbarino",
    "name": "Andrew R. Garbarino",
+   "nameParts": {
+    "first": "Andrew",
+    "last": "Garbarino",
+    "middle": "R.",
+    "official_full": "Andrew R. Garbarino"
+   },
    "office": "2344 Rayburn House Office Building",
    "opensecrets": "N00046030",
    "party": "Republican",
@@ -5805,6 +6867,12 @@
    "govtrack": 456885,
    "last": "Garcia",
    "name": "Robert Garcia",
+   "nameParts": {
+    "first": "Robert",
+    "last": "Garcia",
+    "middle": "Julio",
+    "official_full": "Robert Garcia"
+   },
    "office": "109 Cannon House Office Building",
    "opensecrets": "N00049470",
    "party": "Democrat",
@@ -5835,6 +6903,12 @@
    "govtrack": 456923,
    "last": "Goldman",
    "name": "Daniel S. Goldman",
+   "nameParts": {
+    "first": "Dan",
+    "last": "Goldman",
+    "middle": "Sachs",
+    "official_full": "Daniel S. Goldman"
+   },
    "office": "245 Cannon House Office Building",
    "opensecrets": "N00051424",
    "party": "Democrat",
@@ -5865,6 +6939,11 @@
    "govtrack": 456949,
    "last": "Gluesenkamp Perez",
    "name": "Marie Gluesenkamp Perez",
+   "nameParts": {
+    "first": "Marie",
+    "last": "Gluesenkamp Perez",
+    "official_full": "Marie Gluesenkamp Perez"
+   },
    "office": "1431 Longworth House Office Building",
    "opensecrets": "N00050490",
    "party": "Democrat",
@@ -5896,6 +6975,12 @@
    "govtrack": 457021,
    "last": "Goldman",
    "name": "Craig A. Goldman",
+   "nameParts": {
+    "first": "Craig",
+    "last": "Goldman",
+    "middle": "A.",
+    "official_full": "Craig A. Goldman"
+   },
    "office": "1716 Longworth House Office Building",
    "opensecrets": "N00053861",
    "party": "Republican",
@@ -5927,6 +7012,12 @@
    "govtrack": 457010,
    "last": "Gillen",
    "name": "Laura Gillen",
+   "nameParts": {
+    "first": "Laura",
+    "last": "Gillen",
+    "middle": "Anne",
+    "official_full": "Laura Gillen"
+   },
    "office": "428 Cannon House Office Building",
    "opensecrets": "N00050425",
    "party": "Democrat",
@@ -5957,6 +7048,12 @@
    "govtrack": 457023,
    "last": "Gill",
    "name": "Brandon Gill",
+   "nameParts": {
+    "first": "Brandon",
+    "last": "Gill",
+    "middle": "Gene",
+    "official_full": "Brandon Gill"
+   },
    "office": "1305 Longworth House Office Building",
    "opensecrets": "N00054402",
    "party": "Republican",
@@ -5987,6 +7084,12 @@
    "govtrack": 457007,
    "last": "Goodlander",
    "name": "Maggie Goodlander",
+   "nameParts": {
+    "first": "Maggie",
+    "last": "Goodlander",
+    "middle": "Vivian",
+    "official_full": "Maggie Goodlander"
+   },
    "office": "223 Cannon House Office Building",
    "opensecrets": "N00055218",
    "party": "Democrat",
@@ -6017,6 +7120,12 @@
    "govtrack": 456975,
    "last": "Gray",
    "name": "Adam Gray",
+   "nameParts": {
+    "first": "Adam",
+    "last": "Gray",
+    "middle": "Channing",
+    "official_full": "Adam Gray"
+   },
    "office": "1230 Longworth House Office Building",
    "opensecrets": "N00050061",
    "party": "Democrat",
@@ -6047,6 +7156,12 @@
    "govtrack": 457037,
    "last": "Grijalva",
    "name": "Adelita S. Grijalva",
+   "nameParts": {
+    "first": "Adelita",
+    "last": "Grijalva",
+    "middle": "S.",
+    "official_full": "Adelita S. Grijalva"
+   },
    "office": "1203 Longworth House Office Building",
    "opensecrets": null,
    "party": "Democrat",
@@ -6072,6 +7187,11 @@
    "govtrack": 457043,
    "last": "Gallagher",
    "name": "James Gallagher",
+   "nameParts": {
+    "first": "James",
+    "last": "Gallagher",
+    "official_full": "James Gallagher"
+   },
    "office": "408 Cannon House Office Building",
    "opensecrets": null,
    "party": "Republican",
@@ -6095,6 +7215,11 @@
    "govtrack": 457044,
    "last": "Graham Nordone",
    "name": "Darline Graham",
+   "nameParts": {
+    "first": "Darline",
+    "last": "Graham Nordone",
+    "official_full": "Darline Graham"
+   },
    "office": "211 Russell Senate Office Building",
    "opensecrets": null,
    "party": "Republican",
@@ -6120,6 +7245,12 @@
    "govtrack": 456797,
    "last": "Hickenlooper",
    "name": "John W. Hickenlooper",
+   "nameParts": {
+    "first": "John",
+    "last": "Hickenlooper",
+    "middle": "Wright",
+    "official_full": "John W. Hickenlooper"
+   },
    "office": "316 Hart Senate Office Building",
    "opensecrets": "N00044206",
    "party": "Democrat",
@@ -6151,6 +7282,12 @@
    "govtrack": 456798,
    "last": "Hagerty",
    "name": "Bill Hagerty",
+   "nameParts": {
+    "first": "Bill",
+    "last": "Hagerty",
+    "middle": "Francis",
+    "official_full": "Bill Hagerty"
+   },
    "office": "251 Russell Senate Office Building",
    "opensecrets": "N00045369",
    "party": "Republican",
@@ -6182,6 +7319,12 @@
    "govtrack": 400189,
    "last": "Hoyer",
    "name": "Steny H. Hoyer",
+   "nameParts": {
+    "first": "Steny",
+    "last": "Hoyer",
+    "middle": "H.",
+    "official_full": "Steny H. Hoyer"
+   },
    "office": "1705 Longworth House Office Building",
    "opensecrets": "N00001821",
    "party": "Democrat",
@@ -6214,6 +7357,12 @@
    "govtrack": 412200,
    "last": "Hirono",
    "name": "Mazie K. Hirono",
+   "nameParts": {
+    "first": "Mazie",
+    "last": "Hirono",
+    "middle": "K.",
+    "official_full": "Mazie K. Hirono"
+   },
    "office": "109 Hart Senate Office Building",
    "opensecrets": "N00028139",
    "party": "Democrat",
@@ -6246,6 +7395,11 @@
    "govtrack": 412281,
    "last": "Heinrich",
    "name": "Martin Heinrich",
+   "nameParts": {
+    "first": "Martin",
+    "last": "Heinrich",
+    "official_full": "Martin Heinrich"
+   },
    "office": "709 Hart Senate Office Building",
    "opensecrets": "N00029835",
    "party": "Democrat",
@@ -6278,6 +7432,13 @@
    "govtrack": 412282,
    "last": "Himes",
    "name": "James A. Himes",
+   "nameParts": {
+    "first": "James",
+    "last": "Himes",
+    "middle": "A.",
+    "nickname": "Jim",
+    "official_full": "James A. Himes"
+   },
    "office": "2137 Rayburn House Office Building",
    "opensecrets": "N00029070",
    "party": "Democrat",
@@ -6311,6 +7472,11 @@
    "govtrack": 412434,
    "last": "Harris",
    "name": "Andy Harris",
+   "nameParts": {
+    "first": "Andy",
+    "last": "Harris",
+    "official_full": "Andy Harris"
+   },
    "office": "1536 Longworth House Office Building",
    "opensecrets": "N00029147",
    "party": "Republican",
@@ -6342,6 +7508,11 @@
    "govtrack": 412437,
    "last": "Huizenga",
    "name": "Bill Huizenga",
+   "nameParts": {
+    "first": "Bill",
+    "last": "Huizenga",
+    "official_full": "Bill Huizenga"
+   },
    "office": "2232 Rayburn House Office Building",
    "opensecrets": "N00030673",
    "party": "Republican",
@@ -6374,6 +7545,11 @@
    "govtrack": 412494,
    "last": "Hoeven",
    "name": "John Hoeven",
+   "nameParts": {
+    "first": "John",
+    "last": "Hoeven",
+    "official_full": "John Hoeven"
+   },
    "office": "338 Russell Senate Office Building",
    "opensecrets": "N00031688",
    "party": "Republican",
@@ -6406,6 +7582,12 @@
    "govtrack": 412559,
    "last": "Horsford",
    "name": "Steven Horsford",
+   "nameParts": {
+    "first": "Steven",
+    "last": "Horsford",
+    "middle": "A.",
+    "official_full": "Steven Horsford"
+   },
    "office": "406 Cannon House Office Building",
    "opensecrets": "N00033638",
    "party": "Democrat",
@@ -6436,6 +7618,11 @@
    "govtrack": 412550,
    "last": "Hudson",
    "name": "Richard Hudson",
+   "nameParts": {
+    "first": "Richard",
+    "last": "Hudson",
+    "official_full": "Richard Hudson"
+   },
    "office": "2112 Rayburn House Office Building",
    "opensecrets": "N00033630",
    "party": "Republican",
@@ -6467,6 +7654,11 @@
    "govtrack": 412511,
    "last": "Huffman",
    "name": "Jared Huffman",
+   "nameParts": {
+    "first": "Jared",
+    "last": "Huffman",
+    "official_full": "Jared Huffman"
+   },
    "office": "2330 Rayburn House Office Building",
    "opensecrets": "N00033030",
    "party": "Democrat",
@@ -6499,6 +7691,12 @@
    "govtrack": 412609,
    "last": "Hill",
    "name": "J. French Hill",
+   "nameParts": {
+    "first": "J.",
+    "last": "Hill",
+    "middle": "French",
+    "official_full": "J. French Hill"
+   },
    "office": "1533 Longworth House Office Building",
    "opensecrets": "N00035792",
    "party": "Republican",
@@ -6530,6 +7728,13 @@
    "govtrack": 412680,
    "last": "Hassan",
    "name": "Margaret Wood Hassan",
+   "nameParts": {
+    "first": "Margaret",
+    "last": "Hassan",
+    "middle": "Wood",
+    "nickname": "Maggie",
+    "official_full": "Margaret Wood Hassan"
+   },
    "office": "324 Hart Senate Office Building",
    "opensecrets": "N00038397",
    "party": "Democrat",
@@ -6560,6 +7765,11 @@
    "govtrack": 412705,
    "last": "Higgins",
    "name": "Clay Higgins",
+   "nameParts": {
+    "first": "Clay",
+    "last": "Higgins",
+    "official_full": "Clay Higgins"
+   },
    "office": "572 Cannon House Office Building",
    "opensecrets": "N00039953",
    "party": "Republican",
@@ -6590,6 +7800,11 @@
    "govtrack": 412743,
    "last": "Hyde-Smith",
    "name": "Cindy Hyde-Smith",
+   "nameParts": {
+    "first": "Cindy",
+    "last": "Hyde-Smith",
+    "official_full": "Cindy Hyde-Smith"
+   },
    "office": "528 Hart Senate Office Building",
    "opensecrets": "N00043298",
    "party": "Republican",
@@ -6621,6 +7836,11 @@
    "govtrack": 412763,
    "last": "Hayes",
    "name": "Jahana Hayes",
+   "nameParts": {
+    "first": "Jahana",
+    "last": "Hayes",
+    "official_full": "Jahana Hayes"
+   },
    "office": "2049 Rayburn House Office Building",
    "opensecrets": "N00043421",
    "party": "Democrat",
@@ -6652,6 +7872,12 @@
    "govtrack": 412748,
    "last": "Hern",
    "name": "Kevin Hern",
+   "nameParts": {
+    "first": "Kevin",
+    "last": "Hern",
+    "middle": "R.",
+    "official_full": "Kevin Hern"
+   },
    "office": "171 Cannon House Office Building",
    "opensecrets": "N00040829",
    "party": "Republican",
@@ -6682,6 +7908,11 @@
    "govtrack": 412810,
    "last": "Houlahan",
    "name": "Chrissy Houlahan",
+   "nameParts": {
+    "first": "Chrissy",
+    "last": "Houlahan",
+    "official_full": "Chrissy Houlahan"
+   },
    "office": "1727 Longworth House Office Building",
    "opensecrets": "N00040949",
    "party": "Democrat",
@@ -6713,6 +7944,11 @@
    "govtrack": 456844,
    "last": "Harshbarger",
    "name": "Diana Harshbarger",
+   "nameParts": {
+    "first": "Diana",
+    "last": "Harshbarger",
+    "official_full": "Diana Harshbarger"
+   },
    "office": "167 Cannon House Office Building",
    "opensecrets": "N00046688",
    "party": "Republican",
@@ -6742,6 +7978,12 @@
    "govtrack": 412840,
    "last": "Hawley",
    "name": "Josh Hawley",
+   "nameParts": {
+    "first": "Joshua",
+    "last": "Hawley",
+    "nickname": "Josh",
+    "official_full": "Josh Hawley"
+   },
    "office": "381 Russell Senate Office Building",
    "opensecrets": "N00041620",
    "party": "Republican",
@@ -6773,6 +8015,11 @@
    "govtrack": 412754,
    "last": "Harder",
    "name": "Josh Harder",
+   "nameParts": {
+    "first": "Josh",
+    "last": "Harder",
+    "official_full": "Josh Harder"
+   },
    "office": "209 Cannon House Office Building",
    "opensecrets": "N00040853",
    "party": "Democrat",
@@ -6801,6 +8048,11 @@
    "govtrack": 456816,
    "last": "Hinson",
    "name": "Ashley Hinson",
+   "nameParts": {
+    "first": "Ashley",
+    "last": "Hinson",
+    "official_full": "Ashley Hinson"
+   },
    "office": "2458 Rayburn House Office Building",
    "opensecrets": "N00044521",
    "party": "Republican",
@@ -6830,6 +8082,12 @@
    "govtrack": 456903,
    "last": "Houchin",
    "name": "Erin Houchin",
+   "nameParts": {
+    "first": "Erin",
+    "last": "Houchin",
+    "middle": "Suzanne",
+    "official_full": "Erin Houchin"
+   },
    "office": "342 Cannon House Office Building",
    "opensecrets": "N00037427",
    "party": "Republican",
@@ -6860,6 +8118,12 @@
    "govtrack": 456932,
    "last": "Hoyle",
    "name": "Val T. Hoyle",
+   "nameParts": {
+    "first": "Valerie",
+    "last": "Hoyle",
+    "middle": "Anne",
+    "official_full": "Val T. Hoyle"
+   },
    "office": "1620 Longworth House Office Building",
    "opensecrets": "N00049734",
    "party": "Democrat",
@@ -6890,6 +8154,12 @@
    "govtrack": 456946,
    "last": "Hunt",
    "name": "Wesley Hunt",
+   "nameParts": {
+    "first": "Wesley",
+    "last": "Hunt",
+    "middle": "Parish",
+    "official_full": "Wesley Hunt"
+   },
    "office": "1520 Longworth House Office Building",
    "opensecrets": "N00044362",
    "party": "Republican",
@@ -6920,6 +8190,12 @@
    "govtrack": 456951,
    "last": "Hageman",
    "name": "Harriet M. Hageman",
+   "nameParts": {
+    "first": "Harriet",
+    "last": "Hageman",
+    "middle": "Maxine",
+    "official_full": "Harriet M. Hageman"
+   },
    "office": "1227 Longworth House Office Building",
    "opensecrets": "N00049197",
    "party": "Republican",
@@ -6949,6 +8225,12 @@
    "govtrack": 456973,
    "last": "Hamadeh",
    "name": "Abraham J. Hamadeh",
+   "nameParts": {
+    "first": "Abraham",
+    "last": "Hamadeh",
+    "middle": "Jamal",
+    "official_full": "Abraham J. Hamadeh"
+   },
    "office": "1722 Longworth House Office Building",
    "opensecrets": "N00053795",
    "party": "Republican",
@@ -6974,6 +8256,12 @@
    "govtrack": 456986,
    "last": "Haridopolos",
    "name": "Mike Haridopolos",
+   "nameParts": {
+    "first": "Mike",
+    "last": "Haridopolos",
+    "middle": "John",
+    "official_full": "Mike Haridopolos"
+   },
    "office": "1039 Longworth House Office Building",
    "opensecrets": "N00033076",
    "party": "Republican",
@@ -7002,6 +8290,12 @@
    "govtrack": 456982,
    "last": "Hurd",
    "name": "Jeff Hurd",
+   "nameParts": {
+    "first": "Jeff",
+    "last": "Hurd",
+    "middle": "Stephen",
+    "official_full": "Jeff Hurd"
+   },
    "office": "1641 Longworth House Office Building",
    "opensecrets": "N00053367",
    "party": "Republican",
@@ -7033,6 +8327,11 @@
    "govtrack": 457003,
    "last": "Harrigan",
    "name": "Pat Harrigan",
+   "nameParts": {
+    "first": "Pat",
+    "last": "Harrigan",
+    "official_full": "Pat Harrigan"
+   },
    "office": "1233 Longworth House Office Building",
    "opensecrets": "N00050144",
    "party": "Republican",
@@ -7064,6 +8363,12 @@
    "govtrack": 457002,
    "last": "Harris",
    "name": "Mark Harris",
+   "nameParts": {
+    "first": "Mark",
+    "last": "Harris",
+    "middle": "Everette",
+    "official_full": "Mark Harris"
+   },
    "office": "126 Cannon House Office Building",
    "opensecrets": "N00035491",
    "party": "Republican",
@@ -7094,6 +8399,11 @@
    "govtrack": 457019,
    "last": "Hernández Rivera",
    "name": "Pablo José Hernández",
+   "nameParts": {
+    "first": "Pablo José",
+    "last": "Hernández Rivera",
+    "official_full": "Pablo José Hernández"
+   },
    "office": "1419 Longworth House Office Building",
    "opensecrets": "N00052286",
    "party": "Democrat",
@@ -7124,6 +8434,12 @@
    "govtrack": 457032,
    "last": "Husted",
    "name": "Jon Husted",
+   "nameParts": {
+    "first": "Jon",
+    "last": "Husted",
+    "middle": "Allen",
+    "official_full": "Jon Husted"
+   },
    "office": "304 Russell Senate Office Building",
    "opensecrets": null,
    "party": "Republican",
@@ -7149,6 +8465,12 @@
    "govtrack": 400196,
    "last": "Issa",
    "name": "Darrell Issa",
+   "nameParts": {
+    "first": "Darrell",
+    "last": "Issa",
+    "middle": "E.",
+    "official_full": "Darrell Issa"
+   },
    "office": "2108 Rayburn House Office Building",
    "opensecrets": "N00007017",
    "party": "Republican",
@@ -7179,6 +8501,12 @@
    "govtrack": 456905,
    "last": "Ivey",
    "name": "Glenn Ivey",
+   "nameParts": {
+    "first": "Glenn",
+    "last": "Ivey",
+    "middle": "Frederick",
+    "official_full": "Glenn Ivey"
+   },
    "office": "1610 Longworth House Office Building",
    "opensecrets": "N00033749",
    "party": "Democrat",
@@ -7209,6 +8537,14 @@
    "govtrack": 412199,
    "last": "Johnson",
    "name": "Henry C. \"Hank\" Johnson, Jr.",
+   "nameParts": {
+    "first": "Henry",
+    "last": "Johnson",
+    "middle": "C.",
+    "nickname": "Hank",
+    "official_full": "Henry C. \"Hank\" Johnson, Jr.",
+    "suffix": "Jr."
+   },
    "office": "2240 Rayburn House Office Building",
    "opensecrets": "N00027848",
    "party": "Democrat",
@@ -7241,6 +8577,11 @@
    "govtrack": 412226,
    "last": "Jordan",
    "name": "Jim Jordan",
+   "nameParts": {
+    "first": "Jim",
+    "last": "Jordan",
+    "official_full": "Jim Jordan"
+   },
    "office": "2056 Rayburn House Office Building",
    "opensecrets": "N00027894",
    "party": "Republican",
@@ -7272,6 +8613,11 @@
    "govtrack": 412496,
    "last": "Johnson",
    "name": "Ron Johnson",
+   "nameParts": {
+    "first": "Ron",
+    "last": "Johnson",
+    "official_full": "Ron Johnson"
+   },
    "office": "328 Hart Senate Office Building",
    "opensecrets": "N00032546",
    "party": "Republican",
@@ -7304,6 +8650,12 @@
    "govtrack": 412561,
    "last": "Jeffries",
    "name": "Hakeem S. Jeffries",
+   "nameParts": {
+    "first": "Hakeem",
+    "last": "Jeffries",
+    "middle": "S.",
+    "official_full": "Hakeem S. Jeffries"
+   },
    "office": "2267 Rayburn House Office Building",
    "opensecrets": "N00033640",
    "party": "Democrat",
@@ -7335,6 +8687,12 @@
    "govtrack": 412566,
    "last": "Joyce",
    "name": "David P. Joyce",
+   "nameParts": {
+    "first": "David",
+    "last": "Joyce",
+    "middle": "P.",
+    "official_full": "David P. Joyce"
+   },
    "office": "2065 Rayburn House Office Building",
    "opensecrets": "N00035007",
    "party": "Republican",
@@ -7367,6 +8725,11 @@
    "govtrack": 412730,
    "last": "Jayapal",
    "name": "Pramila Jayapal",
+   "nameParts": {
+    "first": "Pramila",
+    "last": "Jayapal",
+    "official_full": "Pramila Jayapal"
+   },
    "office": "2346 Rayburn House Office Building",
    "opensecrets": "N00038858",
    "party": "Democrat",
@@ -7399,6 +8762,11 @@
    "govtrack": 412706,
    "last": "Johnson",
    "name": "Mike Johnson",
+   "nameParts": {
+    "first": "Mike",
+    "last": "Johnson",
+    "official_full": "Mike Johnson"
+   },
    "office": "521 Cannon House Office Building",
    "opensecrets": "N00039106",
    "party": "Republican",
@@ -7430,6 +8798,11 @@
    "govtrack": 412816,
    "last": "Johnson",
    "name": "Dusty Johnson",
+   "nameParts": {
+    "first": "Dusty",
+    "last": "Johnson",
+    "official_full": "Dusty Johnson"
+   },
    "office": "1714 Longworth House Office Building",
    "opensecrets": "N00040559",
    "party": "Republican",
@@ -7458,6 +8831,11 @@
    "govtrack": 412812,
    "last": "Joyce",
    "name": "John Joyce",
+   "nameParts": {
+    "first": "John",
+    "last": "Joyce",
+    "official_full": "John Joyce"
+   },
    "office": "2102 Rayburn House Office Building",
    "opensecrets": "N00043242",
    "party": "Republican",
@@ -7486,6 +8864,12 @@
    "govtrack": 456847,
    "last": "Jackson",
    "name": "Ronny Jackson",
+   "nameParts": {
+    "first": "Ronny",
+    "last": "Jackson",
+    "middle": "Lynn",
+    "official_full": "Ronny Jackson"
+   },
    "office": "125 Cannon House Office Building",
    "opensecrets": "N00046055",
    "party": "Republican",
@@ -7516,6 +8900,11 @@
    "govtrack": 456804,
    "last": "Jacobs",
    "name": "Sara Jacobs",
+   "nameParts": {
+    "first": "Sara",
+    "last": "Jacobs",
+    "official_full": "Sara Jacobs"
+   },
    "office": "2348 Rayburn House Office Building",
    "opensecrets": "N00042081",
    "party": "Democrat",
@@ -7546,6 +8935,12 @@
    "govtrack": 456907,
    "last": "James",
    "name": "John James",
+   "nameParts": {
+    "first": "John",
+    "last": "James",
+    "middle": "Edwards",
+    "official_full": "John James"
+   },
    "office": "1519 Longworth House Office Building",
    "opensecrets": "N00041550",
    "party": "Republican",
@@ -7577,6 +8972,12 @@
    "govtrack": 456899,
    "last": "Jackson",
    "name": "Jonathan L. Jackson",
+   "nameParts": {
+    "first": "Jonathan",
+    "last": "Jackson",
+    "middle": "Luther",
+    "official_full": "Jonathan L. Jackson"
+   },
    "office": "1632 Longworth House Office Building",
    "opensecrets": "N00050105",
    "party": "Democrat",
@@ -7606,6 +9007,12 @@
    "govtrack": 457024,
    "last": "Johnson",
    "name": "Julie Johnson",
+   "nameParts": {
+    "first": "Julie",
+    "last": "Johnson",
+    "middle": "Elizabeth",
+    "official_full": "Julie Johnson"
+   },
    "office": "221 Cannon House Office Building",
    "opensecrets": "N00052806",
    "party": "Democrat",
@@ -7636,6 +9043,12 @@
    "govtrack": 456987,
    "last": "Jack",
    "name": "Brian Jack",
+   "nameParts": {
+    "first": "Brian",
+    "last": "Jack",
+    "middle": "Timothy",
+    "official_full": "Brian Jack"
+   },
    "office": "1320 Longworth House Office Building",
    "opensecrets": "N00055118",
    "party": "Republican",
@@ -7666,6 +9079,13 @@
    "govtrack": 456969,
    "last": "Justice",
    "name": "James C. Justice",
+   "nameParts": {
+    "first": "Jim",
+    "last": "Justice",
+    "middle": "Conley",
+    "official_full": "James C. Justice",
+    "suffix": "II"
+   },
    "office": "509 Hart Senate Office Building",
    "opensecrets": "N00053062",
    "party": "Republican",
@@ -7695,6 +9115,11 @@
    "govtrack": 400211,
    "last": "Kaptur",
    "name": "Marcy Kaptur",
+   "nameParts": {
+    "first": "Marcy",
+    "last": "Kaptur",
+    "official_full": "Marcy Kaptur"
+   },
    "office": "2314 Rayburn House Office Building",
    "opensecrets": "N00003522",
    "party": "Democrat",
@@ -7727,6 +9152,12 @@
    "govtrack": 412242,
    "last": "Klobuchar",
    "name": "Amy Klobuchar",
+   "nameParts": {
+    "first": "Amy",
+    "last": "Klobuchar",
+    "middle": "Jean",
+    "official_full": "Amy Klobuchar"
+   },
    "office": "425 Dirksen Senate Office Building",
    "opensecrets": "N00027500",
    "party": "Democrat",
@@ -7757,6 +9188,12 @@
    "govtrack": 412435,
    "last": "Keating",
    "name": "William R. Keating",
+   "nameParts": {
+    "first": "William",
+    "last": "Keating",
+    "middle": "R.",
+    "official_full": "William R. Keating"
+   },
    "office": "2372 Rayburn House Office Building",
    "opensecrets": "N00031933",
    "party": "Democrat",
@@ -7788,6 +9225,11 @@
    "govtrack": 412465,
    "last": "Kelly",
    "name": "Mike Kelly",
+   "nameParts": {
+    "first": "Mike",
+    "last": "Kelly",
+    "official_full": "Mike Kelly"
+   },
    "office": "1707 Longworth House Office Building",
    "opensecrets": "N00031647",
    "party": "Republican",
@@ -7819,6 +9261,11 @@
    "govtrack": 456794,
    "last": "Kelly",
    "name": "Mark Kelly",
+   "nameParts": {
+    "first": "Mark",
+    "last": "Kelly",
+    "official_full": "Mark Kelly"
+   },
    "office": "516 Hart Senate Office Building",
    "opensecrets": "N00044223",
    "party": "Democrat",
@@ -7850,6 +9297,13 @@
    "govtrack": 412545,
    "last": "King",
    "name": "Angus S. King, Jr.",
+   "nameParts": {
+    "first": "Angus",
+    "last": "King",
+    "middle": "S.",
+    "official_full": "Angus S. King, Jr.",
+    "suffix": "Jr."
+   },
    "office": "133 Hart Senate Office Building",
    "opensecrets": "N00034580",
    "party": "Independent",
@@ -7881,6 +9335,12 @@
    "govtrack": 412582,
    "last": "Kaine",
    "name": "Tim Kaine",
+   "nameParts": {
+    "first": "Timothy",
+    "last": "Kaine",
+    "nickname": "Tim",
+    "official_full": "Tim Kaine"
+   },
    "office": "231 Russell Senate Office Building",
    "opensecrets": "N00033177",
    "party": "Democrat",
@@ -7912,6 +9372,12 @@
    "govtrack": 412595,
    "last": "Kelly",
    "name": "Robin L. Kelly",
+   "nameParts": {
+    "first": "Robin",
+    "last": "Kelly",
+    "middle": "L.",
+    "official_full": "Robin L. Kelly"
+   },
    "office": "2329 Rayburn House Office Building",
    "opensecrets": "N00035215",
    "party": "Democrat",
@@ -7943,6 +9409,11 @@
    "govtrack": 412673,
    "last": "Kelly",
    "name": "Trent Kelly",
+   "nameParts": {
+    "first": "Trent",
+    "last": "Kelly",
+    "official_full": "Trent Kelly"
+   },
    "office": "2243 Rayburn House Office Building",
    "opensecrets": "N00037003",
    "party": "Republican",
@@ -7974,6 +9445,11 @@
    "govtrack": 412684,
    "last": "Khanna",
    "name": "Ro Khanna",
+   "nameParts": {
+    "first": "Ro",
+    "last": "Khanna",
+    "official_full": "Ro Khanna"
+   },
    "office": "306 Cannon House Office Building",
    "opensecrets": "N00026427",
    "party": "Democrat",
@@ -8005,6 +9481,11 @@
    "govtrack": 412701,
    "last": "Krishnamoorthi",
    "name": "Raja Krishnamoorthi",
+   "nameParts": {
+    "first": "Raja",
+    "last": "Krishnamoorthi",
+    "official_full": "Raja Krishnamoorthi"
+   },
    "office": "2367 Rayburn House Office Building",
    "opensecrets": "N00033240",
    "party": "Democrat",
@@ -8035,6 +9516,11 @@
    "govtrack": 412724,
    "last": "Kustoff",
    "name": "David Kustoff",
+   "nameParts": {
+    "first": "David",
+    "last": "Kustoff",
+    "official_full": "David Kustoff"
+   },
    "office": "560 Cannon House Office Building",
    "opensecrets": "N00025445",
    "party": "Republican",
@@ -8066,6 +9552,12 @@
    "govtrack": 412679,
    "last": "Kennedy",
    "name": "John Kennedy",
+   "nameParts": {
+    "first": "John",
+    "last": "Kennedy",
+    "middle": "Neely",
+    "official_full": "John Kennedy"
+   },
    "office": "437 Russell Senate Office Building",
    "opensecrets": "N00026823",
    "party": "Republican",
@@ -8097,6 +9589,11 @@
    "govtrack": 412797,
    "last": "Kim",
    "name": "Andy Kim",
+   "nameParts": {
+    "first": "Andy",
+    "last": "Kim",
+    "official_full": "Andy Kim"
+   },
    "office": "520 Hart Senate Office Building",
    "opensecrets": "N00041370",
    "party": "Democrat",
@@ -8126,6 +9623,12 @@
    "govtrack": 456802,
    "last": "Kim",
    "name": "Young Kim",
+   "nameParts": {
+    "first": "Young",
+    "last": "Kim",
+    "middle": "Oak",
+    "official_full": "Young Kim"
+   },
    "office": "2439 Rayburn House Office Building",
    "opensecrets": "N00042386",
    "party": "Republican",
@@ -8157,6 +9660,13 @@
    "govtrack": 456917,
    "last": "Kean",
    "name": "Thomas H. Kean, Jr.",
+   "nameParts": {
+    "first": "Thomas",
+    "last": "Kean",
+    "middle": "Howard",
+    "official_full": "Thomas H. Kean, Jr.",
+    "suffix": "Jr."
+   },
    "office": "251 Cannon House Office Building",
    "opensecrets": "N00027502",
    "party": "Republican",
@@ -8187,6 +9697,12 @@
    "govtrack": 456947,
    "last": "Kiggans",
    "name": "Jennifer A. Kiggans",
+   "nameParts": {
+    "first": "Jennifer",
+    "last": "Kiggans",
+    "middle": "Ann",
+    "official_full": "Jennifer A. Kiggans"
+   },
    "office": "152 Cannon House Office Building",
    "opensecrets": "N00048315",
    "party": "Republican",
@@ -8218,6 +9734,12 @@
    "govtrack": 456884,
    "last": "Kamlager-Dove",
    "name": "Sydney Kamlager-Dove",
+   "nameParts": {
+    "first": "Sydney",
+    "last": "Kamlager-Dove",
+    "middle": "Kai",
+    "official_full": "Sydney Kamlager-Dove"
+   },
    "office": "144 Cannon House Office Building",
    "opensecrets": "N00049460",
    "party": "Democrat",
@@ -8248,6 +9770,12 @@
    "govtrack": 456881,
    "last": "Kiley",
    "name": "Kevin Kiley",
+   "nameParts": {
+    "first": "Kevin",
+    "last": "Kiley",
+    "middle": "Patrick",
+    "official_full": "Kevin Kiley"
+   },
    "office": "2445 Rayburn House Office Building",
    "opensecrets": "N00050259",
    "party": "Independent",
@@ -8278,6 +9806,11 @@
    "govtrack": 456957,
    "last": "Kennedy",
    "name": "Timothy M. Kennedy",
+   "nameParts": {
+    "first": "Timothy",
+    "last": "Kennedy",
+    "official_full": "Timothy M. Kennedy"
+   },
    "office": "423 Cannon House Office Building",
    "opensecrets": "N00054366",
    "party": "Democrat",
@@ -8309,6 +9842,12 @@
    "govtrack": 457025,
    "last": "Kennedy",
    "name": "Mike Kennedy",
+   "nameParts": {
+    "first": "Mike",
+    "last": "Kennedy",
+    "middle": "Steven",
+    "official_full": "Mike Kennedy"
+   },
    "office": "1626 Longworth House Office Building",
    "opensecrets": "N00043086",
    "party": "Republican",
@@ -8339,6 +9878,12 @@
    "govtrack": 456999,
    "last": "King-Hinds",
    "name": "Kimberlyn King-Hinds",
+   "nameParts": {
+    "first": "Kimberlyn",
+    "last": "King-Hinds",
+    "middle": "Kay",
+    "official_full": "Kimberlyn King-Hinds"
+   },
    "office": "425 Cannon House Office Building",
    "opensecrets": null,
    "party": "Republican",
@@ -8369,6 +9914,11 @@
    "govtrack": 457004,
    "last": "Knott",
    "name": "Brad Knott",
+   "nameParts": {
+    "first": "Brad",
+    "last": "Knott",
+    "official_full": "Brad Knott"
+   },
    "office": "1239 Longworth House Office Building",
    "opensecrets": "N00053743",
    "party": "Republican",
@@ -8399,6 +9949,11 @@
    "govtrack": 456835,
    "last": "Leger Fernandez",
    "name": "Teresa Leger Fernandez",
+   "nameParts": {
+    "first": "Teresa",
+    "last": "Leger Fernandez",
+    "official_full": "Teresa Leger Fernandez"
+   },
    "office": "2417 Rayburn House Office Building",
    "opensecrets": "N00044559",
    "party": "Democrat",
@@ -8431,6 +9986,11 @@
    "govtrack": 400245,
    "last": "Lofgren",
    "name": "Zoe Lofgren",
+   "nameParts": {
+    "first": "Zoe",
+    "last": "Lofgren",
+    "official_full": "Zoe Lofgren"
+   },
    "office": "1401 Longworth House Office Building",
    "opensecrets": "N00007479",
    "party": "Democrat",
@@ -8462,6 +10022,12 @@
    "govtrack": 400247,
    "last": "Lucas",
    "name": "Frank D. Lucas",
+   "nameParts": {
+    "first": "Frank",
+    "last": "Lucas",
+    "middle": "D.",
+    "official_full": "Frank D. Lucas"
+   },
    "office": "2405 Rayburn House Office Building",
    "opensecrets": "N00005559",
    "party": "Republican",
@@ -8494,6 +10060,12 @@
    "govtrack": 400233,
    "last": "Larson",
    "name": "John B. Larson",
+   "nameParts": {
+    "first": "John",
+    "last": "Larson",
+    "middle": "B.",
+    "official_full": "John B. Larson"
+   },
    "office": "1501 Longworth House Office Building",
    "opensecrets": "N00000575",
    "party": "Democrat",
@@ -8526,6 +10098,11 @@
    "govtrack": 400232,
    "last": "Larsen",
    "name": "Rick Larsen",
+   "nameParts": {
+    "first": "Rick",
+    "last": "Larsen",
+    "official_full": "Rick Larsen"
+   },
    "office": "2163 Rayburn House Office Building",
    "opensecrets": "N00009759",
    "party": "Democrat",
@@ -8558,6 +10135,12 @@
    "govtrack": 400249,
    "last": "Lynch",
    "name": "Stephen F. Lynch",
+   "nameParts": {
+    "first": "Stephen",
+    "last": "Lynch",
+    "middle": "F.",
+    "official_full": "Stephen F. Lynch"
+   },
    "office": "2109 Rayburn House Office Building",
    "opensecrets": "N00013855",
    "party": "Democrat",
@@ -8590,6 +10173,12 @@
    "govtrack": 412256,
    "last": "Latta",
    "name": "Robert E. Latta",
+   "nameParts": {
+    "first": "Robert",
+    "last": "Latta",
+    "middle": "E.",
+    "official_full": "Robert E. Latta"
+   },
    "office": "2470 Rayburn House Office Building",
    "opensecrets": "N00012233",
    "party": "Republican",
@@ -8622,6 +10211,12 @@
    "govtrack": 412293,
    "last": "Luján",
    "name": "Ben Ray Luján",
+   "nameParts": {
+    "first": "Ben",
+    "last": "Luján",
+    "middle": "Ray",
+    "official_full": "Ben Ray Luján"
+   },
    "office": "498 Russell Senate Office Building",
    "opensecrets": "N00029562",
    "party": "Democrat",
@@ -8652,6 +10247,12 @@
    "govtrack": 412294,
    "last": "Lummis",
    "name": "Cynthia M. Lummis",
+   "nameParts": {
+    "first": "Cynthia",
+    "last": "Lummis",
+    "middle": "M.",
+    "official_full": "Cynthia M. Lummis"
+   },
    "office": "127a Russell Senate Office Building",
    "opensecrets": "N00029788",
    "party": "Republican",
@@ -8682,6 +10283,11 @@
    "govtrack": 412464,
    "last": "Lankford",
    "name": "James Lankford",
+   "nameParts": {
+    "first": "James",
+    "last": "Lankford",
+    "official_full": "James Lankford"
+   },
    "office": "731 Hart Senate Office Building",
    "opensecrets": "N00031129",
    "party": "Republican",
@@ -8714,6 +10320,11 @@
    "govtrack": 412495,
    "last": "Lee",
    "name": "Mike Lee",
+   "nameParts": {
+    "first": "Mike",
+    "last": "Lee",
+    "official_full": "Mike Lee"
+   },
    "office": "363 Russell Senate Office Building",
    "opensecrets": "N00031696",
    "party": "Republican",
@@ -8746,6 +10357,11 @@
    "govtrack": 412616,
    "last": "Lieu",
    "name": "Ted Lieu",
+   "nameParts": {
+    "first": "Ted",
+    "last": "Lieu",
+    "official_full": "Ted Lieu"
+   },
    "office": "2454 Rayburn House Office Building",
    "opensecrets": "N00035825",
    "party": "Democrat",
@@ -8777,6 +10393,11 @@
    "govtrack": 412624,
    "last": "Loudermilk",
    "name": "Barry Loudermilk",
+   "nameParts": {
+    "first": "Barry",
+    "last": "Loudermilk",
+    "official_full": "Barry Loudermilk"
+   },
    "office": "2133 Rayburn House Office Building",
    "opensecrets": "N00035347",
    "party": "Republican",
@@ -8808,6 +10429,11 @@
    "govtrack": 412674,
    "last": "LaHood",
    "name": "Darin LaHood",
+   "nameParts": {
+    "first": "Darin",
+    "last": "LaHood",
+    "official_full": "Darin LaHood"
+   },
    "office": "503 Cannon House Office Building",
    "opensecrets": "N00037031",
    "party": "Republican",
@@ -8838,6 +10464,11 @@
    "govtrack": 412802,
    "last": "Lee",
    "name": "Susie Lee",
+   "nameParts": {
+    "first": "Susie",
+    "last": "Lee",
+    "official_full": "Susie Lee"
+   },
    "office": "365 Cannon House Office Building",
    "opensecrets": "N00037247",
    "party": "Democrat",
@@ -8868,6 +10499,11 @@
    "govtrack": 412760,
    "last": "Levin",
    "name": "Mike Levin",
+   "nameParts": {
+    "first": "Mike",
+    "last": "Levin",
+    "official_full": "Mike Levin"
+   },
    "office": "2352 Rayburn House Office Building",
    "opensecrets": "N00040667",
    "party": "Democrat",
@@ -8899,6 +10535,11 @@
    "govtrack": 456859,
    "last": "Letlow",
    "name": "Julia Letlow",
+   "nameParts": {
+    "first": "Julia",
+    "last": "Letlow",
+    "official_full": "Julia Letlow"
+   },
    "office": "142 Cannon House Office Building",
    "opensecrets": "N00047972",
    "party": "Republican",
@@ -8928,6 +10569,12 @@
    "govtrack": 456891,
    "last": "Luna",
    "name": "Anna Paulina Luna",
+   "nameParts": {
+    "first": "Anna",
+    "last": "Luna",
+    "middle": "Paulina",
+    "official_full": "Anna Paulina Luna"
+   },
    "office": "226 Cannon House Office Building",
    "opensecrets": "N00045228",
    "party": "Republican",
@@ -8958,6 +10605,12 @@
    "govtrack": 456892,
    "last": "Lee",
    "name": "Laurel M. Lee",
+   "nameParts": {
+    "first": "Laurel",
+    "last": "Lee",
+    "middle": "Frances",
+    "official_full": "Laurel M. Lee"
+   },
    "office": "2464 Rayburn House Office Building",
    "opensecrets": "N00051178",
    "party": "Republican",
@@ -8988,6 +10641,12 @@
    "govtrack": 456920,
    "last": "LaLota",
    "name": "Nick LaLota",
+   "nameParts": {
+    "first": "Nicolas",
+    "last": "LaLota",
+    "middle": "Joseph",
+    "official_full": "Nick LaLota"
+   },
    "office": "122 Cannon House Office Building",
    "opensecrets": "N00050419",
    "party": "Republican",
@@ -9018,6 +10677,12 @@
    "govtrack": 456924,
    "last": "Lawler",
    "name": "Michael Lawler",
+   "nameParts": {
+    "first": "Michael",
+    "last": "Lawler",
+    "middle": "Vincent",
+    "official_full": "Michael Lawler"
+   },
    "office": "324 Cannon House Office Building",
    "opensecrets": "N00051208",
    "party": "Republican",
@@ -9049,6 +10714,12 @@
    "govtrack": 456927,
    "last": "Langworthy",
    "name": "Nicholas A. Langworthy",
+   "nameParts": {
+    "first": "Nicholas",
+    "last": "Langworthy",
+    "middle": "A.",
+    "official_full": "Nicholas A. Langworthy"
+   },
    "office": "422 Cannon House Office Building",
    "opensecrets": "N00051431",
    "party": "Republican",
@@ -9079,6 +10750,12 @@
    "govtrack": 456928,
    "last": "Landsman",
    "name": "Greg Landsman",
+   "nameParts": {
+    "first": "Greg",
+    "last": "Landsman",
+    "middle": "John",
+    "official_full": "Greg Landsman"
+   },
    "office": "2244 Rayburn House Office Building",
    "opensecrets": "N00049718",
    "party": "Democrat",
@@ -9109,6 +10786,12 @@
    "govtrack": 456935,
    "last": "Lee",
    "name": "Summer L. Lee",
+   "nameParts": {
+    "first": "Summer",
+    "last": "Lee",
+    "middle": "Lynn",
+    "official_full": "Summer L. Lee"
+   },
    "office": "2437 Rayburn House Office Building",
    "opensecrets": "N00049757",
    "party": "Democrat",
@@ -9140,6 +10823,12 @@
    "govtrack": 456942,
    "last": "Luttrell",
    "name": "Morgan Luttrell",
+   "nameParts": {
+    "first": "Morgan",
+    "last": "Luttrell",
+    "middle": "Joe",
+    "official_full": "Morgan Luttrell"
+   },
    "office": "444 Cannon House Office Building",
    "opensecrets": "N00048776",
    "party": "Republican",
@@ -9170,6 +10859,12 @@
    "govtrack": 457011,
    "last": "Latimer",
    "name": "George Latimer",
+   "nameParts": {
+    "first": "George",
+    "last": "Latimer",
+    "middle": "Stephen",
+    "official_full": "George Latimer"
+   },
    "office": "1507 Longworth House Office Building",
    "opensecrets": "N00054136",
    "party": "Democrat",
@@ -9200,6 +10895,12 @@
    "govtrack": 456976,
    "last": "Liccardo",
    "name": "Sam T. Liccardo",
+   "nameParts": {
+    "first": "Sam",
+    "last": "Liccardo",
+    "middle": "Theodore",
+    "official_full": "Sam T. Liccardo"
+   },
    "office": "1117 Longworth House Office Building",
    "opensecrets": "N00054265",
    "party": "Democrat",
@@ -9229,6 +10930,13 @@
    "govtrack": 400253,
    "last": "Markey",
    "name": "Edward J. Markey",
+   "nameParts": {
+    "first": "Edward",
+    "last": "Markey",
+    "middle": "J.",
+    "nickname": "Ed",
+    "official_full": "Edward J. Markey"
+   },
    "office": "255 Dirksen Senate Office Building",
    "opensecrets": "N00000270",
    "party": "Democrat",
@@ -9261,6 +10969,12 @@
    "govtrack": 456843,
    "last": "Mace",
    "name": "Nancy Mace",
+   "nameParts": {
+    "first": "Nancy",
+    "last": "Mace",
+    "middle": "Ruth",
+    "official_full": "Nancy Mace"
+   },
    "office": "1728 Longworth House Office Building",
    "opensecrets": "N00035670",
    "party": "Republican",
@@ -9291,6 +11005,13 @@
    "govtrack": 400263,
    "last": "McGovern",
    "name": "James P. McGovern",
+   "nameParts": {
+    "first": "James",
+    "last": "McGovern",
+    "middle": "P.",
+    "nickname": "Jim",
+    "official_full": "James P. McGovern"
+   },
    "office": "370 Cannon House Office Building",
    "opensecrets": "N00000179",
    "party": "Democrat",
@@ -9323,6 +11044,11 @@
    "govtrack": 456837,
    "last": "Malliotakis",
    "name": "Nicole Malliotakis",
+   "nameParts": {
+    "first": "Nicole",
+    "last": "Malliotakis",
+    "official_full": "Nicole Malliotakis"
+   },
    "office": "1124 Longworth House Office Building",
    "opensecrets": "N00044040",
    "party": "Republican",
@@ -9352,6 +11078,11 @@
    "govtrack": 300072,
    "last": "McConnell",
    "name": "Mitch McConnell",
+   "nameParts": {
+    "first": "Mitch",
+    "last": "McConnell",
+    "official_full": "Mitch McConnell"
+   },
    "office": "317 Russell Senate Office Building",
    "opensecrets": "N00003389",
    "party": "Republican",
@@ -9383,6 +11114,11 @@
    "govtrack": 407672,
    "last": "Mfume",
    "name": "Kweisi Mfume",
+   "nameParts": {
+    "first": "Kweisi",
+    "last": "Mfume",
+    "official_full": "Kweisi Mfume"
+   },
    "office": "2263 Rayburn House Office Building",
    "opensecrets": "N00001799",
    "party": "Democrat",
@@ -9414,6 +11150,12 @@
    "govtrack": 456823,
    "last": "Mann",
    "name": "Tracey Mann",
+   "nameParts": {
+    "first": "Tracey",
+    "last": "Mann",
+    "middle": "Robert",
+    "official_full": "Tracey Mann"
+   },
    "office": "344 Cannon House Office Building",
    "opensecrets": "N00030743",
    "party": "Republican",
@@ -9444,6 +11186,11 @@
    "govtrack": 400284,
    "last": "Moran",
    "name": "Jerry Moran",
+   "nameParts": {
+    "first": "Jerry",
+    "last": "Moran",
+    "official_full": "Jerry Moran"
+   },
    "office": "521 Dirksen Senate Office Building",
    "opensecrets": "N00005282",
    "party": "Republican",
@@ -9476,6 +11223,11 @@
    "govtrack": 300076,
    "last": "Murray",
    "name": "Patty Murray",
+   "nameParts": {
+    "first": "Patty",
+    "last": "Murray",
+    "official_full": "Patty Murray"
+   },
    "office": "154 Russell Senate Office Building",
    "opensecrets": "N00007876",
    "party": "Democrat",
@@ -9507,6 +11259,12 @@
    "govtrack": 456827,
    "last": "McClain",
    "name": "Lisa C. McClain",
+   "nameParts": {
+    "first": "Lisa",
+    "last": "McClain",
+    "middle": "C.",
+    "official_full": "Lisa C. McClain"
+   },
    "office": "562 Cannon House Office Building",
    "opensecrets": "N00045730",
    "party": "Republican",
@@ -9537,6 +11295,12 @@
    "govtrack": 400271,
    "last": "Meeks",
    "name": "Gregory W. Meeks",
+   "nameParts": {
+    "first": "Gregory",
+    "last": "Meeks",
+    "middle": "W.",
+    "official_full": "Gregory W. Meeks"
+   },
    "office": "2310 Rayburn House Office Building",
    "opensecrets": "N00001171",
    "party": "Democrat",
@@ -9569,6 +11333,12 @@
    "govtrack": 400259,
    "last": "McCollum",
    "name": "Betty McCollum",
+   "nameParts": {
+    "first": "Betty",
+    "last": "McCollum",
+    "middle": "Louise",
+    "official_full": "Betty McCollum"
+   },
    "office": "2426 Rayburn House Office Building",
    "opensecrets": "N00012942",
    "party": "Democrat",
@@ -9601,6 +11371,12 @@
    "govtrack": 300075,
    "last": "Murkowski",
    "name": "Lisa Murkowski",
+   "nameParts": {
+    "first": "Lisa",
+    "last": "Murkowski",
+    "middle": "A.",
+    "official_full": "Lisa Murkowski"
+   },
    "office": "522 Hart Senate Office Building",
    "opensecrets": "N00026050",
    "party": "Republican",
@@ -9633,6 +11409,12 @@
    "govtrack": 400654,
    "last": "McCaul",
    "name": "Michael T. McCaul",
+   "nameParts": {
+    "first": "Michael",
+    "last": "McCaul",
+    "middle": "T.",
+    "official_full": "Michael T. McCaul"
+   },
    "office": "2300 Rayburn House Office Building",
    "opensecrets": "N00026460",
    "party": "Republican",
@@ -9665,6 +11447,11 @@
    "govtrack": 400661,
    "last": "Moore",
    "name": "Gwen Moore",
+   "nameParts": {
+    "first": "Gwen",
+    "last": "Moore",
+    "official_full": "Gwen Moore"
+   },
    "office": "2252 Rayburn House Office Building",
    "opensecrets": "N00026914",
    "party": "Democrat",
@@ -9697,6 +11484,12 @@
    "govtrack": 400663,
    "last": "Matsui",
    "name": "Doris O. Matsui",
+   "nameParts": {
+    "first": "Doris",
+    "last": "Matsui",
+    "middle": "O.",
+    "official_full": "Doris O. Matsui"
+   },
    "office": "2206 Rayburn House Office Building",
    "opensecrets": "N00027459",
    "party": "Democrat",
@@ -9729,6 +11522,12 @@
    "govtrack": 412194,
    "last": "Murphy",
    "name": "Christopher Murphy",
+   "nameParts": {
+    "first": "Christopher",
+    "last": "Murphy",
+    "middle": "S.",
+    "official_full": "Christopher Murphy"
+   },
    "office": "136 Hart Senate Office Building",
    "opensecrets": "N00027566",
    "party": "Democrat",
@@ -9761,6 +11560,11 @@
    "govtrack": 412325,
    "last": "Merkley",
    "name": "Jeff Merkley",
+   "nameParts": {
+    "first": "Jeff",
+    "last": "Merkley",
+    "official_full": "Jeff Merkley"
+   },
    "office": "531 Hart Senate Office Building",
    "opensecrets": "N00029303",
    "party": "Democrat",
@@ -9794,6 +11598,11 @@
    "govtrack": 412295,
    "last": "McClintock",
    "name": "Tom McClintock",
+   "nameParts": {
+    "first": "Tom",
+    "last": "McClintock",
+    "official_full": "Tom McClintock"
+   },
    "office": "2256 Rayburn House Office Building",
    "opensecrets": "N00006863",
    "party": "Republican",
@@ -9826,6 +11635,11 @@
    "govtrack": 412503,
    "last": "Massie",
    "name": "Thomas Massie",
+   "nameParts": {
+    "first": "Thomas",
+    "last": "Massie",
+    "official_full": "Thomas Massie"
+   },
    "office": "2371 Rayburn House Office Building",
    "opensecrets": "N00034041",
    "party": "Republican",
@@ -9858,6 +11672,11 @@
    "govtrack": 412560,
    "last": "Meng",
    "name": "Grace Meng",
+   "nameParts": {
+    "first": "Grace",
+    "last": "Meng",
+    "official_full": "Grace Meng"
+   },
    "office": "2468 Rayburn House Office Building",
    "opensecrets": "N00034547",
    "party": "Democrat",
@@ -9888,6 +11707,12 @@
    "govtrack": 412634,
    "last": "Moolenaar",
    "name": "John R. Moolenaar",
+   "nameParts": {
+    "first": "John",
+    "last": "Moolenaar",
+    "middle": "R.",
+    "official_full": "John R. Moolenaar"
+   },
    "office": "246 Cannon House Office Building",
    "opensecrets": "N00036275",
    "party": "Republican",
@@ -9919,6 +11744,11 @@
    "govtrack": 412632,
    "last": "Moulton",
    "name": "Seth Moulton",
+   "nameParts": {
+    "first": "Seth",
+    "last": "Moulton",
+    "official_full": "Seth Moulton"
+   },
    "office": "1126 Longworth House Office Building",
    "opensecrets": "N00035431",
    "party": "Democrat",
@@ -9950,6 +11780,11 @@
    "govtrack": 412704,
    "last": "Marshall",
    "name": "Roger Marshall",
+   "nameParts": {
+    "first": "Roger",
+    "last": "Marshall",
+    "official_full": "Roger Marshall"
+   },
    "office": "479a Russell Senate Office Building",
    "opensecrets": "N00037034",
    "party": "Republican",
@@ -9981,6 +11816,12 @@
    "govtrack": 412698,
    "last": "Mast",
    "name": "Brian J. Mast",
+   "nameParts": {
+    "first": "Brian",
+    "last": "Mast",
+    "middle": "J.",
+    "official_full": "Brian J. Mast"
+   },
    "office": "2182 Rayburn House Office Building",
    "opensecrets": "N00037269",
    "party": "Republican",
@@ -10012,6 +11853,11 @@
    "govtrack": 412811,
    "last": "Meuser",
    "name": "Daniel Meuser",
+   "nameParts": {
+    "first": "Daniel",
+    "last": "Meuser",
+    "official_full": "Daniel Meuser"
+   },
    "office": "350 Cannon House Office Building",
    "opensecrets": "N00029416",
    "party": "Republican",
@@ -10041,6 +11887,12 @@
    "govtrack": 412837,
    "last": "Miller",
    "name": "Carol D. Miller",
+   "nameParts": {
+    "first": "Carol",
+    "last": "Miller",
+    "middle": "D.",
+    "official_full": "Carol D. Miller"
+   },
    "office": "465 Cannon House Office Building",
    "opensecrets": "N00041542",
    "party": "Republican",
@@ -10070,6 +11922,12 @@
    "govtrack": 412749,
    "last": "Morelle",
    "name": "Joseph D. Morelle",
+   "nameParts": {
+    "first": "Joseph",
+    "last": "Morelle",
+    "middle": "D.",
+    "official_full": "Joseph D. Morelle"
+   },
    "office": "570 Cannon House Office Building",
    "opensecrets": "N00043207",
    "party": "Democrat",
@@ -10099,6 +11957,11 @@
    "govtrack": 412769,
    "last": "McBath",
    "name": "Lucy McBath",
+   "nameParts": {
+    "first": "Lucy",
+    "last": "McBath",
+    "official_full": "Lucy McBath"
+   },
    "office": "2246 Rayburn House Office Building",
    "opensecrets": "N00042813",
    "party": "Democrat",
@@ -10129,6 +11992,12 @@
    "govtrack": 412845,
    "last": "Murphy",
    "name": "Gregory F. Murphy",
+   "nameParts": {
+    "first": "Gregory",
+    "last": "Murphy",
+    "middle": "Francis",
+    "official_full": "Gregory F. Murphy"
+   },
    "office": "407 Cannon House Office Building",
    "opensecrets": "N00044027",
    "party": "Republican",
@@ -10159,6 +12028,12 @@
    "govtrack": 456820,
    "last": "Miller",
    "name": "Mary E. Miller",
+   "nameParts": {
+    "first": "Mary",
+    "last": "Miller",
+    "middle": "E.",
+    "official_full": "Mary E. Miller"
+   },
    "office": "1740 Longworth House Office Building",
    "opensecrets": "N00045703",
    "party": "Republican",
@@ -10188,6 +12063,11 @@
    "govtrack": 456800,
    "last": "Moore",
    "name": "Barry Moore",
+   "nameParts": {
+    "first": "Barry",
+    "last": "Moore",
+    "official_full": "Barry Moore"
+   },
    "office": "1511 Longworth House Office Building",
    "opensecrets": "N00041295",
    "party": "Republican",
@@ -10217,6 +12097,12 @@
    "govtrack": 456851,
    "last": "Moore",
    "name": "Blake D. Moore",
+   "nameParts": {
+    "first": "Blake",
+    "last": "Moore",
+    "middle": "David",
+    "official_full": "Blake D. Moore"
+   },
    "office": "1131 Longworth House Office Building",
    "opensecrets": "N00046598",
    "party": "Republican",
@@ -10248,6 +12134,12 @@
    "govtrack": 456821,
    "last": "Mrvan",
    "name": "Frank J. Mrvan",
+   "nameParts": {
+    "first": "Frank",
+    "last": "Mrvan",
+    "middle": "John",
+    "official_full": "Frank J. Mrvan"
+   },
    "office": "2441 Rayburn House Office Building",
    "opensecrets": "N00045905",
    "party": "Democrat",
@@ -10277,6 +12169,12 @@
    "govtrack": 456817,
    "last": "Miller-Meeks",
    "name": "Mariannette Miller-Meeks",
+   "nameParts": {
+    "first": "Mariannette",
+    "last": "Miller-Meeks",
+    "middle": "Jane",
+    "official_full": "Mariannette Miller-Meeks"
+   },
    "office": "504 Cannon House Office Building",
    "opensecrets": "N00029495",
    "party": "Republican",
@@ -10306,6 +12204,11 @@
    "govtrack": 456889,
    "last": "Mills",
    "name": "Cory Mills",
+   "nameParts": {
+    "first": "Cory",
+    "last": "Mills",
+    "official_full": "Cory Mills"
+   },
    "office": "346 Cannon House Office Building",
    "opensecrets": "N00048179",
    "party": "Republican",
@@ -10336,6 +12239,12 @@
    "govtrack": 456893,
    "last": "Moskowitz",
    "name": "Jared Moskowitz",
+   "nameParts": {
+    "first": "Jared",
+    "last": "Moskowitz",
+    "middle": "Evan",
+    "official_full": "Jared Moskowitz"
+   },
    "office": "242 Cannon House Office Building",
    "opensecrets": "N00050596",
    "party": "Democrat",
@@ -10367,6 +12276,12 @@
    "govtrack": 456894,
    "last": "McCormick",
    "name": "Richard McCormick",
+   "nameParts": {
+    "first": "Rich",
+    "last": "McCormick",
+    "middle": "Dean",
+    "official_full": "Richard McCormick"
+   },
    "office": "1719 Longworth House Office Building",
    "opensecrets": "N00044520",
    "party": "Republican",
@@ -10397,6 +12312,12 @@
    "govtrack": 456896,
    "last": "Moylan",
    "name": "James C. Moylan",
+   "nameParts": {
+    "first": "James (Jim)",
+    "last": "Moylan",
+    "middle": "Camacho",
+    "official_full": "James C. Moylan"
+   },
    "office": "228 Cannon House Office Building",
    "opensecrets": "N00050604",
    "party": "Republican",
@@ -10427,6 +12348,11 @@
    "govtrack": 456904,
    "last": "McGarvey",
    "name": "Morgan McGarvey",
+   "nameParts": {
+    "first": "Morgan",
+    "last": "McGarvey",
+    "official_full": "Morgan McGarvey"
+   },
    "office": "1527 Longworth House Office Building",
    "opensecrets": "N00049295",
    "party": "Democrat",
@@ -10457,6 +12383,12 @@
    "govtrack": 456929,
    "last": "Miller",
    "name": "Max L. Miller",
+   "nameParts": {
+    "first": "Max",
+    "last": "Miller",
+    "middle": "Leonard",
+    "official_full": "Max L. Miller"
+   },
    "office": "143 Cannon House Office Building",
    "opensecrets": "N00048277",
    "party": "Republican",
@@ -10488,6 +12420,12 @@
    "govtrack": 456937,
    "last": "Magaziner",
    "name": "Seth Magaziner",
+   "nameParts": {
+    "first": "Seth",
+    "last": "Magaziner",
+    "middle": "Michael",
+    "official_full": "Seth Magaziner"
+   },
    "office": "252 Cannon House Office Building",
    "opensecrets": "N00050458",
    "party": "Democrat",
@@ -10517,6 +12455,12 @@
    "govtrack": 456940,
    "last": "Moran",
    "name": "Nathaniel Moran",
+   "nameParts": {
+    "first": "Nathaniel",
+    "last": "Moran",
+    "middle": "Quentin",
+    "official_full": "Nathaniel Moran"
+   },
    "office": "1605 Longworth House Office Building",
    "opensecrets": "N00049775",
    "party": "Republican",
@@ -10548,6 +12492,11 @@
    "govtrack": 456883,
    "last": "Mullin",
    "name": "Kevin Mullin",
+   "nameParts": {
+    "first": "Kevin",
+    "last": "Mullin",
+    "official_full": "Kevin Mullin"
+   },
    "office": "1404 Longworth House Office Building",
    "opensecrets": "N00049438",
    "party": "Democrat",
@@ -10579,6 +12528,13 @@
    "govtrack": 456918,
    "last": "Menendez",
    "name": "Robert Menendez",
+   "nameParts": {
+    "first": "Robert",
+    "last": "Menendez",
+    "middle": "Jacobsen",
+    "official_full": "Robert Menendez",
+    "suffix": "Jr."
+   },
    "office": "2453 Rayburn House Office Building",
    "opensecrets": "N00049686",
    "party": "Democrat",
@@ -10609,6 +12565,11 @@
    "govtrack": 456953,
    "last": "McClellan",
    "name": "Jennifer L. McClellan",
+   "nameParts": {
+    "first": "Jennifer",
+    "last": "McClellan",
+    "official_full": "Jennifer L. McClellan"
+   },
    "office": "1628 Longworth House Office Building",
    "opensecrets": "N00051961",
    "party": "Democrat",
@@ -10638,6 +12599,11 @@
    "govtrack": 456956,
    "last": "Maloy",
    "name": "Celeste Maloy",
+   "nameParts": {
+    "first": "Celeste",
+    "last": "Maloy",
+    "official_full": "Celeste Maloy"
+   },
    "office": "249 Cannon House Office Building",
    "opensecrets": "N00052817",
    "party": "Republican",
@@ -10669,6 +12635,11 @@
    "govtrack": 456962,
    "last": "McIver",
    "name": "LaMonica McIver",
+   "nameParts": {
+    "first": "LaMonica",
+    "last": "McIver",
+    "official_full": "LaMonica McIver"
+   },
    "office": "426 Cannon House Office Building",
    "opensecrets": "N00055172",
    "party": "Democrat",
@@ -10699,6 +12670,12 @@
    "govtrack": 457017,
    "last": "Mackenzie",
    "name": "Ryan Mackenzie",
+   "nameParts": {
+    "first": "Ryan",
+    "last": "Mackenzie",
+    "middle": "Edward",
+    "official_full": "Ryan Mackenzie"
+   },
    "office": "121 Cannon House Office Building",
    "opensecrets": "N00041866",
    "party": "Republican",
@@ -10729,6 +12706,12 @@
    "govtrack": 457013,
    "last": "Mannion",
    "name": "John W. Mannion",
+   "nameParts": {
+    "first": "John",
+    "last": "Mannion",
+    "middle": "W.",
+    "official_full": "John W. Mannion"
+   },
    "office": "1516 Longworth House Office Building",
    "opensecrets": "N00053112",
    "party": "Democrat",
@@ -10759,6 +12742,12 @@
    "govtrack": 456993,
    "last": "McClain Delaney",
    "name": "April McClain Delaney",
+   "nameParts": {
+    "first": "April",
+    "last": "McClain Delaney",
+    "middle": "Lynn",
+    "official_full": "April McClain Delaney"
+   },
    "office": "1130 Longworth House Office Building",
    "opensecrets": "N00053899",
    "party": "Democrat",
@@ -10789,6 +12778,11 @@
    "govtrack": 456989,
    "last": "Messmer",
    "name": "Mark B. Messmer",
+   "nameParts": {
+    "first": "Mark",
+    "last": "Messmer",
+    "official_full": "Mark B. Messmer"
+   },
    "office": "1208 Longworth House Office Building",
    "opensecrets": "N00054523",
    "party": "Republican",
@@ -10818,6 +12812,12 @@
    "govtrack": 456996,
    "last": "Morrison",
    "name": "Kelly Morrison",
+   "nameParts": {
+    "first": "Kelly",
+    "last": "Morrison",
+    "middle": "Louise",
+    "official_full": "Kelly Morrison"
+   },
    "office": "1205 Longworth House Office Building",
    "opensecrets": "N00053930",
    "party": "Democrat",
@@ -10848,6 +12848,12 @@
    "govtrack": 457031,
    "last": "Moore",
    "name": "Riley M. Moore",
+   "nameParts": {
+    "first": "Riley",
+    "last": "Moore",
+    "middle": "M.",
+    "official_full": "Riley M. Moore"
+   },
    "office": "1337 Longworth House Office Building",
    "opensecrets": "N00051965",
    "party": "Republican",
@@ -10877,6 +12883,12 @@
    "govtrack": 457005,
    "last": "Moore",
    "name": "Tim Moore",
+   "nameParts": {
+    "first": "Tim",
+    "last": "Moore",
+    "middle": "Keith",
+    "official_full": "Tim Moore"
+   },
    "office": "1424 Longworth House Office Building",
    "opensecrets": "N00053948",
    "party": "Republican",
@@ -10907,6 +12919,12 @@
    "govtrack": 456995,
    "last": "McDonald Rivet",
    "name": "Kristen McDonald Rivet",
+   "nameParts": {
+    "first": "Kristen",
+    "last": "McDonald Rivet",
+    "middle": "Lee",
+    "official_full": "Kristen McDonald Rivet"
+   },
    "office": "1408 Longworth House Office Building",
    "opensecrets": "N00054163",
    "party": "Democrat",
@@ -10937,6 +12955,12 @@
    "govtrack": 456985,
    "last": "McBride",
    "name": "Sarah McBride",
+   "nameParts": {
+    "first": "Sarah",
+    "last": "McBride",
+    "middle": "Elizabeth",
+    "official_full": "Sarah McBride"
+   },
    "office": "1306 Longworth House Office Building",
    "opensecrets": "N00052698",
    "party": "Democrat",
@@ -10967,6 +12991,13 @@
    "govtrack": 457026,
    "last": "McGuire",
    "name": "John J. McGuire III",
+   "nameParts": {
+    "first": "John",
+    "last": "McGuire",
+    "middle": "J.",
+    "official_full": "John J. McGuire III",
+    "suffix": "III"
+   },
    "office": "1013 Longworth House Office Building",
    "opensecrets": "N00045930",
    "party": "Republican",
@@ -10997,6 +13028,12 @@
    "govtrack": 457001,
    "last": "McDowell",
    "name": "Addison P. McDowell",
+   "nameParts": {
+    "first": "Addison",
+    "last": "McDowell",
+    "middle": "Parker",
+    "official_full": "Addison P. McDowell"
+   },
    "office": "1032 Longworth House Office Building",
    "opensecrets": "N00054055",
    "party": "Republican",
@@ -11027,6 +13064,12 @@
    "govtrack": 456981,
    "last": "Min",
    "name": "Dave Min",
+   "nameParts": {
+    "first": "Dave",
+    "last": "Min",
+    "middle": "Kunnghee",
+    "official_full": "Dave Min"
+   },
    "office": "1034 Longworth House Office Building",
    "opensecrets": "N00040866",
    "party": "Democrat",
@@ -11052,6 +13095,11 @@
    "govtrack": 456967,
    "last": "Moreno",
    "name": "Bernie Moreno",
+   "nameParts": {
+    "first": "Bernie",
+    "last": "Moreno",
+    "official_full": "Bernie Moreno"
+   },
    "office": "284 Russell Senate Office Building",
    "opensecrets": "N00048437",
    "party": "Republican",
@@ -11081,6 +13129,12 @@
    "govtrack": 456968,
    "last": "McCormick",
    "name": "David McCormick",
+   "nameParts": {
+    "first": "Dave",
+    "last": "McCormick",
+    "middle": "Harold",
+    "official_full": "David McCormick"
+   },
    "office": "702 Hart Senate Office Building",
    "opensecrets": "N00050244",
    "party": "Republican",
@@ -11111,6 +13165,12 @@
    "govtrack": 457033,
    "last": "Moody",
    "name": "Ashley Moody",
+   "nameParts": {
+    "first": "Ashley",
+    "last": "Moody",
+    "middle": "Brooke",
+    "official_full": "Ashley Moody"
+   },
    "office": "387 Russell Senate Office Building",
    "opensecrets": null,
    "party": "Republican",
@@ -11136,6 +13196,12 @@
    "govtrack": 457039,
    "last": "Menefee",
    "name": "Christian D. Menefee",
+   "nameParts": {
+    "first": "Christian",
+    "last": "Menefee",
+    "middle": "Dashaun",
+    "official_full": "Christian D. Menefee"
+   },
    "office": "1318 Longworth House Office Building",
    "opensecrets": null,
    "party": "Democrat",
@@ -11161,6 +13227,11 @@
    "govtrack": 457042,
    "last": "Mejia",
    "name": "Analilia Mejia",
+   "nameParts": {
+    "first": "Analilia",
+    "last": "Mejia",
+    "official_full": "Analilia Mejia"
+   },
    "office": "1427 Longworth House Office Building",
    "opensecrets": null,
    "party": "Democrat",
@@ -11186,6 +13257,12 @@
    "govtrack": 400289,
    "last": "Nadler",
    "name": "Jerrold Nadler",
+   "nameParts": {
+    "first": "Jerrold",
+    "last": "Nadler",
+    "middle": "L.",
+    "official_full": "Jerrold Nadler"
+   },
    "office": "2132 Rayburn House Office Building",
    "opensecrets": "N00000939",
    "party": "Democrat",
@@ -11217,6 +13294,12 @@
    "govtrack": 400291,
    "last": "Neal",
    "name": "Richard E. Neal",
+   "nameParts": {
+    "first": "Richard",
+    "last": "Neal",
+    "middle": "E.",
+    "official_full": "Richard E. Neal"
+   },
    "office": "372 Cannon House Office Building",
    "opensecrets": "N00000153",
    "party": "Democrat",
@@ -11248,6 +13331,12 @@
    "govtrack": 456848,
    "last": "Nehls",
    "name": "Troy E. Nehls",
+   "nameParts": {
+    "first": "Troy",
+    "last": "Nehls",
+    "middle": "E.",
+    "official_full": "Troy E. Nehls"
+   },
    "office": "1104 Longworth House Office Building",
    "opensecrets": "N00046067",
    "party": "Republican",
@@ -11278,6 +13367,12 @@
    "govtrack": 400295,
    "last": "Norton",
    "name": "Eleanor Holmes Norton",
+   "nameParts": {
+    "first": "Eleanor",
+    "last": "Norton",
+    "middle": "Holmes",
+    "official_full": "Eleanor Holmes Norton"
+   },
    "office": "2136 Rayburn House Office Building",
    "opensecrets": "N00001692",
    "party": "Democrat",
@@ -11311,6 +13406,12 @@
    "govtrack": 412606,
    "last": "Norcross",
    "name": "Donald Norcross",
+   "nameParts": {
+    "first": "Donald",
+    "last": "Norcross",
+    "middle": "W.",
+    "official_full": "Donald Norcross"
+   },
    "office": "2427 Rayburn House Office Building",
    "opensecrets": "N00036154",
    "party": "Democrat",
@@ -11342,6 +13443,11 @@
    "govtrack": 412660,
    "last": "Newhouse",
    "name": "Dan Newhouse",
+   "nameParts": {
+    "first": "Dan",
+    "last": "Newhouse",
+    "official_full": "Dan Newhouse"
+   },
    "office": "460 Cannon House Office Building",
    "opensecrets": "N00036403",
    "party": "Republican",
@@ -11373,6 +13479,11 @@
    "govtrack": 412738,
    "last": "Norman",
    "name": "Ralph Norman",
+   "nameParts": {
+    "first": "Ralph",
+    "last": "Norman",
+    "official_full": "Ralph Norman"
+   },
    "office": "569 Cannon House Office Building",
    "opensecrets": "N00027783",
    "party": "Republican",
@@ -11404,6 +13515,11 @@
    "govtrack": 412761,
    "last": "Neguse",
    "name": "Joe Neguse",
+   "nameParts": {
+    "first": "Joe",
+    "last": "Neguse",
+    "official_full": "Joe Neguse"
+   },
    "office": "2400 Rayburn House Office Building",
    "opensecrets": "N00041080",
    "party": "Democrat",
@@ -11433,6 +13549,12 @@
    "govtrack": 456898,
    "last": "Nunn",
    "name": "Zachary Nunn",
+   "nameParts": {
+    "first": "Zachary (Zach)",
+    "last": "Nunn",
+    "middle": "Martin",
+    "official_full": "Zachary Nunn"
+   },
    "office": "1410 Longworth House Office Building",
    "opensecrets": "N00048870",
    "party": "Republican",
@@ -11464,6 +13586,12 @@
    "govtrack": 456801,
    "last": "Obernolte",
    "name": "Jay Obernolte",
+   "nameParts": {
+    "first": "Jay",
+    "last": "Obernolte",
+    "middle": "Phillip",
+    "official_full": "Jay Obernolte"
+   },
    "office": "2433 Rayburn House Office Building",
    "opensecrets": "N00045377",
    "party": "Republican",
@@ -11492,6 +13620,12 @@
    "govtrack": 456852,
    "last": "Owens",
    "name": "Burgess Owens",
+   "nameParts": {
+    "first": "Clarence",
+    "last": "Owens",
+    "nickname": "Burgess",
+    "official_full": "Burgess Owens"
+   },
    "office": "309 Cannon House Office Building",
    "opensecrets": "N00045812",
    "party": "Republican",
@@ -11523,6 +13657,11 @@
    "govtrack": 412804,
    "last": "Ocasio-Cortez",
    "name": "Alexandria Ocasio-Cortez",
+   "nameParts": {
+    "first": "Alexandria",
+    "last": "Ocasio-Cortez",
+    "official_full": "Alexandria Ocasio-Cortez"
+   },
    "office": "250 Cannon House Office Building",
    "opensecrets": "N00041162",
    "party": "Democrat",
@@ -11552,6 +13691,11 @@
    "govtrack": 412791,
    "last": "Omar",
    "name": "Ilhan Omar",
+   "nameParts": {
+    "first": "Ilhan",
+    "last": "Omar",
+    "official_full": "Ilhan Omar"
+   },
    "office": "1730 Longworth House Office Building",
    "opensecrets": "N00043581",
    "party": "Democrat",
@@ -11580,6 +13724,11 @@
    "govtrack": 456857,
    "last": "Ossoff",
    "name": "Jon Ossoff",
+   "nameParts": {
+    "first": "Jon",
+    "last": "Ossoff",
+    "official_full": "Jon Ossoff"
+   },
    "office": "317 Hart Senate Office Building",
    "opensecrets": "N00040675",
    "party": "Democrat",
@@ -11610,6 +13759,12 @@
    "govtrack": 456939,
    "last": "Ogles",
    "name": "Andrew Ogles",
+   "nameParts": {
+    "first": "Andrew",
+    "last": "Ogles",
+    "official_full": "Andrew Ogles",
+    "suffix": "IV"
+   },
    "office": "151 Cannon House Office Building",
    "opensecrets": "N00050943",
    "party": "Republican",
@@ -11640,6 +13795,13 @@
    "govtrack": 456991,
    "last": "Olszewski",
    "name": "Johnny Olszewski, Jr.",
+   "nameParts": {
+    "first": "Johnny",
+    "last": "Olszewski",
+    "middle": "Anthony",
+    "official_full": "Johnny Olszewski, Jr.",
+    "suffix": "Jr."
+   },
    "office": "1339 Longworth House Office Building",
    "opensecrets": "N00054814",
    "party": "Democrat",
@@ -11670,6 +13832,13 @@
    "govtrack": 456998,
    "last": "Onder",
    "name": "Robert F. Onder, Jr.",
+   "nameParts": {
+    "first": "Robert",
+    "last": "Onder",
+    "middle": "F.",
+    "official_full": "Robert F. Onder, Jr.",
+    "suffix": "Jr."
+   },
    "office": "1113 Longworth House Office Building",
    "opensecrets": "N00030025",
    "party": "Republican",
@@ -11700,6 +13869,13 @@
    "govtrack": 400308,
    "last": "Pallone",
    "name": "Frank Pallone, Jr.",
+   "nameParts": {
+    "first": "Frank",
+    "last": "Pallone",
+    "middle": "J.",
+    "official_full": "Frank Pallone, Jr.",
+    "suffix": "Jr."
+   },
    "office": "2107 Rayburn House Office Building",
    "opensecrets": "N00000781",
    "party": "Democrat",
@@ -11732,6 +13908,13 @@
    "govtrack": 456846,
    "last": "Pfluger",
    "name": "August Pfluger",
+   "nameParts": {
+    "first": "August",
+    "last": "Pfluger",
+    "middle": "Lee",
+    "official_full": "August Pfluger",
+    "suffix": "II"
+   },
    "office": "2202 Rayburn House Office Building",
    "opensecrets": "N00045421",
    "party": "Republican",
@@ -11763,6 +13946,12 @@
    "govtrack": 456856,
    "last": "Padilla",
    "name": "Alex Padilla",
+   "nameParts": {
+    "first": "Alejandro",
+    "last": "Padilla",
+    "nickname": "Alex",
+    "official_full": "Alex Padilla"
+   },
    "office": "331 Hart Senate Office Building",
    "opensecrets": "N00047888",
    "party": "Democrat",
@@ -11793,6 +13982,11 @@
    "govtrack": 400314,
    "last": "Pelosi",
    "name": "Nancy Pelosi",
+   "nameParts": {
+    "first": "Nancy",
+    "last": "Pelosi",
+    "official_full": "Nancy Pelosi"
+   },
    "office": "1236 Longworth House Office Building",
    "opensecrets": "N00007360",
    "party": "Democrat",
@@ -11824,6 +14018,12 @@
    "govtrack": 412305,
    "last": "Peters",
    "name": "Gary C. Peters",
+   "nameParts": {
+    "first": "Gary",
+    "last": "Peters",
+    "middle": "C.",
+    "official_full": "Gary C. Peters"
+   },
    "office": "724 Hart Senate Office Building",
    "opensecrets": "N00029277",
    "party": "Democrat",
@@ -11856,6 +14056,11 @@
    "govtrack": 412307,
    "last": "Pingree",
    "name": "Chellie Pingree",
+   "nameParts": {
+    "first": "Chellie",
+    "last": "Pingree",
+    "official_full": "Chellie Pingree"
+   },
    "office": "2354 Rayburn House Office Building",
    "opensecrets": "N00013817",
    "party": "Democrat",
@@ -11889,6 +14094,11 @@
    "govtrack": 412492,
    "last": "Paul",
    "name": "Rand Paul",
+   "nameParts": {
+    "first": "Rand",
+    "last": "Paul",
+    "official_full": "Rand Paul"
+   },
    "office": "295 Russell Senate Office Building",
    "opensecrets": "N00030836",
    "party": "Republican",
@@ -11921,6 +14131,11 @@
    "govtrack": 412569,
    "last": "Perry",
    "name": "Scott Perry",
+   "nameParts": {
+    "first": "Scott",
+    "last": "Perry",
+    "official_full": "Scott Perry"
+   },
    "office": "2160 Rayburn House Office Building",
    "opensecrets": "N00034120",
    "party": "Republican",
@@ -11953,6 +14168,11 @@
    "govtrack": 412585,
    "last": "Pocan",
    "name": "Mark Pocan",
+   "nameParts": {
+    "first": "Mark",
+    "last": "Pocan",
+    "official_full": "Mark Pocan"
+   },
    "office": "1026 Longworth House Office Building",
    "opensecrets": "N00033549",
    "party": "Democrat",
@@ -11985,6 +14205,12 @@
    "govtrack": 412523,
    "last": "Peters",
    "name": "Scott H. Peters",
+   "nameParts": {
+    "first": "Scott",
+    "last": "Peters",
+    "middle": "H.",
+    "official_full": "Scott H. Peters"
+   },
    "office": "2369 Rayburn House Office Building",
    "opensecrets": "N00033591",
    "party": "Democrat",
@@ -12016,6 +14242,12 @@
    "govtrack": 412608,
    "last": "Palmer",
    "name": "Gary J. Palmer",
+   "nameParts": {
+    "first": "Gary",
+    "last": "Palmer",
+    "middle": "J.",
+    "official_full": "Gary J. Palmer"
+   },
    "office": "170 Cannon House Office Building",
    "opensecrets": "N00035691",
    "party": "Republican",
@@ -12047,6 +14279,12 @@
    "govtrack": 412659,
    "last": "Plaskett",
    "name": "Stacey E. Plaskett",
+   "nameParts": {
+    "first": "Stacey",
+    "last": "Plaskett",
+    "middle": "E.",
+    "official_full": "Stacey E. Plaskett"
+   },
    "office": "2059 Rayburn House Office Building",
    "opensecrets": "N00035000",
    "party": "Democrat",
@@ -12078,6 +14316,11 @@
    "govtrack": 412685,
    "last": "Panetta",
    "name": "Jimmy Panetta",
+   "nameParts": {
+    "first": "Jimmy",
+    "last": "Panetta",
+    "official_full": "Jimmy Panetta"
+   },
    "office": "200 Cannon House Office Building",
    "opensecrets": "N00038601",
    "party": "Democrat",
@@ -12109,6 +14352,11 @@
    "govtrack": 412795,
    "last": "Pappas",
    "name": "Chris Pappas",
+   "nameParts": {
+    "first": "Chris",
+    "last": "Pappas",
+    "official_full": "Chris Pappas"
+   },
    "office": "452 Cannon House Office Building",
    "opensecrets": "N00042161",
    "party": "Democrat",
@@ -12137,6 +14385,11 @@
    "govtrack": 412782,
    "last": "Pressley",
    "name": "Ayanna Pressley",
+   "nameParts": {
+    "first": "Ayanna",
+    "last": "Pressley",
+    "official_full": "Ayanna Pressley"
+   },
    "office": "402 Cannon House Office Building",
    "opensecrets": "N00042581",
    "party": "Democrat",
@@ -12168,6 +14421,12 @@
    "govtrack": 456886,
    "last": "Pettersen",
    "name": "Brittany Pettersen",
+   "nameParts": {
+    "first": "Brittany",
+    "last": "Pettersen",
+    "middle": "Louise",
+    "official_full": "Brittany Pettersen"
+   },
    "office": "348 Cannon House Office Building",
    "opensecrets": "N00040878",
    "party": "Democrat",
@@ -12198,6 +14457,12 @@
    "govtrack": 457009,
    "last": "Pou",
    "name": "Nellie Pou",
+   "nameParts": {
+    "first": "Nellie",
+    "last": "Pou",
+    "middle": "Avila",
+    "official_full": "Nellie Pou"
+   },
    "office": "1007 Longworth House Office Building",
    "opensecrets": "N00055613",
    "party": "Democrat",
@@ -12228,6 +14493,13 @@
    "govtrack": 457034,
    "last": "Patronis",
    "name": "Jimmy Patronis",
+   "nameParts": {
+    "first": "Jimmy",
+    "last": "Patronis",
+    "middle": "Theo",
+    "official_full": "Jimmy Patronis",
+    "suffix": "Jr."
+   },
    "office": "2021 Rayburn House Office Building",
    "opensecrets": null,
    "party": "Republican",
@@ -12253,6 +14525,11 @@
    "govtrack": 412331,
    "last": "Quigley",
    "name": "Mike Quigley",
+   "nameParts": {
+    "first": "Mike",
+    "last": "Quigley",
+    "official_full": "Mike Quigley"
+   },
    "office": "2083 Rayburn House Office Building",
    "opensecrets": "N00030581",
    "party": "Democrat",
@@ -12285,6 +14562,13 @@
    "govtrack": 300081,
    "last": "Reed",
    "name": "Jack Reed",
+   "nameParts": {
+    "first": "John",
+    "last": "Reed",
+    "middle": "F.",
+    "nickname": "Jack",
+    "official_full": "Jack Reed"
+   },
    "office": "728 Hart Senate Office Building",
    "opensecrets": "N00000362",
    "party": "Democrat",
@@ -12316,6 +14600,12 @@
    "govtrack": 456831,
    "last": "Ross",
    "name": "Deborah K. Ross",
+   "nameParts": {
+    "first": "Deborah",
+    "last": "Ross",
+    "middle": "Koff",
+    "official_full": "Deborah K. Ross"
+   },
    "office": "1221 Longworth House Office Building",
    "opensecrets": "N00038565",
    "party": "Democrat",
@@ -12346,6 +14636,12 @@
    "govtrack": 400340,
    "last": "Rogers",
    "name": "Harold Rogers",
+   "nameParts": {
+    "first": "Harold",
+    "last": "Rogers",
+    "nickname": "Hal",
+    "official_full": "Harold Rogers"
+   },
    "office": "2406 Rayburn House Office Building",
    "opensecrets": "N00003473",
    "party": "Republican",
@@ -12378,6 +14674,11 @@
    "govtrack": 400341,
    "last": "Rogers",
    "name": "Mike Rogers",
+   "nameParts": {
+    "first": "Mike",
+    "last": "Rogers",
+    "official_full": "Mike Rogers"
+   },
    "office": "2469 Rayburn House Office Building",
    "opensecrets": "N00024759",
    "party": "Republican",
@@ -12410,6 +14711,11 @@
    "govtrack": 456871,
    "last": "Ryan",
    "name": "Patrick Ryan",
+   "nameParts": {
+    "first": "Patrick",
+    "last": "Ryan",
+    "official_full": "Patrick Ryan"
+   },
    "office": "1708 Longworth House Office Building",
    "opensecrets": "N00041165",
    "party": "Democrat",
@@ -12438,6 +14744,12 @@
    "govtrack": 412322,
    "last": "Risch",
    "name": "James E. Risch",
+   "nameParts": {
+    "first": "James",
+    "last": "Risch",
+    "middle": "E.",
+    "official_full": "James E. Risch"
+   },
    "office": "483 Russell Senate Office Building",
    "opensecrets": "N00029441",
    "party": "Republican",
@@ -12469,6 +14781,11 @@
    "govtrack": 412519,
    "last": "Ruiz",
    "name": "Raul Ruiz",
+   "nameParts": {
+    "first": "Raul",
+    "last": "Ruiz",
+    "official_full": "Raul Ruiz"
+   },
    "office": "2342 Rayburn House Office Building",
    "opensecrets": "N00033510",
    "party": "Democrat",
@@ -12500,6 +14817,12 @@
    "govtrack": 412664,
    "last": "Radewagen",
    "name": "Aumua Amata Coleman Radewagen",
+   "nameParts": {
+    "first": "Aumua Amata",
+    "last": "Radewagen",
+    "middle": "Coleman",
+    "official_full": "Aumua Amata Coleman Radewagen"
+   },
    "office": "2001 Rayburn House Office Building",
    "opensecrets": "N00007635",
    "party": "Republican",
@@ -12530,6 +14853,11 @@
    "govtrack": 412641,
    "last": "Rouzer",
    "name": "David Rouzer",
+   "nameParts": {
+    "first": "David",
+    "last": "Rouzer",
+    "official_full": "David Rouzer"
+   },
    "office": "2333 Rayburn House Office Building",
    "opensecrets": "N00033527",
    "party": "Republican",
@@ -12561,6 +14889,11 @@
    "govtrack": 412669,
    "last": "Rounds",
    "name": "Mike Rounds",
+   "nameParts": {
+    "first": "Mike",
+    "last": "Rounds",
+    "official_full": "Mike Rounds"
+   },
    "office": "716 Hart Senate Office Building",
    "opensecrets": "N00035187",
    "party": "Republican",
@@ -12592,6 +14925,11 @@
    "govtrack": 412708,
    "last": "Raskin",
    "name": "Jamie Raskin",
+   "nameParts": {
+    "first": "Jamie",
+    "last": "Raskin",
+    "official_full": "Jamie Raskin"
+   },
    "office": "2242 Rayburn House Office Building",
    "opensecrets": "N00037036",
    "party": "Democrat",
@@ -12623,6 +14961,11 @@
    "govtrack": 412715,
    "last": "Rosen",
    "name": "Jacky Rosen",
+   "nameParts": {
+    "first": "Jacky",
+    "last": "Rosen",
+    "official_full": "Jacky Rosen"
+   },
    "office": "713 Hart Senate Office Building",
    "opensecrets": "N00038734",
    "party": "Democrat",
@@ -12653,6 +14996,12 @@
    "govtrack": 412692,
    "last": "Rutherford",
    "name": "John H. Rutherford",
+   "nameParts": {
+    "first": "John",
+    "last": "Rutherford",
+    "middle": "H.",
+    "official_full": "John H. Rutherford"
+   },
    "office": "1711 Longworth House Office Building",
    "opensecrets": "N00039777",
    "party": "Republican",
@@ -12684,6 +15033,11 @@
    "govtrack": 412813,
    "last": "Reschenthaler",
    "name": "Guy Reschenthaler",
+   "nameParts": {
+    "first": "Guy",
+    "last": "Reschenthaler",
+    "official_full": "Guy Reschenthaler"
+   },
    "office": "2209 Rayburn House Office Building",
    "opensecrets": "N00041871",
    "party": "Republican",
@@ -12715,6 +15069,12 @@
    "govtrack": 412818,
    "last": "Rose",
    "name": "John W. Rose",
+   "nameParts": {
+    "first": "John",
+    "last": "Rose",
+    "middle": "W.",
+    "official_full": "John W. Rose"
+   },
    "office": "2238 Rayburn House Office Building",
    "opensecrets": "N00041599",
    "party": "Republican",
@@ -12744,6 +15104,11 @@
    "govtrack": 412826,
    "last": "Roy",
    "name": "Chip Roy",
+   "nameParts": {
+    "first": "Chip",
+    "last": "Roy",
+    "official_full": "Chip Roy"
+   },
    "office": "103 Cannon House Office Building",
    "opensecrets": "N00042268",
    "party": "Republican",
@@ -12772,6 +15137,12 @@
    "govtrack": 456900,
    "last": "Ramirez",
    "name": "Delia C. Ramirez",
+   "nameParts": {
+    "first": "Delia",
+    "last": "Ramirez",
+    "middle": "Catalina",
+    "official_full": "Delia C. Ramirez"
+   },
    "office": "1523 Longworth House Office Building",
    "opensecrets": "N00049548",
    "party": "Democrat",
@@ -12802,6 +15173,11 @@
    "govtrack": 456952,
    "last": "Ricketts",
    "name": "Pete Ricketts",
+   "nameParts": {
+    "first": "Pete",
+    "last": "Ricketts",
+    "official_full": "Pete Ricketts"
+   },
    "office": "139 Russell Senate Office Building",
    "opensecrets": "N00027695",
    "party": "Republican",
@@ -12833,6 +15209,12 @@
    "govtrack": 456959,
    "last": "Rulli",
    "name": "Michael A. Rulli",
+   "nameParts": {
+    "first": "Michael",
+    "last": "Rulli",
+    "middle": "A.",
+    "official_full": "Michael A. Rulli"
+   },
    "office": "421 Cannon House Office Building",
    "opensecrets": "N00054190",
    "party": "Republican",
@@ -12858,6 +15240,12 @@
    "govtrack": 456978,
    "last": "Rivas",
    "name": "Luz M. Rivas",
+   "nameParts": {
+    "first": "Luz",
+    "last": "Rivas",
+    "middle": "Maria",
+    "official_full": "Luz M. Rivas"
+   },
    "office": "1319 Longworth House Office Building",
    "opensecrets": "N00054215",
    "party": "Democrat",
@@ -12888,6 +15276,12 @@
    "govtrack": 457030,
    "last": "Randall",
    "name": "Emily Randall",
+   "nameParts": {
+    "first": "Emily",
+    "last": "Randall",
+    "middle": "Elissa",
+    "official_full": "Emily Randall"
+   },
    "office": "1531 Longworth House Office Building",
    "opensecrets": "N00054078",
    "party": "Democrat",
@@ -12913,6 +15307,12 @@
    "govtrack": 457012,
    "last": "Riley",
    "name": "Josh Riley",
+   "nameParts": {
+    "first": "Josh",
+    "last": "Riley",
+    "middle": "Paul",
+    "official_full": "Josh Riley"
+   },
    "office": "128 Cannon House Office Building",
    "opensecrets": "N00049916",
    "party": "Democrat",
@@ -12942,6 +15342,12 @@
    "govtrack": 400357,
    "last": "Sanders",
    "name": "Bernard Sanders",
+   "nameParts": {
+    "first": "Bernard",
+    "last": "Sanders",
+    "nickname": "Bernie",
+    "official_full": "Bernard Sanders"
+   },
    "office": "332 Dirksen Senate Office Building",
    "opensecrets": "N00000528",
    "party": "Independent",
@@ -12973,6 +15379,13 @@
    "govtrack": 300087,
    "last": "Schumer",
    "name": "Charles E. Schumer",
+   "nameParts": {
+    "first": "Charles",
+    "last": "Schumer",
+    "middle": "E.",
+    "nickname": "Chuck",
+    "official_full": "Charles E. Schumer"
+   },
    "office": "322 Hart Senate Office Building",
    "opensecrets": "N00001093",
    "party": "Democrat",
@@ -13005,6 +15418,12 @@
    "govtrack": 456810,
    "last": "Salazar",
    "name": "Maria Elvira Salazar",
+   "nameParts": {
+    "first": "Maria",
+    "last": "Salazar",
+    "middle": "Elvira",
+    "official_full": "Maria Elvira Salazar"
+   },
    "office": "2162 Rayburn House Office Building",
    "opensecrets": "N00042810",
    "party": "Republican",
@@ -13035,6 +15454,13 @@
    "govtrack": 400364,
    "last": "Scott",
    "name": "Robert C. \"Bobby\" Scott",
+   "nameParts": {
+    "first": "Robert",
+    "last": "Scott",
+    "middle": "C.",
+    "nickname": "Bobby",
+    "official_full": "Robert C. \"Bobby\" Scott"
+   },
    "office": "2328 Rayburn House Office Building",
    "opensecrets": "N00002147",
    "party": "Democrat",
@@ -13067,6 +15493,12 @@
    "govtrack": 400367,
    "last": "Sessions",
    "name": "Pete Sessions",
+   "nameParts": {
+    "first": "Pete",
+    "last": "Sessions",
+    "middle": "A.",
+    "official_full": "Pete Sessions"
+   },
    "office": "2204 Rayburn House Office Building",
    "opensecrets": "N00005681",
    "party": "Republican",
@@ -13098,6 +15530,12 @@
    "govtrack": 400371,
    "last": "Sherman",
    "name": "Brad Sherman",
+   "nameParts": {
+    "first": "Brad",
+    "last": "Sherman",
+    "middle": "J.",
+    "official_full": "Brad Sherman"
+   },
    "office": "2365 Rayburn House Office Building",
    "opensecrets": "N00006897",
    "party": "Democrat",
@@ -13130,6 +15568,11 @@
    "govtrack": 400379,
    "last": "Smith",
    "name": "Adam Smith",
+   "nameParts": {
+    "first": "Adam",
+    "last": "Smith",
+    "official_full": "Adam Smith"
+   },
    "office": "2264 Rayburn House Office Building",
    "opensecrets": "N00007833",
    "party": "Democrat",
@@ -13162,6 +15605,13 @@
    "govtrack": 400380,
    "last": "Smith",
    "name": "Christopher H. Smith",
+   "nameParts": {
+    "first": "Christopher",
+    "last": "Smith",
+    "middle": "H.",
+    "nickname": "Chris",
+    "official_full": "Christopher H. Smith"
+   },
    "office": "2373 Rayburn House Office Building",
    "opensecrets": "N00009816",
    "party": "Republican",
@@ -13193,6 +15643,11 @@
    "govtrack": 456822,
    "last": "Spartz",
    "name": "Victoria Spartz",
+   "nameParts": {
+    "first": "Victoria",
+    "last": "Spartz",
+    "official_full": "Victoria Spartz"
+   },
    "office": "1609 Longworth House Office Building",
    "opensecrets": "N00046537",
    "party": "Republican",
@@ -13222,6 +15677,13 @@
    "govtrack": 400360,
    "last": "Schakowsky",
    "name": "Janice D. Schakowsky",
+   "nameParts": {
+    "first": "Janice",
+    "last": "Schakowsky",
+    "middle": "D.",
+    "nickname": "Jan",
+    "official_full": "Janice D. Schakowsky"
+   },
    "office": "2408 Rayburn House Office Building",
    "opensecrets": "N00004724",
    "party": "Democrat",
@@ -13254,6 +15716,13 @@
    "govtrack": 400376,
    "last": "Simpson",
    "name": "Michael K. Simpson",
+   "nameParts": {
+    "first": "Michael",
+    "last": "Simpson",
+    "middle": "K.",
+    "nickname": "Mike",
+    "official_full": "Michael K. Simpson"
+   },
    "office": "2084 Rayburn House Office Building",
    "opensecrets": "N00006263",
    "party": "Republican",
@@ -13286,6 +15755,12 @@
    "govtrack": 400361,
    "last": "Schiff",
    "name": "Adam B. Schiff",
+   "nameParts": {
+    "first": "Adam",
+    "last": "Schiff",
+    "middle": "B.",
+    "official_full": "Adam B. Schiff"
+   },
    "office": "112 Hart Senate Office Building",
    "opensecrets": "N00009585",
    "party": "Democrat",
@@ -13317,6 +15792,12 @@
    "govtrack": 400355,
    "last": "Sánchez",
    "name": "Linda T. Sánchez",
+   "nameParts": {
+    "first": "Linda",
+    "last": "Sánchez",
+    "middle": "T.",
+    "official_full": "Linda T. Sánchez"
+   },
    "office": "2309 Rayburn House Office Building",
    "opensecrets": "N00024870",
    "party": "Democrat",
@@ -13349,6 +15830,11 @@
    "govtrack": 456854,
    "last": "Strickland",
    "name": "Marilyn Strickland",
+   "nameParts": {
+    "first": "Marilyn",
+    "last": "Strickland",
+    "official_full": "Marilyn Strickland"
+   },
    "office": "1724 Longworth House Office Building",
    "opensecrets": "N00046320",
    "party": "Democrat",
@@ -13379,6 +15865,11 @@
    "govtrack": 412217,
    "last": "Smith",
    "name": "Adrian Smith",
+   "nameParts": {
+    "first": "Adrian",
+    "last": "Smith",
+    "official_full": "Adrian Smith"
+   },
    "office": "502 Cannon House Office Building",
    "opensecrets": "N00027623",
    "party": "Republican",
@@ -13411,6 +15902,12 @@
    "govtrack": 412261,
    "last": "Scalise",
    "name": "Steve Scalise",
+   "nameParts": {
+    "first": "Steve",
+    "last": "Scalise",
+    "middle": "Joseph",
+    "official_full": "Steve Scalise"
+   },
    "office": "266 Cannon House Office Building",
    "opensecrets": "N00009660",
    "party": "Republican",
@@ -13443,6 +15940,11 @@
    "govtrack": 412323,
    "last": "Shaheen",
    "name": "Jeanne Shaheen",
+   "nameParts": {
+    "first": "Jeanne",
+    "last": "Shaheen",
+    "official_full": "Jeanne Shaheen"
+   },
    "office": "506 Hart Senate Office Building",
    "opensecrets": "N00024790",
    "party": "Democrat",
@@ -13476,6 +15978,11 @@
    "govtrack": 412399,
    "last": "Schweikert",
    "name": "David Schweikert",
+   "nameParts": {
+    "first": "David",
+    "last": "Schweikert",
+    "official_full": "David Schweikert"
+   },
    "office": "166 Cannon House Office Building",
    "opensecrets": "N00006460",
    "party": "Republican",
@@ -13508,6 +16015,11 @@
    "govtrack": 412471,
    "last": "Scott",
    "name": "Tim Scott",
+   "nameParts": {
+    "first": "Tim",
+    "last": "Scott",
+    "official_full": "Tim Scott"
+   },
    "office": "104 Hart Senate Office Building",
    "opensecrets": "N00031782",
    "party": "Republican",
@@ -13540,6 +16052,12 @@
    "govtrack": 412396,
    "last": "Sewell",
    "name": "Terri A. Sewell",
+   "nameParts": {
+    "first": "Terri",
+    "last": "Sewell",
+    "middle": "A.",
+    "official_full": "Terri A. Sewell"
+   },
    "office": "1035 Longworth House Office Building",
    "opensecrets": "N00030622",
    "party": "Democrat",
@@ -13572,6 +16090,12 @@
    "govtrack": 412392,
    "last": "Stutzman",
    "name": "Marlin A. Stutzman",
+   "nameParts": {
+    "first": "Marlin",
+    "last": "Stutzman",
+    "middle": "A.",
+    "official_full": "Marlin A. Stutzman"
+   },
    "office": "404 Cannon House Office Building",
    "opensecrets": "N00030891",
    "party": "Republican",
@@ -13602,6 +16126,11 @@
    "govtrack": 412417,
    "last": "Scott",
    "name": "Austin Scott",
+   "nameParts": {
+    "first": "Austin",
+    "last": "Scott",
+    "official_full": "Austin Scott"
+   },
    "office": "2185 Rayburn House Office Building",
    "opensecrets": "N00032457",
    "party": "Republican",
@@ -13633,6 +16162,13 @@
    "govtrack": 412534,
    "last": "Schneider",
    "name": "Bradley Scott Schneider",
+   "nameParts": {
+    "first": "Bradley",
+    "last": "Schneider",
+    "middle": "Scott",
+    "nickname": "Brad",
+    "official_full": "Bradley Scott Schneider"
+   },
    "office": "300 Cannon House Office Building",
    "opensecrets": "N00033101",
    "party": "Democrat",
@@ -13664,6 +16200,12 @@
    "govtrack": 412507,
    "last": "Schatz",
    "name": "Brian Schatz",
+   "nameParts": {
+    "first": "Brian",
+    "last": "Schatz",
+    "middle": "Emanuel",
+    "official_full": "Brian Schatz"
+   },
    "office": "722 Hart Senate Office Building",
    "opensecrets": "N00028138",
    "party": "Democrat",
@@ -13696,6 +16238,12 @@
    "govtrack": 412596,
    "last": "Smith",
    "name": "Jason Smith",
+   "nameParts": {
+    "first": "Jason",
+    "last": "Smith",
+    "middle": "T.",
+    "official_full": "Jason Smith"
+   },
    "office": "1011 Longworth House Office Building",
    "opensecrets": "N00035282",
    "party": "Republican",
@@ -13727,6 +16275,12 @@
    "govtrack": 412648,
    "last": "Stefanik",
    "name": "Elise M. Stefanik",
+   "nameParts": {
+    "first": "Elise",
+    "last": "Stefanik",
+    "middle": "M.",
+    "official_full": "Elise M. Stefanik"
+   },
    "office": "2211 Rayburn House Office Building",
    "opensecrets": "N00035523",
    "party": "Republican",
@@ -13758,6 +16312,11 @@
    "govtrack": 412665,
    "last": "Sullivan",
    "name": "Dan Sullivan",
+   "nameParts": {
+    "first": "Dan",
+    "last": "Sullivan",
+    "official_full": "Dan Sullivan"
+   },
    "office": "706 Hart Senate Office Building",
    "opensecrets": "N00035774",
    "party": "Republican",
@@ -13789,6 +16348,11 @@
    "govtrack": 412722,
    "last": "Smucker",
    "name": "Lloyd Smucker",
+   "nameParts": {
+    "first": "Lloyd",
+    "last": "Smucker",
+    "official_full": "Lloyd Smucker"
+   },
    "office": "302 Cannon House Office Building",
    "opensecrets": "N00038781",
    "party": "Republican",
@@ -13819,6 +16383,11 @@
    "govtrack": 412695,
    "last": "Soto",
    "name": "Darren Soto",
+   "nameParts": {
+    "first": "Darren",
+    "last": "Soto",
+    "official_full": "Darren Soto"
+   },
    "office": "2353 Rayburn House Office Building",
    "opensecrets": "N00037422",
    "party": "Democrat",
@@ -13850,6 +16419,12 @@
    "govtrack": 412717,
    "last": "Suozzi",
    "name": "Thomas R. Suozzi",
+   "nameParts": {
+    "first": "Thomas",
+    "last": "Suozzi",
+    "middle": "R.",
+    "official_full": "Thomas R. Suozzi"
+   },
    "office": "203 Cannon House Office Building",
    "opensecrets": "N00038742",
    "party": "Democrat",
@@ -13879,6 +16454,12 @@
    "govtrack": 412742,
    "last": "Smith",
    "name": "Tina Smith",
+   "nameParts": {
+    "first": "Tina",
+    "last": "Smith",
+    "middle": "Flint",
+    "official_full": "Tina Smith"
+   },
    "office": "720 Hart Senate Office Building",
    "opensecrets": "N00042353",
    "party": "Democrat",
@@ -13909,6 +16490,12 @@
    "govtrack": 412750,
    "last": "Scanlon",
    "name": "Mary Gay Scanlon",
+   "nameParts": {
+    "first": "Mary",
+    "last": "Scanlon",
+    "middle": "Gay",
+    "official_full": "Mary Gay Scanlon"
+   },
    "office": "1214 Longworth House Office Building",
    "opensecrets": "N00042706",
    "party": "Democrat",
@@ -13939,6 +16526,11 @@
    "govtrack": 412784,
    "last": "Slotkin",
    "name": "Elissa Slotkin",
+   "nameParts": {
+    "first": "Elissa",
+    "last": "Slotkin",
+    "official_full": "Elissa Slotkin"
+   },
    "office": "291 Russell Senate Office Building",
    "opensecrets": "N00041357",
    "party": "Democrat",
@@ -13969,6 +16561,11 @@
    "govtrack": 412753,
    "last": "Stanton",
    "name": "Greg Stanton",
+   "nameParts": {
+    "first": "Greg",
+    "last": "Stanton",
+    "official_full": "Greg Stanton"
+   },
    "office": "207 Cannon House Office Building",
    "opensecrets": "N00041750",
    "party": "Democrat",
@@ -13999,6 +16596,11 @@
    "govtrack": 412792,
    "last": "Stauber",
    "name": "Pete Stauber",
+   "nameParts": {
+    "first": "Pete",
+    "last": "Stauber",
+    "official_full": "Pete Stauber"
+   },
    "office": "145 Cannon House Office Building",
    "opensecrets": "N00041511",
    "party": "Republican",
@@ -14028,6 +16630,11 @@
    "govtrack": 412836,
    "last": "Steil",
    "name": "Bryan Steil",
+   "nameParts": {
+    "first": "Bryan",
+    "last": "Steil",
+    "official_full": "Bryan Steil"
+   },
    "office": "1526 Longworth House Office Building",
    "opensecrets": "N00043379",
    "party": "Republican",
@@ -14056,6 +16663,12 @@
    "govtrack": 412766,
    "last": "Steube",
    "name": "W. Gregory Steube",
+   "nameParts": {
+    "first": "W.",
+    "last": "Steube",
+    "middle": "Gregory",
+    "official_full": "W. Gregory Steube"
+   },
    "office": "2457 Rayburn House Office Building",
    "opensecrets": "N00042808",
    "party": "Republican",
@@ -14087,6 +16700,12 @@
    "govtrack": 412786,
    "last": "Stevens",
    "name": "Haley M. Stevens",
+   "nameParts": {
+    "first": "Haley",
+    "last": "Stevens",
+    "middle": "M.",
+    "official_full": "Haley M. Stevens"
+   },
    "office": "2411 Rayburn House Office Building",
    "opensecrets": "N00040915",
    "party": "Democrat",
@@ -14116,6 +16735,11 @@
    "govtrack": 412835,
    "last": "Schrier",
    "name": "Kim Schrier",
+   "nameParts": {
+    "first": "Kim",
+    "last": "Schrier",
+    "official_full": "Kim Schrier"
+   },
    "office": "1110 Longworth House Office Building",
    "opensecrets": "N00041606",
    "party": "Democrat",
@@ -14145,6 +16769,11 @@
    "govtrack": 412838,
    "last": "Scott",
    "name": "Rick Scott",
+   "nameParts": {
+    "first": "Rick",
+    "last": "Scott",
+    "official_full": "Rick Scott"
+   },
    "office": "110 Hart Senate Office Building",
    "opensecrets": "N00043290",
    "party": "Republican",
@@ -14176,6 +16805,12 @@
    "govtrack": 456861,
    "last": "Stansbury",
    "name": "Melanie A. Stansbury",
+   "nameParts": {
+    "first": "Melanie",
+    "last": "Stansbury",
+    "middle": "Ann",
+    "official_full": "Melanie A. Stansbury"
+   },
    "office": "1421 Longworth House Office Building",
    "opensecrets": "N00047871",
    "party": "Democrat",
@@ -14205,6 +16840,11 @@
    "govtrack": 456878,
    "last": "Strong",
    "name": "Dale W. Strong",
+   "nameParts": {
+    "first": "Dale",
+    "last": "Strong",
+    "official_full": "Dale W. Strong"
+   },
    "office": "449 Cannon House Office Building",
    "opensecrets": "N00048145",
    "party": "Republican",
@@ -14235,6 +16875,12 @@
    "govtrack": 456906,
    "last": "Scholten",
    "name": "Hillary J. Scholten",
+   "nameParts": {
+    "first": "Hillary",
+    "last": "Scholten",
+    "middle": "Jeanne",
+    "official_full": "Hillary J. Scholten"
+   },
    "office": "1317 Longworth House Office Building",
    "opensecrets": "N00044885",
    "party": "Democrat",
@@ -14265,6 +16911,12 @@
    "govtrack": 456930,
    "last": "Sykes",
    "name": "Emilia Strong Sykes",
+   "nameParts": {
+    "first": "Emilia",
+    "last": "Sykes",
+    "middle": "Strong",
+    "official_full": "Emilia Strong Sykes"
+   },
    "office": "1217 Longworth House Office Building",
    "opensecrets": "N00050165",
    "party": "Democrat",
@@ -14297,6 +16949,12 @@
    "govtrack": 456941,
    "last": "Self",
    "name": "Keith Self",
+   "nameParts": {
+    "first": "Keith",
+    "last": "Self",
+    "middle": "Alan",
+    "official_full": "Keith Self"
+   },
    "office": "1030 Longworth House Office Building",
    "opensecrets": "N00049337",
    "party": "Republican",
@@ -14327,6 +16985,11 @@
    "govtrack": 456902,
    "last": "Sorensen",
    "name": "Eric Sorensen",
+   "nameParts": {
+    "first": "Eric",
+    "last": "Sorensen",
+    "official_full": "Eric Sorensen"
+   },
    "office": "1314 Longworth House Office Building",
    "opensecrets": "N00049558",
    "party": "Democrat",
@@ -14356,6 +17019,12 @@
    "govtrack": 456934,
    "last": "Salinas",
    "name": "Andrea Salinas",
+   "nameParts": {
+    "first": "Andrea",
+    "last": "Salinas",
+    "middle": "Rose",
+    "official_full": "Andrea Salinas"
+   },
    "office": "403 Cannon House Office Building",
    "opensecrets": "N00049738",
    "party": "Democrat",
@@ -14386,6 +17055,12 @@
    "govtrack": 456875,
    "last": "Schmitt",
    "name": "Eric Schmitt",
+   "nameParts": {
+    "first": "Eric",
+    "last": "Schmitt",
+    "middle": "Stephen",
+    "official_full": "Eric Schmitt"
+   },
    "office": "404 Russell Senate Office Building",
    "opensecrets": "N00048414",
    "party": "Republican",
@@ -14417,6 +17092,12 @@
    "govtrack": 456990,
    "last": "Schmidt",
    "name": "Derek Schmidt",
+   "nameParts": {
+    "first": "Derek",
+    "last": "Schmidt",
+    "middle": "Larkin",
+    "official_full": "Derek Schmidt"
+   },
    "office": "1223 Longworth House Office Building",
    "opensecrets": "N00055179",
    "party": "Republican",
@@ -14447,6 +17128,12 @@
    "govtrack": 456988,
    "last": "Shreve",
    "name": "Jefferson Shreve",
+   "nameParts": {
+    "first": "Jefferson",
+    "last": "Shreve",
+    "middle": "Scott",
+    "official_full": "Jefferson Shreve"
+   },
    "office": "224 Cannon House Office Building",
    "opensecrets": "N00054651",
    "party": "Republican",
@@ -14477,6 +17164,11 @@
    "govtrack": 457028,
    "last": "Subramanyam",
    "name": "Suhas Subramanyam",
+   "nameParts": {
+    "first": "Suhas",
+    "last": "Subramanyam",
+    "official_full": "Suhas Subramanyam"
+   },
    "office": "1009 Longworth House Office Building",
    "opensecrets": "N00054085",
    "party": "Democrat",
@@ -14507,6 +17199,12 @@
    "govtrack": 456974,
    "last": "Simon",
    "name": "Lateefah Simon",
+   "nameParts": {
+    "first": "Lateefah",
+    "last": "Simon",
+    "middle": "Aaliyah",
+    "official_full": "Lateefah Simon"
+   },
    "office": "1023 Longworth House Office Building",
    "opensecrets": "N00052195",
    "party": "Democrat",
@@ -14537,6 +17235,12 @@
    "govtrack": 456966,
    "last": "Sheehy",
    "name": "Tim Sheehy",
+   "nameParts": {
+    "first": "Tim",
+    "last": "Sheehy",
+    "middle": "Patrick",
+    "official_full": "Tim Sheehy"
+   },
    "office": "124 Russell Senate Office Building",
    "opensecrets": "N00053174",
    "party": "Republican",
@@ -14562,6 +17266,12 @@
    "govtrack": 456791,
    "last": "Tiffany",
    "name": "Thomas P. Tiffany",
+   "nameParts": {
+    "first": "Thomas",
+    "last": "Tiffany",
+    "middle": "P.",
+    "official_full": "Thomas P. Tiffany"
+   },
    "office": "451 Cannon House Office Building",
    "opensecrets": "N00045307",
    "party": "Republican",
@@ -14591,6 +17301,12 @@
    "govtrack": 400402,
    "last": "Thompson",
    "name": "Bennie G. Thompson",
+   "nameParts": {
+    "first": "Bennie",
+    "last": "Thompson",
+    "middle": "G.",
+    "official_full": "Bennie G. Thompson"
+   },
    "office": "2466 Rayburn House Office Building",
    "opensecrets": "N00003288",
    "party": "Democrat",
@@ -14623,6 +17339,11 @@
    "govtrack": 400546,
    "last": "Thune",
    "name": "John Thune",
+   "nameParts": {
+    "first": "John",
+    "last": "Thune",
+    "official_full": "John Thune"
+   },
    "office": "511 Dirksen Senate Office Building",
    "opensecrets": "N00004572",
    "party": "Republican",
@@ -14655,6 +17376,12 @@
    "govtrack": 456796,
    "last": "Tuberville",
    "name": "Tommy Tuberville",
+   "nameParts": {
+    "first": "Tommy",
+    "last": "Tuberville",
+    "middle": "Hawley",
+    "official_full": "Tommy Tuberville"
+   },
    "office": "455 Russell Senate Office Building",
    "opensecrets": "N00044434",
    "party": "Republican",
@@ -14685,6 +17412,12 @@
    "govtrack": 400403,
    "last": "Thompson",
    "name": "Mike Thompson",
+   "nameParts": {
+    "first": "Mike",
+    "last": "Thompson",
+    "middle": "Michael",
+    "official_full": "Mike Thompson"
+   },
    "office": "268 Cannon House Office Building",
    "opensecrets": "N00007419",
    "party": "Democrat",
@@ -14718,6 +17451,12 @@
    "govtrack": 400411,
    "last": "Turner",
    "name": "Michael R. Turner",
+   "nameParts": {
+    "first": "Michael",
+    "last": "Turner",
+    "middle": "R.",
+    "official_full": "Michael R. Turner"
+   },
    "office": "2183 Rayburn House Office Building",
    "opensecrets": "N00025175",
    "party": "Republican",
@@ -14750,6 +17489,11 @@
    "govtrack": 412317,
    "last": "Thompson",
    "name": "Glenn Thompson",
+   "nameParts": {
+    "first": "Glenn",
+    "last": "Thompson",
+    "official_full": "Glenn Thompson"
+   },
    "office": "400 Cannon House Office Building",
    "opensecrets": "N00029736",
    "party": "Republican",
@@ -14782,6 +17526,11 @@
    "govtrack": 412318,
    "last": "Titus",
    "name": "Dina Titus",
+   "nameParts": {
+    "first": "Dina",
+    "last": "Titus",
+    "official_full": "Dina Titus"
+   },
    "office": "2370 Rayburn House Office Building",
    "opensecrets": "N00030191",
    "party": "Democrat",
@@ -14814,6 +17563,11 @@
    "govtrack": 412319,
    "last": "Tonko",
    "name": "Paul Tonko",
+   "nameParts": {
+    "first": "Paul",
+    "last": "Tonko",
+    "official_full": "Paul Tonko"
+   },
    "office": "2269 Rayburn House Office Building",
    "opensecrets": "N00030196",
    "party": "Democrat",
@@ -14846,6 +17600,11 @@
    "govtrack": 412520,
    "last": "Takano",
    "name": "Mark Takano",
+   "nameParts": {
+    "first": "Mark",
+    "last": "Takano",
+    "official_full": "Mark Takano"
+   },
    "office": "2078 Rayburn House Office Building",
    "opensecrets": "N00006701",
    "party": "Democrat",
@@ -14878,6 +17637,12 @@
    "govtrack": 412617,
    "last": "Torres",
    "name": "Norma J. Torres",
+   "nameParts": {
+    "first": "Norma",
+    "last": "Torres",
+    "middle": "J.",
+    "official_full": "Norma J. Torres"
+   },
    "office": "2227 Rayburn House Office Building",
    "opensecrets": "N00036107",
    "party": "Democrat",
@@ -14910,6 +17675,11 @@
    "govtrack": 412668,
    "last": "Tillis",
    "name": "Thom Tillis",
+   "nameParts": {
+    "first": "Thom",
+    "last": "Tillis",
+    "official_full": "Thom Tillis"
+   },
    "office": "113 Dirksen Senate Office Building",
    "opensecrets": "N00035492",
    "party": "Republican",
@@ -14941,6 +17711,11 @@
    "govtrack": 412720,
    "last": "Tenney",
    "name": "Claudia Tenney",
+   "nameParts": {
+    "first": "Claudia",
+    "last": "Tenney",
+    "official_full": "Claudia Tenney"
+   },
    "office": "2230 Rayburn House Office Building",
    "opensecrets": "N00036351",
    "party": "Republican",
@@ -14970,6 +17745,12 @@
    "govtrack": 412815,
    "last": "Timmons",
    "name": "William R. Timmons IV",
+   "nameParts": {
+    "first": "William",
+    "last": "Timmons",
+    "middle": "R.",
+    "official_full": "William R. Timmons IV"
+   },
    "office": "267 Cannon House Office Building",
    "opensecrets": "N00042715",
    "party": "Republican",
@@ -15000,6 +17781,11 @@
    "govtrack": 412787,
    "last": "Tlaib",
    "name": "Rashida Tlaib",
+   "nameParts": {
+    "first": "Rashida",
+    "last": "Tlaib",
+    "official_full": "Rashida Tlaib"
+   },
    "office": "2438 Rayburn House Office Building",
    "opensecrets": "N00042649",
    "party": "Democrat",
@@ -15031,6 +17817,11 @@
    "govtrack": 412781,
    "last": "Trahan",
    "name": "Lori Trahan",
+   "nameParts": {
+    "first": "Lori",
+    "last": "Trahan",
+    "official_full": "Lori Trahan"
+   },
    "office": "2233 Rayburn House Office Building",
    "opensecrets": "N00041808",
    "party": "Democrat",
@@ -15063,6 +17854,12 @@
    "govtrack": 456838,
    "last": "Torres",
    "name": "Ritchie Torres",
+   "nameParts": {
+    "first": "Ritchie",
+    "last": "Torres",
+    "middle": "John",
+    "official_full": "Ritchie Torres"
+   },
    "office": "1414 Longworth House Office Building",
    "opensecrets": "N00044346",
    "party": "Democrat",
@@ -15094,6 +17891,12 @@
    "govtrack": 456897,
    "last": "Tokuda",
    "name": "Jill N. Tokuda",
+   "nameParts": {
+    "first": "Jill",
+    "last": "Tokuda",
+    "middle": "Naomi",
+    "official_full": "Jill N. Tokuda"
+   },
    "office": "1027 Longworth House Office Building",
    "opensecrets": "N00051049",
    "party": "Democrat",
@@ -15125,6 +17928,11 @@
    "govtrack": 456908,
    "last": "Thanedar",
    "name": "Shri Thanedar",
+   "nameParts": {
+    "first": "Shri",
+    "last": "Thanedar",
+    "official_full": "Shri Thanedar"
+   },
    "office": "154 Cannon House Office Building",
    "opensecrets": "N00049602",
    "party": "Democrat",
@@ -15155,6 +17963,12 @@
    "govtrack": 457014,
    "last": "Taylor",
    "name": "David J. Taylor",
+   "nameParts": {
+    "first": "David",
+    "last": "Taylor",
+    "middle": "J.",
+    "official_full": "David J. Taylor"
+   },
    "office": "325 Cannon House Office Building",
    "opensecrets": "N00054098",
    "party": "Republican",
@@ -15185,6 +17999,12 @@
    "govtrack": 456980,
    "last": "Tran",
    "name": "Derek Tran",
+   "nameParts": {
+    "first": "Derek",
+    "last": "Tran",
+    "middle": "Truyen",
+    "official_full": "Derek Tran"
+   },
    "office": "1127 Longworth House Office Building",
    "opensecrets": "N00053582",
    "party": "Democrat",
@@ -15210,6 +18030,11 @@
    "govtrack": 412776,
    "last": "Underwood",
    "name": "Lauren Underwood",
+   "nameParts": {
+    "first": "Lauren",
+    "last": "Underwood",
+    "official_full": "Lauren Underwood"
+   },
    "office": "2228 Rayburn House Office Building",
    "opensecrets": "N00041569",
    "party": "Democrat",
@@ -15238,6 +18063,12 @@
    "govtrack": 400416,
    "last": "Velázquez",
    "name": "Nydia M. Velázquez",
+   "nameParts": {
+    "first": "Nydia",
+    "last": "Velázquez",
+    "middle": "M.",
+    "official_full": "Nydia M. Velázquez"
+   },
    "office": "2302 Rayburn House Office Building",
    "opensecrets": "N00001102",
    "party": "Democrat",
@@ -15269,6 +18100,11 @@
    "govtrack": 400415,
    "last": "Van Hollen",
    "name": "Chris Van Hollen",
+   "nameParts": {
+    "first": "Chris",
+    "last": "Van Hollen",
+    "official_full": "Chris Van Hollen"
+   },
    "office": "730 Hart Senate Office Building",
    "opensecrets": "N00013820",
    "party": "Democrat",
@@ -15301,6 +18137,12 @@
    "govtrack": 412515,
    "last": "Valadao",
    "name": "David G. Valadao",
+   "nameParts": {
+    "first": "David",
+    "last": "Valadao",
+    "middle": "G.",
+    "official_full": "David G. Valadao"
+   },
    "office": "2465 Rayburn House Office Building",
    "opensecrets": "N00033367",
    "party": "Republican",
@@ -15330,6 +18172,11 @@
    "govtrack": 412522,
    "last": "Vargas",
    "name": "Juan Vargas",
+   "nameParts": {
+    "first": "Juan",
+    "last": "Vargas",
+    "official_full": "Juan Vargas"
+   },
    "office": "2467 Rayburn House Office Building",
    "opensecrets": "N00007021",
    "party": "Democrat",
@@ -15362,6 +18209,12 @@
    "govtrack": 412579,
    "last": "Veasey",
    "name": "Marc A. Veasey",
+   "nameParts": {
+    "first": "Marc",
+    "last": "Veasey",
+    "middle": "A.",
+    "official_full": "Marc A. Veasey"
+   },
    "office": "2186 Rayburn House Office Building",
    "opensecrets": "N00033839",
    "party": "Democrat",
@@ -15394,6 +18247,11 @@
    "govtrack": 412796,
    "last": "Van Drew",
    "name": "Jefferson Van Drew",
+   "nameParts": {
+    "first": "Jefferson",
+    "last": "Van Drew",
+    "official_full": "Jefferson Van Drew"
+   },
    "office": "2447 Rayburn House Office Building",
    "opensecrets": "N00042164",
    "party": "Republican",
@@ -15425,6 +18283,12 @@
    "govtrack": 456850,
    "last": "Van Duyne",
    "name": "Beth Van Duyne",
+   "nameParts": {
+    "first": "Beth",
+    "last": "Van Duyne",
+    "middle": "Ann",
+    "official_full": "Beth Van Duyne"
+   },
    "office": "1725 Longworth House Office Building",
    "opensecrets": "N00045167",
    "party": "Republican",
@@ -15455,6 +18319,12 @@
    "govtrack": 456950,
    "last": "Van Orden",
    "name": "Derrick Van Orden",
+   "nameParts": {
+    "first": "Derrick",
+    "last": "Van Orden",
+    "middle": "Francis",
+    "official_full": "Derrick Van Orden"
+   },
    "office": "1513 Longworth House Office Building",
    "opensecrets": "N00046843",
    "party": "Republican",
@@ -15485,6 +18355,11 @@
    "govtrack": 456919,
    "last": "Vasquez",
    "name": "Gabe Vasquez",
+   "nameParts": {
+    "first": "Gabriel (Gabe)",
+    "last": "Vasquez",
+    "official_full": "Gabe Vasquez"
+   },
    "office": "322 Cannon House Office Building",
    "opensecrets": "N00049142",
    "party": "Democrat",
@@ -15515,6 +18390,12 @@
    "govtrack": 457027,
    "last": "Vindman",
    "name": "Eugene Simon Vindman",
+   "nameParts": {
+    "first": "Eugene",
+    "last": "Vindman",
+    "middle": "Simon",
+    "official_full": "Eugene Simon Vindman"
+   },
    "office": "1005 Longworth House Office Building",
    "opensecrets": "N00054112",
    "party": "Democrat",
@@ -15545,6 +18426,11 @@
    "govtrack": 457038,
    "last": "Van Epps",
    "name": "Matt Van Epps",
+   "nameParts": {
+    "first": "Matt",
+    "last": "Van Epps",
+    "official_full": "Matt Van Epps"
+   },
    "office": "2446 Rayburn House Office Building",
    "opensecrets": null,
    "party": "Republican",
@@ -15570,6 +18456,11 @@
    "govtrack": 400422,
    "last": "Waters",
    "name": "Maxine Waters",
+   "nameParts": {
+    "first": "Maxine",
+    "last": "Waters",
+    "official_full": "Maxine Waters"
+   },
    "office": "2221 Rayburn House Office Building",
    "opensecrets": "N00006690",
    "party": "Democrat",
@@ -15602,6 +18493,12 @@
    "govtrack": 400432,
    "last": "Wicker",
    "name": "Roger F. Wicker",
+   "nameParts": {
+    "first": "Roger",
+    "last": "Wicker",
+    "middle": "F.",
+    "official_full": "Roger F. Wicker"
+   },
    "office": "425 Russell Senate Office Building",
    "opensecrets": "N00003280",
    "party": "Republican",
@@ -15634,6 +18531,11 @@
    "govtrack": 300100,
    "last": "Wyden",
    "name": "Ron Wyden",
+   "nameParts": {
+    "first": "Ron",
+    "last": "Wyden",
+    "official_full": "Ron Wyden"
+   },
    "office": "221 Dirksen Senate Office Building",
    "opensecrets": "N00007724",
    "party": "Democrat",
@@ -15666,6 +18568,12 @@
    "govtrack": 456811,
    "last": "Williams",
    "name": "Nikema Williams",
+   "nameParts": {
+    "first": "Nikema",
+    "last": "Williams",
+    "middle": "Natassha",
+    "official_full": "Nikema Williams"
+   },
    "office": "1406 Longworth House Office Building",
    "opensecrets": "N00047361",
    "party": "Democrat",
@@ -15696,6 +18604,12 @@
    "govtrack": 456858,
    "last": "Warnock",
    "name": "Raphael G. Warnock",
+   "nameParts": {
+    "first": "Raphael",
+    "last": "Warnock",
+    "middle": "Gamaliel",
+    "official_full": "Raphael G. Warnock"
+   },
    "office": "717 Hart Senate Office Building",
    "opensecrets": "N00046489",
    "party": "Democrat",
@@ -15726,6 +18640,12 @@
    "govtrack": 400433,
    "last": "Wilson",
    "name": "Joe Wilson",
+   "nameParts": {
+    "first": "Joe",
+    "last": "Wilson",
+    "middle": "G.",
+    "official_full": "Joe Wilson"
+   },
    "office": "1436 Longworth House Office Building",
    "opensecrets": "N00024809",
    "party": "Republican",
@@ -15758,6 +18678,11 @@
    "govtrack": 400623,
    "last": "Wasserman Schultz",
    "name": "Debbie Wasserman Schultz",
+   "nameParts": {
+    "first": "Debbie",
+    "last": "Wasserman Schultz",
+    "official_full": "Debbie Wasserman Schultz"
+   },
    "office": "270 Cannon House Office Building",
    "opensecrets": "N00026106",
    "party": "Democrat",
@@ -15790,6 +18715,11 @@
    "govtrack": 412213,
    "last": "Walberg",
    "name": "Tim Walberg",
+   "nameParts": {
+    "first": "Tim",
+    "last": "Walberg",
+    "official_full": "Tim Walberg"
+   },
    "office": "2266 Rayburn House Office Building",
    "opensecrets": "N00026368",
    "party": "Republican",
@@ -15822,6 +18752,11 @@
    "govtrack": 412239,
    "last": "Welch",
    "name": "Peter Welch",
+   "nameParts": {
+    "first": "Peter",
+    "last": "Welch",
+    "official_full": "Peter Welch"
+   },
    "office": "115 Russell Senate Office Building",
    "opensecrets": "N00000515",
    "party": "Democrat",
@@ -15854,6 +18789,11 @@
    "govtrack": 412247,
    "last": "Whitehouse",
    "name": "Sheldon Whitehouse",
+   "nameParts": {
+    "first": "Sheldon",
+    "last": "Whitehouse",
+    "official_full": "Sheldon Whitehouse"
+   },
    "office": "530 Hart Senate Office Building",
    "opensecrets": "N00027533",
    "party": "Democrat",
@@ -15886,6 +18826,12 @@
    "govtrack": 412255,
    "last": "Wittman",
    "name": "Robert J. Wittman",
+   "nameParts": {
+    "first": "Robert",
+    "last": "Wittman",
+    "middle": "J.",
+    "official_full": "Robert J. Wittman"
+   },
    "office": "2055 Rayburn House Office Building",
    "opensecrets": "N00029459",
    "party": "Republican",
@@ -15918,6 +18864,12 @@
    "govtrack": 412321,
    "last": "Warner",
    "name": "Mark R. Warner",
+   "nameParts": {
+    "first": "Mark",
+    "last": "Warner",
+    "middle": "R.",
+    "official_full": "Mark R. Warner"
+   },
    "office": "703 Hart Senate Office Building",
    "opensecrets": "N00002097",
    "party": "Democrat",
@@ -15950,6 +18902,11 @@
    "govtrack": 412410,
    "last": "Webster",
    "name": "Daniel Webster",
+   "nameParts": {
+    "first": "Daniel",
+    "last": "Webster",
+    "official_full": "Daniel Webster"
+   },
    "office": "2184 Rayburn House Office Building",
    "opensecrets": "N00026335",
    "party": "Republican",
@@ -15981,6 +18938,12 @@
    "govtrack": 412412,
    "last": "Wilson",
    "name": "Frederica S. Wilson",
+   "nameParts": {
+    "first": "Frederica",
+    "last": "Wilson",
+    "middle": "S.",
+    "official_full": "Frederica S. Wilson"
+   },
    "office": "2080 Rayburn House Office Building",
    "opensecrets": "N00030650",
    "party": "Democrat",
@@ -16013,6 +18976,11 @@
    "govtrack": 412402,
    "last": "Womack",
    "name": "Steve Womack",
+   "nameParts": {
+    "first": "Steve",
+    "last": "Womack",
+    "official_full": "Steve Womack"
+   },
    "office": "2412 Rayburn House Office Building",
    "opensecrets": "N00031857",
    "party": "Republican",
@@ -16045,6 +19013,11 @@
    "govtrack": 412548,
    "last": "Wagner",
    "name": "Ann Wagner",
+   "nameParts": {
+    "first": "Ann",
+    "last": "Wagner",
+    "official_full": "Ann Wagner"
+   },
    "office": "2350 Rayburn House Office Building",
    "opensecrets": "N00033106",
    "party": "Republican",
@@ -16076,6 +19049,13 @@
    "govtrack": 412574,
    "last": "Weber",
    "name": "Randy K. Weber, Sr.",
+   "nameParts": {
+    "first": "Randy",
+    "last": "Weber",
+    "middle": "K.",
+    "official_full": "Randy K. Weber, Sr.",
+    "suffix": "Sr."
+   },
    "office": "107 Cannon House Office Building",
    "opensecrets": "N00033539",
    "party": "Republican",
@@ -16108,6 +19088,11 @@
    "govtrack": 412578,
    "last": "Williams",
    "name": "Roger Williams",
+   "nameParts": {
+    "first": "Roger",
+    "last": "Williams",
+    "official_full": "Roger Williams"
+   },
    "office": "2336 Rayburn House Office Building",
    "opensecrets": "N00030602",
    "party": "Republican",
@@ -16138,6 +19123,11 @@
    "govtrack": 412542,
    "last": "Warren",
    "name": "Elizabeth Warren",
+   "nameParts": {
+    "first": "Elizabeth",
+    "last": "Warren",
+    "official_full": "Elizabeth Warren"
+   },
    "office": "311 Hart Senate Office Building",
    "opensecrets": "N00033492",
    "party": "Democrat",
@@ -16170,6 +19160,11 @@
    "govtrack": 412610,
    "last": "Westerman",
    "name": "Bruce Westerman",
+   "nameParts": {
+    "first": "Bruce",
+    "last": "Westerman",
+    "official_full": "Bruce Westerman"
+   },
    "office": "202 Cannon House Office Building",
    "opensecrets": "N00035527",
    "party": "Republican",
@@ -16200,6 +19195,11 @@
    "govtrack": 412644,
    "last": "Watson Coleman",
    "name": "Bonnie Watson Coleman",
+   "nameParts": {
+    "first": "Bonnie",
+    "last": "Watson Coleman",
+    "official_full": "Bonnie Watson Coleman"
+   },
    "office": "168 Cannon House Office Building",
    "opensecrets": "N00036158",
    "party": "Democrat",
@@ -16231,6 +19231,11 @@
    "govtrack": 456963,
    "last": "Wied",
    "name": "Tony Wied",
+   "nameParts": {
+    "first": "Tony",
+    "last": "Wied",
+    "official_full": "Tony Wied"
+   },
    "office": "424 Cannon House Office Building",
    "opensecrets": "N00055013",
    "party": "Republican",
@@ -16261,6 +19266,12 @@
    "govtrack": 456977,
    "last": "Whitesides",
    "name": "George Whitesides",
+   "nameParts": {
+    "first": "George",
+    "last": "Whitesides",
+    "middle": "Thomas",
+    "official_full": "George Whitesides"
+   },
    "office": "1504 Longworth House Office Building",
    "opensecrets": "N00052205",
    "party": "Democrat",
@@ -16291,6 +19302,12 @@
    "govtrack": 457036,
    "last": "Walkinshaw",
    "name": "James R. Walkinshaw",
+   "nameParts": {
+    "first": "James",
+    "last": "Walkinshaw",
+    "middle": "R.",
+    "official_full": "James R. Walkinshaw"
+   },
    "office": "2265 Rayburn House Office Building",
    "opensecrets": null,
    "party": "Democrat",
@@ -16316,6 +19333,10 @@
    "govtrack": 457046,
    "last": "Wahab",
    "name": "Aisha Wahab",
+   "nameParts": {
+    "first": "Aisha",
+    "last": "Wahab"
+   },
    "office": "174 Cannon House Office Building",
    "opensecrets": null,
    "party": "Democrat",
@@ -16341,6 +19362,12 @@
    "govtrack": 412428,
    "last": "Young",
    "name": "Todd Young",
+   "nameParts": {
+    "first": "Todd",
+    "last": "Young",
+    "middle": "C.",
+    "official_full": "Todd Young"
+   },
    "office": "185 Dirksen Senate Office Building",
    "opensecrets": "N00030670",
    "party": "Republican",
@@ -16373,6 +19400,11 @@
    "govtrack": 456873,
    "last": "Yakym",
    "name": "Rudy Yakym III",
+   "nameParts": {
+    "first": "Rudy",
+    "last": "Yakym",
+    "official_full": "Rudy Yakym III"
+   },
    "office": "349 Cannon House Office Building",
    "opensecrets": "N00051733",
    "party": "Republican",
@@ -16402,6 +19434,11 @@
    "govtrack": 412640,
    "last": "Zinke",
    "name": "Ryan K. Zinke",
+   "nameParts": {
+    "first": "Ryan",
+    "last": "Zinke",
+    "official_full": "Ryan K. Zinke"
+   },
    "office": "512 Cannon House Office Building",
    "opensecrets": "N00035616",
    "party": "Republican",
