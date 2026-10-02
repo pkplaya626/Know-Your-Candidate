@@ -286,6 +286,19 @@ people have filed at any funding level — so a seat is never described as
 uncontested when somebody has filed for it. Of the 28 races with no profiled
 challenger, 26 show a filing count and only **2** are genuinely empty.
 
+Not every registration that lists 2026 is a 2026 filing, so the field is
+screened first (`candidates.screen`) and the build reports each one it sets
+aside:
+
+- **Stale registrations** — no report covering anything since 1 January 2025.
+  Jim Inhofe's committee last reported through 2022-12-31 and appeared as a
+  2026 Oklahoma Senate candidate carrying 2022 receipts. They are neither
+  profiles nor counted in `filedCount`. A registrant with no report at all is
+  kept: a statement of candidacy with no money yet is still a filing.
+- **Filings for races that do not exist** — a Senate filing from a state with
+  no seat up, or a House district the state does not have (GA-23, NM-66).
+  `races.contestable` derives the real races from the sitting members.
+
 ### Telling them apart
 
 Adding the field made 79% of profiles people who do **not** hold the seat, so
@@ -580,12 +593,14 @@ members, so it is the one exception to the rule that portraits are never
 guessed for the field - and the resolved title is still checked against the
 surname after redirects. Portrait coverage went from 572 to 773 profiles.
 
-All 435 House seats are two-year terms, so every House member has
-`seatUp2026 = true`. Use `seekingReelection2026` to find who is actually
+All 435 House seats are two-year terms, so every voting House member has
+`seatUp2026 = true`. Puerto Rico's Resident Commissioner is the exception: a
+four-year term (48 U.S.C. 891), elected in 2024 and next in 2028, so that seat
+has `seatUp2026 = false` and no 2026 race. Use `seekingReelection2026` to find who is actually
 running. `isUpIn2026` remains as an alias of `seatUp2026`.
 
-`window.kycRaces` holds **474 seats** on the 2026 ballot: 35 Senate, 6
-territory delegates and 433 voting House seats. Every one of the 435 House
+`window.kycRaces` holds every seat on the 2026 ballot: 35 Senate, 5
+territory delegates (not Puerto Rico) and the voting House seats. Every one of the 435 House
 seats is on the ballot, but a seat nobody currently holds has no roster row and
 therefore produces no race, so the shortfall is exactly the vacancies. The 65
 senators whose terms run past 2026 belong to no race.
