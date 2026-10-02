@@ -107,6 +107,41 @@ def fetch_pages(path, params, sort, per_page=100, pause=0.25):
     return rows, count
 
 
+# Requests are spaced to stay under the key's own limit. The key reports it in
+# X-RateLimit-Limit: 60 a minute, not the 1,000 an hour the docs suggest. A
+# local run kept under it only because home latency held requests near one a
+# second; on a GitHub runner `finance --refresh` sent 61 in well under a minute,
+# was cut off with HTTP 429, and the field fetch after it failed outright.
+RATE_WINDOW = 60.0
+_RATE = {"interval": 1.05, "last": 0.0}
+
+
+def _learn_limit(headers):
+    """Widen the spacing if the key's advertised limit calls for it."""
+    try:
+        limit = int((headers or {}).get("X-RateLimit-Limit") or 0)
+    except (TypeError, ValueError):
+        return
+    if limit > 0:
+        _RATE["interval"] = max(_RATE["interval"], RATE_WINDOW / limit * 1.05)
+
+
+def _pace(now=time.monotonic, sleep=time.sleep):
+    wait = _RATE["last"] + _RATE["interval"] - now()
+    if wait > 0:
+        sleep(wait)
+    _RATE["last"] = now()
+
+
+def _retry_after(exc):
+    """Seconds a 429 asks us to wait; the whole window when it does not say."""
+    value = (getattr(exc, "headers", None) or {}).get("Retry-After")
+    try:
+        return max(1.0, float(value))
+    except (TypeError, ValueError):
+        return RATE_WINDOW
+
+
 def _get(path, params, retries=4):
     params = dict(params, api_key=api_key())
     # doseq: several OpenFEC parameters are repeatable (office=H&office=S).
@@ -115,9 +150,12 @@ def _get(path, params, retries=4):
     delay = 1.5
     last = None
     for attempt in range(retries):
+        wait = delay
         try:
+            _pace()
             req = urllib.request.Request(url, headers=_UA)
             with urllib.request.urlopen(req, timeout=_TIMEOUT) as response:
+                _learn_limit(response.headers)
                 return json.loads(response.read().decode("utf-8"))
         except urllib.error.HTTPError as exc:
             last = exc
@@ -127,12 +165,15 @@ def _get(path, params, retries=4):
                         "FEC rate limit hit on DEMO_KEY. Set FEC_API_KEY to a free "
                         "key from https://api.data.gov/signup/ to continue."
                     ) from exc
+                # A short backoff never outlasted the window; wait it out.
+                _learn_limit(exc.headers)
+                wait = _retry_after(exc)
             elif exc.code not in (500, 502, 503, 504):
                 raise FecError(f"FEC {exc.code} for {path}") from exc
         except Exception as exc:
             last = exc
         if attempt < retries - 1:
-            time.sleep(delay)
+            time.sleep(wait)
             delay *= 2
     raise FecError(f"FEC request failed: {path} ({last})")
 
