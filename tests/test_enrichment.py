@@ -289,7 +289,11 @@ class TestRaces(unittest.TestCase):
         voting = [r for r in house if not r["isTerritory"]]
 
         self.assertEqual(len(senate), 35, "Senate seats on the 2026 ballot")
-        self.assertEqual(len(delegates), 6, "territory delegates")
+        # Six delegates sit; five are on the ballot. Puerto Rico's Resident
+        # Commissioner serves four years (48 U.S.C. 891) and is next elected
+        # in 2028.
+        self.assertEqual(len(delegates), len(TERRITORIES) - 1, "territory delegates")
+        self.assertNotIn("PR", {r["state"] for r in delegates})
         self.assertEqual(len(self.races), len(senate) + len(house))
 
         # Every one of the 435 House seats is on the ballot, but a seat nobody

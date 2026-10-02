@@ -25,7 +25,7 @@ from . import (
     validate,
     voteview,
 )
-from .profiles import build_profiles
+from .profiles import build_profiles, screen_field
 
 
 def _load(args):
@@ -71,6 +71,13 @@ def _build(args):
               f"({len(committees['members'])} members with assignments)")
     profiles, stats = build_profiles(raw, snapshot=snapshot, field=field,
                                      finance=finance, committees=committees)
+    # The same screen build_profiles applied: filedCount and validation must
+    # count the field the profiles were built from.
+    field = screen_field(field, profiles)
+    if field:
+        print(f"  field: {field['count']} filings for races on the 2026 ballot "
+              f"({stats['field_stale']} stale registrations and "
+              f"{stats['field_phantom']} filings for seats not up set aside)")
     stats["fec"] = fec.apply_cache(profiles, finance) if finance else 0
     # Filed candidates arrive with their totals from the field register, so
     # the finance cache covers only the roster. Count what the page shows.
@@ -149,7 +156,7 @@ def _build(args):
 
     issues = validate.run(profiles, raw, races=race_list, geo=geo,
                           snapshot=snapshot, finance=finance, campaigns=sites,
-                          results=outcomes)
+                          results=outcomes, field=field)
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -418,6 +425,23 @@ def _field(args):
         path = candidates.save_cache(cache, args.root)
         print(f"  wrote {path}")
 
+    # Screen exactly as the build does, so these numbers are the site's.
+    raw_count = cache["count"]
+    raw = _load(args)
+    if raw is None:
+        return 2
+    profiles, _ = build_profiles(raw, snapshot=legislators.load_snapshot(args.root))
+    cache = screen_field(cache, profiles)
+    screened = cache["screened"]
+    print(f"\n  {raw_count} registrations list {cache['cycle']}; set aside "
+          f"{len(screened['stale'])} with no report since {screened['cycleStart']} "
+          f"and {len(screened['phantom'])} for seats not on the ballot")
+    if getattr(args, "verbose", False):
+        for kind in ("stale", "phantom"):
+            for row in screened[kind]:
+                print(f"    {kind:7} {row['candidate_id']} {row.get('name')} "
+                      f"{candidates.race_id(row)} (through {row.get('coverage_end_date')})")
+
     counts = candidates.filing_counts(cache)
     keep = candidates.eligible(cache)
     print(f"\n  {cache['count']} people have filed for {cache['cycle']}")
@@ -603,7 +627,8 @@ def _verify(args):
     outcomes = results_mod.load_cache(args.root)
     stats["results"] = results_mod.apply_cache(profiles, outcomes) if outcomes else 0
     race_list = races_mod.build(
-        profiles, candidates.filing_counts(candidates.load_cache(args.root)),
+        profiles, candidates.filing_counts(
+            screen_field(candidates.load_cache(args.root), profiles)),
         results=outcomes, dates=results_mod.load_dates(args.root),
     )
     stats.update(races_mod.stats(race_list))

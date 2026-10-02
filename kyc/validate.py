@@ -761,8 +761,62 @@ def check_campaign_blocklist(campaigns):
                   f"{len(stale)} blocked campaign hosts match no cached site", stale)]
 
 
+def check_field_screen(field, today=None):
+    """List every FEC filing the build set aside, and coverage from the future.
+
+    :func:`kyc.candidates.screen` removes stale registrations (no report
+    since the cycle began - Jim Inhofe's 2022 committee) and filings for races
+    that do not exist this year (a Senate filing from a state with no seat
+    up, GA-23 in a state with 14 districts). Dropping data is exactly the
+    kind of change that must never be silent, so each one is named here.
+
+    A coverage end date after today is a filing error at the FEC or a
+    misread field here; either way the totals beside it are not what they
+    claim to be.
+    """
+    if not field:
+        return []
+    import datetime
+
+    if today is None:
+        from .emit import build_timestamp
+        today = datetime.date.fromisoformat(build_timestamp()[:10])
+    from .candidates import race_id
+
+    def line(row):
+        return (f"{row.get('name')} ({row.get('candidate_id')}, {race_id(row)}, "
+                f"reported through {row.get('coverage_end_date') or 'nothing'})")
+
+    issues = []
+    screened = field.get("screened") or {}
+    stale = screened.get("stale") or []
+    if stale:
+        issues.append(Issue(
+            "warn", "field-stale",
+            f"{len(stale)} FEC registrations listing 2026 have reported nothing since "
+            f"{screened.get('cycleStart')}; not shown as candidates or counted as filed",
+            sorted(line(r) for r in stale)))
+    phantom = screened.get("phantom") or []
+    if phantom:
+        issues.append(Issue(
+            "warn", "field-phantom-race",
+            f"{len(phantom)} FEC filings are for seats not on the 2026 ballot "
+            f"(no Senate seat up, or a district the state does not have); dropped",
+            sorted(line(r) for r in phantom)))
+    future = [
+        r for r in field.get("candidates", [])
+        if (r.get("coverage_end_date") or "")[:10] > today.isoformat()
+    ]
+    if future:
+        issues.append(Issue(
+            "warn", "field-future-coverage",
+            f"{len(future)} FEC filings report coverage ending after {today.isoformat()}",
+            sorted(line(r) for r in future)))
+    return issues
+
+
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
-        results=None):
+        results=None, field=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_identity(profiles)
@@ -777,6 +831,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_geometry(profiles, geo)
     issues += check_snapshot(profiles, raw, snapshot)
     issues += check_finance(profiles, finance)
+    issues += check_field_screen(field)
     issues += check_duplicate_people(profiles)
     issues += check_results(profiles, races)
     issues += check_results_pages(results)
