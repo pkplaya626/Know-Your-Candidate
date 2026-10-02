@@ -171,7 +171,49 @@ class TestBuild(unittest.TestCase):
             if not p["isCandidate"] and "House" in p["chamber"]
         ]
         self.assertTrue(house)
-        self.assertTrue(all(p["seatUp2026"] for p in house))
+        self.assertTrue(all(p["seatUp2026"] for p in house if p["state"] != "PR"))
+
+    def test_puerto_ricos_resident_commissioner_is_not_up_in_2026(self):
+        """A four-year term (48 U.S.C. 891): elected 2024, next on the ballot in 2028.
+
+        The site showed H-PR-00-2026 with him "seeking re-election", though the
+        FEC's 2026 calendar has no PR House primary.
+        """
+        from kyc import races
+
+        pr = [p for p in self.profiles
+              if not p["isCandidate"] and "House" in p["chamber"] and p["state"] == "PR"]
+        self.assertEqual(len(pr), 1)
+        self.assertFalse(pr[0]["seatUp2026"])
+        self.assertFalse(pr[0]["seekingReelection2026"])
+        self.assertEqual(pr[0]["termEndYear"], 2029)
+        self.assertNotIn("H-PR-00-2026", races.contestable(self.profiles))
+        self.assertTrue(races.house_seat_up("PR", 2028))
+        self.assertTrue(races.house_seat_up("GU", 2026))
+        race_ids = {r["id"] for r in races.build(self.profiles)}
+        self.assertNotIn("H-PR-00-2026", race_ids)
+        self.assertIn("H-GU-00-2026", race_ids)
+
+    def test_ages_are_computed_from_the_birthdate(self):
+        """The CSV's Age column was typed once; 70 were stale at build time."""
+        import datetime
+        from kyc.profiles import _age, age_as_of
+
+        as_of = datetime.date(2026, 10, 1)
+        self.assertEqual(_age({"Birthdate": "1965-10-01", "Age": "40"}, as_of), 61)
+        self.assertEqual(_age({"Birthdate": "1965-10-02", "Age": "40"}, as_of), 60)
+        # The CSV only when there is no usable birthdate.
+        self.assertEqual(_age({"Birthdate": "2026 Primary", "Age": "58"}, as_of), 58)
+        self.assertEqual(_age({"Birthdate": "", "Age": ""}, as_of), "Unknown")
+        # Anchored on the data's fetch date, not the wall clock, so verify is
+        # stable and SOURCE_DATE_EPOCH builds do not make everyone 25 years younger.
+        self.assertEqual(age_as_of({"fetched": "2026-09-13T22:14:22+00:00"}),
+                         datetime.date(2026, 9, 13))
+        for p in self.profiles:
+            if p["birthdate"][:4].isdigit() and isinstance(p["age"], int):
+                born = datetime.date.fromisoformat(p["birthdate"][:10])
+                self.assertIn(self.stats["ageAsOf"][:4], {str(born.year + p["age"]),
+                                                          str(born.year + p["age"] + 1)})
 
     def test_retiring_members_are_not_seeking_reelection(self):
         retiring = [
