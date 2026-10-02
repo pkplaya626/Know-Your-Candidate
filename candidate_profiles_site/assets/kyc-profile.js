@@ -486,16 +486,16 @@
     var target = el("profileModalStatus");
     var pieces = [];
 
-    var table = item.isCandidate ? RACE_STATUS :
+    /* A member running for another seat reads as anyone else in that race,
+     * named: "On the November ballot for Senate • IA". The member wording -
+     * "renominated", "not seeking re-election" - is about the seat they
+     * hold, and their result there is not their 2026 story. */
+    var elsewhere = !item.isCandidate && !!item.contestLabel;
+    var table = item.isCandidate || elsewhere ? RACE_STATUS :
       Object.assign({}, RACE_STATUS, MEMBER_RACE_STATUS);
-    var race = table[item.raceStatus];
+    var race = table[KYC.contestStatus(item)];
     if (race) {
-      var label = race[1];
-      // A member's result belongs to the seat they are contesting.
-      if (!item.isCandidate && item.contestLabel) {
-        label = label.replace("for 2026", "for " + item.contestLabel)
-          .replace("the November ballot", "the November ballot for " + item.contestLabel);
-      }
+      var label = elsewhere ? race[1] + " for " + item.contestLabel : race[1];
       pieces.push('<span class="badge ' + race[0] + '" title="' +
         KYC.escapeAttr(race[2]) + '">' + KYC.escapeHtml(label) + "</span>");
     }

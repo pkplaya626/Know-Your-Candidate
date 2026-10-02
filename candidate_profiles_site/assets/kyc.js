@@ -174,6 +174,33 @@
     return profileIndex.get(id);
   }
 
+  /** True for a sitting member whose 2026 filing is for a different seat -
+   *  the other chamber, or a redrawn district. */
+  function runsElsewhere(item) {
+    return !!item && !item.isCandidate && !!item.contestRaceId &&
+      item.contestRaceId !== item.raceId;
+  }
+
+  /** The primary result that describes what this person is doing in 2026.
+   *
+   *  For a member running for another seat, the record's own raceStatus can
+   *  be about the seat they hold: Ashley Hinson is "unlisted" in IA-2
+   *  because she is the Senate nominee in Iowa, and the page called that
+   *  "not seeking re-election". The result for the race they are actually
+   *  in lives on their filing's profile (alsoRunningId), and is used only
+   *  when that profile is in the same race. Anything else is "", never the
+   *  held seat's absence. The pipeline derives both statuses; this only
+   *  chooses which of them the reader is shown. */
+  function contestStatus(item) {
+    if (!item) return "";
+    if (!runsElsewhere(item) || item.raceStatusRace === item.contestRaceId) {
+      return item.raceStatus || "";
+    }
+    var filing = item.alsoRunningId && byId(item.alsoRunningId);
+    if (filing && filing.raceId === item.contestRaceId) return filing.raceStatus || "";
+    return "";
+  }
+
   /* Portraits are resolved and checked at build time, so this runtime chain
    * is a safety net rather than the primary mechanism. */
   function handleImageFallback(img, profileId) {
@@ -836,6 +863,8 @@
     partyClass: partyClass,
     // data
     byId: byId,
+    runsElsewhere: runsElsewhere,
+    contestStatus: contestStatus,
     meta: meta,
     portraitSrc: portraitSrc,
     handleImageFallback: handleImageFallback,

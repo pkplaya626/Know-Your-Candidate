@@ -926,6 +926,94 @@ async function testDeepLinks() {
   }
 }
 
+/* ====================================================== running elsewhere */
+
+/* A member contesting another seat has a primary result for the seat they
+ * hold - usually "unlisted", because they are not running for it - and one
+ * for the race they are in, on their filing's profile. The page showed the
+ * first: Ashley Hinson, Iowa's Republican Senate nominee, read "Not on the
+ * 2026 ballot - not seeking re-election". */
+async function testRunningElsewhere() {
+  const { window, D } = await buildPage("index.html");
+  const KYC = window.KYC;
+  const people = window.legislatorsData;
+  const movers = people.filter((p) => KYC.runsElsewhere(p) && p.contestLabel &&
+    p.raceStatusRace && p.raceStatusRace !== p.contestRaceId);
+  const filingOf = (p) => KYC.byId(p.alsoRunningId);
+  const decided = movers.filter((p) => filingOf(p) && filingOf(p).raceId === p.contestRaceId &&
+    filingOf(p).raceStatus);
+  const nominees = decided.filter((p) => filingOf(p).raceStatus === "nominee");
+  const losers = decided.filter((p) => filingOf(p).raceStatus === "eliminated");
+
+  const profileStatus = (p) => {
+    KYC.profile.open(p.id, { fromRoute: true });
+    const text = D.getElementById("profileModalStatus").textContent;
+    KYC.profile.close();
+    return text;
+  };
+
+  suite("members running for another seat — their race, not their seat", () => {
+    check("the data has members whose held-seat result differs from their race",
+      decided.length > 0 && nominees.length > 0, `${decided.length} decided, ${nominees.length} nominees`);
+    check("every one shows the result of the race they are in",
+      decided.every((p) => KYC.contestStatus(p) === filingOf(p).raceStatus),
+      decided.filter((p) => KYC.contestStatus(p) !== filingOf(p).raceStatus).map((p) => p.name).join(", "));
+
+    const badProfiles = decided.filter((p) => {
+      const t = profileStatus(p);
+      return /not seeking re-election|Not on the 2026 ballot|Renominated/i.test(t) ||
+        !t.includes(p.contestLabel);
+    });
+    check("no profile calls them off the ballot or renominated", badProfiles.length === 0,
+      badProfiles.map((p) => p.name + ": " + profileStatus(p)).join(" | "));
+    check("a nominee's profile says which November ballot",
+      nominees.every((p) => profileStatus(p).includes("On the November ballot for " + p.contestLabel)),
+      nominees.length ? profileStatus(nominees[0]) : "");
+    check("a loser's profile says which primary",
+      losers.every((p) => profileStatus(p).includes("Lost the 2026 primary for " + p.contestLabel)),
+      losers.length ? profileStatus(losers[0]) : "none in the data");
+
+    // The card carries the filing's own badge. A filing that is itself
+    // unlisted in its race says so; the held seat's absence never shows.
+    const FILING_BADGE = { nominee: /On the November ballot/, eliminated: /Lost primary/,
+      withdrawn: /Withdrew/, advanced: /In runoff/, unlisted: /Not on primary ballot/ };
+    const badCards = decided.filter((p) => {
+      const html = KYC.cards.statusBadge(p);
+      return /Not on the ballot|Renominated/.test(html) ||
+        !FILING_BADGE[filingOf(p).raceStatus].test(html) ||
+        (filingOf(p).raceStatus !== "unlisted" && /Not on primary ballot/.test(html));
+    });
+    check("each card shows the result of their race, not their seat", badCards.length === 0,
+      badCards.map((p) => p.name + ": " + KYC.cards.statusBadge(p)).join(" | "));
+
+    // Someone with no filing in their race shows no result, never the seat's.
+    const undecided = movers.filter((p) => !decided.includes(p));
+    check("with no result for their race, nothing is borrowed from the seat",
+      undecided.every((p) => KYC.contestStatus(p) === "" ||
+        (filingOf(p) && filingOf(p).raceId === p.contestRaceId)));
+  });
+  window.close();
+
+  const map = await buildPage("map.html");
+  await settle(50);
+  const nominee = nominees[0];
+  if (nominee) {
+    map.D.querySelector('[data-mode="house"]').click();
+    const picker = map.D.getElementById("mapStateSelect");
+    picker.value = nominee.state;
+    picker.dispatchEvent(new map.window.Event("change"));
+    const row = map.D.querySelector(`#delegation [data-id="${nominee.id}"]`);
+    suite("map.html — a member running for another seat", () => {
+      check(`${nominee.name}'s row is in the ${nominee.state} delegation`, !!row);
+      check("the row carries the result of their race",
+        row && /Running for/.test(row.textContent) && /Nominee/.test(row.textContent) &&
+          !/Not on ballot/.test(row.textContent),
+        row && row.textContent.replace(/\s+/g, " ").trim());
+    });
+  }
+  map.window.close();
+}
+
 /* ================================================================== report */
 
 (async function main() {
@@ -934,6 +1022,7 @@ async function testDeepLinks() {
   if (!only || only === "map.html") await testMap();
   if (!only || only === "states") await testStates();
   if (!only || only === "links") await testDeepLinks();
+  if (!only || only === "links") await testRunningElsewhere();
 
   let failed = 0;
   for (const r of results) {

@@ -284,8 +284,12 @@
   function rowBadge(item) {
     var status = String(item.status || "").toLowerCase();
     if (!item.isCandidate && item.contestLabel) {
+      // With the result of the race they are in, not of the seat they hold.
+      var contest = RACE_BADGE[KYC.contestStatus(item)];
       return '<span class="badge badge-warn">Running for ' +
-        KYC.escapeHtml(item.contestLabel.replace(/ • /, " ")) + "</span>";
+        KYC.escapeHtml(item.contestLabel.replace(/ • /, " ")) + "</span>" +
+        (contest ? ' <span class="badge ' + contest.split("|")[0] + '">' +
+          contest.split("|")[1] + "</span>" : "");
     }
     var race = RACE_BADGE[item.raceStatus];
     if (race) {
