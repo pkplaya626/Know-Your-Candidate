@@ -1,0 +1,74 @@
+==District 5==
+{{Infobox election
+| nominee1 = [[Nikema Williams]]
+| party1 = Democratic Party (United States)
+| nominee2 = {{nowrap|John Salvesen}}
+| party2 = Republican Party (United States)
+}}
+===Democratic primary===
+====Nominee====
+*[[Nikema Williams]], incumbent U.S. representative
+====Eliminated in primary====
+*Arnetress Beatty, consumer services specialist
+==== Endorsements ====
+====Fundraising====
+====Results====
+{{Election box begin no change |title = Democratic primary results }}
+{{Election box winning candidate with party link no change
+| candidate = [[Nikema Williams]] (incumbent)
+| party = Democratic Party (United States)
+| votes = 118,546
+| percentage = 88.0
+}}
+{{Election box candidate with party link no change
+| candidate = Arnetress Beatty
+| party = Democratic Party (United States)
+| votes = 16,186
+| percentage = 12.0
+}}
+{{Election box total no change
+| votes = 134,732
+| percentage = 100.0
+}}
+{{Election box end}}
+===Republican primary===
+====Nominee====
+*John Salvesen, handyman
+====Results====
+{{Election box begin no change |title = Republican primary results }}
+{{Election box winning candidate with party link no change
+| candidate = John Salvesen
+| party = Republican Party (United States)
+| votes = 9,552
+| percentage = 100.0
+}}
+{{Election box total no change
+| votes = 9,552
+| percentage = 100.0
+}}
+{{Election box end}}
+===General election===
+====Predictions====
+====Post-primary endorsements====
+====Fundraising====
+====Results====
+{{Election box begin|title=2026 Georgia's 5th congressional district election}}
+{{Election box candidate with party link 
+  |party      = Democratic Party (United States)
+  |candidate  = [[Nikema Williams]] (incumbent)
+  |votes      = 
+  |percentage = 
+  |change = 
+}}
+{{Election box candidate with party link 
+  |party      = Republican Party (United States)
+  |candidate  = John Salvesen
+  |votes      = 
+  |percentage = 
+  |change = 
+}}
+{{Election box total no change
+  |votes      = 
+  |percentage = 
+}}
+{{Election box end}}

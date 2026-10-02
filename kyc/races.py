@@ -5,9 +5,75 @@ question a voter actually has, which is "who is running for my seat". A race
 is the natural unit: one seat, the incumbent, and everyone challenging them.
 """
 
-from .normalize import TERRITORIES
+from .normalize import AT_LARGE, TERRITORIES
 
 ELECTION_YEAR = 2026
+
+# House seats that are not two-year terms. Puerto Rico's Resident Commissioner
+# serves four years (48 U.S.C. 891), elected with the President: 2024, then
+# 2028. The FEC's 2026 calendar has no PR-H primary and Wikipedia's "2026
+# United States House of Representatives elections" lists delegate races for
+# AS, DC, GU, MP and VI only - yet the site showed H-PR-00-2026 with the
+# Resident Commissioner "seeking re-election". congress-legislators records
+# his term as ending 2027-01-03, so the term date cannot be trusted here and
+# the statute is encoded instead: {state: election years are multiples of}.
+FOUR_YEAR_HOUSE_SEATS = {"PR": 4}
+
+
+def house_seat_up(state, year=ELECTION_YEAR):
+    """Is *state*'s House seat on the *year* ballot? True for every two-year seat."""
+    period = FOUR_YEAR_HOUSE_SEATS.get(state)
+    return True if period is None else year % period == 0
+
+
+def house_term_end_year(state, year=ELECTION_YEAR):
+    """The year the current House term for *state* ends (Jan. 3)."""
+    election = year
+    while not house_seat_up(state, election):
+        election += 1
+    return election + 1
+
+
+def contestable(profiles, year=ELECTION_YEAR):
+    """Every race id that genuinely exists in *year*, from the sitting members.
+
+    The FEC accepts a Senate filing from a state with no Senate seat on the
+    ballot, and a House filing for a district the state does not have
+    (Georgia has 14 seats; filings arrived for GA-23, and New Mexico, with 3,
+    for NM-66). Taken at face value each became a race with a "pending
+    primary". So a race exists only if:
+
+    * Senate - a sitting senator's seat is up this year (``seatUp2026``,
+      which comes from the snapshot's real term dates, rule 17);
+    * House - the district is one the state actually has: 1 to the highest
+      district any sitting member holds (so a vacant seat still counts), or
+      the at-large seat; and the seat is up this year (not Puerto Rico in
+      2026).
+
+    Seat counts come from the roster, never from a hard-coded total.
+    """
+    senate, house = set(), {}
+    for profile in profiles:
+        if profile.get("isCandidate"):
+            continue
+        state = profile.get("state")
+        chamber = profile.get("chamber") or ""
+        if "Senate" in chamber:
+            if profile.get("seatUp2026"):
+                senate.add(race_id("Senate", state, None))
+        elif "House" in chamber and profile.get("districtNum") is not None:
+            house.setdefault(state, set()).add(profile["districtNum"])
+
+    contests = set(senate)
+    for state, districts in house.items():
+        if not house_seat_up(state, year):
+            continue
+        if state in AT_LARGE:
+            numbers = {0}
+        else:
+            numbers = set(range(1, max(districts) + 1)) if max(districts) > 0 else {0}
+        contests |= {race_id("House", state, n) for n in numbers}
+    return contests
 
 
 def race_id(chamber, state, district_num):

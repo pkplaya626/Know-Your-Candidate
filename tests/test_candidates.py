@@ -243,10 +243,136 @@ class TestToProfiles(unittest.TestCase):
             self.assertEqual(candidates.party_label(filing(party=code)), expected)
 
 
+class TestScreen(unittest.TestCase):
+    """Registrations that list 2026 are not all 2026 candidacies."""
+
+    CONTESTS = {"S-OK-2026", "H-TX-01-2026", "H-GA-14-2026", "H-NM-03-2026"}
+
+    def test_the_current_period_wins_over_a_larger_earlier_one(self):
+        # Ranking on receipts first put a previous period's money on a 2026
+        # profile and made an active filer look stale.
+        rows = [filing(receipts=900000.0, coverage="2024-12-31"),
+                filing(receipts=12000.0, coverage="2026-06-30")]
+        row = candidates.build_cache(rows)["candidates"][0]
+        self.assertEqual((row["receipts"], row["coverage_end_date"]), (12000.0, "2026-06-30"))
+
+    def test_a_registration_with_no_report_since_the_cycle_began_is_stale(self):
+        # Jim Inhofe, S4OK00083: last report through 2022-12-31, shown as a
+        # 2026 Oklahoma Senate candidate with his 2022 receipts.
+        inhofe = filing("S4OK00083", "INHOFE, JAMES M. SEN.", "S", "OK", 0,
+                        receipts=154687.18, coverage="2022-12-31")
+        current = filing("S6OK00001", "ROE, RICHARD", "S", "OK", 0, coverage="2026-06-30")
+        unreported = filing("S6OK00002", "POE, ED", "S", "OK", 0, receipts=0, coverage=None)
+        cache = candidates.build_cache([inhofe, current, unreported])
+        screened = candidates.screen(cache, self.CONTESTS)
+
+        kept = {r["candidate_id"] for r in screened["candidates"]}
+        self.assertEqual(kept, {"S6OK00001", "S6OK00002"})
+        self.assertEqual([r["candidate_id"] for r in screened["screened"]["stale"]],
+                         ["S4OK00083"])
+        # Counted consistently: a stale registration is not a 2026 filing.
+        self.assertEqual(candidates.filing_counts(screened), {"S-OK-2026": 2})
+        profiles, _ = candidates.to_profiles(screened, [])
+        self.assertEqual([p["fecCandidateId"] for p in profiles], ["S6OK00001"])
+        # The input is not modified.
+        self.assertEqual(cache["count"], 3)
+
+    def test_the_first_day_of_the_cycle_is_current(self):
+        row = filing(coverage="2025-01-01")
+        screened = candidates.screen(candidates.build_cache([row]), self.CONTESTS)
+        self.assertEqual(screened["count"], 1)
+
+    def test_filings_for_races_that_do_not_exist_are_dropped(self):
+        rows = [
+            filing("S6CA00001", office="S", state="CA", district=0),   # no CA seat up
+            filing("H6GA23001", state="GA", district=23),             # GA has 14
+            filing("H6NM66001", state="NM", district=66),             # NM has 3
+            filing("H6GA14001", state="GA", district=14),
+            filing("H6NM03001", state="NM", district=3),
+        ]
+        screened = candidates.screen(candidates.build_cache(rows), self.CONTESTS)
+        self.assertEqual({r["candidate_id"] for r in screened["candidates"]},
+                         {"H6GA14001", "H6NM03001"})
+        self.assertEqual(len(screened["screened"]["phantom"]), 3)
+        self.assertEqual(set(candidates.filing_counts(screened)),
+                         {"H-GA-14-2026", "H-NM-03-2026"})
+
+    def test_validate_names_every_dropped_filing(self):
+        import datetime
+
+        rows = [filing("S4OK00083", "INHOFE, JAMES M. SEN.", "S", "OK", 0,
+                       coverage="2022-12-31"),
+                filing("H6GA23001", state="GA", district=23),
+                filing("H6OR05234", state="OR", district=5, coverage="2026-12-31")]
+        screened = candidates.screen(candidates.build_cache(rows), self.CONTESTS | {"H-OR-05-2026"})
+        issues = validate.check_field_screen(screened, today=datetime.date(2026, 10, 1))
+        by_code = {i.code: i for i in issues}
+        self.assertEqual(set(by_code), {"field-stale", "field-phantom-race",
+                                        "field-future-coverage"})
+        self.assertTrue(all(i.level == "warn" for i in issues))
+        self.assertIn("S4OK00083", by_code["field-stale"].detail[0])
+        self.assertIn("H-GA-23-2026", by_code["field-phantom-race"].detail[0])
+        self.assertIn("H6OR05234", by_code["field-future-coverage"].detail[0])
+
+
+class TestContestable(unittest.TestCase):
+    """Races exist only for real seats, counted from the roster."""
+
+    @classmethod
+    def setUpClass(cls):
+        from kyc import races
+
+        cls.profiles, cls.stats = build_profiles(load_all(ROOT))
+        cls.contests = races.contestable(cls.profiles)
+
+    def test_senate_races_are_exactly_the_seats_up(self):
+        senate = {c for c in self.contests if c.startswith("S-")}
+        up = {f"S-{p['state']}-2026" for p in self.profiles
+              if not p["isCandidate"] and "Senate" in p["chamber"] and p["seatUp2026"]}
+        self.assertEqual(senate, up)
+        self.assertEqual(len(senate), validate.EXPECTED_SENATE_UP_2026)
+        for state in ("CA", "NY", "PA", "AZ"):
+            self.assertNotIn(f"S-{state}-2026", self.contests)
+
+    def test_house_districts_are_the_states_seats(self):
+        held = {}
+        for p in self.profiles:
+            if not p["isCandidate"] and p["chamber"] == "House":
+                held.setdefault(p["state"], set()).add(p["districtNum"])
+        for state, districts in held.items():
+            ours = {c for c in self.contests if c.startswith(f"H-{state}-")}
+            if state == "PR":
+                self.assertEqual(ours, set())
+            elif max(districts) == 0:
+                self.assertEqual(ours, {f"H-{state}-00-2026"})
+            else:
+                self.assertEqual(len(ours), max(districts), state)
+        self.assertNotIn("H-GA-23-2026", self.contests)
+        self.assertNotIn("H-NM-66-2026", self.contests)
+        self.assertIn("H-GA-14-2026", self.contests)
+
+    def test_the_built_site_has_no_phantom_race(self):
+        from kyc import races
+
+        field = candidates.load_cache(ROOT)
+        profiles, _ = build_profiles(load_all(ROOT), field=field)
+        built = {r["id"] for r in races.build(profiles)}
+        self.assertLessEqual(built, races.contestable(profiles))
+
+
 class TestAgainstTheRealField(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.cache = candidates.load_cache(ROOT)
+
+    def test_no_stale_registration_becomes_a_profile(self):
+        raw = load_all(ROOT)
+        profiles, _ = build_profiles(raw, field=self.cache)
+        ids = {p.get("fecCandidateId") for p in profiles if p.get("source") == "fec-field"}
+        self.assertNotIn("S4OK00083", ids)   # Jim Inhofe, last report 2022-12-31
+        for p in profiles:
+            if p.get("source") == "fec-field":
+                self.assertGreaterEqual(p["financeAsOf"], candidates.cycle_start(), p["id"])
 
     def test_the_field_is_committed(self):
         self.assertIsNotNone(self.cache, "run: python build_profile_site.py field")

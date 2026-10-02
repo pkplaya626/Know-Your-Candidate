@@ -1,0 +1,61 @@
+== District 4 ==
+{{Infobox election
+| nominee1 = [[Jim Jordan]]
+| party1 = Republican Party (United States)
+| nominee2 = Joshua Kolasinski
+| party2 = Democratic Party (United States)
+}}
+===Republican primary===
+====Nominee====
+*[[Jim Jordan]], incumbent U.S. representative
+==== Endorsements ====
+====Fundraising====
+====Results====
+{{Election box begin no change|title=Republican primary results}}
+{{Election box winning candidate with party link no change|party=Republican Party (United States)|candidate=[[Jim Jordan]] (incumbent)|votes=75,210|percentage=100.0}}
+{{Election box total no change|votes=75,210|percentage=100.0}}
+{{Election box end}}
+===Democratic primary===
+==== Nominee ====
+*Joshua Kolasinski, small business owner
+====Results====
+{{Election box begin no change|title=Democratic primary results}}
+{{Election box winning candidate with party link no change|party=Democratic Party (United States)|candidate=Joshua Kolasinski|votes=26,406|percentage=100.0}}
+{{Election box total no change|votes=26,406|percentage=100.0}}
+{{Election box end}}
+===Independents===
+====Declared====
+====Withdrawn====
+*Tamie Wilson, businesswoman and Democratic nominee for this district in [[2022 United States House of Representatives elections in Ohio#District 4|2022]] and [[2024 United States House of Representat
+===General election===
+====Predictions====
+====Fundraising====
+====Results====
+{{Election box begin|title=2026 Ohio's 4th congressional district election}}
+{{Election box candidate with party link 
+  |party      = Republican Party (United States)
+  |candidate  = [[Jim Jordan]] (incumbent)
+  |votes      = 
+  |percentage = 
+  |change = 
+}}
+{{Election box candidate with party link 
+  |party      = Democratic Party (United States)
+  |candidate  = Joshua Kolasinski 
+  |votes      = 
+  |percentage = 
+  |change = 
+}}
+{{Election box candidate with party link 
+  |party      = Independent
+  |candidate  = Tracey Tackett
+  |votes      = 
+  |percentage = 
+  |change = 
+}}
+{{Election box total no change
+  |votes      = 
+  |percentage = 
+}}
+{{Election box end}}
+====Post-primary endorsements====

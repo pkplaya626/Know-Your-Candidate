@@ -109,7 +109,11 @@ def build_cache(rows, cycle=CYCLE):
     number a reader would take at face value.
 
     Where a candidate appears twice, the row carrying real reported totals
-    wins; between two of those, the larger receipts figure does.
+    wins; between two of those, the most recent period does, and only then
+    the larger receipts figure. Ranking on receipts first picked a larger
+    earlier period over the current one, which put the previous cycle's money
+    on a 2026 profile (rule 19) and made an active filer look stale to
+    :func:`screen`.
     """
     best = {}
     for row in rows:
@@ -118,6 +122,7 @@ def build_cache(rows, cycle=CYCLE):
             continue
         rank = (
             1 if row.get("coverage_end_date") else 0,
+            (row.get("coverage_end_date") or "")[:10],
             row.get("receipts") or 0,
         )
         if candidate_id not in best or rank > best[candidate_id][0]:
@@ -182,12 +187,67 @@ def district_number(row):
         return None
 
 
+def cycle_start(cycle=CYCLE):
+    """First day of the two-year period that elects in *cycle*."""
+    return f"{cycle - 1}-01-01"
+
+
+def screen(cache, contests, cycle=CYCLE):
+    """The field with filings that are not 2026 candidacies set aside.
+
+    ``/candidates/totals/?election_year=2026`` returns everyone whose
+    registration *lists* 2026, which is not the same as everyone running in
+    it. Two kinds of row are removed, and returned so ``validate`` can list
+    every one of them by name (nothing is dropped silently):
+
+    ``stale``
+        Reported activity that ends before the cycle began. Jim Inhofe
+        (S4OK00083) last reported for the period ending 2022-12-31 and
+        appeared as a 2026 Oklahoma Senate candidate carrying his 2022
+        receipts. Someone who has reported nothing since 1 January 2025 has
+        not filed *for 2026* in any sense a reader would recognise, and their
+        old totals on a 2026 page read as current money (rule 19). A
+        registrant with no report at all is kept: a statement of candidacy
+        with no money yet is still a 2026 filing, which is what rule 22's
+        ``filedCount`` counts.
+
+    ``phantom``
+        A filing for a race that does not exist this year: a Senate filing
+        from a state with no seat up, or a House district the state does not
+        have. *contests* is :func:`kyc.races.contestable`.
+
+    Returns a new cache dict; the input is not modified. ``cache["screened"]``
+    holds the dropped rows. Rows with no state stay - they never reach a race.
+    """
+    if not cache:
+        return cache
+    start = cycle_start(cycle)
+    kept, stale, phantom = [], [], []
+    for row in cache.get("candidates", []):
+        coverage = (row.get("coverage_end_date") or "")[:10]
+        rid = race_id(row, cycle)
+        if coverage and coverage < start:
+            stale.append(row)
+        elif rid is not None and rid not in contests:
+            phantom.append(row)
+        else:
+            kept.append(row)
+    screened = dict(cache)
+    screened["candidates"] = kept
+    screened["count"] = len(kept)
+    screened["screened"] = {"stale": stale, "phantom": phantom, "cycleStart": start}
+    return screened
+
+
 def filing_counts(cache, year=CYCLE):
     """``{race_id: number of people who have filed}``, at any funding level.
 
     Counted from everyone, not just those over the statutory threshold. The
     point is that no race is ever described as uncontested when somebody has
-    filed for it.
+    filed for it. "Everyone" means everyone :func:`screen` kept: a
+    registration whose last report predates the cycle is not a 2026 filing,
+    and a filing for a seat that is not on the ballot is not a filing for any
+    race we show.
     """
     counts = {}
     for row in (cache or {}).get("candidates", []):

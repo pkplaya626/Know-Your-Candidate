@@ -32,6 +32,40 @@ ELECTION_YEAR = 2026
 NEXT_CONGRESS_START = "2027-01-03"
 
 
+def age_as_of(snapshot=None):
+    """The date ages are computed at: when the membership data was fetched.
+
+    The CSVs' Age column is a number typed on the day the row was written,
+    and 70 of them were already wrong when the site was built. Ages are
+    computed from the birthdate instead - but not at the wall-clock moment of
+    the build. ``verify`` asks whether the committed data matches its sources
+    (rule 18); an age that ticked over at midnight would make it fail on
+    every birthday, and CI's ``SOURCE_DATE_EPOCH`` build (2001) would make
+    everyone 25 years younger. The snapshot's fetch date is part of the data,
+    moves forward on every weekly refresh, and is reproducible. Without a
+    snapshot the build timestamp is used, which honours SOURCE_DATE_EPOCH.
+    """
+    import datetime
+
+    stamp = (snapshot or {}).get("fetched")
+    if not stamp:
+        from .emit import build_timestamp
+        stamp = build_timestamp()
+    return datetime.date.fromisoformat(str(stamp)[:10])
+
+
+def _age(row, as_of):
+    """Age from the birthdate at *as_of*; the CSV's Age only without a usable one."""
+    from .legislators import age_on
+
+    birthdate = clean_str(row.get("Birthdate"), "")
+    if as_of is not None and looks_like_date(birthdate):
+        years = age_on(birthdate[:10], as_of)
+        if years:
+            return int(years)
+    return parse_age(row.get("Age"))
+
+
 def _fold(text):
     """Strip accents so surname matching works on "Lujan" vs "Lujan"."""
     normalized = unicodedata.normalize("NFD", str(text))
@@ -189,7 +223,8 @@ def _committee_text(assignments):
     return "; ".join(parts)
 
 
-def _build_member(row, index, seats_up=None, term_ends=None, person=None, assignments=None):
+def _build_member(row, index, seats_up=None, term_ends=None, person=None, assignments=None,
+                  as_of=None):
     name = clean_str(row.get("Name"), "")
     bioguide = row.get("Bioguide ID")
     profile_id = clean_str(bioguide, "") or f"CURR_{index}"
@@ -211,9 +246,12 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
     end_year = None
     if kind == "House":
         # Every House seat is a two-year term, so all of them are on the
-        # 2026 ballot regardless of whether the incumbent is running.
-        seat_up = True
-        end_year = ELECTION_YEAR + 1
+        # 2026 ballot regardless of whether the incumbent is running - except
+        # Puerto Rico's Resident Commissioner, who serves four (48 U.S.C. 891).
+        from .races import house_seat_up, house_term_end_year
+
+        seat_up = house_seat_up(state, ELECTION_YEAR)
+        end_year = house_term_end_year(state, ELECTION_YEAR)
     elif kind == "Senate":
         # Prefer the authoritative snapshot, keyed on bioguide id. The
         # fallback matches a hand-typed surname against the member's name,
@@ -254,7 +292,7 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
         # Retained under the original name for the page's existing filters.
         "isUpIn2026": seat_up,
         "seekingReelection2026": seat_up and not not_seeking,
-        "age": parse_age(row.get("Age")),
+        "age": _age(row, as_of),
         "birthdate": clean_str(row.get("Birthdate"), "Unknown"),
         "education": clean_str(row.get("Education"), "N/A"),
         "previous_professions": clean_str(row.get("Previous Professions"), "N/A"),
@@ -284,7 +322,7 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
     return profile
 
 
-def _build_candidate(row, index):
+def _build_candidate(row, index, as_of=None):
     name = clean_str(row.get("Name"), "")
     chamber_raw = clean_str(row.get("Chamber"), "Senate (Candidate)")
     kind = _chamber_kind(chamber_raw)
@@ -322,7 +360,7 @@ def _build_candidate(row, index):
         "isUpIn2026": False,
         "seekingReelection2026": False,
         "upcomingPrimary": upcoming,
-        "age": parse_age(row.get("Age")),
+        "age": _age(row, as_of),
         "birthdate": clean_str(row.get("Birthdate"), "Unknown"),
         "education": clean_str(row.get("Education"), "N/A"),
         "previous_professions": clean_str(row.get("Previous Professions"), "N/A"),
@@ -454,6 +492,19 @@ def _apply_filings(profiles, field, finance):
     return moved, reseated
 
 
+def screen_field(field, profiles):
+    """The FEC field without stale registrations or filings for absent races.
+
+    Only the sitting members in *profiles* are read, so this gives the same
+    answer before and after candidate profiles are appended.
+    """
+    if not field:
+        return field
+    from . import candidates as field_mod, races as races_mod
+
+    return field_mod.screen(field, races_mod.contestable(profiles, ELECTION_YEAR))
+
+
 def build_profiles(data, snapshot=None, field=None, finance=None, committees=None):
     """Build the unified profile list from loaded roster rows.
 
@@ -468,8 +519,16 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
     which made the site report 436 races as having no declared challenger when
     only four of them actually did.
 
+    The field is first passed through :func:`kyc.candidates.screen` against
+    the races that exist this year (:func:`kyc.races.contestable`, derived
+    from the sitting members built here), so stale registrations and filings
+    for seats that are not on the ballot never become profiles or races.
+    Callers that count ``filedCount`` must count the same screened field:
+    :func:`screen_field` reproduces it from the finished profiles.
+
     Returns ``(profiles, stats)``.
     """
+    as_of = age_as_of(snapshot)
     seats_up = term_ends = None
     people = {}
     if snapshot:
@@ -496,12 +555,14 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
             from . import legislators as legislators_mod
             seats = legislators_mod.assignments(committees, bioguide)
         profiles.append(_build_member(row, index, seats_up, term_ends,
-                                      person=people.get(bioguide), assignments=seats))
+                                      person=people.get(bioguide), assignments=seats,
+                                      as_of=as_of))
 
     member_count = len(profiles)
+    field = screen_field(field, profiles)
 
     for index, row in enumerate(candidates):
-        profiles.append(_build_candidate(row, index))
+        profiles.append(_build_candidate(row, index, as_of=as_of))
 
     roster_count = len(profiles)
     if field:
@@ -539,6 +600,9 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
         if p["chamber"] == "House" and p["state"] not in TERRITORIES
     ]
     stats = {
+        "ageAsOf": as_of.isoformat(),
+        "field_stale": len(((field or {}).get("screened") or {}).get("stale", [])),
+        "field_phantom": len(((field or {}).get("screened") or {}).get("phantom", [])),
         "members": member_count,
         "candidates": len(profiles) - member_count,
         "roster_candidates": roster_count - member_count,

@@ -1,0 +1,191 @@
+==District 1==
+{{Infobox election
+| party1 = Republican Party (United States)
+| party2 = Democratic Party (United States)
+}}
+===Primary===
+====Advanced to general====
+* [[James Gallagher (California politician)|James Gallagher]] (Republican), incumbent U.S. representative, former [[List of minority leaders of the California State Assembly|Minority Leader of the Cal
+* [[Mike McGuire (politician)|Mike McGuire]] (Democratic), former [[president pro tempore of the California State Senate]] (2024–2025) from the [[California's 2nd senatorial district|2nd district]] (2
+====Eliminated in primary====
+* Audrey Denney (Democratic), consultant, runner-up for this seat in [[2018 United States House of Representatives elections in California#District 1|2018]] and [[2020 United States House of Represent
+* Janice Karrman (Democratic), retired wine broker
+* Timothy Sean Kelly (No party preference), attorney
+* Richard T. Minner (No party preference), software architect
+====Withdrawn====
+* James Salegui (Democratic), financial advisor
+* Kyle Wilson (Democratic), labor attorney ''(endorsed Denney)''
+====Declined====
+====Endorsements====
+====Fundraising====
+====Polling====
+====Results====
+{{Election box begin no change
+| title = Primary results
+}}
+{{Election box winning candidate with party link no change
+| party = Republican Party (United States)
+| candidate = [[James Gallagher (California politician)|James Gallagher]]
+| votes = 92,975
+| percentage = 42.15
+}}
+{{Election box winning candidate with party link no change
+| party = Democratic Party (United States)
+| candidate = [[Mike McGuire (politician)|Mike McGuire]]
+| votes = 92,121
+| percentage = 41.76
+}}
+{{Election box candidate with party link no change
+| party = Democratic Party (United States)
+| candidate = Audrey Denney
+| votes = 31,378
+| percentage = 14.22
+}}
+{{Election box candidate with party link no change
+| party = Democratic Party (United States)
+| candidate = Janice Karman
+| votes = 1,697
+| percentage = 0.77
+}}
+{{Election box candidate with party link no change
+| party = No party preference
+| candidate = Timothy Sean Kelly
+| votes = 1,640
+| percentage = 0.74
+}}
+{{Election box candidate with party link no change
+| party = No party preference
+| candidate = Richard Minner
+| votes = 784
+| percentage = 0.36
+}}
+{{Election box total no change
+| votes = 220,595
+| percentage = 100.0
+}}
+{{Election box end}}
+===General election===
+====Predictions====
+====Post-primary endorsements====
+====Fundraising====
+====Results====
+{{Election box begin|title=2026 California's 1st congressional district election}}
+{{Election box candidate with party link
+  |party      = Republican Party (United States)
+  |candidate  = [[James Gallagher (California politician)|James Gallagher]] (incumbent)
+  |votes      = 
+  |percentage = 
+  |change = 
+}}
+{{Election box candidate with party link
+  |party      = Democratic Party (United States)
+  |candidate  = [[Mike McGuire (politician)|Mike McGuire]]
+  |votes      = 
+  |percentage = 
+  |change = 
+}}
+{{Election box total no change
+  |votes      = 
+  |percentage = 
+}}
+{{Election box end}}
+==District 2==
+{{Infobox election
+| party1 = Democratic Party (United States)
+| party2 = Republican Party (United States)
+}}
+===Primary===
+====Advanced to general====
+* [[Jared Huffman]] (Democratic), incumbent U.S. representative
+* Robin Littau (Republican), [[Enterprise Elementary School District|Enterprise Elementary School Board]] trustee
+====Eliminated in primary====
+* Gregory Burgess (No party preference), caregiver
+* Tim Geist (Republican), former researcher
+* Nicolette Hahn Niman (No party preference), cattle rancher
+* Paul Saulsbury (Republican), mental health professional
+* Angelita Valles (Republican), former [[Victorville, CA|Victorville]] city councillor
+* Rose Penelope Yee (Democratic), businesswoman and runner-up for the 1st district in [[2024 United States House of Representatives elections in California#District 1|2024]]
+====Withdrawn====
+* Colby Smart (No party preference), deputy superintendent at the [[Humboldt County, California|Humboldt County]] Office of Education
+===Endorsements===
+===Fundraising===
+====Results====
+{{Election box begin no change
+| title = Primary results
+}}
+{{Election box winning candidate with party link no change
+| party = Democratic Party (United States)
+| candidate = [[Jared Huffman]] (incumbent)
+| votes = 139,662
+| percentage = 56.48
+}}
+{{Election box winning candidate with party link no change
+| party = Republican Party (United States)
+| candidate = Robin Littau
+| votes = 28,222
+| percentage = 11.41
+}}
+{{Election box candidate with party link no change
+| party = Democratic Party (United States)
+| candidate = Rose Yee
+| votes = 18,898
+| percentage = 7.64
+}}
+{{Election box candidate with party link no change
+| party = Republican Party (United States)
+| candidate = Angelita Valles
+| votes = 16,307
+| percentage = 6.59
+}}
+{{Election box candidate with party link no change
+| party = Republican Party (United States)
+| candidate = Tim Geist
+| votes = 16,160
+| percentage = 6.53
+}}
+{{Election box candidate with party link no change
+| party = Republican Party (United States)
+| candidate = Paul Saulsbury
+| votes = 14,399
+| percentage = 5.82
+}}
+{{Election box candidate with party link no change
+| party = No party preference
+| candidate = Nicolette Niman
+| votes = 11,886
+| percentage = 4.81
+}}
+{{Election box candidate with party link no change
+| party = No party preference
+| candidate = Gregory Burgess
+| votes = 1,759
+| percentage = 0.71
+}}
+{{Election box total no change
+| votes = 247,293
+| percentage = 100.0
+}}
+{{Election box end}}
+===General election===
+====Predictions====
+====Fundraising====
+====Results====
+{{Election box begin|title=2026 California's 2nd congressional district election}}
+{{Election box candidate with party link
+| party = Democratic Party (United States)
+| candidate = [[Jared Huffman]] (incumbent)
+| votes = 
+| percentage = 
+}}
+{{Election box candidate with party link
+| party =Republican Party (United States)
+| candidate = Robin Littau
+| votes = 
+| percentage = 
+| change = 
+}}
+{{Election box total
+| votes =
+| percentage = 
+}}
+{{Election box end}}

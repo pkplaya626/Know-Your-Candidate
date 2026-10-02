@@ -13,9 +13,12 @@ name: Refresh
 
 on:
   schedule:
-    # Mondays, 07:20 UTC. Off the hour because GitHub's scheduler queues
-    # heavily at :00 and skips runs it cannot start.
-    - cron: "20 7 * * 1"
+    # Mondays and Thursdays, 07:20 UTC. Off the hour because GitHub's
+    # scheduler queues heavily at :00 and skips runs it cannot start.
+    # Thursdays only until the 2026-11-03 election: in the run-up a week-old
+    # field misses withdrawals and results. The `gate` job below skips the
+    # Thursday run after the election, so nobody has to remember to edit this.
+    - cron: "20 7 * * 1,4"
   workflow_dispatch:
     inputs:
       portraits:
@@ -26,14 +29,35 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  # A failed run opens (or comments on) a "Weekly refresh failed" issue.
+  issues: write
 
 concurrency:
   group: refresh
   cancel-in-progress: false
 
 jobs:
+  gate:
+    name: Decide whether this run is due
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.due.outputs.run }}
+    steps:
+      - id: due
+        run: |
+          # The extra Thursday run exists only for the 2026 election.
+          if [ "${{ github.event_name }}" = "schedule" ] \
+             && [ "$(date -u +%u)" = "4" ] \
+             && [ "$(date -u +%Y-%m-%d)" \> "2026-11-03" ]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
   refresh:
     name: Reconcile against congress-legislators
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -57,8 +81,12 @@ jobs:
 
       # A member with no portrait shows a silhouette. Resolving here means the
       # PR arrives complete rather than needing a second pass.
+      #
+      # On a schedule the `inputs` context is empty, so the old condition
+      # `inputs.portraits != false` compared null with false - and portraits
+      # never ran on the weekly refresh. Only a manual run can opt out.
       - name: Resolve portraits for anyone new
-        if: inputs.portraits != false
+        if: github.event_name != 'workflow_dispatch' || inputs.portraits
         run: python build_profile_site.py portraits
 
       # Optional. Without the secret this is skipped entirely rather than
@@ -68,11 +96,18 @@ jobs:
       # The condition tests `env`, not `secrets`: the secrets context is not
       # available in a step-level `if`, so the obvious spelling would never be
       # true and the step would silently never run.
+      #
+      # --refresh: without it `fec.resolve_all` fetches only profiles missing
+      # from the cache, so every cached incumbent kept the totals of the day
+      # they were first looked up while challengers' totals moved weekly.
+      # Request budget (the key allows 1000 an hour): about 540 members by id
+      # at one request each, ~60 roster challengers at up to two, ~45 pages of
+      # the field, and the campaign lookups below - capped to stay under it.
       - name: Refresh campaign finance
         env:
           FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
         if: env.FEC_API_KEY != ''
-        run: python build_profile_site.py finance
+        run: python build_profile_site.py finance --refresh
 
       # Who has filed, and - from the state election pages - who is still in.
       - name: Refresh the candidate field and primary results
@@ -90,7 +125,7 @@ jobs:
         env:
           FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
         if: env.FEC_API_KEY != ''
-        run: python build_profile_site.py campaigns --limit 250 || true
+        run: python build_profile_site.py campaigns --limit 150 || true
 
       - name: Refresh House financial disclosure links
         run: python build_profile_site.py disclosures
@@ -113,7 +148,9 @@ jobs:
             exit 0
           fi
 
-          branch="refresh/congress-$(date -u +%Y-%m-%d)"
+          # The run id keeps the name unique: a branch left behind by an
+          # earlier failed run on the same day made the push fail.
+          branch="refresh/congress-$(date -u +%Y-%m-%d)-${{ github.run_id }}"
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
@@ -146,3 +183,23 @@ jobs:
           Validation, \`verify\` and the unit tests all ran before this was opened.
           BODY
           )"
+
+      # A failed scheduled run used to be silent: nobody watches the Actions
+      # tab, and the site kept serving the old field. Open an issue, or
+      # comment on the one already open, so the failure reaches a person.
+      - name: Report the failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Weekly refresh failed"
+          body="The refresh run on $(date -u +%Y-%m-%d) failed: $RUN_URL"
+          number=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --search "\"$title\" in:title" --json number,title \
+            --jq "map(select(.title == \"$title\")) | .[0].number // empty")
+          if [ -n "$number" ]; then
+            gh issue comment "$number" --repo "$GITHUB_REPOSITORY" --body "$body"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
+          fi

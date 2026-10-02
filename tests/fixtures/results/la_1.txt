@@ -1,0 +1,17 @@
+==District 1==
+{{Infobox election
+| nominee1 =
+| party1 =
+| nominee2 =
+| party2 =
+}}
+===Candidates===
+==== Declared ====
+==== Withdrawn ====
+* Jim Long (Democratic)
+* Donna Major (Democratic)
+* Candida Pagel (Democratic)
+===General election===
+====Predictions====
+====Endorsements====
+====Fundraising====
