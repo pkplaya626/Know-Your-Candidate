@@ -617,7 +617,7 @@ class TestRefreshWorkflow(unittest.TestCase):
 
     def test_portraits_run_on_a_schedule(self):
         # `inputs` is empty on a schedule, so this was never true there.
-        self.assertNotIn("inputs.portraits != false", self.text)
+        self.assertNotIn("if: inputs.portraits != false", self.text)
         self.assertIn("github.event_name != 'workflow_dispatch' || inputs.portraits",
                       self.text)
 
