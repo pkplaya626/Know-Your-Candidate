@@ -586,7 +586,7 @@ def _continues_elsewhere(bullet, bullets):
         if (_BALLOT_HEADING.fullmatch(heading) and "write-in" not in other["contest"]
                 and party_key(other["contest"]) != mine):
             return True
-    return bool(_CONTINUES.search(re.split(r"<ref", bullet["line"], 1)[0]))
+    return bool(_CONTINUES.search(re.split(r"<ref", bullet["line"], maxsplit=1)[0]))
 
 
 def candidate_lists(text):
@@ -935,6 +935,66 @@ def ballot_parties(boxes):
                 parties.setdefault(row["name"], key)
     parties.update(general)
     return parties
+
+
+def ballot_labels(boxes):
+    """``{name: line}`` as the November ballot spells a minor-party line.
+
+    :func:`ballot_parties` folds a label into a key for comparison, which is
+    the wrong form to show: "speak the truth" is "Speak The Truth" on the
+    page. Only lines that are not a major party's are kept, and only from the
+    general-election table or the infobox - a primary row is not a November
+    line.
+    """
+    out = {}
+    for raw_title, rows in _canonical(boxes):
+        title = _clean_title(raw_title)
+        if title != INFOBOX_TITLE and _stage(title) != "general":
+            continue
+        for row in rows:
+            label = re.sub(r"\s*\([^()]*\)\s*$", "", row.get("party") or "").strip()
+            if label and party_key(label) not in BALLOT_LABELS:
+                out.setdefault(row["name"], label)
+    return out
+
+
+# Ballot "parties" that are not a line a voter sees.
+_NOT_A_LINE = ("", "none", "all", "write-in", "n/a", "nan")
+_SMALL_WORDS = {"a", "an", "and", "for", "in", "of", "on", "the", "to"}
+LINE_LABELS = {"democratic": "Democratic", "republican": "Republican",
+               "libertarian": "Libertarian", "green": "Green",
+               "independent": "Independent"}
+
+
+def _line_title(key):
+    words = key.split()
+    return " ".join(w if i and w in _SMALL_WORDS else w[:1].upper() + w[1:]
+                    for i, w in enumerate(words))
+
+
+def ballot_line(name, party, key, label=None):
+    """The November line to show beside a nominee, or ``None``.
+
+    Jose Vega (NY-15) lost the Democratic primary and is on the ballot on the
+    "Speak The Truth" line; the roster still calls him a Democrat, which put
+    two Democratic nominees side by side on the page. The line is shown, the
+    party is never overwritten. Nothing is returned when the line is the
+    person's own party's, is no line at all ("none", a write-in), or is the
+    person's own name - New York's independent petitions name a line after
+    the candidate (Karen Ortiz, NY-12), which is an independent nomination,
+    not a party.
+    """
+    key = str(key or "").strip().lower()
+    if key in _NOT_A_LINE:
+        return None
+    words, own = set(_tokens(key)), _tokens(name or "")
+    if len(own) >= 2 and own[-1] in words and words <= set(own):
+        key, label = "independent", None
+    if key == party_key(party):
+        return None
+    if label and party_key(label) == key:
+        return label
+    return LINE_LABELS.get(key) or _line_title(key)
 
 
 def coverage(boxes, open_primary=False):
@@ -1322,9 +1382,10 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         if not outcome:
             continue
         matched, ambiguous = match_names(list(outcome), rows, (aliases or {}).get(rid))
-        status, party, article = {}, {}, {}
+        status, party, article, label = {}, {}, {}, {}
         listed = ballot_parties(boxes)
         linked = ballot_articles(boxes)
+        spelled = ballot_labels(boxes)
         for name, cids in matched.items():
             for cid in cids:
                 status[cid] = outcome[name]
@@ -1332,10 +1393,14 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                     party[cid] = listed[name]
                 if linked.get(name):
                     article[cid] = linked[name]
+                if spelled.get(name):
+                    label[cid] = spelled[name]
         races[rid] = {
             "page": title,
             "status": status,
             "party": party,
+            # A minor-party November line as the page spells it, per filing.
+            "label": label,
             # The article the ballot line links to, per filing.
             "article": article,
             # Ids a Wikipedia name fitted but could not be told apart. No
@@ -1448,13 +1513,14 @@ def apply_cache(profiles, cache):
     """
     if not cache:
         return 0
-    by_id, party_of, article_of, unsure = {}, {}, {}, set()
+    by_id, party_of, article_of, label_of, unsure = {}, {}, {}, {}, set()
     races = cache.get("races", {})
     for rid, race in races.items():
         for cid, status in race.get("status", {}).items():
             by_id[cid] = (rid, status)
         party_of.update(race.get("party") or {})
         article_of.update(race.get("article") or {})
+        label_of.update(race.get("label") or {})
         unsure.update(race.get("unsure") or [])
     from .candidates import race_id
     from .races import race_id as seat_id, seat_label
@@ -1485,6 +1551,12 @@ def apply_cache(profiles, cache):
                         and party_key(profile.get("party")) != party_of[candidate_id]):
                     profile["fecParty"] = profile["party"]
                     profile["party"] = label
+            if status == NOMINEE:
+                # Shown beside "On the November ballot"; never a new party.
+                line = ballot_line(profile.get("name"), profile.get("party"),
+                                   party_of.get(candidate_id), label_of.get(candidate_id))
+                if line:
+                    profile["ballotLine"] = line
             applied += 1
             if not profile.get("isCandidate"):
                 seat = seat_id(profile["chamber"], profile["state"], profile.get("districtNum"))

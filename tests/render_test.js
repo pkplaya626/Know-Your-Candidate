@@ -512,6 +512,46 @@ async function testDirectoryAsync() {
     }
   });
 
+  suite("index.html — a nominee's November ballot line", () => {
+    // NY-15: Jose Vega lost the Democratic primary and is on the "Speak The
+    // Truth" line; without the line he read as a second Democratic nominee.
+    // A real nominee in a race with a member stands in, given a hostile line.
+    const race = window.kycRaces.find((r) => r.incumbentIds.length &&
+      r.candidateIds.some((id) => (KYC.byId(id) || {}).raceStatus === "nominee"));
+    check("a race with a challenger nominee exists to test", !!race);
+    if (!race) return;
+    const nominee = KYC.byId(race.candidateIds.find((id) => KYC.byId(id).raceStatus === "nominee"));
+    const plain = KYC.cards.raceBadge(nominee);
+    check("a nominee with no ballotLine shows no line", !/ line</.test(plain), plain);
+    nominee.ballotLine = 'Speak <b>The</b> "Truth"';
+    try {
+      const badge = KYC.cards.raceBadge(nominee);
+      check("the card badge names the line",
+        badge.indexOf("On the November ballot – Speak &lt;b&gt;The&lt;/b&gt; &quot;Truth&quot; line") !== -1,
+        badge);
+      check("the card badge's title does not claim a primary win", !/Won the primary/.test(badge));
+      KYC.profile.open(nominee.id);
+      const status = D.getElementById("profileModalStatus");
+      check("the profile status line names the line",
+        status.textContent.indexOf('On the November ballot – Speak <b>The</b> "Truth" line') !== -1,
+        status.textContent);
+      check("the line is escaped, never markup", !status.querySelector("b"));
+      KYC.profile.close();
+      KYC.profile.open(race.incumbentIds[0]);
+      const row = D.querySelector('#profileModalRace .race-mate[data-goto="' + nominee.id + '"]');
+      check("'In this race' names the line",
+        !!row && row.textContent.indexOf('On the ballot – Speak <b>The</b> "Truth" line') !== -1,
+        row && row.textContent);
+      check("and escapes it", !!row && !row.querySelector(".race-mate-meta b"));
+      KYC.profile.close();
+      nominee.raceStatus = "eliminated";
+      check("only a nominee's line is shown", !/Truth/.test(KYC.cards.raceBadge(nominee)));
+    } finally {
+      nominee.raceStatus = "nominee";
+      delete nominee.ballotLine;
+    }
+  });
+
   suite("index.html — search suggestions and remembered state", () => {
     const search = D.getElementById("searchInput");
     search.dispatchEvent(new window.Event("focus"));

@@ -312,7 +312,8 @@
       var status = MATE_STATUS[p.raceStatus]
         ? '<span class="badge ' + (p.raceStatus === "nominee" ? "badge-money" :
             p.raceStatus === "advanced" ? "badge-warn" : "badge-neutral") + '">' +
-          KYC.escapeHtml(MATE_STATUS[p.raceStatus]) + "</span>"
+          KYC.escapeHtml(MATE_STATUS[p.raceStatus]) +
+          (p.raceStatus === "nominee" ? KYC.ballotLineSuffix(p) : "") + "</span>"
         : "";
       return '<button type="button" class="race-mate" data-goto="' + KYC.escapeAttr(p.id) + '">' +
         '<img src="' + KYC.escapeAttr(KYC.portraitSrc(p)) + '" alt="" loading="lazy" ' +
@@ -528,8 +529,14 @@
     var race = table[KYC.contestStatus(item)];
     if (race) {
       var label = elsewhere ? race[1] + " for " + item.contestLabel : race[1];
+      // "On the November ballot – Speak The Truth line": a primary loser on
+      // a minor-party line must not read as their party's second nominee.
+      var line = KYC.ballotLine(item);
+      var title = line ? "On the general election ballot on the " + line +
+        " line. Source: the state's Wikipedia election results page." : race[2];
       pieces.push('<span class="badge ' + race[0] + '" title="' +
-        KYC.escapeAttr(race[2]) + '">' + KYC.escapeHtml(label) + "</span>");
+        KYC.escapeAttr(title) + '">' + KYC.escapeHtml(label) +
+        KYC.ballotLineSuffix(item) + "</span>");
     }
 
     var text = String(item.status || "").trim();

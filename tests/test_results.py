@@ -377,6 +377,56 @@ class TestApplying(unittest.TestCase):
         for st in ("eliminated", "withdrawn", "unlisted"):
             self.assertFalse(results.on_ballot({"raceStatus": st}))
 
+    def test_a_nominee_on_another_line_gets_that_line_and_keeps_the_party(self):
+        # NY-15 on 2026-10-02: Ritchie Torres is the Democratic nominee; Jose
+        # Vega lost that primary and is on the "Speak The Truth" line. The
+        # page showed two "Democrat - On the November ballot" rows.
+        section = results.house_sections(fixture("ny_15.txt"))[15]
+        boxes = results.parse_boxes(section)
+        labels = results.ballot_labels(boxes)
+        self.assertEqual(labels["Jose Vega"], "Speak The Truth")
+        self.assertNotIn("Ritchie Torres", labels)        # a major party's line
+        cache = {"races": {"H-NY-15-2026": {
+            "status": {"H4NY15147": "nominee", "H0NY15160": "nominee",
+                       "H0NY15194": "eliminated"},
+            "party": {"H4NY15147": "speak the truth", "H0NY15160": "democratic",
+                      "H0NY15194": "democratic"},
+            "label": {"H4NY15147": labels["Jose Vega"]}}}}
+        base = {"isCandidate": True, "state": "NY", "chamber": "House (Candidate)",
+                "districtNum": 15, "source": "fec-field"}
+        vega = dict(base, id="FEC_H4NY15147", fecCandidateId="H4NY15147",
+                    name="Jose David Vega", party="Democrat")
+        torres = dict(base, id="T000486", fecCandidateId="H0NY15160", isCandidate=False,
+                      name="Ritchie Torres", party="Democrat", chamber="House")
+        blake = dict(base, id="FEC_H0NY15194", fecCandidateId="H0NY15194",
+                     name="Michael Blake", party="Democrat")
+        results.apply_cache([vega, torres, blake], cache)
+        self.assertEqual(vega["ballotLine"], "Speak The Truth")
+        self.assertEqual(vega["party"], "Democrat")            # never overwritten
+        self.assertNotIn("ballotLine", torres)
+        self.assertNotIn("ballotLine", blake)                  # not a nominee
+
+    def test_ballot_line_rules(self):
+        line = results.ballot_line
+        # A cache without the page's spelling still gives a readable label.
+        self.assertEqual(line("Andre Clement Easton", "Independent",
+                              "party for socialism and liberation"),
+                         "Party for Socialism and Liberation")
+        self.assertEqual(line("Wilneida Negron", "Independence Party", "for all of us"),
+                         "For All of Us")
+        # No line at all.
+        self.assertIsNone(line("Brian McGinnis", "Independent", "none"))
+        self.assertIsNone(line("Pat Doe", "Democrat", "write-in"))
+        self.assertIsNone(line("Pat Doe", "Democrat", ""))
+        # A line named after the candidate is an independent petition, not a
+        # party: nothing when they are listed as independent already.
+        self.assertIsNone(line("Karen Ortiz", "Independent", "karen ortiz"))
+        self.assertEqual(line("Karen Ortiz", "Democrat", "karen ortiz", "Karen Ortiz"),
+                         "Independent")
+        # Their own party's line is no news.
+        self.assertIsNone(line("Ritchie Torres", "Democrat", "democratic"))
+        self.assertIsNone(line("Ritchie Torres", "DEM", "democratic"))
+
     def test_race_summary_counts_and_unfiled_nominees(self):
         summary = results.race_summary(self.cache(), "H-TX-18-2026")
         self.assertEqual(summary["nominees"], 1)
