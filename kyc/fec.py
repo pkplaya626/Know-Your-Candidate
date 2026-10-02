@@ -80,6 +80,33 @@ def using_demo_key(root="."):
     return api_key(root) == "DEMO_KEY"
 
 
+def fetch_pages(path, params, sort, per_page=100, pause=0.25):
+    """Every row of a paginated OpenFEC endpoint, in a stable order.
+
+    The API pages with LIMIT/OFFSET, so each page request sorts afresh. Over a
+    sort key with ties - "-receipts", where 1,386 House filers share $0 - the
+    tied rows come back in a different order on every request: some appear on
+    two pages and as many on none. One 2026 field fetch returned 3,754 rows of
+    which only 3,342 were distinct, and Rhode Island's Senate primary went
+    missing from the 243-row election calendar the same way. *sort* must
+    therefore end in a key that is unique per row. Returns ``(rows, count)``,
+    the count being the API's own total, for the caller to check against.
+    """
+    rows, page, count = [], 1, None
+    while True:
+        payload = _get(path, dict(params, per_page=per_page, page=page, sort=list(sort)))
+        results = payload.get("results") or []
+        rows.extend(results)
+        pagination = payload.get("pagination") or {}
+        if count is None:
+            count = pagination.get("count", 0)
+        if not results or page >= pagination.get("pages", 1):
+            break
+        page += 1
+        time.sleep(pause)
+    return rows, count
+
+
 def _get(path, params, retries=4):
     params = dict(params, api_key=api_key())
     # doseq: several OpenFEC parameters are repeatable (office=H&office=S).

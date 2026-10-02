@@ -72,35 +72,36 @@ class ResultsError(RuntimeError):
 
 # ------------------------------------------------------------------ calendar
 
+# A total order for /election-dates/ rows (see fec.fetch_pages).
+CALENDAR_SORT = ("election_state", "office_sought", "election_type_id",
+                 "election_district", "election_date", "create_date")
+
+
 def fetch_dates(cycle=CYCLE):
     """``{(state, office): {"primary": date, "runoff": date}}`` from the FEC."""
     from . import fec
 
+    # Unsorted, the three calendar pages shuffled between requests and Rhode
+    # Island's Senate primary was never returned. This order is unique except
+    # for rows the FEC itself lists twice, which are identical.
+    rows, count = fec.fetch_pages("/election-dates/", {"election_year": cycle}, CALENDAR_SORT)
+    if len(rows) != count:
+        raise ResultsError(f"the FEC calendar returned {len(rows)} of {count} rows")
     out = {}
-    page = 1
-    while True:
-        payload = fec._get("/election-dates/", {
-            "election_year": cycle, "per_page": 100, "page": page,
-        })
-        for row in payload.get("results") or []:
-            state = row.get("election_state")
-            office = row.get("office_sought")
-            kind = row.get("election_type_id") or ""
-            when = (row.get("election_date") or "")[:10]
-            if not (state and office in ("H", "S") and when):
-                continue
-            slot = out.setdefault((state, office), {"primary": None, "runoff": None})
-            # Some states list a date per district; keep the earliest primary
-            # and the latest runoff, which brackets the whole process.
-            if kind == "P" and (slot["primary"] is None or when < slot["primary"]):
-                slot["primary"] = when
-            elif kind == "R" and (slot["runoff"] is None or when > slot["runoff"]):
-                slot["runoff"] = when
-        pagination = payload.get("pagination") or {}
-        if page >= pagination.get("pages", 1):
-            break
-        page += 1
-        time.sleep(0.25)
+    for row in rows:
+        state = row.get("election_state")
+        office = row.get("office_sought")
+        kind = row.get("election_type_id") or ""
+        when = (row.get("election_date") or "")[:10]
+        if not (state and office in ("H", "S") and when):
+            continue
+        slot = out.setdefault((state, office), {"primary": None, "runoff": None})
+        # Some states list a date per district; keep the earliest primary
+        # and the latest runoff, which brackets the whole process.
+        if kind == "P" and (slot["primary"] is None or when < slot["primary"]):
+            slot["primary"] = when
+        elif kind == "R" and (slot["runoff"] is None or when > slot["runoff"]):
+            slot["runoff"] = when
     if not out:
         raise ResultsError("the FEC returned no election dates")
     return out
