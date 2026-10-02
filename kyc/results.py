@@ -514,22 +514,37 @@ def _bullet_name(line):
     return text
 
 
-def candidate_lists(text):
-    """The people a page files under "Withdrawn" or "Eliminated" headings.
+# A heading that lists people who are on, or running for, a ballot line, and
+# one that lists people who are not. A person an "Eliminated" list names is
+# out only of the contest that list belongs to; where the page lists them a
+# second time decides whether they carry on.
+_BALLOT_HEADING = re.compile(
+    r"(?:presumptive )?nominees?|declared|candidates|on the ballot|qualified|certified")
+_OFF_BALLOT_HEADING = re.compile(
+    r"filed(?: paperwork)?|potential|publicly expressed interest|declined|"
+    r"withdrawn|withdrew\b.*|eliminated\b.*|disqualified|failed to qualify|"
+    r"removed from (?:the )?ballot|lost\b.*|endorsements?|fundraising|polling|results")
+# ''(running as an independent)'', ''(filed to run as an independent)'',
+# ''(running on the Working Families line)''. A write-in is not a ballot line.
+_CONTINUES = re.compile(r"''\((?![^)]*write-in)[^)]*\b(?:running|run) (?:as|on)\b[^)]*\)''", re.I)
 
-    Returned as ``(title, rows)`` in the shape :func:`parse_boxes` uses, with
-    one of :data:`LIST_TITLES` as the title. A results table records a vote;
-    these lists record what happened afterwards. Chuck Edwards won NC-11's
-    Republican primary with 70% and ended his bid on 2026-08-05, and the only
-    place the page said so in a form a parser can read was the heading he was
-    moved under: "Withdrew after nomination".
+
+def _list_bullets(text):
+    """Every bullet under every heading, with the contest it belongs to.
+
+    The contest is the nearest enclosing heading that is not a bare
+    "Candidates": "Democratic primary", "Independents", "Write-in candidates".
     """
-    out = {}
+    out = []
     headings = list(_HEADING.finditer(text or ""))
     for n, heading in enumerate(headings):
-        kind = _list_kind(heading.group(2))
-        if not kind:
-            continue
+        level, contest = len(heading.group(1)), ""
+        for parent in reversed(headings[:n]):
+            label = clean_name(parent.group(2)).lower()
+            if len(parent.group(1)) < level and label != "candidates":
+                contest = label
+                break
+            level = min(level, len(parent.group(1)))
         end = headings[n + 1].start() if n + 1 < len(headings) else len(text)
         for line in text[heading.end():end].splitlines():
             line = line.strip()
@@ -539,9 +554,67 @@ def candidate_lists(text):
             name = clean_name(raw)
             if len(name.split()) < 2 or _PLACEHOLDER.match(name):
                 continue
-            out.setdefault(kind, []).append({
-                "name": name, "won": False, "withdrawn": kind != ELIMINATED_LIST,
-                "votes": None, "party": None, "article": link_target(raw)})
+            out.append({"heading": heading, "contest": contest, "name": name,
+                        "raw": raw, "line": line})
+    return out
+
+
+def _continues_elsewhere(bullet, bullets):
+    """Does the page say this person, on an "Eliminated" list, runs on?
+
+    Andrew Rice (CT-3) sits under the Democrats' "Eliminated at convention"
+    marked ''(running as an independent)''. Where the page lists him again
+    decides it: a "Declared" heading in the independents' section is a run,
+    a "Filed paperwork" heading is not. On 2026-09-13 the page had him under
+    "Declared" and in the infobox; on 2026-09-15 an editor moved him to
+    "Filed paperwork" and out of the infobox, noting he had not qualified for
+    the ballot by petition. The annotation was never updated, so it decides
+    only for someone the page lists nowhere else.
+
+    A second listing counts as a run only in another party's contest and not
+    as a write-in. Hampton Harris (AL-2) is a "Nominee" of the voided May
+    Republican primary and "Eliminated" in the special Republican primary
+    that replaced it; the first does not undo the second.
+    """
+    mine = party_key(bullet["contest"])
+    for other in bullets:
+        if (other["heading"].start() == bullet["heading"].start()
+                or not _same_spelling(other["name"], bullet["name"])):
+            continue
+        heading = clean_name(other["heading"].group(2)).lower()
+        if _OFF_BALLOT_HEADING.fullmatch(heading):
+            return False
+        if (_BALLOT_HEADING.fullmatch(heading) and "write-in" not in other["contest"]
+                and party_key(other["contest"]) != mine):
+            return True
+    return bool(_CONTINUES.search(re.split(r"<ref", bullet["line"], maxsplit=1)[0]))
+
+
+def candidate_lists(text):
+    """The people a page files under "Withdrawn" or "Eliminated" headings.
+
+    Returned as ``(title, rows)`` in the shape :func:`parse_boxes` uses, with
+    one of :data:`LIST_TITLES` as the title. A results table records a vote;
+    these lists record what happened afterwards. Chuck Edwards won NC-11's
+    Republican primary with 70% and ended his bid on 2026-08-05, and the only
+    place the page said so in a form a parser can read was the heading he was
+    moved under: "Withdrew after nomination".
+
+    An "Eliminated" list belongs to one party's contest. Someone the page
+    says carries on under another line (:func:`_continues_elsewhere`) is left
+    out of it, so the November ballot, the infobox or nothing decides them.
+    """
+    out = {}
+    bullets = _list_bullets(text)
+    for bullet in bullets:
+        kind = _list_kind(bullet["heading"].group(2))
+        if not kind:
+            continue
+        if kind == ELIMINATED_LIST and _continues_elsewhere(bullet, bullets):
+            continue
+        out.setdefault(kind, []).append({
+            "name": bullet["name"], "won": False, "withdrawn": kind != ELIMINATED_LIST,
+            "votes": None, "party": None, "article": link_target(bullet["raw"])})
     return [(kind, rows) for kind, rows in out.items()]
 
 
@@ -863,6 +936,66 @@ def ballot_parties(boxes):
                 parties.setdefault(row["name"], key)
     parties.update(general)
     return parties
+
+
+def ballot_labels(boxes):
+    """``{name: line}`` as the November ballot spells a minor-party line.
+
+    :func:`ballot_parties` folds a label into a key for comparison, which is
+    the wrong form to show: "speak the truth" is "Speak The Truth" on the
+    page. Only lines that are not a major party's are kept, and only from the
+    general-election table or the infobox - a primary row is not a November
+    line.
+    """
+    out = {}
+    for raw_title, rows in _canonical(boxes):
+        title = _clean_title(raw_title)
+        if title != INFOBOX_TITLE and _stage(title) != "general":
+            continue
+        for row in rows:
+            label = re.sub(r"\s*\([^()]*\)\s*$", "", row.get("party") or "").strip()
+            if label and party_key(label) not in BALLOT_LABELS:
+                out.setdefault(row["name"], label)
+    return out
+
+
+# Ballot "parties" that are not a line a voter sees.
+_NOT_A_LINE = ("", "none", "all", "write-in", "n/a", "nan")
+_SMALL_WORDS = {"a", "an", "and", "for", "in", "of", "on", "the", "to"}
+LINE_LABELS = {"democratic": "Democratic", "republican": "Republican",
+               "libertarian": "Libertarian", "green": "Green",
+               "independent": "Independent"}
+
+
+def _line_title(key):
+    words = key.split()
+    return " ".join(w if i and w in _SMALL_WORDS else w[:1].upper() + w[1:]
+                    for i, w in enumerate(words))
+
+
+def ballot_line(name, party, key, label=None):
+    """The November line to show beside a nominee, or ``None``.
+
+    Jose Vega (NY-15) lost the Democratic primary and is on the ballot on the
+    "Speak The Truth" line; the roster still calls him a Democrat, which put
+    two Democratic nominees side by side on the page. The line is shown, the
+    party is never overwritten. Nothing is returned when the line is the
+    person's own party's, is no line at all ("none", a write-in), or is the
+    person's own name - New York's independent petitions name a line after
+    the candidate (Karen Ortiz, NY-12), which is an independent nomination,
+    not a party.
+    """
+    key = str(key or "").strip().lower()
+    if key in _NOT_A_LINE:
+        return None
+    words, own = set(_tokens(key)), _tokens(name or "")
+    if len(own) >= 2 and own[-1] in words and words <= set(own):
+        key, label = "independent", None
+    if key == party_key(party):
+        return None
+    if label and party_key(label) == key:
+        return label
+    return LINE_LABELS.get(key) or _line_title(key)
 
 
 def coverage(boxes, open_primary=False):
@@ -1250,9 +1383,10 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         if not outcome:
             continue
         matched, ambiguous = match_names(list(outcome), rows, (aliases or {}).get(rid))
-        status, party, article = {}, {}, {}
+        status, party, article, label = {}, {}, {}, {}
         listed = ballot_parties(boxes)
         linked = ballot_articles(boxes)
+        spelled = ballot_labels(boxes)
         for name, cids in matched.items():
             for cid in cids:
                 status[cid] = outcome[name]
@@ -1260,10 +1394,14 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                     party[cid] = listed[name]
                 if linked.get(name):
                     article[cid] = linked[name]
+                if spelled.get(name):
+                    label[cid] = spelled[name]
         races[rid] = {
             "page": title,
             "status": status,
             "party": party,
+            # A minor-party November line as the page spells it, per filing.
+            "label": label,
             # The article the ballot line links to, per filing.
             "article": article,
             # Ids a Wikipedia name fitted but could not be told apart. No
@@ -1376,13 +1514,14 @@ def apply_cache(profiles, cache):
     """
     if not cache:
         return 0
-    by_id, party_of, article_of, unsure = {}, {}, {}, set()
+    by_id, party_of, article_of, label_of, unsure = {}, {}, {}, {}, set()
     races = cache.get("races", {})
     for rid, race in races.items():
         for cid, status in race.get("status", {}).items():
             by_id[cid] = (rid, status)
         party_of.update(race.get("party") or {})
         article_of.update(race.get("article") or {})
+        label_of.update(race.get("label") or {})
         unsure.update(race.get("unsure") or [])
     from .candidates import race_id
     from .races import race_id as seat_id, seat_label
@@ -1413,6 +1552,12 @@ def apply_cache(profiles, cache):
                         and party_key(profile.get("party")) != party_of[candidate_id]):
                     profile["fecParty"] = profile["party"]
                     profile["party"] = label
+            if status == NOMINEE:
+                # Shown beside "On the November ballot"; never a new party.
+                line = ballot_line(profile.get("name"), profile.get("party"),
+                                   party_of.get(candidate_id), label_of.get(candidate_id))
+                if line:
+                    profile["ballotLine"] = line
             applied += 1
             if not profile.get("isCandidate"):
                 seat = seat_id(profile["chamber"], profile["state"], profile.get("districtNum"))

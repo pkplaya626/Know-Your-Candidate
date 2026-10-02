@@ -541,6 +541,7 @@ Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
 | `alsoRunningId` / `incumbentId` | Cross-link between a member and a separate profile for their own candidacy |
 | `raceStatus` / `raceStatusRace` | `nominee`, `advanced`, `eliminated`, `withdrawn` or `unlisted`, and the race it refers to |
 | `ballotParty` / `fecParty` | The party the ballot lists, when it differs from the roster or FEC record |
+| `ballotLine` | For a nominee only: the November ballot line as the results page spells it ("Speak The Truth", "Party for Socialism and Liberation"), when it is not the line of the party shown. Never set for "none", a write-in or a line named after the candidate themselves (an independent petition reads as "Independent"); `party` is never overwritten by it |
 | `rosterSeat` | For a curated challenger, the seat the roster gave them when the FEC filing says otherwise |
 
 ## State pages

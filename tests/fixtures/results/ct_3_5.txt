@@ -1,0 +1,128 @@
+==District 3==
+{{Infobox election
+| nominee1 = [[Rosa DeLauro]]
+| party1 = Democratic Party (United States)
+| nominee2 = Christopher Lancia
+| party2 = Republican Party (United States)
+}}
+===Democratic primary===
+====Candidates====
+===== Nominee =====
+*[[Rosa DeLauro]], incumbent U.S. representative
+=====Eliminated at convention=====
+* Andrew Rice, molecular biologist and [[Democratic Socialists of America|DSA]] member ''(running as an independent)''
+=====Withdrawn=====
+*Damjan DeNoble, attorney
+====Endorsements====
+====Fundraising====
+===Republican primary===
+====Candidates====
+===== Nominee =====
+*Christopher Lancia, law enforcement professional
+=====Eliminated at convention=====
+*Rafael Irizarry, nominee for [[Connecticut's 121st House of Representatives district]] in [[2024 Connecticut House of Representatives election#District 121|2024]]
+====Endorsements====
+====Fundraising====
+===Independents===
+==== Candidates ====
+=====Declared=====
+*Thomas Egan, attorney
+=====Filed Paperwork=====
+*Andrew Rice, biologist and democratic socialist activist ''(previously ran in the Democratic primary)''
+===General election===
+====Predictions====
+==District 4==
+{{Infobox election
+| nominee1 = [[Jim Himes]]
+| party1 = Democratic Party (United States)
+| nominee2 = Michael Goldstein
+| party2 = Republican Party (United States)
+}}
+===Democratic primary===
+==== Candidates ====
+===== Nominee =====
+*[[Jim Himes]], incumbent U.S. representative
+=====Eliminated at convention=====
+* Joseph Perez-Caputo, law student and community organizer ''(filed to run as an independent)''
+====Endorsements====
+====Fundraising====
+===Republican primary===
+====Nominee====
+*Michael Goldstein, nominee for this district in [[2024 United States House of Representatives elections in Connecticut#District 4|2024]], and candidate in [[2020 United States House of Representatives elections in Connecticut#District 4|2020]] and [[2022 United States House of Representatives elections in Connecticut#District 4|2022]]
+====Eliminated in primary====
+*Daniel Miressi
+====Filed paperwork====
+*Luz Bueno
+====Endorsements====
+====Fundraising====
+====Results====
+{{Election box begin no change |title=Republican primary results}}
+{{Election box winning candidate with party link no change
+  |party      = Republican Party (United States)
+  |candidate  = Michael Goldstein
+  |votes      = 4,632
+  |percentage = 74.3
+}}{{Election box candidate with party link no change
+  |party      = Republican Party (United States)
+  |candidate  = Daniel Miressi
+  |votes      = 1,606
+  |percentage = 25.7
+}}{{Election box total no change
+  |votes      = 6,238
+  |percentage = 100.0
+}}{{Election box end}}
+===Independents===
+==== Candidates ====
+=====Filed paperwork=====
+*Damon Lawrence Cerreta, cleaning service owner
+*Joseph Perez-Caputo, law student and community organizer
+===General election===
+====Predictions====
+==District 5==
+{{Infobox election
+| nominee1 = [[Jahana Hayes]]
+| party1 = Democratic Party (United States)
+| nominee2 = Chris Shea
+| party2 = Republican Party (United States)
+}}
+===Democratic primary===
+==== Candidates ====
+===== Nominee =====
+*[[Jahana Hayes]], incumbent U.S. representative
+=====Eliminated at convention=====
+*Winter Solomita
+*Jackson Taddeo-Waite, filmmaker ''(running as an independent)''
+====Endorsements====
+====Fundraising====
+===Republican primary===
+==== Nominee ====
+*Chris Shea, firefighter
+==== Eliminated in primary ====
+*Jonathan De Barros, nonprofit founder
+==== Eliminated at convention ====
+*Michele Botelho, paralegal
+====Endorsements====
+====Fundraising====
+====Results====
+{{Election box begin no change |title=Republican primary results}}
+{{Election box winning candidate with party link no change
+  |party      = Republican Party (United States)
+  |candidate  = Chris Shea
+  |votes      = 10,261
+  |percentage = 81.0
+}}{{Election box candidate with party link no change
+  |party      = Republican Party (United States)
+  |candidate  = Jonathan De Barros
+  |votes      = 2,411
+  |percentage = 19.0
+}}{{Election box total no change
+  |votes      = 12,672
+  |percentage = 100.0
+}}{{Election box end}}
+===Independents===
+==== Candidates ====
+=====Filed paperwork=====
+*Jackson Taddeo-Waite, filmmaker ''(previously ran in the Democratic primary)''
+===General election===
+====Predictions====
+==== Post-primary endorsements ====
