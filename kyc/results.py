@@ -165,13 +165,33 @@ def open_primary(state, office, cycle=CYCLE):
     return (state, office, cycle) in OPEN_PRIMARY_SEATS
 
 
-def primary_settled(dates, state, office, today):
-    """True when this seat's primary - and its runoff, if any - has happened."""
+def primary_settled(dates, state, office, today, open_seat=False):
+    """True when this seat's results can be read.
+
+    For a party primary that is once the primary - and its runoff, if any -
+    has happened: a first round alone cannot say who the nominee is, and the
+    page may never tabulate the runoff (TX-32's Ryan Binkley).
+
+    *open_seat* is a seat whose first round is a nonpartisan primary on
+    general-election day (:func:`open_primary`). That first round is itself a
+    result - who advanced, who is out, or who won outright - so the seat
+    opens once the primary has happened. Waiting for the runoff, as the
+    party-primary gate does, kept every Louisiana House candidate "still
+    running" for the six weeks between November 3 and the December 12
+    runoff. :func:`resolve_race` reads the runoff table only once
+    :func:`runoff_held`.
+    """
     slot = dates.get((state, office))
     if not slot or not slot.get("primary"):
         return False
-    latest = slot.get("runoff") or slot["primary"]
+    latest = slot["primary"] if open_seat else (slot.get("runoff") or slot["primary"])
     return latest < today.isoformat()
+
+
+def runoff_held(dates, state, office, today):
+    """True when this seat has a runoff date and it has passed."""
+    runoff = (dates.get((state, office)) or {}).get("runoff")
+    return bool(runoff) and runoff < today.isoformat()
 
 
 # ----------------------------------------------------------------- wikipedia
@@ -718,7 +738,7 @@ def _canonical(boxes):
     return out
 
 
-def resolve_race(boxes, has_runoff=False, open_primary=False):
+def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True):
     """Who is still standing, from a race's results tables.
 
     Returns ``{name: status}`` for everyone named in a primary-stage table,
@@ -741,9 +761,19 @@ def resolve_race(boxes, has_runoff=False, open_primary=False):
 
     *open_primary* is a seat whose first round is a nonpartisan primary on
     general-election day (Louisiana's House seats in 2026). Its November table
-    is that primary: nobody has a status until a winner is marked, two marked
-    winners only advance, and a December runoff table decides it.
+    is that primary: nobody has any status until it marks a result (see
+    :func:`_open_rounds`), the two marked winners only advance and everyone
+    else in it is out, one marked winner with a majority of the counted vote
+    is elected outright, and once *runoff_held* a December runoff table that
+    marks a winner decides it.
     """
+    if open_primary:
+        boxes = _open_rounds(boxes, runoff_held)
+        if not any(r["won"] for title, rows in boxes
+                   if title in (OPEN_PRIMARY_TITLE, OPEN_RUNOFF_TITLE) for r in rows):
+            # Election night before the page has a result: no statuses at
+            # all, so nothing is inferred from anyone's absence either.
+            return {}
     primaries, runoffs, generals, infobox, lists = {}, {}, [], [], {}
     for raw_title, rows in _canonical(boxes):
         title = _clean_title(raw_title)
@@ -754,8 +784,6 @@ def resolve_race(boxes, has_runoff=False, open_primary=False):
             lists.setdefault(title, []).extend(rows)
             continue
         stage = _stage(title)
-        if open_primary and stage == "general":
-            stage, title = "primary", OPEN_PRIMARY_TITLE
         if stage == "runoff":
             runoffs.setdefault(title, []).extend(rows)
         elif stage == "primary":
@@ -802,6 +830,63 @@ def resolve_race(boxes, has_runoff=False, open_primary=False):
 
 
 OPEN_PRIMARY_TITLE = "Nonpartisan primary results"
+OPEN_RUNOFF_TITLE = "Nonpartisan runoff results"
+
+
+def _open_rounds(boxes, runoff_held=True):
+    """An open-primary seat's tables, rewritten as its two rounds.
+
+    The November box is titled like a general election ("2026 Louisiana's
+    5th congressional district election") and is the first round; it becomes
+    one ``OPEN_PRIMARY_TITLE`` table. Its marked winners count only when they
+    are a result the rules allow: the top two, or one candidate holding a
+    majority of the counted vote (Louisiana elects outright with a majority).
+    Anything else - one winner with no vote count, three winners - is a page
+    mid-edit, and its markers are dropped rather than read as a verdict.
+
+    A runoff box becomes ``OPEN_RUNOFF_TITLE``, and is kept only once the
+    runoff has been held and it marks a winner. A vote-less December box put
+    up the morning after the first round would otherwise eliminate both
+    people still running.
+
+    Infobox, candidate-list and party-primary tables pass through untouched.
+    """
+    out, first, at = [], [], None
+    for raw_title, rows in boxes:
+        title = _clean_title(raw_title)
+        if title == INFOBOX_TITLE or title in LIST_TITLES:
+            out.append((raw_title, rows))
+            continue
+        stage = _stage(title)
+        if stage == "general":
+            if at is None:
+                at = len(out)
+                out.append(None)
+            first.extend(rows)
+        elif stage == "runoff":
+            if runoff_held and any(r["won"] for r in rows):
+                out.append((OPEN_RUNOFF_TITLE, rows))
+        else:
+            out.append((raw_title, rows))
+    if at is not None:
+        if not _first_round_decided(first):
+            first = [dict(r, won=False) for r in first]
+        out[at] = (OPEN_PRIMARY_TITLE, first)
+    return out
+
+
+def _first_round_decided(rows):
+    """True when an open primary's marked winners are a complete result."""
+    winners = {r["name"] for r in rows if r["won"] and not r["withdrawn"]}
+    if len(winners) == 2:
+        return True
+    if len(winners) != 1:
+        return False
+    votes = [r.get("votes") for r in rows]
+    if any(v is None for v in votes) or not sum(votes):
+        return False
+    top = max(r["votes"] for r in rows if r["name"] in winners)
+    return 2 * top > sum(votes)
 
 
 def _losers(primaries, runoffs):
@@ -998,7 +1083,7 @@ def ballot_line(name, party, key, label=None):
     return LINE_LABELS.get(key) or _line_title(key)
 
 
-def coverage(boxes, open_primary=False):
+def coverage(boxes, open_primary=False, runoff_held=True):
     """What the page has actually decided, for people it does not name.
 
     ``{"general": bool, "parties": [keys]}`` - whether a general-election
@@ -1007,15 +1092,16 @@ def coverage(boxes, open_primary=False):
     only out of the race when the page has decided the contest they were in:
     a Democrat is not eliminated because the Republican table is complete.
     """
+    if open_primary:
+        # Louisiana's November table is a nonpartisan primary, read by the
+        # same rules resolve_race applies to it.
+        boxes = _open_rounds(boxes, runoff_held)
     general, parties = False, set()
     for raw_title, rows in boxes:
         title = _clean_title(raw_title)
         if title == INFOBOX_TITLE or title in LIST_TITLES:
             continue          # names people; decides nothing about the rest
         stage = _stage(title)
-        if open_primary and stage == "general":
-            # Louisiana's November table is a nonpartisan primary.
-            stage, title = "primary", OPEN_PRIMARY_TITLE
         if stage == "general":
             general = True
         elif stage in ("primary", "runoff") and any(r["won"] for r in rows):
@@ -1330,7 +1416,8 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         return None, None, trouble
 
     for state, office in states:
-        if not primary_settled(dates, state, office, today):
+        if not primary_settled(dates, state, office, today,
+                               open_seat=open_primary(state, office)):
             pending.extend(rid for rid, rows in by_race.items()
                            if rows[0].get("state") == state and rows[0].get("office") == office)
             continue
@@ -1378,9 +1465,16 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         if nominees:
             boxes.append((INFOBOX_TITLE, nominees))
         boxes.extend(candidate_lists(section))
+        held = runoff_held(dates, state, office, today)
         outcome = resolve_race(boxes, has_runoff=bool(slot.get("runoff")),
-                               open_primary=is_open)
+                               open_primary=is_open, runoff_held=held)
         if not outcome:
+            if is_open and any(r.get("won") for _, rs in boxes for r in rs):
+                # Winners are marked, but not as a result the open-primary
+                # rules allow (the top two, or one with a majority of the
+                # counted vote). Left unread, and said so.
+                log(f"    [warn] {rid}: the page marks winners that are not a "
+                    f"complete open-primary result; left unsettled")
             continue
         matched, ambiguous = match_names(list(outcome), rows, (aliases or {}).get(rid))
         status, party, article, label = {}, {}, {}, {}
@@ -1412,7 +1506,7 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
             # and a race header that omits them is wrong.
             "unmatched": {name: outcome[name] for name in sorted(set(outcome) - set(matched))},
             "ambiguous": ambiguous,
-            "decided": coverage(boxes, open_primary=is_open),
+            "decided": coverage(boxes, open_primary=is_open, runoff_held=held),
         }
 
     log(f"    settled races with results: {len(races)}   "
@@ -1482,7 +1576,13 @@ def respect_open_primaries(cache):
         if cycle != cache.get("cycle", CYCLE):
             continue
         slot = {"primary": fixed["primary"], "runoff": fixed.get("runoff")}
-        if day and primary_settled({(state, office): slot}, state, office, day):
+        # Results for the seat are kept only from a run that used this
+        # calendar - it travels with the cache - and only once its first
+        # round had happened by that run's date.
+        built_with = (cache.get("dates") or {}).get(f"{state}-{office}")
+        if (day and built_with == slot
+                and primary_settled({(state, office): slot}, state, office, day,
+                                    open_seat=True)):
             continue
         prefix = f"{office}-{state}-"
         stale = [rid for rid in cache["races"] if rid.startswith(prefix)]

@@ -373,6 +373,75 @@ class TestValidation(unittest.TestCase):
         self.assertIn("stale-snapshot", codes)
 
 
+class TestSenateClass(unittest.TestCase):
+    """Each senator's class and the year their seat is next on the ballot,
+    from the term actually being served - never a hand table."""
+
+    def cycle(self, **kw):
+        snap = snapshot_of(entry(bioguide="A", **kw))
+        return legislators.senate_cycle(legislators.by_bioguide(snap)["A"])
+
+    def test_class_two_is_up_in_2026(self):
+        self.assertEqual(self.cycle(senate_class=2, end="2027-01-03"),
+                         {"senateClass": 2, "nextElection": 2026, "senateSpecial": False})
+
+    def test_class_three_is_up_in_2028(self):
+        self.assertEqual(self.cycle(senate_class=3, end="2029-01-03"),
+                         {"senateClass": 3, "nextElection": 2028, "senateSpecial": False})
+
+    def test_class_one_is_up_in_2030(self):
+        self.assertEqual(self.cycle(senate_class=1, end="2031-01-03"),
+                         {"senateClass": 1, "nextElection": 2030, "senateSpecial": False})
+
+    def test_an_appointed_class_three_seat_is_a_2026_special(self):
+        # Jon Husted's appointment ends on election day 2026: the seat is on
+        # this year's ballot two years before its class's own cycle.
+        self.assertEqual(self.cycle(senate_class=3, state="OH", end="2026-11-03"),
+                         {"senateClass": 3, "nextElection": 2026, "senateSpecial": True})
+
+    def test_a_house_member_has_no_class(self):
+        snap = snapshot_of(entry(bioguide="H", chamber="rep", end="2027-01-03"))
+        self.assertIsNone(legislators.senate_class(legislators.by_bioguide(snap)["H"]))
+
+    def test_an_unreadable_term_end_is_none_not_a_guess(self):
+        self.assertIsNone(legislators.next_election({"termEnd": ""}))
+        self.assertIsNone(legislators.next_election(None))
+        self.assertIsNone(legislators.senate_class({"senateClass": 4}))
+
+
+class TestSenateClassValidation(unittest.TestCase):
+
+    def senator(self, pid, state, cls, nxt, up=False, name=None):
+        return {"id": pid, "name": name or pid, "chamber": "Senate", "state": state,
+                "party": "Republican", "isCandidate": False, "senateClass": cls,
+                "nextElection": nxt, "seatUp2026": up}
+
+    def codes(self, profiles, snapshot=True):
+        return {(i.level, i.code) for i in validate.check_senate_classes(
+            profiles, {"legislators": []} if snapshot else None)}
+
+    def test_a_clean_pair_reports_nothing(self):
+        self.assertEqual(self.codes([self.senator("A", "OH", 1, 2030),
+                                     self.senator("B", "OH", 3, 2026, up=True)]), set())
+
+    def test_a_missing_class_is_an_error(self):
+        self.assertIn(("error", "senate-class-missing"),
+                      self.codes([self.senator("A", "TX", None, 2026, up=True)]))
+
+    def test_two_senators_of_one_class_is_an_error(self):
+        self.assertIn(("error", "senate-class-clash"),
+                      self.codes([self.senator("A", "TX", 2, 2026, up=True),
+                                  self.senator("B", "TX", 2, 2026, up=True)]))
+
+    def test_next_election_disagreeing_with_seat_up_is_reported(self):
+        self.assertIn(("warn", "senate-next-election"),
+                      self.codes([self.senator("A", "TX", 2, 2026, up=False)]))
+
+    def test_without_a_snapshot_it_says_it_did_not_look(self):
+        self.assertEqual(self.codes([self.senator("A", "TX", None, 2026)], snapshot=False),
+                         {("warn", "senate-class-unchecked")})
+
+
 class TestAgainstTheRealSnapshot(unittest.TestCase):
     """The committed snapshot and the committed rosters must agree."""
 
@@ -418,11 +487,145 @@ class TestAgainstTheRealSnapshot(unittest.TestCase):
                     if not p["isCandidate"] and "Senate" in p["chamber"]]
         self.assertTrue(all(p["termEndYear"] for p in senators))
 
+    def test_every_senator_has_a_class_and_next_election(self):
+        profiles, _ = build_profiles(self.raw, snapshot=self.snapshot)
+        senators = [p for p in profiles
+                    if not p["isCandidate"] and "Senate" in p["chamber"]]
+        self.assertTrue(all(p["senateClass"] in (1, 2, 3) for p in senators))
+        # The 2026 ballot by this route is exactly the seatUp2026 set.
+        self.assertEqual({p["id"] for p in senators if p["nextElection"] == 2026},
+                         {p["id"] for p in senators if p["seatUp2026"]})
+        # Every special is a seat whose class is not the 2026 class.
+        for p in senators:
+            if p["senateSpecial"]:
+                self.assertEqual(p["nextElection"], 2026)
+                self.assertNotEqual(p["senateClass"], 2)
+        self.assertEqual(validate.check_senate_classes(profiles, self.snapshot), [])
+
     def test_the_snapshot_is_json_and_sorted(self):
         with open(legislators.snapshot_path(ROOT), encoding="utf-8") as handle:
             raw = json.load(handle)
         ids = [p["bioguide"] for p in raw["legislators"]]
         self.assertEqual(ids, sorted(ids))
+
+
+def person_named(wikipedia=None, **name):
+    """A trimmed snapshot record carrying only what the name helpers read."""
+    return {"bioguide": "X000001", "wikipedia": wikipedia,
+            "nameParts": legislators.name_parts(name)}
+
+
+class TestNames(unittest.TestCase):
+    """The roster holds legal names; voters type the names members go by.
+
+    56 sitting members could not be found under their Wikipedia name ("Jim
+    Clyburn", "Hank Johnson"), and five displayed as a bare initial and a
+    surname ("C. Franklin" for Scott Franklin)."""
+
+    def test_trim_keeps_the_recorded_name_parts(self):
+        raw = entry()
+        raw["name"] = {"first": "Earl", "middle": "L.", "last": "Carter",
+                       "nickname": "Buddy", "official_full": 'Earl L. "Buddy" Carter'}
+        parts = legislators.trim(raw)["nameParts"]
+        self.assertEqual(parts["nickname"], "Buddy")
+        self.assertNotIn("suffix", parts)
+
+    def test_official_full_loses_its_quoted_nickname(self):
+        person = person_named(first="Earl", middle="L.", last="Carter", nickname="Buddy",
+                              official_full='Earl L. "Buddy" Carter', wikipedia="Buddy Carter")
+        self.assertEqual(legislators.aliases(person, "Earl Carter"),
+                         ["Earl L. Carter", "Buddy Carter"])
+
+    def test_nickname_carries_the_suffix(self):
+        person = person_named(first="Henry", middle="C.", last="Johnson", suffix="Jr.",
+                              nickname="Hank", official_full='Henry C. "Hank" Johnson, Jr.',
+                              wikipedia="Hank Johnson")
+        found = legislators.aliases(person, "Henry Johnson")
+        self.assertEqual(found, ["Henry C. Johnson, Jr.", "Hank Johnson, Jr.", "Hank Johnson"])
+
+    def test_wikipedia_disambiguator_is_dropped(self):
+        person = person_named(first="John", last="Reed", nickname="Jack",
+                              official_full="Jack Reed",
+                              wikipedia="Jack Reed (Rhode Island politician)")
+        self.assertEqual(legislators.aliases(person, "John Reed"), ["Jack Reed"])
+
+    def test_aliases_that_fold_to_the_display_name_are_dropped(self):
+        person = person_named(first="Mario", last="Díaz-Balart",
+                              official_full="Mario Díaz-Balart",
+                              wikipedia="Mario Díaz-Balart")
+        self.assertEqual(legislators.aliases(person, "Mario Diaz-Balart"), [])
+
+    def test_no_record_means_no_aliases(self):
+        self.assertEqual(legislators.aliases(None, "Pat Smith"), [])
+
+    def test_goes_by_prefers_the_nickname(self):
+        person = person_named(first="J.", middle="Luis", last="Correa", nickname="Lou")
+        self.assertEqual(legislators.goes_by(person), "Lou Correa")
+
+    def test_goes_by_falls_back_to_a_real_middle_name(self):
+        person = person_named(first="W.", middle="Gregory", last="Steube")
+        self.assertEqual(legislators.goes_by(person), "Gregory Steube")
+
+    def test_goes_by_never_returns_another_initial(self):
+        person = person_named(first="C.", middle="S.", last="Franklin")
+        self.assertIsNone(legislators.goes_by(person))
+        self.assertIsNone(legislators.goes_by(None))
+
+    def test_fold_name_ignores_case_and_accents(self):
+        self.assertEqual(legislators.fold_name("Jesús GARCÍA"), "jesus garcia")
+
+
+class TestNamesOnTheRealRoster(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.snapshot = legislators.load_snapshot(ROOT)
+        raw = sources.load_all(ROOT)
+        profiles, _ = build_profiles(raw, snapshot=cls.snapshot)
+        cls.members = {p["id"]: p for p in profiles if not p["isCandidate"]}
+        cls.roster = {r.get("Bioguide ID"): r.get("Name") for r in raw["members"]}
+
+    def test_the_snapshot_carries_name_parts(self):
+        people = self.snapshot["legislators"]
+        self.assertTrue(all(p.get("nameParts", {}).get("last") for p in people))
+
+    def test_no_member_displays_as_a_bare_initial(self):
+        initial_first = [p["name"] for p in self.members.values()
+                         if legislators.is_initial(p["name"].split()[0])]
+        self.assertEqual(initial_first, [])
+
+    def test_only_initial_first_names_are_redisplayed(self):
+        changed = 0
+        for member_id, profile in self.members.items():
+            roster = self.roster.get(member_id)
+            if profile["name"] == roster:
+                self.assertNotIn("rosterName", profile)
+                continue
+            changed += 1
+            self.assertTrue(legislators.is_initial(roster.split()[0]), roster)
+            self.assertEqual(profile["rosterName"], roster)
+            self.assertIn(roster, profile["aliases"])
+        self.assertGreater(changed, 0)
+
+    def test_scott_franklin_and_french_hill(self):
+        self.assertEqual(self.members["F000472"]["name"], "Scott Franklin")
+        self.assertEqual(self.members["H001072"]["name"], "French Hill")
+
+    def test_the_finance_cache_still_keys_on_the_roster_spelling(self):
+        # A changed key would read as "nobody has looked" for every
+        # re-displayed member.
+        self.assertEqual(fec.profile_key(self.members["F000472"]), "c. franklin|FL|H")
+
+    def test_voters_names_are_aliases(self):
+        self.assertIn("Jim Clyburn", self.members["C000537"]["aliases"])
+        self.assertIn("Hank Johnson", self.members["J000288"]["aliases"])
+        self.assertIn("Lou Correa", self.members["C001110"]["aliases"])
+
+    def test_aliases_never_repeat_the_display_name(self):
+        for profile in self.members.values():
+            found = profile.get("aliases", [])
+            folded = {legislators.fold_name(a) for a in found}
+            self.assertNotIn(legislators.fold_name(profile["name"]), folded)
+            self.assertEqual(len(folded), len(found))
 
 
 if __name__ == "__main__":

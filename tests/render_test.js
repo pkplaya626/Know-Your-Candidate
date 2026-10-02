@@ -155,7 +155,7 @@ async function testShared(page) {
     check("[hidden] wins over component display rules",
       /\[hidden\]\s*\{[^}]*display:\s*none\s*!important/.test(css));
     check("the page hides with the property, not a class", (() => {
-      const js = ["kyc.js", "kyc-cards.js", "kyc-profile.js", "kyc-directory.js", "kyc-map.js", "kyc-state.js"]
+      const js = ["kyc.js", "kyc-cards.js", "kyc-profile.js", "kyc-senate.js", "kyc-directory.js", "kyc-map.js", "kyc-state.js"]
         .filter((f) => fs.existsSync(path.join(SITE, "assets", f)))
         .map((f) => fs.readFileSync(path.join(SITE, "assets", f), "utf8"))
         .join("\n");
@@ -571,6 +571,48 @@ async function testDirectoryAsync() {
     check("and links to its page", /states\/tx\.html$/.test(slot.querySelector("a").getAttribute("href")));
     D.getElementById("stateSelect").value = "all";
     D.getElementById("stateSelect").dispatchEvent(new window.Event("change"));
+  });
+
+  suite("index.html — members are found by the names voters use", () => {
+    // The roster holds legal names: 56 sitting members could not be found
+    // as "Jim Clyburn" or "Hank Johnson", accented queries missed unaccented
+    // names, and five displayed as "C. Franklin"-style initials.
+    const byId = (id) => window.legislatorsData.find((p) => p.id === id);
+    const finds = (id, q) => KYC.matchesQuery(byId(id), q.toLowerCase());
+    check("'Jim Clyburn' finds James Clyburn", finds("C000537", "Jim Clyburn"));
+    check("'Hank Johnson' finds Henry Johnson", finds("J000288", "Hank Johnson"));
+    check("'Chuy Garcia' finds him without the accent", finds("G000586", "Chuy Garcia"));
+    check("'Mario Díaz-Balart' finds the unaccented name", finds("D000600", "Mario Díaz-Balart"));
+    check("'Diaz-Balart' still finds it", finds("D000600", "Diaz-Balart"));
+    check("an alias does not match everyone",
+      window.legislatorsData.filter((p) => KYC.matchesQuery(p, "jim clyburn")).length === 1);
+    check("folding is exposed and total", KYC.foldText("JESÚS") === "jesus" && KYC.foldText(null) === "");
+
+    const franklin = byId("F000472");
+    check("an initial-first roster name displays as the name he goes by",
+      franklin.name === "Scott Franklin", franklin.name);
+    check("the roster spelling stays searchable", finds("F000472", "C. Franklin"));
+    const list = D.getElementById("kycNames");
+    const option = [...list.options].find((o) => o.value === "James Clyburn");
+    check("suggestions keep the display name and carry the alias as a label",
+      !!option && /Jim Clyburn/.test(option.getAttribute("label") || ""),
+      option && option.getAttribute("label"));
+    check("the initial-first roster spelling is not suggested; the display name is",
+      ![...list.options].some((o) => o.value === "C. Franklin") &&
+      [...list.options].some((o) => o.value === "Scott Franklin"));
+  });
+
+  suite("index.html — alias search through the directory", () => {
+    window.location.hash = "#/?q=" + encodeURIComponent("Jim Clyburn");
+    window.dispatchEvent(new window.Event("hashchange"));
+    const ids = [...D.getElementById("results").querySelectorAll(".card")]
+      .map((c) => c.getAttribute("data-id"));
+    check("a 'Jim Clyburn' search shows his card, and only his", ids.length === 1 && ids[0] === "C000537",
+      ids.slice(0, 5).join(","));
+    const card = D.querySelector('#results .card[data-id="C000537"]');
+    check("and the card shows the display name", !!card && /James Clyburn/.test(card.textContent));
+    window.location.hash = "#/";
+    window.dispatchEvent(new window.Event("hashchange"));
   });
 
   suite("index.html — the map's old bug, checked on both pages", () => {
@@ -1133,9 +1175,181 @@ function testContrast() {
 
 /* ================================================================== report */
 
+/* ============================================================ senate view */
+
+/* The Senate by the year each seat is next decided. Every expected number
+ * here is computed from the data the page loaded, never typed in. */
+async function testSenate() {
+  const { window, D, errors } = await buildPage("index.html", { hash: "#/?view=senate" });
+  await settle(50);
+  const KYC = window.KYC;
+  const people = window.legislatorsData;
+  const races = window.kycRaces;
+  const results = D.getElementById("results");
+  const toggle = D.getElementById("senateViewToggle");
+  const senators = people.filter((p) => !p.isCandidate && /Senate/.test(p.chamber));
+  const year = window.kycBuildMeta.election.year;
+  const ids = (root) => [...root.querySelectorAll(".card")].map((c) => c.getAttribute("data-id"));
+  const offBallot = (p) => !!KYC.cards.OFF_BALLOT[KYC.contestStatus(p)];
+  const seatOf = (race) => {
+    const head = race && D.getElementById("senate-seat-" + race.id);
+    return head && head.closest("section");
+  };
+
+  suite("index.html — Senate view", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("#/?view=senate lands on the Senate view",
+      results.querySelectorAll("section.senate-group").length > 0);
+    check("the toggle is a button announced as pressed",
+      toggle.tagName === "BUTTON" && toggle.getAttribute("aria-pressed") === "true");
+    check("every sitting senator has a class and a next election",
+      senators.every((p) => [1, 2, 3].includes(p.senateClass) && p.nextElection));
+
+    const groups = [...results.querySelectorAll(":scope > section.senate-group")];
+    const titles = groups.map((g) => g.querySelector(":scope > .senate-group-title").textContent);
+    const years = [...new Set(senators.map((p) => p.nextElection))].sort();
+    check("one top-level group per year, in order",
+      groups.length === years.length &&
+      years.every((y, i) => titles[i].indexOf("Up in " + y) === 0), titles.join(" | "));
+    check("group headings are real headings", groups.every((g) =>
+      g.querySelector(":scope > .senate-group-title").tagName === "H2"));
+
+    const regular = (y) => senators.filter((p) => p.nextElection === y && !p.senateSpecial);
+    check("each group's count is its senators in the data", groups.every((g, i) => {
+      const n = regular(years[i]).length;
+      return g.getAttribute("data-seats") === String(n) &&
+        g.querySelector(".senate-count").textContent.indexOf(n + " seat") === 0;
+    }), groups.map((g) => g.getAttribute("data-seats")).join(","));
+    check("each group names its class", groups.every((g, i) => {
+      const cls = regular(years[i])[0].senateClass;
+      return titles[i].indexOf("Class " + ["", "I", "II", "III"][cls]) !== -1;
+    }), titles.join(" | "));
+
+    const specials = senators.filter((p) => p.senateSpecial);
+    const sub = results.querySelector(".senate-group-special");
+    const subTitle = sub ? sub.querySelector(".senate-group-title") : null;
+    check("the specials are a labelled sub-group inside their year",
+      !specials.length || (!!sub && sub.parentElement === groups[0] &&
+        subTitle.tagName === "H3" && /special elections/.test(subTitle.textContent) &&
+        sub.getAttribute("data-seats") === String(specials.length)),
+      subTitle ? subTitle.textContent : "no sub-group");
+    check("the specials come after the year's regular seats", !sub ||
+      groups[0].lastElementChild === sub);
+
+    const later = groups.slice(1);
+    check("later years list their senators", later.every((g, i) => {
+      const shown = ids(g);
+      const expected = regular(years[i + 1]).map((p) => p.id);
+      return shown.length === expected.length && expected.every((id) => shown.includes(id));
+    }));
+
+    // A 2026 seat: the holder, then the people running for it.
+    const upRaces = races.filter((r) => r.chamber === "Senate" && r.year === year);
+    const blocks = upRaces.map(seatOf);
+    check("every 2026 Senate race has a seat block", blocks.every(Boolean),
+      `${blocks.filter(Boolean).length} of ${upRaces.length}`);
+    check("each seat block leads with its sitting senator",
+      upRaces.every((r, i) => !blocks[i] || ids(blocks[i])[0] === r.incumbentIds[0]));
+    const race = upRaces.find((r) => r.candidateIds.some((id) => !offBallot(KYC.byId(id))));
+    const block = seatOf(race);
+    const running = race ? race.candidateIds.map(KYC.byId).filter((p) => !offBallot(p)) : [];
+    check("a 2026 seat lists its race's candidates after the incumbent", !!block &&
+      running.length > 0 && running.every((p) => ids(block).indexOf(p.id) > 0 ||
+        (p.incumbentId && ids(block).indexOf(p.incumbentId) > 0)),
+      race ? race.id : "no race");
+    check("and labels them as running for this seat",
+      !!block && /Running for this seat/.test(block.textContent));
+    const ranks = (b) => ids(b).slice(1).map((id) => {
+      const st = KYC.contestStatus(KYC.byId(id));
+      return st === "nominee" ? 0 : st === "advanced" ? 1 : 2;
+    });
+    check("nominees, then runoffs, then still running", blocks.filter(Boolean).every((b) => {
+      const r = ranks(b);
+      return r.every((v, i) => i === 0 || r[i - 1] <= v);
+    }));
+    const movers = people.filter((p) => !p.isCandidate && /House/.test(p.chamber) &&
+      /^S-/.test(p.contestRaceId || "") && !offBallot(p));
+    check("a member running for a Senate seat appears under it, once", movers.every((p) => {
+      const b = seatOf(races.find((r) => r.id === p.contestRaceId));
+      const shown = b ? ids(b) : [];
+      return shown.includes(p.id) && !shown.includes(p.alsoRunningId);
+    }), movers.map((p) => p.name).join(", "));
+
+    const outIds = upRaces.flatMap((r) => r.candidateIds).filter((id) => offBallot(KYC.byId(id)));
+    const anyOut = () => [...results.querySelectorAll(".card")]
+      .some((c) => outIds.includes(c.getAttribute("data-id")));
+    check("eliminated candidates are hidden by default", outIds.length > 0 && !anyOut(),
+      `${outIds.length} off the ballot`);
+    D.querySelector('[data-group="eliminated"]').click();
+    check("and appear with the Include eliminated control", anyOut());
+    check("after everyone still running", upRaces.every((r) => {
+      const b = seatOf(r);
+      if (!b) return true;
+      const all = ids(b).slice(1);
+      const firstOut = all.findIndex((id) => offBallot(KYC.byId(id)));
+      return firstOut === -1 || all.slice(firstOut).every((id) => offBallot(KYC.byId(id)));
+    }));
+    check("the URL carries both", /view=senate/.test(window.location.hash) &&
+      /eliminated=show/.test(window.location.hash), window.location.hash);
+    D.querySelector('[data-group="eliminated"]').click();
+
+    const shownCount = announced(D);
+    check("the results bar counts what is shown",
+      shownCount === results.querySelectorAll(".card").length, String(shownCount));
+
+    // Filters narrow it; a seat with nothing matching disappears.
+    const republican = D.querySelector('[data-group="party"][data-value="Republican"]');
+    republican.click();
+    const parties = [...results.querySelectorAll(".card")]
+      .map((c) => KYC.byId(c.getAttribute("data-id")).party);
+    check("the party filter narrows the Senate view",
+      parties.length > 0 && parties.every((p) => p === "Republican"), `${parties.length} cards`);
+    check("seat blocks with nothing matching are hidden",
+      [...results.querySelectorAll("section.senate-seat")].every((s) => s.querySelector(".card")));
+    republican.click();
+
+    const first = results.querySelector(".card");
+    first.click();
+    const modal = D.getElementById("profileModal");
+    check("a card opens the profile",
+      modal && !modal.hidden && D.getElementById("profileModalName").textContent ===
+        KYC.byId(first.getAttribute("data-id")).name);
+    D.querySelector("#profileModal .modal-footer [data-close]").click();
+  });
+
+  suite("index.html — Senate view URL and escaping", () => {
+    toggle.click();
+    check("toggling off returns to the grid", toggle.getAttribute("aria-pressed") === "false" &&
+      !results.querySelector("section.senate-group") && !/view=senate/.test(window.location.hash),
+      window.location.hash);
+    toggle.click();
+    check("toggling on writes #/?view=senate", /view=senate/.test(window.location.hash) &&
+      !!results.querySelector("section.senate-group"), window.location.hash);
+    D.getElementById("raceViewToggle").click();
+    check("the race view releases the Senate toggle",
+      toggle.getAttribute("aria-pressed") === "false" &&
+      D.getElementById("raceViewToggle").getAttribute("aria-pressed") === "true");
+    window.location.hash = "#/?view=senate";
+    window.dispatchEvent(new window.Event("hashchange"));
+    check("the URL round-trips back to the Senate view",
+      toggle.getAttribute("aria-pressed") === "true" && !!results.querySelector("section.senate-group"));
+
+    const victim = senators[0];
+    const real = victim.name;
+    victim.name = '<img id="kyc-pwn" src=x>';
+    toggle.click();
+    toggle.click();
+    check("names are escaped in the Senate view", !D.getElementById("kyc-pwn") &&
+      results.textContent.includes('<img id="kyc-pwn" src=x>'));
+    victim.name = real;
+  });
+  window.close();
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "index.html") await testDirectoryAsync();
+  if (!only || only === "index.html") await testSenate();
   if (!only || only === "map.html") await testMap();
   if (!only || only === "states") await testStates();
   if (!only || only === "links") await testDeepLinks();

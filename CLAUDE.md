@@ -38,6 +38,7 @@ data/campaigns.json         ──┴─> kyc/ ──> candidate_profiles_site/
                                              assets/kyc.js
                                              assets/kyc-cards.js
                                              assets/kyc-profile.js
+                                             assets/kyc-senate.js
                                              assets/kyc-directory.js
                                              assets/kyc-map.js
                                              assets/kyc-state.js
@@ -72,8 +73,8 @@ python build_profile_site.py field --check    # who is running, from the FEC
 python build_profile_site.py disclosures      # House financial disclosure links
 python build_profile_site.py results          # who is still in, from Wikipedia
 python build_profile_site.py campaigns        # campaign websites from FEC committees
-python -m unittest discover tests             # 438 tests, no dependencies
-npm install && npm test                       # 371 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 485 tests, no dependencies
+npm install && npm test                       # 414 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
