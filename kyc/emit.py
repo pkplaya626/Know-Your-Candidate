@@ -24,6 +24,7 @@ PAGE_REQUIREMENTS = {
         "data/profiles.js",
         "assets/kyc-cards.js",
         "assets/kyc-profile.js",
+        "assets/kyc-senate.js",
         "assets/kyc-directory.js",
     ),
     "map.html": (

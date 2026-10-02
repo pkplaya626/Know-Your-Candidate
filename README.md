@@ -41,8 +41,8 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… portraits --refresh` | Re-resolve every portrait, not just the missing ones |
 | `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`) |
 | `… refresh` | `fetch`, then `build` |
-| `python -m unittest discover tests` | 438 pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (371 checks) |
+| `python -m unittest discover tests` | 450 pipeline tests |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (401 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -113,6 +113,7 @@ order renders an empty site with no error anywhere.
 | `assets/kyc.js` | Theme, icon sprite, escaping, provenance, router, dialog helper, shell |
 | `assets/kyc-profile.js` | The profile dialog, shared by both pages |
 | `assets/kyc-cards.js` | Profile cards and race sections, shared by the grid and the state pages |
+| `assets/kyc-senate.js` | The grid's Senate view: every seat by the year it is next decided, with the candidates for each 2026 seat |
 | `assets/kyc-directory.js` | The grid: filtering, sorting, races |
 | `assets/kyc-map.js` | The map: rendering, modes, delegation panel |
 | `assets/kyc-state.js` | A state's page, and the directory of states |
