@@ -201,6 +201,25 @@
     return "";
   }
 
+  /** The November ballot line of a nominee whose line is not their party's
+   *  ("Speak The Truth"), read from the same record contestStatus reads, or
+   *  "". The pipeline decides when there is one; this never derives it. */
+  function ballotLine(item) {
+    if (!item || contestStatus(item) !== "nominee") return "";
+    if (!runsElsewhere(item) || item.raceStatusRace === item.contestRaceId) {
+      return String(item.ballotLine || "");
+    }
+    var filing = item.alsoRunningId && byId(item.alsoRunningId);
+    return String((filing && filing.raceId === item.contestRaceId && filing.ballotLine) || "");
+  }
+
+  /** " – Speak The Truth line", already escaped, to follow a nominee's
+   *  status; "" for everyone else. */
+  function ballotLineSuffix(item) {
+    var line = ballotLine(item);
+    return line ? " – " + escapeHtml(line) + " line" : "";
+  }
+
   /* Portraits are resolved and checked at build time, so this runtime chain
    * is a safety net rather than the primary mechanism. */
   function handleImageFallback(img, profileId) {
@@ -865,6 +884,8 @@
     byId: byId,
     runsElsewhere: runsElsewhere,
     contestStatus: contestStatus,
+    ballotLine: ballotLine,
+    ballotLineSuffix: ballotLineSuffix,
     meta: meta,
     portraitSrc: portraitSrc,
     handleImageFallback: handleImageFallback,

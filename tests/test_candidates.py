@@ -525,3 +525,78 @@ class TestDisclosuresAgainstRealData(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestFieldPagination(unittest.TestCase):
+    """The FEC pages with LIMIT/OFFSET; a sort with ties shuffles between pages.
+
+    Sorted on "-receipts", one fetch returned 3,754 rows of which only 3,342
+    were distinct: about one filing in nine was silently missing, a different
+    set each refresh, and a sitting member's filing went with it.
+    """
+
+    def setUp(self):
+        from kyc import fec
+        self.fec = fec
+        self.real = fec.fetch_pages
+
+    def tearDown(self):
+        self.fec.fetch_pages = self.real
+
+    @staticmethod
+    def rows(n, office="H"):
+        return [{"candidate_id": f"{office}{i:04d}", "cycle": 2026, "office": office,
+                 "name": f"P{i}"} for i in range(n)]
+
+    def test_the_field_is_paged_on_a_unique_key(self):
+        self.assertEqual(candidates.FIELD_SORT, ("candidate_id", "cycle"))
+
+    def test_a_shuffled_fetch_is_retried_until_every_row_arrives_once(self):
+        calls = []
+
+        def fake(path, params, sort):
+            calls.append(params["office"])
+            good = self.rows(5, params["office"])
+            if calls.count(params["office"]) == 1:
+                return good[:4] + good[:1], 5     # one row twice, one missing
+            return good, 5
+
+        self.fec.fetch_pages = fake
+        log = []
+        out = candidates.fetch(log=log.append)
+        self.assertEqual(len(out), 10)
+        self.assertEqual(len({r["candidate_id"] for r in out}), 10)
+        self.assertTrue(any("fetching again" in line for line in log))
+
+    def test_a_field_that_never_arrives_whole_is_refused(self):
+        self.fec.fetch_pages = lambda path, params, sort: (self.rows(3) + self.rows(1), 4)
+        with self.assertRaises(candidates.FieldError):
+            candidates.fetch(log=lambda *_: None, attempts=2)
+
+    def test_fetch_pages_sends_the_sort_and_reads_every_page(self):
+        from kyc import fec
+        real_get = fec._get
+        seen = []
+
+        def fake_get(path, params, retries=4):
+            seen.append(params)
+            page = params["page"]
+            return {"results": [{"n": page}], "pagination": {"count": 2, "pages": 2}}
+
+        fec._get = fake_get
+        try:
+            rows, count = fec.fetch_pages("/x/", {"a": 1}, ("k", "j"), pause=0)
+        finally:
+            fec._get = real_get
+        self.assertEqual((rows, count), ([{"n": 1}, {"n": 2}], 2))
+        self.assertEqual([p["sort"] for p in seen], [["k", "j"], ["k", "j"]])
+
+    def test_a_short_election_calendar_is_refused(self):
+        from kyc import results
+        self.fec.fetch_pages = lambda path, params, sort: ([{"election_state": "RI"}], 2)
+        with self.assertRaises(results.ResultsError):
+            results.fetch_dates()
+        row = {"election_state": "RI", "office_sought": "S", "election_type_id": "P",
+               "election_date": "2026-09-09T00:00:00"}
+        self.fec.fetch_pages = lambda path, params, sort: ([row], 1)
+        self.assertEqual(results.fetch_dates()[("RI", "S")]["primary"], "2026-09-09")

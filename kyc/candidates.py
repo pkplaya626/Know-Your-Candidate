@@ -34,7 +34,6 @@ is not - which was the actual defect.
 
 import json
 import os
-import time
 
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "fec_field.json")
 
@@ -71,28 +70,39 @@ class FieldError(RuntimeError):
 
 # ------------------------------------------------------------------ fetching
 
-def fetch(cycle=CYCLE, log=print):
-    """Every active candidate for *cycle*, with their reported totals."""
+# One row per (candidate, two-year period), so this pair is unique and the
+# pages cannot shuffle between requests - see fec.fetch_pages.
+FIELD_SORT = ("candidate_id", "cycle")
+
+
+def fetch(cycle=CYCLE, log=print, attempts=3):
+    """Every active candidate for *cycle*, with their reported totals.
+
+    Every row must arrive exactly once. The old "-receipts" sort silently
+    dropped about one row in nine on each fetch, a different set each time,
+    so people came and went between refreshes and a sitting member's filing
+    could vanish along with her primary result. A short fetch is retried and
+    then refused: a partial field would read as candidates having withdrawn.
+    """
     from . import fec
 
     rows = []
     for office in ("H", "S"):
-        page = 1
-        while True:
-            payload = fec._get("/candidates/totals/", {
-                "election_year": cycle, "office": office,
-                "is_active_candidate": True, "per_page": 100, "page": page,
-                "sort": "-receipts",
-            })
-            results = payload.get("results") or []
-            rows.extend(results)
-            pagination = payload.get("pagination") or {}
-            if page == 1:
-                log(f"    office {office}: {pagination.get('count', 0)} filers")
-            if not results or page >= pagination.get("pages", 1):
+        for attempt in range(1, attempts + 1):
+            got, count = fec.fetch_pages("/candidates/totals/", {
+                "election_year": cycle, "office": office, "is_active_candidate": True,
+            }, FIELD_SORT)
+            distinct = {(r.get("candidate_id"), r.get("cycle")) for r in got}
+            if len(got) == count and len(distinct) == count:
                 break
-            page += 1
-            time.sleep(0.25)
+            log(f"    office {office}: {len(distinct)} distinct rows of {count} "
+                f"(attempt {attempt}); fetching again")
+        else:
+            raise FieldError(
+                f"office {office}: the FEC returned {len(distinct)} distinct rows of "
+                f"{count} after {attempts} attempts; refusing to write a partial field")
+        log(f"    office {office}: {count} filers")
+        rows.extend(got)
 
     if not rows:
         raise FieldError(f"the FEC returned no candidates for {cycle}")

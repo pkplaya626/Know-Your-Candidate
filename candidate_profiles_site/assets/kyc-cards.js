@@ -51,8 +51,14 @@
     var status = KYC.contestStatus(item);
     var spec = (own && MEMBER_RACE_BADGE[status]) || RACE_BADGE[status];
     if (!spec) return "";
-    return '<span class="badge ' + spec[0] + '" title="' + KYC.escapeAttr(spec[2]) +
-      '">' + KYC.escapeHtml(spec[1]) + "</span>";
+    // A nominee on another line than their party's says so, or a primary
+    // loser on a minor-party line reads as a second Democratic nominee.
+    var line = KYC.ballotLine(item);
+    // Not "won the primary": Jose Vega (NY-15) lost it and is on the ballot.
+    var title = line ? "Will appear on the general election ballot on the " + line +
+      " line, per the published results." : spec[2];
+    return '<span class="badge ' + spec[0] + '" title="' + KYC.escapeAttr(title) +
+      '">' + KYC.escapeHtml(spec[1]) + KYC.ballotLineSuffix(item) + "</span>";
   }
 
   function statusBadge(item) {

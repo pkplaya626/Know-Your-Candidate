@@ -289,14 +289,16 @@
       return '<span class="badge badge-warn">Running for ' +
         KYC.escapeHtml(item.contestLabel.replace(/ • /, " ")) + "</span>" +
         (contest ? ' <span class="badge ' + contest.split("|")[0] + '">' +
-          contest.split("|")[1] + "</span>" : "");
+          contest.split("|")[1] + KYC.ballotLineSuffix(item) + "</span>" : "");
     }
     var race = RACE_BADGE[item.raceStatus];
     if (race) {
       var bits = race.split("|");
       if (!item.isCandidate && !item.contestLabel && item.raceStatus === "nominee") bits[1] = "Renominated";
       if (!item.isCandidate && item.raceStatus === "unlisted") bits = ["badge-danger", "Not on ballot"];
-      return '<span class="badge ' + bits[0] + '">' + bits[1] + "</span>";
+      // "Nominee – Speak The Truth line": not a second Democratic nominee.
+      return '<span class="badge ' + bits[0] + '">' + bits[1] +
+        (item.raceStatus === "nominee" ? KYC.ballotLineSuffix(item) : "") + "</span>";
     }
     if (item.isCandidate) return '<span class="badge badge-money">Challenger</span>';
     if (/retiring|not running|defeated|ineligible|resigned/.test(status)) {

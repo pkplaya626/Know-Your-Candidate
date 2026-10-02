@@ -72,8 +72,8 @@ python build_profile_site.py field --check    # who is running, from the FEC
 python build_profile_site.py disclosures      # House financial disclosure links
 python build_profile_site.py results          # who is still in, from Wikipedia
 python build_profile_site.py campaigns        # campaign websites from FEC committees
-python -m unittest discover tests             # 427 tests, no dependencies
-npm install && npm test                       # 362 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 438 tests, no dependencies
+npm install && npm test                       # 371 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -293,6 +293,16 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     block is no wider than the evidence: a dead `www.` host does not block
     its bare domain. Never treat a single failed lookup as dead (rule 8);
     confirm it at a second resolver first.
+
+36. **Page on a unique key, and count what came back.** OpenFEC pages with
+    LIMIT/OFFSET. The field was sorted on "-receipts", where 1,386 filers
+    share $0, so tied rows shuffled between page requests: each refresh
+    returned about one filing in seven twice and silently skipped as many,
+    a different set every time - 638 people, a sitting member's filing with
+    them, and Rhode Island's Senate primary from the unsorted calendar.
+    `fec.fetch_pages` takes a sort that ends in a unique key; the field
+    must arrive with every (candidate_id, cycle) exactly once or it is
+    refetched and then refused.
 
 ## Curated data
 
