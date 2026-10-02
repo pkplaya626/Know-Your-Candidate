@@ -326,9 +326,41 @@
       html += '<details class="race-out"><summary>' + out.length +
         " no longer in this race</summary>" + out.map(row).join("") + "</details>";
     }
-    if (!others.length) html = '<span class="kyc-absent">Nobody else has filed for this seat</span>';
+    /* People the results page puts on the November ballot with no FEC filing
+     * over $5,000 have no profile, so no row - but leaving them out made a
+     * member with a named November opponent read as unopposed. */
+    var res = race.results || null;
+    var unfiled = res && res.otherNominees && res.otherNominees.length ? res.otherNominees : [];
+    if (unfiled.length) {
+      html += '<p class="race-note">Also on the November ballot, per the published ' +
+        "results, with no FEC filing over $5,000 and so no profile here: " +
+        KYC.escapeHtml(unfiled.join(", ")) + ".</p>";
+    }
+    if (!others.length && !unfiled.length) html = aloneNote(race);
     panel.hidden = false;
     target.innerHTML = html;
+  }
+
+  /* Nobody else in this race has a profile. That used to read "Nobody else
+   * has filed for this seat" for every such race, including ones where five
+   * people had filed - a claim about our profiles dressed up as a fact about
+   * the race. It is worded from the race's own counts, as the race header
+   * on the cards is, and says nobody filed only when filedCount does. */
+  function aloneNote(race) {
+    var filed = race.filedCount || 0;
+    var res = race.results || null;
+    var text;
+    if (race.settled && res) {
+      text = "No one else is on the November ballot for this seat, per the published results" +
+        (filed ? " (" + filed + " filed with the FEC in all)." : ".");
+    } else if (filed) {
+      text = filed + (filed === 1 ? " has" : " have") + " filed with the FEC for this seat, " +
+        "but no one else has reported raising $5,000 - the point at which federal law " +
+        "treats someone as a candidate.";
+    } else {
+      return '<span class="kyc-absent">Nobody else has filed with the FEC for this seat</span>';
+    }
+    return '<p class="race-note">' + KYC.escapeHtml(text) + "</p>";
   }
 
   /* Every link is built from an id the source dataset holds - never from a
@@ -486,16 +518,16 @@
     var target = el("profileModalStatus");
     var pieces = [];
 
-    var table = item.isCandidate ? RACE_STATUS :
+    /* A member running for another seat reads as anyone else in that race,
+     * named: "On the November ballot for Senate • IA". The member wording -
+     * "renominated", "not seeking re-election" - is about the seat they
+     * hold, and their result there is not their 2026 story. */
+    var elsewhere = !item.isCandidate && !!item.contestLabel;
+    var table = item.isCandidate || elsewhere ? RACE_STATUS :
       Object.assign({}, RACE_STATUS, MEMBER_RACE_STATUS);
-    var race = table[item.raceStatus];
+    var race = table[KYC.contestStatus(item)];
     if (race) {
-      var label = race[1];
-      // A member's result belongs to the seat they are contesting.
-      if (!item.isCandidate && item.contestLabel) {
-        label = label.replace("for 2026", "for " + item.contestLabel)
-          .replace("the November ballot", "the November ballot for " + item.contestLabel);
-      }
+      var label = elsewhere ? race[1] + " for " + item.contestLabel : race[1];
       pieces.push('<span class="badge ' + race[0] + '" title="' +
         KYC.escapeAttr(race[2]) + '">' + KYC.escapeHtml(label) + "</span>");
     }
@@ -551,7 +583,6 @@
     var party = el("profileModalParty");
     party.textContent = item.party;
     party.style.background = PARTY_LABEL_BG[KYC.partyKey(item)];
-    party.style.color = "#0b0d10";
 
     var photo = el("profileModalPhoto");
     photo.setAttribute("data-photo-idx", "0");

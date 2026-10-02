@@ -174,6 +174,33 @@
     return profileIndex.get(id);
   }
 
+  /** True for a sitting member whose 2026 filing is for a different seat -
+   *  the other chamber, or a redrawn district. */
+  function runsElsewhere(item) {
+    return !!item && !item.isCandidate && !!item.contestRaceId &&
+      item.contestRaceId !== item.raceId;
+  }
+
+  /** The primary result that describes what this person is doing in 2026.
+   *
+   *  For a member running for another seat, the record's own raceStatus can
+   *  be about the seat they hold: Ashley Hinson is "unlisted" in IA-2
+   *  because she is the Senate nominee in Iowa, and the page called that
+   *  "not seeking re-election". The result for the race they are actually
+   *  in lives on their filing's profile (alsoRunningId), and is used only
+   *  when that profile is in the same race. Anything else is "", never the
+   *  held seat's absence. The pipeline derives both statuses; this only
+   *  chooses which of them the reader is shown. */
+  function contestStatus(item) {
+    if (!item) return "";
+    if (!runsElsewhere(item) || item.raceStatusRace === item.contestRaceId) {
+      return item.raceStatus || "";
+    }
+    var filing = item.alsoRunningId && byId(item.alsoRunningId);
+    if (filing && filing.raceId === item.contestRaceId) return filing.raceStatus || "";
+    return "";
+  }
+
   /* Portraits are resolved and checked at build time, so this runtime chain
    * is a safety net rather than the primary mechanism. */
   function handleImageFallback(img, profileId) {
@@ -282,15 +309,23 @@
     return d;
   }
 
+  /* Counted in the reader's own calendar, not in UTC. Election Day is a
+   * local date - polls open and close on local clocks - and measuring to
+   * UTC midnight called it "Election Day" from 7 pm Eastern on the Sunday
+   * before, then "the election has passed" from 7 pm Eastern on the day
+   * itself, while every polling place west of the Mississippi was open.
+   * Both sides are reduced to a calendar date (the reader's local
+   * year/month/day, the election's civil date) and compared as whole days. */
   function electionStatus(year, now) {
     year = year || 2026;
     now = now || new Date();
     var day = generalElectionDay(year);
-    var days = Math.ceil((day.getTime() - now.getTime()) / 86400000);
+    var today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    var days = Math.round((day.getTime() - today) / 86400000);
 
     var phase;
-    if (days > 1) phase = "campaign";
-    else if (days >= 0) phase = "election-day";
+    if (days > 0) phase = "campaign";
+    else if (days === 0) phase = "election-day";
     else phase = "post-election";
 
     return {
@@ -440,6 +475,7 @@
    * view. Without this the site cannot be shared, which is the single
    * biggest functional gap for a tool whose whole purpose is being passed
    * around before an election. */
+  var routeHandlers = [];
   var router = {
     read: function () {
       var hash = global.location.hash.replace(/^#\/?/, "");
@@ -478,17 +514,33 @@
       history.replaceState(null, "", global.location.pathname + hash);
     },
 
+    /* The pushed entry is marked, so closing knows whether there is a view
+     * of ours behind it to go back to. */
     writeProfile: function (id) {
       history.pushState(
-        null, "", global.location.pathname + "#/profile/" + encodeURIComponent(id)
+        { kycProfile: true },
+        "", global.location.pathname + "#/profile/" + encodeURIComponent(id)
       );
     },
 
+    /** Leave a profile view. Back only undoes a profile this page pushed. A
+     *  visitor who arrived on a shared #/profile/ link has nothing of ours
+     *  behind them, and history.back() sent them off the site - so that
+     *  entry is replaced with the list in place and the page told to show
+     *  it, since replaceState fires no event of its own. */
     clearProfile: function () {
-      if (/#\/profile\//.test(global.location.hash)) history.back();
+      if (!/#\/profile\//.test(global.location.hash)) return;
+      var pushed = history.state && history.state.kycProfile;
+      if (pushed) {
+        history.back();
+        return;
+      }
+      history.replaceState(null, "", global.location.pathname + "#/");
+      routeHandlers.forEach(function (handler) { handler(); });
     },
 
     onChange: function (handler) {
+      routeHandlers.push(handler);
       global.addEventListener("hashchange", handler);
       global.addEventListener("popstate", handler);
     },
@@ -811,6 +863,8 @@
     partyClass: partyClass,
     // data
     byId: byId,
+    runsElsewhere: runsElsewhere,
+    contestStatus: contestStatus,
     meta: meta,
     portraitSrc: portraitSrc,
     handleImageFallback: handleImageFallback,

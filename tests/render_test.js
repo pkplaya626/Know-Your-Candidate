@@ -17,7 +17,8 @@ const SITE = path.resolve(__dirname, "..", "candidate_profiles_site");
 
 /* ------------------------------------------------------------------ setup */
 
-function buildPage(page) {
+function buildPage(page, opts) {
+  opts = opts || {};
   const errors = [];
   const vc = new VirtualConsole();
   vc.on("jsdomError", (e) => errors.push("jsdomError: " + e.message));
@@ -36,12 +37,17 @@ function buildPage(page) {
 
   const dom = new JSDOM(html, {
     runScripts: "dangerously",
-    url: "https://kyc.local/" + page,
+    url: "https://kyc.local/" + page + (opts.hash || ""),
     pretendToBeVisual: true,
     virtualConsole: vc,
     beforeParse(window) {
       // jsdom has no matchMedia; the theme layer asks it whether the OS
       // prefers light.
+      // Count every history.back(): from a page someone landed on directly,
+      // one takes them off the site, and jsdom would silently do nothing.
+      window.__backCalls = 0;
+      const back = window.history.back.bind(window.history);
+      window.history.back = () => { window.__backCalls += 1; back(); };
       window.matchMedia = (query) => ({
         media: query,
         matches: false,
@@ -209,6 +215,27 @@ async function testShared(page) {
     check("phase during campaign", es.phase === "campaign", es.phase);
     check("phase after the vote",
       KYC.electionStatus(2026, new Date("2026-12-01T12:00:00Z")).phase === "post-election");
+    // The reader's calendar, not UTC's. Dates are built from local
+    // components so the check means the same thing in every time zone: the
+    // old UTC arithmetic said "Election Day" from Sunday evening in the
+    // East and "has passed" while the West was still voting.
+    const at = (m, d, h, min) => KYC.electionStatus(2026, new Date(2026, m - 1, d, h, min || 0));
+    check("Sunday 1 Nov, late evening: still two days out",
+      at(11, 1, 23, 30).phase === "campaign" && at(11, 1, 23, 30).days === 2,
+      at(11, 1, 23, 30).label);
+    check("Monday 2 Nov, all day: one day out, not Election Day",
+      [0, 12, 19, 23].every((h) => at(11, 2, h).phase === "campaign" && at(11, 2, h).days === 1) &&
+        at(11, 2, 20).label === "1 day to the 2026 election",
+      at(11, 2, 20).label);
+    check("Tuesday 3 Nov, midnight to midnight: Election Day",
+      [0, 7, 19, 20, 23].every((h) => at(11, 3, h).phase === "election-day") &&
+        at(11, 3, 23, 59).label === "Election Day",
+      at(11, 3, 21).label);
+    check("Wednesday 4 Nov from midnight: the election has passed",
+      at(11, 4, 0, 1).phase === "post-election" &&
+        at(11, 4, 0, 1).label === "2026 general election has passed",
+      at(11, 4, 0, 1).label);
+    check("1 October reads 33 days", at(10, 1, 12).days === 33, at(10, 1, 12).label);
     // 2028: first Monday is the 6th, so election day is the 7th.
     check("election day generalises to 2028",
       KYC.electionStatus(2028, new Date("2028-01-01Z")).iso === "2028-11-07");
@@ -792,6 +819,278 @@ async function testStates() {
   });
 }
 
+/* ============================================================ deep links */
+
+const settle = (ms) => new Promise((r) => setTimeout(r, ms || 150));
+
+/* A link someone was sent is the first page they see. Landing on
+ * #/profile/<id> used to leave the grid behind the dialog at "Loading
+ * profiles..." with no cards, and closing it called history.back() - which,
+ * with nothing of ours behind it, left the site. The map overwrote its
+ * incoming hash at boot, so state and profile links opened a blank map. */
+async function testDeepLinks() {
+  const probe = await buildPage("index.html");
+  const people = probe.window.legislatorsData;
+  const senator = people.find((p) => p.state === "TX" && /Senate/.test(p.chamber) && !p.isCandidate);
+  probe.window.close();
+
+  for (const page of ["index.html", "map.html", "states/tx.html"]) {
+    const { window, D, errors } = await buildPage(page, { hash: "#/profile/" + senator.id });
+    await settle();
+    const modal = D.getElementById("profileModal");
+    suite(`${page} — landing on a shared profile link`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("the profile opens", modal && !modal.hidden &&
+        D.getElementById("profileModalName").textContent === senator.name,
+        D.getElementById("profileModalName") && D.getElementById("profileModalName").textContent);
+      check("the address still names the profile",
+        window.location.hash === "#/profile/" + senator.id, window.location.hash);
+      if (page === "index.html") {
+        check("the grid is drawn underneath", announced(D) > 0 &&
+          D.querySelectorAll("#results .card").length > 0,
+          D.getElementById("resultsLabel").textContent.trim());
+      }
+      if (page === "map.html") {
+        check("the map shows that person's state underneath",
+          /Texas|TX/.test(D.getElementById("panelState").textContent),
+          D.getElementById("panelState").textContent);
+      }
+    });
+
+    D.querySelector("#profileModal .modal-footer [data-close]").click();
+    await settle();
+    suite(`${page} — closing a profile someone landed on`, () => {
+      check("the dialog closes", modal.hidden);
+      check("does not go back off the site", window.__backCalls === 0, `${window.__backCalls} back()`);
+      check("the address becomes the list", !/profile/.test(window.location.hash),
+        window.location.hash);
+      if (page === "index.html") {
+        check("the grid is still there", D.querySelectorAll("#results .card").length > 0);
+      }
+      if (page === "map.html") {
+        check("the list address keeps the state", /state=TX/.test(window.location.hash),
+          window.location.hash);
+      }
+    });
+
+    // Opened in the page, closing still goes back: the entry is ours.
+    const before = window.location.hash;
+    window.KYC.profile.open(senator.id);
+    await settle(50);
+    const pushed = window.location.hash;
+    D.querySelector("#profileModal .modal-footer [data-close]").click();
+    await settle();
+    suite(`${page} — closing a profile opened in the page`, () => {
+      check("opening pushes the profile address", pushed === "#/profile/" + senator.id, pushed);
+      check("closing goes back once", window.__backCalls === 1, `${window.__backCalls} back()`);
+      check("back to where the reader was", window.location.hash === before,
+        `${window.location.hash} vs ${before}`);
+    });
+    window.close();
+  }
+
+  const cases = [
+    ["#/?state=TX", "TX", "senate"],
+    ["#/?state=TX&mode=house", "TX", "house"],
+    ["#/?state=OR&mode=house", "OR", "house"],
+  ];
+  for (const [hash, code, mode] of cases) {
+    const { window, D, errors } = await buildPage("map.html", { hash });
+    await settle(50);
+    suite(`map.html${hash} — the incoming route survives boot`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("the address is not rewritten", window.location.hash === hash, window.location.hash);
+      check(`${code} is selected`, D.getElementById("mapStateSelect").value === code,
+        D.getElementById("mapStateSelect").value);
+      check(`the ${mode} view is on`,
+        D.querySelector(`[data-mode="${mode}"]`).getAttribute("aria-pressed") === "true");
+    });
+    window.close();
+  }
+
+  // The link every state page carries to the map lands on that state.
+  {
+    const { window, D } = await buildPage("states/tx.html");
+    const link = [...D.querySelectorAll("a[href*='map.html']")].map((a) => a.getAttribute("href"))
+      .find((h) => /#/.test(h));
+    window.close();
+    const hash = link ? link.slice(link.indexOf("#")) : "";
+    const map = await buildPage("map.html", { hash });
+    await settle(50);
+    suite("states/tx.html — its map link", () => {
+      check("the state page links to the map at its state", /state=TX/.test(hash), link);
+      check("which opens on Texas", map.D.getElementById("mapStateSelect").value === "TX",
+        map.D.getElementById("mapStateSelect").value);
+    });
+    map.window.close();
+  }
+}
+
+/* ====================================================== running elsewhere */
+
+/* A member contesting another seat has a primary result for the seat they
+ * hold - usually "unlisted", because they are not running for it - and one
+ * for the race they are in, on their filing's profile. The page showed the
+ * first: Ashley Hinson, Iowa's Republican Senate nominee, read "Not on the
+ * 2026 ballot - not seeking re-election". */
+async function testRunningElsewhere() {
+  const { window, D } = await buildPage("index.html");
+  const KYC = window.KYC;
+  const people = window.legislatorsData;
+  const movers = people.filter((p) => KYC.runsElsewhere(p) && p.contestLabel &&
+    p.raceStatusRace && p.raceStatusRace !== p.contestRaceId);
+  const filingOf = (p) => KYC.byId(p.alsoRunningId);
+  const decided = movers.filter((p) => filingOf(p) && filingOf(p).raceId === p.contestRaceId &&
+    filingOf(p).raceStatus);
+  const nominees = decided.filter((p) => filingOf(p).raceStatus === "nominee");
+  const losers = decided.filter((p) => filingOf(p).raceStatus === "eliminated");
+
+  const profileStatus = (p) => {
+    KYC.profile.open(p.id, { fromRoute: true });
+    const text = D.getElementById("profileModalStatus").textContent;
+    KYC.profile.close();
+    return text;
+  };
+
+  suite("members running for another seat — their race, not their seat", () => {
+    check("the data has members whose held-seat result differs from their race",
+      decided.length > 0 && nominees.length > 0, `${decided.length} decided, ${nominees.length} nominees`);
+    check("every one shows the result of the race they are in",
+      decided.every((p) => KYC.contestStatus(p) === filingOf(p).raceStatus),
+      decided.filter((p) => KYC.contestStatus(p) !== filingOf(p).raceStatus).map((p) => p.name).join(", "));
+
+    const badProfiles = decided.filter((p) => {
+      const t = profileStatus(p);
+      return /not seeking re-election|Not on the 2026 ballot|Renominated/i.test(t) ||
+        !t.includes(p.contestLabel);
+    });
+    check("no profile calls them off the ballot or renominated", badProfiles.length === 0,
+      badProfiles.map((p) => p.name + ": " + profileStatus(p)).join(" | "));
+    check("a nominee's profile says which November ballot",
+      nominees.every((p) => profileStatus(p).includes("On the November ballot for " + p.contestLabel)),
+      nominees.length ? profileStatus(nominees[0]) : "");
+    check("a loser's profile says which primary",
+      losers.every((p) => profileStatus(p).includes("Lost the 2026 primary for " + p.contestLabel)),
+      losers.length ? profileStatus(losers[0]) : "none in the data");
+
+    // The card carries the filing's own badge. A filing that is itself
+    // unlisted in its race says so; the held seat's absence never shows.
+    const FILING_BADGE = { nominee: /On the November ballot/, eliminated: /Lost primary/,
+      withdrawn: /Withdrew/, advanced: /In runoff/, unlisted: /Not on primary ballot/ };
+    const badCards = decided.filter((p) => {
+      const html = KYC.cards.statusBadge(p);
+      return /Not on the ballot|Renominated/.test(html) ||
+        !FILING_BADGE[filingOf(p).raceStatus].test(html) ||
+        (filingOf(p).raceStatus !== "unlisted" && /Not on primary ballot/.test(html));
+    });
+    check("each card shows the result of their race, not their seat", badCards.length === 0,
+      badCards.map((p) => p.name + ": " + KYC.cards.statusBadge(p)).join(" | "));
+
+    // Someone with no filing in their race shows no result, never the seat's.
+    const undecided = movers.filter((p) => !decided.includes(p));
+    check("with no result for their race, nothing is borrowed from the seat",
+      undecided.every((p) => KYC.contestStatus(p) === "" ||
+        (filingOf(p) && filingOf(p).raceId === p.contestRaceId)));
+  });
+
+  /* "Nobody else has filed for this seat" was printed whenever no other
+   * profile was in the race - for Hank Johnson with five filings and a named
+   * November opponent. It may say so only when filedCount does. */
+  suite("in this race — alone among the profiles", () => {
+    const raceOf = (p) => window.kycRaces.find((r) => r.id === (p.contestRaceId || p.raceId));
+    const alone = people.filter((p) => {
+      const r = raceOf(p);
+      return r && !r.incumbentIds.concat(r.candidateIds).some((id) => id !== p.id && KYC.byId(id));
+    });
+    const panelText = (p) => {
+      KYC.profile.open(p.id, { fromRoute: true });
+      const t = D.getElementById("profileModalRace").textContent;
+      KYC.profile.close();
+      return t;
+    };
+    check("the data has people alone among the profiles in their race", alone.length > 0,
+      `${alone.length}`);
+    const lies = alone.filter((p) => /Nobody else has filed/.test(panelText(p)) && raceOf(p).filedCount > 0);
+    check("never 'nobody else has filed' when people have filed", lies.length === 0,
+      lies.map((p) => `${p.name} (${raceOf(p).filedCount} filed)`).join(", "));
+    const named = alone.filter((p) => ((raceOf(p).results || {}).otherNominees || []).length);
+    check("a named November opponent without a profile is listed",
+      named.length > 0 && named.every((p) => raceOf(p).results.otherNominees.every((n) => panelText(p).includes(n))),
+      named.length ? panelText(named[0]) : "none in the data");
+    const filedOnly = alone.find((p) => !raceOf(p).settled && raceOf(p).filedCount > 0);
+    check("an unsettled race says how many filed",
+      !filedOnly || panelText(filedOnly).includes(raceOf(filedOnly).filedCount + " ha"),
+      filedOnly ? panelText(filedOnly) : "none in the data");
+    const none = alone.find((p) => !raceOf(p).filedCount && !(raceOf(p).settled && raceOf(p).results));
+    check("nobody filed is said only when nobody did",
+      !none || /Nobody else has filed/.test(panelText(none)), none ? panelText(none) : "none in the data");
+  });
+  window.close();
+
+  const map = await buildPage("map.html");
+  await settle(50);
+  const nominee = nominees[0];
+  if (nominee) {
+    map.D.querySelector('[data-mode="house"]').click();
+    const picker = map.D.getElementById("mapStateSelect");
+    picker.value = nominee.state;
+    picker.dispatchEvent(new map.window.Event("change"));
+    const row = map.D.querySelector(`#delegation [data-id="${nominee.id}"]`);
+    suite("map.html — a member running for another seat", () => {
+      check(`${nominee.name}'s row is in the ${nominee.state} delegation`, !!row);
+      check("the row carries the result of their race",
+        row && /Running for/.test(row.textContent) && /Nominee/.test(row.textContent) &&
+          !/Not on ballot/.test(row.textContent),
+        row && row.textContent.replace(/\s+/g, " ").trim());
+    });
+  }
+  map.window.close();
+}
+
+/* ============================================================== contrast */
+
+/* WCAG AA for text is 4.5:1. --text-faint labels fields, footers and every
+ * absence, and was 3.4-4.3:1; the profile's party tag put near-black on the
+ * light theme's dark party colours at 2.6-3.0:1. Checked from the tokens
+ * themselves, so a new value cannot quietly regress. */
+function testContrast() {
+  const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+  const block = (sel) => {
+    const i = css.indexOf(sel + " {");
+    const out = {};
+    for (const m of css.slice(i, css.indexOf("\n}", i)).matchAll(/--([\w-]+):\s*(#[0-9a-fA-F]{6})\s*;/g)) {
+      out[m[1]] = m[2];
+    }
+    return out;
+  };
+  const base = block(":root");
+  const themes = {
+    dark: base,
+    amoled: Object.assign({}, base, block('[data-theme="amoled"]')),
+    light: Object.assign({}, base, block('[data-theme="light"]')),
+  };
+  const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const lum = (h) => {
+    const c = rgb(h).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  };
+  const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+
+  suite("kyc.css — text contrast (WCAG AA, 4.5:1)", () => {
+    for (const [name, t] of Object.entries(themes)) {
+      const faint = ["surface-0", "surface-1", "surface-2"].map((s) => ratio(t["text-faint"], t[s]));
+      check(`${name}: faint text on surfaces 0-2`, faint.every((r) => r >= 4.5),
+        faint.map((r) => r.toFixed(2)).join(" / "));
+      const tags = ["party-d", "party-r", "party-i", "text-muted"].map((p) => ratio(t["text-inverse"], t[p]));
+      check(`${name}: party tag label on its party colour`, tags.every((r) => r >= 4.5),
+        tags.map((r) => r.toFixed(2)).join(" / "));
+    }
+    const js = fs.readFileSync(path.join(SITE, "assets", "kyc-profile.js"), "utf8");
+    check("the party tag's label colour comes from the theme, not a literal",
+      !/style\.color\s*=\s*["']#/.test(js) && /\.party-tag\s*\{[^}]*color:\s*var\(--text-inverse\)/.test(css));
+  });
+}
+
 /* ================================================================== report */
 
 (async function main() {
@@ -799,6 +1098,9 @@ async function testStates() {
   if (!only || only === "index.html") await testDirectoryAsync();
   if (!only || only === "map.html") await testMap();
   if (!only || only === "states") await testStates();
+  if (!only || only === "links") await testDeepLinks();
+  if (!only || only === "links") await testRunningElsewhere();
+  if (!only || only === "contrast") testContrast();
 
   let failed = 0;
   for (const r of results) {

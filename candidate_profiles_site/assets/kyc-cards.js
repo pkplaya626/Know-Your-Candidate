@@ -48,7 +48,8 @@
     // "Renominated" is about the seat a member holds; a member on another
     // seat's ballot is simply on it.
     var own = !item.isCandidate && !item.contestLabel;
-    var spec = (own && MEMBER_RACE_BADGE[item.raceStatus]) || RACE_BADGE[item.raceStatus];
+    var status = KYC.contestStatus(item);
+    var spec = (own && MEMBER_RACE_BADGE[status]) || RACE_BADGE[status];
     if (!spec) return "";
     return '<span class="badge ' + spec[0] + '" title="' + KYC.escapeAttr(spec[2]) +
       '">' + KYC.escapeHtml(spec[1]) + "</span>";

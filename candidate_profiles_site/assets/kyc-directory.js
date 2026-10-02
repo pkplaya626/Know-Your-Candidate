@@ -202,10 +202,18 @@
     }
   }
 
-  function apply() {
+  /* `quiet` renders without writing the filters into the URL, for the grid
+   * drawn underneath a profile someone landed on directly - writing it then
+   * would replace the profile link they arrived on. */
+  function apply(opts) {
     syncStateLink();
     visible = data.filter(matches);
     visible.sort(SORTS[state.sort] || SORTS.region);
+    listDrawn = true;
+    if (opts && opts.quiet) {
+      render();
+      return;
+    }
     KYC.router.writeFilters({
       q: state.q,
       chamber: state.chamber,
@@ -329,13 +337,22 @@
 
   /* -------------------------------------------------------------- routing */
 
+  /* Landing on a shared #/profile/ link opened the dialog and returned before
+   * the grid was ever drawn, so the page behind it read "Loading profiles..."
+   * with no cards, and closing the dialog showed an empty site. The first
+   * route draws the default list underneath whatever it opens. */
+  var listDrawn = false;
+
   function applyRoute(route) {
     if (route.view === "profile" && KYC.profile.open(route.id, { fromRoute: true })) {
+      if (!listDrawn) applyParams({}, { quiet: true });
       return;
     }
     if (KYC.profile.isOpen()) KYC.profile.close();
+    applyParams(route.params || {});
+  }
 
-    var params = route.params || {};
+  function applyParams(params, opts) {
     state.q = params.q || "";
     state.chamber = params.chamber || "all";
     state.party = params.party || "all";
@@ -359,7 +376,7 @@
     doc.getElementById("raceViewToggle")
       .setAttribute("aria-pressed", String(state.view === "race"));
     syncChips();
-    apply();
+    apply(opts);
   }
 
   /* ----------------------------------------------------------------- boot */
