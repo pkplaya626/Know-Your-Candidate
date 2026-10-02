@@ -698,6 +698,14 @@ class TestSenateDateFallback(unittest.TestCase):
         self.assertIn("RI", logged[0])
         self.assertIn("2026-09-09", logged[0])
 
+    def test_a_state_with_no_senate_election_borrows_nothing(self):
+        # People file for Arizona's Senate seats, which are not up in 2026;
+        # the FEC calendar has no AZ Senate slot, and none is invented.
+        fec = {("AZ", "H"): {"primary": "2026-07-21", "runoff": None}}
+        dates, notes = results.effective_dates(fec, {"AZ"})
+        self.assertNotIn(("AZ", "S"), dates)
+        self.assertEqual([n for n in notes if n["seat"] == "AZ-S"], [])
+
     def test_a_senate_date_of_its_own_is_kept(self):
         fec = {("RI", "H"): {"primary": "2026-09-09", "runoff": None},
                ("RI", "S"): {"primary": "2026-09-10", "runoff": None}}

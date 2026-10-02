@@ -128,9 +128,13 @@ def effective_dates(dates, senate_states=(), log=None):
     out = {key: dict(slot) for key, slot in (dates or {}).items()}
     notes = []
     for state in sorted(set(senate_states)):
-        slot = out.get((state, "S")) or {"primary": None, "runoff": None}
+        # Only where the FEC lists a 2026 Senate election at all. People
+        # file for Senate seats that are not up this cycle (Arizona,
+        # California, New York ...); those states have no Senate slot, and
+        # borrowing a date for them would "settle" a race that does not exist.
+        slot = out.get((state, "S"))
         house = (out.get((state, "H")) or {}).get("primary")
-        if not slot.get("primary") and house:
+        if slot is not None and not slot.get("primary") and house:
             out[(state, "S")] = dict(slot, primary=house)
             notes.append({"kind": "senate-from-house", "seat": f"{state}-S",
                           "text": f"{state} Senate: the FEC calendar has no primary date; "
