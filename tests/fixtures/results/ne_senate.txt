@@ -1,0 +1,119 @@
+{{Infobox election
+| nominee1 = [[Pete Ricketts]]
+| party1 = Republican Party (United States)
+| nominee2 = [[Dan Osborn]]
+| party2 = Independent politician
+| nominee3 =
+| party3 =
+}}
+== Republican primary ==
+=== Candidates ===
+==== Nominee ====
+*[[Pete Ricketts]], incumbent U.S. senator
+==== Eliminated in primary ====
+*Todd Knobel, entrepreneur
+*Eric Mortimore
+*Debb Axtell Schultz
+*Mac Stevens, realtor and candidate for U.S. Senate in [[2024 United States Senate special election in Nebraska|2024]]
+===Endorsements===
+===Fundraising===
+===Results===
+{{Election box begin no change
+ | title=Republican primary results}}
+{{Election box winning candidate with party link no change
+ | party=Republican Party (United States)
+ | candidate=[[Pete Ricketts]] (incumbent)
+ | votes=160,547
+ | percentage=81.5}}
+{{Election box candidate with party link no change
+ | party=Republican Party (United States)
+ | candidate=Todd Knobel
+ | votes=15,921
+ | percentage=8.1}}
+{{Election box candidate with party link no change
+ | party=Republican Party (United States)
+ | candidate=Debb Axtel Schultz
+ | votes=11,735
+ | percentage=6.0}}
+{{Election box candidate with party link no change
+ | party=Republican Party (United States)
+ | candidate=Mac Stevens
+ | votes=5,204
+ | percentage=2.6}}
+{{Election box candidate with party link no change
+ | party=Republican Party (United States)
+ | candidate=Eric Mortimore
+ | votes=3,667
+ | percentage=1.9}}
+{{Election box total no change
+ | votes=197,074
+ | percentage=100.0}}
+{{Election box end}}
+== Independent ==
+==== Candidate ====
+== Democratic primary ==
+=== Background ===
+=== Candidates ===
+==== Withdrew after nomination ====
+* Cindy Burbank, retired pharmacy technician
+==== Eliminated in primary ====
+*William Forbes, pastor
+===Endorsements===
+===Fundraising===
+===Results===
+{{Election box begin no change
+ | title=Democratic primary results}}
+{{Election box winning candidate with party link no change
+ | party=Democratic Party (United States)
+ | candidate=Cindy Burbank
+ | votes=110,210
+ | percentage=89.5}}
+{{Election box candidate with party link no change
+ | party=Democratic Party (United States)
+ | candidate=William Forbes
+ | votes=12,863
+ | percentage=10.5}}
+{{Election box total no change
+ | votes=123,073
+ | percentage=100.0}}
+{{Election box end}}
+== Third parties==
+=== America First Party ===
+===Legal Marijuana NOW primary===
+=== Nebraska Working People Party ===
+== General election ==
+=== Predictions ===
+===Endorsements===
+===Debates===
+===Fundraising===
+===Polling===
+===Results===
+{{Election box begin
+ | title      = 2026 United States Senate election in Nebraska
+}}
+{{Election box candidate with party link|party=Republican Party (United States)|candidate=[[Pete Ricketts]] (incumbent)|votes=|percentage=|change=}}
+{{Election box candidate with party link|party=Independent|candidate=[[Dan Osborn]]|votes=|percentage=|change=}}
+{{Election box candidate with party link|party=Nebraska Legal Marijuana NOW Party|candidate=Mike Marvin ''(withdrawn)''|votes=|percentage=|change=}}
+{{Election box candidate with party link
+ |party=America First Party (Nebraska)
+ |candidate=Chuck Conboy
+ |votes=
+ |percentage=
+ |change=
+}}
+{{Election box candidate with party link
+ |party=Nebraska Working People Party
+ |candidate=Robin Richards
+ |votes=
+ |percentage=
+ |change=
+}}
+{{Election box total
+ | votes= 
+ | percentage= 
+ | change= 
+}}
+{{Election box end}}
+== Notes ==
+== References ==
+== External links ==

@@ -148,7 +148,8 @@ def _build(args):
               f"{stats['geo_territories']} territories")
 
     issues = validate.run(profiles, raw, races=race_list, geo=geo,
-                          snapshot=snapshot, finance=finance, campaigns=sites)
+                          snapshot=snapshot, finance=finance, campaigns=sites,
+                          results=outcomes)
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:

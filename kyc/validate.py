@@ -535,8 +535,9 @@ def check_duplicate_people(profiles):
 MULTI_NOMINEE_STATES = frozenset({"CA", "WA", "AK"})
 
 # No primary decides who these are, so several can share a November ballot.
-UNPRIMARIED_PARTIES = frozenset({"independent", "unaffiliated", "no party",
-                                 "nonpartisan", "other", "write-in", "none"})
+# These are results.party_key values - the key space nominees are grouped in -
+# so "Independent", "unaffiliated" and "no party" all arrive as "independent".
+UNPRIMARIED_PARTIES = frozenset({"independent", "all", "other", "write-in", "none"})
 
 RACE_STATUSES = frozenset({"nominee", "eliminated", "withdrawn", "advanced", "unlisted"})
 
@@ -563,6 +564,7 @@ def check_results(profiles, races):
     """
     if races is None:
         return []
+    from .results import party_key
 
     issues = []
     by_id = {p["id"]: p for p in profiles}
@@ -590,12 +592,16 @@ def check_results(profiles, races):
         nominees = collections.defaultdict(dict)
         for p in people:
             if p.get("raceStatus") == "nominee":
+                # Grouped by the line they are on in November, not the roster
+                # party: NY-15's Jose Vega lost the Democratic primary and is
+                # on the "Speak The Truth" line beside the Democratic nominee.
                 # Keyed on the folded name: one person registered twice with
                 # the FEC is one nominee, and is reported separately.
-                nominees[p["party"]].setdefault(_fold(p["name"]), p)
+                line = p.get("ballotParty") or party_key(p["party"])
+                nominees[line].setdefault(_fold(p["name"]), p)
         if race["state"] not in MULTI_NOMINEE_STATES:
             for party, found in sorted(nominees.items()):
-                if len(found) > 1 and str(party).lower() not in UNPRIMARIED_PARTIES:
+                if len(found) > 1 and party not in UNPRIMARIED_PARTIES:
                     crowded.append(f"{race['id']}: {len(found)} {party} nominees - " +
                                    ", ".join(f"{p['name']} ({p['id']})"
                                              for p in found.values()))
@@ -644,6 +650,44 @@ def check_results(profiles, races):
                             f"{len(retired)} sitting members are nominees but the "
                             f"roster says they are not seeking re-election",
                             retired))
+    return issues
+
+
+def check_results_pages(cache):
+    """What the last ``results`` run could not read, and what it overrode.
+
+    A results page that is missing, unreadable or split into pages the
+    parser did not follow leaves every race on it showing everyone who ever
+    filed, and nothing on the site looks wrong. California's split did that
+    to 52 races; the delegates' "the District of Columbia" titles did it to
+    Norton and Plaskett.
+    """
+    if not cache:
+        return []
+    issues = []
+    unparsed = list(cache.get("unparsedPages") or [])
+    if unparsed:
+        issues.append(Issue("error", "results-page-unparsed",
+                            f"{len(unparsed)} results pages exist but have no district "
+                            f"sections the parser can read; none of their races "
+                            f"have results", unparsed))
+    missing = list(cache.get("missingPages") or [])
+    if missing:
+        issues.append(Issue("warn", "results-page-missing",
+                            f"{len(missing)} settled seats have no Wikipedia results "
+                            f"page under any title asked for", missing))
+    failed = list(cache.get("fetchFailed") or [])
+    if failed:
+        issues.append(Issue("warn", "results-fetch-failed",
+                            f"{len(failed)} results pages could not be fetched; "
+                            f"their races were left as they were", failed))
+    overridden = [n["text"] for n in cache.get("calendarNotes") or []
+                  if isinstance(n, dict) and n.get("kind") == "open-primary"]
+    if overridden:
+        issues.append(Issue("warn", "calendar-override-disagrees",
+                            f"{len(overridden)} seats use overrides.OPEN_PRIMARY_SEATS "
+                            f"where the FEC calendar says otherwise; re-check the "
+                            f"source when the FEC updates", overridden))
     return issues
 
 
@@ -717,7 +761,8 @@ def check_campaign_blocklist(campaigns):
                   f"{len(stale)} blocked campaign hosts match no cached site", stale)]
 
 
-def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None):
+def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
+        results=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_identity(profiles)
@@ -734,6 +779,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_finance(profiles, finance)
     issues += check_duplicate_people(profiles)
     issues += check_results(profiles, races)
+    issues += check_results_pages(results)
     issues += check_seats_contested(profiles)
     return issues
 

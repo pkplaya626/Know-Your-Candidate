@@ -138,6 +138,28 @@ SENATE_SEATS_UP_2026 = {
     "WV": "Capito", "WY": "Lummis",
 }
 
+# Seats whose first round is a nonpartisan ("jungle") primary held on general
+# election day, with a runoff after it. Keyed (state, office, cycle); laid over
+# the FEC calendar by results.effective_dates, and validate warns whenever the
+# FEC's own dates disagree, so the entry is re-examined rather than forgotten.
+#
+# Louisiana's party primaries for the U.S. House (May 16 / June 27) were
+# postponed after Louisiana v. Callais and the state redrew its map; Act 7 of
+# the 2026 Regular Session moved the House races to an open primary on
+# November 3 with a runoff on December 12 (Louisiana Secretary of State release
+# of 2026-07-08; Wikipedia, "2026 United States House of Representatives
+# elections in Louisiana", revision 1377090557, re-read 2026-10-01). The FEC
+# calendar's "primary 2026-08-07" is the close of qualifying. Louisiana's
+# Senate race kept its closed party primaries and is not listed.
+OPEN_PRIMARY_SEATS = {
+    ("LA", "H", 2026): {
+        "primary": "2026-11-03",
+        "runoff": "2026-12-12",
+        "source": "https://en.wikipedia.org/w/index.php?oldid=1377090557 "
+                  "(Louisiana Secretary of State, 2026-07-08; Act 7, 2026 R.S.)",
+    },
+}
+
 # Phrases in a Status value that mean the incumbent is not on the 2026 ballot.
 NOT_SEEKING_MARKERS = ("retiring", "not running", "defeated", "ineligible", "resigned")
 

@@ -106,6 +106,60 @@ def fetch_dates(cycle=CYCLE):
     return out
 
 
+def effective_dates(dates, senate_states=(), log=None):
+    """The FEC calendar with the curated corrections laid over it.
+
+    Returns ``(dates, notes)``. Two corrections:
+
+    * ``overrides.OPEN_PRIMARY_SEATS`` replaces a seat's slot outright. The
+      FEC's "primary" for Louisiana's House seats in 2026 is the end of
+      qualifying, not an election, and reading it as one crowned every person
+      Wikipedia listed in a vote-less November box as the nominee.
+    * A state with a Senate race whose Senate slot has no primary date takes
+      its House primary date. State primaries are held statewide on one day;
+      the FEC listed Rhode Island's House primary (2026-09-09) and no Senate
+      one, so S-RI-2026 could never settle.
+
+    Each correction is described in ``notes``, and *log* (when given) is
+    told, so a borrowed date is never silent.
+    """
+    from .overrides import OPEN_PRIMARY_SEATS
+
+    out = {key: dict(slot) for key, slot in (dates or {}).items()}
+    notes = []
+    for state in sorted(set(senate_states)):
+        slot = out.get((state, "S")) or {"primary": None, "runoff": None}
+        house = (out.get((state, "H")) or {}).get("primary")
+        if not slot.get("primary") and house:
+            out[(state, "S")] = dict(slot, primary=house)
+            notes.append({"kind": "senate-from-house", "seat": f"{state}-S",
+                          "text": f"{state} Senate: the FEC calendar has no primary date; "
+                                  f"using {state}'s House primary date {house} "
+                                  f"(state primaries are statewide)"})
+    for (state, office, cycle), fixed in sorted(OPEN_PRIMARY_SEATS.items()):
+        if cycle != CYCLE:
+            continue
+        fec_slot = (dates or {}).get((state, office)) or {}
+        out[(state, office)] = {"primary": fixed["primary"], "runoff": fixed.get("runoff")}
+        if (fec_slot.get("primary"), fec_slot.get("runoff")) != (fixed["primary"], fixed.get("runoff")):
+            notes.append({"kind": "open-primary", "seat": f"{state}-{office}",
+                          "text": f"{state}-{office}: open primary {fixed['primary']}, runoff "
+                                  f"{fixed.get('runoff')} per overrides.OPEN_PRIMARY_SEATS; "
+                                  f"the FEC calendar says primary {fec_slot.get('primary')}, "
+                                  f"runoff {fec_slot.get('runoff')}"})
+    for note in notes:
+        if log:
+            log(f"    [note] {note['text']}")
+    return out, notes
+
+
+def open_primary(state, office, cycle=CYCLE):
+    """True for a seat whose first round is a nonpartisan primary in November."""
+    from .overrides import OPEN_PRIMARY_SEATS
+
+    return (state, office, cycle) in OPEN_PRIMARY_SEATS
+
+
 def primary_settled(dates, state, office, today):
     """True when this seat's primary - and its runoff, if any - has happened."""
     slot = dates.get((state, office))
@@ -141,14 +195,28 @@ def page_titles(state, office, cycle=CYCLE):
     if not name:
         return []
     if office == "H":
-        return [
-            f"{cycle} United States House of Representatives elections in {name}",
-            f"{cycle} United States House of Representatives election in {name}",
-        ]
+        # Territories and DC take "the" and some a longer name: on 2026-10-01
+        # the delegates' articles were "... election in the District of
+        # Columbia", "... in the United States Virgin Islands" and "... in the
+        # Northern Mariana Islands". Asking only for the bare name read no
+        # outcome for Norton or Plaskett at all.
+        names = [name] + [f"the {n}" for n in (TITLE_NAMES.get(state, name),)]
+        titles = []
+        for n in names:
+            titles += [
+                f"{cycle} United States House of Representatives elections in {n}",
+                f"{cycle} United States House of Representatives election in {n}",
+            ]
+        return titles
     return [
         f"{cycle} United States Senate election in {name}",
         f"{cycle} United States Senate special election in {name}",
     ]
+
+
+# The name a territory goes by in an article title, where it is not the
+# roster's. "Virgin Islands" alone is the British territory too.
+TITLE_NAMES = {"VI": "United States Virgin Islands"}
 
 
 class PageMissing(Exception):
@@ -232,7 +300,7 @@ def template_fields(body):
 # A ballot line that is not a person: an undecided slot or the write-in tally.
 _PLACEHOLDER = re.compile(
     r"^(tbd|tba|to be (determined|announced)|none|vacant|write-?ins?|others?|"
-    r"scattering|blank|no candidate|nominee)\b", re.I)
+    r"scattering|blank|no candidate|nominee|over-?votes?|under-?votes?)\b", re.I)
 
 
 def link_target(raw):
@@ -252,10 +320,63 @@ def link_target(raw):
     return None
 
 
+_TEMPLATE = re.compile(r"\{\{([^{}]*)\}\}")
+
+# Templates whose parameters are the words of a name, in order.
+_NAME_TEMPLATES = {"sortname", "sort name"}
+
+
+def _unwrap_template(match):
+    """``{{nowrap|John Salvesen}}`` -> ``John Salvesen``.
+
+    A formatting template wrapped around a name is still the name: GA-5's
+    infobox wrote ``{{nowrap|John Salvesen}}`` and the race listed him twice,
+    once under each spelling. ``{{sortname|First|Last}}`` is the name's two
+    halves. Anything else - a citation, a flag - is not part of the name.
+    """
+    parts = list(template_fields_positional(match.group(1)))
+    head = parts[0].strip().lower() if parts else ""
+    args = [p.strip() for p in parts[1:] if "=" not in p]
+    if head in _NAME_TEMPLATES:
+        return " ".join(args[:2])
+    if head in ("nowrap", "nobr", "nowrap begin", "small", "big", "nobold",
+                "noitalic", "abbr", "lang", "nowr", "no wrap"):
+        return args[-1] if head == "lang" else (args[0] if args else "")
+    return ""
+
+
+def template_fields_positional(body):
+    """A template's parts split on its top-level pipes, name first."""
+    depth, start, i = 0, 0, 0
+    text = body or ""
+    while i < len(text):
+        two = text[i:i + 2]
+        if two in ("[[", "{{"):
+            depth += 1
+            i += 2
+            continue
+        if two in ("]]", "}}"):
+            depth = max(depth - 1, 0)
+            i += 2
+            continue
+        if text[i] == "|" and depth == 0:
+            yield text[start:i]
+            start = i + 1
+        i += 1
+    yield text[start:]
+
+
 def clean_name(raw):
     """``[[Al Green (politician)|Al Green]] (incumbent)`` -> ``Al Green``."""
-    text = _LINK.sub(lambda m: m.group(2) or m.group(1), raw or "")
+    text = raw or ""
+    for _ in range(4):                      # innermost templates first
+        unwrapped = _TEMPLATE.sub(_unwrap_template, text)
+        if unwrapped == text:
+            break
+        text = unwrapped
+    text = _LINK.sub(lambda m: m.group(2) or m.group(1), text)
     text = _MARKUP.sub("", text)
+    text = text.replace("{{", "").replace("}}", "")
     return " ".join(text.split())
 
 
@@ -347,8 +468,86 @@ def infobox_nominees(text):
     return rows
 
 
-def house_sections(text):
-    """``{district_number: section_text}`` from a state's House page."""
+WITHDRAWN_LIST = "Withdrawn list"
+WITHDREW_NOMINEE_LIST = "Withdrew after nomination list"
+ELIMINATED_LIST = "Eliminated list"
+# Pseudo-tables built from a page's candidate lists or infobox: they name
+# people, but no one was counted in them.
+LIST_TITLES = (WITHDRAWN_LIST, WITHDREW_NOMINEE_LIST, ELIMINATED_LIST)
+
+_HEADING = re.compile(r"^(=+)\s*(.*?)\s*\1\s*$", re.M)
+
+
+def _list_kind(heading):
+    lowered = clean_name(heading).lower()
+    if re.fullmatch(r"withdrew after (?:nomination|winning)[^=]*", lowered):
+        return WITHDREW_NOMINEE_LIST
+    if re.fullmatch(r"withdrawn|withdrew(?: (?:from|before|during|prior)\b[^=]*)?", lowered):
+        return WITHDRAWN_LIST
+    if re.fullmatch(r"eliminated (?:in|at) [^=]*", lowered):
+        return ELIMINATED_LIST
+    return None
+
+
+def _bullet_name(line):
+    """``* [[Janet Mills]], governor of Maine ...`` -> raw ``[[Janet Mills]]``."""
+    text = re.split(r"<ref|<!--", line, 1)[0]
+    depth, i = 0, 0
+    while i < len(text):
+        two = text[i:i + 2]
+        if two in ("[[", "{{"):
+            depth += 1
+            i += 2
+            continue
+        if two in ("]]", "}}"):
+            depth = max(depth - 1, 0)
+            i += 2
+            continue
+        if text[i] in ",;:" and depth == 0:
+            return text[:i]
+        i += 1
+    return text
+
+
+def candidate_lists(text):
+    """The people a page files under "Withdrawn" or "Eliminated" headings.
+
+    Returned as ``(title, rows)`` in the shape :func:`parse_boxes` uses, with
+    one of :data:`LIST_TITLES` as the title. A results table records a vote;
+    these lists record what happened afterwards. Chuck Edwards won NC-11's
+    Republican primary with 70% and ended his bid on 2026-08-05, and the only
+    place the page said so in a form a parser can read was the heading he was
+    moved under: "Withdrew after nomination".
+    """
+    out = {}
+    headings = list(_HEADING.finditer(text or ""))
+    for n, heading in enumerate(headings):
+        kind = _list_kind(heading.group(2))
+        if not kind:
+            continue
+        end = headings[n + 1].start() if n + 1 < len(headings) else len(text)
+        for line in text[heading.end():end].splitlines():
+            line = line.strip()
+            if not line.startswith("*"):
+                continue
+            raw = _bullet_name(line.lstrip("*").strip())
+            name = clean_name(raw)
+            if len(name.split()) < 2 or _PLACEHOLDER.match(name):
+                continue
+            out.setdefault(kind, []).append({
+                "name": name, "won": False, "withdrawn": kind != ELIMINATED_LIST,
+                "votes": None, "party": None, "article": link_target(raw)})
+    return [(kind, rows) for kind, rows in out.items()]
+
+
+def house_sections(text, at_large=False):
+    """``{district_number: section_text}`` from a state's House page.
+
+    Only an at-large seat's page is read whole. A state with districts whose
+    page has no "District N" headings is a page this cannot read - California's
+    was split into two sub-articles on 2026-09-20 - and treating it as one
+    at-large race silently dropped all 52 of its races.
+    """
     sections = {}
     parts = re.split(r"\n==+\s*District (\d+)\s*==+", text or "")
     # parts = [preamble, num, body, num, body, ...]
@@ -357,10 +556,27 @@ def house_sections(text):
             sections[int(parts[i])] = parts[i + 1]
         except ValueError:
             continue
-    if not sections and text:
+    if not sections and text and at_large:
         # At-large states have no district headings; the whole page is it.
         sections[0] = text
     return sections
+
+
+_MAIN = re.compile(r"\{\{\s*(?:main|main article)\s*\|([^{}]*)\}\}", re.I)
+
+
+def sub_articles(text, title):
+    """Articles a page hands its districts to: ``{{main|<title> (districts 1–26)}}``."""
+    found = []
+    for match in _MAIN.finditer(text or ""):
+        for target in template_fields_positional(match.group(1)):
+            target = target.strip()
+            if "=" in target:
+                continue
+            target = target[0].upper() + target[1:] if target else target
+            if target.startswith(f"{title} (") and target not in found:
+                found.append(target)
+    return found
 
 
 # ---------------------------------------------------------------- resolving
@@ -424,10 +640,12 @@ def _canonical(boxes):
     return out
 
 
-def resolve_race(boxes, has_runoff=False):
+def resolve_race(boxes, has_runoff=False, open_primary=False):
     """Who is still standing, from a race's results tables.
 
-    Returns ``{name: status}`` for everyone named in a primary-stage table.
+    Returns ``{name: status}`` for everyone named in a primary-stage table,
+    on the general ballot, in the infobox, or in a Withdrawn / Eliminated
+    candidate list.
 
     The general-election table, when the page has one, is the authority: the
     people in it are the nominees and everyone else named in a primary or
@@ -437,14 +655,29 @@ def resolve_race(boxes, has_runoff=False):
     the nominee - unless the state holds runoffs and the primary marked two
     winners, in which case they only *advanced* and the page has not caught
     up with the runoff yet.
+
+    Leaving the race is not losing it. A marked primary winner who is not on
+    the general ballot withdrew (Chuck Edwards, NC-11; Graham Platner, Maine
+    Senate); a primary loser is eliminated however the page annotates their
+    row (Janet Mills suspended her campaign, stayed on the ballot and lost).
+
+    *open_primary* is a seat whose first round is a nonpartisan primary on
+    general-election day (Louisiana's House seats in 2026). Its November table
+    is that primary: nobody has a status until a winner is marked, two marked
+    winners only advance, and a December runoff table decides it.
     """
-    primaries, runoffs, generals, infobox = {}, {}, [], []
+    primaries, runoffs, generals, infobox, lists = {}, {}, [], [], {}
     for raw_title, rows in _canonical(boxes):
         title = _clean_title(raw_title)
         if title == INFOBOX_TITLE:
             infobox.extend(rows)
             continue
+        if title in LIST_TITLES:
+            lists.setdefault(title, []).extend(rows)
+            continue
         stage = _stage(title)
+        if open_primary and stage == "general":
+            stage, title = "primary", OPEN_PRIMARY_TITLE
         if stage == "runoff":
             runoffs.setdefault(title, []).extend(rows)
         elif stage == "primary":
@@ -452,18 +685,59 @@ def resolve_race(boxes, has_runoff=False):
         elif stage == "general":
             generals.extend(rows)
 
-    status = _resolve_tables(primaries, runoffs, generals, has_runoff)
+    status = _resolve_tables(primaries, runoffs, generals, has_runoff or open_primary)
+
+    # Who lost a decided contest. Nothing below may turn them into anything
+    # else: a convention's "Withdrawn" list naming a primary loser, or a
+    # ''(withdrawn)'' on their primary row, does not undo the count.
+    lost = _losers(primaries, runoffs) - {r["name"] for r in generals if not r["withdrawn"]}
+    for name in lost:
+        status[name] = ELIMINATED
+
+    ballot = {r["name"] for r in generals if not r["withdrawn"]}
+    after_nomination = {r["name"] for r in lists.get(WITHDREW_NOMINEE_LIST, [])}
+    withdrew = {r["name"] for r in lists.get(WITHDRAWN_LIST, [])}
+    for name in after_nomination | withdrew:
+        if name in lost:
+            continue
+        # A generic "Withdrawn" list does not outrank the November ballot -
+        # someone can leave a party's primary and run as an independent. A
+        # "Withdrew after nomination" list is about the nominee and does.
+        if name in ballot and name not in after_nomination:
+            continue
+        status[name] = WITHDRAWN
+    for row in lists.get(ELIMINATED_LIST, []):
+        status.setdefault(row["name"], ELIMINATED)
+
     # The infobox names the November ballot and is kept current before the
     # tables are. It adds nominees the tables do not know about and settles a
     # runoff the runoff table has not caught up with. It never overrules a
     # table's verdict: an infobox still showing a presumptive nominee who
     # then lost the primary would otherwise put them back on the ballot, and
     # an infobox showing only the incumbent must not strike out a challenger
-    # the primary table has crowned.
-    for row in infobox:
-        if status.get(row["name"]) in (None, ADVANCED):
-            status[row["name"]] = NOMINEE
+    # the primary table has crowned. An open primary has no nominees to name.
+    if not open_primary:
+        for row in infobox:
+            if status.get(row["name"]) in (None, ADVANCED):
+                status[row["name"]] = NOMINEE
     return status
+
+
+OPEN_PRIMARY_TITLE = "Nonpartisan primary results"
+
+
+def _losers(primaries, runoffs):
+    """Everyone the count put out: unmarked in a table that marked a winner."""
+    out = set()
+    later = {r["name"] for rows in runoffs.values() for r in rows}
+    for title, rows in list(primaries.items()) + list(runoffs.items()):
+        if not any(r["won"] for r in rows):
+            continue
+        is_runoff = title in runoffs
+        for row in rows:
+            if not row["won"] and (is_runoff or row["name"] not in later):
+                out.add(row["name"])
+    return out
 
 
 def _resolve_tables(primaries, runoffs, generals, has_runoff):
@@ -476,18 +750,28 @@ def _resolve_tables(primaries, runoffs, generals, has_runoff):
 
     status = {}
     if generals:
-        ballot = {r["name"] for r in generals}
+        ballot = {r["name"] for r in generals if not r["withdrawn"]}
+        struck = {r["name"] for r in generals if r["withdrawn"]}
+        won_final = _final_winners(primaries, runoffs, has_runoff)
         for name in named:
-            if name in withdrawn:
+            if name in withdrawn or name in struck:
                 status[name] = WITHDRAWN
             elif name in ballot:
                 status[name] = NOMINEE
+            elif name in won_final:
+                # Won their party's nomination and is not on the November
+                # ballot: they left the race. Calling that "eliminated" told
+                # readers Graham Platner lost a primary he won by 40 points.
+                status[name] = WITHDRAWN
             else:
                 status[name] = ELIMINATED
         # Someone on the general ballot who skipped the primary (a
-        # convention nominee, a party-switcher) is still a nominee.
+        # convention nominee, a party-switcher) is still a nominee - unless
+        # the ballot itself marks them withdrawn.
         for name in ballot - named:
             status[name] = NOMINEE
+        for name in struck - named:
+            status[name] = WITHDRAWN
         return status
 
     runoff_names = set()
@@ -521,6 +805,25 @@ def _resolve_tables(primaries, runoffs, generals, has_runoff):
             else:
                 status[row["name"]] = NOMINEE
     return status
+
+
+def _final_winners(primaries, runoffs, has_runoff):
+    """People whose last contest on the page marked them as its winner.
+
+    A first-round winner in a runoff state whose runoff the page does not
+    show is left out: they may have lost a runoff nobody tabulated (TX-32's
+    Ryan Binkley), and the absence cannot tell which.
+    """
+    out = set()
+    in_runoff = {r["name"] for rows in runoffs.values() for r in rows}
+    for rows in runoffs.values():
+        out.update(r["name"] for r in rows if r["won"])
+    for rows in primaries.values():
+        winners = [r for r in rows if r["won"]]
+        if has_runoff and len(winners) > 1:
+            continue
+        out.update(r["name"] for r in winners if r["name"] not in in_runoff)
+    return out
 
 
 def ballot_articles(boxes):
@@ -557,7 +860,7 @@ def ballot_parties(boxes):
     return parties
 
 
-def coverage(boxes):
+def coverage(boxes, open_primary=False):
     """What the page has actually decided, for people it does not name.
 
     ``{"general": bool, "parties": [keys]}`` - whether a general-election
@@ -569,9 +872,12 @@ def coverage(boxes):
     general, parties = False, set()
     for raw_title, rows in boxes:
         title = _clean_title(raw_title)
-        if title == INFOBOX_TITLE:
-            continue          # names nominees; decides nothing about the rest
+        if title == INFOBOX_TITLE or title in LIST_TITLES:
+            continue          # names people; decides nothing about the rest
         stage = _stage(title)
+        if open_primary and stage == "general":
+            # Louisiana's November table is a nonpartisan primary.
+            stage, title = "primary", OPEN_PRIMARY_TITLE
         if stage == "general":
             general = True
         elif stage in ("primary", "runoff") and any(r["won"] for r in rows):
@@ -860,15 +1166,18 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
     states = sorted({(row.get("state"), row.get("office"))
                      for rows in by_race.values() for row in rows[:1]})
 
-    races, pending, missing_pages, failed = {}, [], [], []
+    senate_states = {row.get("state") for rows in by_race.values() for row in rows[:1]
+                     if row.get("office") == "S"}
+    dates, calendar_notes = effective_dates(dates, senate_states, log=log)
+
+    races, pending, missing_pages, failed, unparsed = {}, [], [], [], []
     pages = {}
-    for state, office in states:
-        if not primary_settled(dates, state, office, today):
-            pending.extend(rid for rid, rows in by_race.items()
-                           if rows[0].get("state") == state and rows[0].get("office") == office)
-            continue
-        text, used, trouble = None, None, False
-        for title in page_titles(state, office):
+
+    def fetch_first(titles):
+        """``(title, text)`` for the first title that exists, and whether a
+        request failed on the way (rule 8: that is not evidence of absence)."""
+        trouble = False
+        for title in titles:
             try:
                 text = fetch(title)
             except PageMissing:
@@ -879,33 +1188,60 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                 text = None
             time.sleep(_GAP)
             if text:
-                used = title
-                break
-        if text:
-            pages[(state, office)] = (used, text)
-        elif trouble:
-            failed.append(f"{state}-{office}")
-        else:
-            missing_pages.append(f"{state}-{office}")
+                return title, text, trouble
+        return None, None, trouble
+
+    for state, office in states:
+        if not primary_settled(dates, state, office, today):
+            pending.extend(rid for rid, rows in by_race.items()
+                           if rows[0].get("state") == state and rows[0].get("office") == office)
+            continue
+        used, text, trouble = fetch_first(page_titles(state, office))
+        if not text:
+            (failed if trouble else missing_pages).append(f"{state}-{office}")
+            continue
+        if office == "S":
+            pages[(state, office)] = {0: (used, text)}
+            continue
+        districts = {int(rid.split("-")[2]) for rid, rows in by_race.items()
+                     if rows[0].get("state") == state and rows[0].get("office") == "H"}
+        at_large = districts <= {0}
+        sections = {n: (used, body) for n, body in house_sections(text, at_large).items()}
+        # A page split into sub-articles hands its districts to them through
+        # {{main|...}}: California's on 2026-09-20.
+        for sub in sub_articles(text, used):
+            sub_used, sub_text, sub_trouble = fetch_first([sub])
+            if not sub_text:
+                (failed if sub_trouble else missing_pages).append(f"{state}-{office}: {sub}")
+                continue
+            for n, body in house_sections(sub_text).items():
+                sections.setdefault(n, (sub_used, body))
+        if not sections:
+            # Never fall back to reading the page as one at-large race: that
+            # silently dropped every California seat.
+            log(f"    [ERROR] {used!r} has no 'District N' sections for {state}'s "
+                f"{len(districts)} seats; its results were not read")
+            unparsed.append(f"{state}-{office}: {used}")
+            continue
+        pages[(state, office)] = sections
 
     for rid, rows in sorted(by_race.items()):
         state, office = rows[0].get("state"), rows[0].get("office")
         if (state, office) not in pages:
             continue
-        title, text = pages[(state, office)]
-        if office == "H":
-            district = int(rid.split("-")[2])
-            section = house_sections(text).get(district)
-        else:
-            section = text
+        key = int(rid.split("-")[2]) if office == "H" else 0
+        title, section = pages[(state, office)].get(key, (None, None))
         if not section:
             continue
         slot = dates.get((state, office)) or {}
+        is_open = open_primary(state, office)
         boxes = parse_boxes(section)
         nominees = infobox_nominees(section)
         if nominees:
             boxes.append((INFOBOX_TITLE, nominees))
-        outcome = resolve_race(boxes, has_runoff=bool(slot.get("runoff")))
+        boxes.extend(candidate_lists(section))
+        outcome = resolve_race(boxes, has_runoff=bool(slot.get("runoff")),
+                               open_primary=is_open)
         if not outcome:
             continue
         matched, ambiguous = match_names(list(outcome), rows, (aliases or {}).get(rid))
@@ -933,12 +1269,12 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
             # and a race header that omits them is wrong.
             "unmatched": {name: outcome[name] for name in sorted(set(outcome) - set(matched))},
             "ambiguous": ambiguous,
-            "decided": coverage(boxes),
+            "decided": coverage(boxes, open_primary=is_open),
         }
 
     log(f"    settled races with results: {len(races)}   "
         f"pending primaries: {len(pending)}   pages missing: {len(missing_pages)}   "
-        f"fetches failed: {len(failed)}")
+        f"fetches failed: {len(failed)}   unparsed: {len(unparsed)}")
     return {
         "asOf": today.isoformat(),
         "cycle": CYCLE,
@@ -946,6 +1282,11 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         "pending": sorted(pending),
         "missingPages": sorted(missing_pages),
         "fetchFailed": sorted(failed),
+        # Pages that exist but whose districts could not be found. Every
+        # race on them is unread, so validate makes this an error.
+        "unparsedPages": sorted(unparsed),
+        # Every place the calendar above is not the FEC's, and why.
+        "calendarNotes": calendar_notes,
         # The calendar travels with the results so `build` needs no network
         # to know whether a race's primary has happened.
         "dates": {f"{state}-{office}": slot for (state, office), slot in sorted(dates.items())},
@@ -974,11 +1315,45 @@ def load_cache(root="."):
             cache = json.load(handle)
     except (ValueError, OSError):
         return None
-    return cache if cache.get("races") is not None else None
+    if cache.get("races") is None:
+        return None
+    return respect_open_primaries(cache)
+
+
+def respect_open_primaries(cache):
+    """Withdraw results a cache holds for an open-primary seat not yet decided.
+
+    A cache written before ``OPEN_PRIMARY_SEATS`` existed read Louisiana's
+    vote-less November boxes as a ballot of nominees. The seat's first round
+    is that November election, so as of the cache's own date nothing about
+    it was settled; its races go back to pending rather than being shown.
+    """
+    from .overrides import OPEN_PRIMARY_SEATS
+
+    as_of = cache.get("asOf")
+    try:
+        day = datetime.date.fromisoformat(as_of) if as_of else None
+    except ValueError:
+        day = None
+    for (state, office, cycle), fixed in OPEN_PRIMARY_SEATS.items():
+        if cycle != cache.get("cycle", CYCLE):
+            continue
+        slot = {"primary": fixed["primary"], "runoff": fixed.get("runoff")}
+        if day and primary_settled({(state, office): slot}, state, office, day):
+            continue
+        prefix = f"{office}-{state}-"
+        stale = [rid for rid in cache["races"] if rid.startswith(prefix)]
+        for rid in stale:
+            del cache["races"][rid]
+        if stale:
+            cache["pending"] = sorted(set(cache.get("pending") or []) | set(stale))
+        if f"{state}-{office}" in (cache.get("dates") or {}):
+            cache["dates"][f"{state}-{office}"] = slot
+    return cache
 
 
 def load_dates(root="."):
-    """The FEC calendar as cached by the last ``results`` run."""
+    """The calendar as cached by the last ``results`` run, overrides applied."""
     cache = load_cache(root)
     out = {}
     for key, slot in ((cache or {}).get("dates") or {}).items():
