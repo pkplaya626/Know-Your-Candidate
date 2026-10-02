@@ -602,5 +602,47 @@ class TestValidationReport(unittest.TestCase):
         self.assertEqual(errors, [])
 
 
+class TestRefreshWorkflow(unittest.TestCase):
+    """The scheduled refresh shipped four silent defects; keep each one fixed."""
+
+    @classmethod
+    def setUpClass(cls):
+        path = os.path.join(ROOT, ".github", "workflows", "refresh.yml")
+        with open(path, encoding="utf-8") as handle:
+            cls.text = handle.read()
+
+    def test_cached_incumbents_are_refreshed(self):
+        # Without --refresh, fec.resolve_all fetches only uncached profiles.
+        self.assertIn("build_profile_site.py finance --refresh", self.text)
+
+    def test_portraits_run_on_a_schedule(self):
+        # `inputs` is empty on a schedule, so this was never true there.
+        self.assertNotIn("inputs.portraits != false", self.text)
+        self.assertIn("github.event_name != 'workflow_dispatch' || inputs.portraits",
+                      self.text)
+
+    def test_a_failure_opens_an_issue(self):
+        self.assertIn("issues: write", self.text)
+        self.assertIn("if: failure()", self.text)
+        self.assertIn('title="Weekly refresh failed"', self.text)
+        self.assertIn("actions/runs/${{ github.run_id }}", self.text)
+
+    def test_the_branch_name_is_unique_per_run(self):
+        self.assertIn('branch="refresh/congress-$(date -u +%Y-%m-%d)-${{ github.run_id }}"',
+                      self.text)
+
+    def test_runs_twice_a_week_until_the_election(self):
+        self.assertIn('cron: "20 7 * * 1,4"', self.text)
+        self.assertIn('"2026-11-03"', self.text)
+        self.assertIn("needs.gate.outputs.run == 'true'", self.text)
+
+    def test_campaign_lookups_fit_the_hourly_budget(self):
+        import re
+
+        limit = int(re.search(r"campaigns --limit (\d+)", self.text).group(1))
+        # ~540 members by id + ~120 for roster challengers + ~45 field pages.
+        self.assertLessEqual(540 + 120 + 45 + limit, 1000)
+
+
 if __name__ == "__main__":
     unittest.main()
