@@ -788,6 +788,232 @@ class TestOpenPrimary(unittest.TestCase):
         self.assertEqual(cache["dates"]["LA-H"], {"primary": "2026-11-03", "runoff": "2026-12-12"})
 
 
+LA_TITLE = "2026 United States House of Representatives elections in Louisiana"
+LA5_NOVEMBER = "2026 Louisiana's 5th congressional district election"
+LA5_DECEMBER = "2026 Louisiana's 5th congressional district runoff election"
+LA_CALENDAR = {("LA", "H"): {"primary": "2026-11-03", "runoff": "2026-12-12"}}
+
+# (as the page writes them, party, FEC name, FEC id)
+LA5_PEOPLE = {
+    "echols": ("[[Michael Echols]]", "Republican", "ECHOLS, MICHAEL", "H6LA05101"),
+    "moore": ("[[Pat Moore (Louisiana politician)|Patricia Moore]]", "Democratic",
+              "MOORE, PATRICIA", "H6LA05102"),
+    "cathey": ("[[Stewart Cathey Jr.]]", "Republican", "CATHEY, STEWART JR", "H6LA05103"),
+    "cordell": ("Misti Cordell", "Republican", "CORDELL, MISTI", "H6LA05104"),
+    "mckay": ("Dan McKay", "Democratic", "MCKAY, DAN", "H6LA05105"),
+}
+# Filed with the FEC, never on the November ballot.
+LA5_ABSENT = ("SMITH, JOHN", "H6LA05199")
+
+
+def la5_box(title, *rows):
+    """A results box shaped like the real LA-5 one on 2026-10-02.
+
+    Each row is ``(key, votes, won)``; ``votes=None`` is the blank count the
+    box carries until election night.
+    """
+    out = ["{{Election box begin no change", f"| title={title}", "}}"]
+    for key, votes, won in rows:
+        shown, party = LA5_PEOPLE[key][:2]
+        kind = "winning candidate" if won else "candidate"
+        out += [f"{{{{Election box {kind} with party link no change",
+                f" | party      = {party} Party (United States)",
+                f" | candidate  = {shown}",
+                f" | votes      = {'' if votes is None else format(votes, ',')}",
+                " | percentage = ",
+                "}}"]
+    out += ["{{Election box total no change", "| votes = ", "}}", "{{Election box end}}"]
+    return "\n".join(out)
+
+
+VOTELESS = [(key, None, False) for key in LA5_PEOPLE]
+TOP_TWO = [("echols", 40000, True), ("moore", 30000, True), ("cathey", 15000, False),
+           ("cordell", 10000, False), ("mckay", 5000, False)]
+
+
+class TestOpenPrimaryElectionNight(NoGap):
+    """LA's House seats from November 3 to December 12 and after.
+
+    The calendar gate used to wait for the runoff date, as it does for a
+    party primary, so the site would have shown every Louisiana candidate as
+    still running for six weeks after the first round had decided who
+    advanced.
+    """
+
+    def ids(self, *keys):
+        return {LA5_PEOPLE[k][3] for k in keys}
+
+    def run_build(self, today, *tables, log=None):
+        field = {"candidates": [row(p[3], p[2], "LA", "H", 5, "DEM" if p[1] == "Democratic"
+                                    else "REP") for p in LA5_PEOPLE.values()]
+                 + [row(LA5_ABSENT[1], LA5_ABSENT[0], "LA", "H", 5, "DEM")]}
+        page = "\n==District 5==\n" + "\n".join(tables) + "\n"
+        return results.build(field, LA_CALENDAR, today=today,
+                             log=(log.append if log is not None else lambda *_: None),
+                             fetch=lambda title: page if title == LA_TITLE else
+                             (_ for _ in ()).throw(results.PageMissing(title)))
+
+    def statuses(self, cache):
+        status = cache["races"]["H-LA-05-2026"]["status"]
+        out = {}
+        for key, person in LA5_PEOPLE.items():
+            out[key] = status.get(person[3])
+        return out
+
+    # -- the calendar
+    def test_the_gate_opens_after_the_primary_for_an_open_seat_only(self):
+        dates = {**LA_CALENDAR, ("TX", "H"): {"primary": "2026-03-03", "runoff": "2026-12-01"}}
+        nov3, nov4 = datetime.date(2026, 11, 3), datetime.date(2026, 11, 4)
+        self.assertFalse(results.primary_settled(dates, "LA", "H", nov3, open_seat=True))
+        self.assertTrue(results.primary_settled(dates, "LA", "H", nov4, open_seat=True))
+        # The party-primary gate is unchanged: the runoff must have happened.
+        self.assertFalse(results.primary_settled(dates, "LA", "H", nov4))
+        self.assertFalse(results.primary_settled(dates, "TX", "H", nov4))
+        self.assertFalse(results.runoff_held(dates, "LA", "H", nov4))
+        self.assertFalse(results.runoff_held(dates, "LA", "H", datetime.date(2026, 12, 12)))
+        self.assertTrue(results.runoff_held(dates, "LA", "H", datetime.date(2026, 12, 13)))
+        self.assertFalse(results.runoff_held({}, "LA", "H", nov4))
+
+    def test_on_primary_day_the_seat_is_still_pending(self):
+        cache = self.run_build(datetime.date(2026, 11, 3), la5_box(LA5_NOVEMBER, *TOP_TWO))
+        self.assertEqual(cache["races"], {})
+        self.assertIn("H-LA-05-2026", cache["pending"])
+
+    # -- November 4: the first round
+    def test_before_any_winner_is_marked_nobody_has_a_status(self):
+        logged = []
+        cache = self.run_build(datetime.date(2026, 11, 4), la5_box(LA5_NOVEMBER, *VOTELESS),
+                               log=logged)
+        self.assertEqual(cache["races"], {})          # not settled: no absence inference
+        self.assertNotIn("H-LA-05-2026", cache["pending"])
+        self.assertFalse(any("[warn]" in line for line in logged))
+
+    def test_the_marked_top_two_advance_and_the_rest_are_out(self):
+        cache = self.run_build(datetime.date(2026, 11, 4), la5_box(LA5_NOVEMBER, *TOP_TWO))
+        self.assertEqual(self.statuses(cache), {
+            "echols": "advanced", "moore": "advanced", "cathey": "eliminated",
+            "cordell": "eliminated", "mckay": "eliminated"})
+        race = cache["races"]["H-LA-05-2026"]
+        self.assertEqual(race["decided"], {"general": False, "parties": ["all"]})
+        # The race card: settled, two in the runoff, nobody yet the nominee.
+        summary = results.race_summary(cache, "H-LA-05-2026")
+        self.assertEqual((summary["nominees"], summary["advanced"], summary["eliminated"]),
+                         (0, 2, 3))
+
+    def test_a_vote_less_runoff_box_put_up_early_eliminates_nobody(self):
+        cache = self.run_build(datetime.date(2026, 11, 4), la5_box(LA5_NOVEMBER, *TOP_TWO),
+                               la5_box(LA5_DECEMBER, ("echols", None, False),
+                                       ("moore", None, False)))
+        self.assertEqual(self.statuses(cache)["echols"], "advanced")
+        self.assertEqual(self.statuses(cache)["moore"], "advanced")
+
+    def test_a_runoff_winner_before_the_runoff_date_is_not_read(self):
+        cache = self.run_build(datetime.date(2026, 11, 20), la5_box(LA5_NOVEMBER, *TOP_TWO),
+                               la5_box(LA5_DECEMBER, ("echols", 1, True), ("moore", 0, False)))
+        self.assertEqual(self.statuses(cache)["moore"], "advanced")
+
+    def test_one_winner_with_a_majority_is_elected_outright(self):
+        cache = self.run_build(datetime.date(2026, 11, 4), la5_box(
+            LA5_NOVEMBER, ("echols", 55000, True), ("moore", 30000, False),
+            ("cathey", 15000, False)))
+        out = self.statuses(cache)
+        self.assertEqual((out["echols"], out["moore"], out["cathey"]),
+                         ("nominee", "eliminated", "eliminated"))
+
+    def test_winners_that_are_not_a_complete_result_decide_nothing(self):
+        for rows in (
+            [("echols", 45000, True), ("moore", 35000, False), ("cathey", 20000, False)],
+            [("echols", None, True), ("moore", None, False)],
+            [("echols", 40, True), ("moore", 30, True), ("cathey", 30, True)],
+        ):
+            logged = []
+            cache = self.run_build(datetime.date(2026, 11, 4), la5_box(LA5_NOVEMBER, *rows),
+                                   log=logged)
+            self.assertEqual(cache["races"], {}, rows)
+            self.assertTrue(any("[warn] H-LA-05-2026" in line for line in logged), rows)
+
+    def test_a_filer_absent_from_the_first_round_is_unlisted(self):
+        cache = self.run_build(datetime.date(2026, 11, 4), la5_box(LA5_NOVEMBER, *TOP_TWO))
+        filer = {"id": LA5_ABSENT[1], "fecCandidateId": LA5_ABSENT[1], "isCandidate": True,
+                 "state": "LA", "chamber": "House", "districtNum": 5, "party": "Democrat"}
+        member = {"id": "L000999", "fecCandidateId": LA5_PEOPLE["echols"][3],
+                  "isCandidate": False, "state": "LA", "chamber": "House", "districtNum": 5,
+                  "party": "Republican", "seatUp2026": True, "seekingReelection2026": False}
+        results.apply_cache([filer, member], cache)
+        self.assertEqual(filer["raceStatus"], "unlisted")
+        self.assertTrue(results.on_ballot(member))
+        self.assertTrue(member["seekingReelection2026"])     # in the runoff for their seat
+
+    # -- December 13: the runoff
+    def test_after_the_runoff_its_table_decides(self):
+        cache = self.run_build(datetime.date(2026, 12, 13), la5_box(LA5_NOVEMBER, *TOP_TWO),
+                               la5_box(LA5_DECEMBER, ("echols", 52000, True),
+                                       ("moore", 48000, False)))
+        self.assertEqual(self.statuses(cache), {
+            "echols": "nominee", "moore": "eliminated", "cathey": "eliminated",
+            "cordell": "eliminated", "mckay": "eliminated"})
+
+    def test_after_the_runoff_an_unreported_runoff_leaves_both_in_it(self):
+        cache = self.run_build(datetime.date(2026, 12, 13), la5_box(LA5_NOVEMBER, *TOP_TWO),
+                               la5_box(LA5_DECEMBER, ("echols", None, False),
+                                       ("moore", None, False)))
+        out = self.statuses(cache)
+        self.assertEqual((out["echols"], out["moore"], out["mckay"]),
+                         ("advanced", "advanced", "eliminated"))
+
+    # -- the cache
+    def test_a_cache_built_after_the_first_round_keeps_its_results(self):
+        cache = self.run_build(datetime.date(2026, 11, 4), la5_box(LA5_NOVEMBER, *TOP_TWO))
+        kept = results.respect_open_primaries(cache)
+        self.assertIn("H-LA-05-2026", kept["races"])
+
+    def test_a_cache_built_without_the_override_still_gives_them_up(self):
+        cache = {"asOf": "2026-11-04", "cycle": 2026, "pending": [],
+                 "races": {"H-LA-05-2026": {"status": {"X": "nominee"}}},
+                 "dates": {"LA-H": {"primary": "2026-08-07", "runoff": None}}}
+        cache = results.respect_open_primaries(cache)
+        self.assertEqual(cache["races"], {})
+        self.assertEqual(cache["pending"], ["H-LA-05-2026"])
+
+
+class TestPartyRunoffGateUnchanged(NoGap):
+    """A Georgia/Texas-style party runoff still waits for the runoff date."""
+
+    title = "2026 United States House of Representatives elections in Georgia"
+    dates = {("GA", "H"): {"primary": "2026-05-19", "runoff": "2026-06-16"}}
+    field = {"candidates": [row("H6GA05201", "ALPHA, ANN", "GA", "H", 5, "REP"),
+                            row("H6GA05202", "BETA, BEA", "GA", "H", 5, "REP"),
+                            row("H6GA05203", "GAMMA, CY", "GA", "H", 5, "REP")]}
+    first = box("Republican primary results", ("Ann Alpha", 40, True),
+                ("Bea Beta", 35, True), ("Cy Gamma", 25, False))
+    runoff = box("Republican primary runoff results", ("Ann Alpha", 45, False),
+                 ("Bea Beta", 55, True))
+
+    def run_build(self, today, *tables):
+        page = "\n==District 5==\n" + "\n".join(tables) + "\n"
+        return results.build(self.field, self.dates, today=today, log=lambda *_: None,
+                             fetch=lambda t: page if t == self.title else
+                             (_ for _ in ()).throw(results.PageMissing(t)))
+
+    def test_between_primary_and_runoff_the_race_is_pending(self):
+        self.assertFalse(results.open_primary("GA", "H"))
+        cache = self.run_build(datetime.date(2026, 6, 1), self.first)
+        self.assertEqual(cache["races"], {})
+        self.assertEqual(cache["pending"], ["H-GA-05-2026"])
+
+    def test_after_the_runoff_the_runoff_table_decides(self):
+        cache = self.run_build(datetime.date(2026, 6, 17), self.first, self.runoff)
+        self.assertEqual(cache["races"]["H-GA-05-2026"]["status"],
+                         {"H6GA05201": "eliminated", "H6GA05202": "nominee",
+                          "H6GA05203": "eliminated"})
+
+    def test_after_the_runoff_date_an_untabulated_runoff_leaves_both_advanced(self):
+        cache = self.run_build(datetime.date(2026, 6, 17), self.first)
+        self.assertEqual(cache["races"]["H-GA-05-2026"]["status"],
+                         {"H6GA05201": "advanced", "H6GA05202": "advanced",
+                          "H6GA05203": "eliminated"})
+
+
 class TestSenateDateFallback(unittest.TestCase):
     def test_a_senate_race_without_a_primary_date_takes_the_house_date(self):
         # The FEC calendar lists Rhode Island's House primary (2026-09-09)
