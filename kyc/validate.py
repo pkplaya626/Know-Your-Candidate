@@ -806,6 +806,65 @@ def check_field_screen(field, today=None):
     return issues
 
 
+def check_senate_classes(profiles, snapshot=None):
+    """Every sitting senator has a class, and a state's two seats differ.
+
+    The Senate view groups seats by class and by the year each is next on
+    the ballot. A senator with no class would silently drop out of it, and
+    two senators from one state in the same class means one of the terms
+    was read wrongly - the Constitution never puts both of a state's seats
+    on the same ballot except through a special election, which is still
+    a seat of the other class. ``nextElection`` must also agree with
+    ``seatUp2026``, which comes from the same term dates by another route.
+    """
+    senators = [p for p in _members(profiles)
+                if "Senate" in p["chamber"] and p.get("party") != "Vacant"]
+    if not senators:
+        return []
+    if not snapshot:
+        return [Issue("warn", "senate-class-unchecked",
+                      "No congress_snapshot.json; senators carry no class, so the "
+                      "Senate view cannot group them. Run 'congress'.")]
+
+    issues = []
+    missing = sorted(f"{p['name']} ({p['state']})" for p in senators
+                     if p.get("senateClass") not in (1, 2, 3))
+    if missing:
+        issues.append(Issue(
+            "error", "senate-class-missing",
+            f"{len(missing)} sitting senator(s) have no Senate class", missing,
+        ))
+
+    by_state = collections.defaultdict(list)
+    for p in senators:
+        if p.get("senateClass") in (1, 2, 3):
+            by_state[p["state"]].append(p)
+    clashes = sorted(
+        f"{st}: " + ", ".join(f"{p['name']} (Class {p['senateClass']})" for p in people)
+        for st, people in by_state.items()
+        if len({p["senateClass"] for p in people}) != len(people)
+    )
+    if clashes:
+        issues.append(Issue(
+            "error", "senate-class-clash",
+            f"{len(clashes)} state(s) have two senators in the same class", clashes,
+        ))
+
+    disagree = sorted(
+        f"{p['name']} ({p['state']}): nextElection {p.get('nextElection')}, "
+        f"seatUp2026 {bool(p.get('seatUp2026'))}"
+        for p in senators
+        if (p.get("nextElection") == 2026) != bool(p.get("seatUp2026"))
+    )
+    if disagree:
+        issues.append(Issue(
+            "warn", "senate-next-election",
+            f"{len(disagree)} senator(s) whose next election disagrees with seatUp2026",
+            disagree,
+        ))
+    return issues
+
+
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
         results=None, field=None):
     """Run every check. Returns a list of :class:`Issue`."""
@@ -821,6 +880,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_markup(profiles)
     issues += check_geometry(profiles, geo)
     issues += check_snapshot(profiles, raw, snapshot)
+    issues += check_senate_classes(profiles, snapshot)
     issues += check_finance(profiles, finance)
     issues += check_field_screen(field)
     issues += check_duplicate_people(profiles)

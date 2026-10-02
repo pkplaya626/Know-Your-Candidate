@@ -140,10 +140,51 @@
       .join("");
   }
 
+  /* The Senate by the year each seat is next decided (assets/kyc-senate.js).
+   * The view is the Senate by definition, so the chamber filter does not
+   * apply - a House member running for a Senate seat belongs under it.
+   * Every other filter narrows what is shown. */
+  function senateMatches(item) {
+    var chamber = state.chamber;
+    state.chamber = "all";
+    try {
+      return matchesFilters(item);
+    } finally {
+      state.chamber = chamber;
+    }
+  }
+
+  function renderSenate(grid, empty, label) {
+    var view = KYC.senate.render(data, races, {
+      matches: senateMatches,
+      showOut: state.eliminated === "show",
+    });
+    label.textContent = view.people
+      ? "Showing " + view.people.toLocaleString() + " profiles across " +
+        view.seats.toLocaleString() + " Senate seat" + (view.seats === 1 ? "" : "s")
+      : "No profiles match these filters";
+    grid.className = "senate-view";
+    grid.innerHTML = view.html;
+    empty.hidden = view.people > 0;
+  }
+
+  function syncViewToggles() {
+    var race = doc.getElementById("raceViewToggle");
+    var senate = doc.getElementById("senateViewToggle");
+    if (race) race.setAttribute("aria-pressed", String(state.view === "race"));
+    if (senate) senate.setAttribute("aria-pressed", String(state.view === "senate"));
+  }
+
   function render() {
     var grid = doc.getElementById("results");
     var empty = doc.getElementById("noResults");
     var label = doc.getElementById("resultsLabel");
+
+    if (state.view === "senate" && KYC.senate) {
+      if (observer) { observer.disconnect(); observer = null; }
+      renderSenate(grid, empty, label);
+      return;
+    }
 
     label.textContent = visible.length
       ? "Showing " + visible.length.toLocaleString() + " of " +
@@ -207,6 +248,7 @@
    * would replace the profile link they arrived on. */
   function apply(opts) {
     syncStateLink();
+    syncViewToggles();
     visible = data.filter(matches);
     visible.sort(SORTS[state.sort] || SORTS.region);
     listDrawn = true;
@@ -264,6 +306,14 @@
       toggle.setAttribute("aria-pressed", String(state.view === "race"));
       apply();
     });
+
+    var senate = doc.getElementById("senateViewToggle");
+    if (senate) {
+      senate.addEventListener("click", function () {
+        state.view = state.view === "senate" ? "grid" : "senate";
+        apply();
+      });
+    }
   }
 
   function initStateFilter() {
@@ -369,6 +419,7 @@
     state.state = params.state || "all";
     state.sort = SORTS[params.sort] ? params.sort : "region";
     state.view = params.view === "race" ? "race" : "grid";
+    if (params.view === "senate" && KYC.senate) state.view = "senate";
 
     doc.getElementById("searchInput").value = state.q;
     doc.getElementById("stateSelect").value = state.state;

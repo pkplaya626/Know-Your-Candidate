@@ -41,8 +41,8 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… portraits --refresh` | Re-resolve every portrait, not just the missing ones |
 | `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`) |
 | `… refresh` | `fetch`, then `build` |
-| `python -m unittest discover tests` | 456 pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (384 checks) |
+| `python -m unittest discover tests` | 485 pipeline tests |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (414 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -113,6 +113,7 @@ order renders an empty site with no error anywhere.
 | `assets/kyc.js` | Theme, icon sprite, escaping, provenance, router, dialog helper, shell |
 | `assets/kyc-profile.js` | The profile dialog, shared by both pages |
 | `assets/kyc-cards.js` | Profile cards and race sections, shared by the grid and the state pages |
+| `assets/kyc-senate.js` | The grid's Senate view: every seat by the year it is next decided, with the candidates for each 2026 seat |
 | `assets/kyc-directory.js` | The grid: filtering, sorting, races |
 | `assets/kyc-map.js` | The map: rendering, modes, delegation panel |
 | `assets/kyc-state.js` | A state's page, and the directory of states |
@@ -542,6 +543,9 @@ Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
 | `raceStatus` / `raceStatusRace` | `nominee`, `advanced`, `eliminated`, `withdrawn` or `unlisted`, and the race it refers to |
 | `ballotParty` / `fecParty` | The party the ballot lists, when it differs from the roster or FEC record |
 | `ballotLine` | For a nominee only: the November ballot line as the results page spells it ("Speak The Truth", "Party for Socialism and Liberation"), when it is not the line of the party shown. Never set for "none", a write-in or a line named after the candidate themselves (an independent petition reads as "Independent"); `party` is never overwritten by it |
+| `senateClass` | Sitting senators only: the constitutional class of the seat (1, 2 or 3), from the term record in `congress_snapshot.json`, keyed on bioguide id. `null` only when the build has no snapshot, which validation reports |
+| `nextElection` | Sitting senators only: the year the seat is next on the November ballot, from the real term end date - a term ending 3 January is decided the November before; an appointee's term ending on election day is decided that year. Class II -> 2026, Class III -> 2028, Class I -> 2030, except a special |
+| `senateSpecial` | Sitting senators only: `true` when `nextElection` comes before the class's regular cycle - a special election for the rest of the term (Ohio and Florida's Class III seats in 2026) |
 | `rosterSeat` | For a curated challenger, the seat the roster gave them when the FEC filing says otherwise |
 
 ## State pages
@@ -601,6 +605,13 @@ All 435 House seats are two-year terms, so every voting House member has
 four-year term (48 U.S.C. 891), elected in 2024 and next in 2028, so that seat
 has `seatUp2026 = false` and no 2026 race. Use `seekingReelection2026` to find who is actually
 running. `isUpIn2026` remains as an alias of `seatUp2026`.
+
+The grid's **Senate** view (`#/?view=senate`) groups all 100 seats by when
+each is next decided: the 2026 seats (Class II, then the Class III specials),
+each with its sitting senator followed by the people running for that seat
+from `kycRaces`; then Class III (2028) and Class I (2030). Validation makes
+a senator with no class, or two senators from one state in the same class,
+a build error, and warns when `nextElection` and `seatUp2026` disagree.
 
 `window.kycRaces` holds every seat on the 2026 ballot: 35 Senate, 5
 territory delegates (not Puerto Rico) and the voting House seats. Every one of the 435 House

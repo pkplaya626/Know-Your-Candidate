@@ -515,6 +515,56 @@ def term_end_year(snapshot, bioguide):
         return None
 
 
+# Constitutional Senate classes are fixed to a cycle: Class I was elected in
+# 2024, Class II in 2026, Class III in 2028, and each repeats every six years.
+SENATE_CLASSES = (1, 2, 3)
+
+
+def next_election(person):
+    """The general-election year in which this senator's seat is next on the
+    ballot, from the term actually being served - or ``None``.
+
+    A regular term ends on 3 January, so the seat is on the ballot the
+    November before (a term ending 2029-01-03 -> 2028). A seat filled by
+    appointment ends on election day itself (Jon Husted's Class III term
+    ends 2026-11-03), so a term ending in November or December is decided
+    that same year: a special election, two years before the class's own
+    cycle. Deriving it from the date rather than from the class is what
+    puts those seats on the 2026 ballot.
+    """
+    end = (person or {}).get("termEnd") or ""
+    try:
+        year, month = int(end[:4]), int(end[5:7])
+    except ValueError:
+        return None
+    return year if month >= 11 else year - 1
+
+
+def senate_class(person):
+    """1, 2 or 3 for a senator in the snapshot, else ``None``."""
+    value = (person or {}).get("senateClass")
+    return value if value in SENATE_CLASSES else None
+
+
+def senate_cycle(person):
+    """``{"senateClass", "nextElection", "senateSpecial"}`` for one senator.
+
+    ``senateSpecial`` is true when the seat is on the ballot before its
+    class's regular cycle - a special election for the remainder of a term.
+    The class's regular year is the next election year congruent with the
+    class (Class I 2024+6k, Class II 2026+6k, Class III 2028+6k).
+    """
+    cls = senate_class(person)
+    year = next_election(person)
+    special = False
+    if cls and year:
+        regular = 2022 + 2 * cls
+        while regular < year:
+            regular += 6
+        special = regular != year
+    return {"senateClass": cls, "nextElection": year, "senateSpecial": special}
+
+
 # -------------------------------------------------------------- reconciling
 
 class Drift:

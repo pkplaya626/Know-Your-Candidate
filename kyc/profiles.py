@@ -325,6 +325,8 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
                                     extra=(name,) if display != name else ())
         if found:
             profile["aliases"] = found
+    if kind == "Senate":
+        profile.update(_senate_cycle(person, profile))
     if assignments:
         # The roster column was typed by hand and is what "No data" would
         # replace; the committee rosters are maintained with each Congress
@@ -338,6 +340,24 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
         ]
         profile["committeesSource"] = "congress-legislators"
     return profile
+
+
+def _senate_cycle(person, profile):
+    """A sitting senator's class and next election, keyed on bioguide id
+    through the snapshot (rule 17).
+
+    Without a snapshot there is no class to report - the roster does not
+    carry one, and guessing it from a term-start date is the six-year-hop
+    heuristic that is wrong for every appointee - so ``senateClass`` stays
+    ``None`` and validation says so; ``nextElection`` falls back to the
+    election year the profile already derived.
+    """
+    from . import legislators
+
+    if not person:
+        return {"senateClass": None, "nextElection": profile.get("electionYear"),
+                "senateSpecial": False}
+    return legislators.senate_cycle(person)
 
 
 def _build_candidate(row, index, as_of=None):

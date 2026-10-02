@@ -789,6 +789,47 @@ svg { flex: none; }
 .race-out[open] > summary { margin-bottom: var(--s-4); }
 .race-out .card { opacity: 0.72; }
 
+/* The Senate by the year each seat is next decided (assets/kyc-senate.js):
+ * a group per year, each 2026 seat a race block, the year's specials a
+ * labelled sub-group inside it. */
+.senate-group {
+  margin-bottom: var(--s-7);
+}
+.senate-group-title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-3);
+  margin-bottom: var(--s-4);
+  padding-bottom: var(--s-2);
+  border-bottom: 2px solid var(--border);
+  font-size: var(--t-lg);
+  font-weight: 700;
+  color: var(--text);
+}
+.senate-count {
+  font-size: var(--t-sm);
+  font-weight: 400;
+  color: var(--text-muted);
+}
+.senate-group-special {
+  margin-top: var(--s-6);
+  margin-bottom: 0;
+  padding-left: var(--s-4);
+  border-left: 3px solid var(--border);
+}
+.senate-group-special > .senate-group-title {
+  font-size: var(--t-md);
+  border-bottom-width: 1px;
+}
+.senate-role {
+  margin: var(--s-3) 0 var(--s-2);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.senate-out .card { opacity: 0.72; }
+
 /* ============================================================ 10. panels */
 
 .panel {
