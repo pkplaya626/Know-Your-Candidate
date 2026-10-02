@@ -610,6 +610,60 @@ class TestWithdrawals(unittest.TestCase):
         self.assertEqual(len(lists), 1)
 
 
+class TestEliminatedButRunningOn(unittest.TestCase):
+    """An "Eliminated" list is about one party's contest. Connecticut's page,
+    read on 2026-10-02, lists three Democratic convention losers marked
+    ''(running as an independent)'' - and lists each again in the
+    independents' section under "Filed paperwork", not "Declared"."""
+
+    def test_ct_convention_losers_who_only_filed_paperwork_stay_eliminated(self):
+        text = fixture("ct_3_5.txt")
+        # Andrew Rice: moved from "Declared" to "Filed paperwork" and out of
+        # the infobox on 2026-09-15; the annotation was never updated.
+        self.assertEqual(page_statuses(text, 3)["Andrew Rice"], "eliminated")
+        self.assertEqual(page_statuses(text, 4)["Joseph Perez-Caputo"], "eliminated")
+        self.assertEqual(page_statuses(text, 5)["Jackson Taddeo-Waite"], "eliminated")
+        self.assertEqual(page_statuses(text, 3)["Rosa DeLauro"], "nominee")
+
+    def test_relisted_as_declared_elsewhere_is_not_eliminated(self):
+        # The page as it stood on 2026-09-13: Rice under the independents'
+        # "Declared" heading and in the infobox as the Independent nominee.
+        text = fixture("ct_3_5.txt").replace(
+            "=====Declared=====\n*Thomas Egan, attorney\n",
+            "=====Declared=====\n*Thomas Egan, attorney\n"
+            "*Andrew Rice, biologist ''(previously ran in the Democratic primary)''\n")
+        self.assertNotIn("Andrew Rice", page_statuses(text, 3))
+        text = text.replace("| party2 = Republican Party (United States)\n",
+                            "| party2 = Republican Party (United States)\n"
+                            "| nominee3 = Andrew Rice\n| party3 = [[Independent politician|Independent]]\n", 1)
+        self.assertEqual(page_statuses(text, 3)["Andrew Rice"], "nominee")
+
+    def test_the_annotation_decides_only_when_the_page_lists_them_nowhere_else(self):
+        text = ("===Democratic primary===\n====Eliminated at convention====\n"
+                "* Ann Onward, organiser ''(running as an independent)''\n"
+                "* Bo Writein, teacher ''(running as a write-in)''\n"
+                "* Cy Done, lawyer\n")
+        out = page_statuses(text)
+        self.assertNotIn("Ann Onward", out)
+        self.assertEqual(out["Bo Writein"], "eliminated")   # not a ballot line
+        self.assertEqual(out["Cy Done"], "eliminated")
+
+    def test_a_second_listing_in_the_same_party_or_as_a_write_in_is_no_run(self):
+        # Hampton Harris (AL-2): "Nominee" of the voided May Republican
+        # primary, "Eliminated" in the special one. Rio Phillips (WV Senate):
+        # eliminated in the Democratic primary, then a write-in candidate.
+        text = ("===Nonbinding Republican primary===\n====Nominee====\n"
+                "*Hampton Harris, attorney\n"
+                "===Special Republican primary===\n=====Eliminated in primary=====\n"
+                "*Hampton Harris, nominee in the May primary election\n"
+                "==Democratic primary==\n====Eliminated in primary====\n*Rio Phillips\n"
+                "==Write-in Candidates==\n===Candidates===\n"
+                "*Rio Phillips, cybersecurity technician\n")
+        out = page_statuses(text)
+        self.assertEqual(out["Hampton Harris"], "eliminated")
+        self.assertEqual(out["Rio Phillips"], "eliminated")
+
+
 class TestNames(unittest.TestCase):
     def test_formatting_templates_are_unwrapped(self):
         self.assertEqual(results.clean_name("{{nowrap|John Salvesen}}"), "John Salvesen")

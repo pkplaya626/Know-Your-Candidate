@@ -513,22 +513,37 @@ def _bullet_name(line):
     return text
 
 
-def candidate_lists(text):
-    """The people a page files under "Withdrawn" or "Eliminated" headings.
+# A heading that lists people who are on, or running for, a ballot line, and
+# one that lists people who are not. A person an "Eliminated" list names is
+# out only of the contest that list belongs to; where the page lists them a
+# second time decides whether they carry on.
+_BALLOT_HEADING = re.compile(
+    r"(?:presumptive )?nominees?|declared|candidates|on the ballot|qualified|certified")
+_OFF_BALLOT_HEADING = re.compile(
+    r"filed(?: paperwork)?|potential|publicly expressed interest|declined|"
+    r"withdrawn|withdrew\b.*|eliminated\b.*|disqualified|failed to qualify|"
+    r"removed from (?:the )?ballot|lost\b.*|endorsements?|fundraising|polling|results")
+# ''(running as an independent)'', ''(filed to run as an independent)'',
+# ''(running on the Working Families line)''. A write-in is not a ballot line.
+_CONTINUES = re.compile(r"''\((?![^)]*write-in)[^)]*\b(?:running|run) (?:as|on)\b[^)]*\)''", re.I)
 
-    Returned as ``(title, rows)`` in the shape :func:`parse_boxes` uses, with
-    one of :data:`LIST_TITLES` as the title. A results table records a vote;
-    these lists record what happened afterwards. Chuck Edwards won NC-11's
-    Republican primary with 70% and ended his bid on 2026-08-05, and the only
-    place the page said so in a form a parser can read was the heading he was
-    moved under: "Withdrew after nomination".
+
+def _list_bullets(text):
+    """Every bullet under every heading, with the contest it belongs to.
+
+    The contest is the nearest enclosing heading that is not a bare
+    "Candidates": "Democratic primary", "Independents", "Write-in candidates".
     """
-    out = {}
+    out = []
     headings = list(_HEADING.finditer(text or ""))
     for n, heading in enumerate(headings):
-        kind = _list_kind(heading.group(2))
-        if not kind:
-            continue
+        level, contest = len(heading.group(1)), ""
+        for parent in reversed(headings[:n]):
+            label = clean_name(parent.group(2)).lower()
+            if len(parent.group(1)) < level and label != "candidates":
+                contest = label
+                break
+            level = min(level, len(parent.group(1)))
         end = headings[n + 1].start() if n + 1 < len(headings) else len(text)
         for line in text[heading.end():end].splitlines():
             line = line.strip()
@@ -538,9 +553,67 @@ def candidate_lists(text):
             name = clean_name(raw)
             if len(name.split()) < 2 or _PLACEHOLDER.match(name):
                 continue
-            out.setdefault(kind, []).append({
-                "name": name, "won": False, "withdrawn": kind != ELIMINATED_LIST,
-                "votes": None, "party": None, "article": link_target(raw)})
+            out.append({"heading": heading, "contest": contest, "name": name,
+                        "raw": raw, "line": line})
+    return out
+
+
+def _continues_elsewhere(bullet, bullets):
+    """Does the page say this person, on an "Eliminated" list, runs on?
+
+    Andrew Rice (CT-3) sits under the Democrats' "Eliminated at convention"
+    marked ''(running as an independent)''. Where the page lists him again
+    decides it: a "Declared" heading in the independents' section is a run,
+    a "Filed paperwork" heading is not. On 2026-09-13 the page had him under
+    "Declared" and in the infobox; on 2026-09-15 an editor moved him to
+    "Filed paperwork" and out of the infobox, noting he had not qualified for
+    the ballot by petition. The annotation was never updated, so it decides
+    only for someone the page lists nowhere else.
+
+    A second listing counts as a run only in another party's contest and not
+    as a write-in. Hampton Harris (AL-2) is a "Nominee" of the voided May
+    Republican primary and "Eliminated" in the special Republican primary
+    that replaced it; the first does not undo the second.
+    """
+    mine = party_key(bullet["contest"])
+    for other in bullets:
+        if (other["heading"].start() == bullet["heading"].start()
+                or not _same_spelling(other["name"], bullet["name"])):
+            continue
+        heading = clean_name(other["heading"].group(2)).lower()
+        if _OFF_BALLOT_HEADING.fullmatch(heading):
+            return False
+        if (_BALLOT_HEADING.fullmatch(heading) and "write-in" not in other["contest"]
+                and party_key(other["contest"]) != mine):
+            return True
+    return bool(_CONTINUES.search(re.split(r"<ref", bullet["line"], 1)[0]))
+
+
+def candidate_lists(text):
+    """The people a page files under "Withdrawn" or "Eliminated" headings.
+
+    Returned as ``(title, rows)`` in the shape :func:`parse_boxes` uses, with
+    one of :data:`LIST_TITLES` as the title. A results table records a vote;
+    these lists record what happened afterwards. Chuck Edwards won NC-11's
+    Republican primary with 70% and ended his bid on 2026-08-05, and the only
+    place the page said so in a form a parser can read was the heading he was
+    moved under: "Withdrew after nomination".
+
+    An "Eliminated" list belongs to one party's contest. Someone the page
+    says carries on under another line (:func:`_continues_elsewhere`) is left
+    out of it, so the November ballot, the infobox or nothing decides them.
+    """
+    out = {}
+    bullets = _list_bullets(text)
+    for bullet in bullets:
+        kind = _list_kind(bullet["heading"].group(2))
+        if not kind:
+            continue
+        if kind == ELIMINATED_LIST and _continues_elsewhere(bullet, bullets):
+            continue
+        out.setdefault(kind, []).append({
+            "name": bullet["name"], "won": False, "withdrawn": kind != ELIMINATED_LIST,
+            "votes": None, "party": None, "article": link_target(bullet["raw"])})
     return [(kind, rows) for kind, rows in out.items()]
 
 
