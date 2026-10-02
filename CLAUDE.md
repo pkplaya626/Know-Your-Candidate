@@ -73,7 +73,7 @@ python build_profile_site.py field --check    # who is running, from the FEC
 python build_profile_site.py disclosures      # House financial disclosure links
 python build_profile_site.py results          # who is still in, from Wikipedia
 python build_profile_site.py campaigns        # campaign websites from FEC committees
-python -m unittest discover tests             # 495 tests, no dependencies
+python -m unittest discover tests             # 499 tests, no dependencies
 npm install && npm test                       # 453 real-DOM checks (needs jsdom)
 ```
 
@@ -304,6 +304,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     `fec.fetch_pages` takes a sort that ends in a unique key; the field
     must arrive with every (candidate_id, cycle) exactly once or it is
     refetched and then refused.
+
+37. **Pace to the limit the key reports, not the one the docs promise.** The
+    FEC key answers `X-RateLimit-Limit: 60` - a minute, not 1,000 an hour.
+    Runs from home stayed under it by accident of latency; the first refresh
+    on a GitHub runner sent 61 requests in under a minute, got 429, and
+    failed. `fec._get` spaces every request from that header (never faster
+    than one a second) and waits out `Retry-After` or the whole window on a
+    429. A failed refresh opens a "Weekly refresh failed" issue and the next
+    good one closes it.
 
 ## Curated data
 

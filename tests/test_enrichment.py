@@ -476,3 +476,78 @@ class TestRaces(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class TestFecRateLimit(unittest.TestCase):
+    """The key allows 60 requests a minute (X-RateLimit-Limit: 60).
+
+    A GitHub runner's low latency let `finance --refresh` send 61 requests in
+    well under a minute; the FEC answered 429, a 1.5 s backoff never outlasted
+    the window, and the weekly refresh failed at the field fetch after it.
+    """
+
+    def setUp(self):
+        self.saved = dict(fec._RATE)
+
+    def tearDown(self):
+        fec._RATE.clear()
+        fec._RATE.update(self.saved)
+
+    def test_requests_are_spaced_whatever_the_latency(self):
+        clock, slept = [100.0], []
+
+        def sleep(seconds):
+            slept.append(round(seconds, 3))
+            clock[0] += seconds
+
+        fec._RATE.update(interval=1.05, last=0.0)
+        fec._pace(lambda: clock[0], sleep)
+        fec._pace(lambda: clock[0], sleep)
+        self.assertEqual(slept, [1.05])
+
+    def test_the_advertised_limit_widens_the_spacing_and_never_narrows_it(self):
+        fec._RATE.update(interval=1.05)
+        fec._learn_limit({"X-RateLimit-Limit": "30"})
+        self.assertAlmostEqual(fec._RATE["interval"], 2.1)
+        for header in ({"X-RateLimit-Limit": "1000"}, {"X-RateLimit-Limit": "junk"}, {}, None):
+            fec._learn_limit(header)
+            self.assertAlmostEqual(fec._RATE["interval"], 2.1)
+
+    def test_a_429_waits_out_what_it_asks_then_succeeds(self):
+        import io
+        import urllib.error
+        from unittest import mock
+
+        calls, slept = [], []
+
+        class Response:
+            headers = {"X-RateLimit-Limit": "60"}
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+            def read(self):
+                return b'{"results": []}'
+
+        def urlopen(req, timeout=None):
+            calls.append(req.full_url)
+            if len(calls) == 1:
+                raise urllib.error.HTTPError(req.full_url, 429, "Too Many Requests",
+                                             {"Retry-After": "7"}, io.BytesIO(b""))
+            return Response()
+
+        fec._RATE.update(interval=0.0, last=0.0)
+        with mock.patch.object(fec.urllib.request, "urlopen", urlopen), \
+                mock.patch.object(fec.time, "sleep", slept.append), \
+                mock.patch.object(fec, "api_key", lambda root=".": "TESTKEY"), \
+                mock.patch.object(fec, "using_demo_key", lambda root=".": False):
+            self.assertEqual(fec._get("/x/", {}), {"results": []})
+        self.assertEqual(len(calls), 2)
+        self.assertIn(7.0, slept)
+
+    def test_a_429_that_names_no_wait_waits_the_whole_window(self):
+        silent = type("Silent429", (), {"headers": {}})()
+        self.assertEqual(fec._retry_after(silent), fec.RATE_WINDOW)
