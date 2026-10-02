@@ -384,25 +384,7 @@
   "H-LA-04-2026",
   "H-LA-05-2026",
   "H-LA-06-2026",
-  "H-MP-00-2026",
-  "S-AS-2026",
-  "S-AZ-2026",
-  "S-CA-2026",
-  "S-CT-2026",
-  "S-DC-2026",
-  "S-HI-2026",
-  "S-IN-2026",
-  "S-MD-2026",
-  "S-MO-2026",
-  "S-ND-2026",
-  "S-NV-2026",
-  "S-NY-2026",
-  "S-PA-2026",
-  "S-PR-2026",
-  "S-UT-2026",
-  "S-VI-2026",
-  "S-WA-2026",
-  "S-WI-2026"
+  "H-MP-00-2026"
  ],
  "races": {
   "H-AK-00-2026": {
@@ -15162,7 +15144,6 @@
    "status": {
     "S0CO00575": "nominee",
     "S4CO00452": "withdrawn",
-    "S6CO00390": "withdrawn",
     "S6CO00408": "eliminated",
     "S6CO00416": "withdrawn",
     "S6CO00424": "eliminated",
@@ -15179,7 +15160,8 @@
     "A.J. Zimpfer": "withdrawn",
     "Blake Huber": "nominee",
     "Bob Chew": "nominee",
-    "Christopher Baum": "nominee"
+    "Christopher Baum": "nominee",
+    "Joshua William Kuebler": "withdrawn"
    },
    "unsure": [
     "S6CO00549",
@@ -15305,14 +15287,14 @@
    "status": {
     "S2GA00282": "eliminated",
     "S4GA11202": "eliminated",
-    "S6GA00267": "withdrawn",
     "S6GA00382": "withdrawn",
     "S6GA00390": "nominee",
     "S6GA00408": "eliminated",
     "S8GA00180": "nominee"
    },
    "unmatched": {
-    "Buddy Carter": "eliminated"
+    "Buddy Carter": "eliminated",
+    "Reagan Box": "withdrawn"
    },
    "unsure": []
   },
@@ -16210,7 +16192,6 @@
    "status": {
     "S0OK00420": "eliminated",
     "S2OK00186": "withdrawn",
-    "S6OK04148": "withdrawn",
     "S6OK04163": "nominee",
     "S6OK04171": "eliminated",
     "S6OK04197": "eliminated",
@@ -16224,7 +16205,9 @@
     "S6OK04270": "eliminated",
     "S6OK04288": "eliminated"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Tammy Swearengin": "withdrawn"
+   },
    "unsure": []
   },
   "S-OR-2026": {
@@ -16531,7 +16514,6 @@
    "ambiguous": [],
    "article": {
     "S4WV00159": "Shelley Moore Capito",
-    "S6WV00147": "Derrick Evans (politician)",
     "S6WV00162": "Tom Willis (politician)",
     "S6WV00196": "Jeff Kessler"
    },
@@ -16560,7 +16542,6 @@
     "S4WV00357": "eliminated",
     "S4WV00365": "eliminated",
     "S4WV00407": "eliminated",
-    "S6WV00147": "withdrawn",
     "S6WV00154": "eliminated",
     "S6WV00162": "eliminated",
     "S6WV00170": "eliminated",
@@ -16569,6 +16550,7 @@
    },
    "unmatched": {
     "David Purkey": "eliminated",
+    "Derrick Evans": "withdrawn",
     "Thornton Cooper": "eliminated"
    },
    "unsure": []
