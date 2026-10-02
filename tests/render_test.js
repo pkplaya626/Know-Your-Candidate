@@ -17,7 +17,8 @@ const SITE = path.resolve(__dirname, "..", "candidate_profiles_site");
 
 /* ------------------------------------------------------------------ setup */
 
-function buildPage(page) {
+function buildPage(page, opts) {
+  opts = opts || {};
   const errors = [];
   const vc = new VirtualConsole();
   vc.on("jsdomError", (e) => errors.push("jsdomError: " + e.message));
@@ -36,12 +37,17 @@ function buildPage(page) {
 
   const dom = new JSDOM(html, {
     runScripts: "dangerously",
-    url: "https://kyc.local/" + page,
+    url: "https://kyc.local/" + page + (opts.hash || ""),
     pretendToBeVisual: true,
     virtualConsole: vc,
     beforeParse(window) {
       // jsdom has no matchMedia; the theme layer asks it whether the OS
       // prefers light.
+      // Count every history.back(): from a page someone landed on directly,
+      // one takes them off the site, and jsdom would silently do nothing.
+      window.__backCalls = 0;
+      const back = window.history.back.bind(window.history);
+      window.history.back = () => { window.__backCalls += 1; back(); };
       window.matchMedia = (query) => ({
         media: query,
         matches: false,
@@ -813,6 +819,113 @@ async function testStates() {
   });
 }
 
+/* ============================================================ deep links */
+
+const settle = (ms) => new Promise((r) => setTimeout(r, ms || 150));
+
+/* A link someone was sent is the first page they see. Landing on
+ * #/profile/<id> used to leave the grid behind the dialog at "Loading
+ * profiles..." with no cards, and closing it called history.back() - which,
+ * with nothing of ours behind it, left the site. The map overwrote its
+ * incoming hash at boot, so state and profile links opened a blank map. */
+async function testDeepLinks() {
+  const probe = await buildPage("index.html");
+  const people = probe.window.legislatorsData;
+  const senator = people.find((p) => p.state === "TX" && /Senate/.test(p.chamber) && !p.isCandidate);
+  probe.window.close();
+
+  for (const page of ["index.html", "map.html", "states/tx.html"]) {
+    const { window, D, errors } = await buildPage(page, { hash: "#/profile/" + senator.id });
+    await settle();
+    const modal = D.getElementById("profileModal");
+    suite(`${page} — landing on a shared profile link`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("the profile opens", modal && !modal.hidden &&
+        D.getElementById("profileModalName").textContent === senator.name,
+        D.getElementById("profileModalName") && D.getElementById("profileModalName").textContent);
+      check("the address still names the profile",
+        window.location.hash === "#/profile/" + senator.id, window.location.hash);
+      if (page === "index.html") {
+        check("the grid is drawn underneath", announced(D) > 0 &&
+          D.querySelectorAll("#results .card").length > 0,
+          D.getElementById("resultsLabel").textContent.trim());
+      }
+      if (page === "map.html") {
+        check("the map shows that person's state underneath",
+          /Texas|TX/.test(D.getElementById("panelState").textContent),
+          D.getElementById("panelState").textContent);
+      }
+    });
+
+    D.querySelector("#profileModal .modal-footer [data-close]").click();
+    await settle();
+    suite(`${page} — closing a profile someone landed on`, () => {
+      check("the dialog closes", modal.hidden);
+      check("does not go back off the site", window.__backCalls === 0, `${window.__backCalls} back()`);
+      check("the address becomes the list", !/profile/.test(window.location.hash),
+        window.location.hash);
+      if (page === "index.html") {
+        check("the grid is still there", D.querySelectorAll("#results .card").length > 0);
+      }
+      if (page === "map.html") {
+        check("the list address keeps the state", /state=TX/.test(window.location.hash),
+          window.location.hash);
+      }
+    });
+
+    // Opened in the page, closing still goes back: the entry is ours.
+    const before = window.location.hash;
+    window.KYC.profile.open(senator.id);
+    await settle(50);
+    const pushed = window.location.hash;
+    D.querySelector("#profileModal .modal-footer [data-close]").click();
+    await settle();
+    suite(`${page} — closing a profile opened in the page`, () => {
+      check("opening pushes the profile address", pushed === "#/profile/" + senator.id, pushed);
+      check("closing goes back once", window.__backCalls === 1, `${window.__backCalls} back()`);
+      check("back to where the reader was", window.location.hash === before,
+        `${window.location.hash} vs ${before}`);
+    });
+    window.close();
+  }
+
+  const cases = [
+    ["#/?state=TX", "TX", "senate"],
+    ["#/?state=TX&mode=house", "TX", "house"],
+    ["#/?state=OR&mode=house", "OR", "house"],
+  ];
+  for (const [hash, code, mode] of cases) {
+    const { window, D, errors } = await buildPage("map.html", { hash });
+    await settle(50);
+    suite(`map.html${hash} — the incoming route survives boot`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("the address is not rewritten", window.location.hash === hash, window.location.hash);
+      check(`${code} is selected`, D.getElementById("mapStateSelect").value === code,
+        D.getElementById("mapStateSelect").value);
+      check(`the ${mode} view is on`,
+        D.querySelector(`[data-mode="${mode}"]`).getAttribute("aria-pressed") === "true");
+    });
+    window.close();
+  }
+
+  // The link every state page carries to the map lands on that state.
+  {
+    const { window, D } = await buildPage("states/tx.html");
+    const link = [...D.querySelectorAll("a[href*='map.html']")].map((a) => a.getAttribute("href"))
+      .find((h) => /#/.test(h));
+    window.close();
+    const hash = link ? link.slice(link.indexOf("#")) : "";
+    const map = await buildPage("map.html", { hash });
+    await settle(50);
+    suite("states/tx.html — its map link", () => {
+      check("the state page links to the map at its state", /state=TX/.test(hash), link);
+      check("which opens on Texas", map.D.getElementById("mapStateSelect").value === "TX",
+        map.D.getElementById("mapStateSelect").value);
+    });
+    map.window.close();
+  }
+}
+
 /* ================================================================== report */
 
 (async function main() {
@@ -820,6 +933,7 @@ async function testStates() {
   if (!only || only === "index.html") await testDirectoryAsync();
   if (!only || only === "map.html") await testMap();
   if (!only || only === "states") await testStates();
+  if (!only || only === "links") await testDeepLinks();
 
   let failed = 0;
   for (const r of results) {

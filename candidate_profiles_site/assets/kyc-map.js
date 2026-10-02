@@ -448,6 +448,11 @@
 
   /* ----------------------------------------------------------------- boot */
 
+  function hasShape(code) {
+    return !!code && (!!geo.states[code] ||
+      (geo.territories || []).some(function (t) { return t.code === code; }));
+  }
+
   function initStatePicker() {
     var picker = doc.getElementById("mapStateSelect");
     if (!picker) return;
@@ -478,7 +483,13 @@
     KYC.profile.ensure();
     drawMap();
     initStatePicker();
-    setMode("senate");
+    /* Read the incoming route before anything writes one. Boot used to call
+     * setMode("senate") as a user action, which wrote "#/" over the address
+     * before it was read - so map.html#/?state=TX, every state page's map
+     * link and every shared profile link all landed on a blank map. */
+    var initial = KYC.router.read();
+    setMode(MODE_TITLE[initial.params.mode] ? initial.params.mode : "senate",
+            { fromRoute: true });
 
     var svg = doc.getElementById("usMap");
     svg.addEventListener("click", function (event) {
@@ -515,13 +526,16 @@
       if (wanted !== mode) setMode(wanted, { fromRoute: true });
       if (route.params.state && route.params.state !== selected) {
         select(route.params.state, { fromRoute: true });
+      } else if (!route.params.state && selected) {
+        // Back on the list with a state still showing - after closing a
+        // profile someone landed on directly - so the address says which.
+        KYC.router.writeFilters({ state: selected, mode: mode === "senate" ? "" : mode });
       }
     });
-    var initial = KYC.router.read();
-    if (initial.params.mode && initial.params.mode !== mode) {
-      setMode(initial.params.mode, { fromRoute: true });
-    }
     if (initial.view === "profile") {
+      // A shared profile opens over that person's state, not a blank map.
+      var person = KYC.byId(initial.id);
+      if (person && hasShape(person.state)) select(person.state, { fromRoute: true });
       KYC.profile.open(initial.id, { fromRoute: true });
     } else if (initial.params.state) {
       select(initial.params.state, { fromRoute: true });

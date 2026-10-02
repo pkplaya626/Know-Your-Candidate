@@ -448,6 +448,7 @@
    * view. Without this the site cannot be shared, which is the single
    * biggest functional gap for a tool whose whole purpose is being passed
    * around before an election. */
+  var routeHandlers = [];
   var router = {
     read: function () {
       var hash = global.location.hash.replace(/^#\/?/, "");
@@ -486,17 +487,33 @@
       history.replaceState(null, "", global.location.pathname + hash);
     },
 
+    /* The pushed entry is marked, so closing knows whether there is a view
+     * of ours behind it to go back to. */
     writeProfile: function (id) {
       history.pushState(
-        null, "", global.location.pathname + "#/profile/" + encodeURIComponent(id)
+        { kycProfile: true },
+        "", global.location.pathname + "#/profile/" + encodeURIComponent(id)
       );
     },
 
+    /** Leave a profile view. Back only undoes a profile this page pushed. A
+     *  visitor who arrived on a shared #/profile/ link has nothing of ours
+     *  behind them, and history.back() sent them off the site - so that
+     *  entry is replaced with the list in place and the page told to show
+     *  it, since replaceState fires no event of its own. */
     clearProfile: function () {
-      if (/#\/profile\//.test(global.location.hash)) history.back();
+      if (!/#\/profile\//.test(global.location.hash)) return;
+      var pushed = history.state && history.state.kycProfile;
+      if (pushed) {
+        history.back();
+        return;
+      }
+      history.replaceState(null, "", global.location.pathname + "#/");
+      routeHandlers.forEach(function (handler) { handler(); });
     },
 
     onChange: function (handler) {
+      routeHandlers.push(handler);
       global.addEventListener("hashchange", handler);
       global.addEventListener("popstate", handler);
     },
