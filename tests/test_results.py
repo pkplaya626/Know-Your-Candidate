@@ -976,6 +976,52 @@ class TestOpenPrimaryElectionNight(NoGap):
         self.assertEqual(cache["pending"], ["H-LA-05-2026"])
 
 
+class TestResultsCommandUsesTheScreenedField(unittest.TestCase):
+    """``results`` matches against the field the build uses, not the raw one.
+
+    The raw FEC register lists Senate filings from states with no 2026 seat
+    up (Arizona, California, New York ...); read raw, each became a phantom
+    "race" in the cache's pending list.
+    """
+
+    def test_phantom_races_never_reach_the_resolver(self):
+        import contextlib
+        import io
+        import types
+        from unittest import mock
+
+        from kyc import candidates, cli
+        from kyc.profiles import build_profiles, screen_field
+        from kyc import legislators, sources
+
+        raw_field = candidates.load_cache(ROOT)
+        raw_races = {candidates.race_id(r) for r in raw_field["candidates"]} - {None}
+        profiles, _ = build_profiles(sources.load_all(ROOT),
+                                     snapshot=legislators.load_snapshot(ROOT))
+        screened = screen_field(raw_field, profiles)
+        real = {candidates.race_id(r) for r in screened["candidates"]} - {None}
+        phantom = raw_races - real
+        self.assertTrue(phantom, "the committed field has no phantom races to screen")
+
+        seen = {}
+
+        def fake_build(field, dates, **kw):
+            seen["field"] = field
+            return {"races": {}, "pending": []}
+
+        args = types.SimpleNamespace(root=ROOT, check=False, verbose=False)
+        with mock.patch.object(results, "fetch_dates", return_value={}), \
+                mock.patch.object(results, "build", side_effect=fake_build), \
+                mock.patch.object(results, "save_cache", return_value="(not written)"), \
+                contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(cli._results(args), 0)
+        given = {candidates.race_id(r) for r in seen["field"]["candidates"]} - {None}
+        self.assertEqual(given & phantom, set())
+        self.assertEqual(given, real)
+        self.assertEqual([r["candidate_id"] for r in seen["field"]["candidates"]],
+                         [r["candidate_id"] for r in screened["candidates"]])
+
+
 class TestPartyRunoffGateUnchanged(NoGap):
     """A Georgia/Texas-style party runoff still waits for the runoff date."""
 

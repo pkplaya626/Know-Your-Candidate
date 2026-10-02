@@ -527,46 +527,55 @@ def _results(args):
         # ("Ken Paxton" for "PAXTON, WARREN KENNETH JR."), and the finance
         # lookup has already tied that name to a candidate id.
         aliases = {}
+        # Matched against the same screened field the build uses: only
+        # races on the 2026 ballot. The raw register listed Senate "races"
+        # for states with no seat up (S-AZ, S-CA, S-NY ...) as pending
+        # primaries, and stale registrations as people to match.
         raw = _load(args)
-        if raw is not None:
-            snapshot = legislators.load_snapshot(args.root)
-            profiles, _ = build_profiles(raw, snapshot=snapshot)
-            fec.apply_cache(profiles, fec.load_cache(args.root))
-            filed = {row["candidate_id"]: row for row in field["candidates"]}
-            known = {person["bioguide"]: person
-                     for person in (snapshot or {}).get("legislators", [])}
-            for profile in profiles:
-                cid = profile.get("fecCandidateId")
-                # A member with no filing this cycle is keyed on their
-                # bioguide id instead, so the page can still say whether they
-                # are on the ballot: the FEC field lacked Nick LaLota while
-                # New York's page had him on the November ballot.
-                key = cid if cid in filed else (
-                    profile["id"] if not profile["isCandidate"] else cid)
-                if not key:
-                    continue
-                # The alias belongs to the race the filing is for, which is
-                # not always the seat the roster gives: after redistricting
-                # Ami Bera holds CA-6 and is filed for CA-3, and the CA-3
-                # results name him.
-                rid = candidates.race_id(filed[cid]) if cid in filed else candidates.race_id({
-                    "state": profile["state"],
-                    "office": "S" if "Senate" in profile["chamber"] else "H",
-                    "district_number": profile.get("districtNum"),
-                })
-                if not rid:
-                    continue
-                names = {profile["name"]}
-                person = known.get(profile["id"])
-                if person:
-                    # The article title is the spelling the election page
-                    # links to: "Andy Barr", not the roster's "Garland Barr".
-                    names.update(
-                        re.sub(r"\s*\([^)]*\)\s*$", "", n)      # "Dan Sullivan (U.S. senator)"
-                        for n in (person.get("name"), person.get("wikipedia")) if n
-                    )
-                for name in sorted(names):
-                    aliases.setdefault(rid, []).append((name, key))
+        if raw is None:
+            return 2
+        snapshot = legislators.load_snapshot(args.root)
+        profiles, _ = build_profiles(raw, snapshot=snapshot)
+        field = screen_field(field, profiles)
+        print(f"  field: {field['count']} filings for races on the 2026 ballot "
+              f"({len(field['screened']['stale'])} stale and "
+              f"{len(field['screened']['phantom'])} for absent races set aside)")
+        fec.apply_cache(profiles, fec.load_cache(args.root))
+        filed = {row["candidate_id"]: row for row in field["candidates"]}
+        known = {person["bioguide"]: person
+                 for person in (snapshot or {}).get("legislators", [])}
+        for profile in profiles:
+            cid = profile.get("fecCandidateId")
+            # A member with no filing this cycle is keyed on their
+            # bioguide id instead, so the page can still say whether they
+            # are on the ballot: the FEC field lacked Nick LaLota while
+            # New York's page had him on the November ballot.
+            key = cid if cid in filed else (
+                profile["id"] if not profile["isCandidate"] else cid)
+            if not key:
+                continue
+            # The alias belongs to the race the filing is for, which is
+            # not always the seat the roster gives: after redistricting
+            # Ami Bera holds CA-6 and is filed for CA-3, and the CA-3
+            # results name him.
+            rid = candidates.race_id(filed[cid]) if cid in filed else candidates.race_id({
+                "state": profile["state"],
+                "office": "S" if "Senate" in profile["chamber"] else "H",
+                "district_number": profile.get("districtNum"),
+            })
+            if not rid:
+                continue
+            names = {profile["name"]}
+            person = known.get(profile["id"])
+            if person:
+                # The article title is the spelling the election page
+                # links to: "Andy Barr", not the roster's "Garland Barr".
+                names.update(
+                    re.sub(r"\s*\([^)]*\)\s*$", "", n)      # "Dan Sullivan (U.S. senator)"
+                    for n in (person.get("name"), person.get("wikipedia")) if n
+                )
+            for name in sorted(names):
+                aliases.setdefault(rid, []).append((name, key))
         print("Reading primary results from Wikipedia ...")
         cache = results_mod.build(field, dates, today=datetime.date.today(), log=print,
                                   aliases=aliases)
