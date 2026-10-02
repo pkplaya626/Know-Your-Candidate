@@ -2930,6 +2930,19 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Adam_Hamilton%2C_1930s.jpg/960px-Adam_Hamilton%2C_1930s.jpg",
   "via": "wikipedia"
  },
+ "person:adam hollier|MI|H": {
+  "name": "Adam Hollier",
+  "title": "Adam Hollier",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Adam_Hollier_at_Whitmer%27s_inauguration_%28January_1%2C_2023%29_%28cropped%29.jpg/960px-Adam_Hollier_at_Whitmer%27s_inauguration_%28January_1%2C_2023%29_%28cropped%29.jpg",
+  "via": "wikipedia"
+ },
+ "person:adele mcclure|VA|H": {
+  "name": "Adele McClure",
+  "title": "Adele McClure",
+  "unverified": true,
+  "url": "https://upload.wikimedia.org/wikipedia/commons/7/79/2025_Virginia_State_of_the_Commonwealth%2C_Youngkin_procession_%28cropped%29.jpg",
+  "via": "wikipedia"
+ },
  "person:adrian boafo|MD|H": {
   "name": "Adrian Boafo",
   "title": "Adrian Boafo",
@@ -2996,6 +3009,11 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Amanda_Edwards_headshot_%281%29.jpg",
   "via": "wikipedia"
  },
+ "person:amanda n septimo|NY|H": {
+  "name": "Amanda N Septimo",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:amish shah|AZ|H": {
   "name": "Amish Shah",
   "title": "Amish Shah",
@@ -3007,6 +3025,12 @@
   "title": "Amy McGrath",
   "unverified": true,
   "url": "https://upload.wikimedia.org/wikipedia/commons/6/6a/Amy_McGrath_Event-_%2849220643717%29_1.jpg",
+  "via": "wikipedia"
+ },
+ "person:andre bauer|SC|S": {
+  "name": "Andre Bauer",
+  "title": "André Bauer",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/Ambassador_Bauer_Official_Portrait_-1.jpg/960px-Ambassador_Bauer_Official_Portrait_-1.jpg",
   "via": "wikipedia"
  },
  "person:andy barr|KY|S": {
@@ -3028,6 +3052,12 @@
   "url": null,
   "via": "unresolved"
  },
+ "person:angela nixon|FL|S": {
+  "name": "Angela Nixon",
+  "title": "Angie Nixon",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/Angie_Nixon_official_portrait.jpg/960px-Angie_Nixon_official_portrait.jpg",
+  "via": "wikipedia"
+ },
  "person:angie craig|MN|S": {
   "name": "Angie Craig",
   "title": "Angie Craig",
@@ -3040,11 +3070,22 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Annie_Andrews_Greenville_%28cropped%29.jpg/960px-Annie_Andrews_Greenville_%28cropped%29.jpg",
   "via": "wikipedia-search"
  },
+ "person:anthony sabatini|FL|H": {
+  "name": "Anthony Sabatini",
+  "title": "Anthony Sabatini",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/3/38/Sabatiniheadshot_2024-25.jpg",
+  "via": "wikipedia"
+ },
  "person:antonio reynoso|NY|H": {
   "name": "Antonio Reynoso",
   "title": "Antonio Reynoso",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c9/Antonio_Reynoso.jpg/960px-Antonio_Reynoso.jpg",
   "via": "wikipedia"
+ },
+ "person:antony barran|WA|H": {
+  "name": "Antony Barran",
+  "url": null,
+  "via": "unresolved"
  },
  "person:arthur carr ellis|MD|H": {
   "name": "Arthur Carr Ellis",
@@ -3127,6 +3168,12 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2e/Brandon_Herrera_with_attendees_%2855457704523%29_%28cropped%29.jpg/960px-Brandon_Herrera_with_attendees_%2855457704523%29_%28cropped%29.jpg",
   "via": "wikipedia"
  },
+ "person:bree fram|VA|H": {
+  "name": "Bree Fram",
+  "title": "Bree Fram",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/67/Col_Bree_Fram.jpg/960px-Col_Bree_Fram.jpg",
+  "via": "wikipedia"
+ },
  "person:brent taylor|TN|H": {
   "name": "Brent Taylor",
   "title": "Brent Taylor (Tennessee politician)",
@@ -3138,6 +3185,12 @@
   "name": "Brenton Awa",
   "title": "Brenton Awa",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Senator_Awa_Visits_Marine_Corps_Base_Hawaii_%288%29_%28cropped%29.jpg/960px-Senator_Awa_Visits_Marine_Corps_Base_Hawaii_%288%29_%28cropped%29.jpg",
+  "via": "wikipedia"
+ },
+ "person:brett lindstrom|NE|H": {
+  "name": "Brett Lindstrom",
+  "title": "Brett Lindstrom",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/Brett_Lindstrom.jpg/960px-Brett_Lindstrom.jpg",
   "via": "wikipedia"
  },
  "person:brian bengs|SD|S": {
@@ -3179,6 +3232,17 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fd/Cain_Headshot_2025.jpg/960px-Cain_Headshot_2025.jpg",
   "via": "wikipedia"
  },
+ "person:brooke pinto|DC|H": {
+  "name": "Brooke Pinto",
+  "title": "Brooke Pinto",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/0/03/Member_of_the_Council_of_the_District_of_Columbia_Brooke_Pinto_%28cropped%29.jpg",
+  "via": "wikipedia"
+ },
+ "person:bryce reeves|VA|S": {
+  "name": "Bryce Reeves",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:bushra amiwala|IL|H": {
   "name": "Bushra Amiwala",
   "title": "Bushra Amiwala",
@@ -3190,6 +3254,12 @@
   "name": "Cait Conley",
   "title": "Cait Conley",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a6/DHS_Secretary_Alejandro_Mayorkas_Gives_Opening_Remarks_During_CISA_National_Election_Exercise_in_Arlington%2C_Virginia_on_22_August_2024_-_6.jpg/960px-DHS_Secretary_Alejandro_Mayorkas_Gives_Opening_Remarks_During_CISA_National_Election_Exercise_in_Arlington%2C_Virginia_on_22_August_2024_-_6.jpg",
+  "via": "wikipedia"
+ },
+ "person:cameron kasky|NY|H": {
+  "name": "Cameron Kasky",
+  "title": "Cameron Kasky",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/8/82/Cameron_Kasky_3.jpg",
   "via": "wikipedia"
  },
  "person:carey baker|FL|H": {
@@ -3214,6 +3284,11 @@
  },
  "person:carrie buck|NV|H": {
   "name": "Carrie Buck",
+  "url": null,
+  "via": "unresolved"
+ },
+ "person:casey crabtree|SD|H": {
+  "name": "Casey Crabtree",
   "url": null,
   "via": "unresolved"
  },
@@ -3243,6 +3318,12 @@
   "name": "Cherlynn Stevenson",
   "title": "Cherlynn Stevenson",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Cherlynn_Stevenson.jpg/960px-Cherlynn_Stevenson.jpg",
+  "via": "wikipedia"
+ },
+ "person:chi osse|NY|H": {
+  "name": "Chi Osse",
+  "title": "Chi Ossé",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/f/f1/Chi_osse_2026.jpeg",
   "via": "wikipedia"
  },
  "person:chris beck|OR|H": {
@@ -3319,6 +3400,12 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Colin_Allred%2C_official_portrait%2C_117th_Congress.jpg/960px-Colin_Allred%2C_official_portrait%2C_117th_Congress.jpg",
   "via": "wikipedia"
  },
+ "person:colin allred|TX|S": {
+  "name": "Colin Allred",
+  "title": "Colin Allred",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2a/Colin_Allred%2C_official_portrait%2C_117th_Congress.jpg/960px-Colin_Allred%2C_official_portrait%2C_117th_Congress.jpg",
+  "via": "wikipedia"
+ },
  "person:colton moore|GA|H": {
   "name": "Colton Moore",
   "title": "Colton Moore",
@@ -3357,6 +3444,18 @@
   "name": "Dan Green",
   "url": null,
   "via": "unresolved"
+ },
+ "person:dan helmer|VA|H": {
+  "name": "Dan Helmer",
+  "url": null,
+  "via": "unresolved"
+ },
+ "person:dan innis|NH|S": {
+  "name": "Dan Innis",
+  "title": "Dan Innis",
+  "unverified": true,
+  "url": "https://upload.wikimedia.org/wikipedia/commons/e/eb/Our_four_guest_hosts_are_talking_to_Dan_Innis%2C_who_is_running_for_Congress._Listen_in_LIVE_at_http_ift.tt_1NtUC1A_%2823882863759%29.jpg",
+  "via": "wikipedia"
  },
  "person:dan osborn|NE|S": {
   "name": "Dan Osborn",
@@ -3410,6 +3509,12 @@
   "url": null,
   "via": "unresolved"
  },
+ "person:david l. young|CO|H": {
+  "name": "David L. Young",
+  "title": "Dave Young (Colorado politician)",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Dave_Young_%28Colorado_politician%29_2022_%28cropped%29.JPG/960px-Dave_Young_%28Colorado_politician%29_2022_%28cropped%29.JPG",
+  "via": "wikipedia"
+ },
  "person:david pan|CA|H": {
   "name": "David Pan",
   "url": null,
@@ -3424,6 +3529,31 @@
   "name": "David Trone",
   "title": "David Trone",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/11/David_Trone_official_photo.jpg/960px-David_Trone_official_photo.jpg",
+  "via": "wikipedia"
+ },
+ "person:david w hann|MN|S": {
+  "name": "David W Hann",
+  "title": "David Hann",
+  "unverified": true,
+  "url": "https://upload.wikimedia.org/wikipedia/commons/e/e0/David_Hann%2C_April_2013.png",
+  "via": "wikipedia"
+ },
+ "person:deanna gordon|KY|H": {
+  "name": "Deanna Gordon",
+  "title": "Deanna Gordon",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Rep._Deanna_Frazier_Gordon.jpg/960px-Rep._Deanna_Frazier_Gordon.jpg",
+  "via": "wikipedia"
+ },
+ "person:delia laverne smith|VI|H": {
+  "name": "Delia Laverne Smith",
+  "title": "Delia L. Smith",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Delia_L._Smith%2C_U.S._Attorney.jpg/960px-Delia_L._Smith%2C_U.S._Attorney.jpg",
+  "via": "wikipedia"
+ },
+ "person:della au belatti|HI|H": {
+  "name": "Della Au Belatti",
+  "title": "Della Au Belatti",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/The_Final_Note%2C_The_Lasting_Legacy_111th_Army_Band_Commander_CW5_Hiyane_Retires_After_43_Years_Della_Au_Belatti_%28cropped%29.jpg/960px-The_Final_Note%2C_The_Lasting_Legacy_111th_Army_Band_Commander_CW5_Hiyane_Retires_After_43_Years_Della_Au_Belatti_%28cropped%29.jpg",
   "via": "wikipedia"
  },
  "person:democratic nominee|FL|S": {
@@ -3446,6 +3576,11 @@
   "title": "Bo Biteman",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/Bo_Biteman_by_Gage_Skidmore.jpg/960px-Bo_Biteman_by_Gage_Skidmore.jpg",
   "via": "wikipedia"
+ },
+ "person:derek kitchen|UT|H": {
+  "name": "Derek Kitchen",
+  "url": null,
+  "via": "unresolved"
  },
  "person:derek merrin|OH|H": {
   "name": "Derek Merrin",
@@ -3482,6 +3617,12 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Donna_Miller_in_front_of_Christmas_Tree.jpg/960px-Donna_Miller_in_front_of_Christmas_Tree.jpg",
   "via": "wikipedia"
  },
+ "person:dorothy mcauliffe|VA|H": {
+  "name": "Dorothy McAuliffe",
+  "title": "Dorothy McAuliffe",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Special_Representative_for_Global_Partnerships_Dorothy_McAuliffe.jpg/960px-Special_Representative_for_Global_Partnerships_Dorothy_McAuliffe.jpg",
+  "via": "wikipedia"
+ },
  "person:ed gallrein|KY|H": {
   "name": "Ed Gallrein",
   "title": "Ed Gallrein",
@@ -3509,10 +3650,21 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/9/9e/Rep._Elaine_Luria_official_photo%2C_117th_Congress.jpg",
   "via": "wikipedia"
  },
+ "person:elijah manley|FL|H": {
+  "name": "Elijah Manley",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:eliott rodriguez|FL|H": {
   "name": "Eliott Rodriguez",
   "url": null,
   "via": "unresolved"
+ },
+ "person:elizabeth guzman|VA|H": {
+  "name": "Elizabeth Guzman",
+  "title": "Elizabeth Guzmán",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7d/Elizabeth_Guzman_at_volunteer_appreciation_event2.jpg/960px-Elizabeth_Guzman_at_volunteer_appreciation_event2.jpg",
+  "via": "wikipedia"
  },
  "person:emanuel jones|GA|H": {
   "name": "Emanuel Jones",
@@ -3528,11 +3680,22 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/f/f2/Minnesota_State_Senator_Eric_Pratt.jpg",
   "via": "wikipedia"
  },
+ "person:eric skrmetta|LA|S": {
+  "name": "Eric Skrmetta",
+  "title": "Eric Skrmetta",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Eric_Skrmetta_%285856698877%29_%28cropped%29.jpg/960px-Eric_Skrmetta_%285856698877%29_%28cropped%29.jpg",
+  "via": "wikipedia"
+ },
  "person:ervin stone yen|OK|S": {
   "name": "Ervin Stone Yen",
   "title": "Ervin Yen",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Ervinyen.jpg/960px-Ervinyen.jpg",
   "via": "wikipedia"
+ },
+ "person:esther kim varet|CA|H": {
+  "name": "Esther Kim Varet",
+  "url": null,
+  "via": "unresolved"
  },
  "person:evan power|FL|H": {
   "name": "Evan Power",
@@ -3588,11 +3751,23 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/0/0a/George_Moraitis.jpg",
   "via": "wikipedia"
  },
+ "person:gina swoboda|AZ|H": {
+  "name": "Gina Swoboda",
+  "title": "Gina Swoboda",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/72/Gina_Swoboda_%28cropped%29.jpg/960px-Gina_Swoboda_%28cropped%29.jpg",
+  "via": "wikipedia"
+ },
  "person:graham platner|ME|S": {
   "name": "Graham Platner",
   "title": "Graham Platner",
   "unverified": true,
   "url": "https://upload.wikimedia.org/wikipedia/commons/1/1a/Platner_headshot.jpg",
+  "via": "wikipedia"
+ },
+ "person:gregory jaczko|DC|H": {
+  "name": "Gregory Jaczko",
+  "title": "Gregory Jaczko",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3b/Gregory_B._Jaczko.jpg/960px-Gregory_B._Jaczko.jpg",
   "via": "wikipedia"
  },
  "person:gregory levy|OH|S": {
@@ -3622,6 +3797,12 @@
   "url": null,
   "via": "unresolved"
  },
+ "person:heather keeler|MN|H": {
+  "name": "Heather Keeler",
+  "title": "Heather Keeler",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/9/90/Heather_Keeler_at_DFL_post-Roe_Agenda_Press_Conference_%28cropped%29.jpg",
+  "via": "wikipedia"
+ },
  "person:hector de la torre|CA|H": {
   "name": "Hector de la Torre",
   "title": "Hector De La Torre",
@@ -3640,10 +3821,22 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f2/Official_headshot_of_Houston_Gaines.jpg/960px-Official_headshot_of_Houston_Gaines.jpg",
   "via": "wikipedia"
  },
+ "person:jackie norris|IA|S": {
+  "name": "Jackie Norris",
+  "title": "Jackie Norris",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e8/Norris_Jackie_2024-1.jpg/960px-Norris_Jackie_2024-1.jpg",
+  "via": "wikipedia"
+ },
  "person:jacqui irwin v|CA|H": {
   "name": "Jacqui Irwin V",
   "title": "Jacqui Irwin",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/150302-Z-WQ610-_%2816698067641%29_%28cropped%29.jpg/960px-150302-Z-WQ610-_%2816698067641%29_%28cropped%29.jpg",
+  "via": "wikipedia"
+ },
+ "person:james (j.d.) david ford|IN|H": {
+  "name": "James (j.d.) David Ford",
+  "title": "J. D. Ford",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/7/74/JD_Ford%2C_Indy_Pride_Parade_2023_%282%29_%28cropped%29.jpg",
   "via": "wikipedia"
  },
  "person:james arnold settelmeyer|NV|H": {
@@ -3677,6 +3870,12 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/James_W._Byrd_at_Campbell_County_League_of_Women_Voters%27_General_Election_Candidates%27_Forum_in_Gillette%2C_Wyoming_%28cropped%29.jpg/960px-James_W._Byrd_at_Campbell_County_League_of_Women_Voters%27_General_Election_Candidates%27_Forum_in_Gillette%2C_Wyoming_%28cropped%29.jpg",
   "via": "wikipedia"
  },
+ "person:jami floyd|NY|H": {
+  "name": "Jami Floyd",
+  "title": "Jami Floyd",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bc/Jami_Floyd_Portrait.jpg/960px-Jami_Floyd_Portrait.jpg",
+  "via": "wikipedia"
+ },
  "person:jamie davis|LA|S": {
   "name": "Jamie Davis",
   "url": null,
@@ -3686,6 +3885,18 @@
   "name": "Jamie Marie Zahlaway Belsito",
   "title": "Jamie Belsito",
   "url": "https://upload.wikimedia.org/wikipedia/commons/5/59/Jamie_Zahlaway_Belsito.jpg",
+  "via": "wikipedia"
+ },
+ "person:janak joshi|CO|S": {
+  "name": "Janak Joshi",
+  "url": null,
+  "via": "unresolved"
+ },
+ "person:janelle karen sarauw|VI|H": {
+  "name": "Janelle Karen Sarauw",
+  "title": "Janelle Sarauw",
+  "unverified": true,
+  "url": "https://upload.wikimedia.org/wikipedia/commons/f/fb/Janelle_Sarauw.jpg",
   "via": "wikipedia"
  },
  "person:janelle stelson|PA|H": {
@@ -3743,6 +3954,12 @@
   "name": "Jeffrey Hulum III",
   "title": "Jeffrey Hulum III",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/Rep._Jeffrey_Hulum_III_%28cropped%29.jpg/960px-Rep._Jeffrey_Hulum_III_%28cropped%29.jpg",
+  "via": "wikipedia"
+ },
+ "person:jennifer konfrst|IA|H": {
+  "name": "Jennifer Konfrst",
+  "title": "Jennifer Konfrst",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Jennifer_Konfrst.jpg/960px-Jennifer_Konfrst.jpg",
   "via": "wikipedia"
  },
  "person:jeremy moss|MI|H": {
@@ -3840,6 +4057,23 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/John_E._Sununu.jpg/960px-John_E._Sununu.jpg",
   "via": "wikipedia"
  },
+ "person:john joseph salka|NY|H": {
+  "name": "John Joseph Salka",
+  "url": null,
+  "via": "unresolved"
+ },
+ "person:john king|GA|S": {
+  "name": "John King",
+  "title": "John F. King",
+  "unverified": true,
+  "url": "https://upload.wikimedia.org/wikipedia/commons/f/fb/Brig._Gen._John_King_command_photo_%2815812374941%29.jpg",
+  "via": "wikipedia"
+ },
+ "person:john lemondes|NY|H": {
+  "name": "John Lemondes",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:john lujan|TX|H": {
   "name": "John Lujan",
   "title": "John Lujan",
@@ -3855,6 +4089,23 @@
   "name": "Jonathan Michael Nez",
   "title": "Jonathan Nez",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/Jonathan_Nez_%28B_cropped%29.jpg/960px-Jonathan_Nez_%28B_cropped%29.jpg",
+  "via": "wikipedia"
+ },
+ "person:joseph allen tate|MI|S": {
+  "name": "Joseph Allen Tate",
+  "title": "Joe Tate (politician)",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7f/TATE_AT_CANDIDACY_ACCOUNCEMENT_2016_%28cropped%29.jpg/960px-TATE_AT_CANDIDACY_ACCOUNCEMENT_2016_%28cropped%29.jpg",
+  "via": "wikipedia"
+ },
+ "person:joseph baldacci|ME|H": {
+  "name": "Joseph Baldacci",
+  "url": null,
+  "via": "unresolved"
+ },
+ "person:joseph chaplik|AZ|H": {
+  "name": "Joseph Chaplik",
+  "title": "Joseph Chaplik",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/34/Joseph_Chaplik_by_Gage_Skidmore.jpg/960px-Joseph_Chaplik_by_Gage_Skidmore.jpg",
   "via": "wikipedia"
  },
  "person:josh turek|IA|S": {
@@ -3881,6 +4132,12 @@
   "title": "Juliana Stratton",
   "unverified": true,
   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Juliana_Stratton_2023_%28cropped%29.jpg/960px-Juliana_Stratton_2023_%28cropped%29.jpg",
+  "via": "wikipedia"
+ },
+ "person:julie cathryn emerson|LA|S": {
+  "name": "Julie Cathryn Emerson",
+  "title": "Julie Emerson",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8a/Julie_Emerson_by_Gage_Skidmore.jpg/960px-Julie_Emerson_by_Gage_Skidmore.jpg",
   "via": "wikipedia"
  },
  "person:julie gonzales|CO|S": {
@@ -3919,6 +4176,11 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/a/a4/Kai_Newkirk_meditation_2024.jpg",
   "via": "wikipedia"
  },
+ "person:karen ortiz|NY|H": {
+  "name": "Karen Ortiz",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:karianne lisonbee|UT|H": {
   "name": "Karianne Lisonbee",
   "title": "Karianne Lisonbee",
@@ -3930,6 +4192,11 @@
   "title": "Kat Abughazaleh",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/Kat_Abughazaleh_2_%28cropped%29.jpg/960px-Kat_Abughazaleh_2_%28cropped%29.jpg",
   "via": "wikipedia"
+ },
+ "person:kathleen riebe|UT|H": {
+  "name": "Kathleen Riebe",
+  "url": null,
+  "via": "unresolved"
  },
  "person:kelvin oneal buck|MS|H": {
   "name": "Kelvin Oneal Buck",
@@ -3961,6 +4228,13 @@
   "name": "Kevin Steele",
   "url": null,
   "via": "unresolved"
+ },
+ "person:kevin w techau|IA|H": {
+  "name": "Kevin W Techau",
+  "title": "Kevin W. Techau",
+  "unverified": true,
+  "url": "https://upload.wikimedia.org/wikipedia/commons/9/99/Kevin_W._Techau.jpg",
+  "via": "wikipedia"
  },
  "person:kim david|OK|H": {
   "name": "Kim David",
@@ -4061,6 +4335,11 @@
   "unverified": true,
   "url": "https://upload.wikimedia.org/wikipedia/commons/c/ca/Luke_Bronin_%2842831415392%29.jpg",
   "via": "wikipedia"
+ },
+ "person:luther campbell|FL|H": {
+  "name": "Luther Campbell",
+  "url": null,
+  "via": "unresolved"
  },
  "person:m. zuhdi jasser|AZ|H": {
   "name": "M. Zuhdi Jasser",
@@ -4197,6 +4476,19 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e6/2026Little.jpg/960px-2026Little.jpg",
   "via": "wikipedia"
  },
+ "person:matt strickler|VA|H": {
+  "name": "Matt Strickler",
+  "title": "Matt Strickler",
+  "unverified": true,
+  "url": "https://upload.wikimedia.org/wikipedia/commons/e/ec/Matt_Strickler%2C_ribbon_cutting.jpg",
+  "via": "wikipedia"
+ },
+ "person:matt windschitl|IA|H": {
+  "name": "Matt Windschitl",
+  "title": "Matt Windschitl",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/MattLindschitl.jpg/960px-MattLindschitl.jpg",
+  "via": "wikipedia"
+ },
  "person:matthew boehnke|WA|H": {
   "name": "Matthew Boehnke",
   "title": "Matt Boehnke",
@@ -4226,6 +4518,12 @@
   "name": "Melat Kiros",
   "title": "Melat Kiros",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Melat_Kiros_Portrait.jpg/960px-Melat_Kiros_Portrait.jpg",
+  "via": "wikipedia"
+ },
+ "person:melisa lopez franzen|MN|S": {
+  "name": "Melisa Lopez Franzen",
+  "title": "Melisa López Franzen",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9d/Melisa_Lopez_Franzen_%282025%29_%28cropped%29.jpg/960px-Melisa_Lopez_Franzen_%282025%29_%28cropped%29.jpg",
   "via": "wikipedia"
  },
  "person:melissa luburich bean|IL|H": {
@@ -4259,6 +4557,11 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/33/Mike-Rogers-Head-Shot-2_%283x4_cropped%29.jpg/960px-Mike-Rogers-Head-Shot-2_%283x4_cropped%29.jpg",
   "via": "wikipedia"
  },
+ "person:michael s katz|DE|S": {
+  "name": "Michael S Katz",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:michael whatley|NC|S": {
   "name": "Michael Whatley",
   "title": "Michael Whatley",
@@ -4286,6 +4589,11 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Rep._Mike_Collins_official_photo%2C_118th_Congress.jpg/960px-Rep._Mike_Collins_official_photo%2C_118th_Congress.jpg",
   "via": "wikipedia"
  },
+ "person:mike france|CT|H": {
+  "name": "Mike France",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:mike lipetri|NY|H": {
   "name": "Mike Lipetri",
   "title": "Mike LiPetri",
@@ -4312,6 +4620,12 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/4/48/6-17-25_world_refugee_day_advocacy_event_Mike_Simmons_%28cropped%29.jpg",
   "via": "wikipedia"
  },
+ "person:morgan cephas|PA|H": {
+  "name": "Morgan Cephas",
+  "title": "Morgan Cephas",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Morgan_Cephas.jpg/960px-Morgan_Cephas.jpg",
+  "via": "wikipedia"
+ },
  "person:mussab ali|NJ|H": {
   "name": "Mussab Ali",
   "title": "Mussab Ali",
@@ -4333,6 +4647,12 @@
   "name": "Nate Blouin",
   "url": null,
   "via": "unresolved"
+ },
+ "person:nate morris|KY|S": {
+  "name": "Nate Morris",
+  "title": "Nate Morris",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/Nate_Morris.jpg/960px-Nate_Morris.jpg",
+  "via": "wikipedia"
  },
  "person:nicole williams|MD|H": {
   "name": "Nicole Williams",
@@ -4385,6 +4705,11 @@
  },
  "person:patrick schmidt|KS|S": {
   "name": "Patrick Schmidt",
+  "url": null,
+  "via": "unresolved"
+ },
+ "person:paul dans|SC|S": {
+  "name": "Paul Dans",
   "url": null,
   "via": "unresolved"
  },
@@ -4496,6 +4821,12 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7d/Richard_Pan_2010.jpg/960px-Richard_Pan_2010.jpg",
   "via": "wikipedia"
  },
+ "person:robert c. white jr.|DC|H": {
+  "name": "Robert C. White Jr.",
+  "title": "Robert White (Washington, D.C., politician)",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Member_of_the_Council_of_the_District_of_Columbia_Robert_C._White_Jr_%28cropped%29.jpg/960px-Member_of_the_Council_of_the_District_of_Columbia_Robert_C._White_Jr_%28cropped%29.jpg",
+  "via": "wikipedia"
+ },
  "person:robert james peters|IL|H": {
   "name": "Robert James Peters",
   "title": "Robert Peters (Illinois politician)",
@@ -4521,6 +4852,12 @@
   "title": "Robin Kelly",
   "unverified": true,
   "url": "https://upload.wikimedia.org/wikipedia/commons/d/da/Robin_Kelly_portrait_%28118th_Congress%29.jpg",
+  "via": "wikipedia"
+ },
+ "person:rodney blum|IA|H": {
+  "name": "Rodney Blum",
+  "title": "Rod Blum",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/38/Rod_Blum_114th_congress_photo.jpg/960px-Rod_Blum_114th_congress_photo.jpg",
   "via": "wikipedia"
  },
  "person:ron hanks|CO|H": {
@@ -4580,6 +4917,12 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/Rep._Ryan_Dotson.jpg/960px-Rep._Ryan_Dotson.jpg",
   "via": "wikipedia"
  },
+ "person:saddam salim|VA|H": {
+  "name": "Saddam Salim",
+  "title": "Saddam Azlan Salim",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/SaddamSalim2023_%28cropped%29.jpg/960px-SaddamSalim2023_%28cropped%29.jpg",
+  "via": "wikipedia"
+ },
  "person:samuel kelley forstag|MT|H": {
   "name": "Samuel Kelley Forstag",
   "title": "Sam Forstag",
@@ -4592,6 +4935,12 @@
   "title": "Sam Wang (neuroscientist)",
   "unverified": true,
   "url": "https://upload.wikimedia.org/wikipedia/commons/f/f0/WangSeminar.png",
+  "via": "wikipedia"
+ },
+ "person:sarah eckhardt|TX|H": {
+  "name": "Sarah Eckhardt",
+  "title": "Sarah Eckhardt",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8a/Sarah_Eckhardt_%28cropped%29.jpg/960px-Sarah_Eckhardt_%28cropped%29.jpg",
   "via": "wikipedia"
  },
  "person:sarah trone garriott|IA|H": {
@@ -4647,10 +4996,23 @@
   "url": null,
   "via": "unresolved"
  },
+ "person:shannon lundgren|IA|H": {
+  "name": "Shannon Lundgren",
+  "title": "Shannon Lundgren",
+  "unverified": true,
+  "url": "https://upload.wikimedia.org/wikipedia/commons/9/9d/Iowa_State_Representative_Shannon_Lundgren_official_portrait_GA88.jpg",
+  "via": "wikipedia"
+ },
  "person:sharif street|PA|H": {
   "name": "Sharif Street",
   "title": "Sharif Street",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/Sharif_Street_-_18901_gov_minwage_dz_030_%28cropped%29.jpg/960px-Sharif_Street_-_18901_gov_minwage_dz_030_%28cropped%29.jpg",
+  "via": "wikipedia"
+ },
+ "person:shenna bellows|ME|S": {
+  "name": "Shenna Bellows",
+  "title": "Shenna Bellows",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Shenna_Bellows.jpg/960px-Shenna_Bellows.jpg",
   "via": "wikipedia"
  },
  "person:sherrod brown|OH|S": {
@@ -4665,6 +5027,12 @@
   "title": "Shevrin Jones",
   "unverified": true,
   "url": "https://upload.wikimedia.org/wikipedia/commons/1/16/Shevrin_Jones.jpg",
+  "via": "wikipedia"
+ },
+ "person:shiva ayyadurai|MA|S": {
+  "name": "Shiva Ayyadurai",
+  "title": "Shiva Ayyadurai",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/Shiva_Ayyadurai_Portrait.jpg/960px-Shiva_Ayyadurai_Portrait.jpg",
   "via": "wikipedia"
  },
  "person:stefany shaheen|NH|H": {
@@ -4693,6 +5061,19 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/8/87/Steve_Marshall_%2841773693585%29.jpg",
   "via": "wikipedia"
  },
+ "person:tara anne durant|VA|H": {
+  "name": "Tara Anne Durant",
+  "title": "Tara Durant",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Tara_Durant_at_Veterans_Bill_Signing%2C_Stafford_-_9-9-22_-_014_%28cropped%29.jpg/960px-Tara_Durant_at_Veterans_Bill_Signing%2C_Stafford_-_9-9-22_-_014_%28cropped%29.jpg",
+  "via": "wikipedia"
+ },
+ "person:taylor r darling|NY|H": {
+  "name": "Taylor R Darling",
+  "title": "Taylor Darling",
+  "unverified": true,
+  "url": "https://upload.wikimedia.org/wikipedia/commons/0/00/%2803-12-24%29_Taylor_Darling.jpg",
+  "via": "wikipedia"
+ },
  "person:tbd - runoff winner|OK|S": {
   "name": "TBD - Runoff Winner",
   "url": null,
@@ -4714,6 +5095,12 @@
   "url": null,
   "via": "unresolved"
  },
+ "person:thomas james feely|AZ|H": {
+  "name": "Thomas James Feely",
+  "title": "Jay Feely",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Jay_Feely_by_Gage_Skidmore.jpg/960px-Jay_Feely_by_Gage_Skidmore.jpg",
+  "via": "wikipedia"
+ },
  "person:thomas perriello|VA|H": {
   "name": "Thomas Perriello",
   "title": "Tom Perriello",
@@ -4723,6 +5110,11 @@
  },
  "person:tim greimel|MI|H": {
   "name": "Tim Greimel",
+  "url": null,
+  "via": "unresolved"
+ },
+ "person:tim myers|CA|H": {
+  "name": "Tim Myers",
   "url": null,
   "via": "unresolved"
  },
@@ -4737,6 +5129,12 @@
   "name": "Tram Nguyen",
   "title": "Tram Nguyen",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Tram_T._Nguyen.jpg/960px-Tram_T._Nguyen.jpg",
+  "via": "wikipedia"
+ },
+ "person:travis w. grantham|AZ|H": {
+  "name": "Travis W. Grantham",
+  "title": "Travis Grantham",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b6/Travis_Grantham_by_Gage_Skidmore_2.jpg/960px-Travis_Grantham_by_Gage_Skidmore_2.jpg",
   "via": "wikipedia"
  },
  "person:tricia pridemore|GA|H": {
@@ -4774,6 +5172,11 @@
   "url": null,
   "via": "unresolved"
  },
+ "person:wendy gooditis|VA|H": {
+  "name": "Wendy Gooditis",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:wes climer|SC|H": {
   "name": "Wes Climer",
   "url": null,
@@ -4783,6 +5186,12 @@
   "name": "Wesley Hunt",
   "title": "Wesley Hunt",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5c/Rep._Wesley_Hunt_official_photo.jpg/960px-Rep._Wesley_Hunt_official_photo.jpg",
+  "via": "wikipedia"
+ },
+ "person:wiley nickel|NC|S": {
+  "name": "Wiley Nickel",
+  "title": "Wiley Nickel",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/34/Rep._Wiley_Nickel%2C_118th_Congress_%281%29.jpg/960px-Rep._Wiley_Nickel%2C_118th_Congress_%281%29.jpg",
   "via": "wikipedia"
  },
  "person:william lawrence|MI|H": {
@@ -4800,6 +5209,12 @@
   "name": "Willie Junior Preston",
   "title": "Willie Preston",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/44/Willie_Preston_at_Candidate_Forums_for_the_Public_Good_2026_Cropped.jpg/960px-Willie_Preston_at_Candidate_Forums_for_the_Public_Good_2026_Cropped.jpg",
+  "via": "wikipedia"
+ },
+ "person:yadira caraveo|CO|H": {
+  "name": "Yadira Caraveo",
+  "title": "Yadira Caraveo",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/Rep._Yadira_Caraveo_-_118th_Congress.jpg/960px-Rep._Yadira_Caraveo_-_118th_Congress.jpg",
   "via": "wikipedia"
  }
 }

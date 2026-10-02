@@ -1,6 +1,6 @@
 {
  "count": 539,
- "fetched": "2026-09-13T22:14:22+00:00",
+ "fetched": "2026-10-02T01:24:41+00:00",
  "legislators": [
   {
    "ballotpedia": "Robert B. Aderholt",
@@ -1797,7 +1797,7 @@
    "state": "GA",
    "termEnd": "2027-01-03",
    "termStart": "2026-09-01",
-   "url": null,
+   "url": "https://blair.house.gov/",
    "votesmart": null,
    "wikipedia": "Everton Blair"
   },
@@ -6080,7 +6080,7 @@
    "state": "CA",
    "termEnd": "2027-01-03",
    "termStart": "2026-06-10",
-   "url": null,
+   "url": "https://gallagher.house.gov/",
    "votesmart": null,
    "wikipedia": null
   },
@@ -16324,7 +16324,7 @@
    "state": "CA",
    "termEnd": "2027-01-03",
    "termStart": "2026-09-02",
-   "url": null,
+   "url": "https://wahab.house.gov/",
    "votesmart": null,
    "wikipedia": "Aisha Wahab"
   },
