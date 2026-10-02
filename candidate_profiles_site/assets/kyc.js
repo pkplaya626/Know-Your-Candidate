@@ -590,20 +590,31 @@
     "funding_sources", "voting_alignment",
   ];
 
+  /* Lower case with accents removed (NFD, then drop the combining marks), on
+   * the query and the profile alike: "Diaz-Balart" finds "Díaz-Balart" and
+   * the other way round. */
+  function foldText(text) {
+    return String(text == null ? "" : text).normalize("NFD")
+      .replace(/\p{Mn}/gu, "").toLowerCase();
+  }
+
   function searchIndex(item) {
     if (item.__search) return item.__search;
     var parts = [];
     SEARCH_FIELDS.forEach(function (field) {
       if (item[field] && hasValue(item, field)) parts.push(String(item[field]));
     });
-    item.__search = parts.join(" ").toLowerCase();
+    // Other names the member's own record gives ("Jim Clyburn" for James
+    // Clyburn); derived in the pipeline from the bioguide-keyed record.
+    (item.aliases || []).forEach(function (alias) { parts.push(String(alias)); });
+    item.__search = foldText(parts.join(" "));
     return item.__search;
   }
 
   function matchesQuery(item, query) {
     if (!query) return true;
     var haystack = searchIndex(item);
-    return query.split(/\s+/).every(function (term) {
+    return foldText(query).split(/\s+/).every(function (term) {
       return !term || haystack.indexOf(term) !== -1;
     });
   }
@@ -808,14 +819,21 @@
         if (!people.length || doc.getElementById("kycNames")) return;
         var list = doc.createElement("datalist");
         list.id = "kycNames";
+        // Each option's value is the display name; a member's aliases ride in
+        // its label, which browsers show beside it and match typing against,
+        // so "Jim Clyburn" offers "James Clyburn".
         var names = {};
         people.forEach(function (p) {
           if (p.raceStatus && p.raceStatus !== "nominee" && p.raceStatus !== "advanced" &&
               p.isCandidate) return;      // off-ballot filers would swamp the list
-          names[p.name] = true;
+          var known = names[p.name] || (names[p.name] = []);
+          (p.aliases || []).forEach(function (alias) {
+            if (known.indexOf(alias) === -1) known.push(alias);
+          });
         });
         list.innerHTML = Object.keys(names).sort().map(function (name) {
-          return '<option value="' + escapeAttr(name) + '"></option>';
+          var label = names[name].length ? ' label="' + escapeAttr(names[name].join(" · ")) + '"' : "";
+          return '<option value="' + escapeAttr(name) + '"' + label + '></option>';
         }).join("");
         doc.body.appendChild(list);
         search.setAttribute("list", "kycNames");
@@ -897,6 +915,7 @@
     electionStatus: electionStatus,
     generalElectionDay: generalElectionDay,
     matchesQuery: matchesQuery,
+    foldText: foldText,
     searchIndex: searchIndex,
     districtOrder: districtOrder,
     debounce: debounce,
