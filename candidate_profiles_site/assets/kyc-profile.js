@@ -104,6 +104,7 @@
       '          <div class="money-tile"><span class="label">Cash on hand</span>',
       '            <span class="amount" id="profileModalCash"></span></div>',
       "        </div>",
+      '        <p class="finance-period" id="profileModalFinancePeriod" hidden></p>',
       '        <span class="field-label">Funding sources</span>',
       '        <p class="note-box" id="profileModalFunding" style="margin-top:6px"></p>',
       "      </section>",
@@ -627,6 +628,14 @@
     cashWrap.hidden = !item.cashOnHand;
     if (item.cashOnHand) el("profileModalCash").textContent = item.cashOnHand;
 
+    // Which months the money covers, next to the money: a Senate election
+    // period is six years and a House one two, and the tiles alone cannot
+    // say which a figure is.
+    var period = KYC.financePeriod(item);
+    var periodEl = el("profileModalFinancePeriod");
+    periodEl.hidden = !period;
+    periodEl.textContent = period ? period + "." : "";
+
     renderStatus(item);
     renderCrossLink(item);
     renderPlatform(item);
@@ -637,7 +646,8 @@
 
     el("profileModalSource").textContent = item.financeSource
       ? "Finance figures from the FEC" +
-        (item.financeAsOf ? ", through " + item.financeAsOf : "")
+        (item.financeAsOf ? ", through " + item.financeAsOf : "") +
+        (item.financeElection ? " (" + item.financeElection + " election period)" : "")
       : "Figures as filed in the source rosters";
   }
 
