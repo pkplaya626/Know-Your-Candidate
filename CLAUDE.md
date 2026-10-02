@@ -72,7 +72,7 @@ python build_profile_site.py field --check    # who is running, from the FEC
 python build_profile_site.py disclosures      # House financial disclosure links
 python build_profile_site.py results          # who is still in, from Wikipedia
 python build_profile_site.py campaigns        # campaign websites from FEC committees
-python -m unittest discover tests             # 372 tests, no dependencies
+python -m unittest discover tests             # 377 tests, no dependencies
 npm install && npm test                       # 276 real-DOM checks (needs jsdom)
 ```
 
@@ -283,6 +283,16 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     grid. A hand-edited copy per state would drift the first time one was
     touched, and a state page that disagreed with the grid about who holds
     a district would look entirely normal.
+
+35. **A registered campaign site is not a working one.** The FEC keeps the
+    website a committee filed, sometimes cycles ago, and lapsed campaign
+    domains get bought. On 2026-10-01 seven sites linked from this page,
+    five of them sitting members', served gambling spam under the
+    candidate's name, and 13 more did not exist in DNS. Such hosts go in
+    `overrides.BLOCKED_CAMPAIGN_HOSTS` with the date and what was seen. A
+    block is no wider than the evidence: a dead `www.` host does not block
+    its bare domain. Never treat a single failed lookup as dead (rule 8);
+    confirm it at a second resolver first.
 
 ## Curated data
 

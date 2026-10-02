@@ -5,6 +5,8 @@ lives apart from the loaders. Keep entries sourced and minimal - the CSVs are
 the source of truth wherever they are correct.
 """
 
+from urllib.parse import urlsplit
+
 # Photo overrides for people the automated Bioguide/Wikipedia chain misses or
 # resolves to the wrong image.
 #
@@ -68,6 +70,59 @@ STATUS_OVERRIDES = {
     "Cynthia Lummis": "Incumbent not running for re-election in 2026.",
 }
 
+# Seat-status notes keyed on bioguide id, the only safe key for a person
+# (rules 3 and 17). STATUS_OVERRIDES above matches a name substring; put new
+# entries here instead. Each value is (status line, source). A member who is
+# leaving the seat needs a NOT_SEEKING_MARKERS phrase in the status line.
+MEMBER_STATUS_BY_ID = {
+    # The DC article is titled "... election in the District of Columbia",
+    # which results.page_titles never asks for, so no outcome was ever read.
+    "N000147": ("Not running for re-election in 2026 (announced January 2026).",
+                "https://en.wikipedia.org/wiki/2026_United_States_House_of_Representatives_"
+                "election_in_the_District_of_Columbia"),
+    # Same title problem: "... election in the United States Virgin Islands".
+    "P000610": ("Retiring to run for governor of the U.S. Virgin Islands.",
+                "https://en.wikipedia.org/wiki/2026_United_States_House_of_Representatives_"
+                "elections#Non-voting_delegates"),
+    # Withdrew 2026-07-21, before Wikipedia's LA-6 box existed to say so.
+    "F000110": ("Not running for re-election in 2026; running for the Louisiana State Senate.",
+                "https://www.thegreenpapers.com/G26/LA"),
+}
+
+# Campaign websites that must never be linked, keyed on the host the FEC
+# committee registered (lower case; a key without "www." also covers the
+# "www." form). The FEC keeps whatever site a committee once filed, and a
+# lapsed campaign domain gets bought: on 2026-10-01 seven served gambling pages
+# under a candidate's name. Each value is (kind, date checked, what was seen).
+# "hijacked" entries must never come back. "dead" entries - the host does not
+# exist in DNS, or the hosting platform says the site is gone - may be removed
+# once the committee files a working address; validate reports any entry that
+# no longer matches a cached site.
+BLOCKED_CAMPAIGN_HOSTS = {
+    "maxinewatersforcongress.com": ("hijacked", "2026-10-01", "redirects to a gambling site"),
+    "tedlieu.com": ("hijacked", "2026-10-01", "serves a gambling page"),
+    "electjimbaird.com": ("hijacked", "2026-10-01", "redirects to a gambling site"),
+    "troycarter4congress.com": ("hijacked", "2026-10-01", "serves an online-casino page"),
+    "suozziforcongress2024.com": ("hijacked", "2026-10-01", "redirects to a gambling site"),
+    "votemikefrance.com": ("hijacked", "2026-10-01", "serves a gambling page under his name"),
+    "lukebronin.com": ("hijacked", "2026-10-01", "redirects to a gambling site"),
+    "benniegthompson.com": ("dead", "2026-10-01", "NXDOMAIN at two resolvers"),
+    "www.plaskettforcongress.org": ("dead", "2026-10-01", "NXDOMAIN at two resolvers"),
+    "www.steilforwisconsin.com": ("dead", "2026-10-01", "NXDOMAIN at two resolvers"),
+    "cleofields.com": ("dead", "2026-10-01", "NXDOMAIN at two resolvers"),
+    "www.shreveforcongress.com": ("dead", "2026-10-01", "NXDOMAIN at two resolvers"),
+    "davetaylorforcongrss.com": ("dead", "2026-10-01", "NXDOMAIN; the filing misspells it"),
+    "capitolforsenate.com": ("dead", "2026-10-01", "NXDOMAIN; the filing misspells it"),
+    "www.hallieforarkansas.com": ("dead", "2026-10-01", "NXDOMAIN at two resolvers"),
+    "lanciaforcongress2026.com": ("dead", "2026-10-01", "NXDOMAIN at two resolvers"),
+    "infoforpurviforcongress.com": ("dead", "2026-10-01", "NXDOMAIN at two resolvers"),
+    "www.raymondesmithjr.com": ("dead", "2026-10-01", "NXDOMAIN at two resolvers"),
+    "www.tonyguyforcongress.com": ("dead", "2026-10-01", "NXDOMAIN at two resolvers"),
+    "johndeatonforsenate.co": ("dead", "2026-10-01", "NXDOMAIN at two resolvers"),
+    "burbridgeforri.com": ("dead", "2026-10-01", "Squarespace 'Website Expired' page"),
+    "tanianymanforcongress.com": ("dead", "2026-10-01", "Wix 'domain not connected' page"),
+}
+
 # The 35 Senate seats on the 2026 ballot, keyed by state with the surname of
 # the sitting member of that seat. Previously duplicated verbatim inside both
 # index.html and map.html; it is pipeline data, so it belongs here.
@@ -87,8 +142,12 @@ SENATE_SEATS_UP_2026 = {
 NOT_SEEKING_MARKERS = ("retiring", "not running", "defeated", "ineligible", "resigned")
 
 
-def status_override(name, current):
-    """Return the curated status for *name*, falling back to *current*."""
+def status_override(name, current, member_id=None):
+    """Return the curated status for a member, falling back to *current*.
+
+    The bioguide-keyed table wins over the older name-substring one."""
+    if member_id and member_id in MEMBER_STATUS_BY_ID:
+        return MEMBER_STATUS_BY_ID[member_id][0]
     lowered = str(name).lower()
     for key, val in STATUS_OVERRIDES.items():
         if key.lower() in lowered:
@@ -100,3 +159,16 @@ def is_not_seeking(status):
     """True when a status line says the incumbent is leaving the seat."""
     lowered = str(status or "").lower()
     return any(marker in lowered for marker in NOT_SEEKING_MARKERS)
+
+
+def blocked_campaign_host(url):
+    """The BLOCKED_CAMPAIGN_HOSTS key that bars *url*, or None."""
+    try:
+        host = (urlsplit(str(url or "")).hostname or "").lower()
+    except ValueError:
+        return None
+    bare = host[4:] if host.startswith("www.") else host
+    for key in (host, bare):
+        if key and key in BLOCKED_CAMPAIGN_HOSTS:
+            return key
+    return None

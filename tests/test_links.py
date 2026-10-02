@@ -12,7 +12,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from kyc import campaigns, legislators  # noqa: E402
+from kyc import campaigns, legislators, overrides  # noqa: E402
 from kyc.profiles import _build_member  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -108,6 +108,25 @@ class TestMemberProfile(unittest.TestCase):
         self.assertEqual(profile["refs"]["govtrack"], 456945)
         self.assertEqual(profile["social"], {"twitter": "RepCasar"})
 
+    def test_an_id_keyed_status_says_who_is_leaving(self):
+        # Eleanor Holmes Norton announced her retirement in January 2026, but
+        # the DC results page was never read, so the site said she was running.
+        row = {"Bioguide ID": "N000147", "Name": "Eleanor Norton", "Chamber": "House",
+               "Party": "Democrat", "State": "DC", "District": "District 0",
+               "Status": "Active Member", "Term Start": "2025-01-03"}
+        profile = _build_member(row, 0)
+        self.assertFalse(profile["seekingReelection2026"])
+        self.assertIn("Not running", profile["status"])
+        # Keyed on the id, not the name: someone else called Norton is untouched.
+        other = dict(row, **{"Bioguide ID": "X000001"})
+        self.assertTrue(_build_member(other, 1)["seekingReelection2026"])
+
+    def test_every_id_keyed_status_is_sourced_and_parses(self):
+        for member_id, (status, source) in overrides.MEMBER_STATUS_BY_ID.items():
+            self.assertRegex(member_id, r"^[A-Z]\d{6}$")
+            self.assertTrue(source.startswith("https://"), member_id)
+            self.assertTrue(overrides.is_not_seeking(status), member_id)
+
     def test_nothing_is_written_without_a_source(self):
         profile = _build_member(self.row, 0)
         for key in ("website", "phone", "office", "contactForm", "refs", "social",
@@ -181,6 +200,42 @@ class TestCampaignSites(unittest.TestCase):
         self.assertNotIn("campaignSite", people[1])
         self.assertEqual(people[1]["campaignCommittee"], "AMY FOR CONGRESS")
         self.assertNotIn("campaignCommittee", people[2])
+
+    def test_a_lapsed_or_hijacked_domain_is_never_linked(self):
+        # On 2026-10-01 seven registered campaign domains served gambling
+        # pages under the candidate's name. The committee is still named; only
+        # the link goes.
+        cache = {"H1": {"found": True, "committee_id": "C1", "name": "WATERS",
+                        "url": "https://www.maxinewatersforcongress.com/about"},
+                 "H2": {"found": True, "committee_id": "C2", "name": "LIEU",
+                        "url": "https://tedlieu.com"},
+                 "H3": {"found": True, "committee_id": "C3", "name": "FINE",
+                        "url": "https://fine.example"}}
+        people = [{"fecCandidateId": "H1"}, {"fecCandidateId": "H2"}, {"fecCandidateId": "H3"}]
+        self.assertEqual(campaigns.apply_cache(people, cache), 1)
+        self.assertNotIn("campaignSite", people[0])
+        self.assertNotIn("campaignSite", people[1])
+        self.assertEqual(people[0]["campaignCommittee"], "WATERS")
+        self.assertEqual(people[2]["campaignSite"], "https://fine.example")
+        self.assertEqual([c for c, _, _ in campaigns.blocked_sites(cache)], ["H1", "H2"])
+
+    def test_a_dead_www_host_does_not_block_its_bare_domain(self):
+        # Only "www." failed to resolve; the bare domain may be a working site
+        # the committee files later, so the block is no wider than the evidence.
+        self.assertEqual(overrides.blocked_campaign_host("https://www.plaskettforcongress.org"),
+                         "www.plaskettforcongress.org")
+        self.assertIsNone(overrides.blocked_campaign_host("https://plaskettforcongress.org"))
+        self.assertEqual(overrides.blocked_campaign_host("https://WWW.LukeBronin.com/"),
+                         "lukebronin.com")
+        for junk in (None, "", "not a url", "http://[bad"):
+            self.assertIsNone(overrides.blocked_campaign_host(junk))
+
+    def test_every_blocklist_entry_says_why(self):
+        for host, (kind, checked, seen) in overrides.BLOCKED_CAMPAIGN_HOSTS.items():
+            self.assertIn(kind, ("hijacked", "dead"), host)
+            self.assertRegex(checked, r"^\d{4}-\d{2}-\d{2}$", host)
+            self.assertTrue(seen, host)
+            self.assertEqual(host, host.lower(), host)
 
 
 class TestArticleLinks(unittest.TestCase):

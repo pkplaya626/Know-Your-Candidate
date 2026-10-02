@@ -21,7 +21,7 @@ import os
 import re
 import time
 
-from . import fec
+from . import fec, overrides
 from .results import OFF_BALLOT
 
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "campaigns.json")
@@ -184,6 +184,19 @@ def apply_cache(profiles, cache):
             profile["campaignCommittee"] = record["name"]
             profile["campaignCommitteeId"] = record["committee_id"]
         if record.get("url"):
+            # A lapsed or hijacked domain is worse than no link at all.
+            if overrides.blocked_campaign_host(record["url"]):
+                continue
             profile["campaignSite"] = record["url"]
             applied += 1
     return applied
+
+
+def blocked_sites(cache):
+    """``[(candidate id, url, blocklist key)]`` for every cached site withheld."""
+    out = []
+    for candidate_id, record in sorted((cache or {}).items()):
+        key = overrides.blocked_campaign_host((record or {}).get("url"))
+        if key:
+            out.append((candidate_id, record["url"], key))
+    return out

@@ -190,6 +190,13 @@ def check_overrides(profiles, raw):
                             f"{len(dead_status)} status overrides match no profile",
                             dead_status))
 
+    member_ids = {p["id"] for p in profiles if not p.get("isCandidate")}
+    dead_ids = sorted(k for k in overrides.MEMBER_STATUS_BY_ID if k not in member_ids)
+    if dead_ids:
+        issues.append(Issue("warn", "stale-member-status",
+                            f"{len(dead_ids)} id-keyed status overrides match no member",
+                            dead_ids))
+
     candidate_keys = {
         (p["name"], p["state"]) for p in profiles if p["isCandidate"]
     }
@@ -692,7 +699,25 @@ def check_seats_contested(profiles):
     return issues
 
 
-def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None):
+def check_campaign_blocklist(campaigns):
+    """Blocklist entries must still bar something, or they are stale.
+
+    A dead entry left behind after a committee files a new address is
+    harmless; one keyed on a mistyped host never blocked anything at all.
+    """
+    if campaigns is None:
+        return []
+    from .campaigns import blocked_sites
+
+    used = {key for _, _, key in blocked_sites(campaigns)}
+    stale = sorted(k for k in overrides.BLOCKED_CAMPAIGN_HOSTS if k not in used)
+    if not stale:
+        return []
+    return [Issue("warn", "stale-campaign-block",
+                  f"{len(stale)} blocked campaign hosts match no cached site", stale)]
+
+
+def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_identity(profiles)
@@ -701,6 +726,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None):
     issues += check_fields(profiles)
     issues += check_placeholders(profiles)
     issues += check_overrides(profiles, raw)
+    issues += check_campaign_blocklist(campaigns)
     issues += check_races(profiles, races)
     issues += check_markup(profiles)
     issues += check_geometry(profiles, geo)

@@ -88,7 +88,9 @@ def _build(args):
     sites = campaigns.load_cache(args.root)
     stats["campaign_sites"] = campaigns.apply_cache(profiles, sites) if sites else 0
     if sites:
-        print(f"  campaigns: {stats['campaign_sites']} profiles with a campaign website")
+        withheld = len(campaigns.blocked_sites(sites))
+        print(f"  campaigns: {stats['campaign_sites']} profiles with a campaign website"
+              f" ({withheld} withheld as lapsed or hijacked)")
 
     cache = portraits.load_cache(args.root)
     if cache:
@@ -146,7 +148,7 @@ def _build(args):
               f"{stats['geo_territories']} territories")
 
     issues = validate.run(profiles, raw, races=race_list, geo=geo,
-                          snapshot=snapshot, finance=finance)
+                          snapshot=snapshot, finance=finance, campaigns=sites)
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
