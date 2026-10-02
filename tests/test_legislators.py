@@ -373,6 +373,75 @@ class TestValidation(unittest.TestCase):
         self.assertIn("stale-snapshot", codes)
 
 
+class TestSenateClass(unittest.TestCase):
+    """Each senator's class and the year their seat is next on the ballot,
+    from the term actually being served - never a hand table."""
+
+    def cycle(self, **kw):
+        snap = snapshot_of(entry(bioguide="A", **kw))
+        return legislators.senate_cycle(legislators.by_bioguide(snap)["A"])
+
+    def test_class_two_is_up_in_2026(self):
+        self.assertEqual(self.cycle(senate_class=2, end="2027-01-03"),
+                         {"senateClass": 2, "nextElection": 2026, "senateSpecial": False})
+
+    def test_class_three_is_up_in_2028(self):
+        self.assertEqual(self.cycle(senate_class=3, end="2029-01-03"),
+                         {"senateClass": 3, "nextElection": 2028, "senateSpecial": False})
+
+    def test_class_one_is_up_in_2030(self):
+        self.assertEqual(self.cycle(senate_class=1, end="2031-01-03"),
+                         {"senateClass": 1, "nextElection": 2030, "senateSpecial": False})
+
+    def test_an_appointed_class_three_seat_is_a_2026_special(self):
+        # Jon Husted's appointment ends on election day 2026: the seat is on
+        # this year's ballot two years before its class's own cycle.
+        self.assertEqual(self.cycle(senate_class=3, state="OH", end="2026-11-03"),
+                         {"senateClass": 3, "nextElection": 2026, "senateSpecial": True})
+
+    def test_a_house_member_has_no_class(self):
+        snap = snapshot_of(entry(bioguide="H", chamber="rep", end="2027-01-03"))
+        self.assertIsNone(legislators.senate_class(legislators.by_bioguide(snap)["H"]))
+
+    def test_an_unreadable_term_end_is_none_not_a_guess(self):
+        self.assertIsNone(legislators.next_election({"termEnd": ""}))
+        self.assertIsNone(legislators.next_election(None))
+        self.assertIsNone(legislators.senate_class({"senateClass": 4}))
+
+
+class TestSenateClassValidation(unittest.TestCase):
+
+    def senator(self, pid, state, cls, nxt, up=False, name=None):
+        return {"id": pid, "name": name or pid, "chamber": "Senate", "state": state,
+                "party": "Republican", "isCandidate": False, "senateClass": cls,
+                "nextElection": nxt, "seatUp2026": up}
+
+    def codes(self, profiles, snapshot=True):
+        return {(i.level, i.code) for i in validate.check_senate_classes(
+            profiles, {"legislators": []} if snapshot else None)}
+
+    def test_a_clean_pair_reports_nothing(self):
+        self.assertEqual(self.codes([self.senator("A", "OH", 1, 2030),
+                                     self.senator("B", "OH", 3, 2026, up=True)]), set())
+
+    def test_a_missing_class_is_an_error(self):
+        self.assertIn(("error", "senate-class-missing"),
+                      self.codes([self.senator("A", "TX", None, 2026, up=True)]))
+
+    def test_two_senators_of_one_class_is_an_error(self):
+        self.assertIn(("error", "senate-class-clash"),
+                      self.codes([self.senator("A", "TX", 2, 2026, up=True),
+                                  self.senator("B", "TX", 2, 2026, up=True)]))
+
+    def test_next_election_disagreeing_with_seat_up_is_reported(self):
+        self.assertIn(("warn", "senate-next-election"),
+                      self.codes([self.senator("A", "TX", 2, 2026, up=False)]))
+
+    def test_without_a_snapshot_it_says_it_did_not_look(self):
+        self.assertEqual(self.codes([self.senator("A", "TX", None, 2026)], snapshot=False),
+                         {("warn", "senate-class-unchecked")})
+
+
 class TestAgainstTheRealSnapshot(unittest.TestCase):
     """The committed snapshot and the committed rosters must agree."""
 
@@ -417,6 +486,21 @@ class TestAgainstTheRealSnapshot(unittest.TestCase):
         senators = [p for p in profiles
                     if not p["isCandidate"] and "Senate" in p["chamber"]]
         self.assertTrue(all(p["termEndYear"] for p in senators))
+
+    def test_every_senator_has_a_class_and_next_election(self):
+        profiles, _ = build_profiles(self.raw, snapshot=self.snapshot)
+        senators = [p for p in profiles
+                    if not p["isCandidate"] and "Senate" in p["chamber"]]
+        self.assertTrue(all(p["senateClass"] in (1, 2, 3) for p in senators))
+        # The 2026 ballot by this route is exactly the seatUp2026 set.
+        self.assertEqual({p["id"] for p in senators if p["nextElection"] == 2026},
+                         {p["id"] for p in senators if p["seatUp2026"]})
+        # Every special is a seat whose class is not the 2026 class.
+        for p in senators:
+            if p["senateSpecial"]:
+                self.assertEqual(p["nextElection"], 2026)
+                self.assertNotEqual(p["senateClass"], 2)
+        self.assertEqual(validate.check_senate_classes(profiles, self.snapshot), [])
 
     def test_the_snapshot_is_json_and_sorted(self):
         with open(legislators.snapshot_path(ROOT), encoding="utf-8") as handle:
