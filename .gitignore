@@ -34,3 +34,6 @@ package-lock.json
 *.csv.tmp
 candidate_profiles_site/data/*.tmp
 _inline/
+
+# Agent worktrees (Claude Code) live inside the checkout; never commit them.
+.claude/worktrees/
