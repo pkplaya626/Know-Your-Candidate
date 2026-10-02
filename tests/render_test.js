@@ -208,6 +208,45 @@ async function testShared(page) {
       !/kyc-absent/.test(KYC.renderField({ receipts: "$0.00", quality: {} }, "receipts")));
   });
 
+  suite(`${page} — finance period`, () => {
+    // An incumbent's and a challenger's totals were once measured over
+    // different periods with nothing on the page to say so.
+    const senate = { financeSource: "FEC", chamber: "Senate", financePeriod: "election",
+      financeElection: 2026, financeSince: "2021-01-01", financeAsOf: "2026-08-26" };
+    const p = KYC.financePeriod(senate);
+    check("the election and its months are named",
+      p.indexOf("Raised for the 2026 election, Jan 2021 – Aug 2026") === 0, p);
+    check("a six-year Senate period says so", /six-year term/.test(p) && /2021/.test(p), p);
+
+    const house = KYC.financePeriod({ financeSource: "FEC", chamber: "House (Candidate)",
+      financePeriod: "election", financeElection: 2026,
+      financeSince: "2025-01-01", financeAsOf: "2026-06-30" });
+    check("a two-year House period carries no Senate caveat",
+      house === "Raised for the 2026 election, Jan 2025 – Jun 2026", house);
+
+    const noStart = KYC.financePeriod({ financeSource: "FEC", chamber: "House (Candidate)",
+      financePeriod: "election", financeElection: 2026, financeSince: null,
+      financeAsOf: "2026-06-30" });
+    check("no start date is reported as none, not invented",
+      noStart === "Raised for the 2026 election, through Jun 2026", noStart);
+
+    const cycle = KYC.financePeriod({ financeSource: "FEC", chamber: "Senate",
+      financePeriod: "cycle", financeSince: null, financeAsOf: "2026-08-26" });
+    check("an old two-year cycle total is called one, not an election total",
+      /2025–26 two-year cycle/.test(cycle) && !/2026 election/.test(cycle) &&
+        /not comparable/.test(cycle), cycle);
+
+    check("no money, no period", KYC.financePeriod({ receipts: "No data" }) === "");
+    check("a malformed date is dropped, not shown",
+      KYC.financePeriod({ financeSource: "FEC", financePeriod: "election",
+        financeElection: 2026, financeSince: "<b>x</b>", financeAsOf: "2026-06-30" }) ===
+        "Raised for the 2026 election, through Jun 2026");
+
+    const badge = KYC.renderField(Object.assign({ receipts: "$1", quality: {} }, senate),
+      "receipts", { source: true });
+    check("the FEC badge title carries the period", /Jan 2021/.test(badge) && /2026 election/.test(badge));
+  });
+
   suite(`${page} — election arithmetic`, () => {
     const es = KYC.electionStatus(2026, new Date("2026-08-20T12:00:00Z"));
     check("2026 election day is 3 November", es.iso === "2026-11-03", es.iso);
@@ -486,6 +525,47 @@ async function testDirectoryAsync() {
     check("hostile URLs are escaped, not interpreted", !/<img/.test(html) && !/<b>/.test(html));
     KYC.profile.close();
     window.legislatorsData.pop();
+  });
+
+  suite("index.html — finance period in the dialog", () => {
+    // KYC.byId indexes the profiles once, so borrow a real profile, give it
+    // the fields under test, and put it back exactly as it was.
+    const host = window.legislatorsData.find((p) => p.isCandidate && p.financeSource);
+    const show = (fields) => {
+      const saved = {};
+      Object.keys(fields).forEach((k) => { saved[k] = host[k]; host[k] = fields[k]; });
+      KYC.profile.open(host.id);
+      const el = D.getElementById("profileModalFinancePeriod");
+      const out = { hidden: el.hidden, text: el.textContent,
+        footer: D.getElementById("profileModalSource").textContent };
+      KYC.profile.close();
+      Object.keys(saved).forEach((k) => {
+        if (saved[k] === undefined) delete host[k]; else host[k] = saved[k];
+      });
+      return out;
+    };
+    check("a candidate with FEC money exists", !!host);
+    const base = { chamber: "Senate (Candidate)", financeSource: "FEC",
+      financePeriod: "election", financeElection: 2026, financeAsOf: "2026-06-30" };
+    const withStart = show(Object.assign({ financeSince: "2025-01-01" }, base));
+    check("the period shows under the money",
+      !withStart.hidden && withStart.text === "Raised for the 2026 election, Jan 2025 – Jun 2026.",
+      withStart.text);
+    check("the footer names the election period", /2026 election period/.test(withStart.footer),
+      withStart.footer);
+    const without = show(Object.assign({ financeSince: null }, base));
+    check("without a start date the period says only what is known",
+      !without.hidden && without.text === "Raised for the 2026 election, through Jun 2026.",
+      without.text);
+    const hostile = show(Object.assign({ financeSince: "<img src=x onerror=alert(1)>" }, base));
+    check("a hostile start date never reaches the markup",
+      !/<img/.test(D.getElementById("profileModalFinancePeriod").innerHTML) &&
+        !/img/.test(hostile.text), hostile.text);
+    const none = show({ financeSource: undefined });
+    check("no money, no period line", none.hidden && none.text === "");
+
+    const real = window.legislatorsData.find((p) => p.financeSource && p.financeElection);
+    check("built profiles carry the election period", !!real);
   });
 
   suite("index.html — in this race", () => {

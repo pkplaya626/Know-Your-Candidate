@@ -200,6 +200,20 @@ class TestToProfiles(unittest.TestCase):
         made, _ = candidates.to_profiles(candidates.build_cache([filing()]), [])
         self.assertEqual(made[0]["filedName"], "DOE, JANE")
 
+    def test_the_election_period_is_carried(self):
+        row = dict(filing(office="S", district=None), coverage_start_date="2021-01-01T00:00:00")
+        made, _ = candidates.to_profiles(candidates.build_cache([row]), [])
+        self.assertEqual(made[0]["financeSince"], "2021-01-01")
+        self.assertEqual(made[0]["financeAsOf"], "2026-06-30")
+        self.assertEqual(made[0]["financePeriod"], "election")
+        self.assertEqual(made[0]["financeElection"], candidates.CYCLE)
+
+    def test_a_field_cached_without_a_start_date_invents_none(self):
+        # Caches written before coverage_start_date was kept.
+        made, _ = candidates.to_profiles(candidates.build_cache([filing()]), [])
+        self.assertIsNone(made[0]["financeSince"])
+        self.assertEqual(made[0]["financePeriod"], "election")
+
     def test_no_speculative_portrait_urls(self):
         # 1,979 guessed Wikipedia URLs is ~4,000 requests that 404 and took
         # the page's load event to 59 seconds.

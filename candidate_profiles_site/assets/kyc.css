@@ -1229,6 +1229,12 @@ svg { flex: none; }
 }
 .money-tile.in .amount { color: var(--money-in); }
 .money-tile.out .amount { color: var(--money-out); }
+.finance-period {
+  margin: calc(-1 * var(--s-2)) 0 var(--s-4);
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
 
 .note-box {
   padding: var(--s-3);
