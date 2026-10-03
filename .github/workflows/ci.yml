@@ -19,9 +19,9 @@ jobs:
         # The pipeline is standard-library only; check the range we claim.
         python-version: ["3.9", "3.12", "3.13"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -68,9 +68,9 @@ jobs:
     name: Site
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           # jsdom 30 requires ^22.22.2 || ^24.15.0 || >=26. Node 20 installed
           # it happily and then died inside undici at require() time.
@@ -141,7 +141,7 @@ jobs:
     name: Local asset references resolve
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Every href/src on a page exists on disk
         run: |
           python3 - <<'PY'
