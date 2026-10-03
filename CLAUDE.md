@@ -28,7 +28,8 @@ data/disclosures.json       ──┤
 data/primary_results.json   ──┤
 data/committees.json        ──┤   (committee rosters, with rank and title)
 data/campaigns.json         ──┤
-data/enrichment.json        ──┴─> kyc/ ──> candidate_profiles_site/
+data/enrichment.json        ──┤
+data/odds.json              ──┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
                                              states/*.html      (generated, one per state)
@@ -37,6 +38,7 @@ data/enrichment.json        ──┴─> kyc/ ──> candidate_profiles_site/
                                              └──> map.html      (partisan map)
                                              assets/kyc.css
                                              assets/kyc.js
+                                             assets/kyc-odds.js
                                              assets/kyc-cards.js
                                              assets/kyc-profile.js
                                              assets/kyc-senate.js
@@ -51,8 +53,8 @@ data/enrichment.json        ──┴─> kyc/ ──> candidate_profiles_site/
 - Everything in `data/` is **generated**. Never edit `profiles.js` or `geo.js`
   by hand. `portraits.json`, `finance.json`, `fec_field.json`,
   `disclosures.json`, `primary_results.json`, `committees.json`,
-  `campaigns.json` and `enrichment.json` are caches, but they *are*
-  hand-editable.
+  `campaigns.json`, `enrichment.json` and `odds.json` are caches, but they
+  *are* hand-editable.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them only to check they load the right scripts in the right order; it never
   rewrites them. `states/*.html` and `sitemap.xml` are the opposite: generated
@@ -76,12 +78,13 @@ python build_profile_site.py disclosures      # House and Senate disclosure link
 python build_profile_site.py results          # who is still in, from Wikipedia
 python build_profile_site.py campaigns        # campaign websites from FEC committees
 python build_profile_site.py enrich           # fill gaps; check every campaign site
-python -m unittest discover tests             # 571 tests, no dependencies
-npm install && npm test                       # 478 real-DOM checks (needs jsdom)
+python build_profile_site.py odds             # market prices and polling averages
+python -m unittest discover tests             # 590 tests, no dependencies
+npm install && npm test                       # 491 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
-`campaigns`, `enrich` and `congress` touch the network. Run the
+`campaigns`, `enrich`, `odds` and `congress` touch the network. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -359,6 +362,23 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     off-screen) is a compromised site, not a lapsed one: Ron Johnson's
     stays linked and is reported. A bot wall, a JavaScript-only page or a
     timeout concludes nothing (rule 8).
+
+40. **A market belongs to the state its own question and rules name, and
+    its price is quoted, never blended.** Kalshi's series ticker
+    `SENATELA` holds *Kentucky's* race - "Will Republicans win the Senate
+    race in Kentucky?", resolving on "a Senator of Kentucky" - while
+    Louisiana's sits under `KXSENATELA`, and Alabama's series is titled
+    just "Alabama". `odds.py` uses tickers and titles only to find
+    candidates; a market is attributed to a state when its question and its
+    resolution rules both name it, and a Polymarket event when its title and
+    description agree. An outcome label that names nobody in the race is
+    shown as the party the market resolves on and reported (rule 20). Each
+    source's price, and each aggregator's polling average as the race's
+    Wikipedia page lists it, is shown as published, dated, linked and
+    labelled as not a poll and not this site's forecast; a poll table is
+    used only when every candidate column names someone in the race, which
+    is how the primary's "Cornyn / Hunt / Paxton" table stayed off the
+    November race.
 
 ## Curated data
 

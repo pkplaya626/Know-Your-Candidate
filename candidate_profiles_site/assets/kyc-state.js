@@ -124,7 +124,8 @@
     /* The 2026 races, one section each, in ballot order. */
     var raceHtml = senateRaces.concat(houseRaces).map(function (race) {
       var people = peopleIn(race);
-      return cards.raceSection(race, people, { title: districtLabel(race), stateLink: false });
+      return cards.raceSection(race, people, { title: districtLabel(race), stateLink: false,
+                                               fullOdds: true });
     }).join("");
     if (raceHtml) {
       /* Texas has 38 districts; a row of jump chips saves the scroll. */

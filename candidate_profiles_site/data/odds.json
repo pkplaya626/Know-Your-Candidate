@@ -1,0 +1,4159 @@
+{
+ "control": {
+  "senate": [
+   {
+    "event": "CONTROLS-2026",
+    "outcomes": [
+     {
+      "label": "Democratic Party",
+      "party": "d",
+      "price": 0.63,
+      "question": "Will Democrats win the U.S. Senate in 2026?"
+     },
+     {
+      "label": "Republican Party",
+      "party": "r",
+      "price": 0.38,
+      "question": "Will Republicans win the U.S. Senate in 2026?"
+     }
+    ],
+    "source": "kalshi",
+    "title": "Which party will win the U.S. Senate?",
+    "url": "https://kalshi.com/markets/controls"
+   },
+   {
+    "event": "which-party-will-win-the-senate-in-2026",
+    "outcomes": [
+     {
+      "ask": 0.65,
+      "bid": 0.64,
+      "label": "Democratic Party",
+      "party": "d",
+      "price": 0.645,
+      "question": "Will the Democratic Party control the Senate after the 2026 Midterm elections?",
+      "volume": 3221939.4994369983
+     },
+     {
+      "ask": 0.36,
+      "bid": 0.35,
+      "label": "Republican Party",
+      "party": "r",
+      "price": 0.355,
+      "question": "Will the Republican Party control the Senate after the 2026 Midterm elections?",
+      "volume": 2350063.1206650003
+     }
+    ],
+    "source": "polymarket",
+    "title": "Which party will win the Senate in 2026?",
+    "url": "https://polymarket.com/event/which-party-will-win-the-senate-in-2026"
+   }
+  ]
+ },
+ "fetched": "2026-10-03T05:05:07+00:00",
+ "notes": [],
+ "races": {
+  "S-AK-2026": {
+   "markets": [
+    {
+     "event": "SENATEAK-26",
+     "outcomes": [
+      {
+       "ask": 0.68,
+       "bid": 0.67,
+       "label": "Democratic party",
+       "party": "d",
+       "price": 0.68,
+       "question": "Will Democratics win the Senate race in Alaska?",
+       "volume": 712669.03
+      },
+      {
+       "ask": 0.33,
+       "bid": 0.32,
+       "label": "Republican party",
+       "party": "r",
+       "price": 0.33,
+       "question": "Will Republicans win the Senate race in Alaska?",
+       "volume": 1405082.74
+      }
+     ],
+     "source": "kalshi",
+     "title": "Alaska Senate winner?",
+     "url": "https://kalshi.com/markets/senateak"
+    },
+    {
+     "event": "alaska-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.71,
+       "bid": 0.7,
+       "label": "Mary Peltola",
+       "party": null,
+       "price": 0.705,
+       "question": "Will Mary Peltola win the Alaska Senate race in 2026?",
+       "volume": 682239.936393
+      },
+      {
+       "ask": 0.29,
+       "bid": 0.28,
+       "label": "Sen. Dan Sullivan",
+       "party": null,
+       "price": 0.285,
+       "question": "Will Dan Sullivan win the Alaska Senate race in 2026?",
+       "volume": 320314.877231
+      },
+      {
+       "ask": 0.001,
+       "bid": null,
+       "label": "Ann Diener",
+       "party": null,
+       "price": 0.0005,
+       "question": "Will Ann Diener win the Alaska Senate race in 2026?",
+       "volume": 37064.207577999994
+      },
+      {
+       "ask": 0.001,
+       "bid": null,
+       "label": "Dustin Darden",
+       "party": null,
+       "price": 0.0005,
+       "question": "Will Dustin Darden win the Alaska Senate race in 2026?",
+       "volume": 24336.347312
+      },
+      {
+       "ask": 0.001,
+       "bid": null,
+       "label": "Richard Grayson",
+       "party": null,
+       "price": 0.0005,
+       "question": "Will Richard Grayson win the Alaska Senate race in 2026?",
+       "volume": 24856.937521000007
+      },
+      {
+       "ask": 0.001,
+       "bid": null,
+       "label": "Daniel J. Sullivan Jr.",
+       "party": null,
+       "price": 0.0005,
+       "question": "Will Daniel J. Sullivan Jr. win the Alaska Senate race in 2026?",
+       "volume": 0.0
+      },
+      {
+       "ask": 0.001,
+       "bid": null,
+       "label": "David Leslie",
+       "party": null,
+       "price": 0.0005,
+       "question": "Will David Leslie win the Alaska Senate race in 2026?",
+       "volume": 2405.94
+      }
+     ],
+     "source": "polymarket",
+     "title": "Alaska Senate Election Winner",
+     "url": "https://polymarket.com/event/alaska-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in Alaska",
+    "rows": [
+     {
+      "administered": "through September 30, 2026",
+      "aggregator": "Decision Desk HQ",
+      "margin": "Peltola +0.3%",
+      "other": 4.9,
+      "results": [
+       {
+        "id": "S001198",
+        "label": "Dan S. Sullivan (R)",
+        "party": "r",
+        "pct": 47.4
+       },
+       {
+        "id": "FEC_S6AK00276",
+        "label": "Mary Peltola (D)",
+        "party": "d",
+        "pct": 47.7
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://votes.decisiondeskhq.com/races/2026-11-03/alaska-us-senate-general-election/polling"
+     },
+     {
+      "administered": "through September 30, 2026",
+      "aggregator": "FiftyPlusOne",
+      "margin": "Peltola +3.5%",
+      "other": 5.1,
+      "results": [
+       {
+        "id": "S001198",
+        "label": "Dan S. Sullivan (R)",
+        "party": "r",
+        "pct": 45.7
+       },
+       {
+        "id": "FEC_S6AK00276",
+        "label": "Mary Peltola (D)",
+        "party": "d",
+        "pct": 49.2
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://fiftyplusone.news/polls/senate/general/alaska"
+     },
+     {
+      "administered": "through September 30, 2026",
+      "aggregator": "Race to the WH",
+      "margin": "Peltola +2.1%",
+      "other": 3.1,
+      "results": [
+       {
+        "id": "S001198",
+        "label": "Dan S. Sullivan (R)",
+        "party": "r",
+        "pct": 47.4
+       },
+       {
+        "id": "FEC_S6AK00276",
+        "label": "Mary Peltola (D)",
+        "party": "d",
+        "pct": 49.5
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://www.racetothewh.com/senate/26polls"
+     },
+     {
+      "administered": "September 8–30, 2026",
+      "aggregator": "RealClearPolitics",
+      "margin": "Peltola +1.5%",
+      "other": 2.5,
+      "results": [
+       {
+        "id": "S001198",
+        "label": "Dan S. Sullivan (R)",
+        "party": "r",
+        "pct": 48.0
+       },
+       {
+        "id": "FEC_S6AK00276",
+        "label": "Mary Peltola (D)",
+        "party": "d",
+        "pct": 49.5
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://www.realclearpolling.com/polls/senate/general/2026/alaska/peltola-vs-sullivan"
+     },
+     {
+      "administered": "through September 30, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "Peltola +2.0%",
+      "other": 7.4,
+      "results": [
+       {
+        "id": "S001198",
+        "label": "Dan S. Sullivan (R)",
+        "party": "r",
+        "pct": 45.3
+       },
+       {
+        "id": "FEC_S6AK00276",
+        "label": "Mary Peltola (D)",
+        "party": "d",
+        "pct": 47.3
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Alaska#Polling"
+   }
+  },
+  "S-AL-2026": {
+   "markets": [
+    {
+     "event": "SENATEAL-26",
+     "outcomes": [
+      {
+       "ask": 0.984,
+       "bid": 0.964,
+       "label": "Barry Moore",
+       "party": "r",
+       "price": 0.984,
+       "question": "Will Republicans win the Senate race in Alabama?",
+       "volume": 2109.23
+      },
+      {
+       "ask": 0.03,
+       "bid": 0.016,
+       "label": "Everett Wess",
+       "party": "d",
+       "price": 0.03,
+       "question": "Will Democratics win the Senate race in Alabama?",
+       "volume": 8836.61
+      }
+     ],
+     "source": "kalshi",
+     "title": "Alabama Senate winner?",
+     "url": "https://kalshi.com/markets/senateal"
+    },
+    {
+     "event": "alabama-senate-election-winner-154",
+     "outcomes": [
+      {
+       "ask": 0.992,
+       "bid": 0.961,
+       "label": "Barry Moore (R)",
+       "party": "r",
+       "price": 0.9765,
+       "question": "Will the Republicans win the Alabama Senate race in 2026?",
+       "volume": 7132.411848
+      },
+      {
+       "ask": 0.029,
+       "bid": 0.004,
+       "label": "Everett Wess (D)",
+       "party": "d",
+       "price": 0.0165,
+       "question": "Will the Democrats win the Alabama Senate race in 2026?",
+       "volume": 5870.865706999999
+      }
+     ],
+     "source": "polymarket",
+     "title": "Alabama Senate Election Winner",
+     "url": "https://polymarket.com/event/alabama-senate-election-winner-154"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in Alabama",
+    "rows": [
+     {
+      "administered": "through September 25, 2026",
+      "aggregator": "Race to the WH",
+      "margin": "Moore +19.0%",
+      "other": 14.0,
+      "results": [
+       {
+        "id": "CAND_29",
+        "label": "Barry Moore (R)",
+        "party": "r",
+        "pct": 52.5
+       },
+       {
+        "id": "CAND_28",
+        "label": "Everett Wess (D)",
+        "party": "d",
+        "pct": 33.5
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://www.racetothewh.com/senate/26polls"
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Alabama#Polling"
+   }
+  },
+  "S-AR-2026": {
+   "markets": [
+    {
+     "event": "SENATEAR-26",
+     "outcomes": [
+      {
+       "ask": 0.938,
+       "bid": 0.934,
+       "label": "Tom Cotton",
+       "party": "r",
+       "price": 0.94,
+       "question": "Will Republicans win the Senate race in Arkansas?",
+       "volume": 38927.79
+      },
+      {
+       "ask": 0.069,
+       "bid": 0.061,
+       "label": "Hallie Shoffner",
+       "party": "d",
+       "price": 0.058,
+       "question": "Will Democratics win the Senate race in Arkansas?",
+       "volume": 138058.88
+      }
+     ],
+     "source": "kalshi",
+     "title": "Arkansas Senate winner?",
+     "url": "https://kalshi.com/markets/senatear"
+    },
+    {
+     "event": "arkansas-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.938,
+       "bid": 0.937,
+       "label": "Tom Cotton (R)",
+       "party": "r",
+       "price": 0.9375,
+       "question": "Will the Republicans win the Arkansas Senate race in 2026?",
+       "volume": 19736.463552
+      },
+      {
+       "ask": 0.064,
+       "bid": 0.062,
+       "label": "Hallie Shoffner (D)",
+       "party": "d",
+       "price": 0.063,
+       "question": "Will the Democrats win the Arkansas Senate race in 2026?",
+       "volume": 9484.034669
+      }
+     ],
+     "source": "polymarket",
+     "title": "Arkansas Senate Election Winner",
+     "url": "https://polymarket.com/event/arkansas-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in Arkansas",
+    "rows": [
+     {
+      "administered": "through August 18, 2026",
+      "aggregator": "Race to the WH",
+      "margin": "Cotton +10.0%",
+      "other": 12.2,
+      "results": [
+       {
+        "id": "C001095",
+        "label": "Tom Cotton (R)",
+        "party": "r",
+        "pct": 48.9
+       },
+       {
+        "id": "CAND_30",
+        "label": "Hallie Shoffner (D)",
+        "party": "d",
+        "pct": 38.9
+       }
+      ],
+      "updated": "September 14, 2026",
+      "url": "https://www.racetothewh.com/senate/26polls"
+     },
+     {
+      "administered": "through August 18, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "Cotton +6.6%",
+      "other": 11.4,
+      "results": [
+       {
+        "id": "C001095",
+        "label": "Tom Cotton (R)",
+        "party": "r",
+        "pct": 47.6
+       },
+       {
+        "id": "CAND_30",
+        "label": "Hallie Shoffner (D)",
+        "party": "d",
+        "pct": 41.0
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Arkansas#Polling"
+   }
+  },
+  "S-CO-2026": {
+   "markets": [
+    {
+     "event": "SENATECO-26",
+     "outcomes": [
+      {
+       "ask": 0.989,
+       "bid": 0.984,
+       "label": "John Hickenlooper",
+       "party": "d",
+       "price": 0.988,
+       "question": "Will Democratics win the Senate race in Colorado?",
+       "volume": 12368.72
+      },
+      {
+       "ask": 0.013,
+       "bid": 0.011,
+       "label": "Mark Baisley",
+       "party": "r",
+       "price": 0.013,
+       "question": "Will Republicans win the Senate race in Colorado?",
+       "volume": 17935.37
+      }
+     ],
+     "source": "kalshi",
+     "title": "Colorado Senate winner?",
+     "url": "https://kalshi.com/markets/senateco"
+    },
+    {
+     "event": "colorado-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.992,
+       "bid": 0.97,
+       "label": "John Hickenlooper (D)",
+       "party": "d",
+       "price": 0.981,
+       "question": "Will the Democrats win the Colorado Senate race in 2026?",
+       "volume": 14181.433195000005
+      },
+      {
+       "ask": 0.024,
+       "bid": 0.011,
+       "label": "Mark Baisley (R)",
+       "party": "r",
+       "price": 0.0175,
+       "question": "Will the Republicans win the Colorado Senate race in 2026?",
+       "volume": 37019.83475499998
+      }
+     ],
+     "source": "polymarket",
+     "title": "Colorado Senate Election Winner",
+     "url": "https://polymarket.com/event/colorado-senate-election-winner"
+    }
+   ]
+  },
+  "S-DE-2026": {
+   "markets": [
+    {
+     "event": "SENATEDE-26",
+     "outcomes": [
+      {
+       "ask": 0.995,
+       "bid": 0.986,
+       "label": "Democratic party",
+       "party": "d",
+       "price": 0.995,
+       "question": "Will Democratics win the Senate race in Delaware?",
+       "volume": 7262.54
+      },
+      {
+       "ask": 0.012,
+       "bid": 0.005,
+       "label": "Republican party",
+       "party": "r",
+       "price": 0.005,
+       "question": "Will Republicans win the Senate race in Delaware?",
+       "volume": 19182.06
+      }
+     ],
+     "source": "kalshi",
+     "title": "Delaware Senate winner?",
+     "url": "https://kalshi.com/markets/senatede"
+    },
+    {
+     "event": "delaware-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.994,
+       "bid": 0.98,
+       "label": "Democrat",
+       "party": "d",
+       "price": 0.987,
+       "question": "Will the Democrats win the Delaware Senate race in 2026?",
+       "volume": 12065.903503000005
+      },
+      {
+       "ask": 0.022,
+       "bid": 0.007,
+       "label": "Republican",
+       "party": "r",
+       "price": 0.0145,
+       "question": "Will the Republicans win the Delaware Senate race in 2026?",
+       "volume": 19649.865721
+      }
+     ],
+     "source": "polymarket",
+     "title": "Delaware Senate Election Winner",
+     "url": "https://polymarket.com/event/delaware-senate-election-winner"
+    }
+   ]
+  },
+  "S-FL-2026": {
+   "markets": [
+    {
+     "event": "SENATEFLS-26",
+     "outcomes": [
+      {
+       "ask": 0.904,
+       "bid": 0.9,
+       "label": "Ashley Moody",
+       "party": "r",
+       "price": 0.9,
+       "question": "Will Republicans win the Senate race in Florida?",
+       "volume": 370862.21
+      },
+      {
+       "ask": 0.1,
+       "bid": 0.098,
+       "label": "Angie Nixon",
+       "party": "d",
+       "price": 0.1,
+       "question": "Will Democratics win the Senate race in Florida?",
+       "volume": 708501.72
+      }
+     ],
+     "source": "kalshi",
+     "title": "Florida Senate winner?",
+     "url": "https://kalshi.com/markets/senatefls"
+    },
+    {
+     "event": "florida-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.92,
+       "bid": 0.91,
+       "label": "Ashley Moody (R)",
+       "party": "r",
+       "price": 0.915,
+       "question": "Will the Republicans win the Florida Senate race in 2026?",
+       "volume": 90997.499579
+      },
+      {
+       "ask": 0.09,
+       "bid": 0.08,
+       "label": "Angie Nixon (D)",
+       "party": "d",
+       "price": 0.085,
+       "question": "Will the Democrats win the Florida Senate race in 2026?",
+       "volume": 68212.33679899998
+      }
+     ],
+     "source": "polymarket",
+     "title": "Florida Senate Election Winner",
+     "url": "https://polymarket.com/event/florida-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in Florida",
+    "rows": [
+     {
+      "administered": "through September 27, 2026",
+      "aggregator": "Decision Desk HQ",
+      "margin": "Moody +5.3%",
+      "other": 8.3,
+      "results": [
+       {
+        "id": "M001244",
+        "label": "Ashley Moody (R)",
+        "party": "r",
+        "pct": 48.5
+       },
+       {
+        "id": "FEC_S6FL00830",
+        "label": "Angie Nixon (D)",
+        "party": "d",
+        "pct": 43.2
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://votes.decisiondeskhq.com/races/2026-11-03/florida-us-senate-special-election-general/forecast"
+     },
+     {
+      "administered": "through September 27, 2026",
+      "aggregator": "Race to the WH",
+      "margin": "Moody +6.3%",
+      "other": 8.9,
+      "results": [
+       {
+        "id": "M001244",
+        "label": "Ashley Moody (R)",
+        "party": "r",
+        "pct": 48.7
+       },
+       {
+        "id": "FEC_S6FL00830",
+        "label": "Angie Nixon (D)",
+        "party": "d",
+        "pct": 42.4
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://www.racetothewh.com/senate/26polls"
+     },
+     {
+      "administered": "July 8 – September 21, 2026",
+      "aggregator": "RealClearPolitics",
+      "margin": "Moody +6.6%",
+      "other": 8.6,
+      "results": [
+       {
+        "id": "M001244",
+        "label": "Ashley Moody (R)",
+        "party": "r",
+        "pct": 49.0
+       },
+       {
+        "id": "FEC_S6FL00830",
+        "label": "Angie Nixon (D)",
+        "party": "d",
+        "pct": 42.4
+       }
+      ],
+      "updated": "September 24, 2026",
+      "url": "https://www.realclearpolling.com/polls/senate/general/2026/florida/moody-vs-nixon"
+     },
+     {
+      "administered": "through September 27, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "Moody +5.7%",
+      "other": 8.7,
+      "results": [
+       {
+        "id": "M001244",
+        "label": "Ashley Moody (R)",
+        "party": "r",
+        "pct": 48.5
+       },
+       {
+        "id": "FEC_S6FL00830",
+        "label": "Angie Nixon (D)",
+        "party": "d",
+        "pct": 42.8
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Florida#Polling"
+   }
+  },
+  "S-GA-2026": {
+   "markets": [
+    {
+     "event": "SENATEGA-26",
+     "outcomes": [
+      {
+       "ask": 0.963,
+       "bid": 0.958,
+       "label": "Jon Ossoff",
+       "party": "d",
+       "price": 0.963,
+       "question": "Will Democratics win the Senate race in Georgia?",
+       "volume": 447345.39
+      },
+      {
+       "ask": 0.044,
+       "bid": 0.04,
+       "label": "Mike Collins",
+       "party": "r",
+       "price": 0.044,
+       "question": "Will Republicans win the Senate race in Georgia?",
+       "volume": 1029401.04
+      }
+     ],
+     "source": "kalshi",
+     "title": "Georgia Senate winner?",
+     "url": "https://kalshi.com/markets/senatega"
+    },
+    {
+     "event": "georgia-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.974,
+       "bid": 0.97,
+       "label": "Jon Ossoff (D)",
+       "party": "d",
+       "price": 0.972,
+       "question": "Will the Democrats win the Georgia Senate race in 2026?",
+       "volume": 88904.17490599999
+      },
+      {
+       "ask": 0.031,
+       "bid": 0.026,
+       "label": "Mike Collins (R)",
+       "party": "r",
+       "price": 0.0285,
+       "question": "Will the Republicans win the Georgia Senate race in 2026?",
+       "volume": 116062.352893
+      }
+     ],
+     "source": "polymarket",
+     "title": "Georgia Senate Election Winner",
+     "url": "https://polymarket.com/event/georgia-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in Georgia",
+    "rows": [
+     {
+      "administered": "September 14 – 23, 2026",
+      "aggregator": "270toWin",
+      "margin": "Ossoff +6.7%",
+      "other": 6.7,
+      "results": [
+       {
+        "id": "O000174",
+        "label": "Jon Ossoff (D)",
+        "party": "d",
+        "pct": 50.0
+       },
+       {
+        "id": "FEC_S6GA00390",
+        "label": "Mike Collins (R)",
+        "party": "r",
+        "pct": 43.3
+       }
+      ],
+      "updated": "September 23, 2026",
+      "url": "https://www.270towin.com/2026-senate-polls/georgia"
+     },
+     {
+      "administered": "through September 18, 2026",
+      "aggregator": "Decision Desk HQ",
+      "margin": "Ossoff +7.2%",
+      "other": 7.4,
+      "results": [
+       {
+        "id": "O000174",
+        "label": "Jon Ossoff (D)",
+        "party": "d",
+        "pct": 49.9
+       },
+       {
+        "id": "FEC_S6GA00390",
+        "label": "Mike Collins (R)",
+        "party": "r",
+        "pct": 42.7
+       }
+      ],
+      "updated": "September 23, 2026",
+      "url": "https://votes.decisiondeskhq.com/races/2026-11-03/georgia-us-senate-general-election/polling"
+     },
+     {
+      "administered": "through September 18, 2026",
+      "aggregator": "FiftyPlusOne",
+      "margin": "Ossoff +9.0%",
+      "other": 6.6,
+      "results": [
+       {
+        "id": "O000174",
+        "label": "Jon Ossoff (D)",
+        "party": "d",
+        "pct": 51.2
+       },
+       {
+        "id": "FEC_S6GA00390",
+        "label": "Mike Collins (R)",
+        "party": "r",
+        "pct": 42.2
+       }
+      ],
+      "updated": "September 23, 2026",
+      "url": "https://fiftyplusone.news/polls/senate/general/georgia"
+     },
+     {
+      "administered": "July 13 – September 18, 2026",
+      "aggregator": "RealClearPolitics",
+      "margin": "Ossoff +7.5%",
+      "other": 6.5,
+      "results": [
+       {
+        "id": "O000174",
+        "label": "Jon Ossoff (D)",
+        "party": "d",
+        "pct": 50.5
+       },
+       {
+        "id": "FEC_S6GA00390",
+        "label": "Mike Collins (R)",
+        "party": "r",
+        "pct": 43.0
+       }
+      ],
+      "updated": "September 23, 2026",
+      "url": "https://www.realclearpolling.com/polls/senate/general/2026/georgia/ossoff-vs-collins"
+     },
+     {
+      "administered": "through September 18, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "Ossoff +8.2%",
+      "other": 6.0,
+      "results": [
+       {
+        "id": "O000174",
+        "label": "Jon Ossoff (D)",
+        "party": "d",
+        "pct": 51.1
+       },
+       {
+        "id": "FEC_S6GA00390",
+        "label": "Mike Collins (R)",
+        "party": "r",
+        "pct": 42.9
+       }
+      ],
+      "updated": "September 23, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Georgia#Polling"
+   }
+  },
+  "S-IA-2026": {
+   "markets": [
+    {
+     "event": "SENATEIA-26",
+     "outcomes": [
+      {
+       "ask": 0.56,
+       "bid": 0.55,
+       "label": "Ashley Hinson",
+       "party": "r",
+       "price": 0.55,
+       "question": "Will Republicans win the Senate race in Iowa?",
+       "volume": 1702932.31
+      },
+      {
+       "ask": 0.45,
+       "bid": 0.44,
+       "label": "Josh Turek",
+       "party": "d",
+       "price": 0.45,
+       "question": "Will Democratics win the Senate race in Iowa?",
+       "volume": 2224029.01
+      }
+     ],
+     "source": "kalshi",
+     "title": "Iowa Senate winner?",
+     "url": "https://kalshi.com/markets/senateia"
+    },
+    {
+     "event": "iowa-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.57,
+       "bid": 0.56,
+       "label": "Ashley Hinson (R)",
+       "party": "r",
+       "price": 0.565,
+       "question": "Will the Republicans win the Iowa Senate race in 2026?",
+       "volume": 328787.88914499996
+      },
+      {
+       "ask": 0.44,
+       "bid": 0.42,
+       "label": "Josh Turek (D)",
+       "party": "d",
+       "price": 0.43,
+       "question": "Will the Democrats win the Iowa Senate race in 2026?",
+       "volume": 379561.13379
+      }
+     ],
+     "source": "polymarket",
+     "title": "Iowa Senate Election Winner",
+     "url": "https://polymarket.com/event/iowa-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in Iowa",
+    "rows": [
+     {
+      "administered": "September 15–30, 2026",
+      "aggregator": "270toWin",
+      "margin": "Turek +1.0%",
+      "other": 9.4,
+      "results": [
+       {
+        "id": "CAND_17",
+        "label": "Ashley Hinson (R)",
+        "party": "r",
+        "pct": 44.8
+       },
+       {
+        "id": "CAND_16",
+        "label": "Josh Turek (D)",
+        "party": "d",
+        "pct": 45.8
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": "https://www.270towin.com/2026-senate-polls/iowa"
+     },
+     {
+      "administered": "through September 29, 2026",
+      "aggregator": "Decision Desk HQ",
+      "margin": "Turek +1.0%",
+      "other": 9.0,
+      "results": [
+       {
+        "id": "CAND_17",
+        "label": "Ashley Hinson (R)",
+        "party": "r",
+        "pct": 45.0
+       },
+       {
+        "id": "CAND_16",
+        "label": "Josh Turek (D)",
+        "party": "d",
+        "pct": 46.0
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": "https://votes.decisiondeskhq.com/races/2026-11-03/iowa-us-senate-general-election/polling"
+     },
+     {
+      "administered": "through September 29, 2026",
+      "aggregator": "FiftyPlusOne",
+      "margin": "Turek +0.6%",
+      "other": 9.0,
+      "results": [
+       {
+        "id": "CAND_17",
+        "label": "Ashley Hinson (R)",
+        "party": "r",
+        "pct": 45.2
+       },
+       {
+        "id": "CAND_16",
+        "label": "Josh Turek (D)",
+        "party": "d",
+        "pct": 45.8
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": "https://fiftyplusone.news/polls/senate/general/iowa"
+     },
+     {
+      "administered": "August 31 – October 1, 2026",
+      "aggregator": "RealClearPolitics",
+      "margin": "Turek +0.5%",
+      "other": 9.6,
+      "results": [
+       {
+        "id": "CAND_17",
+        "label": "Ashley Hinson (R)",
+        "party": "r",
+        "pct": 45.0
+       },
+       {
+        "id": "CAND_16",
+        "label": "Josh Turek (D)",
+        "party": "d",
+        "pct": 45.5
+       }
+      ],
+      "updated": "October 1, 2026",
+      "url": "https://www.realclearpolling.com/polls/senate/general/2026/iowa/turek-vs-hinson"
+     },
+     {
+      "administered": "through September 23, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "Turek +1.6%",
+      "other": 8.6,
+      "results": [
+       {
+        "id": "CAND_17",
+        "label": "Ashley Hinson (R)",
+        "party": "r",
+        "pct": 44.9
+       },
+       {
+        "id": "CAND_16",
+        "label": "Josh Turek (D)",
+        "party": "d",
+        "pct": 46.5
+       }
+      ],
+      "updated": "September 27, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Iowa#Polling"
+   }
+  },
+  "S-ID-2026": {
+   "markets": [
+    {
+     "event": "SENATEID-26",
+     "outcomes": [
+      {
+       "ask": 0.927,
+       "bid": 0.926,
+       "label": "Jim Risch",
+       "party": "r",
+       "price": 0.927,
+       "question": "Will Republicans win the Senate race in Idaho?",
+       "volume": 102704.03
+      },
+      {
+       "ask": 0.08,
+       "bid": 0.07,
+       "label": "Todd Achilles",
+       "party": "i",
+       "price": 0.08,
+       "question": "Will Todd Achilless win the Senate race in Idaho?",
+       "volume": 110064.54
+      },
+      {
+       "ask": 0.006,
+       "bid": 0.004,
+       "label": "David Roth",
+       "party": "d",
+       "price": 0.006,
+       "question": "Will Democratics win the Senate race in Idaho?",
+       "volume": 58292.49
+      }
+     ],
+     "source": "kalshi",
+     "title": "Idaho Senate winner?",
+     "url": "https://kalshi.com/markets/senateid"
+    },
+    {
+     "event": "idaho-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.946,
+       "bid": 0.943,
+       "label": "Jim Risch (R)",
+       "party": "r",
+       "price": 0.9445,
+       "question": "Will the Republicans win the Idaho Senate race in 2026?",
+       "volume": 79457.06092499998
+      },
+      {
+       "ask": 0.06,
+       "bid": 0.058,
+       "label": "Todd Achilles (I)",
+       "party": "i",
+       "price": 0.059,
+       "question": "Will Todd Achilles win the Idaho Senate race in 2026?",
+       "volume": 14968.779157
+      },
+      {
+       "ask": 0.001,
+       "bid": null,
+       "label": "Democrat",
+       "party": "d",
+       "price": 0.0005,
+       "question": "Will the Democrats win the Idaho Senate race in 2026?",
+       "volume": 18825.407163
+      }
+     ],
+     "source": "polymarket",
+     "title": "Idaho Senate Election Winner",
+     "url": "https://polymarket.com/event/idaho-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in Idaho",
+    "rows": [
+     {
+      "administered": "through September 16, 2026",
+      "aggregator": "Race to the WH",
+      "margin": "Risch +1.4%",
+      "other": 20.8,
+      "results": [
+       {
+        "id": "R000584",
+        "label": "Jim Risch (R)",
+        "party": "r",
+        "pct": 40.3
+       },
+       {
+        "id": "CAND_32",
+        "label": "Todd Achilles (I)",
+        "party": "i",
+        "pct": 38.9
+       }
+      ],
+      "updated": "September 18, 2026",
+      "url": "https://www.racetothewh.com/senate/26polls"
+     },
+     {
+      "administered": "through August 13, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "Risch +18.9%",
+      "other": 29.5,
+      "results": [
+       {
+        "id": "R000584",
+        "label": "Jim Risch (R)",
+        "party": "r",
+        "pct": 44.7
+       },
+       {
+        "id": "CAND_32",
+        "label": "Todd Achilles (I)",
+        "party": "i",
+        "pct": 25.8
+       }
+      ],
+      "updated": "September 18, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Idaho#Polling"
+   }
+  },
+  "S-IL-2026": {
+   "markets": [
+    {
+     "event": "SENATEIL-26",
+     "outcomes": [
+      {
+       "ask": 0.984,
+       "bid": 0.972,
+       "label": "Juliana Stratton",
+       "party": "d",
+       "price": 0.972,
+       "question": "Will Democratics win the Senate race in Illinois?",
+       "volume": 9628.63
+      },
+      {
+       "ask": 0.019,
+       "bid": 0.007,
+       "label": "Don Tracy",
+       "party": "r",
+       "price": 0.019,
+       "question": "Will Republicans win the Senate race in Illinois?",
+       "volume": 8406.33
+      }
+     ],
+     "source": "kalshi",
+     "title": "Illinois Senate winner?",
+     "url": "https://kalshi.com/markets/senateil"
+    },
+    {
+     "event": "illinois-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.987,
+       "bid": 0.973,
+       "label": "Juliana Stratton (D)",
+       "party": "d",
+       "price": 0.98,
+       "question": "Will the Democrats win the Illinois Senate race in 2026?",
+       "volume": 16926.502889000003
+      },
+      {
+       "ask": 0.025,
+       "bid": 0.018,
+       "label": "Don Tracy (R)",
+       "party": "r",
+       "price": 0.0215,
+       "question": "Will the Republicans win the Illinois Senate race in 2026?",
+       "volume": 16592.797580000002
+      }
+     ],
+     "source": "polymarket",
+     "title": "Illinois Senate Election Winner",
+     "url": "https://polymarket.com/event/illinois-senate-election-winner"
+    }
+   ]
+  },
+  "S-KS-2026": {
+   "markets": [
+    {
+     "event": "SENATEKS-26",
+     "outcomes": [
+      {
+       "ask": 0.69,
+       "bid": 0.68,
+       "label": "Roger Marshall",
+       "party": "r",
+       "price": 0.69,
+       "question": "Will Republicans win the Senate race in Kansas?",
+       "volume": 964462.92
+      },
+      {
+       "ask": 0.32,
+       "bid": 0.31,
+       "label": "Adam Hamilton",
+       "party": "d",
+       "price": 0.32,
+       "question": "Will Democratics win the Senate race in Kansas?",
+       "volume": 1473865.92
+      }
+     ],
+     "source": "kalshi",
+     "title": "Kansas Senate winner?",
+     "url": "https://kalshi.com/markets/senateks"
+    },
+    {
+     "event": "kansas-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.69,
+       "bid": 0.68,
+       "label": "Roger Marshall (R)",
+       "party": "r",
+       "price": 0.685,
+       "question": "Will the Republicans win the Kansas Senate race in 2026?",
+       "volume": 304545.26614799985
+      },
+      {
+       "ask": 0.33,
+       "bid": 0.31,
+       "label": "Adam Hamilton (D)",
+       "party": "d",
+       "price": 0.32,
+       "question": "Will the Democrats win the Kansas Senate race in 2026?",
+       "volume": 239624.10320000007
+      }
+     ],
+     "source": "polymarket",
+     "title": "Kansas Senate Election Winner",
+     "url": "https://polymarket.com/event/kansas-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in Kansas",
+    "rows": [
+     {
+      "administered": "September 8 – October 1, 2026",
+      "aggregator": "270toWin",
+      "margin": "Marshall +0.2%",
+      "other": 8.2,
+      "results": [
+       {
+        "id": "M001198",
+        "label": "Roger Marshall (R)",
+        "party": "r",
+        "pct": 46.0
+       },
+       {
+        "id": "CAND_18",
+        "label": "Adam Hamilton (D)",
+        "party": "d",
+        "pct": 45.8
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://www.270towin.com/2026-senate-polls/kansas"
+     },
+     {
+      "administered": "through October 1, 2026",
+      "aggregator": "FiftyPlusOne",
+      "margin": "Hamilton +1.1%",
+      "other": 8.5,
+      "results": [
+       {
+        "id": "M001198",
+        "label": "Roger Marshall (R)",
+        "party": "r",
+        "pct": 45.2
+       },
+       {
+        "id": "CAND_18",
+        "label": "Adam Hamilton (D)",
+        "party": "d",
+        "pct": 46.3
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://fiftyplusone.news/polls/senate/general/kansas"
+     },
+     {
+      "administered": "September 8 – October 1, 2026",
+      "aggregator": "RealClearPolitics",
+      "margin": "Marshall +1.0%",
+      "other": 10.4,
+      "results": [
+       {
+        "id": "M001198",
+        "label": "Roger Marshall (R)",
+        "party": "r",
+        "pct": 45.3
+       },
+       {
+        "id": "CAND_18",
+        "label": "Adam Hamilton (D)",
+        "party": "d",
+        "pct": 44.3
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://www.realclearpolling.com/polls/senate/general/2026/kansas/marshall-vs-hamilton"
+     },
+     {
+      "administered": "through September 24, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "Marshall +0.1%",
+      "other": 7.1,
+      "results": [
+       {
+        "id": "M001198",
+        "label": "Roger Marshall (R)",
+        "party": "r",
+        "pct": 46.5
+       },
+       {
+        "id": "CAND_18",
+        "label": "Adam Hamilton (D)",
+        "party": "d",
+        "pct": 46.4
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Kansas#Polling"
+   }
+  },
+  "S-KY-2026": {
+   "markets": [
+    {
+     "event": "SENATELA-26",
+     "outcomes": [
+      {
+       "ask": 0.958,
+       "bid": 0.953,
+       "label": "Andy Barr",
+       "party": "r",
+       "price": 0.958,
+       "question": "Will Republicans win the Senate race in Kentucky?",
+       "volume": 79592.82
+      },
+      {
+       "ask": 0.046,
+       "bid": 0.036,
+       "label": "Charles Booker",
+       "party": "d",
+       "price": 0.034,
+       "question": "Will Democratics win the Senate race in Kentucky?",
+       "volume": 92159.19
+      }
+     ],
+     "source": "kalshi",
+     "title": "Kentucky Senate winner?",
+     "url": "https://kalshi.com/markets/senatela"
+    },
+    {
+     "event": "kentucky-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.969,
+       "bid": 0.961,
+       "label": "Andy Barr (R)",
+       "party": "r",
+       "price": 0.965,
+       "question": "Will the Republicans win the Kentucky Senate race in 2026?",
+       "volume": 28736.16559600001
+      },
+      {
+       "ask": 0.041,
+       "bid": 0.013,
+       "label": "Charles Booker (D)",
+       "party": "d",
+       "price": 0.027,
+       "question": "Will the Democrats win the Kentucky Senate race in 2026?",
+       "volume": 7800.9962460000015
+      }
+     ],
+     "source": "polymarket",
+     "title": "Kentucky Senate Election Winner",
+     "url": "https://polymarket.com/event/kentucky-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in Kentucky",
+    "rows": [
+     {
+      "administered": "through August 27, 2026",
+      "aggregator": "Race to the WH",
+      "margin": "Barr +10.6%",
+      "other": 11.0,
+      "results": [
+       {
+        "id": "CAND_36",
+        "label": "Andy Barr (R)",
+        "party": "r",
+        "pct": 49.8
+       },
+       {
+        "id": "CAND_35",
+        "label": "Charles Booker (D)",
+        "party": "d",
+        "pct": 39.2
+       }
+      ],
+      "updated": "September 11, 2026",
+      "url": "https://www.racetothewh.com/senate/26polls"
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Kentucky#Polling"
+   }
+  },
+  "S-LA-2026": {
+   "markets": [
+    {
+     "event": "KXSENATELA-26NOV",
+     "outcomes": [
+      {
+       "ask": 0.925,
+       "bid": 0.915,
+       "label": "Julia Letlow",
+       "party": "r",
+       "price": 0.915,
+       "question": "Will Republicans win the Senate race in Louisiana?",
+       "volume": 19417.93
+      },
+      {
+       "ask": 0.078,
+       "bid": 0.055,
+       "label": "Jamie Davis",
+       "party": "d",
+       "price": 0.078,
+       "question": "Will Democratics win the Senate race in Louisiana?",
+       "volume": 58257.85
+      }
+     ],
+     "source": "kalshi",
+     "title": "Louisiana Senate winner?",
+     "url": "https://kalshi.com/markets/kxsenatela"
+    },
+    {
+     "event": "louisiana-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.94,
+       "bid": 0.92,
+       "label": "Julia Letlow (R)",
+       "party": "r",
+       "price": 0.93,
+       "question": "Will the Republicans win the Louisiana Senate race in 2026?",
+       "volume": 21259.498176999998
+      },
+      {
+       "ask": 0.07,
+       "bid": 0.06,
+       "label": "Jamie Davis (D)",
+       "party": "d",
+       "price": 0.065,
+       "question": "Will the Democrats win the Louisiana Senate race in 2026?",
+       "volume": 25644.401532000003
+      }
+     ],
+     "source": "polymarket",
+     "title": "Louisiana Senate Election Winner",
+     "url": "https://polymarket.com/event/louisiana-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in Louisiana",
+    "rows": [
+     {
+      "administered": "through September 19, 2026",
+      "aggregator": "Race to the WH",
+      "margin": "Letlow +5.8%",
+      "other": 9.2,
+      "results": [
+       {
+        "id": "CAND_38",
+        "label": "Julia Letlow (R)",
+        "party": "r",
+        "pct": 48.3
+       },
+       {
+        "id": "CAND_37",
+        "label": "Jamie Davis (D)",
+        "party": "d",
+        "pct": 42.5
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://www.racetothewh.com/senate/26polls"
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Louisiana#Polling"
+   }
+  },
+  "S-MA-2026": {
+   "markets": [
+    {
+     "event": "SENATEMA-26",
+     "outcomes": [
+      {
+       "ask": 0.988,
+       "bid": 0.987,
+       "label": "Ed Markey",
+       "party": "d",
+       "price": 0.988,
+       "question": "Will Democratics win the Senate race in Massachusetts?",
+       "volume": 8741.16
+      },
+      {
+       "ask": 0.018,
+       "bid": 0.011,
+       "label": "John Deaton",
+       "party": "r",
+       "price": 0.012,
+       "question": "Will Republicans win the Senate race in Massachusetts?",
+       "volume": 14336.81
+      }
+     ],
+     "source": "kalshi",
+     "title": "Massachusetts Senate winner?",
+     "url": "https://kalshi.com/markets/senatema"
+    },
+    {
+     "event": "massachusetts-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.981,
+       "bid": 0.977,
+       "label": "Ed Markey (D)",
+       "party": "d",
+       "price": 0.979,
+       "question": "Will the Democrats win the Massachusetts Senate race in 2026?",
+       "volume": 35494.484924
+      },
+      {
+       "ask": 0.024,
+       "bid": 0.014,
+       "label": "John Deaton (R)",
+       "party": "r",
+       "price": 0.019,
+       "question": "Will the Republicans win the Massachusetts Senate race in 2026?",
+       "volume": 13107.341222999998
+      }
+     ],
+     "source": "polymarket",
+     "title": "Massachusetts Senate Election Winner",
+     "url": "https://polymarket.com/event/massachusetts-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in Massachusetts",
+    "rows": [
+     {
+      "administered": "through September 22, 2026",
+      "aggregator": "Race to the WH",
+      "margin": "Markey +24.0%",
+      "other": 17.8,
+      "results": [
+       {
+        "id": "M000133",
+        "label": "Ed Markey (D)",
+        "party": "d",
+        "pct": 53.1
+       },
+       {
+        "id": "FEC_S6MA00304",
+        "label": "John Deaton (R)",
+        "party": "r",
+        "pct": 29.1
+       }
+      ],
+      "updated": "September 29, 2026",
+      "url": "https://www.racetothewh.com/senate/26polls"
+     },
+     {
+      "administered": "through September 22, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "Markey +25.0%",
+      "other": 16.2,
+      "results": [
+       {
+        "id": "M000133",
+        "label": "Ed Markey (D)",
+        "party": "d",
+        "pct": 54.4
+       },
+       {
+        "id": "FEC_S6MA00304",
+        "label": "John Deaton (R)",
+        "party": "r",
+        "pct": 29.4
+       }
+      ],
+      "updated": "September 29, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Massachusetts#Polling"
+   }
+  },
+  "S-ME-2026": {
+   "markets": [
+    {
+     "event": "SENATEME-26",
+     "outcomes": [
+      {
+       "ask": 0.6,
+       "bid": 0.59,
+       "label": "Troy Jackson",
+       "party": "d",
+       "price": 0.6,
+       "question": "Will Democratics win the Senate race in Maine?",
+       "volume": 3532619.74
+      },
+      {
+       "ask": 0.41,
+       "bid": 0.4,
+       "label": "Susan Collins",
+       "party": "r",
+       "price": 0.41,
+       "question": "Will Republicans win the Senate race in Maine?",
+       "volume": 3831185.25
+      }
+     ],
+     "source": "kalshi",
+     "title": "Maine Senate winner?",
+     "url": "https://kalshi.com/markets/senateme"
+    },
+    {
+     "event": "maine-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.59,
+       "bid": 0.58,
+       "label": "Troy Jackson (D)",
+       "party": "d",
+       "price": 0.585,
+       "question": "Will the Democrats win the Maine Senate race in 2026?",
+       "volume": 1180058.016270001
+      },
+      {
+       "ask": 0.41,
+       "bid": 0.4,
+       "label": "Susan Collins (R)",
+       "party": "r",
+       "price": 0.405,
+       "question": "Will the Republicans win the Maine Senate race in 2026?",
+       "volume": 896123.4454829999
+      }
+     ],
+     "source": "polymarket",
+     "title": "Maine Senate Election Winner",
+     "url": "https://polymarket.com/event/maine-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in Maine",
+    "rows": [
+     {
+      "administered": "September 15 – October 1, 2026",
+      "aggregator": "270toWin",
+      "margin": "Jackson +1.5%",
+      "other": 4.7,
+      "results": [
+       {
+        "id": "C001035",
+        "label": "Susan Collins (R)",
+        "party": "r",
+        "pct": 46.9
+       },
+       {
+        "id": "CAND_19",
+        "label": "Troy Jackson (D)",
+        "party": "d",
+        "pct": 48.4
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://www.270towin.com/2026-senate-polls/maine"
+     },
+     {
+      "administered": "through October 1, 2026",
+      "aggregator": "Decision Desk HQ",
+      "margin": "Jackson +1.4%",
+      "other": 4.2,
+      "results": [
+       {
+        "id": "C001035",
+        "label": "Susan Collins (R)",
+        "party": "r",
+        "pct": 47.2
+       },
+       {
+        "id": "CAND_19",
+        "label": "Troy Jackson (D)",
+        "party": "d",
+        "pct": 48.6
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://votes.decisiondeskhq.com/races/2026-11-03/maine-us-senate-general-election/polling"
+     },
+     {
+      "administered": "through October 1, 2026",
+      "aggregator": "FiftyPlusOne",
+      "margin": "Jackson +2.3%",
+      "other": 5.5,
+      "results": [
+       {
+        "id": "C001035",
+        "label": "Susan Collins (R)",
+        "party": "r",
+        "pct": 46.1
+       },
+       {
+        "id": "CAND_19",
+        "label": "Troy Jackson (D)",
+        "party": "d",
+        "pct": 48.4
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://fiftyplusone.news/polls/senate/general/maine"
+     },
+     {
+      "administered": "through October 1, 2026",
+      "aggregator": "Race to the WH",
+      "margin": "Jackson +1.3%",
+      "other": 5.3,
+      "results": [
+       {
+        "id": "C001035",
+        "label": "Susan Collins (R)",
+        "party": "r",
+        "pct": 46.7
+       },
+       {
+        "id": "CAND_19",
+        "label": "Troy Jackson (D)",
+        "party": "d",
+        "pct": 48.0
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://www.racetothewh.com/senate/26polls"
+     },
+     {
+      "administered": "September 8–30, 2026",
+      "aggregator": "RealClearPolitics",
+      "margin": "Jackson +0.2%",
+      "other": 5.2,
+      "results": [
+       {
+        "id": "C001035",
+        "label": "Susan Collins (R)",
+        "party": "r",
+        "pct": 47.3
+       },
+       {
+        "id": "CAND_19",
+        "label": "Troy Jackson (D)",
+        "party": "d",
+        "pct": 47.5
+       }
+      ],
+      "updated": "October 1, 2026",
+      "url": "https://www.realclearpolling.com/polls/senate/general/2026/collins-vs-jackson"
+     },
+     {
+      "administered": "through September 30, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "Jackson +2.2%",
+      "other": 5.4,
+      "results": [
+       {
+        "id": "C001035",
+        "label": "Susan Collins (R)",
+        "party": "r",
+        "pct": 46.2
+       },
+       {
+        "id": "CAND_19",
+        "label": "Troy Jackson (D)",
+        "party": "d",
+        "pct": 48.4
+       }
+      ],
+      "updated": "October 1, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Maine#Polling"
+   }
+  },
+  "S-MI-2026": {
+   "markets": [
+    {
+     "event": "SENATEMI-26",
+     "outcomes": [
+      {
+       "ask": 0.72,
+       "bid": 0.71,
+       "label": "Abdul El-Sayed",
+       "party": "d",
+       "price": 0.72,
+       "question": "Will Democratics win the Senate race in Michigan?",
+       "volume": 2071481.32
+      },
+      {
+       "ask": 0.28,
+       "bid": 0.27,
+       "label": "Mike Rogers",
+       "party": "r",
+       "price": 0.28,
+       "question": "Will Republicans win the Senate race in Michigan?",
+       "volume": 2821072.99
+      }
+     ],
+     "source": "kalshi",
+     "title": "Michigan Senate winner?",
+     "url": "https://kalshi.com/markets/senatemi"
+    },
+    {
+     "event": "michigan-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.73,
+       "bid": 0.72,
+       "label": "Abdul El-Sayed (D)",
+       "party": "d",
+       "price": 0.725,
+       "question": "Will the Democrats win the Michigan Senate race in 2026?",
+       "volume": 708894.769175
+      },
+      {
+       "ask": 0.28,
+       "bid": 0.27,
+       "label": "Mike Rogers (R)",
+       "party": "r",
+       "price": 0.275,
+       "question": "Will the Republicans win the Michigan Senate race in 2026?",
+       "volume": 540101.9693799998
+      }
+     ],
+     "source": "polymarket",
+     "title": "Michigan Senate Election Winner",
+     "url": "https://polymarket.com/event/michigan-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in Michigan",
+    "rows": [
+     {
+      "administered": "September 15–28, 2026",
+      "aggregator": "270toWin",
+      "margin": "El-Sayed +3.6%",
+      "other": 7.8,
+      "results": [
+       {
+        "id": "CAND_20",
+        "label": "Abdul El-Sayed (D)",
+        "party": "d",
+        "pct": 48.0
+       },
+       {
+        "id": "FEC_S4MI00595",
+        "label": "Mike Rogers (R)",
+        "party": "r",
+        "pct": 44.4
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": "https://www.270towin.com/2026-senate-polls/michigan"
+     },
+     {
+      "administered": "through September 28, 2026",
+      "aggregator": "Decision Desk HQ",
+      "margin": "El-Sayed +3.9%",
+      "other": 8.1,
+      "results": [
+       {
+        "id": "CAND_20",
+        "label": "Abdul El-Sayed (D)",
+        "party": "d",
+        "pct": 47.9
+       },
+       {
+        "id": "FEC_S4MI00595",
+        "label": "Mike Rogers (R)",
+        "party": "r",
+        "pct": 44.0
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": "https://votes.decisiondeskhq.com/races/2026-11-03/michigan-us-senate-general-election/polling"
+     },
+     {
+      "administered": "through September 28, 2026",
+      "aggregator": "FiftyPlusOne",
+      "margin": "El-Sayed +3.4%",
+      "other": 8.8,
+      "results": [
+       {
+        "id": "CAND_20",
+        "label": "Abdul El-Sayed (D)",
+        "party": "d",
+        "pct": 47.3
+       },
+       {
+        "id": "FEC_S4MI00595",
+        "label": "Mike Rogers (R)",
+        "party": "r",
+        "pct": 43.9
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": "https://fiftyplusone.news/polls/senate/general/michigan"
+     },
+     {
+      "administered": "September 7–28, 2026",
+      "aggregator": "RealClearPolitics",
+      "margin": "El-Sayed +3.4%",
+      "other": 7.6,
+      "results": [
+       {
+        "id": "CAND_20",
+        "label": "Abdul El-Sayed (D)",
+        "party": "d",
+        "pct": 47.9
+       },
+       {
+        "id": "FEC_S4MI00595",
+        "label": "Mike Rogers (R)",
+        "party": "r",
+        "pct": 44.5
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": "https://www.realclearpolling.com/polls/senate/general/2026/michigan/rogers-vs-el-sayed"
+     },
+     {
+      "administered": "through September 27, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "El-Sayed +3.8%",
+      "other": 7.8,
+      "results": [
+       {
+        "id": "CAND_20",
+        "label": "Abdul El-Sayed (D)",
+        "party": "d",
+        "pct": 48.0
+       },
+       {
+        "id": "FEC_S4MI00595",
+        "label": "Mike Rogers (R)",
+        "party": "r",
+        "pct": 44.2
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Michigan#Polling"
+   }
+  },
+  "S-MN-2026": {
+   "markets": [
+    {
+     "event": "SENATEMN-26",
+     "outcomes": [
+      {
+       "ask": 0.88,
+       "bid": 0.87,
+       "label": "Peggy Flanagan",
+       "party": "d",
+       "price": 0.88,
+       "question": "Will Democratic (DFL)s win the Senate race in Minnesota?",
+       "volume": 360014.07
+      },
+      {
+       "ask": 0.13,
+       "bid": 0.12,
+       "label": "Michele Tafoya",
+       "party": "r",
+       "price": 0.12,
+       "question": "Will Republicans win the Senate race in Minnesota?",
+       "volume": 909585.77
+      }
+     ],
+     "source": "kalshi",
+     "title": "Minnesota Senate winner?",
+     "url": "https://kalshi.com/markets/senatemn"
+    },
+    {
+     "event": "minnesota-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.9,
+       "bid": 0.89,
+       "label": "Peggy Flanagan (D)",
+       "party": "d",
+       "price": 0.895,
+       "question": "Will the Democrats win the Minnesota Senate race in 2026?",
+       "volume": 86735.97393100001
+      },
+      {
+       "ask": 0.11,
+       "bid": 0.09,
+       "label": "Michele Tafoya (R)",
+       "party": "r",
+       "price": 0.1,
+       "question": "Will the Republicans win the Minnesota Senate race in 2026?",
+       "volume": 56153.318256
+      }
+     ],
+     "source": "polymarket",
+     "title": "Minnesota Senate Election Winner",
+     "url": "https://polymarket.com/event/minnesota-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in Minnesota",
+    "rows": [
+     {
+      "administered": "September 11–30, 2026",
+      "aggregator": "270toWin",
+      "margin": "Flanagan +1.5%",
+      "other": 11.9,
+      "results": [
+       {
+        "id": "FEC_S6MN00440",
+        "label": "Peggy Flanagan (DFL)",
+        "party": "d",
+        "pct": 44.8
+       },
+       {
+        "id": "FEC_S6MN00556",
+        "label": "Michele Tafoya (R)",
+        "party": "r",
+        "pct": 43.3
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": "https://www.270towin.com/2026-senate-polls/minnesota"
+     },
+     {
+      "administered": "through September 29, 2026",
+      "aggregator": "Decision Desk HQ",
+      "margin": "Flanagan +2.2%",
+      "other": 11.8,
+      "results": [
+       {
+        "id": "FEC_S6MN00440",
+        "label": "Peggy Flanagan (DFL)",
+        "party": "d",
+        "pct": 45.2
+       },
+       {
+        "id": "FEC_S6MN00556",
+        "label": "Michele Tafoya (R)",
+        "party": "r",
+        "pct": 43.0
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": "https://votes.decisiondeskhq.com/races/2026-11-03/minnesota-us-senate-general-election/polling"
+     },
+     {
+      "administered": "through September 29, 2026",
+      "aggregator": "FiftyPlusOne",
+      "margin": "Flanagan +2.1%",
+      "other": 13.9,
+      "results": [
+       {
+        "id": "FEC_S6MN00440",
+        "label": "Peggy Flanagan (DFL)",
+        "party": "d",
+        "pct": 44.1
+       },
+       {
+        "id": "FEC_S6MN00556",
+        "label": "Michele Tafoya (R)",
+        "party": "r",
+        "pct": 42.0
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": "https://fiftyplusone.news/polls/senate/general/minnesota"
+     },
+     {
+      "administered": "through September 29, 2026",
+      "aggregator": "Race to the WH",
+      "margin": "Flanagan +2.1%",
+      "other": 11.9,
+      "results": [
+       {
+        "id": "FEC_S6MN00440",
+        "label": "Peggy Flanagan (DFL)",
+        "party": "d",
+        "pct": 45.1
+       },
+       {
+        "id": "FEC_S6MN00556",
+        "label": "Michele Tafoya (R)",
+        "party": "r",
+        "pct": 43.0
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": "https://www.racetothewh.com/senate/26polls"
+     },
+     {
+      "administered": "August 31 – September 29, 2026",
+      "aggregator": "RealClearPolitics",
+      "margin": "Flanagan +1.6%",
+      "other": 12.4,
+      "results": [
+       {
+        "id": "FEC_S6MN00440",
+        "label": "Peggy Flanagan (DFL)",
+        "party": "d",
+        "pct": 44.6
+       },
+       {
+        "id": "FEC_S6MN00556",
+        "label": "Michele Tafoya (R)",
+        "party": "r",
+        "pct": 43.0
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": "https://www.realclearpolling.com/polls/senate/general/2026/minnesota/tafoya-vs-flanagan"
+     },
+     {
+      "administered": "through September 29, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "Flanagan +2.6%",
+      "other": 11.6,
+      "results": [
+       {
+        "id": "FEC_S6MN00440",
+        "label": "Peggy Flanagan (DFL)",
+        "party": "d",
+        "pct": 45.5
+       },
+       {
+        "id": "FEC_S6MN00556",
+        "label": "Michele Tafoya (R)",
+        "party": "r",
+        "pct": 42.9
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Minnesota#Polling"
+   }
+  },
+  "S-MS-2026": {
+   "markets": [
+    {
+     "event": "SENATEMS-26",
+     "outcomes": [
+      {
+       "ask": 0.902,
+       "bid": 0.901,
+       "label": "Cindy Hyde-Smith",
+       "party": "r",
+       "price": 0.902,
+       "question": "Will Republicans win the Senate race in Mississippi?",
+       "volume": 70491.63
+      },
+      {
+       "ask": 0.11,
+       "bid": 0.099,
+       "label": "Scott Colom",
+       "party": "d",
+       "price": 0.11,
+       "question": "Will Democratics win the Senate race in Mississippi?",
+       "volume": 158672.4
+      }
+     ],
+     "source": "kalshi",
+     "title": "Mississippi Senate winner?",
+     "url": "https://kalshi.com/markets/senatems"
+    },
+    {
+     "event": "mississippi-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.91,
+       "bid": 0.9,
+       "label": "Cindy Hyde-Smith (R)",
+       "party": "r",
+       "price": 0.905,
+       "question": "Will the Republicans win the Mississippi Senate race in 2026?",
+       "volume": 62924.745385999995
+      },
+      {
+       "ask": 0.1,
+       "bid": 0.08,
+       "label": "Scott Colom (D)",
+       "party": "d",
+       "price": 0.09,
+       "question": "Will the Democrats win the Mississippi Senate race in 2026?",
+       "volume": 63195.48097299999
+      }
+     ],
+     "source": "polymarket",
+     "title": "Mississippi Senate Election Winner",
+     "url": "https://polymarket.com/event/mississippi-senate-election-winner"
+    }
+   ]
+  },
+  "S-MT-2026": {
+   "markets": [
+    {
+     "event": "SENATEMT-26",
+     "outcomes": [
+      {
+       "ask": 0.93,
+       "bid": 0.917,
+       "label": "Kurt Alme",
+       "party": "r",
+       "price": 0.93,
+       "question": "Will Republicans win the Senate race in Montana?",
+       "volume": 231579.23
+      },
+      {
+       "ask": 0.081,
+       "bid": 0.076,
+       "label": "Seth Bodnar",
+       "party": "i",
+       "price": 0.076,
+       "question": "Will Independents win the Senate race in Montana?",
+       "volume": 234444.32
+      },
+      {
+       "ask": 0.009,
+       "bid": 0.005,
+       "label": "Alani Bankhead",
+       "party": "d",
+       "price": 0.011,
+       "question": "Will Democratics win the Senate race in Montana?",
+       "volume": 168724.67
+      }
+     ],
+     "source": "kalshi",
+     "title": "Montana Senate winner?",
+     "url": "https://kalshi.com/markets/senatemt"
+    },
+    {
+     "event": "montana-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.92,
+       "bid": 0.91,
+       "label": "Kurt Alme (R)",
+       "party": "r",
+       "price": 0.915,
+       "question": "Will the Republicans win the Montana Senate race in 2026?",
+       "volume": 75421.46377300001
+      },
+      {
+       "ask": 0.084,
+       "bid": 0.083,
+       "label": "Independent",
+       "party": "i",
+       "price": 0.0835,
+       "question": "Will an Independent win the Montana Senate race in 2026?",
+       "volume": 24010.589143
+      },
+      {
+       "ask": 0.006,
+       "bid": 0.002,
+       "label": "Alani Bankhead (D)",
+       "party": "d",
+       "price": 0.004,
+       "question": "Will the Democrats win the Montana Senate race in 2026?",
+       "volume": 45747.186443000006
+      }
+     ],
+     "source": "polymarket",
+     "title": "Montana Senate Election Winner",
+     "url": "https://polymarket.com/event/montana-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in Montana",
+    "rows": [
+     {
+      "administered": "through September 15, 2026",
+      "aggregator": "Decision Desk HQ",
+      "margin": "Alme +15.0%",
+      "other": 12.0,
+      "results": [
+       {
+        "id": "CAND_23",
+        "label": "Kurt Alme (R)",
+        "party": "r",
+        "pct": 42.4
+       },
+       {
+        "id": "CAND_22",
+        "label": "Alani Bankhead (D)",
+        "party": "d",
+        "pct": 18.2
+       },
+       {
+        "id": "CAND_24",
+        "label": "Seth Bodnar (I)",
+        "party": "i",
+        "pct": 27.4
+       }
+      ],
+      "updated": "September 22, 2026",
+      "url": "https://votes.decisiondeskhq.com/polls/montana"
+     },
+     {
+      "administered": "through September 15, 2026",
+      "aggregator": "FiftyPlusOne",
+      "margin": "Alme +15.1%",
+      "other": 11.5,
+      "results": [
+       {
+        "id": "CAND_23",
+        "label": "Kurt Alme (R)",
+        "party": "r",
+        "pct": 42.4
+       },
+       {
+        "id": "CAND_22",
+        "label": "Alani Bankhead (D)",
+        "party": "d",
+        "pct": 18.8
+       },
+       {
+        "id": "CAND_24",
+        "label": "Seth Bodnar (I)",
+        "party": "i",
+        "pct": 27.3
+       }
+      ],
+      "updated": "September 22, 2026",
+      "url": "https://fiftyplusone.news/polls/senate/general/montana"
+     },
+     {
+      "administered": "through September 15, 2026",
+      "aggregator": "Race to the WH",
+      "margin": "Alme +16.2%",
+      "other": 8.6,
+      "results": [
+       {
+        "id": "CAND_23",
+        "label": "Kurt Alme (R)",
+        "party": "r",
+        "pct": 43.3
+       },
+       {
+        "id": "CAND_22",
+        "label": "Alani Bankhead (D)",
+        "party": "d",
+        "pct": 21.0
+       },
+       {
+        "id": "CAND_24",
+        "label": "Seth Bodnar (I)",
+        "party": "i",
+        "pct": 27.1
+       }
+      ],
+      "updated": "September 18, 2026",
+      "url": "https://www.racetothewh.com/senate/26polls"
+     },
+     {
+      "administered": "through September 15, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "Alme +16.5%",
+      "other": 9.4,
+      "results": [
+       {
+        "id": "CAND_23",
+        "label": "Kurt Alme (R)",
+        "party": "r",
+        "pct": 42.6
+       },
+       {
+        "id": "CAND_22",
+        "label": "Alani Bankhead (D)",
+        "party": "d",
+        "pct": 21.9
+       },
+       {
+        "id": "CAND_24",
+        "label": "Seth Bodnar (I)",
+        "party": "i",
+        "pct": 26.1
+       }
+      ],
+      "updated": "September 18, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Montana#Polling"
+   }
+  },
+  "S-NC-2026": {
+   "markets": [
+    {
+     "event": "SENATENC-26",
+     "outcomes": [
+      {
+       "ask": 0.95,
+       "bid": 0.949,
+       "label": "Roy Cooper",
+       "party": "d",
+       "price": 0.95,
+       "question": "Will Democratics win the Senate race in North Carolina?",
+       "volume": 1447246.7
+      },
+      {
+       "ask": 0.052,
+       "bid": 0.048,
+       "label": "Michael Whatley",
+       "party": "r",
+       "price": 0.048,
+       "question": "Will Republicans win the Senate race in North Carolina?",
+       "volume": 1044273.74
+      }
+     ],
+     "source": "kalshi",
+     "title": "North Carolina Senate winner?",
+     "url": "https://kalshi.com/markets/senatenc"
+    },
+    {
+     "event": "north-carolina-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.96,
+       "bid": 0.95,
+       "label": "Roy Cooper (D)",
+       "party": "d",
+       "price": 0.955,
+       "question": "Will the Democrats win the North Carolina Senate race in 2026?",
+       "volume": 104525.47167000001
+      },
+      {
+       "ask": 0.05,
+       "bid": 0.03,
+       "label": "Michael Whatley (R)",
+       "party": "r",
+       "price": 0.04,
+       "question": "Will the Republicans win the North Carolina Senate race in 2026?",
+       "volume": 109334.80378299995
+      }
+     ],
+     "source": "polymarket",
+     "title": "North Carolina Senate Election Winner",
+     "url": "https://polymarket.com/event/north-carolina-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in North Carolina",
+    "rows": [
+     {
+      "administered": "September 23 – 30, 2026",
+      "aggregator": "270toWin",
+      "margin": "Cooper +9.2%",
+      "other": 7.8,
+      "results": [
+       {
+        "id": "CAND_2",
+        "label": "Michael Whatley (R)",
+        "party": "r",
+        "pct": 41.5
+       },
+       {
+        "id": "CAND_1",
+        "label": "Roy Cooper (D)",
+        "party": "d",
+        "pct": 50.7
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": "https://www.270towin.com/2026-senate-polls/north-carolina"
+     },
+     {
+      "administered": "through September 22, 2026",
+      "aggregator": "Decision Desk HQ",
+      "margin": "Cooper +8.9%",
+      "other": 9.9,
+      "results": [
+       {
+        "id": "CAND_2",
+        "label": "Michael Whatley (R)",
+        "party": "r",
+        "pct": 40.6
+       },
+       {
+        "id": "CAND_1",
+        "label": "Roy Cooper (D)",
+        "party": "d",
+        "pct": 49.5
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": "https://votes.decisiondeskhq.com/races/2026-11-03/north-carolina-us-senate-general-election/polling"
+     },
+     {
+      "administered": "through September 29, 2026",
+      "aggregator": "FiftyPlusOne",
+      "margin": "Cooper +10.0%",
+      "other": 8.6,
+      "results": [
+       {
+        "id": "CAND_2",
+        "label": "Michael Whatley (R)",
+        "party": "r",
+        "pct": 40.7
+       },
+       {
+        "id": "CAND_1",
+        "label": "Roy Cooper (D)",
+        "party": "d",
+        "pct": 50.7
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": "https://fiftyplusone.news/polls/senate/general/north-carolina"
+     },
+     {
+      "administered": "September 6 – 29, 2026",
+      "aggregator": "RealClearPolitics",
+      "margin": "Cooper +9.0%",
+      "other": 9.4,
+      "results": [
+       {
+        "id": "CAND_2",
+        "label": "Michael Whatley (R)",
+        "party": "r",
+        "pct": 40.8
+       },
+       {
+        "id": "CAND_1",
+        "label": "Roy Cooper (D)",
+        "party": "d",
+        "pct": 49.8
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": "https://www.realclearpolling.com/polls/senate/general/2026/north-carolina/cooper-vs-whatley"
+     },
+     {
+      "administered": "through September 22, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "Cooper +9.2%",
+      "other": 7.8,
+      "results": [
+       {
+        "id": "CAND_2",
+        "label": "Michael Whatley (R)",
+        "party": "r",
+        "pct": 41.5
+       },
+       {
+        "id": "CAND_1",
+        "label": "Roy Cooper (D)",
+        "party": "d",
+        "pct": 50.7
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_North_Carolina#Polling"
+   }
+  },
+  "S-NE-2026": {
+   "markets": [
+    {
+     "event": "SENATENE-26",
+     "outcomes": [
+      {
+       "ask": 0.73,
+       "bid": 0.72,
+       "label": "Pete Ricketts",
+       "party": "r",
+       "price": 0.73,
+       "question": "Will Republicans win the Senate race in Nebraska?",
+       "volume": 1189528.2
+      },
+      {
+       "ask": 0.28,
+       "bid": 0.27,
+       "label": "Dan Osborn",
+       "party": "i",
+       "price": 0.28,
+       "question": "Will Dan Osborn (as an independent)s win the Senate race in Nebraska?",
+       "volume": 844244.85
+      },
+      {
+       "ask": 0.008,
+       "bid": 0.0,
+       "label": "Cindy Burbank",
+       "party": "d",
+       "price": 0.008,
+       "question": "Will Democratics win the Senate race in Nebraska?",
+       "volume": 64430.0
+      }
+     ],
+     "source": "kalshi",
+     "title": "Nebraska Senate winner?",
+     "url": "https://kalshi.com/markets/senatene"
+    },
+    {
+     "event": "nebraska-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.73,
+       "bid": 0.72,
+       "label": "Pete Ricketts (R)",
+       "party": "r",
+       "price": 0.725,
+       "question": "Will the Republicans win the Nebraska Senate race in 2026?",
+       "volume": 259430.67493699995
+      },
+      {
+       "ask": 0.26,
+       "bid": 0.25,
+       "label": "Independent",
+       "party": "i",
+       "price": 0.255,
+       "question": "Will an independent win the Nebraska Senate race in 2026?",
+       "volume": 125678.62420299998
+      },
+      {
+       "ask": 0.002,
+       "bid": null,
+       "label": "Democrat",
+       "party": "d",
+       "price": 0.001,
+       "question": "Will the Democrats win the Nebraska Senate race in 2026?",
+       "volume": 104624.10643100001
+      }
+     ],
+     "source": "polymarket",
+     "title": "Nebraska Senate Election Winner",
+     "url": "https://polymarket.com/event/nebraska-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in Nebraska",
+    "rows": [
+     {
+      "administered": "September 8–30, 2026",
+      "aggregator": "270toWin",
+      "margin": "Ricketts +1.6%",
+      "other": 9.0,
+      "results": [
+       {
+        "id": "R000618",
+        "label": "Pete Ricketts (R)",
+        "party": "r",
+        "pct": 46.3
+       },
+       {
+        "id": "CAND_25",
+        "label": "Dan Osborn (I)",
+        "party": "i",
+        "pct": 44.7
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://www.270towin.com/2026-senate-polls/nebraska"
+     },
+     {
+      "administered": "through September 30, 2026",
+      "aggregator": "FiftyPlusOne",
+      "margin": "Ricketts +1.0%",
+      "other": 9.0,
+      "results": [
+       {
+        "id": "R000618",
+        "label": "Pete Ricketts (R)",
+        "party": "r",
+        "pct": 46.0
+       },
+       {
+        "id": "CAND_25",
+        "label": "Dan Osborn (I)",
+        "party": "i",
+        "pct": 45.0
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://fiftyplusone.news/polls/senate/general/nebraska"
+     },
+     {
+      "administered": "through September 26, 2026",
+      "aggregator": "Decision Desk HQ",
+      "margin": "Osborn +3.1%",
+      "other": 9.1,
+      "results": [
+       {
+        "id": "R000618",
+        "label": "Pete Ricketts (R)",
+        "party": "r",
+        "pct": 43.5
+       },
+       {
+        "id": "CAND_25",
+        "label": "Dan Osborn (I)",
+        "party": "i",
+        "pct": 46.6
+       }
+      ],
+      "updated": "September 27, 2026",
+      "url": null
+     },
+     {
+      "administered": "through September 16, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "Osborn +0.6%",
+      "other": 5.8,
+      "results": [
+       {
+        "id": "R000618",
+        "label": "Pete Ricketts (R)",
+        "party": "r",
+        "pct": 46.8
+       },
+       {
+        "id": "CAND_25",
+        "label": "Dan Osborn (I)",
+        "party": "i",
+        "pct": 47.4
+       }
+      ],
+      "updated": "September 26, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Nebraska#Polling"
+   }
+  },
+  "S-NH-2026": {
+   "markets": [
+    {
+     "event": "SENATENH-26",
+     "outcomes": [
+      {
+       "ask": 0.87,
+       "bid": 0.86,
+       "label": "Chris Pappas",
+       "party": "d",
+       "price": 0.87,
+       "question": "Will Democratics win the Senate race in New Hampshire?",
+       "volume": 463215.36
+      },
+      {
+       "ask": 0.14,
+       "bid": 0.13,
+       "label": "John E. Sununu",
+       "party": "r",
+       "price": 0.15,
+       "question": "Will Republicans win the Senate race in New Hampshire?",
+       "volume": 1180056.45
+      }
+     ],
+     "source": "kalshi",
+     "title": "New Hampshire Senate winner?",
+     "url": "https://kalshi.com/markets/senatenh"
+    },
+    {
+     "event": "new-hampshire-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.87,
+       "bid": 0.86,
+       "label": "Chris Pappas (D)",
+       "party": "d",
+       "price": 0.865,
+       "question": "Will the Democrats win the New Hampshire Senate race in 2026?",
+       "volume": 145726.67471900003
+      },
+      {
+       "ask": 0.14,
+       "bid": 0.13,
+       "label": "John E. Sununu (R)",
+       "party": "r",
+       "price": 0.135,
+       "question": "Will the Republicans win the New Hampshire Senate race in 2026?",
+       "volume": 150000.87264900006
+      }
+     ],
+     "source": "polymarket",
+     "title": "New Hampshire Senate Election Winner",
+     "url": "https://polymarket.com/event/new-hampshire-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in New Hampshire",
+    "rows": [
+     {
+      "administered": "September 9–25, 2026",
+      "aggregator": "270toWin",
+      "margin": "Pappas +5.0%",
+      "other": 9.0,
+      "results": [
+       {
+        "id": "FEC_S6NH00141",
+        "label": "Chris Pappas",
+        "party": "d",
+        "pct": 48.0
+       },
+       {
+        "id": "FEC_S6NH00208",
+        "label": "John E. Sununu",
+        "party": "r",
+        "pct": 43.0
+       }
+      ],
+      "updated": "September 27, 2026",
+      "url": null
+     },
+     {
+      "administered": "through September 21, 2026",
+      "aggregator": "Decision Desk HQ",
+      "margin": "Pappas +6.9%",
+      "other": 11.9,
+      "results": [
+       {
+        "id": "FEC_S6NH00141",
+        "label": "Chris Pappas",
+        "party": "d",
+        "pct": 47.5
+       },
+       {
+        "id": "FEC_S6NH00208",
+        "label": "John E. Sununu",
+        "party": "r",
+        "pct": 40.6
+       }
+      ],
+      "updated": "September 27, 2026",
+      "url": "https://votes.decisiondeskhq.com/races/2026-11-03/new-hampshire-us-senate-general-election/polling"
+     },
+     {
+      "administered": "through September 22, 2026",
+      "aggregator": "FiftyPlusOne",
+      "margin": "Pappas +4.4%",
+      "other": 8.2,
+      "results": [
+       {
+        "id": "FEC_S6NH00141",
+        "label": "Chris Pappas",
+        "party": "d",
+        "pct": 48.1
+       },
+       {
+        "id": "FEC_S6NH00208",
+        "label": "John E. Sununu",
+        "party": "r",
+        "pct": 43.7
+       }
+      ],
+      "updated": "September 27, 2026",
+      "url": "https://fiftyplusone.news/polls/senate/general/new-hampshire"
+     },
+     {
+      "administered": "August 17 – September 22, 2026",
+      "aggregator": "RealClearPolitics",
+      "margin": "Pappas +6.5%",
+      "other": 10.9,
+      "results": [
+       {
+        "id": "FEC_S6NH00141",
+        "label": "Chris Pappas",
+        "party": "d",
+        "pct": 47.8
+       },
+       {
+        "id": "FEC_S6NH00208",
+        "label": "John E. Sununu",
+        "party": "r",
+        "pct": 41.3
+       }
+      ],
+      "updated": "September 27, 2026",
+      "url": "https://www.realclearpolling.com/polls/senate/general/2026/new-hampshire/pappas-vs-sununu"
+     },
+     {
+      "administered": "through September 26, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "Pappas +6.5%",
+      "other": 12.3,
+      "results": [
+       {
+        "id": "FEC_S6NH00141",
+        "label": "Chris Pappas",
+        "party": "d",
+        "pct": 47.1
+       },
+       {
+        "id": "FEC_S6NH00208",
+        "label": "John E. Sununu",
+        "party": "r",
+        "pct": 40.6
+       }
+      ],
+      "updated": "September 27, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_New_Hampshire#Polling"
+   }
+  },
+  "S-NJ-2026": {
+   "markets": [
+    {
+     "event": "SENATENJ-26",
+     "outcomes": [
+      {
+       "ask": 0.99,
+       "bid": 0.982,
+       "label": "Cory Booker",
+       "party": "d",
+       "price": 0.981,
+       "question": "Will Democratics win the Senate race in New Jersey?",
+       "volume": 12101.04
+      },
+      {
+       "ask": 0.018,
+       "bid": 0.005,
+       "label": "Justin Murphy",
+       "party": "r",
+       "price": 0.017,
+       "question": "Will Republicans win the Senate race in New Jersey?",
+       "volume": 30465.2
+      }
+     ],
+     "source": "kalshi",
+     "title": "New Jersey Senate winner?",
+     "url": "https://kalshi.com/markets/senatenj"
+    },
+    {
+     "event": "new-jersey-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.985,
+       "bid": 0.965,
+       "label": "Cory Booker (D)",
+       "party": "d",
+       "price": 0.975,
+       "question": "Will the Democrats win the New Jersey Senate race in 2026?",
+       "volume": 11597.504505
+      },
+      {
+       "ask": 0.031,
+       "bid": 0.007,
+       "label": "Justin Murphy (R)",
+       "party": "r",
+       "price": 0.019,
+       "question": "Will the Republicans win the New Jersey Senate race in 2026?",
+       "volume": 9708.750293000001
+      }
+     ],
+     "source": "polymarket",
+     "title": "New Jersey Senate Election Winner",
+     "url": "https://polymarket.com/event/new-jersey-senate-election-winner"
+    }
+   ]
+  },
+  "S-NM-2026": {
+   "markets": [
+    {
+     "event": "SENATENM-26",
+     "outcomes": [
+      {
+       "ask": 0.985,
+       "bid": 0.977,
+       "label": "Ben Ray Luján",
+       "party": "d",
+       "price": 0.985,
+       "question": "Will Democratics win the Senate race in New Mexico?",
+       "volume": 21704.07
+      },
+      {
+       "ask": 0.019,
+       "bid": 0.011,
+       "label": "Larry E. Marker",
+       "party": "r",
+       "price": 0.011,
+       "question": "Will Republicans win the Senate race in New Mexico?",
+       "volume": 14891.13
+      }
+     ],
+     "source": "kalshi",
+     "title": "New Mexico Senate winner?",
+     "url": "https://kalshi.com/markets/senatenm"
+    },
+    {
+     "event": "new-mexico-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.98,
+       "bid": 0.971,
+       "label": "Ben Ray Luján (D)",
+       "party": "d",
+       "price": 0.9755,
+       "question": "Will the Democrats win the New Mexico Senate race in 2026?",
+       "volume": 16755.067656000003
+      },
+      {
+       "ask": 0.025,
+       "bid": 0.011,
+       "label": "Larry Marker (R)",
+       "party": "r",
+       "price": 0.018,
+       "question": "Will the Republicans win the New Mexico Senate race in 2026?",
+       "volume": 9270.991268
+      }
+     ],
+     "source": "polymarket",
+     "title": "New Mexico Senate Election Winner",
+     "url": "https://polymarket.com/event/new-mexico-senate-election-winner"
+    }
+   ]
+  },
+  "S-OH-2026": {
+   "markets": [
+    {
+     "event": "SENATEOHS-26",
+     "outcomes": [
+      {
+       "ask": 0.6,
+       "bid": 0.59,
+       "label": "Sherrod Brown",
+       "party": "d",
+       "price": 0.6,
+       "question": "Will Democratics win the Senate race in Ohio?",
+       "volume": 2939199.47
+      },
+      {
+       "ask": 0.41,
+       "bid": 0.4,
+       "label": "Jon Husted",
+       "party": "r",
+       "price": 0.41,
+       "question": "Will Republicans win the Senate race in Ohio?",
+       "volume": 2754423.28
+      }
+     ],
+     "source": "kalshi",
+     "title": "Ohio Senate winner?",
+     "url": "https://kalshi.com/markets/senateohs"
+    },
+    {
+     "event": "ohio-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.59,
+       "bid": 0.58,
+       "label": "Sherrod Brown (D)",
+       "party": "d",
+       "price": 0.585,
+       "question": "Will the Democrats win the Ohio Senate race in 2026?",
+       "volume": 595140.1449560003
+      },
+      {
+       "ask": 0.42,
+       "bid": 0.41,
+       "label": "Jon Husted (R)",
+       "party": "r",
+       "price": 0.415,
+       "question": "Will the Republicans win the Ohio Senate race in 2026?",
+       "volume": 423466.27917099994
+      }
+     ],
+     "source": "polymarket",
+     "title": "Ohio Senate Election Winner",
+     "url": "https://polymarket.com/event/ohio-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in Ohio",
+    "rows": [
+     {
+      "administered": "September 10–29, 2026",
+      "aggregator": "270toWin",
+      "margin": "Brown +4.0%",
+      "other": 8.4,
+      "results": [
+       {
+        "id": "H001104",
+        "label": "Jon Husted (R)",
+        "party": "r",
+        "pct": 43.8
+       },
+       {
+        "id": "CAND_0",
+        "label": "Sherrod Brown (D)",
+        "party": "d",
+        "pct": 47.8
+       }
+      ],
+      "updated": "September 29, 2026",
+      "url": "https://www.270towin.com/2026-senate-polls/ohio"
+     },
+     {
+      "administered": "through September 27, 2026",
+      "aggregator": "Decision Desk HQ",
+      "margin": "Brown +4.5%",
+      "other": 8.9,
+      "results": [
+       {
+        "id": "H001104",
+        "label": "Jon Husted (R)",
+        "party": "r",
+        "pct": 43.3
+       },
+       {
+        "id": "CAND_0",
+        "label": "Sherrod Brown (D)",
+        "party": "d",
+        "pct": 47.8
+       }
+      ],
+      "updated": "September 29, 2026",
+      "url": "https://polls.decisiondeskhq.com/averages/general-ballot-test/2026-oh-us-senate/ohio/lv-rv-adults"
+     },
+     {
+      "administered": "through September 27, 2026",
+      "aggregator": "FiftyPlusOne",
+      "margin": "Brown +5.1%",
+      "other": 6.7,
+      "results": [
+       {
+        "id": "H001104",
+        "label": "Jon Husted (R)",
+        "party": "r",
+        "pct": 44.1
+       },
+       {
+        "id": "CAND_0",
+        "label": "Sherrod Brown (D)",
+        "party": "d",
+        "pct": 49.2
+       }
+      ],
+      "updated": "September 29, 2026",
+      "url": "https://fiftyplusone.news/polls/senate/general/ohio"
+     },
+     {
+      "administered": "through September 27, 2026",
+      "aggregator": "Race to the WH",
+      "margin": "Brown +5.0%",
+      "other": 7.4,
+      "results": [
+       {
+        "id": "H001104",
+        "label": "Jon Husted (R)",
+        "party": "r",
+        "pct": 43.8
+       },
+       {
+        "id": "CAND_0",
+        "label": "Sherrod Brown (D)",
+        "party": "d",
+        "pct": 48.8
+       }
+      ],
+      "updated": "September 29, 2026",
+      "url": "https://www.racetothewh.com/senate/26polls"
+     },
+     {
+      "administered": "September 1–27, 2026",
+      "aggregator": "RealClearPolitics",
+      "margin": "Brown +3.8%",
+      "other": 8.8,
+      "results": [
+       {
+        "id": "H001104",
+        "label": "Jon Husted (R)",
+        "party": "r",
+        "pct": 43.7
+       },
+       {
+        "id": "CAND_0",
+        "label": "Sherrod Brown (D)",
+        "party": "d",
+        "pct": 47.5
+       }
+      ],
+      "updated": "September 29, 2026",
+      "url": "https://www.realclearpolling.com/polls/senate/special-election/2026/ohio/husted-vs-brown"
+     },
+     {
+      "administered": "through September 23, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "Brown +4.5%",
+      "other": 8.3,
+      "results": [
+       {
+        "id": "H001104",
+        "label": "Jon Husted (R)",
+        "party": "r",
+        "pct": 43.6
+       },
+       {
+        "id": "CAND_0",
+        "label": "Sherrod Brown (D)",
+        "party": "d",
+        "pct": 48.1
+       }
+      ],
+      "updated": "September 29, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Ohio#Polling"
+   }
+  },
+  "S-OK-2026": {
+   "markets": [
+    {
+     "event": "SENATEOK-26",
+     "outcomes": [
+      {
+       "ask": 0.971,
+       "bid": 0.961,
+       "label": "Kevin Hern",
+       "party": "r",
+       "price": 0.974,
+       "question": "Will Republicans win the Senate race in Oklahoma?",
+       "volume": 21288.9
+      },
+      {
+       "ask": 0.024,
+       "bid": 0.021,
+       "label": "N’Kiyla Thomas",
+       "party": "d",
+       "price": 0.024,
+       "question": "Will Democratics win the Senate race in Oklahoma?",
+       "volume": 18923.21
+      }
+     ],
+     "source": "kalshi",
+     "title": "Oklahoma Senate winner?",
+     "url": "https://kalshi.com/markets/senateok"
+    },
+    {
+     "event": "oklahoma-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.995,
+       "bid": 0.973,
+       "label": "Kevin Hern (R)",
+       "party": "r",
+       "price": 0.984,
+       "question": "Will the Republicans win the Oklahoma Senate race in 2026?",
+       "volume": 19636.15527
+      },
+      {
+       "ask": 0.023,
+       "bid": 0.007,
+       "label": "N’Kiyla “Jasmine” Thomas (D)",
+       "party": "d",
+       "price": 0.015,
+       "question": "Will the Democrats win the Oklahoma Senate race in 2026?",
+       "volume": 6855.921002999999
+      }
+     ],
+     "source": "polymarket",
+     "title": "Oklahoma Senate Election Winner",
+     "url": "https://polymarket.com/event/oklahoma-senate-election-winner"
+    }
+   ]
+  },
+  "S-OR-2026": {
+   "markets": [
+    {
+     "event": "SENATEOR-26",
+     "outcomes": [
+      {
+       "ask": 0.992,
+       "bid": 0.978,
+       "label": "Jeff Merkley",
+       "party": "d",
+       "price": 0.991,
+       "question": "Will Democratics win the Senate race in Oregon?",
+       "volume": 4909.55
+      },
+      {
+       "ask": 0.011,
+       "bid": 0.003,
+       "label": "David Brock Smith",
+       "party": "r",
+       "price": 0.003,
+       "question": "Will Republicans win the Senate race in Oregon?",
+       "volume": 6621.61
+      }
+     ],
+     "source": "kalshi",
+     "title": "Oregon Senate winner?",
+     "url": "https://kalshi.com/markets/senateor"
+    },
+    {
+     "event": "oregon-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.983,
+       "bid": 0.974,
+       "label": "Jeff Merkley (D)",
+       "party": "d",
+       "price": 0.9785,
+       "question": "Will the Democrats win the Oregon Senate race in 2026?",
+       "volume": 3843.206669
+      },
+      {
+       "ask": 0.022,
+       "bid": 0.018,
+       "label": "David Brock Smith (R)",
+       "party": "r",
+       "price": 0.02,
+       "question": "Will the Republicans win the Oregon Senate race in 2026?",
+       "volume": 3097.6092280000003
+      }
+     ],
+     "source": "polymarket",
+     "title": "Oregon Senate Election Winner",
+     "url": "https://polymarket.com/event/oregon-senate-election-winner"
+    }
+   ]
+  },
+  "S-RI-2026": {
+   "markets": [
+    {
+     "event": "SENATERI-26",
+     "outcomes": [
+      {
+       "ask": 0.993,
+       "bid": 0.988,
+       "label": "Jack Reed",
+       "party": "d",
+       "price": 0.99,
+       "question": "Will Democratics win the Senate race in Rhode Island?",
+       "volume": 18705.4
+      },
+      {
+       "ask": 0.01,
+       "bid": 0.007,
+       "label": "Raymond McKay",
+       "party": "r",
+       "price": 0.019,
+       "question": "Will Republicans win the Senate race in Rhode Island?",
+       "volume": 4892.18
+      }
+     ],
+     "source": "kalshi",
+     "title": "Rhode Island Senate winner?",
+     "url": "https://kalshi.com/markets/senateri"
+    },
+    {
+     "event": "rhode-island-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.998,
+       "bid": 0.988,
+       "label": "Jack Reed (D)",
+       "party": "d",
+       "price": 0.993,
+       "question": "Will the Democrats win the Rhode Island Senate race in 2026?",
+       "volume": 7515.532805999999
+      },
+      {
+       "ask": 0.014,
+       "bid": 0.003,
+       "label": "Raymond McKay (R)",
+       "party": "r",
+       "price": 0.0085,
+       "question": "Will the Republicans win the Rhode Island Senate race in 2026?",
+       "volume": 19055.489786
+      }
+     ],
+     "source": "polymarket",
+     "title": "Rhode Island Senate Election Winner",
+     "url": "https://polymarket.com/event/rhode-island-senate-election-winner"
+    }
+   ]
+  },
+  "S-SC-2026": {
+   "markets": [
+    {
+     "event": "SENATESC-26",
+     "outcomes": [
+      {
+       "ask": 0.87,
+       "bid": 0.86,
+       "label": "Darline Graham",
+       "party": "r",
+       "price": 0.87,
+       "question": "Will Republicans win the Senate race in South Carolina?",
+       "volume": 756540.36
+      },
+      {
+       "ask": 0.14,
+       "bid": 0.13,
+       "label": "Annie Andrews",
+       "party": "d",
+       "price": 0.13,
+       "question": "Will Democratics win the Senate race in South Carolina?",
+       "volume": 1352022.0
+      }
+     ],
+     "source": "kalshi",
+     "title": "South Carolina Senate winner?",
+     "url": "https://kalshi.com/markets/senatesc"
+    },
+    {
+     "event": "south-carolina-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.88,
+       "bid": 0.87,
+       "label": "Darline Graham Nordone (R)",
+       "party": "r",
+       "price": 0.875,
+       "question": "Will the Republicans win the South Carolina Senate race in 2026?",
+       "volume": 229274.514757
+      },
+      {
+       "ask": 0.12,
+       "bid": 0.11,
+       "label": "Annie Andrews (D)",
+       "party": "d",
+       "price": 0.115,
+       "question": "Will the Democrats win the South Carolina Senate race in 2026?",
+       "volume": 309301.2251690001
+      }
+     ],
+     "source": "polymarket",
+     "title": "South Carolina Senate Election Winner",
+     "url": "https://polymarket.com/event/south-carolina-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in South Carolina",
+    "rows": [
+     {
+      "administered": "September 10–26, 2026",
+      "aggregator": "270toWin",
+      "margin": "Graham +1.5%",
+      "other": 13.5,
+      "results": [
+       {
+        "id": "G000608",
+        "label": "Darline Graham (R)",
+        "party": "r",
+        "pct": 44.0
+       },
+       {
+        "id": "CAND_26",
+        "label": "Annie Andrews (D)",
+        "party": "d",
+        "pct": 42.5
+       }
+      ],
+      "updated": "September 27, 2026",
+      "url": "https://www.270towin.com/2026-senate-polls/south-carolina"
+     },
+     {
+      "administered": "through September 29, 2026",
+      "aggregator": "FiftyPlusOne",
+      "margin": "Graham +1.1%",
+      "other": 12.1,
+      "results": [
+       {
+        "id": "G000608",
+        "label": "Darline Graham (R)",
+        "party": "r",
+        "pct": 44.5
+       },
+       {
+        "id": "CAND_26",
+        "label": "Annie Andrews (D)",
+        "party": "d",
+        "pct": 43.4
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://fiftyplusone.news/polls/senate/general/south-carolina"
+     },
+     {
+      "administered": "through September 29, 2026",
+      "aggregator": "Race to the WH",
+      "margin": "Graham +1.3%",
+      "other": 10.9,
+      "results": [
+       {
+        "id": "G000608",
+        "label": "Darline Graham (R)",
+        "party": "r",
+        "pct": 45.2
+       },
+       {
+        "id": "CAND_26",
+        "label": "Annie Andrews (D)",
+        "party": "d",
+        "pct": 43.9
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://www.racetothewh.com/senate/26polls"
+     },
+     {
+      "administered": "September 14–29, 2026",
+      "aggregator": "RealClearPolitics",
+      "margin": "Graham +2.4%",
+      "other": 11.0,
+      "results": [
+       {
+        "id": "G000608",
+        "label": "Darline Graham (R)",
+        "party": "r",
+        "pct": 45.7
+       },
+       {
+        "id": "CAND_26",
+        "label": "Annie Andrews (D)",
+        "party": "d",
+        "pct": 43.3
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://www.realclearpolling.com/polls/senate/general/2026/south-carolina/graham-nordone-vs-andrews"
+     },
+     {
+      "administered": "through September 25, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "Graham +1.7%",
+      "other": 13.5,
+      "results": [
+       {
+        "id": "G000608",
+        "label": "Darline Graham (R)",
+        "party": "r",
+        "pct": 44.1
+       },
+       {
+        "id": "CAND_26",
+        "label": "Annie Andrews (D)",
+        "party": "d",
+        "pct": 42.4
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_South_Carolina#Polling"
+   }
+  },
+  "S-SD-2026": {
+   "markets": [
+    {
+     "event": "SENATESD-26",
+     "outcomes": [
+      {
+       "ask": 0.938,
+       "bid": 0.911,
+       "label": "Mike Rounds",
+       "party": "r",
+       "price": 0.938,
+       "question": "Will Republicans win the Senate race in South Dakota?",
+       "volume": 76999.59
+      },
+      {
+       "ask": 0.08,
+       "bid": 0.07,
+       "label": "Brian Bengs",
+       "party": "i",
+       "price": 0.08,
+       "question": "Will Brian Bengss win the Senate race in South Dakota?",
+       "volume": 105913.42
+      },
+      {
+       "ask": 0.004,
+       "bid": 0.002,
+       "label": "Julian Beaudion",
+       "party": "d",
+       "price": 0.004,
+       "question": "Will Democratics win the Senate race in South Dakota?",
+       "volume": 32019.07
+      }
+     ],
+     "source": "kalshi",
+     "title": "South Dakota Senate winner?",
+     "url": "https://kalshi.com/markets/senatesd"
+    },
+    {
+     "event": "south-dakota-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.911,
+       "bid": 0.909,
+       "label": "Mike Rounds (R)",
+       "party": "r",
+       "price": 0.91,
+       "question": "Will the Republicans win the South Dakota Senate race in 2026?",
+       "volume": 29000.055884999998
+      },
+      {
+       "ask": 0.091,
+       "bid": 0.085,
+       "label": "Brian Bengs (I)",
+       "party": "i",
+       "price": 0.088,
+       "question": "Will Brian Bengs win the South Dakota Senate race in 2026?",
+       "volume": 4862.435729999999
+      },
+      {
+       "ask": 0.002,
+       "bid": 0.001,
+       "label": "Democrat",
+       "party": "d",
+       "price": 0.0015,
+       "question": "Will the Democrats win the South Dakota Senate race in 2026?",
+       "volume": 13452.783559999996
+      }
+     ],
+     "source": "polymarket",
+     "title": "South Dakota Senate Election Winner",
+     "url": "https://polymarket.com/event/south-dakota-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in South Dakota",
+    "rows": [
+     {
+      "administered": "through September 27, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "Bengs +1.9%",
+      "other": 5.9,
+      "results": [
+       {
+        "id": "R000605",
+        "label": "Mike Rounds (R)",
+        "party": "r",
+        "pct": 46.1
+       },
+       {
+        "id": "CAND_44",
+        "label": "Brian Bengs (I)",
+        "party": "i",
+        "pct": 48.0
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_South_Dakota#Polling"
+   }
+  },
+  "S-TN-2026": {
+   "markets": [
+    {
+     "event": "SENATETN-26",
+     "outcomes": [
+      {
+       "ask": 0.98,
+       "bid": 0.962,
+       "label": "Bill Hagerty",
+       "party": "r",
+       "price": 0.962,
+       "question": "Will Republicans win the Senate race in Tennessee?",
+       "volume": 10136.94
+      },
+      {
+       "ask": 0.038,
+       "bid": 0.019,
+       "label": "Marquita Bradshaw",
+       "party": "d",
+       "price": 0.038,
+       "question": "Will Democratics win the Senate race in Tennessee?",
+       "volume": 31629.36
+      }
+     ],
+     "source": "kalshi",
+     "title": "Tennessee Senate winner?",
+     "url": "https://kalshi.com/markets/senatetn"
+    },
+    {
+     "event": "tennessee-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.983,
+       "bid": 0.971,
+       "label": "Bill Hagerty (R)",
+       "party": "r",
+       "price": 0.977,
+       "question": "Will the Republicans win the Tennessee Senate race in 2026?",
+       "volume": 19680.406581999992
+      },
+      {
+       "ask": 0.031,
+       "bid": 0.01,
+       "label": "Marquita Bradshaw (D)",
+       "party": "d",
+       "price": 0.0205,
+       "question": "Will the Democrats win the Tennessee Senate race in 2026?",
+       "volume": 10782.566499999999
+      }
+     ],
+     "source": "polymarket",
+     "title": "Tennessee Senate Election Winner",
+     "url": "https://polymarket.com/event/tennessee-senate-election-winner"
+    }
+   ]
+  },
+  "S-TX-2026": {
+   "markets": [
+    {
+     "event": "SENATETX-26",
+     "outcomes": [
+      {
+       "ask": 0.64,
+       "bid": 0.63,
+       "label": "James Talarico",
+       "party": "d",
+       "price": 0.64,
+       "question": "Will Democratics win the Senate race in Texas?",
+       "volume": 7077058.33
+      },
+      {
+       "ask": 0.38,
+       "bid": 0.37,
+       "label": "Ken Paxton",
+       "party": "r",
+       "price": 0.38,
+       "question": "Will Republicans win the Senate race in Texas?",
+       "volume": 9997157.83
+      }
+     ],
+     "source": "kalshi",
+     "title": "Texas Senate winner?",
+     "url": "https://kalshi.com/markets/senatetx"
+    },
+    {
+     "event": "texas-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.61,
+       "bid": 0.6,
+       "label": "James Talarico (D)",
+       "party": "d",
+       "price": 0.605,
+       "question": "Will the Democrats win the Texas Senate race in 2026?",
+       "volume": 847116.1483720001
+      },
+      {
+       "ask": 0.39,
+       "bid": 0.38,
+       "label": "Ken Paxton (R)",
+       "party": "r",
+       "price": 0.385,
+       "question": "Will the Republicans win the Texas Senate race in 2026?",
+       "volume": 902292.1131400003
+      }
+     ],
+     "source": "polymarket",
+     "title": "Texas Senate Election Winner",
+     "url": "https://polymarket.com/event/texas-senate-election-winner"
+    }
+   ],
+   "polls": {
+    "page": "2026 United States Senate election in Texas",
+    "rows": [
+     {
+      "administered": "September 15–28, 2026",
+      "aggregator": "270toWin",
+      "margin": "Talarico +3.0%",
+      "other": 5.8,
+      "results": [
+       {
+        "id": "CAND_4",
+        "label": "Ken Paxton (R)",
+        "party": "r",
+        "pct": 45.6
+       },
+       {
+        "id": "CAND_27",
+        "label": "James Talarico (D)",
+        "party": "d",
+        "pct": 48.6
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://www.270towin.com/2026-senate-polls/texas"
+     },
+     {
+      "administered": "through September 28, 2026",
+      "aggregator": "Decision Desk HQ",
+      "margin": "Talarico +2.9%",
+      "other": 7.1,
+      "results": [
+       {
+        "id": "CAND_4",
+        "label": "Ken Paxton (R)",
+        "party": "r",
+        "pct": 45.0
+       },
+       {
+        "id": "CAND_27",
+        "label": "James Talarico (D)",
+        "party": "d",
+        "pct": 47.9
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://votes.decisiondeskhq.com/races/2026-11-03/texas-us-senate-general-election/polling"
+     },
+     {
+      "administered": "through September 28, 2026",
+      "aggregator": "FiftyPlusOne",
+      "margin": "Talarico +3.0%",
+      "other": 6.6,
+      "results": [
+       {
+        "id": "CAND_4",
+        "label": "Ken Paxton (R)",
+        "party": "r",
+        "pct": 45.2
+       },
+       {
+        "id": "CAND_27",
+        "label": "James Talarico (D)",
+        "party": "d",
+        "pct": 48.2
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://fiftyplusone.news/polls/senate/general/texas"
+     },
+     {
+      "administered": "September 12–29, 2026",
+      "aggregator": "RealClearPolitics",
+      "margin": "Talarico +2.4%",
+      "other": 6.6,
+      "results": [
+       {
+        "id": "CAND_4",
+        "label": "Ken Paxton (R)",
+        "party": "r",
+        "pct": 45.5
+       },
+       {
+        "id": "CAND_27",
+        "label": "James Talarico (D)",
+        "party": "d",
+        "pct": 47.9
+       }
+      ],
+      "updated": "October 2, 2026",
+      "url": "https://www.realclearpolling.com/polls/senate/general/2026/texas/talarico-vs-paxton"
+     },
+     {
+      "administered": "through September 29, 2026",
+      "aggregator": "The Texas Tribune",
+      "margin": "Talarico +2.1%",
+      "other": 7.5,
+      "results": [
+       {
+        "id": "CAND_4",
+        "label": "Ken Paxton (R)",
+        "party": "r",
+        "pct": 45.2
+       },
+       {
+        "id": "CAND_27",
+        "label": "James Talarico (D)",
+        "party": "d",
+        "pct": 47.3
+       }
+      ],
+      "updated": "September 30, 2026",
+      "url": "https://www.texastribune.org/2026/08/07/texas-us-senate-james-talarico-ken-paxton-polls/"
+     },
+     {
+      "administered": "through September 27, 2026",
+      "aggregator": "Silver Bulletin",
+      "margin": "Talarico +3.4%",
+      "other": 6.0,
+      "results": [
+       {
+        "id": "CAND_4",
+        "label": "Ken Paxton (R)",
+        "party": "r",
+        "pct": 45.3
+       },
+       {
+        "id": "CAND_27",
+        "label": "James Talarico (D)",
+        "party": "d",
+        "pct": 48.7
+       }
+      ],
+      "updated": "October 1, 2026",
+      "url": null
+     }
+    ],
+    "url": "https://en.wikipedia.org/wiki/2026_United_States_Senate_election_in_Texas#Polling"
+   }
+  },
+  "S-VA-2026": {
+   "markets": [
+    {
+     "event": "SENATEVA-26",
+     "outcomes": [
+      {
+       "ask": 0.99,
+       "bid": 0.977,
+       "label": "Mark Warner",
+       "party": "d",
+       "price": 0.978,
+       "question": "Will Democratics win the Senate race in Virginia?",
+       "volume": 18901.55
+      },
+      {
+       "ask": 0.019,
+       "bid": 0.004,
+       "label": "Bert Mizusawa",
+       "party": "r",
+       "price": 0.02,
+       "question": "Will Republicans win the Senate race in Virginia?",
+       "volume": 12487.01
+      }
+     ],
+     "source": "kalshi",
+     "title": "Virginia Senate winner?",
+     "url": "https://kalshi.com/markets/senateva"
+    },
+    {
+     "event": "virginia-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.994,
+       "bid": 0.971,
+       "label": "Mark Warner (D)",
+       "party": "d",
+       "price": 0.9825,
+       "question": "Will the Democrats win the Virginia Senate race in 2026?",
+       "volume": 16198.49505
+      },
+      {
+       "ask": 0.033,
+       "bid": 0.005,
+       "label": "Bert Mizusawa (R)",
+       "party": "r",
+       "price": 0.019,
+       "question": "Will the Republicans win the Virginia Senate race in 2026?",
+       "volume": 7454.679110000001
+      }
+     ],
+     "source": "polymarket",
+     "title": "Virginia Senate Election Winner",
+     "url": "https://polymarket.com/event/virginia-senate-election-winner"
+    }
+   ]
+  },
+  "S-WV-2026": {
+   "markets": [
+    {
+     "event": "SENATEWV-26",
+     "outcomes": [
+      {
+       "ask": 0.984,
+       "bid": 0.972,
+       "label": "Shelley Moore Capito",
+       "party": "r",
+       "price": 0.984,
+       "question": "Will Republicans win the Senate race in West Virginia?",
+       "volume": 9110.29
+      },
+      {
+       "ask": 0.027,
+       "bid": 0.022,
+       "label": "Rachel Fetty Anderson",
+       "party": "d",
+       "price": 0.027,
+       "question": "Will Democratics win the Senate race in West Virginia?",
+       "volume": 13393.82
+      }
+     ],
+     "source": "kalshi",
+     "title": "West Virginia Senate winner?",
+     "url": "https://kalshi.com/markets/senatewv"
+    },
+    {
+     "event": "west-virginia-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.997,
+       "bid": 0.976,
+       "label": "Shelley Moore Capito (R)",
+       "party": "r",
+       "price": 0.9865,
+       "question": "Will the Republicans win the West Virginia Senate race in 2026?",
+       "volume": 10846.194514000003
+      },
+      {
+       "ask": 0.019,
+       "bid": 0.006,
+       "label": "Rachel Fetty Anderson (D)",
+       "party": "d",
+       "price": 0.0125,
+       "question": "Will the Democrats win the West Virginia Senate race in 2026?",
+       "volume": 5351.339320000001
+      }
+     ],
+     "source": "polymarket",
+     "title": "West Virginia Senate Election Winner",
+     "url": "https://polymarket.com/event/west-virginia-senate-election-winner"
+    }
+   ]
+  },
+  "S-WY-2026": {
+   "markets": [
+    {
+     "event": "SENATEWY-26",
+     "outcomes": [
+      {
+       "ask": 0.975,
+       "bid": 0.974,
+       "label": "Harriet Hageman",
+       "party": "r",
+       "price": 0.975,
+       "question": "Will Republicans win the Senate race in Wyoming?",
+       "volume": 14252.37
+      },
+      {
+       "ask": 0.026,
+       "bid": 0.024,
+       "label": "James Byrd",
+       "party": "d",
+       "price": 0.026,
+       "question": "Will Democratics win the Senate race in Wyoming?",
+       "volume": 9950.73
+      }
+     ],
+     "source": "kalshi",
+     "title": "Wyoming Senate winner?",
+     "url": "https://kalshi.com/markets/senatewy"
+    },
+    {
+     "event": "wyoming-senate-election-winner",
+     "outcomes": [
+      {
+       "ask": 0.979,
+       "bid": 0.971,
+       "label": "Harriet Hageman (R)",
+       "party": "r",
+       "price": 0.975,
+       "question": "Will the Republicans win the Wyoming Senate race in 2026?",
+       "volume": 13636.374726999999
+      },
+      {
+       "ask": 0.028,
+       "bid": 0.022,
+       "label": "James W. Byrd (D)",
+       "party": "d",
+       "price": 0.025,
+       "question": "Will the Democrats win the Wyoming Senate race in 2026?",
+       "volume": 5694.943125
+      }
+     ],
+     "source": "polymarket",
+     "title": "Wyoming Senate Election Winner",
+     "url": "https://polymarket.com/event/wyoming-senate-election-winner"
+    }
+   ]
+  }
+ }
+}
