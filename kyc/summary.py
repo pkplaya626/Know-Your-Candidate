@@ -62,6 +62,14 @@ def committee_table(committees, profiles):
     return table
 
 
+def redistricting():
+    """``{code: {page, name}}``: states with a before-and-after district map,
+    so a state page and a profile can link to it."""
+    from . import districts
+
+    return districts.index()
+
+
 def build(profiles, races=None, committees=None):
     """Chamber balance and 2026 election headline figures."""
     members = [p for p in profiles if not p.get("isCandidate")]
@@ -114,6 +122,7 @@ def build(profiles, races=None, committees=None):
             "open": sum(1 for r in races if r.get("openSeat")),
         }
     summary["states"] = by_state(profiles, races)
+    summary["redistricting"] = redistricting()
     if committees:
         summary["committees"] = committee_table(committees, profiles)
     return summary

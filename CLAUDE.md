@@ -22,6 +22,8 @@ if a page loads a remote script, stylesheet or font.
 ```text
 *.csv (repo root)           ──┐
 us_atlas_states_topo.json   ──┤
+ca_districts_topo.json      ──┤   (both California House maps, fixed until 2030)
+ca_places.json              ──┤   (towns for the close-ups; tools/fetch_ca_places.py)
 congress_snapshot.json      ──┤
 data/fec_field.json         ──┤   (the FEC's 2026 candidate register)
 data/disclosures.json       ──┤
@@ -33,7 +35,9 @@ data/odds.json              ──┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
                                              data/odds.js       (market prices, polling averages)
+                                             data/districts.js  (before-and-after district maps)
                                              states/*.html      (generated, one per state)
+                                             redistricting/*.html (generated, one per redrawn map)
                                              sitemap.xml        (generated)
                                              ├──> index.html    (grid, races, profiles)
                                              └──> map.html      (partisan map)
@@ -46,21 +50,25 @@ data/odds.json              ──┴─> kyc/ ──> candidate_profiles_site/
                                              assets/kyc-directory.js
                                              assets/kyc-map.js
                                              assets/kyc-state.js
+                                             assets/kyc-districts.js
 ```
 
 - The root CSVs are the editorial source of truth. The state atlas and
   `congress_snapshot.json` are vendored inputs: refreshed by a command, never
-  hand-edited.
-- Everything in `data/` is **generated**. Never edit `profiles.js`, `geo.js`
-  or `odds.js` by hand. `portraits.json`, `finance.json`, `fec_field.json`,
+  hand-edited. So are `ca_districts_topo.json` (no refresh command: the lines
+  are fixed by law until the 2030 census) and `ca_places.json`
+  (`tools/fetch_ca_places.py`).
+- Everything in `data/` is **generated**. Never edit `profiles.js`, `geo.js`,
+  `odds.js` or `districts.js` by hand. `portraits.json`, `finance.json`, `fec_field.json`,
   `disclosures.json`, `primary_results.json`, `committees.json`,
   `campaigns.json`, `enrichment.json` and `odds.json` are caches, but they
   *are* hand-editable.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them only to check they load the right scripts in the right order; it never
-  rewrites them. `states/*.html` and `sitemap.xml` are the opposite: generated
-  from `kyc/pages.py` on every build, never edited by hand, and `verify`
-  fails when one on disk is not what the template would write.
+  rewrites them. `states/*.html`, `redistricting/*.html` and `sitemap.xml`
+  are the opposite: generated from `kyc/pages.py` on every build, never
+  edited by hand, and `verify` fails when one on disk is not what the
+  template would write.
 - Shared page behaviour belongs in `assets/`, not in a page. Neither page
   contains an inline `<script>` block.
 
@@ -72,7 +80,7 @@ python build_profile_site.py build --check    # validate only
 python build_profile_site.py verify           # committed data matches sources
 python build_profile_site.py congress --check # roster vs Congress (offline)
 python build_profile_site.py congress --apply # write newly seated members in
-python build_profile_site.py geo              # regenerate map geometry only
+python build_profile_site.py geo              # regenerate map geometry only (both maps)
 python build_profile_site.py congress         # refresh membership (network)
 python build_profile_site.py field --check    # who is running, from the FEC
 python build_profile_site.py disclosures      # House and Senate disclosure links
@@ -80,8 +88,8 @@ python build_profile_site.py results          # who is still in, from Wikipedia
 python build_profile_site.py campaigns        # campaign websites from FEC committees
 python build_profile_site.py enrich           # fill gaps; check every campaign site
 python build_profile_site.py odds             # market prices and polling averages (writes odds.js)
-python -m unittest discover tests             # 613 tests, no dependencies
-npm install && npm test                       # 516 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 648 tests, no dependencies
+npm install && npm test                       # 609 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -451,7 +459,8 @@ That check found a retirement note keyed `"Dick Durbin"` when the roster says
   return something display-ready.
 - Add a regression test for any data bug fixed — `tests/test_pipeline.py` for
   core parsing, `tests/test_enrichment.py` for provenance/portraits/FEC/races,
-  `tests/test_geo.py` for map geometry, `tests/test_site.py` for summary
+  `tests/test_geo.py` for map geometry, `tests/test_districts.py` for the
+  before-and-after district maps, `tests/test_site.py` for summary
   figures, emitted files and page wiring, `tests/render_test.js` for anything
   visible on a page.
 - When changing profile fields, update the field tables in `README.md`.

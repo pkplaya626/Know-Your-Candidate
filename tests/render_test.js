@@ -98,10 +98,11 @@ async function testShared(page) {
     check("theme applied before paint", !!D.documentElement.getAttribute("data-theme"),
       D.documentElement.getAttribute("data-theme"));
     check("icon sprite injected", !!D.getElementById("kyc-sprite"));
-    check("every <use> resolves to a sprite symbol", (() => {
+    check("every <use> resolves: icons to a sprite symbol, district maps to a shape", (() => {
       const ids = new Set([...D.querySelectorAll("#kyc-sprite symbol")].map((s) => s.id));
       const used = [...D.querySelectorAll("use")].map((u) => (u.getAttribute("href") || "").slice(1));
-      return used.length > 0 && used.every((id) => ids.has(id));
+      return used.length > 0 && used.every((id) => ids.has(id) ||
+        (/^kycd-/.test(id) && !!D.querySelector(".district-defs #" + id)));
     })());
   });
 
@@ -155,7 +156,7 @@ async function testShared(page) {
     check("[hidden] wins over component display rules",
       /\[hidden\]\s*\{[^}]*display:\s*none\s*!important/.test(css));
     check("the page hides with the property, not a class", (() => {
-      const js = ["kyc.js", "kyc-odds.js", "kyc-cards.js", "kyc-profile.js", "kyc-senate.js", "kyc-directory.js", "kyc-map.js", "kyc-state.js"]
+      const js = ["kyc.js", "kyc-odds.js", "kyc-cards.js", "kyc-profile.js", "kyc-senate.js", "kyc-directory.js", "kyc-map.js", "kyc-state.js", "kyc-districts.js"]
         .filter((f) => fs.existsSync(path.join(SITE, "assets", f)))
         .map((f) => fs.readFileSync(path.join(SITE, "assets", f), "utf8"))
         .join("\n");
@@ -1758,6 +1759,186 @@ async function testOdds() {
   });
 }
 
+/* ========================================================= redistricting */
+
+/* California's House map before and after Proposition 50. Everything the
+ * page says about a person is read from profiles.js, so every expectation
+ * here is derived from the same records rather than typed in: a name in a
+ * test is a name that goes stale the next time someone moves. */
+async function testRedistricting() {
+  const page = "redistricting/ca.html";
+  const { window, D, KYC } = await testShared(page);
+  const maps = window.kycDistricts && window.kycDistricts.CA;
+  const people = window.legislatorsData;
+  const races = window.kycRaces;
+  const caHouse = (p) => !p.isCandidate && p.state === "CA" && /House/.test(p.chamber);
+  const holders = (n) => people.filter((p) => caHouse(p) && p.districtNum === n);
+  const raceFor = (n) => races.find((r) => r.chamber === "House" && r.state === "CA" && r.district === n);
+  const contestOf = (p) => (races.find((r) => r.id === p.contestRaceId) || {}).district;
+  const movers = people.filter((p) => caHouse(p) && KYC.runsElsewhere(p) &&
+    /^H-CA-/.test(p.contestRaceId));
+  const cards = () => [...D.querySelectorAll(".plan-card")];
+  const focusOf = (card) => [...card.querySelectorAll(".district-statewide use.is-focus")]
+    .map((u) => +u.getAttribute("data-district")).sort((a, b) => a - b);
+  const click = (el, opts) => el.dispatchEvent(new window.MouseEvent("click",
+    Object.assign({ bubbles: true }, opts || {})));
+
+  suite(`${page} — the two maps`, () => {
+    check("the maps loaded", !!maps && maps.plans.length === 2);
+    check("every district is drawn once, into shared defs",
+      D.querySelectorAll(".district-defs path").length === maps.seats * 2 + 2,
+      `${D.querySelectorAll(".district-defs path").length}`);
+    check("a card per map, before then after", cards().length === 2 &&
+      /Before/.test(cards()[0].textContent) && /After/.test(cards()[1].textContent));
+    cards().forEach((card, i) => {
+      const plan = maps.plans[i];
+      const shapes = [...card.querySelectorAll(".district-statewide use.district-shape")];
+      check(`${plan.title}: the statewide map draws every district`,
+        shapes.length === maps.seats, `${shapes.length}`);
+      check(`${plan.title}: every shape is this map's own`, shapes.every((u) =>
+        u.getAttribute("href") === "#kycd-" + plan.key + "-" + u.getAttribute("data-district")));
+      const numbered = new Set([...card.querySelectorAll(
+        ".district-statewide .district-num, .district-inset .district-num")].map((t) => +t.textContent));
+      const missing = [];
+      for (let n = 1; n <= maps.seats; n++) if (!numbered.has(n)) missing.push(n);
+      check(`${plan.title}: every district is numbered, statewide or in an inset`,
+        missing.length === 0, missing.join(", "));
+    });
+  });
+
+  suite(`${page} — who moved comes from the data`, () => {
+    const rows = [...D.querySelectorAll(".mover")];
+    check("a row per member running in a different California district",
+      movers.length > 0 && rows.length === movers.length, `${rows.length} of ${movers.length}`);
+    check("each member's group holds both of their districts", movers.every((p) => {
+      const group = [...D.querySelectorAll(".mover-group")]
+        .find((g) => g.textContent.indexOf(p.name) !== -1);
+      const ds = group ? group.getAttribute("data-focus").split(",").map(Number) : [];
+      return ds.indexOf(p.districtNum) !== -1 && ds.indexOf(contestOf(p)) !== -1;
+    }));
+    const first = D.querySelector(".mover-group");
+    check("the first group is the view a visitor lands on",
+      first.getAttribute("aria-pressed") === "true");
+    const wanted = first.getAttribute("data-focus").split(",").map(Number).sort((a, b) => a - b);
+    check("its districts are picked out on both maps",
+      cards().every((c) => focusOf(c).join() === wanted.join()), cards().map(focusOf).join(" / "));
+  });
+
+  suite(`${page} — the close-ups and cards name who the data names`, () => {
+    const [before, after] = cards();
+    const beforeText = before.querySelector(".district-closeup").textContent;
+    const afterText = after.querySelector(".district-closeup").textContent;
+    const fact = (card, n) => [...card.querySelectorAll(".district-fact")].find((f) =>
+      f.querySelector(".district-fact-title").textContent.indexOf("CA-" + n + " ") !== -1);
+    const ids = (f) => (f ? [...f.querySelectorAll(".card[data-id]")] : [])
+      .map((c) => c.getAttribute("data-id")).sort().join();
+    focusOf(before).forEach((n) => {
+      const held = holders(n);
+      check(`CA-${n}: the old map's close-up names who holds the seat`,
+        held.length > 0 && held.every((p) => beforeText.indexOf(p.name) !== -1),
+        held.map((p) => p.name).join());
+      const here = movers.filter((p) => contestOf(p) === n);
+      check(`CA-${n}: the new map's close-up names the members running there`,
+        here.every((p) => afterText.indexOf(p.name) !== -1), here.map((p) => p.name).join());
+      check(`CA-${n}: the old map's card is the seat's holder`,
+        ids(fact(before, n)) === held.map((p) => p.id).sort().join());
+      const race = raceFor(n);
+      const onBallot = [...new Set(race.incumbentIds.concat(race.candidateIds))].map(KYC.byId)
+        .filter((p) => p && (p.isCandidate || (p.contestRaceId || p.raceId) === race.id) &&
+          /^(nominee|advanced)$/.test(p.isCandidate ? p.raceStatus : KYC.contestStatus(p)));
+      check(`CA-${n}: the new map's cards are the race's nominees`,
+        onBallot.length > 0 && ids(fact(after, n)) === onBallot.map((p) => p.id).sort().join(),
+        ids(fact(after, n)) + " vs " + onBallot.map((p) => p.id).join());
+      check(`CA-${n}: the new map's card links to the race on the state page`,
+        !!fact(after, n).querySelector('a[href="../states/ca.html#race-' + race.id + '"]'));
+    });
+  });
+
+  suite(`${page} — every view has a URL`, () => {
+    const groups = [...D.querySelectorAll(".mover-group")];
+    if (groups[1]) {
+      groups[1].click();
+      check("picking a group writes it to the address, commas and all",
+        window.location.hash === "#/?d=" + groups[1].getAttribute("data-focus"), window.location.hash);
+      check("and presses it, and only it", groups[1].getAttribute("aria-pressed") === "true" &&
+        groups[0].getAttribute("aria-pressed") === "false");
+    }
+    click(D.querySelector('.district-statewide use[data-district="12"]'));
+    check("clicking a district picks it out",
+      window.location.hash === "#/?d=12" && focusOf(cards()[1]).join() === "12", window.location.hash);
+    click(D.querySelector('.district-statewide use[data-district="11"]'), { shiftKey: true });
+    check("Shift-click adds one", window.location.hash === "#/?d=12,11", window.location.hash);
+    const pick = D.getElementById("districtPick");
+    pick.value = "5";
+    pick.dispatchEvent(new window.Event("change", { bubbles: true }));
+    check("the district list picks one too", window.location.hash === "#/?d=5", window.location.hash);
+    check("the close-up follows", /CA-5\b/.test(
+      cards()[0].querySelector(".district-closeup").getAttribute("aria-label")));
+    const toggle = D.getElementById("ghostToggle");
+    toggle.click();
+    check("the other map's dashed lines can be hidden",
+      D.getElementById("districtsApp").classList.contains("hide-ghosts"));
+    toggle.click();
+    const card = D.querySelector(".plan-card .card[data-id]");
+    card.click();
+    check("a card opens the shared profile dialog", !D.getElementById("profileModal").hidden &&
+      D.getElementById("profileModalName").textContent === KYC.byId(card.getAttribute("data-id")).name);
+    KYC.profile.close();
+    check("nothing on the page is unescaped markup from the data",
+      !/<script/i.test(D.getElementById("districtsApp").innerHTML));
+  });
+
+  const linked = await buildPage(page, { hash: "#/?d=41" });
+  suite(`${page} — a shared link opens its own view`, () => {
+    check("#/?d=41 lands on CA-41", focusOf(linked.D.querySelector(".plan-card")).join() === "41");
+    check("and leaves no group pressed",
+      ![...linked.D.querySelectorAll(".mover-group")].some((g) => g.getAttribute("aria-pressed") === "true"));
+  });
+  const broken = await buildPage(page, { hash: "#/?d=99,abc" });
+  suite(`${page} — a broken link falls back to the first group`, () => {
+    check("nothing out of range is picked",
+      broken.D.querySelector(".mover-group").getAttribute("aria-pressed") === "true");
+  });
+
+  const mover = movers[0];
+  const expectLink = "redistricting/ca.html#/?d=" +
+    [mover.districtNum, contestOf(mover)].sort((a, b) => a - b).join(",");
+  const direct = await buildPage(page, { hash: "#/profile/" + encodeURIComponent(mover.id) });
+  suite(`${page} — a profile link opens over the maps`, () => {
+    check("the dialog shows the person", !direct.D.getElementById("profileModal").hidden &&
+      direct.D.getElementById("profileModalName").textContent === mover.name, mover.name);
+    const note = direct.D.querySelector("#profileModalRace .race-redrawn a");
+    check("the dialog links to both of their districts",
+      !!note && note.getAttribute("href") === "../" + expectLink, note && note.getAttribute("href"));
+  });
+
+  const grid = await buildPage("index.html");
+  suite("index.html — the profile dialog links to the redrawn lines", () => {
+    grid.window.KYC.profile.open(mover.id);
+    const note = grid.D.querySelector("#profileModalRace .race-redrawn a");
+    check("a member running in a redrawn district gets a link to both districts",
+      !!note && note.getAttribute("href") === expectLink, note && note.getAttribute("href"));
+    grid.window.KYC.profile.close();
+    const texan = people.find((p) => !p.isCandidate && p.state === "TX" && /House/.test(p.chamber) &&
+      races.some((r) => r.id === (p.contestRaceId || p.raceId)));
+    grid.window.KYC.profile.open(texan.id);
+    check("a race in a state with no redrawn map gets no such link",
+      !grid.D.querySelector("#profileModalRace .race-redrawn"), texan.name);
+    grid.window.KYC.profile.close();
+  });
+
+  const ca = await buildPage("states/ca.html");
+  const tx = await buildPage("states/tx.html");
+  suite("state pages — the link to the maps", () => {
+    const href = (d) => [...d.querySelectorAll(".state-links a")].map((a) => a.getAttribute("href"));
+    check("California's page links to its old and new lines",
+      href(ca.D).indexOf("../redistricting/ca.html") !== -1, href(ca.D).join(" "));
+    check("Texas's page does not", !href(tx.D).some((h) => /redistricting/.test(h)));
+    const sitemap = fs.readFileSync(path.join(SITE, "sitemap.xml"), "utf8");
+    check("the sitemap lists the page", sitemap.includes("/redistricting/ca.html"));
+  });
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "index.html") await testDirectoryAsync();
@@ -1766,6 +1947,7 @@ async function testOdds() {
   if (!only || only === "index.html") await testSeatRows();
   if (!only || only === "map.html") await testMap();
   if (!only || only === "states") await testStates();
+  if (!only || only === "redistricting") await testRedistricting();
   if (!only || only === "links") await testDeepLinks();
   if (!only || only === "links") await testFoldedIds();
   if (!only || only === "links") await testRunningElsewhere();

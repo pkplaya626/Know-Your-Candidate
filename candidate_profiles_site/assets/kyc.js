@@ -652,7 +652,10 @@
       var query = Object.keys(params)
         .filter(function (k) { return params[k] && params[k] !== "all"; })
         .map(function (k) {
-          return encodeURIComponent(k) + "=" + encodeURIComponent(params[k]);
+          // Commas are legal in a fragment: a shared link reads "d=3,6",
+          // not "d=3%2C6". read() decodes either.
+          return encodeURIComponent(k) + "=" +
+            encodeURIComponent(params[k]).replace(/%2C/g, ",");
         })
         .join("&");
       var hash = query ? "#/?" + query : "#/";

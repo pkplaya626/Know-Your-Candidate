@@ -167,9 +167,7 @@ _PAGE = string.Template("""\
 
     <main class="app-main" id="stateMain">
         <div class="content scroll-y">
-            <div id="stateContent" class="state-page">
-                <p class="results-bar" role="status">Loading&hellip;</p>
-            </div>
+$main
 
             <footer class="site-footer">
                 <p><strong>Sources:</strong>
@@ -177,7 +175,7 @@ _PAGE = string.Template("""\
                     <code>congress-legislators</code> dataset; the candidate field and
                     campaign finance from the Federal Election Commission; primary results
                     from each state's Wikipedia election page; portraits from Congress.gov
-                    and Wikipedia.</p>
+                    and Wikipedia.</p>$more_sources
                 <p><strong>Who counts as a candidate:</strong> everyone the FEC records
                     as having raised or spent more than $$5,000 for the 2026 cycle
                     (52&nbsp;U.S.C.&nbsp;&sect;30101(2)). People the primary removed stay on
@@ -189,19 +187,43 @@ _PAGE = string.Template("""\
     </main>
 </div>
 
-<script src="../data/profiles.js"></script>
-<script src="../data/odds.js"></script>
-<script src="../assets/kyc-odds.js"></script>
-<script src="../assets/kyc-cards.js"></script>
-<script src="../assets/kyc-profile.js"></script>
-<script src="../assets/kyc-state.js"></script>
+$scripts
 </body>
 </html>
 """)
 
+# The state pages render everything from profiles.js on the client.
+_STATE_MAIN = """\
+            <div id="stateContent" class="state-page">
+                <p class="results-bar" role="status">Loading&hellip;</p>
+            </div>"""
+
+_STATE_SCRIPTS = (
+    "../data/profiles.js",
+    "../data/odds.js",
+    "../assets/kyc-odds.js",
+    "../assets/kyc-cards.js",
+    "../assets/kyc-profile.js",
+    "../assets/kyc-state.js",
+)
+
+_REDISTRICTING_SCRIPTS = (
+    "../data/profiles.js",
+    "../data/odds.js",
+    "../data/districts.js",
+    "../assets/kyc-odds.js",
+    "../assets/kyc-cards.js",
+    "../assets/kyc-profile.js",
+    "../assets/kyc-districts.js",
+)
+
 
 def _e(text):
     return html.escape(str(text), quote=True)
+
+
+def _scripts(sources):
+    return "\n".join(f'<script src="{_e(src)}"></script>' for src in sources)
 
 
 def render_state(code, host, summary=None):
@@ -229,6 +251,9 @@ def render_state(code, host, summary=None):
         page_kind="state",
         search_placeholder=_e(f"Search {name} profiles…"),
         states_current="",
+        main=_STATE_MAIN,
+        more_sources="",
+        scripts=_scripts(_STATE_SCRIPTS),
     )
 
 
@@ -246,10 +271,71 @@ def render_states_index(host):
         page_kind="states",
         search_placeholder=_e("Search states…"),
         states_current=' aria-current="page"',
+        main=_STATE_MAIN,
+        more_sources="",
+        scripts=_scripts(_STATE_SCRIPTS),
     )
 
 
-def sitemap(host, codes, built=None):
+def redistricting_path(code):
+    """``redistricting/ca.html``: a state's before-and-after district map."""
+    return f"redistricting/{code.lower()}.html"
+
+
+def render_redistricting(code, host):
+    """A state's House map before and after a redistricting.
+
+    The introduction is static, so the page says what it is without
+    JavaScript; the maps and every claim about a person are rendered by
+    ``assets/kyc-districts.js`` from districts.js and profiles.js.
+    """
+    from .districts import PLANS
+
+    spec = PLANS[code]
+    name = state_name(code)
+    old, new = spec["plans"]
+    canonical = f"https://{host}/{redistricting_path(code)}" if host else redistricting_path(code)
+    description = (
+        f"{name}'s {spec['seats']} House districts under the {old['title']} and the "
+        f"{new['title']}, side by side: which members are running in a different "
+        f"district, and how much of each new district came from each old one."
+    )
+    main = "\n".join([
+        '            <div id="districtsContent" class="state-page districts-page">',
+        '                <header class="state-hero">',
+        '                    <p class="state-kicker">Redistricting</p>',
+        f'                    <h1 class="state-title">{_e(spec["headline"])}</h1>',
+        f'                    <p class="districts-lede">{_e(spec["intro"])}</p>',
+        '                    <p class="state-links">',
+        f'                        <a class="btn" href="../{_e(page_path(code))}">'
+        f'<svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> '
+        f'{_e(name)} page</a>',
+        '                    </p>',
+        '                </header>',
+        '                <div id="districtsApp">',
+        '                    <p class="results-bar" role="status">Loading the maps&hellip;</p>',
+        '                </div>',
+        '            </div>',
+    ])
+    more = "".join(f"\n                <p>{_e(line)}</p>" for line in spec["sources"])
+    return _PAGE.substitute(
+        title=_e(f"{name} redistricting: {old['title']} and {new['title']} — "
+                 "Know Your Candidate"),
+        og_title=_e(spec["headline"]),
+        description=_e(description),
+        canonical=_e(canonical),
+        host=_e(host or ""),
+        code=_e(code),
+        page_kind="redistricting",
+        search_placeholder=_e(f"Search {name} profiles…"),
+        states_current="",
+        main=main,
+        more_sources=more,
+        scripts=_scripts(_REDISTRICTING_SCRIPTS),
+    )
+
+
+def sitemap(host, codes, built=None, redistricting=()):
     """``sitemap.xml`` listing the two hand-maintained pages and every state.
 
     Individual profiles live behind hash fragments, which crawlers do not
@@ -273,5 +359,7 @@ def sitemap(host, codes, built=None):
     url("states/index.html", "0.8")
     for code in sorted(codes):
         url(page_path(code), "0.7")
+    for code in sorted(redistricting):
+        url(redistricting_path(code), "0.6", "monthly")
     lines.append("</urlset>")
     return "\n".join(lines) + "\n"

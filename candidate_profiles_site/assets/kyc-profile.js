@@ -388,7 +388,26 @@
     }
     if (!others.length && !unfiled.length) html = aloneNote(race);
     panel.hidden = false;
-    target.innerHTML = html;
+    target.innerHTML = redrawnNote(item, race) + html;
+  }
+
+  /* A House race in a state whose map was redrawn for 2026: a link to the
+   * district on both maps - and, for a member running in a different
+   * district, to the one they hold as well. */
+  function redrawnNote(item, race) {
+    var plan = (KYC.meta().redistricting || {})[race.state];
+    if (!plan || race.chamber !== "House" || !race.district) return "";
+    var seats = [race.district];
+    if (KYC.runsElsewhere(item) && item.state === race.state && item.districtNum &&
+        item.districtNum !== race.district) {
+      seats.unshift(item.districtNum);
+    }
+    var label = seats.map(function (n) { return race.state + "-" + n; }).join(" and ");
+    var link = KYC.siteRoot() + plan.page + "#/?d=" +
+      seats.slice().sort(function (a, b) { return a - b; }).join(",");
+    return '<p class="race-note race-redrawn">' + KYC.icon("layers") + ' <a href="' +
+      KYC.escapeAttr(link) + '">' + KYC.escapeHtml(plan.name) + " redrew its House " +
+      "districts for 2026: " + KYC.escapeHtml(label) + " before and after &rsaquo;</a></p>";
   }
 
   /* Nobody else in this race has a profile. That used to read "Nobody else

@@ -52,6 +52,12 @@
   --warn: #ffc24d;
   --danger: #ff6f64;
 
+  /* Districts picked out on the redistricting maps. Teal, magenta and lime,
+     because red, blue, amber and purple already mean a party here. */
+  --focus-1: #2ec4b6;
+  --focus-2: #f07ad4;
+  --focus-3: #b5e655;
+
   /* Spacing scale: 4px base. */
   --s-1: 0.25rem;
   --s-2: 0.5rem;
@@ -131,6 +137,10 @@
 
   --warn: #815500;
   --danger: #b3261e;
+
+  --focus-1: #0e7c72;
+  --focus-2: #a5228f;
+  --focus-3: #557a0d;
 
   --shadow-1: 0 1px 2px rgb(16 20 26 / 0.08);
   --shadow-2: 0 4px 16px rgb(16 20 26 / 0.12);
@@ -1982,3 +1992,269 @@ svg { flex: none; }
 }
 .race-mates .race-out > summary { padding: var(--s-2) var(--s-3); }
 #yourState .nav-link { color: var(--accent); }
+
+/* ===================================================== 15. redistricting */
+
+/* A state's House map before and after a redistricting. Every district is
+ * one shared path in a hidden <defs>, drawn by <use> in each view; fill and
+ * stroke are set on the <use> and inherited by the drawing, so a district
+ * can be picked out in one view without touching the others. */
+.district-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+.districts-lede {
+  max-width: 72ch;
+  margin: 0 0 var(--s-4);
+  color: var(--text-muted);
+  font-size: var(--t-md);
+  line-height: 1.55;
+}
+
+.mover-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  margin: 0 0 var(--s-4);
+}
+.mover-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease), background-color 0.15s var(--ease);
+}
+.mover-group:hover { border-color: var(--border-strong); background: var(--surface-3); }
+.mover-group[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.mover {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--s-2);
+  font-size: var(--t-sm);
+}
+.mover-name { font-weight: 700; }
+.mover-seats {
+  font-weight: 600;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.districts-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3) var(--s-5);
+  margin: 0 0 var(--s-2);
+}
+.districts-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--t-sm);
+  font-weight: 600;
+}
+.districts-pick .select { width: auto; }
+.districts-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--t-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: var(--s-5);
+}
+.plan-card {
+  min-width: 0;
+  padding: var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-1);
+}
+.plan-head { margin-bottom: var(--s-2); }
+.plan-title {
+  margin: 0 0 var(--s-1);
+  font-size: var(--t-xl);
+  font-weight: 800;
+}
+.plan-used {
+  margin: 0;
+  font-size: var(--t-sm);
+  color: var(--text-muted);
+}
+.plan-panel-title {
+  margin: var(--s-4) 0 var(--s-2);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.district-map {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.district-inset,
+.district-closeup {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.inset-row {
+  display: flex;
+  gap: var(--s-2);
+  align-items: flex-start;
+}
+.inset {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+}
+.inset figcaption {
+  margin-top: var(--s-1);
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.district-shape {
+  fill: var(--surface-3);
+  stroke: var(--surface-1);
+  stroke-width: 0.7;
+  cursor: pointer;
+}
+.district-shape:hover { fill: var(--border-strong); }
+.district-shape.is-focus { stroke: var(--text); stroke-width: 1.2; }
+.district-shape.is-focus:hover { opacity: 0.85; }
+.district-shape.focus-1 { fill: var(--focus-1); }
+.district-shape.focus-2 { fill: var(--focus-2); }
+.district-shape.focus-3 { fill: var(--focus-3); }
+
+.state-line,
+.county-line,
+.inset-outline,
+.district-ghost,
+.district-ghost-halo {
+  fill: none;
+  pointer-events: none;
+}
+.state-line { stroke: var(--text-faint); stroke-width: 1; }
+.county-line { stroke: var(--text-faint); stroke-width: 0.8; stroke-dasharray: 2 2.5; }
+.inset-outline {
+  stroke: var(--text-muted);
+  stroke-width: 1;
+  stroke-dasharray: 3 2;
+  vector-effect: non-scaling-stroke;
+}
+/* The other map's lines for the picked districts, dashed, on a halo so a
+ * line stays visible where it crosses a fill of its own colour. */
+.district-ghost-halo { stroke: var(--surface-0); stroke-width: 5; }
+.district-ghost { stroke-width: 2.4; stroke-dasharray: 6 4; }
+.district-ghost.focus-1 { stroke: var(--focus-1); }
+.district-ghost.focus-2 { stroke: var(--focus-2); }
+.district-ghost.focus-3 { stroke: var(--focus-3); }
+.hide-ghosts .district-ghosts { display: none; }
+
+/* Labels sit on a halo of the page colour, which keeps them legible over
+ * any fill in every theme. Sizes are set per view, in map units. */
+.district-labels text {
+  fill: var(--text);
+  stroke: var(--surface-0);
+  paint-order: stroke;
+  stroke-linejoin: round;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+.district-num { font-weight: 800; }
+.district-caption { font-weight: 700; }
+.county-name {
+  fill: var(--text-faint);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.town-dot { fill: var(--text); stroke: var(--surface-0); pointer-events: none; }
+
+.district-facts {
+  display: grid;
+  gap: var(--s-3);
+  margin-top: var(--s-4);
+}
+.district-fact {
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+.district-fact.focus-1 { border-left-color: var(--focus-1); }
+.district-fact.focus-2 { border-left-color: var(--focus-2); }
+.district-fact.focus-3 { border-left-color: var(--focus-3); }
+.district-fact-title {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin: 0 0 var(--s-2);
+  font-size: var(--t-md);
+  font-weight: 700;
+}
+.focus-swatch {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--border-strong);
+}
+.focus-1 > .district-fact-title .focus-swatch { background: var(--focus-1); }
+.focus-2 > .district-fact-title .focus-swatch { background: var(--focus-2); }
+.focus-3 > .district-fact-title .focus-swatch { background: var(--focus-3); }
+.district-fact-label {
+  margin: var(--s-2) 0;
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.district-fact .card-grid { gap: var(--s-3); }
+.district-flow {
+  margin: var(--s-3) 0 0;
+  font-size: var(--t-sm);
+  line-height: 1.6;
+}
+.district-flow .district-fact-label { margin: 0 var(--s-1) 0 0; }
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.link-button:hover { text-decoration: underline; }
+.race-redrawn a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+.race-redrawn a:hover { text-decoration: underline; }
+.district-caption-role { font-weight: 600; }

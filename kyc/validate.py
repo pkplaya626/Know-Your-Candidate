@@ -341,6 +341,27 @@ def check_geometry(profiles, geo):
     return []
 
 
+def check_district_maps(races, district_maps, error=None):
+    """A before-and-after map must describe the seats the races are for.
+
+    The maps are numbered 1..N and the page reads "CA-3" off them; if the
+    state's delegation ever changed size, every number on the page would
+    point at the wrong shape and nothing would look wrong.
+    """
+    if error:
+        return [Issue("error", "district-map", f"District maps did not build: {error}")]
+    issues = []
+    for code, state in sorted((district_maps or {}).items()):
+        numbers = sorted(r.get("district") or 0 for r in races or []
+                         if r.get("chamber") == "House" and r.get("state") == code)
+        if races and numbers != list(range(1, state["seats"] + 1)):
+            issues.append(Issue(
+                "error", "district-map-seats",
+                f"{code}'s district maps number {state['seats']} seats, but the "
+                f"races are for districts {numbers[:3]}...{numbers[-3:]} ({len(numbers)})"))
+    return issues
+
+
 # A snapshot older than this is reported. Congress changes often enough that
 # a month-old membership list is a claim worth re-checking, and the whole
 # point of committing the snapshot is that nothing silently goes stale.
@@ -1074,9 +1095,11 @@ def check_registrations(profiles, field):
 
 
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
-        results=None, field=None, enrichment=None, odds=None):
+        results=None, field=None, enrichment=None, odds=None, district_maps=None,
+        district_error=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
+    issues += check_district_maps(races, district_maps, district_error)
     issues += check_identity(profiles)
     issues += check_chamber_sizes(profiles)
     issues += check_seats(profiles)
