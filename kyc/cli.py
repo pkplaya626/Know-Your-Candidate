@@ -136,9 +136,12 @@ def _build(args):
     stats.update(races_mod.stats(race_list))
     markets = odds_mod.load_cache(args.root)
     if markets:
-        stats["odds"] = odds_mod.apply(race_list, markets, {p["id"]: p for p in profiles})
-        print(f"  odds: markets or polls for {stats['odds']} Senate races "
-              f"(fetched {markets.get('fetched')})")
+        reach = odds_mod.coverage(markets, race_list)
+        print(f"  odds: markets for {reach['senate'][0]}/{reach['senate'][1]} Senate and "
+              f"{reach['house'][0]}/{reach['house'][1]} House races, polling averages for "
+              f"{reach['polls']} (fetched {markets.get('fetched')}); "
+              f"{reach['unprofiled']} outcome labels name a nominee with no profile here "
+              "and show as their party")
     else:
         print("  [warn] no odds cache; run 'odds' for market prices and polling averages")
     # The results settle who is on the ballot, so count after applying them.
@@ -199,8 +202,6 @@ def _build(args):
 
     summary = summary_mod.build(profiles, races=race_list,
                                 committees=legislators.load_committees(args.root))
-    if odds_mod.control(markets):
-        summary["senateControl"] = odds_mod.control(markets)
     path, size = emit.write_profiles(
         profiles, stats, args.root, races=race_list, summary=summary
     )
@@ -209,6 +210,14 @@ def _build(args):
     if geo:
         geo_path, geo_size = emit.write_geo(geo, args.root)
         print(f"[ok] wrote {geo_path} ({geo_size / 1024:.0f} KB)")
+
+    # Rewritten only when the prices changed, so a roster rebuild leaves the
+    # odds refresh's file alone.
+    page_odds = odds_mod.payload(markets)
+    odds_file = os.path.join(args.root, emit.ODDS_FILE)
+    if emit.read_signature(path=odds_file) != emit.odds_signature(page_odds):
+        odds_path, odds_size = emit.write_odds(page_odds, args.root)
+        print(f"[ok] wrote {odds_path} ({odds_size / 1024:.0f} KB)")
 
     written = emit.write_state_pages(profiles, args.root, summary=summary)
     print(f"[ok] wrote {len(written)} state pages under {emit.STATES_DIR}")
@@ -375,10 +384,14 @@ def _odds(args):
     by_id = {p["id"]: p for p in profiles}
 
     def people_of(race):
-        # Who a market label or a poll column may name: anyone still in it.
+        # Who a market label or a poll column may name: anyone still in it,
+        # and the nominees the results page lists with no FEC filing over
+        # $5,000 - in the race, though they have no profile here.
         ids = race.get("incumbentIds", []) + race.get("candidateIds", [])
-        return [by_id[i] for i in ids
-                if i in by_id and by_id[i].get("raceStatus") not in results_mod.OFF_BALLOT]
+        people = [by_id[i] for i in ids
+                  if i in by_id and by_id[i].get("raceStatus") not in results_mod.OFF_BALLOT]
+        unfiled = ((race.get("results") or {}).get("otherNominees") or [])
+        return people + [{"name": name} for name in unfiled]
 
     if args.check:
         cache = odds_mod.load_cache(args.root)
@@ -388,13 +401,14 @@ def _odds(args):
     else:
         cache = odds_mod.build(race_list, people_of)
         odds_mod.save_cache(cache, args.root)
-        print(f"\n[ok] odds cache: {odds_mod.CACHE_PATH}")
-    senate = [r for r in race_list if r["chamber"] == "Senate"]
-    entries = cache.get("races") or {}
-    print(f"  {sum(1 for r in senate if (entries.get(r['id']) or {}).get('markets'))} of "
-          f"{len(senate)} Senate races have a market; "
-          f"{sum(1 for r in senate if (entries.get(r['id']) or {}).get('polls'))} have "
-          f"polling averages (fetched {cache.get('fetched')})")
+        odds_path, _ = emit.write_odds(odds_mod.payload(cache), args.root)
+        print(f"\n[ok] odds cache: {odds_mod.CACHE_PATH}; page data: {odds_path}")
+    reach = odds_mod.coverage(cache, race_list)
+    print(f"  markets for {reach['senate'][0]} of {reach['senate'][1]} Senate and "
+          f"{reach['house'][0]} of {reach['house'][1]} House races; polling averages for "
+          f"{reach['polls']}; control of "
+          f"{' and '.join(sorted(cache.get('control') or {})) or 'neither chamber'} "
+          f"(fetched {cache.get('fetched')})")
     notes = cache.get("notes") or []
     if notes:
         print(f"\n  {len(notes)} note(s):")
@@ -767,12 +781,8 @@ def _verify(args):
         results=outcomes, dates=results_mod.load_dates(args.root),
     )
     stats.update(races_mod.stats(race_list))
-    markets = odds_mod.load_cache(args.root)
-    odds_mod.apply(race_list, markets, {p["id"]: p for p in profiles})
     summary = summary_mod.build(profiles, races=race_list,
                                 committees=legislators.load_committees(args.root))
-    if odds_mod.control(markets):
-        summary["senateControl"] = odds_mod.control(markets)
 
     problems = []
 
@@ -796,6 +806,15 @@ def _verify(args):
                         + (" ..." if len(stale_pages) > 5 else ""))
     else:
         print(f"  ok  {emit.STATES_DIR} pages match the template")
+
+    odds_expected = emit.odds_signature(odds_mod.payload(odds_mod.load_cache(args.root)))
+    odds_committed = emit.read_signature(path=os.path.join(args.root, emit.ODDS_FILE))
+    if odds_committed is None:
+        problems.append(f"{emit.ODDS_FILE} is missing or carries no signature")
+    elif odds_committed != odds_expected:
+        problems.append(f"{emit.ODDS_FILE} is stale")
+    else:
+        print(f"  ok  {emit.ODDS_FILE} matches odds.json ({odds_expected[:16]}...)")
 
     try:
         geo = geo_mod.build(args.root)
@@ -930,7 +949,7 @@ def build_parser():
     camp.add_argument("--refresh", action="store_true",
                       help="look everyone up again, not just the uncached")
 
-    odds = add("odds", help="market prices and polling averages for the 2026 Senate races")
+    odds = add("odds", help="market prices and polling averages for the 2026 races")
     odds.add_argument("--check", action="store_true",
                       help="report coverage from the committed cache; no network")
 

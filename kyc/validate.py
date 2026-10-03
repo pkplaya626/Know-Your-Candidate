@@ -810,9 +810,11 @@ def check_odds(races, odds, today=None):
 
     A market's outcome label that names nobody in its race is shown as the
     party the market resolves on and listed here: on 2026-10-03 Kalshi's
-    Louisiana page was really Kentucky's, labelled "Andy Barr" and "Charles
+    Louisiana ticker held Kentucky's race, labelled "Andy Barr" and "Charles
     Booker". A Senate race no market covers, prices that do not add up to
-    about a dollar, and a cache older than a week are reported too.
+    about a dollar, and a cache older than a week are reported too. House
+    races without a market are many and expected; only their count is shown
+    by the build.
     """
     if not odds or races is None:
         return []
@@ -821,31 +823,41 @@ def check_odds(races, odds, today=None):
     from .odds import SOURCES, STALE_DAYS
 
     issues, mismatched, incoherent = [], [], []
-    senate = [r for r in races if r.get("chamber") == "Senate"]
-    for race in senate:
-        for market in (race.get("odds") or {}).get("markets") or []:
+    entries = odds.get("races") or {}
+    for rid, entry in sorted(entries.items()):
+        for market in entry.get("markets") or []:
             source = SOURCES.get(market.get("source"), market.get("source"))
             for outcome in market.get("outcomes") or []:
                 # Under a cent is an eliminated candidate's market nobody
-                # closed (Alaska's, after its August primary), not an error.
-                if outcome.get("mismatch") and (outcome.get("price") or 0) >= 0.01:
-                    mismatched.append(f"{race['id']} {source}: \"{outcome.get('marketLabel')}\" "
+                # closed (Alaska's, after its August primary), not an error;
+                # a nominee too small to have a profile here is a gap in our
+                # data, counted by the build, not a conflict in theirs.
+                if (outcome.get("mismatch") and outcome.get("conflict")
+                        and (outcome.get("price") or 0) >= 0.01):
+                    mismatched.append(f"{rid} {source}: \"{outcome.get('marketLabel')}\" "
                                       f"names nobody in the race; shown as {outcome.get('label')}")
             total = sum(o.get("price") or 0 for o in market.get("outcomes") or [])
             if not 0.85 <= total <= 1.2:
-                incoherent.append(f"{race['id']} {source}: prices add up to {total:.2f}")
+                incoherent.append(f"{rid} {source}: prices add up to {total:.2f}")
     if mismatched:
         issues.append(Issue("warn", "odds-label-mismatch",
-                            f"{len(mismatched)} market label(s) name nobody in their race",
+                            f"{len(mismatched)} market label(s) name someone other than "
+                            "this site's candidate of that party",
                             mismatched))
     if incoherent:
         issues.append(Issue("warn", "odds-incoherent",
                             f"{len(incoherent)} market(s) whose prices do not add up", incoherent))
-    uncovered = [r["id"] for r in senate if not (r.get("odds") or {}).get("markets")]
+    uncovered = [r["id"] for r in races if r.get("chamber") == "Senate"
+                 and not (entries.get(r["id"]) or {}).get("markets")]
     if uncovered:
         issues.append(Issue("warn", "odds-uncovered",
                             f"{len(uncovered)} Senate race(s) with no market from either source",
                             uncovered))
+    unknown = sorted(set(entries) - {r["id"] for r in races})
+    if unknown:
+        issues.append(Issue("warn", "odds-unknown-race",
+                            f"{len(unknown)} race id(s) in the odds cache are not on the ballot "
+                            "any more; run 'odds'", unknown))
     fetched = str(odds.get("fetched") or "")[:10]
     if today is None:
         from .emit import build_timestamp

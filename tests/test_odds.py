@@ -1,7 +1,7 @@
 """Tests for prediction-market prices and polling averages (kyc/odds.py).
 
 A price or a poll shown against the wrong race looks entirely normal on the
-page, so most of these pin attribution: which state a market is about, which
+page, so most of these pin attribution: which seat a market is about, which
 people a label names, and which table on a page is the November matchup.
 """
 
@@ -9,18 +9,29 @@ import datetime
 import json
 import os
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from kyc import odds, validate  # noqa: E402
+from kyc import emit, odds, validate  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
-NAMES = {"texas": "TX", "kentucky": "KY", "louisiana": "LA", "virginia": "VA",
-         "west virginia": "WV", "alaska": "AK"}
+
+RACES = [
+    {"id": "S-TX-2026", "chamber": "Senate", "state": "TX", "district": None},
+    {"id": "S-KY-2026", "chamber": "Senate", "state": "KY", "district": None},
+    {"id": "S-LA-2026", "chamber": "Senate", "state": "LA", "district": None},
+    {"id": "S-VA-2026", "chamber": "Senate", "state": "VA", "district": None},
+    {"id": "S-WV-2026", "chamber": "Senate", "state": "WV", "district": None},
+    {"id": "H-CA-22-2026", "chamber": "House", "state": "CA", "district": 22},
+    {"id": "H-CA-03-2026", "chamber": "House", "state": "CA", "district": 3},
+    {"id": "H-AK-00-2026", "chamber": "House", "state": "AK", "district": 0},
+]
+INDEX = odds.race_index(RACES)
 
 
-def kalshi_market(ticker, question, rule_state, label, price, party="Republican party"):
+def kalshi_senate(ticker, question, rule_state, label, price, party="Republican party"):
     return {"ticker": ticker, "status": "active", "title": question,
             "rules_primary": f"If a representative of the {party} is sworn in as a Senator of "
                              f"{rule_state} for the term beginning in 2027, then the market "
@@ -30,48 +41,79 @@ def kalshi_market(ticker, question, rule_state, label, price, party="Republican 
             "volume_fp": "100"}
 
 
+def kalshi_house(ticker, asked, ruled, label, price, party="Democratic"):
+    return {"ticker": ticker, "status": "active",
+            "title": f"Will {party} win the House race for {asked}?",
+            "rules_primary": f"If the House member sworn in for {ruled} for the term beginning in "
+                             f"2027 is a member of the {party} Party, then the market resolves to Yes.",
+            "yes_sub_title": label, "subtitle": "", "last_price_dollars": str(price),
+            "yes_bid_dollars": None, "yes_ask_dollars": None, "volume_fp": "100"}
+
+
 class TestKalshiAttribution(unittest.TestCase):
-    """A market belongs to the state its own question and rules name."""
+    """A market belongs to the seat its own question and rules name."""
 
     def test_a_ticker_that_says_one_state_cannot_place_another_states_race(self):
         # SENATELA-26 is Kentucky's race on Kalshi, labelled with Kentucky's
         # nominees; Louisiana's lives under KXSENATELA.
         event = {"event_ticker": "SENATELA-26", "sub_title": "In 2026", "markets": [
-            kalshi_market("SENATELA-26-R", "Will Republicans win the Senate race in Kentucky?",
+            kalshi_senate("SENATELA-26-R", "Will Republicans win the Senate race in Kentucky?",
                           "Kentucky", "Andy Barr", 0.958),
-            kalshi_market("SENATELA-26-D", "Will Democratics win the Senate race in Kentucky?",
+            kalshi_senate("SENATELA-26-D", "Will Democratics win the Senate race in Kentucky?",
                           "Kentucky", "Charles Booker", 0.034, party="Democratic party")]}
-        state, record = odds.kalshi_market(event, "SENATELA", NAMES)
-        self.assertEqual(state, "KY")
+        race, record = odds.kalshi_market(event, "SENATELA", INDEX)
+        self.assertEqual(race, "S-KY-2026")
         self.assertEqual([(o["label"], o["party"]) for o in record["outcomes"]],
                          [("Andy Barr", "r"), ("Charles Booker", "d")])
 
     def test_a_question_and_rules_that_disagree_place_it_nowhere(self):
-        event = {"event_ticker": "X-26", "sub_title": "In 2026", "markets": [
-            kalshi_market("X-26-R", "Will Republicans win the Senate race in Texas?",
-                          "Louisiana", "Ken Paxton", 0.4)]}
-        state, note = odds.kalshi_market(event, "X", NAMES)
-        self.assertIsNone(state)
-        self.assertIn("asks about TX but resolves on LA", note)
+        market = kalshi_senate("X-26-R", "Will Republicans win the Senate race in Texas?",
+                               "Louisiana", "Ken Paxton", 0.4)
+        race, note = odds.kalshi_place(market, INDEX)
+        self.assertIsNone(race)
+        self.assertIn("asks about S-TX-2026 but resolves on S-LA-2026", note)
 
     def test_west_virginia_is_not_virginia(self):
-        self.assertEqual(odds._state_in("the Senate race in West Virginia", NAMES), "WV")
-        self.assertEqual(odds._state_in("the Senate race in Virginia", NAMES), "VA")
+        self.assertEqual(odds.senate_race("the Senate race in West Virginia", INDEX), "S-WV-2026")
+        self.assertEqual(odds.senate_race("the Senate race in Virginia", INDEX), "S-VA-2026")
+
+    def test_a_house_market_is_placed_by_the_district_its_question_and_rules_name(self):
+        market = kalshi_house("HOUSECA3-26-D", "CA-3", "CA-03", "Ami Bera", 0.97)
+        self.assertEqual(odds.kalshi_place(market, INDEX), ("H-CA-03-2026", None))
+        moved = kalshi_house("X-26-D", "CA-22", "CA-03", "Someone", 0.5)
+        race, note = odds.kalshi_place(moved, INDEX)
+        self.assertIsNone(race)
+        self.assertIn("asks about H-CA-22-2026 but resolves on H-CA-03-2026", note)
+
+    def test_an_at_large_seat_answers_to_al_00_and_01(self):
+        for code in ("AL", "00", "01"):
+            self.assertEqual(odds.house_race("AK", code, INDEX), "H-AK-00-2026", code)
+        self.assertIsNone(odds.house_race("CA", "99", INDEX))     # not on the ballot here
 
     def test_a_market_with_no_last_trade_takes_the_middle_of_its_spread(self):
-        market = kalshi_market("T-26-R", "Will Republicans win the Senate race in Texas?",
+        market = kalshi_senate("T-26-R", "Will Republicans win the Senate race in Texas?",
                                "Texas", "Ken Paxton", None)
         market.update(last_price_dollars=None, yes_bid_dollars="0.36", yes_ask_dollars="0.40")
-        other = kalshi_market("T-26-D", "Will Democratics win the Senate race in Texas?",
+        other = kalshi_senate("T-26-D", "Will Democratics win the Senate race in Texas?",
                               "Texas", "James Talarico", 0.62, party="Democratic party")
-        state, record = odds.kalshi_market({"event_ticker": "T-26", "markets": [market, other]},
-                                           "T", NAMES)
+        race, record = odds.kalshi_market({"event_ticker": "T-26", "markets": [market, other]},
+                                          "T", INDEX)
         self.assertEqual(record["outcomes"][1]["price"], 0.38)
 
     def test_only_the_2026_contest(self):
         self.assertTrue(odds._is_2026({"sub_title": "In 2026", "event_ticker": "SENATETX-26"}))
         self.assertTrue(odds._is_2026({"event_ticker": "KXSENATELA-26NOV"}))
+        self.assertTrue(odds._is_2026({"sub_title": "AL-01", "event_ticker": "KXHOUSERACE-AL01-26"}))
         self.assertFalse(odds._is_2026({"sub_title": "In 2028", "event_ticker": "SENATEGA-28"}))
+
+    def test_series_are_found_by_ticker_or_title_but_never_a_primary(self):
+        self.assertTrue(odds._race_series({"ticker": "SENATEAL", "title": "Alabama"}))
+        self.assertTrue(odds._race_series({"ticker": "HOUSECA3", "title": "House CA3"}))
+        self.assertTrue(odds._race_series({"ticker": "KXHOUSERACE", "title": "House Race Winner?"}))
+        self.assertFalse(odds._race_series({"ticker": "KXSENATEFLD",
+                                            "title": "Florida Democratic Senate nominee"}))
+        self.assertFalse(odds._race_series({"ticker": "KXHOUSEEXPEL",
+                                            "title": "How many House members will be expelled?"}))
 
 
 class TestPolymarket(unittest.TestCase):
@@ -99,8 +141,22 @@ class TestPolymarket(unittest.TestCase):
                                            "control the Senate?", 0.645),
                                self.market("Republican Party", "Will the Republican Party "
                                            "control the Senate?", 0.355)]}
-        record = odds.polymarket_market(control)
-        self.assertEqual([o["party"] for o in record["outcomes"]], ["d", "r"])
+        self.assertEqual([o["party"] for o in odds.polymarket_market(control)["outcomes"]],
+                         ["d", "r"])
+
+    def test_events_are_placed_when_title_and_description_agree(self):
+        house = {"slug": "ca-22", "title": "CA-22 House Election Winner",
+                 "description": "This market will resolve according to the party of the candidate "
+                                "who wins the CA-22 congressional district seat."}
+        self.assertEqual(odds.polymarket_place(house, INDEX), ("H-CA-22-2026", None))
+        split = dict(house, description="... wins the CA-03 congressional district seat.")
+        race, note = odds.polymarket_place(split, INDEX)
+        self.assertIsNone(race)
+        self.assertIn("do not name one seat", note)
+        senate = {"slug": "texas", "title": "Texas Senate Election Winner",
+                  "description": "the winner of the 2026 midterm Texas U.S. Senate election"}
+        self.assertEqual(odds.polymarket_place(senate, INDEX), ("S-TX-2026", None))
+        self.assertEqual(odds.polymarket_place({"title": "Which party wins?"}, INDEX), (None, None))
 
 
 TABLE = """{| class="wikitable sortable"
@@ -164,13 +220,29 @@ class TestPollingAverages(unittest.TestCase):
 
 
 class TestCheckedOutcomes(unittest.TestCase):
-    def test_a_label_naming_nobody_in_the_race_is_shown_as_its_party(self):
-        market = {"outcomes": [{"label": "Andy Barr", "party": "r", "price": 0.96},
-                               {"label": "Republican party", "party": "r", "price": 0.5}]}
-        out = odds.checked_outcomes(market, PEOPLE)
-        self.assertEqual((out[0]["label"], out[0]["marketLabel"], out[0]["mismatch"]),
-                         ("Republican party", "Andy Barr", True))
+    def test_a_label_naming_someone_else_of_a_known_party_is_a_conflict(self):
+        # Kalshi's Louisiana page was Kentucky's: "Andy Barr" where this site
+        # knows the Republican.
+        people = PEOPLE
+        out = odds.checked_outcomes({"outcomes": [
+            {"label": "Andy Barr", "party": "r", "price": 0.96},
+            {"label": "Republican party", "party": "r", "price": 0.5}]}, people)
+        self.assertEqual((out[0]["label"], out[0]["marketLabel"], out[0]["mismatch"],
+                          out[0]["conflict"]), ("Republican party", "Andy Barr", True, True))
         self.assertNotIn("mismatch", out[1])
+
+    def test_a_nominee_too_small_for_a_profile_is_shown_as_the_party_not_flagged(self):
+        out = odds.checked_outcomes({"outcomes": [
+            {"label": "Robin Littau (R)", "party": "r", "price": 0.03}]},
+            [{"id": "FEC_D", "name": "Audrey Denney", "party": "Democrat"}])
+        self.assertEqual((out[0]["label"], out[0]["mismatch"], out[0]["conflict"]),
+                         ("Republican party", True, False))
+
+    def test_a_nominee_the_results_page_lists_counts_as_in_the_race(self):
+        out = odds.checked_outcomes({"outcomes": [
+            {"label": "Bernadette Greene-Placentia", "party": "d", "price": 0.2}]},
+            PEOPLE + [{"name": "Bernadette Greene-Placentia"}])
+        self.assertNotIn("mismatch", out[0])
 
     def test_a_label_naming_two_people_still_names_someone_in_the_race(self):
         # Alaska's race holds Dan Sullivan and a different Daniel J Sullivan.
@@ -183,44 +255,72 @@ class TestCheckedOutcomes(unittest.TestCase):
         self.assertEqual([(o.get("mismatch"), o["party"]) for o in out],
                          [(None, "r"), (None, "d")])
 
-    def test_apply_attaches_odds_to_senate_races_only(self):
-        races = [{"id": "S-TX-2026", "chamber": "Senate", "incumbentIds": [],
-                  "candidateIds": ["FEC_P", "FEC_T"]},
-                 {"id": "H-TX-01-2026", "chamber": "House", "incumbentIds": [], "candidateIds": []}]
-        cache = {"fetched": "2026-10-03T05:00:00+00:00", "races": {
-            "S-TX-2026": {"markets": [{"source": "kalshi", "outcomes": [
-                {"label": "Ken Paxton", "party": "r", "price": 0.38}]}]},
-            "H-TX-01-2026": {"markets": []}}}
-        self.assertEqual(odds.apply(races, cache, {p["id"]: p for p in PEOPLE}), 1)
-        self.assertEqual(races[0]["odds"]["asOf"], "2026-10-03T05:00:00+00:00")
-        self.assertNotIn("odds", races[1])
+
+class TestThePageFile(unittest.TestCase):
+    CACHE = {"fetched": "2026-10-03T05:00:00+00:00", "notes": ["x"], "races": {
+        "S-TX-2026": {"markets": [{"source": "kalshi", "event": "SENATETX-26", "title": "T",
+                                   "url": "https://kalshi.com/markets/senatetx", "outcomes": [
+                                       {"label": "Ken Paxton", "party": "r", "price": 0.38,
+                                        "bid": 0.37, "ask": 0.38, "volume": 9.0,
+                                        "question": "Will Republicans win?"}]}]},
+        "H-CA-22-2026": {}},
+        "control": {"house": [{"source": "kalshi", "outcomes": [
+            {"label": "Democratic Party", "party": "d", "price": 0.92}]}]}}
+
+    def test_the_page_gets_what_it_shows_and_nothing_else(self):
+        page = odds.payload(self.CACHE)
+        self.assertEqual(set(page), {"asOf", "races", "control"})
+        self.assertEqual(list(page["races"]), ["S-TX-2026"])      # empty entries dropped
+        outcome = page["races"]["S-TX-2026"]["markets"][0]["outcomes"][0]
+        self.assertEqual(set(outcome), {"label", "party", "price", "question"})
+        self.assertEqual(page["control"]["house"][0]["outcomes"][0]["price"], 0.92)
+
+    def test_the_page_file_is_a_function_of_the_cache_alone(self):
+        self.assertEqual(emit.odds_signature(odds.payload(self.CACHE)),
+                         emit.odds_signature(odds.payload(json.loads(json.dumps(self.CACHE)))))
+        with tempfile.TemporaryDirectory() as root:
+            path, _ = emit.write_odds(odds.payload(self.CACHE), root)
+            self.assertEqual(emit.read_signature(path=path),
+                             emit.odds_signature(odds.payload(self.CACHE)))
+            with open(path, encoding="utf-8") as handle:
+                text = handle.read()
+            self.assertIn("window.kycOdds = ", text)
+            self.assertNotIn('"volume"', text)
 
 
 class TestValidateOdds(unittest.TestCase):
     TODAY = datetime.date(2026, 10, 3)
 
-    def race(self, outcomes, rid="S-LA-2026"):
-        return {"id": rid, "chamber": "Senate", "odds": {"markets": [
-            {"source": "kalshi", "outcomes": outcomes}]}}
+    def codes(self, entries, races=None, fetched="2026-10-03T05:00:00+00:00"):
+        races = races if races is not None else [{"id": rid, "chamber": "Senate"} for rid in entries]
+        return {i.code: i for i in validate.check_odds(
+            races, {"fetched": fetched, "races": entries}, today=self.TODAY)}
 
-    def codes(self, races, fetched="2026-10-03T05:00:00+00:00"):
-        return {i.code: i for i in validate.check_odds(races, {"fetched": fetched},
-                                                       today=self.TODAY)}
+    def market(self, outcomes):
+        return {"markets": [{"source": "kalshi", "outcomes": outcomes}]}
 
-    def test_a_mislabelled_outcome_is_reported_and_a_penny_one_is_not(self):
-        found = self.codes([self.race([
+    def test_only_a_real_conflict_is_a_warning(self):
+        found = self.codes({"S-LA-2026": self.market([
             {"label": "Republican party", "marketLabel": "Andy Barr", "mismatch": True,
-             "price": 0.96},
-            {"label": "Other", "marketLabel": "Ann Diener", "mismatch": True, "price": 0.0005},
-            {"label": "Jamie Davis", "price": 0.04}])])
+             "conflict": True, "price": 0.92},
+            {"label": "Democratic party", "marketLabel": "Robin Littau", "mismatch": True,
+             "conflict": False, "price": 0.06},
+            {"label": "Other", "marketLabel": "Ann Diener", "mismatch": True, "conflict": True,
+             "price": 0.0005}])})
         self.assertEqual(len(found["odds-label-mismatch"].detail), 1)
         self.assertIn("Andy Barr", found["odds-label-mismatch"].detail[0])
 
-    def test_uncovered_incoherent_and_stale(self):
-        found = self.codes([self.race([{"label": "A", "price": 0.3}, {"label": "B", "price": 0.2}]),
-                            {"id": "S-TX-2026", "chamber": "Senate"}],
-                           fetched="2026-09-20T05:00:00+00:00")
-        self.assertEqual(set(found), {"odds-incoherent", "odds-uncovered", "odds-stale"})
+    def test_uncovered_senate_races_incoherent_prices_stale_and_unknown_races(self):
+        races = [{"id": "S-LA-2026", "chamber": "Senate"}, {"id": "S-TX-2026", "chamber": "Senate"},
+                 {"id": "H-CA-22-2026", "chamber": "House"}]
+        found = self.codes({"S-LA-2026": self.market([{"label": "A", "price": 0.3},
+                                                      {"label": "B", "price": 0.2}]),
+                            "H-ZZ-01-2026": self.market([{"label": "A", "price": 0.5},
+                                                         {"label": "B", "price": 0.5}])},
+                           races=races, fetched="2026-09-20T05:00:00+00:00")
+        self.assertEqual(set(found), {"odds-incoherent", "odds-uncovered", "odds-stale",
+                                      "odds-unknown-race"})
+        self.assertEqual(found["odds-uncovered"].detail, ["S-TX-2026"])   # House is not listed
 
 
 class TestTheCommittedCache(unittest.TestCase):
@@ -229,7 +329,7 @@ class TestTheCommittedCache(unittest.TestCase):
         if not cache:
             self.skipTest("no odds cache committed")
         for rid, entry in cache["races"].items():
-            self.assertTrue(rid.startswith("S-"), rid)
+            self.assertRegex(rid, r"^(S-[A-Z]{2}|H-[A-Z]{2}-\d{2})-2026$", rid)
             for market in entry.get("markets") or []:
                 self.assertIn(market["source"], odds.SOURCES, rid)
                 self.assertGreaterEqual(len(market["outcomes"]), 2, rid)
@@ -237,6 +337,13 @@ class TestTheCommittedCache(unittest.TestCase):
                     self.assertTrue(0 <= outcome["price"] <= 1, (rid, outcome))
             for row in (entry.get("polls") or {}).get("rows", []):
                 self.assertTrue(all(0 < r["pct"] < 100 for r in row["results"]), (rid, row))
+
+    def test_the_committed_page_file_matches_the_cache(self):
+        cache = odds.load_cache(ROOT)
+        if not cache:
+            self.skipTest("no odds cache committed")
+        self.assertEqual(emit.read_signature(path=os.path.join(ROOT, emit.ODDS_FILE)),
+                         emit.odds_signature(odds.payload(cache)))
 
 
 if __name__ == "__main__":

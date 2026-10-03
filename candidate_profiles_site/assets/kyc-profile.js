@@ -118,6 +118,7 @@
       "      </section>",
       '      <section class="panel" id="profileModalRacePanel" hidden>',
       '        <h3 class="panel-head">' + KYC.icon("flag") + ' <span id="profileModalRaceTitle">In this race</span></h3>',
+      '        <div id="profileModalRaceOdds"></div>',
       '        <div class="list-rows race-mates" id="profileModalRace"></div>',
       "      </section>",
       "    </div>",
@@ -336,6 +337,7 @@
     if (!race) {
       panel.hidden = true;
       target.innerHTML = "";
+      el("profileModalRaceOdds").innerHTML = "";
       return;
     }
     var others = race.incumbentIds.concat(race.candidateIds)
@@ -352,6 +354,8 @@
     var out = others.filter(function (p) { return KYC.cards && KYC.cards.offBallot(p); });
     var shown = others.filter(function (p) { return !(KYC.cards && KYC.cards.offBallot(p)); });
     el("profileModalRaceTitle").textContent = race.label;
+    // The markets on this race, compactly, above the people in it.
+    el("profileModalRaceOdds").innerHTML = KYC.odds ? KYC.odds.render(race, { compact: true }) : "";
     var row = function (p) {
       var role = p.isCandidate ? "" : '<span class="badge badge-neutral">Member</span> ';
       var status = MATE_STATUS[p.raceStatus]

@@ -1,0 +1,112 @@
+# Refresh prediction-market prices and polling averages every twelve hours.
+#
+# Prices move daily, so this runs far more often than the roster refresh -
+# and unlike it, it publishes on its own. That is safe because of what it can
+# touch: `odds` writes candidate_profiles_site/data/odds.json and odds.js and
+# nothing else (kyc/odds.py: the page file is a pure function of the cache,
+# and the roster build leaves it alone), every outcome label is checked
+# against the race before it is stored, and the run must pass the same
+# validation, verify and tests a deploy does. If any other file would change,
+# it stops and reports instead of committing.
+#
+# A push made with GITHUB_TOKEN does not start other workflows, so the deploy
+# is started explicitly with workflow_dispatch, which it does allow.
+
+name: Odds
+
+on:
+  schedule:
+    # 00:47 and 12:47 UTC. Off the hour: GitHub's scheduler queues heavily at
+    # :00 and drops runs it cannot start.
+    - cron: "47 0,12 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+  issues: write
+
+concurrency:
+  group: odds
+  cancel-in-progress: false
+
+jobs:
+  odds:
+    name: Read the markets and polling averages, then publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Read Kalshi, Polymarket and the polling averages
+        run: python build_profile_site.py odds --verbose
+
+      - name: Confirm the result is valid and self-consistent
+        run: |
+          python build_profile_site.py build --check --strict
+          python build_profile_site.py verify
+          python -m unittest discover tests
+
+      - name: Commit the new prices and deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          changed=$(git status --porcelain | awk '{print $2}')
+          if [ -z "$changed" ]; then
+            echo "No price or average has changed."
+            exit 0
+          fi
+          allowed='^candidate_profiles_site/data/odds\.(json|js)$'
+          other=$(printf '%s\n' "$changed" | grep -Ev "$allowed" || true)
+          if [ -n "$other" ]; then
+            echo "::error::An odds refresh must change only the odds files; it would also change:"
+            printf '%s\n' "$other"
+            exit 1
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add candidate_profiles_site/data/odds.json candidate_profiles_site/data/odds.js
+          git commit -m "Refresh prediction markets and polling averages ($(date -u +%Y-%m-%dT%H:%MZ))
+
+          Opened automatically by .github/workflows/odds.yml. Kalshi and
+          Polymarket prices and the polling averages each race's Wikipedia page
+          lists, each outcome label checked against its race."
+          git push origin HEAD:main
+          gh workflow run deploy.yml --ref main -f reason="odds refresh"
+
+      # The same pattern as the roster refresh: a failed scheduled run reaches
+      # a person as an issue, and the next good run closes it.
+      - name: Report the failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Odds refresh failed"
+          body="The odds refresh at $(date -u +%Y-%m-%dT%H:%MZ) failed: $RUN_URL"
+          number=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --search "\"$title\" in:title" --json number,title \
+            --jq "map(select(.title == \"$title\")) | .[0].number // empty")
+          if [ -n "$number" ]; then
+            gh issue comment "$number" --repo "$GITHUB_REPOSITORY" --body "$body"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
+          fi
+
+      - name: Close the failure issue after a good run
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Odds refresh failed"
+          number=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --search "\"$title\" in:title" --json number,title \
+            --jq "map(select(.title == \"$title\")) | .[0].number // empty")
+          if [ -n "$number" ]; then
+            gh issue close "$number" --repo "$GITHUB_REPOSITORY" \
+              --comment "The odds refresh recovered at $(date -u +%Y-%m-%dT%H:%MZ): $RUN_URL"
+          fi

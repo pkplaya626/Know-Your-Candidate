@@ -10,6 +10,7 @@ SITE_DIR = "candidate_profiles_site"
 DATA_DIR = os.path.join(SITE_DIR, "data")
 DATA_FILE = os.path.join(DATA_DIR, "profiles.js")
 GEO_FILE = os.path.join(DATA_DIR, "geo.js")
+ODDS_FILE = os.path.join(DATA_DIR, "odds.js")
 
 # The scripts each page must load, in the order it must load them. The build
 # never rewrites a page; it only reports when one has drifted out of step with
@@ -22,6 +23,7 @@ PAGE_REQUIREMENTS = {
     "index.html": (
         "assets/kyc.js",
         "data/profiles.js",
+        "data/odds.js",
         "assets/kyc-odds.js",
         "assets/kyc-cards.js",
         "assets/kyc-profile.js",
@@ -32,6 +34,7 @@ PAGE_REQUIREMENTS = {
         "assets/kyc.js",
         "data/profiles.js",
         "data/geo.js",
+        "data/odds.js",
         "assets/kyc-odds.js",
         "assets/kyc-cards.js",
         "assets/kyc-profile.js",
@@ -43,6 +46,7 @@ PAGE_REQUIREMENTS = {
 STATE_PAGE_REQUIREMENTS = (
     "../assets/kyc.js",
     "../data/profiles.js",
+    "../data/odds.js",
     "../assets/kyc-odds.js",
     "../assets/kyc-cards.js",
     "../assets/kyc-profile.js",
@@ -243,6 +247,30 @@ def write_geo(geo, root="."):
 def geo_signature(geo):
     """Content hash of the map geometry, excluding the build timestamp."""
     return hashlib.sha256(_json(geo).encode("utf-8")).hexdigest()
+
+
+def write_odds(payload, root="."):
+    """Emit ``candidate_profiles_site/data/odds.js``.
+
+    Market prices and polling averages, keyed by race id, in a file of their
+    own: the twelve-hourly odds refresh writes this and odds.json and nothing
+    else, so it never collides with the weekly roster refresh's profiles.js.
+    """
+    path = os.path.join(root, ODDS_FILE)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    text = (
+        _BANNER.format(source="candidate_profiles_site/data/odds.json (Kalshi, Polymarket, "
+                              "Wikipedia)", built=build_timestamp())
+        + f"// Races: {len(payload.get('races', {}))}\n"
+        + f"window.kycOdds = {_json(payload)};\n"
+        + 'window.kycOddsMeta = {"signature":"' + odds_signature(payload) + '"};\n'
+    )
+    return path, _atomic_write(path, text)
+
+
+def odds_signature(payload):
+    """Content hash of the odds payload, excluding the build timestamp."""
+    return hashlib.sha256(_json(payload).encode("utf-8")).hexdigest()
 
 
 def script_sources(html):

@@ -232,8 +232,7 @@
       ' <a class="race-state-link" href="' + KYC.escapeAttr(KYC.stateUrl(race.state)) +
       '" title="' + KYC.escapeAttr("Everything about " + KYC.stateName(race.state)) + '">' +
       KYC.escapeHtml(KYC.stateName(race.state)) + " &rsaquo;</a>";
-    var odds = race.chamber === "Senate" && KYC.odds
-      ? KYC.odds.render(race, { compact: !opts.fullOdds }) : "";
+    var odds = KYC.odds ? KYC.odds.render(race, { compact: !opts.fullOdds }) : "";
     return [
       '<section class="race" id="', KYC.escapeAttr("race-" + race.id), '">',
       '<div class="race-head"><h3 class="race-title">',

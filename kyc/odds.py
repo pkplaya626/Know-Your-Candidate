@@ -1,13 +1,15 @@
-"""What prediction markets and polling averages say about each 2026 Senate race.
+"""What prediction markets and polling averages say about each 2026 race.
 
 Three sources, each quoted as it publishes itself and never blended into a
 number of our own:
 
 * **Kalshi**, a CFTC-regulated exchange: its public market-data API, no key.
 * **Polymarket**: its public Gamma API, no key.
-* **Polling averages** as the race's Wikipedia page lists them - 270toWin,
-  Decision Desk HQ, FiftyPlusOne, RealClearPolitics and others - each row
-  linked to the aggregator that published it.
+* **Polling averages** as a Senate race's Wikipedia page lists them -
+  270toWin, Decision Desk HQ, FiftyPlusOne, RealClearPolitics and others -
+  each row linked to the aggregator that published it. House races have
+  none: Wikipedia lists no averages for a district, and its district tables
+  are single polls, many of them a campaign's own.
 
 A market price is what a trader pays for a contract that pays $1 if the
 outcome happens. It is not a poll and not a forecast by this site, and the
@@ -20,6 +22,11 @@ Louisiana's lives under ``KXSENATELA``. A market belongs to the state its own
 question and its own resolution rules both name, never to the one a ticker
 suggests. A market's outcome label that names nobody in the race ("Andy Barr"
 on a Louisiana page) is shown as the party it resolves on, and reported.
+
+The labels are checked when the prices are read, and the result is stored
+in the cache; ``data/odds.js`` is a pure function of that cache. So the
+twelve-hourly refresh (.github/workflows/odds.yml) changes two files and
+nothing else, and the weekly roster refresh never touches them.
 """
 
 import datetime
@@ -79,22 +86,47 @@ def _price(text):
     return value if 0 <= value <= 1 else None
 
 
-def state_codes(races):
-    """``{"texas": "TX"}`` for every state with a 2026 Senate race."""
+def race_index(races):
+    """Where a market can point: every 2026 Senate seat by state name, and
+    every House seat by (state, district number)."""
     from .results import state_name
 
-    return {state_name(r["state"]).lower(): r["state"]
-            for r in races if r.get("chamber") == "Senate"}
+    senate, house, at_large = {}, {}, set()
+    for race in races:
+        if race.get("chamber") == "Senate":
+            senate[state_name(race["state"]).lower()] = race["id"]
+        elif race.get("chamber") == "House":
+            number = int(race.get("district") or 0)
+            house[(race["state"], number)] = race["id"]
+            if not number:
+                at_large.add(race["state"])
+    return {"senate": senate, "house": house, "at_large": at_large}
 
 
-def _state_in(text, names):
-    """The state *text* names, longest name first ("West Virginia" before
-    "Virginia", rule 5), or ``None``."""
+def senate_race(text, index):
+    """The Senate race a state name in *text* points at, longest name first
+    ("West Virginia" before "Virginia", rule 5), or ``None``."""
     lowered = (text or "").lower()
-    for name in sorted(names, key=len, reverse=True):
+    for name in sorted(index["senate"], key=len, reverse=True):
         if re.search(r"(?<![a-z])" + re.escape(name) + r"(?![a-z])", lowered):
-            return names[name]
+            return index["senate"][name]
     return None
+
+
+def house_race(state, district, index):
+    """The House race "CA-22" points at, or ``None``. An at-large seat is
+    district 0 here; a market may call it "AL", "00" or "01"."""
+    state = (state or "").upper()
+    if str(district).upper() == "AL":
+        number = 0
+    else:
+        try:
+            number = int(district)
+        except (TypeError, ValueError):
+            return None
+    if state in index["at_large"] and number in (0, 1):
+        number = 0
+    return index["house"].get((state, number))
 
 
 _PARTY_WORDS = (("democrat", "d"), ("republican", "r"), ("independent", "i"),
@@ -111,39 +143,55 @@ def party_of(text):
 
 # --------------------------------------------------------------------- Kalshi
 
-# A series about who wins a Senate seat, not a primary, a combination or a
-# count: "Texas Senate race", "Who will win the Senate race in Louisiana?",
-# "Special Senate election in Ohio".
-_KALSHI_RACE = re.compile(r"senate race|senate winner|senate election|win the senate", re.I)
-_KALSHI_NOT = re.compile(r"primary|nominee|combo|margin|turnout|count|endorse|advance|matchup|"
-                         r"closer|split|call|leader|majority|governor|state senate|district|"
-                         r"seats|ballot|sworn|runoff counties|parl", re.I)
-_KALSHI_QUESTION = re.compile(r"win the senate race in ([A-Za-z .]+?)\?", re.I)
-_KALSHI_RULE = re.compile(r"senator (?:of|from) ([A-Za-z .]+?)(?: for| following| in |,|\.|$)", re.I)
+# Discovery only: a series is read when its ticker or title looks like a race
+# for a seat, never a primary, a combination, a count or a state legislature.
+_KALSHI_RACE = re.compile(r"senate race|senate winner|senate election|win the senate|"
+                          r"house race|house winner", re.I)
+_KALSHI_NOT = re.compile(r"primary|nomin|combo|margin|turnout|count|endorse|advance|matchup|"
+                         r"closer|split|call|leader|majority|governor|state senate|state house|"
+                         r"house of delegates|assembly|council|supervisor|seats|ballot|sworn|"
+                         r"runoff counties|parl|speaker|expel|exit poll|popular vote", re.I)
+_K_SENATE_Q = re.compile(r"win the senate race in ([A-Za-z .]+?)\?", re.I)
+_K_SENATE_R = re.compile(r"senator (?:of|from) ([A-Za-z .]+?)(?: for| following| in |,|\.|$)",
+                         re.I)
+# "Will Democratic win the House race for CA-3?" / "...sworn in for CA-03..."
+_K_HOUSE_Q = re.compile(r"(?i:house race for) ([A-Z]{2})-(\d{1,2}|AL)\b")
+_K_HOUSE_R = re.compile(r"(?i:sworn in for) ([A-Z]{2})-(\d{1,2}|AL)\b")
+
+
+def _race_series(series):
+    title, ticker = series.get("title") or "", series.get("ticker") or ""
+    if _KALSHI_NOT.search(title):
+        return False
+    if re.match(r"^(?:KX)?SENATE", ticker) or re.match(r"^(?:KX)?HOUSE(?:RACE|[A-Z]{2}\d{1,2})$",
+                                                       ticker):
+        return True
+    return bool(_KALSHI_RACE.search(title))
 
 
 def kalshi_series():
-    """Series that may hold a 2026 Senate race.
-
-    Discovery only - Alabama's series is titled just "Alabama" - so a series
-    is read when its title reads like a Senate race or its ticker starts with
-    SENATE. Which state a market is about is decided by the market itself.
-    """
+    """Series that may hold a 2026 race. Alabama's Senate series is titled
+    just "Alabama" and House series "House CA3", so tickers count too; which
+    seat a market is about is decided by the market itself."""
     payload = _get_json(f"{KALSHI_API}/series?category=Elections")
-    out = []
-    for series in payload.get("series") or []:
-        title = series.get("title") or ""
-        if _KALSHI_NOT.search(title):
-            continue
-        if _KALSHI_RACE.search(title) or re.match(r"^(?:KX)?SENATE", series.get("ticker") or ""):
-            out.append(series)
+    return [s for s in payload.get("series") or [] if _race_series(s)]
+
+
+def kalshi_events(series_ticker, pause=0.3):
+    """Every open event in a series - KXHOUSERACE holds one per district."""
+    out, cursor = [], None
+    for _ in range(25):
+        params = {"series_ticker": series_ticker, "with_nested_markets": "true",
+                  "status": "open", "limit": 200}
+        if cursor:
+            params["cursor"] = cursor
+        payload = _get_json(f"{KALSHI_API}/events?{urllib.parse.urlencode(params)}")
+        out.extend(payload.get("events") or [])
+        cursor = payload.get("cursor")
+        if not cursor:
+            break
+        time.sleep(pause)
     return out
-
-
-def kalshi_events(series_ticker):
-    query = urllib.parse.urlencode({"series_ticker": series_ticker,
-                                    "with_nested_markets": "true", "status": "open"})
-    return _get_json(f"{KALSHI_API}/events?{query}").get("events") or []
 
 
 def _is_2026(event):
@@ -151,50 +199,100 @@ def _is_2026(event):
                                                                   event.get("event_ticker") or "")
 
 
-def kalshi_market(event, series_ticker, names):
-    """``(state, market record)`` from one Kalshi event, or ``(None, reason)``.
+def kalshi_place(market, index):
+    """``(race id, None)``; ``(None, note)`` when its question and its rules
+    disagree; ``(None, None)`` when it is not about who wins a 2026 seat."""
+    question, rules = market.get("title") or "", market.get("rules_primary") or ""
+    asked, ruled = _K_SENATE_Q.search(question), _K_SENATE_R.search(rules)
+    if asked:
+        race = senate_race(asked.group(1), index)
+        resolved = senate_race(ruled.group(1), index) if ruled else None
+    else:
+        asked, ruled = _K_HOUSE_Q.search(question), _K_HOUSE_R.search(rules)
+        if not asked:
+            return None, None
+        race = house_race(*asked.groups(), index)
+        resolved = house_race(*ruled.groups(), index) if ruled else None
+    if race is None:
+        return None, None
+    if race != resolved:
+        return None, (f"{market.get('ticker')}: asks about {race} but resolves on "
+                      f"{resolved or 'no seat on the ballot'}")
+    return race, None
 
-    Every market's question and its resolution rules must name the same state,
+
+def kalshi_market(event, series_ticker, index):
+    """``(race id, market record)`` from one Kalshi event, or ``(None, note)``.
+
+    Every market's question and its resolution rules must name the same seat,
     and every market in the event must agree.
     """
-    outcomes, states = [], set()
+    outcomes, places = [], set()
     for market in event.get("markets") or []:
         if market.get("status") not in ("active", "open"):
             continue
-        question = market.get("title") or ""
-        asked = _KALSHI_QUESTION.search(question)
-        ruled = _KALSHI_RULE.search(market.get("rules_primary") or "")
-        state = _state_in(asked.group(1), names) if asked else None
-        rule_state = _state_in(ruled.group(1), names) if ruled else None
-        if not state:
-            return None, None          # not a "who wins this state's seat" market
-        if state != rule_state:
-            return None, (f"{market.get('ticker')}: asks about {state} but resolves on "
-                          f"{rule_state or 'no state'}")
-        states.add(state)
+        race, note = kalshi_place(market, index)
+        if race is None:
+            return None, note
+        places.add(race)
         price = _price(market.get("last_price_dollars"))
         bid, ask = _price(market.get("yes_bid_dollars")), _price(market.get("yes_ask_dollars"))
         if price is None and bid is not None and ask is not None:
             price = round((bid + ask) / 2, 4)
         if price is None:
             continue
+        question = market.get("title") or ""
         outcomes.append({
             "label": (market.get("yes_sub_title") or "").strip(),
             "party": party_of(market.get("subtitle")) or party_of(question),
             "question": question, "price": price, "bid": bid, "ask": ask,
             "volume": float(market.get("volume_fp") or market.get("volume") or 0),
         })
-    if len(states) != 1 or len(outcomes) < 2:
-        return None, f"{event.get('event_ticker')}: no single state with two priced outcomes"
-    record = {"source": KALSHI, "event": event.get("event_ticker"),
-              "title": event.get("title"),
-              "url": f"https://kalshi.com/markets/{series_ticker.lower()}",
-              "outcomes": sorted(outcomes, key=lambda o: -o["price"])}
-    return states.pop(), record
+    if len(places) != 1 or len(outcomes) < 2:
+        return None, None
+    return places.pop(), {"source": KALSHI, "event": event.get("event_ticker"),
+                          "title": event.get("title"),
+                          "url": f"https://kalshi.com/markets/{series_ticker.lower()}",
+                          "outcomes": sorted(outcomes, key=lambda o: -o["price"])}
 
 
-def fetch_kalshi(names, log=print, pause=0.3):
-    """``({state: record}, control record or None, notes)``."""
+def _kalshi_control(series_ticker, notes):
+    try:
+        events = kalshi_events(series_ticker)
+    except OddsError as exc:
+        notes.append(str(exc))
+        return None
+    for event in events:
+        if not _is_2026(event):
+            continue
+        outcomes = []
+        for market in event.get("markets") or []:
+            price = _price(market.get("last_price_dollars"))
+            if price is None or market.get("status") not in ("active", "open"):
+                continue
+            outcomes.append({"label": (market.get("yes_sub_title") or "").strip(),
+                             "party": party_of(market.get("yes_sub_title")),
+                             "question": market.get("title"), "price": price})
+        if len(outcomes) >= 2:
+            return {"source": KALSHI, "event": event.get("event_ticker"),
+                    "title": event.get("title"),
+                    "url": f"https://kalshi.com/markets/{series_ticker.lower()}",
+                    "outcomes": sorted(outcomes, key=lambda o: -o["price"])}
+    return None
+
+
+def _keep_busier(found, race, record, notes, source):
+    if race in found:
+        notes.append(f"{race}: two {source} events ({found[race]['event']}, "
+                     f"{record['event']}); kept the busier")
+        if sum(o.get("volume") or 0 for o in record["outcomes"]) <= \
+                sum(o.get("volume") or 0 for o in found[race]["outcomes"]):
+            return
+    found[race] = record
+
+
+def fetch_kalshi(index, log=print, pause=0.3):
+    """``({race id: record}, {chamber: control record}, notes)``."""
     found, notes = {}, []
     for series in kalshi_series():
         time.sleep(pause)
@@ -206,50 +304,30 @@ def fetch_kalshi(names, log=print, pause=0.3):
         for event in events:
             if not _is_2026(event):
                 continue
-            state, record = kalshi_market(event, series["ticker"], names)
-            if state is None:
+            race, record = kalshi_market(event, series["ticker"], index)
+            if race is None:
                 if record:
                     notes.append(record)
                 continue
-            if state in found:
-                notes.append(f"{state}: two Kalshi events ({found[state]['event']}, "
-                             f"{record['event']}); kept the busier")
-                if sum(o["volume"] for o in record["outcomes"]) <= \
-                        sum(o["volume"] for o in found[state]["outcomes"]):
-                    continue
-            found[state] = record
-    control = None
-    try:
-        for event in kalshi_events("CONTROLS"):
-            if not _is_2026(event):
-                continue
-            outcomes = []
-            for market in event.get("markets") or []:
-                price = _price(market.get("last_price_dollars"))
-                if price is None or market.get("status") not in ("active", "open"):
-                    continue
-                outcomes.append({"label": (market.get("yes_sub_title") or "").strip(),
-                                 "party": party_of(market.get("yes_sub_title")),
-                                 "question": market.get("title"), "price": price})
-            if len(outcomes) >= 2:
-                control = {"source": KALSHI, "event": event.get("event_ticker"),
-                           "title": event.get("title"),
-                           "url": "https://kalshi.com/markets/controls",
-                           "outcomes": sorted(outcomes, key=lambda o: -o["price"])}
-    except OddsError as exc:
-        notes.append(str(exc))
-    log(f"  kalshi: {len(found)} Senate races{', and control of the Senate' if control else ''}")
+            _keep_busier(found, race, record, notes, "Kalshi")
+    control = {chamber: c for chamber, c in (("senate", _kalshi_control("CONTROLS", notes)),
+                                             ("house", _kalshi_control("CONTROLH", notes))) if c}
+    log(f"  kalshi: {sum(r.startswith('S-') for r in found)} Senate and "
+        f"{sum(r.startswith('H-') for r in found)} House races; control of "
+        f"{' and '.join(sorted(control)) or 'neither chamber'}")
     return found, control, notes
 
 
 # ----------------------------------------------------------------- Polymarket
 
-_PM_TITLE = re.compile(r"^\s*(?P<state>[A-Za-z .']+?)\s+(?:Special\s+)?Senate\s+Election\s+Winner\s*$",
-                       re.I)
-_PM_CONTROL = "which-party-will-win-the-senate-in-2026"
+_PM_SENATE = re.compile(r"^\s*(?P<state>[A-Za-z .']+?)\s+(?:Special\s+)?Senate\s+Election\s+Winner\s*$",
+                        re.I)
+_PM_HOUSE = re.compile(r"^\s*(?P<state>[A-Z]{2})-(?P<district>\d{1,2}|AL)\s+House\s+Election\s+Winner\s*$")
+_PM_CONTROL = {"which-party-will-win-the-senate-in-2026": "senate",
+               "which-party-will-win-the-house-in-2026": "house"}
 
 
-def polymarket_events(pause=0.3, pages=20):
+def polymarket_events(pause=0.3, pages=30):
     """Every open event Polymarket tags as part of the midterms."""
     out = []
     for page in range(pages):
@@ -263,11 +341,36 @@ def polymarket_events(pause=0.3, pages=20):
     return out
 
 
+def polymarket_place(event, index):
+    """``(race id, None)``; ``(None, note)`` when the title and description
+    disagree; ``(None, None)`` when the event is not a race for a seat."""
+    title, description = event.get("title") or "", event.get("description") or ""
+    senate = _PM_SENATE.match(title)
+    if senate:
+        race = senate_race(senate.group("state"), index)
+        if race is None:
+            return None, None
+        if senate_race(description, index) != race:
+            return None, f"{event.get('slug')}: title and description do not name one state"
+        return race, None
+    house = _PM_HOUSE.match(title)
+    if house:
+        race = house_race(house.group("state"), house.group("district"), index)
+        if race is None:
+            return None, None
+        named_seats = {house_race(st, d, index)
+                       for st, d in re.findall(r"\b([A-Z]{2})-(\d{1,2}|AL)\b", description)}
+        if named_seats != {race}:
+            return None, f"{event.get('slug')}: title and description do not name one seat"
+        return race, None
+    return None, None
+
+
 def _pm_party(market):
     question = (market.get("question") or "").lower()
-    if "will the democrats" in question:
+    if "will the democrat" in question:
         return "d"
-    if "will the republicans" in question:
+    if "will the republican" in question:
         return "r"
     if "will an independent" in question:
         return "i"
@@ -310,32 +413,27 @@ def polymarket_market(event):
             "outcomes": sorted(outcomes, key=lambda o: -o["price"])}
 
 
-def fetch_polymarket(names, log=print):
-    """``({state: record}, control record or None, notes)``."""
-    found, notes, control = {}, [], None
+def fetch_polymarket(index, log=print):
+    """``({race id: record}, {chamber: control record}, notes)``."""
+    found, notes, control = {}, [], {}
     for event in polymarket_events():
-        if event.get("slug") == _PM_CONTROL:
-            control = polymarket_market(event)
+        chamber = _PM_CONTROL.get(event.get("slug"))
+        if chamber:
+            record = polymarket_market(event)
+            if record:
+                control[chamber] = record
             continue
-        title = _PM_TITLE.match(event.get("title") or "")
-        if not title:
-            continue
-        state = _state_in(title.group("state"), names)
-        # The title says which state; the description must say the same.
-        if not state or _state_in(event.get("description") or "", names) != state:
-            notes.append(f"{event.get('slug')}: title and description do not name one state")
+        race, note = polymarket_place(event, index)
+        if race is None:
+            if note:
+                notes.append(note)
             continue
         record = polymarket_market(event)
-        if record is None:
-            continue
-        if state in found:
-            notes.append(f"{state}: two Polymarket events ({found[state]['event']}, "
-                         f"{record['event']}); kept the busier")
-            if sum(o["volume"] for o in record["outcomes"]) <= \
-                    sum(o["volume"] for o in found[state]["outcomes"]):
-                continue
-        found[state] = record
-    log(f"  polymarket: {len(found)} Senate races{', and control of the Senate' if control else ''}")
+        if record is not None:
+            _keep_busier(found, race, record, notes, "Polymarket")
+    log(f"  polymarket: {sum(r.startswith('S-') for r in found)} Senate and "
+        f"{sum(r.startswith('H-') for r in found)} House races; control of "
+        f"{' and '.join(sorted(control)) or 'neither chamber'}")
     return found, control, notes
 
 
@@ -562,8 +660,9 @@ def _party_key(person):
 
 
 def _shared_party(people):
-    """The party everyone in *people* shares, or ``None``."""
-    parties = {_party_key(p) for p in people}
+    """The party everyone in *people* shares, or ``None``. A nominee known
+    only by name, from the results page, has no party to share."""
+    parties = {_party_key(p) for p in people if p.get("party")}
     return parties.pop() if len(parties) == 1 else None
 
 
@@ -629,32 +728,79 @@ def save_cache(cache, root="."):
 
 
 def build(races, people_of, log=print, now=None):
-    """Fetch all three sources into one cache document."""
-    names = state_codes(races)
-    by_state = {r["state"]: r["id"] for r in races if r.get("chamber") == "Senate"}
-    kalshi, kalshi_control, kalshi_notes = fetch_kalshi(names, log=log)
-    poly, poly_control, poly_notes = fetch_polymarket(names, log=log)
+    """Fetch all three sources into one cache document, labels checked."""
+    index = race_index(races)
+    kalshi, kalshi_control, kalshi_notes = fetch_kalshi(index, log=log)
+    poly, poly_control, poly_notes = fetch_polymarket(index, log=log)
     polls, poll_notes = fetch_polls(races, people_of, log=log)
+    by_id = {r["id"]: r for r in races}
     entries = {}
-    for state, rid in by_state.items():
-        markets = [m for m in (kalshi.get(state), poly.get(state)) if m]
+    for rid in sorted(set(kalshi) | set(poly) | set(polls)):
+        people = people_of(by_id[rid])
+        markets = [dict(m, outcomes=checked_outcomes(m, people))
+                   for m in (kalshi.get(rid), poly.get(rid)) if m]
         entry = {}
         if markets:
             entry["markets"] = markets
         if rid in polls:
             entry["polls"] = polls[rid]
-        if entry:
-            entries[rid] = entry
+        entries[rid] = entry
+    control = {}
+    for chamber in ("senate", "house"):
+        found = [c for c in (kalshi_control.get(chamber), poly_control.get(chamber)) if c]
+        if found:
+            control[chamber] = found
     stamp = (now or datetime.datetime.now(datetime.timezone.utc)).isoformat(timespec="seconds")
-    return {
-        "fetched": stamp,
-        "races": entries,
-        "control": {"senate": [c for c in (kalshi_control, poly_control) if c]},
-        "notes": sorted(kalshi_notes + poly_notes + poll_notes),
-    }
+    return {"fetched": stamp, "races": entries, "control": control,
+            "notes": sorted(kalshi_notes + poly_notes + poll_notes)}
 
 
-# ---------------------------------------------------------------------- apply
+# The page needs the label, the party, the price and the question; bids,
+# asks and volumes stay in the cache.
+_PAGE_FIELDS = ("label", "party", "price", "question", "mismatch", "marketLabel")
+
+
+def _page_market(market):
+    out = {k: market[k] for k in ("source", "event", "title", "url") if k in market}
+    out["outcomes"] = [{k: o[k] for k in _PAGE_FIELDS if k in o} for o in market.get("outcomes") or []]
+    return out
+
+
+def payload(cache):
+    """What ``data/odds.js`` carries: a pure function of the cache, so it
+    changes only when the prices do."""
+    cache = cache or {}
+    races = {}
+    for rid, entry in sorted((cache.get("races") or {}).items()):
+        row = {}
+        if entry.get("markets"):
+            row["markets"] = [_page_market(m) for m in entry["markets"]]
+        if entry.get("polls"):
+            row["polls"] = entry["polls"]
+        if row:
+            races[rid] = row
+    control = {chamber: [_page_market(m) for m in markets]
+               for chamber, markets in sorted((cache.get("control") or {}).items())}
+    return {"asOf": cache.get("fetched"), "races": races, "control": control}
+
+
+def coverage(cache, races):
+    """``{"senate": (with a market, of), "house": (...), "polls": n}``."""
+    entries = (cache or {}).get("races") or {}
+    out = {}
+    for chamber, prefix in (("senate", "S-"), ("house", "H-")):
+        ids = [r["id"] for r in races if r["id"].startswith(prefix)]
+        out[chamber] = (sum(1 for i in ids if (entries.get(i) or {}).get("markets")), len(ids))
+    out["polls"] = sum(1 for e in entries.values() if e.get("polls"))
+    # Labels naming a nominee who filed too little to have a profile here:
+    # shown as the party the market resolves on.
+    out["unprofiled"] = sum(1 for e in entries.values() for m in e.get("markets") or []
+                            for o in m.get("outcomes") or []
+                            if o.get("mismatch") and not o.get("conflict"))
+    return out
+
+
+# ---------------------------------------------------------------------- checks
 
 def checked_outcomes(market, people):
     """The market's outcomes, each label checked against the race.
@@ -680,33 +826,13 @@ def checked_outcomes(market, people):
                 row["marketLabel"] = label
                 row["label"] = {"d": "Democratic party", "r": "Republican party",
                                 "i": "Independent"}.get(row.get("party"), "Other")
+                # A conflict when this site knows someone of that party in the
+                # race and the market names someone else (Kalshi's "Andy Barr"
+                # on Louisiana, where Julia Letlow is the Republican); otherwise
+                # a nominee who filed too little to have a profile here.
+                row["conflict"] = any(p.get("party") and _party_key(p) == row.get("party")
+                                      for p in people)
             elif not row.get("party"):
                 row["party"] = _label_party(label) or _shared_party(hits)
         out.append(row)
     return out
-
-
-def apply(races, cache, by_id):
-    """Attach ``odds`` to every Senate race the cache covers; return the count."""
-    entries = (cache or {}).get("races") or {}
-    applied = 0
-    for race in races:
-        entry = entries.get(race["id"])
-        if not entry or race.get("chamber") != "Senate":
-            continue
-        people = [by_id[i] for i in race.get("incumbentIds", []) + race.get("candidateIds", [])
-                  if i in by_id]
-        markets = []
-        for market in entry.get("markets") or []:
-            markets.append(dict(market, outcomes=checked_outcomes(market, people)))
-        race["odds"] = {"asOf": cache.get("fetched"), "markets": markets}
-        if entry.get("polls"):
-            race["odds"]["polls"] = entry["polls"]
-        applied += 1
-    return applied
-
-
-def control(cache):
-    """The markets on which party wins the Senate, for the build meta."""
-    senate = ((cache or {}).get("control") or {}).get("senate") or []
-    return {"asOf": cache.get("fetched"), "markets": senate} if senate else None
