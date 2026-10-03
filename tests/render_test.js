@@ -1286,24 +1286,47 @@ async function testRunningElsewhere() {
         row && /Running for/.test(row.textContent) && /Nominee/.test(row.textContent) &&
           !/Not on ballot/.test(row.textContent),
         row && row.textContent.replace(/\s+/g, " ").trim());
-      // Beside the name, "Running for House CA-41" and "Nominee" took the
-      // whole row: the name vanished and "House • CA-38" broke a word a line.
-      check("their two badges sit under the name, not beside it",
-        !!row && row.querySelectorAll(".who .row-badges .badge").length === 2 &&
-          ![...row.children].some((c) => c.classList.contains("badge")),
+      // Both badges beside the name took the whole row: the name vanished and
+      // "House • CA-38" broke a word a line. The seat gets a line of its own
+      // under the text; the result stays at the end, in line with every
+      // "Renominated".
+      const contestOf = (r) => [...r.children].find((c) => c.classList.contains("contest"));
+      const atEnd = (r) => [...r.children]
+        .filter((c) => c.classList.contains("badge") && !c.classList.contains("contest"));
+      check("the row says which seat they are running for",
+        !!row && /^Running for /.test((contestOf(row) || {}).textContent || ""),
         row && row.innerHTML.replace(/<img[^>]*>/, "").slice(0, 240));
+      // One state's panel: the district or "Senate" is all the row lacks, and
+      // "Running for House CA-41" wrapped to two lines beside "Nominee".
+      const seat = nominee.contestLabel.split(" • ");
+      const said = row && (contestOf(row) || {}).textContent;
+      check("the seat is said in the panel's terms: the district, or Senate",
+        said === "Running for " + (seat[0] === "House" ? seat[1] : "Senate"),
+        `${said} for ${nominee.contestLabel}`);
+      check("and the result of their race at the row's end, like everyone else's",
+        !!row && atEnd(row).length === 1 && /Nominee/.test(atEnd(row)[0].textContent),
+        row && atEnd(row).map((b) => b.textContent).join(" | "));
       const own = [...map.D.querySelectorAll("#delegation .person-row")].find((r) => {
         const p = map.window.KYC.byId(r.getAttribute("data-id"));
         return p && !p.isCandidate && !p.contestLabel && p.raceStatus === "nominee";
       });
       check("a member seeking re-election keeps one badge at the row's end",
-        !!own && !own.querySelector(".row-badges") &&
-          [...own.children].filter((c) => c.classList.contains("badge")).length === 1,
+        !!own && !contestOf(own) && atEnd(own).length === 1,
         own && own.textContent.replace(/\s+/g, " ").trim());
-      // jsdom has no layout, so this asserts the rule rather than the effect.
+      // jsdom has no layout, so these assert the rule rather than the effect.
       const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
       check("the seat line is cut short, never broken a word a line",
         /\.person-row \.who \.office[^{]*\{[^}]*white-space:\s*nowrap/.test(css));
+      check("a long name or party wraps rather than being cut short",
+        !!row && !row.querySelector(".who .name").classList.contains("truncate") &&
+          !/\.person-row \.who \.(name|party)[^{]*\{[^}]*white-space:\s*nowrap/.test(css));
+      // "Nominee – Party for Socialism and Liberation line" took 48% and cut
+      // the seat beside it to "House • NY-…".
+      check("the text column never narrows below the seat line",
+        /\.person-row\s*\{[^}]*grid-template-columns:\s*auto minmax\(min-content, 1fr\)/.test(css));
+      check("the seat's line spans the text and status columns, under both",
+        /grid-template-areas:\s*"photo who status go"\s*"\.\s+contest contest \."/.test(css) &&
+          /\.person-row > \.badge\.contest\s*\{[^}]*grid-area:\s*contest/.test(css));
     });
   }
   map.window.close();
