@@ -61,7 +61,7 @@
      {
       "label": "Republican Party",
       "party": "r",
-      "price": 0.36,
+      "price": 0.37,
       "question": "Will Republicans win the U.S. Senate in 2026?"
      }
     ],
@@ -97,7 +97,7 @@
    }
   ]
  },
- "fetched": "2026-10-03T17:02:10+00:00",
+ "fetched": "2026-10-03T17:10:29+00:00",
  "notes": [],
  "races": {
   "H-AK-00-2026": {
@@ -124,11 +124,11 @@
        "volume": 600.84966
       },
       {
-       "ask": 0.033,
-       "bid": 0.015,
+       "ask": 0.03,
+       "bid": 0.019,
        "label": "Democratic Party",
        "party": "d",
-       "price": 0.024,
+       "price": 0.0245,
        "question": "Will the Democratic Party win the AK-AL House seat?",
        "volume": 35581.17799099999
       },
@@ -270,7 +270,7 @@
      "outcomes": [
       {
        "ask": 0.996,
-       "bid": 0.959,
+       "bid": 0.958,
        "label": "Mike Rogers",
        "party": "r",
        "price": 0.983,
@@ -351,11 +351,11 @@
      "event": "al-04-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.996,
-       "bid": 0.968,
+       "ask": 0.997,
+       "bid": 0.965,
        "label": "Robert Aderholt (R)",
        "party": "r",
-       "price": 0.982,
+       "price": 0.981,
        "question": "Will the Republican Party win the AL-04 House seat?",
        "volume": 19962.103616
       },
@@ -463,11 +463,11 @@
      "event": "al-06-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.97,
-       "bid": 0.949,
+       "ask": 0.969,
+       "bid": 0.948,
        "label": "Gary Palmer (R)",
        "party": "r",
-       "price": 0.9595,
+       "price": 0.9585,
        "question": "Will the Republican Party win the AL-06 House seat?",
        "volume": 10053.508328
       },
@@ -550,7 +550,7 @@
      "outcomes": [
       {
        "ask": 0.977,
-       "bid": 0.917,
+       "bid": 0.923,
        "label": "Rick Crawford",
        "party": "r",
        "price": 0.947,
@@ -575,8 +575,8 @@
      "event": "ar-01-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.98,
-       "bid": 0.949,
+       "ask": 0.978,
+       "bid": 0.951,
        "label": "Rick Crawford (R)",
        "party": "r",
        "price": 0.9645,
@@ -584,11 +584,11 @@
        "volume": 16662.320745
       },
       {
-       "ask": 0.032,
+       "ask": 0.033,
        "bid": 0.007,
        "label": "Terri Green (D)",
        "party": "d",
-       "price": 0.0195,
+       "price": 0.02,
        "question": "Will the Democratic Party win the AR-01 House seat?",
        "volume": 10366.621386
       }
@@ -726,7 +726,7 @@
        "volume": 3056.17
       },
       {
-       "ask": 0.068,
+       "ask": 0.062,
        "bid": 0.024,
        "label": "James Russell",
        "party": "d",
@@ -743,20 +743,20 @@
      "event": "ar-04-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.979,
+       "ask": 0.98,
        "bid": 0.95,
        "label": "Bruce Westerman (R)",
        "party": "r",
-       "price": 0.9645,
+       "price": 0.965,
        "question": "Will the Republican Party win the AR-04 House seat?",
        "volume": 12847.008756000001
       },
       {
-       "ask": 0.05,
-       "bid": 0.019,
+       "ask": 0.049,
+       "bid": 0.018,
        "label": "James Russell (D)",
        "party": "d",
-       "price": 0.0345,
+       "price": 0.0335,
        "question": "Will the Democratic Party win the AR-04 House seat?",
        "volume": 11426.720856999997
       }
@@ -865,10 +865,10 @@
       },
       {
        "ask": 0.32,
-       "bid": 0.31,
+       "bid": 0.3,
        "label": "Jonathan Nez (D)",
        "party": "d",
-       "price": 0.315,
+       "price": 0.31,
        "question": "Will the Democratic Party win the AZ-02 House seat?",
        "volume": 4058.312439
       }
@@ -1145,10 +1145,10 @@
       },
       {
        "ask": 0.017,
-       "bid": 0.002,
+       "bid": 0.001,
        "label": "Daniel Butierez (R)",
        "party": "r",
-       "price": 0.0095,
+       "price": 0.009,
        "question": "Will the Republican Party win the AZ-07 House seat?",
        "volume": 33371.446148
       }
@@ -1362,11 +1362,11 @@
      "event": "ca-02-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.991,
+       "ask": 0.992,
        "bid": 0.973,
        "label": "Jared Huffman (D)",
        "party": "d",
-       "price": 0.982,
+       "price": 0.9825,
        "question": "Will the Democratic Party win the CA-02 House seat?",
        "volume": 5977.437161
       },
@@ -1430,11 +1430,11 @@
        "volume": 26070.993003999996
       },
       {
-       "ask": 0.039,
+       "ask": 0.04,
        "bid": 0.024,
        "label": "Robb Tucker (R)",
        "party": "r",
-       "price": 0.0315,
+       "price": 0.032,
        "question": "Will the Republican Party win the CA-03 House seat?",
        "volume": 17666.729127
       }
@@ -1581,11 +1581,11 @@
        "volume": 28103.379823000007
       },
       {
-       "ask": 0.031,
+       "ask": 0.029,
        "bid": 0.028,
        "label": "Republican Party",
        "party": "r",
-       "price": 0.0295,
+       "price": 0.0285,
        "question": "Will the Republican Party win the CA-06 House seat?",
        "volume": 25232.395552
       }
@@ -1611,11 +1611,11 @@
        "volume": 6634.353242
       },
       {
-       "ask": 0.047,
-       "bid": 0.006,
+       "ask": 0.044,
+       "bid": 0.012,
        "label": "Republican Party",
        "party": "r",
-       "price": 0.0265,
+       "price": 0.028,
        "question": "Will the Republican Party win the CA-07 House seat?",
        "volume": 6147.734775000001
       }
@@ -1658,11 +1658,11 @@
      "event": "ca-08-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.976,
+       "ask": 0.975,
        "bid": 0.952,
        "label": "John Garamendi (D)",
        "party": "d",
-       "price": 0.964,
+       "price": 0.9635,
        "question": "Will the Democratic Party win the CA-08 House seat?",
        "volume": 14263.826134
       },
@@ -1845,11 +1845,11 @@
        "volume": 27361.475035
       },
       {
-       "ask": 0.015,
+       "ask": 0.018,
        "bid": 0.004,
        "label": "Republican Party",
        "party": "r",
-       "price": 0.0095,
+       "price": 0.011,
        "question": "Will the Republican Party win the CA-12 House seat?",
        "volume": 17381.03624
       }
@@ -1867,7 +1867,7 @@
      "outcomes": [
       {
        "ask": 0.966,
-       "bid": 0.94,
+       "bid": 0.939,
        "label": "Adam Gray",
        "party": "d",
        "price": 0.966,
@@ -1902,10 +1902,10 @@
       },
       {
        "ask": 0.03,
-       "bid": 0.009,
+       "bid": 0.01,
        "label": "Kevin Lincoln (R)",
        "party": "r",
-       "price": 0.0195,
+       "price": 0.02,
        "question": "Will the Republican Party win the CA-13 House seat?",
        "volume": 17474.561041
       }
@@ -2103,19 +2103,19 @@
      "outcomes": [
       {
        "ask": 0.978,
-       "bid": 0.96,
+       "bid": 0.959,
        "label": "Ro Khanna (D)",
        "party": "d",
-       "price": 0.969,
+       "price": 0.9685,
        "question": "Will the Democratic Party win the CA-17 House seat?",
        "volume": 13294.971012
       },
       {
-       "ask": 0.041,
-       "bid": 0.011,
+       "ask": 0.035,
+       "bid": 0.007,
        "label": "Ritesh Tandon (R)",
        "party": "r",
-       "price": 0.026,
+       "price": 0.021,
        "question": "Will the Republican Party win the CA-17 House seat?",
        "volume": 2534.8170499999997
       }
@@ -2158,11 +2158,11 @@
      "event": "ca-18-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.989,
+       "ask": 0.986,
        "bid": 0.978,
        "label": "Zoe Lofgren (D)",
        "party": "d",
-       "price": 0.9835,
+       "price": 0.982,
        "question": "Will the Democratic Party win the CA-18 House seat?",
        "volume": 30633.925748999998
       },
@@ -2413,7 +2413,7 @@
      "outcomes": [
       {
        "ask": 0.954,
-       "bid": 0.931,
+       "bid": 0.933,
        "label": "Jay Obernolte",
        "party": "r",
        "price": 0.949,
@@ -2477,7 +2477,7 @@
        "volume": 3967.28
       },
       {
-       "ask": 0.048,
+       "ask": 0.046,
        "bid": 0.014,
        "label": "Bob Smith",
        "party": "r",
@@ -2503,8 +2503,8 @@
        "volume": 33512.776771000004
       },
       {
-       "ask": 0.03,
-       "bid": 0.006,
+       "ask": 0.031,
+       "bid": 0.005,
        "label": "Bob Smith (R)",
        "party": "r",
        "price": 0.018,
@@ -2764,10 +2764,10 @@
       },
       {
        "ask": 0.048,
-       "bid": 0.028,
+       "bid": 0.029,
        "label": "Republican Party",
        "party": "r",
-       "price": 0.038,
+       "price": 0.0385,
        "question": "Will the Republican Party win the CA-29 House seat?",
        "volume": 17532.882773
       }
@@ -2866,11 +2866,11 @@
      "event": "ca-31-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.969,
+       "ask": 0.968,
        "bid": 0.94,
        "label": "Gil Cisneros (D)",
        "party": "d",
-       "price": 0.9545,
+       "price": 0.954,
        "question": "Will the Democratic Party win the CA-31 House seat?",
        "volume": 8088.9136290000015
       },
@@ -2961,7 +2961,7 @@
        "volume": 5943.24
       },
       {
-       "ask": 0.08,
+       "ask": 0.071,
        "bid": 0.022,
        "conflict": false,
        "label": "Republican party",
@@ -3074,7 +3074,7 @@
      "outcomes": [
       {
        "ask": 0.999,
-       "bid": 0.964,
+       "bid": 0.963,
        "label": "Norma Torres (D)",
        "party": "d",
        "price": 0.981,
@@ -3263,7 +3263,7 @@
        "volume": 1633.98
       },
       {
-       "ask": 0.056,
+       "ask": 0.048,
        "bid": 0.023,
        "conflict": false,
        "label": "Republican party",
@@ -3283,23 +3283,23 @@
      "event": "ca-39-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.98,
+       "ask": 0.979,
        "bid": 0.951,
        "label": "Mark Takano (D)",
        "party": "d",
-       "price": 0.9655,
+       "price": 0.965,
        "question": "Will the Democratic Party win the CA-39 House seat?",
        "volume": 40860.058340999996
       },
       {
-       "ask": 0.048,
+       "ask": 0.049,
        "bid": 0.02,
        "conflict": false,
        "label": "Republican party",
        "marketLabel": "Steve Manos (R)",
        "mismatch": true,
        "party": "r",
-       "price": 0.034,
+       "price": 0.0345,
        "question": "Will the Republican Party win the CA-39 House seat?",
        "volume": 16881.032259
       }
@@ -3714,7 +3714,7 @@
      "event": "KXHOUSERACE-CA48-26",
      "outcomes": [
       {
-       "ask": 0.905,
+       "ask": 0.91,
        "bid": 0.89,
        "label": "Marni von Wilpert",
        "party": "d",
@@ -3723,8 +3723,8 @@
        "volume": 13317.16
       },
       {
-       "ask": 0.1,
-       "bid": 0.09,
+       "ask": 0.099,
+       "bid": 0.088,
        "label": "Jim Desmond",
        "party": "r",
        "price": 0.099,
@@ -3780,7 +3780,7 @@
       },
       {
        "ask": 0.036,
-       "bid": 0.011,
+       "bid": 0.012,
        "label": "Armen Kurdian",
        "party": "r",
        "price": 0.02,
@@ -3959,7 +3959,7 @@
        "volume": 14523.47
       },
       {
-       "ask": 0.057,
+       "ask": 0.055,
        "bid": 0.021,
        "label": "Jeff Belle",
        "party": "r",
@@ -4106,14 +4106,14 @@
        "volume": 19241.503578999997
       },
       {
-       "ask": 0.028,
-       "bid": 0.017,
+       "ask": 0.024,
+       "bid": 0.016,
        "conflict": false,
        "label": "Republican party",
        "marketLabel": "Kelley Dennison (R)",
        "mismatch": true,
        "party": "r",
-       "price": 0.0225,
+       "price": 0.02,
        "question": "Will the Republican Party win the CO-02 House seat?",
        "volume": 21568.593001
       }
@@ -4268,11 +4268,11 @@
      "event": "co-05-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.75,
+       "ask": 0.76,
        "bid": 0.73,
        "label": "Jeff Crank (R)",
        "party": "r",
-       "price": 0.74,
+       "price": 0.745,
        "question": "Will the Republican Party win the CO-05 House seat?",
        "volume": 3409.734183
       },
@@ -4298,7 +4298,7 @@
      "event": "KXHOUSERACE-CO06-26",
      "outcomes": [
       {
-       "ask": 0.985,
+       "ask": 0.991,
        "bid": 0.965,
        "label": "Jason Crow",
        "party": "d",
@@ -4308,7 +4308,7 @@
       },
       {
        "ask": 0.035,
-       "bid": 0.004,
+       "bid": 0.005,
        "conflict": false,
        "label": "Republican party",
        "marketLabel": "Jason Clark",
@@ -4328,22 +4328,22 @@
      "outcomes": [
       {
        "ask": 0.97,
-       "bid": 0.953,
+       "bid": 0.943,
        "label": "Jason Crow (D)",
        "party": "d",
-       "price": 0.9615,
+       "price": 0.9565,
        "question": "Will the Democratic Party win the CO-06 House seat?",
        "volume": 15037.151384
       },
       {
-       "ask": 0.049,
-       "bid": 0.03,
+       "ask": 0.057,
+       "bid": 0.032,
        "conflict": false,
        "label": "Republican party",
        "marketLabel": "Jason Clark (R)",
        "mismatch": true,
        "party": "r",
-       "price": 0.0395,
+       "price": 0.0445,
        "question": "Will the Republican Party win the CO-06 House seat?",
        "volume": 16072.297939
       }
@@ -4396,10 +4396,10 @@
       },
       {
        "ask": 0.058,
-       "bid": 0.019,
+       "bid": 0.021,
        "label": "Tim Bennett (R)",
        "party": "r",
-       "price": 0.0385,
+       "price": 0.0395,
        "question": "Will the Republican Party win the CO-07 House seat?",
        "volume": 7951.245042
       }
@@ -4930,7 +4930,7 @@
       },
       {
        "ask": 0.07,
-       "bid": 0.043,
+       "bid": 0.036,
        "label": "Seth Harp",
        "party": "d",
        "price": 0.061,
@@ -5011,11 +5011,11 @@
        "volume": 17280.045743
       },
       {
-       "ask": 0.15,
+       "ask": 0.16,
        "bid": 0.13,
        "label": "LaShonda Holloway (D)",
        "party": "d",
-       "price": 0.14,
+       "price": 0.145,
        "question": "Will the Democratic Party win the FL-04 House seat?",
        "volume": 11490.243551000001
       }
@@ -5313,7 +5313,7 @@
      "outcomes": [
       {
        "ask": 0.984,
-       "bid": 0.949,
+       "bid": 0.951,
        "label": "Maxwell Frost",
        "party": "d",
        "price": 0.96,
@@ -5338,11 +5338,11 @@
      "event": "fl-10-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.976,
-       "bid": 0.944,
+       "ask": 0.977,
+       "bid": 0.945,
        "label": "Maxwell Frost (D)",
        "party": "d",
-       "price": 0.96,
+       "price": 0.961,
        "question": "Will the Democratic Party win the FL-10 House seat?",
        "volume": 15858.465441000004
       },
@@ -5377,7 +5377,7 @@
        "volume": 1202.88
       },
       {
-       "ask": 0.13,
+       "ask": 0.12,
        "bid": 0.11,
        "label": "James Pericola",
        "party": "d",
@@ -5433,7 +5433,7 @@
        "volume": 5921.5
       },
       {
-       "ask": 0.16,
+       "ask": 0.17,
        "bid": 0.11,
        "label": "Kimberly Overman",
        "party": "d",
@@ -5825,7 +5825,7 @@
        "volume": 130.46
       },
       {
-       "ask": 0.073,
+       "ask": 0.069,
        "bid": 0.045,
        "label": "Victor Arias",
        "party": "d",
@@ -5907,11 +5907,11 @@
        "volume": 19234.423659000007
       },
       {
-       "ask": 0.038,
-       "bid": 0.008,
+       "ask": 0.037,
+       "bid": 0.007,
        "label": "Brent Andersen (R)",
        "party": "r",
-       "price": 0.023,
+       "price": 0.022,
        "question": "Will the Republican Party win the FL-20 House seat?",
        "volume": 14951.678402000001
       }
@@ -6329,7 +6329,7 @@
        "volume": 2235.24
       },
       {
-       "ask": 0.091,
+       "ask": 0.085,
        "bid": 0.061,
        "label": "Phil Ehr",
        "party": "d",
@@ -6669,7 +6669,7 @@
      "outcomes": [
       {
        "ask": 0.975,
-       "bid": 0.943,
+       "bid": 0.945,
        "label": "Lucy McBath",
        "party": "d",
        "price": 0.975,
@@ -6677,8 +6677,8 @@
        "volume": 7306.0
       },
       {
-       "ask": 0.063,
-       "bid": 0.015,
+       "ask": 0.062,
+       "bid": 0.008,
        "label": "Kevin Martin",
        "party": "r",
        "price": 0.063,
@@ -6703,11 +6703,11 @@
        "volume": 6408.987717
       },
       {
-       "ask": 0.034,
-       "bid": 0.006,
+       "ask": 0.037,
+       "bid": 0.01,
        "label": "Kevin Martin (R)",
        "party": "r",
-       "price": 0.02,
+       "price": 0.0235,
        "question": "Will the Republican Party win the GA-06 House seat?",
        "volume": 17501.668811000003
       }
@@ -6789,7 +6789,7 @@
        "volume": 3921.37
       },
       {
-       "ask": 0.065,
+       "ask": 0.064,
        "bid": 0.043,
        "label": "Kelly Esti",
        "party": "d",
@@ -6845,8 +6845,8 @@
        "volume": 10322.0
       },
       {
-       "ask": 0.054,
-       "bid": 0.021,
+       "ask": 0.051,
+       "bid": 0.031,
        "conflict": false,
        "label": "Democratic party",
        "marketLabel": "Caitlyn Gegen",
@@ -6899,7 +6899,7 @@
      "outcomes": [
       {
        "ask": 0.965,
-       "bid": 0.918,
+       "bid": 0.926,
        "label": "Houston Gaines",
        "party": "r",
        "price": 0.953,
@@ -6907,7 +6907,7 @@
        "volume": 1287.0
       },
       {
-       "ask": 0.06,
+       "ask": 0.057,
        "bid": 0.052,
        "label": "Pamela DeLancy",
        "party": "d",
@@ -6980,11 +6980,11 @@
      "event": "ga-11-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.967,
+       "ask": 0.976,
        "bid": 0.962,
        "label": "John Cowan (R)",
        "party": "r",
-       "price": 0.9645,
+       "price": 0.969,
        "question": "Will the Republican Party win the GA-11 House seat?",
        "volume": 40889.821024000004
       },
@@ -7019,7 +7019,7 @@
        "volume": 8535.11
       },
       {
-       "ask": 0.095,
+       "ask": 0.092,
        "bid": 0.081,
        "label": "Ceretta Smith",
        "party": "d",
@@ -7067,7 +7067,7 @@
      "outcomes": [
       {
        "ask": 0.983,
-       "bid": 0.926,
+       "bid": 0.924,
        "label": "Jasmine Clark",
        "party": "d",
        "price": 0.98,
@@ -7272,11 +7272,11 @@
      "event": "hi-02-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.969,
+       "ask": 0.97,
        "bid": 0.95,
        "label": "Jill Tokuda (D)",
        "party": "d",
-       "price": 0.9595,
+       "price": 0.96,
        "question": "Will the Democratic Party win the HI-02 House seat?",
        "volume": 43902.223284
       },
@@ -7346,11 +7346,11 @@
        "volume": 26286.032341000006
       },
       {
-       "ask": 0.15,
+       "ask": 0.16,
        "bid": 0.14,
        "label": "Mariannette Miller-Meeks (R)",
        "party": "r",
-       "price": 0.145,
+       "price": 0.15,
        "question": "Will the Republican Party win the IA-01 House seat?",
        "volume": 13984.615153
       }
@@ -7433,7 +7433,7 @@
       },
       {
        "ask": 0.25,
-       "bid": 0.23,
+       "bid": 0.22,
        "label": "Zach Nunn",
        "party": "r",
        "price": 0.25,
@@ -7544,7 +7544,7 @@
        "volume": 297.02
       },
       {
-       "ask": 0.064,
+       "ask": 0.076,
        "bid": 0.011,
        "label": "Kaylee Peterson",
        "party": "d",
@@ -7600,7 +7600,7 @@
        "volume": 1861.0
       },
       {
-       "ask": 0.069,
+       "ask": 0.063,
        "bid": 0.04,
        "label": "Elinor Gilbreath",
        "party": "d",
@@ -7673,11 +7673,11 @@
      "event": "il-01-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.966,
+       "ask": 0.964,
        "bid": 0.94,
        "label": "Jonathan Jackson (D)",
        "party": "d",
-       "price": 0.953,
+       "price": 0.952,
        "question": "Will the Democratic Party win the IL-01 House seat?",
        "volume": 30235.623727999995
       },
@@ -7704,7 +7704,7 @@
      "outcomes": [
       {
        "ask": 0.985,
-       "bid": 0.927,
+       "bid": 0.926,
        "label": "Donna Miller",
        "party": "d",
        "price": 0.95,
@@ -7732,23 +7732,23 @@
      "event": "il-02-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.992,
-       "bid": 0.951,
+       "ask": 0.993,
+       "bid": 0.952,
        "label": "Donna Miller (D)",
        "party": "d",
-       "price": 0.9715,
+       "price": 0.9725,
        "question": "Will the Democratic Party win the IL-02 House seat?",
        "volume": 14456.876638
       },
       {
-       "ask": 0.051,
+       "ask": 0.049,
        "bid": 0.009,
        "conflict": false,
        "label": "Republican party",
        "marketLabel": "Michael Noack (R)",
        "mismatch": true,
        "party": "r",
-       "price": 0.03,
+       "price": 0.029,
        "question": "Will the Republican Party win the IL-02 House seat?",
        "volume": 19292.679090000005
       }
@@ -7871,23 +7871,23 @@
      "event": "il-04-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.978,
-       "bid": 0.946,
+       "ask": 0.979,
+       "bid": 0.947,
        "label": "Patty Garcia (D)",
        "party": "d",
-       "price": 0.962,
+       "price": 0.963,
        "question": "Will the Democratic Party win the IL-04 House seat?",
        "volume": 45551.17190699999
       },
       {
-       "ask": 0.057,
+       "ask": 0.055,
        "bid": 0.025,
        "conflict": false,
        "label": "Republican party",
        "marketLabel": "Lupe Castillo (R)",
        "mismatch": true,
        "party": "r",
-       "price": 0.041,
+       "price": 0.04,
        "question": "Will the Republican Party win the IL-04 House seat?",
        "volume": 16122.449942
       }
@@ -7969,8 +7969,8 @@
        "volume": 39.98
       },
       {
-       "ask": 0.05,
-       "bid": 0.007,
+       "ask": 0.033,
+       "bid": 0.008,
        "label": "Niki Conforti",
        "party": "r",
        "price": 0.053,
@@ -7987,10 +7987,10 @@
      "outcomes": [
       {
        "ask": 0.972,
-       "bid": 0.954,
+       "bid": 0.955,
        "label": "Sean Casten (D)",
        "party": "d",
-       "price": 0.963,
+       "price": 0.9635,
        "question": "Will the Democratic Party win the IL-06 House seat?",
        "volume": 20011.415488
       },
@@ -8073,7 +8073,7 @@
      "outcomes": [
       {
        "ask": 0.95,
-       "bid": 0.914,
+       "bid": 0.912,
        "label": "Melissa Bean",
        "party": "d",
        "price": 0.95,
@@ -8193,7 +8193,7 @@
        "volume": 2132.02
       },
       {
-       "ask": 0.053,
+       "ask": 0.059,
        "bid": 0.007,
        "conflict": false,
        "label": "Republican party",
@@ -8255,7 +8255,7 @@
        "volume": 64.9
       },
       {
-       "ask": 0.035,
+       "ask": 0.03,
        "bid": 0.005,
        "label": "Jeff Walter",
        "party": "r",
@@ -8367,7 +8367,7 @@
        "volume": 1363.0
       },
       {
-       "ask": 0.067,
+       "ask": 0.062,
        "bid": 0.015,
        "label": "Jeff Wilson",
        "party": "r",
@@ -8583,7 +8583,7 @@
      "outcomes": [
       {
        "ask": 0.979,
-       "bid": 0.951,
+       "bid": 0.959,
        "label": "Eric Sorensen",
        "party": "d",
        "price": 0.972,
@@ -8639,7 +8639,7 @@
      "outcomes": [
       {
        "ask": 0.971,
-       "bid": 0.929,
+       "bid": 0.935,
        "label": "Frank Mrvan",
        "party": "d",
        "price": 0.922,
@@ -8750,7 +8750,7 @@
      "event": "KXHOUSERACE-IN03-26",
      "outcomes": [
       {
-       "ask": 0.966,
+       "ask": 0.962,
        "bid": 0.925,
        "label": "Marlin Stutzman",
        "party": "r",
@@ -9003,11 +9003,11 @@
      "event": "in-07-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.991,
+       "ask": 0.988,
        "bid": 0.947,
        "label": "André Carson (D)",
        "party": "d",
-       "price": 0.969,
+       "price": 0.9675,
        "question": "Will the Democratic Party win the IN-07 House seat?",
        "volume": 7947.259561999999
       },
@@ -9093,7 +9093,7 @@
      "outcomes": [
       {
        "ask": 0.938,
-       "bid": 0.917,
+       "bid": 0.92,
        "label": "Erin Houchin",
        "party": "r",
        "price": 0.94,
@@ -9101,7 +9101,7 @@
        "volume": 5256.44
       },
       {
-       "ask": 0.077,
+       "ask": 0.079,
        "bid": 0.049,
        "label": "Brad Meyer",
        "party": "d",
@@ -9127,11 +9127,11 @@
        "volume": 15222.513512000001
       },
       {
-       "ask": 0.066,
+       "ask": 0.064,
        "bid": 0.059,
        "label": "Brad Meyer (D)",
        "party": "d",
-       "price": 0.0625,
+       "price": 0.0615,
        "question": "Will the Democratic Party win the IN-09 House seat?",
        "volume": 16576.841641999996
       }
@@ -9438,7 +9438,7 @@
       },
       {
        "ask": 0.054,
-       "bid": 0.016,
+       "bid": 0.017,
        "label": "Megan Wingfield",
        "party": "d",
        "price": 0.059,
@@ -9510,11 +9510,11 @@
      "event": "ky-03-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.978,
+       "ask": 0.977,
        "bid": 0.943,
        "label": "Morgan McGarvey (D)",
        "party": "d",
-       "price": 0.9605,
+       "price": 0.96,
        "question": "Will the Democratic Party win the KY-03 House seat?",
        "volume": 17843.377852999998
       },
@@ -9605,7 +9605,7 @@
        "volume": 15.0
       },
       {
-       "ask": 0.036,
+       "ask": 0.034,
        "bid": 0.013,
        "label": "Ned Pillersdorf",
        "party": "d",
@@ -9821,7 +9821,7 @@
      "outcomes": [
       {
        "ask": 0.978,
-       "bid": 0.927,
+       "bid": 0.934,
        "label": "Republican party",
        "party": "r",
        "price": 0.979,
@@ -9856,10 +9856,10 @@
       },
       {
        "ask": 0.05,
-       "bid": 0.016,
+       "bid": 0.018,
        "label": "Democratic Party",
        "party": "d",
-       "price": 0.033,
+       "price": 0.034,
        "question": "Will the Democratic Party win the LA-03 House seat?",
        "volume": 11841.958886
       }
@@ -9876,8 +9876,8 @@
      "event": "KXHOUSERACE-LA04-26",
      "outcomes": [
       {
-       "ask": 0.978,
-       "bid": 0.92,
+       "ask": 0.96,
+       "bid": 0.921,
        "label": "Republican party",
        "party": "r",
        "price": 0.954,
@@ -9885,7 +9885,7 @@
        "volume": 1696.18
       },
       {
-       "ask": 0.076,
+       "ask": 0.072,
        "bid": 0.022,
        "label": "Democratic party",
        "party": "d",
@@ -9911,11 +9911,11 @@
        "volume": 3692.0833420000004
       },
       {
-       "ask": 0.07,
-       "bid": 0.028,
+       "ask": 0.071,
+       "bid": 0.03,
        "label": "Democratic Party",
        "party": "d",
-       "price": 0.049,
+       "price": 0.0505,
        "question": "Will the Democratic Party win the LA-04 House seat?",
        "volume": 14396.592800999997
       }
@@ -9941,7 +9941,7 @@
        "volume": 14037.0
       },
       {
-       "ask": 0.066,
+       "ask": 0.086,
        "bid": 0.041,
        "label": "Democratic party",
        "party": "d",
@@ -10080,10 +10080,10 @@
       },
       {
        "ask": 0.049,
-       "bid": 0.021,
+       "bid": 0.019,
        "label": "Republican Party",
        "party": "r",
-       "price": 0.035,
+       "price": 0.034,
        "question": "Will the Republican Party win the MA-01 House seat?",
        "volume": 43522.121163
       }
@@ -10182,8 +10182,8 @@
      "event": "ma-03-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.974,
-       "bid": 0.931,
+       "ask": 0.972,
+       "bid": 0.933,
        "label": "Lori Trahan (D)",
        "party": "d",
        "price": 0.9525,
@@ -10191,11 +10191,11 @@
        "volume": 11842.696021000002
       },
       {
-       "ask": 0.031,
+       "ask": 0.032,
        "bid": 0.009,
        "label": "Gary Grossi (R)",
        "party": "r",
-       "price": 0.02,
+       "price": 0.021,
        "question": "Will the Republican Party win the MA-03 House seat?",
        "volume": 11475.46156
       }
@@ -10212,7 +10212,7 @@
      "event": "KXHOUSERACE-MA04-26",
      "outcomes": [
       {
-       "ask": 0.983,
+       "ask": 0.985,
        "bid": 0.969,
        "label": "Jake Auchincloss",
        "party": "d",
@@ -10295,19 +10295,19 @@
      "outcomes": [
       {
        "ask": 0.975,
-       "bid": 0.962,
+       "bid": 0.963,
        "label": "Katherine Clark (D)",
        "party": "d",
-       "price": 0.9685,
+       "price": 0.969,
        "question": "Will the Democratic Party win the MA-05 House seat?",
        "volume": 26806.152253999997
       },
       {
-       "ask": 0.024,
+       "ask": 0.023,
        "bid": 0.021,
        "label": "Republican Party",
        "party": "r",
-       "price": 0.0225,
+       "price": 0.022,
        "question": "Will the Republican Party win the MA-05 House seat?",
        "volume": 10531.118296
       }
@@ -10381,7 +10381,7 @@
      "outcomes": [
       {
        "ask": 0.998,
-       "bid": 0.959,
+       "bid": 0.957,
        "label": "Ayanna Pressley",
        "party": "d",
        "price": 0.99,
@@ -10406,11 +10406,11 @@
      "event": "ma-07-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.992,
-       "bid": 0.963,
+       "ask": 0.991,
+       "bid": 0.969,
        "label": "Ayanna Pressley (D)",
        "party": "d",
-       "price": 0.9775,
+       "price": 0.98,
        "question": "Will the Democratic Party win the MA-07 House seat?",
        "volume": 16991.940899
       },
@@ -10445,7 +10445,7 @@
        "volume": 406.53
       },
       {
-       "ask": 0.046,
+       "ask": 0.045,
        "bid": 0.003,
        "conflict": false,
        "label": "Republican party",
@@ -10474,14 +10474,14 @@
        "volume": 14597.879152
       },
       {
-       "ask": 0.029,
+       "ask": 0.028,
        "bid": 0.005,
        "conflict": false,
        "label": "Republican party",
        "marketLabel": "Robert Burke (R)",
        "mismatch": true,
        "party": "r",
-       "price": 0.017,
+       "price": 0.0165,
        "question": "Will the Republican Party win the MA-08 House seat?",
        "volume": 13260.507809
       }
@@ -10498,8 +10498,8 @@
      "event": "KXHOUSERACE-MA09-26",
      "outcomes": [
       {
-       "ask": 0.978,
-       "bid": 0.953,
+       "ask": 0.977,
+       "bid": 0.95,
        "label": "Bill Keating",
        "party": "d",
        "price": 0.94,
@@ -10534,10 +10534,10 @@
       },
       {
        "ask": 0.033,
-       "bid": 0.02,
+       "bid": 0.016,
        "label": "Tyler MacAllister (R)",
        "party": "r",
-       "price": 0.0265,
+       "price": 0.0245,
        "question": "Will the Republican Party win the MA-09 House seat?",
        "volume": 17371.207498000003
       }
@@ -10816,14 +10816,14 @@
        "volume": 14680.130087
       },
       {
-       "ask": 0.04,
+       "ask": 0.039,
        "bid": 0.017,
        "conflict": false,
        "label": "Republican party",
        "marketLabel": "Chris Chaffee (R)",
        "mismatch": true,
        "party": "r",
-       "price": 0.0285,
+       "price": 0.028,
        "question": "Will the Republican Party win the MD-05 House seat?",
        "volume": 9579.444830999999
       }
@@ -10984,20 +10984,20 @@
      "event": "md-08-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.986,
+       "ask": 0.984,
        "bid": 0.955,
        "label": "Jamie Raskin (D)",
        "party": "d",
-       "price": 0.9705,
+       "price": 0.9695,
        "question": "Will the Democratic Party win the MD-08 House seat?",
        "volume": 19485.749309
       },
       {
        "ask": 0.044,
-       "bid": 0.009,
+       "bid": 0.011,
        "label": "Cheryl Riley (R)",
        "party": "r",
-       "price": 0.0265,
+       "price": 0.0275,
        "question": "Will the Republican Party win the MD-08 House seat?",
        "volume": 8536.75775
       }
@@ -11049,11 +11049,11 @@
        "volume": 32842.35935400001
       },
       {
-       "ask": 0.059,
+       "ask": 0.056,
        "bid": 0.017,
        "label": "Ronald Russell (R)",
        "party": "r",
-       "price": 0.038,
+       "price": 0.0365,
        "question": "Will the Republican Party win the ME-01 House seat?",
        "volume": 14915.455881999998
       }
@@ -11359,7 +11359,7 @@
        "volume": 3080.99
       },
       {
-       "ask": 0.093,
+       "ask": 0.082,
        "bid": 0.063,
        "label": "Christian Vukasovich",
        "party": "d",
@@ -11435,11 +11435,11 @@
      "event": "mi-06-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.984,
-       "bid": 0.955,
+       "ask": 0.986,
+       "bid": 0.956,
        "label": "Debbie Dingell (D)",
        "party": "d",
-       "price": 0.9695,
+       "price": 0.971,
        "question": "Will the Democratic Party win the MI-06 House seat?",
        "volume": 25944.589397
       },
@@ -11581,7 +11581,7 @@
      "outcomes": [
       {
        "ask": 0.977,
-       "bid": 0.924,
+       "bid": 0.925,
        "label": "Lisa McClain",
        "party": "r",
        "price": 0.945,
@@ -11606,20 +11606,20 @@
      "event": "mi-09-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.971,
-       "bid": 0.953,
+       "ask": 0.974,
+       "bid": 0.954,
        "label": "Lisa McClain (R)",
        "party": "r",
-       "price": 0.962,
+       "price": 0.964,
        "question": "Will the Republican Party win the MI-09 House seat?",
        "volume": 27241.127478000006
       },
       {
-       "ask": 0.05,
+       "ask": 0.052,
        "bid": 0.03,
        "label": "Ray Pooley (D)",
        "party": "d",
-       "price": 0.04,
+       "price": 0.041,
        "question": "Will the Democratic Party win the MI-09 House seat?",
        "volume": 10419.943903000001
       }
@@ -11719,10 +11719,10 @@
      "outcomes": [
       {
        "ask": 0.965,
-       "bid": 0.937,
+       "bid": 0.939,
        "label": "Jeremy Moss (D)",
        "party": "d",
-       "price": 0.951,
+       "price": 0.952,
        "question": "Will the Democratic Party win the MI-11 House seat?",
        "volume": 58923.875662
       },
@@ -11985,7 +11985,7 @@
      "outcomes": [
       {
        "ask": 0.982,
-       "bid": 0.945,
+       "bid": 0.946,
        "label": "Kelly Morrison",
        "party": "d",
        "price": 0.99,
@@ -12519,7 +12519,7 @@
       },
       {
        "ask": 0.066,
-       "bid": 0.04,
+       "bid": 0.038,
        "label": "Democratic party",
        "party": "d",
        "price": 0.041,
@@ -12575,7 +12575,7 @@
       },
       {
        "ask": 0.048,
-       "bid": 0.023,
+       "bid": 0.027,
        "label": "Republican party",
        "party": "r",
        "price": 0.039,
@@ -12769,10 +12769,10 @@
       },
       {
        "ask": 0.038,
-       "bid": 0.01,
+       "bid": 0.008,
        "label": "Chris Reichard (D)",
        "party": "d",
-       "price": 0.024,
+       "price": 0.023,
        "question": "Will the Democratic Party win the MO-08 House seat?",
        "volume": 18552.963008
       }
@@ -12910,7 +12910,7 @@
        "volume": 1067.0
       },
       {
-       "ask": 0.04,
+       "ask": 0.029,
        "bid": 0.004,
        "label": "Michael Chiaradio",
        "party": "d",
@@ -13182,7 +13182,7 @@
      "outcomes": [
       {
        "ask": 0.995,
-       "bid": 0.961,
+       "bid": 0.977,
        "label": "Deborah Ross",
        "party": "d",
        "price": 0.967,
@@ -13589,7 +13589,7 @@
       },
       {
        "ask": 0.25,
-       "bid": 0.19,
+       "bid": 0.2,
        "label": "Richard Ojeda",
        "party": "d",
        "price": 0.24,
@@ -13635,7 +13635,7 @@
      "event": "KXHOUSERACE-NC10-26",
      "outcomes": [
       {
-       "ask": 0.958,
+       "ask": 0.959,
        "bid": 0.937,
        "label": "Pat Harrigan",
        "party": "r",
@@ -13644,8 +13644,8 @@
        "volume": 1705.84
       },
       {
-       "ask": 0.078,
-       "bid": 0.037,
+       "ask": 0.068,
+       "bid": 0.038,
        "label": "Ashley Bell",
        "party": "d",
        "price": 0.079,
@@ -13865,7 +13865,7 @@
      "event": "KXHOUSERACE-NC14-26",
      "outcomes": [
       {
-       "ask": 0.9,
+       "ask": 0.89,
        "bid": 0.87,
        "label": "Tim Moore",
        "party": "r",
@@ -13986,7 +13986,7 @@
        "volume": 9622.42
       },
       {
-       "ask": 0.19,
+       "ask": 0.17,
        "bid": 0.15,
        "label": "Chris Backemeyer",
        "party": "d",
@@ -14081,10 +14081,10 @@
       },
       {
        "ask": 0.087,
-       "bid": 0.081,
+       "bid": 0.08,
        "label": "Brinker Harding (R)",
        "party": "r",
-       "price": 0.084,
+       "price": 0.0835,
        "question": "Will the Republican Party win the NE-02 House seat?",
        "volume": 8601.492339999995
       }
@@ -14128,10 +14128,10 @@
      "outcomes": [
       {
        "ask": 0.972,
-       "bid": 0.956,
+       "bid": 0.957,
        "label": "Adrian Smith (R)",
        "party": "r",
-       "price": 0.964,
+       "price": 0.9645,
        "question": "Will the Republican Party win the NE-03 House seat?",
        "volume": 10420.835169
       },
@@ -14213,7 +14213,7 @@
      "event": "KXHOUSERACE-NH02-26",
      "outcomes": [
       {
-       "ask": 0.941,
+       "ask": 0.942,
        "bid": 0.93,
        "label": "Maggie Goodlander",
        "party": "d",
@@ -14222,7 +14222,7 @@
        "volume": 6053.84
       },
       {
-       "ask": 0.088,
+       "ask": 0.084,
        "bid": 0.051,
        "label": "Lily Tang Williams",
        "party": "r",
@@ -14249,10 +14249,10 @@
       },
       {
        "ask": 0.055,
-       "bid": 0.038,
+       "bid": 0.035,
        "label": "Lily Tang Williams (R)",
        "party": "r",
-       "price": 0.0465,
+       "price": 0.045,
        "question": "Will the Republican Party win the NH-02 House seat?",
        "volume": 10881.83892
       }
@@ -14473,10 +14473,10 @@
       },
       {
        "ask": 0.048,
-       "bid": 0.02,
+       "bid": 0.016,
        "label": "Rachel Peace (D)",
        "party": "d",
-       "price": 0.034,
+       "price": 0.032,
        "question": "Will the Democratic Party win the NJ-04 House seat?",
        "volume": 13222.869802000001
       }
@@ -14550,7 +14550,7 @@
      "outcomes": [
       {
        "ask": 0.979,
-       "bid": 0.929,
+       "bid": 0.932,
        "label": "Frank Pallone",
        "party": "d",
        "price": 0.923,
@@ -14558,7 +14558,7 @@
        "volume": 383.96
       },
       {
-       "ask": 0.059,
+       "ask": 0.067,
        "bid": 0.02,
        "label": "Hillary Herzig",
        "party": "r",
@@ -14584,11 +14584,11 @@
        "volume": 14181.411892999999
       },
       {
-       "ask": 0.03,
+       "ask": 0.031,
        "bid": 0.017,
        "label": "Hillary Herzig (R)",
        "party": "r",
-       "price": 0.0235,
+       "price": 0.024,
        "question": "Will the Republican Party win the NJ-06 House seat?",
        "volume": 20041.754599999997
       }
@@ -14774,7 +14774,7 @@
      "outcomes": [
       {
        "ask": 0.997,
-       "bid": 0.936,
+       "bid": 0.951,
        "label": "LaMonica McIver",
        "party": "d",
        "price": 0.963,
@@ -14802,11 +14802,11 @@
      "event": "nj-10-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.994,
+       "ask": 0.991,
        "bid": 0.971,
        "label": "LaMonica McIver (D)",
        "party": "d",
-       "price": 0.9825,
+       "price": 0.981,
        "question": "Will the Democratic Party win the NJ-10 House seat?",
        "volume": 18693.563872000002
       },
@@ -14900,7 +14900,7 @@
        "volume": 8453.08
       },
       {
-       "ask": 0.065,
+       "ask": 0.064,
        "bid": 0.02,
        "label": "Gregg Mele",
        "party": "r",
@@ -14917,20 +14917,20 @@
      "event": "nj-12-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.984,
+       "ask": 0.982,
        "bid": 0.961,
        "label": "Adam Hamawy (D)",
        "party": "d",
-       "price": 0.9725,
+       "price": 0.9715,
        "question": "Will the Democratic Party win the NJ-12 House seat?",
        "volume": 20673.036279
       },
       {
        "ask": 0.04,
-       "bid": 0.018,
+       "bid": 0.019,
        "label": "Gregg Mele (R)",
        "party": "r",
-       "price": 0.029,
+       "price": 0.0295,
        "question": "Will the Republican Party win the NJ-12 House seat?",
        "volume": 8894.883356
       }
@@ -14976,11 +14976,11 @@
      "event": "nm-01-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.974,
+       "ask": 0.976,
        "bid": 0.943,
        "label": "Melanie Stansbury (D)",
        "party": "d",
-       "price": 0.9585,
+       "price": 0.9595,
        "question": "Will the Democratic Party win the NM-01 House seat?",
        "volume": 21457.495382
       },
@@ -15092,10 +15092,10 @@
      "outcomes": [
       {
        "ask": 0.976,
-       "bid": 0.968,
+       "bid": 0.969,
        "label": "Teresa Leger Fernández (D)",
        "party": "d",
-       "price": 0.972,
+       "price": 0.9725,
        "question": "Will the Democratic Party win the NM-03 House seat?",
        "volume": 23654.895770999996
       },
@@ -15157,10 +15157,10 @@
       },
       {
        "ask": 0.059,
-       "bid": 0.033,
+       "bid": 0.03,
        "label": "Carrie Buck (R)",
        "party": "r",
-       "price": 0.046,
+       "price": 0.045,
        "question": "Will the Republican Party win the NV-01 House seat?",
        "volume": 16646.395453
       }
@@ -15522,7 +15522,7 @@
        "volume": 13998.84
       },
       {
-       "ask": 0.1,
+       "ask": 0.11,
        "bid": 0.093,
        "label": "Jeanine Driscoll",
        "party": "r",
@@ -15660,11 +15660,11 @@
      "event": "ny-06-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.988,
+       "ask": 0.992,
        "bid": 0.947,
        "label": "Grace Meng (D)",
        "party": "d",
-       "price": 0.9675,
+       "price": 0.9695,
        "question": "Will the Democratic Party win the NY-06 House seat?",
        "volume": 10654.415637
       },
@@ -15702,7 +15702,7 @@
        "volume": 3.0
       },
       {
-       "ask": 0.029,
+       "ask": 0.047,
        "bid": 0.004,
        "conflict": false,
        "label": "Republican party",
@@ -15723,10 +15723,10 @@
      "outcomes": [
       {
        "ask": 0.98,
-       "bid": 0.956,
+       "bid": 0.958,
        "label": "Claire Valdez (D)",
        "party": "d",
-       "price": 0.968,
+       "price": 0.969,
        "question": "Will the Democratic Party win the NY-07 House seat?",
        "volume": 15682.094168
       },
@@ -15784,11 +15784,11 @@
      "event": "ny-08-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.976,
+       "ask": 0.988,
        "bid": 0.949,
        "label": "Hakeem Jeffries (D)",
        "party": "d",
-       "price": 0.9625,
+       "price": 0.9685,
        "question": "Will the Democratic Party win the NY-08 House seat?",
        "volume": 14127.873192
       },
@@ -15826,7 +15826,7 @@
        "volume": 3021.57
       },
       {
-       "ask": 0.045,
+       "ask": 0.039,
        "bid": 0.005,
        "conflict": false,
        "label": "Republican party",
@@ -15888,7 +15888,7 @@
        "volume": 573.74
       },
       {
-       "ask": 0.04,
+       "ask": 0.037,
        "bid": 0.003,
        "conflict": false,
        "label": "Republican party",
@@ -16006,7 +16006,7 @@
        "volume": 31.06
       },
       {
-       "ask": 0.046,
+       "ask": 0.04,
        "bid": 0.002,
        "label": "Caroline Shinkle",
        "party": "r",
@@ -16124,7 +16124,7 @@
        "volume": 406.24
       },
       {
-       "ask": 0.046,
+       "ask": 0.045,
        "bid": 0.016,
        "label": "Diamant Hysenaj",
        "party": "r",
@@ -16180,7 +16180,7 @@
        "volume": 251.93
       },
       {
-       "ask": 0.023,
+       "ask": 0.047,
        "bid": 0.01,
        "conflict": false,
        "label": "Republican party",
@@ -16242,7 +16242,7 @@
        "volume": 531.38
       },
       {
-       "ask": 0.065,
+       "ask": 0.064,
        "bid": 0.005,
        "conflict": false,
        "label": "Republican party",
@@ -16272,13 +16272,13 @@
       },
       {
        "ask": 0.058,
-       "bid": 0.009,
+       "bid": 0.011,
        "conflict": false,
        "label": "Republican party",
        "marketLabel": "Joseph Cinquemani (R)",
        "mismatch": true,
        "party": "r",
-       "price": 0.0335,
+       "price": 0.0345,
        "question": "Will the Republican Party win the NY-16 House seat?",
        "volume": 10601.609999999999
       }
@@ -16416,7 +16416,7 @@
        "volume": 7910.27
       },
       {
-       "ask": 0.019,
+       "ask": 0.018,
        "bid": 0.011,
        "label": "Peter Oberacker",
        "party": "r",
@@ -16464,7 +16464,7 @@
      "outcomes": [
       {
        "ask": 0.979,
-       "bid": 0.943,
+       "bid": 0.944,
        "label": "Paul Tonko",
        "party": "d",
        "price": 0.973,
@@ -16585,7 +16585,7 @@
       },
       {
        "ask": 0.052,
-       "bid": 0.042,
+       "bid": 0.038,
        "label": "Kailee Buller",
        "party": "r",
        "price": 0.05,
@@ -16779,10 +16779,10 @@
       },
       {
        "ask": 0.032,
-       "bid": 0.013,
+       "bid": 0.012,
        "label": "Virginia McIntyre (R)",
        "party": "r",
-       "price": 0.0225,
+       "price": 0.022,
        "question": "Will the Republican Party win the NY-25 House seat?",
        "volume": 10882.363471
       }
@@ -16808,7 +16808,7 @@
        "volume": 410.5
       },
       {
-       "ask": 0.051,
+       "ask": 0.058,
        "bid": 0.006,
        "conflict": false,
        "label": "Republican party",
@@ -16946,11 +16946,11 @@
      "event": "oh-02-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.993,
+       "ask": 0.982,
        "bid": 0.968,
        "label": "David Taylor (R)",
        "party": "r",
-       "price": 0.9805,
+       "price": 0.975,
        "question": "Will the Republican Party win the OH-02 House seat?",
        "volume": 19896.823179
       },
@@ -17446,7 +17446,7 @@
      "outcomes": [
       {
        "ask": 0.993,
-       "bid": 0.958,
+       "bid": 0.946,
        "label": "Shontel Brown",
        "party": "d",
        "price": 0.957,
@@ -17454,7 +17454,7 @@
        "volume": 80.04
       },
       {
-       "ask": 0.052,
+       "ask": 0.037,
        "bid": 0.008,
        "conflict": false,
        "label": "Republican party",
@@ -17474,11 +17474,11 @@
      "event": "oh-11-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.997,
-       "bid": 0.968,
+       "ask": 0.996,
+       "bid": 0.965,
        "label": "Shontel Brown (D)",
        "party": "d",
-       "price": 0.9825,
+       "price": 0.9805,
        "question": "Will the Democratic Party win the OH-11 House seat?",
        "volume": 15628.622429
       },
@@ -17516,7 +17516,7 @@
        "volume": 4452.4
       },
       {
-       "ask": 0.068,
+       "ask": 0.067,
        "bid": 0.048,
        "label": "Jerrad Christian",
        "party": "d",
@@ -17589,11 +17589,11 @@
      "event": "oh-13-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.972,
-       "bid": 0.948,
+       "ask": 0.974,
+       "bid": 0.947,
        "label": "Emilia Sykes (D)",
        "party": "d",
-       "price": 0.96,
+       "price": 0.9605,
        "question": "Will the Democratic Party win the OH-13 House seat?",
        "volume": 10893.741956
       },
@@ -17628,7 +17628,7 @@
        "volume": 3555.05
       },
       {
-       "ask": 0.067,
+       "ask": 0.072,
        "bid": 0.032,
        "label": "Maria Jukic",
        "party": "d",
@@ -17655,10 +17655,10 @@
       },
       {
        "ask": 0.055,
-       "bid": 0.028,
+       "bid": 0.029,
        "label": "Maria Jukic (D)",
        "party": "d",
-       "price": 0.0415,
+       "price": 0.042,
        "question": "Will the Democratic Party win the OH-14 House seat?",
        "volume": 18168.621448
       }
@@ -17740,7 +17740,7 @@
        "volume": 2497.3
       },
       {
-       "ask": 0.08,
+       "ask": 0.063,
        "bid": 0.039,
        "label": "John Croisant",
        "party": "d",
@@ -18053,10 +18053,10 @@
      "outcomes": [
       {
        "ask": 0.984,
-       "bid": 0.941,
+       "bid": 0.958,
        "label": "Suzanne Bonamici (D)",
        "party": "d",
-       "price": 0.9625,
+       "price": 0.971,
        "question": "Will the Democratic Party win the OR-01 House seat?",
        "volume": 10565.669701
       },
@@ -18141,7 +18141,7 @@
      "event": "KXHOUSERACE-OR03-26",
      "outcomes": [
       {
-       "ask": 0.987,
+       "ask": 0.984,
        "bid": 0.938,
        "label": "Maxine Dexter",
        "party": "d",
@@ -18516,10 +18516,10 @@
      "outcomes": [
       {
        "ask": 0.98,
-       "bid": 0.958,
+       "bid": 0.95,
        "label": "Chris Rabb (D)",
        "party": "d",
-       "price": 0.969,
+       "price": 0.965,
        "question": "Will the Democratic Party win the PA-03 House seat?",
        "volume": 19731.345456000006
       },
@@ -18663,7 +18663,7 @@
      "event": "KXHOUSERACE-PA06-26",
      "outcomes": [
       {
-       "ask": 0.991,
+       "ask": 0.989,
        "bid": 0.944,
        "label": "Chrissy Houlahan",
        "party": "d",
@@ -18673,7 +18673,7 @@
       },
       {
        "ask": 0.055,
-       "bid": 0.009,
+       "bid": 0.01,
        "label": "Marty Young",
        "party": "r",
        "price": 0.043,
@@ -18689,20 +18689,20 @@
      "event": "pa-06-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.986,
-       "bid": 0.933,
+       "ask": 0.977,
+       "bid": 0.946,
        "label": "Chrissy Houlahan (D)",
        "party": "d",
-       "price": 0.9595,
+       "price": 0.9615,
        "question": "Will the Democratic Party win the PA-06 House seat?",
        "volume": 13328.238675
       },
       {
        "ask": 0.04,
-       "bid": 0.011,
+       "bid": 0.014,
        "label": "Marty Young (R)",
        "party": "r",
-       "price": 0.0255,
+       "price": 0.027,
        "question": "Will the Republican Party win the PA-06 House seat?",
        "volume": 25212.15463200001
       }
@@ -18858,19 +18858,19 @@
      "outcomes": [
       {
        "ask": 0.98,
-       "bid": 0.947,
+       "bid": 0.943,
        "label": "Dan Meuser (R)",
        "party": "r",
-       "price": 0.9635,
+       "price": 0.9615,
        "question": "Will the Republican Party win the PA-09 House seat?",
        "volume": 14412.447825000001
       },
       {
-       "ask": 0.049,
-       "bid": 0.018,
+       "ask": 0.05,
+       "bid": 0.019,
        "label": "Rachel Wallace (D)",
        "party": "d",
-       "price": 0.0335,
+       "price": 0.0345,
        "question": "Will the Democratic Party win the PA-09 House seat?",
        "volume": 7843.260208000001
       }
@@ -18944,7 +18944,7 @@
      "outcomes": [
       {
        "ask": 0.959,
-       "bid": 0.926,
+       "bid": 0.913,
        "label": "Lloyd Smucker",
        "party": "r",
        "price": 0.94,
@@ -18970,10 +18970,10 @@
      "outcomes": [
       {
        "ask": 0.952,
-       "bid": 0.936,
+       "bid": 0.937,
        "label": "Lloyd Smucker (R)",
        "party": "r",
-       "price": 0.944,
+       "price": 0.9445,
        "question": "Will the Republican Party win the PA-11 House seat?",
        "volume": 16985.347436
       },
@@ -19008,7 +19008,7 @@
        "volume": 57788.34
       },
       {
-       "ask": 0.053,
+       "ask": 0.042,
        "bid": 0.003,
        "label": "James Hayes",
        "party": "r",
@@ -19034,11 +19034,11 @@
        "volume": 18899.077801
       },
       {
-       "ask": 0.048,
+       "ask": 0.047,
        "bid": 0.008,
        "label": "James Hayes (R)",
        "party": "r",
-       "price": 0.028,
+       "price": 0.0275,
        "question": "Will the Republican Party win the PA-12 House seat?",
        "volume": 5352.2999230000005
       }
@@ -19081,11 +19081,11 @@
      "event": "pa-13-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.983,
+       "ask": 0.984,
        "bid": 0.941,
        "label": "John Joyce (R)",
        "party": "r",
-       "price": 0.962,
+       "price": 0.9625,
        "question": "Will the Republican Party win the PA-13 House seat?",
        "volume": 9921.622171
       },
@@ -19120,7 +19120,7 @@
        "volume": 431.61
       },
       {
-       "ask": 0.047,
+       "ask": 0.035,
        "bid": 0.009,
        "label": "Alan Bradstock",
        "party": "d",
@@ -19193,11 +19193,11 @@
      "event": "pa-15-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.964,
+       "ask": 0.966,
        "bid": 0.95,
        "label": "Glenn Thompson (R)",
        "party": "r",
-       "price": 0.957,
+       "price": 0.958,
        "question": "Will the Republican Party win the PA-15 House seat?",
        "volume": 9601.475686000002
       },
@@ -19232,7 +19232,7 @@
        "volume": 3430.3
       },
       {
-       "ask": 0.089,
+       "ask": 0.087,
        "bid": 0.059,
        "label": "Justin Wagner",
        "party": "d",
@@ -19315,10 +19315,10 @@
       },
       {
        "ask": 0.042,
-       "bid": 0.014,
+       "bid": 0.017,
        "label": "Tony Guy (R)",
        "party": "r",
-       "price": 0.028,
+       "price": 0.0295,
        "question": "Will the Republican Party win the PA-17 House seat?",
        "volume": 17360.162091
       }
@@ -19401,7 +19401,7 @@
       },
       {
        "ask": 0.041,
-       "bid": 0.012,
+       "bid": 0.01,
        "label": "Victor Mellor",
        "party": "r",
        "price": 0.041,
@@ -19790,7 +19790,7 @@
      "outcomes": [
       {
        "ask": 0.949,
-       "bid": 0.909,
+       "bid": 0.902,
        "label": "Russell Fry",
        "party": "r",
        "price": 0.937,
@@ -19798,7 +19798,7 @@
        "volume": 15391.6
       },
       {
-       "ask": 0.089,
+       "ask": 0.079,
        "bid": 0.052,
        "label": "John Vincent",
        "party": "d",
@@ -20079,7 +20079,7 @@
       },
       {
        "ask": 0.035,
-       "bid": 0.012,
+       "bid": 0.01,
        "label": "Victoria Broderick",
        "party": "d",
        "price": 0.041,
@@ -20104,11 +20104,11 @@
        "volume": 39196.24956800001
       },
       {
-       "ask": 0.026,
+       "ask": 0.029,
        "bid": 0.002,
        "label": "Victoria Broderick (D)",
        "party": "d",
-       "price": 0.014,
+       "price": 0.0155,
        "question": "Will the Democratic Party win the TN-04 House seat?",
        "volume": 44311.201921999986
       }
@@ -20134,7 +20134,7 @@
        "volume": 11401.29
       },
       {
-       "ask": 0.11,
+       "ask": 0.1,
        "bid": 0.072,
        "label": "Chaz Molder",
        "party": "d",
@@ -20329,10 +20329,10 @@
       },
       {
        "ask": 0.04,
-       "bid": 0.026,
+       "bid": 0.018,
        "label": "Heidi Kuhn (D)",
        "party": "d",
-       "price": 0.033,
+       "price": 0.029,
        "question": "Will the Democratic Party win the TN-08 House seat?",
        "volume": 20914.644996
       }
@@ -20432,10 +20432,10 @@
      "outcomes": [
       {
        "ask": 0.97,
-       "bid": 0.943,
+       "bid": 0.946,
        "label": "Nathaniel Moran (R)",
        "party": "r",
-       "price": 0.9565,
+       "price": 0.958,
        "question": "Will the Republican Party win the TX-01 House seat?",
        "volume": 5321.249032
       },
@@ -20462,7 +20462,7 @@
      "outcomes": [
       {
        "ask": 0.945,
-       "bid": 0.9,
+       "bid": 0.902,
        "label": "Steve Toth",
        "party": "r",
        "price": 0.949,
@@ -20552,11 +20552,11 @@
        "volume": 26826.138033999996
       },
       {
-       "ask": 0.056,
+       "ask": 0.058,
        "bid": 0.02,
        "label": "Evan Hunt (D)",
        "party": "d",
-       "price": 0.038,
+       "price": 0.039,
        "question": "Will the Democratic Party win the TX-03 House seat?",
        "volume": 14717.817657999998
       }
@@ -20655,11 +20655,11 @@
      "event": "tx-05-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.986,
-       "bid": 0.956,
+       "ask": 0.989,
+       "bid": 0.958,
        "label": "Lance Gooden (R)",
        "party": "r",
-       "price": 0.971,
+       "price": 0.9735,
        "question": "Will the Republican Party win the TX-05 House seat?",
        "volume": 17083.009302
       },
@@ -20832,11 +20832,11 @@
        "volume": 9364.769788
       },
       {
-       "ask": 0.043,
+       "ask": 0.042,
        "bid": 0.011,
        "label": "Laura Jones (D)",
        "party": "d",
-       "price": 0.027,
+       "price": 0.0265,
        "question": "Will the Democratic Party win the TX-08 House seat?",
        "volume": 17505.427514000003
       }
@@ -20991,11 +20991,11 @@
      "event": "tx-11-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.971,
+       "ask": 0.972,
        "bid": 0.941,
        "label": "August Pfluger (R)",
        "party": "r",
-       "price": 0.956,
+       "price": 0.9565,
        "question": "Will the Republican Party win the TX-11 House seat?",
        "volume": 9700.45993
       },
@@ -21030,7 +21030,7 @@
        "volume": 1545.08
       },
       {
-       "ask": 0.084,
+       "ask": 0.085,
        "bid": 0.037,
        "conflict": false,
        "label": "Democratic party",
@@ -21205,7 +21205,7 @@
       },
       {
        "ask": 0.21,
-       "bid": 0.19,
+       "bid": 0.2,
        "label": "Monica De La Cruz",
        "party": "r",
        "price": 0.21,
@@ -21281,10 +21281,10 @@
      "outcomes": [
       {
        "ask": 0.979,
-       "bid": 0.967,
+       "bid": 0.966,
        "label": "Veronica Escobar (D)",
        "party": "d",
-       "price": 0.973,
+       "price": 0.9725,
        "question": "Will the Democratic Party win the TX-16 House seat?",
        "volume": 14525.853484
       },
@@ -21314,7 +21314,7 @@
      "outcomes": [
       {
        "ask": 0.948,
-       "bid": 0.917,
+       "bid": 0.919,
        "label": "Pete Sessions",
        "party": "r",
        "price": 0.907,
@@ -21369,7 +21369,7 @@
      "event": "KXHOUSERACE-TX18-26",
      "outcomes": [
       {
-       "ask": 0.987,
+       "ask": 0.985,
        "bid": 0.942,
        "label": "Christian Menefee",
        "party": "d",
@@ -21379,7 +21379,7 @@
       },
       {
        "ask": 0.072,
-       "bid": 0.007,
+       "bid": 0.005,
        "conflict": false,
        "label": "Republican party",
        "marketLabel": "Ronald Whitfield",
@@ -21398,23 +21398,23 @@
      "event": "tx-18-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.972,
+       "ask": 0.963,
        "bid": 0.933,
        "label": "Christian Menefee (D)",
        "party": "d",
-       "price": 0.9525,
+       "price": 0.948,
        "question": "Will the Democratic Party win the TX-18 House seat?",
        "volume": 14611.674635
       },
       {
-       "ask": 0.051,
+       "ask": 0.063,
        "bid": 0.024,
        "conflict": false,
        "label": "Republican party",
        "marketLabel": "Ronald Whitfield (R)",
        "mismatch": true,
        "party": "r",
-       "price": 0.0375,
+       "price": 0.0435,
        "question": "Will the Republican Party win the TX-18 House seat?",
        "volume": 1759.2116460000002
       }
@@ -21711,7 +21711,7 @@
      "event": "KXHOUSERACE-TX24-26",
      "outcomes": [
       {
-       "ask": 0.93,
+       "ask": 0.934,
        "bid": 0.919,
        "label": "Beth Van Duyne",
        "party": "r",
@@ -21838,7 +21838,7 @@
        "volume": 6646.06
       },
       {
-       "ask": 0.059,
+       "ask": 0.064,
        "bid": 0.005,
        "label": "Steven Shook",
        "party": "d",
@@ -22036,13 +22036,13 @@
       },
       {
        "ask": 0.046,
-       "bid": 0.014,
+       "bid": 0.013,
        "conflict": false,
        "label": "Republican party",
        "marketLabel": "Martha Fierro (R)",
        "mismatch": true,
        "party": "r",
-       "price": 0.03,
+       "price": 0.0295,
        "question": "Will the Republican Party win the TX-29 House seat?",
        "volume": 11869.802948999999
       }
@@ -22086,10 +22086,10 @@
      "outcomes": [
       {
        "ask": 0.958,
-       "bid": 0.952,
+       "bid": 0.94,
        "label": "Frederick Haynes III (D)",
        "party": "d",
-       "price": 0.955,
+       "price": 0.949,
        "question": "Will the Democratic Party win the TX-30 House seat?",
        "volume": 5656.070066999999
       },
@@ -22124,7 +22124,7 @@
        "volume": 1538.11
       },
       {
-       "ask": 0.097,
+       "ask": 0.069,
        "bid": 0.047,
        "label": "Justin Early",
        "party": "d",
@@ -22257,22 +22257,22 @@
      "outcomes": [
       {
        "ask": 0.977,
-       "bid": 0.951,
+       "bid": 0.952,
        "label": "Colin Allred (D)",
        "party": "d",
-       "price": 0.964,
+       "price": 0.9645,
        "question": "Will the Democratic Party win the TX-33 House seat?",
        "volume": 3135.088455
       },
       {
-       "ask": 0.037,
+       "ask": 0.035,
        "bid": 0.007,
        "conflict": false,
        "label": "Republican party",
        "marketLabel": "Patrick Gillespie (R)",
        "mismatch": true,
        "party": "r",
-       "price": 0.022,
+       "price": 0.021,
        "question": "Will the Republican Party win the TX-33 House seat?",
        "volume": 13634.22
       }
@@ -22401,7 +22401,7 @@
      "event": "KXHOUSERACE-TX36-26",
      "outcomes": [
       {
-       "ask": 0.962,
+       "ask": 0.959,
        "bid": 0.923,
        "label": "Brian Babin",
        "party": "r",
@@ -22752,7 +22752,7 @@
        "volume": 1876.05
       },
       {
-       "ask": 0.058,
+       "ask": 0.057,
        "bid": 0.023,
        "label": "Jonny Larsen",
        "party": "d",
@@ -22835,10 +22835,10 @@
       },
       {
        "ask": 0.48,
-       "bid": 0.47,
+       "bid": 0.46,
        "label": "Shannon Taylor (D)",
        "party": "d",
-       "price": 0.475,
+       "price": 0.47,
        "question": "Will the Democratic Party win the VA-01 House seat?",
        "volume": 43681.130642000004
       }
@@ -22921,7 +22921,7 @@
       },
       {
        "ask": 0.034,
-       "bid": 0.007,
+       "bid": 0.005,
        "label": "Edwin Rivera",
        "party": "r",
        "price": 0.055,
@@ -23094,7 +23094,7 @@
        "volume": 22505.8
       },
       {
-       "ask": 0.1,
+       "ask": 0.11,
        "bid": 0.067,
        "label": "Beth Macy",
        "party": "d",
@@ -23224,19 +23224,19 @@
      "outcomes": [
       {
        "ask": 0.97,
-       "bid": 0.949,
+       "bid": 0.953,
        "label": "Don Beyer (D)",
        "party": "d",
-       "price": 0.9595,
+       "price": 0.9615,
        "question": "Will the Democratic Party win the VA-08 House seat?",
        "volume": 12724.283155000003
       },
       {
        "ask": 0.028,
-       "bid": 0.016,
+       "bid": 0.017,
        "label": "Tony Sabio (R)",
        "party": "r",
-       "price": 0.022,
+       "price": 0.0225,
        "question": "Will the Republican Party win the VA-08 House seat?",
        "volume": 28240.565733
       }
@@ -23254,7 +23254,7 @@
      "outcomes": [
       {
        "ask": 0.984,
-       "bid": 0.95,
+       "bid": 0.937,
        "label": "Morgan Griffith",
        "party": "r",
        "price": 0.966,
@@ -23289,10 +23289,10 @@
       },
       {
        "ask": 0.032,
-       "bid": 0.015,
+       "bid": 0.012,
        "label": "Joy Powers (D)",
        "party": "d",
-       "price": 0.0235,
+       "price": 0.022,
        "question": "Will the Democratic Party win the VA-09 House seat?",
        "volume": 21537.482373000006
       }
@@ -23447,11 +23447,11 @@
      "event": "vt-al-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.992,
-       "bid": 0.958,
+       "ask": 0.991,
+       "bid": 0.96,
        "label": "Becca Balint (D)",
        "party": "d",
-       "price": 0.975,
+       "price": 0.9755,
        "question": "Will the Democratic Party win the VT-AL House seat?",
        "volume": 14008.287320999998
       },
@@ -23548,7 +23548,7 @@
        "volume": 610.01
       },
       {
-       "ask": 0.068,
+       "ask": 0.066,
        "bid": 0.016,
        "conflict": false,
        "label": "Republican party",
@@ -23835,7 +23835,7 @@
       },
       {
        "ask": 0.018,
-       "bid": 0.003,
+       "bid": 0.005,
        "label": "Nirav Sheth",
        "party": "r",
        "price": 0.018,
@@ -23851,20 +23851,20 @@
      "event": "wa-07-house-election-winner",
      "outcomes": [
       {
-       "ask": 0.982,
-       "bid": 0.95,
+       "ask": 0.979,
+       "bid": 0.946,
        "label": "Pramila Jayapal (D)",
        "party": "d",
-       "price": 0.966,
+       "price": 0.9625,
        "question": "Will the Democratic Party win the WA-07 House seat?",
        "volume": 11607.171087
       },
       {
-       "ask": 0.024,
+       "ask": 0.025,
        "bid": 0.016,
        "label": "Nirav Sheth (R)",
        "party": "r",
-       "price": 0.02,
+       "price": 0.0205,
        "question": "Will the Republican Party win the WA-07 House seat?",
        "volume": 23003.683802
       }
@@ -24351,7 +24351,7 @@
       },
       {
        "ask": 0.072,
-       "bid": 0.047,
+       "bid": 0.051,
        "label": "Brad Smith",
        "party": "d",
        "price": 0.049,
@@ -24518,7 +24518,7 @@
        "volume": 1855.97
       },
       {
-       "ask": 0.049,
+       "ask": 0.048,
        "bid": 0.011,
        "label": "Vince George",
        "party": "d",
@@ -24601,10 +24601,10 @@
       },
       {
        "ask": 0.037,
-       "bid": 0.027,
+       "bid": 0.028,
        "label": "Ace Parsi (D)",
        "party": "d",
-       "price": 0.032,
+       "price": 0.0325,
        "question": "Will the Democratic Party win the WV-02 House seat?",
        "volume": 28771.55974
       }
@@ -25016,11 +25016,11 @@
      "event": "arkansas-senate-election-winner",
      "outcomes": [
       {
-       "ask": 0.938,
+       "ask": 0.94,
        "bid": 0.928,
        "label": "Tom Cotton (R)",
        "party": "r",
-       "price": 0.933,
+       "price": 0.934,
        "question": "Will the Republicans win the Arkansas Senate race in 2026?",
        "volume": 21841.368922
       },
@@ -25132,10 +25132,10 @@
       },
       {
        "ask": 0.024,
-       "bid": 0.007,
+       "bid": 0.011,
        "label": "Mark Baisley (R)",
        "party": "r",
-       "price": 0.0155,
+       "price": 0.0175,
        "question": "Will the Republicans win the Colorado Senate race in 2026?",
        "volume": 37019.83475499998
       }
@@ -25178,11 +25178,11 @@
      "event": "delaware-senate-election-winner",
      "outcomes": [
       {
-       "ask": 0.993,
+       "ask": 0.994,
        "bid": 0.98,
        "label": "Democrat",
        "party": "d",
-       "price": 0.9865,
+       "price": 0.987,
        "question": "Will the Democrats win the Delaware Senate race in 2026?",
        "volume": 12065.903503000005
       },
@@ -25534,18 +25534,18 @@
        "bid": 0.56,
        "label": "Ashley Hinson",
        "party": "r",
-       "price": 0.56,
+       "price": 0.57,
        "question": "Will Republicans win the Senate race in Iowa?",
-       "volume": 1705287.32
+       "volume": 1705288.32
       },
       {
        "ask": 0.45,
        "bid": 0.44,
        "label": "Josh Turek",
        "party": "d",
-       "price": 0.45,
+       "price": 0.44,
        "question": "Will Democratics win the Senate race in Iowa?",
-       "volume": 2225062.98
+       "volume": 2225117.64
       }
      ],
      "source": "kalshi",
@@ -25702,7 +25702,7 @@
      "event": "SENATEID-26",
      "outcomes": [
       {
-       "ask": 0.929,
+       "ask": 0.939,
        "bid": 0.92,
        "label": "Jim Risch",
        "party": "r",
@@ -25740,11 +25740,11 @@
      "event": "idaho-senate-election-winner",
      "outcomes": [
       {
-       "ask": 0.953,
+       "ask": 0.952,
        "bid": 0.941,
        "label": "Jim Risch (R)",
        "party": "r",
-       "price": 0.947,
+       "price": 0.9465,
        "question": "Will the Republicans win the Idaho Senate race in 2026?",
        "volume": 80702.46669999998
       },
@@ -25829,8 +25829,8 @@
      "event": "SENATEIL-26",
      "outcomes": [
       {
-       "ask": 0.984,
-       "bid": 0.972,
+       "ask": 0.983,
+       "bid": 0.973,
        "label": "Juliana Stratton",
        "party": "d",
        "price": 0.972,
@@ -25885,13 +25885,13 @@
      "event": "SENATEKS-26",
      "outcomes": [
       {
-       "ask": 0.65,
-       "bid": 0.64,
+       "ask": 0.64,
+       "bid": 0.63,
        "label": "Roger Marshall",
        "party": "r",
        "price": 0.64,
        "question": "Will Republicans win the Senate race in Kansas?",
-       "volume": 1003535.97
+       "volume": 1003776.24
       },
       {
        "ask": 0.37,
@@ -25900,7 +25900,7 @@
        "party": "d",
        "price": 0.36,
        "question": "Will Democratics win the Senate race in Kansas?",
-       "volume": 1531606.72
+       "volume": 1531837.23
       }
      ],
      "source": "kalshi",
@@ -25912,19 +25912,19 @@
      "outcomes": [
       {
        "ask": 0.64,
-       "bid": 0.63,
+       "bid": 0.62,
        "label": "Roger Marshall (R)",
        "party": "r",
-       "price": 0.635,
+       "price": 0.63,
        "question": "Will the Republicans win the Kansas Senate race in 2026?",
        "volume": 410807.4134949999
       },
       {
-       "ask": 0.38,
-       "bid": 0.37,
+       "ask": 0.37,
+       "bid": 0.36,
        "label": "Adam Hamilton (D)",
        "party": "d",
-       "price": 0.375,
+       "price": 0.365,
        "question": "Will the Democrats win the Kansas Senate race in 2026?",
        "volume": 312021.48386199994
       }
@@ -26041,7 +26041,7 @@
        "party": "r",
        "price": 0.958,
        "question": "Will Republicans win the Senate race in Kentucky?",
-       "volume": 79593.86
+       "volume": 79693.86
       },
       {
        "ask": 0.046,
@@ -26071,10 +26071,10 @@
       },
       {
        "ask": 0.041,
-       "bid": 0.015,
+       "bid": 0.014,
        "label": "Charles Booker (D)",
        "party": "d",
-       "price": 0.028,
+       "price": 0.0275,
        "question": "Will the Democrats win the Kentucky Senate race in 2026?",
        "volume": 7800.9962460000015
       }
@@ -26315,7 +26315,7 @@
        "party": "d",
        "price": 0.6,
        "question": "Will Democratics win the Senate race in Maine?",
-       "volume": 3536886.8
+       "volume": 3536889.3
       },
       {
        "ask": 0.41,
@@ -26324,7 +26324,7 @@
        "party": "r",
        "price": 0.41,
        "question": "Will Republicans win the Senate race in Maine?",
-       "volume": 3848730.68
+       "volume": 3849199.13
       }
      ],
      "source": "kalshi",
@@ -26503,13 +26503,13 @@
      "event": "SENATEMI-26",
      "outcomes": [
       {
-       "ask": 0.73,
+       "ask": 0.72,
        "bid": 0.71,
        "label": "Abdul El-Sayed",
        "party": "d",
-       "price": 0.71,
+       "price": 0.73,
        "question": "Will Democratics win the Senate race in Michigan?",
-       "volume": 2072627.64
+       "volume": 2072654.52
       },
       {
        "ask": 0.28,
@@ -26518,7 +26518,7 @@
        "party": "r",
        "price": 0.28,
        "question": "Will Republicans win the Senate race in Michigan?",
-       "volume": 2825125.22
+       "volume": 2825516.22
       }
      ],
      "source": "kalshi",
@@ -26690,7 +26690,7 @@
        "party": "r",
        "price": 0.14,
        "question": "Will Republicans win the Senate race in Minnesota?",
-       "volume": 927382.75
+       "volume": 927517.49
       }
      ],
      "source": "kalshi",
@@ -26873,9 +26873,9 @@
        "bid": 0.901,
        "label": "Cindy Hyde-Smith",
        "party": "r",
-       "price": 0.901,
+       "price": 0.902,
        "question": "Will Republicans win the Senate race in Mississippi?",
-       "volume": 70729.13
+       "volume": 70784.18
       },
       {
        "ask": 0.1,
@@ -26926,15 +26926,15 @@
      "outcomes": [
       {
        "ask": 0.929,
-       "bid": 0.912,
+       "bid": 0.913,
        "label": "Kurt Alme",
        "party": "r",
-       "price": 0.911,
+       "price": 0.929,
        "question": "Will Republicans win the Senate race in Montana?",
-       "volume": 232542.36
+       "volume": 232642.36
       },
       {
-       "ask": 0.081,
+       "ask": 0.08,
        "bid": 0.076,
        "label": "Seth Bodnar",
        "party": "i",
@@ -27121,18 +27121,18 @@
        "bid": 0.949,
        "label": "Roy Cooper",
        "party": "d",
-       "price": 0.949,
+       "price": 0.95,
        "question": "Will Democratics win the Senate race in North Carolina?",
-       "volume": 1447802.38
+       "volume": 1447818.11
       },
       {
        "ask": 0.052,
-       "bid": 0.05,
+       "bid": 0.049,
        "label": "Michael Whatley",
        "party": "r",
-       "price": 0.053,
+       "price": 0.049,
        "question": "Will Republicans win the Senate race in North Carolina?",
-       "volume": 1044674.4
+       "volume": 1044809.14
       }
      ],
      "source": "kalshi",
@@ -27143,11 +27143,11 @@
      "event": "north-carolina-senate-election-winner",
      "outcomes": [
       {
-       "ask": 0.968,
+       "ask": 0.969,
        "bid": 0.954,
        "label": "Roy Cooper (D)",
        "party": "d",
-       "price": 0.961,
+       "price": 0.9615,
        "question": "Will the Democrats win the North Carolina Senate race in 2026?",
        "volume": 104952.08167000001
       },
@@ -27295,16 +27295,16 @@
        "party": "r",
        "price": 0.73,
        "question": "Will Republicans win the Senate race in Nebraska?",
-       "volume": 1189554.36
+       "volume": 1189555.36
       },
       {
        "ask": 0.28,
        "bid": 0.27,
        "label": "Dan Osborn",
        "party": "i",
-       "price": 0.28,
+       "price": 0.27,
        "question": "Will Dan Osborn (as an independent)s win the Senate race in Nebraska?",
-       "volume": 844613.7
+       "volume": 844662.14
       },
       {
        "ask": 0.008,
@@ -27724,10 +27724,10 @@
       },
       {
        "ask": 0.025,
-       "bid": 0.007,
+       "bid": 0.011,
        "label": "Larry Marker (R)",
        "party": "r",
-       "price": 0.016,
+       "price": 0.018,
        "question": "Will the Republicans win the New Mexico Senate race in 2026?",
        "volume": 9270.991268
       }
@@ -27750,7 +27750,7 @@
        "party": "d",
        "price": 0.61,
        "question": "Will Democratics win the Senate race in Ohio?",
-       "volume": 2941026.53
+       "volume": 2941142.48
       },
       {
        "ask": 0.38,
@@ -28121,7 +28121,7 @@
        "party": "d",
        "price": 0.14,
        "question": "Will Democratics win the Senate race in South Carolina?",
-       "volume": 1358222.67
+       "volume": 1358256.31
       }
      ],
      "source": "kalshi",
@@ -28409,20 +28409,20 @@
      "event": "tennessee-senate-election-winner",
      "outcomes": [
       {
-       "ask": 0.983,
+       "ask": 0.981,
        "bid": 0.963,
        "label": "Bill Hagerty (R)",
        "party": "r",
-       "price": 0.973,
+       "price": 0.972,
        "question": "Will the Republicans win the Tennessee Senate race in 2026?",
        "volume": 19680.406581999996
       },
       {
-       "ask": 0.031,
+       "ask": 0.032,
        "bid": 0.021,
        "label": "Marquita Bradshaw (D)",
        "party": "d",
-       "price": 0.026,
+       "price": 0.0265,
        "question": "Will the Democrats win the Tennessee Senate race in 2026?",
        "volume": 10782.566499999997
       }
@@ -28443,9 +28443,9 @@
        "bid": 0.64,
        "label": "James Talarico",
        "party": "d",
-       "price": 0.65,
+       "price": 0.64,
        "question": "Will Democratics win the Senate race in Texas?",
-       "volume": 7145344.01
+       "volume": 7145444.25
       },
       {
        "ask": 0.36,
@@ -28454,7 +28454,7 @@
        "party": "r",
        "price": 0.36,
        "question": "Will Republicans win the Senate race in Texas?",
-       "volume": 10331232.37
+       "volume": 10331774.07
       }
      ],
      "source": "kalshi",
