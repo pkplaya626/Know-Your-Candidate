@@ -11,6 +11,7 @@ DATA_DIR = os.path.join(SITE_DIR, "data")
 DATA_FILE = os.path.join(DATA_DIR, "profiles.js")
 GEO_FILE = os.path.join(DATA_DIR, "geo.js")
 ODDS_FILE = os.path.join(DATA_DIR, "odds.js")
+DISTRICTS_FILE = os.path.join(DATA_DIR, "districts.js")
 
 # The scripts each page must load, in the order it must load them. The build
 # never rewrites a page; it only reports when one has drifted out of step with
@@ -53,8 +54,22 @@ STATE_PAGE_REQUIREMENTS = (
     "../assets/kyc-state.js",
 )
 
+# A state's before-and-after district map. It reads the profiles for every
+# claim about a person and districts.js for the lines, so both load first.
+REDISTRICTING_PAGE_REQUIREMENTS = (
+    "../assets/kyc.js",
+    "../data/profiles.js",
+    "../data/odds.js",
+    "../data/districts.js",
+    "../assets/kyc-odds.js",
+    "../assets/kyc-cards.js",
+    "../assets/kyc-profile.js",
+    "../assets/kyc-districts.js",
+)
+
 PAGES = tuple(PAGE_REQUIREMENTS)
 STATES_DIR = os.path.join(SITE_DIR, "states")
+REDISTRICTING_DIR = os.path.join(SITE_DIR, "redistricting")
 SITEMAP_FILE = os.path.join(SITE_DIR, "sitemap.xml")
 
 _BANNER = """\
@@ -173,14 +188,18 @@ def state_codes(profiles):
 
 
 def render_state_pages(profiles, root=".", summary=None):
-    """``{relative path: html}`` for every state page and the index."""
-    from . import pages
+    """``{relative path: html}`` for every generated page: one per state, the
+    index of states, and one per state with a before-and-after district map."""
+    from . import districts, pages
 
     host = canonical_host(root)
     out = {os.path.join(STATES_DIR, "index.html"): pages.render_states_index(host)}
     for code in state_codes(profiles):
         out[os.path.join(SITE_DIR, *pages.page_path(code).split("/"))] = (
             pages.render_state(code, host, summary))
+    for code in districts.plan_codes():
+        out[os.path.join(SITE_DIR, *pages.redistricting_path(code).split("/"))] = (
+            pages.render_redistricting(code, host))
     return out
 
 
@@ -216,13 +235,14 @@ def check_state_pages(profiles, root=".", summary=None):
 def write_sitemap(profiles, root="."):
     """Write ``sitemap.xml`` listing the pages and every state. Returns the
     path, or ``None`` when no custom domain is configured."""
-    from . import pages
+    from . import districts, pages
 
     host = canonical_host(root)
     if not host:
         return None
     path = os.path.join(root, SITEMAP_FILE)
-    _atomic_write(path, pages.sitemap(host, state_codes(profiles)))
+    _atomic_write(path, pages.sitemap(host, state_codes(profiles),
+                                      redistricting=districts.plan_codes()))
     return path
 
 
@@ -247,6 +267,33 @@ def write_geo(geo, root="."):
 def geo_signature(geo):
     """Content hash of the map geometry, excluding the build timestamp."""
     return hashlib.sha256(_json(geo).encode("utf-8")).hexdigest()
+
+
+def write_districts(payload, root="."):
+    """Emit ``candidate_profiles_site/data/districts.js``.
+
+    The before-and-after district maps, projected at build time like the
+    national map. A pure function of the vendored boundaries and places:
+    nothing about a person is in it, so a roster refresh never changes it.
+    """
+    from . import districts
+
+    path = os.path.join(root, DISTRICTS_FILE)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    sources = sorted({name for code in payload
+                      for name in (districts.PLANS[code]["file"], districts.PLANS[code]["places"])})
+    text = (
+        _BANNER.format(source=", ".join(sources), built=build_timestamp())
+        + f"// States: {', '.join(sorted(payload))}\n"
+        + f"window.kycDistricts = {_json(payload)};\n"
+        + 'window.kycDistrictsMeta = {"signature":"' + districts_signature(payload) + '"};\n'
+    )
+    return path, _atomic_write(path, text)
+
+
+def districts_signature(payload):
+    """Content hash of the district maps, excluding the build timestamp."""
+    return hashlib.sha256(_json(payload).encode("utf-8")).hexdigest()
 
 
 def write_odds(payload, root="."):
@@ -339,11 +386,13 @@ def check_pages(root="."):
     """
     results = []
     checks = dict(PAGE_REQUIREMENTS)
-    states_dir = os.path.join(root, STATES_DIR)
-    if os.path.isdir(states_dir):
-        for name in sorted(os.listdir(states_dir)):
-            if name.endswith(".html"):
-                checks[f"states/{name}"] = STATE_PAGE_REQUIREMENTS
+    for folder, required in ((STATES_DIR, STATE_PAGE_REQUIREMENTS),
+                             (REDISTRICTING_DIR, REDISTRICTING_PAGE_REQUIREMENTS)):
+        directory = os.path.join(root, folder)
+        if os.path.isdir(directory):
+            for name in sorted(os.listdir(directory)):
+                if name.endswith(".html"):
+                    checks[f"{os.path.basename(folder)}/{name}"] = required
 
     for page, required in checks.items():
         path = os.path.join(root, SITE_DIR, page)

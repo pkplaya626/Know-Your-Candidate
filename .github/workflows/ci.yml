@@ -61,9 +61,11 @@ jobs:
           python build_profile_site.py > /dev/null
           cp candidate_profiles_site/data/profiles.js "$RUNNER_TEMP/profiles.1.js"
           cp candidate_profiles_site/data/geo.js "$RUNNER_TEMP/geo.1.js"
+          cp candidate_profiles_site/data/districts.js "$RUNNER_TEMP/districts.1.js"
           python build_profile_site.py > /dev/null
           cmp "$RUNNER_TEMP/profiles.1.js" candidate_profiles_site/data/profiles.js
           cmp "$RUNNER_TEMP/geo.1.js" candidate_profiles_site/data/geo.js
+          cmp "$RUNNER_TEMP/districts.1.js" candidate_profiles_site/data/districts.js
           echo "ok: two builds at the same epoch are identical"
           git checkout -- candidate_profiles_site/data/
 

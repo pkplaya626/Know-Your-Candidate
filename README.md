@@ -20,7 +20,7 @@ Python 3.9+ and the standard library. Nothing to install.
 
 | Command | What it does |
 |---|---|
-| `python build_profile_site.py` | Build `data/profiles.js` and `data/geo.js` |
+| `python build_profile_site.py` | Build `data/profiles.js`, `data/geo.js` and `data/districts.js` |
 | `… build --check` | Validate only; write nothing |
 | `… build --strict` | Refuse to write if validation finds an error |
 | `… build --json` | Emit the validation report as JSON |
@@ -40,14 +40,15 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… enrich --refresh` | Read everyone again, not only those read more than six days ago |
 | `… odds` | Kalshi and Polymarket prices for each 2026 race and for control of both chambers, and the polling averages each Senate race's Wikipedia page lists; writes `data/odds.json` and `data/odds.js` |
 | `… odds --check` | Report market and polling coverage from the committed cache; no network |
-| `… geo` | Regenerate only the map geometry |
+| `… geo` | Regenerate only the map geometry: the national map and the before-and-after district maps |
 | `… fetch` | Refresh DW-NOMINATE scores from Voteview into the roster CSVs |
 | `… portraits` | Resolve and check a portrait URL for every profile |
 | `… portraits --refresh` | Re-resolve every portrait, not just the missing ones |
 | `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`) |
 | `… refresh` | `fetch`, then `build` |
-| `python -m unittest discover tests` | 613 pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (516 checks) |
+| `python tools/fetch_ca_places.py` | Rebuild `ca_places.json`, the towns labelled on the California district maps (network) |
+| `python -m unittest discover tests` | 648 pipeline tests |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (609 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -65,6 +66,8 @@ Congressional_Candidates_2026.csv        ─┼─> kyc/ ─> data/profiles.js �
 Completed_Primary_Candidates_2026.csv    ─┤          data/geo.js       ─┤   (grid + races)
 Late_Primary_Candidates_2026.csv         ─┘          portraits.json     └─> map.html
 us_atlas_states_topo.json                ──> kyc/geo.py                     (partisan map)
+ca_districts_topo.json, ca_places.json   ──> kyc/districts.py ─> data/districts.js
+                                             ─> redistricting/ca.html  (old and new lines)
 congress_snapshot.json                   ──> kyc/legislators.py
       ^ authoritative membership, used to reconcile the rosters above
 ```
@@ -777,6 +780,58 @@ disk is not what the template would write.
 They are linked from everywhere a state is named: the race headers in the
 grid, the profile dialog's "Represents" line, the state filter in the sidebar,
 the map's delegation panel, the footer, and `sitemap.xml`.
+
+## Redrawn districts
+
+California redrew its House map for 2026. Proposition 50 replaced the
+commission's 2021 lines with the Legislature's (AB 604) for the 2026 through
+2030 elections, and members followed the new numbers: Ami Bera, who holds the
+6th, is running in the redrawn 3rd, and Kevin Kiley, who holds the 3rd, in the
+redrawn 6th. `redistricting/ca.html` puts the two maps side by side.
+
+- **Both maps, all 52 districts, numbered.** Districts too small to number
+  statewide are numbered in Bay Area, Los Angeles and San Diego insets.
+- **Who moved, from the data.** The members running in a different district
+  are read from `contestRaceId` (rule 30) and grouped where their moves share a
+  district, so Bera and Kiley are one view. The first group is the default.
+  Any district can be picked from a list or by clicking it; Shift-click
+  compares up to three. The choice is in the address (`#/?d=3,6`).
+- **A close-up of the picked districts** on both maps, framed by where they
+  run under the new lines, with the other map's lines dashed, county lines,
+  and towns. Who held each seat and who is running in it now are captions
+  from `profiles.js`.
+- **The people, as cards,** under each map: the seat's holder under the old
+  map, the November ballot under the new one, each opening the profile dialog.
+- **Where the land went.** Each card lists the share of the district's area
+  that came from, or went to, each district on the other map. The shares are
+  measured on an equal-area projection and describe land, not people.
+
+The California page and the profile dialog of anyone in a California House
+race link to it; for a member running in a different district, the link
+picks out both.
+
+`kyc/districts.py` projects the boundaries at build time with California's
+own equal-area projection (EPSG:3310's parameters), so the page loads no
+mapping library and an overlap on the page is an overlap on the ground.
+`data/districts.js` holds only geometry; everything said about a person comes
+from `profiles.js`. The build fails loudly if a plan does not number every
+seat exactly once, if a district's number would be drawn outside its shape,
+if the two plans do not account for each other's area, or if the map's seats
+do not match the state's races.
+
+Sources, vendored at the repository root:
+
+| File | What it is |
+|---|---|
+| `ca_districts_topo.json` | Both plans' districts from the Wikimedia Commons map data pages *California's Nth congressional district (2023–)* and *(2027–)* (CC0), with Census county lines from us-atlas, simplified for display with mapshaper. Fixed by law until the 2030 census, so it has no refresh command. |
+| `ca_places.json` | California's 482 incorporated places: the Census Gazetteer's internal point, joined on the ANSI code to the USGS GNIS civil feature as a cross-check, and Census population estimates used only to rank labels. Built by `tools/fetch_ca_places.py`. |
+
+An internal point is guaranteed to be inside its place, but not inside the
+part anyone means: San Francisco's is on the Farallon Islands, 52 km out to
+sea, because the city and county includes them. A point more than three
+"radii" (the radius of a circle with the place's land area) from the USGS
+point is replaced by it, and the file records each replacement. Only San
+Francisco qualifies.
 
 ## Contact and links
 

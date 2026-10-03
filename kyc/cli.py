@@ -9,6 +9,7 @@ import sys
 from . import (
     __version__,
     campaigns,
+    districts as districts_mod,
     emit,
     fec,
     geo as geo_mod,
@@ -159,6 +160,16 @@ def _build(args):
     except geo_mod.AtlasError as exc:
         print(f"  [warn] map geometry unavailable: {exc}")
 
+    # The before-and-after district maps are vendored and checked in, so a
+    # failure here is a data error, not a missing download: validation
+    # reports it as one, and --strict refuses to write.
+    district_maps, district_error = None, None
+    try:
+        district_maps = districts_mod.build(args.root)
+        stats.update(districts_mod.stats(district_maps))
+    except districts_mod.DistrictsError as exc:
+        district_error = str(exc)
+
     print(
         f"\n[+] {stats['total']} profiles "
         f"({stats['members']} sitting members, {stats['candidates']} candidates)"
@@ -177,11 +188,15 @@ def _build(args):
     if geo:
         print(f"    {stats['geo_states']} state shapes | "
               f"{stats['geo_territories']} territories")
+    if district_maps:
+        print(f"    before-and-after district maps for "
+              f"{', '.join(sorted(district_maps))}")
 
     issues = validate.run(profiles, raw, races=race_list, geo=geo,
                           snapshot=snapshot, finance=finance, campaigns=sites,
                           results=outcomes, field=field, enrichment=enrichment,
-                          odds=markets)
+                          odds=markets, district_maps=district_maps,
+                          district_error=district_error)
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -210,6 +225,9 @@ def _build(args):
     if geo:
         geo_path, geo_size = emit.write_geo(geo, args.root)
         print(f"[ok] wrote {geo_path} ({geo_size / 1024:.0f} KB)")
+    if district_maps:
+        maps_path, maps_size = emit.write_districts(district_maps, args.root)
+        print(f"[ok] wrote {maps_path} ({maps_size / 1024:.0f} KB)")
 
     # Rewritten only when the prices changed, so a roster rebuild leaves the
     # odds refresh's file alone.
@@ -220,7 +238,9 @@ def _build(args):
         print(f"[ok] wrote {odds_path} ({odds_size / 1024:.0f} KB)")
 
     written = emit.write_state_pages(profiles, args.root, summary=summary)
-    print(f"[ok] wrote {len(written)} state pages under {emit.STATES_DIR}")
+    maps = [w for w in written if os.path.normpath(emit.REDISTRICTING_DIR) in os.path.normpath(w)]
+    print(f"[ok] wrote {len(written) - len(maps)} state pages under {emit.STATES_DIR} and "
+          f"{len(maps)} under {emit.REDISTRICTING_DIR}")
     sitemap_path = emit.write_sitemap(profiles, args.root)
     if sitemap_path:
         print(f"[ok] wrote {sitemap_path}")
@@ -832,6 +852,22 @@ def _verify(args):
         else:
             print(f"  ok  {emit.GEO_FILE} matches the atlas ({geo_expected[:16]}...)")
 
+    try:
+        district_maps = districts_mod.build(args.root)
+    except districts_mod.DistrictsError as exc:
+        problems.append(f"district maps unavailable: {exc}")
+    else:
+        maps_expected = emit.districts_signature(district_maps)
+        maps_committed = emit.read_signature(
+            path=os.path.join(args.root, emit.DISTRICTS_FILE))
+        if maps_committed is None:
+            problems.append(f"{emit.DISTRICTS_FILE} is missing or carries no signature")
+        elif maps_committed != maps_expected:
+            problems.append(f"{emit.DISTRICTS_FILE} is stale")
+        else:
+            print(f"  ok  {emit.DISTRICTS_FILE} matches the district maps "
+                  f"({maps_expected[:16]}...)")
+
     for page, ok, note in emit.check_pages(args.root):
         if ok:
             print(f"  ok  {page} loads its data in the right order")
@@ -873,6 +909,14 @@ def _geo(args):
     path, size = emit.write_geo(geo, args.root)
     print(f"[ok] wrote {path} ({size / 1024:.0f} KB) "
           f"- {len(geo['states'])} states, {len(geo['territories'])} territories")
+    try:
+        district_maps = districts_mod.build(args.root)
+    except districts_mod.DistrictsError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 2
+    path, size = emit.write_districts(district_maps, args.root)
+    print(f"[ok] wrote {path} ({size / 1024:.0f} KB) "
+          f"- before-and-after district maps for {', '.join(sorted(district_maps))}")
     return 0
 
 
@@ -930,7 +974,8 @@ def build_parser():
     _add_build_flags(add("build", help="generate candidate_profiles_site/data/*.js"))
 
     add("fetch", help="refresh DW-NOMINATE scores from Voteview")
-    add("geo", help="regenerate the map geometry from the state atlas")
+    add("geo", help="regenerate the map geometry: the state atlas and the "
+                    "before-and-after district maps")
     add("verify", help="check the committed data still matches the sources")
 
     disc = add("disclosures", help="link members to their filed financial disclosures")
