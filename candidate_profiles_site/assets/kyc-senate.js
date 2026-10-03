@@ -275,7 +275,7 @@
       emit(groupSection(group, opts, false, inner));
     });
     // Which party the markets expect to hold the chamber, above the seats.
-    if (html.length && KYC.odds) html.unshift(KYC.odds.control());
+    if (html.length && KYC.odds) html.unshift(KYC.odds.control("senate"));
     return { html: html.join(""), people: total, seats: seats };
   }
 

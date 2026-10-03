@@ -1,6 +1,7 @@
-/* Market prices and polling averages for a 2026 Senate race (kyc/odds.py),
- * rendered one way on every page that shows the race: the grid's race view,
- * the Senate view, the state pages and the map.
+/* Market prices and polling averages for a 2026 race (kyc/odds.py, emitted
+ * as data/odds.js), rendered one way on every page that shows the race: the
+ * grid's race view, the Senate view, the state pages, the map and the
+ * profile dialog.
  *
  * Each source is quoted as it publishes itself and labelled as what it is.
  * Nothing here blends sources or computes a figure of its own: a market
@@ -37,6 +38,11 @@
 
   function party(key) {
     return key === "d" || key === "r" ? key : "i";
+  }
+
+  /** data/odds.js, keyed by race id; absent on a page that does not load it. */
+  function data() {
+    return global.kycOdds || { races: {}, control: {} };
   }
 
   function link(url, label, title) {
@@ -105,7 +111,7 @@
 
   /** The race's block. *opts.compact* drops the poll table for one line. */
   function render(race, opts) {
-    var odds = race && race.odds;
+    var odds = race && (data().races || {})[race.id];
     if (!odds) return "";
     opts = opts || {};
     var markets = (odds.markets || []).map(marketRow).filter(Boolean);
@@ -127,7 +133,7 @@
     return '<section class="odds' + (opts.compact ? " odds-compact" : "") + '" aria-label="' +
       KYC.escapeAttr("Prediction markets and polling averages for " + (race.label || "this race")) + '">' +
       '<p class="odds-subhead">Prediction markets <span class="odds-faint">as of ' +
-        KYC.escapeHtml(day(odds.asOf)) + "</span></p>" +
+        KYC.escapeHtml(day(data().asOf)) + "</span></p>" +
       markets.join("") + pollHtml +
       '<p class="odds-note">A market price is what traders pay for a contract worth $1 if that ' +
         "outcome happens. It is not a poll, and not this site’s forecast. Polling averages " +
@@ -135,15 +141,19 @@
       "</section>";
   }
 
-  /** Which party the markets expect to control the Senate. */
-  function control() {
-    var meta = (KYC.meta && KYC.meta()) || global.kycBuildMeta || {};
-    var block = meta.senateControl;
-    if (!block || !(block.markets || []).length) return "";
-    return '<section class="odds odds-control" aria-label="Prediction markets on control of the Senate">' +
-      '<p class="odds-subhead">Control of the Senate after November, by prediction market ' +
-        '<span class="odds-faint">as of ' + KYC.escapeHtml(day(block.asOf)) + "</span></p>" +
-      block.markets.map(marketRow).join("") +
+  var CHAMBER = { senate: "the Senate", house: "the House" };
+
+  /** Which party the markets expect to control *chamber* ("senate", "house"). */
+  function control(chamber) {
+    var markets = (data().control || {})[chamber] || [];
+    if (!markets.length) return "";
+    var name = CHAMBER[chamber] || chamber;
+    return '<section class="odds odds-control" aria-label="' +
+        KYC.escapeAttr("Prediction markets on control of " + name) + '">' +
+      '<p class="odds-subhead">Control of ' + KYC.escapeHtml(name) +
+        ' after November, by prediction market <span class="odds-faint">as of ' +
+        KYC.escapeHtml(day(data().asOf)) + "</span></p>" +
+      markets.map(marketRow).join("") +
       '<p class="odds-note">What traders pay for a $1 contract on each party winning a majority. ' +
         "Not a poll, and not this site’s forecast.</p></section>";
   }

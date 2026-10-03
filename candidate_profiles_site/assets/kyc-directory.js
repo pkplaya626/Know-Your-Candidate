@@ -200,7 +200,9 @@
 
     if (state.view === "race") {
       grid.className = "";
-      grid.innerHTML = raceSections(visible);
+      // Which party the markets expect to hold each chamber, above the races.
+      grid.innerHTML = (KYC.odds ? KYC.odds.control("senate") + KYC.odds.control("house") : "") +
+        raceSections(visible);
       return;
     }
     grid.className = "card-grid";

@@ -190,6 +190,7 @@ _PAGE = string.Template("""\
 </div>
 
 <script src="../data/profiles.js"></script>
+<script src="../data/odds.js"></script>
 <script src="../assets/kyc-odds.js"></script>
 <script src="../assets/kyc-cards.js"></script>
 <script src="../assets/kyc-profile.js"></script>

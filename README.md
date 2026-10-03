@@ -38,7 +38,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… enrich` | Fill gaps for everyone still running from their Wikipedia infobox and campaign site, and check every linked campaign site |
 | `… enrich --check` | Report what the committed cache fills; no network |
 | `… enrich --refresh` | Read everyone again, not only those read more than six days ago |
-| `… odds` | Kalshi and Polymarket prices for each 2026 Senate race and for control of the Senate, and the polling averages each race's Wikipedia page lists |
+| `… odds` | Kalshi and Polymarket prices for each 2026 race and for control of both chambers, and the polling averages each Senate race's Wikipedia page lists; writes `data/odds.json` and `data/odds.js` |
 | `… odds --check` | Report market and polling coverage from the committed cache; no network |
 | `… geo` | Regenerate only the map geometry |
 | `… fetch` | Refresh DW-NOMINATE scores from Voteview into the roster CSVs |
@@ -46,8 +46,8 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… portraits --refresh` | Re-resolve every portrait, not just the missing ones |
 | `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`) |
 | `… refresh` | `fetch`, then `build` |
-| `python -m unittest discover tests` | 590 pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (491 checks) |
+| `python -m unittest discover tests` | 603 pipeline tests |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (495 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -488,17 +488,24 @@ For the 509 challengers on the November ballot, on 2026-10-02:
 
 ## Prediction markets and polling averages
 
-Every 2026 Senate race shows what two prediction markets and the published
-polling averages say about it - in the Senate view, the grid's race view, the
-state pages and the map's 2026 Senate panel - and the Senate view opens with
-the markets on which party will control the chamber.
-`python build_profile_site.py odds` writes `data/odds.json`:
+Every 2026 race shows what two prediction markets say about it, and every
+Senate race the published polling averages too - in the grid's race view, the
+state pages, the profile dialog's "in this race" panel, the Senate view and
+the map's 2026 Senate panel. The race view opens with the markets on which
+party will control each chamber, and the Senate view with the Senate's.
+`python build_profile_site.py odds` writes `data/odds.json` and the page file
+`data/odds.js`:
 
 | Source | What is shown | How it is tied to the race |
 |---|---|---|
-| **Kalshi** (a CFTC-regulated exchange), public market data | Each outcome's last traded price, with the market's own label and question | The market's question and its resolution rules must both name the state |
-| **Polymarket**, public Gamma API | Each live outcome's displayed price; placeholder outcomes ("Person A") are skipped | The event's title and its description must name the same state |
-| **Polling averages**: 270toWin, Decision Desk HQ, FiftyPlusOne, RealClearPolitics, Race to the WH, Silver Bulletin and others, as the race's Wikipedia page lists them | Each aggregator's figures and the date it last updated them, linked to the aggregator | The general-election section's "Aggregate polls" table, used only when every candidate column names someone in the race |
+| **Kalshi** (a CFTC-regulated exchange), public market data | Each outcome's last traded price, with the market's own label and question | The market's question and its resolution rules must both name the seat: the state for the Senate ("a Senator of Kentucky"), the district for the House ("sworn in for CA-03") |
+| **Polymarket**, public Gamma API | Each live outcome's displayed price; placeholder outcomes ("Person A") are skipped | The event's title and its description must name the same seat |
+| **Polling averages** (Senate only): 270toWin, Decision Desk HQ, FiftyPlusOne, RealClearPolitics, Race to the WH, Silver Bulletin and others, as the race's Wikipedia page lists them | Each aggregator's figures and the date it last updated them, linked to the aggregator | The general-election section's "Aggregate polls" table, used only when every candidate column names someone in the race |
+
+House races have no polling averages. Wikipedia lists none for a district, and
+its district tables are single polls - mostly primaries, many of them a
+campaign's own ("Poll sponsored by Chaplik's campaign") - which would need a
+partisan label beside every figure to be shown fairly.
 
 Nothing is blended or recomputed. A market price is what a trader pays for a
 contract worth $1 if that outcome happens; the page says beside every block
@@ -508,16 +515,28 @@ under 1% are counted rather than drawn.
 **Attribution is checked, not trusted (rule 40).** Kalshi's ticker `SENATELA`
 holds Kentucky's race, labelled with Kentucky's nominees; a ticker-based
 match would have put Andy Barr's odds on Louisiana's page. A market label
-that names nobody in its race is shown as the party it resolves on, and
-`build --check` lists it (`odds-label-mismatch`), along with any Senate race
-no market covers (`odds-uncovered`), prices that do not add up to about a
-dollar (`odds-incoherent`) and a cache more than eight days old
-(`odds-stale`).
+that names nobody in its race is shown as the party it resolves on. When this
+site knows a candidate of that party in the race, that is a conflict and
+`build --check` lists it (`odds-label-mismatch`); when it does not - a
+nominee who filed too little to have a profile here, about 150 of them in
+safe House seats - the build counts it instead. It also reports any Senate
+race no market covers (`odds-uncovered`), prices that do not add up to about
+a dollar (`odds-incoherent`), race ids no longer on the ballot
+(`odds-unknown-race`) and a cache more than eight days old (`odds-stale`).
 
-On 2026-10-03 both markets covered all 35 races and control of the Senate,
-and 22 races had polling averages on their Wikipedia page. The House comes
-next: both markets list House races, and the module keys everything by race
-id so they can be added without changing the page.
+On 2026-10-03 both markets covered all 35 Senate races and control of both
+chambers; Kalshi covered 425 House races and Polymarket 434, together 434 of
+the 440 (435 voting seats and five delegates); 22 Senate races had polling
+averages on their Wikipedia page.
+
+**Refreshed every twelve hours, on its own.** `.github/workflows/odds.yml`
+runs at 00:47 and 12:47 UTC: it reads the markets, runs the same
+validation, `verify` and tests a deploy does, commits the two odds files to
+`main` and starts the deploy. It may commit nothing else, and stops if any
+other file would change. That is possible because `data/odds.js` is a pure
+function of `data/odds.json` - labels are checked when the prices are read,
+and the result is stored in the cache - so the roster build leaves it alone
+and the weekly refresh's pull request never collides with it.
 
 ## Portraits
 
@@ -835,7 +854,8 @@ Current warnings, all expected:
 | Workflow | Trigger | What it does |
 |---|---|---|
 | `ci.yml` | push, PR | Tests, validation, `verify`, reproducibility, no-CDN and no-inline-handler checks |
-| `refresh.yml` | Mondays and Thursdays 07:20 UTC (Thursdays only until election day), manual | Reconciles against congress-legislators, refreshes the field, results, money, disclosures, filled gaps and market prices, checks every campaign site, and **opens a PR** if anything changed |
+| `refresh.yml` | Mondays and Thursdays 07:20 UTC (Thursdays only until election day), manual | Reconciles against congress-legislators, refreshes the field, results, money, disclosures and filled gaps, checks every campaign site, and **opens a PR** if anything changed |
+| `odds.yml` | Every twelve hours (00:47 and 12:47 UTC), manual | Refreshes market prices and polling averages, validates, **commits only the two odds files to main** and starts the deploy |
 | `deploy.yml` | manual only | Publishes to GitHub Pages |
 
 `refresh.yml` never pushes to main and never deploys. It resolves portraits for
@@ -919,8 +939,8 @@ the sidebar counts moved into the build metadata.
   current as their sites.
 - **Two senators have no financial-disclosure link.** Both were appointed in
   2026 and have not filed an annual report yet.
-- **Market prices are as of the last refresh.** They move every day; the
-  refresh runs twice a week and every block says the date it was read.
-  Polling averages appear only for the races whose Wikipedia page lists them.
+- **Market prices are up to twelve hours old.** Every block says the date
+  it was read. Polling averages appear only for the Senate races whose
+  Wikipedia page lists them, and for no House race.
   Kalshi's site turns away automated requests, so its links - to each
   market's series page - were not checked by a script.

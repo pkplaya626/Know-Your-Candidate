@@ -1600,16 +1600,21 @@ async function testOdds() {
       !!results.querySelector(".odds-poll-table tbody th") &&
         /Updated/.test((results.querySelector(".odds-poll-table thead") || {}).textContent || ""));
 
+    check("the prices come from data/odds.js, keyed by race id",
+      !!window.kycOdds && !!window.kycOdds.races["S-TX-2026"] &&
+        Object.keys(window.kycOdds.races).some((id) => /^H-/.test(id)));
+
     // Markup in a market label never reaches the page as markup.
-    const hostile = { label: "Test", odds: { asOf: "2026-10-03T00:00:00Z", markets: [
+    window.kycOdds.races.X_HOSTILE = { markets: [
       { source: "kalshi", url: "https://kalshi.com/markets/x", title: "<b>x</b>", outcomes: [
         { label: "<img src=x onerror=alert(1)>", party: "r", price: 0.6 },
-        { label: "Other", party: "d", price: 0.4 }] }] } };
+        { label: "Other", party: "d", price: 0.4 }] }] };
     const holder = D.createElement("div");
-    holder.innerHTML = KYC.odds.render(hostile);
+    holder.innerHTML = KYC.odds.render({ id: "X_HOSTILE", label: "Test" });
+    delete window.kycOdds.races.X_HOSTILE;
     check("market labels are escaped", !holder.querySelector("img") && !holder.querySelector("b") &&
       /onerror/.test(holder.textContent));
-    check("a race with no odds renders nothing", KYC.odds.render({ label: "x" }) === "");
+    check("a race with no odds renders nothing", KYC.odds.render({ id: "nope", label: "x" }) === "");
     check("prices are written as the market writes them",
       KYC.odds.percent(0.995) === ">99%" && KYC.odds.percent(0.004) === "<1%" &&
         KYC.odds.percent(0.384) === "38%");
@@ -1619,11 +1624,34 @@ async function testOdds() {
     window.location.hash = "#/";
     window.dispatchEvent(new window.Event("hashchange"));
     D.getElementById("raceViewToggle").click();
-    const senate = [...results.querySelectorAll("section.race")].filter((s) => /^race-S-/.test(s.id));
+    const tops = [...results.children].slice(0, 2);
+    check("the race view opens with control of both chambers",
+      tops.every((t) => t.classList.contains("odds-control")) &&
+        /Senate/.test(tops[0].textContent) && /House/.test(tops[1].textContent));
+    const sections = [...results.querySelectorAll("section.race")];
+    const senate = sections.filter((s) => /^race-S-/.test(s.id));
+    const house = sections.filter((s) => /^race-H-/.test(s.id));
     check("Senate races show their markets, compactly",
       senate.length > 0 && senate.some((s) => s.querySelector(".odds-compact")), String(senate.length));
-    check("House races show none", ![...results.querySelectorAll("section.race")]
-      .filter((s) => /^race-H-/.test(s.id)).some((s) => s.querySelector(".odds")));
+    check("House races show theirs too",
+      house.filter((s) => s.querySelector(".odds-compact")).length > house.length / 2,
+      house.filter((s) => s.querySelector(".odds-compact")).length + " of " + house.length);
+    D.getElementById("raceViewToggle").click();
+  });
+
+  suite("index.html — a race's markets in the profile dialog", () => {
+    const member = window.legislatorsData.find((p) => !p.isCandidate && p.chamber === "House" &&
+      p.raceId && window.kycOdds.races[p.raceId]);
+    check("a House member whose race has a market exists", !!member);
+    if (member) {
+      KYC.profile.open(member.id);
+      const slot = D.getElementById("profileModalRaceOdds");
+      check("the dialog shows their race's markets above the people in it",
+        !!slot.querySelector(".odds-compact .odds-market") &&
+          slot.compareDocumentPosition(D.getElementById("profileModalRace")) & 4,
+        member.name);
+      KYC.profile.close();
+    }
   });
 }
 

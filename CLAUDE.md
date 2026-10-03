@@ -32,6 +32,7 @@ data/enrichment.json        ──┤
 data/odds.json              ──┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
+                                             data/odds.js       (market prices, polling averages)
                                              states/*.html      (generated, one per state)
                                              sitemap.xml        (generated)
                                              ├──> index.html    (grid, races, profiles)
@@ -50,8 +51,8 @@ data/odds.json              ──┴─> kyc/ ──> candidate_profiles_site/
 - The root CSVs are the editorial source of truth. The state atlas and
   `congress_snapshot.json` are vendored inputs: refreshed by a command, never
   hand-edited.
-- Everything in `data/` is **generated**. Never edit `profiles.js` or `geo.js`
-  by hand. `portraits.json`, `finance.json`, `fec_field.json`,
+- Everything in `data/` is **generated**. Never edit `profiles.js`, `geo.js`
+  or `odds.js` by hand. `portraits.json`, `finance.json`, `fec_field.json`,
   `disclosures.json`, `primary_results.json`, `committees.json`,
   `campaigns.json`, `enrichment.json` and `odds.json` are caches, but they
   *are* hand-editable.
@@ -78,9 +79,9 @@ python build_profile_site.py disclosures      # House and Senate disclosure link
 python build_profile_site.py results          # who is still in, from Wikipedia
 python build_profile_site.py campaigns        # campaign websites from FEC committees
 python build_profile_site.py enrich           # fill gaps; check every campaign site
-python build_profile_site.py odds             # market prices and polling averages
-python -m unittest discover tests             # 590 tests, no dependencies
-npm install && npm test                       # 491 real-DOM checks (needs jsdom)
+python build_profile_site.py odds             # market prices and polling averages (writes odds.js)
+python -m unittest discover tests             # 603 tests, no dependencies
+npm install && npm test                       # 495 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -378,7 +379,21 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     labelled as not a poll and not this site's forecast; a poll table is
     used only when every candidate column names someone in the race, which
     is how the primary's "Cornyn / Hunt / Paxton" table stayed off the
-    November race.
+    November race. House markets are placed the same way, by the district
+    code both the question ("the House race for CA-3") and the rules
+    ("sworn in for CA-03") carry. A label naming someone other than this
+    site's candidate of that party is a conflict and a warning; one naming a
+    nominee too small to have a profile here is counted, not warned about.
+
+41. **A file that publishes on its own may change only itself.**
+    `.github/workflows/odds.yml` commits to `main` every twelve hours
+    without a review, so `data/odds.js` is a pure function of
+    `data/odds.json` - labels are checked when prices are read and stored
+    in the cache, never against the race list at build time - the build
+    rewrites it only when its signature changes, and the workflow refuses
+    to commit if any other file would change. Anything that would make the
+    roster build touch the odds files, or the odds job touch anything else,
+    breaks the property that keeps an unreviewed commit safe.
 
 ## Curated data
 

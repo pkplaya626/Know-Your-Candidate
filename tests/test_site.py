@@ -602,6 +602,45 @@ class TestValidationReport(unittest.TestCase):
         self.assertEqual(errors, [])
 
 
+class TestOddsWorkflow(unittest.TestCase):
+    """The twelve-hourly odds refresh publishes on its own, so what it may
+    touch, and what it must pass first, is pinned here."""
+
+    @classmethod
+    def setUpClass(cls):
+        def read(name):
+            with open(os.path.join(ROOT, ".github", "workflows", name), encoding="utf-8") as handle:
+                return handle.read()
+        cls.text, cls.refresh = read("odds.yml"), read("refresh.yml")
+
+    def test_it_runs_every_twelve_hours(self):
+        import re
+
+        cron = re.search(r'cron:\s*"(\d+) ([\d,]+) \* \* \*"', self.text)
+        self.assertIsNotNone(cron)
+        self.assertEqual(len(cron.group(2).split(",")), 2)
+
+    def test_nothing_is_committed_before_the_checks_a_deploy_runs(self):
+        commit = self.text.index("git push origin HEAD:main")
+        for gate in ("build --check --strict", "build_profile_site.py verify",
+                     "unittest discover tests"):
+            self.assertLess(self.text.index(gate), commit, gate)
+
+    def test_it_may_commit_only_the_odds_files(self):
+        self.assertIn(r"'^candidate_profiles_site/data/odds\.(json|js)$'", self.text)
+        self.assertIn("git add candidate_profiles_site/data/odds.json "
+                      "candidate_profiles_site/data/odds.js", self.text)
+        self.assertNotIn("git add -A", self.text)
+
+    def test_it_starts_the_deploy_its_own_push_cannot(self):
+        # A GITHUB_TOKEN push starts no workflow; workflow_dispatch is allowed.
+        self.assertIn("gh workflow run deploy.yml", self.text)
+        self.assertIn("actions: write", self.text)
+
+    def test_the_roster_refresh_leaves_prices_to_it(self):
+        self.assertNotIn("build_profile_site.py odds", self.refresh)
+
+
 class TestRefreshWorkflow(unittest.TestCase):
     """The scheduled refresh shipped four silent defects; keep each one fixed."""
 
