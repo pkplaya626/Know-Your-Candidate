@@ -81,7 +81,7 @@ python build_profile_site.py campaigns        # campaign websites from FEC commi
 python build_profile_site.py enrich           # fill gaps; check every campaign site
 python build_profile_site.py odds             # market prices and polling averages (writes odds.js)
 python -m unittest discover tests             # 603 tests, no dependencies
-npm install && npm test                       # 495 real-DOM checks (needs jsdom)
+npm install && npm test                       # 498 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
