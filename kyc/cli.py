@@ -16,6 +16,7 @@ from . import (
     disclosures,
     enrich,
     legislators,
+    odds as odds_mod,
     overrides,
     portraits,
     profiles as profiles_mod,
@@ -133,6 +134,13 @@ def _build(args):
     race_list = races_mod.build(profiles, candidates.filing_counts(field),
                                 results=outcomes, dates=results_mod.load_dates(args.root))
     stats.update(races_mod.stats(race_list))
+    markets = odds_mod.load_cache(args.root)
+    if markets:
+        stats["odds"] = odds_mod.apply(race_list, markets, {p["id"]: p for p in profiles})
+        print(f"  odds: markets or polls for {stats['odds']} Senate races "
+              f"(fetched {markets.get('fetched')})")
+    else:
+        print("  [warn] no odds cache; run 'odds' for market prices and polling averages")
     # The results settle who is on the ballot, so count after applying them.
     stats["not_seeking"] = sum(
         1 for p in profiles
@@ -169,7 +177,8 @@ def _build(args):
 
     issues = validate.run(profiles, raw, races=race_list, geo=geo,
                           snapshot=snapshot, finance=finance, campaigns=sites,
-                          results=outcomes, field=field, enrichment=enrichment)
+                          results=outcomes, field=field, enrichment=enrichment,
+                          odds=markets)
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -190,6 +199,8 @@ def _build(args):
 
     summary = summary_mod.build(profiles, races=race_list,
                                 committees=legislators.load_committees(args.root))
+    if odds_mod.control(markets):
+        summary["senateControl"] = odds_mod.control(markets)
     path, size = emit.write_profiles(
         profiles, stats, args.root, races=race_list, summary=summary
     )
@@ -344,6 +355,51 @@ def _enrich(args):
                 print(f"    - {line}")
             if not args.verbose and len(lines) > 10:
                 print(f"    ... {len(lines) - 10} more (--verbose)")
+    return 0
+
+
+def _odds(args):
+    """Market prices and polling averages for every 2026 Senate race."""
+    raw = _load(args)
+    if raw is None:
+        return 2
+    field = candidates.load_cache(args.root)
+    finance = fec.load_cache(args.root)
+    profiles, _ = build_profiles(raw, snapshot=legislators.load_snapshot(args.root),
+                                 field=field, finance=finance)
+    fec.apply_cache(profiles, finance)
+    outcomes = results_mod.load_cache(args.root)
+    results_mod.apply_cache(profiles, outcomes)
+    race_list = races_mod.build(profiles, candidates.filing_counts(screen_field(field, profiles)),
+                                results=outcomes, dates=results_mod.load_dates(args.root))
+    by_id = {p["id"]: p for p in profiles}
+
+    def people_of(race):
+        # Who a market label or a poll column may name: anyone still in it.
+        ids = race.get("incumbentIds", []) + race.get("candidateIds", [])
+        return [by_id[i] for i in ids
+                if i in by_id and by_id[i].get("raceStatus") not in results_mod.OFF_BALLOT]
+
+    if args.check:
+        cache = odds_mod.load_cache(args.root)
+        if not cache:
+            print(f"[error] no {odds_mod.CACHE_PATH}; run 'odds' first.", file=sys.stderr)
+            return 2
+    else:
+        cache = odds_mod.build(race_list, people_of)
+        odds_mod.save_cache(cache, args.root)
+        print(f"\n[ok] odds cache: {odds_mod.CACHE_PATH}")
+    senate = [r for r in race_list if r["chamber"] == "Senate"]
+    entries = cache.get("races") or {}
+    print(f"  {sum(1 for r in senate if (entries.get(r['id']) or {}).get('markets'))} of "
+          f"{len(senate)} Senate races have a market; "
+          f"{sum(1 for r in senate if (entries.get(r['id']) or {}).get('polls'))} have "
+          f"polling averages (fetched {cache.get('fetched')})")
+    notes = cache.get("notes") or []
+    if notes:
+        print(f"\n  {len(notes)} note(s):")
+        for note in (notes if args.verbose else notes[:12]):
+            print(f"    - {note}")
     return 0
 
 
@@ -711,8 +767,12 @@ def _verify(args):
         results=outcomes, dates=results_mod.load_dates(args.root),
     )
     stats.update(races_mod.stats(race_list))
+    markets = odds_mod.load_cache(args.root)
+    odds_mod.apply(race_list, markets, {p["id"]: p for p in profiles})
     summary = summary_mod.build(profiles, races=race_list,
                                 committees=legislators.load_committees(args.root))
+    if odds_mod.control(markets):
+        summary["senateControl"] = odds_mod.control(markets)
 
     problems = []
 
@@ -870,6 +930,10 @@ def build_parser():
     camp.add_argument("--refresh", action="store_true",
                       help="look everyone up again, not just the uncached")
 
+    odds = add("odds", help="market prices and polling averages for the 2026 Senate races")
+    odds.add_argument("--check", action="store_true",
+                      help="report coverage from the committed cache; no network")
+
     rich = add("enrich", help="read candidates' Wikipedia infoboxes and campaign sites")
     rich.add_argument("--check", action="store_true",
                       help="report what the committed cache fills; no network")
@@ -930,6 +994,8 @@ def main(argv=None):
         return _campaigns(args)
     if args.command == "enrich":
         return _enrich(args)
+    if args.command == "odds":
+        return _odds(args)
     if args.command == "portraits":
         return _portraits(args)
     if args.command == "finance":

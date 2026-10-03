@@ -159,6 +159,7 @@
       KYC.escapeHtml(stateName), " &rsaquo;</a></h", level, ">",
       race ? KYC.cards.raceBadges(race) : "",
       "</div>",
+      race && KYC.odds ? KYC.odds.render(race) : "",
     ];
     // One row per seat: the senator, then the people running for the seat,
     // side by side - stacked, each seat took a screen of mostly empty width.
@@ -273,6 +274,8 @@
       });
       emit(groupSection(group, opts, false, inner));
     });
+    // Which party the markets expect to hold the chamber, above the seats.
+    if (html.length && KYC.odds) html.unshift(KYC.odds.control());
     return { html: html.join(""), people: total, seats: seats };
   }
 

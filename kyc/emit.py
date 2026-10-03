@@ -22,6 +22,7 @@ PAGE_REQUIREMENTS = {
     "index.html": (
         "assets/kyc.js",
         "data/profiles.js",
+        "assets/kyc-odds.js",
         "assets/kyc-cards.js",
         "assets/kyc-profile.js",
         "assets/kyc-senate.js",
@@ -31,6 +32,7 @@ PAGE_REQUIREMENTS = {
         "assets/kyc.js",
         "data/profiles.js",
         "data/geo.js",
+        "assets/kyc-odds.js",
         "assets/kyc-cards.js",
         "assets/kyc-profile.js",
         "assets/kyc-map.js",
@@ -41,6 +43,7 @@ PAGE_REQUIREMENTS = {
 STATE_PAGE_REQUIREMENTS = (
     "../assets/kyc.js",
     "../data/profiles.js",
+    "../assets/kyc-odds.js",
     "../assets/kyc-cards.js",
     "../assets/kyc-profile.js",
     "../assets/kyc-state.js",

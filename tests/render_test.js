@@ -155,7 +155,7 @@ async function testShared(page) {
     check("[hidden] wins over component display rules",
       /\[hidden\]\s*\{[^}]*display:\s*none\s*!important/.test(css));
     check("the page hides with the property, not a class", (() => {
-      const js = ["kyc.js", "kyc-cards.js", "kyc-profile.js", "kyc-senate.js", "kyc-directory.js", "kyc-map.js", "kyc-state.js"]
+      const js = ["kyc.js", "kyc-odds.js", "kyc-cards.js", "kyc-profile.js", "kyc-senate.js", "kyc-directory.js", "kyc-map.js", "kyc-state.js"]
         .filter((f) => fs.existsSync(path.join(SITE, "assets", f)))
         .map((f) => fs.readFileSync(path.join(SITE, "assets", f), "utf8"))
         .join("\n");
@@ -1572,10 +1572,66 @@ async function testSeatRows() {
   window.close();
 }
 
+/* =========================================================== odds */
+
+async function testOdds() {
+  const { window, D, errors } = await buildPage("index.html", { hash: "#/?view=senate" });
+  await settle(50);
+  const KYC = window.KYC;
+  const results = D.getElementById("results");
+
+  suite("index.html — prediction markets and polling averages", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const control = results.querySelector(".odds-control");
+    check("the Senate view opens with the markets on control of the chamber",
+      !!control && control.querySelectorAll(".odds-market").length >= 1 &&
+        results.firstElementChild === control);
+    const blocks = [...results.querySelectorAll(".senate-seat .odds")];
+    check("2026 seats carry their race's markets", blocks.length > 20, String(blocks.length));
+    check("every bar says in words what it draws",
+      [...results.querySelectorAll(".odds-bar")].every((b) => /\d+%/.test(b.getAttribute("aria-label") || "")));
+    const links = [...results.querySelectorAll(".odds a")];
+    check("every source is linked, and opens safely",
+      links.length > 0 && links.every((a) => /^https:/.test(a.href) && a.target === "_blank" &&
+        /noopener/.test(a.rel)));
+    check("each block says a price is not a poll or a forecast",
+      blocks.every((b) => /not a poll/.test(b.textContent)));
+    check("a polling table names the aggregator and when it was updated",
+      !!results.querySelector(".odds-poll-table tbody th") &&
+        /Updated/.test((results.querySelector(".odds-poll-table thead") || {}).textContent || ""));
+
+    // Markup in a market label never reaches the page as markup.
+    const hostile = { label: "Test", odds: { asOf: "2026-10-03T00:00:00Z", markets: [
+      { source: "kalshi", url: "https://kalshi.com/markets/x", title: "<b>x</b>", outcomes: [
+        { label: "<img src=x onerror=alert(1)>", party: "r", price: 0.6 },
+        { label: "Other", party: "d", price: 0.4 }] }] } };
+    const holder = D.createElement("div");
+    holder.innerHTML = KYC.odds.render(hostile);
+    check("market labels are escaped", !holder.querySelector("img") && !holder.querySelector("b") &&
+      /onerror/.test(holder.textContent));
+    check("a race with no odds renders nothing", KYC.odds.render({ label: "x" }) === "");
+    check("prices are written as the market writes them",
+      KYC.odds.percent(0.995) === ">99%" && KYC.odds.percent(0.004) === "<1%" &&
+        KYC.odds.percent(0.384) === "38%");
+  });
+
+  suite("index.html — a race's markets in the grid's race view", () => {
+    window.location.hash = "#/";
+    window.dispatchEvent(new window.Event("hashchange"));
+    D.getElementById("raceViewToggle").click();
+    const senate = [...results.querySelectorAll("section.race")].filter((s) => /^race-S-/.test(s.id));
+    check("Senate races show their markets, compactly",
+      senate.length > 0 && senate.some((s) => s.querySelector(".odds-compact")), String(senate.length));
+    check("House races show none", ![...results.querySelectorAll("section.race")]
+      .filter((s) => /^race-H-/.test(s.id)).some((s) => s.querySelector(".odds")));
+  });
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "index.html") await testDirectoryAsync();
   if (!only || only === "index.html") await testSenate();
+  if (!only || only === "index.html") await testOdds();
   if (!only || only === "index.html") await testSeatRows();
   if (!only || only === "map.html") await testMap();
   if (!only || only === "states") await testStates();

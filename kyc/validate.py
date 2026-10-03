@@ -805,6 +805,61 @@ def check_portrait_overrides(enrichment):
                   stale)]
 
 
+def check_odds(races, odds, today=None):
+    """Market prices and polling averages: attributed, current, coherent.
+
+    A market's outcome label that names nobody in its race is shown as the
+    party the market resolves on and listed here: on 2026-10-03 Kalshi's
+    Louisiana page was really Kentucky's, labelled "Andy Barr" and "Charles
+    Booker". A Senate race no market covers, prices that do not add up to
+    about a dollar, and a cache older than a week are reported too.
+    """
+    if not odds or races is None:
+        return []
+    import datetime
+
+    from .odds import SOURCES, STALE_DAYS
+
+    issues, mismatched, incoherent = [], [], []
+    senate = [r for r in races if r.get("chamber") == "Senate"]
+    for race in senate:
+        for market in (race.get("odds") or {}).get("markets") or []:
+            source = SOURCES.get(market.get("source"), market.get("source"))
+            for outcome in market.get("outcomes") or []:
+                # Under a cent is an eliminated candidate's market nobody
+                # closed (Alaska's, after its August primary), not an error.
+                if outcome.get("mismatch") and (outcome.get("price") or 0) >= 0.01:
+                    mismatched.append(f"{race['id']} {source}: \"{outcome.get('marketLabel')}\" "
+                                      f"names nobody in the race; shown as {outcome.get('label')}")
+            total = sum(o.get("price") or 0 for o in market.get("outcomes") or [])
+            if not 0.85 <= total <= 1.2:
+                incoherent.append(f"{race['id']} {source}: prices add up to {total:.2f}")
+    if mismatched:
+        issues.append(Issue("warn", "odds-label-mismatch",
+                            f"{len(mismatched)} market label(s) name nobody in their race",
+                            mismatched))
+    if incoherent:
+        issues.append(Issue("warn", "odds-incoherent",
+                            f"{len(incoherent)} market(s) whose prices do not add up", incoherent))
+    uncovered = [r["id"] for r in senate if not (r.get("odds") or {}).get("markets")]
+    if uncovered:
+        issues.append(Issue("warn", "odds-uncovered",
+                            f"{len(uncovered)} Senate race(s) with no market from either source",
+                            uncovered))
+    fetched = str(odds.get("fetched") or "")[:10]
+    if today is None:
+        from .emit import build_timestamp
+        today = datetime.date.fromisoformat(build_timestamp()[:10])
+    try:
+        age = (today - datetime.date.fromisoformat(fetched)).days
+    except ValueError:
+        age = None
+    if age is not None and age > STALE_DAYS:
+        issues.append(Issue("warn", "odds-stale",
+                            f"market prices are {age} days old; run 'odds'", [fetched]))
+    return issues
+
+
 def check_field_screen(field, today=None):
     """List every FEC filing the build set aside, and coverage from the future.
 
@@ -976,7 +1031,7 @@ def check_registrations(profiles, field):
 
 
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
-        results=None, field=None, enrichment=None):
+        results=None, field=None, enrichment=None, odds=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_identity(profiles)
@@ -988,6 +1043,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_campaign_blocklist(campaigns)
     issues += check_campaign_sites(profiles, enrichment)
     issues += check_portrait_overrides(enrichment)
+    issues += check_odds(races, odds)
     issues += check_races(profiles, races)
     issues += check_markup(profiles)
     issues += check_geometry(profiles, geo)

@@ -381,6 +381,12 @@
      * in one scroll buries the delegation the reader clicked the state to
      * see, so the challengers sit behind a count they can open. */
     var html = "";
+    if (mode === "senate2026" && KYC.odds) {
+      var seatRace = (global.kycRaces || []).filter(function (r) {
+        return r.chamber === "Senate" && r.state === code;
+      })[0];
+      if (seatRace) html += KYC.odds.render(seatRace, { compact: true });
+    }
     if (seated.length) {
       html += '<p class="panel-subhead">' +
         (mode === "senate2026" ? "Seat held by" : "Currently seated") +

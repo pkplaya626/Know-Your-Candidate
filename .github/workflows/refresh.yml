@@ -139,6 +139,13 @@ jobs:
       - name: Fill gaps from candidates' articles and campaign sites
         run: python build_profile_site.py enrich
 
+      # Kalshi and Polymarket prices for every 2026 Senate race and for
+      # control of the chamber, and the polling averages each race's
+      # Wikipedia page lists. Public endpoints, no key. A price moves daily;
+      # the page shows the date it was read beside every figure.
+      - name: Refresh prediction markets and polling averages
+        run: python build_profile_site.py odds
+
       - name: Rebuild the site data
         run: python build_profile_site.py
 
