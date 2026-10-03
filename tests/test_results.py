@@ -1234,3 +1234,33 @@ class TestElectionPageWords(unittest.TestCase):
         results.apply_cache([member], self.cache())
         self.assertEqual(member["previous_professions"], "Attorney")
         self.assertNotIn("fieldSources", member)
+
+
+class TestNamedMinorParty(unittest.TestCase):
+    """The FEC files Joseph Tache as "Other"; the ballot names his party."""
+
+    def cache(self, key, label):
+        return {"asOf": "2026-09-13", "races": {"S-MA-2026": {
+            "status": {"S6MA00288": "nominee"}, "party": {"S6MA00288": key},
+            "label": {"S6MA00288": label}}}}
+
+    def profile(self, party="Other"):
+        return {"id": "FEC_S6MA00288", "fecCandidateId": "S6MA00288", "isCandidate": True,
+                "source": "fec-field", "name": "Joseph Tache", "party": party,
+                "state": "MA", "chamber": "Senate (Candidate)", "districtNum": None}
+
+    def test_the_ballot_party_replaces_a_party_the_filing_never_named(self):
+        tache = self.profile()
+        results.apply_cache([tache], self.cache("party for socialism and liberation",
+                                                "Party for Socialism and Liberation"))
+        self.assertEqual(tache["party"], "Party for Socialism and Liberation")
+        self.assertEqual(tache["fecParty"], "Other")
+        self.assertNotIn("ballotLine", tache)     # it is his party, not a second line
+
+    def test_a_named_party_is_never_replaced_by_a_minor_line(self):
+        # Jose Vega is a Democrat on the "Speak The Truth" line: shown as a
+        # line beside the nomination, never as his party.
+        vega = self.profile(party="Democrat")
+        results.apply_cache([vega], self.cache("speak the truth", "Speak The Truth"))
+        self.assertEqual(vega["party"], "Democrat")
+        self.assertEqual(vega["ballotLine"], "Speak The Truth")

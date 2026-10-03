@@ -1735,6 +1735,15 @@ def apply_cache(profiles, cache):
                 # the profile. A roster row that disagrees is reported by
                 # ``validate`` for a person to correct.
                 label = BALLOT_LABELS.get(party_of[candidate_id])
+                if (label is None and profile.get("source") == "fec-field"
+                        and party_key(profile.get("party")) in _NAMELESS_PARTY):
+                    # The FEC says only "Other"; the ballot names the party.
+                    # Joseph Tache is the Party for Socialism and Liberation's
+                    # Senate nominee in Massachusetts, and the page called him
+                    # "Other" beside a badge reading "Nominee - Party for
+                    # Socialism and Liberation line".
+                    label = ballot_line(profile.get("name"), profile.get("party"),
+                                        party_of[candidate_id], label_of.get(candidate_id))
                 if (profile.get("source") == "fec-field" and label
                         and party_key(profile.get("party")) != party_of[candidate_id]):
                     profile["fecParty"] = profile["party"]
@@ -1800,6 +1809,8 @@ def apply_cache(profiles, cache):
 BALLOT_LABELS = {"democratic": "Democrat", "republican": "Republican",
                  "libertarian": "Libertarian", "green": "Green",
                  "independent": "Independent"}
+# FEC party fields that name no party, which the ballot's own label replaces.
+_NAMELESS_PARTY = ("other", "oth", "unknown", "none", "")
 
 
 def decided_for(race, party):

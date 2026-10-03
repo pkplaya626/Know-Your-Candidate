@@ -644,5 +644,38 @@ class TestRefreshWorkflow(unittest.TestCase):
         self.assertLessEqual(540 + 120 + 45 + limit, 1000)
 
 
+class TestNoControlCharacters(unittest.TestCase):
+    """A backslash escape that a shell ate is a control character in a file.
+
+    `content: "\\25B8"` in kyc.css was written through a heredoc that read
+    "\\25" as octal: every "no longer in this race" toggle on the site showed a
+    missing-glyph box beside "B8" for three weeks. The same pass turned two
+    regular expressions in render_test.js into ones that could never match -
+    `\\b` became a backspace and `\\1` a 0x01 - so two checks passed vacuously.
+    Nothing a person reads or writes here needs a C0 control character.
+    """
+
+    def test_no_tracked_text_file_holds_one(self):
+        import re
+        import subprocess
+
+        try:
+            files = subprocess.run(["git", "ls-files"], cwd=ROOT, capture_output=True,
+                                   text=True, check=True).stdout.split()
+        except (OSError, subprocess.CalledProcessError):
+            self.skipTest("not a git checkout")
+        control = re.compile(rb"[\x01-\x08\x0b\x0c\x0e-\x1f\x7f]")
+        binary = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".pdf", ".zip")
+        found = []
+        for name in files:
+            if name.lower().endswith(binary):
+                continue
+            with open(os.path.join(ROOT, name), "rb") as handle:
+                for number, line in enumerate(handle.read().split(b"\n"), start=1):
+                    if control.search(line):
+                        found.append(f"{name}:{number}")
+        self.assertEqual(found, [])
+
+
 if __name__ == "__main__":
     unittest.main()

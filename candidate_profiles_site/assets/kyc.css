@@ -787,9 +787,18 @@ svg { flex: none; }
 }
 .race-out > summary::-webkit-details-marker { display: none; }
 .race-out > summary::before {
-  content: "B8";
+  /* Drawn, not typed: the glyph this used to be was written through a shell
+   * that read its escape as octal, and every page showed a missing-glyph box
+   * beside "B8" for three weeks. */
+  content: "";
   display: inline-block;
+  width: 0;
+  height: 0;
   margin-right: var(--s-2);
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  vertical-align: 1px;
   transition: transform 0.18s var(--ease);
 }
 .race-out[open] > summary::before { transform: rotate(90deg); }
@@ -1563,6 +1572,20 @@ svg { flex: none; }
   font-weight: 700;
 }
 .person-row > .icon { color: var(--text-faint); }
+/* A ballot-line badge ("Nominee - Working Families line") is long: it wraps
+ * and shrinks rather than squeezing the name to nothing. */
+.person-row > .badge {
+  flex: 0 1 auto;
+  max-width: 48%;
+  white-space: normal;
+  text-align: center;
+}
+.person-row .who .name,
+.person-row .who .party {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* ========================================================= 14. responsive */
 
@@ -1810,11 +1833,14 @@ svg { flex: none; }
 .race-mate-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .race-mate-name { font-weight: 600; }
 .race-mate-meta { display: flex; flex-wrap: wrap; gap: var(--s-1); align-items: center; font-size: var(--t-xs); }
-.race-mates .race-out { border-top: 0; }
+/* A list-rows child is a flex row; the toggle must not be one, or opening it
+ * lays the people out beside the summary and stretches the summary into a
+ * tall dashed column. */
+.race-mates > .race-out { display: block; border-top: 0; }
 .race-mates .race-note {
   margin: 0;
   color: var(--text-muted);
   font-size: var(--t-sm);
 }
-.race-mates .race-out > summary { padding: var(--s-2) 0; }
+.race-mates .race-out > summary { padding: var(--s-2) var(--s-3); }
 #yourState .nav-link { color: var(--accent); }
