@@ -276,8 +276,16 @@ class TestThePageFile(unittest.TestCase):
         self.assertEqual(page["control"]["house"][0]["outcomes"][0]["price"], 0.92)
 
     def test_the_page_file_is_a_function_of_the_cache_alone(self):
-        self.assertEqual(emit.odds_signature(odds.payload(self.CACHE)),
-                         emit.odds_signature(odds.payload(json.loads(json.dumps(self.CACHE)))))
+        # A fresh fetch holds its rows in the order they were built; odds.json
+        # holds them sorted. The first scheduled run wrote odds.js from the
+        # one and verified it against the other, and failed.
+        fresh = json.loads(json.dumps(self.CACHE))
+        fresh["races"]["S-TX-2026"]["polls"] = {"page": "P", "url": "U", "rows": [
+            {"aggregator": "270toWin", "url": None, "updated": "Oct 2", "results": [
+                {"label": "Ken Paxton (R)", "party": "r", "pct": 45.6, "id": None}]}]}
+        saved = json.loads(json.dumps(fresh, sort_keys=True))
+        self.assertEqual(emit.odds_signature(odds.payload(fresh)),
+                         emit.odds_signature(odds.payload(saved)))
         with tempfile.TemporaryDirectory() as root:
             path, _ = emit.write_odds(odds.payload(self.CACHE), root)
             self.assertEqual(emit.read_signature(path=path),
