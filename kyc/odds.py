@@ -781,7 +781,12 @@ def payload(cache):
             races[rid] = row
     control = {chamber: [_page_market(m) for m in markets]
                for chamber, markets in sorted((cache.get("control") or {}).items())}
-    return {"asOf": cache.get("fetched"), "races": races, "control": control}
+    page = {"asOf": cache.get("fetched"), "races": races, "control": control}
+    # Keys sorted at every level: the cache is saved sorted, so the payload
+    # built from a fresh fetch in memory and the one rebuilt from odds.json on
+    # disk must serialise identically, or verify calls a just-written file
+    # stale - which is how the first scheduled run failed.
+    return json.loads(json.dumps(page, sort_keys=True))
 
 
 def coverage(cache, races):
