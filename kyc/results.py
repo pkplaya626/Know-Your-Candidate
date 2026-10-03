@@ -41,6 +41,8 @@ import time
 import unicodedata
 import urllib.parse
 import urllib.request
+from .normalize import fill_field
+
 
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "primary_results.json")
 
@@ -608,6 +610,61 @@ def _continues_elsewhere(bullet, bullets):
                 and party_key(other["contest"]) != mine):
             return True
     return bool(_CONTINUES.search(re.split(r"<ref", bullet["line"], maxsplit=1)[0]))
+
+
+_PIPED_LINK = re.compile(r"\[\[(?:[^\]|]*\|)?([^\]]*)\]\]")
+_EXTERNAL_LINK = re.compile(r"\[(https?://[^\s\]]+)\s+([^\]]+)\]")
+_SITE_HEADING = re.compile(r"campaign (?:web)?sites?|official campaign|external links", re.I)
+# Notes about the listing itself, not about the person.
+_LISTING_NOTE = re.compile(
+    r"\(\s*(?:running|filed|withdrew|write-in|previously|incumbent|campaign)[^)]*\)", re.I)
+
+
+def plain_text(wikitext):
+    """Wiki markup as a reader sees it: links to their labels, notes dropped."""
+    text = re.sub(r"<ref[^>]*>.*?</ref>|<ref[^/]*/>|<!--.*?-->", "", wikitext or "", flags=re.S)
+    text = re.sub(r"\{\{(?:nowrap|small|nobr)\|([^{}]*)\}\}", r"\1", text, flags=re.I)
+    text = re.sub(r"\{\{[^{}]*\}\}", "", text)
+    text = _PIPED_LINK.sub(r"\1", text)
+    text = _EXTERNAL_LINK.sub(r"\2", text)
+    text = re.sub(r"'{2,}|<[^>]+>", "", text)
+    return re.sub(r"\s+", " ", text).strip(" ,;:.")
+
+
+def candidate_descriptors(section):
+    """``{name: description}`` from the race's candidate lists.
+
+    Election pages describe each listed candidate in a few words - "molecular
+    biologist and DSA member", "former state senator". Only ballot headings
+    are read (Declared, Nominee, Candidates), and only the text the page puts
+    after the name; nothing is inferred.
+    """
+    out = {}
+    for bullet in _list_bullets(section):
+        heading = clean_name(bullet["heading"].group(2)).lower()
+        if not _BALLOT_HEADING.search(heading) or _OFF_BALLOT_HEADING.search(heading):
+            continue
+        line = bullet["line"].lstrip("*").strip()
+        rest = line[len(bullet["raw"]):] if line.startswith(bullet["raw"]) else ""
+        text = plain_text(_LISTING_NOTE.sub("", rest.lstrip(",;: ")))
+        if 3 <= len(text) <= 200 and bullet["name"] not in out:
+            out[bullet["name"]] = text
+    return out
+
+
+def campaign_sites(section):
+    """``{name: url}`` from the race's "Campaign websites" list."""
+    out = {}
+    headings = list(_HEADING.finditer(section or ""))
+    for n, heading in enumerate(headings):
+        if not _SITE_HEADING.search(heading.group(2)):
+            continue
+        end = headings[n + 1].start() if n + 1 < len(headings) else len(section)
+        for url, label in _EXTERNAL_LINK.findall(section[heading.end():end]):
+            name = clean_name(re.sub(r"\s*\([^)]*\)\s*$", "", plain_text(label)))
+            if len(name.split()) >= 2 and name not in out:
+                out[name] = url
+    return out
 
 
 def candidate_lists(text):
@@ -1485,10 +1542,12 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                     f"complete open-primary result; left unsettled")
             continue
         matched, ambiguous = match_names(list(outcome), rows, (aliases or {}).get(rid))
-        status, party, article, label = {}, {}, {}, {}
+        status, party, article, label, about, site = {}, {}, {}, {}, {}, {}
         listed = ballot_parties(boxes)
         linked = ballot_articles(boxes)
         spelled = ballot_labels(boxes)
+        described = candidate_descriptors(section)
+        sites = campaign_sites(section)
         for name, cids in matched.items():
             for cid in cids:
                 status[cid] = outcome[name]
@@ -1498,6 +1557,10 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                     article[cid] = linked[name]
                 if spelled.get(name):
                     label[cid] = spelled[name]
+                if described.get(name):
+                    about[cid] = described[name]
+                if sites.get(name):
+                    site[cid] = sites[name]
         races[rid] = {
             "page": title,
             "status": status,
@@ -1506,6 +1569,10 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
             "label": label,
             # The article the ballot line links to, per filing.
             "article": article,
+            # The page's own few words about each candidate, and the campaign
+            # site its "Campaign websites" list gives - per filing.
+            "about": about,
+            "site": site,
             # Ids a Wikipedia name fitted but could not be told apart. No
             # status, and no inference from their absence either.
             "unsure": match_names.unsure,
@@ -1623,12 +1690,15 @@ def apply_cache(profiles, cache):
     if not cache:
         return 0
     by_id, party_of, article_of, label_of, unsure = {}, {}, {}, {}, set()
+    about_of, site_of = {}, {}
     races = cache.get("races", {})
     for rid, race in races.items():
         for cid, status in race.get("status", {}).items():
             by_id[cid] = (rid, status)
         party_of.update(race.get("party") or {})
         article_of.update(race.get("article") or {})
+        about_of.update(race.get("about") or {})
+        site_of.update(race.get("site") or {})
         label_of.update(race.get("label") or {})
         unsure.update(race.get("unsure") or [])
     from .candidates import race_id
@@ -1643,6 +1713,15 @@ def apply_cache(profiles, cache):
             rid, status = by_id[candidate_id]
             profile["raceStatus"] = status
             profile["raceStatusRace"] = rid
+            if candidate_id in about_of and profile.get("source") == "fec-field":
+                # The election page's own description of a filed candidate,
+                # shown as their background and credited to the page.
+                fill_field(profile, "previous_professions", about_of[candidate_id],
+                           "election-page")
+            if candidate_id in site_of:
+                # Not linked yet: a site the page lists is checked for
+                # hijacking and dead domains by `enrich` before it is shown.
+                profile["electionPageSite"] = site_of[candidate_id]
             if candidate_id in article_of and not profile.get("wikipedia"):
                 # A member's title comes from the bioguide mapping; for a
                 # filed candidate the ballot's own link is the authority.

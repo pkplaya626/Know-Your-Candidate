@@ -22,10 +22,15 @@ scraping it would be fragile and against the spirit of that gate, so senators
 have no disclosure link and the README says so.
 """
 
+import http.cookiejar
 import io
 import json
 import os
+import re
+import time
+import unicodedata
 import urllib.error
+import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 import zipfile
@@ -172,5 +177,241 @@ def apply_cache(profiles, cache):
         profile["disclosureUrl"] = record["url"]
         profile["disclosureYear"] = record.get("year")
         profile["disclosureFiled"] = record.get("filed")
+        profile["disclosureSource"] = record.get("source") or HOUSE_SOURCE
         applied += 1
     return applied
+
+
+# --------------------------------------------------------------------- Senate
+#
+# Senators file with the Secretary of the Senate, whose search (eFD) asks a
+# visitor to accept its terms - the reports may not be used commercially or
+# to solicit money - before it answers. A civic directory linking the filings
+# is within those terms, so the pipeline accepts them once per run, as a
+# reader would, and asks for each sitting senator's annual reports by state
+# and surname. The match is then checked like an FEC figure (rule 20): the
+# filer must be a senator for that state whose name fits the member, and
+# anything that fits two people is left alone.
+
+EFD_ROOT = "https://efdsearch.senate.gov"
+EFD_HOME = EFD_ROOT + "/search/home/"
+EFD_DATA = EFD_ROOT + "/search/report/data/"
+SENATE_SOURCE = "senate-efd"
+HOUSE_SOURCE = "house-clerk"
+
+_CSRF_FORM = re.compile(r'name="csrfmiddlewaretoken" value="([^"]+)"')
+_HREF = re.compile(r'href="([^"]+)"')
+_TAGS = re.compile(r"<[^>]+>")
+_CY = re.compile(r"\bCY\s*(\d{4})\b")
+
+
+def _fold(text):
+    normal = unicodedata.normalize("NFD", str(text or ""))
+    return "".join(c for c in normal if unicodedata.category(c) != "Mn").lower().strip()
+
+
+def senate_session(pause=1.0):
+    """``(opener, csrf)`` after accepting the eFD terms once."""
+    jar = http.cookiejar.CookieJar()
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+    try:
+        with opener.open(urllib.request.Request(EFD_HOME, headers=_UA), timeout=_TIMEOUT) as r:
+            page = r.read().decode("utf-8", "replace")
+        token = _CSRF_FORM.search(page)
+        if not token:
+            raise DisclosureError("the Senate eFD home page carried no terms form")
+        time.sleep(pause)
+        body = urllib.parse.urlencode({"prohibition_agreement": "1",
+                                       "csrfmiddlewaretoken": token.group(1)}).encode()
+        agree = urllib.request.Request(EFD_HOME, data=body,
+                                       headers=dict(_UA, Referer=EFD_HOME))
+        with opener.open(agree, timeout=_TIMEOUT) as r:
+            r.read()
+    except urllib.error.URLError as exc:
+        raise DisclosureError(f"Senate eFD unreachable: {exc}") from exc
+    csrf = next((c.value for c in jar if c.name == "csrftoken"), "")
+    if not csrf:
+        raise DisclosureError("the Senate eFD did not open a session")
+    return opener, csrf
+
+
+def senate_rows(opener, csrf, state, surname, since="01/01/2025 00:00:00"):
+    """Raw eFD result rows for a senator's annual reports (report type 7)."""
+    body = urllib.parse.urlencode({
+        "start": "0", "length": "25", "report_types": "[7]", "filer_types": "[1]",
+        "submitted_start_date": since, "submitted_end_date": "", "candidate_state": "",
+        "senator_state": state, "office_id": "", "first_name": "", "last_name": surname,
+    }).encode()
+    req = urllib.request.Request(EFD_DATA, data=body, headers=dict(
+        _UA, Referer=EFD_ROOT + "/search/", **{"X-CSRFToken": csrf,
+                                                "X-Requested-With": "XMLHttpRequest"}))
+    try:
+        with opener.open(req, timeout=_TIMEOUT) as r:
+            return json.loads(r.read().decode("utf-8")).get("data") or []
+    except (urllib.error.URLError, ValueError) as exc:
+        raise DisclosureError(f"Senate eFD search failed for {surname} ({state}): {exc}") from exc
+
+
+def parse_senate_rows(rows):
+    """``[{first, last, filer, title, year, url, filed, amendment}]`` from eFD rows.
+
+    An electronic report names its year ("Annual Report for CY 2025"). A paper
+    one - scanned, filed by Richard Durbin and Richard Blumenthal - says only
+    "Annual Report", and its year is the one before it was filed: the report
+    covers the previous calendar year, due in May with extensions to August.
+    Skipping those left both senators with no link at all.
+    """
+    out = []
+    for row in rows or []:
+        if not isinstance(row, (list, tuple)) or len(row) < 5:
+            continue
+        first, last, filer, title_html, filed = (str(c or "") for c in row[:5])
+        link = _HREF.search(title_html)
+        title = _TAGS.sub("", title_html).strip()
+        year = _CY.search(title)
+        if year:
+            year = year.group(1)
+        elif link and "/paper/" in link.group(1) and title.lower().startswith("annual report"):
+            filed_year = re.search(r"(\d{4})\s*$", filed.strip())
+            year = str(int(filed_year.group(1)) - 1) if filed_year else None
+        if not link or not year:
+            continue
+        out.append({"first": _TAGS.sub("", first).strip(), "last": _TAGS.sub("", last).strip(),
+                    "filer": _TAGS.sub("", filer).strip(), "title": title,
+                    "year": year, "filed": filed.strip(),
+                    "amendment": "amendment" in title.lower(),
+                    "url": urllib.parse.urljoin(EFD_ROOT, link.group(1))})
+    return out
+
+
+def _filed_sort(report):
+    """Latest year first; within it the original report over an amendment."""
+    month, day, year = (report["filed"].split("/") + ["0", "0", "0"])[:3]
+    return (report["year"], not report.get("amendment"), year.zfill(4), month.zfill(2),
+            day.zfill(2))
+
+
+def _is_senator(filer):
+    """eFD's label for a senator filing: "Cruz, Ted (Senator)", or on a paper
+    report just "Senator"."""
+    label = _fold(filer).strip()
+    return "(senator)" in label or label == "senator"
+
+
+def _legal_name(report):
+    first = _fold(report["first"]).replace(".", " ").split()
+    return f"{first[0] if first else ''} {_fold(report['last']).strip()}"
+
+
+def _filers(reports):
+    """The distinct people who filed *reports*.
+
+    An electronic report's label names its filer ("Smith, Mike R. (Senator)"),
+    and two labels are two people. A paper report says only "Senator"; it
+    belongs to the one labelled filer with the same legal name, or stands for
+    a filer of its own when there is none - or more than one.
+    """
+    labelled = {}
+    for report in reports:
+        label = _fold(report["filer"]).strip()
+        if "(" in label:
+            labelled.setdefault(_legal_name(report), set()).add(label)
+    people = set()
+    for report in reports:
+        label = _fold(report["filer"]).strip()
+        if "(" in label:
+            people.add(label)
+            continue
+        owners = labelled.get(_legal_name(report), set())
+        people.add(next(iter(owners)) if len(owners) == 1 else "paper: " + _legal_name(report))
+    return people
+
+
+_SUFFIXES = ("jr", "sr", "ii", "iii", "iv")
+
+
+def _given_names(report):
+    """Every first name eFD gives for a filer: the legal one and the filer label's."""
+    names = set(_fold(report["first"]).replace(".", " ").split())
+    filer = _fold(report["filer"])
+    if "," in filer:
+        names |= set(filer.split(",", 1)[1].split("(")[0].replace(".", " ").split())
+    return {n for n in names if len(n) > 1 and n not in _SUFFIXES}
+
+
+# Standard English short forms. Only ever used to confirm a filer the query
+# has already pinned to one state, one surname and a senator - never to find
+# a person: "Jim" Banks files as "Banks, James E.".
+NICKNAMES = {
+    "jim": "james", "jimmy": "james", "bill": "william", "billy": "william",
+    "bob": "robert", "bobby": "robert", "dick": "richard", "rick": "richard",
+    "chuck": "charles", "jack": "john", "ted": "edward", "tom": "thomas",
+    "tommy": "thomas", "liz": "elizabeth", "beth": "elizabeth", "peggy": "margaret",
+    "kathy": "katherine", "katie": "katherine", "joe": "joseph", "ben": "benjamin",
+}
+
+
+def _name_fits(a, b):
+    if a == b or NICKNAMES.get(a) == b or NICKNAMES.get(b) == a:
+        return True
+    return min(len(a), len(b)) >= 3 and (a.startswith(b) or b.startswith(a))
+
+
+def pick_senate(profile, reports):
+    """The member's latest annual report, or ``None`` when it is not certain.
+
+    The filer must be a senator (eFD's own "(Senator)" label), carry the
+    member's surname, and have a first name the member also goes by - the
+    roster's legal name, or an alias from the bioguide-keyed record. Two
+    different people fitting is ambiguity, never a choice.
+    """
+    words = _fold(profile.get("rosterName") or profile["name"]).replace(".", "").split()
+    if not words:
+        return None
+    surname = words[-1] if words[-1] not in ("jr", "sr", "ii", "iii", "iv") else words[-2]
+    given = {words[0]}
+    for alias in profile.get("aliases") or []:
+        parts = _fold(alias).replace(".", "").split()
+        if parts:
+            given.add(parts[0])
+    fits = []
+    for report in reports:
+        if not _is_senator(report["filer"]) or surname not in _fold(report["last"]):
+            continue
+        # eFD carries the legal name ("Rafael E") and the name the filer goes
+        # by ("Cruz, Ted"); a nickname may also be a prefix ("Mitch" of "A.
+        # Mitchell", "Jeff" of "Jeffrey").
+        if not any(_name_fits(g, f) for g in given for f in _given_names(report)):
+            continue
+        fits.append(report)
+    people = _filers(fits)
+    if len(people) != 1:
+        return None
+    best = max(fits, key=_filed_sort)
+    return {"url": best["url"], "year": best["year"], "filed": best["filed"],
+            "name": profile["name"], "title": best["title"], "source": SENATE_SOURCE}
+
+
+def match_senate(profiles, log=print, pause=1.0):
+    """``{bioguide: record}`` for every sitting senator with an annual report."""
+    senators = [p for p in profiles if not p.get("isCandidate") and p.get("chamber") == "Senate"]
+    opener, csrf = senate_session(pause)
+    found, unclear = {}, []
+    for profile in senators:
+        words = _fold(profile.get("rosterName") or profile["name"]).replace(".", "").split()
+        surname = words[-1] if words[-1] not in ("jr", "sr", "ii", "iii", "iv") else words[-2]
+        time.sleep(pause)
+        reports = parse_senate_rows(senate_rows(opener, csrf, profile["state"], surname))
+        if not reports:
+            # Tammy Duckworth's reports carry no state, so a search filtered on
+            # Illinois finds nothing. The name checks below still apply.
+            time.sleep(pause)
+            reports = parse_senate_rows(senate_rows(opener, csrf, "", surname))
+        record = pick_senate(profile, reports)
+        if record:
+            found[profile["id"]] = record
+        elif reports:
+            unclear.append(f"{profile['name']} ({profile['state']})")
+    if unclear:
+        log(f"  [warn] left alone, the filer did not certainly match: {', '.join(unclear)}")
+    return found

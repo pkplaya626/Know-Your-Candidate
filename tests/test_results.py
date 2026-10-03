@@ -1166,3 +1166,71 @@ class TestValidateResultsPages(unittest.TestCase):
     def test_a_clean_run_reports_nothing(self):
         self.assertEqual(self.issues({"missingPages": [], "unparsedPages": []}), {})
         self.assertEqual(self.issues(None), {})
+
+
+class TestElectionPageWords(unittest.TestCase):
+    """What a race's own page says about each candidate, and where their
+    campaign lives: read from the page, never inferred."""
+
+    SECTION = "\n".join([
+        "==Democratic primary==",
+        "===Candidates===",
+        "====Nominee====",
+        "* [[Jane Doe (politician)|Jane Doe]], molecular biologist and "
+        "[[Democratic Socialists of America|DSA]] member<ref>{{cite web|url=x}}</ref>",
+        "====Eliminated in primary====",
+        "* John Roe, attorney",
+        "====Withdrawn====",
+        "* Sam Poe, businessman",
+        "====Declined====",
+        "* Pat Moe, state senator",
+        "===Independents===",
+        "====Declared====",
+        "* Alex Lowe, retired teacher ''(running as an independent)''",
+        "* Chris Bowe",
+        "== External links ==",
+        "'''Official campaign websites for candidates'''",
+        "*[https://www.janedoe.com/ Jane Doe (D)]",
+        '*[https://lowe2026.org/ Alex "Al" Lowe (I)]',
+        "*[https://example.com/ Official site]",
+    ])
+
+    def test_only_ballot_headings_are_read_and_only_what_follows_the_name(self):
+        self.assertEqual(results.candidate_descriptors(self.SECTION), {
+            "Jane Doe": "molecular biologist and DSA member",
+            "Alex Lowe": "retired teacher",
+        })
+
+    def test_the_external_links_list_gives_each_candidates_site(self):
+        sites = results.campaign_sites(self.SECTION)
+        self.assertEqual(sites["Jane Doe"], "https://www.janedoe.com/")
+        # Keyed as the page spells the name, which is how its ballot lines are
+        # matched to filings; a label that is no one's name attaches to no one.
+        self.assertEqual(sites['Alex "Al" Lowe'], "https://lowe2026.org/")
+
+    def cache(self):
+        return {"asOf": "2026-09-13", "races": {"H-TX-18-2026": {
+            "status": {"H6TX18232": "nominee", "H2TX18001": "nominee"},
+            "about": {"H6TX18232": "molecular biologist", "H2TX18001": "incumbent"},
+            "site": {"H6TX18232": "https://www.janedoe.com/"},
+        }}}
+
+    def test_a_filed_candidate_gets_the_description_credited_to_the_page(self):
+        filed = {"id": "H6TX18232", "fecCandidateId": "H6TX18232", "isCandidate": True,
+                 "source": "fec-field", "state": "TX", "chamber": "House (Candidate)",
+                 "districtNum": 18, "previous_professions": "No data",
+                 "quality": {"previous_professions": "unknown"}}
+        results.apply_cache([filed], self.cache())
+        self.assertEqual(filed["previous_professions"], "molecular biologist")
+        self.assertEqual(filed["fieldSources"], {"previous_professions": "election-page"})
+        # The page's site is held back until `enrich` has read it.
+        self.assertEqual(filed["electionPageSite"], "https://www.janedoe.com/")
+        self.assertNotIn("campaignSite", filed)
+
+    def test_a_members_roster_fields_are_never_touched(self):
+        member = {"id": "H2TX18001", "fecCandidateId": "H2TX18001", "isCandidate": False,
+                  "state": "TX", "chamber": "House", "districtNum": 18,
+                  "previous_professions": "Attorney", "quality": {}}
+        results.apply_cache([member], self.cache())
+        self.assertEqual(member["previous_professions"], "Attorney")
+        self.assertNotIn("fieldSources", member)

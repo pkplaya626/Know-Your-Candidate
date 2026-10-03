@@ -252,7 +252,7 @@ class TestCampaignSites(unittest.TestCase):
 
     def test_every_blocklist_entry_says_why(self):
         for host, (kind, checked, seen) in overrides.BLOCKED_CAMPAIGN_HOSTS.items():
-            self.assertIn(kind, ("hijacked", "dead"), host)
+            self.assertIn(kind, ("hijacked", "dead", "unrelated"), host)
             self.assertRegex(checked, r"^\d{4}-\d{2}-\d{2}$", host)
             self.assertTrue(seen, host)
             self.assertEqual(host, host.lower(), host)

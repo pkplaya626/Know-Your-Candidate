@@ -127,8 +127,17 @@ jobs:
         if: env.FEC_API_KEY != ''
         run: python build_profile_site.py campaigns --limit 150 || true
 
-      - name: Refresh House financial disclosure links
+      - name: Refresh financial disclosure links (House Clerk and Senate eFD)
         run: python build_profile_site.py disclosures
+
+      # What a filed candidate's own sources say - the birth date, education
+      # and occupation in the article their ballot page links; their
+      # campaign's description of itself, its issues page and its portrait -
+      # and a read of every linked campaign site, so a domain that lapses into
+      # a gambling page is caught by the next run rather than by a reader.
+      # Anyone read in the last six days is skipped. No API key involved.
+      - name: Fill gaps from candidates' articles and campaign sites
+        run: python build_profile_site.py enrich
 
       - name: Rebuild the site data
         run: python build_profile_site.py

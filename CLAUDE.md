@@ -27,7 +27,8 @@ data/fec_field.json         ──┤   (the FEC's 2026 candidate register)
 data/disclosures.json       ──┤
 data/primary_results.json   ──┤
 data/committees.json        ──┤   (committee rosters, with rank and title)
-data/campaigns.json         ──┴─> kyc/ ──> candidate_profiles_site/
+data/campaigns.json         ──┤
+data/enrichment.json        ──┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
                                              states/*.html      (generated, one per state)
@@ -49,8 +50,9 @@ data/campaigns.json         ──┴─> kyc/ ──> candidate_profiles_site/
   hand-edited.
 - Everything in `data/` is **generated**. Never edit `profiles.js` or `geo.js`
   by hand. `portraits.json`, `finance.json`, `fec_field.json`,
-  `disclosures.json`, `primary_results.json`, `committees.json` and
-  `campaigns.json` are caches, but they *are* hand-editable.
+  `disclosures.json`, `primary_results.json`, `committees.json`,
+  `campaigns.json` and `enrichment.json` are caches, but they *are*
+  hand-editable.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them only to check they load the right scripts in the right order; it never
   rewrites them. `states/*.html` and `sitemap.xml` are the opposite: generated
@@ -70,15 +72,16 @@ python build_profile_site.py congress --apply # write newly seated members in
 python build_profile_site.py geo              # regenerate map geometry only
 python build_profile_site.py congress         # refresh membership (network)
 python build_profile_site.py field --check    # who is running, from the FEC
-python build_profile_site.py disclosures      # House financial disclosure links
+python build_profile_site.py disclosures      # House and Senate disclosure links
 python build_profile_site.py results          # who is still in, from Wikipedia
 python build_profile_site.py campaigns        # campaign websites from FEC committees
-python -m unittest discover tests             # 509 tests, no dependencies
-npm install && npm test                       # 466 real-DOM checks (needs jsdom)
+python build_profile_site.py enrich           # fill gaps; check every campaign site
+python -m unittest discover tests             # 571 tests, no dependencies
+npm install && npm test                       # 478 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
-`campaigns` and `congress` touch the network. Run the
+`campaigns`, `enrich` and `congress` touch the network. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -319,6 +322,43 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     than one a second) and waits out `Retry-After` or the whole window on a
     429. A failed refresh opens a "Weekly refresh failed" issue and the next
     good one closes it.
+
+38. **Fill a gap only from a source tied to the person, in its own words,
+    and say which.** A filed candidate arrives with a name, a party and
+    money. `enrich.py` reads only the article their ballot page links
+    (rule 33) and the campaign site their committee filed (rule 32) or the
+    race page lists - never a search. What reaches the page is quoted, not
+    paraphrased: an infobox date, the campaign's own description of itself,
+    the headings of its issues page. All of it goes through
+    `normalize.fill_field`, which never overwrites a value and records the
+    source in `fieldSources` for the page to badge. A site must name the
+    candidate in its text before anything is taken from it, and an image
+    must carry their surname in its file name or alt text *and* be taller
+    than it is wide, unless its own name says headshot, portrait or
+    profile. Look at what passes: the first full run's 79 "portraits"
+    included a T-shirt, a clipboard icon, four logos and eight group or
+    family photographs, every one carrying the right name. What passes
+    every rule and is still not a likeness goes in
+    `overrides.NOT_A_PORTRAIT`, because the weekly re-read undoes an edit
+    to the cache. Issue headings come from one heading level of a page
+    that is not a ballot-question page ("Tyler votes NO" under a measure is
+    not his platform), and never a line naming anyone else in the race -
+    "Rob Wittman has allowed healthcare prices to skyrocket" is an attack
+    line, not a platform.
+
+39. **Read every linked campaign site, and know a compromised site from a
+    hijacked one.** Rule 35's blocklist was a one-off sweep; domains keep
+    lapsing. `enrich` reads every committee site linked for anyone still
+    in a race, members' too. Visible gambling spam or a parking page is
+    withdrawn from the profile automatically and reported for a person to
+    record in `BLOCKED_CAMPAIGN_HOSTS` - that is how `joshweil.us` (a 301
+    chain to a slot site) and two parked domains were found on 2026-10-02,
+    one of them only after redirects were followed with cookies and a
+    page's `window.location = "/lander"` was read as the parking script it
+    is. Spam *hidden* in the campaign's own page (`display:none`,
+    off-screen) is a compromised site, not a lapsed one: Ron Johnson's
+    stays linked and is reported. A bot wall, a JavaScript-only page or a
+    timeout concludes nothing (rule 8).
 
 ## Curated data
 

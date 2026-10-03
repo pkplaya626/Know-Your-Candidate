@@ -516,25 +516,28 @@ class TestDisclosures(unittest.TestCase):
 
 
 class TestDisclosuresAgainstRealData(unittest.TestCase):
-    def test_only_house_members_are_linked(self):
+    def test_only_members_are_linked_each_to_their_own_chamber(self):
         raw = load_all(ROOT)
         profiles, _ = build_profiles(raw)
         cache = disclosures.load_cache(ROOT)
         if not cache:
             self.skipTest("no disclosure cache committed")
         disclosures.apply_cache(profiles, cache)
-        wrong = [
-            p["name"] for p in profiles
-            if p.get("disclosureUrl") and p["chamber"] != "House"
-        ]
+        wrong = []
+        for p in profiles:
+            if not p.get("disclosureUrl"):
+                continue
+            house = p["chamber"] == "House" and p["disclosureSource"] == "house-clerk"
+            senate = p["chamber"] == "Senate" and p["disclosureSource"] == "senate-efd"
+            if p["isCandidate"] or not (house or senate):
+                wrong.append(p["name"])
         self.assertEqual(wrong, [])
 
-    def test_every_link_points_at_the_house_clerk(self):
+    def test_every_link_points_at_the_office_that_holds_the_filing(self):
         for record in (disclosures.load_cache(ROOT) or {}).values():
-            self.assertTrue(
-                record["url"].startswith("https://disclosures-clerk.house.gov/"),
-                record["url"],
-            )
+            host = ("https://efdsearch.senate.gov/" if record.get("source") == "senate-efd"
+                    else "https://disclosures-clerk.house.gov/")
+            self.assertTrue(record["url"].startswith(host), record["url"])
 
 
 if __name__ == "__main__":
@@ -674,3 +677,86 @@ class TestRegistrations(unittest.TestCase):
                      "otherFecIds": ["H6FL22149"]}]
         codes = [i.code for i in validate.check_registrations(profiles, field)]
         self.assertIn("registrations-disagree", codes)
+
+
+class TestSenateDisclosures(unittest.TestCase):
+    """Senators' annual reports from the Senate eFD, checked like FEC money."""
+
+    @staticmethod
+    def row(first, last, filer, cy, filed, uuid="abc"):
+        return [first, last, filer,
+                f'<a href="/search/view/annual/{uuid}/" target="_blank">Annual Report for CY {cy}</a>',
+                filed]
+
+    def test_rows_parse_to_absolute_report_links(self):
+        out = disclosures.parse_senate_rows([self.row("Christopher A", "Coons", "Coons, Chris (Senator)", 2025, "08/06/2026")])
+        self.assertEqual(out[0]["url"], "https://efdsearch.senate.gov/search/view/annual/abc/")
+        self.assertEqual((out[0]["year"], out[0]["filed"]), ("2025", "08/06/2026"))
+
+    def test_the_name_a_senator_goes_by_or_a_nickname_confirms_the_filer(self):
+        cruz = {"name": "Ted Cruz", "state": "TX"}
+        reports = disclosures.parse_senate_rows([self.row("Rafael E", "Cruz", "Cruz, Ted (Senator)", 2025, "05/15/2026")])
+        self.assertEqual(disclosures.pick_senate(cruz, reports)["year"], "2025")
+        banks = {"name": "Jim Banks", "state": "IN"}
+        reports = disclosures.parse_senate_rows([self.row("James", "Banks", "Banks, James E. (Senator)", 2025, "05/15/2026")])
+        self.assertIsNotNone(disclosures.pick_senate(banks, reports))
+
+    def test_the_latest_annual_report_wins(self):
+        coons = {"name": "Christopher Coons", "state": "DE"}
+        reports = disclosures.parse_senate_rows([
+            self.row("Christopher A", "Coons", "Coons, Chris (Senator)", 2024, "05/15/2025", "old"),
+            self.row("Christopher A", "Coons", "Coons, Chris (Senator)", 2025, "08/06/2026", "new"),
+        ])
+        self.assertTrue(disclosures.pick_senate(coons, reports)["url"].endswith("/new/"))
+
+    def test_a_different_person_or_two_people_is_never_a_match(self):
+        member = {"name": "Mike Smith", "state": "XX"}
+        other = disclosures.parse_senate_rows([self.row("Laura", "Smith", "Smith, Laura (Senator)", 2025, "05/15/2026")])
+        self.assertIsNone(disclosures.pick_senate(member, other))
+        two = disclosures.parse_senate_rows([
+            self.row("Michael", "Smith", "Smith, Mike (Senator)", 2025, "05/15/2026", "a"),
+            self.row("Michael", "Smith", "Smith, Mike R. (Senator)", 2025, "05/16/2026", "b"),
+        ])
+        self.assertIsNone(disclosures.pick_senate(member, two))
+        candidate = disclosures.parse_senate_rows([self.row("Mike", "Smith", "Smith, Mike (Candidate)", 2025, "05/15/2026")])
+        self.assertIsNone(disclosures.pick_senate(member, candidate))
+
+    def test_applied_records_say_which_chamber_filed_them(self):
+        people = [{"id": "C001088"}, {"id": "A000055"}]
+        cache = {"C001088": {"url": "https://efdsearch.senate.gov/x", "year": "2025", "source": "senate-efd"},
+                 "A000055": {"url": "https://disclosures-clerk.house.gov/y.pdf", "year": "2025"}}
+        self.assertEqual(disclosures.apply_cache(people, cache), 2)
+        self.assertEqual(people[0]["disclosureSource"], "senate-efd")
+        self.assertEqual(people[1]["disclosureSource"], "house-clerk")
+
+
+    def test_paper_annual_reports_count_for_the_year_before_they_were_filed(self):
+        # Richard Durbin and Richard Blumenthal file on paper; eFD titles those
+        # "Annual Report" and labels the filer only "Senator".
+        rows = [["RICHARD J", "DURBIN", "Senator",
+                 '<a href="/search/view/paper/8f61/" target="_blank">Annual Report</a>',
+                 "08/12/2026"],
+                ["RICHARD J", "DURBIN", "Senator",
+                 '<a href="/search/view/paper/8a94/" target="_blank">Annual Report</a>',
+                 "07/31/2025"],
+                ["RICHARD J", "DURBIN", "Senator",
+                 '<a href="/search/view/paper/bc06/" target="_blank">Annual Report (Amendment)</a>',
+                 "08/13/2026"]]
+        reports = disclosures.parse_senate_rows(rows)
+        self.assertEqual([r["year"] for r in reports], ["2025", "2024", "2025"])
+        record = disclosures.pick_senate({"name": "Richard Durbin", "state": "IL"}, reports)
+        self.assertEqual(record["url"], "https://efdsearch.senate.gov/search/view/paper/8f61/")
+        self.assertEqual(record["year"], "2025")
+
+    def test_a_senators_paper_and_electronic_reports_are_one_filer(self):
+        # Maria Cantwell and eight others file both ways; read as two people,
+        # all nine lost their link.
+        reports = disclosures.parse_senate_rows([
+            ["Maria", "Cantwell", "Cantwell, Maria (Senator)",
+             '<a href="/search/view/annual/e1/" target="_blank">Annual Report for CY 2024</a>',
+             "05/15/2025"],
+            ["MARIA", "CANTWELL", "Senator",
+             '<a href="/search/view/paper/p1/" target="_blank">Annual Report</a>', "08/13/2026"],
+        ])
+        record = disclosures.pick_senate({"name": "Maria Cantwell", "state": "WA"}, reports)
+        self.assertEqual(record["url"], "https://efdsearch.senate.gov/search/view/paper/p1/")

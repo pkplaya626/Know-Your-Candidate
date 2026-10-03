@@ -1254,6 +1254,28 @@ svg { flex: none; }
   line-height: 1.5;
 }
 
+/* A campaign's description of itself, quoted from its website. */
+.campaign-quote {
+  margin: 0 0 var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: var(--surface-2);
+  font-size: var(--t-sm);
+  color: var(--text);
+  line-height: 1.6;
+}
+.campaign-quote p { margin: 0; }
+.campaign-quote footer,
+.field-credit {
+  font-size: var(--t-xs);
+  color: var(--text-faint);
+  line-height: 1.5;
+}
+.campaign-quote footer { margin-top: var(--s-1); }
+.field-credit { margin: var(--s-2) 0 0; }
+.field-credit .badge { margin-right: var(--s-1); }
+
 .note-box {
   padding: var(--s-3);
   border: 1px solid var(--border);

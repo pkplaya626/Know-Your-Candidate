@@ -141,36 +141,69 @@
 
   /* -------------------------------------------------------------- sections */
 
+  function outLink(url, label) {
+    return '<a href="' + KYC.escapeAttr(url) + '" target="_blank" rel="noopener noreferrer">' +
+      KYC.escapeHtml(label) + "</a>";
+  }
+
   /** Platform text arrives as prose, a comma list, or a Python-style list
-   *  literal. Whatever the shape, every fragment is escaped. */
+   *  literal - or, for a filed candidate, as the headings of their campaign's
+   *  issues page, joined with "; " by kyc/enrich.py. Whatever the shape,
+   *  every fragment is escaped, and what came from a campaign says so. */
   function renderPlatform(item) {
     var target = el("profileModalPlatform");
-    if (!KYC.hasValue(item, "platforms")) {
-      target.innerHTML = KYC.renderField(item, "platforms");
-      return;
+    var fromSite = (item.fieldSources || {}).platforms === "campaign-site";
+    var html = "";
+
+    // The campaign's own one-line description of itself, quoted, never
+    // paraphrased.
+    if (item.campaignQuote) {
+      html += '<blockquote class="campaign-quote"><p>“' +
+        KYC.escapeHtml(item.campaignQuote) + "”</p><footer>The campaign’s own " +
+        "description, from " +
+        (item.campaignSite ? outLink(item.campaignSite, "its website") : "its website") +
+        "</footer></blockquote>";
     }
 
-    var text = String(item.platforms || "").trim();
-    var parts = null;
+    if (KYC.hasValue(item, "platforms")) {
+      var text = String(item.platforms || "").trim();
+      var parts = null;
 
-    if (text.charAt(0) === "[" && text.charAt(text.length - 1) === "]") {
-      try {
-        var parsed = JSON.parse(text.replace(/'/g, '"'));
-        if (Array.isArray(parsed)) parts = parsed.map(String);
-      } catch (e) {
-        /* not a list literal after all; fall through to the comma split */
+      if (fromSite) {
+        parts = text.split(/;\s+/);
+      } else if (text.charAt(0) === "[" && text.charAt(text.length - 1) === "]") {
+        try {
+          var parsed = JSON.parse(text.replace(/'/g, '"'));
+          if (Array.isArray(parsed)) parts = parsed.map(String);
+        } catch (e) {
+          /* not a list literal after all; fall through to the comma split */
+        }
       }
-    }
-    if (!parts) parts = text.split(/,\s+/);
+      if (!parts) parts = text.split(/,\s+/);
 
-    if (parts.length > 1) {
-      target.innerHTML =
-        '<ul class="bullets">' +
-        parts.map(function (p) { return "<li>" + KYC.escapeHtml(p) + "</li>"; }).join("") +
-        "</ul>";
-    } else {
-      target.innerHTML = '<p class="note-box">' + KYC.escapeHtml(text) + "</p>";
+      if (parts.length > 1) {
+        html +=
+          '<ul class="bullets">' +
+          parts.map(function (p) { return "<li>" + KYC.escapeHtml(p) + "</li>"; }).join("") +
+          "</ul>";
+      } else {
+        html += '<p class="note-box">' + KYC.escapeHtml(text) + "</p>";
+      }
+      if (fromSite) {
+        html += '<p class="field-credit">' + KYC.sourceBadge(item, "platforms").trim() +
+          " The headings of the campaign’s issues page" +
+          (item.campaignIssuesUrl ? ": " + outLink(item.campaignIssuesUrl, "read it in full") : "") +
+          "</p>";
+      }
+    } else if (!item.campaignQuote) {
+      html += KYC.renderField(item, "platforms");
     }
+
+    if (!fromSite && item.campaignIssuesUrl) {
+      html += '<p class="field-credit">' +
+        outLink(item.campaignIssuesUrl, "The campaign’s issues page") + "</p>";
+    }
+    target.innerHTML = html;
   }
 
   /** DW-NOMINATE renders as a position on a scale. The string also carries a
@@ -411,8 +444,12 @@
     if (item.website) sites.push(linkChip(item.website, "Official website", item.website));
     if (item.campaignSite) {
       sites.push(linkChip(item.campaignSite, "Campaign website",
-        (item.campaignCommittee ? item.campaignCommittee + " - " : "") +
-        "as filed with the FEC"));
+        item.campaignSiteVia === "election-page"
+          // Not from a filing: the race's Wikipedia page lists it, and the
+          // pipeline checked that the site names the candidate.
+          ? "As listed on Wikipedia’s page for this race"
+          : (item.campaignCommittee ? item.campaignCommittee + " - " : "") +
+            "as filed with the FEC"));
     }
     if (item.contactForm) sites.push(linkChip(item.contactForm, "Contact form"));
     if (sites.length) rows.push('<div class="links-row">' + sites.join("") + "</div>");
@@ -555,12 +592,14 @@
   function renderAge(item) {
     var hasAge = item.age && item.age !== "Unknown";
     var hasBirth = KYC.hasValue(item, "birthdate") && item.birthdate !== "Unknown";
+    // A birthdate the pipeline read from a Wikipedia infobox says so.
+    var badge = hasBirth ? KYC.sourceBadge(item, "birthdate") : "";
 
     if (hasAge && hasBirth) {
-      return KYC.escapeHtml(item.age + " (born " + item.birthdate + ")");
+      return KYC.escapeHtml(item.age + " (born " + item.birthdate + ")") + badge;
     }
     if (hasAge) return KYC.escapeHtml(item.age + " years old");
-    if (hasBirth) return KYC.escapeHtml(item.birthdate);
+    if (hasBirth) return KYC.escapeHtml(item.birthdate) + badge;
     return '<span class="kyc-absent">No data</span>';
   }
 
@@ -607,14 +646,21 @@
      * see what was actually submitted. */
     var disclosure = el("profileModalDisclosure");
     if (item.disclosureUrl) {
+      // The Senate's eFD shows its terms of use before the first report a
+      // visitor opens; the link says so rather than looking broken.
+      var senate = item.disclosureSource === "senate-efd";
       disclosure.innerHTML =
         '<a class="disclosure-link" target="_blank" rel="noopener noreferrer" href="' +
         KYC.escapeAttr(item.disclosureUrl) + '" title="' +
-        KYC.escapeAttr(
-          "Annual financial disclosure filed with the Clerk of the House" +
-          (item.disclosureFiled ? " on " + item.disclosureFiled : "") + " (PDF)"
+        KYC.escapeAttr(senate
+          ? "Annual financial disclosure filed with the Secretary of the Senate" +
+            (item.disclosureFiled ? " on " + item.disclosureFiled : "") +
+            ". The Senate asks you to accept its terms of use first, then open the link again."
+          : "Annual financial disclosure filed with the Clerk of the House" +
+            (item.disclosureFiled ? " on " + item.disclosureFiled : "") + " (PDF)"
         ) + '">' + KYC.icon("link") + " " +
-        KYC.escapeHtml(item.disclosureYear || "") + " disclosure (PDF)</a>";
+        KYC.escapeHtml(item.disclosureYear || "") +
+        (senate ? " disclosure (Senate eFD)" : " disclosure (PDF)") + "</a>";
     } else {
       disclosure.innerHTML = "";
     }
