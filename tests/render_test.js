@@ -115,7 +115,7 @@ async function testShared(page) {
     // Specifically a *stylesheet*, not any remote <link>. The original test
     // matched every https href and so failed the moment rel="canonical" was
     // added, which loads nothing at all.
-    const remoteLinks = [...raw.matchAll(/<link[^>]*>/g)].map((m) => m[0])
+    const remoteLinks = [...raw.matchAll(/<link\b[^>]*>/g)].map((m) => m[0])
       .filter((tag) => /href="https?:/.test(tag))
       .filter((tag) => /rel="(stylesheet|preload|preconnect|dns-prefetch)"/.test(tag));
     check("no remote stylesheet or font", remoteLinks.length === 0, remoteLinks.join(" "));
@@ -326,7 +326,7 @@ async function testDirectory() {
     })());
     check("no label carries a raw roster district spelling", (() => {
       const texts = [...grid.querySelectorAll(".card-office")].map((n) => n.textContent);
-      return texts.every((t) => !/District \d|([A-Z]{2})-/.test(t));
+      return texts.every((t) => !/District \d|([A-Z]{2})-\1/.test(t));
     })());
     check("card names are escaped", (() => {
       const html = grid.innerHTML;
@@ -630,6 +630,17 @@ async function testDirectoryAsync() {
       if (saved[k] === undefined) delete host[k]; else host[k] = saved[k];
     });
     delete host.__search;
+
+    // A roster platform with commas inside its items (Edward Markey's).
+    const markey = KYC.byId("M000133");
+    if (markey) {
+      KYC.profile.open(markey.id);
+      const items = [...D.querySelectorAll("#profileModalPlatform .bullets li")].map((li) => li.textContent);
+      check("an item with commas inside it stays one bullet",
+        items.includes("Telecommunications, technology, and digital privacy") &&
+          !items.some((t) => /^(and|or) /.test(t)), items.join(" | "));
+      KYC.profile.close();
+    }
 
     const quoted = window.legislatorsData.find((p) => p.campaignQuote);
     check("built profiles carry campaign descriptions", !!quoted);

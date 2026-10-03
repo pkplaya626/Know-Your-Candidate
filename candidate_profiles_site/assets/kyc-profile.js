@@ -179,7 +179,18 @@
           /* not a list literal after all; fall through to the comma split */
         }
       }
-      if (!parts) parts = text.split(/,\s+/);
+      if (!parts) {
+        // The rosters separate items with commas and use them inside items
+        // too: "Telecommunications, technology, and digital privacy" is one
+        // item, not three bullets reading "technology" and "and digital
+        // privacy". Items start with a capital; a fragment that does not
+        // belongs to the one before it.
+        parts = text.split(/,\s+/).reduce(function (items, piece) {
+          if (items.length && /^[a-z]/.test(piece)) items[items.length - 1] += ", " + piece;
+          else items.push(piece);
+          return items;
+        }, []);
+      }
 
       if (parts.length > 1) {
         html +=
