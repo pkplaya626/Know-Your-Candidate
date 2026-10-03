@@ -11,7 +11,9 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from kyc import fec, normalize, portraits, races, validate  # noqa: E402
+from unittest import mock  # noqa: E402
+
+from kyc import fec, normalize, photos, portraits, races, validate  # noqa: E402
 from kyc.normalize import TERRITORIES, classify  # noqa: E402
 from kyc.profiles import apply_quality, build_profiles  # noqa: E402
 from kyc.sources import load_all  # noqa: E402
@@ -128,6 +130,176 @@ class TestPortraits(unittest.TestCase):
         self.assertEqual(profile["photos"][0], "https://new/2.jpg")
         self.assertEqual(profile["photo_url"], "https://new/2.jpg")
         self.assertEqual(profile["photoSource"], "wikipedia")
+
+
+class TestPortraitSizes(unittest.TestCase):
+    """Sizes of one photograph for a srcset, and where a member's comes from.
+
+    Measured 2026-10-03: congress.gov's member portraits are 175px wide and
+    Wikimedia's first choices were 960px thumbnails or originals up to 2364px,
+    shown in 38px circles. The Clerk, congress.gov and the unitedstates
+    project held a different photograph of seven of ten members sampled.
+    """
+
+    ORIGINAL = ("https://upload.wikimedia.org/wikipedia/commons/7/7f/"
+                "Rep._Yassamin_Ansari_official_photo%2C_119th_Congress.jpg")
+    THUMB = ("https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/"
+             "Rep._Yassamin_Ansari_official_photo%2C_119th_Congress.jpg/960px-"
+             "Rep._Yassamin_Ansari_official_photo%2C_119th_Congress.jpg")
+
+    def test_a_thumbnail_and_its_original_are_one_photograph(self):
+        file = ("upload", "wikipedia/commons", "7/7f",
+                "Rep._Yassamin_Ansari_official_photo%2C_119th_Congress.jpg")
+        self.assertEqual(portraits.wikimedia_file(self.ORIGINAL), file)
+        self.assertEqual(portraits.wikimedia_file(self.THUMB), file)
+        other_host = self.THUMB.replace("://upload.", "://thumb.")
+        self.assertEqual(portraits.wikimedia_file(other_host)[0], "thumb")
+        local = "https://upload.wikimedia.org/wikipedia/en/a/ab/Someone.jpg"
+        self.assertEqual(portraits.wikimedia_file(local)[1], "wikipedia/en")
+
+    def test_only_wikimedia_rasters_have_sizes(self):
+        self.assertIsNone(portraits.wikimedia_file(
+            "https://www.congress.gov/img/member/s001156_200.jpg"))
+        self.assertIsNone(portraits.wikimedia_file(
+            "https://clerk.house.gov/images/members/S001156.jpg"))
+        # An SVG's thumbnails are PNGs under another name; not a portrait.
+        self.assertIsNone(portraits.wikimedia_file(
+            "https://upload.wikimedia.org/wikipedia/commons/a/ab/Seal.svg"))
+
+    def test_sizes_are_standard_and_narrower_than_the_original(self):
+        # Wikimedia refuses any other width with HTTP 400 (https://w.wiki/GHai).
+        standard = {20, 40, 60, 120, 250, 330, 500, 960, 1280, 1920, 3840}
+        self.assertLessEqual(set(portraits.THUMB_STEPS), standard)
+        big = portraits.thumb_set(self.THUMB, 2364)
+        self.assertEqual([w for w, _ in big], [120, 250, 330, 500])
+        for width, url in big:
+            self.assertTrue(url.endswith(f"/{width}px-Rep._Yassamin_Ansari_official_photo"
+                                         "%2C_119th_Congress.jpg"), url)
+            self.assertEqual(portraits.wikimedia_file(url)[1:],
+                             portraits.wikimedia_file(self.THUMB)[1:])
+        # Wikimedia will not enlarge: a small original is itself the top size.
+        small = portraits.thumb_set(self.ORIGINAL, 400)
+        self.assertEqual([w for w, _ in small], [120, 250, 330, 400])
+        self.assertEqual(small[-1][1], self.ORIGINAL)
+        self.assertEqual(portraits.thumb_set(self.ORIGINAL, None), [])
+
+    def test_a_comma_or_space_cannot_end_a_srcset_entry(self):
+        url = "https://upload.wikimedia.org/wikipedia/commons/7/7f/A,_B C.jpg"
+        for _width, entry in portraits.thumb_set(url, 2000):
+            self.assertNotIn(",", entry)
+            self.assertNotIn(" ", entry)
+
+    def _file(self, n):
+        return self.THUMB.replace("7/7f", f"{n % 10}/{n % 10}{n % 10}").replace("Ansari", f"A{n}")
+
+    def test_one_fetch_confirms_a_file_and_only_a_refusal_empties_its_set(self):
+        ok, refused, unclear = self._file(1), self._file(2), self._file(3)
+        unmeasured = self._file(4)
+        cache = {"ok": {"url": ok}, "refused": {"url": refused}, "unclear": {"url": unclear},
+                 "unmeasured": {"url": unmeasured},
+                 "clerk": {"url": "https://clerk.house.gov/images/members/S001156.jpg"}}
+        verdict = {ok: True, refused: False, unclear: None}
+        asked = []
+
+        def render(url):
+            asked.append(url)
+            return next(v for base, v in verdict.items()
+                        if url.split("/thumb/")[1].split("/")[2] == base.split("/thumb/")[1].split("/")[2])
+
+        with mock.patch.object(portraits, "image_sizes",
+                               return_value={u: (2364, 3395) for u in (ok, refused, unclear)}), \
+                mock.patch.object(portraits, "_render", side_effect=render):
+            self.assertEqual(portraits.size_all(cache, log=lambda *a: None), 3)
+        self.assertEqual(len(asked), 3)  # one fetch a file, never one a size
+        self.assertTrue(all("/120px-" in url for url in asked), asked)
+        self.assertEqual([w for w, _ in cache["ok"]["set"]], [120, 250, 330, 500])
+        self.assertEqual((cache["ok"]["width"], cache["ok"]["height"]), (2364, 3395))
+        self.assertEqual(cache["refused"]["set"], [])
+        # Could not tell: the sizes are valid by construction, so they stay.
+        self.assertEqual(len(cache["unclear"]["set"]), 4)
+        self.assertNotIn("set", cache["unmeasured"])  # tried again next run
+        self.assertNotIn("set", cache["clerk"])  # not Wikimedia: one URL, no sizes
+
+    def test_checking_stops_when_wikimedia_stops_answering(self):
+        files = [self._file(n) for n in range(12)]
+        cache = {str(n): {"url": url} for n, url in enumerate(files)}
+        with mock.patch.object(portraits, "image_sizes",
+                               return_value={u: (2364, 3395) for u in files}), \
+                mock.patch.object(portraits, "_render", return_value=None) as render:
+            self.assertEqual(portraits.size_all(cache, log=lambda *a: None), 12)
+        self.assertEqual(render.call_count, portraits._render_trip)
+        self.assertTrue(all(len(record["set"]) == 4 for record in cache.values()))
+
+    def test_apply_cache_and_cross_links_carry_the_sizes(self):
+        sizes = [[120, self.THUMB.replace("960px", "120px")]]
+        member = {"id": "M1", "isCandidate": False, "name": "A B", "state": "AZ",
+                  "photos": ["placeholder"], "alsoRunningId": "C1"}
+        running = {"id": "C1", "isCandidate": True, "name": "A B", "state": "AZ",
+                   "photos": ["placeholder"], "incumbentId": "M1"}
+        plain = {"id": "M2", "isCandidate": False, "name": "C D", "state": "AZ",
+                 "photos": ["placeholder"]}
+        cache = {
+            portraits.profile_key(member): {"url": self.THUMB, "via": "wikipedia", "set": sizes},
+            portraits.profile_key(plain): {"url": "https://clerk.house.gov/x.jpg", "via": "clerk.house.gov"},
+        }
+        portraits.inherit_cross_links([member, running, plain], cache)
+        portraits.apply_cache([member, running, plain], cache)
+        self.assertEqual(member["photoSet"], sizes)
+        self.assertEqual(running["photoSet"], sizes)
+        self.assertNotIn("photoSet", plain)
+
+    def test_house_members_get_the_clerks_portrait_senators_the_articles(self):
+        house = {"id": "H000001", "isCandidate": False, "name": "Hal House", "state": "TX",
+                 "chamber": "House", "photos": ["placeholder"]}
+        senate = {"id": "S000001", "isCandidate": False, "name": "Sue Senate", "state": "TX",
+                  "chamber": "Senate", "photos": ["placeholder"]}
+        bare = {"id": "S000002", "isCandidate": False, "name": "Sam Bare", "state": "OK",
+                "chamber": "Senate", "photos": ["placeholder"]}
+        article = "https://upload.wikimedia.org/wikipedia/commons/a/ab/Sue_Senate.jpg"
+        asked = []
+
+        def check(url):
+            asked.append(url)
+            return True
+
+        saved = {}
+        with mock.patch.object(portraits, "load_cache", return_value={}), \
+                mock.patch.object(portraits, "save_cache", side_effect=lambda c, r: saved.update(c)), \
+                mock.patch.object(portraits, "check_image", side_effect=check), \
+                mock.patch.object(portraits, "fetch_legislator_titles",
+                                  return_value={"S000001": "Sue Senate", "S000002": "Sam Bare"}), \
+                mock.patch.object(portraits, "wiki_page_images",
+                                  return_value={"Sue Senate": ("Sue Senate", article)}), \
+                mock.patch.object(portraits, "wiki_search_title", return_value=None), \
+                mock.patch.object(portraits, "size_all", return_value=0):
+            portraits.resolve_all([house, senate, bare], refresh=True, log=lambda *a: None)
+        self.assertEqual(saved[portraits.profile_key(house)]["url"],
+                         "https://clerk.house.gov/images/members/H000001.jpg")
+        self.assertEqual(saved[portraits.profile_key(senate)]["url"], article)
+        # No article portrait: the official one, small as it is.
+        self.assertEqual(saved[portraits.profile_key(bare)]["url"],
+                         "https://www.congress.gov/img/member/s000002_200.jpg")
+        # A senator's congress.gov portrait is not even asked for when the
+        # article has one.
+        self.assertNotIn("https://www.congress.gov/img/member/s000001_200.jpg", asked)
+
+    def test_no_chain_links_the_lapsed_photo_domain(self):
+        # theunitedstates.io lapsed and was parked by 2026-10-03 (rule 35).
+        chain = photos.member_photos("Linda Sanchez", "S001156")
+        self.assertFalse([u for u in chain if "theunitedstates.io" in u], chain)
+        self.assertIn("https://unitedstates.github.io/images/congress/450x550/S001156.jpg", chain)
+
+    def test_a_srcset_from_another_file_is_an_error(self):
+        mine = [[120, self.THUMB.replace("960px", "120px")],
+                [250, self.THUMB.replace("960px", "250px").replace("%2C", ",")]]
+        profile = {"name": "Yassamin Ansari", "state": "AZ", "photos": [self.THUMB],
+                   "photoSet": mine}
+        self.assertEqual(validate.check_photo_sets([profile]), [])
+        profile["photoSet"] = mine + [[330, "https://upload.wikimedia.org/wikipedia/"
+                                            "commons/thumb/1/1a/Other.jpg/330px-Other.jpg"]]
+        issues = validate.check_photo_sets([profile])
+        self.assertEqual([i.code for i in issues], ["photo-set-mixes-photographs"])
+        self.assertEqual(issues[0].level, "error")
 
 
 class TestFec(unittest.TestCase):

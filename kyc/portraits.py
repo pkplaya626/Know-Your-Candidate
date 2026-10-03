@@ -21,6 +21,21 @@ Two lessons are baked into this module:
   good URLs. It now distinguishes "definitely broken" from "could not tell".
 * **Never search with a topical hint.** Searching "Dan Osborn NE politician"
   pushes his actual article out of the results; "Dan Osborn" returns it first.
+
+And two about size, measured on 2026-10-03:
+
+* **A srcset lists sizes of one photograph.** congress.gov's portrait is
+  175px wide; the House Clerk's and the unitedstates project's are larger,
+  but for seven of ten members sampled each was a *different* photograph -
+  the Clerk's newer, the project's often a Congress or two older. A srcset
+  lets the screen choose, so mixing sources would let pixel density decide
+  which photograph a reader sees. Only Wikimedia serves one photograph at
+  several sizes; everything else ships a single URL.
+* **Wikimedia serves only its standard thumbnail widths** and refuses any
+  other with HTTP 400; a burst of thumbnail requests gets 429 for everything
+  from that address. :func:`size_all` builds the sizes from the measured
+  original and fetches only the smallest, slowly. The page falls back to the
+  plain URL when a size fails.
 """
 
 import json
@@ -38,6 +53,14 @@ CACHE_PATH = os.path.join("candidate_profiles_site", "data", "portraits.json")
 LEGISLATORS_URL = "https://unitedstates.github.io/congress-legislators/legislators-current.json"
 WIKI_API = "https://en.wikipedia.org/w/api.php"
 CONGRESS_IMG = "https://www.congress.gov/img/member/{bioguide_lower}_200.jpg"
+# A House member's current official portrait, 335px wide. congress.gov's is
+# 175px - soft on a high-density screen - and often a Congress or two older.
+CLERK_IMG = "https://clerk.house.gov/images/members/{bioguide_upper}.jpg"
+
+# Wikimedia renders a hotlinked thumbnail only at its standard widths
+# (https://w.wiki/GHai). The largest the page needs is a ~165px card on a 3x
+# screen, so 500 is the top step.
+THUMB_STEPS = (120, 250, 330, 500)
 
 # Wikimedia asks for a descriptive User-Agent identifying the client.
 _UA = {"User-Agent": "know-your-candidate/2.1 (open-source civic data project)"}
@@ -92,10 +115,10 @@ def _get(url, timeout=_TIMEOUT, retries=6):
     raise PortraitError(f"GET failed after {retries} attempts: {url} ({last})")
 
 
-def _api(params):
-    """Rate-limited call to the MediaWiki API."""
+def _api(params, endpoint=WIKI_API):
+    """Rate-limited call to a MediaWiki API (English Wikipedia's by default)."""
     params = dict(params, action="query", format="json", formatversion="2")
-    url = f"{WIKI_API}?{urllib.parse.urlencode(params)}"
+    url = f"{endpoint}?{urllib.parse.urlencode(params)}"
     with _api_lock:
         wait = _api_gap - (time.monotonic() - _last_call[0])
         if wait > 0:
@@ -136,6 +159,156 @@ def check_image(url, timeout=_TIMEOUT):
         except Exception:
             return None
     return None
+
+
+# -------------------------------------------------------------------- sizes
+
+_WIKIMEDIA = re.compile(
+    r"^https://(?P<host>upload|thumb)\.wikimedia\.org/(?P<project>wikipedia/[a-z-]+)/"
+    r"(?:thumb/)?(?P<hash>[0-9a-f]/[0-9a-f]{2})/(?P<file>[^/]+?)(?:/\d+px-[^/]+)?$")
+_THUMBABLE = re.compile(r"\.(jpe?g|png|webp)$", re.I)
+_IMAGE_MAGIC = (b"\xff\xd8\xff", b"\x89PNG", b"RIFF")
+_render_gap = 1.0
+# Consecutive could-not-tell answers after which a run stops checking sizes.
+_render_trip = 5
+
+
+def wikimedia_file(url):
+    """``(host, project, hash path, file)`` behind a Wikimedia image URL - the
+    original or any thumbnail of it - or ``None`` for anything else."""
+    match = _WIKIMEDIA.match(url or "")
+    if not match or not _THUMBABLE.search(match.group("file")):
+        return None
+    return match.group("host"), match.group("project"), match.group("hash"), match.group("file")
+
+
+def thumb_set(url, width):
+    """``[[width, url], ...]`` - sizes of one Wikimedia photograph, smallest
+    first, for a srcset.
+
+    Each is a standard thumbnail narrower than the original, which Wikimedia
+    will not enlarge; an original no wider than the top step is itself the
+    largest. A comma or space would end a srcset entry early, so both are
+    percent-encoded.
+    """
+    parts = wikimedia_file(url)
+    if not parts or not width:
+        return []
+    host, project, hashed, name = parts
+    name = name.replace(" ", "%20").replace(",", "%2C")
+    base = f"https://{host}.wikimedia.org/{project}/thumb/{hashed}/{name}"
+    out = [[step, f"{base}/{step}px-{name}"] for step in THUMB_STEPS if step < width]
+    if width <= THUMB_STEPS[-1]:
+        out.append([width, f"https://upload.wikimedia.org/{project}/{hashed}/{name}"])
+    return out
+
+
+def _api_endpoint(project):
+    """The MediaWiki API that describes the files under *project*."""
+    wiki = project.split("/", 1)[1]
+    if wiki == "commons":
+        return "https://commons.wikimedia.org/w/api.php"
+    return f"https://{wiki}.wikipedia.org/w/api.php"
+
+
+def image_sizes(urls, log=None):
+    """``{url: (width, height)}`` of the original behind each Wikimedia URL."""
+    wanted = {}
+    for url in urls:
+        parts = wikimedia_file(url)
+        if parts:
+            title = "File:" + urllib.parse.unquote(parts[3])
+            wanted.setdefault(parts[1], {}).setdefault(title, []).append(url)
+
+    out = {}
+    for project, by_title in wanted.items():
+        titles = list(by_title)
+        for i in range(0, len(titles), _BATCH):
+            try:
+                payload = _api({"prop": "imageinfo", "iiprop": "size",
+                                "titles": "|".join(titles[i:i + _BATCH])},
+                               endpoint=_api_endpoint(project))
+            except Exception as exc:
+                if log:
+                    log(f"    [warn] imageinfo batch failed: {exc}")
+                continue
+            query = payload.get("query", {})
+            alias = {item["to"]: item["from"] for item in query.get("normalized", [])}
+            for page in query.get("pages", []):
+                info = (page.get("imageinfo") or [{}])[0]
+                title = alias.get(page.get("title"), page.get("title"))
+                if info.get("width"):
+                    for url in by_title.get(title, []):
+                        out[url] = (info["width"], info["height"])
+    return out
+
+
+def _render(url):
+    """Fetch one size: ``True`` an image, ``False`` refused, ``None`` could
+    not tell.
+
+    Wikimedia answers a burst of thumbnail requests with 429 for everything
+    from that address. The first full run fetched every size and retried each
+    429 with a backoff, which spent a minute a size and kept the burst going,
+    so a 429 here waits out the window once and then gives up.
+    """
+    for attempt in range(2):
+        time.sleep(_render_gap)
+        try:
+            req = urllib.request.Request(url, headers=_UA)
+            with urllib.request.urlopen(req, timeout=_TIMEOUT) as response:
+                body = response.read()
+            return len(body) > 1000 and body.startswith(_IMAGE_MAGIC)
+        except urllib.error.HTTPError as exc:
+            if exc.code != 429 and exc.code < 500:
+                return False
+            if attempt == 0:
+                wait = exc.headers.get("Retry-After") if exc.headers else None
+                try:
+                    time.sleep(min(float(wait or 60), 120.0))
+                except ValueError:
+                    time.sleep(60.0)
+        except Exception:
+            return None
+    return None
+
+
+def size_all(cache, log=print):
+    """Give each Wikimedia portrait in *cache* a ``set`` of sizes.
+
+    The sizes are Wikimedia's standard widths narrower than the measured
+    original, so they are valid by construction; one fetch of the smallest
+    confirms the file can be thumbnailed at all, and a file that cannot gets
+    an empty set. A check that could not tell keeps the set (rule 8) - the
+    page falls back to the plain URL when a size fails - and after
+    ``_render_trip`` of those in a row the run stops checking rather than
+    wait on a closed window. An original that could not be measured gets no
+    ``set`` and is tried again on the next run.
+    """
+    todo = {key: record for key, record in cache.items()
+            if record.get("url") and "set" not in record and wikimedia_file(record["url"])}
+    if not todo:
+        return 0
+    log(f"    sizes: measuring {len(todo)} Wikimedia portrait(s) ...")
+    dims = image_sizes([record["url"] for record in todo.values()], log=log)
+    sized = unclear = refused = 0
+    for record in todo.values():
+        measured = dims.get(record["url"])
+        if not measured:
+            continue
+        record["width"], record["height"] = measured
+        entries = thumb_set(record["url"], measured[0])
+        verdict = None
+        if entries and unclear < _render_trip:
+            verdict = _render(entries[0][1])
+            unclear = unclear + 1 if verdict is None else 0
+        refused += verdict is False
+        record["set"] = [] if verdict is False else entries
+        sized += 1
+    if unclear >= _render_trip:
+        log("    sizes: Wikimedia stopped answering; the rest are kept unchecked (rule 8)")
+    log(f"    sizes: {sized} measured ({refused} refused), {len(todo) - sized} could not be")
+    return sized
 
 
 # ------------------------------------------------------------------ sources
@@ -353,25 +526,36 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
 
     if not todo:
         log(f"  portraits: {len(cache)} cached, nothing to resolve")
+        if size_all(cache, log=log):
+            save_cache(cache, root)
         return cache, {"resolved": 0, "cached": len(cache)}
 
     log(f"  portraits: resolving {len(todo)} profile(s) ...")
 
-    # --- Stage 1: Congress.gov, the official portrait for sitting members.
+    # --- Stage 1: a House member's official portrait - the Clerk's current
+    # one, then congress.gov's. A senator goes to Wikipedia first (stage 2):
+    # the Senate publishes no portrait by Bioguide id, congress.gov's is
+    # 175px, and for most senators sampled it was older than the article's.
     def official(profile):
-        if profile["isCandidate"] or profile["id"].startswith("CURR_"):
-            return profile, None
-        url = CONGRESS_IMG.format(bioguide_lower=profile["id"].lower())
-        return profile, (url if check_image(url) else None)
+        if (profile["isCandidate"] or profile["id"].startswith("CURR_")
+                or not profile.get("chamber", "").startswith("House")):
+            return profile, None, None
+        for template, via in ((CLERK_IMG, "clerk.house.gov"), (CONGRESS_IMG, "congress.gov")):
+            url = template.format(bioguide_upper=profile["id"].upper(),
+                                  bioguide_lower=profile["id"].lower())
+            if check_image(url):
+                return profile, url, via
+        return profile, None, None
 
     resolved = {}
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        for profile, url in pool.map(official, todo):
+        for profile, url, via in pool.map(official, todo):
             if url:
                 resolved[profile_key(profile)] = {
-                    "url": url, "via": "congress.gov", "name": profile["name"],
+                    "url": url, "via": via, "name": profile["name"],
                 }
-    log(f"    congress.gov: {len(resolved)}")
+    clerk = sum(1 for r in resolved.values() if r["via"] == "clerk.house.gov")
+    log(f"    clerk.house.gov: {clerk}, congress.gov: {len(resolved) - clerk}")
 
     remaining = [p for p in todo if profile_key(p) not in resolved]
 
@@ -427,6 +611,23 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
         else:
             still.append(profile)
 
+    # --- Stage 3b: a senator with no portrait on Wikipedia gets the official
+    # one, small as it is.
+    def senate_official(profile):
+        if (profile["isCandidate"] or profile["id"].startswith("CURR_")
+                or not profile.get("chamber", "").startswith("Senate")):
+            return profile, None
+        url = CONGRESS_IMG.format(bioguide_lower=profile["id"].lower())
+        return profile, (url if check_image(url) else None)
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for profile, url in pool.map(senate_official, still):
+            if url:
+                resolved[profile_key(profile)] = {
+                    "url": url, "via": "congress.gov", "name": profile["name"],
+                }
+    still = [p for p in still if profile_key(p) not in resolved]
+
     # --- Stage 4: search Wikipedia for whoever is left - roster people only.
     still = [p for p in still if p.get("source") != "fec-field"]
     if still:
@@ -449,8 +650,8 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
     # --- Stage 5: check what we found, keeping anything not proven broken.
     def confirm(item):
         key, record = item
-        if record["via"] == "congress.gov":
-            return key, record  # already checked in stage 1
+        if record["via"] in ("clerk.house.gov", "congress.gov"):
+            return key, record  # already checked when it was found
         verdict = check_image(record["url"])
         if verdict is False:
             return key, {"url": None, "via": "broken", "name": record["name"]}
@@ -468,6 +669,7 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
             "url": None, "via": "unresolved", "name": profile["name"],
         }
 
+    size_all(cache, log=log)
     shared = inherit_cross_links(profiles, cache)
     if shared:
         log(f"    cross-link inheritance: {shared}")
@@ -502,6 +704,9 @@ def inherit_cross_links(profiles, cache):
                 "url": source["url"], "via": "cross-link",
                 "name": profile["name"], "title": source.get("title"),
             }
+            for field in ("width", "height", "set"):
+                if field in source:
+                    cache[key][field] = source[field]
             shared += 1
     return shared
 
@@ -518,5 +723,8 @@ def apply_cache(profiles, cache):
         profile["photos"] = [url] + [u for u in profile["photos"] if u != url]
         profile["photo_url"] = url
         profile["photoSource"] = record.get("via")
+        # Sizes of this same photograph, for the page's srcset.
+        if record.get("set"):
+            profile["photoSet"] = record["set"]
         hits += 1
     return hits

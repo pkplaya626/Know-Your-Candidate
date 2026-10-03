@@ -354,6 +354,48 @@ async function testDirectory() {
         /\.chip-groups\s*\{[^}]*clip-path:\s*inset\(/.test(css));
   });
 
+  suite("index.html — portraits come in sizes of one photograph", () => {
+    // A 960px original in a 38px circle cost up to 760 KB, and congress.gov's
+    // 175px portrait was soft on a 2x screen. Wikimedia's standard sizes of
+    // the same file go in a srcset, and the browser picks one for the screen.
+    const set = [[120, "https://u.test/120px-x.jpg"], [250, "https://u.test/250px-x.jpg"]];
+    const attrs = KYC.portraitAttrs({ photos: ["https://u.test/x.jpg"], photoSet: set }, "165px");
+    check("a portrait with sizes gets a srcset and the width it is drawn at",
+      attrs.includes('srcset="https://u.test/120px-x.jpg 120w, https://u.test/250px-x.jpg 250w"') &&
+        attrs.includes('sizes="165px"'), attrs);
+    check("one without sizes gets only its src",
+      !/srcset/.test(KYC.portraitAttrs({ photos: ["https://u.test/x.jpg"] }, "165px")));
+    check("a silhouette never gets a srcset",
+      !/srcset/.test(KYC.portraitAttrs({ photos: ["placeholder"], photoSet: set }, "38px")));
+    check("a srcset is escaped like everything else",
+      !/"onerror/.test(KYC.portraitAttrs(
+        { photos: ["https://u.test/x.jpg"], photoSet: [[120, 'https://u.test/"onerror="1']] }, "38px")));
+
+    const real = window.legislatorsData.find((p) => p.photoSet && p.photos.length > 1);
+    check("the build lists sizes for Wikimedia portraits", !!real);
+    if (real) {
+      const img = D.createElement("img");
+      img.setAttribute("data-profile", real.id);
+      KYC.setPortrait(img, real, "116px");
+      check("the dialog's portrait gets the sizes too",
+        img.getAttribute("srcset") === KYC.portraitSrcset(real) && img.getAttribute("sizes") === "116px");
+      KYC.handleImageFallback(img, real.id);
+      check("a size that fails is retried as the same photograph's plain URL",
+        !img.hasAttribute("srcset") && !img.hasAttribute("sizes") &&
+          img.getAttribute("src") === real.photos[0], img.getAttribute("src"));
+      KYC.handleImageFallback(img, real.id);
+      const next = real.photos.slice(1).find((u) => u !== "placeholder") || KYC.SILHOUETTE;
+      check("and only then does the chain move on", img.getAttribute("src") === next,
+        img.getAttribute("src"));
+      KYC.setPortrait(img, { photos: ["https://u.test/y.jpg"] }, "116px");
+      check("the next profile's portrait does not keep the last one's sizes",
+        !img.hasAttribute("srcset") && !img.hasAttribute("sizes"));
+    }
+    const profileJs = fs.readFileSync(path.join(SITE, "assets", "kyc-profile.js"), "utf8");
+    check("the dialog sets its portrait through setPortrait",
+      /KYC\.setPortrait\(photo, item, "116px"\)/.test(profileJs) && !/photo\.src\s*=/.test(profileJs));
+  });
+
   suite("index.html — filtering", () => {
     const label = D.getElementById("resultsLabel");
     const total = announced(D);

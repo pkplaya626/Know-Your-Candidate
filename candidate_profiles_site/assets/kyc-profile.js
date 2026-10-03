@@ -365,7 +365,7 @@
           (p.raceStatus === "nominee" ? KYC.ballotLineSuffix(p) : "") + "</span>"
         : "";
       return '<button type="button" class="race-mate" data-goto="' + KYC.escapeAttr(p.id) + '">' +
-        '<img src="' + KYC.escapeAttr(KYC.portraitSrc(p)) + '" alt="" loading="lazy" ' +
+        '<img ' + KYC.portraitAttrs(p, "36px") + ' alt="" loading="lazy" ' +
         'data-photo-idx="0" data-profile="' + KYC.escapeAttr(p.id) + '">' +
         '<span class="race-mate-body"><span class="race-mate-name">' + KYC.escapeHtml(p.name) +
         '</span><span class="race-mate-meta"><span class="' + KYC.partyClass(p) + '">' +
@@ -647,10 +647,9 @@
     party.style.background = PARTY_LABEL_BG[KYC.partyKey(item)];
 
     var photo = el("profileModalPhoto");
-    photo.setAttribute("data-photo-idx", "0");
     photo.setAttribute("data-profile", item.id);
     photo.alt = "Portrait of " + item.name;
-    photo.src = KYC.portraitSrc(item);
+    KYC.setPortrait(photo, item, "116px");
 
     el("profileModalAge").innerHTML = renderAge(item);
     el("profileModalWorth").innerHTML = KYC.renderField(item, "net_worth");

@@ -80,8 +80,8 @@ python build_profile_site.py results          # who is still in, from Wikipedia
 python build_profile_site.py campaigns        # campaign websites from FEC committees
 python build_profile_site.py enrich           # fill gaps; check every campaign site
 python build_profile_site.py odds             # market prices and polling averages (writes odds.js)
-python -m unittest discover tests             # 603 tests, no dependencies
-npm install && npm test                       # 506 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 613 tests, no dependencies
+npm install && npm test                       # 516 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -394,6 +394,25 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     to commit if any other file would change. Anything that would make the
     roster build touch the odds files, or the odds job touch anything else,
     breaks the property that keeps an unreviewed commit safe.
+
+42. **A srcset lists sizes of one photograph.** congress.gov's member
+    portraits are 175px wide, soft on a 2x screen. The first-choice Wikimedia
+    images were 960px thumbnails, or originals up to 2,364px wide, drawn in
+    38px circles. The larger official copies are other photographs: for
+    seven of ten members sampled on 2026-10-03, the House Clerk's was newer
+    and the unitedstates project's a Congress or two older. A srcset mixing
+    them would let screen density choose which photograph a reader sees. So
+    a House member's portrait is the Clerk's, a single URL. A senator's is
+    the article's, through the bioguide mapping. `photoSet` holds only
+    Wikimedia's standard sizes of that one file, since any other width is
+    refused with HTTP 400. The sizes are built from the measured original.
+    `portraits` fetches only the smallest, slowly: the first run fetched
+    every size, and a burst gets 429 for everything from that address. The
+    page falls back to the plain URL when a size fails, and
+    `validate.check_photo_sets` fails a set that names another file. The
+    project's old image host,
+    theunitedstates.io, lapsed into a parking network; nothing links it now
+    (rule 35).
 
 ## Curated data
 

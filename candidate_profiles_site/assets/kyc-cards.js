@@ -114,8 +114,9 @@
     return [
       '<button type="button" class="card" data-id="', KYC.escapeAttr(item.id), '">',
       '<span class="card-photo">',
-      '<img src="', KYC.escapeAttr(KYC.portraitSrc(item)),
-      '" alt="" loading="lazy" decoding="async" data-photo-idx="0" data-profile="',
+      // Cards measured 146-171px wide from a phone to a 2,000px screen.
+      '<img ', KYC.portraitAttrs(item, "165px"),
+      ' alt="" loading="lazy" decoding="async" data-photo-idx="0" data-profile="',
       KYC.escapeAttr(item.id), '">',
       "</span>",
       '<span class="card-body">',
