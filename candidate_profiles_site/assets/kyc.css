@@ -1667,7 +1667,22 @@ svg { flex: none; }
   white-space: normal;
   text-align: center;
 }
+/* A member contesting another seat ("Running for House CA-41", "Nominee"):
+ * a line of their own under the party, so they never take the name's width. */
+.person-row .row-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+  margin-top: var(--s-1);
+}
+.person-row .row-badges .badge {
+  max-width: 100%;
+  white-space: normal;
+}
+/* One line each, cut short rather than broken: "House • CA-38" wrapped a
+ * word at a time down the row when something beside it took the width. */
 .person-row .who .name,
+.person-row .who .office,
 .person-row .who .party {
   overflow: hidden;
   text-overflow: ellipsis;

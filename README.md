@@ -47,7 +47,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`) |
 | `… refresh` | `fetch`, then `build` |
 | `python -m unittest discover tests` | 603 pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (495 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (498 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.

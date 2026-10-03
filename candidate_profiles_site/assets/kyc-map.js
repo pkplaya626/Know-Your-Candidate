@@ -281,16 +281,18 @@
     advanced: "badge-warn|In runoff",
   };
 
+  /* A member contesting another seat: where, and the result of the race
+   * they are in, not of the seat they hold. */
+  function contestBadges(item) {
+    var contest = RACE_BADGE[KYC.contestStatus(item)];
+    return '<span class="badge badge-warn">Running for ' +
+      KYC.escapeHtml(item.contestLabel.replace(/ • /, " ")) + "</span>" +
+      (contest ? ' <span class="badge ' + contest.split("|")[0] + '">' +
+        contest.split("|")[1] + KYC.ballotLineSuffix(item) + "</span>" : "");
+  }
+
   function rowBadge(item) {
     var status = String(item.status || "").toLowerCase();
-    if (!item.isCandidate && item.contestLabel) {
-      // With the result of the race they are in, not of the seat they hold.
-      var contest = RACE_BADGE[KYC.contestStatus(item)];
-      return '<span class="badge badge-warn">Running for ' +
-        KYC.escapeHtml(item.contestLabel.replace(/ • /, " ")) + "</span>" +
-        (contest ? ' <span class="badge ' + contest.split("|")[0] + '">' +
-          contest.split("|")[1] + KYC.ballotLineSuffix(item) + "</span>" : "");
-    }
     var race = RACE_BADGE[item.raceStatus];
     if (race) {
       var bits = race.split("|");
@@ -311,6 +313,11 @@
   }
 
   function personRow(item) {
+    // A member contesting another seat carries two badges ("Running for
+    // House CA-41", "Nominee"). At the row's end they squeezed the name to
+    // nothing and broke "House • CA-38" over four lines, so they take a line
+    // of their own under the party. A single status stays at the end.
+    var elsewhere = !item.isCandidate && item.contestLabel;
     return [
       '<button type="button" class="person-row" data-id="',
       KYC.escapeAttr(item.id), '">',
@@ -322,8 +329,9 @@
       '<span class="office">', KYC.escapeHtml(item.officeLabel), "</span>",
       '<span class="party ', KYC.partyClass(item), '">',
       KYC.escapeHtml(item.party), "</span>",
+      elsewhere ? '<span class="row-badges">' + contestBadges(item) + "</span>" : "",
       "</span>",
-      rowBadge(item),
+      elsewhere ? "" : rowBadge(item),
       KYC.icon("chevron"),
       "</button>",
     ].join("");

@@ -1286,6 +1286,24 @@ async function testRunningElsewhere() {
         row && /Running for/.test(row.textContent) && /Nominee/.test(row.textContent) &&
           !/Not on ballot/.test(row.textContent),
         row && row.textContent.replace(/\s+/g, " ").trim());
+      // Beside the name, "Running for House CA-41" and "Nominee" took the
+      // whole row: the name vanished and "House • CA-38" broke a word a line.
+      check("their two badges sit under the name, not beside it",
+        !!row && row.querySelectorAll(".who .row-badges .badge").length === 2 &&
+          ![...row.children].some((c) => c.classList.contains("badge")),
+        row && row.innerHTML.replace(/<img[^>]*>/, "").slice(0, 240));
+      const own = [...map.D.querySelectorAll("#delegation .person-row")].find((r) => {
+        const p = map.window.KYC.byId(r.getAttribute("data-id"));
+        return p && !p.isCandidate && !p.contestLabel && p.raceStatus === "nominee";
+      });
+      check("a member seeking re-election keeps one badge at the row's end",
+        !!own && !own.querySelector(".row-badges") &&
+          [...own.children].filter((c) => c.classList.contains("badge")).length === 1,
+        own && own.textContent.replace(/\s+/g, " ").trim());
+      // jsdom has no layout, so this asserts the rule rather than the effect.
+      const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+      check("the seat line is cut short, never broken a word a line",
+        /\.person-row \.who \.office[^{]*\{[^}]*white-space:\s*nowrap/.test(css));
     });
   }
   map.window.close();
