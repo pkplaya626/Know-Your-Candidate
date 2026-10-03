@@ -294,6 +294,24 @@
    *  figure, "no filing exists", and "nobody has researched this" - and
    *  showing all three identically is the core credibility problem on a
    *  transparency site. */
+  /* Where a field filled by the pipeline came from: [badge, tooltip]. */
+  var FIELD_SOURCES = {
+    "election-page": ["Wikipedia",
+      "How Wikipedia's 2026 election page describes this candidate"],
+    "wikipedia": ["Wikipedia", "From the candidate's Wikipedia article"],
+    "campaign-site": ["Campaign site",
+      "From the campaign's own website, in its own words"],
+  };
+
+  /** The badge saying where a pipeline-filled field came from, or "". */
+  function sourceBadge(item, field) {
+    var from = FIELD_SOURCES[((item && item.fieldSources) || {})[field]];
+    return from
+      ? ' <span class="badge badge-neutral field-source" title="' + escapeAttr(from[1]) +
+        '">' + escapeHtml(from[0]) + "</span>"
+      : "";
+  }
+
   function renderField(item, field, opts) {
     opts = opts || {};
     var status = (item.quality || {})[field];
@@ -312,7 +330,8 @@
       );
     }
 
-    var html = escapeHtml(value);
+    // A field filled from a named source (normalize.fill_field) says which.
+    var html = escapeHtml(value) + sourceBadge(item, field);
     if (opts.source && item.financeSource) {
       var period = financePeriod(item);
       html +=
@@ -651,6 +670,8 @@
     "name", "state", "party", "district", "officeLabel", "status",
     "education", "previous_professions", "committees", "platforms",
     "funding_sources", "voting_alignment",
+    // The campaign's own words: "nurse", "veteran" find who says so.
+    "campaignQuote",
   ];
 
   /* Lower case with accents removed (NFD, then drop the combining marks), on
@@ -958,6 +979,7 @@
     escapeHtml: escapeHtml,
     escapeAttr: escapeAttr,
     renderField: renderField,
+    sourceBadge: sourceBadge,
     financePeriod: financePeriod,
     monthYear: monthYear,
     hasValue: hasValue,

@@ -137,9 +137,10 @@ SAME_PERSON_FILINGS = {
 # lapsed campaign domain gets bought: on 2026-10-01 seven served gambling pages
 # under a candidate's name. Each value is (kind, date checked, what was seen).
 # "hijacked" entries must never come back. "dead" entries - the host does not
-# exist in DNS, or the hosting platform says the site is gone - may be removed
-# once the committee files a working address; validate reports any entry that
-# no longer matches a cached site.
+# exist in DNS, the hosting platform says the site is gone, or the domain is
+# parked - and "unrelated" ones - it answers, with a site that is not a
+# campaign - may be removed once the committee files a working address;
+# validate reports any entry that no longer matches a cached site.
 BLOCKED_CAMPAIGN_HOSTS = {
     "maxinewatersforcongress.com": ("hijacked", "2026-10-01", "redirects to a gambling site"),
     "tedlieu.com": ("hijacked", "2026-10-01", "serves a gambling page"),
@@ -163,6 +164,33 @@ BLOCKED_CAMPAIGN_HOSTS = {
     "johndeatonforsenate.co": ("dead", "2026-10-01", "NXDOMAIN at two resolvers"),
     "burbridgeforri.com": ("dead", "2026-10-01", "Squarespace 'Website Expired' page"),
     "tanianymanforcongress.com": ("dead", "2026-10-01", "Wix 'domain not connected' page"),
+    # Found by `enrich`, which reads every linked committee site, and each
+    # confirmed by hand on 2026-10-02.
+    "joshweil.us": ("hijacked", "2026-10-02",
+                    "www and bare both 301 through other domains to an Indonesian "
+                    "slot-gambling page"),
+    "dannymintonfortexas.com": ("dead", "2026-10-02",
+                                "parked: a script sends visitors to a registrar's parking lander"),
+    "marklambforcongress.com": ("dead", "2026-10-02",
+                                "parked: a script sends visitors to a registrar's parking lander"),
+    "angusformaine.com": ("dead", "2026-10-02", "every form of the address answers HTTP 404"),
+    "jakeforma.com": ("dead", "2026-10-02", "every form of the address answers HTTP 404"),
+    "drkumar4congress.com": ("dead", "2026-10-02", "every form of the address answers HTTP 404"),
+    "abudahbisa.org": ("unrelated", "2026-10-02",
+                       "an electronics shop's page; nothing about a campaign"),
+}
+
+# Images on a campaign's own site that `enrich` would take as the candidate's
+# portrait but that are not one, keyed on the image URL: (date checked, what it
+# shows). Its rules turn away logos, share cards, merchandise and most group
+# shots by file name and shape; these passed both, and only a look tells. The
+# weekly refresh re-reads every site, so a correction made by editing the
+# cache would not last. validate reports an entry no cached site offers.
+NOT_A_PORTRAIT = {
+    "https://kaileebuller.com/wp-content/uploads/2026/03/Buller.jpg":
+        ("2026-10-02", "a family photograph: four people in the snow"),
+    "https://rickbrattin.com/wp-content/uploads/2026/02/Brattin-extended-scaled.png":
+        ("2026-10-02", "a hunting scene; no face at card size"),
 }
 
 # The 35 Senate seats on the 2026 ballot, keyed by state with the surname of

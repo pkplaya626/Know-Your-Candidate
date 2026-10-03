@@ -30,25 +30,29 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… congress --apply` | Add newly seated members to the roster CSVs |
 | `… field` | Refresh the FEC register of everyone running in 2026 |
 | `… field --check` | Report the field from the committed cache; no network |
-| `… disclosures` | Link House members to their filed financial disclosures |
+| `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
 | `… results` | Read each state's primary results from Wikipedia: who is still in |
 | `… results --check` | Report the results from the committed cache; no network |
 | `… campaigns` | Look up campaign websites from each candidate's FEC committee (needs `FEC_API_KEY`) |
 | `… campaigns --check` | Report campaign-site coverage from the committed cache; no network |
+| `… enrich` | Fill gaps for everyone still running from their Wikipedia infobox and campaign site, and check every linked campaign site |
+| `… enrich --check` | Report what the committed cache fills; no network |
+| `… enrich --refresh` | Read everyone again, not only those read more than six days ago |
 | `… geo` | Regenerate only the map geometry |
 | `… fetch` | Refresh DW-NOMINATE scores from Voteview into the roster CSVs |
 | `… portraits` | Resolve and check a portrait URL for every profile |
 | `… portraits --refresh` | Re-resolve every portrait, not just the missing ones |
 | `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`) |
 | `… refresh` | `fetch`, then `build` |
-| `python -m unittest discover tests` | 509 pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (466 checks) |
+| `python -m unittest discover tests` | 571 pipeline tests |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (478 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
 
-Only `fetch`, `portraits`, `finance` and `congress` touch the network. `build`
-and `verify` are fully offline and read the committed caches and snapshot.
+Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
+`campaigns`, `enrich` and `congress` touch the network. `build` and `verify`
+are fully offline and read the committed caches and snapshot.
 
 ## How the data flows
 
@@ -90,11 +94,12 @@ CI asserts that a rebuild changes nothing.
 | `races.py` | Group profiles into the seats they contest |
 | `legislators.py` | The authoritative membership, and reconciliation against it |
 | `candidates.py` | The FEC's register of who is running in 2026 |
-| `disclosures.py` | Links to House members' filed financial disclosures |
+| `disclosures.py` | Links to members' filed financial disclosures (House Clerk, Senate eFD) |
 | `geo.py` | Decode the state atlas into SVG path data |
 | `summary.py` | Chamber balance, election headline figures, per-state figures |
 | `pages.py` | The state-page template, the states directory and the sitemap |
 | `campaigns.py` | Campaign websites from each candidate's FEC committee |
+| `enrich.py` | Fill filed candidates' gaps from their Wikipedia infobox and campaign site; check every linked campaign site |
 | `validate.py` | Data-quality checks |
 | `emit.py` | Write the data files atomically; verify the pages are wired up |
 | `cli.py` | Argument parsing and command wiring |
@@ -315,9 +320,12 @@ state to see.
 ### What these profiles do and do not contain
 
 Name, party, seat, receipts, disbursements and cash on hand, all from the FEC
-with a coverage date. Education, platform, committees and net worth are
-editorial research that no dataset supplies, so they stay empty and the
-provenance layer reports them as *No data*.
+with a coverage date. Committees and net worth are editorial research that no
+dataset supplies, so they stay empty and the provenance layer reports them as
+*No data*. For anyone still in a race, background, education, age, what the
+campaign says it stands for and a portrait are filled where the person's own
+sources say so - see [Filling the gaps](#filling-the-gaps) - each credited to
+its source.
 
 They also carry **no portrait**. Portrait resolution for a member goes through
 the authoritative bioguide→Wikipedia mapping and cannot pick the wrong person.
@@ -409,6 +417,71 @@ fed in as aliases so the match does not depend on how the FEC spells them.
 Race headers show the primary date, who is on the November ballot, how many
 filers are out, and anyone the results put on the ballot with no FEC filing
 over $5,000 — leaving them off would make the header lie.
+
+## Filling the gaps
+
+A filed candidate arrives with a name, a party and a dollar figure. For
+everyone still in a race, `python build_profile_site.py enrich` reads what
+their own sources say and writes `data/enrichment.json`:
+
+| What | From | Shown as |
+|---|---|---|
+| Birth date (so age), education, occupation | The infobox of the Wikipedia article the state's ballot page links (rule 33), its title checked against the surname after redirects | The field, badged **Wikipedia** |
+| A few words of background | The race page's own description of each listed candidate ("former president of the Navajo Nation"), read by `results` | *Previous careers*, badged **Wikipedia** |
+| What the campaign says it is about | The campaign home page's own description of itself, quoted whole | A quotation under *Platform*, linked to the site |
+| The issues it runs on | The section headings of the page the site links as its issues, platform or priorities | Bullets badged **Campaign site**, linked to that page |
+| A portrait | An image on the campaign site named for the candidate and shaped like a headshot | The card and dialog portrait |
+| A campaign website | The race page's "Campaign websites" list, for a challenger whose committee filed none or one that failed the check | The link, credited to the race page |
+
+Nothing is summarised or rewritten. Every value goes through
+`normalize.fill_field`, which never overwrites what a roster or filing gave and
+records the source in `fieldSources`; the page shows that source as a badge.
+Ages are computed at the same date as every other age on the site.
+
+**Before anything is taken from a campaign site,** the site must come from the
+committee's Form 1 or the race page (never a search), its text must name the
+candidate (the surname, the middle name of a three-part filing name, or a first
+name its own address carries - "Kristi for Congress" at votekristiburke.com),
+and it must not read as hijacked or parked. A description is quoted only in
+whole sentences - a search plugin's cut-off "…the people in U.S." is not one -
+and without its calls to action, signposts ("The official campaign website
+of…") and posts the home page happens to be showing. Issue headings come from
+one heading level of a page that is not a privacy policy, a shop, a news page
+or a ballot-question page ("Tyler votes NO" beneath a measure is not his
+platform); furniture ("Become a Volunteer", "Checks can be mailed to", "This
+website uses cookies") is dropped, a page that is mostly furniture gives no
+list, and a heading that names anyone else in the race is an attack line, not
+an issue. An image must carry the surname in its file name or alt text, must
+not be named as a logo, a share card, merchandise, a collage or someone else
+("Mikes Mom.png"), and must be taller than it is wide unless its own name or
+alt text calls it a headshot, portrait or profile: the first full run took a
+T-shirt, a clipboard icon, four logos, two collages and eight group or family
+photographs, each carrying the right name. `overrides.NOT_A_PORTRAIT` holds the few that pass
+every rule and are still not a likeness; the weekly re-read would undo a
+correction made in the cache.
+
+**Every linked campaign site is read, members' included.** A site serving
+visible gambling spam or a parking page comes off the profile at once and is
+reported (`campaign-site-withdrawn`) for a person to record in
+`BLOCKED_CAMPAIGN_HOSTS`: the first run found `joshweil.us` redirecting to a
+slot site and two parked domains, and confirmed four more dead or unrelated
+hosts. A site with spam *hidden* in the campaign's own page is compromised,
+not lapsed, and stays linked (`campaign-site-compromised` - Ron Johnson's,
+2026-10-02). One that answers without naming the candidate, or is a "coming
+soon" page, stays and is reported (`campaign-site-unconfirmed`). A bot wall, a
+JavaScript-only page or a timeout concludes nothing (rule 8). The refresh
+workflow re-reads everyone each Monday.
+
+For the 509 challengers on the November ballot, on 2026-10-02:
+
+| | Before | After |
+|---|---|---|
+| Background / previous careers | 40 (8%) | 433 (85%) |
+| What they are running on (issues, or the campaign's own words) | 40 (8%) | 289 (57%) |
+| Education | 40 (8%) | 152 (30%) |
+| Age | 40 (8%) | 134 (26%) |
+| Portrait | 140 (28%) | 171 (34%) |
+| Campaign website | 391 (77%) | 413 (81%) |
 
 ## Portraits
 
@@ -515,13 +588,27 @@ figure from them is an estimate dressed as a fact — the exact thing the
 provenance layer exists to prevent.
 
 What is available is the filing itself. The Clerk of the House publishes an
-annual ZIP containing an XML index of every disclosure, and **396 of 439 House
-members** now carry a link to their own annual report (PDF) beside the
-net-worth field.
+annual ZIP containing an XML index of every disclosure, and **401 of 439 House
+members** carry a link to their own annual report (PDF) beside the net-worth
+field.
 
-Senators have none. The Senate's equivalent sits behind a session-based search
-that must be agreed to before it returns anything; scraping it would be fragile
-and against the spirit of that gate.
+**98 of 100 senators** carry a link to their latest annual report in the
+Secretary of the Senate's eFD system. eFD asks every visitor to agree that the
+reports will not be used for a commercial purpose, a credit decision or to
+solicit money; a non-commercial civic page linking each senator to their own
+filing is the use the system exists for, so `disclosures` agrees once per run,
+searches each senator's annual reports, and links the latest. A report is
+matched only when the filer is listed as a senator, the surname matches, and
+the first name fits - the legal name, the name in the filer label ("Cruz, Ted
+(Senator)"), a prefix, or a common nickname - and anything that fits two
+filers is left alone. Paper filings count too: Richard Durbin and Richard
+Blumenthal file on paper, which eFD lists as plain "Annual Report" under the
+label "Senator", so the year is taken as the one before the filing date and a
+paper report belongs to the one labelled filer with the same legal name. Tammy
+Duckworth's reports carry no state, so a search that finds nothing for the
+state is repeated on the surname alone. The link says that the Senate shows its
+terms first. The two without one, Alan Armstrong and Darline Graham Nordone,
+were appointed in 2026 and have not filed an annual report yet.
 
 ## Data provenance
 
@@ -549,6 +636,13 @@ midterms reads as current money.
 are *not* real data. About **11% of surfaced fields** fall into one of those
 categories — that is the honest picture, and the page shows it as such. Absent
 values are excluded from search, so "not disclosed" does not match everyone.
+
+A field the pipeline filled from a named source rather than a roster records
+that source in `fieldSources` - `wikipedia` (an article's infobox),
+`election-page` (the race page's description) or `campaign-site` (the
+campaign's own issues page) - and the page shows it as a badge beside the
+value, with a tooltip saying exactly where it came from. See
+[Filling the gaps](#filling-the-gaps).
 
 ## Election flags and races
 
@@ -600,7 +694,11 @@ the map's delegation panel, the footer, and `sitemap.xml`.
 | `wikipedia` | The bioguide mapping for members; the state ballot page's own link for filed candidates (`wikipediaVia`) | Members, and candidates the ballot page links |
 | `aliases` | Other names a voter may search by, all from the member's own `congress-legislators` record (matched on bioguide id): `official_full` without its quoted nickname, nickname + surname (+ suffix), and the Wikipedia title without its disambiguator ("Jim Clyburn", "Hank Johnson"). Names that fold to the display name are dropped. Searched, never displayed as the name | Sitting members whose record adds a name |
 | `rosterName` | The roster CSV's spelling, set only when it opens with a bare initial ("C. Franklin") and `name` was replaced by the name the record says they go by (nickname + surname, else a real middle name + surname). Keys the finance cache and stays searchable | Five sitting members |
-| `campaignSite`, `campaignCommittee` | The principal campaign committee's Form 1 at the FEC (`data/campaigns.json`) | Everyone on a ballot with an FEC id |
+| `campaignSite`, `campaignCommittee` | The principal campaign committee's Form 1 at the FEC (`data/campaigns.json`); for a challenger whose committee filed none, or filed one that failed the check, the race page's "Campaign websites" list (`campaignSiteVia: "election-page"`) once `enrich` has confirmed the site names them | Everyone on a ballot with an FEC id |
+| `electionPageSite` | The site the race page lists, held back until `enrich` has read it; never shown directly | Filed candidates the race page lists one for |
+| `campaignQuote` | The campaign home page's own description of itself, quoted (`enrich`) | Challengers still running whose site describes itself |
+| `campaignIssuesUrl` | The page the campaign site links as its issues, platform or priorities | Challengers still running |
+| `disclosureUrl`, `disclosureSource` | The member's latest annual financial disclosure: `house-clerk` (a PDF from the Clerk's annual index) or `senate-efd` (a report in the Senate's eFD system) | Members with a filing on record |
 | `committeeList`, `committeesSource` | `committee-membership-current`, with rank and title (`data/committees.json`) | Sitting members |
 | `fecCandidateId` | Links the FEC's own candidate page | Everyone the FEC knows |
 | `otherFecIds` | The same person's other FEC registrations (one committee's money reported under several ids, or a curated pair in `overrides.SAME_PERSON_FILINGS`); a link shared under any of them opens this profile | People registered more than once |
@@ -701,7 +799,7 @@ Current warnings, all expected:
 | Workflow | Trigger | What it does |
 |---|---|---|
 | `ci.yml` | push, PR | Tests, validation, `verify`, reproducibility, no-CDN and no-inline-handler checks |
-| `refresh.yml` | Mondays 07:20 UTC, manual | Reconciles against congress-legislators and **opens a PR** if Congress has changed |
+| `refresh.yml` | Mondays and Thursdays 07:20 UTC (Thursdays only until election day), manual | Reconciles against congress-legislators, refreshes the field, results, money, disclosures and filled gaps, checks every campaign site, and **opens a PR** if anything changed |
 | `deploy.yml` | manual only | Publishes to GitHub Pages |
 
 `refresh.yml` never pushes to main and never deploys. It resolves portraits for
@@ -773,9 +871,15 @@ the sidebar counts moved into the build metadata.
   the chamber. The rosters do not record it, so the site reports `53 R / 45 D /
   2 I` and leaves the arithmetic to the reader rather than asserting something
   it cannot source.
-- **Campaign websites are as the treasurer typed them.** The FEC's committee
-  register holds a site for 856 of the 1,035 people on a ballot; the rest
-  filed none, and nothing is guessed for them. Off-ballot filers are not
-  looked up.
-- **Senators have no financial-disclosure link.** The Senate's search sits
-  behind a session gate that would have to be scraped.
+- **Campaign websites are what the treasurer filed, checked weekly.** The
+  FEC's committee register holds a site for 856 of the 1,035 people on a
+  ballot; the rest filed none, and nothing is guessed for them beyond the race
+  page's own list. Off-ballot filers are not looked up. `enrich` reads every
+  linked site each week, but a domain can lapse between two Mondays.
+- **Most challengers still have no portrait, education or age.** About two in
+  three on the November ballot have no headshot that their own campaign or a
+  linked article names as theirs, and a guess is worse than a silhouette
+  (rule 24). Issue lists and descriptions are the campaigns' own words and as
+  current as their sites.
+- **Two senators have no financial-disclosure link.** Both were appointed in
+  2026 and have not filed an annual report yet.

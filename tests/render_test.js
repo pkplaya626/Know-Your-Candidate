@@ -568,6 +568,77 @@ async function testDirectoryAsync() {
     check("built profiles carry the election period", !!real);
   });
 
+  suite("index.html — gaps filled from a named source", () => {
+    // kyc/enrich.py fills a filed candidate's empty fields from their
+    // Wikipedia infobox and their campaign's own site. Borrow a real filed
+    // candidate, give them the fields under test, put everything back.
+    const host = window.legislatorsData.find((p) => p.source === "fec-field" && p.isCandidate);
+    check("a filed candidate exists to test", !!host);
+    if (!host) return;
+    const fields = {
+      platforms: "Healthcare; Lower costs, higher wages; Public schools",
+      birthdate: "1980-01-02", age: 46, previous_professions: "molecular biologist",
+      quality: {}, campaignSite: "https://example.org/", campaignSiteVia: "election-page",
+      campaignIssuesUrl: "https://example.org/issues",
+      campaignQuote: "Zyxwvut fights for <img src=x onerror=alert(1)> working families.",
+      fieldSources: { platforms: "campaign-site", birthdate: "wikipedia",
+        previous_professions: "election-page" },
+    };
+    const saved = {};
+    Object.keys(fields).forEach((k) => { saved[k] = host[k]; host[k] = fields[k]; });
+    delete host.__search;
+    KYC.profile.open(host.id);
+
+    const platform = D.getElementById("profileModalPlatform");
+    const bullets = [...platform.querySelectorAll(".bullets li")].map((li) => li.textContent);
+    check("the campaign's issue headings are split on semicolons, not commas",
+      bullets.length === 3 && bullets[1] === "Lower costs, higher wages", bullets.join(" | "));
+    check("its own description is quoted, and markup in it is never interpreted",
+      !platform.querySelector("img") && /onerror=alert/.test(platform.textContent) &&
+        !!platform.querySelector("blockquote.campaign-quote"));
+    check("the platform says it came from the campaign's site",
+      /Campaign site/.test(platform.textContent));
+    const out = [...platform.querySelectorAll("a")];
+    check("and links the issues page it was read from, safely",
+      out.some((a) => a.href === "https://example.org/issues") &&
+        out.every((a) => a.target === "_blank" && /noopener/.test(a.rel)));
+    check("a birthdate read from Wikipedia says so",
+      /Wikipedia/.test(D.getElementById("profileModalAge").textContent));
+    const careers = D.getElementById("profileModalCareers");
+    check("the election page's description of them is credited to it",
+      /molecular biologist/.test(careers.textContent) &&
+        /election page/.test((careers.querySelector(".field-source") || {}).title || ""));
+    const chip = [...D.getElementById("profileModalContact").querySelectorAll("a")]
+      .find((a) => a.href === "https://example.org/");
+    check("a site from the election page does not claim to be an FEC filing",
+      !!chip && /Wikipedia/.test(chip.title) && !/FEC/.test(chip.title), chip && chip.title);
+    check("the campaign's own words are searchable",
+      KYC.matchesQuery(host, "zyxwvut"));
+    KYC.profile.close();
+
+    // A quote and no list: the platform shows the quote, not "No data".
+    host.platforms = "No data";
+    host.quality = { platforms: "unknown" };
+    host.fieldSources = {};
+    KYC.profile.open(host.id);
+    check("a campaign's description stands in for an empty platform",
+      /Zyxwvut/.test(platform.textContent) && !/No data/.test(platform.textContent),
+      platform.textContent);
+    KYC.profile.close();
+
+    Object.keys(saved).forEach((k) => {
+      if (saved[k] === undefined) delete host[k]; else host[k] = saved[k];
+    });
+    delete host.__search;
+
+    const quoted = window.legislatorsData.find((p) => p.campaignQuote);
+    check("built profiles carry campaign descriptions", !!quoted);
+    const pictured = window.legislatorsData.filter((p) => p.photoSource === "campaign-site");
+    check("a portrait from a campaign site is only ever a filed candidate's",
+      pictured.every((p) => p.source === "fec-field" && p.isCandidate),
+      pictured.filter((p) => p.source !== "fec-field").map((p) => p.id).join(","));
+  });
+
   suite("index.html — in this race", () => {
     // A member with challengers still on the ballot: the dialog lists them.
     const race = window.kycRaces.find((r) => r.incumbentIds.length && r.candidateCount > 1 && r.settled);

@@ -752,6 +752,59 @@ def check_campaign_blocklist(campaigns):
                   f"{len(stale)} blocked campaign hosts match no cached site", stale)]
 
 
+def check_campaign_sites(profiles, enrichment):
+    """Name every committee site the enrichment pass would not vouch for.
+
+    A site that reads as hijacked or parked has already been taken off the
+    profile by :func:`kyc.enrich.apply_cache`; it is listed so a person can
+    confirm it and record the decision in ``BLOCKED_CAMPAIGN_HOSTS``. One that
+    answered but does not name the candidate stays linked - most are pages
+    built entirely in JavaScript - and is listed so a moved or lapsed domain
+    is seen rather than shown.
+    """
+    if not enrichment:
+        return []
+    from .enrich import problems
+
+    found = problems(profiles, enrichment)
+    issues = []
+    if found["withdrawn"]:
+        issues.append(Issue("warn", "campaign-site-withdrawn",
+                            f"{len(found['withdrawn'])} committee website(s) read as hijacked or "
+                            "parked and are not linked; confirm and add to "
+                            "BLOCKED_CAMPAIGN_HOSTS", found["withdrawn"]))
+    if found["unconfirmed"]:
+        issues.append(Issue("warn", "campaign-site-unconfirmed",
+                            f"{len(found['unconfirmed'])} committee website(s) are linked but "
+                            "their page did not confirm the candidate", found["unconfirmed"]))
+    if found["compromised"]:
+        issues.append(Issue("warn", "campaign-site-compromised",
+                            f"{len(found['compromised'])} campaign website(s) hide gambling links "
+                            "in their own pages; still linked", found["compromised"]))
+    return issues
+
+
+def check_portrait_overrides(enrichment):
+    """Every ``NOT_A_PORTRAIT`` entry must still be an image some site offers.
+
+    Once the site drops the image, the entry guards nothing; once its URL is
+    mistyped, it never did.
+    """
+    if not enrichment:
+        return []
+    offered = set()
+    for entry in (enrichment.get("people") or {}).values():
+        for key in ("site", "listed"):
+            record = entry.get(key) or {}
+            offered.update([record.get("portrait")] + list(record.get("notPortraits") or []))
+    stale = sorted(u for u in overrides.NOT_A_PORTRAIT if u not in offered)
+    if not stale:
+        return []
+    return [Issue("warn", "stale-portrait-override",
+                  f"{len(stale)} NOT_A_PORTRAIT entries match no image a cached site offers",
+                  stale)]
+
+
 def check_field_screen(field, today=None):
     """List every FEC filing the build set aside, and coverage from the future.
 
@@ -923,7 +976,7 @@ def check_registrations(profiles, field):
 
 
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
-        results=None, field=None):
+        results=None, field=None, enrichment=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_identity(profiles)
@@ -933,6 +986,8 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_placeholders(profiles)
     issues += check_overrides(profiles, raw)
     issues += check_campaign_blocklist(campaigns)
+    issues += check_campaign_sites(profiles, enrichment)
+    issues += check_portrait_overrides(enrichment)
     issues += check_races(profiles, races)
     issues += check_markup(profiles)
     issues += check_geometry(profiles, geo)

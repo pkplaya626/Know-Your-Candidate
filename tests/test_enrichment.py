@@ -615,3 +615,524 @@ class TestFinancePeriodWarning(unittest.TestCase):
         self.assertEqual([i.code for i in issues], ["finance-cycle-period"])
         self.assertEqual(issues[0].detail, ["A (Senate • SC)"])
         self.assertEqual(validate.check_finance_periods(people[1:]), [])
+
+
+# ------------------------------------------------- filling gaps (kyc/enrich.py)
+
+from kyc import enrich  # noqa: E402
+
+
+def _page(html_text):
+    return enrich.parse_page(html_text)
+
+
+def _challenger(**extra):
+    profile = {
+        "id": "H6TX01234", "name": "Jane Q Smith", "isCandidate": True,
+        "source": "fec-field", "raceStatus": "nominee", "chamber": "House (Candidate)",
+        "state": "TX", "districtNum": 1, "officeLabel": "House • TX-1",
+        "age": "Unknown", "birthdate": "", "education": "", "previous_professions": "",
+        "platforms": "", "photos": ["placeholder"],
+    }
+    profile.update(extra)
+    return apply_quality(profile)
+
+
+class TestFillField(unittest.TestCase):
+    """The one way an empty field is filled: never over a value, always credited."""
+
+    def test_an_empty_field_is_filled_and_credited(self):
+        profile = _challenger()
+        self.assertTrue(normalize.fill_field(profile, "education", "Rice University (BA)",
+                                             "wikipedia"))
+        self.assertEqual(profile["education"], "Rice University (BA)")
+        self.assertNotIn("education", profile["quality"])
+        self.assertEqual(profile["fieldSources"], {"education": "wikipedia"})
+
+    def test_a_roster_value_is_never_overwritten(self):
+        profile = apply_quality({"education": "Yale (JD)"})
+        self.assertFalse(normalize.fill_field(profile, "education", "Harvard", "wikipedia"))
+        self.assertEqual(profile["education"], "Yale (JD)")
+        self.assertNotIn("fieldSources", profile)
+
+    def test_a_sources_own_placeholder_is_not_promoted_to_a_finding(self):
+        profile = _challenger()
+        self.assertFalse(normalize.fill_field(profile, "education", "N/A", "wikipedia"))
+        self.assertEqual(profile["quality"]["education"], "unknown")
+
+
+class TestInfobox(unittest.TestCase):
+    ARTICLE = """{{Short description|American politician}}
+{{Infobox officeholder
+| name = Jane Smith
+| birth_date = {{birth date and age|mf=yes|1975|4|12}}<ref>{{cite web|url=x}}</ref>
+| alma_mater = {{plainlist|
+* [[Rice University]] ([[Bachelor of Arts|BA]])
+* [[University of Texas School of Law|University of Texas]] ([[Juris Doctor|JD]])
+}}
+| occupation = {{hlist|Attorney|[[Teacher|teacher]]}}
+| party = {{nowrap|[[Democratic Party (United States)|Democratic]]}}
+}}
+'''Jane Smith''' (born April 12, 1975) is ..."""
+
+    def test_the_infobox_gives_birth_education_and_occupation(self):
+        self.assertEqual(enrich.wiki_facts(self.ARTICLE), {
+            "born": "1975-04-12",
+            "education": "Rice University (BA); University of Texas (JD)",
+            "occupation": "Attorney; teacher",
+        })
+
+    def test_a_year_alone_or_an_impossible_date_is_not_a_birthdate(self):
+        self.assertEqual(enrich.birth_date("{{birth year and age|1975}}"), "")
+        self.assertEqual(enrich.birth_date("{{birth date and age|1975|2|30}}"), "")
+        self.assertEqual(enrich.birth_date("{{Birth date and age|1961|8|4|df=yes}}"),
+                         "1961-08-04")
+
+    def test_line_breaks_and_lists_become_one_semicolon_list(self):
+        self.assertEqual(enrich.list_text("[[Yale University|Yale]] (BA)<br />Oxford (MSc)"),
+                         "Yale (BA); Oxford (MSc)")
+        self.assertEqual(enrich.list_text("{{ubl|Lawyer|lawyer|Farmer}}"), "Lawyer; Farmer")
+
+    def test_no_infobox_no_facts(self):
+        self.assertEqual(enrich.wiki_facts("'''Jane Smith''' is a teacher."), {})
+
+
+class TestCampaignSiteVerdict(unittest.TestCase):
+    """May this page stand for the candidate's campaign?"""
+
+    PROFILE = {"name": "Mike France"}
+    GOOD = ("<title>Mike France for Congress</title><h1>Meet Mike</h1>"
+            "<p>Mike France is running to lower costs. Casino workers deserve a raise.</p>")
+
+    def verdict(self, markup, status=200, url="https://votemikefrance.com/",
+                final="https://votemikefrance.com/"):
+        return enrich.assess(self.PROFILE, url, final, status, _page(markup))
+
+    def test_a_page_that_names_the_candidate_is_safe(self):
+        self.assertEqual(self.verdict(self.GOOD), (True, "ok"))
+
+    def test_a_hijacked_page_is_refused_even_under_the_candidates_name(self):
+        # votemikefrance.com served a gambling page under his name (rule 35).
+        spam = "<title>Mike France - Slot Gacor Hari Ini</title><p>situs slot maxwin</p>"
+        self.assertEqual(self.verdict(spam), (False, enrich.HIJACKED))
+
+    def test_a_parked_domain_is_refused(self):
+        self.assertEqual(self.verdict("<title>votemikefrance.com is for sale</title>"
+                                      "<p>Buy this domain today. Mike France</p>"),
+                         (False, enrich.PARKED))
+
+    def test_the_name_in_the_address_alone_proves_nothing(self):
+        shop = "<title>Abudahbisa</title><p>" + "Electronics for everyone. " * 30 + "</p>"
+        self.assertEqual(self.verdict(shop), (False, enrich.ELSEWHERE))
+        self.assertEqual(self.verdict("<title>Coming Soon</title><p>We're under construction."
+                                      " Please check back for an update soon.</p>"),
+                         (False, enrich.UNBUILT))
+
+    def test_a_parking_script_is_parked_whatever_the_page_says(self):
+        lander = ('<html><head><script src="/parking-lander/static/js/main.js"></script>'
+                  "<script>window.LANDER_SYSTEM='PW'</script></head></html>")
+        self.assertEqual(self.verdict(lander), (False, enrich.PARKED))
+
+    def test_spam_hidden_in_the_campaigns_own_page_is_reported_not_unlinked(self):
+        # ronjohnsonforsenate.com, 2026-10-02: his own page, with casino links
+        # in a display:none block and an off-screen div.
+        page = (self.GOOD + '<div id="hidden-post" style="display:none">Claim free spins at '
+                '<a href="http://x.pl/">Casino Bonus</a></div>'
+                '<div style="position: absolute; left: -8046px;">online casino reviews</div>')
+        self.assertEqual(self.verdict(page), (True, enrich.COMPROMISED))
+        visible = self.GOOD + "<p>" + "Best online casinos and free spins. " * 5 + "</p>"
+        self.assertEqual(self.verdict(visible), (False, enrich.HIJACKED))
+
+    def test_a_site_that_cannot_be_read_concludes_nothing(self):
+        # Rule 8: unreachable, a bot wall (403, or 202 with a challenge), a
+        # server error, and a page with nothing but a video are not evidence.
+        for status in (None, 403, 202, 429, 503):
+            self.assertIsNone(self.verdict("", status=status)[0], status)
+        self.assertIsNone(self.verdict("<title>Where's Ya Fatha?</title><video></video>")[0])
+        self.assertEqual(self.verdict("", status=404), (False, "HTTP 404"))
+        self.assertFalse(self.verdict("", status=301, final="https://moneyslim.nl/")[0])
+
+    def test_a_single_mention_of_gambling_is_not_hijacking(self):
+        self.assertTrue(self.verdict(self.GOOD)[0])
+
+    def test_the_names_a_campaign_actually_uses_count(self):
+        def named(name, text, host):
+            return enrich.names_candidate({"name": name}, text, host)
+        self.assertTrue(named("Kristi Burke", "Kristi for Congress", "votekristiburke.com"))
+        self.assertFalse(named("Kristi Burke", "Kristi for Congress", "example.com"))
+        self.assertTrue(named("Darline Graham Nordone", "Darline Graham for Senate", "x.com"))
+        self.assertTrue(named("Maad Abu-Ghazalah", "Maad Abu-Ghazalah for NC", "getmaad.org"))
+        self.assertFalse(named("Mike Smith", "Smithfield Foods", "smithfield.com"))
+
+    def test_a_compressed_body_is_read_and_a_parking_script_followed(self):
+        import gzip
+        page = b"<title>Jane Smith</title>" * 100
+        body = gzip.compress(page)
+        self.assertEqual(enrich._decoded(body, "gzip"), page)
+        # A body read only up to MAX_BODY is cut off before the gzip trailer.
+        self.assertEqual(enrich._decoded(body[:-8], "gzip"), page)
+        self.assertIsNone(enrich._decoded(b"\x1b\x00", "br"))
+        jump = enrich._SCRIPT_REDIRECT.search(
+            '<script>window.onload=function(){window.location.href="/lander"}</script>')
+        self.assertEqual(jump.group(1), "/lander")
+
+
+class TestCampaignWords(unittest.TestCase):
+    """What a campaign says about itself, quoted rather than paraphrased."""
+
+    def describe(self, text, name="Jane Smith"):
+        return enrich.description(_page(f'<meta name="description" content="{text}">'), name)
+
+    def test_a_label_is_not_a_description(self):
+        self.assertEqual(self.describe("Jane Smith for Congress - Official Campaign Website"), "")
+        self.assertEqual(self.describe(
+            "Jane is running for U.S. Congress in Pennsylvania's 9th Congressional District."), "")
+
+    def test_a_truncated_description_is_cut_back_to_whole_sentences(self):
+        self.assertEqual(self.describe(
+            "Jane Smith has spent 14 years as the county's top prosecutor, protecting families. "
+            "She has never backed down from a fight and she"),
+            "Jane Smith has spent 14 years as the county's top prosecutor, protecting families.")
+
+    def test_calls_to_action_and_title_bars_are_dropped(self):
+        self.assertEqual(self.describe(
+            "Learn about Jane Smith's campaign and her values. Get involved today."), "")
+        self.assertEqual(self.describe(
+            "Jane Smith for Congress | Nurse, mother, fighter for affordable care"), "")
+        self.assertEqual(self.describe(
+            "campaign for real change and a better future! learn more about Jane"), "")
+
+    def test_what_a_full_run_found_is_not_a_description(self):
+        # Each of these reached a profile on the first full run.
+        for text in (
+            "Let's make things work for Hardworking Alaskans DONATE WITH ANEDOT "
+            "https://youtu.be/voLhcztE0a8 Bill is endorsed by: 0 Organizations",
+            "Gerald Malloy and Howie Carr discuss upcoming debates, and 25 years of "
+            "Vermont Federal legislators effect on Vermonters.",
+            "An official campaign website for Bridgford for Iowa, providing information "
+            "about the candidate, their platform, and ways to get involved.",
+            "Meet Julie Fortier, Democrat for U.S. House in Illinois District 12. Learn her "
+            "vision, issues, and how to donate or get involved.",
+            "Laura Jones wants to represent all of the people, not just some of the people in U.S.",
+            "Please stay engaged! YOU are the most important part of #RussIsForUS.",
+        ):
+            self.assertEqual(self.describe(text, "Jane Smith"), "", text)
+
+    def test_abbreviations_do_not_end_sentences(self):
+        self.assertEqual(self.describe(
+            "Bill Redpath for US Senate Donate Now. I'm Bill Redpath, running in the special "
+            "election for the U.S. Senate in Ohio for 2026. My platform combines conservative "
+            "economics with liberal positions on social issues.", "William Redpath"),
+            "I'm Bill Redpath, running in the special election for the U.S. Senate in Ohio for "
+            "2026. My platform combines conservative economics with liberal positions on social "
+            "issues.")
+        self.assertEqual(self.describe(
+            "Sarah Trone Garriott is a mom, State Senator, and Lutheran Minister running to flip "
+            "IA-03. She's running to lower costs for working families...", "Sarah Trone Garriott"),
+            "Sarah Trone Garriott is a mom, State Senator, and Lutheran Minister running to flip "
+            "IA-03.")
+
+    def test_a_real_description_is_kept_verbatim(self):
+        text = ("Retired Air Force officer Jane Smith is running to fight for affordability, "
+                "accountability, and the state's most vulnerable.")
+        self.assertEqual(self.describe(text), text)
+
+    def test_the_issues_link_is_the_index_not_the_privacy_policy(self):
+        page = _page('<a href="/privacy-policy">Privacy Policy</a>'
+                     '<a href="/issue-energy/">Energy</a><a href="/meet-jane">Meet</a>'
+                     '<a href="/key-issues">Where Jane Stands</a>')
+        self.assertEqual(enrich.issues_link(page, "https://janesmith.com/"),
+                         "https://janesmith.com/key-issues")
+        page = _page('<a href="/policies">Privacy policies</a><a href="/platform">Platform</a>')
+        self.assertEqual(enrich.issues_link(page, "https://janesmith.com/"),
+                         "https://janesmith.com/platform")
+
+    def test_issue_headings_are_one_level_of_issues_and_nothing_else(self):
+        page = _page(
+            "<h1>On the Issues</h1><h2>Jane's Top Issues</h2>"
+            "<h3>#1 Healthcare</h3><h4>Lower premiums</h4>"
+            "<h3>Rob Wittman has let prices skyrocket</h3>"
+            "<h3>Lower Costs, Raise Wages</h3><h3>Promote</h3><h3>{{ card.title }}</h3>"
+            "<h3>Public Schools</h3><h3>Ready to vote?</h3><h3>Donate Today</h3>")
+        self.assertEqual(enrich.issue_headings(page, "Jane Smith", rivals={"wittman"}),
+                         ["Healthcare", "Lower Costs, Raise Wages", "Public Schools"])
+
+    def test_furniture_fragments_and_addresses_are_not_issues(self):
+        page = _page("".join(f"<h2>{t}</h2>" for t in (
+            "\U0001fa99 Cost of living", "Healthcare »", "Housing​", "Housing",
+            "WE ARE FIGHTING FOR", "and It's Running Out", "This website uses cookies",
+            "Bill 1 of 6", "Checks can be mailed to", "Sam for Montana PO Box 7224",
+            "(Paid for by hardworking Americans)", "Amy's complete Ballotpedia survey",
+            "Get the latest updates from the campaign trail", "Public Schools",
+            "Clean Water", "Fair Taxes", "Veterans")))
+        self.assertEqual(enrich.issue_headings(page, "Amy Chai"),
+                         ["Cost of living", "Healthcare", "Housing", "Public Schools",
+                          "Clean Water", "Fair Taxes", "Veterans"])
+
+    def test_a_page_that_is_mostly_furniture_gives_no_list(self):
+        page = _page("".join(f"<h2>{t}</h2>" for t in (
+            "What We Can Achieve Together", "Clean Water", "Fair Taxes", "Campaign News",
+            "Follow Us", "Become a Volunteer", "Keep Up with the Campaign", "Donate",
+            "Contact", "Privacy Policy")))
+        self.assertEqual(enrich.issue_headings(page, "Ron Russell"), [])
+
+    def test_a_ballot_question_page_is_never_the_issues_page(self):
+        page = _page('<a href="/ballot-questions/">Where Tyler Stands</a>'
+                     '<a href="/the-issues">The Issues</a>')
+        self.assertEqual(enrich.issues_link(page, "https://macallister4congress.com/"),
+                         "https://macallister4congress.com/the-issues")
+
+    def test_a_page_of_issues_set_in_h1s_is_read(self):
+        page = _page("".join(f"<h1>{t}</h1>" for t in
+                             ("Health Care", "Public Education", "Rural Investment")))
+        self.assertEqual(enrich.issue_headings(page, "James Talarico"),
+                         ["Health Care", "Public Education", "Rural Investment"])
+
+    def test_fewer_than_three_issues_is_not_a_list(self):
+        self.assertEqual(enrich.issue_headings(_page("<h2>Healthcare</h2><h2>Jobs</h2>"),
+                                               "Jane Smith"), [])
+
+
+class TestCampaignPortraits(unittest.TestCase):
+    """A campaign image is a portrait only when it is named for the candidate
+    and shaped like one (rule 24)."""
+
+    PROFILE = {"name": "Shannon Leigh Taylor"}
+
+    def picks(self, *tags):
+        return enrich.portrait(_page("".join(tags)), "https://shannontaylorva.com/", self.PROFILE)
+
+    def test_a_file_named_for_the_candidate_is_considered(self):
+        self.assertEqual(self.picks('<img src="/up/Shannon_Taylor_Headshot-1024x1024.jpg">'),
+                         [("https://shannontaylorva.com/up/Shannon_Taylor_Headshot-1024x1024.jpg",
+                           True)])
+
+    def test_an_image_named_only_in_its_alt_text_is_considered(self):
+        self.assertEqual(self.picks('<img src="https://cdn.x.com/4f9a2c.png" alt="Shannon Taylor">'),
+                         [("https://cdn.x.com/4f9a2c.png", False)])
+
+    def test_what_a_full_run_took_that_was_not_a_portrait(self):
+        # Each of these reached a profile before the portrait rules tightened.
+        self.assertEqual(self.picks(
+            '<img src="/Taylor-Website-Icons-2.png">',
+            '<img src="/Taylor_SocialShare_SQ.png">',
+            '<img src="/taylor_collage.jpg">',
+            '<img src="/webclip-shannon-taylor.png">',
+            '<img src="/Taylors Mom.png" alt="Shannon Taylor">',
+            '<img src="/ts.jpg" alt="Shannon Taylor merch shirt">'), [])
+        # "Photo" is not a headshot, so "Photo Edit Purple" is three words about
+        # something other than the person: a group photograph, on the first run.
+        self.assertEqual(self.picks('<img src="/Taylor_Photo_Edit_Purple.png">'), [])
+
+    def test_logos_crowds_slogans_and_strangers_are_not(self):
+        self.assertEqual(self.picks(
+            '<img src="/taylor-logo.png">',
+            '<img src="/Taylor+for+Congress.png">',
+            '<img src="/taylor-with-supporters.jpg">',
+            '<img src="/taylor_website_loyal_to_you.png">',
+            '<img src="/headshot.jpg" alt="Senator Kaine">',
+            '<img src="http://insecure.example/taylor.jpg">'), [])
+
+    def test_image_sizes_are_read_from_the_header_bytes(self):
+        png = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR" + (300).to_bytes(4, "big") + \
+            (400).to_bytes(4, "big")
+        gif = b"GIF89a" + (640).to_bytes(2, "little") + (200).to_bytes(2, "little")
+        jpeg = (b"\xff\xd8\xff\xe0\x00\x10" + b"\x00" * 14 + b"\xff\xc0\x00\x11\x08"
+                + (480).to_bytes(2, "big") + (360).to_bytes(2, "big") + b"\x03" + b"\x00" * 9)
+        webp = (b"RIFF\x00\x00\x00\x00WEBPVP8X" + b"\x00" * 8
+                + (499).to_bytes(3, "little") + (599).to_bytes(3, "little"))
+        self.assertEqual(enrich.image_size(png), (300, 400))
+        self.assertEqual(enrich.image_size(gif), (640, 200))
+        self.assertEqual(enrich.image_size(jpeg), (360, 480))
+        self.assertEqual(enrich.image_size(webp), (500, 600))
+        self.assertIsNone(enrich.image_size(b"not an image"))
+
+
+class TestApplyEnrichment(unittest.TestCase):
+    AS_OF = __import__("datetime").date(2026, 9, 30)
+
+    def cache(self, **entry):
+        return {"people": {"H6TX01234": entry}}
+
+    SAFE_SITE = {"url": "https://janesmith.com", "final": "https://janesmith.com/",
+                 "status": 200, "safe": True, "reason": "ok",
+                 "description": "A nurse running to make care affordable for every family.",
+                 "issues": ["Healthcare", "Lower costs", "Public schools"],
+                 "issuesUrl": "https://janesmith.com/issues",
+                 "portrait": "https://janesmith.com/jane-smith-headshot.jpg"}
+
+    def test_infobox_facts_fill_empty_fields_with_the_age_at_the_build_date(self):
+        profile = _challenger()
+        counts = enrich.apply_cache([profile], self.cache(wiki={
+            "born": "1975-10-15", "education": "Rice University (BA)", "occupation": "Nurse"}),
+            as_of=self.AS_OF)
+        self.assertEqual(profile["birthdate"], "1975-10-15")
+        self.assertEqual(profile["age"], 50)          # not yet 51 on 2026-09-30
+        self.assertEqual(profile["previous_professions"], "Nurse")
+        self.assertEqual(profile["fieldSources"], {"birthdate": "wikipedia",
+                                                   "education": "wikipedia",
+                                                   "previous_professions": "wikipedia"})
+        self.assertEqual(counts["born"], 1)
+
+    def test_what_the_election_page_already_said_is_kept(self):
+        profile = _challenger()
+        normalize.fill_field(profile, "previous_professions", "state senator", "election-page")
+        enrich.apply_cache([profile], self.cache(wiki={"occupation": "Politician"}),
+                           as_of=self.AS_OF)
+        self.assertEqual(profile["previous_professions"], "state senator")
+        self.assertEqual(profile["fieldSources"]["previous_professions"], "election-page")
+
+    def test_the_campaign_site_gives_a_quote_a_platform_and_a_portrait(self):
+        profile = _challenger(campaignSite="https://janesmith.com")
+        enrich.apply_cache([profile], self.cache(site=self.SAFE_SITE), as_of=self.AS_OF)
+        self.assertEqual(profile["campaignQuote"], self.SAFE_SITE["description"])
+        self.assertEqual(profile["platforms"], "Healthcare; Lower costs; Public schools")
+        self.assertEqual(profile["fieldSources"]["platforms"], "campaign-site")
+        self.assertEqual(profile["campaignIssuesUrl"], "https://janesmith.com/issues")
+        self.assertEqual(profile["photos"][0], self.SAFE_SITE["portrait"])
+        self.assertEqual(profile["photoSource"], "campaign-site")
+
+    def test_an_existing_portrait_and_a_members_photo_are_never_replaced(self):
+        pictured = _challenger(campaignSite="https://janesmith.com", photoSource="wikipedia",
+                               photos=["https://upload.wikimedia.org/jane.jpg"])
+        roster = _challenger(campaignSite="https://janesmith.com", source=None)
+        enrich.apply_cache([pictured], self.cache(site=self.SAFE_SITE), as_of=self.AS_OF)
+        enrich.apply_cache([roster], self.cache(site=self.SAFE_SITE), as_of=self.AS_OF)
+        self.assertEqual(pictured["photos"], ["https://upload.wikimedia.org/jane.jpg"])
+        self.assertNotIn("photoSource", roster)
+
+    def test_an_election_page_site_is_linked_only_when_it_checked_out(self):
+        listed = dict(self.SAFE_SITE, url="https://smith2026.com")
+        profile = _challenger()
+        enrich.apply_cache([profile], self.cache(listed=listed), as_of=self.AS_OF)
+        self.assertEqual(profile["campaignSite"], "https://smith2026.com")
+        self.assertEqual(profile["campaignSiteVia"], "election-page")
+
+        unsure = _challenger()
+        enrich.apply_cache([unsure], self.cache(listed=dict(listed, safe=None)),
+                           as_of=self.AS_OF)
+        self.assertNotIn("campaignSite", unsure)
+
+        # A committee site that checks out wins over the page's.
+        filed = _challenger(campaignSite="https://janesmith.com")
+        enrich.apply_cache([filed], self.cache(site=self.SAFE_SITE, listed=listed),
+                           as_of=self.AS_OF)
+        self.assertEqual(filed["campaignSite"], "https://janesmith.com")
+        self.assertNotIn("campaignSiteVia", filed)
+
+    def test_a_hijacked_committee_site_is_withdrawn_whoever_filed_it(self):
+        bad = {"url": "https://votemikefrance.com", "safe": False, "reason": enrich.HIJACKED}
+        member = {"id": "H6TX01234", "name": "Mike France", "isCandidate": False,
+                  "raceStatus": "nominee", "campaignSite": "https://votemikefrance.com"}
+        counts = enrich.apply_cache([member], self.cache(site=bad), as_of=self.AS_OF)
+        self.assertNotIn("campaignSite", member)
+        self.assertEqual(counts["withdrawn"], 1)
+
+    def test_a_site_that_did_not_name_the_candidate_stays_but_is_reported(self):
+        unnamed = {"url": "https://janesmith.com", "safe": False, "reason": enrich.UNNAMED}
+        profile = _challenger(campaignSite="https://janesmith.com")
+        enrich.apply_cache([profile], self.cache(site=unnamed), as_of=self.AS_OF)
+        self.assertEqual(profile["campaignSite"], "https://janesmith.com")
+        self.assertNotIn("campaignQuote", profile)
+        issues = validate.check_campaign_sites([profile], self.cache(site=unnamed))
+        self.assertEqual([i.code for i in issues], ["campaign-site-unconfirmed"])
+
+    def test_each_kind_of_site_problem_is_reported_once_and_decided_ones_not_at_all(self):
+        def person(pid, url, safe, reason):
+            return ({"id": pid, "name": pid, "officeLabel": "House • TX-1"},
+                    {"site": {"url": url, "safe": safe, "reason": reason}})
+        rows = [person("A", "https://a.com", False, enrich.PARKED),
+                person("B", "https://b.com", False, enrich.ELSEWHERE),
+                person("C", "https://c.com", True, enrich.COMPROMISED),
+                person("D", "https://joshweil.us", False, enrich.HIJACKED),
+                person("E", "https://e.com", True, "ok")]
+        cache = {"people": {p["id"]: entry for p, entry in rows}}
+        issues = validate.check_campaign_sites([p for p, _ in rows], cache)
+        self.assertEqual({i.code: len(i.detail) for i in issues},
+                         {"campaign-site-withdrawn": 1, "campaign-site-unconfirmed": 1,
+                          "campaign-site-compromised": 1})
+
+    def test_an_unreachable_site_keeps_only_its_own_earlier_verdict(self):
+        old = {"url": "https://janesmith.com", "safe": True, "reason": "ok"}
+        again = {"url": "https://janesmith.com", "safe": None, "reason": "unreachable"}
+        moved = {"url": "https://smith2026.com", "safe": None, "reason": "unreachable"}
+        self.assertEqual(enrich._keep(old, again)["safe"], True)
+        self.assertIsNone(enrich._keep(old, moved)["safe"])
+        self.assertIsNone(enrich._keep(old, None))
+
+    def test_someone_out_of_the_race_is_left_alone(self):
+        profile = _challenger(raceStatus="eliminated", campaignSite="https://janesmith.com")
+        enrich.apply_cache([profile], self.cache(site=self.SAFE_SITE,
+                                                 wiki={"born": "1975-10-15"}), as_of=self.AS_OF)
+        self.assertNotIn("campaignQuote", profile)
+        self.assertEqual(profile["quality"]["birthdate"], "unknown")
+
+
+class TestEnrichmentAgainstTheRealCache(unittest.TestCase):
+    """The committed cache, applied the way the build applies it."""
+
+    @classmethod
+    def setUpClass(cls):
+        import datetime
+
+        from kyc import campaigns, candidates, legislators, results
+
+        cache = enrich.load_cache(ROOT)
+        if not cache:
+            raise unittest.SkipTest("no enrichment cache committed")
+        finance = fec.load_cache(ROOT)
+        cls.profiles, stats = build_profiles(
+            load_all(ROOT), snapshot=legislators.load_snapshot(ROOT),
+            field=candidates.load_cache(ROOT), finance=finance)
+        fec.apply_cache(cls.profiles, finance)
+        campaigns.apply_cache(cls.profiles, campaigns.load_cache(ROOT))
+        portraits.apply_cache(cls.profiles, portraits.load_cache(ROOT))
+        results.apply_cache(cls.profiles, results.load_cache(ROOT))
+        cls.cache = cache
+        enrich.apply_cache(cls.profiles, cache,
+                           as_of=datetime.date.fromisoformat(stats["ageAsOf"]))
+
+    def test_every_filled_field_names_a_known_source(self):
+        known = {"wikipedia", "election-page", "campaign-site"}
+        seen = {s for p in self.profiles for s in (p.get("fieldSources") or {}).values()}
+        self.assertLessEqual(seen, known)
+
+    def test_campaign_portraits_and_quotes_belong_to_challengers_still_running(self):
+        for profile in self.profiles:
+            if profile.get("photoSource") == "campaign-site" or profile.get("campaignQuote"):
+                self.assertTrue(enrich.running(profile), profile["name"])
+            if profile.get("photoSource") == "campaign-site":
+                self.assertEqual(profile.get("source"), "fec-field", profile["name"])
+                self.assertTrue(profile["photos"][0].startswith("https://"), profile["name"])
+
+    def test_no_profile_links_a_site_the_cache_found_hijacked(self):
+        for profile in self.profiles:
+            site = (self.cache["people"].get(profile["id"]) or {}).get("site")
+            if enrich.withdrawn(site):
+                self.assertNotEqual(profile.get("campaignSite"), site["url"], profile["name"])
+
+
+class TestPortraitOverrides(unittest.TestCase):
+    """A person's look at an image outlasts the weekly re-read."""
+
+    URL = "https://kaileebuller.com/wp-content/uploads/2026/03/Buller.jpg"
+
+    def test_an_image_ruled_out_by_hand_never_reaches_the_profile(self):
+        profile = _challenger(campaignSite="https://kaileebuller.com")
+        cache = {"people": {"H6TX01234": {"site": {
+            "url": "https://kaileebuller.com", "safe": True, "reason": "ok",
+            "portrait": self.URL}}}}
+        enrich.apply_cache([profile], cache)
+        self.assertNotIn("photoSource", profile)
+        stale = [u for i in validate.check_portrait_overrides(cache) for u in i.detail]
+        self.assertNotIn(self.URL, stale)       # the site still offers it
+
+    def test_the_rules_skip_it_and_remember_that_they_did(self):
+        page = _page(f'<img src="{self.URL}">')
+        pictures = enrich.portrait(page, "https://kaileebuller.com/", {"name": "Kailee Buller"})
+        self.assertEqual([u for u, _ in pictures], [self.URL])
+        self.assertIn(self.URL, enrich.overrides.NOT_A_PORTRAIT)
+
+    def test_an_entry_no_site_offers_any_more_is_reported(self):
+        issues = validate.check_portrait_overrides({"people": {}})
+        self.assertEqual([i.code for i in issues], ["stale-portrait-override"])

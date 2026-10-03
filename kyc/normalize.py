@@ -264,3 +264,26 @@ def looks_like_date(val):
     contains a four-digit year, so a bare digit check waves it through.
     """
     return bool(_DATE_LIKE.match(str(val or "")))
+
+
+def fill_field(profile, field, value, source):
+    """Fill an EMPTY field from a named source; True when it did.
+
+    Never overwrites a value: the roster and curated notes win wherever they
+    say something. The value still goes through :func:`classify` (rule 10), so
+    a source's own placeholder is not promoted to a finding, and the source is
+    recorded in ``fieldSources`` for the page to show beside it.
+    """
+    status = (profile.get("quality") or {}).get(field)
+    current = profile.get(field)
+    if status is None and current not in (None, "", "No data"):
+        return False
+    text, verdict = classify(value)
+    if verdict != OK:
+        return False
+    profile[field] = text
+    quality = profile.get("quality")
+    if isinstance(quality, dict):
+        quality.pop(field, None)
+    profile.setdefault("fieldSources", {})[field] = source
+    return True

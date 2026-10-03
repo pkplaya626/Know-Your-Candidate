@@ -14,6 +14,7 @@ from . import (
     geo as geo_mod,
     candidates,
     disclosures,
+    enrich,
     legislators,
     overrides,
     portraits,
@@ -117,6 +118,18 @@ def _build(args):
         print("  [warn] no primary results; run 'results'. Eliminated candidates "
               "will still show as running.")
 
+    # After the results: who is still running, and the article and campaign
+    # site their state's election page links, both arrive with them.
+    enrichment = enrich.load_cache(args.root)
+    if enrichment:
+        filled = enrich.apply_cache(profiles, enrichment, as_of=_age_date(stats))
+        stats["enriched"] = dict(sorted(filled.items()))
+        print("  enrich: " + ", ".join(f"{n} {k}" for k, n in sorted(filled.items()))
+              + f" (read {enrichment.get('checked')})")
+    else:
+        print("  [warn] no enrichment cache; run 'enrich' to read candidates' "
+              "articles and campaign sites")
+
     race_list = races_mod.build(profiles, candidates.filing_counts(field),
                                 results=outcomes, dates=results_mod.load_dates(args.root))
     stats.update(races_mod.stats(race_list))
@@ -156,7 +169,7 @@ def _build(args):
 
     issues = validate.run(profiles, raw, races=race_list, geo=geo,
                           snapshot=snapshot, finance=finance, campaigns=sites,
-                          results=outcomes, field=field)
+                          results=outcomes, field=field, enrichment=enrichment)
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -286,6 +299,52 @@ def _campaigns(args):
                                      refresh=args.refresh)
     print(f"\n[ok] campaigns cache: {campaigns.CACHE_PATH}")
     return 1 if stats.get("stopped") else 0
+
+
+def _age_date(stats):
+    """The date the build computes every age at (``profiles.age_as_of``)."""
+    import datetime
+
+    return datetime.date.fromisoformat(stats["ageAsOf"])
+
+
+def _enrich(args):
+    """Read the articles and campaign sites of everyone still running."""
+    raw = _load(args)
+    if raw is None:
+        return 2
+    field = candidates.load_cache(args.root)
+    finance = fec.load_cache(args.root)
+    profiles, stats = build_profiles(raw, snapshot=legislators.load_snapshot(args.root),
+                                     field=field, finance=finance)
+    fec.apply_cache(profiles, finance)
+    campaigns.apply_cache(profiles, campaigns.load_cache(args.root))
+    portraits.apply_cache(profiles, portraits.load_cache(args.root))
+    # Who is still running, and the article and site the election page links.
+    results_mod.apply_cache(profiles, results_mod.load_cache(args.root))
+    if args.check:
+        cache = enrich.load_cache(args.root)
+        if not cache:
+            print(f"[error] no {enrich.CACHE_PATH}; run 'enrich' first.", file=sys.stderr)
+            return 2
+        filled = enrich.apply_cache(profiles, cache, as_of=_age_date(stats))
+        print("  enrich: " + ", ".join(f"{n} {k}" for k, n in sorted(filled.items())))
+    else:
+        cache, _counts = enrich.resolve_all(profiles, root=args.root, refresh=args.refresh,
+                                            limit=args.limit)
+        print(f"\n[ok] enrichment cache: {enrich.CACHE_PATH}")
+    found = enrich.problems(profiles, cache)
+    for title, lines in (("withdrawn as hijacked or parked", found["withdrawn"]),
+                         ("kept, but the page could not confirm them", found["unconfirmed"]),
+                         ("kept, but compromised with hidden gambling links",
+                          found["compromised"])):
+        if lines:
+            print(f"\n  {len(lines)} committee site(s) {title}:")
+            for line in (lines if args.verbose else lines[:10]):
+                print(f"    - {line}")
+            if not args.verbose and len(lines) > 10:
+                print(f"    ... {len(lines) - 10} more (--verbose)")
+    return 0
 
 
 def _finance(args):
@@ -489,13 +548,23 @@ def _disclosures(args):
             print("[error] no disclosure index could be read.", file=sys.stderr)
             return 2
         found = disclosures.match(profiles, filings)
+        print("Searching the Senate's eFD for senators' annual reports ...")
+        try:
+            found.update(disclosures.match_senate(profiles))
+        except disclosures.DisclosureError as exc:
+            # The House links stand on their own; a Senate outage keeps last
+            # run's Senate links rather than writing them out (rule 8).
+            print(f"  [warn] {exc}; keeping the cached Senate links")
+            previous = disclosures.load_cache(args.root)
+            found.update({k: v for k, v in previous.items()
+                          if v.get("source") == disclosures.SENATE_SOURCE})
         print(f"  wrote {disclosures.save_cache(found, args.root)}")
 
-    house = [p for p in profiles if not p["isCandidate"] and p["chamber"] == "House"]
-    print(f"\n  {len(found)} of {len(house)} House members have an annual "
-          "report on file")
-    print("  Senators have none: the Senate's disclosure search sits behind a "
-          "session gate that\n  would have to be scraped, so it is left alone.")
+    members = [p for p in profiles if not p["isCandidate"]]
+    for chamber in ("House", "Senate"):
+        seated = [p for p in members if p["chamber"] == chamber]
+        have = sum(1 for p in seated if p["id"] in found)
+        print(f"  {have} of {len(seated)} {chamber} members have an annual report on file")
     return 0
 
 
@@ -635,6 +704,7 @@ def _verify(args):
 
     outcomes = results_mod.load_cache(args.root)
     stats["results"] = results_mod.apply_cache(profiles, outcomes) if outcomes else 0
+    enrich.apply_cache(profiles, enrich.load_cache(args.root), as_of=_age_date(stats))
     race_list = races_mod.build(
         profiles, candidates.filing_counts(
             screen_field(candidates.load_cache(args.root), profiles)),
@@ -800,6 +870,14 @@ def build_parser():
     camp.add_argument("--refresh", action="store_true",
                       help="look everyone up again, not just the uncached")
 
+    rich = add("enrich", help="read candidates' Wikipedia infoboxes and campaign sites")
+    rich.add_argument("--check", action="store_true",
+                      help="report what the committed cache fills; no network")
+    rich.add_argument("--limit", type=int, default=None,
+                      help="read at most N people this run")
+    rich.add_argument("--refresh", action="store_true",
+                      help="read everyone again, not just those read over six days ago")
+
     field = add("field", help="refresh the FEC register of 2026 candidates")
     field.add_argument("--check", action="store_true",
                        help="use the committed cache; make no network call")
@@ -850,6 +928,8 @@ def main(argv=None):
         return _results(args)
     if args.command == "campaigns":
         return _campaigns(args)
+    if args.command == "enrich":
+        return _enrich(args)
     if args.command == "portraits":
         return _portraits(args)
     if args.command == "finance":
