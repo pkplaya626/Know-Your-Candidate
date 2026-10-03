@@ -12,7 +12,10 @@ permissions:
 jobs:
   pipeline:
     name: Pipeline (Python ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
+    # ubuntu-latest becomes Ubuntu 26.04 from 2026-10-19, and actions/setup-python
+    # has no Python 3.9 build for it (its manifest stops at 24.04), so the oldest
+    # version we claim stays on 24.04.
+    runs-on: ${{ matrix.python-version == '3.9' && 'ubuntu-24.04' || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
       matrix:

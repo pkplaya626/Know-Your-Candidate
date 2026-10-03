@@ -281,14 +281,23 @@
     advanced: "badge-warn|In runoff",
   };
 
-  /* A member contesting another seat: where, and the result of the race
-   * they are in, not of the seat they hold. */
-  function contestBadges(item) {
+  /* A member contesting another seat: the seat, and the result of the race
+   * they are in, not of the seat they hold. The panel is one state's, so the
+   * seat says only what the row does not: "Running for CA-41", "Running for
+   * Senate" - and the state too, should a contest ever be in another one. */
+  function contestSeat(item) {
+    var seat = item.contestLabel.split(" • ");
+    var label = seat[0] === "House" && seat[1] ? seat[1]
+      : seat[1] === item.state ? seat[0] : seat.join(" ");
+    return '<span class="badge badge-warn contest" title="' +
+      KYC.escapeAttr("Running for " + item.contestLabel) + '">Running for ' +
+      KYC.escapeHtml(label) + "</span>";
+  }
+
+  function contestBadge(item) {
     var contest = RACE_BADGE[KYC.contestStatus(item)];
-    return '<span class="badge badge-warn">Running for ' +
-      KYC.escapeHtml(item.contestLabel.replace(/ • /, " ")) + "</span>" +
-      (contest ? ' <span class="badge ' + contest.split("|")[0] + '">' +
-        contest.split("|")[1] + KYC.ballotLineSuffix(item) + "</span>" : "");
+    return contest ? '<span class="badge ' + contest.split("|")[0] + '">' +
+      contest.split("|")[1] + KYC.ballotLineSuffix(item) + "</span>" : "";
   }
 
   function rowBadge(item) {
@@ -313,10 +322,11 @@
   }
 
   function personRow(item) {
-    // A member contesting another seat carries two badges ("Running for
-    // House CA-41", "Nominee"). At the row's end they squeezed the name to
-    // nothing and broke "House • CA-38" over four lines, so they take a line
-    // of their own under the party. A single status stays at the end.
+    // A member contesting another seat carries two badges. Both at the row's
+    // end squeezed the name to nothing and broke "House • CA-38" over four
+    // lines, so the seat ("Running for CA-41") takes a line under the text
+    // and the result ("Nominee") stays at the end, in line with every other
+    // row's "Renominated". The grid in kyc.css places them.
     var elsewhere = !item.isCandidate && item.contestLabel;
     return [
       '<button type="button" class="person-row" data-id="',
@@ -325,13 +335,12 @@
       '" alt="" loading="lazy" decoding="async" data-photo-idx="0" data-profile="',
       KYC.escapeAttr(item.id), '">',
       '<span class="who">',
-      '<span class="name truncate">', KYC.escapeHtml(item.name), "</span>",
+      '<span class="name">', KYC.escapeHtml(item.name), "</span>",
       '<span class="office">', KYC.escapeHtml(item.officeLabel), "</span>",
       '<span class="party ', KYC.partyClass(item), '">',
       KYC.escapeHtml(item.party), "</span>",
-      elsewhere ? '<span class="row-badges">' + contestBadges(item) + "</span>" : "",
       "</span>",
-      elsewhere ? "" : rowBadge(item),
+      elsewhere ? contestSeat(item) + contestBadge(item) : rowBadge(item),
       KYC.icon("chevron"),
       "</button>",
     ].join("");

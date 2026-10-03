@@ -1611,10 +1611,22 @@ svg { flex: none; }
 }
 .panel-subhead.expander.open .icon { transform: rotate(90deg); }
 
+/* Photo, name, status and chevron share the first line of every row, so the
+ * statuses line up down the panel. A member running for another seat gets a
+ * second line for that seat ("Running for CA-41"), as wide as the text and
+ * status together: squeezed into the text column beside "Lost primary" it
+ * broke as "TX-" / "33". The text column never narrows below its widest
+ * unbreakable line - the seat, in practice - so a long status ("Nominee -
+ * Party for Socialism and Liberation line") wraps instead of cutting the
+ * district to "House • NY-...". The columns are spaced with margins, not a
+ * gap, so a row with no status keeps no empty column. */
 .person-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(min-content, 1fr) fit-content(48%) auto;
+  grid-template-areas:
+    "photo who status go"
+    ".     contest contest .";
   align-items: center;
-  gap: var(--s-3);
   width: 100%;
   padding: var(--s-2) var(--s-3);
   border: 1px solid var(--border);
@@ -1628,9 +1640,10 @@ svg { flex: none; }
 }
 .person-row:hover { background: var(--surface-3); }
 .person-row img {
-  flex: none;
+  grid-area: photo;
   width: 38px;
   height: 38px;
+  margin-right: var(--s-3);
   border-radius: 50%;
   object-fit: cover;
   object-position: center top;
@@ -1640,14 +1653,17 @@ svg { flex: none; }
 /* The three lines are spans, so they need to be stacked explicitly or the
    name, seat and party run together on one line. */
 .person-row .who {
+  grid-area: who;
   display: flex;
   flex-direction: column;
-  flex: 1;
   min-width: 0;
 }
+/* A name or party wraps rather than being cut short: "Sydney Kamla..." in a
+ * 340px panel told the reader less than a second line does. */
 .person-row .who .name {
   font-size: var(--t-sm);
   font-weight: 700;
+  overflow-wrap: break-word;
 }
 .person-row .who .office {
   font-size: var(--t-xs);
@@ -1657,33 +1673,34 @@ svg { flex: none; }
 .person-row .who .party {
   font-size: var(--t-xs);
   font-weight: 700;
+  overflow-wrap: break-word;
 }
-.person-row > .icon { color: var(--text-faint); }
-/* A ballot-line badge ("Nominee - Working Families line") is long: it wraps
- * and shrinks rather than squeezing the name to nothing. */
+.person-row > .icon {
+  grid-area: go;
+  margin-left: var(--s-3);
+  color: var(--text-faint);
+}
+/* A ballot-line badge ("Nominee - Working Families line") is long: its
+ * column stops at 48% of the row and it wraps there, rather than squeezing
+ * the name to nothing. */
 .person-row > .badge {
-  flex: 0 1 auto;
-  max-width: 48%;
+  grid-area: status;
+  justify-self: end;
+  margin-left: var(--s-3);
   white-space: normal;
   text-align: center;
 }
-/* A member contesting another seat ("Running for House CA-41", "Nominee"):
- * a line of their own under the party, so they never take the name's width. */
-.person-row .row-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-1);
-  margin-top: var(--s-1);
-}
-.person-row .row-badges .badge {
+.person-row > .badge.contest {
+  grid-area: contest;
+  justify-self: start;
   max-width: 100%;
-  white-space: normal;
+  margin: var(--s-1) 0 0;
+  text-align: left;
 }
-/* One line each, cut short rather than broken: "House • CA-38" wrapped a
- * word at a time down the row when something beside it took the width. */
-.person-row .who .name,
-.person-row .who .office,
-.person-row .who .party {
+/* The seat stays on one line: "House • CA-38" wrapped a word at a time down
+ * the row when something beside it took the width. The grid keeps room for
+ * it, so the ellipsis is only a backstop. */
+.person-row .who .office {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
