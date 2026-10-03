@@ -334,6 +334,26 @@ async function testDirectory() {
     })());
   });
 
+  suite("index.html — the filter bar shows every chip", () => {
+    // It scrolled sideways with its scrollbar hidden: short of about 2,100px
+    // "Senate by class" was cut off, and nothing said it was there.
+    const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+    const bar = (css.match(/\n\.toolbar\s*\{[^}]*\}/) || [""])[0];
+    check("the bar wraps rather than scrolling",
+      /flex-wrap:\s*wrap/.test(bar) && !/overflow/.test(bar) &&
+        !/scrollbar-width:\s*none/.test(css),
+      bar.replace(/\s+/g, " ").trim());
+    const chips = [...D.querySelectorAll(".toolbar .chip")];
+    check("every chip is in a labelled group, which wraps as a whole",
+      chips.length > 0 && chips.every((c) => c.closest('.chip-group[role="group"][aria-label]')),
+      `${chips.length} chips`);
+    // jsdom has no layout, so this asserts the rules rather than the effect.
+    check("dividers come from the stylesheet, and none starts a line",
+      !D.querySelector(".toolbar-divider") &&
+        /\.chip-group \+ \.chip-group::before/.test(css) &&
+        /\.chip-groups\s*\{[^}]*clip-path:\s*inset\(/.test(css));
+  });
+
   suite("index.html — filtering", () => {
     const label = D.getElementById("resultsLabel");
     const total = announced(D);

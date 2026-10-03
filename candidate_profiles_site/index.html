@@ -152,60 +152,63 @@
     <main class="app-main" id="mainContent">
 
         <div class="toolbar" role="group" aria-label="Filters">
-            <button type="button" class="chip" data-group="chamber" data-value="all"
-                    aria-pressed="true">All</button>
-            <button type="button" class="chip" data-group="chamber" data-value="Senate"
-                    aria-pressed="false">Senate</button>
-            <button type="button" class="chip" data-group="chamber" data-value="House"
-                    aria-pressed="false">House</button>
+            <div class="chip-groups">
+                <div class="chip-group" role="group" aria-label="Chamber">
+                    <button type="button" class="chip" data-group="chamber" data-value="all"
+                            aria-pressed="true">All</button>
+                    <button type="button" class="chip" data-group="chamber" data-value="Senate"
+                            aria-pressed="false">Senate</button>
+                    <button type="button" class="chip" data-group="chamber" data-value="House"
+                            aria-pressed="false">House</button>
+                </div>
 
-            <span class="toolbar-divider" aria-hidden="true"></span>
+                <div class="chip-group" role="group" aria-label="Members or challengers">
+                    <button type="button" class="chip" data-group="role" data-value="member"
+                            data-optional aria-pressed="false"
+                            title="Only people currently serving in Congress">Sitting members</button>
+                    <button type="button" class="chip" data-group="role" data-value="candidate"
+                            data-optional aria-pressed="false"
+                            title="Only 2026 candidates who do not currently hold the seat">Challengers</button>
+                </div>
 
-            <button type="button" class="chip" data-group="role" data-value="member"
-                    data-optional aria-pressed="false"
-                    title="Only people currently serving in Congress">Sitting members</button>
-            <button type="button" class="chip" data-group="role" data-value="candidate"
-                    data-optional aria-pressed="false"
-                    title="Only 2026 candidates who do not currently hold the seat">Challengers</button>
+                <div class="chip-group" role="group" aria-label="Party">
+                    <button type="button" class="chip" data-group="party" data-value="Democrat"
+                            data-optional aria-pressed="false">Democratic</button>
+                    <button type="button" class="chip" data-group="party" data-value="Republican"
+                            data-optional aria-pressed="false">Republican</button>
+                    <button type="button" class="chip" data-group="party" data-value="Independent"
+                            data-optional aria-pressed="false">Independent</button>
+                </div>
 
-            <span class="toolbar-divider" aria-hidden="true"></span>
+                <div class="chip-group" role="group" aria-label="2026 election">
+                    <button type="button" class="chip" data-group="election" data-value="senateUp26"
+                            data-optional aria-pressed="false">Senate seats up ’26</button>
+                    <button type="button" class="chip" data-group="election" data-value="notSeeking"
+                            data-optional aria-pressed="false"
+                            title="Sitting members not on the November ballot for the seat they hold: retiring, running for another office, or beaten in a primary">Not seeking re-election</button>
+                    <button type="button" class="chip" data-group="election" data-value="contested"
+                            data-optional aria-pressed="false">Contested races</button>
+                </div>
 
-            <button type="button" class="chip" data-group="party" data-value="Democrat"
-                    data-optional aria-pressed="false">Democratic</button>
-            <button type="button" class="chip" data-group="party" data-value="Republican"
-                    data-optional aria-pressed="false">Republican</button>
-            <button type="button" class="chip" data-group="party" data-value="Independent"
-                    data-optional aria-pressed="false">Independent</button>
+                <div class="chip-group" role="group" aria-label="Eliminated candidates">
+                    <button type="button" class="chip" data-group="eliminated" data-value="show"
+                            data-optional aria-pressed="false"
+                            title="Also show candidates the primary removed: those who lost, withdrew, or were never on the primary ballot">
+                        Include eliminated
+                    </button>
+                </div>
 
-            <span class="toolbar-divider" aria-hidden="true"></span>
-
-            <button type="button" class="chip" data-group="election" data-value="senateUp26"
-                    data-optional aria-pressed="false">Senate seats up ’26</button>
-            <button type="button" class="chip" data-group="election" data-value="notSeeking"
-                    data-optional aria-pressed="false"
-                    title="Sitting members not on the November ballot for the seat they hold: retiring, running for another office, or beaten in a primary">Not seeking re-election</button>
-            <button type="button" class="chip" data-group="election" data-value="contested"
-                    data-optional aria-pressed="false">Contested races</button>
-
-            <span class="toolbar-divider" aria-hidden="true"></span>
-
-            <button type="button" class="chip" data-group="eliminated" data-value="show"
-                    data-optional aria-pressed="false"
-                    title="Also show candidates the primary removed: those who lost, withdrew, or were never on the primary ballot">
-                Include eliminated
-            </button>
-
-            <span class="toolbar-divider" aria-hidden="true"></span>
-
-            <button type="button" class="chip" id="raceViewToggle" aria-pressed="false"
-                    title="Group each incumbent with everyone challenging them">
-                Group by race
-            </button>
-
-            <button type="button" class="chip" id="senateViewToggle" aria-pressed="false"
-                    title="Every Senate seat, grouped by the year it is next on the ballot, with the candidates for each 2026 seat">
-                Senate by class
-            </button>
+                <div class="chip-group" role="group" aria-label="View">
+                    <button type="button" class="chip" id="raceViewToggle" aria-pressed="false"
+                            title="Group each incumbent with everyone challenging them">
+                        Group by race
+                    </button>
+                    <button type="button" class="chip" id="senateViewToggle" aria-pressed="false"
+                            title="Every Senate seat, grouped by the year it is next on the ballot, with the candidates for each 2026 seat">
+                        Senate by class
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div class="content scroll-y">
