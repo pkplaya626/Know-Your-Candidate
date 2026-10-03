@@ -7,10 +7,12 @@ prints anything suspicious; nothing here blocks a build.
 
 import collections
 import re
+import urllib.parse
 
 from . import overrides
 from .normalize import TERRITORIES, clean_str
 from .photos import PLACEHOLDER
+from .portraits import wikimedia_file
 
 # Expected chamber sizes for the 119th Congress.
 EXPECTED_SENATE_SEATS = 100
@@ -784,6 +786,35 @@ def check_campaign_sites(profiles, enrichment):
     return issues
 
 
+def _photograph(url):
+    parts = wikimedia_file(url)
+    return (parts[1], parts[2], urllib.parse.unquote(parts[3])) if parts else None
+
+
+def check_photo_sets(profiles):
+    """A profile's srcset lists sizes of its own portrait and nothing else.
+
+    The browser picks an entry by screen density, so an entry from another
+    file shows a reader on a different screen a different photograph, and
+    nothing on either screen looks wrong. congress.gov, the House Clerk and
+    the unitedstates project each hold a different photograph of most
+    members, which is why only Wikimedia's sizes of one file qualify.
+    """
+    mixed = []
+    for p in profiles:
+        entries = p.get("photoSet") or []
+        if not entries:
+            continue
+        head = _photograph((p.get("photos") or [None])[0])
+        if head is None or any(_photograph(url) != head for _width, url in entries):
+            mixed.append(f"{p['name']} ({p['state']})")
+    if not mixed:
+        return []
+    return [Issue("error", "photo-set-mixes-photographs",
+                  f"{len(mixed)} srcset(s) list a file other than the portrait they size",
+                  mixed)]
+
+
 def check_portrait_overrides(enrichment):
     """Every ``NOT_A_PORTRAIT`` entry must still be an image some site offers.
 
@@ -1051,6 +1082,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_seats(profiles)
     issues += check_fields(profiles)
     issues += check_placeholders(profiles)
+    issues += check_photo_sets(profiles)
     issues += check_overrides(profiles, raw)
     issues += check_campaign_blocklist(campaigns)
     issues += check_campaign_sites(profiles, enrichment)

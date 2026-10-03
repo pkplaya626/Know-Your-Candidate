@@ -331,8 +331,8 @@
     return [
       '<button type="button" class="person-row" data-id="',
       KYC.escapeAttr(item.id), '">',
-      '<img src="', KYC.escapeAttr(KYC.portraitSrc(item)),
-      '" alt="" loading="lazy" decoding="async" data-photo-idx="0" data-profile="',
+      '<img ', KYC.portraitAttrs(item, "38px"),
+      ' alt="" loading="lazy" decoding="async" data-photo-idx="0" data-profile="',
       KYC.escapeAttr(item.id), '">',
       '<span class="who">',
       '<span class="name">', KYC.escapeHtml(item.name), "</span>",

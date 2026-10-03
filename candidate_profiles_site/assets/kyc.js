@@ -236,7 +236,21 @@
   function handleImageFallback(img, profileId) {
     var item = byId(profileId);
     var chain = (item && item.photos) || [];
-    var idx = parseInt(img.getAttribute("data-photo-idx") || "0", 10) + 1;
+    var at = parseInt(img.getAttribute("data-photo-idx") || "0", 10);
+
+    // The srcset only chooses a size of the photograph at chain[at], so a
+    // size that fails is retried as that photograph's plain URL before the
+    // chain moves on to another source.
+    if (img.hasAttribute("srcset")) {
+      img.removeAttribute("srcset");
+      img.removeAttribute("sizes");
+      if (chain[at] && chain[at] !== "placeholder") {
+        img.src = chain[at];
+        return;
+      }
+    }
+
+    var idx = at + 1;
 
     while (idx < chain.length && chain[idx] === "placeholder") idx++;
 
@@ -255,6 +269,38 @@
   function portraitSrc(item) {
     var first = item && item.photos && item.photos[0];
     return !first || first === "placeholder" ? SILHOUETTE : first;
+  }
+
+  /* Sizes of the first portrait for a srcset, when the build found several
+   * of the same photograph: the browser then fetches one sharp at this
+   * screen's density, rather than a 960px original for a 38px circle. */
+  function portraitSrcset(item) {
+    var set = item && item.photoSet;
+    if (!set || !set.length || portraitSrc(item) === SILHOUETTE) return "";
+    return set.map(function (entry) { return entry[1] + " " + entry[0] + "w"; }).join(", ");
+  }
+
+  /** The src - and srcset and sizes, when there are sizes - of a portrait
+   *  <img>, escaped. *sizes* is the width it is drawn at, e.g. "38px". */
+  function portraitAttrs(item, sizes) {
+    var set = portraitSrcset(item);
+    return 'src="' + escapeAttr(portraitSrc(item)) + '"' + (set
+      ? ' srcset="' + escapeAttr(set) + '" sizes="' + escapeAttr(sizes) + '"'
+      : "");
+  }
+
+  /** Point an existing <img> at a profile's portrait - the dialog reuses one
+   *  element, so a srcset left by the last profile must go. */
+  function setPortrait(img, item, sizes) {
+    var set = portraitSrcset(item);
+    img.setAttribute("data-photo-idx", "0");
+    img.removeAttribute("srcset");
+    img.removeAttribute("sizes");
+    if (set) {
+      img.setAttribute("sizes", sizes);
+      img.setAttribute("srcset", set);
+    }
+    img.src = portraitSrc(item);
   }
 
   /* Delegated: one listener for every portrait on the page, rather than an
@@ -993,6 +1039,9 @@
     ballotLineSuffix: ballotLineSuffix,
     meta: meta,
     portraitSrc: portraitSrc,
+    portraitSrcset: portraitSrcset,
+    portraitAttrs: portraitAttrs,
+    setPortrait: setPortrait,
     handleImageFallback: handleImageFallback,
     SILHOUETTE: SILHOUETTE,
     // behaviour

@@ -38,8 +38,14 @@ def _wiki_urls(name, suffixes=("", "_official_portrait")):
 def member_photos(name, bioguide_id):
     """Portrait chain for a sitting member, best source first.
 
-    Order: Congress.gov, theunitedstates.io (two sizes), Bioguide Retro, then
+    Order: Congress.gov, the unitedstates project's copy of the GPO photo
+    (often a Congress or two older, so a last resort), Bioguide Retro, then
     Wikipedia. Members without a Bioguide ID skip straight to Wikipedia.
+
+    The project's images used to be linked at theunitedstates.io. That domain
+    lapsed: on 2026-10-03 it resolved to a domain-parking network and its TLS
+    handshake failed, so every member's chain pointed twice at a host anyone
+    could buy (rule 35). The project serves the same files from GitHub Pages.
     """
     urls = []
 
@@ -49,8 +55,7 @@ def member_photos(name, bioguide_id):
         initial = upper[0] if upper else "A"
         urls += [
             f"https://www.congress.gov/img/member/{lower}_200.jpg",
-            f"https://theunitedstates.io/images/congress/450x550/{upper}.jpg",
-            f"https://theunitedstates.io/images/congress/225x275/{upper}.jpg",
+            f"https://unitedstates.github.io/images/congress/450x550/{upper}.jpg",
             f"https://bioguideretro.congress.gov/Static_Files/images/bioguide/{initial}/{upper}.jpg",
         ]
 

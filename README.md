@@ -46,8 +46,8 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… portraits --refresh` | Re-resolve every portrait, not just the missing ones |
 | `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`) |
 | `… refresh` | `fetch`, then `build` |
-| `python -m unittest discover tests` | 603 pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (506 checks) |
+| `python -m unittest discover tests` | 613 pipeline tests |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (516 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -546,9 +546,42 @@ hand-editable. Coverage is **571/594 (96%)**; of the 23 without one, 9 are
 placeholder rows for unresolved primaries, so 14 real people lack a portrait
 because no public source has one.
 
-Resolution order: Congress.gov official portrait → Wikipedia via the
-`congress-legislators` Bioguide↔title mapping → a bare Wikipedia title guess →
-a Wikipedia search. A member and their own 2026 candidacy share a portrait.
+Resolution order:
+
+- **House members:** the House Clerk's official portrait (335px wide and the
+  current one), then congress.gov's (175px, often a Congress or two older).
+- **Senators:** the Wikipedia article's portrait through the
+  `congress-legislators` Bioguide↔title mapping, then congress.gov's. The
+  Senate publishes no portrait by Bioguide id, and for most senators sampled
+  congress.gov's was the older photograph.
+- **Everyone else:** the same mapping, a bare Wikipedia title guess, then a
+  Wikipedia search - never a guess or a search for a filed candidate (see
+  [Who is running](#who-is-running)).
+
+A member and their own 2026 candidacy share a portrait.
+
+### Sizes
+
+A Wikimedia portrait carries `photoSet`: Wikimedia's standard thumbnail widths
+of that file (120, 250, 330 and 500px) narrower than the original. The page
+puts them in a `srcset`, so a 38px circle fetches the 120px file and a card on
+a 2x screen the 330px one. Both used to fetch a 960px thumbnail or an original
+of up to 2,364px. Wikimedia refuses any width but its standard ones, so the
+sizes are built from the original's measured width. `portraits` fetches only
+the smallest, slowly, to confirm the file can be resized at all: a burst of
+thumbnail requests gets HTTP 429 for everything from that address. If a size
+fails on the page, the page loads the photograph's plain URL instead.
+
+A srcset holds sizes of one photograph only. The House Clerk, congress.gov
+and the unitedstates project hold different photographs of most members
+(seven of ten sampled), so a Clerk or congress.gov portrait ships as a single
+URL, and `validate` fails a `photoSet` that names another file.
+
+| Field | What it holds |
+|---|---|
+| `photos` | The fallback chain the page walks on a load error, ending in `"placeholder"` (the silhouette) |
+| `photoSource` | Where the first entry came from: `clerk.house.gov`, `congress.gov`, `wikipedia`, `wikipedia-search`, `cross-link` or `campaign-site` |
+| `photoSet` | `[[width, url], ...]`, smallest first: sizes of the first entry's photograph for the page's `srcset`. Wikimedia portraits only |
 
 Set `"pinned": true` on a cache entry to stop the resolver overwriting a
 hand-corrected URL.
@@ -560,6 +593,12 @@ Two rules are load-bearing here, both learned the hard way:
   about 160 working portraits.
 - **Never search with a topical hint.** Searching `Dan Osborn NE politician`
   pushes his own article out of the top results; `Dan Osborn` returns it first.
+
+The fallback chain used to link the unitedstates project's images at
+`theunitedstates.io`. That domain lapsed: on 2026-10-03 it resolved to a
+domain-parking network, so every member's chain pointed twice at a host anyone
+could buy. The chain now uses the project's GitHub Pages copy, as a last
+resort, because it is often an older photograph.
 
 ## Campaign finance
 
