@@ -302,9 +302,9 @@
   /* -------------------------------------------------------------- labels */
 
   function textBox(x, y, text, size, anchor) {
-    var w = String(text).length * size * 0.6;
+    var w = (String(text).length * 0.6 + 0.44) * size;
     var left = anchor === "middle" ? x - w / 2 : anchor === "end" ? x - w : x;
-    return [left, y - size * 0.6, left + w, y + size * 0.6];
+    return [left, y - size * 0.62, left + w, y + size * 0.62];
   }
 
   function collides(box, placed) {
@@ -318,13 +318,26 @@
       box[1] >= frame[1] && box[3] <= frame[1] + frame[3];
   }
 
-  /* The anchor is always an attribute: a stylesheet rule would override a
-   * presentation attribute, and a caption set beside a number would be
-   * centred over it instead. */
+  /* A label is page text over the map, not SVG text. Samsung Internet's
+   * dark mode - on whenever the phone is dark, and deaf to every opt-out a
+   * page can declare - repaints a page by lightening anything dark: inside
+   * an SVG that took a number's dark text and left its light halo light,
+   * so every label bloomed into a smear. Page text on a page background is
+   * what every forced dark mode treats predictably, darkening the backing
+   * and lightening the text. So a label is a span on a small backing of
+   * the page colour, placed by percentage of its map's frame; *x*, *y* and
+   * *size* are in map units, and the anchor says which edge sits at x. */
   function text(cls, x, y, size, content, anchor) {
-    return '<text class="' + cls + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) +
-      '" font-size="' + size.toFixed(2) + '" stroke-width="' + (size * 0.2).toFixed(2) +
-      '" text-anchor="' + (anchor || "middle") + '">' + KYC.escapeHtml(content) + "</text>";
+    return { cls: cls, x: x, y: y, size: size, content: content, anchor: anchor || "middle" };
+  }
+
+  function labelLayer(frame, px, labels) {
+    return '<div class="map-labels" aria-hidden="true">' + labels.filter(Boolean).map(function (l) {
+      return '<span class="map-label ' + l.cls + " anchor-" + l.anchor + '" style="left:' +
+        ((l.x - frame[0]) / frame[2] * 100).toFixed(3) + "%;top:" +
+        ((l.y - frame[1]) / frame[3] * 100).toFixed(3) + "%;font-size:" +
+        (l.size * px).toFixed(2) + 'px">' + KYC.escapeHtml(l.content) + "</span>";
+    }).join("") + "</div>";
   }
 
   /* --------------------------------------------------------------- views */
@@ -385,11 +398,14 @@
     }).join(""));
   }
 
-  function svg(frame, cls, label, body) {
-    return '<svg class="district-map ' + cls + (focus.length ? " has-focus" : "") +
-      '" viewBox="' + frame.map(function (v) {
+  /** A map: the SVG, and its labels over it. *px* is screen pixels per
+   *  map unit at the width the map is drawn. */
+  function svg(frame, cls, label, body, labels, px) {
+    return '<div class="map-frame"><svg class="district-map ' + cls +
+      (focus.length ? " has-focus" : "") + '" viewBox="' + frame.map(function (v) {
         return v.toFixed(1);
-      }).join(" ") + '" role="img" aria-label="' + KYC.escapeAttr(label) + '">' + body + "</svg>";
+      }).join(" ") + '" role="img" aria-label="' + KYC.escapeAttr(label) + '">' + body + "</svg>" +
+      labelLayer(frame, px, labels || []) + "</div>";
   }
 
   /** Whether a district's number fits at *px* screen pixels per map unit.
@@ -406,10 +422,10 @@
     var labels = numbers(plan).map(function (n) {
       var district = plan.districts[n];
       var picked = focus.indexOf(n) !== -1;
-      if (!picked && !fitsAt(district, px)) return "";
+      if (!picked && !fitsAt(district, px)) return null;
       return text("district-num" + focusClass(n), district.at[0], district.at[1],
                   (picked ? 15 : NUMBER_PX) / px, numLabel(n));
-    }).join("");
+    });
     var lines = state.insets.map(function (inset) {
       var b = inset.box;
       return '<rect class="inset-outline" x="' + b[0] + '" y="' + b[1] + '" width="' + b[2] +
@@ -418,8 +434,8 @@
     return svg(frame, "district-statewide",
       "All " + state.seats + " districts on the " + plan.title,
       '<g class="district-shapes">' + clipped(plan, shapes(plan, frame)) + "</g>" +
-      '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan) + lines +
-      '<g class="district-labels" aria-hidden="true">' + labels + "</g>");
+      '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan) + lines,
+      labels, px);
   }
 
   /* Each inset is drawn as wide as it needs for every number in it, or as
@@ -457,25 +473,25 @@
     var labels = mine.map(function (n) {
       var district = plan.districts[n];
       var picked = focus.indexOf(n) !== -1;
-      if (!picked && !fitsAt(district, px)) return "";
+      if (!picked && !fitsAt(district, px)) return null;
       var size = (picked ? 13 : NUMBER_PX) / px;
       placed.push(textBox(district.at[0], district.at[1], numLabel(n), size, "middle"));
       return text("district-num" + focusClass(n), district.at[0], district.at[1], size,
                   numLabel(n));
     }).concat(others.map(function (n) {
       var at = labelAt(plan, n, frame, 9 / px);
-      if (!at || at[2] * px < LABEL_ROOM + 0.5) return "";
+      if (!at || at[2] * px < LABEL_ROOM + 0.5) return null;
       var size = (focus.indexOf(n) !== -1 ? 13 : NUMBER_PX) / px;
       var box = textBox(at[0], at[1], numLabel(n), size, "middle");
-      if (collides(box, placed)) return "";
+      if (collides(box, placed)) return null;
       placed.push(box);
       return text("district-num" + focusClass(n), at[0], at[1], size, numLabel(n));
-    })).join("");
+    }));
     return '<figure class="inset" style="width:' + Math.round(width) + 'px">' +
       svg(frame, "district-inset", inset.title + " on the " + plan.title,
         '<g class="district-shapes">' + clipped(plan, shapes(plan, frame)) + "</g>" +
-        '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan) +
-        '<g class="district-labels" aria-hidden="true">' + labels + "</g>") +
+        '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan),
+        labels, px) +
       "<figcaption>" + KYC.escapeHtml(inset.title) + "</figcaption></figure>";
   }
 
@@ -648,8 +664,8 @@
       '<use href="#kycd-counties" class="county-line"/>' +
       '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan) +
       '<g class="district-ghosts">' + ghosts + "</g>" +
-      '<g aria-hidden="true">' + dots.join("") + "</g>" +
-      '<g class="district-labels" aria-hidden="true">' + marks.join("") + "</g>");
+      '<g aria-hidden="true">' + dots.join("") + "</g>",
+      marks, px);
   }
 
   /* --------------------------------------------------------------- facts */

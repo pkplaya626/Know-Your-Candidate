@@ -18,7 +18,7 @@
 /* ============================================================== 1. tokens */
 
 :root {
-  color-scheme: dark;
+  color-scheme: only dark;
 
   /* Surfaces run 0 (page) -> 3 (raised/hover). */
   --surface-0: #0d0f12;
@@ -60,7 +60,7 @@
 
   /* State codes on the partisan map, over any party colour. */
   --map-label: #ffffff;
-  --map-label-halo: rgb(0 0 0 / 0.55);
+  --map-label-backing: rgb(0 0 0 / 0.34);
 
   /* Spacing scale: 4px base. */
   --s-1: 0.25rem;
@@ -103,7 +103,7 @@
 }
 
 [data-theme="amoled"] {
-  color-scheme: dark;
+  color-scheme: only dark;
   --surface-0: #000000;
   --surface-1: #0a0b0d;
   --surface-2: #050506;
@@ -121,7 +121,7 @@
  * party fills at about 2:1 against a darkened background. */
 [data-theme="light"] {
   color-scheme: only light;
-  --map-label-halo: rgb(0 0 0 / 0.45);
+  --map-label-backing: rgb(0 0 0 / 0.26);
   --surface-0: #f5f7fa;
   --surface-1: #ffffff;
   --surface-2: #eceff4;
@@ -1629,51 +1629,51 @@ svg.district-map,
   stroke-width: 1.5;
 }
 
-/* Size, halo width and baseline are set per label by kyc-map.js, from the
- * width the map is drawn at; a stylesheet font-size would override them. */
-.state-label {
+/* The partisan map's words are page text in a layer over it (kyc-map.js
+ * drawMap), 11px at any width: a code on a small dark backing, so it reads
+ * on any party colour and survives a forced dark mode. The layer is laid
+ * over the map's own box; each label is centred on its point. */
+.us-map-labels .map-label {
+  font-size: 11px;
   font-weight: 700;
-  fill: var(--map-label);
-  paint-order: stroke;
-  stroke: var(--map-label-halo);
-  stroke-linejoin: round;
-  pointer-events: none;
+  color: var(--map-label);
+  background: var(--map-label-backing);
   user-select: none;
 }
-
-/* A small state's code, out where there is room for it. */
-.state-callout { cursor: pointer; }
 .callout-line {
   stroke: var(--text-muted);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
-.callout-box {
-  fill: var(--surface-3);
-  stroke: var(--surface-0);
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-  transition: fill 0.18s var(--ease);
+/* A small state's code, out where there is room for it, in a box of its
+ * colour that can be tapped. */
+.us-map-labels .map-callout {
+  min-width: 2.3em;
+  padding: 0;
+  border: 1px solid var(--surface-0);
+  border-radius: 0.28em;
+  background: var(--surface-3);
+  color: var(--text-inverse);
+  line-height: 1.3;
+  text-align: center;
+  cursor: pointer;
+  pointer-events: auto;
 }
 @media (hover: hover) {
-  .state-callout:hover .callout-box { stroke: var(--text); }
+  .us-map-labels .map-callout:hover { border-color: var(--text); }
 }
-.callout-box.is-selected { stroke: var(--text); stroke-width: 2.5; }
-
-.territory-caption {
+.us-map-labels .map-callout.is-selected { outline: 2px solid var(--text); outline-offset: 0; }
+/* A territory's code and the strip's caption sit on the page itself. */
+.us-map-labels .territory-label {
+  background: none;
+  color: var(--text);
+}
+.us-map-labels .territory-caption {
+  background: none;
+  color: var(--text-faint);
   font-weight: 600;
-  fill: var(--text-faint);
-}
-/* A territory's code sits on the page, not on its shape, so it is written
- * in the page's text colour: white on a dark halo was a ghost in light. */
-.territory-label {
-  font-weight: 700;
-  fill: var(--text);
-  paint-order: stroke;
-  stroke: var(--surface-0);
-  stroke-linejoin: round;
-  pointer-events: none;
-  user-select: none;
+  line-height: 1.2;
+  text-align: right;
 }
 
 /* -------- delegation panel -------- */
@@ -2550,20 +2550,35 @@ svg.district-map,
 .district-ghost.focus-3 { stroke: var(--focus-3); }
 .hide-ghosts .district-ghosts { display: none; }
 
-/* Labels sit on a halo of the page colour, which keeps them legible over
- * any fill in every theme. Sizes are set per view, in map units. */
-.district-labels text {
-  fill: var(--text);
-  stroke: var(--surface-0);
-  paint-order: stroke;
-  stroke-linejoin: round;
-  dominant-baseline: central;
+/* Labels are page text over the map (kyc-districts.js text()), on a small
+ * backing of the page colour - legible over any fill in every theme, and
+ * under a forced dark mode, which darkens the backing and lightens the
+ * text. An SVG halo came out as light as its text there. Sizes and places
+ * are set per label; the layer is exactly the map's frame. */
+.map-frame { position: relative; }
+.map-labels {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
   pointer-events: none;
 }
+.map-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 0 0.22em;
+  border-radius: 0.3em;
+  background: color-mix(in srgb, var(--surface-0) 72%, transparent);
+  color: var(--text);
+  line-height: 1.24;
+  white-space: nowrap;
+}
+.map-label.anchor-start { transform: translate(0, -50%); }
+.map-label.anchor-end { transform: translate(-100%, -50%); }
 .district-num { font-weight: 700; }
 .district-caption { font-weight: 600; }
 .county-name {
-  fill: var(--text-faint);
+  background: color-mix(in srgb, var(--surface-0) 55%, transparent);
+  color: var(--text-muted);
   font-weight: 600;
   letter-spacing: 0.08em;
 }

@@ -944,7 +944,7 @@ async function testMap() {
       [...shapes].every((s) => s.getAttribute("role") === "button" && s.getAttribute("aria-label")));
     // In place where the code fits; in a callout or the territory strip
     // where it does not - but every one somewhere.
-    const named = new Set([...D.querySelectorAll("#usMap .state-label, #usMap .territory-label")]
+    const named = new Set([...D.querySelectorAll("#mapLabels .map-label")]
       .map((t) => t.textContent));
     const every = Object.keys(window.kycGeo.states).concat(window.kycGeo.territories.map((t) => t.code));
     check("every state and territory is named on the map",
@@ -1902,8 +1902,8 @@ async function testRedistricting() {
         shapes.length === maps.seats, `${shapes.length}`);
       check(`${plan.title}: every shape is this map's own`, shapes.every((u) =>
         u.getAttribute("href") === "#kycd-" + plan.key + "-" + u.getAttribute("data-district")));
-      const numbered = new Set([...card.querySelectorAll(
-        ".district-statewide .district-num, .district-inset .district-num")].map((t) => +t.textContent));
+      const numbered = new Set([...card.querySelectorAll(".map-frame .district-num")]
+        .map((t) => +t.textContent));
       const missing = [];
       for (let n = 1; n <= maps.seats; n++) if (!numbered.has(n)) missing.push(n);
       check(`${plan.title}: every district is numbered, statewide or in an inset`,
@@ -2142,6 +2142,15 @@ async function testDistrictPages() {
   suite("districts/tx.html — a redrawn map, clipped to the land", () => {
     const D = tx.D;
     check("no page errors", tx.errors.length === 0, tx.errors.join(" | "));
+    // Words are page text over every view - statewide, insets, close-up.
+    // Inside the SVG, Samsung Internet's dark mode lightened a number's dark
+    // halo along with the number, and every label bloomed.
+    check("no district map draws SVG text", !D.querySelector(".district-map text"),
+      D.querySelectorAll(".district-map text").length + " text elements");
+    check("its labels are page text on the map's frame",
+      D.querySelectorAll(".map-frame > .map-labels .map-label").length > 20);
+    const scheme = D.querySelector('meta[name="color-scheme"]').getAttribute("content");
+    check("the page declares only the scheme it shows", /^only (dark|light)$/.test(scheme), scheme);
     const clip = D.querySelector(".district-defs clipPath#kycd-land");
     // One path of every old district's rings. One <use> per district froze
     // Texas's page for 11-12 seconds on a mid-range Android phone while
@@ -2323,40 +2332,43 @@ async function testMapOnAPhone() {
     suite(`map.html — the map drawn ${width}px wide`, () => {
       const D = page.D;
       check("no page errors", page.errors.length === 0, page.errors.join(" | "));
-      const px = width / 975;
-      const label = D.querySelector("#usMap .state-label");
-      const size = label && parseFloat(label.getAttribute("font-size")) * px;
-      check("a state's code is 11px on screen", Math.abs(size - 11) < 0.05, size);
+      // Every word is page text over the map: inside the SVG, Samsung
+      // Internet's dark mode lightened a code's dark halo with the code, and
+      // every label bloomed.
+      check("no text is drawn inside the map's SVG", !D.querySelector("#usMap text"));
       const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
-      const rule = (css.match(/\n\.state-label\s*\{[^}]*\}/) || [""])[0];
-      check("no stylesheet size or halo overrides it, and no colour literal",
-        !/font-size|stroke-width|#[0-9a-f]{3,6}/i.test(rule), rule.replace(/\s+/g, " "));
-      const callouts = [...D.querySelectorAll("#usMap .state-callout")]
-        .map((g) => g.getAttribute("data-state"));
+      const rule = (css.match(/\n\.us-map-labels \.map-label\s*\{[^}]*\}/) || [""])[0];
+      check("a state's code is 11px on screen, on a backing from the theme",
+        /font-size:\s*11px/.test(rule) && /background:\s*var\(--map-label-backing\)/.test(rule) &&
+          !/#[0-9a-f]{3,6}/i.test(rule), rule.replace(/\s+/g, " "));
+      const codes = (cls) => [...D.querySelectorAll("#mapLabels ." + cls)].map((s) => s.textContent);
+      const callouts = codes("map-callout");
       if (width < 500) {
         check("states too small for their code are named in callouts",
           ["RI", "DE", "MD", "NJ", "MA", "CT", "HI"].every((c) => callouts.includes(c)),
           callouts.join(" "));
-        check("and are not also labelled in place", ["RI", "DE"].every((c) =>
-          ![...D.querySelectorAll("#usMap > g > .state-label")].some((t) => t.textContent === c)));
+        check("and are not also labelled in place",
+          ["RI", "DE"].every((c) => !codes("state-code").includes(c)));
       } else {
         check("a wide map labels more states in place", callouts.length < 7, callouts.join(" "));
       }
       check("D.C. is named in the strip, not a callout", !callouts.includes("DC") &&
-        [...D.querySelectorAll("#mapTerritories .territory-label")].some((t) => t.textContent === "DC"));
-      const ri = D.querySelector('#usMap .state-callout[data-state="RI"]');
+        codes("territory-label").includes("DC"));
+      const left = (s) => parseFloat(s.style.left);
+      check("labels are placed inside the map's frame", [...D.querySelectorAll("#mapLabels .map-label")]
+        .every((s) => left(s) >= 0 && left(s) <= 100 && parseFloat(s.style.top) >= 0 &&
+          parseFloat(s.style.top) <= 100));
+      const ri = D.querySelector('#mapLabels .map-callout[data-state="RI"]');
       if (ri) {
-        ri.querySelector(".callout-box").dispatchEvent(
-          new page.window.MouseEvent("click", { bubbles: true }));
+        ri.dispatchEvent(new page.window.MouseEvent("click", { bubbles: true }));
         check("a callout can be tapped to pick its state",
           /state=RI/.test(page.window.location.hash) &&
             D.querySelector('#usMap .state[data-state="RI"]').getAttribute("aria-pressed") === "true",
           page.window.location.hash);
         check("and its box takes the state's colour and shows it is picked",
-          !!ri.querySelector(".callout-box.is-selected") &&
-            !!ri.querySelector(".callout-box").style.fill);
+          ri.classList.contains("is-selected") && !!ri.style.background);
         check("a callout is not a second tab stop for the state",
-          ri.closest('[aria-hidden="true"]') && !ri.querySelector("[tabindex]"));
+          ri.closest('[aria-hidden="true"]') && !ri.hasAttribute("tabindex"));
       }
     });
   }
@@ -2381,12 +2393,13 @@ async function testDistrictsOnAPhone() {
         check(`every district on the ${plan.title} is numbered somewhere`,
           missing.length === 0, missing.join(", "));
         const map = card.querySelector(".district-statewide");
-        const num = map.querySelector(".district-num");
-        const px = width / state.viewBox[2];
-        const size = num && parseFloat(num.getAttribute("font-size")) * px;
+        const num = map.closest(".map-frame").querySelector(".map-labels .district-num");
+        const size = num && parseFloat(num.style.fontSize);
         check("a statewide number is 11px on screen", Math.abs(size - 11) < 0.05, size);
-        const halo = num && parseFloat(num.getAttribute("stroke-width")) * px;
-        check("on a halo a fifth of that, not a blot", Math.abs(halo - 2.2) < 0.05, halo);
+        // Page text on a backing, not SVG text on a halo: a forced dark mode
+        // made the halo as light as the number.
+        check("drawn as page text over the map, not inside the SVG",
+          !map.querySelector("text") && num.classList.contains("map-label"));
       });
       const titles = [...D.querySelectorAll(".plan-card")[0]
         .querySelectorAll("figure.inset figcaption")].map((f) => f.textContent);

@@ -203,8 +203,14 @@ layout is the same. What they do differently is handled too:
 - The compact header runs up to 760px, which covers a Fold's inner screen and
   phones in landscape. Under 130% page zoom or more, the search box gets a
   row of its own.
-- A reader who picks the Light theme keeps it under Samsung Internet's dark
-  mode and Brave's night mode (`color-scheme: only light`).
+- Every word on the maps is page text on a small backing laid over the map,
+  not text drawn inside the SVG. Samsung Internet's dark mode repaints every
+  page whatever it declares. Inside an SVG it lightened a label's dark halo
+  along with the label, and the text bloomed into a smear. Page text
+  survives a repaint: the backing goes dark, the text light. The page also
+  declares `only dark` or `only light` for the theme it shows. Brave's night
+  mode, Chrome's auto-dark and Samsung's "Use website dark theme" respect
+  that.
 - Timed on an emulated mid-range phone (4x CPU throttle), every page is
   loaded in under 0.6 s; Texas's district page took 11 s before its clip was
   made a single path. Brave's and Samsung's ad-block lists (EasyList,
