@@ -52,8 +52,11 @@
     }).join(" ");
   }
 
-  function balance(people) {
-    var counts = {};
+  /* The delegation by party. *vacant* is the state's empty seats, which
+   * have no profile to count (summary.py counts them from the races), so
+   * the heading agrees with the sidebar. */
+  function balance(people, vacant) {
+    var counts = { vacant: vacant || 0 };
     people.forEach(function (p) {
       var key = KYC.partyKey(p);
       counts[key] = (counts[key] || 0) + 1;
@@ -122,7 +125,8 @@
       html.push(
         '<section class="state-section">',
         '<h2 class="state-heading">' + (info.territory ? "Delegate to the U.S. House" : "U.S. House delegation") +
-          ' <span class="balance">' + balance(house) + "</span></h2>",
+          ' <span class="balance">' + balance(house,
+            ((info.balance || {}).house || {}).vacant) + "</span></h2>",
         '<div class="card-grid">' + house.map(cards.card).join("") + "</div>",
         "</section>"
       );

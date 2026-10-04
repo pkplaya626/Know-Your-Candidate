@@ -122,6 +122,12 @@ def build(profiles, races=None, committees=None):
             "open": sum(1 for r in races if r.get("openSeat")),
         }
     summary["states"] = by_state(profiles, races)
+    if races is not None:
+        # The same vacancies, nationally: 433 members of a 435-seat House
+        # read as a complete chamber when two seats were empty.
+        summary["house"]["vacant"] = sum(
+            s["balance"]["house"]["vacant"] for s in summary["states"].values()
+            if not s["territory"])
     summary["districtMaps"] = district_maps()
     if committees:
         summary["committees"] = committee_table(committees, profiles)
@@ -146,6 +152,10 @@ def by_state(profiles, races=None):
             "name": state_name(code), "senators": 0, "house": 0, "delegates": 0,
             "seatsUp": 0, "open": 0, "challengersOnBallot": 0, "challengersOut": 0,
             "races": 0, "territory": code in TERRITORIES,
+            # The state's own delegation by party, for its sidebar. A
+            # territory's delegate sits in the House, so counts there.
+            "balance": {"senate": {"D": 0, "R": 0, "I": 0, "vacant": 0},
+                        "house": {"D": 0, "R": 0, "I": 0, "vacant": 0}},
         })
         if p.get("isCandidate"):
             if p.get("raceStatus") in ("eliminated", "withdrawn", "unlisted"):
@@ -159,8 +169,11 @@ def by_state(profiles, races=None):
             entry["delegates"] += 1
         else:
             entry["house"] += 1
+        chamber = "senate" if "Senate" in p["chamber"] else "house"
+        entry["balance"][chamber][_party_bucket(p)] += 1
         if p.get("seatUp2026"):
             entry["seatsUp"] += 1
+    house_races = {}
     for race in races or []:
         entry = out.get(race.get("state"))
         if entry is None:
@@ -168,4 +181,12 @@ def by_state(profiles, races=None):
         entry["races"] += 1
         if race.get("openSeat"):
             entry["open"] += 1
+        if race.get("chamber") == "House":
+            house_races[race["state"]] = house_races.get(race["state"], 0) + 1
+    # Every House seat is on the ballot, so a state's House races are its
+    # seats. The roster has no row for a seat nobody holds; a seat with a
+    # race but no member is vacant, and is counted, not left out of the sum.
+    for code, seats in house_races.items():
+        balance = out[code]["balance"]["house"]
+        balance["vacant"] += max(0, seats - sum(balance.values()))
     return out

@@ -819,6 +819,10 @@ petition, and the courts kept the 2022 map in place; its page says so.
 - **A close-up of the picked districts.** It shows county lines, towns, and
   captions naming who holds the seat or is running in it, from `profiles.js`.
   On a redrawn state the other map's lines are dashed.
+- **Party colours.** Each district is drawn in the party of the member who
+  holds it, or as vacant. A redrawn state's new map is left plain: nobody
+  holds those seats until November, and colouring them would be a forecast.
+  Picked districts keep their fill and are outlined in their highlight colour.
 - **The people, as cards.** Each opens the profile dialog. On a redrawn state,
   each card also gives the share of the district's land that came from, or
   went to, each district on the other map.
@@ -930,6 +934,13 @@ challenging them.
 `kyc/summary.py` counts the chamber balance, the seats on the ballot and the
 defending split, and ships them in `window.kycBuildMeta`. The sidebars read
 them at runtime.
+
+On a state's own pages, its state page and its district map, the sidebar also
+shows that state's delegation by party, in the same colours: Senate, then
+House. A seat with no sitting member is counted as vacant. The roster has no
+row for it, so the vacancy is counted from the races, which cover every seat.
+The national House line counts the same vacancies, so it adds up to 435
+rather than reading 433 as a full chamber.
 
 They used to be literal text in both pages — `53 R | 47 D/I`, `35`, `435` —
 with a copy-pasted counting function per page and nothing tying either to the

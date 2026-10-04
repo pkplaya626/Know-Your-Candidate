@@ -876,6 +876,28 @@
       pill(info.house.vacant, "party-vacant", "Vacant"),
     ]));
 
+    // On a state's own pages, that state's delegation, counted the same way
+    // and drawn in the same colours. D.C. and the territories have no
+    // senators, so no Senate line.
+    var slot = doc.getElementById("stateBalance");
+    var code = doc.body && doc.body.getAttribute("data-state");
+    var mine = code && info.states && info.states[code];
+    if (slot && mine && mine.balance) {
+      var line = function (label, counts) {
+        return '<div class="balance-label">' + label + "</div>" +
+          '<div class="balance">' + join([
+            pill(counts.R, "party-r", "R"),
+            pill(counts.D, "party-d", "D"),
+            pill(counts.I, "party-i", "I"),
+            pill(counts.vacant, "party-vacant", "Vacant"),
+          ]) + "</div>";
+      };
+      slot.innerHTML = '<h2 class="sidebar-heading">' + escapeHtml(mine.name) + "</h2>" +
+        (mine.senators ? line("Senate", mine.balance.senate) : "") +
+        line("House", mine.balance.house);
+      slot.hidden = false;
+    }
+
     var election = info.election || {};
     var defending = election.senateDefending || {};
     set("senateSeatsUp", String(election.senateSeatsUp || 0));

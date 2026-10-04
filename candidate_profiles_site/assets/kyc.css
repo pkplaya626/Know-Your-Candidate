@@ -1018,12 +1018,16 @@ svg { flex: none; }
 
 .balance {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--s-2);
+  gap: 0 var(--s-2);
   font-size: var(--t-md);
   font-weight: 700;
   margin-bottom: var(--s-4);
 }
+/* "218 R" stays whole; a fourth count ("2 Vacant") wraps as a unit instead
+ * of breaking every count over two lines. */
+.balance > span { white-space: nowrap; }
 .balance:last-child { margin-bottom: 0; }
 .balance .sep,
 .stat-row .sep {
@@ -2145,12 +2149,60 @@ svg { flex: none; }
   stroke-width: 0.7;
   cursor: pointer;
 }
-.district-shape:hover { fill: var(--border-strong); }
-.district-shape.is-focus { stroke: var(--text); stroke-width: 1.2; }
-.district-shape.is-focus:hover { opacity: 0.85; }
-.district-shape.focus-1 { fill: var(--focus-1); }
-.district-shape.focus-2 { fill: var(--focus-2); }
-.district-shape.focus-3 { fill: var(--focus-3); }
+/* Each district in the party of the member who holds it, mixed toward the
+ * card so the numbers drawn on it stay legible. A redrawn state's new map has
+ * no members until November and is left plain. */
+.district-shape.party-d { fill: color-mix(in srgb, var(--party-d) 70%, var(--surface-1)); }
+.district-shape.party-r { fill: color-mix(in srgb, var(--party-r) 70%, var(--surface-1)); }
+.district-shape.party-i { fill: color-mix(in srgb, var(--party-i) 70%, var(--surface-1)); }
+.district-shape.party-vacant {
+  fill: color-mix(in srgb, var(--party-vacant) 35%, var(--surface-1));
+}
+.district-shape:hover { stroke: var(--text); stroke-width: 1.6; }
+/* With districts picked, the rest step back. */
+.has-focus .district-shape:not(.is-focus) { fill-opacity: 0.7; }
+/* On the plain map a picked district is tinted as well as outlined. */
+.district-shape.party-none.focus-1 { fill: color-mix(in srgb, var(--focus-1) 45%, var(--surface-3)); }
+.district-shape.party-none.focus-2 { fill: color-mix(in srgb, var(--focus-2) 45%, var(--surface-3)); }
+.district-shape.party-none.focus-3 { fill: color-mix(in srgb, var(--focus-3) 45%, var(--surface-3)); }
+
+/* A picked district's outline, over every fill and on a halo, so it reads
+ * against red, blue and amber alike. */
+.district-focus-halo,
+.district-focus {
+  fill: none;
+  pointer-events: none;
+}
+.district-focus-halo { stroke: var(--surface-0); stroke-width: 6; }
+.district-focus { stroke-width: 3; }
+.district-focus.focus-1 { stroke: var(--focus-1); }
+.district-focus.focus-2 { stroke: var(--focus-2); }
+.district-focus.focus-3 { stroke: var(--focus-3); }
+
+.party-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-1) var(--s-4);
+  margin: var(--s-3) 0 0;
+  font-size: var(--t-sm);
+  color: var(--text-muted);
+}
+.party-legend-title { flex-basis: 100%; font-weight: 600; }
+.party-legend .key { display: inline-flex; align-items: center; gap: var(--s-2); }
+.party-legend .swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid var(--border-strong);
+}
+.swatch.party-fill-d { background: color-mix(in srgb, var(--party-d) 70%, var(--surface-1)); }
+.swatch.party-fill-r { background: color-mix(in srgb, var(--party-r) 70%, var(--surface-1)); }
+.swatch.party-fill-i { background: color-mix(in srgb, var(--party-i) 70%, var(--surface-1)); }
+.swatch.party-fill-vacant {
+  background: color-mix(in srgb, var(--party-vacant) 35%, var(--surface-1));
+}
+.swatch.party-fill-none { background: var(--surface-3); }
 
 .state-line,
 .county-line,

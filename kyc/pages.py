@@ -142,6 +142,8 @@ _PAGE = string.Template("""\
             <div class="balance" id="houseBalance"></div>
         </div>
 
+        <div class="sidebar-section" id="stateBalance" hidden></div>
+
         <div class="sidebar-section">
             <h2 class="sidebar-heading">
                 <svg class="icon icon-sm" aria-hidden="true"><use href="#i-flag"/></svg>

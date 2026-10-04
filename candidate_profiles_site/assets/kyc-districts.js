@@ -285,30 +285,58 @@
     return at === -1 ? "" : " is-focus focus-" + (at + 1);
   }
 
-  function tip(plan, n) {
-    var where = seat(n) + " on the " + plan.title;
-    if (plan === newPlan()) {
-      var names = running(n).map(function (p) { return p.name; });
-      return names.length ? where + ": " + names.join(", ") + " on the ballot" : where;
-    }
-    var held = (holdersOf[n] || []).map(function (p) { return p.name; });
-    return held.length ? where + ": held by " + held.join(", ") : where;
+  /** The party a district is drawn in: its sitting member's, on the map
+   *  the members were elected under. A seat with no member on the roster is
+   *  vacant. A redrawn state's new map has no members yet - November fills
+   *  its seats - so it is drawn in none, never in a guess. */
+  function partyOf(plan, n) {
+    if (plan !== state.plans[0]) return "none";
+    var held = holdersOf[n] || [];
+    return held.length ? KYC.partyKey(held[0]) : "vacant";
   }
 
-  /** Every district meeting *frame*, as <use> elements. */
+  function tip(plan, n) {
+    var where = seat(n) + " on the " + plan.title;
+    var parts = [];
+    if (plan === state.plans[0]) {
+      var held = holdersOf[n] || [];
+      parts.push(held.length ? "held by " + held.map(function (p) {
+        return p.name + " (" + p.party + ")";
+      }).join(", ") : "vacant: no sitting member");
+    }
+    if (plan === newPlan()) {
+      var names = running(n).map(function (p) { return p.name; });
+      if (names.length) parts.push(names.join(", ") + " on the ballot");
+    }
+    return parts.length ? where + ": " + parts.join("; ") : where;
+  }
+
+  /** Every district meeting *frame*, as <use> elements, in its party. */
   function shapes(plan, frame) {
     return numbers(plan).filter(function (n) {
       return meets(plan.districts[n].box, frame);
     }).map(function (n) {
-      return '<use href="#' + pathId(plan, n) + '" class="district-shape' + focusClass(n) +
-        '" data-district="' + n + '"><title>' + KYC.escapeHtml(tip(plan, n)) + "</title></use>";
+      return '<use href="#' + pathId(plan, n) + '" class="district-shape party-' +
+        partyOf(plan, n) + focusClass(n) + '" data-district="' + n + '"><title>' +
+        KYC.escapeHtml(tip(plan, n)) + "</title></use>";
     }).join("");
   }
 
+  /** The picked districts' outlines, drawn over every fill so a district
+   *  keeps its party colour and is still found at a glance. */
+  function focusLines(plan) {
+    return clipped(plan, focus.map(function (n) {
+      return '<use href="#' + pathId(plan, n) + '" class="district-focus-halo"/>' +
+        '<use href="#' + pathId(plan, n) + '" class="district-focus focus-' +
+        (focus.indexOf(n) + 1) + '"/>';
+    }).join(""));
+  }
+
   function svg(frame, cls, label, body) {
-    return '<svg class="district-map ' + cls + '" viewBox="' + frame.map(function (v) {
-      return v.toFixed(1);
-    }).join(" ") + '" role="img" aria-label="' + KYC.escapeAttr(label) + '">' + body + "</svg>";
+    return '<svg class="district-map ' + cls + (focus.length ? " has-focus" : "") +
+      '" viewBox="' + frame.map(function (v) {
+        return v.toFixed(1);
+      }).join(" ") + '" role="img" aria-label="' + KYC.escapeAttr(label) + '">' + body + "</svg>";
   }
 
   function insetBoxes() {
@@ -338,7 +366,7 @@
     return svg(frame, "district-statewide",
       "All " + state.seats + " districts on the " + plan.title,
       '<g class="district-shapes">' + clipped(plan, shapes(plan, frame)) + "</g>" +
-      '<use href="#kycd-outline" class="state-line"/>' + lines +
+      '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan) + lines +
       '<g class="district-labels" aria-hidden="true">' + labels + "</g>");
   }
 
@@ -367,7 +395,7 @@
       return '<figure class="inset" style="width:' + Math.round(width) + 'px">' +
         svg(frame, "district-inset", inset.title + " on the " + plan.title,
           '<g class="district-shapes">' + clipped(plan, shapes(plan, frame)) + "</g>" +
-          '<use href="#kycd-outline" class="state-line"/>' +
+          '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan) +
           '<g class="district-labels" aria-hidden="true">' + labels + "</g>") +
         "<figcaption>" + KYC.escapeHtml(inset.title) + "</figcaption></figure>";
     }).join("") + "</div>";
@@ -540,7 +568,7 @@
       "Close-up of " + focus.map(seat).join(", ") + " on the " + plan.title,
       '<g class="district-shapes">' + clipped(plan, shapes(plan, frame)) + "</g>" +
       '<use href="#kycd-counties" class="county-line"/>' +
-      '<use href="#kycd-outline" class="state-line"/>' +
+      '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan) +
       '<g class="district-ghosts">' + ghosts + "</g>" +
       '<g aria-hidden="true">' + dots.join("") + "</g>" +
       '<g class="district-labels" aria-hidden="true">' + marks.join("") + "</g>");
@@ -761,6 +789,7 @@
         redrawn() ? " Shares of area describe land, not people." : "", "</p>");
     }
     html.push(
+      legend(),
       "</section>",
       '<div class="plan-grid', redrawn() ? "" : " single", '" id="planGrid"></div>',
       '<div class="districts-sources">', (state.sources || []).map(function (line) {
@@ -768,6 +797,27 @@
       }).join(""), "</div>"
     );
     return html.join("");
+  }
+
+  /** Which colour is which: only the parties the map actually shows. */
+  function legend() {
+    var current = state.plans[0];
+    var shown = {};
+    numbers(current).forEach(function (n) { shown[partyOf(current, n)] = true; });
+    var keys = [["d", "Democrat"], ["r", "Republican"], ["i", "Independent"],
+      ["vacant", "Vacant seat"]].filter(function (p) { return shown[p[0]]; });
+    var items = keys.map(function (p) {
+      return '<span class="key"><span class="swatch party-fill-' + p[0] + '"></span>' +
+        KYC.escapeHtml(p[1]) + "</span>";
+    });
+    if (redrawn()) {
+      items.push('<span class="key"><span class="swatch party-fill-none"></span>' +
+        "The " + KYC.escapeHtml(newPlan().title) + ": seats filled in November</span>");
+    }
+    return '<p class="party-legend"><span class="party-legend-title">' +
+      (redrawn() ? "The " + KYC.escapeHtml(state.plans[0].title) + " is colored"
+        : "Colored") + " by the party of the member who holds each seat</span>" +
+      items.join("") + "</p>";
   }
 
   function drawDefs() {
