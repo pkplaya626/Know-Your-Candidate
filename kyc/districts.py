@@ -73,10 +73,11 @@ MIN_COVERAGE = 0.97
 #
 # Numbers used to be sized for a 620px map and scaled with it, so on a phone
 # every one came out 4px tall. Now they are 11px at any width, and the
-# insets are planned for the narrowest map a phone draws: 302px on a 360px
-# screen, less the page's and the card's padding. Every district is
-# numbered somewhere at any width from PHONE_PX up.
-PHONE_PX = 300
+# insets are planned for the narrowest map a phone draws: 286px on a Galaxy
+# Z Fold's 344px cover screen, less the page's and the card's padding (302px
+# on a 360px phone). Every district is numbered somewhere at any width from
+# PHONE_PX up.
+PHONE_PX = 280
 DESIGN_PX = 620
 LABEL_ROOM_PX = 6.5
 # An inset is drawn between these widths, enough to number everything in it
@@ -643,7 +644,7 @@ def insets(plans, places, frame, depth=0, around=""):
                 parent[find(i)] = find(j)
     groups = {}
     for i, (plan, n) in enumerate(small):
-        groups.setdefault(find(i), []).append(plan[n]["box"])
+        groups.setdefault(find(i), []).append(_around_label(plan[n], w))
     boxes = sorted(_group_box(members) for members in groups.values())
     limit = MAX_INSETS if depth == 0 else MAX_DETAILS
     while len(boxes) > 1:
@@ -683,6 +684,18 @@ def every_inset(found):
     for inset in found:
         yield inset
         yield from every_inset(inset.get("detail", []))
+
+
+def _around_label(district, frame_width):
+    """The part of *district* an inset has to show: the neighbourhood of its
+    label point, never more than the district itself. Whole bounding boxes
+    let one long thin district - TX-15 runs 335 units from the Rio Grande to
+    San Antonio - stretch an inset until it swallowed the next metro's, and
+    a box half the size of Texas titled "Houston & San Antonio" resulted."""
+    (x, y), box = district["at"], district["box"]
+    half = max(2.5 * district["room"], 0.03 * frame_width)
+    return [max(box[0], x - half), max(box[1], y - half),
+            min(box[2], x + half), min(box[3], y + half)]
 
 
 def _group_box(boxes):

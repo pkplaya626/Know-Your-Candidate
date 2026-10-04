@@ -111,6 +111,17 @@ class TestEveryState(unittest.TestCase):
                 for detail in inset.get("detail", []):
                     self.assertLess(detail["box"][2], inset["box"][2], f"{code} {inset['title']}")
 
+    def test_no_inset_covers_a_large_part_of_its_state(self):
+        # An inset grew to hold each member district's whole bounding box, so
+        # one long thin district - TX-15, 335 units tall - stretched Houston's
+        # until it swallowed San Antonio's: "Houston & San Antonio", half of
+        # Texas. A member now brings only its label's neighbourhood.
+        for code, state in self.maps.items():
+            width, height = state["viewBox"][2], state["viewBox"][3]
+            for inset in districts.every_inset(state["insets"]):
+                self.assertLess(inset["box"][2], 0.35 * width, f"{code} {inset['title']}")
+                self.assertLess(inset["box"][3], 0.35 * height, f"{code} {inset['title']}")
+
     def test_a_state_elected_at_large_has_no_insets(self):
         for code, state in self.maps.items():
             if state["atLarge"]:

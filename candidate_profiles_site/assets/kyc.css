@@ -198,7 +198,9 @@ a {
   color: var(--accent);
   text-decoration: none;
 }
-a:hover { text-decoration: underline; }
+@media (hover: hover) {
+  a:hover { text-decoration: underline; }
+}
 
 button,
 input,
@@ -211,6 +213,23 @@ textarea {
 img { max-width: 100%; }
 
 svg { flex: none; }
+
+/* Touch. Android's browsers flash a grey box over anything tapped - over a
+ * map state it is the shape's whole bounding rectangle - so the flash is off
+ * and controls answer with :active instead. A quick double tap on a control
+ * or a map picks twice rather than zooming the page; pinch-zoom is untouched
+ * (rule 15). Hover looks are only applied where a pointer can hover: on a
+ * touch screen :hover sticks after the tap. */
+html { -webkit-tap-highlight-color: transparent; }
+button,
+a,
+select,
+summary,
+label,
+.card,
+.chip,
+svg.district-map,
+#usMap { touch-action: manipulation; }
 
 /* Keyboard users must be able to see where they are. */
 :focus-visible {
@@ -281,7 +300,9 @@ svg { flex: none; }
   background-clip: content-box;
   border-radius: var(--radius-pill);
 }
-.scroll-y::-webkit-scrollbar-thumb:hover { background-color: var(--text-faint); }
+@media (hover: hover) {
+  .scroll-y::-webkit-scrollbar-thumb:hover { background-color: var(--text-faint); }
+}
 
 .truncate {
   overflow: hidden;
@@ -338,7 +359,9 @@ svg { flex: none; }
   color: var(--text);
   text-decoration: none;
 }
-.brand:hover { text-decoration: none; }
+@media (hover: hover) {
+  .brand:hover { text-decoration: none; }
+}
 .brand .icon { color: var(--accent); width: 1.375rem; height: 1.375rem; }
 .brand-name {
   font-size: var(--t-lg);
@@ -410,7 +433,9 @@ svg { flex: none; }
   text-decoration: none;
   transition: background-color 0.15s var(--ease);
 }
-.nav-link:hover { background: var(--surface-3); text-decoration: none; }
+@media (hover: hover) {
+  .nav-link:hover { background: var(--surface-3); text-decoration: none; }
+}
 .nav-link .icon { color: var(--text-muted); }
 .nav-link[aria-current="page"] {
   background: var(--surface-3);
@@ -495,7 +520,9 @@ svg { flex: none; }
   cursor: pointer;
   transition: background-color 0.15s var(--ease), border-color 0.15s var(--ease);
 }
-.btn:hover { background: var(--surface-1); border-color: var(--border-strong); }
+@media (hover: hover) {
+  .btn:hover { background: var(--surface-1); border-color: var(--border-strong); }
+}
 
 .btn-icon {
   display: inline-flex;
@@ -511,7 +538,9 @@ svg { flex: none; }
   cursor: pointer;
   transition: background-color 0.15s var(--ease), color 0.15s var(--ease);
 }
-.btn-icon:hover { background: var(--surface-3); color: var(--text); }
+@media (hover: hover) {
+  .btn-icon:hover { background: var(--surface-3); color: var(--text); }
+}
 
 .chip {
   flex: none;
@@ -526,7 +555,9 @@ svg { flex: none; }
   cursor: pointer;
   transition: background-color 0.15s var(--ease), color 0.15s var(--ease);
 }
-.chip:hover { background: var(--border); }
+@media (hover: hover) {
+  .chip:hover { background: var(--border); }
+}
 .chip[aria-pressed="true"],
 .chip.active {
   background: var(--text);
@@ -544,8 +575,10 @@ svg { flex: none; }
   color: var(--text);
   font-size: var(--t-md);
 }
-.select:hover,
-.text-input:hover { border-color: var(--border-strong); }
+@media (hover: hover) {
+  .select:hover,
+  .text-input:hover { border-color: var(--border-strong); }
+}
 .select {
   appearance: none;
   cursor: pointer;
@@ -564,7 +597,9 @@ svg { flex: none; }
   font-size: var(--t-sm);
   width: auto;
 }
-.select-bare:hover { color: var(--text); border-color: var(--border); }
+@media (hover: hover) {
+  .select-bare:hover { color: var(--text); border-color: var(--border); }
+}
 .sort-control { position: relative; display: flex; align-items: center; }
 .sort-control .icon { display: none; }
 .filters-toggle { display: none; }
@@ -629,7 +664,9 @@ svg { flex: none; }
   text-align: left;
   cursor: pointer;
 }
-.menu-item:hover { background: var(--surface-3); }
+@media (hover: hover) {
+  .menu-item:hover { background: var(--surface-3); }
+}
 .menu-item .icon { color: var(--text-muted); }
 .menu-item[aria-checked="true"] { font-weight: 600; }
 .menu-item[aria-checked="true"] .icon { color: var(--accent); }
@@ -659,7 +696,9 @@ svg { flex: none; }
   white-space: nowrap;
   cursor: pointer;
 }
-.segmented button:hover { color: var(--text); }
+@media (hover: hover) {
+  .segmented button:hover { color: var(--text); }
+}
 .segmented button[aria-pressed="true"] {
   background: var(--surface-3);
   color: var(--text);
@@ -765,8 +804,12 @@ svg { flex: none; }
   display: block;
   transition: transform 0.2s var(--ease);
 }
-.card:hover .card-photo { border-color: var(--border-strong); }
-.card:hover .card-photo img { transform: scale(1.04); }
+@media (hover: hover) {
+  .card:hover .card-photo { border-color: var(--border-strong); }
+}
+@media (hover: hover) {
+  .card:hover .card-photo img { transform: scale(1.04); }
+}
 
 .card-body {
   display: flex;
@@ -1109,7 +1152,9 @@ svg { flex: none; }
   text-decoration: none;
   transition: background-color 0.15s var(--ease), border-color 0.15s var(--ease);
 }
-.link-chip:hover { background: var(--surface-1); border-color: var(--border-strong); }
+@media (hover: hover) {
+  .link-chip:hover { background: var(--surface-1); border-color: var(--border-strong); }
+}
 .link-chip-icon { width: 0.85em; height: 0.85em; opacity: 0.7; }
 .contact-office { margin: 0 0 var(--s-2); }
 .contact-office a { color: inherit; }
@@ -1301,7 +1346,9 @@ svg { flex: none; }
   font-weight: 600;
   cursor: pointer;
 }
-.modal-meta button:hover { text-decoration: underline; }
+@media (hover: hover) {
+  .modal-meta button:hover { text-decoration: underline; }
+}
 
 .modal-body {
   display: grid;
@@ -1545,7 +1592,9 @@ svg { flex: none; }
   stroke-width: 1;
   transition: fill 0.18s var(--ease);
 }
-.state:hover { stroke: var(--text); stroke-width: 1.5; }
+@media (hover: hover) {
+  .state:hover { stroke: var(--text); stroke-width: 1.5; }
+}
 .state:focus-visible {
   outline: none;
   stroke: var(--accent);
@@ -1589,7 +1638,9 @@ svg { flex: none; }
   vector-effect: non-scaling-stroke;
   transition: fill 0.18s var(--ease);
 }
-.state-callout:hover .callout-box { stroke: var(--text); }
+@media (hover: hover) {
+  .state-callout:hover .callout-box { stroke: var(--text); }
+}
 .callout-box.is-selected { stroke: var(--text); stroke-width: 2.5; }
 
 .territory-caption {
@@ -1679,7 +1730,9 @@ svg { flex: none; }
   letter-spacing: 0;
 }
 .panel-subhead.expander { cursor: pointer; }
-.panel-subhead.expander:hover { color: var(--text-muted); }
+@media (hover: hover) {
+  .panel-subhead.expander:hover { color: var(--text-muted); }
+}
 .panel-subhead.expander .icon {
   width: 0.9em;
   height: 0.9em;
@@ -1714,7 +1767,9 @@ svg { flex: none; }
   cursor: pointer;
   transition: background-color 0.15s var(--ease);
 }
-.person-row:hover { background: var(--surface-3); }
+@media (hover: hover) {
+  .person-row:hover { background: var(--surface-3); }
+}
 .person-row img {
   grid-area: photo;
   width: 38px;
@@ -1970,6 +2025,7 @@ svg { flex: none; }
  * The close button stays in reach as the profile scrolls. */
 @media (max-width: 560px), (max-height: 500px) {
   .modal { padding: 0; align-items: stretch; }
+  .modal-scrim { backdrop-filter: none; }
   .modal-dialog {
     width: 100%;
     height: 100vh;
@@ -2012,6 +2068,21 @@ svg { flex: none; }
   }
   /* "1" through "9" in a state's jump row were 39px wide. */
   .chip { min-width: 44px; justify-content: center; }
+
+  /* What a tap looks like, now the grey flash is gone. */
+  .btn:active,
+  .btn-icon:active,
+  .chip:active,
+  .link-chip:active,
+  .menu-item:active,
+  .nav-link:active,
+  .person-row:active,
+  .state-row:active,
+  .mover-group:active { background: var(--surface-3); }
+  .chip[aria-pressed="true"]:active { background: var(--text-muted); }
+  .card:active .card-photo { border-color: var(--accent); }
+  .state:active,
+  .district-shape:active { stroke: var(--text); stroke-width: 1.6; }
   .brand { min-height: 44px; min-width: 44px; justify-content: center; }
 }
 
@@ -2039,7 +2110,9 @@ svg { flex: none; }
   color: var(--accent);
   text-decoration: none;
 }
-.sidebar-link:hover { text-decoration: underline; }
+@media (hover: hover) {
+  .sidebar-link:hover { text-decoration: underline; }
+}
 
 .state-link {
   margin-left: var(--s-2);
@@ -2048,7 +2121,9 @@ svg { flex: none; }
   text-decoration: none;
   white-space: nowrap;
 }
-.state-link:hover { text-decoration: underline; }
+@media (hover: hover) {
+  .state-link:hover { text-decoration: underline; }
+}
 
 .race-state-link {
   margin-left: var(--s-2);
@@ -2057,7 +2132,9 @@ svg { flex: none; }
   color: var(--accent);
   text-decoration: none;
 }
-.race-state-link:hover { text-decoration: underline; }
+@media (hover: hover) {
+  .race-state-link:hover { text-decoration: underline; }
+}
 
 .state-page { padding-bottom: var(--s-6); }
 .state-hero { padding: var(--s-4) 0 var(--s-5); }
@@ -2120,7 +2197,9 @@ svg { flex: none; }
   text-decoration: none;
   transition: border-color 0.15s var(--ease), background-color 0.15s var(--ease);
 }
-.state-row:hover { border-color: var(--border-strong); background: var(--surface-3); }
+@media (hover: hover) {
+  .state-row:hover { border-color: var(--border-strong); background: var(--surface-3); }
+}
 .state-row-name { font-weight: 700; }
 .state-row-code { margin-left: var(--s-1); font-weight: 600; color: var(--text-muted); }
 .state-row-meta { font-size: var(--t-sm); color: var(--text-muted); }
@@ -2165,7 +2244,9 @@ svg { flex: none; }
   cursor: pointer;
   font: inherit;
 }
-.race-mate:hover .race-mate-name { color: var(--accent); }
+@media (hover: hover) {
+  .race-mate:hover .race-mate-name { color: var(--accent); }
+}
 .race-mate img {
   flex: none;
   width: 36px;
@@ -2229,7 +2310,9 @@ svg { flex: none; }
   cursor: pointer;
   transition: border-color 0.15s var(--ease), background-color 0.15s var(--ease);
 }
-.mover-group:hover { border-color: var(--border-strong); background: var(--surface-3); }
+@media (hover: hover) {
+  .mover-group:hover { border-color: var(--border-strong); background: var(--surface-3); }
+}
 .mover-group[aria-pressed="true"] {
   border-color: var(--accent);
   box-shadow: inset 0 0 0 1px var(--accent);
@@ -2287,8 +2370,8 @@ svg { flex: none; }
 }
 .plan-head { margin-bottom: var(--s-2); }
 /* On a phone every pixel of card padding comes off the map: at 12px a 360px
- * screen draws it 302px wide, which is what kyc/districts.py plans the
- * insets for (PHONE_PX). */
+ * screen draws it 302px wide and a Galaxy Z Fold's 344px cover screen 286px,
+ * which is what kyc/districts.py plans the insets for (PHONE_PX). */
 @media (max-width: 560px) {
   .plan-card { padding: var(--s-3); }
 }
@@ -2357,7 +2440,9 @@ svg { flex: none; }
 .district-shape.party-vacant {
   fill: color-mix(in srgb, var(--party-vacant) 35%, var(--surface-1));
 }
-.district-shape:hover { stroke: var(--text); stroke-width: 1.6; }
+@media (hover: hover) {
+  .district-shape:hover { stroke: var(--text); stroke-width: 1.6; }
+}
 /* With districts picked, the rest step back. */
 .has-focus .district-shape:not(.is-focus) { fill-opacity: 0.7; }
 /* On the plain map a picked district is tinted as well as outlined. */
@@ -2504,13 +2589,17 @@ svg { flex: none; }
   font-weight: 600;
   cursor: pointer;
 }
-.link-button:hover { text-decoration: underline; }
+@media (hover: hover) {
+  .link-button:hover { text-decoration: underline; }
+}
 .race-redrawn a {
   color: var(--accent);
   font-weight: 600;
   text-decoration: none;
 }
-.race-redrawn a:hover { text-decoration: underline; }
+@media (hover: hover) {
+  .race-redrawn a:hover { text-decoration: underline; }
+}
 .district-caption-role { font-weight: 500; }
 /* One map instead of two: a single card at a readable width. */
 .plan-grid.single { grid-template-columns: minmax(0, 860px); }

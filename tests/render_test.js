@@ -2175,6 +2175,42 @@ async function testDistrictPages() {
   });
 }
 
+async function testDrawerBack() {
+  // Android's back gesture is expected to close an open drawer, not leave
+  // the page under it.
+  const { window, D } = await buildPage("index.html");
+  await new Promise((r) => setTimeout(r, 300));
+  const wait = () => new Promise((r) => setTimeout(r, 120));
+  const toggle = D.querySelector(".sidebar-toggle");
+  toggle.click();
+  const pushed = !!(window.history.state && window.history.state.kycDrawer);
+  // A sentinel in the grid: a redraw replaces the grid's contents.
+  const sentinel = D.createElement("i");
+  sentinel.id = "drawerSentinel";
+  D.getElementById("results").appendChild(sentinel);
+  window.history.back();
+  await wait();
+  const closedByBack = !D.body.classList.contains("sidebar-open");
+  const keptGrid = !!D.getElementById("drawerSentinel");
+  toggle.click();
+  D.querySelector(".sidebar-scrim").click();
+  await wait();
+  const popped = !(window.history.state && window.history.state.kycDrawer);
+  const shut = !D.body.classList.contains("sidebar-open");
+  const chip = D.querySelector('.chip[data-group="party"][data-value="Republican"]');
+  chip.click();
+  const filtered = /party=Republican/.test(window.location.hash);
+  chip.click();
+  suite("index.html — Back closes the drawer, and nothing else", () => {
+    check("opening the drawer gives it a history entry, at the same address", pushed);
+    check("Back closes the drawer", closedByBack);
+    check("and does not redraw the grid under it, so a long scroll survives", keptGrid,
+      "the grid was redrawn");
+    check("closing it with a tap takes its entry off again", popped && shut);
+    check("filters still write the address", filtered, window.location.hash);
+  });
+}
+
 /* jsdom has no layout, so a page that measures itself sees 0 - which the
  * district page reads as "no layout" and draws for 620px. This makes the
  * statewide maps measure *width* instead, as a phone's would. */
@@ -2252,7 +2288,7 @@ async function testDistrictsOnAPhone() {
   // Numbers were sized for a 620px map and scaled with it: on a phone every
   // one was 4px tall. They are 11px at the width the map is drawn, written
   // where they fit, and every district is numbered somewhere.
-  for (const [code, width] of [["NY", 302], ["TX", 302], ["CA", 302], ["TX", 620]]) {
+  for (const [code, width] of [["NY", 286], ["TX", 302], ["CA", 286], ["TX", 620], ["TX", 860]]) {
     const page = await buildPage("districts/" + code.toLowerCase() + ".html",
                                  { setup: drawnAt(width) });
     suite(`districts/${code.toLowerCase()}.html — the map drawn ${width}px wide`, () => {
@@ -2281,11 +2317,16 @@ async function testDistrictsOnAPhone() {
           titles.join(" | "));
       }
       if (code === "TX") {
-        // Houston needs 550px for every number in it: a phone gets a closer
-        // inset, a desktop that can draw it whole does not.
-        check(width < 550 ? "Houston gets a closer inset on a phone"
-                          : "and not where Houston is drawn whole",
-          titles.includes("Houston, closer") === width < 550, titles.join(" | "));
+        // A closer inset appears exactly when its inset is drawn narrower
+        // than every number in it needs.
+        state.insets.filter((i) => i.detail).forEach((inset) => {
+          const drawn = Math.min(width, inset.width);
+          const closer = inset.detail.every((d) => titles.includes(d.title));
+          check(drawn < inset.fits ? `${inset.title} gets its closer insets when drawn too narrow`
+                                   : `${inset.title}, drawn whole, gets none`,
+            closer === drawn < inset.fits,
+            `${drawn}px for ${inset.fits}px: ` + titles.join(" | "));
+        });
         const widest = Math.max(...[...D.querySelectorAll("figure.inset")]
           .map((f) => parseFloat(f.style.width)));
         check("no inset is drawn wider than the map", widest <= width, widest);
@@ -2302,6 +2343,7 @@ async function testDistrictsOnAPhone() {
   if (!only || only === "index.html") await testSeatRows();
   if (!only || only === "map.html") await testMap();
   if (!only || only === "map.html") await testMapOnAPhone();
+  if (!only || only === "index.html") await testDrawerBack();
   if (!only || only === "states") await testStates();
   if (!only || only === "redistricting") await testRedistricting();
   if (!only || only === "redistricting") await testDistrictPages();
