@@ -38,7 +38,6 @@ Each state's file is a TopoJSON topology with objects ``current``,
 import argparse
 import csv
 import hashlib
-import heapq
 import io
 import json
 import math
@@ -53,7 +52,7 @@ import zipfile
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from kyc import districts  # noqa: E402
+from kyc import districts, geo  # noqa: E402
 from kyc.geo import FIPS_TO_STATE  # noqa: E402
 
 CENSUS = "https://www2.census.gov/geo/tiger/GENZ2024/shp/"
@@ -505,77 +504,9 @@ def _area(ring):
                for i in range(len(ring))) / 2
 
 
-def _signed_distance(x, y, rings):
-    inside, best = False, float("inf")
-    for ring in rings:
-        n = len(ring)
-        for i in range(n):
-            ax, ay = ring[i]
-            bx, by = ring[(i + 1) % n]
-            if (ay > y) != (by > y) and x < (bx - ax) * (y - ay) / (by - ay) + ax:
-                inside = not inside
-            dx, dy = bx - ax, by - ay
-            t = 0.0 if dx == dy == 0 else max(0.0, min(1.0, ((x - ax) * dx + (y - ay) * dy) /
-                                                      (dx * dx + dy * dy)))
-            best = min(best, math.hypot(x - ax - t * dx, y - ay - t * dy))
-    return best if inside else -best
-
-
-def _on_land(rings, land, steps=48):
-    """The roomiest point that is inside *rings* and on *land*: of a grid
-    over the district, the sample farthest from any sample that is not."""
-    xs = [p[0] for r in rings for p in r]
-    ys = [p[1] for r in rings for p in r]
-    x0, y0, x1, y1 = min(xs), min(ys), max(xs), max(ys)
-    grid = [(x0 + (x1 - x0) * (i + 0.5) / steps, y0 + (y1 - y0) * (j + 0.5) / steps)
-            for i in range(steps) for j in range(steps)]
-    good = [p for p in grid if _signed_distance(*p, rings) > 0 and _signed_distance(*p, land) > 0]
-    bad = [p for p in grid if p not in set(good)]
-    if not good:
-        raise SystemExit("a district of the new map has no land on the Census map")
-    return max(good, key=lambda p: min((math.dist(p, q) for q in bad), default=0.0))
-
-
-def polylabel(rings, cells=8):
-    """Mapbox's polylabel: the interior point farthest from any edge."""
-    xs = [p[0] for r in rings for p in r]
-    ys = [p[1] for r in rings for p in r]
-    x0, y0, x1, y1 = min(xs), min(ys), max(xs), max(ys)
-    size = max(x1 - x0, y1 - y0)
-    precision = size / 400
-    cell = size / cells
-    heap, counter = [], 0
-
-    def push(x, y, half):
-        nonlocal counter
-        d = _signed_distance(x, y, rings)
-        heapq.heappush(heap, (-(d + half * math.sqrt(2)), counter, x, y, half, d))
-        counter += 1
-
-    y = y0
-    while y < y1:
-        x = x0
-        while x < x1:
-            push(x + cell / 2, y + cell / 2, cell / 2)
-            x += cell
-        y += cell
-    best = None
-    for x, y in (((x0 + x1) / 2, (y0 + y1) / 2),):
-        d = _signed_distance(x, y, rings)
-        best = (d, x, y)
-    while heap:
-        bound, _, x, y, half, d = heapq.heappop(heap)
-        if d > best[0]:
-            best = (d, x, y)
-        if -bound - best[0] <= precision:
-            continue
-        half /= 2
-        for sx in (-half, half):
-            for sy in (-half, half):
-                push(x + sx, y + sy, half)
-    if best[0] <= 0:
-        raise SystemExit("no interior point found for a district")
-    return best[1], best[2]
+# One implementation of the label point, shared with the national map.
+_signed_distance = geo.signed_distance
+polylabel = geo.polylabel
 
 
 # -------------------------------------------------------------- the states
