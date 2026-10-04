@@ -20,7 +20,7 @@ Python 3.9+ and the standard library. Nothing to install.
 
 | Command | What it does |
 |---|---|
-| `python build_profile_site.py` | Build `data/profiles.js`, `data/geo.js` and `data/districts.js` |
+| `python build_profile_site.py` | Build `data/profiles.js`, `data/geo.js` and `data/districts/*.js` |
 | `… build --check` | Validate only; write nothing |
 | `… build --strict` | Refuse to write if validation finds an error |
 | `… build --json` | Emit the validation report as JSON |
@@ -46,9 +46,9 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… portraits --refresh` | Re-resolve every portrait, not just the missing ones |
 | `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`) |
 | `… refresh` | `fetch`, then `build` |
-| `python tools/fetch_ca_places.py` | Rebuild `ca_places.json`, the towns labelled on the California district maps (network) |
-| `python -m unittest discover tests` | 648 pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (609 checks) |
+| `python tools/fetch_district_maps.py` | Rebuild `district_maps/`: every state's district boundaries, the new 2026 maps, and the towns to label (network) |
+| `python -m unittest discover tests` | 662 pipeline tests |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (631 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -66,8 +66,8 @@ Congressional_Candidates_2026.csv        ─┼─> kyc/ ─> data/profiles.js �
 Completed_Primary_Candidates_2026.csv    ─┤          data/geo.js       ─┤   (grid + races)
 Late_Primary_Candidates_2026.csv         ─┘          portraits.json     └─> map.html
 us_atlas_states_topo.json                ──> kyc/geo.py                     (partisan map)
-ca_districts_topo.json, ca_places.json   ──> kyc/districts.py ─> data/districts.js
-                                             ─> redistricting/ca.html  (old and new lines)
+district_maps/*.json                     ──> kyc/districts.py ─> data/districts/<st>.js
+                                             ─> districts/<st>.html  (every state's map)
 congress_snapshot.json                   ──> kyc/legislators.py
       ^ authoritative membership, used to reconcile the rosters above
 ```
@@ -781,57 +781,90 @@ They are linked from everywhere a state is named: the race headers in the
 grid, the profile dialog's "Represents" line, the state filter in the sidebar,
 the map's delegation panel, the footer, and `sitemap.xml`.
 
-## Redrawn districts
+## District maps
 
-California redrew its House map for 2026. Proposition 50 replaced the
-commission's 2021 lines with the Legislature's (AB 604) for the 2026 through
-2030 elections, and members followed the new numbers: Ami Bera, who holds the
-6th, is running in the redrawn 3rd, and Kevin Kiley, who holds the 3rd, in the
-redrawn 6th. `redistricting/ca.html` puts the two maps side by side.
+Every state and territory has a district page, `districts/tx.html`. It draws
+the state's House districts, numbered, with who holds each seat and who is on
+the November ballot. Where the map for 2026 is not the one members were
+elected under in 2024, the page draws both maps side by side.
 
-- **Both maps, all 52 districts, numbered.** Districts too small to number
-  statewide are numbered in Bay Area, Los Angeles and San Diego insets.
-- **Who moved, from the data.** The members running in a different district
-  are read from `contestRaceId` (rule 30) and grouped where their moves share a
-  district, so Bera and Kiley are one view. The first group is the default.
-  Any district can be picked from a list or by clicking it; Shift-click
-  compares up to three. The choice is in the address (`#/?d=3,6`).
-- **A close-up of the picked districts** on both maps, framed by where they
-  run under the new lines, with the other map's lines dashed, county lines,
-  and towns. Who held each seat and who is running in it now are captions
-  from `profiles.js`.
-- **The people, as cards,** under each map: the seat's holder under the old
-  map, the November ballot under the new one, each opening the profile dialog.
-- **Where the land went.** Each card lists the share of the district's area
-  that came from, or went to, each district on the other map. The shares are
-  measured on an equal-area projection and describe land, not people.
+Nine states are in that position. Each was checked against the enacting body's
+own record on 2026-10-03:
 
-The California page and the profile dialog of anyone in a California House
-race link to it; for a member running in a different district, the link
-picks out both.
-
-`kyc/districts.py` projects the boundaries at build time with California's
-own equal-area projection (EPSG:3310's parameters), so the page loads no
-mapping library and an overlap on the page is an overlap on the ground.
-`data/districts.js` holds only geometry; everything said about a person comes
-from `profiles.js`. The build fails loudly if a plan does not number every
-seat exactly once, if a district's number would be drawn outside its shape,
-if the two plans do not account for each other's area, or if the map's seats
-do not match the state's races.
-
-Sources, vendored at the repository root:
-
-| File | What it is |
+| State | The 2026 map |
 |---|---|
-| `ca_districts_topo.json` | Both plans' districts from the Wikimedia Commons map data pages *California's Nth congressional district (2023–)* and *(2027–)* (CC0), with Census county lines from us-atlas, simplified for display with mapshaper. Fixed by law until the 2030 census, so it has no refresh command. |
-| `ca_places.json` | California's 482 incorporated places: the Census Gazetteer's internal point, joined on the ANSI code to the USGS GNIS civil feature as a cross-check, and Census population estimates used only to rank labels. Built by `tools/fetch_ca_places.py`. |
+| CA | Proposition 50 (AB 604) |
+| TX | Plan C2333 (HB 4, 2025) |
+| FL | HB 1-D (Chapter 2026-229) |
+| UT | The court-ordered map |
+| NC | S.L. 2025-95 (districts 1 and 3) |
+| OH | The Ohio Redistricting Commission's 2025 map |
+| TN | Public Chapter 3 (HB 7003) |
+| LA | Act 2 (SB 121) |
+| AL | The Legislature's 2023 plan, put back in effect by the U.S. Supreme Court on June 2, 2026 |
 
-An internal point is guaranteed to be inside its place, but not inside the
-part anyone means: San Francisco's is on the Farallon Islands, 52 km out to
-sea, because the city and county includes them. A point more than three
-"radii" (the radius of a circle with the place's land area) from the USGS
-point is replaced by it, and the file records each replacement. Only San
-Francisco qualifies.
+Missouri is not on the list. Its 2025 map was suspended by a referendum
+petition, and the courts kept the 2022 map in place; its page says so.
+
+- **Every district numbered.** Districts too small to number statewide are
+  numbered in insets. `kyc/districts.py` places them automatically around each
+  cluster of small districts and names each after its biggest towns. Each inset
+  is sized so its closest two numbers sit apart.
+- **Who moved, from the data.** Members running in a different district are
+  read from `contestRaceId` (rule 30) and grouped where their moves share a
+  district. Bera and Kiley are one view, and Al Green's move from TX-9
+  to TX-18 another. A redrawn state opens on its first group. Any district can be
+  picked from a list or by clicking it, and Shift-click compares up to three.
+  The choice is in the address (`#/?d=3,6`).
+- **A close-up of the picked districts.** It shows county lines, towns, and
+  captions naming who holds the seat or is running in it, from `profiles.js`.
+  On a redrawn state the other map's lines are dashed.
+- **The people, as cards.** Each opens the profile dialog. On a redrawn state,
+  each card also gives the share of the district's land that came from, or
+  went to, each district on the other map.
+
+Every state page links to its map, and so does the profile dialog of anyone
+in a House race. For a member running in a different district, the link picks
+out both districts. The address of the first California page,
+`redistricting/ca.html`, redirects to `districts/ca.html`.
+
+`kyc/districts.py` projects each state at build time with an equal-area conic
+fitted to it. California uses EPSG:3310's parameters, and Alaska's Aleutians
+are unwrapped across the antimeridian. So the page loads no mapping library,
+and a share of the drawing is a share of the ground. `data/districts/<st>.js`
+holds only geometry, one file per state; everything said about a person comes
+from `profiles.js`.
+
+The build fails loudly when:
+
+- a map does not number its seats exactly once, or as the state's races do;
+- a district's number would be drawn outside its shape, or on water the page
+  clips away;
+- the new map does not cover every old district.
+
+### Sources
+
+`tools/fetch_district_maps.py` writes `district_maps/<st>.json` and
+`district_maps/places.json`. It is standard-library only and runs over the
+network; nothing it writes is edited by hand.
+
+| Layer | Source |
+|---|---|
+| The districts members were elected in, and county lines | Census Bureau 2024 cartographic boundaries at 1:5,000,000 (`cb_2024_us_cd119_5m`, `cb_2024_us_county_5m`), used as published. They stop at the shore. |
+| A new map for 2026 | The state's own enacted-plan shapefile: the California Senate, the Texas Legislative Council, Florida EDR, the Utah Geospatial Resource Center, the North Carolina General Assembly, the Tennessee Comptroller, the Louisiana Legislature and the Alabama Secretary of State. Ohio's commission publishes no shapefile, so Ohio's comes from Wikimedia Commons map data (CC0). It was checked against the commission's block assignment file: every district covers exactly the counties the commission assigns it. Projected files (Web Mercator, Lambert conformal conic) are unprojected, and refused if any point lands outside the state. |
+| Towns | Every incorporated place's Census Gazetteer internal point, ranked by Census Vintage 2024 population estimates. |
+
+The new maps are simplified along shared arcs, so neighbouring districts still
+touch. Their water is clipped on the page to the Census map's land; area
+shares and the label sizes that depend on them are measured over land only.
+
+An internal point is inside its place but not always inside the part anyone
+means: San Francisco's is on the Farallon Islands, 52 km out to sea. A point
+outside its place's largest piece of land, per the Census 2024 place
+boundaries, is moved to that piece's interior, and the file records each move.
+A second source was tried first and rejected: USGS GNIS disagrees with the
+Census by kilometres for dozens of ordinary towns, and for Alvin, Texas, it is
+the USGS point that is out of town.
 
 ## Contact and links
 

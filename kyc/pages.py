@@ -207,10 +207,10 @@ _STATE_SCRIPTS = (
     "../assets/kyc-state.js",
 )
 
-_REDISTRICTING_SCRIPTS = (
+_DISTRICT_SCRIPTS = (
     "../data/profiles.js",
     "../data/odds.js",
-    "../data/districts.js",
+    "../data/districts/{code}.js",
     "../assets/kyc-odds.js",
     "../assets/kyc-cards.js",
     "../assets/kyc-profile.js",
@@ -277,35 +277,73 @@ def render_states_index(host):
     )
 
 
-def redistricting_path(code):
-    """``redistricting/ca.html``: a state's before-and-after district map."""
-    return f"redistricting/{code.lower()}.html"
+def _possessive(name):
+    return name + ("'" if name.endswith("Islands") else "'s")
 
 
-def render_redistricting(code, host):
-    """A state's House map before and after a redistricting.
+# States whose map is unchanged but nearly was, where a reader may have read
+# otherwise. Each clause is on the record of the court that decided it.
+UNCHANGED_NOTES = {
+    "MO": ("A map passed in 2025 was suspended by a referendum petition, and the courts "
+           "have kept these districts in place for 2026."),
+}
+
+
+def district_page_text(code, seats=None):
+    """``(headline, introduction)`` for a state's district page."""
+    from .districts import REDRAWN
+
+    if code in REDRAWN:
+        return REDRAWN[code]["headline"], REDRAWN[code]["intro"]
+    name = state_name(code)
+    if code == "PR":
+        return (f"{_possessive(name)} seat in the House",
+                "Puerto Rico elects a non-voting resident commissioner to the House, at "
+                "large, for a four-year term. The seat is not on the ballot in 2026.")
+    if code in TERRITORIES:
+        return (f"{_possessive(name)} seat in the House",
+                f"{name} elects a non-voting delegate to the House, at large.")
+    if seats == 1:
+        return (f"{_possessive(name)} seat in the House",
+                f"{name} elects one member of the House, at large: the whole state is "
+                f"one district.")
+    intro = (f"{name} elects {seats} members of the House, one from each district below. "
+             f"These are the districts of the 2024 election, and they are used again in "
+             f"2026." if seats else
+             f"{name}'s House districts, as used in 2024 and again in 2026.")
+    if code in UNCHANGED_NOTES:
+        intro += " " + UNCHANGED_NOTES[code]
+    return f"{_possessive(name)} House districts", intro
+
+
+def render_district_page(code, host, summary=None):
+    """A state's House districts - and, where the map was redrawn, both maps.
 
     The introduction is static, so the page says what it is without
     JavaScript; the maps and every claim about a person are rendered by
-    ``assets/kyc-districts.js`` from districts.js and profiles.js.
+    ``assets/kyc-districts.js`` from the state's map file and profiles.js.
     """
-    from .districts import PLANS
+    from .districts import REDRAWN, page_path as district_path
 
-    spec = PLANS[code]
     name = state_name(code)
-    old, new = spec["plans"]
-    canonical = f"https://{host}/{redistricting_path(code)}" if host else redistricting_path(code)
-    description = (
-        f"{name}'s {spec['seats']} House districts under the {old['title']} and the "
-        f"{new['title']}, side by side: which members are running in a different "
-        f"district, and how much of each new district came from each old one."
-    )
+    info = ((summary or {}).get("states") or {}).get(code) or {}
+    seats = info.get("house") or info.get("delegates") or None
+    headline, intro = district_page_text(code, seats)
+    path = district_path(code)
+    canonical = f"https://{host}/{path}" if host else path
+    if code in REDRAWN:
+        description = (f"{name}'s House districts under the 2024 map and the map for 2026, "
+                       f"side by side: who holds each seat, who is running where, and how "
+                       f"much of each new district came from each old one.")
+    else:
+        description = (f"{name}'s House districts on a map: who holds each seat and who is "
+                       f"on the November 2026 ballot.")
     main = "\n".join([
         '            <div id="districtsContent" class="state-page districts-page">',
         '                <header class="state-hero">',
-        '                    <p class="state-kicker">Redistricting</p>',
-        f'                    <h1 class="state-title">{_e(spec["headline"])}</h1>',
-        f'                    <p class="districts-lede">{_e(spec["intro"])}</p>',
+        f'                    <p class="state-kicker">{"Redistricting" if code in REDRAWN else "District map"}</p>',
+        f'                    <h1 class="state-title">{_e(headline)}</h1>',
+        f'                    <p class="districts-lede">{_e(intro)}</p>',
         '                    <p class="state-links">',
         f'                        <a class="btn" href="../{_e(page_path(code))}">'
         f'<svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> '
@@ -313,29 +351,50 @@ def render_redistricting(code, host):
         '                    </p>',
         '                </header>',
         '                <div id="districtsApp">',
-        '                    <p class="results-bar" role="status">Loading the maps&hellip;</p>',
+        '                    <p class="results-bar" role="status">Loading the map&hellip;</p>',
         '                </div>',
         '            </div>',
     ])
-    more = "".join(f"\n                <p>{_e(line)}</p>" for line in spec["sources"])
+    scripts = [s.replace("{code}", code.lower()) for s in _DISTRICT_SCRIPTS]
     return _PAGE.substitute(
-        title=_e(f"{name} redistricting: {old['title']} and {new['title']} — "
-                 "Know Your Candidate"),
-        og_title=_e(spec["headline"]),
+        title=_e(f"{headline} — Know Your Candidate"),
+        og_title=_e(headline),
         description=_e(description),
         canonical=_e(canonical),
         host=_e(host or ""),
         code=_e(code),
-        page_kind="redistricting",
+        page_kind="districts",
         search_placeholder=_e(f"Search {name} profiles…"),
         states_current="",
         main=main,
-        more_sources=more,
-        scripts=_scripts(_REDISTRICTING_SCRIPTS),
+        more_sources="",
+        scripts=_scripts(scripts),
     )
 
 
-def sitemap(host, codes, built=None, redistricting=()):
+def render_redirect(target, host):
+    """A page that moved: a stub that sends the reader on, and tells search
+    engines where the page lives now."""
+    canonical = f"https://{host}/{target.replace('../', '')}" if host else target
+    return "\n".join([
+        "<!DOCTYPE html>",
+        '<html lang="en">',
+        "<head>",
+        '<meta charset="utf-8">',
+        "<title>Moved — Know Your Candidate</title>",
+        f'<meta http-equiv="refresh" content="0; url={_e(target)}">',
+        f'<link rel="canonical" href="{_e(canonical)}">',
+        '<meta name="robots" content="noindex">',
+        "</head>",
+        "<body>",
+        f'<p>This page has moved to <a href="{_e(target)}">{_e(target)}</a>.</p>',
+        "</body>",
+        "</html>",
+        "",
+    ])
+
+
+def sitemap(host, codes, built=None, district_maps=()):
     """``sitemap.xml`` listing the two hand-maintained pages and every state.
 
     Individual profiles live behind hash fragments, which crawlers do not
@@ -359,7 +418,7 @@ def sitemap(host, codes, built=None, redistricting=()):
     url("states/index.html", "0.8")
     for code in sorted(codes):
         url(page_path(code), "0.7")
-    for code in sorted(redistricting):
-        url(redistricting_path(code), "0.6", "monthly")
+    for code in sorted(district_maps):
+        url(f"districts/{code.lower()}.html", "0.6", "monthly")
     lines.append("</urlset>")
     return "\n".join(lines) + "\n"

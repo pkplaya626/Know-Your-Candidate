@@ -74,8 +74,8 @@
     }
     var name = info.name;
     doc.title = name + " — Know Your Candidate";
-    // A state whose House map was redrawn for 2026 links to the two maps.
-    var redrawn = (KYC.meta().redistricting || {})[code];
+    // Every state links to its district map; a redrawn one says so.
+    var districtMap = (KYC.meta().districtMaps || {})[code];
 
     var members = data.filter(function (p) { return !p.isCandidate && p.state === code; });
     var senators = members.filter(function (p) { return p.chamber.indexOf("Senate") !== -1; });
@@ -98,9 +98,10 @@
         KYC.icon("map") + " See on the map</a> ",
       '<a class="btn" href="' + KYC.escapeAttr(KYC.siteRoot() + "index.html#/?state=" + code) + '">' +
         KYC.icon("grid") + " All " + KYC.escapeHtml(name) + " profiles</a>",
-      redrawn
-        ? ' <a class="btn" href="' + KYC.escapeAttr(KYC.siteRoot() + redrawn.page) + '">' +
-          KYC.icon("layers") + " Old and new district lines</a>"
+      districtMap
+        ? ' <a class="btn" href="' + KYC.escapeAttr(KYC.siteRoot() + districtMap.page) + '">' +
+          KYC.icon("layers") + (districtMap.redrawn ? " Old and new district lines" :
+            " District map") + "</a>"
         : "",
       "</p>",
       "</header>"

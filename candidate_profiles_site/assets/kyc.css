@@ -2121,11 +2121,14 @@ svg { flex: none; }
 }
 .inset-row {
   display: flex;
-  gap: var(--s-2);
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--s-3);
   align-items: flex-start;
 }
 .inset {
-  flex: 1 1 0;
+  flex: 0 1 auto;
+  max-width: 100%;
   min-width: 0;
   margin: 0;
 }
@@ -2258,3 +2261,13 @@ svg { flex: none; }
 }
 .race-redrawn a:hover { text-decoration: underline; }
 .district-caption-role { font-weight: 600; }
+/* One map instead of two: a single card at a readable width. */
+.plan-grid.single { grid-template-columns: minmax(0, 860px); }
+/* Holes and islands by the even-odd rule, as the build measured them. */
+.district-shape { fill-rule: evenodd; }
+.districts-sources {
+  margin-top: var(--s-5);
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+.districts-sources p { margin: 0 0 var(--s-1); }

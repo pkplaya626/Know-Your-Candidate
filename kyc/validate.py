@@ -342,24 +342,29 @@ def check_geometry(profiles, geo):
 
 
 def check_district_maps(races, district_maps, error=None):
-    """A before-and-after map must describe the seats the races are for.
+    """A state's district map must describe the seats its races are for.
 
-    The maps are numbered 1..N and the page reads "CA-3" off them; if the
-    state's delegation ever changed size, every number on the page would
-    point at the wrong shape and nothing would look wrong.
+    The page reads "TX-9" off the map; if a state's delegation ever changed
+    size, or a race were filed under a district the map does not have, every
+    number on the page would point at the wrong shape and nothing would look
+    wrong. Puerto Rico has no House race in 2026, so it has nothing to match.
     """
     if error:
         return [Issue("error", "district-map", f"District maps did not build: {error}")]
-    issues = []
+    if not races:
+        return []
+    wrong = []
     for code, state in sorted((district_maps or {}).items()):
-        numbers = sorted(r.get("district") or 0 for r in races or []
-                         if r.get("chamber") == "House" and r.get("state") == code)
-        if races and numbers != list(range(1, state["seats"] + 1)):
-            issues.append(Issue(
-                "error", "district-map-seats",
-                f"{code}'s district maps number {state['seats']} seats, but the "
-                f"races are for districts {numbers[:3]}...{numbers[-3:]} ({len(numbers)})"))
-    return issues
+        drawn = sorted(int(n) for n in state["plans"][-1]["districts"])
+        raced = sorted(r.get("district") or 0 for r in races
+                       if r.get("chamber") == "House" and r.get("state") == code)
+        if raced and raced != drawn:
+            wrong.append(f"{code}: map has {drawn[:3]}...{drawn[-3:]} ({len(drawn)}), "
+                         f"races are for {raced[:3]}...{raced[-3:]} ({len(raced)})")
+    if wrong:
+        return [Issue("error", "district-map-seats",
+                      f"{len(wrong)} district maps do not match their state's races", wrong)]
+    return []
 
 
 # A snapshot older than this is reported. Congress changes often enough that
