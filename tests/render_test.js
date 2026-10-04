@@ -1079,6 +1079,25 @@ async function testStates() {
     const jump = D.getElementById("stateJump");
     check("the jump list names every state", jump.options.length > 50, `${jump.options.length}`);
     check("the jump list has Texas selected", jump.value === "TX");
+    // The state's own delegation in the sidebar, counted from the data: a
+    // House race with no member is a vacancy.
+    const block = D.getElementById("stateBalance");
+    const seated = members.filter((p) => /House/.test(p.chamber));
+    const count = (list, key) => list.filter((p) => KYC.partyKey(p) === key).length;
+    const houseSeats = window.kycRaces.filter((r) => r.state === "TX" && r.chamber === "House").length;
+    const expectHouse = [["r", "R"], ["d", "D"], ["i", "I"]]
+      .filter(([k]) => count(seated, k)).map(([k, l]) => count(seated, k) + " " + l)
+      .concat(houseSeats > seated.length ? [(houseSeats - seated.length) + " Vacant"] : []);
+    const lines = [...block.querySelectorAll(".balance")].map((b) => b.textContent.replace(/\s+/g, " ").trim());
+    check("the sidebar shows Texas's own delegation", !block.hidden &&
+      /Texas/.test(block.querySelector(".sidebar-heading").textContent));
+    check("its senators by party", lines[0] === [["r", "R"], ["d", "D"], ["i", "I"]]
+      .filter(([k]) => count(senators, k)).map(([k, l]) => count(senators, k) + " " + l).join("/"),
+      lines[0]);
+    check("its House members by party, vacancies included", lines[1] === expectHouse.join("/"),
+      `${lines[1]} vs ${expectHouse.join("/")}`);
+    check("in the party colours", !!block.querySelector(".party-r") &&
+      block.querySelectorAll(".balance").length === 2);
     check("search narrows the cards", (() => {
       const input = D.getElementById("stateSearch");
       input.value = "zzzz-no-such-person";
@@ -2010,6 +2029,33 @@ async function testDistrictPages() {
       p.districtNum === 2);
     check("and its people, from the data",
       !!D.querySelector('.district-fact .card[data-id="' + holder.id + '"]'), holder.name);
+    const people = ia.window.legislatorsData;
+    const wrong = [...D.querySelectorAll(".district-statewide use.district-shape")].filter((u) => {
+      const n = +u.getAttribute("data-district");
+      const seated = people.find((p) => !p.isCandidate && p.state === "IA" &&
+        /House/.test(p.chamber) && p.districtNum === n);
+      return !u.classList.contains("party-" + (seated ? ia.window.KYC.partyKey(seated) : "vacant"));
+    });
+    check("each district is drawn in its member's party", wrong.length === 0,
+      wrong.map((u) => u.getAttribute("data-district")).join(", "));
+    check("the legend names only the parties drawn",
+      [...D.querySelectorAll(".party-legend .key")].length ===
+        new Set(people.filter((p) => !p.isCandidate && p.state === "IA" && /House/.test(p.chamber))
+          .map((p) => ia.window.KYC.partyKey(p))).size);
+  });
+
+  const fl = await buildPage("districts/fl.html");
+  suite("districts/fl.html — a seat with no member", () => {
+    const vacant = fl.window.kycRaces.filter((r) => r.state === "FL" && r.chamber === "House")
+      .map((r) => r.district)
+      .filter((n) => !fl.window.legislatorsData.some((p) => !p.isCandidate && p.state === "FL" &&
+        /House/.test(p.chamber) && p.districtNum === n));
+    check("the data has a seat with no member", vacant.length > 0, vacant.join(", "));
+    const shape = fl.D.querySelector('.plan-card .district-statewide use[data-district="' +
+      vacant[0] + '"]');
+    check("it is drawn as vacant, not as a party", !!shape && shape.classList.contains("party-vacant"));
+    check("and the legend says what that colour means",
+      /Vacant seat/.test(fl.D.querySelector(".party-legend").textContent));
   });
 
   const ak = await buildPage("districts/ak.html");
@@ -2043,6 +2089,14 @@ async function testDistrictPages() {
       !cards[0].querySelector('.district-statewide g[clip-path] use.district-shape'));
     check("each map's sources are listed",
       /Census Bureau/.test(D.querySelector(".districts-sources").textContent));
+    check("the old map is drawn in its members' parties, the new one in none",
+      ![...cards[0].querySelectorAll(".district-statewide use.district-shape")]
+        .some((u) => u.classList.contains("party-none")) &&
+      [...cards[1].querySelectorAll(".district-statewide use.district-shape")]
+        .every((u) => u.classList.contains("party-none")));
+    check("a picked district is outlined over its fill, not refilled",
+      !!cards[0].querySelector(".district-statewide .district-focus.focus-1") &&
+      !cards[0].querySelector(".district-statewide use.district-shape.is-focus.party-none"));
     // The sidebar's list was filled by the state pages' module only, so it
     // was empty here.
     const jump = D.getElementById("stateJump");

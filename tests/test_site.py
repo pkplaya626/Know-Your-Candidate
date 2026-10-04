@@ -425,6 +425,38 @@ class TestStatePages(unittest.TestCase):
         self.assertEqual(by_state["GU"]["delegates"], 1)
         self.assertTrue(by_state["GU"]["territory"])
 
+    def test_each_state_has_its_own_balance_and_its_vacancies(self):
+        # The roster holds no row for a seat nobody holds; the races cover
+        # every seat, so a race with no member is a vacancy, not a gap.
+        people = [
+            member(id="S1", state="TX"),
+            member(id="S2", state="TX", party="Democrat"),
+            member(id="H1", state="TX", chamber="House", districtNum=1),
+            member(id="H2", state="TX", chamber="House", districtNum=2, party="Democrat"),
+            member(id="D1", state="GU", chamber="House", districtNum=0, party="Democrat"),
+        ]
+        races = [{"id": f"H-TX-0{n}-2026", "state": "TX", "chamber": "House", "district": n}
+                 for n in (1, 2, 3)]
+        by_state = summary.by_state(people, races)
+        self.assertEqual(by_state["TX"]["balance"], {
+            "senate": {"D": 1, "R": 1, "I": 0, "vacant": 0},
+            "house": {"D": 1, "R": 1, "I": 0, "vacant": 1}})
+        self.assertEqual(by_state["GU"]["balance"]["house"], {"D": 1, "R": 0, "I": 0, "vacant": 0})
+        national = summary.build(people, races=races)
+        self.assertEqual(national["house"]["vacant"], 1)       # the territory is not counted
+
+    def test_the_real_house_adds_up_to_its_seats(self):
+        meta = json.loads(open(os.path.join(ROOT, emit.DATA_FILE), encoding="utf-8").read()
+                          .split("window.kycBuildMeta = ", 1)[1].rstrip().rstrip(";"))
+        house = meta["house"]
+        self.assertEqual(house["D"] + house["R"] + house["I"] + house["vacant"], house["seats"])
+        for code, state in meta["states"].items():
+            if state["territory"] or not state["races"]:
+                continue
+            seats = sum(state["balance"]["house"].values())
+            with self.subTest(state=code):
+                self.assertEqual(seats, state["house"] + state["balance"]["house"]["vacant"])
+
 
 class TestHostnameConsistency(unittest.TestCase):
     """One hostname, six places, five files.
