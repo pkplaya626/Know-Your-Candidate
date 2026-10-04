@@ -1,9 +1,10 @@
-"""Tests for the before-and-after district maps (kyc/districts.py).
+"""Tests for every state's district maps (kyc/districts.py) and the tool that
+vendors them (tools/fetch_district_maps.py).
 
-The page reads "CA-3" off these shapes and says who held it and who is
-running in it. A shape that decodes, projects or numbers wrongly would put
-the right name on the wrong piece of California and look entirely normal,
-so the geometry is checked against places whose district is on record.
+A page reads "TX-9" off these shapes and says who held it and who is running
+in it. A shape that decodes, projects or numbers wrongly would put the right
+name on the wrong piece of a state and look entirely normal, so the geometry
+is checked against places whose district is on record.
 """
 
 import io
@@ -40,105 +41,143 @@ def rings_of(path_data):
     return rings
 
 
-class TestCaliforniaMaps(unittest.TestCase):
-    """The real, vendored boundaries."""
+class TestEveryState(unittest.TestCase):
+    """All 56 maps: built, numbered as the races are, and labelled."""
 
     @classmethod
     def setUpClass(cls):
-        cls.ca = districts.build(ROOT)["CA"]
-        cls.old, cls.new = cls.ca["plans"]
+        cls.maps = districts.build(ROOT)
+
+    def test_every_state_and_territory_has_a_map(self):
+        self.assertEqual(sorted(self.maps), districts.all_codes())
+        self.assertEqual(len(self.maps), 56)
+
+    def test_redrawn_states_have_two_maps_and_the_rest_one(self):
+        for code, state in self.maps.items():
+            self.assertEqual(len(state["plans"]), 2 if code in districts.REDRAWN else 1, code)
+
+    def test_a_single_seat_is_numbered_zero_as_the_races_are(self):
+        for code in ("AK", "DE", "ND", "SD", "VT", "WY", "DC", "PR", "GU", "VI", "AS", "MP"):
+            state = self.maps[code]
+            self.assertTrue(state["atLarge"], code)
+            self.assertEqual(list(state["plans"][0]["districts"]), ["0"], code)
+
+    def test_every_district_is_numbered_somewhere(self):
+        # Statewide when it is big enough at the page's size, else inside an
+        # inset - the rule the page follows, so no number goes missing.
+        for code, state in self.maps.items():
+            px = districts.DESIGN_PX / state["viewBox"][2]
+            boxes = [i["box"] for i in state["insets"]]
+            for plan in state["plans"][-1:]:
+                for n, d in plan["districts"].items():
+                    big = d["area"] * px * px >= districts.LABEL_PX
+                    inset = any(b[0] <= d["at"][0] <= b[0] + b[2] and
+                                b[1] <= d["at"][1] <= b[1] + b[3] for b in boxes)
+                    self.assertTrue(big or inset, f"{code}-{n} is too small and in no inset")
+
+    def test_numbers_in_an_inset_are_drawn_apart(self):
+        # The Los Angeles inset once drew old CA-45 and CA-46 11px apart, and
+        # the page dropped both numbers rather than overlap them.
+        for code, state in self.maps.items():
+            for inset in state["insets"]:
+                x, y, w, h = inset["box"]
+                scale = inset["width"] / w
+                for plan in state["plans"]:
+                    pts = [d["at"] for d in plan["districts"].values()
+                           if x <= d["at"][0] <= x + w and y <= d["at"][1] <= y + h]
+                    gaps = [math.dist(a, b) * scale for i, a in enumerate(pts)
+                            for b in pts[i + 1:]]
+                    self.assertGreaterEqual(min(gaps, default=99), districts.INSET_GAP_PX - 0.5,
+                                            f"{code} {inset['title']} {plan['key']}")
+
+    def test_every_label_point_is_inside_its_district(self):
+        for code, state in self.maps.items():
+            for plan in state["plans"]:
+                for n, d in plan["districts"].items():
+                    self.assertTrue(districts._contains(rings_of(d["d"]), *d["at"]),
+                                    f"{code} {plan['key']} {n}")
+
+    def test_redrawn_maps_account_for_every_old_district(self):
+        for code in districts.REDRAWN:
+            totals = {}
+            for old, _new, _of_new, of_old in self.maps[code]["flows"]:
+                totals[old] = totals.get(old, 0) + of_old
+            self.assertTrue(all(t >= districts.MIN_COVERAGE for t in totals.values()), code)
+
+    def test_the_maps_say_nothing_about_people(self):
+        # The emitted files are a pure function of the geometry; the page
+        # joins them to profiles.js. A name here would be a second source.
+        text = emit._json(self.maps["CA"]) + emit._json(self.maps["TX"])
+        for word in ("Bera", "Kiley", "Democrat", "Republican"):
+            self.assertNotIn(word, text)
+
+
+class TestRecordedPlaces(unittest.TestCase):
+    """Places whose district is on record, so a projection or numbering
+    error shows up as a town in the wrong district."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.ca = districts.build(ROOT, ["CA"])["CA"]
         cls.towns = {p[0]: (p[1], p[2]) for p in cls.ca["places"]}
 
-    def district_of(self, plan, town):
+    def district_of(self, key, town):
+        plan = next(p for p in self.ca["plans"] if p["key"] == key)
         x, y = self.towns[town]
         hits = [int(n) for n, d in plan["districts"].items()
                 if districts._contains(rings_of(d["d"]), x, y)]
-        self.assertEqual(len(hits), 1, f"{town} falls in {hits} on the {plan['key']} map")
+        self.assertEqual(len(hits), 1, f"{town} falls in {hits} on the {key} map")
         return hits[0]
-
-    def test_both_plans_number_every_seat(self):
-        for plan in (self.old, self.new):
-            self.assertEqual(sorted(map(int, plan["districts"])), list(range(1, 53)))
 
     def test_north_is_up_and_east_is_right(self):
         self.assertGreater(self.towns["Folsom"][0], self.towns["Sacramento"][0])
         self.assertLess(self.towns["Truckee"][1], self.towns["Bishop"][1])
-        self.assertLess(self.towns["Sacramento"][1], self.towns["Los Angeles"][1])
 
     def test_the_drawn_state_is_the_size_of_california(self):
-        # 163,696 square miles (423,970 km2) including water, per the Census
-        # Bureau. A wrong projection, a bad decode or a lost district moves
-        # this by far more than the 1% allowed.
-        for plan in (self.old, self.new):
+        # The Census map stops at the coast but keeps inland water, so it
+        # measures between California's land (403,466 km2) and its total
+        # area (423,970 km2), per the Census Bureau.
+        for plan in self.ca["plans"]:
             area = sum(d["area"] for d in plan["districts"].values()) * self.ca["unitKm"] ** 2
-            self.assertAlmostEqual(area / 423970, 1, delta=0.01, msg=plan["key"])
+            self.assertTrue(403466 * 0.99 < area < 423970, (plan["key"], area))
 
     def test_the_old_third_and_sixth_hold_the_towns_on_record(self):
         # Wikipedia, "California's 3rd congressional district" (2023-2027):
-        # Roseville, Folsom, Rocklin, Auburn and Lincoln, and Alpine, Inyo,
-        # Mono and Nevada counties. The 6th: Rancho Cordova, Citrus Heights.
+        # Roseville, Folsom, Rocklin, Auburn and Lincoln, and Inyo, Mono and
+        # Nevada counties. The 6th: Rancho Cordova and Citrus Heights.
         for town in ("Roseville", "Folsom", "Rocklin", "Auburn", "Lincoln",
                      "Truckee", "Grass Valley", "Bishop", "Mammoth Lakes"):
-            self.assertEqual(self.district_of(self.old, town), 3, town)
+            self.assertEqual(self.district_of("current", town), 3, town)
         for town in ("Rancho Cordova", "Citrus Heights"):
-            self.assertEqual(self.district_of(self.old, town), 6, town)
+            self.assertEqual(self.district_of("current", town), 6, town)
 
     def test_the_new_third_and_sixth_hold_the_towns_on_record(self):
         # KCRA and CBS Sacramento on the Proposition 50 lines: the new 3rd
-        # takes all of Nevada County, Folsom and the Lake Tahoe Basin and
-        # drops the eastern Sierra; the new 6th takes Roseville, Rocklin,
-        # Citrus Heights and West Sacramento.
+        # takes Nevada County, Folsom and the Lake Tahoe Basin and drops the
+        # eastern Sierra; the new 6th takes Roseville, Rocklin, Citrus
+        # Heights and West Sacramento.
         for town in ("Truckee", "Grass Valley", "Nevada City", "Folsom", "South Lake Tahoe"):
-            self.assertEqual(self.district_of(self.new, town), 3, town)
+            self.assertEqual(self.district_of("next", town), 3, town)
         for town in ("Roseville", "Rocklin", "Citrus Heights", "West Sacramento"):
-            self.assertEqual(self.district_of(self.new, town), 6, town)
-        self.assertNotEqual(self.district_of(self.new, "Bishop"), 3)
+            self.assertEqual(self.district_of("next", town), 6, town)
+        self.assertNotEqual(self.district_of("next", "Bishop"), 3)
 
     def test_overlaps_agree_with_an_independent_measurement(self):
-        # Measured separately with mapshaper's overlay on the same files:
-        # the new 3rd is 97% old 3rd, 2.5% old 6th, 0.9% old 7th; the new
-        # 6th is 50% old 6th, 37% old 3rd, 13% old 7th.
+        # Measured separately with mapshaper's overlay: the new 3rd is 97%
+        # old 3rd, 2.5% old 6th, 0.9% old 7th; the new 6th is 50% old 6th,
+        # 37% old 3rd, 13% old 7th.
         came = {(f[0], f[1]): f[2] for f in self.ca["flows"]}
         expected = {(3, 3): 0.97, (6, 3): 0.025, (7, 3): 0.009,
                     (6, 6): 0.50, (3, 6): 0.37, (7, 6): 0.13}
         for pair, share in expected.items():
             self.assertAlmostEqual(came.get(pair, 0), share, delta=0.015, msg=pair)
 
-    def test_every_district_is_accounted_for_by_the_other_plan(self):
-        for column, side in ((2, 1), (3, 0)):
-            totals = {}
-            for flow in self.ca["flows"]:
-                totals[flow[side]] = totals.get(flow[side], 0) + flow[column]
-            self.assertEqual(len(totals), 52)
-            self.assertTrue(all(t >= districts.MIN_COVERAGE for t in totals.values()), totals)
-
-    def test_every_label_point_is_inside_its_district(self):
-        for plan in (self.old, self.new):
-            for n, d in plan["districts"].items():
-                self.assertTrue(districts._contains(rings_of(d["d"]), *d["at"]),
-                                f"{plan['key']} {n}")
-
-    def test_county_names_sit_inside_their_counties(self):
-        names = {c[0] for c in self.ca["counties"]["names"]}
-        self.assertEqual(len(names), 58)          # every county in California
-        self.assertTrue(self.ca["counties"]["mesh"].startswith("M"))
-        self.assertNotIn("Z", self.ca["counties"]["mesh"])   # lines, not shapes
-
-    def test_insets_frame_the_dense_metros(self):
-        boxes = {i["key"]: i["box"] for i in self.ca["insets"]}
-        x, y = self.towns["Los Angeles"]
-        la = boxes["la"]
-        self.assertTrue(la[0] < x < la[0] + la[2] and la[1] < y < la[1] + la[3])
+    def test_san_francisco_is_labelled_in_san_francisco(self):
+        # Its Census internal point is on the Farallon Islands, 52 km out.
         x, y = self.towns["San Francisco"]
-        bay = boxes["bay"]
-        self.assertTrue(bay[0] < x < bay[0] + bay[2] and bay[1] < y < bay[1] + bay[3])
-
-    def test_the_payload_says_nothing_about_people(self):
-        # districts.js is a pure function of the geometry; the page joins it
-        # to profiles.js. A name in here would be a second source of truth.
-        text = emit._json(self.ca)
-        for name in ("Bera", "Kiley", "Calvert", "Democrat", "Republican"):
-            self.assertNotIn(name, text)
+        inset = next(i for i in self.ca["insets"] if "San Francisco" in i["title"])
+        b = inset["box"]
+        self.assertTrue(b[0] < x < b[0] + b[2] and b[1] < y < b[1] + b[3])
 
 
 class TestProjection(unittest.TestCase):
@@ -146,7 +185,7 @@ class TestProjection(unittest.TestCase):
     def test_it_is_equal_area(self):
         # A one-degree cell has area dlon * (sin lat2 - sin lat1) on the unit
         # sphere; an equal-area projection keeps it, wherever the cell is.
-        albers = districts._Albers()
+        albers = districts._Albers((34.0, 40.5), -120.0)
         for west, south in ((-124, 32.5), (-120, 37), (-115, 41)):
             edge = ([(west + i / 50, south) for i in range(51)] +
                     [(west + 1, south + i / 50) for i in range(51)] +
@@ -158,6 +197,46 @@ class TestProjection(unittest.TestCase):
             true = math.radians(1) * (math.sin(math.radians(south + 1)) -
                                       math.sin(math.radians(south)))
             self.assertAlmostEqual(drawn / true, 1, delta=1e-4)
+
+    def test_alaska_is_not_split_by_the_antimeridian(self):
+        # The Aleutians reach past 180 degrees; they are west of Alaska.
+        albers = districts.projection_for("AK", [(-150, 60), (179, 52), (-130, 55)])
+        west, _ = albers.raw(179.5, 52)
+        main, _ = albers.raw(-150, 61)
+        self.assertLess(west, main)
+
+    def test_web_mercator_and_lambert_are_undone(self):
+        import fetch_district_maps as F
+
+        mercator = ('PROJCS["WGS_1984_Web_Mercator_Auxiliary_Sphere",GEOGCS["GCS_WGS_1984",'
+                    'DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]]],'
+                    'PROJECTION["Mercator_Auxiliary_Sphere"],PARAMETER["False_Easting",0.0],'
+                    'PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",0.0],'
+                    'UNIT["Meter",1.0]]')
+        lon, lat = F.unprojector(mercator)(-13358338.895192828, 4865942.279503176)
+        self.assertAlmostEqual(lon, -120.0, places=6)
+        self.assertAlmostEqual(lat, 40.0, places=6)
+        # NC State Plane (EPSG:2264, US feet): Raleigh's Capitol is at
+        # roughly 2,106,000 ft E, 738,000 ft N.
+        state_plane = ('PROJCS["NAD_1983_StatePlane_North_Carolina_FIPS_3200_Feet",'
+                       'GEOGCS["GCS_North_American_1983",DATUM["D_North_American_1983",'
+                       'SPHEROID["GRS_1980",6378137.0,298.257222101]]],'
+                       'PROJECTION["Lambert_Conformal_Conic"],'
+                       'PARAMETER["False_Easting",2000000.002616666],'
+                       'PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",-79.0],'
+                       'PARAMETER["Standard_Parallel_1",34.33333333333334],'
+                       'PARAMETER["Standard_Parallel_2",36.16666666666666],'
+                       'PARAMETER["Latitude_Of_Origin",33.75],UNIT["Foot_US",0.3048006096012192]]')
+        lon, lat = F.unprojector(state_plane)(2106000, 738000)
+        self.assertAlmostEqual(lon, -78.64, delta=0.02)
+        self.assertAlmostEqual(lat, 35.78, delta=0.02)
+
+    def test_an_unknown_projection_is_refused(self):
+        import fetch_district_maps as F
+
+        with self.assertRaises(SystemExit):
+            F.unprojector('PROJCS["x",GEOGCS["g",DATUM["d",SPHEROID["s",6378137,298.25]]],'
+                          'PROJECTION["Transverse_Mercator"],UNIT["Meter",1.0]]')
 
 
 def square(x0, y0, x1, y1):
@@ -173,15 +252,26 @@ class TestMeasure(unittest.TestCase):
         self.assertEqual(areas, [{1: 100.0, 2: 100.0}, {1: 100.0, 2: 100.0}])
         self.assertEqual(overlaps, {(1, 1): 50.0, (2, 1): 50.0, (1, 2): 50.0, (2, 2): 50.0})
 
+    def test_one_plan_is_measured_alone(self):
+        areas, overlaps = districts.measure([{1: square(0, 0, 4, 5)}], 12)
+        self.assertEqual((areas, overlaps), ([{1: 20.0}], {}))
+
     def test_a_hole_is_not_area(self):
         donut = [[(0, 0), (10, 0), (10, 10), (0, 10)], [(4, 4), (6, 4), (6, 6), (4, 6)]]
         areas, _ = districts.measure([{1: donut}, {1: donut}], 12)
         self.assertEqual(areas[0][1], 96.0)
 
-    def test_a_district_the_other_plan_misses_is_an_error(self):
-        areas = [{1: 100.0}, {1: 100.0}]
+    def test_a_new_district_out_at_sea_is_sized_by_its_land(self):
+        # The old map stops at the shore; the new one runs out over water.
+        old = {1: square(0, 0, 10, 10)}
+        new = {1: square(0, 0, 10, 20)}
+        areas, overlaps = districts.measure([old, new], 22)
+        self.assertEqual(districts.land_areas(areas, overlaps), {1: 100.0})
+        self.assertEqual(districts.flows(areas, overlaps), [[1, 1, 1.0, 1.0]])
+
+    def test_an_old_district_the_new_plan_misses_is_an_error(self):
         with self.assertRaises(districts.DistrictsError) as caught:
-            districts.flows(areas, {(1, 1): 90.0})
+            districts.flows([{1: 100.0}, {1: 100.0}], {(1, 1): 90.0})
         self.assertIn("old 1 (90%)", str(caught.exception))
 
     def test_slivers_are_not_flows(self):
@@ -195,13 +285,12 @@ class TestMeasure(unittest.TestCase):
         self.assertTrue(districts._contains(crescent, x, y))
 
     def test_open_lines_are_not_closed(self):
-        path = districts.lines_to_path([[(0, 0), (1, 1), (3, 1)]])
-        self.assertEqual(path, "M0,0l1,1 2,0")
+        self.assertEqual(districts.lines_to_path([[(0, 0), (1, 1), (3, 1)]]), "M0,0l1,1 2,0")
 
 
-def _topology(points=None, numbers=(1, 2)):
-    """Two plans of two side-by-side districts, numbered the other way round
-    in the second plan, and one county around both. Unquantised."""
+def _topology(numbers=(1, 2), points=None):
+    """A two-district state, renumbered the other way round in its new map,
+    with one county around both. Unquantised."""
     left = [[-121.0, 38.0], [-120.5, 38.0], [-120.5, 38.5], [-121.0, 38.5], [-121.0, 38.0]]
     right = [[-120.5, 38.0], [-120.0, 38.0], [-120.0, 38.5], [-120.5, 38.5], [-120.5, 38.0]]
     whole = [[-121.0, 38.0], [-120.0, 38.0], [-120.0, 38.5], [-121.0, 38.5], [-121.0, 38.0]]
@@ -210,45 +299,43 @@ def _topology(points=None, numbers=(1, 2)):
     def plan(first, second):
         return {"type": "GeometryCollection", "geometries": [
             {"type": "Polygon", "arcs": [[first]], "properties": {"d": numbers[0]}},
-            {"type": "Polygon", "arcs": [[second]], "properties": {"d": numbers[1]}},
-        ]}
+            {"type": "Polygon", "arcs": [[second]], "properties": {"d": numbers[1]}}]}
 
     def pts(swap):
         return {"type": "GeometryCollection", "geometries": [
             {"type": "Point", "coordinates": points[2 if swap else 1], "properties": {"d": 1}},
-            {"type": "Point", "coordinates": points[1 if swap else 2], "properties": {"d": 2}},
-        ]}
+            {"type": "Point", "coordinates": points[1 if swap else 2], "properties": {"d": 2}}]}
 
-    return {
-        "type": "Topology",
-        "arcs": [left, right, whole],
-        "objects": {
-            "old_s": plan(0, 1), "new_s": plan(1, 0),
-            "old_pts": pts(False), "new_pts": pts(True),
-            "counties": {"type": "GeometryCollection", "geometries": [
-                {"type": "Polygon", "arcs": [[2]], "properties": {"name": "Test"}}]},
-        },
-    }
+    return {"type": "Topology", "arcs": [left, right, whole], "objects": {
+        "current": plan(0, 1), "next": plan(1, 0),
+        "current_pts": pts(False), "next_pts": pts(True),
+        "counties": {"type": "GeometryCollection", "geometries": [
+            {"type": "Polygon", "arcs": [[2]], "properties": {"name": "Test County"}}]}}}
 
 
 class TestBuildState(unittest.TestCase):
     """The loud failures, on a two-district state."""
 
-    def build(self, topo):
-        spec = dict(districts.PLANS["CA"], seats=2, file="t.json", places="p.json", insets=())
+    def build(self, topo, redrawn=True):
         with tempfile.TemporaryDirectory() as tmp:
-            with open(os.path.join(tmp, "t.json"), "w", encoding="utf-8") as f:
+            os.makedirs(os.path.join(tmp, districts.MAPS_DIR))
+            with open(districts.map_file("ZZ", tmp), "w", encoding="utf-8") as f:
                 json.dump(topo, f)
-            with open(os.path.join(tmp, "p.json"), "w", encoding="utf-8") as f:
-                json.dump({"places": [["Town", -120.6, 38.2, 1000]]}, f)
-            with mock.patch.dict(districts.PLANS, {"ZZ": spec}, clear=True):
-                return districts.build_state("ZZ", tmp)
+            entry = {"ZZ": {"headline": "", "intro": ""}} if redrawn else {}
+            with mock.patch.dict(districts.REDRAWN, entry), \
+                    mock.patch.object(districts, "state_name", lambda c: "Zed"):
+                return districts.build_state("ZZ", tmp, {"ZZ": [["Town", -120.6, 38.2, 9]]})
 
     def test_a_clean_state_builds(self):
         state = self.build(_topology())
         self.assertEqual([sorted(p["districts"]) for p in state["plans"]], [["1", "2"]] * 2)
         self.assertEqual(state["flows"], [[1, 2, 1.0, 1.0], [2, 1, 1.0, 1.0]])
         self.assertEqual(state["places"][0][0], "Town")
+        self.assertEqual([p["label"] for p in state["plans"]], ["Before", "After"])
+
+    def test_a_new_map_with_no_entry_is_an_error(self):
+        with self.assertRaisesRegex(districts.DistrictsError, "REDRAWN has no entry"):
+            self.build(_topology(), redrawn=False)
 
     def test_a_label_point_outside_its_district_is_an_error(self):
         topo = _topology(points={1: [-120.25, 38.25], 2: [-120.75, 38.25]})
@@ -269,37 +356,71 @@ class TestBuildState(unittest.TestCase):
                 districts.build_state("CA", tmp)
 
 
+class TestInsets(unittest.TestCase):
+
+    def test_small_districts_get_a_named_box_and_big_ones_do_not(self):
+        plan = {"1": {"area": 400000, "at": [500, 500], "box": [0, 0, 1000, 1000]},
+                "2": {"area": 20, "at": [100, 100], "box": [95, 95, 105, 105]},
+                "3": {"area": 20, "at": [110, 100], "box": [105, 95, 115, 105]}}
+        places = [["Big City", 101, 101, 500000], ["Small Town", 112, 99, 1000]]
+        boxes = districts.insets(plan, places, [0, 0, 1000, 1000])
+        self.assertEqual(len(boxes), 1)
+        self.assertEqual(boxes[0]["title"], "Big City")
+        x, y, w, h = boxes[0]["box"]
+        for n in ("2", "3"):
+            self.assertTrue(x < plan[n]["at"][0] < x + w and y < plan[n]["at"][1] < y + h)
+
+
 class TestEmitted(unittest.TestCase):
 
-    def test_the_file_records_its_signature(self):
-        payload = {"CA": {"plans": [], "x": 1}}
+    def test_each_state_gets_its_own_file_and_signature(self):
+        maps = {"ZZ": {"plans": [], "x": 1}, "YY": {"plans": [], "x": 2}}
         with tempfile.TemporaryDirectory() as tmp:
-            emit.write_districts(payload, root=tmp)
-            path = os.path.join(tmp, emit.DISTRICTS_FILE)
-            self.assertEqual(emit.read_signature(path=path), emit.districts_signature(payload))
+            written = emit.write_districts(maps, root=tmp)
+            self.assertEqual(len(written), 2)
+            self.assertEqual(emit.check_districts(maps, tmp), [])
+            path = emit.district_file("ZZ", tmp)
+            self.assertEqual(emit.read_signature(path=path), emit.districts_signature(maps["ZZ"]))
             with open(path, encoding="utf-8") as f:
-                text = f.read()
-        self.assertIn("window.kycDistricts = ", text)
-        self.assertIn("ca_districts_topo.json", text)
+                self.assertIn('window.kycDistricts = {"ZZ":', f.read())
+            maps["ZZ"]["x"] = 3
+            self.assertEqual([p for p, _ in emit.check_districts(maps, tmp)], [path])
 
-    def test_the_build_metadata_lists_the_maps(self):
+    def test_the_build_metadata_lists_every_map(self):
         from kyc import summary
-        self.assertEqual(summary.redistricting(),
-                         {"CA": {"page": "redistricting/ca.html", "name": "California"}})
+        index = summary.district_maps()
+        self.assertEqual(len(index), 56)
+        self.assertEqual(index["TX"], {"page": "districts/tx.html", "name": "Texas",
+                                       "redrawn": True})
+        self.assertFalse(index["MO"]["redrawn"])
+
+    def test_the_redrawn_states_are_the_nine_on_record(self):
+        # Verified against each enacting body's record on 2026-10-03.
+        # Missouri's 2025 map was suspended by referendum and is not in effect.
+        self.assertEqual(sorted(districts.REDRAWN),
+                         ["AL", "CA", "FL", "LA", "NC", "OH", "TN", "TX", "UT"])
 
 
 class TestValidation(unittest.TestCase):
 
-    def races(self, count):
-        return [{"chamber": "House", "state": "CA", "district": n} for n in range(1, count + 1)]
+    def races(self, code, count):
+        return [{"chamber": "House", "state": code, "district": n} for n in range(1, count + 1)]
+
+    def state(self, count):
+        return {"plans": [{"districts": {str(n): {} for n in range(1, count + 1)}}]}
 
     def test_a_map_for_the_seats_on_the_ballot_passes(self):
-        self.assertEqual(validate.check_district_maps(self.races(52), {"CA": {"seats": 52}}), [])
+        self.assertEqual(validate.check_district_maps(self.races("CA", 52),
+                                                      {"CA": self.state(52)}), [])
 
     def test_a_map_numbering_other_seats_is_an_error(self):
-        issues = validate.check_district_maps(self.races(53), {"CA": {"seats": 52}})
-        self.assertEqual([i.code for i in issues], ["district-map-seats"])
-        self.assertEqual(issues[0].level, "error")
+        issues = validate.check_district_maps(self.races("CA", 53), {"CA": self.state(52)})
+        self.assertEqual([(i.level, i.code) for i in issues], [("error", "district-map-seats")])
+
+    def test_a_seat_with_no_race_has_nothing_to_match(self):
+        self.assertEqual(validate.check_district_maps(self.races("CA", 1),
+                                                      {"PR": {"plans": [{"districts": {"0": {}}}]}}),
+                         [])
 
     def test_a_map_that_did_not_build_is_an_error(self):
         issues = validate.check_district_maps([], None, "label point is outside")
@@ -307,61 +428,69 @@ class TestValidation(unittest.TestCase):
 
 
 class TestPlacesTool(unittest.TestCase):
-    """tools/fetch_ca_places.py, offline: the join, the names, the refusal."""
+    """tools/fetch_district_maps.py's places, offline."""
 
-    def files(self, extra_estimate=""):
-        # Truckee's internal point agrees with USGS; San Francisco's is on the
-        # Farallon Islands, 52 km out, as it really is; Sacramento has no
-        # USGS record at all.
-        gazetteer = ("USPS\tGEOID\tANSICODE\tNAME\tLSAD\tFUNCSTAT\tALAND\tAWATER\t"
-                     "ALAND_SQMI\tAWATER_SQMI\tINTPTLAT\tINTPTLONG\n"
-                     "CA\t0680000\t02413403\tTruckee town\t43\tA\t84000000\t0\t1\t0\t39.35\t-120.19\n"
-                     "CA\t0667000\t02411786\tSan Francisco city\t25\tA\t121400000\t0\t1\t0"
-                     "\t37.727239\t-123.032229\n"
-                     "CA\t0664000\t02411751\tSacramento city\t25\tA\t1\t0\t1\t0\t38.56\t-121.46\n"
-                     "NV\t3200001\t1\tElsewhere city\t25\tA\t1\t0\t1\t0\t39.0\t-119.0\n")
-        gnis = ("feature_id|feature_name|feature_class|prim_lat_dec|prim_long_dec\n"
-                "2413403|Town of Truckee|Civil|39.3454399|-120.1848719\n"
-                "2411786|City of San Francisco|Civil|37.7782253|-122.4425085\n"
-                "277593|San Francisco|Populated Place|37.775|-122.4194444\n")
-        archives = []
-        for name, body in (("2020_Gaz_place_national.txt", gazetteer),
-                           ("Text/DomesticNames_CA.txt", gnis)):
-            buffer = io.BytesIO()
-            with zipfile.ZipFile(buffer, "w") as archive:
-                archive.writestr(name, body)
-            archives.append(buffer.getvalue())
-        estimates = ("SUMLEV,STATE,COUNTY,PLACE,NAME,POPESTIMATE2024\n"
-                     "162,06,000,80000,Truckee town,17240\n"
-                     "162,06,000,67000,San Francisco city,827526\n"
-                     "162,06,000,64000,Sacramento city,535798\n"
-                     "040,06,000,00000,California,39000000\n" + extra_estimate)
-        return archives[0], estimates.encode("latin-1"), archives[1]
+    def gazetteer(self, rows):
+        header = ("USPS\tGEOID\tANSICODE\tNAME\tLSAD\tFUNCSTAT\tALAND\tAWATER\t"
+                  "ALAND_SQMI\tAWATER_SQMI\tINTPTLAT\tINTPTLONG\n")
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w") as archive:
+            archive.writestr("2020_Gaz_place_national.txt", header + "".join(rows))
+        return buffer.getvalue()
 
-    def test_places_are_joined_named_and_ranked(self):
-        import fetch_ca_places
-        payload = fetch_ca_places.build(*self.files())
-        self.assertEqual([p[0] for p in payload["places"]],
-                         ["San Francisco", "Sacramento", "Truckee"])
-        self.assertEqual(payload["places"][2], ["Truckee", -120.19, 39.35, 17240])
+    def test_a_point_off_the_largest_piece_moves_onto_it(self):
+        import fetch_district_maps as F
 
-    def test_an_internal_point_out_at_sea_is_replaced_and_recorded(self):
-        import fetch_ca_places
-        payload = fetch_ca_places.build(*self.files())
-        self.assertEqual(payload["places"][0], ["San Francisco", -122.4425085, 37.7782253, 827526])
-        self.assertEqual(payload["moved"], [["San Francisco", -123.032229, 37.727239, 52.2]])
-        self.assertEqual(payload["unchecked"], ["Sacramento"])
+        # San Francisco: its internal point on a small island to the west.
+        gaz = self.gazetteer([
+            "CA\t0667000\t02411786\tSan Francisco city\t25\tA\t1\t0\t1\t0\t37.72\t-123.03\n",
+            "CA\t0680000\t02413403\tTruckee town\t43\tA\t1\t0\t1\t0\t39.33\t-120.18\n"])
+        est = ("SUMLEV,STATE,COUNTY,PLACE,NAME,POPESTIMATE2024\n"
+               "162,06,000,67000,San Francisco city,827526\n"
+               "162,06,000,80000,Truckee town,17240\n"
+               "162,06,000,99999,Newtown city,40\n").encode("latin-1")
+        mainland = [(-122.52, 37.70), (-122.36, 37.70), (-122.36, 37.81), (-122.52, 37.81)]
+        island = [(-123.04, 37.71), (-123.02, 37.71), (-123.02, 37.73), (-123.04, 37.73)]
+        truckee = [(-120.25, 39.30), (-120.10, 39.30), (-120.10, 39.38), (-120.25, 39.38)]
+        shapes = {"0667000": [mainland, island], "0680000": [truckee]}
+        payload = F.build_places(gaz, est, lambda fips: shapes)
+        sf = payload["places"]["CA"][0]
+        self.assertEqual(sf[0], "San Francisco")
+        self.assertTrue(-122.52 < sf[1] < -122.36 and 37.70 < sf[2] < 37.81, sf)
+        self.assertEqual([m[1] for m in payload["moved"]], ["San Francisco"])
+        self.assertEqual(payload["places"]["CA"][1], ["Truckee", -120.18, 39.33, 17240])
+        self.assertEqual(payload["unlocated"], ["Newtown city, CA"])
 
-    def test_a_place_with_no_point_is_refused(self):
-        import fetch_ca_places
-        with self.assertRaises(SystemExit):
-            fetch_ca_places.build(*self.files("162,06,000,99999,Nowhere city,5\n"))
+    def test_legal_forms_are_not_labels(self):
+        import fetch_district_maps as F
 
-    def test_the_committed_file_was_checked_against_usgs(self):
-        with open(os.path.join(ROOT, "ca_places.json"), encoding="utf-8") as f:
+        self.assertEqual(F._short_name("Truckee town"), "Truckee")
+        self.assertEqual(F._short_name("Nashville-Davidson metropolitan government (balance)"),
+                         "Nashville-Davidson")
+        self.assertEqual(F._short_name("Juneau city and borough"), "Juneau")
+
+    def test_the_committed_places_were_checked_against_their_boundaries(self):
+        with open(os.path.join(ROOT, districts.PLACES_FILE), encoding="utf-8") as f:
             payload = json.load(f)
-        self.assertEqual(payload["unchecked"], [])
-        self.assertEqual([m[0] for m in payload["moved"]], ["San Francisco"])
+        self.assertIn("San Francisco", [m[1] for m in payload["moved"]])
+        self.assertEqual(len(payload["places"]), 51)          # 50 states and D.C.
+
+
+class TestTopology(unittest.TestCase):
+    """The tool simplifies shared boundaries once, so neighbours still touch."""
+
+    def test_neighbours_share_their_simplified_boundary(self):
+        import fetch_district_maps as F
+
+        wiggle = [(-120.5 + 0.0001 * (i % 2), 38.0 + i * 0.005) for i in range(101)]
+        left = [(-121.0, 38.0)] + wiggle + [(-121.0, 38.5)]
+        right = [wiggle[0], (-120.0, 38.0), (-120.0, 38.5)] + list(reversed(wiggle))[:-1]
+        topo = F.Topology(38.25)
+        topo.add("p", [({"d": 1}, [left]), ({"d": 2}, [right])], tolerance=250.0)
+        shared = [a for a in topo.arcs if len(a) > 2]
+        self.assertTrue(shared, "the wiggly boundary should be one shared arc")
+        rings = [topo.ring(ids) for _, arcs in topo.objects["p"] for ids in arcs]
+        self.assertTrue(set(rings[0]) & set(rings[1]))
 
 
 if __name__ == "__main__":

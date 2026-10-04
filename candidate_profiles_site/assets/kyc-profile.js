@@ -391,23 +391,26 @@
     target.innerHTML = redrawnNote(item, race) + html;
   }
 
-  /* A House race in a state whose map was redrawn for 2026: a link to the
-   * district on both maps - and, for a member running in a different
-   * district, to the one they hold as well. */
+  /* A House race: a link to the district on its state's map - and where the
+   * map was redrawn for 2026, on both maps, with the district a member holds
+   * when they are running in another one. */
   function redrawnNote(item, race) {
-    var plan = (KYC.meta().redistricting || {})[race.state];
-    if (!plan || race.chamber !== "House" || !race.district) return "";
-    var seats = [race.district];
-    if (KYC.runsElsewhere(item) && item.state === race.state && item.districtNum &&
-        item.districtNum !== race.district) {
+    var plan = (KYC.meta().districtMaps || {})[race.state];
+    if (!plan || race.chamber !== "House") return "";
+    var label = function (n) { return race.state + "-" + (n ? n : "AL"); };
+    var seats = [race.district || 0];
+    if (plan.redrawn && KYC.runsElsewhere(item) && item.state === race.state &&
+        item.districtNum && item.districtNum !== race.district) {
       seats.unshift(item.districtNum);
     }
-    var label = seats.map(function (n) { return race.state + "-" + n; }).join(" and ");
     var link = KYC.siteRoot() + plan.page + "#/?d=" +
       seats.slice().sort(function (a, b) { return a - b; }).join(",");
+    var words = plan.redrawn
+      ? plan.name + " redrew its House districts for 2026: " +
+        seats.map(label).join(" and ") + " before and after"
+      : label(seats[0]) + " on the district map";
     return '<p class="race-note race-redrawn">' + KYC.icon("layers") + ' <a href="' +
-      KYC.escapeAttr(link) + '">' + KYC.escapeHtml(plan.name) + " redrew its House " +
-      "districts for 2026: " + KYC.escapeHtml(label) + " before and after &rsaquo;</a></p>";
+      KYC.escapeAttr(link) + '">' + KYC.escapeHtml(words) + " &rsaquo;</a></p>";
   }
 
   /* Nobody else in this race has a profile. That used to read "Nobody else

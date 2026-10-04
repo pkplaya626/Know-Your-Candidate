@@ -329,11 +329,14 @@ class TestStatePages(unittest.TestCase):
             with open(os.path.join(tmp, emit.CNAME_FILE), "w", encoding="utf-8") as f:
                 f.write("example.org\n")
             written = emit.write_state_pages(people, tmp, summary={"states": {}})
-            self.assertEqual(
-                sorted(os.path.relpath(w, os.path.join(tmp, emit.SITE_DIR)).replace(os.sep, "/")
-                       for w in written),
-                ["redistricting/ca.html", "states/ak.html", "states/index.html",
-                 "states/tx.html"])
+            relative = sorted(
+                os.path.relpath(w, os.path.join(tmp, emit.SITE_DIR)).replace(os.sep, "/")
+                for w in written)
+            self.assertEqual([r for r in relative if not r.startswith("districts/")],
+                             ["redistricting/ca.html", "states/ak.html", "states/index.html",
+                              "states/tx.html"])
+            # A district map for every state and territory, whatever the roster.
+            self.assertEqual(len([r for r in relative if r.startswith("districts/")]), 56)
             self.assertEqual(emit.check_state_pages(people, tmp, summary={"states": {}}), [])
             with open(os.path.join(tmp, emit.STATES_DIR, "tx.html"), "a", encoding="utf-8") as f:
                 f.write("<!-- edited by hand -->")
@@ -351,17 +354,38 @@ class TestStatePages(unittest.TestCase):
         for page in state_pages:
             self.assertTrue(results[page][0], f"{page}: {results[page][1]}")
 
-    def test_the_redistricting_page_loads_the_maps_after_the_people(self):
+    def test_a_district_page_loads_its_own_map_after_the_people(self):
         from kyc import pages
-        html = pages.render_redistricting("CA", "example.org")
-        self.assertIn('rel="canonical" href="https://example.org/redistricting/ca.html"', html)
-        self.assertIn('data-page="redistricting"', html)
+        html = pages.render_district_page("CA", "example.org")
+        self.assertIn('rel="canonical" href="https://example.org/districts/ca.html"', html)
+        self.assertIn('data-page="districts"', html)
         self.assertIn('data-state="CA"', html)
         self.assertIn("Proposition 50", html)
         self.assertNotIn("$", html.replace("$5,000", ""))   # every placeholder filled
-        self.assertEqual(emit.script_sources(html), list(emit.REDISTRICTING_PAGE_REQUIREMENTS))
+        self.assertEqual(emit.script_sources(html), [
+            s.replace("{code}", "ca") for s in emit.DISTRICT_PAGE_REQUIREMENTS])
         results = {p: (ok, note) for p, ok, note in emit.check_pages(ROOT)}
-        self.assertEqual(results["redistricting/ca.html"], (True, "ok"))
+        district_pages = [p for p in results if p.startswith("districts/")]
+        self.assertEqual(len(district_pages), 56)
+        self.assertTrue(all(results[p] == (True, "ok") for p in district_pages))
+
+    def test_a_district_page_says_only_what_its_seats_are(self):
+        from kyc import pages
+        self.assertIn("elects 4 members of the House",
+                      pages.district_page_text("IA", 4)[1])
+        self.assertIn("at large", pages.district_page_text("AK", 1)[1])
+        self.assertIn("non-voting delegate", pages.district_page_text("GU", 1)[1])
+        self.assertIn("not on the ballot in 2026", pages.district_page_text("PR", 1)[1])
+        self.assertIn("referendum", pages.district_page_text("MO", 8)[1])
+        self.assertEqual(pages.district_page_text("MP", 1)[0],
+                         "Northern Mariana Islands' seat in the House")
+
+    def test_the_first_page_address_still_answers(self):
+        from kyc import pages
+        html = pages.render_redirect("../districts/ca.html", "example.org")
+        self.assertIn('content="0; url=../districts/ca.html"', html)
+        self.assertIn('rel="canonical" href="https://example.org/districts/ca.html"', html)
+        self.assertIn('content="noindex"', html)
 
     def test_a_state_page_is_byte_for_byte_what_it_was(self):
         # The template grew parameters for the redistricting page; the state
@@ -372,11 +396,12 @@ class TestStatePages(unittest.TestCase):
         self.assertEqual(emit.script_sources(html), list(emit.STATE_PAGE_REQUIREMENTS))
         self.assertIn("and Wikipedia.</p>\n                <p><strong>Who counts", html)
 
-    def test_the_sitemap_lists_the_redistricting_pages_last(self):
+    def test_the_sitemap_lists_the_district_maps_last(self):
         from kyc import pages
-        xml = pages.sitemap("example.org", ["TX"], redistricting=["CA"])
+        xml = pages.sitemap("example.org", ["TX"], district_maps=["CA", "TX"])
         locs = [line.strip() for line in xml.splitlines() if "<loc>" in line]
-        self.assertEqual(locs[-1], "<loc>https://example.org/redistricting/ca.html</loc>")
+        self.assertEqual(locs[-2:], ["<loc>https://example.org/districts/ca.html</loc>",
+                                     "<loc>https://example.org/districts/tx.html</loc>"])
 
     def test_per_state_summary_counts_the_delegation(self):
         people = [

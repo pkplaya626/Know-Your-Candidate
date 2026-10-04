@@ -22,8 +22,7 @@ if a page loads a remote script, stylesheet or font.
 ```text
 *.csv (repo root)           ──┐
 us_atlas_states_topo.json   ──┤
-ca_districts_topo.json      ──┤   (both California House maps, fixed until 2030)
-ca_places.json              ──┤   (towns for the close-ups; tools/fetch_ca_places.py)
+district_maps/*.json        ──┤   (every state's districts; tools/fetch_district_maps.py)
 congress_snapshot.json      ──┤
 data/fec_field.json         ──┤   (the FEC's 2026 candidate register)
 data/disclosures.json       ──┤
@@ -35,9 +34,9 @@ data/odds.json              ──┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
                                              data/odds.js       (market prices, polling averages)
-                                             data/districts.js  (before-and-after district maps)
+                                             data/districts/*.js (one district map per state)
                                              states/*.html      (generated, one per state)
-                                             redistricting/*.html (generated, one per redrawn map)
+                                             districts/*.html   (generated, one per state)
                                              sitemap.xml        (generated)
                                              ├──> index.html    (grid, races, profiles)
                                              └──> map.html      (partisan map)
@@ -55,17 +54,16 @@ data/odds.json              ──┴─> kyc/ ──> candidate_profiles_site/
 
 - The root CSVs are the editorial source of truth. The state atlas and
   `congress_snapshot.json` are vendored inputs: refreshed by a command, never
-  hand-edited. So are `ca_districts_topo.json` (no refresh command: the lines
-  are fixed by law until the 2030 census) and `ca_places.json`
-  (`tools/fetch_ca_places.py`).
+  hand-edited. So is `district_maps/`, written by `tools/fetch_district_maps.py`
+  from Census boundaries and each redrawn state's own enacted-plan file.
 - Everything in `data/` is **generated**. Never edit `profiles.js`, `geo.js`,
-  `odds.js` or `districts.js` by hand. `portraits.json`, `finance.json`, `fec_field.json`,
+  `odds.js` or `districts/*.js` by hand. `portraits.json`, `finance.json`, `fec_field.json`,
   `disclosures.json`, `primary_results.json`, `committees.json`,
   `campaigns.json`, `enrichment.json` and `odds.json` are caches, but they
   *are* hand-editable.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them only to check they load the right scripts in the right order; it never
-  rewrites them. `states/*.html`, `redistricting/*.html` and `sitemap.xml`
+  rewrites them. `states/*.html`, `districts/*.html` and `sitemap.xml`
   are the opposite: generated from `kyc/pages.py` on every build, never
   edited by hand, and `verify` fails when one on disk is not what the
   template would write.
@@ -88,8 +86,8 @@ python build_profile_site.py results          # who is still in, from Wikipedia
 python build_profile_site.py campaigns        # campaign websites from FEC committees
 python build_profile_site.py enrich           # fill gaps; check every campaign site
 python build_profile_site.py odds             # market prices and polling averages (writes odds.js)
-python -m unittest discover tests             # 648 tests, no dependencies
-npm install && npm test                       # 609 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 662 tests, no dependencies
+npm install && npm test                       # 631 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -421,6 +419,17 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     project's old image host,
     theunitedstates.io, lapsed into a parking network; nothing links it now
     (rule 35).
+
+## District maps
+
+`kyc/districts.REDRAWN` lists the states whose 2026 House map differs from
+2024's. It is an editorial judgement checked against primary sources, not
+something the data can show: Missouri passed a map and is not on it, because
+a referendum petition suspended the map and the courts kept the old one.
+Before adding a state, confirm the enacting record and that the plan is in
+effect, and point `shapefile` at the state's own file. `tools/fetch_district_maps.py`
+refuses a projection it cannot undo, and a file with any point outside the
+state.
 
 ## Curated data
 

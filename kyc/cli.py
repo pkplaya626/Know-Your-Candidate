@@ -189,8 +189,9 @@ def _build(args):
         print(f"    {stats['geo_states']} state shapes | "
               f"{stats['geo_territories']} territories")
     if district_maps:
-        print(f"    before-and-after district maps for "
-              f"{', '.join(sorted(district_maps))}")
+        redrawn = sorted(c for c, s in district_maps.items() if len(s["plans"]) == 2)
+        print(f"    {len(district_maps)} district maps; redrawn for 2026: "
+              f"{', '.join(redrawn)}")
 
     issues = validate.run(profiles, raw, races=race_list, geo=geo,
                           snapshot=snapshot, finance=finance, campaigns=sites,
@@ -226,8 +227,9 @@ def _build(args):
         geo_path, geo_size = emit.write_geo(geo, args.root)
         print(f"[ok] wrote {geo_path} ({geo_size / 1024:.0f} KB)")
     if district_maps:
-        maps_path, maps_size = emit.write_districts(district_maps, args.root)
-        print(f"[ok] wrote {maps_path} ({maps_size / 1024:.0f} KB)")
+        files = emit.write_districts(district_maps, args.root)
+        print(f"[ok] wrote {len(files)} district maps under {emit.DISTRICTS_DIR} "
+              f"({sum(size for _, size in files) / 1024:.0f} KB)")
 
     # Rewritten only when the prices changed, so a roster rebuild leaves the
     # odds refresh's file alone.
@@ -238,16 +240,18 @@ def _build(args):
         print(f"[ok] wrote {odds_path} ({odds_size / 1024:.0f} KB)")
 
     written = emit.write_state_pages(profiles, args.root, summary=summary)
-    maps = [w for w in written if os.path.normpath(emit.REDISTRICTING_DIR) in os.path.normpath(w)]
-    print(f"[ok] wrote {len(written) - len(maps)} state pages under {emit.STATES_DIR} and "
-          f"{len(maps)} under {emit.REDISTRICTING_DIR}")
+    maps = [w for w in written
+            if os.path.normpath(emit.DISTRICT_PAGES_DIR) in os.path.normpath(w)]
+    states = [w for w in written if os.path.normpath(emit.STATES_DIR) in os.path.normpath(w)]
+    print(f"[ok] wrote {len(states)} state pages under {emit.STATES_DIR} and "
+          f"{len(maps)} district pages under {emit.DISTRICT_PAGES_DIR}")
     sitemap_path = emit.write_sitemap(profiles, args.root)
     if sitemap_path:
         print(f"[ok] wrote {sitemap_path}")
 
     for page, ok, note in emit.check_pages(args.root):
-        if ok and page.startswith("states/"):
-            continue                    # 57 identical "ok" lines say nothing
+        if ok and page.startswith(("states/", "districts/")):
+            continue                    # 113 identical "ok" lines say nothing
         print(f"     {'ok  ' if ok else 'WARN'} {page}: {note}")
 
     return 0
@@ -857,16 +861,14 @@ def _verify(args):
     except districts_mod.DistrictsError as exc:
         problems.append(f"district maps unavailable: {exc}")
     else:
-        maps_expected = emit.districts_signature(district_maps)
-        maps_committed = emit.read_signature(
-            path=os.path.join(args.root, emit.DISTRICTS_FILE))
-        if maps_committed is None:
-            problems.append(f"{emit.DISTRICTS_FILE} is missing or carries no signature")
-        elif maps_committed != maps_expected:
-            problems.append(f"{emit.DISTRICTS_FILE} is stale")
+        stale_maps = emit.check_districts(district_maps, args.root)
+        if stale_maps:
+            problems.append(f"{len(stale_maps)} district map file(s) are "
+                            f"{stale_maps[0][1]}: " + ", ".join(
+                                os.path.basename(p) for p, _ in stale_maps[:5]))
         else:
-            print(f"  ok  {emit.DISTRICTS_FILE} matches the district maps "
-                  f"({maps_expected[:16]}...)")
+            print(f"  ok  {emit.DISTRICTS_DIR}: {len(district_maps)} maps match "
+                  f"{districts_mod.MAPS_DIR}")
 
     for page, ok, note in emit.check_pages(args.root):
         if ok:
@@ -914,9 +916,9 @@ def _geo(args):
     except districts_mod.DistrictsError as exc:
         print(f"[error] {exc}", file=sys.stderr)
         return 2
-    path, size = emit.write_districts(district_maps, args.root)
-    print(f"[ok] wrote {path} ({size / 1024:.0f} KB) "
-          f"- before-and-after district maps for {', '.join(sorted(district_maps))}")
+    files = emit.write_districts(district_maps, args.root)
+    print(f"[ok] wrote {len(files)} district maps under {emit.DISTRICTS_DIR} "
+          f"({sum(size for _, size in files) / 1024:.0f} KB)")
     return 0
 
 
@@ -974,8 +976,8 @@ def build_parser():
     _add_build_flags(add("build", help="generate candidate_profiles_site/data/*.js"))
 
     add("fetch", help="refresh DW-NOMINATE scores from Voteview")
-    add("geo", help="regenerate the map geometry: the state atlas and the "
-                    "before-and-after district maps")
+    add("geo", help="regenerate the map geometry: the state atlas and every "
+                    "state's district maps")
     add("verify", help="check the committed data still matches the sources")
 
     disc = add("disclosures", help="link members to their filed financial disclosures")

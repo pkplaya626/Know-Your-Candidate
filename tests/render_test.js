@@ -1766,7 +1766,7 @@ async function testOdds() {
  * here is derived from the same records rather than typed in: a name in a
  * test is a name that goes stale the next time someone moves. */
 async function testRedistricting() {
-  const page = "redistricting/ca.html";
+  const page = "districts/ca.html";
   const { window, D, KYC } = await testShared(page);
   const maps = window.kycDistricts && window.kycDistricts.CA;
   const people = window.legislatorsData;
@@ -1901,7 +1901,7 @@ async function testRedistricting() {
   });
 
   const mover = movers[0];
-  const expectLink = "redistricting/ca.html#/?d=" +
+  const expectLink = "districts/ca.html#/?d=" +
     [mover.districtNum, contestOf(mover)].sort((a, b) => a - b).join(",");
   const direct = await buildPage(page, { hash: "#/profile/" + encodeURIComponent(mover.id) });
   suite(`${page} — a profile link opens over the maps`, () => {
@@ -1919,23 +1919,103 @@ async function testRedistricting() {
     check("a member running in a redrawn district gets a link to both districts",
       !!note && note.getAttribute("href") === expectLink, note && note.getAttribute("href"));
     grid.window.KYC.profile.close();
-    const texan = people.find((p) => !p.isCandidate && p.state === "TX" && /House/.test(p.chamber) &&
-      races.some((r) => r.id === (p.contestRaceId || p.raceId)));
-    grid.window.KYC.profile.open(texan.id);
-    check("a race in a state with no redrawn map gets no such link",
-      !grid.D.querySelector("#profileModalRace .race-redrawn"), texan.name);
+    const iowan = people.find((p) => !p.isCandidate && p.state === "IA" && /House/.test(p.chamber) &&
+      !p.contestRaceId && races.some((r) => r.id === p.raceId));
+    grid.window.KYC.profile.open(iowan.id);
+    const plain = grid.D.querySelector("#profileModalRace .race-redrawn a");
+    check("a race in a state whose map did not change links to its one map",
+      !!plain && plain.getAttribute("href") === "districts/ia.html#/?d=" + iowan.districtNum &&
+        /on the district map/.test(plain.textContent) && !/redrew/.test(plain.textContent),
+      plain && plain.textContent);
     grid.window.KYC.profile.close();
   });
 
   const ca = await buildPage("states/ca.html");
-  const tx = await buildPage("states/tx.html");
+  const ia = await buildPage("states/ia.html");
   suite("state pages — the link to the maps", () => {
-    const href = (d) => [...d.querySelectorAll(".state-links a")].map((a) => a.getAttribute("href"));
+    const link = (d) => [...d.querySelectorAll(".state-links a")]
+      .find((a) => /districts\//.test(a.getAttribute("href")));
     check("California's page links to its old and new lines",
-      href(ca.D).indexOf("../redistricting/ca.html") !== -1, href(ca.D).join(" "));
-    check("Texas's page does not", !href(tx.D).some((h) => /redistricting/.test(h)));
+      link(ca.D) && link(ca.D).getAttribute("href") === "../districts/ca.html" &&
+        /Old and new/.test(link(ca.D).textContent));
+    check("Iowa's page links to its district map",
+      link(ia.D) && link(ia.D).getAttribute("href") === "../districts/ia.html" &&
+        /District map/.test(link(ia.D).textContent));
     const sitemap = fs.readFileSync(path.join(SITE, "sitemap.xml"), "utf8");
-    check("the sitemap lists the page", sitemap.includes("/redistricting/ca.html"));
+    check("the sitemap lists every district page",
+      fs.readdirSync(path.join(SITE, "districts")).every((f) => sitemap.includes("/districts/" + f)));
+  });
+}
+
+/* Every other shape of district page: one map, a single seat, a seat with no
+ * race this year, a redrawn map clipped to the land, and the old address. */
+async function testDistrictPages() {
+  const files = fs.readdirSync(path.join(SITE, "districts")).filter((f) => f.endsWith(".html"));
+  suite("districts/ — one page per state and territory", () => {
+    check("56 pages", files.length === 56, `${files.length}`);
+    const unwired = files.filter((f) => {
+      const raw = fs.readFileSync(path.join(SITE, "districts", f), "utf8");
+      return raw.indexOf('src="../data/districts/' + f.replace(".html", ".js") + '"') === -1;
+    });
+    check("each loads its own state's map and no other", unwired.length === 0, unwired.join(", "));
+  });
+
+  const ia = await buildPage("districts/ia.html");
+  suite("districts/ia.html — a map that did not change", () => {
+    const D = ia.D;
+    check("no page errors", ia.errors.length === 0, ia.errors.join(" | "));
+    check("one map", D.querySelectorAll(".plan-card").length === 1);
+    check("no moves to pick from", !D.querySelector(".mover-group"));
+    check("no dashed other-map lines to toggle", !D.getElementById("ghostToggle"));
+    check("nothing is picked until the reader picks", !D.querySelector(".district-closeup"));
+    const pick = D.getElementById("districtPick");
+    pick.value = "2";
+    pick.dispatchEvent(new ia.window.Event("change", { bubbles: true }));
+    check("picking a district shows its close-up", !!D.querySelector(".district-closeup") &&
+      ia.window.location.hash === "#/?d=2", ia.window.location.hash);
+    const holder = ia.window.legislatorsData.find((p) => !p.isCandidate && p.state === "IA" &&
+      p.districtNum === 2);
+    check("and its people, from the data",
+      !!D.querySelector('.district-fact .card[data-id="' + holder.id + '"]'), holder.name);
+  });
+
+  const ak = await buildPage("districts/ak.html");
+  suite("districts/ak.html — a seat elected at large", () => {
+    const D = ak.D;
+    check("no page errors", ak.errors.length === 0, ak.errors.join(" | "));
+    check("the one seat is shown without a pick", !!D.querySelector(".district-fact"));
+    check("its number reads AL", [...D.querySelectorAll(".district-num")]
+      .some((t) => t.textContent === "AL"));
+    check("no close-up of the whole state", !D.querySelector(".district-closeup"));
+  });
+
+  const pr = await buildPage("districts/pr.html");
+  suite("districts/pr.html — a seat with no race in 2026", () => {
+    check("no page errors", pr.errors.length === 0, pr.errors.join(" | "));
+    check("it says there is no race, not that nobody is running",
+      /No race for this seat in 2026/.test(pr.D.getElementById("districtsApp").textContent));
+  });
+
+  const tx = await buildPage("districts/tx.html");
+  suite("districts/tx.html — a redrawn map, clipped to the land", () => {
+    const D = tx.D;
+    check("no page errors", tx.errors.length === 0, tx.errors.join(" | "));
+    const clip = D.querySelector(".district-defs clipPath#kycd-land");
+    check("the land is the old map's districts",
+      !!clip && clip.querySelectorAll("use").length === tx.window.kycDistricts.TX.seats);
+    const cards = D.querySelectorAll(".plan-card");
+    check("the new map's shapes are drawn inside the clip",
+      !!cards[1].querySelector('.district-statewide g[clip-path="url(#kycd-land)"] use.district-shape'));
+    check("the old map's are not",
+      !cards[0].querySelector('.district-statewide g[clip-path] use.district-shape'));
+    check("each map's sources are listed",
+      /Census Bureau/.test(D.querySelector(".districts-sources").textContent));
+  });
+
+  suite("redistricting/ca.html — the first page's address still answers", () => {
+    const raw = fs.readFileSync(path.join(SITE, "redistricting", "ca.html"), "utf8");
+    check("it sends readers to the new page", /url=\.\.\/districts\/ca\.html/.test(raw));
+    check("and tells search engines not to index it", /noindex/.test(raw));
   });
 }
 
@@ -1948,6 +2028,7 @@ async function testRedistricting() {
   if (!only || only === "map.html") await testMap();
   if (!only || only === "states") await testStates();
   if (!only || only === "redistricting") await testRedistricting();
+  if (!only || only === "redistricting") await testDistrictPages();
   if (!only || only === "links") await testDeepLinks();
   if (!only || only === "links") await testFoldedIds();
   if (!only || only === "links") await testRunningElsewhere();

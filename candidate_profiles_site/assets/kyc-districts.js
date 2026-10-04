@@ -1,16 +1,19 @@
-/* Know Your Candidate - a state's House map before and after a redistricting.
+/* Know Your Candidate - a state's House districts, and where the map was
+ * redrawn for 2026, the map it replaced.
  *
  * The lines come from window.kycDistricts: SVG paths projected at build time
  * by kyc/districts.py, which also measured how much of each new district's
- * area came from each old one. Everything said about a person - who holds a
+ * land came from each old one. Everything said about a person - who holds a
  * seat, who is running where, who is on the November ballot - comes from
  * profiles.js, the same records the grid and the state pages render, so this
  * page cannot disagree with them about anyone.
  *
  * Each district is drawn once, into one hidden <defs>, and every view - the
- * statewide map, the metro insets, the close-up - is a set of <use>
- * references to it. Fills are set on the <use>, which the shared path
- * inherits, so a district can be highlighted in one view and not another.
+ * statewide map, the insets, the close-up - is a set of <use> references to
+ * it. Fills are set on the <use>, which the shared path inherits, so a
+ * district can be highlighted in one view and not another. A new map's
+ * districts run out over water; they are clipped to the old map's land,
+ * which stops at the shore.
  *
  * Which districts are picked out lives in the address (#/?d=3,6), so every
  * view can be shared.
@@ -43,20 +46,37 @@
     return doc.getElementById(id);
   }
 
+  /* "TX-9", and "AK-AL" for a seat elected at large - the site's own label. */
   function seat(n) {
-    return code + "-" + n;
+    return code + "-" + (n === 0 ? "AL" : n);
+  }
+
+  function numLabel(n) {
+    return n === 0 ? "AL" : String(n);
   }
 
   function numbers(plan) {
     return Object.keys(plan.districts).map(Number).sort(function (a, b) { return a - b; });
   }
 
+  function redrawn() {
+    return state.plans.length === 2;
+  }
+
+  /** The map for 2026: the new one where there is one. */
   function newPlan() {
     return state.plans[state.plans.length - 1];
   }
 
   function otherPlan(plan) {
+    if (!redrawn()) return null;
     return state.plans[0] === plan ? state.plans[1] : state.plans[0];
+  }
+
+  /** The new map is drawn clipped to the old map's land. */
+  function clipped(plan, markup) {
+    return redrawn() && plan === newPlan()
+      ? '<g clip-path="url(#kycd-land)">' + markup + "</g>" : markup;
   }
 
   function pct(share) {
@@ -309,7 +329,7 @@
         if (district.area * px * px < 380) return "";
       }
       return text("district-num" + focusClass(n), district.at[0], district.at[1],
-                  (picked ? 15 : 11) / px, String(n));
+                  (picked ? 15 : 11) / px, numLabel(n));
     }).join("");
     var lines = insets.map(function (b) {
       return '<rect class="inset-outline" x="' + b[0] + '" y="' + b[1] + '" width="' + b[2] +
@@ -317,17 +337,19 @@
     }).join("");
     return svg(frame, "district-statewide",
       "All " + state.seats + " districts on the " + plan.title,
-      '<g class="district-shapes">' + shapes(plan, frame) + "</g>" +
+      '<g class="district-shapes">' + clipped(plan, shapes(plan, frame)) + "</g>" +
       '<use href="#kycd-outline" class="state-line"/>' + lines +
       '<g class="district-labels" aria-hidden="true">' + labels + "</g>");
   }
 
+  /* Each inset is drawn at the width the build chose - enough to keep its
+   * closest two numbers apart - and they wrap: squeezed into one row, the
+   * Los Angeles inset was too small to number every district in it. */
   function insets(plan) {
-    var total = state.insets.reduce(function (sum, i) { return sum + i.box[2] / i.box[3]; }, 0);
     return '<div class="inset-row">' + state.insets.map(function (inset) {
       var frame = inset.box;
-      var aspect = frame[2] / frame[3];
-      var px = (DESIGN - 24) * (aspect / total) / frame[2];
+      var width = Math.min(DESIGN, inset.width || DESIGN);
+      var px = width / frame[2];
       var placed = [];
       var labels = numbers(plan).filter(function (n) {
         return meets(plan.districts[n].box, frame);
@@ -337,14 +359,14 @@
         var at = labelAt(plan, n, frame, 9 / px);
         if (!at || at[2] * px < 7) return "";
         var size = (focus.indexOf(n) !== -1 ? 12 : 10) / px;
-        var box = textBox(at[0], at[1], String(n), size, "middle");
+        var box = textBox(at[0], at[1], numLabel(n), size, "middle");
         if (collides(box, placed)) return "";
         placed.push(box);
-        return text("district-num" + focusClass(n), at[0], at[1], size, String(n));
+        return text("district-num" + focusClass(n), at[0], at[1], size, numLabel(n));
       }).join("");
-      return '<figure class="inset" style="flex-grow:' + aspect.toFixed(3) + '">' +
+      return '<figure class="inset" style="width:' + Math.round(width) + 'px">' +
         svg(frame, "district-inset", inset.title + " on the " + plan.title,
-          '<g class="district-shapes">' + shapes(plan, frame) + "</g>" +
+          '<g class="district-shapes">' + clipped(plan, shapes(plan, frame)) + "</g>" +
           '<use href="#kycd-outline" class="state-line"/>' +
           '<g class="district-labels" aria-hidden="true">' + labels + "</g>") +
         "<figcaption>" + KYC.escapeHtml(inset.title) + "</figcaption></figure>";
@@ -374,7 +396,7 @@
   /** Names for the picked districts on the close-up: who held the seat,
    *  or which members are running in it now. */
   function caption(plan, n) {
-    var people = plan === newPlan()
+    var people = redrawn() && plan === newPlan()
       ? running(n).filter(function (p) { return !p.isCandidate; })
       : holdersOf[n] || [];
     return people.map(function (p) { return p.name; }).join(" · ");
@@ -401,10 +423,10 @@
       var at = labelAt(plan, n, frame, 20 / px);
       if (!at || (!picked && at[2] * px < 16)) return;
       var size = (picked ? 30 : 17) / px;
-      var box = textBox(at[0], at[1], String(n), size, "middle");
+      var box = textBox(at[0], at[1], numLabel(n), size, "middle");
       if (!picked && collides(box, placed)) return;
       placed.push(box);
-      marks.push(text("district-num" + focusClass(n), at[0], at[1], size, String(n)));
+      marks.push(text("district-num" + focusClass(n), at[0], at[1], size, numLabel(n)));
       spots[n] = [at[0], at[1], size];
     }
 
@@ -415,7 +437,7 @@
       var words = spot && caption(plan, n);
       if (!words) return;
       var name = 12.5 / px, role = 10.5 / px;
-      var what = plan === newPlan() ? "running here in " + year : "holds this seat";
+      var what = redrawn() && plan === newPlan() ? "running here in " + year : "holds this seat";
       var half = spot[2] * 0.95, aside = spot[2] * 0.45 + 6 / px;
       // [x, y of the name line, y of the role line, anchor]
       var options = [
@@ -498,7 +520,9 @@
 
     state.counties.names.forEach(function (county) {
       if (county[3] * px * px < 9000 || !within([county[1], county[2]], frame, 0)) return;
-      var words = county[0].toUpperCase() + " CO.";
+      // The Census name says what kind of county it is: "Orleans Parish",
+      // "Juneau City and Borough", "Richmond city".
+      var words = county[0].replace(/ County$/, " Co.").toUpperCase();
       var size = 9.5 / px;
       var box = textBox(county[1], county[2], words, size, "middle");
       if (!fits(box, frame) || collides(box, placed)) return;
@@ -506,15 +530,15 @@
       marks.unshift(text("county-name", county[1], county[2], size, words));
     });
 
-    var ghosts = focus.map(function (n) {
+    var ghosts = other ? clipped(other, focus.map(function (n) {
       return '<use href="#' + pathId(other, n) + '" class="district-ghost-halo"/>' +
         '<use href="#' + pathId(other, n) + '" class="district-ghost focus-' +
         (focus.indexOf(n) + 1) + '"/>';
-    }).join("");
+    }).join("")) : "";
 
     return svg(frame, "district-closeup",
       "Close-up of " + focus.map(seat).join(", ") + " on the " + plan.title,
-      '<g class="district-shapes">' + shapes(plan, frame) + "</g>" +
+      '<g class="district-shapes">' + clipped(plan, shapes(plan, frame)) + "</g>" +
       '<use href="#kycd-counties" class="county-line"/>' +
       '<use href="#kycd-outline" class="state-line"/>' +
       '<g class="district-ghosts">' + ghosts + "</g>" +
@@ -585,26 +609,69 @@
       "</section>";
   }
 
+  /** One map, one district: who holds it and who is on the ballot - the
+   *  holder once, when they are running for it again. */
+  function factOnly(plan, n) {
+    var race = raceOf[n];
+    var people = running(n);
+    var held = (holdersOf[n] || []).filter(function (p) { return people.indexOf(p) === -1; });
+    var res = race && race.results;
+    var unfiled = res && res.otherNominees && res.otherNominees.length ? res.otherNominees : [];
+    var who = race && race.settled ? "On the November ballot" : "Running in 2026";
+    return '<section class="district-fact' + focusClass(n) + '">' +
+      '<h4 class="district-fact-title"><span class="focus-swatch"></span>' +
+      KYC.escapeHtml(seat(n)) + "</h4>" +
+      (held.length
+        ? '<p class="district-fact-label">Seat held by</p><div class="card-grid">' +
+          held.map(KYC.cards.card).join("") + "</div>"
+        : "") +
+      (!race
+        ? '<p class="state-note">No race for this seat in 2026.</p>'
+        : people.length
+          ? '<p class="district-fact-label">' + who + '</p><div class="card-grid">' +
+            people.map(KYC.cards.card).join("") + "</div>"
+          : '<p class="district-fact-label">' + who + ": nobody with a profile here</p>") +
+      (unfiled.length
+        ? '<p class="state-note">Also on the ballot, per the published results, with no FEC ' +
+          "filing over $5,000: " + KYC.escapeHtml(unfiled.join(", ")) + ".</p>"
+        : "") +
+      (race
+        ? '<p class="district-flow"><a class="race-state-link" href="' +
+          KYC.escapeAttr(KYC.stateUrl(code) + "#race-" + race.id) + '">The ' +
+          KYC.escapeHtml(seat(n)) + " race on the " + KYC.escapeHtml(KYC.stateName(code)) +
+          " page &rsaquo;</a></p>"
+        : "") +
+      "</section>";
+  }
+
   /* -------------------------------------------------------------- render */
 
   function planCard(plan, index) {
-    var old = index === 0;
     var head = [
       '<header class="plan-head">',
       '<p class="state-kicker">', KYC.escapeHtml(plan.label), "</p>",
       '<h2 class="plan-title">', KYC.escapeHtml(plan.title), "</h2>",
-      '<p class="plan-used">Drawn by ', KYC.escapeHtml(plan.drawnBy), "; used for ",
+      '<p class="plan-used">',
+      plan.drawnBy ? "Drawn by " + KYC.escapeHtml(plan.drawnBy) + "; used for "
+        : "Used for ",
       KYC.escapeHtml(plan.used), ".</p>",
       "</header>",
     ].join("");
-    var body = '<h3 class="plan-panel-title">Statewide</h3>' + statewide(plan) +
-      '<h3 class="plan-panel-title">Dense metro areas</h3>' + insets(plan);
+    // An at-large seat is the whole state: the statewide map is its close-up.
+    var whole = state.atLarge;
+    var body = '<h3 class="plan-panel-title">' + (whole ? "The district" : "Statewide") +
+      "</h3>" + statewide(plan) +
+      (state.insets.length
+        ? '<h3 class="plan-panel-title">Where districts are small</h3>' + insets(plan) : "");
     if (focus.length) {
-      body += '<h3 class="plan-panel-title">Close-up: ' +
-        KYC.escapeHtml(focus.map(seat).join(", ")) + "</h3>" + closeup(plan) +
-        '<div class="district-facts">' + focus.map(function (n) {
-          return old ? factOld(plan, n) : factNew(plan, n);
-        }).join("") + "</div>";
+      if (!whole) {
+        body += '<h3 class="plan-panel-title">Close-up: ' +
+          KYC.escapeHtml(focus.map(seat).join(", ")) + "</h3>" + closeup(plan);
+      }
+      body += '<div class="district-facts">' + focus.map(function (n) {
+        if (!redrawn()) return factOnly(plan, n);
+        return index === 0 ? factOld(plan, n) : factNew(plan, n);
+      }).join("") + "</div>";
     }
     return '<section class="plan-card" aria-label="' + KYC.escapeAttr(plan.label + ": " +
       plan.title) + '">' + head + body + "</section>";
@@ -629,10 +696,12 @@
 
   function parseFocus(value) {
     var seen = {};
+    var valid = {};
+    numbers(newPlan()).forEach(function (n) { valid[n] = true; });
     return String(value || "").split(",").map(function (s) {
-      return parseInt(s, 10);
+      return /^\s*\d+\s*$/.test(s) ? parseInt(s, 10) : NaN;
     }).filter(function (n) {
-      if (!(n >= 1 && n <= state.seats) || seen[n]) return false;
+      if (!valid[n] || seen[n]) return false;
       seen[n] = true;
       return true;
     }).slice(0, MAX_FOCUS);
@@ -647,9 +716,10 @@
       html.push(
         '<h2 class="state-heading">Running in a different district</h2>',
         '<p class="state-note">', String(list.length), " member", list.length === 1 ? "" : "s",
-        " of the House from ", KYC.escapeHtml(state.name), " hold one district and ",
-        list.length === 1 ? "is" : "are", " running in another. Pick a group to see the ",
-        "districts on both maps, or choose any district below.</p>",
+        " of the House from ", KYC.escapeHtml(state.name), " hold", list.length === 1 ? "s" : "",
+        " one district and ", list.length === 1 ? "is" : "are",
+        " running in another. Pick a group to see the districts on both maps, or choose any ",
+        "district below.</p>",
         '<div class="mover-groups">'
       );
       grouped.forEach(function (g) {
@@ -666,23 +736,36 @@
       });
       html.push("</div>");
     }
+    var many = numbers(newPlan()).length > 1;
     html.push(
-      '<div class="districts-tools">',
-      '<label class="districts-pick"><span>Any district</span>',
+      '<div class="districts-tools"', many ? "" : " hidden", ">",
+      '<label class="districts-pick"><span>', redrawn() ? "Any district" : "Pick a district",
+      "</span>",
       '<select id="districtPick" class="select"><option value="">Choose&hellip;</option>'
     );
-    for (var n = 1; n <= state.seats; n++) {
+    numbers(newPlan()).forEach(function (n) {
       html.push('<option value="', String(n), '">', KYC.escapeHtml(seat(n)), "</option>");
+    });
+    html.push("</select></label>");
+    if (redrawn()) {
+      html.push(
+        '<label class="districts-toggle"><input type="checkbox" id="ghostToggle" checked> ',
+        "Dashed: the same districts' lines on the other map</label>"
+      );
+    }
+    html.push("</div>");
+    if (many) {
+      html.push('<p class="state-note">', redrawn() ? "Or click" : "Or click",
+        " a district on ", redrawn() ? "either map" : "the map",
+        "; Shift-click to compare up to ", String(MAX_FOCUS), ".",
+        redrawn() ? " Shares of area describe land, not people." : "", "</p>");
     }
     html.push(
-      "</select></label>",
-      '<label class="districts-toggle"><input type="checkbox" id="ghostToggle" checked> ',
-      "Dashed: the same districts' lines on the other map</label>",
-      "</div>",
-      '<p class="state-note">Or click a district on either map; Shift-click to compare up to ',
-      String(MAX_FOCUS), ". Shares of area describe land, not people.</p>",
       "</section>",
-      '<div class="plan-grid" id="planGrid"></div>'
+      '<div class="plan-grid', redrawn() ? "" : " single", '" id="planGrid"></div>',
+      '<div class="districts-sources">', (state.sources || []).map(function (line) {
+        return "<p>" + KYC.escapeHtml(line) + "</p>";
+      }).join(""), "</div>"
     );
     return html.join("");
   }
@@ -695,6 +778,14 @@
           '" vector-effect="non-scaling-stroke"/>');
       });
     });
+    if (redrawn()) {
+      // The old map's land, which the new map is clipped to.
+      parts.push('<clipPath id="kycd-land">');
+      numbers(state.plans[0]).forEach(function (n) {
+        parts.push('<use href="#', pathId(state.plans[0], n), '"/>');
+      });
+      parts.push("</clipPath>");
+    }
     parts.push('<path id="kycd-counties" d="', KYC.escapeAttr(state.counties.mesh),
       '" vector-effect="non-scaling-stroke"/>');
     parts.push('<path id="kycd-outline" d="', KYC.escapeAttr(state.counties.outline),
@@ -732,9 +823,12 @@
       var n = parseInt(event.target.value, 10);
       setFocus(n ? [n] : defaults);
     });
-    el("ghostToggle").addEventListener("change", function (event) {
-      app.classList.toggle("hide-ghosts", !event.target.checked);
-    });
+    var toggle = el("ghostToggle");
+    if (toggle) {
+      toggle.addEventListener("change", function (event) {
+        app.classList.toggle("hide-ghosts", !event.target.checked);
+      });
+    }
   }
 
   function applyRoute(route, defaults) {
@@ -753,9 +847,9 @@
     if (!app) return;
     if (!state) {
       app.innerHTML = '<div class="empty-state">' + KYC.icon("info") +
-        "<h3>The district maps did not load</h3>" +
+        "<h3>The district map did not load</h3>" +
         "<p>Run <code>python build_profile_site.py geo</code> to regenerate " +
-        "<code>data/districts.js</code>.</p></div>";
+        "<code>data/districts/</code>.</p></div>";
       return;
     }
     if (!data.length) {
@@ -767,7 +861,11 @@
     indexPeople();
     var list = moves();
     var first = groups(list)[0];
-    var defaults = first ? first.districts.slice(0, MAX_FOCUS) : [];
+    // A redrawn state opens on its first group of moves; a single seat is
+    // always the one shown; anywhere else the reader picks.
+    var only = numbers(newPlan());
+    var defaults = first ? first.districts.slice(0, MAX_FOCUS)
+      : only.length === 1 ? only : [];
 
     drawDefs();
     app.innerHTML = controls(list);
