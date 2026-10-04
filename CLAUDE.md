@@ -86,8 +86,8 @@ python build_profile_site.py results          # who is still in, from Wikipedia
 python build_profile_site.py campaigns        # campaign websites from FEC committees
 python build_profile_site.py enrich           # fill gaps; check every campaign site
 python build_profile_site.py odds             # market prices and polling averages (writes odds.js)
-python -m unittest discover tests             # 672 tests, no dependencies
-npm install && npm test                       # 716 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 673 tests, no dependencies
+npm install && npm test                       # 744 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -440,6 +440,20 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     stay in reach (the dialog's close button) is sticky inside what scrolls.
     Every field and menu is 16px there, or iOS zooms the page when one is
     tapped and leaves it zoomed.
+
+45. **Time it on a throttled phone, not on this machine.** A mid-range
+    Android phone runs a page about 4x slower than a desktop. Texas's
+    district page froze such a phone for 11-12 seconds: the new map was
+    clipped to a `<clipPath>` of 38 `<use>` elements, and Blink took 2
+    seconds just to resolve it even on a desktop. One path of the same
+    rings draws the same pixels in 0.5 seconds. Measured the same way:
+    - The label search compared every sample with every other.
+    - Each district page drew three times on load.
+    - Closing a profile redrew the grid from its first card, losing the
+      reader's place.
+    Before shipping anything that draws, time it under CDP
+    `Emulation.setCPUThrottlingRate` 4 and 6, as well as looking at it.
+    Keep a clip, mask or filter to one child.
 
 ## District maps
 

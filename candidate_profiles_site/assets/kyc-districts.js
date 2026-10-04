@@ -222,38 +222,81 @@
       box[1] < frame[1] + frame[3] && box[3] > frame[1];
   }
 
+  var labelCache = {};
+
   /** Where to write a district's number inside *frame*: its own label
    *  point when that is in view, otherwise the roomiest visible point -
    *  the close-up crops old CA-3, which ran south to Death Valley. Returns
-   *  [x, y, room] with room in map units, or null. */
+   *  [x, y, room] with room in map units, or null.
+   *
+   *  Room is the distance from a sample to the nearest sample outside the
+   *  district, or to the frame's edge. It used to compare every sample with
+   *  every other - 289 x 289 distances a label, never kept - and an inset
+   *  full of districts reaching in from outside cost a mid-range Android
+   *  phone a quarter of a second each time it was drawn. Two passes over
+   *  the grid carry each sample's nearest outside sample instead, and the
+   *  answer, being in map units, is kept for the next draw. */
   function labelAt(plan, n, frame, margin) {
     var district = plan.districts[n];
     if (within(district.at, frame, margin)) return [district.at[0], district.at[1], Infinity];
+    var key = plan.key + "-" + n + "-" + frame.join(",") + "-" + margin.toFixed(2);
+    if (Object.prototype.hasOwnProperty.call(labelCache, key)) return labelCache[key];
     var x0 = Math.max(district.box[0], frame[0] + margin);
     var y0 = Math.max(district.box[1], frame[1] + margin);
     var x1 = Math.min(district.box[2], frame[0] + frame[2] - margin);
     var y1 = Math.min(district.box[3], frame[1] + frame[3] - margin);
-    if (x1 <= x0 || y1 <= y0) return null;
+    if (x1 <= x0 || y1 <= y0) return (labelCache[key] = null);
     var rings = ringsOf(plan, n);
-    var steps = 16, cells = [];
-    for (var i = 0; i <= steps; i++) {
-      for (var j = 0; j <= steps; j++) {
-        var x = x0 + (x1 - x0) * i / steps, y = y0 + (y1 - y0) * j / steps;
-        cells.push([x, y, contains(rings, x, y)]);
+    var steps = 16, size = steps + 1;
+    var xs = [], ys = [], inside = [], nearX = [], nearY = [];
+    for (var k = 0; k < size; k++) {
+      xs.push(x0 + (x1 - x0) * k / steps);
+      ys.push(y0 + (y1 - y0) * k / steps);
+    }
+    for (var i = 0; i < size; i++) {
+      for (var j = 0; j < size; j++) {
+        var at = i * size + j;
+        inside[at] = contains(rings, xs[i], ys[j]);
+        nearX[at] = inside[at] ? NaN : xs[i];
+        nearY[at] = inside[at] ? NaN : ys[j];
+      }
+    }
+    // A sample takes its neighbour's nearest outside sample when that is
+    // closer than its own: forwards, then backwards.
+    function relax(i, j, ni, nj) {
+      if (ni < 0 || nj < 0 || ni >= size || nj >= size) return;
+      var at = i * size + j, from = ni * size + nj;
+      if (isNaN(nearX[from])) return;
+      var d = Math.hypot(xs[i] - nearX[from], ys[j] - nearY[from]);
+      if (isNaN(nearX[at]) || d < Math.hypot(xs[i] - nearX[at], ys[j] - nearY[at])) {
+        nearX[at] = nearX[from];
+        nearY[at] = nearY[from];
+      }
+    }
+    for (i = 0; i < size; i++) {
+      for (j = 0; j < size; j++) {
+        relax(i, j, i - 1, j); relax(i, j, i, j - 1);
+        relax(i, j, i - 1, j - 1); relax(i, j, i - 1, j + 1);
+      }
+    }
+    for (i = steps; i >= 0; i--) {
+      for (j = steps; j >= 0; j--) {
+        relax(i, j, i + 1, j); relax(i, j, i, j + 1);
+        relax(i, j, i + 1, j + 1); relax(i, j, i + 1, j - 1);
       }
     }
     var best = null;
-    cells.forEach(function (c) {
-      if (!c[2]) return;
-      // Room: the distance to the nearest outside sample or the frame edge.
-      var room = Math.min(c[0] - frame[0], frame[0] + frame[2] - c[0],
-                          c[1] - frame[1], frame[1] + frame[3] - c[1]);
-      cells.forEach(function (o) {
-        if (!o[2]) room = Math.min(room, Math.hypot(o[0] - c[0], o[1] - c[1]));
-      });
-      if (!best || room > best[2]) best = [c[0], c[1], room];
-    });
-    return best;
+    for (i = 0; i < size; i++) {
+      for (j = 0; j < size; j++) {
+        var cell = i * size + j;
+        if (!inside[cell]) continue;
+        var x = xs[i], y = ys[j];
+        var room = Math.min(x - frame[0], frame[0] + frame[2] - x, y - frame[1], frame[1] + frame[3] - y);
+        if (!isNaN(nearX[cell])) room = Math.min(room, Math.hypot(x - nearX[cell], y - nearY[cell]));
+        if (!best || room > best[2]) best = [x, y, room];
+      }
+    }
+    return (labelCache[key] = best);
   }
 
   /* -------------------------------------------------------------- labels */
@@ -741,6 +784,8 @@
   }
 
   function render() {
+    var expected = expectedWidth();
+    if (expected) drawnAt = expected;
     el("planGrid").innerHTML = state.plans.map(planCard).join("");
     Array.prototype.forEach.call(doc.querySelectorAll(".mover-group"), function (button) {
       button.setAttribute("aria-pressed",
@@ -767,9 +812,36 @@
     return width > 40 ? Math.round(width) : 0;
   }
 
+  /** The width the statewide map will be drawn at, from the grid's width,
+   *  its columns and a card's padding - so a page draws once per width
+   *  instead of drawing at a guess, measuring and drawing again. 0 without
+   *  layout; render() still measures what it drew and corrects a miss. */
+  function expectedWidth() {
+    var grid = el("planGrid");
+    var width = grid ? grid.getBoundingClientRect().width : 0;
+    if (width < 40 || !global.getComputedStyle) return 0;
+    var gap = parseFloat(global.getComputedStyle(grid).columnGap) || 0;
+    var single = grid.classList.contains("single");
+    // The grid's own rule: columns of at least 420px, as many as there are
+    // maps; a single map is at most 860px.
+    var columns = single ? 1
+      : Math.max(1, Math.min(state.plans.length, Math.floor((width + gap) / (420 + gap))));
+    var card = (width - gap * (columns - 1)) / columns;
+    if (single) card = Math.min(card, 860);
+    var probe = doc.createElement("div");
+    probe.className = "plan-card";
+    grid.appendChild(probe);
+    var style = global.getComputedStyle(probe);
+    var inner = card - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) -
+      parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth);
+    grid.removeChild(probe);
+    return inner > 40 ? Math.round(inner) : 0;
+  }
+
   function watchWidth() {
     if (!global.ResizeObserver) return;
-    var last = 0;
+    // The observer reports the width it starts at; that is not a change.
+    var last = Math.round(el("planGrid").getBoundingClientRect().width);
     var redraw = KYC.debounce(function () { render(); }, 120);
     new global.ResizeObserver(function (entries) {
       var width = Math.round(entries[0].contentRect.width);
@@ -901,12 +973,15 @@
       });
     });
     if (redrawn()) {
-      // The old map's land, which the new map is clipped to.
-      parts.push('<clipPath id="kycd-land">');
-      numbers(state.plans[0]).forEach(function (n) {
-        parts.push('<use href="#', pathId(state.plans[0], n), '"/>');
-      });
-      parts.push("</clipPath>");
+      // The old map's land, which the new map is clipped to: one path of
+      // every old district's rings. It was one <use> per district, and Blink
+      // spent 2 seconds resolving that clip on a desktop - 11 to 20 on an
+      // Android phone - with Texas's page frozen and blank the whole time.
+      // Same rings, same nonzero rule, the same pixels.
+      var land = numbers(state.plans[0]).map(function (n) {
+        return state.plans[0].districts[n].d;
+      }).join(" ");
+      parts.push('<clipPath id="kycd-land"><path d="', KYC.escapeAttr(land), '"/></clipPath>');
     }
     parts.push('<path id="kycd-counties" d="', KYC.escapeAttr(state.counties.mesh),
       '" vector-effect="non-scaling-stroke"/>');

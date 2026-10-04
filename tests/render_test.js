@@ -1891,8 +1891,8 @@ async function testRedistricting() {
   suite(`${page} — the two maps`, () => {
     check("the maps loaded", !!maps && maps.plans.length === 2);
     check("every district is drawn once, into shared defs",
-      D.querySelectorAll(".district-defs path").length === maps.seats * 2 + 2,
-      `${D.querySelectorAll(".district-defs path").length}`);
+      D.querySelectorAll(".district-defs > defs > path").length === maps.seats * 2 + 2,
+      `${D.querySelectorAll(".district-defs > defs > path").length}`);
     check("a card per map, before then after", cards().length === 2 &&
       /Before/.test(cards()[0].textContent) && /After/.test(cards()[1].textContent));
     cards().forEach((card, i) => {
@@ -2143,8 +2143,16 @@ async function testDistrictPages() {
     const D = tx.D;
     check("no page errors", tx.errors.length === 0, tx.errors.join(" | "));
     const clip = D.querySelector(".district-defs clipPath#kycd-land");
-    check("the land is the old map's districts",
-      !!clip && clip.querySelectorAll("use").length === tx.window.kycDistricts.TX.seats);
+    // One path of every old district's rings. One <use> per district froze
+    // Texas's page for 11-12 seconds on a mid-range Android phone while
+    // Blink resolved the clip.
+    const oldPlan = tx.window.kycDistricts.TX.plans[0];
+    const ring = (d) => d.split("M").filter(Boolean).length;
+    const rings = Object.values(oldPlan.districts).reduce((n, d) => n + ring(d.d), 0);
+    check("the land is one path of the old map's districts",
+      !!clip && clip.children.length === 1 && clip.children[0].tagName === "path" &&
+        ring(clip.children[0].getAttribute("d")) === rings,
+      clip && clip.children.length + " children");
     const cards = D.querySelectorAll(".plan-card");
     check("the new map's shapes are drawn inside the clip",
       !!cards[1].querySelector('.district-statewide g[clip-path="url(#kycd-land)"] use.district-shape'));
@@ -2172,6 +2180,112 @@ async function testDistrictPages() {
     const raw = fs.readFileSync(path.join(SITE, "redistricting", "ca.html"), "utf8");
     check("it sends readers to the new page", /url=\.\.\/districts\/ca\.html/.test(raw));
     check("and tells search engines not to index it", /noindex/.test(raw));
+  });
+}
+
+async function testDrawerBack() {
+  // Android's back gesture is expected to close an open drawer, not leave
+  // the page under it.
+  const { window, D } = await buildPage("index.html");
+  await new Promise((r) => setTimeout(r, 300));
+  const wait = () => new Promise((r) => setTimeout(r, 120));
+  const toggle = D.querySelector(".sidebar-toggle");
+  toggle.click();
+  const pushed = !!(window.history.state && window.history.state.kycDrawer);
+  // A sentinel in the grid: a redraw replaces the grid's contents.
+  const sentinel = D.createElement("i");
+  sentinel.id = "drawerSentinel";
+  D.getElementById("results").appendChild(sentinel);
+  window.history.back();
+  await wait();
+  const closedByBack = !D.body.classList.contains("sidebar-open");
+  const keptGrid = !!D.getElementById("drawerSentinel");
+  toggle.click();
+  D.querySelector(".sidebar-scrim").click();
+  await wait();
+  const popped = !(window.history.state && window.history.state.kycDrawer);
+  const shut = !D.body.classList.contains("sidebar-open");
+  const chip = D.querySelector('.chip[data-group="party"][data-value="Republican"]');
+  chip.click();
+  const filtered = /party=Republican/.test(window.location.hash);
+  chip.click();
+  suite("index.html — Back closes the drawer, and nothing else", () => {
+    check("opening the drawer gives it a history entry, at the same address", pushed);
+    check("Back closes the drawer", closedByBack);
+    check("and does not redraw the grid under it, so a long scroll survives", keptGrid,
+      "the grid was redrawn");
+    check("closing it with a tap takes its entry off again", popped && shut);
+    check("filters still write the address", filtered, window.location.hash);
+  });
+}
+
+async function testAndroidBack() {
+  // A phone's layout: the queries a phone matches.
+  const phone = (window) => {
+    window.matchMedia = (query) => ({
+      media: query,
+      matches: /max-width: (1000|760)px|pointer: coarse/.test(query),
+      addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {},
+    });
+  };
+  const { window, D } = await buildPage("index.html", { setup: phone });
+  const KYC = window.KYC;
+  await new Promise((r) => setTimeout(r, 300));
+  const wait = () => new Promise((r) => setTimeout(r, 120));
+
+  // Closing a profile returns to the list as it was drawn.
+  const card = D.querySelector("#results .card");
+  card.click();
+  const opened = /#\/profile\//.test(window.location.hash);
+  const sentinel = D.createElement("i");
+  sentinel.id = "profileSentinel";
+  D.getElementById("results").appendChild(sentinel);
+  window.history.back();
+  await wait();
+  const closed = D.getElementById("profileModal").hidden;
+  const kept = !!D.getElementById("profileSentinel");
+
+  // The theme menu, on a touch layout: Back closes it and stays.
+  const theme = D.getElementById("themeButton");
+  theme.click();
+  const menuPushed = !!(window.history.state && window.history.state.kycMenu);
+  window.history.back();
+  await wait();
+  const menuClosed = D.getElementById("themePanel").hidden;
+  theme.click();
+  D.querySelector('[data-theme-option="dark"]').click();
+  await wait();
+  const menuPopped = !(window.history.state && window.history.state.kycMenu) &&
+    D.getElementById("themePanel").hidden;
+
+  // The term reads as two unbreakable dates.
+  card.click();
+  const spans = [...D.querySelectorAll("#profileModalTerm .nowrap")].map((x) => x.textContent);
+  KYC.profile.close();
+  await wait();
+
+  suite("index.html — Back on Android", () => {
+    check("a profile opens at its own address", opened, window.location.hash);
+    check("Back closes it", closed);
+    check("and the grid underneath is not redrawn, so the reader keeps their place", kept,
+      "the grid was redrawn from its first card");
+    check("the theme menu gets a history entry on a touch layout", menuPushed);
+    check("Back closes the menu and stays on the page", menuClosed);
+    check("picking a theme closes the menu and takes its entry off", menuPopped);
+    check("a short placeholder on a phone", D.getElementById("searchInput").placeholder === "Search…",
+      D.getElementById("searchInput").placeholder);
+    check("a term's dates never break inside a date", spans.length === 2 &&
+      spans.every((x) => /^\d{4}-\d{2}-\d{2}$/.test(x)), spans.join(" | "));
+    const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+    check("a chosen Light theme opts out of forced dark (Samsung Internet, Brave)",
+      /\[data-theme="light"\] \{[^}]*color-scheme: only light/.test(css));
+    // Every :hover rule sits inside @media (hover: hover); strip those
+    // blocks and no :hover selector may be left.
+    const ungated = css.replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/@media \(hover: hover\) \{[\s\S]*?\n\}/g, "");
+    check("hover looks apply only where a pointer hovers",
+      !/:hover[^{}]*\{/.test(ungated), (ungated.match(/[^{}]*:hover[^{}]*\{/) || [""])[0].trim());
+    check("no grey tap flash", /-webkit-tap-highlight-color: transparent/.test(css));
   });
 }
 
@@ -2252,7 +2366,7 @@ async function testDistrictsOnAPhone() {
   // Numbers were sized for a 620px map and scaled with it: on a phone every
   // one was 4px tall. They are 11px at the width the map is drawn, written
   // where they fit, and every district is numbered somewhere.
-  for (const [code, width] of [["NY", 302], ["TX", 302], ["CA", 302], ["TX", 620]]) {
+  for (const [code, width] of [["NY", 286], ["TX", 302], ["CA", 286], ["TX", 620], ["TX", 860]]) {
     const page = await buildPage("districts/" + code.toLowerCase() + ".html",
                                  { setup: drawnAt(width) });
     suite(`districts/${code.toLowerCase()}.html — the map drawn ${width}px wide`, () => {
@@ -2281,11 +2395,16 @@ async function testDistrictsOnAPhone() {
           titles.join(" | "));
       }
       if (code === "TX") {
-        // Houston needs 550px for every number in it: a phone gets a closer
-        // inset, a desktop that can draw it whole does not.
-        check(width < 550 ? "Houston gets a closer inset on a phone"
-                          : "and not where Houston is drawn whole",
-          titles.includes("Houston, closer") === width < 550, titles.join(" | "));
+        // A closer inset appears exactly when its inset is drawn narrower
+        // than every number in it needs.
+        state.insets.filter((i) => i.detail).forEach((inset) => {
+          const drawn = Math.min(width, inset.width);
+          const closer = inset.detail.every((d) => titles.includes(d.title));
+          check(drawn < inset.fits ? `${inset.title} gets its closer insets when drawn too narrow`
+                                   : `${inset.title}, drawn whole, gets none`,
+            closer === drawn < inset.fits,
+            `${drawn}px for ${inset.fits}px: ` + titles.join(" | "));
+        });
         const widest = Math.max(...[...D.querySelectorAll("figure.inset")]
           .map((f) => parseFloat(f.style.width)));
         check("no inset is drawn wider than the map", widest <= width, widest);
@@ -2302,6 +2421,8 @@ async function testDistrictsOnAPhone() {
   if (!only || only === "index.html") await testSeatRows();
   if (!only || only === "map.html") await testMap();
   if (!only || only === "map.html") await testMapOnAPhone();
+  if (!only || only === "index.html") await testDrawerBack();
+  if (!only || only === "index.html") await testAndroidBack();
   if (!only || only === "states") await testStates();
   if (!only || only === "redistricting") await testRedistricting();
   if (!only || only === "redistricting") await testDistrictPages();

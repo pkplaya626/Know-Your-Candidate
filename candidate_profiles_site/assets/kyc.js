@@ -585,6 +585,12 @@
     return api;
   }
 
+  /** Phones and tablets: the layout with a drawer, or a finger to point. */
+  function touchLayout() {
+    return !!(global.matchMedia &&
+      global.matchMedia("(max-width: 1000px), (pointer: coarse)").matches);
+  }
+
   /** A click-opened, keyboard-operable menu.
    *
    *  The theme picker used to be a CSS :hover popup, which meant it could not
@@ -593,12 +599,13 @@
   function createMenu(button, panel) {
     function isOpen() { return !panel.hidden; }
 
-    function close() {
+    function close(fromHistory) {
       if (!isOpen()) return;
       panel.hidden = true;
       button.setAttribute("aria-expanded", "false");
       doc.removeEventListener("keydown", onKey, true);
       doc.removeEventListener("click", onOutside, true);
+      if (fromHistory !== true && history.state && history.state.kycMenu) history.back();
     }
 
     function open() {
@@ -606,9 +613,18 @@
       button.setAttribute("aria-expanded", "true");
       doc.addEventListener("keydown", onKey, true);
       doc.addEventListener("click", onOutside, true);
+      // On a touch screen Android's back gesture should close the menu, not
+      // leave the page: an entry at the same address to step back from.
+      if (touchLayout() && !(history.state && history.state.kycMenu)) {
+        history.pushState({ kycMenu: true }, "", global.location.href);
+      }
       var first = panel.querySelector(FOCUSABLE);
       if (first) first.focus();
     }
+
+    global.addEventListener("popstate", function () {
+      if (!(history.state && history.state.kycMenu)) close(true);
+    });
 
     function onKey(event) {
       if (event.key === "Escape") {
@@ -641,6 +657,22 @@
    * biggest functional gap for a tool whose whole purpose is being passed
    * around before an election. */
   var routeHandlers = [];
+  /* The address the page last showed. A history step that lands on the same
+   * address - the entry the drawer pushes so Android's back gesture can
+   * close it - is not a navigation, and redrawing for it would cut a grid
+   * the reader had scrolled deep into back to its first page of cards. The
+   * one dispatcher also stops each handler running twice per hash change,
+   * once for hashchange and once for popstate. */
+  var routedHref = global.location.href;
+
+  function onNavigate() {
+    if (global.location.href === routedHref) return;
+    routedHref = global.location.href;
+    routeHandlers.forEach(function (handler) { handler(); });
+  }
+  global.addEventListener("hashchange", onNavigate);
+  global.addEventListener("popstate", onNavigate);
+
   var router = {
     read: function () {
       var hash = global.location.hash.replace(/^#\/?/, "");
@@ -680,6 +712,7 @@
       if (global.location.hash === hash) return;
       // replaceState: filter tweaks should not fill the back button.
       history.replaceState(null, "", global.location.pathname + hash);
+      routedHref = global.location.href;
     },
 
     /* The pushed entry is marked, so closing knows whether there is a view
@@ -703,6 +736,7 @@
       }
       history.pushState({ kycProfile: true, depth: depth }, "",
         global.location.pathname + hash);
+      routedHref = global.location.href;
     },
 
     /** Leave a profile view, however many profiles deep. Back only undoes
@@ -721,13 +755,12 @@
         return;
       }
       history.replaceState(null, "", global.location.pathname + "#/");
+      routedHref = global.location.href;
       routeHandlers.forEach(function (handler) { handler(); });
     },
 
     onChange: function (handler) {
       routeHandlers.push(handler);
-      global.addEventListener("hashchange", handler);
-      global.addEventListener("popstate", handler);
     },
   };
 
@@ -979,9 +1012,13 @@
     var toggle = doc.querySelector(".sidebar-toggle");
     var scrim = doc.querySelector(".sidebar-scrim");
     var sidebar = doc.getElementById("sidebar");
-    var closeSidebar = function () {
+    var closeSidebar = function (fromHistory) {
       if (!doc.body.classList.contains("sidebar-open")) return;
       doc.body.classList.remove("sidebar-open");
+      // Closed by a tap rather than by Back: take its history entry off
+      // again. A pick in the drawer has already replaced that entry with
+      // the address it chose, which is then the step Back undoes.
+      if (fromHistory !== true && history.state && history.state.kycDrawer) history.back();
       if (toggle) {
         toggle.setAttribute("aria-expanded", "false");
         // Back to the button that opened it, unless the reader has already
@@ -995,11 +1032,20 @@
         if (doc.body.classList.contains("sidebar-open")) return closeSidebar();
         doc.body.classList.add("sidebar-open");
         toggle.setAttribute("aria-expanded", "true");
+        // On Android the back gesture is expected to close an open drawer,
+        // not leave the page under it: give it an entry to step back from.
+        // Same address, so the router does not treat it as a navigation.
+        if (!(history.state && history.state.kycDrawer)) {
+          history.pushState({ kycDrawer: true }, "", global.location.href);
+        }
         var first = sidebar && sidebar.querySelector(FOCUSABLE);
         if (first) first.focus({ preventScroll: true });
       });
     }
     if (scrim) scrim.addEventListener("click", closeSidebar);
+    global.addEventListener("popstate", function () {
+      if (!(history.state && history.state.kycDrawer)) closeSidebar(true);
+    });
     doc.addEventListener("keydown", function (event) {
       if (event.key === "Escape") closeSidebar();
     });
@@ -1007,7 +1053,8 @@
     // what was picked; the reader had to find the dimmed strip to see it.
     if (sidebar) {
       sidebar.addEventListener("change", function (event) {
-        if (event.target.matches("select")) closeSidebar();
+        // "Jump to" leaves the page; stepping back now would cancel that.
+        if (event.target.matches("select") && event.target.id !== "stateJump") closeSidebar();
       });
     }
 
@@ -1038,10 +1085,20 @@
     }
 
     // A placeholder written for a desktop box read "Search na" on a phone.
-    if (global.matchMedia && global.matchMedia("(max-width: 560px)").matches) {
-      Array.prototype.forEach.call(doc.querySelectorAll("[data-placeholder-short]"), function (input) {
-        input.setAttribute("placeholder", input.getAttribute("data-placeholder-short"));
-      });
+    // It follows the width, so folding or unfolding a Fold updates it.
+    if (global.matchMedia) {
+      var compact = global.matchMedia("(max-width: 760px)");
+      var placeholders = function () {
+        Array.prototype.forEach.call(doc.querySelectorAll("[data-placeholder-short]"), function (input) {
+          if (!input.hasAttribute("data-placeholder-long")) {
+            input.setAttribute("data-placeholder-long", input.getAttribute("placeholder") || "");
+          }
+          input.setAttribute("placeholder", input.getAttribute(
+            compact.matches ? "data-placeholder-short" : "data-placeholder-long"));
+        });
+      };
+      placeholders();
+      if (compact.addEventListener) compact.addEventListener("change", placeholders);
     }
 
     renderSummary();

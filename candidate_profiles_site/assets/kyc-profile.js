@@ -657,7 +657,16 @@
     } else {
       stateLink.hidden = true;
     }
-    el("profileModalTerm").textContent = item.term_start || "N/A";
+    // "2021-01-03 - 2027-01-03" broke as "2027-01-" / "03" in large text.
+    var term = el("profileModalTerm");
+    term.textContent = "";
+    String(item.term_start || "N/A").split(" - ").forEach(function (part, i) {
+      if (i) term.appendChild(doc.createTextNode(" - "));
+      var span = doc.createElement("span");
+      span.className = "nowrap";
+      span.textContent = part;
+      term.appendChild(span);
+    });
 
     var chamber = el("profileModalChamber");
     chamber.textContent = item.chamber;
