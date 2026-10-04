@@ -345,7 +345,7 @@ async function testDirectory() {
       /flex-wrap:\s*wrap/.test(bar) && !/overflow/.test(bar) &&
         !/scrollbar-width:\s*none/.test(css),
       bar.replace(/\s+/g, " ").trim());
-    const chips = [...D.querySelectorAll(".toolbar .chip")];
+    const chips = [...D.querySelectorAll(".toolbar .chip:not(.filters-toggle)")];
     check("every chip is in a labelled group, which wraps as a whole",
       chips.length > 0 && chips.every((c) => c.closest('.chip-group[role="group"][aria-label]')),
       `${chips.length} chips`);
@@ -354,6 +354,52 @@ async function testDirectory() {
       !D.querySelector(".toolbar-divider") &&
         /\.chip-group \+ \.chip-group::before/.test(css) &&
         /\.chip-groups\s*\{[^}]*clip-path:\s*inset\(/.test(css));
+  });
+
+  suite("index.html — on a phone the filters fold behind one button", () => {
+    // Fourteen chips wrapped onto seven rows, 328px of a 780px screen, and
+    // stayed pinned there while the cards scrolled underneath.
+    const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+    const toggle = D.getElementById("filtersToggle");
+    const bar = toggle && toggle.closest(".toolbar");
+    check("the button is in the filter bar, and says what it controls",
+      !!bar && toggle.getAttribute("aria-controls") === "chipGroups" &&
+        !!D.getElementById("chipGroups"));
+    check("it shows only on a phone, where the chips fold while it is closed",
+      /\.filters-toggle\s*\{\s*display:\s*none/.test(css) &&
+        /\.toolbar\[data-filters="closed"\] > \.chip-groups\s*\{\s*display:\s*none/.test(css));
+    check("it starts closed", bar.getAttribute("data-filters") === "closed" &&
+      toggle.getAttribute("aria-expanded") === "false");
+    toggle.click();
+    check("a tap opens it", bar.getAttribute("data-filters") === "open" &&
+      toggle.getAttribute("aria-expanded") === "true");
+    toggle.click();
+    check("and another closes it", bar.getAttribute("data-filters") === "closed");
+    const count = D.getElementById("filtersCount");
+    check("with no filter on, it counts none", count.textContent === "", count.textContent);
+    D.querySelector('.chip[data-group="party"][data-value="Democrat"]').click();
+    D.querySelector('.chip[data-group="chamber"][data-value="House"]').click();
+    check("it counts the filters that are on, so a folded bar never hides one",
+      count.textContent === "(2 on)", count.textContent);
+    D.querySelector('.chip[data-group="party"][data-value="Democrat"]').click();
+    D.querySelector('.chip[data-group="chamber"][data-value="all"]').click();
+    check("and stops counting them when they are off", count.textContent === "",
+      count.textContent);
+  });
+
+  suite("index.html — the header leaves the search box room", () => {
+    // The sort, a select as wide as "Sort: 2026 Senate races", took 184px of
+    // a 390px header and left the search field 0-13px wide.
+    const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+    const sort = D.getElementById("sortBy");
+    const control = sort.closest(".sort-control");
+    check("on a phone the sort is an icon over its own menu",
+      !!control && !!control.querySelector('use[href="#i-sort"]') &&
+        !!D.getElementById("i-sort") &&
+        /\.sort-control select\s*\{[^}]*opacity:\s*0/.test(css));
+    check("and keeps its label", !!D.querySelector('label[for="sortBy"]'));
+    check("no field or menu is under 16px on a phone, so iOS never zooms in",
+      /\.search input,\s*\.select,\s*\.select-bare,\s*\.text-input\s*\{\s*font-size:\s*16px/.test(css));
   });
 
   suite("index.html — portraits come in sizes of one photograph", () => {
@@ -896,7 +942,13 @@ async function testMap() {
       [...shapes].every((s) => s.getAttribute("tabindex") === "0"));
     check("states expose a role and a label",
       [...shapes].every((s) => s.getAttribute("role") === "button" && s.getAttribute("aria-label")));
-    check("state labels drawn", D.querySelectorAll("#usMap .state-label").length >= 51);
+    // In place where the code fits; in a callout or the territory strip
+    // where it does not - but every one somewhere.
+    const named = new Set([...D.querySelectorAll("#usMap .state-label, #usMap .territory-label")]
+      .map((t) => t.textContent));
+    const every = Object.keys(window.kycGeo.states).concat(window.kycGeo.territories.map((t) => t.code));
+    check("every state and territory is named on the map",
+      every.every((c) => named.has(c)), every.filter((c) => !named.has(c)).join(" "));
   });
 
   suite("map.html — modes", () => {
@@ -1921,6 +1973,16 @@ async function testRedistricting() {
       window.location.hash === "#/?d=12" && focusOf(cards()[1]).join() === "12", window.location.hash);
     click(D.querySelector('.district-statewide use[data-district="11"]'), { shiftKey: true });
     check("Shift-click adds one", window.location.hash === "#/?d=12,11", window.location.hash);
+    // A phone has no Shift key: with Compare on, a plain tap adds one too.
+    const compare = D.getElementById("compareToggle");
+    compare.click();
+    click(D.querySelector('.district-statewide use[data-district="13"]'));
+    check("with Compare on, a tap adds a district", window.location.hash === "#/?d=12,11,13",
+      window.location.hash);
+    click(D.querySelector('.district-statewide use[data-district="11"]'));
+    check("and a tap on a picked one takes it off", window.location.hash === "#/?d=12,13",
+      window.location.hash);
+    compare.click();
     const pick = D.getElementById("districtPick");
     pick.value = "5";
     pick.dispatchEvent(new window.Event("change", { bubbles: true }));
@@ -2128,6 +2190,64 @@ function drawnAt(width) {
   };
 }
 
+/* The same, for the partisan map's SVG. */
+function mapDrawnAt(width) {
+  return (window) => {
+    const real = window.Element.prototype.getBoundingClientRect;
+    window.Element.prototype.getBoundingClientRect = function () {
+      if (this.id !== "usMap") return real.call(this);
+      return { width, height: 0, top: 0, left: 0, right: width, bottom: 0, x: 0, y: 0 };
+    };
+  };
+}
+
+async function testMapOnAPhone() {
+  // Codes were 10 map units: a phone drew them 3.8px tall, at weight 800 on
+  // a 2.5-unit halo. Now they are 11px at the width the map is drawn.
+  for (const width of [374, 900]) {
+    const page = await buildPage("map.html", { setup: mapDrawnAt(width) });
+    suite(`map.html — the map drawn ${width}px wide`, () => {
+      const D = page.D;
+      check("no page errors", page.errors.length === 0, page.errors.join(" | "));
+      const px = width / 975;
+      const label = D.querySelector("#usMap .state-label");
+      const size = label && parseFloat(label.getAttribute("font-size")) * px;
+      check("a state's code is 11px on screen", Math.abs(size - 11) < 0.05, size);
+      const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+      const rule = (css.match(/\n\.state-label\s*\{[^}]*\}/) || [""])[0];
+      check("no stylesheet size or halo overrides it, and no colour literal",
+        !/font-size|stroke-width|#[0-9a-f]{3,6}/i.test(rule), rule.replace(/\s+/g, " "));
+      const callouts = [...D.querySelectorAll("#usMap .state-callout")]
+        .map((g) => g.getAttribute("data-state"));
+      if (width < 500) {
+        check("states too small for their code are named in callouts",
+          ["RI", "DE", "MD", "NJ", "MA", "CT", "HI"].every((c) => callouts.includes(c)),
+          callouts.join(" "));
+        check("and are not also labelled in place", ["RI", "DE"].every((c) =>
+          ![...D.querySelectorAll("#usMap > g > .state-label")].some((t) => t.textContent === c)));
+      } else {
+        check("a wide map labels more states in place", callouts.length < 7, callouts.join(" "));
+      }
+      check("D.C. is named in the strip, not a callout", !callouts.includes("DC") &&
+        [...D.querySelectorAll("#mapTerritories .territory-label")].some((t) => t.textContent === "DC"));
+      const ri = D.querySelector('#usMap .state-callout[data-state="RI"]');
+      if (ri) {
+        ri.querySelector(".callout-box").dispatchEvent(
+          new page.window.MouseEvent("click", { bubbles: true }));
+        check("a callout can be tapped to pick its state",
+          /state=RI/.test(page.window.location.hash) &&
+            D.querySelector('#usMap .state[data-state="RI"]').getAttribute("aria-pressed") === "true",
+          page.window.location.hash);
+        check("and its box takes the state's colour and shows it is picked",
+          !!ri.querySelector(".callout-box.is-selected") &&
+            !!ri.querySelector(".callout-box").style.fill);
+        check("a callout is not a second tab stop for the state",
+          ri.closest('[aria-hidden="true"]') && !ri.querySelector("[tabindex]"));
+      }
+    });
+  }
+}
+
 async function testDistrictsOnAPhone() {
   // Numbers were sized for a 620px map and scaled with it: on a phone every
   // one was 4px tall. They are 11px at the width the map is drawn, written
@@ -2181,6 +2301,7 @@ async function testDistrictsOnAPhone() {
   if (!only || only === "index.html") await testOdds();
   if (!only || only === "index.html") await testSeatRows();
   if (!only || only === "map.html") await testMap();
+  if (!only || only === "map.html") await testMapOnAPhone();
   if (!only || only === "states") await testStates();
   if (!only || only === "redistricting") await testRedistricting();
   if (!only || only === "redistricting") await testDistrictPages();

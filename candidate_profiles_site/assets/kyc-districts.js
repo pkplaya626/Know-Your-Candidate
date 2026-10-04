@@ -841,6 +841,12 @@
       html.push('<option value="', String(n), '">', KYC.escapeHtml(seat(n)), "</option>");
     });
     html.push("</select></label>");
+    // Shift-click has no touch equivalent: on a phone the only way to
+    // compare districts was a preset group.
+    html.push(
+      '<label class="districts-toggle"><input type="checkbox" id="compareToggle"> ',
+      "Compare: each click adds a district</label>"
+    );
     if (redrawn()) {
       html.push(
         '<label class="districts-toggle"><input type="checkbox" id="ghostToggle" checked> ',
@@ -851,7 +857,7 @@
     if (many) {
       html.push('<p class="state-note">', redrawn() ? "Or click" : "Or click",
         " a district on ", redrawn() ? "either map" : "the map",
-        "; Shift-click to compare up to ", String(MAX_FOCUS), ".",
+        "; turn on Compare, or Shift-click, to compare up to ", String(MAX_FOCUS), ".",
         redrawn() ? " Shares of area describe land, not people." : "", "</p>");
     }
     html.push(
@@ -927,7 +933,8 @@
       var shape = event.target.closest("[data-district]");
       if (!shape) return;
       var n = parseInt(shape.getAttribute("data-district"), 10);
-      if (event.shiftKey || event.ctrlKey || event.metaKey) {
+      var compare = el("compareToggle");
+      if (event.shiftKey || event.ctrlKey || event.metaKey || (compare && compare.checked)) {
         var next = focus.indexOf(n) === -1 ? focus.concat([n])
           : focus.filter(function (m) { return m !== n; });
         setFocus(next.length > MAX_FOCUS ? next.slice(1) : next);

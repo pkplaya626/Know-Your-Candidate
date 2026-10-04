@@ -46,18 +46,22 @@
         <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
         <label class="sr-only" for="searchInput">Search profiles</label>
         <input type="search" id="searchInput" autocomplete="off" spellcheck="false"
-               placeholder="Search name, state, committee, education…">
+               placeholder="Search name, state, committee, education…"
+               data-placeholder-short="Search profiles…">
     </div>
 
     <div class="header-actions">
-        <label class="sr-only" for="sortBy">Sort results</label>
-        <select id="sortBy" class="select select-bare">
-            <option value="region">Sort: by region</option>
-            <option value="senate26">Sort: 2026 Senate races</option>
-            <option value="name">Sort: by name</option>
-            <option value="age-desc">Sort: oldest first</option>
-            <option value="age-asc">Sort: youngest first</option>
-        </select>
+        <div class="sort-control">
+            <svg class="icon" aria-hidden="true"><use href="#i-sort"/></svg>
+            <label class="sr-only" for="sortBy">Sort results</label>
+            <select id="sortBy" class="select select-bare">
+                <option value="region">Sort: by region</option>
+                <option value="senate26">Sort: 2026 Senate races</option>
+                <option value="name">Sort: by name</option>
+                <option value="age-desc">Sort: oldest first</option>
+                <option value="age-asc">Sort: youngest first</option>
+            </select>
+        </div>
 
         <div class="menu">
             <button type="button" class="btn-icon" id="themeButton"
@@ -151,8 +155,13 @@
 
     <main class="app-main" id="mainContent">
 
-        <div class="toolbar" role="group" aria-label="Filters">
-            <div class="chip-groups">
+        <div class="toolbar" role="group" aria-label="Filters" data-filters="closed">
+            <button type="button" class="chip filters-toggle" id="filtersToggle"
+                    aria-expanded="false" aria-controls="chipGroups">
+                <svg class="icon icon-sm" aria-hidden="true"><use href="#i-filter"/></svg>
+                Filters <span class="filters-count" id="filtersCount"></span>
+            </button>
+            <div class="chip-groups" id="chipGroups">
                 <div class="chip-group" role="group" aria-label="Chamber">
                     <button type="button" class="chip" data-group="chamber" data-value="all"
                             aria-pressed="true">All</button>

@@ -232,6 +232,48 @@ def signed_distance(x, y, rings):
     return best if inside else -best
 
 
+def _crosses(ax, ay, bx, by, box):
+    """Whether segment a-b touches the inside of *box* (x0, y0, x1, y1)."""
+    x0, y0, x1, y1 = box
+    t0, t1 = 0.0, 1.0
+    dx, dy = bx - ax, by - ay
+    for p, q in ((-dx, ax - x0), (dx, x1 - ax), (-dy, ay - y0), (dy, y1 - ay)):
+        if p == 0:
+            if q < 0:
+                return False
+            continue
+        r = q / p
+        if p < 0:
+            t0 = max(t0, r)
+        else:
+            t1 = min(t1, r)
+        if t0 > t1:
+            return False
+    return True
+
+
+def box_room(x, y, rings, aspect=1.6):
+    """The half-height of the largest box, *aspect* times as wide as it is
+    tall, centred on ``(x, y)`` and inside *rings* - how big a label can be
+    written there. A circle's radius is the wrong test for a two-letter code:
+    Tennessee is thin and long, and "TN" is long and thin too."""
+    if signed_distance(x, y, rings) <= 0:
+        return 0.0
+    edges = [(ring[i], ring[(i + 1) % len(ring)]) for ring in rings for i in range(len(ring))]
+
+    def fits(k):
+        box = (x - aspect * k, y - k, x + aspect * k, y + k)
+        return not any(_crosses(a[0], a[1], b[0], b[1], box) for a, b in edges)
+
+    low, high = 0.0, 1.0
+    while fits(high):
+        low, high = high, high * 2
+    for _ in range(24):
+        middle = (low + high) / 2
+        low, high = (middle, high) if fits(middle) else (low, middle)
+    return low
+
+
 def outline_distance(rings):
     """A signed distance function for the land a tiling of *rings* covers.
 
@@ -367,10 +409,15 @@ def build(root="."):
         path = rings_to_path(rings)
         if not path:
             continue
+        label = label_point(rings)
         states[code] = {
             "name": (geometry.get("properties") or {}).get("name", code),
             "d": path,
-            "label": label_point(rings),
+            "label": label,
+            # How big a label fits at the label point: the half-height, in
+            # map units, of the largest box the shape of a two-letter code
+            # (1.75 times as wide as its capitals are tall).
+            "labelRoom": _round(box_room(label[0], label[1], rings, 1.75)),
             "bounds": bounds(rings),
         }
 

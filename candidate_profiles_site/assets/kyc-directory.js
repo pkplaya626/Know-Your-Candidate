@@ -169,6 +169,7 @@
   }
 
   function syncViewToggles() {
+    syncFiltersCount();
     var race = doc.getElementById("raceViewToggle");
     var senate = doc.getElementById("senateViewToggle");
     if (race) race.setAttribute("aria-pressed", String(state.view === "race"));
@@ -285,6 +286,33 @@
         chip.setAttribute("aria-pressed", String(active));
       }
     );
+    syncFiltersCount();
+  }
+
+  /* On a phone the chips fold behind one button, which says how many are on
+   * so a filtered grid never looks like the whole field. */
+  function activeFilters() {
+    return ["chamber", "role", "party", "election"].filter(function (group) {
+      return state[group] && state[group] !== "all";
+    }).length + (state.eliminated === "show" ? 1 : 0) + (state.view !== "grid" ? 1 : 0);
+  }
+
+  function syncFiltersCount() {
+    var count = doc.getElementById("filtersCount");
+    if (!count) return;
+    var n = activeFilters();
+    count.textContent = n ? "(" + n + " on)" : "";
+  }
+
+  function initFiltersToggle() {
+    var toggle = doc.getElementById("filtersToggle");
+    if (!toggle) return;
+    var bar = toggle.closest(".toolbar");
+    toggle.addEventListener("click", function () {
+      var open = bar.getAttribute("data-filters") !== "open";
+      bar.setAttribute("data-filters", open ? "open" : "closed");
+      toggle.setAttribute("aria-expanded", String(open));
+    });
   }
 
   function initChips() {
@@ -442,6 +470,7 @@
     }
     KYC.profile.ensure();
     initChips();
+    initFiltersToggle();
     initStateFilter();
     initSearch();
     initSort();
