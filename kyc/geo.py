@@ -232,7 +232,86 @@ def signed_distance(x, y, rings):
     return best if inside else -best
 
 
-def polylabel(rings, cells=8):
+def _crosses(ax, ay, bx, by, box):
+    """Whether segment a-b touches the inside of *box* (x0, y0, x1, y1)."""
+    x0, y0, x1, y1 = box
+    t0, t1 = 0.0, 1.0
+    dx, dy = bx - ax, by - ay
+    for p, q in ((-dx, ax - x0), (dx, x1 - ax), (-dy, ay - y0), (dy, y1 - ay)):
+        if p == 0:
+            if q < 0:
+                return False
+            continue
+        r = q / p
+        if p < 0:
+            t0 = max(t0, r)
+        else:
+            t1 = min(t1, r)
+        if t0 > t1:
+            return False
+    return True
+
+
+def box_room(x, y, rings, aspect=1.6):
+    """The half-height of the largest box, *aspect* times as wide as it is
+    tall, centred on ``(x, y)`` and inside *rings* - how big a label can be
+    written there. A circle's radius is the wrong test for a two-letter code:
+    Tennessee is thin and long, and "TN" is long and thin too."""
+    if signed_distance(x, y, rings) <= 0:
+        return 0.0
+    edges = [(ring[i], ring[(i + 1) % len(ring)]) for ring in rings for i in range(len(ring))]
+
+    def fits(k):
+        box = (x - aspect * k, y - k, x + aspect * k, y + k)
+        return not any(_crosses(a[0], a[1], b[0], b[1], box) for a, b in edges)
+
+    low, high = 0.0, 1.0
+    while fits(high):
+        low, high = high, high * 2
+    for _ in range(24):
+        middle = (low + high) / 2
+        low, high = (middle, high) if fits(middle) else (low, middle)
+    return low
+
+
+def outline_distance(rings):
+    """A signed distance function for the land a tiling of *rings* covers.
+
+    The rings are a whole map's districts. Inside is by the even-odd rule
+    over all of them; distance is measured only to edges no two rings share
+    - the coast and the state line - so the lines between the districts are
+    not treated as edges of the land. A shared edge is recognised by its
+    exact coordinates, which a topology's shared arcs guarantee.
+    """
+    count = {}
+    for ring in rings:
+        for i in range(len(ring)):
+            a, b = tuple(ring[i]), tuple(ring[(i + 1) % len(ring)])
+            if a != b:
+                key = (a, b) if a <= b else (b, a)
+                count[key] = count.get(key, 0) + 1
+    edges = [key for key, seen in count.items() if seen == 1]
+
+    def distance(x, y):
+        inside = False
+        for ring in rings:
+            n = len(ring)
+            for i in range(n):
+                ax, ay = ring[i]
+                bx, by = ring[(i + 1) % n]
+                if (ay > y) != (by > y) and x < (bx - ax) * (y - ay) / (by - ay) + ax:
+                    inside = not inside
+        best = float("inf")
+        for (ax, ay), (bx, by) in edges:
+            dx, dy = bx - ax, by - ay
+            t = max(0.0, min(1.0, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy)))
+            best = min(best, math.hypot(x - ax - t * dx, y - ay - t * dy))
+        return best if inside else -best
+
+    return distance
+
+
+def polylabel(rings, cells=8, within=None):
     """The interior point farthest from any edge - the pole of
     inaccessibility, after Mapbox's polylabel.
 
@@ -241,6 +320,11 @@ def polylabel(rings, cells=8):
     coastal marsh, between Michigan's peninsulas, and into the Pacific
     between Hawaii's islands. This point is inside the shape, as far from
     its edges as the shape allows.
+
+    *within*, a signed distance function for a second region, asks for the
+    point of the overlap instead: a new district that runs out to sea is
+    labelled on its land. Inside both, the distance to the overlap's edge is
+    the smaller of the two distances, so the search is the same.
     """
     xs = [p[0] for r in rings for p in r]
     ys = [p[1] for r in rings for p in r]
@@ -250,9 +334,13 @@ def polylabel(rings, cells=8):
     cell = size / cells
     heap, counter = [], 0
 
+    def distance(x, y):
+        d = signed_distance(x, y, rings)
+        return d if within is None else min(d, within(x, y))
+
     def push(x, y, half):
         nonlocal counter
-        d = signed_distance(x, y, rings)
+        d = distance(x, y)
         heapq.heappush(heap, (-(d + half * math.sqrt(2)), counter, x, y, half, d))
         counter += 1
 
@@ -264,7 +352,7 @@ def polylabel(rings, cells=8):
             x += cell
         y += cell
     middle = ((x0 + x1) / 2, (y0 + y1) / 2)
-    best = (signed_distance(*middle, rings), middle[0], middle[1])
+    best = (distance(*middle), middle[0], middle[1])
     while heap:
         bound, _, x, y, half, d = heapq.heappop(heap)
         if d > best[0]:
@@ -321,10 +409,15 @@ def build(root="."):
         path = rings_to_path(rings)
         if not path:
             continue
+        label = label_point(rings)
         states[code] = {
             "name": (geometry.get("properties") or {}).get("name", code),
             "d": path,
-            "label": label_point(rings),
+            "label": label,
+            # How big a label fits at the label point: the half-height, in
+            # map units, of the largest box the shape of a two-letter code
+            # (1.75 times as wide as its capitals are tall).
+            "labelRoom": _round(box_room(label[0], label[1], rings, 1.75)),
             "bounds": bounds(rings),
         }
 

@@ -164,7 +164,29 @@ CI fails if any of them come back.
   without using the map.
 - Skip link, labelled controls, live region on the result count, focus-trapped
   dialog with focus restore, `prefers-reduced-motion` honoured.
-- The sidebar becomes an off-canvas drawer under 1000px.
+- The sidebar becomes an off-canvas drawer under 1000px. It takes focus when
+  it opens, closes when a state is picked in it, and is hidden, not just moved
+  off-screen, when closed.
+
+### On a phone
+
+Measured in Chrome's device emulation at 360, 390 and 430px and in landscape:
+
+- Below 1000px the page itself scrolls, under a sticky header, so Safari's
+  toolbars collapse and a tap on the status bar goes back to the top. It used
+  to be a box inside a body that never scrolled.
+- Every text field and menu is 16px, so iOS does not zoom into the page when
+  one is tapped.
+- The grid's filters fold behind a **Filters** button that counts the ones that
+  are on, and its sort is an icon over its own menu. The search box had been
+  squeezed to 0-13px wide.
+- The profile dialog is the whole screen and scrolls as one page, with the
+  close button kept in reach.
+- Map text is 11px on screen at the width the map is drawn. On the partisan
+  map, states too small for their code are named in boxes of their own colour
+  in the Atlantic, and the boxes can be tapped.
+- Buttons, chips and links meant for a finger are at least 44px.
+- The browser's toolbar colour follows the chosen theme.
 
 ### Getting around
 
@@ -806,15 +828,22 @@ own record on 2026-10-03:
 Missouri is not on the list. Its 2025 map was suspended by a referendum
 petition, and the courts kept the 2022 map in place; its page says so.
 
-- **Every district numbered.** Districts too small to number statewide are
-  numbered in insets. `kyc/districts.py` places them automatically around each
-  cluster of small districts and names each after its biggest towns. Each inset
-  is sized so its closest two numbers sit apart.
+- **Every district numbered, at any width.** Numbers are 11px on screen at
+  whatever width the map is drawn; the page measures it, and redraws when it
+  changes. A number is written where its district has room for it: the build
+  records each district's clear room around its label point. Districts too
+  small to number on a phone's map are numbered in insets, which
+  `kyc/districts.py` places around each cluster and names after its biggest
+  towns. An inset drawn too narrow for every number in it, such as New York
+  City on a phone, is followed by a closer one ("New York, closer").
+  `tests/test_districts.py` checks that every district is numbered at every
+  width from 300px up.
 - **Who moved, from the data.** Members running in a different district are
   read from `contestRaceId` (rule 30) and grouped where their moves share a
   district. Bera and Kiley are one view, and Al Green's move from TX-9
   to TX-18 another. A redrawn state opens on its first group. Any district can be
-  picked from a list or by clicking it, and Shift-click compares up to three.
+  picked from a list or by clicking it. Shift-click, or the **Compare** switch
+  on a touch screen, compares up to three.
   The choice is in the address (`#/?d=3,6`).
 - **A close-up of the picked districts.** It shows county lines, towns, and
   captions naming who holds the seat or is running in it, from `profiles.js`.

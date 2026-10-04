@@ -445,14 +445,15 @@ class Topology:
     def label_points(self, name, out_name, land=None):
         """The pole of inaccessibility of every district: a label point
         well inside, never on a crescent's empty middle. With *land* (the
-        rings of the Census map, which is clipped to the shore), a district
-        that runs out to sea is labelled on its land."""
+        rings of the Census map, which is clipped to the shore), it is the
+        pole of the district's land - the part the page draws - so a
+        district that runs out to sea is labelled where it can be seen,
+        and no number sits against a coast it does not show."""
         points = []
+        coast = geo.outline_distance(land) if land is not None else None
         for props, arcs_of in self.objects[name]:
             rings = [[self._metres(p) for p in self.ring(ids)] for ids in arcs_of]
-            x, y = polylabel(rings)
-            if land is not None and _signed_distance(x, y, land) <= 0:
-                x, y = _on_land(rings, land)
+            x, y = polylabel(rings, within=coast)
             points.append({"type": "Point", "properties": props,
                            "coordinates": [int(round(x / self.kx)), int(round(y / self.ky))]})
         self.points = getattr(self, "points", {})
@@ -505,7 +506,6 @@ def _area(ring):
 
 
 # One implementation of the label point, shared with the national map.
-_signed_distance = geo.signed_distance
 polylabel = geo.polylabel
 
 

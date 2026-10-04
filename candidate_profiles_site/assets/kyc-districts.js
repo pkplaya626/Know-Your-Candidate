@@ -28,9 +28,13 @@
   var data = global.legislatorsData || [];
   var races = global.kycRaces || [];
 
-  /* Text is sized for a map drawn this many pixels wide; SVG scales it with
-   * the map, so it stays in proportion on a phone. */
+  /* Text is sized for the width a map is actually drawn at, measured after
+   * the first render. It used to be sized for 620px and left to scale with
+   * the map: on a phone the map is half that, and every number came out
+   * 4px tall - a smudge of bold glyph and halo. 620 is only the first guess
+   * (and what a test without layout sees). */
   var DESIGN = 620;
+  var drawnAt = DESIGN;
   /* One colour per picked district; they are deliberately not the party
    * colours, which mean something everywhere else on the site. */
   var MAX_FOCUS = 3;
@@ -38,6 +42,12 @@
    * separately leave slivers along every shared line. */
   var MIN_SHARE = 0.01;
   var TOWN_LABELS = 14;
+  /* A district's number is written wherever the district has this much
+   * clear room around its label point, in screen pixels: half an 11px number
+   * and its halo. kyc/districts.py plans the insets by the same rule
+   * (LABEL_ROOM_PX), so every district is numbered somewhere. */
+  var LABEL_ROOM = 6.5;
+  var NUMBER_PX = 11;
 
   var focus = [];
   var OFF_BALLOT = { eliminated: true, withdrawn: true, unlisted: true };
@@ -270,7 +280,7 @@
    * centred over it instead. */
   function text(cls, x, y, size, content, anchor) {
     return '<text class="' + cls + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) +
-      '" font-size="' + size.toFixed(2) + '" stroke-width="' + (size * 0.24).toFixed(2) +
+      '" font-size="' + size.toFixed(2) + '" stroke-width="' + (size * 0.2).toFixed(2) +
       '" text-anchor="' + (anchor || "middle") + '">' + KYC.escapeHtml(content) + "</text>";
   }
 
@@ -339,27 +349,26 @@
       }).join(" ") + '" role="img" aria-label="' + KYC.escapeAttr(label) + '">' + body + "</svg>";
   }
 
-  function insetBoxes() {
-    return state.insets.map(function (inset) { return inset.box; });
+  /** Whether a district's number fits at *px* screen pixels per map unit.
+   *  A state elected at large has one district, labelled however small. */
+  function fitsAt(district, px) {
+    return state.atLarge || district.room * px >= LABEL_ROOM;
   }
 
-  /** The whole state. Districts too small to number here are numbered in
-   *  the metro insets instead, as on a printed atlas. */
+  /** The whole state. A district too small to number here is numbered in
+   *  a metro inset, as on a printed atlas. */
   function statewide(plan) {
     var frame = state.viewBox.slice();
-    var px = DESIGN / frame[2];
-    var insets = insetBoxes();
+    var px = drawnAt / frame[2];
     var labels = numbers(plan).map(function (n) {
       var district = plan.districts[n];
       var picked = focus.indexOf(n) !== -1;
-      if (!picked) {
-        if (insets.some(function (b) { return within(district.at, b, 0); })) return "";
-        if (district.area * px * px < 380) return "";
-      }
+      if (!picked && !fitsAt(district, px)) return "";
       return text("district-num" + focusClass(n), district.at[0], district.at[1],
-                  (picked ? 15 : 11) / px, numLabel(n));
+                  (picked ? 15 : NUMBER_PX) / px, numLabel(n));
     }).join("");
-    var lines = insets.map(function (b) {
+    var lines = state.insets.map(function (inset) {
+      var b = inset.box;
       return '<rect class="inset-outline" x="' + b[0] + '" y="' + b[1] + '" width="' + b[2] +
         '" height="' + b[3] + '"/>';
     }).join("");
@@ -370,35 +379,61 @@
       '<g class="district-labels" aria-hidden="true">' + labels + "</g>");
   }
 
-  /* Each inset is drawn at the width the build chose - enough to keep its
-   * closest two numbers apart - and they wrap: squeezed into one row, the
-   * Los Angeles inset was too small to number every district in it. */
+  /* Each inset is drawn as wide as it needs for every number in it, or as
+   * wide as the card where that is narrower, and they wrap: squeezed into
+   * one row, the Los Angeles inset was too small to number every district.
+   * Drawn narrower than it needs - New York City on a phone - an inset is
+   * followed by the closer insets the build planned for that case, and the
+   * districts too small for it are numbered there. */
   function insets(plan) {
-    return '<div class="inset-row">' + state.insets.map(function (inset) {
-      var frame = inset.box;
-      var width = Math.min(DESIGN, inset.width || DESIGN);
-      var px = width / frame[2];
-      var placed = [];
-      var labels = numbers(plan).filter(function (n) {
-        return meets(plan.districts[n].box, frame);
-      }).map(function (n) {
-        var district = plan.districts[n];
-        if (district.area * px * px < 30) return "";
-        var at = labelAt(plan, n, frame, 9 / px);
-        if (!at || at[2] * px < 7) return "";
-        var size = (focus.indexOf(n) !== -1 ? 12 : 10) / px;
-        var box = textBox(at[0], at[1], numLabel(n), size, "middle");
-        if (collides(box, placed)) return "";
-        placed.push(box);
-        return text("district-num" + focusClass(n), at[0], at[1], size, numLabel(n));
-      }).join("");
-      return '<figure class="inset" style="width:' + Math.round(width) + 'px">' +
-        svg(frame, "district-inset", inset.title + " on the " + plan.title,
-          '<g class="district-shapes">' + clipped(plan, shapes(plan, frame)) + "</g>" +
-          '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan) +
-          '<g class="district-labels" aria-hidden="true">' + labels + "</g>") +
-        "<figcaption>" + KYC.escapeHtml(inset.title) + "</figcaption></figure>";
-    }).join("") + "</div>";
+    return '<div class="inset-row">' + insetFigures(plan, state.insets) + "</div>";
+  }
+
+  function insetFigures(plan, list) {
+    return list.map(function (inset) {
+      var width = Math.min(drawnAt, inset.width);
+      return insetFigure(plan, inset, width) +
+        (width < inset.fits ? insetFigures(plan, inset.detail || []) : "");
+    }).join("");
+  }
+
+  function insetFigure(plan, inset, width) {
+    var frame = inset.box;
+    var px = width / frame[2];
+    var placed = [];
+    var mine = [];
+    var others = [];
+    numbers(plan).forEach(function (n) {
+      var district = plan.districts[n];
+      if (within(district.at, frame, 9 / px)) mine.push(n);
+      else if (meets(district.box, frame)) others.push(n);
+    });
+    // The districts whose label points are in the frame are what the inset
+    // is for, and are numbered first; a district reaching in from outside
+    // is numbered only where that collides with nothing.
+    var labels = mine.map(function (n) {
+      var district = plan.districts[n];
+      var picked = focus.indexOf(n) !== -1;
+      if (!picked && !fitsAt(district, px)) return "";
+      var size = (picked ? 13 : NUMBER_PX) / px;
+      placed.push(textBox(district.at[0], district.at[1], numLabel(n), size, "middle"));
+      return text("district-num" + focusClass(n), district.at[0], district.at[1], size,
+                  numLabel(n));
+    }).concat(others.map(function (n) {
+      var at = labelAt(plan, n, frame, 9 / px);
+      if (!at || at[2] * px < LABEL_ROOM + 0.5) return "";
+      var size = (focus.indexOf(n) !== -1 ? 13 : NUMBER_PX) / px;
+      var box = textBox(at[0], at[1], numLabel(n), size, "middle");
+      if (collides(box, placed)) return "";
+      placed.push(box);
+      return text("district-num" + focusClass(n), at[0], at[1], size, numLabel(n));
+    })).join("");
+    return '<figure class="inset" style="width:' + Math.round(width) + 'px">' +
+      svg(frame, "district-inset", inset.title + " on the " + plan.title,
+        '<g class="district-shapes">' + clipped(plan, shapes(plan, frame)) + "</g>" +
+        '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan) +
+        '<g class="district-labels" aria-hidden="true">' + labels + "</g>") +
+      "<figcaption>" + KYC.escapeHtml(inset.title) + "</figcaption></figure>";
   }
 
   /** The frame for the close-up: where the picked districts run under the
@@ -432,7 +467,7 @@
 
   function closeup(plan) {
     var frame = closeupFrame();
-    var px = DESIGN / frame[2];
+    var px = drawnAt / frame[2];
     var other = otherPlan(plan);
     var placed = [];
     var marks = [];
@@ -712,6 +747,37 @@
         String(button.getAttribute("data-focus") === focus.join(",")));
     });
     el("districtPick").value = focus.length === 1 ? String(focus[0]) : "";
+    // Text sizes depend on the drawn width, which only layout knows. One
+    // redraw at most, so a width that flickers cannot loop.
+    var measured = mapWidth();
+    if (measured && Math.abs(measured - drawnAt) > 4 && !remeasuring) {
+      drawnAt = measured;
+      remeasuring = true;
+      try { render(); } finally { remeasuring = false; }
+    }
+  }
+
+  var remeasuring = false;
+
+  /** How wide the statewide map is actually drawn, in CSS pixels; 0 when
+   *  there is no layout to measure (a test, a hidden page). */
+  function mapWidth() {
+    var map = doc.querySelector(".plan-card .district-statewide");
+    var width = map ? map.getBoundingClientRect().width : 0;
+    return width > 40 ? Math.round(width) : 0;
+  }
+
+  function watchWidth() {
+    if (!global.ResizeObserver) return;
+    var last = 0;
+    var redraw = KYC.debounce(function () { render(); }, 120);
+    new global.ResizeObserver(function (entries) {
+      var width = Math.round(entries[0].contentRect.width);
+      if (Math.abs(width - last) > 4) {
+        last = width;
+        redraw();
+      }
+    }).observe(el("planGrid"));
   }
 
   function setFocus(list, opts) {
@@ -775,6 +841,12 @@
       html.push('<option value="', String(n), '">', KYC.escapeHtml(seat(n)), "</option>");
     });
     html.push("</select></label>");
+    // Shift-click has no touch equivalent: on a phone the only way to
+    // compare districts was a preset group.
+    html.push(
+      '<label class="districts-toggle"><input type="checkbox" id="compareToggle"> ',
+      "Compare: each click adds a district</label>"
+    );
     if (redrawn()) {
       html.push(
         '<label class="districts-toggle"><input type="checkbox" id="ghostToggle" checked> ',
@@ -785,7 +857,7 @@
     if (many) {
       html.push('<p class="state-note">', redrawn() ? "Or click" : "Or click",
         " a district on ", redrawn() ? "either map" : "the map",
-        "; Shift-click to compare up to ", String(MAX_FOCUS), ".",
+        "; turn on Compare, or Shift-click, to compare up to ", String(MAX_FOCUS), ".",
         redrawn() ? " Shares of area describe land, not people." : "", "</p>");
     }
     html.push(
@@ -861,7 +933,8 @@
       var shape = event.target.closest("[data-district]");
       if (!shape) return;
       var n = parseInt(shape.getAttribute("data-district"), 10);
-      if (event.shiftKey || event.ctrlKey || event.metaKey) {
+      var compare = el("compareToggle");
+      if (event.shiftKey || event.ctrlKey || event.metaKey || (compare && compare.checked)) {
         var next = focus.indexOf(n) === -1 ? focus.concat([n])
           : focus.filter(function (m) { return m !== n; });
         setFocus(next.length > MAX_FOCUS ? next.slice(1) : next);
@@ -920,6 +993,7 @@
     drawDefs();
     app.innerHTML = controls(list);
     bind(app, defaults);
+    watchWidth();
 
     var initial = KYC.router.read();
     var wanted = initial.view === "list" ? parseFocus(initial.params.d) : [];

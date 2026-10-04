@@ -86,8 +86,8 @@ python build_profile_site.py results          # who is still in, from Wikipedia
 python build_profile_site.py campaigns        # campaign websites from FEC committees
 python build_profile_site.py enrich           # fill gaps; check every campaign site
 python build_profile_site.py odds             # market prices and polling averages (writes odds.js)
-python -m unittest discover tests             # 662 tests, no dependencies
-npm install && npm test                       # 631 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 672 tests, no dependencies
+npm install && npm test                       # 716 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -419,6 +419,27 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     project's old image host,
     theunitedstates.io, lapsed into a parking network; nothing links it now
     (rule 35).
+
+43. **Size map text for the width the map is drawn at.** The district
+    maps' numbers were sized for a 620px map and scaled down with it, so a
+    phone drew them 4px tall; the partisan map's codes were 3.8px, at weight
+    800 on a halo - a glow, not a letter. Both pages measure the width they
+    draw at and write text 11px on screen, where the build's measured room
+    (`room`, `labelRoom`) says it fits; the rest is numbered in an inset or a
+    callout, never dropped. `test_every_district_is_numbered_at_every_width`
+    checks every district at every width from `PHONE_PX` up. A label point
+    is the pole of what the page draws: a new map's district is labelled on
+    its land (`geo.polylabel(..., within=)`). The grid search it replaced
+    ignored its own bounding box and numbered FL-19 and OH-14 on their own
+    borders.
+
+44. **On a phone, the page scrolls.** A fixed body with a scrolling box
+    inside kept Safari's toolbars on screen, broke tap-to-top, and pinned the
+    grid's filters over half the screen while results scrolled under them.
+    Below 1000px the document scrolls under a sticky header, and what must
+    stay in reach (the dialog's close button) is sticky inside what scrolls.
+    Every field and menu is 16px there, or iOS zooms the page when one is
+    tapped and leaves it zoomed.
 
 ## District maps
 

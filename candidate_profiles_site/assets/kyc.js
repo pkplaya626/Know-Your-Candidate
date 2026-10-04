@@ -44,6 +44,7 @@
     link: "M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1",
     share: "M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 15V3M8 7l4-4 4 4",
     filter: "M3 5h18l-7 8v6l-4 2v-8z",
+    sort: "M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4",
   };
 
   function iconSprite() {
@@ -110,8 +111,25 @@
     } catch (e) {
       /* the attribute above still applies */
     }
+    syncThemeColor();
     themeListeners.forEach(function (fn) {
       try { fn(resolveTheme(name), name); } catch (e) { /* keep going */ }
+    });
+  }
+
+  /* A phone tints its toolbar from <meta name="theme-color">. The pages
+   * carry a pair keyed to the OS's preference, so a reader who chose light on
+   * a dark phone got a near-black bar over a white page, and AMOLED black got
+   * a grey one. Once a theme applies, both say the page's own colour. */
+  function syncThemeColor() {
+    var metas = doc.querySelectorAll('meta[name="theme-color"]');
+    if (!metas.length || !global.getComputedStyle || !doc.documentElement) return;
+    var colour = global.getComputedStyle(doc.documentElement)
+      .getPropertyValue("--surface-0").trim();
+    if (!colour) return;
+    Array.prototype.forEach.call(metas, function (meta) {
+      meta.removeAttribute("media");
+      meta.setAttribute("content", colour);
     });
   }
 
@@ -960,20 +978,38 @@
     // Off-canvas sidebar for narrow screens.
     var toggle = doc.querySelector(".sidebar-toggle");
     var scrim = doc.querySelector(".sidebar-scrim");
+    var sidebar = doc.getElementById("sidebar");
     var closeSidebar = function () {
+      if (!doc.body.classList.contains("sidebar-open")) return;
       doc.body.classList.remove("sidebar-open");
-      if (toggle) toggle.setAttribute("aria-expanded", "false");
+      if (toggle) {
+        toggle.setAttribute("aria-expanded", "false");
+        // Back to the button that opened it, unless the reader has already
+        // moved on to something outside the drawer.
+        if (!doc.activeElement || doc.activeElement === doc.body ||
+            (sidebar && sidebar.contains(doc.activeElement))) toggle.focus();
+      }
     };
     if (toggle) {
       toggle.addEventListener("click", function () {
-        var open = doc.body.classList.toggle("sidebar-open");
-        toggle.setAttribute("aria-expanded", String(open));
+        if (doc.body.classList.contains("sidebar-open")) return closeSidebar();
+        doc.body.classList.add("sidebar-open");
+        toggle.setAttribute("aria-expanded", "true");
+        var first = sidebar && sidebar.querySelector(FOCUSABLE);
+        if (first) first.focus({ preventScroll: true });
       });
     }
     if (scrim) scrim.addEventListener("click", closeSidebar);
     doc.addEventListener("keydown", function (event) {
       if (event.key === "Escape") closeSidebar();
     });
+    // Picking a state in the drawer on a phone left the drawer open over
+    // what was picked; the reader had to find the dimmed strip to see it.
+    if (sidebar) {
+      sidebar.addEventListener("change", function (event) {
+        if (event.target.matches("select")) closeSidebar();
+      });
+    }
 
     // Theme menu.
     var themeButton = doc.getElementById("themeButton");
@@ -999,6 +1035,13 @@
         markChecked();
       });
       markChecked();
+    }
+
+    // A placeholder written for a desktop box read "Search na" on a phone.
+    if (global.matchMedia && global.matchMedia("(max-width: 560px)").matches) {
+      Array.prototype.forEach.call(doc.querySelectorAll("[data-placeholder-short]"), function (input) {
+        input.setAttribute("placeholder", input.getAttribute("data-placeholder-short"));
+      });
     }
 
     renderSummary();
