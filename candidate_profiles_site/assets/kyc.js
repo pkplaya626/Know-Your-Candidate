@@ -665,24 +665,41 @@
     },
 
     /* The pushed entry is marked, so closing knows whether there is a view
-     * of ours behind it to go back to. */
+     * of ours behind it to go back to - and counts how many profiles deep
+     * it is. A profile opened from another profile's race list is pushed
+     * on top of it, so the browser's Back steps back through them; closing
+     * used to step back one at a time too, and every profile visited had
+     * to be closed in turn. */
     writeProfile: function (id) {
-      history.pushState(
-        { kycProfile: true },
-        "", global.location.pathname + "#/profile/" + encodeURIComponent(id)
-      );
+      var hash = "#/profile/" + encodeURIComponent(id);
+      if (global.location.hash === hash) return;
+      var state = history.state;
+      var depth = 1;
+      if (state && state.kycProfile) {
+        depth = (state.depth || 1) + 1;
+      } else if (/#\/profile\//.test(global.location.hash)) {
+        // A profile the reader landed on from a shared link: put the list
+        // beneath it, so closing what they open from it ends on the list,
+        // not on the profile they arrived at.
+        history.replaceState(null, "", global.location.pathname + "#/");
+      }
+      history.pushState({ kycProfile: true, depth: depth }, "",
+        global.location.pathname + hash);
     },
 
-    /** Leave a profile view. Back only undoes a profile this page pushed. A
-     *  visitor who arrived on a shared #/profile/ link has nothing of ours
-     *  behind them, and history.back() sent them off the site - so that
-     *  entry is replaced with the list in place and the page told to show
-     *  it, since replaceState fires no event of its own. */
+    /** Leave a profile view, however many profiles deep. Back only undoes
+     *  profiles this page pushed. A visitor who arrived on a shared
+     *  #/profile/ link has nothing of ours behind them, and history.back()
+     *  sent them off the site - so that entry is replaced with the list in
+     *  place and the page told to show it, since replaceState fires no
+     *  event of its own. */
     clearProfile: function () {
       if (!/#\/profile\//.test(global.location.hash)) return;
-      var pushed = history.state && history.state.kycProfile;
-      if (pushed) {
-        history.back();
+      var state = history.state;
+      if (state && state.kycProfile) {
+        var depth = state.depth || 1;
+        if (depth > 1) history.go(-depth);
+        else history.back();
         return;
       }
       history.replaceState(null, "", global.location.pathname + "#/");
@@ -883,6 +900,33 @@
     }
   }
 
+  /* The sidebar's "Jump to" list, on every page that carries one. It lived
+   * in the state pages' module, so the district maps - the same sidebar, a
+   * different module - showed an empty list. On a district map it goes to
+   * that state's map; anywhere else, to the state's page. */
+  function initJump() {
+    var select = doc.getElementById("stateJump");
+    if (!select || select.options.length > 1) return;
+    var states = meta().states || {};
+    var maps = meta().districtMaps || {};
+    var here = (doc.body && doc.body.getAttribute("data-state")) || "";
+    var onMaps = doc.body && doc.body.getAttribute("data-page") === "districts";
+    Object.keys(states).sort(function (a, b) {
+      return states[a].name.localeCompare(states[b].name);
+    }).forEach(function (code) {
+      var option = doc.createElement("option");
+      option.value = code;
+      option.textContent = states[code].name + " (" + code + ")";
+      if (code === here) option.selected = true;
+      select.appendChild(option);
+    });
+    select.addEventListener("change", function () {
+      var code = select.value;
+      if (!code) return;
+      global.location.href = onMaps && maps[code] ? siteRoot() + maps[code].page : stateUrl(code);
+    });
+  }
+
   function initShell() {
     if (doc.body && !doc.getElementById("kyc-sprite")) {
       var holder = doc.createElement("div");
@@ -937,6 +981,7 @@
 
     renderSummary();
     renderRememberedState();
+    initJump();
     var here = doc.body && doc.body.getAttribute("data-state");
     if (here) rememberState(here);
 

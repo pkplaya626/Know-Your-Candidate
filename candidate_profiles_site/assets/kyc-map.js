@@ -163,10 +163,12 @@
     Object.keys(geo.states).sort().forEach(function (code) {
       var shape = geo.states[code];
       parts.push(shapeMarkup(code, shape.name, shape.d));
-      if (shape.centroid) {
+      // The build places each name at the point farthest from the
+      // state's edges, not at its centroid (kyc/geo.py polylabel).
+      if (shape.label) {
         labels.push(
-          '<text class="state-label" x="' + shape.centroid[0] +
-          '" y="' + (shape.centroid[1] + 3.5) + '" text-anchor="middle">' +
+          '<text class="state-label" x="' + shape.label[0] +
+          '" y="' + (shape.label[1] + 3.5) + '" text-anchor="middle">' +
           KYC.escapeHtml(code) + "</text>"
         );
       }

@@ -99,22 +99,27 @@ class TestPathRendering(unittest.TestCase):
         self.assertTrue(geo.rings_to_path([[(0, 0), (4, 0), (4, 4)]]).endswith("Z"))
 
 
-class TestCentroid(unittest.TestCase):
+class TestLabelPoint(unittest.TestCase):
     def test_square(self):
-        square = [(0, 0), (10, 0), (10, 10), (0, 10), (0, 0)]
-        self.assertEqual(geo.rings_centroid([square]), (5.0, 5.0))
+        square = [(0, 0), (10, 0), (10, 10), (0, 10)]
+        x, y = geo.label_point([square])
+        self.assertAlmostEqual(x, 5.0, delta=0.1)
+        self.assertAlmostEqual(y, 5.0, delta=0.1)
 
-    def test_triangle(self):
-        triangle = [(0, 0), (6, 0), (0, 6), (0, 0)]
-        self.assertEqual(geo.rings_centroid([triangle]), (2.0, 2.0))
+    def test_a_crescent_is_labelled_on_itself(self):
+        # Its centroid falls in the empty middle; the label must not.
+        crescent = [(0, 0), (10, 0), (10, 10), (0, 10), (0, 8), (8, 8), (8, 2), (0, 2)]
+        x, y = geo.label_point([crescent])
+        self.assertGreater(geo.signed_distance(x, y, [crescent]), 0.5)
 
-    def test_zero_area_falls_back_to_the_vertex_mean(self):
-        # A label still has to land somewhere; the origin would be wrong.
-        line = [(0, 0), (4, 0), (0, 0)]
-        self.assertEqual(geo.rings_centroid([line]), (1.3, 0.0))
+    def test_islands_are_labelled_on_the_biggest(self):
+        big = [(0, 0), (20, 0), (20, 20), (0, 20)]
+        small = [(40, 0), (44, 0), (44, 4), (40, 4)]
+        x, y = geo.label_point([big, small])
+        self.assertTrue(0 < x < 20 and 0 < y < 20)
 
-    def test_no_points_has_no_centroid(self):
-        self.assertIsNone(geo.rings_centroid([]))
+    def test_no_points_has_no_label(self):
+        self.assertIsNone(geo.label_point([]))
 
 
 class TestAtlas(unittest.TestCase):
@@ -132,18 +137,27 @@ class TestAtlas(unittest.TestCase):
             with self.subTest(state=code):
                 self.assertTrue(shape["d"].startswith("M"), code)
                 self.assertGreater(len(shape["d"]), 40, code)
-                self.assertIsNotNone(shape["centroid"], code)
+                self.assertIsNotNone(shape["label"], code)
                 self.assertTrue(shape["name"], code)
 
-    def test_every_centroid_sits_inside_its_own_bounding_box(self):
-        # Catches a ring stitched together in the wrong order, which produces
-        # a plausible-looking path but throws the label across the map.
+    def test_every_label_sits_inside_its_own_state(self):
+        # Also catches a ring stitched together in the wrong order, which
+        # produces a plausible-looking path but throws the label across the
+        # map. The centroid labels this replaced put Hawaii's in the Pacific.
+        topo = geo.load_atlas(ROOT)
+        arcs = geo.decode_arcs(topo)
+        rings = {geo.FIPS_TO_STATE.get(str(g.get("id", "")).zfill(2)):
+                 geo.geometry_rings(g, arcs) for g in topo["objects"]["states"]["geometries"]}
         for code, shape in self.geo["states"].items():
-            cx, cy = shape["centroid"]
-            min_x, min_y, max_x, max_y = shape["bounds"]
             with self.subTest(state=code):
-                self.assertTrue(min_x <= cx <= max_x, f"{code} x={cx} in {min_x}..{max_x}")
-                self.assertTrue(min_y <= cy <= max_y, f"{code} y={cy} in {min_y}..{max_y}")
+                self.assertGreater(geo.signed_distance(*shape["label"], rings[code]), 0, code)
+        # The ones that were near an edge sit well inside now: Florida's was
+        # 4 px from its coast, Louisiana's on the marsh, Michigan's between
+        # its peninsulas.
+        for code in ("FL", "LA", "MI", "HI"):
+            with self.subTest(state=code):
+                self.assertGreater(geo.signed_distance(*self.geo["states"][code]["label"],
+                                                       rings[code]), 9, code)
 
     def test_geometry_stays_inside_the_viewbox(self):
         # Alaska's projected inset reaches slightly left of zero in the source
@@ -160,10 +174,10 @@ class TestAtlas(unittest.TestCase):
     def test_known_states_land_where_they_should(self):
         # A projection or FIPS mix-up would move these; the coarse quadrant is
         # the point, not the exact pixel.
-        west = self.geo["states"]["CA"]["centroid"][0]
-        east = self.geo["states"]["ME"]["centroid"][0]
-        north = self.geo["states"]["MN"]["centroid"][1]
-        south = self.geo["states"]["FL"]["centroid"][1]
+        west = self.geo["states"]["CA"]["label"][0]
+        east = self.geo["states"]["ME"]["label"][0]
+        north = self.geo["states"]["MN"]["label"][1]
+        south = self.geo["states"]["FL"]["label"][1]
         self.assertLess(west, east, "California should sit west of Maine")
         self.assertLess(north, south, "Minnesota should sit north of Florida")
 

@@ -1193,6 +1193,39 @@ async function testDeepLinks() {
       check("back to where the reader was", window.location.hash === before,
         `${window.location.hash} vs ${before}`);
     });
+
+    // Profiles opened from one another's race lists: Back steps through
+    // them, and one close ends on the page. Each close used to step back a
+    // single profile, so a reader closed every profile they had visited.
+    const start = window.location.hash;
+    window.KYC.profile.open(senator.id);
+    await settle(50);
+    const hops = [];
+    for (let i = 0; i < 2; i++) {
+      const next = [...D.querySelectorAll("#profileModal [data-goto]")]
+        .find((b) => hops.indexOf(b.getAttribute("data-goto")) === -1 &&
+          b.getAttribute("data-goto") !== senator.id);
+      if (!next) break;
+      hops.push(next.getAttribute("data-goto"));
+      next.click();
+      await settle(50);
+    }
+    window.history.back();
+    await settle();
+    const afterBack = D.getElementById("profileModalName").textContent;
+    D.querySelector("#profileModal .modal-footer [data-close]").click();
+    await settle();
+    const closedHash = window.location.hash;
+    const closed = modal.hidden;
+    await settle(200);
+    suite(`${page} — profiles opened from one another`, () => {
+      check("two race-mates were followed", hops.length === 2, hops.join(", "));
+      check("Back steps to the previous profile",
+        afterBack === window.KYC.byId(hops[0]).name, afterBack);
+      check("one close ends on the page the reader started from",
+        closed && closedHash === start, `${closedHash} vs ${start}`);
+      check("and the dialog stays closed", modal.hidden);
+    });
     window.close();
   }
 
@@ -2010,6 +2043,12 @@ async function testDistrictPages() {
       !cards[0].querySelector('.district-statewide g[clip-path] use.district-shape'));
     check("each map's sources are listed",
       /Census Bureau/.test(D.querySelector(".districts-sources").textContent));
+    // The sidebar's list was filled by the state pages' module only, so it
+    // was empty here.
+    const jump = D.getElementById("stateJump");
+    check("the Jump to list names every state and territory",
+      jump.options.length === 57, `${jump.options.length} options`);
+    check("with this page's state selected", jump.value === "TX", jump.value);
   });
 
   suite("redistricting/ca.html — the first page's address still answers", () => {

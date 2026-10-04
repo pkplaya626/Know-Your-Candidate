@@ -196,24 +196,6 @@
 
   /* --------------------------------------------------------------- chrome */
 
-  function initJump() {
-    var select = el("stateJump");
-    if (!select) return;
-    var states = KYC.meta().states || {};
-    Object.keys(states).sort(function (a, b) {
-      return states[a].name.localeCompare(states[b].name);
-    }).forEach(function (c) {
-      var option = doc.createElement("option");
-      option.value = c;
-      option.textContent = states[c].name + " (" + c + ")";
-      if (c === code) option.selected = true;
-      select.appendChild(option);
-    });
-    select.addEventListener("change", function () {
-      if (select.value) global.location.href = KYC.stateUrl(select.value);
-    });
-  }
-
   function initSearch() {
     var input = el("stateSearch");
     if (!input) return;
@@ -255,7 +237,6 @@
     }
     KYC.profile.ensure();
     if (kind === "states") renderIndex(); else renderState();
-    initJump();
     initSearch();
     initCards();
     KYC.router.onChange(function () { applyRoute(KYC.router.read()); });
