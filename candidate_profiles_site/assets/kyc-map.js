@@ -168,32 +168,32 @@
     var box = geo.viewBox || [0, 0, 975, 610];
     var px = drawnAt / box[2];
     var size = LABEL_PX / px;
-    var halo = (size * 0.18).toFixed(2);
     var strip = geo.territories || [];
     var inStrip = strip.map(function (t) { return t.code; });
 
-    function label(x, y, code, cls) {
-      return '<text class="' + (cls || "state-label") + '" x="' + x.toFixed(1) +
-        '" y="' + y.toFixed(1) + '" font-size="' + size.toFixed(2) + '" stroke-width="' + halo +
-        '" text-anchor="middle" dominant-baseline="central">' + KYC.escapeHtml(code) + "</text>";
+    // Every word on the map is page text in a layer over it, not SVG text:
+    // Samsung Internet's dark mode lightens whatever is dark inside an SVG,
+    // so a code's dark halo came out as light as the code and bloomed. Page
+    // text on a page background is darkened and lightened predictably.
+    // Positions are in map units here and become percentages of the frame.
+    var labels = [];
+    function label(x, y, html, cls, extra) {
+      labels.push({ x: x, y: y, html: html, cls: cls, extra: extra || "" });
     }
 
     // A callout: the state's code in a box of its colour, joined to it.
     var w = size * 2.3;
     var h = size * 1.4;
+    var lines = [];
     function callout(code, cx, cy) {
       var at = geo.states[code].label;
-      return '<g class="state-callout" data-state="' + KYC.escapeAttr(code) + '">' +
-        '<line class="callout-line" x1="' + at[0] + '" y1="' + at[1] + '" x2="' +
-        (cx - w / 2).toFixed(1) + '" y2="' + cy.toFixed(1) + '"/>' +
-        '<rect class="callout-box" data-state="' + KYC.escapeAttr(code) + '" x="' +
-        (cx - w / 2).toFixed(1) + '" y="' + (cy - h / 2).toFixed(1) + '" width="' +
-        w.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="' + (h * 0.2).toFixed(1) + '"/>' +
-        label(cx, cy, code) + "</g>";
+      lines.push('<line class="callout-line" x1="' + at[0] + '" y1="' + at[1] + '" x2="' +
+        (cx - w / 2).toFixed(1) + '" y2="' + cy.toFixed(1) + '"/>');
+      label(cx, cy, KYC.escapeHtml(code), "map-callout",
+        ' data-state="' + KYC.escapeAttr(code) + '"');
     }
 
     var parts = [];
-    var labels = [];
     var column = [];
     var beside = [];
     Object.keys(geo.states).sort().forEach(function (code) {
@@ -203,25 +203,24 @@
       // edges, not at its centroid (kyc/geo.py polylabel).
       if (!shape.label) return;
       if ((shape.labelRoom || 0) * px >= FIT_PX) {
-        labels.push(label(shape.label[0], shape.label[1], code));
+        label(shape.label[0], shape.label[1], KYC.escapeHtml(code), "state-code");
       } else if (inStrip.indexOf(code) === -1) {
         // D.C. is named in the strip below, so it needs no callout.
         (shape.label[0] >= EAST ? column : beside).push(code);
       }
     });
 
-    var callouts = [];
     var gap = h + 3 / px;
     var cx = box[2] - 6 / px - w / 2;
     var y = -Infinity;
     column.sort(function (a, b) { return geo.states[a].label[1] - geo.states[b].label[1]; })
       .forEach(function (code) {
         y = Math.max(geo.states[code].label[1], y + gap, COLUMN_TOP + h / 2);
-        callouts.push(callout(code, cx, y));
+        callout(code, cx, y);
       });
     beside.forEach(function (code) {
       var shape = geo.states[code];
-      callouts.push(callout(code, shape.bounds[2] + 6 / px + w / 2, shape.label[1]));
+      callout(code, shape.bounds[2] + 6 / px + w / 2, shape.label[1]);
     });
 
     // Territories are not in the atlas - three of them sit thousands of miles
@@ -231,33 +230,70 @@
     var step = tile + Math.max(6, 10 / px);
     var top = Math.max(STRIP_Y, y + h / 2 + 8 / px);
     var tileHeight = tile * 35 / 40;
-    var captionX = STRIP_LEFT - 10 / px;
-    var territories = [
-      '<text class="territory-caption" x="' + captionX.toFixed(1) + '" y="' +
-      (top + tileHeight / 2 - size * 0.6).toFixed(1) + '" font-size="' + size.toFixed(2) +
-      '" text-anchor="end">Territories &amp; D.C.<tspan x="' + captionX.toFixed(1) +
-      '" dy="1.2em">(not to scale)</tspan></text>',
-    ];
+    label(STRIP_LEFT - 10 / px, top + tileHeight / 2,
+      "Territories &amp; D.C.<br>(not to scale)", "territory-caption anchor-end");
+    var territories = [];
     strip.forEach(function (territory, i) {
       var x = STRIP_LEFT + i * step;
       territories.push(
         '<g transform="translate(' + x.toFixed(1) + "," + top.toFixed(1) + ") scale(" +
         (tile / 40).toFixed(3) + ')">' +
-        shapeMarkup(territory.code, territory.name, territory.d, null, "state--detached") +
-        "</g>" + label(x + tile / 2, top + tileHeight + size * 0.8, territory.code,
-                       "territory-label")
-      );
+        shapeMarkup(territory.code, territory.name, territory.d, null, "state--detached") + "</g>");
+      label(x + tile / 2, top + tileHeight + size * 0.8, KYC.escapeHtml(territory.code),
+        "territory-label");
     });
 
     // The strip sits below the projected atlas, so the viewBox is taller
     // than the atlas itself.
-    svg.setAttribute("viewBox", box[0] + " " + box[1] + " " + box[2] + " " +
-      (top + tileHeight + size * 1.6).toFixed(1));
+    var height = top + tileHeight + size * 1.6;
+    svg.setAttribute("viewBox", box[0] + " " + box[1] + " " + box[2] + " " + height.toFixed(1));
     svg.innerHTML =
       '<g id="mapStates">' + parts.join("") + "</g>" +
-      '<g aria-hidden="true">' + labels.join("") + "</g>" +
-      '<g aria-hidden="true">' + callouts.join("") + "</g>" +
+      '<g aria-hidden="true">' + lines.join("") + "</g>" +
       '<g id="mapTerritories">' + territories.join("") + "</g>";
+    labelLayer().innerHTML = labels.map(function (l) {
+      return '<span class="map-label ' + l.cls + '"' + l.extra + ' style="left:' +
+        ((l.x - box[0]) / box[2] * 100).toFixed(3) + "%;top:" +
+        ((l.y - box[1]) / height * 100).toFixed(3) + '%">' + l.html + "</span>";
+    }).join("");
+    placeLabels();
+  }
+
+  /** The layer the map's words are written in, made once. */
+  function labelLayer() {
+    var layer = doc.getElementById("mapLabels");
+    if (!layer) {
+      layer = doc.createElement("div");
+      layer.id = "mapLabels";
+      layer.className = "map-labels us-map-labels";
+      layer.setAttribute("aria-hidden", "true");
+      doc.getElementById("mapStage").appendChild(layer);
+    }
+    return layer;
+  }
+
+  /** Lay the word layer exactly over the drawn map: the SVG letterboxes the
+   *  map when its height is capped, so the layer is the map's own box inside
+   *  the SVG's, not the SVG's. */
+  function placeLabels() {
+    var svg = doc.getElementById("usMap");
+    var layer = labelLayer();
+    var stage = doc.getElementById("mapStage");
+    var rect = svg.getBoundingClientRect();
+    var view = (svg.getAttribute("viewBox") || "").split(" ").map(Number);
+    if (!rect.width || view.length !== 4 || !view[3]) {
+      layer.style.cssText = "";
+      return;
+    }
+    var width = Math.min(rect.width, rect.height * view[2] / view[3] || rect.width);
+    var height = width * view[3] / view[2];
+    var outer = stage.getBoundingClientRect();
+    layer.style.left = (rect.left - outer.left + (rect.width - width) / 2).toFixed(1) + "px";
+    layer.style.top = (rect.top - outer.top + (rect.height - height) / 2).toFixed(1) + "px";
+    layer.style.width = width.toFixed(1) + "px";
+    layer.style.height = height.toFixed(1) + "px";
+    layer.style.right = "auto";
+    layer.style.bottom = "auto";
   }
 
   /** How wide the map is drawn, in CSS pixels; 0 without layout. The SVG
@@ -279,7 +315,7 @@
     if (!global.ResizeObserver) return;
     var redraw = KYC.debounce(function () {
       var width = mapWidth();
-      if (!width || Math.abs(width - drawnAt) <= 4) return;
+      if (!width || Math.abs(width - drawnAt) <= 4) return placeLabels();
       drawnAt = width;
       drawMap();
       paint();
@@ -311,10 +347,10 @@
       }
     );
     Array.prototype.forEach.call(
-      doc.querySelectorAll("#usMap .callout-box"),
+      doc.querySelectorAll("#mapLabels .map-callout"),
       function (node) {
         var code = node.getAttribute("data-state");
-        node.style.fill = appearance(code).fill;
+        node.style.background = appearance(code).fill;
         node.classList.toggle("is-selected", code === selected);
       }
     );
@@ -634,7 +670,9 @@
             { fromRoute: true });
 
     var svg = doc.getElementById("usMap");
-    svg.addEventListener("click", function (event) {
+    // On the stage, not the SVG: a small state's callout is page text
+    // over the map, and picks its state too.
+    doc.getElementById("mapStage").addEventListener("click", function (event) {
       var shape = event.target.closest("[data-state]");
       if (!shape) return;
       select(shape.getAttribute("data-state"));

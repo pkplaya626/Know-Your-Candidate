@@ -87,7 +87,7 @@ python build_profile_site.py campaigns        # campaign websites from FEC commi
 python build_profile_site.py enrich           # fill gaps; check every campaign site
 python build_profile_site.py odds             # market prices and polling averages (writes odds.js)
 python -m unittest discover tests             # 673 tests, no dependencies
-npm install && npm test                       # 744 real-DOM checks (needs jsdom)
+npm install && npm test                       # 749 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -454,6 +454,20 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Before shipping anything that draws, time it under CDP
     `Emulation.setCPUThrottlingRate` 4 and 6, as well as looking at it.
     Keep a clip, mask or filter to one child.
+
+46. **Words on a map are page text, not SVG text.** Samsung Internet's
+    dark mode is on whenever the phone is dark. By default it repaints
+    every page and ignores `color-scheme`, `only light` and
+    `prefers-color-scheme` alike. Inside an SVG it lightens anything dark
+    and keeps anything light. A district number's dark text and its light
+    halo both came out light, and every label on both maps bloomed into a
+    smear: the "too bold", then "blurry", text reported from a Galaxy.
+    No halo colour survives that. Page text on a page background does:
+    every forced dark mode darkens the backing and lightens the text. So
+    labels are spans on a small backing, placed by percentage over the map
+    (`kyc-districts.js` `text()`, `kyc-map.js` `drawMap`), and the tests
+    fail if either map draws an SVG `<text>`. The page still declares the
+    scheme it shows with `only` (`syncColorScheme`), which Chromium honours.
 
 ## District maps
 

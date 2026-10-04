@@ -112,9 +112,20 @@
       /* the attribute above still applies */
     }
     syncThemeColor();
+    syncColorScheme(resolveTheme(name));
     themeListeners.forEach(function (fn) {
       try { fn(resolveTheme(name), name); } catch (e) { /* keep going */ }
     });
+  }
+
+  /* The page declares only the scheme it is showing, with "only": the
+   * standard's way to say "do not repaint this". Chromium's auto dark mode
+   * honours it, and so does Samsung Internet in its "Use website dark theme"
+   * mode. Its default dark mode ignores every declaration, which is why the
+   * maps' words are page text that survives a repaint (rule 46). */
+  function syncColorScheme(theme) {
+    var meta = doc.querySelector('meta[name="color-scheme"]');
+    if (meta) meta.setAttribute("content", theme === "light" ? "only light" : "only dark");
   }
 
   /* A phone tints its toolbar from <meta name="theme-color">. The pages
