@@ -188,6 +188,29 @@ Measured in Chrome's device emulation at 360, 390 and 430px and in landscape:
 - Buttons, chips and links meant for a finger are at least 44px.
 - The browser's toolbar colour follows the chosen theme.
 
+Android's Chrome, Brave and Samsung Internet share Chromium's engine, so the
+layout is the same. What they do differently is handled too:
+
+- No grey flash over a tapped control or map state (a tapped control shows
+  `:active` instead), and no hover look left stuck on what was tapped: hover
+  styles apply only where there is a pointer that hovers.
+- A quick double tap picks twice rather than zooming the page; pinch-zoom
+  still works.
+- The back gesture closes an open drawer or the theme menu, as it does the
+  profile dialog, before it leaves the page. Closing a profile returns to the
+  grid exactly as it was, scrolled to the same card.
+- District maps are numbered down to a Galaxy Z Fold's 344px cover screen.
+- The compact header runs up to 760px, which covers a Fold's inner screen and
+  phones in landscape. Under 130% page zoom or more, the search box gets a
+  row of its own.
+- A reader who picks the Light theme keeps it under Samsung Internet's dark
+  mode and Brave's night mode (`color-scheme: only light`).
+- Timed on an emulated mid-range phone (4x CPU throttle), every page is
+  loaded in under 0.6 s; Texas's district page took 11 s before its clip was
+  made a single path. Brave's and Samsung's ad-block lists (EasyList,
+  EasyPrivacy, uBlock Origin, AdGuard, Fanboy and Brave's own) neither hide
+  an element of the site nor block one of its files.
+
 ### Getting around
 
 - `/` focuses the search box from anywhere on any page; Escape hands focus

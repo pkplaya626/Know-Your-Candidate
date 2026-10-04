@@ -89,6 +89,8 @@
   --shadow-3: 0 24px 64px rgb(0 0 0 / 0.55);
 
   --header-h: 56px;
+  /* A toolbar is one header-row tall, even where the header takes two. */
+  --bar-h: 56px;
   --sidebar-w: 244px;
   --panel-w: 340px;
 
@@ -114,8 +116,11 @@
   --text-inverse: #000000;
 }
 
+/* "only light": a reader who chose Light keeps it. Samsung Internet's dark
+ * mode and Brave's night mode otherwise invert the page, leaving the map's
+ * party fills at about 2:1 against a darkened background. */
 [data-theme="light"] {
-  color-scheme: light;
+  color-scheme: only light;
   --map-label-halo: rgb(0 0 0 / 0.45);
   --surface-0: #f5f7fa;
   --surface-1: #ffffff;
@@ -304,6 +309,8 @@ svg.district-map,
   .scroll-y::-webkit-scrollbar-thumb:hover { background-color: var(--text-faint); }
 }
 
+.nowrap { white-space: nowrap; }
+
 .truncate {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -462,7 +469,7 @@ svg.district-map,
   align-items: center;
   gap: var(--s-2);
   flex: none;
-  min-height: var(--header-h);
+  min-height: var(--bar-h);
   padding: var(--s-2) var(--s-5);
   border-bottom: 1px solid var(--border);
 }
@@ -675,7 +682,9 @@ svg.district-map,
 /* Segmented control - map view modes. */
 .segmented {
   display: flex;
-  flex: none;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  max-width: 100%;
   gap: 2px;
   padding: 3px;
   border: 1px solid var(--border);
@@ -784,8 +793,16 @@ svg.district-map,
   cursor: pointer;
   /* 594 cards is a lot of layout; skip the offscreen ones. */
   content-visibility: auto;
-  contain-intrinsic-size: auto 260px;
+  contain-intrinsic-size: auto 320px;
 }
+/* On the long state pages, per race rather than per card: 282 cards each
+ * skipping their own rendering cost a low-end phone a third of its scroll
+ * frames in visibility bookkeeping. 39 races do the same job. */
+.race {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 700px;
+}
+.race .card { content-visibility: visible; }
 
 .card-photo {
   position: relative;
@@ -1953,22 +1970,14 @@ svg.district-map,
   .card-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); }
 }
 
-@media (max-width: 560px) {
-  .search { padding: 0 var(--s-3); }
+/* A compact header up to 760px: a Galaxy Z Fold's inner screen and any phone
+ * in landscape had the desktop header, whose wordmark and sort select left
+ * the search box 0px wide from 561 to 600px. */
+@media (max-width: 760px) {
   /* Below this the wordmark and the search field cannot both fit, and a
      search field a voter can actually type in matters more than a name they
      just read in the tab title. */
   .brand-name { display: none; }
-  .money-grid { grid-template-columns: 1fr; }
-  .field-grid { grid-template-columns: 1fr; }
-  .field-grid .span-2 { grid-column: auto; }
-
-  .app-header { gap: var(--s-1); }
-
-  /* Small print a step larger: 11px carried every badge, party line and
-   * market price, and the faintest text was the smallest. */
-  :root { --t-xs: 0.75rem; }
-  .site-footer { font-size: var(--t-sm); }
 
   /* The grid's sort is an icon over its own menu. As a labelled select it
    * took 184px of a 390px header and left the search box 13px wide - 0 at
@@ -1993,6 +2002,34 @@ svg.district-map,
     outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
+}
+
+/* Narrower than any phone at 100% - a phone at 130% page zoom or more - the
+ * search box gets a row of its own; beside the buttons it was 14px wide. */
+@media (max-width: 350px) {
+  :root:has(.app-header .search) { --header-h: 104px; }
+  .app-header:has(.search) {
+    flex-wrap: wrap;
+    align-content: center;
+    row-gap: var(--s-1);
+  }
+  .app-header .search { order: 10; flex: 1 0 100%; margin: 0; }
+  .header-actions { margin-left: auto; }
+}
+
+@media (max-width: 560px) {
+  .search { padding: 0 var(--s-3); }
+  .money-grid { grid-template-columns: 1fr; }
+  .field-grid { grid-template-columns: 1fr; }
+  .field-grid .span-2 { grid-column: auto; }
+
+  .app-header { gap: var(--s-1); }
+
+  /* Small print a step larger: 11px carried every badge, party line and
+   * market price, and the faintest text was the smallest. */
+  :root { --t-xs: 0.75rem; }
+  .site-footer { font-size: var(--t-sm); }
+
 
   /* The grid's fourteen filter chips wrapped onto seven rows above the
    * cards. On a phone they fold behind one button that says how many are

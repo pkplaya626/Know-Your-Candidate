@@ -256,6 +256,7 @@
     visible.sort(SORTS[state.sort] || SORTS.region);
     listDrawn = true;
     if (opts && opts.quiet) {
+      drawnFor = "{}";
       render();
       return;
     }
@@ -270,6 +271,7 @@
       sort: state.sort === "region" ? "" : state.sort,
       view: state.view === "grid" ? "" : state.view,
     });
+    drawnFor = JSON.stringify(KYC.router.read().params || {});
     render();
   }
 
@@ -388,6 +390,13 @@
       KYC.debounce(function () {
         state.q = input.value.toLowerCase().trim();
         apply();
+        // Searching from 800px down the list left the reader among the
+        // matches with the count off-screen - under the keyboard, on
+        // Samsung Internet, where it shrinks the page.
+        var label = doc.getElementById("resultsLabel");
+        if (label && label.getBoundingClientRect().top < 0) {
+          label.scrollIntoView({ block: "start" });
+        }
       }, 140)
     );
   }
@@ -422,6 +431,11 @@
    * with no cards, and closing the dialog showed an empty site. The first
    * route draws the default list underneath whatever it opens. */
   var listDrawn = false;
+  /* The filters the list on screen was drawn for. Closing a profile - by
+   * its button or Android's back gesture - returns to the same list, and
+   * redrawing it cut the grid back to its first 120 cards: a reader 300
+   * cards down lost their place and the card they had opened. */
+  var drawnFor = null;
 
   function applyRoute(route) {
     if (route.view === "profile" && KYC.profile.open(route.id, { fromRoute: true })) {
@@ -429,6 +443,7 @@
       return;
     }
     if (KYC.profile.isOpen()) KYC.profile.close();
+    if (listDrawn && JSON.stringify(route.params || {}) === drawnFor) return;
     applyParams(route.params || {});
   }
 

@@ -585,6 +585,12 @@
     return api;
   }
 
+  /** Phones and tablets: the layout with a drawer, or a finger to point. */
+  function touchLayout() {
+    return !!(global.matchMedia &&
+      global.matchMedia("(max-width: 1000px), (pointer: coarse)").matches);
+  }
+
   /** A click-opened, keyboard-operable menu.
    *
    *  The theme picker used to be a CSS :hover popup, which meant it could not
@@ -593,12 +599,13 @@
   function createMenu(button, panel) {
     function isOpen() { return !panel.hidden; }
 
-    function close() {
+    function close(fromHistory) {
       if (!isOpen()) return;
       panel.hidden = true;
       button.setAttribute("aria-expanded", "false");
       doc.removeEventListener("keydown", onKey, true);
       doc.removeEventListener("click", onOutside, true);
+      if (fromHistory !== true && history.state && history.state.kycMenu) history.back();
     }
 
     function open() {
@@ -606,9 +613,18 @@
       button.setAttribute("aria-expanded", "true");
       doc.addEventListener("keydown", onKey, true);
       doc.addEventListener("click", onOutside, true);
+      // On a touch screen Android's back gesture should close the menu, not
+      // leave the page: an entry at the same address to step back from.
+      if (touchLayout() && !(history.state && history.state.kycMenu)) {
+        history.pushState({ kycMenu: true }, "", global.location.href);
+      }
       var first = panel.querySelector(FOCUSABLE);
       if (first) first.focus();
     }
+
+    global.addEventListener("popstate", function () {
+      if (!(history.state && history.state.kycMenu)) close(true);
+    });
 
     function onKey(event) {
       if (event.key === "Escape") {
@@ -1027,7 +1043,9 @@
       });
     }
     if (scrim) scrim.addEventListener("click", closeSidebar);
-    global.addEventListener("popstate", function () { closeSidebar(true); });
+    global.addEventListener("popstate", function () {
+      if (!(history.state && history.state.kycDrawer)) closeSidebar(true);
+    });
     doc.addEventListener("keydown", function (event) {
       if (event.key === "Escape") closeSidebar();
     });
@@ -1067,10 +1085,20 @@
     }
 
     // A placeholder written for a desktop box read "Search na" on a phone.
-    if (global.matchMedia && global.matchMedia("(max-width: 560px)").matches) {
-      Array.prototype.forEach.call(doc.querySelectorAll("[data-placeholder-short]"), function (input) {
-        input.setAttribute("placeholder", input.getAttribute("data-placeholder-short"));
-      });
+    // It follows the width, so folding or unfolding a Fold updates it.
+    if (global.matchMedia) {
+      var compact = global.matchMedia("(max-width: 760px)");
+      var placeholders = function () {
+        Array.prototype.forEach.call(doc.querySelectorAll("[data-placeholder-short]"), function (input) {
+          if (!input.hasAttribute("data-placeholder-long")) {
+            input.setAttribute("data-placeholder-long", input.getAttribute("placeholder") || "");
+          }
+          input.setAttribute("placeholder", input.getAttribute(
+            compact.matches ? "data-placeholder-short" : "data-placeholder-long"));
+        });
+      };
+      placeholders();
+      if (compact.addEventListener) compact.addEventListener("change", placeholders);
     }
 
     renderSummary();
