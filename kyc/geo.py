@@ -232,7 +232,44 @@ def signed_distance(x, y, rings):
     return best if inside else -best
 
 
-def polylabel(rings, cells=8):
+def outline_distance(rings):
+    """A signed distance function for the land a tiling of *rings* covers.
+
+    The rings are a whole map's districts. Inside is by the even-odd rule
+    over all of them; distance is measured only to edges no two rings share
+    - the coast and the state line - so the lines between the districts are
+    not treated as edges of the land. A shared edge is recognised by its
+    exact coordinates, which a topology's shared arcs guarantee.
+    """
+    count = {}
+    for ring in rings:
+        for i in range(len(ring)):
+            a, b = tuple(ring[i]), tuple(ring[(i + 1) % len(ring)])
+            if a != b:
+                key = (a, b) if a <= b else (b, a)
+                count[key] = count.get(key, 0) + 1
+    edges = [key for key, seen in count.items() if seen == 1]
+
+    def distance(x, y):
+        inside = False
+        for ring in rings:
+            n = len(ring)
+            for i in range(n):
+                ax, ay = ring[i]
+                bx, by = ring[(i + 1) % n]
+                if (ay > y) != (by > y) and x < (bx - ax) * (y - ay) / (by - ay) + ax:
+                    inside = not inside
+        best = float("inf")
+        for (ax, ay), (bx, by) in edges:
+            dx, dy = bx - ax, by - ay
+            t = max(0.0, min(1.0, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy)))
+            best = min(best, math.hypot(x - ax - t * dx, y - ay - t * dy))
+        return best if inside else -best
+
+    return distance
+
+
+def polylabel(rings, cells=8, within=None):
     """The interior point farthest from any edge - the pole of
     inaccessibility, after Mapbox's polylabel.
 
@@ -241,6 +278,11 @@ def polylabel(rings, cells=8):
     coastal marsh, between Michigan's peninsulas, and into the Pacific
     between Hawaii's islands. This point is inside the shape, as far from
     its edges as the shape allows.
+
+    *within*, a signed distance function for a second region, asks for the
+    point of the overlap instead: a new district that runs out to sea is
+    labelled on its land. Inside both, the distance to the overlap's edge is
+    the smaller of the two distances, so the search is the same.
     """
     xs = [p[0] for r in rings for p in r]
     ys = [p[1] for r in rings for p in r]
@@ -250,9 +292,13 @@ def polylabel(rings, cells=8):
     cell = size / cells
     heap, counter = [], 0
 
+    def distance(x, y):
+        d = signed_distance(x, y, rings)
+        return d if within is None else min(d, within(x, y))
+
     def push(x, y, half):
         nonlocal counter
-        d = signed_distance(x, y, rings)
+        d = distance(x, y)
         heapq.heappush(heap, (-(d + half * math.sqrt(2)), counter, x, y, half, d))
         counter += 1
 
@@ -264,7 +310,7 @@ def polylabel(rings, cells=8):
             x += cell
         y += cell
     middle = ((x0 + x1) / 2, (y0 + y1) / 2)
-    best = (signed_distance(*middle, rings), middle[0], middle[1])
+    best = (distance(*middle), middle[0], middle[1])
     while heap:
         bound, _, x, y, half, d = heapq.heappop(heap)
         if d > best[0]:

@@ -21,7 +21,7 @@ from unittest import mock
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
 
-from kyc import districts, emit, validate  # noqa: E402
+from kyc import districts, emit, geo, validate  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 
@@ -62,33 +62,59 @@ class TestEveryState(unittest.TestCase):
             self.assertTrue(state["atLarge"], code)
             self.assertEqual(list(state["plans"][0]["districts"]), ["0"], code)
 
-    def test_every_district_is_numbered_somewhere(self):
-        # Statewide when it is big enough at the page's size, else inside an
-        # inset - the rule the page follows, so no number goes missing.
+    def test_every_district_is_numbered_at_every_width(self):
+        # Numbers were sized for a 620px map and scaled with it, so a phone
+        # drew them 4px tall. They are 11px now, written where they fit, and
+        # the insets are planned so that at any width from PHONE_PX up every
+        # district is numbered somewhere - the page's own rule, simulated.
+        widths = (districts.PHONE_PX, 302, 324, 364, 420, 500, 560, 620, 860)
         for code, state in self.maps.items():
-            px = districts.DESIGN_PX / state["viewBox"][2]
-            boxes = [i["box"] for i in state["insets"]]
-            for plan in state["plans"][-1:]:
-                for n, d in plan["districts"].items():
-                    big = d["area"] * px * px >= districts.LABEL_PX
-                    inset = any(b[0] <= d["at"][0] <= b[0] + b[2] and
-                                b[1] <= d["at"][1] <= b[1] + b[3] for b in boxes)
-                    self.assertTrue(big or inset, f"{code}-{n} is too small and in no inset")
+            for plan in state["plans"]:
+                for drawn in widths:
+                    missing = set(plan["districts"]) - numbered(state, plan, drawn)
+                    self.assertFalse(missing, f"{code} {plan['key']} at {drawn}px: "
+                                              f"{sorted(missing, key=int)}")
 
-    def test_numbers_in_an_inset_are_drawn_apart(self):
-        # The Los Angeles inset once drew old CA-45 and CA-46 11px apart, and
-        # the page dropped both numbers rather than overlap them.
+    def test_room_is_clear_room(self):
+        # The rule trusts "room": a disk that size around the label point is
+        # inside the district, and for a new map inside the land it is drawn
+        # clipped to. Two numbers that fit can then never overlap. (Within
+        # the rounding of the emitted path, label point and room.)
         for code, state in self.maps.items():
-            for inset in state["insets"]:
-                x, y, w, h = inset["box"]
-                scale = inset["width"] / w
-                for plan in state["plans"]:
-                    pts = [d["at"] for d in plan["districts"].values()
-                           if x <= d["at"][0] <= x + w and y <= d["at"][1] <= y + h]
-                    gaps = [math.dist(a, b) * scale for i, a in enumerate(pts)
-                            for b in pts[i + 1:]]
-                    self.assertGreaterEqual(min(gaps, default=99), districts.INSET_GAP_PX - 0.5,
-                                            f"{code} {inset['title']} {plan['key']}")
+            for plan in state["plans"]:
+                for n, d in plan["districts"].items():
+                    edge = geo.signed_distance(*d["at"], rings_of(d["d"]))
+                    self.assertGreater(d["room"], 0, f"{code} {plan['key']} {n}")
+                    self.assertLessEqual(d["room"], edge + 0.2, f"{code} {plan['key']} {n}")
+
+    def test_no_number_sits_against_its_own_edge(self):
+        # The tool moved a label point that fell at sea onto land by ranking
+        # grid samples by their distance from samples off the district - with
+        # no samples beyond the district's bounding box, so a point on the box
+        # edge scored as roomy. FL-19 and OH-14 were numbered on their own
+        # borders, 1.0 and 2.2 units from the edge; the pole of the
+        # district's land puts them 15 and 95 units in. A pole is never this
+        # close to an edge relative to the district's size.
+        for code, state in self.maps.items():
+            for plan in state["plans"]:
+                for n, d in plan["districts"].items():
+                    self.assertGreater(d["room"], 0.12 * math.sqrt(d["area"]),
+                                       f"{code} {plan['key']} {n}")
+
+    def test_a_closer_inset_is_planned_only_where_one_is_needed(self):
+        for code, state in self.maps.items():
+            for inset in districts.every_inset(state["insets"]):
+                self.assertGreaterEqual(inset["width"], districts.INSET_MIN_PX)
+                self.assertLessEqual(inset["width"], districts.DESIGN_PX)
+                self.assertEqual("detail" in inset, inset["fits"] > districts.PHONE_PX,
+                                 f"{code} {inset['title']}")
+                for detail in inset.get("detail", []):
+                    self.assertLess(detail["box"][2], inset["box"][2], f"{code} {inset['title']}")
+
+    def test_a_state_elected_at_large_has_no_insets(self):
+        for code, state in self.maps.items():
+            if state["atLarge"]:
+                self.assertEqual(state["insets"], [], code)
 
     def test_every_label_point_is_inside_its_district(self):
         for code, state in self.maps.items():
@@ -172,12 +198,61 @@ class TestRecordedPlaces(unittest.TestCase):
         for pair, share in expected.items():
             self.assertAlmostEqual(came.get(pair, 0), share, delta=0.015, msg=pair)
 
+    def test_manhattan_has_a_closer_inset_named_for_new_york(self):
+        # Excluding the town an inset was already named for once titled
+        # Manhattan "Yonkers & New Rochelle" and central Houston "Pasadena &
+        # Pearland"; a closer view of the same town says so instead.
+        ny = load_state("NY")
+        city = next(i for i in ny["insets"] if i["title"] == "New York")
+        self.assertEqual([d["title"] for d in city["detail"]], ["New York, closer"])
+        x, y = dict((p[0], p[1:3]) for p in ny["places"])["New York"]
+        self.assertTrue(any(b[0] < x < b[0] + b[2] and b[1] < y < b[1] + b[3]
+                            for b in (d["box"] for d in city["detail"])))
+
     def test_san_francisco_is_labelled_in_san_francisco(self):
         # Its Census internal point is on the Farallon Islands, 52 km out.
         x, y = self.towns["San Francisco"]
         inset = next(i for i in self.ca["insets"] if "San Francisco" in i["title"])
         b = inset["box"]
         self.assertTrue(b[0] < x < b[0] + b[2] and b[1] < y < b[1] + b[3])
+
+
+def numbered(state, plan, drawn):
+    """The districts kyc-districts.js numbers in *plan* when the statewide
+    map is drawn *drawn* pixels wide: wherever a district has LABEL_ROOM_PX
+    of room around its label point - statewide, in an inset drawn at
+    min(drawn, width), and in that inset's closer insets when it is drawn
+    narrower than it fits."""
+    if state["atLarge"]:
+        return set(plan["districts"])
+    rule = districts.LABEL_ROOM_PX
+    px = drawn / state["viewBox"][2]
+    out = {n for n, d in plan["districts"].items() if d["room"] * px >= rule}
+
+    def visit(found):
+        for inset in found:
+            width = min(drawn, inset["width"])
+            x, y, w, h = inset["box"]
+            scale = width / w
+            margin = 9 / scale
+            out.update(n for n, d in plan["districts"].items()
+                       if x + margin <= d["at"][0] <= x + w - margin
+                       and y + margin <= d["at"][1] <= y + h - margin
+                       and d["room"] * scale >= rule)
+            if width < inset["fits"]:
+                visit(inset.get("detail", []))
+
+    visit(state["insets"])
+    return out
+
+
+_STATES = {}
+
+
+def load_state(code):
+    if code not in _STATES:
+        _STATES[code] = districts.build_state(code, ROOT, districts.load_places(ROOT))
+    return _STATES[code]
 
 
 class TestProjection(unittest.TestCase):
@@ -359,16 +434,31 @@ class TestBuildState(unittest.TestCase):
 class TestInsets(unittest.TestCase):
 
     def test_small_districts_get_a_named_box_and_big_ones_do_not(self):
-        plan = {"1": {"area": 400000, "at": [500, 500], "box": [0, 0, 1000, 1000]},
-                "2": {"area": 20, "at": [100, 100], "box": [95, 95, 105, 105]},
-                "3": {"area": 20, "at": [110, 100], "box": [105, 95, 115, 105]}}
+        plan = {"1": {"room": 300, "at": [500, 500], "box": [0, 0, 1000, 1000]},
+                "2": {"room": 5, "at": [100, 100], "box": [95, 95, 105, 105]},
+                "3": {"room": 5, "at": [110, 100], "box": [105, 95, 115, 105]}}
         places = [["Big City", 101, 101, 500000], ["Small Town", 112, 99, 1000]]
-        boxes = districts.insets(plan, places, [0, 0, 1000, 1000])
+        boxes = districts.insets([plan], places, [0, 0, 1000, 1000])
         self.assertEqual(len(boxes), 1)
         self.assertEqual(boxes[0]["title"], "Big City")
         x, y, w, h = boxes[0]["box"]
         for n in ("2", "3"):
             self.assertTrue(x < plan[n]["at"][0] < x + w and y < plan[n]["at"][1] < y + h)
+        self.assertNotIn("detail", boxes[0])
+
+    def test_a_district_too_small_for_its_inset_gets_a_closer_one(self):
+        # Seven districts around a town, one of them a sliver: the inset that
+        # numbers the six on a phone cannot number the seventh, so it holds
+        # a closer inset around it, named for the same town.
+        plan = {str(n): {"room": 4.0, "at": [100 + 12 * n, 100], "box":
+                         [96 + 12 * n, 96, 104 + 12 * n, 104]} for n in range(1, 7)}
+        plan["7"] = {"room": 0.4, "at": [130, 112], "box": [129, 111, 131, 113]}
+        boxes = districts.insets([plan], [["Town", 130, 105, 90000]], [0, 0, 1000, 1000])
+        self.assertEqual(len(boxes), 1)
+        self.assertGreater(boxes[0]["fits"], districts.PHONE_PX)
+        self.assertEqual([d["title"] for d in boxes[0]["detail"]], ["Town, closer"])
+        x, y, w, h = boxes[0]["detail"][0]["box"]
+        self.assertTrue(x < 130 < x + w and y < 112 < y + h)
 
 
 class TestEmitted(unittest.TestCase):
@@ -491,6 +581,22 @@ class TestTopology(unittest.TestCase):
         self.assertTrue(shared, "the wiggly boundary should be one shared arc")
         rings = [topo.ring(ids) for _, arcs in topo.objects["p"] for ids in arcs]
         self.assertTrue(set(rings[0]) & set(rings[1]))
+
+    def test_a_new_district_is_labelled_on_the_old_map_s_land(self):
+        # PR #34 moved polylabel into kyc/geo.py and deleted the helper this
+        # path called, so the next refresh of a redrawn state would have
+        # crashed. A new district reaching far out to sea is labelled on land.
+        import fetch_district_maps as F
+
+        land = [(-121.0, 38.0), (-120.9, 38.0), (-120.9, 38.1), (-121.0, 38.1)]
+        sea = [(-121.0, 38.0), (-120.5, 38.0), (-120.5, 38.1), (-121.0, 38.1)]
+        topo = F.Topology(38.05)
+        topo.add("current", [({"d": 1}, [land])])
+        topo.add("next", [({"d": 1}, [sea])])
+        topo.label_points("next", "next_pts", land=topo.rings_m("current"))
+        x, y = topo.points["next_pts"][0]["coordinates"]
+        metres = (x * topo.kx, y * topo.ky)
+        self.assertGreater(geo.signed_distance(*metres, topo.rings_m("current")), 0)
 
 
 if __name__ == "__main__":

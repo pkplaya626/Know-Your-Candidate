@@ -56,6 +56,7 @@ function buildPage(page, opts) {
         addListener() {},
         removeListener() {},
       });
+      if (opts.setup) opts.setup(window);
     },
   });
 
@@ -2112,6 +2113,67 @@ async function testDistrictPages() {
   });
 }
 
+/* jsdom has no layout, so a page that measures itself sees 0 - which the
+ * district page reads as "no layout" and draws for 620px. This makes the
+ * statewide maps measure *width* instead, as a phone's would. */
+function drawnAt(width) {
+  return (window) => {
+    const real = window.Element.prototype.getBoundingClientRect;
+    window.Element.prototype.getBoundingClientRect = function () {
+      if (!this.classList || !this.classList.contains("district-statewide")) {
+        return real.call(this);
+      }
+      return { width, height: width, top: 0, left: 0, right: width, bottom: width, x: 0, y: 0 };
+    };
+  };
+}
+
+async function testDistrictsOnAPhone() {
+  // Numbers were sized for a 620px map and scaled with it: on a phone every
+  // one was 4px tall. They are 11px at the width the map is drawn, written
+  // where they fit, and every district is numbered somewhere.
+  for (const [code, width] of [["NY", 302], ["TX", 302], ["CA", 302], ["TX", 620]]) {
+    const page = await buildPage("districts/" + code.toLowerCase() + ".html",
+                                 { setup: drawnAt(width) });
+    suite(`districts/${code.toLowerCase()}.html — the map drawn ${width}px wide`, () => {
+      const D = page.D;
+      const state = page.window.kycDistricts[code];
+      check("no page errors", page.errors.length === 0, page.errors.join(" | "));
+      [...D.querySelectorAll(".plan-card")].forEach((card, i) => {
+        const plan = state.plans[i];
+        const written = new Set([...card.querySelectorAll(".district-num")]
+          .map((t) => t.textContent));
+        const missing = Object.keys(plan.districts).filter((n) => !written.has(n));
+        check(`every district on the ${plan.title} is numbered somewhere`,
+          missing.length === 0, missing.join(", "));
+        const map = card.querySelector(".district-statewide");
+        const num = map.querySelector(".district-num");
+        const px = width / state.viewBox[2];
+        const size = num && parseFloat(num.getAttribute("font-size")) * px;
+        check("a statewide number is 11px on screen", Math.abs(size - 11) < 0.05, size);
+        const halo = num && parseFloat(num.getAttribute("stroke-width")) * px;
+        check("on a halo a fifth of that, not a blot", Math.abs(halo - 2.2) < 0.05, halo);
+      });
+      const titles = [...D.querySelectorAll(".plan-card")[0]
+        .querySelectorAll("figure.inset figcaption")].map((f) => f.textContent);
+      if (code === "NY") {
+        check("Manhattan gets a closer inset", titles.includes("New York, closer"),
+          titles.join(" | "));
+      }
+      if (code === "TX") {
+        // Houston needs 550px for every number in it: a phone gets a closer
+        // inset, a desktop that can draw it whole does not.
+        check(width < 550 ? "Houston gets a closer inset on a phone"
+                          : "and not where Houston is drawn whole",
+          titles.includes("Houston, closer") === width < 550, titles.join(" | "));
+        const widest = Math.max(...[...D.querySelectorAll("figure.inset")]
+          .map((f) => parseFloat(f.style.width)));
+        check("no inset is drawn wider than the map", widest <= width, widest);
+      }
+    });
+  }
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "index.html") await testDirectoryAsync();
@@ -2122,6 +2184,7 @@ async function testDistrictPages() {
   if (!only || only === "states") await testStates();
   if (!only || only === "redistricting") await testRedistricting();
   if (!only || only === "redistricting") await testDistrictPages();
+  if (!only || only === "redistricting") await testDistrictsOnAPhone();
   if (!only || only === "links") await testDeepLinks();
   if (!only || only === "links") await testFoldedIds();
   if (!only || only === "links") await testRunningElsewhere();

@@ -66,16 +66,28 @@ MIN_FLOW = 0.005
 # mis-numbered, not merely simplified.
 MIN_COVERAGE = 0.97
 
-# The page lays a map out at this many pixels across. A district smaller
-# than LABEL_PX square pixels at that size is numbered in an inset instead.
+# A map is drawn as wide as its card, which the page measures. A number
+# fits in a district when the district has LABEL_ROOM_PX of clear room
+# around its label point at that width - half an 11px number and its halo.
+# Room, not area: a long thin district has area and nowhere to write.
+#
+# Numbers used to be sized for a 620px map and scaled with it, so on a phone
+# every one came out 4px tall. Now they are 11px at any width, and the
+# insets are planned for the narrowest map a phone draws: 302px on a 360px
+# screen, less the page's and the card's padding. Every district is
+# numbered somewhere at any width from PHONE_PX up.
+PHONE_PX = 300
 DESIGN_PX = 620
-LABEL_PX = 380
-INSET_LABEL_PX = 30
-MAX_INSETS = 4
-# Two numbers in an inset are drawn at least this far apart, in page pixels;
-# an inset is never narrower than INSET_MIN_PX.
-INSET_GAP_PX = 18
+LABEL_ROOM_PX = 6.5
+# An inset is drawn between these widths, enough to number everything in it
+# where the card allows, and a state has at most MAX_INSETS of them.
 INSET_MIN_PX = 240
+MAX_INSETS = 6
+# Where an inset is drawn too narrow for every number in it - New York City
+# on a phone - closer insets inside it number the rest, down to this depth,
+# at most MAX_DETAILS to an inset.
+DETAIL_DEPTH = 3
+MAX_DETAILS = 3
 
 # California's own projection, EPSG:3310. Every other state gets an Albers
 # conic with standard parallels at a sixth and five-sixths of its latitude.
@@ -581,41 +593,63 @@ def flows(areas, overlaps):
     return out
 
 
-def insets(plan, places, viewbox, also=()):
-    """Boxes around districts too small to number on the statewide map.
+def needs_inset(district, frame):
+    """True when *district*'s number cannot fit in *frame* drawn PHONE_PX wide."""
+    return district["room"] * PHONE_PX / frame[2] < LABEL_ROOM_PX
 
-    The small districts are grouped by how close their numbers would sit,
-    each group gets a box, and boxes that overlap merge - at most
-    MAX_INSETS. Each is named for the biggest towns inside it. Every small
-    district's label point is inside some box, which is what lets the page
-    number every district somewhere.
+
+def _inside(point, box):
+    return box[0] <= point[0] <= box[2] and box[1] <= point[1] <= box[3]
+
+
+def insets(plans, places, frame, depth=0, around=""):
+    """Close-ups of the districts too small to number on *frame*.
+
+    *plans* is every map the page draws, so a redrawn state's old map is
+    numbered too; *frame* is ``[x, y, width, height]``, the statewide view
+    at depth 0. A district is small when its number would not fit with the
+    frame drawn PHONE_PX wide. The small districts are grouped by how close
+    their numbers would sit, each group gets a box, and boxes that overlap
+    merge, down to MAX_INSETS. Each is named for the biggest towns inside it;
+    a closer view of the same towns says so.
+
+    ``width`` is how wide to draw an inset - wide enough for every number
+    in it, within INSET_MIN_PX and DESIGN_PX - and ``fits`` the width at
+    which every number in it does fit, uncapped. An inset that does not fit
+    at PHONE_PX holds ``detail``: the same, one level closer. The page
+    draws a detail only when it draws its inset narrower than ``fits``.
+    Every small district's label point is inside its box, so at any width
+    from PHONE_PX up, every district is numbered somewhere.
     """
-    px = DESIGN_PX / viewbox[2]
-    small = [n for n, d in plan.items() if d["area"] * px * px < LABEL_PX]
+    x, y, w, h = frame
+    bounds = [x, y, x + w, y + h]
+    small = [(plan, n) for plan in plans for n, d in plan.items()
+             if _inside(d["at"], bounds) and needs_inset(d, frame)]
     if not small:
         return []
-    parent = {n: n for n in small}
+    parent = list(range(len(small)))
 
-    def find(n):
-        while parent[n] != n:
-            parent[n] = parent[parent[n]]
-            n = parent[n]
-        return n
+    def find(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
 
-    reach = 70 / px
-    for i, a in enumerate(small):
-        for b in small[i + 1:]:
-            (ax, ay), (bx, by) = plan[a]["at"], plan[b]["at"]
-            if math.hypot(ax - bx, ay - by) < reach:
-                parent[find(a)] = find(b)
+    reach = 70 * w / DESIGN_PX
+    for i, (pa, a) in enumerate(small):
+        for j in range(i + 1, len(small)):
+            pb, b = small[j]
+            if math.dist(pa[a]["at"], pb[b]["at"]) < reach:
+                parent[find(i)] = find(j)
     groups = {}
-    for n in small:
-        groups.setdefault(find(n), []).append(n)
-    boxes = sorted(_group_box(plan, members) for members in groups.values())
+    for i, (plan, n) in enumerate(small):
+        groups.setdefault(find(i), []).append(plan[n]["box"])
+    boxes = sorted(_group_box(members) for members in groups.values())
+    limit = MAX_INSETS if depth == 0 else MAX_DETAILS
     while len(boxes) > 1:
         pair = next(((i, j) for i in range(len(boxes)) for j in range(i + 1, len(boxes))
                      if _overlap(boxes[i], boxes[j])), None)
-        if pair is None and len(boxes) > MAX_INSETS:
+        if pair is None and len(boxes) > limit:
             pair = _closest(boxes)
         if pair is None:
             break
@@ -628,30 +662,32 @@ def insets(plan, places, viewbox, also=()):
         x0, y0, x1, y1 = box
         inside = [p for p in places if x0 <= p[1] <= x1 and y0 <= p[2] <= y1]
         names = [p[0] for p in inside[:2] if p[3] >= 0.4 * inside[0][3]] if inside else []
-        out.append({"title": " & ".join(names) if names else "Close-up",
-                    "box": [geo._round(x0), geo._round(y0),
-                            geo._round(x1 - x0), geo._round(y1 - y0)],
-                    "width": max(inset_width(p, box) for p in (plan,) + tuple(also))})
+        title = " & ".join(names) if names else around or "Close-up"
+        if depth and title.split(", closer")[0] == around.split(", closer")[0]:
+            title = around.split(", closer")[0] + ", closer"
+        rooms = [d["room"] for plan in plans for d in plan.values() if _inside(d["at"], box)]
+        fits = int(math.ceil(LABEL_ROOM_PX * (x1 - x0) / min(rooms)))
+        inset = {"title": title,
+                 "box": [geo._round(x0), geo._round(y0),
+                         geo._round(x1 - x0), geo._round(y1 - y0)],
+                 "width": min(DESIGN_PX, max(INSET_MIN_PX, fits)),
+                 "fits": fits}
+        if fits > PHONE_PX and depth + 1 < DETAIL_DEPTH:
+            inset["detail"] = insets(plans, places, inset["box"], depth + 1, title)
+        out.append(inset)
     return out
 
 
-def inset_width(plan, box):
-    """How wide, in page pixels, to draw an inset so the closest two numbers
-    in it sit INSET_GAP_PX apart - a fixed size squeezed Los Angeles until
-    its numbers collided and dropped - within the card's width."""
-    x0, y0, x1, y1 = box
-    points = [d["at"] for d in plan.values()
-              if x0 <= d["at"][0] <= x1 and y0 <= d["at"][1] <= y1]
-    closest = min((math.dist(a, b) for i, a in enumerate(points) for b in points[i + 1:]),
-                  default=None)
-    width = INSET_MIN_PX if not closest else INSET_GAP_PX / closest * (x1 - x0)
-    return int(round(min(DESIGN_PX, max(INSET_MIN_PX, width))))
+def every_inset(found):
+    """Every inset and detail, depth first."""
+    for inset in found:
+        yield inset
+        yield from every_inset(inset.get("detail", []))
 
 
-def _group_box(plan, members):
+def _group_box(boxes):
     xs, ys = [], []
-    for n in members:
-        b = plan[n]["box"]
+    for b in boxes:
         xs += [b[0], b[2]]
         ys += [b[1], b[3]]
     x0, y0, x1, y1 = min(xs), min(ys), max(xs), max(ys)
@@ -732,6 +768,8 @@ def build_state(code, root=".", places=None):
         areas[1] = land_areas(areas, overlaps)
     viewbox = [0, 0, WIDTH, fit.height]
     land = [r for district_rings in rings[0].values() for r in district_rings]
+    # The new map is drawn clipped to this land, so its room ends at the coast.
+    coast = geo.outline_distance(land) if len(keys) == 2 else None
     out_plans = []
     for key, plan_rings, plan_points, plan_areas in zip(keys, rings, points, areas):
         districts = {}
@@ -753,6 +791,10 @@ def build_state(code, root=".", places=None):
                 "at": [geo._round(at[0]), geo._round(at[1])],
                 "box": list(geo.bounds(district_rings)),
                 "area": int(round(plan_areas[number])),
+                # Clear room around the label point, in map units: whether a
+                # number fits inside the district at a given width.
+                "room": geo._round(min(geo.signed_distance(at[0], at[1], district_rings),
+                                       coast(*at) if key == "next" else math.inf)),
             }
         out_plans.append(dict(_plan_text(code, key), key=key, districts=districts))
 
@@ -769,9 +811,10 @@ def build_state(code, root=".", places=None):
         "flows": flows(areas, overlaps) if len(keys) == 2 else [],
         "counties": _counties(topo, raw_arcs, fit),
         "places": town_list,
-        # Sized for every map drawn in them: the old map's numbers too.
-        "insets": insets(out_plans[-1]["districts"], town_list, viewbox,
-                         [p["districts"] for p in out_plans[:-1]]),
+        # For every map the page draws: the old map's numbers too. A state
+        # elected at large has one district and nothing to tell apart.
+        "insets": insets([p["districts"] for p in out_plans], town_list, viewbox)
+        if len(rings[0]) > 1 else [],
         "sources": _sources(code, topo),
     }
 

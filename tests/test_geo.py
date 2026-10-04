@@ -121,6 +121,26 @@ class TestLabelPoint(unittest.TestCase):
     def test_no_points_has_no_label(self):
         self.assertIsNone(geo.label_point([]))
 
+    def test_the_outline_of_a_tiling_ignores_the_lines_inside_it(self):
+        # Two districts side by side: the land is the 20x10 rectangle, and a
+        # point beside the line between them is not near the land's edge.
+        west = [(0, 0), (10, 0), (10, 10), (0, 10)]
+        east = [(10, 0), (20, 0), (20, 10), (10, 10)]
+        land = geo.outline_distance([west, east])
+        self.assertAlmostEqual(land(10.5, 5), 5.0)
+        self.assertAlmostEqual(land(19, 5), 1.0)
+        self.assertAlmostEqual(land(25, 5), -5.0)
+
+    def test_a_district_that_runs_out_to_sea_is_labelled_on_its_land(self):
+        # Mostly sea: its own pole is offshore, and a number there would be
+        # clipped away with the water. The pole of its land is mid-land.
+        district = [(0, 0), (40, 0), (40, 10), (0, 10)]
+        land = geo.outline_distance([[(0, 0), (10, 0), (10, 10), (0, 10)]])
+        x, y = geo.polylabel([district], within=land)
+        self.assertAlmostEqual(x, 5.0, delta=0.2)
+        self.assertAlmostEqual(y, 5.0, delta=0.2)
+        self.assertGreater(geo.polylabel([district])[0], 10)
+
 
 class TestAtlas(unittest.TestCase):
     """The real atlas, decoded the way the build decodes it."""
