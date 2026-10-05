@@ -334,7 +334,8 @@ class TestStatePages(unittest.TestCase):
                 for w in written)
             # The guide's pages are checked in test_guide.py.
             self.assertEqual([r for r in relative
-                              if not r.startswith(("districts/", "government/", "legislature/"))],
+                              if not r.startswith(("districts/", "government/", "legislature/",
+                                                    "counties/"))],
                              ["redistricting/ca.html", "states/ak.html", "states/index.html",
                               "states/tx.html"])
             # A district map for every state and territory, whatever the roster.

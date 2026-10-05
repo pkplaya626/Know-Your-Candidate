@@ -516,6 +516,93 @@ def render_legislature_page(code, host, summary=None):
     )
 
 
+_COUNTIES_SIDEBAR = """
+        <div class="sidebar-section">
+            <h2 class="sidebar-heading">Counties &amp; local governments</h2>
+            <p class="sidebar-note">Every county, city, township, school district and special
+                district, from the Census Bureau's 2022 Census of Governments.</p>
+        </div>
+"""
+
+
+def render_counties_page(code, host):
+    """A state's counties and every local government in each. The page
+    carries the state code only; ``assets/kyc-local.js`` draws it from
+    ``data/local/<st>.js``."""
+    from .government import jump_options
+    from .government_maps import STATES
+
+    name = state_name(code)
+    path = f"counties/{code.lower()}.html"
+    canonical = f"https://{host}/{path}" if host else path
+    title = f"{name}: counties and local governments"
+    main = "\n".join([
+        '            <div id="localContent" class="state-page local-page">',
+        '                <header class="state-hero">',
+        '                    <p class="state-kicker">Counties &amp; local governments</p>',
+        f'                    <h1 class="state-title">{_e(name)}</h1>',
+        '                    <p class="districts-lede">Every county, city and town, township, school '
+        'district and special district, as the Census Bureau counted them in 2022. Pick a county to '
+        'see every government in it, with a link to its own site where the Census lists one.</p>',
+        '                    <p class="state-links">',
+        f'                        <a class="btn" href="../{_e(page_path(code))}"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> {_e(name)} page</a>',
+        f'                        <a class="btn" href="../legislature/{_e(code.lower())}.html"><svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> State legislature</a>',
+        '                        <a class="btn" href="../government/local.html"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg> How local government works</a>',
+        "                    </p>",
+        "                </header>",
+        '                <div class="party-legend" aria-label="Local governments per county">',
+        '                    <span class="party-legend-title">Local governments in each county</span>',
+        '                    <span class="key"><span class="swatch region-fill-scale-1"></span>Fewer than 10</span>',
+        '                    <span class="key"><span class="swatch region-fill-scale-2"></span>10&ndash;24</span>',
+        '                    <span class="key"><span class="swatch region-fill-scale-3"></span>25&ndash;49</span>',
+        '                    <span class="key"><span class="swatch region-fill-scale-4"></span>50&ndash;99</span>',
+        '                    <span class="key"><span class="swatch region-fill-scale-5"></span>100 or more</span>',
+        "                </div>",
+        '                <div class="leg-layout">',
+        '                    <div class="leg-map-card"><div id="localMap" class="leg-map">',
+        '                        <p class="results-bar" role="status">Loading the map&hellip;</p>',
+        "                    </div></div>",
+        '                    <aside class="leg-panel local-panel" aria-live="polite">',
+        '                        <h2 class="leg-panel-title" id="localPanelTitle"></h2>',
+        '                        <div id="localPanelBody"></div>',
+        "                    </aside>",
+        "                </div>",
+        '                <section class="leg-roster-section" aria-labelledby="localRosterTitle">',
+        '                    <h2 class="state-heading" id="localRosterTitle">Every county</h2>',
+        '                    <div id="localRoster" class="leg-roster"></div>',
+        "                </section>",
+        "            </div>",
+    ])
+    footer = "\n".join([
+        "                <p><strong>Sources:</strong> every government, its county, website, city,",
+        "                    population or enrollment, from the U.S. Census Bureau's 2022 Census of",
+        "                    Governments: Government Units listing, checked against the Bureau's",
+        "                    published counts for every state; county lines from its cartographic",
+        "                    boundary file. Names are shown in title case; the listing prints them in",
+        "                    capitals.</p>",
+        "                <p>Non-partisan and independent.</p>",
+    ])
+    scripts = [s.replace("{code}", code.lower()) for s in (
+        "../data/local/{code}.js", "../assets/kyc-regionmap.js", "../assets/kyc-local.js")]
+    return render_page(
+        title=_e(f"{title} — Know Your Candidate"),
+        og_title=_e(title),
+        description=_e(f"Every county in {name} and every local government in each: cities, "
+                       f"townships, school districts and special districts, with links."),
+        canonical=_e(canonical),
+        host=_e(host or ""),
+        code=_e(code),
+        page_kind="counties",
+        search="",
+        sidebar=_COUNTIES_SIDEBAR,
+        jump_options=jump_options(STATES),
+        jump_attrs=' data-jump-to="counties/{code}.html"',
+        main=main,
+        footer=footer,
+        scripts=_scripts(scripts),
+    )
+
+
 def render_redirect(target, host):
     """A page that moved: a stub that sends the reader on, and tells search
     engines where the page lives now."""
@@ -569,5 +656,7 @@ def sitemap(host, codes, built=None, district_maps=(), guide=(), legislatures=()
         url(f"government/{slug}.html", "0.5", "monthly")
     for code in sorted(legislatures):
         url(f"legislature/{code.lower()}.html", "0.6", "weekly")
+    for code in sorted(legislatures):
+        url(f"counties/{code.lower()}.html", "0.5", "monthly")
     lines.append("</urlset>")
     return "\n".join(lines) + "\n"

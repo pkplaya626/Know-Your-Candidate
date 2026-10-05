@@ -223,7 +223,14 @@
           code.toLowerCase() + ".html") + '">' + KYC.icon("landmark") + " " +
           KYC.escapeHtml(map.name(code)) + " Legislature: every district and member ›</a></p>"
         : "";
-      target.innerHTML = legislature + order.map(function (id) {
+      // On the local map, the state's counties and every government in each.
+      var local = page === "local" && data.modes["local-total"] &&
+        data.modes["local-total"].values[code] !== undefined && code !== "DC"
+        ? '<p class="guide-fact-link"><a href="' + KYC.escapeAttr(KYC.siteRoot() + "counties/" +
+          code.toLowerCase() + ".html") + '">' + KYC.icon("layers") + " " +
+          KYC.escapeHtml(map.name(code)) + ": every county and its local governments ›</a></p>"
+        : "";
+      target.innerHTML = legislature + local + order.map(function (id) {
         var m = data.modes[id];
         var value = m.values[code];
         var fact = value === undefined ? m.outside : m.facts[code];

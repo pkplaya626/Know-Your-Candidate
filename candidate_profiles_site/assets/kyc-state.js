@@ -109,7 +109,9 @@
       // Every state - not D.C. or a territory - has a legislature page.
       info.senators
         ? ' <a class="btn" href="' + KYC.escapeAttr(KYC.siteRoot() + "legislature/" +
-          code.toLowerCase() + ".html") + '">' + KYC.icon("landmark") + " State legislature</a>"
+          code.toLowerCase() + ".html") + '">' + KYC.icon("landmark") + " State legislature</a>" +
+          ' <a class="btn" href="' + KYC.escapeAttr(KYC.siteRoot() + "counties/" +
+          code.toLowerCase() + ".html") + '">' + KYC.icon("layers") + " Counties &amp; local governments</a>"
         : "",
       "</p>",
       "</header>"

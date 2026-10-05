@@ -15,6 +15,8 @@ ODDS_FILE = os.path.join(DATA_DIR, "odds.js")
 GOVERNMENT_FILE = os.path.join(DATA_DIR, "government.js")
 # One file per state: its legislative districts and who sits for them.
 LEGISLATURE_DIR = os.path.join(DATA_DIR, "legislature")
+# One file per state: its counties and every local government in each.
+LOCAL_DIR = os.path.join(DATA_DIR, "local")
 # One file per state, each loaded only by that state's district page.
 DISTRICTS_DIR = os.path.join(DATA_DIR, "districts")
 
@@ -83,10 +85,19 @@ LEGISLATURE_PAGE_REQUIREMENTS = (
     "../assets/kyc-legislature.js",
 )
 
+# A state's counties page: its counties and governments, the map, the page.
+COUNTIES_PAGE_REQUIREMENTS = (
+    "../assets/kyc.js",
+    "../data/local/{code}.js",
+    "../assets/kyc-regionmap.js",
+    "../assets/kyc-local.js",
+)
+
 PAGES = tuple(PAGE_REQUIREMENTS)
 STATES_DIR = os.path.join(SITE_DIR, "states")
 DISTRICT_PAGES_DIR = os.path.join(SITE_DIR, "districts")
 LEGISLATURE_PAGES_DIR = os.path.join(SITE_DIR, "legislature")
+COUNTIES_PAGES_DIR = os.path.join(SITE_DIR, "counties")
 # The guide to how government works: generated pages, one folder down. What
 # each loads depends on the page (kyc.government.scripts).
 GOVERNMENT_DIR = os.path.join(SITE_DIR, "government")
@@ -231,6 +242,8 @@ def render_state_pages(profiles, root=".", summary=None):
     for code in STATES:
         out[os.path.join(LEGISLATURE_PAGES_DIR, f"{code.lower()}.html")] = (
             pages.render_legislature_page(code, host, summary))
+        out[os.path.join(COUNTIES_PAGES_DIR, f"{code.lower()}.html")] = (
+            pages.render_counties_page(code, host))
     return out
 
 
@@ -423,6 +436,43 @@ def write_legislature(maps, root="."):
     return written
 
 
+def local_file(code, root="."):
+    """``candidate_profiles_site/data/local/tx.js``."""
+    return os.path.join(root, LOCAL_DIR, f"{code.lower()}.js")
+
+
+def write_local(maps, root="."):
+    """Emit one ``data/local/<st>.js`` per state whose content changed."""
+    os.makedirs(os.path.join(root, LOCAL_DIR), exist_ok=True)
+    written = []
+    for code, payload in sorted(maps.items()):
+        path = local_file(code, root)
+        signature = legislature_signature(payload)
+        if read_signature(path=path) == signature:
+            continue
+        text = (
+            _BANNER.format(source=f"legislative_maps/{code.lower()}.json (counties), "
+                                  f"local_governments/{code.lower()}.json (Census listing)",
+                           built=build_timestamp())
+            + f"window.kycLocal = {_json({code: payload})};\n"
+            + 'window.kycLocalMeta = {"signature":"' + signature + '"};\n'
+        )
+        written.append((path, _atomic_write(path, text)))
+    return written
+
+
+def check_local(maps, root="."):
+    problems = []
+    for code, payload in sorted(maps.items()):
+        path = local_file(code, root)
+        committed = read_signature(path=path)
+        if committed is None:
+            problems.append((path, "missing or carries no signature"))
+        elif committed != legislature_signature(payload):
+            problems.append((path, "stale"))
+    return problems
+
+
 def check_legislature(maps, root="."):
     """``[(path, problem)]`` for legislature files missing or out of date."""
     problems = []
@@ -509,7 +559,8 @@ def check_pages(root="."):
     checks = dict(PAGE_REQUIREMENTS)
     for folder, required in ((STATES_DIR, STATE_PAGE_REQUIREMENTS),
                              (DISTRICT_PAGES_DIR, DISTRICT_PAGE_REQUIREMENTS),
-                             (LEGISLATURE_PAGES_DIR, LEGISLATURE_PAGE_REQUIREMENTS)):
+                             (LEGISLATURE_PAGES_DIR, LEGISLATURE_PAGE_REQUIREMENTS),
+                             (COUNTIES_PAGES_DIR, COUNTIES_PAGE_REQUIREMENTS)):
         directory = os.path.join(root, folder)
         if os.path.isdir(directory):
             for name in sorted(os.listdir(directory)):
