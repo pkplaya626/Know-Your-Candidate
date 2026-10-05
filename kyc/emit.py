@@ -72,6 +72,9 @@ DISTRICT_PAGE_REQUIREMENTS = (
 PAGES = tuple(PAGE_REQUIREMENTS)
 STATES_DIR = os.path.join(SITE_DIR, "states")
 DISTRICT_PAGES_DIR = os.path.join(SITE_DIR, "districts")
+# The guide to how government works: generated pages, one folder down. What
+# each loads depends on the page (kyc.government.scripts).
+GOVERNMENT_DIR = os.path.join(SITE_DIR, "government")
 # The first district page lived here for a day; the address still answers.
 REDIRECTS = {os.path.join(SITE_DIR, "redistricting", "ca.html"): "../districts/ca.html"}
 SITEMAP_FILE = os.path.join(SITE_DIR, "sitemap.xml")
@@ -193,9 +196,9 @@ def state_codes(profiles):
 
 def render_state_pages(profiles, root=".", summary=None):
     """``{relative path: html}`` for every generated page: one per state, the
-    index of states, one district map per state, and the old address of the
-    first one."""
-    from . import districts, pages
+    index of states, one district map per state, the old address of the
+    first one, and the guide to how government works."""
+    from . import districts, government, pages
 
     host = canonical_host(root)
     out = {os.path.join(STATES_DIR, "index.html"): pages.render_states_index(host)}
@@ -207,6 +210,8 @@ def render_state_pages(profiles, root=".", summary=None):
             pages.render_district_page(code, host, summary))
     for path, target in REDIRECTS.items():
         out[path] = pages.render_redirect(target, host)
+    for relative, text in government.render_all(host, state_codes(profiles)).items():
+        out[os.path.join(SITE_DIR, *relative.split("/"))] = text
     return out
 
 
@@ -242,14 +247,15 @@ def check_state_pages(profiles, root=".", summary=None):
 def write_sitemap(profiles, root="."):
     """Write ``sitemap.xml`` listing the pages and every state. Returns the
     path, or ``None`` when no custom domain is configured."""
-    from . import districts, pages
+    from . import districts, government, pages
 
     host = canonical_host(root)
     if not host:
         return None
     path = os.path.join(root, SITEMAP_FILE)
     _atomic_write(path, pages.sitemap(host, state_codes(profiles),
-                                      district_maps=districts.all_codes()))
+                                      district_maps=districts.all_codes(),
+                                      guide=government.slugs()))
     return path
 
 
@@ -423,6 +429,11 @@ def check_pages(root="."):
                     code = name[:-len(".html")]
                     checks[f"{os.path.basename(folder)}/{name}"] = tuple(
                         src.replace("{code}", code) for src in required)
+
+    from . import government
+    for slug in government.slugs():
+        checks[government.page_path(slug)] = ("../assets/kyc.js",) + tuple(
+            government.scripts(slug))
 
     for page, required in checks.items():
         path = os.path.join(root, SITE_DIR, page)

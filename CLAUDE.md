@@ -37,6 +37,7 @@ data/odds.json              ──┴─> kyc/ ──> candidate_profiles_site/
                                              data/districts/*.js (one district map per state)
                                              states/*.html      (generated, one per state)
                                              districts/*.html   (generated, one per state)
+                                             government/*.html  (generated: the guide, kyc/government_text.py)
                                              sitemap.xml        (generated)
                                              ├──> index.html    (grid, races, profiles)
                                              └──> map.html      (partisan map)
@@ -50,6 +51,7 @@ data/odds.json              ──┴─> kyc/ ──> candidate_profiles_site/
                                              assets/kyc-map.js
                                              assets/kyc-state.js
                                              assets/kyc-districts.js
+                                             assets/kyc-guide.js
 ```
 
 - The root CSVs are the editorial source of truth. The state atlas and
@@ -63,8 +65,9 @@ data/odds.json              ──┴─> kyc/ ──> candidate_profiles_site/
   *are* hand-editable.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them only to check they load the right scripts in the right order; it never
-  rewrites them. `states/*.html`, `districts/*.html` and `sitemap.xml`
-  are the opposite: generated from `kyc/pages.py` on every build, never
+  rewrites them. `states/*.html`, `districts/*.html`, `government/*.html`
+  and `sitemap.xml` are the opposite: generated from `kyc/pages.py` (the
+  guide's words from `kyc/government_text.py`) on every build, never
   edited by hand, and `verify` fails when one on disk is not what the
   template would write.
 - Shared page behaviour belongs in `assets/`, not in a page. Neither page
@@ -86,8 +89,8 @@ python build_profile_site.py results          # who is still in, from Wikipedia
 python build_profile_site.py campaigns        # campaign websites from FEC committees
 python build_profile_site.py enrich           # fill gaps; check every campaign site
 python build_profile_site.py odds             # market prices and polling averages (writes odds.js)
-python -m unittest discover tests             # 673 tests, no dependencies
-npm install && npm test                       # 749 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 691 tests, no dependencies
+npm install && npm test                       # 851 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -468,6 +471,27 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (`kyc-districts.js` `text()`, `kyc-map.js` `drawMap`), and the tests
     fail if either map draws an SVG `<text>`. The page still declares the
     scheme it shows with `only` (`syncColorScheme`), which Chromium honours.
+
+47. **Check every page, not only the pages at the root.** CI's link check
+    globbed `candidate_profiles_site/*.html`, so every one of the 56
+    district pages linked "States & territories" to a `districts/index.html`
+    that never existed, and nothing failed. CI and
+    `test_guide.TestEveryLocalLinkResolves` walk every folder now.
+
+48. **The guide is checked text, and names no one.** `government/` explains
+    institutions in static prose, so each section cites the primary
+    sources it was checked against, and `validate.check_guide` fails on a
+    link to a page, section or state that does not exist, or a section
+    with no source. The owner's source report said 574 tribes (575 since
+    the Lumbee were recognized in December 2025), treated FTC removal
+    protection as settled (*Trump v. Slaughter*, June 2026, struck it
+    down), and called the federal executive "unitary", a contested
+    theory's label. Every claim was researched and then attacked by a
+    second agent before it was written. When the text is revised, re-check
+    what can change (counts, decisions, agency names) and move `REVIEWED`.
+    Who holds an office is never typed in: the Congress page renders
+    committee leads from the rosters, and a committee's minority lead is
+    found by the seat's `side`, not its title.
 
 ## District maps
 

@@ -45,6 +45,7 @@
     share: "M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 15V3M8 7l4-4 4 4",
     filter: "M3 5h18l-7 8v6l-4 2v-8z",
     sort: "M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4",
+    landmark: "M3 9l9-5 9 5zM6 11v6M10 11v6M14 11v6M18 11v6M4 17h16M3 20h18",
   };
 
   function iconSprite() {
@@ -990,12 +991,16 @@
    * that state's map; anywhere else, to the state's page. */
   function initJump() {
     var select = doc.getElementById("stateJump");
-    if (!select || select.options.length > 1) return;
+    if (!select || select.getAttribute("data-wired")) return;
+    select.setAttribute("data-wired", "true");
     var states = meta().states || {};
     var maps = meta().districtMaps || {};
     var here = (doc.body && doc.body.getAttribute("data-state")) || "";
     var onMaps = doc.body && doc.body.getAttribute("data-page") === "districts";
-    Object.keys(states).sort(function (a, b) {
+    // The guide's pages load no build metadata, so the build writes their
+    // list into the page; it still needs its listener.
+    var written = select.options.length > 1;
+    if (!written) Object.keys(states).sort(function (a, b) {
       return states[a].name.localeCompare(states[b].name);
     }).forEach(function (code) {
       var option = doc.createElement("option");
