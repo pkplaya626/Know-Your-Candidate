@@ -242,9 +242,11 @@ _STATE_MAIN = """\
 _STATE_SCRIPTS = (
     "../data/profiles.js",
     "../data/odds.js",
+    "../data/stategov.js",
     "../assets/kyc-odds.js",
     "../assets/kyc-cards.js",
     "../assets/kyc-profile.js",
+    "../assets/kyc-stategov.js",
     "../assets/kyc-state.js",
 )
 

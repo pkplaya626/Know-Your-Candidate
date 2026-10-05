@@ -34,11 +34,14 @@ data/campaigns.json         ──┤
 data/enrichment.json        ──┤
 data/odds.json              ──┤
 data/census_governments.json ─┤
-data/state_legislators.json ──┴─> kyc/ ──> candidate_profiles_site/
+data/state_legislators.json ──┤
+data/executives.json        ──┤   (every governor, from the NGA)
+data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
                                              data/odds.js       (market prices, polling averages)
                                              data/government.js (the guide's maps: kyc/government_maps.py)
+                                             data/stategov.js   (governors, chamber control, trifectas)
                                              data/legislature/*.js (one state legislature per state)
                                              data/local/*.js    (one state's counties and governments)
                                              data/districts/*.js (one district map per state)
@@ -64,6 +67,7 @@ data/state_legislators.json ──┴─> kyc/ ──> candidate_profiles_site/
                                              assets/kyc-regionmap.js
                                              assets/kyc-legislature.js
                                              assets/kyc-local.js
+                                             assets/kyc-stategov.js
                                              assets/kyc-guide.js
 ```
 
@@ -106,14 +110,15 @@ python build_profile_site.py odds             # market prices and polling averag
 python build_profile_site.py census           # local governments by state (Census of Governments)
 python build_profile_site.py statelegs        # every state legislator (Open States), matched to districts
 python build_profile_site.py localgov         # every local government (Census listing), checked
+python build_profile_site.py executives       # every governor (NGA), and NCSL's party counts
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
-python -m unittest discover tests             # 728 tests, no dependencies
-npm install && npm test                       # 961 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 748 tests, no dependencies
+npm install && npm test                       # 986 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
-`campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov` and `congress`
-touch the network, as do the two `tools/fetch_*_maps.py` scripts. Run the
+`campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`
+and `congress` touch the network, as do the two `tools/fetch_*_maps.py` scripts. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -551,6 +556,18 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     government to its county on the Census code, never the county's name,
     and show what the listing does not hold - who serves - as absent, not
     guessed.
+
+54. **A majority of seats is not a majority that governs.** Counted by
+    seats, as NCSL counts them, Alaska is a Republican trifecta; the
+    Legislature's own roster lists a Republican as minority leader in both
+    chambers, because coalitions of both parties run them. Control is
+    counted from Open States and from NCSL separately and shown only where
+    they agree; a seat with nobody listed counts for no one, so 67 of 134
+    is not a majority. What the counts cannot show goes in
+    `stategov.COALITIONS` with its evidence, and `build` warns once the
+    seats stop fitting it. The NGA's roster page carries the NGA's own
+    links and logo before its list: read only the list items, or Alabama's
+    governor gets the leadership page and the logo.
 
 ## District maps
 

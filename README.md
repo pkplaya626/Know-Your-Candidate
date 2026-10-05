@@ -33,6 +33,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… census` | Count each state's local governments from the Census of Governments (`--check` reads the cache) |
 | `… statelegs` | Every state legislator from Open States, matched to the district maps (`--check` re-matches the cache) |
 | `… localgov` | Every local government from the Census listing, checked against the published counts |
+| `… executives` | Every governor from the NGA, and NCSL's count of each legislature's parties (`--check` reports the caches) |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
 | `… results` | Read each state's primary results from Wikipedia: who is still in |
 | `… results --check` | Report the results from the committed cache; no network |
@@ -114,6 +115,8 @@ CI asserts that a rebuild changes nothing.
 | `legislature.py` | Each state's legislature page data: projected districts, close-ups and the members in each |
 | `localgov.py` | Every local government, county by county, from the Census listing (the `localgov` command) |
 | `counties.py` | Each state's counties page data: projected counties and the governments in each |
+| `executives.py` | Every governor, from the National Governors Association's roster (the `executives` command) |
+| `stategov.py` | Who runs each state: governor, chamber control, trifecta, checked against NCSL |
 | `campaigns.py` | Campaign websites from each candidate's FEC committee |
 | `enrich.py` | Fill filed candidates' gaps from their Wikipedia infobox and campaign site; check every linked campaign site |
 | `odds.py` | Prediction-market prices (Kalshi, Polymarket) and published polling averages for the 2026 Senate races |
@@ -144,6 +147,7 @@ order renders an empty site with no error anywhere.
 | `assets/kyc-regionmap.js` | A map of any regions inside a state (legislative districts now), with labels and close-ups |
 | `assets/kyc-legislature.js` | A state's legislature page: chambers, districts, members |
 | `assets/kyc-local.js` | A state's counties page: every county and every local government in it |
+| `assets/kyc-stategov.js` | Governors, legislatures and trifectas: the map's three state views and every state page's section |
 
 Every view has a URL: `#/profile/<id>` for a person,
 `#/?state=TX&chamber=Senate` for a filtered list, so any view can be linked and
@@ -959,6 +963,43 @@ The map is `assets/kyc-regionmap.js`, a renderer for any regions keyed by
 any id - counties and towns are next - built on the district pages'
 techniques: one definition per shape, labels as page text at 11px for the
 drawn width, close-ups planned by `kyc/districts.insets`.
+
+## Governors and party control
+
+The partisan map has three state views beside its three for Congress -
+**Governors**, **Legislatures** and **Trifectas** - and every state page has
+a "State government" section drawn by the same module
+(`assets/kyc-stategov.js`): the governor, with party, time in office, office
+website, NGA biography and the office's address and phone, and each chamber's
+seats by party. `map.html#/?state=TX&mode=trifecta` opens a view as sent.
+
+| What | Source | How |
+|---|---|---|
+| Governors: name, party, terms, office contact, headshot | National Governors Association, current governors (50 states and 5 territories) | `python build_profile_site.py executives` writes `data/executives.json` |
+| Seats by party | The Open States legislators behind the legislature pages | `statelegs` (above) |
+| A second count of seats, control and governors' parties | NCSL, State Partisan Composition | `executives` writes `data/partisan_composition.json` |
+
+A party holds a chamber when it has more than half of **all** its seats; a
+seat Open States lists nobody for counts for no one. A trifecta is one party
+holding the governorship and both chambers. Open States and NCSL are counted
+separately and must agree about which party holds each chamber: where they do
+not, the map shows "Sources disagree" and the panel shows both, rather than
+either. On 2026-10-05 they agreed in all 50 states, as did the NGA and NCSL
+on every governor's party.
+
+Two cases the counts alone would get wrong are written down with their
+evidence (`stategov.COALITIONS`). Alaska's Republicans hold a majority of the
+seats in both chambers, but the Legislature's own roster lists a Republican
+as minority leader in each: coalitions of both parties run them, so Alaska is
+not drawn as a trifecta (NCSL, counting seats, calls it one). Nebraska's
+Legislature is elected without party labels and is drawn as nonpartisan.
+`build` warns when the seats stop fitting a note.
+
+The roster is cross-checked against Wikidata's record of each state's
+incumbent; Wikidata is a lead, never a source, and any disagreement is
+reported, not applied. The NGA posts its headshots only at full size,
+0.3-7.6 MB, and a guessed smaller URL is a 404, so a headshot over 1 MB is
+left off the card. D.C. has a mayor and council, and its page says so.
 
 ## Counties and local governments
 

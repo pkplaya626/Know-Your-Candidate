@@ -2783,11 +2783,115 @@ async function testCounties() {
   });
 }
 
+/* ======================================================= state government */
+
+async function testStateGov() {
+  const { window, D, errors, sources } = await buildPage("map.html", { hash: "#/?state=AK&mode=legislature" });
+  const data = window.kycStateGov;
+  const KYC = window.KYC;
+  const shape = (code) => D.querySelector('#usMap [data-state="' + code + '"]');
+  const stateCodes = Object.keys(window.kycGeo.states).filter((c) => c !== "DC");
+
+  suite("map.html — governors, legislatures and trifectas", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("the data loads before the module, and the module before the map",
+      sources.indexOf("data/stategov.js") < sources.indexOf("assets/kyc-stategov.js") &&
+      sources.indexOf("assets/kyc-stategov.js") < sources.indexOf("assets/kyc-map.js"));
+    check("a pasted URL opens the view and the state",
+      D.querySelector('[data-mode="legislature"]').getAttribute("aria-pressed") === "true" &&
+      D.getElementById("panelState").textContent === "Alaska");
+    const panel = D.getElementById("delegation");
+    check("Alaska's coalitions are said, with the Legislature's own roster",
+      /coalitions/.test(panel.textContent) &&
+      !!panel.querySelector('a[href^="https://www.akleg.gov/"]'));
+    check("so Alaska is not a trifecta", data.states.AK.trifecta === "divided");
+    check("the panel links the state's legislature and counties pages",
+      !!panel.querySelector('a[href$="legislature/ak.html"]') &&
+      !!panel.querySelector('a[href$="counties/ak.html"]'));
+    check("every outbound link opens safely",
+      [...panel.querySelectorAll('a[target="_blank"]')].every((a) => /noopener/.test(a.getAttribute("rel"))));
+    check("a seat is never called vacant", !/vacan/i.test(panel.textContent));
+    check("Nebraska is drawn as nonpartisan, not as a party",
+      /without party labels/.test(shape("NE").getAttribute("aria-label")) &&
+      !/party-/.test(shape("NE").style.fill));
+
+    D.querySelector('[data-mode="governor"]').click();
+    check("each state is filled by its governor's party", stateCodes.every((c) =>
+      shape(c).style.fill === "var(--party-" + data.states[c].governor.partyKey.toLowerCase() + ")"),
+      stateCodes.filter((c) => !data.states[c]).join(" "));
+    check("D.C. says it has a mayor, not a governor",
+      /mayor/.test(shape("DC").getAttribute("aria-label")));
+    check("the governor is named, with the NGA's page",
+      D.getElementById("delegation").textContent.indexOf(data.states.AK.governor.name) !== -1 &&
+      !!D.querySelector('#delegation a[href^="https://www.nga.org/governors/"]'));
+    check("the view is in the address", /mode=governor/.test(window.location.hash), window.location.hash);
+    check("the legend follows the view", /Republican governor/.test(D.getElementById("mapLegend").textContent));
+
+    D.querySelector('[data-mode="trifecta"]').click();
+    const painted = stateCodes.filter((c) => shape(c).style.fill === "var(--party-r)").length;
+    const counted = stateCodes.filter((c) => data.states[c].trifecta === "R").length;
+    check("every Republican trifecta in the data is painted, and nothing else",
+      painted === counted && counted > 0, `${painted} painted, ${counted} in the data`);
+    check("a state without a trifecta is divided", (() => {
+      const divided = stateCodes.filter((c) => data.states[c].trifecta === "divided");
+      return divided.length > 0 && divided.every((c) => shape(c).style.fill === "var(--split)");
+    })());
+
+    window.location.hash = "#/?state=MN&mode=legislature";
+    window.dispatchEvent(new window.Event("hashchange"));
+    check("a chamber where no party has a majority says so",
+      /No party holds a majority/.test(D.getElementById("delegation").textContent));
+
+    const img = D.querySelector("#delegation .gov-portrait");
+    if (img) {
+      img.dispatchEvent(new window.Event("error"));
+      check("a headshot that fails to load is removed, not left broken",
+        !D.querySelector("#delegation .gov-portrait"));
+    }
+    check("no text inside the map's SVG (rule 46)", !D.querySelector("#usMap text"));
+  });
+
+  suite("state government — the data", () => {
+    check("every state has a governor", stateCodes.every((c) => data.states[c] && data.states[c].governor.name));
+    check("a majority is more than half of all seats", stateCodes.every((c) => {
+      const s = data.states[c];
+      return ["upper", "lower"].every((k) => {
+        const ch = s[k];
+        if (!ch) return true;
+        const m = ch.majority;
+        return m ? ch[m] * 2 > ch.seats : ch.D * 2 <= ch.seats && ch.R * 2 <= ch.seats;
+      });
+    }));
+  });
+
+  const ak = await buildPage("states/ak.html");
+  const mapped = await buildPage("map.html", { hash: "#/?state=AK&mode=legislature" });
+  suite("states/ak.html — its state government", () => {
+    const section = ak.D.getElementById("state-government");
+    check("the state page has a state government section", !!section);
+    const heads = [...ak.D.querySelectorAll("#stateContent .state-heading")].map((h) => h.textContent);
+    check("it follows the congressional delegation (rule 27)",
+      heads.findIndex((h) => /State government/.test(h)) > heads.findIndex((h) => /House/.test(h)), heads.join(" | "));
+    check("it says exactly what the map's panel says (rule 12)",
+      section.querySelector(".gov-chambers").innerHTML ===
+        mapped.D.querySelector("#delegation .gov-chambers").innerHTML &&
+      section.querySelector(".gov-note").textContent ===
+        mapped.D.querySelector("#delegation .gov-note").textContent);
+  });
+
+  const dc = await buildPage("states/dc.html");
+  suite("states/dc.html — D.C. has no governor", () => {
+    const section = dc.D.getElementById("state-government");
+    check("the page says so rather than showing nothing", !!section && /mayor/.test(section.textContent));
+  });
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "guide") await testGuide();
   if (!only || only === "legislature") await testLegislatures();
   if (!only || only === "counties") await testCounties();
+  if (!only || only === "stategov") await testStateGov();
   if (!only || only === "index.html") await testDirectoryAsync();
   if (!only || only === "index.html") await testSenate();
   if (!only || only === "index.html") await testOdds();

@@ -1,0 +1,956 @@
+{
+ "fetched": "2026-10-05T20:10:55+00:00",
+ "governors": {
+  "AK": {
+   "address": "Office of the Governor, P.O. Box 110001, Juneau, AK 99811-0001",
+   "born": "May 5, 1961",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/09/Gov_Dunleavy_Sep2023_square-scaled.jpg",
+   "headshotBytes": 530764,
+   "name": "Mike Dunleavy",
+   "party": "Republican",
+   "partyKey": "R",
+   "profile": "https://www.nga.org/governors/alaska/",
+   "state": "AK",
+   "terms": [
+    "December 3, 2018 - December 5, 2022",
+    "December 5, 2022 - Current"
+   ],
+   "website": "https://gov.alaska.gov/",
+   "wikidata": "Q16209663"
+  },
+  "AL": {
+   "address": "600 Dexter Avenue, Montgomery, AL 36130",
+   "born": "October 15, 1944",
+   "headshot": "https://www.nga.org/wp-content/uploads/2018/01/Governor-Ivey-2019-Headshot-scaled.jpg",
+   "headshotBytes": 891271,
+   "name": "Kay Ivey",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "334.242.7100",
+   "profile": "https://www.nga.org/governors/alabama/",
+   "state": "AL",
+   "terms": [
+    "April 19, 2017 - January 13, 2019",
+    "January 14, 2019 - January 16, 2023",
+    "January 16, 2023 - Current"
+   ],
+   "website": "https://governor.alabama.gov/",
+   "wikidata": "Q6380211"
+  },
+  "AR": {
+   "address": "500 Woodlane St., Little Rock, AR 72201",
+   "born": "August 13, 1982",
+   "headshot": "https://www.nga.org/wp-content/uploads/2023/01/Governor-Headshot-sanders-e1756131825437.jpg",
+   "headshotBytes": 35060,
+   "name": "Sarah Huckabee Sanders",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "501-682-2345",
+   "profile": "https://www.nga.org/governors/arkansas/",
+   "state": "AR",
+   "terms": [
+    "January 10, 2023 - Current"
+   ],
+   "website": "https://governor.arkansas.gov/",
+   "wikidata": "Q27986907"
+  },
+  "AS": {
+   "address": "Office of the Governor, Pago Pago, AS 96799",
+   "born": "December 31, 1955",
+   "headshot": "https://www.nga.org/wp-content/uploads/2025/01/GOV_PULA_2025.jpg",
+   "headshotBytes": 139195,
+   "name": "Pula’ali’i Nikolao Pula",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "684-633-4116",
+   "profile": "https://www.nga.org/governors/american-samoa/",
+   "state": "AS",
+   "terms": [
+    "January 3, 2025 - Current"
+   ]
+  },
+  "AZ": {
+   "address": "Office of the Governor, 1700 W. Washington St., Phoenix, AZ 85007",
+   "born": "December 28, 1969",
+   "headshot": "https://www.nga.org/wp-content/uploads/2023/01/governor-katie-hobbs-scaled.jpeg",
+   "headshotBytes": 484937,
+   "name": "Katie Hobbs",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "602-542-4331",
+   "profile": "https://www.nga.org/governors/arizona/",
+   "state": "AZ",
+   "terms": [
+    "January 2, 2023 - Current"
+   ],
+   "website": "https://azgovernor.gov/",
+   "wikidata": "Q16226012"
+  },
+  "CA": {
+   "address": "1021 O Street, Suite 9000, Sacramento, CA 95814",
+   "born": "October 10, 1967",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/09/1200px-Gavin_Newsom_official_photo_square.jpg",
+   "headshotBytes": 333044,
+   "name": "Gavin Newsom",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "916-445-2841",
+   "profile": "https://www.nga.org/governors/california/",
+   "state": "CA",
+   "terms": [
+    "January 7, 2019 - January 6, 2023",
+    "January 6, 2023 - Current"
+   ],
+   "website": "https://www.gov.ca.gov/",
+   "wikidata": "Q461391"
+  },
+  "CO": {
+   "address": "State Capitol Bldg, 200 E. Colfax Ave., Rm. 136, Denver, CO 80203",
+   "born": "May 12, 1975",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/01/Colorado-Jared-Polis-November-2019.jpg",
+   "headshotBytes": 96431,
+   "name": "Jared Polis",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "303-866-2471",
+   "profile": "https://www.nga.org/governors/colorado/",
+   "state": "CO",
+   "terms": [
+    "January 8, 2019 - January 10, 2023",
+    "January 10, 2023 - Current"
+   ],
+   "website": "https://www.colorado.gov/governor/",
+   "wikidata": "Q935734"
+  },
+  "CT": {
+   "address": "Office of the Governor, State Capitol, 210 Capitol Avenue, Hartford, CT 06106",
+   "born": "January 3, 1954",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/09/govlamont-scaled.jpg",
+   "headshotBytes": 670568,
+   "name": "Ned Lamont",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "860-566-4840",
+   "profile": "https://www.nga.org/governors/connecticut/",
+   "state": "CT",
+   "terms": [
+    "January 9, 2019 - January 4, 2023",
+    "January 4, 2023 - Current"
+   ],
+   "website": "https://portal.ct.gov/governor/",
+   "wikidata": "Q1973878"
+  },
+  "DE": {
+   "address": "150 Martin Luther King Jr Blvd, South Dover, DE 19901",
+   "born": "September 21, 1971",
+   "headshot": "https://www.nga.org/wp-content/uploads/2025/01/matt-meyer_800x600.jpg",
+   "headshotBytes": 247790,
+   "name": "Matt Meyer",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "302-744-4101",
+   "profile": "https://www.nga.org/governors/delaware/",
+   "state": "DE",
+   "terms": [
+    "January 21, 2025 - Current"
+   ],
+   "website": "https://governor.delaware.gov/",
+   "wikidata": "Q26703331"
+  },
+  "FL": {
+   "address": "400 S Monroe St., Tallahassee, FL 32399",
+   "born": "September 14, 1978",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/09/Ron_DeSantis_Official_Portrait_113th_Congress.jpg",
+   "headshotBytes": 253788,
+   "name": "Ron DeSantis",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "850-488-7146",
+   "profile": "https://www.nga.org/governors/florida/",
+   "state": "FL",
+   "terms": [
+    "January 8, 2019 - January 3, 2023",
+    "January 3, 2023 - Current"
+   ],
+   "wikidata": "Q3105215"
+  },
+  "GA": {
+   "address": "206 Washington Street Suite 203, State Capitol, Atlanta, GA 30334",
+   "born": "November 2, 1963",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/09/GovBrianKemp_2024WEB.jpg",
+   "headshotBytes": 119787,
+   "name": "Brian Kemp",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "404-656-1776",
+   "profile": "https://www.nga.org/governors/georgia/",
+   "state": "GA",
+   "terms": [
+    "January 14, 2019 - January 9, 2023",
+    "January 9, 2023 - Current"
+   ],
+   "website": "https://gov.georgia.gov/",
+   "wikidata": "Q4964973"
+  },
+  "GU": {
+   "address": "Ricardo J Bordallo Governor’s Complex, 513 West Marine Corps Drive, Hagatna, GU 96910",
+   "born": "November 8, 1950",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/09/GUAM-LOURDES-LEON-GUERRERO_square-scaled.jpg",
+   "headshotBytes": 480862,
+   "name": "Lou Leon Guerrero",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "671-472-8931",
+   "profile": "https://www.nga.org/governors/guam/",
+   "state": "GU",
+   "terms": [
+    "January 7, 2019 - January 2, 2023",
+    "January 2, 2023 - Current"
+   ],
+   "website": "http://governor.guam.gov/"
+  },
+  "HI": {
+   "address": "Executive Chambers, State Capitol, 415 South Beretania St., Honolulu, Hawai‘i 96813",
+   "born": "February 11, 1970",
+   "headshot": "https://www.nga.org/wp-content/uploads/2022/12/Governor_Josh_Green.jpg",
+   "headshotBytes": 32040,
+   "name": "Josh Green",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "808-586-0034",
+   "profile": "https://www.nga.org/governors/hawaii/",
+   "state": "HI",
+   "terms": [
+    "December 5, 2022 - Current"
+   ],
+   "website": "https://governor.hawaii.gov/",
+   "wikidata": "Q16224583"
+  },
+  "IA": {
+   "address": "Office of the Governor, Iowa State Capitol, 1007 East Grand Avenue, Des Moines, IA 50319",
+   "born": "August 4, 1959",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/09/Governor-Reynolds-2025-Headshot_square.jpg",
+   "headshotBytes": 317504,
+   "name": "Kim Reynolds",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "515-281-5211",
+   "profile": "https://www.nga.org/governors/iowa/",
+   "state": "IA",
+   "terms": [
+    "May 27, 2017 - January 15, 2019",
+    "January 15, 2019 - January 13, 2023",
+    "January 13, 2023 - Current"
+   ],
+   "website": "https://governor.iowa.gov/",
+   "wikidata": "Q6409269"
+  },
+  "ID": {
+   "address": "State Capitol, PO Box 83720, Boise, ID 83720",
+   "born": "February 15, 1954",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/09/governor_little_square.jpg",
+   "headshotBytes": 28731,
+   "name": "Brad Little",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "208-334-2100",
+   "profile": "https://www.nga.org/governors/idaho/",
+   "state": "ID",
+   "terms": [
+    "January 7, 2019 - January 6, 2023",
+    "January 6, 2023 - Current"
+   ],
+   "website": "https://gov.idaho.gov/",
+   "wikidata": "Q4954097"
+  },
+  "IL": {
+   "address": "Office of the Governor, 401 S. Spring St., Springfield, IL 62704",
+   "born": "January 19, 1965",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/09/2026-JB-Headshot.jpg",
+   "headshotBytes": 292439,
+   "name": "JB Pritzker",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "217-782-6830",
+   "profile": "https://www.nga.org/governors/illinois/",
+   "state": "IL",
+   "terms": [
+    "January 14, 2019 - January 9, 2023",
+    "January 9, 2023 - Current"
+   ],
+   "website": "https://www2.illinois.gov/sites/gov/Pages/default.aspx"
+  },
+  "IN": {
+   "address": "200 W. Washington St., Rm. 206, Indianapolis, IN 46204",
+   "born": "March 24, 1954",
+   "headshot": "https://www.nga.org/wp-content/uploads/2025/01/GMB-FInal-Headshot_square.jpg",
+   "headshotBytes": 355202,
+   "name": "Mike Braun",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "317-232-4567",
+   "profile": "https://www.nga.org/governors/indiana/",
+   "state": "IN",
+   "terms": [
+    "January 13, 2025 - Current"
+   ],
+   "website": "https://www.in.gov/gov/index.htm",
+   "wikidata": "Q42804470"
+  },
+  "KS": {
+   "address": "Office of the Governor, Kansas Statehouse, 300 SW 10th Ave., Ste. 241S, Topeka, KS 66612-1590",
+   "born": "January 24, 1950",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/09/kelly_square.jpg",
+   "headshotBytes": 102987,
+   "name": "Laura Kelly",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "785-296-3232",
+   "profile": "https://www.nga.org/governors/kansas/",
+   "state": "KS",
+   "terms": [
+    "January 14, 2019 - January 9, 2023",
+    "January 9, 2023 - Current"
+   ],
+   "website": "https://governor.kansas.gov/",
+   "wikidata": "Q6499080"
+  },
+  "KY": {
+   "address": "700 Capitol Avenue, Suite 100, Frankfort, Kentucky 40601",
+   "born": "November 29, 1977",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/12/Governor-Beshear_Official-Picture_square-scaled.jpg",
+   "headshotBytes": 730524,
+   "name": "Andy Beshear",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "502-564-2611",
+   "profile": "https://www.nga.org/governors/kentucky/",
+   "state": "KY",
+   "terms": [
+    "December 10, 2019 - December 11, 2023",
+    "December 11, 2023 - Current"
+   ],
+   "website": "https://governor.ky.gov/Pages/index.aspx",
+   "wikidata": "Q21572825"
+  },
+  "LA": {
+   "address": "Office of the Governor, PO Box 94004, Baton Rouge, LA 70804",
+   "born": "December 23, 1970",
+   "headshot": "https://www.nga.org/wp-content/uploads/2024/01/Governor-Landry-Official-Portrait_square-scaled.jpg",
+   "headshotBytes": 440584,
+   "name": "Jeff Landry",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "225-342-0991",
+   "profile": "https://www.nga.org/governors/louisiana/",
+   "state": "LA",
+   "terms": [
+    "January 8, 2024 - Current"
+   ],
+   "website": "https://gov.louisiana.gov/",
+   "wikidata": "Q1686330"
+  },
+  "MA": {
+   "address": "Massachusetts State House, 24 Beacon St., Office of the Governor, Room 280, Boston, MA 02133",
+   "born": "February 8, 1971",
+   "headshot": "https://www.nga.org/wp-content/uploads/2023/01/Maura_Healey_square.jpg",
+   "headshotBytes": 70107,
+   "name": "Maura Healey",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "617-725-4005",
+   "profile": "https://www.nga.org/governors/massachusetts/",
+   "state": "MA",
+   "terms": [
+    "January 5, 2023 - Current"
+   ],
+   "website": "https://www.mass.gov/orgs/office-of-the-governor",
+   "wikidata": "Q16205062"
+  },
+  "MD": {
+   "address": "100 State Circle, Annapolis, Maryland 21401-1925​",
+   "born": "October 15, 1978",
+   "headshot": "https://www.nga.org/wp-content/uploads/2023/01/governor-wes-moore-official-portrait_square.jpg",
+   "headshotBytes": 322893,
+   "name": "Wes Moore",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "410-974-3901",
+   "profile": "https://www.nga.org/governors/maryland/",
+   "state": "MD",
+   "terms": [
+    "January 18, 2023 - Current"
+   ],
+   "website": "https://governor.maryland.gov/",
+   "wikidata": "Q7983732"
+  },
+  "ME": {
+   "address": "1 State House Station, Augusta, ME 04333",
+   "born": "December 30, 1947",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/09/3218_Gov-Janet-Mills-20230307_square-scaled.jpg",
+   "headshotBytes": 880536,
+   "name": "Janet Mills",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "207-287-3531",
+   "profile": "https://www.nga.org/governors/maine/",
+   "state": "ME",
+   "terms": [
+    "January 2, 2019 - January 4, 2023",
+    "January 4, 2023 - Current"
+   ],
+   "website": "https://www.maine.gov/governor/mills/",
+   "wikidata": "Q6153618"
+  },
+  "MI": {
+   "address": "P.O. Box 30013, Lansing, Michigan 48909",
+   "born": "August 23, 1971",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/09/GovWhitmerPortMaster_square-scaled.jpg",
+   "headshotBytes": 456877,
+   "name": "Gretchen Whitmer",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "517-335-7858",
+   "profile": "https://www.nga.org/governors/michigan/",
+   "state": "MI",
+   "terms": [
+    "January 1, 2019 - January 1, 2023",
+    "January 1, 2023 - Current"
+   ],
+   "website": "https://www.michigan.gov/whitmer/",
+   "wikidata": "Q5607720"
+  },
+  "MN": {
+   "address": "130 State Capitol, 75 Rev Dr. Martin Luther King Jr. Blvd., St. Paul, MN 55155",
+   "born": "April 6, 1964",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/09/Governor-Walz-2024_square.jpg",
+   "headshotBytes": 603148,
+   "name": "Tim Walz",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "651-201-3400",
+   "profile": "https://www.nga.org/governors/minnesota/",
+   "state": "MN",
+   "terms": [
+    "January 7, 2019 - January 2, 2023",
+    "January 2, 2023 - Current"
+   ],
+   "website": "https://mn.gov/governor/",
+   "wikidata": "Q2434360"
+  },
+  "MO": {
+   "address": "P.O. Box 720, Jefferson City, MO 65102",
+   "born": "January 17, 1962",
+   "headshot": "https://www.nga.org/wp-content/uploads/2025/01/Governor-Mike-Kehoe_square-scaled.jpg",
+   "headshotBytes": 646315,
+   "name": "Mike Kehoe",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "573-751-3222",
+   "profile": "https://www.nga.org/governors/missouri/",
+   "state": "MO",
+   "terms": [
+    "January 13, 2025 - Current"
+   ],
+   "website": "https://governor.mo.gov/",
+   "wikidata": "Q6847475"
+  },
+  "MP": {
+   "address": "Juan A. Sablan Memorial Building, Capitol Hill 96950 Saipan, Northern Mariana Islands",
+   "born": "July 10, 1948",
+   "headshot": "https://www.nga.org/wp-content/uploads/2025/07/David-M-Apatang-Head-Shot.jpg",
+   "headshotBytes": 52106,
+   "name": "David M. Apatang",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "670-237-2200",
+   "profile": "https://www.nga.org/governors/northern-mariana-islands/",
+   "state": "MP",
+   "terms": [
+    "July 24, 2025 - Current"
+   ],
+   "website": "https://governor.cnmi.gov/"
+  },
+  "MS": {
+   "address": "P.O. Box 139, Jackson, MS 39205",
+   "born": "June 5, 1974",
+   "headshot": "https://www.nga.org/wp-content/uploads/2020/01/headshot-governor-tate-reeves_R_square.jpg",
+   "headshotBytes": 27215,
+   "name": "Tate Reeves",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "601-359-3150",
+   "profile": "https://www.nga.org/governors/mississippi/",
+   "state": "MS",
+   "terms": [
+    "January 14, 2020 - Current"
+   ],
+   "website": "https://governorreeves.ms.gov/",
+   "wikidata": "Q7687964"
+  },
+  "MT": {
+   "address": "P.O. Box 200801, Helena, MT 59620-0801",
+   "born": "April 17, 1961",
+   "headshot": "https://www.nga.org/wp-content/uploads/2020/11/Montana-Greg-Gianforte-January-2021.jpg",
+   "headshotBytes": 53074,
+   "name": "Greg Gianforte",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "406-444-3111",
+   "profile": "https://www.nga.org/governors/montana/",
+   "state": "MT",
+   "terms": [
+    "January 4, 2021 - January 6, 2025",
+    "January 6, 2025 - Current"
+   ],
+   "website": "http://governor.mt.gov/",
+   "wikidata": "Q5605607"
+  },
+  "NC": {
+   "born": "September 13, 1966",
+   "headshot": "https://www.nga.org/wp-content/uploads/2025/01/Josh-Stein_NC.jpg",
+   "headshotBytes": 107118,
+   "name": "Josh Stein",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "919-814-2000",
+   "profile": "https://www.nga.org/governors/north-carolina/",
+   "state": "NC",
+   "terms": [
+    "January 1, 2025 - Current"
+   ],
+   "website": "https://governor.nc.gov/",
+   "wikidata": "Q6289402"
+  },
+  "ND": {
+   "address": "600 East Boulevard Avenue, Bismarck ND, 58505-0001",
+   "born": "October 8, 1976",
+   "headshot": "https://www.nga.org/wp-content/uploads/2024/12/GovernorArmstrong.jpg",
+   "headshotBytes": 180973,
+   "name": "Kelly Armstrong",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "701-328-2200",
+   "profile": "https://www.nga.org/governors/north-dakota/",
+   "state": "ND",
+   "terms": [
+    "December 15, 2024 - Current"
+   ],
+   "website": "https://www.governor.nd.gov/",
+   "wikidata": "Q50362353"
+  },
+  "NE": {
+   "address": "PO Box 94848, Lincoln, NE 68509-4848",
+   "born": "December 31, 1955",
+   "headshot": "https://www.nga.org/wp-content/uploads/2023/01/Governor_Pillen.png",
+   "headshotBytes": 193981,
+   "name": "Jim Pillen",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "402-471-2244",
+   "profile": "https://www.nga.org/governors/nebraska/",
+   "state": "NE",
+   "terms": [
+    "January 5, 2023 - Current"
+   ],
+   "website": "https://governor.nebraska.gov/",
+   "wikidata": "Q111961602"
+  },
+  "NH": {
+   "born": "June 27, 1968",
+   "headshot": "https://www.nga.org/wp-content/uploads/2025/01/ayotte_portrait-for-online.jpg",
+   "headshotBytes": 291575,
+   "name": "Kelly Ayotte",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "603-271-2121",
+   "profile": "https://www.nga.org/governors/new-hampshire/",
+   "state": "NH",
+   "terms": [
+    "January 9, 2025 - Current"
+   ],
+   "website": "https://www.governor.nh.gov/",
+   "wikidata": "Q22354"
+  },
+  "NJ": {
+   "born": "January 19, 1972",
+   "headshot": "https://www.nga.org/wp-content/uploads/2026/01/home-gov_official_square.jpg",
+   "headshotBytes": 190347,
+   "name": "Mikie Sherrill",
+   "party": "Democratic",
+   "partyKey": "D",
+   "profile": "https://www.nga.org/governors/new-jersey/",
+   "state": "NJ",
+   "terms": [
+    "January 20, 2026 - Current"
+   ],
+   "wikidata": "Q47087146"
+  },
+  "NM": {
+   "address": "490 Old Santa Fe Trail Room 400, Santa Fe, NM 87501",
+   "born": "October 24, 1959",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/02/New-Mexico-Michelle-Lujan-Grisham-January-2018.jpg",
+   "headshotBytes": 2897534,
+   "name": "Michelle Lujan Grisham",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "505-476-2200",
+   "profile": "https://www.nga.org/governors/new-mexico/",
+   "state": "NM",
+   "terms": [
+    "January 1, 2019 - January 1, 2023",
+    "January 1, 2023 - Current"
+   ],
+   "website": "http://www.governor.state.nm.us/",
+   "wikidata": "Q3917203"
+  },
+  "NV": {
+   "address": "State Capitol Building, 101 N. Carson Street, Carson City, NV 89701",
+   "born": "November 8, 1962",
+   "headshot": "https://www.nga.org/wp-content/uploads/2023/01/Governor-Joe-Lombardo_Official-Photo-scaled.jpg",
+   "headshotBytes": 495613,
+   "name": "Joe Lombardo",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "775-684-5670",
+   "profile": "https://www.nga.org/governors/nevada/",
+   "state": "NV",
+   "terms": [
+    "January 2, 2023 - Current"
+   ],
+   "website": "https://gov.nv.gov/",
+   "wikidata": "Q28033703"
+  },
+  "NY": {
+   "address": "NYS State Capitol Building, Albany, NY 12224",
+   "born": "August 27, 1958",
+   "headshot": "https://www.nga.org/wp-content/uploads/2021/08/GovernorHochul.jpg",
+   "headshotBytes": 27239,
+   "name": "Kathy Hochul",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "518-474-8390",
+   "profile": "https://www.nga.org/governors/new-york/",
+   "state": "NY",
+   "terms": [
+    "August 24, 2021 - January 1, 2023",
+    "January 1, 2023 - Current"
+   ],
+   "website": "https://www.governor.ny.gov/",
+   "wikidata": "Q45956"
+  },
+  "OH": {
+   "address": "Riffe Center, 30th Floor, 77 South High Street, Columbus, OH 43215",
+   "born": "January 5, 1947",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/01/Gov-Mike-DeWine.jpg",
+   "headshotBytes": 7617284,
+   "name": "Mike DeWine",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "614-644-4357",
+   "profile": "https://www.nga.org/governors/ohio/",
+   "state": "OH",
+   "terms": [
+    "January 14, 2019 - January 8, 2023",
+    "January 8, 2023 - Current"
+   ],
+   "website": "http://governor.ohio.gov/",
+   "wikidata": "Q1363468"
+  },
+  "OK": {
+   "address": "2300 N. Lincoln Blvd., Suite 212, Oklahoma City, OK 73105",
+   "born": "December 28, 1972",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/06/Oklahoma-Kevin-Stitt-June-2019.jpg",
+   "headshotBytes": 780790,
+   "name": "Kevin Stitt",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "405-521-2342",
+   "profile": "https://www.nga.org/governors/oklahoma/",
+   "state": "OK",
+   "terms": [
+    "January 14, 2019 - January 9, 2023",
+    "January 9, 2023 - Current"
+   ],
+   "website": "http://www.gov.ok.gov/",
+   "wikidata": "Q58322517"
+  },
+  "OR": {
+   "address": "900 Court Street, Suite 254, Salem, OR 97301-4047",
+   "born": "September 30, 1966",
+   "headshot": "https://www.nga.org/wp-content/uploads/2023/01/Governor-Tina-Kotek_Official.jpg",
+   "headshotBytes": 182431,
+   "name": "Tina Kotek",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "503-378-4582",
+   "profile": "https://www.nga.org/governors/oregon/",
+   "state": "OR",
+   "terms": [
+    "January 9, 2023 - Current"
+   ],
+   "website": "http://www.oregon.gov/gov/pages/index.aspx"
+  },
+  "PA": {
+   "address": "501 North 3rd Street, 508 Main Capitol Building, Harrisburg, PA 17120",
+   "born": "June 20, 1973",
+   "headshot": "https://www.nga.org/wp-content/uploads/2023/01/JDS_headshot.png",
+   "headshotBytes": 348737,
+   "name": "Josh Shapiro",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "717-787-2500",
+   "profile": "https://www.nga.org/governors/pennsylvania/",
+   "state": "PA",
+   "terms": [
+    "January 17, 2023 - Current"
+   ],
+   "website": "http://governor.pa.gov/",
+   "wikidata": "Q6289368"
+  },
+  "PR": {
+   "born": "August 5, 1976",
+   "headshot": "https://www.nga.org/wp-content/uploads/2025/01/Governor_Jenniffer_Gonzalez-scaled.jpg",
+   "headshotBytes": 847825,
+   "name": "Jenniffer González-Colón",
+   "party": "Republican",
+   "partyKey": "R",
+   "profile": "https://www.nga.org/governors/puerto-rico/",
+   "state": "PR",
+   "terms": [
+    "January 2, 2025 - Current"
+   ],
+   "website": "https://www.fortaleza.pr.gov/"
+  },
+  "RI": {
+   "address": "82 Smith Street, Providence, RI 02903",
+   "born": "June 16, 1951",
+   "headshot": "https://www.nga.org/wp-content/uploads/2021/03/Gov-Dan-Mckee-400.png",
+   "headshotBytes": 224356,
+   "name": "Dan McKee",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "401-222-2080",
+   "profile": "https://www.nga.org/governors/rhode-island/",
+   "state": "RI",
+   "terms": [
+    "March 2, 2021 - January 3, 2023",
+    "January 3, 2023 - Current"
+   ],
+   "website": "https://governor.ri.gov/",
+   "wikidata": "Q5218111"
+  },
+  "SC": {
+   "address": "State House, 1100 Gervais Street, Columbia, South Carolina 29201",
+   "born": "May 27, 1947",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/09/McMaster-Gov.-2025a-full-size_square-scaled.jpg",
+   "headshotBytes": 396223,
+   "name": "Henry McMaster",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "803-734-2100",
+   "profile": "https://www.nga.org/governors/south-carolina/",
+   "state": "SC",
+   "terms": [
+    "January 24, 2017 - January 8, 2019",
+    "January 8, 2019 - January 11, 2023",
+    "January 11, 2023 - Current"
+   ],
+   "website": "http://governor.sc.gov/",
+   "wikidata": "Q5725737"
+  },
+  "SD": {
+   "address": "500 East Capitol Avenue, Pierre, SD 57501",
+   "born": "February 5, 1959",
+   "headshot": "https://www.nga.org/wp-content/uploads/2025/01/Governor-Rhoden-square-scaled.jpg",
+   "headshotBytes": 658114,
+   "name": "Larry Rhoden",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "605-773-3212",
+   "profile": "https://www.nga.org/governors/south-dakota/",
+   "state": "SD",
+   "terms": [
+    "January 25, 2025 - Current"
+   ],
+   "website": "https://governor.sd.gov/default.aspx",
+   "wikidata": "Q16193325"
+  },
+  "TN": {
+   "address": "600 Dr. Martin L. King, Jr. Blvd., Nashville, TN 37243",
+   "born": "October 9, 1959",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/09/GBL_2022_square.jpg",
+   "headshotBytes": 429513,
+   "name": "Bill Lee",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "615-741-2001",
+   "profile": "https://www.nga.org/governors/tennessee/",
+   "state": "TN",
+   "terms": [
+    "January 19, 2019 - Current"
+   ],
+   "website": "https://www.tn.gov/content/tn/governor.html",
+   "wikidata": "Q58321685"
+  },
+  "TX": {
+   "address": "P.O. Box 12428 Austin, TX 78711",
+   "born": "November 13, 1957",
+   "headshot": "https://www.nga.org/wp-content/uploads/2018/07/TX_Gov_Greg_Abbott.png",
+   "headshotBytes": 293563,
+   "name": "Greg Abbott",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "512/463-2000",
+   "profile": "https://www.nga.org/governors/texas/",
+   "state": "TX",
+   "terms": [
+    "January 20, 2015 - January 7, 2019",
+    "January 8, 2019 - January 17, 2023",
+    "January 17, 2023 - Current"
+   ],
+   "website": "http://gov.texas.gov/"
+  },
+  "UT": {
+   "address": "350 N. State Street, Suite 200, P.O. Box 142220, Salt Lake City, UT 84114-2220",
+   "born": "July 11, 1975",
+   "headshot": "https://www.nga.org/wp-content/uploads/2021/01/Governor_Cox_official_square-scaled.jpg",
+   "headshotBytes": 590114,
+   "name": "Spencer Cox",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "801-538-1000",
+   "profile": "https://www.nga.org/governors/utah/",
+   "state": "UT",
+   "terms": [
+    "January 4, 2021 - January 8, 2025",
+    "January 8, 2025 - Current"
+   ],
+   "website": "https://governor.utah.gov/",
+   "wikidata": "Q16208237"
+  },
+  "VA": {
+   "born": "August 7, 1979",
+   "headshot": "https://www.nga.org/wp-content/uploads/2026/01/Abigail_Spanberger_2026.jpg",
+   "headshotBytes": 208846,
+   "name": "Abigail Spanberger",
+   "party": "Democratic",
+   "partyKey": "D",
+   "profile": "https://www.nga.org/governors/virginia/",
+   "state": "VA",
+   "terms": [
+    "January 17, 2026 - Current"
+   ],
+   "wikidata": "Q55603085"
+  },
+  "VI": {
+   "born": "February 21, 1968",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/09/gov_bryan_square.jpg",
+   "headshotBytes": 67312,
+   "name": "Albert Bryan",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "340-774-0001",
+   "profile": "https://www.nga.org/governors/virgin-islands/",
+   "state": "VI",
+   "terms": [
+    "January 7, 2019 - January 2, 2023",
+    "January 2, 2023 - Current"
+   ],
+   "website": "https://www.vi.gov/"
+  },
+  "VT": {
+   "address": "Office of the Governor, 109 State Street, Pavilion, Montpelier, VT 05609",
+   "born": "August 4, 1958",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/02/Vermont-Phil-Scott-November-2018.jpg",
+   "headshotBytes": 981392,
+   "name": "Phil Scott",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "802-828-3333",
+   "profile": "https://www.nga.org/governors/vermont/",
+   "state": "VT",
+   "terms": [
+    "January 5, 2017 - January 9, 2019",
+    "January 10, 2019 - January 6, 2021",
+    "January 7, 2021 - January 5, 2023",
+    "January 5, 2023 - January 9, 2025",
+    "January 9, 2025 - Current"
+   ],
+   "website": "https://governor.vermont.gov/",
+   "wikidata": "Q7185808"
+  },
+  "WA": {
+   "address": "PO Box 40002, Olympia, WA 98504-0002",
+   "born": "February 23, 1965",
+   "headshot": "https://www.nga.org/wp-content/uploads/2025/01/Bob_Ferguson.jpg",
+   "headshotBytes": 29086,
+   "name": "Bob Ferguson",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "360-902-4111",
+   "profile": "https://www.nga.org/governors/washington/",
+   "state": "WA",
+   "terms": [
+    "January 15, 2025 - Current"
+   ],
+   "website": "http://www.governor.wa.gov/",
+   "wikidata": "Q4932411"
+  },
+  "WI": {
+   "address": "P.O. Box 7863, Madison, WI 53707",
+   "born": "November 5, 1951",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/09/Wisconsin-Tony-Evers-January-2019.jpg",
+   "headshotBytes": 449584,
+   "name": "Tony Evers",
+   "party": "Democratic",
+   "partyKey": "D",
+   "phone": "608-266-1212",
+   "profile": "https://www.nga.org/governors/wisconsin/",
+   "state": "WI",
+   "terms": [
+    "January 7, 2019 - January 3, 2023",
+    "January 3, 2023 - Current"
+   ],
+   "website": "https://evers.wi.gov/",
+   "wikidata": "Q7822309"
+  },
+  "WV": {
+   "address": "1900 Kanawha Street, Charleston, WV 25305",
+   "born": "December 21, 1967",
+   "headshot": "https://www.nga.org/wp-content/uploads/2025/01/Patrick-Morrisey-scaled-1.jpg",
+   "headshotBytes": 290551,
+   "name": "Patrick Morrisey",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "304-558-2000",
+   "profile": "https://www.nga.org/governors/west-virginia/",
+   "state": "WV",
+   "terms": [
+    "January 13, 2025 - Current"
+   ],
+   "website": "https://governor.wv.gov/",
+   "wikidata": "Q7147254"
+  },
+  "WY": {
+   "address": "State Capitol Building Room 124 Cheyenne, WY 82002",
+   "born": "March 14, 1957",
+   "headshot": "https://www.nga.org/wp-content/uploads/2019/01/Wyoming-Mark-Gordon-November-2019.jpg",
+   "headshotBytes": 179103,
+   "name": "Mark Gordon",
+   "party": "Republican",
+   "partyKey": "R",
+   "phone": "307/777-7434",
+   "profile": "https://www.nga.org/governors/wyoming/",
+   "state": "WY",
+   "terms": [
+    "January 7, 2019 - January 2, 2023",
+    "January 2, 2023 - Current"
+   ],
+   "website": "http://governor.wy.gov/",
+   "wikidata": "Q6767775"
+  }
+ },
+ "source": "National Governors Association, current governors",
+ "url": "https://www.nga.org/governors/"
+}

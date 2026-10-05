@@ -13,6 +13,8 @@ GEO_FILE = os.path.join(DATA_DIR, "geo.js")
 ODDS_FILE = os.path.join(DATA_DIR, "odds.js")
 # What the guide's maps say about each state (kyc/government_maps.py).
 GOVERNMENT_FILE = os.path.join(DATA_DIR, "government.js")
+# Each state's governor and which party holds each chamber (kyc/stategov.py).
+STATEGOV_FILE = os.path.join(DATA_DIR, "stategov.js")
 # One file per state: its legislative districts and who sits for them.
 LEGISLATURE_DIR = os.path.join(DATA_DIR, "legislature")
 # One file per state: its counties and every local government in each.
@@ -43,9 +45,11 @@ PAGE_REQUIREMENTS = {
         "data/profiles.js",
         "data/geo.js",
         "data/odds.js",
+        "data/stategov.js",
         "assets/kyc-odds.js",
         "assets/kyc-cards.js",
         "assets/kyc-profile.js",
+        "assets/kyc-stategov.js",
         "assets/kyc-usmap.js",
         "assets/kyc-map.js",
     ),
@@ -56,9 +60,11 @@ STATE_PAGE_REQUIREMENTS = (
     "../assets/kyc.js",
     "../data/profiles.js",
     "../data/odds.js",
+    "../data/stategov.js",
     "../assets/kyc-odds.js",
     "../assets/kyc-cards.js",
     "../assets/kyc-profile.js",
+    "../assets/kyc-stategov.js",
     "../assets/kyc-state.js",
 )
 
@@ -403,6 +409,25 @@ def write_government(payload, root="."):
         + 'window.kycGovernmentMeta = {"signature":"' + government_signature(payload) + '"};\n'
     )
     return path, _atomic_write(path, text)
+
+
+def write_stategov(payload, root="."):
+    """Emit ``candidate_profiles_site/data/stategov.js``: each state's
+    governor and the parties in its legislature, rewritten only when its
+    signature changes."""
+    path = os.path.join(root, STATEGOV_FILE)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    text = (
+        _BANNER.format(source="kyc/stategov.py", built=build_timestamp())
+        + f"window.kycStateGov = {_json(payload)};\n"
+        + 'window.kycStateGovMeta = {"signature":"' + stategov_signature(payload) + '"};\n'
+    )
+    return path, _atomic_write(path, text)
+
+
+def stategov_signature(payload):
+    """Content hash of the state government data, excluding the build time."""
+    return hashlib.sha256(_json(payload).encode("utf-8")).hexdigest()
 
 
 def legislature_file(code, root="."):
