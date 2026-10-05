@@ -391,7 +391,7 @@ def load_committees(root="."):
 
 
 def assignments(committees, bioguide):
-    """A member's committees as ``[{name, title, rank, sub, parent, url}]``."""
+    """A member's committees as ``[{name, title, side, rank, sub, parent, url}]``."""
     if not committees:
         return []
     names = committees.get("committees") or {}
@@ -403,6 +403,10 @@ def assignments(committees, bioguide):
             "code": seat["code"],
             "name": info.get("name") or seat["code"],
             "title": seat.get("title"),
+            # "majority" or "minority": which side's seat this is. A title
+            # alone cannot say - "Vice Chairman" leads the minority on Senate
+            # Ethics and Intelligence and is a majority post elsewhere.
+            "side": seat.get("party"),
             "rank": seat.get("rank"),
             "sub": bool(info.get("parent")),
             "parent": parent.get("name"),

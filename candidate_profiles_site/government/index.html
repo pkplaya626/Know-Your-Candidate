@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How American government is organized — Know Your Candidate</title>
+<meta name="description" content="A plain-language guide to American government: Congress, the president and the federal courts; state governments; counties, cities, townships, school and special districts; and tribal nations, with the sources each part was checked against.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://candidates.radicalrelay.us/government/index.html">
+<meta property="og:url" content="https://candidates.radicalrelay.us/government/index.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="How American government is organized">
+<meta property="og:description" content="A plain-language guide to American government: Congress, the president and the federal courts; state governments; counties, cities, townships, school and special districts; and tribal nations, with the sources each part was checked against.">
+<meta property="og:image" content="https://candidates.radicalrelay.us/assets/social-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Know Your Candidate">
+<meta property="og:site_name" content="Know Your Candidate">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/kyc.css">
+<script src="../assets/kyc.js"></script>
+</head>
+<body data-root="../" data-state="" data-page="guide">
+
+<a href="#stateMain" class="skip-link">Skip to content</a>
+<button type="button" class="sidebar-scrim" tabindex="-1" aria-hidden="true"></button>
+
+<header class="app-header">
+    <button type="button" class="btn-icon sidebar-toggle" aria-expanded="false"
+            aria-controls="sidebar" aria-label="Show navigation">
+        <svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg>
+    </button>
+
+    <a class="brand" href="../index.html">
+        <svg class="icon" aria-hidden="true"><use href="#i-vote"/></svg>
+        <span class="brand-name">Know Your Candidate</span>
+        <span class="brand-sub">119th Congress</span>
+    </a>
+
+
+    <div class="header-actions">
+        <div class="menu">
+            <button type="button" class="btn-icon" id="themeButton"
+                    aria-haspopup="true" aria-label="Change theme">
+                <svg class="icon" aria-hidden="true"><use href="#i-palette"/></svg>
+            </button>
+            <div class="menu-panel" id="themePanel" role="menu" hidden>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="system" aria-checked="true">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Match system
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="dark" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Dark
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="amoled" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    AMOLED black
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="light" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Light
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="app-body">
+    <aside class="sidebar scroll-y" id="sidebar" aria-label="Navigation and summary">
+        <nav class="sidebar-section" aria-label="Views">
+            <a class="nav-link" href="../index.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg>
+                Profile grid
+            </a>
+            <a class="nav-link" href="../map.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-map"/></svg>
+                Partisan map
+            </a>
+            <a class="nav-link" href="../states/index.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
+                States &amp; territories
+            </a>
+            <a class="nav-link" href="../government/index.html" aria-current="page">
+                <svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg>
+                How government works
+            </a>
+            <div id="yourState" hidden></div>
+        </nav>
+
+        <nav class="sidebar-section" aria-label="In this guide">
+            <h2 class="sidebar-heading">In this guide</h2>
+            <a class="nav-link nav-sub" href="index.html" aria-current="page">Overview</a>
+            <a class="nav-link nav-sub" href="congress.html">Congress</a>
+            <a class="nav-link nav-sub" href="executive.html">The executive</a>
+            <a class="nav-link nav-sub" href="courts.html">Federal courts</a>
+            <a class="nav-link nav-sub" href="states.html">State governments</a>
+            <a class="nav-link nav-sub" href="local.html">Local governments</a>
+            <a class="nav-link nav-sub" href="tribal.html">Tribal nations</a>
+        </nav>
+
+        <nav class="sidebar-section push" aria-label="Jump to a state">
+            <h2 class="sidebar-heading">Jump to</h2>
+            <label class="sr-only" for="stateJump">Jump to a state or territory</label>
+            <select id="stateJump" class="select">
+                <option value="">Choose a state&hellip;</option>
+                <option value="AL">Alabama (AL)</option>
+                <option value="AK">Alaska (AK)</option>
+                <option value="AS">American Samoa (AS)</option>
+                <option value="AZ">Arizona (AZ)</option>
+                <option value="AR">Arkansas (AR)</option>
+                <option value="CA">California (CA)</option>
+                <option value="CO">Colorado (CO)</option>
+                <option value="CT">Connecticut (CT)</option>
+                <option value="DE">Delaware (DE)</option>
+                <option value="DC">District of Columbia (DC)</option>
+                <option value="FL">Florida (FL)</option>
+                <option value="GA">Georgia (GA)</option>
+                <option value="GU">Guam (GU)</option>
+                <option value="HI">Hawaii (HI)</option>
+                <option value="ID">Idaho (ID)</option>
+                <option value="IL">Illinois (IL)</option>
+                <option value="IN">Indiana (IN)</option>
+                <option value="IA">Iowa (IA)</option>
+                <option value="KS">Kansas (KS)</option>
+                <option value="KY">Kentucky (KY)</option>
+                <option value="LA">Louisiana (LA)</option>
+                <option value="ME">Maine (ME)</option>
+                <option value="MD">Maryland (MD)</option>
+                <option value="MA">Massachusetts (MA)</option>
+                <option value="MI">Michigan (MI)</option>
+                <option value="MN">Minnesota (MN)</option>
+                <option value="MS">Mississippi (MS)</option>
+                <option value="MO">Missouri (MO)</option>
+                <option value="MT">Montana (MT)</option>
+                <option value="NE">Nebraska (NE)</option>
+                <option value="NV">Nevada (NV)</option>
+                <option value="NH">New Hampshire (NH)</option>
+                <option value="NJ">New Jersey (NJ)</option>
+                <option value="NM">New Mexico (NM)</option>
+                <option value="NY">New York (NY)</option>
+                <option value="NC">North Carolina (NC)</option>
+                <option value="ND">North Dakota (ND)</option>
+                <option value="MP">Northern Mariana Islands (MP)</option>
+                <option value="OH">Ohio (OH)</option>
+                <option value="OK">Oklahoma (OK)</option>
+                <option value="OR">Oregon (OR)</option>
+                <option value="PA">Pennsylvania (PA)</option>
+                <option value="PR">Puerto Rico (PR)</option>
+                <option value="RI">Rhode Island (RI)</option>
+                <option value="SC">South Carolina (SC)</option>
+                <option value="SD">South Dakota (SD)</option>
+                <option value="TN">Tennessee (TN)</option>
+                <option value="TX">Texas (TX)</option>
+                <option value="UT">Utah (UT)</option>
+                <option value="VT">Vermont (VT)</option>
+                <option value="VI">Virgin Islands (VI)</option>
+                <option value="VA">Virginia (VA)</option>
+                <option value="WA">Washington (WA)</option>
+                <option value="WV">West Virginia (WV)</option>
+                <option value="WI">Wisconsin (WI)</option>
+                <option value="WY">Wyoming (WY)</option>
+            </select>
+        </nav>
+    </aside>
+
+    <main class="app-main" id="stateMain">
+        <div class="content scroll-y">
+            <article id="guideContent" class="state-page guide-page">
+                <header class="state-hero">
+                    <p class="state-kicker">How government works</p>
+                    <h1 class="state-title">How American government is organized</h1>
+                    <p class="guide-lede">Every American lives under several governments at once: the federal government, a state, and in most places a county, a city or town, a school district and other special districts. Many are also citizens of a tribal nation. This guide explains who does what at each level and how the levels fit together.</p>
+                </header>
+                <section class="guide-section" id="levels" aria-labelledby="levels-title">
+                    <h2 class="guide-heading" id="levels-title">The levels at a glance</h2>
+                    <p>The Constitution divides power two ways. It splits the national government into three branches: Congress makes the laws, the president carries them out, and the courts decide cases. And it leaves to the states, or to the people, the powers it does not give the national government (the Tenth Amendment). Each state, in turn, creates its own local governments.</p>
+                    <div class="guide-table-wrap">
+                        <table class="guide-table">
+                            <caption>Counts from the Census Bureau's 2022 Census of Governments, and the Bureau of Indian Affairs' list of January 30, 2026.</caption>
+                            <thead><tr><th scope="col">Level</th><th scope="col">Makes the laws</th><th scope="col">Runs the government</th><th scope="col">Decides cases</th><th scope="col">How many</th></tr></thead>
+                            <tbody>
+                                <tr><th scope="row">Federal</th><td data-label="Makes the laws"><a href="congress.html">Congress</a>: the Senate and the House of Representatives</td><td data-label="Runs the government"><a href="executive.html">The president</a>, 15 executive departments and many agencies</td><td data-label="Decides cases"><a href="courts.html">The federal courts</a>: the Supreme Court, 13 courts of appeals, 94 district courts</td><td data-label="How many">1</td></tr>
+                                <tr><th scope="row"><a href="states.html">States</a></th><td data-label="Makes the laws">A legislature of two chambers (one in Nebraska)</td><td data-label="Runs the government">A governor and, in most states, other officials elected statewide</td><td data-label="Decides cases">A supreme court (two highest courts in Texas and Oklahoma), appeals courts and trial courts</td><td data-label="How many">50</td></tr>
+                                <tr><th scope="row"><a href="local.html#counties">Counties</a></th><td data-label="Makes the laws">A board of commissioners or supervisors, or a county council</td><td data-label="Runs the government">The board itself, an administrator it appoints, or an elected county executive</td><td data-label="Decides cases">State trial courts, usually organized county by county</td><td data-label="How many">3,031</td></tr>
+                                <tr><th scope="row"><a href="local.html#municipalities">Cities, towns and villages</a></th><td data-label="Makes the laws">A city council or board of aldermen, or a commission</td><td data-label="Runs the government">A mayor, a manager the council appoints, or the commissioners</td><td data-label="Decides cases">Municipal courts in many places</td><td data-label="How many">19,491</td></tr>
+                                <tr><th scope="row"><a href="local.html#townships">Towns and townships</a></th><td data-label="Makes the laws">A township board, or a town meeting of the voters</td><td data-label="Runs the government">The board, or an elected select board</td><td data-label="Decides cases">State courts</td><td data-label="How many">16,214, in 20 states</td></tr>
+                                <tr><th scope="row"><a href="local.html#schools">School districts</a></th><td data-label="Makes the laws">An elected school board</td><td data-label="Runs the government">A superintendent the board appoints</td><td data-label="Decides cases">State courts</td><td data-label="How many">12,546</td></tr>
+                                <tr><th scope="row"><a href="local.html#special">Special districts</a></th><td data-label="Makes the laws">A board of directors, trustees or commissioners</td><td data-label="Runs the government">A general manager or executive director</td><td data-label="Decides cases">State courts</td><td data-label="How many">39,555</td></tr>
+                                <tr><th scope="row"><a href="tribal.html">Tribal nations</a></th><td data-label="Makes the laws">A tribal council, or a general council of all adult citizens</td><td data-label="Runs the government">A chair, president, governor or principal chief</td><td data-label="Decides cases">Tribal courts and peacemaking; Courts of Indian Offenses where a tribe has no court of its own</td><td data-label="How many">575</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p>In all, the Census Bureau counted 90,837 local governments in 2022. Its count for 2025, published in May 2026, is 91,438, mostly because of new special districts.</p>
+                    <ul class="guide-cards">
+                        <li><a class="guide-card" href="congress.html"><strong>How Congress works</strong><span>The Senate and the House: what each does, who runs them, and who chairs each committee now.</span></a></li>
+                        <li><a class="guide-card" href="executive.html"><strong>The president and the executive branch</strong><span>The presidency, the Executive Office, the 15 departments and the independent agencies.</span></a></li>
+                        <li><a class="guide-card" href="courts.html"><strong>The federal courts</strong><span>The Supreme Court, the courts of appeals and district courts, and the courts Congress has created outside Article III.</span></a></li>
+                        <li><a class="guide-card" href="states.html"><strong>State governments</strong><span>Legislatures, governors and the other officials states elect, executive councils, and state courts.</span></a></li>
+                        <li><a class="guide-card" href="local.html"><strong>Local governments</strong><span>Counties, cities, towns and townships, school districts and special districts.</span></a></li>
+                        <li><a class="guide-card" href="tribal.html"><strong>Tribal nations</strong><span>Sovereignty, tribal governments and courts, and who has jurisdiction in Indian country.</span></a></li>
+                    </ul>
+                    <p>Know Your Candidate follows one part of all this: the members of the 119th Congress, and everyone who has filed to run for their seats in November 2026. Start from the <a href="../index.html">profile grid</a>, the <a href="../map.html">partisan map</a> or <a href="../states/index.html">your state's page</a>.</p>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://constitution.congress.gov/constitution/article-1/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article I</a>; <a href="https://constitution.congress.gov/constitution/article-2/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article II</a>; <a href="https://constitution.congress.gov/constitution/article-3/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article III</a>; <a href="https://constitution.congress.gov/constitution/amendment-10/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Tenth Amendment</a>; <a href="https://www.census.gov/library/publications/2026/econ/govtorg2225.html" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: Government Organization Summary Report, 2022 and 2025</a>; <a href="https://www.govinfo.gov/content/pkg/FR-2026-01-30/html/2026-01899.htm" target="_blank" rel="noopener noreferrer">Bureau of Indian Affairs: Indian Entities Recognized (91 FR 4102, Jan. 30, 2026)</a></p>
+                </section>
+                <section class="guide-section" id="together" aria-labelledby="together-title">
+                    <h2 class="guide-heading" id="together-title">How the levels fit together</h2>
+                    <h3 class="guide-subheading">Checks within the federal government</h3>
+                    <p>No money may be drawn from the Treasury except as Congress appropriates it by law (Article I, Section 9), which gives Congress control over what every agency may spend. The courts can set aside a law or an official act that conflicts with the Constitution, a power the Supreme Court asserted in Marbury v. Madison (1803).</p>
+                    <h3 class="guide-subheading">The federal government and the states</h3>
+                    <p>Federal law made under the Constitution overrides conflicting state law (Article VI). But the federal government has only the powers the Constitution grants, and it may not order state officers to carry out federal programs (Printz v. United States, 1997). Instead, Congress often attaches conditions to money it offers the states, for highways, schools or health care. The Supreme Court has set limits on those conditions too (South Dakota v. Dole, 1987; NFIB v. Sebelius, 2012).</p>
+                    <h3 class="guide-subheading">Two court systems</h3>
+                    <p>State courts have the final word on what state law means. The U.S. Supreme Court may review a state court decision that turns on federal law, but not one that rests on an adequate and independent ground in state law (Michigan v. Long, 1983). A civil case filed in state court can be moved (“removed”) to federal court if it could have been filed there in the first place: because it arises under federal law, for example, or is between citizens of different states (28 U.S.C. 1441). A criminal case can be removed only in narrow circumstances, chiefly when the defendant is a federal officer (28 U.S.C. 1442).</p>
+                    <h3 class="guide-subheading">States and their local governments</h3>
+                    <p>Local governments are created by their state and have only the powers it gives them. Under Dillon's Rule, named for an Iowa judge's 1868 opinion, a local government may exercise only the powers granted to it expressly, those necessarily or fairly implied in them, and those essential to its purposes. Many states instead give some or all of their cities and counties home rule: the power to act on local matters without specific permission. Either way, the legislature can limit or override local ordinances, and state law generally prevails on matters of statewide concern. <a href="local.html#powers">More on local governments</a>.</p>
+                    <p>Executive power is divided inside most states too: the attorney general, secretary of state and other officials are often elected separately from the governor, and may belong to a different party (<a href="states.html#executive">state governments</a>). County sheriffs and prosecutors, elected in most states, enforce state law inside and outside city limits alike.</p>
+                    <h3 class="guide-subheading">Tribal nations</h3>
+                    <p>Tribal nations are neither states nor parts of states. They deal with the federal government government-to-government, and criminal jurisdiction in Indian country is divided among tribal, federal and state governments by statutes and court decisions. <a href="tribal.html#jurisdiction">Who has jurisdiction</a>.</p>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://constitution.congress.gov/constitution/article-1/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article I</a>; <a href="https://constitution.congress.gov/constitution/article-6/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article VI</a>; <a href="https://www.law.cornell.edu/supremecourt/text/5/137" target="_blank" rel="noopener noreferrer">Marbury v. Madison, 5 U.S. 137 (1803)</a>; <a href="https://www.law.cornell.edu/supremecourt/text/521/898" target="_blank" rel="noopener noreferrer">Printz v. United States, 521 U.S. 898 (1997)</a>; <a href="https://www.law.cornell.edu/supremecourt/text/483/203" target="_blank" rel="noopener noreferrer">South Dakota v. Dole, 483 U.S. 203 (1987)</a>; <a href="https://www.law.cornell.edu/supremecourt/text/11-393" target="_blank" rel="noopener noreferrer">NFIB v. Sebelius, 567 U.S. 519 (2012)</a>; <a href="https://www.law.cornell.edu/supremecourt/text/463/1032" target="_blank" rel="noopener noreferrer">Michigan v. Long, 463 U.S. 1032 (1983)</a>; <a href="https://www.law.cornell.edu/uscode/text/28/1441" target="_blank" rel="noopener noreferrer">28 U.S.C. 1441 (removal of civil actions)</a>; <a href="https://www.law.cornell.edu/uscode/text/28/1442" target="_blank" rel="noopener noreferrer">28 U.S.C. 1442 (removal: federal officers)</a>; <a href="https://www.nlc.org/resource/cities-101-delegation-of-power/" target="_blank" rel="noopener noreferrer">National League of Cities: Cities 101, Delegation of Power</a>; <a href="https://www.naco.org/sites/default/files/2025-03/2024%20County%20Government%20Primer_update_v8_FINAL.pdf" target="_blank" rel="noopener noreferrer">National Association of Counties: County Government Primer (2024)</a></p>
+                </section>
+                <nav class="guide-pager" aria-label="Guide pages">
+                    <a class="guide-pager-link next" rel="next" href="congress.html"><span>Next</span> Congress</a>
+                </nav>
+            </article>
+
+            <footer class="site-footer">
+                <p><strong>About this guide:</strong> a plain-language summary of how
+                    American government is organized. Each section lists the sources
+                    it was checked against, on <time datetime="2026-10-05">2026-10-05</time>.
+                    It describes offices and institutions; where it names who holds
+                    one today, that comes from the same data as the rest of the site.
+                    It is not legal advice.</p>
+                <p>Non-partisan and independent.</p>
+            </footer>
+        </div>
+    </main>
+</div>
+
+<script src="../assets/kyc-guide.js"></script>
+</body>
+</html>

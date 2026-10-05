@@ -103,7 +103,8 @@ jobs:
 
           LOADS = {"stylesheet", "preload", "preconnect", "dns-prefetch", "icon"}
           offenders = []
-          for page in pathlib.Path("candidate_profiles_site").glob("*.html"):
+          # Every folder: the generated pages sit one level down.
+          for page in pathlib.Path("candidate_profiles_site").rglob("*.html"):
               html = page.read_text(encoding="utf-8")
               for tag in re.findall(r"<script\b[^>]*>", html):
                   if re.search(r'src="https?:', tag):
@@ -130,8 +131,9 @@ jobs:
       # KYC.escapeHtml. These pages describe real, named people.
       - name: No inline event handlers in the markup
         run: |
-          if grep -rnE '\son(click|error|load|change|submit)=' \
-               candidate_profiles_site/*.html candidate_profiles_site/assets/*.js; then
+          # Every page in every folder (rule 47), and every module.
+          if grep -rnE --include='*.html' --include='*.js' '\son(click|error|load|change|submit)=' \
+               candidate_profiles_site/ --exclude-dir=data; then
             echo "An inline event handler is back; use delegated listeners."
             exit 1
           fi
@@ -154,13 +156,17 @@ jobs:
 
           site = pathlib.Path("candidate_profiles_site")
           missing = []
-          for page in site.glob("*.html"):
+          # Every folder, each reference relative to its own page: checking
+          # only the root let all 56 district pages link a states index
+          # that did not exist (CLAUDE.md rule 47).
+          for page in site.rglob("*.html"):
               html = page.read_text(encoding="utf-8")
               for ref in re.findall(r'(?:src|href)="([^"#?][^"]*)"', html):
                   if ref.startswith(("http:", "https:", "data:", "mailto:", "#")):
                       continue
-                  if not (site / ref).exists():
-                      missing.append(f"{page.name} -> {ref}")
+                  target = ref.split("#")[0].split("?")[0]
+                  if target and not (page.parent / target).exists():
+                      missing.append(f"{page.relative_to(site)} -> {ref}")
           if missing:
               sys.exit("Broken local references:\n  " + "\n  ".join(missing))
           print("ok: every local reference resolves")

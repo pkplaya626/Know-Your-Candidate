@@ -334,8 +334,12 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
         profile["committees"] = _committee_text(assignments) or profile["committees"]
         # Codes and titles only; the names, URLs and parents travel once in
         # the build metadata rather than 539 times in the profiles.
+        # A titled seat also says which side holds it, so the guide's
+        # Congress page can tell a committee's chair from its minority lead.
         profile["committeeList"] = [
-            dict({"code": seat["code"]}, **({"title": seat["title"]} if seat.get("title") else {}))
+            dict({"code": seat["code"]},
+                 **({"title": seat["title"]} if seat.get("title") else {}),
+                 **({"side": seat["side"]} if seat.get("title") and seat.get("side") else {}))
             for seat in assignments
         ]
         profile["committeesSource"] = "congress-legislators"

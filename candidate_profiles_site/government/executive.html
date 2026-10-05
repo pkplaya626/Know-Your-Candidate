@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The president and the executive branch — Know Your Candidate</title>
+<meta name="description" content="What the president and vice president do, the Executive Office of the President, the 15 executive departments, and the independent agencies, commissions and government corporations.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://candidates.radicalrelay.us/government/executive.html">
+<meta property="og:url" content="https://candidates.radicalrelay.us/government/executive.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The president and the executive branch">
+<meta property="og:description" content="What the president and vice president do, the Executive Office of the President, the 15 executive departments, and the independent agencies, commissions and government corporations.">
+<meta property="og:image" content="https://candidates.radicalrelay.us/assets/social-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Know Your Candidate">
+<meta property="og:site_name" content="Know Your Candidate">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/kyc.css">
+<script src="../assets/kyc.js"></script>
+</head>
+<body data-root="../" data-state="" data-page="guide">
+
+<a href="#stateMain" class="skip-link">Skip to content</a>
+<button type="button" class="sidebar-scrim" tabindex="-1" aria-hidden="true"></button>
+
+<header class="app-header">
+    <button type="button" class="btn-icon sidebar-toggle" aria-expanded="false"
+            aria-controls="sidebar" aria-label="Show navigation">
+        <svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg>
+    </button>
+
+    <a class="brand" href="../index.html">
+        <svg class="icon" aria-hidden="true"><use href="#i-vote"/></svg>
+        <span class="brand-name">Know Your Candidate</span>
+        <span class="brand-sub">119th Congress</span>
+    </a>
+
+
+    <div class="header-actions">
+        <div class="menu">
+            <button type="button" class="btn-icon" id="themeButton"
+                    aria-haspopup="true" aria-label="Change theme">
+                <svg class="icon" aria-hidden="true"><use href="#i-palette"/></svg>
+            </button>
+            <div class="menu-panel" id="themePanel" role="menu" hidden>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="system" aria-checked="true">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Match system
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="dark" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Dark
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="amoled" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    AMOLED black
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="light" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Light
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="app-body">
+    <aside class="sidebar scroll-y" id="sidebar" aria-label="Navigation and summary">
+        <nav class="sidebar-section" aria-label="Views">
+            <a class="nav-link" href="../index.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg>
+                Profile grid
+            </a>
+            <a class="nav-link" href="../map.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-map"/></svg>
+                Partisan map
+            </a>
+            <a class="nav-link" href="../states/index.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
+                States &amp; territories
+            </a>
+            <a class="nav-link" href="../government/index.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg>
+                How government works
+            </a>
+            <div id="yourState" hidden></div>
+        </nav>
+
+        <nav class="sidebar-section" aria-label="In this guide">
+            <h2 class="sidebar-heading">In this guide</h2>
+            <a class="nav-link nav-sub" href="index.html">Overview</a>
+            <a class="nav-link nav-sub" href="congress.html">Congress</a>
+            <a class="nav-link nav-sub" href="executive.html" aria-current="page">The executive</a>
+            <a class="nav-link nav-sub" href="courts.html">Federal courts</a>
+            <a class="nav-link nav-sub" href="states.html">State governments</a>
+            <a class="nav-link nav-sub" href="local.html">Local governments</a>
+            <a class="nav-link nav-sub" href="tribal.html">Tribal nations</a>
+        </nav>
+
+        <nav class="sidebar-section push" aria-label="Jump to a state">
+            <h2 class="sidebar-heading">Jump to</h2>
+            <label class="sr-only" for="stateJump">Jump to a state or territory</label>
+            <select id="stateJump" class="select">
+                <option value="">Choose a state&hellip;</option>
+                <option value="AL">Alabama (AL)</option>
+                <option value="AK">Alaska (AK)</option>
+                <option value="AS">American Samoa (AS)</option>
+                <option value="AZ">Arizona (AZ)</option>
+                <option value="AR">Arkansas (AR)</option>
+                <option value="CA">California (CA)</option>
+                <option value="CO">Colorado (CO)</option>
+                <option value="CT">Connecticut (CT)</option>
+                <option value="DE">Delaware (DE)</option>
+                <option value="DC">District of Columbia (DC)</option>
+                <option value="FL">Florida (FL)</option>
+                <option value="GA">Georgia (GA)</option>
+                <option value="GU">Guam (GU)</option>
+                <option value="HI">Hawaii (HI)</option>
+                <option value="ID">Idaho (ID)</option>
+                <option value="IL">Illinois (IL)</option>
+                <option value="IN">Indiana (IN)</option>
+                <option value="IA">Iowa (IA)</option>
+                <option value="KS">Kansas (KS)</option>
+                <option value="KY">Kentucky (KY)</option>
+                <option value="LA">Louisiana (LA)</option>
+                <option value="ME">Maine (ME)</option>
+                <option value="MD">Maryland (MD)</option>
+                <option value="MA">Massachusetts (MA)</option>
+                <option value="MI">Michigan (MI)</option>
+                <option value="MN">Minnesota (MN)</option>
+                <option value="MS">Mississippi (MS)</option>
+                <option value="MO">Missouri (MO)</option>
+                <option value="MT">Montana (MT)</option>
+                <option value="NE">Nebraska (NE)</option>
+                <option value="NV">Nevada (NV)</option>
+                <option value="NH">New Hampshire (NH)</option>
+                <option value="NJ">New Jersey (NJ)</option>
+                <option value="NM">New Mexico (NM)</option>
+                <option value="NY">New York (NY)</option>
+                <option value="NC">North Carolina (NC)</option>
+                <option value="ND">North Dakota (ND)</option>
+                <option value="MP">Northern Mariana Islands (MP)</option>
+                <option value="OH">Ohio (OH)</option>
+                <option value="OK">Oklahoma (OK)</option>
+                <option value="OR">Oregon (OR)</option>
+                <option value="PA">Pennsylvania (PA)</option>
+                <option value="PR">Puerto Rico (PR)</option>
+                <option value="RI">Rhode Island (RI)</option>
+                <option value="SC">South Carolina (SC)</option>
+                <option value="SD">South Dakota (SD)</option>
+                <option value="TN">Tennessee (TN)</option>
+                <option value="TX">Texas (TX)</option>
+                <option value="UT">Utah (UT)</option>
+                <option value="VT">Vermont (VT)</option>
+                <option value="VI">Virgin Islands (VI)</option>
+                <option value="VA">Virginia (VA)</option>
+                <option value="WA">Washington (WA)</option>
+                <option value="WV">West Virginia (WV)</option>
+                <option value="WI">Wisconsin (WI)</option>
+                <option value="WY">Wyoming (WY)</option>
+            </select>
+        </nav>
+    </aside>
+
+    <main class="app-main" id="stateMain">
+        <div class="content scroll-y">
+            <article id="guideContent" class="state-page guide-page">
+                <header class="state-hero">
+                    <p class="state-kicker">How government works</p>
+                    <h1 class="state-title">The president and the executive branch</h1>
+                    <p class="guide-lede">Article II vests the executive power in one person, the president. The federal government elects only the president and vice president; most states elect several executive officials separately (<a href="states.html#executive">state governments</a>).</p>
+                </header>
+                <nav class="guide-toc" aria-labelledby="guideTocTitle">
+                    <h2 class="guide-toc-title" id="guideTocTitle">On this page</h2>
+                    <ol>
+                        <li><a href="#president">The president and vice president</a></li>
+                        <li><a href="#eop">The Executive Office of the President</a></li>
+                        <li><a href="#departments">The executive departments</a></li>
+                        <li><a href="#agencies">Independent agencies, commissions and corporations</a></li>
+                    </ol>
+                </nav>
+                <section class="guide-section" id="president" aria-labelledby="president-title">
+                    <h2 class="guide-heading" id="president-title">The president and vice president</h2>
+                    <p>The president is elected to a four-year term and may be elected no more than twice (Twenty-second Amendment). The president commands the armed forces; may grant reprieves and pardons for federal offenses, except in cases of impeachment; makes treaties with the consent of two-thirds of the senators present; and appoints ambassadors, judges and other officers with the Senate's consent (Article II, Section 2). The president signs or vetoes the bills Congress passes (Article I, Section 7) and must “take Care that the Laws be faithfully executed” (Article II, Section 3).</p>
+                    <p>Executive orders are the president's directions to the executive branch. The Constitution does not mention them: each must rest on the president's own constitutional powers or on authority Congress has given by law, and courts can set aside one that rests on neither (Youngstown Sheet &amp; Tube Co. v. Sawyer, 1952).</p>
+                    <p>The vice president becomes president if the office falls vacant (Twenty-fifth Amendment), and presides over the Senate, breaking ties there. After the vice president, the line of succession runs to the Speaker of the House, the Senate's president pro tempore, and then the cabinet secretaries in the order the statute lists them, roughly the order in which their offices were first created (3 U.S.C. 19).</p>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://constitution.congress.gov/constitution/article-1/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article I</a>; <a href="https://constitution.congress.gov/constitution/article-2/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article II</a>; <a href="https://constitution.congress.gov/constitution/amendment-22/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Twenty-second Amendment</a>; <a href="https://constitution.congress.gov/constitution/amendment-25/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Twenty-fifth Amendment</a>; <a href="https://www.law.cornell.edu/uscode/text/3/19" target="_blank" rel="noopener noreferrer">3 U.S.C. 19 (presidential succession)</a>; <a href="https://www.law.cornell.edu/supremecourt/text/343/579" target="_blank" rel="noopener noreferrer">Youngstown Sheet &amp; Tube Co. v. Sawyer, 343 U.S. 579 (1952)</a></p>
+                </section>
+                <section class="guide-section" id="eop" aria-labelledby="eop-title">
+                    <h2 class="guide-heading" id="eop-title">The Executive Office of the President</h2>
+                    <p>The president's own staff and advisers make up the Executive Office of the President. Among them:</p>
+                    <dl class="guide-roles">
+                        <div class="guide-role"><dt>White House chief of staff</dt><dd>Runs the president's staff and schedule, and is often a principal negotiator with Congress.</dd></div>
+                        <div class="guide-role"><dt>Office of Management and Budget</dt><dd>Prepares the budget the president sends Congress, oversees how agencies manage and spend, and through its Office of Information and Regulatory Affairs reviews significant regulations before they are issued. Its director is confirmed by the Senate (31 U.S.C. 502).</dd></div>
+                        <div class="guide-role"><dt>National Security Council</dt><dd>The president's forum for defense, intelligence and foreign policy, run by the national security advisor.</dd></div>
+                        <div class="guide-role"><dt>White House Counsel</dt><dd>Advises the president and the White House on legal questions, including nominations, pardons and requests from congressional investigators.</dd></div>
+                    </dl>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://www.archives.gov/federal-register/codification/executive-order/08248.html" target="_blank" rel="noopener noreferrer">Executive Order 8248 (1939), establishing the Executive Office of the President</a>; <a href="https://www.law.cornell.edu/uscode/text/31/502" target="_blank" rel="noopener noreferrer">31 U.S.C. 502 (Office of Management and Budget)</a>; <a href="https://www.law.cornell.edu/uscode/text/50/3021" target="_blank" rel="noopener noreferrer">50 U.S.C. 3021 (National Security Council)</a></p>
+                </section>
+                <section class="guide-section" id="departments" aria-labelledby="departments-title">
+                    <h2 class="guide-heading" id="departments-title">The executive departments</h2>
+                    <p>There are 15 executive departments (5 U.S.C. 101). Each is headed by a secretary, except Justice, which is headed by the attorney general; all are nominated by the president and confirmed by the Senate. With the vice president they make up the cabinet, to which presidents also add other officials. They are listed here in the order of presidential succession.</p>
+                    <div class="guide-table-wrap">
+                        <table class="guide-table">
+                            <thead><tr><th scope="col">Department</th><th scope="col">Headed by</th><th scope="col">What it does, for example</th></tr></thead>
+                            <tbody>
+                                <tr><th scope="row">State</th><td data-label="Headed by">Secretary of State</td><td data-label="What it does, for example">Foreign relations, embassies and passports</td></tr>
+                                <tr><th scope="row">Treasury</th><td data-label="Headed by">Secretary of the Treasury</td><td data-label="What it does, for example">Taxes (the Internal Revenue Service), the national debt, sanctions, and printing and minting money</td></tr>
+                                <tr><th scope="row">Defense</th><td data-label="Headed by">Secretary of Defense</td><td data-label="What it does, for example">The armed forces. Since 2025 it may also use the title Department of War (<a href="#changes">see below</a>).</td></tr>
+                                <tr><th scope="row">Justice</th><td data-label="Headed by">Attorney General</td><td data-label="What it does, for example">Federal prosecutions, the government's lawsuits, civil rights enforcement, the FBI and federal prisons</td></tr>
+                                <tr><th scope="row">Interior</th><td data-label="Headed by">Secretary of the Interior</td><td data-label="What it does, for example">Federal lands (the Bureau of Land Management and National Park Service), water projects, and the Bureau of Indian Affairs</td></tr>
+                                <tr><th scope="row">Agriculture</th><td data-label="Headed by">Secretary of Agriculture</td><td data-label="What it does, for example">Farm programs, meat and poultry inspection, food assistance (SNAP) and the Forest Service</td></tr>
+                                <tr><th scope="row">Commerce</th><td data-label="Headed by">Secretary of Commerce</td><td data-label="What it does, for example">The census, patents (USPTO), weather and oceans (NOAA) and measurement standards (NIST)</td></tr>
+                                <tr><th scope="row">Labor</th><td data-label="Headed by">Secretary of Labor</td><td data-label="What it does, for example">Workplace safety (OSHA), wage and hour laws, and employment statistics</td></tr>
+                                <tr><th scope="row">Health and Human Services</th><td data-label="Headed by">Secretary of Health and Human Services</td><td data-label="What it does, for example">Medicare and Medicaid, drug approval (FDA), disease control (CDC) and medical research (NIH)</td></tr>
+                                <tr><th scope="row">Housing and Urban Development</th><td data-label="Headed by">Secretary of Housing and Urban Development</td><td data-label="What it does, for example">Public housing, mortgage insurance (FHA), community development grants and fair housing</td></tr>
+                                <tr><th scope="row">Transportation</th><td data-label="Headed by">Secretary of Transportation</td><td data-label="What it does, for example">Aviation (FAA), highways, railroads, transit and shipping</td></tr>
+                                <tr><th scope="row">Energy</th><td data-label="Headed by">Secretary of Energy</td><td data-label="What it does, for example">Nuclear weapons (NNSA), the national laboratories and energy research</td></tr>
+                                <tr><th scope="row">Education</th><td data-label="Headed by">Secretary of Education</td><td data-label="What it does, for example">Student aid, grants to schools, and civil rights in education. Some of its programs are now run by other departments (<a href="#changes">see below</a>).</td></tr>
+                                <tr><th scope="row">Veterans Affairs</th><td data-label="Headed by">Secretary of Veterans Affairs</td><td data-label="What it does, for example">Veterans' health care, disability benefits and national cemeteries</td></tr>
+                                <tr><th scope="row">Homeland Security</th><td data-label="Headed by">Secretary of Homeland Security</td><td data-label="What it does, for example">Border and immigration enforcement (CBP and ICE), disasters (FEMA), cybersecurity (CISA) and airport screening (TSA)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <h3 class="guide-subheading" id="changes">Changes since 2025</h3>
+                    <p>Executive Order 14347 of September 5, 2025 lets the Department of Defense and its secretary use “Department of War” and “Secretary of War” as secondary titles, in correspondence, public communications, ceremonies and documents other than statutes. The department's name in law is still the Department of Defense (10 U.S.C. 111). On July 22, 2026 the House passed a defense authorization bill that would rename it; on July 14 the Senate had declined, 50-46, to take up its own version, and the rename has not become law.</p>
+                    <p>The Department of Education still exists in law (20 U.S.C. 3411), and Congress has not passed a bill to abolish it. Since 2025 it has handed the day-to-day running of many of its programs to other departments under interagency agreements. Among them: career, technical and adult education, and from November 2025 Title I and other school and college grant programs, to Labor; Indian education to Interior; student loans to Treasury (March 2026); and, from June 2026, special education to Health and Human Services and civil rights enforcement to Justice.</p>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://www.law.cornell.edu/uscode/text/5/101" target="_blank" rel="noopener noreferrer">5 U.S.C. 101 (the executive departments)</a>; <a href="https://www.law.cornell.edu/uscode/text/3/19" target="_blank" rel="noopener noreferrer">3 U.S.C. 19 (presidential succession)</a>; <a href="https://www.law.cornell.edu/uscode/text/10/111" target="_blank" rel="noopener noreferrer">10 U.S.C. 111 (the Department of Defense)</a>; <a href="https://www.govinfo.gov/content/pkg/FR-2025-09-10/pdf/2025-17508.pdf" target="_blank" rel="noopener noreferrer">Executive Order 14347, 90 FR 43893 (Sept. 10, 2025)</a>; <a href="https://www.dailypress.senate.gov/tuesday-july-14-2026/" target="_blank" rel="noopener noreferrer">U.S. Senate floor log, July 14, 2026</a>; <a href="https://www.congress.gov/crs-product/IN12704" target="_blank" rel="noopener noreferrer">Congressional Research Service, Insight IN12704</a>; <a href="https://www.law.cornell.edu/uscode/text/20/3411" target="_blank" rel="noopener noreferrer">20 U.S.C. 3411 (Department of Education)</a>; <a href="https://www.ed.gov/about/news/press-release/us-department-of-education-announces-six-new-agency-partnerships-break-federal-bureaucracy" target="_blank" rel="noopener noreferrer">U.S. Department of Education: six new agency partnerships (Nov. 18, 2025)</a>; <a href="https://www.ed.gov/media/document/ed-treasury-interagency-agreement-federal-student-assistance-partnership-march-19-2026-113468.pdf" target="_blank" rel="noopener noreferrer">U.S. Department of Education: Education–Treasury interagency agreement</a>; <a href="https://www.ed.gov/about/news/press-release/us-department-of-education-announces-additional-partnerships-strengthen-coordination-individuals-disabilities-programs-bolster-civil-rights" target="_blank" rel="noopener noreferrer">U.S. Department of Education: additional partnerships (June 16, 2026)</a></p>
+                </section>
+                <section class="guide-section" id="agencies" aria-labelledby="agencies-title">
+                    <h2 class="guide-heading" id="agencies-title">Independent agencies, commissions and corporations</h2>
+                    <dl class="guide-roles">
+                        <div class="guide-role"><dt>Independent agencies</dt><dd>Agencies outside the 15 departments, each led by a single administrator who serves at the president's pleasure: the Environmental Protection Agency, NASA and the Central Intelligence Agency, for example.</dd></div>
+                        <div class="guide-role"><dt>Regulatory commissions</dt><dd>Boards of several members serving staggered terms, often with a limit on how many may belong to one party: the Federal Trade Commission, the Securities and Exchange Commission, the Federal Communications Commission and the Federal Reserve Board, for example.</dd></div>
+                        <div class="guide-role"><dt>Government corporations</dt><dd>Enterprises the government owns or created: the U.S. Postal Service, an independent establishment of the executive branch governed by a Board of Governors, and Amtrak, which by law is not a federal agency.</dd></div>
+                    </dl>
+                    <h3 class="guide-subheading" id="removal">Can the president remove a commissioner?</h3>
+                    <p>Congress has written into some agencies' laws that their members may be removed only “for cause”: for the Federal Trade Commission, for “inefficiency, neglect of duty, or malfeasance in office” (15 U.S.C. 41). In Trump v. Slaughter, decided on June 29, 2026, the Supreme Court held 6-3 that the FTC's protection violates the separation of powers, and overruled whatever remained of Humphrey's Executor v. United States (1935), the case that had upheld it. The Court said it was not deciding the Federal Reserve's case, or that of judges on courts outside Article III (<a href="courts.html#other-courts">such as the Tax Court</a>).</p>
+                    <p>The Federal Reserve's governors may also be removed only for cause (12 U.S.C. 242). The same day, in Trump v. Cook, the Court refused 5-4 to let the president remove a governor while her lawsuit continues, and said that the governors' protection is consistent with the Constitution; that case has not been finally decided. A year earlier, in Trump v. Wilcox (May 22, 2025), the Court had let the president remove members of the National Labor Relations Board and the Merit Systems Protection Board while their cases went on, describing the Federal Reserve as a “uniquely structured, quasi-private entity”.</p>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://www.law.cornell.edu/uscode/text/15/41" target="_blank" rel="noopener noreferrer">15 U.S.C. 41 (Federal Trade Commission)</a>; <a href="https://www.law.cornell.edu/uscode/text/12/242" target="_blank" rel="noopener noreferrer">12 U.S.C. 242 (Federal Reserve Board)</a>; <a href="https://www.law.cornell.edu/uscode/text/39/201" target="_blank" rel="noopener noreferrer">39 U.S.C. 201 (Postal Service)</a>; <a href="https://www.law.cornell.edu/uscode/text/49/24301" target="_blank" rel="noopener noreferrer">49 U.S.C. 24301 (Amtrak)</a>; <a href="https://www.supremecourt.gov/opinions/25pdf/609us2r62_g314.pdf" target="_blank" rel="noopener noreferrer">Trump v. Slaughter, 609 U.S. 422 (2026)</a>; <a href="https://www.supremecourt.gov/opinions/25pdf/609us2r63_e2pg.pdf" target="_blank" rel="noopener noreferrer">Trump v. Cook, 609 U.S. 528 (2026)</a>; <a href="https://www.supremecourt.gov/opinions/24pdf/24a966_1b8e.pdf" target="_blank" rel="noopener noreferrer">Trump v. Wilcox, No. 24A966 (order of May 22, 2025)</a></p>
+                </section>
+                <nav class="guide-pager" aria-label="Guide pages">
+                    <a class="guide-pager-link" rel="prev" href="congress.html"><span>Previous</span> Congress</a>
+                    <a class="guide-pager-link next" rel="next" href="courts.html"><span>Next</span> Federal courts</a>
+                </nav>
+            </article>
+
+            <footer class="site-footer">
+                <p><strong>About this guide:</strong> a plain-language summary of how
+                    American government is organized. Each section lists the sources
+                    it was checked against, on <time datetime="2026-10-05">2026-10-05</time>.
+                    It describes offices and institutions; where it names who holds
+                    one today, that comes from the same data as the rest of the site.
+                    It is not legal advice.</p>
+                <p>Non-partisan and independent.</p>
+            </footer>
+        </div>
+    </main>
+</div>
+
+<script src="../assets/kyc-guide.js"></script>
+</body>
+</html>

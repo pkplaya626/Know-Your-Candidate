@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Congress works — Know Your Candidate</title>
+<meta name="description" content="What Congress does, how the Senate and the House differ, who runs each chamber, the officers and agencies that serve them, and who chairs each committee today.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://candidates.radicalrelay.us/government/congress.html">
+<meta property="og:url" content="https://candidates.radicalrelay.us/government/congress.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="How Congress works">
+<meta property="og:description" content="What Congress does, how the Senate and the House differ, who runs each chamber, the officers and agencies that serve them, and who chairs each committee today.">
+<meta property="og:image" content="https://candidates.radicalrelay.us/assets/social-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Know Your Candidate">
+<meta property="og:site_name" content="Know Your Candidate">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/kyc.css">
+<script src="../assets/kyc.js"></script>
+</head>
+<body data-root="../" data-state="" data-page="guide">
+
+<a href="#stateMain" class="skip-link">Skip to content</a>
+<button type="button" class="sidebar-scrim" tabindex="-1" aria-hidden="true"></button>
+
+<header class="app-header">
+    <button type="button" class="btn-icon sidebar-toggle" aria-expanded="false"
+            aria-controls="sidebar" aria-label="Show navigation">
+        <svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg>
+    </button>
+
+    <a class="brand" href="../index.html">
+        <svg class="icon" aria-hidden="true"><use href="#i-vote"/></svg>
+        <span class="brand-name">Know Your Candidate</span>
+        <span class="brand-sub">119th Congress</span>
+    </a>
+
+
+    <div class="header-actions">
+        <div class="menu">
+            <button type="button" class="btn-icon" id="themeButton"
+                    aria-haspopup="true" aria-label="Change theme">
+                <svg class="icon" aria-hidden="true"><use href="#i-palette"/></svg>
+            </button>
+            <div class="menu-panel" id="themePanel" role="menu" hidden>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="system" aria-checked="true">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Match system
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="dark" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Dark
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="amoled" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    AMOLED black
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="light" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Light
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="app-body">
+    <aside class="sidebar scroll-y" id="sidebar" aria-label="Navigation and summary">
+        <nav class="sidebar-section" aria-label="Views">
+            <a class="nav-link" href="../index.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg>
+                Profile grid
+            </a>
+            <a class="nav-link" href="../map.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-map"/></svg>
+                Partisan map
+            </a>
+            <a class="nav-link" href="../states/index.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
+                States &amp; territories
+            </a>
+            <a class="nav-link" href="../government/index.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg>
+                How government works
+            </a>
+            <div id="yourState" hidden></div>
+        </nav>
+
+        <nav class="sidebar-section" aria-label="In this guide">
+            <h2 class="sidebar-heading">In this guide</h2>
+            <a class="nav-link nav-sub" href="index.html">Overview</a>
+            <a class="nav-link nav-sub" href="congress.html" aria-current="page">Congress</a>
+            <a class="nav-link nav-sub" href="executive.html">The executive</a>
+            <a class="nav-link nav-sub" href="courts.html">Federal courts</a>
+            <a class="nav-link nav-sub" href="states.html">State governments</a>
+            <a class="nav-link nav-sub" href="local.html">Local governments</a>
+            <a class="nav-link nav-sub" href="tribal.html">Tribal nations</a>
+        </nav>
+
+        <div class="sidebar-section">
+            <h2 class="sidebar-heading">119th Congress</h2>
+            <div class="balance-label">Senate</div>
+            <div class="balance" id="senateBalance"></div>
+            <div class="balance-label">House</div>
+            <div class="balance" id="houseBalance"></div>
+        </div>
+
+        <div class="sidebar-section" id="stateBalance" hidden></div>
+
+        <div class="sidebar-section">
+            <h2 class="sidebar-heading">
+                <svg class="icon icon-sm" aria-hidden="true"><use href="#i-flag"/></svg>
+                2026 midterms
+            </h2>
+            <time id="electionCountdown" class="badge badge-warn countdown"></time>
+            <div class="stat-row"><span>Senate seats up</span>
+                <span class="value" id="senateSeatsUp"></span></div>
+            <div class="stat-row"><span>House seats up</span>
+                <span class="value" id="houseSeatsUp"></span></div>
+            <div class="stat-row"><span>Challengers on the ballot</span>
+                <span class="value" id="challengerCount"></span></div>
+        </div>
+
+        <nav class="sidebar-section push" aria-label="Jump to a state">
+            <h2 class="sidebar-heading">Jump to</h2>
+            <label class="sr-only" for="stateJump">Jump to a state or territory</label>
+            <select id="stateJump" class="select">
+                <option value="">Choose a state&hellip;</option>
+            </select>
+        </nav>
+    </aside>
+
+    <main class="app-main" id="stateMain">
+        <div class="content scroll-y">
+            <article id="guideContent" class="state-page guide-page">
+                <header class="state-hero">
+                    <p class="state-kicker">How government works</p>
+                    <h1 class="state-title">How Congress works</h1>
+                    <p class="guide-lede">Article I of the Constitution gives the power to make federal law to Congress: a Senate, in which every state has two votes, and a House of Representatives, in which seats follow population. Who sits there now is on the <a href="../index.html">profile grid</a> and the <a href="../map.html">partisan map</a>.</p>
+                </header>
+                <nav class="guide-toc" aria-labelledby="guideTocTitle">
+                    <h2 class="guide-toc-title" id="guideTocTitle">On this page</h2>
+                    <ol>
+                        <li><a href="#powers">What Congress does</a></li>
+                        <li><a href="#senate">The Senate</a></li>
+                        <li><a href="#house">The House of Representatives</a></li>
+                        <li><a href="#committees">Committees, and who leads them now</a></li>
+                        <li><a href="#support">Congress's own agencies</a></li>
+                    </ol>
+                </nav>
+                <section class="guide-section" id="powers" aria-labelledby="powers-title">
+                    <h2 class="guide-heading" id="powers-title">What Congress does</h2>
+                    <p>All federal legislative power belongs to Congress (Article I, Section 1). Section 8 lists its powers: among them to tax and spend, to borrow, to regulate commerce with foreign nations, among the states and with Indian tribes, to declare war, and to raise and support the armed forces. No money may be spent from the Treasury unless Congress has appropriated it (Section 9), which gives Congress control over how much each agency may spend.</p>
+                    <p>A bill becomes law when both chambers pass it in the same words and the president signs it, or does not return it within ten days (Sundays excepted) while Congress is in session. If the president vetoes it, Congress can override the veto by a two-thirds vote in each chamber (Section 7).</p>
+                    <p>Congress also oversees how the laws are carried out, through hearings, investigations and reports, and it can remove federal officers: the House impeaches, by a simple majority in practice, and the Senate tries the case, where conviction takes two-thirds of the senators present (Article I, Sections 2 and 3; Article II, Section 4).</p>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://constitution.congress.gov/constitution/article-1/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article I</a>; <a href="https://constitution.congress.gov/constitution/article-2/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article II</a></p>
+                </section>
+                <section class="guide-section" id="senate" aria-labelledby="senate-title">
+                    <h2 class="guide-heading" id="senate-title">The Senate</h2>
+                    <p>The Senate has 100 members, two from each state, elected by the state's voters (Seventeenth Amendment) to six-year terms. The terms are staggered, so about a third of the seats are up every two years. <a href="../index.html#/?view=senate">Which seats are up in 2026</a>.</p>
+                    <p>The Senate alone gives or withholds its advice and consent (Article II, Section 2): a treaty needs two-thirds of the senators present, and the president's nominations of ambassadors, judges, cabinet secretaries and other officers need its consent, which it gives by a simple majority. It also tries impeachments.</p>
+                    <h3 class="guide-subheading">Who runs it</h3>
+                    <dl class="guide-roles">
+                        <div class="guide-role"><dt>President of the Senate</dt><dd>The vice president of the United States, who may preside and votes only to break a tie (Article I, Section 3).</dd></div>
+                        <div class="guide-role"><dt>President pro tempore</dt><dd>Elected by the Senate to preside when the vice president is absent; by custom, the longest-serving senator of the majority party. Third in the line of presidential succession, after the vice president and the Speaker of the House (3 U.S.C. 19).</dd></div>
+                        <div class="guide-role"><dt>Majority leader</dt><dd>Chosen by the majority party's senators. By the Senate's precedents the presiding officer recognizes the majority leader first, which lets the leader decide what the Senate takes up and when, move to end debate (cloture), and negotiate the unanimous-consent agreements under which most of its business is done.</dd></div>
+                        <div class="guide-role"><dt>Minority leader</dt><dd>Chosen by the minority party's senators to lead their side in debate and in negotiation with the majority.</dd></div>
+                        <div class="guide-role"><dt>Whips</dt><dd>Each party's assistant leader, who counts votes and keeps senators informed of what is coming.</dd></div>
+                        <div class="guide-role"><dt>Committee chairs and ranking members</dt><dd>The majority party chairs every committee and controls its agenda: hearings, investigations, markups of bills and, in the Senate, confirmation hearings for nominees. The senior member of the minority is the ranking member. <a href="#committees">Who holds each post now</a>.</dd></div>
+                    </dl>
+                    <h3 class="guide-subheading">Officers who are not senators</h3>
+                    <dl class="guide-roles">
+                        <div class="guide-role"><dt>Secretary of the Senate</dt><dd>Elected by the Senate. Keeps its journal and records, receives its bills, and manages its finances and payroll.</dd></div>
+                        <div class="guide-role"><dt>Sergeant at Arms</dt><dd>The Senate's chief law enforcement and protocol officer: keeps order, oversees security with the Capitol Police, and can be directed to compel absent senators to attend.</dd></div>
+                        <div class="guide-role"><dt>Parliamentarian</dt><dd>Advises the presiding officer, without regard to party, on the Senate's rules and precedents, including what a budget reconciliation bill may contain under the Congressional Budget Act.</dd></div>
+                        <div class="guide-role"><dt>Legal and legislative counsel</dt><dd>The Office of Senate Legal Counsel represents the Senate in court; the Office of the Legislative Counsel drafts bills and amendments for senators.</dd></div>
+                    </dl>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://constitution.congress.gov/constitution/article-1/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article I</a>; <a href="https://constitution.congress.gov/constitution/article-2/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article II</a>; <a href="https://constitution.congress.gov/constitution/amendment-17/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Seventeenth Amendment</a>; <a href="https://www.law.cornell.edu/uscode/text/3/19" target="_blank" rel="noopener noreferrer">3 U.S.C. 19 (presidential succession)</a>; <a href="https://www.senate.gov/senators/leadership.htm" target="_blank" rel="noopener noreferrer">U.S. Senate: Leadership &amp; Officers</a>; <a href="https://www.senate.gov/about/officers-staff/president-pro-tempore.htm" target="_blank" rel="noopener noreferrer">U.S. Senate: About the President Pro Tempore</a>; <a href="https://www.senate.gov/about/parties-leadership/floor-leader-priority-recognition.htm" target="_blank" rel="noopener noreferrer">U.S. Senate: Floor Leaders Receive Priority Recognition</a>; <a href="https://www.senate.gov/about/officers-staff.htm" target="_blank" rel="noopener noreferrer">U.S. Senate: Officers &amp; Staff</a></p>
+                </section>
+                <section class="guide-section" id="house" aria-labelledby="house-title">
+                    <h2 class="guide-heading" id="house-title">The House of Representatives</h2>
+                    <p>The House has 435 voting members, each elected from a district to a two-year term. Seats are divided among the states by population after each census, and every state has at least one (Article I, Section 2). Since every term ends together, all 435 voting seats are on the ballot every two years. Six more members can serve and vote on committees but not on the House floor: delegates from the District of Columbia, Guam, the U.S. Virgin Islands, American Samoa and the Northern Mariana Islands, and Puerto Rico's resident commissioner, who serves four years. <a href="../states/index.html">Each state's districts</a>.</p>
+                    <p>Bills for raising revenue must start in the House (Article I, Section 7), and the House alone can impeach (Article I, Section 2).</p>
+                    <h3 class="guide-subheading">Who runs it</h3>
+                    <dl class="guide-roles">
+                        <div class="guide-role"><dt>Speaker</dt><dd>Elected by the whole House, and in practice the leader of its majority. Presides and refers bills to committees, and through the majority's control of the Rules Committee, which sets the terms of debate for most major bills, largely decides what reaches the floor. Second in the line of presidential succession (3 U.S.C. 19).</dd></div>
+                        <div class="guide-role"><dt>Majority and minority leaders</dt><dd>Chosen by each party. The majority leader schedules the House's business with the Speaker; the minority leader leads the other side.</dd></div>
+                        <div class="guide-role"><dt>Whips</dt><dd>Count and gather votes for each party's position.</dd></div>
+                        <div class="guide-role"><dt>Committee chairs and ranking members</dt><dd>As in the Senate, the majority chairs every committee and the ranking member leads the minority's side. <a href="#committees">Who holds each post now</a>.</dd></div>
+                    </dl>
+                    <h3 class="guide-subheading">Officers who are not members</h3>
+                    <dl class="guide-roles">
+                        <div class="guide-role"><dt>Clerk</dt><dd>Keeps the House's records, receives and certifies its bills, and publishes its roll-call votes.</dd></div>
+                        <div class="guide-role"><dt>Sergeant at Arms</dt><dd>Keeps order on the floor under the Speaker's direction and oversees security with the Capitol Police.</dd></div>
+                        <div class="guide-role"><dt>Chief Administrative Officer</dt><dd>Runs the House's finances, payroll, technology and purchasing.</dd></div>
+                        <div class="guide-role"><dt>Parliamentarian</dt><dd>Advises, without regard to party, on the House's rules and precedents, including whether an amendment is germane.</dd></div>
+                        <div class="guide-role"><dt>Chaplain</dt><dd>Opens each day's session with a prayer and offers pastoral care.</dd></div>
+                    </dl>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://constitution.congress.gov/constitution/article-1/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article I</a>; <a href="https://www.law.cornell.edu/uscode/text/3/19" target="_blank" rel="noopener noreferrer">3 U.S.C. 19 (presidential succession)</a>; <a href="https://www.house.gov/the-house-explained" target="_blank" rel="noopener noreferrer">U.S. House of Representatives: The House Explained</a>; <a href="https://www.house.gov/leadership" target="_blank" rel="noopener noreferrer">U.S. House of Representatives: Leadership</a>; <a href="https://www.house.gov/the-house-explained/officers-and-organizations" target="_blank" rel="noopener noreferrer">U.S. House of Representatives: Officers and Organizations</a>; <a href="https://clerk.house.gov/Votes" target="_blank" rel="noopener noreferrer">Office of the Clerk, U.S. House: Roll Call Votes</a></p>
+                </section>
+                <section class="guide-section" id="committees" aria-labelledby="committees-title">
+                    <h2 class="guide-heading" id="committees-title">Committees, and who leads them now</h2>
+                    <p>Most of Congress's work is done in committees. Standing committees are permanent and each covers a set of subjects; select and special committees are created for a particular purpose; joint committees have members from both chambers. A committee holds hearings, investigates, and “marks up” bills, revising them before the full chamber votes.</p>
+                    <div class="guide-live" data-live="committees">
+                        <p class="results-bar" role="status">With JavaScript on, this page lists who chairs every committee now and who leads its minority. Each member's committee posts are also on their profile.</p>
+                    </div>
+                    <p>Each name opens that member's profile. The posts come from the committee rosters kept by the congress-legislators project, the same source as every profile's committee list. The Senate and the House each list their party leaders: <a href="https://www.senate.gov/senators/leadership.htm" target="_blank" rel="noopener noreferrer">Senate leadership</a>, <a href="https://www.house.gov/leadership" target="_blank" rel="noopener noreferrer">House leadership</a>.</p>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://www.congress.gov/committees" target="_blank" rel="noopener noreferrer">Congress.gov: Committees of the U.S. Congress</a>; <a href="https://github.com/unitedstates/congress-legislators" target="_blank" rel="noopener noreferrer">congress-legislators: committee membership</a>; <a href="https://www.senate.gov/senators/leadership.htm" target="_blank" rel="noopener noreferrer">U.S. Senate: Leadership &amp; Officers</a>; <a href="https://www.house.gov/leadership" target="_blank" rel="noopener noreferrer">U.S. House of Representatives: Leadership</a></p>
+                </section>
+                <section class="guide-section" id="support" aria-labelledby="support-title">
+                    <h2 class="guide-heading" id="support-title">Congress's own agencies</h2>
+                    <dl class="guide-roles">
+                        <div class="guide-role"><dt>Government Accountability Office</dt><dd>Audits and investigates how federal agencies spend money and run programs, mostly at Congress's request. It is led by the Comptroller General, appointed by the president with the Senate's consent to a 15-year term (31 U.S.C. 703).</dd></div>
+                        <div class="guide-role"><dt>Congressional Budget Office</dt><dd>Produces nonpartisan budget and economic projections and estimates what bills would cost, known as scores.</dd></div>
+                        <div class="guide-role"><dt>Congressional Research Service</dt><dd>Part of the Library of Congress. Provides confidential, nonpartisan research and analysis to members and committees.</dd></div>
+                        <div class="guide-role"><dt>Architect of the Capitol</dt><dd>Maintains and preserves the Capitol and the buildings and grounds around it.</dd></div>
+                    </dl>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://www.law.cornell.edu/uscode/text/31/703" target="_blank" rel="noopener noreferrer">31 U.S.C. 703 (Comptroller General)</a>; <a href="https://www.gao.gov/about" target="_blank" rel="noopener noreferrer">Government Accountability Office: About</a>; <a href="https://www.cbo.gov/about/overview" target="_blank" rel="noopener noreferrer">Congressional Budget Office: Overview</a>; <a href="https://www.law.cornell.edu/uscode/text/2/166" target="_blank" rel="noopener noreferrer">2 U.S.C. 166 (Congressional Research Service)</a>; <a href="https://www.aoc.gov/about-us" target="_blank" rel="noopener noreferrer">Architect of the Capitol: About</a></p>
+                </section>
+                <nav class="guide-pager" aria-label="Guide pages">
+                    <a class="guide-pager-link" rel="prev" href="index.html"><span>Previous</span> Overview</a>
+                    <a class="guide-pager-link next" rel="next" href="executive.html"><span>Next</span> The executive</a>
+                </nav>
+            </article>
+
+            <footer class="site-footer">
+                <p><strong>About this guide:</strong> a plain-language summary of how
+                    American government is organized. Each section lists the sources
+                    it was checked against, on <time datetime="2026-10-05">2026-10-05</time>.
+                    It describes offices and institutions; where it names who holds
+                    one today, that comes from the same data as the rest of the site.
+                    It is not legal advice.</p>
+                <p>Non-partisan and independent.</p>
+            </footer>
+        </div>
+    </main>
+</div>
+
+<script src="../data/profiles.js"></script>
+<script src="../data/odds.js"></script>
+<script src="../assets/kyc-odds.js"></script>
+<script src="../assets/kyc-cards.js"></script>
+<script src="../assets/kyc-profile.js"></script>
+<script src="../assets/kyc-guide.js"></script>
+</body>
+</html>

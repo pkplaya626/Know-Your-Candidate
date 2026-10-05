@@ -157,8 +157,8 @@ class TestMemberProfile(unittest.TestCase):
     def test_authoritative_committees_replace_the_roster_column(self):
         seats = [
             {"code": "HSAG", "name": "House Committee on Agriculture", "title": "Chair",
-             "rank": 1, "sub": False, "parent": None, "url": None},
-            {"code": "HSAG15", "name": "Forestry", "title": None, "rank": 3,
+             "side": "majority", "rank": 1, "sub": False, "parent": None, "url": None},
+            {"code": "HSAG15", "name": "Forestry", "title": None, "side": "majority", "rank": 3,
              "sub": True, "parent": "House Committee on Agriculture", "url": None},
             {"code": "HSGO", "name": "House Committee on Oversight", "title": None,
              "rank": 9, "sub": False, "parent": None, "url": None},
@@ -167,19 +167,22 @@ class TestMemberProfile(unittest.TestCase):
         self.assertEqual(profile["committees"],
                          "House Committee on Agriculture (Chair); House Committee on Oversight")
         self.assertEqual(profile["committeeList"],
-                         [{"code": "HSAG", "title": "Chair"}, {"code": "HSAG15"}, {"code": "HSGO"}])
+                         [{"code": "HSAG", "title": "Chair", "side": "majority"},
+                          {"code": "HSAG15"}, {"code": "HSGO"}])
         self.assertEqual(profile["committeesSource"], "congress-legislators")
 
     def test_the_build_metadata_names_every_committee_used(self):
         from kyc import summary
         committees = {"committees": {
-            "HSAG": {"name": "House Committee on Agriculture", "url": "https://ag.house.gov/"},
+            "HSAG": {"name": "House Committee on Agriculture", "url": "https://ag.house.gov/",
+                     "chamber": "house"},
             "HSAG15": {"name": "Forestry", "parent": "HSAG"},
             "SSAF": {"name": "Senate Agriculture"}}}
         profiles = [{"committeeList": [{"code": "HSAG", "title": "Chair"}, {"code": "HSAG15"}]}]
         table = summary.committee_table(committees, profiles)
         self.assertEqual(table, {
-            "HSAG": {"name": "House Committee on Agriculture", "url": "https://ag.house.gov/"},
+            "HSAG": {"name": "House Committee on Agriculture", "url": "https://ag.house.gov/",
+                     "chamber": "house"},
             "HSAG15": {"name": "Forestry", "url": "https://ag.house.gov/", "parent": "HSAG"},
         })
 

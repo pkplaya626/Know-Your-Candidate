@@ -47,7 +47,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`) |
 | `… refresh` | `fetch`, then `build` |
 | `python tools/fetch_district_maps.py` | Rebuild `district_maps/`: every state's district boundaries, the new 2026 maps, and the towns to label (network) |
-| `python -m unittest discover tests` | 662 pipeline tests |
+| `python -m unittest discover tests` | The pipeline tests |
 | `npm install && npm test` | Render every page in jsdom and drive the UI (631 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
@@ -102,7 +102,9 @@ CI asserts that a rebuild changes nothing.
 | `disclosures.py` | Links to members' filed financial disclosures (House Clerk, Senate eFD) |
 | `geo.py` | Decode the state atlas into SVG path data |
 | `summary.py` | Chamber balance, election headline figures, per-state figures |
-| `pages.py` | The state-page template, the states directory and the sitemap |
+| `pages.py` | The shared page template, the state pages, the states directory and the sitemap |
+| `government.py` | The guide to how government works: renders its pages and refuses a broken link or an uncited section |
+| `government_text.py` | The guide's words and the sources each section was checked against |
 | `campaigns.py` | Campaign websites from each candidate's FEC committee |
 | `enrich.py` | Fill filed candidates' gaps from their Wikipedia infobox and campaign site; check every linked campaign site |
 | `odds.py` | Prediction-market prices (Kalshi, Polymarket) and published polling averages for the 2026 Senate races |
@@ -128,6 +130,7 @@ order renders an empty site with no error anywhere.
 | `assets/kyc-directory.js` | The grid: filtering, sorting, races |
 | `assets/kyc-map.js` | The map: rendering, modes, delegation panel |
 | `assets/kyc-state.js` | A state's page, and the directory of states |
+| `assets/kyc-guide.js` | The guide's pages: what they show from the data (who leads each committee) |
 
 Every view has a URL: `#/profile/<id>` for a person,
 `#/?state=TX&chamber=Senate` for a filtered list, so any view can be linked and
@@ -832,6 +835,45 @@ They are linked from everywhere a state is named: the race headers in the
 grid, the profile dialog's "Represents" line, the state filter in the sidebar,
 the map's delegation panel, the footer, and `sitemap.xml`.
 
+## How government works
+
+`government/` is a guide to the offices around the people this site covers:
+Congress, the executive and the federal courts, state governments, local
+governments and tribal nations. Its seven pages are generated, like the state
+pages, from the shared template in `kyc/pages.py`, with their words in
+`kyc/government_text.py`.
+
+The words are static, so they are held to the standard of everything else
+here in a different way:
+
+- **Every section cites its sources.** The outline came from a report the
+  site's owner supplied. Every checkable claim in it was checked against
+  primary sources (the Constitution, the U.S. Code, court opinions, the
+  Census Bureau, the Bureau of Indian Affairs, NCSL, state codes) by one
+  researcher and then by a skeptic trying to refute the result. Where the
+  report was wrong, out of date or took a side, the guide says what the
+  sources say: 575 federally recognized tribes, not 574, since Congress
+  recognized the Lumbee in December 2025; the FTC's removal protection struck
+  down in *Trump v. Slaughter* (2026); the 94 district courts counted with the
+  three territorial ones; "unitary executive", a contested legal theory,
+  replaced by what Article II says. The footer gives the date the text was
+  last checked (`REVIEWED`).
+- **Nothing about a person is typed into it.** Who chairs each committee and
+  who leads its minority comes from the same committee rosters as each
+  profile, rendered by `assets/kyc-guide.js`; each name opens the profile.
+  `test_guide.py` fails if a current officeholder's name appears in the text.
+- **A link that leads nowhere is a build error.** Links are written
+  `[label](target)` with a target the build resolves: `guide:congress#senate`,
+  `site:map.html`, `state:TX` or an `https://` URL. `validate.check_guide`
+  fails on a missing page, section or state, an unknown source, or a source
+  no section cites.
+- **Only the page that shows people loads them.** The Congress page loads
+  `profiles.js` like a state page; the others load only `kyc.js` and
+  `kyc-guide.js`, and carry their "Jump to" list in the HTML.
+
+Every page links to the guide from its sidebar, and the guide links back into
+the grid, the Senate view, the map and the state pages.
+
 ## District maps
 
 Every state and territory has a district page, `districts/tx.html`. It draws
@@ -943,7 +985,7 @@ the USGS point that is out of town.
 | `campaignQuote` | The campaign home page's own description of itself, quoted (`enrich`) | Challengers still running whose site describes itself |
 | `campaignIssuesUrl` | The page the campaign site links as its issues, platform or priorities | Challengers still running |
 | `disclosureUrl`, `disclosureSource` | The member's latest annual financial disclosure: `house-clerk` (a PDF from the Clerk's annual index) or `senate-efd` (a report in the Senate's eFD system) | Members with a filing on record |
-| `committeeList`, `committeesSource` | `committee-membership-current`, with rank and title (`data/committees.json`) | Sitting members |
+| `committeeList`, `committeesSource` | `committee-membership-current`, with rank and title (`data/committees.json`); a titled seat also carries `side` (`majority` or `minority`), because a title alone cannot say which - "Vice Chairman" leads the minority on Senate Ethics and Intelligence | Sitting members |
 | `fecCandidateId` | Links the FEC's own candidate page | Everyone the FEC knows |
 | `otherFecIds` | The same person's other FEC registrations (one committee's money reported under several ids, or a curated pair in `overrides.SAME_PERSON_FILINGS`); a link shared under any of them opens this profile | People registered more than once |
 

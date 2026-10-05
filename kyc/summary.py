@@ -46,7 +46,9 @@ def _split(profiles):
 
 
 def committee_table(committees, profiles):
-    """``{code: {name, url, parent}}`` for every committee a profile sits on."""
+    """``{code: {name, url, parent | chamber}}`` for every committee a profile
+    sits on. A full committee carries its chamber ("house", "senate",
+    "joint"); a subcommittee, its parent's code."""
     names = (committees or {}).get("committees") or {}
     used = {seat["code"] for p in profiles for seat in p.get("committeeList") or []}
     table = {}
@@ -58,6 +60,8 @@ def committee_table(committees, profiles):
             entry["url"] = info.get("url") or parent.get("url")
         if info.get("parent"):
             entry["parent"] = info["parent"]
+        elif info.get("chamber"):
+            entry["chamber"] = info["chamber"]
         table[code] = entry
     return table
 

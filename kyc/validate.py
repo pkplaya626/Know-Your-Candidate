@@ -1129,7 +1129,23 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_results(profiles, races)
     issues += check_results_pages(results)
     issues += check_seats_contested(profiles)
+    issues += check_guide()
     return issues
+
+
+def check_guide():
+    """The guide's text (kyc/government_text.py): every link leads to a page,
+    section or state that exists, and every source is cited by a section.
+
+    An error, not a warning: the guide is static text, so nothing later in
+    the build would notice a link that goes nowhere."""
+    from . import government
+    problems = government.check()
+    if not problems:
+        return []
+    return [Issue("error", "guide",
+                  f"{len(problems)} problem(s) in the guide's text (kyc/government_text.py)",
+                  problems)]
 
 
 def as_dict(issues, stats=None):
