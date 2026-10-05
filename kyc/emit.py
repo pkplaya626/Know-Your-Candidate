@@ -11,6 +11,8 @@ DATA_DIR = os.path.join(SITE_DIR, "data")
 DATA_FILE = os.path.join(DATA_DIR, "profiles.js")
 GEO_FILE = os.path.join(DATA_DIR, "geo.js")
 ODDS_FILE = os.path.join(DATA_DIR, "odds.js")
+# What the guide's maps say about each state (kyc/government_maps.py).
+GOVERNMENT_FILE = os.path.join(DATA_DIR, "government.js")
 # One file per state, each loaded only by that state's district page.
 DISTRICTS_DIR = os.path.join(DATA_DIR, "districts")
 
@@ -40,6 +42,7 @@ PAGE_REQUIREMENTS = {
         "assets/kyc-odds.js",
         "assets/kyc-cards.js",
         "assets/kyc-profile.js",
+        "assets/kyc-usmap.js",
         "assets/kyc-map.js",
     ),
 }
@@ -351,6 +354,28 @@ def write_odds(payload, root="."):
 
 def odds_signature(payload):
     """Content hash of the odds payload, excluding the build timestamp."""
+    return hashlib.sha256(_json(payload).encode("utf-8")).hexdigest()
+
+
+def write_government(payload, root="."):
+    """Emit ``candidate_profiles_site/data/government.js``: the guide's maps.
+
+    A pure function of ``kyc/government_maps.py`` and the atlas - nothing
+    about a person is in it - so a roster refresh never changes it, and the
+    build rewrites it only when its signature changes.
+    """
+    path = os.path.join(root, GOVERNMENT_FILE)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    text = (
+        _BANNER.format(source="kyc/government_maps.py", built=build_timestamp())
+        + f"window.kycGovernment = {_json(payload)};\n"
+        + 'window.kycGovernmentMeta = {"signature":"' + government_signature(payload) + '"};\n'
+    )
+    return path, _atomic_write(path, text)
+
+
+def government_signature(payload):
+    """Content hash of the guide's map data, excluding the build timestamp."""
     return hashlib.sha256(_json(payload).encode("utf-8")).hexdigest()
 
 

@@ -1,0 +1,424 @@
+{
+ "fetched": "2026-10-05T14:55:46+00:00",
+ "national": {
+  "county": 3031,
+  "municipal": 19491,
+  "school": 12546,
+  "special": 39555,
+  "total": 90837,
+  "township": 16214
+ },
+ "source": "2022 Census of Governments, Table CG2200ORG02: Local Governments by Type and State",
+ "states": {
+  "AK": {
+   "county": 15,
+   "municipal": 149,
+   "school": null,
+   "special": 17,
+   "total": 181,
+   "township": null
+  },
+  "AL": {
+   "county": 67,
+   "municipal": 462,
+   "school": 138,
+   "special": 541,
+   "total": 1208,
+   "township": null
+  },
+  "AR": {
+   "county": 75,
+   "municipal": 500,
+   "school": 234,
+   "special": 753,
+   "total": 1562,
+   "township": null
+  },
+  "AZ": {
+   "county": 15,
+   "municipal": 91,
+   "school": 242,
+   "special": 326,
+   "total": 674,
+   "township": null
+  },
+  "CA": {
+   "county": 57,
+   "municipal": 482,
+   "school": 1006,
+   "special": 2949,
+   "total": 4494,
+   "township": null
+  },
+  "CO": {
+   "county": 62,
+   "municipal": 272,
+   "school": 180,
+   "special": 3201,
+   "total": 3715,
+   "township": null
+  },
+  "CT": {
+   "county": null,
+   "municipal": 30,
+   "school": 17,
+   "special": 433,
+   "total": 629,
+   "township": 149
+  },
+  "DC": {
+   "county": null,
+   "municipal": 1,
+   "school": null,
+   "special": 1,
+   "total": 2,
+   "township": null
+  },
+  "DE": {
+   "county": 3,
+   "municipal": 57,
+   "school": 19,
+   "special": 255,
+   "total": 334,
+   "township": null
+  },
+  "FL": {
+   "county": 66,
+   "municipal": 412,
+   "school": 95,
+   "special": 1374,
+   "total": 1947,
+   "township": null
+  },
+  "GA": {
+   "county": 152,
+   "municipal": 537,
+   "school": 180,
+   "special": 510,
+   "total": 1379,
+   "township": null
+  },
+  "HI": {
+   "county": 3,
+   "municipal": 1,
+   "school": null,
+   "special": 17,
+   "total": 21,
+   "township": null
+  },
+  "IA": {
+   "county": 99,
+   "municipal": 940,
+   "school": 342,
+   "special": 445,
+   "total": 1826,
+   "township": null
+  },
+  "ID": {
+   "county": 44,
+   "municipal": 199,
+   "school": 118,
+   "special": 807,
+   "total": 1168,
+   "township": null
+  },
+  "IL": {
+   "county": 102,
+   "municipal": 1295,
+   "school": 890,
+   "special": 3218,
+   "total": 6930,
+   "township": 1425
+  },
+  "IN": {
+   "county": 91,
+   "municipal": 567,
+   "school": 290,
+   "special": 696,
+   "total": 2648,
+   "township": 1004
+  },
+  "KS": {
+   "county": 103,
+   "municipal": 624,
+   "school": 306,
+   "special": 1468,
+   "total": 3768,
+   "township": 1267
+  },
+  "KY": {
+   "county": 118,
+   "municipal": 417,
+   "school": 171,
+   "special": 601,
+   "total": 1307,
+   "township": null
+  },
+  "LA": {
+   "county": 60,
+   "municipal": 304,
+   "school": 69,
+   "special": 101,
+   "total": 534,
+   "township": null
+  },
+  "MA": {
+   "county": 5,
+   "municipal": 56,
+   "school": 85,
+   "special": 415,
+   "total": 856,
+   "township": 295
+  },
+  "MD": {
+   "county": 23,
+   "municipal": 157,
+   "school": null,
+   "special": 162,
+   "total": 342,
+   "township": null
+  },
+  "ME": {
+   "county": 16,
+   "municipal": 23,
+   "school": 101,
+   "special": 227,
+   "total": 828,
+   "township": 461
+  },
+  "MI": {
+   "county": 83,
+   "municipal": 533,
+   "school": 567,
+   "special": 437,
+   "total": 2860,
+   "township": 1240
+  },
+  "MN": {
+   "county": 87,
+   "municipal": 854,
+   "school": 330,
+   "special": 579,
+   "total": 3629,
+   "township": 1779
+  },
+  "MO": {
+   "county": 114,
+   "municipal": 943,
+   "school": 529,
+   "special": 1927,
+   "total": 3796,
+   "township": 283
+  },
+  "MS": {
+   "county": 82,
+   "municipal": 298,
+   "school": 150,
+   "special": 437,
+   "total": 967,
+   "township": null
+  },
+  "MT": {
+   "county": 54,
+   "municipal": 128,
+   "school": 310,
+   "special": 736,
+   "total": 1228,
+   "township": null
+  },
+  "NC": {
+   "county": 100,
+   "municipal": 552,
+   "school": null,
+   "special": 313,
+   "total": 965,
+   "township": null
+  },
+  "ND": {
+   "county": 53,
+   "municipal": 356,
+   "school": 173,
+   "special": 683,
+   "total": 2570,
+   "township": 1305
+  },
+  "NE": {
+   "county": 93,
+   "municipal": 528,
+   "school": 267,
+   "special": 1303,
+   "total": 2541,
+   "township": 350
+  },
+  "NH": {
+   "county": 10,
+   "municipal": 13,
+   "school": 166,
+   "special": 128,
+   "total": 538,
+   "township": 221
+  },
+  "NJ": {
+   "county": 21,
+   "municipal": 323,
+   "school": 521,
+   "special": 222,
+   "total": 1328,
+   "township": 241
+  },
+  "NM": {
+   "county": 33,
+   "municipal": 105,
+   "school": 96,
+   "special": 769,
+   "total": 1003,
+   "township": null
+  },
+  "NV": {
+   "county": 16,
+   "municipal": 19,
+   "school": 17,
+   "special": 135,
+   "total": 187,
+   "township": null
+  },
+  "NY": {
+   "county": 57,
+   "municipal": 595,
+   "school": 676,
+   "special": 1189,
+   "total": 3447,
+   "township": 930
+  },
+  "OH": {
+   "county": 88,
+   "municipal": 926,
+   "school": 665,
+   "special": 952,
+   "total": 3939,
+   "township": 1308
+  },
+  "OK": {
+   "county": 77,
+   "municipal": 592,
+   "school": 539,
+   "special": 632,
+   "total": 1840,
+   "township": null
+  },
+  "OR": {
+   "county": 36,
+   "municipal": 240,
+   "school": 223,
+   "special": 1029,
+   "total": 1528,
+   "township": null
+  },
+  "PA": {
+   "county": 66,
+   "municipal": 1013,
+   "school": 514,
+   "special": 1712,
+   "total": 4851,
+   "township": 1546
+  },
+  "RI": {
+   "county": null,
+   "municipal": 8,
+   "school": 4,
+   "special": 84,
+   "total": 127,
+   "township": 31
+  },
+  "SC": {
+   "county": 46,
+   "municipal": 271,
+   "school": 78,
+   "special": 271,
+   "total": 666,
+   "township": null
+  },
+  "SD": {
+   "county": 66,
+   "municipal": 310,
+   "school": 149,
+   "special": 478,
+   "total": 1900,
+   "township": 897
+  },
+  "TN": {
+   "county": 92,
+   "municipal": 345,
+   "school": 14,
+   "special": 451,
+   "total": 902,
+   "township": null
+  },
+  "TX": {
+   "county": 254,
+   "municipal": 1225,
+   "school": 1070,
+   "special": 2984,
+   "total": 5533,
+   "township": null
+  },
+  "UT": {
+   "county": 29,
+   "municipal": 254,
+   "school": 41,
+   "special": 308,
+   "total": 632,
+   "township": null
+  },
+  "VA": {
+   "county": 95,
+   "municipal": 228,
+   "school": 1,
+   "special": 198,
+   "total": 522,
+   "township": null
+  },
+  "VT": {
+   "county": 14,
+   "municipal": 40,
+   "school": 121,
+   "special": 162,
+   "total": 574,
+   "township": 237
+  },
+  "WA": {
+   "county": 39,
+   "municipal": 281,
+   "school": 295,
+   "special": 1275,
+   "total": 1890,
+   "township": null
+  },
+  "WI": {
+   "county": 72,
+   "municipal": 605,
+   "school": 437,
+   "special": 703,
+   "total": 3062,
+   "township": 1245
+  },
+  "WV": {
+   "county": 55,
+   "municipal": 231,
+   "school": 55,
+   "special": 298,
+   "total": 639,
+   "township": null
+  },
+  "WY": {
+   "county": 23,
+   "municipal": 99,
+   "school": 55,
+   "special": 643,
+   "total": 820,
+   "township": null
+  }
+ },
+ "url": "https://www2.census.gov/programs-surveys/gus/tables/2022/cog2022_cg2200org02.zip",
+ "year": 2022
+}

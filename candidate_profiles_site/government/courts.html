@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="../assets/kyc.css">
 <script src="../assets/kyc.js"></script>
 </head>
-<body data-root="../" data-state="" data-page="guide">
+<body data-root="../" data-state="" data-page="guide-courts">
 
 <a href="#stateMain" class="skip-link">Skip to content</a>
 <button type="button" class="sidebar-scrim" tabindex="-1" aria-hidden="true"></button>
@@ -109,7 +109,7 @@
         <nav class="sidebar-section push" aria-label="Jump to a state">
             <h2 class="sidebar-heading">Jump to</h2>
             <label class="sr-only" for="stateJump">Jump to a state or territory</label>
-            <select id="stateJump" class="select">
+            <select id="stateJump" class="select" data-jump="map">
                 <option value="">Choose a state&hellip;</option>
                 <option value="AL">Alabama (AL)</option>
                 <option value="AK">Alaska (AK)</option>
@@ -172,43 +172,60 @@
     </aside>
 
     <main class="app-main" id="stateMain">
-        <div class="content scroll-y">
-            <article id="guideContent" class="state-page guide-page">
-                <header class="state-hero">
-                    <p class="state-kicker">How government works</p>
-                    <h1 class="state-title">The federal courts</h1>
-                    <p class="guide-lede">Article III vests the judicial power of the United States in one Supreme Court and the lower courts Congress creates. Federal courts hear cases under federal law and the Constitution, and many disputes between citizens of different states; <a href="states.html#courts">state courts</a> hear most of the rest.</p>
-                </header>
-                <nav class="guide-toc" aria-labelledby="guideTocTitle">
-                    <h2 class="guide-toc-title" id="guideTocTitle">On this page</h2>
-                    <ol>
-                        <li><a href="#judges">Article III judges</a></li>
-                        <li><a href="#supreme-court">The Supreme Court</a></li>
-                        <li><a href="#appeals">The courts of appeals</a></li>
-                        <li><a href="#district">District courts and other trial courts</a></li>
-                        <li><a href="#other-courts">Courts outside Article III</a></li>
-                    </ol>
-                </nav>
-                <section class="guide-section" id="judges" aria-labelledby="judges-title">
-                    <h2 class="guide-heading" id="judges-title">Article III judges</h2>
+        <header class="guide-map-head">
+            <p class="state-kicker">How government works</p>
+            <h1 class="guide-map-title">The federal courts</h1>
+        </header>
+        <div class="toolbar">
+            <div class="map-legend" id="mapLegend" aria-live="polite"></div>
+        </div>
+        <div class="map-stage" id="mapStage">
+            <svg id="usMap" viewBox="0 0 975 652" preserveAspectRatio="xMidYMid meet"
+                 role="group" aria-label="Map of U.S. states and territories.
+                 Each state is a button that shows what this page says about it."></svg>
+        </div>
+    </main>
+
+    <aside class="detail-panel" aria-label="Federal courts, state by state">
+        <div class="detail-head">
+            <div class="detail-title">
+                <h2>
+                    <svg class="icon icon-sm" aria-hidden="true"><use href="#i-pin"/></svg>
+                    <span id="panelState">Select a state</span>
+                </h2>
+            </div>
+            <p class="detail-sub" id="panelMode">Which court of appeals hears each state's federal appeals</p>
+            <a class="sidebar-link" id="panelStateLink" href="../states/index.html" hidden></a>
+        </div>
+        <div class="delegation scroll-y guide-panel" id="guideContent">
+            <div id="guideFacts" aria-live="polite"></div>
+            <section class="guide-about" data-mode="circuits">
+                <h3 class="guide-about-title">Which court of appeals hears each state's federal appeals</h3>
+                <p>The country's federal district courts are grouped into twelve regional circuits, each with a court of appeals. The number on each state is its circuit. A thirteenth court, the Federal Circuit, hears certain kinds of appeal (patents, trade, money claims against the United States) from everywhere.</p>
+                <p class="guide-sources"><span>Sources:</span> <a href="https://www.law.cornell.edu/uscode/text/28/41" target="_blank" rel="noopener noreferrer">28 U.S.C. 41 (the circuits)</a>; <a href="https://www.law.cornell.edu/uscode/text/48/1824" target="_blank" rel="noopener noreferrer">48 U.S.C. 1824 (District Court for the Northern Mariana Islands)</a>; <a href="https://www.law.cornell.edu/uscode/text/28/1295" target="_blank" rel="noopener noreferrer">28 U.S.C. 1295 (Federal Circuit)</a>; <a href="https://www.uscourts.gov/about-federal-courts/court-role-and-structure" target="_blank" rel="noopener noreferrer">U.S. Courts: Court Role and Structure</a></p>
+            </section>
+            <div class="guide-more">
+                <h3 class="guide-more-title">More about federal courts</h3>
+                <details class="guide-more-section" id="judges">
+                    <summary>Article III judges</summary>
                     <p>Supreme Court justices, and the judges of the courts of appeals, the district courts and the Court of International Trade, are nominated by the president and confirmed by the Senate. They hold office “during good Behaviour”: in effect for life, unless they resign, retire, or are impeached and removed. Their pay cannot be cut while they serve (Article III, Section 1).</p>
                     <p>A judge who meets the law's test of age and years of service may take senior status: the judge keeps the office and hears a reduced caseload, and the seat can be filled by a new appointment (28 U.S.C. 371).</p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://constitution.congress.gov/constitution/article-3/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article III</a>; <a href="https://www.law.cornell.edu/uscode/text/28/371" target="_blank" rel="noopener noreferrer">28 U.S.C. 371 (senior status)</a>; <a href="https://www.uscourts.gov/about-federal-courts/court-role-and-structure" target="_blank" rel="noopener noreferrer">U.S. Courts: Court Role and Structure</a></p>
-                </section>
-                <section class="guide-section" id="supreme-court" aria-labelledby="supreme-court-title">
-                    <h2 class="guide-heading" id="supreme-court-title">The Supreme Court</h2>
+                </details>
+                <details class="guide-more-section" id="supreme-court">
+                    <summary>The Supreme Court</summary>
                     <p>The Court has nine members, the Chief Justice of the United States and eight associate justices. The number is set by law (28 U.S.C. 1), not by the Constitution. A few cases, such as disputes between states, can begin there (Article III, Section 2). Nearly all the rest come from the federal courts of appeals and from state supreme courts on questions of federal law, and the Court chooses which to hear by granting a petition for a writ of certiorari.</p>
                     <p>The Chief Justice presides over the Judicial Conference of the United States, which sets policy for the federal courts, and chairs the board of the Federal Judicial Center, their research and education agency (28 U.S.C. 331, 621). When a president is tried on impeachment, the Chief Justice presides in the Senate (Article I, Section 3).</p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://constitution.congress.gov/constitution/article-3/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article III</a>; <a href="https://constitution.congress.gov/constitution/article-1/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article I</a>; <a href="https://www.law.cornell.edu/uscode/text/28/1" target="_blank" rel="noopener noreferrer">28 U.S.C. 1 (the Supreme Court)</a>; <a href="https://www.law.cornell.edu/uscode/text/28/331" target="_blank" rel="noopener noreferrer">28 U.S.C. 331 (Judicial Conference)</a>; <a href="https://www.law.cornell.edu/uscode/text/28/621" target="_blank" rel="noopener noreferrer">28 U.S.C. 621 (Federal Judicial Center)</a></p>
-                </section>
-                <section class="guide-section" id="appeals" aria-labelledby="appeals-title">
-                    <h2 class="guide-heading" id="appeals-title">The courts of appeals</h2>
+                </details>
+                <details class="guide-more-section" id="appeals">
+                    <summary>The courts of appeals</summary>
                     <p>There are 13 courts of appeals. Eleven numbered circuits and the D.C. Circuit each hear appeals from the district courts in their region. The Court of Appeals for the Federal Circuit hears appeals from across the country in particular kinds of case, such as patents, international trade and claims for money against the United States (28 U.S.C. 41, 1295). Congress has authorized 179 judgeships on the courts of appeals: 167 on the regional circuits and 12 on the Federal Circuit.</p>
                     <p>Appeals are usually decided by panels of three judges. A court may rehear a case en banc, with all its active judges, or in the Ninth Circuit a panel of eleven. Each circuit's chief judge is chosen by seniority: the longest-serving active judge who is 64 or younger, has served at least a year and has not been chief judge before (28 U.S.C. 45).</p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.law.cornell.edu/uscode/text/28/41" target="_blank" rel="noopener noreferrer">28 U.S.C. 41 (the circuits)</a>; <a href="https://www.law.cornell.edu/uscode/text/28/1295" target="_blank" rel="noopener noreferrer">28 U.S.C. 1295 (Federal Circuit)</a>; <a href="https://www.law.cornell.edu/uscode/text/28/45" target="_blank" rel="noopener noreferrer">28 U.S.C. 45 (chief judges of the circuits)</a>; <a href="https://www.uscourts.gov/about-federal-courts/court-role-and-structure" target="_blank" rel="noopener noreferrer">U.S. Courts: Court Role and Structure</a>; <a href="https://www.uscourts.gov/sites/default/files/2025-01/allauth.pdf" target="_blank" rel="noopener noreferrer">U.S. Courts: Authorized Judgeships, 1789 to present</a></p>
-                </section>
-                <section class="guide-section" id="district" aria-labelledby="district-title">
-                    <h2 class="guide-heading" id="district-title">District courts and other trial courts</h2>
+                </details>
+                <details class="guide-more-section" id="district">
+                    <summary>District courts and other trial courts</summary>
                     <p>The district courts are the federal trial courts. There are 94: 89 in the 50 states, one each for the District of Columbia and Puerto Rico, and three territorial courts, for Guam, the Northern Mariana Islands and the U.S. Virgin Islands, whose judges serve ten-year terms. Every state has at least one. Congress has authorized 673 district judgeships, and 4 more in the territorial courts.</p>
                     <p>The Court of International Trade, in New York, hears civil cases about tariffs, customs and trade laws from anywhere in the country (28 U.S.C. 251).</p>
                     <dl class="guide-roles">
@@ -216,9 +233,9 @@
                         <div class="guide-role"><dt>Bankruptcy judges</dt><dd>The 90 bankruptcy courts are units of the district courts (28 U.S.C. 151). Their judges are appointed by the court of appeals for the circuit to 14-year terms (28 U.S.C. 152).</dd></div>
                     </dl>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.uscourts.gov/about-federal-courts/court-role-and-structure" target="_blank" rel="noopener noreferrer">U.S. Courts: Court Role and Structure</a>; <a href="https://www.uscourts.gov/sites/default/files/2025-01/allauth.pdf" target="_blank" rel="noopener noreferrer">U.S. Courts: Authorized Judgeships, 1789 to present</a>; <a href="https://www.law.cornell.edu/uscode/text/28/251" target="_blank" rel="noopener noreferrer">28 U.S.C. 251 (Court of International Trade)</a>; <a href="https://www.law.cornell.edu/uscode/text/28/631" target="_blank" rel="noopener noreferrer">28 U.S.C. 631 (magistrate judges)</a>; <a href="https://www.law.cornell.edu/uscode/text/28/636" target="_blank" rel="noopener noreferrer">28 U.S.C. 636 (magistrate judges: jurisdiction)</a>; <a href="https://www.law.cornell.edu/uscode/text/18/3401" target="_blank" rel="noopener noreferrer">18 U.S.C. 3401 (misdemeanors tried by magistrate judges)</a>; <a href="https://www.law.cornell.edu/uscode/text/28/151" target="_blank" rel="noopener noreferrer">28 U.S.C. 151 (bankruptcy courts)</a>; <a href="https://www.law.cornell.edu/uscode/text/28/152" target="_blank" rel="noopener noreferrer">28 U.S.C. 152 (bankruptcy judges)</a></p>
-                </section>
-                <section class="guide-section" id="other-courts" aria-labelledby="other-courts-title">
-                    <h2 class="guide-heading" id="other-courts-title">Courts outside Article III</h2>
+                </details>
+                <details class="guide-more-section" id="other-courts">
+                    <summary>Courts outside Article III</summary>
                     <p>Under its other powers, Congress has created courts whose judges serve fixed terms, without Article III's protections:</p>
                     <dl class="guide-roles">
                         <div class="guide-role"><dt>U.S. Tax Court</dt><dd>Nineteen judges, appointed by the president with the Senate's consent to 15-year terms. Taxpayers can dispute a tax deficiency there before paying it (26 U.S.C. 7443).</dd></div>
@@ -231,13 +248,12 @@
                     </dl>
                     <p>When the Supreme Court held in 2026 that Federal Trade Commissioners cannot be protected from removal by the president, it left open whether Congress may protect the judges of courts like these (<a href="executive.html#removal">removal protection</a>).</p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.law.cornell.edu/uscode/text/26/7443" target="_blank" rel="noopener noreferrer">26 U.S.C. 7443 (Tax Court)</a>; <a href="https://www.law.cornell.edu/uscode/text/28/171" target="_blank" rel="noopener noreferrer">28 U.S.C. 171 (Court of Federal Claims)</a>; <a href="https://www.law.cornell.edu/uscode/text/38/7253" target="_blank" rel="noopener noreferrer">38 U.S.C. 7253 (Court of Appeals for Veterans Claims)</a>; <a href="https://www.law.cornell.edu/uscode/text/10/942" target="_blank" rel="noopener noreferrer">10 U.S.C. 942 (Court of Appeals for the Armed Forces)</a>; <a href="https://www.law.cornell.edu/uscode/text/50/1803" target="_blank" rel="noopener noreferrer">50 U.S.C. 1803 (Foreign Intelligence Surveillance Court)</a>; <a href="https://constitution.congress.gov/constitution/article-4/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article IV</a>; <a href="https://www.law.cornell.edu/uscode/text/5/3105" target="_blank" rel="noopener noreferrer">5 U.S.C. 3105 (administrative law judges)</a>; <a href="https://www.uscourts.gov/about-federal-courts/court-role-and-structure" target="_blank" rel="noopener noreferrer">U.S. Courts: Court Role and Structure</a>; <a href="https://www.supremecourt.gov/opinions/25pdf/609us2r62_g314.pdf" target="_blank" rel="noopener noreferrer">Trump v. Slaughter, 609 U.S. 422 (2026)</a></p>
-                </section>
+                </details>
+            </div>
                 <nav class="guide-pager" aria-label="Guide pages">
                     <a class="guide-pager-link" rel="prev" href="executive.html"><span>Previous</span> The executive</a>
                     <a class="guide-pager-link next" rel="next" href="states.html"><span>Next</span> State governments</a>
                 </nav>
-            </article>
-
             <footer class="site-footer">
                 <p><strong>About this guide:</strong> a plain-language summary of how
                     American government is organized. Each section lists the sources
@@ -248,9 +264,12 @@
                 <p>Non-partisan and independent.</p>
             </footer>
         </div>
-    </main>
+    </aside>
 </div>
 
+<script src="../data/geo.js"></script>
+<script src="../data/government.js"></script>
+<script src="../assets/kyc-usmap.js"></script>
 <script src="../assets/kyc-guide.js"></script>
 </body>
 </html>

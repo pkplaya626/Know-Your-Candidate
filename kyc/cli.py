@@ -239,6 +239,14 @@ def _build(args):
         odds_path, odds_size = emit.write_odds(page_odds, args.root)
         print(f"[ok] wrote {odds_path} ({odds_size / 1024:.0f} KB)")
 
+    # The guide's maps: rewritten only when what they say changed.
+    from . import government_maps
+    guide_maps = government_maps.payload()
+    guide_file = os.path.join(args.root, emit.GOVERNMENT_FILE)
+    if emit.read_signature(path=guide_file) != emit.government_signature(guide_maps):
+        guide_path, guide_size = emit.write_government(guide_maps, args.root)
+        print(f"[ok] wrote {guide_path} ({guide_size / 1024:.0f} KB)")
+
     written = emit.write_state_pages(profiles, args.root, summary=summary)
     maps = [w for w in written
             if os.path.normpath(emit.DISTRICT_PAGES_DIR) in os.path.normpath(w)]
@@ -840,6 +848,17 @@ def _verify(args):
     else:
         print(f"  ok  {emit.ODDS_FILE} matches odds.json ({odds_expected[:16]}...)")
 
+    from . import government_maps
+    guide_expected = emit.government_signature(government_maps.payload())
+    guide_committed = emit.read_signature(path=os.path.join(args.root, emit.GOVERNMENT_FILE))
+    if guide_committed is None:
+        problems.append(f"{emit.GOVERNMENT_FILE} is missing or carries no signature")
+    elif guide_committed != guide_expected:
+        problems.append(f"{emit.GOVERNMENT_FILE} is stale")
+    else:
+        print(f"  ok  {emit.GOVERNMENT_FILE} matches kyc/government_maps.py "
+              f"({guide_expected[:16]}...)")
+
     try:
         geo = geo_mod.build(args.root)
     except geo_mod.AtlasError as exc:
@@ -899,6 +918,29 @@ def _verify(args):
         return 1
 
     print("\n[ok] committed data is in sync with the sources.")
+    return 0
+
+
+def _census(args):
+    """The Census of Governments' counts of local governments, by state, for
+    the guide's local map (kyc/census.py)."""
+    from . import census
+    if args.check:
+        cache = census.load_cache(args.root)
+        if not cache:
+            print(f"[error] no {census.CACHE_PATH}; run 'census' to fetch it", file=sys.stderr)
+            return 2
+        print(f"  {census.CACHE_PATH}: {len(cache['states']) - 1} states and D.C., "
+              f"{cache['national']['total']:,} local governments ({cache['year']})")
+        return 0
+    try:
+        national, states = census.fetch()
+    except census.CensusError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 2
+    path = census.save_cache(national, states, args.root)
+    print(f"[ok] wrote {path}: {len(states) - 1} states and D.C., "
+          f"{national['total']:,} local governments; every column adds up to the table's total")
     return 0
 
 
@@ -1019,6 +1061,10 @@ def build_parser():
     congress.add_argument("--apply", action="store_true",
                           help="add newly seated members to the roster CSVs")
 
+    census = add("census", help="count each state's local governments (Census of Governments)")
+    census.add_argument("--check", action="store_true",
+                        help="report the committed cache; make no network call")
+
     pics = add("portraits", help="resolve and verify portrait URLs")
     pics.add_argument("--refresh", action="store_true",
                       help="re-verify every portrait, not just missing ones")
@@ -1046,6 +1092,8 @@ def main(argv=None):
         return _fetch(args)
     if args.command == "geo":
         return _geo(args)
+    if args.command == "census":
+        return _census(args)
     if args.command == "verify":
         return _verify(args)
     if args.command == "congress":

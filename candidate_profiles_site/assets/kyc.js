@@ -1009,6 +1009,8 @@
       if (code === here) option.selected = true;
       select.appendChild(option);
     });
+    // A guide map picks the state on its own map instead (kyc-guide.js).
+    if (select.getAttribute("data-jump") === "map") return;
     select.addEventListener("change", function () {
       var code = select.value;
       if (!code) return;

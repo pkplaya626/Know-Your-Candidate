@@ -135,21 +135,13 @@ $sidebar
         <nav class="sidebar-section push" aria-label="Jump to a state">
             <h2 class="sidebar-heading">Jump to</h2>
             <label class="sr-only" for="stateJump">Jump to a state or territory</label>
-            <select id="stateJump" class="select">
+            <select id="stateJump" class="select"$jump_attrs>
                 <option value="">Choose a state&hellip;</option>$jump_options
             </select>
         </nav>
     </aside>
 
-    <main class="app-main" id="stateMain">
-        <div class="content scroll-y">
-$main
-
-            <footer class="site-footer">
-$footer
-            </footer>
-        </div>
-    </main>
+$main_block
 </div>
 
 $scripts
@@ -211,18 +203,34 @@ _CONGRESS_FOOTER = """\
                     <time id="buildStamp">&mdash;</time>.</p>"""
 
 
+# A reading page: one scrolling column, its footer at the end. A map page
+# (the guide's) passes its own main block instead: the map and its panel.
+_CONTENT_MAIN = string.Template("""    <main class="app-main" id="stateMain">
+        <div class="content scroll-y">
+$main
+
+            <footer class="site-footer">
+$footer
+            </footer>
+        </div>
+    </main>""")
+
+
 def render_page(**fields):
     """Fill the shared template. Each page kind passes what differs; the
     profile pages share the Congress sidebar, footer and search box."""
+    if "main_block" not in fields:
+        fields["main_block"] = _CONTENT_MAIN.substitute(
+            main=fields.pop("main"), footer=fields.pop("footer", _CONGRESS_FOOTER))
     search = fields.pop("search", None)
     if search is None:
         search = string.Template(_SEARCH).substitute(
             search_placeholder=fields.pop("search_placeholder"))
     fields.setdefault("sidebar", _CONGRESS_SIDEBAR)
-    fields.setdefault("footer", _CONGRESS_FOOTER)
     fields.setdefault("states_current", "")
     fields.setdefault("government_current", "")
     fields.setdefault("jump_options", "")
+    fields.setdefault("jump_attrs", "")
     return _PAGE.substitute(search=search, **fields)
 
 # The state pages render everything from profiles.js on the client.

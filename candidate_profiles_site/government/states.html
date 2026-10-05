@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="../assets/kyc.css">
 <script src="../assets/kyc.js"></script>
 </head>
-<body data-root="../" data-state="" data-page="guide">
+<body data-root="../" data-state="" data-page="guide-states">
 
 <a href="#stateMain" class="skip-link">Skip to content</a>
 <button type="button" class="sidebar-scrim" tabindex="-1" aria-hidden="true"></button>
@@ -109,7 +109,7 @@
         <nav class="sidebar-section push" aria-label="Jump to a state">
             <h2 class="sidebar-heading">Jump to</h2>
             <label class="sr-only" for="stateJump">Jump to a state or territory</label>
-            <select id="stateJump" class="select">
+            <select id="stateJump" class="select" data-jump="map">
                 <option value="">Choose a state&hellip;</option>
                 <option value="AL">Alabama (AL)</option>
                 <option value="AK">Alaska (AK)</option>
@@ -172,37 +172,75 @@
     </aside>
 
     <main class="app-main" id="stateMain">
-        <div class="content scroll-y">
-            <article id="guideContent" class="state-page guide-page">
-                <header class="state-hero">
-                    <p class="state-kicker">How government works</p>
-                    <h1 class="state-title">State governments</h1>
-                    <p class="guide-lede">Each state has its own constitution, legislature, governor and courts. The Tenth Amendment reserves to the states, or to the people, the powers the Constitution does not give the federal government, so much of the law of daily life, from most criminal law to family law, contracts, property, schools and licensing, is state law. <a href="../states/index.html">Your state's page</a> lists who represents it in Congress.</p>
-                </header>
-                <nav class="guide-toc" aria-labelledby="guideTocTitle">
-                    <h2 class="guide-toc-title" id="guideTocTitle">On this page</h2>
-                    <ol>
-                        <li><a href="#powers">What states can do</a></li>
-                        <li><a href="#legislatures">Legislatures</a></li>
-                        <li><a href="#executive">Governors, and the other officials states elect</a></li>
-                        <li><a href="#councils">Councils and cabinets that check the governor</a></li>
-                        <li><a href="#courts">State courts</a></li>
-                    </ol>
-                </nav>
-                <section class="guide-section" id="powers" aria-labelledby="powers-title">
-                    <h2 class="guide-heading" id="powers-title">What states can do</h2>
+        <header class="guide-map-head">
+            <p class="state-kicker">How government works</p>
+            <h1 class="guide-map-title">State governments</h1>
+        </header>
+        <div class="toolbar">
+            <div class="map-legend" id="mapLegend" aria-live="polite"></div>
+            <div class="segmented push-right" role="group" aria-label="Map view">
+                <button type="button" data-mode="legislature" aria-pressed="true">Legislature</button>
+                <button type="button" data-mode="presides" aria-pressed="false">Senate president</button>
+                <button type="button" data-mode="veto" aria-pressed="false">Line-item veto</button>
+                <button type="button" data-mode="judges" aria-pressed="false">Choosing judges</button>
+            </div>
+        </div>
+        <div class="map-stage" id="mapStage">
+            <svg id="usMap" viewBox="0 0 975 652" preserveAspectRatio="xMidYMid meet"
+                 role="group" aria-label="Map of U.S. states and territories.
+                 Each state is a button that shows what this page says about it."></svg>
+        </div>
+    </main>
+
+    <aside class="detail-panel" aria-label="State governments, state by state">
+        <div class="detail-head">
+            <div class="detail-title">
+                <h2>
+                    <svg class="icon icon-sm" aria-hidden="true"><use href="#i-pin"/></svg>
+                    <span id="panelState">Select a state</span>
+                </h2>
+            </div>
+            <p class="detail-sub" id="panelMode">How each state's legislature is built</p>
+            <a class="sidebar-link" id="panelStateLink" href="../states/index.html" hidden></a>
+        </div>
+        <div class="delegation scroll-y guide-panel" id="guideContent">
+            <div id="guideFacts" aria-live="polite"></div>
+            <section class="guide-about" data-mode="legislature">
+                <h3 class="guide-about-title">How each state's legislature is built</h3>
+                <p>Every state but Nebraska has a legislature of two chambers. The upper is the Senate; the lower is usually the House of Representatives, but the Assembly in four states, the General Assembly in New Jersey and the House of Delegates in three. Pick a state to see its own.</p>
+                <p class="guide-sources"><span>Sources:</span> <a href="https://www.ncsl.org/resources/details/number-of-legislators-and-length-of-terms-in-years" target="_blank" rel="noopener noreferrer">NCSL: Number of Legislators and Length of Terms in Years</a>; <a href="https://nebraskalegislature.gov/about/history_unicameral.php" target="_blank" rel="noopener noreferrer">Nebraska Legislature: History of the Unicameral</a>; <a href="https://nebraskalegislature.gov/senators/senator_list.php" target="_blank" rel="noopener noreferrer">Nebraska Legislature: Senators by district</a></p>
+            </section>
+            <section class="guide-about" data-mode="presides" hidden>
+                <h3 class="guide-about-title">Who presides over the state senate</h3>
+                <p>In about half the states the lieutenant governor is the president of the senate, presiding and breaking ties; elsewhere the senate elects its own president. Tennessee's and West Virginia's senates elect a leader whom the law also calls lieutenant governor, and five states have no lieutenant governor at all. As compiled by the Council of State Governments in 2022.</p>
+                <p class="guide-sources"><span>Sources:</span> <a href="https://bookofthestates.org/tables/2022-4-14/" target="_blank" rel="noopener noreferrer">Council of State Governments, Book of the States 2022, Table 4.14: Lieutenant Governors: Powers and Duties</a>; <a href="https://www.ncsl.org/resources/details/roles-and-responsibilities-of-selected-leadership-positions" target="_blank" rel="noopener noreferrer">NCSL: Roles and Responsibilities of Selected Leadership Positions</a>; <a href="https://www.azleg.gov/legtext/55leg/2R/bills/SCR1024P.htm" target="_blank" rel="noopener noreferrer">Arizona Legislature: S.C.R. 1024 (2021), Proposition 131 (2022)</a></p>
+            </section>
+            <section class="guide-about" data-mode="veto" hidden>
+                <h3 class="guide-about-title">Can the governor veto one item in a spending bill?</h3>
+                <p>Governors in 44 states can strike individual items from a spending bill and sign the rest. The governors of Indiana, Nevada, New Hampshire, North Carolina, Rhode Island and Vermont cannot: they sign or veto a bill whole.</p>
+                <p class="guide-sources"><span>Sources:</span> <a href="https://www.ncsl.org/about-state-legislatures/separation-of-powers-executive-veto-powers" target="_blank" rel="noopener noreferrer">NCSL: Separation of Powers, Executive Veto Powers</a></p>
+            </section>
+            <section class="guide-about" data-mode="judges" hidden>
+                <h3 class="guide-about-title">How each state chooses the justices of its highest court</h3>
+                <p>States choose the justices of their highest court in five ways: contested elections with or without party labels on the ballot; appointment followed by retention elections, in which voters say yes or no to keeping a justice (often called the Missouri Plan); appointment with no election; or election by the legislature. Vacancies between elections are usually filled by appointment. From the Council of State Governments' 2022 tables, checked for changes through October 2026: Maryland renamed its high court in 2022, and Utah enlarged its own in 2026.</p>
+                <p class="guide-sources"><span>Sources:</span> <a href="https://bookofthestates.org/tables/2022-5-1/" target="_blank" rel="noopener noreferrer">Council of State Governments, Book of the States 2022, Table 5.1: State Courts of Last Resort</a>; <a href="https://bookofthestates.org/tables/2022-5-6/" target="_blank" rel="noopener noreferrer">Council of State Governments, Book of the States 2022, Table 5.6: Selection and Retention of Appellate Court Judges</a>; <a href="https://www.njcourts.gov/courts/supreme" target="_blank" rel="noopener noreferrer">New Jersey Courts: Supreme Court</a>; <a href="https://le.utah.gov/~2026/bills/static/SB0134.html" target="_blank" rel="noopener noreferrer">Utah S.B. 134 (2026), Court Amendments</a>; <a href="https://www.courts.mo.gov/page.jsp?id=297" target="_blank" rel="noopener noreferrer">Missouri Courts: the Missouri Nonpartisan Court Plan</a></p>
+            </section>
+            <div class="guide-more">
+                <h3 class="guide-more-title">More about state governments</h3>
+                <details class="guide-more-section" id="powers">
+                    <summary>What states can do</summary>
                     <p>States hold what courts call the police power: broad authority to make laws for public health, safety and welfare, limited by the U.S. Constitution, federal law and the state's own constitution. Each state constitution sets up a legislature, an executive and courts, and many go into far more detail than the federal one, on taxes, debt, education and local government.</p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://constitution.congress.gov/constitution/amendment-10/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Tenth Amendment</a>; <a href="https://www.law.cornell.edu/wex/police_powers" target="_blank" rel="noopener noreferrer">Legal Information Institute: police powers</a></p>
-                </section>
-                <section class="guide-section" id="legislatures" aria-labelledby="legislatures-title">
-                    <h2 class="guide-heading" id="legislatures-title">Legislatures</h2>
+                </details>
+                <details class="guide-more-section" id="legislatures">
+                    <summary>Legislatures</summary>
                     <p>Every state but Nebraska has a legislature of two chambers. The upper chamber is the Senate. The lower is the House of Representatives in most states; the Assembly in <a href="https://www.assembly.ca.gov/" target="_blank" rel="noopener noreferrer">California</a>, <a href="https://www.leg.state.nv.us/App/Legislator/A/Assembly/Current" target="_blank" rel="noopener noreferrer">Nevada</a>, <a href="https://nyassembly.gov/" target="_blank" rel="noopener noreferrer">New York</a> and <a href="https://legis.wisconsin.gov/assembly/" target="_blank" rel="noopener noreferrer">Wisconsin</a>; the General Assembly in <a href="https://www.njleg.state.nj.us/" target="_blank" rel="noopener noreferrer">New Jersey</a>; and the House of Delegates in <a href="https://mgaleg.maryland.gov/mgawebsite/Members/Index/house" target="_blank" rel="noopener noreferrer">Maryland</a>, <a href="https://house.vga.virginia.gov/" target="_blank" rel="noopener noreferrer">Virginia</a> and <a href="https://www.wvlegislature.gov/" target="_blank" rel="noopener noreferrer">West Virginia</a>. Nebraska's single chamber has 49 members, called senators, elected without party labels on the ballot.</p>
                     <p>Who presides varies. In about 26 states the lieutenant governor is the president of the senate; elsewhere the senate elects its own president. Lower chambers elect a speaker, who usually controls committee assignments, the referral of bills and the floor calendar. In Texas the lieutenant governor presides over the Senate and, with the Speaker of the House, jointly chairs the Legislative Budget Board (Tex. Gov't Code 322.001).</p>
                     <p>Nonpartisan staff support the legislators: legislative counsel or revisors draft bills and keep the state's code of laws; fiscal offices estimate what bills cost; auditors review state agencies; and each chamber's clerk or secretary keeps its journal and records its votes.</p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://nebraskalegislature.gov/about/history_unicameral.php" target="_blank" rel="noopener noreferrer">Nebraska Legislature: History of the Unicameral</a>; <a href="https://nebraskalegislature.gov/senators/senator_list.php" target="_blank" rel="noopener noreferrer">Nebraska Legislature: Senators by district</a>; <a href="https://www.ncsl.org/resources/details/roles-and-responsibilities-of-selected-leadership-positions" target="_blank" rel="noopener noreferrer">NCSL: Roles and Responsibilities of Selected Leadership Positions</a>; <a href="https://statutes.capitol.texas.gov/Docs/GV/htm/GV.322.htm" target="_blank" rel="noopener noreferrer">Texas Government Code, chapter 322 (Legislative Budget Board)</a>; <a href="https://www.lbb.texas.gov/About_LBB.aspx" target="_blank" rel="noopener noreferrer">Texas Legislative Budget Board: About</a></p>
-                </section>
-                <section class="guide-section" id="executive" aria-labelledby="executive-title">
-                    <h2 class="guide-heading" id="executive-title">Governors, and the other officials states elect</h2>
+                </details>
+                <details class="guide-more-section" id="executive">
+                    <summary>Governors, and the other officials states elect</summary>
                     <p>The federal government elects one executive. Most states elect several: besides the governor, voters choose some combination of a lieutenant governor, attorney general, secretary of state, treasurer, auditor or comptroller, and in some states a superintendent of schools or commissioners of agriculture, insurance, labor or public utilities. Each answers to the voters rather than to the governor, and they need not belong to the governor's party. This is often called a plural executive.</p>
                     <figure class="guide-chart">
                         <p class="guide-chart-top">Voters statewide</p>
@@ -228,9 +266,9 @@
                     </dl>
                     <p>Texas also elects a commissioner of the General Land Office, which manages state lands and mineral rights whose income supports public schools, and the three members of the Railroad Commission, which, despite its name, regulates the state's oil and gas industry and pipelines.</p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.ncsl.org/about-state-legislatures/separation-of-powers-executive-veto-powers" target="_blank" rel="noopener noreferrer">NCSL: Separation of Powers, Executive Veto Powers</a>; <a href="https://www.ncsl.org/resources/details/roles-and-responsibilities-of-selected-leadership-positions" target="_blank" rel="noopener noreferrer">NCSL: Roles and Responsibilities of Selected Leadership Positions</a>; <a href="https://www.ncsl.org/elections-and-campaigns/election-administration-at-state-and-local-levels" target="_blank" rel="noopener noreferrer">NCSL: Election Administration at State and Local Levels</a>; <a href="https://www.glo.texas.gov/about-glo" target="_blank" rel="noopener noreferrer">Texas General Land Office: About the GLO</a>; <a href="https://www.rrc.texas.gov/about-us/rrc-history/" target="_blank" rel="noopener noreferrer">Railroad Commission of Texas: RRC History</a></p>
-                </section>
-                <section class="guide-section" id="councils" aria-labelledby="councils-title">
-                    <h2 class="guide-heading" id="councils-title">Councils and cabinets that check the governor</h2>
+                </details>
+                <details class="guide-more-section" id="councils">
+                    <summary>Councils and cabinets that check the governor</summary>
                     <p>Some states give other separately elected officials a formal check on the governor. Among them:</p>
                     <dl class="guide-roles">
                         <div class="guide-role"><dt>New Hampshire</dt><dd>Five executive councilors, elected every two years from districts, must consent before the governor appoints judges, the attorney general and other officers, grants a pardon, or pays money out of the treasury (Constitution, Part Second, Articles 46, 52 and 56). Under the state's procedures manual, the Governor and Council also approve state contracts over $10,000.</dd></div>
@@ -239,9 +277,9 @@
                         <div class="guide-role"><dt>Florida</dt><dd>The Cabinet is the elected attorney general, chief financial officer and commissioner of agriculture. A pardon needs the approval of two of them, and with the governor they act as the trustees of the state's lands and, less the agriculture commissioner, as the State Board of Administration, which invests its funds (Constitution, Article IV, Sections 4 and 8).</dd></div>
                     </dl>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://law.justia.com/constitution/new-hampshire/" target="_blank" rel="noopener noreferrer">New Hampshire Constitution (Justia)</a>; <a href="https://www.council.nh.gov/" target="_blank" rel="noopener noreferrer">New Hampshire Executive Council</a>; <a href="https://www.mass.gov/orgs/governors-council" target="_blank" rel="noopener noreferrer">Massachusetts Governor's Council</a>; <a href="https://www.ncleg.gov/Laws/Constitution/Article3" target="_blank" rel="noopener noreferrer">North Carolina Constitution, Article III</a>; <a href="https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_146/GS_146-22.html" target="_blank" rel="noopener noreferrer">N.C. Gen. Stat. 146-22 (state land acquisitions)</a>; <a href="https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_146/GS_146-29.html" target="_blank" rel="noopener noreferrer">N.C. Gen. Stat. 146-29 (state land dispositions)</a>; <a href="https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_143C/GS_143C-4-4.html" target="_blank" rel="noopener noreferrer">N.C. Gen. Stat. 143C-4-4 (Contingency and Emergency Fund)</a>; <a href="https://www.flsenate.gov/Laws/Constitution" target="_blank" rel="noopener noreferrer">Florida Constitution, Article IV (Florida Senate)</a></p>
-                </section>
-                <section class="guide-section" id="courts" aria-labelledby="courts-title">
-                    <h2 class="guide-heading" id="courts-title">State courts</h2>
+                </details>
+                <details class="guide-more-section" id="courts">
+                    <summary>State courts</summary>
                     <p>State courts hear the great majority of the country's cases, criminal and civil. Most states have these levels:</p>
                     <div class="guide-table-wrap">
                         <table class="guide-table">
@@ -258,13 +296,12 @@
                     <p>Texas and Oklahoma each have two highest courts: a Supreme Court for civil cases and a Court of Criminal Appeals for criminal ones. Juvenile cases go to the Supreme Court in Texas, but juvenile delinquency appeals go to the Court of Criminal Appeals in Oklahoma, where the Supreme Court settles any dispute between the two over which should hear a case.</p>
                     <p>States choose their judges in several ways: partisan elections, nonpartisan elections, appointment by the governor, election by the legislature, or merit selection. Under merit selection a commission nominates candidates, the governor appoints one, and the judge later stands in a retention election; Missouri adopted it in 1940, and it is often called the Missouri Plan.</p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.nycourts.gov/courts/8th-judicial-district/court-structure" target="_blank" rel="noopener noreferrer">New York State Unified Court System: Court Structure</a>; <a href="https://www.txcourts.gov/about-texas-courts/" target="_blank" rel="noopener noreferrer">Texas Judicial Branch: Court Structure</a>; <a href="https://okcca.net/cases/2016/OK-CR-24/" target="_blank" rel="noopener noreferrer">Oklahoma Court of Criminal Appeals: 2016 OK CR 24 (Rule 7.1, juvenile appeals)</a>; <a href="https://www.oksenate.gov/sites/default/files/2022-05/oc7.pdf" target="_blank" rel="noopener noreferrer">Oklahoma Constitution, Article VII</a>; <a href="https://www.courts.mo.gov/page.jsp?id=297" target="_blank" rel="noopener noreferrer">Missouri Courts: the Missouri Nonpartisan Court Plan</a></p>
-                </section>
+                </details>
+            </div>
                 <nav class="guide-pager" aria-label="Guide pages">
                     <a class="guide-pager-link" rel="prev" href="courts.html"><span>Previous</span> Federal courts</a>
                     <a class="guide-pager-link next" rel="next" href="local.html"><span>Next</span> Local governments</a>
                 </nav>
-            </article>
-
             <footer class="site-footer">
                 <p><strong>About this guide:</strong> a plain-language summary of how
                     American government is organized. Each section lists the sources
@@ -275,9 +312,12 @@
                 <p>Non-partisan and independent.</p>
             </footer>
         </div>
-    </main>
+    </aside>
 </div>
 
+<script src="../data/geo.js"></script>
+<script src="../data/government.js"></script>
+<script src="../assets/kyc-usmap.js"></script>
 <script src="../assets/kyc-guide.js"></script>
 </body>
 </html>

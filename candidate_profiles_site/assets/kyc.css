@@ -58,6 +58,22 @@
   --focus-2: #f07ad4;
   --focus-3: #b5e655;
 
+  /* The guide's maps colour categories that are not parties - which
+     legislatures have an Assembly, which circuit hears a state's appeals -
+     so they never use red, blue, amber or purple. Defined from the focus
+     colours and the text, they follow every theme. */
+  --cat-1: var(--focus-1);
+  --cat-2: var(--focus-2);
+  --cat-3: var(--focus-3);
+  --cat-4: color-mix(in srgb, var(--text-muted) 55%, var(--surface-1));
+  --cat-5: var(--text);
+  /* Counts (the local map): one hue, five steps, faint to full. */
+  --scale-1: color-mix(in srgb, var(--focus-1) 18%, var(--surface-2));
+  --scale-2: color-mix(in srgb, var(--focus-1) 38%, var(--surface-2));
+  --scale-3: color-mix(in srgb, var(--focus-1) 58%, var(--surface-2));
+  --scale-4: color-mix(in srgb, var(--focus-1) 78%, var(--surface-2));
+  --scale-5: var(--focus-1);
+
   /* State codes on the partisan map, over any party colour. */
   --map-label: #ffffff;
   --map-label-backing: rgb(0 0 0 / 0.34);
@@ -2953,4 +2969,110 @@ svg.district-map,
     color: var(--text-faint);
   }
   .guide-pager-link { min-width: 0; flex: 1; }
+}
+
+/* ============================================================ 17. guide maps */
+
+/* A guide page with a map takes map.html's layout - views over the map, a
+ * panel beside it - with the page's title above the toolbar. */
+.guide-map-head {
+  padding: var(--s-3) var(--s-4) 0;
+}
+.guide-map-head .state-kicker { margin-bottom: 0; }
+.guide-map-title {
+  margin: 0;
+  font-size: var(--t-xl);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.guide-panel { padding: var(--s-3) var(--s-4) var(--s-5); }
+.guide-panel .guide-sources { margin-top: var(--s-2); }
+.guide-panel .guide-pager { margin-top: var(--s-5); }
+.guide-panel .guide-pager-link { min-width: 0; flex: 1; }
+.guide-panel .site-footer { margin-top: var(--s-5); }
+
+.guide-about-title,
+.guide-more-title {
+  margin: 0 0 var(--s-2);
+  font-size: var(--t-md);
+  font-weight: 700;
+}
+.guide-about p,
+.guide-fact p,
+.guide-more-section p,
+.guide-more-section li {
+  margin: 0 0 var(--s-2);
+  font-size: var(--t-sm);
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+/* One fact per view about the picked state; the current view's first. */
+.guide-fact {
+  margin: 0 0 var(--s-3);
+  padding: var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+}
+.guide-fact.is-current { border-color: var(--border-strong); background: var(--surface-2); }
+.guide-fact-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  font-weight: 700;
+  color: var(--text) !important;
+}
+.guide-fact-title .swatch,
+.guide-fact-title .faint { font-weight: 500; }
+/* The circuits' legend: each circuit's number in its own colour. */
+.map-legend .swatch-label {
+  width: auto;
+  min-width: 1.6em;
+  height: auto;
+  padding: 0 0.3em;
+  font-size: var(--t-xs);
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--text-inverse);
+}
+.guide-fact .swatch {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 3px;
+  border: 1px solid var(--border-strong);
+}
+
+/* The page's text, folded under the facts. */
+.guide-more { margin-top: var(--s-5); }
+.guide-more-section {
+  border-top: 1px solid var(--border);
+  padding: var(--s-2) 0;
+  scroll-margin-top: calc(var(--header-h) + var(--s-3));
+}
+.guide-more-section > summary {
+  cursor: pointer;
+  padding: var(--s-2) 0;
+  font-weight: 600;
+  font-size: var(--t-md);
+}
+/* One arrow on every device: a touch screen's flex summary drops the
+ * browser's own marker. */
+.guide-more-section > summary { list-style: none; }
+.guide-more-section > summary::-webkit-details-marker { display: none; }
+.guide-more-section > summary::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: var(--s-2);
+  color: var(--text-muted);
+  transition: transform 0.15s var(--ease);
+}
+.guide-more-section[open] > summary::before { transform: rotate(90deg); }
+.guide-more-section .guide-roles { grid-template-columns: 1fr; }
+.guide-more-section .guide-table { font-size: var(--t-xs); }
+@media (pointer: coarse) {
+  .guide-more-section > summary { min-height: 44px; display: flex; align-items: center; }
 }

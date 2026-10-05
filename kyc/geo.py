@@ -447,6 +447,33 @@ def build(root="."):
     }
 
 
+def neighbours(root="."):
+    """``{code: set of codes}``: the states that share a border.
+
+    Read from the topology itself - two states are neighbours when an arc
+    belongs to both - so the guide's circuit map can colour neighbouring
+    circuits differently without anyone typing a list of borders.
+    """
+    topo = load_atlas(root)
+    owners = {}
+    for geometry in topo["objects"]["states"].get("geometries", []):
+        code = FIPS_TO_STATE.get(str(geometry.get("id", "")).zfill(2))
+        if not code:
+            continue
+        stack = [geometry.get("arcs") or []]
+        while stack:
+            item = stack.pop()
+            if isinstance(item, int):
+                owners.setdefault(item if item >= 0 else ~item, set()).add(code)
+            else:
+                stack.extend(item)
+    near = {}
+    for codes in owners.values():
+        for code in codes:
+            near.setdefault(code, set()).update(codes - {code})
+    return near
+
+
 def stats(geo):
     return {
         "geo_states": len(geo["states"]),

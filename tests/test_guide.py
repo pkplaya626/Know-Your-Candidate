@@ -110,7 +110,8 @@ class TestGuidePages(unittest.TestCase):
             html = government.render(slug, "example.org", ["TX", "AK"])
             self.assertIn(f'rel="canonical" href="https://example.org/government/{slug}.html"',
                           html)
-            self.assertIn('data-page="guide"', html)
+            # A map page also says which guide page it is (kyc-guide.js reads it).
+            self.assertRegex(html, r'data-page="guide(-[a-z]+)?"')
             self.assertIn('data-root="../"', html)
             self.assertIsNone(re.search(r"\$[a-z_]+", html.replace("$5,000", "")), slug)
             self.assertEqual(emit.script_sources(html),
