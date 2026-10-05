@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="../assets/kyc.css">
 <script src="../assets/kyc.js"></script>
 </head>
-<body data-root="../" data-state="" data-page="guide">
+<body data-root="../" data-state="" data-page="guide-local">
 
 <a href="#stateMain" class="skip-link">Skip to content</a>
 <button type="button" class="sidebar-scrim" tabindex="-1" aria-hidden="true"></button>
@@ -109,7 +109,7 @@
         <nav class="sidebar-section push" aria-label="Jump to a state">
             <h2 class="sidebar-heading">Jump to</h2>
             <label class="sr-only" for="stateJump">Jump to a state or territory</label>
-            <select id="stateJump" class="select">
+            <select id="stateJump" class="select" data-jump="map">
                 <option value="">Choose a state&hellip;</option>
                 <option value="AL">Alabama (AL)</option>
                 <option value="AK">Alaska (AK)</option>
@@ -172,32 +172,81 @@
     </aside>
 
     <main class="app-main" id="stateMain">
-        <div class="content scroll-y">
-            <article id="guideContent" class="state-page guide-page">
-                <header class="state-hero">
-                    <p class="state-kicker">How government works</p>
-                    <h1 class="state-title">Local governments</h1>
-                    <p class="guide-lede">Counties, cities and towns, townships, school districts and special districts are created by their states and exercise the powers their states give them. In 2022 the Census Bureau counted 90,837 of them.</p>
-                </header>
-                <nav class="guide-toc" aria-labelledby="guideTocTitle">
-                    <h2 class="guide-toc-title" id="guideTocTitle">On this page</h2>
-                    <ol>
-                        <li><a href="#powers">Where local power comes from</a></li>
-                        <li><a href="#counties">Counties</a></li>
-                        <li><a href="#municipalities">Cities, towns and villages</a></li>
-                        <li><a href="#townships">Towns and townships</a></li>
-                        <li><a href="#schools">School districts</a></li>
-                        <li><a href="#special">Special districts</a></li>
-                    </ol>
-                </nav>
-                <section class="guide-section" id="powers" aria-labelledby="powers-title">
-                    <h2 class="guide-heading" id="powers-title">Where local power comes from</h2>
+        <header class="guide-map-head">
+            <p class="state-kicker">How government works</p>
+            <h1 class="guide-map-title">Local governments</h1>
+        </header>
+        <div class="toolbar">
+            <div class="map-legend" id="mapLegend" aria-live="polite"></div>
+            <div class="segmented push-right" role="group" aria-label="Map view">
+                <button type="button" data-mode="local-total" aria-pressed="true">All</button>
+                <button type="button" data-mode="local-county" aria-pressed="false">Counties</button>
+                <button type="button" data-mode="local-municipal" aria-pressed="false">Cities and towns</button>
+                <button type="button" data-mode="local-township" aria-pressed="false">Townships</button>
+                <button type="button" data-mode="local-school" aria-pressed="false">School districts</button>
+                <button type="button" data-mode="local-special" aria-pressed="false">Special districts</button>
+            </div>
+        </div>
+        <div class="map-stage" id="mapStage">
+            <svg id="usMap" viewBox="0 0 975 652" preserveAspectRatio="xMidYMid meet"
+                 role="group" aria-label="Map of U.S. states and territories.
+                 Each state is a button that shows what this page says about it."></svg>
+        </div>
+    </main>
+
+    <aside class="detail-panel" aria-label="Local governments, state by state">
+        <div class="detail-head">
+            <div class="detail-title">
+                <h2>
+                    <svg class="icon icon-sm" aria-hidden="true"><use href="#i-pin"/></svg>
+                    <span id="panelState">Select a state</span>
+                </h2>
+            </div>
+            <p class="detail-sub" id="panelMode">Local governments of every kind, by state</p>
+            <a class="sidebar-link" id="panelStateLink" href="../states/index.html" hidden></a>
+        </div>
+        <div class="delegation scroll-y guide-panel" id="guideContent">
+            <div id="guideFacts" aria-live="polite"></div>
+            <section class="guide-about" data-mode="local-total">
+                <h3 class="guide-about-title">Local governments of every kind, by state</h3>
+                <p>The Census Bureau counted 90,837 local governments in 2022: the most in Illinois (6,930), the fewest among the states in Hawaii (21).</p>
+                <p class="guide-sources"><span>Sources:</span> <a href="https://www2.census.gov/programs-surveys/gus/tables/2022/cog2022_cg2200org02.zip" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: 2022 Census of Governments, Table CG2200ORG02, Local Governments by Type and State</a>; <a href="https://www.census.gov/content/dam/Census/library/publications/2024/econ/2022ISD.pdf" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: 2022 Census of Governments, Individual State Descriptions</a></p>
+            </section>
+            <section class="guide-about" data-mode="local-county" hidden>
+                <h3 class="guide-about-title">County governments, by state</h3>
+                <p>3,031 county governments in 2022. Louisiana's are called parishes, and Alaska's organized boroughs are counted as counties. Connecticut, the District of Columbia and Rhode Island have none.</p>
+                <p class="guide-sources"><span>Sources:</span> <a href="https://www2.census.gov/programs-surveys/gus/tables/2022/cog2022_cg2200org02.zip" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: 2022 Census of Governments, Table CG2200ORG02, Local Governments by Type and State</a>; <a href="https://www.census.gov/content/dam/Census/library/publications/2024/econ/2022ISD.pdf" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: 2022 Census of Governments, Individual State Descriptions</a></p>
+            </section>
+            <section class="guide-about" data-mode="local-municipal" hidden>
+                <h3 class="guide-about-title">Municipal governments: cities, towns, villages and boroughs, by state</h3>
+                <p>19,491 cities, towns, villages and boroughs in 2022.</p>
+                <p class="guide-sources"><span>Sources:</span> <a href="https://www2.census.gov/programs-surveys/gus/tables/2022/cog2022_cg2200org02.zip" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: 2022 Census of Governments, Table CG2200ORG02, Local Governments by Type and State</a>; <a href="https://www.census.gov/content/dam/Census/library/publications/2024/econ/2022ISD.pdf" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: 2022 Census of Governments, Individual State Descriptions</a></p>
+            </section>
+            <section class="guide-about" data-mode="local-township" hidden>
+                <h3 class="guide-about-title">Town and township governments, by state</h3>
+                <p>16,214 town and township governments in 2022, in 20 states, all in the Midwest and the Northeast. Elsewhere there are none.</p>
+                <p class="guide-sources"><span>Sources:</span> <a href="https://www2.census.gov/programs-surveys/gus/tables/2022/cog2022_cg2200org02.zip" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: 2022 Census of Governments, Table CG2200ORG02, Local Governments by Type and State</a>; <a href="https://www.census.gov/content/dam/Census/library/publications/2024/econ/2022ISD.pdf" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: 2022 Census of Governments, Individual State Descriptions</a></p>
+            </section>
+            <section class="guide-about" data-mode="local-school" hidden>
+                <h3 class="guide-about-title">Independent school districts, by state</h3>
+                <p>12,546 independent school districts in 2022. Alaska, the District of Columbia, Hawaii, Maryland and North Carolina had none: their public schools are run by the state, a county or a city.</p>
+                <p class="guide-sources"><span>Sources:</span> <a href="https://www2.census.gov/programs-surveys/gus/tables/2022/cog2022_cg2200org02.zip" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: 2022 Census of Governments, Table CG2200ORG02, Local Governments by Type and State</a>; <a href="https://www.census.gov/content/dam/Census/library/publications/2024/econ/2022ISD.pdf" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: 2022 Census of Governments, Individual State Descriptions</a></p>
+            </section>
+            <section class="guide-about" data-mode="local-special" hidden>
+                <h3 class="guide-about-title">Special districts, by state</h3>
+                <p>39,555 special districts in 2022, for water, fire protection, transit, hospitals and much else: the most numerous kind of local government.</p>
+                <p class="guide-sources"><span>Sources:</span> <a href="https://www2.census.gov/programs-surveys/gus/tables/2022/cog2022_cg2200org02.zip" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: 2022 Census of Governments, Table CG2200ORG02, Local Governments by Type and State</a>; <a href="https://www.census.gov/content/dam/Census/library/publications/2024/econ/2022ISD.pdf" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: 2022 Census of Governments, Individual State Descriptions</a></p>
+            </section>
+            <div class="guide-more">
+                <h3 class="guide-more-title">More about local governments</h3>
+                <details class="guide-more-section" id="powers">
+                    <summary>Where local power comes from</summary>
                     <p>Local governments are not sovereign: each is a political subdivision of its state. Under Dillon's Rule, named for an Iowa judge's 1868 opinion, a local government may exercise only the powers granted to it expressly, those necessarily or fairly implied in them, and those essential to its purposes. It still applies in many states. By the National Association of Counties' count, Dillon's Rule governs every county in 14 states, every county has home rule in 13, and the other 21 states with county governments mix the two.</p>
                     <p>Over the twentieth century many states adopted home rule instead, by constitution or by statute: a city or county, often one that adopts its own charter, may act on local matters without specific permission. In every state, though, the legislature can limit or override local ordinances, and state law generally prevails on matters of statewide concern.</p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.nlc.org/resource/cities-101-delegation-of-power/" target="_blank" rel="noopener noreferrer">National League of Cities: Cities 101, Delegation of Power</a>; <a href="https://www.naco.org/page/county-structure-authority-and-finances" target="_blank" rel="noopener noreferrer">National Association of Counties: County Structure, Authority and Finances</a>; <a href="https://www.naco.org/sites/default/files/2025-03/2024%20County%20Government%20Primer_update_v8_FINAL.pdf" target="_blank" rel="noopener noreferrer">National Association of Counties: County Government Primer (2024)</a></p>
-                </section>
-                <section class="guide-section" id="counties" aria-labelledby="counties-title">
-                    <h2 class="guide-heading" id="counties-title">Counties</h2>
+                </details>
+                <details class="guide-more-section" id="counties">
+                    <summary>Counties</summary>
                     <p>There were 3,031 county governments in 2022. Louisiana calls its counties parishes, and Alaska's organized boroughs are counted as counties. Connecticut (since 1960), Rhode Island and the District of Columbia have no county governments, and seven of Massachusetts's counties have none.</p>
                     <p>Counties carry out state duties, such as running courthouses and jails, recording deeds, conducting elections and assessing property, and provide local services such as roads, public health and, outside cities, policing. They are governed in one of three main forms:</p>
                     <div class="guide-table-wrap">
@@ -222,9 +271,9 @@
                         <div class="guide-role"><dt>Auditor or controller</dt><dd>Checks the county's accounts and approves its payments.</dd></div>
                     </dl>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.census.gov/library/publications/2026/econ/govtorg2225.html" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: Government Organization Summary Report, 2022 and 2025</a>; <a href="https://www.census.gov/content/dam/Census/library/publications/2024/econ/2022ISD.pdf" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: 2022 Census of Governments, Individual State Descriptions</a>; <a href="https://www.naco.org/sites/default/files/2025-03/2024%20County%20Government%20Primer_update_v8_FINAL.pdf" target="_blank" rel="noopener noreferrer">National Association of Counties: County Government Primer (2024)</a>; <a href="https://www.sheriffs.org/about-nsa/faq" target="_blank" rel="noopener noreferrer">National Sheriffs' Association: FAQ</a>; <a href="https://law.unc.edu/wp-content/uploads/2026/05/National-Study-of-Prosecutor-Elections-2020-to-2024.pdf" target="_blank" rel="noopener noreferrer">UNC School of Law: National Study of Prosecutor Elections, 2020 to 2024</a>; <a href="https://oag.dc.gov/public-safety/prosecution" target="_blank" rel="noopener noreferrer">D.C. Office of the Attorney General: Prosecution</a></p>
-                </section>
-                <section class="guide-section" id="municipalities" aria-labelledby="municipalities-title">
-                    <h2 class="guide-heading" id="municipalities-title">Cities, towns and villages</h2>
+                </details>
+                <details class="guide-more-section" id="municipalities">
+                    <summary>Cities, towns and villages</summary>
                     <p>Municipalities, called cities, towns, villages or boroughs depending on the state, are incorporated under state law to provide services such as police and fire protection, zoning, water and sewers, streets and parks. There were 19,491 in 2022. Most are governed in one of these forms:</p>
                     <dl class="guide-roles">
                         <div class="guide-role"><dt>Council–manager</dt><dd>The elected council, often with a mayor who chairs it, sets policy and the budget and appoints a professional manager to run the departments. It was the most common form in a 2018 survey by the International City/County Management Association: 48 percent of responding municipalities, against 38 percent for mayor–council.</dd></div>
@@ -243,21 +292,21 @@
                     </dl>
                     <p>Many cities have a municipal court for violations of city ordinances, traffic and parking cases and, in some states, misdemeanors. Some use hearing officers to decide building, housing and health code cases instead.</p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.census.gov/library/publications/2026/econ/govtorg2225.html" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: Government Organization Summary Report, 2022 and 2025</a>; <a href="https://www.nlc.org/resource/cities-101-forms-of-local-government/" target="_blank" rel="noopener noreferrer">National League of Cities: Cities 101, Forms of Local Government</a>; <a href="https://icma.org/sites/default/files/2018%20Municipal%20Form%20of%20Government%20Survey%20Report.pdf" target="_blank" rel="noopener noreferrer">ICMA: 2018 Municipal Form of Government Survey</a>; <a href="https://www.tshaonline.org/handbook/entries/commission-form-of-city-government" target="_blank" rel="noopener noreferrer">Handbook of Texas: Commission Form of City Government</a>; <a href="https://www.portland.gov/transition/overview" target="_blank" rel="noopener noreferrer">City of Portland: Transition to the new form of government</a></p>
-                </section>
-                <section class="guide-section" id="townships" aria-labelledby="townships-title">
-                    <h2 class="guide-heading" id="townships-title">Towns and townships</h2>
+                </details>
+                <details class="guide-more-section" id="townships">
+                    <summary>Towns and townships</summary>
                     <p>In 20 states, all in the Midwest and Northeast, the Census Bureau counts town or township governments below the county: Connecticut, Illinois, Indiana, Kansas, Maine, Massachusetts, Michigan, Minnesota, Missouri, Nebraska, New Hampshire, New Jersey, New York, North Dakota, Ohio, Pennsylvania, Rhode Island, South Dakota, Vermont and Wisconsin. There were 16,214 in 2022.</p>
                     <p>They range widely. In the Midwest a township may keep up rural roads and cemeteries, assess property and give aid to the poor, under an elected board of trustees or supervisors and a clerk. In New England, New York, New Jersey and Pennsylvania, towns and townships can be full municipal governments, some serving dense suburbs.</p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.census.gov/content/dam/Census/library/publications/2024/econ/2022ISD.pdf" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: 2022 Census of Governments, Individual State Descriptions</a>; <a href="https://www.census.gov/library/publications/2026/econ/govtorg2225.html" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: Government Organization Summary Report, 2022 and 2025</a></p>
-                </section>
-                <section class="guide-section" id="schools" aria-labelledby="schools-title">
-                    <h2 class="guide-heading" id="schools-title">School districts</h2>
+                </details>
+                <details class="guide-more-section" id="schools">
+                    <summary>School districts</summary>
                     <p>There were 12,546 independent school districts in 2022: governments in their own right, each with an elected board that adopts the budget, sets the property tax rate where state law allows, and appoints a superintendent to run the schools.</p>
                     <p>Elsewhere the schools are run by a city, county or state government, and the Census Bureau counts them as part of that government, a dependent school system. Alaska, Hawaii, Maryland, North Carolina, Virginia and the District of Columbia have only dependent systems.</p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.census.gov/library/publications/2026/econ/govtorg2225.html" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: Government Organization Summary Report, 2022 and 2025</a>; <a href="https://www.census.gov/content/dam/Census/library/publications/2024/econ/2022ISD.pdf" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: 2022 Census of Governments, Individual State Descriptions</a></p>
-                </section>
-                <section class="guide-section" id="special" aria-labelledby="special-title">
-                    <h2 class="guide-heading" id="special-title">Special districts</h2>
+                </details>
+                <details class="guide-more-section" id="special">
+                    <summary>Special districts</summary>
                     <p>Special districts are the most numerous kind of local government: 39,555 in 2022, and 40,199 by 2025. Each is created under state law, often with a local vote, to provide one service or a few across a defined area, and many can levy taxes or charge fees and issue bonds.</p>
                     <div class="guide-table-wrap">
                         <table class="guide-table">
@@ -272,13 +321,12 @@
                         </table>
                     </div>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.census.gov/library/publications/2026/econ/govtorg2225.html" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: Government Organization Summary Report, 2022 and 2025</a>; <a href="https://www.census.gov/content/dam/Census/library/publications/2024/econ/2022ISD.pdf" target="_blank" rel="noopener noreferrer">U.S. Census Bureau: 2022 Census of Governments, Individual State Descriptions</a></p>
-                </section>
+                </details>
+            </div>
                 <nav class="guide-pager" aria-label="Guide pages">
                     <a class="guide-pager-link" rel="prev" href="states.html"><span>Previous</span> State governments</a>
                     <a class="guide-pager-link next" rel="next" href="tribal.html"><span>Next</span> Tribal nations</a>
                 </nav>
-            </article>
-
             <footer class="site-footer">
                 <p><strong>About this guide:</strong> a plain-language summary of how
                     American government is organized. Each section lists the sources
@@ -289,9 +337,12 @@
                 <p>Non-partisan and independent.</p>
             </footer>
         </div>
-    </main>
+    </aside>
 </div>
 
+<script src="../data/geo.js"></script>
+<script src="../data/government.js"></script>
+<script src="../assets/kyc-usmap.js"></script>
 <script src="../assets/kyc-guide.js"></script>
 </body>
 </html>

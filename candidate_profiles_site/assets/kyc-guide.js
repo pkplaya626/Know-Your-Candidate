@@ -130,6 +130,205 @@
     target.innerHTML = html;
   }
 
+  /* ----------------------------------------------------------------- maps */
+
+  /* A guide page with a map: the views in kyc/government_maps.py, drawn by
+   * the shared map (kyc-usmap.js). Picking a state lists everything this
+   * page says about it, each fact with its sources; with no state picked,
+   * the panel says what the current view shows. The address carries both,
+   * #/?state=TX&mode=veto, so any view can be shared (KYC.router). */
+  function initMap() {
+    var data = global.kycGovernment;
+    var page = (doc.body.getAttribute("data-page") || "").replace(/^guide-/, "");
+    var ids = data && data.pages && data.pages[page];
+    if (!ids || !ids.length || !KYC.usmap) return;
+
+    var route = KYC.router.read().params;
+    var mode = ids.indexOf(route.mode) !== -1 ? route.mode : ids[0];
+    var selected = "";
+
+    function current() { return data.modes[mode]; }
+
+    function fill(token) {
+      return token === "none" ? "var(--surface-2)" : "var(--" + token + ")";
+    }
+
+    /* The faint fills - the low counts, grey, none - take the theme's own
+     * text colour in a callout; the bright ones keep the dark default. */
+    var LIGHT_INK = { "scale-1": 1, "scale-2": 1, "scale-3": 1, "cat-4": 1, none: 1 };
+    function ink(token) {
+      return LIGHT_INK[token] ? "var(--text)" : "";
+    }
+
+    function entry(m, value) {
+      return m.legend.filter(function (e) { return e.key === value; })[0];
+    }
+
+    function look(code) {
+      var m = current();
+      var value = m.values[code];
+      var e = value === undefined ? null : entry(m, value);
+      if (!e) {
+        return { fill: "var(--surface-2)", ink: "var(--text)",
+                 text: map.name(code) + ": " + (m.outside || "not shown") };
+      }
+      return { fill: fill(e.token), ink: ink(e.token), text: map.name(code) + ": " + e.label };
+    }
+
+    var map = KYC.usmap.create({
+      look: look,
+      label: function (code) {
+        var labels = current().labels;
+        return (labels && labels[code]) || code;
+      },
+      onSelect: function (code) { select(code); },
+    });
+
+    function drawLegend() {
+      var m = current();
+      var used = {};
+      Object.keys(m.values).forEach(function (code) { used[m.values[code]] = true; });
+      // A view that writes its own words on the states (the circuits) keys
+      // its legend by those words; colour alone repeats there.
+      doc.getElementById("mapLegend").innerHTML = m.legend.filter(function (e) {
+        return used[e.key];
+      }).map(function (e) {
+        var chip = m.labels
+          ? '<span class="swatch swatch-label" style="background:' + fill(e.token) +
+            (ink(e.token) ? ";color:" + ink(e.token) : "") + '">' +
+            KYC.escapeHtml(e.key === "none" ? "–" : e.key) + "</span>"
+          : '<span class="swatch" style="background:' + fill(e.token) + '"></span>';
+        return '<span class="key">' + chip + KYC.escapeHtml(e.label) + "</span>";
+      }).join("");
+    }
+
+    function sourceLinks(keys) {
+      return keys.map(function (key) {
+        var s = data.sources[key];
+        return s ? '<a href="' + KYC.escapeAttr(s[1]) + '" target="_blank" rel="noopener noreferrer">' +
+          KYC.escapeHtml(s[0]) + "</a>" : "";
+      }).filter(Boolean).join("; ");
+    }
+
+    /* Everything this page says about one state: the current view first. */
+    function showFacts(code) {
+      var target = doc.getElementById("guideFacts");
+      if (!code) { target.innerHTML = ""; return; }
+      var order = [mode].concat(ids.filter(function (id) { return id !== mode; }));
+      target.innerHTML = order.map(function (id) {
+        var m = data.modes[id];
+        var value = m.values[code];
+        var fact = value === undefined ? m.outside : m.facts[code];
+        if (!fact) return "";
+        var e = value === undefined ? null : entry(m, value);
+        var link = m.links && m.links[code];
+        return '<div class="guide-fact' + (id === mode ? " is-current" : "") + '">' +
+          '<p class="guide-fact-title">' +
+          (e ? '<span class="swatch" style="background:' + fill(e.token) + '"></span>' : "") +
+          KYC.escapeHtml(m.label) + (e ? ' <span class="faint">' + KYC.escapeHtml(e.label) + "</span>" : "") +
+          "</p><p>" + KYC.escapeHtml(fact) + "</p>" +
+          (link ? '<p><a href="' + KYC.escapeAttr(link[1]) +
+            '" target="_blank" rel="noopener noreferrer">' + KYC.escapeHtml(link[0]) + " ›</a></p>" : "") +
+          '<p class="guide-sources"><span>Sources:</span> ' + sourceLinks(m.sources) + "</p></div>";
+      }).join("");
+    }
+
+    function showHead() {
+      doc.getElementById("panelState").textContent = selected ? map.name(selected) : "Select a state";
+      doc.getElementById("panelMode").textContent = current().title;
+      var link = doc.getElementById("panelStateLink");
+      var hasPage = selected && map.hasShape(selected);
+      link.hidden = !hasPage;
+      if (hasPage) {
+        link.href = KYC.stateUrl(selected);
+        link.textContent = "Open the " + map.name(selected) + " page ›";
+      }
+      Array.prototype.forEach.call(doc.querySelectorAll(".guide-about[data-mode]"), function (s) {
+        s.hidden = s.getAttribute("data-mode") !== mode;
+      });
+    }
+
+    function writeRoute() {
+      KYC.router.writeFilters({ state: selected, mode: mode === ids[0] ? "" : mode });
+    }
+
+    function select(code, opts) {
+      if (!code || !map.hasShape(code)) return;
+      selected = code;
+      map.setSelected(code);
+      showHead();
+      showFacts(code);
+      var picker = doc.getElementById("stateJump");
+      if (picker && picker.value !== code) picker.value = code;
+      if (!(opts && opts.fromRoute)) writeRoute();
+    }
+
+    function setMode(next, opts) {
+      if (!data.modes[next] || ids.indexOf(next) === -1) return;
+      var relabel = !!(data.modes[next].labels || current().labels) && next !== mode;
+      mode = next;
+      Array.prototype.forEach.call(doc.querySelectorAll(".segmented [data-mode]"), function (b) {
+        b.setAttribute("aria-pressed", String(b.getAttribute("data-mode") === mode));
+      });
+      // Only a view that writes its own words on the states (the circuit
+      // numbers) needs the labels redrawn; the rest only repaint.
+      if (relabel) map.draw();
+      map.paint();
+      drawLegend();
+      showHead();
+      showFacts(selected);
+      if (!(opts && opts.fromRoute)) writeRoute();
+    }
+
+    if (!map.loaded()) {
+      doc.getElementById("mapStage").innerHTML = '<div class="empty-state">' + KYC.icon("info") +
+        "<h3>Map geometry did not load</h3></div>";
+      return;
+    }
+    // The first view is chosen before the first draw, so the map draws once.
+    map.start();
+    map.paint();
+    drawLegend();
+    showHead();
+
+    var segmented = doc.querySelector(".segmented");
+    if (segmented) {
+      segmented.addEventListener("click", function (event) {
+        var button = event.target.closest("[data-mode]");
+        if (button) setMode(button.getAttribute("data-mode"));
+      });
+      Array.prototype.forEach.call(segmented.querySelectorAll("[data-mode]"), function (b) {
+        b.setAttribute("aria-pressed", String(b.getAttribute("data-mode") === mode));
+      });
+    }
+    var picker = doc.getElementById("stateJump");
+    if (picker && picker.getAttribute("data-jump") === "map") {
+      picker.addEventListener("change", function () {
+        if (picker.value) { select(picker.value); map.reveal(); }
+      });
+    }
+    KYC.router.onChange(function () {
+      var params = KYC.router.read().params;
+      var wanted = ids.indexOf(params.mode) !== -1 ? params.mode : ids[0];
+      if (wanted !== mode) setMode(wanted, { fromRoute: true });
+      if (params.state && params.state !== selected) select(params.state, { fromRoute: true });
+    });
+    if (route.state) select(route.state, { fromRoute: true });
+
+    // A link to one of the page's sections (#legislatures) opens it.
+    function openSection() {
+      var id = (global.location.hash || "").slice(1);
+      if (!id || id.charAt(0) === "/") return;
+      var target = doc.getElementById(id);
+      if (target && target.tagName === "DETAILS") {
+        target.open = true;
+        target.scrollIntoView({ block: "start" });
+      }
+    }
+    openSection();
+    global.addEventListener("hashchange", openSection);
+  }
+
   /* ----------------------------------------------------------------- boot */
 
   var LIVE = { committees: renderCommittees };
@@ -141,6 +340,7 @@
   }
 
   KYC.ready(function () {
+    initMap();
     var blocks = doc.querySelectorAll(".guide-live[data-live]");
     Array.prototype.forEach.call(blocks, function (block) {
       var fill = LIVE[block.getAttribute("data-live")];

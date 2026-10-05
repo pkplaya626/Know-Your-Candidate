@@ -2526,6 +2526,8 @@ async function testGuide() {
     });
   }
 
+  await testGuideMaps();
+
   suite("guide — reachable from every kind of page", () => {
     for (const page of ["index.html", "map.html", "states/tx.html", "districts/ca.html"]) {
       const raw = fs.readFileSync(path.join(SITE, page), "utf8");
@@ -2538,6 +2540,115 @@ async function testGuide() {
     check("a district page's states link reaches the states index",
       district.includes('href="../states/index.html"') && !/href="index\.html"/.test(district));
   });
+}
+
+/* The guide's maps: the views in kyc/government_maps.py, drawn by the shared
+ * map (kyc-usmap.js) the partisan map uses. */
+async function testGuideMaps() {
+  const pages = (() => {
+    const text = fs.readFileSync(path.join(SITE, "data", "government.js"), "utf8");
+    const json = text.slice(text.indexOf("window.kycGovernment = ") + 23, text.indexOf(";\nwindow.kycGovernmentMeta"));
+    return JSON.parse(json).pages;
+  })();
+
+  for (const slug of Object.keys(pages)) {
+    const page = `government/${slug}.html`;
+    const { window, D, errors } = await buildPage(page);
+    const KYC = window.KYC;
+    const data = window.kycGovernment;
+    const ids = pages[slug];
+    suite(`${page} — the map`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const shapes = [...D.querySelectorAll("#usMap .state")];
+      check("every state, D.C. and territory is a shape", shapes.length >= 56, `${shapes.length}`);
+      check("no text is drawn inside the map's SVG (rule 46)", !D.querySelector("#usMap text"));
+      check("every fill is a theme colour, never a literal",
+        shapes.every((s) => /^var\(--/.test(s.style.fill)), shapes.map((s) => s.style.fill).find((f) => !/^var/.test(f)));
+      check("every state names its value to a screen reader",
+        shapes.every((s) => (s.getAttribute("aria-label") || "").includes(":")));
+      check("the legend shows the first view",
+        D.querySelectorAll("#mapLegend .key").length >= 2);
+      check("one explanation shows, for the first view",
+        [...D.querySelectorAll(".guide-about")].filter((s) => !s.hidden).map((s) => s.getAttribute("data-mode"))
+          .join() === ids[0]);
+      if (ids.length > 1) {
+        check("a button for every view", D.querySelectorAll(".segmented [data-mode]").length === ids.length);
+      }
+
+      // Pick a state with a click, as a reader would.
+      const tx = D.querySelector('#usMap .state[data-state="TX"]');
+      tx.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+      check("picking a state names it in the panel", D.getElementById("panelState").textContent === "Texas");
+      check("the panel lists every view's fact about it, with sources",
+        D.querySelectorAll("#guideFacts .guide-fact").length === ids.length &&
+        [...D.querySelectorAll("#guideFacts .guide-fact")].every((f) => f.querySelector(".guide-sources a[href^='https://']")));
+      check("the current view's fact comes first",
+        D.querySelector("#guideFacts .guide-fact").classList.contains("is-current"));
+      check("the pick is in the address, so the view can be shared",
+        /state=TX/.test(window.location.hash), window.location.hash);
+      check("the panel links to the state's page",
+        /states\/tx\.html$/.test(D.getElementById("panelStateLink").getAttribute("href")));
+      check("the facts are text, not markup from the data", !/<script/i.test(D.getElementById("guideFacts").innerHTML));
+
+      // The jump list picks on the map instead of leaving the page.
+      const jump = D.getElementById("stateJump");
+      jump.value = "CA";
+      jump.dispatchEvent(new window.Event("change"));
+      check("the jump list picks the state on this map",
+        D.getElementById("panelState").textContent === "California" &&
+        D.querySelector('#usMap .state[data-state="CA"]').getAttribute("aria-pressed") === "true");
+
+      if (ids.length > 1) {
+        const last = ids[ids.length - 1];
+        D.querySelector(`.segmented [data-mode="${last}"]`).click();
+        check("switching view shows its explanation and legend",
+          !D.querySelector(`.guide-about[data-mode="${last}"]`).hidden &&
+          D.querySelector(`.guide-about[data-mode="${ids[0]}"]`).hidden);
+        check("switching view is in the address", window.location.hash.includes(`mode=${last}`),
+          window.location.hash);
+        check("the picked state's current fact follows the view",
+          D.querySelector("#guideFacts .guide-fact.is-current .guide-fact-title").textContent
+            .indexOf(data.modes[last].label) === 0);
+      }
+      // A faint fill writes its callout in the theme's text colour.
+      const faint = [...D.querySelectorAll("#mapLabels .map-callout")]
+        .filter((c) => /scale-[123]|cat-4|surface-2/.test(c.style.background));
+      check("callouts on faint fills use the light ink", faint.every((c) => c.style.color === "var(--text)"),
+        `${faint.length} faint callouts`);
+    });
+  }
+
+  // Deep links land on the view and state they name.
+  {
+    const { window, D } = await buildPage("government/states.html", { hash: "#/?mode=veto&state=IN" });
+    suite("government/states.html — a shared view opens as sent", () => {
+      check("the veto view is pressed",
+        D.querySelector('.segmented [data-mode="veto"]').getAttribute("aria-pressed") === "true");
+      check("Indiana is picked, and its fact says it has no line-item veto",
+        D.getElementById("panelState").textContent === "Indiana" &&
+        /cannot veto single items/.test(D.querySelector("#guideFacts .guide-fact.is-current").textContent));
+    });
+  }
+  {
+    const { D } = await buildPage("government/courts.html", { hash: "#/?state=TX" });
+    suite("government/courts.html — circuits are numbered", () => {
+      const labels = Object.fromEntries([...D.querySelectorAll("#mapLabels .state-code")]
+        .map((s) => [s.textContent, true]));
+      check("states carry their circuit's number, not their code", labels["5"] && labels["9"] && !labels.TX);
+      check("the legend keys each circuit by its number",
+        [...D.querySelectorAll("#mapLegend .swatch-label")].map((s) => s.textContent).includes("11"));
+      check("Texas is in the Fifth Circuit, with a link to that court",
+        /Fifth Circuit/.test(D.getElementById("guideFacts").textContent) &&
+        !!D.querySelector('#guideFacts a[href="https://www.ca5.uscourts.gov/"]'));
+    });
+  }
+  {
+    const { D } = await buildPage("government/local.html", { hash: "#/?mode=local-county&state=CT" });
+    suite("government/local.html — none is not zero", () => {
+      check("Connecticut has no county governments, said in words",
+        /No county governments/.test(D.querySelector("#guideFacts .guide-fact.is-current").textContent));
+    });
+  }
 }
 
 (async function main() {

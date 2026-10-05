@@ -30,6 +30,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… congress --apply` | Add newly seated members to the roster CSVs |
 | `… field` | Refresh the FEC register of everyone running in 2026 |
 | `… field --check` | Report the field from the committed cache; no network |
+| `… census` | Count each state's local governments from the Census of Governments (`--check` reads the cache) |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
 | `… results` | Read each state's primary results from Wikipedia: who is still in |
 | `… results --check` | Report the results from the committed cache; no network |
@@ -105,6 +106,8 @@ CI asserts that a rebuild changes nothing.
 | `pages.py` | The shared page template, the state pages, the states directory and the sitemap |
 | `government.py` | The guide to how government works: renders its pages and refuses a broken link or an uncited section |
 | `government_text.py` | The guide's words and the sources each section was checked against |
+| `government_maps.py` | What the guide's maps say about each state, every value with its source |
+| `census.py` | The Census of Governments' counts of local governments by state (the `census` command) |
 | `campaigns.py` | Campaign websites from each candidate's FEC committee |
 | `enrich.py` | Fill filed candidates' gaps from their Wikipedia infobox and campaign site; check every linked campaign site |
 | `odds.py` | Prediction-market prices (Kalshi, Polymarket) and published polling averages for the 2026 Senate races |
@@ -130,7 +133,8 @@ order renders an empty site with no error anywhere.
 | `assets/kyc-directory.js` | The grid: filtering, sorting, races |
 | `assets/kyc-map.js` | The map: rendering, modes, delegation panel |
 | `assets/kyc-state.js` | A state's page, and the directory of states |
-| `assets/kyc-guide.js` | The guide's pages: what they show from the data (who leads each committee) |
+| `assets/kyc-usmap.js` | The map of the states, drawn once for the partisan map and the guide's maps |
+| `assets/kyc-guide.js` | The guide's pages: their maps, and what they show from the data (who leads each committee) |
 
 Every view has a URL: `#/profile/<id>` for a person,
 `#/?state=TX&chamber=Senate` for a filtered list, so any view can be linked and
@@ -873,6 +877,43 @@ here in a different way:
 
 Every page links to the guide from its sidebar, and the guide links back into
 the grid, the Senate view, the map and the state pages.
+
+### The guide's maps
+
+Four of the guide's pages are maps, laid out like `map.html` and drawn by the
+same code (`assets/kyc-usmap.js`): views over the map, a legend, and a panel
+that lists everything the page says about a picked state, each fact with its
+sources. `#/?state=TX&mode=veto` opens any view as sent.
+
+| Page | Views | Source |
+|---|---|---|
+| State governments | Legislature (chambers and seats), who presides over the senate, line-item veto, how high-court justices are chosen | NCSL; Book of the States 2022, tables 4.14, 5.1 and 5.6, checked for changes through October 2026 |
+| Federal courts | The circuit each state's appeals go to, numbered on the map | 28 U.S.C. 41; 48 U.S.C. 1824 |
+| Local governments | Counts of every kind of local government, and of counties, municipalities, townships, school districts and special districts | Census of Governments 2022, table CG2200ORG02 (`census` command) |
+| Tribal nations | Public Law 280: the six states the law names and the ten that took jurisdiction later | 18 U.S.C. 1162; BIA |
+
+The data is `kyc/government_maps.py`, emitted as `data/government.js`
+(rewritten only when it changes; `verify` checks its signature). A view must
+give every one of the fifty states a value, or `validate.check_guide` fails:
+a fact known for a few states and not the rest stays in the text, which is
+why there is no map of "councils that check the governor" - Iowa, Florida
+and others have boards of elected officials that a two-colour map would deny.
+Colours are categories (`--cat-1` to `--cat-5`, `--scale-1` to `--scale-5`),
+never party colours. Circuits that share a border never share a colour; the
+build colours them from the atlas's own borders (`geo.neighbours`).
+
+Compiled tables were checked, not trusted. The Book of the States 2022 says
+New Jersey's Supreme Court has five justices; the court's own site says a
+chief justice and six associates. Utah enlarged its court to seven in 2026,
+and Maryland renamed its own in 2022. Michigan's justices, whom the table
+lists as partisan, run on a ballot that shows no party, so the map, which
+groups states by what the ballot shows, puts Michigan with the nonpartisan
+states.
+
+The Census table marks a kind of government a state does not have with "X".
+That is kept as "none" - Texas has no township governments - and never
+written as a count of zero (rule 19). `census` refuses a table whose states do
+not add up to its own national row.
 
 ## District maps
 

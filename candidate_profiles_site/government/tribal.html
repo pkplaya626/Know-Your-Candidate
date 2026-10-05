@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="../assets/kyc.css">
 <script src="../assets/kyc.js"></script>
 </head>
-<body data-root="../" data-state="" data-page="guide">
+<body data-root="../" data-state="" data-page="guide-tribal">
 
 <a href="#stateMain" class="skip-link">Skip to content</a>
 <button type="button" class="sidebar-scrim" tabindex="-1" aria-hidden="true"></button>
@@ -109,7 +109,7 @@
         <nav class="sidebar-section push" aria-label="Jump to a state">
             <h2 class="sidebar-heading">Jump to</h2>
             <label class="sr-only" for="stateJump">Jump to a state or territory</label>
-            <select id="stateJump" class="select">
+            <select id="stateJump" class="select" data-jump="map">
                 <option value="">Choose a state&hellip;</option>
                 <option value="AL">Alabama (AL)</option>
                 <option value="AK">Alaska (AK)</option>
@@ -172,31 +172,49 @@
     </aside>
 
     <main class="app-main" id="stateMain">
-        <div class="content scroll-y">
-            <article id="guideContent" class="state-page guide-page">
-                <header class="state-hero">
-                    <p class="state-kicker">How government works</p>
-                    <h1 class="state-title">Tribal nations</h1>
-                    <p class="guide-lede">There are 575 federally recognized tribes. They are not states, parts of states or foreign nations: the Supreme Court has called them “domestic dependent nations”, self-governing communities whose sovereignty predates the Constitution.</p>
-                </header>
-                <nav class="guide-toc" aria-labelledby="guideTocTitle">
-                    <h2 class="guide-toc-title" id="guideTocTitle">On this page</h2>
-                    <ol>
-                        <li><a href="#sovereignty">Sovereignty and recognition</a></li>
-                        <li><a href="#governments">Tribal governments</a></li>
-                        <li><a href="#courts">Tribal courts</a></li>
-                        <li><a href="#jurisdiction">Who has jurisdiction in Indian country</a></li>
-                    </ol>
-                </nav>
-                <section class="guide-section" id="sovereignty" aria-labelledby="sovereignty-title">
-                    <h2 class="guide-heading" id="sovereignty-title">Sovereignty and recognition</h2>
+        <header class="guide-map-head">
+            <p class="state-kicker">How government works</p>
+            <h1 class="guide-map-title">Tribal nations</h1>
+        </header>
+        <div class="toolbar">
+            <div class="map-legend" id="mapLegend" aria-live="polite"></div>
+        </div>
+        <div class="map-stage" id="mapStage">
+            <svg id="usMap" viewBox="0 0 975 652" preserveAspectRatio="xMidYMid meet"
+                 role="group" aria-label="Map of U.S. states and territories.
+                 Each state is a button that shows what this page says about it."></svg>
+        </div>
+    </main>
+
+    <aside class="detail-panel" aria-label="Tribal nations, state by state">
+        <div class="detail-head">
+            <div class="detail-title">
+                <h2>
+                    <svg class="icon icon-sm" aria-hidden="true"><use href="#i-pin"/></svg>
+                    <span id="panelState">Select a state</span>
+                </h2>
+            </div>
+            <p class="detail-sub" id="panelMode">Where states took over jurisdiction in Indian country</p>
+            <a class="sidebar-link" id="panelStateLink" href="../states/index.html" hidden></a>
+        </div>
+        <div class="delegation scroll-y guide-panel" id="guideContent">
+            <div id="guideFacts" aria-live="polite"></div>
+            <section class="guide-about" data-mode="pl280">
+                <h3 class="guide-about-title">Where states took over jurisdiction in Indian country</h3>
+                <p>Public Law 280 (1953) gave six states criminal jurisdiction over most of the Indian country within them, in place of the federal government. Ten more states later took on some jurisdiction by choice. It did not let states regulate or tax tribes (Bryan v. Itasca County, 1976).</p>
+                <p class="guide-sources"><span>Sources:</span> <a href="https://www.law.cornell.edu/uscode/text/18/1162" target="_blank" rel="noopener noreferrer">18 U.S.C. 1162 (Public Law 280: criminal jurisdiction)</a>; <a href="https://www.law.cornell.edu/uscode/text/28/1360" target="_blank" rel="noopener noreferrer">28 U.S.C. 1360 (Public Law 280: civil actions)</a>; <a href="https://www.bia.gov/faqs/what-public-law-280-and-where-does-it-apply" target="_blank" rel="noopener noreferrer">Bureau of Indian Affairs: What is Public Law 280?</a>; <a href="https://www.law.cornell.edu/supremecourt/text/426/373" target="_blank" rel="noopener noreferrer">Bryan v. Itasca County, 426 U.S. 373 (1976)</a></p>
+            </section>
+            <div class="guide-more">
+                <h3 class="guide-more-title">More about tribal nations</h3>
+                <details class="guide-more-section" id="sovereignty">
+                    <summary>Sovereignty and recognition</summary>
                     <p>Tribal sovereignty is inherent: it was not granted by the United States. In three early cases, Johnson v. M'Intosh (1823), Cherokee Nation v. Georgia (1831) and Worcester v. Georgia (1832), known together as the Marshall Trilogy, the Supreme Court described tribes as “domestic dependent nations” (Cherokee Nation) and as distinct political communities in which state law has no force (Worcester). Congress's broad power over Indian affairs rests on the Indian Commerce Clause (Article I, Section 8) and the treaty power, and Congress and the courts have since limited tribal powers in some respects.</p>
                     <p>Federally recognized tribes have a government-to-government relationship with the United States, chiefly through the Bureau of Indian Affairs in the Department of the Interior. Congress recognized the Lumbee Tribe of North Carolina in December 2025, and the Bureau's list of January 30, 2026 has 575 tribes, up from 574.</p>
                     <p>Under the Indian Self-Determination and Education Assistance Act (1975) and the Tribal Self-Governance Act (1994), tribes can run federally funded programs, such as health care and schools, themselves.</p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.law.cornell.edu/supremecourt/text/21/543" target="_blank" rel="noopener noreferrer">Johnson v. M'Intosh, 21 U.S. 543 (1823)</a>; <a href="https://www.law.cornell.edu/supremecourt/text/30/1" target="_blank" rel="noopener noreferrer">Cherokee Nation v. Georgia, 30 U.S. 1 (1831)</a>; <a href="https://www.law.cornell.edu/supremecourt/text/31/515" target="_blank" rel="noopener noreferrer">Worcester v. Georgia, 31 U.S. 515 (1832)</a>; <a href="https://constitution.congress.gov/constitution/article-1/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article I</a>; <a href="https://www.govinfo.gov/content/pkg/FR-2026-01-30/html/2026-01899.htm" target="_blank" rel="noopener noreferrer">Bureau of Indian Affairs: Indian Entities Recognized (91 FR 4102, Jan. 30, 2026)</a>; <a href="https://www.bia.gov/faqs/what-federally-recognized-tribe" target="_blank" rel="noopener noreferrer">Bureau of Indian Affairs: What is a federally recognized tribe?</a>; <a href="https://www.law.cornell.edu/uscode/text/25/5301" target="_blank" rel="noopener noreferrer">25 U.S.C. 5301 (Indian Self-Determination Act)</a>; <a href="https://www.law.cornell.edu/uscode/text/25/5361" target="_blank" rel="noopener noreferrer">25 U.S.C. 5361 (Tribal Self-Governance)</a></p>
-                </section>
-                <section class="guide-section" id="governments" aria-labelledby="governments-title">
-                    <h2 class="guide-heading" id="governments-title">Tribal governments</h2>
+                </details>
+                <details class="guide-more-section" id="governments">
+                    <summary>Tribal governments</summary>
                     <p>Tribes organize their governments in many ways: under constitutions of their own, under constitutions adopted through the Indian Reorganization Act of 1934, or in traditional forms. Many have a council that makes the laws, an executive, and courts.</p>
                     <figure class="guide-chart">
                         <p class="guide-chart-top">Tribal citizens</p>
@@ -215,9 +233,9 @@
                         <div class="guide-role"><dt>Tribal police</dt><dd>Enforce tribal law under the tribe's own authority, often alongside federal and state officers.</dd></div>
                     </dl>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.law.cornell.edu/uscode/text/25/5123" target="_blank" rel="noopener noreferrer">25 U.S.C. 5123 (tribal constitutions)</a>; <a href="https://www.bia.gov/faqs/what-federally-recognized-tribe" target="_blank" rel="noopener noreferrer">Bureau of Indian Affairs: What is a federally recognized tribe?</a></p>
-                </section>
-                <section class="guide-section" id="courts" aria-labelledby="courts-title">
-                    <h2 class="guide-heading" id="courts-title">Tribal courts</h2>
+                </details>
+                <details class="guide-more-section" id="courts">
+                    <summary>Tribal courts</summary>
                     <p>Many tribes run their own justice systems, which the Indian Tribal Justice Act (1993) supports with federal funding.</p>
                     <dl class="guide-roles">
                         <div class="guide-role"><dt>Tribal trial courts</dt><dd>Hear cases under tribal law: crimes, family and child-custody matters (including cases under the Indian Child Welfare Act), probate and contracts.</dd></div>
@@ -227,9 +245,9 @@
                     </dl>
                     <p>The Indian Civil Rights Act of 1968 applies most of the Bill of Rights' protections to tribal governments and limits the sentences tribal courts can impose, to one year for an offense. The Tribal Law and Order Act of 2010 raised the limit to three years for one offense and nine years in all, for a tribe that provides added protections, among them a licensed defense lawyer and a law-trained judge.</p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.law.cornell.edu/uscode/text/25/3601" target="_blank" rel="noopener noreferrer">25 U.S.C. 3601 (Indian Tribal Justice Act)</a>; <a href="https://www.law.cornell.edu/uscode/text/25/1911" target="_blank" rel="noopener noreferrer">25 U.S.C. 1911 (Indian Child Welfare Act)</a>; <a href="https://www.ecfr.gov/current/title-25/chapter-I/subchapter-B/part-11/subpart-B/section-11.201" target="_blank" rel="noopener noreferrer">25 C.F.R. 11.201 (Courts of Indian Offenses: magistrates)</a>; <a href="https://www.law.cornell.edu/uscode/text/25/1302" target="_blank" rel="noopener noreferrer">25 U.S.C. 1302 (Indian Civil Rights Act)</a></p>
-                </section>
-                <section class="guide-section" id="jurisdiction" aria-labelledby="jurisdiction-title">
-                    <h2 class="guide-heading" id="jurisdiction-title">Who has jurisdiction in Indian country</h2>
+                </details>
+                <details class="guide-more-section" id="jurisdiction">
+                    <summary>Who has jurisdiction in Indian country</summary>
                     <p>Which government can prosecute a crime in Indian country depends on where it happened, who committed it and who the victim was.</p>
                     <ul class="guide-list">
                         <li>Federal: the Major Crimes Act (18 U.S.C. 1153) gives federal courts jurisdiction over a list of serious crimes, among them murder, kidnapping, felony assault and sexual abuse, committed by an Indian in Indian country. It generally does not apply in the six Public Law 280 states below. Tribes can also prosecute Indian defendants, within the sentencing limits above.</li>
@@ -237,12 +255,11 @@
                         <li>State: Public Law 280 (1953) gave six states criminal jurisdiction over most of the Indian country within them, in place of the federal government: Alaska (where the Metlakatla Indian Community also keeps criminal jurisdiction), California, Minnesota (except the Red Lake reservation), Nebraska, Oregon (except the Warm Springs reservation) and Wisconsin. It also opened their courts to private civil suits arising there, but did not let states regulate or tax tribes (Bryan v. Itasca County, 1976). Ten more states later took on some jurisdiction by choice: Arizona, Florida, Idaho, Iowa, Montana, Nevada, North Dakota, South Dakota, Utah and Washington. Some jurisdiction has since been returned to the federal government and the tribes.</li>
                     </ul>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.law.cornell.edu/uscode/text/18/1153" target="_blank" rel="noopener noreferrer">18 U.S.C. 1153 (Major Crimes Act)</a>; <a href="https://www.law.cornell.edu/supremecourt/text/435/191" target="_blank" rel="noopener noreferrer">Oliphant v. Suquamish Indian Tribe, 435 U.S. 191 (1978)</a>; <a href="https://www.law.cornell.edu/uscode/text/25/1304" target="_blank" rel="noopener noreferrer">25 U.S.C. 1304 (special Tribal criminal jurisdiction)</a>; <a href="https://www.justice.gov/tribal/2013-and-2022-reauthorizations-violence-against-women-act-vawa" target="_blank" rel="noopener noreferrer">U.S. Department of Justice: 2013 and 2022 Reauthorizations of VAWA</a>; <a href="https://www.law.cornell.edu/uscode/text/18/1162" target="_blank" rel="noopener noreferrer">18 U.S.C. 1162 (Public Law 280: criminal jurisdiction)</a>; <a href="https://www.law.cornell.edu/uscode/text/28/1360" target="_blank" rel="noopener noreferrer">28 U.S.C. 1360 (Public Law 280: civil actions)</a>; <a href="https://www.bia.gov/faqs/what-public-law-280-and-where-does-it-apply" target="_blank" rel="noopener noreferrer">Bureau of Indian Affairs: What is Public Law 280?</a>; <a href="https://www.law.cornell.edu/supremecourt/text/426/373" target="_blank" rel="noopener noreferrer">Bryan v. Itasca County, 426 U.S. 373 (1976)</a></p>
-                </section>
+                </details>
+            </div>
                 <nav class="guide-pager" aria-label="Guide pages">
                     <a class="guide-pager-link" rel="prev" href="local.html"><span>Previous</span> Local governments</a>
                 </nav>
-            </article>
-
             <footer class="site-footer">
                 <p><strong>About this guide:</strong> a plain-language summary of how
                     American government is organized. Each section lists the sources
@@ -253,9 +270,12 @@
                 <p>Non-partisan and independent.</p>
             </footer>
         </div>
-    </main>
+    </aside>
 </div>
 
+<script src="../data/geo.js"></script>
+<script src="../data/government.js"></script>
+<script src="../assets/kyc-usmap.js"></script>
 <script src="../assets/kyc-guide.js"></script>
 </body>
 </html>

@@ -40,6 +40,19 @@ _PEOPLE_SCRIPTS = (
     "../assets/kyc-profile.js",
     "../assets/kyc-guide.js",
 )
+# A page with a map draws it the way the partisan map is drawn: the state
+# shapes, then what the guide says about each state, then the shared map.
+_MAP_SCRIPTS = (
+    "../data/geo.js",
+    "../data/government.js",
+    "../assets/kyc-usmap.js",
+    "../assets/kyc-guide.js",
+)
+
+
+def _map_modes(slug):
+    from . import government_maps
+    return government_maps.modes().get(slug) or []
 
 
 def page_path(slug):
@@ -60,6 +73,8 @@ def _page(slug):
 
 def scripts(slug):
     """The scripts a guide page loads after ``kyc.js``, in order."""
+    if _map_modes(slug):
+        return _MAP_SCRIPTS
     return _PEOPLE_SCRIPTS if _page(slug).get("people") else _PLAIN_SCRIPTS
 
 
@@ -303,6 +318,95 @@ def _sidebar(here, people):
     return sidebar + (pages._CONGRESS_SIDEBAR if people else "")
 
 
+def _section_lines(section, here, pad, collapsed):
+    """One of the page's text sections; folded into a <details> on a map
+    page, where it reads below the panel's facts."""
+    sid = section["id"]
+    lines = []
+    if collapsed:
+        lines.append(f'{pad}<details class="guide-more-section" id="{_e(sid)}">')
+        lines.append(f'{pad}    <summary>{html.escape(section["heading"], quote=False)}</summary>')
+    for block in section["blocks"]:
+        lines.extend(_block(block, here, pad + "    "))
+    lines.append(f'{pad}    <p class="guide-sources"><span>Sources:</span> '
+                 f'{_sources(section["sources"], here)}</p>')
+    if collapsed:
+        lines.append(f"{pad}</details>")
+    return lines
+
+
+def _map_main(page, modes):
+    """The map layout of map.html: a toolbar of views over the map, and a
+    panel that shows the picked state's facts, what the current view means,
+    and the page's text below them."""
+    from . import government_maps
+    here = page["slug"]
+    first = modes[0]
+    pad = " " * 12
+    lines = [
+        '    <main class="app-main" id="stateMain">',
+        '        <header class="guide-map-head">',
+        '            <p class="state-kicker">How government works</p>',
+        f'            <h1 class="guide-map-title">{inline(page["title"], here)}</h1>',
+        '        </header>',
+        '        <div class="toolbar">',
+        '            <div class="map-legend" id="mapLegend" aria-live="polite"></div>',
+    ]
+    if len(modes) > 1:
+        lines.append('            <div class="segmented push-right" role="group" aria-label="Map view">')
+        for i, mode in enumerate(modes):
+            lines.append(f'                <button type="button" data-mode="{_e(mode["id"])}" '
+                         f'aria-pressed="{"true" if i == 0 else "false"}">'
+                         f'{html.escape(mode["label"], quote=False)}</button>')
+        lines.append("            </div>")
+    lines += [
+        "        </div>",
+        '        <div class="map-stage" id="mapStage">',
+        '            <svg id="usMap" viewBox="0 0 975 652" preserveAspectRatio="xMidYMid meet"',
+        '                 role="group" aria-label="Map of U.S. states and territories.',
+        '                 Each state is a button that shows what this page says about it."></svg>',
+        "        </div>",
+        "    </main>",
+        "",
+        f'    <aside class="detail-panel" aria-label="{_e(page["nav"])}, state by state">',
+        '        <div class="detail-head">',
+        '            <div class="detail-title">',
+        '                <h2>',
+        '                    <svg class="icon icon-sm" aria-hidden="true"><use href="#i-pin"/></svg>',
+        '                    <span id="panelState">Select a state</span>',
+        "                </h2>",
+        "            </div>",
+        f'            <p class="detail-sub" id="panelMode">{html.escape(first["title"], quote=False)}</p>',
+        '            <a class="sidebar-link" id="panelStateLink" href="../states/index.html" hidden></a>',
+        "        </div>",
+        '        <div class="delegation scroll-y guide-panel" id="guideContent">',
+        '            <div id="guideFacts" aria-live="polite"></div>',
+    ]
+    for i, mode in enumerate(modes):
+        hidden = "" if i == 0 else " hidden"
+        lines.append(f'{pad}<section class="guide-about" data-mode="{_e(mode["id"])}"{hidden}>')
+        lines.append(f'{pad}    <h3 class="guide-about-title">{html.escape(mode["title"], quote=False)}</h3>')
+        lines.append(f'{pad}    <p>{inline(mode["about"], here)}</p>')
+        links = []
+        for key in mode["sources"]:
+            title, url = government_maps.SOURCES[key]
+            links.append(f'<a href="{_e(url)}" target="_blank" rel="noopener noreferrer">'
+                         f"{html.escape(title, quote=False)}</a>")
+        lines.append(f'{pad}    <p class="guide-sources"><span>Sources:</span> {"; ".join(links)}</p>')
+        lines.append(f"{pad}</section>")
+    lines.append(f'{pad}<div class="guide-more">')
+    lines.append(f'{pad}    <h3 class="guide-more-title">More about {html.escape(page["nav"].lower(), quote=False)}</h3>')
+    for section in page["sections"]:
+        lines.extend(_section_lines(section, here, pad + "    ", collapsed=True))
+    lines.append(f"{pad}</div>")
+    lines.extend(_pager(here))
+    lines.append(f'{pad}<footer class="site-footer">')
+    lines.append(_footer(page))
+    lines.append(f"{pad}</footer>")
+    lines += ["        </div>", "    </aside>"]
+    return "\n".join(lines)
+
+
 def _footer(page):
     return "\n".join([
         "                <p><strong>About this guide:</strong> a plain-language summary of how",
@@ -330,6 +434,9 @@ def render(slug, host, codes=()):
     path = page_path(slug)
     canonical = f"https://{host}/{path}" if host else path
     people = bool(page.get("people"))
+    modes = _map_modes(slug)
+    layout = ({"main_block": _map_main(page, modes)} if modes else
+              {"main": _main(page), "footer": _footer(page)})
     return pages.render_page(
         title=_e(f"{page['title']} — Know Your Candidate"),
         og_title=_e(page["title"]),
@@ -337,14 +444,15 @@ def render(slug, host, codes=()):
         canonical=_e(canonical),
         host=_e(host or ""),
         code="",
-        page_kind="guide",
+        page_kind=f"guide-{slug}" if modes else "guide",
         search="",
         government_current=' aria-current="page"' if slug == "index" else "",
         sidebar=_sidebar(slug, people),
         jump_options="" if people else jump_options(codes),
-        main=_main(page),
-        footer=_footer(page),
+        # On a map page the list picks the state on the map (kyc-guide.js).
+        jump_attrs=' data-jump="map"' if modes else "",
         scripts="\n".join(f'<script src="{_e(src)}"></script>' for src in scripts(slug)),
+        **layout,
     )
 
 

@@ -30,10 +30,12 @@ data/primary_results.json   ──┤
 data/committees.json        ──┤   (committee rosters, with rank and title)
 data/campaigns.json         ──┤
 data/enrichment.json        ──┤
-data/odds.json              ──┴─> kyc/ ──> candidate_profiles_site/
+data/odds.json              ──┤
+data/census_governments.json ─┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
                                              data/odds.js       (market prices, polling averages)
+                                             data/government.js (the guide's maps: kyc/government_maps.py)
                                              data/districts/*.js (one district map per state)
                                              states/*.html      (generated, one per state)
                                              districts/*.html   (generated, one per state)
@@ -51,6 +53,7 @@ data/odds.json              ──┴─> kyc/ ──> candidate_profiles_site/
                                              assets/kyc-map.js
                                              assets/kyc-state.js
                                              assets/kyc-districts.js
+                                             assets/kyc-usmap.js
                                              assets/kyc-guide.js
 ```
 
@@ -61,8 +64,8 @@ data/odds.json              ──┴─> kyc/ ──> candidate_profiles_site/
 - Everything in `data/` is **generated**. Never edit `profiles.js`, `geo.js`,
   `odds.js` or `districts/*.js` by hand. `portraits.json`, `finance.json`, `fec_field.json`,
   `disclosures.json`, `primary_results.json`, `committees.json`,
-  `campaigns.json`, `enrichment.json` and `odds.json` are caches, but they
-  *are* hand-editable.
+  `campaigns.json`, `enrichment.json`, `odds.json` and
+  `census_governments.json` are caches, but they *are* hand-editable.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them only to check they load the right scripts in the right order; it never
   rewrites them. `states/*.html`, `districts/*.html`, `government/*.html`
@@ -89,12 +92,13 @@ python build_profile_site.py results          # who is still in, from Wikipedia
 python build_profile_site.py campaigns        # campaign websites from FEC committees
 python build_profile_site.py enrich           # fill gaps; check every campaign site
 python build_profile_site.py odds             # market prices and polling averages (writes odds.js)
-python -m unittest discover tests             # 692 tests, no dependencies
-npm install && npm test                       # 851 real-DOM checks (needs jsdom)
+python build_profile_site.py census           # local governments by state (Census of Governments)
+python -m unittest discover tests             # 706 tests, no dependencies
+npm install && npm test                       # 925 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
-`campaigns`, `enrich`, `odds` and `congress` touch the network. Run the
+`campaigns`, `enrich`, `odds`, `census` and `congress` touch the network. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -492,6 +496,22 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Who holds an office is never typed in: the Congress page renders
     committee leads from the rosters, and a committee's minority lead is
     found by the seat's `side`, not its title.
+
+49. **A map of every state is a claim about every state.** The guide's maps
+    (`kyc/government_maps.py`) must give each of the fifty a sourced value,
+    and `check()` fails otherwise. A fact known for three states is a list
+    in the text, not a map: "councils that check the governor" was dropped as
+    a map because Iowa's Executive Council and other boards of elected
+    officials would have been coloured as having none. Draw categories in
+    `--cat-*` and `--scale-*`, never party colours, and keep a state that has
+    none of a thing ("X" in the Census table) apart from a count of zero.
+
+50. **A compiled table is a lead, not a source.** The Book of the States
+    2022 gives New Jersey's Supreme Court five justices; it has seven. Its
+    tables also predate Utah's 2026 enlargement and Maryland's 2022 rename.
+    Read a compiled table from its raw HTML or file, not through a
+    summarizer, and check it against each state's own record and for
+    changes since it was published before a map shows it.
 
 ## District maps
 

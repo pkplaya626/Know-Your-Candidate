@@ -1139,8 +1139,8 @@ def check_guide():
 
     An error, not a warning: the guide is static text, so nothing later in
     the build would notice a link that goes nowhere."""
-    from . import government
-    problems = government.check()
+    from . import government, government_maps
+    problems = government.check() + government_maps.check()
     if not problems:
         return []
     return [Issue("error", "guide",
