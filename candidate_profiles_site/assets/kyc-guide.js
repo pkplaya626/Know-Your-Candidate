@@ -215,7 +215,15 @@
       var target = doc.getElementById("guideFacts");
       if (!code) { target.innerHTML = ""; return; }
       var order = [mode].concat(ids.filter(function (id) { return id !== mode; }));
-      target.innerHTML = order.map(function (id) {
+      // On the state-government map, a state's own legislature is a click
+      // away: its districts and members (legislature/<st>.html).
+      var legislature = page === "states" && data.modes.legislature &&
+        data.modes.legislature.values[code] !== undefined
+        ? '<p class="guide-fact-link"><a href="' + KYC.escapeAttr(KYC.siteRoot() + "legislature/" +
+          code.toLowerCase() + ".html") + '">' + KYC.icon("landmark") + " " +
+          KYC.escapeHtml(map.name(code)) + " Legislature: every district and member ›</a></p>"
+        : "";
+      target.innerHTML = legislature + order.map(function (id) {
         var m = data.modes[id];
         var value = m.values[code];
         var fact = value === undefined ? m.outside : m.facts[code];

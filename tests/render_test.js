@@ -2651,9 +2651,95 @@ async function testGuideMaps() {
   }
 }
 
+/* ======================================================= legislatures */
+
+/* A state's legislature: Census districts, Open States members, drawn by
+ * the shared region map (kyc-regionmap.js). */
+async function testLegislatures() {
+  const pick = (D, window, id) => {
+    const shape = D.querySelector(`#legMap .district-statewide [data-region="${id}"]`);
+    shape.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  };
+  {
+    const { window, D, errors, sources } = await buildPage("legislature/tx.html");
+    const state = window.kycLegislature.TX;
+    suite("legislature/tx.html — the Senate and House on a map", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("its data loads before the map and the page", sources.indexOf("../data/legislature/tx.js") <
+        sources.indexOf("../assets/kyc-regionmap.js") &&
+        sources.indexOf("../assets/kyc-regionmap.js") < sources.indexOf("../assets/kyc-legislature.js"));
+      const shapes = D.querySelectorAll("#legMap .district-statewide .region-shape");
+      check("the Senate is drawn first, a shape per district",
+        shapes.length === Object.keys(state.chambers.upper.districts).length, `${shapes.length}`);
+      check("no text is drawn inside the map's SVG (rule 46)", !D.querySelector("#legMap svg text"));
+      check("every district is in a party's colour or none",
+        [...shapes].every((s) => /party-(d|r|i|split|none)/.test(s.getAttribute("class"))));
+      check("the panel opens on the chamber", /Texas Senate/.test(D.getElementById("legPanelTitle").textContent));
+      D.querySelector('.segmented [data-chamber="lower"]').click();
+      check("the House has its own map", D.querySelectorAll("#legMap .district-statewide .region-shape").length ===
+        Object.keys(state.chambers.lower.districts).length);
+      check("the chamber is in the address", /chamber=lower/.test(window.location.hash), window.location.hash);
+      const id = Object.keys(state.chambers.lower.members)[0];
+      pick(D, window, id);
+      const people = state.chambers.lower.members[id];
+      check("picking a district names its members, from the data",
+        people.every((p) => D.getElementById("legPanelBody").textContent.includes(p.name)));
+      check("the pick is in the address", window.location.hash.includes("d=" + id), window.location.hash);
+      check("every district is listed below, as buttons",
+        D.querySelectorAll("#legRoster .leg-row").length === Object.keys(state.chambers.lower.districts).length);
+      check("member text is escaped, never markup", !/<script/i.test(D.getElementById("legPanelBody").innerHTML));
+      const img = D.querySelector("#legPanelBody .leg-photo");
+      if (img) {
+        img.dispatchEvent(new window.Event("error"));
+        check("a portrait that fails to load steps aside", !D.querySelector("#legPanelBody .leg-photo"));
+      }
+      check("the page links to the state page and its congressional map",
+        !!D.querySelector('a[href="../states/tx.html"]') && !!D.querySelector('a[href="../districts/tx.html"]'));
+      check("the jump list goes to another state's legislature",
+        D.getElementById("stateJump").getAttribute("data-jump-to") === "legislature/{code}.html");
+    });
+  }
+  {
+    const { D, errors } = await buildPage("legislature/ne.html");
+    suite("legislature/ne.html — one chamber", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("no chamber switch for a one-chamber legislature", !D.querySelector("[data-chamber]"));
+      check("all 49 districts drawn", D.querySelectorAll("#legMap .district-statewide .region-shape").length === 49);
+    });
+  }
+  {
+    const { window, D, errors } = await buildPage("legislature/nh.html", { hash: "#/?chamber=lower" });
+    suite("legislature/nh.html — members the map cannot draw are listed", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const off = window.kycLegislature.NH.unplaced.filter((p) => p.chamber === "lower");
+      check("floterial members are listed under 'Not on the map'",
+        off.length > 0 && off.every((p) => D.getElementById("legPanelBody").textContent.includes(p.name)),
+        `${off.length}`);
+    });
+  }
+  {
+    const raw = fs.readFileSync(path.join(SITE, "legislature/ms.html"), "utf8");
+    suite("legislature/ms.html — a state whose lines changed says so", () => {
+      check("the page names the redrawn districts", /Senate districts 1, 2, 11, 19/.test(raw));
+    });
+  }
+  {
+    const tx = await buildPage("states/tx.html");
+    const dc = await buildPage("states/dc.html");
+    suite("state pages — link to their legislature", () => {
+      check("Texas's page links to its legislature",
+        !!tx.D.querySelector('#stateContent a[href="../legislature/tx.html"]'));
+      check("D.C., which has no state legislature, has no such link",
+        !!dc.D.querySelector("#stateContent .state-links") &&
+        !dc.D.querySelector('#stateContent a[href*="legislature/"]'));
+    });
+  }
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "guide") await testGuide();
+  if (!only || only === "legislature") await testLegislatures();
   if (!only || only === "index.html") await testDirectoryAsync();
   if (!only || only === "index.html") await testSenate();
   if (!only || only === "index.html") await testOdds();

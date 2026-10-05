@@ -23,6 +23,7 @@ if a page loads a remote script, stylesheet or font.
 *.csv (repo root)           ──┐
 us_atlas_states_topo.json   ──┤
 district_maps/*.json        ──┤   (every state's districts; tools/fetch_district_maps.py)
+legislative_maps/*.json     ──┤   (state senate and house districts; tools/fetch_legislative_maps.py)
 congress_snapshot.json      ──┤
 data/fec_field.json         ──┤   (the FEC's 2026 candidate register)
 data/disclosures.json       ──┤
@@ -31,15 +32,18 @@ data/committees.json        ──┤   (committee rosters, with rank and title)
 data/campaigns.json         ──┤
 data/enrichment.json        ──┤
 data/odds.json              ──┤
-data/census_governments.json ─┴─> kyc/ ──> candidate_profiles_site/
+data/census_governments.json ─┤
+data/state_legislators.json ──┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
                                              data/odds.js       (market prices, polling averages)
                                              data/government.js (the guide's maps: kyc/government_maps.py)
+                                             data/legislature/*.js (one state legislature per state)
                                              data/districts/*.js (one district map per state)
                                              states/*.html      (generated, one per state)
                                              districts/*.html   (generated, one per state)
                                              government/*.html  (generated: the guide, kyc/government_text.py)
+                                             legislature/*.html (generated, one per state)
                                              sitemap.xml        (generated)
                                              ├──> index.html    (grid, races, profiles)
                                              └──> map.html      (partisan map)
@@ -54,6 +58,8 @@ data/census_governments.json ─┴─> kyc/ ──> candidate_profiles_site/
                                              assets/kyc-state.js
                                              assets/kyc-districts.js
                                              assets/kyc-usmap.js
+                                             assets/kyc-regionmap.js
+                                             assets/kyc-legislature.js
                                              assets/kyc-guide.js
 ```
 
@@ -64,8 +70,9 @@ data/census_governments.json ─┴─> kyc/ ──> candidate_profiles_site/
 - Everything in `data/` is **generated**. Never edit `profiles.js`, `geo.js`,
   `odds.js` or `districts/*.js` by hand. `portraits.json`, `finance.json`, `fec_field.json`,
   `disclosures.json`, `primary_results.json`, `committees.json`,
-  `campaigns.json`, `enrichment.json`, `odds.json` and
-  `census_governments.json` are caches, but they *are* hand-editable.
+  `campaigns.json`, `enrichment.json`, `odds.json`,
+  `census_governments.json` and `state_legislators.json` are caches, but they
+  *are* hand-editable.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them only to check they load the right scripts in the right order; it never
   rewrites them. `states/*.html`, `districts/*.html`, `government/*.html`
@@ -93,12 +100,15 @@ python build_profile_site.py campaigns        # campaign websites from FEC commi
 python build_profile_site.py enrich           # fill gaps; check every campaign site
 python build_profile_site.py odds             # market prices and polling averages (writes odds.js)
 python build_profile_site.py census           # local governments by state (Census of Governments)
-python -m unittest discover tests             # 706 tests, no dependencies
-npm install && npm test                       # 925 real-DOM checks (needs jsdom)
+python build_profile_site.py statelegs        # every state legislator (Open States), matched to districts
+python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
+python -m unittest discover tests             # 721 tests, no dependencies
+npm install && npm test                       # 948 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
-`campaigns`, `enrich`, `odds`, `census` and `congress` touch the network. Run the
+`campaigns`, `enrich`, `odds`, `census`, `statelegs` and `congress` touch the
+network, as do the two `tools/fetch_*_maps.py` scripts. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -512,6 +522,22 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Read a compiled table from its raw HTML or file, not through a
     summarizer, and check it against each state's own record and for
     changes since it was published before a map shows it.
+
+51. **A member who cannot be placed is listed, never guessed.** Open States
+    names districts as each legislature does ("10th Bristol", "Belknap 1",
+    "10A"); the Census names them its own way. `statelegs.norm` reduces both
+    alike and anything left over is reported and shown under "Not on the
+    map" - New Hampshire's floterial seats, Maine's tribal representatives.
+    A nearest-name match would put someone on the wrong district, and a map
+    makes that look entirely normal. A seat with nobody listed is "nobody
+    listed", never "vacant" (rule 19).
+
+52. **A rejection page is not a file.** The Census server answers a burst -
+    and New Mexico's 2025 senate file, always - with "Request Rejected" and
+    status 200. The downloader cached that page as the file, so every later
+    run read HTML as a shapefile. `fetch_district_maps.get` refuses a zip URL
+    whose body is not a zip and never caches it, and the legislative tool
+    probes a file's first bytes before falling back to the 2024 release.
 
 ## District maps
 

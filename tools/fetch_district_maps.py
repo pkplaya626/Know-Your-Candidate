@@ -88,23 +88,40 @@ def cache_dir():
     return path
 
 
+def _whole(url, body):
+    """Whether *body* is what *url* promised. The Census server answers a
+    burst with a "Request Rejected" page and status 200; cached, that page
+    would stand in for the file on every later run."""
+    if url.lower().endswith(".zip"):
+        return zipfile.is_zipfile(io.BytesIO(body))
+    return True
+
+
 def get(url, pause=0.0):
     """Download *url*, caching it so a re-run does not fetch it again."""
     name = hashlib.sha256(url.encode("utf-8")).hexdigest()[:24]
     path = os.path.join(cache_dir(), name)
     if os.path.exists(path):
         with open(path, "rb") as handle:
-            return handle.read()
+            body = handle.read()
+        if _whole(url, body):
+            return body
+        os.remove(path)                 # a rejection cached by an older run
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     for attempt in range(5):
         try:
             with urllib.request.urlopen(request, timeout=180) as response:
                 body = response.read()
+            if not _whole(url, body):
+                raise OSError(f"{url} did not return the file (the server rejected the request)")
             break
         except urllib.error.HTTPError as exc:
             if exc.code == 404:
                 raise
             time.sleep(5 * (attempt + 1))
+        except OSError:
+            # A rejection page or a dropped connection: wait longer each time.
+            time.sleep(15 * (attempt + 1))
     else:
         raise RuntimeError(f"could not fetch {url}")
     with open(path + ".tmp", "wb") as handle:
