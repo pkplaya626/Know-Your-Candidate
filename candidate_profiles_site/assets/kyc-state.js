@@ -106,6 +106,11 @@
           KYC.icon("layers") + (districtMap.redrawn ? " Old and new district lines" :
             " District map") + "</a>"
         : "",
+      // Every state - not D.C. or a territory - has a legislature page.
+      info.senators
+        ? ' <a class="btn" href="' + KYC.escapeAttr(KYC.siteRoot() + "legislature/" +
+          code.toLowerCase() + ".html") + '">' + KYC.icon("landmark") + " State legislature</a>"
+        : "",
       "</p>",
       "</header>"
     );

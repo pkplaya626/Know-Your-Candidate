@@ -408,6 +408,114 @@ def render_district_page(code, host, summary=None):
     )
 
 
+_LEGISLATURE_SIDEBAR = """
+        <div class="sidebar-section">
+            <h2 class="sidebar-heading">State legislatures</h2>
+            <p class="sidebar-note">Every state's districts and the members who sit for
+                them, from Open States and the Census Bureau.</p>
+        </div>
+"""
+
+
+def render_legislature_page(code, host, summary=None):
+    """A state's legislature: its Senate and House districts on a map, and
+    the members who sit for them. The page carries the state code only;
+    ``assets/kyc-legislature.js`` draws it from ``data/legislature/<st>.js``."""
+    from .government_maps import LOWER_CHAMBER, SEATS, STATES
+    from .government import jump_options
+
+    name = state_name(code)
+    path = f"legislature/{code.lower()}.html"
+    canonical = f"https://{host}/{path}" if host else path
+    senate, house = SEATS[code]
+    lower = LOWER_CHAMBER.get(code, "House of Representatives")
+    if code == "NE":
+        title = "Nebraska Legislature"
+        lede = (f"Nebraska's Legislature has one chamber of {senate} members, called "
+                f"senators, each elected from a district on a nonpartisan ballot.")
+        chambers = ""
+    else:
+        title = f"{name} Legislature"
+        lede = (f"The {name} Senate has {senate} members and the {lower} {house}. Pick a "
+                f"district on the map to see who sits for it.")
+        chambers = "\n".join([
+            '                    <div class="segmented" role="group" aria-label="Chamber">',
+            '                        <button type="button" data-chamber="upper" aria-pressed="true">Senate</button>',
+            f'                        <button type="button" data-chamber="lower" aria-pressed="false">{_e(lower)}</button>',
+            "                    </div>",
+        ])
+    from .legislature import STATE_NOTES
+    note = STATE_NOTES.get(code)
+    main = "\n".join(line for line in [
+        '            <div id="legislatureContent" class="state-page legislature-page">',
+        '                <header class="state-hero">',
+        '                    <p class="state-kicker">State legislature</p>',
+        f'                    <h1 class="state-title">{_e(title)}</h1>',
+        f'                    <p class="districts-lede">{_e(lede)}</p>',
+        # A state whose lines changed after the Census captured them says so.
+        (f'                    <p class="guide-note">{_e(note[0])} <a href="{_e(note[1])}" '
+         f'target="_blank" rel="noopener noreferrer">Source</a></p>') if note else None,
+        '                    <p class="state-links">',
+        f'                        <a class="btn" href="../{_e(page_path(code))}"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> {_e(name)} page</a>',
+        f'                        <a class="btn" href="../districts/{_e(code.lower())}.html"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg> Congressional districts</a>',
+        '                        <a class="btn" href="../government/states.html"><svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> How states are governed</a>',
+        "                    </p>",
+        "                </header>",
+        '                <div class="toolbar legislature-toolbar">',
+        chambers,
+        '                    <div class="party-legend" aria-label="Colours">',
+        '                        <span class="key"><span class="swatch party-fill-r"></span>Republican</span>',
+        '                        <span class="key"><span class="swatch party-fill-d"></span>Democratic</span>',
+        '                        <span class="key"><span class="swatch party-fill-i"></span>Independent or other</span>',
+        '                        <span class="key"><span class="swatch party-fill-split"></span>Members of more than one party</span>',
+        '                        <span class="key"><span class="swatch party-fill-none"></span>Nobody listed, or nonpartisan</span>',
+        "                    </div>",
+        "                </div>",
+        '                <div class="leg-layout">',
+        '                    <div class="leg-map-card"><div id="legMap" class="leg-map">',
+        '                        <p class="results-bar" role="status">Loading the map&hellip;</p>',
+        "                    </div></div>",
+        '                    <aside class="leg-panel" aria-live="polite">',
+        '                        <h2 class="leg-panel-title" id="legPanelTitle"></h2>',
+        '                        <div id="legPanelBody"></div>',
+        "                    </aside>",
+        "                </div>",
+        '                <section class="leg-roster-section" aria-labelledby="legRosterTitle">',
+        '                    <h2 class="state-heading" id="legRosterTitle">Every district</h2>',
+        '                    <div id="legRoster" class="leg-roster"></div>',
+        "                </section>",
+        "            </div>",
+    ] if line is not None)
+    footer = "\n".join([
+        "                <p><strong>Sources:</strong> members, their parties, districts, contact",
+        "                    details and portraits from Open States (public domain), as each",
+        "                    legislature publishes them; district boundaries from the U.S. Census",
+        "                    Bureau's cartographic boundary files, as set for the 2024 elections.",
+        "                    A seat with nobody listed may be vacant, or Open States may be behind",
+        "                    a special election.</p>",
+        "                <p>Non-partisan and independent.</p>",
+    ])
+    scripts = [s.replace("{code}", code.lower()) for s in (
+        "../data/legislature/{code}.js", "../assets/kyc-regionmap.js", "../assets/kyc-legislature.js")]
+    return render_page(
+        title=_e(f"{title} — Know Your Candidate"),
+        og_title=_e(f"{title}: every district and member"),
+        description=_e(f"Every {name} state legislative district on a map, and the members "
+                       f"who sit for them: party, contact details and links."),
+        canonical=_e(canonical),
+        host=_e(host or ""),
+        code=_e(code),
+        page_kind="legislature",
+        search="",
+        sidebar=_LEGISLATURE_SIDEBAR,
+        jump_options=jump_options(STATES),
+        jump_attrs=' data-jump-to="legislature/{code}.html"',
+        main=main,
+        footer=footer,
+        scripts=_scripts(scripts),
+    )
+
+
 def render_redirect(target, host):
     """A page that moved: a stub that sends the reader on, and tells search
     engines where the page lives now."""
@@ -430,7 +538,7 @@ def render_redirect(target, host):
     ])
 
 
-def sitemap(host, codes, built=None, district_maps=(), guide=()):
+def sitemap(host, codes, built=None, district_maps=(), guide=(), legislatures=()):
     """``sitemap.xml`` listing the two hand-maintained pages and every state.
 
     Individual profiles live behind hash fragments, which crawlers do not
@@ -459,5 +567,7 @@ def sitemap(host, codes, built=None, district_maps=(), guide=()):
     # The guide, in reading order.
     for slug in guide:
         url(f"government/{slug}.html", "0.5", "monthly")
+    for code in sorted(legislatures):
+        url(f"legislature/{code.lower()}.html", "0.6", "weekly")
     lines.append("</urlset>")
     return "\n".join(lines) + "\n"

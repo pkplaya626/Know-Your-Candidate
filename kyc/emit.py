@@ -13,6 +13,8 @@ GEO_FILE = os.path.join(DATA_DIR, "geo.js")
 ODDS_FILE = os.path.join(DATA_DIR, "odds.js")
 # What the guide's maps say about each state (kyc/government_maps.py).
 GOVERNMENT_FILE = os.path.join(DATA_DIR, "government.js")
+# One file per state: its legislative districts and who sits for them.
+LEGISLATURE_DIR = os.path.join(DATA_DIR, "legislature")
 # One file per state, each loaded only by that state's district page.
 DISTRICTS_DIR = os.path.join(DATA_DIR, "districts")
 
@@ -72,9 +74,19 @@ DISTRICT_PAGE_REQUIREMENTS = (
     "../assets/kyc-districts.js",
 )
 
+# A state's legislature page: the districts and people, then the map, then
+# the page module that reads both.
+LEGISLATURE_PAGE_REQUIREMENTS = (
+    "../assets/kyc.js",
+    "../data/legislature/{code}.js",
+    "../assets/kyc-regionmap.js",
+    "../assets/kyc-legislature.js",
+)
+
 PAGES = tuple(PAGE_REQUIREMENTS)
 STATES_DIR = os.path.join(SITE_DIR, "states")
 DISTRICT_PAGES_DIR = os.path.join(SITE_DIR, "districts")
+LEGISLATURE_PAGES_DIR = os.path.join(SITE_DIR, "legislature")
 # The guide to how government works: generated pages, one folder down. What
 # each loads depends on the page (kyc.government.scripts).
 GOVERNMENT_DIR = os.path.join(SITE_DIR, "government")
@@ -215,6 +227,10 @@ def render_state_pages(profiles, root=".", summary=None):
         out[path] = pages.render_redirect(target, host)
     for relative, text in government.render_all(host, state_codes(profiles)).items():
         out[os.path.join(SITE_DIR, *relative.split("/"))] = text
+    from .government_maps import STATES
+    for code in STATES:
+        out[os.path.join(LEGISLATURE_PAGES_DIR, f"{code.lower()}.html")] = (
+            pages.render_legislature_page(code, host, summary))
     return out
 
 
@@ -256,9 +272,11 @@ def write_sitemap(profiles, root="."):
     if not host:
         return None
     path = os.path.join(root, SITEMAP_FILE)
+    from .government_maps import STATES
     _atomic_write(path, pages.sitemap(host, state_codes(profiles),
                                       district_maps=districts.all_codes(),
-                                      guide=government.slugs()))
+                                      guide=government.slugs(),
+                                      legislatures=STATES))
     return path
 
 
@@ -374,6 +392,50 @@ def write_government(payload, root="."):
     return path, _atomic_write(path, text)
 
 
+def legislature_file(code, root="."):
+    """``candidate_profiles_site/data/legislature/tx.js``."""
+    return os.path.join(root, LEGISLATURE_DIR, f"{code.lower()}.js")
+
+
+def legislature_signature(payload):
+    """Content hash of one state's legislature data, excluding the build time."""
+    return hashlib.sha256(_json(payload).encode("utf-8")).hexdigest()
+
+
+def write_legislature(maps, root="."):
+    """Emit one ``data/legislature/<st>.js`` per state whose content changed.
+    Returns ``[(path, size)]`` for the files written."""
+    os.makedirs(os.path.join(root, LEGISLATURE_DIR), exist_ok=True)
+    written = []
+    for code, payload in sorted(maps.items()):
+        path = legislature_file(code, root)
+        signature = legislature_signature(payload)
+        if read_signature(path=path) == signature:
+            continue
+        text = (
+            _BANNER.format(source=f"legislative_maps/{code.lower()}.json, "
+                                  "data/state_legislators.json (Open States)",
+                           built=build_timestamp())
+            + f"window.kycLegislature = {_json({code: payload})};\n"
+            + 'window.kycLegislatureMeta = {"signature":"' + signature + '"};\n'
+        )
+        written.append((path, _atomic_write(path, text)))
+    return written
+
+
+def check_legislature(maps, root="."):
+    """``[(path, problem)]`` for legislature files missing or out of date."""
+    problems = []
+    for code, payload in sorted(maps.items()):
+        path = legislature_file(code, root)
+        committed = read_signature(path=path)
+        if committed is None:
+            problems.append((path, "missing or carries no signature"))
+        elif committed != legislature_signature(payload):
+            problems.append((path, "stale"))
+    return problems
+
+
 def government_signature(payload):
     """Content hash of the guide's map data, excluding the build timestamp."""
     return hashlib.sha256(_json(payload).encode("utf-8")).hexdigest()
@@ -446,7 +508,8 @@ def check_pages(root="."):
     results = []
     checks = dict(PAGE_REQUIREMENTS)
     for folder, required in ((STATES_DIR, STATE_PAGE_REQUIREMENTS),
-                             (DISTRICT_PAGES_DIR, DISTRICT_PAGE_REQUIREMENTS)):
+                             (DISTRICT_PAGES_DIR, DISTRICT_PAGE_REQUIREMENTS),
+                             (LEGISLATURE_PAGES_DIR, LEGISLATURE_PAGE_REQUIREMENTS)):
         directory = os.path.join(root, folder)
         if os.path.isdir(directory):
             for name in sorted(os.listdir(directory)):

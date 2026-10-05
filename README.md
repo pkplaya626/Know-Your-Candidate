@@ -31,6 +31,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… field` | Refresh the FEC register of everyone running in 2026 |
 | `… field --check` | Report the field from the committed cache; no network |
 | `… census` | Count each state's local governments from the Census of Governments (`--check` reads the cache) |
+| `… statelegs` | Every state legislator from Open States, matched to the district maps (`--check` re-matches the cache) |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
 | `… results` | Read each state's primary results from Wikipedia: who is still in |
 | `… results --check` | Report the results from the committed cache; no network |
@@ -108,6 +109,8 @@ CI asserts that a rebuild changes nothing.
 | `government_text.py` | The guide's words and the sources each section was checked against |
 | `government_maps.py` | What the guide's maps say about each state, every value with its source |
 | `census.py` | The Census of Governments' counts of local governments by state (the `census` command) |
+| `statelegs.py` | Every state legislator, from Open States, matched to a Census district (the `statelegs` command) |
+| `legislature.py` | Each state's legislature page data: projected districts, close-ups and the members in each |
 | `campaigns.py` | Campaign websites from each candidate's FEC committee |
 | `enrich.py` | Fill filed candidates' gaps from their Wikipedia infobox and campaign site; check every linked campaign site |
 | `odds.py` | Prediction-market prices (Kalshi, Polymarket) and published polling averages for the 2026 Senate races |
@@ -135,6 +138,8 @@ order renders an empty site with no error anywhere.
 | `assets/kyc-state.js` | A state's page, and the directory of states |
 | `assets/kyc-usmap.js` | The map of the states, drawn once for the partisan map and the guide's maps |
 | `assets/kyc-guide.js` | The guide's pages: their maps, and what they show from the data (who leads each committee) |
+| `assets/kyc-regionmap.js` | A map of any regions inside a state (legislative districts now), with labels and close-ups |
+| `assets/kyc-legislature.js` | A state's legislature page: chambers, districts, members |
 
 Every view has a URL: `#/profile/<id>` for a person,
 `#/?state=TX&chamber=Senate` for a filtered list, so any view can be linked and
@@ -914,6 +919,42 @@ The Census table marks a kind of government a state does not have with "X".
 That is kept as "none" - Texas has no township governments - and never
 written as a count of zero (rule 19). `census` refuses a table whose states do
 not add up to its own national row.
+
+## State legislatures
+
+Every state has a page for its legislature, `legislature/<st>.html`: its Senate
+and House districts on a map in their members' party colours, a panel for the
+picked district with each member's party, contact details, portrait and
+links, and every district listed below. `#/?chamber=lower&d=134` opens any
+district as sent. Every state page links to it.
+
+| What | Source | How |
+|---|---|---|
+| Members, party, district, contact, portraits, links | Open States, per-state current legislators (public domain) | `python build_profile_site.py statelegs` writes `data/state_legislators.json` |
+| District boundaries | Census Bureau cartographic boundary files, 2025 (1:500,000), districts as set for the 2024 elections | `python tools/fetch_legislative_maps.py` writes `legislative_maps/<st>.json` |
+
+Each member keeps Open States' own id, and is placed on the map by matching
+their district's name to the Census boundary's, after both are reduced the
+same way: "10th Bristol District" and "10th Bristol", "Hampshire-Franklin-
+Worcester" and "Hampshire, Franklin and Worcester", "Merrimack 08" and
+"Merrimack 8"; Idaho's seats 10A and 10B are district 10. Anyone who still
+does not match is reported by `statelegs` and listed on the page under "Not
+on the map", never guessed: New Hampshire's floterial representatives, who
+sit for districts that overlay others, and Maine's non-voting tribal
+representatives, elected by their nations rather than a district.
+
+A seat Open States lists nobody for is "nobody listed", not "vacant": the
+record may be behind a special election. Two states' lines changed after the
+Census captured them, and their pages say so: Michigan's Senate (new lines
+from November 2026) and Mississippi (2025 special elections under redrawn
+lines, then vacated by the Supreme Court in May 2026). The Census server
+refuses New Mexico's 2025 senate file, so that map comes from the 2024 file,
+which holds the same districts.
+
+The map is `assets/kyc-regionmap.js`, a renderer for any regions keyed by
+any id - counties and towns are next - built on the district pages'
+techniques: one definition per shape, labels as page text at 11px for the
+drawn width, close-ups planned by `kyc/districts.insets`.
 
 ## District maps
 

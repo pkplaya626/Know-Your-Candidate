@@ -239,6 +239,20 @@ def _build(args):
         odds_path, odds_size = emit.write_odds(page_odds, args.root)
         print(f"[ok] wrote {odds_path} ({odds_size / 1024:.0f} KB)")
 
+    # Each state's legislature: districts and members, rewritten per state
+    # only when its content changed.
+    from . import legislature as legislature_mod
+    try:
+        legislatures = legislature_mod.build(args.root)
+    except legislature_mod.LegislatureError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 2
+    written_legs = emit.write_legislature(legislatures, args.root)
+    leg_stats = legislature_mod.stats(legislatures)
+    print(f"[ok] state legislatures: {leg_stats['states']} states, {leg_stats['districts']:,} "
+          f"districts, {leg_stats['placed']:,} members placed, {leg_stats['unplaced']} listed off "
+          f"the map; {len(written_legs)} file(s) rewritten")
+
     # The guide's maps: rewritten only when what they say changed.
     from . import government_maps
     guide_maps = government_maps.payload()
@@ -848,6 +862,18 @@ def _verify(args):
     else:
         print(f"  ok  {emit.ODDS_FILE} matches odds.json ({odds_expected[:16]}...)")
 
+    from . import legislature as legislature_mod
+    try:
+        stale_legs = emit.check_legislature(legislature_mod.build(args.root), args.root)
+    except legislature_mod.LegislatureError as exc:
+        problems.append(f"state legislatures unavailable: {exc}")
+    else:
+        if stale_legs:
+            problems.append(f"{len(stale_legs)} legislature file(s) are {stale_legs[0][1]}: "
+                            + ", ".join(os.path.basename(p) for p, _ in stale_legs[:5]))
+        else:
+            print(f"  ok  {emit.LEGISLATURE_DIR}: every state matches its maps and roster")
+
     from . import government_maps
     guide_expected = emit.government_signature(government_maps.payload())
     guide_committed = emit.read_signature(path=os.path.join(args.root, emit.GOVERNMENT_FILE))
@@ -918,6 +944,51 @@ def _verify(args):
         return 1
 
     print("\n[ok] committed data is in sync with the sources.")
+    return 0
+
+
+def _statelegs(args):
+    """Every state legislator from Open States, matched to the district maps."""
+    from . import statelegs
+    from .government_maps import STATES
+    if args.check:
+        cache = statelegs.load_cache(args.root)
+        if not cache:
+            print(f"[error] no {statelegs.CACHE_PATH}; run 'statelegs'", file=sys.stderr)
+            return 2
+        by_state = cache["states"]
+    else:
+        try:
+            by_state = statelegs.fetch(STATES)
+        except statelegs.StateLegislatorsError as exc:
+            print(f"[error] {exc}", file=sys.stderr)
+            return 2
+    unplaced_total = 0
+    for code in STATES:
+        topo = statelegs.load_map(code, args.root)
+        if not topo:
+            print(f"  [warn] {code}: no legislative_maps/{code.lower()}.json; run "
+                  f"tools/fetch_legislative_maps.py")
+            continue
+        unplaced = statelegs.match(code, by_state[code], topo)
+        unplaced_total += len(unplaced)
+        if unplaced:
+            reasons = sorted({why for _, why in unplaced})
+            print(f"  {code}: {len(unplaced)} not placed on the map ({'; '.join(reasons)}): "
+                  + ", ".join(sorted({r['district'] for r, _ in unplaced})[:6]))
+    report = statelegs.seats_report(by_state)
+    short = [f"{c} {ch} {n}/{s}" for c, v in report.items() for ch, (n, s) in v.items() if n < s]
+    over = [f"{c} {ch} {n}/{s}" for c, v in report.items() for ch, (n, s) in v.items() if n > s]
+    total = sum(len(v) for v in by_state.values())
+    print(f"  {total:,} legislators in {len(by_state)} states; {unplaced_total} not placed")
+    if short:
+        print(f"  seats with nobody listed: {', '.join(short)}")
+    if over:
+        print(f"[error] more legislators than seats: {', '.join(over)}", file=sys.stderr)
+        return 1
+    if not args.check:
+        path = statelegs.save_cache(by_state, args.root)
+        print(f"[ok] wrote {path}")
     return 0
 
 
@@ -1061,6 +1132,10 @@ def build_parser():
     congress.add_argument("--apply", action="store_true",
                           help="add newly seated members to the roster CSVs")
 
+    legs = add("statelegs", help="every state legislator, from Open States")
+    legs.add_argument("--check", action="store_true",
+                      help="match the committed cache to the district maps; no network")
+
     census = add("census", help="count each state's local governments (Census of Governments)")
     census.add_argument("--check", action="store_true",
                         help="report the committed cache; make no network call")
@@ -1094,6 +1169,8 @@ def main(argv=None):
         return _geo(args)
     if args.command == "census":
         return _census(args)
+    if args.command == "statelegs":
+        return _statelegs(args)
     if args.command == "verify":
         return _verify(args)
     if args.command == "congress":

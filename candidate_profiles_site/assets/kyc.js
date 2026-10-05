@@ -1011,9 +1011,15 @@
     });
     // A guide map picks the state on its own map instead (kyc-guide.js).
     if (select.getAttribute("data-jump") === "map") return;
+    // A page of a kind every state has (a legislature) jumps to that state's.
+    var pattern = select.getAttribute("data-jump-to");
     select.addEventListener("change", function () {
       var code = select.value;
       if (!code) return;
+      if (pattern) {
+        global.location.href = siteRoot() + pattern.replace("{code}", code.toLowerCase());
+        return;
+      }
       global.location.href = onMaps && maps[code] ? siteRoot() + maps[code].page : stateUrl(code);
     });
   }

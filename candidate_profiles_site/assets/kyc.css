@@ -3046,6 +3046,9 @@ svg.district-map,
   border: 1px solid var(--border-strong);
 }
 
+.guide-fact-link { margin: 0 0 var(--s-3); font-weight: 600; font-size: var(--t-sm); }
+.guide-fact-link a { display: inline-flex; align-items: center; gap: var(--s-2); }
+
 /* The page's text, folded under the facts. */
 .guide-more { margin-top: var(--s-5); }
 .guide-more-section {
@@ -3075,4 +3078,107 @@ svg.district-map,
 .guide-more-section .guide-table { font-size: var(--t-xs); }
 @media (pointer: coarse) {
   .guide-more-section > summary { min-height: 44px; display: flex; align-items: center; }
+}
+
+/* ====================================================== 18. state legislatures */
+
+/* A state's legislature: the map and a panel side by side, the list of every
+ * district below. The map is the shared region map (kyc-regionmap.js), in
+ * the district maps' party fills. */
+.legislature-toolbar {
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  padding: 0 0 var(--s-3);
+  border-bottom: 0;
+}
+.legislature-toolbar .party-legend { margin: 0; }
+.leg-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+  gap: var(--s-4);
+  align-items: start;
+  margin-bottom: var(--s-6);
+}
+.leg-map-card {
+  padding: var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+}
+.leg-map .inset-row { margin-top: var(--s-3); }
+.leg-panel {
+  position: sticky;
+  top: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+.leg-panel-title {
+  margin: 0 0 var(--s-3);
+  font-size: var(--t-lg);
+  font-weight: 700;
+}
+.leg-panel p { margin: 0 0 var(--s-2); font-size: var(--t-sm); line-height: 1.55; }
+.leg-subhead { margin-top: var(--s-4) !important; font-weight: 700; color: var(--text); }
+
+/* A district's two parties, half and half: the split colour of the map. */
+.district-shape.party-split { fill: color-mix(in srgb, var(--split) 70%, var(--surface-1)); }
+.swatch.party-fill-split { background: color-mix(in srgb, var(--split) 70%, var(--surface-1)); }
+/* The picked district: outlined over every fill. */
+.region-shape.is-focus { stroke: var(--text); stroke-width: 2.4; }
+
+.leg-person {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--s-3);
+  padding: var(--s-3) 0;
+  border-top: 1px solid var(--border);
+}
+.leg-person:first-child { border-top: 0; padding-top: 0; }
+.leg-photo {
+  width: 56px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--surface-3);
+}
+.leg-who p { margin: 0 0 var(--s-1); }
+.leg-name { font-weight: 700; font-size: var(--t-md); }
+.leg-party { font-weight: 600; font-size: var(--t-sm); }
+.leg-contact,
+.leg-links { font-size: var(--t-xs); overflow-wrap: anywhere; }
+.leg-contact a,
+.leg-links a { color: var(--accent); }
+
+.leg-roster {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: var(--s-2);
+}
+.leg-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.leg-row-district { font-weight: 700; font-size: var(--t-sm); }
+.leg-row-people { font-size: var(--t-sm); }
+@media (hover: hover) {
+  .leg-row:hover { border-color: var(--border-strong); background: var(--surface-3); }
+}
+@media (pointer: coarse) {
+  .leg-row { min-height: 44px; }
+  .leg-row:active { background: var(--surface-3); }
+}
+@media (max-width: 1000px) {
+  .leg-layout { grid-template-columns: minmax(0, 1fr); }
+  .leg-panel { position: static; }
 }
