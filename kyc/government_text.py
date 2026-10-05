@@ -85,6 +85,10 @@ SOURCES = {
                    "https://www.law.cornell.edu/uscode/text/28/621"),
     "usc-28-631": ("28 U.S.C. 631 (magistrate judges)",
                    "https://www.law.cornell.edu/uscode/text/28/631"),
+    "usc-28-636": ("28 U.S.C. 636 (magistrate judges: jurisdiction)",
+                   "https://www.law.cornell.edu/uscode/text/28/636"),
+    "usc-18-3401": ("18 U.S.C. 3401 (misdemeanors tried by magistrate judges)",
+                    "https://www.law.cornell.edu/uscode/text/18/3401"),
     "usc-28-1295": ("28 U.S.C. 1295 (Federal Circuit)",
                     "https://www.law.cornell.edu/uscode/text/28/1295"),
     "usc-28-1441": ("28 U.S.C. 1441 (removal of civil actions)",
@@ -167,6 +171,12 @@ SOURCES = {
                           "https://www.senate.gov/senators/leadership.htm"),
     "senate-officers": ("U.S. Senate: Officers & Staff",
                         "https://www.senate.gov/about/officers-staff.htm"),
+    "senate-pro-tem": ("U.S. Senate: About the President Pro Tempore",
+                       "https://www.senate.gov/about/officers-staff/president-pro-tempore.htm"),
+    "senate-recognition": ("U.S. Senate: Floor Leaders Receive Priority Recognition",
+                           "https://www.senate.gov/about/parties-leadership/floor-leader-priority-recognition.htm"),
+    "clerk-votes": ("Office of the Clerk, U.S. House: Roll Call Votes",
+                    "https://clerk.house.gov/Votes"),
     "congress-committees": ("Congress.gov: Committees of the U.S. Congress",
                             "https://www.congress.gov/committees"),
     "congress-legislators": ("congress-legislators: committee membership",
@@ -216,6 +226,10 @@ SOURCES = {
                    "https://www.law.cornell.edu/wex/police_powers"),
     "nebraska": ("Nebraska Legislature: History of the Unicameral",
                  "https://nebraskalegislature.gov/about/history_unicameral.php"),
+    "nebraska-senators": ("Nebraska Legislature: Senators by district",
+                          "https://nebraskalegislature.gov/senators/senator_list.php"),
+    "fl-const": ("Florida Constitution, Article IV (Florida Senate)",
+                 "https://www.flsenate.gov/Laws/Constitution"),
     "tx-322": ("Texas Government Code, chapter 322 (Legislative Budget Board)",
                "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.322.htm"),
     "tx-lbb": ("Texas Legislative Budget Board: About", "https://www.lbb.texas.gov/About_LBB.aspx"),
@@ -248,7 +262,8 @@ SOURCES = {
     "mo-plan": ("Missouri Courts: the Missouri Nonpartisan Court Plan",
                 "https://www.courts.mo.gov/page.jsp?id=297"),
     "tx-glo": ("Texas General Land Office: About the GLO", "https://www.glo.texas.gov/about-glo"),
-    "tx-rrc": ("Railroad Commission of Texas: About", "https://www.rrc.texas.gov/about-us/"),
+    "tx-rrc": ("Railroad Commission of Texas: RRC History",
+               "https://www.rrc.texas.gov/about-us/rrc-history/"),
 
     # Local governments
     "nlc-delegation": ("National League of Cities: Cities 101, Delegation of Power",
@@ -257,6 +272,8 @@ SOURCES = {
                   "https://www.nlc.org/resource/cities-101-forms-of-local-government/"),
     "naco-primer": ("National Association of Counties: County Government Primer (2024)",
                     "https://www.naco.org/sites/default/files/2025-03/2024%20County%20Government%20Primer_update_v8_FINAL.pdf"),
+    "tsha-commission": ("Handbook of Texas: Commission Form of City Government",
+                        "https://www.tshaonline.org/handbook/entries/commission-form-of-city-government"),
     "icma-2018": ("ICMA: 2018 Municipal Form of Government Survey",
                   "https://icma.org/sites/default/files/2018%20Municipal%20Form%20of%20Government%20Survey%20Report.pdf"),
     "naco-structure": ("National Association of Counties: County Structure, Authority and Finances",
@@ -472,9 +489,9 @@ CONGRESS = {
                       "(Section 7)."),
                 ("p", "Congress also oversees how the laws are carried out, through hearings, "
                       "investigations and reports, and it can remove federal officers: the House "
-                      "impeaches by a majority vote, and the Senate tries the case, where "
-                      "conviction takes two-thirds of the senators present (Article I, Sections 2 "
-                      "and 3; Article II, Section 4)."),
+                      "impeaches, by a simple majority in practice, and the Senate tries the "
+                      "case, where conviction takes two-thirds of the senators present (Article "
+                      "I, Sections 2 and 3; Article II, Section 4)."),
             ],
             "sources": ["const-art1", "const-art2"],
         },
@@ -486,10 +503,11 @@ CONGRESS = {
                       "voters (Seventeenth Amendment) to six-year terms. The terms are staggered, "
                       "so about a third of the seats are up every two years. [Which seats are up "
                       "in 2026](site:index.html#/?view=senate)."),
-                ("p", "The Senate alone gives or withholds its advice and consent: a treaty needs "
-                      "two-thirds of the senators present, and the president's nominations of "
-                      "ambassadors, judges, cabinet secretaries and other officers need a "
-                      "majority (Article II, Section 2). It also tries impeachments."),
+                ("p", "The Senate alone gives or withholds its advice and consent (Article II, "
+                      "Section 2): a treaty needs two-thirds of the senators present, and the "
+                      "president's nominations of ambassadors, judges, cabinet secretaries and "
+                      "other officers need its consent, which it gives by a simple majority. It "
+                      "also tries impeachments."),
                 ("h3", "Who runs it"),
                 ("roles", [
                     ("President of the Senate",
@@ -538,7 +556,8 @@ CONGRESS = {
                 ]),
             ],
             "sources": ["const-art1", "const-art2", "const-amdt17", "usc-3-19",
-                        "senate-leadership", "senate-officers"],
+                        "senate-leadership", "senate-pro-tem", "senate-recognition",
+                        "senate-officers"],
         },
         {
             "id": "house",
@@ -575,8 +594,8 @@ CONGRESS = {
                 ("h3", "Officers who are not members"),
                 ("roles", [
                     ("Clerk",
-                     "Keeps the House's records, receives and certifies its bills, runs its "
-                     "electronic voting and publishes the roll calls."),
+                     "Keeps the House's records, receives and certifies its bills, and "
+                     "publishes its roll-call votes."),
                     ("Sergeant at Arms",
                      "Keeps order on the floor under the Speaker's direction and oversees "
                      "security with the Capitol Police."),
@@ -590,7 +609,7 @@ CONGRESS = {
                 ]),
             ],
             "sources": ["const-art1", "usc-3-19", "house-explained", "house-leadership",
-                        "house-officers"],
+                        "house-officers", "clerk-votes"],
         },
         {
             "id": "committees",
@@ -672,8 +691,8 @@ EXECUTIVE = {
                       "(Twenty-fifth Amendment), and presides over the Senate, breaking ties "
                       "there. After the vice president, the line of succession runs to the "
                       "Speaker of the House, the Senate's president pro tempore, and then the "
-                      "cabinet secretaries in the order their departments were created (3 U.S.C. "
-                      "19)."),
+                      "cabinet secretaries in the order the statute lists them, roughly the "
+                      "order in which their offices were first created (3 U.S.C. 19)."),
             ],
             "sources": ["const-art1", "const-art2", "const-amdt22", "const-amdt25", "usc-3-19",
                         "youngstown"],
@@ -910,8 +929,9 @@ COURTS = {
                     ("Magistrate judges",
                      "Appointed by each district court's judges, for eight years if full-time "
                      "and four if part-time (28 U.S.C. 631). They handle warrants, first "
-                     "appearances, bail and pretrial matters, and can try misdemeanors and, if "
-                     "the parties agree, civil cases."),
+                     "appearances, bail and pretrial matters. They can try petty offenses, "
+                     "other misdemeanors if the defendant agrees, and civil cases if the "
+                     "parties agree (18 U.S.C. 3401; 28 U.S.C. 636)."),
                     ("Bankruptcy judges",
                      "The 90 bankruptcy courts are units of the district courts (28 U.S.C. "
                      "151). Their judges are appointed by the court of appeals for the circuit "
@@ -919,7 +939,7 @@ COURTS = {
                 ]),
             ],
             "sources": ["uscourts-structure", "uscourts-judgeships", "usc-28-251", "usc-28-631",
-                        "usc-28-151", "usc-28-152"],
+                        "usc-28-636", "usc-18-3401", "usc-28-151", "usc-28-152"],
         },
         {
             "id": "other-courts",
@@ -1003,10 +1023,16 @@ STATES = {
             "blocks": [
                 ("p", "Every state but Nebraska has a legislature of two chambers. The upper "
                       "chamber is the Senate. The lower is the House of Representatives in most "
-                      "states; the Assembly in California, Nevada, New York and Wisconsin; the "
-                      "General Assembly in New Jersey; and the House of Delegates in Maryland, "
-                      "Virginia and West Virginia. Nebraska's single chamber has 49 members, "
-                      "called senators, elected without party labels on the ballot."),
+                      "states; the Assembly in [California](https://www.assembly.ca.gov/), "
+                      "[Nevada](https://www.leg.state.nv.us/App/Legislator/A/Assembly/Current), "
+                      "[New York](https://nyassembly.gov/) and "
+                      "[Wisconsin](https://legis.wisconsin.gov/assembly/); the General Assembly "
+                      "in [New Jersey](https://www.njleg.state.nj.us/); and the House of "
+                      "Delegates in [Maryland](https://mgaleg.maryland.gov/mgawebsite/Members/Index/house), "
+                      "[Virginia](https://house.vga.virginia.gov/) and "
+                      "[West Virginia](https://www.wvlegislature.gov/). Nebraska's single chamber "
+                      "has 49 members, called senators, elected without party labels on the "
+                      "ballot."),
                 ("p", "Who presides varies. In about 26 states the lieutenant governor is the "
                       "president of the senate; elsewhere the senate elects its own president. "
                       "Lower chambers elect a speaker, who usually controls committee "
@@ -1019,7 +1045,7 @@ STATES = {
                       "bills cost; auditors review state agencies; and each chamber's clerk or "
                       "secretary keeps its journal and records its votes."),
             ],
-            "sources": ["nebraska", "ncsl-leaders", "tx-322", "tx-lbb"],
+            "sources": ["nebraska", "nebraska-senators", "ncsl-leaders", "tx-322", "tx-lbb"],
         },
         {
             "id": "executive",
@@ -1089,9 +1115,10 @@ STATES = {
         },
         {
             "id": "councils",
-            "heading": "Executive councils",
+            "heading": "Councils and cabinets that check the governor",
             "blocks": [
-                ("p", "Three states give a separately elected council a check on the governor:"),
+                ("p", "Some states give other separately elected officials a formal check on the "
+                      "governor. Among them:"),
                 ("roles", [
                     ("New Hampshire",
                      "Five executive councilors, elected every two years from districts, must "
@@ -1109,10 +1136,16 @@ STATES = {
                      "governor and lieutenant governor among them. Its approval is needed for "
                      "the state to buy, sell or lease land, and to spend from the Contingency "
                      "and Emergency Fund."),
+                    ("Florida",
+                     "The Cabinet is the elected attorney general, chief financial officer and "
+                     "commissioner of agriculture. A pardon needs the approval of two of them, "
+                     "and with the governor they act as the trustees of the state's lands and, "
+                     "less the agriculture commissioner, as the State Board of Administration, "
+                     "which invests its funds (Constitution, Article IV, Sections 4 and 8)."),
                 ]),
             ],
             "sources": ["nh-const", "nh-council", "ma-council", "nc-const-3", "nc-146-22",
-                        "nc-146-29", "nc-143c-4-4"],
+                        "nc-146-29", "nc-143c-4-4", "fl-const"],
         },
         {
             "id": "courts",
@@ -1313,7 +1346,7 @@ LOCAL = {
                       "hearing officers to decide building, housing and health code cases "
                       "instead."),
             ],
-            "sources": ["cog-report", "nlc-forms", "icma-2018", "portland"],
+            "sources": ["cog-report", "nlc-forms", "icma-2018", "tsha-commission", "portland"],
         },
         {
             "id": "townships",

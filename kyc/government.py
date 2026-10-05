@@ -17,12 +17,16 @@ that says "see the Senate" and goes nowhere looks entirely normal.
 """
 
 import html
+import os
 import re
 
 from . import pages
 from .government_text import PAGES, REVIEWED, SOURCES
 
 FOLDER = "government"
+# The site's own pages, which a "site:" link must name.
+SITE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                    "candidate_profiles_site")
 
 # What each guide page loads. Most need only the shared module; a page that
 # shows people loads them the way a state page does, so a name opens the
@@ -106,6 +110,9 @@ def href(target, here):
     if kind == "site":
         if not rest or rest.startswith(("/", ".")):
             raise ValueError(f"{here}: site link {rest!r} must be relative to the root")
+        page = rest.split("#")[0].split("?")[0]
+        if not os.path.isfile(os.path.join(SITE, *page.split("/"))):
+            raise ValueError(f"{here}: no site page {page!r}")
         return "../" + rest, False
     if kind == "state":
         if rest not in pages.STATE_NAMES:
@@ -114,18 +121,29 @@ def href(target, here):
     raise ValueError(f"{here}: unknown link target {target!r}")
 
 
+# What is left of a link the pattern could not read: "[label](" with a
+# parenthesis in its target, say. It would reach the page as raw markup.
+_UNREAD = re.compile(r"\]\(|\[[^\]]*\]\s*\(")
+
+
+def _text(segment, here):
+    if _UNREAD.search(segment):
+        raise ValueError(f"{here}: link markup the build cannot read: {segment.strip()[:80]!r}")
+    return html.escape(segment, quote=False)
+
+
 def inline(text, here):
     """Escape *text* for HTML, turning ``[label](target)`` into links."""
     out = []
     last = 0
     for match in _LINK.finditer(text):
-        out.append(html.escape(text[last:match.start()], quote=False))
+        out.append(_text(text[last:match.start()], here))
         url, external = href(match.group(2), here)
         extra = ' target="_blank" rel="noopener noreferrer"' if external else ""
         out.append(f'<a href="{_e(url)}"{extra}>'
                    f'{html.escape(match.group(1), quote=False)}</a>')
         last = match.end()
-    out.append(html.escape(text[last:], quote=False))
+    out.append(_text(text[last:], here))
     return "".join(out)
 
 

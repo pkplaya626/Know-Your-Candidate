@@ -70,7 +70,8 @@ class TestGuideLinks(unittest.TestCase):
         self.assertEqual(government.href("https://example.org/a", "index"),
                          ("https://example.org/a", True))
         for bad in ("guide:nowhere", "guide:congress#nowhere", "#nowhere", "state:XX",
-                    "site:/map.html", "site:../map.html", "http://example.org", "ftp:x"):
+                    "site:/map.html", "site:../map.html", "site:mpa.html",
+                    "http://example.org", "ftp:x"):
             with self.assertRaises(ValueError, msg=bad):
                 government.href(bad, "index")
 
@@ -80,6 +81,16 @@ class TestGuideLinks(unittest.TestCase):
             html,
             'a &lt;b&gt; &amp; <a href="https://e.org/?a=1&amp;b=2" target="_blank" '
             'rel="noopener noreferrer">x &lt;y&gt;</a> z')
+
+    def test_a_link_the_build_cannot_read_is_refused(self):
+        # A parenthesis in the target defeats the pattern; the text must not
+        # reach the page as raw "[label](url)".
+        with self.assertRaises(ValueError):
+            government.inline("See [the Lumbee](https://e.org/wiki/Lumbee_(tribe)).", "index")
+        with self.assertRaises(ValueError):
+            government.inline("A [broken] (guide:congress) link", "index")
+        self.assertEqual(government.inline("Brackets [like these] are text.", "index"),
+                         "Brackets [like these] are text.")
 
     def test_an_unknown_source_or_block_is_refused(self):
         with self.assertRaises(ValueError):

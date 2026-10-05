@@ -131,8 +131,9 @@ jobs:
       # KYC.escapeHtml. These pages describe real, named people.
       - name: No inline event handlers in the markup
         run: |
-          if grep -rnE '\son(click|error|load|change|submit)=' \
-               candidate_profiles_site/*.html candidate_profiles_site/assets/*.js; then
+          # Every page in every folder (rule 47), and every module.
+          if grep -rnE --include='*.html' --include='*.js' '\son(click|error|load|change|submit)=' \
+               candidate_profiles_site/ --exclude-dir=data; then
             echo "An inline event handler is back; use delegated listeners."
             exit 1
           fi

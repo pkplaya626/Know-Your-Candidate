@@ -89,7 +89,7 @@ python build_profile_site.py results          # who is still in, from Wikipedia
 python build_profile_site.py campaigns        # campaign websites from FEC committees
 python build_profile_site.py enrich           # fill gaps; check every campaign site
 python build_profile_site.py odds             # market prices and polling averages (writes odds.js)
-python -m unittest discover tests             # 691 tests, no dependencies
+python -m unittest discover tests             # 692 tests, no dependencies
 npm install && npm test                       # 851 real-DOM checks (needs jsdom)
 ```
 
