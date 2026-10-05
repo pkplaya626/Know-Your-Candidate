@@ -6484,6 +6484,16 @@
   "url": null,
   "website": null
  },
+ "H6NY07255": {
+  "committee_id": "C00946244",
+  "fetched": "2026-10-05T16:34:22+00:00",
+  "found": true,
+  "last_file_date": "2026-10-02",
+  "name": "PRISCILLA GHAZNAVI FOR CONGRESS",
+  "person": "Priscilla Ghaznavi",
+  "url": "https://priscillaghaznaviforcongress.com",
+  "website": "PRISCILLAGHAZNAVIFORCONGRESS.COM"
+ },
  "H6NY10176": {
   "committee_id": "C00930123",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -7624,6 +7634,16 @@
   "url": null,
   "website": null
  },
+ "H6TX30252": {
+  "committee_id": "C00931261",
+  "fetched": "2026-10-05T16:34:22+00:00",
+  "found": true,
+  "last_file_date": "2026-09-29",
+  "name": "BARBARA MALLORY CARAWAY FOR CONGRESS 2026",
+  "person": "Barbara Mallory Caraway",
+  "url": "https://barbaraforcongress.com",
+  "website": "BARBARAFORCONGRESS.COM"
+ },
  "H6TX31094": {
   "committee_id": "C00907329",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -7867,6 +7887,16 @@
  "H6VA11249": {
   "committee_id": "C00959106",
   "fetched": "2026-09-13T22:19:03+00:00",
+  "found": true,
+  "last_file_date": "2026-09-11",
+  "name": "PURVES FOR CONGRESS",
+  "person": "Arthur Grahame Purves",
+  "url": null,
+  "website": null
+ },
+ "H6VA11256": {
+  "committee_id": "C00959106",
+  "fetched": "2026-10-05T16:34:22+00:00",
   "found": true,
   "last_file_date": "2026-09-11",
   "name": "PURVES FOR CONGRESS",

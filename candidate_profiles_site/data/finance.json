@@ -1900,7 +1900,7 @@
  "dan osborn|NE|S": {
   "candidate_id": "S4NE00207",
   "cash_on_hand": 2421487.06,
-  "coverage_end": "2026-06-30",
+  "coverage_end": "2026-09-30",
   "coverage_start": "2025-01-01",
   "disbursements": 3393629.65,
   "election_year": 2026,
@@ -1951,10 +1951,10 @@
  },
  "daniel webster|FL|H": {
   "candidate_id": "H0FL08208",
-  "cash_on_hand": 101286.7,
-  "coverage_end": "2026-06-30",
+  "cash_on_hand": 14443.5,
+  "coverage_end": "2026-09-30",
   "coverage_start": "2025-01-01",
-  "disbursements": 385954.25,
+  "disbursements": 472797.45,
   "election_year": 2026,
   "found": true,
   "individual_contributions": 147930.93,
@@ -7166,7 +7166,7 @@
  "randy feenstra|IA|H": {
   "candidate_id": "H0IA04145",
   "cash_on_hand": 0.0,
-  "coverage_end": "2026-06-30",
+  "coverage_end": "2026-09-30",
   "coverage_start": "2025-01-01",
   "disbursements": 2287481.84,
   "election_year": 2026,
