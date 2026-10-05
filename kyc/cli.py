@@ -253,6 +253,19 @@ def _build(args):
           f"districts, {leg_stats['placed']:,} members placed, {leg_stats['unplaced']} listed off "
           f"the map; {len(written_legs)} file(s) rewritten")
 
+    # Each state's counties and their local governments.
+    from . import counties as counties_mod
+    try:
+        local_maps = counties_mod.build(args.root)
+    except counties_mod.CountiesError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 2
+    written_local = emit.write_local(local_maps, args.root)
+    local_stats = counties_mod.stats(local_maps)
+    print(f"[ok] counties: {local_stats['counties']:,} counties, {local_stats['governments']:,} "
+          f"governments and school systems placed, {local_stats['unmatched']} under county areas "
+          f"not on the map; {len(written_local)} file(s) rewritten")
+
     # The guide's maps: rewritten only when what they say changed.
     from . import government_maps
     guide_maps = government_maps.payload()
@@ -874,6 +887,18 @@ def _verify(args):
         else:
             print(f"  ok  {emit.LEGISLATURE_DIR}: every state matches its maps and roster")
 
+    from . import counties as counties_mod
+    try:
+        stale_local = emit.check_local(counties_mod.build(args.root), args.root)
+    except counties_mod.CountiesError as exc:
+        problems.append(f"county pages unavailable: {exc}")
+    else:
+        if stale_local:
+            problems.append(f"{len(stale_local)} county file(s) are {stale_local[0][1]}: "
+                            + ", ".join(os.path.basename(p) for p, _ in stale_local[:5]))
+        else:
+            print(f"  ok  {emit.LOCAL_DIR}: every state matches its counties and listing")
+
     from . import government_maps
     guide_expected = emit.government_signature(government_maps.payload())
     guide_committed = emit.read_signature(path=os.path.join(args.root, emit.GOVERNMENT_FILE))
@@ -944,6 +969,33 @@ def _verify(args):
         return 1
 
     print("\n[ok] committed data is in sync with the sources.")
+    return 0
+
+
+def _localgov(args):
+    """Every local government, county by county, checked against the
+    published table before anything is written (kyc/localgov.py)."""
+    from . import census, localgov
+    table = census.load_cache(args.root)
+    if not table:
+        print(f"[error] no {census.CACHE_PATH}; run 'census' first", file=sys.stderr)
+        return 2
+    try:
+        by_state = localgov.fetch()
+    except localgov.LocalGovError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 2
+    problems = localgov.check_against_table(by_state, table)
+    if problems:
+        print("[error] the listing disagrees with the published table:", file=sys.stderr)
+        for problem in problems[:20]:
+            print(f"    {problem}", file=sys.stderr)
+        return 1
+    paths = localgov.save(by_state, args.root)
+    total = sum(len(e["governments"]) for s in by_state.values() for e in s["counties"].values())
+    print(f"[ok] wrote {len(paths)} files under {localgov.OUT_DIR}: {total:,} governments and "
+          f"school systems in {sum(len(s['counties']) for s in by_state.values()):,} counties; "
+          f"every count agrees with the published table")
     return 0
 
 
@@ -1132,6 +1184,8 @@ def build_parser():
     congress.add_argument("--apply", action="store_true",
                           help="add newly seated members to the roster CSVs")
 
+    local = add("localgov", help="every local government, county by county (Census listing)")
+
     legs = add("statelegs", help="every state legislator, from Open States")
     legs.add_argument("--check", action="store_true",
                       help="match the committed cache to the district maps; no network")
@@ -1171,6 +1225,8 @@ def main(argv=None):
         return _census(args)
     if args.command == "statelegs":
         return _statelegs(args)
+    if args.command == "localgov":
+        return _localgov(args)
     if args.command == "verify":
         return _verify(args)
     if args.command == "congress":

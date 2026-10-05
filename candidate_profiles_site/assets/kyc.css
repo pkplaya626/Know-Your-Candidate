@@ -3182,3 +3182,52 @@ svg.district-map,
   .leg-layout { grid-template-columns: minmax(0, 1fr); }
   .leg-panel { position: static; }
 }
+
+/* ================================================== 19. counties and local */
+
+/* A county shaded by how many local governments it has: one hue, five
+ * steps (the --scale-* colours), never a party colour. */
+.district-shape.region-scale-1 { fill: var(--scale-1); }
+.district-shape.region-scale-2 { fill: var(--scale-2); }
+.district-shape.region-scale-3 { fill: var(--scale-3); }
+.district-shape.region-scale-4 { fill: var(--scale-4); }
+.district-shape.region-scale-5 { fill: var(--scale-5); }
+.swatch.region-fill-scale-1 { background: var(--scale-1); }
+.swatch.region-fill-scale-2 { background: var(--scale-2); }
+.swatch.region-fill-scale-3 { background: var(--scale-3); }
+.swatch.region-fill-scale-4 { background: var(--scale-4); }
+.swatch.region-fill-scale-5 { background: var(--scale-5); }
+.local-page .party-legend { margin: 0 0 var(--s-3); }
+
+.local-total { font-weight: 700; color: var(--text); }
+.local-filter {
+  width: 100%;
+  margin: 0 0 var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  color: var(--text);
+  font: inherit;
+}
+.local-group {
+  margin: var(--s-4) 0 var(--s-2);
+  font-size: var(--t-sm);
+  font-weight: 700;
+}
+.local-list { margin: 0; padding: 0; list-style: none; }
+.local-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--s-2) 0;
+  border-top: 1px solid var(--border);
+  font-size: var(--t-sm);
+}
+.local-name a { color: var(--accent); }
+.local-meta { color: var(--text-muted); font-size: var(--t-xs); }
+.local-panel { max-height: calc(100vh - var(--header-h) - var(--s-6)); overflow-y: auto; }
+@media (max-width: 1000px) {
+  .local-panel { max-height: none; overflow: visible; }
+  .local-filter { font-size: 16px; }
+}

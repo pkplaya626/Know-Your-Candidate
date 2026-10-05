@@ -23,7 +23,8 @@ if a page loads a remote script, stylesheet or font.
 *.csv (repo root)           ──┐
 us_atlas_states_topo.json   ──┤
 district_maps/*.json        ──┤   (every state's districts; tools/fetch_district_maps.py)
-legislative_maps/*.json     ──┤   (state senate and house districts; tools/fetch_legislative_maps.py)
+legislative_maps/*.json     ──┤   (state senate and house districts, counties; tools/fetch_legislative_maps.py)
+local_governments/*.json    ──┤   (every local government, from the Census listing; localgov)
 congress_snapshot.json      ──┤
 data/fec_field.json         ──┤   (the FEC's 2026 candidate register)
 data/disclosures.json       ──┤
@@ -39,11 +40,13 @@ data/state_legislators.json ──┴─> kyc/ ──> candidate_profiles_site/
                                              data/odds.js       (market prices, polling averages)
                                              data/government.js (the guide's maps: kyc/government_maps.py)
                                              data/legislature/*.js (one state legislature per state)
+                                             data/local/*.js    (one state's counties and governments)
                                              data/districts/*.js (one district map per state)
                                              states/*.html      (generated, one per state)
                                              districts/*.html   (generated, one per state)
                                              government/*.html  (generated: the guide, kyc/government_text.py)
                                              legislature/*.html (generated, one per state)
+                                             counties/*.html    (generated, one per state)
                                              sitemap.xml        (generated)
                                              ├──> index.html    (grid, races, profiles)
                                              └──> map.html      (partisan map)
@@ -60,6 +63,7 @@ data/state_legislators.json ──┴─> kyc/ ──> candidate_profiles_site/
                                              assets/kyc-usmap.js
                                              assets/kyc-regionmap.js
                                              assets/kyc-legislature.js
+                                             assets/kyc-local.js
                                              assets/kyc-guide.js
 ```
 
@@ -101,14 +105,15 @@ python build_profile_site.py enrich           # fill gaps; check every campaign 
 python build_profile_site.py odds             # market prices and polling averages (writes odds.js)
 python build_profile_site.py census           # local governments by state (Census of Governments)
 python build_profile_site.py statelegs        # every state legislator (Open States), matched to districts
+python build_profile_site.py localgov         # every local government (Census listing), checked
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
-python -m unittest discover tests             # 721 tests, no dependencies
-npm install && npm test                       # 948 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 728 tests, no dependencies
+npm install && npm test                       # 961 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
-`campaigns`, `enrich`, `odds`, `census`, `statelegs` and `congress` touch the
-network, as do the two `tools/fetch_*_maps.py` scripts. Run the
+`campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov` and `congress`
+touch the network, as do the two `tools/fetch_*_maps.py` scripts. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -538,6 +543,14 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     run read HTML as a shapefile. `fetch_district_maps.get` refuses a zip URL
     whose body is not a zip and never caches it, and the legislative tool
     probes a file's first bytes before falling back to the 2024 release.
+
+53. **Two sources of one count must agree, or neither is shown.** The
+    county pages list 92,114 governments from the Census listing; the guide's
+    local map counts them from the Census table. `localgov` refuses a listing
+    whose count disagrees with the table for any state and type. Join a
+    government to its county on the Census code, never the county's name,
+    and show what the listing does not hold - who serves - as absent, not
+    guessed.
 
 ## District maps
 

@@ -18,7 +18,8 @@ the same 1:5,000,000 county file as the district maps, for orientation.
 
 Each state's file is a TopoJSON topology with objects ``upper``,
 ``upper_pts`` (one label point per district, its pole of inaccessibility),
-``lower`` and ``lower_pts`` (absent for Nebraska), and ``counties``.
+``lower`` and ``lower_pts`` (absent for Nebraska), ``counties`` (each with
+its Census GEOID) and ``counties_pts``. The county pages use the counties.
 
     python tools/fetch_legislative_maps.py                # every state
     python tools/fetch_legislative_maps.py --states TX,NH # some states
@@ -119,7 +120,10 @@ def state_maps(codes):
     for row, rings in maps.read_layer(maps.COUNTIES_URL):
         code = FIPS_TO_STATE.get(row["STATEFP"])
         if code in codes:
-            counties.setdefault(code, []).append(({"name": row["NAMELSAD"]}, rings))
+            # The county's Census code (GEOID) is how the county pages find
+            # its governments in the Census listing - never its name.
+            counties.setdefault(code, []).append(
+                ({"name": row["NAMELSAD"], "id": row["STATEFP"] + row["COUNTYFP"]}, rings))
     for code in codes:
         layers = {"upper": chamber(code, "sldu")}
         if code not in UNICAMERAL:
@@ -136,6 +140,7 @@ def state_maps(codes):
             for props, _ in items:
                 props.pop("vintage", None)
         topo.add("counties", sorted(counties.get(code, []), key=lambda i: i[0]["name"]))
+        topo.label_points("counties", "counties_pts")
         payload = topo.topojson()
         payload["sources"] = sources
         path = os.path.join(OUT_DIR, f"{code.lower()}.json")

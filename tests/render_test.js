@@ -2736,10 +2736,58 @@ async function testLegislatures() {
   }
 }
 
+/* =========================================================== counties */
+
+/* A state's counties and every local government in each: the Census
+ * listing, joined to the county map on the Census code. */
+async function testCounties() {
+  const { window, D, errors, sources } = await buildPage("counties/tx.html", { hash: "#/?county=48201" });
+  const state = window.kycLocal.TX;
+  suite("counties/tx.html — every county and its governments", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("its data loads before the map and the page",
+      sources.indexOf("../data/local/tx.js") < sources.indexOf("../assets/kyc-regionmap.js") &&
+      sources.indexOf("../assets/kyc-regionmap.js") < sources.indexOf("../assets/kyc-local.js"));
+    const shapes = D.querySelectorAll("#localMap .district-statewide .region-shape");
+    check("a shape per county", shapes.length === Object.keys(state.counties).length, `${shapes.length}`);
+    check("counties are shaded by count, never a party colour",
+      [...shapes].every((s) => /region-scale-[1-5]/.test(s.getAttribute("class")) &&
+        !/party-/.test(s.getAttribute("class"))));
+    check("no text inside the map's SVG (rule 46)", !D.querySelector("#localMap svg text"));
+    check("a shared county link opens that county", D.getElementById("localPanelTitle").textContent === "Harris County");
+    const rows = state.governments["48201"];
+    const listed = D.querySelectorAll("#localPanelBody .local-item").length;
+    check("every government and school system in the county is listed", listed === rows.length,
+      `${listed} of ${rows.length}`);
+    check("a government's own site is linked, opening safely",
+      [...D.querySelectorAll('#localPanelBody .local-name a')].every((a) =>
+        /^https?:\/\//.test(a.getAttribute("href")) && /noopener/.test(a.getAttribute("rel"))));
+    const filter = D.getElementById("localFilter");
+    filter.value = "school";
+    filter.dispatchEvent(new window.Event("input"));
+    const shown = D.querySelectorAll("#localPanelBody .local-item").length;
+    check("the filter narrows the list", shown > 0 && shown < rows.length, `${shown}`);
+    const travis = D.querySelector('#localMap .district-statewide [data-region="48453"]');
+    travis.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    check("picking another county shows it, and puts it in the address",
+      D.getElementById("localPanelTitle").textContent === "Travis County" &&
+      /county=48453/.test(window.location.hash), window.location.hash);
+    check("every county is in the list below",
+      D.querySelectorAll("#localRoster .leg-row").length === Object.keys(state.counties).length);
+    check("names are text, never markup", !/<script/i.test(D.getElementById("localPanelBody").innerHTML));
+  });
+  const tx = await buildPage("states/tx.html");
+  suite("states/tx.html — links to its counties", () => {
+    check("the state page links to its counties page",
+      !!tx.D.querySelector('#stateContent a[href="../counties/tx.html"]'));
+  });
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "guide") await testGuide();
   if (!only || only === "legislature") await testLegislatures();
+  if (!only || only === "counties") await testCounties();
   if (!only || only === "index.html") await testDirectoryAsync();
   if (!only || only === "index.html") await testSenate();
   if (!only || only === "index.html") await testOdds();

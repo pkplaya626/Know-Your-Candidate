@@ -32,6 +32,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… field --check` | Report the field from the committed cache; no network |
 | `… census` | Count each state's local governments from the Census of Governments (`--check` reads the cache) |
 | `… statelegs` | Every state legislator from Open States, matched to the district maps (`--check` re-matches the cache) |
+| `… localgov` | Every local government from the Census listing, checked against the published counts |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
 | `… results` | Read each state's primary results from Wikipedia: who is still in |
 | `… results --check` | Report the results from the committed cache; no network |
@@ -111,6 +112,8 @@ CI asserts that a rebuild changes nothing.
 | `census.py` | The Census of Governments' counts of local governments by state (the `census` command) |
 | `statelegs.py` | Every state legislator, from Open States, matched to a Census district (the `statelegs` command) |
 | `legislature.py` | Each state's legislature page data: projected districts, close-ups and the members in each |
+| `localgov.py` | Every local government, county by county, from the Census listing (the `localgov` command) |
+| `counties.py` | Each state's counties page data: projected counties and the governments in each |
 | `campaigns.py` | Campaign websites from each candidate's FEC committee |
 | `enrich.py` | Fill filed candidates' gaps from their Wikipedia infobox and campaign site; check every linked campaign site |
 | `odds.py` | Prediction-market prices (Kalshi, Polymarket) and published polling averages for the 2026 Senate races |
@@ -140,6 +143,7 @@ order renders an empty site with no error anywhere.
 | `assets/kyc-guide.js` | The guide's pages: their maps, and what they show from the data (who leads each committee) |
 | `assets/kyc-regionmap.js` | A map of any regions inside a state (legislative districts now), with labels and close-ups |
 | `assets/kyc-legislature.js` | A state's legislature page: chambers, districts, members |
+| `assets/kyc-local.js` | A state's counties page: every county and every local government in it |
 
 Every view has a URL: `#/profile/<id>` for a person,
 `#/?state=TX&chamber=Senate` for a filtered list, so any view can be linked and
@@ -955,6 +959,32 @@ The map is `assets/kyc-regionmap.js`, a renderer for any regions keyed by
 any id - counties and towns are next - built on the district pages'
 techniques: one definition per shape, labels as page text at 11px for the
 drawn width, close-ups planned by `kyc/districts.insets`.
+
+## Counties and local governments
+
+Every state has a page for its counties, `counties/<st>.html`: a map of its
+counties shaded by how many local governments each has, and a panel listing
+every government in the picked county - its county government, cities and
+towns, townships, school districts, special districts (with what each does)
+and the school systems a state, county or city runs - each with its own
+website, city, and population or enrollment where the Census records them.
+`#/?county=48201` opens Harris County as sent. State pages link to it.
+
+The source is the Census Bureau's 2022 Government Units listing
+(`python build_profile_site.py localgov` writes `local_governments/<st>.json`):
+one row per government, 92,114 in all with the dependent school systems.
+Before anything is written the listing is checked against the Bureau's
+published table of counts (`census`), for every state and type; one that
+disagrees is refused. Governments join their county on the Census code,
+never a name. The listing prints names in capitals; the page shows them in
+title case (acronyms such as ISD kept, McX and O'X handled) and keeps the
+published form in the data. Many addresses are in capitals too: the scheme
+and host are lowered, the path kept as published.
+
+What the listing does not hold is who serves: it names the title of a
+contact official, not the person. No free, authoritative national source
+lists local officials, so the page says what each government is and links
+its own site rather than guessing who runs it.
 
 ## District maps
 
