@@ -1,5 +1,5 @@
 {
- "checked": "2026-10-02",
+ "checked": "2026-10-05",
  "people": {
   "A000055": {
    "checked": "2026-10-02",
@@ -7133,6 +7133,17 @@
     "title": "Claire Valdez"
    }
   },
+  "FEC_H6NY07255": {
+   "checked": "2026-10-05",
+   "name": "Priscilla Ghaznavi",
+   "site": {
+    "final": "https://priscillaghaznaviforcongress.com",
+    "reason": "ok",
+    "safe": true,
+    "status": 200,
+    "url": "https://priscillaghaznaviforcongress.com"
+   }
+  },
   "FEC_H6NY11265": {
    "checked": "2026-10-02",
    "name": "Michael Decillis",
@@ -8984,6 +8995,17 @@
   },
   "FEC_H6VA11249": {
    "checked": "2026-10-02",
+   "listed": {
+    "final": "https://www.votepurves.org/",
+    "reason": "ok",
+    "safe": true,
+    "status": 200,
+    "url": "https://www.votepurves.org/"
+   },
+   "name": "Arthur Grahame Purves"
+  },
+  "FEC_H6VA11256": {
+   "checked": "2026-10-05",
    "listed": {
     "final": "https://www.votepurves.org/",
     "reason": "ok",

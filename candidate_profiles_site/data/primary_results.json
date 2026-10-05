@@ -1,5 +1,5 @@
 {
- "asOf": "2026-10-02",
+ "asOf": "2026-10-05",
  "calendarNotes": [
   {
    "kind": "open-primary",
@@ -997,7 +997,7 @@
   "H-AZ-05-2026": {
    "about": {
     "H6AZ05240": "nurse",
-    "H6AZ05265": "former Pinal County Sheriff (2017–2024) and candidate for U.S. Senate in 2024"
+    "H6AZ05265": "former Pinal County sheriff (2017–2024) and candidate for U.S. Senate in 2024"
    },
    "ambiguous": [],
    "article": {
@@ -5252,7 +5252,7 @@
     "H6GU01032": "Alicia Limtiaco"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
@@ -6728,7 +6728,7 @@
   },
   "H-KS-03-2026": {
    "about": {
-    "H6KS03308": "Shawnee city councilman",
+    "H6KS03308": "former Shawnee city councilman",
     "H8KS03155": "incumbent U.S. representative"
    },
    "ambiguous": [],
@@ -8205,6 +8205,7 @@
     "H6MI10334": "republican",
     "H6MI10359": "republican",
     "H6MI10367": "republican",
+    "H6MI10383": "libertarian",
     "H8MI09142": "working class party"
    },
    "site": {},
@@ -8218,6 +8219,7 @@
     "H6MI10334": "eliminated",
     "H6MI10359": "nominee",
     "H6MI10367": "eliminated",
+    "H6MI10383": "nominee",
     "H8MI09142": "nominee"
    },
    "unmatched": {
@@ -11020,6 +11022,7 @@
   },
   "H-NY-05-2026": {
    "about": {
+    "H6NY05127": "former employee of the NYC Mayor's Office",
     "H8NY06048": "incumbent U.S. representative"
    },
    "ambiguous": [],
@@ -18263,6 +18266,7 @@
     "S6NC00472": "republican",
     "S6NC00480": "republican",
     "S6NC00522": "republican",
+    "S6NC00530": "democratic",
     "S6NC00548": "republican",
     "S6NC00563": "green",
     "S8NC00270": "democratic"
