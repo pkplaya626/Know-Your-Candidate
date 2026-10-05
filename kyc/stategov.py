@@ -36,10 +36,18 @@ USER_AGENT = "Mozilla/5.0 (compatible; know-your-candidate/1.0)"
 # roster names a Republican as minority leader in both chambers although
 # Republicans hold a majority of the seats in each: the majorities that elect
 # the leaders are coalitions of members from both parties.
+#
+# A note holds for one legislature. *session* is read from the legislators'
+# own links (Open States lists each Alaska member's akleg.gov page, whose
+# address carries the legislature's number): once the members listed belong
+# to a later legislature, or the seats stop fitting, the note is not shown
+# and ``build`` reports it.
 COALITIONS = {
     "AK": {
         "party": "R",
         "chambers": ("upper", "lower"),
+        "session": 34,
+        "sessionLink": r"akleg\.gov/basis/Member/Detail/(\d+)",
         "text": ("Republicans hold a majority of the seats in both chambers, but the "
                  "Legislature's roster lists a Republican as minority leader in each: both "
                  "chambers are run by coalitions of members from both parties."),
@@ -47,6 +55,22 @@ COALITIONS = {
         "checked": "2026-10-05",
     },
 }
+
+
+def coalition_holds(code, records, chambers):
+    """``(holds, why)`` for a state's coalition note against the current
+    records and seat counts."""
+    note = COALITIONS[code]
+    for which in note["chambers"]:
+        if (chambers.get(which) or {}).get("majority") != note["party"]:
+            return False, (f"the note says {note['party']} holds a majority of the {which} "
+                           f"chamber's seats; it no longer does")
+    sessions = [int(n) for r in records for link in r.get("links", ())
+                for n in re.findall(note["sessionLink"], link)]
+    if not sessions or max(sessions) != note["session"]:
+        return False, (f"the note is about legislature {note['session']}; the members listed "
+                       f"belong to {max(sessions) if sessions else 'an unknown one'}")
+    return True, ""
 
 # The NGA posts no smaller copy of its headshots, and a guessed size URL is
 # a 404. Most are 0.3-0.9 MB; one is 7.6 MB, for a 72px circle. A headshot
@@ -177,10 +201,19 @@ def in_office_since(terms):
     return run[0][2], len(run)
 
 
-def _governor(gov):
+def _governor(gov, problems=None):
+    """What the page shows of a governor. The first day in office is shown
+    only when Wikidata records the same date for them in that office: the
+    NGA's pages give Kay Ivey April 19, 2017 and Kim Reynolds May 27, 2017,
+    and they were sworn in on April 10 and May 24."""
     since, terms = in_office_since(gov.get("terms", []))
+    first = _date(since) if since else None
+    confirmed = first is not None and first.isoformat() in (gov.get("wikidataStarts") or ())
+    if since and not confirmed and problems is not None and gov.get("wikidataStarts"):
+        problems.append(f"{gov.get('state', '?')}: the NGA says {gov['name']} took office on "
+                        f"{since}; Wikidata records {', '.join(gov['wikidataStarts'])}")
     out = {"name": gov["name"], "party": gov["party"], "partyKey": gov["partyKey"],
-           "since": since, "terms": terms, "profile": gov["profile"]}
+           "since": since if confirmed else "", "terms": terms, "profile": gov["profile"]}
     for key in ("website", "phone", "address"):
         if gov.get(key):
             out[key] = gov[key]
@@ -195,13 +228,19 @@ def build(root="."):
     """``(payload, problems)``: what ``data/stategov.js`` holds, and every
     disagreement between the sources."""
     from . import executives, statelegs
-    governors = (executives.load_cache(root) or {}).get("governors", {})
-    legislators = (statelegs.load_cache(root) or {}).get("states", {})
-    ncsl = load_ncsl(root) or {"states": {}, "updated": ""}
+    exec_cache, leg_cache, ncsl = (executives.load_cache(root), statelegs.load_cache(root),
+                                   load_ncsl(root))
+    for cache, path, command in ((exec_cache, executives.CACHE_PATH, "executives"),
+                                 (leg_cache, statelegs.CACHE_PATH, "statelegs"),
+                                 (ncsl, NCSL_CACHE, "executives")):
+        if not cache:
+            raise StateGovError(f"no {path}; run '{command}'")
+    governors = exec_cache["governors"]
+    legislators = leg_cache["states"]
     problems = []
     states = {}
     for code in sorted(governors):
-        entry = {"governor": _governor(governors[code])}
+        entry = {"governor": _governor(dict(governors[code], state=code), problems)}
         if code in STATES:
             entry.update(_legislature(code, legislators.get(code, []), ncsl["states"].get(code),
                                       entry["governor"]["partyKey"], problems))
@@ -213,19 +252,12 @@ def build(root="."):
     missing = [c for c in STATES if c not in states]
     if missing:
         problems.append(f"no governor for {', '.join(missing)}")
-    for code, note in COALITIONS.items():
-        entry = states.get(code, {})
-        for which in note["chambers"]:
-            if (entry.get(which) or {}).get("majority") != note["party"]:
-                problems.append(f"{code}: the coalition note says {note['party']} holds a majority "
-                                f"of the {which} chamber's seats; it no longer does")
-    exec_cache = executives.load_cache(root) or {}
     payload = {
         "states": states,
         "sources": {
             "nga": [executives.SOURCE, executives.ROSTER_URL, exec_cache.get("fetched", "")[:10]],
             "openstates": [statelegs.SOURCE, "https://openstates.org/",
-                           (statelegs.load_cache(root) or {}).get("fetched", "")[:10]],
+                           leg_cache.get("fetched", "")[:10]],
             "ncsl": [NCSL_SOURCE, NCSL_URL, ncsl.get("updated", "")],
         },
     }
@@ -255,9 +287,12 @@ def _legislature(code, records, theirs, governor_key, problems):
                             f"{out[which]['majority'] or 'no majority'}, NCSL "
                             f"{ncsl or 'no majority'}")
     upper, lower = out["upper"]["majority"], out["lower"]["majority"]
+    holds, why = coalition_holds(code, records, out) if code in COALITIONS else (False, "")
+    if why:
+        problems.append(f"{code}: coalition note not shown: {why}")
     if disputed:
         out["legislature"] = out["trifecta"] = "disputed"
-    elif code in COALITIONS:
+    elif holds:
         out["legislature"] = "coalition"
         out["trifecta"] = "divided"
         out["note"] = COALITIONS[code]["text"]

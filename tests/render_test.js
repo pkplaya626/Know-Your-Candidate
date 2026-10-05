@@ -2837,6 +2837,13 @@ async function testStateGov() {
       return divided.length > 0 && divided.every((c) => shape(c).style.fill === "var(--split)");
     })());
 
+    window.location.hash = "#/?state=GU&mode=legislature";
+    window.dispatchEvent(new window.Event("hashchange"));
+    check("a territory's governor is never shown as its legislature's party",
+      !/Democratic|Republican/.test(D.getElementById("panelCounts").textContent) &&
+      /not covered/.test(D.getElementById("panelCounts").textContent),
+      D.getElementById("panelCounts").textContent);
+
     window.location.hash = "#/?state=MN&mode=legislature";
     window.dispatchEvent(new window.Event("hashchange"));
     check("a chamber where no party has a majority says so",
@@ -2877,6 +2884,13 @@ async function testStateGov() {
         mapped.D.querySelector("#delegation .gov-chambers").innerHTML &&
       section.querySelector(".gov-note").textContent ===
         mapped.D.querySelector("#delegation .gov-note").textContent);
+  });
+
+  const pr = await buildPage("states/pr.html");
+  suite("states/pr.html — a territory's government", () => {
+    const section = pr.D.getElementById("state-government");
+    check("headed as the territory's government, not local government",
+      !!section && /Territorial government/.test(section.querySelector(".state-heading").textContent));
   });
 
   const dc = await buildPage("states/dc.html");

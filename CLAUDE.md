@@ -112,8 +112,8 @@ python build_profile_site.py statelegs        # every state legislator (Open Sta
 python build_profile_site.py localgov         # every local government (Census listing), checked
 python build_profile_site.py executives       # every governor (NGA), and NCSL's party counts
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
-python -m unittest discover tests             # 748 tests, no dependencies
-npm install && npm test                       # 986 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 754 tests, no dependencies
+npm install && npm test                       # 988 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -565,9 +565,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     they agree; a seat with nobody listed counts for no one, so 67 of 134
     is not a majority. What the counts cannot show goes in
     `stategov.COALITIONS` with its evidence, and `build` warns once the
-    seats stop fitting it. The NGA's roster page carries the NGA's own
-    links and logo before its list: read only the list items, or Alabama's
-    governor gets the leadership page and the logo.
+    seats stop fitting it - or once the members listed belong to a later
+    legislature, read from the session in their own links. The NGA's roster
+    page carries the NGA's own links and logo before its list: read only the
+    list items, or Alabama's governor gets the leadership page and the logo.
+    And the NGA's pages are themselves wrong about two governors' first day
+    in office, so a date is shown only where Wikidata records the same one.
 
 ## District maps
 

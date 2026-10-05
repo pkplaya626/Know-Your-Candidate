@@ -268,7 +268,11 @@ def _build(args):
 
     # Who runs each state: governors and party control, checked against NCSL.
     from . import stategov
-    state_gov, gov_problems = stategov.build(args.root)
+    try:
+        state_gov, gov_problems = stategov.build(args.root)
+    except stategov.StateGovError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 2
     for problem in gov_problems:
         print(f"  [warn] {problem}")
     gov_file = os.path.join(args.root, emit.STATEGOV_FILE)
@@ -913,9 +917,15 @@ def _verify(args):
             print(f"  ok  {emit.LOCAL_DIR}: every state matches its counties and listing")
 
     from . import stategov
-    gov_expected = emit.stategov_signature(stategov.build(args.root)[0])
+    try:
+        gov_expected = emit.stategov_signature(stategov.build(args.root)[0])
+    except stategov.StateGovError as exc:
+        gov_expected = None
+        problems.append(str(exc))
     gov_committed = emit.read_signature(path=os.path.join(args.root, emit.STATEGOV_FILE))
-    if gov_committed is None:
+    if gov_expected is None:
+        pass
+    elif gov_committed is None:
         problems.append(f"{emit.STATEGOV_FILE} is missing or carries no signature")
     elif gov_committed != gov_expected:
         problems.append(f"{emit.STATEGOV_FILE} is stale")
@@ -1037,10 +1047,17 @@ def _executives(args):
         governors = cache["governors"]
     else:
         try:
-            governors = executives.fetch()
+            governors = executives.fetch(previous=executives.load_cache(args.root))
         except executives.ExecutivesError as exc:
             print(f"[error] {exc}", file=sys.stderr)
             return 2
+        for code, gov in sorted(governors.items()):
+            if gov.get("unread"):
+                print(f"  [warn] {code}: the NGA page has contact fields the parser does not "
+                      f"read: {', '.join(gov['unread'])}")
+            if gov.get("headshot") and gov.get("headshotBytes") is None:
+                print(f"  [warn] {code}: the headshot's size could not be measured; it is left "
+                      f"off the card until it can be")
     missing = [code for code in STATES if code not in governors]
     if missing:
         print(f"[error] no governor for {', '.join(missing)}", file=sys.stderr)
@@ -1057,7 +1074,11 @@ def _executives(args):
             return 2
         print(f"[ok] wrote {executives.save_cache(governors, args.root)}")
         print(f"[ok] wrote {stategov.save_ncsl(table, args.root)} (NCSL, updated {table['updated']})")
-    _, problems = stategov.build(args.root)
+    try:
+        _, problems = stategov.build(args.root)
+    except stategov.StateGovError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 2
     for problem in problems:
         print(f"  [warn] {problem}")
     parties = {}

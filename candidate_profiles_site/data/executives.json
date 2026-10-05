@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-05T20:10:55+00:00",
+ "fetched": "2026-10-05T20:42:47+00:00",
  "governors": {
   "AK": {
    "address": "Office of the Governor, P.O. Box 110001, Juneau, AK 99811-0001",
@@ -9,6 +9,7 @@
    "name": "Mike Dunleavy",
    "party": "Republican",
    "partyKey": "R",
+   "phone": "907-465-3500",
    "profile": "https://www.nga.org/governors/alaska/",
    "state": "AK",
    "terms": [
@@ -16,7 +17,10 @@
     "December 5, 2022 - Current"
    ],
    "website": "https://gov.alaska.gov/",
-   "wikidata": "Q16209663"
+   "wikidata": "Q16209663",
+   "wikidataStarts": [
+    "2018-12-03"
+   ]
   },
   "AL": {
    "address": "600 Dexter Avenue, Montgomery, AL 36130",
@@ -35,7 +39,10 @@
     "January 16, 2023 - Current"
    ],
    "website": "https://governor.alabama.gov/",
-   "wikidata": "Q6380211"
+   "wikidata": "Q6380211",
+   "wikidataStarts": [
+    "2017-04-10"
+   ]
   },
   "AR": {
    "address": "500 Woodlane St., Little Rock, AR 72201",
@@ -52,7 +59,10 @@
     "January 10, 2023 - Current"
    ],
    "website": "https://governor.arkansas.gov/",
-   "wikidata": "Q27986907"
+   "wikidata": "Q27986907",
+   "wikidataStarts": [
+    "2023-01-10"
+   ]
   },
   "AS": {
    "address": "Office of the Governor, Pago Pago, AS 96799",
@@ -84,7 +94,10 @@
     "January 2, 2023 - Current"
    ],
    "website": "https://azgovernor.gov/",
-   "wikidata": "Q16226012"
+   "wikidata": "Q16226012",
+   "wikidataStarts": [
+    "2023-01-02"
+   ]
   },
   "CA": {
    "address": "1021 O Street, Suite 9000, Sacramento, CA 95814",
@@ -102,7 +115,10 @@
     "January 6, 2023 - Current"
    ],
    "website": "https://www.gov.ca.gov/",
-   "wikidata": "Q461391"
+   "wikidata": "Q461391",
+   "wikidataStarts": [
+    "2019-01-07"
+   ]
   },
   "CO": {
    "address": "State Capitol Bldg, 200 E. Colfax Ave., Rm. 136, Denver, CO 80203",
@@ -120,7 +136,10 @@
     "January 10, 2023 - Current"
    ],
    "website": "https://www.colorado.gov/governor/",
-   "wikidata": "Q935734"
+   "wikidata": "Q935734",
+   "wikidataStarts": [
+    "2019-01-08"
+   ]
   },
   "CT": {
    "address": "Office of the Governor, State Capitol, 210 Capitol Avenue, Hartford, CT 06106",
@@ -138,7 +157,10 @@
     "January 4, 2023 - Current"
    ],
    "website": "https://portal.ct.gov/governor/",
-   "wikidata": "Q1973878"
+   "wikidata": "Q1973878",
+   "wikidataStarts": [
+    "2019-01-09"
+   ]
   },
   "DE": {
    "address": "150 Martin Luther King Jr Blvd, South Dover, DE 19901",
@@ -155,7 +177,10 @@
     "January 21, 2025 - Current"
    ],
    "website": "https://governor.delaware.gov/",
-   "wikidata": "Q26703331"
+   "wikidata": "Q26703331",
+   "wikidataStarts": [
+    "2025-01-21"
+   ]
   },
   "FL": {
    "address": "400 S Monroe St., Tallahassee, FL 32399",
@@ -172,7 +197,11 @@
     "January 8, 2019 - January 3, 2023",
     "January 3, 2023 - Current"
    ],
-   "wikidata": "Q3105215"
+   "website": "https://www.flgov.com/",
+   "wikidata": "Q3105215",
+   "wikidataStarts": [
+    "2019-01-08"
+   ]
   },
   "GA": {
    "address": "206 Washington Street Suite 203, State Capitol, Atlanta, GA 30334",
@@ -190,7 +219,10 @@
     "January 9, 2023 - Current"
    ],
    "website": "https://gov.georgia.gov/",
-   "wikidata": "Q4964973"
+   "wikidata": "Q4964973",
+   "wikidataStarts": [
+    "2019-01-14"
+   ]
   },
   "GU": {
    "address": "Ricardo J Bordallo Governor’s Complex, 513 West Marine Corps Drive, Hagatna, GU 96910",
@@ -224,7 +256,10 @@
     "December 5, 2022 - Current"
    ],
    "website": "https://governor.hawaii.gov/",
-   "wikidata": "Q16224583"
+   "wikidata": "Q16224583",
+   "wikidataStarts": [
+    "2022-12-05"
+   ]
   },
   "IA": {
    "address": "Office of the Governor, Iowa State Capitol, 1007 East Grand Avenue, Des Moines, IA 50319",
@@ -243,7 +278,10 @@
     "January 13, 2023 - Current"
    ],
    "website": "https://governor.iowa.gov/",
-   "wikidata": "Q6409269"
+   "wikidata": "Q6409269",
+   "wikidataStarts": [
+    "2017-05-24"
+   ]
   },
   "ID": {
    "address": "State Capitol, PO Box 83720, Boise, ID 83720",
@@ -261,7 +299,10 @@
     "January 6, 2023 - Current"
    ],
    "website": "https://gov.idaho.gov/",
-   "wikidata": "Q4954097"
+   "wikidata": "Q4954097",
+   "wikidataStarts": [
+    "2019-01-07"
+   ]
   },
   "IL": {
    "address": "Office of the Governor, 401 S. Spring St., Springfield, IL 62704",
@@ -295,7 +336,10 @@
     "January 13, 2025 - Current"
    ],
    "website": "https://www.in.gov/gov/index.htm",
-   "wikidata": "Q42804470"
+   "wikidata": "Q42804470",
+   "wikidataStarts": [
+    "2025-01-13"
+   ]
   },
   "KS": {
    "address": "Office of the Governor, Kansas Statehouse, 300 SW 10th Ave., Ste. 241S, Topeka, KS 66612-1590",
@@ -313,7 +357,10 @@
     "January 9, 2023 - Current"
    ],
    "website": "https://governor.kansas.gov/",
-   "wikidata": "Q6499080"
+   "wikidata": "Q6499080",
+   "wikidataStarts": [
+    "2019-01-14"
+   ]
   },
   "KY": {
    "address": "700 Capitol Avenue, Suite 100, Frankfort, Kentucky 40601",
@@ -331,7 +378,10 @@
     "December 11, 2023 - Current"
    ],
    "website": "https://governor.ky.gov/Pages/index.aspx",
-   "wikidata": "Q21572825"
+   "wikidata": "Q21572825",
+   "wikidataStarts": [
+    "2019-12-10"
+   ]
   },
   "LA": {
    "address": "Office of the Governor, PO Box 94004, Baton Rouge, LA 70804",
@@ -348,7 +398,10 @@
     "January 8, 2024 - Current"
    ],
    "website": "https://gov.louisiana.gov/",
-   "wikidata": "Q1686330"
+   "wikidata": "Q1686330",
+   "wikidataStarts": [
+    "2024-01-08"
+   ]
   },
   "MA": {
    "address": "Massachusetts State House, 24 Beacon St., Office of the Governor, Room 280, Boston, MA 02133",
@@ -365,7 +418,10 @@
     "January 5, 2023 - Current"
    ],
    "website": "https://www.mass.gov/orgs/office-of-the-governor",
-   "wikidata": "Q16205062"
+   "wikidata": "Q16205062",
+   "wikidataStarts": [
+    "2023-01-05"
+   ]
   },
   "MD": {
    "address": "100 State Circle, Annapolis, Maryland 21401-1925​",
@@ -382,7 +438,10 @@
     "January 18, 2023 - Current"
    ],
    "website": "https://governor.maryland.gov/",
-   "wikidata": "Q7983732"
+   "wikidata": "Q7983732",
+   "wikidataStarts": [
+    "2023-01-18"
+   ]
   },
   "ME": {
    "address": "1 State House Station, Augusta, ME 04333",
@@ -400,7 +459,10 @@
     "January 4, 2023 - Current"
    ],
    "website": "https://www.maine.gov/governor/mills/",
-   "wikidata": "Q6153618"
+   "wikidata": "Q6153618",
+   "wikidataStarts": [
+    "2019-01-02"
+   ]
   },
   "MI": {
    "address": "P.O. Box 30013, Lansing, Michigan 48909",
@@ -418,7 +480,10 @@
     "January 1, 2023 - Current"
    ],
    "website": "https://www.michigan.gov/whitmer/",
-   "wikidata": "Q5607720"
+   "wikidata": "Q5607720",
+   "wikidataStarts": [
+    "2019-01-01"
+   ]
   },
   "MN": {
    "address": "130 State Capitol, 75 Rev Dr. Martin Luther King Jr. Blvd., St. Paul, MN 55155",
@@ -436,7 +501,10 @@
     "January 2, 2023 - Current"
    ],
    "website": "https://mn.gov/governor/",
-   "wikidata": "Q2434360"
+   "wikidata": "Q2434360",
+   "wikidataStarts": [
+    "2019-01-07"
+   ]
   },
   "MO": {
    "address": "P.O. Box 720, Jefferson City, MO 65102",
@@ -453,7 +521,10 @@
     "January 13, 2025 - Current"
    ],
    "website": "https://governor.mo.gov/",
-   "wikidata": "Q6847475"
+   "wikidata": "Q6847475",
+   "wikidataStarts": [
+    "2025-01-13"
+   ]
   },
   "MP": {
    "address": "Juan A. Sablan Memorial Building, Capitol Hill 96950 Saipan, Northern Mariana Islands",
@@ -486,7 +557,10 @@
     "January 14, 2020 - Current"
    ],
    "website": "https://governorreeves.ms.gov/",
-   "wikidata": "Q7687964"
+   "wikidata": "Q7687964",
+   "wikidataStarts": [
+    "2020-01-14"
+   ]
   },
   "MT": {
    "address": "P.O. Box 200801, Helena, MT 59620-0801",
@@ -504,9 +578,13 @@
     "January 6, 2025 - Current"
    ],
    "website": "http://governor.mt.gov/",
-   "wikidata": "Q5605607"
+   "wikidata": "Q5605607",
+   "wikidataStarts": [
+    "2021-01-04"
+   ]
   },
   "NC": {
+   "address": "Office of the Governor, 20301 Mail Service Center, Raleigh, NC 27699-0301",
    "born": "September 13, 1966",
    "headshot": "https://www.nga.org/wp-content/uploads/2025/01/Josh-Stein_NC.jpg",
    "headshotBytes": 107118,
@@ -520,7 +598,10 @@
     "January 1, 2025 - Current"
    ],
    "website": "https://governor.nc.gov/",
-   "wikidata": "Q6289402"
+   "wikidata": "Q6289402",
+   "wikidataStarts": [
+    "2025-01-01"
+   ]
   },
   "ND": {
    "address": "600 East Boulevard Avenue, Bismarck ND, 58505-0001",
@@ -537,7 +618,10 @@
     "December 15, 2024 - Current"
    ],
    "website": "https://www.governor.nd.gov/",
-   "wikidata": "Q50362353"
+   "wikidata": "Q50362353",
+   "wikidataStarts": [
+    "2024-12-15"
+   ]
   },
   "NE": {
    "address": "PO Box 94848, Lincoln, NE 68509-4848",
@@ -554,9 +638,13 @@
     "January 5, 2023 - Current"
    ],
    "website": "https://governor.nebraska.gov/",
-   "wikidata": "Q111961602"
+   "wikidata": "Q111961602",
+   "wikidataStarts": [
+    "2023-01-05"
+   ]
   },
   "NH": {
+   "address": "Office of the Governor, State House, 107 North Main Street, Concord, NH 03301",
    "born": "June 27, 1968",
    "headshot": "https://www.nga.org/wp-content/uploads/2025/01/ayotte_portrait-for-online.jpg",
    "headshotBytes": 291575,
@@ -570,7 +658,10 @@
     "January 9, 2025 - Current"
    ],
    "website": "https://www.governor.nh.gov/",
-   "wikidata": "Q22354"
+   "wikidata": "Q22354",
+   "wikidataStarts": [
+    "2025-01-09"
+   ]
   },
   "NJ": {
    "born": "January 19, 1972",
@@ -584,7 +675,10 @@
    "terms": [
     "January 20, 2026 - Current"
    ],
-   "wikidata": "Q47087146"
+   "wikidata": "Q47087146",
+   "wikidataStarts": [
+    "2026-01-20"
+   ]
   },
   "NM": {
    "address": "490 Old Santa Fe Trail Room 400, Santa Fe, NM 87501",
@@ -602,7 +696,10 @@
     "January 1, 2023 - Current"
    ],
    "website": "http://www.governor.state.nm.us/",
-   "wikidata": "Q3917203"
+   "wikidata": "Q3917203",
+   "wikidataStarts": [
+    "2019-01-01"
+   ]
   },
   "NV": {
    "address": "State Capitol Building, 101 N. Carson Street, Carson City, NV 89701",
@@ -619,7 +716,10 @@
     "January 2, 2023 - Current"
    ],
    "website": "https://gov.nv.gov/",
-   "wikidata": "Q28033703"
+   "wikidata": "Q28033703",
+   "wikidataStarts": [
+    "2023-01-02"
+   ]
   },
   "NY": {
    "address": "NYS State Capitol Building, Albany, NY 12224",
@@ -637,7 +737,10 @@
     "January 1, 2023 - Current"
    ],
    "website": "https://www.governor.ny.gov/",
-   "wikidata": "Q45956"
+   "wikidata": "Q45956",
+   "wikidataStarts": [
+    "2021-08-24"
+   ]
   },
   "OH": {
    "address": "Riffe Center, 30th Floor, 77 South High Street, Columbus, OH 43215",
@@ -655,7 +758,10 @@
     "January 8, 2023 - Current"
    ],
    "website": "http://governor.ohio.gov/",
-   "wikidata": "Q1363468"
+   "wikidata": "Q1363468",
+   "wikidataStarts": [
+    "2019-01-14"
+   ]
   },
   "OK": {
    "address": "2300 N. Lincoln Blvd., Suite 212, Oklahoma City, OK 73105",
@@ -673,7 +779,10 @@
     "January 9, 2023 - Current"
    ],
    "website": "http://www.gov.ok.gov/",
-   "wikidata": "Q58322517"
+   "wikidata": "Q58322517",
+   "wikidataStarts": [
+    "2019-01-14"
+   ]
   },
   "OR": {
    "address": "900 Court Street, Suite 254, Salem, OR 97301-4047",
@@ -706,7 +815,10 @@
     "January 17, 2023 - Current"
    ],
    "website": "http://governor.pa.gov/",
-   "wikidata": "Q6289368"
+   "wikidata": "Q6289368",
+   "wikidataStarts": [
+    "2023-01-17"
+   ]
   },
   "PR": {
    "born": "August 5, 1976",
@@ -738,7 +850,10 @@
     "January 3, 2023 - Current"
    ],
    "website": "https://governor.ri.gov/",
-   "wikidata": "Q5218111"
+   "wikidata": "Q5218111",
+   "wikidataStarts": [
+    "2021-03-02"
+   ]
   },
   "SC": {
    "address": "State House, 1100 Gervais Street, Columbia, South Carolina 29201",
@@ -757,7 +872,10 @@
     "January 11, 2023 - Current"
    ],
    "website": "http://governor.sc.gov/",
-   "wikidata": "Q5725737"
+   "wikidata": "Q5725737",
+   "wikidataStarts": [
+    "2017-01-24"
+   ]
   },
   "SD": {
    "address": "500 East Capitol Avenue, Pierre, SD 57501",
@@ -774,7 +892,10 @@
     "January 25, 2025 - Current"
    ],
    "website": "https://governor.sd.gov/default.aspx",
-   "wikidata": "Q16193325"
+   "wikidata": "Q16193325",
+   "wikidataStarts": [
+    "2025-01-25"
+   ]
   },
   "TN": {
    "address": "600 Dr. Martin L. King, Jr. Blvd., Nashville, TN 37243",
@@ -791,7 +912,10 @@
     "January 19, 2019 - Current"
    ],
    "website": "https://www.tn.gov/content/tn/governor.html",
-   "wikidata": "Q58321685"
+   "wikidata": "Q58321685",
+   "wikidataStarts": [
+    "2019-01-19"
+   ]
   },
   "TX": {
    "address": "P.O. Box 12428 Austin, TX 78711",
@@ -827,7 +951,10 @@
     "January 8, 2025 - Current"
    ],
    "website": "https://governor.utah.gov/",
-   "wikidata": "Q16208237"
+   "wikidata": "Q16208237",
+   "wikidataStarts": [
+    "2021-01-04"
+   ]
   },
   "VA": {
    "born": "August 7, 1979",
@@ -841,9 +968,13 @@
    "terms": [
     "January 17, 2026 - Current"
    ],
-   "wikidata": "Q55603085"
+   "wikidata": "Q55603085",
+   "wikidataStarts": [
+    "2026-01-17"
+   ]
   },
   "VI": {
+   "address": "Government House, 5047 (21-22) Kongens Gade, St. Thomas, VI 00802-6487",
    "born": "February 21, 1968",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/09/gov_bryan_square.jpg",
    "headshotBytes": 67312,
@@ -878,7 +1009,10 @@
     "January 9, 2025 - Current"
    ],
    "website": "https://governor.vermont.gov/",
-   "wikidata": "Q7185808"
+   "wikidata": "Q7185808",
+   "wikidataStarts": [
+    "2017-01-05"
+   ]
   },
   "WA": {
    "address": "PO Box 40002, Olympia, WA 98504-0002",
@@ -895,7 +1029,10 @@
     "January 15, 2025 - Current"
    ],
    "website": "http://www.governor.wa.gov/",
-   "wikidata": "Q4932411"
+   "wikidata": "Q4932411",
+   "wikidataStarts": [
+    "2025-01-15"
+   ]
   },
   "WI": {
    "address": "P.O. Box 7863, Madison, WI 53707",
@@ -913,7 +1050,10 @@
     "January 3, 2023 - Current"
    ],
    "website": "https://evers.wi.gov/",
-   "wikidata": "Q7822309"
+   "wikidata": "Q7822309",
+   "wikidataStarts": [
+    "2019-01-07"
+   ]
   },
   "WV": {
    "address": "1900 Kanawha Street, Charleston, WV 25305",
@@ -930,7 +1070,10 @@
     "January 13, 2025 - Current"
    ],
    "website": "https://governor.wv.gov/",
-   "wikidata": "Q7147254"
+   "wikidata": "Q7147254",
+   "wikidataStarts": [
+    "2025-01-13"
+   ]
   },
   "WY": {
    "address": "State Capitol Building Room 124 Cheyenne, WY 82002",
@@ -948,7 +1091,10 @@
     "January 2, 2023 - Current"
    ],
    "website": "http://governor.wy.gov/",
-   "wikidata": "Q6767775"
+   "wikidata": "Q6767775",
+   "wikidataStarts": [
+    "2019-01-07"
+   ]
   }
  },
  "source": "National Governors Association, current governors",

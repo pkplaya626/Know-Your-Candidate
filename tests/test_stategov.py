@@ -107,6 +107,25 @@ class TestRoster(unittest.TestCase):
             '<li class="item"><a href="https://gov.illinois.gov/">Governor\'s Website</a></li>', "")
         self.assertNotIn("website", executives.parse_profile(portal_only))
 
+    def test_contact_labels_are_read_by_meaning(self):
+        # Alaska's "Office Phone", North Carolina's address block headed
+        # "Office of the Governor", the Virgin Islands' "Government House",
+        # and Florida's "Governer's Website" all went unread.
+        page = (PROFILE
+                .replace("Phone  </small>", "Office Phone  </small>")
+                .replace("Address  </small>\n  Office of the Governor<br>",
+                         "Government House  </small>\n  ")
+                .replace(">Governor's Website<", ">Governer's Website<"))
+        facts = executives.parse_profile(page)
+        self.assertEqual(facts["phone"], "217-782-6830")
+        self.assertEqual(facts["address"], "Government House, 401 S. Spring St., Springfield, IL 62704")
+        self.assertEqual(facts["website"], "https://gov.illinois.gov/")
+        self.assertNotIn("unread", facts)
+
+    def test_a_contact_field_that_cannot_be_read_is_reported(self):
+        page = PROFILE.replace("Phone  </small>", "Fax  </small>")
+        self.assertEqual(executives.parse_profile(page)["unread"], ["Fax"])
+
     def test_wikidata_names_are_compared_by_person(self):
         self.assertTrue(executives.same_person("Mike Dunleavy", "Michael J. Dunleavy"))
         self.assertTrue(executives.same_person("JB Pritzker", "J. B. Pritzker"))
@@ -115,7 +134,9 @@ class TestRoster(unittest.TestCase):
     def test_a_cross_check_never_overwrites_the_roster(self):
         governors = {"AK": {"name": "Mike Dunleavy"}, "TX": {"name": "Greg Abbott"}}
         agree, disagree = executives.cross_check(
-            governors, {"AK": ("Mike Dunleavy", "Q1"), "TX": ("Someone Else", "Q2")})
+            governors, {"AK": ("Mike Dunleavy", "Q1", ["2018-12-03"]),
+                        "TX": ("Someone Else", "Q2", [])})
+        self.assertEqual(governors["AK"]["wikidataStarts"], ["2018-12-03"])
         self.assertEqual(agree, ["AK"])
         self.assertEqual(disagree, [("TX", "Greg Abbott", "Someone Else")])
         self.assertEqual(governors["TX"]["name"], "Greg Abbott")
@@ -169,11 +190,35 @@ class TestControl(unittest.TestCase):
         self.assertEqual((out["legislature"], out["trifecta"]), ("nonpartisan", "nonpartisan"))
         self.assertNotIn("lower", out)
 
+    def _alaska(self, upper, lower, session):
+        link = f"https://www.akleg.gov/basis/Member/Detail/{session}?code=x"
+        records = ([{"chamber": "upper", "partyKey": k, "links": [link]}
+                    for k, n in upper.items() for _ in range(n)] +
+                   [{"chamber": "lower", "partyKey": k, "links": [link]}
+                    for k, n in lower.items() for _ in range(n)])
+        problems = []
+        return stategov._legislature("AK", records, None, "R", problems), problems
+
     def test_a_coalition_majority_is_not_party_control(self):
-        out, _ = self._state("AK", {"R": 11, "D": 9}, {"R": 21, "D": 14, "I": 5})
+        out, problems = self._alaska({"R": 11, "D": 9}, {"R": 21, "D": 14, "I": 5}, 34)
         self.assertEqual(out["upper"]["majority"], "R")
         self.assertEqual((out["legislature"], out["trifecta"]), ("coalition", "divided"))
         self.assertIn("coalitions", out["note"])
+        self.assertEqual(problems, [])
+
+    def test_a_coalition_note_lapses_with_its_legislature(self):
+        # The note is about the 34th Legislature; the 35th may organise
+        # differently, so it is not shown once the members listed are its.
+        out, problems = self._alaska({"R": 11, "D": 9}, {"R": 21, "D": 14, "I": 5}, 35)
+        self.assertNotIn("note", out)
+        self.assertEqual(out["trifecta"], "R")
+        self.assertIn("legislature 34", problems[0])
+
+    def test_a_coalition_note_lapses_when_the_seats_stop_fitting_it(self):
+        out, problems = self._alaska({"D": 11, "R": 9}, {"D": 21, "R": 19}, 34)
+        self.assertNotIn("note", out)
+        self.assertEqual(out["legislature"], "D")
+        self.assertTrue(problems)
 
     def test_in_office_since_follows_unbroken_terms(self):
         terms = ["January 20, 2015 - January 7, 2019", "January 8, 2019 - January 17, 2023",
@@ -182,6 +227,24 @@ class TestControl(unittest.TestCase):
         # Jerry Brown's first two terms ended in 1983; a return is a new run.
         gap = ["January 6, 1975 - January 3, 1983", "January 3, 2011 - Current"]
         self.assertEqual(stategov.in_office_since(gap), ("January 3, 2011", 1))
+
+    def test_a_first_day_is_shown_only_when_wikidata_agrees(self):
+        base = {"name": "Kay Ivey", "party": "Republican", "partyKey": "R", "profile": "p",
+                "state": "AL", "terms": ["April 19, 2017 - January 13, 2019",
+                                         "January 14, 2019 - January 16, 2023",
+                                         "January 16, 2023 - Current"]}
+        problems = []
+        self.assertEqual(stategov._governor(dict(base, wikidataStarts=["2017-04-10"]), problems)["since"], "")
+        self.assertIn("April 19, 2017", problems[0])
+        agreed = dict(base, terms=["April 10, 2017 - Current"], wikidataStarts=["2017-04-10"])
+        self.assertEqual(stategov._governor(agreed)["since"], "April 10, 2017")
+        self.assertEqual(stategov._governor(dict(base, terms=["April 10, 2017 - Current"]))["since"], "")
+
+    def test_a_missing_cache_stops_the_build(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as empty:
+            with self.assertRaises(stategov.StateGovError):
+                stategov.build(empty)
 
     def test_a_heavy_or_unmeasured_headshot_is_left_off(self):
         base = {"name": "A", "party": "Republican", "partyKey": "R", "profile": "p", "terms": [],
@@ -212,8 +275,11 @@ class TestNcsl(unittest.TestCase):
 class TestCommitted(unittest.TestCase):
 
     def test_the_sources_agree_everywhere(self):
+        # The only disagreements are the NGA's two wrong first days, which
+        # are left off the page.
         payload, problems = stategov.build(ROOT)
-        self.assertEqual(problems, [])
+        self.assertEqual(sorted(p[:3] for p in problems), ["AL:", "IA:"])
+        self.assertEqual(payload["states"]["AL"]["governor"]["since"], "")
         self.assertEqual([c for c in STATES if c not in payload["states"]], [])
 
     def test_trifectas_agree_with_ncsl_except_where_a_note_says_why(self):

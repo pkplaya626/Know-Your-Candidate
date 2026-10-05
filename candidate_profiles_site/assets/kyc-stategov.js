@@ -113,14 +113,16 @@
     return { fill: FILL[t] || FILL.split, text: name + ": " + trifectaText(s.trifecta).split(":")[0] };
   }
 
-  /** The panel's badge: the party pills that say it at a glance. */
+  /** The panel's badge: the party pills that say it at a glance. A
+   * territory's governor is never shown as its legislature's party. */
   function badge(code, mode) {
     var s = state(code);
     if (!s) return '<span class="faint">No governor</span>';
-    if (mode === "governor" || !s.legislature) {
+    if (mode === "governor") {
       return '<span class="party-' + KYC.escapeAttr(s.governor.partyKey.toLowerCase()) + '">' +
         KYC.escapeHtml(s.governor.party) + "</span>";
     }
+    if (!s.legislature) return '<span class="faint">Legislature not covered</span>';
     if (mode === "trifecta") {
       return KYC.escapeHtml(s.trifecta === "R" || s.trifecta === "D" ? PARTY[s.trifecta] + " trifecta"
         : s.trifecta === "nonpartisan" ? "Nonpartisan legislature"
@@ -212,8 +214,10 @@
         '<a class="sidebar-link" href="' + KYC.escapeAttr(KYC.siteRoot() + "counties/" + lower + ".html") +
         '">Counties and local governments ›</a></p>';
     }
+    var ncsl = data.sources.ncsl && data.sources.ncsl[2];
     html += '<p class="gov-sources faint">Governor: ' + source("nga") + ". Seats: " +
-      (s.upper ? source("openstates") + ", checked against " + source("ncsl") : "not covered") + ".</p>";
+      (s.upper ? source("openstates") + (ncsl ? ", checked against " + source("ncsl") : "") :
+        "not covered") + ".</p>";
     return html;
   }
 

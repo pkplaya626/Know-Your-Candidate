@@ -991,13 +991,19 @@ Two cases the counts alone would get wrong are written down with their
 evidence (`stategov.COALITIONS`). Alaska's Republicans hold a majority of the
 seats in both chambers, but the Legislature's own roster lists a Republican
 as minority leader in each: coalitions of both parties run them, so Alaska is
-not drawn as a trifecta (NCSL, counting seats, calls it one). Nebraska's
+not drawn as a trifecta (NCSL, counting seats, calls it one). The note is
+about the 34th Legislature, read from the session number in each member's
+akleg.gov link; once the members listed belong to the 35th, or the seats stop
+fitting it, the note is not shown and `build` says why. Nebraska's
 Legislature is elected without party labels and is drawn as nonpartisan.
-`build` warns when the seats stop fitting a note.
 
 The roster is cross-checked against Wikidata's record of each state's
 incumbent; Wikidata is a lead, never a source, and any disagreement is
-reported, not applied. The NGA posts its headshots only at full size,
+reported, not applied. A governor's first day in office is shown only where
+Wikidata records the same date: the NGA's own pages give Kay Ivey April 19,
+2017 and Kim Reynolds May 27, 2017, and they took office on April 10 and May
+24, so neither date is shown for them. A territory's page heads the section
+"Territorial government"; its legislature is not covered yet. The NGA posts its headshots only at full size,
 0.3-7.6 MB, and a guessed smaller URL is a 404, so a headshot over 1 MB is
 left off the card. D.C. has a mayor and council, and its page says so.
 

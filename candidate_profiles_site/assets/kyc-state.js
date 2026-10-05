@@ -144,8 +144,8 @@
     if (KYC.stategov && (KYC.stategov.state(code) || code === "DC")) {
       html.push(
         '<section class="state-section" id="state-government">',
-        '<h2 class="state-heading">' + (info.territory || code === "DC" ? "Local government" :
-          "State government") + "</h2>",
+        '<h2 class="state-heading">' + (code === "DC" ? "Local government" :
+          info.territory ? "Territorial government" : "State government") + "</h2>",
         '<div class="stategov">' + KYC.stategov.render(code, { links: false }) + "</div>",
         "</section>"
       );
