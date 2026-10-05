@@ -34,6 +34,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… statelegs` | Every state legislator from Open States, matched to the district maps (`--check` re-matches the cache) |
 | `… localgov` | Every local government from the Census listing, checked against the published counts |
 | `… executives` | Every governor from the NGA, and NCSL's count of each legislature's parties (`--check` reports the caches) |
+| `… officers` | Every lieutenant governor (NLGA) and secretary of state (NASS), cross-checked where the rosters overlap |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
 | `… results` | Read each state's primary results from Wikipedia: who is still in |
 | `… results --check` | Report the results from the committed cache; no network |
@@ -116,6 +117,7 @@ CI asserts that a rebuild changes nothing.
 | `localgov.py` | Every local government, county by county, from the Census listing (the `localgov` command) |
 | `counties.py` | Each state's counties page data: projected counties and the governments in each |
 | `executives.py` | Every governor, from the National Governors Association's roster (the `executives` command) |
+| `officers.py` | Lieutenant governors and secretaries of state, from their associations' rosters (the `officers` command) |
 | `stategov.py` | Who runs each state: governor, chamber control, trifecta, checked against NCSL |
 | `campaigns.py` | Campaign websites from each candidate's FEC committee |
 | `enrich.py` | Fill filed candidates' gaps from their Wikipedia infobox and campaign site; check every linked campaign site |
@@ -966,18 +968,23 @@ drawn width, close-ups planned by `kyc/districts.insets`.
 
 ## Governors and party control
 
-The partisan map has three state views beside its three for Congress -
-**Governors**, **Legislatures** and **Trifectas** - and every state page has
+The partisan map has state views beside its three for Congress - the
+statewide offices (**Governors**, **Lt. governors**, **Secretaries of state**)
+and party control (**Legislatures**, **Trifectas**) - and every state page has
 a "State government" section drawn by the same module
 (`assets/kyc-stategov.js`): the governor, with party, time in office, office
-website, NGA biography and the office's address and phone, and each chamber's
-seats by party. `map.html#/?state=TX&mode=trifecta` opens a view as sent.
+website, NGA biography and the office's address and phone; the lieutenant
+governor and secretary of state, with how each holds the office and whether
+they run the state's elections; and each chamber's seats by party.
+`map.html#/?state=TX&mode=sos` opens a view as sent.
 
 | What | Source | How |
 |---|---|---|
 | Governors: name, party, terms, office contact, headshot | National Governors Association, current governors (50 states and 5 territories) | `python build_profile_site.py executives` writes `data/executives.json` |
 | Seats by party | The Open States legislators behind the legislature pages | `statelegs` (above) |
 | A second count of seats, control and governors' parties | NCSL, State Partisan Composition | `executives` writes `data/partisan_composition.json` |
+| Lieutenant governors, and who is first in line where there is none | National Lieutenant Governors Association, members | `officers` writes `data/statewide_officers.json` |
+| Secretaries of state: party, elected or appointed, chief election official, contact | National Association of Secretaries of State, membership roster | `officers` |
 
 A party holds a chamber when it has more than half of **all** its seats; a
 seat Open States lists nobody for counts for no one. A trifecta is one party
@@ -1006,6 +1013,18 @@ Wikidata records the same date: the NGA's own pages give Kay Ivey April 19,
 "Territorial government"; its legislature is not covered yet. The NGA posts its headshots only at full size,
 0.3-7.6 MB, and a guessed smaller URL is a 404, so a headshot over 1 MB is
 left off the card. D.C. has a mayor and council, and its page says so.
+
+Each association is the authority on its own members, and where two name
+the holder of one office they must agree. NASS's member in Alaska, Hawaii and
+Utah is the lieutenant governor (those states have no secretary of state);
+NLGA's in Arizona, Oregon and Wyoming, which have no lieutenant governor, is
+the secretary of state, first in line. On 2026-10-05 they disagreed about one
+person: NASS lists Sylvia Luke as Hawaii's lieutenant governor, NLGA Keith
+Regan as acting lieutenant governor, so the page names both and shows
+neither as the holder. A state with no lieutenant governor says who is first
+in line; New Jersey's office is vacant, as NLGA lists it. A NASS photograph
+is used only when its file name carries the person's surname: NASS's own alt
+text calls every one a state seal.
 
 ## Counties and local governments
 

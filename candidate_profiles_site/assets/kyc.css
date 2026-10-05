@@ -3300,4 +3300,36 @@ svg.district-map,
 .gov-pages { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); }
 .gov-sources { font-size: var(--t-xs); }
 
+/* Statewide officers: a small portrait beside each holder. */
+.gov-officers { list-style: none; margin: 0 0 var(--s-3); padding: 0; }
+.gov-officer {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  column-gap: var(--s-3);
+  padding: var(--s-2) var(--s-1);
+  border-bottom: 1px solid var(--border);
+}
+.gov-officer > * { grid-column: 2; margin: 0 0 2px; }
+.gov-officer-text { grid-template-columns: minmax(0, 1fr); }
+.gov-officer-text > * { grid-column: 1; }
+.gov-officer-role {
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.gov-officer-photo {
+  grid-column: 1;
+  grid-row: 1 / span 4;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 20%;
+  background: var(--surface-3);
+}
+.gov-officer-name { font-weight: 700; color: var(--text); }
+.gov-officer-note { font-size: var(--t-sm); color: var(--text-muted); }
+
 .state-section .stategov { max-width: 46rem; padding: 0; }

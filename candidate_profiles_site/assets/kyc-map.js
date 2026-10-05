@@ -195,10 +195,8 @@
     senate: "Senate delegation",
     house: "House delegation and 2026 candidates",
     senate2026: "2026 Senate race",
-    governor: KYC.stategov.titles.governor,
-    legislature: KYC.stategov.titles.legislature,
-    trifecta: KYC.stategov.titles.trifecta,
   };
+  KYC.stategov.modes.forEach(function (m) { MODE_TITLE[m] = KYC.stategov.titles[m]; });
 
   function forMode(code) {
     var people = delegation(code);

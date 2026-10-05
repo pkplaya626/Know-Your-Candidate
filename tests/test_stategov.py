@@ -275,10 +275,11 @@ class TestNcsl(unittest.TestCase):
 class TestCommitted(unittest.TestCase):
 
     def test_the_sources_agree_everywhere(self):
-        # The only disagreements are the NGA's two wrong first days, which
-        # are left off the page.
+        # The NGA's two wrong first days are left off the page.
         payload, problems = stategov.build(ROOT)
-        self.assertEqual(sorted(p[:3] for p in problems), ["AL:", "IA:"])
+        # The other is NASS's and NLGA's disagreement about Hawaii's
+        # lieutenant governor (tests/test_officers.py).
+        self.assertEqual(sorted(p[:3] for p in problems), ["AL:", "HI:", "IA:"])
         self.assertEqual(payload["states"]["AL"]["governor"]["since"], "")
         self.assertEqual([c for c in STATES if c not in payload["states"]], [])
 

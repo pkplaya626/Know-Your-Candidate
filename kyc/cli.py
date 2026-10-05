@@ -1033,6 +1033,33 @@ def _localgov(args):
     return 0
 
 
+def _officers(args):
+    """Every lieutenant governor and secretary of state, from the NLGA's and
+    NASS's own rosters, cross-checked where they overlap (kyc/officers.py)."""
+    from . import officers
+    from .government_maps import STATES
+    if args.check:
+        cache = officers.load_cache(args.root)
+        if not cache:
+            print(f"[error] no {officers.CACHE_PATH}; run 'officers'", file=sys.stderr)
+            return 2
+    else:
+        try:
+            cache = officers.fetch()
+        except officers.OfficersError as exc:
+            print(f"[error] {exc}", file=sys.stderr)
+            return 2
+    for office, rows in (("secretaries of state (NASS)", cache["sos"]),
+                         ("lieutenant governors (NLGA)", cache["lt"])):
+        missing = [c for c in STATES if c not in rows]
+        print(f"  {len(rows)} {office}" + (f"; none listed for {', '.join(missing)}" if missing else ""))
+    for code, office, nass, nlga in officers.overlaps(cache["sos"], cache["lt"]):
+        print(f"  [warn] {code}: NASS lists {nass} as {office}, NLGA {nlga}; neither is shown")
+    if not args.check:
+        print(f"[ok] wrote {officers.save_cache(cache, args.root)}")
+    return 0
+
+
 def _executives(args):
     """Every governor, from the NGA's roster, cross-checked against Wikidata,
     and NCSL's count of each legislature's parties (kyc/executives.py,
@@ -1276,6 +1303,10 @@ def build_parser():
 
     local = add("localgov", help="every local government, county by county (Census listing)")
 
+    officers_cmd = add("officers", help="every lieutenant governor and secretary of state (NLGA, NASS)")
+    officers_cmd.add_argument("--check", action="store_true",
+                              help="report the committed cache; make no network call")
+
     execs = add("executives", help="every governor, from the National Governors Association")
     execs.add_argument("--check", action="store_true",
                        help="report the committed cache; make no network call")
@@ -1323,6 +1354,8 @@ def main(argv=None):
         return _localgov(args)
     if args.command == "executives":
         return _executives(args)
+    if args.command == "officers":
+        return _officers(args)
     if args.command == "verify":
         return _verify(args)
     if args.command == "congress":
