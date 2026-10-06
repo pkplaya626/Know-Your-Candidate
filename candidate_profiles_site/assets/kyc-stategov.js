@@ -44,6 +44,7 @@
   /* The statewide offices other than governor, as the data keys them. */
   var OFFICES = {
     lt: { title: "Lieutenant governor", word: "lieutenant governor" },
+    ag: { title: "Attorney general", word: "attorney general" },
     sos: { title: "Secretary of state", word: "secretary of state" },
   };
 
@@ -63,6 +64,10 @@
       [FILL.D, "Democratic"],
       [FILL.absent, "No secretary of state"],
     ],
+    ag: [
+      [FILL.R, "Republican"],
+      [FILL.D, "Democratic"],
+    ],
     legislature: [
       [FILL.R, "Republican majority in both chambers"],
       [FILL.D, "Democratic majority in both chambers"],
@@ -80,6 +85,7 @@
   var TITLES = {
     governor: "Governor",
     lt: "Lieutenant governor",
+    ag: "Attorney general",
     sos: "Secretary of state",
     legislature: "State legislature",
     trifecta: "Governor and legislature",
@@ -104,6 +110,9 @@
       if (any(function (s) { return s[mode] && s[mode].vacant; })) rows.push([FILL.vacant, "Vacant"]);
       if (any(function (s) { return s[mode] && s[mode].disputed; })) {
         rows.push([FILL.disputed, "Sources disagree"]);
+      }
+      if (any(function (s) { return s[mode] && (s[mode].unconfirmed || s[mode].unlisted); })) {
+        rows.push([FILL.vacant, "Not confirmed by the office"]);
       }
     } else if (mode !== "governor" && any(function (s) { return s.legislature === "disputed"; })) {
       rows.push([FILL.disputed, "Sources disagree"]);
@@ -152,6 +161,9 @@
       var word = OFFICES[mode].word;
       if (!off) return { fill: FILL.none, text: name + ": no " + word + " listed" };
       if (off.disputed) return { fill: FILL.disputed, text: name + ": the sources disagree about the " + word };
+      if (off.unconfirmed || off.unlisted) {
+        return { fill: FILL.vacant, text: name + ": the " + word + " could not be confirmed with the office" };
+      }
       if (off.vacant) return { fill: FILL.vacant, text: name + ": the office of " + word + " is vacant" };
       if (off.notMember) {
         return { fill: FILL.vacant, text: name + ": the " + word + " is not confirmed (NASS's listing only)" };
@@ -184,6 +196,7 @@
       var off = s[mode];
       if (!off) return '<span class="faint">Not listed</span>';
       if (off.disputed) return "Sources disagree";
+      if (off.unconfirmed || off.unlisted) return "Not confirmed";
       if (off.vacant) return "Vacant";
       if (off.notMember) return "Not confirmed";
       if (off.none) return "No " + KYC.escapeHtml(OFFICES[mode].word);
@@ -250,10 +263,25 @@
     var label = OFFICES[kind].title;
     if (!off) return "";
     var body;
-    if (off.disputed) {
+    if (off.disputed && kind === "ag") {
+      body = '<p class="gov-officer-note">The sources disagree: ' +
+        off.disputed.map(KYC.escapeHtml).join("; ") + ". Neither is shown as the holder.</p>";
+    } else if (off.disputed) {
       body = '<p class="gov-officer-note">The sources disagree: NASS lists ' +
         KYC.escapeHtml(off.disputed[0]) + "; NLGA lists " + KYC.escapeHtml(off.disputed[1]) +
         ". Neither is shown as the holder.</p>";
+    } else if (off.unlisted) {
+      body = '<p class="gov-officer-note">Neither party\'s association of attorneys general lists ' +
+        "one for this state." + (off.office ? " " + link(off.office, "The office's site") + "." : "") + "</p>";
+    } else if (off.unconfirmed) {
+      // Why it is not confirmed is the pipeline's to say: a site that refused
+      // the request, or a page that was read and does not name them.
+      body = '<p class="gov-officer-note">The ' + KYC.escapeHtml(off.listedBy) + " lists " + who(off) +
+        " as its member here. " + (off.unreadable
+          ? "The office's own site refuses automated requests, so this is not confirmed."
+          : "The office's own page does not name them as attorney general, so this is the " +
+            "association's listing, not confirmed.") +
+        (off.office ? " " + link(off.office, "The office's site") + "." : "") + "</p>";
     } else if (off.vacant) {
       body = '<p class="gov-officer-note">Vacant, as the National Lieutenant Governors Association lists it.</p>';
     } else if (off.none && kind === "lt") {
@@ -269,9 +297,10 @@
         "currently a NASS member, so this is the association's listing, not confirmed." +
         (off.website ? " " + link(off.website, "The office's site") + "." : "") + "</p>";
     } else {
-      var facts = [off.selection, off.electionChief ? "Chief election official" : ""].filter(Boolean);
-      var links = [off.website ? link(off.website, "Office") : "", off.bio ? link(off.bio, "Biography") : ""]
-        .filter(Boolean);
+      var facts = [off.selection, off.electionChief ? "Chief election official" : "",
+        off.listedBy ? "Party: a member of the " + off.listedBy : ""].filter(Boolean);
+      var links = [off.website ? link(off.website, "Office") : "", off.office ? link(off.office, "Office") : "",
+        off.bio ? link(off.bio, "Biography") : ""].filter(Boolean);
       var contact = [off.phone, off.email, off.address].filter(Boolean).map(KYC.escapeHtml);
       body = (off.photo ? '<img class="gov-officer-photo" src="' + KYC.escapeAttr(off.photo) +
           '" alt="" width="40" height="40" loading="lazy" decoding="async">' : "") +
@@ -313,9 +342,9 @@
       link(gov.profile, "NGA biography") + "</p>" +
       (contact ? '<p class="faint gov-contact">' + contact + "</p>" : "") +
       "</div></div>";
-    if (s.lt || s.sos) {
+    if (s.lt || s.ag || s.sos) {
       html += '<p class="panel-subhead">Statewide officers</p><ul class="gov-officers">' +
-        officerRow("lt", s.lt) + officerRow("sos", s.sos) + "</ul>";
+        officerRow("lt", s.lt) + officerRow("ag", s.ag) + officerRow("sos", s.sos) + "</ul>";
     }
     if (s.upper) {
       html += '<p class="panel-subhead">Legislature</p><ul class="gov-chambers">' +
@@ -337,6 +366,8 @@
     var ncsl = data.sources.ncsl && data.sources.ncsl[2];
     html += '<p class="gov-sources faint">Governor: ' + source("nga") + ". " +
       (s.lt ? "Lieutenant governor: " + source("nlga") + ". " : "") +
+      (s.ag ? "Attorney general: the office's own site, with party from " + source("raga") +
+        " or " + source("daga") + ". " : "") +
       (s.sos ? "Secretary of state: " + source("nass") + ". " : "") + "Seats: " +
       (s.upper ? source("openstates") + (ncsl ? ", checked against " + source("ncsl") : "") :
         "not covered") + ".</p>";
@@ -354,7 +385,7 @@
   }, true);
 
   KYC.stategov = {
-    modes: ["governor", "lt", "sos", "legislature", "trifecta"],
+    modes: ["governor", "lt", "ag", "sos", "legislature", "trifecta"],
     titles: TITLES,
     state: state,
     look: look,

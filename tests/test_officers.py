@@ -210,6 +210,150 @@ class TestForState(unittest.TestCase):
         self.assertTrue(officers._surname_in("Pulu Ae Ae Jr.", "https://x/Pulu-Ae-Ae-Samoa.png"))
 
 
+class TestAttorneysGeneral(unittest.TestCase):
+
+    def test_a_name_counts_only_beside_the_title(self):
+        page = ("Office of the New York Attorney General Letitia James. Kris Mayes, Attorney "
+                "General. Attorney General Griffin Announces. AG Liz Murrill's Office. "
+                "Secretary of the Commonwealth Candi Mundon King")
+        for name in ("Letitia James", "Kris Mayes", "Tim Griffin", "Liz Murrill"):
+            self.assertTrue(officers.names_attorney_general(name, page), name)
+        # A nickname the office does not use, and a stranger, are not a match.
+        self.assertFalse(officers.names_attorney_general("Tish James", page))
+        self.assertFalse(officers.names_attorney_general("Dan Bishop", page))
+        # The name far from the title is not a match.
+        self.assertFalse(officers.names_attorney_general(
+            "Jane Doe", "Jane Doe" + " lorem ipsum" * 20 + " Attorney General"))
+        self.assertTrue(officers.names_holder("Candi Mundon King", page, "sos"))
+        self.assertTrue(officers.names_holder("Sarah Godlewski", "Secretary Godlewski said", "sos"))
+
+    def test_a_predecessor_or_neighbour_is_not_the_holder(self):
+        # Each of these confirmed the wrong person with an 80-character window.
+        cases = [
+            ("Treg Taylor", "About the acting attorney general Cori Mills. Former attorney general "
+                            "Treg Taylor asked if she would serve", "AK"),
+            ("Josh Stein", "Governor Josh Stein and Attorney General Jeff Jackson announce", "NC"),
+            ("Dan Bishop", "Jeff Jackson defeated Dan Bishop to become attorney general", "NC"),
+            ("Dan Bishop", "Former Attorney General Dan Bishop", "NC"),
+            ("Jane Smith", "Commissioner of Ag Jane Smith", "NC"),
+        ]
+        for name, page, code in cases:
+            self.assertFalse(officers.names_attorney_general(name, page, code), name)
+        # The state's own name and an ordinal may stand between name and title.
+        self.assertTrue(officers.names_attorney_general(
+            "Phil Weiser", "Phil Weiser Colorado Attorney General", "CO"))
+        self.assertTrue(officers.names_attorney_general(
+            "Alan Wilson", "Alan Wilson, South Carolina's 51st Attorney General", "SC"))
+
+    def test_a_name_in_an_html_comment_is_not_on_the_page(self):
+        # North Carolina's page keeps its previous holder commented out.
+        page = ("<html><body><!-- <div>Attorney General Josh Stein</div> -->"
+                "<p>Attorney General Jeff Jackson</p></body></html>")
+        text = officers.visible_text(page)
+        self.assertFalse(officers.names_attorney_general("Josh Stein", text, "NC"))
+        self.assertTrue(officers.names_attorney_general("Jeff Jackson", text, "NC"))
+
+    def test_acting_is_the_title_directly_before_the_name(self):
+        self.assertFalse(officers.acting("Jeff Jackson", "A bill enacting Attorney General Jackson's proposals"))
+        self.assertFalse(officers.acting("Ken Paxton", "Attorney General Paxton thanked Acting Attorney "
+                                                       "General Angela Colmenero"))
+
+    def test_acting_is_read_from_the_office(self):
+        page = "About the Acting Attorney General Cori Mills"
+        self.assertTrue(officers.acting("Cori Mills", page))
+        self.assertFalse(officers.acting("Cori Mills", "Attorney General Cori Mills"))
+
+    RAGA = {"NC": {"name": "Dan Bishop"}, "NH": {"name": "John Formella"},
+            "TX": {"name": "Ken Paxton"}, "OH": {"name": "Andy Wilson"}}
+    DAGA = {"NC": {"name": "Jeff Jackson"}, "NY": {"name": "Tish James"},
+            "MA": {"name": "Andrea Campbell"}}
+
+    def _rows(self, texts):
+        return officers.attorneys_general(self.RAGA, self.DAGA, texts)
+
+    def test_the_office_settles_which_association_is_right(self):
+        # RAGA listed for North Carolina the Republican Jeff Jackson beat in
+        # 2024; the office's page names Jackson.
+        rows, problems = self._rows({"NC": ("https://ncdoj.gov/", "Attorney General Jeff Jackson")})
+        self.assertEqual((rows["NC"]["name"], rows["NC"]["party"]), ("Jeff Jackson", "D"))
+        self.assertTrue(any("Dan Bishop" in p for p in problems))
+
+    def test_an_association_spelling_the_office_does_not_use_needs_a_form(self):
+        rows, _ = self._rows({"NY": ("https://ag.ny.gov/", "Attorney General Letitia James")})
+        self.assertEqual(rows["NY"]["name"], "Letitia James")
+
+    def test_an_unreadable_office_leaves_the_listing_attributed(self):
+        rows, problems = self._rows({"NH": ("https://www.doj.nh.gov/", None)})
+        nh = rows["NH"]
+        self.assertTrue(nh["unconfirmed"])
+        self.assertEqual(nh["listedBy"], "Republican Attorneys General Association")
+        self.assertEqual(nh["selection"], "Appointed by the governor and Executive Council")
+        self.assertTrue(problems)
+
+    def test_two_listings_and_an_unreadable_office_is_a_dispute(self):
+        rows, _ = self._rows({"NC": ("https://ncdoj.gov/", None)})
+        self.assertEqual(rows["NC"]["disputed"], ["Dan Bishop (R)", "Jeff Jackson (D)"])
+
+    def test_two_listings_and_a_page_naming_neither_is_a_dispute(self):
+        rows, _ = self._rows({"NC": ("https://ncdoj.gov/", "Welcome to the Department of Justice. " * 20)})
+        self.assertEqual(rows["NC"]["disputed"], ["Dan Bishop (R)", "Jeff Jackson (D)"])
+        self.assertNotIn("name", rows["NC"])
+
+    def test_an_unconfirmed_listing_says_why(self):
+        rows, _ = self._rows({"NH": ("https://www.doj.nh.gov/", None),
+                              "TX": ("https://www.texasattorneygeneral.gov/", "Attorney General Someone Else")})
+        self.assertTrue(rows["NH"]["unreadable"])
+        self.assertNotIn("unreadable", rows["TX"])
+
+    def test_a_state_neither_association_lists_says_so(self):
+        rows, problems = self._rows({})
+        self.assertTrue(rows["WY"]["unlisted"])
+        self.assertTrue(any(p.startswith("WY:") for p in problems))
+
+    def test_a_listing_the_office_does_not_name_is_not_shown_as_fact(self):
+        rows, _ = self._rows({"TX": ("https://www.texasattorneygeneral.gov/", "Attorney General Someone Else")})
+        self.assertTrue(rows["TX"]["unconfirmed"])
+
+    def test_dagas_roster_and_usagovs_link(self):
+        page = ('<a class="profile-card"\n   href="https://dems.ag/profile/raul-torrez/"\n   '
+                'title="Ra&uacute;l  Torrez">\n<div><h1>Ra&uacute;l <br>Torrez</h1>'
+                '<p class="profile-card__copy">New Mexico</p></div></a>') * 1
+        filler = "".join(f'<a class="profile-card" href="https://dems.ag/p/{i}/" title="Person {i}">'
+                         f'<p class="profile-card__copy">{s}</p></a>' for i, s in enumerate(
+                             ["Arizona", "California", "Colorado", "Connecticut", "Delaware",
+                              "Hawaii", "Illinois", "Maine", "Maryland", "Massachusetts",
+                              "Michigan", "Minnesota", "Nevada", "New Jersey", "New York"]))
+        rows = officers.parse_daga(page + filler)
+        self.assertEqual(rows["NM"]["name"], "Raúl Torrez")
+        usagov = ('<li class="field field--name-field-state-attorney-general field--type-link">\n'
+                  '<a href="https://www.texasattorneygeneral.gov/">Office of the Attorney General</a></li>')
+        self.assertEqual(officers.usagov_office(usagov), "https://www.texasattorneygeneral.gov/")
+        with self.assertRaises(officers.OfficersError):
+            officers.usagov_office("<p>nothing here</p>")
+
+    def test_a_page_drawn_by_javascript_concludes_nothing(self):
+        saved = officers._get
+        officers._get = lambda url, timeout=60: "<html><body><div id=app></div></body></html>"
+        try:
+            self.assertIsNone(officers._office_text("https://example.gov/", 0))
+        finally:
+            officers._get = saved
+
+    def test_a_non_member_secretary_the_office_names_is_confirmed(self):
+        saved = officers._get
+        officers._get = lambda url, timeout=60: ("<html><body>" + "Welcome. " * 40 +
+                                                 "Secretary of State Cord Byrd</body></html>")
+        try:
+            sos = officers.confirm_non_members({"FL": {
+                "name": "Cord Byrd", "party": "R", "partyKey": "R", "title": "Secretary of State",
+                "member": False, "website": "https://dos.fl.gov/"}}, pause=0)
+        finally:
+            officers._get = saved
+        self.assertTrue(sos["FL"]["officeConfirms"])
+        page = officers.for_state("FL", {"sos": sos, "lt": {}}, [])
+        self.assertNotIn("notMember", page["sos"])
+
+
 class TestCommitted(unittest.TestCase):
 
     def test_every_state_has_both_offices_accounted_for(self):
@@ -218,6 +362,19 @@ class TestCommitted(unittest.TestCase):
             entry = payload["states"][code]
             self.assertIn("lt", entry, code)
             self.assertIn("sos", entry, code)
+
+    def test_every_attorney_general_row_says_what_it_is(self):
+        # Confirmed by the office, an attributed listing, a dispute, or no
+        # listing at all - never a bare name.
+        payload, _ = stategov.build(ROOT)
+        for code in STATES:
+            row = payload["states"][code]["ag"]
+            kinds = [k for k in ("unconfirmed", "disputed", "unlisted") if row.get(k)]
+            if not kinds:
+                self.assertIn(row["partyKey"], ("D", "R"), code)
+                self.assertTrue(row["listedBy"] and row["office"], code)
+            if row.get("unconfirmed"):
+                self.assertTrue(row["listedBy"], code)
 
     def test_every_disagreement_is_shown_as_one(self):
         # On 2026-10-05: Hawaii's lieutenant governor.

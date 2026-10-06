@@ -969,7 +969,8 @@ drawn width, close-ups planned by `kyc/districts.insets`.
 ## Governors and party control
 
 The partisan map has state views beside its three for Congress - the
-statewide offices (**Governors**, **Lt. governors**, **Secretaries of state**)
+statewide offices (**Governors**, **Lt. governors**, **Attorneys general**,
+**Secretaries of state**)
 and party control (**Legislatures**, **Trifectas**) - and every state page has
 a "State government" section drawn by the same module
 (`assets/kyc-stategov.js`): the governor, with party, time in office, office
@@ -985,6 +986,8 @@ they run the state's elections; and each chamber's seats by party.
 | A second count of seats, control and governors' parties | NCSL, State Partisan Composition | `executives` writes `data/partisan_composition.json` |
 | Lieutenant governors, and who is first in line where there is none | National Lieutenant Governors Association, members | `officers` writes `data/statewide_officers.json` |
 | Secretaries of state: party, elected or appointed, chief election official, contact | National Association of Secretaries of State, membership roster | `officers` |
+| Attorneys general: who holds the office | The office's own website, linked from USA.gov's page for the state | `officers` |
+| Attorneys general: party | Republican and Democratic Attorneys General Associations, members | `officers` |
 
 A party holds a chamber when it has more than half of **all** its seats; a
 seat Open States lists nobody for counts for no one. A trifecta is one party
@@ -1024,14 +1027,29 @@ office on either roster. NASS marks some entries "Currently Not a NASS
 Member": such an entry is not NASS speaking for its own member, so it never
 overrides NLGA's - its Hawaii entry named Sylvia Luke, whom Keith Regan
 (acting) had replaced - and a secretary of state NASS lists for a non-member
-state (Florida, Nevada, Virginia, Wisconsin) is shown as NASS's listing, not
-as fact. A state with no lieutenant governor says who is first in line,
-unless that office is itself vacant or disputed; New Jersey's lieutenant
-governorship is vacant, as NLGA lists it. An NLGA photograph, like a NASS
-one, must carry the person's surname in its file name - NLGA's card for a
-vacancy carries the association's logo. A NASS photograph
-is used only when its file name carries the person's surname: NASS's own alt
-text calls every one a state seal.
+state is shown as fact only when that office's own site names them (Florida,
+Virginia and Wisconsin's do; Nevada's draws itself with JavaScript, so it
+stays NASS's listing). A state with no lieutenant governor says who is first
+in line, unless that office is itself vacant or disputed; New Jersey's
+lieutenant governorship is vacant, as NLGA lists it. A photograph from
+either roster must carry the person's surname in its file name: NASS's alt
+text calls every one a state seal, and NLGA's card for a vacancy carries the
+association's logo.
+
+No association lists every attorney general in a form a script can read
+(NAAG's site is behind a Cloudflare challenge), and neither party's
+association is trusted for the name: on 2026-10-05 RAGA listed for North
+Carolina the Republican Jeff Jackson beat in 2024, and printed "Maryland" and
+"Vermont" as members' names. So the associations - which between them have
+covered all fifty - give each candidate and their party, and a name is shown
+only when the attorney general's own office, linked from USA.gov's page for
+the state, names that person beside the title: 48 of 50 on 2026-10-05.
+Where the office's site refuses a script (Massachusetts, New Hampshire) the
+page says which association lists whom, and that the office could not
+confirm it. A few offices need another official page
+(`officers.OFFICE_PAGES`: Wyoming's staff page, Kansas's state portal) and a
+few a different front door (`OFFICE_LINK`: USA.gov's West Virginia link is a
+404). A page that draws itself with JavaScript concludes nothing.
 
 ## Counties and local governments
 

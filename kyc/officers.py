@@ -29,6 +29,8 @@ import html
 import json
 import os
 import re
+import time
+import unicodedata
 import urllib.parse
 import urllib.request
 
@@ -280,9 +282,322 @@ def overlaps(nass, nlga):
     return out
 
 
+# ------------------------------------------------------- attorneys general
+#
+# No association lists every attorney general in a form a script can read:
+# NAAG's site is behind a Cloudflare challenge. Each party's association
+# lists its own members - RAGA's Republicans, DAGA's Democrats, which
+# together have covered all fifty - and those give the party. Neither is
+# trusted for the name: on 2026-10-05 RAGA listed for North Carolina the
+# Republican Jeff Jackson beat in 2024, and printed "Maryland" and
+# "Vermont" as members' names. So a name is shown only when the attorney
+# general's own office, linked from USA.gov's page for the state, names
+# that person beside the title.
+
+DAGA_URL = "https://dems.ag/meet-the-attorneys-general/"
+USAGOV_URL = "https://www.usa.gov/states/{slug}"
+
+# The office's page where USA.gov's link is wrong, or another official page
+# where the office's own site names nobody or refuses a script. Each with
+# what was seen on 2026-10-05.
+OFFICE_PAGES = {
+    # USA.gov links ago.wv.gov/Pages/default.aspx, which is a 404.
+    "WV": ["https://ago.wv.gov/"],
+    # The homepage names nobody; the office's staff page names the AG.
+    "WY": ["https://attorneygeneral.wyo.gov/law-office-division/administrative-division/"
+           "administrative-division-staff"],
+    # ag.ks.gov answers Akamai "Access Denied"; the state portal's Elected
+    # Officials block names the attorney general.
+    "KS": ["https://portal.kansas.gov/"],
+}
+
+# The office's form of a name an association prints differently.
+NAME_FORMS = {
+    # DAGA's card; ag.ny.gov: "Office of the New York Attorney General
+    # Letitia James".
+    "Tish James": "Letitia James",
+}
+
+# The office's front door, where USA.gov links a contact page, a page that
+# is gone, or a domain named for the officeholder (rules 35 and 39:
+# ago.ms.gov redirects to attorneygenerallynnfitch.com, which will lapse).
+OFFICE_LINK = {
+    "AK": "https://law.alaska.gov/",
+    "HI": "https://ag.hawaii.gov/",
+    "MS": "https://ago.ms.gov/",
+    "WV": "https://ago.wv.gov/",
+}
+
+# How the office is filled where it is not elected statewide. Checked on
+# 2026-10-05 against each office's own site (Wyoming's quotes Wyo. Stat.
+# 9-1-601; Tennessee's, its appointment by the Supreme Court).
+AG_SELECTION = {
+    "AK": "Appointed by the governor",
+    "HI": "Appointed by the governor",
+    "ME": "Chosen by the legislature",
+    "NH": "Appointed by the governor and Executive Council",
+    "NJ": "Appointed by the governor",
+    "TN": "Appointed by the state Supreme Court",
+    "WY": "Appointed by the governor",
+}
+
+_DAGA_ITEM = re.compile(r'<a class="profile-card"\s+href="([^"]+)"\s+title="([^"]+)">.*?'
+                        r'<p class="profile-card__copy">(.*?)</p>', re.S)
+
+
+def parse_daga(page):
+    """``{code: {"name", "profile"}}`` for DAGA's members (D.C.'s included)."""
+    rows = {}
+    for profile, name, state in _DAGA_ITEM.findall(page):
+        code = jurisdiction(state)
+        if code in rows:
+            raise OfficersError(f"DAGA lists {code} twice")
+        rows[code] = {"name": _text(name), "profile": profile}
+    if len(rows) < 15:
+        raise OfficersError(f"DAGA's roster lists only {len(rows)} members")
+    return rows
+
+
+def usagov_office(page):
+    """The attorney general's office link on a USA.gov state page."""
+    links = re.findall(r'field--name-field-state-attorney-general[^>]*>\s*<a href="([^"]+)"', page)
+    if len(links) != 1:
+        raise OfficersError(f"USA.gov's page has {len(links)} attorney general links, not one")
+    return html.unescape(links[0])
+
+
+def _fold(text):
+    """Lower case, accents off, periods and quotes gone, one space - letter
+    for letter, so a match's position is its position in the original."""
+    out = []
+    for ch in text:
+        base = unicodedata.normalize("NFKD", ch)[:1] or ch
+        out.append(base.lower() if base.isalnum() else (" " if not base.isspace() else " "))
+    return re.sub(r" +", " ", "".join(out))
+
+
+def visible_text(page):
+    """A page's readable text: no head, script, style or title, and nothing
+    inside an HTML comment - North Carolina's page keeps a commented-out
+    "Attorney General Josh Stein", its previous holder."""
+    body = re.sub(r"<!--.*?-->", " ", page, flags=re.S)
+    body = re.sub(r"<(head|script|style|title|noscript)\b[^>]*>.*?</\1>", " ", body, flags=re.S | re.I)
+    return _text(body)
+
+
+_SUFFIX = {"jr", "sr", "ii", "iii", "iv"}
+
+
+TITLES = {
+    "ag": r"(?:attorney general|(?<!of )\bag\b)",
+    "sos": r"(?:secretary of state|secretary of the commonwealth)",
+}
+# The title as it stands directly before a surname: "Attorney General
+# Sunday", "Secretary Godlewski" (Wisconsin's own page).
+ADJACENT = {
+    "ag": r"(?:attorney general|(?<!of )\bag\b)",
+    "sos": r"(?:secretary of state|secretary of the commonwealth|\bsecretary)",
+}
+
+
+def names_attorney_general(name, text, code=None):
+    return names_holder(name, text, "ag", code)
+
+
+# Before a title, a word that makes it someone's past: "former attorney
+# general Treg Taylor" is on Alaska's page about its acting attorney general.
+_PAST = r"(?<!former )(?<!then )(?<!past )(?<!previous )(?<!late )"
+# Words that may stand between a name and its title, after it: the state's
+# own name, "Office of the", an ordinal ("South Carolina's 51st").
+_BETWEEN = {"office", "of", "the", "state", "s", "department", "justice"}
+
+
+def names_holder(name, text, office="ag", code=None):
+    """Whether *text* names *name* as the holder of *office* - the name
+    directly beside its title, nothing else:
+
+    - the title, then the name ("Attorney General Jeff Jackson"), unless the
+      title is someone's past ("former attorney general ...");
+    - the name, then the title, with only the state's name, "Office of the"
+      or an ordinal between ("Phil Weiser Colorado Attorney General",
+      "Alan Wilson was elected ..." is not);
+    - the title, then the surname alone ("Attorney General Sunday").
+
+    Middle initials or names may stand between first and last. A different
+    first name is not a match: that is a person to look at, and NAME_FORMS
+    to fill in. An 80-character window confirmed predecessors and governors
+    standing beside the attorney general."""
+    from .pages import state_name
+    words = [w for w in _fold(re.sub(r'"[^"]*"', " ", name)).split() if w not in _SUFFIX]
+    if len(words) < 2:
+        return False
+    first, last = re.escape(words[0]), re.escape(words[-1])
+    folded = _fold(text)
+    title = TITLES[office]
+    full = rf"\b{first}(?: [a-z]+){{0,2}} {last}\b"
+    if re.search(rf"{_PAST}{title} {full}", folded):
+        return True
+    if re.search(rf"{_PAST}{ADJACENT[office]} {last}\b", folded):
+        return True
+    allowed = _BETWEEN | ({code.lower()} | set(_fold(state_name(code)).split()) if code else set())
+    for match in re.finditer(rf"{full}((?: [a-z0-9]+){{0,5}}?) {title}", folded):
+        between = match.group(1).split()
+        if all(w in allowed or re.fullmatch(r"\d+(st|nd|rd|th)", w) for w in between):
+            return True
+    return False
+
+
+def acting(name, text):
+    """Whether the office's page calls the person acting attorney general:
+    the title directly before their name. "A bill enacting Attorney General
+    Jackson's proposals", or another official called acting nearby, is not."""
+    last = re.escape(_fold(name).split()[-1])
+    return bool(re.search(rf"\bacting attorney general (?:[a-z]+ ){{0,2}}{last}\b", _fold(text)))
+
+
+def _office_text(url, pause):
+    """The visible text of an office page and of any page it links as its
+    attorney general's own ("Attorney General", "About the Attorney
+    General"), or ``None`` when the site refuses the request. A failed
+    request is tried once more before the office counts as unreadable: one
+    timeout on Tennessee's site made it read as unconfirmed (rule 8)."""
+    page = None
+    for wait in (2, 10, 0):
+        try:
+            page = _get(url)
+            break
+        except OfficersError:
+            time.sleep(wait)
+    if page is None:
+        return None
+    if re.search(r"<title>\s*(Access Denied|Just a moment|Not allowed)", page, re.I):
+        return None
+    texts = [visible_text(page)]
+    # A page that draws itself with JavaScript (Nevada's secretary of state)
+    # says nothing either way: unreadable, not "does not name them".
+    if len(texts[0]) < 300:
+        return None
+    for href, label in re.findall(r'<a\s+href="([^"]+)"[^>]*>\s*([^<]{0,40})</a>', page):
+        if re.fullmatch(r"(About|Meet)?\s*(the\s+)?Attorney General", _text(label), re.I):
+            target = urllib.parse.urljoin(url, html.unescape(href))
+            if urllib.parse.urlparse(target).netloc == urllib.parse.urlparse(url).netloc:
+                time.sleep(pause)
+                try:
+                    texts.append(visible_text(_get(target)))
+                except OfficersError:
+                    pass
+                break
+    return " ".join(texts)
+
+
+def attorneys_general(raga, daga, office_texts):
+    """``(rows, problems)``. *office_texts* is ``{code: (url, text or None)}``.
+    A row is the confirmed holder, an unconfirmed association listing, or a
+    dispute; *problems* says what a person should look at."""
+    from .government_maps import STATES
+    rows, problems = {}, []
+    for code in STATES:
+        url, text = office_texts.get(code, ("", None))
+        listed = [(r, "R", "Republican Attorneys General Association") for r in [raga.get(code)] if r]
+        listed += [(r, "D", "Democratic Attorneys General Association") for r in [daga.get(code)] if r]
+        base = {"office": url} if url else {}
+        if code in AG_SELECTION:
+            base["selection"] = AG_SELECTION[code]
+        if not listed:
+            rows[code] = dict(base, unlisted=True)
+            problems.append(f"{code}: neither association lists an attorney general")
+            continue
+        if text is None:
+            if len(listed) > 1:
+                rows[code] = dict(base, disputed=[f"{r['name']} ({p})" for r, p, _ in listed])
+                problems.append(f"{code}: both associations list someone and the office "
+                                f"could not be read")
+            else:
+                r, party, source = listed[0]
+                rows[code] = dict(base, unconfirmed=True, unreadable=True, name=r["name"],
+                                  party=party, partyKey=party, listedBy=source)
+                problems.append(f"{code}: the office's site could not be read; {r['name']} is "
+                                f"shown as {source}'s listing, unconfirmed")
+            continue
+        confirmed = []
+        for r, party, source in listed:
+            name = NAME_FORMS.get(r["name"], r["name"])
+            name = " ".join(name.split())
+            if names_attorney_general(name, text, code):
+                confirmed.append((name, party, source, r))
+            else:
+                problems.append(f"{code}: {source} lists {r['name']}, whom the office's page "
+                                f"does not name as attorney general")
+        if len(confirmed) == 1:
+            name, party, source, r = confirmed[0]
+            rows[code] = dict(base, name=name, party=party, partyKey=party, listedBy=source,
+                              title="Acting Attorney General" if acting(name, text)
+                              else "Attorney General")
+        elif not confirmed and len(listed) > 1:
+            # Both associations list someone and the office names neither:
+            # neither listing stands for the office (RAGA's alone would be
+            # the man who lost North Carolina's race).
+            rows[code] = dict(base, disputed=[f"{r['name']} ({p})" for r, p, _ in listed])
+        elif not confirmed:
+            r, party, source = listed[0]
+            rows[code] = dict(base, unconfirmed=True, name=r["name"], party=party,
+                              partyKey=party, listedBy=source)
+        else:
+            rows[code] = dict(base, disputed=[f"{n} ({p})" for n, p, _, _ in confirmed])
+            problems.append(f"{code}: the office's page names both associations' members")
+    return rows, problems
+
+
+def ag_problems(rows):
+    """What the committed attorney-general rows leave for a person to look
+    at (the build re-reports these; the fetch reports more)."""
+    out = []
+    for code, row in sorted(rows.items()):
+        if row.get("unconfirmed"):
+            out.append(f"{code}: {row['name']} is shown as {row['listedBy']}'s listing; the "
+                       f"office's own page did not confirm it")
+        elif row.get("disputed"):
+            out.append(f"{code}: the attorney general is disputed: {', '.join(row['disputed'])}")
+        elif row.get("unlisted"):
+            out.append(f"{code}: neither association lists an attorney general")
+    return out
+
+
+def fetch_attorneys_general(pause=0.5):
+    """``(rows, problems)`` from the live rosters, USA.gov and every office."""
+    from .government_maps import STATES
+    from .pages import state_name
+    raga, daga = parse_raga(_get(RAGA_URL)), parse_daga(_get(DAGA_URL))
+    texts = {}
+    for code in STATES:
+        slug = re.sub(r"[^a-z]+", "-", state_name(code).lower()).strip("-")
+        url = usagov_office(_get(USAGOV_URL.format(slug=slug)))
+        pages = OFFICE_PAGES.get(code, [url])
+        found = [t for t in (_office_text(p, pause) for p in pages) if t]
+        texts[code] = (OFFICE_LINK.get(code, url), " ".join(found) if found else None)
+        time.sleep(pause)
+    return attorneys_general(raga, daga, texts)
+
+
+def confirm_non_members(sos, pause=0.5):
+    """A secretary of state NASS lists for a state that is not a member is
+    not NASS speaking for its member; the office's own site, which NASS
+    links, can still confirm it. Marks ``officeConfirms`` on each it does."""
+    for code, entry in sorted(sos.items()):
+        if entry.get("member") is False and office_of(entry["title"]) == "Secretary of State":
+            text = _office_text(entry["website"], pause) if entry.get("website") else None
+            if text and names_holder(entry["name"], text, "sos", code):
+                entry["officeConfirms"] = True
+            time.sleep(pause)
+    return sos
+
+
 def fetch():
-    """``{"sos": {...}, "lt": {...}}`` from the live rosters."""
-    return {"sos": parse_nass(_get(NASS_URL)), "lt": parse_nlga(_get(NLGA_URL))}
+    """``{"sos": {...}, "lt": {...}, "ag": {...}}`` from the live rosters,
+    with the attorney-general problems to report."""
+    ag, problems = fetch_attorneys_general()
+    return {"sos": confirm_non_members(parse_nass(_get(NASS_URL))),
+            "lt": parse_nlga(_get(NLGA_URL)), "ag": ag, "agProblems": problems}
 
 
 # ------------------------------------------------------------- for a state
@@ -322,6 +637,8 @@ def for_state(code, cache, disputes):
         out["lt"] = {"none": True}
         if not lt.get("vacant") and (code, office_of(lt["title"])) not in named:
             out["lt"]["successor"] = _person(lt)
+    if code in cache.get("ag", {}):
+        out["ag"] = cache["ag"][code]
     sos = cache["sos"].get(code)
     if (code, "Secretary of State") in named:
         out["sos"] = {"disputed": list(named[(code, "Secretary of State")])}
@@ -331,7 +648,7 @@ def for_state(code, cache, disputes):
         person = _person(sos)
         if person.get("photo") and not _surname_in(sos["name"], person["photo"]):
             del person["photo"]
-        if sos.get("member") is False:
+        if sos.get("member") is False and not sos.get("officeConfirms"):
             person["notMember"] = True
         out["sos"] = person
     return out
