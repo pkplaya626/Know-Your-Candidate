@@ -2844,8 +2844,12 @@ async function testCounties() {
     check("the legend switches to the legal forms", CD.getElementById("countyLegend").hidden &&
       !CD.getElementById("cityLegend").hidden && /City/.test(CD.getElementById("cityLegend").textContent));
     check("no text inside the map's SVG (rule 46)", !CD.querySelector("#localMap svg text"));
-    check("every place is in the list under the map",
-      CD.querySelectorAll('#localRoster [data-city]').length === ids.length);
+    const listed = CD.querySelectorAll('#localRoster [data-city]').length;
+    check("the list shows the first places and a button for the rest",
+      listed < ids.length && listed <= 200 && !!CD.querySelector("#localRoster [data-more]"), `${listed}`);
+    CD.querySelector("#localRoster [data-more]").dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
+    check("showing all lists every place",
+      CD.querySelectorAll('#localRoster [data-city]').length === ids.length && !CD.querySelector("#localRoster [data-more]"));
     const filter = CD.getElementById("cityFilter");
     filter.value = "houston";
     filter.dispatchEvent(new W.Event("input"));

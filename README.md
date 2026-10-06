@@ -55,7 +55,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_district_maps.py` | Rebuild `district_maps/`: every state's district boundaries, the new 2026 maps, and the towns to label (network) |
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (1036 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (1045 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1116,7 +1116,8 @@ its own site rather than guessing who runs it.
 
 The same page switches to **Cities & towns**: every incorporated place - city,
 town, village, borough - as a dot coloured by the legal form the Census names,
-19,517 in all. Picking one shows its government, with its own site and
+19,517 in all, and, in the twenty states that have them, every town or
+township government as a ring at its county subdivision. Picking one shows its government, with its own site and
 population, and a link to its county; a county's list has a button that shows
 each of its cities on the map, and every place is also in a filterable list
 under the map, since a dot is small to tap on a phone.
@@ -1140,6 +1141,18 @@ Mountain House, California), consolidated governments the two sources name
 differently (Baton Rouge's city-parish), and a handful of spellings that
 disagree ("Cajah's Mountain"). They are drawn, say that no government is
 joined, and are reported by the build; nothing is matched to its nearest name.
+
+Towns and townships are joined the other way: the listing gives each the
+Census code of its county subdivision, and the subdivision boundaries
+(`cb_2025_<st>_cousub_500k`, vendored by the same tool for the twenty states
+whose Census table counts town or township governments) carry the same
+code. 16,167 of the 16,214 are placed on their own code, the name checked
+against the boundary file's. The other 47 changed after 2022 - Wisconsin's
+Town of Madison was dissolved, Rib Mountain became a village, two
+Massachusetts towns took city charters - and stay listed under their county;
+none is placed by its name. In Connecticut, Massachusetts and the rest of New
+England, where the town is the local government, the town rings are most of
+the map.
 
 ## District maps
 

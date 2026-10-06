@@ -76,6 +76,7 @@
     Object.keys(set).forEach(function (id) { cities[id] = set[id]; });
   });
   function isTown(id) { return Object.prototype.hasOwnProperty.call(towns, id); }
+  var TOWN_PX = 2.3;
   var cityIds = Object.keys(cities).sort(function (a, b) {
     return cities[a][3].localeCompare(cities[b][3], "en") || a.localeCompare(b);
   });
@@ -127,7 +128,9 @@
     if (view !== "cities") return [];
     return cityIds.map(function (id) {
       var c = cities[id];
-      return { id: id, at: [c[0], c[1]], cls: "dot-" + formOf(id),
+      // Townships tile a state about 6 px apart on a phone (Minnesota has
+      // 1,774), so their rings are drawn smaller than the cities' dots.
+      return { id: id, at: [c[0], c[1]], cls: "dot-" + formOf(id), px: isTown(id) ? TOWN_PX : 0,
                title: c[3] + (c[2] ? " (" + kindText(c[2]) + ")" : "") };
     });
   }
@@ -271,6 +274,13 @@
     }).join("");
   }
 
+  /* Minnesota has 2,630 cities, towns and townships. Drawing every row at
+   * once cost 370 ms on a phone slowed 4x (rule 45), so the list shows the
+   * first LIST_LIMIT that match, a button for the rest, and the filter
+   * always searches them all. */
+  var LIST_LIMIT = 200;
+  var listAll = false;
+
   function cityRows(filter) {
     var q = KYC.foldText ? KYC.foldText(filter || "") : (filter || "").toLowerCase();
     var shown = cityIds.filter(function (id) {
@@ -279,7 +289,8 @@
       return (KYC.foldText ? KYC.foldText(text) : text.toLowerCase()).indexOf(q) !== -1;
     });
     if (!shown.length) return '<p class="faint">Nothing matches.</p>';
-    return shown.map(function (id) {
+    var cut = !listAll && shown.length > LIST_LIMIT ? shown.slice(0, LIST_LIMIT) : shown;
+    return cut.map(function (id) {
       var c = cities[id];
       var county = (state.counties[c[4]] || {}).name || "";
       return '<button type="button" class="leg-row" data-city="' + KYC.escapeAttr(id) + '">' +
@@ -287,10 +298,16 @@
         KYC.escapeHtml(c[3]) + "</span>" +
         '<span class="leg-row-people">' + KYC.escapeHtml([c[2] ? kindText(c[2]) : "", county]
           .filter(Boolean).join(" · ")) + "</span></button>";
-    }).join("");
+    }).join("") + (cut.length < shown.length
+      ? '<button type="button" class="leg-row local-more" data-more="1">' +
+        '<span class="leg-row-district">Show all ' + shown.length.toLocaleString("en-US") + "</span>" +
+        '<span class="leg-row-people">The first ' + cut.length + " are listed; the filter above " +
+        "searches them all.</span></button>"
+      : "");
   }
 
   function roster() {
+    listAll = false;
     if (view === "cities") {
       el("localRosterTitle").textContent = "Every city and town";
       el("localRoster").innerHTML =
@@ -323,6 +340,15 @@
 
   /* ----------------------------------------------------------------- picks */
 
+  /* Marks the picks on the map: in place within a view, a full draw when
+   * the view has changed since the map was last drawn. */
+  var drawnView = "";
+  function draw(region, dot) {
+    if (!map) return;
+    map.select(region, dot, drawnView !== view);
+    drawnView = view;
+  }
+
   function narrow() {
     return global.matchMedia && global.matchMedia("(max-width: 1000px)").matches;
   }
@@ -334,7 +360,7 @@
   function pick(fips, opts) {
     picked = state.counties[fips] ? fips : "";
     pickedCity = "";
-    if (map) map.select(picked, "");
+    draw(picked, "");
     if (picked) showCounty(picked); else showState();
     if (picked && !(opts && opts.fromRoute) && narrow()) {
       el("localPanelTitle").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -347,7 +373,7 @@
     if (view !== "cities") setView("cities", { quiet: true });
     pickedCity = id;
     picked = "";
-    map.select("", id);
+    draw("", id);
     showCity(id);
     if (!(opts && opts.fromRoute) && narrow()) {
       el("localPanelTitle").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -365,7 +391,7 @@
     // Quiet: the caller picks next, and that draws the map.
     if (opts && opts.quiet) return;
     if (view === "counties") pickedCity = "";
-    if (map) map.select(picked, pickedCity);
+    draw(picked, pickedCity);
     if (pickedCity) showCity(pickedCity); else if (picked) showCounty(picked); else showState();
     if (!(opts && opts.fromRoute)) write();
   }
@@ -418,6 +444,11 @@
     else pick(params.county || "", { fromRoute: true });
 
     el("localRoster").addEventListener("click", function (event) {
+      if (event.target.closest("[data-more]")) {
+        listAll = true;
+        el("cityRows").innerHTML = cityRows(el("cityFilter").value);
+        return;
+      }
       var row = event.target.closest("[data-region],[data-city]");
       if (!row) return;
       if (row.hasAttribute("data-city")) pickCity(row.getAttribute("data-city"));
