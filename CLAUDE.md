@@ -37,6 +37,7 @@ data/census_governments.json ─┤
 data/state_legislators.json ──┤
 data/executives.json        ──┤   (every governor, from the NGA)
 data/statewide_officers.json ─┤   (lieutenant governors, secretaries of state, attorneys general)
+data/courts.json            ──┤   (each state's highest court, from the courts)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
@@ -81,8 +82,8 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `disclosures.json`, `primary_results.json`, `committees.json`,
   `campaigns.json`, `enrichment.json`, `odds.json`,
   `census_governments.json`, `state_legislators.json`, `executives.json`,
-  `partisan_composition.json` and `statewide_officers.json` are caches, but
-  they *are* hand-editable. `stategov.js` is generated from the last four.
+  `partisan_composition.json`, `statewide_officers.json` and `courts.json` are caches, but
+  they *are* hand-editable. `stategov.js` is generated from the last five.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them only to check they load the right scripts in the right order; it never
   rewrites them. `states/*.html`, `districts/*.html`, `government/*.html`
@@ -114,14 +115,15 @@ python build_profile_site.py statelegs        # every state legislator (Open Sta
 python build_profile_site.py localgov         # every local government (Census listing), checked
 python build_profile_site.py executives       # every governor (NGA), and NCSL's party counts
 python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS), attorneys general
+python build_profile_site.py courts           # each state's highest court, from the court's own roster
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
-python -m unittest discover tests             # 792 tests, no dependencies
-npm install && npm test                       # 1003 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 808 tests, no dependencies
+npm install && npm test                       # 1010 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`,
-`officers` and `congress` touch the network, as do the two `tools/fetch_*_maps.py` scripts. Run the
+`officers`, `courts` and `congress` touch the network, as do the two `tools/fetch_*_maps.py` scripts. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -606,6 +608,19 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     directly beside its title - an 80-character window confirmed "former
     attorney general Treg Taylor" on Alaska's page, and a governor standing
     beside the attorney general.
+
+57. **A court's members come from the court.** No national source lists
+    sitting state justices, so `courts.COURTS` holds a recipe per court and
+    `read_court` refuses a roster with more names than seats or two chiefs.
+    Fewer names than seats is "nobody listed by the court", never
+    "vacant" (rule 19). "Chief" is the chief: Arizona's Vice Chief Justice,
+    Utah's and Washington's Associate Chief Justice and Kentucky's Deputy
+    Chief Justice are not, and Utah's page, which names no chief since its
+    chief justice retired, is shown as naming none. A court whose page a
+    script cannot read is in `UNREADABLE` with what was seen, and listed
+    without members - never filled from Wikipedia or Ballotpedia. Recipes
+    run case-insensitively, so a pattern that must see capitals scopes it
+    (`(?-i:...)`): Montana's matched "is" and "was" as names.
 
 ## District maps
 

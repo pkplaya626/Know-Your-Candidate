@@ -132,14 +132,17 @@ jobs:
 
       # Who runs each state: governors (NGA, checked against Wikidata),
       # NCSL's party counts, lieutenant governors (NLGA), secretaries of
-      # state (NASS) and every state legislator (Open States). Each command
-      # refuses an incomplete roster rather than writing it, and a change
-      # reaches the page only through this run's pull request. No key needed.
+      # state (NASS), attorneys general (their offices), every state
+      # legislator (Open States) and each highest court's members (the
+      # courts). Each command refuses an incomplete roster rather than
+      # writing it, and a change reaches the page only through this run's
+      # pull request. No key needed.
       - name: Refresh state governments
         run: |
           python build_profile_site.py executives
           python build_profile_site.py officers
           python build_profile_site.py statelegs
+          python build_profile_site.py courts
 
       # What a filed candidate's own sources say - the birth date, education
       # and occupation in the article their ballot page links; their
