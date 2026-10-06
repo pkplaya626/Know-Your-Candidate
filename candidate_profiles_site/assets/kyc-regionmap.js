@@ -15,6 +15,11 @@
  *     viewBox, regions: {id: {d, at, box, room, label}}, insets, outline, mesh,
  *     look: function (id) { return { cls: "party-r", title: "..." }; },
  *     onSelect: function (id) {},
+ *     // Optional points over the regions - a state's cities and towns -
+ *     // each a dot a few pixels across at any width. A dot's name is its
+ *     // <title>, never SVG text (rule 46).
+ *     dots: function () { return [{ id, at: [x, y], cls, title }]; },
+ *     onDot: function (id) {},
  *   });
  *   map.render();
  */
@@ -39,6 +44,9 @@
     });
     var drawnAt = Math.max(280, target.clientWidth || DESIGN);
     var selected = "";
+    var selectedDot = "";
+    /* A dot's radius on screen, in pixels; the picked one larger. */
+    var DOT_PX = 3.5;
 
     function meets(box, frame) {
       return box[0] < frame[0] + frame[2] && box[2] > frame[0] &&
@@ -78,6 +86,24 @@
       }).join("") + "</div>";
     }
 
+    function dots(frame, px) {
+      if (!opts.dots) return "";
+      var list = opts.dots();
+      if (!list.length) return "";
+      // The picked dot last, so it is drawn over its neighbours.
+      return '<g class="map-dots">' + list.filter(function (d) {
+        return d.id !== selectedDot && within(d.at, frame);
+      }).concat(list.filter(function (d) {
+        return d.id === selectedDot && within(d.at, frame);
+      })).map(function (d) {
+        var picked = d.id === selectedDot;
+        return '<circle class="map-dot ' + (d.cls || "") + (picked ? " is-focus" : "") + '" cx="' +
+          d.at[0] + '" cy="' + d.at[1] + '" r="' + ((picked ? DOT_PX * 1.6 : DOT_PX) / px).toFixed(2) +
+          '" data-dot="' + KYC.escapeAttr(d.id) + '"><title>' + KYC.escapeHtml(d.title || d.id) +
+          "</title></circle>";
+      }).join("") + "</g>";
+    }
+
     function view(frame, cls, label, px) {
       var mine = ids.filter(function (id) { return within(regions[id].at, frame); });
       var outline = opts.outline ? '<use href="#' + prefix + 'outline" class="state-line"/>' : "";
@@ -90,7 +116,7 @@
       return '<div class="map-frame"><svg class="district-map ' + cls + '" viewBox="' +
         frame.map(function (v) { return (+v).toFixed(1); }).join(" ") + '" role="img" aria-label="' +
         KYC.escapeAttr(label) + '"><g class="district-shapes">' + shapes(frame) + "</g>" + mesh +
-        outline + lines + "</svg>" + labels(frame, px, mine) + "</div>";
+        outline + lines + dots(frame, px) + "</svg>" + labels(frame, px, mine) + "</div>";
     }
 
     /* Each inset as wide as it needs for every label in it, or the width
@@ -119,7 +145,24 @@
       render();
     }
 
+    function setSelectedDot(id) {
+      selectedDot = id || "";
+      render();
+    }
+
+    /* A region and a dot picked together, in one draw (rule 45). */
+    function select(region, dot) {
+      selected = region || "";
+      selectedDot = dot || "";
+      render();
+    }
+
     target.addEventListener("click", function (event) {
+      var dot = event.target.closest("[data-dot]");
+      if (dot && opts.onDot) {
+        opts.onDot(dot.getAttribute("data-dot"));
+        return;
+      }
       var shape = event.target.closest("[data-region]");
       if (shape && opts.onSelect) opts.onSelect(shape.getAttribute("data-region"));
     });
@@ -137,6 +180,8 @@
     return {
       render: render,
       setSelected: setSelected,
+      setSelectedDot: setSelectedDot,
+      select: select,
       ids: function () { return ids.slice(); },
     };
   }

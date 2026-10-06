@@ -477,6 +477,7 @@ def write_local(maps, root="."):
             continue
         text = (
             _BANNER.format(source=f"legislative_maps/{code.lower()}.json (counties), "
+                                  f"local_maps/{code.lower()}.json (places), "
                                   f"local_governments/{code.lower()}.json (Census listing)",
                            built=build_timestamp())
             + f"window.kycLocal = {_json({code: payload})};\n"

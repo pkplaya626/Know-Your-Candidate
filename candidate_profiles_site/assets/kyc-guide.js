@@ -230,7 +230,14 @@
           code.toLowerCase() + ".html") + '">' + KYC.icon("layers") + " " +
           KYC.escapeHtml(map.name(code)) + ": every county and its local governments ›</a></p>"
         : "";
-      target.innerHTML = legislature + local + order.map(function (id) {
+      // On the state-government map, the state's own page says who holds
+      // each office the map describes: governor, legislature, highest court.
+      var stateGov = legislature
+        ? '<p class="guide-fact-link"><a href="' + KYC.escapeAttr(KYC.stateUrl(code) + "#state-government") +
+          '">' + KYC.icon("pin") + " " + KYC.escapeHtml(map.name(code)) +
+          "'s governor, legislature and highest court: who holds each \u203a</a></p>"
+        : "";
+      target.innerHTML = legislature + stateGov + local + order.map(function (id) {
         var m = data.modes[id];
         var value = m.values[code];
         var fact = value === undefined ? m.outside : m.facts[code];

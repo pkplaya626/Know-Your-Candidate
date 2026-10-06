@@ -1207,6 +1207,49 @@ const settle = (ms) => new Promise((r) => setTimeout(r, ms || 150));
  * profiles..." with no cards, and closing it called history.back() - which,
  * with nothing of ours behind it, left the site. The map overwrote its
  * incoming hash at boot, so state and profile links opened a blank map. */
+/* Every level links to the levels around it: the state page, its House
+ * districts, its legislature, its counties, and back. */
+async function testInterlinks() {
+  const has = (D, href) => !!D.querySelector(`a[href="${href}"]`);
+  const districts = await buildPage("districts/tx.html");
+  const dc = await buildPage("districts/dc.html");
+  const leg = await buildPage("legislature/tx.html");
+  const local = await buildPage("counties/tx.html");
+  suite("pages link to the levels around them", () => {
+    check("a district page links to its state's legislature and counties",
+      has(districts.D, "../legislature/tx.html") && has(districts.D, "../counties/tx.html"));
+    check("D.C.'s district page links to no legislature or counties page it does not have",
+      !dc.D.querySelector('a[href^="../legislature/"]') && !dc.D.querySelector('a[href^="../counties/"]'));
+    check("a legislature page links to its state's counties and House districts",
+      has(leg.D, "../counties/tx.html") && has(leg.D, "../districts/tx.html"));
+    check("a counties page links to its state's legislature and House districts",
+      has(local.D, "../legislature/tx.html") && has(local.D, "../districts/tx.html"));
+  });
+
+  const map = await buildPage("map.html", { hash: "#/?state=TX&mode=house" });
+  suite("map.html — the House view links to the district map", () => {
+    const panel = map.D.getElementById("delegation");
+    check("Texas's House panel links its district page",
+      !!panel.querySelector('a[href="districts/tx.html"]'), panel.innerHTML.slice(0, 200));
+  });
+
+  const guide = await buildPage("government/states.html");
+  suite("government/states.html — a state links to who holds its offices", () => {
+    guide.D.querySelector('#usMap .state[data-state="TX"]')
+      .dispatchEvent(new guide.window.MouseEvent("click", { bubbles: true }));
+    check("picking a state links its page's state-government section",
+      !!guide.D.querySelector('#guideFacts a[href="../states/tx.html#state-government"]'));
+  });
+
+  const state = await buildPage("states/tx.html", { hash: "#state-government" });
+  suite("states/tx.html — a link to a section reaches it", () => {
+    check("the section a link names exists once the page is drawn",
+      !!state.D.getElementById("state-government"));
+    check("a plain section link is no route: no profile opens",
+      !state.D.querySelector("dialog[open]"));
+  });
+}
+
 async function testDeepLinks() {
   const probe = await buildPage("index.html");
   const people = probe.window.legislatorsData;
@@ -2776,6 +2819,71 @@ async function testCounties() {
       D.querySelectorAll("#localRoster .leg-row").length === Object.keys(state.counties).length);
     check("names are text, never markup", !/<script/i.test(D.getElementById("localPanelBody").innerHTML));
   });
+  const cityPage = await buildPage("counties/tx.html", { hash: "#/?county=48201" });
+  suite("counties/tx.html — cities and towns", () => {
+    const W = cityPage.window, CD = cityPage.D;
+    const cities = W.kycLocal.TX.cities;
+    const ids = Object.keys(cities);
+    check("no page errors", cityPage.errors.length === 0, cityPage.errors.join(" | "));
+    check("the counties view draws no dots", !CD.querySelector("#localMap .map-dot"));
+    const pin = CD.querySelector('#localPanelBody .local-pin[data-city="4835000"]');
+    check("a county's city that is on the map has a button to show it there", !!pin);
+    CD.querySelector('.segmented [data-view="cities"]').dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
+    const dots = CD.querySelectorAll("#localMap .district-statewide .map-dot");
+    check("the cities view draws a dot per incorporated place", dots.length === ids.length,
+      `${dots.length} of ${ids.length}`);
+    check("the switch says which view is on, and the address carries it",
+      CD.querySelector('[data-view="cities"]').getAttribute("aria-pressed") === "true" &&
+      /view=cities/.test(W.location.hash), W.location.hash);
+    check("dots are coloured by legal form, never a party colour",
+      [...dots].every((d) => /dot-(city|town|village|borough|other)/.test(d.getAttribute("class")) &&
+        !/party-/.test(d.getAttribute("class"))));
+    check("counties become a plain ground under the dots",
+      [...CD.querySelectorAll("#localMap .district-statewide .region-shape")].every((s) =>
+        /region-plain/.test(s.getAttribute("class"))));
+    check("the legend switches to the legal forms", CD.getElementById("countyLegend").hidden &&
+      !CD.getElementById("cityLegend").hidden && /City/.test(CD.getElementById("cityLegend").textContent));
+    check("no text inside the map's SVG (rule 46)", !CD.querySelector("#localMap svg text"));
+    check("every place is in the list under the map",
+      CD.querySelectorAll('#localRoster [data-city]').length === ids.length);
+    const filter = CD.getElementById("cityFilter");
+    filter.value = "houston";
+    filter.dispatchEvent(new W.Event("input"));
+    const shown = CD.querySelectorAll('#localRoster [data-city]').length;
+    check("the list's filter narrows it", shown > 0 && shown < 20, `${shown}`);
+    CD.querySelector('#localMap .district-statewide [data-dot="4835000"]')
+      .dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
+    const body = CD.getElementById("localPanelBody");
+    check("picking a dot shows the place and its government, linked to its own site",
+      CD.getElementById("localPanelTitle").textContent === "Houston" && /City of Houston/.test(body.textContent) &&
+      !!body.querySelector('.local-name a[rel~="noopener"]'), body.textContent.slice(0, 120));
+    check("the place is in the address", /city=4835000/.test(W.location.hash), W.location.hash);
+    check("the picked dot is drawn larger, and once",
+      CD.querySelectorAll('#localMap .district-statewide [data-dot="4835000"].is-focus').length === 1);
+    body.querySelector("[data-county]").dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
+    check("its county is a click away", CD.getElementById("localPanelTitle").textContent === "Harris County" &&
+      /county=48201/.test(W.location.hash), W.location.hash);
+    const unjoined = ids.filter((id) => !cities[id][5])[0];
+    if (unjoined) {
+      CD.querySelector('.segmented [data-view="cities"]').dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
+      CD.querySelector(`#localMap .district-statewide [data-dot="${unjoined}"]`)
+        .dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
+      check("a place with no government joined says so, and claims no government",
+        /no entry this site could tie/.test(body.textContent) && !body.querySelector(".local-item"),
+        body.textContent.slice(0, 160));
+    }
+  });
+  const shared = await buildPage("counties/tx.html", { hash: "#/?view=cities&city=4835000" });
+  suite("counties/tx.html — a shared place link", () => {
+    check("opens the cities view on that place",
+      shared.D.getElementById("localPanelTitle").textContent === "Houston" &&
+      shared.D.querySelectorAll("#localMap .map-dot").length > 0);
+  });
+  const hawaii = await buildPage("counties/hi.html");
+  suite("counties/hi.html — a state with no incorporated place", () => {
+    check("offers no cities view", hawaii.D.querySelector(".segmented").hidden &&
+      !hawaii.D.querySelector("#localMap .map-dot"));
+  });
   const tx = await buildPage("states/tx.html");
   suite("states/tx.html — links to its counties", () => {
     check("the state page links to its counties page",
@@ -3031,6 +3139,7 @@ async function testStateGov() {
   if (!only || only === "redistricting") await testRedistricting();
   if (!only || only === "redistricting") await testDistrictPages();
   if (!only || only === "redistricting") await testDistrictsOnAPhone();
+  if (!only || only === "links") await testInterlinks();
   if (!only || only === "links") await testDeepLinks();
   if (!only || only === "links") await testFoldedIds();
   if (!only || only === "links") await testRunningElsewhere();

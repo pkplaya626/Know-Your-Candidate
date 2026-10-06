@@ -133,7 +133,10 @@ def get(url, pause=0.0):
 
 # ------------------------------------------------------------- shapefiles
 
-def read_dbf(data):
+def read_dbf(data, encoding="latin-1"):
+    """Records as dicts of text. *encoding* is the layer's own (its .cpg);
+    dBase's default is Latin-1, but the Census writes UTF-8 and says so, and
+    reading it as Latin-1 put "DoÃ±a Ana County" on the page."""
     count = struct.unpack("<I", data[4:8])[0]
     header, record = struct.unpack("<HH", data[8:12])
     fields, pos = [], 32
@@ -145,7 +148,7 @@ def read_dbf(data):
         raw = data[header + i * record + 1: header + (i + 1) * record]
         row, offset = {}, 0
         for name, width in fields:
-            row[name] = raw[offset:offset + width].decode("latin-1").strip()
+            row[name] = raw[offset:offset + width].decode(encoding).strip()
             offset += width
         rows.append(row)
     return rows
@@ -174,7 +177,10 @@ def read_layer(url):
     archive = zipfile.ZipFile(io.BytesIO(get(url)))
     # macOS archives carry "__MACOSX/._x.shp" resource forks; they are not data.
     names = [n for n in archive.namelist() if "__MACOSX" not in n]
-    rows = read_dbf(archive.read([n for n in names if n.lower().endswith(".dbf")][0]))
+    cpg = [n for n in names if n.lower().endswith(".cpg")]
+    declared = archive.read(cpg[0]).decode("ascii", "replace").strip().lower() if cpg else ""
+    encoding = "utf-8" if declared.replace("-", "") in ("utf8", "65001") else "latin-1"
+    rows = read_dbf(archive.read([n for n in names if n.lower().endswith(".dbf")][0]), encoding)
     shapes = read_shp(archive.read([n for n in names if n.lower().endswith(".shp")][0]))
     if len(rows) != len(shapes):
         raise SystemExit(f"{url}: {len(rows)} records but {len(shapes)} shapes")

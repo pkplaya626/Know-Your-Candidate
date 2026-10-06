@@ -1,0 +1,19 @@
+{
+"state":"NH",
+"source":"U.S. Census Bureau, 2025 cartographic boundary files of places (1:500,000)",
+"url":"https://www2.census.gov/geo/tiger/GENZ2025/shp/cb_2025_33_place_500k.zip",
+"places":[
+{"id":"3305140","name":"Berlin","kind":"city","point":[-71.218023,44.487963],"land":158893879},
+{"id":"3312900","name":"Claremont","kind":"city","point":[-72.333041,43.37929],"land":111766136},
+{"id":"3314200","name":"Concord","kind":"city","point":[-71.563746,43.233275],"land":165602774},
+{"id":"3318820","name":"Dover","kind":"city","point":[-70.864351,43.177176],"land":69236658},
+{"id":"3327380","name":"Franklin","kind":"city","point":[-71.664332,43.461784],"land":71050024},
+{"id":"3339300","name":"Keene","kind":"city","point":[-72.293631,42.949713],"land":96068853},
+{"id":"3340180","name":"Laconia","kind":"city","point":[-71.481535,43.58345],"land":51380585},
+{"id":"3341300","name":"Lebanon","kind":"city","point":[-72.2549,43.634945],"land":104389357},
+{"id":"3345140","name":"Manchester","kind":"city","point":[-71.432951,42.980387],"land":85561619},
+{"id":"3350260","name":"Nashua","kind":"city","point":[-71.483929,42.734655],"land":79860094},
+{"id":"3362900","name":"Portsmouth","kind":"city","point":[-70.780895,43.060355],"land":40566158},
+{"id":"3365140","name":"Rochester","kind":"city","point":[-70.966682,43.29108],"land":116603498},
+{"id":"3369940","name":"Somersworth","kind":"city","point":[-70.883826,43.249719],"land":25392070}
+]}

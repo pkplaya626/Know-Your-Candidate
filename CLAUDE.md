@@ -25,6 +25,7 @@ us_atlas_states_topo.json   ──┤
 district_maps/*.json        ──┤   (every state's districts; tools/fetch_district_maps.py)
 legislative_maps/*.json     ──┤   (state senate and house districts, counties; tools/fetch_legislative_maps.py)
 local_governments/*.json    ──┤   (every local government, from the Census listing; localgov)
+local_maps/*.json           ──┤   (every incorporated place, one point each; tools/fetch_local_maps.py)
 congress_snapshot.json      ──┤
 data/fec_field.json         ──┤   (the FEC's 2026 candidate register)
 data/disclosures.json       ──┤
@@ -117,13 +118,14 @@ python build_profile_site.py executives       # every governor (NGA), and NCSL's
 python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS), attorneys general
 python build_profile_site.py courts           # each state's highest court, from the court's own roster
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
-python -m unittest discover tests             # 808 tests, no dependencies
-npm install && npm test                       # 1010 real-DOM checks (needs jsdom)
+python tools/fetch_local_maps.py              # every incorporated place, for the county pages (Census, network)
+python -m unittest discover tests             # 819 tests, no dependencies
+npm install && npm test                       # 1036 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`,
-`officers`, `courts` and `congress` touch the network, as do the two `tools/fetch_*_maps.py` scripts. Run the
+`officers`, `courts` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -621,6 +623,30 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     without members - never filled from Wikipedia or Ballotpedia. Recipes
     run case-insensitively, so a pattern that must see capitals scopes it
     (`(?-i:...)`): Montana's matched "is" and "was" as names.
+
+58. **A shapefile says its own encoding.** `read_dbf` decoded every layer
+    as Latin-1, dBase's default, and the Census writes UTF-8 and says so in
+    the layer's `.cpg`: "DoÃ±a Ana County" and sixteen Puerto Rico
+    municipios were on the district, legislature and county pages for weeks
+    with nothing failing. `read_layer` honours the `.cpg`, and
+    `test_no_vendored_or_generated_file_carries_mojibake` fails on "Ã" or
+    "Â" followed by a character from U+0080-U+00BF in any map or data file.
+
+59. **A city is joined to its government only one to one.** The Census
+    listing's place codes are not its boundary file's (Texarkana, Texas:
+    68810 against 72368), so `counties.match_cities` joins on the name -
+    within the state, never across one - and only where one place and one
+    government share it, or, for a name shared, where one government of it
+    is filed in the county the place's point lies in. Passes go from
+    strictest to loosest over what the last left: name and legal form (the
+    city and the village of Pewaukee, Wisconsin share a name and a county);
+    name; name without the forms after it ("Phenix City" is the listing's
+    "CITY OF PHENIX"). A place left unjoined is drawn and says so, the
+    government stays under its county, and the build reports both. Never
+    fall back to a town or township of the same name: the Village of Rib
+    Mountain was incorporated in 2023 from a Town of Rib Mountain the 2022
+    listing still holds, and joining them would show a dissolved
+    government as the village's.
 
 ## District maps
 

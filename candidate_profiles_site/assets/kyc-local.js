@@ -3,12 +3,17 @@
  * special districts, and the school systems a state, county or city runs.
  *
  * Everything comes from window.kycLocal, built by kyc/counties.py from the
- * Census Bureau's county boundaries and its 2022 Government Units listing,
- * joined on the county's Census code. The map is the shared region map
- * (kyc-regionmap.js); counties are shaded by how many local governments
- * each has.
+ * Census Bureau's county and place boundaries and its 2022 Government Units
+ * listing. Governments are joined to counties on the county's Census code,
+ * and a city or town to its government only where the build found the join
+ * one to one. The map is the shared region map (kyc-regionmap.js), in two
+ * views:
+ *   - Counties: each county shaded by how many local governments it has;
+ *   - Cities and towns: every incorporated place a dot, coloured by the
+ *     legal form the Census names (city, town, village, borough).
  *
- * The address carries the picked county: #/?county=48201.
+ * The address carries the view and the pick:
+ * #/?county=48201, #/?view=cities&city=4835000.
  */
 (function (global) {
   "use strict";
@@ -17,7 +22,9 @@
   var KYC = global.KYC;
   var code = doc.body.getAttribute("data-state") || "";
   var state = (global.kycLocal || {})[code] || null;
+  var view = "counties";
   var picked = "";
+  var pickedCity = "";
   var map = null;
 
   var KINDS = {
@@ -32,8 +39,18 @@
   /* Shades for the count of governments in a county: five steps of one hue
    * (the --scale-* colours), never a party colour. */
   var EDGES = [10, 25, 50, 100];
+  /* A place's dot by its legal form, in the --cat-* colours; every other
+   * form (a consolidated government, a municipality) is "other". */
+  var FORMS = [
+    ["city", "City"],
+    ["town", "Town"],
+    ["village", "Village"],
+    ["borough", "Borough"],
+    ["other", "Other legal form"],
+  ];
 
   function el(id) { return doc.getElementById(id); }
+  function plural(n, word) { return n.toLocaleString("en-US") + " " + word + (n === 1 ? "" : "s"); }
 
   function counted(rows) {
     return rows.filter(function (r) { return r[0] !== "dependent"; }).length;
@@ -45,11 +62,56 @@
     return "scale-" + step;
   }
 
+  /* --------------------------------------------------------------- cities */
+
+  // [x, y, kind, name, county, ref]; ref is [county code, row] or null.
+  var cities = (state && state.cities) || {};
+  var cityIds = Object.keys(cities).sort(function (a, b) {
+    return cities[a][3].localeCompare(cities[b][3], "en") || a.localeCompare(b);
+  });
+  // "48201:12" -> the place joined to that government row.
+  var cityOfRow = {};
+  cityIds.forEach(function (id) {
+    var ref = cities[id][5];
+    if (ref) cityOfRow[ref[0] + ":" + ref[1]] = id;
+  });
+
+  function form(kind) {
+    return ["city", "town", "village", "borough"].indexOf(kind) !== -1 ? kind : "other";
+  }
+
+  /* The legal form as a reader should see it. The Census calls the part of
+   * a consolidated government outside its other places its "balance". */
+  function kindText(kind) {
+    if (kind === "balance") return "consolidated government (the part outside its other places)";
+    return kind;
+  }
+
+  function governmentRow(ref) {
+    if (!ref) return null;
+    var rows = state.governments[ref[0]];
+    if (!rows) {
+      var area = state.unmatched.filter(function (u) { return u.fips === ref[0]; })[0];
+      rows = area ? area.governments : null;
+    }
+    return rows ? rows[ref[1]] || null : null;
+  }
+
+  function cityDots() {
+    if (view !== "cities") return [];
+    return cityIds.map(function (id) {
+      var c = cities[id];
+      return { id: id, at: [c[0], c[1]], cls: "dot-" + form(c[2]),
+               title: c[3] + (c[2] ? " (" + kindText(c[2]) + ")" : "") };
+    });
+  }
+
   function look(fips) {
     var rows = state.governments[fips] || [];
     var n = counted(rows);
-    return { cls: "district-shape region-" + shade(n),
-             title: state.counties[fips].name + ": " + n + " local government" + (n === 1 ? "" : "s") };
+    var title = state.counties[fips].name + ": " + plural(n, "local government");
+    if (view === "cities") return { cls: "district-shape region-plain", title: title };
+    return { cls: "district-shape region-" + shade(n), title: title };
   }
 
   /* ----------------------------------------------------------------- lists */
@@ -60,31 +122,42 @@
       Number(row[4]).toLocaleString("en-US");
   }
 
-  function item(row) {
+  /* One government. *key* ("48201:12") finds the place joined to it, which
+   * gets a button that shows it on the cities map. */
+  function item(row, key) {
     var name = row[3]
       ? '<a href="' + KYC.escapeAttr(row[3]) + '" target="_blank" rel="noopener noreferrer">' +
         KYC.escapeHtml(row[1]) + "</a>"
       : KYC.escapeHtml(row[1]);
     var bits = [row[5], row[2], size(row), row[6] === "inactive" ? "listed as inactive" : ""]
       .filter(Boolean).map(KYC.escapeHtml);
-    return '<li class="local-item"><span class="local-name">' + name + "</span>" +
+    var place = key && cityOfRow[key];
+    var pin = place
+      ? ' <button type="button" class="local-pin" data-city="' + KYC.escapeAttr(place) +
+        '" aria-label="Show ' + KYC.escapeAttr(cities[place][3]) + ' on the map">' +
+        KYC.icon("pin") + "</button>"
+      : "";
+    return '<li class="local-item"><span class="local-name">' + name + pin + "</span>" +
       (bits.length ? '<span class="local-meta">' + bits.join(" · ") + "</span>" : "") + "</li>";
   }
 
-  function groups(rows, filter) {
+  function groups(rows, filter, fips) {
     var q = KYC.foldText ? KYC.foldText(filter || "") : (filter || "").toLowerCase();
     var html = "";
     ORDER.forEach(function (kind) {
-      var mine = rows.filter(function (r) {
-        if (r[0] !== kind) return false;
-        if (!q) return true;
-        var text = r[1] + " " + r[5] + " " + r[2];
-        return (KYC.foldText ? KYC.foldText(text) : text.toLowerCase()).indexOf(q) !== -1;
+      var mine = [];
+      rows.forEach(function (r, i) {
+        if (r[0] !== kind) return;
+        if (q) {
+          var text = r[1] + " " + r[5] + " " + r[2];
+          if ((KYC.foldText ? KYC.foldText(text) : text.toLowerCase()).indexOf(q) === -1) return;
+        }
+        mine.push(item(r, fips ? fips + ":" + i : ""));
       });
       if (!mine.length) return;
       html += '<h3 class="local-group">' + KYC.escapeHtml(KINDS[kind]) +
         ' <span class="faint">' + mine.length + "</span></h3>" +
-        '<ul class="local-list">' + mine.map(item).join("") + "</ul>";
+        '<ul class="local-list">' + mine.join("") + "</ul>";
     });
     return html || '<p class="faint">Nothing matches.</p>';
   }
@@ -95,14 +168,42 @@
     var n = counted(rows);
     el("localPanelTitle").textContent = county.name;
     el("localPanelBody").innerHTML =
-      '<p class="local-total">' + n + " local government" + (n === 1 ? "" : "s") +
-      " in 2022</p>" +
+      '<p class="local-total">' + plural(n, "local government") + " in 2022</p>" +
       '<label class="sr-only" for="localFilter">Filter this county\'s governments</label>' +
       '<input type="search" id="localFilter" class="local-filter" placeholder="Filter by name, kind or city" autocomplete="off">' +
-      '<div id="localGroups">' + groups(rows, "") + "</div>";
+      '<div id="localGroups">' + groups(rows, "", fips) + "</div>";
     el("localFilter").addEventListener("input", function () {
-      el("localGroups").innerHTML = groups(rows, el("localFilter").value);
+      el("localGroups").innerHTML = groups(rows, el("localFilter").value, fips);
     });
+  }
+
+  function countyButton(fips) {
+    if (!fips || !state.counties[fips]) return "";
+    return '<button type="button" class="sidebar-link local-county-link" data-county="' +
+      KYC.escapeAttr(fips) + '">' + KYC.escapeHtml(state.counties[fips].name) +
+      ": every local government ›</button>";
+  }
+
+  function showCity(id) {
+    var c = cities[id];
+    var row = governmentRow(c[5]);
+    el("localPanelTitle").textContent = c[3];
+    var body = '<p class="local-total"><span class="swatch dot-swatch dot-' + form(c[2]) + '"></span>' +
+      KYC.escapeHtml(c[2] ? "Incorporated " + kindText(c[2]) : "Incorporated place") +
+      (c[4] && state.counties[c[4]] ? ", in " + KYC.escapeHtml(state.counties[c[4]].name) : "") + "</p>";
+    if (row) {
+      body += '<h3 class="local-group">Its government</h3><ul class="local-list">' + item(row, "") + "</ul>" +
+        '<p class="faint">As the Census Bureau listed it in 2022, with its own website where the ' +
+        "Bureau has one.</p>";
+    } else {
+      // Not joined is not "no government" (rule 19): the build found no
+      // government in the listing it could tie to this place one to one.
+      body += '<p class="gov-officer-note">The Census Bureau\'s 2022 listing of governments has no ' +
+        "entry this site could tie to this place by its name alone, so none is shown here. A place " +
+        "incorporated since 2022 is not in that listing yet.</p>";
+    }
+    body += countyButton(c[4]);
+    el("localPanelBody").innerHTML = body;
   }
 
   function showState() {
@@ -111,45 +212,159 @@
     var extra = state.unmatched.map(function (u) {
       return '<p class="leg-subhead">' + KYC.escapeHtml(u.name) + "</p>" +
         '<p class="faint">The Census listing files these under a county area that is not on the ' +
-        "current county map.</p>" + groups(u.governments, "");
+        "current county map.</p>" + groups(u.governments, "", u.fips);
     }).join("") + (state.statewide.length
       ? '<p class="leg-subhead">Statewide</p><p class="faint">Run by the state, with no county.</p>' +
         groups(state.statewide, "") : "");
     el("localPanelTitle").textContent = state.name;
-    el("localPanelBody").innerHTML =
-      '<p class="local-total">' + total.toLocaleString("en-US") + " local governments in " +
-      Object.keys(state.counties).length + " counties (2022).</p>" +
-      '<p class="faint">Pick a county on the map, or from the list below, to see every ' +
-      "government in it.</p>" + extra;
+    var lede = view === "cities"
+      ? '<p class="local-total">' + plural(cityIds.length, "incorporated place") + " (2025).</p>" +
+        '<p class="faint">Every city, town, village and borough, at a point inside it. Pick one on the ' +
+        "map, or from the list below, to see its government.</p>"
+      : '<p class="local-total">' + total.toLocaleString("en-US") + " local governments in " +
+        Object.keys(state.counties).length + " counties (2022).</p>" +
+        '<p class="faint">Pick a county on the map, or from the list below, to see every ' +
+        "government in it.</p>";
+    el("localPanelBody").innerHTML = lede + extra;
   }
 
-  function roster() {
+  /* ---------------------------------------------------------------- roster */
+
+  function countyRoster() {
     var ids = Object.keys(state.counties).sort(function (a, b) {
       return state.counties[a].name.localeCompare(state.counties[b].name);
     });
-    el("localRoster").innerHTML = ids.map(function (fips) {
+    return ids.map(function (fips) {
       var n = counted(state.governments[fips] || []);
       return '<button type="button" class="leg-row" data-region="' + KYC.escapeAttr(fips) + '">' +
         '<span class="leg-row-district">' + KYC.escapeHtml(state.counties[fips].name) + "</span>" +
-        '<span class="leg-row-people">' + n + " local government" + (n === 1 ? "" : "s") + "</span></button>";
+        '<span class="leg-row-people">' + plural(n, "local government") + "</span></button>";
     }).join("");
+  }
+
+  function cityRows(filter) {
+    var q = KYC.foldText ? KYC.foldText(filter || "") : (filter || "").toLowerCase();
+    var shown = cityIds.filter(function (id) {
+      if (!q) return true;
+      var text = cities[id][3] + " " + ((state.counties[cities[id][4]] || {}).name || "");
+      return (KYC.foldText ? KYC.foldText(text) : text.toLowerCase()).indexOf(q) !== -1;
+    });
+    if (!shown.length) return '<p class="faint">Nothing matches.</p>';
+    return shown.map(function (id) {
+      var c = cities[id];
+      var county = (state.counties[c[4]] || {}).name || "";
+      return '<button type="button" class="leg-row" data-city="' + KYC.escapeAttr(id) + '">' +
+        '<span class="leg-row-district"><span class="swatch dot-swatch dot-' + form(c[2]) + '"></span>' +
+        KYC.escapeHtml(c[3]) + "</span>" +
+        '<span class="leg-row-people">' + KYC.escapeHtml([c[2] ? kindText(c[2]) : "", county]
+          .filter(Boolean).join(" · ")) + "</span></button>";
+    }).join("");
+  }
+
+  function roster() {
+    if (view === "cities") {
+      el("localRosterTitle").textContent = "Every city and town";
+      el("localRoster").innerHTML =
+        '<label class="sr-only" for="cityFilter">Filter the cities and towns</label>' +
+        '<input type="search" id="cityFilter" class="local-filter" placeholder="Filter by name or county" autocomplete="off">' +
+        '<div id="cityRows" class="leg-roster">' + cityRows("") + "</div>";
+      el("cityFilter").addEventListener("input", function () {
+        el("cityRows").innerHTML = cityRows(el("cityFilter").value);
+      });
+    } else {
+      el("localRosterTitle").textContent = "Every county";
+      el("localRoster").innerHTML = countyRoster();
+    }
+  }
+
+  function legend() {
+    var countyKey = el("countyLegend");
+    var cityKey = el("cityLegend");
+    if (countyKey) countyKey.hidden = view === "cities";
+    if (!cityKey) return;
+    cityKey.hidden = view !== "cities";
+    var present = {};
+    cityIds.forEach(function (id) { present[form(cities[id][2])] = true; });
+    cityKey.innerHTML = '<span class="party-legend-title">Incorporated places, by legal form</span>' +
+      FORMS.filter(function (f) { return present[f[0]]; }).map(function (f) {
+        return '<span class="key"><span class="swatch dot-swatch dot-' + f[0] + '"></span>' +
+          KYC.escapeHtml(f[1]) + "</span>";
+      }).join("");
+  }
+
+  /* ----------------------------------------------------------------- picks */
+
+  function narrow() {
+    return global.matchMedia && global.matchMedia("(max-width: 1000px)").matches;
+  }
+
+  function write() {
+    KYC.router.writeFilters({ view: view === "cities" ? "cities" : "", county: picked, city: pickedCity });
   }
 
   function pick(fips, opts) {
     picked = state.counties[fips] ? fips : "";
-    if (map) map.setSelected(picked);
+    pickedCity = "";
+    if (map) map.select(picked, "");
     if (picked) showCounty(picked); else showState();
-    if (picked && !(opts && opts.fromRoute) && global.matchMedia &&
-        global.matchMedia("(max-width: 1000px)").matches) {
+    if (picked && !(opts && opts.fromRoute) && narrow()) {
       el("localPanelTitle").scrollIntoView({ behavior: "smooth", block: "start" });
     }
-    if (!(opts && opts.fromRoute)) KYC.router.writeFilters({ county: picked });
+    if (!(opts && opts.fromRoute)) write();
+  }
+
+  function pickCity(id, opts) {
+    if (!cities[id]) return;
+    if (view !== "cities") setView("cities", { quiet: true });
+    pickedCity = id;
+    picked = "";
+    map.select("", id);
+    showCity(id);
+    if (!(opts && opts.fromRoute) && narrow()) {
+      el("localPanelTitle").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    if (!(opts && opts.fromRoute)) write();
+  }
+
+  function setView(next, opts) {
+    view = next === "cities" && cityIds.length ? "cities" : "counties";
+    Array.prototype.forEach.call(doc.querySelectorAll(".segmented [data-view]"), function (b) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-view") === view));
+    });
+    legend();
+    roster();
+    // Quiet: the caller picks next, and that draws the map.
+    if (opts && opts.quiet) return;
+    if (view === "counties") pickedCity = "";
+    if (map) map.select(picked, pickedCity);
+    if (pickedCity) showCity(pickedCity); else if (picked) showCounty(picked); else showState();
+    if (!(opts && opts.fromRoute)) write();
+  }
+
+  function follow(params) {
+    var wantedView = params.view === "cities" ? "cities" : "counties";
+    if (wantedView !== view) setView(wantedView, { fromRoute: true });
+    if (params.city && cities[params.city]) {
+      if (params.city !== pickedCity) pickCity(params.city, { fromRoute: true });
+    } else if ((params.county || "") !== picked || pickedCity) {
+      pick(params.county || "", { fromRoute: true });
+    }
   }
 
   KYC.ready(function () {
     if (!state) {
       el("localMap").innerHTML = '<p class="results-bar">This state\'s county map did not load.</p>';
       return;
+    }
+    var segmented = doc.querySelector(".segmented");
+    if (segmented) {
+      // Hawaii has no incorporated places: its counties are its only
+      // general-purpose local governments.
+      segmented.hidden = !cityIds.length;
+      segmented.addEventListener("click", function (event) {
+        var b = event.target.closest("[data-view]");
+        if (b) setView(b.getAttribute("data-view"));
+      });
     }
     map = KYC.regionmap.create(el("localMap"), {
       title: state.name + " counties",
@@ -158,22 +373,41 @@
       insets: state.insets,
       outline: state.outline,
       look: look,
+      dots: cityDots,
       onSelect: function (fips) { pick(fips); },
+      onDot: function (id) { pickCity(id); },
     });
-    var route = KYC.router.read().params;
-    map.render();
+    var params = KYC.router.read().params;
+    view = params.view === "cities" && cityIds.length ? "cities" : "counties";
+    Array.prototype.forEach.call(doc.querySelectorAll(".segmented [data-view]"), function (b) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-view") === view));
+    });
+    legend();
     roster();
-    pick(route.county || "", { fromRoute: true });
+    // The pick draws the map: once on load (rule 45).
+    if (params.city && cities[params.city]) pickCity(params.city, { fromRoute: true });
+    else pick(params.county || "", { fromRoute: true });
+
     el("localRoster").addEventListener("click", function (event) {
-      var row = event.target.closest("[data-region]");
-      if (row) {
-        pick(row.getAttribute("data-region"));
-        el("localMap").scrollIntoView({ behavior: "smooth", block: "start" });
+      var row = event.target.closest("[data-region],[data-city]");
+      if (!row) return;
+      if (row.hasAttribute("data-city")) pickCity(row.getAttribute("data-city"));
+      else pick(row.getAttribute("data-region"));
+      el("localMap").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    el("localPanelBody").addEventListener("click", function (event) {
+      var city = event.target.closest("[data-city]");
+      if (city) {
+        pickCity(city.getAttribute("data-city"));
+        if (narrow()) el("localMap").scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      var county = event.target.closest("[data-county]");
+      if (county) {
+        setView("counties", { quiet: true });
+        pick(county.getAttribute("data-county"));
       }
     });
-    KYC.router.onChange(function () {
-      var wanted = KYC.router.read().params.county || "";
-      if (wanted !== picked) pick(wanted, { fromRoute: true });
-    });
+    KYC.router.onChange(function () { follow(KYC.router.read().params); });
   });
 })(window);

@@ -180,6 +180,16 @@
     target.innerHTML = html.join("");
   }
 
+  /* A link to a section of this page ("#state-government", from the guide)
+   * arrives before the script has drawn that section, so the browser's own
+   * jump finds nothing. Jump once it is there. */
+  function jumpToSection() {
+    var hash = global.location.hash;
+    if (!/^#[A-Za-z][\w-]*$/.test(hash)) return;
+    var section = doc.getElementById(hash.slice(1));
+    if (section && section.scrollIntoView) section.scrollIntoView({ block: "start" });
+  }
+
   /* ---------------------------------------------------------- all states */
 
   function renderIndex() {
@@ -259,7 +269,7 @@
       return;
     }
     KYC.profile.ensure();
-    if (kind === "states") renderIndex(); else renderState();
+    if (kind === "states") renderIndex(); else { renderState(); jumpToSection(); }
     initSearch();
     initCards();
     KYC.router.onChange(function () { applyRoute(KYC.router.read()); });
