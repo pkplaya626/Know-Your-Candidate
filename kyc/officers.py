@@ -377,8 +377,11 @@ def _fold(text):
 
 
 def visible_text(page):
-    """A page's readable text: no head, script, style or title."""
-    body = re.sub(r"<(head|script|style|title|noscript)\b[^>]*>.*?</\1>", " ", page, flags=re.S | re.I)
+    """A page's readable text: no head, script, style or title, and nothing
+    inside an HTML comment - North Carolina's page keeps a commented-out
+    "Attorney General Josh Stein", its previous holder."""
+    body = re.sub(r"<!--.*?-->", " ", page, flags=re.S)
+    body = re.sub(r"<(head|script|style|title|noscript)\b[^>]*>.*?</\1>", " ", body, flags=re.S | re.I)
     return _text(body)
 
 
@@ -386,46 +389,70 @@ _SUFFIX = {"jr", "sr", "ii", "iii", "iv"}
 
 
 TITLES = {
-    "ag": r"(?:attorney general|\bag\b)",
+    "ag": r"(?:attorney general|(?<!of )\bag\b)",
     "sos": r"(?:secretary of state|secretary of the commonwealth)",
 }
 # The title as it stands directly before a surname: "Attorney General
 # Sunday", "Secretary Godlewski" (Wisconsin's own page).
 ADJACENT = {
-    "ag": r"(?:attorney general|\bag\b)",
+    "ag": r"(?:attorney general|(?<!of )\bag\b)",
     "sos": r"(?:secretary of state|secretary of the commonwealth|\bsecretary)",
 }
 
 
-def names_attorney_general(name, text):
-    return names_holder(name, text, "ag")
+def names_attorney_general(name, text, code=None):
+    return names_holder(name, text, "ag", code)
 
 
-def names_holder(name, text, office="ag"):
-    """Whether *text* names *name* as the holder of *office*: its title
-    ("Attorney General" or "AG"; "Secretary of State") within 80 characters
-    of the full name, middle initials and nicknames in quotes allowed between
-    first and last; or the title and the surname with nothing between. A
-    different first name is not a match: that is a person to look at, and
-    NAME_FORMS to fill in."""
+# Before a title, a word that makes it someone's past: "former attorney
+# general Treg Taylor" is on Alaska's page about its acting attorney general.
+_PAST = r"(?<!former )(?<!then )(?<!past )(?<!previous )(?<!late )"
+# Words that may stand between a name and its title, after it: the state's
+# own name, "Office of the", an ordinal ("South Carolina's 51st").
+_BETWEEN = {"office", "of", "the", "state", "s", "department", "justice"}
+
+
+def names_holder(name, text, office="ag", code=None):
+    """Whether *text* names *name* as the holder of *office* - the name
+    directly beside its title, nothing else:
+
+    - the title, then the name ("Attorney General Jeff Jackson"), unless the
+      title is someone's past ("former attorney general ...");
+    - the name, then the title, with only the state's name, "Office of the"
+      or an ordinal between ("Phil Weiser Colorado Attorney General",
+      "Alan Wilson was elected ..." is not);
+    - the title, then the surname alone ("Attorney General Sunday").
+
+    Middle initials or names may stand between first and last. A different
+    first name is not a match: that is a person to look at, and NAME_FORMS
+    to fill in. An 80-character window confirmed predecessors and governors
+    standing beside the attorney general."""
+    from .pages import state_name
     words = [w for w in _fold(re.sub(r'"[^"]*"', " ", name)).split() if w not in _SUFFIX]
     if len(words) < 2:
         return False
     first, last = re.escape(words[0]), re.escape(words[-1])
     folded = _fold(text)
     title = TITLES[office]
-    # Up to two middle words: initials, or names ("Candi Mundon King").
     full = rf"\b{first}(?: [a-z]+){{0,2}} {last}\b"
-    near = rf"{title}.{{0,80}}?{full}|{full}.{{0,80}}?{title}"
-    adjacent = rf"{ADJACENT[office]} {last}\b"
-    return bool(re.search(near, folded) or re.search(adjacent, folded))
+    if re.search(rf"{_PAST}{title} {full}", folded):
+        return True
+    if re.search(rf"{_PAST}{ADJACENT[office]} {last}\b", folded):
+        return True
+    allowed = _BETWEEN | ({code.lower()} | set(_fold(state_name(code)).split()) if code else set())
+    for match in re.finditer(rf"{full}((?: [a-z0-9]+){{0,5}}?) {title}", folded):
+        between = match.group(1).split()
+        if all(w in allowed or re.fullmatch(r"\d+(st|nd|rd|th)", w) for w in between):
+            return True
+    return False
 
 
 def acting(name, text):
-    """Whether the office's page calls the person acting attorney general."""
+    """Whether the office's page calls the person acting attorney general:
+    the title directly before their name. "A bill enacting Attorney General
+    Jackson's proposals", or another official called acting nearby, is not."""
     last = re.escape(_fold(name).split()[-1])
-    return bool(re.search(rf"acting attorney general.{{0,60}}?\b{last}\b|\b{last}\b.{{0,60}}?"
-                          rf"acting attorney general", _fold(text)))
+    return bool(re.search(rf"\bacting attorney general (?:[a-z]+ ){{0,2}}{last}\b", _fold(text)))
 
 
 def _office_text(url, pause):
@@ -487,8 +514,8 @@ def attorneys_general(raga, daga, office_texts):
                                 f"could not be read")
             else:
                 r, party, source = listed[0]
-                rows[code] = dict(base, unconfirmed=True, name=r["name"], party=party,
-                                  partyKey=party, listedBy=source)
+                rows[code] = dict(base, unconfirmed=True, unreadable=True, name=r["name"],
+                                  party=party, partyKey=party, listedBy=source)
                 problems.append(f"{code}: the office's site could not be read; {r['name']} is "
                                 f"shown as {source}'s listing, unconfirmed")
             continue
@@ -496,7 +523,7 @@ def attorneys_general(raga, daga, office_texts):
         for r, party, source in listed:
             name = NAME_FORMS.get(r["name"], r["name"])
             name = " ".join(name.split())
-            if names_attorney_general(name, text):
+            if names_attorney_general(name, text, code):
                 confirmed.append((name, party, source, r))
             else:
                 problems.append(f"{code}: {source} lists {r['name']}, whom the office's page "
@@ -506,6 +533,11 @@ def attorneys_general(raga, daga, office_texts):
             rows[code] = dict(base, name=name, party=party, partyKey=party, listedBy=source,
                               title="Acting Attorney General" if acting(name, text)
                               else "Attorney General")
+        elif not confirmed and len(listed) > 1:
+            # Both associations list someone and the office names neither:
+            # neither listing stands for the office (RAGA's alone would be
+            # the man who lost North Carolina's race).
+            rows[code] = dict(base, disputed=[f"{r['name']} ({p})" for r, p, _ in listed])
         elif not confirmed:
             r, party, source = listed[0]
             rows[code] = dict(base, unconfirmed=True, name=r["name"], party=party,
@@ -554,7 +586,7 @@ def confirm_non_members(sos, pause=0.5):
     for code, entry in sorted(sos.items()):
         if entry.get("member") is False and office_of(entry["title"]) == "Secretary of State":
             text = _office_text(entry["website"], pause) if entry.get("website") else None
-            if text and names_holder(entry["name"], text, "sos"):
+            if text and names_holder(entry["name"], text, "sos", code):
                 entry["officeConfirms"] = True
             time.sleep(pause)
     return sos

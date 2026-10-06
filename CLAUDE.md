@@ -115,7 +115,7 @@ python build_profile_site.py localgov         # every local government (Census l
 python build_profile_site.py executives       # every governor (NGA), and NCSL's party counts
 python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS), attorneys general
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
-python -m unittest discover tests             # 787 tests, no dependencies
+python -m unittest discover tests             # 792 tests, no dependencies
 npm install && npm test                       # 1003 real-DOM checks (needs jsdom)
 ```
 
@@ -600,9 +600,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     General <anyone> Brown" on Utah's site could be Washington's Nick Brown.
     A site that refuses the request, or draws itself with JavaScript (fewer
     than 300 visible characters), concludes nothing (rule 8) and is tried
-    again before the listing is shown as an association's, attributed. And
-    this network resolves dems.ag to nothing - DNS interception, not the
-    site - so a local run reads DAGA's page through its address.
+    again before the listing is shown as an association's, attributed.
+    Text inside an HTML comment is not on the page: North Carolina's keeps a
+    commented-out "Attorney General Josh Stein". And a name counts only
+    directly beside its title - an 80-character window confirmed "former
+    attorney general Treg Taylor" on Alaska's page, and a governor standing
+    beside the attorney general.
 
 ## District maps
 

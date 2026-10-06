@@ -274,9 +274,14 @@
       body = '<p class="gov-officer-note">Neither party\'s association of attorneys general lists ' +
         "one for this state." + (off.office ? " " + link(off.office, "The office's site") + "." : "") + "</p>";
     } else if (off.unconfirmed) {
+      // Why it is not confirmed is the pipeline's to say: a site that refused
+      // the request, or a page that was read and does not name them.
       body = '<p class="gov-officer-note">The ' + KYC.escapeHtml(off.listedBy) + " lists " + who(off) +
-        " as its member here. The office's own site refuses automated requests, so this is not " +
-        "confirmed." + (off.office ? " " + link(off.office, "The office's site") + "." : "") + "</p>";
+        " as its member here. " + (off.unreadable
+          ? "The office's own site refuses automated requests, so this is not confirmed."
+          : "The office's own page does not name them as attorney general, so this is the " +
+            "association's listing, not confirmed.") +
+        (off.office ? " " + link(off.office, "The office's site") + "." : "") + "</p>";
     } else if (off.vacant) {
       body = '<p class="gov-officer-note">Vacant, as the National Lieutenant Governors Association lists it.</p>';
     } else if (off.none && kind === "lt") {

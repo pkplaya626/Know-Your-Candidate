@@ -227,6 +227,37 @@ class TestAttorneysGeneral(unittest.TestCase):
         self.assertTrue(officers.names_holder("Candi Mundon King", page, "sos"))
         self.assertTrue(officers.names_holder("Sarah Godlewski", "Secretary Godlewski said", "sos"))
 
+    def test_a_predecessor_or_neighbour_is_not_the_holder(self):
+        # Each of these confirmed the wrong person with an 80-character window.
+        cases = [
+            ("Treg Taylor", "About the acting attorney general Cori Mills. Former attorney general "
+                            "Treg Taylor asked if she would serve", "AK"),
+            ("Josh Stein", "Governor Josh Stein and Attorney General Jeff Jackson announce", "NC"),
+            ("Dan Bishop", "Jeff Jackson defeated Dan Bishop to become attorney general", "NC"),
+            ("Dan Bishop", "Former Attorney General Dan Bishop", "NC"),
+            ("Jane Smith", "Commissioner of Ag Jane Smith", "NC"),
+        ]
+        for name, page, code in cases:
+            self.assertFalse(officers.names_attorney_general(name, page, code), name)
+        # The state's own name and an ordinal may stand between name and title.
+        self.assertTrue(officers.names_attorney_general(
+            "Phil Weiser", "Phil Weiser Colorado Attorney General", "CO"))
+        self.assertTrue(officers.names_attorney_general(
+            "Alan Wilson", "Alan Wilson, South Carolina's 51st Attorney General", "SC"))
+
+    def test_a_name_in_an_html_comment_is_not_on_the_page(self):
+        # North Carolina's page keeps its previous holder commented out.
+        page = ("<html><body><!-- <div>Attorney General Josh Stein</div> -->"
+                "<p>Attorney General Jeff Jackson</p></body></html>")
+        text = officers.visible_text(page)
+        self.assertFalse(officers.names_attorney_general("Josh Stein", text, "NC"))
+        self.assertTrue(officers.names_attorney_general("Jeff Jackson", text, "NC"))
+
+    def test_acting_is_the_title_directly_before_the_name(self):
+        self.assertFalse(officers.acting("Jeff Jackson", "A bill enacting Attorney General Jackson's proposals"))
+        self.assertFalse(officers.acting("Ken Paxton", "Attorney General Paxton thanked Acting Attorney "
+                                                       "General Angela Colmenero"))
+
     def test_acting_is_read_from_the_office(self):
         page = "About the Acting Attorney General Cori Mills"
         self.assertTrue(officers.acting("Cori Mills", page))
@@ -262,6 +293,17 @@ class TestAttorneysGeneral(unittest.TestCase):
     def test_two_listings_and_an_unreadable_office_is_a_dispute(self):
         rows, _ = self._rows({"NC": ("https://ncdoj.gov/", None)})
         self.assertEqual(rows["NC"]["disputed"], ["Dan Bishop (R)", "Jeff Jackson (D)"])
+
+    def test_two_listings_and_a_page_naming_neither_is_a_dispute(self):
+        rows, _ = self._rows({"NC": ("https://ncdoj.gov/", "Welcome to the Department of Justice. " * 20)})
+        self.assertEqual(rows["NC"]["disputed"], ["Dan Bishop (R)", "Jeff Jackson (D)"])
+        self.assertNotIn("name", rows["NC"])
+
+    def test_an_unconfirmed_listing_says_why(self):
+        rows, _ = self._rows({"NH": ("https://www.doj.nh.gov/", None),
+                              "TX": ("https://www.texasattorneygeneral.gov/", "Attorney General Someone Else")})
+        self.assertTrue(rows["NH"]["unreadable"])
+        self.assertNotIn("unreadable", rows["TX"])
 
     def test_a_state_neither_association_lists_says_so(self):
         rows, problems = self._rows({})
