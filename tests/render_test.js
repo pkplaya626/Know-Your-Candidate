@@ -2858,6 +2858,68 @@ async function testStateGov() {
     check("no text inside the map's SVG (rule 46)", !D.querySelector("#usMap text"));
   });
 
+  suite("map.html — lieutenant governors and secretaries of state", () => {
+    const pick = (hash) => {
+      window.location.hash = hash;
+      window.dispatchEvent(new window.Event("hashchange"));
+      return D.getElementById("delegation").textContent;
+    };
+    let text = pick("#/?state=AZ&mode=lt");
+    check("the Lt. governors view is selected, and only it, across every group",
+      D.querySelectorAll('[data-mode][aria-pressed="true"]').length === 1 &&
+      D.querySelector('[data-mode="lt"]').getAttribute("aria-pressed") === "true");
+    check("a state with no lieutenant governor names who is first in line",
+      /no lieutenant governor/.test(text) && /First in line/.test(text) &&
+      /Secretary of State/.test(text), text.slice(0, 200));
+    check("and is drawn as having no such office, not in a party colour",
+      !/party-/.test(shape("AZ").style.fill));
+    // Whichever state is vacant this week: the test must not fail the refresh
+    // that fills New Jersey's office.
+    const vacancy = stateCodes.find((c) => data.states[c].lt && data.states[c].lt.vacant);
+    if (vacancy) {
+      text = pick("#/?state=" + vacancy + "&mode=lt");
+      check("a vacancy is said, and attributed", /Vacant, as the National Lieutenant Governors Association lists it/.test(text));
+    }
+    const listed = stateCodes.find((c) => data.states[c].sos && data.states[c].sos.notMember);
+    if (listed) {
+      text = pick("#/?state=" + listed + "&mode=sos");
+      check("a secretary NASS lists for a non-member is its listing, not a fact",
+        /not currently a NASS member/.test(text) && (() => {
+          const row = [...D.querySelectorAll("#delegation .gov-officer")]
+            .find((li) => /Secretary of state/i.test(li.querySelector(".gov-officer-role").textContent));
+          return row && !row.querySelector(".gov-officer-name");
+        })());
+      check("and is drawn unconfirmed, not in a party colour", !/party-/.test(shape(listed).style.fill));
+    }
+    const hi = data.states.HI.lt;
+    if (hi && hi.disputed) {
+      text = pick("#/?state=HI&mode=lt");
+      check("where the rosters disagree, both are named and neither is the holder",
+        hi.disputed.every((n) => text.indexOf(n) !== -1) && /Neither is shown as the holder/.test(text) &&
+        !D.querySelector("#delegation .gov-officer-name"));
+      check("the legend explains the disagreement",
+        /Sources disagree/.test(D.getElementById("mapLegend").textContent));
+    }
+    pick("#/?state=TX&mode=sos");
+    check("each state is filled by its secretary of state's party", stateCodes.every((c) => {
+      const o = data.states[c].sos;
+      if (!o || o.none || o.disputed || o.vacant || o.notMember) return true;
+      return shape(c).style.fill === "var(--party-" + o.partyKey.toLowerCase() + ")";
+    }));
+    text = pick("#/?state=UT&mode=sos");
+    check("a state with no secretary of state says who runs its elections",
+      /no secretary of state; the lieutenant governor's office runs its elections/.test(text));
+    text = pick("#/?state=TX&mode=sos");
+    check("an appointed secretary of state is marked so", /Appointed/.test(text) && /Chief election official/.test(text));
+    check("every outbound link opens safely",
+      [...D.querySelectorAll('#delegation a[target="_blank"]')].every((a) => /noopener/.test(a.getAttribute("rel"))));
+    const photo = D.querySelector("#delegation .gov-officer-photo");
+    if (photo) {
+      photo.dispatchEvent(new window.Event("error"));
+      check("an officer's photo that fails to load is removed", !photo.isConnected);
+    }
+  });
+
   suite("state government — the data", () => {
     check("every state has a governor", stateCodes.every((c) => data.states[c] && data.states[c].governor.name));
     check("a majority is more than half of all seats", stateCodes.every((c) => {

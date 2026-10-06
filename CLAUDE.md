@@ -36,6 +36,7 @@ data/odds.json              ──┤
 data/census_governments.json ─┤
 data/state_legislators.json ──┤
 data/executives.json        ──┤   (every governor, from the NGA)
+data/statewide_officers.json ─┤   (lieutenant governors, secretaries of state: NLGA, NASS)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
@@ -79,8 +80,9 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `odds.js` or `districts/*.js` by hand. `portraits.json`, `finance.json`, `fec_field.json`,
   `disclosures.json`, `primary_results.json`, `committees.json`,
   `campaigns.json`, `enrichment.json`, `odds.json`,
-  `census_governments.json` and `state_legislators.json` are caches, but they
-  *are* hand-editable.
+  `census_governments.json`, `state_legislators.json`, `executives.json`,
+  `partisan_composition.json` and `statewide_officers.json` are caches, but
+  they *are* hand-editable. `stategov.js` is generated from the last four.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them only to check they load the right scripts in the right order; it never
   rewrites them. `states/*.html`, `districts/*.html`, `government/*.html`
@@ -111,14 +113,15 @@ python build_profile_site.py census           # local governments by state (Cens
 python build_profile_site.py statelegs        # every state legislator (Open States), matched to districts
 python build_profile_site.py localgov         # every local government (Census listing), checked
 python build_profile_site.py executives       # every governor (NGA), and NCSL's party counts
+python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
-python -m unittest discover tests             # 754 tests, no dependencies
-npm install && npm test                       # 988 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 775 tests, no dependencies
+npm install && npm test                       # 999 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
-`campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`
-and `congress` touch the network, as do the two `tools/fetch_*_maps.py` scripts. Run the
+`campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`,
+`officers` and `congress` touch the network, as do the two `tools/fetch_*_maps.py` scripts. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -571,6 +574,22 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     list items, or Alabama's governor gets the leadership page and the logo.
     And the NGA's pages are themselves wrong about two governors' first day
     in office, so a date is shown only where Wikidata records the same one.
+
+55. **An association's roster is the authority on its members, and only
+    on them.** NASS's member for Alaska, Hawaii and Utah is the lieutenant
+    governor; NLGA's for Arizona, Oregon and Wyoming is the secretary of
+    state. Where two rosters name one office's holder they must name the
+    same person of the same party, or the page names both and shows neither
+    (`officers.overlaps`), and "Acting" is the same office on either roster.
+    An entry NASS marks "Currently Not a NASS Member" is not NASS speaking
+    for its member: its Hawaii entry named a lieutenant governor NLGA's
+    member had replaced. Compare
+    names without honorifics ("Hon.", "High Chief"), strip invisible
+    characters (one RAGA card carried a zero-width space, and two cards for
+    one state then disagreed), and drop a card whose "name" is a state:
+    RAGA prints "Maryland" and "Vermont" where it has no member. RAGA also
+    lists a North Carolina attorney general who lost the 2024 election, so
+    an attorney general's name needs the office's own confirmation.
 
 ## District maps
 

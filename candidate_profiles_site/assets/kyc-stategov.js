@@ -2,10 +2,11 @@
  * holds each chamber of its legislature.
  *
  * Everything comes from window.kycStateGov, built by kyc/stategov.py: the
- * governor from the National Governors Association's roster, the seats from
- * the legislators Open States lists, checked against NCSL's own count. One
- * module draws it for the map's three state views and for every state page,
- * so the two can never disagree (rule 12).
+ * governor from the National Governors Association's roster, the lieutenant
+ * governor and secretary of state from their associations' own rosters
+ * (NLGA, NASS), the seats from the legislators Open States lists, checked
+ * against NCSL's own count. One module draws it for the map's state views
+ * and for every state page, so the two can never disagree (rule 12).
  *
  * A party "holds" a chamber when it has more than half of all its seats. A
  * seat with nobody listed counts for no one and is never called vacant.
@@ -27,8 +28,23 @@
     I: "var(--party-i)",
     split: "var(--split)",
     nonpartisan: "color-mix(in srgb, var(--text-faint) 45%, var(--surface-2))",
-    disputed: "var(--text-faint)",
+    /* An office that does not exist is the faintest grey; a vacancy is the
+     * House view's vacant grey; sources that disagree are drawn in the text
+     * colour itself, the strongest contrast any theme has, so the three
+     * cannot be confused (the muted and faint greys were 1.27:1 in the
+     * light theme). */
+    disputed: "var(--text)",
+    vacant: "var(--text-faint)",
     none: "var(--surface-2)",
+  };
+  /* An office the state does not have is drawn like a nonpartisan body: in
+   * neither party's colour, and apart from "not covered". */
+  FILL.absent = FILL.nonpartisan;
+
+  /* The statewide offices other than governor, as the data keys them. */
+  var OFFICES = {
+    lt: { title: "Lieutenant governor", word: "lieutenant governor" },
+    sos: { title: "Secretary of state", word: "secretary of state" },
   };
 
   var LEGENDS = {
@@ -36,6 +52,16 @@
       [FILL.R, "Republican governor"],
       [FILL.D, "Democratic governor"],
       [FILL.I, "Another party"],
+    ],
+    lt: [
+      [FILL.R, "Republican"],
+      [FILL.D, "Democratic"],
+      [FILL.absent, "No lieutenant governor"],
+    ],
+    sos: [
+      [FILL.R, "Republican"],
+      [FILL.D, "Democratic"],
+      [FILL.absent, "No secretary of state"],
     ],
     legislature: [
       [FILL.R, "Republican majority in both chambers"],
@@ -53,21 +79,40 @@
 
   var TITLES = {
     governor: "Governor",
+    lt: "Lieutenant governor",
+    sos: "Secretary of state",
     legislature: "State legislature",
     trifecta: "Governor and legislature",
   };
 
-  function anyDisputed() {
-    return Object.keys(data.states).some(function (c) {
-      return data.states[c].legislature === "disputed";
-    });
+  function any(test) {
+    return Object.keys(data.states).some(function (c) { return test(data.states[c]); });
   }
 
-  /** The legend for one of the map's state views: [[fill, label]]. */
+  /** The legend for one of the map's state views: [[fill, label]]. "Vacant"
+   * and "Sources disagree" appear only when some state is. */
   function legend(mode) {
     var rows = (LEGENDS[mode] || []).slice();
-    if (mode !== "governor" && anyDisputed()) rows.push([FILL.disputed, "Sources disagree"]);
+    if (OFFICES[mode]) {
+      if (any(function (s) {
+        var key = s[mode] && s[mode].partyKey;
+        return key && key !== "D" && key !== "R";
+      })) {
+        rows.push([FILL.I, "Another party"]);
+      }
+      if (any(function (s) { return !s[mode]; })) rows.push([FILL.none, "Not listed"]);
+      if (any(function (s) { return s[mode] && s[mode].vacant; })) rows.push([FILL.vacant, "Vacant"]);
+      if (any(function (s) { return s[mode] && s[mode].disputed; })) {
+        rows.push([FILL.disputed, "Sources disagree"]);
+      }
+    } else if (mode !== "governor" && any(function (s) { return s.legislature === "disputed"; })) {
+      rows.push([FILL.disputed, "Sources disagree"]);
+    }
     return rows;
+  }
+
+  function partyName(letter) {
+    return PARTY[letter] || letter;
   }
 
   function seatWord(n) { return n + " seat" + (n === 1 ? "" : "s"); }
@@ -102,6 +147,19 @@
       return { fill: FILL[gov.partyKey] || FILL.I,
                text: name + ": Gov. " + gov.name + " (" + gov.party + ")" };
     }
+    if (OFFICES[mode]) {
+      var off = s[mode];
+      var word = OFFICES[mode].word;
+      if (!off) return { fill: FILL.none, text: name + ": no " + word + " listed" };
+      if (off.disputed) return { fill: FILL.disputed, text: name + ": the sources disagree about the " + word };
+      if (off.vacant) return { fill: FILL.vacant, text: name + ": the office of " + word + " is vacant" };
+      if (off.notMember) {
+        return { fill: FILL.vacant, text: name + ": the " + word + " is not confirmed (NASS's listing only)" };
+      }
+      if (off.none) return { fill: FILL.absent, text: name + " has no " + word };
+      return { fill: FILL[off.partyKey] || FILL.I,
+               text: name + ": " + off.title + " " + off.name + " (" + partyName(off.party) + ")" };
+    }
     if (!s.legislature) {
       return { fill: FILL.none, text: name + ": its legislature is not covered here" };
     }
@@ -121,6 +179,16 @@
     if (mode === "governor") {
       return '<span class="party-' + KYC.escapeAttr(s.governor.partyKey.toLowerCase()) + '">' +
         KYC.escapeHtml(s.governor.party) + "</span>";
+    }
+    if (OFFICES[mode]) {
+      var off = s[mode];
+      if (!off) return '<span class="faint">Not listed</span>';
+      if (off.disputed) return "Sources disagree";
+      if (off.vacant) return "Vacant";
+      if (off.notMember) return "Not confirmed";
+      if (off.none) return "No " + KYC.escapeHtml(OFFICES[mode].word);
+      return '<span class="party-' + KYC.escapeAttr(off.partyKey.toLowerCase()) + '">' +
+        KYC.escapeHtml(partyName(off.party)) + "</span>";
     }
     if (!s.legislature) return '<span class="faint">Legislature not covered</span>';
     if (mode === "trifecta") {
@@ -171,6 +239,54 @@
       KYC.escapeHtml(text) + "</a>";
   }
 
+  function who(person) {
+    return KYC.escapeHtml(person.name) + ' <span class="party-' +
+      KYC.escapeAttr(person.partyKey.toLowerCase()) + '">(' + KYC.escapeHtml(partyName(person.party)) +
+      ")</span>";
+  }
+
+  /** One statewide officer's row: the holder, or why there is none. */
+  function officerRow(kind, off) {
+    var label = OFFICES[kind].title;
+    if (!off) return "";
+    var body;
+    if (off.disputed) {
+      body = '<p class="gov-officer-note">The sources disagree: NASS lists ' +
+        KYC.escapeHtml(off.disputed[0]) + "; NLGA lists " + KYC.escapeHtml(off.disputed[1]) +
+        ". Neither is shown as the holder.</p>";
+    } else if (off.vacant) {
+      body = '<p class="gov-officer-note">Vacant, as the National Lieutenant Governors Association lists it.</p>';
+    } else if (off.none && kind === "lt") {
+      body = '<p class="gov-officer-note">The state has no lieutenant governor.' +
+        (off.successor ? " First in line to succeed the governor: " +
+          KYC.escapeHtml(off.successor.title) + " " + who(off.successor) + "." : "") + "</p>";
+    } else if (off.none) {
+      body = '<p class="gov-officer-note">The state has no secretary of state' +
+        (off.electionChief ? "; the lieutenant governor's office runs its elections." : ".") + "</p>";
+    } else if (off.notMember) {
+      body = '<p class="gov-officer-note">The National Association of Secretaries of State lists ' +
+        who(off) + " as " + KYC.escapeHtml(off.title.toLowerCase()) + ", though the office is not " +
+        "currently a NASS member, so this is the association's listing, not confirmed." +
+        (off.website ? " " + link(off.website, "The office's site") + "." : "") + "</p>";
+    } else {
+      var facts = [off.selection, off.electionChief ? "Chief election official" : ""].filter(Boolean);
+      var links = [off.website ? link(off.website, "Office") : "", off.bio ? link(off.bio, "Biography") : ""]
+        .filter(Boolean);
+      var contact = [off.phone, off.email, off.address].filter(Boolean).map(KYC.escapeHtml);
+      body = (off.photo ? '<img class="gov-officer-photo" src="' + KYC.escapeAttr(off.photo) +
+          '" alt="" width="40" height="40" loading="lazy" decoding="async">' : "") +
+        '<p class="gov-officer-name">' + who(off) + "</p>" +
+        (off.title.toLowerCase() !== label.toLowerCase()
+          ? '<p class="faint">' + KYC.escapeHtml(off.title) + "</p>" : "") +
+        (facts.length ? '<p class="faint">' + KYC.escapeHtml(facts.join(" · ")) + "</p>" : "") +
+        (links.length ? '<p class="gov-links">' + links.join(" · ") + "</p>" : "") +
+        (contact.length ? '<p class="faint gov-contact">' + contact.join(" · ") + "</p>" : "");
+    }
+    var pictured = body.indexOf("gov-officer-photo") !== -1;
+    return '<li class="gov-officer' + (pictured ? "" : " gov-officer-text") + '">' +
+      '<span class="gov-officer-role">' + KYC.escapeHtml(label) + "</span>" + body + "</li>";
+  }
+
   /** Everything known about who runs one state, as HTML. *opts.links* adds
    * the links to its legislature and county pages. */
   function render(code, opts) {
@@ -197,6 +313,10 @@
       link(gov.profile, "NGA biography") + "</p>" +
       (contact ? '<p class="faint gov-contact">' + contact + "</p>" : "") +
       "</div></div>";
+    if (s.lt || s.sos) {
+      html += '<p class="panel-subhead">Statewide officers</p><ul class="gov-officers">' +
+        officerRow("lt", s.lt) + officerRow("sos", s.sos) + "</ul>";
+    }
     if (s.upper) {
       html += '<p class="panel-subhead">Legislature</p><ul class="gov-chambers">' +
         chamberRow(s.upper, code) + (s.lower ? chamberRow(s.lower, code) : "") + "</ul>";
@@ -215,7 +335,9 @@
         '">Counties and local governments ›</a></p>';
     }
     var ncsl = data.sources.ncsl && data.sources.ncsl[2];
-    html += '<p class="gov-sources faint">Governor: ' + source("nga") + ". Seats: " +
+    html += '<p class="gov-sources faint">Governor: ' + source("nga") + ". " +
+      (s.lt ? "Lieutenant governor: " + source("nlga") + ". " : "") +
+      (s.sos ? "Secretary of state: " + source("nass") + ". " : "") + "Seats: " +
       (s.upper ? source("openstates") + (ncsl ? ", checked against " + source("ncsl") : "") :
         "not covered") + ".</p>";
     return html;
@@ -225,11 +347,14 @@
    * broken image. Error events do not bubble, so this listens on capture. */
   global.document.addEventListener("error", function (event) {
     var img = event.target;
-    if (img && img.classList && img.classList.contains("gov-portrait")) img.remove();
+    if (img && img.classList &&
+        (img.classList.contains("gov-portrait") || img.classList.contains("gov-officer-photo"))) {
+      img.remove();
+    }
   }, true);
 
   KYC.stategov = {
-    modes: ["governor", "legislature", "trifecta"],
+    modes: ["governor", "lt", "sos", "legislature", "trifecta"],
     titles: TITLES,
     state: state,
     look: look,

@@ -227,20 +227,26 @@ def _governor(gov, problems=None):
 def build(root="."):
     """``(payload, problems)``: what ``data/stategov.js`` holds, and every
     disagreement between the sources."""
-    from . import executives, statelegs
-    exec_cache, leg_cache, ncsl = (executives.load_cache(root), statelegs.load_cache(root),
-                                   load_ncsl(root))
+    from . import executives, officers, statelegs
+    exec_cache, leg_cache, ncsl, officer_cache = (
+        executives.load_cache(root), statelegs.load_cache(root), load_ncsl(root),
+        officers.load_cache(root))
     for cache, path, command in ((exec_cache, executives.CACHE_PATH, "executives"),
                                  (leg_cache, statelegs.CACHE_PATH, "statelegs"),
-                                 (ncsl, NCSL_CACHE, "executives")):
+                                 (ncsl, NCSL_CACHE, "executives"),
+                                 (officer_cache, officers.CACHE_PATH, "officers")):
         if not cache:
             raise StateGovError(f"no {path}; run '{command}'")
     governors = exec_cache["governors"]
     legislators = leg_cache["states"]
     problems = []
+    disputes = officers.overlaps(officer_cache["sos"], officer_cache["lt"])
+    for code, office, theirs, ours in disputes:
+        problems.append(f"{code}: NASS lists {theirs} as {office}, NLGA {ours}; neither is shown")
     states = {}
     for code in sorted(governors):
         entry = {"governor": _governor(dict(governors[code], state=code), problems)}
+        entry.update(officers.for_state(code, officer_cache, disputes))
         if code in STATES:
             entry.update(_legislature(code, legislators.get(code, []), ncsl["states"].get(code),
                                       entry["governor"]["partyKey"], problems))
@@ -259,6 +265,10 @@ def build(root="."):
             "openstates": [statelegs.SOURCE, "https://openstates.org/",
                            leg_cache.get("fetched", "")[:10]],
             "ncsl": [NCSL_SOURCE, NCSL_URL, ncsl.get("updated", "")],
+            "nass": ["National Association of Secretaries of State, membership roster",
+                     officers.NASS_URL, officer_cache.get("fetched", "")[:10]],
+            "nlga": ["National Lieutenant Governors Association, members", officers.NLGA_URL,
+                     officer_cache.get("fetched", "")[:10]],
         },
     }
     return payload, problems

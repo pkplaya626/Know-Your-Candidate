@@ -130,6 +130,17 @@ jobs:
       - name: Refresh financial disclosure links (House Clerk and Senate eFD)
         run: python build_profile_site.py disclosures
 
+      # Who runs each state: governors (NGA, checked against Wikidata),
+      # NCSL's party counts, lieutenant governors (NLGA), secretaries of
+      # state (NASS) and every state legislator (Open States). Each command
+      # refuses an incomplete roster rather than writing it, and a change
+      # reaches the page only through this run's pull request. No key needed.
+      - name: Refresh state governments
+        run: |
+          python build_profile_site.py executives
+          python build_profile_site.py officers
+          python build_profile_site.py statelegs
+
       # What a filed candidate's own sources say - the birth date, education
       # and occupation in the article their ballot page links; their
       # campaign's description of itself, its issues page and its portrait -
@@ -171,10 +182,13 @@ jobs:
           git add -A
           git commit -m "Reconcile the rosters with the current Congress
 
-          Opened automatically by .github/workflows/refresh.yml against
-          congress-legislators. Every field written here comes from that
-          dataset; education, net worth, committees and platform are editorial
-          research and are left empty rather than invented."
+          Opened automatically by .github/workflows/refresh.yml. Congressional
+          membership comes from congress-legislators; education, net worth,
+          committees and platform are editorial research and are left empty
+          rather than invented. State governments come from their own
+          authorities: governors from the NGA, lieutenant governors from NLGA,
+          secretaries of state from NASS, legislators from Open States, party
+          counts from NCSL."
           git push -u origin "$branch"
 
           gh pr create \
@@ -193,6 +207,12 @@ jobs:
           worth, committees and platform stay empty for anyone new, so the
           provenance layer reports them as *No data* rather than showing an
           invention.
+
+          The same run re-reads state governments from their own authorities:
+          governors (National Governors Association, checked against
+          Wikidata), lieutenant governors (NLGA), secretaries of state (NASS),
+          state legislators (Open States) and party counts (NCSL). Review any
+          change to those files as you would a change of officeholder.
 
           Validation, \`verify\` and the unit tests all ran before this was opened.
           BODY
