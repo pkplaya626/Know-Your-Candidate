@@ -2920,6 +2920,33 @@ async function testStateGov() {
     }
   });
 
+  suite("map.html — attorneys general", () => {
+    const pick = (hash) => {
+      window.location.hash = hash;
+      window.dispatchEvent(new window.Event("hashchange"));
+      return D.getElementById("delegation").textContent;
+    };
+    const confirmed = stateCodes.find((c) => data.states[c].ag && data.states[c].ag.name &&
+      !data.states[c].ag.unconfirmed);
+    let text = pick("#/?state=" + confirmed + "&mode=ag");
+    check("a confirmed attorney general is named, with the association their party comes from",
+      text.indexOf(data.states[confirmed].ag.name) !== -1 && /Party: a member of the/.test(text));
+    check("each confirmed attorney general's state is in their party's colour", stateCodes.every((c) => {
+      const o = data.states[c].ag;
+      if (!o || o.unconfirmed || o.disputed || o.unlisted) return true;
+      return shape(c).style.fill === "var(--party-" + o.partyKey.toLowerCase() + ")";
+    }));
+    const unconfirmed = stateCodes.find((c) => data.states[c].ag && data.states[c].ag.unconfirmed);
+    if (unconfirmed) {
+      text = pick("#/?state=" + unconfirmed + "&mode=ag");
+      check("an unconfirmed listing is attributed to its association, not stated as fact",
+        /lists .* as its member here/.test(text) && /not confirmed/.test(text));
+      check("and is drawn unconfirmed, with a legend for it",
+        !/party-/.test(shape(unconfirmed).style.fill) &&
+        /Not confirmed by the office/.test(D.getElementById("mapLegend").textContent));
+    }
+  });
+
   suite("state government — the data", () => {
     check("every state has a governor", stateCodes.every((c) => data.states[c] && data.states[c].governor.name));
     check("a majority is more than half of all seats", stateCodes.every((c) => {

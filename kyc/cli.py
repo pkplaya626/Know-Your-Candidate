@@ -1060,6 +1060,11 @@ def _officers(args):
         return 1
     for code, office, nass, nlga in officers.overlaps(cache["sos"], cache["lt"]):
         print(f"  [warn] {code}: NASS lists {nass} as {office}, NLGA {nlga}; neither is shown")
+    ag = cache.get("ag", {})
+    confirmed = sum(1 for row in ag.values() if row.get("name") and not row.get("unconfirmed"))
+    print(f"  {confirmed} of {len(STATES)} attorneys general confirmed on their office's own page")
+    for problem in cache.pop("agProblems", officers.ag_problems(ag)):
+        print(f"  [warn] {problem}")
     if not args.check:
         print(f"[ok] wrote {officers.save_cache(cache, args.root)}")
     return 0

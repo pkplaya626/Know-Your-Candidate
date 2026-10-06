@@ -36,7 +36,7 @@ data/odds.json              ──┤
 data/census_governments.json ─┤
 data/state_legislators.json ──┤
 data/executives.json        ──┤   (every governor, from the NGA)
-data/statewide_officers.json ─┤   (lieutenant governors, secretaries of state: NLGA, NASS)
+data/statewide_officers.json ─┤   (lieutenant governors, secretaries of state, attorneys general)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
@@ -113,10 +113,10 @@ python build_profile_site.py census           # local governments by state (Cens
 python build_profile_site.py statelegs        # every state legislator (Open States), matched to districts
 python build_profile_site.py localgov         # every local government (Census listing), checked
 python build_profile_site.py executives       # every governor (NGA), and NCSL's party counts
-python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS)
+python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS), attorneys general
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
-python -m unittest discover tests             # 775 tests, no dependencies
-npm install && npm test                       # 999 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 787 tests, no dependencies
+npm install && npm test                       # 1003 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -590,6 +590,19 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     RAGA prints "Maryland" and "Vermont" where it has no member. RAGA also
     lists a North Carolina attorney general who lost the 2024 election, so
     an attorney general's name needs the office's own confirmation.
+
+56. **A name is confirmed where the office names it beside its title.**
+    `officers.names_holder` takes the full name within 80 characters of the
+    title, up to two middle words between first and last, or the title
+    directly before the surname ("Attorney General Sunday"). It never takes a
+    different first name: DAGA's "Tish James" is the office's "Letitia
+    James" only through `NAME_FORMS`, an evidenced entry, because "Attorney
+    General <anyone> Brown" on Utah's site could be Washington's Nick Brown.
+    A site that refuses the request, or draws itself with JavaScript (fewer
+    than 300 visible characters), concludes nothing (rule 8) and is tried
+    again before the listing is shown as an association's, attributed. And
+    this network resolves dems.ag to nothing - DNS interception, not the
+    site - so a local run reads DAGA's page through its address.
 
 ## District maps
 

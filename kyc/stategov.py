@@ -243,6 +243,7 @@ def build(root="."):
     disputes = officers.overlaps(officer_cache["sos"], officer_cache["lt"])
     for code, office, theirs, ours in disputes:
         problems.append(f"{code}: NASS lists {theirs} as {office}, NLGA {ours}; neither is shown")
+    problems.extend(officers.ag_problems(officer_cache.get("ag", {})))
     states = {}
     for code in sorted(governors):
         entry = {"governor": _governor(dict(governors[code], state=code), problems)}
@@ -268,6 +269,10 @@ def build(root="."):
             "nass": ["National Association of Secretaries of State, membership roster",
                      officers.NASS_URL, officer_cache.get("fetched", "")[:10]],
             "nlga": ["National Lieutenant Governors Association, members", officers.NLGA_URL,
+                     officer_cache.get("fetched", "")[:10]],
+            "raga": ["Republican Attorneys General Association, members", officers.RAGA_URL,
+                     officer_cache.get("fetched", "")[:10]],
+            "daga": ["Democratic Attorneys General Association, members", officers.DAGA_URL,
                      officer_cache.get("fetched", "")[:10]],
         },
     }
