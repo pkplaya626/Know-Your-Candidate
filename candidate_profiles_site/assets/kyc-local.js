@@ -10,7 +10,9 @@
  * views:
  *   - Counties: each county shaded by how many local governments it has;
  *   - Cities and towns: every incorporated place a dot, coloured by the
- *     legal form the Census names (city, town, village, borough).
+ *     legal form the Census names (city, town, village, borough), and in
+ *     the twenty states that have them, every town or township government
+ *     a ring at its county subdivision, joined on the Census code.
  *
  * The address carries the view and the pick:
  * #/?county=48201, #/?view=cities&city=4835000.
@@ -47,6 +49,7 @@
     ["village", "Village"],
     ["borough", "Borough"],
     ["other", "Other legal form"],
+    ["township", "Town or township government"],
   ];
 
   function el(id) { return doc.getElementById(id); }
@@ -65,7 +68,14 @@
   /* --------------------------------------------------------------- cities */
 
   // [x, y, kind, name, county, ref]; ref is [county code, row] or null.
-  var cities = (state && state.cities) || {};
+  // Towns and townships (county subdivisions, ten-digit codes) share the
+  // view with the incorporated places (seven digits); each is joined.
+  var towns = (state && state.towns) || {};
+  var cities = {};
+  [(state && state.cities) || {}, towns].forEach(function (set) {
+    Object.keys(set).forEach(function (id) { cities[id] = set[id]; });
+  });
+  function isTown(id) { return Object.prototype.hasOwnProperty.call(towns, id); }
   var cityIds = Object.keys(cities).sort(function (a, b) {
     return cities[a][3].localeCompare(cities[b][3], "en") || a.localeCompare(b);
   });
@@ -78,6 +88,22 @@
 
   function form(kind) {
     return ["city", "town", "village", "borough"].indexOf(kind) !== -1 ? kind : "other";
+  }
+
+  /* A place's mark: its legal form's colour, or the town or township ring. */
+  function formOf(id) {
+    return isTown(id) ? "township" : form(cities[id][2]);
+  }
+
+  /* What a place is, in a line: "Incorporated village", "Charter township
+   * government (a county subdivision)". */
+  function whatItIs(id) {
+    var kind = cities[id][2];
+    if (isTown(id)) {
+      return (kind ? kind.charAt(0).toUpperCase() + kind.slice(1) : "Town or township") +
+        " government (a county subdivision)";
+    }
+    return kind ? "Incorporated " + kindText(kind) : "Incorporated place";
   }
 
   /* The legal form as a reader should see it. The Census calls the part of
@@ -101,7 +127,7 @@
     if (view !== "cities") return [];
     return cityIds.map(function (id) {
       var c = cities[id];
-      return { id: id, at: [c[0], c[1]], cls: "dot-" + form(c[2]),
+      return { id: id, at: [c[0], c[1]], cls: "dot-" + formOf(id),
                title: c[3] + (c[2] ? " (" + kindText(c[2]) + ")" : "") };
     });
   }
@@ -188,8 +214,8 @@
     var c = cities[id];
     var row = governmentRow(c[5]);
     el("localPanelTitle").textContent = c[3];
-    var body = '<p class="local-total"><span class="swatch dot-swatch dot-' + form(c[2]) + '"></span>' +
-      KYC.escapeHtml(c[2] ? "Incorporated " + kindText(c[2]) : "Incorporated place") +
+    var body = '<p class="local-total"><span class="swatch dot-swatch dot-' + formOf(id) + '"></span>' +
+      KYC.escapeHtml(whatItIs(id)) +
       (c[4] && state.counties[c[4]] ? ", in " + KYC.escapeHtml(state.counties[c[4]].name) : "") + "</p>";
     if (row) {
       body += '<h3 class="local-group">Its government</h3><ul class="local-list">' + item(row, "") + "</ul>" +
@@ -217,10 +243,13 @@
       ? '<p class="leg-subhead">Statewide</p><p class="faint">Run by the state, with no county.</p>' +
         groups(state.statewide, "") : "");
     el("localPanelTitle").textContent = state.name;
+    var townCount = Object.keys(towns).length;
     var lede = view === "cities"
-      ? '<p class="local-total">' + plural(cityIds.length, "incorporated place") + " (2025).</p>" +
-        '<p class="faint">Every city, town, village and borough, at a point inside it. Pick one on the ' +
-        "map, or from the list below, to see its government.</p>"
+      ? '<p class="local-total">' + plural(cityIds.length - townCount, "incorporated place") + " (2025)" +
+        (townCount ? " and " + plural(townCount, "town or township government") : "") + ".</p>" +
+        '<p class="faint">Every city, town, village and borough, at a point inside it' +
+        (townCount ? ", and every town or township that governs, as a ring" : "") +
+        ". Pick one on the map, or from the list below, to see its government.</p>"
       : '<p class="local-total">' + total.toLocaleString("en-US") + " local governments in " +
         Object.keys(state.counties).length + " counties (2022).</p>" +
         '<p class="faint">Pick a county on the map, or from the list below, to see every ' +
@@ -254,7 +283,7 @@
       var c = cities[id];
       var county = (state.counties[c[4]] || {}).name || "";
       return '<button type="button" class="leg-row" data-city="' + KYC.escapeAttr(id) + '">' +
-        '<span class="leg-row-district"><span class="swatch dot-swatch dot-' + form(c[2]) + '"></span>' +
+        '<span class="leg-row-district"><span class="swatch dot-swatch dot-' + formOf(id) + '"></span>' +
         KYC.escapeHtml(c[3]) + "</span>" +
         '<span class="leg-row-people">' + KYC.escapeHtml([c[2] ? kindText(c[2]) : "", county]
           .filter(Boolean).join(" · ")) + "</span></button>";
@@ -284,8 +313,8 @@
     if (!cityKey) return;
     cityKey.hidden = view !== "cities";
     var present = {};
-    cityIds.forEach(function (id) { present[form(cities[id][2])] = true; });
-    cityKey.innerHTML = '<span class="party-legend-title">Incorporated places, by legal form</span>' +
+    cityIds.forEach(function (id) { present[formOf(id)] = true; });
+    cityKey.innerHTML = '<span class="party-legend-title">Cities and towns, by legal form</span>' +
       FORMS.filter(function (f) { return present[f[0]]; }).map(function (f) {
         return '<span class="key"><span class="swatch dot-swatch dot-' + f[0] + '"></span>' +
           KYC.escapeHtml(f[1]) + "</span>";

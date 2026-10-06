@@ -2879,6 +2879,35 @@ async function testCounties() {
       shared.D.getElementById("localPanelTitle").textContent === "Houston" &&
       shared.D.querySelectorAll("#localMap .map-dot").length > 0);
   });
+  const ct = await buildPage("counties/ct.html", { hash: "#/?view=cities" });
+  suite("counties/ct.html — towns, where towns are the local government", () => {
+    const W = ct.window, CD = ct.D;
+    const towns = W.kycLocal.CT.towns;
+    const townIds = Object.keys(towns);
+    check("no page errors", ct.errors.length === 0, ct.errors.join(" | "));
+    check("Connecticut's towns are on the map, each joined to its government",
+      townIds.length > 100 && townIds.every((id) => towns[id][5]), `${townIds.length}`);
+    const rings = CD.querySelectorAll("#localMap .district-statewide .map-dot.dot-township");
+    check("a town is drawn as a ring, apart from the incorporated places", rings.length === townIds.length,
+      `${rings.length} of ${townIds.length}`);
+    check("the legend names the ring", /Town or township government/.test(CD.getElementById("cityLegend").textContent));
+    const id = townIds[0];
+    CD.querySelector(`#localMap .district-statewide [data-dot="${id}"]`)
+      .dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
+    const body = CD.getElementById("localPanelBody");
+    const ref = towns[id][5];
+    const gov = W.kycLocal.CT.governments[ref[0]][ref[1]];
+    check("picking a town shows it as a county subdivision government, with its government",
+      CD.getElementById("localPanelTitle").textContent === towns[id][3] &&
+      /county subdivision/.test(body.textContent) && body.textContent.indexOf(gov[1]) !== -1,
+      body.textContent.slice(0, 160));
+    check("the town is in the address", W.location.hash.indexOf("city=" + id) !== -1, W.location.hash);
+    check("every town is in the list under the map",
+      townIds.every((t) => CD.querySelector(`#localRoster [data-city="${t}"]`)));
+    body.querySelector("[data-county]").dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
+    check("the town's government has a button that shows it on the map",
+      !!CD.querySelector(`#localPanelBody .local-pin[data-city="${id}"]`));
+  });
   const hawaii = await buildPage("counties/hi.html");
   suite("counties/hi.html — a state with no incorporated place", () => {
     check("offers no cities view", hawaii.D.querySelector(".segmented").hidden &&
