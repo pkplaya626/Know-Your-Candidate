@@ -35,6 +35,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… localgov` | Every local government from the Census listing, checked against the published counts |
 | `… executives` | Every governor from the NGA, and NCSL's count of each legislature's parties (`--check` reports the caches) |
 | `… officers` | Every lieutenant governor (NLGA) and secretary of state (NASS), cross-checked where the rosters overlap |
+| `… courts` | Each state's highest court and its members, read from the court's own roster |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
 | `… results` | Read each state's primary results from Wikipedia: who is still in |
 | `… results --check` | Report the results from the committed cache; no network |
@@ -118,6 +119,7 @@ CI asserts that a rebuild changes nothing.
 | `counties.py` | Each state's counties page data: projected counties and the governments in each |
 | `executives.py` | Every governor, from the National Governors Association's roster (the `executives` command) |
 | `officers.py` | Lieutenant governors and secretaries of state, from their associations' rosters (the `officers` command) |
+| `courts.py` | Each state's court of last resort and its members, from each court's own page (the `courts` command) |
 | `stategov.py` | Who runs each state: governor, chamber control, trifecta, checked against NCSL |
 | `campaigns.py` | Campaign websites from each candidate's FEC committee |
 | `enrich.py` | Fill filed candidates' gaps from their Wikipedia infobox and campaign site; check every linked campaign site |
@@ -1050,6 +1052,36 @@ confirm it. A few offices need another official page
 (`officers.OFFICE_PAGES`: Wyoming's staff page, Kansas's state portal) and a
 few a different front door (`OFFICE_LINK`: USA.gov's West Virginia link is a
 404). A page that draws itself with JavaScript concludes nothing.
+
+## State high courts
+
+Every state page's "State government" section, and the map's state panel,
+list the state's court of last resort: its members as the court lists them,
+the chief first, how justices are chosen and for how long (from the guide's
+table), and a link to the court's own roster. Texas and Oklahoma also list
+their Court of Criminal Appeals. No party is shown: a justice is not a
+party's officeholder.
+
+No national source lists sitting state justices - the Conference of Chief
+Justices publishes only its board, and the National Center for State Courts
+has no directory - so each roster is read from the court's own page with a
+recipe in `courts.COURTS`: the page, the slice of it that holds the court,
+and a pattern for one member (or, where the page draws itself with
+JavaScript, the JSON it loads: Florida, Michigan, Minnesota, Oregon). A
+roster with more names than seats, or two chiefs, is refused. Fewer names
+than seats reads "nobody listed by the court" for the rest (California's,
+Hawaii's and South Carolina's on 2026-10-06), never "vacant"; Utah's page
+names no chief justice since Chief Justice Durrant retired, and the page
+says the court lists none. An Associate, Vice or Deputy Chief Justice is not
+the chief.
+
+Ten states' courts cannot be read by a script (`courts.UNREADABLE`):
+Alabama's site resets every connection; Louisiana's draws its justices with
+JavaScript; Massachusetts', Missouri's, New Hampshire's and Tennessee's
+answer with a bot wall or challenge; Connecticut's, Nevada's and New York's
+refuse this pipeline's requests; Rhode Island's publishes only a PDF. Their
+pages name the court and say why its members are not listed, and nothing is
+taken from Wikipedia or Ballotpedia instead.
 
 ## Counties and local governments
 

@@ -316,6 +316,39 @@
       '<span class="gov-officer-role">' + KYC.escapeHtml(label) + "</span>" + body + "</li>";
   }
 
+  /** A state's court of last resort: who sits on it, as the court lists
+   * them, or why its roster could not be read. No party: a justice is not
+   * a party's officeholder. */
+  function courtBlock(court) {
+    if (!court) return "";
+    var chiefTitle = court.word === "judges"
+      ? (/Criminal/.test(court.name) ? "Presiding Judge" : "Chief Judge") : "Chief Justice";
+    var about = court.chosen
+      ? '<p class="faint">' + KYC.escapeHtml(court.word.charAt(0).toUpperCase() + court.word.slice(1)) +
+        " are " + KYC.escapeHtml(court.chosen) + ". Term: " + KYC.escapeHtml(court.term) + ".</p>" : "";
+    var body;
+    if (court.unreadable) {
+      body = '<p class="gov-officer-note">' + KYC.escapeHtml(court.unreadable) +
+        ", so its members are not listed here." + (court.url ? " " + link(court.url, "The court's site") + "." : "") +
+        "</p>";
+    } else {
+      var members = court.members.slice().sort(function (a, b) {
+        return (b === court.chief) - (a === court.chief);
+      });
+      var short = court.seats - members.length;
+      body = '<ul class="gov-court">' + members.map(function (name) {
+        return '<li class="gov-court-member">' + KYC.escapeHtml(name) +
+          (name === court.chief ? ' <span class="faint">' + chiefTitle + "</span>" : "") + "</li>";
+      }).join("") + "</ul>" +
+        '<p class="faint">' + members.length + " of " + court.seats + " seats" +
+        (short > 0 ? "; " + short + " with nobody listed by the court" : "") +
+        (court.chief ? "" : "; the court lists no " + chiefTitle.toLowerCase()) + ". " +
+        link(court.url, "The court's roster") + "</p>";
+    }
+    return '<p class="panel-subhead">' + KYC.escapeHtml(court.name) + "</p>" + about + body +
+      (court.note ? '<p class="faint">' + KYC.escapeHtml(court.note) + "</p>" : "");
+  }
+
   /** Everything known about who runs one state, as HTML. *opts.links* adds
    * the links to its legislature and county pages. */
   function render(code, opts) {
@@ -355,6 +388,7 @@
       }
       html += '<p class="gov-trifecta">' + KYC.escapeHtml(trifectaText(s.trifecta)) + ".</p>";
     }
+    html += courtBlock(s.court) + courtBlock(s.criminalCourt);
     if (opts && opts.links && s.upper) {
       var lower = code.toLowerCase();
       html += '<p class="gov-pages">' +

@@ -3390,4 +3390,19 @@ button.local-county-link {
 .gov-officer-name { font-weight: 700; color: var(--text); }
 .gov-officer-note { font-size: var(--t-sm); color: var(--text-muted); }
 
+/* A state's highest court: names in two columns where there is room. */
+.gov-court {
+  list-style: none;
+  margin: 0 0 var(--s-2);
+  padding: 0;
+  columns: 2 14rem;
+  column-gap: var(--s-4);
+}
+.gov-court-member {
+  break-inside: avoid;
+  padding: 2px var(--s-1);
+  font-size: var(--t-sm);
+  color: var(--text);
+}
+
 .state-section .stategov { max-width: 46rem; padding: 0; }

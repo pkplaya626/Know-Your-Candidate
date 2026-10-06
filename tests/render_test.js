@@ -3047,6 +3047,30 @@ async function testStateGov() {
       !!section && /Territorial government/.test(section.querySelector(".state-heading").textContent));
   });
 
+  const tx = await buildPage("states/tx.html");
+  const al = await buildPage("states/al.html");
+  const ut = await buildPage("states/ut.html");
+  suite("state pages — each state's highest court", () => {
+    const court = tx.window.kycStateGov.states.TX.court;
+    const section = tx.D.getElementById("state-government");
+    const names = [...section.querySelectorAll(".gov-court-member")].map((li) => li.textContent);
+    check("the court's members are listed, as the court lists them",
+      court.members.every((m) => names.some((n) => n.indexOf(m) === 0)), names.join("; "));
+    check("the chief comes first, marked as chief", /Chief Justice$/.test(names[0]) &&
+      names[0].indexOf(court.chief) === 0, names[0]);
+    check("Texas's Court of Criminal Appeals is listed too, its head the presiding judge",
+      /Court of Criminal Appeals/.test(section.textContent) && /Presiding Judge/.test(section.textContent));
+    check("the roster links to the court's own page",
+      !!section.querySelector('a[href^="https://www.txcourts.gov/"][rel~="noopener"]'));
+    const alText = al.D.getElementById("state-government").textContent;
+    check("a court whose roster cannot be read says why, and names no one",
+      /members are not listed here/.test(alText) && !al.D.querySelector("#state-government .gov-court-member"));
+    const utText = ut.D.getElementById("state-government").textContent;
+    check("a court with no chief listed says so", /lists no chief justice/.test(utText), utText.slice(0, 120));
+    check("no party is shown for a justice", ![...section.querySelectorAll(".gov-court-member")]
+      .some((li) => li.querySelector('[class^="party-"]')));
+  });
+
   const dc = await buildPage("states/dc.html");
   suite("states/dc.html — D.C. has no governor", () => {
     const section = dc.D.getElementById("state-government");

@@ -227,7 +227,7 @@ def _governor(gov, problems=None):
 def build(root="."):
     """``(payload, problems)``: what ``data/stategov.js`` holds, and every
     disagreement between the sources."""
-    from . import executives, officers, statelegs
+    from . import courts, executives, officers, statelegs
     exec_cache, leg_cache, ncsl, officer_cache = (
         executives.load_cache(root), statelegs.load_cache(root), load_ncsl(root),
         officers.load_cache(root))
@@ -241,6 +241,9 @@ def build(root="."):
     legislators = leg_cache["states"]
     problems = []
     disputes = officers.overlaps(officer_cache["sos"], officer_cache["lt"])
+    # The courts' cache is optional: a state whose court was never read
+    # simply has no court block, rather than the build failing.
+    court_cache = courts.load_cache(root)
     for code, office, theirs, ours in disputes:
         problems.append(f"{code}: NASS lists {theirs} as {office}, NLGA {ours}; neither is shown")
     problems.extend(officers.ag_problems(officer_cache.get("ag", {})))
@@ -248,6 +251,7 @@ def build(root="."):
     for code in sorted(governors):
         entry = {"governor": _governor(dict(governors[code], state=code), problems)}
         entry.update(officers.for_state(code, officer_cache, disputes))
+        entry.update(courts.for_state(code, court_cache))
         if code in STATES:
             entry.update(_legislature(code, legislators.get(code, []), ncsl["states"].get(code),
                                       entry["governor"]["partyKey"], problems))
