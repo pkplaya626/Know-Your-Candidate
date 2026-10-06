@@ -437,8 +437,17 @@ def extract(page, recipe):
 def read_court(code, recipe, seats):
     """``{"members": [...], "chief": name, "listed", "seats", "url"}``, or
     raises when the page does not fit the court: no names, more names than
-    seats, or more than one chief."""
-    page = _get(recipe["url"], recipe.get("headers"))
+    seats, or more than one chief. A failed request is tried again before
+    the court counts as unread: one dropped connection lost Mississippi."""
+    page = None
+    for wait in (3, 10, 0):
+        try:
+            page = _get(recipe["url"], recipe.get("headers"))
+            break
+        except CourtsError:
+            if not wait:
+                raise
+            time.sleep(wait)
     members = extract(page, recipe)
     if not members:
         raise CourtsError(f"{code}: no members read from {recipe['url']}")
