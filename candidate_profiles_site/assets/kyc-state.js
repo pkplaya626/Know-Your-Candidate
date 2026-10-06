@@ -139,6 +139,18 @@
       );
     }
 
+    /* Who runs the state itself: drawn by the module the map's state views
+     * use, so the two say the same thing. */
+    if (KYC.stategov && (KYC.stategov.state(code) || code === "DC")) {
+      html.push(
+        '<section class="state-section" id="state-government">',
+        '<h2 class="state-heading">' + (code === "DC" ? "Local government" :
+          info.territory ? "Territorial government" : "State government") + "</h2>",
+        '<div class="stategov">' + KYC.stategov.render(code, { links: false }) + "</div>",
+        "</section>"
+      );
+    }
+
     /* The 2026 races, one section each, in ballot order. */
     var raceHtml = senateRaces.concat(houseRaces).map(function (race) {
       var people = peopleIn(race);

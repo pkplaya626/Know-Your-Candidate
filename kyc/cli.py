@@ -266,6 +266,23 @@ def _build(args):
           f"governments and school systems placed, {local_stats['unmatched']} under county areas "
           f"not on the map; {len(written_local)} file(s) rewritten")
 
+    # Who runs each state: governors and party control, checked against NCSL.
+    from . import stategov
+    try:
+        state_gov, gov_problems = stategov.build(args.root)
+    except stategov.StateGovError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 2
+    for problem in gov_problems:
+        print(f"  [warn] {problem}")
+    gov_file = os.path.join(args.root, emit.STATEGOV_FILE)
+    if emit.read_signature(path=gov_file) != emit.stategov_signature(state_gov):
+        gov_path, gov_size = emit.write_stategov(state_gov, args.root)
+        print(f"[ok] wrote {gov_path} ({gov_size / 1024:.0f} KB)")
+    gov_stats = stategov.stats(state_gov)
+    print(f"[ok] state government: {gov_stats['governors']} governors; " + ", ".join(
+        f"{n} {k}" for k, n in sorted(gov_stats["trifectas"].items())))
+
     # The guide's maps: rewritten only when what they say changed.
     from . import government_maps
     guide_maps = government_maps.payload()
@@ -899,6 +916,23 @@ def _verify(args):
         else:
             print(f"  ok  {emit.LOCAL_DIR}: every state matches its counties and listing")
 
+    from . import stategov
+    try:
+        gov_expected = emit.stategov_signature(stategov.build(args.root)[0])
+    except stategov.StateGovError as exc:
+        gov_expected = None
+        problems.append(str(exc))
+    gov_committed = emit.read_signature(path=os.path.join(args.root, emit.STATEGOV_FILE))
+    if gov_expected is None:
+        pass
+    elif gov_committed is None:
+        problems.append(f"{emit.STATEGOV_FILE} is missing or carries no signature")
+    elif gov_committed != gov_expected:
+        problems.append(f"{emit.STATEGOV_FILE} is stale")
+    else:
+        print(f"  ok  {emit.STATEGOV_FILE} matches the governor, legislator and NCSL caches "
+              f"({gov_expected[:16]}...)")
+
     from . import government_maps
     guide_expected = emit.government_signature(government_maps.payload())
     guide_committed = emit.read_signature(path=os.path.join(args.root, emit.GOVERNMENT_FILE))
@@ -996,6 +1030,62 @@ def _localgov(args):
     print(f"[ok] wrote {len(paths)} files under {localgov.OUT_DIR}: {total:,} governments and "
           f"school systems in {sum(len(s['counties']) for s in by_state.values()):,} counties; "
           f"every count agrees with the published table")
+    return 0
+
+
+def _executives(args):
+    """Every governor, from the NGA's roster, cross-checked against Wikidata,
+    and NCSL's count of each legislature's parties (kyc/executives.py,
+    kyc/stategov.py)."""
+    from . import executives, stategov
+    from .government_maps import STATES
+    if args.check:
+        cache = executives.load_cache(args.root)
+        if not cache:
+            print(f"[error] no {executives.CACHE_PATH}; run 'executives'", file=sys.stderr)
+            return 2
+        governors = cache["governors"]
+    else:
+        try:
+            governors = executives.fetch(previous=executives.load_cache(args.root))
+        except executives.ExecutivesError as exc:
+            print(f"[error] {exc}", file=sys.stderr)
+            return 2
+        for code, gov in sorted(governors.items()):
+            if gov.get("unread"):
+                print(f"  [warn] {code}: the NGA page has contact fields the parser does not "
+                      f"read: {', '.join(gov['unread'])}")
+            if gov.get("headshot") and gov.get("headshotBytes") is None:
+                print(f"  [warn] {code}: the headshot's size could not be measured; it is left "
+                      f"off the card until it can be")
+    missing = [code for code in STATES if code not in governors]
+    if missing:
+        print(f"[error] no governor for {', '.join(missing)}", file=sys.stderr)
+        return 1
+    if not args.check:
+        agree, disagree = executives.cross_check(governors, executives.wikidata_governors())
+        print(f"  Wikidata confirms {len(agree)} of {len(governors)}")
+        for code, ours, theirs in disagree:
+            print(f"  [warn] {code}: NGA says {ours!r}, Wikidata {theirs!r}")
+        try:
+            table = stategov.fetch_ncsl()
+        except stategov.StateGovError as exc:
+            print(f"[error] {exc}", file=sys.stderr)
+            return 2
+        print(f"[ok] wrote {executives.save_cache(governors, args.root)}")
+        print(f"[ok] wrote {stategov.save_ncsl(table, args.root)} (NCSL, updated {table['updated']})")
+    try:
+        _, problems = stategov.build(args.root)
+    except stategov.StateGovError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 2
+    for problem in problems:
+        print(f"  [warn] {problem}")
+    parties = {}
+    for gov in governors.values():
+        parties[gov["partyKey"]] = parties.get(gov["partyKey"], 0) + 1
+    print(f"  {len(governors)} governors: " +
+          ", ".join(f"{n} {k}" for k, n in sorted(parties.items())))
     return 0
 
 
@@ -1186,6 +1276,10 @@ def build_parser():
 
     local = add("localgov", help="every local government, county by county (Census listing)")
 
+    execs = add("executives", help="every governor, from the National Governors Association")
+    execs.add_argument("--check", action="store_true",
+                       help="report the committed cache; make no network call")
+
     legs = add("statelegs", help="every state legislator, from Open States")
     legs.add_argument("--check", action="store_true",
                       help="match the committed cache to the district maps; no network")
@@ -1227,6 +1321,8 @@ def main(argv=None):
         return _statelegs(args)
     if args.command == "localgov":
         return _localgov(args)
+    if args.command == "executives":
+        return _executives(args)
     if args.command == "verify":
         return _verify(args)
     if args.command == "congress":

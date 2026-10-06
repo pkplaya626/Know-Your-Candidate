@@ -3231,3 +3231,73 @@ svg.district-map,
   .local-panel { max-height: none; overflow: visible; }
   .local-filter { font-size: 16px; }
 }
+
+/* ================================================== 20. state government */
+
+/* The map's two groups of views - Congress, and state governments - each
+ * stay whole when the bar wraps. */
+.map-views {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.stategov { padding: var(--s-2) var(--s-1); }
+.gov-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+}
+.gov-portrait {
+  flex: none;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 20%;
+  background: var(--surface-3);
+}
+.gov-who { min-width: 0; }
+.gov-who p { margin: 0 0 2px; }
+.gov-role {
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.gov-name { font-size: var(--t-lg); font-weight: 700; color: var(--text); }
+.gov-party { font-weight: 600; }
+.gov-links { font-size: var(--t-sm); }
+.gov-contact { font-size: var(--t-xs); overflow-wrap: anywhere; }
+
+.gov-chambers {
+  list-style: none;
+  margin: 0 0 var(--s-3);
+  padding: 0;
+}
+.gov-chamber {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  padding: var(--s-2) var(--s-1);
+  border-bottom: 1px solid var(--border);
+}
+.gov-chamber-name { font-weight: 700; color: var(--text); }
+.gov-chamber-seats { font-size: var(--t-sm); }
+.gov-chamber-seats .sep { margin: 0 var(--s-1); color: var(--text-faint); }
+.gov-chamber-holds { font-size: var(--t-sm); color: var(--text-muted); }
+
+.gov-note {
+  margin: 0 0 var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  border-left: 3px solid var(--border-strong);
+  background: var(--surface-2);
+  font-size: var(--t-sm);
+}
+.gov-trifecta { font-weight: 600; color: var(--text); }
+.gov-pages { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); }
+.gov-sources { font-size: var(--t-xs); }
+
+.state-section .stategov { max-width: 46rem; padding: 0; }

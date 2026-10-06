@@ -1,0 +1,958 @@
+{
+ "fetched": "2026-10-05T20:42:47+00:00",
+ "source": "National Conference of State Legislatures, State Partisan Composition",
+ "states": {
+  "AK": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 14,
+    "R": 21,
+    "other": 5,
+    "seats": 40,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 9,
+    "R": 11,
+    "other": 0,
+    "seats": 20,
+    "vacant": 0
+   }
+  },
+  "AL": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 29,
+    "R": 76,
+    "other": 0,
+    "seats": 105,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 8,
+    "R": 27,
+    "other": 0,
+    "seats": 35,
+    "vacant": 0
+   }
+  },
+  "AR": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 20,
+    "R": 79,
+    "other": 0,
+    "seats": 100,
+    "vacant": 1
+   },
+   "upper": {
+    "D": 6,
+    "R": 29,
+    "other": 0,
+    "seats": 35,
+    "vacant": 0
+   }
+  },
+  "AZ": {
+   "control": "S",
+   "governor": "D",
+   "legislature": "R",
+   "lower": {
+    "D": 27,
+    "R": 33,
+    "other": 0,
+    "seats": 60,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 13,
+    "R": 17,
+    "other": 0,
+    "seats": 30,
+    "vacant": 0
+   }
+  },
+  "CA": {
+   "control": "D",
+   "governor": "D",
+   "legislature": "D",
+   "lower": {
+    "D": 60,
+    "R": 20,
+    "other": 0,
+    "seats": 80,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 30,
+    "R": 10,
+    "other": 0,
+    "seats": 40,
+    "vacant": 0
+   }
+  },
+  "CO": {
+   "control": "D",
+   "governor": "D",
+   "legislature": "D",
+   "lower": {
+    "D": 43,
+    "R": 22,
+    "other": 0,
+    "seats": 65,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 23,
+    "R": 12,
+    "other": 0,
+    "seats": 35,
+    "vacant": 0
+   }
+  },
+  "CT": {
+   "control": "D",
+   "governor": "D",
+   "legislature": "D",
+   "lower": {
+    "D": 102,
+    "R": 49,
+    "other": 0,
+    "seats": 151,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 25,
+    "R": 11,
+    "other": 0,
+    "seats": 36,
+    "vacant": 0
+   }
+  },
+  "DE": {
+   "control": "D",
+   "governor": "D",
+   "legislature": "D",
+   "lower": {
+    "D": 27,
+    "R": 14,
+    "other": 0,
+    "seats": 41,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 15,
+    "R": 6,
+    "other": 0,
+    "seats": 21,
+    "vacant": 0
+   }
+  },
+  "FL": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 34,
+    "R": 84,
+    "other": 0,
+    "seats": 120,
+    "vacant": 2
+   },
+   "upper": {
+    "D": 12,
+    "R": 27,
+    "other": 1,
+    "seats": 40,
+    "vacant": 0
+   }
+  },
+  "GA": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 79,
+    "R": 99,
+    "other": 0,
+    "seats": 180,
+    "vacant": 2
+   },
+   "upper": {
+    "D": 22,
+    "R": 33,
+    "other": 0,
+    "seats": 56,
+    "vacant": 1
+   }
+  },
+  "HI": {
+   "control": "D",
+   "governor": "D",
+   "legislature": "D",
+   "lower": {
+    "D": 41,
+    "R": 10,
+    "other": 0,
+    "seats": 51,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 22,
+    "R": 3,
+    "other": 0,
+    "seats": 25,
+    "vacant": 0
+   }
+  },
+  "IA": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 33,
+    "R": 67,
+    "other": 0,
+    "seats": 100,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 17,
+    "R": 33,
+    "other": 0,
+    "seats": 50,
+    "vacant": 0
+   }
+  },
+  "ID": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 9,
+    "R": 61,
+    "other": 0,
+    "seats": 70,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 6,
+    "R": 29,
+    "other": 0,
+    "seats": 35,
+    "vacant": 0
+   }
+  },
+  "IL": {
+   "control": "D",
+   "governor": "D",
+   "legislature": "D",
+   "lower": {
+    "D": 78,
+    "R": 40,
+    "other": 0,
+    "seats": 118,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 40,
+    "R": 19,
+    "other": 0,
+    "seats": 59,
+    "vacant": 0
+   }
+  },
+  "IN": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 30,
+    "R": 69,
+    "other": 1,
+    "seats": 100,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 10,
+    "R": 40,
+    "other": 0,
+    "seats": 50,
+    "vacant": 0
+   }
+  },
+  "KS": {
+   "control": "S",
+   "governor": "D",
+   "legislature": "R",
+   "lower": {
+    "D": 37,
+    "R": 88,
+    "other": 0,
+    "seats": 125,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 9,
+    "R": 31,
+    "other": 0,
+    "seats": 40,
+    "vacant": 0
+   }
+  },
+  "KY": {
+   "control": "S",
+   "governor": "D",
+   "legislature": "R",
+   "lower": {
+    "D": 20,
+    "R": 80,
+    "other": 0,
+    "seats": 100,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 6,
+    "R": 32,
+    "other": 0,
+    "seats": 38,
+    "vacant": 0
+   }
+  },
+  "LA": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 32,
+    "R": 73,
+    "other": 0,
+    "seats": 105,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 11,
+    "R": 28,
+    "other": 0,
+    "seats": 39,
+    "vacant": 0
+   }
+  },
+  "MA": {
+   "control": "D",
+   "governor": "D",
+   "legislature": "D",
+   "lower": {
+    "D": 132,
+    "R": 25,
+    "other": 1,
+    "seats": 160,
+    "vacant": 2
+   },
+   "upper": {
+    "D": 35,
+    "R": 5,
+    "other": 0,
+    "seats": 40,
+    "vacant": 0
+   }
+  },
+  "MD": {
+   "control": "D",
+   "governor": "D",
+   "legislature": "D",
+   "lower": {
+    "D": 102,
+    "R": 39,
+    "other": 0,
+    "seats": 141,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 34,
+    "R": 13,
+    "other": 0,
+    "seats": 47,
+    "vacant": 0
+   }
+  },
+  "ME": {
+   "control": "S",
+   "governor": "D",
+   "legislature": "S",
+   "lower": {
+    "D": 75,
+    "R": 72,
+    "other": 3,
+    "seats": 151,
+    "vacant": 1
+   },
+   "upper": {
+    "D": 20,
+    "R": 14,
+    "other": 1,
+    "seats": 35,
+    "vacant": 0
+   }
+  },
+  "MI": {
+   "control": "S",
+   "governor": "D",
+   "legislature": "S",
+   "lower": {
+    "D": 52,
+    "R": 58,
+    "other": 0,
+    "seats": 110,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 20,
+    "R": 18,
+    "other": 0,
+    "seats": 38,
+    "vacant": 0
+   }
+  },
+  "MN": {
+   "control": "S",
+   "governor": "D",
+   "legislature": "S",
+   "lower": {
+    "D": 67,
+    "R": 67,
+    "other": 0,
+    "seats": 134,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 34,
+    "R": 33,
+    "other": 0,
+    "seats": 67,
+    "vacant": 0
+   }
+  },
+  "MO": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 52,
+    "R": 106,
+    "other": 0,
+    "seats": 163,
+    "vacant": 5
+   },
+   "upper": {
+    "D": 10,
+    "R": 23,
+    "other": 0,
+    "seats": 34,
+    "vacant": 1
+   }
+  },
+  "MS": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 42,
+    "R": 78,
+    "other": 2,
+    "seats": 122,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 18,
+    "R": 34,
+    "other": 0,
+    "seats": 52,
+    "vacant": 0
+   }
+  },
+  "MT": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 42,
+    "R": 58,
+    "other": 0,
+    "seats": 100,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 18,
+    "R": 32,
+    "other": 0,
+    "seats": 50,
+    "vacant": 0
+   }
+  },
+  "NC": {
+   "control": "S",
+   "governor": "D",
+   "legislature": "R",
+   "lower": {
+    "D": 47,
+    "R": 71,
+    "other": 2,
+    "seats": 120,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 20,
+    "R": 30,
+    "other": 0,
+    "seats": 50,
+    "vacant": 0
+   }
+  },
+  "ND": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 10,
+    "R": 83,
+    "other": 0,
+    "seats": 94,
+    "vacant": 1
+   },
+   "upper": {
+    "D": 5,
+    "R": 42,
+    "other": 0,
+    "seats": 47,
+    "vacant": 0
+   }
+  },
+  "NE": {
+   "control": "N/A",
+   "governor": "R",
+   "legislature": "Nonpartisan",
+   "lower": {
+    "D": 0,
+    "R": 0,
+    "other": 0,
+    "seats": 0,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 0,
+    "R": 0,
+    "other": 49,
+    "seats": 49,
+    "vacant": 0
+   }
+  },
+  "NH": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 177,
+    "R": 215,
+    "other": 1,
+    "seats": 400,
+    "vacant": 7
+   },
+   "upper": {
+    "D": 8,
+    "R": 16,
+    "other": 0,
+    "seats": 24,
+    "vacant": 0
+   }
+  },
+  "NJ": {
+   "control": "D",
+   "governor": "D",
+   "legislature": "D",
+   "lower": {
+    "D": 57,
+    "R": 23,
+    "other": 0,
+    "seats": 80,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 25,
+    "R": 15,
+    "other": 0,
+    "seats": 40,
+    "vacant": 0
+   }
+  },
+  "NM": {
+   "control": "D",
+   "governor": "D",
+   "legislature": "D",
+   "lower": {
+    "D": 44,
+    "R": 26,
+    "other": 0,
+    "seats": 70,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 26,
+    "R": 16,
+    "other": 0,
+    "seats": 42,
+    "vacant": 0
+   }
+  },
+  "NV": {
+   "control": "S",
+   "governor": "R",
+   "legislature": "D",
+   "lower": {
+    "D": 27,
+    "R": 15,
+    "other": 0,
+    "seats": 42,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 13,
+    "R": 8,
+    "other": 0,
+    "seats": 21,
+    "vacant": 0
+   }
+  },
+  "NY": {
+   "control": "D",
+   "governor": "D",
+   "legislature": "D",
+   "lower": {
+    "D": 103,
+    "R": 47,
+    "other": 0,
+    "seats": 150,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 41,
+    "R": 22,
+    "other": 0,
+    "seats": 63,
+    "vacant": 0
+   }
+  },
+  "OH": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 34,
+    "R": 65,
+    "other": 0,
+    "seats": 99,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 9,
+    "R": 24,
+    "other": 0,
+    "seats": 33,
+    "vacant": 0
+   }
+  },
+  "OK": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 18,
+    "R": 81,
+    "other": 0,
+    "seats": 101,
+    "vacant": 2
+   },
+   "upper": {
+    "D": 8,
+    "R": 40,
+    "other": 0,
+    "seats": 48,
+    "vacant": 0
+   }
+  },
+  "OR": {
+   "control": "D",
+   "governor": "D",
+   "legislature": "D",
+   "lower": {
+    "D": 37,
+    "R": 23,
+    "other": 0,
+    "seats": 60,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 18,
+    "R": 12,
+    "other": 0,
+    "seats": 30,
+    "vacant": 0
+   }
+  },
+  "PA": {
+   "control": "S",
+   "governor": "D",
+   "legislature": "S",
+   "lower": {
+    "D": 102,
+    "R": 99,
+    "other": 0,
+    "seats": 203,
+    "vacant": 2
+   },
+   "upper": {
+    "D": 23,
+    "R": 27,
+    "other": 0,
+    "seats": 50,
+    "vacant": 0
+   }
+  },
+  "RI": {
+   "control": "D",
+   "governor": "D",
+   "legislature": "D",
+   "lower": {
+    "D": 64,
+    "R": 10,
+    "other": 1,
+    "seats": 75,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 34,
+    "R": 4,
+    "other": 0,
+    "seats": 38,
+    "vacant": 0
+   }
+  },
+  "SC": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 35,
+    "R": 89,
+    "other": 0,
+    "seats": 124,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 12,
+    "R": 34,
+    "other": 0,
+    "seats": 46,
+    "vacant": 0
+   }
+  },
+  "SD": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 5,
+    "R": 65,
+    "other": 0,
+    "seats": 70,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 3,
+    "R": 32,
+    "other": 0,
+    "seats": 35,
+    "vacant": 0
+   }
+  },
+  "TN": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 24,
+    "R": 75,
+    "other": 0,
+    "seats": 99,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 6,
+    "R": 27,
+    "other": 0,
+    "seats": 33,
+    "vacant": 0
+   }
+  },
+  "TX": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 62,
+    "R": 88,
+    "other": 0,
+    "seats": 150,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 12,
+    "R": 18,
+    "other": 0,
+    "seats": 31,
+    "vacant": 1
+   }
+  },
+  "UT": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 14,
+    "R": 61,
+    "other": 0,
+    "seats": 75,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 6,
+    "R": 22,
+    "other": 1,
+    "seats": 29,
+    "vacant": 0
+   }
+  },
+  "VA": {
+   "control": "D",
+   "governor": "D",
+   "legislature": "D",
+   "lower": {
+    "D": 64,
+    "R": 36,
+    "other": 0,
+    "seats": 100,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 21,
+    "R": 19,
+    "other": 0,
+    "seats": 40,
+    "vacant": 0
+   }
+  },
+  "VT": {
+   "control": "S",
+   "governor": "R",
+   "legislature": "D",
+   "lower": {
+    "D": 87,
+    "R": 55,
+    "other": 8,
+    "seats": 150,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 16,
+    "R": 13,
+    "other": 1,
+    "seats": 30,
+    "vacant": 0
+   }
+  },
+  "WA": {
+   "control": "D",
+   "governor": "D",
+   "legislature": "D",
+   "lower": {
+    "D": 59,
+    "R": 39,
+    "other": 0,
+    "seats": 98,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 30,
+    "R": 19,
+    "other": 0,
+    "seats": 49,
+    "vacant": 0
+   }
+  },
+  "WI": {
+   "control": "S",
+   "governor": "D",
+   "legislature": "R",
+   "lower": {
+    "D": 45,
+    "R": 54,
+    "other": 0,
+    "seats": 99,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 15,
+    "R": 18,
+    "other": 0,
+    "seats": 33,
+    "vacant": 0
+   }
+  },
+  "WV": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 9,
+    "R": 91,
+    "other": 0,
+    "seats": 100,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 2,
+    "R": 32,
+    "other": 0,
+    "seats": 34,
+    "vacant": 0
+   }
+  },
+  "WY": {
+   "control": "R",
+   "governor": "R",
+   "legislature": "R",
+   "lower": {
+    "D": 6,
+    "R": 56,
+    "other": 0,
+    "seats": 62,
+    "vacant": 0
+   },
+   "upper": {
+    "D": 2,
+    "R": 29,
+    "other": 0,
+    "seats": 31,
+    "vacant": 0
+   }
+  }
+ },
+ "updated": "May 27, 2026",
+ "url": "https://www.ncsl.org/about-state-legislatures/state-partisan-composition"
+}

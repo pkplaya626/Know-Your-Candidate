@@ -134,13 +134,20 @@
 
         <div class="toolbar">
             <div class="map-legend" id="mapLegend" aria-live="polite"></div>
-            <div class="segmented push-right" role="group" aria-label="Map view">
-                <button type="button" data-mode="senate" aria-pressed="true">Senate</button>
-                <button type="button" data-mode="senate2026" aria-pressed="false">
-                    <svg class="icon icon-sm" aria-hidden="true"><use href="#i-flag"/></svg>
-                    2026 races
-                </button>
-                <button type="button" data-mode="house" aria-pressed="false">House</button>
+            <div class="map-views push-right">
+                <div class="segmented" role="group" aria-label="Congress">
+                    <button type="button" data-mode="senate" aria-pressed="true">Senate</button>
+                    <button type="button" data-mode="senate2026" aria-pressed="false">
+                        <svg class="icon icon-sm" aria-hidden="true"><use href="#i-flag"/></svg>
+                        2026 races
+                    </button>
+                    <button type="button" data-mode="house" aria-pressed="false">House</button>
+                </div>
+                <div class="segmented" role="group" aria-label="State governments">
+                    <button type="button" data-mode="governor" aria-pressed="false">Governors</button>
+                    <button type="button" data-mode="legislature" aria-pressed="false">Legislatures</button>
+                    <button type="button" data-mode="trifecta" aria-pressed="false">Trifectas</button>
+                </div>
             </div>
         </div>
 
@@ -176,9 +183,11 @@
 <script src="data/profiles.js"></script>
 <script src="data/geo.js"></script>
 <script src="data/odds.js"></script>
+<script src="data/stategov.js"></script>
 <script src="assets/kyc-odds.js"></script>
 <script src="assets/kyc-cards.js"></script>
 <script src="assets/kyc-profile.js"></script>
+<script src="assets/kyc-stategov.js"></script>
 <script src="assets/kyc-usmap.js"></script>
 <script src="assets/kyc-map.js"></script>
 </body>

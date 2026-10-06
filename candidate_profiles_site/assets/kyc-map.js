@@ -11,7 +11,9 @@
  *
  * The drawing itself - shapes, labels, callouts, the territory strip - is
  * the shared KYC.usmap (kyc-usmap.js); this module decides what colours a
- * state and what its panel shows.
+ * state and what its panel shows. The three state-government views -
+ * governors, legislatures, trifectas - are KYC.stategov's (kyc-stategov.js),
+ * the same module every state page draws its own section with.
  */
 (function (global) {
   "use strict";
@@ -79,8 +81,13 @@
     return "color-mix(in srgb, var(--party-r) " + ((50 - pct) * 2) + "%, var(--split))";
   }
 
+  function stateMode() {
+    return KYC.stategov.modes.indexOf(mode) !== -1;
+  }
+
   /** Fill and hover text for one state in the current mode. */
   function appearance(code) {
+    if (stateMode()) return KYC.stategov.look(code, mode);
     var counts = tally(code);
 
     if (mode === "senate") {
@@ -154,6 +161,13 @@
 
   function drawLegend() {
     var target = doc.getElementById("mapLegend");
+    if (stateMode()) {
+      target.innerHTML = KYC.stategov.legend(mode).map(function (entry) {
+        return '<span class="key"><span class="swatch" style="background:' +
+          entry[0] + '"></span>' + KYC.escapeHtml(entry[1]) + "</span>";
+      }).join("");
+      return;
+    }
     if (mode === "house") {
       target.innerHTML = [
         '<span class="key"><span class="party-r">All R</span>',
@@ -181,6 +195,9 @@
     senate: "Senate delegation",
     house: "House delegation and 2026 candidates",
     senate2026: "2026 Senate race",
+    governor: KYC.stategov.titles.governor,
+    legislature: KYC.stategov.titles.legislature,
+    trifecta: KYC.stategov.titles.trifecta,
   };
 
   function forMode(code) {
@@ -283,6 +300,13 @@
       pageLink.hidden = false;
       pageLink.href = KYC.stateUrl(code);
       pageLink.textContent = "Open the " + KYC.stateName(code) + " page \u203a";
+    }
+
+    if (stateMode()) {
+      doc.getElementById("panelCounts").innerHTML = KYC.stategov.badge(code, mode);
+      list.innerHTML = '<div class="stategov">' + KYC.stategov.render(code, { links: true }) + "</div>";
+      list.scrollTop = 0;
+      return;
     }
 
     var group = mode === "house" ? counts.house : counts.senate;
@@ -436,7 +460,7 @@
     setMode(MODE_TITLE[initial.params.mode] ? initial.params.mode : "senate",
             { fromRoute: true });
 
-    doc.querySelector(".segmented").addEventListener("click", function (event) {
+    doc.querySelector(".map-views").addEventListener("click", function (event) {
       var button = event.target.closest("[data-mode]");
       if (button) setMode(button.getAttribute("data-mode"));
     });
