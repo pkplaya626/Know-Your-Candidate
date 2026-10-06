@@ -1090,7 +1090,13 @@ def _executives(args):
         print(f"[error] no governor for {', '.join(missing)}", file=sys.stderr)
         return 1
     if not args.check:
-        agree, disagree = executives.cross_check(governors, executives.wikidata_governors())
+        wikidata = executives.wikidata_governors()
+        if not wikidata:
+            # Unreachable is not "no record" (rule 8): keep the last run's
+            # confirmation for anyone still in office.
+            kept = executives.carry_over(governors, executives.load_cache(args.root))
+            print(f"  [warn] Wikidata could not be reached; kept the last check for {kept}")
+        agree, disagree = executives.cross_check(governors, wikidata)
         print(f"  Wikidata confirms {len(agree)} of {len(governors)}")
         for code, ours, theirs in disagree:
             print(f"  [warn] {code}: NGA says {ours!r}, Wikidata {theirs!r}")

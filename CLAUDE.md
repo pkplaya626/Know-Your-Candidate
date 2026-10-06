@@ -115,7 +115,7 @@ python build_profile_site.py localgov         # every local government (Census l
 python build_profile_site.py executives       # every governor (NGA), and NCSL's party counts
 python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
-python -m unittest discover tests             # 765 tests, no dependencies
+python -m unittest discover tests             # 768 tests, no dependencies
 npm install && npm test                       # 999 real-DOM checks (needs jsdom)
 ```
 

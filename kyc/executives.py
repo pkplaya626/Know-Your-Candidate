@@ -227,6 +227,20 @@ def wikidata_governors():
             for code, (_, name, qid) in latest.items()}
 
 
+def carry_over(governors, previous):
+    """Copy the last run's Wikidata id and start dates onto each governor
+    who is the same person as before; returns how many were kept."""
+    kept = 0
+    before = (previous or {}).get("governors", {})
+    for code, gov in governors.items():
+        old = before.get(code, {})
+        if old.get("wikidata") and old.get("name") == gov["name"]:
+            gov["wikidata"] = old["wikidata"]
+            gov["wikidataStarts"] = list(old.get("wikidataStarts", ()))
+            kept += 1
+    return kept
+
+
 def cross_check(governors, wikidata):
     """``(agree, disagree)``: names Wikidata confirms, and names it disputes.
     A confirmed governor keeps Wikidata's id and start dates, against which

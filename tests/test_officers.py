@@ -166,12 +166,14 @@ class TestCommitted(unittest.TestCase):
             self.assertIn("lt", entry, code)
             self.assertIn("sos", entry, code)
 
-    def test_hawaii_is_shown_as_disputed_not_as_either_name(self):
+    def test_every_disagreement_is_shown_as_one(self):
+        # On 2026-10-05: Hawaii's lieutenant governor.
         payload, problems = stategov.build(ROOT)
         cache = officers.load_cache(ROOT)
-        if officers.overlaps(cache["sos"], cache["lt"]):
-            self.assertIn("disputed", payload["states"]["HI"]["lt"])
-            self.assertTrue(any(p.startswith("HI:") for p in problems))
+        for code, office, _, _ in officers.overlaps(cache["sos"], cache["lt"]):
+            key = "lt" if office == "Lieutenant Governor" else "sos"
+            self.assertIn("disputed", payload["states"][code][key], code)
+            self.assertTrue(any(p.startswith(code + ":") for p in problems), code)
 
 
 if __name__ == "__main__":

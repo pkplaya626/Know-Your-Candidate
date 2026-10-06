@@ -131,6 +131,18 @@ class TestRoster(unittest.TestCase):
         self.assertTrue(executives.same_person("JB Pritzker", "J. B. Pritzker"))
         self.assertFalse(executives.same_person("Mike Dunleavy", "Wilford Bacon Hoggatt"))
 
+    def test_an_unreachable_wikidata_keeps_the_last_check(self):
+        # Every first day in office would otherwise vanish from the page the
+        # week Wikidata was down (rule 8).
+        previous = {"governors": {"AL": {"name": "Kay Ivey", "wikidata": "Q1",
+                                         "wikidataStarts": ["2017-04-10"]},
+                                  "TX": {"name": "Greg Abbott", "wikidata": "Q2",
+                                         "wikidataStarts": ["2015-01-20"]}}}
+        now = {"AL": {"name": "Kay Ivey"}, "TX": {"name": "Someone New"}}
+        self.assertEqual(executives.carry_over(now, previous), 1)
+        self.assertEqual(now["AL"]["wikidataStarts"], ["2017-04-10"])
+        self.assertNotIn("wikidataStarts", now["TX"])
+
     def test_a_cross_check_never_overwrites_the_roster(self):
         governors = {"AK": {"name": "Mike Dunleavy"}, "TX": {"name": "Greg Abbott"}}
         agree, disagree = executives.cross_check(
@@ -274,22 +286,39 @@ class TestNcsl(unittest.TestCase):
 
 class TestCommitted(unittest.TestCase):
 
-    def test_the_sources_agree_everywhere(self):
-        # The NGA's two wrong first days are left off the page.
-        payload, problems = stategov.build(ROOT)
-        # The other is NASS's and NLGA's disagreement about Hawaii's
-        # lieutenant governor (tests/test_officers.py).
-        self.assertEqual(sorted(p[:3] for p in problems), ["AL:", "HI:", "IA:"])
-        self.assertEqual(payload["states"]["AL"]["governor"]["since"], "")
-        self.assertEqual([c for c in STATES if c not in payload["states"]], [])
+    # These hold for whatever the sources say this week: the weekly refresh
+    # runs them on fresh data, so they assert how a disagreement is shown,
+    # not which disagreements there are today.
 
-    def test_trifectas_agree_with_ncsl_except_where_a_note_says_why(self):
+    def test_every_state_has_a_governor(self):
+        payload, problems = stategov.build(ROOT)
+        self.assertEqual([c for c in STATES if c not in payload["states"]], [])
+        self.assertFalse([p for p in problems if p.startswith("no governor")])
+
+    def test_a_first_day_wikidata_disputes_is_not_shown(self):
+        # On 2026-10-05: Kay Ivey (AL) and Kim Reynolds (IA), whose NGA pages
+        # give the wrong day.
+        payload, problems = stategov.build(ROOT)
+        for problem in problems:
+            if "took office on" in problem:
+                self.assertEqual(payload["states"][problem[:2]]["governor"]["since"], "", problem)
+
+    def test_a_chamber_the_sources_dispute_is_shown_as_disputed(self):
+        payload, problems = stategov.build(ROOT)
+        for problem in problems:
+            if "Open States gives" in problem:
+                self.assertEqual(payload["states"][problem[:2]]["legislature"], "disputed", problem)
+
+    def test_trifectas_differ_from_ncsl_only_where_the_page_says_why(self):
+        # Alaska, for its coalitions; or a state whose chambers the sources
+        # dispute, shown as such.
         payload, _ = stategov.build(ROOT)
         ncsl = stategov.load_ncsl(ROOT)
         names = {"R": "R", "D": "D", "S": "divided", "N/A": "nonpartisan"}
-        differ = sorted(c for c in STATES
-                        if names[ncsl["states"][c]["control"]] != payload["states"][c]["trifecta"])
-        self.assertEqual(differ, sorted(stategov.COALITIONS))
+        for code in STATES:
+            ours = payload["states"][code]
+            if names[ncsl["states"][code]["control"]] != ours["trifecta"]:
+                self.assertTrue(ours.get("note") or ours["trifecta"] == "disputed", code)
 
     def test_no_headshot_on_the_page_is_heavier_than_the_cap(self):
         cache = executives.load_cache(ROOT)["governors"]
