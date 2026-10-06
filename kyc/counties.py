@@ -84,7 +84,7 @@ def load_cities(code, root="."):
 # A government's legal form before its name in the listing ("CITY OF ...")
 # and, for a consolidated government's remainder, after it in the boundary
 # file ("Nashville-Davidson metropolitan government").
-_FORMS = (r"(?:city and county|city and borough|unified government|consolidated government|"
+_FORMS = (r"(?:city and county|city and borough|city-parish|unified government|consolidated government|"
           r"metropolitan government|metro government|metro township|urban county government|"
           r"urban county|city|town|village|borough|municipality|township|corporation|county)")
 # The legal forms both sources print, the boundary file after a place's name
@@ -189,16 +189,22 @@ def _county_of(point, fitted):
 
 def build_cities(code, cities, listing, albers, fit, fitted):
     """``(rows, problems)``: every incorporated place the map draws, as
-    ``{GEOID: [x, y, kind, name, county, ref]}`` where *ref* is ``[county
-    code, index]`` of its government's row in the listing, or None."""
+    ``{GEOID: [x, y, kind, name, county, ref, status]}`` where *ref* is
+    ``[county code, index]`` of its government's row in the listing, or None,
+    and *status* the Census's functional status where it is not "A".
+
+    A place's county is the one the tool found at 1:500,000; only where that
+    is not a drawn county is the point tested against the drawn 1:5,000,000
+    lines, which put four small boroughs and cities on county lines in the
+    county next door."""
     points, rows = [], {}
     for place in cities["places"]:
         at = fit(albers.raw(*place["point"]))
         if not (0 <= at[0] <= D.WIDTH and 0 <= at[1] <= fit.height):
             raise CountiesError(f"{code}: {place['name']} ({place['id']}) is off the state's map")
-        county = _county_of(at, fitted)
+        county = place.get("county") if place.get("county") in fitted else _county_of(at, fitted)
         rows[place["id"]] = [geo._round(at[0]), geo._round(at[1]), place["kind"], place["name"],
-                             county or "", None]
+                             county or "", None, place.get("status", "")]
         points.append((place["id"], city_key(place["name"], place["kind"] == "balance"), county))
     census = {(fips, i): g["census"] for fips, entry in listing["counties"].items()
               for i, g in enumerate(entry["governments"]) if g["type"] == "municipal"}

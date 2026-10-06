@@ -643,9 +643,17 @@ def main_piece_point(rings, lon, lat):
     return x / (scale * 111320.0), y / 110574.0, True
 
 
-def build_places(gazetteer_zip, estimates_csv, shapes_for):
+def _unreadable(name):
+    """A control character or U+FFFD: a letter the source could not write.
+    The estimates file has "Utqiag" + 0x1A + "vik" for Utqiagvik, Alaska."""
+    return any(ord(ch) < 32 or ch == "\ufffd" for ch in name)
+
+
+def build_places(gazetteer_zip, estimates_csv, shapes_for, names_for=None):
     """The places payload. *shapes_for(state fips)* returns ``{GEOID:
-    rings}`` from that state's Census place boundaries, or None."""
+    rings}`` from that state's Census place boundaries, or None;
+    *names_for(state fips)* the boundaries' own ``{GEOID: NAME}``, which
+    stands in for an estimates name the estimates file could not write."""
     archive = zipfile.ZipFile(io.BytesIO(gazetteer_zip))
     lines = archive.read(archive.namelist()[0]).decode("latin-1").splitlines()
     header = [h.strip() for h in lines[0].split("\t")]
@@ -672,6 +680,12 @@ def build_places(gazetteer_zip, estimates_csv, shapes_for):
         if row["STATE"] not in shapes_by_state:
             shapes_by_state[row["STATE"]] = shapes_for(row["STATE"]) or {}
         name = _short_name(row["NAME"])
+        if _unreadable(name):
+            spelled = (names_for(row["STATE"]) or {}).get(geoid, "") if names_for else ""
+            if not spelled or _unreadable(spelled):
+                raise SystemExit(f"{geoid}: the estimates name {row['NAME']!r} has a character the "
+                                 f"file could not write, and no boundary file spells it")
+            name = _short_name(spelled)
         lat, lon = float(point["INTPTLAT"]), float(point["INTPTLONG"])
         rings = shapes_by_state[row["STATE"]].get(geoid)
         if not rings:
@@ -713,14 +727,21 @@ def dump_places(payload):
 
 
 def write_places():
-    def shapes_for(fips):
+    def layer_for(fips):
         try:
-            layer = read_layer(PLACE_SHAPES_URL.format(fips))
+            return read_layer(PLACE_SHAPES_URL.format(fips))
         except urllib.error.HTTPError:
             return None
-        return {row["GEOID"]: rings for row, rings in layer if rings}
 
-    payload = build_places(get(GAZETTEER_URL), get(ESTIMATES_URL), shapes_for)
+    def shapes_for(fips):
+        layer = layer_for(fips)
+        return {row["GEOID"]: rings for row, rings in layer if rings} if layer else None
+
+    def names_for(fips):
+        layer = layer_for(fips)
+        return {row["GEOID"]: row["NAME"] for row, _ in layer} if layer else None
+
+    payload = build_places(get(GAZETTEER_URL), get(ESTIMATES_URL), shapes_for, names_for)
     os.makedirs(OUT_DIR, exist_ok=True)
     with open(PLACES_FILE + ".tmp", "w", encoding="utf-8", newline="\n") as handle:
         handle.write(dump_places(payload))

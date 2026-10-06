@@ -5,14 +5,14 @@
 "subdivisionSource":"U.S. Census Bureau, 2025 cartographic boundary files of county subdivisions (1:500,000)",
 "subdivisionUrl":"https://www2.census.gov/geo/tiger/GENZ2025/shp/cb_2025_44_cousub_500k.zip",
 "places":[
-{"id":"4414140","name":"Central Falls","kind":"city","point":[-71.39309,41.890032],"land":3092443},
-{"id":"4419180","name":"Cranston","kind":"city","point":[-71.483141,41.761861],"land":73413567},
-{"id":"4422960","name":"East Providence","kind":"city","point":[-71.365154,41.810567],"land":34406029},
-{"id":"4449960","name":"Newport","kind":"city","point":[-71.308972,41.495712],"land":19828477},
-{"id":"4454640","name":"Pawtucket","kind":"city","point":[-71.361724,41.875583],"land":22447898},
-{"id":"4459000","name":"Providence","kind":"city","point":[-71.424499,41.831427],"land":47670951},
-{"id":"4474300","name":"Warwick","kind":"city","point":[-71.418999,41.715983],"land":90651869},
-{"id":"4480780","name":"Woonsocket","kind":"city","point":[-71.498075,41.999034],"land":20061557}
+{"id":"4414140","name":"Central Falls","kind":"city","point":[-71.39309,41.890032],"land":3092443,"county":"44007"},
+{"id":"4419180","name":"Cranston","kind":"city","point":[-71.483141,41.761861],"land":73413567,"county":"44007"},
+{"id":"4422960","name":"East Providence","kind":"city","point":[-71.365154,41.810567],"land":34406029,"county":"44007"},
+{"id":"4449960","name":"Newport","kind":"city","point":[-71.308972,41.495712],"land":19828477,"county":"44005"},
+{"id":"4454640","name":"Pawtucket","kind":"city","point":[-71.361724,41.875583],"land":22447898,"county":"44007"},
+{"id":"4459000","name":"Providence","kind":"city","point":[-71.424499,41.831427],"land":47670951,"county":"44007"},
+{"id":"4474300","name":"Warwick","kind":"city","point":[-71.418999,41.715983],"land":90651869,"county":"44003"},
+{"id":"4480780","name":"Woonsocket","kind":"city","point":[-71.498075,41.999034],"land":20061557,"county":"44007"}
 ],
 "subdivisions":[
 {"id":"4400105140","county":"44001","code":"05140","name":"Barrington","kind":"town","point":[-71.316486,41.746882],"land":21198328},

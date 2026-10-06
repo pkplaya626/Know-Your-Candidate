@@ -145,7 +145,8 @@ class TestCities(unittest.TestCase):
                 self.assertEqual(listing["counties"][fips]["governments"][i]["type"], "municipal",
                                  (code, fips, i))
             width, height = page["viewBox"][2], page["viewBox"][3]
-            for pid, (x, y, kind, name, county, ref) in page["cities"].items():
+            for pid, (x, y, kind, name, county, ref, status) in page["cities"].items():
+                self.assertIn(status, ("", "I", "N", "B", "F"), (code, name))
                 self.assertTrue(0 <= x <= width and 0 <= y <= height, (code, name))
                 self.assertTrue(not county or county in page["counties"], (code, name))
             # Every place left unjoined is in what the build reports.
@@ -187,6 +188,52 @@ class TestCities(unittest.TestCase):
         lon, lat = F.point_of([island, main])
         self.assertTrue(0 < lon < 0.1 and 0 < lat < 0.1, (lon, lat))
 
+
+class TestReviewOfTheCities(unittest.TestCase):
+    """What the review of the cities layer found (PR #48)."""
+
+    def test_a_place_on_a_county_line_is_in_the_county_the_census_puts_it(self):
+        # Against the drawn 1:5,000,000 lines these four sat in the county
+        # next door; the tool now finds the county at 1:500,000.
+        expected = {"PA": {"4249504": "42045", "4227112": "42031", "4271976": "42005"},
+                    "ID": {"1642760": "16057"}}
+        for code, places in expected.items():
+            page = counties.build_state(code, ROOT, {})
+            for pid, county in places.items():
+                self.assertEqual(page["cities"][pid][4], county, (code, pid))
+
+    def test_a_city_parish_is_a_legal_form(self):
+        self.assertEqual(counties.city_key("CITY-PARISH OF LAFAYETTE"), counties.city_key("Lafayette"))
+        page = counties.build_state("LA", ROOT, {})
+        listing = localgov.load("LA", ROOT)
+        ref = page["cities"]["2240735"][5]
+        self.assertEqual(listing["counties"][ref[0]]["governments"][ref[1]]["census"],
+                         "CITY-PARISH OF LAFAYETTE")
+
+    def test_a_place_carries_the_census_functional_status(self):
+        page = counties.build_state("KY", ROOT, {})
+        self.assertEqual(page["cities"]["2148000"][6], "N")        # Louisville, since 2003
+        self.assertIsNone(page["cities"]["2148000"][5])
+        self.assertEqual(counties.build_state("TX", ROOT, {})["cities"]["4835000"][6], "")   # Houston
+
+    def test_a_hole_touching_the_outer_line_is_still_a_hole(self):
+        sys.path.insert(0, os.path.join(ROOT, "tools"))
+        import fetch_local_maps as F
+        # A square town with a pocket of unincorporated land that touches
+        # its outer line at the pocket's first vertex (Triadelphia, WV).
+        outer = [(0.0, 0.0), (0.01, 0.0), (0.01, 0.01), (0.0, 0.01)]
+        pocket = [(0.0, 0.0), (0.008, 0.002), (0.008, 0.008), (0.002, 0.008)]
+        lon, lat = F.point_of([outer, pocket])
+        inside_town = F._inside_ring(outer, lon, lat) and not F._inside_ring(pocket, lon, lat)
+        self.assertTrue(inside_town, (lon, lat))
+
+    def test_every_place_point_has_a_county(self):
+        import json
+        from kyc.government_maps import STATES
+        for code in STATES:
+            with open(os.path.join(ROOT, counties.CITIES_DIR, f"{code.lower()}.json"), encoding="utf-8") as handle:
+                for place in json.load(handle)["places"]:
+                    self.assertTrue(place.get("county", "").startswith(place["id"][:2]), (code, place["name"]))
 
 class TestTowns(unittest.TestCase):
     """A town or township is joined on the Census code the listing gives it,

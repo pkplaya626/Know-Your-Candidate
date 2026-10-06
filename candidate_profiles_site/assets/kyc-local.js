@@ -67,7 +67,8 @@
 
   /* --------------------------------------------------------------- cities */
 
-  // [x, y, kind, name, county, ref]; ref is [county code, row] or null.
+  // [x, y, kind, name, county, ref, status]; ref is [county code, row] or
+  // null, status the Census's functional status where it is not "A".
   // Towns and townships (county subdivisions, ten-digit codes) share the
   // view with the incorporated places (seven digits); each is joined.
   var towns = (state && state.towns) || {};
@@ -113,6 +114,15 @@
     if (kind === "balance") return "consolidated government (the part outside its other places)";
     return kind;
   }
+
+  /* The Census's own words for a place's functional status (2025
+   * Gazetteer; census.gov functional status codes). "A", an active
+   * government, needs no note; "F" is a balance, said by its kind. */
+  var STATUS = {
+    I: "an inactive governmental unit",
+    N: "a nonfunctioning legal entity",
+    B: "an active government partially consolidated with another government, with separate officials",
+  };
 
   function governmentRow(ref) {
     if (!ref) return null;
@@ -220,16 +230,22 @@
     var body = '<p class="local-total"><span class="swatch dot-swatch dot-' + formOf(id) + '"></span>' +
       KYC.escapeHtml(whatItIs(id)) +
       (c[4] && state.counties[c[4]] ? ", in " + KYC.escapeHtml(state.counties[c[4]].name) : "") + "</p>";
+    var status = STATUS[c[6]];
+    if (status) {
+      body += '<p class="gov-officer-note">The Census Bureau records ' + KYC.escapeHtml(c[3]) + " as " +
+        KYC.escapeHtml(status) + " (2025).</p>";
+    }
     if (row) {
       body += '<h3 class="local-group">Its government</h3><ul class="local-list">' + item(row, "") + "</ul>" +
         '<p class="faint">As the Census Bureau listed it in 2022, with its own website where the ' +
         "Bureau has one.</p>";
-    } else {
+    } else if (!status) {
       // Not joined is not "no government" (rule 19): the build found no
       // government in the listing it could tie to this place one to one.
+      // Why is not guessed; the listing's date is a fact.
       body += '<p class="gov-officer-note">The Census Bureau\'s 2022 listing of governments has no ' +
-        "entry this site could tie to this place by its name alone, so none is shown here. A place " +
-        "incorporated since 2022 is not in that listing yet.</p>";
+        "entry this site could tie to this place by its name alone, so none is shown here. The " +
+        "listing is from 2022; a place incorporated since then is not in it.</p>";
     }
     body += countyButton(c[4]);
     el("localPanelBody").innerHTML = body;

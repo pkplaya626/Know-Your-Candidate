@@ -13,7 +13,19 @@ form inferred from the name.
 A place is drawn as one point: the pole of inaccessibility of its largest
 piece of land, so a city with an outlying island or annexed strip is placed
 where most of it is (the Census's own internal point for San Francisco is on
-the Farallon Islands). The build (kyc/counties.py) joins each place to its
+the Farallon Islands). Each place also keeps:
+
+* its county: the county, in the 1:500,000 county boundaries of the same
+  release (cb_2025_us_county_500k), that holds its point. The page's own
+  county lines are 1:5,000,000, and against those Millbourne, Pennsylvania,
+  a borough of 0.19 square kilometres on the city line, fell in Philadelphia;
+* its functional status, from the same release's Gazetteer
+  (2025_Gaz_place_national), where it is not "A" (an active government):
+  "I" for an inactive governmental unit, "N" for a nonfunctioning legal
+  entity (Louisville, Kentucky, since the 2003 merger), "B" for one partially
+  consolidated with another government, "F" for a consolidated government's
+  balance - so the page can say what the Census says, not guess why a place
+  has no government. The build (kyc/counties.py) joins each place to its
 government in the Census listing; nothing here is a judgement, and
 everything it writes can be rebuilt by running it again.
 
@@ -43,6 +55,9 @@ from kyc.geo import FIPS_TO_STATE, polylabel  # noqa: E402
 
 PLACES_URL = "https://www2.census.gov/geo/tiger/GENZ2025/shp/cb_2025_{fips}_place_500k.zip"
 COUSUB_URL = "https://www2.census.gov/geo/tiger/GENZ2025/shp/cb_2025_{fips}_cousub_500k.zip"
+COUNTY_URL = "https://www2.census.gov/geo/tiger/GENZ2025/shp/cb_2025_us_county_500k.zip"
+GAZETTEER_URL = ("https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2025_Gazetteer/"
+                 "2025_Gaz_place_national.zip")
 OUT_DIR = "local_maps"
 SOURCE = "U.S. Census Bureau, 2025 cartographic boundary files of places (1:500,000)"
 COUSUB_SOURCE = "U.S. Census Bureau, 2025 cartographic boundary files of county subdivisions (1:500,000)"
@@ -65,8 +80,10 @@ def point_of(rings):
     kx, ky = math.cos(math.radians(lat0)) * 111320.0, 110574.0
     metres = [[(x * kx, y * ky) for x, y in ring] for ring in rings]
     largest = max(metres, key=lambda r: abs(_area(r)))
-    # Holes inside the largest piece (an unincorporated island) count too.
-    holes = [r for r in metres if r is not largest and _inside_ring(largest, *r[0])]
+    # Holes inside the largest piece (an unincorporated island) count too. A
+    # hole may touch the outer line at its first vertex (Triadelphia, West
+    # Virginia), so any vertex inside makes it one.
+    holes = [r for r in metres if r is not largest and any(_inside_ring(largest, *p) for p in r)]
     x, y = polylabel([largest] + holes)
     return [round(x / kx, 6), round(y / ky, 6)]
 
@@ -100,7 +117,44 @@ def legal_form(row):
     raise SystemExit(f"{row['GEOID']}: {full!r} does not contain its name {name!r}")
 
 
-def state_places(code):
+def functional_status():
+    """``{GEOID: FUNCSTAT}`` for every place in the 2025 Gazetteer."""
+    import io
+    import zipfile
+    archive = zipfile.ZipFile(io.BytesIO(maps.get(GAZETTEER_URL)))
+    lines = archive.read(archive.namelist()[0]).decode("utf-8").splitlines()
+    head = lines[0].split("|")
+    rows = [dict(zip(head, line.split("|"))) for line in lines[1:] if line]
+    return {r["GEOID"]: r["FUNCSTAT"] for r in rows}
+
+
+def counties_by_state():
+    """``{state fips: [(county GEOID, rings, bounds)]}`` from the 1:500,000
+    county boundaries."""
+    out = {}
+    for row, rings in maps.read_layer(COUNTY_URL):
+        lons = [p[0] for r in rings for p in r]
+        lats = [p[1] for r in rings for p in r]
+        out.setdefault(row["STATEFP"], []).append(
+            (row["GEOID"], rings, (min(lons), min(lats), max(lons), max(lats))))
+    return out
+
+
+def county_of(point, counties):
+    """The county whose boundary holds *point*, by even-odd over all its
+    rings, or None."""
+    lon, lat = point
+    for geoid, rings, (x0, y0, x1, y1) in counties:
+        if x0 <= lon <= x1 and y0 <= lat <= y1:
+            inside = False
+            for ring in rings:
+                inside ^= _inside_ring(ring, lon, lat)
+            if inside:
+                return geoid
+    return None
+
+
+def state_places(code, status=None, counties=None):
     fips = next(f for f, c in FIPS_TO_STATE.items() if c == code)
     url = PLACES_URL.format(fips=fips)
     out = []
@@ -108,8 +162,18 @@ def state_places(code):
         if row["LSAD"] == CDP or not rings:
             continue
         name, kind = legal_form(row)
-        out.append({"id": row["GEOID"], "name": name, "kind": kind,
-                    "point": point_of(rings), "land": int(row["ALAND"] or 0)})
+        place = {"id": row["GEOID"], "name": name, "kind": kind,
+                 "point": point_of(rings), "land": int(row["ALAND"] or 0)}
+        if counties is not None:
+            county = county_of(place["point"], counties.get(fips, []))
+            if county:
+                place["county"] = county
+        if status is not None:
+            if row["GEOID"] not in status:
+                raise SystemExit(f"{code}: {name} ({row['GEOID']}) is not in the 2025 Gazetteer")
+            if status[row["GEOID"]] != "A":
+                place["status"] = status[row["GEOID"]]
+        out.append(place)
     if not out and code not in NO_PLACES:
         raise SystemExit(f"{code}: no incorporated places in {url}")
     ids = [p["id"] for p in out]
@@ -168,9 +232,13 @@ def main(argv=None):
     from kyc.government_maps import STATES
     codes = [c.strip().upper() for c in args.states.split(",")] if args.states else STATES
     towns = set(township_states())
+    status, counties = functional_status(), counties_by_state()
     os.makedirs(OUT_DIR, exist_ok=True)
     for code in codes:
-        url, places = state_places(code)
+        url, places = state_places(code, status, counties)
+        homeless = [p["name"] for p in places if "county" not in p]
+        if homeless:
+            print(f"{code}: no 1:500,000 county holds the point of {', '.join(homeless)}", flush=True)
         cousub_url, subdivisions = state_subdivisions(code) if code in towns else (None, None)
         path = os.path.join(OUT_DIR, f"{code.lower()}.json")
         with open(path + ".tmp", "w", encoding="utf-8", newline="\n") as handle:

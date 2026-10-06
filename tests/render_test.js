@@ -2867,7 +2867,7 @@ async function testCounties() {
     body.querySelector("[data-county]").dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
     check("its county is a click away", CD.getElementById("localPanelTitle").textContent === "Harris County" &&
       /county=48201/.test(W.location.hash), W.location.hash);
-    const unjoined = ids.filter((id) => !cities[id][5])[0];
+    const unjoined = ids.filter((id) => !cities[id][5] && !cities[id][6])[0];
     if (unjoined) {
       CD.querySelector('.segmented [data-view="cities"]').dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
       CD.querySelector(`#localMap .district-statewide [data-dot="${unjoined}"]`)
@@ -2911,6 +2911,13 @@ async function testCounties() {
     body.querySelector("[data-county]").dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
     check("the town's government has a button that shows it on the map",
       !!CD.querySelector(`#localPanelBody .local-pin[data-city="${id}"]`));
+  });
+  const ky = await buildPage("counties/ky.html", { hash: "#/?view=cities&city=2148000" });
+  suite("counties/ky.html — a place the Census records as not governing", () => {
+    const body = ky.D.getElementById("localPanelBody").textContent;
+    check("Louisville says what the Census records, in its words, and claims no government",
+      /records Louisville as a nonfunctioning legal entity/.test(body) &&
+      !ky.D.querySelector("#localPanelBody .local-item") && !/incorporated since/.test(body), body.slice(0, 200));
   });
   const hawaii = await buildPage("counties/hi.html");
   suite("counties/hi.html — a state with no incorporated place", () => {

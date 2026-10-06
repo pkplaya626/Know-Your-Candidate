@@ -119,8 +119,8 @@ python build_profile_site.py officers         # lieutenant governors (NLGA), sec
 python build_profile_site.py courts           # each state's highest court, from the court's own roster
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 824 tests, no dependencies
-npm install && npm test                       # 1045 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 830 tests, no dependencies
+npm install && npm test                       # 1046 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
