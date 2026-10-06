@@ -255,16 +255,21 @@ def _build(args):
 
     # Each state's counties and their local governments.
     from . import counties as counties_mod
+    city_problems = []
     try:
-        local_maps = counties_mod.build(args.root)
+        local_maps = counties_mod.build(args.root, problems=city_problems)
     except counties_mod.CountiesError as exc:
         print(f"[error] {exc}", file=sys.stderr)
         return 2
+    for problem in city_problems:
+        print(f"  [warn] {problem}")
     written_local = emit.write_local(local_maps, args.root)
     local_stats = counties_mod.stats(local_maps)
     print(f"[ok] counties: {local_stats['counties']:,} counties, {local_stats['governments']:,} "
           f"governments and school systems placed, {local_stats['unmatched']} under county areas "
-          f"not on the map; {len(written_local)} file(s) rewritten")
+          f"not on the map; {local_stats['cities']:,} cities and towns, "
+          f"{local_stats['cities_joined']:,} joined to their government; "
+          f"{len(written_local)} file(s) rewritten")
 
     # Who runs each state: governors and party control, checked against NCSL.
     from . import stategov

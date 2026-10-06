@@ -9,9 +9,23 @@ A government whose county code is not on the map - Connecticut's listing
 uses the counties the state abolished in 1960, its map the planning regions
 that replaced them in Census geography in 2022 - is listed under its county
 area's name, never dropped and never moved to a county it is not in.
+
+Cities and towns come from ``local_maps/<st>.json`` (the Census place
+boundaries, one point each, ``tools/fetch_local_maps.py``). The listing
+carries no usable place code - its FIPS_PLACE for Texarkana, Texas is
+68810, the boundary file's 72368 - so a place is joined to its government
+by name, within the state, and only where the join is one to one: a name
+that one place and one municipal government share, or, where a name is
+shared, the one government of that name in the county the place's point
+lies in. Anything else is reported and left unjoined (rule 51): the place
+is still drawn, the government still listed under its county.
 """
 
+import json
+import os
 import re
+import unicodedata
+from collections import defaultdict
 
 from . import districts as D
 from . import geo, localgov, statelegs
@@ -19,6 +33,7 @@ from .government_maps import STATES
 from .pages import state_name
 
 FOLDER = "counties"
+CITIES_DIR = "local_maps"
 
 # Compact rows for the page: [type, name, city, web, size, function, flags].
 KIND_ORDER = ("county", "municipal", "township", "school", "special", "dependent")
@@ -50,6 +65,142 @@ def _row(gov):
             "inactive" if gov.get("inactive") else ""]
 
 
+def load_cities(code, root="."):
+    path = os.path.join(root, CITIES_DIR, f"{code.lower()}.json")
+    if not os.path.exists(path):
+        return None
+    with open(path, encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+# A government's legal form before its name in the listing ("CITY OF ...")
+# and, for a consolidated government's remainder, after it in the boundary
+# file ("Nashville-Davidson metropolitan government").
+_FORMS = (r"(?:city and county|city and borough|unified government|consolidated government|"
+          r"metropolitan government|metro government|metro township|urban county government|"
+          r"urban county|city|town|village|borough|municipality|township|corporation|county)")
+# The legal forms both sources print, the boundary file after a place's name
+# and the listing before a government's: the city and the village of
+# Pewaukee, Wisconsin share a name and a county and nothing else.
+_SHARED_FORMS = ("city", "town", "village", "borough")
+
+
+def listing_form(census_name):
+    """``"city"`` for the listing's "CITY OF PEWAUKEE", else ``""``."""
+    match = re.match(r"^(city|town|village|borough) of ", (census_name or "").lower())
+    return match.group(1) if match else ""
+
+
+def city_key(name, trailing=False):
+    """A place's or government's name reduced for comparison: no accents,
+    case, legal form, leading "The", alternate name in brackets ("El Paso
+    de Robles (Paso Robles)"), punctuation or spaces; Saint, Mount and Fort
+    as St, Mt and Ft. With *trailing*, legal forms after the name go too:
+    the listing calls Cathedral City "CITY OF CATHEDRAL"."""
+    s = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode().lower()
+    s = re.sub(r"\s*\([^)]*\)", "", s).strip()
+    previous = None
+    while previous != s:                 # "TOWN OF CITY OF CREEDE"
+        previous = s
+        s = re.sub(rf"^(?:the )?{_FORMS} of (?:the )?", "", s).strip()
+    s = re.sub(r"^the\s+", "", s)
+    if trailing:
+        s = re.sub(rf"(?:\s+{_FORMS})+$", "", s)
+    s = s.replace("&", " and ")
+    s = re.sub(r"\bsaint\b|\bst\b\.?", "st", s)
+    s = re.sub(r"\bmount\b|\bmt\b\.?", "mt", s)
+    s = re.sub(r"\bfort\b|\bft\b\.?", "ft", s)
+    return re.sub(r"[^a-z0-9]", "", s)
+
+
+def match_cities(places, governments):
+    """``{place id: government ref}`` joining *places* ``[(id, key,
+    county)]`` to *governments* ``[(ref, key, county)]`` where the join is
+    one to one: a key one place and one government share; or, for a key
+    shared, the one government of it in the place's county when no other
+    place of that key is in the county. Never a nearest or a likeliest."""
+    places_by, govs_by = defaultdict(list), defaultdict(list)
+    for item in places:
+        places_by[item[1]].append(item)
+    for item in governments:
+        govs_by[item[1]].append(item)
+    joined = {}
+    for key, mine in places_by.items():
+        theirs = govs_by.get(key, [])
+        if len(mine) == 1 and len(theirs) == 1:
+            joined[mine[0][0]] = theirs[0][0]
+            continue
+        for pid, _, county in mine:
+            here = [g for g in theirs if county and g[2] == county]
+            rivals = [p for p in mine if p[2] == county]
+            if len(here) == 1 and len(rivals) == 1:
+                joined[pid] = here[0][0]
+    return joined
+
+
+def _county_of(point, fitted):
+    """The county whose drawn shape holds *point*, else None."""
+    x, y = point
+    for fips, (rings, box) in fitted.items():
+        if box[0] <= x <= box[2] and box[1] <= y <= box[3] and D._contains(rings, x, y):
+            return fips
+    return None
+
+
+def build_cities(code, cities, listing, albers, fit, fitted):
+    """``(rows, problems)``: every incorporated place the map draws, as
+    ``{GEOID: [x, y, kind, name, county, ref]}`` where *ref* is ``[county
+    code, index]`` of its government's row in the listing, or None."""
+    points, rows = [], {}
+    for place in cities["places"]:
+        at = fit(albers.raw(*place["point"]))
+        if not (0 <= at[0] <= D.WIDTH and 0 <= at[1] <= fit.height):
+            raise CountiesError(f"{code}: {place['name']} ({place['id']}) is off the state's map")
+        county = _county_of(at, fitted)
+        rows[place["id"]] = [geo._round(at[0]), geo._round(at[1]), place["kind"], place["name"],
+                             county or "", None]
+        points.append((place["id"], city_key(place["name"], place["kind"] == "balance"), county))
+    census = {(fips, i): g["census"] for fips, entry in listing["counties"].items()
+              for i, g in enumerate(entry["governments"]) if g["type"] == "municipal"}
+    governments = [(ref, city_key(name), ref[0]) for ref, name in sorted(census.items())]
+    kinds = {pid: rows[pid][2] for pid in rows}
+    names = {pid: rows[pid][3] for pid in rows}
+    # Three passes, each one to one over what the passes before it left:
+    # name and legal form; name; name without the forms after it ("Phenix
+    # City" and "CITY OF PHENIX").
+    joined = match_cities(
+        [(pid, (kinds[pid], key), county) for pid, key, county in points if kinds[pid] in _SHARED_FORMS],
+        [(ref, (listing_form(census[ref]), key), county) for ref, key, county in governments
+         if listing_form(census[ref])])
+    for pass_places, pass_governments in (
+            (lambda pid, key: key, lambda ref, key: key),
+            (lambda pid, key: city_key(names[pid], True),
+             lambda ref, key: city_key(census[ref], True))):
+        used = set(joined.values())
+        joined.update(match_cities(
+            [(pid, pass_places(pid, key), county) for pid, key, county in points if pid not in joined],
+            [(ref, pass_governments(ref, key), county) for ref, key, county in governments
+             if ref not in used]))
+    for pid, (fips, i) in joined.items():
+        rows[pid][5] = [fips, i]
+    problems = []
+    unjoined = sorted(rows[p][3] for p in rows if rows[p][5] is None)
+    if unjoined:
+        problems.append(f"{code}: {len(unjoined)} place(s) joined to no government in the listing: "
+                        + ", ".join(unjoined[:12]) + (" ..." if len(unjoined) > 12 else ""))
+    used = set(joined.values())
+    left = sorted(listing["counties"][f]["governments"][i]["name"] for (f, i), _, _ in governments
+                  if (f, i) not in used)
+    if left:
+        problems.append(f"{code}: {len(left)} municipal government(s) on no place's point: "
+                        + ", ".join(left[:12]) + (" ..." if len(left) > 12 else ""))
+    outside = sorted(rows[p][3] for p in rows if not rows[p][4])
+    if outside:
+        problems.append(f"{code}: {len(outside)} place point(s) outside every drawn county: "
+                        + ", ".join(outside[:12]))
+    return rows, problems
+
+
 def build_state(code, root=".", places=None):
     topo = statelegs.load_map(code, root)
     if not topo or "counties" not in (topo.get("objects") or {}):
@@ -71,9 +222,10 @@ def build_state(code, root=".", places=None):
     viewbox = [0, 0, D.WIDTH, fit.height]
     towns = D._places((places or {}).get(code, []), albers, fit)
 
-    found = {}
+    found, drawn = {}, {}
     for fips, rings in sorted(raw.items()):
         fitted = [[fit(p) for p in ring] for ring in rings]
+        drawn[fips] = (fitted, geo.bounds(fitted))
         at = fit(albers.raw(*D._decode_point(topo, points[fips]["coordinates"])))
         if not D._contains(fitted, *at):
             raise CountiesError(f"{code} county {fips}: label point outside it")
@@ -94,6 +246,10 @@ def build_state(code, root=".", places=None):
         else:
             unmatched.append({"name": entry["name"], "fips": fips, "governments": rows})
     statewide = [_row(g) for g in listing.get("statewide", [])]
+    cities = load_cities(code, root)
+    if not cities:
+        raise CountiesError(f"no {CITIES_DIR}/{code.lower()}.json; run tools/fetch_local_maps.py")
+    city_rows, city_problems = build_cities(code, cities, listing, albers, fit, drawn)
     return {
         "name": state_name(code),
         "page": page_path(code),
@@ -107,14 +263,25 @@ def build_state(code, root=".", places=None):
         "governments": governments,
         "unmatched": unmatched,
         "statewide": statewide,
+        "cities": city_rows,
+        "problems": city_problems,
         "sources": {"maps": "U.S. Census Bureau, cartographic boundary file of counties (1:5,000,000)",
+                    "cities": cities["source"],
                     "governments": localgov.SOURCE},
     }
 
 
-def build(root=".", codes=None):
+def build(root=".", codes=None, problems=None):
+    """Every state's page data. What the city join left undone is no part
+    of the page: it is added to *problems* for the build to report."""
     places = D.load_places(root)
-    return {code: build_state(code, root, places) for code in (codes or STATES)}
+    maps = {}
+    for code in codes or STATES:
+        maps[code] = build_state(code, root, places)
+        found = maps[code].pop("problems")
+        if problems is not None:
+            problems.extend(found)
+    return maps
 
 
 def stats(maps):
@@ -123,4 +290,6 @@ def stats(maps):
         "counties": sum(len(m["counties"]) for m in maps.values()),
         "governments": sum(len(r) for m in maps.values() for r in m["governments"].values()),
         "unmatched": sum(len(u["governments"]) for m in maps.values() for u in m["unmatched"]),
+        "cities": sum(len(m["cities"]) for m in maps.values()),
+        "cities_joined": sum(1 for m in maps.values() for c in m["cities"].values() if c[5]),
     }

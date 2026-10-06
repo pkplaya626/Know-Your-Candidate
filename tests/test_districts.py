@@ -325,6 +325,65 @@ class TestProjection(unittest.TestCase):
                           'PROJECTION["Transverse_Mercator"],UNIT["Meter",1.0]]')
 
 
+def _dbf(names, encoding):
+    """A one-field dBase file holding *names*, encoded as *encoding*."""
+    import struct
+    width = 40
+    header = struct.pack("<BBBBIHH20x", 3, 126, 1, 1, len(names), 32 + 32 + 1, width + 1)
+    field = b"NAME".ljust(11, b"\0") + b"C" + b"\0" * 4 + bytes([width, 0]) + b"\0" * 14
+    rows = b"".join(b" " + n.encode(encoding).ljust(width, b" ") for n in names)
+    return header + field + b"\r" + rows + b"\x1a"
+
+
+def _null_shp(count):
+    import struct
+    head = struct.pack(">I", 9994) + b"\0" * 20 + struct.pack(">I", 50 + 6 * count) + \
+        struct.pack("<ii", 1000, 5) + b"\0" * 64
+    return head + b"".join(struct.pack(">ii", i + 1, 2) + struct.pack("<i", 0) for i in range(count))
+
+
+class TestText(unittest.TestCase):
+    """A shapefile says its own encoding in its .cpg. Read as Latin-1, the
+    Census's UTF-8 put "DoÃ±a Ana County" and sixteen Puerto Rico municipios
+    on the page."""
+
+    def layer(self, cpg, encoding):
+        import fetch_district_maps as F
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w") as archive:
+            archive.writestr("x.dbf", _dbf(["Doña Ana County", "Mayagüez Municipio"], encoding))
+            archive.writestr("x.shp", _null_shp(2))
+            if cpg is not None:
+                archive.writestr("x.cpg", cpg)
+        with mock.patch.object(F, "get", return_value=buffer.getvalue()):
+            return [row["NAME"] for row, _ in F.read_layer("https://example.test/x.zip")]
+
+    def test_a_layer_that_declares_utf8_is_read_as_utf8(self):
+        self.assertEqual(self.layer("UTF-8", "utf-8"), ["Doña Ana County", "Mayagüez Municipio"])
+        self.assertEqual(self.layer("utf8\n", "utf-8"), ["Doña Ana County", "Mayagüez Municipio"])
+
+    def test_a_layer_that_declares_nothing_is_latin1(self):
+        self.assertEqual(self.layer(None, "latin-1"), ["Doña Ana County", "Mayagüez Municipio"])
+
+    def test_no_vendored_or_generated_file_carries_mojibake(self):
+        # UTF-8 read as Latin-1 turns every accented letter into "Ã" or "Â"
+        # followed by a character from U+0080-U+00BF.
+        broken = re.compile("[\u00c2\u00c3][\u0080-\u00bf]")
+        folders = ["district_maps", "legislative_maps", "local_maps", "local_governments",
+                   os.path.join("candidate_profiles_site", "data")]
+        found = []
+        for folder in folders:
+            for base, _, files in os.walk(os.path.join(ROOT, folder)):
+                for name in files:
+                    if not name.endswith((".json", ".js")):
+                        continue
+                    with open(os.path.join(base, name), encoding="utf-8") as handle:
+                        hit = broken.search(handle.read())
+                    if hit:
+                        found.append(f"{os.path.relpath(os.path.join(base, name), ROOT)}: {hit.group(0)!r}")
+        self.assertEqual(found, [])
+
+
 def square(x0, y0, x1, y1):
     return [[(x0, y0), (x1, y0), (x1, y1), (x0, y1)]]
 
