@@ -1018,11 +1018,18 @@ Each association is the authority on its own members, and where two name
 the holder of one office they must agree. NASS's member in Alaska, Hawaii and
 Utah is the lieutenant governor (those states have no secretary of state);
 NLGA's in Arizona, Oregon and Wyoming, which have no lieutenant governor, is
-the secretary of state, first in line. On 2026-10-05 they disagreed about one
-person: NASS lists Sylvia Luke as Hawaii's lieutenant governor, NLGA Keith
-Regan as acting lieutenant governor, so the page names both and shows
-neither as the holder. A state with no lieutenant governor says who is first
-in line; New Jersey's office is vacant, as NLGA lists it. A NASS photograph
+the secretary of state, first in line; where both name one office's holder
+and disagree, the page names both and shows neither. "Acting" is the same
+office on either roster. NASS marks some entries "Currently Not a NASS
+Member": such an entry is not NASS speaking for its own member, so it never
+overrides NLGA's - its Hawaii entry named Sylvia Luke, whom Keith Regan
+(acting) had replaced - and a secretary of state NASS lists for a non-member
+state (Florida, Nevada, Virginia, Wisconsin) is shown as NASS's listing, not
+as fact. A state with no lieutenant governor says who is first in line,
+unless that office is itself vacant or disputed; New Jersey's lieutenant
+governorship is vacant, as NLGA lists it. An NLGA photograph, like a NASS
+one, must carry the person's surname in its file name - NLGA's card for a
+vacancy carries the association's logo. A NASS photograph
 is used only when its file name carries the person's surname: NASS's own alt
 text calls every one a state seal.
 

@@ -115,7 +115,7 @@ python build_profile_site.py localgov         # every local government (Census l
 python build_profile_site.py executives       # every governor (NGA), and NCSL's party counts
 python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
-python -m unittest discover tests             # 768 tests, no dependencies
+python -m unittest discover tests             # 775 tests, no dependencies
 npm install && npm test                       # 999 real-DOM checks (needs jsdom)
 ```
 
@@ -580,7 +580,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     governor; NLGA's for Arizona, Oregon and Wyoming is the secretary of
     state. Where two rosters name one office's holder they must name the
     same person of the same party, or the page names both and shows neither
-    (`officers.overlaps`): Hawaii's lieutenant governor, on 2026-10-05. Compare
+    (`officers.overlaps`), and "Acting" is the same office on either roster.
+    An entry NASS marks "Currently Not a NASS Member" is not NASS speaking
+    for its member: its Hawaii entry named a lieutenant governor NLGA's
+    member had replaced. Compare
     names without honorifics ("Hon.", "High Chief"), strip invisible
     characters (one RAGA card carried a zero-width space, and two cards for
     one state then disagreed), and drop a card whose "name" is a state:

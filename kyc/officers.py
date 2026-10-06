@@ -16,9 +16,12 @@ publishes of its own members:
 The two overlap: NASS's member in Alaska, Hawaii and Utah is the lieutenant
 governor, and NLGA's in Arizona, Oregon and Wyoming is the secretary of
 state. Where both name the holder of one office they must name the same
-person of the same party, or neither is shown (``overlaps``; rule 53). On
-2026-10-05 they disagreed about one: NASS lists Sylvia Luke as Hawaii's
-lieutenant governor, NLGA Keith Regan as acting lieutenant governor.
+person of the same party, or neither is shown (``overlaps``; rule 53). An
+entry NASS marks as not a member is not NASS speaking for its own member:
+its Hawaii entry named Sylvia Luke, whom Keith Regan, NLGA's member, had
+replaced as (acting) lieutenant governor, so NLGA's stands. A secretary of
+state NASS lists for a non-member state is shown as NASS's listing, not as
+fact.
 """
 
 import datetime
@@ -139,6 +142,11 @@ def parse_nass(page):
             "electionChief": "(CEO)" in head.group(2),
             "website": head.group(1),
         }
+        # "* Currently Not a NASS Member": the entry is not NASS speaking
+        # for its own member (rule 55). Hawaii's named a lieutenant
+        # governor NLGA's member had replaced.
+        if "*" in head.group(2):
+            entry["member"] = False
         img = re.search(r'<img src="([^"]+)"', body)
         if img:
             entry["photo"] = urllib.parse.urljoin(NASS_URL, html.unescape(img.group(1)))
@@ -195,7 +203,7 @@ def parse_nlga(page):
                 raise OfficersError(f"NLGA {code}: no name and party in {who!r}")
             entry.update(name=name, party=party, partyKey=party_key(party))
             img = re.search(r'<img[^>]*\bsrcset="([^"]+)"', before)
-            if img:
+            if img and _surname_in(name, _smallest(img.group(1))):
                 entry["photo"] = _smallest(img.group(1))
         site = re.search(r'<a href="([^"]+)"[^>]*>\s*<span class="elementor-icon-list-text">\s*'
                          r'Website', after)
@@ -207,10 +215,22 @@ def parse_nlga(page):
     return rows
 
 
+def office_of(title):
+    """"Lieutenant Governor", "Secretary of State" or ``None`` for a roster
+    title, acting or not: "Acting Lt. Governor", "Lieutenant Governor/Senate
+    President", "Secretary of the Commonwealth"."""
+    base = re.sub(r"^acting\s+", "", title.strip().lower()).replace("lt.", "lieutenant")
+    if base.startswith("lieutenant governor"):
+        return "Lieutenant Governor"
+    if base.startswith(("secretary of state", "secretary of the commonwealth")):
+        return "Secretary of State"
+    return None
+
+
 def lieutenant(entry):
     """Whether an NLGA entry is the state's lieutenant governor, rather than
     the officer first in line in a state that has none."""
-    return entry["title"].lower().replace("acting ", "").startswith("lieutenant governor")
+    return office_of(entry["title"]) == "Lieutenant Governor"
 
 
 # --------------------------------------------------------------------- RAGA
@@ -248,11 +268,11 @@ def overlaps(nass, nlga):
     out = []
     for code in sorted(set(nass) & set(nlga)):
         a, b = nass[code], nlga[code]
-        office = "Lieutenant Governor" if a["title"] == "Lieutenant Governor" and lieutenant(b) else (
-            "Secretary of State" if a["title"] == "Secretary of State" and
-            b["title"] == "Secretary of State" else None)
-        if not office:
+        office = office_of(a["title"])
+        if not office or office != office_of(b["title"]):
             continue
+        if a.get("member") is False:
+            continue                    # not NASS's member: NLGA's member stands
         theirs = "" if b.get("vacant") else b["name"]
         if not theirs or not same_person(a["name"], theirs) or a["party"] != b.get("party"):
             out.append((code, office, f"{a['name']} ({a['party']})",
@@ -294,21 +314,25 @@ def for_state(code, cache, disputes):
     lt = cache["lt"].get(code)
     if (code, "Lieutenant Governor") in named:
         out["lt"] = {"disputed": list(named[(code, "Lieutenant Governor")])}
-    elif lt and lt.get("vacant"):
-        out["lt"] = {"vacant": True, "title": lt["title"]}
     elif lt and lieutenant(lt):
-        out["lt"] = _person(lt)
+        out["lt"] = {"vacant": True, "title": lt["title"]} if lt.get("vacant") else _person(lt)
     elif lt:
-        out["lt"] = {"none": True, "successor": _person(lt)}
+        # No lieutenant governor. The officer first in line is named only
+        # when that office is neither vacant nor in dispute.
+        out["lt"] = {"none": True}
+        if not lt.get("vacant") and (code, office_of(lt["title"])) not in named:
+            out["lt"]["successor"] = _person(lt)
     sos = cache["sos"].get(code)
     if (code, "Secretary of State") in named:
         out["sos"] = {"disputed": list(named[(code, "Secretary of State")])}
-    elif sos and sos["title"] == "Lieutenant Governor":
+    elif sos and office_of(sos["title"]) == "Lieutenant Governor":
         out["sos"] = {"none": True, "electionChief": "lieutenant governor" if sos["electionChief"] else ""}
     elif sos:
         person = _person(sos)
         if person.get("photo") and not _surname_in(sos["name"], person["photo"]):
             del person["photo"]
+        if sos.get("member") is False:
+            person["notMember"] = True
         out["sos"] = person
     return out
 

@@ -1049,10 +1049,15 @@ def _officers(args):
         except officers.OfficersError as exc:
             print(f"[error] {exc}", file=sys.stderr)
             return 2
+    incomplete = False
     for office, rows in (("secretaries of state (NASS)", cache["sos"]),
                          ("lieutenant governors (NLGA)", cache["lt"])):
         missing = [c for c in STATES if c not in rows]
         print(f"  {len(rows)} {office}" + (f"; none listed for {', '.join(missing)}" if missing else ""))
+        incomplete = incomplete or bool(missing)
+    if incomplete and not args.check:
+        print("[error] a roster is missing states; the cache is not written", file=sys.stderr)
+        return 1
     for code, office, nass, nlga in officers.overlaps(cache["sos"], cache["lt"]):
         print(f"  [warn] {code}: NASS lists {nass} as {office}, NLGA {nlga}; neither is shown")
     if not args.check:

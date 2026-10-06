@@ -2873,8 +2873,24 @@ async function testStateGov() {
       /Secretary of State/.test(text), text.slice(0, 200));
     check("and is drawn as having no such office, not in a party colour",
       !/party-/.test(shape("AZ").style.fill));
-    text = pick("#/?state=NJ&mode=lt");
-    check("a vacancy is said, and attributed", /Vacant, as the National Lieutenant Governors Association lists it/.test(text));
+    // Whichever state is vacant this week: the test must not fail the refresh
+    // that fills New Jersey's office.
+    const vacancy = stateCodes.find((c) => data.states[c].lt && data.states[c].lt.vacant);
+    if (vacancy) {
+      text = pick("#/?state=" + vacancy + "&mode=lt");
+      check("a vacancy is said, and attributed", /Vacant, as the National Lieutenant Governors Association lists it/.test(text));
+    }
+    const listed = stateCodes.find((c) => data.states[c].sos && data.states[c].sos.notMember);
+    if (listed) {
+      text = pick("#/?state=" + listed + "&mode=sos");
+      check("a secretary NASS lists for a non-member is its listing, not a fact",
+        /not currently a NASS member/.test(text) && (() => {
+          const row = [...D.querySelectorAll("#delegation .gov-officer")]
+            .find((li) => /Secretary of state/i.test(li.querySelector(".gov-officer-role").textContent));
+          return row && !row.querySelector(".gov-officer-name");
+        })());
+      check("and is drawn unconfirmed, not in a party colour", !/party-/.test(shape(listed).style.fill));
+    }
     const hi = data.states.HI.lt;
     if (hi && hi.disputed) {
       text = pick("#/?state=HI&mode=lt");
@@ -2887,7 +2903,7 @@ async function testStateGov() {
     pick("#/?state=TX&mode=sos");
     check("each state is filled by its secretary of state's party", stateCodes.every((c) => {
       const o = data.states[c].sos;
-      if (!o || o.none || o.disputed || o.vacant) return true;
+      if (!o || o.none || o.disputed || o.vacant || o.notMember) return true;
       return shape(c).style.fill === "var(--party-" + o.partyKey.toLowerCase() + ")";
     }));
     text = pick("#/?state=UT&mode=sos");

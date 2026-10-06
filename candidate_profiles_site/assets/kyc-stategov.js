@@ -28,10 +28,12 @@
     I: "var(--party-i)",
     split: "var(--split)",
     nonpartisan: "color-mix(in srgb, var(--text-faint) 45%, var(--surface-2))",
-    /* Three greys a reader must tell apart: an office that does not exist
-     * (darkest), a vacancy (the House view's vacant grey), and sources
-     * that disagree (lightest). */
-    disputed: "var(--text-muted)",
+    /* An office that does not exist is the faintest grey; a vacancy is the
+     * House view's vacant grey; sources that disagree are drawn in the text
+     * colour itself, the strongest contrast any theme has, so the three
+     * cannot be confused (the muted and faint greys were 1.27:1 in the
+     * light theme). */
+    disputed: "var(--text)",
     vacant: "var(--text-faint)",
     none: "var(--surface-2)",
   };
@@ -92,6 +94,13 @@
   function legend(mode) {
     var rows = (LEGENDS[mode] || []).slice();
     if (OFFICES[mode]) {
+      if (any(function (s) {
+        var key = s[mode] && s[mode].partyKey;
+        return key && key !== "D" && key !== "R";
+      })) {
+        rows.push([FILL.I, "Another party"]);
+      }
+      if (any(function (s) { return !s[mode]; })) rows.push([FILL.none, "Not listed"]);
       if (any(function (s) { return s[mode] && s[mode].vacant; })) rows.push([FILL.vacant, "Vacant"]);
       if (any(function (s) { return s[mode] && s[mode].disputed; })) {
         rows.push([FILL.disputed, "Sources disagree"]);
@@ -144,6 +153,9 @@
       if (!off) return { fill: FILL.none, text: name + ": no " + word + " listed" };
       if (off.disputed) return { fill: FILL.disputed, text: name + ": the sources disagree about the " + word };
       if (off.vacant) return { fill: FILL.vacant, text: name + ": the office of " + word + " is vacant" };
+      if (off.notMember) {
+        return { fill: FILL.vacant, text: name + ": the " + word + " is not confirmed (NASS's listing only)" };
+      }
       if (off.none) return { fill: FILL.absent, text: name + " has no " + word };
       return { fill: FILL[off.partyKey] || FILL.I,
                text: name + ": " + off.title + " " + off.name + " (" + partyName(off.party) + ")" };
@@ -173,6 +185,7 @@
       if (!off) return '<span class="faint">Not listed</span>';
       if (off.disputed) return "Sources disagree";
       if (off.vacant) return "Vacant";
+      if (off.notMember) return "Not confirmed";
       if (off.none) return "No " + KYC.escapeHtml(OFFICES[mode].word);
       return '<span class="party-' + KYC.escapeAttr(off.partyKey.toLowerCase()) + '">' +
         KYC.escapeHtml(partyName(off.party)) + "</span>";
@@ -250,6 +263,11 @@
     } else if (off.none) {
       body = '<p class="gov-officer-note">The state has no secretary of state' +
         (off.electionChief ? "; the lieutenant governor's office runs its elections." : ".") + "</p>";
+    } else if (off.notMember) {
+      body = '<p class="gov-officer-note">The National Association of Secretaries of State lists ' +
+        who(off) + " as " + KYC.escapeHtml(off.title.toLowerCase()) + ", though the office is not " +
+        "currently a NASS member, so this is the association's listing, not confirmed." +
+        (off.website ? " " + link(off.website, "The office's site") + "." : "") + "</p>";
     } else {
       var facts = [off.selection, off.electionChief ? "Chief election official" : ""].filter(Boolean);
       var links = [off.website ? link(off.website, "Office") : "", off.bio ? link(off.bio, "Biography") : ""]

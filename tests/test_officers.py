@@ -81,10 +81,12 @@ class TestRosters(unittest.TestCase):
 
     def test_an_nlga_entry_takes_the_smallest_size_of_its_one_photo(self):
         from kyc.normalize import US_STATES
-        page = nlga_entry("Alabama", "Will Ainsworth (R), Lieutenant Governor") + "".join(
+        photo = ("https://i0.wp.com/nlga.us/Will-Ainsworth.jpg?w=400 400w, "
+                 "https://i0.wp.com/nlga.us/Will-Ainsworth.jpg?resize=150%2C150 150w")
+        page = nlga_entry("Alabama", "Will Ainsworth (R), Lieutenant Governor", srcset=photo) + "".join(
             nlga_entry(n.title(), "A B (D), Lieutenant Governor") for n in US_STATES if n != "ALABAMA")
         rows = officers.parse_nlga(page)
-        self.assertEqual(rows["AL"]["photo"], "https://i0.wp.com/nlga.us/x.jpg?resize=150%2C150")
+        self.assertEqual(rows["AL"]["photo"], "https://i0.wp.com/nlga.us/Will-Ainsworth.jpg?resize=150%2C150")
         self.assertEqual(rows["AL"]["website"], "https://ltgov.example.gov/")
 
     def test_raga_placeholders_and_invisible_characters(self):
@@ -150,6 +152,57 @@ class TestForState(unittest.TestCase):
         ut = officers.for_state("UT", self.CACHE, disputes)
         self.assertEqual(ut["sos"]["electionChief"], "lieutenant governor")
         self.assertEqual(ut["lt"]["name"], "Deidre Henderson")
+
+    def test_acting_titles_are_the_same_office(self):
+        self.assertEqual(officers.office_of("Acting Lt. Governor"), "Lieutenant Governor")
+        self.assertEqual(officers.office_of("Lieutenant Governor/Senate President"), "Lieutenant Governor")
+        self.assertEqual(officers.office_of("Acting Secretary of State"), "Secretary of State")
+        self.assertEqual(officers.office_of("Secretary of the Commonwealth"), "Secretary of State")
+        self.assertIsNone(officers.office_of("Senate President"))
+
+    def test_an_acting_lieutenant_governor_is_never_a_secretary_of_state(self):
+        cache = {"sos": {"HI": dict(self.CACHE["sos"]["HI"], name="Keith Regan",
+                                    title="Acting Lieutenant Governor")},
+                 "lt": {"HI": self.CACHE["lt"]["HI"]}}
+        hi = officers.for_state("HI", cache, officers.overlaps(cache["sos"], cache["lt"]))
+        self.assertTrue(hi["sos"]["none"])
+        self.assertEqual(officers.overlaps(cache["sos"], cache["lt"]), [])
+
+    def test_an_acting_title_is_still_cross_checked(self):
+        sos = {"AZ": dict(self.CACHE["sos"]["AZ"], name="Jane Doe", party="R", partyKey="R",
+                          title="Acting Secretary of State")}
+        disputes = officers.overlaps(sos, {"AZ": self.CACHE["lt"]["AZ"]})
+        self.assertEqual([d[:2] for d in disputes], [("AZ", "Secretary of State")])
+        az = officers.for_state("AZ", {"sos": sos, "lt": {"AZ": self.CACHE["lt"]["AZ"]}}, disputes)
+        # Neither name stands for the office, so neither is first in line.
+        self.assertEqual(az["lt"], {"none": True})
+        self.assertIn("disputed", az["sos"])
+
+    def test_a_vacant_office_first_in_line_is_not_a_vacant_lieutenant_governor(self):
+        lt = {"OR": {"title": "Secretary of State", "vacant": True}}
+        self.assertEqual(officers.for_state("OR", {"sos": {}, "lt": lt}, [])["lt"], {"none": True})
+
+    def test_a_nass_entry_for_a_non_member_does_not_override_nlgas_member(self):
+        # NASS's Hawaii entry, marked "* Currently Not a NASS Member", named
+        # the lieutenant governor NLGA's member had replaced.
+        sos = {"HI": dict(self.CACHE["sos"]["HI"], member=False)}
+        disputes = officers.overlaps(sos, {"HI": self.CACHE["lt"]["HI"]})
+        self.assertEqual(disputes, [])
+        hi = officers.for_state("HI", {"sos": sos, "lt": {"HI": self.CACHE["lt"]["HI"]}}, disputes)
+        self.assertEqual(hi["lt"]["name"], "Keith Regan")
+
+    def test_a_secretary_listed_for_a_non_member_is_marked_so(self):
+        sos = {"FL": {"name": "Cord Byrd", "party": "R", "partyKey": "R", "title": "Secretary of State",
+                      "selection": "Appointed", "electionChief": True, "member": False}}
+        self.assertTrue(officers.for_state("FL", {"sos": sos, "lt": {}}, [])["sos"]["notMember"])
+
+    def test_an_nlga_logo_is_not_a_portrait(self):
+        from kyc.normalize import US_STATES
+        logo = ("https://i0.wp.com/nlga.us/wp-content/uploads/2025/04/NLGALogo-copy.png?w=400 400w, "
+                "https://i0.wp.com/nlga.us/wp-content/uploads/2025/04/NLGALogo-copy.png?resize=150%2C150 150w")
+        page = nlga_entry("New Jersey", "Jane Doe (D), Lieutenant Governor", srcset=logo) + "".join(
+            nlga_entry(n.title(), "A B (D), Lieutenant Governor") for n in US_STATES if n != "NEW JERSEY")
+        self.assertNotIn("photo", officers.parse_nlga(page)["NJ"])
 
     def test_a_nass_photo_must_carry_the_surname(self):
         self.assertTrue(officers._surname_in("Wes Allen", "https://x/AL-Allen-2023.jpg?itok=1"))
