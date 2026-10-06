@@ -1053,6 +1053,7 @@ def _courts(args):
             if code in before:
                 read[code] = before[code]
                 problems.append(f"{code}: kept the last good read")
+        problems.extend(courts.shrunk(before, read))
     for code, court in sorted(read.items()):
         short = court["seats"] - court["listed"]
         print(f"  {code}: {court['listed']} of {court['seats']}" + (f" ({short} with nobody listed)"

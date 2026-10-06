@@ -429,7 +429,10 @@ def extract(page, recipe):
         if not name or name.lower() in seen:
             continue
         seen.add(name.lower())
-        chief = bool(re.search(CHIEF, f"{title} {_text(raw)}", re.I))
+        # Whitespace normalised first: the lookbehinds in CHIEF need one
+        # plain space, so "Associate<br>\n Chief Justice" or a non-breaking
+        # space would otherwise read an associate chief as the chief.
+        chief = bool(re.search(CHIEF, _text(f"{title} {raw}"), re.I))
         out.append((name, chief))
     return out
 
@@ -511,6 +514,18 @@ def for_state(code, cache):
 
 
 CRIMINAL_SEATS = {"TX-CCA": 9, "OK-CCA": 5}
+
+
+def shrunk(before, after):
+    """A court that now lists fewer members than its last read. The page
+    says the missing seats have "nobody listed by the court", which is true
+    only if the recipe still reads everyone the court lists - Oklahoma's
+    once missed a justice whose link carried an extra attribute - so a drop
+    is reported for a person to look at the court's page."""
+    return [f"{code}: {after[code]['listed']} members read, {before[code]['listed']} last time "
+            f"(gone: {', '.join(sorted(set(before[code]['members']) - set(after[code]['members']))) or '-'})"
+            for code in sorted(set(before) & set(after))
+            if after[code]["listed"] < before[code]["listed"]]
 
 
 def save_cache(courts, root="."):

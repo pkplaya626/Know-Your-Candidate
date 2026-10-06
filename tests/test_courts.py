@@ -61,6 +61,15 @@ class TestChief(unittest.TestCase):
                       "Deputy Chief Justice", "Vice Presiding Judge", "Presiding Justice"):
             self.assertFalse(re.search(courts.CHIEF, title, re.I), title)
 
+    def test_an_associate_chief_split_across_a_line_is_not_the_chief(self):
+        # Utah's page names an Associate Chief Justice and no chief; a line
+        # break or a non-breaking space inside the title must not make her one.
+        recipe = {"url": "x", "item": r"<h3>(?P<title>[^<]*(?:<br>[^<]*)?)</h3>\s*<p>(?P<name>[^<]+)</p>"}
+        for title in ("Associate<br>\n   Chief Justice", "Associate&nbsp;Chief Justice",
+                      "Associate\u00a0Chief Justice"):
+            page = f"<h3>{title}</h3><p>Jill M. Pohlman</p>"
+            self.assertEqual(courts.extract(page, recipe), [("Jill M. Pohlman", False)], title)
+
 
 class TestRecipes(unittest.TestCase):
 
@@ -85,6 +94,16 @@ class TestRecipes(unittest.TestCase):
                 '<div class="usa-card__brow-color"><div>Vacant Seat</div></div>')
         got = courts.extract(page, courts.COURTS["CA"])
         self.assertEqual([n for n, _ in got], ["Patricia Guerrero", "Kelli M. Evans"])
+
+    def test_a_court_that_reads_fewer_members_than_last_time_is_reported(self):
+        before = {"OK": {"listed": 9, "members": ["Dustin P. Rowe", "Travis Jett"]},
+                  "TX": {"listed": 9, "members": []}}
+        after = {"OK": {"listed": 8, "members": ["Dustin P. Rowe"]},
+                 "TX": {"listed": 9, "members": []}}
+        problems = courts.shrunk(before, after)
+        self.assertEqual(len(problems), 1)
+        self.assertIn("OK: 8 members read, 9 last time", problems[0])
+        self.assertIn("Travis Jett", problems[0])
 
     def test_a_page_that_does_not_fit_its_court_is_refused(self):
         saved = courts._get

@@ -117,7 +117,7 @@ python build_profile_site.py executives       # every governor (NGA), and NCSL's
 python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS), attorneys general
 python build_profile_site.py courts           # each state's highest court, from the court's own roster
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
-python -m unittest discover tests             # 806 tests, no dependencies
+python -m unittest discover tests             # 808 tests, no dependencies
 npm install && npm test                       # 1010 real-DOM checks (needs jsdom)
 ```
 
