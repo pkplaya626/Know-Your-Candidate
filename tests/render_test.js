@@ -1207,6 +1207,49 @@ const settle = (ms) => new Promise((r) => setTimeout(r, ms || 150));
  * profiles..." with no cards, and closing it called history.back() - which,
  * with nothing of ours behind it, left the site. The map overwrote its
  * incoming hash at boot, so state and profile links opened a blank map. */
+/* Every level links to the levels around it: the state page, its House
+ * districts, its legislature, its counties, and back. */
+async function testInterlinks() {
+  const has = (D, href) => !!D.querySelector(`a[href="${href}"]`);
+  const districts = await buildPage("districts/tx.html");
+  const dc = await buildPage("districts/dc.html");
+  const leg = await buildPage("legislature/tx.html");
+  const local = await buildPage("counties/tx.html");
+  suite("pages link to the levels around them", () => {
+    check("a district page links to its state's legislature and counties",
+      has(districts.D, "../legislature/tx.html") && has(districts.D, "../counties/tx.html"));
+    check("D.C.'s district page links to no legislature or counties page it does not have",
+      !dc.D.querySelector('a[href^="../legislature/"]') && !dc.D.querySelector('a[href^="../counties/"]'));
+    check("a legislature page links to its state's counties and House districts",
+      has(leg.D, "../counties/tx.html") && has(leg.D, "../districts/tx.html"));
+    check("a counties page links to its state's legislature and House districts",
+      has(local.D, "../legislature/tx.html") && has(local.D, "../districts/tx.html"));
+  });
+
+  const map = await buildPage("map.html", { hash: "#/?state=TX&mode=house" });
+  suite("map.html — the House view links to the district map", () => {
+    const panel = map.D.getElementById("delegation");
+    check("Texas's House panel links its district page",
+      !!panel.querySelector('a[href="districts/tx.html"]'), panel.innerHTML.slice(0, 200));
+  });
+
+  const guide = await buildPage("government/states.html");
+  suite("government/states.html — a state links to who holds its offices", () => {
+    guide.D.querySelector('#usMap .state[data-state="TX"]')
+      .dispatchEvent(new guide.window.MouseEvent("click", { bubbles: true }));
+    check("picking a state links its page's state-government section",
+      !!guide.D.querySelector('#guideFacts a[href="../states/tx.html#state-government"]'));
+  });
+
+  const state = await buildPage("states/tx.html", { hash: "#state-government" });
+  suite("states/tx.html — a link to a section reaches it", () => {
+    check("the section a link names exists once the page is drawn",
+      !!state.D.getElementById("state-government"));
+    check("a plain section link is no route: no profile opens",
+      !state.D.querySelector("dialog[open]"));
+  });
+}
+
 async function testDeepLinks() {
   const probe = await buildPage("index.html");
   const people = probe.window.legislatorsData;
@@ -3096,6 +3139,7 @@ async function testStateGov() {
   if (!only || only === "redistricting") await testRedistricting();
   if (!only || only === "redistricting") await testDistrictPages();
   if (!only || only === "redistricting") await testDistrictsOnAPhone();
+  if (!only || only === "links") await testInterlinks();
   if (!only || only === "links") await testDeepLinks();
   if (!only || only === "links") await testFoldedIds();
   if (!only || only === "links") await testRunningElsewhere();

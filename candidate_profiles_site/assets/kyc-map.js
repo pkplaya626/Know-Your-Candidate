@@ -354,6 +354,13 @@
         " <span>" + seated.length + "</span></p>" +
         seated.map(personRow).join("");
     }
+    // The House view: every district drawn, with who holds it.
+    var districtMap = mode === "house" && (KYC.meta().districtMaps || {})[code];
+    if (districtMap) {
+      html += '<p class="gov-pages"><a class="sidebar-link" href="' +
+        KYC.escapeAttr(KYC.siteRoot() + districtMap.page) + '">' +
+        (districtMap.redrawn ? "Old and new district lines \u203a" : "District map \u203a") + "</a></p>";
+    }
     if (running.length) {
       html +=
         '<button type="button" class="panel-subhead expander" id="showChallengers"' +

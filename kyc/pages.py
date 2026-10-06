@@ -364,6 +364,7 @@ def render_district_page(code, host, summary=None):
     ``assets/kyc-districts.js`` from the state's map file and profiles.js.
     """
     from .districts import REDRAWN, page_path as district_path
+    from .government_maps import STATES
 
     name = state_name(code)
     info = ((summary or {}).get("states") or {}).get(code) or {}
@@ -388,6 +389,14 @@ def render_district_page(code, host, summary=None):
         f'                        <a class="btn" href="../{_e(page_path(code))}">'
         f'<svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> '
         f'{_e(name)} page</a>',
+    ] + ([
+        # Every state - not D.C. or a territory - has a legislature and a
+        # counties page.
+        f'                        <a class="btn" href="../legislature/{_e(code.lower())}.html">'
+        f'<svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> State legislature</a>',
+        f'                        <a class="btn" href="../counties/{_e(code.lower())}.html">'
+        f'<svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg> Counties &amp; local governments</a>',
+    ] if code in STATES else []) + [
         '                    </p>',
         '                </header>',
         '                <div id="districtsApp">',
@@ -460,6 +469,7 @@ def render_legislature_page(code, host, summary=None):
         '                    <p class="state-links">',
         f'                        <a class="btn" href="../{_e(page_path(code))}"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> {_e(name)} page</a>',
         f'                        <a class="btn" href="../districts/{_e(code.lower())}.html"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg> Congressional districts</a>',
+        f'                        <a class="btn" href="../counties/{_e(code.lower())}.html"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg> Counties &amp; local governments</a>',
         '                        <a class="btn" href="../government/states.html"><svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> How states are governed</a>',
         "                    </p>",
         "                </header>",
@@ -550,6 +560,7 @@ def render_counties_page(code, host):
         '                    <p class="state-links">',
         f'                        <a class="btn" href="../{_e(page_path(code))}"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> {_e(name)} page</a>',
         f'                        <a class="btn" href="../legislature/{_e(code.lower())}.html"><svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> State legislature</a>',
+        f'                        <a class="btn" href="../districts/{_e(code.lower())}.html"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg> Congressional districts</a>',
         '                        <a class="btn" href="../government/local.html"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg> How local government works</a>',
         "                    </p>",
         "                </header>",
