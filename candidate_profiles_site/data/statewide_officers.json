@@ -152,7 +152,8 @@
    "office": "https://www.mass.gov/orgs/office-of-the-attorney-general",
    "party": "D",
    "partyKey": "D",
-   "unconfirmed": true
+   "unconfirmed": true,
+   "unreadable": true
   },
   "MD": {
    "listedBy": "Democratic Attorneys General Association",
@@ -242,7 +243,8 @@
    "party": "R",
    "partyKey": "R",
    "selection": "Appointed by the governor and Executive Council",
-   "unconfirmed": true
+   "unconfirmed": true,
+   "unreadable": true
   },
   "NJ": {
    "listedBy": "Democratic Attorneys General Association",
@@ -408,7 +410,7 @@
    "title": "Attorney General"
   }
  },
- "fetched": "2026-10-06T01:25:17+00:00",
+ "fetched": "2026-10-06T06:03:26+00:00",
  "lt": {
   "AK": {
    "name": "Nancy Dahlstrom",
