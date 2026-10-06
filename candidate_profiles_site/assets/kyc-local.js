@@ -227,9 +227,15 @@
     var c = cities[id];
     var row = governmentRow(c[5]);
     el("localPanelTitle").textContent = c[3];
+    // Where the place is, and where its government is listed: a city on a
+    // county line can be in one county and listed under the other (Berthoud,
+    // Colorado: its point in Weld, its government under Larimer). The link
+    // goes to the county whose list holds the government.
+    var here = c[4] && state.counties[c[4]] ? c[4] : "";
+    var filed = c[5] && state.counties[c[5][0]] ? c[5][0] : here;
     var body = '<p class="local-total"><span class="swatch dot-swatch dot-' + formOf(id) + '"></span>' +
       KYC.escapeHtml(whatItIs(id)) +
-      (c[4] && state.counties[c[4]] ? ", in " + KYC.escapeHtml(state.counties[c[4]].name) : "") + "</p>";
+      (here ? ", in " + KYC.escapeHtml(state.counties[here].name) : "") + "</p>";
     var status = STATUS[c[6]];
     if (status) {
       body += '<p class="gov-officer-note">The Census Bureau records ' + KYC.escapeHtml(c[3]) + " as " +
@@ -237,8 +243,9 @@
     }
     if (row) {
       body += '<h3 class="local-group">Its government</h3><ul class="local-list">' + item(row, "") + "</ul>" +
-        '<p class="faint">As the Census Bureau listed it in 2022, with its own website where the ' +
-        "Bureau has one.</p>";
+        '<p class="faint">As the Census Bureau listed it in 2022' +
+        (filed !== here ? ", under " + KYC.escapeHtml(state.counties[filed].name) : "") +
+        ", with its own website where the Bureau has one.</p>";
     } else if (!status) {
       // Not joined is not "no government" (rule 19): the build found no
       // government in the listing it could tie to this place one to one.
@@ -247,7 +254,7 @@
         "entry this site could tie to this place by its name alone, so none is shown here. The " +
         "listing is from 2022; a place incorporated since then is not in it.</p>";
     }
-    body += countyButton(c[4]);
+    body += countyButton(filed);
     el("localPanelBody").innerHTML = body;
   }
 
@@ -412,12 +419,16 @@
     if (!(opts && opts.fromRoute)) write();
   }
 
+  /* One address change, one draw (rule 45): when a pick follows a change
+   * of view, the view is switched quietly and the pick draws. */
   function follow(params) {
     var wantedView = params.view === "cities" ? "cities" : "counties";
-    if (wantedView !== view) setView(wantedView, { fromRoute: true });
-    if (params.city && cities[params.city]) {
-      if (params.city !== pickedCity) pickCity(params.city, { fromRoute: true });
-    } else if ((params.county || "") !== picked || pickedCity) {
+    var city = params.city && cities[params.city] ? params.city : "";
+    var picks = city ? city !== pickedCity : (params.county || "") !== picked || !!pickedCity;
+    if (wantedView !== view) setView(wantedView, { fromRoute: true, quiet: picks });
+    if (city) {
+      if (city !== pickedCity) pickCity(city, { fromRoute: true });
+    } else if (picks) {
       pick(params.county || "", { fromRoute: true });
     }
   }

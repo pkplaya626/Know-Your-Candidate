@@ -2919,6 +2919,24 @@ async function testCounties() {
       /records Louisville as a nonfunctioning legal entity/.test(body) &&
       !ky.D.querySelector("#localPanelBody .local-item") && !/incorporated since/.test(body), body.slice(0, 200));
   });
+  const co = await buildPage("counties/co.html", { hash: "#/?view=cities&city=0806255" });
+  suite("counties/co.html — a city listed under another county than its point", () => {
+    const body = co.D.getElementById("localPanelBody");
+    check("Berthoud links the county whose list holds its government, and says so",
+      body.querySelector("[data-county]").getAttribute("data-county") === "08069" &&
+      /under Larimer County/.test(body.textContent), body.textContent.slice(0, 200));
+  });
+  const once = await buildPage("counties/tx.html", { hash: "#/?county=48201" });
+  let draws = 0;
+  new once.window.MutationObserver((records) => {
+    draws += records.filter((r) => r.target.id === "localMap").length;
+  }).observe(once.D.getElementById("localMap"), { childList: true });
+  once.window.location.hash = "#/?view=cities&city=4819000";
+  await new Promise((resolve) => setTimeout(resolve, 60));
+  suite("counties/tx.html — one address change, one draw (rule 45)", () => {
+    check("switching the view and picking a city from one link draws the map once", draws === 1, `${draws}`);
+    check("and shows the city", once.D.getElementById("localPanelTitle").textContent === "Dallas");
+  });
   const hawaii = await buildPage("counties/hi.html");
   suite("counties/hi.html — a state with no incorporated place", () => {
     check("offers no cities view", hawaii.D.querySelector(".segmented").hidden &&

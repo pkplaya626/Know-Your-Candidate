@@ -3237,7 +3237,9 @@ svg.district-map,
  * colour. A dot keeps a hairline edge at any width. A dot is small to tap
  * on a phone, so every place is also in the filterable list under the map. */
 .local-page .segmented { margin: 0 0 var(--s-3); }
-.district-shape.region-plain { fill: var(--surface-2); }
+/* A ground that differs from the card in every theme: --surface-2 on the
+ * dark card is the card, and the counties and the land disappeared. */
+.district-shape.region-plain { fill: color-mix(in srgb, var(--text) 8%, var(--surface-1)); }
 .map-dot {
   stroke: var(--surface-1);
   stroke-width: 1px;
