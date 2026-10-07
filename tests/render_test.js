@@ -1247,6 +1247,8 @@ async function testInterlinks() {
       !!state.D.getElementById("state-government"));
     check("a plain section link is no route: no profile opens",
       !state.D.querySelector("dialog[open]"));
+    check("the fragment is dropped once used, so closing a profile does not jump back to it",
+      state.window.location.hash === "", state.window.location.hash);
   });
 }
 

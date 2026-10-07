@@ -182,12 +182,18 @@
 
   /* A link to a section of this page ("#state-government", from the guide)
    * arrives before the script has drawn that section, so the browser's own
-   * jump finds nothing. Jump once it is there. */
+   * jump finds nothing. Jump once it is there, then drop the fragment: left
+   * in the address, closing a profile returned to it and jumped the reader
+   * back to the section, however far they had read on. */
   function jumpToSection() {
     var hash = global.location.hash;
     if (!/^#[A-Za-z][\w-]*$/.test(hash)) return;
     var section = doc.getElementById(hash.slice(1));
-    if (section && section.scrollIntoView) section.scrollIntoView({ block: "start" });
+    if (!section) return;
+    if (section.scrollIntoView) section.scrollIntoView({ block: "start" });
+    if (global.history && global.history.replaceState) {
+      global.history.replaceState(global.history.state, "", global.location.pathname + global.location.search);
+    }
   }
 
   /* ---------------------------------------------------------- all states */
