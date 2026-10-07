@@ -3295,6 +3295,8 @@ button.local-county-link {
   cursor: pointer;
 }
 #localRoster .local-filter { max-width: 28rem; }
+/* "Show all" lists Minnesota's 2,630 rows: rows off screen skip layout. */
+#cityRows .leg-row { content-visibility: auto; contain-intrinsic-size: auto 3.25rem; }
 
 /* ================================================== 20. state government */
 

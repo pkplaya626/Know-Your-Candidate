@@ -78,6 +78,7 @@
   });
   function isTown(id) { return Object.prototype.hasOwnProperty.call(towns, id); }
   var TOWN_PX = 2.3;
+  var SHARED_PX = 5.8;
   var cityIds = Object.keys(cities).sort(function (a, b) {
     return cities[a][3].localeCompare(cities[b][3], "en") || a.localeCompare(b);
   });
@@ -147,16 +148,25 @@
     (samePoint[key] = samePoint[key] || []).push(id);
   });
 
+  function sharesPoint(id) {
+    return (samePoint[cities[id][0] + "," + cities[id][1]] || []).length > 1;
+  }
+
   function cityDots() {
     if (view !== "cities") return [];
-    // The rings after the dots, so a ring is never hidden under a dot.
-    return cityIds.filter(function (id) { return !isTown(id); })
-      .concat(cityIds.filter(isTown)).map(function (id) {
+    // Rings first, so a city's dot is never covered: drawn over the dots,
+    // neighbouring rings took the taps meant for Allentown and 159 other
+    // Minnesota and Pennsylvania cities on a phone.
+    return cityIds.filter(isTown).concat(cityIds.filter(function (id) { return !isTown(id); }))
+      .map(function (id) {
       var c = cities[id];
       // Townships tile a state about 6 px apart on a phone (Minnesota has
-      // 1,774), so their rings are drawn smaller than the cities' dots.
-      return { id: id, at: [c[0], c[1]], cls: "dot-" + formOf(id), px: isTown(id) ? TOWN_PX : 0,
-               title: c[3] + (c[2] ? " (" + kindText(c[2]) + ")" : "") };
+      // 1,774), so their rings are smaller than the cities' dots - except
+      // a ring at a city's own point, drawn round the dot so both show.
+      var px = !isTown(id) ? 0 : sharesPoint(id) ? SHARED_PX : TOWN_PX;
+      var named = c[2] && c[3].toLowerCase().indexOf(c[2].toLowerCase()) !== 0;
+      return { id: id, at: [c[0], c[1]], cls: "dot-" + formOf(id), px: px,
+               title: c[3] + (named ? " (" + kindText(c[2]) + ")" : "") };
     });
   }
 
@@ -362,6 +372,7 @@
         '<input type="search" id="cityFilter" class="local-filter" placeholder="Filter by name or county" autocomplete="off">' +
         '<div id="cityRows" class="leg-roster">' + cityRows("") + "</div>";
       el("cityFilter").addEventListener("input", function () {
+        listAll = false;                 // a new filter starts from the first 200 again
         el("cityRows").innerHTML = cityRows(el("cityFilter").value);
       });
     } else {
@@ -410,7 +421,7 @@
     draw(picked, "");
     if (picked) showCounty(picked); else showState();
     if (picked && !(opts && opts.fromRoute) && narrow()) {
-      el("localPanelTitle").scrollIntoView({ behavior: "smooth", block: "start" });
+      reveal(el("localPanelTitle"));
     }
     if (!(opts && opts.fromRoute)) write();
   }
@@ -423,7 +434,7 @@
     draw("", id);
     showCity(id);
     if (!(opts && opts.fromRoute) && narrow()) {
-      el("localPanelTitle").scrollIntoView({ behavior: "smooth", block: "start" });
+      reveal(el("localPanelTitle"));
     }
     if (!(opts && opts.fromRoute)) write();
   }
@@ -446,8 +457,9 @@
   /* One address change, one draw (rule 45): when a pick follows a change
    * of view, the view is switched quietly and the pick draws. */
   function follow(params) {
-    var wantedView = params.view === "cities" ? "cities" : "counties";
     var city = params.city && cities[params.city] ? params.city : "";
+    // A place in the address is a place on the cities map, view or not.
+    var wantedView = city || params.view === "cities" ? "cities" : "counties";
     var picks = city ? city !== pickedCity : (params.county || "") !== picked || !!pickedCity;
     if (wantedView !== view) setView(wantedView, { fromRoute: true, quiet: picks });
     if (city) {
@@ -455,6 +467,15 @@
     } else if (picks) {
       pick(params.county || "", { fromRoute: true });
     }
+  }
+
+  /* The panel is brought into view on a phone after the frame that draws
+   * the map: scrolled inside the click, it forced the new map's layout
+   * there (194 ms of a 450 ms pin on Minnesota at 6x). */
+  function reveal(node) {
+    (global.requestAnimationFrame || global.setTimeout)(function () {
+      node.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }
 
   KYC.ready(function () {
@@ -498,6 +519,9 @@
       if (event.target.closest("[data-more]")) {
         listAll = true;
         el("cityRows").innerHTML = cityRows(el("cityFilter").value);
+        // Keyboard focus to the first row it showed, not back to the top.
+        var shown = el("cityRows").querySelectorAll("[data-city]");
+        if (shown[LIST_LIMIT]) shown[LIST_LIMIT].focus();
         return;
       }
       var row = event.target.closest("[data-region],[data-city]");

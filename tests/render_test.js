@@ -2939,15 +2939,20 @@ async function testCounties() {
     check("switching the view and picking a city from one link draws the map once", draws === 1, `${draws}`);
     check("and shows the city", once.D.getElementById("localPanelTitle").textContent === "Dallas");
   });
-  const il = await buildPage("counties/il.html", { hash: "#/?view=cities&city=1703154898" });
+  const il = await buildPage("counties/il.html", { hash: "#/?view=cities&city=1754885" });
   suite("counties/il.html — a township and a village at one point", () => {
     const body = il.D.getElementById("localPanelBody");
     const ring = il.D.querySelector('#localMap .district-statewide [data-dot="1703154898"]');
     const dot = il.D.querySelector('#localMap .district-statewide [data-dot="1754885"]');
-    check("Oak Park Township's panel names the village at the same point",
-      !!body.querySelector('[data-city="1754885"]'), body.textContent.slice(0, 200));
-    check("the ring is drawn over the dot, not under it",
-      !!ring && !!dot && (dot.compareDocumentPosition(ring) & il.window.Node.DOCUMENT_POSITION_FOLLOWING) !== 0);
+    check("the Village of Oak Park's panel names the township at the same point",
+      !!body.querySelector('[data-city="1703154898"]'), body.textContent.slice(0, 200));
+    check("the ring is drawn under the dot and round it, so both show and the dot takes its own taps",
+      !!ring && !!dot && (ring.compareDocumentPosition(dot) & il.window.Node.DOCUMENT_POSITION_FOLLOWING) !== 0 &&
+      +ring.getAttribute("data-r") > +dot.getAttribute("data-r"), ring && ring.getAttribute("data-r"));
+    const dots = [...il.D.querySelectorAll("#localMap .district-statewide .map-dot")];
+    const firstPlace = dots.findIndex((d) => !d.classList.contains("dot-township"));
+    check("every ring is drawn before every city dot",
+      dots.slice(firstPlace).every((d) => !d.classList.contains("dot-township")));
   });
   const ksTown = await buildPage("counties/ks.html", { hash: "#/?view=cities&city=2011924200" });
   suite("counties/ks.html — a township the Census records as inactive", () => {
@@ -2959,6 +2964,31 @@ async function testCounties() {
     const text = la.D.getElementById("localPanelBody").textContent;
     check("Baton Rouge gives its status and says no government could be tied",
       /partially consolidated/.test(text) && /no entry this site could tie/.test(text), text.slice(0, 240));
+  });
+  const mn = await buildPage("counties/mn.html", { hash: "#/?view=cities&city=2711100100" });
+  suite("counties/mn.html — Show all, and a link without its view", () => {
+    const more = mn.D.querySelector("#localRoster [data-more]");
+    more.dispatchEvent(new mn.window.MouseEvent("click", { bubbles: true }));
+    const rows = mn.D.querySelectorAll("#localRoster [data-city]");
+    check("Show all leaves keyboard focus on the first row it showed", mn.D.activeElement === rows[200],
+      mn.D.activeElement && mn.D.activeElement.textContent.slice(0, 40));
+    const filter = mn.D.getElementById("cityFilter");
+    filter.value = "a";
+    filter.dispatchEvent(new mn.window.Event("input"));
+    check("a new filter starts from the first 200 again",
+      mn.D.querySelectorAll("#localRoster [data-city]").length <= 200 && !!mn.D.querySelector("#localRoster [data-more]"));
+  });
+  let mnDraws = 0;
+  new mn.window.MutationObserver((records) => {
+    mnDraws += records.filter((r) => r.target.id === "localMap").length;
+  }).observe(mn.D.getElementById("localMap"), { childList: true });
+  mn.window.location.hash = "#/?city=2711100100";
+  await new Promise((resolve) => setTimeout(resolve, 60));
+  suite("counties/mn.html — a place in the address is a place on the cities map", () => {
+    check("dropping view=cities from a place's link does not redraw the map", mnDraws === 0, `${mnDraws}`);
+    check("and the place stays picked",
+      mn.D.querySelector('[data-view="cities"]').getAttribute("aria-pressed") === "true" &&
+      mn.D.getElementById("localPanelTitle").textContent === mn.window.kycLocal.MN.towns["2711100100"][3]);
   });
   const hawaii = await buildPage("counties/hi.html");
   suite("counties/hi.html — a state with no incorporated place", () => {
