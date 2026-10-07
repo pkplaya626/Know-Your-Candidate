@@ -10,7 +10,9 @@
  * views:
  *   - Counties: each county shaded by how many local governments it has;
  *   - Cities and towns: every incorporated place a dot, coloured by the
- *     legal form the Census names (city, town, village, borough).
+ *     legal form the Census names (city, town, village, borough), and in
+ *     the twenty states that have them, every town or township government
+ *     a ring at its county subdivision, joined on the Census code.
  *
  * The address carries the view and the pick:
  * #/?county=48201, #/?view=cities&city=4835000.
@@ -47,6 +49,7 @@
     ["village", "Village"],
     ["borough", "Borough"],
     ["other", "Other legal form"],
+    ["township", "Town or township government"],
   ];
 
   function el(id) { return doc.getElementById(id); }
@@ -64,8 +67,18 @@
 
   /* --------------------------------------------------------------- cities */
 
-  // [x, y, kind, name, county, ref]; ref is [county code, row] or null.
-  var cities = (state && state.cities) || {};
+  // [x, y, kind, name, county, ref, status]; ref is [county code, row] or
+  // null, status the Census's functional status where it is not "A".
+  // Towns and townships (county subdivisions, ten-digit codes) share the
+  // view with the incorporated places (seven digits); each is joined.
+  var towns = (state && state.towns) || {};
+  var cities = {};
+  [(state && state.cities) || {}, towns].forEach(function (set) {
+    Object.keys(set).forEach(function (id) { cities[id] = set[id]; });
+  });
+  function isTown(id) { return Object.prototype.hasOwnProperty.call(towns, id); }
+  var TOWN_PX = 2.3;
+  var SHARED_PX = 5.8;
   var cityIds = Object.keys(cities).sort(function (a, b) {
     return cities[a][3].localeCompare(cities[b][3], "en") || a.localeCompare(b);
   });
@@ -80,12 +93,41 @@
     return ["city", "town", "village", "borough"].indexOf(kind) !== -1 ? kind : "other";
   }
 
+  /* A place's mark: its legal form's colour, or the town or township ring. */
+  function formOf(id) {
+    return isTown(id) ? "township" : form(cities[id][2]);
+  }
+
+  /* What a place is, in a line: "Incorporated village", "Charter township
+   * government (a county subdivision)". */
+  function whatItIs(id) {
+    var kind = cities[id][2];
+    if (isTown(id)) {
+      return (kind ? kind.charAt(0).toUpperCase() + kind.slice(1) : "Town or township") +
+        " government (a county subdivision)";
+    }
+    return kind ? "Incorporated " + kindText(kind) : "Incorporated place";
+  }
+
   /* The legal form as a reader should see it. The Census calls the part of
    * a consolidated government outside its other places its "balance". */
   function kindText(kind) {
     if (kind === "balance") return "consolidated government (the part outside its other places)";
     return kind;
   }
+
+  /* The Census's own words for a place's functional status (2025
+   * Gazetteer; census.gov functional status codes). "A", an active
+   * government, needs no note; "F" is a balance, said by its kind. */
+  var STATUS = {
+    I: "an inactive governmental unit",
+    N: "a nonfunctioning legal entity",
+    B: "an active government partially consolidated with another government, with separate officials",
+    C: "an active government consolidated with another government, with a single set of officials",
+    G: "an active government subordinate to another unit of government",
+  };
+  // Statuses that explain on their own why no government is shown.
+  var NOT_GOVERNING = { I: true, N: true };
 
   function governmentRow(ref) {
     if (!ref) return null;
@@ -97,12 +139,34 @@
     return rows ? rows[ref[1]] || null : null;
   }
 
+  /* A township and a city with one boundary (Oak Park's village and
+   * township) get one point: each panel names the other, since the ring
+   * drawn over the dot is small to tap. */
+  var samePoint = {};
+  cityIds.forEach(function (id) {
+    var key = cities[id][0] + "," + cities[id][1];
+    (samePoint[key] = samePoint[key] || []).push(id);
+  });
+
+  function sharesPoint(id) {
+    return (samePoint[cities[id][0] + "," + cities[id][1]] || []).length > 1;
+  }
+
   function cityDots() {
     if (view !== "cities") return [];
-    return cityIds.map(function (id) {
+    // Rings first, so a city's dot is never covered: drawn over the dots,
+    // neighbouring rings took the taps meant for Allentown and 159 other
+    // Minnesota and Pennsylvania cities on a phone.
+    return cityIds.filter(isTown).concat(cityIds.filter(function (id) { return !isTown(id); }))
+      .map(function (id) {
       var c = cities[id];
-      return { id: id, at: [c[0], c[1]], cls: "dot-" + form(c[2]),
-               title: c[3] + (c[2] ? " (" + kindText(c[2]) + ")" : "") };
+      // Townships tile a state about 6 px apart on a phone (Minnesota has
+      // 1,774), so their rings are smaller than the cities' dots - except
+      // a ring at a city's own point, drawn round the dot so both show.
+      var px = !isTown(id) ? 0 : sharesPoint(id) ? SHARED_PX : TOWN_PX;
+      var named = c[2] && c[3].toLowerCase().indexOf(c[2].toLowerCase()) !== 0;
+      return { id: id, at: [c[0], c[1]], cls: "dot-" + formOf(id), px: px,
+               title: c[3] + (named ? " (" + kindText(c[2]) + ")" : "") };
     });
   }
 
@@ -188,21 +252,43 @@
     var c = cities[id];
     var row = governmentRow(c[5]);
     el("localPanelTitle").textContent = c[3];
-    var body = '<p class="local-total"><span class="swatch dot-swatch dot-' + form(c[2]) + '"></span>' +
-      KYC.escapeHtml(c[2] ? "Incorporated " + kindText(c[2]) : "Incorporated place") +
-      (c[4] && state.counties[c[4]] ? ", in " + KYC.escapeHtml(state.counties[c[4]].name) : "") + "</p>";
+    // Where the place is, and where its government is listed: a city on a
+    // county line can be in one county and listed under the other (Berthoud,
+    // Colorado: its point in Weld, its government under Larimer). The link
+    // goes to the county whose list holds the government.
+    var here = c[4] && state.counties[c[4]] ? c[4] : "";
+    var filed = c[5] && state.counties[c[5][0]] ? c[5][0] : here;
+    var body = '<p class="local-total"><span class="swatch dot-swatch dot-' + formOf(id) + '"></span>' +
+      KYC.escapeHtml(whatItIs(id)) +
+      (here ? ", in " + KYC.escapeHtml(state.counties[here].name) : "") + "</p>";
+    var status = STATUS[c[6]];
+    if (status) {
+      body += '<p class="gov-officer-note">The Census Bureau records ' + KYC.escapeHtml(c[3]) + " as " +
+        KYC.escapeHtml(status) + " (2025).</p>";
+    }
     if (row) {
       body += '<h3 class="local-group">Its government</h3><ul class="local-list">' + item(row, "") + "</ul>" +
-        '<p class="faint">As the Census Bureau listed it in 2022, with its own website where the ' +
-        "Bureau has one.</p>";
-    } else {
+        '<p class="faint">As the Census Bureau listed it in 2022' +
+        (filed !== here ? ", under " + KYC.escapeHtml(state.counties[filed].name) : "") +
+        ", with its own website where the Bureau has one.</p>";
+    } else if (!NOT_GOVERNING[c[6]]) {
       // Not joined is not "no government" (rule 19): the build found no
       // government in the listing it could tie to this place one to one.
+      // Why is not guessed; the listing's date is a fact. A status that
+      // explains the absence (inactive, nonfunctioning) says it instead.
       body += '<p class="gov-officer-note">The Census Bureau\'s 2022 listing of governments has no ' +
-        "entry this site could tie to this place by its name alone, so none is shown here. A place " +
-        "incorporated since 2022 is not in that listing yet.</p>";
+        "entry this site could tie to this place by its name alone, so none is shown here. The " +
+        "listing is from 2022; a place incorporated since then is not in it.</p>";
     }
-    body += countyButton(c[4]);
+    var shared = (samePoint[c[0] + "," + c[1]] || []).filter(function (other) { return other !== id; });
+    if (shared.length) {
+      body += '<p class="faint">At the same point: ' + shared.map(function (other) {
+        return '<button type="button" class="sidebar-link local-county-link" data-city="' +
+          KYC.escapeAttr(other) + '">' + KYC.escapeHtml(cities[other][3] + " (" + whatItIs(other).toLowerCase() + ")") +
+          " \u203a</button>";
+      }).join(" ") + "</p>";
+    }
+    body += countyButton(filed);
     el("localPanelBody").innerHTML = body;
   }
 
@@ -217,10 +303,13 @@
       ? '<p class="leg-subhead">Statewide</p><p class="faint">Run by the state, with no county.</p>' +
         groups(state.statewide, "") : "");
     el("localPanelTitle").textContent = state.name;
+    var townCount = Object.keys(towns).length;
     var lede = view === "cities"
-      ? '<p class="local-total">' + plural(cityIds.length, "incorporated place") + " (2025).</p>" +
-        '<p class="faint">Every city, town, village and borough, at a point inside it. Pick one on the ' +
-        "map, or from the list below, to see its government.</p>"
+      ? '<p class="local-total">' + plural(cityIds.length - townCount, "incorporated place") + " (2025)" +
+        (townCount ? " and " + plural(townCount, "town or township government") : "") + ".</p>" +
+        '<p class="faint">Every city, town, village and borough, at a point inside it' +
+        (townCount ? ", and every town or township that governs, as a ring" : "") +
+        ". Pick one on the map, or from the list below, to see its government.</p>"
       : '<p class="local-total">' + total.toLocaleString("en-US") + " local governments in " +
         Object.keys(state.counties).length + " counties (2022).</p>" +
         '<p class="faint">Pick a county on the map, or from the list below, to see every ' +
@@ -242,6 +331,13 @@
     }).join("");
   }
 
+  /* Minnesota has 2,630 cities, towns and townships. Drawing every row at
+   * once cost 370 ms on a phone slowed 4x (rule 45), so the list shows the
+   * first LIST_LIMIT that match, a button for the rest, and the filter
+   * always searches them all. */
+  var LIST_LIMIT = 200;
+  var listAll = false;
+
   function cityRows(filter) {
     var q = KYC.foldText ? KYC.foldText(filter || "") : (filter || "").toLowerCase();
     var shown = cityIds.filter(function (id) {
@@ -250,18 +346,25 @@
       return (KYC.foldText ? KYC.foldText(text) : text.toLowerCase()).indexOf(q) !== -1;
     });
     if (!shown.length) return '<p class="faint">Nothing matches.</p>';
-    return shown.map(function (id) {
+    var cut = !listAll && shown.length > LIST_LIMIT ? shown.slice(0, LIST_LIMIT) : shown;
+    return cut.map(function (id) {
       var c = cities[id];
       var county = (state.counties[c[4]] || {}).name || "";
       return '<button type="button" class="leg-row" data-city="' + KYC.escapeAttr(id) + '">' +
-        '<span class="leg-row-district"><span class="swatch dot-swatch dot-' + form(c[2]) + '"></span>' +
+        '<span class="leg-row-district"><span class="swatch dot-swatch dot-' + formOf(id) + '"></span>' +
         KYC.escapeHtml(c[3]) + "</span>" +
         '<span class="leg-row-people">' + KYC.escapeHtml([c[2] ? kindText(c[2]) : "", county]
           .filter(Boolean).join(" · ")) + "</span></button>";
-    }).join("");
+    }).join("") + (cut.length < shown.length
+      ? '<button type="button" class="leg-row local-more" data-more="1">' +
+        '<span class="leg-row-district">Show all ' + shown.length.toLocaleString("en-US") + "</span>" +
+        '<span class="leg-row-people">The first ' + cut.length + " are listed; the filter above " +
+        "searches them all.</span></button>"
+      : "");
   }
 
   function roster() {
+    listAll = false;
     if (view === "cities") {
       el("localRosterTitle").textContent = "Every city and town";
       el("localRoster").innerHTML =
@@ -269,6 +372,7 @@
         '<input type="search" id="cityFilter" class="local-filter" placeholder="Filter by name or county" autocomplete="off">' +
         '<div id="cityRows" class="leg-roster">' + cityRows("") + "</div>";
       el("cityFilter").addEventListener("input", function () {
+        listAll = false;                 // a new filter starts from the first 200 again
         el("cityRows").innerHTML = cityRows(el("cityFilter").value);
       });
     } else {
@@ -284,8 +388,8 @@
     if (!cityKey) return;
     cityKey.hidden = view !== "cities";
     var present = {};
-    cityIds.forEach(function (id) { present[form(cities[id][2])] = true; });
-    cityKey.innerHTML = '<span class="party-legend-title">Incorporated places, by legal form</span>' +
+    cityIds.forEach(function (id) { present[formOf(id)] = true; });
+    cityKey.innerHTML = '<span class="party-legend-title">Cities and towns, by legal form</span>' +
       FORMS.filter(function (f) { return present[f[0]]; }).map(function (f) {
         return '<span class="key"><span class="swatch dot-swatch dot-' + f[0] + '"></span>' +
           KYC.escapeHtml(f[1]) + "</span>";
@@ -293,6 +397,15 @@
   }
 
   /* ----------------------------------------------------------------- picks */
+
+  /* Marks the picks on the map: in place within a view, a full draw when
+   * the view has changed since the map was last drawn. */
+  var drawnView = "";
+  function draw(region, dot) {
+    if (!map) return;
+    map.select(region, dot, drawnView !== view);
+    drawnView = view;
+  }
 
   function narrow() {
     return global.matchMedia && global.matchMedia("(max-width: 1000px)").matches;
@@ -305,10 +418,10 @@
   function pick(fips, opts) {
     picked = state.counties[fips] ? fips : "";
     pickedCity = "";
-    if (map) map.select(picked, "");
+    draw(picked, "");
     if (picked) showCounty(picked); else showState();
     if (picked && !(opts && opts.fromRoute) && narrow()) {
-      el("localPanelTitle").scrollIntoView({ behavior: "smooth", block: "start" });
+      reveal(el("localPanelTitle"));
     }
     if (!(opts && opts.fromRoute)) write();
   }
@@ -318,10 +431,10 @@
     if (view !== "cities") setView("cities", { quiet: true });
     pickedCity = id;
     picked = "";
-    map.select("", id);
+    draw("", id);
     showCity(id);
     if (!(opts && opts.fromRoute) && narrow()) {
-      el("localPanelTitle").scrollIntoView({ behavior: "smooth", block: "start" });
+      reveal(el("localPanelTitle"));
     }
     if (!(opts && opts.fromRoute)) write();
   }
@@ -336,19 +449,33 @@
     // Quiet: the caller picks next, and that draws the map.
     if (opts && opts.quiet) return;
     if (view === "counties") pickedCity = "";
-    if (map) map.select(picked, pickedCity);
+    draw(picked, pickedCity);
     if (pickedCity) showCity(pickedCity); else if (picked) showCounty(picked); else showState();
     if (!(opts && opts.fromRoute)) write();
   }
 
+  /* One address change, one draw (rule 45): when a pick follows a change
+   * of view, the view is switched quietly and the pick draws. */
   function follow(params) {
-    var wantedView = params.view === "cities" ? "cities" : "counties";
-    if (wantedView !== view) setView(wantedView, { fromRoute: true });
-    if (params.city && cities[params.city]) {
-      if (params.city !== pickedCity) pickCity(params.city, { fromRoute: true });
-    } else if ((params.county || "") !== picked || pickedCity) {
+    var city = params.city && cities[params.city] ? params.city : "";
+    // A place in the address is a place on the cities map, view or not.
+    var wantedView = city || params.view === "cities" ? "cities" : "counties";
+    var picks = city ? city !== pickedCity : (params.county || "") !== picked || !!pickedCity;
+    if (wantedView !== view) setView(wantedView, { fromRoute: true, quiet: picks });
+    if (city) {
+      if (city !== pickedCity) pickCity(city, { fromRoute: true });
+    } else if (picks) {
       pick(params.county || "", { fromRoute: true });
     }
+  }
+
+  /* The panel is brought into view on a phone after the frame that draws
+   * the map: scrolled inside the click, it forced the new map's layout
+   * there (194 ms of a 450 ms pin on Minnesota at 6x). */
+  function reveal(node) {
+    (global.requestAnimationFrame || global.setTimeout)(function () {
+      node.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }
 
   KYC.ready(function () {
@@ -389,6 +516,14 @@
     else pick(params.county || "", { fromRoute: true });
 
     el("localRoster").addEventListener("click", function (event) {
+      if (event.target.closest("[data-more]")) {
+        listAll = true;
+        el("cityRows").innerHTML = cityRows(el("cityFilter").value);
+        // Keyboard focus to the first row it showed, not back to the top.
+        var shown = el("cityRows").querySelectorAll("[data-city]");
+        if (shown[LIST_LIMIT]) shown[LIST_LIMIT].focus();
+        return;
+      }
       var row = event.target.closest("[data-region],[data-city]");
       if (!row) return;
       if (row.hasAttribute("data-city")) pickCity(row.getAttribute("data-city"));

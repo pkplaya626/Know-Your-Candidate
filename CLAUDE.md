@@ -25,7 +25,7 @@ us_atlas_states_topo.json   ──┤
 district_maps/*.json        ──┤   (every state's districts; tools/fetch_district_maps.py)
 legislative_maps/*.json     ──┤   (state senate and house districts, counties; tools/fetch_legislative_maps.py)
 local_governments/*.json    ──┤   (every local government, from the Census listing; localgov)
-local_maps/*.json           ──┤   (every incorporated place, one point each; tools/fetch_local_maps.py)
+local_maps/*.json           ──┤   (every incorporated place and county subdivision, a point each; tools/fetch_local_maps.py)
 congress_snapshot.json      ──┤
 data/fec_field.json         ──┤   (the FEC's 2026 candidate register)
 data/disclosures.json       ──┤
@@ -118,9 +118,9 @@ python build_profile_site.py executives       # every governor (NGA), and NCSL's
 python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS), attorneys general
 python build_profile_site.py courts           # each state's highest court, from the court's own roster
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
-python tools/fetch_local_maps.py              # every incorporated place, for the county pages (Census, network)
-python -m unittest discover tests             # 819 tests, no dependencies
-npm install && npm test                       # 1036 real-DOM checks (needs jsdom)
+python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
+python -m unittest discover tests             # 836 tests, no dependencies
+npm install && npm test                       # 1059 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -647,6 +647,27 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Mountain was incorporated in 2023 from a Town of Rib Mountain the 2022
     listing still holds, and joining them would show a dissolved
     government as the village's.
+
+60. **A town or township is placed by its Census code, never its name.**
+    For the 16,214 town and township governments the listing's FIPS_PLACE
+    is the county subdivision's own code (`localgov` keeps it as
+    `cousub`), and 16,167 of them are on a subdivision of that code.
+    `counties.build_towns` joins on the code; the name is a cross-check
+    (`same_town`), and a code whose names disagree, or one two governments
+    claim, is reported and not drawn. The other 47 changed after 2022 and
+    stay under their county: Wisconsin's Town of Madison was dissolved,
+    and looking it up by name would have put it on the City of Madison;
+    the Town of Rib Mountain's name now belongs to the village that
+    replaced it. A city's FIPS_PLACE is not its boundary-file code
+    (Texarkana: 68810 against 72368), which is why cities are joined by
+    name (rule 59) and towns are not. Draw what a reader must find among
+    thousands at a size that leaves room: Minnesota's 1,774 township rings
+    at the cities' dot size covered its cities on a phone. A code is not
+    enough on its own: the subdivision must be one the Census says
+    governs (status A, B, C, G or I in its Gazetteer) - Mitchell, South
+    Dakota's township is unorganized territory in every Gazetteer since
+    2015 - and a town listed under another county than its subdivision
+    (the Town of Pomfret, Connecticut) is reported as such, not as missing.
 
 ## District maps
 

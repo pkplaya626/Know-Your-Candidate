@@ -1247,6 +1247,8 @@ async function testInterlinks() {
       !!state.D.getElementById("state-government"));
     check("a plain section link is no route: no profile opens",
       !state.D.querySelector("dialog[open]"));
+    check("the fragment is dropped once used, so closing a profile does not jump back to it",
+      state.window.location.hash === "", state.window.location.hash);
   });
 }
 
@@ -2844,8 +2846,12 @@ async function testCounties() {
     check("the legend switches to the legal forms", CD.getElementById("countyLegend").hidden &&
       !CD.getElementById("cityLegend").hidden && /City/.test(CD.getElementById("cityLegend").textContent));
     check("no text inside the map's SVG (rule 46)", !CD.querySelector("#localMap svg text"));
-    check("every place is in the list under the map",
-      CD.querySelectorAll('#localRoster [data-city]').length === ids.length);
+    const listed = CD.querySelectorAll('#localRoster [data-city]').length;
+    check("the list shows the first places and a button for the rest",
+      listed < ids.length && listed <= 200 && !!CD.querySelector("#localRoster [data-more]"), `${listed}`);
+    CD.querySelector("#localRoster [data-more]").dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
+    check("showing all lists every place",
+      CD.querySelectorAll('#localRoster [data-city]').length === ids.length && !CD.querySelector("#localRoster [data-more]"));
     const filter = CD.getElementById("cityFilter");
     filter.value = "houston";
     filter.dispatchEvent(new W.Event("input"));
@@ -2863,7 +2869,7 @@ async function testCounties() {
     body.querySelector("[data-county]").dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
     check("its county is a click away", CD.getElementById("localPanelTitle").textContent === "Harris County" &&
       /county=48201/.test(W.location.hash), W.location.hash);
-    const unjoined = ids.filter((id) => !cities[id][5])[0];
+    const unjoined = ids.filter((id) => !cities[id][5] && !cities[id][6])[0];
     if (unjoined) {
       CD.querySelector('.segmented [data-view="cities"]').dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
       CD.querySelector(`#localMap .district-statewide [data-dot="${unjoined}"]`)
@@ -2878,6 +2884,111 @@ async function testCounties() {
     check("opens the cities view on that place",
       shared.D.getElementById("localPanelTitle").textContent === "Houston" &&
       shared.D.querySelectorAll("#localMap .map-dot").length > 0);
+  });
+  const ct = await buildPage("counties/ct.html", { hash: "#/?view=cities" });
+  suite("counties/ct.html — towns, where towns are the local government", () => {
+    const W = ct.window, CD = ct.D;
+    const towns = W.kycLocal.CT.towns;
+    const townIds = Object.keys(towns);
+    check("no page errors", ct.errors.length === 0, ct.errors.join(" | "));
+    check("Connecticut's towns are on the map, each joined to its government",
+      townIds.length > 100 && townIds.every((id) => towns[id][5]), `${townIds.length}`);
+    const rings = CD.querySelectorAll("#localMap .district-statewide .map-dot.dot-township");
+    check("a town is drawn as a ring, apart from the incorporated places", rings.length === townIds.length,
+      `${rings.length} of ${townIds.length}`);
+    check("the legend names the ring", /Town or township government/.test(CD.getElementById("cityLegend").textContent));
+    const id = townIds[0];
+    CD.querySelector(`#localMap .district-statewide [data-dot="${id}"]`)
+      .dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
+    const body = CD.getElementById("localPanelBody");
+    const ref = towns[id][5];
+    const gov = W.kycLocal.CT.governments[ref[0]][ref[1]];
+    check("picking a town shows it as a county subdivision government, with its government",
+      CD.getElementById("localPanelTitle").textContent === towns[id][3] &&
+      /county subdivision/.test(body.textContent) && body.textContent.indexOf(gov[1]) !== -1,
+      body.textContent.slice(0, 160));
+    check("the town is in the address", W.location.hash.indexOf("city=" + id) !== -1, W.location.hash);
+    check("every town is in the list under the map",
+      townIds.every((t) => CD.querySelector(`#localRoster [data-city="${t}"]`)));
+    body.querySelector("[data-county]").dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
+    check("the town's government has a button that shows it on the map",
+      !!CD.querySelector(`#localPanelBody .local-pin[data-city="${id}"]`));
+  });
+  const ky = await buildPage("counties/ky.html", { hash: "#/?view=cities&city=2148000" });
+  suite("counties/ky.html — a place the Census records as not governing", () => {
+    const body = ky.D.getElementById("localPanelBody").textContent;
+    check("Louisville says what the Census records, in its words, and claims no government",
+      /records Louisville as a nonfunctioning legal entity/.test(body) &&
+      !ky.D.querySelector("#localPanelBody .local-item") && !/incorporated since/.test(body), body.slice(0, 200));
+  });
+  const co = await buildPage("counties/co.html", { hash: "#/?view=cities&city=0806255" });
+  suite("counties/co.html — a city listed under another county than its point", () => {
+    const body = co.D.getElementById("localPanelBody");
+    check("Berthoud links the county whose list holds its government, and says so",
+      body.querySelector("[data-county]").getAttribute("data-county") === "08069" &&
+      /under Larimer County/.test(body.textContent), body.textContent.slice(0, 200));
+  });
+  const once = await buildPage("counties/tx.html", { hash: "#/?county=48201" });
+  let draws = 0;
+  new once.window.MutationObserver((records) => {
+    draws += records.filter((r) => r.target.id === "localMap").length;
+  }).observe(once.D.getElementById("localMap"), { childList: true });
+  once.window.location.hash = "#/?view=cities&city=4819000";
+  await new Promise((resolve) => setTimeout(resolve, 60));
+  suite("counties/tx.html — one address change, one draw (rule 45)", () => {
+    check("switching the view and picking a city from one link draws the map once", draws === 1, `${draws}`);
+    check("and shows the city", once.D.getElementById("localPanelTitle").textContent === "Dallas");
+  });
+  const il = await buildPage("counties/il.html", { hash: "#/?view=cities&city=1754885" });
+  suite("counties/il.html — a township and a village at one point", () => {
+    const body = il.D.getElementById("localPanelBody");
+    const ring = il.D.querySelector('#localMap .district-statewide [data-dot="1703154898"]');
+    const dot = il.D.querySelector('#localMap .district-statewide [data-dot="1754885"]');
+    check("the Village of Oak Park's panel names the township at the same point",
+      !!body.querySelector('[data-city="1703154898"]'), body.textContent.slice(0, 200));
+    check("the ring is drawn under the dot and round it, so both show and the dot takes its own taps",
+      !!ring && !!dot && (ring.compareDocumentPosition(dot) & il.window.Node.DOCUMENT_POSITION_FOLLOWING) !== 0 &&
+      +ring.getAttribute("data-r") > +dot.getAttribute("data-r"), ring && ring.getAttribute("data-r"));
+    const dots = [...il.D.querySelectorAll("#localMap .district-statewide .map-dot")];
+    const firstPlace = dots.findIndex((d) => !d.classList.contains("dot-township"));
+    check("every ring is drawn before every city dot",
+      dots.slice(firstPlace).every((d) => !d.classList.contains("dot-township")));
+  });
+  const ksTown = await buildPage("counties/ks.html", { hash: "#/?view=cities&city=2011924200" });
+  suite("counties/ks.html — a township the Census records as inactive", () => {
+    check("says so, in the Census's words",
+      /records Fowler as an inactive governmental unit/.test(ksTown.D.getElementById("localPanelBody").textContent));
+  });
+  const la = await buildPage("counties/la.html", { hash: "#/?view=cities&city=2205000" });
+  suite("counties/la.html — a status that does not explain a missing government", () => {
+    const text = la.D.getElementById("localPanelBody").textContent;
+    check("Baton Rouge gives its status and says no government could be tied",
+      /partially consolidated/.test(text) && /no entry this site could tie/.test(text), text.slice(0, 240));
+  });
+  const mn = await buildPage("counties/mn.html", { hash: "#/?view=cities&city=2711100100" });
+  suite("counties/mn.html — Show all, and a link without its view", () => {
+    const more = mn.D.querySelector("#localRoster [data-more]");
+    more.dispatchEvent(new mn.window.MouseEvent("click", { bubbles: true }));
+    const rows = mn.D.querySelectorAll("#localRoster [data-city]");
+    check("Show all leaves keyboard focus on the first row it showed", mn.D.activeElement === rows[200],
+      mn.D.activeElement && mn.D.activeElement.textContent.slice(0, 40));
+    const filter = mn.D.getElementById("cityFilter");
+    filter.value = "a";
+    filter.dispatchEvent(new mn.window.Event("input"));
+    check("a new filter starts from the first 200 again",
+      mn.D.querySelectorAll("#localRoster [data-city]").length <= 200 && !!mn.D.querySelector("#localRoster [data-more]"));
+  });
+  let mnDraws = 0;
+  new mn.window.MutationObserver((records) => {
+    mnDraws += records.filter((r) => r.target.id === "localMap").length;
+  }).observe(mn.D.getElementById("localMap"), { childList: true });
+  mn.window.location.hash = "#/?city=2711100100";
+  await new Promise((resolve) => setTimeout(resolve, 60));
+  suite("counties/mn.html — a place in the address is a place on the cities map", () => {
+    check("dropping view=cities from a place's link does not redraw the map", mnDraws === 0, `${mnDraws}`);
+    check("and the place stays picked",
+      mn.D.querySelector('[data-view="cities"]').getAttribute("aria-pressed") === "true" &&
+      mn.D.getElementById("localPanelTitle").textContent === mn.window.kycLocal.MN.towns["2711100100"][3]);
   });
   const hawaii = await buildPage("counties/hi.html");
   suite("counties/hi.html — a state with no incorporated place", () => {
