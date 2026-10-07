@@ -122,7 +122,11 @@
     I: "an inactive governmental unit",
     N: "a nonfunctioning legal entity",
     B: "an active government partially consolidated with another government, with separate officials",
+    C: "an active government consolidated with another government, with a single set of officials",
+    G: "an active government subordinate to another unit of government",
   };
+  // Statuses that explain on their own why no government is shown.
+  var NOT_GOVERNING = { I: true, N: true };
 
   function governmentRow(ref) {
     if (!ref) return null;
@@ -134,9 +138,20 @@
     return rows ? rows[ref[1]] || null : null;
   }
 
+  /* A township and a city with one boundary (Oak Park's village and
+   * township) get one point: each panel names the other, since the ring
+   * drawn over the dot is small to tap. */
+  var samePoint = {};
+  cityIds.forEach(function (id) {
+    var key = cities[id][0] + "," + cities[id][1];
+    (samePoint[key] = samePoint[key] || []).push(id);
+  });
+
   function cityDots() {
     if (view !== "cities") return [];
-    return cityIds.map(function (id) {
+    // The rings after the dots, so a ring is never hidden under a dot.
+    return cityIds.filter(function (id) { return !isTown(id); })
+      .concat(cityIds.filter(isTown)).map(function (id) {
       var c = cities[id];
       // Townships tile a state about 6 px apart on a phone (Minnesota has
       // 1,774), so their rings are drawn smaller than the cities' dots.
@@ -246,13 +261,22 @@
         '<p class="faint">As the Census Bureau listed it in 2022' +
         (filed !== here ? ", under " + KYC.escapeHtml(state.counties[filed].name) : "") +
         ", with its own website where the Bureau has one.</p>";
-    } else if (!status) {
+    } else if (!NOT_GOVERNING[c[6]]) {
       // Not joined is not "no government" (rule 19): the build found no
       // government in the listing it could tie to this place one to one.
-      // Why is not guessed; the listing's date is a fact.
+      // Why is not guessed; the listing's date is a fact. A status that
+      // explains the absence (inactive, nonfunctioning) says it instead.
       body += '<p class="gov-officer-note">The Census Bureau\'s 2022 listing of governments has no ' +
         "entry this site could tie to this place by its name alone, so none is shown here. The " +
         "listing is from 2022; a place incorporated since then is not in it.</p>";
+    }
+    var shared = (samePoint[c[0] + "," + c[1]] || []).filter(function (other) { return other !== id; });
+    if (shared.length) {
+      body += '<p class="faint">At the same point: ' + shared.map(function (other) {
+        return '<button type="button" class="sidebar-link local-county-link" data-city="' +
+          KYC.escapeAttr(other) + '">' + KYC.escapeHtml(cities[other][3] + " (" + whatItIs(other).toLowerCase() + ")") +
+          " \u203a</button>";
+      }).join(" ") + "</p>";
     }
     body += countyButton(filed);
     el("localPanelBody").innerHTML = body;

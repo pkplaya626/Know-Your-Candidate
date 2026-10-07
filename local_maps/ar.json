@@ -306,7 +306,7 @@
 {"id":"0543880","name":"Mansfield","kind":"city","point":[-94.244903,35.059609],"land":5979252,"county":"05127"},
 {"id":"0544120","name":"Marianna","kind":"city","point":[-90.761189,34.770695],"land":9361062,"county":"05077"},
 {"id":"0544150","name":"Marie","kind":"town","point":[-90.082152,35.613713],"land":380610,"county":"05093"},
-{"id":"0544180","name":"Marion","kind":"city","point":[-90.204518,35.20785],"land":52505553,"county":"05035"},
+{"id":"0544180","name":"Marion","kind":"city","point":[-90.204668,35.207748],"land":52505553,"county":"05035"},
 {"id":"0544210","name":"Marked Tree","kind":"city","point":[-90.409259,35.524689],"land":14948977,"county":"05111"},
 {"id":"0544240","name":"Marmaduke","kind":"city","point":[-90.389995,36.192318],"land":3621337,"county":"05055"},
 {"id":"0544300","name":"Marshall","kind":"city","point":[-92.659058,35.907198],"land":10564389,"county":"05129"},
@@ -501,7 +501,7 @@
 {"id":"0576250","name":"Winthrop","kind":"city","point":[-94.354391,33.83086],"land":2694162,"county":"05081"},
 {"id":"0576820","name":"Wooster","kind":"town","point":[-92.44932,35.204862],"land":7369143,"county":"05045"},
 {"id":"0576970","name":"Wrightsville","kind":"city","point":[-92.220164,34.606605],"land":5510108,"county":"05119"},
-{"id":"0577090","name":"Wynne","kind":"city","point":[-90.7872,35.228071],"land":23293435,"county":"05037"},
+{"id":"0577090","name":"Wynne","kind":"city","point":[-90.787308,35.227924],"land":23293435,"county":"05037"},
 {"id":"0577330","name":"Yellville","kind":"city","point":[-92.682236,36.225555],"land":6428377,"county":"05089"},
 {"id":"0577600","name":"Zinc","kind":"town","point":[-92.914102,36.284441],"land":1944153,"county":"05009"}
 ]}

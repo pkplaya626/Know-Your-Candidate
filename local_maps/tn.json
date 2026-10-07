@@ -282,7 +282,7 @@
 {"id":"4766360","name":"Samburg","kind":"town","point":[-89.355441,36.380427],"land":1226013,"county":"47131"},
 {"id":"4766660","name":"Sardis","kind":"town","point":[-88.293987,35.445798],"land":6474835,"county":"47077"},
 {"id":"4766680","name":"Saulsbury","kind":"town","point":[-89.086645,35.048456],"land":1567692,"county":"47069"},
-{"id":"4766720","name":"Savannah","kind":"city","point":[-88.234545,35.223581],"land":17667017,"county":"47071"},
+{"id":"4766720","name":"Savannah","kind":"city","point":[-88.234576,35.223598],"land":17667017,"county":"47071"},
 {"id":"4766880","name":"Scotts Hill","kind":"town","point":[-88.257374,35.521319],"land":9494445,"county":"47077"},
 {"id":"4766940","name":"Selmer","kind":"town","point":[-88.599367,35.162558],"land":24733216,"county":"47109"},
 {"id":"4767120","name":"Sevierville","kind":"city","point":[-83.553967,35.855188],"land":63487168,"county":"47155"},

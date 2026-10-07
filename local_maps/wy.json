@@ -80,7 +80,7 @@
 {"id":"5663755","name":"Ranchester","kind":"town","point":[-107.169464,44.90774],"land":1837206,"county":"56033"},
 {"id":"5663900","name":"Rawlins","kind":"city","point":[-107.235049,41.785488],"land":21363011,"county":"56007"},
 {"id":"5666075","name":"Riverside","kind":"town","point":[-106.781227,41.215875],"land":698268,"county":"56007"},
-{"id":"5666220","name":"Riverton","kind":"city","point":[-108.385022,43.027756],"land":26828326,"county":"56013"},
+{"id":"5666220","name":"Riverton","kind":"city","point":[-108.38502,43.027757],"land":26828326,"county":"56013"},
 {"id":"5667090","name":"Rock River","kind":"town","point":[-105.975433,41.734722],"land":6025752,"county":"56001"},
 {"id":"5667235","name":"Rock Springs","kind":"city","point":[-109.244596,41.590642],"land":51158711,"county":"56037"},
 {"id":"5667440","name":"Rolling Hills","kind":"town","point":[-105.845653,42.900609],"land":2187331,"county":"56009"},

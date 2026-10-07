@@ -172,7 +172,7 @@
 {"id":"0849600","name":"Mead","kind":"town","point":[-104.995124,40.228145],"land":40069059,"county":"08123"},
 {"id":"0849875","name":"Meeker","kind":"town","point":[-107.915989,40.039119],"land":9295238,"county":"08103"},
 {"id":"0850040","name":"Merino","kind":"town","point":[-103.353595,40.483465],"land":392679,"county":"08075"},
-{"id":"0850480","name":"Milliken","kind":"town","point":[-104.862713,40.296891],"land":33786654,"county":"08123"},
+{"id":"0850480","name":"Milliken","kind":"town","point":[-104.862747,40.296717],"land":33786654,"county":"08123"},
 {"id":"0850920","name":"Minturn","kind":"town","point":[-106.371765,39.534751],"land":19304788,"county":"08037"},
 {"id":"0851250","name":"Moffat","kind":"town","point":[-105.905576,38.004846],"land":5496240,"county":"08109"},
 {"id":"0851635","name":"Monte Vista","kind":"city","point":[-106.165747,37.58004],"land":6830389,"county":"08105"},

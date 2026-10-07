@@ -365,7 +365,7 @@
 {"id":"1357456","name":"Oconee","kind":"city","point":[-82.962163,32.853505],"land":2940823,"county":"13303"},
 {"id":"1357540","name":"Odum","kind":"city","point":[-82.025462,31.666666],"land":5250303,"county":"13305"},
 {"id":"1357568","name":"Offerman","kind":"city","point":[-82.113137,31.408823],"land":8473069,"county":"13229"},
-{"id":"1357736","name":"Oglethorpe","kind":"city","point":[-84.062621,32.293835],"land":5196019,"county":"13193"},
+{"id":"1357736","name":"Oglethorpe","kind":"city","point":[-84.062616,32.293819],"land":5196019,"county":"13193"},
 {"id":"1358100","name":"Oliver","kind":"city","point":[-81.533156,32.521593],"land":2405580,"county":"13251"},
 {"id":"1358184","name":"Omega","kind":"city","point":[-83.594968,31.338835],"land":4617795,"county":"13277"},
 {"id":"1358296","name":"Orchard Hill","kind":"town","point":[-84.211567,33.186487],"land":920671,"county":"13255"},

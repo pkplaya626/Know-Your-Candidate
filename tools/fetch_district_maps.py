@@ -624,6 +624,24 @@ def _inside(ring, x, y):
     return hit
 
 
+def largest_piece(rings):
+    """``(largest, holes)``: a place's largest piece of land and the rings
+    that are holes in it, in the rings' own coordinates (scale them first:
+    a degree of longitude is not a degree of latitude).
+
+    A hole winds the opposite way to the ring it is cut from (a shapefile's
+    outer rings run clockwise, its holes counter-clockwise) and lies inside
+    it. A separate piece touching the largest at one vertex winds the same
+    way and is not a hole (Awendaw, South Carolina); a hole may touch its
+    outer line at a vertex (Triadelphia, West Virginia), so it is inside if
+    any of its vertices is."""
+    largest = max(rings, key=lambda r: abs(_area(r)))
+    clockwise = _area(largest) < 0
+    holes = [r for r in rings if r is not largest and (_area(r) < 0) != clockwise
+             and any(_inside(largest, x, y) for x, y in r)]
+    return largest, holes
+
+
 def main_piece_point(rings, lon, lat):
     """``(lon, lat, moved)``: the internal point when it lies in the place's
     largest piece of land, else that piece's pole of inaccessibility.
@@ -635,11 +653,14 @@ def main_piece_point(rings, lon, lat):
     for Alvin, Texas it is the USGS point that is out of town.
     """
     scale = math.cos(math.radians(lat))
-    largest = max(rings, key=lambda r: abs(_area([(x * scale, y) for x, y in r])))
-    if _inside(largest, lon, lat):
+    largest, holes = largest_piece([[(x * scale, y) for x, y in r] for r in rings])
+    # In the largest piece and in none of its holes: Daly City's internal
+    # point, tested against the outer line alone, was in unincorporated
+    # Broadmoor, a hole in it.
+    if _inside(largest, lon * scale, lat) and not any(_inside(h, lon * scale, lat) for h in holes):
         return lon, lat, False
-    metres = [(x * scale * 111320.0, y * 110574.0) for x, y in largest]
-    x, y = polylabel([metres])
+    metres = [[(x * 111320.0, y * 110574.0) for x, y in ring] for ring in [largest] + holes]
+    x, y = polylabel(metres)
     return x / (scale * 111320.0), y / 110574.0, True
 
 

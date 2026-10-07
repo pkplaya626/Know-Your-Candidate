@@ -179,7 +179,7 @@ class TestCities(unittest.TestCase):
                                        "NAMELSAD": "Macon-Bibb County"}), ("Macon-Bibb County", ""))
         # Illinois writes some subdivisions' form before the name.
         self.assertEqual(F.legal_form({"GEOID": "4", "NAME": "17", "NAMELSAD": "Precinct 17"}),
-                         ("17", "Precinct"))
+                         ("Precinct 17", "Precinct"))
         with self.assertRaises(SystemExit):
             F.legal_form({"GEOID": "5", "NAME": "Abbott", "NAMELSAD": "Elm city"})
         # The point is inside the largest piece, not an outlying island.
@@ -220,8 +220,9 @@ class TestReviewOfTheCities(unittest.TestCase):
         sys.path.insert(0, os.path.join(ROOT, "tools"))
         import fetch_local_maps as F
         # A square town with a pocket of unincorporated land that touches
-        # its outer line at the pocket's first vertex (Triadelphia, WV).
-        outer = [(0.0, 0.0), (0.01, 0.0), (0.01, 0.01), (0.0, 0.01)]
+        # its outer line at the pocket's first vertex (Triadelphia, WV). As
+        # in a shapefile, the outer ring runs clockwise and the hole counter.
+        outer = [(0.0, 0.0), (0.0, 0.01), (0.01, 0.01), (0.01, 0.0)]
         pocket = [(0.0, 0.0), (0.008, 0.002), (0.008, 0.008), (0.002, 0.008)]
         lon, lat = F.point_of([outer, pocket])
         inside_town = F._inside_ring(outer, lon, lat) and not F._inside_ring(pocket, lon, lat)
@@ -281,7 +282,7 @@ class TestTowns(unittest.TestCase):
         # The Town of Rib Mountain's code is on no subdivision: the village
         # that replaced it shares its name and is not its government.
         self.assertEqual(sorted(rows), ["5507300100"])
-        self.assertEqual(rows["5507300100"][3:], ["Bern", "55073", ["55073", 1]])
+        self.assertEqual(rows["5507300100"][3:], ["Bern", "55073", ["55073", 1], ""])
         self.assertIn("Town of Rib Mountain", " ".join(problems))
 
     def test_a_code_whose_names_disagree_is_not_placed(self):
@@ -312,7 +313,8 @@ class TestTowns(unittest.TestCase):
             refs = [tuple(t[5]) for t in page["towns"].values()]
             self.assertEqual(len(refs), len(set(refs)), code)
             width, height = page["viewBox"][2], page["viewBox"][3]
-            for sid, (x, y, kind, name, county, ref) in page["towns"].items():
+            for sid, (x, y, kind, name, county, ref, status) in page["towns"].items():
+                self.assertIn(status, ("", "B", "C", "G", "I"), (code, sid))
                 gov = listing["counties"][ref[0]]["governments"][ref[1]]
                 self.assertEqual(gov["type"], "township", (code, sid))
                 self.assertEqual(ref[0] + gov["cousub"], sid, (code, sid))
@@ -329,6 +331,61 @@ class TestTowns(unittest.TestCase):
             if not towns:
                 self.assertEqual(page["towns"], {}, code)
         self.assertGreater(placed, 0)
+
+
+class TestReviewOfTheTowns(unittest.TestCase):
+    """What the review of the towns layer found (PR #49)."""
+
+    def _tools(self):
+        sys.path.insert(0, os.path.join(ROOT, "tools"))
+        import fetch_district_maps as M
+        import fetch_local_maps as F
+        return M, F
+
+    def test_a_form_before_the_name_stays_in_it(self):
+        _, F = self._tools()
+        self.assertEqual(F.legal_form({"GEOID": "1", "NAME": "1", "NAMELSAD": "Township 1"}),
+                         ("Township 1", "Township"))
+        # "Precinct P" starts with "P": only a whole word is a name.
+        self.assertEqual(F.legal_form({"GEOID": "2", "NAME": "P", "NAMELSAD": "Precinct P"}),
+                         ("Precinct P", "Precinct"))
+        page = counties.build_state("KS", ROOT, {})
+        numbered = [t[3] for t in page["towns"].values() if t[3][:1].isdigit()]
+        self.assertEqual(numbered, [])
+
+    def test_a_hole_is_decided_by_its_winding(self):
+        M, _ = self._tools()
+        outer = [(0, 0), (0, 10), (10, 10), (10, 0)]                 # clockwise
+        piece = [(10, 0), (10, 5), (15, 5), (15, 0)]                 # clockwise: a separate piece
+        hole = [(0, 0), (8, 2), (8, 8), (2, 8)]                      # counter-clockwise: a hole
+        largest, holes = M.largest_piece([outer, piece, hole])
+        self.assertEqual((largest, holes), (outer, [hole]))
+
+    def test_a_label_point_in_a_hole_is_moved_out(self):
+        M, _ = self._tools()
+        outer = [(0.0, 0.0), (0.0, 0.01), (0.01, 0.01), (0.01, 0.0)]
+        pocket = [(0.004, 0.004), (0.006, 0.004), (0.006, 0.006), (0.004, 0.006)]
+        lon, lat, moved = M.main_piece_point([outer, pocket], 0.005, 0.005)
+        self.assertTrue(moved)
+        self.assertFalse(0.004 < lon < 0.006 and 0.004 < lat < 0.006, (lon, lat))
+
+    def test_a_subdivision_the_census_says_does_not_govern_gets_no_government(self):
+        page = counties.build_state("SD", ROOT, {})
+        self.assertNotIn("4603543140", page["towns"])               # Mitchell, unorganized territory
+        problems = []
+        counties.build(ROOT, ["SD"], problems=problems)
+        self.assertIn("Township of Mitchell", " ".join(problems))
+
+    def test_a_town_listed_under_another_county_is_reported_so(self):
+        problems = []
+        counties.build(ROOT, ["CT"], problems=problems)
+        report = " ".join(problems)
+        self.assertIn("Town of Pomfret (listed under 09180, its subdivision is in 09150)", report)
+        self.assertNotIn("no county subdivision of their code: Town of Pomfret", report)
+
+    def test_a_town_carries_its_functional_status(self):
+        page = counties.build_state("KS", ROOT, {})
+        self.assertEqual(page["towns"]["2011924200"][6], "I")         # Fowler Township, inactive
 
 if __name__ == "__main__":
     unittest.main()

@@ -247,22 +247,45 @@ def build_cities(code, cities, listing, albers, fit, fitted):
     return rows, problems
 
 
+# The functional statuses of a subdivision that governs (census.gov
+# functional status codes): active (A), partially consolidated (B),
+# consolidated (C), subordinate (G), inactive (I). A subdivision the Census
+# calls statistical (S), fictitious (F) or nonfunctioning (N) is not a
+# government's, whatever the listing says: Mitchell, South Dakota is
+# unorganized territory in every Gazetteer since 2015.
+GOVERNING = {"A", "B", "C", "G", "I"}
+
+
 def build_towns(code, cities, listing, albers, fit, drawn):
     """``(rows, problems)``: every county subdivision joined to a town or
-    township government, as ``{GEOID: [x, y, kind, name, county, ref]}``,
-    joined on the listing's own code for it and cross-checked by name."""
+    township government, as ``{GEOID: [x, y, kind, name, county, ref,
+    status]}``, joined on the listing's own code for it, cross-checked by
+    name and by the subdivision's own functional status."""
     subdivisions = {s["id"]: s for s in cities.get("subdivisions") or []}
+    by_code = defaultdict(list)
+    for sub in subdivisions.values():
+        by_code[sub["code"]].append(sub)
     claims = defaultdict(list)
-    unplaced, disputed = [], []
+    unplaced, disputed, misfiled, idle = [], [], [], []
     for fips, entry in sorted(listing["counties"].items()):
         for i, gov in enumerate(entry["governments"]):
             if gov["type"] != "township":
                 continue
             sub = subdivisions.get(fips + gov["cousub"]) if gov.get("cousub") else None
             if not sub:
-                unplaced.append(gov["name"])
+                # The code may be in another county: the listing files the
+                # Town of Pomfret under the wrong Connecticut planning region.
+                elsewhere = [s for s in by_code.get(gov.get("cousub"), [])
+                             if same_town(gov["census"], s["name"])]
+                if len(elsewhere) == 1:
+                    misfiled.append(f"{gov['name']} (listed under {fips}, its subdivision is in "
+                                    f"{elsewhere[0]['county']})")
+                else:
+                    unplaced.append(gov["name"])
             elif not same_town(gov["census"], sub["name"]):
                 disputed.append(f"{gov['name']} (code {sub['code']} is {sub['name']} {sub['kind']})")
+            elif sub.get("status", "A") not in GOVERNING:
+                idle.append(f"{gov['name']} ({sub['name']}: status {sub['status']})")
             else:
                 claims[sub["id"]].append((fips, i))
     rows, problems = {}, []
@@ -276,7 +299,7 @@ def build_towns(code, cities, listing, albers, fit, drawn):
             raise CountiesError(f"{code}: {sub['name']} ({sid}) is off the state's map")
         county = sub["county"] if sub["county"] in drawn else (_county_of(at, drawn) or "")
         rows[sid] = [geo._round(at[0]), geo._round(at[1]), sub["kind"], sub["name"], county,
-                     list(refs[0])]
+                     list(refs[0]), sub.get("status", "")]
     if unplaced:
         problems.append(f"{code}: {len(unplaced)} town or township government(s) with no county "
                         f"subdivision of their code: " + ", ".join(sorted(unplaced)[:12]) +
@@ -284,6 +307,12 @@ def build_towns(code, cities, listing, albers, fit, drawn):
     if disputed:
         problems.append(f"{code}: {len(disputed)} town or township code(s) whose names disagree, "
                         f"not placed: " + "; ".join(sorted(disputed)[:12]))
+    if misfiled:
+        problems.append(f"{code}: {len(misfiled)} town or township government(s) listed under another "
+                        f"county than their subdivision, not placed: " + "; ".join(sorted(misfiled)[:12]))
+    if idle:
+        problems.append(f"{code}: {len(idle)} town or township government(s) on a subdivision the "
+                        f"Census records as not governing, not placed: " + "; ".join(sorted(idle)[:12]))
     if shared:
         problems.append(f"{code}: {len(shared)} county subdivision(s) claimed by two governments, "
                         f"not placed: " + ", ".join(subdivisions[s]["name"] for s in shared[:12]))

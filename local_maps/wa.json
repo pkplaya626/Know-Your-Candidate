@@ -275,7 +275,7 @@
 {"id":"5378925","name":"Wilkeson","kind":"town","point":[-122.052306,47.100928],"land":1207483,"county":"53053"},
 {"id":"5379135","name":"Wilson Creek","kind":"town","point":[-119.115452,47.42349],"land":2500962,"county":"53025"},
 {"id":"5379275","name":"Winlock","kind":"city","point":[-122.886751,46.490118],"land":8755770,"county":"53041"},
-{"id":"5379380","name":"Winthrop","kind":"town","point":[-120.17795,48.467017],"land":2493022,"county":"53047"},
+{"id":"5379380","name":"Winthrop","kind":"town","point":[-120.177954,48.467017],"land":2493022,"county":"53047"},
 {"id":"5379590","name":"Woodinville","kind":"city","point":[-122.146594,47.764547],"land":14541746,"county":"53033"},
 {"id":"5379625","name":"Woodland","kind":"city","point":[-122.75408,45.90814],"land":10651324,"county":"53015"},
 {"id":"5379835","name":"Woodway","kind":"city","point":[-122.385209,47.78317],"land":3244311,"county":"53061"},

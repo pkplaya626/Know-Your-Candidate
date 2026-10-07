@@ -74,7 +74,7 @@
 {"id":"3042700","name":"Laurel","kind":"city","point":[-108.772115,45.671713],"land":6745791,"county":"30111"},
 {"id":"3042850","name":"Lavina","kind":"town","point":[-108.934357,46.294779],"land":2619000,"county":"30037"},
 {"id":"3043375","name":"Lewistown","kind":"city","point":[-109.477673,47.03721],"land":14820801,"county":"30027"},
-{"id":"3043450","name":"Libby","kind":"city","point":[-115.556038,48.38743],"land":4770965,"county":"30053"},
+{"id":"3043450","name":"Libby","kind":"city","point":[-115.555978,48.38743],"land":4770965,"county":"30053"},
 {"id":"3043525","name":"Lima","kind":"town","point":[-112.593038,44.639614],"land":1447776,"county":"30001"},
 {"id":"3043975","name":"Livingston","kind":"city","point":[-110.563532,45.661959],"land":15723487,"county":"30067"},
 {"id":"3044275","name":"Lodge Grass","kind":"town","point":[-107.367784,45.314442],"land":668349,"county":"30003"},

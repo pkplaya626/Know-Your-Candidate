@@ -2939,6 +2939,27 @@ async function testCounties() {
     check("switching the view and picking a city from one link draws the map once", draws === 1, `${draws}`);
     check("and shows the city", once.D.getElementById("localPanelTitle").textContent === "Dallas");
   });
+  const il = await buildPage("counties/il.html", { hash: "#/?view=cities&city=1703154898" });
+  suite("counties/il.html — a township and a village at one point", () => {
+    const body = il.D.getElementById("localPanelBody");
+    const ring = il.D.querySelector('#localMap .district-statewide [data-dot="1703154898"]');
+    const dot = il.D.querySelector('#localMap .district-statewide [data-dot="1754885"]');
+    check("Oak Park Township's panel names the village at the same point",
+      !!body.querySelector('[data-city="1754885"]'), body.textContent.slice(0, 200));
+    check("the ring is drawn over the dot, not under it",
+      !!ring && !!dot && (dot.compareDocumentPosition(ring) & il.window.Node.DOCUMENT_POSITION_FOLLOWING) !== 0);
+  });
+  const ksTown = await buildPage("counties/ks.html", { hash: "#/?view=cities&city=2011924200" });
+  suite("counties/ks.html — a township the Census records as inactive", () => {
+    check("says so, in the Census's words",
+      /records Fowler as an inactive governmental unit/.test(ksTown.D.getElementById("localPanelBody").textContent));
+  });
+  const la = await buildPage("counties/la.html", { hash: "#/?view=cities&city=2205000" });
+  suite("counties/la.html — a status that does not explain a missing government", () => {
+    const text = la.D.getElementById("localPanelBody").textContent;
+    check("Baton Rouge gives its status and says no government could be tied",
+      /partially consolidated/.test(text) && /no entry this site could tie/.test(text), text.slice(0, 240));
+  });
   const hawaii = await buildPage("counties/hi.html");
   suite("counties/hi.html — a state with no incorporated place", () => {
     check("offers no cities view", hawaii.D.querySelector(".segmented").hidden &&

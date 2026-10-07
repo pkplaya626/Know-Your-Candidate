@@ -119,8 +119,8 @@ python build_profile_site.py officers         # lieutenant governors (NLGA), sec
 python build_profile_site.py courts           # each state's highest court, from the court's own roster
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 830 tests, no dependencies
-npm install && npm test                       # 1050 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 836 tests, no dependencies
+npm install && npm test                       # 1054 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -662,7 +662,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (Texarkana: 68810 against 72368), which is why cities are joined by
     name (rule 59) and towns are not. Draw what a reader must find among
     thousands at a size that leaves room: Minnesota's 1,774 township rings
-    at the cities' dot size covered its cities on a phone.
+    at the cities' dot size covered its cities on a phone. A code is not
+    enough on its own: the subdivision must be one the Census says
+    governs (status A, B, C, G or I in its Gazetteer) - Mitchell, South
+    Dakota's township is unorganized territory in every Gazetteer since
+    2015 - and a town listed under another county than its subdivision
+    (the Town of Pomfret, Connecticut) is reported as such, not as missing.
 
 ## District maps
 
