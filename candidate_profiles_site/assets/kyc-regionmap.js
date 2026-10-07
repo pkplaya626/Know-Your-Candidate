@@ -15,15 +15,12 @@
  *     viewBox, regions: {id: {d, at, box, room, label}}, insets, outline, mesh,
  *     look: function (id) { return { cls: "party-r", title: "..." }; },
  *     onSelect: function (id) {},
-<<<<<<< HEAD
- *     // Optional points over the regions - a state's cities - each a dot a
- *     // few pixels across at any width, its name page text in a <title>.
-=======
  *     // Optional points over the regions - a state's cities and towns -
- *     // each a dot a few pixels across at any width. A dot's name is its
- *     // <title>, never SVG text (rule 46).
->>>>>>> e0dbc40abcac113b20d9ab1d67bd78b2a52667bd
- *     dots: function () { return [{ id, at: [x, y], cls, title }]; },
+ *     // each a dot a few pixels across at any width. A dot's name is a
+ *     // <title> made when it is first hovered (2,630 of them drawn up front
+ *     // cost 50 ms on a slowed phone), never SVG text (rule 46).
+ *     dots: function () { return [{ id, at: [x, y], cls, title, px }]; },
+ *     // px: the dot's radius on screen (default DOT_PX).
  *     onDot: function (id) {},
  *   });
  *   map.render();
@@ -51,11 +48,7 @@
     var selected = "";
     var selectedDot = "";
     /* A dot's radius on screen, in pixels; the picked one larger. */
-<<<<<<< HEAD
-    var DOT_PX = 3.2;
-=======
     var DOT_PX = 3.5;
->>>>>>> e0dbc40abcac113b20d9ab1d67bd78b2a52667bd
 
     function meets(box, frame) {
       return box[0] < frame[0] + frame[2] && box[2] > frame[0] &&
@@ -97,14 +90,6 @@
 
     function dots(frame, px) {
       if (!opts.dots) return "";
-<<<<<<< HEAD
-      return '<g class="map-dots">' + opts.dots().filter(function (d) {
-        return within(d.at, frame);
-      }).map(function (d) {
-        var picked = d.id === selectedDot;
-        return '<circle class="map-dot ' + (d.cls || "") + (picked ? " is-focus" : "") + '" cx="' +
-          d.at[0] + '" cy="' + d.at[1] + '" r="' + ((picked ? DOT_PX * 1.7 : DOT_PX) / px).toFixed(2) +
-=======
       var list = opts.dots();
       if (!list.length) return "";
       // The picked dot last, so it is drawn over its neighbours.
@@ -114,11 +99,11 @@
         return d.id === selectedDot && within(d.at, frame);
       })).map(function (d) {
         var picked = d.id === selectedDot;
+        var radius = (d.px || DOT_PX) / px;
         return '<circle class="map-dot ' + (d.cls || "") + (picked ? " is-focus" : "") + '" cx="' +
-          d.at[0] + '" cy="' + d.at[1] + '" r="' + ((picked ? DOT_PX * 1.6 : DOT_PX) / px).toFixed(2) +
->>>>>>> e0dbc40abcac113b20d9ab1d67bd78b2a52667bd
-          '" data-dot="' + KYC.escapeAttr(d.id) + '"><title>' + KYC.escapeHtml(d.title || d.id) +
-          "</title></circle>";
+          d.at[0] + '" cy="' + d.at[1] + '" r="' + (picked ? radius * 1.6 : radius).toFixed(2) +
+          '" data-r="' + radius.toFixed(2) + '" data-dot="' + KYC.escapeAttr(d.id) +
+          '" data-title="' + KYC.escapeAttr(d.title || d.id) + '"></circle>';
       }).join("") + "</g>";
     }
 
@@ -150,7 +135,13 @@
       }).join("");
     }
 
+    var drawn = false;
+    // With no words on the regions, a pick changes nothing but which shape
+    // and dot are marked, so it can mark them in place.
+    var unlabelled = ids.every(function (id) { return !regions[id].label; });
+
     function render() {
+      drawn = true;
       var frame = opts.viewBox;
       target.innerHTML = defs() +
         view(frame, "district-statewide", opts.title || "Map", drawnAt / frame[2]) +
@@ -163,25 +154,60 @@
       render();
     }
 
-<<<<<<< HEAD
-    /* A pick of a dot repaints the map with it larger. */
-=======
->>>>>>> e0dbc40abcac113b20d9ab1d67bd78b2a52667bd
     function setSelectedDot(id) {
       selectedDot = id || "";
       render();
     }
 
-<<<<<<< HEAD
-=======
     /* A region and a dot picked together, in one draw (rule 45). */
-    function select(region, dot) {
-      selected = region || "";
-      selectedDot = dot || "";
-      render();
+    function mark(attr, id, on) {
+      if (!id) return;
+      Array.prototype.forEach.call(target.querySelectorAll("[" + attr + "]"), function (node) {
+        if (node.getAttribute(attr) !== id) return;
+        node.classList.toggle("is-focus", on);
+        if (attr === "data-dot") {
+          var r = +node.getAttribute("data-r");
+          node.setAttribute("r", (on ? r * 1.6 : r).toFixed(2));
+          if (on) node.parentNode.appendChild(node);   // drawn over its neighbours
+        }
+      });
     }
 
->>>>>>> e0dbc40abcac113b20d9ab1d67bd78b2a52667bd
+    /* A region and a dot picked together. On a map with no region labels
+     * and already drawn at this width, only the marks change: redrawing
+     * Minnesota's 2,630 dots for one pick cost 120 ms on a phone slowed 4x
+     * (rule 45). Otherwise - or when the caller has changed what the map
+     * shows (*redraw*) - one draw. */
+    function select(region, dot, redraw) {
+      region = region || "";
+      dot = dot || "";
+      if (redraw || !drawn || !unlabelled) {
+        selected = region;
+        selectedDot = dot;
+        render();
+        return;
+      }
+      if (region !== selected) {
+        mark("data-region", selected, false);
+        mark("data-region", region, true);
+        selected = region;
+      }
+      if (dot !== selectedDot) {
+        mark("data-dot", selectedDot, false);
+        mark("data-dot", dot, true);
+        selectedDot = dot;
+      }
+    }
+
+    target.addEventListener("mouseover", function (event) {
+      var dot = event.target.closest("[data-dot]");
+      if (dot && !dot.firstChild) {
+        var title = doc.createElementNS("http://www.w3.org/2000/svg", "title");
+        title.textContent = dot.getAttribute("data-title");
+        dot.appendChild(title);
+      }
+    });
+
     target.addEventListener("click", function (event) {
       var dot = event.target.closest("[data-dot]");
       if (dot && opts.onDot) {
@@ -206,10 +232,7 @@
       render: render,
       setSelected: setSelected,
       setSelectedDot: setSelectedDot,
-<<<<<<< HEAD
-=======
       select: select,
->>>>>>> e0dbc40abcac113b20d9ab1d67bd78b2a52667bd
       ids: function () { return ids.slice(); },
     };
   }

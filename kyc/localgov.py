@@ -16,6 +16,11 @@ not add up is refused, not shown.
 The listing's names are in capitals ("COUNTY OF AUTAUGA"). They are shown in
 title case for reading - acronyms such as ISD and MUD kept, McX and O'X
 handled - and the published form is kept beside it (``census``).
+
+A town or township keeps the listing's FIPS_PLACE as ``cousub``: for these
+it is the county subdivision's own Census code, which is how the county
+pages place it on the map. A city's FIPS_PLACE is not its place code in the
+boundary files (Texarkana, Texas: 68810 against 72368), so it is not kept.
 """
 
 import datetime
@@ -139,6 +144,8 @@ def parse(workbook_bytes):
                 gov["enrollment"] = enrollment
             if r.get("IS_ACTIVE") == "N":
                 gov["inactive"] = True
+            if kind_here == "township" and re.fullmatch(r"\d{5}", r.get("FIPS_PLACE", "")):
+                gov["cousub"] = r["FIPS_PLACE"]
             state = by_state.setdefault(code, {"counties": {}, "statewide": []})
             county = r.get("FIPS_COUNTY", "")
             if county:

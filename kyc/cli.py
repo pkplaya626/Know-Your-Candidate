@@ -269,6 +269,7 @@ def _build(args):
           f"governments and school systems placed, {local_stats['unmatched']} under county areas "
           f"not on the map; {local_stats['cities']:,} cities and towns, "
           f"{local_stats['cities_joined']:,} joined to their government; "
+          f"{local_stats['towns']:,} town and township governments placed; "
           f"{len(written_local)} file(s) rewritten")
 
     # Who runs each state: governors and party control, checked against NCSL.

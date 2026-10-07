@@ -1,29 +1,25 @@
-<<<<<<< HEAD
-{"state":"NV","source":"U.S. Census Bureau, 2025 cartographic boundary files: places (1:500,000)","places":[{"id":"3206500","name":"Boulder City","kind":"city","lsad":"25","point":[-114.86799,35.87585],"land":549800824},{"id":"3208500","name":"Caliente","kind":"city","lsad":"25","point":[-114.53406,37.64314],"land":137330529},{"id":"3208900","name":"Carlin","kind":"city","lsad":"25","point":[-116.12016,40.71717],"land":27045266},{"id":"3209700","name":"Carson City","kind":"place","lsad":"00","point":[-119.70735,39.1494],"land":374341370},{"id":"3222500","name":"Elko","kind":"city","lsad":"25","point":[-115.78065,40.83439],"land":46219679},{"id":"3223500","name":"Ely","kind":"city","lsad":"25","point":[-114.8834,39.24834],"land":19750114},{"id":"3224100","name":"Fallon","kind":"city","lsad":"25","point":[-118.78319,39.4752],"land":9623754},{"id":"3224900","name":"Fernley","kind":"city","lsad":"25","point":[-119.19616,39.54536],"land":317851100},{"id":"3231900","name":"Henderson","kind":"city","lsad":"25","point":[-114.96989,36.03845],"land":313371409},{"id":"3240000","name":"Las Vegas","kind":"city","lsad":"25","point":[-115.27507,36.26981],"land":367428873},{"id":"3243000","name":"Lovelock","kind":"city","lsad":"25","point":[-118.47751,40.17866],"land":2230210},{"id":"3246000","name":"Mesquite","kind":"city","lsad":"25","point":[-114.13513,36.81311],"land":82267298},{"id":"3251800","name":"North Las Vegas","kind":"city","lsad":"25","point":[-115.14519,36.27367],"land":272857515},{"id":"3260600","name":"Reno","kind":"city","lsad":"25","point":[-119.81082,39.50762],"land":283081084},{"id":"3268400","name":"Sparks","kind":"city","lsad":"25","point":[-119.71273,39.55522],"land":94546169},{"id":"3283000","name":"Wells","kind":"city","lsad":"25","point":[-114.95879,41.11219],"land":17880754},{"id":"3283730","name":"West Wendover","kind":"city","lsad":"25","point":[-114.09775,40.74063],"land":19367713},{"id":"3284800","name":"Winnemucca","kind":"city","lsad":"25","point":[-117.72754,40.96409],"land":25378569},{"id":"3285400","name":"Yerington","kind":"city","lsad":"25","point":[-119.07564,38.93019],"land":76399795}]}
-=======
 {
 "state":"NV",
 "source":"U.S. Census Bureau, 2025 cartographic boundary files of places (1:500,000)",
 "url":"https://www2.census.gov/geo/tiger/GENZ2025/shp/cb_2025_32_place_500k.zip",
 "places":[
-{"id":"3206500","name":"Boulder City","kind":"city","point":[-114.870991,35.872256],"land":549800824},
-{"id":"3208500","name":"Caliente","kind":"city","point":[-114.533281,37.652585],"land":137330529},
-{"id":"3208900","name":"Carlin","kind":"city","point":[-116.113101,40.717127],"land":27045266},
-{"id":"3209700","name":"Carson City","kind":"","point":[-119.693988,39.145665],"land":374341370},
-{"id":"3222500","name":"Elko","kind":"city","point":[-115.756941,40.832815],"land":46219679},
-{"id":"3223500","name":"Ely","kind":"city","point":[-114.884814,39.248109],"land":19750114},
-{"id":"3224100","name":"Fallon","kind":"city","point":[-118.783062,39.475201],"land":9623754},
-{"id":"3224900","name":"Fernley","kind":"city","point":[-119.25844,39.58582],"land":317851100},
-{"id":"3231900","name":"Henderson","kind":"city","point":[-114.957173,36.015668],"land":313371409},
-{"id":"3240000","name":"Las Vegas","kind":"city","point":[-115.276748,36.183626],"land":367428873},
-{"id":"3243000","name":"Lovelock","kind":"city","point":[-118.478183,40.178025],"land":2230210},
-{"id":"3246000","name":"Mesquite","kind":"city","point":[-114.129634,36.814507],"land":82267298},
-{"id":"3251800","name":"North Las Vegas","kind":"city","point":[-115.15704,36.29486],"land":272857515},
-{"id":"3260600","name":"Reno","kind":"city","point":[-119.781211,39.496373],"land":283081084},
-{"id":"3268400","name":"Sparks","kind":"city","point":[-119.730213,39.53994],"land":94546169},
-{"id":"3283000","name":"Wells","kind":"city","point":[-114.961731,41.112387],"land":17880754},
-{"id":"3283730","name":"West Wendover","kind":"city","point":[-114.093198,40.74061],"land":19367713},
-{"id":"3284800","name":"Winnemucca","kind":"city","point":[-117.733384,40.974362],"land":25378569},
-{"id":"3285400","name":"Yerington","kind":"city","point":[-119.071454,38.93192],"land":76399795}
+{"id":"3206500","name":"Boulder City","kind":"city","point":[-114.870991,35.872256],"land":549800824,"county":"32003"},
+{"id":"3208500","name":"Caliente","kind":"city","point":[-114.533281,37.652585],"land":137330529,"county":"32017"},
+{"id":"3208900","name":"Carlin","kind":"city","point":[-116.113101,40.717127],"land":27045266,"county":"32007"},
+{"id":"3209700","name":"Carson City","kind":"","point":[-119.693988,39.145665],"land":374341370,"county":"32510"},
+{"id":"3222500","name":"Elko","kind":"city","point":[-115.756941,40.832815],"land":46219679,"county":"32007"},
+{"id":"3223500","name":"Ely","kind":"city","point":[-114.884814,39.248109],"land":19750114,"county":"32033"},
+{"id":"3224100","name":"Fallon","kind":"city","point":[-118.783062,39.475201],"land":9623754,"county":"32001"},
+{"id":"3224900","name":"Fernley","kind":"city","point":[-119.25844,39.58582],"land":317851100,"county":"32019"},
+{"id":"3231900","name":"Henderson","kind":"city","point":[-114.957173,36.015668],"land":313371409,"county":"32003"},
+{"id":"3240000","name":"Las Vegas","kind":"city","point":[-115.276748,36.183626],"land":367428873,"county":"32003"},
+{"id":"3243000","name":"Lovelock","kind":"city","point":[-118.478183,40.178025],"land":2230210,"county":"32027"},
+{"id":"3246000","name":"Mesquite","kind":"city","point":[-114.129634,36.814507],"land":82267298,"county":"32003"},
+{"id":"3251800","name":"North Las Vegas","kind":"city","point":[-115.15704,36.29486],"land":272857515,"county":"32003"},
+{"id":"3260600","name":"Reno","kind":"city","point":[-119.781211,39.496373],"land":283081084,"county":"32031"},
+{"id":"3268400","name":"Sparks","kind":"city","point":[-119.730213,39.53994],"land":94546169,"county":"32031"},
+{"id":"3283000","name":"Wells","kind":"city","point":[-114.961731,41.112387],"land":17880754,"county":"32007"},
+{"id":"3283730","name":"West Wendover","kind":"city","point":[-114.093198,40.74061],"land":19367713,"county":"32007"},
+{"id":"3284800","name":"Winnemucca","kind":"city","point":[-117.733384,40.974362],"land":25378569,"county":"32013"},
+{"id":"3285400","name":"Yerington","kind":"city","point":[-119.071454,38.93192],"land":76399795,"county":"32019"}
 ]}
->>>>>>> e0dbc40abcac113b20d9ab1d67bd78b2a52667bd

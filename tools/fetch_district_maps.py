@@ -624,6 +624,24 @@ def _inside(ring, x, y):
     return hit
 
 
+def largest_piece(rings):
+    """``(largest, holes)``: a place's largest piece of land and the rings
+    that are holes in it, in the rings' own coordinates (scale them first:
+    a degree of longitude is not a degree of latitude).
+
+    A hole winds the opposite way to the ring it is cut from (a shapefile's
+    outer rings run clockwise, its holes counter-clockwise) and lies inside
+    it. A separate piece touching the largest at one vertex winds the same
+    way and is not a hole (Awendaw, South Carolina); a hole may touch its
+    outer line at a vertex (Triadelphia, West Virginia), so it is inside if
+    any of its vertices is."""
+    largest = max(rings, key=lambda r: abs(_area(r)))
+    clockwise = _area(largest) < 0
+    holes = [r for r in rings if r is not largest and (_area(r) < 0) != clockwise
+             and any(_inside(largest, x, y) for x, y in r)]
+    return largest, holes
+
+
 def main_piece_point(rings, lon, lat):
     """``(lon, lat, moved)``: the internal point when it lies in the place's
     largest piece of land, else that piece's pole of inaccessibility.
@@ -635,17 +653,28 @@ def main_piece_point(rings, lon, lat):
     for Alvin, Texas it is the USGS point that is out of town.
     """
     scale = math.cos(math.radians(lat))
-    largest = max(rings, key=lambda r: abs(_area([(x * scale, y) for x, y in r])))
-    if _inside(largest, lon, lat):
+    largest, holes = largest_piece([[(x * scale, y) for x, y in r] for r in rings])
+    # In the largest piece and in none of its holes: Daly City's internal
+    # point, tested against the outer line alone, was in unincorporated
+    # Broadmoor, a hole in it.
+    if _inside(largest, lon * scale, lat) and not any(_inside(h, lon * scale, lat) for h in holes):
         return lon, lat, False
-    metres = [(x * scale * 111320.0, y * 110574.0) for x, y in largest]
-    x, y = polylabel([metres])
+    metres = [[(x * 111320.0, y * 110574.0) for x, y in ring] for ring in [largest] + holes]
+    x, y = polylabel(metres)
     return x / (scale * 111320.0), y / 110574.0, True
 
 
-def build_places(gazetteer_zip, estimates_csv, shapes_for):
+def _unreadable(name):
+    """A control character or U+FFFD: a letter the source could not write.
+    The estimates file has "Utqiag" + 0x1A + "vik" for Utqiagvik, Alaska."""
+    return any(ord(ch) < 32 or ch == "\ufffd" for ch in name)
+
+
+def build_places(gazetteer_zip, estimates_csv, shapes_for, names_for=None):
     """The places payload. *shapes_for(state fips)* returns ``{GEOID:
-    rings}`` from that state's Census place boundaries, or None."""
+    rings}`` from that state's Census place boundaries, or None;
+    *names_for(state fips)* the boundaries' own ``{GEOID: NAME}``, which
+    stands in for an estimates name the estimates file could not write."""
     archive = zipfile.ZipFile(io.BytesIO(gazetteer_zip))
     lines = archive.read(archive.namelist()[0]).decode("latin-1").splitlines()
     header = [h.strip() for h in lines[0].split("\t")]
@@ -672,6 +701,12 @@ def build_places(gazetteer_zip, estimates_csv, shapes_for):
         if row["STATE"] not in shapes_by_state:
             shapes_by_state[row["STATE"]] = shapes_for(row["STATE"]) or {}
         name = _short_name(row["NAME"])
+        if _unreadable(name):
+            spelled = (names_for(row["STATE"]) or {}).get(geoid, "") if names_for else ""
+            if not spelled or _unreadable(spelled):
+                raise SystemExit(f"{geoid}: the estimates name {row['NAME']!r} has a character the "
+                                 f"file could not write, and no boundary file spells it")
+            name = _short_name(spelled)
         lat, lon = float(point["INTPTLAT"]), float(point["INTPTLONG"])
         rings = shapes_by_state[row["STATE"]].get(geoid)
         if not rings:
@@ -713,14 +748,21 @@ def dump_places(payload):
 
 
 def write_places():
-    def shapes_for(fips):
+    def layer_for(fips):
         try:
-            layer = read_layer(PLACE_SHAPES_URL.format(fips))
+            return read_layer(PLACE_SHAPES_URL.format(fips))
         except urllib.error.HTTPError:
             return None
-        return {row["GEOID"]: rings for row, rings in layer if rings}
 
-    payload = build_places(get(GAZETTEER_URL), get(ESTIMATES_URL), shapes_for)
+    def shapes_for(fips):
+        layer = layer_for(fips)
+        return {row["GEOID"]: rings for row, rings in layer if rings} if layer else None
+
+    def names_for(fips):
+        layer = layer_for(fips)
+        return {row["GEOID"]: row["NAME"] for row, _ in layer} if layer else None
+
+    payload = build_places(get(GAZETTEER_URL), get(ESTIMATES_URL), shapes_for, names_for)
     os.makedirs(OUT_DIR, exist_ok=True)
     with open(PLACES_FILE + ".tmp", "w", encoding="utf-8", newline="\n") as handle:
         handle.write(dump_places(payload))

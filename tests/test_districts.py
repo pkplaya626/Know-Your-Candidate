@@ -342,6 +342,18 @@ def _null_shp(count):
     return head + b"".join(struct.pack(">ii", i + 1, 2) + struct.pack("<i", 0) for i in range(count))
 
 
+# UTF-8 read as Latin-1 turns any letter beyond ASCII into a lead byte's
+# letter (U+00C2-U+00F4: "Ã", "Ì") followed by continuation characters
+# (U+0080-U+00BF): "DoÃ±a", and Utqiagvik's combining dot as "Ì" + U+0087. A
+# letter a source could not write at all is a control character or U+FFFD,
+# raw or as a JSON escape: the Census estimates file's "Utqiag" 0x1A "vik".
+MOJIBAKE = re.compile(
+    "[\u00c2-\u00f4][\u0080-\u00bf]"
+    "|[\u0000-\u0008\u000b\u000c\u000e-\u001f\ufffd]"
+    r"|\\u000(?![9ad])[0-9a-f]|\\u001[0-9a-f]"
+    r"|\\ufffd", re.I)
+
+
 class TestText(unittest.TestCase):
     """A shapefile says its own encoding in its .cpg. Read as Latin-1, the
     Census's UTF-8 put "DoÃ±a Ana County" and sixteen Puerto Rico municipios
@@ -366,9 +378,6 @@ class TestText(unittest.TestCase):
         self.assertEqual(self.layer(None, "latin-1"), ["Doña Ana County", "Mayagüez Municipio"])
 
     def test_no_vendored_or_generated_file_carries_mojibake(self):
-        # UTF-8 read as Latin-1 turns every accented letter into "Ã" or "Â"
-        # followed by a character from U+0080-U+00BF.
-        broken = re.compile("[\u00c2\u00c3][\u0080-\u00bf]")
         folders = ["district_maps", "legislative_maps", "local_maps", "local_governments",
                    os.path.join("candidate_profiles_site", "data")]
         found = []
@@ -378,10 +387,18 @@ class TestText(unittest.TestCase):
                     if not name.endswith((".json", ".js")):
                         continue
                     with open(os.path.join(base, name), encoding="utf-8") as handle:
-                        hit = broken.search(handle.read())
+                        hit = MOJIBAKE.search(handle.read())
                     if hit:
                         found.append(f"{os.path.relpath(os.path.join(base, name), ROOT)}: {hit.group(0)!r}")
         self.assertEqual(found, [])
+
+    def test_the_check_catches_what_it_says(self):
+        for bad in ["DoÃ±a Ana", "Utqiag\u00cc\u0087vik", "Utqiag\u001avik", "Utqiag\\u001avik",
+                    "Ma\ufffdana", "Ma\\ufffdana"]:
+            self.assertTrue(MOJIBAKE.search(bad), repr(bad))
+        for good in ["Doña Ana", "Utqiaġvik", "Mayagüez", "São Tomé", "line\\nbreak", "a\tb\nc",
+                     "x\\u0009y", "\\u00e9"]:
+            self.assertFalse(MOJIBAKE.search(good), repr(good))
 
 
 def square(x0, y0, x1, y1):
