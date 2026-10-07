@@ -3232,6 +3232,64 @@ svg.district-map,
   .local-filter { font-size: 16px; }
 }
 
+/* The cities view: counties a plain ground, every incorporated place a dot
+ * coloured by the legal form the Census names (--cat-*), never a party
+ * colour. A dot keeps a hairline edge at any width. A dot is small to tap
+ * on a phone, so every place is also in the filterable list under the map. */
+.local-page .segmented { margin: 0 0 var(--s-3); }
+.district-shape.region-plain { fill: var(--surface-2); }
+.map-dot {
+  stroke: var(--surface-1);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+  cursor: pointer;
+}
+.map-dot.dot-city { fill: var(--cat-1); }
+.map-dot.dot-town { fill: var(--cat-2); }
+.map-dot.dot-village { fill: var(--cat-3); }
+.map-dot.dot-borough { fill: var(--cat-5); }
+.map-dot.dot-other { fill: var(--cat-4); }
+.map-dot.is-focus { stroke: var(--text); stroke-width: 2px; }
+.swatch.dot-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: var(--s-1);
+  vertical-align: -1px;
+}
+.swatch.dot-city { background: var(--cat-1); }
+.swatch.dot-town { background: var(--cat-2); }
+.swatch.dot-village { background: var(--cat-3); }
+.swatch.dot-borough { background: var(--cat-5); }
+.swatch.dot-other { background: var(--cat-4); }
+.local-pin {
+  display: inline-flex;
+  align-items: center;
+  margin-left: var(--s-1);
+  padding: 2px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  vertical-align: middle;
+}
+.local-pin .icon { width: 14px; height: 14px; }
+@media (hover: hover) { .local-pin:hover { color: var(--accent); } }
+@media (pointer: coarse) { .local-pin { min-width: 32px; min-height: 32px; justify-content: center; } }
+button.local-county-link {
+  display: inline-block;
+  margin-top: var(--s-3);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+#localRoster .local-filter { max-width: 28rem; }
+
 /* ================================================== 20. state government */
 
 /* The map's two groups of views - Congress, and state governments - each
@@ -3331,5 +3389,20 @@ svg.district-map,
 }
 .gov-officer-name { font-weight: 700; color: var(--text); }
 .gov-officer-note { font-size: var(--t-sm); color: var(--text-muted); }
+
+/* A state's highest court: names in two columns where there is room. */
+.gov-court {
+  list-style: none;
+  margin: 0 0 var(--s-2);
+  padding: 0;
+  columns: 2 14rem;
+  column-gap: var(--s-4);
+}
+.gov-court-member {
+  break-inside: avoid;
+  padding: 2px var(--s-1);
+  font-size: var(--t-sm);
+  color: var(--text);
+}
 
 .state-section .stategov { max-width: 46rem; padding: 0; }

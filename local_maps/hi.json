@@ -1,1 +1,11 @@
+<<<<<<< HEAD
 {"state":"HI","source":"U.S. Census Bureau, 2025 cartographic boundary files: places (1:500,000)","places":[]}
+=======
+{
+"state":"HI",
+"source":"U.S. Census Bureau, 2025 cartographic boundary files of places (1:500,000)",
+"url":"https://www2.census.gov/geo/tiger/GENZ2025/shp/cb_2025_15_place_500k.zip",
+"places":[
+
+]}
+>>>>>>> e0dbc40abcac113b20d9ab1d67bd78b2a52667bd

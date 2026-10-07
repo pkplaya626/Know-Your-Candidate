@@ -25,6 +25,7 @@ us_atlas_states_topo.json   ──┤
 district_maps/*.json        ──┤   (every state's districts; tools/fetch_district_maps.py)
 legislative_maps/*.json     ──┤   (state senate and house districts, counties; tools/fetch_legislative_maps.py)
 local_governments/*.json    ──┤   (every local government, from the Census listing; localgov)
+local_maps/*.json           ──┤   (every incorporated place, one point each; tools/fetch_local_maps.py)
 congress_snapshot.json      ──┤
 data/fec_field.json         ──┤   (the FEC's 2026 candidate register)
 data/disclosures.json       ──┤
@@ -37,6 +38,7 @@ data/census_governments.json ─┤
 data/state_legislators.json ──┤
 data/executives.json        ──┤   (every governor, from the NGA)
 data/statewide_officers.json ─┤   (lieutenant governors, secretaries of state, attorneys general)
+data/courts.json            ──┤   (each state's highest court, from the courts)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
@@ -81,8 +83,8 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `disclosures.json`, `primary_results.json`, `committees.json`,
   `campaigns.json`, `enrichment.json`, `odds.json`,
   `census_governments.json`, `state_legislators.json`, `executives.json`,
-  `partisan_composition.json` and `statewide_officers.json` are caches, but
-  they *are* hand-editable. `stategov.js` is generated from the last four.
+  `partisan_composition.json`, `statewide_officers.json` and `courts.json` are caches, but
+  they *are* hand-editable. `stategov.js` is generated from the last five.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them only to check they load the right scripts in the right order; it never
   rewrites them. `states/*.html`, `districts/*.html`, `government/*.html`
@@ -114,14 +116,16 @@ python build_profile_site.py statelegs        # every state legislator (Open Sta
 python build_profile_site.py localgov         # every local government (Census listing), checked
 python build_profile_site.py executives       # every governor (NGA), and NCSL's party counts
 python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS), attorneys general
+python build_profile_site.py courts           # each state's highest court, from the court's own roster
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
-python -m unittest discover tests             # 792 tests, no dependencies
-npm install && npm test                       # 1003 real-DOM checks (needs jsdom)
+python tools/fetch_local_maps.py              # every incorporated place, for the county pages (Census, network)
+python -m unittest discover tests             # 819 tests, no dependencies
+npm install && npm test                       # 1036 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`,
-`officers` and `congress` touch the network, as do the two `tools/fetch_*_maps.py` scripts. Run the
+`officers`, `courts` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -606,6 +610,43 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     directly beside its title - an 80-character window confirmed "former
     attorney general Treg Taylor" on Alaska's page, and a governor standing
     beside the attorney general.
+
+57. **A court's members come from the court.** No national source lists
+    sitting state justices, so `courts.COURTS` holds a recipe per court and
+    `read_court` refuses a roster with more names than seats or two chiefs.
+    Fewer names than seats is "nobody listed by the court", never
+    "vacant" (rule 19). "Chief" is the chief: Arizona's Vice Chief Justice,
+    Utah's and Washington's Associate Chief Justice and Kentucky's Deputy
+    Chief Justice are not, and Utah's page, which names no chief since its
+    chief justice retired, is shown as naming none. A court whose page a
+    script cannot read is in `UNREADABLE` with what was seen, and listed
+    without members - never filled from Wikipedia or Ballotpedia. Recipes
+    run case-insensitively, so a pattern that must see capitals scopes it
+    (`(?-i:...)`): Montana's matched "is" and "was" as names.
+
+58. **A shapefile says its own encoding.** `read_dbf` decoded every layer
+    as Latin-1, dBase's default, and the Census writes UTF-8 and says so in
+    the layer's `.cpg`: "DoÃ±a Ana County" and sixteen Puerto Rico
+    municipios were on the district, legislature and county pages for weeks
+    with nothing failing. `read_layer` honours the `.cpg`, and
+    `test_no_vendored_or_generated_file_carries_mojibake` fails on "Ã" or
+    "Â" followed by a character from U+0080-U+00BF in any map or data file.
+
+59. **A city is joined to its government only one to one.** The Census
+    listing's place codes are not its boundary file's (Texarkana, Texas:
+    68810 against 72368), so `counties.match_cities` joins on the name -
+    within the state, never across one - and only where one place and one
+    government share it, or, for a name shared, where one government of it
+    is filed in the county the place's point lies in. Passes go from
+    strictest to loosest over what the last left: name and legal form (the
+    city and the village of Pewaukee, Wisconsin share a name and a county);
+    name; name without the forms after it ("Phenix City" is the listing's
+    "CITY OF PHENIX"). A place left unjoined is drawn and says so, the
+    government stays under its county, and the build reports both. Never
+    fall back to a town or township of the same name: the Village of Rib
+    Mountain was incorporated in 2023 from a Town of Rib Mountain the 2022
+    listing still holds, and joining them would show a dissolved
+    government as the village's.
 
 ## District maps
 

@@ -35,6 +35,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… localgov` | Every local government from the Census listing, checked against the published counts |
 | `… executives` | Every governor from the NGA, and NCSL's count of each legislature's parties (`--check` reports the caches) |
 | `… officers` | Every lieutenant governor (NLGA) and secretary of state (NASS), cross-checked where the rosters overlap |
+| `… courts` | Each state's highest court and its members, read from the court's own roster |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
 | `… results` | Read each state's primary results from Wikipedia: who is still in |
 | `… results --check` | Report the results from the committed cache; no network |
@@ -52,8 +53,9 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`) |
 | `… refresh` | `fetch`, then `build` |
 | `python tools/fetch_district_maps.py` | Rebuild `district_maps/`: every state's district boundaries, the new 2026 maps, and the towns to label (network) |
+| `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (631 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (1036 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -115,9 +117,10 @@ CI asserts that a rebuild changes nothing.
 | `statelegs.py` | Every state legislator, from Open States, matched to a Census district (the `statelegs` command) |
 | `legislature.py` | Each state's legislature page data: projected districts, close-ups and the members in each |
 | `localgov.py` | Every local government, county by county, from the Census listing (the `localgov` command) |
-| `counties.py` | Each state's counties page data: projected counties and the governments in each |
+| `counties.py` | Each state's counties page data: projected counties, the governments in each, and every incorporated place joined to its government |
 | `executives.py` | Every governor, from the National Governors Association's roster (the `executives` command) |
 | `officers.py` | Lieutenant governors and secretaries of state, from their associations' rosters (the `officers` command) |
+| `courts.py` | Each state's court of last resort and its members, from each court's own page (the `courts` command) |
 | `stategov.py` | Who runs each state: governor, chamber control, trifecta, checked against NCSL |
 | `campaigns.py` | Campaign websites from each candidate's FEC committee |
 | `enrich.py` | Fill filed candidates' gaps from their Wikipedia infobox and campaign site; check every linked campaign site |
@@ -146,9 +149,9 @@ order renders an empty site with no error anywhere.
 | `assets/kyc-state.js` | A state's page, and the directory of states |
 | `assets/kyc-usmap.js` | The map of the states, drawn once for the partisan map and the guide's maps |
 | `assets/kyc-guide.js` | The guide's pages: their maps, and what they show from the data (who leads each committee) |
-| `assets/kyc-regionmap.js` | A map of any regions inside a state (legislative districts now), with labels and close-ups |
+| `assets/kyc-regionmap.js` | A map of any regions inside a state (legislative districts, counties), with labels, close-ups and an optional layer of dots |
 | `assets/kyc-legislature.js` | A state's legislature page: chambers, districts, members |
-| `assets/kyc-local.js` | A state's counties page: every county and every local government in it |
+| `assets/kyc-local.js` | A state's counties page: every county and every local government in it, and every city and town |
 | `assets/kyc-stategov.js` | Governors, legislatures and trifectas: the map's three state views and every state page's section |
 
 Every view has a URL: `#/profile/<id>` for a person,
@@ -1051,6 +1054,36 @@ confirm it. A few offices need another official page
 few a different front door (`OFFICE_LINK`: USA.gov's West Virginia link is a
 404). A page that draws itself with JavaScript concludes nothing.
 
+## State high courts
+
+Every state page's "State government" section, and the map's state panel,
+list the state's court of last resort: its members as the court lists them,
+the chief first, how justices are chosen and for how long (from the guide's
+table), and a link to the court's own roster. Texas and Oklahoma also list
+their Court of Criminal Appeals. No party is shown: a justice is not a
+party's officeholder.
+
+No national source lists sitting state justices - the Conference of Chief
+Justices publishes only its board, and the National Center for State Courts
+has no directory - so each roster is read from the court's own page with a
+recipe in `courts.COURTS`: the page, the slice of it that holds the court,
+and a pattern for one member (or, where the page draws itself with
+JavaScript, the JSON it loads: Florida, Michigan, Minnesota, Oregon). A
+roster with more names than seats, or two chiefs, is refused. Fewer names
+than seats reads "nobody listed by the court" for the rest (California's,
+Hawaii's and South Carolina's on 2026-10-06), never "vacant"; Utah's page
+names no chief justice since Chief Justice Durrant retired, and the page
+says the court lists none. An Associate, Vice or Deputy Chief Justice is not
+the chief.
+
+Ten states' courts cannot be read by a script (`courts.UNREADABLE`):
+Alabama's site resets every connection; Louisiana's draws its justices with
+JavaScript; Massachusetts', Missouri's, New Hampshire's and Tennessee's
+answer with a bot wall or challenge; Connecticut's, Nevada's and New York's
+refuse this pipeline's requests; Rhode Island's publishes only a PDF. Their
+pages name the court and say why its members are not listed, and nothing is
+taken from Wikipedia or Ballotpedia instead.
+
 ## Counties and local governments
 
 Every state has a page for its counties, `counties/<st>.html`: a map of its
@@ -1059,7 +1092,9 @@ every government in the picked county - its county government, cities and
 towns, townships, school districts, special districts (with what each does)
 and the school systems a state, county or city runs - each with its own
 website, city, and population or enrollment where the Census records them.
-`#/?county=48201` opens Harris County as sent. State pages link to it.
+`#/?county=48201` opens Harris County as sent. Each state's page, House
+district map, legislature page and counties page link to one another, so a
+reader can go from the national map down to one town's government and back.
 
 The source is the Census Bureau's 2022 Government Units listing
 (`python build_profile_site.py localgov` writes `local_governments/<st>.json`):
@@ -1076,6 +1111,35 @@ What the listing does not hold is who serves: it names the title of a
 contact official, not the person. No free, authoritative national source
 lists local officials, so the page says what each government is and links
 its own site rather than guessing who runs it.
+
+### Cities and towns
+
+The same page switches to **Cities & towns**: every incorporated place - city,
+town, village, borough - as a dot coloured by the legal form the Census names,
+19,517 in all. Picking one shows its government, with its own site and
+population, and a link to its county; a county's list has a button that shows
+each of its cities on the map, and every place is also in a filterable list
+under the map, since a dot is small to tap on a phone.
+`#/?view=cities&city=4835000` opens Houston as sent.
+
+The places come from the Census Bureau's 2025 place boundaries
+(`python tools/fetch_local_maps.py` writes `local_maps/<st>.json`), with
+census-designated places left out: a CDP is a statistical area, not a
+government. Each is drawn at the pole of inaccessibility of its largest piece
+of land. Hawaii has none - every place there is a CDP - and its page offers no
+cities view.
+
+The listing's place codes are not the boundary file's (Texarkana, Texas:
+68810 against 72368), so a place is joined to its government by name, within
+the state, and only where the join is one to one: in three passes over what
+the last left - name and legal form, name, then name without the forms after
+it ("Phenix City" is the listing's "CITY OF PHENIX") - and, where a name is
+shared, only by the county the place's point lies in. 19,451 places join. The
+rest are places incorporated since the 2022 listing (Mableton, Georgia;
+Mountain House, California), consolidated governments the two sources name
+differently (Baton Rouge's city-parish), and a handful of spellings that
+disagree ("Cajah's Mountain"). They are drawn, say that no government is
+joined, and are reported by the build; nothing is matched to its nearest name.
 
 ## District maps
 

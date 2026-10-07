@@ -255,16 +255,21 @@ def _build(args):
 
     # Each state's counties and their local governments.
     from . import counties as counties_mod
+    city_problems = []
     try:
-        local_maps = counties_mod.build(args.root)
+        local_maps = counties_mod.build(args.root, problems=city_problems)
     except counties_mod.CountiesError as exc:
         print(f"[error] {exc}", file=sys.stderr)
         return 2
+    for problem in city_problems:
+        print(f"  [warn] {problem}")
     written_local = emit.write_local(local_maps, args.root)
     local_stats = counties_mod.stats(local_maps)
     print(f"[ok] counties: {local_stats['counties']:,} counties, {local_stats['governments']:,} "
           f"governments and school systems placed, {local_stats['unmatched']} under county areas "
-          f"not on the map; {len(written_local)} file(s) rewritten")
+          f"not on the map; {local_stats['cities']:,} cities and towns, "
+          f"{local_stats['cities_joined']:,} joined to their government; "
+          f"{len(written_local)} file(s) rewritten")
 
     # Who runs each state: governors and party control, checked against NCSL.
     from . import stategov
@@ -1033,6 +1038,41 @@ def _localgov(args):
     return 0
 
 
+def _courts(args):
+    """Every state's court of last resort and who sits on it, read from each
+    court's own roster (kyc/courts.py)."""
+    from . import courts
+    from .government_maps import STATES
+    if args.check:
+        cache = courts.load_cache(args.root)
+        if not cache:
+            print(f"[error] no {courts.CACHE_PATH}; run 'courts'", file=sys.stderr)
+            return 2
+        read, problems = cache["courts"], []
+    else:
+        read, problems = courts.fetch()
+        # A court that could not be read this time keeps its last good read
+        # (rule 8): a timeout is not a court with no members.
+        before = (courts.load_cache(args.root) or {}).get("courts", {})
+        for code in sorted(set(courts.COURTS) - set(read)):
+            if code in before:
+                read[code] = before[code]
+                problems.append(f"{code}: kept the last good read")
+        problems.extend(courts.shrunk(before, read))
+    for code, court in sorted(read.items()):
+        short = court["seats"] - court["listed"]
+        print(f"  {code}: {court['listed']} of {court['seats']}" + (f" ({short} with nobody listed)"
+              if short else "") + (f"; chief {court['chief']}" if court["chief"] else "; no chief listed"))
+    missing = [c for c in STATES if c not in read and c not in courts.UNREADABLE]
+    for problem in problems:
+        print(f"  [warn] {problem}")
+    print(f"  {len(read)} courts read; {len(courts.UNREADABLE)} cannot be read by a script"
+          + (f"; no recipe or no result for {', '.join(missing)}" if missing else ""))
+    if not args.check:
+        print(f"[ok] wrote {courts.save_cache(read, args.root)}")
+    return 0
+
+
 def _officers(args):
     """Every lieutenant governor and secretary of state, from the NLGA's and
     NASS's own rosters, cross-checked where they overlap (kyc/officers.py)."""
@@ -1319,6 +1359,10 @@ def build_parser():
 
     local = add("localgov", help="every local government, county by county (Census listing)")
 
+    courts_cmd = add("courts", help="every state's highest court and its members, from the courts")
+    courts_cmd.add_argument("--check", action="store_true",
+                            help="report the committed cache; make no network call")
+
     officers_cmd = add("officers", help="every lieutenant governor and secretary of state (NLGA, NASS)")
     officers_cmd.add_argument("--check", action="store_true",
                               help="report the committed cache; make no network call")
@@ -1370,6 +1414,8 @@ def main(argv=None):
         return _localgov(args)
     if args.command == "executives":
         return _executives(args)
+    if args.command == "courts":
+        return _courts(args)
     if args.command == "officers":
         return _officers(args)
     if args.command == "verify":

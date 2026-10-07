@@ -86,5 +86,103 @@ class TestCountyPages(unittest.TestCase):
                                "Local Fire Protection", "inactive"])
 
 
+
+class TestCities(unittest.TestCase):
+    """A place is joined to its government by name only where the join is
+    one to one; anything else is reported and left unjoined (rule 51)."""
+
+    def test_names_reduce_alike_on_both_sides(self):
+        same = [("CITY OF JERSEY CITY", "Jersey City"), ("CITY OF THE COLONY", "The Colony"),
+                ("TOWN OF CITY OF CREEDE", "City of Creede"), ("CITY OF ST. GEORGE", "St. George"),
+                ("CITY OF SAINT PAUL", "St. Paul"),
+                ("CITY OF EL PASO DE ROBLES", "El Paso de Robles (Paso Robles)"),
+                ("CITY OF LA CANADA FLINTRIDGE", "La Cañada Flintridge")]
+        for listed, drawn in same:
+            self.assertEqual(counties.city_key(listed), counties.city_key(drawn), (listed, drawn))
+        # Forms after the name count only in the looser pass.
+        self.assertNotEqual(counties.city_key("CITY OF PHENIX"), counties.city_key("Phenix City"))
+        self.assertEqual(counties.city_key("CITY OF PHENIX", True), counties.city_key("Phenix City", True))
+        self.assertEqual(counties.city_key("UNIFIED GOVERNMENT OF ATHENS-CLARKE COUNTY", True),
+                         counties.city_key("Athens-Clarke County unified government", True))
+
+    def test_a_join_is_one_to_one_or_not_made(self):
+        places = [("p1", "springfield", "c1"), ("p2", "springfield", "c2"),
+                  ("p3", "salem", "c1"), ("p4", "salem", "c1"), ("p5", "dover", "c3")]
+        governments = [("g1", "springfield", "c1"), ("g2", "springfield", "c2"),
+                       ("g3", "salem", "c1"), ("g5", "dover", "c9")]
+        joined = counties.match_cities(places, governments)
+        # A shared name is told apart by the county the point lies in; a
+        # name and a county shared by two places is not told apart at all;
+        # a name one place and one government share is joined wherever its
+        # government is filed.
+        self.assertEqual(joined, {"p1": "g1", "p2": "g2", "p5": "g5"})
+
+    def test_two_governments_of_one_name_in_one_county_join_neither(self):
+        joined = counties.match_cities([("p1", "pewaukee", "55133")],
+                                       [("g1", "pewaukee", "55133"), ("g2", "pewaukee", "55133")])
+        self.assertEqual(joined, {})
+
+    def test_the_legal_form_tells_a_city_from_a_village_of_one_name(self):
+        self.assertEqual(counties.listing_form("CITY OF PEWAUKEE"), "city")
+        self.assertEqual(counties.listing_form("VILLAGE OF PEWAUKEE"), "village")
+        self.assertEqual(counties.listing_form("METRO TOWNSHIP OF KEARNS"), "")
+        page = counties.build_state("WI", ROOT, {})
+        listing = localgov.load("WI", ROOT)
+        pewaukee = {c[2]: listing["counties"][c[5][0]]["governments"][c[5][1]]["census"]
+                    for c in page["cities"].values() if c[3] == "Pewaukee" and c[5]}
+        self.assertEqual(pewaukee, {"city": "CITY OF PEWAUKEE", "village": "VILLAGE OF PEWAUKEE"})
+
+    def test_every_join_in_every_state_names_a_municipal_government_once(self):
+        from kyc.government_maps import STATES
+        problems = []
+        maps = counties.build(ROOT, problems=problems)
+        self.assertEqual(sorted(maps), sorted(STATES))
+        for code, page in maps.items():
+            refs = [tuple(c[5]) for c in page["cities"].values() if c[5]]
+            self.assertEqual(len(refs), len(set(refs)), code)
+            listing = localgov.load(code, ROOT)
+            for fips, i in refs:
+                self.assertEqual(listing["counties"][fips]["governments"][i]["type"], "municipal",
+                                 (code, fips, i))
+            width, height = page["viewBox"][2], page["viewBox"][3]
+            for pid, (x, y, kind, name, county, ref) in page["cities"].items():
+                self.assertTrue(0 <= x <= width and 0 <= y <= height, (code, name))
+                self.assertTrue(not county or county in page["counties"], (code, name))
+            # Every place left unjoined is in what the build reports.
+            unjoined = [c[3] for c in page["cities"].values() if not c[5]]
+            if unjoined:
+                report = " ".join(p for p in problems if p.startswith(f"{code}: "))
+                for name in unjoined[:12]:
+                    self.assertIn(name, report, code)
+        self.assertNotIn("problems", maps["TX"])
+
+    def test_hawaii_has_counties_and_no_incorporated_place(self):
+        page = counties.build_state("HI", ROOT, {})
+        self.assertEqual(page["cities"], {})
+        self.assertTrue(page["counties"])
+
+    def test_a_consolidated_remainder_keeps_its_own_name(self):
+        import json
+        with open(os.path.join(ROOT, counties.CITIES_DIR, "ct.json"), encoding="utf-8") as handle:
+            places = {p["id"]: p for p in json.load(handle)["places"]}
+        self.assertEqual((places["0947515"]["name"], places["0947515"]["kind"]), ("Milford city", "balance"))
+
+    def test_the_place_file_names_its_legal_forms_from_the_census(self):
+        sys.path.insert(0, os.path.join(ROOT, "tools"))
+        import fetch_local_maps as F
+        self.assertEqual(F.legal_form({"GEOID": "1", "NAME": "Abbott", "NAMELSAD": "Abbott city"}),
+                         ("Abbott", "city"))
+        self.assertEqual(F.legal_form({"GEOID": "2", "NAME": "Milford city (balance)",
+                                       "NAMELSAD": "Milford city (balance)"}), ("Milford city", "balance"))
+        self.assertEqual(F.legal_form({"GEOID": "3", "NAME": "Macon-Bibb County",
+                                       "NAMELSAD": "Macon-Bibb County"}), ("Macon-Bibb County", ""))
+        with self.assertRaises(SystemExit):
+            F.legal_form({"GEOID": "4", "NAME": "Abbott", "NAMELSAD": "City of Abbott"})
+        # The point is inside the largest piece, not an outlying island.
+        main = [(0.0, 0.0), (0.1, 0.0), (0.1, 0.1), (0.0, 0.1)]
+        island = [(1.0, 1.0), (1.001, 1.0), (1.001, 1.001), (1.0, 1.001)]
+        lon, lat = F.point_of([island, main])
+        self.assertTrue(0 < lon < 0.1 and 0 < lat < 0.1, (lon, lat))
+
 if __name__ == "__main__":
     unittest.main()

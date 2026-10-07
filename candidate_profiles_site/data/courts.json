@@ -1,0 +1,618 @@
+{
+ "courts": {
+  "AK": {
+   "chief": "Susan M. Carney",
+   "listed": 5,
+   "members": [
+    "Susan M. Carney",
+    "Dario Borghesan",
+    "Jennifer S. Henderson",
+    "Jude Pate",
+    "Aimee A. Oravec"
+   ],
+   "seats": 5,
+   "url": "https://courts.alaska.gov/judges/index.htm"
+  },
+  "AR": {
+   "chief": "Karen R. Baker",
+   "listed": 7,
+   "members": [
+    "Karen R. Baker",
+    "Courtney Rae Hudson",
+    "Cody Hiland",
+    "Barbara Webb",
+    "Shawn A. Womack",
+    "Nicholas Bronni",
+    "Rhonda K. Wood"
+   ],
+   "seats": 7,
+   "url": "https://www.arcourts.gov/courts/supreme-court/justices"
+  },
+  "AZ": {
+   "chief": "Ann A. Scott Timmer",
+   "listed": 7,
+   "members": [
+    "Ann A. Scott Timmer",
+    "John R. Lopez IV",
+    "Clint Bolick",
+    "James P. Beene",
+    "William G. Montgomery",
+    "Kathryn H. King",
+    "Maria Elena Cruz"
+   ],
+   "seats": 7,
+   "url": "https://www.azcourts.gov/meetthejustices"
+  },
+  "CA": {
+   "chief": "Patricia Guerrero",
+   "listed": 6,
+   "members": [
+    "Patricia Guerrero",
+    "Carol A. Corrigan",
+    "Goodwin H. Liu",
+    "Leondra R. Kruger",
+    "Joshua P. Groban",
+    "Kelli M. Evans"
+   ],
+   "seats": 7,
+   "url": "https://supreme.courts.ca.gov/about-court/justices-court"
+  },
+  "CO": {
+   "chief": "Monica M. Márquez",
+   "listed": 7,
+   "members": [
+    "Monica M. Márquez",
+    "Brian D. Boatright",
+    "William W. Hood, III",
+    "Richard L. Gabriel",
+    "Carlos A. Samour, Jr.",
+    "Maria E. Berkenkotter",
+    "Susan Blanco"
+   ],
+   "seats": 7,
+   "url": "https://www.coloradojudicial.gov/supreme-court/supreme-court-judges-and-staff"
+  },
+  "DE": {
+   "chief": "Collins J. Seitz, Jr.",
+   "listed": 5,
+   "members": [
+    "Collins J. Seitz, Jr.",
+    "Gary F. Traynor",
+    "Abigail M. LeGrow",
+    "N. Christopher Griffiths",
+    "Morgan T. Zurn"
+   ],
+   "seats": 5,
+   "url": "https://courts.delaware.gov/supreme/justices.aspx"
+  },
+  "FL": {
+   "chief": "John D. Couriel",
+   "listed": 7,
+   "members": [
+    "John D. Couriel",
+    "Jorge Labarga",
+    "Carlos G. Muñiz",
+    "Jamie R. Grosshans",
+    "Renatha S. Francis",
+    "Meredith L. Barrios",
+    "Adam Tanenbaum"
+   ],
+   "seats": 7,
+   "url": "https://supremecourt.flcourts.gov/Justices"
+  },
+  "GA": {
+   "chief": "Nels S.D. Peterson",
+   "listed": 9,
+   "members": [
+    "Nels S.D. Peterson",
+    "Sarah Hawkins Warren",
+    "Charles J. Bethel",
+    "John J. Ellington",
+    "Carla Wong McMillian",
+    "Shawn Ellen LaGrua",
+    "Verda M. Colvin",
+    "Andrew A. Pinson",
+    "Benjamin A. Land"
+   ],
+   "seats": 9,
+   "url": "https://www.gasupreme.us/court-information/biographies/"
+  },
+  "HI": {
+   "chief": "Vladimir P. Devens",
+   "listed": 4,
+   "members": [
+    "Vladimir P. Devens",
+    "Sabrina S. McKenna",
+    "Todd W. Eddins",
+    "Lisa M. Ginoza"
+   ],
+   "seats": 5,
+   "url": "https://www.courts.state.hi.us/courts/supreme/justices/justices"
+  },
+  "IA": {
+   "chief": "Susan Christensen",
+   "listed": 7,
+   "members": [
+    "Susan Christensen",
+    "Thomas D. Waterman",
+    "Edward M. Mansfield",
+    "Christopher McDonald",
+    "Dana Oxley",
+    "Matthew McDermott",
+    "David May"
+   ],
+   "seats": 7,
+   "url": "https://www.iowacourts.gov/iowa-courts/supreme-court/justices/"
+  },
+  "ID": {
+   "chief": "Robyn M. Brody",
+   "listed": 5,
+   "members": [
+    "Robyn M. Brody",
+    "G. Richard Bevan",
+    "Gregory W. Moeller",
+    "Colleen D. Zahn",
+    "Cynthia K.C. Meyer"
+   ],
+   "seats": 5,
+   "url": "https://isc.idaho.gov/about-the-courts/sc-justices"
+  },
+  "IL": {
+   "chief": "P. Scott Neville, Jr.",
+   "listed": 7,
+   "members": [
+    "P. Scott Neville, Jr.",
+    "David K. Overstreet",
+    "Lisa Holder White",
+    "Joy V. Cunningham",
+    "Elizabeth M. Rochford",
+    "Mary K. O'Brien",
+    "Sanjay T. Tailor"
+   ],
+   "seats": 7,
+   "url": "https://www.illinoiscourts.gov/courts/supreme-court/meet-the-justices/"
+  },
+  "IN": {
+   "chief": "Loretta H. Rush",
+   "listed": 5,
+   "members": [
+    "Loretta H. Rush",
+    "Mark S. Massa",
+    "Geoffrey G. Slaughter",
+    "Christopher M. Goff",
+    "Derek R. Molter"
+   ],
+   "seats": 5,
+   "url": "https://www.in.gov/courts/supreme/justices/"
+  },
+  "KS": {
+   "chief": "Eric S. Rosen",
+   "listed": 7,
+   "members": [
+    "Eric S. Rosen",
+    "Dan Biles",
+    "Caleb Stegall",
+    "K.J. Wall",
+    "Melissa Taylor Standridge",
+    "Larkin Walsh",
+    "K. Christopher Jayaram"
+   ],
+   "seats": 7,
+   "url": "https://www.kscourts.gov/About-the-Courts/Supreme-Court/Supreme-Court-Justices"
+  },
+  "KY": {
+   "chief": "Debra Hembree Lambert",
+   "listed": 7,
+   "members": [
+    "Debra Hembree Lambert",
+    "Robert B. Conley",
+    "C. Shea Nickell",
+    "Kelly Thompson",
+    "Angela McCormick Bisig",
+    "Pamela R. Goodwine",
+    "Michelle M. Keller"
+   ],
+   "seats": 7,
+   "url": "https://www.kycourts.gov/Courts/Supreme-Court/Pages/default.aspx"
+  },
+  "MD": {
+   "chief": "Matthew Fader",
+   "listed": 7,
+   "members": [
+    "Matthew Fader",
+    "Shirley M. Watts",
+    "Brynja M. Booth",
+    "Jonathan Biran",
+    "Steven B. Gould",
+    "Angela M. Eaves",
+    "Peter K. Killough"
+   ],
+   "seats": 7,
+   "url": "https://www.mdcourts.gov/scm/justices"
+  },
+  "ME": {
+   "chief": "Valerie Stanfill",
+   "listed": 7,
+   "members": [
+    "Valerie Stanfill",
+    "Andrew M. Mead",
+    "Catherine R. Connors",
+    "Rick E. Lawrence",
+    "Wayne R. Douglas",
+    "Julia M. Lipez",
+    "Christopher C. Taub"
+   ],
+   "seats": 7,
+   "url": "https://www.courts.maine.gov/courts/sjc/justices.html"
+  },
+  "MI": {
+   "chief": "Megan K. Cavanagh",
+   "listed": 7,
+   "members": [
+    "Megan K. Cavanagh",
+    "Brian K. Zahra",
+    "Richard Bernstein",
+    "Elizabeth M. Welch",
+    "Kyra H. Bolden",
+    "Kimberly A. Thomas",
+    "Noah P. Hood"
+   ],
+   "seats": 7,
+   "url": "https://www.courts.michigan.gov/courts/supreme-court/justices/"
+  },
+  "MN": {
+   "chief": "Theodora Karin Gaïtas",
+   "listed": 7,
+   "members": [
+    "Theodora Karin Gaïtas",
+    "Anne K. McKeig",
+    "Paul C. Thissen",
+    "Gordon L. Moore, III",
+    "Karl C. Procaccini",
+    "Sarah E. Hennesy",
+    "Reynaldo A. Aligada, Jr."
+   ],
+   "seats": 7,
+   "url": "https://mncourts.gov/supremecourt/supreme-court-justices"
+  },
+  "MS": {
+   "chief": "Michael K. Randolph",
+   "listed": 9,
+   "members": [
+    "Michael K. Randolph",
+    "Leslie D. King",
+    "Josiah D. Coleman",
+    "David M. Ishee",
+    "T. Kenneth Griffis",
+    "David P. Sullivan",
+    "Jenifer B. Branning",
+    "Celeste Embrey Wilson",
+    "Amanda Jones Tollison"
+   ],
+   "seats": 9,
+   "url": "https://courts.ms.gov/appellatecourts/sc/scjustices.php"
+  },
+  "MT": {
+   "chief": "Cory Swanson",
+   "listed": 7,
+   "members": [
+    "Cory Swanson",
+    "James Jeremiah Shea",
+    "Laurie McKinnon",
+    "Beth Baker",
+    "Katherine M. Bidegaray",
+    "James A. Rice",
+    "Ingrid Gustafson"
+   ],
+   "seats": 7,
+   "url": "https://courts.mt.gov/Courts/Supreme/About/bios/"
+  },
+  "NC": {
+   "chief": "Paul Newby",
+   "listed": 7,
+   "members": [
+    "Paul Newby",
+    "Anita Earls",
+    "Philip Berger Jr.",
+    "Tamara Barringer",
+    "Richard Dietz",
+    "Trey Allen",
+    "Allison Riggs"
+   ],
+   "seats": 7,
+   "url": "https://www.nccourts.gov/courts/supreme-court/meet-the-justices"
+  },
+  "ND": {
+   "chief": "Lisa K. Fair McEvers",
+   "listed": 5,
+   "members": [
+    "Lisa K. Fair McEvers",
+    "Jerod E. Tufte",
+    "Jon J. Jensen",
+    "Douglas A. Bahr",
+    "Mark A. Friese"
+   ],
+   "seats": 5,
+   "url": "https://www.ndcourts.gov/supreme-court/justices"
+  },
+  "NE": {
+   "chief": "Jeffrey J. Funke",
+   "listed": 7,
+   "members": [
+    "Jeffrey J. Funke",
+    "Stephanie F. Stacy",
+    "Derek R. Vaughn",
+    "William B. Cassel",
+    "Jonathan J. Papik",
+    "Jason M. Bergevin",
+    "John R. Freudenberg"
+   ],
+   "seats": 7,
+   "url": "https://nebraskajudicial.gov/courts/supreme-court/supreme-court-justices"
+  },
+  "NJ": {
+   "chief": "Stuart Rabner",
+   "listed": 7,
+   "members": [
+    "Stuart Rabner",
+    "Anne M. Patterson",
+    "Fabiana Pierre-Louis",
+    "Rachel Wainer Apter",
+    "Douglas M. Fasciale",
+    "Michael Noriega",
+    "John Jay Hoffman"
+   ],
+   "seats": 7,
+   "url": "https://www.njcourts.gov/public/museum/meet-the-justices"
+  },
+  "NM": {
+   "chief": "Julie J. Vargas",
+   "listed": 5,
+   "members": [
+    "Julie J. Vargas",
+    "Michael E. Vigil",
+    "C. Shannon Bacon",
+    "David K. Thomson",
+    "Briana H. Zamora"
+   ],
+   "seats": 5,
+   "url": "https://supremecourt.nmcourts.gov/about-this-court/supreme-court-justices/"
+  },
+  "OH": {
+   "chief": "Sharon L. Kennedy",
+   "listed": 7,
+   "members": [
+    "Sharon L. Kennedy",
+    "Patrick F. Fischer",
+    "R. Patrick DeWine",
+    "Jennifer Brunner",
+    "Joseph T. Deters",
+    "Daniel R. Hawkins",
+    "Megan E. Shanahan"
+   ],
+   "seats": 7,
+   "url": "https://www.supremecourt.ohio.gov/courts/judicial-system/supreme-court-of-ohio/justices-overview/"
+  },
+  "OK": {
+   "chief": "Dustin P. Rowe",
+   "listed": 9,
+   "members": [
+    "Dustin P. Rowe",
+    "Dana Kuehn",
+    "James R. Winchester",
+    "James E. Edmondson",
+    "Douglas L. Combs",
+    "Noma Gurich",
+    "Richard Darby",
+    "M. John Kane IV",
+    "Travis Jett"
+   ],
+   "seats": 9,
+   "url": "https://oksc.oscn.net/justices/"
+  },
+  "OK-CCA": {
+   "chief": "Gary L. Lumpkin",
+   "listed": 5,
+   "members": [
+    "Gary L. Lumpkin",
+    "William J. Musseman",
+    "David B. Lewis",
+    "Robert L. Hudson",
+    "Scott Rowland"
+   ],
+   "seats": 5,
+   "url": "https://www.okcca.net/judges/"
+  },
+  "OR": {
+   "chief": "Meagan A. Flynn",
+   "listed": 7,
+   "members": [
+    "Stephen K. Bushong",
+    "Christopher L. Garrett",
+    "Bronson D. James",
+    "Roger J. DeHoog",
+    "Meagan A. Flynn",
+    "Rebecca A. Duncan",
+    "Aruna A. Masih"
+   ],
+   "seats": 7,
+   "url": "https://www.courts.oregon.gov/courts/appellate/supreme/Pages/justices.aspx"
+  },
+  "PA": {
+   "chief": "Debra Todd",
+   "listed": 7,
+   "members": [
+    "Debra Todd",
+    "Christine Donohue",
+    "Kevin M. Dougherty",
+    "David N. Wecht",
+    "Sallie Updyke Mundy",
+    "P. Kevin Brobson",
+    "Daniel D. McCaffery"
+   ],
+   "seats": 7,
+   "url": "https://www.pacourts.us/courts/supreme-court/supreme-court-justices"
+  },
+  "SC": {
+   "chief": "John W. Kittredge",
+   "listed": 4,
+   "members": [
+    "John W. Kittredge",
+    "George C. James, Jr.",
+    "D. Garrison Hill",
+    "Letitia H. Verdin"
+   ],
+   "seats": 5,
+   "url": "https://www.sccourts.org/courts/supreme-court/justices/"
+  },
+  "SD": {
+   "chief": "Steven R. Jensen",
+   "listed": 5,
+   "members": [
+    "Steven R. Jensen",
+    "Mark E. Salter",
+    "Patricia J. DeVaney",
+    "Scott P. Myren",
+    "Robert Gusinsky"
+   ],
+   "seats": 5,
+   "url": "https://ujs.sd.gov/supreme-court/"
+  },
+  "TX": {
+   "chief": "Jimmy Blacklock",
+   "listed": 9,
+   "members": [
+    "Jimmy Blacklock",
+    "Debra Lehrmann",
+    "John Phillip Devine",
+    "Brett Busby",
+    "Jane Bland",
+    "Rebeca Aizpuru Huddle",
+    "Evan A. Young",
+    "James P. Sullivan",
+    "Kyle D. Hawkins"
+   ],
+   "seats": 9,
+   "url": "https://www.txcourts.gov/supreme/about-the-court/justices/"
+  },
+  "TX-CCA": {
+   "chief": "David J. Schenck",
+   "listed": 9,
+   "members": [
+    "David J. Schenck",
+    "Bert Richardson",
+    "Kevin Yeary",
+    "David Newell",
+    "Mary Lou Keel",
+    "Scott Walker",
+    "Jesse F. McClure, III",
+    "Lee Finley",
+    "Gina G. Parker"
+   ],
+   "seats": 9,
+   "url": "https://www.txcourts.gov/cca/about-the-court/judges/"
+  },
+  "UT": {
+   "chief": "",
+   "listed": 7,
+   "members": [
+    "Jill M. Pohlman",
+    "John Nielsen",
+    "Stephen P. Dent",
+    "Michael R. Menssen",
+    "Paige Petersen",
+    "Jay T. Jorgensen",
+    "Matthew L. Bell"
+   ],
+   "seats": 7,
+   "url": "https://www.utcourts.gov/en/courts/other-court-info/judges-bios/appellate-courts/supreme-court.html"
+  },
+  "VA": {
+   "chief": "Cleo E. Powell",
+   "listed": 7,
+   "members": [
+    "Cleo E. Powell",
+    "D. Arthur Kelsey",
+    "Stephen R. McCullough",
+    "Teresa M. Chafin",
+    "Wesley G. Russell Jr.",
+    "Thomas P. Mann",
+    "Junius P. Fulton, III"
+   ],
+   "seats": 7,
+   "url": "https://www.vacourts.gov/courts/scv/home"
+  },
+  "VT": {
+   "chief": "Paul L. Reiber",
+   "listed": 5,
+   "members": [
+    "Paul L. Reiber",
+    "Harold E. Eaton, Jr.",
+    "Nancy J. Waples",
+    "Christina E. Nolan",
+    "Michael P. Drescher"
+   ],
+   "seats": 5,
+   "url": "https://www.vtcourts.gov/supreme-court"
+  },
+  "WA": {
+   "chief": "Debra L. Stephens",
+   "listed": 9,
+   "members": [
+    "Debra L. Stephens",
+    "Charles W. Johnson",
+    "Steven C. González",
+    "Sheryl Gordon McCloud",
+    "Raquel Montoya-Lewis",
+    "G. Helen Whitener",
+    "Salvador A. Mungia",
+    "Colleen M. Melody",
+    "Theodore J. Angelis"
+   ],
+   "seats": 9,
+   "url": "https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices"
+  },
+  "WI": {
+   "chief": "Jill J. Karofsky",
+   "listed": 7,
+   "members": [
+    "Jill J. Karofsky",
+    "Annette Kingsland Ziegler",
+    "Rebecca Frank Dallet",
+    "Brian Hagedorn",
+    "Janet C. Protasiewicz",
+    "Susan M. Crawford",
+    "Chris Taylor"
+   ],
+   "seats": 7,
+   "url": "https://www.wicourts.gov/courts/supreme/justices/index.htm"
+  },
+  "WV": {
+   "chief": "C. Haley Bunn",
+   "listed": 5,
+   "members": [
+    "C. Haley Bunn",
+    "William R. Wooton",
+    "Charles S. Trump, IV",
+    "H.L. Kirkpatrick",
+    "James W. Flanigan"
+   ],
+   "seats": 5,
+   "url": "https://www.courtswv.gov/appellate-courts/supreme-court-of-appeals/justices-staff"
+  },
+  "WY": {
+   "chief": "Lynne Boomgaarden",
+   "listed": 5,
+   "members": [
+    "Lynne Boomgaarden",
+    "Kari Gray",
+    "John G. Fenn",
+    "Robert C. Jarosh",
+    "Bridget Hill"
+   ],
+   "seats": 5,
+   "url": "https://www.wyocourts.gov/supreme-court/"
+  }
+ },
+ "fetched": "2026-10-06T06:09:36+00:00"
+}

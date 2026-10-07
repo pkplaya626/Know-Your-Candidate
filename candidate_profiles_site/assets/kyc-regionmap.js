@@ -15,8 +15,14 @@
  *     viewBox, regions: {id: {d, at, box, room, label}}, insets, outline, mesh,
  *     look: function (id) { return { cls: "party-r", title: "..." }; },
  *     onSelect: function (id) {},
+<<<<<<< HEAD
  *     // Optional points over the regions - a state's cities - each a dot a
  *     // few pixels across at any width, its name page text in a <title>.
+=======
+ *     // Optional points over the regions - a state's cities and towns -
+ *     // each a dot a few pixels across at any width. A dot's name is its
+ *     // <title>, never SVG text (rule 46).
+>>>>>>> e0dbc40abcac113b20d9ab1d67bd78b2a52667bd
  *     dots: function () { return [{ id, at: [x, y], cls, title }]; },
  *     onDot: function (id) {},
  *   });
@@ -45,7 +51,11 @@
     var selected = "";
     var selectedDot = "";
     /* A dot's radius on screen, in pixels; the picked one larger. */
+<<<<<<< HEAD
     var DOT_PX = 3.2;
+=======
+    var DOT_PX = 3.5;
+>>>>>>> e0dbc40abcac113b20d9ab1d67bd78b2a52667bd
 
     function meets(box, frame) {
       return box[0] < frame[0] + frame[2] && box[2] > frame[0] &&
@@ -87,12 +97,26 @@
 
     function dots(frame, px) {
       if (!opts.dots) return "";
+<<<<<<< HEAD
       return '<g class="map-dots">' + opts.dots().filter(function (d) {
         return within(d.at, frame);
       }).map(function (d) {
         var picked = d.id === selectedDot;
         return '<circle class="map-dot ' + (d.cls || "") + (picked ? " is-focus" : "") + '" cx="' +
           d.at[0] + '" cy="' + d.at[1] + '" r="' + ((picked ? DOT_PX * 1.7 : DOT_PX) / px).toFixed(2) +
+=======
+      var list = opts.dots();
+      if (!list.length) return "";
+      // The picked dot last, so it is drawn over its neighbours.
+      return '<g class="map-dots">' + list.filter(function (d) {
+        return d.id !== selectedDot && within(d.at, frame);
+      }).concat(list.filter(function (d) {
+        return d.id === selectedDot && within(d.at, frame);
+      })).map(function (d) {
+        var picked = d.id === selectedDot;
+        return '<circle class="map-dot ' + (d.cls || "") + (picked ? " is-focus" : "") + '" cx="' +
+          d.at[0] + '" cy="' + d.at[1] + '" r="' + ((picked ? DOT_PX * 1.6 : DOT_PX) / px).toFixed(2) +
+>>>>>>> e0dbc40abcac113b20d9ab1d67bd78b2a52667bd
           '" data-dot="' + KYC.escapeAttr(d.id) + '"><title>' + KYC.escapeHtml(d.title || d.id) +
           "</title></circle>";
       }).join("") + "</g>";
@@ -139,12 +163,25 @@
       render();
     }
 
+<<<<<<< HEAD
     /* A pick of a dot repaints the map with it larger. */
+=======
+>>>>>>> e0dbc40abcac113b20d9ab1d67bd78b2a52667bd
     function setSelectedDot(id) {
       selectedDot = id || "";
       render();
     }
 
+<<<<<<< HEAD
+=======
+    /* A region and a dot picked together, in one draw (rule 45). */
+    function select(region, dot) {
+      selected = region || "";
+      selectedDot = dot || "";
+      render();
+    }
+
+>>>>>>> e0dbc40abcac113b20d9ab1d67bd78b2a52667bd
     target.addEventListener("click", function (event) {
       var dot = event.target.closest("[data-dot]");
       if (dot && opts.onDot) {
@@ -169,6 +206,10 @@
       render: render,
       setSelected: setSelected,
       setSelectedDot: setSelectedDot,
+<<<<<<< HEAD
+=======
+      select: select,
+>>>>>>> e0dbc40abcac113b20d9ab1d67bd78b2a52667bd
       ids: function () { return ids.slice(); },
     };
   }

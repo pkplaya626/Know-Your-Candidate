@@ -364,6 +364,7 @@ def render_district_page(code, host, summary=None):
     ``assets/kyc-districts.js`` from the state's map file and profiles.js.
     """
     from .districts import REDRAWN, page_path as district_path
+    from .government_maps import STATES
 
     name = state_name(code)
     info = ((summary or {}).get("states") or {}).get(code) or {}
@@ -388,6 +389,14 @@ def render_district_page(code, host, summary=None):
         f'                        <a class="btn" href="../{_e(page_path(code))}">'
         f'<svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> '
         f'{_e(name)} page</a>',
+    ] + ([
+        # Every state - not D.C. or a territory - has a legislature and a
+        # counties page.
+        f'                        <a class="btn" href="../legislature/{_e(code.lower())}.html">'
+        f'<svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> State legislature</a>',
+        f'                        <a class="btn" href="../counties/{_e(code.lower())}.html">'
+        f'<svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg> Counties &amp; local governments</a>',
+    ] if code in STATES else []) + [
         '                    </p>',
         '                </header>',
         '                <div id="districtsApp">',
@@ -460,6 +469,7 @@ def render_legislature_page(code, host, summary=None):
         '                    <p class="state-links">',
         f'                        <a class="btn" href="../{_e(page_path(code))}"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> {_e(name)} page</a>',
         f'                        <a class="btn" href="../districts/{_e(code.lower())}.html"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg> Congressional districts</a>',
+        f'                        <a class="btn" href="../counties/{_e(code.lower())}.html"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg> Counties &amp; local governments</a>',
         '                        <a class="btn" href="../government/states.html"><svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> How states are governed</a>',
         "                    </p>",
         "                </header>",
@@ -545,14 +555,20 @@ def render_counties_page(code, host):
         f'                    <h1 class="state-title">{_e(name)}</h1>',
         '                    <p class="districts-lede">Every county, city and town, township, school '
         'district and special district, as the Census Bureau counted them in 2022. Pick a county to '
-        'see every government in it, with a link to its own site where the Census lists one.</p>',
+        'see every government in it, or switch to cities and towns to find one place and its '
+        'government, with a link to its own site where the Census lists one.</p>',
         '                    <p class="state-links">',
         f'                        <a class="btn" href="../{_e(page_path(code))}"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> {_e(name)} page</a>',
         f'                        <a class="btn" href="../legislature/{_e(code.lower())}.html"><svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> State legislature</a>',
+        f'                        <a class="btn" href="../districts/{_e(code.lower())}.html"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg> Congressional districts</a>',
         '                        <a class="btn" href="../government/local.html"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg> How local government works</a>',
         "                    </p>",
         "                </header>",
-        '                <div class="party-legend" aria-label="Local governments per county">',
+        '                <div class="segmented" role="group" aria-label="Map view">',
+        '                    <button type="button" data-view="counties" aria-pressed="true">Counties</button>',
+        '                    <button type="button" data-view="cities" aria-pressed="false">Cities &amp; towns</button>',
+        "                </div>",
+        '                <div class="party-legend" id="countyLegend" aria-label="Local governments per county">',
         '                    <span class="party-legend-title">Local governments in each county</span>',
         '                    <span class="key"><span class="swatch region-fill-scale-1"></span>Fewer than 10</span>',
         '                    <span class="key"><span class="swatch region-fill-scale-2"></span>10&ndash;24</span>',
@@ -560,6 +576,7 @@ def render_counties_page(code, host):
         '                    <span class="key"><span class="swatch region-fill-scale-4"></span>50&ndash;99</span>',
         '                    <span class="key"><span class="swatch region-fill-scale-5"></span>100 or more</span>',
         "                </div>",
+        '                <div class="party-legend" id="cityLegend" aria-label="Incorporated places by legal form" hidden></div>',
         '                <div class="leg-layout">',
         '                    <div class="leg-map-card"><div id="localMap" class="leg-map">',
         '                        <p class="results-bar" role="status">Loading the map&hellip;</p>',
@@ -580,7 +597,9 @@ def render_counties_page(code, host):
         "                    population or enrollment, from the U.S. Census Bureau's 2022 Census of",
         "                    Governments: Government Units listing, checked against the Bureau's",
         "                    published counts for every state; county lines from its cartographic",
-        "                    boundary file. Names are shown in title case; the listing prints them in",
+        "                    boundary file; every incorporated place and its legal form from its 2025",
+        "                    place boundaries, joined to its government by name only where the join is",
+        "                    one to one. Names are shown in title case; the listing prints them in",
         "                    capitals.</p>",
         "                <p>Non-partisan and independent.</p>",
     ])
