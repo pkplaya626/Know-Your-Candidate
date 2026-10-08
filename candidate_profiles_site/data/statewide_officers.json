@@ -213,12 +213,11 @@
    "title": "Attorney General"
   },
   "NC": {
-   "listedBy": "Democratic Attorneys General Association",
-   "name": "Jeff Jackson",
-   "office": "https://ncdoj.gov/",
-   "party": "D",
-   "partyKey": "D",
-   "title": "Attorney General"
+   "disputed": [
+    "Dan Bishop (R)",
+    "Jeff Jackson (D)"
+   ],
+   "office": "https://ncdoj.gov/"
   },
   "ND": {
    "listedBy": "Republican Attorneys General Association",
@@ -390,7 +389,8 @@
    "office": "https://www.doj.state.wi.us/",
    "party": "D",
    "partyKey": "D",
-   "title": "Attorney General"
+   "unconfirmed": true,
+   "unreadable": true
   },
   "WV": {
    "listedBy": "Republican Attorneys General Association",
@@ -410,7 +410,7 @@
    "title": "Attorney General"
   }
  },
- "fetched": "2026-10-06T06:03:26+00:00",
+ "fetched": "2026-10-08T15:19:15+00:00",
  "lt": {
   "AK": {
    "name": "Nancy Dahlstrom",
@@ -1591,7 +1591,6 @@
    "email": "statesec@wisconsin.gov",
    "member": false,
    "name": "Sarah Godlewski",
-   "officeConfirms": true,
    "party": "D",
    "partyKey": "D",
    "phone": "(608) 266-8888",

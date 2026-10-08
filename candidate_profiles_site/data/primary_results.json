@@ -1,5 +1,5 @@
 {
- "asOf": "2026-10-05",
+ "asOf": "2026-10-08",
  "calendarNotes": [
   {
    "kind": "open-primary",
@@ -3177,6 +3177,7 @@
   },
   "H-CO-06-2026": {
    "about": {
+    "H6CO06165": "small business owner and financial advisor",
     "H8CO06229": "incumbent U.S. representative"
    },
    "ambiguous": [],
@@ -11699,7 +11700,7 @@
   "H-NY-23-2026": {
    "about": {
     "H2NY23228": "incumbent U.S. representative",
-    "H6NY23559": "college professor"
+    "H6NY23559": "college professor at St. Bonaventure University"
    },
    "ambiguous": [],
    "article": {
@@ -14342,6 +14343,7 @@
   "H-TX-07-2026": {
    "about": {
     "H6TX07151": "consultant",
+    "H6TX07177": "IT analyst",
     "H8TX07140": "incumbent U.S. representative"
    },
    "ambiguous": [],
@@ -14362,6 +14364,7 @@
     "H2TX07119": "republican",
     "H6TX07151": "republican",
     "H6TX07169": "republican",
+    "H6TX07177": "green",
     "H8TX07140": "democratic"
    },
    "site": {},
@@ -14370,11 +14373,10 @@
     "H2TX07119": "eliminated",
     "H6TX07151": "nominee",
     "H6TX07169": "eliminated",
+    "H6TX07177": "nominee",
     "H8TX07140": "nominee"
    },
-   "unmatched": {
-    "Ngabo Espoir": "nominee"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-TX-08-2026": {
@@ -17580,6 +17582,7 @@
   },
   "S-ID-2026": {
    "about": {
+    "S0ID00172": "software developer",
     "S6ID00146": "former Democratic state representative from the 16th district (2024–2025)",
     "S6ID00187": "nominee for in 2024",
     "S8ID00092": "incumbent U.S. senator"
@@ -17590,7 +17593,7 @@
     "S8ID00092": "Jim Risch"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "libertarian",
@@ -17600,6 +17603,7 @@
    "label": {},
    "page": "2026 United States Senate election in Idaho",
    "party": {
+    "S0ID00172": "independent",
     "S6ID00120": "republican",
     "S6ID00138": "democratic",
     "S6ID00146": "independent",
@@ -17610,11 +17614,13 @@
     "S8ID00092": "republican"
    },
    "site": {
+    "S0ID00172": "https://nataliefleming.info/",
     "S6ID00146": "https://www.achillesforidaho.com/",
     "S6ID00187": "https://www.loesby.us/",
     "S8ID00092": "https://senatorrisch.com/"
    },
    "status": {
+    "S0ID00172": "nominee",
     "S6ID00120": "eliminated",
     "S6ID00138": "withdrawn",
     "S6ID00146": "nominee",
@@ -17631,7 +17637,7 @@
   },
   "S-IL-2026": {
    "about": {
-    "S6IL00458": "Lieutenant Governor of Illinois (2019–present)"
+    "S6IL00458": "lieutenant governor of Illinois (2019–present)"
    },
    "ambiguous": [],
    "article": {
@@ -18370,6 +18376,7 @@
     "S6NH00141": "Chris Pappas (American politician)",
     "S6NH00166": "Scott Brown (politician)",
     "S6NH00174": "Dan Innis",
+    "S6NH00190": "Jared Sullivan",
     "S6NH00208": "John E. Sununu"
    },
    "decided": {
@@ -18404,6 +18411,7 @@
     "S6NH00166": "eliminated",
     "S6NH00174": "withdrawn",
     "S6NH00182": "eliminated",
+    "S6NH00190": "withdrawn",
     "S6NH00208": "nominee",
     "S6NH00224": "eliminated",
     "S6NH00232": "eliminated"
@@ -18799,7 +18807,7 @@
     "S4SD00049": "Mike Rounds"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "republican"
     ]
