@@ -1,5 +1,5 @@
 {
- "checked": "2026-10-05",
+ "checked": "2026-10-08",
  "people": {
   "A000055": {
    "checked": "2026-10-02",
@@ -3197,6 +3197,17 @@
     "safe": true,
     "status": 200,
     "url": "https://www.melissaforcongress.com"
+   }
+  },
+  "FEC_H4WA01282": {
+   "checked": "2026-10-08",
+   "name": "Mary Silva",
+   "site": {
+    "final": "https://marysilva4congress.nationbuilder.com/",
+    "reason": "HTTP 403",
+    "safe": null,
+    "status": 403,
+    "url": "https://marysilva4congress.nationbuilder.com/"
    }
   },
   "FEC_H4WA05168": {
@@ -7686,6 +7697,18 @@
   "FEC_H6PA03369": {
    "checked": "2026-10-02",
    "name": "Dennis Joseph Mahoney"
+  },
+  "FEC_H6PA04169": {
+   "checked": "2026-10-08",
+   "name": "Aurora Stuski",
+   "site": {
+    "final": "https://aurora4pa.com",
+    "issuesUrl": "https://aurora4pa.com/pa-04-issues/",
+    "reason": "ok",
+    "safe": true,
+    "status": 200,
+    "url": "https://aurora4pa.com"
+   }
   },
   "FEC_H6PA05216": {
    "checked": "2026-10-02",

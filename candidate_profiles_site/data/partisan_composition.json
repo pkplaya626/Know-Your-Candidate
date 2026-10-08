@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-05T20:42:47+00:00",
+ "fetched": "2026-10-08T15:07:56+00:00",
  "source": "National Conference of State Legislatures, State Partisan Composition",
  "states": {
   "AK": {
@@ -53,10 +53,10 @@
    },
    "upper": {
     "D": 6,
-    "R": 29,
+    "R": 28,
     "other": 0,
     "seats": 35,
-    "vacant": 0
+    "vacant": 1
    }
   },
   "AZ": {
@@ -84,10 +84,10 @@
    "legislature": "D",
    "lower": {
     "D": 60,
-    "R": 20,
+    "R": 19,
     "other": 0,
     "seats": 80,
-    "vacant": 0
+    "vacant": 1
    },
    "upper": {
     "D": 30,
@@ -160,17 +160,17 @@
    "legislature": "R",
    "lower": {
     "D": 34,
-    "R": 84,
+    "R": 82,
     "other": 0,
     "seats": 120,
-    "vacant": 2
+    "vacant": 4
    },
    "upper": {
     "D": 12,
-    "R": 27,
+    "R": 26,
     "other": 1,
     "seats": 40,
-    "vacant": 0
+    "vacant": 1
    }
   },
   "GA": {
@@ -178,11 +178,11 @@
    "governor": "R",
    "legislature": "R",
    "lower": {
-    "D": 79,
+    "D": 80,
     "R": 99,
     "other": 0,
     "seats": 180,
-    "vacant": 2
+    "vacant": 1
    },
    "upper": {
     "D": 22,
@@ -224,10 +224,10 @@
    },
    "upper": {
     "D": 17,
-    "R": 33,
+    "R": 32,
     "other": 0,
     "seats": 50,
-    "vacant": 0
+    "vacant": 1
    }
   },
   "ID": {
@@ -331,17 +331,17 @@
    "legislature": "R",
    "lower": {
     "D": 32,
-    "R": 73,
+    "R": 72,
     "other": 0,
     "seats": 105,
-    "vacant": 0
+    "vacant": 1
    },
    "upper": {
-    "D": 11,
+    "D": 10,
     "R": 28,
     "other": 0,
     "seats": 39,
-    "vacant": 0
+    "vacant": 1
    }
   },
   "MA": {
@@ -349,11 +349,11 @@
    "governor": "D",
    "legislature": "D",
    "lower": {
-    "D": 132,
+    "D": 131,
     "R": 25,
     "other": 1,
     "seats": 160,
-    "vacant": 2
+    "vacant": 3
    },
    "upper": {
     "D": 35,
@@ -388,10 +388,10 @@
    "legislature": "S",
    "lower": {
     "D": 75,
-    "R": 72,
+    "R": 73,
     "other": 3,
     "seats": 151,
-    "vacant": 1
+    "vacant": 0
    },
    "upper": {
     "D": 20,
@@ -426,10 +426,10 @@
    "legislature": "S",
    "lower": {
     "D": 67,
-    "R": 67,
+    "R": 66,
     "other": 0,
     "seats": 134,
-    "vacant": 0
+    "vacant": 1
    },
    "upper": {
     "D": 34,
@@ -445,10 +445,10 @@
    "legislature": "R",
    "lower": {
     "D": 52,
-    "R": 106,
+    "R": 105,
     "other": 0,
     "seats": 163,
-    "vacant": 5
+    "vacant": 6
    },
    "upper": {
     "D": 10,
@@ -463,11 +463,11 @@
    "governor": "R",
    "legislature": "R",
    "lower": {
-    "D": 42,
-    "R": 78,
+    "D": 41,
+    "R": 77,
     "other": 2,
     "seats": 122,
-    "vacant": 0
+    "vacant": 2
    },
    "upper": {
     "D": 18,
@@ -509,10 +509,10 @@
    },
    "upper": {
     "D": 20,
-    "R": 30,
+    "R": 29,
     "other": 0,
     "seats": 50,
-    "vacant": 0
+    "vacant": 1
    }
   },
   "ND": {
@@ -520,11 +520,11 @@
    "governor": "R",
    "legislature": "R",
    "lower": {
-    "D": 10,
+    "D": 11,
     "R": 83,
     "other": 0,
     "seats": 94,
-    "vacant": 1
+    "vacant": 0
    },
    "upper": {
     "D": 5,
@@ -558,11 +558,11 @@
    "governor": "R",
    "legislature": "R",
    "lower": {
-    "D": 177,
-    "R": 215,
+    "D": 169,
+    "R": 212,
     "other": 1,
     "seats": 400,
-    "vacant": 7
+    "vacant": 18
    },
    "upper": {
     "D": 8,
@@ -596,11 +596,11 @@
    "governor": "D",
    "legislature": "D",
    "lower": {
-    "D": 44,
+    "D": 42,
     "R": 26,
     "other": 0,
     "seats": 70,
-    "vacant": 0
+    "vacant": 2
    },
    "upper": {
     "D": 26,
@@ -641,11 +641,11 @@
     "vacant": 0
    },
    "upper": {
-    "D": 41,
+    "D": 40,
     "R": 22,
     "other": 0,
     "seats": 63,
-    "vacant": 0
+    "vacant": 1
    }
   },
   "OH": {
@@ -661,10 +661,10 @@
    },
    "upper": {
     "D": 9,
-    "R": 24,
+    "R": 23,
     "other": 0,
     "seats": 33,
-    "vacant": 0
+    "vacant": 1
    }
   },
   "OK": {
@@ -672,11 +672,11 @@
    "governor": "R",
    "legislature": "R",
    "lower": {
-    "D": 18,
+    "D": 19,
     "R": 81,
     "other": 0,
     "seats": 101,
-    "vacant": 2
+    "vacant": 1
    },
    "upper": {
     "D": 8,
@@ -711,10 +711,10 @@
    "legislature": "S",
    "lower": {
     "D": 102,
-    "R": 99,
+    "R": 100,
     "other": 0,
     "seats": 203,
-    "vacant": 2
+    "vacant": 1
    },
    "upper": {
     "D": 23,
@@ -806,10 +806,10 @@
    "legislature": "R",
    "lower": {
     "D": 62,
-    "R": 88,
+    "R": 87,
     "other": 0,
     "seats": 150,
-    "vacant": 0
+    "vacant": 1
    },
    "upper": {
     "D": 12,
@@ -843,11 +843,11 @@
    "governor": "D",
    "legislature": "D",
    "lower": {
-    "D": 64,
+    "D": 63,
     "R": 36,
     "other": 0,
     "seats": 100,
-    "vacant": 0
+    "vacant": 1
    },
    "upper": {
     "D": 21,
@@ -953,6 +953,6 @@
    }
   }
  },
- "updated": "May 27, 2026",
+ "updated": "October 06, 2026",
  "url": "https://www.ncsl.org/about-state-legislatures/state-partisan-composition"
 }
