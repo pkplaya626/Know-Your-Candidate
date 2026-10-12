@@ -358,7 +358,8 @@
    "office": "https://attorneygeneral.utah.gov/",
    "party": "R",
    "partyKey": "R",
-   "title": "Attorney General"
+   "unconfirmed": true,
+   "unreadable": true
   },
   "VA": {
    "listedBy": "Democratic Attorneys General Association",
@@ -410,7 +411,7 @@
    "title": "Attorney General"
   }
  },
- "fetched": "2026-10-06T06:03:26+00:00",
+ "fetched": "2026-10-12T17:17:50+00:00",
  "lt": {
   "AK": {
    "name": "Nancy Dahlstrom",
