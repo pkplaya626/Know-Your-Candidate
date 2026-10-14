@@ -283,6 +283,17 @@ async function testShared(page) {
       KYC.electionStatus(2028, new Date("2028-01-01Z")).iso === "2028-11-07");
   });
 
+  suite(`${page} — ages are today's, not the build's`, () => {
+    // The build stamps `age` on its own date; 17 were a year out nine days
+    // later. The page counts from the birthdate in the reader's calendar.
+    const aoc = { birthdate: "1989-10-13", age: 36 };
+    check("the day before a birthday", KYC.ageOf(aoc, new Date(2026, 9, 12)) === 36);
+    check("on the birthday", KYC.ageOf(aoc, new Date(2026, 9, 13)) === 37);
+    check("a year-only birthdate keeps the build's figure",
+      KYC.ageOf({ birthdate: "1950", age: 76 }, new Date(2026, 9, 13)) === 76);
+    check("no birthdate and no age is no age", KYC.ageOf({ birthdate: "", age: "Unknown" }) === null);
+  });
+
   return { window, D, KYC };
 }
 

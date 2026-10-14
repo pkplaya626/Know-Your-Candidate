@@ -489,6 +489,23 @@
     return d;
   }
 
+  /* A person's age today, in the reader's calendar, from their birthdate.
+   * The build's `age` is computed on the build date and goes stale a day at
+   * a time: nine days after one build, 17 were a year out, Alexandria
+   * Ocasio-Cortez's among them on her birthday. A year-only birthdate keeps
+   * the build's figure, which is all it supports; null when neither exists. */
+  function ageOf(item, now) {
+    if (!item) return null;
+    var born = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(item.birthdate || ""));
+    if (!born) return typeof item.age === "number" ? item.age : null;
+    now = now || new Date();
+    var years = now.getFullYear() - Number(born[1]);
+    var month = now.getMonth() + 1;
+    if (month < Number(born[2]) ||
+        (month === Number(born[2]) && now.getDate() < Number(born[3]))) years -= 1;
+    return years;
+  }
+
   /* Counted in the reader's own calendar, not in UTC. Election Day is a
    * local date - polls open and close on local clocks - and measuring to
    * UTC midnight called it "Election Day" from 7 pm Eastern on the Sunday
@@ -1246,6 +1263,7 @@
     createMenu: createMenu,
     router: router,
     electionStatus: electionStatus,
+    ageOf: ageOf,
     generalElectionDay: generalElectionDay,
     matchesQuery: matchesQuery,
     foldText: foldText,

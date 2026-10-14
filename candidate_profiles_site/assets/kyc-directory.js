@@ -111,7 +111,8 @@
   };
 
   function age(item, fallback) {
-    return typeof item.age === "number" ? item.age : (fallback || 0);
+    var years = KYC.ageOf(item);
+    return years === null ? (fallback || 0) : years;
   }
 
   /* ------------------------------------------------------------ rendering */

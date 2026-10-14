@@ -628,15 +628,16 @@
   }
 
   function renderAge(item) {
-    var hasAge = item.age && item.age !== "Unknown";
+    var years = KYC.ageOf(item);
+    var hasAge = years !== null;
     var hasBirth = KYC.hasValue(item, "birthdate") && item.birthdate !== "Unknown";
     // A birthdate the pipeline read from a Wikipedia infobox says so.
     var badge = hasBirth ? KYC.sourceBadge(item, "birthdate") : "";
 
     if (hasAge && hasBirth) {
-      return KYC.escapeHtml(item.age + " (born " + item.birthdate + ")") + badge;
+      return KYC.escapeHtml(years + " (born " + item.birthdate + ")") + badge;
     }
-    if (hasAge) return KYC.escapeHtml(item.age + " years old");
+    if (hasAge) return KYC.escapeHtml(years + " years old");
     if (hasBirth) return KYC.escapeHtml(item.birthdate) + badge;
     return '<span class="kyc-absent">No data</span>';
   }
