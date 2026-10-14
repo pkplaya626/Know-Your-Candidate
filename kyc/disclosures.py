@@ -1,9 +1,9 @@
 """Official financial disclosures, from the Clerk of the House.
 
-The site shows an "Estimated Net Worth" for 144 of 539 sitting members and
-nothing for the rest, and the figures it does show carry no source at all. A
-number about a named person's private wealth, with no filing behind it, is the
-weakest thing on the page.
+The roster once carried an "Estimated Net Worth" for 144 of 539 sitting
+members, none of it sourced. A number about a named person's private wealth,
+with no filing behind it, was the weakest thing on the page, and the site no
+longer shows one for anyone.
 
 No free service publishes a computed net worth for members of Congress, and
 inventing one from a disclosure is not a small step: the forms report assets in

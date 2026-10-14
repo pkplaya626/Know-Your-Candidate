@@ -222,9 +222,11 @@ class TestToProfiles(unittest.TestCase):
 
     def test_editorial_fields_are_left_empty_not_invented(self):
         made, _ = candidates.to_profiles(candidates.build_cache([filing()]), [])
-        for field in ("education", "platforms", "committees", "net_worth",
+        for field in ("education", "platforms", "committees",
                       "previous_professions", "funding_sources"):
             self.assertEqual(made[0][field], "", field)
+        # Rule 26: there is no net-worth field to fill, for anyone.
+        self.assertNotIn("net_worth", made[0])
 
     def test_deduped_against_an_existing_fec_id(self):
         cache = candidates.build_cache([filing()])
@@ -540,9 +542,9 @@ class TestCuratedRoster(unittest.TestCase):
         self.assertEqual(profile["fecCandidateId"], "S6NC00464")
         self.assertEqual(profile["rosterFecId"], "S6NC00464")
         for field in ("receipts", "disbursements", "birthdate", "education",
-                      "previous_professions", "voting_alignment", "net_worth",
-                      "funding_sources"):
+                      "previous_professions", "voting_alignment", "funding_sources"):
             self.assertIn(field, profile["quality"], field)
+        self.assertNotIn("net_worth", profile)
         self.assertEqual(profile["age"], "Unknown")
         self.assertFalse(profile["hasRealFinance"])
 

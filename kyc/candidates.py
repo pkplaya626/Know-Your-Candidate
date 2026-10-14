@@ -558,7 +558,6 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
             "platforms": "",
             "voting_alignment": "",
             "committees": "",
-            "net_worth": "",
             "funding_sources": "",
             "receipts": fmt_curr(row.get("receipts")),
             "disbursements": fmt_curr(row.get("disbursements")),

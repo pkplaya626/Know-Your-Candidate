@@ -422,8 +422,8 @@ state to see.
 ### What these profiles do and do not contain
 
 Name, party, seat, receipts, disbursements and cash on hand, all from the FEC
-with a coverage date. Committees and net worth are editorial research that no
-dataset supplies, so they stay empty and the provenance layer reports them as
+with a coverage date. Committees are editorial research that no dataset
+supplies, so they stay empty and the provenance layer reports them as
 *No data*. For anyone still in a race, background, education, age, what the
 campaign says it stands for and a portrait are filled where the person's own
 sources say so - see [Filling the gaps](#filling-the-gaps) - each credited to
@@ -771,19 +771,22 @@ it is checked rather than trusted.
 
 ## Net worth and financial disclosures
 
-The site shows an "Estimated Net Worth" for 144 of 539 sitting members and
-nothing for the rest, and the figures it does show carry no source.
+The site shows no net worth for anyone, deliberately. The roster once carried
+an "Estimated Net Worth" for 144 of 539 sitting members, none of them sourced,
+and the dialog showed it beside the disclosure link as though one came from the
+other. The 2026-10-13 audit removed the column and the field.
 
-**This is not filled in, deliberately.** No free service publishes a computed
-net worth for members of Congress, and deriving one from a disclosure is not a
-small step: the forms report assets in broad value *bands*, so any single
-figure from them is an estimate dressed as a fact — the exact thing the
-provenance layer exists to prevent.
+No free service publishes a computed net worth for members of Congress, and
+deriving one from a disclosure is not a small step: the forms report assets in
+broad value *bands*, so any single figure from them is an estimate dressed as a
+fact (rule 26), the exact thing the provenance layer exists to prevent.
 
 What is available is the filing itself. The Clerk of the House publishes an
 annual ZIP containing an XML index of every disclosure, and **401 of 439 House
-members** carry a link to their own annual report (PDF) beside the net-worth
-field.
+members** carry a link to their own annual report (PDF) in the dialog's
+"Financial disclosure" field. A member with no filing found reads "None
+linked"; challengers' disclosures are not looked up, so the field is not shown
+for them.
 
 **98 of 100 senators** carry a link to their latest annual report in the
 Secretary of the Senate's eFD system. eFD asks every visitor to agree that the
@@ -811,9 +814,9 @@ render all three identically:
 | Value | Means | Now shows as |
 |---|---|---|
 | `$3,161,009` | a sourced figure | the figure, with a source badge where known |
-| `N/A (No net worth disclosure provided…)` | no filing exists | *Not disclosed* (muted) |
+| `Not disclosed` | no filing exists | *Not disclosed* (muted) |
 | `""` | nobody has researched it | *No data* (muted) |
-| `Individual/PAC contributions` | true of everyone; no information | dotted underline, marked generic |
+| `General legislative priorities`, `Public service` | true of everyone; no information | *No data* (muted), titled as a generic placeholder (rule 10) |
 | — | the FEC was queried and holds no filing for this cycle | *No filing this cycle* (muted) |
 
 That last row is the only absence that reports work actually done. "No data"

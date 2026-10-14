@@ -399,10 +399,13 @@
         '">' + escapeHtml(ABSENT[status]) + "</span>"
       );
     }
+    // A placeholder is not data (rule 10). "General legislative priorities"
+    // stood as 67 members' platforms and "Public service" as 70 members'
+    // careers, muted but still read as an answer; they are an absence.
     if (status === "generic") {
       return (
-        '<span class="kyc-generic" title="Generic placeholder, not researched detail.">' +
-        escapeHtml(value) + "</span>"
+        '<span class="kyc-absent" title="The source held only a generic placeholder here, ' +
+        'not researched detail.">' + escapeHtml(ABSENT.unknown) + "</span>"
       );
     }
 

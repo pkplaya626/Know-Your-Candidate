@@ -114,7 +114,7 @@ def _senate_term_end(term_start):
 # Fields whose provenance the page surfaces. Finance absences are "we have no
 # filing on hand" rather than "they disclosed nothing", so they map to UNKNOWN.
 _QUALITY_FIELDS = (
-    "net_worth", "funding_sources", "platforms", "committees",
+    "funding_sources", "platforms", "committees",
     "education", "previous_professions", "voting_alignment",
     "receipts", "disbursements", "birthdate",
 )
@@ -315,7 +315,6 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
         "platforms": clean_str(row.get("Policy Focus & Platforms"), "N/A"),
         "voting_alignment": clean_str(row.get("Projected/Historical Voting Alignment"), "N/A"),
         "committees": clean_str(row.get("Committee Assignments"), "None"),
-        "net_worth": clean_str(row.get("Estimated Net Worth"), "N/A"),
         "photos": member_photos(name, bioguide),
     }
     if display != name:
@@ -432,7 +431,6 @@ def _build_candidate(row, index, as_of=None):
             row.get("Committee Assignments"),
             default="None",
         ),
-        "net_worth": "",
         "photos": candidate_photos(name, state),
     }
     fec_id = clean_str(row.get("FEC Candidate ID"), "").upper()

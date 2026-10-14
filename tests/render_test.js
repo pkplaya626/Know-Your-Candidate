@@ -189,7 +189,8 @@ async function testShared(page) {
     const generic = KYC.renderField(
       { funding_sources: "Individual/PAC contributions", quality: { funding_sources: "generic" } },
       "funding_sources");
-    check("generic value marked low-information", /kyc-generic/.test(generic));
+    check("a generic placeholder renders as an absence, not as an answer (rule 10)",
+      /kyc-absent/.test(generic) && !/Individual/.test(generic), generic);
 
     const sourced = KYC.renderField(
       { receipts: "$1,022,664.06", quality: {}, financeSource: "FEC", financeAsOf: "2026-06-30" },
@@ -920,17 +921,16 @@ async function testDirectoryAsync() {
   suite("index.html — the map's old bug, checked on both pages", () => {
     // map.html rendered `item.net_worth` with textContent, so a profile with
     // no filing showed the literal placeholder sentence as if it were data.
-    const withPlaceholder = window.legislatorsData.find(
-      (p) => (p.quality || {}).net_worth === "not_disclosed");
-    check("a profile with no net-worth filing exists to test", !!withPlaceholder);
-    if (withPlaceholder) {
-      KYC.profile.open(withPlaceholder.id);
-      const shown = D.getElementById("profileModalWorth").textContent;
-      check("no placeholder prose reaches the reader",
-        !/No net worth disclosure|N\/A \(/.test(shown), shown);
-      check("it reads as an absence instead", /Not disclosed/.test(shown), shown);
-      KYC.profile.close();
-    }
+    // The field itself is gone (rule 26): no profile carries a net worth, and
+    // no dialog prints the roster's placeholder sentences anywhere.
+    check("no profile carries a net-worth value",
+      !window.legislatorsData.some((p) => "net_worth" in p));
+    const member = window.legislatorsData.find((p) => !p.isCandidate);
+    KYC.profile.open(member.id);
+    const shown = D.getElementById("profileModal").textContent;
+    check("no placeholder prose reaches the reader",
+      !/No net worth disclosure|N\/A \(|Est\. net worth|Party Loyalty/.test(shown));
+    KYC.profile.close();
   });
 
   suite("index.html — deep links", () => {
@@ -1095,12 +1095,12 @@ async function testMap() {
     row.click();
     const modal = D.getElementById("profileModal");
     check("map opens the same dialog as the grid", modal && !modal.hidden);
-    check("dialog uses renderField for net worth", (() => {
+    // Rule 26: no figure for net worth, only the filing itself or "None linked".
+    check("the dialog shows no net-worth figure, only the disclosure", (() => {
       const item = KYC.byId(row.getAttribute("data-id"));
-      const shown = D.getElementById("profileModalWorth").innerHTML;
-      return (item.quality || {}).net_worth
-        ? /kyc-absent|kyc-generic/.test(shown)
-        : shown.length > 0;
+      const shown = D.getElementById("profileModalDisclosure").innerHTML;
+      return !D.getElementById("profileModalWorth") &&
+        (item.disclosureUrl ? /disclosure-link/.test(shown) : /kyc-absent/.test(shown));
     })());
     check("Escape closes it", (() => {
       D.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));

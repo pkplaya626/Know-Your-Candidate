@@ -780,12 +780,6 @@ svg.district-map,
   font-weight: 400;
 }
 
-.kyc-generic {
-  color: var(--text-muted);
-  border-bottom: 1px dotted var(--text-faint);
-  cursor: help;
-}
-
 /* ============================================================= 8. cards */
 
 .card-grid {

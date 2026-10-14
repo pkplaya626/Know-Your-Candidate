@@ -73,9 +73,8 @@
       '        <div class="field-grid">',
       '          <div class="field"><span class="field-label">Age / born</span>',
       '            <span class="field-value" id="profileModalAge"></span></div>',
-      '          <div class="field"><span class="field-label">Est. net worth</span>',
-      '            <span class="field-value" id="profileModalWorth"></span>',
-      '            <span id="profileModalDisclosure"></span></div>',
+      '          <div class="field" id="profileModalDisclosureField"><span class="field-label">Financial disclosure</span>',
+      '            <span class="field-value" id="profileModalDisclosure"></span></div>',
       '          <div class="field span-2"><span class="field-label">Education</span>',
       '            <span class="field-value subtle" id="profileModalEducation"></span></div>',
       '          <div class="field span-2"><span class="field-label">Previous careers</span>',
@@ -240,7 +239,6 @@
     var value = parseFloat(score[1]);
     var pct = Math.max(0, Math.min(100, ((value + 1) / 2) * 100));
     var label = (text.match(/\(([^)]+)\)/) || [])[1] || "";
-    var loyalty = (text.match(/•\s*(.*)$/) || [])[1] || "";
     var tone = value <= -0.1 ? "party-d" : value >= 0.1 ? "party-r" : "";
 
     target.innerHTML = [
@@ -250,8 +248,6 @@
       (value > 0 ? "+" : "") + value.toFixed(2),
       label ? '<span class="label">' + KYC.escapeHtml(label) + "</span>" : "",
       "    </span>",
-      loyalty ? '<span class="badge badge-neutral">' +
-        KYC.escapeHtml(loyalty) + "</span>" : "",
       "  </div>",
       '  <div class="ideology-track" role="img" aria-label="DW-NOMINATE first dimension ' +
       KYC.escapeAttr(value.toFixed(2)) + ' on a scale from -1 (left) to +1 (right)">',
@@ -691,13 +687,16 @@
     KYC.setPortrait(photo, item, "116px");
 
     el("profileModalAge").innerHTML = renderAge(item);
-    el("profileModalWorth").innerHTML = KYC.renderField(item, "net_worth");
 
     /* No free source publishes a computed net worth, and a disclosure reports
      * assets in broad value bands, so deriving one figure from it would be an
-     * estimate dressed as a fact. Link the filing instead and let the reader
-     * see what was actually submitted. */
+     * estimate dressed as a fact (rule 26). The dialog showed an unsourced
+     * "Est. net worth" from the roster for 144 members, beside this link, as
+     * though one came from the other. It links the filing alone now. A
+     * challenger's disclosures are not looked up, so the field is not shown
+     * for them rather than reading as an absence. */
     var disclosure = el("profileModalDisclosure");
+    el("profileModalDisclosureField").hidden = !!item.isCandidate && !item.disclosureUrl;
     if (item.disclosureUrl) {
       // The Senate's eFD shows its terms of use before the first report a
       // visitor opens; the link says so rather than looking broken.
@@ -715,7 +714,9 @@
         KYC.escapeHtml(item.disclosureYear || "") +
         (senate ? " disclosure (Senate eFD)" : " disclosure (PDF)") + "</a>";
     } else {
-      disclosure.innerHTML = "";
+      disclosure.innerHTML = '<span class="kyc-absent" title="' +
+        KYC.escapeAttr("No annual financial disclosure for this member was found in " +
+          "the House Clerk's index or the Senate's eFD.") + '">None linked</span>';
     }
     el("profileModalEducation").innerHTML = KYC.renderField(item, "education");
     el("profileModalCareers").innerHTML = KYC.renderField(item, "previous_professions");

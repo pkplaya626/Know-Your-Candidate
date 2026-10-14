@@ -139,7 +139,6 @@ def check_fields(profiles):
                             sorted(only_placeholder)[:15]))
 
     for field, label in (("receipts", "campaign receipts"),
-                         ("net_worth", "net worth"),
                          ("voting_alignment", "voting alignment")):
         missing = [p for p in profiles if p[field] == "N/A"]
         if missing:
