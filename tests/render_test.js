@@ -856,6 +856,20 @@ async function testDirectoryAsync() {
       KYC.profile.close();
     }
 
+    // Named, if at all, under a spelling that lost: off the ballot either way,
+    // and said as that, not as "not on the primary ballot".
+    const hedged = window.legislatorsData.filter((p) => p.raceStatusUnconfirmed);
+    check("an unconfirmed absence reads 'Not on the November ballot'",
+      hedged.length > 0 && hedged.every((p) => {
+        const html = KYC.cards.statusBadge(p);
+        return /Not on the November ballot/.test(html) && !/primary ballot/.test(html);
+      }), hedged.length + " people");
+    check("nobody whose page name lost is counted as running",
+      !(window.kycRaces || []).some((r) => r.candidateIds.some((id) => {
+        const p = KYC.byId(id);
+        return p && p.raceStatusUnconfirmed && !KYC.cards.offBallot(p);
+      })));
+
     // Rule 22: a nominee whose filing is under $5,000 has no profile but is
     // on the ballot. 54 decided races said "No challenger on the ballot".
     const unprofiled = (window.kycRaces || []).filter((r) => r.settled && r.candidateCount === 0 &&

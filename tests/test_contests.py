@@ -355,6 +355,25 @@ class TestNomineesUnderTheThreshold(unittest.TestCase):
         self.assertEqual(race["candidateCount"], 1)
         self.assertEqual(race["results"]["otherNominees"], [])
 
+    def test_a_second_registration_of_a_profiled_person_is_not_another_nominee(self):
+        # The page's one name matched both of Jeremy Ryan Todd's ids (KY-4).
+        todd = candidate("FEC_H6TX12205", "Jeremy Ryan Todd", "TX", district=12, fec="H6TX12205")
+        todd["raceStatus"] = "nominee"
+        race = self.build({"H6TX12001": "nominee", "H6TX12205": "nominee", "H6TX12213": "nominee"},
+                          [self.row("H6TX12213", "TODD, JEREMY RYAN")], extra=(todd,))
+        self.assertEqual(race["results"].get("belowThreshold", []), [])
+        self.assertEqual(race["candidateCount"], 1)
+
+    def test_one_page_name_and_an_undecided_profile_are_one_person(self):
+        zabel = candidate("FEC_H6TX12318", "Sarah Zabel", "TX", district=12, fec="H6TX12318")
+        zabel["maybeNamed"] = ["Sarah Zabel Peterson"]
+        holder = member("G000999", "Kay Granger", "TX", 12, party="Republican", fec="H6TX12001")
+        cache = {"races": {"H-TX-12-2026": {"status": {"H6TX12001": "nominee"},
+                                            "unmatched": {"Sarah Zabel Peterson": "nominee"}}}}
+        race = {r["id"]: r for r in races.build([holder, zabel], results=cache, filed={})}["H-TX-12-2026"]
+        self.assertEqual(race["candidateCount"], 0)            # counted once, as the page name
+        self.assertEqual(race["results"]["otherNominees"], ["Sarah Zabel Peterson"])
+
     def test_a_loser_under_the_threshold_is_not_on_the_ballot(self):
         race = self.build({"H6TX12001": "nominee", "H6TX12169": "eliminated"},
                           [self.row("H6TX12169", "RODRIGUEZ PRILLIMAN, ANGELA")])

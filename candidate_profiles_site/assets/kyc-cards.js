@@ -35,6 +35,13 @@
       'Advanced to a primary runoff that has not yet been decided.'],
   };
 
+  /* Not named on the results page, which does name someone like them who
+   * lost or withdrew: off the November ballot whichever reading is right,
+   * and that is all the badge says. */
+  var UNCONFIRMED = ['badge-neutral', 'Not on the November ballot',
+    'The published results put nobody of this name on the November ballot; a similar ' +
+    'name they list lost or withdrew.'];
+
   /* For a sitting member the same facts read differently: no primary line
    * is a retirement, and a primary win is a renomination. */
   var MEMBER_RACE_BADGE = {
@@ -54,6 +61,7 @@
     var status = KYC.contestStatus(item);
     var spec = (own && MEMBER_RACE_BADGE[status]) || RACE_BADGE[status];
     if (!spec) return "";
+    if (status === "unlisted" && item.raceStatusUnconfirmed) spec = UNCONFIRMED;
     // A nominee on another line than their party's says so, or a primary
     // loser on a minor-party line reads as a second Democratic nominee.
     var line = KYC.ballotLine(item);

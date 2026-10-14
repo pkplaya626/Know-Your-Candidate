@@ -598,6 +598,12 @@
     var table = item.isCandidate || elsewhere ? RACE_STATUS :
       Object.assign({}, RACE_STATUS, MEMBER_RACE_STATUS);
     var race = table[KYC.contestStatus(item)];
+    if (race && KYC.contestStatus(item) === "unlisted" && item.raceStatusUnconfirmed) {
+      // Named, if at all, under another spelling that lost or withdrew.
+      race = ["badge-neutral", "Not on the November ballot",
+        "The published results put nobody of this name on the November ballot; " +
+        "a similar name they list lost or withdrew."];
+    }
     if (race) {
       var label = elsewhere ? race[1] + " for " + item.contestLabel : race[1];
       // "On the November ballot – Speak The Truth line": a primary loser on

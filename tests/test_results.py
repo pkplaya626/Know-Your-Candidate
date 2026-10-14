@@ -498,13 +498,52 @@ class TestNamesThePageMayUse(unittest.TestCase):
             self.assertGreaterEqual(len(name.split()), 2, cid)
             self.assertRegex(why, r"committee C\d{8}", cid)
 
-    def test_a_possible_nickname_is_never_inferred_absent(self):
-        # "Mark Su" may be "SU, DONGBO": not settled, and not called absent.
+    def test_a_possible_name_that_lost_keeps_them_off_the_ballot(self):
+        # "Mark Su" may be "SU, DONGBO". Either way he is not on the November
+        # ballot, and with no status at all he read as still running.
         person = self.filer("H6NC04998", "Dongbo Su", "SU, DONGBO")
         cache = self.cache({"Mark Su": "eliminated"})
         results.apply_cache([person], cache)
-        self.assertNotIn("raceStatus", person)
+        self.assertEqual(person["raceStatus"], "unlisted")
+        self.assertTrue(person["raceStatusUnconfirmed"])     # said as "not on the November ballot"
         self.assertEqual(cache["unclear"], [("Dongbo Su", "H-NC-04-2026", ["Mark Su"])])
+
+    def test_a_possible_name_on_the_ballot_leaves_them_undecided(self):
+        person = self.filer("H6NC04998", "Ndidiamaka Okpareke", "OKPAREKE, NDIDIAMAKA")
+        cache = self.cache({"Didi Okapareke": "nominee", "Didi Okpareke": "withdrawn"})
+        results.apply_cache([person], cache)
+        self.assertNotIn("raceStatus", person)
+        self.assertEqual(person["maybeNamed"], ["Didi Okapareke", "Didi Okpareke"])
+
+    def test_near_is_one_letter_on_long_words_only(self):
+        self.assertTrue(results._near("okpareke", "okapareke"))
+        self.assertTrue(results._near("gilespie", "gillespie"))
+        self.assertFalse(results._near("su", "sy"))
+        self.assertFalse(results._near("williams", "williamson"))
+
+    def test_another_filer_with_the_same_words_blocks_the_claim(self):
+        person = self.filer("H6NC04999", "Carlquist Lisa", "LISA, CARLQUIST")
+        field = {"candidates": [
+            {"candidate_id": "H6NC04999", "name": "LISA, CARLQUIST", "office": "H",
+             "state": "NC", "district_number": 4},
+            {"candidate_id": "H0NC04000", "name": "CARLQUIST, LISA", "office": "H",
+             "state": "NC", "district_number": 4}]}
+        cache = self.cache({"Lisa Carlquist": "nominee"})
+        results.apply_cache([person], cache, field=field)
+        self.assertNotEqual(person.get("raceStatus"), "nominee")
+
+    def test_a_name_the_matcher_found_ambiguous_is_left_alone(self):
+        person = self.filer("H6NC04999", "Carlquist Lisa", "LISA, CARLQUIST")
+        cache = self.cache({"Lisa Carlquist": "nominee"})
+        cache["races"]["H-NC-04-2026"]["ambiguous"] = ["Lisa Carlquist"]
+        results.apply_cache([person], cache)
+        self.assertNotEqual(person.get("raceStatus"), "nominee")
+
+    def test_a_hyphen_alone_is_not_a_new_name(self):
+        person = self.filer("H6NC04999", "Melissa Conyears-Ervin", "CONYEARS-ERVIN, MELISSA")
+        results.apply_cache([person], self.cache({"Melissa Conyears Ervin": "eliminated"}))
+        self.assertEqual(person["raceStatus"], "eliminated")
+        self.assertEqual(person["name"], "Melissa Conyears-Ervin")
 
     def test_a_different_surname_is_still_absent(self):
         person = self.filer("H6NC04997", "Jane Roe")

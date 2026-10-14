@@ -760,7 +760,8 @@ def check_results_pages(cache):
         # nominees, were told they were not on it.
         issues.append(Issue("warn", "results-name-unresolved",
                             f"{len(unclear)} filers in decided races may be named on the "
-                            f"results page under another spelling; shown with no result. "
+                            f"results page under another spelling: off the November ballot "
+                            f"where every such name lost or withdrew, otherwise undecided. "
                             f"Settle each with an evidenced overrides.RESULT_NAMES entry",
                             sorted(unclear)))
     overridden = [n["text"] for n in cache.get("calendarNotes") or []
