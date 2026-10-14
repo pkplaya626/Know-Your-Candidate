@@ -752,6 +752,17 @@ def check_results_pages(cache):
         issues.append(Issue("warn", "results-fetch-failed",
                             f"{len(failed)} results pages could not be fetched; "
                             f"their races were left as they were", failed))
+    unclear = [f"{name} ({rid}): the page names {', '.join(names)}"
+               for name, rid, names in cache.get("unclear") or []]
+    if unclear:
+        # Shown with no result rather than "Not on the primary ballot": 36
+        # people the page names under a nickname, six of them November
+        # nominees, were told they were not on it.
+        issues.append(Issue("warn", "results-name-unresolved",
+                            f"{len(unclear)} filers in decided races may be named on the "
+                            f"results page under another spelling; shown with no result. "
+                            f"Settle each with an evidenced overrides.RESULT_NAMES entry",
+                            sorted(unclear)))
     overridden = [n["text"] for n in cache.get("calendarNotes") or []
                   if isinstance(n, dict) and n.get("kind") == "open-primary"]
     if overridden:

@@ -128,6 +128,29 @@ SAME_PERSON_FILINGS = {
                                "a single $28,832.67 transfer"),
 }
 
+# The name a results page uses for a filing the matcher cannot connect to it:
+# a nickname the FEC filing does not carry. Keyed on the FEC candidate id;
+# each entry is (the name exactly as the race's results page writes it, the
+# evidence), and the evidence is the candidate's own principal campaign
+# committee at the FEC (its name or its registered website), so the alias
+# is the campaign's word, not a guess about a nickname (rule 17). Applied
+# only inside the filing's own race (results.apply_cache). Checked
+# 2026-10-14.
+RESULT_NAMES = {
+    "S6GA00374": ("Buddy Carter", "committee C00543967 BUDDY CARTER FOR SENATE"),
+    "S6IL00482": ("Raja Krishnamoorthi", "committee C00904466 RAJA FOR ILLINOIS; "
+                                         "filed as KRISHNAMOORTHI, S"),
+    "S6SC04452": ("Mark Sanford", "committee C00285254 SANFORD FOR SENATE, "
+                                  "website marksanford.com"),
+    "H6TN06205": ("Van Hilleary", "committee C00909838 VAN FOR TENNESSEE; "
+                                  "filed as HILLEARY, WILLIAM V."),
+    "H6WV02150": ("Ace Parsi", "committee C00927723 ACE PARSI FOR CONGRESS"),
+    "H4NC02150": ("Max Ganorkar", "committee C00769463 GANORKAR FOR CONGRESS, "
+                                  "website maxforcongress.com"),
+    "H6MS04259": ("Carl Boyanton", "committee C00937136 CARL4CONGRESS; filed with "
+                                   "the names reversed, CARL, BOYANTON LESTER"),
+}
+
 # Campaign websites that must never be linked, keyed on the host the FEC
 # committee registered (lower case; a key without "www." also covers the
 # "www." form). The FEC keeps whatever site a committee once filed, and a

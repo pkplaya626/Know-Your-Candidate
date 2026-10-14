@@ -455,6 +455,78 @@ class TestApplying(unittest.TestCase):
                              {("TX", "H"): {"primary": "2026-03-03", "runoff": "2026-05-26"}})
 
 
+class TestNamesThePageMayUse(unittest.TestCase):
+    """36 filers the results page names under a nickname or a reversed
+    filing were told "Not on the 2026 primary ballot", six of them November
+    nominees: Max Ganorkar (NC-4) is filed as Mahesh, Lisa Carlquist as
+    "LISA, CARLQUIST", Bernadette Greene-Placentia without the hyphen."""
+
+    def cache(self, unmatched):
+        return {"asOf": "2026-10-05", "races": {
+            "H-NC-04-2026": {"status": {"H6NC04001": "nominee"}, "unmatched": dict(unmatched),
+                             "ambiguous": []}}}
+
+    def filer(self, cid, name, filed=None):
+        return {"id": "FEC_" + cid, "fecCandidateId": cid, "isCandidate": True,
+                "source": "fec-field", "name": name, "filedName": filed or name,
+                "state": "NC", "chamber": "House (Candidate)", "districtNum": 4}
+
+    def test_the_same_words_in_another_order_are_the_same_name(self):
+        for page, name, filed in (("Lisa Carlquist", "Carlquist Lisa", "LISA, CARLQUIST"),
+                                  ("Jay J. Bowman", "Bowman J Jay", "JAY, BOWMAN J"),
+                                  ("Bernadette Greene-Placentia", "Bernadette Greene Placentia",
+                                   "GREENE PLACENTIA, BERNADETTE")):
+            person = self.filer("H6NC04999", name, filed)
+            cache = self.cache({page: "nominee"})
+            results.apply_cache([person], cache)
+            self.assertEqual(person["raceStatus"], "nominee", page)
+            self.assertEqual(person["name"], page)               # the ballot's spelling
+            self.assertIn(name, person["aliases"])               # the filed one still found
+            self.assertNotIn(page, cache["races"]["H-NC-04-2026"]["unmatched"])
+
+    def test_an_evidenced_alias_settles_a_nickname(self):
+        from kyc import overrides
+        self.assertIn("H4NC02150", overrides.RESULT_NAMES)
+        person = self.filer("H4NC02150", "Mahesh Ganorkar", "GANORKAR, MAHESH")
+        results.apply_cache([person], self.cache({"Max Ganorkar": "nominee"}))
+        self.assertEqual((person["raceStatus"], person["name"]), ("nominee", "Max Ganorkar"))
+
+    def test_every_alias_cites_the_campaigns_own_committee(self):
+        from kyc import overrides
+        for cid, (name, why) in overrides.RESULT_NAMES.items():
+            self.assertRegex(cid, r"^[HS]\d[A-Z]{2}\d{5}$")
+            self.assertGreaterEqual(len(name.split()), 2, cid)
+            self.assertRegex(why, r"committee C\d{8}", cid)
+
+    def test_a_possible_nickname_is_never_inferred_absent(self):
+        # "Mark Su" may be "SU, DONGBO": not settled, and not called absent.
+        person = self.filer("H6NC04998", "Dongbo Su", "SU, DONGBO")
+        cache = self.cache({"Mark Su": "eliminated"})
+        results.apply_cache([person], cache)
+        self.assertNotIn("raceStatus", person)
+        self.assertEqual(cache["unclear"], [("Dongbo Su", "H-NC-04-2026", ["Mark Su"])])
+
+    def test_a_different_surname_is_still_absent(self):
+        person = self.filer("H6NC04997", "Jane Roe")
+        results.apply_cache([person], self.cache({"Mark Su": "eliminated"}))
+        self.assertEqual(person["raceStatus"], "unlisted")
+
+    def test_one_name_two_filings_settles_neither(self):
+        a = self.filer("H6NC04996", "Carlquist Lisa")
+        b = self.filer("H6NC04995", "Lisa Carlquist")
+        cache = self.cache({"Lisa Carlquist": "nominee"})
+        results.apply_cache([a, b], cache)
+        self.assertNotEqual(a.get("raceStatus"), "nominee")
+        self.assertNotEqual(b.get("raceStatus"), "nominee")
+        self.assertIn("Lisa Carlquist", cache["races"]["H-NC-04-2026"]["unmatched"])
+
+    def test_validate_lists_what_is_unsettled(self):
+        from kyc import validate
+        issues = validate.check_results_pages(
+            {"unclear": [("Dongbo Su", "H-IL-09-2026", ["Mark Su"])]})
+        self.assertEqual([i.code for i in issues], ["results-name-unresolved"])
+
+
 class TestAgainstTheRealCache(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
