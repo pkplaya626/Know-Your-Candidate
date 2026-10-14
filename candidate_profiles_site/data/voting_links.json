@@ -1,0 +1,318 @@
+{
+ "fetched": "2026-10-14T15:02:05+00:00",
+ "pages": {
+  "absentee": "https://www.nass.org/can-i-vote/absentee-early-voting",
+  "polling": "https://www.nass.org/can-i-vote/find-your-polling-place",
+  "register": "https://www.nass.org/can-i-vote/register-to-vote",
+  "status": "https://www.nass.org/can-i-vote/voter-registration-status"
+ },
+ "source": "https://www.nass.org/can-I-vote",
+ "states": {
+  "AK": {
+   "absentee": "http://www.elections.alaska.gov/Core/AKVoteEarly.php",
+   "polling": "https://akelections.maps.arcgis.com/apps/webappviewer/index.html?id=579890d66c7e40ae9f7cc227d76669b1",
+   "register": "https://www.elections.alaska.gov/voter-information/#Reg",
+   "status": "https://myvoterportal.alaska.gov/"
+  },
+  "AL": {
+   "absentee": "https://www.sos.alabama.gov/alabama-votes/voter/absentee-voting",
+   "polling": "https://myinfo.alabamavotes.gov/voterview",
+   "register": "https://www.sos.alabama.gov/alabama-votes/voter/register-to-vote",
+   "status": "https://myinfo.alabamavotes.gov/voterview"
+  },
+  "AR": {
+   "absentee": "https://www.sos.arkansas.gov/elections/voter-information/absentee-voting",
+   "polling": "https://www.voterview.ar-nova.org/",
+   "register": "https://www.sos.arkansas.gov/elections/voter-information/voter-registration-information",
+   "status": "https://www.voterview.ar-nova.org/voterview"
+  },
+  "AZ": {
+   "absentee": "https://my.arizona.vote/Early/ApplicationLogin.aspx",
+   "polling": "https://my.arizona.vote/WhereToVote.aspx?s=address",
+   "register": "https://azsos.gov/elections/voters/registering-vote",
+   "status": "https://my.arizona.vote/WhereToVote.aspx?s=individual"
+  },
+  "CA": {
+   "absentee": "https://www.sos.ca.gov/elections/voter-registration/vote-mail#vote-by-mail",
+   "polling": "http://www.sos.ca.gov/elections/polling-place/",
+   "register": "https://registertovote.ca.gov/",
+   "status": "https://voterstatus.sos.ca.gov/"
+  },
+  "CO": {
+   "absentee": "https://www.sos.state.co.us/pubs/elections/FAQs/ElectionDay.html",
+   "polling": "https://www.sos.state.co.us/voter/pages/pub/olvr/findVoterReg.xhtml",
+   "register": "https://www.sos.state.co.us/voter/pages/pub/olvr/verifyNewVoter.xhtml",
+   "status": "https://www.sos.state.co.us/voter/pages/pub/olvr/findVoterReg.xhtml"
+  },
+  "CT": {
+   "absentee": "https://portal.ct.gov/SOTS/Election-Services/Voter-Information/Absentee-Voting",
+   "polling": "http://www.dir.ct.gov/sots/LookUp.aspx",
+   "register": "https://portal.ct.gov/SOTS/Election-Services/Voter-Information/Voter-Registration-Information",
+   "status": "https://portaldir.ct.gov/sots/LookUp.aspx"
+  },
+  "DC": {
+   "absentee": "https://www.dcboe.org/voters/casting-your-vote/voting-by-special-ballot",
+   "polling": "https://dcboe.org/voters/find-out-where-to-vote/vote-center-locator-tool",
+   "register": "https://www.dcboe.org/voters/register-to-vote/register-update-voter-registration",
+   "status": "https://apps.dcboe.org/VRS"
+  },
+  "DE": {
+   "absentee": "https://elections.delaware.gov/voter/absentee/",
+   "polling": "https://ivote.de.gov/voterview",
+   "register": "https://elections.delaware.gov/voter/votereg.shtml#how",
+   "status": "https://ivote.de.gov/voterview"
+  },
+  "FL": {
+   "absentee": "https://dos.myflorida.com/elections/for-voters/voting/vote-by-mail/",
+   "polling": "http://registration.elections.myflorida.com/",
+   "register": "https://registertovoteflorida.gov/home",
+   "status": "https://registration.elections.myflorida.com/CheckVoterStatus"
+  },
+  "GA": {
+   "absentee": "https://www.mvp.sos.ga.gov/MVP/mvp.do",
+   "polling": "http://www.mvp.sos.ga.gov/",
+   "register": "https://mvp.sos.ga.gov/s/olvr-home",
+   "status": "https://www.mvp.sos.ga.gov/MVP/mvp.do"
+  },
+  "HI": {
+   "absentee": "https://elections.hawaii.gov/voting/voting-in-hawaii/",
+   "polling": "https://elections.hawaii.gov/voting/voting-in-hawaii/",
+   "register": "https://olvr.hawaii.gov/%28S%28vb2rcnebimyjdjcs5q22kazp%29%29/Default.aspx",
+   "status": "https://olvr.hawaii.gov/%28S%28vb2rcnebimyjdjcs5q22kazp%29%29/Default.aspx"
+  },
+  "IA": {
+   "absentee": "https://sos.iowa.gov/elections/electioninfo/absenteeinfo.html",
+   "polling": "https://sos.iowa.gov/elections/voterreg/pollingplace/search.aspx",
+   "register": "https://sos.iowa.gov/voters/voter-registration",
+   "status": "https://sos.iowa.gov/elections/voterreg/regtovote/search.aspx"
+  },
+  "ID": {
+   "absentee": "https://voteidaho.gov/casting-your-ballot/#vote-early",
+   "polling": "https://elections.sos.idaho.gov/ElectionLink/ElectionLink/ViewPollingLocation.aspx",
+   "register": "https://elections.sos.idaho.gov/ElectionLink/ElectionLink/ApplicationInstructions.aspx",
+   "status": "https://elections.sos.idaho.gov/ElectionLink/ElectionLink/VoterSearch.aspx"
+  },
+  "IL": {
+   "absentee": "https://www.elections.il.gov/electionoperations/votingbymail.aspx",
+   "polling": "https://ova.elections.il.gov/PollingPlaceLookup.aspx",
+   "register": "https://ova.elections.il.gov/",
+   "status": "https://ova.elections.il.gov/RegistrationLookup.aspx"
+  },
+  "IN": {
+   "absentee": "http://www.in.gov/sos/elections/2402.htm",
+   "polling": "https://indianavoters.in.gov/PublicSite/PublicMain.aspx",
+   "register": "https://indianavoters.in.gov/PublicSite/PublicMain.aspx",
+   "status": "https://indianavoters.in.gov/"
+  },
+  "KS": {
+   "absentee": "https://sos.ks.gov/elections/voter-information.html",
+   "polling": "https://myvoteinfo.voteks.org/VoterView",
+   "register": "https://www.kdor.ks.gov/Apps/VoterReg/Default.aspx",
+   "status": "https://myvoteinfo.voteks.org/VoterView/"
+  },
+  "KY": {
+   "absentee": "https://elect.ky.gov/Voters/Pages/Absentee-Voting.aspx",
+   "polling": "https://vrsws.sos.ky.gov/ovrweb/govoteky",
+   "register": "https://vrsws.sos.ky.gov/ovrweb/",
+   "status": "https://vrsws.sos.ky.gov/VIC/"
+  },
+  "LA": {
+   "absentee": "https://www.sos.la.gov/elections-voting/absentee-voting-faqs",
+   "polling": "https://voterportal.sos.la.gov/",
+   "register": "https://www.sos.la.gov/elections-voting/register-to-vote",
+   "status": "https://voterportal.sos.la.gov/Home/VoterLogin"
+  },
+  "MA": {
+   "absentee": "https://www.sec.state.ma.us/divisions/elections/voting-information/vote-by-mail.htm",
+   "polling": "https://www.sec.state.ma.us/WhereDoIVoteMA/WhereDoIVote",
+   "register": "https://www.sec.state.ma.us/divisions/elections/voter-resources/registering-to-vote.htm",
+   "status": "https://www.sec.state.ma.us/voterregistrationsearch/myvoterregstatus.aspx"
+  },
+  "MD": {
+   "absentee": "https://elections.maryland.gov/voting/absentee.html",
+   "polling": "http://www.elections.state.md.us/voting/where.html",
+   "register": "https://www.elections.maryland.gov/voter_registration/index.html",
+   "status": "https://voterservices.elections.maryland.gov/VoterSearch"
+  },
+  "ME": {
+   "absentee": "http://www.maine.gov/sos/cec/elec/voter-info/absent.html",
+   "polling": "http://www.maine.gov/portal/government/edemocracy/voter_lookup.php",
+   "register": "https://www.maine.gov/sos/cec/elec/voter-info/votreg.html",
+   "status": "https://www1.maine.gov/portal/government/edemocracy/voter_lookup.php"
+  },
+  "MI": {
+   "absentee": "https://www.michigan.gov/sos/elections/voting/absentee-voting",
+   "polling": "https://mvic.sos.state.mi.us/Voter/index",
+   "register": "https://www.michigan.gov/sos/elections/voting/register-to-vote",
+   "status": "https://mvic.sos.state.mi.us/Voter/Index"
+  },
+  "MN": {
+   "absentee": "https://www.sos.mn.gov/elections-voting/other-ways-to-vote/",
+   "polling": "http://pollfinder.sos.state.mn.us/",
+   "register": "https://www.sos.mn.gov/elections-voting/register-to-vote/",
+   "status": "https://mnvotes.sos.mn.gov/voterstatuscheck/index"
+  },
+  "MO": {
+   "absentee": "https://www.sos.mo.gov/elections/govotemissouri/howtovote#Absentee",
+   "polling": "http://www.sos.mo.gov/elections/pollingplacelookup/",
+   "register": "https://www.sos.mo.gov/elections/goVoteMissouri/register",
+   "status": "https://s1.sos.mo.gov/elections/voterlookup/"
+  },
+  "MS": {
+   "absentee": "https://www.sos.ms.gov/yall-vote/absentee-voting-information",
+   "polling": "https://myelectionday.sos.state.ms.us/VoterOutreach/Pages/VOSearch.aspx",
+   "register": "https://www.sos.ms.gov/elections-voting/voter-registration-information",
+   "status": "https://www.msegov.com/sos/voter_registration/AmIRegistered"
+  },
+  "MT": {
+   "absentee": "http://sos.mt.gov/elections/absentee",
+   "polling": "https://app.mt.gov/voterinfo/",
+   "register": "https://votemt.gov/",
+   "status": "https://app.mt.gov/voterinfo/"
+  },
+  "NC": {
+   "absentee": "https://www.ncsbe.gov/Voting-Options/Absentee-Voting",
+   "polling": "https://vt.ncsbe.gov/PPLkup/",
+   "register": "https://www.ncsbe.gov/Voters/Registering-to-Vote",
+   "status": "https://vt.ncsbe.gov/RegLkup/"
+  },
+  "ND": {
+   "absentee": "https://vip.sos.nd.gov/absentee/Default.aspx",
+   "polling": "https://vip.sos.nd.gov/WhereToVote.aspx?tab=AddressandVotingTimes",
+   "register": "https://www.sos.nd.gov/elections/voter",
+   "status": "https://www.sos.nd.gov/elections"
+  },
+  "NE": {
+   "absentee": "https://sos.nebraska.gov/elections/early-voting",
+   "polling": "https://www.votercheck.necvr.ne.gov/",
+   "register": "https://sos.nebraska.gov/elections/registering-vote",
+   "status": "https://www.votercheck.necvr.ne.gov/VoterView/"
+  },
+  "NH": {
+   "absentee": "https://sos.nh.gov/elections/voters/absentee-ballots/",
+   "polling": "https://app.sos.nh.gov/viphome",
+   "register": "https://www.sos.nh.gov/elections/voters/register-vote",
+   "status": "https://app.sos.nh.gov/voterinformation"
+  },
+  "NJ": {
+   "absentee": "https://www.state.nj.us/state/elections/vote-by-mail.shtml",
+   "polling": "https://www.state.nj.us/state/elections/vote-polling-location.shtml",
+   "register": "https://nj.gov/state/elections/voter-registration.shtml",
+   "status": "https://voter.svrs.nj.gov/registration-check"
+  },
+  "NM": {
+   "absentee": "https://www.sos.nm.gov/voting-and-elections/voter-information-portal/absentee-and-early-voting/",
+   "polling": "https://voterportal.servis.sos.state.nm.us/WhereToVote.aspx",
+   "register": "https://www.sos.nm.gov/voting-and-elections/voter-information-portal/voter-registration-information/",
+   "status": "https://voterportal.servis.sos.state.nm.us/WhereToVote.aspx"
+  },
+  "NV": {
+   "absentee": "https://www.nvsos.gov/sos/elections/voters/voters-with-disabilities/absentee-voting",
+   "polling": "https://nvsos.gov/votersearch/",
+   "register": "https://www.nvsos.gov/SOSVoterServices/start.aspx",
+   "status": "https://www.nvsos.gov/votersearch/"
+  },
+  "NY": {
+   "absentee": "http://www.elections.ny.gov/VotingAbsentee.html",
+   "polling": "https://voterlookup.elections.ny.gov/",
+   "register": "https://dmv.ny.gov/more-info/electronic-voter-registration-application",
+   "status": "https://voterlookup.elections.ny.gov/"
+  },
+  "OH": {
+   "absentee": "https://www.ohiosos.gov/elections/frequently-asked-questions#absentee-voting",
+   "polling": "https://www.ohiosos.gov/directories/find-my-polling-location",
+   "register": "https://olvr.ohiosos.gov/",
+   "status": "https://voterlookup.ohiosos.gov/voterlookup.aspx"
+  },
+  "OK": {
+   "absentee": "https://oklahoma.gov/elections/voters/absentee-voting.html",
+   "polling": "https://okvoterportal.okelections.us/",
+   "register": "https://oklahoma.gov/elections/voter-registration/register-to-vote.html",
+   "status": "https://okvoterportal.okelections.us/"
+  },
+  "OR": {
+   "absentee": "https://sos.oregon.gov/elections/pages/voteinor.aspx",
+   "polling": "https://sos.oregon.gov/voting/pages/drop-box-locator.aspx",
+   "register": "https://sos.oregon.gov/elections/pages/registration.aspx?lang=en",
+   "status": "https://secure.sos.state.or.us/orestar/vr/showVoterSearch.do?lang=eng"
+  },
+  "PA": {
+   "absentee": "https://www.vote.pa.gov/Voting-in-PA/Pages/Mail-and-Absentee-Ballot.aspx",
+   "polling": "https://www.pavoterservices.pa.gov/Pages/PollingPlaceInfo.aspx",
+   "register": "https://www.vote.pa.gov/Register-to-Vote/Pages/How-to-Register-to-Vote.aspx",
+   "status": "https://www.vote.pa.gov/Register-to-Vote/Pages/Check-Your-Voter-Registration-Status.aspx"
+  },
+  "RI": {
+   "absentee": "https://vote.sos.ri.gov/Voter/VotebyMail?ActiveFlag=4",
+   "polling": "https://vote.sos.ri.gov/Home/PollingPlaces?ActiveFlag=2",
+   "register": "https://vote.sos.ri.gov/Home/RegistertoVote?ActiveFlag=1",
+   "status": "https://vote.sos.ri.gov/Home/UpdateVoterRecord?ActiveFlag=0"
+  },
+  "SC": {
+   "absentee": "https://scvotes.gov/voters/absentee-voting/",
+   "polling": "https://vrems.scvotes.sc.gov/Voter/Login?PageMode=PollingPlace",
+   "register": "https://scvotes.gov/voters/register-to-vote/",
+   "status": "https://vrems.scvotes.sc.gov/Voter/Login?PageMode=VoterInformation"
+  },
+  "SD": {
+   "absentee": "https://sdsos.gov/elections-voting/voting/absentee-voting.aspx",
+   "polling": "https://vip.sdsos.gov/VIPLogin.aspx",
+   "register": "https://sdsos.gov/elections-voting/voting/register-to-vote/default.aspx",
+   "status": "https://vip.sdsos.gov/viplogin.aspx"
+  },
+  "TN": {
+   "absentee": "https://sos.tn.gov/products/elections/absentee-voting",
+   "polling": "https://tnmap.tn.gov/voterlookup/",
+   "register": "https://sos.tn.gov/products/elections/how-do-i-register-vote",
+   "status": "https://tnmap.tn.gov/voterlookup/"
+  },
+  "TX": {
+   "absentee": "https://www.votetexas.gov/voting/early-voting.html",
+   "polling": "https://teamrv-mvp.sos.texas.gov/MVP/mvp.do",
+   "register": "https://www.votetexas.gov/register-to-vote/index.html",
+   "status": "https://teamrv-mvp.sos.texas.gov/MVP/mvp.do"
+  },
+  "UT": {
+   "absentee": "https://vote.utah.gov/securing-your-mail-ballot/",
+   "polling": "https://votesearch.utah.gov/voter-search/search/search-by-address/how-and-where-can-i-vote",
+   "register": "https://secure.utah.gov/voterreg/index.html",
+   "status": "https://votesearch.utah.gov/voter-search/search/search-by-voter/voter-info"
+  },
+  "VA": {
+   "absentee": "http://www.elections.virginia.gov/casting-a-ballot/absentee-voting/",
+   "polling": "https://vote.elections.virginia.gov/VoterInformation/Lookup/polling",
+   "register": "https://www.elections.virginia.gov/registration/how-to-register/",
+   "status": "https://vote.elections.virginia.gov/VoterInformation/Lookup/status"
+  },
+  "VT": {
+   "absentee": "https://sos.vermont.gov/elections/voters/early-absentee-voting/",
+   "polling": "https://mvp.vermont.gov",
+   "register": "https://sos.vermont.gov/elections/voters/registration/",
+   "status": "https://mvp.vermont.gov"
+  },
+  "WA": {
+   "absentee": "https://www.sos.wa.gov/elections/faq_vote_by_mail.aspx",
+   "polling": "https://voter.votewa.gov/WhereToVote.aspx",
+   "register": "https://www.sos.wa.gov/elections/voters/voter-eligibility-resources/voter-eligibility",
+   "status": "https://voter.votewa.gov/WhereToVote.aspx"
+  },
+  "WI": {
+   "absentee": "https://elections.wi.gov/node/1103",
+   "polling": "https://myvote.wi.gov/en-us/FindMyPollingPlace",
+   "register": "https://myvote.wi.gov/en-us/RegisterToVote",
+   "status": "https://myvote.wi.gov/en-us/MyVoterInfo"
+  },
+  "WV": {
+   "absentee": "https://sos.wv.gov/absentee-voting-information",
+   "polling": "https://apps.sos.wv.gov/elections/voter/index.aspx",
+   "register": "https://ovr.sos.wv.gov/Register/Landing",
+   "status": "https://apps.sos.wv.gov/Elections/Voter/AmIRegisteredToVote"
+  },
+  "WY": {
+   "absentee": "http://soswy.state.wy.us/Elections/AbsenteeVoting.aspx",
+   "polling": "http://soswy.state.wy.us/Elections/PollPlace/Default.aspx",
+   "register": "https://sos.wyo.gov/Elections/State/RegisteringToVote.aspx",
+   "status": "https://sos.wyo.gov/Elections/State/RegisteringToVote.aspx"
+  }
+ }
+}

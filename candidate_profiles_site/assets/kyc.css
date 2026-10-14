@@ -2256,6 +2256,7 @@ svg.district-map,
   margin: 0;
 }
 .state-links .btn { text-decoration: none; }
+.vote-box .state-note { margin-top: var(--s-2); }
 .state-section { margin-bottom: var(--s-6); }
 .state-heading {
   display: flex;

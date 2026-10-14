@@ -39,6 +39,7 @@ data/state_legislators.json ──┤
 data/executives.json        ──┤   (every governor, from the NGA)
 data/statewide_officers.json ─┤   (lieutenant governors, secretaries of state, attorneys general)
 data/courts.json            ──┤   (each state's highest court, from the courts)
+data/voting_links.json      ──┤   (each state's official voting pages: NASS Can I Vote)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
@@ -83,7 +84,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `disclosures.json`, `primary_results.json`, `committees.json`,
   `campaigns.json`, `enrichment.json`, `odds.json`,
   `census_governments.json`, `state_legislators.json`, `executives.json`,
-  `partisan_composition.json`, `statewide_officers.json` and `courts.json` are caches, but
+  `partisan_composition.json`, `statewide_officers.json`, `courts.json` and `voting_links.json` are caches, but
   they *are* hand-editable. `stategov.js` is generated from the last five.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them only to check they load the right scripts in the right order; it never
@@ -117,15 +118,16 @@ python build_profile_site.py localgov         # every local government (Census l
 python build_profile_site.py executives       # every governor (NGA), and NCSL's party counts
 python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS), attorneys general
 python build_profile_site.py courts           # each state's highest court, from the court's own roster
+python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 864 tests, no dependencies
-npm install && npm test                       # 1119 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 873 tests, no dependencies
+npm install && npm test                       # 1126 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`,
-`officers`, `courts` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts. Run the
+`officers`, `courts`, `voting` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.

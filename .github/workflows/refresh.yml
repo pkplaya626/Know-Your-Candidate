@@ -145,6 +145,9 @@ jobs:
           python build_profile_site.py officers
           python build_profile_site.py statelegs
           python build_profile_site.py courts
+          # Each state's official voting pages, as NASS's "Can I Vote" lists
+          # them; refused unless all 50 states and D.C. are there.
+          python build_profile_site.py voting
 
       # What a filed candidate's own sources say - the birth date, education
       # and occupation in the article their ballot page links; their
