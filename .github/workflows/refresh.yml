@@ -31,6 +31,8 @@ permissions:
   pull-requests: write
   # A failed run opens (or comments on) a "Weekly refresh failed" issue.
   issues: write
+  # To start CI on the pull request it opens (see "Open a pull request").
+  actions: write
 
 concurrency:
   group: refresh
@@ -220,6 +222,23 @@ jobs:
           Validation, \`verify\` and the unit tests all ran before this was opened.
           BODY
           )"
+
+          # A pull request opened with the workflow's own token starts no CI
+          # of its own that runs: GitHub holds it at "action_required" for a
+          # person to approve, and #50 and #51 sat that way for days in
+          # October 2026. A dispatched run is not held.
+          gh workflow run ci.yml --ref "$branch"
+
+          # A newer refresh carries everything an older one did. Leaving both
+          # open asked a reviewer to read the same data twice. The branch is
+          # kept; only the pull request closes.
+          new=$(gh pr view "$branch" --json number --jq .number)
+          for old in $(gh pr list --state open --json number,headRefName \
+              --jq '.[] | select(.headRefName | startswith("refresh/")) | .number'); do
+            if [ "$old" != "$new" ]; then
+              gh pr close "$old" --comment "Superseded by #$new, opened by a newer refresh run."
+            fi
+          done
 
       # A failed scheduled run used to be silent: nobody watches the Actions
       # tab, and the site kept serving the old field. Open an issue, or

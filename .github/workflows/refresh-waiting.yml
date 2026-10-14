@@ -1,0 +1,52 @@
+# Tell a person when a refresh pull request is waiting for them.
+#
+# refresh.yml opens a pull request and never merges it, by design: a change
+# in who holds office is read by a person before it is published. Nothing
+# said one was waiting. In October 2026 the site served data eight days old,
+# three weeks before the election, while two refreshes sat unreviewed.
+#
+# This opens a "Refresh waiting for review" issue once a refresh pull request
+# is more than a day old, comments on it each day one still waits (a comment
+# notifies; an open issue alone does not), and closes it when none is
+# waiting. It changes no file and merges nothing.
+
+name: Refresh waiting
+
+on:
+  schedule:
+    # Daily, off the hour: GitHub's scheduler queues heavily at :00.
+    - cron: "40 14 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: read
+
+jobs:
+  waiting:
+    name: Report refresh pull requests waiting for review
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open, update or close the waiting issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="Refresh waiting for review"
+          cutoff=$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%SZ)
+          waiting=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open \
+            --json number,headRefName,createdAt,url \
+            --jq "map(select((.headRefName | startswith(\"refresh/\")) and .createdAt < \"$cutoff\")) | .[] | \"- #\(.number), opened \(.createdAt[0:10]): \(.url)\"")
+          number=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --search "\"$title\" in:title" --json number,title \
+            --jq "map(select(.title == \"$title\")) | .[0].number // empty")
+          if [ -n "$waiting" ]; then
+            body=$(printf 'A refresh pull request has waited more than a day. The live site serves the data from before it until it is reviewed and merged.\n\n%s\n' "$waiting")
+            if [ -n "$number" ]; then
+              gh issue comment "$number" --repo "$GITHUB_REPOSITORY" --body "$body"
+            else
+              gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
+            fi
+          elif [ -n "$number" ]; then
+            gh issue close "$number" --repo "$GITHUB_REPOSITORY" \
+              --comment "No refresh pull request is waiting for review."
+          fi
