@@ -119,8 +119,8 @@ python build_profile_site.py officers         # lieutenant governors (NLGA), sec
 python build_profile_site.py courts           # each state's highest court, from the court's own roster
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 836 tests, no dependencies
-npm install && npm test                       # 1059 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 842 tests, no dependencies
+npm install && npm test                       # 1089 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -668,6 +668,29 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Dakota's township is unorganized territory in every Gazetteer since
     2015 - and a town listed under another county than its subdivision
     (the Town of Pomfret, Connecticut) is reported as such, not as missing.
+
+61. **A figure needs a source the page can name, and a curated row is two
+    ids and a seat.** The 2026-10-13 audit found:
+    - Three governors who never filed (Kemp, Beshear, Chris Sununu)
+      listed as Senate candidates with round-number totals ("Raised
+      $22,000,000.00").
+    - Curated birthdates that disagreed with the person's own article in
+      17 of 20 checked.
+    - "~92% Party Loyalty" on 536 profiles, independents' included. It
+      was 80 + 30 x |DW-NOMINATE|: one number derived from another and
+      shown as a measurement.
+    - Unsourced net-worth figures beside a disclosure link, as though
+      taken from it.
+
+    A curated row now carries its profile id (`ID`, so deleting a row
+    renumbers no one; odds.json and the enrichment cache key on these
+    ids) and the person's own filing (`FEC Candidate ID`). `validate`
+    fails a row without one, a filing for another seat, and any money
+    whose `financeSource` is not the FEC. Biography comes from the
+    ballot-linked article (rule 38), net worth from nowhere (rule 26), and
+    a label speaks only of what its status knows. A member with no
+    primary line for their seat is "Not running for this seat", never "Not
+    on the ballot": Byron Donalds is on Florida's, for governor.
 
 ## District maps
 
