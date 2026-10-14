@@ -312,12 +312,16 @@ class TestVoteview(unittest.TestCase):
         self.assertIn("Moderate Republican", voteview.describe(0.25))
         self.assertIn("Solidly Conservative", voteview.describe(0.75))
 
-    def test_centrists_are_labelled_independent_not_percentage(self):
-        self.assertIn("Highly Independent", voteview.describe(0.05))
-        self.assertNotIn("%", voteview.describe(0.05))
-
-    def test_loyalty_is_capped(self):
-        self.assertIn("~99%", voteview.describe(1.0))
+    def test_nothing_is_derived_from_the_score(self):
+        # "~92% Party Loyalty" was 80 + 30 x |score|, shown as a statistic and
+        # given even to independents. A party-unity rate is counted from roll
+        # calls; the score says only where a member sits.
+        for score in (-1.0, -0.25, 0.05, 0.41, 1.0):
+            text = voteview.describe(score)
+            self.assertNotIn("%", text)
+            self.assertNotIn("Loyalty", text)
+            self.assertNotIn("Independent", text)
+        self.assertEqual(voteview.describe(0.41), "DW-NOMINATE: +0.41 (Solidly Conservative)")
 
 
 if __name__ == "__main__":

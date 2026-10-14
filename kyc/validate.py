@@ -139,7 +139,6 @@ def check_fields(profiles):
                             sorted(only_placeholder)[:15]))
 
     for field, label in (("receipts", "campaign receipts"),
-                         ("net_worth", "net worth"),
                          ("voting_alignment", "voting alignment")):
         missing = [p for p in profiles if p[field] == "N/A"]
         if missing:
@@ -496,6 +495,7 @@ def check_finance(profiles, finance):
     searched = [
         profile["name"] for profile in profiles
         if (finance.get(fec.profile_key(profile)) or {}).get("via") == "fec-search"
+        and not profile.get("rosterFecId")
     ]
     if searched:
         # Not a problem, but worth seeing: these are the only ones matched by
@@ -503,6 +503,58 @@ def check_finance(profiles, finance):
         issues.append(Issue("warn", "fec-name-matched",
                             f"{len(searched)} profiles were matched to the FEC by name, "
                             f"not by an authoritative id", sorted(searched)))
+    return issues
+
+
+def check_curated_candidates(profiles):
+    """Every curated candidate names their own FEC filing, and every figure
+    of money on the page came from the FEC.
+
+    The curated rosters listed three governors who never filed for the
+    Senate, each with a round-number total that reached the page as
+    "Raised $22,000,000.00", and three nominees under a second profile the
+    FEC's filing could not find. A row now carries the person's FEC id, and
+    the id's own office and state must be the profile's (rule 20).
+    """
+    issues, missing, wrong, unnamed = [], [], [], []
+    for profile in profiles:
+        if not profile.get("isCandidate") or profile.get("source") == "fec-field":
+            continue                        # members, and the FEC's own field
+        if not re.match(r"^CAND_\d+$", profile.get("id") or ""):
+            unnamed.append(f"{profile['name']} ({profile['officeLabel']}): "
+                           f"ID {profile.get('id')!r}")
+        fec_id = profile.get("rosterFecId") or ""
+        match = _FEC_ID.match(fec_id)
+        if not match:
+            missing.append(f"{profile['id']} {profile['name']} ({profile['officeLabel']})"
+                           + (f": {fec_id!r}" if fec_id else ""))
+            continue
+        office, state = match.groups()
+        expected = "S" if "Senate" in profile["chamber"] else "H"
+        if office != expected or state != profile["state"]:
+            wrong.append(f"{profile['id']} {profile['name']} ({profile['officeLabel']}) "
+                         f"names {fec_id}, filed as {office}-{state}")
+    if unnamed:
+        # The id is written in the row so that removing one renumbers nobody;
+        # a row without it would take whatever id its position gave it.
+        issues.append(Issue("error", "curated-no-id",
+                            f"{len(unnamed)} curated candidates have no ID of the form "
+                            f"CAND_<n> in their roster row", unnamed))
+    if missing:
+        issues.append(Issue("error", "curated-no-fec-id",
+                            f"{len(missing)} curated candidates have no FEC candidate id; "
+                            f"add it to the roster row or delete the row", missing))
+    if wrong:
+        issues.append(Issue("error", "curated-fec-id-seat",
+                            f"{len(wrong)} curated candidates name another seat's filing", wrong))
+
+    unsourced = [f"{p['name']} ({p['officeLabel']}): {p.get('receipts')}"
+                 for p in profiles
+                 if p.get("hasRealFinance") and p.get("financeSource") != "FEC"]
+    if unsourced:
+        issues.append(Issue("error", "finance-not-fec",
+                            f"{len(unsourced)} profiles show money that did not come from the FEC",
+                            unsourced))
     return issues
 
 
@@ -1122,6 +1174,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_snapshot(profiles, raw, snapshot)
     issues += check_senate_classes(profiles, snapshot)
     issues += check_finance(profiles, finance)
+    issues += check_curated_candidates(profiles)
     issues += check_finance_periods(profiles)
     issues += check_field_screen(field)
     issues += check_registrations(profiles, field)

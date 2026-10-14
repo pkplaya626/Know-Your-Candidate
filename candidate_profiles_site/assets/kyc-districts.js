@@ -132,13 +132,16 @@
   }
 
   /** Members holding one of this state's districts and running in another,
-   *  from the pipeline's contestRaceId (rule 30). */
+   *  from the pipeline's contestRaceId (rule 30). A member who lost that
+   *  primary, or left it, is not running anywhere: Texas listed Al Green
+   *  (TX-9 -> TX-18) and Julie Johnson (TX-32 -> TX-33) as running after
+   *  both lost. Their status in the race they entered decides. */
   function moves() {
     var byId = {};
     races.forEach(function (r) { byId[r.id] = r; });
     return data.filter(function (p) {
       return !p.isCandidate && p.state === code && p.chamber.indexOf("House") !== -1 &&
-        KYC.runsElsewhere(p);
+        KYC.runsElsewhere(p) && !OFF_BALLOT[KYC.contestStatus(p)];
     }).map(function (p) {
       var race = byId[p.contestRaceId];
       return race && race.chamber === "House" && race.state === code

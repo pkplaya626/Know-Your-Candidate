@@ -70,12 +70,12 @@ def latest_scores(rows):
 def describe(dim1):
     """Render a DW-NOMINATE first-dimension score as a display string.
 
-    The first dimension runs roughly -1 (left) to +1 (right). The loyalty
-    figure is an explicit heuristic derived from distance off centre, not a
-    published statistic, and is labelled as approximate for that reason.
+    The first dimension runs roughly -1 (left) to +1 (right). Nothing else is
+    derived from it. A "~92% Party Loyalty" figure used to follow, computed as
+    80 + 30 x distance from centre: a formula shown as a statistic, given even
+    to independents with no party to be loyal to. A party-unity rate has to be
+    counted from roll calls, not inferred from a score.
     """
-    distance = abs(dim1)
-
     if dim1 < -0.4:
         label = "Solidly Progressive"
     elif dim1 < -0.1:
@@ -87,12 +87,7 @@ def describe(dim1):
     else:
         label = "Solidly Conservative"
 
-    if -0.1 <= dim1 <= 0.1:
-        loyalty = "Highly Independent"
-    else:
-        loyalty = f"~{min(99, int(80 + distance * 30))}% Party Loyalty"
-
-    return f"DW-NOMINATE: {dim1:+.2f} ({label}) • {loyalty}"
+    return f"DW-NOMINATE: {dim1:+.2f} ({label})"
 
 
 def build_alignment_map(rows=None):

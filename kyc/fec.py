@@ -370,7 +370,18 @@ def resolve_all(profiles, root=".", limit=None, refresh=False, snapshot=None,
     # skipped outright, which froze Darline Graham Nordone's July figures
     # through every refresh and left them labelled a two-year total. They are
     # now refreshed like any other record, through the pinned id.
-    todo = [p for p in profiles if refresh or profile_key(p) not in cache]
+    #
+    # A curated candidate carries their FEC id in the roster. A cached record
+    # for another id, or for none, was found by an earlier name search and is
+    # looked up again through the roster's id.
+    def stale(profile):
+        record = cache.get(profile_key(profile))
+        if record is None:
+            return True
+        roster_id = profile.get("rosterFecId")
+        return bool(roster_id) and record.get("candidate_id") != roster_id
+
+    todo = [p for p in profiles if refresh or stale(p)]
 
     if limit:
         todo = todo[:limit]
@@ -384,7 +395,7 @@ def resolve_all(profiles, root=".", limit=None, refresh=False, snapshot=None,
 
     authoritative = known_ids(snapshot, active_ids)
     if authoritative:
-        covered = sum(1 for p in todo if p["id"] in authoritative)
+        covered = sum(1 for p in todo if p["id"] in authoritative or p.get("rosterFecId"))
         log(f"  finance: {covered} of {len(todo)} have an authoritative FEC id")
 
     log(f"  finance: looking up {len(todo)} profile(s) ...")
@@ -403,6 +414,9 @@ def resolve_all(profiles, root=".", limit=None, refresh=False, snapshot=None,
         try:
             if pinned:
                 match = {"candidate_id": pinned["candidate_id"], "via": "pinned"}
+            elif profile.get("rosterFecId"):
+                match = {"candidate_id": profile["rosterFecId"], "via": "roster"}
+                by_id += 1
             else:
                 candidate_id = authoritative.get(profile["id"])
                 if candidate_id:
@@ -498,6 +512,11 @@ def apply_cache(profiles, cache):
     applied = checked = 0
     for profile in profiles:
         record = cache.get(profile_key(profile)) or {}
+        roster_id = profile.get("rosterFecId")
+        if roster_id and record.get("candidate_id") not in (None, roster_id):
+            # Found by an older name search, for a filing the roster says is
+            # not this person's. Show nothing until resolve_all looks again.
+            continue
 
         if record.get("receipts") is None:
             # We identified this person at the FEC and it holds nothing for
@@ -515,6 +534,7 @@ def apply_cache(profiles, cache):
                     quality[field] = NO_FILING
                     profile[field] = STATUS_LABELS[NO_FILING]
                 profile["financeCycle"] = CYCLE
+                profile["hasRealFinance"] = False
                 checked += 1
             continue
 

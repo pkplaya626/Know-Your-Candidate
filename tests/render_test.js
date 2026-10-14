@@ -189,7 +189,12 @@ async function testShared(page) {
     const generic = KYC.renderField(
       { funding_sources: "Individual/PAC contributions", quality: { funding_sources: "generic" } },
       "funding_sources");
-    check("generic value marked low-information", /kyc-generic/.test(generic));
+    check("a generic placeholder renders as an absence, not as an answer (rule 10)",
+      /kyc-absent/.test(generic) && !/Individual/.test(generic), generic);
+    const filler = { name: "Pat Example", platforms: "General legislative priorities",
+      quality: { platforms: "generic" } };
+    check("a generic placeholder is not a value, so not shown or searched",
+      !KYC.hasValue(filler, "platforms") && !KYC.matchesQuery(filler, "legislative priorities"));
 
     const sourced = KYC.renderField(
       { receipts: "$1,022,664.06", quality: {}, financeSource: "FEC", financeAsOf: "2026-06-30" },
@@ -280,6 +285,17 @@ async function testShared(page) {
     // 2028: first Monday is the 6th, so election day is the 7th.
     check("election day generalises to 2028",
       KYC.electionStatus(2028, new Date("2028-01-01Z")).iso === "2028-11-07");
+  });
+
+  suite(`${page} — ages are today's, not the build's`, () => {
+    // The build stamps `age` on its own date; 17 were a year out nine days
+    // later. The page counts from the birthdate in the reader's calendar.
+    const aoc = { birthdate: "1989-10-13", age: 36 };
+    check("the day before a birthday", KYC.ageOf(aoc, new Date(2026, 9, 12)) === 36);
+    check("on the birthday", KYC.ageOf(aoc, new Date(2026, 9, 13)) === 37);
+    check("a year-only birthdate keeps the build's figure",
+      KYC.ageOf({ birthdate: "1950", age: 76 }, new Date(2026, 9, 13)) === 76);
+    check("no birthdate and no age is no age", KYC.ageOf({ birthdate: "", age: "Unknown" }) === null);
   });
 
   return { window, D, KYC };
@@ -822,6 +838,43 @@ async function testDirectoryAsync() {
       nominee.raceStatus = "nominee";
       delete nominee.ballotLine;
     }
+
+    // A curated candidate's roster status ("Primary Candidate / US
+    // Representative") was written before the primary and contradicted the
+    // result beside it; and no figure on the page is "as filed in the source
+    // rosters" any more.
+    const curated = window.legislatorsData.find((p) =>
+      /^CAND_/.test(p.id) && p.raceStatus && p.status && p.status !== "Candidate");
+    check("there is a curated candidate with a result to test", !!curated);
+    if (curated) {
+      KYC.profile.open(curated.id);
+      const line = D.getElementById("profileModalStatus").textContent;
+      check("a candidate's result replaces the roster's status text",
+        line.indexOf(curated.status) === -1, line);
+      check("no money is credited to the rosters",
+        !/source rosters/.test(D.getElementById("profileModalSource").textContent));
+      KYC.profile.close();
+    }
+
+    // A curated profile that took over its FEC filing answers to the old id,
+    // which shared links and odds.json labels still carry.
+    const merged = window.legislatorsData.filter((p) => /^CAND_/.test(p.id) && p.fecCandidateId);
+    check("a curated profile answers to its own filing's id",
+      merged.length > 0 && merged.every((p) => KYC.byId("FEC_" + p.fecCandidateId) === p),
+      merged.filter((p) => KYC.byId("FEC_" + p.fecCandidateId) !== p).map((p) => p.name).join(", "));
+
+    // Rule 27: a challenger is running for the seat, not representing it.
+    const challenger = window.legislatorsData.find((p) => p.isCandidate);
+    const seated = window.legislatorsData.find((p) => !p.isCandidate);
+    KYC.profile.open(challenger.id);
+    const meta = D.querySelector("#profileModal .modal-meta").textContent;
+    check("a candidate's dialog says Running for, never Represents",
+      /Running for/.test(meta) && !/Represents/.test(meta), meta.replace(/\s+/g, " "));
+    KYC.profile.close();
+    KYC.profile.open(seated.id);
+    check("a member's dialog says Represents",
+      /Represents/.test(D.querySelector("#profileModal .modal-meta").textContent));
+    KYC.profile.close();
   });
 
   suite("index.html — search suggestions and remembered state", () => {
@@ -890,17 +943,16 @@ async function testDirectoryAsync() {
   suite("index.html — the map's old bug, checked on both pages", () => {
     // map.html rendered `item.net_worth` with textContent, so a profile with
     // no filing showed the literal placeholder sentence as if it were data.
-    const withPlaceholder = window.legislatorsData.find(
-      (p) => (p.quality || {}).net_worth === "not_disclosed");
-    check("a profile with no net-worth filing exists to test", !!withPlaceholder);
-    if (withPlaceholder) {
-      KYC.profile.open(withPlaceholder.id);
-      const shown = D.getElementById("profileModalWorth").textContent;
-      check("no placeholder prose reaches the reader",
-        !/No net worth disclosure|N\/A \(/.test(shown), shown);
-      check("it reads as an absence instead", /Not disclosed/.test(shown), shown);
-      KYC.profile.close();
-    }
+    // The field itself is gone (rule 26): no profile carries a net worth, and
+    // no dialog prints the roster's placeholder sentences anywhere.
+    check("no profile carries a net-worth value",
+      !window.legislatorsData.some((p) => "net_worth" in p));
+    const member = window.legislatorsData.find((p) => !p.isCandidate);
+    KYC.profile.open(member.id);
+    const shown = D.getElementById("profileModal").textContent;
+    check("no placeholder prose reaches the reader",
+      !/No net worth disclosure|N\/A \(|Est\. net worth|Party Loyalty/.test(shown));
+    KYC.profile.close();
   });
 
   suite("index.html — deep links", () => {
@@ -970,6 +1022,19 @@ async function testMap() {
     })());
     check("mode buttons announce their state",
       D.querySelector('[data-mode="senate2026"]').getAttribute("aria-pressed") === "true");
+    // John Cornyn and Bill Cassidy ran and lost; the label called them "not
+    // running", like a retiree, while the panel beside it said "Lost primary".
+    const label = (code) => (D.querySelector('#usMap [data-state="' + code + '"]') || {
+      getAttribute: () => "" }).getAttribute("aria-label") || "";
+    const lost = window.legislatorsData.filter((p) => !p.isCandidate &&
+      /Senate/.test(p.chamber) && p.seatUp2026 && KYC.contestStatus(p) === "eliminated");
+    check("a senator who lost the primary is labelled so, not 'not running'",
+      lost.every((p) => /lost the primary/.test(label(p.state)) &&
+        !/not running/.test(label(p.state))),
+      lost.map((p) => label(p.state)).join(" | "));
+    check("party is an adjective in the label, as in the legend",
+      ![...D.querySelectorAll("#usMap .state")].some((s) =>
+        /Democrat seat/.test(s.getAttribute("aria-label") || "")));
     D.querySelector('[data-mode="senate"]').click();
   });
 
@@ -1065,12 +1130,12 @@ async function testMap() {
     row.click();
     const modal = D.getElementById("profileModal");
     check("map opens the same dialog as the grid", modal && !modal.hidden);
-    check("dialog uses renderField for net worth", (() => {
+    // Rule 26: no figure for net worth, only the filing itself or "None linked".
+    check("the dialog shows no net-worth figure, only the disclosure", (() => {
       const item = KYC.byId(row.getAttribute("data-id"));
-      const shown = D.getElementById("profileModalWorth").innerHTML;
-      return (item.quality || {}).net_worth
-        ? /kyc-absent|kyc-generic/.test(shown)
-        : shown.length > 0;
+      const shown = D.getElementById("profileModalDisclosure").innerHTML;
+      return !D.getElementById("profileModalWorth") &&
+        (item.disclosureUrl ? /disclosure-link/.test(shown) : /kyc-absent/.test(shown));
     })());
     check("Escape closes it", (() => {
       D.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
@@ -1231,6 +1296,12 @@ async function testInterlinks() {
     const panel = map.D.getElementById("delegation");
     check("Texas's House panel links its district page",
       !!panel.querySelector('a[href="districts/tx.html"]'), panel.innerHTML.slice(0, 200));
+    // The panel counted members only; the state page's balance counts the
+    // vacant seat too. Both read the build's figure now.
+    const vacant = map.window.kycBuildMeta.states.TX.balance.house.vacant;
+    const counts = map.D.getElementById("panelCounts").textContent;
+    check("the House counts show the state's vacancies, as the state page does",
+      !vacant || counts.indexOf(vacant + " vacant") !== -1, counts);
   });
 
   const guide = await buildPage("government/states.html");
@@ -1418,7 +1489,7 @@ async function testRunningElsewhere() {
 
     const badProfiles = decided.filter((p) => {
       const t = profileStatus(p);
-      return /not seeking re-election|Not on the 2026 ballot|Renominated/i.test(t) ||
+      return /not seeking re-election|Not running for this seat|Renominated/i.test(t) ||
         !t.includes(p.contestLabel);
     });
     check("no profile calls them off the ballot or renominated", badProfiles.length === 0,
@@ -1436,12 +1507,23 @@ async function testRunningElsewhere() {
       withdrawn: /Withdrew/, advanced: /In runoff/, unlisted: /Not on primary ballot/ };
     const badCards = decided.filter((p) => {
       const html = KYC.cards.statusBadge(p);
-      return /Not on the ballot|Renominated/.test(html) ||
+      return /Not running for this seat|Renominated/.test(html) ||
         !FILING_BADGE[filingOf(p).raceStatus].test(html) ||
         (filingOf(p).raceStatus !== "unlisted" && /Not on primary ballot/.test(html));
     });
     check("each card shows the result of their race, not their seat", badCards.length === 0,
       badCards.map((p) => p.name + ": " + KYC.cards.statusBadge(p)).join(" | "));
+
+    // A member with no line for their own seat may be on another office's
+    // ballot (Byron Donalds, Florida's nominee for governor), so the badge
+    // speaks only of the seat.
+    const leaving = people.filter((p) => !p.isCandidate && !p.contestLabel &&
+      KYC.contestStatus(p) === "unlisted");
+    check("a member not running for their seat is never called off the ballot",
+      leaving.length > 0 && leaving.every((p) => {
+        const html = KYC.cards.statusBadge(p);
+        return /Not running for this seat/.test(html) && !/Not on the ballot/.test(html);
+      }), leaving.length + " members");
 
     // Someone with no filing in their race shows no result, never the seat's.
     const undecided = movers.filter((p) => !decided.includes(p));
@@ -1497,7 +1579,7 @@ async function testRunningElsewhere() {
       check(`${nominee.name}'s row is in the ${nominee.state} delegation`, !!row);
       check("the row carries the result of their race",
         row && /Running for/.test(row.textContent) && /Nominee/.test(row.textContent) &&
-          !/Not on ballot/.test(row.textContent),
+          !/Leaving seat|Not on ballot/.test(row.textContent),
         row && row.textContent.replace(/\s+/g, " ").trim());
       // Both badges beside the name took the whole row: the name vanished and
       // "House • CA-38" broke a word a line. The seat gets a line of its own
@@ -1925,8 +2007,9 @@ async function testRedistricting() {
   const holders = (n) => people.filter((p) => caHouse(p) && p.districtNum === n);
   const raceFor = (n) => races.find((r) => r.chamber === "House" && r.state === "CA" && r.district === n);
   const contestOf = (p) => (races.find((r) => r.id === p.contestRaceId) || {}).district;
+  const OUT = { eliminated: true, withdrawn: true, unlisted: true };
   const movers = people.filter((p) => caHouse(p) && KYC.runsElsewhere(p) &&
-    /^H-CA-/.test(p.contestRaceId));
+    /^H-CA-/.test(p.contestRaceId) && !OUT[KYC.contestStatus(p)]);
   const cards = () => [...D.querySelectorAll(".plan-card")];
   const focusOf = (card) => [...card.querySelectorAll(".district-statewide use.is-focus")]
     .map((u) => +u.getAttribute("data-district")).sort((a, b) => a - b);
@@ -2110,6 +2193,22 @@ async function testRedistricting() {
 /* Every other shape of district page: one map, a single seat, a seat with no
  * race this year, a redrawn map clipped to the land, and the old address. */
 async function testDistrictPages() {
+  // Texas listed Al Green (TX-9 -> TX-18) and Julie Johnson (TX-32 -> TX-33)
+  // under "Running in a different district" after both lost those primaries.
+  const txMoves = await buildPage("districts/tx.html");
+  suite("districts/tx.html — a member who lost is not 'running'", () => {
+    const listed = [...txMoves.D.querySelectorAll(".mover-name")].map((e) => e.textContent);
+    const out = txMoves.window.legislatorsData.filter((p) => p.state === "TX" &&
+      /House/.test(p.chamber) && txMoves.window.KYC.runsElsewhere(p) &&
+      ["eliminated", "withdrawn", "unlisted"].indexOf(txMoves.window.KYC.contestStatus(p)) !== -1);
+    check("no one off the ballot in their new district is listed as running",
+      out.every((p) => listed.indexOf(p.name) === -1),
+      `${out.length} off the ballot; listed: ${listed.join(", ")}`);
+    const sentence = (txMoves.D.querySelector(".state-note") || {}).textContent || "";
+    check("the count in the sentence is the count listed",
+      !listed.length || sentence.indexOf(String(listed.length) + " member") === 0, sentence);
+  });
+
   const files = fs.readdirSync(path.join(SITE, "districts")).filter((f) => f.endsWith(".html"));
   suite("districts/ — one page per state and territory", () => {
     check("56 pages", files.length === 56, `${files.length}`);

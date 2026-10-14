@@ -548,7 +548,6 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
             "seatUp2026": True,
             "isUpIn2026": False,
             "seekingReelection2026": False,
-            "upcomingPrimary": False,
             # Everything below is genuinely unknown for a filing-derived
             # profile. Left empty so the provenance layer reports it as such
             # rather than inventing a plausible sentence.
@@ -559,7 +558,6 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
             "platforms": "",
             "voting_alignment": "",
             "committees": "",
-            "net_worth": "",
             "funding_sources": "",
             "receipts": fmt_curr(row.get("receipts")),
             "disbursements": fmt_curr(row.get("disbursements")),

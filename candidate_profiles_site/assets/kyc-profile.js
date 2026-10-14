@@ -57,7 +57,7 @@
       '      <h2 class="modal-name" id="profileModalName"></h2>',
       '      <p class="modal-meta">',
       '        <span>' + KYC.icon("pin") +
-      '          Represents <strong id="profileModalRegion"></strong>' +
+      '          <span id="profileModalRegionLabel">Represents</span> <strong id="profileModalRegion"></strong>' +
       '          <a id="profileModalStateLink" class="state-link" href="#"></a></span>',
       '        <span>' + KYC.icon("calendar") +
       '          Term <strong id="profileModalTerm"></strong></span>',
@@ -73,9 +73,8 @@
       '        <div class="field-grid">',
       '          <div class="field"><span class="field-label">Age / born</span>',
       '            <span class="field-value" id="profileModalAge"></span></div>',
-      '          <div class="field"><span class="field-label">Est. net worth</span>',
-      '            <span class="field-value" id="profileModalWorth"></span>',
-      '            <span id="profileModalDisclosure"></span></div>',
+      '          <div class="field" id="profileModalDisclosureField"><span class="field-label">Financial disclosure</span>',
+      '            <span class="field-value" id="profileModalDisclosure"></span></div>',
       '          <div class="field span-2"><span class="field-label">Education</span>',
       '            <span class="field-value subtle" id="profileModalEducation"></span></div>',
       '          <div class="field span-2"><span class="field-label">Previous careers</span>',
@@ -240,7 +239,6 @@
     var value = parseFloat(score[1]);
     var pct = Math.max(0, Math.min(100, ((value + 1) / 2) * 100));
     var label = (text.match(/\(([^)]+)\)/) || [])[1] || "";
-    var loyalty = (text.match(/•\s*(.*)$/) || [])[1] || "";
     var tone = value <= -0.1 ? "party-d" : value >= 0.1 ? "party-r" : "";
 
     target.innerHTML = [
@@ -250,8 +248,6 @@
       (value > 0 ? "+" : "") + value.toFixed(2),
       label ? '<span class="label">' + KYC.escapeHtml(label) + "</span>" : "",
       "    </span>",
-      loyalty ? '<span class="badge badge-neutral">' +
-        KYC.escapeHtml(loyalty) + "</span>" : "",
       "  </div>",
       '  <div class="ideology-track" role="img" aria-label="DW-NOMINATE first dimension ' +
       KYC.escapeAttr(value.toFixed(2)) + ' on a scale from -1 (left) to +1 (right)">',
@@ -585,7 +581,7 @@
   var MEMBER_RACE_STATUS = {
     nominee: ["badge-money", "Renominated for 2026",
       "Won the 2026 primary for this seat. Source: the state's Wikipedia election results page."],
-    unlisted: ["badge-danger", "Not on the 2026 ballot",
+    unlisted: ["badge-danger", "Not running for this seat in 2026",
       "Not named in the primary results or on the November ballot for this seat; " +
       "not seeking re-election."],
   };
@@ -614,7 +610,12 @@
         KYC.ballotLineSuffix(item) + "</span>");
     }
 
+    /* A curated candidate's roster status ("Primary Candidate / US
+     * Representative") was written before the primary; once the results say
+     * where they stand, it only contradicts them. A member's status line is
+     * kept: it is where a retirement or an appointment is explained. */
     var text = String(item.status || "").trim();
+    if (item.isCandidate && race) text = "";
     if (text && text !== "Active Member" && text !== "N/A" &&
         text !== "Filed with the FEC") {
       var leaving = /retiring|not running|defeated|ineligible|resigned/i.test(text);
@@ -627,15 +628,16 @@
   }
 
   function renderAge(item) {
-    var hasAge = item.age && item.age !== "Unknown";
+    var years = KYC.ageOf(item);
+    var hasAge = years !== null;
     var hasBirth = KYC.hasValue(item, "birthdate") && item.birthdate !== "Unknown";
     // A birthdate the pipeline read from a Wikipedia infobox says so.
     var badge = hasBirth ? KYC.sourceBadge(item, "birthdate") : "";
 
     if (hasAge && hasBirth) {
-      return KYC.escapeHtml(item.age + " (born " + item.birthdate + ")") + badge;
+      return KYC.escapeHtml(years + " (born " + item.birthdate + ")") + badge;
     }
-    if (hasAge) return KYC.escapeHtml(item.age + " years old");
+    if (hasAge) return KYC.escapeHtml(years + " years old");
     if (hasBirth) return KYC.escapeHtml(item.birthdate) + badge;
     return '<span class="kyc-absent">No data</span>';
   }
@@ -648,6 +650,9 @@
     // it from chamber + state + district in three separate places, which is
     // how "House • AL-District 3" and "House • TX-TX-32" once shipped.
     el("profileModalRegion").textContent = item.officeLabel;
+    // A challenger does not represent the seat they are running for (rule
+    // 27), and until 2026-10 every candidate's dialog said they did.
+    el("profileModalRegionLabel").textContent = item.isCandidate ? "Running for" : "Represents";
     var stateLink = el("profileModalStateLink");
     if (item.state && item.state !== "N/A") {
       stateLink.hidden = false;
@@ -683,13 +688,16 @@
     KYC.setPortrait(photo, item, "116px");
 
     el("profileModalAge").innerHTML = renderAge(item);
-    el("profileModalWorth").innerHTML = KYC.renderField(item, "net_worth");
 
     /* No free source publishes a computed net worth, and a disclosure reports
      * assets in broad value bands, so deriving one figure from it would be an
-     * estimate dressed as a fact. Link the filing instead and let the reader
-     * see what was actually submitted. */
+     * estimate dressed as a fact (rule 26). The dialog showed an unsourced
+     * "Est. net worth" from the roster for 144 members, beside this link, as
+     * though one came from the other. It links the filing alone now. A
+     * challenger's disclosures are not looked up, so the field is not shown
+     * for them rather than reading as an absence. */
     var disclosure = el("profileModalDisclosure");
+    el("profileModalDisclosureField").hidden = !!item.isCandidate && !item.disclosureUrl;
     if (item.disclosureUrl) {
       // The Senate's eFD shows its terms of use before the first report a
       // visitor opens; the link says so rather than looking broken.
@@ -707,7 +715,13 @@
         KYC.escapeHtml(item.disclosureYear || "") +
         (senate ? " disclosure (Senate eFD)" : " disclosure (PDF)") + "</a>";
     } else {
-      disclosure.innerHTML = "";
+      // A claim about this site, not about the member (rule 19): the
+      // matcher misses compound surnames and other first names (Debbie
+      // Wasserman Schultz, H. Morgan Griffith), so "none exists" was false.
+      disclosure.innerHTML = '<span class="kyc-absent" title="' +
+        KYC.escapeAttr("This site has not matched this member to a filing in the House " +
+          "Clerk's index or the Senate's eFD. The filing may exist.") +
+        '">Not linked here</span>';
     }
     el("profileModalEducation").innerHTML = KYC.renderField(item, "education");
     el("profileModalCareers").innerHTML = KYC.renderField(item, "previous_professions");
@@ -735,11 +749,12 @@
     renderContact(item);
     renderRace(item);
 
+    // Every figure of money on the site is the FEC's (validate: finance-not-fec).
     el("profileModalSource").textContent = item.financeSource
       ? "Finance figures from the FEC" +
         (item.financeAsOf ? ", through " + item.financeAsOf : "") +
         (item.financeElection ? " (" + item.financeElection + " election period)" : "")
-      : "Figures as filed in the source rosters";
+      : "";
   }
 
   function open(id, opts) {

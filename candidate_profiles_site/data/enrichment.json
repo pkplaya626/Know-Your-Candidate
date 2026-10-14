@@ -1002,6 +1002,22 @@
     "title": "Ed Gallrein"
    }
   },
+  "CAND_15": {
+   "checked": "2026-10-02",
+   "name": "Michael A Collins Jr.",
+   "site": {
+    "final": "https://mikecollinsga.com/",
+    "reason": "ok",
+    "safe": true,
+    "status": 200,
+    "url": "https://mikecollinsga.com/"
+   },
+   "wiki": {
+    "born": "1967-07-02",
+    "education": "Georgia State University (BA)",
+    "title": "Mike Collins (politician)"
+   }
+  },
   "CAND_16": {
    "checked": "2026-10-02",
    "name": "Josh Turek",
@@ -1114,6 +1130,22 @@
     "born": "1984-10-31",
     "education": "University of Michigan (BS); Oriel College, Oxford (DPhil); Columbia University (MD)",
     "title": "Abdul El-Sayed"
+   }
+  },
+  "CAND_21": {
+   "checked": "2026-10-02",
+   "name": "Michael J Rogers",
+   "site": {
+    "final": "https://rogersforsenate.com",
+    "reason": "ok",
+    "safe": true,
+    "status": 200,
+    "url": "https://rogersforsenate.com"
+   },
+   "wiki": {
+    "born": "1963-06-02",
+    "education": "Adrian College (BS)",
+    "title": "Mike Rogers (Michigan politician)"
    }
   },
   "CAND_22": {
@@ -1677,6 +1709,26 @@
     "url": "https://www.fettyandersonforsenate.com/"
    },
    "name": "Rachel Fetty Anderson"
+  },
+  "CAND_5": {
+   "checked": "2026-10-02",
+   "name": "William Redpath",
+   "site": {
+    "description": "My platform combines conservative stances on economic issues and generally liberal positions on social issues.",
+    "final": "https://billredpath.com",
+    "issues": [
+     "WAR WITH IRAN",
+     "REPEAL NOT JUST TRUMP’S TARIFFS, REPEAL ALL TARIFFS",
+     "IMMIGRATION",
+     "STOP THE FORTHCOMING DEBT CRISIS",
+     "REDUCE FEDERAL GOVERNMENT SPENDING"
+    ],
+    "issuesUrl": "https://billredpath.com/faq/",
+    "reason": "ok",
+    "safe": true,
+    "status": 200,
+    "url": "https://billredpath.com"
+   }
   },
   "CAND_6": {
    "checked": "2026-10-02",
@@ -9393,22 +9445,6 @@
     "title": "Ben McAdams"
    }
   },
-  "FEC_S4MI00595": {
-   "checked": "2026-10-02",
-   "name": "Michael J Rogers",
-   "site": {
-    "final": "https://rogersforsenate.com",
-    "reason": "ok",
-    "safe": true,
-    "status": 200,
-    "url": "https://rogersforsenate.com"
-   },
-   "wiki": {
-    "born": "1963-06-02",
-    "education": "Adrian College (BS)",
-    "title": "Mike Rogers (Michigan politician)"
-   }
-  },
   "FEC_S4MS00187": {
    "checked": "2026-10-02",
    "name": "Ty Pinkins",
@@ -9561,22 +9597,6 @@
     "born": "1984-02-27",
     "education": "University of Florida (BA)",
     "title": "Angie Nixon"
-   }
-  },
-  "FEC_S6GA00390": {
-   "checked": "2026-10-02",
-   "name": "Michael A Collins Jr.",
-   "site": {
-    "final": "https://mikecollinsga.com/",
-    "reason": "ok",
-    "safe": true,
-    "status": 200,
-    "url": "https://mikecollinsga.com/"
-   },
-   "wiki": {
-    "born": "1967-07-02",
-    "education": "Georgia State University (BA)",
-    "title": "Mike Collins (politician)"
    }
   },
   "FEC_S6IA00181": {
@@ -9771,26 +9791,6 @@
     "born": "1964-09-10",
     "education": "Massachusetts Institute of Technology (BS, MS); Harvard University (MBA)",
     "title": "John E. Sununu"
-   }
-  },
-  "FEC_S6OH00429": {
-   "checked": "2026-10-02",
-   "name": "William Redpath",
-   "site": {
-    "description": "My platform combines conservative stances on economic issues and generally liberal positions on social issues.",
-    "final": "https://billredpath.com",
-    "issues": [
-     "WAR WITH IRAN",
-     "REPEAL NOT JUST TRUMP’S TARIFFS, REPEAL ALL TARIFFS",
-     "IMMIGRATION",
-     "STOP THE FORTHCOMING DEBT CRISIS",
-     "REDUCE FEDERAL GOVERNMENT SPENDING"
-    ],
-    "issuesUrl": "https://billredpath.com/faq/",
-    "reason": "ok",
-    "safe": true,
-    "status": 200,
-    "url": "https://billredpath.com"
    }
   },
   "FEC_S6OK04163": {

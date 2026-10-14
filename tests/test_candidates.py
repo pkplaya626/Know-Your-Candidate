@@ -222,9 +222,11 @@ class TestToProfiles(unittest.TestCase):
 
     def test_editorial_fields_are_left_empty_not_invented(self):
         made, _ = candidates.to_profiles(candidates.build_cache([filing()]), [])
-        for field in ("education", "platforms", "committees", "net_worth",
+        for field in ("education", "platforms", "committees",
                       "previous_professions", "funding_sources"):
             self.assertEqual(made[0][field], "", field)
+        # Rule 26: there is no net-worth field to fill, for anyone.
+        self.assertNotIn("net_worth", made[0])
 
     def test_deduped_against_an_existing_fec_id(self):
         cache = candidates.build_cache([filing()])
@@ -513,6 +515,104 @@ class TestDisclosures(unittest.TestCase):
         member = self.member()
         disclosures.apply_cache([member], disclosures.match([member], [self.filing()]))
         self.assertNotIn("net_worth", member)
+
+
+class TestCuratedRoster(unittest.TestCase):
+    """The curated rosters once put "Raised $22,000,000.00" on a governor who
+    never ran, and three nominees under a second profile with no money of
+    their own. A row is now two ids and a seat; everything else comes from a
+    source tied to the person."""
+
+    ROW = {
+        "ID": "CAND_7", "Name": "Jane Doe", "Chamber": "Senate (Candidate)",
+        "Office / District": "NC", "Party": "Democrat", "FEC Candidate ID": "s6nc00464",
+        "Status": "Challenger", "Campaign Receipts": "22000000",
+        "Campaign Disbursements": "16500000", "Birthdate": "1962-07-02", "Age": "64",
+        "Education": "Somewhere (BA)", "Previous Professions": "Lawyer",
+        "Projected/Historical Voting Alignment": "Projected ~96%-99% Republican",
+        "Estimated Net Worth": "$8,000,000 - $15,000,000 (Based on disclosures)",
+        "Main Funding Sources": "Grassroots donors",
+    }
+
+    def test_a_row_gives_two_ids_and_nothing_invented(self):
+        from kyc.profiles import _build_candidate, apply_quality
+
+        profile = apply_quality(_build_candidate(dict(self.ROW), 99))
+        self.assertEqual(profile["id"], "CAND_7")          # from the row, not its position
+        self.assertEqual(profile["fecCandidateId"], "S6NC00464")
+        self.assertEqual(profile["rosterFecId"], "S6NC00464")
+        for field in ("receipts", "disbursements", "birthdate", "education",
+                      "previous_professions", "voting_alignment", "funding_sources"):
+            self.assertIn(field, profile["quality"], field)
+        self.assertNotIn("net_worth", profile)
+        self.assertEqual(profile["age"], "Unknown")
+        self.assertFalse(profile["hasRealFinance"])
+
+    def test_a_members_money_is_never_read_from_the_roster(self):
+        from kyc.profiles import _build_member
+
+        row = {"Bioguide ID": "A000001", "Name": "Jane Doe", "Chamber": "House",
+               "State": "TX", "District": "District 3", "Total Receipts": "1000",
+               "Total Disbursements": "900", "Main Funding Sources": "Individual/PAC contributions"}
+        profile = _build_member(row, 0)
+        self.assertEqual((profile["receipts"], profile["disbursements"],
+                          profile["funding_sources"]), ("", "", ""))
+
+    def curated(self, **extra):
+        return dict({"id": "CAND_1", "name": "Jane Doe", "chamber": "Senate (Candidate)",
+                     "state": "NC", "officeLabel": "Senate • NC", "isCandidate": True,
+                     "rosterFecId": "S6NC00464"}, **extra)
+
+    def codes(self, profiles):
+        return {i.code for i in validate.check_curated_candidates(profiles) if i.level == "error"}
+
+    def test_a_curated_candidate_needs_their_own_filing(self):
+        self.assertEqual(self.codes([self.curated()]), set())
+        self.assertEqual(self.codes([self.curated(rosterFecId=None)]), {"curated-no-fec-id"})
+        self.assertEqual(self.codes([self.curated(rosterFecId="S6GA00390")]),
+                         {"curated-fec-id-seat"})
+        self.assertEqual(self.codes([self.curated(rosterFecId="H6NC00464")]),
+                         {"curated-fec-id-seat"})
+
+    def test_a_curated_row_needs_its_own_id(self):
+        # A positional fallback could hand a new row a removed person's id
+        # (CAND_3 was Andy Beshear's), and old links would open a stranger.
+        from kyc.profiles import _build_candidate
+        row = dict(self.ROW)
+        del row["ID"]
+        self.assertEqual(_build_candidate(row, 3)["id"], "")
+        for bad in ("", "FEC_S6NC00464", "cand_1"):
+            self.assertIn("curated-no-id", self.codes([self.curated(id=bad)]), bad)
+
+    def test_money_not_from_the_fec_is_an_error(self):
+        governor = self.curated(receipts="$22,000,000.00", hasRealFinance=True)
+        self.assertEqual(self.codes([governor]), {"finance-not-fec"})
+        self.assertEqual(self.codes([dict(governor, financeSource="FEC")]), set())
+
+    def test_a_cached_name_search_for_another_filing_is_not_applied(self):
+        from kyc import fec
+
+        profile = self.curated(name="Mike Collins", state="GA", rosterFecId="S6GA00390",
+                               receipts="", quality={"receipts": "unknown"})
+        cache = {fec.profile_key(profile): {"candidate_id": "S6GA09999", "receipts": 5.0,
+                                            "found": True}}
+        self.assertEqual(fec.apply_cache([profile], cache), 0)
+        self.assertEqual(profile["receipts"], "")
+
+    def test_the_real_rosters(self):
+        raw = load_all(ROOT)
+        profiles, _ = build_profiles(raw)
+        curated = [p for p in profiles if p["id"].startswith("CAND_")]
+        self.assertTrue(curated)
+        self.assertEqual(self.codes(curated), set())
+        # Each declined the race; none ever filed for it.
+        names = {(p["name"], p["state"]) for p in curated}
+        for person in (("Brian Kemp", "GA"), ("Andy Beshear", "KY"), ("Chris Sununu", "NH")):
+            self.assertNotIn(person, names)
+        # Ids survive the rows removed above them (odds.json holds them).
+        by_id = {p["id"]: p["name"] for p in curated}
+        self.assertEqual(by_id["CAND_15"], "Mike Collins")
+        self.assertEqual(by_id["CAND_47"], "Rachel Fetty Anderson")
 
 
 class TestDisclosuresAgainstRealData(unittest.TestCase):

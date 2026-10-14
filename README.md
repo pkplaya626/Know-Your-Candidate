@@ -359,6 +359,27 @@ for federal office, and the roster keeps its role as editorial detail on top.
 | Races with a declared challenger | 38 | **451 of 479** |
 | Races falsely reading "no challenger" | 372 | **0** |
 
+### The curated rows
+
+The 45 hand-curated candidates in `Congressional_Candidates_2026.csv` and its
+two siblings are each two ids and a seat. `ID` is the profile id, written in
+the row so that deleting a row never renumbers the people below it: `odds.json`
+and the enrichment cache hold these ids. `FEC Candidate ID` is the person's own
+filing, and the finance lookup uses it as an authoritative id (`rosterFecId`).
+`validate` fails a curated row with no id or with another seat's filing.
+
+Nothing else about a person is read from these rows: not money, biography,
+platform or committees. No member's money is read from the member rosters
+either. A site audit on 2026-10-13 found three governors
+who never filed for the Senate (Brian Kemp, Andy Beshear and Chris Sununu)
+listed as candidates with round-number totals. One read "Raised
+$22,000,000.00". It also found three nominees on a second profile with no money
+of its own. For the curated nominees, 17 of 20 birthdates disagreed with the
+person's own article. Money now comes from the FEC alone: `validate` fails any
+figure whose `financeSource` is not `FEC`. Biography comes only from the
+article the election page links (`enrich`, rule 38), with its source badge.
+Where neither knows, the page says "No data".
+
 ### Where the line is drawn
 
 The receipts distribution is smooth — there is no natural cliff, and picking a
@@ -402,8 +423,8 @@ state to see.
 ### What these profiles do and do not contain
 
 Name, party, seat, receipts, disbursements and cash on hand, all from the FEC
-with a coverage date. Committees and net worth are editorial research that no
-dataset supplies, so they stay empty and the provenance layer reports them as
+with a coverage date. Committees are editorial research that no dataset
+supplies, so they stay empty and the provenance layer reports them as
 *No data*. For anyone still in a race, background, education, age, what the
 campaign says it stands for and a portrait are filled where the person's own
 sources say so - see [Filling the gaps](#filling-the-gaps) - each credited to
@@ -751,19 +772,23 @@ it is checked rather than trusted.
 
 ## Net worth and financial disclosures
 
-The site shows an "Estimated Net Worth" for 144 of 539 sitting members and
-nothing for the rest, and the figures it does show carry no source.
+The site shows no net worth for anyone, deliberately. The roster once carried
+an "Estimated Net Worth" for 144 of 539 sitting members, none of them sourced,
+and the dialog showed it beside the disclosure link as though one came from the
+other. The 2026-10-13 audit removed the column and the field.
 
-**This is not filled in, deliberately.** No free service publishes a computed
-net worth for members of Congress, and deriving one from a disclosure is not a
-small step: the forms report assets in broad value *bands*, so any single
-figure from them is an estimate dressed as a fact — the exact thing the
-provenance layer exists to prevent.
+No free service publishes a computed net worth for members of Congress, and
+deriving one from a disclosure is not a small step: the forms report assets in
+broad value *bands*, so any single figure from them is an estimate dressed as a
+fact (rule 26), the exact thing the provenance layer exists to prevent.
 
 What is available is the filing itself. The Clerk of the House publishes an
 annual ZIP containing an XML index of every disclosure, and **401 of 439 House
-members** carry a link to their own annual report (PDF) beside the net-worth
-field.
+members** carry a link to their own annual report (PDF) in the dialog's
+"Financial disclosure" field. A member the matcher has not linked reads "Not
+linked here", a statement about this site rather than about the member: the
+matcher misses compound surnames such as Wasserman Schultz. Challengers'
+disclosures are not looked up, so the field is not shown for them.
 
 **98 of 100 senators** carry a link to their latest annual report in the
 Secretary of the Senate's eFD system. eFD asks every visitor to agree that the
@@ -791,9 +816,9 @@ render all three identically:
 | Value | Means | Now shows as |
 |---|---|---|
 | `$3,161,009` | a sourced figure | the figure, with a source badge where known |
-| `N/A (No net worth disclosure provided…)` | no filing exists | *Not disclosed* (muted) |
+| `Not disclosed` | no filing exists | *Not disclosed* (muted) |
 | `""` | nobody has researched it | *No data* (muted) |
-| `Individual/PAC contributions` | true of everyone; no information | dotted underline, marked generic |
+| `General legislative priorities`, `Public service` | true of everyone; no information | *No data* (muted), titled as a generic placeholder (rule 10) |
 | — | the FEC was queried and holds no filing for this cycle | *No filing this cycle* (muted) |
 
 That last row is the only absence that reports work actually done. "No data"
@@ -1267,6 +1292,7 @@ the USGS point that is out of town.
 | `disclosureUrl`, `disclosureSource` | The member's latest annual financial disclosure: `house-clerk` (a PDF from the Clerk's annual index) or `senate-efd` (a report in the Senate's eFD system) | Members with a filing on record |
 | `committeeList`, `committeesSource` | `committee-membership-current`, with rank and title (`data/committees.json`); a titled seat also carries `side` (`majority` or `minority`), because a title alone cannot say which - "Vice Chairman" leads the minority on Senate Ethics and Intelligence | Sitting members |
 | `fecCandidateId` | Links the FEC's own candidate page | Everyone the FEC knows |
+| `rosterFecId` | The curated roster's `FEC Candidate ID` column; the finance lookup takes it as the person's authoritative id, and `validate` checks its office and state against the profile | Curated candidates |
 | `otherFecIds` | The same person's other FEC registrations (one committee's money reported under several ids, or a curated pair in `overrides.SAME_PERSON_FILINGS`); a link shared under any of them opens this profile | People registered more than once |
 
 Every link on the page is built from one of those ids. Nothing is guessed

@@ -204,9 +204,14 @@
       // A person registered with the FEC under several ids has one profile;
       // the others are kept as otherFecIds (derived in the pipeline). A link
       // shared under one of them still opens that person, never a stranger:
-      // a real profile id always wins over an alias.
+      // a real profile id always wins over an alias. A curated profile
+      // answers to its own filing's id too: Mike Collins's filing was
+      // FEC_S6GA00390 until his curated row named it, and links and market
+      // labels saved under that id still open him.
       data.forEach(function (item) {
-        (item.otherFecIds || []).forEach(function (other) {
+        var own = item.fecCandidateId && item.id !== "FEC_" + item.fecCandidateId
+          ? [item.fecCandidateId] : [];
+        (item.otherFecIds || []).concat(own).forEach(function (other) {
           var alias = "FEC_" + other;
           if (!profileIndex.has(alias)) profileIndex.set(alias, item);
         });
@@ -399,10 +404,13 @@
         '">' + escapeHtml(ABSENT[status]) + "</span>"
       );
     }
+    // A placeholder is not data (rule 10). "General legislative priorities"
+    // stood as 67 members' platforms and "Public service" as 70 members'
+    // careers, muted but still read as an answer; they are an absence.
     if (status === "generic") {
       return (
-        '<span class="kyc-generic" title="Generic placeholder, not researched detail.">' +
-        escapeHtml(value) + "</span>"
+        '<span class="kyc-absent" title="The source held only a generic placeholder here, ' +
+        'not researched detail.">' + escapeHtml(ABSENT.unknown) + "</span>"
       );
     }
 
@@ -470,8 +478,12 @@
   }
 
   /** True when a field carries something worth showing at all. */
+  // A generic placeholder is no more a value than an absence (rule 10).
+  // Counted as present, "General legislative priorities" still printed as
+  // 67 members' platforms and matched a search for it.
   function hasValue(item, field) {
-    return !ABSENT[(item.quality || {})[field]];
+    var status = (item.quality || {})[field];
+    return !ABSENT[status] && status !== "generic";
   }
 
   /* ============================================================= election */
@@ -484,6 +496,23 @@
     while (d.getUTCDay() !== 1) d.setUTCDate(d.getUTCDate() + 1); // first Monday
     d.setUTCDate(d.getUTCDate() + 1); // the Tuesday after it
     return d;
+  }
+
+  /* A person's age today, in the reader's calendar, from their birthdate.
+   * The build's `age` is computed on the build date and goes stale a day at
+   * a time: nine days after one build, 17 were a year out, Alexandria
+   * Ocasio-Cortez's among them on her birthday. A year-only birthdate keeps
+   * the build's figure, which is all it supports; null when neither exists. */
+  function ageOf(item, now) {
+    if (!item) return null;
+    var born = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(item.birthdate || ""));
+    if (!born) return typeof item.age === "number" ? item.age : null;
+    now = now || new Date();
+    var years = now.getFullYear() - Number(born[1]);
+    var month = now.getMonth() + 1;
+    if (month < Number(born[2]) ||
+        (month === Number(born[2]) && now.getDate() < Number(born[3]))) years -= 1;
+    return years;
   }
 
   /* Counted in the reader's own calendar, not in UTC. Election Day is a
@@ -1243,6 +1272,7 @@
     createMenu: createMenu,
     router: router,
     electionStatus: electionStatus,
+    ageOf: ageOf,
     generalElectionDay: generalElectionDay,
     matchesQuery: matchesQuery,
     foldText: foldText,
