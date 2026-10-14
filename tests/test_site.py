@@ -794,6 +794,9 @@ class TestRefreshWorkflow(unittest.TestCase):
         watch = self.text.index('gh run watch "$run" --exit-status')
         merge = self.text.index('gh pr merge "$new" --merge --delete-branch')
         self.assertLess(watch, merge)                    # never before CI passes
+        # The dispatched run, not the pull_request one GitHub holds at
+        # "action_required" (which failed #60's merge).
+        self.assertIn("--event workflow_dispatch", self.text)
         self.assertIn('gh workflow run deploy.yml --ref main', self.text[merge:])
 
     def test_a_newer_refresh_closes_the_older_ones(self):
