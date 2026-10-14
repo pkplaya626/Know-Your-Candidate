@@ -359,6 +359,26 @@ for federal office, and the roster keeps its role as editorial detail on top.
 | Races with a declared challenger | 38 | **451 of 479** |
 | Races falsely reading "no challenger" | 372 | **0** |
 
+### The curated rows
+
+The 45 hand-curated candidates in `Congressional_Candidates_2026.csv` and its
+two siblings are each two ids and a seat. `ID` is the profile id, written in
+the row so that deleting a row never renumbers the people below it: `odds.json`
+and the enrichment cache hold these ids. `FEC Candidate ID` is the person's own
+filing, and the finance lookup uses it as an authoritative id (`rosterFecId`).
+`validate` fails a curated row with no id or with another seat's filing.
+
+Nothing else about a person is read from these rows, and no member's money is
+read from the member rosters. A site audit on 2026-10-13 found three governors
+who never filed for the Senate (Brian Kemp, Andy Beshear and Chris Sununu)
+listed as candidates with round-number totals. One read "Raised
+$22,000,000.00". It also found three nominees on a second profile with no money
+of its own. For the curated nominees, 17 of 20 birthdates disagreed with the
+person's own article. Money now comes from the FEC alone: `validate` fails any
+figure whose `financeSource` is not `FEC`. Biography comes only from the
+article the election page links (`enrich`, rule 38), with its source badge.
+Where neither knows, the page says "No data".
+
 ### Where the line is drawn
 
 The receipts distribution is smooth — there is no natural cliff, and picking a
@@ -1267,6 +1287,7 @@ the USGS point that is out of town.
 | `disclosureUrl`, `disclosureSource` | The member's latest annual financial disclosure: `house-clerk` (a PDF from the Clerk's annual index) or `senate-efd` (a report in the Senate's eFD system) | Members with a filing on record |
 | `committeeList`, `committeesSource` | `committee-membership-current`, with rank and title (`data/committees.json`); a titled seat also carries `side` (`majority` or `minority`), because a title alone cannot say which - "Vice Chairman" leads the minority on Senate Ethics and Intelligence | Sitting members |
 | `fecCandidateId` | Links the FEC's own candidate page | Everyone the FEC knows |
+| `rosterFecId` | The curated roster's `FEC Candidate ID` column; the finance lookup takes it as the person's authoritative id, and `validate` checks its office and state against the profile | Curated candidates |
 | `otherFecIds` | The same person's other FEC registrations (one committee's money reported under several ids, or a curated pair in `overrides.SAME_PERSON_FILINGS`); a link shared under any of them opens this profile | People registered more than once |
 
 Every link on the page is built from one of those ids. Nothing is guessed

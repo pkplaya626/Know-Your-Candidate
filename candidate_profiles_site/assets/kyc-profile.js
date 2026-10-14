@@ -614,7 +614,12 @@
         KYC.ballotLineSuffix(item) + "</span>");
     }
 
+    /* A curated candidate's roster status ("Primary Candidate / US
+     * Representative") was written before the primary; once the results say
+     * where they stand, it only contradicts them. A member's status line is
+     * kept: it is where a retirement or an appointment is explained. */
     var text = String(item.status || "").trim();
+    if (item.isCandidate && race) text = "";
     if (text && text !== "Active Member" && text !== "N/A" &&
         text !== "Filed with the FEC") {
       var leaving = /retiring|not running|defeated|ineligible|resigned/i.test(text);
@@ -735,11 +740,12 @@
     renderContact(item);
     renderRace(item);
 
+    // Every figure of money on the site is the FEC's (validate: finance-not-fec).
     el("profileModalSource").textContent = item.financeSource
       ? "Finance figures from the FEC" +
         (item.financeAsOf ? ", through " + item.financeAsOf : "") +
         (item.financeElection ? " (" + item.financeElection + " election period)" : "")
-      : "Figures as filed in the source rosters";
+      : "";
   }
 
   function open(id, opts) {

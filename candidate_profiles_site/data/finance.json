@@ -984,8 +984,20 @@
   "via": "congress-legislators"
  },
  "bill redpath|OH|S": {
-  "found": false,
-  "name": "Bill Redpath"
+  "candidate_id": "S6OH00429",
+  "cash_on_hand": 730.35,
+  "coverage_end": "2026-06-30",
+  "coverage_start": "2025-07-03",
+  "disbursements": 23470.04,
+  "election_year": 2026,
+  "found": true,
+  "individual_contributions": 6735.09,
+  "name": "Bill Redpath",
+  "pac_contributions": 0.0,
+  "party_contributions": 4975.25,
+  "receipts": 24200.39,
+  "self_funding": 7490.04,
+  "via": "roster"
  },
  "blake moore|UT|H": {
   "candidate_id": "H0UT01205",
@@ -6384,8 +6396,20 @@
   "via": "congress-legislators"
  },
  "mike collins|GA|S": {
-  "found": false,
-  "name": "Mike Collins"
+  "candidate_id": "S6GA00390",
+  "cash_on_hand": 2079981.42,
+  "coverage_end": "2026-06-30",
+  "coverage_start": "2025-01-01",
+  "disbursements": 5932538.34,
+  "election_year": 2026,
+  "found": true,
+  "individual_contributions": 4394251.45,
+  "name": "Mike Collins",
+  "pac_contributions": 495631.55,
+  "party_contributions": 0.0,
+  "receipts": 7409349.22,
+  "self_funding": 65000.0,
+  "via": "roster"
  },
  "mike ezell|MS|H": {
   "candidate_id": "H2MS04258",
@@ -6548,8 +6572,20 @@
   "via": "congress-legislators"
  },
  "mike rogers|MI|S": {
-  "found": false,
-  "name": "Mike Rogers"
+  "candidate_id": "S4MI00595",
+  "cash_on_hand": 4414988.49,
+  "coverage_end": "2026-09-30",
+  "coverage_start": "2025-01-01",
+  "disbursements": 6743883.82,
+  "election_year": 2026,
+  "found": true,
+  "individual_contributions": 6831810.16,
+  "name": "Mike Rogers",
+  "pac_contributions": 792227.09,
+  "party_contributions": 62000.0,
+  "receipts": 10903168.59,
+  "self_funding": 0.0,
+  "via": "roster"
  },
  "mike rounds|SD|S": {
   "candidate_id": "S4SD00049",

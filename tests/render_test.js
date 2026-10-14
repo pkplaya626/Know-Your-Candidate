@@ -822,6 +822,23 @@ async function testDirectoryAsync() {
       nominee.raceStatus = "nominee";
       delete nominee.ballotLine;
     }
+
+    // A curated candidate's roster status ("Primary Candidate / US
+    // Representative") was written before the primary and contradicted the
+    // result beside it; and no figure on the page is "as filed in the source
+    // rosters" any more.
+    const curated = window.legislatorsData.find((p) =>
+      /^CAND_/.test(p.id) && p.raceStatus && p.status && p.status !== "Candidate");
+    check("there is a curated candidate with a result to test", !!curated);
+    if (curated) {
+      KYC.profile.open(curated.id);
+      const line = D.getElementById("profileModalStatus").textContent;
+      check("a candidate's result replaces the roster's status text",
+        line.indexOf(curated.status) === -1, line);
+      check("no money is credited to the rosters",
+        !/source rosters/.test(D.getElementById("profileModalSource").textContent));
+      KYC.profile.close();
+    }
   });
 
   suite("index.html — search suggestions and remembered state", () => {

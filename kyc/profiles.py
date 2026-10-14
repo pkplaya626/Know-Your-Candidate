@@ -18,7 +18,6 @@ from .normalize import (
     classify,
     clean_str,
     first_present,
-    fmt_curr,
     is_missing,
     looks_like_date,
     office_label,
@@ -306,9 +305,13 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
         "birthdate": clean_str(row.get("Birthdate"), "Unknown"),
         "education": clean_str(row.get("Education"), "N/A"),
         "previous_professions": clean_str(row.get("Previous Professions"), "N/A"),
-        "receipts": fmt_curr(row.get("Total Receipts")),
-        "disbursements": fmt_curr(row.get("Total Disbursements")),
-        "funding_sources": clean_str(row.get("Main Funding Sources"), "N/A"),
+        # Money comes from the FEC alone (fec.apply_cache; validate's
+        # finance-not-fec). The roster's totals and its "Individual/PAC
+        # contributions" line are never read: a member the FEC lookup missed
+        # reads "No data", not a figure nobody can trace.
+        "receipts": "",
+        "disbursements": "",
+        "funding_sources": "",
         "platforms": clean_str(row.get("Policy Focus & Platforms"), "N/A"),
         "voting_alignment": clean_str(row.get("Projected/Historical Voting Alignment"), "N/A"),
         "committees": clean_str(row.get("Committee Assignments"), "None"),
@@ -365,6 +368,22 @@ def _senate_cycle(person, profile):
 
 
 def _build_candidate(row, index, as_of=None):
+    """A curated candidate: who they are and which seat, keyed on two ids.
+
+    ``ID`` is the profile id, written into the row so that removing a row
+    never renumbers the people after it - odds.json and the enrichment cache
+    hold these ids, and a positional ``CAND_<n>`` once meant deleting three
+    rows would have moved everyone below them onto someone else's markets.
+    ``FEC Candidate ID`` is the person's own filing (rule 17).
+
+    Money, biography, voting alignment and net worth are not read from the
+    row. The roster carried a $22,000,000 total for a governor who never ran,
+    "Projected ~96% Republican" for people with no voting record, and
+    birthdates that disagreed with the person's own article in 17 of 20
+    checked. The FEC supplies the money (fec.apply_cache) and the article the
+    election page links supplies the biography (enrich.apply_cache, rule 38);
+    what neither knows is "No data", which is true.
+    """
     name = clean_str(row.get("Name"), "")
     chamber_raw = clean_str(row.get("Chamber"), "Senate (Candidate)")
     kind = _chamber_kind(chamber_raw)
@@ -375,17 +394,12 @@ def _build_candidate(row, index, as_of=None):
     if kind == "House":
         district_num, district_label = parse_district(office, state)
 
-    status = clean_str(row.get("Status"), "Candidate")
-    upcoming = str(row.get("Upcoming 2026 Primary", "")).strip().lower() == "true"
-    if upcoming and "Upcoming" not in status:
-        status = f"{status} (Upcoming Primary)"
-
     chamber = chamber_raw
     if "Candidate" not in chamber and "Winner" not in chamber:
         chamber = f"{chamber} (Candidate)"
 
-    return {
-        "id": f"CAND_{index}",
+    profile = {
+        "id": clean_str(row.get("ID"), "") or f"CAND_{index}",
         "name": name,
         "chamber": chamber,
         "party": clean_str(row.get("Party"), "Independent"),
@@ -393,7 +407,7 @@ def _build_candidate(row, index, as_of=None):
         "district": district_label or "N/A",
         "districtNum": district_num,
         "officeLabel": office_label(chamber, state, district_label),
-        "status": status,
+        "status": clean_str(row.get("Status"), "Candidate"),
         "term_start": clean_str(row.get("Projected Start"), "Jan. 3, 2027 (If elected)"),
         "termEndYear": None,
         "electionYear": ELECTION_YEAR,
@@ -401,27 +415,31 @@ def _build_candidate(row, index, as_of=None):
         "seatUp2026": True,
         "isUpIn2026": False,
         "seekingReelection2026": False,
-        "upcomingPrimary": upcoming,
-        "age": _age(row, as_of),
-        "birthdate": clean_str(row.get("Birthdate"), "Unknown"),
-        "education": clean_str(row.get("Education"), "N/A"),
-        "previous_professions": clean_str(row.get("Previous Professions"), "N/A"),
-        "receipts": fmt_curr(row.get("Campaign Receipts")),
-        "disbursements": fmt_curr(row.get("Campaign Disbursements")),
-        "funding_sources": clean_str(row.get("Main Funding Sources"), "N/A"),
+        "age": "Unknown",
+        "birthdate": "",
+        "education": "",
+        "previous_professions": "",
+        "receipts": "",
+        "disbursements": "",
+        "funding_sources": "",
         "platforms": first_present(
             row.get("Core Campaigning Issues & Platform Focus"),
             row.get("Policy Focus & Platforms"),
         ),
-        "voting_alignment": clean_str(row.get("Projected/Historical Voting Alignment"), "N/A"),
+        "voting_alignment": "",
         "committees": first_present(
             row.get("Historical Committee Assignments (If any)"),
             row.get("Committee Assignments"),
             default="None",
         ),
-        "net_worth": clean_str(row.get("Estimated Net Worth"), "N/A"),
+        "net_worth": "",
         "photos": candidate_photos(name, state),
     }
+    fec_id = clean_str(row.get("FEC Candidate ID"), "").upper()
+    if fec_id:
+        profile["fecCandidateId"] = fec_id
+        profile["rosterFecId"] = fec_id
+    return profile
 
 
 def _link_key(profile):
