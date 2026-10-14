@@ -478,8 +478,12 @@
   }
 
   /** True when a field carries something worth showing at all. */
+  // A generic placeholder is no more a value than an absence (rule 10).
+  // Counted as present, "General legislative priorities" still printed as
+  // 67 members' platforms and matched a search for it.
   function hasValue(item, field) {
-    return !ABSENT[(item.quality || {})[field]];
+    var status = (item.quality || {})[field];
+    return !ABSENT[status] && status !== "generic";
   }
 
   /* ============================================================= election */

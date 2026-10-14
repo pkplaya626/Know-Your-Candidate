@@ -237,7 +237,7 @@ class TestReconcile(unittest.TestCase):
 
 class TestApply(unittest.TestCase):
     HEADER = ["Bioguide ID", "Name", "Chamber", "Party", "State", "District",
-              "Term Start", "Age", "Birthdate", "Education", "Estimated Net Worth",
+              "Term Start", "Age", "Birthdate", "Education", "Previous Professions",
               "Status"]
 
     def make_roster(self, tmp):
@@ -272,7 +272,7 @@ class TestApply(unittest.TestCase):
         self.assertEqual(row["Status"], "Active Member")
         # Editorial fields are left empty rather than invented.
         self.assertEqual(row["Education"], "")
-        self.assertEqual(row["Estimated Net Worth"], "")
+        self.assertEqual(row["Previous Professions"], "")
 
     def test_at_large_districts_use_the_roster_spelling(self):
         drift = legislators.Drift()

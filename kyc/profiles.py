@@ -17,7 +17,6 @@ from .normalize import (
     UNKNOWN,
     classify,
     clean_str,
-    first_present,
     is_missing,
     looks_like_date,
     office_label,
@@ -375,8 +374,8 @@ def _build_candidate(row, index, as_of=None):
     rows would have moved everyone below them onto someone else's markets.
     ``FEC Candidate ID`` is the person's own filing (rule 17).
 
-    Money, biography, voting alignment and net worth are not read from the
-    row. The roster carried a $22,000,000 total for a governor who never ran,
+    Money, biography, platform, committees and voting alignment are not
+    read from the row. The roster carried a $22,000,000 total for a governor who never ran,
     "Projected ~96% Republican" for people with no voting record, and
     birthdates that disagreed with the person's own article in 17 of 20
     checked. The FEC supplies the money (fec.apply_cache) and the article the
@@ -398,7 +397,10 @@ def _build_candidate(row, index, as_of=None):
         chamber = f"{chamber} (Candidate)"
 
     profile = {
-        "id": clean_str(row.get("ID"), "") or f"CAND_{index}",
+        # No positional fallback: CAND_3 was Andy Beshear's, and a new row
+        # numbered by position could take it. A row without an ID has none,
+        # and validate fails it.
+        "id": clean_str(row.get("ID"), ""),
         "name": name,
         "chamber": chamber,
         "party": clean_str(row.get("Party"), "Independent"),
@@ -421,16 +423,12 @@ def _build_candidate(row, index, as_of=None):
         "receipts": "",
         "disbursements": "",
         "funding_sources": "",
-        "platforms": first_present(
-            row.get("Core Campaigning Issues & Platform Focus"),
-            row.get("Policy Focus & Platforms"),
-        ),
+        # The curator's platform and committee summaries went too: unsourced
+        # paraphrase that also blocked the campaign's own issue headings
+        # (enrich fills only an empty field, rule 38).
+        "platforms": "",
         "voting_alignment": "",
-        "committees": first_present(
-            row.get("Historical Committee Assignments (If any)"),
-            row.get("Committee Assignments"),
-            default="None",
-        ),
+        "committees": "",
         "photos": candidate_photos(name, state),
     }
     fec_id = clean_str(row.get("FEC Candidate ID"), "").upper()

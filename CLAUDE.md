@@ -119,8 +119,8 @@ python build_profile_site.py officers         # lieutenant governors (NLGA), sec
 python build_profile_site.py courts           # each state's highest court, from the court's own roster
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 842 tests, no dependencies
-npm install && npm test                       # 1090 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 843 tests, no dependencies
+npm install && npm test                       # 1095 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -685,8 +685,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     A curated row now carries its profile id (`ID`, so deleting a row
     renumbers no one; odds.json and the enrichment cache key on these
     ids) and the person's own filing (`FEC Candidate ID`). `validate`
-    fails a row without one, a filing for another seat, and any money
-    whose `financeSource` is not the FEC. Biography comes from the
+    fails a row without either, a filing for another seat, and any money
+    whose `financeSource` is not the FEC. The rows hold nothing else: not
+    biography, platform or committees. Biography comes from the
     ballot-linked article (rule 38), net worth from nowhere (rule 26), and
     a label speaks only of what its status knows. A member with no
     primary line for their seat is "Not running for this seat", never "Not

@@ -715,9 +715,13 @@
         KYC.escapeHtml(item.disclosureYear || "") +
         (senate ? " disclosure (Senate eFD)" : " disclosure (PDF)") + "</a>";
     } else {
+      // A claim about this site, not about the member (rule 19): the
+      // matcher misses compound surnames and other first names (Debbie
+      // Wasserman Schultz, H. Morgan Griffith), so "none exists" was false.
       disclosure.innerHTML = '<span class="kyc-absent" title="' +
-        KYC.escapeAttr("No annual financial disclosure for this member was found in " +
-          "the House Clerk's index or the Senate's eFD.") + '">None linked</span>';
+        KYC.escapeAttr("This site has not matched this member to a filing in the House " +
+          "Clerk's index or the Senate's eFD. The filing may exist.") +
+        '">Not linked here</span>';
     }
     el("profileModalEducation").innerHTML = KYC.renderField(item, "education");
     el("profileModalCareers").innerHTML = KYC.renderField(item, "previous_professions");

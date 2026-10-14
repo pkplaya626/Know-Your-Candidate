@@ -191,6 +191,10 @@ async function testShared(page) {
       "funding_sources");
     check("a generic placeholder renders as an absence, not as an answer (rule 10)",
       /kyc-absent/.test(generic) && !/Individual/.test(generic), generic);
+    const filler = { name: "Pat Example", platforms: "General legislative priorities",
+      quality: { platforms: "generic" } };
+    check("a generic placeholder is not a value, so not shown or searched",
+      !KYC.hasValue(filler, "platforms") && !KYC.matchesQuery(filler, "legislative priorities"));
 
     const sourced = KYC.renderField(
       { receipts: "$1,022,664.06", quality: {}, financeSource: "FEC", financeAsOf: "2026-06-30" },

@@ -368,8 +368,9 @@ and the enrichment cache hold these ids. `FEC Candidate ID` is the person's own
 filing, and the finance lookup uses it as an authoritative id (`rosterFecId`).
 `validate` fails a curated row with no id or with another seat's filing.
 
-Nothing else about a person is read from these rows, and no member's money is
-read from the member rosters. A site audit on 2026-10-13 found three governors
+Nothing else about a person is read from these rows: not money, biography,
+platform or committees. No member's money is read from the member rosters
+either. A site audit on 2026-10-13 found three governors
 who never filed for the Senate (Brian Kemp, Andy Beshear and Chris Sununu)
 listed as candidates with round-number totals. One read "Raised
 $22,000,000.00". It also found three nominees on a second profile with no money
@@ -784,9 +785,10 @@ fact (rule 26), the exact thing the provenance layer exists to prevent.
 What is available is the filing itself. The Clerk of the House publishes an
 annual ZIP containing an XML index of every disclosure, and **401 of 439 House
 members** carry a link to their own annual report (PDF) in the dialog's
-"Financial disclosure" field. A member with no filing found reads "None
-linked"; challengers' disclosures are not looked up, so the field is not shown
-for them.
+"Financial disclosure" field. A member the matcher has not linked reads "Not
+linked here", a statement about this site rather than about the member: the
+matcher misses compound surnames such as Wasserman Schultz. Challengers'
+disclosures are not looked up, so the field is not shown for them.
 
 **98 of 100 senators** carry a link to their latest annual report in the
 Secretary of the Senate's eFD system. eFD asks every visitor to agree that the

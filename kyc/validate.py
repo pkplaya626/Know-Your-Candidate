@@ -516,10 +516,13 @@ def check_curated_candidates(profiles):
     FEC's filing could not find. A row now carries the person's FEC id, and
     the id's own office and state must be the profile's (rule 20).
     """
-    issues, missing, wrong = [], [], []
+    issues, missing, wrong, unnamed = [], [], [], []
     for profile in profiles:
-        if not profile["id"].startswith("CAND_"):
-            continue
+        if not profile.get("isCandidate") or profile.get("source") == "fec-field":
+            continue                        # members, and the FEC's own field
+        if not re.match(r"^CAND_\d+$", profile.get("id") or ""):
+            unnamed.append(f"{profile['name']} ({profile['officeLabel']}): "
+                           f"ID {profile.get('id')!r}")
         fec_id = profile.get("rosterFecId") or ""
         match = _FEC_ID.match(fec_id)
         if not match:
@@ -531,6 +534,12 @@ def check_curated_candidates(profiles):
         if office != expected or state != profile["state"]:
             wrong.append(f"{profile['id']} {profile['name']} ({profile['officeLabel']}) "
                          f"names {fec_id}, filed as {office}-{state}")
+    if unnamed:
+        # The id is written in the row so that removing one renumbers nobody;
+        # a row without it would take whatever id its position gave it.
+        issues.append(Issue("error", "curated-no-id",
+                            f"{len(unnamed)} curated candidates have no ID of the form "
+                            f"CAND_<n> in their roster row", unnamed))
     if missing:
         issues.append(Issue("error", "curated-no-fec-id",
                             f"{len(missing)} curated candidates have no FEC candidate id; "

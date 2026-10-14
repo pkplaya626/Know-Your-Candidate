@@ -574,6 +574,16 @@ class TestCuratedRoster(unittest.TestCase):
         self.assertEqual(self.codes([self.curated(rosterFecId="H6NC00464")]),
                          {"curated-fec-id-seat"})
 
+    def test_a_curated_row_needs_its_own_id(self):
+        # A positional fallback could hand a new row a removed person's id
+        # (CAND_3 was Andy Beshear's), and old links would open a stranger.
+        from kyc.profiles import _build_candidate
+        row = dict(self.ROW)
+        del row["ID"]
+        self.assertEqual(_build_candidate(row, 3)["id"], "")
+        for bad in ("", "FEC_S6NC00464", "cand_1"):
+            self.assertIn("curated-no-id", self.codes([self.curated(id=bad)]), bad)
+
     def test_money_not_from_the_fec_is_an_error(self):
         governor = self.curated(receipts="$22,000,000.00", hasRealFinance=True)
         self.assertEqual(self.codes([governor]), {"finance-not-fec"})
