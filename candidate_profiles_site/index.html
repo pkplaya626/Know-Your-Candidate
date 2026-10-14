@@ -6,7 +6,7 @@
      and makes small print unreadable for anyone who needs to magnify it. -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Know Your Candidate — the 119th Congress and the 2026 midterms</title>
-<meta name="description" content="A non-partisan directory of every member of the 119th U.S. Congress and everyone on the 2026 ballot for it - seats, committees, campaign finance and roll-call ideology - with each state's governor, legislature, high court and local governments, and every gap in the data labelled as a gap.">
+<meta name="description" content="A non-partisan directory of every member of the 119th U.S. Congress and the 2026 candidates for it from the FEC's register - seats, committees, campaign finance and roll-call ideology - with each state's governor, legislature, high court and local governments, and every gap in the data labelled as a gap.">
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
@@ -159,23 +159,6 @@
 
     <main class="app-main" id="mainContent">
 
-        <!-- What the site is and where to start. The page opened on filter
-             chips and "Showing 1,105 of 2,562 profiles", with no heading and,
-             on a phone, no name: the state picker was at the bottom of the
-             drawer. -->
-        <section class="intro" aria-labelledby="pageTitle">
-            <h1 class="intro-title" id="pageTitle">Who represents you, and who is running in 2026</h1>
-            <p class="intro-text">Every member of Congress and everyone on the November
-                ballot for it. Each state's page adds its governor, legislature, high court
-                and local governments.</p>
-            <label class="intro-pick" for="introState">
-                <span>Start with your state</span>
-                <select id="introState" class="select">
-                    <option value="">Choose a state…</option>
-                </select>
-            </label>
-        </section>
-
         <div class="toolbar" role="group" aria-label="Filters" data-filters="closed">
             <button type="button" class="chip filters-toggle" id="filtersToggle"
                     aria-expanded="false" aria-controls="chipGroups">
@@ -242,6 +225,27 @@
         </div>
 
         <div class="content scroll-y">
+            <!-- What the site is and where to start. The page opened on filter
+                 chips and "Showing 1,105 of 2,562 profiles", with no heading
+                 and, on a phone, no name. Inside the scrolling area, so on a
+                 desktop it scrolls away with the results instead of pinning
+                 200px above them. -->
+            <section class="intro" aria-labelledby="pageTitle">
+                <h1 class="intro-title" id="pageTitle">Who represents you, and who is running in 2026</h1>
+                <p class="intro-text">Every member of Congress, and the 2026 candidates for it
+                    from the FEC's register. Each state's page adds its governor, legislature,
+                    high court and local governments.</p>
+                <!-- A form, not a select that navigates on change: arrow keys
+                     and type-ahead left the page on the first key (WCAG 3.2.2). -->
+                <form class="intro-pick" id="introForm">
+                    <label for="introState">Open your state's page</label>
+                    <select id="introState" class="select">
+                        <option value="">Choose a state…</option>
+                    </select>
+                    <button type="submit" class="btn">Go</button>
+                </form>
+            </section>
+
             <p class="results-bar" id="resultsLabel" role="status" aria-live="polite">
                 Loading profiles…
             </p>

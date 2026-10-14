@@ -254,8 +254,10 @@
           // A surface grey (a state with no value) takes the page's text
           // colour unless told otherwise: the inverse text was 1.15:1 on it
           // in the light theme and 1.02:1 in the dark.
-          node.style.color = shown.ink ||
-            (/--surface-/.test(shown.fill || "") ? "var(--text)" : "");
+          var surface = /--surface-/.test(shown.fill || "");
+          node.style.color = shown.ink || (surface ? "var(--text)" : "");
+          // A grey box on the grey page needs an edge to be seen as a box.
+          node.style.borderColor = surface ? "var(--text-faint)" : "";
           node.classList.toggle("is-selected", code === selected);
         }
       );

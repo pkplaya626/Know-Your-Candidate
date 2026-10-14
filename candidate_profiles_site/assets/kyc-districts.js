@@ -876,9 +876,14 @@
    * y=1346 on an 844px screen), so the page looked as if nothing happened.
    * After a pick, bring the first picked district's facts into view if none
    * of it shows - as the US map does with its panel. */
-  function reveal() {
+  function reveal(card) {
     if (!global.matchMedia || !global.matchMedia("(max-width: 1000px)").matches) return;
-    var fact = doc.querySelector(".district-fact.is-focus");
+    // The facts of the map that was tapped: each plan has its own, and the
+    // first on the page is the 2024 map's even when the 2025 map was tapped.
+    // Without a card (the list), the newest plan's - the 2026 lines.
+    var cards = doc.querySelectorAll(".plan-card");
+    var scope = cards[card === undefined ? cards.length - 1 : card] || doc;
+    var fact = scope.querySelector(".district-fact.is-focus");
     if (fact && fact.getBoundingClientRect().top > global.innerHeight - 80) {
       fact.scrollIntoView({ behavior: "smooth", block: "start" });
     }
@@ -1046,8 +1051,10 @@
           : focus.filter(function (m) { return m !== n; });
         setFocus(next.length > MAX_FOCUS ? next.slice(1) : next);
       } else {
+        var card = Array.prototype.indexOf.call(doc.querySelectorAll(".plan-card"),
+          shape.closest(".plan-card"));
         setFocus([n]);
-        reveal();
+        reveal(card === -1 ? undefined : card);
       }
     });
     el("districtPick").addEventListener("change", function (event) {

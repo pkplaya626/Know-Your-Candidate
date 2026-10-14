@@ -172,13 +172,14 @@
                "Running for this seat (" + running.length + ")</p>" + cards(running) + "</div>");
     }
     if (row.length) html.push('<div class="senate-seat-row">', row.join(""), "</div>");
+    // The markets after the people still running, before those who left
+    // the race: shown, a dozen faded cards had pushed them 1,400px down.
+    if (race && KYC.odds) html.push(KYC.odds.render(race));
     if (out.length) {
       html.push('<div class="race-out senate-out"><p class="senate-role">No longer running ' +
                 "for this seat (" + out.length + ") &mdash; lost the primary, withdrew, or " +
                 "were not on the primary ballot</p>", cards(out), "</div>");
     }
-    // The markets after the people, as in every race block.
-    if (race && KYC.odds) html.push(KYC.odds.render(race));
     html.push("</section>");
     return { html: html.join(""), people: holder.length + running.length + out.length };
   }

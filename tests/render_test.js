@@ -593,8 +593,15 @@ async function testDirectoryAsync() {
       !!intro && intro.options.length === filter.options.length &&
         [...intro.options].slice(1).every((o, i) => o.value === filter.options[i + 1].value),
       intro && intro.options.length + " vs " + filter.options.length);
-    check("the intro comes before the filters",
-      !!intro && (intro.compareDocumentPosition(D.getElementById("filtersToggle")) & 4) !== 0);
+    // Outside the scroller it stayed pinned, 200px above the results, on a
+    // desktop; inside it, it scrolls away with them.
+    check("the intro scrolls with the results",
+      !!intro && !!intro.closest(".content.scroll-y") &&
+        (intro.compareDocumentPosition(D.getElementById("results")) & 4) !== 0);
+    // Navigating on "change" left the page on the first arrow key.
+    const form = D.getElementById("introForm");
+    check("the picker opens a state's page only when asked",
+      !!form && !!form.querySelector('button[type="submit"]') && form.contains(intro));
   });
 
   suite("index.html — a state's name finds its people", () => {
@@ -602,8 +609,13 @@ async function testDirectoryAsync() {
     const pa = window.legislatorsData.filter((p) => p.state === "PA");
     check("every Pennsylvania profile matches 'Pennsylvania'",
       pa.length > 0 && pa.every((p) => KYC.matchesQuery(p, "pennsylvania")));
-    check("and a state's name does not match another state's people",
-      !window.legislatorsData.some((p) => p.state === "WV" && KYC.matchesQuery(p, "pennsylvania")));
+    // The whole name only (rule 5): indexed as text, "virginia" found all of
+    // West Virginia and "kansas" found Arkansas.
+    const blank = (state) => ({ state: state, name: "Pat Example", quality: {} });
+    check("a state's name finds that state, not a longer one containing it",
+      KYC.matchesQuery(blank("VA"), "virginia") && !KYC.matchesQuery(blank("WV"), "virginia") &&
+        KYC.matchesQuery(blank("WV"), "west virginia") &&
+        KYC.matchesQuery(blank("KS"), "kansas") && !KYC.matchesQuery(blank("AR"), "kansas"));
   });
 
   suite("index.html — profile dialog", () => {
@@ -1094,6 +1106,11 @@ async function testMap() {
       lost.every((p) => /lost the primary/.test(label(p.state)) &&
         !/not running/.test(label(p.state))),
       lost.map((p) => label(p.state)).join(" | "));
+    // White on the empty grey was 1.15:1 (light) and dark on dark 1.02:1.
+    const greys = [...D.querySelectorAll(".map-callout")].filter((c) => /surface/.test(c.style.background || ""));
+    check("a callout on the empty grey takes the page's text colour and an edge",
+      greys.length > 0 && greys.every((c) => c.style.color === "var(--text)" && /text-faint/.test(c.style.borderColor || "")),
+      greys.length + " grey callouts");
     check("party is an adjective in the label, as in the legend",
       ![...D.querySelectorAll("#usMap .state")].some((s) =>
         /Democrat seat/.test(s.getAttribute("aria-label") || "")));
@@ -1225,6 +1242,11 @@ async function testStates() {
     check("an 'On this page' row links every part of the page",
       parts.length === 4 && parts.every((a) => !!D.getElementById(a.getAttribute("href").slice(1))),
       parts.map((a) => a.getAttribute("href")).join(" "));
+    // Left in the address, a fragment sent the reader back to the section
+    // when a profile closed. A jump scrolls and leaves the address alone.
+    const before = window.location.hash;
+    parts[3].dispatchEvent(new window.MouseEvent("click", { bubbles: true, cancelable: true }));
+    check("a jump leaves the address as it was", window.location.hash === before, window.location.hash);
     check("the race list says it covers Congress only",
       /2026 races for Congress in Texas/.test(D.getElementById("races").textContent) &&
         /state and local contests/.test(D.getElementById("races").textContent));
@@ -1752,9 +1774,6 @@ function testContrast() {
     const backed = mix("#000000", themes.light["surface-2"], alpha);
     check("light: a map code on the empty grey", ratio(themes.light["map-label"] || "#ffffff", backed) >= 4.5,
       ratio(themes.light["map-label"] || "#ffffff", backed).toFixed(2));
-    const usmap = fs.readFileSync(path.join(SITE, "assets", "kyc-usmap.js"), "utf8");
-    check("a callout on a surface grey takes the page's text colour",
-      /--surface-\/\.test\(shown\.fill[^)]*\)\s*\?\s*"var\(--text\)"/.test(usmap));
     const js = fs.readFileSync(path.join(SITE, "assets", "kyc-profile.js"), "utf8");
     check("the party tag's label colour comes from the theme, not a literal",
       !/style\.color\s*=\s*["']#/.test(js) && /\.party-tag\s*\{[^}]*color:\s*var\(--text-inverse\)/.test(css));
@@ -2326,6 +2345,16 @@ async function testDistrictPages() {
     check("the picked district's facts are scrolled into view",
       scrolled.length === 1 && scrolled[0].classList.contains("is-focus") &&
         /4/.test(scrolled[0].querySelector(".district-fact-title").textContent),
+      scrolled.map((s) => s.className).join(" | "));
+    // Each map has its own facts; a tap on the 2025 map went to the 2024
+    // map's, already above the screen, and nothing moved.
+    scrolled.length = 0;
+    const cardsNow = [...nc.D.querySelectorAll(".plan-card")];
+    const second = cardsNow[1] && cardsNow[1].querySelector('[data-district="4"]');
+    if (second) second.dispatchEvent(new win.MouseEvent("click", { bubbles: true }));
+    const after = [...nc.D.querySelectorAll(".plan-card")];
+    check("a tap on the second map shows the second map's facts",
+      !!second && scrolled.length === 1 && after[1].contains(scrolled[0]),
       scrolled.map((s) => s.className).join(" | "));
   });
 

@@ -352,7 +352,7 @@
     var out = others.filter(function (p) { return KYC.cards && KYC.cards.offBallot(p); });
     var shown = others.filter(function (p) { return !(KYC.cards && KYC.cards.offBallot(p)); });
     el("profileModalRaceTitle").textContent = race.label;
-    // The markets on this race, compactly, above the people in it.
+    // The markets on this race, compactly, after the people in it.
     el("profileModalRaceOdds").innerHTML = KYC.odds ? KYC.odds.render(race, { compact: true }) : "";
     var row = function (p) {
       var role = p.isCandidate ? "" : '<span class="badge badge-neutral">Member</span> ';

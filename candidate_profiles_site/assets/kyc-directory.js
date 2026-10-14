@@ -158,7 +158,8 @@
   /* Says what was searched for, so a reader who typed a name can tell a
    * miss from a filter they forgot was on. */
   function emptyLabel() {
-    return state.q ? "No profiles match “" + state.q + "” with these filters"
+    var typed = (doc.getElementById("searchInput") || {}).value || state.q;
+    return state.q ? "No profiles match “" + typed.trim() + "” with these filters"
       : "No profiles match these filters";
   }
 
@@ -378,14 +379,19 @@
       state.state = select.value;
       apply();
     });
-    // The intro's picker opens the state's own page: everything about one
-    // state - its delegation, its races, its government - is there.
-    if (intro) {
-      intro.addEventListener("change", function () {
-        if (!intro.value) return;
+    // The intro's picker opens the state's own page - everything about one
+    // state is there - but only when asked: navigating on "change" left the
+    // page on the first arrow key or typed letter. A page restored from the
+    // back cache starts blank again, or choosing the same state did nothing.
+    var form = doc.getElementById("introForm");
+    if (form && intro) {
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (!intro.value) { intro.focus(); return; }
         KYC.rememberState(intro.value);
         global.location.href = KYC.stateUrl(intro.value);
       });
+      global.addEventListener("pageshow", function () { intro.value = ""; });
     }
   }
 

@@ -847,9 +847,6 @@
     SEARCH_FIELDS.forEach(function (field) {
       if (item[field] && hasValue(item, field)) parts.push(String(item[field]));
     });
-    // The state's name as well as its code: "Pennsylvania" found 14 of its
-    // 61 profiles, the ones that happened to mention it in their text.
-    if (item.state && item.state !== "N/A") parts.push(stateName(item.state));
     // Other names the member's own record gives ("Jim Clyburn" for James
     // Clyburn); derived in the pipeline from the bioguide-keyed record.
     (item.aliases || []).forEach(function (alias) { parts.push(String(alias)); });
@@ -857,8 +854,26 @@
     return item.__search;
   }
 
+  /* A query that is a state's whole name finds that state's people:
+   * "Pennsylvania" found 14 of its 61, the ones whose own text mentioned it.
+   * The whole name only, never a substring of another (rule 5): indexed as
+   * text, "virginia" found all of West Virginia and "kansas" Arkansas. */
+  var stateByName = null;
+  function stateNamed(query) {
+    if (stateByName === null) {
+      stateByName = {};
+      var states = meta().states || {};
+      Object.keys(states).forEach(function (code) {
+        stateByName[foldText(states[code].name || "")] = code;
+      });
+    }
+    return stateByName[foldText(query).replace(/\s+/g, " ").trim()] || null;
+  }
+
   function matchesQuery(item, query) {
     if (!query) return true;
+    var named = stateNamed(query);
+    if (named && item.state === named) return true;
     var haystack = searchIndex(item);
     return foldText(query).split(/\s+/).every(function (term) {
       return !term || haystack.indexOf(term) !== -1;

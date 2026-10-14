@@ -277,6 +277,22 @@
 
   function initCards() {
     el("stateContent").addEventListener("click", function (event) {
+      // A jump within the page scrolls there and leaves the address alone.
+      // A fragment left in it sent the reader back to that section when a
+      // profile closed, however far they had read on (as jumpToSection says).
+      var jump = event.target.closest('.jump-row a[href^="#"]');
+      if (jump) {
+        var target = doc.getElementById(jump.getAttribute("href").slice(1));
+        if (target) {
+          event.preventDefault();
+          if (target.scrollIntoView) target.scrollIntoView({ block: "start" });
+          if (target.focus) {
+            if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
+            target.focus({ preventScroll: true });
+          }
+        }
+        return;
+      }
       var card = event.target.closest("[data-id]");
       if (card) KYC.profile.open(card.getAttribute("data-id"));
     });
