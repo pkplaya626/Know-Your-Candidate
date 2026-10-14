@@ -713,6 +713,14 @@ class TestOddsWorkflow(unittest.TestCase):
                 return handle.read()
         cls.text, cls.refresh = read("odds.yml"), read("refresh.yml")
 
+    def test_prices_freeze_before_the_first_polls_close(self):
+        # Prices moving on early returns would read as results (audit CG-15).
+        self.assertIn('"2026-11-03T22:59"', self.text)
+        self.assertIn("steps.due.outputs.run == 'true'", self.text)
+        commit = self.text.index("Commit the new prices and deploy")
+        self.assertIn("if: steps.due.outputs.run == 'true'",
+                      self.text[commit:commit + 120])
+
     def test_it_runs_every_twelve_hours(self):
         import re
 

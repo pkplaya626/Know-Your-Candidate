@@ -132,13 +132,23 @@
     }
     return '<section class="odds' + (opts.compact ? " odds-compact" : "") + '" aria-label="' +
       KYC.escapeAttr("Prediction markets and polling averages for " + (race.label || "this race")) + '">' +
-      '<p class="odds-subhead">Prediction markets <span class="odds-faint">as of ' +
-        KYC.escapeHtml(day(data().asOf)) + "</span></p>" +
+      '<p class="odds-subhead">' + (finalPrices() ? FINAL_HEAD : "Prediction markets") +
+        ' <span class="odds-faint">as of ' + KYC.escapeHtml(day(data().asOf)) + "</span></p>" +
       markets.join("") + pollHtml +
       '<p class="odds-note">A market price is what traders pay for a contract worth $1 if that ' +
         "outcome happens. It is not a poll, and not this site’s forecast. Polling averages " +
-        "are each aggregator’s own.</p>" +
+        "are each aggregator’s own." + (finalPrices() ? FINAL_NOTE : "") + "</p>" +
       "</section>";
+  }
+
+  /* From Election Day on, these are the last prices read before the first
+   * polls closed (odds.yml stops there), and the page says so: prices that
+   * move on early returns would read as results beside "On the November
+   * ballot". */
+  var FINAL_HEAD = "Final market prices, from before the polls closed";
+  var FINAL_NOTE = " These are not results.";
+  function finalPrices(now) {
+    return KYC.electionStatus(undefined, now).phase !== "campaign";
   }
 
   var CHAMBER = { senate: "the Senate", house: "the House" };
@@ -151,12 +161,13 @@
     return '<section class="odds odds-control" aria-label="' +
         KYC.escapeAttr("Prediction markets on control of " + name) + '">' +
       '<p class="odds-subhead">Control of ' + KYC.escapeHtml(name) +
-        ' after November, by prediction market <span class="odds-faint">as of ' +
-        KYC.escapeHtml(day(data().asOf)) + "</span></p>" +
+        " after November, by prediction market" + (finalPrices() ? ": final prices, from before the polls closed" : "") +
+        ' <span class="odds-faint">as of ' + KYC.escapeHtml(day(data().asOf)) + "</span></p>" +
       markets.map(marketRow).join("") +
       '<p class="odds-note">What traders pay for a $1 contract on each party winning a majority. ' +
-        "Not a poll, and not this site’s forecast.</p></section>";
+        "Not a poll, and not this site’s forecast." + (finalPrices() ? FINAL_NOTE : "") +
+        "</p></section>";
   }
 
-  KYC.odds = { render: render, control: control, percent: percent };
+  KYC.odds = { render: render, control: control, percent: percent, finalPrices: finalPrices };
 })(window);

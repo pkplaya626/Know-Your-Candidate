@@ -1948,6 +1948,15 @@ async function testOdds() {
   const KYC = window.KYC;
   const results = D.getElementById("results");
 
+  suite("index.html — prices are labelled final once the polls close", () => {
+    // odds.yml stops refreshing at the first poll closing; from Election Day
+    // on, the page says these are the final prices and not results.
+    check("before Election Day they are live prices",
+      !KYC.odds.finalPrices(new Date(2026, 9, 14, 12)));
+    check("on Election Day and after they are final",
+      KYC.odds.finalPrices(new Date(2026, 10, 3, 20)) && KYC.odds.finalPrices(new Date(2026, 10, 20)));
+  });
+
   suite("index.html — prediction markets and polling averages", () => {
     check("no page errors", errors.length === 0, errors.join(" | "));
     const control = results.querySelector(".odds-control");
