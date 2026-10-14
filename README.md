@@ -1418,10 +1418,12 @@ Current warnings, all expected:
 | `odds.yml` | Every twelve hours (00:47 and 12:47 UTC), manual; stops at the first poll closing on Election Day | Refreshes market prices and polling averages, validates, **commits only the two odds files to main** and starts the deploy. From 23:00 UTC on Nov 3 it changes nothing, and the page labels the last prices final |
 | `deploy.yml` | manual only | Publishes to GitHub Pages |
 
-`refresh.yml` never pushes to main and never deploys. It resolves portraits for
-anyone new, rebuilds, runs validation and the tests, and opens a pull request
-so a change in the membership of Congress is something a person reads and
-merges. It then starts CI on that pull request itself, because a pull request
+`refresh.yml` never pushes to main directly. It resolves portraits for
+anyone new, rebuilds, runs validation and the tests, and opens a pull request.
+Once the pull request's CI passes, it merges it and starts the deploy (since
+2026-10-14: after the election the results reach the page only this way, and a
+pull request that waited for a person kept the site eight days behind). A
+pull request whose checks fail stays open and opens the failure issue. It then starts CI on that pull request itself, because a pull request
 opened with the workflow's own token is held at "action_required", and it
 closes older refresh pull requests as superseded. In October 2026 two sat
 unreviewed for days while the site served data eight days old, so
