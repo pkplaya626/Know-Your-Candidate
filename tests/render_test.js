@@ -839,6 +839,19 @@ async function testDirectoryAsync() {
         !/source rosters/.test(D.getElementById("profileModalSource").textContent));
       KYC.profile.close();
     }
+
+    // Rule 27: a challenger is running for the seat, not representing it.
+    const challenger = window.legislatorsData.find((p) => p.isCandidate);
+    const seated = window.legislatorsData.find((p) => !p.isCandidate);
+    KYC.profile.open(challenger.id);
+    const meta = D.querySelector("#profileModal .modal-meta").textContent;
+    check("a candidate's dialog says Running for, never Represents",
+      /Running for/.test(meta) && !/Represents/.test(meta), meta.replace(/\s+/g, " "));
+    KYC.profile.close();
+    KYC.profile.open(seated.id);
+    check("a member's dialog says Represents",
+      /Represents/.test(D.querySelector("#profileModal .modal-meta").textContent));
+    KYC.profile.close();
   });
 
   suite("index.html — search suggestions and remembered state", () => {

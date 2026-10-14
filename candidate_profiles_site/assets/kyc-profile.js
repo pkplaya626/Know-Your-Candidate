@@ -57,7 +57,7 @@
       '      <h2 class="modal-name" id="profileModalName"></h2>',
       '      <p class="modal-meta">',
       '        <span>' + KYC.icon("pin") +
-      '          Represents <strong id="profileModalRegion"></strong>' +
+      '          <span id="profileModalRegionLabel">Represents</span> <strong id="profileModalRegion"></strong>' +
       '          <a id="profileModalStateLink" class="state-link" href="#"></a></span>',
       '        <span>' + KYC.icon("calendar") +
       '          Term <strong id="profileModalTerm"></strong></span>',
@@ -653,6 +653,9 @@
     // it from chamber + state + district in three separate places, which is
     // how "House • AL-District 3" and "House • TX-TX-32" once shipped.
     el("profileModalRegion").textContent = item.officeLabel;
+    // A challenger does not represent the seat they are running for (rule
+    // 27), and until 2026-10 every candidate's dialog said they did.
+    el("profileModalRegionLabel").textContent = item.isCandidate ? "Running for" : "Represents";
     var stateLink = el("profileModalStateLink");
     if (item.state && item.state !== "N/A") {
       stateLink.hidden = false;
