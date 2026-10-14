@@ -5,9 +5,11 @@
 # CSV has no way to notice: two representatives seated in September 2026 were
 # simply absent from the site until this reconciliation was written.
 #
-# This opens a pull request. It never pushes to main and never deploys, so a
-# change in the membership of Congress arrives as something a person reads and
-# merges.
+# This opens a pull request and merges it once its CI passes (PK, 2026-10-14:
+# results after the election must not wait days for a person). It never pushes
+# to main directly: everything it publishes has passed build --check --strict,
+# verify, the unit tests and the page tests first, and a run whose checks fail
+# leaves its pull request open and opens the failure issue.
 
 name: Refresh
 
@@ -224,10 +226,11 @@ jobs:
           The same run re-reads state governments from their own authorities:
           governors (National Governors Association, checked against
           Wikidata), lieutenant governors (NLGA), secretaries of state (NASS),
-          state legislators (Open States) and party counts (NCSL). Review any
-          change to those files as you would a change of officeholder.
+          state legislators (Open States) and party counts (NCSL).
 
-          Validation, \`verify\` and the unit tests all ran before this was opened.
+          Validation, \`verify\` and the unit tests all ran before this was
+          opened. It merges itself once its CI passes; a change of
+          officeholder in it is worth reading afterwards.
           BODY
           )"
 
@@ -247,6 +250,30 @@ jobs:
               gh pr close "$old" --comment "Superseded by #$new, opened by a newer refresh run."
             fi
           done
+
+          # It merges itself once its checks pass (PK, 2026-10-14). After the
+          # election the results reach the page only through this pull
+          # request, and one that waited for a person kept the site eight days
+          # behind. The run above already passed build --check --strict,
+          # verify and the unit tests; CI adds the page tests. If CI fails,
+          # the pull request stays open, this step fails and the failure
+          # issue below says so.
+          sha=$(git rev-parse HEAD)
+          run=""
+          for _ in $(seq 1 24); do
+            run=$(gh run list --workflow ci.yml --branch "$branch" --json databaseId,headSha \
+              --jq "map(select(.headSha == \"$sha\")) | .[0].databaseId // empty")
+            [ -n "$run" ] && break
+            sleep 5
+          done
+          if [ -z "$run" ]; then
+            echo "::error::No CI run started for $branch; #$new is left for a person."
+            exit 1
+          fi
+          gh run watch "$run" --exit-status --interval 30
+          gh pr merge "$new" --merge --delete-branch
+          # A merge made with this token starts no workflow of its own.
+          gh workflow run deploy.yml --ref main -f reason="refresh #$new merged"
 
       # A failed scheduled run used to be silent: nobody watches the Actions
       # tab, and the site kept serving the old field. Open an issue, or

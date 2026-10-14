@@ -788,10 +788,20 @@ class TestRefreshWorkflow(unittest.TestCase):
         self.assertIn('gh workflow run ci.yml --ref "$branch"', self.text)
         self.assertIn("actions: write", self.text)
 
+    def test_its_pull_request_merges_itself_once_ci_passes(self):
+        # A refresh nobody merged kept the site eight days behind; results
+        # after Nov 3 travel the same way.
+        watch = self.text.index('gh run watch "$run" --exit-status')
+        merge = self.text.index('gh pr merge "$new" --merge --delete-branch')
+        self.assertLess(watch, merge)                    # never before CI passes
+        self.assertIn('gh workflow run deploy.yml --ref main', self.text[merge:])
+
     def test_a_newer_refresh_closes_the_older_ones(self):
         self.assertIn('select(.headRefName | startswith("refresh/"))', self.text)
         self.assertIn('gh pr close "$old"', self.text)
-        self.assertNotIn("--delete-branch", self.text)
+        # A superseded pull request keeps its branch; only a merged one goes.
+        close = [l for l in self.text.splitlines() if 'gh pr close "$old"' in l]
+        self.assertTrue(close and not any("--delete-branch" in l for l in close))
 
     def test_a_waiting_refresh_reaches_a_person(self):
         path = os.path.join(ROOT, ".github", "workflows", "refresh-waiting.yml")
