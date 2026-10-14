@@ -1163,9 +1163,55 @@ def check_registrations(profiles, field):
     return issues
 
 
+def check_voting_links(cache):
+    """Every state and D.C. has its four official voting pages.
+
+    The state page tells a reader where to check their registration, find
+    their polling place, vote absentee or early, and register - each the
+    state's own page, as NASS lists it. A state left out would read as if it
+    had none.
+    """
+    from . import voting
+    if not cache:
+        return [Issue("warn", "voting-links-missing",
+                      f"no {voting.CACHE_PATH}; run 'voting' - state pages say nothing "
+                      f"about how to vote")]
+    states = cache.get("states") or {}
+    gaps = [f"{code}: no {kind} page" for code in sorted(voting.JURISDICTIONS)
+            for kind in voting.PAGES
+            if not str((states.get(code) or {}).get(kind) or "").startswith(("http://", "https://"))]
+    extra = sorted(set(states) - voting.JURISDICTIONS)
+    foreign = sorted(f"{code} {kind}: {link['url']}"
+                     for code, links in voting.effective(cache).items()
+                     for kind, link in links.items() if not voting.official(link["url"], code))
+    issues = []
+    if foreign:
+        issues.append(Issue("error", "voting-links-not-official",
+                            f"{len(foreign)} voting links are not on their state's own "
+                            f"election domain", foreign))
+    dead = voting.dead_links(cache)
+    if dead:
+        # Not shown (voting.for_page), but a reader of that state is missing one.
+        issues.append(Issue("warn", "voting-links-dead",
+                            f"{len(dead)} official voting links answered 404 twice and are "
+                            f"not shown; add an overrides.VOTING_LINKS entry", dead))
+    stale = voting.stale_overrides(cache)
+    if stale:
+        issues.append(Issue("warn", "voting-override-stale",
+                            f"{len(stale)} overrides.VOTING_LINKS entries no longer match "
+                            f"what NASS lists; each may be unneeded", stale))
+    if gaps:
+        issues.append(Issue("error", "voting-links-incomplete",
+                            f"{len(gaps)} official voting pages are missing", gaps))
+    if extra:
+        issues.append(Issue("error", "voting-links-unknown",
+                            f"voting pages for jurisdictions NASS does not list: {', '.join(extra)}"))
+    return issues
+
+
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
         results=None, field=None, enrichment=None, odds=None, district_maps=None,
-        district_error=None):
+        district_error=None, voting=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_district_maps(races, district_maps, district_error)
@@ -1195,6 +1241,8 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_results_pages(results)
     issues += check_seats_contested(profiles)
     issues += check_guide()
+    if voting is not None:                 # None: the caller did not supply it
+        issues += check_voting_links(voting)
     return issues
 
 

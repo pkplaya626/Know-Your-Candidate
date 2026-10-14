@@ -35,6 +35,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… localgov` | Every local government from the Census listing, checked against the published counts |
 | `… executives` | Every governor from the NGA, and NCSL's count of each legislature's parties (`--check` reports the caches) |
 | `… officers` | Every lieutenant governor (NLGA) and secretary of state (NASS), cross-checked where the rosters overlap |
+| `… voting` | Each state's and D.C.'s official pages for checking registration, finding a polling place, voting absentee or early, and registering, as NASS's "Can I Vote" lists them; refused unless all 51 are there |
 | `… courts` | Each state's highest court and its members, read from the court's own roster |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
 | `… results` | Read each state's primary results from Wikipedia: who is still in |
@@ -1025,6 +1026,7 @@ they run the state's elections; and each chamber's seats by party.
 | Lieutenant governors, and who is first in line where there is none | National Lieutenant Governors Association, members | `officers` writes `data/statewide_officers.json` |
 | Secretaries of state: party, elected or appointed, chief election official, contact | National Association of Secretaries of State, membership roster | `officers` |
 | Attorneys general: who holds the office | The office's own website, linked from USA.gov's page for the state | `officers` |
+| How to vote: registration status, polling place, absentee and early voting, registering | Each state's own pages, as NASS's "Can I Vote" (nass.org/can-I-vote) lists them; no date or deadline is typed in. Shown as "Voting in <State>" on the state page; territories, which NASS does not cover, show none | `voting` writes `data/voting_links.json` |
 | Attorneys general: party | Republican and Democratic Attorneys General Associations, members | `officers` |
 
 A party holds a chamber when it has more than half of **all** its seats; a

@@ -27,6 +27,7 @@ from . import (
     summary as summary_mod,
     validate,
     voteview,
+    voting as voting_mod,
 )
 from .profiles import build_profiles, screen_field
 
@@ -199,7 +200,8 @@ def _build(args):
                           snapshot=snapshot, finance=finance, campaigns=sites,
                           results=outcomes, field=field, enrichment=enrichment,
                           odds=markets, district_maps=district_maps,
-                          district_error=district_error)
+                          district_error=district_error,
+                          voting=voting_mod.load_cache(args.root) or {})
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -220,6 +222,7 @@ def _build(args):
 
     summary = summary_mod.build(profiles, races=race_list,
                                 committees=legislators.load_committees(args.root))
+    summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root))
     path, size = emit.write_profiles(
         profiles, stats, args.root, races=race_list, summary=summary
     )
@@ -875,6 +878,7 @@ def _verify(args):
     stats.update(races_mod.stats(race_list))
     summary = summary_mod.build(profiles, races=race_list,
                                 committees=legislators.load_committees(args.root))
+    summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root))
 
     problems = []
 
@@ -1081,6 +1085,40 @@ def _courts(args):
           + (f"; no recipe or no result for {', '.join(missing)}" if missing else ""))
     if not args.check:
         print(f"[ok] wrote {courts.save_cache(read, args.root)}")
+    return 0
+
+
+def _voting(args):
+    """Each state's official voting pages, as NASS's "Can I Vote" lists them
+    (kyc/voting.py): registration status, polling place, absentee and early
+    voting, registering."""
+    from . import voting
+    if args.check:
+        cache = voting.load_cache(args.root)
+        if not cache:
+            print(f"[error] no {voting.CACHE_PATH}; run 'voting'", file=sys.stderr)
+            return 2
+    else:
+        try:
+            cache = voting.fetch()
+        except voting.VotingError as exc:
+            print(f"[error] {exc}", file=sys.stderr)
+            return 2
+        print(f"[ok] wrote {voting.save_cache(cache, args.root)}")
+    states = cache.get("states") or {}
+    print(f"  {len(states)} jurisdictions, {len(voting.PAGES)} official pages each "
+          f"(source: {cache.get('source')})")
+    links = cache.get("links") or {}
+    if links:
+        counts = {s: sum(1 for v in links.values() if v == s)
+                  for s in (voting.LIVE, voting.UNKNOWN, voting.DEAD)}
+        print(f"  opened {len(links)} links: {counts[voting.LIVE]} answered, "
+              f"{counts[voting.UNKNOWN]} inconclusive (bot walls, timeouts), "
+              f"{counts[voting.DEAD]} dead")
+    for line in voting.dead_links(cache):
+        print(f"  [dead] {line} - not shown; add an overrides.VOTING_LINKS entry")
+    for line in voting.stale_overrides(cache):
+        print(f"  [stale override] {line}")
     return 0
 
 
@@ -1374,6 +1412,10 @@ def build_parser():
     courts_cmd.add_argument("--check", action="store_true",
                             help="report the committed cache; make no network call")
 
+    voting_cmd = add("voting", help="each state's official voting pages (NASS Can I Vote)")
+    voting_cmd.add_argument("--check", action="store_true",
+                            help="report the committed cache; make no network call")
+
     officers_cmd = add("officers", help="every lieutenant governor and secretary of state (NLGA, NASS)")
     officers_cmd.add_argument("--check", action="store_true",
                               help="report the committed cache; make no network call")
@@ -1429,6 +1471,8 @@ def main(argv=None):
         return _courts(args)
     if args.command == "officers":
         return _officers(args)
+    if args.command == "voting":
+        return _voting(args)
     if args.command == "verify":
         return _verify(args)
     if args.command == "congress":

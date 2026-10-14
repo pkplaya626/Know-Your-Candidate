@@ -38,6 +38,45 @@
     return "District " + race.district;
   }
 
+  /* How to vote here: the state's own pages, as the secretaries of state's
+   * association lists them (kyc/voting.py). Nothing on the site said how,
+   * when or where to vote. No date or deadline is typed here - those are on
+   * the state's pages, and they change. NASS covers the 50 states and D.C.,
+   * so a territory shows nothing rather than a guess. */
+  var VOTING = [
+    ["status", "Check your registration"],
+    ["polling", "Find your polling place"],
+    ["absentee", "Vote absentee or early"],
+    ["register", "Register to vote"],
+  ];
+  function votingBlock(code, name) {
+    var all = KYC.meta().voting || {};
+    var links = all[code];
+    if (!links) return "";
+    // A per-state label where NASS's kind does not fit the state: North
+    // Dakota does not register voters (overrides.VOTING_LINKS).
+    var labels = (all._labels || {})[code] || {};
+    var place = code === "DC" ? "the District of Columbia" : name;
+    var dated = all._listed
+      ? " (listed " + KYC.escapeHtml(all._listed) +
+        (all._opened ? "; each link opened " + KYC.escapeHtml(all._opened) : "") + ")"
+      : "";
+    return '<section class="state-section vote-box" id="voting" aria-labelledby="votingHead">' +
+      '<h2 class="state-heading" id="votingHead">' + KYC.icon("vote") + " Voting in " +
+        KYC.escapeHtml(place) + "</h2>" +
+      '<p class="state-links">' + VOTING.filter(function (v) { return links[v[0]]; }).map(function (v) {
+        return '<a class="btn" target="_blank" rel="noopener noreferrer" href="' +
+          KYC.escapeAttr(links[v[0]]) + '">' + KYC.icon("link") + " " +
+          KYC.escapeHtml(labels[v[0]] || v[1]) + "</a>";
+      }).join(" ") + "</p>" +
+      '<p class="state-note">Each link is ' + KYC.escapeHtml(place) + "'s own official page, " +
+        "from the National Association of Secretaries of State’s " + '<a href="' +
+        KYC.escapeAttr(all._source || "https://www.nass.org/can-I-vote") + '" target="_blank" ' +
+        'rel="noopener noreferrer">Can I Vote</a>' + dated +
+        ". Deadlines, hours and ID rules are on those pages.</p>" +
+      "</section>";
+  }
+
   function summaryStrip(info) {
     var parts = [];
     if (info.senators) parts.push(plural(info.senators, "senator"));
@@ -131,6 +170,8 @@
           return '<a class="chip chip-link" href="#' + p[0] + '">' + KYC.escapeHtml(p[1]) + "</a>";
         }).join("") + "</nav>");
     }
+
+    html.push(votingBlock(code, name));
 
     /* Who holds the seats now. Senators first, then the House by district;
      * a reader who asked "who represents me" gets the answer before the

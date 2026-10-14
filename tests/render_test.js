@@ -1228,13 +1228,48 @@ async function testMap() {
 async function testStates() {
   const { window, D, KYC } = await testShared("states/tx.html");
 
+  // Nothing on the site said how, when or where to vote (audit CG-5).
+  suite("states/tx.html — how to vote here, from the state's own pages", () => {
+    const box = D.getElementById("voting");
+    const want = window.kycBuildMeta.voting.TX;
+    const links = box ? [...box.querySelectorAll(".state-links a")] : [];
+    check("a 'Voting in Texas' block", !!box && /Voting in Texas/.test(box.textContent));
+    check("its four links are the ones NASS lists for Texas",
+      links.length === 4 && ["status", "polling", "absentee", "register"].every((k) =>
+        links.some((a) => a.getAttribute("href") === want[k])),
+      links.map((a) => a.getAttribute("href")).join(" "));
+    check("each opens in a new tab, without an opener",
+      links.every((a) => a.target === "_blank" && /noopener/.test(a.rel)));
+    check("it names NASS's Can I Vote and the dates it was listed and opened",
+      !!box.querySelector('a[href^="https://www.nass.org/"]') && /listed \d{4}-\d{2}-\d{2}/.test(box.textContent) &&
+        /each link opened \d{4}-\d{2}-\d{2}/.test(box.textContent), box.textContent);
+  });
+  const nd = await buildPage("states/nd.html");
+  suite("states/nd.html — a state that does not register voters", () => {
+    const text = (nd.D.getElementById("voting") || {}).textContent || "";
+    check("North Dakota is never told to register or to check a registration",
+      /Voting in North Dakota/.test(text) && !/Register to vote|Check your registration/.test(text), text);
+  });
+  const dc = await buildPage("states/dc.html");
+  suite("states/dc.html — the District of Columbia", () => {
+    const text = (dc.D.getElementById("voting") || {}).textContent || "";
+    check("the heading says 'the District of Columbia'", /Voting in the District of Columbia/.test(text), text.slice(0, 60));
+  });
+  const guam = await buildPage("states/gu.html");
+  suite("states/gu.html — no NASS listing, no voting block", () => {
+    check("a territory NASS does not cover shows no voting links, rather than a guess",
+      !guam.D.getElementById("voting") && !/Voting in Guam/.test(guam.D.body.textContent));
+  });
+
   suite("states/tx.html — one state's page", () => {
     const content = D.getElementById("stateContent");
     check("the page is about Texas", /Texas/.test(D.querySelector(".state-title").textContent));
     check("the document title names the state", /^Texas/.test(D.title), D.title);
     const members = window.legislatorsData.filter((p) => !p.isCandidate && p.state === "TX");
     const senators = members.filter((p) => /Senate/.test(p.chamber));
-    const heads = [...content.querySelectorAll(".state-heading")];
+    // Of the people on the page, the senators come first (rule 27); the
+    // short block of voting links above them is about no one.
+    const heads = [...content.querySelectorAll(".state-heading")].filter((h) => !h.closest("#voting"));
     check("senators come first", /senators/i.test(heads[0].textContent), heads[0].textContent);
     // On a phone the races began eleven screens down; the page now says
     // where each part starts, and every link lands on a section.

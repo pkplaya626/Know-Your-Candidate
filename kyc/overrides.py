@@ -151,6 +151,42 @@ RESULT_NAMES = {
                                    "the names reversed, CARL, BOYANTON LESTER"),
 }
 
+# Official voting pages that replace what NASS's "Can I Vote" lists for a
+# state, keyed (state, kind) - kind is status, polling, absentee or register.
+# Each is (the URL NASS lists, the state's own page that replaces it or None
+# to show no button, a label or None for the usual one, the evidence). The
+# NASS URL is kept so validate warns once NASS changes its entry and the
+# override can go. Checked 2026-10-14, every replacement found on the
+# state's own election site and answering 200.
+VOTING_LINKS = {
+    ("IA", "absentee"): (
+        "https://sos.iowa.gov/elections/electioninfo/absenteeinfo.html",
+        "https://sos.iowa.gov/voters/absentee-voting", None,
+        "NASS's page answers 404 'Page not found'; sos.iowa.gov links Absentee Voting here"),
+    ("IN", "absentee"): (
+        "http://www.in.gov/sos/elections/2402.htm",
+        "https://www.in.gov/sos/elections/voter-information/ways-to-vote/absentee-voting", None,
+        "NASS's page answers 404; in.gov/sos/elections links absentee voting here"),
+    ("MD", "polling"): (
+        "http://www.elections.state.md.us/voting/where.html",
+        "https://elections.maryland.gov/voting/where.html", None,
+        "the old domain now redirects to the board's home page; this is the same "
+        "'Voter Registration and Polling Place Look-Up' on the current one"),
+    ("CO", "absentee"): (
+        "https://www.sos.state.co.us/pubs/elections/FAQs/ElectionDay.html",
+        "https://www.sos.state.co.us/pubs/elections/FAQs/mailBallotsFAQ.html", None,
+        "NASS links the Election Day FAQ; Colorado mails every voter a ballot, and this "
+        "is the Secretary of State's Mail-in Ballots FAQ"),
+    ("ND", "register"): (
+        "https://www.sos.nd.gov/elections/voter",
+        "https://www.sos.nd.gov/elections/voter", "Voting in North Dakota",
+        "North Dakota does not register voters; NASS lists its general voter page "
+        "under 'register', which the page labelled 'Register to vote'"),
+    ("ND", "status"): (
+        "https://www.sos.nd.gov/elections", None, None,
+        "no registration to check; NASS lists the general Elections page"),
+}
+
 # Campaign websites that must never be linked, keyed on the host the FEC
 # committee registered (lower case; a key without "www." also covers the
 # "www." form). The FEC keeps whatever site a committee once filed, and a
