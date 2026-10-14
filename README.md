@@ -395,6 +395,16 @@ people have filed at any funding level — so a seat is never described as
 uncontested when somebody has filed for it. Of the 28 races with no profiled
 challenger, 26 show a filing count and only **2** are genuinely empty.
 
+A nominee under the threshold is on the ballot all the same. The 2026-10-13
+audit found 54 decided races reading "No challenger on the ballot" over a
+second nominee: TX-12's Democratic nominee raised nothing, and California's
+top-two seats were the worst hit. The results page had already matched each
+one to an FEC id. `races.build` names them from that filing
+(`results.belowThreshold`, `{id, name}`) and adds them to `otherNominees`.
+`contested` is true once anyone besides the incumbent is on the ballot, and
+the card counts them: "1 challenger on the ballot · 1 with no profile here".
+The FEC's incumbent flag keeps an incumbent's own second registration out.
+
 Not every registration that lists 2026 is a 2026 filing, so the field is
 screened first (`candidates.screen`) and the build reports each one it sets
 aside:

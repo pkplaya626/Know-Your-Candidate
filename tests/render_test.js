@@ -856,6 +856,24 @@ async function testDirectoryAsync() {
       KYC.profile.close();
     }
 
+    // Rule 22: a nominee whose filing is under $5,000 has no profile but is
+    // on the ballot. 54 decided races said "No challenger on the ballot".
+    const unprofiled = (window.kycRaces || []).filter((r) => r.settled && r.candidateCount === 0 &&
+      ((r.results || {}).belowThreshold || []).length);
+    check("there are races whose only challengers are under the threshold", unprofiled.length > 0);
+    const badly = unprofiled.filter((r) => {
+      const html = KYC.cards.raceBadges(r);
+      const n = r.results.otherNominees.length;
+      return /No challenger on the ballot/.test(html) ||
+        html.indexOf(n + " challenger") === -1 || html.indexOf(n + " with no profile here") === -1;
+    });
+    check("each counts them as challengers and says they have no profile here",
+      badly.length === 0, badly.slice(0, 3).map((r) => r.id + ": " + KYC.cards.raceBadges(r)).join(" | "));
+    const noOne = (window.kycRaces || []).filter((r) => r.settled && !r.contested &&
+      (r.results.nominees + r.results.otherNominees.length) > Math.max(1, r.incumbentIds.length));
+    check("no decided race with a second nominee says it has no challenger", noOne.length === 0,
+      noOne.slice(0, 5).map((r) => r.id).join(", "));
+
     // A curated profile that took over its FEC filing answers to the old id,
     // which shared links and odds.json labels still carry.
     const merged = window.legislatorsData.filter((p) => /^CAND_/.test(p.id) && p.fecCandidateId);

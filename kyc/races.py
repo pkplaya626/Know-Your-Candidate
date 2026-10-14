@@ -126,17 +126,26 @@ def assign(profiles):
     return profiles
 
 
-def build(profiles, filed_counts=None, results=None, dates=None):
+def build(profiles, filed_counts=None, results=None, dates=None, filed=None):
     """Return the race list, most contested first.
 
-    ``contested`` means we hold a profile for at least one challenger.
+    ``contested`` means somebody besides the incumbent is running: a
+    challenger we hold a profile for, or, once the primary is decided, any
+    nominee the results page names. ``candidateCount`` counts the profiles.
     ``filedCount`` is how many people have filed with the FEC for the seat at
     any funding level, which is a fact about the race rather than about our
     coverage - the two used to be conflated, and a race with eight filers and
     no profile read as "No declared challenger".
+
+    *filed* is the FEC field by candidate id, every filer at any funding
+    level. It names the nominees whose filings are under the $5,000
+    threshold, so have no profile (rule 22).
     """
     assign(profiles)
     by_id = {p["id"]: p for p in profiles}
+    profiled = set()
+    for p in profiles:
+        profiled.update([p.get("fecCandidateId")] + list(p.get("otherFecIds") or []))
 
     races = {}
 
@@ -204,8 +213,16 @@ def build(profiles, filed_counts=None, results=None, dates=None):
                 # the primary has decided who that is.
                 from .results import on_ballot
                 still = [pid for pid in race["candidateIds"] if on_ballot(by_id[pid])]
+                below = _below_threshold(results, race["id"], filed, profiled)
+                if below:
+                    # TX-12 read "No challenger on the ballot" over a
+                    # Democratic nominee who filed and raised nothing, and 53
+                    # races like it. Named from their filing, by its id.
+                    summary["belowThreshold"] = below
+                    summary["otherNominees"] = sorted(
+                        set(summary["otherNominees"]) | {b["name"] for b in below})
                 race["candidateCount"] = len(still)
-                race["contested"] = bool(still)
+                race["contested"] = bool(still) or bool(summary["otherNominees"])
                 race["results"]["unlisted"] = sum(
                     1 for pid in race["candidateIds"]
                     if by_id[pid].get("raceStatus") == "unlisted"
@@ -217,6 +234,28 @@ def build(profiles, filed_counts=None, results=None, dates=None):
                        r["state"], r["district"] if r["district"] is not None else -1),
     )
     return ordered
+
+
+def _below_threshold(results, rid, filed, profiled):
+    """Nominees the results page matched to an FEC filing with no profile.
+
+    The filing is under $5,000, so it never became a profile, but its owner
+    is on the November ballot. An incumbent's own registration is never one
+    of them, whatever the id: the FEC's incumbent flag rules it out.
+    """
+    from .candidates import display_name
+    from .results import NOMINEE
+
+    race = ((results or {}).get("races") or {}).get(rid) or {}
+    out = []
+    for cid, status in sorted((race.get("status") or {}).items()):
+        row = (filed or {}).get(cid)
+        if status != NOMINEE or cid in profiled or not row:
+            continue
+        if row.get("incumbent_challenge") == "I":
+            continue
+        out.append({"id": cid, "name": display_name(row.get("name"))})
+    return sorted(out, key=lambda b: b["name"])
 
 
 def stats(races):

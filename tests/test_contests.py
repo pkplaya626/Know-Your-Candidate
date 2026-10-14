@@ -315,5 +315,51 @@ class TestAgainstTheRealBuild(unittest.TestCase):
         self.assertEqual([i for i in issues if i.level == "error"], [])
 
 
+class TestNomineesUnderTheThreshold(unittest.TestCase):
+    """TX-12 read "No challenger on the ballot" over a Democratic nominee
+    whose filing raised nothing, and 53 decided races like it (rule 22). The
+    results page had matched her to her FEC id; she simply had no profile."""
+
+    def build(self, statuses, rows, extra=()):
+        holder = member("G000999", "Kay Granger", "TX", 12, party="Republican", fec="H6TX12001")
+        cache = {"races": {"H-TX-12-2026": {"status": statuses, "unmatched": {}}}}
+        filed = {r["candidate_id"]: r for r in rows}
+        built = races.build([holder, *extra], results=cache, filed=filed)
+        return {r["id"]: r for r in built}["H-TX-12-2026"]
+
+    def row(self, cid, name, challenge="C"):
+        return dict(filing(cid, name, district=12), receipts=0.0, incumbent_challenge=challenge)
+
+    def test_a_nominee_with_no_profile_makes_the_race_contested(self):
+        race = self.build({"H6TX12001": "nominee", "H6TX12169": "nominee"},
+                          [self.row("H6TX12169", "RODRIGUEZ PRILLIMAN, ANGELA")])
+        self.assertTrue(race["contested"])
+        self.assertEqual(race["candidateCount"], 0)            # still no profile
+        self.assertEqual(race["results"]["belowThreshold"],
+                         [{"id": "H6TX12169", "name": "Angela Rodriguez Prilliman"}])
+        self.assertEqual(race["results"]["otherNominees"], ["Angela Rodriguez Prilliman"])
+
+    def test_the_incumbents_own_registration_is_never_a_challenger(self):
+        # A member matched under an id their profile does not carry is still
+        # the incumbent: the FEC's own flag says so.
+        race = self.build({"H6TX12002": "nominee"},
+                          [self.row("H6TX12002", "GRANGER, KAY", challenge="I")])
+        self.assertFalse(race["contested"])
+        self.assertNotIn("belowThreshold", race["results"])
+
+    def test_someone_with_a_profile_is_not_counted_twice(self):
+        profiled = candidate("FEC_H6TX12300", "Jo Doe", "TX", district=12, fec="H6TX12300")
+        profiled["raceStatus"] = "nominee"
+        race = self.build({"H6TX12001": "nominee", "H6TX12300": "nominee"},
+                          [self.row("H6TX12300", "DOE, JO")], extra=(profiled,))
+        self.assertEqual(race["candidateCount"], 1)
+        self.assertEqual(race["results"]["otherNominees"], [])
+
+    def test_a_loser_under_the_threshold_is_not_on_the_ballot(self):
+        race = self.build({"H6TX12001": "nominee", "H6TX12169": "eliminated"},
+                          [self.row("H6TX12169", "RODRIGUEZ PRILLIMAN, ANGELA")])
+        self.assertFalse(race["contested"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

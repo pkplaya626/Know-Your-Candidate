@@ -133,7 +133,8 @@ def _build(args):
               "articles and campaign sites")
 
     race_list = races_mod.build(profiles, candidates.filing_counts(field),
-                                results=outcomes, dates=results_mod.load_dates(args.root))
+                                results=outcomes, dates=results_mod.load_dates(args.root),
+                                filed=candidates.filed_rows(field))
     stats.update(races_mod.stats(race_list))
     markets = odds_mod.load_cache(args.root)
     if markets:
@@ -462,7 +463,8 @@ def _odds(args):
     outcomes = results_mod.load_cache(args.root)
     results_mod.apply_cache(profiles, outcomes)
     race_list = races_mod.build(profiles, candidates.filing_counts(screen_field(field, profiles)),
-                                results=outcomes, dates=results_mod.load_dates(args.root))
+                                results=outcomes, dates=results_mod.load_dates(args.root),
+                                filed=candidates.filed_rows(field))
     by_id = {p["id"]: p for p in profiles}
 
     def people_of(race):
@@ -857,10 +859,11 @@ def _verify(args):
     outcomes = results_mod.load_cache(args.root)
     stats["results"] = results_mod.apply_cache(profiles, outcomes) if outcomes else 0
     enrich.apply_cache(profiles, enrich.load_cache(args.root), as_of=_age_date(stats))
+    field = candidates.load_cache(args.root)
     race_list = races_mod.build(
-        profiles, candidates.filing_counts(
-            screen_field(candidates.load_cache(args.root), profiles)),
+        profiles, candidates.filing_counts(screen_field(field, profiles)),
         results=outcomes, dates=results_mod.load_dates(args.root),
+        filed=candidates.filed_rows(field),
     )
     stats.update(races_mod.stats(race_list))
     summary = summary_mod.build(profiles, races=race_list,

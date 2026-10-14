@@ -164,10 +164,14 @@
      * a fact about the race, and it was wrong for 372 of them. filedCount
      * is how many people have actually filed with the FEC for the seat. */
     var res = race.results || null;
+    // Nominees the results page names with no profile here: a filing under
+    // $5,000, or none. They are on the ballot, so they count (rule 22).
+    var unprofiled = res && res.otherNominees ? res.otherNominees.length : 0;
     if (race.contested) {
+      var running = race.candidateCount + unprofiled;
       badges.push(
-        '<span class="badge badge-money">' + race.candidateCount +
-        " challenger" + (race.candidateCount === 1 ? "" : "s") +
+        '<span class="badge badge-money">' + running +
+        " challenger" + (running === 1 ? "" : "s") +
         (race.settled ? " on the ballot" : "") + "</span>"
       );
     } else if (race.settled && res) {
@@ -195,12 +199,13 @@
 
     /* People the results page puts on the ballot but the FEC has no
      * filing for. Leaving them off would make the header lie. */
-    if (res && res.otherNominees && res.otherNominees.length) {
+    if (unprofiled) {
       badges.push(
         '<span class="badge badge-warn" title="' + KYC.escapeAttr(
-          "Also on the November ballot per the published results, but with no " +
-          "FEC filing over $5,000, so no profile: " + res.otherNominees.join(", ")
-        ) + '">+ ' + res.otherNominees.length + " on ballot without a filing</span>"
+          "On the November ballot per the published results, with no FEC filing " +
+          "over $5,000 - the point at which federal law treats someone as a " +
+          "candidate - so no profile here: " + res.otherNominees.join(", ")
+        ) + '">' + unprofiled + " with no profile here</span>"
       );
     }
 
