@@ -1412,13 +1412,18 @@ Current warnings, all expected:
 |---|---|---|
 | `ci.yml` | push, PR | Tests, validation, `verify`, reproducibility, no-CDN and no-inline-handler checks |
 | `refresh.yml` | Mondays and Thursdays 07:20 UTC (Thursdays only until election day), manual | Reconciles against congress-legislators, refreshes the field, results, money, disclosures and filled gaps, checks every campaign site, and **opens a PR** if anything changed |
+| `refresh-waiting.yml` | Daily 14:40 UTC, manual | Opens a "Refresh waiting for review" issue once a refresh PR is a day old, comments each day it still waits, closes it when none is |
 | `odds.yml` | Every twelve hours (00:47 and 12:47 UTC), manual | Refreshes market prices and polling averages, validates, **commits only the two odds files to main** and starts the deploy |
 | `deploy.yml` | manual only | Publishes to GitHub Pages |
 
 `refresh.yml` never pushes to main and never deploys. It resolves portraits for
 anyone new, rebuilds, runs validation and the tests, and opens a pull request
 so a change in the membership of Congress is something a person reads and
-merges.
+merges. It then starts CI on that pull request itself, because a pull request
+opened with the workflow's own token is held at "action_required", and it
+closes older refresh pull requests as superseded. In October 2026 two sat
+unreviewed for days while the site served data eight days old, so
+`refresh-waiting.yml` now tells a person when one is waiting.
 
 ## Publishing
 

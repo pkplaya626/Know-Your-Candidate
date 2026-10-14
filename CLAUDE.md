@@ -365,7 +365,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     failed. `fec._get` spaces every request from that header (never faster
     than one a second) and waits out `Retry-After` or the whole window on a
     429. A failed refresh opens a "Weekly refresh failed" issue and the next
-    good one closes it.
+    good one closes it. A refresh pull request still open after a day opens
+    a "Refresh waiting for review" issue (`refresh-waiting.yml`). A good
+    refresh nobody merges is as stale as a failed one.
 
 38. **Fill a gap only from a source tied to the person, in its own words,
     and say which.** A filed candidate arrives with a name, a party and

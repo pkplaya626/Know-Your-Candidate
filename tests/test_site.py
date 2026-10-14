@@ -775,6 +775,28 @@ class TestRefreshWorkflow(unittest.TestCase):
         self.assertIn('"2026-11-03"', self.text)
         self.assertIn("needs.gate.outputs.run == 'true'", self.text)
 
+    def test_its_pull_request_gets_ci_without_a_person_approving_it(self):
+        # #50 and #51 sat at "action_required" for days in October 2026.
+        self.assertIn('gh workflow run ci.yml --ref "$branch"', self.text)
+        self.assertIn("actions: write", self.text)
+
+    def test_a_newer_refresh_closes_the_older_ones(self):
+        self.assertIn('select(.headRefName | startswith("refresh/"))', self.text)
+        self.assertIn('gh pr close "$old"', self.text)
+        self.assertNotIn("--delete-branch", self.text)
+
+    def test_a_waiting_refresh_reaches_a_person(self):
+        path = os.path.join(ROOT, ".github", "workflows", "refresh-waiting.yml")
+        with open(path, encoding="utf-8") as handle:
+            text = handle.read()
+        self.assertIn('title="Refresh waiting for review"', text)
+        self.assertIn("24 hours ago", text)
+        self.assertIn("gh issue close", text)          # and goes away once merged
+        self.assertIn("issues: write", text)
+        # It reports; it never changes the repository or merges anything.
+        self.assertNotIn("contents: write", text)
+        self.assertNotIn("gh pr merge", text)
+
     def test_campaign_lookups_fit_the_hourly_budget(self):
         import re
 
