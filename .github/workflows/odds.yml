@@ -35,22 +35,43 @@ jobs:
     name: Read the markets and polling averages, then publish
     runs-on: ubuntu-latest
     steps:
+      # Prices after the first polls close move on early returns, and the page
+      # would show them beside "On the November ballot" as though they were
+      # results; markets that settle would also drop out of the cache. The
+      # first polls close at 23:00 UTC on Election Day (6 pm in eastern
+      # Indiana and Kentucky), so the last refresh is that morning's and the
+      # 2026 prices stay as they were then. The page labels them as final.
+      - name: Stop once the polls start closing
+        id: due
+        run: |
+          if [ "$(date -u +%Y-%m-%dT%H:%M)" \> "2026-11-03T22:59" ]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "The polls have started closing; the 2026 prices stay as they were."
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@v7
+        if: steps.due.outputs.run == 'true'
 
       - uses: actions/setup-python@v7
+        if: steps.due.outputs.run == 'true'
         with:
           python-version: "3.12"
 
       - name: Read Kalshi, Polymarket and the polling averages
+        if: steps.due.outputs.run == 'true'
         run: python build_profile_site.py odds --verbose
 
       - name: Confirm the result is valid and self-consistent
+        if: steps.due.outputs.run == 'true'
         run: |
           python build_profile_site.py build --check --strict
           python build_profile_site.py verify
           python -m unittest discover tests
 
       - name: Commit the new prices and deploy
+        if: steps.due.outputs.run == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

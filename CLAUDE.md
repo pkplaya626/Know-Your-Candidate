@@ -435,7 +435,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     rewrites it only when its signature changes, and the workflow refuses
     to commit if any other file would change. Anything that would make the
     roster build touch the odds files, or the odds job touch anything else,
-    breaks the property that keeps an unreviewed commit safe.
+    breaks the property that keeps an unreviewed commit safe. The job stops
+    refreshing at the first poll closing (23:00 UTC on Election Day), and
+    from that day the page labels the prices final and not results. Prices
+    that move on early returns would read as results.
 
 42. **A srcset lists sizes of one photograph.** congress.gov's member
     portraits are 175px wide, soft on a 2x screen. The first-choice Wikimedia
