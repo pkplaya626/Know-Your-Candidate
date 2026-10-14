@@ -1240,8 +1240,20 @@ async function testStates() {
       links.map((a) => a.getAttribute("href")).join(" "));
     check("each opens in a new tab, without an opener",
       links.every((a) => a.target === "_blank" && /noopener/.test(a.rel)));
-    check("it names NASS's Can I Vote and the date checked",
-      !!box.querySelector('a[href^="https://www.nass.org/"]') && /checked \d{4}-\d{2}-\d{2}/.test(box.textContent));
+    check("it names NASS's Can I Vote and the dates it was listed and opened",
+      !!box.querySelector('a[href^="https://www.nass.org/"]') && /listed \d{4}-\d{2}-\d{2}/.test(box.textContent) &&
+        /each link opened \d{4}-\d{2}-\d{2}/.test(box.textContent), box.textContent);
+  });
+  const nd = await buildPage("states/nd.html");
+  suite("states/nd.html — a state that does not register voters", () => {
+    const text = (nd.D.getElementById("voting") || {}).textContent || "";
+    check("North Dakota is never told to register or to check a registration",
+      /Voting in North Dakota/.test(text) && !/Register to vote|Check your registration/.test(text), text);
+  });
+  const dc = await buildPage("states/dc.html");
+  suite("states/dc.html — the District of Columbia", () => {
+    const text = (dc.D.getElementById("voting") || {}).textContent || "";
+    check("the heading says 'the District of Columbia'", /Voting in the District of Columbia/.test(text), text.slice(0, 60));
   });
   const guam = await buildPage("states/gu.html");
   suite("states/gu.html — no NASS listing, no voting block", () => {

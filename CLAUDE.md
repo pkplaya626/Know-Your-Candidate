@@ -121,8 +121,8 @@ python build_profile_site.py courts           # each state's highest court, from
 python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 873 tests, no dependencies
-npm install && npm test                       # 1126 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 884 tests, no dependencies
+npm install && npm test                       # 1128 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,

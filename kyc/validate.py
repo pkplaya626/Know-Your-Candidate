@@ -1181,7 +1181,25 @@ def check_voting_links(cache):
             for kind in voting.PAGES
             if not str((states.get(code) or {}).get(kind) or "").startswith(("http://", "https://"))]
     extra = sorted(set(states) - voting.JURISDICTIONS)
+    foreign = sorted(f"{code} {kind}: {link['url']}"
+                     for code, links in voting.effective(cache).items()
+                     for kind, link in links.items() if not voting.official(link["url"], code))
     issues = []
+    if foreign:
+        issues.append(Issue("error", "voting-links-not-official",
+                            f"{len(foreign)} voting links are not on their state's own "
+                            f"election domain", foreign))
+    dead = voting.dead_links(cache)
+    if dead:
+        # Not shown (voting.for_page), but a reader of that state is missing one.
+        issues.append(Issue("warn", "voting-links-dead",
+                            f"{len(dead)} official voting links answered 404 twice and are "
+                            f"not shown; add an overrides.VOTING_LINKS entry", dead))
+    stale = voting.stale_overrides(cache)
+    if stale:
+        issues.append(Issue("warn", "voting-override-stale",
+                            f"{len(stale)} overrides.VOTING_LINKS entries no longer match "
+                            f"what NASS lists; each may be unneeded", stale))
     if gaps:
         issues.append(Issue("error", "voting-links-incomplete",
                             f"{len(gaps)} official voting pages are missing", gaps))
@@ -1223,7 +1241,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_results_pages(results)
     issues += check_seats_contested(profiles)
     issues += check_guide()
-    if voting is not False:
+    if voting is not None:                 # None: the caller did not supply it
         issues += check_voting_links(voting)
     return issues
 

@@ -2,7 +2,10 @@
 
 Nothing on the site told a reader how, when or where to vote (audit
 2026-10-13, CG-5). The links are the states' own; NASS is the directory, and
-a page that does not list every state and D.C. once is refused.
+a page that does not list every state and D.C. once is refused. NASS's
+directory is not always current, so every link is opened, a dead one is
+replaced through an evidenced override or not shown, and a bot wall
+concludes nothing (rule 8).
 """
 
 import os
@@ -11,16 +14,16 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from kyc import validate, voting  # noqa: E402
+from kyc import overrides, validate, voting  # noqa: E402
 from kyc.normalize import US_STATES  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 NAMES = {code: name.title() for name, code in US_STATES.items() if code in voting.JURISDICTIONS}
 
 
-def page(rows):
+def page(rows, attrs=""):
     return "<select>" + "".join(
-        f'<option value="{url}">{name}</option>' for name, url in rows) + "</select>"
+        f'<option{attrs} value="{url}">{name}</option>' for name, url in rows) + "</select>"
 
 
 def every_state(**change):
@@ -29,11 +32,18 @@ def every_state(**change):
     return [row for row in rows.values() if row]
 
 
+def cache_of(**states):
+    base = {code: {kind: f"https://vote.{code.lower()}.gov/{kind}" for kind in voting.PAGES}
+            for code in voting.JURISDICTIONS}
+    for code, links in states.items():
+        base[code].update(links)
+    return {"source": voting.SOURCE, "states": base, "fetched": "2026-10-14T00:00:00+00:00"}
+
+
 class TestParse(unittest.TestCase):
     def test_every_state_and_dc_once(self):
         found = voting.parse(page(every_state()))
         self.assertEqual(set(found), voting.JURISDICTIONS)
-        self.assertEqual(len(found), 51)
         self.assertEqual(found["DC"], "https://vote.dc.gov/check")
 
     def test_a_missing_state_refuses_the_page(self):
@@ -41,37 +51,115 @@ class TestParse(unittest.TestCase):
             voting.parse(page(every_state(WY=None)))
 
     def test_a_state_twice_is_refused(self):
-        rows = every_state() + [("Texas", "https://elsewhere.example.org/")]
+        rows = every_state() + [("Texas", "https://elsewhere.texas.gov/")]
         with self.assertRaisesRegex(voting.VotingError, "TX is listed twice"):
             voting.parse(page(rows))
 
     def test_an_option_that_is_not_a_web_address_is_refused(self):
         with self.assertRaisesRegex(voting.VotingError, "not a web address"):
             voting.parse(page(every_state(OH=("Ohio", "javascript:alert(1)"))))
+        with self.assertRaisesRegex(voting.VotingError, "not a web address"):
+            voting.parse(page(every_state(OH=("Ohio", "https://vote.oh.gov/ x"))))
 
     def test_an_option_that_is_not_a_state_is_refused(self):
-        rows = every_state() + [("Select a state", "https://www.nass.org/")]
+        rows = every_state() + [("Narnia", "https://www.nass.org/")]
         with self.assertRaisesRegex(voting.VotingError, "not a state"):
             voting.parse(page(rows))
 
-    def test_fetch_reads_all_four_pages(self):
-        cache = voting.fetch(get=lambda url: page(every_state()))
-        self.assertEqual(set(cache["states"]["PA"]), set(voting.PAGES))
-        self.assertEqual(cache["source"], voting.SOURCE)
+    def test_the_value_is_read_never_a_data_value(self):
+        text = page(every_state()).replace(
+            '<option value="https://vote.tx.gov/check">',
+            '<option value="https://vote.tx.gov/check" data-value="https://evil.example/">')
+        self.assertEqual(voting.parse(text)["TX"], "https://vote.tx.gov/check")
+
+    def test_a_link_off_the_states_own_domain_is_refused(self):
+        with self.assertRaisesRegex(voting.VotingError, "own election domain"):
+            voting.parse(page(every_state(OH=("Ohio", "https://ohio-votes.example.com/"))))
+        # An allowed non-.gov domain is allowed for its own state only.
+        self.assertTrue(voting.official("https://my.arizona.vote/x", "AZ"))
+        self.assertFalse(voting.official("https://my.arizona.vote/x", "NM"))
+
+    def test_a_stale_aspnet_session_is_stripped(self):
+        # Hawaii's link froze "(S(vb2rc...))" into its path and ended on an error page.
+        rows = every_state(HI=("Hawaii", "https://olvr.hawaii.gov/%28S%28vb2rcnebimyjd%29%29/Default.aspx"))
+        self.assertEqual(voting.parse(page(rows))["HI"], "https://olvr.hawaii.gov/Default.aspx")
+
+
+class TestLiveness(unittest.TestCase):
+    def check(self, answers):
+        seen = []
+
+        def status(url):
+            seen.append(url)
+            return answers[url].pop(0)
+        return voting.check_links(list(answers), status=status, pause=0, sleep=lambda s: None)
+
+    def test_dead_only_on_a_404_from_the_links_own_host_twice(self):
+        u = "https://vote.ia.gov/absentee"
+        self.assertEqual(self.check({u: [(404, u), (404, u)]})[u], voting.DEAD)
+        self.assertEqual(self.check({u: [(404, u), (200, u)]})[u], voting.UNKNOWN)
+
+    def test_a_bot_wall_concludes_nothing(self):
+        # Minnesota redirects a script to a Radware check that answers 404.
+        u = "https://www.sos.mn.gov/register/"
+        wall = "https://validate.perfdrive.com/?ssc=x"
+        self.assertEqual(self.check({u: [(404, wall), (404, wall)]})[u], voting.UNKNOWN)
+        for code in (403, 429, 503, None):
+            self.assertEqual(self.check({u: [(code, u)]})[u], voting.UNKNOWN)
+
+    def test_a_name_that_does_not_resolve_is_dead(self):
+        u = "https://lapsed.example.gov/"
+        self.assertEqual(self.check({u: [("nxdomain", u), ("nxdomain", u)]})[u], voting.DEAD)
+
+
+class TestOverrides(unittest.TestCase):
+    def test_a_dead_nass_link_is_replaced_and_kept_replaced(self):
+        nass, url, _label, _why = overrides.VOTING_LINKS[("IA", "absentee")]
+        shown = voting.effective(cache_of(IA={"absentee": nass}))["IA"]["absentee"]
+        self.assertEqual(shown["url"], url)
+
+    def test_north_dakota_is_not_told_to_register(self):
+        nd = {"register": overrides.VOTING_LINKS[("ND", "register")][0],
+              "status": overrides.VOTING_LINKS[("ND", "status")][0]}
+        page_links = voting.for_page(cache_of(ND=nd))
+        self.assertNotIn("status", page_links["ND"])
+        self.assertEqual(page_links["_labels"]["ND"]["register"], "Voting in North Dakota")
+
+    def test_an_override_stops_once_nass_changes_its_entry(self):
+        cache = cache_of(IA={"absentee": "https://sos.iowa.gov/new-absentee"})
+        self.assertEqual(voting.effective(cache)["IA"]["absentee"]["url"],
+                         "https://sos.iowa.gov/new-absentee")
+        self.assertTrue(any(s.startswith("IA absentee") for s in voting.stale_overrides(cache)))
+
+    def test_a_dead_link_is_not_sent_to_a_reader(self):
+        cache = cache_of()
+        cache["links"] = {"https://vote.oh.gov/polling": voting.DEAD}
+        self.assertNotIn("polling", voting.for_page(cache)["OH"])
+        self.assertEqual(voting.dead_links(cache), ["OH polling: https://vote.oh.gov/polling"])
 
 
 class TestValidate(unittest.TestCase):
-    def test_a_gap_is_an_error(self):
-        cache = voting.fetch(get=lambda url: page(every_state()))
-        self.assertEqual(validate.check_voting_links(cache), [])
-        del cache["states"]["NV"]["polling"]
-        self.assertEqual([i.code for i in validate.check_voting_links(cache)],
-                         ["voting-links-incomplete"])
+    def codes(self, cache):
+        return sorted(i.code for i in validate.check_voting_links(cache))
 
-    def test_the_committed_cache_is_complete(self):
+    def test_a_gap_is_an_error(self):
+        cache = cache_of()
+        del cache["states"]["NV"]["polling"]
+        self.assertIn("voting-links-incomplete", self.codes(cache))
+
+    def test_a_foreign_host_is_an_error(self):
+        self.assertIn("voting-links-not-official",
+                      self.codes(cache_of(OH={"polling": "https://ohio-votes.example.com/"})))
+
+    def test_no_cache_is_a_warning(self):
+        self.assertEqual(self.codes({}), ["voting-links-missing"])
+
+    def test_the_committed_cache_is_complete_official_and_alive(self):
         cache = voting.load_cache(ROOT)
         self.assertIsNotNone(cache)
-        self.assertEqual(validate.check_voting_links(cache), [])
+        errors = [i for i in validate.check_voting_links(cache) if i.level == "error"]
+        self.assertEqual(errors, [])
+        self.assertEqual(voting.dead_links(cache), [])
 
 
 if __name__ == "__main__":

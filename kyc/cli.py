@@ -201,7 +201,7 @@ def _build(args):
                           results=outcomes, field=field, enrichment=enrichment,
                           odds=markets, district_maps=district_maps,
                           district_error=district_error,
-                          voting=voting_mod.load_cache(args.root))
+                          voting=voting_mod.load_cache(args.root) or {})
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -1108,6 +1108,17 @@ def _voting(args):
     states = cache.get("states") or {}
     print(f"  {len(states)} jurisdictions, {len(voting.PAGES)} official pages each "
           f"(source: {cache.get('source')})")
+    links = cache.get("links") or {}
+    if links:
+        counts = {s: sum(1 for v in links.values() if v == s)
+                  for s in (voting.LIVE, voting.UNKNOWN, voting.DEAD)}
+        print(f"  opened {len(links)} links: {counts[voting.LIVE]} answered, "
+              f"{counts[voting.UNKNOWN]} inconclusive (bot walls, timeouts), "
+              f"{counts[voting.DEAD]} dead")
+    for line in voting.dead_links(cache):
+        print(f"  [dead] {line} - not shown; add an overrides.VOTING_LINKS entry")
+    for line in voting.stale_overrides(cache):
+        print(f"  [stale override] {line}")
     return 0
 
 

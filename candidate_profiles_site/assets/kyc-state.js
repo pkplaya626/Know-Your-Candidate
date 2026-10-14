@@ -53,18 +53,26 @@
     var all = KYC.meta().voting || {};
     var links = all[code];
     if (!links) return "";
+    // A per-state label where NASS's kind does not fit the state: North
+    // Dakota does not register voters (overrides.VOTING_LINKS).
+    var labels = (all._labels || {})[code] || {};
+    var place = code === "DC" ? "the District of Columbia" : name;
+    var dated = all._listed
+      ? " (listed " + KYC.escapeHtml(all._listed) +
+        (all._opened ? "; each link opened " + KYC.escapeHtml(all._opened) : "") + ")"
+      : "";
     return '<section class="state-section vote-box" id="voting" aria-labelledby="votingHead">' +
       '<h2 class="state-heading" id="votingHead">' + KYC.icon("vote") + " Voting in " +
-        KYC.escapeHtml(name) + "</h2>" +
+        KYC.escapeHtml(place) + "</h2>" +
       '<p class="state-links">' + VOTING.filter(function (v) { return links[v[0]]; }).map(function (v) {
         return '<a class="btn" target="_blank" rel="noopener noreferrer" href="' +
-          KYC.escapeAttr(links[v[0]]) + '">' + KYC.icon("link") + " " + KYC.escapeHtml(v[1]) + "</a>";
+          KYC.escapeAttr(links[v[0]]) + '">' + KYC.icon("link") + " " +
+          KYC.escapeHtml(labels[v[0]] || v[1]) + "</a>";
       }).join(" ") + "</p>" +
-      '<p class="state-note">Each link is ' + KYC.escapeHtml(name) + "'s own official page, as the " +
-        'National Association of Secretaries of State lists it in <a href="' +
+      '<p class="state-note">Each link is ' + KYC.escapeHtml(place) + "'s own official page, " +
+        "from the National Association of Secretaries of State’s " + '<a href="' +
         KYC.escapeAttr(all._source || "https://www.nass.org/can-I-vote") + '" target="_blank" ' +
-        'rel="noopener noreferrer">Can I Vote</a>' +
-        (all._checked ? " (checked " + KYC.escapeHtml(all._checked) + ")" : "") +
+        'rel="noopener noreferrer">Can I Vote</a>' + dated +
         ". Deadlines, hours and ID rules are on those pages.</p>" +
       "</section>";
   }
