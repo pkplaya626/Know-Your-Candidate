@@ -1,5 +1,5 @@
 {
- "asOf": "2026-10-05",
+ "asOf": "2026-10-14",
  "calendarNotes": [
   {
    "kind": "open-primary",
@@ -3177,6 +3177,7 @@
   },
   "H-CO-06-2026": {
    "about": {
+    "H6CO06165": "small business owner and financial advisor",
     "H8CO06229": "incumbent U.S. representative"
    },
    "ambiguous": [],
@@ -3387,7 +3388,7 @@
   },
   "H-CT-04-2026": {
    "about": {
-    "H6CT04143": "nominee for this district in 2024, and candidate in 2020 and 2022",
+    "H6CT04143": "member of the Greenwich Representative Town Meeting from the 10th district (2023–present), nominee for this district in 2024, and candidate in 2020 and 2022",
     "H8CT04172": "incumbent U.S. representative"
    },
    "ambiguous": [
@@ -3445,6 +3446,7 @@
     "H8CT05245": "democratic"
    },
    "site": {
+    "H6CT05223": "https://www.debarrosforcongress.org/",
     "H6CT05231": "https://chrissheaforcongress.com/",
     "H8CT05245": "https://jahanahayes.com/"
    },
@@ -4406,7 +4408,9 @@
     "H6FL22248": "businessman and candidate for the 19th district in 2020"
    },
    "ambiguous": [],
-   "article": {},
+   "article": {
+    "H6FL21059": "Pia Dandiya"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5401,7 +5405,8 @@
   "H-IA-02-2026": {
    "about": {
     "H6IA02211": "state representative from the 71st district (2019–present)",
-    "H6IA02237": "former state representative from the 84th district (2019–2023)"
+    "H6IA02237": "former state representative from the 84th district (2019–2023)",
+    "H6IA02260": "community organizer"
    },
    "ambiguous": [],
    "article": {
@@ -5427,7 +5432,8 @@
     "H6IA02195": "democratic",
     "H6IA02211": "democratic",
     "H6IA02229": "republican",
-    "H6IA02237": "republican"
+    "H6IA02237": "republican",
+    "H6IA02260": "independent"
    },
    "site": {},
    "status": {
@@ -5439,7 +5445,8 @@
     "H6IA02211": "nominee",
     "H6IA02229": "eliminated",
     "H6IA02237": "nominee",
-    "H6IA02252": "withdrawn"
+    "H6IA02252": "withdrawn",
+    "H6IA02260": "nominee"
    },
    "unmatched": {},
    "unsure": []
@@ -5647,7 +5654,8 @@
   "H-IL-02-2026": {
    "about": {
     "H6IL02355": "Cook County commissioner from the 6th district (2018–present)",
-    "H6IL02371": "photographer"
+    "H6IL02371": "photographer",
+    "H6IL02389": "truck driver"
    },
    "ambiguous": [],
    "article": {
@@ -6031,7 +6039,7 @@
   "H-IL-10-2026": {
    "about": {
     "H2IL10068": "incumbent U.S. representative",
-    "H6IL10176": "nominee for Illinois's 58th House of Representatives district in 2024"
+    "H6IL10176": "optics manufacturer and nominee for Illinois's 58th House of Representatives district in 2024"
    },
    "ambiguous": [],
    "article": {
@@ -6535,6 +6543,7 @@
   },
   "H-IN-07-2026": {
    "about": {
+    "H6IN07444": "real estate associate",
     "H8IN07184": "incumbent U.S. representative"
    },
    "ambiguous": [],
@@ -7655,7 +7664,7 @@
   },
   "H-MD-07-2026": {
    "about": {
-    "H0MD02255": "perennial candidate and nominee for this district in 2022 and 2024",
+    "H0MD02255": "media entrepreneur, perennial candidate, and nominee for this district in 2022 and 2024",
     "H6MD07020": "incumbent U.S. representative"
    },
    "ambiguous": [],
@@ -8321,7 +8330,7 @@
   "H-MI-13-2026": {
    "about": {
     "H6MI13254": "state representative from the 11th district (2023–present){{cite news |last=Kamisar |first=Ben |title=Democratic Rep. Shri Thanedar loses his primary to a progressive challenger in Michigan",
-    "H6MI13312": "perennial candidate"
+    "H6MI13312": "international trade analyst and perennial candidate"
    },
    "ambiguous": [],
    "article": {
@@ -9181,7 +9190,7 @@
   "H-MT-01-2026": {
    "about": {
     "H6MT01137": "smokejumper and union leader",
-    "H6MT01152": "combat veteran and radio host"
+    "H6MT01152": "veteran and radio host"
    },
    "ambiguous": [],
    "article": {
@@ -10913,7 +10922,7 @@
   "H-NY-02-2026": {
    "about": {
     "H0NY02234": "incumbent U.S. representative",
-    "H6NY02140": "former Suffolk County Executive (1988–1991)"
+    "H6NY02140": "former Suffolk County executive (1988–1991)"
    },
    "ambiguous": [],
    "article": {
@@ -10983,7 +10992,8 @@
   "H-NY-04-2026": {
    "about": {
     "H2NY04244": "incumbent U.S. representative",
-    "H6NY04211": "Hempstead receiver of taxes"
+    "H6NY04211": "Hempstead receiver of taxes",
+    "H6NY04237": "systems engineer"
    },
    "ambiguous": [],
    "article": {
@@ -11128,7 +11138,7 @@
   },
   "H-NY-08-2026": {
    "about": {
-    "H2NY10092": "incumbent U.S. representative and House Minority Leader",
+    "H2NY10092": "incumbent U.S. representative and House minority leader",
     "H6NY08188": "data analyst"
    },
    "ambiguous": [],
@@ -11197,7 +11207,7 @@
   },
   "H-NY-10-2026": {
    "about": {
-    "H6NY10176": "New York City Comptroller (2022–2025) and candidate for mayor of New York City in 2025",
+    "H6NY10176": "New York City comptroller (2022–2025) and candidate for mayor of New York City in 2025",
     "H6NY10218": "activist"
    },
    "ambiguous": [],
@@ -11268,8 +11278,8 @@
   "H-NY-12-2026": {
    "about": {
     "H6NY12172": "state assemblymember from the 69th district (2025–present) and candidate for New York's 31st State Senate district in 2016",
-    "H6NY12297": "former Equal Employment Opportunity Commission administrative judge (2018–2025) (Independent)",
-    "H6NY12313": "political scientist (Independence Party of New York)",
+    "H6NY12297": "former Equal Employment Opportunity Commission administrative judge (2018–2025)",
+    "H6NY12313": "political scientist",
     "H6NY12404": "lawyer"
    },
    "ambiguous": [],
@@ -11630,6 +11640,7 @@
    },
    "ambiguous": [],
    "article": {
+    "H6NY21173": "Richard Grayson (writer)",
     "H6NY21215": "Robert Smullen"
    },
    "decided": {
@@ -11652,10 +11663,12 @@
    "site": {},
    "status": {
     "H6NY21157": "nominee",
+    "H6NY21173": "withdrawn",
     "H6NY21199": "nominee",
     "H6NY21207": "withdrawn",
     "H6NY21215": "eliminated",
     "H6NY21223": "eliminated",
+    "H6NY21231": "withdrawn",
     "H6NY23526": "withdrawn"
    },
    "unmatched": {},
@@ -11690,6 +11703,7 @@
     "H4NY22085": "nominee",
     "H6NY22163": "withdrawn",
     "H6NY22171": "withdrawn",
+    "H6NY22197": "withdrawn",
     "H6NY22205": "withdrawn",
     "H6NY22213": "nominee"
    },
@@ -11699,7 +11713,7 @@
   "H-NY-23-2026": {
    "about": {
     "H2NY23228": "incumbent U.S. representative",
-    "H6NY23559": "college professor"
+    "H6NY23559": "college professor at St. Bonaventure University"
    },
    "ambiguous": [],
    "article": {
@@ -11841,7 +11855,9 @@
   "H-OH-01-2026": {
    "about": {
     "H2OH01194": "incumbent U.S. representative",
-    "H6OH01138": "U.S. Air Force veteran and former CIA officer"
+    "H6OH01138": "U.S. Air Force veteran and former CIA officer",
+    "H6OH01229": "software engineer",
+    "H6OH01237": "software engineer"
    },
    "ambiguous": [],
    "article": {
@@ -11887,7 +11903,7 @@
   "H-OH-02-2026": {
    "about": {
     "H4OH02248": "incumbent U.S. representative",
-    "H6OH02326": "candidate for Clermont County commissioner in 2024"
+    "H6OH02326": "homemaker and candidate for Clermont County commissioner in 2024"
    },
    "ambiguous": [],
    "article": {
@@ -12196,7 +12212,7 @@
   "H-OH-10-2026": {
    "about": {
     "H2OH03067": "incumbent U.S. representative",
-    "H6OH10113": "former mayor of Huber Heights and Independent candidate for this district in 2016",
+    "H6OH10113": "former mayor of Huber Heights and independent candidate for this district in 2016",
     "H6OH10121": "U.S. Air Force veteran"
    },
    "ambiguous": [],
@@ -14342,6 +14358,7 @@
   "H-TX-07-2026": {
    "about": {
     "H6TX07151": "consultant",
+    "H6TX07177": "IT analyst",
     "H8TX07140": "incumbent U.S. representative"
    },
    "ambiguous": [],
@@ -14362,6 +14379,7 @@
     "H2TX07119": "republican",
     "H6TX07151": "republican",
     "H6TX07169": "republican",
+    "H6TX07177": "green",
     "H8TX07140": "democratic"
    },
    "site": {},
@@ -14370,11 +14388,10 @@
     "H2TX07119": "eliminated",
     "H6TX07151": "nominee",
     "H6TX07169": "eliminated",
+    "H6TX07177": "nominee",
     "H8TX07140": "nominee"
    },
-   "unmatched": {
-    "Ngabo Espoir": "nominee"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-TX-08-2026": {
@@ -14478,7 +14495,8 @@
   },
   "H-TX-10-2026": {
    "about": {
-    "H6TX10221": "political-law attorney and former director and chief lawyer of Elon Musk's America PAC"
+    "H6TX10221": "political-law attorney and former director and chief lawyer of Elon Musk's America PAC",
+    "H6TX31102": "U.S. Army veteran and former Dell Technologies global-marketing employee"
    },
    "ambiguous": [],
    "article": {
@@ -15968,7 +15986,7 @@
   "H-VA-04-2026": {
    "about": {
     "H4VA04066": "incumbent U.S. representative",
-    "H6VA04129": "former CIO Advisory Leader for IBM",
+    "H6VA04129": "former CIO advisory leader for IBM",
     "H6VA04137": "anti-abortion activist and convicted felon"
    },
    "ambiguous": [],
@@ -16079,7 +16097,7 @@
   "H-VA-07-2026": {
    "about": {
     "H4VA07234": "incumbent U.S. representative (2025–present)",
-    "H6VA07205": "former Director for Iraq at the U.S. National Security Council",
+    "H6VA07205": "former director for Iraq at the U.S. National Security Council",
     "H6VA07312": "anti-abortion activist, Constitution Party nominee for president in 2024, and perennial candidate",
     "H6VA07346": "video and audio producer",
     "H6VA07353": "non-profit CEO"
@@ -17388,7 +17406,7 @@
     "S6DE00206": "Michael Katz (politician)"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
@@ -17580,6 +17598,7 @@
   },
   "S-ID-2026": {
    "about": {
+    "S0ID00172": "software developer",
     "S6ID00146": "former Democratic state representative from the 16th district (2024–2025)",
     "S6ID00187": "nominee for in 2024",
     "S8ID00092": "incumbent U.S. senator"
@@ -17590,7 +17609,7 @@
     "S8ID00092": "Jim Risch"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "libertarian",
@@ -17600,6 +17619,7 @@
    "label": {},
    "page": "2026 United States Senate election in Idaho",
    "party": {
+    "S0ID00172": "independent",
     "S6ID00120": "republican",
     "S6ID00138": "democratic",
     "S6ID00146": "independent",
@@ -17610,11 +17630,13 @@
     "S8ID00092": "republican"
    },
    "site": {
+    "S0ID00172": "https://nataliefleming.info/",
     "S6ID00146": "https://www.achillesforidaho.com/",
     "S6ID00187": "https://www.loesby.us/",
     "S8ID00092": "https://senatorrisch.com/"
    },
    "status": {
+    "S0ID00172": "nominee",
     "S6ID00120": "eliminated",
     "S6ID00138": "withdrawn",
     "S6ID00146": "nominee",
@@ -17631,7 +17653,7 @@
   },
   "S-IL-2026": {
    "about": {
-    "S6IL00458": "Lieutenant Governor of Illinois (2019–present)"
+    "S6IL00458": "lieutenant governor of Illinois (2019–present)"
    },
    "ambiguous": [],
    "article": {
@@ -17732,6 +17754,7 @@
    },
    "site": {
     "S0KS00315": "https://kansansformarshall.com/",
+    "S2KS00154": "https://grahamforliberty.com/",
     "S6KS00312": "https://hamiltonforkansas.com/"
    },
    "status": {
@@ -17772,7 +17795,7 @@
     "S6KY00385": "Charles Booker (American politician)"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
@@ -17789,12 +17812,14 @@
     "S6KY00310": "democratic",
     "S6KY00328": "democratic",
     "S6KY00369": "democratic",
+    "S6KY00377": "independent",
     "S6KY00385": "democratic",
     "S6KY00401": "republican",
     "S6KY00419": "republican"
    },
    "site": {
     "S6KY00286": "https://barrforsenate.com/",
+    "S6KY00377": "https://campbellforsenate.org/",
     "S6KY00385": "https://charlesbooker.org/"
    },
    "status": {
@@ -17808,6 +17833,7 @@
     "S6KY00328": "eliminated",
     "S6KY00336": "withdrawn",
     "S6KY00369": "eliminated",
+    "S6KY00377": "nominee",
     "S6KY00385": "nominee",
     "S6KY00393": "eliminated",
     "S6KY00401": "eliminated",
@@ -17841,7 +17867,7 @@
     "S6LA00672": "Eric Skrmetta"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
@@ -18370,6 +18396,7 @@
     "S6NH00141": "Chris Pappas (American politician)",
     "S6NH00166": "Scott Brown (politician)",
     "S6NH00174": "Dan Innis",
+    "S6NH00190": "Jared Sullivan",
     "S6NH00208": "John E. Sununu"
    },
    "decided": {
@@ -18404,6 +18431,7 @@
     "S6NH00166": "eliminated",
     "S6NH00174": "withdrawn",
     "S6NH00182": "eliminated",
+    "S6NH00190": "withdrawn",
     "S6NH00208": "nominee",
     "S6NH00224": "eliminated",
     "S6NH00232": "eliminated"
@@ -18577,7 +18605,7 @@
     "S6OK04288": "Ty England"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
@@ -18590,6 +18618,7 @@
     "S6OK04163": "democratic",
     "S6OK04171": "democratic",
     "S6OK04197": "democratic",
+    "S6OK04205": "independent",
     "S6OK04213": "republican",
     "S6OK04239": "republican",
     "S6OK04247": "republican",
@@ -18609,7 +18638,7 @@
     "S6OK04163": "nominee",
     "S6OK04171": "eliminated",
     "S6OK04197": "eliminated",
-    "S6OK04205": "withdrawn",
+    "S6OK04205": "nominee",
     "S6OK04213": "eliminated",
     "S6OK04221": "withdrawn",
     "S6OK04239": "eliminated",
@@ -18620,12 +18649,15 @@
     "S6OK04288": "eliminated"
    },
    "unmatched": {
+    "Curtis Stinnett": "nominee",
+    "Sevier White": "nominee",
     "Tammy Swearengin": "withdrawn"
    },
    "unsure": []
   },
   "S-OR-2026": {
    "about": {
+    "S2OR00234": "truck driver (Progressive)",
     "S6OR05218": "state senator from the 1st district (2023–present)",
     "S8OR00207": "incumbent U.S. senator (2009–present)"
    },
@@ -18636,15 +18668,19 @@
     "S8OR00207": "Jeff Merkley"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
     ]
    },
-   "label": {},
+   "label": {
+    "S2OR00234": "Oregon Progressive Party"
+   },
    "page": "2026 United States Senate election in Oregon",
    "party": {
+    "S0OR00378": "libertarian",
+    "S2OR00234": "oregon progressive party",
     "S4OR00156": "republican",
     "S6OR05184": "republican",
     "S6OR05200": "republican",
@@ -18656,6 +18692,8 @@
     "S8OR00207": "https://www.jeffmerkley.com/"
    },
    "status": {
+    "S0OR00378": "nominee",
+    "S2OR00234": "nominee",
     "S4OR00156": "eliminated",
     "S6OR05184": "eliminated",
     "S6OR05200": "eliminated",
@@ -18675,14 +18713,15 @@
   "S-RI-2026": {
    "about": {
     "S4RI00051": "former member of the Rhode Island Republican Party State Central Committee, former president of the Rhode Island Republican Assembly, and candidate for U.S. Senate in 2024",
-    "S6RI00163": "incumbent U.S. senator (1997–present)"
+    "S6RI00163": "incumbent U.S. senator (1997–present)",
+    "S6RI00288": "theologian"
    },
    "ambiguous": [],
    "article": {
     "S6RI00163": "Jack Reed (Rhode Island politician)"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
@@ -18694,16 +18733,19 @@
     "S4RI00051": "republican",
     "S6RI00163": "democratic",
     "S6RI00270": "democratic",
+    "S6RI00288": "independent",
     "S6RI00304": "democratic"
    },
    "site": {
     "S4RI00051": "https://www.mckayforussenate.com/",
-    "S6RI00163": "https://jackreed.com/"
+    "S6RI00163": "https://jackreed.com/",
+    "S6RI00288": "https://bahryforsenate.com/"
    },
    "status": {
     "S4RI00051": "nominee",
     "S6RI00163": "nominee",
     "S6RI00270": "eliminated",
+    "S6RI00288": "nominee",
     "S6RI00304": "eliminated"
    },
    "unmatched": {},
@@ -18799,7 +18841,7 @@
     "S4SD00049": "Mike Rounds"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "republican"
     ]
@@ -18827,7 +18869,10 @@
   "S-TN-2026": {
    "about": {
     "S0TN00169": "incumbent U.S. senator (2021–present)",
-    "S4TN00542": "staffing consultant and nominee for this seat in 2020 and candidate in 2024"
+    "S4TN00542": "staffing consultant and nominee for this seat in 2020 and candidate in 2024",
+    "S4TN00583": "candidate for U.S. Senate in 2024 and Democratic nominee for Tennessee's 7th congressional district in 2016",
+    "S6TN00364": "nonprofit founder",
+    "S6TN00372": "small business owner"
    },
    "ambiguous": [],
    "article": {
@@ -18835,7 +18880,7 @@
     "S4TN00542": "Marquita Bradshaw"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
@@ -18848,22 +18893,40 @@
     "S0TN00193": "democratic",
     "S4TN00534": "democratic",
     "S4TN00542": "democratic",
+    "S4TN00583": "independent",
+    "S6TN00364": "independent",
+    "S6TN00372": "independent",
     "S6TN00380": "democratic",
-    "S6TN00406": "democratic"
+    "S6TN00398": "independent",
+    "S6TN00406": "democratic",
+    "S6TN00414": "independent"
    },
    "site": {
     "S0TN00169": "https://teamhagerty.com/",
-    "S4TN00542": "https://www.marquitabradshaw.com/"
+    "S4TN00542": "https://www.marquitabradshaw.com/",
+    "S6TN00364": "https://yoshimatthewssenate.com/",
+    "S6TN00372": "https://www.robertfortn.com/",
+    "S6TN00398": "https://sutmanjr4senate.com/",
+    "S6TN00414": "https://senatorbarcy.org/"
    },
    "status": {
     "S0TN00169": "nominee",
     "S0TN00193": "eliminated",
     "S4TN00534": "eliminated",
     "S4TN00542": "nominee",
+    "S4TN00583": "nominee",
+    "S6TN00364": "nominee",
+    "S6TN00372": "nominee",
     "S6TN00380": "eliminated",
-    "S6TN00406": "eliminated"
+    "S6TN00398": "nominee",
+    "S6TN00406": "eliminated",
+    "S6TN00414": "nominee"
    },
-   "unmatched": {},
+   "unmatched": {
+    "Andrew Gerena": "nominee",
+    "James Macon III": "nominee",
+    "Jeremy Hearn": "nominee"
+   },
    "unsure": []
   },
   "S-TX-2026": {
@@ -18987,22 +19050,26 @@
    "about": {
     "S4WV00159": "incumbent U.S. senator (2015–present)",
     "S6WV00170": "cybersecurity technician |Democrat]])",
-    "S6WV00188": "former Morgantown city council member"
+    "S6WV00188": "former Morgantown city council member",
+    "S6WV00204": "former Republican state delegate (2016–2020) and candidate for governor in 2020 and 2024"
    },
    "ambiguous": [],
    "article": {
     "S4WV00159": "Shelley Moore Capito",
     "S6WV00162": "Tom Willis (politician)",
-    "S6WV00196": "Jeff Kessler"
+    "S6WV00196": "Jeff Kessler",
+    "S6WV00204": "S. Marshall Wilson"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
     ]
    },
-   "label": {},
+   "label": {
+    "S6WV00204": "Constitution Party"
+   },
    "page": "2026 United States Senate election in West Virginia",
    "party": {
     "S4WV00159": "republican",
@@ -19013,12 +19080,14 @@
     "S6WV00162": "republican",
     "S6WV00170": "democratic",
     "S6WV00188": "democratic",
-    "S6WV00196": "democratic"
+    "S6WV00196": "democratic",
+    "S6WV00204": "constitution party"
    },
    "site": {
     "S4WV00159": "https://www.capito.senate.gov/",
     "S6WV00170": "https://www.rioforsenate.com/",
-    "S6WV00188": "https://www.fettyandersonforsenate.com/"
+    "S6WV00188": "https://www.fettyandersonforsenate.com/",
+    "S6WV00204": "https://wilsonwv.com/"
    },
    "status": {
     "S4WV00159": "nominee",
@@ -19029,7 +19098,8 @@
     "S6WV00162": "eliminated",
     "S6WV00170": "eliminated",
     "S6WV00188": "nominee",
-    "S6WV00196": "eliminated"
+    "S6WV00196": "eliminated",
+    "S6WV00204": "nominee"
    },
    "unmatched": {
     "David Purkey": "eliminated",
@@ -19049,7 +19119,7 @@
     "S6WY00217": "James W. Byrd"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
