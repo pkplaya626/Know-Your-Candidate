@@ -155,6 +155,13 @@
     }
   }
 
+  /* Says what was searched for, so a reader who typed a name can tell a
+   * miss from a filter they forgot was on. */
+  function emptyLabel() {
+    return state.q ? "No profiles match “" + state.q + "” with these filters"
+      : "No profiles match these filters";
+  }
+
   function renderSenate(grid, empty, label) {
     var view = KYC.senate.render(data, races, {
       matches: senateMatches,
@@ -163,7 +170,7 @@
     label.textContent = view.people
       ? "Showing " + view.people.toLocaleString() + " profiles across " +
         view.seats.toLocaleString() + " Senate seat" + (view.seats === 1 ? "" : "s")
-      : "No profiles match these filters";
+      : emptyLabel();
     grid.className = "senate-view";
     grid.innerHTML = view.html;
     empty.hidden = view.people > 0;
@@ -191,7 +198,7 @@
     label.textContent = visible.length
       ? "Showing " + visible.length.toLocaleString() + " of " +
         data.length.toLocaleString() + " profiles"
-      : "No profiles match these filters";
+      : emptyLabel();
 
     if (!visible.length) {
       grid.innerHTML = "";
@@ -202,9 +209,9 @@
 
     if (state.view === "race") {
       grid.className = "";
-      // Which party the markets expect to hold each chamber, above the races.
-      grid.innerHTML = (KYC.odds ? KYC.odds.control("senate") + KYC.odds.control("house") : "") +
-        raceSections(visible);
+      // The races, then which party the markets expect to hold each chamber.
+      grid.innerHTML = raceSections(visible) +
+        (KYC.odds ? KYC.odds.control("senate") + KYC.odds.control("house") : "");
       return;
     }
     grid.className = "card-grid";
@@ -351,6 +358,7 @@
 
   function initStateFilter() {
     var select = doc.getElementById("stateSelect");
+    var intro = doc.getElementById("introState");
     var seen = {};
     data.forEach(function (item) {
       if (item.state && item.state !== "N/A") seen[item.state] = true;
@@ -358,15 +366,27 @@
     Object.keys(seen).sort(function (a, b) {
       return KYC.stateName(a).localeCompare(KYC.stateName(b));
     }).forEach(function (code) {
-      var option = doc.createElement("option");
-      option.value = code;
-      option.textContent = KYC.stateName(code) + " (" + code + ")";
-      select.appendChild(option);
+      [select, intro].forEach(function (list) {
+        if (!list) return;
+        var option = doc.createElement("option");
+        option.value = code;
+        option.textContent = KYC.stateName(code) + " (" + code + ")";
+        list.appendChild(option);
+      });
     });
     select.addEventListener("change", function () {
       state.state = select.value;
       apply();
     });
+    // The intro's picker opens the state's own page: everything about one
+    // state - its delegation, its races, its government - is there.
+    if (intro) {
+      intro.addEventListener("change", function () {
+        if (!intro.value) return;
+        KYC.rememberState(intro.value);
+        global.location.href = KYC.stateUrl(intro.value);
+      });
+    }
   }
 
   /* A filtered state is one click from its own page. */

@@ -116,13 +116,28 @@
       "</p>",
       "</header>"
     );
+    /* Where each part of the page starts. On a phone Texas's House
+     * delegation alone is 6,500px of cards, and the 2026 races began eleven
+     * screens down with the only way to them inside the closed drawer. */
+    var parts = [
+      senators.length ? ["senators", "U.S. senators"] : null,
+      house.length ? ["delegation", info.territory ? "Delegate" : "House delegation"] : null,
+      KYC.stategov && (KYC.stategov.state(code) || code === "DC") ? ["state-government", "State government"] : null,
+      senateRaces.length + houseRaces.length ? ["races", "2026 races"] : null,
+    ].filter(Boolean);
+    if (parts.length > 1) {
+      html.push('<nav class="toolbar jump-row state-parts" aria-label="On this page">' +
+        parts.map(function (p) {
+          return '<a class="chip chip-link" href="#' + p[0] + '">' + KYC.escapeHtml(p[1]) + "</a>";
+        }).join("") + "</nav>");
+    }
 
     /* Who holds the seats now. Senators first, then the House by district;
      * a reader who asked "who represents me" gets the answer before the
      * page turns to who is running (rule 27). */
     if (senators.length) {
       html.push(
-        '<section class="state-section">',
+        '<section class="state-section" id="senators">',
         '<h2 class="state-heading">U.S. senators <span class="balance">' + balance(senators) + "</span></h2>",
         '<div class="card-grid">' + senators.map(cards.card).join("") + "</div>",
         "</section>"
@@ -130,7 +145,7 @@
     }
     if (house.length) {
       html.push(
-        '<section class="state-section">',
+        '<section class="state-section" id="delegation">',
         '<h2 class="state-heading">' + (info.territory ? "Delegate to the U.S. House" : "U.S. House delegation") +
           ' <span class="balance">' + balance(house,
             ((info.balance || {}).house || {}).vacant) + "</span></h2>",
@@ -166,9 +181,13 @@
       }).join("");
       html.push(
         '<section class="state-section" id="races">',
-        '<h2 class="state-heading">2026 races in ' + KYC.escapeHtml(name) + "</h2>",
+        // Congress only, and it says so: a list that looked like the whole
+        // ballot left out the governor, the legislature and every local race.
+        '<h2 class="state-heading">2026 races for Congress in ' + KYC.escapeHtml(name) + "</h2>",
         '<p class="state-note">Each seat with the sitting member, everyone on the ' +
-          "November ballot, and - folded under the race - everyone the primary removed.</p>",
+          "November ballot, and - folded under the race - everyone the primary removed. " +
+          "Your ballot may also hold state and local contests, which this site does " +
+          "not list yet.</p>",
         (senateRaces.length + houseRaces.length > 3
           ? '<nav class="toolbar jump-row" aria-label="Jump to a race">' + jumps + "</nav>"
           : ""),

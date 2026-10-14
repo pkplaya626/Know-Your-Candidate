@@ -251,7 +251,11 @@
           node.style.background = shown.fill;
           // A callout's word is dark on the bright fills of the partisan
           // map; a faint fill names its own ink so the word stays legible.
-          node.style.color = shown.ink || "";
+          // A surface grey (a state with no value) takes the page's text
+          // colour unless told otherwise: the inverse text was 1.15:1 on it
+          // in the light theme and 1.02:1 in the dark.
+          node.style.color = shown.ink ||
+            (/--surface-/.test(shown.fill || "") ? "var(--text)" : "");
           node.classList.toggle("is-selected", code === selected);
         }
       );

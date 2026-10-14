@@ -871,6 +871,19 @@
     }).observe(el("planGrid"));
   }
 
+  /* On a phone the facts follow the maps down the page. A tap changed only
+   * an outline, with the district's facts two screens below it (NC-4 at
+   * y=1346 on an 844px screen), so the page looked as if nothing happened.
+   * After a pick, bring the first picked district's facts into view if none
+   * of it shows - as the US map does with its panel. */
+  function reveal() {
+    if (!global.matchMedia || !global.matchMedia("(max-width: 1000px)").matches) return;
+    var fact = doc.querySelector(".district-fact.is-focus");
+    if (fact && fact.getBoundingClientRect().top > global.innerHeight - 80) {
+      fact.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
   function setFocus(list, opts) {
     focus = list.slice(0, MAX_FOCUS);
     render();
@@ -1034,11 +1047,13 @@
         setFocus(next.length > MAX_FOCUS ? next.slice(1) : next);
       } else {
         setFocus([n]);
+        reveal();
       }
     });
     el("districtPick").addEventListener("change", function (event) {
       var n = parseInt(event.target.value, 10);
       setFocus(n ? [n] : defaults);
+      if (n) reveal();
     });
     var toggle = el("ghostToggle");
     if (toggle) {

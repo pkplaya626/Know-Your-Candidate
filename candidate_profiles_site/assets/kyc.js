@@ -567,7 +567,8 @@
      * trap for this dialog specifically. */
     function focusables() {
       return Array.prototype.filter.call(el.querySelectorAll(FOCUSABLE), function (n) {
-        return !n.hasAttribute("hidden") && !n.closest("[hidden]");
+        return !n.hasAttribute("hidden") && !n.closest("[hidden]") &&
+          n.getAttribute("tabindex") !== "-1";
       });
     }
 
@@ -846,6 +847,9 @@
     SEARCH_FIELDS.forEach(function (field) {
       if (item[field] && hasValue(item, field)) parts.push(String(item[field]));
     });
+    // The state's name as well as its code: "Pennsylvania" found 14 of its
+    // 61 profiles, the ones that happened to mention it in their text.
+    if (item.state && item.state !== "N/A") parts.push(stateName(item.state));
     // Other names the member's own record gives ("Jim Clyburn" for James
     // Clyburn); derived in the pipeline from the bioguide-keyed record.
     (item.aliases || []).forEach(function (alias) { parts.push(String(alias)); });
