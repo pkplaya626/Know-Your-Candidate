@@ -1000,6 +1000,19 @@ async function testMap() {
     })());
     check("mode buttons announce their state",
       D.querySelector('[data-mode="senate2026"]').getAttribute("aria-pressed") === "true");
+    // John Cornyn and Bill Cassidy ran and lost; the label called them "not
+    // running", like a retiree, while the panel beside it said "Lost primary".
+    const label = (code) => (D.querySelector('#usMap [data-state="' + code + '"]') || {
+      getAttribute: () => "" }).getAttribute("aria-label") || "";
+    const lost = window.legislatorsData.filter((p) => !p.isCandidate &&
+      /Senate/.test(p.chamber) && p.seatUp2026 && KYC.contestStatus(p) === "eliminated");
+    check("a senator who lost the primary is labelled so, not 'not running'",
+      lost.every((p) => /lost the primary/.test(label(p.state)) &&
+        !/not running/.test(label(p.state))),
+      lost.map((p) => label(p.state)).join(" | "));
+    check("party is an adjective in the label, as in the legend",
+      ![...D.querySelectorAll("#usMap .state")].some((s) =>
+        /Democrat seat/.test(s.getAttribute("aria-label") || "")));
     D.querySelector('[data-mode="senate"]').click();
   });
 
@@ -1261,6 +1274,12 @@ async function testInterlinks() {
     const panel = map.D.getElementById("delegation");
     check("Texas's House panel links its district page",
       !!panel.querySelector('a[href="districts/tx.html"]'), panel.innerHTML.slice(0, 200));
+    // The panel counted members only; the state page's balance counts the
+    // vacant seat too. Both read the build's figure now.
+    const vacant = map.window.kycBuildMeta.states.TX.balance.house.vacant;
+    const counts = map.D.getElementById("panelCounts").textContent;
+    check("the House counts show the state's vacancies, as the state page does",
+      !vacant || counts.indexOf(vacant + " vacant") !== -1, counts);
   });
 
   const guide = await buildPage("government/states.html");
@@ -1448,7 +1467,7 @@ async function testRunningElsewhere() {
 
     const badProfiles = decided.filter((p) => {
       const t = profileStatus(p);
-      return /not seeking re-election|Not on the 2026 ballot|Renominated/i.test(t) ||
+      return /not seeking re-election|Not running for this seat|Renominated/i.test(t) ||
         !t.includes(p.contestLabel);
     });
     check("no profile calls them off the ballot or renominated", badProfiles.length === 0,
@@ -1466,12 +1485,23 @@ async function testRunningElsewhere() {
       withdrawn: /Withdrew/, advanced: /In runoff/, unlisted: /Not on primary ballot/ };
     const badCards = decided.filter((p) => {
       const html = KYC.cards.statusBadge(p);
-      return /Not on the ballot|Renominated/.test(html) ||
+      return /Not running for this seat|Renominated/.test(html) ||
         !FILING_BADGE[filingOf(p).raceStatus].test(html) ||
         (filingOf(p).raceStatus !== "unlisted" && /Not on primary ballot/.test(html));
     });
     check("each card shows the result of their race, not their seat", badCards.length === 0,
       badCards.map((p) => p.name + ": " + KYC.cards.statusBadge(p)).join(" | "));
+
+    // A member with no line for their own seat may be on another office's
+    // ballot (Byron Donalds, Florida's nominee for governor), so the badge
+    // speaks only of the seat.
+    const leaving = people.filter((p) => !p.isCandidate && !p.contestLabel &&
+      KYC.contestStatus(p) === "unlisted");
+    check("a member not running for their seat is never called off the ballot",
+      leaving.length > 0 && leaving.every((p) => {
+        const html = KYC.cards.statusBadge(p);
+        return /Not running for this seat/.test(html) && !/Not on the ballot/.test(html);
+      }), leaving.length + " members");
 
     // Someone with no filing in their race shows no result, never the seat's.
     const undecided = movers.filter((p) => !decided.includes(p));
@@ -1527,7 +1557,7 @@ async function testRunningElsewhere() {
       check(`${nominee.name}'s row is in the ${nominee.state} delegation`, !!row);
       check("the row carries the result of their race",
         row && /Running for/.test(row.textContent) && /Nominee/.test(row.textContent) &&
-          !/Not on ballot/.test(row.textContent),
+          !/Leaving seat|Not on ballot/.test(row.textContent),
         row && row.textContent.replace(/\s+/g, " ").trim());
       // Both badges beside the name took the whole row: the name vanished and
       // "House • CA-38" broke a word a line. The seat gets a line of its own
@@ -1955,8 +1985,9 @@ async function testRedistricting() {
   const holders = (n) => people.filter((p) => caHouse(p) && p.districtNum === n);
   const raceFor = (n) => races.find((r) => r.chamber === "House" && r.state === "CA" && r.district === n);
   const contestOf = (p) => (races.find((r) => r.id === p.contestRaceId) || {}).district;
+  const OUT = { eliminated: true, withdrawn: true, unlisted: true };
   const movers = people.filter((p) => caHouse(p) && KYC.runsElsewhere(p) &&
-    /^H-CA-/.test(p.contestRaceId));
+    /^H-CA-/.test(p.contestRaceId) && !OUT[KYC.contestStatus(p)]);
   const cards = () => [...D.querySelectorAll(".plan-card")];
   const focusOf = (card) => [...card.querySelectorAll(".district-statewide use.is-focus")]
     .map((u) => +u.getAttribute("data-district")).sort((a, b) => a - b);
@@ -2140,6 +2171,22 @@ async function testRedistricting() {
 /* Every other shape of district page: one map, a single seat, a seat with no
  * race this year, a redrawn map clipped to the land, and the old address. */
 async function testDistrictPages() {
+  // Texas listed Al Green (TX-9 -> TX-18) and Julie Johnson (TX-32 -> TX-33)
+  // under "Running in a different district" after both lost those primaries.
+  const txMoves = await buildPage("districts/tx.html");
+  suite("districts/tx.html — a member who lost is not 'running'", () => {
+    const listed = [...txMoves.D.querySelectorAll(".mover-name")].map((e) => e.textContent);
+    const out = txMoves.window.legislatorsData.filter((p) => p.state === "TX" &&
+      /House/.test(p.chamber) && txMoves.window.KYC.runsElsewhere(p) &&
+      ["eliminated", "withdrawn", "unlisted"].indexOf(txMoves.window.KYC.contestStatus(p)) !== -1);
+    check("no one off the ballot in their new district is listed as running",
+      out.every((p) => listed.indexOf(p.name) === -1),
+      `${out.length} off the ballot; listed: ${listed.join(", ")}`);
+    const sentence = (txMoves.D.querySelector(".state-note") || {}).textContent || "";
+    check("the count in the sentence is the count listed",
+      !listed.length || sentence.indexOf(String(listed.length) + " member") === 0, sentence);
+  });
+
   const files = fs.readdirSync(path.join(SITE, "districts")).filter((f) => f.endsWith(".html"));
   suite("districts/ — one page per state and territory", () => {
     check("56 pages", files.length === 56, `${files.length}`);

@@ -40,8 +40,11 @@
   var MEMBER_RACE_BADGE = {
     nominee: ['badge-money', 'Renominated',
       'Won the 2026 primary for this seat.'],
-    unlisted: ['badge-danger', 'Not on the ballot',
-      'Not named in the primary results or on the November ballot; not seeking re-election.'],
+    // About this seat only. "Not on the ballot" was false for a member on
+    // another office's ballot: Byron Donalds, Florida's Republican nominee
+    // for governor, read it on the Florida page.
+    unlisted: ['badge-danger', 'Not running for this seat',
+      'Not named in the primary results for this seat; not seeking re-election to it.'],
   };
 
   function raceBadge(item) {

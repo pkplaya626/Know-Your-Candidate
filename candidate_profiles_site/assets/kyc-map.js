@@ -54,6 +54,14 @@
         : item.chamber.indexOf("House") !== -1 ? "house" : null;
       if (chamber) counts[chamber][KYC.partyKey(item)] += 1;
     });
+    // A vacant seat has no member to count. The build counts it from the
+    // races (summary.by_state), the figure the state page shows too: Texas
+    // read "24 R 13 D" here and "24 R / 13 D / 1 Vacant" there.
+    var balance = (((global.kycBuildMeta || {}).states || {})[code] || {}).balance;
+    if (balance) {
+      counts.house.vacant = balance.house.vacant || 0;
+      counts.senate.vacant = balance.senate.vacant || 0;
+    }
     return counts;
   }
 
@@ -126,10 +134,18 @@
       return { fill: NONE_FILL, text: code + ": no Senate race in 2026" };
     }
     var key = KYC.partyKey(defender);
+    // A senator who ran and lost the primary is not a retiree: John Cornyn
+    // and Bill Cassidy read "not running" here while the panel beside the
+    // map said "Lost primary". The phrase comes from the same status.
+    var status = KYC.contestStatus(defender);
+    var party = defender.party === "Democrat" ? "Democratic" : defender.party;
     return {
       fill: key === "vacant" ? VACANT_FILL : "var(--party-" + key + ")",
-      text: code + ": 2026 Senate race — " + defender.party + " seat (" +
-        defender.name + (defender.seekingReelection2026 ? " running" :
+      text: code + ": 2026 Senate race — " + party + " seat (" +
+        defender.name + (status === "eliminated" ? " lost the primary" :
+          status === "advanced" ? " in a primary runoff" :
+          status === "nominee" && defender.seekingReelection2026 ? " renominated" :
+          defender.seekingReelection2026 ? " running" :
           defender.contestLabel ? " running for " + defender.contestLabel :
           defender.alsoRunningSeat ? " running for " + defender.alsoRunningSeat :
           " not running") + ")",
@@ -246,7 +262,9 @@
     if (race) {
       var bits = race.split("|");
       if (!item.isCandidate && !item.contestLabel && item.raceStatus === "nominee") bits[1] = "Renominated";
-      if (!item.isCandidate && item.raceStatus === "unlisted") bits = ["badge-danger", "Not on ballot"];
+      // About the seat they hold, not the whole ballot (a member may be on
+      // another office's).
+      if (!item.isCandidate && item.raceStatus === "unlisted") bits = ["badge-danger", "Leaving seat"];
       // "Nominee – Speak The Truth line": not a second Democratic nominee.
       return '<span class="badge ' + bits[0] + '">' + bits[1] +
         (item.raceStatus === "nominee" ? KYC.ballotLineSuffix(item) : "") + "</span>";

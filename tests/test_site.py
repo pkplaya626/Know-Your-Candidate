@@ -118,6 +118,13 @@ class TestSummaryAgainstRealData(unittest.TestCase):
     def test_race_counts_match_the_race_list(self):
         self.assertEqual(self.summary["races"]["total"], len(self.races))
 
+    def test_every_state_counts_each_race_as_a_seat_on_the_ballot(self):
+        short = {code: (s["seatsUp"], s["races"]) for code, s in self.summary["states"].items()
+                 if s["seatsUp"] != s["races"]}
+        self.assertEqual(short, {})
+        self.assertEqual(sum(s["seatsUp"] for s in self.summary["states"].values()),
+                         len(self.races))
+
 
 class TestEmit(unittest.TestCase):
     def test_writes_the_globals_the_pages_read(self):
@@ -445,6 +452,9 @@ class TestStatePages(unittest.TestCase):
             "senate": {"D": 1, "R": 1, "I": 0, "vacant": 0},
             "house": {"D": 1, "R": 1, "I": 0, "vacant": 1}})
         self.assertEqual(by_state["GU"]["balance"]["house"], {"D": 1, "R": 0, "I": 0, "vacant": 0})
+        # The vacant seat is on the ballot too: Texas read "38 seats on the
+        # 2026 ballot" over 39 races when this counted members.
+        self.assertEqual(by_state["TX"]["seatsUp"], 3)
         national = summary.build(people, races=races)
         self.assertEqual(national["house"]["vacant"], 1)       # the territory is not counted
 

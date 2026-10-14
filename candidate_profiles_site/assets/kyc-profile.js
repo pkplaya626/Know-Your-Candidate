@@ -581,7 +581,7 @@
   var MEMBER_RACE_STATUS = {
     nominee: ["badge-money", "Renominated for 2026",
       "Won the 2026 primary for this seat. Source: the state's Wikipedia election results page."],
-    unlisted: ["badge-danger", "Not on the 2026 ballot",
+    unlisted: ["badge-danger", "Not running for this seat in 2026",
       "Not named in the primary results or on the November ballot for this seat; " +
       "not seeking re-election."],
   };

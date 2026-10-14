@@ -178,11 +178,19 @@ def by_state(profiles, races=None):
         if p.get("seatUp2026"):
             entry["seatsUp"] += 1
     house_races = {}
+    if races:
+        # Every seat on the ballot is a race, held or not. Counted from the
+        # members, Texas and Florida each read one seat short: their vacant
+        # districts (TX-18 before, TX-23 and FL-20 now) have a race and no
+        # member, and "38 seats on the 2026 ballot" sat over 39 races.
+        for entry in out.values():
+            entry["seatsUp"] = 0
     for race in races or []:
         entry = out.get(race.get("state"))
         if entry is None:
             continue
         entry["races"] += 1
+        entry["seatsUp"] += 1
         if race.get("openSeat"):
             entry["open"] += 1
         if race.get("chamber") == "House":
