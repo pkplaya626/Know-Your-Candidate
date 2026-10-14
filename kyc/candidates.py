@@ -587,6 +587,11 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
     return profiles, skipped
 
 
+def filed_rows(cache):
+    """``{candidate_id: row}`` for every filer in the field, at any funding level."""
+    return {row["candidate_id"]: row for row in (cache or {}).get("candidates", [])}
+
+
 def eligible(cache, threshold=STATUTORY_THRESHOLD):
     """Filings at or above the statutory threshold, incumbents excluded.
 

@@ -395,6 +395,16 @@ people have filed at any funding level — so a seat is never described as
 uncontested when somebody has filed for it. Of the 28 races with no profiled
 challenger, 26 show a filing count and only **2** are genuinely empty.
 
+A nominee under the threshold is on the ballot all the same. The 2026-10-13
+audit found 54 decided races reading "No challenger on the ballot" over a
+second nominee: TX-12's Democratic nominee raised nothing, and California's
+top-two seats were the worst hit. The results page had already matched each
+one to an FEC id. `races.build` names them from that filing
+(`results.belowThreshold`, `{id, name}`) and adds them to `otherNominees`.
+`contested` is true once anyone besides the incumbent is on the ballot, and
+the card counts them: "1 challenger on the ballot · 1 with no profile here".
+The FEC's incumbent flag keeps an incumbent's own second registration out.
+
 Not every registration that lists 2026 is a 2026 filing, so the field is
 screened first (`candidates.screen`) and the build reports each one it sets
 aside:
@@ -1283,7 +1293,10 @@ the USGS point that is out of town.
 | `social` (`twitter`, `facebook`, `instagram`, `youtube_id`, `bluesky`) | `legislators-social-media`, the project's verified account list | Sitting members |
 | `refs` (`govtrack`, `opensecrets`, `votesmart`, `ballotpedia`) | Reference ids from `congress-legislators` | Sitting members |
 | `wikipedia` | The bioguide mapping for members; the state ballot page's own link for filed candidates (`wikipediaVia`) | Members, and candidates the ballot page links |
-| `aliases` | Other names a voter may search by, all from the member's own `congress-legislators` record (matched on bioguide id): `official_full` without its quoted nickname, nickname + surname (+ suffix), and the Wikipedia title without its disambiguator ("Jim Clyburn", "Hank Johnson"). Names that fold to the display name are dropped. Searched, never displayed as the name | Sitting members whose record adds a name |
+| `aliases` | Other names a voter may search by, all from the member's own `congress-legislators` record (matched on bioguide id): `official_full` without its quoted nickname, nickname + surname (+ suffix), and the Wikipedia title without its disambiguator ("Jim Clyburn", "Hank Johnson"). Names that fold to the display name are dropped. Searched, never displayed as the name. For a filed candidate renamed to the ballot's spelling (`nameVia`), the FEC's filed form ("Mahesh Ganorkar", "Carlquist Lisa") | Sitting members whose record adds a name; filed candidates renamed from the ballot |
+| `nameVia` | `"election-page"` when the name shown is the results page's spelling for this filing, settled word for word or by an evidenced `overrides.RESULT_NAMES` entry ("Max Ganorkar", whose filing says Mahesh) | Filed candidates the results page names differently |
+| `raceStatusUnconfirmed` | Set beside `raceStatus: "unlisted"` when the results page does not name the person but names someone similar who lost or withdrew. Off the November ballot either way, and shown as "Not on the November ballot", never "not on the primary ballot" | Filers in decided races |
+| `maybeNamed` | Results-page names that may be this person under another spelling, one of them on the ballot. No status is inferred, and the race counts the person once, as that name | Filers the page may name differently |
 | `rosterName` | The roster CSV's spelling, set only when it opens with a bare initial ("C. Franklin") and `name` was replaced by the name the record says they go by (nickname + surname, else a real middle name + surname). Keys the finance cache and stays searchable | Five sitting members |
 | `campaignSite`, `campaignCommittee` | The principal campaign committee's Form 1 at the FEC (`data/campaigns.json`); for a challenger whose committee filed none, or filed one that failed the check, the race page's "Campaign websites" list (`campaignSiteVia: "election-page"`) once `enrich` has confirmed the site names them | Everyone on a ballot with an FEC id |
 | `electionPageSite` | The site the race page lists, held back until `enrich` has read it; never shown directly | Filed candidates the race page lists one for |

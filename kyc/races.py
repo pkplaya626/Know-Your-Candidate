@@ -126,17 +126,26 @@ def assign(profiles):
     return profiles
 
 
-def build(profiles, filed_counts=None, results=None, dates=None):
+def build(profiles, filed_counts=None, results=None, dates=None, filed=None):
     """Return the race list, most contested first.
 
-    ``contested`` means we hold a profile for at least one challenger.
+    ``contested`` means somebody besides the incumbent is running: a
+    challenger we hold a profile for, or, once the primary is decided, any
+    nominee the results page names. ``candidateCount`` counts the profiles.
     ``filedCount`` is how many people have filed with the FEC for the seat at
     any funding level, which is a fact about the race rather than about our
     coverage - the two used to be conflated, and a race with eight filers and
     no profile read as "No declared challenger".
+
+    *filed* is the FEC field by candidate id, every filer at any funding
+    level. It names the nominees whose filings are under the $5,000
+    threshold, so have no profile (rule 22).
     """
     assign(profiles)
     by_id = {p["id"]: p for p in profiles}
+    profiled = set()
+    for p in profiles:
+        profiled.update([p.get("fecCandidateId")] + list(p.get("otherFecIds") or []))
 
     races = {}
 
@@ -203,9 +212,26 @@ def build(profiles, filed_counts=None, results=None, dates=None):
                 # Only people still on the ballot count as challengers once
                 # the primary has decided who that is.
                 from .results import on_ballot
-                still = [pid for pid in race["candidateIds"] if on_ballot(by_id[pid])]
+                below = _below_threshold(results, race["id"], filed, profiled,
+                                         [by_id[pid] for pid in race["candidateIds"] +
+                                          race["incumbentIds"]])
+                if below:
+                    # TX-12 read "No challenger on the ballot" over a
+                    # Democratic nominee who filed and raised nothing, and 53
+                    # races like it. Named from their filing, by its id.
+                    summary["belowThreshold"] = below
+                    summary["otherNominees"] = sorted(
+                        set(summary["otherNominees"]) | {b["name"] for b in below})
+                # One person, counted once: an undecided profile whose name
+                # the page may give another spelling of is counted as that
+                # page name, not beside it ("Sarah Zabel" and the page's
+                # "Sarah Zabel Peterson" were two challengers).
+                from .results import _maybe_named
+                named = {"unmatched": {n: "nominee" for n in summary["otherNominees"]}}
+                still = [pid for pid in race["candidateIds"] if on_ballot(by_id[pid]) and not (
+                    not by_id[pid].get("raceStatus") and _maybe_named(by_id[pid], named))]
                 race["candidateCount"] = len(still)
-                race["contested"] = bool(still)
+                race["contested"] = bool(still) or bool(summary["otherNominees"])
                 race["results"]["unlisted"] = sum(
                     1 for pid in race["candidateIds"]
                     if by_id[pid].get("raceStatus") == "unlisted"
@@ -217,6 +243,40 @@ def build(profiles, filed_counts=None, results=None, dates=None):
                        r["state"], r["district"] if r["district"] is not None else -1),
     )
     return ordered
+
+
+def _below_threshold(results, rid, filed, profiled, people=()):
+    """Nominees the results page matched to an FEC filing with no profile.
+
+    The filing is under $5,000, so it never became a profile, but its owner
+    is on the November ballot. Not counted: an incumbent's own registration,
+    whatever the id (the FEC's incumbent flag); a second registration of
+    someone with a profile in the race, which the page's one name matched
+    to both ids (Jeremy Ryan Todd, KY-4); and a name already counted.
+    """
+    from .candidates import display_name
+    from .results import NOMINEE, _sequence
+
+    race = ((results or {}).get("races") or {}).get(rid) or {}
+    seen = set()
+    for person in people:
+        for name in (person.get("name"), person.get("filedName")):
+            if name:
+                seen.add(tuple(sorted(_sequence(display_name(name) if "," in name else name))))
+    out = []
+    for cid, status in sorted((race.get("status") or {}).items()):
+        row = (filed or {}).get(cid)
+        if status != NOMINEE or cid in profiled or not row:
+            continue
+        if row.get("incumbent_challenge") == "I":
+            continue
+        name = display_name(row.get("name"))
+        key = tuple(sorted(_sequence(name)))
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append({"id": cid, "name": name})
+    return sorted(out, key=lambda b: b["name"])
 
 
 def stats(races):

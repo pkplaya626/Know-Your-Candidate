@@ -33,6 +33,7 @@ Two gates keep it conservative:
     python build_profile_site.py results --check  # report from the cache
 """
 
+import collections
 import datetime
 import json
 import os
@@ -1681,14 +1682,177 @@ def load_dates(root="."):
     return out
 
 
-def apply_cache(profiles, cache):
+def _words(name):
+    """A name's folded words as a set, hyphenated parts split apart.
+
+    "Bernadette Greene-Placentia" on the page and "GREENE PLACENTIA,
+    BERNADETTE" at the FEC are one spelling; so are "Lisa Carlquist" and a
+    filing typed with the names reversed, "LISA, CARLQUIST".
+    """
+    return frozenset(part for word in _tokens(name or "") for part in word.split("-") if part)
+
+
+def _sequence(name):
+    """A name's folded words in order, hyphens as spaces: "Conyears-Ervin"
+    and "Conyears Ervin" are one spelling; "Carlquist Lisa" and "Lisa
+    Carlquist" are not."""
+    return [part for word in _tokens(name or "") for part in word.split("-") if part]
+
+
+def _race_of(profile):
+    from .candidates import race_id
+    return profile.get("contestRaceId") or race_id({
+        "state": profile.get("state"),
+        "office": "S" if "Senate" in profile.get("chamber", "") else "H",
+        "district_number": profile.get("districtNum"),
+    })
+
+
+def _claim_unmatched(profiles, races, field=None):
+    """Give a filing the status of a results-page name that is exactly it.
+
+    The matcher leaves a page name unmatched when it cannot fit it to one
+    filing. Two cases are not guesses and are settled here, inside the
+    filing's own race only:
+
+    - the same words in any order, with hyphens as spaces: "Jay J. Bowman"
+      against a filing typed "JAY, BOWMAN J";
+    - an alias in ``overrides.RESULT_NAMES``, keyed on the FEC id and
+      evidenced by the campaign's own committee: "Buddy Carter".
+
+    A name that fits two filings, or a filing two names fit, is left alone,
+    and so is a name the matcher already found ambiguous. With *field* (the
+    FEC register, every filer), a word-for-word claim must be unique in the
+    race across everyone who filed, not only the profiles: a $0 filer with
+    the same words is another candidate for the name. The cache is changed
+    in memory, so the race counts built from it after this (races.build)
+    agree with the profiles.
+    """
+    from . import overrides
+    from .candidates import display_name, race_id
+
+    filers = {}
+    for row in (field or {}).get("candidates", []) if isinstance(field, dict) else []:
+        rid = race_id(row)
+        if rid:
+            filers.setdefault(rid, []).append(
+                (row["candidate_id"], _words(display_name(row.get("name")))))
+
+    named = {cid for race in races.values() for cid in (race.get("status") or {})}
+    waiting = {}
+    for profile in profiles:
+        cid = profile.get("fecCandidateId")
+        if not profile.get("isCandidate") or not cid or cid in named:
+            continue
+        rid = _race_of(profile)
+        if rid in races:
+            waiting.setdefault(rid, []).append((profile, cid))
+
+    claimed = {}
+    for rid, people in waiting.items():
+        race = races[rid]
+        unmatched = race.get("unmatched")
+        if not isinstance(unmatched, dict):
+            continue
+        fits = {}
+        ambiguous = set(race.get("ambiguous") or [])
+        for name in unmatched:
+            if name in ambiguous:
+                continue
+            alias = [cid for _p, cid in people
+                     if (overrides.RESULT_NAMES.get(cid) or (None,))[0] == name]
+            words = _words(name)
+            same = [(p, cid) for p, cid in people if len(words) >= 2 and
+                    words in (_words(p.get("name")), _words(p.get("filedName")))]
+            if alias:
+                found = set(alias)
+            else:
+                found = {cid for _p, cid in same}
+                if len(found) == 1:
+                    owner = same[0][0]
+                    own = {owner.get("fecCandidateId")} | set(owner.get("otherFecIds") or [])
+                    if any(w == words and cid not in own for cid, w in filers.get(rid, [])):
+                        continue          # another filer has the same words
+            if len(found) == 1:
+                fits[name] = found.pop()
+        taken = collections.Counter(fits.values())
+        for name, cid in fits.items():
+            if taken[cid] > 1:
+                continue                      # two page names fit one filing
+            status = unmatched.pop(name)
+            race.setdefault("status", {})[cid] = status
+            race.setdefault("claimed", {})[cid] = name
+            claimed[cid] = (rid, status)
+    return claimed
+
+
+def _maybe_named(profile, race):
+    """Page names in this race that may be this person under another spelling.
+
+    "Max Ganorkar" for "GANORKAR, MAHESH", "Mark Su" for "SU, DONGBO": the
+    surname of one is a word of the other. Such a person is not inferred
+    absent from a race whose page may name them (rule 30); ``validate``
+    lists them for a person to settle with an evidenced alias.
+    """
+    unmatched = race.get("unmatched")
+    if not isinstance(unmatched, dict):
+        return []
+    names = [n for n in (profile.get("name"), profile.get("filedName"),
+                         profile.get("rosterName")) if n]
+    mine = frozenset().union(*(_words(n) for n in names)) if names else frozenset()
+    my_last = {part for n in names for part in (_tokens(n) or [""])[-1].split("-") if part}
+    hits = []
+    for name in unmatched:
+        tokens = _tokens(name)
+        if len(tokens) < 2:
+            continue
+        last = {part for part in tokens[-1].split("-") if part}
+        rest = frozenset(part for word in tokens[1:] for part in word.split("-") if part)
+        if (any(_near(a, b) for a in last for b in mine)
+                or any(_near(a, b) for a in my_last for b in rest)):
+            hits.append(name)
+    return sorted(hits)
+
+
+def _near(a, b):
+    """The same word, or, for five letters or more, one letter apart.
+
+    For holding back a claim only, never for making one: NM-1's page lists
+    "Didi Okapareke" as the nominee and "Didi Okpareke" as withdrawn, and
+    the filer Ndidiamaka Okpareke may be either.
+    """
+    if a == b:
+        return True
+    if min(len(a), len(b)) < 5 or abs(len(a) - len(b)) > 1:
+        return False
+    if len(a) > len(b):
+        a, b = b, a
+    i = j = edits = 0
+    while i < len(a) and j < len(b):
+        if a[i] == b[j]:
+            i += 1
+            j += 1
+            continue
+        edits += 1
+        if edits > 1:
+            return False
+        if len(a) == len(b):
+            i += 1
+        j += 1
+    return edits + (len(b) - j) + (len(a) - i) <= 1
+
+
+def apply_cache(profiles, cache, field=None):
     """Set ``raceStatus`` on every filed candidate the results name.
 
     Nothing is removed. A candidate the page says lost keeps their profile and
-    gains a status the page can badge and hide behind a toggle.
+    gains a status the page can badge and hide behind a toggle. *field*, the
+    FEC register, lets a name be settled only when no other filer has it.
     """
     if not cache:
         return 0
+    cache["unclear"] = []
+    _claim_unmatched(profiles, cache.get("races", {}), field)
     by_id, party_of, article_of, label_of, unsure = {}, {}, {}, {}, set()
     about_of, site_of = {}, {}
     races = cache.get("races", {})
@@ -1701,7 +1865,6 @@ def apply_cache(profiles, cache):
         site_of.update(race.get("site") or {})
         label_of.update(race.get("label") or {})
         unsure.update(race.get("unsure") or [])
-    from .candidates import race_id
     from .races import race_id as seat_id, seat_label
 
     applied = 0
@@ -1713,6 +1876,21 @@ def apply_cache(profiles, cache):
             rid, status = by_id[candidate_id]
             profile["raceStatus"] = status
             profile["raceStatusRace"] = rid
+            ballot_name = (races.get(rid, {}).get("claimed") or {}).get(candidate_id)
+            # A hyphen alone changes nothing but the spelling, and the
+            # hyphenated one is the person's: "Greene-Placentia" from the
+            # page, "Conyears-Ervin" kept against the page's "Conyears Ervin".
+            same_words = _sequence(profile.get("name")) == _sequence(ballot_name)
+            if (ballot_name and profile.get("source") == "fec-field"
+                    and profile.get("name") != ballot_name
+                    and (not same_words or ("-" in ballot_name and "-" not in profile["name"]))):
+                # The name on the ballot, for a filing settled exactly or by
+                # the campaign's own committee: "Lisa Carlquist", not the
+                # FEC's reversed "Carlquist Lisa"; "Max Ganorkar", whose
+                # filing says Mahesh. The filed form stays searchable.
+                profile["aliases"] = sorted(set(profile.get("aliases") or []) | {profile["name"]})
+                profile["name"] = ballot_name
+                profile["nameVia"] = "election-page"
             if candidate_id in about_of and profile.get("source") == "fec-field":
                 # The election page's own description of a filed candidate,
                 # shown as their background and credited to the page.
@@ -1790,20 +1968,48 @@ def apply_cache(profiles, cache):
             if candidate_id in unsure or profile.get("id") in unsure:
                 continue
             if rid in races and decided_for(races[rid], profile.get("party")):
+                maybe = _maybe_named(profile, races[rid])
+                if maybe:
+                    cache["unclear"].append((profile["name"], rid, maybe))
+                    if not _all_out(races[rid], maybe):
+                        continue
+                    # Out whichever reading is right: not named, or named
+                    # and beaten. Said as that, never as "not on the
+                    # primary ballot".
+                    profile["raceStatusUnconfirmed"] = True
                 profile["raceStatus"] = UNLISTED
                 profile["raceStatusRace"] = rid
                 profile["seekingReelection2026"] = False
                 applied += 1
         elif profile.get("isCandidate") and candidate_id not in unsure:
-            rid = profile.get("contestRaceId") or race_id({
-                "state": profile.get("state"),
-                "office": "S" if "Senate" in profile.get("chamber", "") else "H",
-                "district_number": profile.get("districtNum"),
-            })
+            rid = _race_of(profile)
             if rid in races and decided_for(races[rid], profile.get("party")):
+                # A refused match is not an absence: "Max Ganorkar" is the
+                # NC-4 Republican nominee and was shown as "Not on the 2026
+                # primary ballot" because the FEC files him as Mahesh.
+                maybe = _maybe_named(profile, races[rid])
+                if maybe:
+                    cache["unclear"].append((profile["name"], rid, maybe))
+                    if not _all_out(races[rid], maybe):
+                        # A name the page puts on the ballot may be them.
+                        # Undecided, and counted once, as that name
+                        # (races.build).
+                        profile["maybeNamed"] = maybe
+                        continue
+                    # J.D. Scholten withdrew and Trey Trainor lost; with no
+                    # status at all they read as still running. Whichever
+                    # reading is right, they are off the November ballot,
+                    # and the page says exactly that.
+                    profile["raceStatusUnconfirmed"] = True
                 profile["raceStatus"] = UNLISTED
                 applied += 1
     return applied
+
+
+def _all_out(race, names):
+    """True when every page name that may be this person is off the ballot."""
+    unmatched = race.get("unmatched") or {}
+    return all(unmatched.get(name) in (ELIMINATED, WITHDRAWN) for name in names)
 
 
 BALLOT_LABELS = {"democratic": "Democrat", "republican": "Republican",

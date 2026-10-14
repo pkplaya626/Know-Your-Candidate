@@ -35,6 +35,13 @@
       'Advanced to a primary runoff that has not yet been decided.'],
   };
 
+  /* Not named on the results page, which does name someone like them who
+   * lost or withdrew: off the November ballot whichever reading is right,
+   * and that is all the badge says. */
+  var UNCONFIRMED = ['badge-neutral', 'Not on the November ballot',
+    'The published results put nobody of this name on the November ballot; a similar ' +
+    'name they list lost or withdrew.'];
+
   /* For a sitting member the same facts read differently: no primary line
    * is a retirement, and a primary win is a renomination. */
   var MEMBER_RACE_BADGE = {
@@ -54,6 +61,7 @@
     var status = KYC.contestStatus(item);
     var spec = (own && MEMBER_RACE_BADGE[status]) || RACE_BADGE[status];
     if (!spec) return "";
+    if (status === "unlisted" && item.raceStatusUnconfirmed) spec = UNCONFIRMED;
     // A nominee on another line than their party's says so, or a primary
     // loser on a minor-party line reads as a second Democratic nominee.
     var line = KYC.ballotLine(item);
@@ -164,10 +172,14 @@
      * a fact about the race, and it was wrong for 372 of them. filedCount
      * is how many people have actually filed with the FEC for the seat. */
     var res = race.results || null;
+    // Nominees the results page names with no profile here: a filing under
+    // $5,000, or none. They are on the ballot, so they count (rule 22).
+    var unprofiled = res && res.otherNominees ? res.otherNominees.length : 0;
     if (race.contested) {
+      var running = race.candidateCount + unprofiled;
       badges.push(
-        '<span class="badge badge-money">' + race.candidateCount +
-        " challenger" + (race.candidateCount === 1 ? "" : "s") +
+        '<span class="badge badge-money">' + running +
+        " challenger" + (running === 1 ? "" : "s") +
         (race.settled ? " on the ballot" : "") + "</span>"
       );
     } else if (race.settled && res) {
@@ -195,12 +207,13 @@
 
     /* People the results page puts on the ballot but the FEC has no
      * filing for. Leaving them off would make the header lie. */
-    if (res && res.otherNominees && res.otherNominees.length) {
+    if (unprofiled) {
       badges.push(
         '<span class="badge badge-warn" title="' + KYC.escapeAttr(
-          "Also on the November ballot per the published results, but with no " +
-          "FEC filing over $5,000, so no profile: " + res.otherNominees.join(", ")
-        ) + '">+ ' + res.otherNominees.length + " on ballot without a filing</span>"
+          "On the November ballot per the published results, with no FEC filing " +
+          "over $5,000 - the point at which federal law treats someone as a " +
+          "candidate - so no profile here: " + res.otherNominees.join(", ")
+        ) + '">' + unprofiled + " with no profile here</span>"
       );
     }
 

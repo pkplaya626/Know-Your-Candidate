@@ -112,7 +112,8 @@ def _build(args):
         print("  [warn] no portrait cache; run 'portraits' to resolve them")
 
     outcomes = results_mod.load_cache(args.root)
-    stats["results"] = results_mod.apply_cache(profiles, outcomes) if outcomes else 0
+    stats["results"] = (results_mod.apply_cache(profiles, outcomes, field=field)
+                        if outcomes else 0)
     if outcomes:
         print(f"  results: {stats['results']} candidates with a primary outcome "
               f"(as of {outcomes.get('asOf')})")
@@ -133,7 +134,8 @@ def _build(args):
               "articles and campaign sites")
 
     race_list = races_mod.build(profiles, candidates.filing_counts(field),
-                                results=outcomes, dates=results_mod.load_dates(args.root))
+                                results=outcomes, dates=results_mod.load_dates(args.root),
+                                filed=candidates.filed_rows(field))
     stats.update(races_mod.stats(race_list))
     markets = odds_mod.load_cache(args.root)
     if markets:
@@ -351,10 +353,12 @@ def _portraits(args):
     # resolvable through the article their state's ballot page links to,
     # and that title arrives with the primary results.
     finance = fec.load_cache(args.root)
+    field = candidates.load_cache(args.root)
     profiles, _ = build_profiles(raw, snapshot=legislators.load_snapshot(args.root),
-                                 field=candidates.load_cache(args.root), finance=finance)
+                                 field=field, finance=finance)
     fec.apply_cache(profiles, finance)
-    results_mod.apply_cache(profiles, results_mod.load_cache(args.root))
+    results_mod.apply_cache(profiles, results_mod.load_cache(args.root),
+                            field=screen_field(field, profiles))
     cache, _summary = portraits.resolve_all(
         profiles, root=args.root, refresh=args.refresh
     )
@@ -384,7 +388,8 @@ def _campaigns(args):
                                  field=field, finance=finance)
     fec.apply_cache(profiles, finance)
     # Statuses decide who is worth a request: nobody the primary removed.
-    results_mod.apply_cache(profiles, results_mod.load_cache(args.root))
+    results_mod.apply_cache(profiles, results_mod.load_cache(args.root),
+                            field=screen_field(field, profiles))
     if args.check:
         cache = campaigns.load_cache(args.root)
         if not cache:
@@ -423,7 +428,8 @@ def _enrich(args):
     campaigns.apply_cache(profiles, campaigns.load_cache(args.root))
     portraits.apply_cache(profiles, portraits.load_cache(args.root))
     # Who is still running, and the article and site the election page links.
-    results_mod.apply_cache(profiles, results_mod.load_cache(args.root))
+    results_mod.apply_cache(profiles, results_mod.load_cache(args.root),
+                            field=screen_field(field, profiles))
     if args.check:
         cache = enrich.load_cache(args.root)
         if not cache:
@@ -460,9 +466,11 @@ def _odds(args):
                                  field=field, finance=finance)
     fec.apply_cache(profiles, finance)
     outcomes = results_mod.load_cache(args.root)
-    results_mod.apply_cache(profiles, outcomes)
-    race_list = races_mod.build(profiles, candidates.filing_counts(screen_field(field, profiles)),
-                                results=outcomes, dates=results_mod.load_dates(args.root))
+    results_mod.apply_cache(profiles, outcomes, field=screen_field(field, profiles))
+    screened = screen_field(field, profiles)
+    race_list = races_mod.build(profiles, candidates.filing_counts(screened),
+                                results=outcomes, dates=results_mod.load_dates(args.root),
+                                filed=candidates.filed_rows(screened))
     by_id = {p["id"]: p for p in profiles}
 
     def people_of(race):
@@ -854,13 +862,15 @@ def _verify(args):
     stats["disclosures"] = disclosures.apply_cache(profiles, filings) if filings else 0
     stats["campaign_sites"] = campaigns.apply_cache(profiles, campaigns.load_cache(args.root))
 
+    field = screen_field(candidates.load_cache(args.root), profiles)
     outcomes = results_mod.load_cache(args.root)
-    stats["results"] = results_mod.apply_cache(profiles, outcomes) if outcomes else 0
+    stats["results"] = (results_mod.apply_cache(profiles, outcomes, field=field)
+                        if outcomes else 0)
     enrich.apply_cache(profiles, enrich.load_cache(args.root), as_of=_age_date(stats))
     race_list = races_mod.build(
-        profiles, candidates.filing_counts(
-            screen_field(candidates.load_cache(args.root), profiles)),
+        profiles, candidates.filing_counts(field),
         results=outcomes, dates=results_mod.load_dates(args.root),
+        filed=candidates.filed_rows(field),
     )
     stats.update(races_mod.stats(race_list))
     summary = summary_mod.build(profiles, races=race_list,

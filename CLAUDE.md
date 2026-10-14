@@ -119,8 +119,8 @@ python build_profile_site.py officers         # lieutenant governors (NLGA), sec
 python build_profile_site.py courts           # each state's highest court, from the court's own roster
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 843 tests, no dependencies
-npm install && npm test                       # 1095 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 861 tests, no dependencies
+npm install && npm test                       # 1100 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -692,6 +692,27 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     a label speaks only of what its status knows. A member with no
     primary line for their seat is "Not running for this seat", never "Not
     on the ballot": Byron Donalds is on Florida's, for governor.
+
+62. **A refused name match is not an absence, and an unsettled person is
+    never counted on the ballot.** The results page writes people as they
+    campaign ("Max Ganorkar", "Buddy Carter", "Lisa Carlquist") and the FEC
+    as they filed ("GANORKAR, MAHESH", "LISA, CARLQUIST"). 36 such filers,
+    six of them November nominees, were told "Not on the 2026 primary
+    ballot". `results.apply_cache` settles a page name only when it is the
+    filing's words in any order (unique among every filer in the race) or
+    an alias in `overrides.RESULT_NAMES` evidenced by the campaign's own
+    FEC committee. Anyone else whose surname, or a near spelling of it, is
+    among the page's unmatched names is never called unlisted:
+    - if every such name lost or withdrew, they are off the ballot either
+      way and read "Not on the November ballot" (`raceStatusUnconfirmed`);
+    - otherwise they are undecided (`maybeNamed`) and counted once, as the
+      page's name.
+
+    The first fix left 29 of them with no status, so the races counted
+    people who had withdrawn (J.D. Scholten) as challengers.
+    A nominee whose filing is under $5,000 is on the ballot all the same.
+    `races.build` names them from the filing (`belowThreshold`), never
+    twice for one person.
 
 ## District maps
 
