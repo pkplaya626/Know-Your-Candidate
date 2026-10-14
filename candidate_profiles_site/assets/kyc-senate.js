@@ -159,7 +159,6 @@
       KYC.escapeHtml(stateName), " &rsaquo;</a></h", level, ">",
       race ? KYC.cards.raceBadges(race) : "",
       "</div>",
-      race && KYC.odds ? KYC.odds.render(race) : "",
     ];
     // One row per seat: the senator, then the people running for the seat,
     // side by side - stacked, each seat took a screen of mostly empty width.
@@ -173,6 +172,9 @@
                "Running for this seat (" + running.length + ")</p>" + cards(running) + "</div>");
     }
     if (row.length) html.push('<div class="senate-seat-row">', row.join(""), "</div>");
+    // The markets after the people still running, before those who left
+    // the race: shown, a dozen faded cards had pushed them 1,400px down.
+    if (race && KYC.odds) html.push(KYC.odds.render(race));
     if (out.length) {
       html.push('<div class="race-out senate-out"><p class="senate-role">No longer running ' +
                 "for this seat (" + out.length + ") &mdash; lost the primary, withdrew, or " +
@@ -274,8 +276,8 @@
       });
       emit(groupSection(group, opts, false, inner));
     });
-    // Which party the markets expect to hold the chamber, above the seats.
-    if (html.length && KYC.odds) html.unshift(KYC.odds.control("senate"));
+    // Which party the markets expect to hold the chamber, after the seats.
+    if (html.length && KYC.odds) html.push(KYC.odds.control("senate"));
     return { html: html.join(""), people: total, seats: seats };
   }
 

@@ -567,7 +567,8 @@
      * trap for this dialog specifically. */
     function focusables() {
       return Array.prototype.filter.call(el.querySelectorAll(FOCUSABLE), function (n) {
-        return !n.hasAttribute("hidden") && !n.closest("[hidden]");
+        return !n.hasAttribute("hidden") && !n.closest("[hidden]") &&
+          n.getAttribute("tabindex") !== "-1";
       });
     }
 
@@ -853,8 +854,26 @@
     return item.__search;
   }
 
+  /* A query that is a state's whole name finds that state's people:
+   * "Pennsylvania" found 14 of its 61, the ones whose own text mentioned it.
+   * The whole name only, never a substring of another (rule 5): indexed as
+   * text, "virginia" found all of West Virginia and "kansas" Arkansas. */
+  var stateByName = null;
+  function stateNamed(query) {
+    if (stateByName === null) {
+      stateByName = {};
+      var states = meta().states || {};
+      Object.keys(states).forEach(function (code) {
+        stateByName[foldText(states[code].name || "")] = code;
+      });
+    }
+    return stateByName[foldText(query).replace(/\s+/g, " ").trim()] || null;
+  }
+
   function matchesQuery(item, query) {
     if (!query) return true;
+    var named = stateNamed(query);
+    if (named && item.state === named) return true;
     var haystack = searchIndex(item);
     return foldText(query).split(/\s+/).every(function (term) {
       return !term || haystack.indexOf(term) !== -1;

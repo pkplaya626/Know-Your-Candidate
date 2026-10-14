@@ -249,13 +249,15 @@
       ' <a class="race-state-link" href="' + KYC.escapeAttr(KYC.stateUrl(race.state)) +
       '" title="' + KYC.escapeAttr("Everything about " + KYC.stateName(race.state)) + '">' +
       KYC.escapeHtml(KYC.stateName(race.state)) + " &rsaquo;</a>";
+    // The people first, then the markets: a reader came for who is running,
+    // and 61% of House market blocks only show a 95-99% favourite.
     var odds = KYC.odds ? KYC.odds.render(race, { compact: !opts.fullOdds }) : "";
     return [
       '<section class="race" id="', KYC.escapeAttr("race-" + race.id), '">',
       '<div class="race-head"><h3 class="race-title">',
       KYC.escapeHtml(title), link, "</h3>", raceBadges(race), "</div>",
-      odds,
       body,
+      odds,
       "</section>",
     ].join("");
   }

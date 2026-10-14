@@ -42,7 +42,9 @@
     wrap.setAttribute("aria-labelledby", "profileModalName");
 
     wrap.innerHTML = [
-      '<button class="modal-scrim" data-close aria-label="Close profile"></button>',
+      // Clicking the backdrop closes; it is not a stop for the keyboard or
+      // a screen reader, which landed on it first ("Close profile, button").
+      '<button class="modal-scrim" data-close tabindex="-1" aria-hidden="true"></button>',
       '<div class="modal-dialog">',
       '  <button class="btn-icon modal-close" data-close aria-label="Close profile">',
       KYC.icon("x"),
@@ -117,8 +119,8 @@
       "      </section>",
       '      <section class="panel" id="profileModalRacePanel" hidden>',
       '        <h3 class="panel-head">' + KYC.icon("flag") + ' <span id="profileModalRaceTitle">In this race</span></h3>',
-      '        <div id="profileModalRaceOdds"></div>',
       '        <div class="list-rows race-mates" id="profileModalRace"></div>',
+      '        <div id="profileModalRaceOdds"></div>',
       "      </section>",
       "    </div>",
       "  </div>",
@@ -350,7 +352,7 @@
     var out = others.filter(function (p) { return KYC.cards && KYC.cards.offBallot(p); });
     var shown = others.filter(function (p) { return !(KYC.cards && KYC.cards.offBallot(p)); });
     el("profileModalRaceTitle").textContent = race.label;
-    // The markets on this race, compactly, above the people in it.
+    // The markets on this race, compactly, after the people in it.
     el("profileModalRaceOdds").innerHTML = KYC.odds ? KYC.odds.render(race, { compact: true }) : "";
     var row = function (p) {
       var role = p.isCandidate ? "" : '<span class="badge badge-neutral">Member</span> ';

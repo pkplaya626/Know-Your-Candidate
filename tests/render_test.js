@@ -582,6 +582,42 @@ async function testDirectoryAsync() {
       D.getElementById("results").querySelectorAll("section.race").length === 0);
   });
 
+  suite("index.html — says what it is and where to start", () => {
+    // It opened on filter chips, with no heading, and on a phone no name.
+    const h1 = [...D.querySelectorAll("h1")];
+    check("one h1, naming what the site answers", h1.length === 1 && /represents you/.test(h1[0].textContent),
+      h1.map((h) => h.textContent).join(" | "));
+    const intro = D.getElementById("introState");
+    const filter = D.getElementById("stateSelect");
+    check("the intro offers every state the filter does",
+      !!intro && intro.options.length === filter.options.length &&
+        [...intro.options].slice(1).every((o, i) => o.value === filter.options[i + 1].value),
+      intro && intro.options.length + " vs " + filter.options.length);
+    // Outside the scroller it stayed pinned, 200px above the results, on a
+    // desktop; inside it, it scrolls away with them.
+    check("the intro scrolls with the results",
+      !!intro && !!intro.closest(".content.scroll-y") &&
+        (intro.compareDocumentPosition(D.getElementById("results")) & 4) !== 0);
+    // Navigating on "change" left the page on the first arrow key.
+    const form = D.getElementById("introForm");
+    check("the picker opens a state's page only when asked",
+      !!form && !!form.querySelector('button[type="submit"]') && form.contains(intro));
+  });
+
+  suite("index.html — a state's name finds its people", () => {
+    // "Pennsylvania" found 14 of 61, the ones that mentioned it in their text.
+    const pa = window.legislatorsData.filter((p) => p.state === "PA");
+    check("every Pennsylvania profile matches 'Pennsylvania'",
+      pa.length > 0 && pa.every((p) => KYC.matchesQuery(p, "pennsylvania")));
+    // The whole name only (rule 5): indexed as text, "virginia" found all of
+    // West Virginia and "kansas" found Arkansas.
+    const blank = (state) => ({ state: state, name: "Pat Example", quality: {} });
+    check("a state's name finds that state, not a longer one containing it",
+      KYC.matchesQuery(blank("VA"), "virginia") && !KYC.matchesQuery(blank("WV"), "virginia") &&
+        KYC.matchesQuery(blank("WV"), "west virginia") &&
+        KYC.matchesQuery(blank("KS"), "kansas") && !KYC.matchesQuery(blank("AR"), "kansas"));
+  });
+
   suite("index.html — profile dialog", () => {
     const first = D.getElementById("results").querySelector(".card");
     const id = first.getAttribute("data-id");
@@ -590,6 +626,12 @@ async function testDirectoryAsync() {
     const modal = D.getElementById("profileModal");
     check("dialog opens on card click", modal && !modal.hidden);
     check("dialog is labelled", modal.getAttribute("aria-labelledby") === "profileModalName");
+    // The full-screen backdrop took first focus: "Close profile, button".
+    const scrim = modal.querySelector(".modal-scrim");
+    check("focus lands inside the dialog, not on the invisible backdrop",
+      D.activeElement !== scrim && scrim.getAttribute("tabindex") === "-1" &&
+        scrim.getAttribute("aria-hidden") === "true",
+      D.activeElement && D.activeElement.className);
     check("dialog names the person",
       D.getElementById("profileModalName").textContent === KYC.byId(id).name);
     check("deep link written to the URL",
@@ -1064,6 +1106,11 @@ async function testMap() {
       lost.every((p) => /lost the primary/.test(label(p.state)) &&
         !/not running/.test(label(p.state))),
       lost.map((p) => label(p.state)).join(" | "));
+    // White on the empty grey was 1.15:1 (light) and dark on dark 1.02:1.
+    const greys = [...D.querySelectorAll(".map-callout")].filter((c) => /surface/.test(c.style.background || ""));
+    check("a callout on the empty grey takes the page's text colour and an edge",
+      greys.length > 0 && greys.every((c) => c.style.color === "var(--text)" && /text-faint/.test(c.style.borderColor || "")),
+      greys.length + " grey callouts");
     check("party is an adjective in the label, as in the legend",
       ![...D.querySelectorAll("#usMap .state")].some((s) =>
         /Democrat seat/.test(s.getAttribute("aria-label") || "")));
@@ -1189,6 +1236,20 @@ async function testStates() {
     const senators = members.filter((p) => /Senate/.test(p.chamber));
     const heads = [...content.querySelectorAll(".state-heading")];
     check("senators come first", /senators/i.test(heads[0].textContent), heads[0].textContent);
+    // On a phone the races began eleven screens down; the page now says
+    // where each part starts, and every link lands on a section.
+    const parts = [...D.querySelectorAll(".state-parts a")];
+    check("an 'On this page' row links every part of the page",
+      parts.length === 4 && parts.every((a) => !!D.getElementById(a.getAttribute("href").slice(1))),
+      parts.map((a) => a.getAttribute("href")).join(" "));
+    // Left in the address, a fragment sent the reader back to the section
+    // when a profile closed. A jump scrolls and leaves the address alone.
+    const before = window.location.hash;
+    parts[3].dispatchEvent(new window.MouseEvent("click", { bubbles: true, cancelable: true }));
+    check("a jump leaves the address as it was", window.location.hash === before, window.location.hash);
+    check("the race list says it covers Congress only",
+      /2026 races for Congress in Texas/.test(D.getElementById("races").textContent) &&
+        /state and local contests/.test(D.getElementById("races").textContent));
     const grids = [...content.querySelectorAll(".state-section > .card-grid")];
     check("both senators are shown", grids[0].querySelectorAll(".card").length === senators.length);
     check("the whole delegation is shown",
@@ -1697,6 +1758,22 @@ function testContrast() {
       check(`${name}: party tag label on its party colour`, tags.every((r) => r >= 4.5),
         tags.map((r) => r.toFixed(2)).join(" / "));
     }
+    // A status badge is 11px bold text over a 14% tint of its own colour.
+    // The light theme's plain colours reached only 4.17-4.42 (audit, VUX-8).
+    const mix = (a, b, w) => "#" + rgb(a).map((v, i) => Math.round(w * v + (1 - w) * rgb(b)[i])
+      .toString(16).padStart(2, "0")).join("");
+    for (const [name, t] of Object.entries(themes)) {
+      const badges = ["money-in", "warn", "danger"].flatMap((c) => ["surface-1", "surface-2"].map((s) =>
+        ratio(t[c + "-text"] || t[c], mix(t[c], t[s], 0.14))));
+      check(`${name}: status badges on their tint`, badges.every((r) => r >= 4.5),
+        badges.map((r) => r.toFixed(2)).join(" / "));
+    }
+    // A state with no value is drawn in the empty grey; its code is white on
+    // a dark backing (rgb(0 0 0 / a) over the grey). 0.26 gave 2.15:1.
+    const alpha = parseFloat((css.match(/\[data-theme="light"\] \{[^}]*--map-label-backing:\s*rgb\(0 0 0 \/ ([\d.]+)\)/) || [])[1]);
+    const backed = mix("#000000", themes.light["surface-2"], alpha);
+    check("light: a map code on the empty grey", ratio(themes.light["map-label"] || "#ffffff", backed) >= 4.5,
+      ratio(themes.light["map-label"] || "#ffffff", backed).toFixed(2));
     const js = fs.readFileSync(path.join(SITE, "assets", "kyc-profile.js"), "utf8");
     check("the party tag's label colour comes from the theme, not a literal",
       !/style\.color\s*=\s*["']#/.test(js) && /\.party-tag\s*\{[^}]*color:\s*var\(--text-inverse\)/.test(css));
@@ -1960,9 +2037,14 @@ async function testOdds() {
   suite("index.html — prediction markets and polling averages", () => {
     check("no page errors", errors.length === 0, errors.join(" | "));
     const control = results.querySelector(".odds-control");
-    check("the Senate view opens with the markets on control of the chamber",
+    // The people first, the markets after them (audit 2026-10-13, CG-14).
+    check("the Senate view ends with the markets on control of the chamber",
       !!control && control.querySelectorAll(".odds-market").length >= 1 &&
-        results.firstElementChild === control);
+        results.lastElementChild === control);
+    const seat = results.querySelector(".senate-seat .odds");
+    check("a seat's markets come after its people",
+      !!seat && !!seat.parentNode.querySelector(".senate-seat-row") &&
+        (seat.parentNode.querySelector(".senate-seat-row").compareDocumentPosition(seat) & 4));
     const blocks = [...results.querySelectorAll(".senate-seat .odds")];
     check("2026 seats carry their race's markets", blocks.length > 20, String(blocks.length));
     check("every bar says in words what it draws",
@@ -2001,10 +2083,11 @@ async function testOdds() {
     window.location.hash = "#/";
     window.dispatchEvent(new window.Event("hashchange"));
     D.getElementById("raceViewToggle").click();
-    const tops = [...results.children].slice(0, 2);
-    check("the race view opens with control of both chambers",
-      tops.every((t) => t.classList.contains("odds-control")) &&
-        /Senate/.test(tops[0].textContent) && /House/.test(tops[1].textContent));
+    const tails = [...results.children].slice(-2);
+    check("the race view ends with control of both chambers, after the races",
+      tails.every((t) => t.classList.contains("odds-control")) &&
+        /Senate/.test(tails[0].textContent) && /House/.test(tails[1].textContent) &&
+        results.firstElementChild.classList.contains("race"));
     const sections = [...results.querySelectorAll("section.race")];
     const senate = sections.filter((s) => /^race-S-/.test(s.id));
     const house = sections.filter((s) => /^race-H-/.test(s.id));
@@ -2023,9 +2106,9 @@ async function testOdds() {
     if (member) {
       KYC.profile.open(member.id);
       const slot = D.getElementById("profileModalRaceOdds");
-      check("the dialog shows their race's markets above the people in it",
+      check("the dialog shows their race's markets after the people in it",
         !!slot.querySelector(".odds-compact .odds-market") &&
-          slot.compareDocumentPosition(D.getElementById("profileModalRace")) & 4,
+          D.getElementById("profileModalRace").compareDocumentPosition(slot) & 4,
         member.name);
       KYC.profile.close();
     }
@@ -2248,6 +2331,40 @@ async function testDistrictPages() {
     const sentence = (txMoves.D.querySelector(".state-note") || {}).textContent || "";
     check("the count in the sentence is the count listed",
       !listed.length || sentence.indexOf(String(listed.length) + " member") === 0, sentence);
+  });
+
+  // A tap changed only an outline, with the district's facts two screens
+  // below it on a phone (audit MAP-4). After a pick they come into view.
+  const nc = await buildPage("districts/nc.html");
+  suite("districts/nc.html — a pick on a phone shows what was picked", () => {
+    const win = nc.window;
+    win.matchMedia = (q) => ({ media: q, matches: /max-width: 1000px/.test(q),
+      addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
+    Object.defineProperty(win, "innerHeight", { value: 844, configurable: true });
+    const scrolled = [];
+    win.Element.prototype.scrollIntoView = function () { scrolled.push(this); };
+    win.Element.prototype.getBoundingClientRect = function () {
+      return { top: this.classList.contains("district-fact") ? 1346 : 0, left: 0,
+        width: 300, height: 100, right: 300, bottom: 100 };
+    };
+    const shape = nc.D.querySelector('.district-statewide [data-district="4"]') ||
+      nc.D.querySelector('[data-district="4"]');
+    check("NC-4 is drawn to tap", !!shape);
+    if (shape) shape.dispatchEvent(new win.MouseEvent("click", { bubbles: true }));
+    check("the picked district's facts are scrolled into view",
+      scrolled.length === 1 && scrolled[0].classList.contains("is-focus") &&
+        /4/.test(scrolled[0].querySelector(".district-fact-title").textContent),
+      scrolled.map((s) => s.className).join(" | "));
+    // Each map has its own facts; a tap on the 2025 map went to the 2024
+    // map's, already above the screen, and nothing moved.
+    scrolled.length = 0;
+    const cardsNow = [...nc.D.querySelectorAll(".plan-card")];
+    const second = cardsNow[1] && cardsNow[1].querySelector('[data-district="4"]');
+    if (second) second.dispatchEvent(new win.MouseEvent("click", { bubbles: true }));
+    const after = [...nc.D.querySelectorAll(".plan-card")];
+    check("a tap on the second map shows the second map's facts",
+      !!second && scrolled.length === 1 && after[1].contains(scrolled[0]),
+      scrolled.map((s) => s.className).join(" | "));
   });
 
   const files = fs.readdirSync(path.join(SITE, "districts")).filter((f) => f.endsWith(".html"));
