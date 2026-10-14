@@ -204,9 +204,14 @@
       // A person registered with the FEC under several ids has one profile;
       // the others are kept as otherFecIds (derived in the pipeline). A link
       // shared under one of them still opens that person, never a stranger:
-      // a real profile id always wins over an alias.
+      // a real profile id always wins over an alias. A curated profile
+      // answers to its own filing's id too: Mike Collins's filing was
+      // FEC_S6GA00390 until his curated row named it, and links and market
+      // labels saved under that id still open him.
       data.forEach(function (item) {
-        (item.otherFecIds || []).forEach(function (other) {
+        var own = item.fecCandidateId && item.id !== "FEC_" + item.fecCandidateId
+          ? [item.fecCandidateId] : [];
+        (item.otherFecIds || []).concat(own).forEach(function (other) {
           var alias = "FEC_" + other;
           if (!profileIndex.has(alias)) profileIndex.set(alias, item);
         });

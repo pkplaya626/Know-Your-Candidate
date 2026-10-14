@@ -852,6 +852,13 @@ async function testDirectoryAsync() {
       KYC.profile.close();
     }
 
+    // A curated profile that took over its FEC filing answers to the old id,
+    // which shared links and odds.json labels still carry.
+    const merged = window.legislatorsData.filter((p) => /^CAND_/.test(p.id) && p.fecCandidateId);
+    check("a curated profile answers to its own filing's id",
+      merged.length > 0 && merged.every((p) => KYC.byId("FEC_" + p.fecCandidateId) === p),
+      merged.filter((p) => KYC.byId("FEC_" + p.fecCandidateId) !== p).map((p) => p.name).join(", "));
+
     // Rule 27: a challenger is running for the seat, not representing it.
     const challenger = window.legislatorsData.find((p) => p.isCandidate);
     const seated = window.legislatorsData.find((p) => !p.isCandidate);
