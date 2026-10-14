@@ -258,10 +258,15 @@ jobs:
           # verify and the unit tests; CI adds the page tests. If CI fails,
           # the pull request stays open, this step fails and the failure
           # issue below says so.
+          # The dispatched run only: the pull_request run on the same commit
+          # is the one GitHub holds at "action_required", and watching it
+          # failed the first auto-merging refresh (2026-10-14, #60) although
+          # the dispatched run had passed.
           sha=$(git rev-parse HEAD)
           run=""
           for _ in $(seq 1 24); do
-            run=$(gh run list --workflow ci.yml --branch "$branch" --json databaseId,headSha \
+            run=$(gh run list --workflow ci.yml --branch "$branch" --event workflow_dispatch \
+              --json databaseId,headSha \
               --jq "map(select(.headSha == \"$sha\")) | .[0].databaseId // empty")
             [ -n "$run" ] && break
             sleep 5
