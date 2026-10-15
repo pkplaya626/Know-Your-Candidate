@@ -1203,7 +1203,6 @@
    },
    "unmatched": {
     "Janice Karman": "eliminated",
-    "Janice Karrman": "eliminated",
     "Timothy Sean Kelly": "eliminated"
    },
    "unsure": []
@@ -1528,8 +1527,7 @@
     "H6CA10195": "eliminated"
    },
    "unmatched": {
-    "Bob Rowland": "eliminated",
-    "Katherine Piccinni": "eliminated"
+    "Bob Rowland": "eliminated"
    },
    "unsure": []
   },
@@ -2616,7 +2614,8 @@
    "party": {
     "H0CA48172": "republican",
     "H2CA47188": "democratic",
-    "H6CA42180": "republican"
+    "H6CA42180": "republican",
+    "H6CA42198": "independent"
    },
    "site": {},
    "status": {
@@ -2626,14 +2625,9 @@
     "H6CA42198": "eliminated"
    },
    "unmatched": {
-    "Larisa Vermaulen": "eliminated",
     "Long Pham": "eliminated"
    },
-   "unsure": [
-    "H2CA45208",
-    "H4CA47192",
-    "H8CA45056"
-   ]
+   "unsure": []
   },
   "H-CA-43-2026": {
    "about": {},
@@ -2909,6 +2903,7 @@
     "H0CA45020": "libertarian",
     "H2CA52089": "democratic",
     "H6CA50290": "democratic",
+    "H6CA50308": "democratic",
     "H6CA50324": "republican"
    },
    "site": {},
@@ -2916,16 +2911,13 @@
     "H0CA45020": "eliminated",
     "H2CA52089": "nominee",
     "H6CA50290": "eliminated",
+    "H6CA50308": "eliminated",
     "H6CA50324": "nominee"
    },
    "unmatched": {
-    "Lucinda KWH Jahn": "eliminated",
-    "Tim Arnous": "eliminated"
+    "Lucinda KWH Jahn": "eliminated"
    },
-   "unsure": [
-    "H0CA50210",
-    "H4CA48067"
-   ]
+   "unsure": []
   },
   "H-CA-51-2026": {
    "about": {},
@@ -4330,6 +4322,7 @@
    "decided": {
     "general": false,
     "parties": [
+     "democratic",
      "republican"
     ]
    },
@@ -5377,7 +5370,8 @@
    "decided": {
     "general": true,
     "parties": [
-     "democratic"
+     "democratic",
+     "republican"
     ]
    },
    "label": {},
@@ -5550,6 +5544,7 @@
     "H2ID01192": "democratic",
     "H4ID01149": "constitution party",
     "H6ID01292": "democratic",
+    "H6ID01318": "independent",
     "H6ID01326": "republican",
     "H6ID01334": "republican",
     "H8ID01124": "republican"
@@ -5559,13 +5554,12 @@
     "H2ID01192": "nominee",
     "H4ID01149": "nominee",
     "H6ID01292": "eliminated",
+    "H6ID01318": "nominee",
     "H6ID01326": "eliminated",
     "H6ID01334": "eliminated",
     "H8ID01124": "nominee"
    },
-   "unmatched": {
-    "Sarah Zabel Peterson": "nominee"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-ID-02-2026": {
@@ -7434,6 +7428,7 @@
    "party": {
     "H2MD06138": "republican",
     "H4MD02232": "democratic",
+    "H6MD02278": "democratic",
     "H6MD02310": "republican"
    },
    "site": {},
@@ -7443,9 +7438,7 @@
     "H6MD02278": "eliminated",
     "H6MD02310": "eliminated"
    },
-   "unmatched": {
-    "Clint Spellman, Jr.": "eliminated"
-   },
+   "unmatched": {},
    "unsure": []
   },
   "H-MD-03-2026": {
@@ -8114,6 +8107,7 @@
    "decided": {
     "general": true,
     "parties": [
+     "democratic",
      "republican"
     ]
    },
@@ -10187,14 +10181,17 @@
      "republican"
     ]
    },
-   "label": {},
+   "label": {
+    "H6NJ03192": "Affordability, Accountability, People"
+   },
    "page": "2026 United States House of Representatives elections in New Jersey",
    "party": {
     "H4NJ03080": "democratic",
     "H4NJ03247": "green",
     "H4NJ03288": "republican",
     "H6NJ03176": "republican",
-    "H6NJ03184": "republican"
+    "H6NJ03184": "republican",
+    "H6NJ03192": "affordability, accountability, people"
    },
    "site": {},
    "status": {
@@ -10203,7 +10200,8 @@
     "H4NJ03288": "eliminated",
     "H6NJ03168": "withdrawn",
     "H6NJ03176": "eliminated",
-    "H6NJ03184": "nominee"
+    "H6NJ03184": "nominee",
+    "H6NJ03192": "nominee"
    },
    "unmatched": {
     "Shawn Scott": "withdrawn"
@@ -10266,17 +10264,21 @@
      "republican"
     ]
    },
-   "label": {},
+   "label": {
+    "H6NJ05247": "Humane Sustainable Future"
+   },
    "page": "2026 United States House of Representatives elections in New Jersey",
    "party": {
     "H6NJ05171": "democratic",
-    "H6NJ05221": "republican"
+    "H6NJ05221": "republican",
+    "H6NJ05247": "humane sustainable future"
    },
    "site": {},
    "status": {
     "H4NJ05150": "withdrawn",
     "H6NJ05171": "nominee",
-    "H6NJ05221": "nominee"
+    "H6NJ05221": "nominee",
+    "H6NJ05247": "nominee"
    },
    "unmatched": {
     "John Aslanian": "withdrawn",
@@ -10364,7 +10366,8 @@
     "H6NJ07300": "withdrawn"
    },
    "unmatched": {
-    "Megan O’Rourke": "eliminated"
+    "Megan O’Rourke": "eliminated",
+    "Seamus Patrick O'Toole": "nominee"
    },
    "unsure": []
   },
@@ -10383,17 +10386,21 @@
      "democratic"
     ]
    },
-   "label": {},
+   "label": {
+    "H6NJ08217": "We The People"
+   },
    "page": "2026 United States House of Representatives elections in New Jersey",
    "party": {
     "H2NJ08232": "democratic",
-    "H6NJ08209": "democratic"
+    "H6NJ08209": "democratic",
+    "H6NJ08217": "we the people"
    },
    "site": {},
    "status": {
     "H2NJ08232": "nominee",
     "H6NJ08183": "withdrawn",
-    "H6NJ08209": "eliminated"
+    "H6NJ08209": "eliminated",
+    "H6NJ08217": "nominee"
    },
    "unmatched": {
     "Aristotle Eliopoulos": "nominee",
@@ -10408,7 +10415,8 @@
    },
    "ambiguous": [],
    "article": {
-    "H4NJ09194": "Nellie Pou"
+    "H4NJ09194": "Nellie Pou",
+    "H6NJ09306": "Terrisa Bukovinac"
    },
    "decided": {
     "general": true,
@@ -10417,18 +10425,22 @@
      "republican"
     ]
    },
-   "label": {},
+   "label": {
+    "H6NJ09306": "Save Our Babies"
+   },
    "page": "2026 United States House of Representatives elections in New Jersey",
    "party": {
     "H4NJ09194": "democratic",
     "H6NJ09264": "republican",
-    "H6NJ09280": "republican"
+    "H6NJ09280": "republican",
+    "H6NJ09306": "save our babies"
    },
    "site": {},
    "status": {
     "H4NJ09194": "nominee",
     "H6NJ09264": "nominee",
-    "H6NJ09280": "eliminated"
+    "H6NJ09280": "eliminated",
+    "H6NJ09306": "nominee"
    },
    "unmatched": {
     "Billy Prempeh": "withdrawn",
@@ -10485,13 +10497,16 @@
      "republican"
     ]
    },
-   "label": {},
+   "label": {
+    "H6NJ11328": "Hope for Tomorrow"
+   },
    "page": "2026 United States House of Representatives elections in New Jersey",
    "party": {
     "H6NJ11179": "democratic",
     "H6NJ11211": "republican",
     "H6NJ11286": "democratic",
     "H6NJ11302": "democratic",
+    "H6NJ11328": "hope for tomorrow",
     "H6NJ11344": "democratic"
    },
    "site": {},
@@ -10500,6 +10515,7 @@
     "H6NJ11211": "nominee",
     "H6NJ11286": "nominee",
     "H6NJ11302": "eliminated",
+    "H6NJ11328": "nominee",
     "H6NJ11344": "eliminated"
    },
    "unmatched": {},
@@ -10571,7 +10587,8 @@
     "W000822": "withdrawn"
    },
    "unmatched": {
-    "David Brown": "eliminated"
+    "David Brown": "eliminated",
+    "Winston Jordan": "nominee"
    },
    "unsure": []
   },
@@ -10600,8 +10617,7 @@
     "H2NM01144": "nominee"
    },
    "unmatched": {
-    "Didi Okapareke": "nominee",
-    "Didi Okpareke": "withdrawn"
+    "Didi Okpareke": "nominee"
    },
    "unsure": []
   },
@@ -10650,6 +10666,7 @@
    "decided": {
     "general": true,
     "parties": [
+     "democratic",
      "republican"
     ]
    },
@@ -11398,7 +11415,9 @@
    },
    "decided": {
     "general": true,
-    "parties": []
+    "parties": [
+     "democratic"
+    ]
    },
    "label": {
     "H6NY14251": "Conservative Party of New York State",
@@ -11990,9 +12009,7 @@
    },
    "site": {},
    "status": {
-    "H2OH04164": "withdrawn",
     "H6OH04082": "nominee",
-    "H6OH04173": "withdrawn",
     "H6OH04181": "nominee"
    },
    "unmatched": {
@@ -15556,8 +15573,7 @@
     "Larry LaRose": "eliminated",
     "Mark Eberwine": "eliminated",
     "Randy Adams": "eliminated",
-    "Rod Lindsch": "eliminated",
-    "Rod Lingsch": "eliminated"
+    "Rod Lindsch": "eliminated"
    },
    "unsure": []
   },
@@ -16035,6 +16051,7 @@
    "page": "2026 United States House of Representatives elections in Virginia",
    "party": {
     "H0VA07133": "republican",
+    "H6VA05191": "democratic",
     "H6VA05209": "democratic",
     "H6VA05217": "democratic",
     "H6VA05233": "republican",
@@ -16056,8 +16073,7 @@
    },
    "unmatched": {
     "Salaam Bhatti": "withdrawn",
-    "Shannon Taylor": "withdrawn",
-    "Suzanne Kryzanowski": "eliminated"
+    "Shannon Taylor": "withdrawn"
    },
    "unsure": []
   },
@@ -16620,6 +16636,7 @@
    "page": "2026 United States House of Representatives elections in Washington",
    "party": {
     "H4WA06117": "democratic",
+    "H6WA06260": "republican",
     "H6WA06286": "republican"
    },
    "site": {},
@@ -17847,10 +17864,7 @@
     "Michael James Faris": "eliminated",
     "Valerie \"Dr Val\" Fredrick": "eliminated"
    },
-   "unsure": [
-    "S6KY00260",
-    "S6KY00278"
-   ]
+   "unsure": []
   },
   "S-LA-2026": {
    "about": {
@@ -18269,6 +18283,7 @@
     "S6NC00373": "Don Brown (author, born 1960)",
     "S6NC00407": "Roy Cooper",
     "S6NC00415": "Michael Whatley",
+    "S6NC00464": "Brian McGinnis",
     "T000476": "Thom Tillis"
    },
    "decided": {
@@ -18313,6 +18328,7 @@
     "S6NC00423": "eliminated",
     "S6NC00449": "eliminated",
     "S6NC00456": "eliminated",
+    "S6NC00464": "withdrawn",
     "S6NC00472": "eliminated",
     "S6NC00480": "eliminated",
     "S6NC00522": "eliminated",

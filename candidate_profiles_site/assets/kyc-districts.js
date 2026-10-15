@@ -50,7 +50,6 @@
   var NUMBER_PX = 11;
 
   var focus = [];
-  var OFF_BALLOT = { eliminated: true, withdrawn: true, unlisted: true };
 
   function el(id) {
     return doc.getElementById(id);
@@ -124,8 +123,8 @@
       seen[p.id] = true;
       if (!p.isCandidate && (p.contestRaceId || p.raceId) !== race.id) return false;
       var status = p.isCandidate ? p.raceStatus : KYC.contestStatus(p);
-      if (race.settled) return status === "nominee" || status === "advanced";
-      return !OFF_BALLOT[status];
+      if (race.settled) return KYC.onNovemberBallot(status) || status === "advanced";
+      return !KYC.offBallot(status);
     }).sort(function (a, b) {
       return (a.isCandidate ? 1 : 0) - (b.isCandidate ? 1 : 0) || a.name.localeCompare(b.name);
     });
@@ -141,7 +140,7 @@
     races.forEach(function (r) { byId[r.id] = r; });
     return data.filter(function (p) {
       return !p.isCandidate && p.state === code && p.chamber.indexOf("House") !== -1 &&
-        KYC.runsElsewhere(p) && !OFF_BALLOT[KYC.contestStatus(p)];
+        KYC.runsElsewhere(p) && !KYC.offBallot(KYC.contestStatus(p));
     }).map(function (p) {
       var race = byId[p.contestRaceId];
       return race && race.chamber === "House" && race.state === code

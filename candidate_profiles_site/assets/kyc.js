@@ -251,7 +251,7 @@
    *  ("Speak The Truth"), read from the same record contestStatus reads, or
    *  "". The pipeline decides when there is one; this never derives it. */
   function ballotLine(item) {
-    if (!item || contestStatus(item) !== "nominee") return "";
+    if (!item || !NOVEMBER[contestStatus(item)]) return "";
     if (!runsElsewhere(item) || item.raceStatusRace === item.contestRaceId) {
       return String(item.ballotLine || "");
     }
@@ -264,6 +264,135 @@
   function ballotLineSuffix(item) {
     var line = ballotLine(item);
     return line ? " – " + escapeHtml(line) + " line" : "";
+  }
+
+  /* ======================================================= race statuses */
+
+  /* Where someone stands in their 2026 race, in one table for every view
+   * that shows it (rule 12): four copies of it, one per view, had to learn
+   * each new status separately. Each status has its badge class; its words
+   * on a card, in the profile ("long"), in a race's list of people ("mate")
+   * and in a map row ("short"); its hover text; and where a race lists it.
+   * `member` holds what reads differently for a sitting member on the seat
+   * they hold: no primary line is a retirement, a primary win a
+   * renomination, a November win a re-election. `off` takes someone out of
+   * the race, behind a toggle. Someone who lost in November was on the
+   * ballot, and stays in view beside the person who beat them. */
+  var SOURCE = " Source: the state's Wikipedia election results page.";
+  var RACE_STATUS = {
+    nominee: { cls: "badge-money", rank: 0,
+      card: "On the November ballot", long: "On the November ballot", mate: "On the ballot",
+      short: "Nominee",
+      title: "Won the primary; will appear on the general election ballot.",
+      member: { card: "Renominated", long: "Renominated for 2026", short: "Renominated",
+        title: "Won the 2026 primary for this seat." } },
+    elected: { cls: "badge-money", rank: 0,
+      card: "Elected", long: "Elected in November", mate: "Elected", short: "Elected",
+      title: "Won the November general election, per the published results.",
+      member: { card: "Re-elected", long: "Re-elected in November", mate: "Re-elected",
+        short: "Re-elected",
+        title: "Won re-election to this seat in November, per the published results." } },
+    runoff: { cls: "badge-warn", rank: 1,
+      card: "In the runoff", long: "In the general election runoff", mate: "In the runoff",
+      short: "In runoff",
+      title: "No candidate won a majority in November; in the runoff between the top two, " +
+        "per the published results." },
+    advanced: { cls: "badge-warn", rank: 1,
+      card: "In runoff", long: "In a primary runoff", mate: "In runoff", short: "In runoff",
+      title: "Advanced to a primary runoff that has not yet been decided." },
+    defeated: { cls: "badge-danger", rank: 3,
+      card: "Lost in November", long: "Lost the November election", mate: "Lost in November",
+      short: "Lost",
+      title: "Lost the November general election, per the published results.",
+      member: { card: "Lost re-election", long: "Lost re-election in November",
+        mate: "Lost re-election", short: "Lost re-election",
+        title: "Lost re-election to this seat in November, per the published results." } },
+    eliminated: { cls: "badge-danger", rank: 4, off: true,
+      card: "Lost primary", long: "Lost the 2026 primary", mate: "Lost primary",
+      short: "Lost primary",
+      title: "Did not win the primary, per the published results." },
+    withdrawn: { cls: "badge-neutral", rank: 5, off: true,
+      card: "Withdrew", long: "Withdrew from the 2026 race", mate: "Withdrew", short: "Withdrew",
+      title: "Withdrew from the race, per the published results." },
+    unlisted: { cls: "badge-neutral", rank: 6, off: true,
+      card: "Not on primary ballot", long: "Not on the 2026 primary ballot", mate: "Not on ballot",
+      short: "Not on ballot",
+      title: "Filed with the FEC but was not listed in the primary results.",
+      // About this seat only. "Not on the ballot" was false for a member on
+      // another office's ballot: Byron Donalds, Florida's Republican nominee
+      // for governor, read it on the Florida page.
+      member: { cls: "badge-danger", card: "Not running for this seat",
+        long: "Not running for this seat in 2026", short: "Leaving seat",
+        title: "Not named in the primary results or on the November ballot for this seat; " +
+          "not seeking re-election to it." } },
+  };
+
+  /* Not named on the results page, which does name someone like them who
+   * lost or withdrew: off the November ballot whichever reading is right,
+   * and that is all the badge says. */
+  var UNCONFIRMED = { cls: "badge-neutral", rank: 6, off: true,
+    card: "Not on the November ballot", long: "Not on the November ballot",
+    mate: "Not on ballot", short: "Not on ballot",
+    title: "The published results put nobody of this name on the November ballot; a similar " +
+      "name they list lost or withdrew." };
+
+  /* After Election Day, a nominee the results have not marked either way.
+   * The results are read twice a week, so this is a claim about when this
+   * site last looked, and says so (rule 19), not one about the count. */
+  var AWAITING = { cls: "badge-neutral", rank: 0,
+    card: "Awaiting result", long: "On the November ballot: awaiting result",
+    mate: "Awaiting result", short: "Awaiting result" };
+
+  var NOVEMBER = { nominee: true, elected: true, defeated: true, runoff: true };
+  var OFF_BALLOT = { eliminated: true, withdrawn: true, unlisted: true };
+
+  /** How to show *status* in *form* ("card", "long", "mate" or "short"):
+   *  `{cls, label, title, rank, off}`, or null for no status. Options:
+   *  `own` - a sitting member, about the seat they hold; `unconfirmed` - the
+   *  record's raceStatusUnconfirmed; `now` - the clock, for tests. */
+  function raceStatus(status, form, opts) {
+    var spec = RACE_STATUS[status];
+    if (!spec) return null;
+    opts = opts || {};
+    if (status === "unlisted" && opts.unconfirmed) spec = UNCONFIRMED;
+    var own = (opts.own && spec.member) || {};
+    var title = own.title || spec.title;
+    if (status === "nominee" && electionStatus(undefined, opts.now).phase === "post-election") {
+      var asOf = (meta().election || {}).resultsAsOf;
+      spec = AWAITING;
+      own = {};
+      title = "On the November ballot. The results this site last read" +
+        (asOf ? ", on " + asOf + "," : "") + " had not marked a winner.";
+    }
+    return {
+      cls: own.cls || spec.cls,
+      label: own[form] || spec[form],
+      title: form === "long" ? title + SOURCE : title,
+      rank: spec.rank,
+      off: !!spec.off,
+    };
+  }
+
+  /** The same for a person: their contest's status, as a member when the
+   *  race is for the seat they hold. */
+  function raceStatusOf(item, form, opts) {
+    if (!item) return null;
+    opts = opts || {};
+    return raceStatus(contestStatus(item), form, {
+      own: !item.isCandidate && !item.contestLabel,
+      unconfirmed: !!item.raceStatusUnconfirmed,
+      now: opts.now,
+    });
+  }
+
+  /** True when the primary settled *status* out of the race. */
+  function offBallot(status) {
+    return !!OFF_BALLOT[status];
+  }
+
+  /** True when *status* means on the November ballot, counted or not. */
+  function onNovemberBallot(status) {
+    return !!NOVEMBER[status];
   }
 
   /* Portraits are resolved and checked at build time, so this runtime chain
@@ -1196,8 +1325,8 @@
         // so "Jim Clyburn" offers "James Clyburn".
         var names = {};
         people.forEach(function (p) {
-          if (p.raceStatus && p.raceStatus !== "nominee" && p.raceStatus !== "advanced" &&
-              p.isCandidate) return;      // off-ballot filers would swamp the list
+          if (p.raceStatus && p.isCandidate && !NOVEMBER[p.raceStatus] &&
+              p.raceStatus !== "advanced") return;  // off-ballot filers would swamp the list
           var known = names[p.name] || (names[p.name] = []);
           (p.aliases || []).forEach(function (alias) {
             if (known.indexOf(alias) === -1) known.push(alias);
@@ -1279,6 +1408,10 @@
     contestStatus: contestStatus,
     ballotLine: ballotLine,
     ballotLineSuffix: ballotLineSuffix,
+    raceStatus: raceStatus,
+    raceStatusOf: raceStatusOf,
+    offBallot: offBallot,
+    onNovemberBallot: onNovemberBallot,
     meta: meta,
     portraitSrc: portraitSrc,
     portraitSrcset: portraitSrcset,

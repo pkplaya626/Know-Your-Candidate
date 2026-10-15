@@ -74,8 +74,9 @@ def district_maps():
     return districts.index()
 
 
-def build(profiles, races=None, committees=None):
-    """Chamber balance and 2026 election headline figures."""
+def build(profiles, races=None, committees=None, results=None):
+    """Chamber balance and 2026 election headline figures. *results*, the
+    results cache, dates what the page says about who won."""
     members = [p for p in profiles if not p.get("isCandidate")]
 
     senate = [p for p in members if "Senate" in p["chamber"]]
@@ -116,6 +117,10 @@ def build(profiles, races=None, committees=None):
             "filedCandidates": sum(
                 1 for p in profiles if p.get("source") == "fec-field"
             ),
+            # The day the results pages were last read: after Election Day a
+            # race with no winner yet says "not marked as of" this, which is
+            # a claim about us, not about the count (rule 19).
+            "resultsAsOf": (results or {}).get("asOf"),
         },
     }
 

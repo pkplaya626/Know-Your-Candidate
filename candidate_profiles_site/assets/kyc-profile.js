@@ -318,10 +318,6 @@
   /* Who else is in this person's 2026 race - the way a video page lists what
    * to watch next. A reader who opened a member sees their challengers one
    * click away; a reader who opened a challenger sees the incumbent. */
-  var MATE_STATUS = {
-    nominee: "On the ballot", advanced: "In runoff", eliminated: "Lost primary",
-    withdrawn: "Withdrew", unlisted: "Not on ballot",
-  };
 
   function renderRace(item) {
     var panel = el("profileModalRacePanel");
@@ -341,13 +337,14 @@
     var others = race.incumbentIds.concat(race.candidateIds)
       .filter(function (id) { return id !== item.id; })
       .map(KYC.byId).filter(Boolean);
-    var order = { nominee: 0, advanced: 1, undefined: 2, eliminated: 3, withdrawn: 4, unlisted: 5 };
+    var order = function (p) {
+      var spec = KYC.raceStatus(p.raceStatus, "mate");
+      return spec ? spec.rank : 2;          // between a runoff and a loss
+    };
     others.sort(function (a, b) {
       var ra = a.isCandidate ? 1 : 0, rb = b.isCandidate ? 1 : 0;
       if (ra !== rb) return ra - rb;
-      var sa = order[a.raceStatus], sb = order[b.raceStatus];
-      if (sa !== sb) return (sa === undefined ? 2 : sa) - (sb === undefined ? 2 : sb);
-      return a.name.localeCompare(b.name);
+      return order(a) - order(b) || a.name.localeCompare(b.name);
     });
     var out = others.filter(function (p) { return KYC.cards && KYC.cards.offBallot(p); });
     var shown = others.filter(function (p) { return !(KYC.cards && KYC.cards.offBallot(p)); });
@@ -356,11 +353,11 @@
     el("profileModalRaceOdds").innerHTML = KYC.odds ? KYC.odds.render(race, { compact: true }) : "";
     var row = function (p) {
       var role = p.isCandidate ? "" : '<span class="badge badge-neutral">Member</span> ';
-      var status = MATE_STATUS[p.raceStatus]
-        ? '<span class="badge ' + (p.raceStatus === "nominee" ? "badge-money" :
-            p.raceStatus === "advanced" ? "badge-warn" : "badge-neutral") + '">' +
-          KYC.escapeHtml(MATE_STATUS[p.raceStatus]) +
-          (p.raceStatus === "nominee" ? KYC.ballotLineSuffix(p) : "") + "</span>"
+      var spec = KYC.raceStatus(p.raceStatus, "mate",
+        { unconfirmed: !!p.raceStatusUnconfirmed });
+      var status = spec
+        ? '<span class="badge ' + spec.cls + '" title="' + KYC.escapeAttr(spec.title) + '">' +
+          KYC.escapeHtml(spec.label) + KYC.ballotLineSuffix(p) + "</span>"
         : "";
       return '<button type="button" class="race-mate" data-goto="' + KYC.escapeAttr(p.id) + '">' +
         '<img ' + KYC.portraitAttrs(p, "36px") + ' alt="" loading="lazy" ' +
@@ -565,29 +562,6 @@
       KYC.escapeHtml(seat) + "</button>";
   }
 
-  var RACE_STATUS = {
-    nominee: ["badge-money", "On the November ballot",
-      "Won the 2026 primary. Source: the state's Wikipedia election results page."],
-    eliminated: ["badge-danger", "Lost the 2026 primary",
-      "Did not win the primary. Source: the state's Wikipedia election results page."],
-    withdrawn: ["badge-neutral", "Withdrew from the 2026 race",
-      "Listed as withdrawn in the published primary results."],
-    unlisted: ["badge-neutral", "Not on the 2026 primary ballot",
-      "Filed with the FEC, but not listed in the primary results for this seat."],
-    advanced: ["badge-warn", "In a primary runoff",
-      "Advanced to a runoff that has not yet been decided."],
-  };
-
-  /* The same facts read differently for a sitting member: "not on the
-   * primary ballot" is a retirement, and a primary win is a renomination. */
-  var MEMBER_RACE_STATUS = {
-    nominee: ["badge-money", "Renominated for 2026",
-      "Won the 2026 primary for this seat. Source: the state's Wikipedia election results page."],
-    unlisted: ["badge-danger", "Not running for this seat in 2026",
-      "Not named in the primary results or on the November ballot for this seat; " +
-      "not seeking re-election."],
-  };
-
   function renderStatus(item) {
     var target = el("profileModalStatus");
     var pieces = [];
@@ -597,23 +571,18 @@
      * "renominated", "not seeking re-election" - is about the seat they
      * hold, and their result there is not their 2026 story. */
     var elsewhere = !item.isCandidate && !!item.contestLabel;
-    var table = item.isCandidate || elsewhere ? RACE_STATUS :
-      Object.assign({}, RACE_STATUS, MEMBER_RACE_STATUS);
-    var race = table[KYC.contestStatus(item)];
-    if (race && KYC.contestStatus(item) === "unlisted" && item.raceStatusUnconfirmed) {
-      // Named, if at all, under another spelling that lost or withdrew.
-      race = ["badge-neutral", "Not on the November ballot",
-        "The published results put nobody of this name on the November ballot; " +
-        "a similar name they list lost or withdrew."];
-    }
+    var race = KYC.raceStatusOf(item, "long");
     if (race) {
-      var label = elsewhere ? race[1] + " for " + item.contestLabel : race[1];
+      var label = elsewhere ? race.label + " for " + item.contestLabel : race.label;
       // "On the November ballot – Speak The Truth line": a primary loser on
       // a minor-party line must not read as their party's second nominee.
       var line = KYC.ballotLine(item);
-      var title = line ? "On the general election ballot on the " + line +
-        " line. Source: the state's Wikipedia election results page." : race[2];
-      pieces.push('<span class="badge ' + race[0] + '" title="' +
+      var campaign = KYC.contestStatus(item) === "nominee" &&
+        KYC.electionStatus().phase !== "post-election";
+      var title = line ? "On the general election ballot on the " + line + " line. " +
+        (campaign ? "Source: the state's Wikipedia election results page." : race.title)
+        : race.title;
+      pieces.push('<span class="badge ' + race.cls + '" title="' +
         KYC.escapeAttr(title) + '">' + KYC.escapeHtml(label) +
         KYC.ballotLineSuffix(item) + "</span>");
     }

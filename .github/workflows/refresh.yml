@@ -15,12 +15,16 @@ name: Refresh
 
 on:
   schedule:
-    # Mondays and Thursdays, 07:20 UTC. Off the hour because GitHub's
+    # Every day at 07:20 UTC; the `gate` job below decides which days run,
+    # so nobody has to remember to edit this. Off the hour because GitHub's
     # scheduler queues heavily at :00 and skips runs it cannot start.
-    # Thursdays only until the 2026-11-03 election: in the run-up a week-old
-    # field misses withdrawals and results. The `gate` job below skips the
-    # Thursday run after the election, so nobody has to remember to edit this.
-    - cron: "20 7 * * 1,4"
+    #   - until the 2026-11-03 election: Mondays and Thursdays, since in the
+    #     run-up a week-old field misses withdrawals and results;
+    #   - 2026-11-04 to 2026-12-15: every day, so who won reaches the page the
+    #     morning after it is marked, through Georgia's December 1 and
+    #     Louisiana's December 12 runoffs;
+    #   - after that: Mondays.
+    - cron: "20 7 * * *"
   workflow_dispatch:
     inputs:
       portraits:
@@ -49,14 +53,19 @@ jobs:
     steps:
       - id: due
         run: |
-          # The extra Thursday run exists only for the 2026 election.
-          if [ "${{ github.event_name }}" = "schedule" ] \
-             && [ "$(date -u +%u)" = "4" ] \
-             && [ "$(date -u +%Y-%m-%d)" \> "2026-11-03" ]; then
-            echo "run=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "run=true" >> "$GITHUB_OUTPUT"
+          today="$(date -u +%Y-%m-%d)"
+          weekday="$(date -u +%u)"
+          run=true
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            if [ "$today" \> "2026-11-03" ] && [ ! "$today" \> "2026-12-15" ]; then
+              run=true                                   # results: every day
+            elif [ ! "$today" \> "2026-11-03" ]; then
+              [ "$weekday" = "1" ] || [ "$weekday" = "4" ] || run=false
+            else
+              [ "$weekday" = "1" ] || run=false
+            fi
           fi
+          echo "run=$run" >> "$GITHUB_OUTPUT"
 
   refresh:
     name: Reconcile against congress-legislators

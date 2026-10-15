@@ -107,7 +107,7 @@ def wanted(profiles):
     then everyone else still on a ballot. Off-ballot filers are skipped."""
     def rank(profile):
         status = profile.get("raceStatus")
-        if status in ("nominee", "advanced"):
+        if status in ("nominee", "advanced", "elected", "runoff"):
             return 0
         if not profile.get("isCandidate"):
             return 1

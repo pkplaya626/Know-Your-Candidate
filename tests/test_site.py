@@ -778,10 +778,39 @@ class TestRefreshWorkflow(unittest.TestCase):
         self.assertIn('branch="refresh/congress-$(date -u +%Y-%m-%d)-${{ github.run_id }}"',
                       self.text)
 
-    def test_runs_twice_a_week_until_the_election(self):
-        self.assertIn('cron: "20 7 * * 1,4"', self.text)
+    def test_runs_twice_a_week_until_the_election_then_daily_through_the_runoffs(self):
+        self.assertIn('cron: "20 7 * * *"', self.text)
         self.assertIn('"2026-11-03"', self.text)
+        self.assertIn('"2026-12-15"', self.text)      # after Louisiana's Dec 12 runoff
         self.assertIn("needs.gate.outputs.run == 'true'", self.text)
+
+    def test_the_gate_picks_the_right_days(self):
+        # Run the gate's own shell for a few dates; bash is on every runner.
+        import re
+        import shutil
+        import subprocess
+        bash = shutil.which("bash")
+        if not bash:
+            self.skipTest("no bash")
+        script = re.search(r"- id: due\n        run: \|\n(.*?)\n\n", self.text, re.S).group(1)
+        script = "\n".join(line[10:] for line in script.splitlines())
+        script = script.replace("${{ github.event_name }}", "schedule")
+        script = script.replace(' >> "$GITHUB_OUTPUT"', "")
+
+        def due(day, weekday):
+            body = (script.replace("$(date -u +%Y-%m-%d)", day)
+                    .replace("$(date -u +%u)", weekday))
+            # As Actions runs a step: -e, -o pipefail.
+            return subprocess.run([bash, "-eo", "pipefail", "-c", body], capture_output=True,
+                                  text=True, check=True).stdout.strip()
+
+        self.assertEqual(due("2026-10-19", "1"), "run=true")     # Monday before
+        self.assertEqual(due("2026-10-21", "3"), "run=false")    # Wednesday before
+        self.assertEqual(due("2026-11-03", "2"), "run=false")    # Election Day itself
+        self.assertEqual(due("2026-11-04", "3"), "run=true")     # the morning after
+        self.assertEqual(due("2026-12-13", "7"), "run=true")     # Louisiana's runoff
+        self.assertEqual(due("2026-12-16", "3"), "run=false")
+        self.assertEqual(due("2026-12-21", "1"), "run=true")
 
     def test_its_pull_request_gets_ci_without_a_person_approving_it(self):
         # #50 and #51 sat at "action_required" for days in October 2026.

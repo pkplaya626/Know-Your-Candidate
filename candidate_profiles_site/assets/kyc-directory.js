@@ -38,7 +38,6 @@
     candidate: function (item) { return !!item.isCandidate; },
   };
 
-  var OFF_BALLOT = KYC.cards.OFF_BALLOT;
   var offBallot = KYC.cards.offBallot;
 
   var ELECTION_TEST = {

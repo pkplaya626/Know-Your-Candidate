@@ -224,6 +224,47 @@ class TestResolving(unittest.TestCase):
         out = results.resolve_race(results.parse_boxes(text))
         self.assertEqual(out["Amanda Edwards"], "withdrawn")
 
+    def test_a_letter_apart_misspelling_on_the_ballot_is_the_primary_winner(self):
+        # NM-1, 2026-10-14: the Republican primary table and the infobox say
+        # "Didi Okpareke"; the November table says "Didi Okapareke".
+        text = "\n".join([
+            box("Republican primary results", ("Didi Okpareke", 31809, True)),
+            box("2026 New Mexico's 1st congressional district election",
+                ("Melanie Stansbury", 0, False), ("Didi Okapareke", 0, False)),
+        ])
+        out = results.resolve_race(results.parse_boxes(text))
+        self.assertEqual(out, {"Didi Okpareke": "nominee", "Melanie Stansbury": "nominee"})
+
+    def test_two_near_names_in_one_table_stay_two_people(self):
+        text = box("Republican primary results", ("Michael Johnson", 9, True),
+                   ("Michael Johnston", 4, False))
+        out = results.resolve_race(results.parse_boxes(text))
+        self.assertEqual(out, {"Michael Johnson": "nominee", "Michael Johnston": "eliminated"})
+        # Nor are different given names, or short surnames, ever folded.
+        self.assertEqual(results._near_spellings([
+            ("A", [{"name": "Ann Okpareke"}]), ("B", [{"name": "Bea Okapareke"}]),
+            ("C", [{"name": "Jo Smith"}]), ("D", [{"name": "Jo Smyth"}])]), {})
+
+    def test_a_row_with_a_nested_template_on_its_own_line_is_read(self):
+        # 2022 Georgia Senate: "{{nowrap|...}}" in the candidate and change
+        # fields made both runoff candidates' November rows vanish.
+        text = "\n".join([
+            "{{Election box begin no change", "| title = 2022 United States Senate election in Georgia",
+            "}}",
+            "{{Election box winning candidate with party link no change",
+            " |party      = Democratic Party (United States)",
+            " |candidate  = {{nowrap|[[Raphael Warnock]] (incumbent)}}",
+            " |votes      = 1,946,117", " |change = {{nowrap|N/A}}", "}}",
+            "{{Election box candidate with party link no change",
+            " |party      = Republican Party (United States)",
+            " |candidate  = [[Herschel Walker]]", " |votes = 1,908,442",
+            " |change = {{nowrap|{{small|N/A}}}}", "}}",
+            "{{Election box end}}",
+        ])
+        rows = [r for _t, rs in results.parse_boxes(text) for r in rs]
+        self.assertEqual([(r["name"], r["won"]) for r in rows],
+                         [("Raphael Warnock", True), ("Herschel Walker", False)])
+
     def test_one_person_spelled_two_ways_is_one_person(self):
         # "Norma J. Torres" in the primary table, "Norma Torres" on the ballot.
         text = "\n".join([
@@ -1013,29 +1054,30 @@ class TestOpenPrimaryElectionNight(NoGap):
         self.assertNotIn("H-LA-05-2026", cache["pending"])
         self.assertFalse(any("[warn]" in line for line in logged))
 
-    def test_the_marked_top_two_advance_and_the_rest_are_out(self):
+    def test_the_marked_top_two_go_to_the_runoff_and_the_rest_lost(self):
+        # The first round is the November election itself: its top two meet in
+        # December, and the rest lost in November (not "lost a primary").
         cache = self.run_build(datetime.date(2026, 11, 4), la5_box(LA5_NOVEMBER, *TOP_TWO))
         self.assertEqual(self.statuses(cache), {
-            "echols": "advanced", "moore": "advanced", "cathey": "eliminated",
-            "cordell": "eliminated", "mckay": "eliminated"})
+            "echols": "runoff", "moore": "runoff", "cathey": "defeated",
+            "cordell": "defeated", "mckay": "defeated"})
         race = cache["races"]["H-LA-05-2026"]
         self.assertEqual(race["decided"], {"general": False, "parties": ["all"]})
-        # The race card: settled, two in the runoff, nobody yet the nominee.
         summary = results.race_summary(cache, "H-LA-05-2026")
-        self.assertEqual((summary["nominees"], summary["advanced"], summary["eliminated"]),
+        self.assertEqual((summary["nominees"], summary["runoff"], summary["defeated"]),
                          (0, 2, 3))
 
     def test_a_vote_less_runoff_box_put_up_early_eliminates_nobody(self):
         cache = self.run_build(datetime.date(2026, 11, 4), la5_box(LA5_NOVEMBER, *TOP_TWO),
                                la5_box(LA5_DECEMBER, ("echols", None, False),
                                        ("moore", None, False)))
-        self.assertEqual(self.statuses(cache)["echols"], "advanced")
-        self.assertEqual(self.statuses(cache)["moore"], "advanced")
+        self.assertEqual(self.statuses(cache)["echols"], "runoff")
+        self.assertEqual(self.statuses(cache)["moore"], "runoff")
 
     def test_a_runoff_winner_before_the_runoff_date_is_not_read(self):
         cache = self.run_build(datetime.date(2026, 11, 20), la5_box(LA5_NOVEMBER, *TOP_TWO),
                                la5_box(LA5_DECEMBER, ("echols", 1, True), ("moore", 0, False)))
-        self.assertEqual(self.statuses(cache)["moore"], "advanced")
+        self.assertEqual(self.statuses(cache)["moore"], "runoff")
 
     def test_one_winner_with_a_majority_is_elected_outright(self):
         cache = self.run_build(datetime.date(2026, 11, 4), la5_box(
@@ -1043,7 +1085,7 @@ class TestOpenPrimaryElectionNight(NoGap):
             ("cathey", 15000, False)))
         out = self.statuses(cache)
         self.assertEqual((out["echols"], out["moore"], out["cathey"]),
-                         ("nominee", "eliminated", "eliminated"))
+                         ("elected", "defeated", "defeated"))
 
     def test_winners_that_are_not_a_complete_result_decide_nothing(self):
         for rows in (
@@ -1075,8 +1117,8 @@ class TestOpenPrimaryElectionNight(NoGap):
                                la5_box(LA5_DECEMBER, ("echols", 52000, True),
                                        ("moore", 48000, False)))
         self.assertEqual(self.statuses(cache), {
-            "echols": "nominee", "moore": "eliminated", "cathey": "eliminated",
-            "cordell": "eliminated", "mckay": "eliminated"})
+            "echols": "elected", "moore": "defeated", "cathey": "defeated",
+            "cordell": "defeated", "mckay": "defeated"})
 
     def test_after_the_runoff_an_unreported_runoff_leaves_both_in_it(self):
         cache = self.run_build(datetime.date(2026, 12, 13), la5_box(LA5_NOVEMBER, *TOP_TWO),
@@ -1084,7 +1126,7 @@ class TestOpenPrimaryElectionNight(NoGap):
                                        ("moore", None, False)))
         out = self.statuses(cache)
         self.assertEqual((out["echols"], out["moore"], out["mckay"]),
-                         ("advanced", "advanced", "eliminated"))
+                         ("runoff", "runoff", "defeated"))
 
     # -- the cache
     def test_a_cache_built_after_the_first_round_keeps_its_results(self):
@@ -1183,6 +1225,205 @@ class TestPartyRunoffGateUnchanged(NoGap):
         self.assertEqual(cache["races"]["H-GA-05-2026"]["status"],
                          {"H6GA05201": "advanced", "H6GA05202": "advanced",
                           "H6GA05203": "eliminated"})
+
+
+class TestGeneralElectionNight(NoGap):
+    """After Election Day the November table decides, and only its marked winner."""
+
+    title = "2026 United States House of Representatives elections in Georgia"
+    dates = {("GA", "H"): {"primary": "2026-05-19", "runoff": "2026-06-16"}}
+    field = {"candidates": [row("H6GA05201", "ALPHA, ANN", "GA", "H", 5, "REP"),
+                            row("H6GA05202", "BETA, BEA", "GA", "H", 5, "REP"),
+                            row("H6GA05204", "DELTA, DEE", "GA", "H", 5, "DEM"),
+                            row("H6GA05205", "EPSILON, ED", "GA", "H", 5, "LIB")]}
+    primaries = "\n".join([
+        box("Republican primary results", ("Ann Alpha", 60, True), ("Bea Beta", 40, False)),
+        box("Democratic primary results", ("Dee Delta", 100, True)),
+    ])
+    GENERAL = "2026 Georgia's 5th congressional district election"
+
+    def general(self, alpha=False, delta=False):
+        return box(self.GENERAL, ("Ann Alpha", 49, alpha), ("Dee Delta", 48, delta),
+                   ("Ed Epsilon", 3, False))
+
+    def run_build(self, today, *tables):
+        page = "\n==District 5==\n" + self.primaries + "\n" + "\n".join(tables) + "\n"
+        return results.build(self.field, self.dates, today=today, log=lambda *_: None,
+                             fetch=lambda t: page if t == self.title else
+                             (_ for _ in ()).throw(results.PageMissing(t)))
+
+    def statuses(self, cache):
+        names = {"H6GA05201": "alpha", "H6GA05202": "beta", "H6GA05204": "delta",
+                 "H6GA05205": "epsilon"}
+        return {names[c]: s for c, s in cache["races"]["H-GA-05-2026"]["status"].items()}
+
+    def test_general_day_is_the_tuesday_after_the_first_monday(self):
+        self.assertEqual(results.general_day(2026), datetime.date(2026, 11, 3))
+        self.assertEqual(results.general_day(2027), datetime.date(2027, 11, 2))
+        self.assertFalse(results.general_held(datetime.date(2026, 11, 3)))
+        self.assertTrue(results.general_held(datetime.date(2026, 11, 4)))
+
+    def test_on_election_day_a_marked_winner_is_not_read(self):
+        # Polls are still open somewhere; an early mark is not a result.
+        cache = self.run_build(datetime.date(2026, 11, 3), self.general(alpha=True))
+        self.assertEqual(self.statuses(cache), {
+            "alpha": "nominee", "beta": "eliminated", "delta": "nominee", "epsilon": "nominee"})
+
+    def test_the_marked_winner_is_elected_and_the_rest_of_the_ballot_lost(self):
+        cache = self.run_build(datetime.date(2026, 11, 4), self.general(alpha=True))
+        # The primary loser keeps their primary result; they were never on it.
+        self.assertEqual(self.statuses(cache), {
+            "alpha": "elected", "beta": "eliminated", "delta": "defeated",
+            "epsilon": "defeated"})
+        summary = results.race_summary(cache, "H-GA-05-2026")
+        self.assertEqual((summary["elected"], summary["defeated"], summary["nominees"]),
+                         (1, 2, 0))
+
+    def test_with_no_marked_winner_the_count_is_continuing(self):
+        cache = self.run_build(datetime.date(2026, 11, 4), self.general())
+        self.assertEqual(self.statuses(cache), {
+            "alpha": "nominee", "beta": "eliminated", "delta": "nominee", "epsilon": "nominee"})
+
+    def test_two_marked_winners_decide_nothing(self):
+        cache = self.run_build(datetime.date(2026, 11, 4), self.general(alpha=True, delta=True))
+        self.assertEqual(self.statuses(cache)["alpha"], "nominee")
+        self.assertEqual(self.statuses(cache)["delta"], "nominee")
+
+    def test_a_general_runoff_holds_the_top_two_and_the_rest_lost(self):
+        cache = self.run_build(datetime.date(2026, 11, 4), self.general(),
+                               box("Runoff results", ("Ann Alpha", 0, False),
+                                   ("Dee Delta", 0, False)))
+        self.assertEqual(self.statuses(cache), {
+            "alpha": "runoff", "beta": "eliminated", "delta": "runoff", "epsilon": "defeated"})
+        self.assertEqual(results.race_summary(cache, "H-GA-05-2026")["runoff"], 2)
+
+    def test_a_runoff_winner_before_the_runoff_date_is_not_read(self):
+        cache = self.run_build(datetime.date(2026, 12, 1), self.general(),
+                               box("Runoff results", ("Ann Alpha", 0, False),
+                                   ("Dee Delta", 1, True)))
+        self.assertEqual((self.statuses(cache)["alpha"], self.statuses(cache)["delta"]),
+                         ("runoff", "runoff"))
+
+    def test_after_the_runoff_its_winner_is_elected(self):
+        cache = self.run_build(datetime.date(2026, 12, 2), self.general(),
+                               box("Runoff results", ("Ann Alpha", 0, False),
+                                   ("Dee Delta", 1, True)))
+        self.assertEqual(self.statuses(cache), {
+            "alpha": "defeated", "beta": "eliminated", "delta": "elected", "epsilon": "defeated"})
+
+    def test_a_party_runoff_titled_without_its_party_is_not_the_general_runoff(self):
+        # June's Republican runoff between Alpha and Beta, boxed as "Runoff
+        # results". Beta was never on the November ballot, so it is not one.
+        cache = self.run_build(datetime.date(2026, 11, 4), self.general(alpha=True),
+                               box("Runoff results", ("Ann Alpha", 55, True),
+                                   ("Bea Beta", 45, False)))
+        self.assertEqual(self.statuses(cache), {
+            "alpha": "elected", "beta": "eliminated", "delta": "defeated", "epsilon": "defeated"})
+
+    def test_a_nominee_who_withdrew_after_nomination_stays_withdrawn(self):
+        text = "\n".join([
+            box("Democratic primary results", ("Dee Delta", 9, True)),
+            box(self.GENERAL, ("Ann Alpha", 9, True), ("Dee Delta", 4, False)),
+            "===Withdrew after nomination===", "*Dee Delta",
+        ])
+        section = text
+        boxes = results.parse_boxes(section) + results.candidate_lists(section)
+        before = results.resolve_race(boxes)
+        after = results.resolve_race(boxes, general_held=True)
+        self.assertEqual(before["Dee Delta"], "withdrawn")
+        self.assertEqual(after["Dee Delta"], "withdrawn")
+        self.assertEqual(after["Ann Alpha"], "elected")
+
+    def test_only_a_state_with_general_runoffs_reads_one(self):
+        self.assertIn("GA", results._general_runoffs())
+        boxes = results.parse_boxes(self.general() + "\n" + box(
+            "Runoff results", ("Ann Alpha", 0, False), ("Dee Delta", 0, False)))
+        out = results.resolve_race(boxes, general_held=True, general_runoff=False)
+        self.assertNotIn("runoff", out.values())
+
+    def test_a_member_who_won_or_lost_was_seeking_reelection(self):
+        cache = self.run_build(datetime.date(2026, 11, 4), self.general(delta=True))
+        member = {"id": "m", "name": "Ann Alpha", "party": "Republican", "state": "GA",
+                  "chamber": "House", "district": "GA-5", "districtNum": 5,
+                  "raceId": "H-GA-05-2026", "isCandidate": False,
+                  "seatUp2026": True, "seekingReelection2026": False,
+                  "fecCandidateId": "H6GA05201",
+                  "status": "Incumbent"}
+        results.apply_cache([member], cache)
+        self.assertEqual(member["raceStatus"], "defeated")
+        self.assertTrue(member["seekingReelection2026"])
+
+
+class TestAnotherSpellingOnThePage(NoGap):
+    """ID-1, 2026-10-14: the November table writes "Sarah Zabel Peterson", the
+    infobox "Sarah Zabel"; the filing is ZABEL, SARAH."""
+
+    title = "2026 United States House of Representatives elections in Idaho"
+    dates = {("ID", "H"): {"primary": "2026-05-19", "runoff": None}}
+    field = {"candidates": [row("H8ID01124", "FULCHER, RUSS", "ID", "H", 1, "REP"),
+                            row("H2ID01192", "PETERSON, KAYLEE", "ID", "H", 1, "DEM"),
+                            row("H6ID01318", "ZABEL, SARAH", "ID", "H", 1, "IND")]}
+
+    def run_build(self, page):
+        return results.build(self.field, self.dates, today=datetime.date(2026, 10, 14),
+                             log=lambda *_: None,
+                             fetch=lambda t: page if t == self.title else
+                             (_ for _ in ()).throw(results.PageMissing(t)))
+
+    def test_the_infobox_spelling_finds_the_filing(self):
+        page = "\n".join([
+            "\n==District 1==",
+            "{{Infobox election", "| nominee1 = [[Russ Fulcher]]",
+            "| party1 = Republican Party (United States)", "| nominee2 = Kaylee Peterson",
+            "| party2 = Democratic Party (United States)", "| nominee3 = Sarah Zabel",
+            "| party3 = Independent politician", "}}",
+            box("Republican primary results", ("Russ Fulcher", 9, True)),
+            box("Democratic primary results", ("Kaylee Peterson", 9, True)),
+            box("2026 Idaho's 1st congressional district election", ("Russ Fulcher", 0, False),
+                ("Kaylee Peterson", 0, False), ("Sarah Zabel Peterson", 0, False)),
+        ])
+        race = self.run_build(page)["races"]["H-ID-01-2026"]
+        self.assertEqual(race["status"], {"H8ID01124": "nominee", "H2ID01192": "nominee",
+                                          "H6ID01318": "nominee"})
+        self.assertEqual(race["unmatched"], {})
+
+
+class TestValidateUncalled(unittest.TestCase):
+    def codes(self, as_of, statuses):
+        from kyc import validate
+        cache = {"asOf": as_of, "races": {"S-AK-2026": {
+            "decided": {"general": True, "parties": ["all"]}, "status": statuses}}}
+        return [i.code for i in validate.check_results_pages(cache)]
+
+    def test_a_race_still_uncalled_days_later_is_reported(self):
+        self.assertIn("general-uncalled", self.codes("2026-11-07", {"a": "nominee", "b": "nominee"}))
+        self.assertNotIn("general-uncalled", self.codes("2026-11-05", {"a": "nominee"}))
+        self.assertNotIn("general-uncalled",
+                         self.codes("2026-11-07", {"a": "elected", "b": "defeated"}))
+
+
+class TestValidateElected(unittest.TestCase):
+    race = {"id": "H-GA-05-2026", "state": "GA", "settled": True, "incumbentIds": [],
+            "candidateIds": ["a", "b"], "results": {}}
+
+    def codes(self, statuses, other=()):
+        from kyc import validate
+        people = [{"id": pid, "name": name, "party": "Democrat", "raceStatus": status,
+                   "raceId": "H-GA-05-2026", "isCandidate": True}
+                  for pid, name, status in statuses]
+        race = dict(self.race, results={"otherElected": list(other)})
+        return [i.code for i in validate.check_results(people, [race])]
+
+    def test_one_winner_is_fine(self):
+        codes = self.codes([("a", "Ann One", "elected"), ("b", "Bo Two", "defeated")])
+        self.assertNotIn("multiple-elected", codes)
+        self.assertNotIn("settled-race-without-nominee", codes)
+
+    def test_two_winners_are_an_error(self):
+        self.assertIn("multiple-elected",
+                      self.codes([("a", "Ann One", "elected"), ("b", "Bo Two", "elected")]))
+        self.assertIn("multiple-elected",
+                      self.codes([("a", "Ann One", "elected")], other=["Cy Three"]))
 
 
 class TestSenateDateFallback(unittest.TestCase):

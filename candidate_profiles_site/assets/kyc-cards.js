@@ -15,61 +15,28 @@
    * lost, withdrew, or was never on the primary ballot is not "in the race",
    * and showing them as though they were is the opposite mistake from the
    * one the FEC field fixed. They stay in the data - nothing is deleted -
-   * behind a toggle. */
-  var OFF_BALLOT = { eliminated: true, withdrawn: true, unlisted: true };
-
+   * behind a toggle. The statuses and their words are KYC.raceStatus's. */
   function offBallot(item) {
-    return !!OFF_BALLOT[item.raceStatus];
+    return KYC.offBallot(item.raceStatus);
   }
-
-  var RACE_BADGE = {
-    nominee: ['badge-money', 'On the November ballot',
-      'Won the primary; will appear on the general election ballot.'],
-    eliminated: ['badge-danger', 'Lost primary',
-      'Did not win the primary, per the published results.'],
-    withdrawn: ['badge-neutral', 'Withdrew',
-      'Withdrew from the race, per the published results.'],
-    unlisted: ['badge-neutral', 'Not on primary ballot',
-      'Filed with the FEC but was not listed in the primary results.'],
-    advanced: ['badge-warn', 'In runoff',
-      'Advanced to a primary runoff that has not yet been decided.'],
-  };
-
-  /* Not named on the results page, which does name someone like them who
-   * lost or withdrew: off the November ballot whichever reading is right,
-   * and that is all the badge says. */
-  var UNCONFIRMED = ['badge-neutral', 'Not on the November ballot',
-    'The published results put nobody of this name on the November ballot; a similar ' +
-    'name they list lost or withdrew.'];
-
-  /* For a sitting member the same facts read differently: no primary line
-   * is a retirement, and a primary win is a renomination. */
-  var MEMBER_RACE_BADGE = {
-    nominee: ['badge-money', 'Renominated',
-      'Won the 2026 primary for this seat.'],
-    // About this seat only. "Not on the ballot" was false for a member on
-    // another office's ballot: Byron Donalds, Florida's Republican nominee
-    // for governor, read it on the Florida page.
-    unlisted: ['badge-danger', 'Not running for this seat',
-      'Not named in the primary results for this seat; not seeking re-election to it.'],
-  };
 
   function raceBadge(item) {
     // "Renominated" is about the seat a member holds; a member on another
     // seat's ballot is simply on it.
-    var own = !item.isCandidate && !item.contestLabel;
-    var status = KYC.contestStatus(item);
-    var spec = (own && MEMBER_RACE_BADGE[status]) || RACE_BADGE[status];
+    var spec = KYC.raceStatusOf(item, "card");
     if (!spec) return "";
-    if (status === "unlisted" && item.raceStatusUnconfirmed) spec = UNCONFIRMED;
     // A nominee on another line than their party's says so, or a primary
     // loser on a minor-party line reads as a second Democratic nominee.
     var line = KYC.ballotLine(item);
     // Not "won the primary": Jose Vega (NY-15) lost it and is on the ballot.
-    var title = line ? "Will appear on the general election ballot on the " + line +
-      " line, per the published results." : spec[2];
-    return '<span class="badge ' + spec[0] + '" title="' + KYC.escapeAttr(title) +
-      '">' + KYC.escapeHtml(spec[1]) + KYC.ballotLineSuffix(item) + "</span>";
+    // Before the count a nominee's own hover ("won the primary") is wrong for
+    // a line like that; after it, "awaiting result" still needs its date.
+    var campaign = KYC.contestStatus(item) === "nominee" &&
+      KYC.electionStatus().phase !== "post-election";
+    var title = line ? "On the general election ballot on the " + line +
+      " line, per the published results." + (campaign ? "" : " " + spec.title) : spec.title;
+    return '<span class="badge ' + spec.cls + '" title="' + KYC.escapeAttr(title) +
+      '">' + KYC.escapeHtml(spec.label) + KYC.ballotLineSuffix(item) + "</span>";
   }
 
   function statusBadge(item) {
@@ -87,7 +54,7 @@
     }
     /* A sitting member the primary eliminated is leaving too, and a reader
      * should see that before "seat up". */
-    if (!item.isCandidate && OFF_BALLOT[item.raceStatus]) {
+    if (!item.isCandidate && KYC.offBallot(item.raceStatus)) {
       return raceBadge(item);
     }
     if (/retiring|not running|defeated|ineligible|resigned/.test(status)) {
@@ -98,9 +65,11 @@
         '<span class="badge badge-money" title="Filed with the FEC; the primary has not been held yet.">2026 challenger</span>';
     }
     /* Won (or is in the runoff for) the primary for the seat they hold:
-     * "Renominated" says more than "seat up". Before any result, the seat
-     * badge below still shows. */
-    if (!item.isCandidate && (item.raceStatus === "nominee" || item.raceStatus === "advanced")) {
+     * "Renominated" says more than "seat up", and "Re-elected" or "Lost
+     * re-election" more again. Before any result, the seat badge below
+     * still shows. */
+    if (!item.isCandidate && (KYC.onNovemberBallot(item.raceStatus) ||
+        item.raceStatus === "advanced")) {
       var renominated = raceBadge(item);
       if (renominated) return renominated;
     }
@@ -140,16 +109,60 @@
     ].join("");
   }
 
-  /** The badges that summarise a race: open seat, primary date, how many
-   *  are on the ballot, how many filed. */
+  /** Who is in *race* with *status*, by name: the people with a profile
+   *  whose contest it is, and the names the results page gives with no
+   *  profile here (res.otherElected, res.otherRunoff). */
+  function namesWith(race, status, unprofiled) {
+    var seen = {};
+    var names = race.incumbentIds.concat(race.candidateIds).map(KYC.byId)
+      .filter(function (p) {
+        if (!p || seen[p.id]) return false;
+        seen[p.id] = true;
+        var contest = p.isCandidate ? p.raceId : (p.contestRaceId || p.raceId);
+        return contest === race.id && KYC.contestStatus(p) === status;
+      })
+      .map(function (p) { return p.name; });
+    (unprofiled || []).forEach(function (name) {
+      if (names.indexOf(name) === -1) names.push(name);
+    });
+    return names;
+  }
+
+  /** After Election Day: who won the race, who is in its runoff, or that
+   *  the results this site last read had not said - never a guess. */
+  function outcomeBadge(race) {
+    if (KYC.electionStatus().phase !== "post-election" || !race.settled) return "";
+    var res = race.results || {};
+    var won = namesWith(race, "elected", res.otherElected);
+    if (won.length === 1) {
+      return '<span class="badge badge-money" title="' + KYC.escapeAttr(
+        "Marked as the winner on the state's Wikipedia election results page.") +
+        '">Won by ' + KYC.escapeHtml(won[0]) + "</span>";
+    }
+    var runoff = namesWith(race, "runoff", res.otherRunoff);
+    if (runoff.length) {
+      return '<span class="badge badge-warn" title="' + KYC.escapeAttr(
+        "No candidate won a majority in November. In the runoff, per the published " +
+        "results: " + runoff.join(", ") + ".") + '">Going to a runoff</span>';
+    }
+    var asOf = (KYC.meta().election || {}).resultsAsOf;
+    return '<span class="badge badge-neutral" title="' + KYC.escapeAttr(
+      "The results this site last read" + (asOf ? ", on " + asOf + "," : "") +
+      " had not marked a winner.") + '">Awaiting result</span>';
+  }
+
+  /** The badges that summarise a race: its November result, open seat,
+   *  primary date, how many are on the ballot, how many filed. */
   function raceBadges(race) {
     var badges = [];
+    var outcome = outcomeBadge(race);
+    if (outcome) badges.push(outcome);
     if (race.openSeat) {
       var holder = race.incumbentIds.map(KYC.byId).filter(Boolean)[0];
       var why = !holder ? "A newly drawn seat with no sitting member." :
         holder.contestLabel ? holder.name + " is running for " + holder.contestLabel + "." :
         holder.alsoRunningSeat ? holder.name + " is running for " + holder.alsoRunningSeat + "." :
-        OFF_BALLOT[holder.raceStatus] ? holder.name + " is not on the November ballot." :
+        KYC.offBallot(holder.raceStatus) ? holder.name + " is not on the November ballot." :
         holder.name + " is not seeking re-election.";
       badges.push('<span class="badge badge-warn" title="' + KYC.escapeAttr(why) +
         '">Open seat</span>');
@@ -263,7 +276,6 @@
   }
 
   KYC.cards = {
-    OFF_BALLOT: OFF_BALLOT,
     offBallot: offBallot,
     raceBadge: raceBadge,
     statusBadge: statusBadge,

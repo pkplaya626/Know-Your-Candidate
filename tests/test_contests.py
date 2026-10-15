@@ -120,6 +120,20 @@ class TestCrossLink(unittest.TestCase):
         self.assertEqual(_cross_link([carter, senate]), 1)
         self.assertFalse(carter["seekingReelection2026"])
 
+    def test_a_filing_under_an_initial_links_through_its_evidenced_name(self):
+        # "KRISHNAMOORTHI, S": RESULT_NAMES has the name his own committee
+        # uses, keyed on the filing's id.
+        raja = member("K000391", "Raja Krishnamoorthi", "IL", 8)
+        senate = candidate("FEC_S6IL00482", "S Krishnamoorthi", "IL", chamber="Senate",
+                           fec="S6IL00482", source="fec-field")
+        self.assertEqual(_cross_link([raja, senate]), 1)
+        self.assertEqual(raja["alsoRunningId"], "FEC_S6IL00482")
+        self.assertEqual(raja["contestRaceId"], "S-IL-2026")
+        # Without the entry's id, an initial links nobody.
+        other = candidate("FEC_S6IL99999", "S Krishnamoorthi", "IL", chamber="Senate",
+                          fec="S6IL99999", source="fec-field")
+        self.assertEqual(_cross_link([member("K000391", "Raja Krishnamoorthi", "IL", 8), other]), 0)
+
     def test_same_name_in_another_state_is_not_linked(self):
         rogers = member("R000575", "Mike Rogers", "AL", 3, party="Republican")
         other = candidate("FEC_S6MI00001", "Mike Rogers", "MI", chamber="Senate",
@@ -336,7 +350,7 @@ class TestNomineesUnderTheThreshold(unittest.TestCase):
         self.assertTrue(race["contested"])
         self.assertEqual(race["candidateCount"], 0)            # still no profile
         self.assertEqual(race["results"]["belowThreshold"],
-                         [{"id": "H6TX12169", "name": "Angela Rodriguez Prilliman"}])
+                         [{"id": "H6TX12169", "name": "Angela Rodriguez Prilliman", "status": "nominee"}])
         self.assertEqual(race["results"]["otherNominees"], ["Angela Rodriguez Prilliman"])
 
     def test_the_incumbents_own_registration_is_never_a_challenger(self):

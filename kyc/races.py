@@ -222,6 +222,9 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None):
                     summary["belowThreshold"] = below
                     summary["otherNominees"] = sorted(
                         set(summary["otherNominees"]) | {b["name"] for b in below})
+                    for key, wanted in (("otherElected", "elected"), ("otherRunoff", "runoff")):
+                        summary[key] = sorted(set(summary.get(key) or ()) | {
+                            b["name"] for b in below if b["status"] == wanted})
                 # One person, counted once: an undecided profile whose name
                 # the page may give another spelling of is counted as that
                 # page name, not beside it ("Sarah Zabel" and the page's
@@ -255,7 +258,7 @@ def _below_threshold(results, rid, filed, profiled, people=()):
     to both ids (Jeremy Ryan Todd, KY-4); and a name already counted.
     """
     from .candidates import display_name
-    from .results import NOMINEE, _sequence
+    from .results import NOVEMBER, _sequence
 
     race = ((results or {}).get("races") or {}).get(rid) or {}
     seen = set()
@@ -266,7 +269,7 @@ def _below_threshold(results, rid, filed, profiled, people=()):
     out = []
     for cid, status in sorted((race.get("status") or {}).items()):
         row = (filed or {}).get(cid)
-        if status != NOMINEE or cid in profiled or not row:
+        if status not in NOVEMBER or cid in profiled or not row:
             continue
         if row.get("incumbent_challenge") == "I":
             continue
@@ -275,7 +278,7 @@ def _below_threshold(results, rid, filed, profiled, people=()):
         if key in seen:
             continue
         seen.add(key)
-        out.append({"id": cid, "name": name})
+        out.append({"id": cid, "name": name, "status": status})
     return sorted(out, key=lambda b: b["name"])
 
 

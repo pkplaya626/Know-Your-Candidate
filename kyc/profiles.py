@@ -438,7 +438,7 @@ def _build_candidate(row, index, as_of=None):
     return profile
 
 
-def _link_key(profile):
+def _link_key(profile, name=None):
     """First and last name, folded, plus the state.
 
     Middle names and suffixes are dropped: the FEC files Buddy Carter's
@@ -450,10 +450,25 @@ def _link_key(profile):
     """
     from .results import _tokens
 
-    words = _tokens(profile["name"])
+    words = _tokens(name or profile["name"])
     if len(words) < 2:
         return None
     return (words[0], words[-1], profile["state"])
+
+
+def _link_keys(profile):
+    """The candidate's own key, and the key of the name its filing's
+    evidenced entry in ``overrides.RESULT_NAMES`` gives. The FEC files Raja
+    Krishnamoorthi's Senate run as "KRISHNAMOORTHI, S", so his member card
+    never pointed at it; the entry is keyed on the filing's id and evidenced
+    by his own committee (RAJA FOR ILLINOIS), not a guess (rule 17)."""
+    from .overrides import RESULT_NAMES
+
+    keys = [_link_key(profile)]
+    entry = RESULT_NAMES.get(profile.get("fecCandidateId") or "")
+    if entry:
+        keys.append(_link_key(profile, entry[0]))
+    return [k for k in keys if k]
 
 
 def _cross_link(profiles):
@@ -479,7 +494,7 @@ def _cross_link(profiles):
     for profile in profiles:
         if not profile["isCandidate"]:
             continue
-        held = members.get(_link_key(profile))
+        held = next((members[k] for k in _link_keys(profile) if k in members), None)
         if held is None or held["chamber"] == profile["chamber"]:
             continue
         profile["incumbentId"] = held["id"]
