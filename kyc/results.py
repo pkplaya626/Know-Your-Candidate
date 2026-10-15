@@ -66,7 +66,20 @@ ADVANCED = "advanced"   # through to a runoff that has not happened yet
 # what it says: they filed, and they were not listed.
 UNLISTED = "unlisted"
 
+# After the general election, from the same pages and the same template: the
+# November table's marked winner, everyone else on that ballot, and the two a
+# general-election runoff is between (Georgia's, Louisiana's December round).
+# Read only once Election Day has passed (general_held); a table with no
+# marked winner leaves everyone as they were - the count is continuing.
+ELECTED = "elected"
+DEFEATED = "defeated"
+RUNOFF = "runoff"
+
+# Off the November ballot: the primary settled them out. Someone DEFEATED in
+# November was on it, and stays in view beside the person who beat them.
 OFF_BALLOT = (ELIMINATED, WITHDRAWN, UNLISTED)
+# On the November ballot, before and after it is counted.
+NOVEMBER = (NOMINEE, ELECTED, DEFEATED, RUNOFF)
 
 
 class ResultsError(RuntimeError):
@@ -189,6 +202,32 @@ def primary_settled(dates, state, office, today, open_seat=False):
         return False
     latest = slot["primary"] if open_seat else (slot.get("runoff") or slot["primary"])
     return latest < today.isoformat()
+
+
+def general_day(year=CYCLE):
+    """Election Day: the Tuesday after the first Monday in November."""
+    day = datetime.date(year, 11, 1)
+    while day.weekday() != 0:
+        day += datetime.timedelta(days=1)
+    return day + datetime.timedelta(days=1)
+
+
+def general_held(today, year=CYCLE):
+    """True from the day after Election Day: no November table is read as a
+    result before the polls have closed everywhere."""
+    return today > general_day(year)
+
+
+def general_runoff_held(state, today):
+    """True when *state* holds general-election runoffs and its date has passed."""
+    from . import overrides
+    entry = overrides.GENERAL_RUNOFFS.get(state)
+    return bool(entry) and entry[0] < today.isoformat()
+
+
+def _general_runoffs():
+    from . import overrides
+    return overrides.GENERAL_RUNOFFS
 
 
 def runoff_held(dates, state, office, today):
@@ -519,7 +558,7 @@ def _list_kind(heading):
 
 def _bullet_name(line):
     """``* [[Janet Mills]], governor of Maine ...`` -> raw ``[[Janet Mills]]``."""
-    text = re.split(r"<ref|<!--", line, 1)[0]
+    text = re.split(r"<ref|<!--", line, maxsplit=1)[0]
     depth, i = 0, 0
     while i < len(text):
         two = text[i:i + 2]
@@ -796,7 +835,8 @@ def _canonical(boxes):
     return out
 
 
-def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True):
+def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
+                 general_held=False, general_runoff=False, general_runoff_held=False):
     """Who is still standing, from a race's results tables.
 
     Returns ``{name: status}`` for everyone named in a primary-stage table,
@@ -824,6 +864,16 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True):
     else in it is out, one marked winner with a majority of the counted vote
     is elected outright, and once *runoff_held* a December runoff table that
     marks a winner decides it.
+
+    Once *general_held* (the day after Election Day), the November table's
+    marked winner is ELECTED and everyone else on it DEFEATED; with no
+    marked winner, or several and no runoff, nothing changes (rule 29). In a
+    state with *general_runoff* (Georgia), a runoff table with no party in its
+    title is the general runoff: its two are in a RUNOFF, everyone else on
+    the November ballot is DEFEATED, and once *general_runoff_held* its marked
+    winner is ELECTED. An open primary's first round is the November election
+    itself: its majority winner is ELECTED, its top two are in a RUNOFF, and
+    the rest are DEFEATED.
     """
     if open_primary:
         boxes = _open_rounds(boxes, runoff_held)
@@ -833,6 +883,7 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True):
             # all, so nothing is inferred from anyone's absence either.
             return {}
     primaries, runoffs, generals, infobox, lists = {}, {}, [], [], {}
+    general_runoff_rows = []
     for raw_title, rows in _canonical(boxes):
         title = _clean_title(raw_title)
         if title == INFOBOX_TITLE:
@@ -842,6 +893,11 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True):
             lists.setdefault(title, []).extend(rows)
             continue
         stage = _stage(title)
+        if general_runoff and not open_primary and _unpartisan_runoff(title):
+            # "Runoff results", no party named: Georgia's December round, or a
+            # party runoff an editor titled without its party. Kept with the
+            # runoffs as well; _settle_general tells them apart by who is in it.
+            general_runoff_rows.extend(rows)
         if stage == "runoff":
             runoffs.setdefault(title, []).extend(rows)
         elif stage == "primary":
@@ -884,7 +940,60 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True):
         for row in infobox:
             if status.get(row["name"]) in (None, ADVANCED):
                 status[row["name"]] = NOMINEE
+    if general_held and open_primary:
+        _settle_open_primary(status, boxes)
+    elif general_held:
+        _settle_general(status, generals, general_runoff_rows, general_runoff_held)
     return status
+
+
+_PARTY_WORDS = re.compile(
+    r"primary|convention|caucus|party|democrat|republican|libertarian|green|\bdfl\b", re.I)
+
+
+def _unpartisan_runoff(title):
+    """A runoff table that names no party and no primary ("Runoff results")."""
+    return _stage(title) == "runoff" and not _PARTY_WORDS.search(title)
+
+
+def _settle_general(status, generals, runoff_rows, runoff_held):
+    """Who won in November, from the general table's marked winner."""
+    ballot = [r for r in generals if not r["withdrawn"]]
+    names = {r["name"] for r in ballot}
+    in_runoff = {r["name"] for r in runoff_rows if not r["withdrawn"]}
+    # A general runoff is between people on the November ballot. A party
+    # runoff's loser never was, so a table holding anyone else is not one.
+    if len(in_runoff) >= 2 and in_runoff <= names:
+        for name in names - in_runoff:
+            status[name] = DEFEATED
+        decided = runoff_held and any(r["won"] for r in runoff_rows if not r["withdrawn"])
+        for row in runoff_rows:
+            if row["withdrawn"]:
+                continue
+            status[row["name"]] = (ELECTED if row["won"] else DEFEATED) if decided else RUNOFF
+        return
+    winners = {r["name"] for r in ballot if r["won"]}
+    if len(winners) != 1:
+        return                      # count continuing, or a page mid-edit
+    for name in names:
+        status[name] = ELECTED if name in winners else DEFEATED
+
+
+def _settle_open_primary(status, boxes):
+    """An open primary's first round is the November election itself."""
+    final = {r["name"]: r for title, rows in boxes if _clean_title(title) == OPEN_RUNOFF_TITLE
+             for r in rows}
+    first = {r["name"] for title, rows in boxes if _clean_title(title) == OPEN_PRIMARY_TITLE
+             for r in rows}
+    for name, current in list(status.items()):
+        if name in final and not final[name]["withdrawn"]:
+            status[name] = ELECTED if final[name]["won"] else DEFEATED
+        elif current == NOMINEE:
+            status[name] = ELECTED          # a majority on the first round
+        elif current == ADVANCED:
+            status[name] = RUNOFF
+        elif current == ELIMINATED and name in first:
+            status[name] = DEFEATED
 
 
 OPEN_PRIMARY_TITLE = "Nonpartisan primary results"
@@ -1533,7 +1642,10 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         boxes.extend(candidate_lists(section))
         held = runoff_held(dates, state, office, today)
         outcome = resolve_race(boxes, has_runoff=bool(slot.get("runoff")),
-                               open_primary=is_open, runoff_held=held)
+                               open_primary=is_open, runoff_held=held,
+                               general_held=general_held(today),
+                               general_runoff=state in _general_runoffs(),
+                               general_runoff_held=general_runoff_held(state, today))
         if not outcome:
             if is_open and any(r.get("won") for _, rs in boxes for r in rs):
                 # Winners are marked, but not as a result the open-primary
@@ -1926,8 +2038,9 @@ def apply_cache(profiles, cache, field=None):
                         and party_key(profile.get("party")) != party_of[candidate_id]):
                     profile["fecParty"] = profile["party"]
                     profile["party"] = label
-            if status == NOMINEE:
-                # Shown beside "On the November ballot"; never a new party.
+            if status in NOVEMBER:
+                # Shown beside "On the November ballot", or "Elected"; never
+                # a new party.
                 line = ballot_line(profile.get("name"), profile.get("party"),
                                    party_of.get(candidate_id), label_of.get(candidate_id))
                 if line:
@@ -1942,9 +2055,10 @@ def apply_cache(profiles, cache, field=None):
                     profile["contestLabel"] = seat_label(rid)
                     if profile.get("seatUp2026"):
                         profile["seekingReelection2026"] = False
-                elif status in (NOMINEE, ADVANCED):
-                    # On their own seat's ballot. That outranks a roster
-                    # status line and a candidacy elsewhere: Russell Fry lost
+                elif status in (NOMINEE, ADVANCED, ELECTED, RUNOFF, DEFEATED):
+                    # On their own seat's ballot, or were in November. That
+                    # outranks a roster status line and a candidacy
+                    # elsewhere: Russell Fry lost
                     # South Carolina's special Senate primary and is still the
                     # House nominee for SC-7.
                     profile["contestRaceId"] = None
@@ -2042,11 +2156,16 @@ def on_ballot(profile):
 
 
 def race_summary(cache, race_id):
-    """``{"nominees": n, "eliminated": n, "withdrawn": n}`` or ``None``."""
+    """``{"nominees": n, "eliminated": n, "withdrawn": n, ...}`` or ``None``.
+
+    ``otherNominees`` names everyone the page puts on the November ballot
+    whom no filing matched, before and after the count; ``otherElected`` and
+    ``otherRunoff`` say which of them won, or are in a runoff."""
     race = (cache or {}).get("races", {}).get(race_id)
     if not race:
         return None
-    counts = {NOMINEE: 0, ELIMINATED: 0, WITHDRAWN: 0, ADVANCED: 0}
+    counts = {NOMINEE: 0, ELIMINATED: 0, WITHDRAWN: 0, ADVANCED: 0,
+              ELECTED: 0, DEFEATED: 0, RUNOFF: 0}
     for status in race.get("status", {}).values():
         counts[status] = counts.get(status, 0) + 1
     unmatched = race.get("unmatched") or {}
@@ -2054,4 +2173,7 @@ def race_summary(cache, race_id):
         unmatched = {}
     return {"nominees": counts[NOMINEE], "eliminated": counts[ELIMINATED],
             "withdrawn": counts[WITHDRAWN], "advanced": counts[ADVANCED],
-            "otherNominees": sorted(n for n, st in unmatched.items() if st == NOMINEE)}
+            "elected": counts[ELECTED], "defeated": counts[DEFEATED], "runoff": counts[RUNOFF],
+            "otherNominees": sorted(n for n, st in unmatched.items() if st in NOVEMBER),
+            "otherElected": sorted(n for n, st in unmatched.items() if st == ELECTED),
+            "otherRunoff": sorted(n for n, st in unmatched.items() if st == RUNOFF)}

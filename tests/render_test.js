@@ -17,6 +17,26 @@ const SITE = path.resolve(__dirname, "..", "candidate_profiles_site");
 
 /* ------------------------------------------------------------------ setup */
 
+/* The page reads the clock: after Election Day a nominee reads "Awaiting
+ * result" and market prices read as final. A suite that used the real clock
+ * would start failing on 4 November and hold every refresh behind it, so a
+ * page is built at a campaign-season moment unless a suite says otherwise
+ * (opts.now: an ISO local time, or null for the real clock). */
+const CAMPAIGN_NOW = "2026-10-20T12:00:00";
+
+function freezeClock(window, iso) {
+  const Real = window.Date;
+  const fixed = new Real(iso).getTime();
+  class Frozen extends Real {
+    constructor(...args) {
+      if (args.length) super(...args);
+      else super(fixed);
+    }
+    static now() { return fixed; }
+  }
+  window.Date = Frozen;
+}
+
 function buildPage(page, opts) {
   opts = opts || {};
   const errors = [];
@@ -56,6 +76,7 @@ function buildPage(page, opts) {
         addListener() {},
         removeListener() {},
       });
+      if (opts.now !== null) freezeClock(window, opts.now || CAMPAIGN_NOW);
       if (opts.setup) opts.setup(window);
     },
   });
@@ -1832,7 +1853,7 @@ async function testSenate() {
   const senators = people.filter((p) => !p.isCandidate && /Senate/.test(p.chamber));
   const year = window.kycBuildMeta.election.year;
   const ids = (root) => [...root.querySelectorAll(".card")].map((c) => c.getAttribute("data-id"));
-  const offBallot = (p) => !!KYC.cards.OFF_BALLOT[KYC.contestStatus(p)];
+  const offBallot = (p) => KYC.offBallot(KYC.contestStatus(p));
   const seatOf = (race) => {
     const head = race && D.getElementById("senate-seat-" + race.id);
     return head && head.closest("section");
@@ -3524,6 +3545,105 @@ async function testStateGov() {
   });
 }
 
+/* ========================================================= election night */
+
+/* The day after: one Georgia race called, one going to a runoff, one the
+ * results have not marked. The statuses are set the way the pipeline sets
+ * them (results.resolve_race), on the data as it loads. */
+function electionNight(window) {
+  let meta;
+  Object.defineProperty(window, "kycBuildMeta", {
+    configurable: true,
+    get() { return meta; },
+    set(value) {
+      meta = value;
+      meta.election = Object.assign({}, meta.election, { resultsAsOf: "2026-11-05" });
+      const byId = Object.fromEntries(window.legislatorsData.map((p) => [p.id, p]));
+      const own = (p, r) => p && !p.contestLabel &&
+        (p.isCandidate ? p.raceId : (p.contestRaceId || p.raceId)) === r.id;
+      const nominees = (r) => [...new Set(r.incumbentIds.concat(r.candidateIds))]
+        .map((id) => byId[id]).filter((p) => own(p, r) && p.raceStatus === "nominee");
+      const races = window.kycRaces.filter((r) => r.state === "GA" && r.settled &&
+        nominees(r).length >= 2);
+      const [called, runoff, open] = races;
+      const winner = nominees(called)[0];
+      nominees(called).forEach((p) => { p.raceStatus = p === winner ? "elected" : "defeated"; });
+      nominees(runoff).forEach((p, i) => { p.raceStatus = i < 2 ? "runoff" : "defeated"; });
+      window.__night = { called, runoff, open, winner };
+    },
+  });
+}
+
+async function testElectionNight() {
+  const { window, D, errors } = await buildPage("states/ga.html",
+    { now: "2026-11-05T09:00:00", setup: electionNight });
+  const KYC = window.KYC;
+  const { called, runoff, open, winner } = window.__night || {};
+  const section = (r) => r && D.getElementById("race-" + r.id);
+  const head = (r) => ((section(r) || {}).querySelector || (() => null)).call(
+    section(r), ".race-head");
+  const cardOf = (r, p) => section(r) && section(r).querySelector(
+    '.card[data-id="' + p.id + '"]');
+
+  suite("states/ga.html — the day after the election", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("three Georgia races to read", !!(called && runoff && open),
+      [called, runoff, open].map((r) => r && r.id).join(" "));
+    const h = head(called);
+    check("a called race's header names its winner",
+      !!h && h.textContent.indexOf("Won by " + winner.name) !== -1, h && h.textContent);
+    const won = cardOf(called, winner);
+    check("the winner's card says Elected (Re-elected for the member)",
+      !!won && (winner.isCandidate ? /Elected/ : /Re-elected/).test(won.textContent),
+      won && won.textContent);
+    const loser = called.incumbentIds.concat(called.candidateIds).map(KYC.byId)
+      .find((p) => p && p.raceStatus === "defeated");
+    const lost = loser && cardOf(called, loser);
+    check("who lost is still in view, and says they lost in November",
+      !!lost && !lost.closest("details") &&
+        /Lost in November|Lost re-election/.test(lost.textContent),
+      lost ? lost.textContent : "no loser");
+
+    const r = head(runoff);
+    check("a race in a runoff says so", !!r && /Going to a runoff/.test(r.textContent),
+      r && r.textContent);
+    const inIt = runoff.incumbentIds.concat(runoff.candidateIds).map(KYC.byId)
+      .filter((p) => p && p.raceStatus === "runoff");
+    check("both in the runoff read In the runoff", inIt.length === 2 &&
+      inIt.every((p) => /In the runoff/.test((cardOf(runoff, p) || {}).textContent || "")));
+
+    const o = head(open);
+    const badge = o && [...o.querySelectorAll(".badge")].find((b) => /Awaiting result/.test(b.textContent));
+    check("a race nobody has marked is awaiting a result, as of the last read",
+      !!badge && /2026-11-05/.test(badge.getAttribute("title")), o && o.textContent);
+    const waiting = open.incumbentIds.concat(open.candidateIds).map(KYC.byId)
+      .filter((p) => p && p.raceStatus === "nominee");
+    check("its nominees no longer read On the November ballot, as if nothing had happened",
+      waiting.length >= 2 && waiting.every((p) => {
+        const c = cardOf(open, p);
+        return c && /Awaiting result/.test(c.textContent) &&
+          !/On the November ballot|Renominated/.test(c.textContent);
+      }));
+    check("Won by appears once per called race, and nowhere else",
+      D.querySelectorAll(".race-head").length > 0 &&
+        [...D.querySelectorAll(".race-head")].filter((x) => /Won by/.test(x.textContent)).length === 1);
+
+    won.click();
+    const status = D.getElementById("profileModalStatus");
+    check("the winner's profile says so",
+      !!status && /(Re-)?[Ee]lected in November/.test(status.textContent),
+      status && status.textContent);
+    D.querySelector("#profileModal .modal-footer [data-close]").click();
+  });
+
+  const before = await buildPage("states/ga.html", { setup: electionNight });
+  suite("states/ga.html — the same results before Election Day are not shown as results", () => {
+    const text = [...before.D.querySelectorAll(".race-head")].map((x) => x.textContent).join(" ");
+    check("no race header reads Won by, runoff or awaiting during the campaign",
+      text.length > 0 && !/Won by|Going to a runoff|Awaiting result/.test(text));
+  });
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "guide") await testGuide();
@@ -3539,6 +3659,7 @@ async function testStateGov() {
   if (!only || only === "index.html") await testDrawerBack();
   if (!only || only === "index.html") await testAndroidBack();
   if (!only || only === "states") await testStates();
+  if (!only || only === "states") await testElectionNight();
   if (!only || only === "redistricting") await testRedistricting();
   if (!only || only === "redistricting") await testDistrictPages();
   if (!only || only === "redistricting") await testDistrictsOnAPhone();

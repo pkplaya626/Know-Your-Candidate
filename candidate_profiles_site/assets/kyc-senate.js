@@ -22,17 +22,19 @@
 
   var ROMAN = { 1: "I", 2: "II", 3: "III" };
 
-  /* Nominees first, then a primary runoff still to be decided, then people
-   * whose primary has not been held; the people the primary removed come
-   * last and only on request. */
-  var RANK = { nominee: 0, advanced: 1 };
+  /* Nominees (and, after November, the winner) first, then a runoff still
+   * to be decided, then people whose primary has not been held, then who
+   * lost in November; the people the primary removed come last and only on
+   * request. The order is KYC.raceStatus's. */
   var RUNNING = 2;
-  var OUT = 3;
 
   function rank(item) {
-    var status = KYC.contestStatus(item);
-    if (KYC.cards.OFF_BALLOT[status]) return OUT;
-    return status in RANK ? RANK[status] : RUNNING;
+    var spec = KYC.raceStatusOf(item, "short");
+    return spec ? spec.rank : RUNNING;
+  }
+
+  function isOut(item) {
+    return KYC.offBallot(KYC.contestStatus(item));
   }
 
   function isSenator(item) {
@@ -141,9 +143,9 @@
   function seatBlock(seat, level, opts) {
     var match = opts.matches;
     var holder = match(seat.holder) ? [seat.holder] : [];
-    var running = seat.running.filter(function (p) { return rank(p) !== OUT && match(p); });
+    var running = seat.running.filter(function (p) { return !isOut(p) && match(p); });
     var out = opts.showOut
-      ? seat.running.filter(function (p) { return rank(p) === OUT && match(p); })
+      ? seat.running.filter(function (p) { return isOut(p) && match(p); })
       : [];
     if (!holder.length && !running.length && !out.length) return null;
 

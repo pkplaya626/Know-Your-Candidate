@@ -231,11 +231,6 @@
 
   /* The panel's rows are narrow, so the shared badges' labels are shortened
    * here; the statuses themselves are the shared module's. */
-  var RACE_BADGE = {
-    nominee: "badge-money|Nominee", eliminated: "badge-danger|Lost primary",
-    withdrawn: "badge-neutral|Withdrew", unlisted: "badge-neutral|Not on ballot",
-    advanced: "badge-warn|In runoff",
-  };
 
   /* A member contesting another seat: the seat, and the result of the race
    * they are in, not of the seat they hold. The panel is one state's, so the
@@ -250,25 +245,26 @@
       KYC.escapeHtml(label) + "</span>";
   }
 
+  function badge(spec, item) {
+    return '<span class="badge ' + spec.cls + '" title="' + KYC.escapeAttr(spec.title) + '">' +
+      KYC.escapeHtml(spec.label) + KYC.ballotLineSuffix(item) + "</span>";
+  }
+
   function contestBadge(item) {
-    var contest = RACE_BADGE[KYC.contestStatus(item)];
-    return contest ? '<span class="badge ' + contest.split("|")[0] + '">' +
-      contest.split("|")[1] + KYC.ballotLineSuffix(item) + "</span>" : "";
+    var spec = KYC.raceStatus(KYC.contestStatus(item), "short");
+    return spec ? badge(spec, item) : "";
   }
 
   function rowBadge(item) {
     var status = String(item.status || "").toLowerCase();
-    var race = RACE_BADGE[item.raceStatus];
-    if (race) {
-      var bits = race.split("|");
-      if (!item.isCandidate && !item.contestLabel && item.raceStatus === "nominee") bits[1] = "Renominated";
-      // About the seat they hold, not the whole ballot (a member may be on
-      // another office's).
-      if (!item.isCandidate && item.raceStatus === "unlisted") bits = ["badge-danger", "Leaving seat"];
-      // "Nominee – Speak The Truth line": not a second Democratic nominee.
-      return '<span class="badge ' + bits[0] + '">' + bits[1] +
-        (item.raceStatus === "nominee" ? KYC.ballotLineSuffix(item) : "") + "</span>";
-    }
+    // "Renominated", "Leaving seat": about the seat a member holds, not the
+    // whole ballot (a member may be on another office's). "Nominee – Speak
+    // The Truth line": not a second Democratic nominee.
+    var race = KYC.raceStatus(item.raceStatus, "short", {
+      own: !item.isCandidate && (!item.contestLabel || item.raceStatus === "unlisted"),
+      unconfirmed: !!item.raceStatusUnconfirmed,
+    });
+    if (race) return badge(race, item);
     if (item.isCandidate) return '<span class="badge badge-money">Challenger</span>';
     if (/retiring|not running|defeated|ineligible|resigned/.test(status)) {
       return '<span class="badge badge-danger">Departing</span>';
@@ -349,12 +345,11 @@
         a.name.localeCompare(b.name)
       );
     };
-    var OFF = KYC.cards.OFF_BALLOT;
     var seated = people.filter(function (x) { return !x.isCandidate; }).sort(order);
     var running = people.filter(function (x) {
-      return x.isCandidate && !OFF[x.raceStatus];
+      return x.isCandidate && !KYC.offBallot(x.raceStatus);
     }).sort(order);
-    var out = people.filter(function (x) { return x.isCandidate && OFF[x.raceStatus]; });
+    var out = people.filter(function (x) { return x.isCandidate && KYC.offBallot(x.raceStatus); });
 
     /* Texas has 37 representatives and 191 filed challengers. Listing all 228
      * in one scroll buries the delegation the reader clicked the state to

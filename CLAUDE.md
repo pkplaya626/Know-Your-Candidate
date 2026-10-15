@@ -121,8 +121,8 @@ python build_profile_site.py courts           # each state's highest court, from
 python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 884 tests, no dependencies
-npm install && npm test                       # 1128 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 899 tests, no dependencies
+npm install && npm test                       # 1140 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -720,6 +720,22 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     A nominee whose filing is under $5,000 is on the ballot all the same.
     `races.build` names them from the filing (`belowThreshold`), never
     twice for one person.
+
+63. **A November result is read like a primary result, and not before the
+    day after.** `results.general_held` opens the November table on the day
+    after Election Day; a single marked winner is `elected` and the rest of
+    that ballot `defeated`, and no mark or two marks change nothing.
+    Georgia's general runoff (`overrides.GENERAL_RUNOFFS`) is a runoff table
+    naming no party whose people were all on the November ballot - a June
+    party runoff titled "Runoff results" holds a loser who never was. Who
+    lost in November is not off the ballot and stays in view. A nominee
+    with no result after Election Day reads "Awaiting result" as of the day
+    the results were last read, never "On the November ballot" as though
+    nothing had happened. The status words live in one table,
+    `KYC.raceStatus`; five views each kept their own and every new status
+    had to be taught to each. The render suite builds pages on a frozen
+    campaign-season clock (`CAMPAIGN_NOW`), or every check that reads "On
+    the November ballot" would fail on 4 November and hold each refresh.
 
 ## District maps
 

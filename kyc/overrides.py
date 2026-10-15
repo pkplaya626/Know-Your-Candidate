@@ -286,6 +286,17 @@ OPEN_PRIMARY_SEATS = {
     },
 }
 
+# States whose federal general election goes to a runoff when no candidate wins
+# a majority, and when (state code: (date, evidence)). After Election Day the
+# results reader treats an unpartisan "Runoff results" table on these states'
+# pages as that runoff (results.resolve_race). Louisiana's House seats are an
+# open primary with its own December round (OPEN_PRIMARY_SEATS).
+GENERAL_RUNOFFS = {
+    "GA": ("2026-12-01", "O.C.G.A. 21-2-501(a): a runoff is held on the 28th day after a "
+                         "general election in which no candidate receives a majority; "
+                         "November 3 + 28 days = December 1, 2026"),
+}
+
 # Phrases in a Status value that mean the incumbent is not on the 2026 ballot.
 NOT_SEEKING_MARKERS = ("retiring", "not running", "defeated", "ineligible", "resigned")
 

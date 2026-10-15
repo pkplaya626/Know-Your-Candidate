@@ -401,7 +401,7 @@ audit found 54 decided races reading "No challenger on the ballot" over a
 second nominee: TX-12's Democratic nominee raised nothing, and California's
 top-two seats were the worst hit. The results page had already matched each
 one to an FEC id. `races.build` names them from that filing
-(`results.belowThreshold`, `{id, name}`) and adds them to `otherNominees`.
+(`results.belowThreshold`, `{id, name, status}`) and adds them to `otherNominees`.
 `contested` is true once anyone besides the incumbent is on the ballot, and
 the card counts them: "1 challenger on the ballot · 1 with no profile here".
 The FEC's incumbent flag keeps an incumbent's own second registration out.
@@ -531,6 +531,42 @@ fed in as aliases so the match does not depend on how the FEC spells them.
 Race headers show the primary date, who is on the November ballot, how many
 filers are out, and anyone the results put on the ballot with no FEC filing
 over $5,000 — leaving them off would make the header lie.
+
+### After Election Day
+
+The same pages, read the same way, say who won. Nothing is read from the
+November table until the day *after* Election Day (`results.general_held`):
+on the day itself polls are open somewhere, and an early mark is not a
+result.
+
+- **One marked winner decides the race.** The general table's single
+  `Election box winning candidate` row is `elected`; everyone else on that
+  ballot is `defeated`. No marked winner, or two, changes nothing: the count
+  is continuing, or the page is mid-edit. `validate` fails a race with more
+  than one person elected (`multiple-elected`).
+- **Georgia's December runoff.** `overrides.GENERAL_RUNOFFS` lists the states
+  whose general election goes to a runoff without a majority, with the
+  statute and the date (Georgia: December 1, O.C.G.A. 21-2-501). There, a
+  runoff table that names no party is the general runoff only if everyone in
+  it was on the November ballot — a party runoff's loser never was. Its two
+  are `runoff`, the rest of the ballot `defeated`, and after the runoff date
+  its marked winner is `elected`.
+- **Louisiana's House seats** are an open primary whose first round is the
+  November election itself: its majority winner is `elected`, its top two
+  are in the December 12 `runoff`, and the rest `defeated`.
+- **Who lost in November stays in view.** `defeated` is not off the ballot;
+  they were on it. Only people the primary settled out sit behind
+  **Include eliminated**.
+- **A nominee with no result yet reads "Awaiting result"**, and the race
+  header says the results this site last read (`election.resultsAsOf` in the
+  build meta) had not marked a winner. That is a claim about when we looked,
+  not about the count. A called race's header reads "Won by …"; a race going
+  to a runoff says so.
+
+Every view takes its words for a status from one table, `KYC.raceStatus` in
+`assets/kyc.js`: the card, the profile, a race's list of people and a map row
+each have a form, and a sitting member's own seat reads "Renominated",
+"Re-elected" or "Lost re-election".
 
 ## Filling the gaps
 
@@ -865,7 +901,7 @@ Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
 | `raceId` | For a member, the seat they hold; for a challenger, the seat they filed for |
 | `contestRaceId` / `contestLabel` | A member contesting a *different* seat: a redrawn district, the other chamber |
 | `alsoRunningId` / `incumbentId` | Cross-link between a member and a separate profile for their own candidacy |
-| `raceStatus` / `raceStatusRace` | `nominee`, `advanced`, `eliminated`, `withdrawn` or `unlisted`, and the race it refers to |
+| `raceStatus` / `raceStatusRace` | `nominee`, `advanced`, `eliminated`, `withdrawn` or `unlisted`; after Election Day also `elected`, `defeated` or `runoff` (a general-election runoff); and the race it refers to |
 | `ballotParty` / `fecParty` | The party the ballot lists, when it differs from the roster or FEC record |
 | `ballotLine` | For a nominee only: the November ballot line as the results page spells it ("Speak The Truth", "Party for Socialism and Liberation"), when it is not the line of the party shown. Never set for "none", a write-in or a line named after the candidate themselves (an independent petition reads as "Independent"); `party` is never overwritten by it |
 | `senateClass` | Sitting senators only: the constitutional class of the seat (1, 2 or 3), from the term record in `congress_snapshot.json`, keyed on bioguide id. `null` only when the build has no snapshot, which validation reports |
