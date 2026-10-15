@@ -37,6 +37,44 @@ function freezeClock(window, iso) {
   window.Date = Frozen;
 }
 
+/* The data moves too: from 4 November the daily refresh writes November
+ * results into it. A page built at CAMPAIGN_NOW sees the data as it stood
+ * then - elected, defeated and runoff read back as the nominee each was
+ * (results.NOVEMBER), and the race summaries with them - or every suite
+ * that looks for a nominee would fail on the first called race and hold
+ * the refresh behind it. A suite that sets its own clock gets the data as
+ * it is, and opts.data may change it as it loads. */
+const NOVEMBER_RESULTS = { elected: true, defeated: true, runoff: true };
+
+function rewindToCampaign(window) {
+  window.legislatorsData.forEach((p) => {
+    if (NOVEMBER_RESULTS[p.raceStatus]) p.raceStatus = "nominee";
+  });
+  window.kycRaces.forEach((r) => {
+    const res = r.results;
+    if (!res) return;
+    res.nominees = (res.nominees || 0) + (res.elected || 0) + (res.defeated || 0) + (res.runoff || 0);
+    res.elected = res.defeated = res.runoff = 0;
+    res.otherElected = [];
+    res.otherRunoff = [];
+  });
+}
+
+/* Run *hooks* once the profile data has loaded: profiles.js assigns
+ * kycBuildMeta last, after legislatorsData and kycRaces. */
+function onData(window, hooks) {
+  if (!hooks.length) return;
+  let meta;
+  Object.defineProperty(window, "kycBuildMeta", {
+    configurable: true,
+    get() { return meta; },
+    set(value) {
+      meta = value;
+      if (window.legislatorsData && window.kycRaces) hooks.forEach((hook) => hook(window, meta));
+    },
+  });
+}
+
 function buildPage(page, opts) {
   opts = opts || {};
   const errors = [];
@@ -77,6 +115,9 @@ function buildPage(page, opts) {
         removeListener() {},
       });
       if (opts.now !== null) freezeClock(window, opts.now || CAMPAIGN_NOW);
+      // opts.written: the data as a later refresh would write it, before the rewind.
+      onData(window, [opts.written, opts.now === undefined ? rewindToCampaign : null, opts.data]
+        .filter(Boolean));
       if (opts.setup) opts.setup(window);
     },
   });
@@ -3548,35 +3589,33 @@ async function testStateGov() {
 /* ========================================================= election night */
 
 /* The day after: one Georgia race called, one going to a runoff, one the
- * results have not marked. The statuses are set the way the pipeline sets
- * them (results.resolve_race), on the data as it loads. */
-function electionNight(window) {
-  let meta;
-  Object.defineProperty(window, "kycBuildMeta", {
-    configurable: true,
-    get() { return meta; },
-    set(value) {
-      meta = value;
-      meta.election = Object.assign({}, meta.election, { resultsAsOf: "2026-11-05" });
-      const byId = Object.fromEntries(window.legislatorsData.map((p) => [p.id, p]));
-      const own = (p, r) => p && !p.contestLabel &&
-        (p.isCandidate ? p.raceId : (p.contestRaceId || p.raceId)) === r.id;
-      const nominees = (r) => [...new Set(r.incumbentIds.concat(r.candidateIds))]
-        .map((id) => byId[id]).filter((p) => own(p, r) && p.raceStatus === "nominee");
-      const races = window.kycRaces.filter((r) => r.state === "GA" && r.settled &&
-        nominees(r).length >= 2);
-      const [called, runoff, open] = races;
-      const winner = nominees(called)[0];
-      nominees(called).forEach((p) => { p.raceStatus = p === winner ? "elected" : "defeated"; });
-      nominees(runoff).forEach((p, i) => { p.raceStatus = i < 2 ? "runoff" : "defeated"; });
-      window.__night = { called, runoff, open, winner };
-    },
-  });
+ * results have not marked. The data is first put back as it stood before
+ * the count, whatever the refresh has written since, and the statuses are
+ * then set the way the pipeline sets them (results.resolve_race). */
+function electionNight(window, meta) {
+  rewindToCampaign(window);
+  meta.election = Object.assign({}, meta.election, { resultsAsOf: "2026-11-05" });
+  const byId = Object.fromEntries(window.legislatorsData.map((p) => [p.id, p]));
+  const own = (p, r) => p && !p.contestLabel &&
+    (p.isCandidate ? p.raceId : (p.contestRaceId || p.raceId)) === r.id;
+  const nominees = (r) => [...new Set(r.incumbentIds.concat(r.candidateIds))]
+    .map((id) => byId[id]).filter((p) => own(p, r) && p.raceStatus === "nominee");
+  const races = window.kycRaces.filter((r) => r.state === "GA" && r.settled &&
+    nominees(r).length >= 2);
+  if (races.length < 3) {
+    window.__night = {};
+    return;
+  }
+  const [called, runoff, open] = races;
+  const winner = nominees(called)[0];
+  nominees(called).forEach((p) => { p.raceStatus = p === winner ? "elected" : "defeated"; });
+  nominees(runoff).forEach((p, i) => { p.raceStatus = i < 2 ? "runoff" : "defeated"; });
+  window.__night = { called, runoff, open, winner };
 }
 
 async function testElectionNight() {
   const { window, D, errors } = await buildPage("states/ga.html",
-    { now: "2026-11-05T09:00:00", setup: electionNight });
+    { now: "2026-11-05T09:00:00", data: electionNight });
   const KYC = window.KYC;
   const { called, runoff, open, winner } = window.__night || {};
   const section = (r) => r && D.getElementById("race-" + r.id);
@@ -3589,6 +3628,7 @@ async function testElectionNight() {
     check("no page errors", errors.length === 0, errors.join(" | "));
     check("three Georgia races to read", !!(called && runoff && open),
       [called, runoff, open].map((r) => r && r.id).join(" "));
+    if (!(called && runoff && open)) return;
     const h = head(called);
     check("a called race's header names its winner",
       !!h && h.textContent.indexOf("Won by " + winner.name) !== -1, h && h.textContent);
@@ -3624,6 +3664,13 @@ async function testElectionNight() {
         return c && /Awaiting result/.test(c.textContent) &&
           !/On the November ballot|Renominated/.test(c.textContent);
       }));
+    const lineHolder = waiting[0];
+    lineHolder.ballotLine = "Speak The Truth";
+    const hover = (KYC.cards.raceBadge(lineHolder).match(/title="([^"]*)"/) || [])[1] || "";
+    delete lineHolder.ballotLine;
+    check("a nominee on another line still says when the results were last read",
+      /Speak The Truth line/.test(hover) && /2026-11-05/.test(hover) && /had not marked/.test(hover),
+      hover);
     check("Won by appears once per called race, and nowhere else",
       D.querySelectorAll(".race-head").length > 0 &&
         [...D.querySelectorAll(".race-head")].filter((x) => /Won by/.test(x.textContent)).length === 1);
@@ -3636,11 +3683,50 @@ async function testElectionNight() {
     D.querySelector("#profileModal .modal-footer [data-close]").click();
   });
 
-  const before = await buildPage("states/ga.html", { setup: electionNight });
+  const before = await buildPage("states/ga.html", { now: CAMPAIGN_NOW, data: electionNight });
   suite("states/ga.html — the same results before Election Day are not shown as results", () => {
     const text = [...before.D.querySelectorAll(".race-head")].map((x) => x.textContent).join(" ");
     check("no race header reads Won by, runoff or awaiting during the campaign",
       text.length > 0 && !/Won by|Going to a runoff|Awaiting result/.test(text));
+  });
+
+  /* The data as the refresh will write it once races are called: every
+   * suite built at the campaign clock still finds its nominees. */
+  const refreshed = await buildPage("index.html", { written: (win) => {
+    win.legislatorsData.forEach((p) => {
+      if (p.raceStatus === "nominee") p.raceStatus = p.isCandidate ? "defeated" : "elected";
+    });
+  } });
+  suite("index.html — November results in the data, campaign clock on the page", () => {
+    const people = refreshed.window.legislatorsData;
+    check("no page errors", refreshed.errors.length === 0, refreshed.errors.join(" | "));
+    check("the page sees them as nominees, as they stood before the count",
+      people.some((p) => p.raceStatus === "nominee") &&
+        !people.some((p) => NOVEMBER_RESULTS[p.raceStatus]));
+  });
+
+  // The partisan map's Senate-2026 label read a senator who lost in
+  // November as "running" while the panel said "Lost re-election".
+  const map = await buildPage("map.html", { now: "2026-11-05T09:00:00", data: (w) => {
+    rewindToCampaign(w);
+    const up = w.legislatorsData.filter((p) => !p.isCandidate && /Senate/.test(p.chamber) &&
+      p.seatUp2026 && p.raceStatus === "nominee" && !p.contestLabel);
+    w.__senators = { lost: up[0], won: up[1], waiting: up[2] };
+    if (up[0]) up[0].raceStatus = "defeated";
+    if (up[1]) up[1].raceStatus = "elected";
+  } });
+  suite("map.html — the 2026 Senate map after the election", () => {
+    const { lost, won, waiting } = map.window.__senators || {};
+    map.D.querySelector('[data-mode="senate2026"]').click();
+    const label = (p) => (map.D.querySelector('#usMap [data-state="' + p.state + '"]') ||
+      { getAttribute: () => "" }).getAttribute("aria-label") || "";
+    check("three senators to read", !!(lost && won && waiting));
+    if (!(lost && won && waiting)) return;
+    check("a senator who lost in November is not 'running'",
+      /lost re-election/.test(label(lost)) && !/running/.test(label(lost)), label(lost));
+    check("a senator who won reads re-elected", /re-elected/.test(label(won)), label(won));
+    check("an uncalled race reads awaiting result, not renominated",
+      /awaiting result/.test(label(waiting)) && !/renominated/.test(label(waiting)), label(waiting));
   });
 }
 

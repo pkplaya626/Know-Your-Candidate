@@ -121,8 +121,8 @@ python build_profile_site.py courts           # each state's highest court, from
 python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 899 tests, no dependencies
-npm install && npm test                       # 1140 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 906 tests, no dependencies
+npm install && npm test                       # 1147 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -734,8 +734,17 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     nothing had happened. The status words live in one table,
     `KYC.raceStatus`; five views each kept their own and every new status
     had to be taught to each. The render suite builds pages on a frozen
-    campaign-season clock (`CAMPAIGN_NOW`), or every check that reads "On
-    the November ballot" would fail on 4 November and hold each refresh.
+    campaign-season clock (`CAMPAIGN_NOW`) and reads the data back as it
+    stood then (`rewindToCampaign`), or every check that looks for a
+    nominee would fail on the first called race and hold each refresh. And
+    a row is read whole: the row pattern once ended at a nested template
+    followed by a newline (`{{nowrap|N/A}}`), so the 2022 Georgia Senate
+    page lost both runoff candidates' November rows and Warnock read as
+    "withdrawn" - and five New Jersey nominees were missing in 2026. Within
+    one race's page a misspelling a letter apart that never shares a table
+    with its correct form is the same person (NM-1's "Okapareke" made the
+    primary winner "withdrawn"), and a person is matched by any spelling
+    the page gives them (ID-1's "Sarah Zabel Peterson" and "Sarah Zabel").
 
 ## District maps
 

@@ -29,9 +29,12 @@
     // loser on a minor-party line reads as a second Democratic nominee.
     var line = KYC.ballotLine(item);
     // Not "won the primary": Jose Vega (NY-15) lost it and is on the ballot.
+    // Before the count a nominee's own hover ("won the primary") is wrong for
+    // a line like that; after it, "awaiting result" still needs its date.
+    var campaign = KYC.contestStatus(item) === "nominee" &&
+      KYC.electionStatus().phase !== "post-election";
     var title = line ? "On the general election ballot on the " + line +
-      " line, per the published results." +
-      (KYC.contestStatus(item) === "nominee" ? "" : " " + spec.title) : spec.title;
+      " line, per the published results." + (campaign ? "" : " " + spec.title) : spec.title;
     return '<span class="badge ' + spec.cls + '" title="' + KYC.escapeAttr(title) +
       '">' + KYC.escapeHtml(spec.label) + KYC.ballotLineSuffix(item) + "</span>";
   }

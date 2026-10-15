@@ -778,6 +778,24 @@ def check_results_pages(cache):
                             f"where every such name lost or withdrew, otherwise undecided. "
                             f"Settle each with an evidenced overrides.RESULT_NAMES entry",
                             sorted(unclear)))
+    # Three days after Election Day a race the page has not called is worth a
+    # person's look: Alaska's ranked-choice count is published as a table,
+    # not an Election box, and would read "Awaiting result" for weeks.
+    from .results import general_day, NOMINEE, NOVEMBER
+    import datetime
+    as_of = cache.get("asOf") or ""
+    if as_of and as_of > (general_day() + datetime.timedelta(days=3)).isoformat():
+        uncalled = sorted(
+            rid for rid, race in (cache.get("races") or {}).items()
+            if (race.get("decided") or {}).get("general")
+            and NOMINEE in (race.get("status") or {}).values()
+            and not set(NOVEMBER[1:]) & set((race.get("status") or {}).values()))
+        if uncalled:
+            issues.append(Issue("warn", "general-uncalled",
+                                f"{len(uncalled)} races have no November result on their "
+                                f"page three days after Election Day; check the page's "
+                                f"format (Alaska's ranked-choice table is not an Election "
+                                f"box)", uncalled))
     overridden = [n["text"] for n in cache.get("calendarNotes") or []
                   if isinstance(n, dict) and n.get("kind") == "open-primary"]
     if overridden:

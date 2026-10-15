@@ -133,9 +133,15 @@ SAME_PERSON_FILINGS = {
 # each entry is (the name exactly as the race's results page writes it, the
 # evidence), and the evidence is the candidate's own principal campaign
 # committee at the FEC (its name or its registered website), so the alias
-# is the campaign's word, not a guess about a nickname (rule 17). Applied
-# only inside the filing's own race (results.apply_cache). Checked
-# 2026-10-14.
+# is the campaign's word, not a guess about a nickname (rule 17). Where the
+# committee's register entry does not carry the name, the home page of the
+# website that entry registers may, in its own title. Applied only inside
+# the filing's own race (results.apply_cache). Checked 2026-10-14, the
+# committees read from the FEC's /candidate/{id}/committees/ that day.
+# Not settled, for want of such evidence: Rakhi Israni Singh (CA-14; her
+# site says "Rakhi Israni"), Sonia Kacker (CA-26) and J. D. Scholten (Iowa
+# Senate; both sites draw themselves with script), Daira Smith-Rodriguez
+# (Maine Senate; no site registered).
 RESULT_NAMES = {
     "S6GA00374": ("Buddy Carter", "committee C00543967 BUDDY CARTER FOR SENATE"),
     "S6IL00482": ("Raja Krishnamoorthi", "committee C00904466 RAJA FOR ILLINOIS; "
@@ -149,6 +155,44 @@ RESULT_NAMES = {
                                   "website maxforcongress.com"),
     "H6MS04259": ("Carl Boyanton", "committee C00937136 CARL4CONGRESS; filed with "
                                    "the names reversed, CARL, BOYANTON LESTER"),
+    "H6TX34098": ("Fred Hinojosa", "committee C00917724 FRED HINOJOSA FOR CONGRESS"),
+    "H6VA01232": ("Salaam Bhatti", "committee C00912287 SALAAM BHATTI FOR CONGRESS"),
+    "H6CO06157": ("Mel Tewahade", "committee C00944173 MEL FOR COLORADO, website "
+                                  "melforcolorado.com; filed as TEWAHADE, BEMELEKOT W"),
+    "S6IL00466": ("Casey Chlebek", "committee C00903823 CASEY CHLEBEK FOR US SENATE"),
+    "H6NJ05239": ("Sandy Gajapathy", "committee C00920066 SANDY GAJAPATHY FOR CONGRESS"),
+    "H4TX27105": ("Scott Mandel", "authorized committee C00862946 SCOTT MANDEL FOR "
+                                  "CONGRESS; filed as MANDEL, CHARLES"),
+    "H6TX09199": ("Crystal DeLeon-Sarmiento", "committee C00926535 CRYSTAL FOR US CONGRESS, "
+                  "website crystalforuscongress.com titled \"Crystal De Leon Sarmiento for "
+                  "US Congress\""),
+    "H6IL09210": ("Mark Su", "committee C00904680 MARK SU FOR CONGRESS; filed as SU, DONGBO"),
+    "H6OH14222": ("Nicole Frenchko", "committee C00935023 NIKI FRENCHKO FOR CONGRESS; "
+                                     "filed reversed as NICOLE, FRENCHKO MICHELE"),
+    "H6MI10300": ("Tripp Adams", "committee C00908293 TRIPP ADAMS FOR CONGRESS"),
+    "H6FL22164": ("Herbie Wertheim", "committee C00945014 DR. HERBIE WERTHEIM FOR CONGRESS"),
+    "H4FL02138": ("Yen Bailey", "committee C00882886 YEN BAILEY FOR CONGRESS"),
+    "H6TX21376": ("Trey Trainor", "committee C00922344 TREY TRAINOR FOR TEXAS"),
+    "H4OR01121": ("Jamil Ahmad", "committee C00870303 CHAUDHRY-AHMAD FOR CONGRESS, "
+                                 "website jamilahmadforcongress.com"),
+    "H6VA00028": ("J.P. Cooney", "committee C00938670 COONEY FOR CONGRESS, website "
+                                 "cooneyforcongress.com titled \"J.P. Cooney for Congress\""),
+    "H6IL09285": ("Hoan Huynh", "committee C00909903 HOAN FOR 9, website hoanfor9.com; "
+                                "filed as HUYNH, KHAI-HOAN"),
+    "H6CA30219": ("Pini Herman", "committee C00917641 PINI HERMAN FOR HOUSE CA30"),
+    "H2CA18171": ("Luis Arregu\u00edn", "committee C00805770 LUIS ARREGUIN FOR CONGRESS CA-18"),
+    "H6NC11222": ("Moe Davis", "committee C00906081 MOE DAVIS FOR CONGRESS COMMITTEE"),
+    "H6NM01129": ("Didi Okpareke", "committee C00908509 NDIDIAMAKA OKPAREKE FOR CONGRESS, "
+                                   "website didiforcongress.com"),
+    "S6FL00863": ("Neil J. Gillespie", "committee C00943399 NEIL J GILLESPIE FOR US SENATE; "
+                                       "filed as GILESPIE, NEIL JOSEPH"),
+    "H6WI07256": ("Niina Baum", "committee C00938019 BAUM FOR CONGRESS, website "
+                                "baumforwisconsin.com; filed as THRELFALL-BAUM, NIINA"),
+    "H6TX31151": ("Vince Offer", "committee C00928614 OFFER VINCE SHAMWOW SHLOMI FOR CONGRESS"),
+    "H6TX35111": ("Randy Adams", "committee C00929570 RANDY ADAMS FOR CONGRESS"),
+    "H6GA01208": ("Sharon Williamson", "committee C00931949 SHARON STOKES-WILLIAMSON FOR "
+                                       "CONGRESS, website sswilliamsonforcongress.com"),
+    "H6TX24180": ("TJ Ware", "committee C00907527 TJ WARE FOR CONGRESS"),
 }
 
 # Official voting pages that replace what NASS's "Can I Vote" lists for a

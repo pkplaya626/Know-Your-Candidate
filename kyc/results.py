@@ -318,9 +318,15 @@ def fetch_wikitext(title):
 
 _BOX = re.compile(r"\{\{Election box begin[^}]*?\|\s*title\s*=\s*([^\n|}]+).*?\{\{Election box end\}\}",
                   re.S | re.I)
+# A row's body is any text and templates nested up to two deep. The body
+# once had to resume with "|" after a nested template, so a row holding
+# "|candidate = {{nowrap|[[Raphael Warnock]] (incumbent)}}" or "|change =
+# {{nowrap|N/A}}" on a line of its own matched nothing: the 2022 Georgia
+# Senate page lost both runoff candidates' November rows, and Warnock read
+# as "withdrawn".
 _ROW = re.compile(
     r"\{\{Election box (?P<kind>winning candidate|candidate)[^|}]*"
-    r"(?P<body>(?:\|[^{}]*|\{\{[^{}]*\}\})*)\}\}",
+    r"(?P<body>(?:[^{}]|\{\{(?:[^{}]|\{\{[^{}]*\}\})*\}\})*)\}\}",
     re.S | re.I,
 )
 _LINK = re.compile(r"\[\[([^\]|]+)(?:\|([^\]]+))?\]\]")
@@ -810,20 +816,58 @@ def _same_spelling(a, b):
     return any(_given_fits(x, y) for x in a[:-1] for y in b[:-1])
 
 
+def _near_spellings(boxes):
+    """``{spelling: spelling kept}`` for one person written a letter apart.
+
+    NM-1's page has Didi Okpareke winning the Republican primary and "Didi
+    Okapareke" on the November ballot. Read as two people, the primary
+    winner was "withdrawn" (won, and not on the ballot) and the nominee
+    matched no filing. Two different people whose names are a letter apart
+    would be listed together somewhere - in one primary, or on one November
+    ballot - so names that share a table are never merged; the given names
+    must be the same words, and the surnames six letters or more and one
+    letter apart. The spelling kept is the one more tables use.
+    """
+    tables, order, uses = [], [], collections.Counter()
+    for _title, rows in boxes:
+        names = {r["name"] for r in rows}
+        tables.append(names)
+        uses.update(names)
+        order.extend(r["name"] for r in rows if r["name"] not in order)
+    ranked = sorted(order, key=lambda n: (-uses[n], order.index(n)))
+    alias = {}
+    for i, kept in enumerate(ranked):
+        if kept in alias:
+            continue
+        a = _tokens(kept)
+        for other in ranked[i + 1:]:
+            b = _tokens(other)
+            if (other in alias or len(a) < 2 or len(b) < 2 or a[:-1] != b[:-1]
+                    or a[-1] == b[-1] or min(len(a[-1]), len(b[-1])) < 6
+                    or not _near(a[-1], b[-1])):
+                continue
+            if any(kept in t and other in t for t in tables):
+                continue
+            alias[other] = kept
+    return alias
+
+
 def _canonical(boxes):
     """Rewrite every row's name to the first spelling seen for that person.
 
     Pages routinely write a candidate one way in the primary table and
     another on the general ballot ("Norma J. Torres" / "Norma Torres").
     Treating those as two people made both ambiguous and left the real one
-    unlabelled.
+    unlabelled. A letter-apart misspelling is folded in first
+    (:func:`_near_spellings`).
     """
+    near = _near_spellings(boxes)
     seen = []
     out = []
     for title, rows in boxes:
         fixed = []
         for row in rows:
-            name = row["name"]
+            name = near.get(row["name"], row["name"])
             if name not in seen:
                 same = [s for s in seen if _same_spelling(s, name)]
                 if len(same) == 1:
@@ -833,6 +877,37 @@ def _canonical(boxes):
             fixed.append(dict(row, name=name))
         out.append((title, fixed))
     return out
+
+
+def _spellings(boxes):
+    """``{name resolve_race reports: every spelling the page uses for them}``."""
+    out = {}
+    for (_title, raw), (_same, fixed) in zip(boxes, _canonical(boxes)):
+        for before, after in zip(raw, fixed):
+            out.setdefault(after["name"], set()).add(before["name"])
+    return out
+
+
+def _match_spellings(outcome, boxes, rows, aliases, matched, ambiguous):
+    """Match a person by another spelling their page gives them.
+
+    The kept spelling is the first the page uses, and that may be the one
+    no filing fits: ID-1's November table writes "Sarah Zabel Peterson",
+    its infobox "Sarah Zabel", and the filing is ZABEL, SARAH. A filing
+    another name already matched is never taken.
+    """
+    taken = {cid for cids in matched.values() for cid in cids}
+    for name, spellings in _spellings(boxes).items():
+        if name not in outcome or name in matched or name in ambiguous:
+            continue
+        for other in sorted(spellings - {name}):
+            found, unsure = match_names([other], rows, aliases)
+            cids = found.get(other) or []
+            if cids and not unsure and not taken & set(cids):
+                matched[name] = cids
+                taken |= set(cids)
+                break
+    return matched
 
 
 def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
@@ -957,9 +1032,14 @@ def _unpartisan_runoff(title):
 
 
 def _settle_general(status, generals, runoff_rows, runoff_held):
-    """Who won in November, from the general table's marked winner."""
+    """Who won in November, from the general table's marked winner.
+
+    Someone already WITHDRAWN - listed as having withdrawn after the ballots
+    were printed, their row left in the table - stays withdrawn unless the
+    table marks them the winner."""
     ballot = [r for r in generals if not r["withdrawn"]]
-    names = {r["name"] for r in ballot}
+    names = {r["name"] for r in ballot
+             if status.get(r["name"]) != WITHDRAWN or r["won"]}
     in_runoff = {r["name"] for r in runoff_rows if not r["withdrawn"]}
     # A general runoff is between people on the November ballot. A party
     # runoff's loser never was, so a table holding anyone else is not one.
@@ -1655,6 +1735,8 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                     f"complete open-primary result; left unsettled")
             continue
         matched, ambiguous = match_names(list(outcome), rows, (aliases or {}).get(rid))
+        matched = _match_spellings(outcome, boxes, rows, (aliases or {}).get(rid),
+                                   matched, ambiguous)
         status, party, article, label, about, site = {}, {}, {}, {}, {}, {}
         listed = ballot_parties(boxes)
         linked = ballot_articles(boxes)
@@ -1929,9 +2011,9 @@ def _maybe_named(profile, race):
 def _near(a, b):
     """The same word, or, for five letters or more, one letter apart.
 
-    For holding back a claim only, never for making one: NM-1's page lists
-    "Didi Okapareke" as the nominee and "Didi Okpareke" as withdrawn, and
-    the filer Ndidiamaka Okpareke may be either.
+    For holding back a claim, and, inside one race's page, for folding a
+    misspelling that never shares a table with its correct form into it
+    (:func:`_near_spellings`) - never for matching a name to a filing.
     """
     if a == b:
         return True

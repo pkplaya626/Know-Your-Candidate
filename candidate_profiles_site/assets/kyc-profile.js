@@ -577,9 +577,11 @@
       // "On the November ballot – Speak The Truth line": a primary loser on
       // a minor-party line must not read as their party's second nominee.
       var line = KYC.ballotLine(item);
+      var campaign = KYC.contestStatus(item) === "nominee" &&
+        KYC.electionStatus().phase !== "post-election";
       var title = line ? "On the general election ballot on the " + line + " line. " +
-        (KYC.contestStatus(item) === "nominee" ? "Source: the state's Wikipedia election " +
-          "results page." : race.title) : race.title;
+        (campaign ? "Source: the state's Wikipedia election results page." : race.title)
+        : race.title;
       pieces.push('<span class="badge ' + race.cls + '" title="' +
         KYC.escapeAttr(title) + '">' + KYC.escapeHtml(label) +
         KYC.ballotLineSuffix(item) + "</span>");

@@ -224,6 +224,47 @@ class TestResolving(unittest.TestCase):
         out = results.resolve_race(results.parse_boxes(text))
         self.assertEqual(out["Amanda Edwards"], "withdrawn")
 
+    def test_a_letter_apart_misspelling_on_the_ballot_is_the_primary_winner(self):
+        # NM-1, 2026-10-14: the Republican primary table and the infobox say
+        # "Didi Okpareke"; the November table says "Didi Okapareke".
+        text = "\n".join([
+            box("Republican primary results", ("Didi Okpareke", 31809, True)),
+            box("2026 New Mexico's 1st congressional district election",
+                ("Melanie Stansbury", 0, False), ("Didi Okapareke", 0, False)),
+        ])
+        out = results.resolve_race(results.parse_boxes(text))
+        self.assertEqual(out, {"Didi Okpareke": "nominee", "Melanie Stansbury": "nominee"})
+
+    def test_two_near_names_in_one_table_stay_two_people(self):
+        text = box("Republican primary results", ("Michael Johnson", 9, True),
+                   ("Michael Johnston", 4, False))
+        out = results.resolve_race(results.parse_boxes(text))
+        self.assertEqual(out, {"Michael Johnson": "nominee", "Michael Johnston": "eliminated"})
+        # Nor are different given names, or short surnames, ever folded.
+        self.assertEqual(results._near_spellings([
+            ("A", [{"name": "Ann Okpareke"}]), ("B", [{"name": "Bea Okapareke"}]),
+            ("C", [{"name": "Jo Smith"}]), ("D", [{"name": "Jo Smyth"}])]), {})
+
+    def test_a_row_with_a_nested_template_on_its_own_line_is_read(self):
+        # 2022 Georgia Senate: "{{nowrap|...}}" in the candidate and change
+        # fields made both runoff candidates' November rows vanish.
+        text = "\n".join([
+            "{{Election box begin no change", "| title = 2022 United States Senate election in Georgia",
+            "}}",
+            "{{Election box winning candidate with party link no change",
+            " |party      = Democratic Party (United States)",
+            " |candidate  = {{nowrap|[[Raphael Warnock]] (incumbent)}}",
+            " |votes      = 1,946,117", " |change = {{nowrap|N/A}}", "}}",
+            "{{Election box candidate with party link no change",
+            " |party      = Republican Party (United States)",
+            " |candidate  = [[Herschel Walker]]", " |votes = 1,908,442",
+            " |change = {{nowrap|{{small|N/A}}}}", "}}",
+            "{{Election box end}}",
+        ])
+        rows = [r for _t, rs in results.parse_boxes(text) for r in rs]
+        self.assertEqual([(r["name"], r["won"]) for r in rows],
+                         [("Raphael Warnock", True), ("Herschel Walker", False)])
+
     def test_one_person_spelled_two_ways_is_one_person(self):
         # "Norma J. Torres" in the primary table, "Norma Torres" on the ballot.
         text = "\n".join([
@@ -1279,6 +1320,20 @@ class TestGeneralElectionNight(NoGap):
         self.assertEqual(self.statuses(cache), {
             "alpha": "elected", "beta": "eliminated", "delta": "defeated", "epsilon": "defeated"})
 
+    def test_a_nominee_who_withdrew_after_nomination_stays_withdrawn(self):
+        text = "\n".join([
+            box("Democratic primary results", ("Dee Delta", 9, True)),
+            box(self.GENERAL, ("Ann Alpha", 9, True), ("Dee Delta", 4, False)),
+            "===Withdrew after nomination===", "*Dee Delta",
+        ])
+        section = text
+        boxes = results.parse_boxes(section) + results.candidate_lists(section)
+        before = results.resolve_race(boxes)
+        after = results.resolve_race(boxes, general_held=True)
+        self.assertEqual(before["Dee Delta"], "withdrawn")
+        self.assertEqual(after["Dee Delta"], "withdrawn")
+        self.assertEqual(after["Ann Alpha"], "elected")
+
     def test_only_a_state_with_general_runoffs_reads_one(self):
         self.assertIn("GA", results._general_runoffs())
         boxes = results.parse_boxes(self.general() + "\n" + box(
@@ -1297,6 +1352,54 @@ class TestGeneralElectionNight(NoGap):
         results.apply_cache([member], cache)
         self.assertEqual(member["raceStatus"], "defeated")
         self.assertTrue(member["seekingReelection2026"])
+
+
+class TestAnotherSpellingOnThePage(NoGap):
+    """ID-1, 2026-10-14: the November table writes "Sarah Zabel Peterson", the
+    infobox "Sarah Zabel"; the filing is ZABEL, SARAH."""
+
+    title = "2026 United States House of Representatives elections in Idaho"
+    dates = {("ID", "H"): {"primary": "2026-05-19", "runoff": None}}
+    field = {"candidates": [row("H8ID01124", "FULCHER, RUSS", "ID", "H", 1, "REP"),
+                            row("H2ID01192", "PETERSON, KAYLEE", "ID", "H", 1, "DEM"),
+                            row("H6ID01318", "ZABEL, SARAH", "ID", "H", 1, "IND")]}
+
+    def run_build(self, page):
+        return results.build(self.field, self.dates, today=datetime.date(2026, 10, 14),
+                             log=lambda *_: None,
+                             fetch=lambda t: page if t == self.title else
+                             (_ for _ in ()).throw(results.PageMissing(t)))
+
+    def test_the_infobox_spelling_finds_the_filing(self):
+        page = "\n".join([
+            "\n==District 1==",
+            "{{Infobox election", "| nominee1 = [[Russ Fulcher]]",
+            "| party1 = Republican Party (United States)", "| nominee2 = Kaylee Peterson",
+            "| party2 = Democratic Party (United States)", "| nominee3 = Sarah Zabel",
+            "| party3 = Independent politician", "}}",
+            box("Republican primary results", ("Russ Fulcher", 9, True)),
+            box("Democratic primary results", ("Kaylee Peterson", 9, True)),
+            box("2026 Idaho's 1st congressional district election", ("Russ Fulcher", 0, False),
+                ("Kaylee Peterson", 0, False), ("Sarah Zabel Peterson", 0, False)),
+        ])
+        race = self.run_build(page)["races"]["H-ID-01-2026"]
+        self.assertEqual(race["status"], {"H8ID01124": "nominee", "H2ID01192": "nominee",
+                                          "H6ID01318": "nominee"})
+        self.assertEqual(race["unmatched"], {})
+
+
+class TestValidateUncalled(unittest.TestCase):
+    def codes(self, as_of, statuses):
+        from kyc import validate
+        cache = {"asOf": as_of, "races": {"S-AK-2026": {
+            "decided": {"general": True, "parties": ["all"]}, "status": statuses}}}
+        return [i.code for i in validate.check_results_pages(cache)]
+
+    def test_a_race_still_uncalled_days_later_is_reported(self):
+        self.assertIn("general-uncalled", self.codes("2026-11-07", {"a": "nominee", "b": "nominee"}))
+        self.assertNotIn("general-uncalled", self.codes("2026-11-05", {"a": "nominee"}))
+        self.assertNotIn("general-uncalled",
+                         self.codes("2026-11-07", {"a": "elected", "b": "defeated"}))
 
 
 class TestValidateElected(unittest.TestCase):

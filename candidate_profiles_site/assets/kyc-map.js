@@ -137,13 +137,19 @@
     // A senator who ran and lost the primary is not a retiree: John Cornyn
     // and Bill Cassidy read "not running" here while the panel beside the
     // map said "Lost primary". The phrase comes from the same status.
+    // After November, the result (KYC.raceStatus's statuses), never "running".
     var status = KYC.contestStatus(defender);
+    var counted = KYC.electionStatus().phase === "post-election";
     var party = defender.party === "Democrat" ? "Democratic" : defender.party;
     return {
       fill: key === "vacant" ? VACANT_FILL : "var(--party-" + key + ")",
       text: code + ": 2026 Senate race — " + party + " seat (" +
         defender.name + (status === "eliminated" ? " lost the primary" :
           status === "advanced" ? " in a primary runoff" :
+          status === "elected" ? " re-elected" :
+          status === "defeated" ? " lost re-election" :
+          status === "runoff" ? " in the general election runoff" :
+          status === "nominee" && counted ? " awaiting result" :
           status === "nominee" && defender.seekingReelection2026 ? " renominated" :
           defender.seekingReelection2026 ? " running" :
           defender.contestLabel ? " running for " + defender.contestLabel :
