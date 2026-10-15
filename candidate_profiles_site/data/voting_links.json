@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-14T18:20:15+00:00",
+ "fetched": "2026-10-15T13:20:17+00:00",
  "links": {
   "http://pollfinder.sos.state.mn.us/": "live",
   "http://registration.elections.myflorida.com/": "live",
@@ -189,7 +189,7 @@
   "https://www.votetexas.gov/voting/early-voting.html": "live",
   "https://www1.maine.gov/portal/government/edemocracy/voter_lookup.php": "live"
  },
- "linksChecked": "2026-10-14",
+ "linksChecked": "2026-10-15",
  "pages": {
   "absentee": "https://www.nass.org/can-i-vote/absentee-early-voting",
   "polling": "https://www.nass.org/can-i-vote/find-your-polling-place",
