@@ -1,5 +1,5 @@
 {
- "asOf": "2026-10-14",
+ "asOf": "2026-10-15",
  "calendarNotes": [
   {
    "kind": "open-primary",
@@ -14512,8 +14512,7 @@
   },
   "H-TX-10-2026": {
    "about": {
-    "H6TX10221": "political-law attorney and former director and chief lawyer of Elon Musk's America PAC",
-    "H6TX31102": "U.S. Army veteran and former Dell Technologies global-marketing employee"
+    "H6TX10221": "political-law attorney and former director and chief lawyer of Elon Musk's America PAC"
    },
    "ambiguous": [],
    "article": {
@@ -16032,13 +16031,13 @@
   "H-VA-05-2026": {
    "about": {
     "H0VA07133": "incumbent U.S. representative",
-    "H6VA05217": "former special envoy for Sudan (2024–2025), former U.S. representative (2009–2011)",
     "H6VA05241": "vocational therapist"
    },
-   "ambiguous": [],
+   "ambiguous": [
+    "Tom Perriello"
+   ],
    "article": {
-    "H0VA07133": "John McGuire (Virginia politician)",
-    "H6VA05217": "Tom Perriello"
+    "H0VA07133": "John McGuire (Virginia politician)"
    },
    "decided": {
     "general": true,
@@ -16053,7 +16052,6 @@
     "H0VA07133": "republican",
     "H6VA05191": "democratic",
     "H6VA05209": "democratic",
-    "H6VA05217": "democratic",
     "H6VA05233": "republican",
     "H6VA05241": "independent"
    },
@@ -16066,14 +16064,14 @@
     "H6VA05183": "withdrawn",
     "H6VA05191": "eliminated",
     "H6VA05209": "eliminated",
-    "H6VA05217": "nominee",
     "H6VA05233": "eliminated",
     "H6VA05241": "nominee",
     "H6VA05266": "withdrawn"
    },
    "unmatched": {
     "Salaam Bhatti": "withdrawn",
-    "Shannon Taylor": "withdrawn"
+    "Shannon Taylor": "withdrawn",
+    "Tom Perriello": "nominee"
    },
    "unsure": []
   },

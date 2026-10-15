@@ -1,5 +1,5 @@
 {
- "checked": "2026-10-14",
+ "checked": "2026-10-15",
  "people": {
   "A000055": {
    "checked": "2026-10-14",
@@ -4114,6 +4114,32 @@
    "checked": "2026-10-14",
    "name": "Mitchell Lee Clemmons"
   },
+  "FEC_H6CA43188": {
+   "checked": "2026-10-15",
+   "name": "Cristian Morales",
+   "site": {
+    "final": "https://forallvoices.com",
+    "issues": [
+     "A California Families Can Afford",
+     "Honest, Accountable Government",
+     "Affordable Homeownership and Housing",
+     "Safe Communities and the Second Amendment",
+     "Affordable, Patient-Centered Healthcare",
+     "Strong Schools and Parental Rights",
+     "Secure Borders and Fair Immigration",
+     "Peace Through Strength",
+     "Responsible Technology and AI",
+     "Protect Seniors and Strengthen Social Security",
+     "American Energy, Environmental Stewardship, and Jobs",
+     "Protect Constitutional Rights and Equal Opportunity"
+    ],
+    "issuesUrl": "https://forallvoices.com/platform/",
+    "reason": "ok",
+    "safe": true,
+    "status": 200,
+    "url": "https://forallvoices.com"
+   }
+  },
   "FEC_H6CA44210": {
    "checked": "2026-10-14",
    "name": "Genevieve Angel"
@@ -6146,6 +6172,19 @@
    "checked": "2026-10-14",
    "name": "Michael Gabriel Firment"
   },
+  "FEC_H6LA05341": {
+   "checked": "2026-10-15",
+   "name": "Patricia Ann Moore",
+   "site": {
+    "description": "This is home. Pat Moore is running for Congress in Louisiana's 5th District because our communities deserve to be heard.",
+    "final": "https://patmooreforcongress.com",
+    "portrait": "https://raw.githubusercontent.com/dpconway4-bot/pat-moore-for-congress/main/assets/pat-moore-headshot.jpg",
+    "reason": "ok",
+    "safe": true,
+    "status": 200,
+    "url": "https://patmooreforcongress.com"
+   }
+  },
   "FEC_H6LA06158": {
    "checked": "2026-10-14",
    "name": "Anjanita Monique Appeaning"
@@ -7786,6 +7825,10 @@
     "url": "https://brianshaverforcongress.com"
    }
   },
+  "FEC_H6OH06244": {
+   "checked": "2026-10-15",
+   "name": "Elizabeth Ann Kirtley"
+  },
   "FEC_H6OH07168": {
    "checked": "2026-10-14",
    "name": "Brian Poindexter",
@@ -7941,6 +7984,10 @@
     "status": 200,
     "url": "https://www.projectduecourse.org"
    }
+  },
+  "FEC_H6OR01308": {
+   "checked": "2026-10-15",
+   "name": "Barbara J Kahl"
   },
   "FEC_H6OR02322": {
    "checked": "2026-10-14",
@@ -8435,6 +8482,10 @@
     "status": 200,
     "url": "https://www.annagolladay.com"
    }
+  },
+  "FEC_H6TN03251": {
+   "checked": "2026-10-15",
+   "name": "Rodney Joe King"
   },
   "FEC_H6TN05397": {
    "checked": "2026-10-14",
@@ -9781,6 +9832,19 @@
     "title": "Ben McAdams"
    }
   },
+  "FEC_H8VA05106": {
+   "checked": "2026-10-15",
+   "name": "Thomas Stuart Price Perriello",
+   "site": {
+    "description": "A proud native Virginian, Tom Perriello has spent the last 25 years serving his community and country as a Congressman, diplomat, non-profit leader and teacher.",
+    "final": "https://www.tomperriello.com/",
+    "issuesUrl": "https://www.tomperriello.com/issues",
+    "reason": "moved to tomperriello.com, still names the candidate",
+    "safe": true,
+    "status": 200,
+    "url": "https://www.tomperriellova.com"
+   }
+  },
   "FEC_S4MS00187": {
    "checked": "2026-10-14",
    "name": "Ty Pinkins",
@@ -9977,36 +10041,6 @@
     "safe": true,
     "status": 200,
     "url": "https://www.whit4ilsenate.com"
-   }
-  },
-  "FEC_S6KY00260": {
-   "checked": "2026-10-14",
-   "name": "Michael Faris",
-   "site": {
-    "final": "https://www.farisforsenate.com",
-    "lastTry": {
-     "reason": "HTTP 401",
-     "status": 401
-    },
-    "reason": "HTTP 401",
-    "safe": null,
-    "status": 401,
-    "url": "https://www.farisforsenate.com"
-   }
-  },
-  "FEC_S6KY00278": {
-   "checked": "2026-10-14",
-   "name": "Michael James Faris",
-   "site": {
-    "final": "https://www.farisforsenate.com",
-    "lastTry": {
-     "reason": "HTTP 401",
-     "status": 401
-    },
-    "reason": "HTTP 401",
-    "safe": null,
-    "status": 401,
-    "url": "https://www.farisforsenate.com"
    }
   },
   "FEC_S6MA00288": {

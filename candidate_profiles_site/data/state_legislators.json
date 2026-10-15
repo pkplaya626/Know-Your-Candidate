@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-14T18:11:20+00:00",
+ "fetched": "2026-10-15T13:14:00+00:00",
  "source": "Open States (Plural Policy), current legislators",
  "states": {
   "AK": [
@@ -25474,24 +25474,6 @@
    },
    {
     "chamber": "lower",
-    "district": "38",
-    "districtId": "038",
-    "email": "jon.dunwell@legis.iowa.gov",
-    "id": "ocd-person/7a97018b-eb0e-46cf-8bd8-26520ff0d1e0",
-    "image": "https://www.legis.iowa.gov/photo?action=getPhoto&ga=91&pid=32165",
-    "links": [
-     "https://iowahouserepublicans.nationbuilder.com/reps",
-     "https://mailchi.mp/6f5fef3ed848/untitled-page",
-     "https://www.legis.iowa.gov/legislators/legislator?ga=89&personID=32165",
-     "https://www.legis.iowa.gov/legislators/legislator?personID=32165"
-    ],
-    "name": "Jon Dunwell",
-    "party": "Republican",
-    "partyKey": "R",
-    "state": "IA"
-   },
-   {
-    "chamber": "lower",
     "district": "39",
     "districtId": "039",
     "email": "rick.olson@legis.iowa.gov",
@@ -41471,7 +41453,7 @@
     "chamber": "lower",
     "district": "39",
     "districtId": "039",
-    "districtPhone": "337-886-4687",
+    "districtPhone": "337-230-7582",
     "email": "hse039@legis.la.gov",
     "id": "ocd-person/c725a955-93ff-415e-91df-a7398f823474",
     "image": "https://static.wixstatic.com/media/66f8d9_8ae2cf856c374eee86e43d32c995830b~mv2.jpg/v1/fill/w_150,h_210,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/Doyle%20Boudreaux_JPG.jpg",
@@ -42118,22 +42100,6 @@
      "https://house.louisiana.gov/H_Reps/members?ID=76"
     ],
     "name": "Stephanie Berault",
-    "party": "Republican",
-    "partyKey": "R",
-    "state": "LA"
-   },
-   {
-    "chamber": "lower",
-    "district": "77",
-    "districtId": "077",
-    "districtPhone": "985-893-6262",
-    "email": "wrightm@legis.la.gov",
-    "id": "ocd-person/d3ecec03-0408-46f0-8c82-b775f787e6e1",
-    "links": [
-     "https://house.louisiana.gov/H_Reps/members.aspx?ID=77",
-     "https://house.louisiana.gov/H_Reps/members?ID=77"
-    ],
-    "name": "Mark Wright",
     "party": "Republican",
     "partyKey": "R",
     "state": "LA"
@@ -89173,6 +89139,21 @@
    },
    {
     "chamber": "lower",
+    "district": "66",
+    "districtId": "066",
+    "email": "rep66@ohiohouse.gov",
+    "id": "ocd-person/f578440a-e5ea-4775-bb41-94adad15fa73",
+    "image": "https://img.legistorm.com/people/550/217550.jpg?rand=304840",
+    "links": [
+     "https://ohiohouse.gov/members/sean-hutson"
+    ],
+    "name": "Sean Hutson",
+    "party": "Republican",
+    "partyKey": "R",
+    "state": "OH"
+   },
+   {
+    "chamber": "lower",
     "district": "67",
     "districtId": "067",
     "email": "rep67@ohiohouse.gov",
@@ -91347,20 +91328,6 @@
     "name": "Ross Ford",
     "party": "Republican",
     "partyKey": "R",
-    "state": "OK"
-   },
-   {
-    "chamber": "lower",
-    "district": "77",
-    "districtId": "077",
-    "email": "john.waldron@okhouse.gov",
-    "id": "ocd-person/6a662cc1-492b-4c65-a77c-9b8b202b1ae5",
-    "links": [
-     "https://www.okhouse.gov/representatives/john-waldron"
-    ],
-    "name": "John Waldron",
-    "party": "Democratic",
-    "partyKey": "D",
     "state": "OK"
    },
    {
