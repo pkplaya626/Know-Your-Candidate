@@ -534,16 +534,16 @@ def render_legislature_page(code, host, summary=None):
 
 
 _FEDERAL_SIDEBAR = """
-        <div class="sidebar-section">
+        <nav class="sidebar-section" aria-label="Federal government">
             <h2 class="sidebar-heading">Federal government</h2>
             <p class="sidebar-note">Who holds the federal government's offices now, each from the
                 office's own record: the President, the Vice President and the Cabinet, the
                 Supreme Court, and every sitting Article III judge.</p>
-            <a class="sidebar-link" href="../federal/index.html#executive">The executive</a>
-            <a class="sidebar-link" href="../federal/index.html#cabinet">The Cabinet</a>
-            <a class="sidebar-link" href="../federal/index.html#supreme-court">The Supreme Court</a>
-            <a class="sidebar-link" href="../federal/index.html#courts">The Article III courts</a>
-        </div>
+            <a class="nav-link nav-sub" href="../federal/index.html#executive">The President and Vice President</a>
+            <a class="nav-link nav-sub" href="../federal/index.html#cabinet">The Cabinet</a>
+            <a class="nav-link nav-sub" href="../federal/index.html#supreme-court">The Supreme Court</a>
+            <a class="nav-link nav-sub" href="../federal/index.html#courts">The Article III courts</a>
+        </nav>
 """
 
 _FEDERAL_FOOTER = "\n".join([

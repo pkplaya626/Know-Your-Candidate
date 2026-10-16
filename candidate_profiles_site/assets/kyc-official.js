@@ -332,7 +332,10 @@
     var portrait = el("officialModalPortrait");
     var photo = el("officialModalPhoto");
     var person = found ? found.person : null;
-    el("officialModalName").textContent = person ? person.name : "No longer listed";
+    // A court page holds only its own judges: someone not on it may sit
+    // elsewhere, so only the hub, which holds everyone, says "no longer".
+    el("officialModalName").textContent = person ? person.name :
+      doc.body.getAttribute("data-page") === "court" ? "Not on this court" : "No longer listed";
     portrait.hidden = !(person && person.photo);
     if (person && person.photo) {
       photo.src = person.photo;

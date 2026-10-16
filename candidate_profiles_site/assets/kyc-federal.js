@@ -316,6 +316,17 @@
       " as of " + esc(asOf) + (id === "scotus" ? "; its members as " +
         source(d.sources.judiciary.supremeCourt, "the Court lists them") : "") +
       ". This page lists who sits; it does not count vacancies, which the directory does not hold.</p>";
+    // A chief the directory also lists on senior status: nobody is shown as
+    // chief, and the page says why (kyc/judiciary.py).
+    var unsettled = court.chiefUnsettled && mine.judges.filter(function (j) {
+      return (j.seats || []).some(function (s) { return s.court === id && s.chiefUnsettled; });
+    })[0];
+    if (unsettled) {
+      html += '<p class="state-note" id="chiefUnsettled">The directory lists ' + esc(unsettled.name) +
+        " as this court’s chief judge and also on senior status. A chief judge must be in " +
+        "regular active service (28 U.S.C. 136(a)), so nobody is shown as chief until the " +
+        "record is settled.</p>";
+    }
     var heads = ["Judge", "Title", "Appointed by", "Commissioned"];
     html += section("active", id === "scotus" ? "The justices" : "Active judges",
       active.length ? table("", heads, judgeRows(active, false))

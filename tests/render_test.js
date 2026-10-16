@@ -4500,6 +4500,19 @@ async function testFederal() {
       !doc.querySelector('#officialModalBody a[href="ca1.html"]'));
   });
 
+  const conflicted = ((ca1.window.kycFederal || {}).courts || []).find((c) => c.chiefUnsettled);
+  if (conflicted) {
+    const page = await buildPage("courts/" + conflicted.id + ".html");
+    await settle(50);
+    suite("courts/" + conflicted.id + ".html — a chief the directory also lists as senior", () => {
+      check("no page errors", page.errors.length === 0, page.errors.join(" | "));
+      const note = page.D.getElementById("chiefUnsettled");
+      check("nobody is shown as chief, and the page says why", !!note &&
+        /28 U\.S\.C\. 136/.test(note.textContent) && !page.D.querySelector("#federalBody .badge"),
+        note && note.textContent);
+    });
+  }
+
   const guam = await buildPage("courts/gu.html");
   await settle(50);
   suite("courts/gu.html — a territorial court", () => {
