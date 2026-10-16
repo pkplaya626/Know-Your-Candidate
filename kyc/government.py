@@ -408,11 +408,13 @@ def _map_main(page, modes):
 
 
 def _footer(page):
+    # A page checked on another day than the rest of the guide says so.
+    reviewed = page.get("reviewed", REVIEWED)
     return "\n".join([
         "                <p><strong>About this guide:</strong> a plain-language summary of how",
         "                    American government is organized. Each section lists the sources",
-        f'                    it was checked against, on <time datetime="{_e(REVIEWED)}">'
-        f"{_e(REVIEWED)}</time>.",
+        f'                    it was checked against, on <time datetime="{_e(reviewed)}">'
+        f"{_e(reviewed)}</time>.",
         "                    It describes offices and institutions; where it names who holds",
         "                    one today, that comes from the same data as the rest of the site.",
         "                    It is not legal advice.</p>",

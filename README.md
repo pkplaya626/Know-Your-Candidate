@@ -968,9 +968,23 @@ the map's delegation panel, the footer, and `sitemap.xml`.
 
 `government/` is a guide to the offices around the people this site covers:
 Congress, the executive and the federal courts, state governments, local
-governments and tribal nations. Its seven pages are generated, like the state
-pages, from the shared template in `kyc/pages.py`, with their words in
-`kyc/government_text.py`.
+governments and tribal nations, and how elections work. Its eight pages are
+generated, like the state pages, from the shared template in `kyc/pages.py`,
+with their words in `kyc/government_text.py`.
+
+The elections page (`government/elections.html`) answers what readers ask in
+November and December: when federal elections are held and who runs them,
+primaries and other ways of nominating, runoffs (Texas, Georgia's December 1
+general runoff, Louisiana's December 12 round), ranked-choice counts in Maine
+and Alaska, counting, canvass and certification (with *Watson v. RNC*, June
+2026, on mailed ballots that arrive after Election Day), recounts, when the
+winners take office, and how vacancies are filled. It names states only as
+examples from their own laws and never counts states it did not check. Its
+40 claims were drafted from primary sources and then attacked one by one by
+a second reader; 11 were corrected (among them that Alaska's voters decide
+on November 3 whether to repeal its top-four primary and ranked-choice
+general elections). It was checked on 2026-10-16, a later date than the rest
+of the guide, and its footer says so (`"reviewed"` on the page).
 
 The words are static, so they are held to the standard of everything else
 here in a different way:

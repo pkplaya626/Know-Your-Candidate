@@ -528,7 +528,8 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     down), and called the federal executive "unitary", a contested
     theory's label. Every claim was researched and then attacked by a
     second agent before it was written. When the text is revised, re-check
-    what can change (counts, decisions, agency names) and move `REVIEWED`.
+    what can change (counts, decisions, agency names) and move `REVIEWED`;
+    a page checked on another day carries its own `"reviewed"` date.
     Who holds an office is never typed in: the Congress page renders
     committee leads from the rosters, and a committee's minority lead is
     found by the seat's `side`, not its title.

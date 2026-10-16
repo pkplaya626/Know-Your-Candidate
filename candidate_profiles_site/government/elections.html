@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How elections work — Know Your Candidate</title>
+<meta name="description" content="When federal elections are held and who runs them; primaries, runoffs and ranked-choice counts; how votes are counted, certified and recounted; and when the people elected take office, with the sources each part was checked against.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://candidates.radicalrelay.us/government/elections.html">
+<meta property="og:url" content="https://candidates.radicalrelay.us/government/elections.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="How elections work">
+<meta property="og:description" content="When federal elections are held and who runs them; primaries, runoffs and ranked-choice counts; how votes are counted, certified and recounted; and when the people elected take office, with the sources each part was checked against.">
+<meta property="og:image" content="https://candidates.radicalrelay.us/assets/social-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Know Your Candidate">
+<meta property="og:site_name" content="Know Your Candidate">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/kyc.css">
+<script src="../assets/kyc.js"></script>
+</head>
+<body data-root="../" data-state="" data-page="guide">
+
+<a href="#stateMain" class="skip-link">Skip to content</a>
+<button type="button" class="sidebar-scrim" tabindex="-1" aria-hidden="true"></button>
+
+<header class="app-header">
+    <button type="button" class="btn-icon sidebar-toggle" aria-expanded="false"
+            aria-controls="sidebar" aria-label="Show navigation">
+        <svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg>
+    </button>
+
+    <a class="brand" href="../index.html">
+        <svg class="icon" aria-hidden="true"><use href="#i-vote"/></svg>
+        <span class="brand-name">Know Your Candidate</span>
+        <span class="brand-sub">119th Congress</span>
+    </a>
+
+
+    <div class="header-actions">
+        <div class="menu">
+            <button type="button" class="btn-icon" id="themeButton"
+                    aria-haspopup="true" aria-label="Change theme">
+                <svg class="icon" aria-hidden="true"><use href="#i-palette"/></svg>
+            </button>
+            <div class="menu-panel" id="themePanel" role="menu" hidden>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="system" aria-checked="true">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Match system
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="dark" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Dark
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="amoled" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    AMOLED black
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="light" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Light
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="app-body">
+    <aside class="sidebar scroll-y" id="sidebar" aria-label="Navigation and summary">
+        <nav class="sidebar-section" aria-label="Views">
+            <a class="nav-link" href="../index.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg>
+                Profile grid
+            </a>
+            <a class="nav-link" href="../map.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-map"/></svg>
+                Partisan map
+            </a>
+            <a class="nav-link" href="../states/index.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
+                States &amp; territories
+            </a>
+            <a class="nav-link" href="../government/index.html">
+                <svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg>
+                How government works
+            </a>
+            <div id="yourState" hidden></div>
+        </nav>
+
+        <nav class="sidebar-section" aria-label="In this guide">
+            <h2 class="sidebar-heading">In this guide</h2>
+            <a class="nav-link nav-sub" href="index.html">Overview</a>
+            <a class="nav-link nav-sub" href="congress.html">Congress</a>
+            <a class="nav-link nav-sub" href="executive.html">The executive</a>
+            <a class="nav-link nav-sub" href="courts.html">Federal courts</a>
+            <a class="nav-link nav-sub" href="states.html">State governments</a>
+            <a class="nav-link nav-sub" href="local.html">Local governments</a>
+            <a class="nav-link nav-sub" href="tribal.html">Tribal nations</a>
+            <a class="nav-link nav-sub" href="elections.html" aria-current="page">Elections</a>
+        </nav>
+
+        <nav class="sidebar-section push" aria-label="Jump to a state">
+            <h2 class="sidebar-heading">Jump to</h2>
+            <label class="sr-only" for="stateJump">Jump to a state or territory</label>
+            <select id="stateJump" class="select">
+                <option value="">Choose a state&hellip;</option>
+                <option value="AL">Alabama (AL)</option>
+                <option value="AK">Alaska (AK)</option>
+                <option value="AS">American Samoa (AS)</option>
+                <option value="AZ">Arizona (AZ)</option>
+                <option value="AR">Arkansas (AR)</option>
+                <option value="CA">California (CA)</option>
+                <option value="CO">Colorado (CO)</option>
+                <option value="CT">Connecticut (CT)</option>
+                <option value="DE">Delaware (DE)</option>
+                <option value="DC">District of Columbia (DC)</option>
+                <option value="FL">Florida (FL)</option>
+                <option value="GA">Georgia (GA)</option>
+                <option value="GU">Guam (GU)</option>
+                <option value="HI">Hawaii (HI)</option>
+                <option value="ID">Idaho (ID)</option>
+                <option value="IL">Illinois (IL)</option>
+                <option value="IN">Indiana (IN)</option>
+                <option value="IA">Iowa (IA)</option>
+                <option value="KS">Kansas (KS)</option>
+                <option value="KY">Kentucky (KY)</option>
+                <option value="LA">Louisiana (LA)</option>
+                <option value="ME">Maine (ME)</option>
+                <option value="MD">Maryland (MD)</option>
+                <option value="MA">Massachusetts (MA)</option>
+                <option value="MI">Michigan (MI)</option>
+                <option value="MN">Minnesota (MN)</option>
+                <option value="MS">Mississippi (MS)</option>
+                <option value="MO">Missouri (MO)</option>
+                <option value="MT">Montana (MT)</option>
+                <option value="NE">Nebraska (NE)</option>
+                <option value="NV">Nevada (NV)</option>
+                <option value="NH">New Hampshire (NH)</option>
+                <option value="NJ">New Jersey (NJ)</option>
+                <option value="NM">New Mexico (NM)</option>
+                <option value="NY">New York (NY)</option>
+                <option value="NC">North Carolina (NC)</option>
+                <option value="ND">North Dakota (ND)</option>
+                <option value="MP">Northern Mariana Islands (MP)</option>
+                <option value="OH">Ohio (OH)</option>
+                <option value="OK">Oklahoma (OK)</option>
+                <option value="OR">Oregon (OR)</option>
+                <option value="PA">Pennsylvania (PA)</option>
+                <option value="PR">Puerto Rico (PR)</option>
+                <option value="RI">Rhode Island (RI)</option>
+                <option value="SC">South Carolina (SC)</option>
+                <option value="SD">South Dakota (SD)</option>
+                <option value="TN">Tennessee (TN)</option>
+                <option value="TX">Texas (TX)</option>
+                <option value="UT">Utah (UT)</option>
+                <option value="VT">Vermont (VT)</option>
+                <option value="VI">Virgin Islands (VI)</option>
+                <option value="VA">Virginia (VA)</option>
+                <option value="WA">Washington (WA)</option>
+                <option value="WV">West Virginia (WV)</option>
+                <option value="WI">Wisconsin (WI)</option>
+                <option value="WY">Wyoming (WY)</option>
+            </select>
+        </nav>
+    </aside>
+
+    <main class="app-main" id="stateMain">
+        <div class="content scroll-y">
+            <article id="guideContent" class="state-page guide-page">
+                <header class="state-hero">
+                    <p class="state-kicker">How government works</p>
+                    <h1 class="state-title">How elections work</h1>
+                    <p class="guide-lede">Federal law fixes the day of the November election, but nearly everything else - who may vote in a primary, how a winner is decided, when the count ends - is set by each state. This page explains the parts readers ask about in November and December, with examples from states' own laws. It is a guide, not legal advice: for your own ballot, use <a href="../states/index.html">your state's official voting pages</a>.</p>
+                </header>
+                <nav class="guide-toc" aria-labelledby="guideTocTitle">
+                    <h2 class="guide-toc-title" id="guideTocTitle">On this page</h2>
+                    <ol>
+                        <li><a href="#when">When federal elections are held</a></li>
+                        <li><a href="#who-runs">Who runs elections</a></li>
+                        <li><a href="#primaries">Primaries, and other ways candidates are nominated</a></li>
+                        <li><a href="#runoffs">Runoffs</a></li>
+                        <li><a href="#ranked-choice">Ranked-choice voting</a></li>
+                        <li><a href="#counting">Counting, canvassing and certification</a></li>
+                        <li><a href="#recounts">Recounts</a></li>
+                        <li><a href="#taking-office">Taking office</a></li>
+                        <li><a href="#vacancies">Filling vacancies</a></li>
+                    </ol>
+                </nav>
+                <section class="guide-section" id="when" aria-labelledby="when-title">
+                    <h2 class="guide-heading" id="when-title">When federal elections are held</h2>
+                    <p>Federal law sets the day of the general election for Congress: the Tuesday after the first Monday in November of every even-numbered year (2 U.S.C. 7). In 2026 that is November 3. Every House seat is on that ballot, because House terms are two years.</p>
+                    <p>A state holds a regular Senate election when one of its senators' six-year terms is ending, on the same November ballot, and the winner's term begins on January 3 of the next year (2 U.S.C. 1). When a Senate seat falls vacant, the Seventeenth Amendment calls for an election to fill it (see <a href="#vacancies">filling vacancies</a>).</p>
+                    <p>Primary dates are not set nationally; each state sets its own. Texas law puts its general primary on the first Tuesday in March of even-numbered years. Georgia held its 2026 primary on May 19, with a runoff on June 16.</p>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://www.law.cornell.edu/uscode/text/2/7" target="_blank" rel="noopener noreferrer">2 U.S.C. 7 (the day of the House election)</a>; <a href="https://www.law.cornell.edu/uscode/text/2/1" target="_blank" rel="noopener noreferrer">2 U.S.C. 1 (the election of senators)</a>; <a href="https://constitution.congress.gov/constitution/amendment-17/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Seventeenth Amendment</a>; <a href="https://tcss.legis.texas.gov/resources/EL/pdf/EL.41.pdf" target="_blank" rel="noopener noreferrer">Texas Election Code, chapter 41 (election dates)</a>; <a href="https://georgia.gov/georgia-election-guide" target="_blank" rel="noopener noreferrer">Georgia.gov, Georgia election guide</a></p>
+                </section>
+                <section class="guide-section" id="who-runs" aria-labelledby="who-runs-title">
+                    <h2 class="guide-heading" id="who-runs-title">Who runs elections</h2>
+                    <p>The Constitution's Elections Clause leaves the times, places and manner of congressional elections to each state's legislature, and lets Congress make or change those rules by law (Article I, Section 4).</p>
+                    <p>Each state has a chief election official, who oversees or advises. But, as the U.S. Election Assistance Commission puts it, elections are usually run at the county level, and in some states by cities or townships, and no two states run them the same way. So the rules for registering, voting by mail and counting differ from state to state.</p>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://constitution.congress.gov/constitution/article-1/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article I</a>; <a href="https://www.eac.gov/who-is-in-charge-of-elections-in-my-state" target="_blank" rel="noopener noreferrer">U.S. Election Assistance Commission, Who is in charge of elections in my state?</a></p>
+                </section>
+                <section class="guide-section" id="primaries" aria-labelledby="primaries-title">
+                    <h2 class="guide-heading" id="primaries-title">Primaries, and other ways candidates are nominated</h2>
+                    <p>In a partisan primary, voters choose a party's candidate for the general election; a nonpartisan primary narrows the field for an office. Each state decides who may vote in a party's primary. In a closed primary, only voters affiliated with the party may take part. An open primary generally lets any voter take part: in Virginia, any qualified voter may vote in a primary, but no one may vote for the candidates of more than one party. In a partially closed primary, the state's parties decide whether voters registered with no party may take part.</p>
+                    <p>Louisiana began closed party primaries in spring 2026, for the U.S. Senate among other offices. A voter registered as a Democrat or a Republican votes only in that party's primary, and a voter registered with no party may choose either party's primary, but not both.</p>
+                    <p>Some states hold no party primary for Congress. California and Washington list every candidate on one primary ballot, and the two with the most votes go on to November whatever party they prefer; a party preference on Washington's ballot is shown for voters' information only. Alaska's primary chooses no party's nominee: the four candidates with the most votes go on to the general election, which is decided by <a href="#ranked-choice">ranked-choice voting</a>. On November 3, 2026, Alaska's voters also decide a ballot measure that would repeal its open primary and ranked-choice general elections.</p>
+                    <p>Louisiana's U.S. House seats follow a different calendar in 2026. Under Act 7 of the 2026 Regular Session they were moved to the November 3 ballot as an open primary: every candidate runs on one ballot, a candidate with a majority of the votes is elected, and otherwise the top two, of any party, meet in a general election on December 12. <a href="../states/la.html">Louisiana's page</a> lists the candidates the Secretary of State has qualified.</p>
+                    <p>Some parties nominate without a primary. In Virginia, a state party may decide how it nominates candidates for the U.S. Senate and statewide office, and state law sets deadlines for nominations made other than by primary. In Connecticut, a party convention endorses a candidate for each state or district office, and a primary is held only if another candidate qualifies to challenge the endorsed one; otherwise the endorsed candidate is the nominee.</p>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://www.eac.gov/voters/primary-election-types" target="_blank" rel="noopener noreferrer">U.S. Election Assistance Commission, Primary election types</a>; <a href="https://law.lis.virginia.gov/vacode/title24.2/chapter5/section24.2-530/" target="_blank" rel="noopener noreferrer">Code of Virginia 24.2-530 (who may vote in a primary)</a>; <a href="https://www.sos.la.gov/elections-voting/how-candidates-are-elected" target="_blank" rel="noopener noreferrer">Louisiana Secretary of State, How candidates are elected</a>; <a href="https://www.sos.ca.gov/elections/primary-elections-california" target="_blank" rel="noopener noreferrer">California Secretary of State, Primary elections in California</a>; <a href="https://app.leg.wa.gov/RCW/default.aspx?cite=29A.52.112" target="_blank" rel="noopener noreferrer">Revised Code of Washington 29A.52.112 (the top-two primary)</a>; <a href="https://www.akleg.gov/basis/statutes.asp?media=print&amp;secStart=15.25.010&amp;secEnd=15.25.010" target="_blank" rel="noopener noreferrer">Alaska Statutes 15.25.010 (the primary)</a>; <a href="https://www.akleg.gov/basis/statutes.asp?media=print&amp;secStart=15.15.350&amp;secEnd=15.15.350" target="_blank" rel="noopener noreferrer">Alaska Statutes 15.15.350 (ranked-choice general elections)</a>; <a href="https://www.elections.alaska.gov/petitions-and-ballot-measures/" target="_blank" rel="noopener noreferrer">Alaska Division of Elections, Petitions and ballot measures</a>; <a href="https://www.sos.la.gov/media/dcvl5ojl/051426-fall-house-races.pdf" target="_blank" rel="noopener noreferrer">Louisiana Secretary of State, release of May 14, 2026 on the fall House races</a>; <a href="https://law.lis.virginia.gov/vacode/title24.2/chapter5/section24.2-509/" target="_blank" rel="noopener noreferrer">Code of Virginia 24.2-509 (how a party nominates)</a>; <a href="https://law.lis.virginia.gov/vacode/title24.2/chapter5/section24.2-510/" target="_blank" rel="noopener noreferrer">Code of Virginia 24.2-510 (nominations other than by primary)</a>; <a href="https://www.cga.ct.gov/current/pub/chap_153.htm" target="_blank" rel="noopener noreferrer">Connecticut General Statutes, chapter 153 (nominations and primaries)</a></p>
+                </section>
+                <section class="guide-section" id="runoffs" aria-labelledby="runoffs-title">
+                    <h2 class="guide-heading" id="runoffs-title">Runoffs</h2>
+                    <p>Some states require a winner to have a majority of the votes, not just the most. When no one has a majority, the leaders meet again in a runoff. In Texas, a primary candidate needs a majority of the votes to win a party's nomination, and a runoff primary is held when no one has one.</p>
+                    <p>Georgia requires a majority in its primaries and its general elections; when no candidate has one, the top two meet in a runoff (O.C.G.A. 21-2-501). Georgia's general-election runoff, if one is needed in 2026, is on December 1, four weeks after Election Day.</p>
+                    <p>Louisiana's December round is not a primary runoff: for its House seats in 2026 the November 3 vote is itself the open primary, and a seat no one wins with a majority is decided at the general election on December 12. So some House seats may not be decided until December.</p>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://tcss.legis.texas.gov/resources/EL/pdf/EL.172.pdf" target="_blank" rel="noopener noreferrer">Texas Election Code, chapter 172 (primaries and runoffs)</a>; <a href="https://www.legis.ga.gov/api/legislation/document/20212022/201498" target="_blank" rel="noopener noreferrer">Georgia SB 202 (2021), including O.C.G.A. 21-2-501 (runoffs)</a>; <a href="https://georgia.gov/events/2026-12-01/election-day-general-election-runoff" target="_blank" rel="noopener noreferrer">Georgia.gov, General election runoff, December 1, 2026</a>; <a href="https://www.sos.la.gov/elections-voting/how-candidates-are-elected" target="_blank" rel="noopener noreferrer">Louisiana Secretary of State, How candidates are elected</a></p>
+                </section>
+                <section class="guide-section" id="ranked-choice" aria-labelledby="ranked-choice-title">
+                    <h2 class="guide-heading" id="ranked-choice-title">Ranked-choice voting</h2>
+                    <p>Maine and Alaska decide their federal general elections by ranked-choice voting, and Maine also uses it in its state-level primaries. Voters rank the candidates in order of preference instead of choosing one.</p>
+                    <p>The count goes in rounds. If a candidate has more than half of the first choices, that candidate wins. If not, under Alaska's law the last-place candidate is eliminated and each of that candidate's ballots moves to the next candidate ranked on it, and the rounds repeat until someone wins; Maine eliminates the lowest-ranked candidates round by round until two are left. In Maine, when no one wins on the first count, ballots and memory devices are brought from each town to a central count in Augusta. Alaska counts mailed ballots that arrive up to 10 days after the election, or 15 days for ballots mailed from outside the United States. In both states a final result can take days.</p>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://www.maine.gov/sos/elections-voting/ranked-choice-voting-frequently-asked-questions" target="_blank" rel="noopener noreferrer">Maine Secretary of State, Ranked-choice voting: frequently asked questions</a>; <a href="https://www.akleg.gov/basis/statutes.asp?media=print&amp;secStart=15.15.350&amp;secEnd=15.15.350" target="_blank" rel="noopener noreferrer">Alaska Statutes 15.15.350 (ranked-choice general elections)</a>; <a href="https://www.akleg.gov/basis/statutes.asp?media=print&amp;secStart=15.20.081&amp;secEnd=15.20.081" target="_blank" rel="noopener noreferrer">Alaska Statutes 15.20.081 (absentee ballots)</a></p>
+                </section>
+                <section class="guide-section" id="counting" aria-labelledby="counting-title">
+                    <h2 class="guide-heading" id="counting-title">Counting, canvassing and certification</h2>
+                    <p>Voting ends on Election Day; counting does not, and results reported on election night are unofficial. Some states count mailed ballots sent by Election Day that arrive afterward: California counts ballots postmarked by Election Day that reach the county by November 10, 2026. On June 29, 2026 the Supreme Court held, in Watson v. Republican National Committee, that the federal Election Day statutes do not stop a state from counting ballots postmarked by Election Day and received afterward.</p>
+                    <p>Provisional ballots take time too. In a federal election, a voter whose name is not on the list, or whose eligibility an official questions, may cast a provisional ballot, and it is counted if election officials later confirm under state law that the voter was eligible (52 U.S.C. 21082).</p>
+                    <p>After the count, local officials review and confirm the results - the canvass - and then the state certifies them, on deadlines each state sets. Two examples for 2026: California's counties have until December 3 to certify, and its Secretary of State certifies the statewide results by December 11. In Texas, local canvasses are held from the third day after the election at the earliest, and the state canvass must be done by December 7.</p>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://www.sos.ca.gov/elections/upcoming-elections/general-election-november-3-2026/key-dates-deadlines" target="_blank" rel="noopener noreferrer">California Secretary of State, November 3, 2026 general election: key dates and deadlines</a>; <a href="https://www.law.cornell.edu/supremecourt/text/24-1260" target="_blank" rel="noopener noreferrer">Watson v. Republican National Committee, No. 24-1260 (June 29, 2026)</a>; <a href="https://www.law.cornell.edu/uscode/text/52/21082" target="_blank" rel="noopener noreferrer">52 U.S.C. 21082 (provisional ballots)</a>; <a href="https://www.sos.texas.gov/elections/laws/advisory2026-21-november-3-election-law-calendar.shtml" target="_blank" rel="noopener noreferrer">Texas Secretary of State, Advisory 2026-21: the November 3, 2026 election law calendar</a></p>
+                </section>
+                <section class="guide-section" id="recounts" aria-labelledby="recounts-title">
+                    <h2 class="guide-heading" id="recounts-title">Recounts</h2>
+                    <p>Recounts are governed by state law. Three examples. Arizona recounts automatically when the margin between the top two candidates is one-half of one percent or less of the votes cast for both. Florida orders a recount when the unofficial returns show a candidate lost by one-half of a percent or less of the votes cast for the office, unless the losing candidate asks in writing that none be made. In Texas a candidate must ask: one condition is that the difference between the candidate and the winner is less than 10 percent of the winner's votes, and as a general rule the petition is due by 5 p.m. on the third business day after the canvass is completed.</p>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://www.azleg.gov/ars/16/00661.htm" target="_blank" rel="noopener noreferrer">Arizona Revised Statutes 16-661 (automatic recounts)</a>; <a href="https://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&amp;URL=0100-0199/0102/Sections/0102.141.html" target="_blank" rel="noopener noreferrer">Florida Statutes 102.141 (canvassing boards and recounts)</a>; <a href="https://tcss.legis.texas.gov/resources/EL/pdf/EL.212.pdf" target="_blank" rel="noopener noreferrer">Texas Election Code, chapter 212 (recounts)</a></p>
+                </section>
+                <section class="guide-section" id="taking-office" aria-labelledby="taking-office-title">
+                    <h2 class="guide-heading" id="taking-office-title">Taking office</h2>
+                    <p>Under the Twentieth Amendment, the terms of senators and representatives end, and the new terms begin, at noon on January 3. The terms of the members elected on November 3, 2026 begin at noon on January 3, 2027.</p>
+                    <p>The Constitution makes each house of Congress the judge of the elections, returns and qualifications of its own members (Article I, Section 5), so a dispute over who won a House or Senate seat can end up before that house.</p>
+                    <p>Governors and state legislators take office on dates set by each state's constitution and laws. In Texas, for one, the governor is installed on the first Tuesday after the Legislature organizes, or as soon after as is practicable.</p>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://constitution.congress.gov/constitution/amendment-20/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Twentieth Amendment</a>; <a href="https://constitution.congress.gov/constitution/article-1/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article I</a>; <a href="https://tcss.legis.texas.gov/resources/CN/pdf/CN.4.pdf" target="_blank" rel="noopener noreferrer">Texas Constitution, Article 4 (the executive department)</a></p>
+                </section>
+                <section class="guide-section" id="vacancies" aria-labelledby="vacancies-title">
+                    <h2 class="guide-heading" id="vacancies-title">Filling vacancies</h2>
+                    <p>When a House seat falls vacant, the Constitution has the state's governor call an election to fill it (Article I, Section 2). It provides for no appointment, so the seat is empty until the special election.</p>
+                    <p>Senate vacancies are covered by the Seventeenth Amendment: the governor calls an election, and the state's legislature may let the governor appoint a temporary senator until the voters fill the seat by election as the legislature directs. Whether a governor may make that appointment, and when the election is held, depends on each state's law.</p>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://constitution.congress.gov/constitution/article-1/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article I</a>; <a href="https://constitution.congress.gov/constitution/amendment-17/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Seventeenth Amendment</a></p>
+                </section>
+                <nav class="guide-pager" aria-label="Guide pages">
+                    <a class="guide-pager-link" rel="prev" href="tribal.html"><span>Previous</span> Tribal nations</a>
+                </nav>
+            </article>
+
+            <footer class="site-footer">
+                <p><strong>About this guide:</strong> a plain-language summary of how
+                    American government is organized. Each section lists the sources
+                    it was checked against, on <time datetime="2026-10-16">2026-10-16</time>.
+                    It describes offices and institutions; where it names who holds
+                    one today, that comes from the same data as the rest of the site.
+                    It is not legal advice.</p>
+                <p>Non-partisan and independent.</p>
+            </footer>
+        </div>
+    </main>
+</div>
+
+<script src="../assets/kyc-guide.js"></script>
+</body>
+</html>
