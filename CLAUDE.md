@@ -139,7 +139,8 @@ python build_profile_site.py judiciary        # every sitting federal judge (FJC
 python build_profile_site.py vacancies        # vacancies in the federal courts, as uscourts.gov lists them
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 1094 tests, no dependencies
+python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
+python -m unittest discover tests             # 1098 tests, no dependencies
 npm install && npm test                       # 1308 real-DOM checks (needs jsdom)
 ```
 
