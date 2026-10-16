@@ -289,6 +289,80 @@ SOURCES = {
                  "https://www.justice.gov/tribal/2013-and-2022-reauthorizations-violence-against-women-act-vawa"),
     "bia-pl280": ("Bureau of Indian Affairs: What is Public Law 280?",
                   "https://www.bia.gov/faqs/what-public-law-280-and-where-does-it-apply"),
+
+    # How elections work (checked 2026-10-16)
+    "const-amdt20": ("U.S. Constitution, Twentieth Amendment",
+                     "https://constitution.congress.gov/constitution/amendment-20/"),
+    "usc-2-1": ("2 U.S.C. 1 (the election of senators)",
+                "https://www.law.cornell.edu/uscode/text/2/1"),
+    "usc-2-7": ("2 U.S.C. 7 (the day of the House election)",
+                "https://www.law.cornell.edu/uscode/text/2/7"),
+    "usc-52-21082": ("52 U.S.C. 21082 (provisional ballots)",
+                     "https://www.law.cornell.edu/uscode/text/52/21082"),
+    "watson-rnc": ("Watson v. Republican National Committee, No. 24-1260 (June 29, 2026)",
+                   "https://www.law.cornell.edu/supremecourt/text/24-1260"),
+    "eac-in-charge": ("U.S. Election Assistance Commission, Who is in charge of elections in "
+                      "my state?", "https://www.eac.gov/who-is-in-charge-of-elections-in-my-state"),
+    "eac-primaries": ("U.S. Election Assistance Commission, Primary election types",
+                      "https://www.eac.gov/voters/primary-election-types"),
+    "tx-el-41": ("Texas Election Code, chapter 41 (election dates)",
+                 "https://tcss.legis.texas.gov/resources/EL/pdf/EL.41.pdf"),
+    "tx-el-172": ("Texas Election Code, chapter 172 (primaries and runoffs)",
+                  "https://tcss.legis.texas.gov/resources/EL/pdf/EL.172.pdf"),
+    "tx-el-212": ("Texas Election Code, chapter 212 (recounts)",
+                  "https://tcss.legis.texas.gov/resources/EL/pdf/EL.212.pdf"),
+    "tx-sos-2026-calendar": ("Texas Secretary of State, Advisory 2026-21: the November 3, "
+                             "2026 election law calendar",
+                             "https://www.sos.texas.gov/elections/laws/"
+                             "advisory2026-21-november-3-election-law-calendar.shtml"),
+    "tx-const-art4": ("Texas Constitution, Article 4 (the executive department)",
+                      "https://tcss.legis.texas.gov/resources/CN/pdf/CN.4.pdf"),
+    "ga-election-guide": ("Georgia.gov, Georgia election guide",
+                          "https://georgia.gov/georgia-election-guide"),
+    "ga-sb202": ("Georgia SB 202 (2021), including O.C.G.A. 21-2-501 (runoffs)",
+                 "https://www.legis.ga.gov/api/legislation/document/20212022/201498"),
+    "ga-runoff-2026": ("Georgia.gov, General election runoff, December 1, 2026",
+                       "https://georgia.gov/events/2026-12-01/election-day-general-election-runoff"),
+    "la-sos-elected": ("Louisiana Secretary of State, How candidates are elected",
+                       "https://www.sos.la.gov/elections-voting/how-candidates-are-elected"),
+    "la-sos-house-2026": ("Louisiana Secretary of State, release of May 14, 2026 on the fall "
+                          "House races",
+                          "https://www.sos.la.gov/media/dcvl5ojl/051426-fall-house-races.pdf"),
+    "va-24-2-509": ("Code of Virginia 24.2-509 (how a party nominates)",
+                    "https://law.lis.virginia.gov/vacode/title24.2/chapter5/section24.2-509/"),
+    "va-24-2-510": ("Code of Virginia 24.2-510 (nominations other than by primary)",
+                    "https://law.lis.virginia.gov/vacode/title24.2/chapter5/section24.2-510/"),
+    "va-24-2-530": ("Code of Virginia 24.2-530 (who may vote in a primary)",
+                    "https://law.lis.virginia.gov/vacode/title24.2/chapter5/section24.2-530/"),
+    "ct-chap-153": ("Connecticut General Statutes, chapter 153 (nominations and primaries)",
+                    "https://www.cga.ct.gov/current/pub/chap_153.htm"),
+    "ca-sos-primaries": ("California Secretary of State, Primary elections in California",
+                         "https://www.sos.ca.gov/elections/primary-elections-california"),
+    "ca-sos-2026-dates": ("California Secretary of State, November 3, 2026 general election: "
+                          "key dates and deadlines",
+                          "https://www.sos.ca.gov/elections/upcoming-elections/"
+                          "general-election-november-3-2026/key-dates-deadlines"),
+    "wa-29a-52-112": ("Revised Code of Washington 29A.52.112 (the top-two primary)",
+                      "https://app.leg.wa.gov/RCW/default.aspx?cite=29A.52.112"),
+    "ak-15-25-010": ("Alaska Statutes 15.25.010 (the primary)",
+                     "https://www.akleg.gov/basis/statutes.asp?media=print"
+                     "&secStart=15.25.010&secEnd=15.25.010"),
+    "ak-15-15-350": ("Alaska Statutes 15.15.350 (ranked-choice general elections)",
+                     "https://www.akleg.gov/basis/statutes.asp?media=print"
+                     "&secStart=15.15.350&secEnd=15.15.350"),
+    "ak-15-20-081": ("Alaska Statutes 15.20.081 (absentee ballots)",
+                     "https://www.akleg.gov/basis/statutes.asp?media=print"
+                     "&secStart=15.20.081&secEnd=15.20.081"),
+    "ak-ballot-measures": ("Alaska Division of Elections, Petitions and ballot measures",
+                           "https://www.elections.alaska.gov/petitions-and-ballot-measures/"),
+    "me-rcv-faq": ("Maine Secretary of State, Ranked-choice voting: frequently asked questions",
+                   "https://www.maine.gov/sos/elections-voting/"
+                   "ranked-choice-voting-frequently-asked-questions"),
+    "az-16-661": ("Arizona Revised Statutes 16-661 (automatic recounts)",
+                  "https://www.azleg.gov/ars/16/00661.htm"),
+    "fl-102-141": ("Florida Statutes 102.141 (canvassing boards and recounts)",
+                   "https://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute"
+                   "&URL=0100-0199/0102/Sections/0102.141.html"),
 }
 
 
@@ -391,6 +465,10 @@ INDEX = {
                     ("Tribal nations", "guide:tribal",
                      "Sovereignty, tribal governments and courts, and who has jurisdiction in "
                      "Indian country."),
+                    ("How elections work", "guide:elections",
+                     "When elections are held and who runs them, primaries and runoffs, "
+                     "ranked-choice counts, certification and recounts, and when winners "
+                     "take office."),
                 ]),
                 ("p", "Know Your Candidate follows one part of all this: the members of the "
                       "119th Congress, and everyone who has filed to run for their seats in "
@@ -1577,4 +1655,215 @@ TRIBAL = {
 }
 
 
-PAGES = (INDEX, CONGRESS, EXECUTIVE, COURTS, STATES, LOCAL, TRIBAL)
+ELECTIONS = {
+    "slug": "elections",
+    "nav": "Elections",
+    "title": "How elections work",
+    # This page was written and checked after the rest of the guide.
+    "reviewed": "2026-10-16",
+    "description": ("When federal elections are held and who runs them; primaries, runoffs and "
+                    "ranked-choice counts; how votes are counted, certified and recounted; and "
+                    "when the people elected take office, with the sources each part was "
+                    "checked against."),
+    "lede": ("Federal law fixes the day of the November election, but nearly everything else - "
+             "who may vote in a primary, how a winner is decided, when the count ends - is set "
+             "by each state. This page explains the parts readers ask about in November and "
+             "December, with examples from states' own laws. It is a guide, not legal advice: "
+             "for your own ballot, use [your state's official voting pages](site:states/index.html)."),
+    "sections": [
+        {
+            "id": "when",
+            "heading": "When federal elections are held",
+            "blocks": [
+                ("p", "Federal law sets the day of the general election for Congress: the "
+                      "Tuesday after the first Monday in November of every even-numbered year "
+                      "(2 U.S.C. 7). In 2026 that is November 3. Every House seat is on that "
+                      "ballot, because House terms are two years."),
+                ("p", "A state holds a regular Senate election when one of its senators' six-year "
+                      "terms is ending, on the same November ballot, and the winner's term "
+                      "begins on January 3 of the next year (2 U.S.C. 1). When a Senate seat "
+                      "falls vacant, the Seventeenth Amendment calls for an election to fill it "
+                      "(see [filling vacancies](#vacancies))."),
+                ("p", "Primary dates are not set nationally; each state sets its own. Texas law "
+                      "puts its general primary on the first Tuesday in March of even-numbered "
+                      "years. Georgia held its 2026 primary on May 19, with a runoff on June 16."),
+            ],
+            "sources": ["usc-2-7", "usc-2-1", "const-amdt17", "tx-el-41", "ga-election-guide"],
+        },
+        {
+            "id": "who-runs",
+            "heading": "Who runs elections",
+            "blocks": [
+                ("p", "The Constitution's Elections Clause leaves the times, places and manner of "
+                      "congressional elections to each state's legislature, and lets Congress "
+                      "make or change those rules by law (Article I, Section 4)."),
+                ("p", "Each state has a chief election official, who oversees or advises. But, as "
+                      "the U.S. Election Assistance Commission puts it, elections are usually run "
+                      "at the county level, and in some states by cities or townships, and no two "
+                      "states run them the same way. So the rules for registering, voting by mail "
+                      "and counting differ from state to state."),
+            ],
+            "sources": ["const-art1", "eac-in-charge"],
+        },
+        {
+            "id": "primaries",
+            "heading": "Primaries, and other ways candidates are nominated",
+            "blocks": [
+                ("p", "In a partisan primary, voters choose a party's candidate for the general "
+                      "election; a nonpartisan primary narrows the field for an office. Who may vote "
+                      "in a party's primary varies by state. In a closed primary, only voters "
+                      "affiliated with the party may take part. An open primary generally lets any "
+                      "voter take part: in Virginia, any qualified voter may vote in a primary, but "
+                      "no one may vote for the candidates of more than one party. In a partially "
+                      "closed primary, the state's parties decide whether voters registered with no "
+                      "party may take part."),
+                ("p", "Louisiana began closed party primaries in spring 2026, for the U.S. Senate "
+                      "among other offices. A voter registered as a Democrat or a Republican votes "
+                      "only in that party's primary, and a voter registered with no party may "
+                      "choose either party's primary, but not both."),
+                ("p", "Some states hold no party primary for Congress. California and Washington "
+                      "list every candidate on one primary ballot, and the two with the most votes "
+                      "go on to November whatever party they prefer; a party preference on "
+                      "Washington's ballot is shown for voters' information only. Alaska's primary "
+                      "chooses no party's nominee: the four candidates with the most votes go on to "
+                      "the general election, which is decided by [ranked-choice voting]"
+                      "(#ranked-choice). On November 3, 2026, Alaska's voters also decide a ballot "
+                      "measure that would repeal its open primary and ranked-choice general "
+                      "elections."),
+                ("p", "Louisiana's U.S. House seats follow a different calendar in 2026. Under Act 7 "
+                      "of the 2026 Regular Session they were moved to the November 3 ballot as an "
+                      "open primary: every candidate runs on one ballot, a candidate with a "
+                      "majority of the votes is elected, and otherwise the top two, of any party, "
+                      "meet in a general election on December 12. [Louisiana's page](state:LA) "
+                      "lists the candidates the Secretary of State has qualified."),
+                ("p", "Some parties nominate without a primary. In Virginia, a state party may "
+                      "decide how it nominates candidates for the U.S. Senate and statewide office, "
+                      "and state law sets deadlines for nominations made other than by primary. In "
+                      "Connecticut, a party convention endorses a candidate for each state or "
+                      "district office, and a primary is held only if another candidate qualifies "
+                      "to challenge the endorsed one; otherwise the endorsed candidate is the "
+                      "nominee."),
+            ],
+            "sources": ["eac-primaries", "va-24-2-530", "la-sos-elected", "ca-sos-primaries",
+                        "wa-29a-52-112", "ak-15-25-010", "ak-15-15-350", "ak-ballot-measures",
+                        "la-sos-house-2026", "va-24-2-509", "va-24-2-510", "ct-chap-153"],
+        },
+        {
+            "id": "runoffs",
+            "heading": "Runoffs",
+            "blocks": [
+                ("p", "Some states require a winner to have a majority of the votes, not just the "
+                      "most. When no one has a majority, the leaders meet again in a runoff. In "
+                      "Texas, a primary candidate needs a majority of the votes to win a party's "
+                      "nomination, and a runoff primary is held when no one has one."),
+                ("p", "Georgia requires a majority in its primaries and its general elections; when "
+                      "no candidate has one, the top two meet in a runoff (O.C.G.A. 21-2-501). "
+                      "Georgia's general-election runoff, if one is needed in 2026, is on December "
+                      "1, four weeks after Election Day."),
+                ("p", "Louisiana's December round is not a primary runoff: for its House seats in "
+                      "2026 the November 3 vote is itself the open primary, and a seat no one wins "
+                      "with a majority is decided at the general election on December 12. So some "
+                      "House seats may not be decided until December."),
+            ],
+            "sources": ["tx-el-172", "ga-sb202", "ga-runoff-2026", "la-sos-elected"],
+        },
+        {
+            "id": "ranked-choice",
+            "heading": "Ranked-choice voting",
+            "blocks": [
+                ("p", "Maine and Alaska decide their federal general elections by ranked-choice "
+                      "voting, and Maine also uses it in its state-level primaries. Voters rank the "
+                      "candidates in order of preference instead of choosing one."),
+                ("p", "The count goes in rounds. If a candidate has more than half of the first "
+                      "choices, that candidate wins. If not, under Alaska's law the last-place "
+                      "candidate is eliminated and each of that candidate's ballots moves to the "
+                      "next candidate ranked on it, and the rounds repeat until someone wins; "
+                      "Maine eliminates the lowest-ranked candidates round by round until two are "
+                      "left. In Maine, when no one wins on the first count, ballots and memory "
+                      "devices are brought from each town to a central count in Augusta. Alaska "
+                      "counts mailed ballots that arrive up to 10 days after the election, or 15 "
+                      "days for ballots mailed from outside the United States, so its final count "
+                      "waits for that window to close; in Maine the rounds are run only after the "
+                      "ballots reach Augusta."),
+            ],
+            "sources": ["me-rcv-faq", "ak-15-15-350", "ak-15-20-081"],
+        },
+        {
+            "id": "counting",
+            "heading": "Counting, canvassing and certification",
+            "blocks": [
+                ("p", "Voting ends on Election Day; counting does not, and results reported on "
+                      "election night are unofficial. Some states count mailed ballots sent by "
+                      "Election Day that arrive afterward: California counts ballots postmarked by "
+                      "Election Day that reach the county by November 10, 2026. On June 29, 2026 "
+                      "the Supreme Court held, in Watson v. Republican National Committee, that the "
+                      "federal Election Day statutes do not stop a state from counting ballots "
+                      "postmarked by Election Day and received afterward."),
+                ("p", "Provisional ballots take time too. In a federal election, a voter whose name "
+                      "is not on the list, or whose eligibility an official questions, may cast a "
+                      "provisional ballot, and it is counted if election officials later confirm "
+                      "under state law that the voter was eligible (52 U.S.C. 21082)."),
+                ("p", "After the count, local officials review and confirm the results - the "
+                      "canvass - and then the state certifies them, on deadlines each state sets. "
+                      "Two examples for 2026: California's counties have until December 3 to "
+                      "certify, and its Secretary of State certifies the statewide results by "
+                      "December 11. In Texas, local canvasses are held from the third day after the "
+                      "election at the earliest, and the state canvass must be done by December 7."),
+            ],
+            "sources": ["ca-sos-2026-dates", "watson-rnc", "usc-52-21082", "tx-sos-2026-calendar"],
+        },
+        {
+            "id": "recounts",
+            "heading": "Recounts",
+            "blocks": [
+                ("p", "Recounts are governed by state law. Three examples. Arizona recounts "
+                      "automatically when the margin between the top two candidates is one-half of "
+                      "one percent or less of the votes cast for both. Florida orders a recount when "
+                      "the unofficial returns show a candidate lost by one-half of a percent or less "
+                      "of the votes cast for the office, unless the losing candidate asks in "
+                      "writing that none be made. In Texas a candidate must ask: one condition is "
+                      "that the difference between the candidate and the winner is less than 10 "
+                      "percent of the winner's votes, and as a general rule the petition is due by "
+                      "5 p.m. on the third business day after the canvass is completed."),
+            ],
+            "sources": ["az-16-661", "fl-102-141", "tx-el-212"],
+        },
+        {
+            "id": "taking-office",
+            "heading": "Taking office",
+            "blocks": [
+                ("p", "Under the Twentieth Amendment, the terms of senators and representatives end, "
+                      "and the new terms begin, at noon on January 3. The regular terms of the "
+                      "members elected on November 3, 2026 begin at noon on January 3, 2027. A "
+                      "member elected to the rest of a vacant term, as in the special Senate "
+                      "elections on the same ballot, joins a term already running rather than one "
+                      "that begins on January 3."),
+                ("p", "The Constitution makes each house of Congress the judge of the elections, "
+                      "returns and qualifications of its own members (Article I, Section 5), so a "
+                      "dispute over who won a House or Senate seat can end up before that house."),
+                ("p", "Governors and state legislators take office on dates set by each state's "
+                      "constitution and laws. In Texas, for one, the governor is installed on the "
+                      "first Tuesday after the Legislature organizes, or as soon after as is "
+                      "practicable."),
+            ],
+            "sources": ["const-amdt20", "const-art1", "tx-const-art4"],
+        },
+        {
+            "id": "vacancies",
+            "heading": "Filling vacancies",
+            "blocks": [
+                ("p", "When a House seat falls vacant, the Constitution has the state's governor "
+                      "call an election to fill it (Article I, Section 2). It provides for no "
+                      "appointment, so the seat is empty until the special election."),
+                ("p", "Senate vacancies are covered by the Seventeenth Amendment: the governor "
+                      "calls an election, and the state's legislature may let the governor appoint "
+                      "a temporary senator until the voters fill the seat by election as the "
+                      "legislature directs. Whether a governor may make that appointment, and when "
+                      "the election is held, depends on each state's law."),
+            ],
+            "sources": ["const-art1", "const-amdt17"],
+        },
+    ],
+}
+
+PAGES = (INDEX, CONGRESS, EXECUTIVE, COURTS, STATES, LOCAL, TRIBAL, ELECTIONS)

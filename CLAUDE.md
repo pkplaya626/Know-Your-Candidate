@@ -124,7 +124,7 @@ python build_profile_site.py voting           # each state's official voting pag
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python -m unittest discover tests             # 941 tests, no dependencies
-npm install && npm test                       # 1188 real-DOM checks (needs jsdom)
+npm install && npm test                       # 1201 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -528,7 +528,8 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     down), and called the federal executive "unitary", a contested
     theory's label. Every claim was researched and then attacked by a
     second agent before it was written. When the text is revised, re-check
-    what can change (counts, decisions, agency names) and move `REVIEWED`.
+    what can change (counts, decisions, agency names) and move `REVIEWED`;
+    a page checked on another day carries its own `"reviewed"` date.
     Who holds an office is never typed in: the Congress page renders
     committee leads from the rosters, and a committee's minority lead is
     found by the seat's `side`, not its title.
