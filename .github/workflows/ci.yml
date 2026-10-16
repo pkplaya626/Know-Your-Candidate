@@ -144,6 +144,49 @@ jobs:
           npm install --no-fund --no-audit
           npm test
 
+  # The turn of the Congress, rehearsed on a copy every run: December's
+  # special-election seatings either way, and the 120th Congress on January 4
+  # (tools/rehearse_changeover.py). A change that would break the site on
+  # either day fails here, months before it would. The outcomes are fiction
+  # about real people: written only under the runner's temp directory, never
+  # in the checkout, and nothing from this job is uploaded or published. A
+  # scenario the committed data is already past is skipped.
+  rehearsal:
+    name: Rehearsal (${{ matrix.scenario }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: [december-loses, december-wins, january]
+    env:
+      SCENARIO: ${{ matrix.scenario }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+
+      - name: Apply the fictional membership, build, check strictly and verify
+        run: python tools/rehearse_changeover.py --out "$RUNNER_TEMP/rehearsal" --scenario "$SCENARIO"
+
+      - name: Unit tests on the rehearsed data
+        run: |
+          COPY="$RUNNER_TEMP/rehearsal/$SCENARIO"
+          if [ -d "$COPY" ]; then cd "$COPY" && python -m unittest discover tests; fi
+
+      - name: Page checks on the rehearsed data
+        run: |
+          npm install --no-fund --no-audit
+          COPY="$RUNNER_TEMP/rehearsal/$SCENARIO"
+          if [ -d "$COPY" ]; then
+            cd "$COPY" && NODE_PATH="$GITHUB_WORKSPACE/node_modules" node tests/render_test.js
+          fi
+
   links:
     name: Local asset references resolve
     runs-on: ubuntu-latest
