@@ -4407,26 +4407,45 @@ async function testFederal() {
     check("the data loaded", !!d && d.offices.length > 0 && d.courts.length > 100);
     if (!d) return;
     const leaders = [...D.querySelectorAll(".fed-leader")];
+    const term = D.getElementById("executiveTerm");
+    const same = d.president.since === d.vicePresident.since && d.president.until === d.vicePresident.until;
+    check("a term they share is said once, above them", !same || (!!term &&
+      term.textContent.indexOf(d.president.since) !== -1 &&
+      [...D.querySelectorAll(".fed-leader")].every((c) => c.textContent.indexOf(d.president.until) === -1)),
+      term && term.textContent);
     check("the President, then the Vice President",
       leaders.length === 2 && leaders[0].textContent.indexOf(d.president.name) !== -1 &&
       leaders[1].textContent.indexOf(d.vicePresident.name) !== -1);
-    const rows = [...D.querySelectorAll("#cabinet tbody tr")];
-    check("a row for every office the White House lists", rows.length === d.offices.length,
-      `${rows.length} rows, ${d.offices.length} offices`);
+    const rows = [...D.querySelectorAll("#cabinet .fed-officer")];
+    check("a card for every office the White House lists", rows.length === d.offices.length,
+      `${rows.length} cards, ${d.offices.length} offices`);
+    check("every officer the White House pictures is pictured", d.offices.every((o) =>
+      !o.holder || !o.holder.photo || rows.some((r) => r.textContent.indexOf(o.holder.name) !== -1 &&
+        r.querySelector("img.fed-photo"))));
     const departments = d.offices.filter((o) => o.kind === "department")
       .sort((a, b) => a.order - b.order);
     check("the departments first, in the order of succession", departments.every((o, i) =>
-      rows[i].querySelector("th").textContent.indexOf(o.office) === 0));
+      rows[i].querySelector(".fed-office").textContent === o.office));
     check("no Cabinet officer is shown with a party",
       !PARTY_WORDS.test(D.getElementById("cabinet").textContent));
-    const justices = [...D.querySelectorAll("#supreme-court table")][0].querySelectorAll("tbody tr");
+    const justices = [...D.querySelectorAll("#supreme-court .fed-justice")];
     check("the Court's members as the Court lists them",
       justices.length === d.supremeCourt.members.length, `${justices.length}`);
     const retired = new Set((d.supremeCourt.retired || []).map((j) => j.id));
-    const first = [...D.querySelectorAll("#supreme-court table")][0];
-    check("a retired justice is never among them", [...first.querySelectorAll("[data-official]")]
-      .every((b) => !retired.has(b.getAttribute("data-official"))));
-    const links = [...D.querySelectorAll('#courts a[href^="../courts/"]')].map((a) => a.getAttribute("href"))
+    check("a retired justice is never among them", justices.every((c) =>
+      !retired.has(c.querySelector("[data-official]").getAttribute("data-official"))));
+    check("each justice the Court pictures is pictured", d.supremeCourt.members.every((j, i) =>
+      !j.portrait || (justices[i].querySelector("img.fed-photo") || {}).getAttribute &&
+        justices[i].querySelector("img.fed-photo").getAttribute("src") === j.portrait.url));
+    const sized = [...D.querySelectorAll("#cabinet img.fed-photo, #executive img.fed-photo")];
+    // A srcset is read by its "url widthw" pairs: the URLs hold commas.
+    const urlsOf = (img) => [...(img.getAttribute("srcset") || "").matchAll(/(\S+)\s+\d+w/g)]
+      .map((m) => m[1].replace(/^,/, ""));
+    check("an executive photo is drawn from the sizes of that one file", sized.length > 0 &&
+      sized.every((img) => urlsOf(img).every((u) =>
+        u.split("?")[0] === img.getAttribute("src").split("?")[0])) &&
+      sized.some((img) => urlsOf(img).length > 1));
+    const links = [...D.querySelectorAll('#courts table a[href^="../courts/"]')].map((a) => a.getAttribute("href"))
       .filter((href) => href.indexOf("#") === -1);
     check("every court but the Supreme Court is linked, once",
       links.length === d.courts.length - 1 && new Set(links).size === links.length,
@@ -4455,7 +4474,7 @@ async function testFederal() {
         encodeURIComponent(c.chief.id) + '"]')));
     const tie = d.offices.find((o) => o.holder && o.holder.senate &&
       o.holder.senate.yeas === o.holder.senate.nays);
-    check("a tie the Vice President broke is said", !tie || [...D.querySelectorAll("#cabinet tr")]
+    check("a tie the Vice President broke is said", !tie || [...D.querySelectorAll("#cabinet .fed-officer")]
       .some((tr) => tr.textContent.indexOf(tie.holder.name) !== -1 &&
         /the Vice President breaking the tie/.test(tr.textContent)));
     const summary = D.getElementById("vacancySummary");
@@ -4464,9 +4483,73 @@ async function testFederal() {
       summary.textContent.indexOf(d.vacancies.asOf) !== -1, summary && summary.textContent);
     check("each court's row gives its vacancies",
       [...D.querySelectorAll("#courts thead")].every((h) => /Vacancies/.test(h.textContent)));
+    const changes = D.getElementById("changes");
+    const withHistory = d.offices.filter((o) => (o.history || []).length);
+    check("the Cabinet's changes since the term began are listed", !withHistory.length ||
+      (!!changes && changes.querySelectorAll("tbody tr").length > 0));
+    if (changes && withHistory.length) {
+      const when = [...changes.querySelectorAll("tbody tr th")].map((th) => th.textContent)
+        .filter((w) => /^\d{4}/.test(w));
+      check("newest first", when.every((w, i) => i === 0 || w.slice(0, 4) <= when[i - 1].slice(0, 4)),
+        when.slice(0, 6).join(" | "));
+      const left = withHistory.reduce((n, o) => n + o.history.filter((r) => r.end).length, 0);
+      check("a departure for every holder who left", [...changes.querySelectorAll(".badge")]
+        .filter((b) => b.textContent === "Left").length === left, `${left}`);
+      const replaced = withHistory.find((o) => o.history.findIndex((r) => r.current) > 0);
+      const card = replaced && [...D.querySelectorAll("#cabinet .fed-officer")]
+        .find((c) => c.querySelector(".fed-office").textContent === replaced.office);
+      const prev = replaced && replaced.history[replaced.history.findIndex((r) => r.current) - 1];
+      check("a card names whom its officer followed this term", !replaced ||
+        (!!card && (card.textContent.indexOf("after " + prev.name) !== -1 ||
+          card.textContent.indexOf("previously this term: " + prev.name) !== -1)), card && card.textContent);
+      const actingNotes = withHistory.flatMap((o) => o.history.filter((r) => r.actingNote && r.actingStart));
+      check("acting service before a confirmation is in the timeline", actingNotes.every((r) =>
+        [...changes.querySelectorAll("tbody tr")].some((tr) =>
+          tr.textContent.indexOf(r.name + " became acting") !== -1)), actingNotes.map((r) => r.name).join(", "));
+      const cards = [...D.querySelectorAll("#cabinet .fed-officer")];
+      check("'after' only where the hand-over is shown", withHistory.every((o) => {
+        const i = o.history.findIndex((r) => r.current);
+        if (i < 1) return true;
+        const prev = o.history[i - 1], now = o.history[i];
+        const same = prev.end && prev.end.shown && now.start && now.start.shown &&
+          prev.end.shown.precision === "day" && now.start.shown.precision === "day" &&
+          prev.end.shown.date === now.start.shown.date;
+        const card = cards.find((c) => c.querySelector(".fed-office").textContent === o.office);
+        return !card || card.textContent.indexOf((same ? "after " : "previously this term: ") + prev.name) !== -1;
+      }));
+      check("no Wikidata label is shown for a person: names are the White House's, the Senate's " +
+        "or an article's", withHistory.every((o) => o.history.every((r) =>
+          r.current ? r.name === o.holder.name : !!(r.wikipedia || (r.confirmed && r.name === r.confirmed.nominee)))));
+    }
     check("the courts are said to be the Article III courts",
       /Article III/.test(D.getElementById("courts").textContent) &&
       !/Every federal court/.test(D.getElementById("federalBody").textContent));
+  });
+
+  suite("federal/index.html — the circuit map", () => {
+    const svg = D.getElementById("circuitMap");
+    check("the map is drawn", !!svg && svg.querySelectorAll("[data-state]").length >= 56,
+      svg && `${svg.querySelectorAll("[data-state]").length}`);
+    check("no word is SVG text (rule 46)", !!svg && !svg.querySelector("text"));
+    // The territory strip's own caption is the map's, not a state's.
+    const words = [...D.querySelectorAll("#circuitLabels .map-label")].map((s) => s.textContent)
+      .filter((w) => !/Territories/.test(w));
+    const circuits = new Set(d.courts.filter((c) => c.token).map((c) => c.circuit).concat(["–"]));
+    check("each state carries its circuit's number, never its code", words.length >= 50 &&
+      words.every((w) => circuits.has(w)) && words.includes("5") && words.includes("9"),
+      words.filter((w) => !circuits.has(w)).slice(0, 5).join(", "));
+    const texas = svg && svg.querySelector('[data-state="TX"]');
+    if (texas) texas.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    const panel = D.getElementById("circuitPanel");
+    const tx = d.courts.filter((c) => (c.states || []).includes("TX") && c.kind === "district")
+      .map((c) => c.id);
+    check("picking a state lists its court of appeals and every district court",
+      !!panel.querySelector('a[href="../courts/ca5.html"]') &&
+      tx.length === 4 && tx.every((id) => !!panel.querySelector('a[href="../courts/' + id + '.html"]')),
+      panel.textContent);
+    check("and the pick is in the address", /circuitState=TX/.test(window.location.hash), window.location.hash);
+    const samoa = svg && svg.querySelector('[data-state="AS"]');
+    check("American Samoa is in no circuit", !!samoa && /surface-2/.test(samoa.style.fill || samoa.getAttribute("style") || ""));
   });
 
   suite("federal/index.html — finding a judge", () => {

@@ -164,14 +164,20 @@
 
   /* ---------------------------------------------------------------- hub */
 
-  function leaderCard(p) {
-    return '<li class="fed-leader">' +
-      (p.photo ? '<img class="fed-photo" src="' + KYC.escapeAttr(p.photo) +
-        '" alt="" width="72" height="90" loading="lazy" decoding="async">' : "") +
+  /** The President or Vice President. Their term is said once, above
+   *  both, when they share it; a card says its own only when they differ (a
+   *  Vice President who took office mid-term). */
+  function leaderCard(p, shared) {
+    return '<li class="fed-card fed-leader">' + portrait(p) +
       '<div><p class="fed-office">' + esc(p.office) + "</p>" +
       '<p class="fed-name">' + person(p.id, p.name) + "</p>" +
-      '<p class="faint">' + esc(p.party) + "; since " + esc(p.since) + ", term ends " +
-      esc(p.until) + "</p></div></li>";
+      '<p class="faint">' + esc(p.party) +
+      (shared ? "" : "; since " + esc(p.since) + ", term ends " + esc(p.until)) +
+      "</p></div></li>";
+  }
+
+  function sameTerm(a, b) {
+    return !!a && !!b && a.since === b.since && a.until === b.until;
   }
 
   function senateCell(holder) {
@@ -196,16 +202,128 @@
     return '<span class="faint">No page names the head</span>';
   }
 
-  function officeRow(office) {
+  function portrait(person) {
+    return KYC.official.pictureTag(person, 72, "fed-photo");
+  }
+
+  /** Since when the holder has held the office, and whom they followed
+   *  this term - each date only where the sources agree. */
+  function tenureLine(office) {
+    var rows = office.history || [];
+    var now = rows.filter(function (r) { return r.current; })[0];
+    var before = now ? rows.slice(0, rows.indexOf(now)) : [];
+    var start = now && now.start && now.start.shown ? KYC.official.whenText(now.start.shown) : "";
+    var prev = before[before.length - 1];
+    if (!start && !prev) return "";
+    // "After" only when the dates show one handing over to the other on the
+    // same day: an acting officer the record lacks may have served between.
+    var handover = prev && prev.end && prev.end.shown && now.start && now.start.shown &&
+      prev.end.shown.precision === "day" && now.start.shown.precision === "day" &&
+      prev.end.shown.date === now.start.shown.date;
+    return '<p class="fed-fact"><span class="fed-fact-label">In office</span> ' +
+      (start ? "Since " + esc(start) : "") +
+      (prev ? (start ? "; " : "") + (handover ? "after " : "previously this term: ") +
+        esc(prev.name) + (prev.acting ? " (acting)" : "") : "") +
+      "</p>";
+  }
+
+  /** Every change since the term began, newest first: who was confirmed,
+   *  who left, who served as acting - each date where the sources agree. */
+  function changeEvents(d) {
+    var events = [];
+    d.offices.forEach(function (office) {
+      (office.history || []).forEach(function (row) {
+        if (row.confirmed) {
+          events.push({ sort: row.confirmed.date, when: row.confirmed.date, office: office,
+            kind: "confirmed", row: row,
+            text: row.name + " confirmed by the Senate, " + row.confirmed.yeas + "\u2013" +
+              row.confirmed.nays + (row.confirmed.yeas === row.confirmed.nays
+                ? ", the Vice President breaking the tie" : ""), url: row.confirmed.url });
+        }
+        if (row.acting && row.start && row.start.shown) {
+          events.push({ sort: row.start.shown.date, when: KYC.official.whenText(row.start.shown),
+            office: office, kind: "acting", row: row, text: row.name + " became acting" });
+        } else if (row.actingNote && row.actingStart) {
+          // Acting before being confirmed, as the person's own article puts it.
+          events.push({ sort: row.actingStart.date, when: KYC.official.whenText(row.actingStart),
+            office: office, kind: "acting", row: row,
+            text: row.name + " became acting (their Wikipedia article: \u201c" + row.actingNote + "\u201d)" });
+        }
+        if (row.end) {
+          var shown = row.end.shown;
+          events.push({ sort: shown ? shown.date : row.end.sort || "", when: shown
+            ? KYC.official.whenText(shown)
+            : row.end.differs ? "Date differs between sources" : "Date not in both sources",
+            office: office, kind: "left", row: row,
+            text: row.acting ? row.name + "’s service as acting ended"
+              : row.name + " left the office" });
+        }
+      });
+    });
+    return events.sort(function (a, b) { return a.sort < b.sort ? 1 : a.sort > b.sort ? -1 : 0; });
+  }
+
+  var CHANGE_BADGES = { confirmed: ["badge-neutral", "Confirmed"], left: ["badge-warn", "Left"],
+    acting: ["badge-neutral", "Acting"] };
+
+  function changeRow(e) {
+    var badge = CHANGE_BADGES[e.kind];
+    return "<tr><th scope=\"row\">" + esc(e.when) + "</th>" +
+      cell("Office", esc(e.office.office)) +
+      cell("What happened", '<span class="badge ' + badge[0] + '">' + badge[1] + "</span> " +
+        (e.url ? '<a href="' + KYC.escapeAttr(e.url) + '" target="_blank" rel="noopener noreferrer">' +
+          esc(e.text) + "</a>" : esc(e.text))) + "</tr>";
+  }
+
+  function changesSection(d) {
+    var events = changeEvents(d);
+    if (!events.length) return "";
+    var recent = events.slice(0, 12);
+    var earlier = events.slice(12);
+    var heads = ["When", "Office", "What happened"];
+    var meta = d.changes || {};
+    return section("changes", "Changes since the term began",
+      '<p class="guide-lede">Who was confirmed, who left and who served as acting in each ' +
+      "office since " + esc(meta.since || "") + ", newest first. Confirmations are the " +
+      "Senate’s roll calls; who held each office comes from Wikidata, and a date is shown only " +
+      "to the day, month or year on which Wikidata and the person’s Wikipedia article agree" +
+      (meta.read ? ", as read " + esc(meta.read) : "") + ". An acting officer Wikidata does not " +
+      "record is not listed.</p>" +
+      table("", heads, recent.map(changeRow)) +
+      (earlier.length ? '<details class="fed-earlier"><summary>' + earlier.length +
+        " earlier changes</summary>" + table("", heads, earlier.map(changeRow)) + "</details>" : ""));
+  }
+
+  /** One Cabinet office as a card: its holder's portrait and name, the
+   *  Senate's vote and the office's own page. An office the White House
+   *  lists with nobody in it says so. */
+  function officeCard(office) {
     var h = office.holder;
-    return "<tr><th scope=\"row\">" + esc(office.office) +
-      '<br><span class="faint">' + esc(office.body) + "</span></th>" +
-      cell("Who holds it", h ? person(h.id, h.name) + (h.title && h.title !== office.office
-        ? '<br><span class="faint">' + esc(h.title) + "</span>" : "") +
-        ((h.page || {}).acting ? ' <span class="badge badge-warn">Acting</span>' : "")
-        : '<span class="faint">Nobody listed by the White House</span>') +
-      cell("Senate vote", h ? senateCell(h) : "") +
-      cell("The office’s page", h ? pageCell(h) : "") + "</tr>";
+    if (!h) {
+      return '<li class="fed-card fed-officer"><div><p class="fed-office">' + esc(office.office) +
+        '</p><p class="faint">Nobody listed by the White House</p></div></li>';
+    }
+    return '<li class="fed-card fed-officer">' + portrait(h) +
+      '<div><p class="fed-office">' + esc(office.office) + "</p>" +
+      '<p class="fed-name">' + person(h.id, h.name) +
+      ((h.page || {}).acting ? ' <span class="badge badge-warn">Acting</span>' : "") + "</p>" +
+      (h.title && h.title !== office.office ? '<p class="faint">' + esc(h.title) + "</p>" : "") +
+      tenureLine(office) +
+      '<p class="fed-fact"><span class="fed-fact-label">Senate vote</span> ' + senateCell(h) + "</p>" +
+      '<p class="fed-fact"><span class="fed-fact-label">The office’s page</span> ' + pageCell(h) +
+      "</p></div></li>";
+  }
+
+  /** A justice as a card: the Court's own portrait, role, appointment. */
+  function justiceCard(j) {
+    var seat = (j.seats || [])[0] || {};
+    return '<li class="fed-card fed-justice">' + portrait(j) +
+      '<div><p class="fed-office">' + esc(j.justice ? j.justice.role : seat.title) + "</p>" +
+      '<p class="fed-name">' + person(j.id, j.name) + "</p>" +
+      '<p class="fed-fact"><span class="fed-fact-label">Appointed by</span> ' +
+        esc(seat.appointedBy) + "</p>" +
+      '<p class="fed-fact"><span class="fed-fact-label">' + (j.justice ? "Took the oath" : "Commissioned") +
+        "</span> " + esc((j.justice && j.justice.oath) || seat.commissioned) + "</p></div></li>";
   }
 
   function justiceRows(justices) {
@@ -220,39 +338,50 @@
 
   function renderHub(d) {
     var asOf = d.asOf || {};
+    var shared = sameTerm(d.president, d.vicePresident);
     var html = section("executive", "The President and Vice President",
-      '<ul class="fed-leaders">' + leaderCard(d.president) + leaderCard(d.vicePresident) + "</ul>" +
+      (shared ? '<p class="fed-term" id="executiveTerm">The term: <strong>' +
+        esc(d.president.since) + "</strong> to <strong>" + esc(d.president.until) +
+        "</strong></p>" : "") +
+      '<ul class="fed-cards fed-leaders">' + leaderCard(d.president, shared) +
+        leaderCard(d.vicePresident, shared) + "</ul>" +
       '<p class="faint">Terms from ' + source(d.sources.executive.executive,
         "congress-legislators’ record of executive terms") + ", as of " + esc(asOf.executive) + ".</p>");
 
     var departments = d.offices.filter(function (o) { return o.kind === "department"; })
       .sort(function (a, b) { return a.order - b.order; });
     var others = d.offices.filter(function (o) { return o.kind !== "department"; });
-    var heads = ["Office", "Who holds it", "Senate vote", "The office’s page"];
     html += section("cabinet", "The Cabinet",
       '<p class="guide-lede">Who the White House lists in the ' +
       source(d.sources.executive.cabinet, "President’s Cabinet") + ", each checked on " +
       "the office’s own page and against the Senate’s roll-call votes, as of " +
       esc(asOf.executive) + ". A Cabinet officer is shown without a party.</p>" +
-      table("The heads of the fifteen executive departments, in the order 3 U.S.C. 19(d)(1) " +
-        "lists them", heads, departments.map(officeRow)) +
-      (others.length ? table("Other officers the White House lists with the Cabinet", heads,
-        others.map(officeRow)) : ""));
+      '<h3 class="fed-subhead">The heads of the fifteen executive departments, in the order ' +
+        '<span class="cite">3 U.S.C. 19(d)(1)</span> lists them</h3>' +
+      '<ul class="fed-cards">' + departments.map(officeCard).join("") + "</ul>" +
+      (others.length ? '<h3 class="fed-subhead">Other officers the White House lists with ' +
+        'the Cabinet</h3><ul class="fed-cards">' + others.map(officeCard).join("") + "</ul>" : ""));
+
+    html += changesSection(d);
 
     var scotus = d.supremeCourt || {};
     html += section("supreme-court", "The Supreme Court",
       '<p class="guide-lede">Its members as ' + source(d.sources.judiciary.supremeCourt,
         "the Court lists them") + ", with each justice’s appointment from the Federal " +
       "Judicial Center’s directory, as of " + esc(asOf.judiciary) + ". " +
-      '<a href="../courts/scotus.html">The Court’s page</a>.</p>' +
-      table("", ["Justice", "Role", "Appointed by", "Since"], justiceRows(scotus.members || [])) +
+      '<a href="../courts/scotus.html">The Court’s page</a>.' +
+      ((scotus.members || []).some(function (j) { return j.portrait; })
+        ? " Portraits: " + source((scotus.members.filter(function (j) { return j.portrait; })[0]
+            .portrait || {}).source, "Collection of the Supreme Court of the United States") + "."
+        : "") + "</p>" +
+      '<ul class="fed-cards">' + (scotus.members || []).map(justiceCard).join("") + "</ul>" +
       ((scotus.retired || []).length
         ? table("Retired justices, listed apart: they are not members of the Court",
           ["Justice", "Role", "Appointed by", "Since"], justiceRows(scotus.retired)) : ""));
 
     var courts = d.courts.filter(function (c) { return c.kind !== "supreme"; });
     var appeals = courts.filter(function (c) { return c.kind === "appeals"; });
-    var body = '<div class="fed-search">' +
+    var body = circuitMapMarkup() + '<div class="fed-search">' +
       '<label class="field-label" for="judgeSearch">Find a federal judge</label>' +
       '<input id="judgeSearch" class="search-input" type="search" autocomplete="off" ' +
       'placeholder="A judge’s name" aria-describedby="judgeSearchCount">' +
@@ -282,6 +411,7 @@
     html += section("courts", "The Article III courts", body);
     el("federalBody").innerHTML = html;
     initSearch();
+    initCircuitMap(d);
   }
 
   function vacancySummary(d) {
@@ -292,6 +422,107 @@
       esc(v.totals.nominees) + " with a nominee pending, as of " + esc(v.asOf) + "; " +
       esc(v.emergencies) + " of them designated judicial emergencies, and " +
       source(v.sources.future, v.future + " more announced") + ".</p>";
+  }
+
+  /* ------------------------------------------------------- circuit map */
+
+  /* The states by the court of appeals that hears their federal appeals,
+   * drawn by the shared map (kyc-usmap.js) in the guide's colours - one
+   * table of circuits (kyc/federal_courts.circuits) and one colouring, so
+   * the two maps cannot disagree. Picking a state lists its courts. */
+  function circuitMapMarkup() {
+    if (!KYC.usmap || !global.kycGeo) return "";
+    return '<div class="fed-circuits">' +
+      '<h3 class="panel-subhead">Which court of appeals hears each state’s appeals</h3>' +
+      '<div class="map-legend" id="circuitLegend"></div>' +
+      '<div class="map-stage fed-circuit-stage" id="circuitStage">' +
+      '<svg id="circuitMap" viewBox="0 0 975 652" preserveAspectRatio="xMidYMid meet" ' +
+      'role="group" aria-label="Map of the states and territories by federal judicial circuit. ' +
+      'Each state is a button that lists its federal courts."></svg></div>' +
+      '<div class="fed-circuit-panel" id="circuitPanel" aria-live="polite">' +
+      '<p class="faint">Pick a state for its district courts and its court of appeals.</p></div>' +
+      "</div>";
+  }
+
+  function tokenFill(token) {
+    return token ? "var(--" + token + ")" : "var(--surface-2)";
+  }
+
+  function tokenInk(token) {
+    return !token || token === "cat-4" ? "var(--text)" : "";
+  }
+
+  /** The address's parameters, with *key* set: the search and the map share
+   *  the address and neither may wipe the other's. */
+  function setParam(key, value) {
+    var route = KYC.router.read();
+    var params = route.view === "list" ? route.params : {};
+    params[key] = value;
+    KYC.router.writeFilters(params);
+  }
+
+  function initCircuitMap(d) {
+    if (!KYC.usmap || !global.kycGeo || !el("circuitMap")) return;
+    var circuitOf = {};
+    var courtsOf = {};
+    d.courts.forEach(function (c) {
+      (c.states || []).forEach(function (code) {
+        if (c.kind === "appeals") circuitOf[code] = c;
+        else if (c.kind === "district" || c.kind === "territorial") {
+          (courtsOf[code] = courtsOf[code] || []).push(c);
+        }
+      });
+    });
+    var map = KYC.usmap.create({
+      svg: "circuitMap", stage: "circuitStage", layer: "circuitLabels",
+      look: function (code) {
+        var c = circuitOf[code];
+        return c
+          ? { fill: tokenFill(c.token), ink: tokenInk(c.token), text: map.name(code) + ": " + shortName(c) }
+          : { fill: tokenFill(null), ink: "var(--text)",
+              text: map.name(code) + ": no federal district court, in no circuit" };
+      },
+      label: function (code) {
+        var c = circuitOf[code];
+        return c ? c.circuit : "\u2013";
+      },
+      onSelect: function (code) { pick(code, true); },
+    });
+
+    function pick(code, typed) {
+      if (!map.hasShape(code)) return;
+      map.setSelected(code);
+      if (typed) setParam("circuitState", code);
+      var c = circuitOf[code];
+      var mine = courtsOf[code] || [];
+      el("circuitPanel").innerHTML = '<h4 class="fed-circuit-state">' + esc(map.name(code)) + "</h4>" +
+        (c ? '<p class="fed-fact"><span class="fed-fact-label">Court of appeals</span> ' +
+          courtLink(c, "../courts/") + "</p>" : "") +
+        (mine.length ? '<p class="fed-fact"><span class="fed-fact-label">' +
+          (mine.length > 1 ? "District courts" : "District court") + "</span> " +
+          mine.map(function (m) { return courtLink(m, "../courts/"); }).join(", ") + "</p>"
+          : '<p class="faint">No federal district court: its courts are territorial, and it is in ' +
+            "no circuit.</p>");
+    }
+
+    var seen = {};
+    var legend = d.courts.filter(function (c) { return c.kind === "appeals" && c.token; })
+      .map(function (c) {
+        if (seen[c.circuit]) return "";
+        seen[c.circuit] = true;
+        return '<span class="key"><span class="swatch swatch-label" style="background:' +
+          tokenFill(c.token) + (tokenInk(c.token) ? ";color:" + tokenInk(c.token) : "") + '">' +
+          esc(c.circuit) + "</span>" + esc(shortName(c)) + "</span>";
+      }).join("");
+    var federal = d.courts.filter(function (c) { return c.id === "cafc"; })[0];
+    el("circuitLegend").innerHTML = legend + '<span class="key"><span class="swatch swatch-label" ' +
+      'style="background:' + tokenFill(null) + ';color:var(--text)">\u2013</span>In no circuit</span>' +
+      (federal ? '<span class="key">' + courtLink(federal, "../courts/") + " hears certain cases " +
+        "from every state</span>" : "");
+    map.start();
+    map.paint();
+    var wanted = KYC.router.read().params.circuitState;
+    if (wanted) pick(String(wanted).toUpperCase(), false);
   }
 
   /* ------------------------------------------------------------- search */
@@ -309,7 +540,7 @@
       var status = el("judgeSearchCount");
       // Only what the reader types goes in the address: on load it may be
       // a shared #/official/ link, which this must not overwrite.
-      if (typed) KYC.router.writeFilters({ q: input.value.trim() });
+      if (typed) setParam("q", input.value.trim());
       if (!words.length) {
         list.innerHTML = "";
         status.textContent = index.length.toLocaleString("en-US") + " sitting Article III judges";

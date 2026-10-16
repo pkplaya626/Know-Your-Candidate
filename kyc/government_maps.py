@@ -193,20 +193,11 @@ PL280_EXCEPTIONS = {
 
 # 28 U.S.C. 41, and 48 U.S.C. 1824 for the Northern Mariana Islands.
 # American Samoa has no federal district court, so it is in no circuit.
-CIRCUITS = {
-    "1": ("ME", "MA", "NH", "PR", "RI"),
-    "2": ("CT", "NY", "VT"),
-    "3": ("DE", "NJ", "PA", "VI"),
-    "4": ("MD", "NC", "SC", "VA", "WV"),
-    "5": ("LA", "MS", "TX"),
-    "6": ("KY", "MI", "OH", "TN"),
-    "7": ("IL", "IN", "WI"),
-    "8": ("AR", "IA", "MN", "MO", "NE", "ND", "SD"),
-    "9": ("AK", "AZ", "CA", "ID", "MT", "NV", "OR", "WA", "GU", "HI", "MP"),
-    "10": ("CO", "KS", "NM", "OK", "UT", "WY"),
-    "11": ("AL", "FL", "GA"),
-    "DC": ("DC",),
-}
+# The circuits and their states: kyc/federal_courts.py's courts of appeals,
+# the one table the federal hub's map reads too.
+from .federal_courts import circuit_colours as _colours, circuits as _court_circuits
+
+CIRCUITS = _court_circuits()
 ORDINAL = {"1": "First", "2": "Second", "3": "Third", "4": "Fourth", "5": "Fifth",
            "6": "Sixth", "7": "Seventh", "8": "Eighth", "9": "Ninth", "10": "Tenth",
            "11": "Eleventh", "DC": "D.C."}
@@ -369,19 +360,8 @@ def _veto():
 
 def _circuit_colours():
     """A colour for each circuit such that no two neighbouring circuits share
-    one: greedy, in circuit order, over borders read from the atlas."""
-    near = geo.neighbours()
-    of = {code: key for key, codes in CIRCUITS.items() for code in codes}
-    touching = {key: set() for key in CIRCUITS}
-    for code, others in near.items():
-        for other in others:
-            if code in of and other in of and of[code] != of[other]:
-                touching[of[code]].add(of[other])
-    colour = {}
-    for key in CIRCUITS:
-        used = {colour[k] for k in touching[key] if k in colour}
-        colour[key] = next(c for c in ("cat-1", "cat-2", "cat-3", "cat-4") if c not in used)
-    return colour
+    one (kyc/federal_courts.circuit_colours, over the atlas's borders)."""
+    return _colours(geo.neighbours())
 
 
 def _circuits():

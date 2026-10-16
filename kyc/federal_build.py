@@ -41,6 +41,7 @@ def _leader(person, office):
         "party": person.get("party"),
         "since": person.get("termStart"), "until": person.get("termEnd"),
         "photo": person.get("photo"),
+        "photoSet": person.get("photoSet") or [],
         "links": {k: v for k, v in (
             ("whitehouse", person.get("page")),
             ("wikipedia", person["ids"].get("wikipedia")),
@@ -58,16 +59,43 @@ def _holder(office):
     return {
         "id": slug(holder["name"]), "name": holder["name"], "title": holder["title"],
         "photo": holder.get("photo"),
+        "photoSet": holder.get("photoSet") or [],
         "page": {k: page[k] for k in ("status", "url", "acting") if page.get(k)},
         "senate": holder.get("senate"),
         "senateUnread": bool(holder.get("senateUnread")),
     }
 
 
+def _when(value):
+    """A date as the pages show it: the agreed ``{date, precision}``, and
+    whether the sources gave one and disagreed."""
+    if not value:
+        return None
+    wikidata, wikipedia = value.get("wikidata"), value.get("wikipedia")
+    return {"shown": value.get("shown"),
+            # Disagreement needs two dates; one source alone is "not in both".
+            "differs": value.get("shown") is None and bool(wikidata) and bool(wikipedia),
+            "sort": (wikidata or wikipedia or {}).get("date")}
+
+
+def _change(row):
+    """One holder of an office this term, as the pages show it."""
+    confirmed = row.get("confirmed")
+    out = {
+        "name": row["name"], "current": row.get("current"), "acting": row.get("acting"),
+        "actingNote": row.get("actingNote"), "actingStart": row.get("actingStart"),
+        "confirmed": {k: confirmed[k] for k in ("date", "yeas", "nays", "url", "vote", "nominee")}
+        if confirmed else None,
+        "start": _when(row.get("start")), "end": _when(row.get("end")),
+        "wikidata": row.get("wikidata"), "wikipedia": row.get("wikipedia"),
+    }
+    return {k: v for k, v in out.items() if v not in (None, False, "")}
+
+
 def _judge(record):
     """A judge as the pages show them: nothing a source did not state."""
     keep = ("id", "name", "sortName", "status", "seats", "prior", "born", "education",
-            "career", "otherNominations", "fjc", "justice", "retiredJustice")
+            "career", "otherNominations", "fjc", "justice", "retiredJustice", "portrait")
     return {k: record[k] for k in keep if record.get(k) not in (None, [], "")}
 
 
@@ -106,11 +134,20 @@ def build(root="."):
         if row.get("court"):
             coming.setdefault(row["court"], []).append(_opening(row))
     offices = []
+    # Who has held each office since the term began (kyc/cabinet.py).
+    changes = executive.get("changes") or {}
     for office in executive["offices"]:
         table = next(o for o in federal_offices.OFFICES if o["key"] == office["key"])
-        offices.append({"key": office["key"], "office": office["office"], "body": office["body"],
-                        "kind": office["kind"], "order": office.get("order"),
-                        "pages": list(table["pages"]), "holder": _holder(office)})
+        entry = {"key": office["key"], "office": office["office"], "body": office["body"],
+                 "kind": office["kind"], "order": office.get("order"),
+                 "pages": list(table["pages"]), "holder": _holder(office)}
+        held = ((changes.get("offices") or {}).get(office["key"]) or {}).get("holders")
+        if held:
+            entry["history"] = [_change(row) for row in held]
+        offices.append(entry)
+    # The circuit map's colours: the guide's, from one table (rule 12).
+    from . import geo
+    colours = federal_courts.circuit_colours(geo.neighbours())
     index = []
     for cid, court in federal_courts.COURTS.items():
         held = courts["courts"][cid]
@@ -121,6 +158,8 @@ def build(root="."):
             "listed": held["listed"], "active": held["active"], "senior": held["senior"],
             "chief": {"id": chief, "name": judges[chief]["name"]} if chief else None,
             "chiefUnsettled": bool(held.get("chiefUnsettled")),
+            **({"token": colours[court["circuit"]]}
+               if court["kind"] == "appeals" and court.get("states") else {}),
             "vacancies": len(vacant.get(cid, [])),
             "nominees": sum(1 for r in vacant.get(cid, []) if r.get("nominee")),
             "future": len(coming.get(cid, [])),
@@ -137,6 +176,7 @@ def build(root="."):
                          "retired": [_judge(judges[i]) for i in scotus.get("retired") or []]},
         # Sitting judges: a retired justice is listed apart, never counted.
         "judges": sum(1 for j in judges.values() if not j.get("retiredJustice")),
+        "changes": {k: changes[k] for k in ("since", "read", "sources") if changes.get(k)} or None,
         "vacancies": {
             "asOf": openings["asOf"], "sources": openings["sources"],
             "totals": openings["totals"], "future": len(openings["future"]),

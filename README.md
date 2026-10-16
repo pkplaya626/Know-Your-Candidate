@@ -1425,13 +1425,62 @@ appointed by a president, by name.
 
 `federal/index.html` shows who holds the federal government's offices:
 
-- the President and the Vice President;
-- the Cabinet, the fifteen departments first in the order of succession,
-  each with the Senate's confirming vote and whether the office's own page
-  names them;
-- the Supreme Court, with retired justices listed apart;
-- every federal court, the courts of appeals and then each circuit's
-  district courts, with a search of every sitting judge.
+- the President and the Vice President, with their shared term said once;
+- the Cabinet as cards with portraits, the fifteen departments first in the
+  order of succession, each with the Senate's confirming vote, whether the
+  office's own page names the holder, since when they have held it and whom
+  they followed;
+- every change in the Cabinet since the term began (below);
+- the Supreme Court as cards with the Court's own portraits, with retired
+  justices listed apart;
+- a map of the states by federal judicial circuit, and every federal court,
+  the courts of appeals and then each circuit's district courts, with a
+  search of every sitting judge.
+
+### Portraits
+
+The Cabinet's portraits are the White House's. Its originals run to 6.5 MB,
+so each card draws from the sizes the White House serves of that one file,
+read from the srcset on its Cabinet page (`photoSet`, rule 42). Those URLs
+contain commas (`?resize=428,600`), so the srcset is read by its "url width"
+pairs, never split on commas. The justices' portraits are the Court's own,
+from its biographies page, credited to the Collection of the Supreme Court
+of the United States. Each is joined only to the nine justices already
+joined to the directory, since the page also pictures retired justices, and
+only when its caption's title agrees with the justice's role. Any failure
+shows none (`justice-portraits`). Lower-court judges have no portraits:
+Wikidata's images for them fail too many of rule 38's tests to show
+unreviewed.
+
+### Changes in the Cabinet
+
+The executive refresh also records who has held each office since the
+President's term began (`kyc/cabinet.py`), into `changes` in
+`federal_executive.json`:
+
+- **Confirmed:** the Senate's own roll calls for that office, with their
+  date and tally. The Senate's name rides with the vote ("Walter Clayton"
+  is Jay Clayton).
+- **Who held it:** Wikidata's "position held" statements on the office's
+  own item (each office's id is in `kyc/federal_offices.py`). Only people
+  with a dated start count, joined to a confirmation by the office and the
+  surname within the term. A holder is named by their Wikipedia article's
+  title, never by a Wikidata label; the current holder by the White
+  House's name.
+- **When:** in office from and to only to the precision on which Wikidata
+  and the person's own Wikipedia infobox agree: the day, the month or the
+  year. Wikidata gave Pete Hegseth's start as 2025-09-05; his article and
+  the Senate say January. Where they agree on nothing, the page says the
+  sources differ and shows no date. An infobox entry is the office's exact
+  name, past an ordinal and "Acting" - "Deputy Director of the Office of
+  Management and Budget" is not its Director - and a person who held the
+  office before takes the entry of this term.
+
+The hub lists every change newest first: confirmed, left, acting. Each
+card says since when and whom its officer followed, and the dialog lists
+the office's holders this term. An acting officer Wikidata does not record
+is not listed, and the page says so. A failed read keeps the last history
+(rule 8).
 
 Each court has its own page, `courts/<id>.html` (`courts/ca5.html`,
 `courts/tx-s.html`): its chief judge, active judges and judges on senior

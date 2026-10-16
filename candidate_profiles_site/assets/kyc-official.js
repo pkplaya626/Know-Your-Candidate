@@ -28,6 +28,75 @@
     return global.kycFederal || {};
   }
 
+  var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August",
+    "September", "October", "November", "December"];
+
+  /** An agreed date at its precision: "2025-02-05", "March 2026", "2026". */
+  function whenText(w) {
+    if (!w || !w.date) return "";
+    if (w.precision === "month") return MONTHS[Number(w.date.slice(5, 7)) - 1] + " " + w.date.slice(0, 4);
+    return w.date;
+  }
+
+  /** One holder of an office this term, in words: confirmed, acting, in
+   *  office from and to - each date only where the sources agree. */
+  function tenureText(row) {
+    var parts = [];
+    // In the order it happened: acting service, then the confirmation.
+    if (row.actingNote) parts.push(row.actingNote.replace(/^Acting:/, "acting"));
+    else if (row.acting) parts.push("acting");
+    if (row.confirmed) {
+      parts.push("confirmed " + row.confirmed.date + " (" + row.confirmed.yeas + "\u2013" +
+        row.confirmed.nays + (row.confirmed.yeas === row.confirmed.nays
+          ? ", the Vice President breaking the tie" : "") + ")");
+    } else {
+      parts.push("no Senate roll call confirming them to this office found");
+    }
+    var start = row.start && row.start.shown ? whenText(row.start.shown) : "";
+    var end = row.end ? (row.end.shown ? whenText(row.end.shown) : "") : "";
+    if (row.end) {
+      parts.push(start || end ? "in office " + (start || "?") + " to " + (end || "?")
+        : "in office, then left; " + (row.end.differs ? "the sources differ on the dates"
+          : "the dates are not in both sources"));
+    } else if (start) {
+      parts.push("in office since " + start);
+    } else if (row.start && row.start.differs) {
+      parts.push("the sources differ on when they took office");
+    }
+    return parts.join("; ");
+  }
+
+  /** An official's picture: the White House's photo with the sizes it
+   *  serves of that one file (rule 42), or a justice's official portrait.
+   *  ``{src, srcset, credit, source}``, or null. */
+  function picture(person) {
+    if (!person) return null;
+    if (person.photo) {
+      var sizes = person.photoSet || [];
+      return {
+        src: sizes.length ? sizes[0][0] : person.photo,
+        srcset: sizes.map(function (s) { return s[0] + " " + s[1] + "w"; }).join(", "),
+        credit: "Photo: The White House", source: null,
+      };
+    }
+    if (person.portrait && person.portrait.url) {
+      return { src: person.portrait.url, srcset: "", credit: "Portrait: " + person.portrait.credit,
+               source: person.portrait.source };
+    }
+    return null;
+  }
+
+  /** The markup for a picture *px* wide, lazy, decorative (the name is
+   *  beside it). */
+  function pictureTag(person, px, className) {
+    var p = picture(person);
+    if (!p) return "";
+    return '<img class="' + KYC.escapeAttr(className) + '" src="' + KYC.escapeAttr(p.src) + '"' +
+      (p.srcset ? ' srcset="' + KYC.escapeAttr(p.srcset) + '" sizes="' + px + 'px"' : "") +
+      ' alt="" width="' + px + '" height="' + Math.round(px * 1.25) +
+      '" loading="lazy" decoding="async">';
+  }
+
   /** Every official the page holds, by id: ``{kind, person, office}``. */
   function officials() {
     var out = {};
@@ -216,9 +285,20 @@
       ((holder.page || {}).acting ? '<span class="badge badge-warn">Acting</span>' : "");
     var rows = field("Senate confirmation", senateText(holder), true) +
       field("The office’s own page", pageText(holder), true);
+    var history = (office.history || []);
+    var since = (federal().changes || {}).since;
+    var held = history.length ? '<ol class="bullets fed-history">' + history.map(function (row) {
+      return "<li><strong>" + KYC.escapeHtml(row.name) + "</strong>" +
+        (row.current ? ' <span class="badge badge-neutral">Now</span>' : "") + "<br>" +
+        KYC.escapeHtml(tenureText(row)) + "</li>";
+    }).join("") + "</ol>" + '<p class="faint">Confirmations from the Senate’s roll calls; who ' +
+      "held the office from Wikidata; dates where Wikidata and the person’s Wikipedia article " +
+      "agree. An acting officer Wikidata does not record is not listed.</p>" : "";
     el("officialModalBody").innerHTML =
       '<div class="modal-column">' +
-      panel("check", "The record", '<div class="field-grid">' + rows + "</div>") + "</div>" +
+      panel("check", "The record", '<div class="field-grid">' + rows + "</div>") +
+      (held ? panel("calendar", "This office since " + (since || "the term began"), held) : "") +
+      "</div>" +
       '<div class="modal-column">' +
       panel("info", "Where this comes from", '<p class="note-box">Listed by the White House ' +
         "among the President’s Cabinet; checked on the office’s own page and " +
@@ -336,11 +416,15 @@
     // elsewhere, so only the hub, which holds everyone, says "no longer".
     el("officialModalName").textContent = person ? person.name :
       doc.body.getAttribute("data-page") === "court" ? "Not on this court" : "No longer listed";
-    portrait.hidden = !(person && person.photo);
-    if (person && person.photo) {
-      photo.src = person.photo;
+    var pic = picture(person);
+    portrait.hidden = !pic;
+    if (pic) {
+      photo.srcset = pic.srcset;
+      photo.sizes = pic.srcset ? "116px" : "";
+      photo.src = pic.src;
       photo.alt = person.name;
     } else {
+      photo.removeAttribute("srcset");
       photo.removeAttribute("src");
       photo.alt = "";
     }
@@ -348,6 +432,15 @@
     else if (found.kind === "leader") renderLeader(person);
     else if (found.kind === "officer") renderOfficer(person, found.office);
     else renderJudge(person);
+    // Whose picture it is: credited beside the record's own source.
+    if (pic) {
+      var credit = doc.createElement("span");
+      credit.className = "faint official-credit";
+      credit.innerHTML = "; " + (pic.source ? '<a href="' + KYC.escapeAttr(pic.source) +
+        '" target="_blank" rel="noopener noreferrer">' + KYC.escapeHtml(pic.credit) + "</a>"
+        : KYC.escapeHtml(pic.credit)) + ".";
+      el("officialModalSource").appendChild(credit);
+    }
   }
 
   function open(id, opts) {
@@ -432,6 +525,7 @@
 
   KYC.official = {
     open: open, close: close, isOpen: isOpen, ensure: ensure,
-    applyRoute: applyRoute, officials: officials,
+    applyRoute: applyRoute, officials: officials, pictureTag: pictureTag,
+    whenText: whenText, tenureText: tenureText,
   };
 })(window);

@@ -1,6 +1,1330 @@
 {
  "asOf": "2026-10-16",
- "fetched": "2026-10-16T17:53:29+00:00",
+ "changes": {
+  "offices": {
+   "agriculture": {
+    "article": "United States Secretary of Agriculture",
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-02-13",
+       "nays": 28,
+       "nominee": "Brooke Rollins",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00053.htm",
+       "vote": "119-1-53",
+       "yeas": 72
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Brooke Rollins",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2025-02-13",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-02-13",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-02-13",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q4974474",
+      "wikipedia": "Brooke Rollins"
+     }
+    ],
+    "office": "Secretary of Agriculture",
+    "problems": [],
+    "wikidata": "Q1029955"
+   },
+   "chief-of-staff": {
+    "article": "White House Chief of Staff",
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": null,
+      "current": false,
+      "end": null,
+      "infobox": true,
+      "name": "Susie Wiles",
+      "nameFrom": "wikipedia",
+      "start": {
+       "shown": {
+        "date": "2025-01-20",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-01-20",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-01-20",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q113560461",
+      "wikipedia": "Susie Wiles"
+     }
+    ],
+    "office": "White House Chief of Staff",
+    "problems": [],
+    "wikidata": "Q786242"
+   },
+   "cia": {
+    "article": "Director of the Central Intelligence Agency",
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-01-23",
+       "nays": 25,
+       "nominee": "John Ratcliffe",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00013.htm",
+       "vote": "119-1-13",
+       "yeas": 74
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "John Ratcliffe",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2025-01-23",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-01-23",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-01-23",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q16980175",
+      "wikipedia": "John Ratcliffe"
+     }
+    ],
+    "office": "Director of the Central Intelligence Agency",
+    "problems": [],
+    "wikidata": "Q27656"
+   },
+   "commerce": {
+    "article": "United States Secretary of Commerce",
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-02-18",
+       "nays": 45,
+       "nominee": "Howard Lutnick",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00057.htm",
+       "vote": "119-1-57",
+       "yeas": 51
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Howard Lutnick",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2025-02",
+        "precision": "month"
+       },
+       "wikidata": {
+        "date": "2025-02-19",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-02-21",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q16194176",
+      "wikipedia": "Howard Lutnick"
+     }
+    ],
+    "office": "Secretary of Commerce",
+    "problems": [],
+    "wikidata": "Q2003296"
+   },
+   "defense": {
+    "article": "United States Secretary of Defense",
+    "holders": [
+     {
+      "acting": true,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": null,
+      "current": false,
+      "end": {
+       "shown": {
+        "date": "2025-01-25",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-01-25",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-01-25",
+        "precision": "day"
+       }
+      },
+      "infobox": true,
+      "name": "Robert G. Salesses",
+      "nameFrom": "wikipedia",
+      "start": {
+       "shown": {
+        "date": "2025-01-20",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-01-20",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-01-20",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q131833688",
+      "wikipedia": "Robert G. Salesses"
+     },
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-01-24",
+       "nays": 50,
+       "nominee": "Peter Hegseth",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00015.htm",
+       "vote": "119-1-15",
+       "yeas": 50
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Pete Hegseth",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2025",
+        "precision": "year"
+       },
+       "wikidata": {
+        "date": "2025-09-05",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-01-25",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q7172014",
+      "wikipedia": "Pete Hegseth"
+     }
+    ],
+    "office": "Secretary of Defense",
+    "problems": [],
+    "wikidata": "Q735015"
+   },
+   "dni": {
+    "article": "Director of National Intelligence",
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-02-12",
+       "nays": 48,
+       "nominee": "Tulsi Gabbard",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00050.htm",
+       "vote": "119-1-50",
+       "yeas": 52
+      },
+      "current": false,
+      "end": {
+       "shown": {
+        "date": "2026-06",
+        "precision": "month"
+       },
+       "wikidata": {
+        "date": "2026-06-30",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2026-06-19",
+        "precision": "day"
+       }
+      },
+      "infobox": true,
+      "name": "Tulsi Gabbard",
+      "nameFrom": "wikipedia",
+      "start": {
+       "shown": {
+        "date": "2025-02-12",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-02-12",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-02-12",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q32620",
+      "wikipedia": "Tulsi Gabbard"
+     },
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2026-07-28",
+       "nays": 47,
+       "nominee": "Walter Clayton",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1192/vote_119_2_00211.htm",
+       "vote": "119-2-211",
+       "yeas": 51
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Jay Clayton",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2026",
+        "precision": "year"
+       },
+       "wikidata": {
+        "date": "2026-07-28",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2026-08-03",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q28122984",
+      "wikipedia": "Jay Clayton"
+     }
+    ],
+    "office": "Director of National Intelligence",
+    "problems": [],
+    "wikidata": "Q1154057"
+   },
+   "education": {
+    "article": "United States Secretary of Education",
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-03-03",
+       "nays": 45,
+       "nominee": "Linda McMahon",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00099.htm",
+       "vote": "119-1-99",
+       "yeas": 51
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Linda McMahon",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2025-03-03",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-03-03",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-03-03",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q233905",
+      "wikipedia": "Linda McMahon"
+     }
+    ],
+    "office": "Secretary of Education",
+    "problems": [],
+    "wikidata": "Q967762"
+   },
+   "energy": {
+    "article": "United States Secretary of Energy",
+    "holders": [
+     {
+      "acting": true,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": null,
+      "current": false,
+      "end": {
+       "shown": {
+        "date": "2025-02-04",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-02-04",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-02-04",
+        "precision": "day"
+       }
+      },
+      "infobox": true,
+      "name": "Ingrid Kolb",
+      "nameFrom": "wikipedia",
+      "start": {
+       "shown": {
+        "date": "2025-01-20",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-01-20",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-01-20",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q131936652",
+      "wikipedia": "Ingrid Kolb"
+     },
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-02-03",
+       "nays": 38,
+       "nominee": "Christopher Wright",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00030.htm",
+       "vote": "119-1-30",
+       "yeas": 59
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Chris Wright",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2025-02-03",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-02-03",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-02-03",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q131225840",
+      "wikipedia": "Chris Wright"
+     }
+    ],
+    "office": "Secretary of Energy",
+    "problems": [],
+    "wikidata": "Q1029968"
+   },
+   "epa": {
+    "article": "Administrator of the Environmental Protection Agency",
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-01-29",
+       "nays": 42,
+       "nominee": "Lee Zeldin",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00024.htm",
+       "vote": "119-1-24",
+       "yeas": 56
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Lee Zeldin",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2025-01-29",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-01-29",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-01-29",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q16221257",
+      "wikipedia": "Lee Zeldin"
+     }
+    ],
+    "office": "Administrator of the Environmental Protection Agency",
+    "problems": [],
+    "wikidata": "Q2087596"
+   },
+   "hhs": {
+    "article": "United States Secretary of Health and Human Services",
+    "holders": [
+     {
+      "acting": true,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": null,
+      "current": false,
+      "end": {
+       "shown": {
+        "date": "2025-02-13",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-02-13",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-02-13",
+        "precision": "day"
+       }
+      },
+      "infobox": true,
+      "name": "Dorothy Fink",
+      "nameFrom": "wikipedia",
+      "start": {
+       "shown": {
+        "date": "2025-01-20",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-01-20",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-01-20",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q131837206",
+      "wikipedia": "Dorothy Fink"
+     },
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-02-13",
+       "nays": 48,
+       "nominee": "Robert F. Kennedy, Jr.",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00052.htm",
+       "vote": "119-1-52",
+       "yeas": 52
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Robert F. Kennedy, Jr.",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2025-02-13",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-02-13",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-02-13",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q1352872",
+      "wikipedia": "Robert F. Kennedy Jr."
+     }
+    ],
+    "office": "Secretary of Health and Human Services",
+    "problems": [],
+    "wikidata": "Q2305968"
+   },
+   "homeland": {
+    "article": "United States Secretary of Homeland Security",
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-01-25",
+       "nays": 34,
+       "nominee": "Kristi Noem",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00017.htm",
+       "vote": "119-1-17",
+       "yeas": 59
+      },
+      "current": false,
+      "end": {
+       "shown": {
+        "date": "2026-03-24",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2026-03-24",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2026-03-24",
+        "precision": "day"
+       }
+      },
+      "infobox": true,
+      "name": "Kristi Noem",
+      "nameFrom": "wikipedia",
+      "start": {
+       "shown": {
+        "date": "2025-01-25",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-01-25",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-01-25",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q465749",
+      "wikipedia": "Kristi Noem"
+     },
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2026-03-23",
+       "nays": 45,
+       "nominee": "Markwayne Mullin",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1192/vote_119_2_00063.htm",
+       "vote": "119-2-63",
+       "yeas": 54
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Markwayne Mullin",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2026-03",
+        "precision": "month"
+       },
+       "wikidata": {
+        "date": "2026-03-31",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2026-03-24",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q3448772",
+      "wikipedia": "Markwayne Mullin"
+     }
+    ],
+    "office": "Secretary of Homeland Security",
+    "problems": [],
+    "wikidata": "Q642859"
+   },
+   "hud": {
+    "article": "United States Secretary of Housing and Urban Development",
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-02-05",
+       "nays": 44,
+       "nominee": "Eric Turner",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00035.htm",
+       "vote": "119-1-35",
+       "yeas": 55
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Scott Turner",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2025-02-05",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-02-05",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-02-05",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q7437419",
+      "wikipedia": "Scott Turner (politician)"
+     }
+    ],
+    "office": "Secretary of Housing and Urban Development",
+    "problems": [],
+    "wikidata": "Q2419581"
+   },
+   "interior": {
+    "article": "United States Secretary of the Interior",
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-01-30",
+       "nays": 17,
+       "nominee": "Douglas Burgum",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00026.htm",
+       "vote": "119-1-26",
+       "yeas": 80
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Doug Burgum",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2025",
+        "precision": "year"
+       },
+       "wikidata": {
+        "date": "2025-01-31",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-02-01",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q22095395",
+      "wikipedia": "Doug Burgum"
+     }
+    ],
+    "office": "Secretary of the Interior",
+    "problems": [],
+    "wikidata": "Q2287650"
+   },
+   "justice": {
+    "article": "United States Attorney General",
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-02-04",
+       "nays": 46,
+       "nominee": "Pamela Bondi",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00033.htm",
+       "vote": "119-1-33",
+       "yeas": 54
+      },
+      "current": false,
+      "end": {
+       "shown": {
+        "date": "2026-04-02",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2026-04-02",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2026-04-02",
+        "precision": "day"
+       }
+      },
+      "infobox": true,
+      "name": "Pam Bondi",
+      "nameFrom": "wikipedia",
+      "start": {
+       "shown": {
+        "date": "2025-02-05",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-02-05",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-02-05",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q7128915",
+      "wikipedia": "Pam Bondi"
+     },
+     {
+      "acting": null,
+      "actingNote": "Acting: April 2, 2026 – August 10, 2026",
+      "actingStart": {
+       "date": "2026-04-02",
+       "precision": "day"
+      },
+      "confirmed": {
+       "date": "2026-08-08",
+       "nays": 49,
+       "nominee": "Todd Blanche",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1192/vote_119_2_00230.htm",
+       "vote": "119-2-230",
+       "yeas": 50
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Todd Blanche",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2026",
+        "precision": "year"
+       },
+       "wikidata": {
+        "date": "2026-08-08",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2026-04-02",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q125628262",
+      "wikipedia": "Todd Blanche"
+     }
+    ],
+    "office": "Attorney General",
+    "problems": [],
+    "wikidata": "Q636207"
+   },
+   "labor": {
+    "article": "United States Secretary of Labor",
+    "holders": [
+     {
+      "acting": true,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": null,
+      "current": false,
+      "end": {
+       "shown": {
+        "date": "2025-03-11",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-03-11",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-03-11",
+        "precision": "day"
+       }
+      },
+      "infobox": true,
+      "name": "Vince Micone",
+      "nameFrom": "wikipedia",
+      "start": {
+       "shown": {
+        "date": "2025-01-20",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-01-20",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-01-20",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q132143541",
+      "wikipedia": "Vince Micone"
+     },
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-03-10",
+       "nays": 32,
+       "nominee": "Lori Chavez-DeRemer",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00111.htm",
+       "vote": "119-1-111",
+       "yeas": 67
+      },
+      "current": false,
+      "end": {
+       "shown": {
+        "date": "2026-04-20",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2026-04-20",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2026-04-20",
+        "precision": "day"
+       }
+      },
+      "infobox": true,
+      "name": "Lori Chavez-DeRemer",
+      "nameFrom": "wikipedia",
+      "start": {
+       "shown": {
+        "date": "2025-03-11",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-03-11",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-03-11",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q115522128",
+      "wikipedia": "Lori Chavez-DeRemer"
+     },
+     {
+      "acting": null,
+      "actingNote": "Acting: April 20, 2026 – October 2, 2026",
+      "actingStart": {
+       "date": "2026-04-20",
+       "precision": "day"
+      },
+      "confirmed": {
+       "date": "2026-09-30",
+       "nays": 41,
+       "nominee": "Keith Sonderling",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1192/vote_119_2_00256.htm",
+       "vote": "119-2-256",
+       "yeas": 47
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Keith Sonderling",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2026-04-20",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2026-04-20",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2026-04-20",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q73030183",
+      "wikipedia": "Keith Sonderling"
+     }
+    ],
+    "office": "Secretary of Labor",
+    "problems": [],
+    "wikidata": "Q967750"
+   },
+   "omb": {
+    "article": "Director of the Office of Management and Budget",
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-02-06",
+       "nays": 47,
+       "nominee": "Russell Vought",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00037.htm",
+       "vote": "119-1-37",
+       "yeas": 53
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Russ Vought",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2025-02",
+        "precision": "month"
+       },
+       "wikidata": {
+        "date": "2025-02-08",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-02-07",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q29963497",
+      "wikipedia": "Russell Vought"
+     }
+    ],
+    "office": "Director of the Office of Management and Budget",
+    "problems": [],
+    "wikidata": "Q16300323"
+   },
+   "sba": {
+    "article": "Administrator of the Small Business Administration",
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-02-19",
+       "nays": 46,
+       "nominee": "Kelly Loeffler",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00059.htm",
+       "vote": "119-1-59",
+       "yeas": 52
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Kelly Loeffler",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2025-02-20",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-02-20",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-02-20",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q76570207",
+      "wikipedia": "Kelly Loeffler"
+     }
+    ],
+    "office": "Administrator of the Small Business Administration",
+    "problems": [],
+    "wikidata": "Q15623718"
+   },
+   "state": {
+    "article": "United States Secretary of State",
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-01-20",
+       "nays": 0,
+       "nominee": "Marco Rubio",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00008.htm",
+       "vote": "119-1-8",
+       "yeas": 99
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Marco Rubio",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2025-01",
+        "precision": "month"
+       },
+       "wikidata": {
+        "date": "2025-01-20",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-01-21",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q324546",
+      "wikipedia": "Marco Rubio"
+     }
+    ],
+    "office": "Secretary of State",
+    "problems": [],
+    "wikidata": "Q14213"
+   },
+   "transportation": {
+    "article": "United States Secretary of Transportation",
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-01-28",
+       "nays": 22,
+       "nominee": "Sean Duffy",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00021.htm",
+       "vote": "119-1-21",
+       "yeas": 77
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Sean Duffy",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2025-01-28",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-01-28",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-01-28",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q1729888",
+      "wikipedia": "Sean Duffy"
+     }
+    ],
+    "office": "Secretary of Transportation",
+    "problems": [],
+    "wikidata": "Q967737"
+   },
+   "treasury": {
+    "article": "United States Secretary of the Treasury",
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-01-27",
+       "nays": 29,
+       "nominee": "Scott Bessent",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00019.htm",
+       "vote": "119-1-19",
+       "yeas": 68
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Scott Bessent",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2025-01-28",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-01-28",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-01-28",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q7435987",
+      "wikipedia": "Scott Bessent"
+     }
+    ],
+    "office": "Secretary of the Treasury",
+    "problems": [],
+    "wikidata": "Q4215834"
+   },
+   "un": {
+    "article": "Permanent Representative of the United States of America to the United Nations",
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-09-19",
+       "nays": 43,
+       "nominee": "Michael G. Waltz",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00530.htm",
+       "vote": "119-1-530",
+       "yeas": 47
+      },
+      "current": false,
+      "end": null,
+      "infobox": true,
+      "name": "Mike Waltz",
+      "nameFrom": "wikipedia",
+      "start": {
+       "shown": {
+        "date": "2025-09-21",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-09-21",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-09-21",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q55386653",
+      "wikipedia": "Mike Waltz"
+     }
+    ],
+    "office": "Representative of the United States to the United Nations",
+    "problems": [],
+    "wikidata": "Q1785225"
+   },
+   "ustr": {
+    "article": null,
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-02-26",
+       "nays": 43,
+       "nominee": "Jamieson Greer",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00094.htm",
+       "vote": "119-1-94",
+       "yeas": 56
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Jamieson Greer",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2025-02",
+        "precision": "month"
+       },
+       "wikidata": {
+        "date": "2025-02-26",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-02-27",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q131339945",
+      "wikipedia": "Jamieson Greer"
+     }
+    ],
+    "office": "United States Trade Representative",
+    "problems": [],
+    "wikidata": "Q27907212"
+   },
+   "veterans": {
+    "article": "United States Secretary of Veterans Affairs",
+    "holders": [
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": {
+       "date": "2025-02-04",
+       "nays": 23,
+       "nominee": "Douglas Collins",
+       "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00032.htm",
+       "vote": "119-1-32",
+       "yeas": 77
+      },
+      "current": true,
+      "end": null,
+      "infobox": true,
+      "name": "Doug Collins",
+      "nameFrom": "white-house",
+      "start": {
+       "shown": {
+        "date": "2025-02-05",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2025-02-05",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2025-02-05",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q3162841",
+      "wikipedia": "Doug Collins (politician)"
+     }
+    ],
+    "office": "Secretary of Veterans Affairs",
+    "problems": [],
+    "wikidata": "Q1658460"
+   }
+  },
+  "read": "2026-10-16",
+  "since": "2025-01-20",
+  "sources": {
+   "senate": "https://www.senate.gov/legislative/votes_new.htm",
+   "wikidata": "https://www.wikidata.org/",
+   "wikipedia": "https://en.wikipedia.org/"
+  }
+ },
+ "fetched": "2026-10-16T21:53:51+00:00",
  "offices": [
   {
    "body": "Department of State",
@@ -11,6 +1335,24 @@
      "url": "https://www.state.gov/biographies/marco-rubio/"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Marco-Rubio.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Marco-Rubio.jpeg?resize=453,600",
+      453
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Marco-Rubio.jpeg?resize=768,1017",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Marco-Rubio.jpeg?resize=907,1200",
+      907
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Marco-Rubio.jpeg",
+      967
+     ]
+    ],
     "senate": {
      "date": "2025-01-20",
      "issue": "PN11-13",
@@ -36,6 +1378,24 @@
      "url": "https://home.treasury.gov/about/general-information/officials"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Bessent.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Bessent.jpeg?resize=428,600",
+      428
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Bessent.jpeg?resize=768,1078",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Bessent.jpeg?resize=855,1200",
+      855
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Bessent.jpeg",
+      912
+     ]
+    ],
     "senate": {
      "date": "2025-01-27",
      "issue": "PN11-1",
@@ -60,6 +1420,24 @@
      "status": "unreadable"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Pete-Hegseth.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Pete-Hegseth.jpeg?resize=464,600",
+      464
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Pete-Hegseth.jpeg?resize=768,994",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Pete-Hegseth.jpeg?resize=927,1200",
+      927
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Pete-Hegseth.jpeg",
+      989
+     ]
+    ],
     "senate": {
      "date": "2025-01-24",
      "issue": "PN11-7",
@@ -85,6 +1463,32 @@
      "url": "https://www.justice.gov/ag"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/04/Todd-Blanche.jpg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Todd-Blanche.jpg?resize=499,600",
+      499
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Todd-Blanche.jpg?resize=768,924",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Todd-Blanche.jpg?resize=997,1200",
+      997
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Todd-Blanche.jpg?resize=1276,1536",
+      1276
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Todd-Blanche.jpg?resize=1702,2048",
+      1702
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Todd-Blanche.jpg",
+      4985
+     ]
+    ],
     "senate": {
      "date": "2026-08-08",
      "issue": "PN1078",
@@ -110,6 +1514,24 @@
      "url": "https://www.doi.gov/secretary-doug-burgum"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Doug-Burgum.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Doug-Burgum.jpeg?resize=400,600",
+      400
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Doug-Burgum.jpeg?resize=768,1152",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Doug-Burgum.jpeg?resize=800,1200",
+      800
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Doug-Burgum.jpeg",
+      853
+     ]
+    ],
     "senate": {
      "date": "2025-01-30",
      "issue": "PN11-3",
@@ -134,6 +1556,24 @@
      "status": "unreadable"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Brooke-Rollins.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Brooke-Rollins.jpeg?resize=480,600",
+      480
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Brooke-Rollins.jpeg?resize=768,960",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Brooke-Rollins.jpeg?resize=960,1200",
+      960
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Brooke-Rollins.jpeg",
+      1024
+     ]
+    ],
     "senate": {
      "date": "2025-02-13",
      "issue": "PN11-12",
@@ -158,6 +1598,24 @@
      "status": "unreadable"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Howard-Lutnick.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Howard-Lutnick.jpeg?resize=464,600",
+      464
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Howard-Lutnick.jpeg?resize=768,994",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Howard-Lutnick.jpeg?resize=927,1200",
+      927
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Howard-Lutnick.jpeg",
+      989
+     ]
+    ],
     "senate": {
      "date": "2025-02-18",
      "issue": "PN11-9",
@@ -182,6 +1640,32 @@
      "status": "unreadable"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/04/Keith-Sonderling.jpg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Keith-Sonderling.jpg?resize=464,600",
+      464
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Keith-Sonderling.jpg?resize=768,994",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Keith-Sonderling.jpg?resize=927,1200",
+      927
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Keith-Sonderling.jpg?resize=1187,1536",
+      1187
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Keith-Sonderling.jpg?resize=1582,2048",
+      1582
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Keith-Sonderling.jpg",
+      3408
+     ]
+    ],
     "senate": {
      "date": "2026-09-30",
      "issue": "PN1129",
@@ -206,6 +1690,24 @@
      "status": "unreadable"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Robert-F-Kennedy-Jr.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Robert-F-Kennedy-Jr.jpeg?resize=450,600",
+      450
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Robert-F-Kennedy-Jr.jpeg?resize=768,1023",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Robert-F-Kennedy-Jr.jpeg?resize=901,1200",
+      901
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Robert-F-Kennedy-Jr.jpeg",
+      961
+     ]
+    ],
     "senate": {
      "date": "2025-02-13",
      "issue": "PN11-8",
@@ -231,6 +1733,20 @@
      "url": "https://www.hud.gov/aboutus/secretary"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Turner.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Turner.jpeg?resize=480,600",
+      480
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Turner.jpeg?resize=768,960",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Turner.jpeg",
+      800
+     ]
+    ],
     "senate": {
      "date": "2025-02-05",
      "issue": "PN11-14",
@@ -255,6 +1771,24 @@
      "status": "unreadable"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Sean-Duffy.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Sean-Duffy.jpeg?resize=478,600",
+      478
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Sean-Duffy.jpeg?resize=768,964",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Sean-Duffy.jpeg?resize=956,1200",
+      956
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Sean-Duffy.jpeg",
+      1020
+     ]
+    ],
     "senate": {
      "date": "2025-01-28",
      "issue": "PN11-6",
@@ -280,6 +1814,24 @@
      "url": "https://www.energy.gov/"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Chris-Wright.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Chris-Wright.jpeg?resize=480,600",
+      480
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Chris-Wright.jpeg?resize=768,960",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Chris-Wright.jpeg?resize=960,1200",
+      960
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Chris-Wright.jpeg",
+      1024
+     ]
+    ],
     "senate": {
      "date": "2025-02-03",
      "issue": "PN11-15",
@@ -304,6 +1856,24 @@
      "status": "unreadable"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Linda-McMahon.jpg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Linda-McMahon.jpg?resize=150,150",
+      150
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Linda-McMahon.jpg?resize=600,600",
+      600
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Linda-McMahon.jpg?resize=768,768",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Linda-McMahon.jpg",
+      943
+     ]
+    ],
     "senate": {
      "date": "2025-03-03",
      "issue": "PN11-10",
@@ -329,6 +1899,16 @@
      "url": "https://department.va.gov/about/"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Doug-Collins.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Doug-Collins.jpeg?resize=480,600",
+      480
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Doug-Collins.jpeg",
+      720
+     ]
+    ],
     "senate": {
      "date": "2025-02-04",
      "issue": "PN11-5",
@@ -354,6 +1934,16 @@
      "url": "https://www.dhs.gov/leadership"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/03/Markwayne-Mullin.jpg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/03/Markwayne-Mullin.jpg?resize=464,600",
+      464
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/03/Markwayne-Mullin.jpg",
+      500
+     ]
+    ],
     "senate": {
      "date": "2026-03-23",
      "issue": "PN858",
@@ -379,6 +1969,16 @@
      "url": "https://www.epa.gov/aboutepa/epa-administrator"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Lee-Zeldin.jpg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Lee-Zeldin.jpg?resize=480,600",
+      480
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Lee-Zeldin.jpg",
+      500
+     ]
+    ],
     "senate": {
      "date": "2025-01-29",
      "issue": "PN11-23",
@@ -403,6 +2003,7 @@
      "status": "none"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Russ-Vought.jpg",
+    "photoSet": [],
     "senate": {
      "date": "2025-02-06",
      "issue": "PN11-22",
@@ -428,6 +2029,16 @@
      "url": "https://ustr.gov/about-us/biographies-key-officials"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Jamieson-Greer.jpg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Jamieson-Greer.jpg?resize=489,600",
+      489
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Jamieson-Greer.jpg",
+      603
+     ]
+    ],
     "senate": {
      "date": "2025-02-26",
      "issue": "PN11-17",
@@ -452,6 +2063,32 @@
      "status": "unreadable"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/08/Jay-Clayton.jpg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/08/Jay-Clayton.jpg?resize=480,600",
+      480
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/08/Jay-Clayton.jpg?resize=768,960",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/08/Jay-Clayton.jpg?resize=960,1200",
+      960
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/08/Jay-Clayton.jpg?resize=1229,1536",
+      1229
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/08/Jay-Clayton.jpg?resize=1638,2048",
+      1638
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/08/Jay-Clayton.jpg",
+      2880
+     ]
+    ],
     "senate": {
      "date": "2026-07-28",
      "issue": "PN1092",
@@ -477,6 +2114,24 @@
      "url": "https://www.cia.gov/about/director-of-cia/"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/John-Ratcliffe.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/John-Ratcliffe.jpeg?resize=480,600",
+      480
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/John-Ratcliffe.jpeg?resize=768,960",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/John-Ratcliffe.jpeg?resize=960,1200",
+      960
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/John-Ratcliffe.jpeg",
+      1024
+     ]
+    ],
     "senate": {
      "date": "2025-01-23",
      "issue": "PN11-19",
@@ -502,6 +2157,24 @@
      "url": "https://www.sba.gov/person/kelly-loeffler/"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Kelly-Loeffler.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Kelly-Loeffler.jpeg?resize=480,600",
+      480
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Kelly-Loeffler.jpeg?resize=768,960",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Kelly-Loeffler.jpeg?resize=960,1200",
+      960
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Kelly-Loeffler.jpeg",
+      1024
+     ]
+    ],
     "senate": {
      "date": "2025-02-19",
      "issue": "PN11-18",
@@ -532,6 +2205,32 @@
   "page": "https://www.whitehouse.gov/administration/donald-j-trump/",
   "party": "Republican",
   "photo": "https://www.whitehouse.gov/wp-content/uploads/2025/06/President-Donald-Trump-Official-Presidential-Portrait.png",
+  "photoSet": [
+   [
+    "https://www.whitehouse.gov/wp-content/uploads/2025/06/President-Donald-Trump-Official-Presidential-Portrait.png?resize=600,338",
+    600
+   ],
+   [
+    "https://www.whitehouse.gov/wp-content/uploads/2025/06/President-Donald-Trump-Official-Presidential-Portrait.png?resize=768,432",
+    768
+   ],
+   [
+    "https://www.whitehouse.gov/wp-content/uploads/2025/06/President-Donald-Trump-Official-Presidential-Portrait.png?resize=1200,675",
+    1200
+   ],
+   [
+    "https://www.whitehouse.gov/wp-content/uploads/2025/06/President-Donald-Trump-Official-Presidential-Portrait.png?resize=1536,864",
+    1536
+   ],
+   [
+    "https://www.whitehouse.gov/wp-content/uploads/2025/06/President-Donald-Trump-Official-Presidential-Portrait.png?resize=2048,1152",
+    2048
+   ],
+   [
+    "https://www.whitehouse.gov/wp-content/uploads/2025/06/President-Donald-Trump-Official-Presidential-Portrait.png",
+    3000
+   ]
+  ],
   "termEnd": "2029-01-20",
   "termStart": "2025-01-20"
  },
@@ -556,6 +2255,16 @@
   "page": "https://www.whitehouse.gov/administration/jd-vance/",
   "party": "Republican",
   "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/03/Vice-President-JD-Vance-3.jpg",
+  "photoSet": [
+   [
+    "https://www.whitehouse.gov/wp-content/uploads/2026/03/Vice-President-JD-Vance-3.jpg?resize=400,600",
+    400
+   ],
+   [
+    "https://www.whitehouse.gov/wp-content/uploads/2026/03/Vice-President-JD-Vance-3.jpg",
+    500
+   ]
+  ],
   "termEnd": "2029-01-20",
   "termStart": "2025-01-20"
  }

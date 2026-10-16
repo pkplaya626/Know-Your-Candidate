@@ -154,6 +154,45 @@ class TestRecordsThatNeedReading(unittest.TestCase):
                 self.assertIsNone(seat["seniorSince"], cid)
 
 
+class TestTheJusticesPortraits(unittest.TestCase):
+    """The Court's own portraits, joined only to the nine justices already
+    joined to the directory: the page pictures retired justices too."""
+
+    def build(self, page, image_ok=lambda url: True):
+        return judiciary.build(fixture("federal-judicial-service.csv"), fixture("judges.csv"),
+                               fixture("members.html"), TODAY, page, image_ok)
+
+    def test_each_justice_has_their_own_portrait(self):
+        cache = self.build(fixture("biographies.html"))
+        members = cache["courts"]["scotus"]["judges"]
+        urls = [cache["judges"][j]["portrait"]["url"] for j in members]
+        self.assertEqual(len(set(urls)), 9)
+        roberts = cache["judges"][cache["courts"]["scotus"]["chief"]]["portrait"]
+        self.assertTrue(roberts["url"].endswith("justice_pictures/Roberts_8807-16_Crop.jpg"))
+        self.assertTrue(any(u.endswith("Kavanaugh%2012221_005_crop.jpg") for u in urls))
+        for jid in cache["courts"]["scotus"]["retired"]:
+            self.assertNotIn("portrait", cache["judges"][jid])
+        self.assertEqual(cache["portraitProblems"], [])
+
+    def test_a_title_that_disagrees_with_the_role_shows_none(self):
+        page = fixture("biographies.html").replace(
+            "John G. Roberts, Chief Justice of the United States",
+            "John G. Roberts, Associate Justice")
+        cache = self.build(page)
+        self.assertFalse(any("portrait" in j for j in cache["judges"].values()))
+        self.assertIn("justice-portraits", [p[1] for p in judiciary.problems(cache, TODAY)])
+
+    def test_a_missing_picture_shows_none(self):
+        cache = self.build(fixture("biographies.html").replace("Clarence Thomas,", "Someone Else,"))
+        self.assertFalse(any("portrait" in j for j in cache["judges"].values()))
+
+    def test_a_portrait_that_does_not_load_shows_none_and_an_unread_check_concludes_nothing(self):
+        broken = self.build(fixture("biographies.html"), image_ok=lambda url: "Thomas" not in url)
+        self.assertFalse(any("portrait" in j for j in broken["judges"].values()))
+        unread = self.build(fixture("biographies.html"), image_ok=lambda url: None)
+        self.assertEqual(sum(1 for j in unread["judges"].values() if "portrait" in j), 9)
+
+
 class TestWhatIsRefused(unittest.TestCase):
     def test_a_court_the_table_does_not_know(self):
         text = fixture("federal-judicial-service.csv").replace(
@@ -176,7 +215,8 @@ class TestWhatIsRefused(unittest.TestCase):
         def read(url):
             return {judiciary.SERVICE_URL: fixture("federal-judicial-service.csv"),
                     judiciary.JUDGES_URL: fixture("judges.csv"),
-                    judiciary.SCOTUS_URL: fixture("members.html")}[url]
+                    judiciary.SCOTUS_URL: fixture("members.html"),
+                    judiciary.PORTRAITS_URL: fixture("biographies.html")}[url]
         previous = {"judges": {f"fjc-{n}": {} for n in range(1000)}}
         with self.assertRaises(judiciary.JudiciaryError):
             judiciary.fetch(previous=previous, today=TODAY, read=read)
