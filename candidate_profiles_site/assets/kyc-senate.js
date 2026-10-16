@@ -9,11 +9,15 @@
  * senator who holds it.
  *
  * Nothing is derived here (rule 1). senateClass, nextElection and
- * senateSpecial come from the pipeline, keyed on bioguide id; a seat's race
- * is the one whose incumbentIds names the senator; candidates are the
- * race's candidateIds plus any member whose contestRaceId is that race;
- * statuses come from KYC.contestStatus. Cards are KYC.cards.card, so they
- * look and open exactly like the grid's (one implementation, rule 12).
+ * senateSpecial come from the pipeline, keyed on bioguide id. A 2026 seat
+ * is its race - every Senate race of the cycle, whoever holds the seat now:
+ * the race's incumbentIds names who held it (a senator who has since left
+ * is a former member, "Held the seat until"), and its winner, once seated,
+ * is listed in that seat and nowhere else, so the Senate stays 100 seats.
+ * Candidates are the race's candidateIds plus any member whose
+ * contestRaceId is that race; statuses come from KYC.contestStatus. Cards
+ * are KYC.cards.card, so they look and open exactly like the grid's (one
+ * implementation, rule 12).
  */
 (function (global) {
   "use strict";
@@ -37,24 +41,14 @@
     return KYC.offBallot(KYC.contestStatus(item));
   }
 
+  /** A senator sitting now: never a former member (rule 27). */
   function isSenator(item) {
-    return !item.isCandidate && String(item.chamber).indexOf("Senate") !== -1;
+    return KYC.seated(item) && String(item.chamber).indexOf("Senate") !== -1;
   }
 
   function byState(a, b) {
     return KYC.stateName(a.state).localeCompare(KYC.stateName(b.state)) ||
-      a.name.localeCompare(b.name);
-  }
-
-  /** The race a sitting senator's seat is in, matched on the id in
-   *  incumbentIds - never on the state alone, which holds two seats. */
-  function raceIndex(races) {
-    var index = {};
-    races.forEach(function (race) {
-      if (race.chamber !== "Senate") return;
-      race.incumbentIds.forEach(function (id) { index[id] = race; });
-    });
-    return index;
+      (a.holder ? a.holder.name : "").localeCompare(b.holder ? b.holder.name : "");
   }
 
   /** Everyone running for *race* other than its sitting senator, in ballot
@@ -65,13 +59,14 @@
     var seen = {};
     var shown = [];
     var twins = {};
+    var holderId = holder ? holder.id : null;
     function add(item) {
-      if (!item || seen[item.id] || item.id === holder.id) return;
+      if (!item || seen[item.id] || item.id === holderId) return;
       seen[item.id] = true;
       shown.push(item);
     }
-    [holder].concat(people.filter(function (p) {
-      return !p.isCandidate && p.contestRaceId === race.id && p.id !== holder.id;
+    (holder ? [holder] : []).concat(people.filter(function (p) {
+      return !p.isCandidate && p.contestRaceId === race.id && p.id !== holderId;
     })).forEach(function (member) {
       twins[member.id] = true;
       if (member.alsoRunningId) twins[member.alsoRunningId] = true;
@@ -94,19 +89,34 @@
    *  validation reports as an error - shown rather than silently dropped).
    *
    *  Returns ``[{key, year, classes, special, title, seats: [{holder, race,
-   *  running}]}]``. */
+   *  running, state, senateClass}]}]``; a 2026 seat's holder is null when
+   *  the record's incumbent has no profile (its race still names them). */
   function groups(people, races) {
-    var raceOf = raceIndex(races);
     var buckets = {};
-    people.filter(isSenator).forEach(function (holder) {
-      // A senator in a race is grouped by the race: Ohio's special election
-      // stays a 2026 special after its winner is seated for the term to 2029.
-      var race = raceOf[holder.id];
-      var year = race ? race.year : holder.nextElection;
-      var special = race ? !!race.special : holder.senateSpecial;
-      var known = holder.senateClass && year;
-      var key = known ? year + (special ? "s" : "r") : "unknown";
-      (buckets[key] = buckets[key] || []).push(holder);
+    var placed = {};
+    function put(key, seat) {
+      (buckets[key] = buckets[key] || []).push(seat);
+    }
+    // Every Senate race is a seat, grouped by the race: Ohio's special
+    // election stays a 2026 special after its winner is seated for the term
+    // to 2029, and Florida's still has a seat after its appointee has left.
+    races.forEach(function (race) {
+      if (race.chamber !== "Senate") return;
+      var holder = race.incumbentIds.map(KYC.byId).filter(Boolean)[0] || null;
+      if (holder) placed[holder.id] = true;
+      if (race.winnerId) placed[race.winnerId] = true;
+      put(race.year + (race.special ? "s" : "r"), {
+        holder: holder, race: race, state: race.state,
+        senateClass: race.senateClass || (holder && holder.senateClass) || null,
+        running: contenders(race, people, holder),
+      });
+    });
+    // Every other sitting senator, by the year their seat is next decided.
+    people.filter(function (p) { return isSenator(p) && !placed[p.id]; }).forEach(function (holder) {
+      var known = holder.senateClass && holder.nextElection;
+      var key = known ? holder.nextElection + (holder.senateSpecial ? "s" : "r") : "unknown";
+      put(key, { holder: holder, race: null, state: holder.state,
+                 senateClass: holder.senateClass, running: [] });
     });
     return Object.keys(buckets).sort().map(function (key) {
       var seats = buckets[key].sort(byState);
@@ -127,11 +137,7 @@
         classes: classes,
         special: special,
         title: title,
-        seats: seats.map(function (holder) {
-          var race = raceOf[holder.id] || null;
-          return { holder: holder, race: race,
-                   running: race ? contenders(race, people, holder) : [] };
-        }),
+        seats: seats,
       };
     });
   }
@@ -144,10 +150,11 @@
     return n.toLocaleString() + " " + word + (n === 1 ? "" : "s");
   }
 
-  /** One 2026 seat: its sitting senator, then everyone running for it. */
+  /** One 2026 seat: who holds it (or held it, until they left), then
+   *  everyone running for it. */
   function seatBlock(seat, level, opts) {
     var match = opts.matches;
-    var holder = match(seat.holder) ? [seat.holder] : [];
+    var holder = seat.holder && match(seat.holder) ? [seat.holder] : [];
     var running = seat.running.filter(function (p) { return !isOut(p) && match(p); });
     var out = opts.showOut
       ? seat.running.filter(function (p) { return isOut(p) && match(p); })
@@ -156,12 +163,12 @@
 
     var race = seat.race;
     var id = "senate-seat-" + (race ? race.id : seat.holder.id);
-    var stateName = KYC.stateName(seat.holder.state);
+    var stateName = KYC.stateName(seat.state);
     var html = [
       '<section class="race senate-seat" aria-labelledby="', KYC.escapeAttr(id), '">',
       '<div class="race-head"><h', level, ' class="race-title" id="', KYC.escapeAttr(id), '">',
-      KYC.escapeHtml(stateName), " – Class ", ROMAN[seat.holder.senateClass] || "?",
-      ' seat <a class="race-state-link" href="', KYC.escapeAttr(KYC.stateUrl(seat.holder.state)),
+      KYC.escapeHtml(stateName), " – Class ", ROMAN[seat.senateClass] || "?",
+      ' seat <a class="race-state-link" href="', KYC.escapeAttr(KYC.stateUrl(seat.state)),
       '" title="', KYC.escapeAttr("Everything about " + stateName), '">',
       KYC.escapeHtml(stateName), " &rsaquo;</a></h", level, ">",
       race ? KYC.cards.raceBadges(race) : "",
@@ -171,8 +178,16 @@
     // side by side - stacked, each seat took a screen of mostly empty width.
     var row = [];
     if (holder.length) {
-      row.push('<div class="senate-side senate-holder"><p class="senate-role">Holds the seat</p>' +
-               cards(holder) + "</div>");
+      var role = KYC.seated(seat.holder) ? "Holds the seat"
+        : "Held the seat until " + seat.holder.formerMember.left;
+      row.push('<div class="senate-side senate-holder"><p class="senate-role">' +
+               KYC.escapeHtml(role) + "</p>" + cards(holder) + "</div>");
+    } else if (!seat.holder && race && race.incumbent) {
+      // The record names who held the seat even with no profile here
+      // (validate reports that as an error).
+      row.push('<div class="senate-side senate-holder"><p class="senate-role">Held the seat</p>' +
+               "<p>" + KYC.escapeHtml(race.incumbent.name + " (" + race.incumbent.party + ")") +
+               "</p></div>");
     }
     if (running.length) {
       row.push('<div class="senate-side senate-running"><p class="senate-role">' +
@@ -206,7 +221,9 @@
         if (block) { blocks.push(block.html); people += block.people; }
       });
     } else {
-      var shown = group.seats.map(function (s) { return s.holder; }).filter(opts.matches);
+      var shown = group.seats.map(function (s) { return s.holder; }).filter(function (p) {
+        return p && opts.matches(p);
+      });
       if (shown.length) blocks.push(cards(shown));
       people = shown.length;
     }

@@ -42,6 +42,15 @@
   function statusBadge(item) {
     var status = String(item.status || "").toLowerCase();
 
+    /* A 2026 incumbent who has left Congress: that first, then how their
+     * race went. Never "seat up", never a sitting member's badge. */
+    if (item.formerMember) {
+      var how = raceBadge(item);
+      return '<span class="badge badge-neutral" title="' +
+        KYC.escapeAttr(KYC.formerText(item) + "; held this seat in the 2026 race.") +
+        '">Former member</span>' + (how ? " " + how : "");
+    }
+
     /* A member contesting another seat - the other chamber, or a redrawn
      * district - is leaving this one, and the reader should see where they
      * went before anything else. */
@@ -159,7 +168,10 @@
     if (outcome) badges.push(outcome);
     if (race.openSeat) {
       var holder = race.incumbentIds.map(KYC.byId).filter(Boolean)[0];
-      var why = !holder ? "A newly drawn seat with no sitting member." :
+      // The record names who held the seat even when they have no profile.
+      var named = race.incumbent && race.incumbent.name;
+      var why = !holder ? (named ? named + " no longer holds the seat." :
+          "A newly drawn seat with no sitting member.") :
         holder.contestLabel ? holder.name + " is running for " + holder.contestLabel + "." :
         holder.alsoRunningSeat ? holder.name + " is running for " + holder.alsoRunningSeat + "." :
         KYC.offBallot(holder.raceStatus) ? holder.name + " is not on the November ballot." :

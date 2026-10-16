@@ -76,8 +76,14 @@ def district_maps():
 
 def build(profiles, races=None, committees=None, results=None):
     """Chamber balance and 2026 election headline figures. *results*, the
-    results cache, dates what the page says about who won."""
-    members = [p for p in profiles if not p.get("isCandidate")]
+    results cache, dates what the page says about who won.
+
+    The balance counts who sits now (``record.seated``); the seats up and
+    who defends them count the record's incumbents, a former member among
+    them, so a seat whose holder has left is still one of the 35."""
+    from .record import seated
+
+    members = [p for p in profiles if seated(p)]
 
     senate = [p for p in members if "Senate" in p["chamber"]]
     # Delegates from the territories sit in the House but cannot vote on
@@ -91,7 +97,10 @@ def build(profiles, races=None, committees=None, results=None):
         if "House" in p["chamber"] and p["state"] in TERRITORIES
     ]
 
-    senate_up = [p for p in senate if p.get("seatUp2026")]
+    holders = [p for p in profiles if not p.get("isCandidate") and p.get("seatUp2026")]
+    senate_up = [p for p in holders if "Senate" in p["chamber"]]
+    house_up = [p for p in holders
+                if "House" in p["chamber"] and p["state"] not in TERRITORIES]
 
     summary = {
         "congress": 119,
@@ -104,7 +113,7 @@ def build(profiles, races=None, committees=None, results=None):
             "senateDefending": _split(senate_up),
             "houseSeatsUp": HOUSE_SEATS,
             "notSeeking": sum(
-                1 for p in senate_up + house_voting
+                1 for p in senate_up + house_up
                 if not p.get("seekingReelection2026")
             ),
             "challengers": sum(1 for p in profiles if p.get("isCandidate")),
@@ -171,6 +180,12 @@ def by_state(profiles, races=None):
                 entry["challengersOut"] += 1
             else:
                 entry["challengersOnBallot"] += 1
+            continue
+        if p.get("formerMember"):
+            # Held a seat on the ballot and has left: still that seat's
+            # incumbent in the 2026 race, never in the state's delegation.
+            if p.get("seatUp2026"):
+                entry["seatsUp"] += 1
             continue
         if "Senate" in p["chamber"]:
             entry["senators"] += 1

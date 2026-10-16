@@ -41,7 +41,10 @@ class Issue:
 
 
 def _members(profiles):
-    return [p for p in profiles if not p["isCandidate"]]
+    """The members sitting now: never a candidate, never a former member."""
+    from .record import seated
+
+    return [p for p in profiles if seated(p)]
 
 
 def check_chamber_sizes(profiles):
@@ -71,12 +74,13 @@ def check_chamber_sizes(profiles):
 def check_record(profiles, record, snapshot=None):
     """The frozen race record (kyc/record.py) against today's members.
 
-    Every Senate race carries its class. Each one's incumbent is a sitting
-    member, or someone whose term has ended by the snapshot's date - a
-    special election's seat once its winner is seated. And, until the
-    Congress the cycle elects is sitting, today's seats must be the
-    record's: a race only the record has, or a seat only today has, is an
-    error, except for such an ended term (record.drift).
+    Every Senate race carries its class. Every incumbent the record names
+    has a profile: on the roster, or archived when they left
+    (``formerMember``, built from Former_Members.csv) - so a race never loses
+    the person who held its seat. And, until the Congress the cycle elects
+    is sitting, today's seats must be the record's: a race only the record
+    has, or a seat only today has, is an error, except for a term that has
+    ended (record.drift).
     """
     from . import cycle as cycle_mod, record as record_mod
 
@@ -88,18 +92,15 @@ def check_record(profiles, record, snapshot=None):
     if not senate or any(not race.get("senateClass") for race in senate.values()):
         issues.append(Issue("error", "record-senate",
                             "the record's Senate races are missing or carry no class"))
-    sitting = {p["id"] for p in _members(profiles)}
-    fetched = ((snapshot or {}).get("fetched") or "")[:10]
-    unseated = sorted(
+    built = {p["id"] for p in profiles if not p.get("isCandidate")}
+    lost = sorted(
         f"{rid} ({inc['name']}, {inc['bioguide']})"
         for rid, inc in record["incumbents"].items()
-        if rid in senate and inc and inc["bioguide"] not in sitting
-        and not (fetched and (inc.get("termEnd") or "9999") <= fetched)
-        and not record_mod.seat_filled(record, rid, snapshot))
-    if unseated:
-        issues.append(Issue("error", "unmatched-senate-seat",
-                            f"{len(unseated)} of the record's Senate incumbents are not sitting "
-                            f"members, and their terms have not ended", unseated))
+        if inc and inc["bioguide"] not in built)
+    if lost:
+        issues.append(Issue("error", "record-incumbent-missing",
+                            f"{len(lost)} of the record's incumbents have no profile: not on "
+                            f"the roster, and not archived in Former_Members.csv", lost))
     if snapshot and cycle_mod.phase(snapshot) == "campaign":
         live = record_mod.live_races(profiles, snapshot)
         apart = record_mod.drift(record, live, snapshot)
@@ -1340,6 +1341,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_registrations(profiles, field)
     issues += check_duplicate_people(profiles)
     issues += check_results(profiles, races)
+    issues += check_winners(profiles, races)
     issues += check_results_pages(results)
     issues += check_seats_contested(profiles)
     issues += check_guide()
@@ -1347,6 +1349,32 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     if voting is not None:                 # None: the caller did not supply it
         issues += check_voting_links(voting)
     return issues
+
+
+def check_winners(profiles, races):
+    """A member seated since Election Day in a seat they won (``winnerId``)
+    whose filing's profile is also in that race: one person shown twice.
+
+    Their filing is folded into the member only through an FEC id Congress's
+    own record lists for them (rule 25); until congress-legislators adds the
+    id, both profiles stay, and this says so."""
+    by_id = {p["id"]: p for p in profiles}
+    twice = []
+    for race in races or []:
+        winner = by_id.get(race.get("winnerId"))
+        if not winner:
+            continue
+        for pid in race["candidateIds"]:
+            other = by_id.get(pid)
+            if (other and other is not winner and other.get("isCandidate")
+                    and other.get("raceStatus") == "elected"):
+                twice.append(f"{race['id']}: {winner['name']} ({winner['id']}) is seated; "
+                             f"{other['name']} ({other['id']}) is the filing marked elected")
+    if not twice:
+        return []
+    return [Issue("warn", "seated-unlinked",
+                  f"{len(twice)} seated winners are not yet linked to their filing by an FEC "
+                  f"id in congress-legislators; both profiles are shown", sorted(twice))]
 
 
 def check_guide():

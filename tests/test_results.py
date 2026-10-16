@@ -1168,9 +1168,9 @@ class TestResultsCommandUsesTheScreenedField(unittest.TestCase):
 
         raw_field = candidates.load_cache(ROOT)
         raw_races = {candidates.race_id(r) for r in raw_field["candidates"]} - {None}
-        profiles, _ = build_profiles(sources.load_all(ROOT),
-                                     snapshot=legislators.load_snapshot(ROOT))
-        screened = screen_field(raw_field, profiles)
+        raw = sources.load_all(ROOT)
+        profiles, _ = build_profiles(raw, snapshot=legislators.load_snapshot(ROOT))
+        screened = screen_field(raw_field, profiles, raw["record"])
         real = {candidates.race_id(r) for r in screened["candidates"]} - {None}
         phantom = raw_races - real
         self.assertTrue(phantom, "the committed field has no phantom races to screen")

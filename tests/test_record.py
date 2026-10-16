@@ -125,7 +125,8 @@ class TestTheRecord(unittest.TestCase):
 def specials_seated(raw, snapshot):
     """The roster and membership as they will read once the Florida and Ohio
     special elections' winners are seated: a fictional senator (Z900001) in
-    the Florida appointee's place, her roster row gone, and Ohio's appointee
+    the Florida appointee's place, her roster row archived as `congress
+    --apply` would archive it (left 2026-12-08), and Ohio's appointee
     re-seated for the term to 2029. Found through the record's bioguide ids,
     so it holds whatever today's snapshot already shows. Never committed."""
     held = raw["record"]["incumbents"]
@@ -150,8 +151,18 @@ def specials_seated(raw, snapshot):
             person.update(termStart="2026-12-08", termEnd="2029-01-03", how=None, endType=None)
     after["legislators"] = people
     after["fetched"] = "2026-12-09T07:20:00+00:00"
-    roster = dict(raw, members=[r for r in raw["members"]
-                                if (r.get("Bioguide ID") or "").upper() != florida])
+    gone = [r for r in raw["members"] if (r.get("Bioguide ID") or "").upper() == florida]
+    # The winner's row, as `congress --apply` writes it.
+    fields = [k for k in raw["members"][0] if k != "_source"]
+    winner = next(p for p in people if p["bioguide"] == "Z900001")
+    members = [r for r in raw["members"] if r not in gone]
+    if not any((r.get("Bioguide ID") or "").upper() == "Z900001" for r in members):
+        members.append(legislators.row_for(winner, fields))
+    roster = dict(raw, members=members,
+                  former=list(raw.get("former") or []) + [
+                      dict(r, **{"Left Office": "2026-12-08",
+                                 "Left Via": "legislators-historical",
+                                 "Last Congress": "119"}) for r in gone])
     return roster, after, florida, ohio
 
 
@@ -190,21 +201,44 @@ class TestTheSpecialsSeated(unittest.TestCase):
         self.assertTrue(ohio["seatUp2026"])
         self.assertEqual(ohio["termEndYear"], 2029)
         self.assertTrue(ohio["term_start"].endswith("2029-01-03"), ohio["term_start"])
-        # Florida's other senator, whose term runs to 2031, is not up.
-        florida = [p for p in self.profiles if not p["isCandidate"] and p["state"] == "FL"
-                   and "Senate" in p["chamber"]]
+        # Florida's other senator, whose term runs to 2031, is not up, and
+        # neither is the winner seated in December.
+        florida = [p for p in self.profiles if record.seated(p) and p["state"] == "FL"
+                   and "Senate" in p["chamber"] and p["id"] != "Z900001"]
         self.assertTrue(florida and not any(p["seatUp2026"] for p in florida))
 
     def test_the_record_checks_stay_quiet_once_the_term_has_ended(self):
         issues = validate.check_record(self.profiles, self.record, self.snapshot)
         self.assertEqual([i.code for i in issues], [])
 
-    def test_an_incumbent_gone_before_the_term_ended_is_an_error(self):
-        early = dict(self.snapshot, fetched="2026-10-20T07:20:00+00:00")
-        early["legislators"] = [p for p in self.snapshot["legislators"]
-                                if p["bioguide"] != "Z900001"]
-        codes = [i.code for i in validate.check_record(self.profiles, self.record, early)]
-        self.assertIn("unmatched-senate-seat", codes)
+    def test_the_appointee_who_left_keeps_her_race(self):
+        florida = next(p for p in self.profiles if p["id"] == self.florida)
+        self.assertEqual(florida["formerMember"]["left"], "2026-12-08")
+        self.assertEqual(florida["term_start"], "2025-01-21 - 2026-12-08")
+        self.assertEqual(florida["committees"], "No data")
+        self.assertNotIn("phone", florida)
+        built = {r["id"]: r for r in races.build(self.profiles, record=self.record)}
+        self.assertEqual(built["S-FL-2026"]["incumbentIds"], [self.florida])
+        self.assertEqual(built["S-FL-2026"]["incumbent"]["seated"], False)
+        self.assertEqual(built["S-FL-2026"]["winnerId"], "Z900001")
+        # Never counted as a sitting senator: the Senate is still 100.
+        self.assertNotIn("senate-size",
+                         [i.code for i in validate.check_chamber_sizes(self.profiles)])
+
+    def test_the_winner_is_never_an_incumbent_or_up(self):
+        winner = next(p for p in self.profiles if p["id"] == "Z900001")
+        self.assertEqual((winner["raceRole"], winner["raceId"], winner["seatUp2026"]),
+                         ("winner", "S-FL-2026", False))
+        built = {r["id"]: r for r in races.build(self.profiles, record=self.record)}
+        self.assertNotIn("Z900001", built["S-FL-2026"]["incumbentIds"])
+        self.assertIn("Z900001", built["S-FL-2026"]["candidateIds"])
+
+    def test_an_incumbent_with_no_profile_is_an_error(self):
+        # Neither on the roster nor archived: the race would lose its holder.
+        bare = dict(self.raw, former=[])
+        profiles, _ = build_profiles(bare, snapshot=self.snapshot)
+        codes = [i.code for i in validate.check_record(profiles, self.record, self.snapshot)]
+        self.assertIn("record-incumbent-missing", codes)
 
     def test_drift_allows_only_an_ended_term(self):
         live = record.race_ids(self.record) - {"S-FL-2026"}
@@ -212,6 +246,66 @@ class TestTheSpecialsSeated(unittest.TestCase):
         early = dict(self.snapshot, fetched="2026-10-01T07:20:00+00:00")
         self.assertEqual(record.drift(self.record, live, early),
                          ["S-FL-2026: in the record, not among today's seats"])
+
+
+class TestTheWinnersFiling(unittest.TestCase):
+    """A special election's winner seated in December has a filing in the
+    field, with its own FEC_ profile. One person: folded into the member
+    only by the FEC id Congress's record lists for them (rule 25)."""
+
+    @classmethod
+    def setUpClass(cls):
+        from kyc import candidates
+
+        cls.raw = sources.load_all(ROOT)
+        cls.field = candidates.load_cache(ROOT)
+        cls.roster, cls.after, cls.florida, _ = specials_seated(
+            cls.raw, legislators.load_snapshot(ROOT))
+        # A real filer for Florida's seat stands in for the winner's filing.
+        filers = [r for r in screen_field(cls.field, build_profiles(cls.raw)[0],
+                                          cls.raw["record"])["candidates"]
+                  if candidates.race_id(r) == "S-FL-2026"
+                  and (r.get("receipts") or 0) >= candidates.STATUTORY_THRESHOLD
+                  and r.get("incumbent_challenge") != "I"]
+        if not filers:
+            raise unittest.SkipTest("no Florida Senate filer past the threshold")
+        cls.filing = max(filers, key=lambda r: r["receipts"])["candidate_id"]
+        # The profile the filing has today: curated (CAND_) or the field's.
+        base = build_profiles(cls.raw, field=cls.field)[0]
+        cls.held_by = next(p["id"] for p in base if cls.filing in (
+            p.get("fecCandidateId"), p.get("rosterFecId")) or p["id"] == "FEC_" + cls.filing)
+
+    def build(self, fec_ids):
+        after = copy.deepcopy(self.after)
+        for person in after["legislators"]:
+            if person["bioguide"] == "Z900001":
+                person["fec"] = person["fecAll"] = fec_ids
+        profiles, _ = build_profiles(self.roster, snapshot=after, field=self.field)
+        return {p["id"]: p for p in profiles}, races.build(profiles, record=self.raw["record"])
+
+    def test_linked_by_the_records_id_it_is_one_profile(self):
+        people, built = self.build([self.filing])
+        self.assertNotIn(self.held_by, people)
+        self.assertEqual(people["Z900001"]["fecCandidateId"], self.filing)
+        if not self.held_by.startswith("FEC_"):
+            # A curated id answers for the member.
+            self.assertIn(self.held_by, people["Z900001"]["otherIds"])
+        race = next(r for r in built if r["id"] == "S-FL-2026")
+        self.assertEqual(race["winnerId"], "Z900001")
+        self.assertIn("Z900001", race["candidateIds"])
+        self.assertNotIn("Z900001", race["incumbentIds"])
+
+    def test_without_the_id_neither_is_merged(self):
+        # Different names, no id: both stay, and nothing is guessed.
+        people, built = self.build([])
+        self.assertIn(self.held_by, people)
+        self.assertNotIn("fecCandidateId", people["Z900001"])
+        race = next(r for r in built if r["id"] == "S-FL-2026")
+        self.assertIn(self.held_by, race["candidateIds"])
+        # Marked elected, the filing beside the seated winner is reported.
+        people[self.held_by]["raceStatus"] = "elected"
+        codes = [i.code for i in validate.check_winners(list(people.values()), built)]
+        self.assertEqual(codes, ["seated-unlinked"])
 
 
 class TestTheSpecialsSeatedThroughApply(unittest.TestCase):
@@ -264,7 +358,7 @@ class TestTheSpecialsSeatedThroughApply(unittest.TestCase):
         self.assertEqual(ohio["Term End Date"], "2029-01-03")
 
     def test_the_build_finds_nothing_wrong(self):
-        roster = dict(self.raw, members=self.members)
+        roster = dict(self.raw, members=self.members, former=self.former)
         when = datetime.datetime(2026, 12, 9, 8)
         errors = [i.code for i in validate.check_snapshot([], roster, self.after, now=when)
                   if i.level == "error"]

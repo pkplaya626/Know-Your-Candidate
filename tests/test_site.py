@@ -100,15 +100,19 @@ class TestSummaryAgainstRealData(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         raw = sources.load_all(ROOT)
+        cls.record = raw["record"]
         cls.profiles, _ = build_profiles(raw)
-        cls.races = races_mod.build(cls.profiles)
+        cls.races = races_mod.build(cls.profiles, record=cls.record)
         cls.summary = summary.build(cls.profiles, races=cls.races)
 
     def test_the_senate_has_one_hundred_seats(self):
+        # Sitting senators: a former member is never one.
         self.assertEqual(self.summary["senate"]["total"], 100)
 
-    def test_thirty_five_senate_seats_are_up(self):
-        self.assertEqual(self.summary["election"]["senateSeatsUp"], 35)
+    def test_the_senate_seats_up_are_the_records(self):
+        # 35 in 2026, whoever holds them now.
+        self.assertEqual(self.summary["election"]["senateSeatsUp"],
+                         sum(1 for rid in self.record["races"] if rid.startswith("S-")))
 
     def test_the_party_split_adds_up(self):
         senate = self.summary["senate"]

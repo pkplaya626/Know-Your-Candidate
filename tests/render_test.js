@@ -593,7 +593,7 @@ async function testDirectoryAsync() {
     check("sitting members filter narrows the grid", memberTotal < total,
       `${memberTotal} of ${total}`);
     check("every card is someone currently in Congress",
-      members.every((c) => !KYC.byId(c.getAttribute("data-id")).isCandidate));
+      members.every((c) => KYC.seated(KYC.byId(c.getAttribute("data-id")))));
     check("the filter is in the URL", /role=member/.test(window.location.hash),
       window.location.hash);
 
@@ -603,8 +603,12 @@ async function testDirectoryAsync() {
     D.querySelector('[data-group="chamber"][data-value="all"]').click();
 
     D.querySelector('[data-group="role"][data-value="candidate"]').click();
+    // A 2026 incumbent who has left Congress is in neither, and shows under
+    // "all" only while on a ballot (the grid hides who is off it).
+    const formers = window.legislatorsData.filter((p) => p.formerMember &&
+      !KYC.cards.offBallot(p)).length;
     check("challengers filter is the complement",
-      announced(D) === total - memberTotal, `${announced(D)}`);
+      announced(D) === total - memberTotal - formers, `${announced(D)}`);
     check("every card is a challenger",
       [...cards()].every((c) => KYC.byId(c.getAttribute("data-id")).isCandidate));
 
@@ -1004,7 +1008,7 @@ async function testDirectoryAsync() {
 
     // Rule 27: a challenger is running for the seat, not representing it.
     const challenger = window.legislatorsData.find((p) => p.isCandidate);
-    const seated = window.legislatorsData.find((p) => !p.isCandidate);
+    const seated = window.legislatorsData.find((p) => KYC.seated(p));
     KYC.profile.open(challenger.id);
     const meta = D.querySelector("#profileModal .modal-meta").textContent;
     check("a candidate's dialog says Running for, never Represents",
@@ -1942,8 +1946,14 @@ async function testSenate() {
   const races = window.kycRaces;
   const results = D.getElementById("results");
   const toggle = D.getElementById("senateViewToggle");
-  const senators = people.filter((p) => !p.isCandidate && /Senate/.test(p.chamber));
+  const senators = people.filter((p) => KYC.seated(p) && /Senate/.test(p.chamber));
   const year = window.kycBuildMeta.election.year;
+  // Every 2026 Senate race is a seat, whoever holds it now; later years are
+  // the sitting senators who neither held nor won one.
+  const senateRaces = races.filter((r) => r.chamber === "Senate");
+  const placed = new Set(senateRaces.flatMap((r) =>
+    r.incumbentIds.slice(0, 1).concat(r.winnerId ? [r.winnerId] : [])));
+  const unplaced = senators.filter((p) => !placed.has(p.id));
   const ids = (root) => [...root.querySelectorAll(".card")].map((c) => c.getAttribute("data-id"));
   const offBallot = (p) => KYC.offBallot(KYC.contestStatus(p));
   const seatOf = (race) => {
@@ -1962,14 +1972,17 @@ async function testSenate() {
 
     const groups = [...results.querySelectorAll(":scope > section.senate-group")];
     const titles = groups.map((g) => g.querySelector(":scope > .senate-group-title").textContent);
-    const years = [...new Set(senators.map((p) => p.nextElection))].sort();
+    const years = [...new Set(senateRaces.map((r) => r.year)
+      .concat(unplaced.map((p) => p.nextElection)))].sort();
     check("one top-level group per year, in order",
       groups.length === years.length &&
       years.every((y, i) => titles[i].indexOf("Up in " + y) === 0), titles.join(" | "));
     check("group headings are real headings", groups.every((g) =>
       g.querySelector(":scope > .senate-group-title").tagName === "H2"));
 
-    const regular = (y) => senators.filter((p) => p.nextElection === y && !p.senateSpecial);
+    const regular = (y) => y === year
+      ? senateRaces.filter((r) => r.year === y && !r.special)
+      : unplaced.filter((p) => p.nextElection === y && !p.senateSpecial);
     check("each group's count is its senators in the data", groups.every((g, i) => {
       const n = regular(years[i]).length;
       return g.getAttribute("data-seats") === String(n) &&
@@ -1980,7 +1993,7 @@ async function testSenate() {
       return titles[i].indexOf("Class " + ["", "I", "II", "III"][cls]) !== -1;
     }), titles.join(" | "));
 
-    const specials = senators.filter((p) => p.senateSpecial);
+    const specials = senateRaces.filter((r) => r.year === year && r.special);
     const sub = results.querySelector(".senate-group-special");
     const subTitle = sub ? sub.querySelector(".senate-group-title") : null;
     check("the specials are a labelled sub-group inside their year",
@@ -1992,6 +2005,9 @@ async function testSenate() {
       groups[0].lastElementChild === sub);
 
     const later = groups.slice(1);
+    check("the groups hold the whole Senate", groups.reduce((n, g) =>
+      n + Number(g.getAttribute("data-seats")), 0) + specials.length === senators.length,
+      groups.map((g) => g.getAttribute("data-seats")).join(","));
     check("later years list their senators", later.every((g, i) => {
       const shown = ids(g);
       const expected = regular(years[i + 1]).map((p) => p.id);
@@ -4016,6 +4032,96 @@ async function testReseatedSpecial() {
   });
 }
 
+/* December or January: a 2026 incumbent who has left Congress
+ * (`formerMember`, built from Former_Members.csv) and the winner seated in
+ * that seat (`raceRole` "winner"). Made from Florida's Senate seat as the
+ * data stands; a fictional winner, Z900001, never a real person. */
+function departFlorida(w) {
+  const race = w.kycRaces.find((r) => r.id === "S-FL-2026");
+  const holder = race && w.legislatorsData.find((p) => p.id === race.incumbentIds[0]);
+  w.__florida = { race, holder };
+  if (!holder || holder.formerMember || race.winnerId) return;
+  holder.formerMember = { left: "2026-12-08", via: "legislators-historical", congress: 119 };
+  holder.status = "Former member: left office 2026-12-08";
+  holder.raceStatus = "defeated";
+  race.incumbent.seated = false;
+  const winner = Object.assign({}, holder, {
+    id: "Z900001", name: "Zora Example", party: "Independent", raceRole: "winner",
+    raceId: race.id, seatUp2026: false, isUpIn2026: false, seekingReelection2026: false,
+    raceStatus: "elected", status: "Active Member", senateClass: 3, nextElection: 2028,
+    senateSpecial: false, term_start: "2026-12-08 - 2029-01-03",
+  });
+  delete winner.formerMember;
+  delete winner.appointed;
+  delete winner.fecCandidateId;
+  w.legislatorsData.push(winner);
+  race.candidateIds.push(winner.id);
+  race.winnerId = winner.id;
+}
+
+async function testFormerIncumbent() {
+  const now = new Date("2026-12-10T12:00:00Z");
+  const grid = await buildPage("index.html", { hash: "#/?role=member&chamber=Senate", now,
+                                                 data: departFlorida });
+  await settle(50);
+  suite("index.html — a 2026 incumbent who has left, and the seat's winner", () => {
+    const { window, D, errors } = grid;
+    const KYC = window.KYC;
+    const { race, holder } = window.__florida;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("Florida's appointee is a former member", !!holder && !!holder.formerMember);
+    const ids = [...D.querySelectorAll("#results .card")].map((c) => c.getAttribute("data-id"));
+    check("sitting senators exclude her and include the winner",
+      !ids.includes(holder.id) && ids.includes(race.winnerId), `${ids.length} cards`);
+    check("the Senate is still 100", ids.length === 100, `${ids.length}`);
+    KYC.profile.open(holder.id);
+    const meta = D.querySelector("#profileModal .modal-meta").textContent;
+    check("her dialog says she represented the state until she left",
+      /Represented \(until 2026-12-08\)/.test(meta) && !/Represents/.test(meta),
+      meta.replace(/\s+/g, " "));
+    check("and says she left office",
+      /Left office 2026-12-08/.test(D.getElementById("profileModalStatus").textContent));
+    KYC.profile.close();
+    KYC.profile.open(race.winnerId);
+    const status = D.getElementById("profileModalStatus").textContent;
+    const won = KYC.byId(race.winnerId).raceStatus === "elected";
+    check("the winner was elected, never re-elected", !/Re-elected/.test(status) &&
+      (!won || /Elected/.test(status)), status);
+    KYC.profile.close();
+  });
+
+  const view = await buildPage("index.html", { hash: "#/?view=senate", now, data: departFlorida });
+  await settle(50);
+  suite("index.html — Senate view after a 2026 seat changes hands", () => {
+    const { window, D, errors } = view;
+    const { race, holder } = window.__florida;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const head = D.getElementById("senate-seat-" + race.id);
+    const block = head && head.closest("section");
+    const ids = block ? [...block.querySelectorAll(".card")].map((c) => c.getAttribute("data-id")) : [];
+    check("the seat block leads with who held it", ids[0] === holder.id, ids.join(","));
+    check("saying until when", !!block && /Held the seat until 2026-12-08/.test(block.textContent));
+    check("its winner is listed in the seat", ids.includes(race.winnerId));
+    const elsewhere = [...view.D.querySelectorAll(".card")]
+      .filter((c) => c.getAttribute("data-id") === race.winnerId).length;
+    check("and nowhere else", elsewhere === 1, `${elsewhere}`);
+    const badge = block && block.querySelector('.card[data-id="' + holder.id + '"]');
+    check("her card is badged a former member", !!badge && /Former member/.test(badge.textContent));
+  });
+
+  const state = await buildPage("states/fl.html", { now, data: departFlorida });
+  await settle(50);
+  suite("states/fl.html — after a 2026 seat changes hands", () => {
+    const { window, D, errors } = state;
+    const { race, holder } = window.__florida;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const section = D.getElementById("senators");
+    const ids = section ? [...section.querySelectorAll(".card")].map((c) => c.getAttribute("data-id")) : [];
+    check("the state's senators are who sits now", ids.length === 2 &&
+      !ids.includes(holder.id) && ids.includes(race.winnerId), ids.join(","));
+  });
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "guide") await testGuide();
@@ -4025,6 +4131,7 @@ async function testReseatedSpecial() {
   if (!only || only === "index.html") await testDirectoryAsync();
   if (!only || only === "index.html") await testSenate();
   if (!only || only === "index.html") await testReseatedSpecial();
+  if (!only || only === "index.html") await testFormerIncumbent();
   if (!only || only === "index.html") await testOdds();
   if (!only || only === "index.html") await testSeatRows();
   if (!only || only === "map.html") await testMap();

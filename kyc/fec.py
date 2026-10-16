@@ -322,7 +322,7 @@ def save_cache(cache, root="."):
     return path
 
 
-def known_ids(snapshot, active_ids=None):
+def known_ids(snapshot, active_ids=None, record=None):
     """``{bioguide: fec_candidate_id}`` from the authoritative membership.
 
     ``congress-legislators`` records the FEC candidate id for 537 of the 539
@@ -340,9 +340,20 @@ def known_ids(snapshot, active_ids=None):
     the profile reported "No filing this cycle" while $674,406 sat under the
     other one. An old committee id looks exactly as authoritative as a current
     one, which is why the cycle has to be the tie-breaker.
+
+    *record*, the frozen race record, covers a record incumbent who has left
+    and so is not in the snapshot: their ids for the chamber of the seat they
+    held, as the record kept them. Without it their money would be looked
+    up by a name search.
     """
+    people = list((snapshot or {}).get("legislators", []))
+    sitting = {p["bioguide"] for p in people}
+    for rid, inc in ((record or {}).get("incumbents") or {}).items():
+        if inc and inc["bioguide"] not in sitting:
+            people.append({"bioguide": inc["bioguide"],
+                           "fec": [i for i in inc.get("fec") or [] if i[:1] == rid[:1]]})
     ids = {}
-    for person in (snapshot or {}).get("legislators", []):
+    for person in people:
         candidate_ids = person.get("fec") or []
         if not candidate_ids:
             continue
@@ -356,7 +367,7 @@ def known_ids(snapshot, active_ids=None):
 
 
 def resolve_all(profiles, root=".", limit=None, refresh=False, snapshot=None,
-                active_ids=None, log=print):
+                active_ids=None, log=print, record=None):
     """Look up finance totals, resuming from the cache.
 
     Requests are sequential and rate-limited on purpose; the FEC key allows
@@ -393,7 +404,7 @@ def resolve_all(profiles, root=".", limit=None, refresh=False, snapshot=None,
         log("  [warn] using DEMO_KEY - the FEC will throttle after a few requests.")
         log("         Set FEC_API_KEY from https://api.data.gov/signup/ for a full run.")
 
-    authoritative = known_ids(snapshot, active_ids)
+    authoritative = known_ids(snapshot, active_ids, record)
     if authoritative:
         covered = sum(1 for p in todo if p["id"] in authoritative or p.get("rosterFecId"))
         log(f"  finance: {covered} of {len(todo)} have an authoritative FEC id")

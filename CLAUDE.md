@@ -126,8 +126,8 @@ python build_profile_site.py courts           # each state's highest court, from
 python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 995 tests, no dependencies
-npm install && npm test                       # 1204 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 999 tests, no dependencies
+npm install && npm test                       # 1220 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -801,6 +801,24 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     new Congress, a snapshot of the old one fails every build
     (`snapshot-behind`); the refresh runs daily from January 3 to 14 so
     that takes two missed runs, not one missed Monday.
+
+67. **Who held a seat is the record's word; who sits now is `seated`.**
+    Archived by rule 66, Florida's appointee would have vanished from the
+    race she held: her member profile gone, her own filing excluded as an
+    incumbent's, "35 Senate seats up" reading 34 - and the refresh failing
+    every December day. A record incumbent who has left is a profile with
+    the same bioguide id and `formerMember` (from `Former_Members.csv`), so
+    every cache keyed on them still finds them; the term ends the day they
+    left, and the archived status and committee seats are not shown. Every
+    "who represents me" view counts with `record.seated` / `KYC.seated`,
+    never `not isCandidate`, or a former member reads as someone's
+    senator (rule 27). A race's `incumbentIds` and `incumbent` come from the
+    record, and every record race exists whoever points at it. A member
+    seated since Election Day in a seat they did not hold is its winner
+    (`raceRole`), never an incumbent, never "re-elected" - nor is an
+    appointee. Their filing is folded in only by the FEC id Congress's
+    record lists for them, a curated row's id kept as `otherIds`; without
+    that id both profiles stay and `seated-unlinked` says so (rule 25).
 
 ## District maps
 

@@ -132,25 +132,67 @@ def live_races(profiles, snapshot, cycle=None):
     from . import legislators, races as races_mod
 
     cycle = cycle or cycle_mod.CYCLE
-    members = [p for p in profiles if not p.get("isCandidate")]
+    members = [p for p in profiles if seated(p)]
     house = {rid for rid in races_mod.contestable(members, cycle) if rid.startswith("H-")}
     senate = {races_mod.race_id("Senate", p["state"], None)
               for p in legislators.senators_up(snapshot, cycle)}
     return house | senate
 
 
-def seat_filled(record, rid, snapshot):
-    """True when someone else now sits in a record Senate race's seat - same
-    state, same class: an appointee after a resignation. The seat is still
-    on the ballot; the departure is the roster's business (check_snapshot)."""
-    race = ((record or {}).get("races") or {}).get(rid) or {}
-    return any(p.get("chamber") == "Senate" and p.get("state") == race.get("state")
-               and p.get("senateClass") == race.get("senateClass")
-               for p in (snapshot or {}).get("legislators", []))
-
-
 def race_ids(record):
     return set((record or {}).get("races") or {})
+
+
+def seated(profile):
+    """Sitting in Congress now: a member profile, not a candidate's and not a
+    former member's (``formerMember``, a record incumbent who has left).
+
+    Every view that answers "who represents me" counts with this, never with
+    ``not isCandidate`` alone: a former member keeps the member shape so
+    their race, money, portrait and links still find them (rule 27)."""
+    return not profile.get("isCandidate") and not profile.get("formerMember")
+
+
+def held_races(record):
+    """``{bioguide: race id}`` for every record incumbent."""
+    return {inc["bioguide"]: rid
+            for rid, inc in ((record or {}).get("incumbents") or {}).items() if inc}
+
+
+def seated_winners(record, snapshot):
+    """``{bioguide: race id}``: each member seated in a record race's seat
+    since Election Day who is not that race's record incumbent - its winner,
+    by the seating.
+
+    The seat is the race's: same state and Senate class, or same state and
+    district number (the races use the plan the election was held under,
+    which is the plan the winners sit in). A record incumbent re-seated in
+    their own seat is not a winner of it; one seated in another seat - a
+    representative elected to the Senate, a member who ran in a renumbered
+    district - is that seat's winner, and still the incumbent of their own.
+    """
+    races = (record or {}).get("races") or {}
+    held = (record or {}).get("incumbents") or {}
+    day = (record or {}).get("electionDay") or cycle_mod.general_election_day(
+        (record or {}).get("cycle") or cycle_mod.CYCLE).isoformat()
+    seats = {}
+    for rid, race in races.items():
+        if race.get("chamber") == "Senate":
+            seats[("Senate", race["state"], race.get("senateClass"))] = rid
+        else:
+            seats[("House", race["state"], race.get("district"))] = rid
+    out = {}
+    for person in (snapshot or {}).get("legislators", []):
+        if (person.get("termStart") or "") < day:
+            continue
+        if person.get("chamber") == "Senate":
+            key = ("Senate", person.get("state"), person.get("senateClass"))
+        else:
+            key = ("House", person.get("state"), person.get("district") or 0)
+        rid = seats.get(key)
+        if rid and (held.get(rid) or {}).get("bioguide") != person["bioguide"]:
+            out[person["bioguide"]] = rid
+    return out
 
 
 def senate_incumbents(record):

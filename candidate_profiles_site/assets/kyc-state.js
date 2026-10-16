@@ -119,7 +119,8 @@
     // Every state links to its district map; a redrawn one says so.
     var districtMap = (KYC.meta().districtMaps || {})[code];
 
-    var members = data.filter(function (p) { return !p.isCandidate && p.state === code; });
+    // Who represents the state now (rule 27): never a former member.
+    var members = data.filter(function (p) { return KYC.seated(p) && p.state === code; });
     var senators = members.filter(function (p) { return p.chamber.indexOf("Senate") !== -1; });
     var house = members.filter(function (p) { return p.chamber.indexOf("House") !== -1; })
       .sort(function (a, b) { return KYC.districtOrder(a) - KYC.districtOrder(b); });

@@ -222,8 +222,10 @@ def write_profiles(profiles, stats, root=".", races=None, summary=None):
 
 def state_codes(profiles):
     """Every state or territory a sitting member represents."""
+    from .record import seated
+
     return sorted({p["state"] for p in profiles
-                   if not p.get("isCandidate") and p.get("state") not in (None, "", "N/A")})
+                   if seated(p) and p.get("state") not in (None, "", "N/A")})
 
 
 def render_state_pages(profiles, root=".", summary=None):

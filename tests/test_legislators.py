@@ -850,9 +850,9 @@ class TestAgainstTheRealSnapshot(unittest.TestCase):
         self.assertTrue(all(p["termEndYear"] for p in senators))
 
     def test_every_senator_has_a_class_and_next_election(self):
+        from kyc.record import seated
         profiles, _ = build_profiles(self.raw, snapshot=self.snapshot)
-        senators = [p for p in profiles
-                    if not p["isCandidate"] and "Senate" in p["chamber"]]
+        senators = [p for p in profiles if seated(p) and "Senate" in p["chamber"]]
         self.assertTrue(all(p["senateClass"] in (1, 2, 3) for p in senators))
         # The 2026 ballot by this route is the seatUp2026 set, except a
         # record incumbent re-seated since Election Day (a special
@@ -950,7 +950,8 @@ class TestNamesOnTheRealRoster(unittest.TestCase):
         cls.snapshot = legislators.load_snapshot(ROOT)
         raw = sources.load_all(ROOT)
         profiles, _ = build_profiles(raw, snapshot=cls.snapshot)
-        cls.members = {p["id"]: p for p in profiles if not p["isCandidate"]}
+        from kyc.record import seated
+        cls.members = {p["id"]: p for p in profiles if seated(p)}
         cls.roster = {r.get("Bioguide ID"): r.get("Name") for r in raw["members"]}
 
     def test_the_snapshot_carries_name_parts(self):

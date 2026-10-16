@@ -96,14 +96,15 @@
 
   /* --------------------------------------------------------- the people */
 
-  /** Sitting House members by the district they hold - the old map's. */
+  /** Sitting House members by the district they hold - the old map's. A
+   *  former member holds nothing (rule 27). */
   var holdersOf = {};
   /** The 2026 House race for each new district. */
   var raceOf = {};
 
   function indexPeople() {
     data.forEach(function (p) {
-      if (p.isCandidate || p.state !== code || p.chamber.indexOf("House") === -1) return;
+      if (!KYC.seated(p) || p.state !== code || p.chamber.indexOf("House") === -1) return;
       (holdersOf[p.districtNum] || (holdersOf[p.districtNum] = [])).push(p);
     });
     races.forEach(function (r) {

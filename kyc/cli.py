@@ -520,7 +520,8 @@ def _finance(args):
     field = candidates.load_cache(args.root)
     active = {r["candidate_id"] for r in (field or {}).get("candidates", [])}
     fec.resolve_all(profiles, root=args.root, limit=args.limit,
-                    refresh=args.refresh, snapshot=snapshot, active_ids=active)
+                    refresh=args.refresh, snapshot=snapshot, active_ids=active,
+                    record=raw.get("record"))
     print(f"\n[ok] finance cache: {fec.CACHE_PATH}")
     return 0
 
@@ -787,7 +788,9 @@ def _disclosures(args):
                           if v.get("source") == disclosures.SENATE_SOURCE})
         print(f"  wrote {disclosures.save_cache(found, args.root)}")
 
-    members = [p for p in profiles if not p["isCandidate"]]
+    from .record import seated as sits
+
+    members = [p for p in profiles if sits(p)]
     for chamber in ("House", "Senate"):
         seated = [p for p in members if p["chamber"] == chamber]
         have = sum(1 for p in seated if p["id"] in found)
@@ -840,6 +843,11 @@ def _results(args):
         filed = {row["candidate_id"]: row for row in field["candidates"]}
         known = {person["bioguide"]: person
                  for person in (snapshot or {}).get("legislators", [])}
+        # A record incumbent who has left is no longer in the snapshot; the
+        # record holds their official name and article title.
+        for inc in ((raw.get("record") or {}).get("incumbents") or {}).values():
+            if inc and inc["bioguide"] not in known:
+                known[inc["bioguide"]] = inc
         for profile in profiles:
             cid = profile.get("fecCandidateId")
             # A member with no filing this cycle is keyed on their

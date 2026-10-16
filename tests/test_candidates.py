@@ -338,16 +338,19 @@ class TestContestable(unittest.TestCase):
     def setUpClass(cls):
         from kyc import races
 
-        cls.profiles, cls.stats = build_profiles(load_all(ROOT))
-        cls.contests = races.contestable(cls.profiles)
+        raw = load_all(ROOT)
+        cls.record = raw["record"]
+        cls.profiles, cls.stats = build_profiles(raw)
+        cls.contests = races.contestable(cls.profiles, record=cls.record)
 
     def test_senate_races_are_exactly_the_seats_up(self):
+        # The record's incumbents, a former member among them once one has
+        # left: the seat is still the race's.
         senate = {c for c in self.contests if c.startswith("S-")}
         up = {f"S-{p['state']}-2026" for p in self.profiles
               if not p["isCandidate"] and "Senate" in p["chamber"] and p["seatUp2026"]}
         self.assertEqual(senate, up)
-        record = load_all(ROOT)["record"]
-        self.assertEqual(senate, {r for r in record["races"] if r.startswith("S-")})
+        self.assertEqual(senate, {r for r in self.record["races"] if r.startswith("S-")})
         for state in ("CA", "NY", "PA", "AZ"):
             self.assertNotIn(f"S-{state}-2026", self.contests)
 
@@ -372,9 +375,11 @@ class TestContestable(unittest.TestCase):
         from kyc import races
 
         field = candidates.load_cache(ROOT)
-        profiles, _ = build_profiles(load_all(ROOT), field=field)
-        built = {r["id"] for r in races.build(profiles)}
-        self.assertLessEqual(built, races.contestable(profiles))
+        raw = load_all(ROOT)
+        profiles, _ = build_profiles(raw, field=field)
+        built = {r["id"] for r in races.build(profiles, record=raw["record"])}
+        # Every race of the record, and no other.
+        self.assertEqual(built, races.contestable(profiles, record=raw["record"]))
 
 
 class TestAgainstTheRealField(unittest.TestCase):

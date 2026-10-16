@@ -565,8 +565,9 @@ class TestRaces(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         raw = load_all(ROOT)
+        cls.record = raw["record"]
         cls.profiles, _ = build_profiles(raw)
-        cls.races = races.build(cls.profiles)
+        cls.races = races.build(cls.profiles, record=cls.record)
         cls.by_id = {p["id"]: p for p in cls.profiles}
 
     def test_the_race_list_is_every_seat_we_know_an_occupant_for(self):
@@ -587,24 +588,32 @@ class TestRaces(unittest.TestCase):
         self.assertNotIn("PR", {r["state"] for r in delegates})
         self.assertEqual(len(self.races), len(senate) + len(house))
 
-        # Every one of the 435 House seats is on the ballot, but a seat nobody
-        # currently holds has no roster row and so produces no race. The
-        # shortfall is exactly the vacancies, and never anything else.
-        seated = {
-            (p["state"], p["districtNum"]) for p in self.profiles
-            if not p["isCandidate"] and p["chamber"] == "House"
-            and p["state"] not in TERRITORIES
-        }
-        self.assertEqual(len(voting), len(seated))
+        # Every House seat on the ballot is a race, held or not: the record
+        # froze them all, a vacant seat (TX-23, FL-20) among them. Every
+        # seat a member holds is one of them.
+        frozen = {rid for rid, r in self.record["races"].items()
+                  if r["chamber"] == "House" and r["state"] not in TERRITORIES}
+        self.assertEqual({r["id"] for r in voting}, frozen)
+        held = {races.race_id("House", p["state"], p["districtNum"]) for p in self.profiles
+                if not p["isCandidate"] and p["chamber"] == "House"
+                and p["state"] not in TERRITORIES and p.get("raceRole") != "winner"}
+        self.assertLessEqual(held, frozen)
         self.assertLessEqual(len(voting), 435)
 
     def test_senators_not_up_belong_to_no_race(self):
-        idle = [
-            p for p in self.profiles
-            if not p["isCandidate"] and "Senate" in p["chamber"] and not p["seatUp2026"]
-        ]
-        self.assertEqual(len(idle), 65)
+        from kyc.record import seated
+
+        senators = [p for p in self.profiles if seated(p) and "Senate" in p["chamber"]]
+        up = [p for p in senators if p["seatUp2026"]]
+        won = [p for p in senators if p.get("raceRole") == "winner"]
+        idle = [p for p in senators if not p["seatUp2026"] and p not in won]
+        self.assertTrue(idle)
         self.assertTrue(all(p["raceId"] is None for p in idle))
+        # Every Senate race's holder is a sitting senator or a former member.
+        former = [p for p in self.profiles if p.get("formerMember")
+                  and "Senate" in p["chamber"] and p["seatUp2026"]]
+        self.assertEqual(len(up) + len(former),
+                         sum(1 for rid in self.record["races"] if rid.startswith("S-")))
 
     def test_race_ids_are_stable_and_unique(self):
         ids = [r["id"] for r in self.races]
