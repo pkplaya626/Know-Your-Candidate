@@ -255,68 +255,106 @@
     return best;
   }
 
-  /** On each map, the district a location is in and any other whose line
-   *  is within NEAR_KM of it: ``[{plan, inside, near}]``, or null when the
-   *  map has no projection. */
-  function locate(lon, lat) {
+  /** On each map, where a location falls: ``[{plan, kind, inside, near}]``,
+   *  or null when the map has no projection. *accuracy* is the browser's own
+   *  estimate in metres; the margin grows by it, since a fix 2 km off is a
+   *  home 2 km away.
+   *
+   *  kind is
+   *  - "in": inside one district, no line within the margin;
+   *  - "line": within the margin of a line between two or more districts;
+   *  - "edge": inside one district, near a line no other district shares -
+   *    the state line or the shore, so possibly outside the state;
+   *  - "out": inside no district but near one: at the edge or outside;
+   *  - "none": nowhere near this map. */
+  function locate(lon, lat, accuracy) {
     var at = project(lon, lat);
     if (!at) return null;
-    var margin = NEAR_KM / state.unitKm;
+    var extra = isFinite(accuracy) && accuracy > 0 ? accuracy / 1000 : 0;
+    var margin = (NEAR_KM + extra) / state.unitKm;
     return state.plans.map(function (plan) {
-      var inside = [], near = [];
+      var inside = [], near = [], ownEdge = false;
       numbers(plan).forEach(function (n) {
         var rings = ringsOf(plan, n);
         var dist = edgeDistance(rings, at[0], at[1]);
         if (contains(rings, at[0], at[1])) {
           inside.push(n);
-          if (dist <= margin) near.push(n);
+          if (dist <= margin) ownEdge = true;
         } else if (dist <= margin) {
           near.push(n);
         }
       });
-      return { plan: plan, inside: inside, near: near };
+      var kind = inside.length + near.length >= 2 ? "line"
+        : inside.length === 1 ? (ownEdge ? "edge" : "in")
+        : near.length ? "out" : "none";
+      return { plan: plan, kind: kind, inside: inside, near: near };
     });
   }
 
-  /** What a location means on this page, in words, with the district to
-   *  focus when the map can say. */
-  function located(found) {
+  /* Beyond this the browser's fix is too rough to name a district at all. */
+  var ROUGH_KM = 10;
+
+  function lookupLink() {
     var lookup = (KYC.meta().voting || {})[code] || {};
     var official = lookup.status || lookup.polling;
-    var check = official ? ' <a href="' + KYC.escapeAttr(official) + '" target="_blank" ' +
+    return official ? ' <a href="' + KYC.escapeAttr(official) + '" target="_blank" ' +
       'rel="noopener noreferrer">Check with ' + KYC.escapeHtml(state.name) +
       "'s own lookup &rsaquo;</a>" : "";
+  }
+
+  function seats(list) {
+    var names = list.map(function (n) { return "<strong>" + KYC.escapeHtml(seat(n)) + "</strong>"; });
+    return names.length < 2 ? names.join("")
+      : names.slice(0, -1).join(", ") + " and " + names[names.length - 1];
+  }
+
+  function phrase(f) {
+    if (f.kind === "in") return "you are in " + seats(f.inside);
+    if (f.kind === "line") return "you are near the line between " + seats(f.inside.concat(f.near));
+    if (f.kind === "edge") return "you are in " + seats(f.inside) +
+      ", close to the state line or the shore";
+    if (f.kind === "out") return "you are at the edge of " + KYC.escapeHtml(state.name) +
+      " or just outside it; the nearest district is " + seats(f.near);
+    return "this map does not reach your location";
+  }
+
+  /** What a location means on this page, in words, and the districts to
+   *  show. Never a district the map cannot vouch for. */
+  function located(found, accuracy) {
+    var check = lookupLink();
     var main = found[found.length - 1];          // the map for 2026
-    var lines = [];
-    var focusOn = null;
-    if (!main.inside.length && !main.near.length) {
+    var km = isFinite(accuracy) ? Math.round(accuracy / 100) / 10 : null;
+    var reach = main.inside.concat(main.near);
+    if ((km !== null && km > ROUGH_KM) || reach.length > MAX_FOCUS) {
+      return { html: "Your browser shared only an approximate location" +
+        (km !== null ? " (to within about " + km + " km)" : "") +
+        ", too rough to place in a district. Pick your district below." + check, focus: null };
+    }
+    if (main.kind === "none") {
       return { html: "That location is not in " + KYC.escapeHtml(state.name) + ". " +
         '<a href="' + KYC.escapeAttr(KYC.siteRoot() + "states/index.html") +
         '">Find your state &rsaquo;</a>', focus: null };
     }
-    var unsure = false;
-    var phrases = found.map(function (f) {
-      var close = f.near.filter(function (n) { return f.inside.indexOf(n) === -1; });
-      if (f.inside.length === 1 && !close.length) {
-        if (f === main) focusOn = [f.inside[0]];
-        return "you are in <strong>" + KYC.escapeHtml(seat(f.inside[0])) + "</strong>";
-      }
-      unsure = true;
-      var both = f.inside.concat(close);
-      if (f === main) focusOn = both.slice(0, MAX_FOCUS);
-      return "you are near the line between " + both.map(function (n) {
-        return "<strong>" + KYC.escapeHtml(seat(n)) + "</strong>";
-      }).join(" and ");
-    });
+    var phrases = found.map(phrase);
+    var names = ["the map members were elected on", "the map for 2026"];
+    var first;
     if (found.length === 1 || phrases[0] === phrases[1]) {
-      lines.push(found.length > 1 ? "On both maps, " + phrases[0] + "."
-        : phrases[0].charAt(0).toUpperCase() + phrases[0].slice(1) + ".");
+      first = (found.length > 1 ? "On both maps, " : "") + phrases[0] + ".";
     } else {
-      lines.push("On the map members were elected on, " + phrases[0] + ". On the map for 2026, " +
-        phrases[1] + ".");
+      first = found.map(function (f, i) {
+        return f.kind === "none" ? names[i] + " does not reach this point."
+          : "on " + names[i] + ", " + phrases[i] + ".";
+      }).map(function (s) { return s.charAt(0).toUpperCase() + s.slice(1); }).join(" ");
     }
-    if (unsure) lines.push("The map is simplified, so it cannot say which side of a line you are on.");
-    return { html: lines.join(" ") + check, focus: focusOn };
+    first = first.charAt(0).toUpperCase() + first.slice(1);
+    var unsure = found.some(function (f) { return f.kind !== "in" && f.kind !== "none"; });
+    var lines = [first];
+    if (unsure) {
+      lines.push("The map is simplified, so it cannot say exactly where a line runs" +
+        (km !== null && km >= 1 ? ", and your browser's location is accurate to about " + km + " km" : "") +
+        ".");
+    }
+    return { html: lines.join(" ") + check, focus: reach.slice(0, MAX_FOCUS) };
   }
 
   function findMe() {
@@ -327,23 +365,24 @@
     button.disabled = true;
     global.navigator.geolocation.getCurrentPosition(function (pos) {
       button.disabled = false;
-      var found = locate(pos.coords.longitude, pos.coords.latitude);
+      var accuracy = pos.coords.accuracy;
+      var found = locate(pos.coords.longitude, pos.coords.latitude, accuracy);
       if (!found) {
-        out.textContent = "This map cannot place a location.";
+        out.innerHTML = "This map cannot place a location. Pick your district below." + lookupLink();
         return;
       }
-      var said = located(found);
+      var said = located(found, accuracy);
       out.innerHTML = said.html;
-      if (said.focus) {
-        setFocus(said.focus);
-        reveal();
-      }
+      // The answer stays where it is, above the map, with its caveat and
+      // the lookup link: revealing the district card scrolled them away on
+      // a phone.
+      if (said.focus && said.focus.length) setFocus(said.focus);
     }, function (err) {
       button.disabled = false;
-      out.textContent = err && err.code === 1
-        ? "Your browser did not share a location. Pick your district below, or use your state's own lookup."
-        : "Your location could not be found. Pick your district below, or use your state's own lookup.";
-    }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 });
+      out.innerHTML = (err && err.code === 1
+        ? "Your browser did not share a location."
+        : "Your location could not be found.") + " Pick your district below." + lookupLink();
+    }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 });
   }
 
   function within(point, frame, margin) {

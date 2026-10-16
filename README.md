@@ -1382,13 +1382,26 @@ replays every town's longitude and latitude through the page's own code and
 checks it lands on the town's point.
 
 The maps are the Census Bureau's 1:5,000,000 cartographic boundaries,
-simplified again for display, so they cannot place a home that is close to a
-line. Within 3 km of a line the page says "near the line between PA-2 and
-PA-3", names both, and chooses neither; otherwise it says "You are in
-PA-12" and shows that district. A state redrawn for 2026 is answered on both
-maps. A location outside the state says so, a refused location says what to
-do instead, and every answer links the state's own voter lookup (from NASS's
-Can I Vote) to confirm it.
+simplified again for display. A reviewer measured them against the finer
+1:500,000 boundaries and the official 2026 plans: in about 145,000 test
+points none was placed in the wrong district with confidence, and the
+deepest misplacement was 0.85 km. So the page allows 3 km, plus however far
+off the browser says its own fix may be (a Wi-Fi or IP location is often
+several kilometres), and answers in one of five ways:
+
+- "You are in PA-16": inside one district, no line within reach;
+- "near the line between PA-2 and PA-3": both are named, neither chosen;
+- "in TX-13, close to the state line or the shore": the only line in reach
+  is the state's own edge;
+- "at the edge of Missouri or just outside it; the nearest district is
+  MO-5": inside no district, but close to one;
+- "That location is not in Pennsylvania", with a link to find the state.
+
+A fix rougher than 10 km, or one that reaches more than three districts, is
+"too rough to place in a district". A state redrawn for 2026 is answered on
+both maps. A refused or failed location says what to do instead. Every
+answer links the state's own voter lookup (from NASS's Can I Vote) to
+confirm it, and the answer stays above the map rather than scrolling away.
 
 ## Contact and links
 
