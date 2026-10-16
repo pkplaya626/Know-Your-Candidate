@@ -361,9 +361,26 @@ class TestApply(unittest.TestCase):
         self.assertEqual(row["Committee Assignments"], "")
         self.assertEqual(row["Education"], "BA, Rice University")
 
+    def test_a_moved_row_is_written_into_its_new_file_first(self):
+        # Interrupted between the two writes, the member is in both files
+        # (member-twice, which the next run finishes), never in neither.
+        snap = snapshot_of(entry(chamber="sen", state="TX", start="2027-01-03",
+                                 end="2033-01-03", senate_class=2))
+        order, write = [], legislators._write_rows
+        with tempfile.TemporaryDirectory() as tmp:
+            self.rosters(tmp, house=[self.member()])
+            drift = self.drift_of(tmp, snap)
+            legislators._write_rows = lambda path, *a: (order.append(os.path.basename(path)),
+                                                        write(path, *a))
+            try:
+                legislators.apply(drift, tmp)
+            finally:
+                legislators._write_rows = write
+        self.assertEqual(order, ["Cleaned_Senate.csv", "Cleaned_House.csv"])
+
     def test_a_member_the_records_say_left_is_archived_whole(self):
         snap = snapshot_of(entry(bioguide="STAYS", chamber="rep", district=6))
-        ended = {"X000001": {"left": "2027-01-03", "via": "term-ended"}}
+        ended = {"X000001": {"left": "2027-01-03", "via": "legislators-historical"}}
         with tempfile.TemporaryDirectory() as tmp:
             self.rosters(tmp, house=[self.member(), self.member("STAYS", District="District 6")])
             report = legislators.apply(self.drift_of(tmp, snap, ended), tmp)
@@ -373,7 +390,7 @@ class TestApply(unittest.TestCase):
         self.assertEqual([r["Bioguide ID"] for r in house], ["STAYS"])
         row, = former
         self.assertEqual((row["Left Office"], row["Left Via"], row["Last Congress"]),
-                         ("2027-01-03", "term-ended", "119"))
+                         ("2027-01-03", "legislators-historical", "119"))
         self.assertEqual(row["Education"], "BA, Rice University")
 
     def test_a_departure_with_no_record_is_left_for_somebody_to_see(self):
@@ -455,22 +472,27 @@ class TestDepartures(unittest.TestCase):
                                      historical=self.historical("GONE", "2026-11-14"))
         self.assertEqual(out, {"GONE": {"left": "2026-11-14", "via": "legislators-historical"}})
 
-    def test_a_term_the_previous_snapshot_ended_is_expected(self):
-        # The January 3 changeover, and an appointee's term ending at the
-        # special election, before legislators-historical lists them.
-        previous = snapshot_of(entry(bioguide="GONE", chamber="rep", end="2027-01-03"))
-        out = legislators.departures({"GONE"}, self.now, previous=previous)
-        self.assertEqual(out, {"GONE": {"left": "2027-01-03", "via": "term-ended"}})
-
     def test_the_day_a_term_ends_counts(self):
-        previous = snapshot_of(entry(bioguide="GONE", end="2027-01-03"))
         self.now["fetched"] = "2027-01-03T23:00:00+00:00"
-        self.assertIn("GONE", legislators.departures({"GONE"}, self.now, previous=previous))
+        self.assertIn("GONE", legislators.departures(
+            {"GONE"}, self.now, historical=self.historical("GONE", "2027-01-03")))
 
-    def test_an_absence_no_record_explains_is_not(self):
-        previous = snapshot_of(entry(bioguide="GONE", end="2031-01-03"))
-        self.assertEqual(legislators.departures({"GONE"}, self.now, previous=previous,
-                                                historical=[]), {})
+    def test_a_term_that_has_ended_is_not_evidence_on_its_own(self):
+        # On January 3 every House term has ended. A current file that
+        # dropped somebody by mistake, with a historical file read that does
+        # not list them, must leave them departed: an error, not an archive.
+        self.assertEqual(legislators.departures({"GONE"}, self.now, historical=[]), {})
+
+    def test_no_historical_file_archives_nobody(self):
+        # A failed download concludes nothing (rule 8).
+        self.assertEqual(legislators.departures({"GONE"}, self.now, historical=None), {})
+
+    def test_an_appointee_leaves_on_the_day_the_record_gives(self):
+        # Not the special election's date: they serve until the winner is
+        # seated, and legislators-historical records that day.
+        out = legislators.departures({"GONE"}, self.now,
+                                     historical=self.historical("GONE", "2026-12-08"))
+        self.assertEqual(out["GONE"]["left"], "2026-12-08")
 
     def test_a_record_of_a_term_still_running_is_not(self):
         # Listed as historical with a term ending in 2029: an upstream fault.
@@ -481,7 +503,7 @@ class TestDepartures(unittest.TestCase):
     def test_reconcile_tells_the_expected_from_the_departed(self):
         rows = [roster_row("STAYS", Chamber="Senate", District=""),
                 roster_row("GONE"), roster_row("LOST")]
-        ended = {"GONE": {"left": "2027-01-03", "via": "term-ended"}}
+        ended = {"GONE": {"left": "2027-01-03", "via": "legislators-historical"}}
         drift = legislators.reconcile(rows, self.now, ended=ended)
         self.assertEqual([p["bioguide"] for p in drift.expected], ["GONE"])
         self.assertEqual(drift.expected[0]["left"], "2027-01-03")
@@ -832,9 +854,16 @@ class TestAgainstTheRealSnapshot(unittest.TestCase):
         senators = [p for p in profiles
                     if not p["isCandidate"] and "Senate" in p["chamber"]]
         self.assertTrue(all(p["senateClass"] in (1, 2, 3) for p in senators))
-        # The 2026 ballot by this route is exactly the seatUp2026 set.
+        # The 2026 ballot by this route is the seatUp2026 set, except a
+        # record incumbent re-seated since Election Day (a special
+        # election's winner), whose next election is their new term's.
+        from kyc import cycle
+        election = cycle.general_election_day(cycle.CYCLE).isoformat()
+        people = legislators.by_bioguide(self.snapshot)
+        reseated = {p["id"] for p in senators
+                    if (people.get(p["id"]) or {}).get("termStart", "") > election}
         self.assertEqual({p["id"] for p in senators if p["nextElection"] == 2026},
-                         {p["id"] for p in senators if p["seatUp2026"]})
+                         {p["id"] for p in senators if p["seatUp2026"]} - reseated)
         # Every special is a seat whose class is not the 2026 class.
         for p in senators:
             if p["senateSpecial"]:

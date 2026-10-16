@@ -126,7 +126,7 @@ python build_profile_site.py courts           # each state's highest court, from
 python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 993 tests, no dependencies
+python -m unittest discover tests             # 995 tests, no dependencies
 npm install && npm test                       # 1204 real-DOM checks (needs jsdom)
 ```
 
@@ -787,16 +787,20 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     and 17) whose three entries had already left the roster. Now
     `congress --apply` archives a member to `Former_Members.csv` only when
     `legislators-historical` lists their bioguide with a term ended by the
-    day the snapshot was read, or the snapshot it replaces gave them a term
-    that has ended (`legislators.departures`). Anyone else absent stays in
-    the roster and fails the build (rule 16). A new term rewrites the
-    row's seat and dates (`reseated`) but never its party, and the term on
-    a profile is the snapshot's, except Puerto Rico's: congress-legislators
-    lists its four-year term one Congress at a time. Members are
+    day the snapshot was read (`legislators.departures`), on the day it
+    gives. A term that has ended is not evidence on its own: on January 3
+    every House term has, so a current file that dropped someone would
+    archive them. Anyone else absent stays in the roster and fails the
+    build (rule 16), and a failed download archives nobody. A new term
+    rewrites the row's seat and dates (`reseated`) but never its party, and
+    the term on a profile is the snapshot's, except Puerto Rico's:
+    congress-legislators lists its four-year term one Congress at a time.
+    Members are
     deduplicated on bioguide, not seat: a stale district and a newcomer
     seated at that number shared a key, and one vanished. Three days into a
     new Congress, a snapshot of the old one fails every build
-    (`snapshot-behind`).
+    (`snapshot-behind`); the refresh runs daily from January 3 to 14 so
+    that takes two missed runs, not one missed Monday.
 
 ## District maps
 

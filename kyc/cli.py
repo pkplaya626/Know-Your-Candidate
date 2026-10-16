@@ -531,11 +531,8 @@ def _congress(args):
     if raw is None:
         return 2
 
-    # The snapshot this run replaces: a term it gave that has ended by the new
-    # read is a departure the records explain (legislators.departures).
-    previous = legislators.load_snapshot(args.root)
     if args.check:
-        snapshot = previous
+        snapshot = legislators.load_snapshot(args.root)
         if snapshot is None:
             print(f"[error] no {legislators.SNAPSHOT_FILE}; run 'congress' first.",
                   file=sys.stderr)
@@ -587,9 +584,9 @@ def _congress(args):
             print(f"  wrote {path} ({len(data['committees'])} committees, "
                   f"{len(data['members'])} members with assignments)")
 
-    # Whoever has left: by id, from legislators-historical and the snapshot
-    # this one replaces. Downloaded only when somebody has left; a failed
-    # download decides nothing (rule 8), and those people stay "departed".
+    # Whoever has left: by id, from legislators-historical, downloaded only
+    # when somebody has. A failed download decides nothing (rule 8): nobody is
+    # archived, those people stay "departed", and the build says so.
     absent = legislators.roster_ids(raw["members"]) - set(legislators.by_bioguide(snapshot))
     historical = None
     if absent and args.historical:
@@ -603,9 +600,8 @@ def _congress(args):
             historical = legislators.fetch(legislators.HISTORICAL_URL)
             print(f"  legislators-historical: {len(historical)} people")
         except legislators.LegislatorsError as exc:
-            print(f"  [warn] {exc}")
-    ended = legislators.departures(
-        absent, snapshot, previous=None if args.check else previous, historical=historical)
+            print(f"  [warn] {exc}; nobody is archived this run")
+    ended = legislators.departures(absent, snapshot, historical=historical)
 
     drift = legislators.reconcile(raw["members"], snapshot, ended=ended)
     print(f"\n  reconciliation: {drift.summary()}")
@@ -686,9 +682,9 @@ def _congress(args):
                   "Run `python build_profile_site.py` to regenerate the site.")
         if drift.departed:
             print(f"\n[error] {len(drift.departed)} roster member(s) are absent from "
-                  "the membership, and neither legislators-historical nor the previous "
-                  "snapshot says their term ended. They stay in the roster, and the "
-                  "build fails, until somebody looks.")
+                  "the membership, and legislators-historical (if it could be read) does "
+                  "not say they left. They stay in the roster, and the build fails, "
+                  "until somebody looks.")
         return 0
 
     if not drift.clean:

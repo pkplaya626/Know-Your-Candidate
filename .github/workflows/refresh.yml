@@ -23,7 +23,11 @@ on:
     #   - 2026-11-04 to 2026-12-15: every day, so who won reaches the page the
     #     morning after it is marked, through Georgia's December 1 and
     #     Louisiana's December 12 runoffs;
-    #   - after that: Mondays.
+    #   - 2027-01-03 to 2027-01-14: every day, so the 120th Congress lands
+    #     the morning after congress-legislators switches to it; a snapshot
+    #     still of the 119th fails every build from January 6
+    #     (validate.SNAPSHOT_BEHIND_DAYS);
+    #   - otherwise: Mondays.
     - cron: "20 7 * * *"
   workflow_dispatch:
     inputs:
@@ -59,6 +63,8 @@ jobs:
           if [ "${{ github.event_name }}" = "schedule" ]; then
             if [ "$today" \> "2026-11-03" ] && [ ! "$today" \> "2026-12-15" ]; then
               run=true                                   # results: every day
+            elif [ "$today" \> "2027-01-02" ] && [ ! "$today" \> "2027-01-14" ]; then
+              run=true                                   # the 120th is sworn in: every day
             elif [ ! "$today" \> "2026-11-03" ]; then
               [ "$weekday" = "1" ] || [ "$weekday" = "4" ] || run=false
             else

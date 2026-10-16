@@ -625,45 +625,37 @@ COMPARED_FIELDS = ("party", "state", "district", "chamber", "birthday")
 SEAT_FIELDS = ("state", "district", "chamber")
 
 
-def departures(bioguides, snapshot, previous=None, historical=None):
-    """Which of *bioguides* - roster members absent from *snapshot* - left
-    when the records say their term ended. Decided by id, never by name
-    (rules 3 and 17).
+def departures(bioguides, snapshot, historical=None):
+    """Which of *bioguides* - roster members absent from *snapshot* - the
+    record says have left. Decided by id, never by name (rules 3 and 17).
 
-    ``{bioguide: {"left": "YYYY-MM-DD", "via": source}}``, from, in order:
+    ``{bioguide: {"left": "YYYY-MM-DD", "via": "legislators-historical"}}``
+    for each one *historical*, ``legislators-historical``, lists with a last
+    term ended on or before the day *snapshot* was read: a defeat, a
+    retirement, a resignation, a death. The day is the one the record gives,
+    which for an appointee is the day their successor was seated, not the
+    special election's.
 
-    1. *historical*, ``legislators-historical``: the person is listed there,
-       and their last term ended on or before the day *snapshot* was read -
-       a resignation, a death, a defeat, a retirement;
-    2. *previous*, the snapshot this one replaces: the term it gave them
-       has ended by that day. That covers the January 3 changeover and an
-       appointee's term ending at a special election, even before
-       ``legislators-historical`` lists them.
-
-    Anyone in neither is absent from the membership with no record of
-    leaving: an upstream fault until someone shows otherwise, and never
-    archived (rule 16). An unavailable *historical* concludes nothing about
-    anyone (rule 8); the caller passes ``None``.
+    Nothing else counts. That a term the previous snapshot gave has ended
+    is not evidence: on January 3 it is true of every House member, so a
+    current file that dropped someone by mistake would archive them, and
+    the error rule 16 exists for would never fire. Congress's records move
+    a person from the current file to the historical one in one commit, so
+    a real departure is always in both reads. Anyone else is absent with no
+    record of leaving, and stays ``departed``: an error until somebody
+    looks. An unavailable *historical* concludes nothing (rule 8); the
+    caller passes ``None`` and nobody is archived.
     """
     read = str((snapshot or {}).get("fetched") or "")[:10]
     if not read:
         return {}
-    gone = {}
+    out = {}
     for entry in historical or []:
         bioguide = str((entry.get("id") or {}).get("bioguide") or "").upper()
         terms = entry.get("terms") or []
-        if bioguide in bioguides and terms:
-            gone[bioguide] = str(terms[-1].get("end") or "")
-    before = by_bioguide(previous)
-    out = {}
-    for bioguide in sorted(bioguides):
-        left = gone.get(bioguide)
-        if left and left <= read:
+        left = str((terms[-1] if terms else {}).get("end") or "")
+        if bioguide in bioguides and left and left <= read:
             out[bioguide] = {"left": left, "via": "legislators-historical"}
-            continue
-        ended = str((before.get(bioguide) or {}).get("termEnd") or "")
-        if ended and ended <= read:
-            out[bioguide] = {"left": ended, "via": "term-ended"}
     return out
 
 
@@ -686,8 +678,8 @@ def reconcile(member_rows, snapshot, district_parser=None, ended=None):
     than imported so this module stays free of the loader's import graph.
 
     *ended* is :func:`departures` for the rows absent from the snapshot.
-    Those it names are ``expected``, the rest ``departed``. The build has no
-    previous snapshot to ask, so it passes nothing and every absence is
+    Those it names are ``expected``, the rest ``departed``. The build reads
+    no historical file, so it passes nothing and every absence is
     ``departed``: ``congress --apply`` archives the expected ones first.
 
     A member serving a term that began after the row's ``Term Start`` is
@@ -892,7 +884,7 @@ def apply(drift, root=".", today=None):
       term are rewritten from the snapshot. A member elected to the other
       chamber moves to its file, and their committee assignments are
       emptied: they described the seat they left.
-    * ``expected``: each member the records say has left (:func:`departures`)
+    * ``expected``: each member the record says has left (:func:`departures`)
       moves, row and all, to :data:`FORMER_ROSTER`.
 
     ``departed`` - absent with no record of leaving - is never touched: a
@@ -905,7 +897,7 @@ def apply(drift, root=".", today=None):
     from . import cycle
 
     report = {"added": {}, "reseated": {}, "archived": []}
-    files = {}
+    files, gained = {}, set()
     for chamber, roster in ROSTER_FOR_CHAMBER.items():
         fieldnames, rows = _read_rows(os.path.join(root, roster))
         if fieldnames:
@@ -936,6 +928,7 @@ def apply(drift, root=".", today=None):
             files[chamber]["rows"].remove(row)
             files[target]["rows"].append(row)
             files[target]["dirty"] = True
+            gained.add(target)
             chamber = target
         report["reseated"].setdefault(files[chamber]["name"], []).append(seat["name"])
 
@@ -978,7 +971,11 @@ def apply(drift, root=".", today=None):
             held["dirty"] = True
             report["added"].setdefault(held["name"], []).append(person["name"])
 
-    for held in files.values():
+    # A moved row is written into its new file before it is taken out of the
+    # old one: an interruption leaves it in both (member-twice, which the
+    # next run finishes), never in neither.
+    for chamber in sorted(files, key=lambda c: c not in gained):
+        held = files[chamber]
         if held["dirty"]:
             _write_rows(os.path.join(root, held["name"]), held["fieldnames"], held["rows"])
     return report

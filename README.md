@@ -333,13 +333,15 @@ atomically:
   so a party difference is still an error for somebody to look at.
 - **Anyone who has left** moves, row and all, to `Former_Members.csv`, with
   the day they left, the record that says so and their last Congress. Who
-  has left is decided by bioguide id, never by name: either
-  `legislators-historical` lists them with a term ended by the day the
-  snapshot was read, or the snapshot being replaced gave them a term that has
-  ended — the January 3 changeover, or an appointee's term ending at a special
-  election. Anyone absent with no such record stays in the roster, and the
-  build's `departed-member` error says so: an upstream fault until somebody
-  shows otherwise.
+  has left is decided by bioguide id, never by name: `legislators-historical`
+  lists them with a term ended by the day the snapshot was read, and the day
+  it gives is the one written (for an appointee, the day their successor was
+  seated, not the special election's). That a term has ended is not evidence
+  on its own — on January 3 it is true of every House member, so a current
+  file that dropped someone by mistake would archive them. Anyone absent with
+  no such record stays in the roster, and the build's `departed-member` error
+  says so: an upstream fault until somebody shows otherwise. A failed
+  download of the historical file archives nobody.
 
 Running it twice changes nothing. Puerto Rico's Resident Commissioner is
 the exception to the term dates: congress-legislators records the four-year

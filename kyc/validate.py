@@ -383,9 +383,10 @@ SNAPSHOT_STALE_DAYS = 30
 
 
 # Days after a new Congress's terms begin before a snapshot of the old one is
-# an error: the refresh runs daily over the changeover (refresh.yml), so three
-# days is two failed runs, and the site would still be naming the people who
-# left as "who represents you".
+# an error. refresh.yml runs every day from January 3 to 14 of the year after
+# the cycle, and upstream switched the 119th in on the evening of January 3,
+# so this is two scheduled runs (January 4 and 5) that failed to land it -
+# with the site still naming the people who left as "who represents you".
 SNAPSHOT_BEHIND_DAYS = 3
 
 
@@ -456,8 +457,8 @@ def check_snapshot(profiles, raw, snapshot, now=None):
 
     if drift.departed:
         # Decided by id, never by a name list: `congress --apply` archives
-        # whoever legislators-historical or the previous snapshot says left
-        # (legislators.departures), so anyone still here has no record of it.
+        # whoever legislators-historical says left (legislators.departures),
+        # so anyone still here has no record of it.
         issues.append(Issue(
             "error", "departed-member",
             f"{len(drift.departed)} roster entries are no longer serving; "
@@ -1182,11 +1183,20 @@ def check_senate_classes(profiles, snapshot=None):
             f"{len(clashes)} state(s) have two senators in the same class", clashes,
         ))
 
+    # A record incumbent re-seated since Election Day - a special election's
+    # winner in December - keeps the 2026 race and is next on the ballot in
+    # their new term's year.
+    from . import cycle, legislators
+
+    election = cycle.general_election_day(cycle.CYCLE).isoformat()
+    people = legislators.by_bioguide(snapshot)
     disagree = sorted(
         f"{p['name']} ({p['state']}): nextElection {p.get('nextElection')}, "
         f"seatUp2026 {bool(p.get('seatUp2026'))}"
         for p in senators
         if (p.get("nextElection") == 2026) != bool(p.get("seatUp2026"))
+        and not (p.get("seatUp2026")
+                 and (people.get(p["id"]) or {}).get("termStart", "") > election)
     )
     if disagree:
         issues.append(Issue(
