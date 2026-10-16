@@ -4410,13 +4410,16 @@ async function testFederal() {
     check("the President, then the Vice President",
       leaders.length === 2 && leaders[0].textContent.indexOf(d.president.name) !== -1 &&
       leaders[1].textContent.indexOf(d.vicePresident.name) !== -1);
-    const rows = [...D.querySelectorAll("#cabinet tbody tr")];
-    check("a row for every office the White House lists", rows.length === d.offices.length,
-      `${rows.length} rows, ${d.offices.length} offices`);
+    const rows = [...D.querySelectorAll("#cabinet .fed-officer")];
+    check("a card for every office the White House lists", rows.length === d.offices.length,
+      `${rows.length} cards, ${d.offices.length} offices`);
+    check("every officer the White House pictures is pictured", d.offices.every((o) =>
+      !o.holder || !o.holder.photo || rows.some((r) => r.textContent.indexOf(o.holder.name) !== -1 &&
+        r.querySelector("img.fed-photo"))));
     const departments = d.offices.filter((o) => o.kind === "department")
       .sort((a, b) => a.order - b.order);
     check("the departments first, in the order of succession", departments.every((o, i) =>
-      rows[i].querySelector("th").textContent.indexOf(o.office) === 0));
+      rows[i].querySelector(".fed-office").textContent === o.office));
     check("no Cabinet officer is shown with a party",
       !PARTY_WORDS.test(D.getElementById("cabinet").textContent));
     const justices = [...D.querySelectorAll("#supreme-court table")][0].querySelectorAll("tbody tr");
@@ -4455,7 +4458,7 @@ async function testFederal() {
         encodeURIComponent(c.chief.id) + '"]')));
     const tie = d.offices.find((o) => o.holder && o.holder.senate &&
       o.holder.senate.yeas === o.holder.senate.nays);
-    check("a tie the Vice President broke is said", !tie || [...D.querySelectorAll("#cabinet tr")]
+    check("a tie the Vice President broke is said", !tie || [...D.querySelectorAll("#cabinet .fed-officer")]
       .some((tr) => tr.textContent.indexOf(tie.holder.name) !== -1 &&
         /the Vice President breaking the tie/.test(tr.textContent)));
     const summary = D.getElementById("vacancySummary");

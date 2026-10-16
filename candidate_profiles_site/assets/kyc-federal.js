@@ -165,9 +165,7 @@
   /* ---------------------------------------------------------------- hub */
 
   function leaderCard(p) {
-    return '<li class="fed-leader">' +
-      (p.photo ? '<img class="fed-photo" src="' + KYC.escapeAttr(p.photo) +
-        '" alt="" width="72" height="90" loading="lazy" decoding="async">' : "") +
+    return '<li class="fed-card fed-leader">' + portrait(p.photo) +
       '<div><p class="fed-office">' + esc(p.office) + "</p>" +
       '<p class="fed-name">' + person(p.id, p.name) + "</p>" +
       '<p class="faint">' + esc(p.party) + "; since " + esc(p.since) + ", term ends " +
@@ -196,16 +194,28 @@
     return '<span class="faint">No page names the head</span>';
   }
 
-  function officeRow(office) {
+  function portrait(photo) {
+    return photo ? '<img class="fed-photo" src="' + KYC.escapeAttr(photo) +
+      '" alt="" width="72" height="90" loading="lazy" decoding="async">' : "";
+  }
+
+  /** One Cabinet office as a card: its holder's portrait and name, the
+   *  Senate's vote and the office's own page. An office the White House
+   *  lists with nobody in it says so. */
+  function officeCard(office) {
     var h = office.holder;
-    return "<tr><th scope=\"row\">" + esc(office.office) +
-      '<br><span class="faint">' + esc(office.body) + "</span></th>" +
-      cell("Who holds it", h ? person(h.id, h.name) + (h.title && h.title !== office.office
-        ? '<br><span class="faint">' + esc(h.title) + "</span>" : "") +
-        ((h.page || {}).acting ? ' <span class="badge badge-warn">Acting</span>' : "")
-        : '<span class="faint">Nobody listed by the White House</span>') +
-      cell("Senate vote", h ? senateCell(h) : "") +
-      cell("The office’s page", h ? pageCell(h) : "") + "</tr>";
+    if (!h) {
+      return '<li class="fed-card fed-officer"><div><p class="fed-office">' + esc(office.office) +
+        '</p><p class="faint">Nobody listed by the White House</p></div></li>';
+    }
+    return '<li class="fed-card fed-officer">' + portrait(h.photo) +
+      '<div><p class="fed-office">' + esc(office.office) + "</p>" +
+      '<p class="fed-name">' + person(h.id, h.name) +
+      ((h.page || {}).acting ? ' <span class="badge badge-warn">Acting</span>' : "") + "</p>" +
+      (h.title && h.title !== office.office ? '<p class="faint">' + esc(h.title) + "</p>" : "") +
+      '<p class="fed-fact"><span class="fed-fact-label">Senate vote</span> ' + senateCell(h) + "</p>" +
+      '<p class="fed-fact"><span class="fed-fact-label">The office’s page</span> ' + pageCell(h) +
+      "</p></div></li>";
   }
 
   function justiceRows(justices) {
@@ -221,23 +231,24 @@
   function renderHub(d) {
     var asOf = d.asOf || {};
     var html = section("executive", "The President and Vice President",
-      '<ul class="fed-leaders">' + leaderCard(d.president) + leaderCard(d.vicePresident) + "</ul>" +
+      '<ul class="fed-cards fed-leaders">' + leaderCard(d.president) + leaderCard(d.vicePresident) +
+        "</ul>" +
       '<p class="faint">Terms from ' + source(d.sources.executive.executive,
         "congress-legislators’ record of executive terms") + ", as of " + esc(asOf.executive) + ".</p>");
 
     var departments = d.offices.filter(function (o) { return o.kind === "department"; })
       .sort(function (a, b) { return a.order - b.order; });
     var others = d.offices.filter(function (o) { return o.kind !== "department"; });
-    var heads = ["Office", "Who holds it", "Senate vote", "The office’s page"];
     html += section("cabinet", "The Cabinet",
       '<p class="guide-lede">Who the White House lists in the ' +
       source(d.sources.executive.cabinet, "President’s Cabinet") + ", each checked on " +
       "the office’s own page and against the Senate’s roll-call votes, as of " +
       esc(asOf.executive) + ". A Cabinet officer is shown without a party.</p>" +
-      table("The heads of the fifteen executive departments, in the order 3 U.S.C. 19(d)(1) " +
-        "lists them", heads, departments.map(officeRow)) +
-      (others.length ? table("Other officers the White House lists with the Cabinet", heads,
-        others.map(officeRow)) : ""));
+      '<h3 class="panel-subhead">The heads of the fifteen executive departments, in the order ' +
+        "3 U.S.C. 19(d)(1) lists them</h3>" +
+      '<ul class="fed-cards">' + departments.map(officeCard).join("") + "</ul>" +
+      (others.length ? '<h3 class="panel-subhead">Other officers the White House lists with ' +
+        'the Cabinet</h3><ul class="fed-cards">' + others.map(officeCard).join("") + "</ul>" : ""));
 
     var scotus = d.supremeCourt || {};
     html += section("supreme-court", "The Supreme Court",

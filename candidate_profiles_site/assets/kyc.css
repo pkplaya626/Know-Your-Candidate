@@ -3483,15 +3483,16 @@ button.local-county-link {
    (kyc-federal.js). Tables are the guide's (.guide-table, a card per row on
    a phone); a name opens the official dialog (kyc-official.js). */
 .fed-section { margin: 0 0 var(--s-6); }
-.fed-leaders {
+.fed-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
   gap: var(--s-3);
-  margin: 0 0 var(--s-3);
+  margin: 0 0 var(--s-4);
   padding: 0;
   list-style: none;
 }
-.fed-leader {
+.fed-leaders { grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
+.fed-card {
   display: flex;
   gap: var(--s-3);
   align-items: flex-start;
@@ -3500,7 +3501,17 @@ button.local-county-link {
   border-radius: var(--radius);
   background: var(--surface-1);
 }
-.fed-leader p { margin: 0 0 var(--s-1); }
+.fed-card p { margin: 0 0 var(--s-1); }
+.fed-card > div { min-width: 0; }
+.fed-fact { font-size: var(--t-sm); color: var(--text-muted); }
+.fed-fact-label {
+  display: block;
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
 .fed-photo {
   flex: none;
   width: 72px;
