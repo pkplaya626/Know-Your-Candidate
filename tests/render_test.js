@@ -1350,7 +1350,7 @@ async function testStates() {
       marks.length >= 6 && marks.every((a) => /^https:\/\//.test(a.getAttribute("href")) &&
         a.target === "_blank" && /noopener/.test(a.rel)), marks.length + " marks");
     check("a chamber says how many of its seats are up",
-      marks.some((a) => /seats on the Nov 3 ballot/.test(a.textContent)));
+      marks.some((a) => /seats on the Nov 3, 2026 ballot/.test(a.textContent)));
     const jump = note && note.querySelector('a[href="#state-government"]');
     if (jump) jump.click();
     check("its link to State government leaves the address alone",
@@ -1375,7 +1375,7 @@ async function testStates() {
     const text = az.D.getElementById("delegation").textContent;
     check("a new office elected on Nov 3 is not called one the state lacks",
       /No one holds this office yet/.test(text) && !/The state has no lieutenant governor/.test(text) &&
-        /On the Nov 3 ballot/.test(text), text.slice(0, 300));
+        /On the Nov 3, 2026 ballot/.test(text), text.slice(0, 300));
   });
   const ks = await buildPage("map.html", { hash: "#/?state=KS&mode=legislature" });
   suite("map.html — a chamber with no regular election", () => {

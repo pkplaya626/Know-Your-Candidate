@@ -1494,19 +1494,31 @@ def check_judiciary(cache):
     return issues
 
 
-def check_guide():
+def check_guide(today=None):
     """The guide's text (kyc/government_text.py): every link leads to a page,
     section or state that exists, and every source is cited by a section.
 
     An error, not a warning: the guide is static text, so nothing later in
-    the build would notice a link that goes nowhere."""
+    the build would notice a link that goes nowhere. Text about a dated event
+    whose date has passed since the page was checked is a warning
+    (``guide-revisit``): static prose about November 3 reads as still to
+    come long after it, and nothing else would say so (rule 48)."""
+    import datetime
+
     from . import government, government_maps
     problems = government.check() + government_maps.check()
-    if not problems:
-        return []
-    return [Issue("error", "guide",
-                  f"{len(problems)} problem(s) in the guide's text (kyc/government_text.py)",
-                  problems)]
+    issues = []
+    if problems:
+        issues.append(Issue("error", "guide",
+                            f"{len(problems)} problem(s) in the guide's text "
+                            f"(kyc/government_text.py)", problems))
+    due = government.revisits(today or datetime.date.today().isoformat())
+    if due:
+        issues.append(Issue("warn", "guide-revisit",
+                             f"{len(due)} passage(s) of the guide describe dates that have passed "
+                             f"since the page was checked; re-check them and move its 'reviewed'",
+                             [f"{slug} (since {day}): {what}" for slug, day, what in due]))
+    return issues
 
 
 def check_ballot2026():
