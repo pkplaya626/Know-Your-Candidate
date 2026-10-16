@@ -332,6 +332,7 @@ class _Albers:
     """Spherical Albers equal-area conic, fitted to a box later."""
 
     def __init__(self, parallels, meridian):
+        self.parallels = tuple(parallels)
         phi0, phi1 = (math.radians(p) for p in parallels)
         self.n = (math.sin(phi0) + math.sin(phi1)) / 2
         self.c = 1 + math.sin(phi0) * (2 * self.n - math.sin(phi0))
@@ -820,6 +821,10 @@ def build_state(code, root=".", places=None):
         "viewBox": viewbox,
         # Kilometres per map unit, so every "area" here has a stated unit.
         "unitKm": round(EARTH_RADIUS_KM / fit.k, 6),
+        # How a longitude and latitude land on this map: the page places a
+        # reader's own location with it, on the device (kyc-districts.js).
+        "projection": {"parallels": list(albers.parallels), "meridian": albers.meridian,
+                       "minX": fit.min_x, "maxY": fit.max_y, "k": fit.k, "pad": PAD},
         "plans": out_plans,
         "flows": flows(areas, overlaps) if len(keys) == 2 else [],
         "counties": _counties(topo, raw_arcs, fit),

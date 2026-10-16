@@ -1370,6 +1370,26 @@ A second source was tried first and rejected: USGS GNIS disagrees with the
 Census by kilometres for dozens of ordinary towns, and for Alvin, Texas, it is
 the USGS point that is out of town.
 
+### Find my district
+
+A district page with more than one seat has a **Find my district** button.
+The browser shares the reader's location, if they allow it, and the page
+places it on the map **on the device**: nothing is sent anywhere. Each
+state's district file carries the projection the build drew it with
+(`projection`: the Albers parallels and meridian, and the fit), so the page
+projects the location exactly as the towns on the map were projected; a test
+replays every town's longitude and latitude through the page's own code and
+checks it lands on the town's point.
+
+The maps are the Census Bureau's 1:5,000,000 cartographic boundaries,
+simplified again for display, so they cannot place a home that is close to a
+line. Within 3 km of a line the page says "near the line between PA-2 and
+PA-3", names both, and chooses neither; otherwise it says "You are in
+PA-12" and shows that district. A state redrawn for 2026 is answered on both
+maps. A location outside the state says so, a refused location says what to
+do instead, and every answer links the state's own voter lookup (from NASS's
+Can I Vote) to confirm it.
+
 ## Contact and links
 
 | Field | Source | Who has it |

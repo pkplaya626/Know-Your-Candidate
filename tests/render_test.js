@@ -2461,6 +2461,87 @@ async function testRedistricting() {
 
 /* Every other shape of district page: one map, a single seat, a seat with no
  * race this year, a redrawn map clipped to the land, and the old address. */
+/* Find my district: the reader's location, placed on the device. */
+function at(lat, lon, fail) {
+  return (window) => {
+    Object.defineProperty(window.navigator, "geolocation", { configurable: true, value: {
+      getCurrentPosition(ok, err) {
+        if (fail) err({ code: fail });
+        else ok({ coords: { latitude: lat, longitude: lon } });
+      },
+    } });
+  };
+}
+
+async function testFindMyDistrict() {
+  const places = JSON.parse(fs.readFileSync(path.join(SITE, "..", "district_maps", "places.json"),
+    "utf8")).places;
+  const town = (code, name) => places[code].find((p) => p[0] === name);
+  const [, plon, plat] = town("PA", "Pittsburgh");
+
+  const page = await buildPage("districts/pa.html", { setup: at(plat, plon) });
+  const { window, D, errors } = page;
+  const KYC = window.KYC;
+  const state = window.kycDistricts.PA;
+  suite("districts/pa.html — find my district", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const button = D.getElementById("locateMe");
+    check("a Find my district button, saying the location stays on the device",
+      !!button && /not sent anywhere/.test(button.getAttribute("title")));
+    // The page's projection puts every town where the build drew it.
+    // Several towns share a name (three Franklins): any one of them will do.
+    const off = places.PA.filter((p) => state.places.some((d) => d[0] === p[0])).filter((p) => {
+      const xy = KYC.districtMap.project(p[1], p[2]);
+      return !state.places.some((d) => d[0] === p[0] &&
+        Math.abs(xy[0] - d[1]) <= 0.06 && Math.abs(xy[1] - d[2]) <= 0.06);
+    });
+    check("every Pennsylvania town lands on its own point", off.length === 0,
+      off.slice(0, 3).map((p) => p[0]).join(", "));
+    button.click();
+    const said = D.getElementById("locateResult");
+    check("Pittsburgh is in PA-12, as on record", !said.hidden && /^You are in PA-12\./.test(said.textContent),
+      said.textContent);
+    check("and PA-12 is the district shown", D.getElementById("districtPick").value === "12",
+      D.getElementById("districtPick").value);
+    check("with the state's own lookup to confirm it",
+      !!said.querySelector('a[target="_blank"][rel~="noopener"]'));
+    // A town within 3 km of a line is never placed on one side of it.
+    const near = places.PA.find((p) => {
+      const f = KYC.districtMap.locate(p[1], p[2]);
+      return f && f[0].near.length >= 2;
+    });
+    check("a Pennsylvania town lies near a line, to test with", !!near);
+    if (near) {
+      const f = KYC.districtMap.locate(near[1], near[2])[0];
+      check("near a line, both districts are named and neither is chosen",
+        f.near.length >= 2 && f.inside.length <= 1, JSON.stringify(f.near));
+    }
+  });
+
+  const paris = await buildPage("districts/pa.html", { setup: at(48.8566, 2.3522) });
+  paris.D.getElementById("locateMe").click();
+  const denied = await buildPage("districts/pa.html", { setup: at(0, 0, 1) });
+  denied.D.getElementById("locateMe").click();
+  const tx = town("TX", "Austin");
+  const texas = await buildPage("districts/tx.html", { setup: at(tx[2], tx[1]) });
+  texas.D.getElementById("locateMe").click();
+  suite("districts — find my district elsewhere", () => {
+    check("a location outside the state says so",
+      /not in Pennsylvania/.test(paris.D.getElementById("locateResult").textContent));
+    check("a refused location says what to do instead",
+      /did not share a location/.test(denied.D.getElementById("locateResult").textContent));
+    const t = texas.D.getElementById("locateResult").textContent;
+    check("a redrawn state answers for both maps, once each, and says simplified once",
+      (/On both maps/.test(t) || (/On the map for 2026/.test(t) &&
+        /On the map members were elected on/.test(t))) &&
+        (t.match(/simplified/g) || []).length <= 1, t);
+  });
+  const ak = await buildPage("districts/ak.html", { setup: at(61.2, -149.9) });
+  suite("districts/ak.html — one seat, nothing to find", () => {
+    check("no button for a state elected at large", !ak.D.getElementById("locateMe"));
+  });
+}
+
 async function testDistrictPages() {
   // Texas listed Al Green (TX-9 -> TX-18) and Julie Johnson (TX-32 -> TX-33)
   // under "Running in a different district" after both lost those primaries.
@@ -3820,6 +3901,7 @@ async function testElectionNight() {
   if (!only || only === "states") await testElectionNight();
   if (!only || only === "redistricting") await testRedistricting();
   if (!only || only === "redistricting") await testDistrictPages();
+  if (!only || only === "redistricting") await testFindMyDistrict();
   if (!only || only === "redistricting") await testDistrictsOnAPhone();
   if (!only || only === "links") await testInterlinks();
   if (!only || only === "links") await testDeepLinks();

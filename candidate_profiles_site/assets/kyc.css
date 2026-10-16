@@ -3474,3 +3474,7 @@ button.local-county-link {
 }
 
 .state-section .stategov { max-width: 46rem; padding: 0; }
+
+/* Find my district: one button above the district tools, its answer under it. */
+.districts-locate { margin: 0 0 var(--s-3); }
+.districts-locate .state-note { margin-top: var(--s-2); }

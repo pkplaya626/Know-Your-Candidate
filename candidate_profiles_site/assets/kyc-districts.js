@@ -214,6 +214,138 @@
     return hit;
   }
 
+  /* --------------------------------------------------- find my district */
+
+  /* A reader's location is placed on the map here, on the device: it is
+   * never sent anywhere. The maps are Census cartographic boundaries
+   * (1:5,000,000), simplified again for display, so within this distance of
+   * a line the map cannot say which side a home is on, and says so. */
+  var NEAR_KM = 3;
+
+  /** Where a longitude and latitude fall on this state's map, by the
+   *  projection the build drew it with (kyc/districts.py), or null. */
+  function project(lon, lat) {
+    var p = state && state.projection;
+    if (!p) return null;
+    var rad = Math.PI / 180;
+    var phi0 = p.parallels[0] * rad, phi1 = p.parallels[1] * rad;
+    var n = (Math.sin(phi0) + Math.sin(phi1)) / 2;
+    var c = 1 + Math.sin(phi0) * (2 * n - Math.sin(phi0));
+    var r0 = Math.sqrt(c) / n;
+    var d = ((lon - p.meridian + 180) % 360 + 360) % 360 - 180;
+    var lam = d * rad * n;
+    var r = Math.sqrt(c - 2 * n * Math.sin(lat * rad)) / n;
+    var x = r * Math.sin(lam), y = r0 - r * Math.cos(lam);
+    return [p.pad + p.k * (x - p.minX), p.pad + p.k * (p.maxY - y)];
+  }
+
+  /** Shortest distance from a point to a district's boundary. */
+  function edgeDistance(rings, x, y) {
+    var best = Infinity;
+    rings.forEach(function (ring) {
+      for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        var ax = ring[j][0], ay = ring[j][1], bx = ring[i][0], by = ring[i][1];
+        var dx = bx - ax, dy = by - ay;
+        var len = dx * dx + dy * dy;
+        var t = len ? Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / len)) : 0;
+        var ex = ax + t * dx - x, ey = ay + t * dy - y;
+        best = Math.min(best, Math.sqrt(ex * ex + ey * ey));
+      }
+    });
+    return best;
+  }
+
+  /** On each map, the district a location is in and any other whose line
+   *  is within NEAR_KM of it: ``[{plan, inside, near}]``, or null when the
+   *  map has no projection. */
+  function locate(lon, lat) {
+    var at = project(lon, lat);
+    if (!at) return null;
+    var margin = NEAR_KM / state.unitKm;
+    return state.plans.map(function (plan) {
+      var inside = [], near = [];
+      numbers(plan).forEach(function (n) {
+        var rings = ringsOf(plan, n);
+        var dist = edgeDistance(rings, at[0], at[1]);
+        if (contains(rings, at[0], at[1])) {
+          inside.push(n);
+          if (dist <= margin) near.push(n);
+        } else if (dist <= margin) {
+          near.push(n);
+        }
+      });
+      return { plan: plan, inside: inside, near: near };
+    });
+  }
+
+  /** What a location means on this page, in words, with the district to
+   *  focus when the map can say. */
+  function located(found) {
+    var lookup = (KYC.meta().voting || {})[code] || {};
+    var official = lookup.status || lookup.polling;
+    var check = official ? ' <a href="' + KYC.escapeAttr(official) + '" target="_blank" ' +
+      'rel="noopener noreferrer">Check with ' + KYC.escapeHtml(state.name) +
+      "'s own lookup &rsaquo;</a>" : "";
+    var main = found[found.length - 1];          // the map for 2026
+    var lines = [];
+    var focusOn = null;
+    if (!main.inside.length && !main.near.length) {
+      return { html: "That location is not in " + KYC.escapeHtml(state.name) + ". " +
+        '<a href="' + KYC.escapeAttr(KYC.siteRoot() + "states/index.html") +
+        '">Find your state &rsaquo;</a>', focus: null };
+    }
+    var unsure = false;
+    var phrases = found.map(function (f) {
+      var close = f.near.filter(function (n) { return f.inside.indexOf(n) === -1; });
+      if (f.inside.length === 1 && !close.length) {
+        if (f === main) focusOn = [f.inside[0]];
+        return "you are in <strong>" + KYC.escapeHtml(seat(f.inside[0])) + "</strong>";
+      }
+      unsure = true;
+      var both = f.inside.concat(close);
+      if (f === main) focusOn = both.slice(0, MAX_FOCUS);
+      return "you are near the line between " + both.map(function (n) {
+        return "<strong>" + KYC.escapeHtml(seat(n)) + "</strong>";
+      }).join(" and ");
+    });
+    if (found.length === 1 || phrases[0] === phrases[1]) {
+      lines.push(found.length > 1 ? "On both maps, " + phrases[0] + "."
+        : phrases[0].charAt(0).toUpperCase() + phrases[0].slice(1) + ".");
+    } else {
+      lines.push("On the map members were elected on, " + phrases[0] + ". On the map for 2026, " +
+        phrases[1] + ".");
+    }
+    if (unsure) lines.push("The map is simplified, so it cannot say which side of a line you are on.");
+    return { html: lines.join(" ") + check, focus: focusOn };
+  }
+
+  function findMe() {
+    var out = el("locateResult");
+    var button = el("locateMe");
+    out.hidden = false;
+    out.textContent = "Finding your location…";
+    button.disabled = true;
+    global.navigator.geolocation.getCurrentPosition(function (pos) {
+      button.disabled = false;
+      var found = locate(pos.coords.longitude, pos.coords.latitude);
+      if (!found) {
+        out.textContent = "This map cannot place a location.";
+        return;
+      }
+      var said = located(found);
+      out.innerHTML = said.html;
+      if (said.focus) {
+        setFocus(said.focus);
+        reveal();
+      }
+    }, function (err) {
+      button.disabled = false;
+      out.textContent = err && err.code === 1
+        ? "Your browser did not share a location. Pick your district below, or use your state's own lookup."
+        : "Your location could not be found. Pick your district below, or use your state's own lookup.";
+    }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 });
+  }
+
   function within(point, frame, margin) {
     return point[0] >= frame[0] + margin && point[0] <= frame[0] + frame[2] - margin &&
       point[1] >= frame[1] + margin && point[1] <= frame[1] + frame[3] - margin;
@@ -939,6 +1071,16 @@
       html.push("</div>");
     }
     var many = numbers(newPlan()).length > 1;
+    // Only where the browser can share a location and the map can place it.
+    var canLocate = many && !!state.projection && !!(global.navigator && global.navigator.geolocation);
+    if (canLocate) {
+      html.push(
+        '<div class="districts-locate"><button type="button" class="btn" id="locateMe" title="',
+        "Your location is placed on this map on your device and is not sent anywhere.",
+        '">', KYC.icon("pin"), " Find my district</button>",
+        '<p class="state-note" id="locateResult" role="status" aria-live="polite" hidden></p></div>'
+      );
+    }
     html.push(
       '<div class="districts-tools"', many ? "" : " hidden", ">",
       '<label class="districts-pick"><span>', redrawn() ? "Any district" : "Pick a district",
@@ -1056,6 +1198,8 @@
         reveal(card === -1 ? undefined : card);
       }
     });
+    var locateMe = el("locateMe");
+    if (locateMe) locateMe.addEventListener("click", findMe);
     el("districtPick").addEventListener("change", function (event) {
       var n = parseInt(event.target.value, 10);
       setFocus(n ? [n] : defaults);
@@ -1079,6 +1223,8 @@
     if (!wanted.length) wanted = defaults;
     if (wanted.join(",") !== focus.join(",")) setFocus(wanted, { fromRoute: true });
   }
+
+  KYC.districtMap = { project: project, locate: locate };
 
   KYC.ready(function () {
     var app = el("districtsApp");
