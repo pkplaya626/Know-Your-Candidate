@@ -112,29 +112,7 @@ $search
 
 <div class="app-body">
     <aside class="sidebar scroll-y" id="sidebar" aria-label="Navigation and summary">
-        <nav class="sidebar-section" aria-label="Views">
-            <a class="nav-link" href="../index.html">
-                <svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg>
-                Profile grid
-            </a>
-            <a class="nav-link" href="../map.html">
-                <svg class="icon" aria-hidden="true"><use href="#i-map"/></svg>
-                Partisan map
-            </a>
-            <a class="nav-link" href="../states/index.html"$states_current>
-                <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
-                States &amp; territories
-            </a>
-            <a class="nav-link" href="../federal/index.html"$federal_current>
-                <svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg>
-                Federal government
-            </a>
-            <a class="nav-link" href="../government/index.html"$government_current>
-                <svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg>
-                How government works
-            </a>
-            <div id="yourState" hidden></div>
-        </nav>
+$nav
 $sidebar
         <nav class="sidebar-section push" aria-label="Jump to a state">
             <h2 class="sidebar-heading">Jump to</h2>
@@ -152,6 +130,58 @@ $scripts
 </body>
 </html>
 """)
+
+# The site's navigation, by level of government. One table: every generated
+# page renders it, and emit.check_nav holds the two hand-maintained pages,
+# index.html and map.html, to it. Each entry is (key, path from the site's
+# root, icon, label). The election's year is the cycle's (kyc/cycle.py),
+# never typed (rule 65).
+def nav_groups():
+    from .cycle import CYCLE
+
+    return (
+        (f"Elections {CYCLE}", (
+            ("candidates", "index.html", "user", "Candidates"),
+            ("races", "map.html", "map", "Races & partisan map"),
+        )),
+        ("Federal", (
+            ("congress", "index.html#/?role=member", "landmark", "Congress"),
+            ("executive", "federal/index.html#executive", "flag", "President & Cabinet"),
+            ("courts", "federal/index.html#supreme-court", "scale", "Federal courts"),
+        )),
+        ("State", (
+            ("states", "states/index.html", "pin", "States & territories"),
+            ("legislatures", "legislature/index.html", "columns", "State legislatures"),
+        )),
+        ("Local", (
+            ("local", "counties/index.html", "layers", "Counties & cities"),
+        )),
+        ("Learn", (
+            ("guide", "government/index.html", "scroll", "Know Your Government"),
+        )),
+    )
+
+
+def nav_html(prefix="../", current=None, how="page"):
+    """The sidebar's navigation, its links *prefix*-ed from the page. The
+    entry *current* is marked ``aria-current``: "page" where its link is
+    this page, "true" where this page belongs to it (a court's page, under
+    Federal courts)."""
+    lines = ['        <nav class="sidebar-section site-nav" aria-label="Site">']
+    for heading, entries in nav_groups():
+        lines.append(f'            <h2 class="nav-group">{_e(heading)}</h2>')
+        for key, path, icon, label in entries:
+            mark = f' aria-current="{how}"' if key == current else ""
+            lines += [f'            <a class="nav-link" href="{_e(prefix + path)}" data-nav="{key}"{mark}>',
+                      f'                <svg class="icon" aria-hidden="true"><use href="#i-{icon}"/></svg>',
+                      f"                {_e(label)}",
+                      "            </a>"]
+        if heading == "State":
+            # The reader's own state, remembered (KYC.renderRememberedState).
+            lines.append('            <div id="yourState" hidden></div>')
+    lines.append("        </nav>")
+    return "\n".join(lines)
+
 
 # The search box in the header. A state's pages search its profiles; the
 # guide's pages carry no profiles to search, so they have none (as the map).
@@ -173,6 +203,7 @@ _CONGRESS_SIDEBAR = """
             <div class="balance" id="senateBalance"></div>
             <div class="balance-label">House</div>
             <div class="balance" id="houseBalance"></div>
+            <a class="sidebar-link learn-link" href="../government/congress.html">How Congress works</a>
         </div>
 
         <div class="sidebar-section" id="stateBalance" hidden></div>
@@ -189,6 +220,7 @@ _CONGRESS_SIDEBAR = """
                 <span class="value" id="houseSeatsUp"></span></div>
             <div class="stat-row"><span>Challengers on the ballot</span>
                 <span class="value" id="challengerCount"></span></div>
+            <a class="sidebar-link learn-link" href="../government/elections.html">How elections work</a>
         </div>
 """
 
@@ -231,9 +263,7 @@ def render_page(**fields):
         search = string.Template(_SEARCH).substitute(
             search_placeholder=fields.pop("search_placeholder"))
     fields.setdefault("sidebar", _CONGRESS_SIDEBAR)
-    fields.setdefault("states_current", "")
-    fields.setdefault("government_current", "")
-    fields.setdefault("federal_current", "")
+    fields["nav"] = nav_html("../", fields.pop("nav_current", None), fields.pop("nav_how", "page"))
     fields.setdefault("jump_options", "")
     fields.setdefault("jump_attrs", "")
     return _PAGE.substitute(search=search, **fields)
@@ -297,6 +327,8 @@ def render_state(code, host, summary=None):
         host=_e(host or ""),
         code=_e(code),
         page_kind="state",
+        nav_current="states",
+        nav_how="true",
         search_placeholder=_e(f"Search {name} profiles…"),
         main=_STATE_MAIN,
         scripts=_scripts(_STATE_SCRIPTS),
@@ -316,9 +348,146 @@ def render_states_index(host):
         code="",
         page_kind="states",
         search_placeholder=_e("Search states…"),
-        states_current=' aria-current="page"',
+        nav_current="states",
         main=_STATE_MAIN,
         scripts=_scripts(_STATE_SCRIPTS),
+    )
+
+
+def render_legislatures_index(host):
+    """Every state legislature, each linked to its page, with each chamber's
+    seats by party and who holds a majority - drawn by
+    ``assets/kyc-stategov.js`` from ``data/stategov.js``, the words of the
+    state pages. The list itself is plain links, there without the script."""
+    from .government_maps import STATES
+
+    path = "legislature/index.html"
+    canonical = f"https://{host}/{path}" if host else path
+    rows = "\n".join(
+        f'                    <li class="directory-row" data-state="{_e(code)}">'
+        f'<a class="directory-name" href="{_e(code.lower())}.html">{_e(state_name(code))}</a>'
+        f'<div class="directory-facts" data-facts="{_e(code)}"></div></li>'
+        for code in sorted(STATES, key=state_name))
+    main = "\n".join([
+        '            <div id="legislatureDirectory" class="state-page directory-page">',
+        '                <header class="state-hero">',
+        '                    <p class="state-kicker">State legislatures</p>',
+        '                    <h1 class="state-title">Every state legislature</h1>',
+        '                    <p class="districts-lede">Each state\'s two chambers - one in Nebraska -',
+        '                        with the seats each party holds and who has a majority. Pick a state',
+        '                        for its districts on a map and the members who sit for them.</p>',
+        '                    <p class="state-links">',
+        f'                        <a class="btn" href="{_e(_learn("states#legislatures"))}"><svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg> How state legislatures work</a>',
+        '                        <a class="btn" href="../states/index.html"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> States &amp; territories</a>',
+        "                    </p>",
+        "                </header>",
+        '                <ul class="directory-list">',
+        rows,
+        "                </ul>",
+        "            </div>",
+    ])
+    footer = "\n".join([
+        "                <p><strong>Sources:</strong> members and their parties from Open States, as",
+        "                    each legislature publishes them, counted against the National Conference",
+        "                    of State Legislatures' figures; a chamber's control is shown only where",
+        "                    the two agree. A seat with nobody listed counts for no one.</p>",
+        "                <p>Non-partisan and independent.</p>",
+    ])
+    return render_page(
+        title=_e("State legislatures — Know Your Candidate"),
+        og_title=_e("Every state legislature: who holds each chamber"),
+        description=_e("Every state legislature: each chamber's seats by party and who holds a "
+                       "majority, with a map of each state's districts and members."),
+        canonical=_e(canonical),
+        host=_e(host or ""),
+        code="",
+        page_kind="legislatures",
+        search="",
+        sidebar="",
+        nav_current="legislatures",
+        main=main,
+        footer=footer,
+        scripts=_scripts(("../data/stategov.js", "../assets/kyc-stategov.js")),
+    )
+
+
+# The Census of Governments' kinds of local government, in the order the
+# guide explains them, and what each column says.
+_LOCAL_KINDS = (("county", "Counties"), ("municipal", "Cities and towns"),
+                ("township", "Towns and townships"), ("school", "School districts"),
+                ("special", "Special districts"), ("total", "All local governments"))
+
+
+def render_counties_index(host, census=None):
+    """Every state's local governments, counted by kind as the Census of
+    Governments counts them, each state linked to its counties page. A
+    state with none of a kind (an "X" in the Census table) reads "none",
+    never 0 (rule 49)."""
+    from .government_maps import STATES
+
+    path = "counties/index.html"
+    canonical = f"https://{host}/{path}" if host else path
+    counts = (census or {}).get("states") or {}
+
+    def cell(code, kind):
+        value = (counts.get(code) or {}).get(kind)
+        if value is None:
+            return '<td class="faint">none</td>' if code in counts else "<td>&ndash;</td>"
+        return f"<td>{value:,}</td>"
+
+    rows = "\n".join(
+        f'                        <tr><th scope="row"><a href="{_e(code.lower())}.html">'
+        f'{_e(state_name(code))}</a></th>' + "".join(cell(code, k) for k, _w in _LOCAL_KINDS) + "</tr>"
+        for code in sorted(STATES, key=state_name))
+    year = (census or {}).get("year")
+    main = "\n".join([
+        '            <div id="countiesDirectory" class="state-page directory-page">',
+        '                <header class="state-hero">',
+        '                    <p class="state-kicker">Counties &amp; local governments</p>',
+        '                    <h1 class="state-title">Every state&#8217;s local governments</h1>',
+        '                    <p class="districts-lede">Counties, cities and towns, townships, school',
+        '                        districts and special districts, as the Census Bureau counted them'
+        + (f" in {_e(year)}" if year else "") + '. Pick a state for its counties on a map and every',
+        '                        government in each.</p>',
+        '                    <p class="state-links">',
+        f'                        <a class="btn" href="{_e(_learn("local"))}"><svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg> How local governments work</a>',
+        '                        <a class="btn" href="../states/index.html"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> States &amp; territories</a>',
+        "                    </p>",
+        "                </header>",
+        '                <div class="directory-scroll" tabindex="0" role="region" aria-label="Local governments by state">',
+        '                    <table class="directory-table">',
+        '                        <thead><tr><th scope="col">State</th>' +
+        "".join(f'<th scope="col">{_e(words)}</th>' for _k, words in _LOCAL_KINDS) + "</tr></thead>",
+        "                        <tbody>",
+        rows,
+        "                        </tbody>",
+        "                    </table>",
+        "                </div>",
+        "            </div>",
+    ])
+    footer = "\n".join([
+        "                <p><strong>Source:</strong> the U.S. Census Bureau's Census of Governments"
+        + (f" ({_e(year)})" if year else "") + ", which counts every",
+        '                    local government by state and kind. "None" is a state with no',
+        "                    government of that kind; Connecticut and Rhode Island, for one, have no",
+        "                    county governments.</p>",
+        "                <p>Non-partisan and independent.</p>",
+    ])
+    return render_page(
+        title=_e("Counties & local governments — Know Your Candidate"),
+        og_title=_e("Every state's local governments, counted"),
+        description=_e("Every state's counties, cities and towns, townships, school districts and "
+                       "special districts, as the Census counts them, with a map of each state."),
+        canonical=_e(canonical),
+        host=_e(host or ""),
+        code="",
+        page_kind="local",
+        search="",
+        sidebar="",
+        nav_current="local",
+        main=main,
+        footer=footer,
+        scripts="",
     )
 
 
@@ -394,6 +563,8 @@ def render_district_page(code, host, summary=None):
         f'                        <a class="btn" href="../{_e(page_path(code))}">'
         f'<svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> '
         f'{_e(name)} page</a>',
+        f'                        <a class="btn" href="{_e(_learn("congress#house"))}">'
+        '<svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg> How the House works</a>',
     ] + ([
         # Every state - not D.C. or a territory - has a legislature and a
         # counties page.
@@ -418,6 +589,8 @@ def render_district_page(code, host, summary=None):
         host=_e(host or ""),
         code=_e(code),
         page_kind="districts",
+        nav_current="states",
+        nav_how="true",
         search_placeholder=_e(f"Search {name} profiles…"),
         main=main,
         scripts=_scripts(scripts),
@@ -523,6 +696,8 @@ def render_legislature_page(code, host, summary=None):
         host=_e(host or ""),
         code=_e(code),
         page_kind="legislature",
+        nav_current="legislatures",
+        nav_how="true",
         search="",
         sidebar=_LEGISLATURE_SIDEBAR,
         jump_options=jump_options(STATES),
@@ -611,12 +786,33 @@ def render_federal_page(host, codes=()):
         page_kind="federal",
         search="",
         sidebar=_FEDERAL_SIDEBAR,
-        federal_current=' aria-current="page"',
+        nav_current="executive",
         jump_options=_jump(codes),
         main=main,
         footer=_FEDERAL_FOOTER,
         scripts=_scripts(_FEDERAL_SCRIPTS),
     )
+
+
+def _learn(target):
+    """The address, from a page one folder down, of a section of the guide:
+    ``"courts#appeals"`` -> ``"../government/courts.html#appeals"``. Raises
+    for a page or section the guide does not have, so a "how this works"
+    link cannot lead nowhere (rule 47)."""
+    from . import government
+
+    url, _external = government.href("guide:" + target, "index")
+    return "../government/" + url
+
+
+# Where the guide explains each kind of federal court, and what to call it.
+_COURT_SECTIONS = {"supreme": "supreme-court", "appeals": "appeals", "district": "district",
+                   "territorial": "other-courts", "trade": "district"}
+_COURT_WORDS = {"supreme": "How the Supreme Court works",
+                "appeals": "How the courts of appeals work",
+                "district": "How the district courts work",
+                "territorial": "How the territorial courts work",
+                "trade": "How the federal trial courts work"}
 
 
 def render_court_page(court_id, host, codes=()):
@@ -634,7 +830,7 @@ def render_court_page(court_id, host, codes=()):
         f'                    <h1 class="state-title">{_e(court["name"])}</h1>',
         '                    <p class="state-links">',
         '                        <a class="btn" href="../federal/index.html#courts"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg> The Article III courts</a>',
-        '                        <a class="btn" href="../government/courts.html"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg> How the federal courts work</a>',
+        f'                        <a class="btn" href="{_e(_learn("courts#" + _COURT_SECTIONS[court["kind"]]))}"><svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg> {_e(_COURT_WORDS[court["kind"]])}</a>',
         "                    </p>",
         "                </header>",
         '                <div id="federalBody">',
@@ -655,7 +851,8 @@ def render_court_page(court_id, host, codes=()):
         page_kind="court",
         search="",
         sidebar=_FEDERAL_SIDEBAR,
-        federal_current=' aria-current="page"',
+        nav_current="courts",
+        nav_how="true",
         jump_options=_jump(codes),
         main=main,
         footer=_FEDERAL_FOOTER,
@@ -749,6 +946,8 @@ def render_counties_page(code, host):
         host=_e(host or ""),
         code=_e(code),
         page_kind="counties",
+        nav_current="local",
+        nav_how="true",
         search="",
         sidebar=_COUNTIES_SIDEBAR,
         jump_options=jump_options(STATES),
@@ -810,8 +1009,12 @@ def sitemap(host, codes, built=None, district_maps=(), guide=(), legislatures=()
     # The guide, in reading order.
     for slug in guide:
         url(f"government/{slug}.html", "0.5", "monthly")
+    if legislatures:
+        url("legislature/index.html", "0.6", "weekly")
     for code in sorted(legislatures):
         url(f"legislature/{code.lower()}.html", "0.6", "weekly")
+    if legislatures:
+        url("counties/index.html", "0.5", "monthly")
     for code in sorted(legislatures):
         url(f"counties/{code.lower()}.html", "0.5", "monthly")
     if courts:

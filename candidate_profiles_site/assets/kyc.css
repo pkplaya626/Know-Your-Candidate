@@ -471,11 +471,96 @@ svg.district-map,
   .nav-link:hover { background: var(--surface-3); text-decoration: none; }
 }
 .nav-link .icon { color: var(--text-muted); }
-.nav-link[aria-current="page"] {
+.nav-link[aria-current="page"],
+.nav-link[aria-current="true"] {
   background: var(--surface-3);
   font-weight: 600;
 }
-.nav-link[aria-current="page"] .icon { color: var(--accent); }
+.nav-link[aria-current="page"] .icon,
+.nav-link[aria-current="true"] .icon { color: var(--accent); }
+/* The site's navigation, by level of government (pages.nav_groups). */
+.nav-group {
+  font-size: var(--t-xs);
+  font-weight: 700;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: var(--s-4) 0 var(--s-1);
+  padding: 0 var(--s-3);
+}
+.nav-group:first-child { margin-top: 0; }
+
+/* "How this works": a data page's link to the section of Know Your
+ * Government that explains it, and a guide section's links to where its
+ * subject can be seen now. */
+.learn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  font-size: var(--t-sm);
+}
+.sidebar-link.learn-link { margin-top: var(--s-3); }
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-1) var(--s-4);
+}
+.section-head .guide-subheading { margin-right: auto; }
+.guide-see {
+  margin: var(--s-3) 0 0;
+  font-size: var(--t-sm);
+}
+.guide-see > span:first-child {
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-right: var(--s-1);
+}
+.guide-see .sep { color: var(--text-faint); }
+.guide-holders {
+  list-style: none;
+  margin: var(--s-3) 0 0;
+  padding: 0;
+  columns: 2 16rem;
+  column-gap: var(--s-5);
+}
+.guide-holders li { break-inside: avoid; padding: 2px 0; }
+
+/* The directories of legislatures and of local governments. */
+.directory-list {
+  list-style: none;
+  margin: var(--s-4) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  gap: var(--s-3);
+}
+.directory-row {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+  padding: var(--s-3) var(--s-4);
+}
+.directory-name { font-weight: 700; }
+.directory-facts .gov-chambers { margin-top: var(--s-2); }
+.directory-facts p { margin: var(--s-1) 0 0; }
+.directory-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.directory-table th, .directory-table td {
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+  white-space: nowrap;
+}
+.directory-table th[scope="row"], .directory-table thead th:first-child { text-align: left; }
+/* On a phone the table scrolls in its own box, the state's name held at
+ * its left edge; the page itself never scrolls sideways. */
+.directory-scroll { overflow-x: auto; max-width: 100%; }
+.directory-table th[scope="row"] {
+  position: sticky;
+  left: 0;
+  background: var(--surface-0);
+}
 
 .app-main {
   display: flex;
@@ -2765,7 +2850,7 @@ svg.district-map,
 
 /* ============================================================== 16. guide */
 
-/* How government works: reading pages. Prose is held to a readable measure;
+/* Know Your Government: reading pages. Prose is held to a readable measure;
  * tables and charts may use the full width. */
 .guide-page { max-width: 980px; }
 .guide-lede {

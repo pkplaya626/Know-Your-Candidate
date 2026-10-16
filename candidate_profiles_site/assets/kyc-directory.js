@@ -492,6 +492,14 @@
       state.election = "all";
     }
     state.state = params.state || "all";
+    // The sidebar names the view: Congress for the sitting members,
+    // Candidates otherwise (pages.nav_groups).
+    var here = state.role === "member" ? "congress" : "candidates";
+    Array.prototype.forEach.call(doc.querySelectorAll('.site-nav [data-nav="candidates"], ' +
+        '.site-nav [data-nav="congress"]'), function (link) {
+      if (link.getAttribute("data-nav") === here) link.setAttribute("aria-current", "page");
+      else link.removeAttribute("aria-current");
+    });
     state.sort = SORTS[params.sort] ? params.sort : "region";
     state.view = params.view === "race" ? "race" : "grid";
     if (params.view === "senate" && KYC.senate) state.view = "senate";

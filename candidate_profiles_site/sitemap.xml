@@ -616,6 +616,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://candidates.radicalrelay.us/legislature/index.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://candidates.radicalrelay.us/legislature/ak.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -864,6 +869,11 @@
     <loc>https://candidates.radicalrelay.us/legislature/wy.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://candidates.radicalrelay.us/counties/index.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://candidates.radicalrelay.us/counties/ak.html</loc>

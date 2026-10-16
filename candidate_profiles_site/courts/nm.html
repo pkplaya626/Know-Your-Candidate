@@ -75,28 +75,49 @@
 
 <div class="app-body">
     <aside class="sidebar scroll-y" id="sidebar" aria-label="Navigation and summary">
-        <nav class="sidebar-section" aria-label="Views">
-            <a class="nav-link" href="../index.html">
-                <svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg>
-                Profile grid
+        <nav class="sidebar-section site-nav" aria-label="Site">
+            <h2 class="nav-group">Elections 2026</h2>
+            <a class="nav-link" href="../index.html" data-nav="candidates">
+                <svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>
+                Candidates
             </a>
-            <a class="nav-link" href="../map.html">
+            <a class="nav-link" href="../map.html" data-nav="races">
                 <svg class="icon" aria-hidden="true"><use href="#i-map"/></svg>
-                Partisan map
+                Races &amp; partisan map
             </a>
-            <a class="nav-link" href="../states/index.html">
+            <h2 class="nav-group">Federal</h2>
+            <a class="nav-link" href="../index.html#/?role=member" data-nav="congress">
+                <svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg>
+                Congress
+            </a>
+            <a class="nav-link" href="../federal/index.html#executive" data-nav="executive">
+                <svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>
+                President &amp; Cabinet
+            </a>
+            <a class="nav-link" href="../federal/index.html#supreme-court" data-nav="courts" aria-current="true">
+                <svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg>
+                Federal courts
+            </a>
+            <h2 class="nav-group">State</h2>
+            <a class="nav-link" href="../states/index.html" data-nav="states">
                 <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
                 States &amp; territories
             </a>
-            <a class="nav-link" href="../federal/index.html" aria-current="page">
-                <svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg>
-                Federal government
-            </a>
-            <a class="nav-link" href="../government/index.html">
-                <svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg>
-                How government works
+            <a class="nav-link" href="../legislature/index.html" data-nav="legislatures">
+                <svg class="icon" aria-hidden="true"><use href="#i-columns"/></svg>
+                State legislatures
             </a>
             <div id="yourState" hidden></div>
+            <h2 class="nav-group">Local</h2>
+            <a class="nav-link" href="../counties/index.html" data-nav="local">
+                <svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg>
+                Counties &amp; cities
+            </a>
+            <h2 class="nav-group">Learn</h2>
+            <a class="nav-link" href="../government/index.html" data-nav="guide">
+                <svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg>
+                Know Your Government
+            </a>
         </nav>
 
         <nav class="sidebar-section" aria-label="Federal government">
@@ -184,7 +205,7 @@
                     <h1 class="state-title">U.S. District Court for the District of New Mexico</h1>
                     <p class="state-links">
                         <a class="btn" href="../federal/index.html#courts"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg> The Article III courts</a>
-                        <a class="btn" href="../government/courts.html"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg> How the federal courts work</a>
+                        <a class="btn" href="../government/courts.html#district"><svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg> How the district courts work</a>
                     </p>
                 </header>
                 <div id="federalBody">

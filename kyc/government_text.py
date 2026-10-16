@@ -1,4 +1,4 @@
-"""The words of the guide to how government works (rendered by ``government``).
+"""The words of Know Your Government, the guide (rendered by ``government``).
 
 Editorial text, like ``overrides``: every section names the sources it was
 checked against, and ``REVIEWED`` is the day it was last checked. The site
@@ -1881,3 +1881,58 @@ ELECTIONS = {
 }
 
 PAGES = (INDEX, CONGRESS, EXECUTIVE, COURTS, STATES, LOCAL, TRIBAL, ELECTIONS)
+
+# The guide explains offices; the site shows who holds them. After a
+# section's text, the places on this site where its subject can be seen
+# now: (page, section) -> [(words, target)]. Targets are checked like any
+# link in the guide (government.href).
+SEE = {
+    ("congress", "senate"): [
+        ("The senators sitting now", "site:index.html#/?role=member&chamber=Senate"),
+        ("The Senate races on the ballot", "site:index.html#/?view=senate")],
+    ("congress", "house"): [
+        ("The representatives sitting now", "site:index.html#/?role=member&chamber=House"),
+        ("Every state's districts, on a map", "site:states/index.html")],
+    ("congress", "committees"): [
+        ("Each member's committees, in their profile", "site:index.html#/?role=member")],
+    ("executive", "president"): [
+        ("The President and Vice President", "site:federal/index.html#executive")],
+    ("executive", "departments"): [
+        ("Who heads each department", "site:federal/index.html#cabinet"),
+        ("Changes in the Cabinet since the term began", "site:federal/index.html#changes")],
+    ("courts", "judges"): [("Find a federal judge", "site:federal/index.html#courts")],
+    ("courts", "supreme-court"): [
+        ("The justices", "site:federal/index.html#supreme-court"),
+        ("The Court's page", "site:courts/scotus.html")],
+    ("courts", "appeals"): [
+        ("Every court of appeals and its judges", "site:federal/index.html#courts")],
+    ("courts", "district"): [
+        ("Every district court and its judges", "site:federal/index.html#courts")],
+    ("states", "legislatures"): [("Every state legislature", "site:legislature/index.html")],
+    ("states", "executive"): [
+        ("Each state's governor and the officials it elects", "site:states/index.html")],
+    ("states", "courts"): [("Each state's highest court, on its state page", "site:states/index.html")],
+    ("local", "counties"): [("Every state's counties, on a map", "site:counties/index.html")],
+    ("local", "municipalities"): [
+        ("Every state's cities and towns, on a map", "site:counties/index.html")],
+    ("local", "townships"): [("Every state's local governments, counted", "site:counties/index.html")],
+    ("elections", "when"): [
+        ("The 2026 races", "site:index.html#/?view=race"),
+        ("The races on the partisan map", "site:map.html")],
+    ("elections", "primaries"): [("Who is still on the ballot", "site:index.html")],
+}
+
+# Sections that list who holds the offices they explain, from the site's
+# data (assets/kyc-guide.js), never typed (rule 48): (page, section) ->
+# (what, the words a reader sees without the script).
+HOLDERS = {
+    ("executive", "president"): (
+        "executive", "Who holds these offices now is on the "
+        "[federal government's page](site:federal/index.html#executive)."),
+    ("executive", "departments"): (
+        "cabinet", "Who heads each department now is on the "
+        "[federal government's page](site:federal/index.html#cabinet)."),
+    ("courts", "supreme-court"): (
+        "justices", "The justices sitting now are on the "
+        "[federal government's page](site:federal/index.html#supreme-court)."),
+}

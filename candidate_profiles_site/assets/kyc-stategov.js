@@ -541,6 +541,29 @@
     }
   }, true);
 
+  /* The directory of legislatures (legislature/index.html): each listed
+   * state's chambers, in the words of its state page. The list is plain
+   * links without this. */
+  function directory() {
+    Array.prototype.forEach.call(global.document.querySelectorAll("[data-facts]"), function (cell) {
+      var s = state(cell.getAttribute("data-facts"));
+      if (!s) return;
+      var code = cell.getAttribute("data-facts");
+      var chambers = [s.upper, s.lower].filter(Boolean);
+      cell.innerHTML = '<ul class="gov-chambers">' + chambers.map(function (c) {
+        return chamberRow(c, code, "");
+      }).join("") + "</ul>" +
+        (s.legislature && code !== "NE"
+          ? '<p class="faint">' + KYC.escapeHtml(control(s.legislature).replace(/^./, function (c) {
+              return c.toUpperCase();
+            })) + ".</p>" : "");
+    });
+  }
+
+  KYC.ready(function () {
+    if (global.document.getElementById("legislatureDirectory")) directory();
+  });
+
   KYC.stategov = {
     modes: ["governor", "lt", "ag", "sos", "legislature", "trifecta", "governor2026"],
     ballotList: ballotList,

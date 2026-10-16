@@ -75,28 +75,49 @@
 
 <div class="app-body">
     <aside class="sidebar scroll-y" id="sidebar" aria-label="Navigation and summary">
-        <nav class="sidebar-section" aria-label="Views">
-            <a class="nav-link" href="../index.html">
-                <svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg>
-                Profile grid
+        <nav class="sidebar-section site-nav" aria-label="Site">
+            <h2 class="nav-group">Elections 2026</h2>
+            <a class="nav-link" href="../index.html" data-nav="candidates">
+                <svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>
+                Candidates
             </a>
-            <a class="nav-link" href="../map.html">
+            <a class="nav-link" href="../map.html" data-nav="races">
                 <svg class="icon" aria-hidden="true"><use href="#i-map"/></svg>
-                Partisan map
+                Races &amp; partisan map
             </a>
-            <a class="nav-link" href="../states/index.html">
+            <h2 class="nav-group">Federal</h2>
+            <a class="nav-link" href="../index.html#/?role=member" data-nav="congress">
+                <svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg>
+                Congress
+            </a>
+            <a class="nav-link" href="../federal/index.html#executive" data-nav="executive">
+                <svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>
+                President &amp; Cabinet
+            </a>
+            <a class="nav-link" href="../federal/index.html#supreme-court" data-nav="courts">
+                <svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg>
+                Federal courts
+            </a>
+            <h2 class="nav-group">State</h2>
+            <a class="nav-link" href="../states/index.html" data-nav="states">
                 <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
                 States &amp; territories
             </a>
-            <a class="nav-link" href="../federal/index.html">
-                <svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg>
-                Federal government
-            </a>
-            <a class="nav-link" href="../government/index.html">
-                <svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg>
-                How government works
+            <a class="nav-link" href="../legislature/index.html" data-nav="legislatures">
+                <svg class="icon" aria-hidden="true"><use href="#i-columns"/></svg>
+                State legislatures
             </a>
             <div id="yourState" hidden></div>
+            <h2 class="nav-group">Local</h2>
+            <a class="nav-link" href="../counties/index.html" data-nav="local">
+                <svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg>
+                Counties &amp; cities
+            </a>
+            <h2 class="nav-group">Learn</h2>
+            <a class="nav-link" href="../government/index.html" data-nav="guide" aria-current="true">
+                <svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg>
+                Know Your Government
+            </a>
         </nav>
 
         <nav class="sidebar-section" aria-label="In this guide">
@@ -117,6 +138,7 @@
             <div class="balance" id="senateBalance"></div>
             <div class="balance-label">House</div>
             <div class="balance" id="houseBalance"></div>
+            <a class="sidebar-link learn-link" href="../government/congress.html">How Congress works</a>
         </div>
 
         <div class="sidebar-section" id="stateBalance" hidden></div>
@@ -133,6 +155,7 @@
                 <span class="value" id="houseSeatsUp"></span></div>
             <div class="stat-row"><span>Challengers on the ballot</span>
                 <span class="value" id="challengerCount"></span></div>
+            <a class="sidebar-link learn-link" href="../government/elections.html">How elections work</a>
         </div>
 
         <nav class="sidebar-section push" aria-label="Jump to a state">
@@ -148,7 +171,7 @@
         <div class="content scroll-y">
             <article id="guideContent" class="state-page guide-page">
                 <header class="state-hero">
-                    <p class="state-kicker">How government works</p>
+                    <p class="state-kicker">Know Your Government</p>
                     <h1 class="state-title">How Congress works</h1>
                     <p class="guide-lede">Article I of the Constitution gives the power to make federal law to Congress: a Senate, in which every state has two votes, and a House of Representatives, in which seats follow population. Who sits there now is on the <a href="../index.html">profile grid</a> and the <a href="../map.html">partisan map</a>.</p>
                 </header>
@@ -189,6 +212,7 @@
                         <div class="guide-role"><dt>Parliamentarian</dt><dd>Advises the presiding officer, without regard to party, on the Senate's rules and precedents, including what a budget reconciliation bill may contain under the Congressional Budget Act.</dd></div>
                         <div class="guide-role"><dt>Legal and legislative counsel</dt><dd>The Office of Senate Legal Counsel represents the Senate in court; the Office of the Legislative Counsel drafts bills and amendments for senators.</dd></div>
                     </dl>
+                    <p class="guide-see"><span>See it on this site:</span> <a href="../index.html#/?role=member&amp;chamber=Senate">The senators sitting now</a><span class="sep" aria-hidden="true"> · </span><a href="../index.html#/?view=senate">The Senate races on the ballot</a></p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://constitution.congress.gov/constitution/article-1/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article I</a>; <a href="https://constitution.congress.gov/constitution/article-2/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article II</a>; <a href="https://constitution.congress.gov/constitution/amendment-17/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Seventeenth Amendment</a>; <a href="https://www.law.cornell.edu/uscode/text/3/19" target="_blank" rel="noopener noreferrer">3 U.S.C. 19 (presidential succession)</a>; <a href="https://www.senate.gov/senators/leadership.htm" target="_blank" rel="noopener noreferrer">U.S. Senate: Leadership &amp; Officers</a>; <a href="https://www.senate.gov/about/officers-staff/president-pro-tempore.htm" target="_blank" rel="noopener noreferrer">U.S. Senate: About the President Pro Tempore</a>; <a href="https://www.senate.gov/about/parties-leadership/floor-leader-priority-recognition.htm" target="_blank" rel="noopener noreferrer">U.S. Senate: Floor Leaders Receive Priority Recognition</a>; <a href="https://www.senate.gov/about/officers-staff.htm" target="_blank" rel="noopener noreferrer">U.S. Senate: Officers &amp; Staff</a></p>
                 </section>
                 <section class="guide-section" id="house" aria-labelledby="house-title">
@@ -210,6 +234,7 @@
                         <div class="guide-role"><dt>Parliamentarian</dt><dd>Advises, without regard to party, on the House's rules and precedents, including whether an amendment is germane.</dd></div>
                         <div class="guide-role"><dt>Chaplain</dt><dd>Opens each day's session with a prayer and offers pastoral care.</dd></div>
                     </dl>
+                    <p class="guide-see"><span>See it on this site:</span> <a href="../index.html#/?role=member&amp;chamber=House">The representatives sitting now</a><span class="sep" aria-hidden="true"> · </span><a href="../states/index.html">Every state's districts, on a map</a></p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://constitution.congress.gov/constitution/article-1/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article I</a>; <a href="https://www.law.cornell.edu/uscode/text/3/19" target="_blank" rel="noopener noreferrer">3 U.S.C. 19 (presidential succession)</a>; <a href="https://www.house.gov/the-house-explained" target="_blank" rel="noopener noreferrer">U.S. House of Representatives: The House Explained</a>; <a href="https://www.house.gov/leadership" target="_blank" rel="noopener noreferrer">U.S. House of Representatives: Leadership</a>; <a href="https://www.house.gov/the-house-explained/officers-and-organizations" target="_blank" rel="noopener noreferrer">U.S. House of Representatives: Officers and Organizations</a>; <a href="https://clerk.house.gov/Votes" target="_blank" rel="noopener noreferrer">Office of the Clerk, U.S. House: Roll Call Votes</a></p>
                 </section>
                 <section class="guide-section" id="committees" aria-labelledby="committees-title">
@@ -219,6 +244,7 @@
                         <p class="results-bar" role="status">With JavaScript on, this page lists who chairs every committee now and who leads its minority. Each member's committee posts are also on their profile.</p>
                     </div>
                     <p>Each name opens that member's profile. The posts come from the committee rosters kept by the congress-legislators project, the same source as every profile's committee list. The Senate and the House each list their party leaders: <a href="https://www.senate.gov/senators/leadership.htm" target="_blank" rel="noopener noreferrer">Senate leadership</a>, <a href="https://www.house.gov/leadership" target="_blank" rel="noopener noreferrer">House leadership</a>.</p>
+                    <p class="guide-see"><span>See it on this site:</span> <a href="../index.html#/?role=member">Each member's committees, in their profile</a></p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.congress.gov/committees" target="_blank" rel="noopener noreferrer">Congress.gov: Committees of the U.S. Congress</a>; <a href="https://github.com/unitedstates/congress-legislators" target="_blank" rel="noopener noreferrer">congress-legislators: committee membership</a>; <a href="https://www.senate.gov/senators/leadership.htm" target="_blank" rel="noopener noreferrer">U.S. Senate: Leadership &amp; Officers</a>; <a href="https://www.house.gov/leadership" target="_blank" rel="noopener noreferrer">U.S. House of Representatives: Leadership</a></p>
                 </section>
                 <section class="guide-section" id="support" aria-labelledby="support-title">

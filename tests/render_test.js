@@ -1647,6 +1647,104 @@ const settle = (ms) => new Promise((r) => setTimeout(r, ms || 150));
  * profiles..." with no cards, and closing it called history.back() - which,
  * with nothing of ours behind it, left the site. The map overwrote its
  * incoming hash at boot, so state and profile links opened a blank map. */
+/* The sidebar, by level of government (pages.nav_groups), the directories
+ * of legislatures and of local governments, and Know Your Government's
+ * links to what it explains. */
+async function testNavigation() {
+  const GROUPS = ["Elections 2026", "Federal", "State", "Local", "Learn"];
+  const grid = await buildPage("index.html");
+  await settle(50);
+  suite("the sidebar, by level of government", () => {
+    const { D, window } = grid;
+    const heads = [...D.querySelectorAll(".site-nav .nav-group")].map((h) => h.textContent.trim());
+    check("five groups, from elections to learning", JSON.stringify(heads) === JSON.stringify(GROUPS),
+      heads.join(" | "));
+    const keys = [...D.querySelectorAll(".site-nav [data-nav]")].map((a) => a.getAttribute("data-nav"));
+    check("nine places to go", keys.join(",") ===
+      "candidates,races,congress,executive,courts,states,legislatures,local,guide", keys.join(","));
+    check("the grid is Candidates",
+      D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav") === "candidates");
+    window.location.hash = "#/?role=member";
+    window.dispatchEvent(new window.HashChangeEvent("hashchange"));
+    check("and Congress when it shows the sitting members",
+      D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav") === "congress" &&
+        D.querySelectorAll('.site-nav [aria-current]').length === 1);
+    check("the guide is named Know Your Government",
+      D.querySelector('.site-nav [data-nav="guide"]').textContent.trim() === "Know Your Government");
+    check("the Congress and election boxes say where they are explained",
+      !!D.querySelector('a.learn-link[href="government/congress.html"]') &&
+        !!D.querySelector('a.learn-link[href="government/elections.html"]'));
+  });
+
+  const legs = await buildPage("legislature/index.html");
+  await settle(50);
+  suite("legislature/index.html — every state legislature", () => {
+    const { D, errors } = legs;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const rows = D.querySelectorAll(".directory-row");
+    check("one row per state, each linked to its legislature", rows.length === 50 &&
+      [...rows].every((r) => r.querySelector('a.directory-name[href$=".html"]')));
+    const mn = D.querySelector('[data-facts="MN"]');
+    check("each chamber's seats by party, in the state pages' words",
+      mn.querySelectorAll(".gov-chamber").length === 2 && /seats/.test(mn.textContent), mn.textContent);
+    const ne = D.querySelector('[data-facts="NE"]');
+    check("Nebraska's one chamber", ne.querySelectorAll(".gov-chamber").length === 1, ne.textContent);
+    check("the sidebar marks State legislatures",
+      D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav") === "legislatures");
+    check("and links how legislatures work",
+      !!D.querySelector('a[href="../government/states.html#legislatures"]'));
+  });
+
+  const counties = await buildPage("counties/index.html");
+  await settle(50);
+  suite("counties/index.html — every state's local governments", () => {
+    const { D, errors } = counties;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const rows = [...D.querySelectorAll(".directory-table tbody tr")];
+    check("one row per state, linked to its counties page", rows.length === 50 &&
+      rows.every((r) => r.querySelector('a[href$=".html"]')));
+    const ct = rows.find((r) => /Connecticut/.test(r.textContent));
+    // Rule 49: a state with none of a kind is not a count of zero.
+    check("a state with no county governments says none, not 0",
+      ct && ct.children[1].textContent === "none", ct && ct.children[1].textContent);
+    check("the sidebar marks Counties & cities",
+      D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav") === "local");
+  });
+
+  const exec = await buildPage("government/executive.html");
+  await settle(50);
+  suite("government/executive.html — who holds the offices it explains", () => {
+    const { D, errors, window } = exec;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("the guide is Know Your Government", /Know Your Government/.test(
+      D.querySelector(".state-kicker").textContent));
+    const d = window.kycFederal;
+    const president = D.querySelector('.guide-live[data-live="executive"] a');
+    check("the President, from the data, linked to their record",
+      !!president && president.textContent === d.president.name &&
+        president.getAttribute("href") === "../federal/index.html#/official/" +
+          encodeURIComponent(d.president.id));
+    const heads = D.querySelectorAll('.guide-live[data-live="cabinet"] li');
+    check("every department's head", heads.length ===
+      d.offices.filter((o) => o.kind === "department").length);
+    check("each section says where it can be seen on this site",
+      !!D.querySelector('#departments .guide-see a[href="../federal/index.html#cabinet"]'));
+    check("the sidebar marks Know Your Government as this page's level",
+      D.querySelector('.site-nav [aria-current]').getAttribute("data-nav") === "guide");
+  });
+
+  const courts = await buildPage("government/courts.html");
+  await settle(50);
+  suite("government/courts.html — the justices sitting now", () => {
+    const { D, errors, window } = courts;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const items = D.querySelectorAll('.guide-live[data-live="justices"] li');
+    check("every justice, from the data", items.length === window.kycFederal.supremeCourt.members.length);
+    check("the Chief Justice is named as one", /Chief Justice/.test(items[0].textContent),
+      items[0].textContent);
+  });
+}
+
 /* Every level links to the levels around it: the state page, its House
  * districts, its legislature, its counties, and back. */
 async function testInterlinks() {
@@ -1658,12 +1756,21 @@ async function testInterlinks() {
   suite("pages link to the levels around them", () => {
     check("a district page links to its state's legislature and counties",
       has(districts.D, "../legislature/tx.html") && has(districts.D, "../counties/tx.html"));
+    // The page's own links: the sidebar links every directory.
     check("D.C.'s district page links to no legislature or counties page it does not have",
-      !dc.D.querySelector('a[href^="../legislature/"]') && !dc.D.querySelector('a[href^="../counties/"]'));
+      !dc.D.querySelector('main a[href^="../legislature/"]') &&
+        !dc.D.querySelector('main a[href^="../counties/"]'));
     check("a legislature page links to its state's counties and House districts",
       has(leg.D, "../counties/tx.html") && has(leg.D, "../districts/tx.html"));
     check("a counties page links to its state's legislature and House districts",
       has(local.D, "../legislature/tx.html") && has(local.D, "../districts/tx.html"));
+    check("a district page links to how the House works",
+      has(districts.D, "../government/congress.html#house"));
+    check("a page belongs to its level in the sidebar",
+      (leg.D.querySelector(".site-nav [aria-current]") || {}).getAttribute &&
+        leg.D.querySelector(".site-nav [aria-current]").getAttribute("data-nav") === "legislatures" &&
+        local.D.querySelector(".site-nav [aria-current]").getAttribute("data-nav") === "local" &&
+        districts.D.querySelector(".site-nav [aria-current]").getAttribute("data-nav") === "states");
   });
 
   const map = await buildPage("map.html", { hash: "#/?state=TX&mode=house" });
@@ -3164,7 +3271,7 @@ async function testDistrictsOnAPhone() {
 
 /* ================================================================ guide */
 
-/* The guide to how government works: static, sourced text generated by
+/* Know Your Government, the guide: static, sourced text generated by
  * kyc/government.py, plus what kyc-guide.js fills in from the data. Most of
  * its pages load no profiles, so testShared's "data loaded" does not apply. */
 async function testGuide() {
@@ -4546,8 +4653,12 @@ async function testFederal() {
     check("a table becomes cards on a phone: every cell says its column",
       [...D.querySelectorAll(".guide-table td")].every((td) => td.getAttribute("data-label")));
     check("the nav marks this page", (D.querySelector('.nav-link[aria-current="page"]') || {})
-      .getAttribute && D.querySelector('.nav-link[aria-current="page"]').getAttribute("href") ===
-      "../federal/index.html");
+      .getAttribute && D.querySelector('.nav-link[aria-current="page"]').getAttribute("data-nav") ===
+      "executive");
+    const learn = [...D.querySelectorAll(".fed-section .learn-link")].map((a) => a.getAttribute("href"));
+    check("each section links where Know Your Government explains it",
+      ["executive", "cabinet", "supreme-court", "courts"].every((id) =>
+        !!D.querySelector("#" + id + " .learn-link[href^='../government/']")), learn.join(" "));
     check("no state is remembered from this page", D.body.getAttribute("data-state") === "");
     check("the sidebar's state list is written into the page",
       D.getElementById("stateJump").options.length > 50, `${D.getElementById("stateJump").options.length}`);
@@ -4909,6 +5020,7 @@ async function testFederal() {
   if (!only || only === "redistricting") await testFindMyDistrict();
   if (!only || only === "redistricting") await testDistrictsOnAPhone();
   if (!only || only === "links") await testInterlinks();
+  if (!only || only === "links") await testNavigation();
   if (!only || only === "links") await testDeepLinks();
   if (!only || only === "links") await testFoldedIds();
   if (!only || only === "links") await testRunningElsewhere();

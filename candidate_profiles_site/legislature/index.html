@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>State legislatures — Know Your Candidate</title>
+<meta name="description" content="Every state legislature: each chamber&#x27;s seats by party and who holds a majority, with a map of each state&#x27;s districts and members.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://candidates.radicalrelay.us/legislature/index.html">
+<meta property="og:url" content="https://candidates.radicalrelay.us/legislature/index.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Every state legislature: who holds each chamber">
+<meta property="og:description" content="Every state legislature: each chamber&#x27;s seats by party and who holds a majority, with a map of each state&#x27;s districts and members.">
+<meta property="og:image" content="https://candidates.radicalrelay.us/assets/social-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Know Your Candidate">
+<meta property="og:site_name" content="Know Your Candidate">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/kyc.css">
+<script src="../assets/kyc.js"></script>
+</head>
+<body data-root="../" data-state="" data-page="legislatures">
+
+<a href="#stateMain" class="skip-link">Skip to content</a>
+<button type="button" class="sidebar-scrim" tabindex="-1" aria-hidden="true"></button>
+
+<header class="app-header">
+    <button type="button" class="btn-icon sidebar-toggle" aria-expanded="false"
+            aria-controls="sidebar" aria-label="Show navigation">
+        <svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg>
+    </button>
+
+    <a class="brand" href="../index.html">
+        <svg class="icon" aria-hidden="true"><use href="#i-vote"/></svg>
+        <span class="brand-name">Know Your Candidate</span>
+        <span class="brand-sub" data-congress>U.S. Congress</span>
+    </a>
+
+
+    <div class="header-actions">
+        <div class="menu">
+            <button type="button" class="btn-icon" id="themeButton"
+                    aria-haspopup="true" aria-label="Change theme">
+                <svg class="icon" aria-hidden="true"><use href="#i-palette"/></svg>
+            </button>
+            <div class="menu-panel" id="themePanel" role="menu" hidden>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="system" aria-checked="true">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Match system
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="dark" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Dark
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="amoled" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    AMOLED black
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-theme-option="light" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Light
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="app-body">
+    <aside class="sidebar scroll-y" id="sidebar" aria-label="Navigation and summary">
+        <nav class="sidebar-section site-nav" aria-label="Site">
+            <h2 class="nav-group">Elections 2026</h2>
+            <a class="nav-link" href="../index.html" data-nav="candidates">
+                <svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>
+                Candidates
+            </a>
+            <a class="nav-link" href="../map.html" data-nav="races">
+                <svg class="icon" aria-hidden="true"><use href="#i-map"/></svg>
+                Races &amp; partisan map
+            </a>
+            <h2 class="nav-group">Federal</h2>
+            <a class="nav-link" href="../index.html#/?role=member" data-nav="congress">
+                <svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg>
+                Congress
+            </a>
+            <a class="nav-link" href="../federal/index.html#executive" data-nav="executive">
+                <svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>
+                President &amp; Cabinet
+            </a>
+            <a class="nav-link" href="../federal/index.html#supreme-court" data-nav="courts">
+                <svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg>
+                Federal courts
+            </a>
+            <h2 class="nav-group">State</h2>
+            <a class="nav-link" href="../states/index.html" data-nav="states">
+                <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
+                States &amp; territories
+            </a>
+            <a class="nav-link" href="../legislature/index.html" data-nav="legislatures" aria-current="page">
+                <svg class="icon" aria-hidden="true"><use href="#i-columns"/></svg>
+                State legislatures
+            </a>
+            <div id="yourState" hidden></div>
+            <h2 class="nav-group">Local</h2>
+            <a class="nav-link" href="../counties/index.html" data-nav="local">
+                <svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg>
+                Counties &amp; cities
+            </a>
+            <h2 class="nav-group">Learn</h2>
+            <a class="nav-link" href="../government/index.html" data-nav="guide">
+                <svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg>
+                Know Your Government
+            </a>
+        </nav>
+
+        <nav class="sidebar-section push" aria-label="Jump to a state">
+            <h2 class="sidebar-heading">Jump to</h2>
+            <label class="sr-only" for="stateJump">Jump to a state or territory</label>
+            <select id="stateJump" class="select">
+                <option value="">Choose a state&hellip;</option>
+            </select>
+        </nav>
+    </aside>
+
+    <main class="app-main" id="stateMain">
+        <div class="content scroll-y">
+            <div id="legislatureDirectory" class="state-page directory-page">
+                <header class="state-hero">
+                    <p class="state-kicker">State legislatures</p>
+                    <h1 class="state-title">Every state legislature</h1>
+                    <p class="districts-lede">Each state's two chambers - one in Nebraska -
+                        with the seats each party holds and who has a majority. Pick a state
+                        for its districts on a map and the members who sit for them.</p>
+                    <p class="state-links">
+                        <a class="btn" href="../government/states.html#legislatures"><svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg> How state legislatures work</a>
+                        <a class="btn" href="../states/index.html"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> States &amp; territories</a>
+                    </p>
+                </header>
+                <ul class="directory-list">
+                    <li class="directory-row" data-state="AL"><a class="directory-name" href="al.html">Alabama</a><div class="directory-facts" data-facts="AL"></div></li>
+                    <li class="directory-row" data-state="AK"><a class="directory-name" href="ak.html">Alaska</a><div class="directory-facts" data-facts="AK"></div></li>
+                    <li class="directory-row" data-state="AZ"><a class="directory-name" href="az.html">Arizona</a><div class="directory-facts" data-facts="AZ"></div></li>
+                    <li class="directory-row" data-state="AR"><a class="directory-name" href="ar.html">Arkansas</a><div class="directory-facts" data-facts="AR"></div></li>
+                    <li class="directory-row" data-state="CA"><a class="directory-name" href="ca.html">California</a><div class="directory-facts" data-facts="CA"></div></li>
+                    <li class="directory-row" data-state="CO"><a class="directory-name" href="co.html">Colorado</a><div class="directory-facts" data-facts="CO"></div></li>
+                    <li class="directory-row" data-state="CT"><a class="directory-name" href="ct.html">Connecticut</a><div class="directory-facts" data-facts="CT"></div></li>
+                    <li class="directory-row" data-state="DE"><a class="directory-name" href="de.html">Delaware</a><div class="directory-facts" data-facts="DE"></div></li>
+                    <li class="directory-row" data-state="FL"><a class="directory-name" href="fl.html">Florida</a><div class="directory-facts" data-facts="FL"></div></li>
+                    <li class="directory-row" data-state="GA"><a class="directory-name" href="ga.html">Georgia</a><div class="directory-facts" data-facts="GA"></div></li>
+                    <li class="directory-row" data-state="HI"><a class="directory-name" href="hi.html">Hawaii</a><div class="directory-facts" data-facts="HI"></div></li>
+                    <li class="directory-row" data-state="ID"><a class="directory-name" href="id.html">Idaho</a><div class="directory-facts" data-facts="ID"></div></li>
+                    <li class="directory-row" data-state="IL"><a class="directory-name" href="il.html">Illinois</a><div class="directory-facts" data-facts="IL"></div></li>
+                    <li class="directory-row" data-state="IN"><a class="directory-name" href="in.html">Indiana</a><div class="directory-facts" data-facts="IN"></div></li>
+                    <li class="directory-row" data-state="IA"><a class="directory-name" href="ia.html">Iowa</a><div class="directory-facts" data-facts="IA"></div></li>
+                    <li class="directory-row" data-state="KS"><a class="directory-name" href="ks.html">Kansas</a><div class="directory-facts" data-facts="KS"></div></li>
+                    <li class="directory-row" data-state="KY"><a class="directory-name" href="ky.html">Kentucky</a><div class="directory-facts" data-facts="KY"></div></li>
+                    <li class="directory-row" data-state="LA"><a class="directory-name" href="la.html">Louisiana</a><div class="directory-facts" data-facts="LA"></div></li>
+                    <li class="directory-row" data-state="ME"><a class="directory-name" href="me.html">Maine</a><div class="directory-facts" data-facts="ME"></div></li>
+                    <li class="directory-row" data-state="MD"><a class="directory-name" href="md.html">Maryland</a><div class="directory-facts" data-facts="MD"></div></li>
+                    <li class="directory-row" data-state="MA"><a class="directory-name" href="ma.html">Massachusetts</a><div class="directory-facts" data-facts="MA"></div></li>
+                    <li class="directory-row" data-state="MI"><a class="directory-name" href="mi.html">Michigan</a><div class="directory-facts" data-facts="MI"></div></li>
+                    <li class="directory-row" data-state="MN"><a class="directory-name" href="mn.html">Minnesota</a><div class="directory-facts" data-facts="MN"></div></li>
+                    <li class="directory-row" data-state="MS"><a class="directory-name" href="ms.html">Mississippi</a><div class="directory-facts" data-facts="MS"></div></li>
+                    <li class="directory-row" data-state="MO"><a class="directory-name" href="mo.html">Missouri</a><div class="directory-facts" data-facts="MO"></div></li>
+                    <li class="directory-row" data-state="MT"><a class="directory-name" href="mt.html">Montana</a><div class="directory-facts" data-facts="MT"></div></li>
+                    <li class="directory-row" data-state="NE"><a class="directory-name" href="ne.html">Nebraska</a><div class="directory-facts" data-facts="NE"></div></li>
+                    <li class="directory-row" data-state="NV"><a class="directory-name" href="nv.html">Nevada</a><div class="directory-facts" data-facts="NV"></div></li>
+                    <li class="directory-row" data-state="NH"><a class="directory-name" href="nh.html">New Hampshire</a><div class="directory-facts" data-facts="NH"></div></li>
+                    <li class="directory-row" data-state="NJ"><a class="directory-name" href="nj.html">New Jersey</a><div class="directory-facts" data-facts="NJ"></div></li>
+                    <li class="directory-row" data-state="NM"><a class="directory-name" href="nm.html">New Mexico</a><div class="directory-facts" data-facts="NM"></div></li>
+                    <li class="directory-row" data-state="NY"><a class="directory-name" href="ny.html">New York</a><div class="directory-facts" data-facts="NY"></div></li>
+                    <li class="directory-row" data-state="NC"><a class="directory-name" href="nc.html">North Carolina</a><div class="directory-facts" data-facts="NC"></div></li>
+                    <li class="directory-row" data-state="ND"><a class="directory-name" href="nd.html">North Dakota</a><div class="directory-facts" data-facts="ND"></div></li>
+                    <li class="directory-row" data-state="OH"><a class="directory-name" href="oh.html">Ohio</a><div class="directory-facts" data-facts="OH"></div></li>
+                    <li class="directory-row" data-state="OK"><a class="directory-name" href="ok.html">Oklahoma</a><div class="directory-facts" data-facts="OK"></div></li>
+                    <li class="directory-row" data-state="OR"><a class="directory-name" href="or.html">Oregon</a><div class="directory-facts" data-facts="OR"></div></li>
+                    <li class="directory-row" data-state="PA"><a class="directory-name" href="pa.html">Pennsylvania</a><div class="directory-facts" data-facts="PA"></div></li>
+                    <li class="directory-row" data-state="RI"><a class="directory-name" href="ri.html">Rhode Island</a><div class="directory-facts" data-facts="RI"></div></li>
+                    <li class="directory-row" data-state="SC"><a class="directory-name" href="sc.html">South Carolina</a><div class="directory-facts" data-facts="SC"></div></li>
+                    <li class="directory-row" data-state="SD"><a class="directory-name" href="sd.html">South Dakota</a><div class="directory-facts" data-facts="SD"></div></li>
+                    <li class="directory-row" data-state="TN"><a class="directory-name" href="tn.html">Tennessee</a><div class="directory-facts" data-facts="TN"></div></li>
+                    <li class="directory-row" data-state="TX"><a class="directory-name" href="tx.html">Texas</a><div class="directory-facts" data-facts="TX"></div></li>
+                    <li class="directory-row" data-state="UT"><a class="directory-name" href="ut.html">Utah</a><div class="directory-facts" data-facts="UT"></div></li>
+                    <li class="directory-row" data-state="VT"><a class="directory-name" href="vt.html">Vermont</a><div class="directory-facts" data-facts="VT"></div></li>
+                    <li class="directory-row" data-state="VA"><a class="directory-name" href="va.html">Virginia</a><div class="directory-facts" data-facts="VA"></div></li>
+                    <li class="directory-row" data-state="WA"><a class="directory-name" href="wa.html">Washington</a><div class="directory-facts" data-facts="WA"></div></li>
+                    <li class="directory-row" data-state="WV"><a class="directory-name" href="wv.html">West Virginia</a><div class="directory-facts" data-facts="WV"></div></li>
+                    <li class="directory-row" data-state="WI"><a class="directory-name" href="wi.html">Wisconsin</a><div class="directory-facts" data-facts="WI"></div></li>
+                    <li class="directory-row" data-state="WY"><a class="directory-name" href="wy.html">Wyoming</a><div class="directory-facts" data-facts="WY"></div></li>
+                </ul>
+            </div>
+
+            <footer class="site-footer">
+                <p><strong>Sources:</strong> members and their parties from Open States, as
+                    each legislature publishes them, counted against the National Conference
+                    of State Legislatures' figures; a chamber's control is shown only where
+                    the two agree. A seat with nobody listed counts for no one.</p>
+                <p>Non-partisan and independent.</p>
+            </footer>
+        </div>
+    </main>
+</div>
+
+<script src="../data/stategov.js"></script>
+<script src="../assets/kyc-stategov.js"></script>
+</body>
+</html>

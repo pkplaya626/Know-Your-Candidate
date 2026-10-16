@@ -46,9 +46,21 @@
       "</tr></thead><tbody>" + rows.join("") + "</tbody></table></div>";
   }
 
+  /* Where Know Your Government explains each of the hub's sections
+   * (kyc/government.py checks these sections exist: tests/test_guide.py). */
+  var LEARN = {
+    executive: ["executive.html#president", "How the presidency works"],
+    cabinet: ["executive.html#departments", "How the executive departments work"],
+    "supreme-court": ["courts.html#supreme-court", "How the Supreme Court works"],
+    courts: ["courts.html#appeals", "How the federal courts are organized"],
+  };
+
   function section(id, title, body) {
+    var learn = LEARN[id];
     return '<section class="fed-section" id="' + KYC.escapeAttr(id) + '">' +
-      '<h2 class="guide-subheading">' + esc(title) + "</h2>" + body + "</section>";
+      '<div class="section-head"><h2 class="guide-subheading">' + esc(title) + "</h2>" +
+      (learn ? '<a class="learn-link" href="' + KYC.escapeAttr("../government/" + learn[0]) + '">' +
+        KYC.icon("scroll") + " " + esc(learn[1]) + "</a>" : "") + "</div>" + body + "</section>";
   }
 
   function source(url, text) {

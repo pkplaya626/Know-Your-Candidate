@@ -75,28 +75,49 @@
 
 <div class="app-body">
     <aside class="sidebar scroll-y" id="sidebar" aria-label="Navigation and summary">
-        <nav class="sidebar-section" aria-label="Views">
-            <a class="nav-link" href="../index.html">
-                <svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg>
-                Profile grid
+        <nav class="sidebar-section site-nav" aria-label="Site">
+            <h2 class="nav-group">Elections 2026</h2>
+            <a class="nav-link" href="../index.html" data-nav="candidates">
+                <svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>
+                Candidates
             </a>
-            <a class="nav-link" href="../map.html">
+            <a class="nav-link" href="../map.html" data-nav="races">
                 <svg class="icon" aria-hidden="true"><use href="#i-map"/></svg>
-                Partisan map
+                Races &amp; partisan map
             </a>
-            <a class="nav-link" href="../states/index.html">
+            <h2 class="nav-group">Federal</h2>
+            <a class="nav-link" href="../index.html#/?role=member" data-nav="congress">
+                <svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg>
+                Congress
+            </a>
+            <a class="nav-link" href="../federal/index.html#executive" data-nav="executive">
+                <svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>
+                President &amp; Cabinet
+            </a>
+            <a class="nav-link" href="../federal/index.html#supreme-court" data-nav="courts">
+                <svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg>
+                Federal courts
+            </a>
+            <h2 class="nav-group">State</h2>
+            <a class="nav-link" href="../states/index.html" data-nav="states">
                 <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
                 States &amp; territories
             </a>
-            <a class="nav-link" href="../federal/index.html">
-                <svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg>
-                Federal government
-            </a>
-            <a class="nav-link" href="../government/index.html">
-                <svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg>
-                How government works
+            <a class="nav-link" href="../legislature/index.html" data-nav="legislatures">
+                <svg class="icon" aria-hidden="true"><use href="#i-columns"/></svg>
+                State legislatures
             </a>
             <div id="yourState" hidden></div>
+            <h2 class="nav-group">Local</h2>
+            <a class="nav-link" href="../counties/index.html" data-nav="local">
+                <svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg>
+                Counties &amp; cities
+            </a>
+            <h2 class="nav-group">Learn</h2>
+            <a class="nav-link" href="../government/index.html" data-nav="guide" aria-current="true">
+                <svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg>
+                Know Your Government
+            </a>
         </nav>
 
         <nav class="sidebar-section" aria-label="In this guide">
@@ -180,7 +201,7 @@
         <div class="content scroll-y">
             <article id="guideContent" class="state-page guide-page">
                 <header class="state-hero">
-                    <p class="state-kicker">How government works</p>
+                    <p class="state-kicker">Know Your Government</p>
                     <h1 class="state-title">How elections work</h1>
                     <p class="guide-lede">Federal law fixes the day of the November election, but nearly everything else - who may vote in a primary, how a winner is decided, when the count ends - is set by each state. This page explains the parts readers ask about in November and December, with examples from states' own laws. It is a guide, not legal advice: for your own ballot, use <a href="../states/index.html">your state's official voting pages</a>.</p>
                 </header>
@@ -203,6 +224,7 @@
                     <p>Federal law sets the day of the general election for Congress: the Tuesday after the first Monday in November of every even-numbered year (2 U.S.C. 7). In 2026 that is November 3. Every House seat is on that ballot, because House terms are two years.</p>
                     <p>A state holds a regular Senate election when one of its senators' six-year terms is ending, on the same November ballot, and the winner's term begins on January 3 of the next year (2 U.S.C. 1). When a Senate seat falls vacant, the Seventeenth Amendment calls for an election to fill it (see <a href="#vacancies">filling vacancies</a>).</p>
                     <p>Primary dates are not set nationally; each state sets its own. Texas law puts its general primary on the first Tuesday in March of even-numbered years. Georgia held its 2026 primary on May 19, with a runoff on June 16.</p>
+                    <p class="guide-see"><span>See it on this site:</span> <a href="../index.html#/?view=race">The 2026 races</a><span class="sep" aria-hidden="true"> · </span><a href="../map.html">The races on the partisan map</a></p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.law.cornell.edu/uscode/text/2/7" target="_blank" rel="noopener noreferrer">2 U.S.C. 7 (the day of the House election)</a>; <a href="https://www.law.cornell.edu/uscode/text/2/1" target="_blank" rel="noopener noreferrer">2 U.S.C. 1 (the election of senators)</a>; <a href="https://constitution.congress.gov/constitution/amendment-17/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Seventeenth Amendment</a>; <a href="https://tcss.legis.texas.gov/resources/EL/pdf/EL.41.pdf" target="_blank" rel="noopener noreferrer">Texas Election Code, chapter 41 (election dates)</a>; <a href="https://georgia.gov/georgia-election-guide" target="_blank" rel="noopener noreferrer">Georgia.gov, Georgia election guide</a></p>
                 </section>
                 <section class="guide-section" id="who-runs" aria-labelledby="who-runs-title">
@@ -218,6 +240,7 @@
                     <p>Some states hold no party primary for Congress. California and Washington list every candidate on one primary ballot, and the two with the most votes go on to November whatever party they prefer; a party preference on Washington's ballot is shown for voters' information only. Alaska's primary chooses no party's nominee: the four candidates with the most votes go on to the general election, which is decided by <a href="#ranked-choice">ranked-choice voting</a>. On November 3, 2026, Alaska's voters also decide a ballot measure that would repeal its open primary and ranked-choice general elections.</p>
                     <p>Louisiana's U.S. House seats follow a different calendar in 2026. Under Act 7 of the 2026 Regular Session they were moved to the November 3 ballot as an open primary: every candidate runs on one ballot, a candidate with a majority of the votes is elected, and otherwise the top two, of any party, meet in a general election on December 12. <a href="../states/la.html">Louisiana's page</a> lists the candidates the Secretary of State has qualified.</p>
                     <p>Some parties nominate without a primary. In Virginia, a state party may decide how it nominates candidates for the U.S. Senate and statewide office, and state law sets deadlines for nominations made other than by primary. In Connecticut, a party convention endorses a candidate for each state or district office, and a primary is held only if another candidate qualifies to challenge the endorsed one; otherwise the endorsed candidate is the nominee.</p>
+                    <p class="guide-see"><span>See it on this site:</span> <a href="../index.html">Who is still on the ballot</a></p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.eac.gov/voters/primary-election-types" target="_blank" rel="noopener noreferrer">U.S. Election Assistance Commission, Primary election types</a>; <a href="https://law.lis.virginia.gov/vacode/title24.2/chapter5/section24.2-530/" target="_blank" rel="noopener noreferrer">Code of Virginia 24.2-530 (who may vote in a primary)</a>; <a href="https://www.sos.la.gov/elections-voting/how-candidates-are-elected" target="_blank" rel="noopener noreferrer">Louisiana Secretary of State, How candidates are elected</a>; <a href="https://www.sos.ca.gov/elections/primary-elections-california" target="_blank" rel="noopener noreferrer">California Secretary of State, Primary elections in California</a>; <a href="https://app.leg.wa.gov/RCW/default.aspx?cite=29A.52.112" target="_blank" rel="noopener noreferrer">Revised Code of Washington 29A.52.112 (the top-two primary)</a>; <a href="https://www.akleg.gov/basis/statutes.asp?media=print&amp;secStart=15.25.010&amp;secEnd=15.25.010" target="_blank" rel="noopener noreferrer">Alaska Statutes 15.25.010 (the primary)</a>; <a href="https://www.akleg.gov/basis/statutes.asp?media=print&amp;secStart=15.15.350&amp;secEnd=15.15.350" target="_blank" rel="noopener noreferrer">Alaska Statutes 15.15.350 (ranked-choice general elections)</a>; <a href="https://www.elections.alaska.gov/petitions-and-ballot-measures/" target="_blank" rel="noopener noreferrer">Alaska Division of Elections, Petitions and ballot measures</a>; <a href="https://www.sos.la.gov/media/dcvl5ojl/051426-fall-house-races.pdf" target="_blank" rel="noopener noreferrer">Louisiana Secretary of State, release of May 14, 2026 on the fall House races</a>; <a href="https://law.lis.virginia.gov/vacode/title24.2/chapter5/section24.2-509/" target="_blank" rel="noopener noreferrer">Code of Virginia 24.2-509 (how a party nominates)</a>; <a href="https://law.lis.virginia.gov/vacode/title24.2/chapter5/section24.2-510/" target="_blank" rel="noopener noreferrer">Code of Virginia 24.2-510 (nominations other than by primary)</a>; <a href="https://www.cga.ct.gov/current/pub/chap_153.htm" target="_blank" rel="noopener noreferrer">Connecticut General Statutes, chapter 153 (nominations and primaries)</a></p>
                 </section>
                 <section class="guide-section" id="runoffs" aria-labelledby="runoffs-title">
