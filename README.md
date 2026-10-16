@@ -1375,6 +1375,17 @@ court's chief while their service as chief judge has begun and not ended. A
 confirmed nominee with no commission is not sitting, and the build says so.
 A judge sitting on several courts (a roving judgeship) is one person.
 
+Two things the directory's rows need read together:
+
+- **A chief judge on senior status.** A chief judge must be in regular
+  active service (28 U.S.C. 136(a)), so a record holding both cannot say
+  who is chief. Nobody is shown as that court's chief, the page says the
+  record is contradictory, and the build warns (`judge-record-conflict`).
+- **A statutory reassignment.** The Fifth Circuit's judges were reassigned
+  to the new Eleventh in 1981. The open row names no President and dates
+  the reassignment, so the appointment and the commission are taken from
+  the row the reassignment ended, and the seat says when it was reassigned.
+
 **Judges have no party.** The directory's "Party of Appointing President"
 columns describe the president, not the judge: they are dropped when the
 file is read, with its gender and race columns, so nothing later can show
@@ -1406,7 +1417,16 @@ A name opens the person's record in one dialog (`assets/kyc-official.js`):
 - a judge's earlier federal service, birth, education and career, in the
   directory's words, and a link to their FJC page.
 
-`#/official/<id>` opens it as sent.
+`#/official/<id>` opens it as sent; on the hub, a judge's name opens their
+record on their court's page, which loads it.
+
+A tied Senate vote confirms only on the Vice President's vote (Article I,
+Section 3), and the page says so beside the tally. When the Senate's votes
+could not be read, an officer with no earlier finding reads "could not be
+read when last checked", never "no roll call found" (rule 19). The pages
+cover Article III judges and say so: the Court of Federal Claims, the Tax
+Court, and bankruptcy and magistrate judges are not in the directory, and
+a search that finds nobody says it searched the directory.
 
 | File | What it holds |
 |---|---|

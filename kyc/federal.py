@@ -388,16 +388,23 @@ def fetch(previous=None, today=None, read=None, log=print):
         if votes is not None:
             holder["senate"] = confirmation(office, entry["name"], votes)
         else:
+            # The Senate's votes could not be read: the last run's finding
+            # for the same person stands; for anyone else nothing was looked
+            # at, which is not "no roll call found" (rule 19).
             kept = (before.get(office["key"]) or {}).get("holder") or {}
-            if same_person(kept.get("name", ""), entry["name"]):
+            if same_person(kept.get("name", ""), entry["name"]) and not kept.get("senateUnread"):
                 holder["senate"] = kept.get("senate")
+            else:
+                holder["senate"] = None
+                holder["senateUnread"] = True
         holder["page"] = confirm_on_page(office, entry["name"], read)
         offices.append({"key": office["key"], "office": office["office"],
                         "body": office["body"],
                         "kind": "department" if department else "cabinet-level",
                         "order": order if department else None, "holder": holder})
-        log(f"  {office['office']}: {entry['name']} - page {holder['page']['status']}, "
-            f"Senate {(holder.get('senate') or {}).get('vote', 'no roll call found')}")
+        log(f"  {office['office']}: {entry['name']} - page {holder['page']['status']}, Senate "
+            + ("votes not read" if holder.get("senateUnread")
+               else (holder.get("senate") or {}).get("vote", "no roll call found")))
     return {
         "fetched": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
         "asOf": today,

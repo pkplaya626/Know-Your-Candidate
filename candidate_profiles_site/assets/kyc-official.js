@@ -154,10 +154,16 @@
 
   function senateText(holder) {
     var s = holder.senate;
+    if (holder.senateUnread) {
+      return absent("The Senate’s votes could not be read when last checked; this says nothing either way");
+    }
     if (!s) {
       return absent("No Senate roll call confirming them to this office was found");
     }
-    return "Confirmed " + KYC.escapeHtml(s.yeas + "–" + s.nays) + " on " +
+    // A tied roll call confirms only on the Vice President's vote
+    // (Article I, Section 3).
+    return "Confirmed " + KYC.escapeHtml(s.yeas + "–" + s.nays) +
+      (s.yeas === s.nays ? ", the Vice President breaking the tie," : "") + " on " +
       KYC.escapeHtml(s.date) + " (" + outLink(s.url, "roll call " + s.vote) + ")" +
       (s.nominee && s.nominee !== holder.name
         ? '<br><span class="faint">The Senate’s record names them ' +
@@ -237,6 +243,7 @@
           (seat.vote ? " (" + KYC.escapeHtml(vote(seat.vote)) + ")" : ""));
       }
       if (seat.commissioned) parts.push("commissioned " + KYC.escapeHtml(seat.commissioned));
+      if (seat.reassigned) parts.push("reassigned to this court by statute " + KYC.escapeHtml(seat.reassigned));
       if (seat.chiefSince) parts.push("chief since " + KYC.escapeHtml(seat.chiefSince));
       if (seat.seniorSince) parts.push("senior status since " + KYC.escapeHtml(seat.seniorSince));
       return "<li><strong>" + KYC.escapeHtml(seat.title || "Judge") + "</strong>, " +
@@ -305,12 +312,17 @@
   /* --------------------------------------------------------- not listed */
 
   function renderMissing(id) {
+    // A court page holds only its own judges; the hub holds everyone.
+    var court = doc.body.getAttribute("data-page") === "court";
     el("officialModalKind").textContent = "Not listed";
     el("officialModalMeta").textContent = "";
     el("officialModalBody").innerHTML = '<div class="modal-column">' +
       panel("info", "Nobody here by this link", '<p class="note-box">The link names ' +
-        KYC.escapeHtml(id) + ", and nobody of that id is among the officials this page lists " +
-        "now. They may have left office since the link was made.</p>") + "</div>";
+        KYC.escapeHtml(id) + (court
+          ? ", and nobody of that id sits on this court. " +
+            '<a href="../federal/index.html#courts">Find a judge on the federal government’s page</a>.'
+          : ", and nobody of that id is among the officials this page lists now. They may " +
+            "have left office since the link was made.") + "</p>") + "</div>";
     el("officialModalSource").textContent = "";
   }
 
@@ -337,6 +349,15 @@
 
   function open(id, opts) {
     var found = officials()[id] || null;
+    var elsewhere = !found && (global.kycJudgesIndex || []).filter(function (row) {
+      return row[0] === id;
+    })[0];
+    if (elsewhere) {
+      // A judge of a court whose file this page has not loaded: their
+      // court's page has their record.
+      global.location.replace(courtUrl(elsewhere[2][0]) + "#/official/" + encodeURIComponent(id));
+      return true;
+    }
     ensure();
     current = id;
     render(id, found);

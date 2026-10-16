@@ -935,7 +935,7 @@ COURTS = {
              "and the lower courts Congress creates. Federal courts hear cases under federal "
              "law and the Constitution, and many disputes between citizens of different "
              "states; [state courts](guide:states#courts) hear most of the rest. Every sitting "
-             "federal judge, court by court, is on [the federal government's "
+             "Article III judge, court by court, is on [the federal government's "
              "page](site:federal/index.html#courts)."),
     "sections": [
         {

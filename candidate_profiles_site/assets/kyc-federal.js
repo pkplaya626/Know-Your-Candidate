@@ -79,11 +79,24 @@
     return court.listed ? court.active + " active, " + court.senior + " senior" : "";
   }
 
+  /** A judge named on the hub opens on their court's page, which loads
+   *  their record; the hub loads only the courts' index. */
+  function judgeLink(court, judge, prefix) {
+    return '<a href="' + KYC.escapeAttr(prefix + court.id + ".html#/official/" +
+      encodeURIComponent(judge.id)) + '">' + esc(judge.name) + "</a>";
+  }
+
+  function chiefCell(c, prefix) {
+    if (c.chief) return judgeLink(c, c.chief, prefix);
+    return '<span class="faint">' + (!c.listed ? "Not in the directory"
+      : c.chiefUnsettled ? "The directory’s record of its chief is contradictory"
+      : "None named") + "</span>";
+  }
+
   function courtRows(courts, prefix) {
     return courts.map(function (c) {
       return "<tr><th scope=\"row\">" + courtLink(c, prefix) + "</th>" +
-        cell("Chief judge", c.chief ? person(c.chief.id, c.chief.name) :
-          '<span class="faint">' + (c.listed ? "None named" : "Not in the directory") + "</span>") +
+        cell("Chief judge", chiefCell(c, prefix)) +
         cell("Judges", c.listed ? esc(counts(c)) :
           '<span class="faint">Not in the directory</span>') + "</tr>";
     });
@@ -105,9 +118,13 @@
 
   function senateCell(holder) {
     var s = holder && holder.senate;
+    if (holder && holder.senateUnread) {
+      return '<span class="faint">The Senate’s votes could not be read when last checked</span>';
+    }
     if (!s) return '<span class="faint">No confirming roll call found</span>';
     return '<a href="' + KYC.escapeAttr(s.url) + '" target="_blank" rel="noopener noreferrer">' +
-      esc(s.yeas + "–" + s.nays) + "</a>, " + esc(s.date);
+      esc(s.yeas + "–" + s.nays) + "</a>, " + esc(s.date) +
+      (s.yeas === s.nays ? ", the Vice President breaking the tie" : "");
   }
 
   function pageCell(holder) {
@@ -118,7 +135,7 @@
     }
     if (page.status === "unconfirmed") return '<span class="faint">Not named there when last read</span>';
     if (page.status === "unreadable") return '<span class="faint">Could not be read</span>';
-    return '<span class="faint">No such page</span>';
+    return '<span class="faint">No page names the head</span>';
   }
 
   function officeRow(office) {
@@ -183,10 +200,13 @@
       'placeholder="A judge’s name" aria-describedby="judgeSearchCount">' +
       '<p class="faint" id="judgeSearchCount" role="status"></p>' +
       '<ul class="fed-results" id="judgeResults"></ul></div>' +
-      '<p class="guide-lede">Every sitting judge of each court, from the ' +
+      '<p class="guide-lede">Every sitting judge of each court whose judges are appointed under ' +
+      "Article III, from the " +
       source(d.sources.judiciary.directory, "Federal Judicial Center’s Biographical Directory") +
-      " as of " + esc(asOf.judiciary) + ". These pages list who sits; they do not count " +
-      "vacancies, which the directory does not hold.</p>" +
+      " as of " + esc(asOf.judiciary) + ", and the three territorial district courts. The " +
+      "Court of Federal Claims, the Tax Court, and bankruptcy and magistrate judges are not " +
+      "in it. These pages list who sits; they do not count vacancies, which the directory " +
+      "does not hold.</p>" +
       "<h3 class=\"panel-subhead\">Courts of appeals</h3>" +
       table("", COURT_HEADS, courtRows(appeals, "../courts/"));
     appeals.forEach(function (circuit) {
@@ -202,7 +222,7 @@
       body += '<h3 class="panel-subhead">Court of International Trade</h3>' +
         table("", COURT_HEADS, courtRows(trade, "../courts/"));
     }
-    html += section("courts", "Every federal court", body);
+    html += section("courts", "The Article III courts", body);
     el("federalBody").innerHTML = html;
     initSearch();
   }
@@ -225,21 +245,21 @@
       if (typed) KYC.router.writeFilters({ q: input.value.trim() });
       if (!words.length) {
         list.innerHTML = "";
-        status.textContent = index.length.toLocaleString("en-US") + " sitting judges";
+        status.textContent = index.length.toLocaleString("en-US") + " sitting Article III judges";
         return;
       }
       var hits = [];
       for (var i = 0; i < index.length; i += 1) {
         if (words.every(function (w) { return folded[i].indexOf(w) !== -1; })) hits.push(index[i]);
       }
-      status.textContent = hits.length === 0 ? "No sitting judge by that name" :
+      status.textContent = hits.length === 0 ? "No Article III judge by that name in the directory" :
         hits.length + (hits.length === 1 ? " judge" : " judges") +
         (hits.length > SEARCH_LIMIT ? ", the first " + SEARCH_LIMIT + " shown" : "");
       list.innerHTML = hits.slice(0, SEARCH_LIMIT).map(function (row) {
-        var court = courts[row[2]] || { name: row[2] };
-        return '<li><a href="' + KYC.escapeAttr("../courts/" + row[2] + ".html#/official/" +
+        var names = row[2].map(function (cid) { return (courts[cid] || { name: cid }).name; });
+        return '<li><a href="' + KYC.escapeAttr("../courts/" + row[2][0] + ".html#/official/" +
           encodeURIComponent(row[0])) + '">' + esc(row[1]) + "</a> " +
-          '<span class="faint">' + esc(court.name) + (row[3] === "senior" ? ", senior status" : "") +
+          '<span class="faint">' + esc(names.join("; ")) + (row[3] === "senior" ? ", senior status" : "") +
           "</span></li>";
       }).join("");
     }

@@ -60,6 +60,7 @@ def _holder(office):
         "photo": holder.get("photo"),
         "page": {k: page[k] for k in ("status", "url", "acting") if page.get(k)},
         "senate": holder.get("senate"),
+        "senateUnread": bool(holder.get("senateUnread")),
     }
 
 
@@ -98,6 +99,7 @@ def build(root="."):
             "circuit": court.get("circuit"), "states": list(court.get("states") or ()),
             "listed": held["listed"], "active": held["active"], "senior": held["senior"],
             "chief": {"id": chief, "name": judges[chief]["name"]} if chief else None,
+            "chiefUnsettled": bool(held.get("chiefUnsettled")),
         })
     scotus = courts["courts"]["scotus"]
     payload = {
@@ -109,7 +111,8 @@ def build(root="."):
         "courts": index,
         "supremeCourt": {"members": [_judge(judges[i]) for i in scotus["judges"]],
                          "retired": [_judge(judges[i]) for i in scotus.get("retired") or []]},
-        "judges": len(judges),
+        # Sitting judges: a retired justice is listed apart, never counted.
+        "judges": sum(1 for j in judges.values() if not j.get("retiredJustice")),
     }
     per_court = {}
     for cid, held in courts["courts"].items():
@@ -119,12 +122,14 @@ def build(root="."):
                           "judges": [_judge(judges[i]) for i in held["judges"]]}
         if held.get("retired"):
             per_court[cid]["retired"] = [_judge(judges[i]) for i in held["retired"]]
-    search = []
+    # One row per judge, with every court they sit on: a judge on several
+    # courts (a roving judgeship) is one person.
+    sitting_on = {}
     for cid, held in courts["courts"].items():
         for jid in held["judges"]:
-            record = judges[jid]
-            search.append([jid, record["name"], cid, record["status"]])
-    search.sort(key=lambda row: (row[1], row[2]))
+            sitting_on.setdefault(jid, []).append(cid)
+    search = sorted(([jid, judges[jid]["name"], sitting_on[jid], judges[jid]["status"]]
+                     for jid in sitting_on), key=lambda row: (row[1], row[0]))
     _check_ids(payload, per_court)
     return payload, per_court, search, problems
 

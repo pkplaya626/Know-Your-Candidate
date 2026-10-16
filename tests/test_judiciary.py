@@ -96,6 +96,64 @@ class TestTheDirectory(unittest.TestCase):
         self.assertEqual(kagan["seats"][0]["appointedBy"], "Barack Obama")
 
 
+def service_row(**fields):
+    """One row of the FJC's service file, with only what a test sets."""
+    row = {"nid": "1", "Judge Name": "Doe, Jane",
+           "Court Name": "U.S. Court of Appeals for the Eleventh Circuit",
+           "Appointment Title": "Judge", "Appointing President": "Gerald Ford",
+           "Nomination Date": "", "Confirmation Date": "", "Commission Date": "1975-11-21",
+           "Senior Status Date": "", "Termination Date": "", "Termination": "",
+           "Senate Vote Type": "", "Ayes/Nays": "", "Seat ID": "X",
+           "Service as Chief Judge, Begin": "", "Service as Chief Judge, End": "",
+           "2nd Service as Chief Judge, Begin": "", "2nd Service as Chief Judge, End": ""}
+    row.update(fields)
+    return row
+
+
+class TestRecordsThatNeedReading(unittest.TestCase):
+    def test_a_chief_on_senior_status_is_not_shown_as_chief(self):
+        # Catherine Eagles's row: chief of the Middle District of North
+        # Carolina since 2023 with no end, and senior since 2024-12-31. A
+        # chief must be in regular active service (28 U.S.C. 136(a)).
+        row = service_row(**{
+            "Court Name": "U.S. District Court for the Middle District of North Carolina",
+            "Commission Date": "2010-01-01", "Senior Status Date": "2024-12-31",
+            "Service as Chief Judge, Begin": "2023"})
+        judges, _pending, _problems, conflicts = judiciary.sitting([row], {}, TODAY)
+        seat = judges["1"]["seats"][0]
+        self.assertIsNone(seat["chiefSince"])
+        self.assertTrue(seat["chiefUnsettled"])
+        self.assertEqual(len(conflicts), 1)
+
+    def test_a_reassignment_carries_the_appointment(self):
+        # Gerald Tjoflat: commissioned to the Fifth Circuit in 1975 and
+        # reassigned by statute to the Eleventh when it was created in 1981.
+        rows = [service_row(**{"Court Name": "U.S. Court of Appeals for the Fifth Circuit",
+                               "Termination Date": "1981-10-01", "Termination": "Reassignment",
+                               "Nomination Date": "1975-11-03"}),
+                service_row(**{"Appointing President": "None (reassignment)",
+                               "Commission Date": "1981-10-01"})]
+        judges, _pending, _problems, conflicts = judiciary.sitting(rows, {}, TODAY)
+        seat = judges["1"]["seats"][0]
+        self.assertEqual((seat["court"], seat["appointedBy"], seat["commissioned"],
+                          seat["nominated"], seat["reassigned"]),
+                         ("ca11", "Gerald Ford", "1975-11-21", "1975-11-03", "1981-10-01"))
+        self.assertEqual(conflicts, [])
+
+    def test_the_committed_cache_names_every_appointing_president(self):
+        cache = judiciary.load_cache(ROOT)
+        if cache is None:
+            self.skipTest("no judiciary cache committed")
+        self.assertEqual([j["name"] for j in cache["judges"].values()
+                          if not all(s.get("appointedBy") for s in j["seats"])], [])
+        # Nobody is a court's chief while on senior status.
+        for cid, court in cache["courts"].items():
+            chief = cache["judges"].get(court.get("chief") or "")
+            if chief and cid != "scotus":
+                seat = next(s for s in chief["seats"] if s["court"] == cid)
+                self.assertIsNone(seat["seniorSince"], cid)
+
+
 class TestWhatIsRefused(unittest.TestCase):
     def test_a_court_the_table_does_not_know(self):
         text = fixture("federal-judicial-service.csv").replace(

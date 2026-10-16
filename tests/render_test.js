@@ -4340,7 +4340,8 @@ async function testFederal() {
     const first = [...D.querySelectorAll("#supreme-court table")][0];
     check("a retired justice is never among them", [...first.querySelectorAll("[data-official]")]
       .every((b) => !retired.has(b.getAttribute("data-official"))));
-    const links = [...D.querySelectorAll('#courts a[href^="../courts/"]')].map((a) => a.getAttribute("href"));
+    const links = [...D.querySelectorAll('#courts a[href^="../courts/"]')].map((a) => a.getAttribute("href"))
+      .filter((href) => href.indexOf("#") === -1);
     check("every court but the Supreme Court is linked, once",
       links.length === d.courts.length - 1 && new Set(links).size === links.length,
       `${links.length} links, ${d.courts.length} courts`);
@@ -4354,6 +4355,27 @@ async function testFederal() {
       .getAttribute && D.querySelector('.nav-link[aria-current="page"]').getAttribute("href") ===
       "../federal/index.html");
     check("no state is remembered from this page", D.body.getAttribute("data-state") === "");
+    check("the sidebar's state list is written into the page",
+      D.getElementById("stateJump").options.length > 50, `${D.getElementById("stateJump").options.length}`);
+    // The hub loads no court's file: a name it cannot open must not be a
+    // button, or a sitting judge reads as "no longer listed".
+    const buttons = [...D.querySelectorAll("[data-official]")];
+    check("every name the hub offers to open, it can open", buttons.every((b) =>
+      window.KYC.official.officials()[b.getAttribute("data-official")]),
+      buttons.filter((b) => !window.KYC.official.officials()[b.getAttribute("data-official")])
+        .map((b) => b.textContent).slice(0, 5).join(", "));
+    const chiefs = d.courts.filter((c) => c.kind !== "supreme" && c.chief);
+    check("a chief judge links to their record on their court's page", chiefs.every((c) =>
+      !!D.querySelector('#courts a[href="../courts/' + c.id + ".html#/official/" +
+        encodeURIComponent(c.chief.id) + '"]')));
+    const tie = d.offices.find((o) => o.holder && o.holder.senate &&
+      o.holder.senate.yeas === o.holder.senate.nays);
+    check("a tie the Vice President broke is said", !tie || [...D.querySelectorAll("#cabinet tr")]
+      .some((tr) => tr.textContent.indexOf(tie.holder.name) !== -1 &&
+        /the Vice President breaking the tie/.test(tr.textContent)));
+    check("the courts are said to be the Article III courts",
+      /Article III/.test(D.getElementById("courts").textContent) &&
+      !/Every federal court/.test(D.getElementById("federalBody").textContent));
   });
 
   suite("federal/index.html — finding a judge", () => {
@@ -4370,8 +4392,19 @@ async function testFederal() {
     check("the search is in the address", /q=/.test(window.location.hash), window.location.hash);
     input.value = "zzqxv nobody";
     input.dispatchEvent(new window.Event("input"));
-    check("a name nobody has says so", /No sitting judge by that name/.test(
-      D.getElementById("judgeSearchCount").textContent));
+    check("a name nobody has says so, for the directory it searched",
+      /No Article III judge by that name in the directory/.test(
+        D.getElementById("judgeSearchCount").textContent));
+    const index = window.kycJudgesIndex;
+    const roving = index.find((row) => row[2].length > 1);
+    if (roving) {
+      input.value = roving[1];
+      input.dispatchEvent(new window.Event("input"));
+      const shown = [...D.querySelectorAll("#judgeResults a")].filter((a) => a.textContent === roving[1]);
+      check("a judge on several courts is listed once", shown.length === 1, `${shown.length}`);
+    }
+    check("the count is of people", D.getElementById("judgeSearchCount") &&
+      new Set(index.map((row) => row[0])).size === index.length);
     input.value = "";
     input.dispatchEvent(new window.Event("input"));
   });

@@ -156,7 +156,7 @@ def sitting(rows, bios, today):
     caller to refuse on: a new or renamed court read as nothing would drop
     its judges with nothing said."""
     names = federal_courts.by_fjc_name()
-    judges, unknown, pending = {}, set(), []
+    judges, unknown, pending, conflicts = {}, set(), [], []
     for row in rows:
         if _date(row.get("Termination Date"), "termination date"):
             continue
@@ -186,8 +186,19 @@ def sitting(rows, bios, today):
             "chiefSince": _chief(row, today),
             "seat": row.get("Seat ID", "").strip() or None,
         }
+        if seat["chiefSince"] and seat["seniorSince"]:
+            # A chief judge must be in regular active service (28 U.S.C.
+            # 136(a)): a record that has both cannot say who is chief, and
+            # nobody is shown as chief until it is settled.
+            conflicts.append(f"{row['Judge Name']}: chief judge of {name} since "
+                             f"{seat['chiefSince']} and on senior status since {seat['seniorSince']}")
+            seat["chiefSince"] = None
+            seat["chiefUnsettled"] = True
         if row.get("Appointing President", "").strip().startswith("None ("):
-            seat["appointedBy"] = None          # a reassignment: the first row names them
+            # A reassignment by statute (the Fifth Circuit's division in
+            # 1981): the appointment is the earlier seat's, filled in below.
+            seat["appointedBy"] = None
+            seat["reassigned"] = commissioned
         bio = bios.get(nid) or {}
         judge = judges.setdefault(nid, {
             "id": f"fjc-{nid}", "nid": nid,
@@ -198,22 +209,52 @@ def sitting(rows, bios, today):
             "fjc": JUDGE_PAGE.format(nid=nid), "seats": [],
         })
         judge["seats"].append(seat)
-    prior = {}
+    prior, ended_rows = {}, {}
     for row in rows:
         ended = _date(row.get("Termination Date"), "termination date")
         nid = row["nid"].strip()
         if ended and nid in judges:
+            ended_rows.setdefault(nid, []).append(row)
             prior.setdefault(nid, []).append({
                 "court": row["Court Name"].strip(),
                 "title": row.get("Appointment Title", "").strip() or None,
                 "from": _date(row.get("Commission Date"), "commission date"),
                 "to": ended, "how": row.get("Termination", "").strip() or None})
     for nid, judge in judges.items():
+        for seat in judge["seats"]:
+            if seat.get("reassigned"):
+                origin = _appointment(ended_rows.get(nid, []), seat["reassigned"])
+                if origin:
+                    seat.update(origin)
+                else:
+                    conflicts.append(f"{judge['name']}: reassigned to {seat['court']} with no "
+                                     f"earlier appointment in the directory")
         judge["prior"] = sorted(prior.get(nid, []), key=lambda p: p["from"] or "")
         judge["seats"].sort(key=lambda s: s["commissioned"])
         judge["status"] = "senior" if all(s["seniorSince"] for s in judge["seats"]) else "active"
     problems = [f"a court the table does not know: {name}" for name in sorted(unknown)]
-    return judges, pending, problems
+    return judges, pending, problems, sorted(conflicts)
+
+
+def _appointment(rows, reassigned):
+    """The appointment a statutory reassignment carried over: the judge's
+    seat that ended by reassignment on that day, followed back through any
+    earlier reassignment to the row that names the President."""
+    for _ in range(len(rows)):
+        row = next((r for r in rows
+                    if _date(r.get("Termination Date"), "termination date") == reassigned
+                    and r.get("Termination", "").strip() == "Reassignment"), None)
+        if row is None:
+            return None
+        president = row.get("Appointing President", "").strip()
+        commissioned = _date(row.get("Commission Date"), "commission date")
+        if president and not president.startswith("None ("):
+            return {"appointedBy": president,
+                    "nominated": _date(row.get("Nomination Date"), "nomination date"),
+                    "confirmed": _date(row.get("Confirmation Date"), "confirmation date"),
+                    "vote": _vote(row), "commissioned": commissioned}
+        reassigned = commissioned
+    return None
 
 
 # ------------------------------------------------------- the Supreme Court
@@ -288,7 +329,7 @@ def build(service_text, judges_text, scotus_page, today):
     """The cache, or :class:`JudiciaryError` when a source is not what the
     pipeline knows."""
     bios = read_judges(judges_text)
-    judges, pending, problems = sitting(read_service(service_text), bios, today)
+    judges, pending, problems, conflicts = sitting(read_service(service_text), bios, today)
     if problems:
         raise JudiciaryError("; ".join(problems))
     members, retired, joins = join_justices(parse_justices(scotus_page), judges, bios)
@@ -313,6 +354,9 @@ def build(service_text, judges_text, scotus_page, today):
                                               js[1]["seniorSince"] is not None,
                                               js[1]["commissioned"]))
         courts[cid] = {
+            # A chief the directory's record contradicts (on senior status):
+            # nobody is named, and the page says why.
+            "chiefUnsettled": any(s.get("chiefUnsettled") for _j, s in seats) and not chiefs,
             "listed": court.get("fjc", court["name"]) is not None,
             "active": sum(1 for _j, s in seats if not s["seniorSince"]),
             "senior": sum(1 for _j, s in seats if s["seniorSince"]),
@@ -333,6 +377,7 @@ def build(service_text, judges_text, scotus_page, today):
                    for j in sorted(judges.values(), key=lambda j: j["id"])},
         "courts": courts,
         "pending": sorted(pending),
+        "conflicts": conflicts,
     }
 
 
@@ -401,6 +446,10 @@ def problems(cache, today=None):
         out.append(("warn", "judges-not-commissioned",
                     f"{len(cache['pending'])} confirmed judges are not commissioned yet and are "
                     f"not listed as sitting", cache["pending"]))
+    if cache.get("conflicts"):
+        out.append(("warn", "judge-record-conflict",
+                    f"{len(cache['conflicts'])} judges' directory records contradict themselves; "
+                    f"what they cannot settle is not shown", cache["conflicts"]))
     age = None
     if cache.get("asOf"):
         today = today or datetime.date.today().isoformat()

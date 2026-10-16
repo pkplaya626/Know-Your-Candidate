@@ -56,11 +56,20 @@ class TestTheBuild(unittest.TestCase):
         orders = [o["order"] for o in self.payload["offices"] if o["kind"] == "department"]
         self.assertEqual(sorted(orders), list(range(1, len(orders) + 1)))
 
-    def test_the_search_lists_each_judge_under_each_court_they_sit_on(self):
-        expected = sorted((j["id"], cid) for cid, c in self.courts.items() for j in c["judges"])
-        self.assertEqual(sorted((row[0], row[2]) for row in self.search), expected)
-        names = [(row[1], row[2]) for row in self.search]
+    def test_the_search_lists_each_judge_once_with_every_court(self):
+        # A judge on several courts (a roving judgeship) is one person.
+        expected = {}
+        for cid, court in self.courts.items():
+            for judge in court["judges"]:
+                expected.setdefault(judge["id"], []).append(cid)
+        self.assertEqual({row[0]: row[2] for row in self.search}, expected)
+        self.assertEqual(len(self.search), len({row[0] for row in self.search}))
+        names = [(row[1], row[0]) for row in self.search]
         self.assertEqual(names, sorted(names))
+
+    def test_the_count_is_of_sitting_judges(self):
+        # The retired justices are listed apart, never counted as sitting.
+        self.assertEqual(self.payload["judges"], len(self.search))
 
     def test_a_retired_justice_is_never_a_member(self):
         scotus = self.payload["supremeCourt"]

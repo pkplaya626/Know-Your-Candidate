@@ -279,9 +279,11 @@ def render_state_pages(profiles, root=".", summary=None):
         out[os.path.join(COUNTIES_PAGES_DIR, f"{code.lower()}.html")] = (
             pages.render_counties_page(code, host))
     from . import federal_courts
-    out[os.path.join(FEDERAL_PAGES_DIR, "index.html")] = pages.render_federal_page(host)
+    codes = state_codes(profiles)
+    out[os.path.join(FEDERAL_PAGES_DIR, "index.html")] = pages.render_federal_page(host, codes)
     for cid in federal_courts.COURTS:
-        out[os.path.join(COURT_PAGES_DIR, f"{cid}.html")] = pages.render_court_page(cid, host)
+        out[os.path.join(COURT_PAGES_DIR, f"{cid}.html")] = pages.render_court_page(cid, host,
+                                                                                    codes)
     return out
 
 

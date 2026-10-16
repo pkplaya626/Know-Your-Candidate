@@ -1349,7 +1349,8 @@ def _judiciary(args):
         except judiciary.JudiciaryError as exc:
             print(f"[error] {exc}; the committed cache is unchanged", file=sys.stderr)
             return 2
-    judges = cache["judges"]
+    # A retired justice is listed apart and never counted as sitting.
+    judges = {k: j for k, j in cache["judges"].items() if not j.get("retiredJustice")}
     active = sum(1 for j in judges.values() if j["status"] == "active")
     print(f"  {len(judges)} sitting judges: {active} active, {len(judges) - active} senior "
           f"(directory as of {cache['asOf']})")

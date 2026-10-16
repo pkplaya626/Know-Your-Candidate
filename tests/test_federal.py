@@ -3,10 +3,12 @@ own sources and never guessed (kyc/federal.py, kyc/federal_offices.py).
 
 Fixtures are trimmed copies of the real pages as read on 2026-10-16."""
 
+import copy
 import json
 import os
 import sys
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -155,6 +157,41 @@ class TestTheSenatesConfirmation(unittest.TestCase):
                                                self.votes))
         self.assertIsNone(federal.confirmation(self.office["treasury"], "Marco Rubio",
                                                self.votes))
+
+
+class TestWhenTheSenateCannotBeRead(unittest.TestCase):
+    """A vote menu that cannot be read concludes nothing (rule 8): the last
+    run's finding stands for the same person, and anyone else is "not read",
+    never "no roll call found" (rule 19)."""
+
+    def fetch(self, previous):
+        pages = {federal.EXECUTIVE_URL: fixture("executive.json"),
+                 federal_offices.ADMINISTRATION_URL: fixture("administration.html"),
+                 federal_offices.CABINET_URL: fixture("cabinet.html")}
+
+        def read(url):
+            if url in pages:
+                return pages[url]
+            raise federal.FederalError(f"HTTP Error 503 for {url}")
+
+        with mock.patch.object(federal.time, "sleep", lambda _s: None):
+            return federal.fetch(previous=previous, today="2026-10-16", read=read,
+                                 log=lambda *_a: None)
+
+    def test_nothing_read_is_never_none_found(self):
+        holders = [o["holder"] for o in self.fetch(None)["offices"] if o["holder"]]
+        self.assertTrue(holders)
+        self.assertTrue(all(h["senateUnread"] and h["senate"] is None for h in holders))
+
+    def test_the_last_finding_for_the_same_person_stands(self):
+        previous = copy.deepcopy(self.fetch(None))
+        office = next(o for o in previous["offices"] if o["holder"])
+        office["holder"]["senate"] = {"vote": "119-1-8"}
+        office["holder"].pop("senateUnread")
+        kept = next(o for o in self.fetch(previous)["offices"]
+                    if o["key"] == office["key"])["holder"]
+        self.assertEqual(kept["senate"], {"vote": "119-1-8"})
+        self.assertNotIn("senateUnread", kept)
 
 
 class TestTheBuildsWord(unittest.TestCase):

@@ -538,11 +538,11 @@ _FEDERAL_SIDEBAR = """
             <h2 class="sidebar-heading">Federal government</h2>
             <p class="sidebar-note">Who holds the federal government's offices now, each from the
                 office's own record: the President, the Vice President and the Cabinet, the
-                Supreme Court, and every federal judge.</p>
+                Supreme Court, and every sitting Article III judge.</p>
             <a class="sidebar-link" href="../federal/index.html#executive">The executive</a>
             <a class="sidebar-link" href="../federal/index.html#cabinet">The Cabinet</a>
             <a class="sidebar-link" href="../federal/index.html#supreme-court">The Supreme Court</a>
-            <a class="sidebar-link" href="../federal/index.html#courts">Every federal court</a>
+            <a class="sidebar-link" href="../federal/index.html#courts">The Article III courts</a>
         </div>
 """
 
@@ -557,6 +557,13 @@ _FEDERAL_FOOTER = "\n".join([
     "                <p>Non-partisan and independent.</p>",
 ])
 
+def _jump(codes):
+    """The "Jump to" list, written into the page: these pages load no build
+    metadata to fill it."""
+    from .government import jump_options
+    return jump_options(codes)
+
+
 _FEDERAL_SCRIPTS = (
     "../data/federal.js",
     "../data/judiciary/index.js",
@@ -565,7 +572,7 @@ _FEDERAL_SCRIPTS = (
 )
 
 
-def render_federal_page(host):
+def render_federal_page(host, codes=()):
     """The federal government's hub: the President, the Vice President, the
     Cabinet, the Supreme Court and every federal court. The page carries no
     names; ``assets/kyc-federal.js`` draws it from ``data/federal.js``."""
@@ -577,8 +584,8 @@ def render_federal_page(host):
         '                    <p class="state-kicker">Federal government</p>',
         '                    <h1 class="state-title">Who holds the federal government&#8217;s offices</h1>',
         '                    <p class="districts-lede">The President and Vice President, the Cabinet, the',
-        '                        Supreme Court and every federal judge, each from the office&#8217;s own',
-        '                        record. Pick a name for the person&#8217;s record.</p>',
+        '                        Supreme Court and every sitting Article III judge, each from the',
+        '                        office&#8217;s own record. Pick a name for the person&#8217;s record.</p>',
         '                    <p class="state-links">',
         '                        <a class="btn" href="../government/executive.html"><svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> How the executive works</a>',
         '                        <a class="btn" href="../government/courts.html"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg> How the federal courts work</a>',
@@ -593,7 +600,7 @@ def render_federal_page(host):
         title=_e("Federal government — Know Your Candidate"),
         og_title=_e("The federal government: who holds each office"),
         description=_e("The President, the Vice President, the Cabinet, the Supreme Court and "
-                       "every sitting federal judge, each from the office's own record."),
+                       "every sitting Article III judge, each from the office's own record."),
         canonical=_e(canonical),
         host=_e(host or ""),
         code="",
@@ -601,13 +608,14 @@ def render_federal_page(host):
         search="",
         sidebar=_FEDERAL_SIDEBAR,
         federal_current=' aria-current="page"',
+        jump_options=_jump(codes),
         main=main,
         footer=_FEDERAL_FOOTER,
         scripts=_scripts(_FEDERAL_SCRIPTS),
     )
 
 
-def render_court_page(court_id, host):
+def render_court_page(court_id, host, codes=()):
     """One federal court: its judges, the chief first, then active and senior
     judges. ``assets/kyc-federal.js`` draws it from the court's data file."""
     from .federal_courts import COURTS, KINDS
@@ -621,7 +629,7 @@ def render_court_page(court_id, host):
         f'                    <p class="state-kicker">{_e(KINDS[court["kind"]])}</p>',
         f'                    <h1 class="state-title">{_e(court["name"])}</h1>',
         '                    <p class="state-links">',
-        '                        <a class="btn" href="../federal/index.html#courts"><svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> Every federal court</a>',
+        '                        <a class="btn" href="../federal/index.html#courts"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg> The Article III courts</a>',
         '                        <a class="btn" href="../government/courts.html"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg> How the federal courts work</a>',
         "                    </p>",
         "                </header>",
@@ -644,6 +652,7 @@ def render_court_page(court_id, host):
         search="",
         sidebar=_FEDERAL_SIDEBAR,
         federal_current=' aria-current="page"',
+        jump_options=_jump(codes),
         main=main,
         footer=_FEDERAL_FOOTER,
         scripts=_scripts(scripts),
