@@ -94,19 +94,29 @@
       leads.map(function (l) { return personButton(l, standard); }).join("<br>") + "</td>";
   }
 
+  /** A seated member of *chamber* whose committees are not yet published:
+   *  a new Congress's rosters come some weeks after it sits, a chamber at a
+   *  time, and its members' profiles say so too (committeesPending). */
+  function pendingIn(chamber) {
+    return (global.legislatorsData || []).filter(function (p) {
+      return KYC.seated(p) && p.committeesPending &&
+        (chamber === "senate") === /Senate/.test(p.chamber || "");
+    })[0];
+  }
+
+  function pendingText(member, what) {
+    return KYC.escapeHtml(what + " assignments for the " +
+      KYC.ordinal(member.committeesPending) + " Congress have not been published yet");
+  }
+
   function renderCommittees(target) {
     var leads = committeeLeads();
     var codes = Object.keys(leads);
     if (!codes.length) {
-      // A new Congress's rosters come some weeks after it sits; until then
-      // its members' profiles say so too (committeesPending).
-      var pending = (global.legislatorsData || []).filter(function (p) {
-        return KYC.seated(p) && p.committeesPending;
-      })[0];
+      var pending = pendingIn("house") || pendingIn("senate");
       target.innerHTML = pending
-        ? '<p class="results-bar" role="status">Committee assignments for the ' +
-          KYC.escapeHtml(pending.committeesPending + "th") + " Congress have not been " +
-          "published yet; each committee's leaders will be listed here once they are.</p>"
+        ? '<p class="results-bar" role="status">' + pendingText(pending, "Committee") +
+          "; each committee's leaders will be listed here once they are.</p>"
         : '<p class="results-bar" role="status">The committee rosters did ' +
           "not load, so this list is empty. Each member's profile lists their committees.</p>";
       return;
@@ -118,7 +128,17 @@
       }).sort(function (a, b) {
         return sortName(a.info.name).localeCompare(sortName(b.info.name));
       });
-      if (!rows.length) return;
+      if (!rows.length) {
+        // One chamber's rosters can be out before the other's.
+        var waiting = chamber[0] !== "joint" && pendingIn(chamber[0]);
+        if (waiting) {
+          html += '<h3 class="guide-subheading">' + KYC.escapeHtml(chamber[1]) + "</h3>" +
+            '<p class="results-bar" role="status">' +
+            pendingText(waiting, chamber[0] === "house" ? "House committee" : "Senate committee") +
+            ".</p>";
+        }
+        return;
+      }
       html += '<h3 class="guide-subheading">' + KYC.escapeHtml(chamber[1]) +
         ' <span class="faint">' + rows.length + "</span></h3>" +
         '<div class="guide-table-wrap"><table class="guide-table guide-committees">' +

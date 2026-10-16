@@ -4114,6 +4114,104 @@ function departFlorida(w) {
   race.winnerId = winner.id;
 }
 
+/* January 3: a representative who won their state's Senate seat sits in it
+ * (`raceRole` "winner", kyc/record.py). The House seat they held is open
+ * because they won elsewhere - never because they are "running for" the
+ * seat they now hold. Hypothetical, made from a member running today. */
+function senateWinnerState() {
+  const line = fs.readFileSync(path.join(SITE, "data", "profiles.js"), "utf8").split("\n")
+    .find((l) => l.indexOf("window.legislatorsData = ") === 0);
+  const people = JSON.parse(line.slice("window.legislatorsData = ".length, -1));
+  const mover = people.find((p) => !p.isCandidate && !p.formerMember && p.chamber === "House" &&
+    /^S-/.test(p.contestRaceId || ""));
+  return mover && mover.state;
+}
+
+function seatSenateWinner(state) {
+  return (w) => {
+    const mover = w.legislatorsData.find((p) => !p.isCandidate && p.state === state &&
+      p.chamber === "House" && /^S-/.test(p.contestRaceId || ""));
+    const house = mover && w.kycRaces.find((r) => r.incumbentIds.indexOf(mover.id) !== -1);
+    w.__winner = { mover, house };
+    if (!mover || !house) return;
+    Object.assign(mover, { raceRole: "winner", heldRaceId: house.id, raceId: mover.contestRaceId,
+      chamber: "Senate", district: "N/A", districtNum: null,
+      officeLabel: "Senate • " + mover.state, raceStatus: "elected" });
+    ["contestRaceId", "contestLabel", "alsoRunningId", "alsoRunningSeat"]
+      .forEach((k) => { delete mover[k]; });
+  };
+}
+
+async function testSenateWinner() {
+  const state = senateWinnerState();
+  const built = state && await buildPage("states/" + state.toLowerCase() + ".html",
+    { data: seatSenateWinner(state) });
+  if (built) await settle(50);
+  suite("states page — a representative seated in the Senate seat they won", () => {
+    check("a House member is running for the Senate today", !!state);
+    if (!built) return;
+    const { window, D, errors } = built;
+    const { mover, house } = window.__winner;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("their House race is on the page", !!house && !!D.getElementById("race-" + house.id));
+    if (!house) return;
+    const badge = [...D.getElementById("race-" + house.id).querySelectorAll(".race-head .badge")]
+      .find((b) => /Open seat/.test(b.textContent));
+    const why = badge ? badge.getAttribute("title") : "";
+    check("the House seat is open because they won the Senate race",
+      why === mover.name + " won the race for Senate " + mover.state + ".", why);
+    const cards = [...D.querySelectorAll('.card[data-id="' + mover.id + '"]')];
+    check("no card of theirs says they are running for a seat",
+      cards.length > 0 && cards.every((c) => !/Running for/.test(c.textContent)),
+      cards.map((c) => c.textContent.replace(/ +/g, " ").slice(0, 120)).join(" | "));
+  });
+}
+
+/* January: the House's committee rosters are out and the Senate's are not
+ * (kyc/legislators.committee_chambers). The guide lists the House's leads
+ * and says the Senate's are not published; a senator's profile says so too,
+ * naming the Congress from the data. */
+function senatePending(w) {
+  w.legislatorsData.forEach((p) => {
+    if (p.isCandidate || p.formerMember || p.chamber !== "Senate") return;
+    delete p.committeeList;
+    p.committees = "";
+    p.committeesPending = 120;
+  });
+}
+
+async function testCommitteesPending() {
+  const guide = await buildPage("government/congress.html", { data: senatePending });
+  await settle(50);
+  suite("government/congress.html — one chamber's committee rosters out, not the other's", () => {
+    const { window, D, errors } = guide;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const live = D.querySelector('.guide-live[data-live="committees"]');
+    const text = live ? live.textContent : "";
+    check("the House's leads are listed", !!live && /House committees/.test(text) &&
+      live.querySelectorAll("table").length >= 1, text.slice(0, 200));
+    check("the Senate's are said to be pending, for the data's Congress",
+      /Senate committee assignments for the 120th Congress have not been published yet/
+        .test(text), text.slice(0, 300));
+    check("no senator is named as a committee lead",
+      [...live.querySelectorAll(".guide-person")].every((b) =>
+        window.KYC.byId(b.getAttribute("data-id")).chamber !== "Senate"));
+  });
+
+  const grid = await buildPage("index.html", { data: senatePending });
+  await settle(50);
+  suite("index.html — a senator whose committees are not yet published", () => {
+    const { window, D, errors } = grid;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const senator = window.legislatorsData.find((p) => p.committeesPending);
+    window.KYC.profile.open(senator.id);
+    const text = D.getElementById("profileModalCommittees").textContent;
+    check("their profile says so, with the Congress's ordinal",
+      /Committee assignments for the 120th Congress have not been published yet/.test(text), text);
+    window.KYC.profile.close();
+  });
+}
+
 async function testFormerIncumbent() {
   const now = new Date("2026-12-10T12:00:00Z");
   const grid = await buildPage("index.html", { hash: "#/?role=member&chamber=Senate", now,
@@ -4209,6 +4307,8 @@ async function testFormerIncumbent() {
   if (!only || only === "index.html") await testSenate();
   if (!only || only === "index.html") await testReseatedSpecial();
   if (!only || only === "index.html") await testFormerIncumbent();
+  if (!only || only === "states") await testSenateWinner();
+  if (!only || only === "guide") await testCommitteesPending();
   if (!only || only === "index.html") await testOdds();
   if (!only || only === "index.html") await testSeatRows();
   if (!only || only === "map.html") await testMap();

@@ -196,6 +196,15 @@ def check_placeholders(profiles):
                   sorted(stand_ins))]
 
 
+def _new_term(profile):
+    """A member serving a term begun since Election Day ("2027-01-03 - ...")."""
+    from .cycle import CYCLE, general_election_day
+
+    start = str(profile.get("term_start") or "")[:10]
+    return (bool(re.match(r"\d{4}-\d{2}-\d{2}$", start))
+            and start >= general_election_day(CYCLE).isoformat())
+
+
 def check_overrides(profiles, raw):
     """Flag curated entries that no longer match anything.
 
@@ -209,8 +218,7 @@ def check_overrides(profiles, raw):
     # term begun since Election Day has moved past their 2026 note, which no
     # longer applies (profiles._build_member) and can be deleted.
     member_ids = {p["id"] for p in profiles if not p.get("isCandidate")
-                  and not p.get("raceRole")
-                  and not str(p.get("term_start") or "").startswith("2027")}
+                  and not p.get("raceRole") and not _new_term(p)}
     dead_ids = sorted(k for k in overrides.MEMBER_STATUS_BY_ID if k not in member_ids)
     if dead_ids:
         issues.append(Issue("warn", "stale-member-status",
@@ -231,9 +239,11 @@ def check_overrides(profiles, raw):
                             dead_photos))
 
     # Not an error, just useful: members who are also 2026 candidates.
+    from .record import seated
+
     duals = sorted(
         f"{p['name']}: {p['officeLabel']} -> {p['alsoRunningSeat']}"
-        for p in profiles if p.get("alsoRunningSeat")
+        for p in profiles if p.get("alsoRunningSeat") and seated(p)
     )
     if duals:
         issues.append(Issue("warn", "dual-role",
@@ -1376,11 +1386,22 @@ def check_winners(profiles, races):
                     and other.get("raceStatus") == "elected"):
                 twice.append(f"{race['id']}: {winner['name']} ({winner['id']}) is seated; "
                              f"{other['name']} ({other['id']}) is the filing marked elected")
-    if not twice:
-        return []
-    return [Issue("warn", "seated-unlinked",
-                  f"{len(twice)} seated winners are not yet linked to their filing by an FEC "
-                  f"id in congress-legislators; both profiles are shown", sorted(twice))]
+    issues = []
+    if twice:
+        issues.append(Issue(
+            "warn", "seated-unlinked",
+            f"{len(twice)} seated winners are not yet linked to their filing by an FEC "
+            f"id in congress-legislators; both profiles are shown", sorted(twice)))
+    # A winner with no filing at all: their money and their result reach no
+    # profile until congress-legislators lists the id, or an evidenced entry
+    # in overrides.MEMBER_FEC_IDS does.
+    unfiled = sorted(f"{p['name']} ({p['id']}): {p.get('raceId')}" for p in profiles
+                     if p.get("raceRole") == "winner" and not p.get("fecCandidateId"))
+    if unfiled:
+        issues.append(Issue("warn", "winner-no-filing",
+                            f"{len(unfiled)} seated winners have no FEC filing linked",
+                            unfiled))
+    return issues
 
 
 def check_member_filings(profiles, snapshot):
@@ -1401,6 +1422,8 @@ def check_member_filings(profiles, snapshot):
         other = by_id.get(member.get("alsoRunningId") or "")
         if member.get("isCandidate") or not other or member["id"] not in known:
             continue
+        if other.get("raceId") and other.get("raceId") == member.get("raceId"):
+            continue            # a filing for the seat they sit in
         filing = other.get("rosterFecId") or other.get("fecCandidateId")
         if filing and filing not in known[member["id"]]:
             missing.append(f"{member['name']} ({member['id']}): {filing} for "

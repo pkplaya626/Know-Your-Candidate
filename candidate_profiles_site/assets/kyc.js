@@ -1496,6 +1496,7 @@
     raceStatusOf: raceStatusOf,
     seated: seated,
     formerText: formerText,
+    ordinal: ordinal,
     ballotSource: ballotSource,
     offBallot: offBallot,
     onNovemberBallot: onNovemberBallot,

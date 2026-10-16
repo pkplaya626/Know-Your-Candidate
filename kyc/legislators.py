@@ -438,6 +438,44 @@ def committees_current(committees, snapshot):
     return None if gone > STALE_COMMITTEE_SHARE * len(holders) else committees
 
 
+COMMITTEE_SEATED_SHARE = 0.9
+
+
+def committee_chambers(committees, snapshot):
+    """The chambers whose committee rosters are the sitting Congress's, and whole.
+
+    A new Congress's rosters arrive a chamber, and often a committee, at a
+    time. Shown as soon as anything is published, a member assigned to one
+    of three committees reads as sitting on one. A chamber's rosters count
+    once every one of its full committees has members and at least
+    ``COMMITTEE_SEATED_SHARE`` of its sitting members hold a seat on one of
+    them; until then its members' profiles say the assignments are not yet
+    published (rule 19).
+    """
+    if not committees:
+        return set()
+    if not snapshot:
+        return {"house", "senate"}
+    if committees_current(committees, snapshot) is None:
+        return set()
+    names = committees.get("committees") or {}
+    members = committees.get("members") or {}
+    filled = {seat["code"] for seats in members.values() for seat in seats}
+    out = set()
+    for chamber, label in (("house", "House"), ("senate", "Senate")):
+        full = {code for code, info in names.items()
+                if info.get("chamber") == chamber and not info.get("parent")}
+        sitting = [p["bioguide"] for p in snapshot.get("legislators", [])
+                   if p.get("chamber") == label]
+        holding = sum(1 for bioguide in sitting
+                      if any((names.get(seat["code"]) or {}).get("chamber") == chamber
+                             for seat in members.get(bioguide, [])))
+        if (full and full <= filled and sitting
+                and holding >= COMMITTEE_SEATED_SHARE * len(sitting)):
+            out.add(chamber)
+    return out
+
+
 def assignments(committees, bioguide):
     """A member's committees as ``[{name, title, side, rank, sub, parent, url}]``."""
     if not committees:

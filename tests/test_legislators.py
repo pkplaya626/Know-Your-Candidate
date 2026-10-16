@@ -643,6 +643,60 @@ class TestANewCongress(unittest.TestCase):
         # While the 119th sits, the roster's column is shown.
         self.assertNotIn("committeesPending", self.build("2025-01-03"))
 
+    def test_a_chamber_counts_once_its_rosters_are_whole(self):
+        house = [entry(bioguide=f"Y00000{i}", chamber="rep", district=i + 1) for i in range(10)]
+        snap = snapshot_of(*house, entry(bioguide="S000001", chamber="sen"))
+        names = {"HSAG": {"chamber": "house"}, "HSAP": {"chamber": "house"},
+                 "HSAP01": {"chamber": "house", "parent": "HSAP"},
+                 "SSAF": {"chamber": "senate"}, "JSEC": {"chamber": "joint"}}
+
+        def rosters(house_seated, senate=True, both=True):
+            members = {f"Y00000{i}": [{"code": "HSAP" if both and i % 2 == 0 else "HSAG"}]
+                       for i in range(house_seated)}
+            if senate:
+                members["S000001"] = [{"code": "SSAF"}]
+            return {"committees": names, "members": members}
+
+        # Nine in ten seated, every full committee filled; a subcommittee or
+        # a joint committee with nobody on it does not hold a chamber back.
+        self.assertEqual(legislators.committee_chambers(rosters(9), snap), {"house", "senate"})
+        # One full committee with nobody on it: the House's are not all out.
+        self.assertEqual(legislators.committee_chambers(rosters(10, both=False), snap),
+                         {"senate"})
+        # Eight in ten: not yet.
+        self.assertEqual(legislators.committee_chambers(rosters(8), snap), {"senate"})
+        self.assertEqual(legislators.committee_chambers(rosters(9, senate=False), snap),
+                         {"house"})
+        self.assertEqual(legislators.committee_chambers(None, snap), set())
+
+    def test_a_partly_published_chamber_is_still_pending(self):
+        names = {"HSAG": {"chamber": "house", "name": "House Committee on Agriculture"},
+                 "HSAP": {"chamber": "house", "name": "House Committee on Appropriations"}}
+        seat = {"code": "HSAG", "party": "majority", "rank": 1, "title": None}
+        found = self.build("2027-01-03", committees={"committees": names,
+                                                     "members": {"X000001": [seat]}})
+        # Appropriations has nobody yet: the one seat out is not the member's
+        # assignments.
+        self.assertEqual(found["committeesPending"], 120)
+        self.assertEqual(found["committees"], "No data")
+        self.assertNotIn("committeeList", found)
+
+    def test_a_member_of_a_published_chamber_with_no_seat_holds_none(self):
+        others = [entry(bioguide=f"Y00000{i}", chamber="rep", district=i + 10,
+                        start="2027-01-03", end="2029-01-03") for i in range(10)]
+        snap = snapshot_of(entry(chamber="rep", district=5, start="2027-01-03",
+                                 end="2029-01-03"), *others)
+        names = {"HSAG": {"chamber": "house", "name": "House Committee on Agriculture"}}
+        rosters = {"committees": names, "members": {
+            f"Y00000{i}": [{"code": "HSAG", "party": "majority", "rank": i + 1, "title": None}]
+            for i in range(10)}}
+        row = roster_row(**{"Committee Assignments": "House Committee on Agriculture"})
+        profiles, _ = build_profiles({"members": [row], "candidates": []}, snapshot=snap,
+                                     committees=rosters)
+        # Not pending, and never the previous Congress's column.
+        self.assertNotIn("committeesPending", profiles[0])
+        self.assertEqual(profiles[0]["committees"], "No data")
+
     def test_rosters_of_people_who_left_are_a_previous_congresss(self):
         snap = snapshot_of(entry(bioguide="STAYS"))
         fresh = {"members": {"STAYS": [{"code": "HSAG"}]}, "committees": {}}
