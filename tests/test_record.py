@@ -130,6 +130,13 @@ def specials_seated(raw, snapshot):
     so it holds whatever today's snapshot already shows. Never committed."""
     held = raw["record"]["incumbents"]
     florida, ohio = held["S-FL-2026"]["bioguide"], held["S-OH-2026"]["bioguide"]
+    # Once the real winners are seated the committed data is the rehearsal,
+    # and a fixture built on it would rehearse a world that never happened.
+    sitting = legislators.by_bioguide(snapshot)
+    for rid in ("S-FL-2026", "S-OH-2026"):
+        appointee = held[rid]
+        if (sitting.get(appointee["bioguide"]) or {}).get("termEnd") != appointee["termEnd"]:
+            raise unittest.SkipTest(f"{rid}'s special election's winner has been seated")
     after = copy.deepcopy(snapshot)
     people = [p for p in after["legislators"] if p["bioguide"] != florida]
     if not any(p["bioguide"] == "Z900001" for p in people):
