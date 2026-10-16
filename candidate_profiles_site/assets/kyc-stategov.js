@@ -81,8 +81,9 @@
       [FILL.nonpartisan, "Nonpartisan legislature"],
     ],
     governor2026: [
-      [FILL.R, "Elected Nov 3; the governor now is a Republican"],
-      [FILL.D, "Elected Nov 3; the governor now is a Democrat"],
+      // The year is part of the date: these pages are read long after it.
+      [FILL.R, "Elected Nov 3, 2026; the governor now is a Republican"],
+      [FILL.D, "Elected Nov 3, 2026; the governor now is a Democrat"],
       [FILL.none, "No governor's election in 2026"],
       // The territories and D.C. are not in the table: never the grey above,
       // which would say they elect no one (Guam, the Virgin Islands and the
@@ -164,7 +165,7 @@
     var b = ballot(code);
     var item = b && b.offices[key];
     if (!item) return "";
-    if (item.up) return ballotMark(item, "On the Nov 3 ballot");
+    if (item.up) return ballotMark(item, "On the Nov 3, 2026 ballot");
     return ballotMark(item, item.selection === "elected" ||
       item.selection === "elected-jointly-with-governor" ? "Not elected in 2026"
       : item.selection === "appointed" ? "Appointed, not elected"
@@ -177,7 +178,7 @@
     var c = b && b.chambers[which];
     if (!c) return "";
     return ballotMark(c, !c.up ? "No regular elections in 2026"
-      : (c.up === c.seats ? "All " + c.seats : c.up + " of " + c.seats) + " seats on the Nov 3 ballot",
+      : (c.up === c.seats ? "All " + c.seats : c.up + " of " + c.seats) + " seats on the Nov 3, 2026 ballot",
       " Regular elections only: a special election to fill an unexpired term is not counted.");
   }
 
@@ -252,7 +253,9 @@
     if (mode === "governor2026") {
       return ballot(code).offices.governor.up
         ? { fill: FILL[gov.partyKey] || FILL.I,
-            text: name + ": the governor is elected on Nov 3 (now Gov. " + gov.name + ", " + gov.party + ")" }
+            text: name + ": the governor " +
+              (KYC.electionStatus(2026).phase === "post-election" ? "was" : "is") +
+              " elected on Nov 3, 2026 (now Gov. " + gov.name + ", " + gov.party + ")" }
         : { fill: FILL.none, text: name + ": no governor's election in 2026" };
     }
     if (OFFICES[mode]) {
