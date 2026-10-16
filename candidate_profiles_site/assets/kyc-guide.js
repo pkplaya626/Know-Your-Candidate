@@ -42,7 +42,7 @@
     var table = KYC.meta().committees || {};
     var out = {};
     (global.legislatorsData || []).forEach(function (person) {
-      if (person.isCandidate) return;
+      if (!KYC.seated(person)) return;
       (person.committeeList || []).forEach(function (seat) {
         var info = table[seat.code];
         if (!seat.title || !info || info.parent) return;

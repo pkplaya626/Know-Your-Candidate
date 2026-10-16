@@ -302,7 +302,7 @@
         text === "None (Candidate)") {
       target.innerHTML =
         '<span class="kyc-absent">No committee assignments' +
-        (item.isCandidate ? " (not a sitting member)" : "") + "</span>";
+        (!KYC.seated(item) ? " (not a sitting member)" : "") + "</span>";
       return;
     }
     target.innerHTML = text
@@ -352,7 +352,9 @@
     // The markets on this race, compactly, after the people in it.
     el("profileModalRaceOdds").innerHTML = KYC.odds ? KYC.odds.render(race, { compact: true }) : "";
     var row = function (p) {
-      var role = p.isCandidate ? "" : '<span class="badge badge-neutral">Member</span> ';
+      var role = KYC.seated(p) ? '<span class="badge badge-neutral">Member</span> '
+        : p.formerMember ? '<span class="badge badge-neutral" title="' +
+          KYC.escapeAttr(KYC.formerText(p)) + '">Former member</span> ' : "";
       var spec = KYC.raceStatus(p.raceStatus, "mate",
         { unconfirmed: !!p.raceStatusUnconfirmed, source: p.raceStatusSource });
       var status = spec
@@ -555,9 +557,13 @@
       return;
     }
     link.hidden = false;
+    // The member this filing belongs to may have left since: never
+    // "currently holds" a seat they no longer sit in.
+    var member = item.incumbentId ? KYC.byId(item.incumbentId) : null;
+    var left = member && member.formerMember ? member.formerMember.left : null;
     link.innerHTML =
       KYC.icon("branch") + " " +
-      (item.alsoRunningId ? "Also running" : "Currently holds") +
+      (item.alsoRunningId ? "Also running" : left ? "Held until " + left : "Currently holds") +
       ' <button type="button" data-goto="' + KYC.escapeAttr(id) + '">' +
       KYC.escapeHtml(seat) + "</button>";
   }
@@ -593,6 +599,12 @@
      * kept: it is where a retirement or an appointment is explained. */
     var text = String(item.status || "").trim();
     if (item.isCandidate && race) text = "";
+    if (item.formerMember) {
+      // Left Congress: said plainly, not as a warning about the seat.
+      pieces.push('<span class="badge badge-neutral">' +
+        KYC.escapeHtml(KYC.formerText(item)) + "</span>");
+      text = "";
+    }
     if (text && text !== "Active Member" && text !== "N/A" &&
         text !== "Filed with the FEC") {
       var leaving = /retiring|not running|defeated|ineligible|resigned/i.test(text);
@@ -629,7 +641,9 @@
     el("profileModalRegion").textContent = item.officeLabel;
     // A challenger does not represent the seat they are running for (rule
     // 27), and until 2026-10 every candidate's dialog said they did.
-    el("profileModalRegionLabel").textContent = item.isCandidate ? "Running for" : "Represents";
+    el("profileModalRegionLabel").textContent = item.formerMember
+      ? "Represented (until " + item.formerMember.left + ")"
+      : item.isCandidate ? "Running for" : "Represents";
     var stateLink = el("profileModalStateLink");
     if (item.state && item.state !== "N/A") {
       stateLink.hidden = false;

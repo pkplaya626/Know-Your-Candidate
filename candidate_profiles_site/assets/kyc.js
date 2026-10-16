@@ -215,9 +215,28 @@
           var alias = "FEC_" + other;
           if (!profileIndex.has(alias)) profileIndex.set(alias, item);
         });
+        // A curated candidate since seated answers to their curated id too.
+        (item.otherIds || []).forEach(function (alias) {
+          if (!profileIndex.has(alias)) profileIndex.set(alias, item);
+        });
       });
     }
     return profileIndex.get(id);
+  }
+
+  /** Sitting in Congress now: a member's profile, and not a former member's.
+   *  A record incumbent who has left keeps the member shape so their 2026
+   *  race still finds them (`formerMember`, from the pipeline); every view
+   *  that answers "who represents me" asks this, never `!isCandidate` alone
+   *  (rule 27). The pipeline's own test is kyc/record.py `seated`. */
+  function seated(item) {
+    return !!item && !item.isCandidate && !item.formerMember;
+  }
+
+  /** "Left office 2026-12-08" for a former member, else "". */
+  function formerText(item) {
+    var former = item && item.formerMember;
+    return former ? "Left office " + former.left : "";
   }
 
   /** True for a sitting member whose 2026 filing is for a different seat -
@@ -405,7 +424,11 @@
   }
 
   /** The same for a person: their contest's status, as a member when the
-   *  race is for the seat they hold. */
+   *  race is for the seat they hold. A member seated since Election Day in
+   *  a seat they did not hold (`raceRole`) was elected, not re-elected; an
+   *  appointee who held the seat was never elected or nominated to it, so
+   *  wins and losses read as anyone's - only "not running for this seat" is
+   *  theirs. */
   function raceStatusOf(item, form, opts) {
     if (!item) return null;
     opts = opts || {};
@@ -413,8 +436,10 @@
     // their filing's race when they run elsewhere.
     var record = !runsElsewhere(item) || item.raceStatusRace === item.contestRaceId ? item
       : byId(item.alsoRunningId) || {};
-    return raceStatus(contestStatus(item), form, {
-      own: !item.isCandidate && !item.contestLabel,
+    var status = contestStatus(item);
+    return raceStatus(status, form, {
+      own: !item.isCandidate && !item.contestLabel && !item.raceRole &&
+        !(item.appointed && status !== "unlisted"),
       unconfirmed: !!item.raceStatusUnconfirmed,
       source: record.raceStatusSource,
       now: opts.now,
@@ -1455,6 +1480,8 @@
     ballotLineSuffix: ballotLineSuffix,
     raceStatus: raceStatus,
     raceStatusOf: raceStatusOf,
+    seated: seated,
+    formerText: formerText,
     ballotSource: ballotSource,
     offBallot: offBallot,
     onNovemberBallot: onNovemberBallot,

@@ -386,6 +386,149 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
     return profile
 
 
+def _former_members(rows, record, profiles, seats_up, as_of=None):
+    """A profile for each record incumbent who has left Congress, from the
+    row ``congress --apply`` archived for them (``Former_Members.csv``).
+
+    The member shape and the bioguide id are kept, so their race, money,
+    portrait, disclosures and every link already shared still find them;
+    ``formerMember`` says they no longer sit, and every "who represents me"
+    view counts with ``record.seated`` (rule 27). Nothing is said that the
+    archive does not know: the term ends on the day they left, the roster's
+    status line and committee seats - about the term that ended - are not
+    shown, and no office or phone is attached.
+
+    A record incumbent still on the roster is built from the roster (an
+    interrupted archive leaves a row in both files). One with no archived
+    row has no profile; the race still names them (``race.incumbent``).
+    """
+    from .record import held_races
+
+    on_roster = {p["id"] for p in profiles}
+    archived = {}
+    for row in rows:
+        bioguide = clean_str(row.get("Bioguide ID"), "").upper()
+        if bioguide and clean_str(row.get("Left Office"), ""):
+            archived.setdefault(bioguide, []).append(row)
+    races = record.get("races") or {}
+    incumbents = record.get("incumbents") or {}
+    out = []
+    for bioguide, rid in sorted(held_races(record).items()):
+        if bioguide in on_roster or bioguide not in archived:
+            continue
+        # The seat they held on the ballot, whatever they sat in last: a
+        # member who won another seat and later left is archived from it.
+        race = races.get(rid) or {}
+        district = race.get("district")
+        seat = {"Chamber": race.get("chamber"), "State": race.get("state"),
+                "District": "" if race.get("chamber") == "Senate" else (
+                    "At-Large" if district == 0 else f"District {district}")}
+        rows_of = sorted(archived[bioguide], key=lambda r: clean_str(r.get("Left Office"), ""))
+        same = [r for r in rows_of if clean_str(r.get("Chamber"), "") == seat["Chamber"]
+                and clean_str(r.get("State"), "") == seat["State"]]
+        row = dict(same[-1] if same else rows_of[-1], **seat)
+        held = incumbents[rid]
+        left = clean_str(row.get("Left Office"), "")
+        profile = _build_member(row, 0, seats_up, None, person=None, as_of=as_of)
+        profile["formerMember"] = {
+            "left": left,
+            "via": clean_str(row.get("Left Via"), ""),
+            "congress": int(clean_str(row.get("Last Congress"), "0") or 0) or None,
+        }
+        profile["status"] = f"Former member: left office {left}"
+        profile["term_start"] = f"{held.get('termStart') or 'N/A'} - {left}"
+        profile["termEndYear"] = int(left[:4])
+        # The committee seats were the term's that ended.
+        profile["committees"] = ""
+        if "Senate" in profile["chamber"]:
+            race = races.get(rid) or {}
+            profile.update(senateClass=race.get("senateClass"), nextElection=None,
+                           senateSpecial=bool(race.get("special")))
+        out.append(profile)
+    return out
+
+
+def _mark_record_roles(profiles, record, snapshot, field):
+    """What the record says about each member: an appointee who held a seat
+    on the ballot (``appointed``, never "re-elected"); a member seated since
+    Election Day for the term a race decided, in a seat they did not hold
+    (``raceRole`` "winner": that race's, never its incumbent); and anyone
+    else seated in such a seat since then (``raceRole`` "successor": in the
+    race only if they ran in it). Neither is "up" for the seat they now sit
+    in, and neither is ever called re-elected (``record.seat_changes``).
+
+    A winner who held another record seat - Andy Barr, KY-6 to the Senate;
+    Greg Casar, TX-35 to TX-37 - is still that race's incumbent, now
+    contesting this one: their held seat says where they went."""
+    from . import candidates as field_mod
+    from .races import seat_label
+    from .record import held_races, seat_changes
+
+    incumbents = record.get("incumbents") or {}
+    appointed = {inc["bioguide"] for inc in incumbents.values() if inc and inc.get("appointed")}
+    changes = seat_changes(record, snapshot) if snapshot else {"winners": {}, "successors": {}}
+    held = held_races(record)
+    people = {p["bioguide"]: p for p in (snapshot or {}).get("legislators", [])}
+    filed = {}
+    for row in (field or {}).get("candidates", []):
+        filed.setdefault(field_mod.race_id(row), set()).add(row.get("candidate_id"))
+    for profile in profiles:
+        if profile.get("isCandidate"):
+            continue
+        if profile["id"] in appointed:
+            profile["appointed"] = True
+        if profile["id"] in held:
+            # The seat they held on the ballot, whatever they sit in now:
+            # what counts them among a chamber's seats up (rule 1).
+            profile["heldRaceId"] = held[profile["id"]]
+        role, rid = "winner", changes["winners"].get(profile["id"])
+        if not rid:
+            role, rid = "successor", changes["successors"].get(profile["id"])
+        if not rid:
+            continue
+        # Their filing for that race, by the id Congress's record lists for
+        # them: how their result reaches this profile.
+        mine = [i for i in (people.get(profile["id"]) or {}).get("fec") or []
+                if i in filed.get(rid, ())]
+        if mine and not profile.get("fecCandidateId"):
+            profile["fecCandidateId"] = mine[0]
+        profile["raceRole"] = role
+        mine_held = held.get(profile["id"])
+        if role == "successor" and not mine:
+            # Seated after the election for another term, and never ran in
+            # it: not part of the 2026 race at all.
+            profile["raceId"] = None
+        else:
+            profile["raceId"] = rid
+        if mine_held and mine_held != rid:
+            if profile["raceId"]:
+                profile.update(contestRaceId=rid, contestLabel=seat_label(rid))
+            profile["seekingReelection2026"] = False
+            profile["seatUp2026"] = profile["isUpIn2026"] = True
+        elif not mine_held:
+            profile.update(seatUp2026=False, isUpIn2026=False, seekingReelection2026=False)
+
+
+def _claimed_ids(profiles, people, record):
+    """FEC ids that already belong to a member profile, by Congress's own
+    record: a seated member's ids for the chamber they sit in (the snapshot's
+    ``fec``), and a former member's for the chamber of the seat they held."""
+    from .record import held_races, seated
+
+    held = held_races(record)
+    incumbents = (record or {}).get("incumbents") or {}
+    out = set()
+    for profile in profiles:
+        if profile.get("isCandidate"):
+            continue
+        if seated(profile):
+            out |= set((people.get(profile["id"]) or {}).get("fec") or [])
+        elif profile["id"] in held:
+            rid = held[profile["id"]]
+            out |= {i for i in (incumbents[rid] or {}).get("fec") or [] if i[:1] == rid[:1]}
+    return out
+
+
 def _senate_cycle(person, profile):
     """A sitting senator's class and next election, keyed on bioguide id
     through the snapshot (rule 17).
@@ -675,10 +818,32 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
                                       person=people.get(bioguide), assignments=seats,
                                       as_of=as_of))
 
-    member_count = len(profiles)
+    if record:
+        profiles.extend(_former_members(data.get("former") or [], record, profiles,
+                                        seats_up, as_of))
+        _mark_record_roles(profiles, record, snapshot, field)
+
+    from .record import seated
+
+    member_count = sum(1 for p in profiles if seated(p))
+    former_count = sum(1 for p in profiles if p.get("formerMember"))
     field = screen_field(field, profiles, record)
 
+    # A curated candidate who has since been seated - a special election's
+    # winner - is the member, by the FEC id Congress's record lists for them
+    # (rule 25), never by name. Their curated id answers for the member
+    # (``otherIds``), so a link or a market label saved under it still opens
+    # the same person.
+    owned = {}
+    for profile in profiles:
+        if seated(profile):
+            for filing in (people.get(profile["id"]) or {}).get("fec") or []:
+                owned[filing] = profile
     for index, row in enumerate(candidates):
+        member = owned.get(clean_str(row.get("FEC Candidate ID"), ""))
+        if member and clean_str(row.get("ID"), ""):
+            member.setdefault("otherIds", []).append(clean_str(row.get("ID"), ""))
+            continue
         profiles.append(_build_candidate(row, index, as_of=as_of))
 
     roster_count = len(profiles)
@@ -694,9 +859,17 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
         # same race, once with a portrait and once without.
         claimed = set()
         for profile in profiles:
-            record = (finance or {}).get(fec_mod.profile_key(profile)) or {}
-            if record.get("candidate_id"):
-                claimed.add(record["candidate_id"])
+            cached = (finance or {}).get(fec_mod.profile_key(profile)) or {}
+            if cached.get("candidate_id"):
+                claimed.add(cached["candidate_id"])
+        # And through the ids Congress's own records hold, with no name in
+        # between (rule 25's exact signal): a sitting member's filings for
+        # the chamber they sit in, and a record incumbent's for the chamber
+        # of the seat they held. A special election's winner, seated in
+        # December, would otherwise appear twice - their member profile and
+        # their filing's - or, where the names agree, lose the filing and with
+        # it their place in the race.
+        claimed |= _claimed_ids(profiles, people, record)
 
         extra, _skipped = field_mod.to_profiles(field, profiles, claimed=claimed)
         profiles.extend(extra)
@@ -714,23 +887,27 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
 
     voting_house = [
         p for p in profiles
-        if p["chamber"] == "House" and p["state"] not in TERRITORIES
+        if p["chamber"] == "House" and p["state"] not in TERRITORIES and seated(p)
     ]
     stats = {
         "ageAsOf": as_of.isoformat(),
+        "former": former_count,
         "field_stale": len(((field or {}).get("screened") or {}).get("stale", [])),
         "field_phantom": len(((field or {}).get("screened") or {}).get("phantom", [])),
         "members": member_count,
-        "candidates": len(profiles) - member_count,
+        "candidates": len(profiles) - member_count - former_count,
         "roster_candidates": roster_count - member_count,
         "filed_candidates": len(profiles) - roster_count,
         "total": len(profiles),
         "cross_linked": links,
         "contesting_elsewhere": moved,
         "reseated": reseated,
-        "senate_seats_up": sum(
-            1 for p in profiles
-            if p["seatUp2026"] and not p["isCandidate"] and "Senate" in p["chamber"]
+        # The Senate races, from the record when there is one: a seat stays a
+        # 2026 race after its holder has left and its winner is seated.
+        "senate_seats_up": (
+            sum(1 for rid in record["races"] if rid.startswith("S-")) if record
+            else sum(1 for p in profiles
+                     if p["seatUp2026"] and not p["isCandidate"] and "Senate" in p["chamber"])
         ),
         "voting_house": len(voting_house),
         "generic_fields": sum(

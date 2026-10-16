@@ -49,7 +49,7 @@
       house: { d: 0, r: 0, i: 0, vacant: 0 },
     };
     delegation(code).forEach(function (item) {
-      if (item.isCandidate) return;
+      if (!KYC.seated(item)) return;
       var chamber = item.chamber.indexOf("Senate") !== -1 ? "senate"
         : item.chamber.indexOf("House") !== -1 ? "house" : null;
       if (chamber) counts[chamber][KYC.partyKey(item)] += 1;
@@ -65,11 +65,18 @@
     return counts;
   }
 
+  /** Who held the state's 2026 Senate seat, from its race: a senator who
+   *  has since left still defends it for their party, and the record names
+   *  them even with no profile here. */
   function senateDefender(code) {
-    return delegation(code).filter(function (item) {
-      return !item.isCandidate && item.chamber.indexOf("Senate") !== -1 &&
-        item.seatUp2026;
-    })[0] || null;
+    var race = (global.kycRaces || []).filter(function (r) {
+      return r.chamber === "Senate" && r.state === code;
+    })[0];
+    if (!race) return null;
+    var holder = race.incumbentIds.map(KYC.byId).filter(Boolean)[0];
+    if (holder) return holder;
+    var inc = race.incumbent;
+    return inc ? { id: inc.bioguide, name: inc.name, party: inc.party } : null;
   }
 
   /* ---------------------------------------------------------------- fills */
@@ -141,16 +148,20 @@
     var status = KYC.contestStatus(defender);
     var counted = KYC.electionStatus().phase === "post-election";
     var party = defender.party === "Democrat" ? "Democratic" : defender.party;
+    // An appointee was never elected or nominated to the seat: never
+    // "re-elected", "renominated" or "lost re-election" (KYC.raceStatusOf).
+    var own = !defender.appointed && !defender.raceRole;
     return {
       fill: key === "vacant" ? VACANT_FILL : "var(--party-" + key + ")",
       text: code + ": 2026 Senate race — " + party + " seat (" +
         defender.name + (status === "eliminated" ? " lost the primary" :
           status === "advanced" ? " in a primary runoff" :
-          status === "elected" ? " re-elected" :
-          status === "defeated" ? " lost re-election" :
+          status === "elected" ? (own ? " re-elected" : " elected") :
+          status === "defeated" ? (own ? " lost re-election" : " lost the election") :
           status === "runoff" ? " in the general election runoff" :
           status === "nominee" && counted ? " awaiting result" :
-          status === "nominee" && defender.seekingReelection2026 ? " renominated" :
+          status === "nominee" && defender.seekingReelection2026 ?
+            (own ? " renominated" : " on the November ballot") :
           defender.seekingReelection2026 ? " running" :
           defender.contestLabel ? " running for " + defender.contestLabel :
           defender.alsoRunningSeat ? " running for " + defender.alsoRunningSeat :
@@ -224,14 +235,15 @@
     var people = delegation(code);
     if (mode === "senate") {
       return people.filter(function (x) {
-        return !x.isCandidate && x.chamber.indexOf("Senate") !== -1;
+        return KYC.seated(x) && x.chamber.indexOf("Senate") !== -1;
       });
     }
     if (mode === "house") {
       return people.filter(function (x) { return x.chamber.indexOf("House") !== -1; });
     }
     return people.filter(function (x) {
-      return x.chamber.indexOf("Senate") !== -1 && (x.seatUp2026 || x.isCandidate);
+      return x.chamber.indexOf("Senate") !== -1 &&
+        (x.seatUp2026 || x.isCandidate || x.raceRole === "winner");
     });
   }
 
@@ -266,8 +278,11 @@
     // "Renominated", "Leaving seat": about the seat a member holds, not the
     // whole ballot (a member may be on another office's). "Nominee – Speak
     // The Truth line": not a second Democratic nominee.
+    // Never "Re-elected" for a member who won a seat they did not hold, or
+    // for an appointee (KYC.raceStatusOf says the same).
     var race = KYC.raceStatus(item.raceStatus, "short", {
-      own: !item.isCandidate && (!item.contestLabel || item.raceStatus === "unlisted"),
+      own: !item.isCandidate && (!item.contestLabel || item.raceStatus === "unlisted") &&
+        !item.raceRole && !(item.appointed && item.raceStatus !== "unlisted"),
       unconfirmed: !!item.raceStatusUnconfirmed,
     });
     if (race) return badge(race, item);
@@ -351,7 +366,11 @@
         a.name.localeCompare(b.name)
       );
     };
-    var seated = people.filter(function (x) { return !x.isCandidate; }).sort(order);
+    // Whoever sits in the seat now holds it - a winner seated since Election
+    // Day included; a 2026 incumbent who has left is never "currently
+    // seated" (rule 27), and is listed apart.
+    var seated = people.filter(function (x) { return KYC.seated(x); }).sort(order);
+    var former = people.filter(function (x) { return x.formerMember; }).sort(order);
     var running = people.filter(function (x) {
       return x.isCandidate && !KYC.offBallot(x.raceStatus);
     }).sort(order);
@@ -372,6 +391,12 @@
         (mode === "senate2026" ? "Seat held by" : "Currently seated") +
         " <span>" + seated.length + "</span></p>" +
         seated.map(personRow).join("");
+    }
+    if (former.length) {
+      html += '<p class="panel-subhead">' +
+        (mode === "senate2026" ? "Held the seat until " + former[0].formerMember.left
+          : "Left office") +
+        " <span>" + former.length + "</span></p>" + former.map(personRow).join("");
     }
     // The House view: every district drawn, with who holds it.
     var districtMap = mode === "house" && (KYC.meta().districtMaps || {})[code];

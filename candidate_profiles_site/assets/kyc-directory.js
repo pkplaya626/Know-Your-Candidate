@@ -32,17 +32,20 @@
 
   /* Who is actually in Congress. Since the field came from the FEC, 79% of
    * profiles are people who do not hold the seat, so "show me my
-   * representatives" needs to be one click rather than a search. */
+   * representatives" needs to be one click rather than a search. A former
+   * member - a 2026 incumbent who has left - is neither. */
   var ROLE_TEST = {
-    member: function (item) { return !item.isCandidate; },
+    member: function (item) { return KYC.seated(item); },
     candidate: function (item) { return !!item.isCandidate; },
   };
 
   var offBallot = KYC.cards.offBallot;
 
   var ELECTION_TEST = {
-    // The 35 Senate seats on the 2026 ballot.
+    // The 35 Senate seats on the 2026 ballot: who held each, by the seat
+    // they held (heldRaceId, from the pipeline), not the one they sit in.
     senateUp26: function (item) {
+      if (item.heldRaceId) return item.heldRaceId.indexOf("S-") === 0;
       return item.seatUp2026 && !item.isCandidate &&
         item.chamber.indexOf("Senate") !== -1;
     },
@@ -73,10 +76,11 @@
   }
 
   function matches(item) {
-    /* Only challengers are hidden. A sitting member who lost their primary
-     * is still in Congress until January and must stay under "Sitting
-     * members" - hiding John Cornyn left the Senate one short. */
-    if (state.eliminated === "hide" && item.isCandidate && offBallot(item)) return false;
+    /* Only challengers, and members who have since left, are hidden. A
+     * sitting member who lost their primary is still in Congress until
+     * January and must stay under "Sitting members" - hiding John Cornyn
+     * left the Senate one short. */
+    if (state.eliminated === "hide" && !KYC.seated(item) && offBallot(item)) return false;
     return matchesFilters(item);
   }
 
@@ -125,7 +129,7 @@
     // In race context the people the primary removed are part of the story,
     // so they are folded under the race whatever the grid toggle says.
     data.forEach(function (item) {
-      if (item.isCandidate && offBallot(item) && matchesFilters(item)) shown.add(item.id);
+      if (!KYC.seated(item) && offBallot(item) && matchesFilters(item)) shown.add(item.id);
     });
 
     return races

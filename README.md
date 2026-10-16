@@ -57,7 +57,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_district_maps.py` | Rebuild `district_maps/`: every state's district boundaries, the new 2026 maps, and the towns to label (network) |
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (1059 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (1224 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1006,6 +1006,21 @@ Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
 | `nextElection` | Sitting senators only: the year the seat is next on the November ballot, from the real term end date - a term ending 3 January is decided the November before; an appointee's term ending on election day is decided that year. Class II -> 2026, Class III -> 2028, Class I -> 2030, except a special |
 | `senateSpecial` | Sitting senators only: `true` when `nextElection` comes before the class's regular cycle - a special election for the rest of the term (Ohio and Florida's Class III seats in 2026) |
 | `rosterSeat` | For a curated challenger, the seat the roster gave them when the FEC filing says otherwise |
+| `formerMember` | `{left, via, congress}`: a record incumbent - who held a 2026 seat - who has since left Congress, built from their `Former_Members.csv` row with the same bioguide id, so their race, money, portrait and links still find them. Never counted as sitting: every "who represents me" view asks `record.seated` / `KYC.seated`. The term ends the day they left; the archived status line and committee seats are not shown | Record incumbents who have left |
+| `raceRole` | `"winner"`: a member seated since Election Day for the term a 2026 race decided, in a seat they did not hold (`record.seat_changes`); `raceId` is that race, and they are its winner, never its incumbent, never "re-elected". `"successor"`: seated in such a seat since Election Day for another term - a special election for the rest of the old one, an appointment - and in the race only if they ran in it. A record incumbent who won another seat (Andy Barr, KY-6 to the Senate) keeps `contestRaceId` for it | Members seated in a 2026 seat they did not hold |
+| `heldRaceId` | The 2026 race whose seat this record incumbent held, sitting or former, whatever they sit in now; what counts them among a chamber's seats up | Record incumbents |
+| `appointed` | The record says this incumbent was appointed to the seat on the ballot. Never "re-elected" or "renominated": they were not elected to it | Florida, Ohio, Oklahoma and South Carolina's appointed senators |
+| `otherIds` | A curated candidate's profile id (`CAND_n`) folded into the member they became, by the FEC id Congress's record lists for them; a link or market label saved under it opens the member | Curated candidates since seated |
+
+Each race (`kycRaces`) carries, beside `incumbentIds` and `candidateIds`:
+
+| Field | Meaning |
+|---|---|
+| `incumbent` | From the frozen record: `{bioguide, name, party, profileId, seated, appointed}` - who held the seat on the ballot, named even when they have no profile here; `seated` while they still sit in it |
+| `winnerId` | The profile of the member seated since Election Day in this seat, when it is not the record incumbent |
+| `senateClass` / `special` | The Senate seat's class, and whether it is a special election, from the record |
+
+`incumbentIds` comes from the record too: the person who held the seat, sitting or former, never whoever sits in it now. Every race of the record exists, whoever points at it.
 
 ## State pages
 

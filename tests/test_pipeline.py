@@ -135,7 +135,8 @@ class TestBuild(unittest.TestCase):
     def test_builds_profiles(self):
         self.assertGreater(self.stats["total"], 500)
         self.assertEqual(
-            self.stats["total"], self.stats["members"] + self.stats["candidates"]
+            self.stats["total"],
+            self.stats["members"] + self.stats["former"] + self.stats["candidates"]
         )
 
     def test_every_profile_has_required_keys(self):

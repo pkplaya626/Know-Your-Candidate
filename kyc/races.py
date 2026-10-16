@@ -56,12 +56,13 @@ def contestable(profiles, year=ELECTION_YEAR, record=None):
 
     Seat counts come from the roster, never from a hard-coded total.
     """
+    from .record import race_ids, seated
+
     if record:
-        from .record import race_ids
         return race_ids(record)
     senate, house = set(), {}
     for profile in profiles:
-        if profile.get("isCandidate"):
+        if not seated(profile):
             continue
         state = profile.get("state")
         chamber = profile.get("chamber") or ""
@@ -122,9 +123,13 @@ def assign(profiles):
 
     A sitting member gets the race for the seat they *hold*; their separate
     candidate profile gets the race for the seat they are *running for*, which
-    is how a House member seeking a Senate seat ends up in two races.
+    is how a House member seeking a Senate seat ends up in two races. A
+    member seated since Election Day in a record seat keeps the race the
+    build gave them (``raceRole``, ``record.seat_changes``).
     """
     for profile in profiles:
+        if profile.get("raceRole"):
+            continue
         chamber, state = profile["chamber"], profile["state"]
         if state in ("N/A", "") or not profile.get("seatUp2026"):
             profile["raceId"] = None
@@ -173,34 +178,72 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
             }
         return races[rid]
 
-    for profile in profiles:
-        rid = profile.get("raceId")
-        if not rid:
-            continue
-        race = race_for(rid)
-        if profile["isCandidate"]:
-            race["candidateIds"].append(profile["id"])
-        else:
-            race["incumbentIds"].append(profile["id"])
-            race["openSeat"] = not profile.get("seekingReelection2026", False)
-            # A member contesting a different seat - a redrawn district, the
-            # other chamber - is a candidate in *that* race as well as the
-            # incumbent of this one. Without this, TX-37 had no Greg Casar
-            # and TX-35 reported two Democratic nominees.
-            contest = profile.get("contestRaceId")
-            if contest and contest != rid and profile.get("alsoRunningId") is None:
-                other = race_for(contest)
-                other["candidateIds"].append(profile["id"])
-                if profile["party"] not in other["parties"]:
-                    other["parties"].append(profile["party"])
+    def join(race, profile, role):
+        ids = race[role]
+        if profile["id"] not in ids:
+            ids.append(profile["id"])
         if profile["party"] not in race["parties"]:
             race["parties"].append(profile["party"])
 
+    def holds(race, profile):
+        join(race, profile, "incumbentIds")
+        race["openSeat"] = not profile.get("seekingReelection2026", False)
+        # A member contesting a different seat - a redrawn district, the
+        # other chamber - is a candidate in *that* race as well as the
+        # incumbent of this one. Without this, TX-37 had no Greg Casar
+        # and TX-35 reported two Democratic nominees.
+        contest = profile.get("contestRaceId")
+        if contest and contest != race["id"] and profile.get("alsoRunningId") is None:
+            join(race_for(contest), profile, "candidateIds")
+
     frozen = (record or {}).get("races") or {}
+    held = (record or {}).get("incumbents") or {}
+    if record:
+        from .record import held_races
+
+        held_by = held_races(record)
+        # Every race of the cycle exists, whoever now points at it: a seat
+        # whose holder has left and was never re-seated is still a race.
+        for rid in frozen:
+            race_for(rid)
+
+    for profile in profiles:
+        rid = profile.get("raceId")
+        if profile["isCandidate"]:
+            if rid:
+                join(race_for(rid), profile, "candidateIds")
+            continue
+        if not record:
+            if rid:
+                holds(race_for(rid), profile)
+            continue
+        # With a record, who held a seat is the record's word, not whoever
+        # sits in it now: on January 3 a newly elected member would
+        # otherwise become a second incumbent of the race they won, and a
+        # record incumbent who has left (``formerMember``) would vanish.
+        mine = held_by.get(profile["id"])
+        if mine:
+            holds(race_for(mine), profile)
+        if profile.get("raceRole") == "winner":
+            race = race_for(rid)
+            join(race, profile, "candidateIds")
+            race["winnerId"] = profile["id"]
+        elif profile.get("raceRole") == "successor":
+            if rid:
+                join(race_for(rid), profile, "candidateIds")
+        elif not mine and rid:
+            # Sitting in a seat the record has no holder for - a vacancy
+            # filled before Election Day - so its incumbent at the election.
+            holds(race_for(rid), profile)
+
     for race in races.values():
         # A special election (Florida's, Ohio's): from the frozen record, so it
         # stays one after the seat's winner is seated for the term to 2029.
         race["special"] = bool((frozen.get(race["id"]) or {}).get("special"))
+        if race["chamber"] == "Senate" and (frozen.get(race["id"]) or {}).get("senateClass"):
+            # The seat's class, from the record: the view groups a seat by
+            # it whoever holds the seat now.
+            race["senateClass"] = frozen[race["id"]]["senateClass"]
         race["candidateCount"] = len(race["candidateIds"])
         race["contested"] = race["candidateCount"] > 0
         race["isTerritory"] = race["state"] in TERRITORIES
@@ -208,6 +251,20 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
         # open by definition.
         if not race["incumbentIds"]:
             race["openSeat"] = True
+        if record:
+            # Who held the seat on the ballot, from the record: named even
+            # when they have no profile here, and said to be seated only
+            # while they still sit in this seat.
+            inc = held.get(race["id"])
+            holder = by_id.get((inc or {}).get("bioguide"))
+            race["incumbent"] = inc and {
+                "bioguide": inc["bioguide"],
+                "name": inc["name"],
+                "party": inc["party"],
+                "profileId": holder["id"] if holder else None,
+                "seated": bool(holder) and _sits_in(holder, race["id"]),
+                "appointed": bool(inc.get("appointed")),
+            }
         if filed_counts is not None:
             race["filedCount"] = filed_counts.get(race["id"], 0)
         if dates:
@@ -257,6 +314,17 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
                        r["state"], r["district"] if r["district"] is not None else -1),
     )
     return ordered
+
+
+def _sits_in(profile, rid):
+    """True when *profile* is a member sitting in race *rid*'s seat now."""
+    from .record import seated
+
+    if not seated(profile):
+        return False
+    if profile.get("raceRole") == "winner":
+        return profile.get("raceId") == rid
+    return race_id(profile["chamber"], profile["state"], profile.get("districtNum")) == rid
 
 
 def _below_threshold(results, rid, filed, profiled, people=()):

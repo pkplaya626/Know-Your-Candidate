@@ -2218,7 +2218,10 @@ def apply_cache(profiles, cache, field=None):
                 if line:
                     profile["ballotLine"] = line
             applied += 1
-            if not profile.get("isCandidate"):
+            # A member seated since Election Day in a record seat
+            # (``raceRole``): the build has said which race is theirs and
+            # which they held; the seat they sit in now says neither.
+            if not profile.get("isCandidate") and not profile.get("raceRole"):
                 seat = seat_id(profile["chamber"], profile["state"], profile.get("districtNum"))
                 if rid != seat:
                     # Named on another seat's ballot: that is the seat they
@@ -2242,7 +2245,8 @@ def apply_cache(profiles, cache, field=None):
                     # November ballot, whatever the roster's status column
                     # says. The seat is open in every sense that matters.
                     profile["seekingReelection2026"] = False
-        elif not profile.get("isCandidate") and profile.get("seatUp2026"):
+        elif (not profile.get("isCandidate") and profile.get("seatUp2026")
+              and not profile.get("raceRole")):
             # The page has decided this member's own party's primary, or
             # shows the November ballot, and does not name them: they are not
             # running. The roster said "Active Member" for thirty-nine
