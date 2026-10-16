@@ -823,8 +823,12 @@ def build_state(code, root=".", places=None):
         "unitKm": round(EARTH_RADIUS_KM / fit.k, 6),
         # How a longitude and latitude land on this map: the page places a
         # reader's own location with it, on the device (kyc-districts.js).
-        "projection": {"parallels": list(albers.parallels), "meridian": albers.meridian,
-                       "minX": fit.min_x, "maxY": fit.max_y, "k": fit.k, "pad": PAD},
+        # Rounded: the last bits of these floats come from the platform's
+        # maths library, and differed between Windows and Linux, so seven
+        # files read as stale in CI. Ten figures move a point by 1e-7 units.
+        "projection": {"parallels": [_sig(p) for p in albers.parallels],
+                       "meridian": _sig(albers.meridian), "minX": _sig(fit.min_x),
+                       "maxY": _sig(fit.max_y), "k": _sig(fit.k), "pad": PAD},
         "plans": out_plans,
         "flows": flows(areas, overlaps) if len(keys) == 2 else [],
         "counties": _counties(topo, raw_arcs, fit),
@@ -835,6 +839,11 @@ def build_state(code, root=".", places=None):
         if len(rings[0]) > 1 else [],
         "sources": _sources(code, topo),
     }
+
+
+def _sig(value):
+    """*value* to ten significant figures, the same on every platform."""
+    return float(f"{value:.10g}")
 
 
 def _sources(code, topo):
