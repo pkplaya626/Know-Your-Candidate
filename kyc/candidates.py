@@ -484,13 +484,13 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
     # which is what keeps it clear of rule 3. Alaska's Senate race contains
     # both "Dan Sullivan" (the member) and a different "Daniel J Sullivan":
     # same surname, different given name, and both survive.
-    incumbents = set()
+    incumbents = {}
     for p in existing:
         if p.get("isCandidate"):
             continue
         words = _fold(p["name"]).split()
         if len(words) >= 2 and p.get("raceId") is not None:
-            incumbents.add((p["raceId"], words[0], words[-1]))
+            incumbents[(p["raceId"], words[0], words[-1])] = p
         elif len(words) >= 2:
             senate = "Senate" in p.get("chamber", "")
             rid = race_id({
@@ -498,7 +498,7 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
                 "district_number": p.get("districtNum"),
             })
             if rid:
-                incumbents.add((rid, words[0], words[-1]))
+                incumbents[(rid, words[0], words[-1])] = p
 
     rows = eligible(cache, threshold)
     merged = registrations(rows)
@@ -515,13 +515,22 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
         key = (_fold(name), row["state"], "S" if senate else "H")
 
         words = _fold(name).split()
-        same_seat_member = (
-            len(words) >= 2
-            and (race_id(row), words[0], words[-1]) in incumbents
-        )
+        same_seat_member = incumbents.get(
+            (race_id(row), words[0], words[-1])) if len(words) >= 2 else None
         # seen_people holds the roster's own people only. Two filers who
         # merely share a name are reported by validate, never merged here.
-        if candidate_id in seen_ids or key in seen_people or same_seat_member:
+        if candidate_id in seen_ids:
+            skipped += 1
+            continue
+        if same_seat_member is not None:
+            # Theirs by rule 25's exact signal: keep the filing's id, or a
+            # winner seated in January - whose record does not list it yet -
+            # has neither its money nor its result.
+            if not same_seat_member.get("fecCandidateId"):
+                same_seat_member["fecCandidateId"] = candidate_id
+            skipped += 1
+            continue
+        if key in seen_people:
             skipped += 1
             continue
         seen_ids.add(candidate_id)

@@ -302,7 +302,8 @@ class TestAgainstTheRealBuild(unittest.TestCase):
             field=candidates.load_cache(ROOT), finance=fec.load_cache(ROOT))
         fec.apply_cache(cls.profiles, fec.load_cache(ROOT))
         results.apply_cache(cls.profiles, results.load_cache(ROOT))
-        cls.races = {r["id"]: r for r in races.build(cls.profiles, results=results.load_cache(ROOT))}
+        cls.races = {r["id"]: r for r in races.build(cls.profiles, results=results.load_cache(ROOT),
+                                                      record=raw["record"])}
         cls.by_id = {p["id"]: p for p in cls.profiles}
 
     def test_no_member_seeks_reelection_to_a_seat_they_are_not_contesting(self):

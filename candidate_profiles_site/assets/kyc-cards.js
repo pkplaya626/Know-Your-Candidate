@@ -172,6 +172,9 @@
       var named = race.incumbent && race.incumbent.name;
       var why = !holder ? (named ? named + " no longer holds the seat." :
           "A newly drawn seat with no sitting member.") :
+        // Seated since in the seat they won elsewhere (kyc/record.py).
+        holder.raceRole === "winner" && holder.raceId !== race.id
+          ? holder.name + " won the race for " + holder.officeLabel.replace(/ • /, " ") + "." :
         holder.contestLabel ? holder.name + " is running for " + holder.contestLabel + "." :
         holder.alsoRunningSeat ? holder.name + " is running for " + holder.alsoRunningSeat + "." :
         KYC.offBallot(holder.raceStatus) ? holder.name + " is not on the November ballot." :

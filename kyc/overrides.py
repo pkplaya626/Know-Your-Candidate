@@ -121,6 +121,22 @@ MEMBER_STATUS_BY_ID = {
 # exact same-committee signal (candidates.same_committee) cannot see it. Each
 # entry maps the registration folded away to (the one kept, the evidence).
 # Rule 25 still holds: a shared name alone never earns an entry here.
+# A member's own FEC candidate id that congress-legislators does not list,
+# keyed on bioguide id: {bioguide: (candidate id, evidence)}. Merged into the
+# snapshot's `fecAll` (and `fec` once they sit in that chamber) when it is
+# built, so a member elected to the other chamber is linked to that
+# candidacy - and their money looked up - by its id, never by a name search.
+# Rule 17; validate's member-candidacy-id-missing lists any further gap.
+MEMBER_FEC_IDS = {
+    # Ashley Hinson, IA-2, running for Iowa's Senate seat: S6IA00314 is
+    # filed as "ARENHOLZ, ASHLEY HINSON" (Iowa, Senate, Republican), her
+    # legal name, and is the FEC Candidate ID of the curated row for her
+    # Senate candidacy; congress-legislators lists only her House id,
+    # H0IA01174. Checked 2026-10-16.
+    "H001091": ("S6IA00314", "the curated row for her Iowa Senate candidacy; filed under "
+                             "her legal name, Arenholz"),
+}
+
 SAME_PERSON_FILINGS = {
     # NV-3: the results page links both registrations to one article,
     # [[Martin O'Donnell]], and their receipts and disbursements differ by the

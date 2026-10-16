@@ -633,8 +633,14 @@ class TestDisclosuresAgainstRealData(unittest.TestCase):
         for p in profiles:
             if not p.get("disclosureUrl"):
                 continue
-            house = p["chamber"] == "House" and p["disclosureSource"] == "house-clerk"
-            senate = p["chamber"] == "Senate" and p["disclosureSource"] == "senate-efd"
+            # The chamber they sit in, or the one whose seat they held on the
+            # ballot: a representative seated a senator filed last with the
+            # House Clerk.
+            held = (p.get("heldRaceId") or "")[:1]
+            house = ((p["chamber"] == "House" or held == "H")
+                     and p["disclosureSource"] == "house-clerk")
+            senate = ((p["chamber"] == "Senate" or held == "S")
+                      and p["disclosureSource"] == "senate-efd")
             if p["isCandidate"] or not (house or senate):
                 wrong.append(p["name"])
         self.assertEqual(wrong, [])
