@@ -16,7 +16,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from kyc import fec, legislators, overrides, sources, validate  # noqa: E402
+from kyc import fec, legislators, sources, validate  # noqa: E402
 from kyc.profiles import build_profiles  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -241,7 +241,7 @@ class TestApply(unittest.TestCase):
               "Status"]
 
     def make_roster(self, tmp):
-        path = os.path.join(tmp, "Cleaned_House_119th.csv")
+        path = os.path.join(tmp, "Cleaned_House.csv")
         with open(path, "w", encoding="utf-8", newline="") as handle:
             writer = csv.DictWriter(handle, fieldnames=self.HEADER)
             writer.writeheader()
@@ -256,12 +256,11 @@ class TestApply(unittest.TestCase):
         )]
         with tempfile.TemporaryDirectory() as tmp:
             path = self.make_roster(tmp)
-            added = legislators.apply_missing(drift, tmp,
-                                              today=datetime.date(2026, 9, 8))
+            report = legislators.apply(drift, tmp, today=datetime.date(2026, 9, 8))
             with open(path, encoding="utf-8", newline="") as handle:
                 rows = list(csv.DictReader(handle))
 
-        self.assertEqual(added, {"Cleaned_House_119th.csv": ["Everton Blair"]})
+        self.assertEqual(report["added"], {"Cleaned_House.csv": ["Everton Blair"]})
         self.assertEqual(len(rows), 1)
         row = rows[0]
         self.assertEqual(row["Bioguide ID"], "B001328")
@@ -281,14 +280,145 @@ class TestApply(unittest.TestCase):
         )]
         with tempfile.TemporaryDirectory() as tmp:
             path = self.make_roster(tmp)
-            legislators.apply_missing(drift, tmp)
+            legislators.apply(drift, tmp)
             with open(path, encoding="utf-8", newline="") as handle:
                 self.assertEqual(list(csv.DictReader(handle))[0]["District"], "At-Large")
 
     def test_nothing_to_add_writes_nothing(self):
         with tempfile.TemporaryDirectory() as tmp:
             self.make_roster(tmp)
-            self.assertEqual(legislators.apply_missing(legislators.Drift(), tmp), {})
+            self.assertEqual(legislators.apply(legislators.Drift(), tmp),
+                             {"added": {}, "reseated": {}, "archived": []})
+
+    FULL = ["Bioguide ID", "Name", "Chamber", "Party", "State", "District", "Term Start",
+            "Age", "Birthdate", "Education", "Committee Assignments", "Term End Date",
+            "Status"]
+
+    @staticmethod
+    def write(tmp, name, rows):
+        with open(os.path.join(tmp, name), "w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=TestApply.FULL)
+            writer.writeheader()
+            writer.writerows(rows)
+
+    def read(self, tmp, name):
+        path = os.path.join(tmp, name)
+        if not os.path.exists(path):
+            return []
+        with open(path, encoding="utf-8", newline="") as handle:
+            return list(csv.DictReader(handle))
+
+    @staticmethod
+    def raw(tmp, name):
+        with open(os.path.join(tmp, name), "rb") as handle:
+            return handle.read()
+
+    def member(self, bioguide="X000001", **kwargs):
+        row = dict.fromkeys(self.FULL, "")
+        row.update({"Bioguide ID": bioguide, "Name": "Pat Smith", "Chamber": "House",
+                    "Party": "Republican", "State": "TX", "District": "District 5",
+                    "Term Start": "2025-01-03", "Birthdate": "1970-01-01",
+                    "Education": "BA, Rice University",
+                    "Committee Assignments": "House Committee on Agriculture",
+                    "Term End Date": "2027-01-03", "Status": "Retiring in 2026"})
+        row.update(kwargs)
+        return row
+
+    def rosters(self, tmp, house=(), senate=()):
+        self.write(tmp, "Cleaned_House.csv", list(house))
+        self.write(tmp, "Cleaned_Senate.csv", list(senate))
+
+    def drift_of(self, tmp, snap, ended=None):
+        rows = sources.load_rosters(sources.MEMBER_ROSTERS, tmp)[0]
+        return legislators.reconcile(rows, snap, ended=ended)
+
+    def test_a_new_term_rewrites_the_seat_and_keeps_the_person(self):
+        snap = snapshot_of(entry(chamber="rep", district=5, start="2027-01-03",
+                                 end="2029-01-03"))
+        with tempfile.TemporaryDirectory() as tmp:
+            self.rosters(tmp, house=[self.member()])
+            report = legislators.apply(self.drift_of(tmp, snap), tmp)
+            row, = self.read(tmp, "Cleaned_House.csv")
+        self.assertEqual(report["reseated"], {"Cleaned_House.csv": ["Pat Smith"]})
+        self.assertEqual((row["Term Start"], row["Term End Date"]), ("2027-01-03", "2029-01-03"))
+        # The status note was about the term that ended.
+        self.assertEqual(row["Status"], "Active Member")
+        self.assertEqual(row["Education"], "BA, Rice University")
+        self.assertEqual(row["Committee Assignments"], "House Committee on Agriculture")
+
+    def test_a_move_to_the_senate_moves_the_row_and_clears_its_committees(self):
+        snap = snapshot_of(entry(chamber="sen", state="TX", start="2027-01-03",
+                                 end="2033-01-03", senate_class=2))
+        with tempfile.TemporaryDirectory() as tmp:
+            self.rosters(tmp, house=[self.member()])
+            legislators.apply(self.drift_of(tmp, snap), tmp)
+            house, senate = self.read(tmp, "Cleaned_House.csv"), self.read(tmp, "Cleaned_Senate.csv")
+        self.assertEqual(house, [])
+        row, = senate
+        self.assertEqual((row["Chamber"], row["District"], row["Term Start"]),
+                         ("Senate", "", "2027-01-03"))
+        # They described the House seat.
+        self.assertEqual(row["Committee Assignments"], "")
+        self.assertEqual(row["Education"], "BA, Rice University")
+
+    def test_a_member_the_records_say_left_is_archived_whole(self):
+        snap = snapshot_of(entry(bioguide="STAYS", chamber="rep", district=6))
+        ended = {"X000001": {"left": "2027-01-03", "via": "term-ended"}}
+        with tempfile.TemporaryDirectory() as tmp:
+            self.rosters(tmp, house=[self.member(), self.member("STAYS", District="District 6")])
+            report = legislators.apply(self.drift_of(tmp, snap, ended), tmp)
+            house = self.read(tmp, "Cleaned_House.csv")
+            former = self.read(tmp, legislators.FORMER_ROSTER)
+        self.assertEqual(report["archived"], ["Pat Smith"])
+        self.assertEqual([r["Bioguide ID"] for r in house], ["STAYS"])
+        row, = former
+        self.assertEqual((row["Left Office"], row["Left Via"], row["Last Congress"]),
+                         ("2027-01-03", "term-ended", "119"))
+        self.assertEqual(row["Education"], "BA, Rice University")
+
+    def test_a_departure_with_no_record_is_left_for_somebody_to_see(self):
+        snap = snapshot_of(entry(bioguide="STAYS", chamber="rep", district=6))
+        with tempfile.TemporaryDirectory() as tmp:
+            self.rosters(tmp, house=[self.member()])
+            drift = self.drift_of(tmp, snap)
+            report = legislators.apply(drift, tmp)
+            house = self.read(tmp, "Cleaned_House.csv")
+            former = self.read(tmp, legislators.FORMER_ROSTER)
+        self.assertEqual([p["bioguide"] for p in drift.departed], ["X000001"])
+        self.assertEqual(report["archived"], [])
+        self.assertEqual([r["Bioguide ID"] for r in house], ["X000001", "STAYS"])
+        self.assertEqual(former, [])
+
+    def test_new_rows_hold_only_what_the_source_knows(self):
+        snap = snapshot_of(entry(bioguide="NEW", chamber="rep", district=9,
+                                 start="2027-01-03", end="2029-01-03"))
+        with tempfile.TemporaryDirectory() as tmp:
+            self.rosters(tmp)
+            legislators.apply(self.drift_of(tmp, snap), tmp)
+            row, = self.read(tmp, "Cleaned_House.csv")
+        self.assertEqual({k for k, v in row.items() if v} - set(legislators.WRITABLE), {"Age"})
+
+    def test_running_it_twice_changes_nothing(self):
+        snap = snapshot_of(
+            entry(bioguide="X000001", chamber="rep", district=5, start="2027-01-03",
+                  end="2029-01-03"),
+            entry(bioguide="MOVER", chamber="sen", start="2027-01-03", end="2033-01-03",
+                  senate_class=2),
+            entry(bioguide="NEW", chamber="rep", district=7, start="2027-01-03",
+                  end="2029-01-03"))
+        ended = {"GONE": {"left": "2027-01-03", "via": "legislators-historical"}}
+        with tempfile.TemporaryDirectory() as tmp:
+            self.rosters(tmp, house=[self.member(), self.member("MOVER", District="District 6"),
+                                     self.member("GONE", District="District 7")])
+            legislators.apply(self.drift_of(tmp, snap, ended), tmp)
+            names = ("Cleaned_House.csv", "Cleaned_Senate.csv", legislators.FORMER_ROSTER)
+            first = [self.raw(tmp, n) for n in names]
+            again = self.drift_of(tmp, snap, ended)
+            report = legislators.apply(again, tmp)
+            second = [self.raw(tmp, n) for n in names]
+        self.assertTrue(again.clean, again.summary())
+        self.assertEqual(report, {"added": {}, "reseated": {}, "archived": []})
+        self.assertEqual(first, second)
 
     def test_age_arithmetic(self):
         today = datetime.date(2026, 9, 8)
@@ -297,6 +427,226 @@ class TestApply(unittest.TestCase):
         self.assertEqual(legislators.age_on("1992-12-31", today), "33")
         self.assertEqual(legislators.age_on("", today), "")
         self.assertEqual(legislators.age_on("not a date", today), "")
+
+
+def roster_row(bioguide="X000001", **kwargs):
+    row = {"Bioguide ID": bioguide, "Name": f"Member {bioguide}", "Chamber": "House",
+           "Party": "Republican", "State": "TX", "District": "District 5",
+           "Birthdate": "1970-01-01", "Term Start": "2025-01-03"}
+    row.update(kwargs)
+    return row
+
+
+class TestDepartures(unittest.TestCase):
+    """Who has left is decided by bioguide id from Congress's own records -
+    never from a list of names (the one that stood in overrides matched on
+    them, rule 17), and never from an absence alone (rule 16)."""
+
+    def setUp(self):
+        self.now = snapshot_of(entry(bioguide="STAYS"))
+        self.now["fetched"] = "2027-01-04T07:20:00+00:00"
+
+    def historical(self, bioguide, end):
+        return [{"id": {"bioguide": bioguide},
+                 "terms": [{"start": "2025-01-03", "end": end}]}]
+
+    def test_a_resignation_legislators_historical_lists_is_expected(self):
+        out = legislators.departures({"GONE"}, self.now,
+                                     historical=self.historical("GONE", "2026-11-14"))
+        self.assertEqual(out, {"GONE": {"left": "2026-11-14", "via": "legislators-historical"}})
+
+    def test_a_term_the_previous_snapshot_ended_is_expected(self):
+        # The January 3 changeover, and an appointee's term ending at the
+        # special election, before legislators-historical lists them.
+        previous = snapshot_of(entry(bioguide="GONE", chamber="rep", end="2027-01-03"))
+        out = legislators.departures({"GONE"}, self.now, previous=previous)
+        self.assertEqual(out, {"GONE": {"left": "2027-01-03", "via": "term-ended"}})
+
+    def test_the_day_a_term_ends_counts(self):
+        previous = snapshot_of(entry(bioguide="GONE", end="2027-01-03"))
+        self.now["fetched"] = "2027-01-03T23:00:00+00:00"
+        self.assertIn("GONE", legislators.departures({"GONE"}, self.now, previous=previous))
+
+    def test_an_absence_no_record_explains_is_not(self):
+        previous = snapshot_of(entry(bioguide="GONE", end="2031-01-03"))
+        self.assertEqual(legislators.departures({"GONE"}, self.now, previous=previous,
+                                                historical=[]), {})
+
+    def test_a_record_of_a_term_still_running_is_not(self):
+        # Listed as historical with a term ending in 2029: an upstream fault.
+        out = legislators.departures({"GONE"}, self.now,
+                                     historical=self.historical("GONE", "2029-01-03"))
+        self.assertEqual(out, {})
+
+    def test_reconcile_tells_the_expected_from_the_departed(self):
+        rows = [roster_row("STAYS", Chamber="Senate", District=""),
+                roster_row("GONE"), roster_row("LOST")]
+        ended = {"GONE": {"left": "2027-01-03", "via": "term-ended"}}
+        drift = legislators.reconcile(rows, self.now, ended=ended)
+        self.assertEqual([p["bioguide"] for p in drift.expected], ["GONE"])
+        self.assertEqual(drift.expected[0]["left"], "2027-01-03")
+        self.assertEqual([p["bioguide"] for p in drift.departed], ["LOST"])
+
+    def test_the_build_calls_every_absence_departed(self):
+        # The build has no previous snapshot to ask: `congress --apply`
+        # archives the expected ones before it runs.
+        rows = [roster_row("STAYS", Chamber="Senate", District=""), roster_row("GONE")]
+        codes = [i.code for i in validate.check_snapshot(
+            [], {"members": rows}, self.now, now=datetime.datetime(2027, 1, 4))]
+        self.assertIn("departed-member", codes)
+
+
+class TestNewTerms(unittest.TestCase):
+    """On January 3 every re-elected member starts a new term. The roster's
+    Term Start is the old one, and the seat columns of a representative
+    elected to the Senate, or seated in a renumbered district, are the old
+    seat's: ``reseated``, for ``congress --apply`` to write."""
+
+    def reseat(self, row, **term):
+        term.setdefault("start", "2027-01-03")
+        term.setdefault("end", "2029-01-03")
+        return legislators.reconcile([row], snapshot_of(entry(**term)))
+
+    def test_a_reelected_member_is_reseated_and_nothing_else(self):
+        drift = self.reseat(roster_row(), chamber="rep", district=5)
+        self.assertEqual([(s["bioguide"], s["moved"]) for s in drift.reseated],
+                         [("X000001", [])])
+        self.assertEqual(drift.changed, [])
+
+    def test_a_representative_elected_to_the_senate(self):
+        drift = self.reseat(roster_row(), chamber="sen", end="2033-01-03", senate_class=2)
+        self.assertEqual([c["field"] for c in drift.reseated[0]["moved"]], ["chamber"])
+        self.assertEqual(drift.changed, [])
+
+    def test_a_renumbered_district(self):
+        drift = self.reseat(roster_row(), chamber="rep", district=7)
+        self.assertEqual([c["field"] for c in drift.reseated[0]["moved"]], ["district"])
+
+    def test_the_same_change_inside_a_term_is_a_disagreement(self):
+        drift = self.reseat(roster_row(), chamber="rep", district=7, start="2025-01-03",
+                            end="2027-01-03")
+        self.assertEqual(drift.reseated, [])
+        self.assertEqual([c["field"] for c in drift.changed], ["district"])
+
+    def test_a_new_term_never_changes_a_party(self):
+        drift = self.reseat(roster_row(), chamber="rep", district=5, party="Democrat")
+        self.assertEqual([c["field"] for c in drift.changed], ["party"])
+        self.assertEqual(drift.reseated[0]["moved"], [])
+
+    def test_puerto_ricos_second_congress_is_not_a_new_term(self):
+        # congress-legislators records the four-year term one Congress at a
+        # time; it began in 2025 and ends in 2029 (48 U.S.C. 891).
+        row = roster_row(State="PR", District="At-Large")
+        self.assertEqual(self.reseat(row, chamber="rep", state="PR", district=0).reseated, [])
+        later = self.reseat(row, chamber="rep", state="PR", district=0, start="2029-01-03",
+                            end="2031-01-03")
+        self.assertEqual(len(later.reseated), 1)
+
+    def test_one_person_on_two_rows_is_an_error(self):
+        rows = [roster_row(), roster_row(Chamber="Senate", District="")]
+        snap = snapshot_of(entry(chamber="rep", district=5))
+        self.assertEqual(legislators.reconcile(rows, snap).twice, ["Member X000001 (X000001)"])
+        codes = [i.code for i in validate.check_snapshot([], {"members": rows}, snap)]
+        self.assertIn("member-twice", codes)
+
+    def test_a_seat_not_yet_written_is_an_error_and_a_date_a_warning(self):
+        def issues(**term):
+            snap = snapshot_of(entry(start="2027-01-03", end="2029-01-03", **term))
+            return {i.code: i.level for i in validate.check_snapshot(
+                [], {"members": [roster_row()]}, snap, now=datetime.datetime(2027, 1, 4))}
+        self.assertEqual(issues(chamber="rep", district=7).get("roster-disagrees"), "error")
+        found = issues(chamber="rep", district=5)
+        self.assertEqual(found.get("term-not-renewed"), "warn")
+        self.assertNotIn("roster-disagrees", found)
+
+
+class TestTermDates(unittest.TestCase):
+    """The term on a profile is the one the snapshot says is being served."""
+
+    def term(self, row, **term):
+        snap = snapshot_of(entry(**term))
+        profiles, _ = build_profiles({"members": [row], "candidates": []}, snapshot=snap)
+        return profiles[0]
+
+    def test_a_reelected_representative_reads_the_new_term(self):
+        # Not the roster's 2025 start against a 2029 end: a four-year House term.
+        found = self.term(roster_row(), chamber="rep", district=5, start="2027-01-03",
+                          end="2029-01-03")
+        self.assertEqual((found["term_start"], found["termEndYear"]),
+                         ("2027-01-03 - 2029-01-03", 2029))
+
+    def test_an_appointees_term_ends_at_the_special_election(self):
+        raw = entry(chamber="sen", start="2025-01-21", end="2026-11-03", senate_class=3)
+        raw["terms"][-1].update({"how": "appointment", "end-type": "special-election"})
+        snap = legislators.build_snapshot([raw], fetched="2026-10-16T00:00:00+00:00")
+        row = roster_row(Chamber="Senate", District="", **{"Term Start": "2025-01-21"})
+        profiles, _ = build_profiles({"members": [row], "candidates": []}, snapshot=snap)
+        self.assertEqual(profiles[0]["term_start"], "2025-01-21 - 2026-11-03 (special election)")
+
+    def test_puerto_ricos_term_is_the_statutes(self):
+        found = self.term(roster_row(State="PR", District="At-Large"), chamber="rep",
+                          state="PR", district=0, start="2025-01-03", end="2027-01-03")
+        self.assertEqual((found["term_start"], found["termEndYear"]),
+                         ("2025-01-03 - 2029-01-03", 2029))
+
+
+class TestOneRowPerPerson(unittest.TestCase):
+    """Members were deduplicated on their seat. A member whose row still
+    carried an old district number and a newcomer seated at that number
+    shared a key, and one of them vanished from the site with nothing said."""
+
+    def test_a_stale_district_and_a_newcomer_both_survive(self):
+        from kyc.profiles import _dedup_members
+
+        rows = [roster_row("OLD"), roster_row("NEW")]
+        self.assertEqual(len(_dedup_members(rows)), 2)
+
+    def test_a_vacant_seat_still_keys_on_the_seat(self):
+        from kyc.profiles import _dedup_members
+
+        rows = [roster_row("", Name="Vacant"), roster_row("", Name="Vacant")]
+        self.assertEqual(len(_dedup_members(rows)), 1)
+
+    def test_the_collision_is_loud_until_apply_writes_the_new_term(self):
+        snap = snapshot_of(entry(bioguide="OLD", chamber="rep", district=7,
+                                 start="2027-01-03", end="2029-01-03"),
+                           entry(bioguide="NEW", chamber="rep", district=5,
+                                 start="2027-01-03", end="2029-01-03"))
+        snap["fetched"] = "2027-01-04T07:20:00+00:00"
+        rows = [roster_row("OLD"), roster_row("NEW", **{"Term Start": "2027-01-03"})]
+        before = [i.code for i in validate.check_snapshot(
+            [], {"members": rows}, snap, now=datetime.datetime(2027, 1, 4))]
+        self.assertIn("roster-disagrees", before)
+        drift = legislators.reconcile(rows, snap)
+        with tempfile.TemporaryDirectory() as tmp:
+            TestApply.write(tmp, "Cleaned_House.csv",
+                            [dict(dict.fromkeys(TestApply.FULL, ""), **r) for r in rows])
+            TestApply.write(tmp, "Cleaned_Senate.csv", [])
+            legislators.apply(drift, tmp)
+            after = sources.load_rosters(sources.MEMBER_ROSTERS, tmp)[0]
+        codes = [i.code for i in validate.check_snapshot(
+            [], {"members": after}, snap, now=datetime.datetime(2027, 1, 4))]
+        self.assertEqual(codes, [])
+
+
+class TestSnapshotBehind(unittest.TestCase):
+    """CI and the deploy compare committed files with each other, so a
+    refresh failing every day from January 3 would leave them green on the
+    old Congress's data. Three days on, it is an error everywhere."""
+
+    def codes(self, when):
+        snapshot = legislators.load_snapshot(ROOT)
+        raw = sources.load_all(ROOT)
+        return [i.code for i in validate.check_snapshot([], raw, snapshot, now=when)]
+
+    def test_a_119th_snapshot_on_january_6_is_an_error(self):
+        from kyc import cycle
+
+        snapshot = legislators.load_snapshot(ROOT)
+        if cycle.snapshot_congress(snapshot) != 119:
+            self.skipTest("the committed snapshot is no longer of the 119th Congress")
+        self.assertIn("snapshot-behind", self.codes(datetime.datetime(2027, 1, 6)))
+        self.assertNotIn("snapshot-behind", self.codes(datetime.datetime(2027, 1, 5, 23)))
 
 
 class TestAuthoritativeFecIds(unittest.TestCase):
@@ -358,13 +708,6 @@ class TestValidation(unittest.TestCase):
         codes = [i.code for i in issues]
         self.assertIn("departed-member", codes)
         self.assertIn("missing-member", codes)
-
-    def test_an_already_excluded_member_is_not_reported_again(self):
-        rows = self.rows()
-        rows[0]["Name"] = sorted(overrides.EXCLUDED_MEMBERS)[0]
-        snap = snapshot_of(entry(bioguide="OTHER"))
-        codes = [i.code for i in validate.check_snapshot([], {"members": rows}, snap)]
-        self.assertNotIn("departed-member", codes)
 
     def test_a_stale_snapshot_is_reported(self):
         snap = snapshot_of(entry(bioguide="X000001"))

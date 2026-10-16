@@ -87,7 +87,7 @@ jobs:
           # reviewer open the run log.
           {
             echo 'summary<<REPORT'
-            grep -E '^\s+(reconciliation:|\+|-|~)' reconcile.log || echo "  no drift"
+            grep -E '^\s+(reconciliation:|\+|-|~|!)' reconcile.log || echo "  no drift"
             echo REPORT
           } >> "$GITHUB_OUTPUT"
           rm reconcile.log

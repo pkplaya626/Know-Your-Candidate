@@ -37,6 +37,11 @@ SNAPSHOT_FILE = "congress_snapshot.json"
 SOURCE_URL = (
     "https://unitedstates.github.io/congress-legislators/legislators-current.json"
 )
+# Everyone who has left, with the day their last term ended: how a departure
+# is told from a fault in the current file (see :func:`departures`).
+HISTORICAL_URL = (
+    "https://unitedstates.github.io/congress-legislators/legislators-historical.json"
+)
 # The same project's companion files: verified social-media accounts, and
 # committee rosters with each member's rank and title.
 SOCIAL_URL = (
@@ -582,22 +587,29 @@ def senate_cycle(person):
 class Drift:
     """What the roster and the authoritative snapshot disagree about."""
 
-    __slots__ = ("missing", "departed", "changed", "checked")
+    __slots__ = ("missing", "departed", "expected", "changed", "reseated", "twice",
+                 "checked")
 
     def __init__(self):
         self.missing = []    # serving now, absent from the roster
-        self.departed = []   # in the roster, no longer serving
+        self.departed = []   # in the roster, no longer serving, no record of why
+        self.expected = []   # in the roster, and the records say the term ended
         self.changed = []    # present in both, disagreeing on a field
+        self.reseated = []   # present in both, serving a term begun since the row
+        self.twice = []      # one bioguide on more than one roster row
         self.checked = 0
 
     @property
     def clean(self):
-        return not (self.missing or self.departed or self.changed)
+        return not (self.missing or self.departed or self.expected or self.changed
+                    or self.reseated or self.twice)
 
     def summary(self):
         return (
             f"{self.checked} matched, {len(self.missing)} missing, "
-            f"{len(self.departed)} departed, {len(self.changed)} changed"
+            f"{len(self.expected)} left at the end of a term, "
+            f"{len(self.departed)} departed with no record of it, "
+            f"{len(self.reseated)} serving a new term, {len(self.changed)} changed"
         )
 
 
@@ -606,30 +618,109 @@ class Drift:
 # education, net worth or committee assignments.
 COMPARED_FIELDS = ("party", "state", "district", "chamber", "birthday")
 
+# What a new term may change about a seat: the chamber (a representative
+# elected to the Senate), the state with it, the district (a renumbered map).
+# A new term never changes a person's party or birthday, so a difference in
+# either is still reported for someone to look at.
+SEAT_FIELDS = ("state", "district", "chamber")
 
-def reconcile(member_rows, snapshot, district_parser=None):
+
+def departures(bioguides, snapshot, previous=None, historical=None):
+    """Which of *bioguides* - roster members absent from *snapshot* - left
+    when the records say their term ended. Decided by id, never by name
+    (rules 3 and 17).
+
+    ``{bioguide: {"left": "YYYY-MM-DD", "via": source}}``, from, in order:
+
+    1. *historical*, ``legislators-historical``: the person is listed there,
+       and their last term ended on or before the day *snapshot* was read -
+       a resignation, a death, a defeat, a retirement;
+    2. *previous*, the snapshot this one replaces: the term it gave them
+       has ended by that day. That covers the January 3 changeover and an
+       appointee's term ending at a special election, even before
+       ``legislators-historical`` lists them.
+
+    Anyone in neither is absent from the membership with no record of
+    leaving: an upstream fault until someone shows otherwise, and never
+    archived (rule 16). An unavailable *historical* concludes nothing about
+    anyone (rule 8); the caller passes ``None``.
+    """
+    read = str((snapshot or {}).get("fetched") or "")[:10]
+    if not read:
+        return {}
+    gone = {}
+    for entry in historical or []:
+        bioguide = str((entry.get("id") or {}).get("bioguide") or "").upper()
+        terms = entry.get("terms") or []
+        if bioguide in bioguides and terms:
+            gone[bioguide] = str(terms[-1].get("end") or "")
+    before = by_bioguide(previous)
+    out = {}
+    for bioguide in sorted(bioguides):
+        left = gone.get(bioguide)
+        if left and left <= read:
+            out[bioguide] = {"left": left, "via": "legislators-historical"}
+            continue
+        ended = str((before.get(bioguide) or {}).get("termEnd") or "")
+        if ended and ended <= read:
+            out[bioguide] = {"left": ended, "via": "term-ended"}
+    return out
+
+
+def roster_ids(member_rows):
+    """The bioguide ids on the roster rows."""
+    from .normalize import clean_str
+
+    ids = set()
+    for row in member_rows:
+        bioguide = clean_str(row.get("Bioguide ID"), "").upper()
+        if bioguide and bioguide != "N/A":
+            ids.add(bioguide)
+    return ids
+
+
+def reconcile(member_rows, snapshot, district_parser=None, ended=None):
     """Compare roster rows against the snapshot.
 
     *district_parser* is ``normalize.parse_district``; it is passed in rather
     than imported so this module stays free of the loader's import graph.
+
+    *ended* is :func:`departures` for the rows absent from the snapshot.
+    Those it names are ``expected``, the rest ``departed``. The build has no
+    previous snapshot to ask, so it passes nothing and every absence is
+    ``departed``: ``congress --apply`` archives the expected ones first.
+
+    A member serving a term that began after the row's ``Term Start`` is
+    ``reseated``: re-elected, elected to the other chamber, or seated in a
+    renumbered district. Their seat columns are the new term's to rewrite,
+    so a difference in them is not ``changed``.
     """
     from .normalize import clean_str, parse_district
 
     parse = district_parser or parse_district
     authoritative = by_bioguide(snapshot)
+    ended = ended or {}
     drift = Drift()
 
-    seen = {}
+    seen, counts = {}, {}
     for row in member_rows:
         bioguide = clean_str(row.get("Bioguide ID"), "").upper()
         if bioguide and bioguide != "N/A":
             seen.setdefault(bioguide, row)
+            counts[bioguide] = counts.get(bioguide, 0) + 1
+    drift.twice = sorted(f"{clean_str(seen[b].get('Name'), '?')} ({b})"
+                         for b, n in counts.items() if n > 1)
 
     for bioguide, row in sorted(seen.items()):
         person = authoritative.get(bioguide)
         name = clean_str(row.get("Name"), "?")
         if person is None:
-            drift.departed.append({"bioguide": bioguide, "name": name})
+            gone = {"bioguide": bioguide, "name": name,
+                    "chamber": clean_str(row.get("Chamber"), "")}
+            if bioguide in ended:
+                drift.expected.append(dict(gone, **ended[bioguide]))
+            else:
+                drift.departed.append(gone)
             continue
 
         drift.checked += 1
@@ -641,6 +732,19 @@ def reconcile(member_rows, snapshot, district_parser=None):
             "birthday": clean_str(row.get("Birthdate"), ""),
             "district": parse(row.get("District"), state)[0],
         }
+        began = clean_str(row.get("Term Start"), "")[:10]
+        renewed = bool(began) and (person.get("termStart") or "") > began
+        if renewed and person["chamber"] == "House" and state == person.get("state"):
+            # A four-year seat is recorded one Congress at a time: Puerto
+            # Rico's term from 2025 gains a 2027 entry that is not a new
+            # term, and its start is still 2025.
+            from .races import house_seat_up
+
+            try:
+                renewed = house_seat_up(state, int(person["termStart"][:4]) - 1)
+            except ValueError:
+                pass
+        moved = []
 
         for field in COMPARED_FIELDS:
             theirs = person.get(field)
@@ -650,12 +754,12 @@ def reconcile(member_rows, snapshot, district_parser=None):
                 # The roster spells this "House" / "Senate" but candidate rows
                 # carry suffixes, so compare by containment.
                 if theirs and theirs not in mine:
-                    drift.changed.append(_change(bioguide, name, field, mine, theirs))
+                    moved.append(_change(bioguide, name, field, mine, theirs))
                 continue
 
             if field == "district":
                 if person["chamber"] == "House" and mine != theirs:
-                    drift.changed.append(_change(bioguide, name, field, mine, theirs))
+                    moved.append(_change(bioguide, name, field, mine, theirs))
                 continue
 
             if field == "party":
@@ -667,7 +771,16 @@ def reconcile(member_rows, snapshot, district_parser=None):
             # An absent roster value is a gap to fill, not a contradiction to
             # report - the existing provenance machinery already labels it.
             if theirs and mine not in ("", "N/A", "Unknown") and mine != theirs:
-                drift.changed.append(_change(bioguide, name, field, mine, theirs))
+                if field in SEAT_FIELDS:
+                    moved.append(_change(bioguide, name, field, mine, theirs))
+                else:
+                    drift.changed.append(_change(bioguide, name, field, mine, theirs))
+
+        if renewed:
+            drift.reseated.append({"bioguide": bioguide, "name": name, "person": person,
+                                   "termStart": began, "moved": moved})
+        else:
+            drift.changed.extend(moved)
 
     for bioguide, person in sorted(authoritative.items()):
         if bioguide not in seen:
@@ -707,8 +820,15 @@ WRITABLE = {
     ),
     "Birthdate": lambda p: p.get("birthday") or "",
     "Term Start": lambda p: p.get("termStart") or "",
+    "Term End Date": lambda p: p.get("termEnd") or "",
     "Status": lambda _p: "Active Member",
 }
+
+# What a new term rewrites on an existing row. Everything else on it - name
+# as the roster spells it, education, professions, platform, voting record -
+# is the person's, not the seat's, and stays. Every status note in the roster
+# is about the term that ended ("Retiring in 2026").
+RESEAT_COLUMNS = ("Chamber", "State", "District", "Term Start", "Term End Date", "Status")
 
 
 def row_for(person, fieldnames):
@@ -720,59 +840,148 @@ def row_for(person, fieldnames):
     return row
 
 
+# The rosters hold whoever the snapshot says is serving, of whichever
+# Congress; the file names no longer claim one.
 ROSTER_FOR_CHAMBER = {
-    "House": "Cleaned_House_119th.csv",
-    "Senate": "Cleaned_Senate_119th.csv",
+    "House": "Cleaned_House.csv",
+    "Senate": "Cleaned_Senate.csv",
 }
 
+# Members who have left, each row as the roster held it on the day it was
+# archived, with when they left, the record that says so, and the last
+# Congress they served in.
+FORMER_ROSTER = "Former_Members.csv"
+FORMER_COLUMNS = ("Left Office", "Left Via", "Last Congress")
 
-def apply_missing(drift, root=".", today=None):
-    """Append newly seated members to the roster CSVs.
 
-    Only the columns in :data:`WRITABLE` are filled. Education, net worth,
-    committees and platform are editorial research that no dataset supplies,
-    so they stay empty and the provenance layer reports them as "No data" -
-    which is true, and better than a plausible invention.
-
-    Departed members are never removed automatically: a roster row may carry
-    curated work, and taking someone out of Congress is a judgement that
-    belongs in ``overrides.EXCLUDED_MEMBERS`` where it is visible.
-
-    Returns ``{roster_filename: [names added]}``.
-    """
+def _read_rows(path):
     import csv
 
-    added = {}
+    if not os.path.exists(path):
+        return None, []
+    with open(path, "r", encoding="utf-8", errors="replace", newline="") as handle:
+        reader = csv.DictReader(handle)
+        return list(reader.fieldnames or []), list(reader)
+
+
+def _write_rows(path, fieldnames, rows):
+    """Atomically (rule 7), dropping any key the file has no column for."""
+    import csv
+
+    tmp = f"{path}.tmp"
+    with open(tmp, "w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(rows)
+    os.replace(tmp, path)
+
+
+def _row_id(row):
+    return str(row.get("Bioguide ID") or "").strip().upper()
+
+
+def apply(drift, root=".", today=None):
+    """Write the drift into the roster CSVs.
+
+    * ``missing``: a row for each newly seated member, with only the columns
+      in :data:`WRITABLE` filled. Education, net worth, committees and
+      platform are editorial research no dataset supplies, so they stay
+      empty and the provenance layer reports "No data" - which is true, and
+      better than a plausible invention (rule 28).
+    * ``reseated``: the :data:`RESEAT_COLUMNS` of each row serving a new
+      term are rewritten from the snapshot. A member elected to the other
+      chamber moves to its file, and their committee assignments are
+      emptied: they described the seat they left.
+    * ``expected``: each member the records say has left (:func:`departures`)
+      moves, row and all, to :data:`FORMER_ROSTER`.
+
+    ``departed`` - absent with no record of leaving - is never touched: a
+    roster row carries curated work, and the build's ``departed-member``
+    error is how somebody finds out. Running it twice changes nothing.
+
+    Returns ``{"added": {roster: [names]}, "reseated": {roster: [names]},
+    "archived": [names]}``.
+    """
+    from . import cycle
+
+    report = {"added": {}, "reseated": {}, "archived": []}
+    files = {}
     for chamber, roster in ROSTER_FOR_CHAMBER.items():
-        people = [p for p in drift.missing if p["chamber"] == chamber]
-        if not people:
-            continue
+        fieldnames, rows = _read_rows(os.path.join(root, roster))
+        if fieldnames:
+            files[chamber] = {"name": roster, "fieldnames": fieldnames, "rows": rows,
+                              "dirty": False}
+    if not files:
+        return report
 
-        path = os.path.join(root, roster)
-        if not os.path.exists(path):
-            continue
+    def holder(bioguide):
+        for chamber, held in files.items():
+            for row in held["rows"]:
+                if _row_id(row) == bioguide:
+                    return chamber, row
+        return None, None
 
-        with open(path, "r", encoding="utf-8", errors="replace", newline="") as handle:
-            reader = csv.DictReader(handle)
-            fieldnames = list(reader.fieldnames or [])
-            rows = list(reader)
+    for seat in drift.reseated:
+        person = seat["person"]
+        chamber, row = holder(seat["bioguide"])
+        if row is None:
+            continue
+        for column in RESEAT_COLUMNS:
+            if column in row:
+                row[column] = WRITABLE[column](person)
+        files[chamber]["dirty"] = True
+        target = person["chamber"]
+        if target != chamber and target in files:
+            row["Committee Assignments"] = ""
+            files[chamber]["rows"].remove(row)
+            files[target]["rows"].append(row)
+            files[target]["dirty"] = True
+            chamber = target
+        report["reseated"].setdefault(files[chamber]["name"], []).append(seat["name"])
+
+    leaving = {p["bioguide"]: p for p in drift.expected}
+    if leaving:
+        path = os.path.join(root, FORMER_ROSTER)
+        fieldnames, former = _read_rows(path)
         if not fieldnames:
-            continue
+            first = next(iter(files.values()))["fieldnames"]
+            fieldnames = first + [c for c in FORMER_COLUMNS if c not in first]
+        kept = {(_row_id(r), r.get("Left Office")) for r in former}
+        for held in files.values():
+            for row in [r for r in held["rows"] if _row_id(r) in leaving]:
+                gone = leaving[_row_id(row)]
+                last = cycle.congress_for_date(
+                    datetime.date.fromisoformat(gone["left"]) - datetime.timedelta(days=1))
+                if (_row_id(row), gone["left"]) not in kept:
+                    former.append(dict(row, **{"Left Office": gone["left"],
+                                               "Left Via": gone["via"],
+                                               "Last Congress": str(last)}))
+                    kept.add((_row_id(row), gone["left"]))
+                    report["archived"].append(gone["name"])
+                held["rows"].remove(row)
+                held["dirty"] = True
+        # The archive is written before the rosters, so an interruption
+        # leaves a member in both - which the next run sees and finishes -
+        # never in neither.
+        if report["archived"]:
+            _write_rows(path, fieldnames, former)
 
-        for person in people:
-            row = row_for(person, fieldnames)
+    for chamber, held in files.items():
+        present = {_row_id(r) for r in held["rows"]}
+        for person in drift.missing:
+            if person["chamber"] != chamber or person["bioguide"] in present:
+                continue
+            row = row_for(person, held["fieldnames"])
             if "Age" in row:
                 row["Age"] = age_on(person.get("birthday"), today)
-            rows.append(row)
+            held["rows"].append(row)
+            held["dirty"] = True
+            report["added"].setdefault(held["name"], []).append(person["name"])
 
-        tmp = f"{path}.tmp"
-        with open(tmp, "w", encoding="utf-8", newline="") as handle:
-            writer = csv.DictWriter(handle, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(rows)
-        os.replace(tmp, path)
-        added[roster] = [p["name"] for p in people]
-    return added
+    for held in files.values():
+        if held["dirty"]:
+            _write_rows(os.path.join(root, held["name"]), held["fieldnames"], held["rows"])
+    return report
 
 
 def age_on(birthday, today=None):

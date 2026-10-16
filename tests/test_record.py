@@ -207,6 +207,61 @@ class TestTheSpecialsSeated(unittest.TestCase):
                          ["S-FL-2026: in the record, not among today's seats"])
 
 
+class TestTheSpecialsSeatedThroughApply(unittest.TestCase):
+    """The December refresh end to end, on copies of the committed rosters:
+    the specials' membership, what `congress --apply` does with it, then the
+    build's own checks. Florida's appointee leaves by the term the previous
+    snapshot gave her, with no name list and no hand edit."""
+
+    @classmethod
+    def setUpClass(cls):
+        import shutil
+
+        cls.raw = sources.load_all(ROOT)
+        previous = legislators.load_snapshot(ROOT)
+        _, cls.after, cls.florida, cls.ohio = specials_seated(cls.raw, previous)
+        if cls.florida not in legislators.roster_ids(cls.raw["members"]):
+            raise unittest.SkipTest("Florida's appointee has left the committed roster: "
+                                    "what this rehearses has happened")
+        with tempfile.TemporaryDirectory() as tmp:
+            for name in sources.MEMBER_ROSTERS + (sources.FORMER_ROSTER,):
+                shutil.copy(os.path.join(ROOT, name), tmp)
+            rows = sources.load_rosters(sources.MEMBER_ROSTERS, tmp)[0]
+            absent = legislators.roster_ids(rows) - set(legislators.by_bioguide(cls.after))
+            ended = legislators.departures(absent, cls.after, previous=previous)
+            cls.drift = legislators.reconcile(rows, cls.after, ended=ended)
+            legislators.apply(cls.drift, tmp, today=datetime.date(2026, 12, 9))
+            cls.members = sources.load_rosters(sources.MEMBER_ROSTERS, tmp)[0]
+            cls.former = sources.read_csv(os.path.join(tmp, sources.FORMER_ROSTER))
+
+    def test_the_appointee_leaves_by_the_term_that_ended(self):
+        self.assertEqual([(p["bioguide"], p["via"]) for p in self.drift.expected],
+                         [(self.florida, "term-ended")])
+        self.assertEqual(self.drift.departed, [])
+        self.assertEqual([(r["Bioguide ID"], r["Left Office"], r["Last Congress"])
+                          for r in self.former], [(self.florida, "2026-11-03", "119")])
+
+    def test_the_winners_are_written_in(self):
+        ids = {r["Bioguide ID"] for r in self.members}
+        self.assertIn("Z900001", ids)
+        self.assertNotIn(self.florida, ids)
+        ohio = next(r for r in self.members if r["Bioguide ID"] == self.ohio)
+        self.assertEqual((ohio["Term Start"], ohio["Term End Date"]),
+                         ("2026-12-08", "2029-01-03"))
+
+    def test_the_build_finds_nothing_wrong(self):
+        roster = dict(self.raw, members=self.members)
+        when = datetime.datetime(2026, 12, 9, 8)
+        errors = [i.code for i in validate.check_snapshot([], roster, self.after, now=when)
+                  if i.level == "error"]
+        self.assertEqual(errors, [])
+        profiles, _ = build_profiles(roster, snapshot=self.after)
+        self.assertEqual([i.code for i in validate.check_record(
+            profiles, self.raw["record"], self.after)], [])
+        ohio = next(p for p in profiles if p["id"] == self.ohio)
+        self.assertEqual(ohio["term_start"], "2026-12-08 - 2029-01-03")
+
+
 class TestRecordDrift(unittest.TestCase):
     """The drift check reads today's Senate seats from the snapshot, so it is
     never the record compared with itself."""

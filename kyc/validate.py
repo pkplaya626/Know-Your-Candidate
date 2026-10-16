@@ -203,15 +203,6 @@ def check_overrides(profiles, raw):
     """
     issues = []
 
-    dead_exclusions = sorted(
-        n for n in overrides.EXCLUDED_MEMBERS
-        if n not in {clean_str(r.get("Name"), "") for r in raw["members"]}
-    )
-    if dead_exclusions:
-        issues.append(Issue("warn", "stale-exclusion",
-                            f"{len(dead_exclusions)} excluded members are not in the roster",
-                            dead_exclusions))
-
     # Status notes are keyed on bioguide id only; one whose id is no longer
     # a sitting member is invisible on the page but quietly wrong.
     member_ids = {p["id"] for p in profiles if not p.get("isCandidate")}
@@ -391,7 +382,14 @@ def check_district_maps(races, district_maps, error=None):
 SNAPSHOT_STALE_DAYS = 30
 
 
-def check_snapshot(profiles, raw, snapshot):
+# Days after a new Congress's terms begin before a snapshot of the old one is
+# an error: the refresh runs daily over the changeover (refresh.yml), so three
+# days is two failed runs, and the site would still be naming the people who
+# left as "who represents you".
+SNAPSHOT_BEHIND_DAYS = 3
+
+
+def check_snapshot(profiles, raw, snapshot, now=None):
     """Compare the rosters against the authoritative membership.
 
     The rosters are hand-curated and, measured field by field, accurate. What
@@ -399,7 +397,9 @@ def check_snapshot(profiles, raw, snapshot):
     week before this check was written were simply missing from the site, and
     nothing anywhere said so.
     """
-    from . import legislators
+    import datetime
+
+    from . import cycle, legislators
 
     if not snapshot:
         return [Issue("warn", "no-snapshot",
@@ -407,15 +407,42 @@ def check_snapshot(profiles, raw, snapshot):
                       "against the authoritative roster. Run 'congress'.")]
 
     issues = []
+    if now is not None and now.tzinfo is None:
+        now = now.replace(tzinfo=datetime.timezone.utc)
 
-    age = legislators.snapshot_age_days(snapshot)
+    age = legislators.snapshot_age_days(snapshot, now)
     if age is not None and age > SNAPSHOT_STALE_DAYS:
         issues.append(Issue(
             "warn", "stale-snapshot",
             f"The membership snapshot is {age} days old; run 'congress' to refresh it",
         ))
 
+    # The one check here that reads the clock on purpose, as stale-snapshot
+    # does: every other check compares committed files with each other, so a
+    # refresh that failed every day from January 3 would leave CI and the
+    # deploy green on the old Congress's data.
+    try:
+        sitting = cycle.snapshot_congress(snapshot)
+    except cycle.CycleError:
+        sitting = None
+    if sitting:
+        today = (now or datetime.datetime.now(datetime.timezone.utc)).date()
+        due = cycle.congress_start(sitting + 1) + datetime.timedelta(days=SNAPSHOT_BEHIND_DAYS)
+        if today >= due:
+            issues.append(Issue(
+                "error", "snapshot-behind",
+                f"The membership snapshot is of the {cycle.ordinal(sitting)} Congress, "
+                f"and the {cycle.ordinal(sitting + 1)} has been sitting since "
+                f"{cycle.congress_start(sitting + 1).isoformat()}; run 'congress --apply'",
+            ))
+
     drift = legislators.reconcile(raw["members"], snapshot)
+
+    if drift.twice:
+        issues.append(Issue(
+            "error", "member-twice",
+            f"{len(drift.twice)} people are on more than one roster row", drift.twice,
+        ))
 
     if drift.missing:
         issues.append(Issue(
@@ -428,21 +455,39 @@ def check_snapshot(profiles, raw, snapshot):
         ))
 
     if drift.departed:
-        known = {n.lower() for n in overrides.EXCLUDED_MEMBERS}
-        unexpected = [p for p in drift.departed if p["name"].lower() not in known]
-        if unexpected:
-            issues.append(Issue(
-                "error", "departed-member",
-                f"{len(unexpected)} roster entries are no longer serving",
-                [f"{p['name']} ({p['bioguide']})" for p in unexpected],
-            ))
+        # Decided by id, never by a name list: `congress --apply` archives
+        # whoever legislators-historical or the previous snapshot says left
+        # (legislators.departures), so anyone still here has no record of it.
+        issues.append(Issue(
+            "error", "departed-member",
+            f"{len(drift.departed)} roster entries are no longer serving; "
+            f"'congress --apply' archives those the records say left",
+            [f"{p['name']} ({p['bioguide']})" for p in drift.departed],
+        ))
 
-    if drift.changed:
+    # A new term's seat not yet written in is as wrong on the page as any
+    # other disagreement (the profile is built from the row); `--apply`
+    # rewrites it.
+    moved = [c for seat in drift.reseated for c in seat["moved"]]
+    if drift.changed or moved:
         issues.append(Issue(
             "error", "roster-disagrees",
-            f"{len(drift.changed)} roster fields disagree with the authoritative roster",
+            f"{len(drift.changed) + len(moved)} roster fields disagree with the "
+            f"authoritative roster",
             [f"{c['name']}: {c['field']} roster={c['roster']!r} "
-             f"authoritative={c['authoritative']!r}" for c in drift.changed],
+             f"authoritative={c['authoritative']!r}" for c in drift.changed]
+            + [f"{c['name']}: {c['field']} roster={c['roster']!r} "
+               f"authoritative={c['authoritative']!r} (a new term; 'congress --apply' "
+               f"writes it)" for c in moved],
+        ))
+
+    # Only the date is behind: the profile reads the term from the snapshot.
+    renewed = sorted(s["name"] for s in drift.reseated if not s["moved"])
+    if renewed:
+        issues.append(Issue(
+            "warn", "term-not-renewed",
+            f"{len(renewed)} roster rows still carry the previous term's start; "
+            f"'congress --apply' writes the new one", renewed,
         ))
 
     _ = profiles

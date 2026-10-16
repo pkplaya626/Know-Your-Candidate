@@ -106,7 +106,8 @@ python build_profile_site.py                  # build (offline)
 python build_profile_site.py build --check    # validate only
 python build_profile_site.py verify           # committed data matches sources
 python build_profile_site.py congress --check # roster vs Congress (offline)
-python build_profile_site.py congress --apply # write newly seated members in
+python build_profile_site.py congress --apply # write the drift in: new members, new terms, departures
+python build_profile_site.py congress --apply --snapshot FILE  # the same from a file (a rehearsal)
 python build_profile_site.py geo              # regenerate map geometry only (both maps)
 python build_profile_site.py congress         # refresh membership (network)
 python build_profile_site.py field --check    # who is running, from the FEC
@@ -125,7 +126,7 @@ python build_profile_site.py courts           # each state's highest court, from
 python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 963 tests, no dependencies
+python -m unittest discover tests             # 993 tests, no dependencies
 npm install && npm test                       # 1204 real-DOM checks (needs jsdom)
 ```
 
@@ -778,6 +779,24 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     The cycle is set by hand in `kyc/cycle.py` and nowhere else; the sitting
     Congress is the snapshot's, and the record phase begins only once it is
     the Congress the cycle elects and was read after noon on January 3.
+
+66. **A departure is decided by id, from a record of it.** January 3 takes
+    about a hundred members out of the snapshot at once, and the
+    `departed-member` error would have failed every refresh from then on.
+    The way out was `overrides.EXCLUDED_MEMBERS`, a list of names (rules 3
+    and 17) whose three entries had already left the roster. Now
+    `congress --apply` archives a member to `Former_Members.csv` only when
+    `legislators-historical` lists their bioguide with a term ended by the
+    day the snapshot was read, or the snapshot it replaces gave them a term
+    that has ended (`legislators.departures`). Anyone else absent stays in
+    the roster and fails the build (rule 16). A new term rewrites the
+    row's seat and dates (`reseated`) but never its party, and the term on
+    a profile is the snapshot's, except Puerto Rico's: congress-legislators
+    lists its four-year term one Congress at a time. Members are
+    deduplicated on bioguide, not seat: a stale district and a newcomer
+    seated at that number shared a key, and one vanished. Three days into a
+    new Congress, a snapshot of the old one fails every build
+    (`snapshot-behind`).
 
 ## District maps
 

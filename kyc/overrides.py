@@ -42,9 +42,11 @@ CANDIDATE_PHOTOS = {
     ("Annie Andrews", "SC"): "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Annie_Andrews_portrait.jpg/800px-Annie_Andrews_portrait.jpg",
 }
 
-# Members present in the roster CSVs who no longer hold the seat. Matched on
-# exact name against the member rosters only.
-EXCLUDED_MEMBERS = frozenset({"Marco Rubio", "J.D. Vance", "Markwayne Mullin"})
+# There is no list of members to leave out. Whoever has left is decided by
+# bioguide id from Congress's own records (legislators.departures) and moved
+# to Former_Members.csv by `congress --apply`. The name list that stood here
+# matched on names (rules 3 and 17), and all three of its names had already
+# left the roster.
 
 # Where the Senate notes below were checked (2026-10-02). Each is the section
 # that states the fact, read from the live article, never from memory.
