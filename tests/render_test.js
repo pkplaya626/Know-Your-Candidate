@@ -2461,6 +2461,122 @@ async function testRedistricting() {
 
 /* Every other shape of district page: one map, a single seat, a seat with no
  * race this year, a redrawn map clipped to the land, and the old address. */
+/* Find my district: the reader's location, placed on the device. */
+function at(lat, lon, fail, accuracy) {
+  return (window) => {
+    Object.defineProperty(window.navigator, "geolocation", { configurable: true, value: {
+      getCurrentPosition(ok, err) {
+        if (fail) err({ code: fail });
+        else ok({ coords: { latitude: lat, longitude: lon,
+          accuracy: accuracy === undefined ? 30 : accuracy } });
+      },
+    } });
+  };
+}
+
+async function located(page, lat, lon, accuracy) {
+  const built = await buildPage(page, { setup: at(lat, lon, 0, accuracy) });
+  built.D.getElementById("locateMe").click();
+  const out = built.D.getElementById("locateResult");
+  return { text: out.textContent, html: out.innerHTML, D: built.D, window: built.window };
+}
+
+// Never "between" one district, or none.
+const lonelyBetween = (html) => /between (<strong>[^<]*<\/strong>)?[.,;]/.test(html) ||
+  /between\s*$/.test(html);
+
+async function testFindMyDistrict() {
+  const places = JSON.parse(fs.readFileSync(path.join(SITE, "..", "district_maps", "places.json"),
+    "utf8")).places;
+  const town = (code, name) => places[code].find((p) => p[0] === name);
+  // Erie, well inside PA-16 (Pittsburgh's point is within 3 km of PA-17).
+  const [, plon, plat] = town("PA", "Erie");
+
+  const page = await buildPage("districts/pa.html", { setup: at(plat, plon) });
+  const { window, D, errors } = page;
+  const KYC = window.KYC;
+  const state = window.kycDistricts.PA;
+  // A town near a line, found with the page's own geometry.
+  const near = places.PA.find((p) => {
+    const f = KYC.districtMap.locate(p[1], p[2], 30);
+    return f && f[0].kind === "line" && f[0].inside.length + f[0].near.length === 2;
+  });
+  suite("districts/pa.html — find my district", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const button = D.getElementById("locateMe");
+    check("a Find my district button, saying the location stays on the device",
+      !!button && /not sent anywhere/.test(button.getAttribute("title")));
+    // Several towns share a name (three Franklins): any one of them will do.
+    const off = places.PA.filter((p) => state.places.some((d) => d[0] === p[0])).filter((p) => {
+      const xy = KYC.districtMap.project(p[1], p[2]);
+      return !state.places.some((d) => d[0] === p[0] &&
+        Math.abs(xy[0] - d[1]) <= 0.06 && Math.abs(xy[1] - d[2]) <= 0.06);
+    });
+    check("every Pennsylvania town lands on its own point", off.length === 0,
+      off.slice(0, 3).map((p) => p[0]).join(", "));
+    button.click();
+    const said = D.getElementById("locateResult");
+    check("Erie is in PA-16, as on record", !said.hidden &&
+      /^You are in PA-16\./.test(said.textContent), said.textContent);
+    check("and PA-16 is the district shown", D.getElementById("districtPick").value === "16",
+      D.getElementById("districtPick").value);
+    check("with the state's own lookup to confirm it",
+      !!said.querySelector('a[target="_blank"][rel~="noopener"]'));
+    check("a Pennsylvania town lies near a line, to test with", !!near);
+  });
+
+  const rough = await located("districts/pa.html", plat, plon, 20000);
+  const line = near ? await located("districts/pa.html", near[2], near[1], 30) : null;
+  suite("districts/pa.html — what the map cannot say", () => {
+    check("a fix 20 km rough names no district",
+      /too rough to place in a district/.test(rough.text) && !/You are in/.test(rough.text) &&
+        /about 20 km/.test(rough.text), rough.text);
+    if (line) {
+      const f = KYC.districtMap.locate(near[1], near[2], 30)[0];
+      const both = f.inside.concat(f.near).map((n) => "PA-" + n);
+      check("near a line, both districts are named, neither chosen, and it says why",
+        /near the line between/.test(line.text) && both.every((s) => line.text.indexOf(s) !== -1) &&
+          !/You are in/.test(line.text) && (line.text.match(/simplified/g) || []).length === 1,
+        line.text);
+      check("and the map shows both", line.D.getElementById("districtPick").value === "");
+    }
+  });
+
+  const paris = await located("districts/pa.html", 48.8566, 2.3522);
+  const denied = await buildPage("districts/pa.html", { setup: at(0, 0, 1) });
+  denied.D.getElementById("locateMe").click();
+  const kck = await located("districts/mo.html", 39.1067, -94.625);
+  const bay = await located("districts/tx.html", 29.55, -94.85);
+  const tx = town("TX", "Austin");
+  const austin = await located("districts/tx.html", tx[2], tx[1]);
+  const texhomaTX = await located("districts/tx.html", 36.4983, -101.7849);
+  const texhomaOK = await located("districts/ok.html", 36.5035, -101.7832);
+  suite("districts — find my district at the edges", () => {
+    check("a location far outside the state says so",
+      /not in Pennsylvania/.test(paris.text), paris.text);
+    const deniedOut = denied.D.getElementById("locateResult");
+    check("a refused location says what to do, and links the state's lookup",
+      /did not share a location/.test(deniedOut.textContent) &&
+        !!deniedOut.querySelector('a[target="_blank"]'), deniedOut.textContent);
+    check("Kansas City, Kansas is at Missouri's edge or outside it, never 'between' one district",
+      /at the edge of Missouri or just outside it/.test(kck.text) && !lonelyBetween(kck.html), kck.text);
+    check("over Galveston Bay no sentence names nothing",
+      !lonelyBetween(bay.html) && !/between \./.test(bay.text) &&
+        !/On the map members were elected on, the map/.test(bay.text), bay.text);
+    check("Austin is answered for both maps, naming districts, simplified said once",
+      /TX-\d+/.test(austin.text) && (/On both maps/.test(austin.text) ||
+        (/On the map for 2026/.test(austin.text) && /On the map members were elected on/.test(austin.text))) &&
+        (austin.text.match(/simplified/g) || []).length <= 1 && !lonelyBetween(austin.html), austin.text);
+    check("on the state line, neither neighbour claims it outright",
+      [texhomaTX.text, texhomaOK.text].every((s) => !/^You are in [A-Z]{2}-\d+\.( |$)/.test(s) ||
+        /state line/.test(s)), texhomaTX.text + " || " + texhomaOK.text);
+  });
+  const ak = await buildPage("districts/ak.html", { setup: at(61.2, -149.9) });
+  suite("districts/ak.html — one seat, nothing to find", () => {
+    check("no button for a state elected at large", !ak.D.getElementById("locateMe"));
+  });
+}
+
 async function testDistrictPages() {
   // Texas listed Al Green (TX-9 -> TX-18) and Julie Johnson (TX-32 -> TX-33)
   // under "Running in a different district" after both lost those primaries.
@@ -3820,6 +3936,7 @@ async function testElectionNight() {
   if (!only || only === "states") await testElectionNight();
   if (!only || only === "redistricting") await testRedistricting();
   if (!only || only === "redistricting") await testDistrictPages();
+  if (!only || only === "redistricting") await testFindMyDistrict();
   if (!only || only === "redistricting") await testDistrictsOnAPhone();
   if (!only || only === "links") await testInterlinks();
   if (!only || only === "links") await testDeepLinks();

@@ -41,6 +41,20 @@ def rings_of(path_data):
     return rings
 
 
+def page_project(p, lon, lat):
+    """kyc-districts.js project(), line for line."""
+    rad = math.pi / 180
+    phi0, phi1 = p["parallels"][0] * rad, p["parallels"][1] * rad
+    n = (math.sin(phi0) + math.sin(phi1)) / 2
+    c = 1 + math.sin(phi0) * (2 * n - math.sin(phi0))
+    r0 = math.sqrt(c) / n
+    d = ((lon - p["meridian"] + 180) % 360 + 360) % 360 - 180
+    lam = d * rad * n
+    r = math.sqrt(c - 2 * n * math.sin(lat * rad)) / n
+    x, y = r * math.sin(lam), r0 - r * math.cos(lam)
+    return p["pad"] + p["k"] * (x - p["minX"]), p["pad"] + p["k"] * (p["maxY"] - y)
+
+
 class TestEveryState(unittest.TestCase):
     """All 56 maps: built, numbered as the races are, and labelled."""
 
@@ -140,6 +154,21 @@ class TestEveryState(unittest.TestCase):
             for old, _new, _of_new, of_old in self.maps[code]["flows"]:
                 totals[old] = totals.get(old, 0) + of_old
             self.assertTrue(all(t >= districts.MIN_COVERAGE for t in totals.values()), code)
+
+    def test_a_longitude_and_latitude_land_where_the_build_put_them(self):
+        # The page places a reader's own location with the emitted projection
+        # (kyc-districts.js project). Replayed here as the page does it, every
+        # town lands on its own emitted point, to the rounding.
+        places = districts.load_places(ROOT)
+        for code, state in self.maps.items():
+            p = state["projection"]
+            for name, lon, lat, _pop in places.get(code, []):
+                x, y = page_project(p, lon, lat)
+                drawn = [t for t in state["places"] if t[0] == name]
+                if not drawn:
+                    continue                     # off the map's box, never drawn
+                self.assertTrue(any(abs(x - t[1]) <= 0.06 and abs(y - t[2]) <= 0.06
+                                    for t in drawn), f"{code} {name}: {x:.2f},{y:.2f}")
 
     def test_the_maps_say_nothing_about_people(self):
         # The emitted files are a pure function of the geometry; the page

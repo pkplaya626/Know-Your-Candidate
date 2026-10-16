@@ -332,6 +332,7 @@ class _Albers:
     """Spherical Albers equal-area conic, fitted to a box later."""
 
     def __init__(self, parallels, meridian):
+        self.parallels = tuple(parallels)
         phi0, phi1 = (math.radians(p) for p in parallels)
         self.n = (math.sin(phi0) + math.sin(phi1)) / 2
         self.c = 1 + math.sin(phi0) * (2 * self.n - math.sin(phi0))
@@ -820,6 +821,14 @@ def build_state(code, root=".", places=None):
         "viewBox": viewbox,
         # Kilometres per map unit, so every "area" here has a stated unit.
         "unitKm": round(EARTH_RADIUS_KM / fit.k, 6),
+        # How a longitude and latitude land on this map: the page places a
+        # reader's own location with it, on the device (kyc-districts.js).
+        # Rounded: the last bits of these floats come from the platform's
+        # maths library, and differed between Windows and Linux, so seven
+        # files read as stale in CI. Ten figures move a point by 1e-7 units.
+        "projection": {"parallels": [_sig(p) for p in albers.parallels],
+                       "meridian": _sig(albers.meridian), "minX": _sig(fit.min_x),
+                       "maxY": _sig(fit.max_y), "k": _sig(fit.k), "pad": PAD},
         "plans": out_plans,
         "flows": flows(areas, overlaps) if len(keys) == 2 else [],
         "counties": _counties(topo, raw_arcs, fit),
@@ -830,6 +839,11 @@ def build_state(code, root=".", places=None):
         if len(rings[0]) > 1 else [],
         "sources": _sources(code, topo),
     }
+
+
+def _sig(value):
+    """*value* to ten significant figures, the same on every platform."""
+    return float(f"{value:.10g}")
 
 
 def _sources(code, topo):
