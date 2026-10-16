@@ -477,8 +477,8 @@ def write_federal(payload, per_court, search, root="."):
     ``data/judiciary/index.js``, each only when its signature changed.
     Returns ``[(path, size)]`` for the files written."""
     os.makedirs(os.path.join(root, JUDICIARY_DIR), exist_ok=True)
-    source = ("data/federal_executive.json, data/judiciary.json, data/political_history.json "
-              "(kyc/federal_build.py)")
+    source = ("data/federal_executive.json, data/judiciary.json, data/political_history.json, "
+              "data/oge_disclosures.json (kyc/federal_build.py)")
     files = [(os.path.join(root, FEDERAL_FILE), "kycFederal", payload)]
     files += [(os.path.join(root, JUDICIARY_DIR, f"{cid}.js"), None, court)
               for cid, court in sorted(per_court.items())]

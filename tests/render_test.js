@@ -4702,6 +4702,31 @@ async function testFederal() {
           .every((el) => !/^[A-Z]{2}\b/.test(el.textContent)));
       KYC.official.close();
     }
+    const filer = d.offices.find((o) => o.holder && o.holder.disclosures &&
+      (o.holder.disclosures.documents || []).length);
+    check("an officer with OGE reports exists", !!filer);
+    if (filer) {
+      KYC.official.open(filer.holder.id);
+      const head = [...modal.querySelectorAll(".panel-head")]
+        .find((h) => /Financial disclosures/.test(h.textContent));
+      const links = head ? [...head.closest("section").querySelectorAll("a")] : [];
+      const reports = links.filter((a) => /\/PAS\+Index\/[0-9A-F]{32}\/\$FILE\//.test(a.href));
+      check("their reports link to the files OGE serves",
+        reports.length === filer.holder.disclosures.documents.length);
+      check("never to OGE's request form, as though it were a report",
+        !links.some((a) => /201%20Request|201 Request/.test(a.href)));
+      check("and say whose filing they are, as OGE files it",
+        head.closest("section").textContent.indexOf(filer.holder.disclosures.filed) !== -1);
+      check("its links open safely", links.every((a) => a.target === "_blank" && /noopener/.test(a.rel)));
+      KYC.official.close();
+    }
+    const none = d.offices.find((o) => o.holder && !o.holder.disclosures);
+    if (none) {
+      KYC.official.open(none.holder.id);
+      check("an officer with no report read is never said not to have filed (rule 19)",
+        /lists no report/.test(modal.textContent) && !/not filed|has not filed/i.test(modal.textContent));
+      KYC.official.close();
+    }
   });
   await settle(50);
   suite("federal/index.html — a justice's dialog", () => {

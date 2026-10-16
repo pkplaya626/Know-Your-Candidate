@@ -44,6 +44,7 @@ data/federal_executive.json ──┤   (President, VP, Cabinet: White House, of
 data/judiciary.json         ──┤   (every sitting federal judge: FJC directory; the Supreme Court's own list)
 data/judicial_vacancies.json ─┤   (vacancies, announced vacancies and emergencies: uscourts.gov)
 data/political_history.json ──┤   (public offices held: congress-legislators; Wikidata the article confirms)
+data/oge_disclosures.json   ──┤   (the executive's financial reports: Office of Government Ethics, by office)
 data/record_2026.json       ──┤   (the frozen 2026 race set: record --freeze)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
@@ -96,8 +97,8 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `campaigns.json`, `enrichment.json`, `odds.json`,
   `census_governments.json`, `state_legislators.json`, `executives.json`,
   `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`,
-  `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json` and
-  `political_history.json` are caches, but
+  `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
+  `political_history.json` and `oge_disclosures.json` are caches, but
   they *are* hand-editable. `stategov.js` is generated from the last five,
   with `kyc/ballot2026.py`: which state offices and legislative seats are on
   the 2026 ballot, a curated table citing each state's own record.
@@ -140,16 +141,17 @@ python build_profile_site.py federal          # the President, VP and Cabinet (W
 python build_profile_site.py judiciary        # every sitting federal judge (FJC) and the Supreme Court as the Court lists it
 python build_profile_site.py vacancies        # vacancies in the federal courts, as uscourts.gov lists them
 python build_profile_site.py history          # public offices each person has held (congress-legislators, Wikidata, Wikipedia)
+python build_profile_site.py oge              # the executive's financial reports (Office of Government Ethics), by office
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1146 tests, no dependencies
-npm install && npm test                       # 1345 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1162 tests, no dependencies
+npm install && npm test                       # 1350 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`,
-`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts. Run the
+`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -892,6 +894,26 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     3 would have stayed current. Whether a seat in Congress is current is
     the membership snapshot's to say, by the person's bioguide id, at
     build time (`history-behind`).
+
+70. **A disclosure belongs to an office, and the report must name its
+    filer.** The Office of Government Ethics files people under their
+    legal names ("Turner, Eric Scott" is Scott Turner), so `kyc/oge.py`
+    attributes a row by the office - OGE's agency and position for it,
+    in `oge.OFFICES`, compared without case and past OGE's record number
+    ("Director 2") - with the holder's surname as a cross-check; two OGE
+    names of that surname on one office are refused (rule 25). The
+    holder's other rows in the same agency under the very same OGE name
+    are theirs (Todd Blanche's annual report is filed as Deputy Attorney
+    General). Only a file OGE serves is linked, never the request form.
+    Each report OGE generates names its filer under "Filer's
+    Information", and is opened: on the first read Robert F. Kennedy
+    Jr.'s transaction report wrote "Kennedy Jr, Robert F" against the
+    index's "Kennedy, Robert F", and the check refused his own report
+    until a suffix stopped counting as a surname. A report that names
+    someone else is not linked; a scan (the President's and the Vice
+    President's reports are) concludes nothing (rule 8) and is linked and
+    marked "not checked". A holder with no row reads "OGE's index lists
+    no report", never "not filed" (rule 19).
 
 ## District maps
 

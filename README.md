@@ -38,6 +38,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… officers` | Every lieutenant governor (NLGA) and secretary of state (NASS), cross-checked where the rosters overlap |
 | `… federal` | The President, the Vice President and the Cabinet: who holds each office, from the White House's pages, each office's own page and the Senate's roll-call votes (`--check` reports the cache) |
 | `… judiciary` | Every sitting federal judge, from the Federal Judicial Center's directory, and the Supreme Court's members as the Court lists them; a short read keeps the last cache (`--check` reports it) |
+| `… oge` | The financial reports the President, the Vice President and the Cabinet filed with the Office of Government Ethics, attributed by office and checked against the filer each report names (`--check` reports the cache). See [Financial disclosures](#financial-disclosures) |
 | `… history` | The public offices each person has held: Congress from congress-legislators, every other office from Wikidata where the person's own Wikipedia article gives the same office the same years; a short read keeps the last cache (`--check` reports it). See [Public offices held](#public-offices-held) |
 | `… voting` | Each state's and D.C.'s official pages for checking registration, finding a polling place, voting absentee or early, and registering, as NASS's "Can I Vote" lists them; refused unless all 51 are there |
 | `… courts` | Each state's highest court and its members, read from the court's own roster |
@@ -61,7 +62,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (1345 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (1350 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -130,6 +131,7 @@ CI asserts that a rebuild changes nothing.
 | `stategov.py` | Who runs each state: governor, chamber control, trifecta, checked against NCSL |
 | `campaigns.py` | Campaign websites from each candidate's FEC committee |
 | `enrich.py` | Fill filed candidates' gaps from their Wikipedia infobox and campaign site; check every linked campaign site |
+| `oge.py` | The executive's financial reports from the Office of Government Ethics, by office (the `oge` command) |
 | `history.py` | The public offices each person has held, from congress-legislators and Wikidata, corroborated by the person's own article (the `history` command) |
 | `odds.py` | Prediction-market prices (Kalshi, Polymarket) and published polling averages for the 2026 Senate races |
 | `validate.py` | Data-quality checks |
@@ -1608,6 +1610,36 @@ vacancies, its announced ones and any emergency. The build compares the two
 sources and warns (`vacancy-judge-not-senior`) when the list says a judge
 took senior status but the directory does not yet show it; the two are
 updated at different times, and the court page says so.
+
+### Financial disclosures
+
+The dialog of the President, the Vice President and each Cabinet officer
+links the reports they filed with the Office of Government Ethics:
+
+- the latest annual report;
+- the report on nomination;
+- the ethics agreement and its latest certification of compliance;
+- the periodic transaction reports, counted, with the latest linked.
+
+`python build_profile_site.py oge` reads OGE's index (`kyc/oge.py`), a row
+per document, and keeps a row only when it is the office's and the holder's:
+
+- **The office.** OGE's agency and position for it, a curated table
+  (`oge.OFFICES`) checked against every office the federal table knows.
+- **The holder.** Their surname, as a cross-check: OGE files legal names
+  ("Turner, Eric Scott"), so first names are never compared, and two OGE
+  names of one surname on one office are refused.
+
+The holder's annual report filed under another post in the same agency
+shows that post ("as Deputy Attorney General").
+
+Only a file OGE serves is linked; a document OGE releases on request is
+counted, and its request form is never linked as though it were the
+report. Each report OGE generates names its filer, and each is opened once
+(a check is kept with the report's address, which never changes): one that
+names someone else is not linked, and a scan whose name cannot be read is
+linked and marked "not checked". A holder with no row reads "OGE's index
+lists no report for this officer under this office", never "not filed".
 
 ## Counties and local governments
 
