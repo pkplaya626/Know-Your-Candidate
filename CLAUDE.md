@@ -137,8 +137,8 @@ python build_profile_site.py federal          # the President, VP and Cabinet (W
 python build_profile_site.py judiciary        # every sitting federal judge (FJC) and the Supreme Court as the Court lists it
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 1076 tests, no dependencies
-npm install && npm test                       # 1292 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1077 tests, no dependencies
+npm install && npm test                       # 1302 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,

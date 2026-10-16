@@ -668,6 +668,29 @@ Every view takes its words for a status from one table, `KYC.raceStatus` in
 each have a form, and a sitting member's own seat reads "Renominated",
 "Re-elected" or "Lost re-election".
 
+### Once the new Congress sits
+
+The build metadata says which phase the data is in (`election.phase`, from
+`kyc/cycle.phase`). It is `"campaign"` until the snapshot is of the Congress
+the cycle elects and was read after noon on January 3. After that it is
+`"record"`, and `KYC.recordPhase()` reads it. In the record phase:
+
+- **The Senate view groups every senator by the year their seat is next
+  decided.** That is 2028 for Class III, Florida's and Ohio's seats among
+  them, then 2030 and 2032. No seat is "up in 2026". The 2026 results stay
+  on the race view and the state pages. Between Election Day and January 3,
+  the cycle's group reads "2026 elections", not "Up in 2026".
+- **A redrawn state's district page draws the new Congress on the new
+  map.** The old map is drawn in the party of whoever last held each seat:
+  each race's incumbent, from the frozen record. "Running in a different
+  district" is gone, and a district's 2026 race is shown as a record, "In
+  the 2026 race".
+- **A state page's headline figures say they are 2026's.**
+
+The render suite builds pages on a clock before January 3 in the
+campaign's phase, so its campaign checks hold on later data. The
+record-phase views have their own checks (`testRecordPhase`).
+
 ## Filling the gaps
 
 A filed candidate arrives with a name, a party and a dollar figure. For
