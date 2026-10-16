@@ -30,6 +30,7 @@ from . import (
     voting as voting_mod,
 )
 from .profiles import build_profiles, screen_field
+from . import federal as federal_mod
 
 
 def _load(args):
@@ -201,7 +202,8 @@ def _build(args):
                           results=outcomes, field=field, enrichment=enrichment,
                           odds=markets, district_maps=district_maps,
                           district_error=district_error,
-                          voting=voting_mod.load_cache(args.root) or {})
+                          voting=voting_mod.load_cache(args.root) or {},
+                          federal=federal_mod.load_cache(args.root))
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -1296,6 +1298,49 @@ def _officers(args):
     return 0
 
 
+def _federal(args):
+    """The federal executive (kyc/federal.py): who holds each office, from the
+    White House's pages, each office's own page and the Senate's roll calls.
+    A source that cannot be read keeps the last good cache (rule 8)."""
+    from . import federal
+
+    previous = federal.load_cache(args.root)
+    if args.check:
+        cache = previous
+        if not cache:
+            print(f"[error] no {federal.CACHE_PATH}; run 'federal'", file=sys.stderr)
+            return 2
+    else:
+        try:
+            cache = federal.fetch(previous=previous)
+        except federal.FederalError as exc:
+            print(f"[error] {exc}; the committed cache is unchanged", file=sys.stderr)
+            return 2
+    for person, title in ((cache["president"], "President"),
+                          (cache["vicePresident"], "Vice President")):
+        print(f"  {title}: {person['name']} ({person.get('party')}), "
+              f"{person['termStart']} to {person['termEnd']}")
+    for office in cache["offices"]:
+        holder = office.get("holder")
+        if not holder:
+            print(f"  {office['office']}: not listed by the White House")
+            continue
+        senate = holder.get("senate")
+        print(f"  {office['office']}: {holder['name']} - own page {holder['page']['status']}"
+              + (", acting" if holder["page"].get("acting") else "")
+              + (f"; confirmed {senate['date']}, {senate['yeas']}-{senate['nays']} "
+                 f"(vote {senate['vote']})" if senate else "; no Senate roll call found"))
+    failed = 0
+    for level, code, message, detail in federal.problems(cache):
+        print(f"  [{level}] {code}: {message}")
+        for line in detail[:10]:
+            print(f"           - {line}")
+        failed += level == "error"
+    if not args.check:
+        print(f"[ok] wrote {federal.save_cache(cache, args.root)}")
+    return 1 if failed else 0
+
+
 def _executives(args):
     """Every governor, from the NGA's roster, cross-checked against Wikidata,
     and NCSL's count of each legislature's parties (kyc/executives.py,
@@ -1569,6 +1614,11 @@ def build_parser():
     officers_cmd.add_argument("--check", action="store_true",
                               help="report the committed cache; make no network call")
 
+    fed = add("federal", help="the President, the Vice President and the Cabinet, from the "
+                              "White House, each office's page and the Senate's votes")
+    fed.add_argument("--check", action="store_true",
+                     help="report the committed cache; make no network call")
+
     execs = add("executives", help="every governor, from the National Governors Association")
     execs.add_argument("--check", action="store_true",
                        help="report the committed cache; make no network call")
@@ -1616,6 +1666,8 @@ def main(argv=None):
         return _localgov(args)
     if args.command == "executives":
         return _executives(args)
+    if args.command == "federal":
+        return _federal(args)
     if args.command == "courts":
         return _courts(args)
     if args.command == "officers":

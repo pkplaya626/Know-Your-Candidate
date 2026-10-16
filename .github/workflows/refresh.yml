@@ -163,6 +163,14 @@ jobs:
           python build_profile_site.py statelegs
           python build_profile_site.py courts
 
+      # The President, the Vice President and the Cabinet: the White House's
+      # pages, each office's own page and the Senate's roll calls
+      # (kyc/federal.py). A source that cannot be read keeps the committed
+      # cache and stops nothing else in this run.
+      - name: Refresh the federal executive
+        continue-on-error: true
+        run: python build_profile_site.py federal
+
       # Each state's official voting pages, as NASS's "Can I Vote" lists
       # them, every link opened once. Refused unless all 50 states and D.C.
       # are there. A NASS outage or bot wall leaves the committed links as

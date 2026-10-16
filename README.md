@@ -36,6 +36,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… localgov` | Every local government from the Census listing, checked against the published counts |
 | `… executives` | Every governor from the NGA, and NCSL's count of each legislature's parties (`--check` reports the caches) |
 | `… officers` | Every lieutenant governor (NLGA) and secretary of state (NASS), cross-checked where the rosters overlap |
+| `… federal` | The President, the Vice President and the Cabinet: who holds each office, from the White House's pages, each office's own page and the Senate's roll-call votes (`--check` reports the cache) |
 | `… voting` | Each state's and D.C.'s official pages for checking registration, finding a polling place, voting absentee or early, and registering, as NASS's "Can I Vote" lists them; refused unless all 51 are there |
 | `… courts` | Each state's highest court and its members, read from the court's own roster |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
@@ -1330,6 +1331,28 @@ answer with a bot wall or challenge; Connecticut's, Nevada's and New York's
 refuse this pipeline's requests; Rhode Island's publishes only a PDF. Their
 pages name the court and say why its members are not listed, and nothing is
 taken from Wikipedia or Ballotpedia instead.
+
+## The federal executive
+
+`python build_profile_site.py federal` records who holds the federal
+executive's offices, in `data/federal_executive.json`. Nothing is on a page
+yet: the owner reviews the names before anything is published.
+
+| Fact | Source | Notes |
+|---|---|---|
+| The President and Vice President: name, party, term, ids | congress-legislators' `executive.json`, the project behind the membership snapshot | A term that does not cover today is a build error, so a stale file never shows a past President |
+| That they are the White House's | whitehouse.gov/administration/ | The page's own links ("President Donald J. Trump"); a different name is reported |
+| Their portraits | Their own White House pages | The first image in the page's content |
+| Who the Cabinet is, and who holds each office | whitehouse.gov/administration/cabinet/ | The authority on which officials the President counts as Cabinet, and on nothing else (rule 55). A title the office table does not know stops the read |
+| That the office names them | The office's own page (`federal_offices`), the name beside the title (rule 56) | Seven departments answer every script with 403: that concludes nothing (rule 8), and the office is shown as the White House lists it. OMB's pages name no Director |
+| The Senate's confirmation | senate.gov's roll-call votes, no key | Found by the Senate's own wording of the office and the holder's surname - two signals, never a name alone. A voice vote has no roll call, and the record says none was found, not that there was no confirmation |
+
+The fifteen departments are the ones 5 U.S.C. 101 lists, in the order 3
+U.S.C. 19(d)(1) gives their heads in the line of succession - from the
+statute, never from a page, which lists people by surname. "Secretary of
+War" is the Secretary of Defense's secondary title under Executive Order
+14347; the statute and this table say Defense. No Cabinet officer is given a
+party: no source used states one, and the President's is not theirs.
 
 ## Counties and local governments
 
