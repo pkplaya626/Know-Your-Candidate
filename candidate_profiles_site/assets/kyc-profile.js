@@ -298,6 +298,14 @@
       return;
     }
 
+    if (item.committeesPending) {
+      // A new Congress's rosters are published some weeks after it sits.
+      target.innerHTML = '<span class="kyc-absent">Committee assignments for the ' +
+        KYC.escapeHtml(item.committeesPending + (item.committeesPending % 10 === 1 &&
+          item.committeesPending % 100 !== 11 ? "st" : "th")) +
+        " Congress have not been published yet</span>";
+      return;
+    }
     if (!KYC.hasValue(item, "committees") || !text || text === "None" ||
         text === "None (Candidate)") {
       target.innerHTML =

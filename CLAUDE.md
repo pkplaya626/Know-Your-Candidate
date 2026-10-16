@@ -126,8 +126,8 @@ python build_profile_site.py courts           # each state's highest court, from
 python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 1006 tests, no dependencies
-npm install && npm test                       # 1224 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1011 tests, no dependencies
+npm install && npm test                       # 1225 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -820,7 +820,27 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     special for the rest of the old term, an appointment) is a successor,
     never the 2026 winner: TX-18's special and regular races had different
     winners in 2024. A record incumbent who won another seat keeps the one
-    they held (`heldRaceId`), which is what the seats-up counts read. Their filing is folded in only by the FEC id Congress's
+    they held (`heldRaceId`), which is what the seats-up counts read.
+
+68. **A new Congress is the data's word, about everything that changes
+    with it.** Rehearsed on a fictional January 4 membership, the site
+    would have gone on calling itself the "119th Congress" (typed into the
+    templates), listed every re-elected member on their old committees
+    (the roster's hand-typed column, and congress-legislators' rosters for
+    the two weeks before it publishes the new ones), kept 2026 status notes
+    on members past that race, and shown a new senator's House money as
+    Senate money (`legislators._fec_ids` fell back to the other chamber's
+    ids; Ashley Hinson's Senate filing is missing upstream). So: the
+    Congress number is `cycle.snapshot_congress`, printed by the pages from
+    `kycBuildMeta.congress` into `[data-congress]`; committee rosters are
+    shown only while their members sit (`committees_current`) and the
+    curated column only while the 119th does, otherwise
+    `committeesPending` says the new rosters are not published yet; a
+    status note stops at a new term; a member has only their own chamber's
+    FEC ids, with any upstream lacks in `overrides.MEMBER_FEC_IDS`, and
+    `member-candidacy-id-missing` lists the next one. Tests that describe
+    the campaign say so and skip after it; the rehearsal is the scratch
+    generator plus `congress --apply --snapshot`, never committed. Their filing is folded in only by the FEC id Congress's
     record lists for them, a curated row's id kept as `otherIds`; without
     that id both profiles stay and `seated-unlinked` says so (rule 25).
 

@@ -221,9 +221,12 @@ class TestBuild(unittest.TestCase):
                                                           str(born.year + p["age"] + 1)})
 
     def test_retiring_members_are_not_seeking_reelection(self):
+        # The roster's or the override's status line: a former member's is
+        # replaced on the page by when they left, and still decided this.
         retiring = [
             p for p in self.profiles
-            if not p["isCandidate"] and overrides.is_not_seeking(p["status"])
+            if not p["isCandidate"] and overrides.is_not_seeking(
+                overrides.status_override(p["id"], p["status"]))
         ]
         self.assertTrue(retiring)
         for profile in retiring:
@@ -234,7 +237,9 @@ class TestBuild(unittest.TestCase):
         durbin = [p for p in self.profiles if p["name"] == "Richard Durbin"]
         self.assertEqual(len(durbin), 1)
         self.assertFalse(durbin[0]["seekingReelection2026"])
-        self.assertIn("not running", durbin[0]["status"].lower())
+        status = durbin[0]["status"] if not durbin[0].get("formerMember") else \
+            overrides.status_override(durbin[0]["id"], "")
+        self.assertIn("not running", status.lower())
 
     def test_labels_have_no_district_word_or_doubled_state(self):
         for profile in self.profiles:

@@ -74,7 +74,7 @@ def district_maps():
     return districts.index()
 
 
-def build(profiles, races=None, committees=None, results=None):
+def build(profiles, races=None, committees=None, results=None, snapshot=None):
     """Chamber balance and 2026 election headline figures. *results*, the
     results cache, dates what the page says about who won.
 
@@ -110,7 +110,10 @@ def build(profiles, races=None, committees=None, results=None):
     house_up = [p for p in holders if held(p, "House") and p["state"] not in TERRITORIES]
 
     summary = {
-        "congress": 119,
+        # Which Congress the membership is of, from the snapshot's own term
+        # dates (cycle.snapshot_congress): the pages print it, never a
+        # typed "119th" that January 3 would make false.
+        "congress": _congress(snapshot),
         "senate": _split(senate),
         "house": dict(_split(house_voting), seats=HOUSE_SEATS),
         "delegates": len(delegates),
@@ -157,6 +160,17 @@ def build(profiles, races=None, committees=None, results=None):
     if committees:
         summary["committees"] = committee_table(committees, profiles)
     return summary
+
+
+def _congress(snapshot):
+    from . import cycle
+
+    if not snapshot:
+        return None
+    try:
+        return cycle.snapshot_congress(snapshot)
+    except cycle.CycleError:
+        return None
 
 
 def by_state(profiles, races=None):

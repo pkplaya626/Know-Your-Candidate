@@ -98,8 +98,17 @@
     var leads = committeeLeads();
     var codes = Object.keys(leads);
     if (!codes.length) {
-      target.innerHTML = '<p class="results-bar" role="status">The committee rosters did ' +
-        "not load, so this list is empty. Each member's profile lists their committees.</p>";
+      // A new Congress's rosters come some weeks after it sits; until then
+      // its members' profiles say so too (committeesPending).
+      var pending = (global.legislatorsData || []).filter(function (p) {
+        return KYC.seated(p) && p.committeesPending;
+      })[0];
+      target.innerHTML = pending
+        ? '<p class="results-bar" role="status">Committee assignments for the ' +
+          KYC.escapeHtml(pending.committeesPending + "th") + " Congress have not been " +
+          "published yet; each committee's leaders will be listed here once they are.</p>"
+        : '<p class="results-bar" role="status">The committee rosters did ' +
+          "not load, so this list is empty. Each member's profile lists their committees.</p>";
       return;
     }
     var html = "";

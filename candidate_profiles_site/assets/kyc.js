@@ -1151,8 +1151,22 @@
    *  These were literal text in both sidebars ("53 R | 47 D/I", "35", "435")
    *  plus a copy-pasted counting function per page. They are counted in
    *  kyc/summary.py now, from the same rosters the grid renders. */
+  /** 120 -> "120th". */
+  function ordinal(n) {
+    var tens = n % 100;
+    var suffix = tens >= 10 && tens <= 20 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" })[n % 10] || "th";
+    return n + suffix;
+  }
+
   function renderSummary() {
     var info = meta();
+    // Which Congress the membership is of, from the data (kyc/summary.py):
+    // the pages carry "U.S. Congress" until it is known, never a number.
+    if (info.congress) {
+      Array.prototype.forEach.call(doc.querySelectorAll("[data-congress]"), function (el) {
+        el.textContent = ordinal(info.congress) + " Congress";
+      });
+    }
     if (!info.senate) return;
 
     var pill = function (count, cls, label) {

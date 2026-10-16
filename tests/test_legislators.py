@@ -16,7 +16,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from kyc import fec, legislators, sources, validate  # noqa: E402
+from kyc import fec, legislators, overrides, sources, validate  # noqa: E402
 from kyc.profiles import build_profiles  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -89,10 +89,21 @@ class TestTrim(unittest.TestCase):
         rep = entry(chamber="rep", fec=["S8WA00194", "H2WA01054"])
         self.assertEqual(legislators.trim(rep)["fec"], ["H2WA01054"])
 
-    def test_fec_ids_are_kept_when_none_match_the_chamber(self):
-        # Dropping them would lose real information; a caller can still check.
-        person = entry(chamber="sen", fec=["H2WA01054"])
-        self.assertEqual(legislators.trim(person)["fec"], ["H2WA01054"])
+    def test_no_other_chambers_ids_stand_in_for_this_one(self):
+        # A senator with only a House id has no Senate filing to look up:
+        # the House id would put their House money on a Senate profile
+        # (rule 20). It is kept among every id, for links.
+        trimmed = legislators.trim(entry(chamber="sen", fec=["H2WA01054"]))
+        self.assertEqual(trimmed["fec"], [])
+        self.assertEqual(trimmed["fecAll"], ["H2WA01054"])
+
+    def test_an_evidenced_id_congress_legislators_lacks_is_added(self):
+        # Ashley Hinson's Senate filing, under her legal name (overrides).
+        bioguide, (filing, _why) = next(iter(overrides.MEMBER_FEC_IDS.items()))
+        trimmed = legislators.trim(entry(bioguide=bioguide, chamber="sen",
+                                         fec=["H0IA01174"]))
+        self.assertIn(filing, trimmed["fecAll"])
+        self.assertEqual(trimmed["fec"], [filing])
 
 
 class TestSnapshot(unittest.TestCase):
@@ -612,6 +623,55 @@ class TestTermDates(unittest.TestCase):
                          ("2025-01-03 - 2029-01-03", 2029))
 
 
+class TestANewCongress(unittest.TestCase):
+    """What January 3 changes about a member who stays: their committee
+    seats and their 2026 status note were the old Congress's."""
+
+    def build(self, start, committees=None, **row):
+        snap = snapshot_of(entry(chamber="rep", district=5, start=start,
+                                 end="2029-01-03" if start >= "2027" else "2027-01-03"))
+        base = roster_row(**{"Committee Assignments": "House Committee on Agriculture"})
+        base.update(row)
+        profiles, _ = build_profiles({"members": [base], "candidates": []}, snapshot=snap,
+                                     committees=committees)
+        return profiles[0]
+
+    def test_the_old_congresss_committees_are_not_shown_as_current(self):
+        found = self.build("2027-01-03")
+        self.assertEqual(found["committeesPending"], 120)
+        self.assertEqual(found["committees"], "No data")
+        # While the 119th sits, the roster's column is shown.
+        self.assertNotIn("committeesPending", self.build("2025-01-03"))
+
+    def test_rosters_of_people_who_left_are_a_previous_congresss(self):
+        snap = snapshot_of(entry(bioguide="STAYS"))
+        fresh = {"members": {"STAYS": [{"code": "HSAG"}]}, "committees": {}}
+        stale = {"members": {"STAYS": [{"code": "HSAG"}], "GONE1": [], "GONE2": []},
+                 "committees": {}}
+        self.assertIs(legislators.committees_current(fresh, snap), fresh)
+        self.assertIsNone(legislators.committees_current(stale, snap))
+        self.assertIsNone(legislators.committees_current({"members": {}}, snap))
+
+    def test_a_2026_status_note_does_not_outlive_the_term(self):
+        overrides.MEMBER_STATUS_BY_ID["X000001"] = ("Retiring in 2026", "a test")
+        try:
+            noted = self.build("2025-01-03")
+            renewed = self.build("2027-01-03")
+        finally:
+            del overrides.MEMBER_STATUS_BY_ID["X000001"]
+        self.assertEqual(noted["status"], "Retiring in 2026")
+        self.assertFalse(noted["seekingReelection2026"])
+        self.assertEqual(renewed["status"], "Active Member")
+
+    def test_the_summary_names_the_congress_from_the_terms(self):
+        from kyc import summary
+
+        snap = snapshot_of(entry(chamber="rep", district=5, start="2027-01-03",
+                                 end="2029-01-03"))
+        self.assertEqual(summary.build([], snapshot=snap)["congress"], 120)
+        self.assertIsNone(summary.build([])["congress"])
+
+
 class TestOneRowPerPerson(unittest.TestCase):
     """Members were deduplicated on their seat. A member whose row still
     carried an old district number and a newcomer seated at that number
@@ -839,8 +899,9 @@ class TestAgainstTheRealSnapshot(unittest.TestCase):
     def test_the_senate_seats_up_are_the_records_incumbents(self):
         from kyc import record
         profiles, _ = build_profiles(self.raw, snapshot=self.snapshot)
+        # By the seat they held, whatever they sit in now (heldRaceId).
         up = {p["id"] for p in profiles
-              if not p["isCandidate"] and "Senate" in p["chamber"] and p["seatUp2026"]}
+              if not p["isCandidate"] and (p.get("heldRaceId") or "").startswith("S-")}
         self.assertEqual(up, record.senate_incumbents(self.raw["record"]))
 
     def test_every_senator_has_a_term_end_year(self):

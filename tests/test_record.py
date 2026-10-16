@@ -39,15 +39,19 @@ class TestTheCommittedSnapshot(unittest.TestCase):
     def setUpClass(cls):
         cls.snapshot = legislators.load_snapshot(ROOT)
 
-    def test_it_is_the_119th_in_the_campaign(self):
-        self.assertEqual(cycle.snapshot_congress(self.snapshot), 119)
-        self.assertEqual(cycle.phase(self.snapshot), "campaign")
+    def test_the_phase_is_the_snapshots(self):
+        # The 119th until the 120th is sitting and read after noon on
+        # January 3, 2027; then the record.
+        sitting = cycle.snapshot_congress(self.snapshot)
+        self.assertIn(sitting, (119, 120))
+        self.assertEqual(cycle.phase(self.snapshot), "campaign" if sitting == 119 else "record")
 
     def test_a_snapshot_of_mixed_congresses_fails_loudly(self):
         mixed = copy.deepcopy(self.snapshot)
         house = [p for p in mixed["legislators"] if p["chamber"] == "House"]
+        other = "2027-01-03" if cycle.snapshot_congress(self.snapshot) == 119 else "2025-01-03"
         for person in house[: len(house) // 2]:
-            person["termStart"] = "2027-01-03"
+            person["termStart"] = other
         with self.assertRaises(cycle.CycleError):
             cycle.snapshot_congress(mixed)
 
@@ -303,6 +307,8 @@ class TestAnIncumbentWhoWonAnotherSeat(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         raw = sources.load_all(ROOT)
+        if cycle.phase(legislators.load_snapshot(ROOT)) != "campaign":
+            raise unittest.SkipTest("January 3 has happened: the committed data is the case")
         cls.record = raw["record"]
         cls.house = cls.record["incumbents"]["H-KY-06-2026"]["bioguide"]
         senator = cls.record["incumbents"]["S-KY-2026"]["bioguide"]
@@ -484,6 +490,9 @@ class TestRecordDrift(unittest.TestCase):
         cls.raw = sources.load_all(ROOT)
         cls.record = cls.raw["record"]
         cls.snapshot = legislators.load_snapshot(ROOT)
+        # Drift is checked only in the campaign phase (validate.check_record).
+        if cycle.phase(cls.snapshot) != "campaign":
+            raise unittest.SkipTest("drift is a campaign-phase check")
 
     def codes(self, snapshot):
         profiles, _ = build_profiles(self.raw, snapshot=snapshot)

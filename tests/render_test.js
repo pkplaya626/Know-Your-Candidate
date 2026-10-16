@@ -558,7 +558,10 @@ async function testDirectoryAsync() {
   const cards = () => D.getElementById("results").querySelectorAll(".card");
 
   suite("index.html — search", () => {
-    check("committee text is searchable", cards().length > 0,
+    // While the sitting Congress's rosters are published (from January 3
+    // there are none for some weeks, and no profile lists a committee).
+    const rosters = window.legislatorsData.some((p) => (p.committeeList || []).length);
+    check("committee text is searchable", !rosters || cards().length > 0,
       `${cards().length} hits for "Armed Services"`);
     check("search reaches beyond name and state",
       cards().length < window.legislatorsData.length);
@@ -592,6 +595,10 @@ async function testDirectoryAsync() {
     const memberTotal = announced(D);
     check("sitting members filter narrows the grid", memberTotal < total,
       `${memberTotal} of ${total}`);
+    check("the Congress named is the data's, not a typed number",
+      [...D.querySelectorAll("[data-congress]")].every((el) =>
+        el.textContent === window.kycBuildMeta.congress + "th Congress"),
+      [...D.querySelectorAll("[data-congress]")].map((el) => el.textContent).join(" | "));
     check("every card is someone currently in Congress",
       members.every((c) => KYC.seated(KYC.byId(c.getAttribute("data-id")))));
     check("the filter is in the URL", /role=member/.test(window.location.hash),
@@ -712,9 +719,10 @@ async function testDirectoryAsync() {
   });
 
   suite("index.html — contact & links", () => {
+    const rosters = window.legislatorsData.some((p) => (p.committeeList || []).length);
     const member = window.legislatorsData.find(
-      (p) => !p.isCandidate && p.website && p.social && p.social.twitter &&
-        p.committeeList && p.committeeList.length && (p.refs || {}).govtrack);
+      (p) => KYC.seated(p) && p.website && p.social && p.social.twitter &&
+        (!rosters || (p.committeeList && p.committeeList.length)) && (p.refs || {}).govtrack);
     check("a member with a site, accounts, committees and ids exists", !!member);
     if (member) {
       KYC.profile.open(member.id);
@@ -733,8 +741,9 @@ async function testDirectoryAsync() {
       const committees = D.getElementById("profileModalCommittees");
       const table = KYC.meta().committees || {};
       check("committees come from the structured rosters",
-        committees.querySelectorAll(".committee").length ===
-          member.committeeList.filter((c) => !(table[c.code] || {}).parent).length);
+        !rosters ? /have not been published yet/.test(committees.textContent) :
+          committees.querySelectorAll(".committee").length ===
+            member.committeeList.filter((c) => !(table[c.code] || {}).parent).length);
       KYC.profile.close();
     }
     const runner = window.legislatorsData.find((p) => p.isCandidate && p.campaignSite);
@@ -1001,7 +1010,12 @@ async function testDirectoryAsync() {
 
     // A curated profile that took over its FEC filing answers to the old id,
     // which shared links and odds.json labels still carry.
-    const merged = window.legislatorsData.filter((p) => /^CAND_/.test(p.id) && p.fecCandidateId);
+    // Not one a seated member also carries: the same person before their
+    // record lists the id, which validate reports (seated-unlinked).
+    const seatedIds = new Set(window.legislatorsData.filter((p) => KYC.seated(p))
+      .map((p) => p.fecCandidateId).filter(Boolean));
+    const merged = window.legislatorsData.filter((p) => /^CAND_/.test(p.id) && p.fecCandidateId &&
+      !seatedIds.has(p.fecCandidateId));
     check("a curated profile answers to its own filing's id",
       merged.length > 0 && merged.every((p) => KYC.byId("FEC_" + p.fecCandidateId) === p),
       merged.filter((p) => KYC.byId("FEC_" + p.fecCandidateId) !== p).map((p) => p.name).join(", "));
@@ -1389,7 +1403,8 @@ async function testStates() {
     const content = D.getElementById("stateContent");
     check("the page is about Texas", /Texas/.test(D.querySelector(".state-title").textContent));
     check("the document title names the state", /^Texas/.test(D.title), D.title);
-    const members = window.legislatorsData.filter((p) => !p.isCandidate && p.state === "TX");
+    // Who represents Texas now (rule 27): never a member who has left.
+    const members = window.legislatorsData.filter((p) => window.KYC.seated(p) && p.state === "TX");
     const senators = members.filter((p) => /Senate/.test(p.chamber));
     // Of the people on the page, the senators come first (rule 27); the
     // short block of voting links above them is about no one.
@@ -1578,7 +1593,10 @@ async function testInterlinks() {
 async function testDeepLinks() {
   const probe = await buildPage("index.html");
   const people = probe.window.legislatorsData;
-  const senator = people.find((p) => p.state === "TX" && /Senate/.test(p.chamber) && !p.isCandidate);
+  // Texas's senator in its 2026 race - its incumbent, sitting or since left,
+  // or the winner seated in it - so the dialog has race-mates to follow.
+  const senator = people.find((p) => p.state === "TX" && /Senate/.test(p.chamber) &&
+    !p.isCandidate && p.raceId);
   probe.window.close();
 
   for (const page of ["index.html", "map.html", "states/tx.html"]) {
@@ -2042,7 +2060,10 @@ async function testSenate() {
       race ? race.id : "no race");
     check("and labels them as running for this seat",
       !!block && /Running for this seat/.test(block.textContent));
-    const ranks = (b) => ids(b).slice(1).map((id) => {
+    // The people running, after whoever holds or held the seat.
+    const runningIds = (b) => [...b.querySelectorAll(".senate-running .card, .senate-out .card")]
+      .map((c) => c.getAttribute("data-id"));
+    const ranks = (b) => runningIds(b).map((id) => {
       const st = KYC.contestStatus(KYC.byId(id));
       return st === "nominee" ? 0 : st === "advanced" ? 1 : 2;
     });
@@ -2068,7 +2089,7 @@ async function testSenate() {
     check("after everyone still running", upRaces.every((r) => {
       const b = seatOf(r);
       if (!b) return true;
-      const all = ids(b).slice(1);
+      const all = runningIds(b);
       const firstOut = all.findIndex((id) => offBallot(KYC.byId(id)));
       return firstOut === -1 || all.slice(firstOut).every((id) => offBallot(KYC.byId(id)));
     }));
@@ -2345,7 +2366,7 @@ async function testRedistricting() {
   suite(`${page} — who moved comes from the data`, () => {
     const rows = [...D.querySelectorAll(".mover")];
     check("a row per member running in a different California district",
-      movers.length > 0 && rows.length === movers.length, `${rows.length} of ${movers.length}`);
+      rows.length === movers.length, `${rows.length} of ${movers.length}`);
     check("each member's group holds both of their districts", movers.every((p) => {
       const group = [...D.querySelectorAll(".mover-group")]
         .find((g) => g.textContent.indexOf(p.name) !== -1);
@@ -2353,12 +2374,17 @@ async function testRedistricting() {
       return ds.indexOf(p.districtNum) !== -1 && ds.indexOf(contestOf(p)) !== -1;
     }));
     const first = D.querySelector(".mover-group");
+    if (!first) return;          // every mover re-seated: nobody is moving
     check("the first group is the view a visitor lands on",
       first.getAttribute("aria-pressed") === "true");
     const wanted = first.getAttribute("data-focus").split(",").map(Number).sort((a, b) => a - b);
     check("its districts are picked out on both maps",
       cards().every((c) => focusOf(c).join() === wanted.join()), cards().map(focusOf).join(" / "));
   });
+
+  // From January 3 every mover sits in the district they won: nobody is
+  // moving, and the checks below are about who was.
+  if (!movers.length) return;
 
   suite(`${page} — the close-ups and cards name who the data names`, () => {
     const [before, after] = cards();
@@ -2708,8 +2734,10 @@ async function testDistrictPages() {
   suite("districts/fl.html — a seat with no member", () => {
     const vacant = fl.window.kycRaces.filter((r) => r.state === "FL" && r.chamber === "House")
       .map((r) => r.district)
-      .filter((n) => !fl.window.legislatorsData.some((p) => !p.isCandidate && p.state === "FL" &&
-        /House/.test(p.chamber) && p.districtNum === n));
+      .filter((n) => !fl.window.legislatorsData.some((p) => fl.window.KYC.seated(p) &&
+        p.state === "FL" && /House/.test(p.chamber) && p.districtNum === n));
+    // Only while a seat is empty: from January 3 every one is filled.
+    if (!vacant.length) return;
     check("the data has a seat with no member", vacant.length > 0, vacant.join(", "));
     const shape = fl.D.querySelector('.plan-card .district-statewide use[data-district="' +
       vacant[0] + '"]');
@@ -2771,7 +2799,10 @@ async function testDistrictPages() {
         .some((u) => u.classList.contains("party-none")) &&
       [...cards[1].querySelectorAll(".district-statewide use.district-shape")]
         .every((u) => u.classList.contains("party-none")));
-    check("a picked district is outlined over its fill, not refilled",
+    // A district is picked on landing while members are moving (the first
+    // group); from January 3 none is, and nothing is picked.
+    const picked = !!D.querySelector(".mover-group");
+    check("a picked district is outlined over its fill, not refilled", !picked ||
       !!cards[0].querySelector(".district-statewide .district-focus.focus-1") &&
       !cards[0].querySelector(".district-statewide use.district-shape.is-focus.party-none"));
     // The sidebar's list was filled by the state pages' module only, so it
@@ -3085,6 +3116,12 @@ async function testGuide() {
         });
       });
       const rows = [...live.querySelectorAll("tbody tr")];
+      if (!expected.size && window.legislatorsData.some((p) => p.committeesPending)) {
+        // A new Congress before its rosters are published.
+        check("says the new Congress's committees are not published yet",
+          /have not been published yet/.test(live.textContent), live.textContent);
+        return;
+      }
       check("a row for every full committee with a titled seat", rows.length === expected.size,
         `${rows.length} rows, ${expected.size} committees`);
       check("House, Senate and joint committees each have a table",
@@ -3925,8 +3962,11 @@ async function testElectionNight() {
     check("a called race's header names its winner",
       !!h && h.textContent.indexOf("Won by " + winner.name) !== -1, h && h.textContent);
     const won = cardOf(called, winner);
+    // Re-elected only for who held the seat by election; a winner seated in
+    // a seat they did not hold, or an appointee, was elected.
+    const reElected = !winner.isCandidate && !winner.raceRole && !winner.appointed;
     check("the winner's card says Elected (Re-elected for the member)",
-      !!won && (winner.isCandidate ? /Elected/ : /Re-elected/).test(won.textContent),
+      !!won && (reElected ? /Re-elected/ : /Elected/).test(won.textContent),
       won && won.textContent);
     const loser = called.incumbentIds.concat(called.candidateIds).map(KYC.byId)
       .find((p) => p && p.raceStatus === "defeated");

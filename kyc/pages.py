@@ -74,7 +74,7 @@ _PAGE = string.Template("""\
     <a class="brand" href="../index.html">
         <svg class="icon" aria-hidden="true"><use href="#i-vote"/></svg>
         <span class="brand-name">Know Your Candidate</span>
-        <span class="brand-sub">119th Congress</span>
+        <span class="brand-sub" data-congress>U.S. Congress</span>
     </a>
 
 $search
@@ -164,7 +164,7 @@ _SEARCH = """\
 # the state's own delegation on its pages, and the election.
 _CONGRESS_SIDEBAR = """
         <div class="sidebar-section">
-            <h2 class="sidebar-heading">119th Congress</h2>
+            <h2 class="sidebar-heading" data-congress>U.S. Congress</h2>
             <div class="balance-label">Senate</div>
             <div class="balance" id="senateBalance"></div>
             <div class="balance-label">House</div>

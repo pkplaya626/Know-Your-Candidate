@@ -256,7 +256,16 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
     if kind == "House":
         district_num, district_label = parse_district(row.get("District"), state)
 
-    status = overrides.status_override(profile_id, clean_str(row.get("Status"), "Active Member"))
+    # A curated status note is about the 2026 race; a member serving a term
+    # that began since Election Day has moved past it (a re-elected member,
+    # a winner), and their roster row says "Active Member".
+    status = clean_str(row.get("Status"), "Active Member")
+    from .cycle import CYCLE, general_election_day
+
+    new_term = bool(person) and (person.get("termStart") or "") >= \
+        general_election_day(CYCLE).isoformat()
+    if not new_term:
+        status = overrides.status_override(profile_id, status)
     not_seeking = overrides.is_not_seeking(status)
 
     # --- 2026 election derivation -------------------------------------
@@ -759,6 +768,12 @@ def screen_field(field, profiles, record=None):
     return field_mod.screen(field, races_mod.contestable(profiles, ELECTION_YEAR, record))
 
 
+# The roster CSV's "Committee Assignments" column was typed for the 119th
+# Congress. It is shown only while that Congress sits: on January 3 it would
+# put every re-elected member on their old committees.
+CURATED_COMMITTEES_CONGRESS = 119
+
+
 def build_profiles(data, snapshot=None, field=None, finance=None, committees=None):
     """Build the unified profile list from loaded roster rows.
 
@@ -786,6 +801,17 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
     seats_up = term_ends = None
     people = {}
     record = (data or {}).get("record")
+    sitting = None
+    if snapshot:
+        from . import cycle as cycle_mod, legislators as legislators_mod
+
+        try:
+            sitting = cycle_mod.snapshot_congress(snapshot)
+        except cycle_mod.CycleError:
+            sitting = None
+        # A previous Congress's committee rosters are none at all.
+        committees = legislators_mod.committees_current(committees, snapshot)
+    curated_committees = sitting in (None, CURATED_COMMITTEES_CONGRESS)
     if snapshot:
         from . import legislators
 
@@ -814,9 +840,14 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
         if committees and bioguide:
             from . import legislators as legislators_mod
             seats = legislators_mod.assignments(committees, bioguide)
-        profiles.append(_build_member(row, index, seats_up, term_ends,
-                                      person=people.get(bioguide), assignments=seats,
-                                      as_of=as_of))
+        member = _build_member(row, index, seats_up, term_ends,
+                               person=people.get(bioguide), assignments=seats, as_of=as_of)
+        if not curated_committees and not seats:
+            # The sitting Congress's rosters are not published yet: said
+            # so, never the previous Congress's seats (rule 19).
+            member["committees"] = ""
+            member["committeesPending"] = sitting
+        profiles.append(member)
 
     if record:
         profiles.extend(_former_members(data.get("former") or [], record, profiles,
