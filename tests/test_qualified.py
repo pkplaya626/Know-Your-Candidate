@@ -181,6 +181,56 @@ class TestTheBallotBeforeTheCount(NoGap):
         self.assertNotIn("H-LA-05-2026", cache["pending"])
         self.assertEqual(cache["qualified"]["races"], ["H-LA-03-2026", "H-LA-05-2026"])
 
+    def test_after_the_count_a_failed_page_does_not_take_the_list_away(self):
+        # From November 4 the seat is no longer pending; a page that cannot be
+        # fetched, is missing or has no section for it must not drop the list.
+        for fetch in (lambda t: (_ for _ in ()).throw(OSError("timeout")),
+                      lambda t: (_ for _ in ()).throw(results.PageMissing(t)),
+                      lambda t: "\nNo district sections here.\n"):
+            cache = results.build(self.field, self.dates, today=datetime.date(2026, 11, 5),
+                                  log=lambda *_: None, fetch=fetch,
+                                  qualified=(qualified.parse_export(EXPORT),
+                                             {"source": qualified.SOURCE}))
+            self.assertEqual(cache["races"]["H-LA-05-2026"]["source"], "qualified")
+
+    def test_a_failed_read_of_the_list_keeps_the_last_one(self):
+        before = self.run_build(datetime.date(2026, 10, 16))
+        before["qualified"] = {"source": qualified.SOURCE, "fetched": "2026-10-16",
+                               "races": ["H-LA-03-2026", "H-LA-05-2026"]}
+        after = results.build(self.field, self.dates, today=datetime.date(2026, 10, 20),
+                              log=lambda *_: None,
+                              fetch=lambda t: (_ for _ in ()).throw(results.PageMissing(t)),
+                              qualified=None)
+        self.assertIn("H-LA-05-2026", after["pending"])
+        kept = results.carry_qualified(after, before)
+        self.assertEqual(kept, ["H-LA-03-2026", "H-LA-05-2026"])
+        self.assertEqual(after["races"]["H-LA-05-2026"]["source"], "qualified")
+        self.assertNotIn("H-LA-05-2026", after["pending"])
+        self.assertTrue(after["qualified"]["carried"])
+        self.assertEqual(after["qualified"]["fetched"], "2026-10-16")
+        from kyc import validate
+        codes = [i.code for i in validate.check_results_pages(after)]
+        self.assertIn("qualified-list-stale", codes)
+
+    def test_a_status_from_the_list_says_where_it_came_from(self):
+        cache = self.run_build(datetime.date(2026, 10, 16))
+        smith = {"id": "FEC_H6LA05199", "fecCandidateId": "H6LA05199", "isCandidate": True,
+                 "source": "fec-field", "name": "John Smith", "party": "Democrat",
+                 "state": "LA", "chamber": "House (Candidate)", "districtNum": 5}
+        echols = {"id": "FEC_H6LA05101", "fecCandidateId": "H6LA05101", "isCandidate": True,
+                  "source": "fec-field", "name": "Michael Echols", "party": "Republican",
+                  "state": "LA", "chamber": "House (Candidate)", "districtNum": 5}
+        results.apply_cache([smith, echols], cache)
+        self.assertEqual((smith["raceStatus"], smith["raceStatusSource"]), ("unlisted", "qualified"))
+        self.assertEqual((echols["raceStatus"], echols["raceStatusSource"]),
+                         ("qualified", "qualified"))
+
+    def test_a_seat_still_on_the_list_days_after_the_count_is_reported(self):
+        from kyc import validate
+        cache = self.run_build(datetime.date(2026, 11, 7))
+        issues = {i.code: i for i in validate.check_results_pages(cache)}
+        self.assertIn("H-LA-05-2026", issues["general-uncalled"].detail)
+
     def test_a_failed_read_leaves_the_seat_pending(self):
         cache = results.build(self.field, self.dates, today=datetime.date(2026, 10, 16),
                               log=lambda *_: None,
@@ -191,7 +241,7 @@ class TestTheBallotBeforeTheCount(NoGap):
 
 
 class TestValidate(unittest.TestCase):
-    def test_several_qualified_of_one_party_is_no_error(self):
+    def test_qualified_is_a_status_the_build_knows(self):
         from kyc import validate
         race = {"id": "H-LA-05-2026", "state": "LA", "settled": True, "incumbentIds": [],
                 "candidateIds": ["a", "b"], "results": {"fromQualifiedList": True}}
@@ -199,9 +249,10 @@ class TestValidate(unittest.TestCase):
                    "raceId": "H-LA-05-2026", "isCandidate": True}
                   for pid, name in (("a", "Michael Echols"), ("b", "Stewart Cathey Jr."))]
         codes = [i.code for i in validate.check_results(people, [race])]
-        self.assertNotIn("multiple-nominees", codes)
+        # Would fail if "qualified" left RACE_STATUSES or NOVEMBER_STATUSES.
         self.assertNotIn("unknown-race-status", codes)
         self.assertNotIn("settled-race-without-nominee", codes)
+        self.assertIn("qualified", validate.RACE_STATUSES)
 
 
 class TestUnsureSurvivesSpellings(unittest.TestCase):

@@ -821,8 +821,13 @@ def _results(args):
             print(f"  [warn] Louisiana's qualified list could not be read: {exc}")
             listed = None
         print("Reading primary results from Wikipedia ...")
+        previous = results_mod.load_cache(args.root)
         cache = results_mod.build(field, dates, today=datetime.date.today(), log=print,
                                   aliases=aliases, qualified=listed)
+        kept = results_mod.carry_qualified(cache, previous)
+        if kept:
+            print(f"  [warn] kept the qualified list read on "
+                  f"{cache['qualified'].get('fetched')} for {len(kept)} seats")
         print(f"  wrote {results_mod.save_cache(cache, args.root)}")
 
     import collections

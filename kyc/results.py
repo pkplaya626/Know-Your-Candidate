@@ -1772,10 +1772,6 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                                general_held=general_held(today),
                                general_runoff=state in _general_runoffs(),
                                general_runoff_held=general_runoff_held(state, today))
-        if not outcome and is_open and rid in qualified_lists:
-            races[rid] = _qualified_race(qualified_lists[rid], rows, (aliases or {}).get(rid),
-                                         qualified_source)
-            continue
         if not outcome:
             if is_open and any(r.get("won") for _, rs in boxes for r in rs):
                 # Winners are marked, but not as a result the open-primary
@@ -1830,12 +1826,21 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
             "decided": coverage(boxes, open_primary=is_open, runoff_held=held),
         }
 
-    # An open-primary seat before its count: the state's qualified list is
-    # its ballot (Louisiana's House seats, kyc/qualified.py).
-    for rid in [r for r in pending if r in qualified_lists]:
+    # An open-primary seat its page has not settled - before its count, or
+    # after it while the page marks no result, cannot be fetched, is missing
+    # or has no section for it: the state's qualified list is its ballot
+    # (Louisiana's House seats, kyc/qualified.py). A failed page never takes
+    # the list away (rule 8).
+    for rid in sorted(qualified_lists):
+        if rid in races:
+            continue
         races[rid] = _qualified_race(qualified_lists[rid], by_race.get(rid, []),
                                      (aliases or {}).get(rid), qualified_source)
-        pending.remove(rid)
+        if rid in pending:
+            pending.remove(rid)
+        elif general_held(today):
+            log(f"    [warn] {rid}: still shown from the qualified list after Election Day; "
+                f"its page has no result this reader can use")
 
     log(f"    settled races with results: {len(races)}   "
         f"pending primaries: {len(pending)}   pages missing: {len(missing_pages)}   "
@@ -1886,6 +1891,28 @@ def load_cache(root="."):
     if cache.get("races") is None:
         return None
     return respect_open_primaries(cache)
+
+
+def carry_qualified(cache, previous):
+    """Keep the last qualified list read when this run could not read one.
+
+    A failed request is not evidence that nobody qualified (rule 8): every
+    race the previous cache showed from the list, and whose page has still
+    settled nothing, is kept as it was, with the day it was read.
+    """
+    if not previous or cache.get("qualified") or not previous.get("qualified"):
+        return []
+    kept = []
+    for rid, race in sorted((previous.get("races") or {}).items()):
+        if race.get("source") != "qualified" or rid in cache["races"]:
+            continue
+        cache["races"][rid] = race
+        if rid in cache.get("pending", []):
+            cache["pending"].remove(rid)
+        kept.append(rid)
+    if kept:
+        cache["qualified"] = dict(previous["qualified"], carried=True)
+    return kept
 
 
 def respect_open_primaries(cache):
@@ -2132,6 +2159,7 @@ def apply_cache(profiles, cache, field=None):
             rid, status = by_id[candidate_id]
             profile["raceStatus"] = status
             profile["raceStatusRace"] = rid
+            _source_of(profile, races.get(rid))
             ballot_name = (races.get(rid, {}).get("claimed") or {}).get(candidate_id)
             # A hyphen alone changes nothing but the spelling, and the
             # hyphenated one is the person's: "Greene-Placentia" from the
@@ -2237,6 +2265,7 @@ def apply_cache(profiles, cache, field=None):
                     profile["raceStatusUnconfirmed"] = True
                 profile["raceStatus"] = UNLISTED
                 profile["raceStatusRace"] = rid
+                _source_of(profile, races[rid])
                 profile["seekingReelection2026"] = False
                 applied += 1
         elif profile.get("isCandidate") and candidate_id not in unsure:
@@ -2260,8 +2289,16 @@ def apply_cache(profiles, cache, field=None):
                     # and the page says exactly that.
                     profile["raceStatusUnconfirmed"] = True
                 profile["raceStatus"] = UNLISTED
+                _source_of(profile, races[rid])
                 applied += 1
     return applied
+
+
+def _source_of(profile, race):
+    """Where a status came from, when it is not a results page: a state's
+    qualified list (kyc/qualified.py). The page credits it, not Wikipedia."""
+    if (race or {}).get("source") == "qualified":
+        profile["raceStatusSource"] = "qualified"
 
 
 def _all_out(race, names):

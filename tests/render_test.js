@@ -3814,7 +3814,10 @@ function qualifiedRace(window) {
     r.candidateIds.length >= 2);
   if (!race) return;
   const people = race.candidateIds.map((id) => byId[id]).filter(Boolean);
-  people.forEach((p, i) => { p.raceStatus = i === people.length - 1 ? "unlisted" : "qualified"; });
+  people.forEach((p, i) => {
+    p.raceStatus = i === people.length - 1 ? "unlisted" : "qualified";
+    p.raceStatusSource = "qualified";
+  });
   race.settled = true;
   race.results = Object.assign({}, race.results, { fromQualifiedList: true,
     otherNominees: ["Kate Cotten"] });
@@ -3845,10 +3848,26 @@ async function testQualifiedBallot() {
     const spec = KYC.raceStatus("qualified", "long");
     check("the profile cites the Secretary of State, not a Wikipedia page",
       /Secretary of State/.test(spec.title) && !/Wikipedia/.test(spec.title), spec.title);
+    const offBadge = card(off) && card(off).querySelector(".badge[title]");
+    check("a filer not on the list is credited to the Secretary of State, not the results",
+      !!offBadge && /Secretary of State's list/.test(offBadge.getAttribute("title")) &&
+        !/primary results/.test(offBadge.getAttribute("title")),
+      offBadge && offBadge.getAttribute("title"));
+    const unprofiled = head && [...head.querySelectorAll(".badge")].find((b) => /no profile here/.test(b.textContent));
+    check("names with no profile are credited to the list too",
+      !!unprofiled && /Secretary of State's list/.test(unprofiled.getAttribute("title")) &&
+        !/published results/.test(unprofiled.getAttribute("title")),
+      unprofiled && unprofiled.getAttribute("title"));
   });
   const after = await buildPage("states/la.html", { now: "2026-11-05T09:00:00", data: qualifiedRace });
   suite("states/la.html — after the count, with no result read yet", () => {
-    const { on: still } = after.window.__qualified || {};
+    const { race: r2, on: still } = after.window.__qualified || {};
+    const h2 = r2 && after.D.getElementById("race-" + r2.id).querySelector(".race-head");
+    const held = h2 && [...h2.querySelectorAll(".badge")].find((b) => /Primary/.test(b.textContent));
+    check("the primary is held, and no result has been read yet",
+      !!held && /Primary held/.test(held.textContent) && /no result has been read yet/.test(
+        held.getAttribute("title")) && !/scheduled/.test(held.getAttribute("title")),
+      held && held.getAttribute("title"));
     const c = still && still[0] && after.D.querySelector('.card[data-id="' + still[0].id + '"]');
     check("a qualified candidate reads Awaiting result", !!c && /Awaiting result/.test(c.textContent),
       c && c.textContent);

@@ -757,8 +757,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     ballot. The export carries addresses, phones and emails; only the name,
     party, date and a withdrawal are kept. Its Outcome column has never held
     a result, so any other value is refused, not guessed at. A failed read
-    leaves the seat pending (rule 8). After the count the results page
-    decides, as everywhere else.
+    keeps the last list read (rule 8), and a page that fails after the count
+    never takes the list away. A status read from it credits the Secretary
+    of State, never "the published results". After the count the results
+    page decides, as everywhere else.
 
 ## District maps
 

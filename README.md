@@ -554,10 +554,18 @@ for each seat and exports it as CSV. Qualifying closed on August 7.
   addresses, phone numbers and emails; none of it is stored.
 - The export's Outcome column has never held a result (checked on the 2024
   export after its count), so any value other than "Withdrew" is refused.
-- A failed read leaves the seats pending, as before.
+- A failed read of the list keeps the last one read, with its date
+  (`results.carry_qualified`), and `build --check` warns
+  (`qualified-list-stale`); with no list ever read, the seats stay pending.
+- Every status read from the list says so: "not on the Secretary of State's
+  list of candidates qualified for the November 3 open primary", and names
+  with no profile are "per the Secretary of State's list", never "per the
+  published results".
 - After the count, the results page decides, exactly as for every other race.
-  Until it marks a result, the list stays and its candidates read "Awaiting
-  result".
+  Until it marks a result - or while it cannot be fetched or has no section
+  for a seat - the list stays, its candidates read "Awaiting result", the
+  header reads "Primary held" with no result read yet, and three days on
+  `general-uncalled` lists the seat.
 
 ### After Election Day
 

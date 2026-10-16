@@ -891,7 +891,7 @@
           people.map(KYC.cards.card).join("") + "</div>"
         : '<p class="district-fact-label">' + who + ": nobody with a profile here</p>") +
       (unfiled.length
-        ? '<p class="state-note">Also on the ballot, per the published results, with no FEC ' +
+        ? '<p class="state-note">Also on the ballot, ' + KYC.ballotSource(race) + ', with no FEC ' +
           "filing over $5,000: " + KYC.escapeHtml(unfiled.join(", ")) + ".</p>"
         : "") +
       flowLine("Where its area came from:", came, "old") +
@@ -927,7 +927,7 @@
             people.map(KYC.cards.card).join("") + "</div>"
           : '<p class="district-fact-label">' + who + ": nobody with a profile here</p>") +
       (unfiled.length
-        ? '<p class="state-note">Also on the ballot, per the published results, with no FEC ' +
+        ? '<p class="state-note">Also on the ballot, ' + KYC.ballotSource(race) + ', with no FEC ' +
           "filing over $5,000: " + KYC.escapeHtml(unfiled.join(", ")) + ".</p>"
         : "") +
       (race

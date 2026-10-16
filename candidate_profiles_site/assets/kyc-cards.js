@@ -170,10 +170,18 @@
     if (race.primaryDate) {
       // A ballot read from a qualified list is not a held primary.
       var listed = !!(race.results && race.results.fromQualifiedList);
-      var held = race.settled && !listed;
+      var now = new Date();
+      var today = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
+        ("0" + now.getDate()).slice(-2);
+      var past = race.primaryDate < today;
+      var held = race.settled && (!listed || past);
       badges.push(
         '<span class="badge badge-neutral" title="' +
-        KYC.escapeAttr(held
+        KYC.escapeAttr(held && listed
+          ? "Primary held " + race.primaryDate + (race.runoffDate ? "; runoff " + race.runoffDate : "") +
+            ". Its ballot was the Secretary of State's list of qualified candidates; no result " +
+            "has been read yet."
+          : held
           ? "Primary held " + race.primaryDate +
             (race.runoffDate ? "; runoff " + race.runoffDate : "") +
             ". Results from the state's Wikipedia election page."
@@ -227,7 +235,7 @@
     if (unprofiled) {
       badges.push(
         '<span class="badge badge-warn" title="' + KYC.escapeAttr(
-          "On the November ballot per the published results, with no FEC filing " +
+          "On the November ballot " + KYC.ballotSource(race) + ", with no FEC filing " +
           "over $5,000 - the point at which federal law treats someone as a " +
           "candidate - so no profile here: " + res.otherNominees.join(", ")
         ) + '">' + unprofiled + " with no profile here</span>"

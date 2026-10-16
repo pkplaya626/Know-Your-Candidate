@@ -354,7 +354,7 @@
     var row = function (p) {
       var role = p.isCandidate ? "" : '<span class="badge badge-neutral">Member</span> ';
       var spec = KYC.raceStatus(p.raceStatus, "mate",
-        { unconfirmed: !!p.raceStatusUnconfirmed });
+        { unconfirmed: !!p.raceStatusUnconfirmed, source: p.raceStatusSource });
       var status = spec
         ? '<span class="badge ' + spec.cls + '" title="' + KYC.escapeAttr(spec.title) + '">' +
           KYC.escapeHtml(spec.label) + KYC.ballotLineSuffix(p) + "</span>"
@@ -377,8 +377,8 @@
     var res = race.results || null;
     var unfiled = res && res.otherNominees && res.otherNominees.length ? res.otherNominees : [];
     if (unfiled.length) {
-      html += '<p class="race-note">Also on the November ballot, per the published ' +
-        "results, with no FEC filing over $5,000 and so no profile here: " +
+      html += '<p class="race-note">Also on the November ballot, ' + KYC.ballotSource(race) +
+        ", with no FEC filing over $5,000 and so no profile here: " +
         KYC.escapeHtml(unfiled.join(", ")) + ".</p>";
     }
     if (!others.length && !unfiled.length) html = aloneNote(race);
@@ -418,7 +418,7 @@
     var res = race.results || null;
     var text;
     if (race.settled && res) {
-      text = "No one else is on the November ballot for this seat, per the published results" +
+      text = "No one else is on the November ballot for this seat, " + KYC.ballotSource(race) +
         (filed ? " (" + filed + " filed with the FEC in all)." : ".");
     } else if (filed) {
       text = filed + (filed === 1 ? " has" : " have") + " filed with the FEC for this seat, " +
