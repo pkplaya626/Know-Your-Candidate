@@ -83,6 +83,23 @@ class TestTheBuild(unittest.TestCase):
             self.assertEqual(index[cid]["future"], len(court["future"]), cid)
         self.assertEqual(self.payload["vacancies"]["totals"], cache["totals"])
 
+    def test_the_circuit_map_has_one_table_and_neighbours_never_share_a_colour(self):
+        from kyc import geo, government_maps
+
+        # The guide's map and the hub's read one table (rule 12).
+        self.assertEqual(government_maps.CIRCUITS, federal_courts.circuits())
+        tokens = {c["circuit"]: c["token"] for c in self.payload["courts"] if c.get("token")}
+        self.assertEqual(set(tokens), set(federal_courts.circuits()))
+        of = {code: key for key, codes in federal_courts.circuits().items() for code in codes}
+        for code, others in geo.neighbours().items():
+            for other in others:
+                if code in of and other in of and of[code] != of[other]:
+                    self.assertNotEqual(tokens[of[code]], tokens[of[other]], (code, other))
+        # Every state and territory with a district court is in exactly one
+        # circuit; American Samoa, which has none, in none.
+        self.assertNotIn("AS", of)
+        self.assertEqual(sum(len(codes) for codes in federal_courts.circuits().values()), len(of))
+
     def test_a_retired_justice_is_never_a_member(self):
         scotus = self.payload["supremeCourt"]
         self.assertEqual(len(scotus["members"]), federal_courts.SUPREME_COURT_SEATS)

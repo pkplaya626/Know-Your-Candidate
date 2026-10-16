@@ -28,6 +28,43 @@
     return global.kycFederal || {};
   }
 
+  var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August",
+    "September", "October", "November", "December"];
+
+  /** An agreed date at its precision: "2025-02-05", "March 2026", "2026". */
+  function whenText(w) {
+    if (!w || !w.date) return "";
+    if (w.precision === "month") return MONTHS[Number(w.date.slice(5, 7)) - 1] + " " + w.date.slice(0, 4);
+    return w.date;
+  }
+
+  /** One holder of an office this term, in words: confirmed, acting, in
+   *  office from and to - each date only where the sources agree. */
+  function tenureText(row) {
+    var parts = [];
+    // In the order it happened: acting service, then the confirmation.
+    if (row.actingNote) parts.push(row.actingNote.replace(/^Acting:/, "acting"));
+    else if (row.acting) parts.push("acting");
+    if (row.confirmed) {
+      parts.push("confirmed " + row.confirmed.date + " (" + row.confirmed.yeas + "\u2013" +
+        row.confirmed.nays + (row.confirmed.yeas === row.confirmed.nays
+          ? ", the Vice President breaking the tie" : "") + ")");
+    } else {
+      parts.push("no Senate roll call confirming them to this office found");
+    }
+    var start = row.start && row.start.shown ? whenText(row.start.shown) : "";
+    var end = row.end ? (row.end.shown ? whenText(row.end.shown) : "") : "";
+    if (row.end) {
+      parts.push(start || end ? "in office " + (start || "?") + " to " + (end || "?")
+        : "in office, then left; the sources differ on the dates");
+    } else if (start) {
+      parts.push("in office since " + start);
+    } else if (row.start && row.start.differs) {
+      parts.push("the sources differ on when they took office");
+    }
+    return parts.join("; ");
+  }
+
   /** An official's picture: the White House's photo with the sizes it
    *  serves of that one file (rule 42), or a justice's official portrait.
    *  ``{src, srcset, credit, source}``, or null. */
@@ -247,9 +284,20 @@
       ((holder.page || {}).acting ? '<span class="badge badge-warn">Acting</span>' : "");
     var rows = field("Senate confirmation", senateText(holder), true) +
       field("The office’s own page", pageText(holder), true);
+    var history = (office.history || []);
+    var since = (federal().changes || {}).since;
+    var held = history.length ? '<ol class="bullets fed-history">' + history.map(function (row) {
+      return "<li><strong>" + KYC.escapeHtml(row.name) + "</strong>" +
+        (row.current ? ' <span class="badge badge-neutral">Now</span>' : "") + "<br>" +
+        KYC.escapeHtml(tenureText(row)) + "</li>";
+    }).join("") + "</ol>" + '<p class="faint">Confirmations from the Senate’s roll calls; who ' +
+      "held the office from Wikidata; dates where Wikidata and the person’s Wikipedia article " +
+      "agree. An acting officer Wikidata does not record is not listed.</p>" : "";
     el("officialModalBody").innerHTML =
       '<div class="modal-column">' +
-      panel("check", "The record", '<div class="field-grid">' + rows + "</div>") + "</div>" +
+      panel("check", "The record", '<div class="field-grid">' + rows + "</div>") +
+      (held ? panel("calendar", "This office since " + (since || "the term began"), held) : "") +
+      "</div>" +
       '<div class="modal-column">' +
       panel("info", "Where this comes from", '<p class="note-box">Listed by the White House ' +
         "among the President’s Cabinet; checked on the office’s own page and " +
@@ -477,5 +525,6 @@
   KYC.official = {
     open: open, close: close, isOpen: isOpen, ensure: ensure,
     applyRoute: applyRoute, officials: officials, pictureTag: pictureTag,
+    whenText: whenText, tenureText: tenureText,
   };
 })(window);

@@ -587,6 +587,37 @@ def by_fjc_name():
     return {fjc_name(cid): cid for cid in COURTS if fjc_name(cid)}
 
 
+def circuits():
+    """``{circuit: (state codes)}`` for the twelve regional circuits, from the
+    courts of appeals' own entries above: the one table the guide's circuit
+    map and the federal hub's both read (rule 12)."""
+    out = {}
+    for court in COURTS.values():
+        if court["kind"] == "appeals" and court.get("states"):
+            out[court["circuit"]] = tuple(court["states"])
+    return out
+
+
+def circuit_colours(near):
+    """A colour token for each circuit such that no two circuits whose
+    states share a border share one: greedy, in circuit order, over *near*
+    (``{state: neighbours}``, kyc.geo.neighbours). Four categorical colours
+    for twelve circuits, so the colour only tells neighbours apart; the
+    number on each state says which circuit it is."""
+    table = circuits()
+    of = {code: key for key, codes in table.items() for code in codes}
+    touching = {key: set() for key in table}
+    for code, others in near.items():
+        for other in others:
+            if code in of and other in of and of[code] != of[other]:
+                touching[of[code]].add(of[other])
+    colour = {}
+    for key in table:
+        used = {colour[k] for k in touching[key] if k in colour}
+        colour[key] = next(c for c in ("cat-1", "cat-2", "cat-3", "cat-4") if c not in used)
+    return colour
+
+
 def check():
     """Problems with the table itself. Empty when it is sound."""
     from .normalize import TERRITORIES, US_STATES

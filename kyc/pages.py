@@ -541,6 +541,7 @@ _FEDERAL_SIDEBAR = """
                 Supreme Court, and every sitting Article III judge.</p>
             <a class="nav-link nav-sub" href="../federal/index.html#executive">The President and Vice President</a>
             <a class="nav-link nav-sub" href="../federal/index.html#cabinet">The Cabinet</a>
+            <a class="nav-link nav-sub" href="../federal/index.html#changes">Changes since the term began</a>
             <a class="nav-link nav-sub" href="../federal/index.html#supreme-court">The Supreme Court</a>
             <a class="nav-link nav-sub" href="../federal/index.html#courts">The Article III courts</a>
         </nav>
@@ -568,7 +569,9 @@ def _jump(codes):
 _FEDERAL_SCRIPTS = (
     "../data/federal.js",
     "../data/judiciary/index.js",
+    "../data/geo.js",
     "../assets/kyc-official.js",
+    "../assets/kyc-usmap.js",
     "../assets/kyc-federal.js",
 )
 

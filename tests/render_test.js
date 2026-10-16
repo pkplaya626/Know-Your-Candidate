@@ -4445,7 +4445,7 @@ async function testFederal() {
       sized.every((img) => urlsOf(img).every((u) =>
         u.split("?")[0] === img.getAttribute("src").split("?")[0])) &&
       sized.some((img) => urlsOf(img).length > 1));
-    const links = [...D.querySelectorAll('#courts a[href^="../courts/"]')].map((a) => a.getAttribute("href"))
+    const links = [...D.querySelectorAll('#courts table a[href^="../courts/"]')].map((a) => a.getAttribute("href"))
       .filter((href) => href.indexOf("#") === -1);
     check("every court but the Supreme Court is linked, once",
       links.length === d.courts.length - 1 && new Set(links).size === links.length,
@@ -4483,9 +4483,57 @@ async function testFederal() {
       summary.textContent.indexOf(d.vacancies.asOf) !== -1, summary && summary.textContent);
     check("each court's row gives its vacancies",
       [...D.querySelectorAll("#courts thead")].every((h) => /Vacancies/.test(h.textContent)));
+    const changes = D.getElementById("changes");
+    const withHistory = d.offices.filter((o) => (o.history || []).length);
+    check("the Cabinet's changes since the term began are listed", !withHistory.length ||
+      (!!changes && changes.querySelectorAll("tbody tr").length > 0));
+    if (changes && withHistory.length) {
+      const when = [...changes.querySelectorAll("tbody tr th")].map((th) => th.textContent)
+        .filter((w) => /^\d{4}/.test(w));
+      check("newest first", when.every((w, i) => i === 0 || w.slice(0, 4) <= when[i - 1].slice(0, 4)),
+        when.slice(0, 6).join(" | "));
+      const left = withHistory.reduce((n, o) => n + o.history.filter((r) => r.end).length, 0);
+      check("a departure for every holder who left", [...changes.querySelectorAll(".badge")]
+        .filter((b) => b.textContent === "Left").length === left, `${left}`);
+      const replaced = withHistory.find((o) => o.history.findIndex((r) => r.current) > 0);
+      const card = replaced && [...D.querySelectorAll("#cabinet .fed-officer")]
+        .find((c) => c.querySelector(".fed-office").textContent === replaced.office);
+      const prev = replaced && replaced.history[replaced.history.findIndex((r) => r.current) - 1];
+      check("a card names whom its officer followed this term", !replaced ||
+        (!!card && card.textContent.indexOf("after " + prev.name) !== -1), card && card.textContent);
+      check("no Wikidata label is shown for a person: names are the White House's, the Senate's " +
+        "or an article's", withHistory.every((o) => o.history.every((r) =>
+          r.current ? r.name === o.holder.name : !!(r.wikipedia || (r.confirmed && r.name === r.confirmed.nominee)))));
+    }
     check("the courts are said to be the Article III courts",
       /Article III/.test(D.getElementById("courts").textContent) &&
       !/Every federal court/.test(D.getElementById("federalBody").textContent));
+  });
+
+  suite("federal/index.html — the circuit map", () => {
+    const svg = D.getElementById("circuitMap");
+    check("the map is drawn", !!svg && svg.querySelectorAll("[data-state]").length >= 56,
+      svg && `${svg.querySelectorAll("[data-state]").length}`);
+    check("no word is SVG text (rule 46)", !!svg && !svg.querySelector("text"));
+    // The territory strip's own caption is the map's, not a state's.
+    const words = [...D.querySelectorAll("#circuitLabels .map-label")].map((s) => s.textContent)
+      .filter((w) => !/Territories/.test(w));
+    const circuits = new Set(d.courts.filter((c) => c.token).map((c) => c.circuit).concat(["–"]));
+    check("each state carries its circuit's number, never its code", words.length >= 50 &&
+      words.every((w) => circuits.has(w)) && words.includes("5") && words.includes("9"),
+      words.filter((w) => !circuits.has(w)).slice(0, 5).join(", "));
+    const texas = svg && svg.querySelector('[data-state="TX"]');
+    if (texas) texas.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    const panel = D.getElementById("circuitPanel");
+    const tx = d.courts.filter((c) => (c.states || []).includes("TX") && c.kind === "district")
+      .map((c) => c.id);
+    check("picking a state lists its court of appeals and every district court",
+      !!panel.querySelector('a[href="../courts/ca5.html"]') &&
+      tx.length === 4 && tx.every((id) => !!panel.querySelector('a[href="../courts/' + id + '.html"]')),
+      panel.textContent);
+    check("and the pick is in the address", /circuitState=TX/.test(window.location.hash), window.location.hash);
+    const samoa = svg && svg.querySelector('[data-state="AS"]');
+    check("American Samoa is in no circuit", !!samoa && /surface-2/.test(samoa.style.fill || samoa.getAttribute("style") || ""));
   });
 
   suite("federal/index.html — finding a judge", () => {

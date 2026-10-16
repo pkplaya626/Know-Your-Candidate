@@ -362,7 +362,7 @@ def senate_votes(congress, read=None):
     return votes
 
 
-def fetch(previous=None, today=None, read=None, log=print):
+def fetch(previous=None, today=None, read=None, log=print, history_read=None):
     """The whole cache. Raises :class:`FederalError` when the White House's
     pages or the executive file cannot be read, so the last good cache
     stands."""
@@ -429,7 +429,7 @@ def fetch(previous=None, today=None, read=None, log=print):
         log(f"  {office['office']}: {entry['name']} - page {holder['page']['status']}, Senate "
             + ("votes not read" if holder.get("senateUnread")
                else (holder.get("senate") or {}).get("vote", "no roll call found")))
-    return {
+    cache = {
         "fetched": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
         "asOf": today,
         "reviewed": federal_offices.REVIEWED,
@@ -440,6 +440,21 @@ def fetch(previous=None, today=None, read=None, log=print):
         "offices": offices,
         "problems": problems,
     }
+    # Who has held each office this term (kyc/cabinet.py). Without the
+    # Senate's votes, or when Wikidata or Wikipedia cannot be read, the last
+    # run's history stands (rule 8).
+    from . import cabinet
+
+    cache["changes"] = (previous or {}).get("changes")
+    # Only a live run reads Wikidata and Wikipedia: a caller that passes its
+    # own reader (a test) must pass history_read as well.
+    if votes is not None and (history_read is not None or read is _get):
+        try:
+            cache["changes"] = cabinet.fetch(cache, votes, read=history_read,
+                                             wiki_read=history_read)
+        except cabinet.CabinetError as exc:
+            log(f"  [warn] {exc}; the last history is kept")
+    return cache
 
 
 def save_cache(cache, root="."):

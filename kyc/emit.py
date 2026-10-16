@@ -101,7 +101,9 @@ FEDERAL_PAGE_REQUIREMENTS = (
     "../assets/kyc.js",
     "../data/federal.js",
     "../data/judiciary/index.js",
+    "../data/geo.js",
     "../assets/kyc-official.js",
+    "../assets/kyc-usmap.js",
     "../assets/kyc-federal.js",
 )
 
