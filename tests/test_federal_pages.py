@@ -71,6 +71,18 @@ class TestTheBuild(unittest.TestCase):
         # The retired justices are listed apart, never counted as sitting.
         self.assertEqual(self.payload["judges"], len(self.search))
 
+    def test_vacancies_are_on_the_courts_their_codes_name(self):
+        from kyc import vacancies
+
+        cache = vacancies.load_cache(ROOT)
+        self.assertEqual(sum(len(c["vacancies"]) for c in self.courts.values()),
+                         sum(1 for r in cache["current"] if r.get("court")))
+        index = {c["id"]: c for c in self.payload["courts"]}
+        for cid, court in self.courts.items():
+            self.assertEqual(index[cid]["vacancies"], len(court["vacancies"]), cid)
+            self.assertEqual(index[cid]["future"], len(court["future"]), cid)
+        self.assertEqual(self.payload["vacancies"]["totals"], cache["totals"])
+
     def test_a_retired_justice_is_never_a_member(self):
         scotus = self.payload["supremeCourt"]
         self.assertEqual(len(scotus["members"]), federal_courts.SUPREME_COURT_SEATS)

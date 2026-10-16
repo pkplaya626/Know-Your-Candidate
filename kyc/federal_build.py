@@ -21,7 +21,7 @@ and are never counted as such (rules 16 and 27).
 
 import re
 
-from . import federal, federal_courts, federal_offices, judiciary
+from . import federal, federal_courts, federal_offices, judiciary, vacancies
 
 
 class FederalBuildError(RuntimeError):
@@ -71,10 +71,20 @@ def _judge(record):
     return {k: record[k] for k in keep if record.get(k) not in (None, [], "")}
 
 
+def _opening(row):
+    """A vacancy as the pages show it: the list's words and dates, no code."""
+    keep = ("vacatedBy", "reason", "since", "announced", "vacancyDate", "nominee",
+            "nominated", "emergency")
+    return {k: row[k] for k in keep if row.get(k) not in (None, "", False)}
+
+
 def build(root="."):
     """``(federal_payload, {court id: payload}, judges index, problems)``."""
     executive = federal.load_cache(root)
     courts = judiciary.load_cache(root)
+    openings = vacancies.load_cache(root)
+    if openings is None:
+        raise FederalBuildError(f"no {vacancies.CACHE_PATH}; run 'vacancies'")
     if executive is None:
         raise FederalBuildError(f"no {federal.CACHE_PATH}; run 'federal'")
     if courts is None:
@@ -83,7 +93,18 @@ def build(root="."):
                 if level == "error"]
     problems += [message for level, _code, message, _d in judiciary.problems(courts)
                  if level == "error"]
+    problems += [message for level, _code, message, _d in vacancies.problems(openings)
+                 if level == "error"]
     judges = courts["judges"]
+    # Each court's vacancies, as the courts list them, by the list's own
+    # court code (kyc/vacancies.py); a code no court has stays unplaced.
+    vacant, coming = {}, {}
+    for row in openings["current"]:
+        if row.get("court"):
+            vacant.setdefault(row["court"], []).append(_opening(row))
+    for row in openings["future"]:
+        if row.get("court"):
+            coming.setdefault(row["court"], []).append(_opening(row))
     offices = []
     for office in executive["offices"]:
         table = next(o for o in federal_offices.OFFICES if o["key"] == office["key"])
@@ -100,6 +121,9 @@ def build(root="."):
             "listed": held["listed"], "active": held["active"], "senior": held["senior"],
             "chief": {"id": chief, "name": judges[chief]["name"]} if chief else None,
             "chiefUnsettled": bool(held.get("chiefUnsettled")),
+            "vacancies": len(vacant.get(cid, [])),
+            "nominees": sum(1 for r in vacant.get(cid, []) if r.get("nominee")),
+            "future": len(coming.get(cid, [])),
         })
     scotus = courts["courts"]["scotus"]
     payload = {
@@ -113,13 +137,19 @@ def build(root="."):
                          "retired": [_judge(judges[i]) for i in scotus.get("retired") or []]},
         # Sitting judges: a retired justice is listed apart, never counted.
         "judges": sum(1 for j in judges.values() if not j.get("retiredJustice")),
+        "vacancies": {
+            "asOf": openings["asOf"], "sources": openings["sources"],
+            "totals": openings["totals"], "future": len(openings["future"]),
+            "emergencies": sum(1 for r in openings["current"] if r.get("emergency")),
+        },
     }
     per_court = {}
     for cid, held in courts["courts"].items():
         # A territorial court's file says only that its judges are not in
         # the directory, so every court page loads the same scripts.
         per_court[cid] = {"id": cid, "listed": held["listed"],
-                          "judges": [_judge(judges[i]) for i in held["judges"]]}
+                          "judges": [_judge(judges[i]) for i in held["judges"]],
+                          "vacancies": vacant.get(cid, []), "future": coming.get(cid, [])}
         if held.get("retired"):
             per_court[cid]["retired"] = [_judge(judges[i]) for i in held["retired"]]
     # One row per judge, with every court they sit on: a judge on several

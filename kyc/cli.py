@@ -32,6 +32,7 @@ from . import (
 from .profiles import build_profiles, screen_field
 from . import federal as federal_mod
 from . import judiciary as judiciary_mod
+from . import vacancies as vacancies_mod
 
 
 def _load(args):
@@ -205,7 +206,8 @@ def _build(args):
                           district_error=district_error,
                           voting=voting_mod.load_cache(args.root) or {},
                           federal=federal_mod.load_cache(args.root),
-                          judiciary=judiciary_mod.load_cache(args.root))
+                          judiciary=judiciary_mod.load_cache(args.root),
+                          vacancies=vacancies_mod.load_cache(args.root))
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -1336,6 +1338,39 @@ def _officers(args):
     return 0
 
 
+def _vacancies(args):
+    """Vacancies in the federal courts, as the courts list them on
+    uscourts.gov: current, announced and emergencies (kyc/vacancies.py). A
+    list that cannot be read, or whose rows do not add up to its own totals,
+    keeps the committed cache (rule 8)."""
+    from . import judiciary, vacancies
+
+    if args.check:
+        cache = vacancies.load_cache(args.root)
+        if not cache:
+            print(f"[error] no {vacancies.CACHE_PATH}; run 'vacancies'", file=sys.stderr)
+            return 2
+    else:
+        try:
+            cache = vacancies.fetch()
+        except vacancies.VacanciesError as exc:
+            print(f"[error] {exc}; the committed cache is unchanged", file=sys.stderr)
+            return 2
+    print(f"  {cache['totals']['vacancies']} vacancies, {cache['totals']['nominees']} with a "
+          f"nominee pending, as of {cache['asOf']}; {len(cache['future'])} announced; "
+          f"{sum(1 for r in cache['current'] if r.get('emergency'))} judicial emergencies")
+    failed = 0
+    for level, code, message, detail in vacancies.problems(
+            cache, judiciary=judiciary.load_cache(args.root)):
+        print(f"  [{level}] {code}: {message}")
+        for line in detail[:10]:
+            print(f"           - {line}")
+        failed += level == "error"
+    if not args.check:
+        print(f"[ok] wrote {vacancies.save_cache(cache, args.root)}")
+    return 1 if failed else 0
+
+
 def _judiciary(args):
     """Every sitting Article III judge, from the Federal Judicial Center's
     directory, and the Supreme Court's members as the Court lists them
@@ -1705,6 +1740,10 @@ def build_parser():
     jud.add_argument("--check", action="store_true",
                      help="report the committed cache; make no network call")
 
+    vac = add("vacancies", help="vacancies in the federal courts, as uscourts.gov lists them")
+    vac.add_argument("--check", action="store_true",
+                     help="report the committed cache; make no network call")
+
     fed = add("federal", help="the President, the Vice President and the Cabinet, from the "
                               "White House, each office's page and the Senate's votes")
     fed.add_argument("--check", action="store_true",
@@ -1761,6 +1800,8 @@ def main(argv=None):
         return _federal(args)
     if args.command == "judiciary":
         return _judiciary(args)
+    if args.command == "vacancies":
+        return _vacancies(args)
     if args.command == "courts":
         return _courts(args)
     if args.command == "officers":

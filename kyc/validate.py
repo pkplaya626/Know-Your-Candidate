@@ -1327,7 +1327,7 @@ def check_voting_links(cache):
 
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
         results=None, field=None, enrichment=None, odds=None, district_maps=None,
-        district_error=None, voting=None, federal=None, judiciary=None):
+        district_error=None, voting=None, federal=None, judiciary=None, vacancies=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_district_maps(races, district_maps, district_error)
@@ -1364,6 +1364,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_ballot2026()
     issues += check_federal(federal)
     issues += check_judiciary(judiciary)
+    issues += check_vacancies(vacancies, judiciary)
     if voting is not None:                 # None: the caller did not supply it
         issues += check_voting_links(voting)
     return issues
@@ -1494,6 +1495,18 @@ def check_judiciary(cache):
         issues += [Issue(level, code, message, detail)
                    for level, code, message, detail in judiciary.problems(cache)]
     return issues
+
+
+def check_vacancies(cache, judiciary=None):
+    """The courts' vacancy lists (kyc/vacancies.py), when the caller supplies
+    them: a court code the table does not know, an emergency that matches no
+    vacancy, a stale read, and a vacancy the FJC's directory disagrees with."""
+    if cache is None:
+        return []
+    from . import vacancies
+
+    return [Issue(level, code, message, detail)
+            for level, code, message, detail in vacancies.problems(cache, judiciary=judiciary)]
 
 
 def check_guide(today=None):

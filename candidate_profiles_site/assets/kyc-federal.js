@@ -98,11 +98,69 @@
       return "<tr><th scope=\"row\">" + courtLink(c, prefix) + "</th>" +
         cell("Chief judge", chiefCell(c, prefix)) +
         cell("Judges", c.listed ? esc(counts(c)) :
-          '<span class="faint">Not in the directory</span>') + "</tr>";
+          '<span class="faint">Not in the directory</span>') +
+        cell("Vacancies", vacancyCount(c)) + "</tr>";
     });
   }
 
-  var COURT_HEADS = ["Court", "Chief judge", "Judges"];
+  /** "2, 1 with a nominee", from the courts' own list. */
+  function vacancyCount(c) {
+    if (!c.vacancies) return '<span class="faint">None listed</span>';
+    return esc(c.vacancies + (c.nominees ? ", " + c.nominees + " with a nominee" : ""));
+  }
+
+  var COURT_HEADS = ["Court", "Chief judge", "Judges", "Vacancies"];
+
+  /* -------------------------------------------------------- vacancies */
+
+  var REASONS = {
+    Senior: "Took senior status", Deceased: "Died", Retired: "Retired",
+    Resigned: "Resigned", Elevated: "Appointed to another court",
+  };
+
+  function personText(p) {
+    return p ? esc(p.name) : '<span class="faint">None yet</span>';
+  }
+
+  /** A court's vacancies, now and announced, as the courts list them. */
+  function vacancySection(d, mine) {
+    var v = d.vacancies || {};
+    var now = mine.vacancies || [];
+    var later = mine.future || [];
+    var src = source((v.sources || {}).current, "the courts’ list of vacancies");
+    var body = '<p class="guide-lede">From ' + src + ", as of " + esc(v.asOf) + ".";
+    if (!now.length && !later.length) {
+      return section("vacancies", "Vacancies", body + " It lists no vacancy on this court, " +
+        "and none announced.</p>");
+    }
+    body += " The two sources are kept apart: a judge the list says has taken senior status " +
+      "can still be among the active judges above until the directory records it.</p>";
+    if (now.length) {
+      body += table("", ["Seat vacated by", "Why", "Vacant since", "Nominee", "Nominated"],
+        now.map(function (r) {
+          return "<tr><th scope=\"row\">" + personText(r.vacatedBy) +
+            (r.emergency ? ' <span class="badge badge-warn" title="Designated a judicial ' +
+              'emergency by the courts">Judicial emergency</span>' : "") + "</th>" +
+            cell("Why", esc(REASONS[r.reason] || r.reason || "")) +
+            cell("Vacant since", esc(r.since || "")) +
+            cell("Nominee", personText(r.nominee)) +
+            cell("Nominated", esc(r.nominated || "")) + "</tr>";
+        }));
+    }
+    if (later.length) {
+      body += '<h3 class="panel-subhead">Announced</h3>' +
+        table("", ["Judge leaving", "Why", "Announced", "Leaves", "Nominee", "Nominated"],
+          later.map(function (r) {
+            return "<tr><th scope=\"row\">" + personText(r.vacatedBy) + "</th>" +
+              cell("Why", esc(REASONS[r.reason] || r.reason || "")) +
+              cell("Announced", esc(r.announced || "")) +
+              cell("Leaves", r.vacancyDate ? esc(r.vacancyDate) : '<span class="faint">Not yet set</span>') +
+              cell("Nominee", personText(r.nominee)) +
+              cell("Nominated", esc(r.nominated || "")) + "</tr>";
+          }));
+    }
+    return section("vacancies", "Vacancies", body);
+  }
 
   /* ---------------------------------------------------------------- hub */
 
@@ -205,8 +263,7 @@
       source(d.sources.judiciary.directory, "Federal Judicial Center’s Biographical Directory") +
       " as of " + esc(asOf.judiciary) + ", and the three territorial district courts. The " +
       "Court of Federal Claims, the Tax Court, and bankruptcy and magistrate judges are not " +
-      "in it. These pages list who sits; they do not count vacancies, which the directory " +
-      "does not hold.</p>" +
+      "in it.</p>" + vacancySummary(d) +
       "<h3 class=\"panel-subhead\">Courts of appeals</h3>" +
       table("", COURT_HEADS, courtRows(appeals, "../courts/"));
     appeals.forEach(function (circuit) {
@@ -225,6 +282,16 @@
     html += section("courts", "The Article III courts", body);
     el("federalBody").innerHTML = html;
     initSearch();
+  }
+
+  function vacancySummary(d) {
+    var v = d.vacancies;
+    if (!v) return "";
+    return '<p class="guide-lede" id="vacancySummary">' + source(v.sources.current,
+      "The courts list") + " " + esc(v.totals.vacancies) + " vacancies, " +
+      esc(v.totals.nominees) + " with a nominee pending, as of " + esc(v.asOf) + "; " +
+      esc(v.emergencies) + " of them designated judicial emergencies, and " +
+      source(v.sources.future, v.future + " more announced") + ".</p>";
   }
 
   /* ------------------------------------------------------------- search */
@@ -305,7 +372,7 @@
       target.innerHTML = '<p class="results-bar" role="status">This court’s judges serve ' +
         "under Article IV of the Constitution, and the Federal Judicial Center’s directory, " +
         "which these pages are built from, lists Article III judges only. They are not listed " +
-        "here: that is not a vacancy.</p>" + related(court, courts);
+        "here: that is not a vacancy.</p>" + vacancySection(d, mine) + related(court, courts);
       return;
     }
     var active = mine.judges.filter(function (j) { return j.status !== "senior"; });
@@ -315,7 +382,7 @@
       source(d.sources.judiciary.directory, "Federal Judicial Center’s Biographical Directory") +
       " as of " + esc(asOf) + (id === "scotus" ? "; its members as " +
         source(d.sources.judiciary.supremeCourt, "the Court lists them") : "") +
-      ". This page lists who sits; it does not count vacancies, which the directory does not hold.</p>";
+      ".</p>";
     // A chief the directory also lists on senior status: nobody is shown as
     // chief, and the page says why (kyc/judiciary.py).
     var unsettled = court.chiefUnsettled && mine.judges.filter(function (j) {
@@ -342,7 +409,7 @@
         '<p class="guide-lede">Listed apart: they are not members of the Court.</p>' +
         table("", heads, judgeRows(mine.retired, false)));
     }
-    target.innerHTML = html + related(court, courts);
+    target.innerHTML = html + vacancySection(d, mine) + related(court, courts);
   }
 
   /** The courts above and below this one. */

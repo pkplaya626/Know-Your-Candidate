@@ -179,6 +179,13 @@ jobs:
         continue-on-error: true
         run: python build_profile_site.py judiciary
 
+      # Vacancies in the federal courts, as the courts list them on
+      # uscourts.gov (kyc/vacancies.py). A list that cannot be read, or whose
+      # rows do not add up to its own totals, keeps the committed cache.
+      - name: Refresh the judicial vacancies
+        continue-on-error: true
+        run: python build_profile_site.py vacancies
+
       # Each state's official voting pages, as NASS's "Can I Vote" lists
       # them, every link opened once. Refused unless all 50 states and D.C.
       # are there. A NASS outage or bot wall leaves the committed links as
