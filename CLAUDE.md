@@ -126,8 +126,8 @@ python build_profile_site.py courts           # each state's highest court, from
 python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 999 tests, no dependencies
-npm install && npm test                       # 1220 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1006 tests, no dependencies
+npm install && npm test                       # 1224 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -814,9 +814,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     never `not isCandidate`, or a former member reads as someone's
     senator (rule 27). A race's `incumbentIds` and `incumbent` come from the
     record, and every record race exists whoever points at it. A member
-    seated since Election Day in a seat they did not hold is its winner
-    (`raceRole`), never an incumbent, never "re-elected" - nor is an
-    appointee. Their filing is folded in only by the FEC id Congress's
+    seated since Election Day for the term a race decided, in a seat they
+    did not hold, is its winner (`raceRole`), never an incumbent, never
+    "re-elected" - nor is an appointee; anyone else seated there since (a
+    special for the rest of the old term, an appointment) is a successor,
+    never the 2026 winner: TX-18's special and regular races had different
+    winners in 2024. A record incumbent who won another seat keeps the one
+    they held (`heldRaceId`), which is what the seats-up counts read. Their filing is folded in only by the FEC id Congress's
     record lists for them, a curated row's id kept as `otherIds`; without
     that id both profiles stay and `seated-unlinked` says so (rule 25).
 
