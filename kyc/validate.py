@@ -1342,6 +1342,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_duplicate_people(profiles)
     issues += check_results(profiles, races)
     issues += check_winners(profiles, races)
+    issues += check_former_wins((raw or {}).get("former"), (raw or {}).get("record"))
     issues += check_results_pages(results)
     issues += check_seats_contested(profiles)
     issues += check_guide()
@@ -1375,6 +1376,37 @@ def check_winners(profiles, races):
     return [Issue("warn", "seated-unlinked",
                   f"{len(twice)} seated winners are not yet linked to their filing by an FEC "
                   f"id in congress-legislators; both profiles are shown", sorted(twice))]
+
+
+def check_former_wins(rows, record):
+    """A member who won a record seat they did not hold and has since left:
+    their archived row's seat is that race's, from after Election Day. The
+    race keeps no winner for them yet - shown rather than silent."""
+    from .normalize import parse_district
+
+    if not rows or not record:
+        return []
+    held = {inc["bioguide"] for inc in (record.get("incumbents") or {}).values() if inc}
+    seats = {}
+    for rid, race in (record.get("races") or {}).items():
+        key = (race["chamber"], race["state"],
+               None if race["chamber"] == "Senate" else race.get("district"))
+        seats[key] = rid
+    day = record.get("electionDay") or ""
+    lost = []
+    for row in rows:
+        bioguide = clean_str(row.get("Bioguide ID"), "").upper()
+        chamber, state = clean_str(row.get("Chamber"), ""), clean_str(row.get("State"), "")
+        district = None if chamber == "Senate" else parse_district(row.get("District"), state)[0]
+        rid = seats.get((chamber, state, district))
+        if (rid and bioguide not in held
+                and clean_str(row.get("Term Start"), "")[:10] >= day):
+            lost.append(f"{clean_str(row.get('Name'), bioguide)} ({bioguide}): {rid}")
+    if not lost:
+        return []
+    return [Issue("warn", "former-winner-unplaced",
+                  f"{len(lost)} archived members won a 2026 seat they did not hold; their "
+                  f"race shows no winner for them", sorted(lost))]
 
 
 def check_guide():

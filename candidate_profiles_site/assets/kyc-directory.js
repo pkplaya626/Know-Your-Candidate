@@ -42,8 +42,10 @@
   var offBallot = KYC.cards.offBallot;
 
   var ELECTION_TEST = {
-    // The 35 Senate seats on the 2026 ballot.
+    // The 35 Senate seats on the 2026 ballot: who held each, by the seat
+    // they held (heldRaceId, from the pipeline), not the one they sit in.
     senateUp26: function (item) {
+      if (item.heldRaceId) return item.heldRaceId.indexOf("S-") === 0;
       return item.seatUp2026 && !item.isCandidate &&
         item.chamber.indexOf("Senate") !== -1;
     },

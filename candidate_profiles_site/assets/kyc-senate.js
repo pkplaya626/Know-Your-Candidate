@@ -103,12 +103,16 @@
     races.forEach(function (race) {
       if (race.chamber !== "Senate") return;
       var holder = race.incumbentIds.map(KYC.byId).filter(Boolean)[0] || null;
+      // Seated since Election Day for the term this race decided: the seat
+      // is theirs now, shown as held, never as a challenger.
+      var winner = KYC.byId(race.winnerId);
+      winner = winner && KYC.seated(winner) ? winner : null;
       if (holder) placed[holder.id] = true;
       if (race.winnerId) placed[race.winnerId] = true;
       put(race.year + (race.special ? "s" : "r"), {
-        holder: holder, race: race, state: race.state,
+        holder: holder, winner: winner, race: race, state: race.state,
         senateClass: race.senateClass || (holder && holder.senateClass) || null,
-        running: contenders(race, people, holder),
+        running: contenders(race, people, holder).filter(function (p) { return p !== winner; }),
       });
     });
     // Every other sitting senator, by the year their seat is next decided.
@@ -155,11 +159,12 @@
   function seatBlock(seat, level, opts) {
     var match = opts.matches;
     var holder = seat.holder && match(seat.holder) ? [seat.holder] : [];
+    var winner = seat.winner && match(seat.winner) ? [seat.winner] : [];
     var running = seat.running.filter(function (p) { return !isOut(p) && match(p); });
     var out = opts.showOut
       ? seat.running.filter(function (p) { return isOut(p) && match(p); })
       : [];
-    if (!holder.length && !running.length && !out.length) return null;
+    if (!holder.length && !winner.length && !running.length && !out.length) return null;
 
     var race = seat.race;
     var id = "senate-seat-" + (race ? race.id : seat.holder.id);
@@ -177,9 +182,14 @@
     // One row per seat: the senator, then the people running for the seat,
     // side by side - stacked, each seat took a screen of mostly empty width.
     var row = [];
+    if (winner.length) {
+      row.push('<div class="senate-side senate-holder"><p class="senate-role">' +
+               "Holds the seat (won it in " + seat.race.year + ")</p>" + cards(winner) + "</div>");
+    }
     if (holder.length) {
       var role = KYC.seated(seat.holder) ? "Holds the seat"
-        : "Held the seat until " + seat.holder.formerMember.left;
+        : seat.holder.formerMember ? "Held the seat until " + seat.holder.formerMember.left
+        : "Held the seat";
       row.push('<div class="senate-side senate-holder"><p class="senate-role">' +
                KYC.escapeHtml(role) + "</p>" + cards(holder) + "</div>");
     } else if (!seat.holder && race && race.incumbent) {
@@ -203,7 +213,8 @@
                 "were not on the primary ballot</p>", cards(out), "</div>");
     }
     html.push("</section>");
-    return { html: html.join(""), people: holder.length + running.length + out.length };
+    return { html: html.join(""),
+             people: winner.length + holder.length + running.length + out.length };
   }
 
   /** A whole group. 2026 seats get a block each; later years are just the

@@ -1175,6 +1175,13 @@ async function testMap() {
       lost.every((p) => /lost the primary/.test(label(p.state)) &&
         !/not running/.test(label(p.state))),
       lost.map((p) => label(p.state)).join(" | "));
+    // Appointed to the seat, never elected or nominated to it.
+    const appointees = window.legislatorsData.filter((p) => p.appointed &&
+      /Senate/.test(p.chamber) && p.seatUp2026);
+    check("an appointee is never called renominated or re-elected",
+      appointees.length > 0 && appointees.every((p) =>
+        !/renominated|re-elected|re-election/.test(label(p.state))),
+      appointees.map((p) => label(p.state)).join(" | "));
     // White on the empty grey was 1.15:1 (light) and dark on dark 1.02:1.
     const greys = [...D.querySelectorAll(".map-callout")].filter((c) => /surface/.test(c.style.background || ""));
     check("a callout on the empty grey takes the page's text colour and an edge",
@@ -2019,8 +2026,11 @@ async function testSenate() {
     const blocks = upRaces.map(seatOf);
     check("every 2026 Senate race has a seat block", blocks.every(Boolean),
       `${blocks.filter(Boolean).length} of ${upRaces.length}`);
+    // Whoever sits in the seat now: its winner once seated, else who held it.
+    const lead = (r) => r.winnerId && KYC.seated(KYC.byId(r.winnerId)) ? r.winnerId
+      : r.incumbentIds[0];
     check("each seat block leads with its sitting senator",
-      upRaces.every((r, i) => !blocks[i] || ids(blocks[i])[0] === r.incumbentIds[0]));
+      upRaces.every((r, i) => !blocks[i] || ids(blocks[i])[0] === lead(r)));
     const race = upRaces.find((r) => r.candidateIds.some((id) => !offBallot(KYC.byId(id))));
     const block = seatOf(race);
     const running = race ? race.candidateIds.map(KYC.byId).filter((p) => !offBallot(p)) : [];
@@ -2157,8 +2167,10 @@ async function testSeatRows() {
   const { window, D, errors } = await buildPage("index.html", { hash: "#/?view=senate" });
   await settle();
   const people = window.legislatorsData;
-  const renominated = people.find((p) => !p.isCandidate && p.chamber === "Senate" &&
-    p.raceStatus === "nominee" && !p.contestLabel);
+  const KYC = window.KYC;
+  // An appointee is never "renominated": they were not nominated to the seat.
+  const renominated = people.find((p) => KYC.seated(p) && p.chamber === "Senate" &&
+    p.raceStatus === "nominee" && !p.contestLabel && !p.appointed && !p.raceRole);
   const races = window.kycRaces;
   suite("Senate view — one row per seat", () => {
     check("no page errors", errors.length === 0, errors.join(" | "));
@@ -2291,7 +2303,8 @@ async function testRedistricting() {
   const maps = window.kycDistricts && window.kycDistricts.CA;
   const people = window.legislatorsData;
   const races = window.kycRaces;
-  const caHouse = (p) => !p.isCandidate && p.state === "CA" && /House/.test(p.chamber);
+  // Who sits now (rule 27): a former member holds no district.
+  const caHouse = (p) => KYC.seated(p) && p.state === "CA" && /House/.test(p.chamber);
   const holders = (n) => people.filter((p) => caHouse(p) && p.districtNum === n);
   const raceFor = (n) => races.find((r) => r.chamber === "House" && r.state === "CA" && r.district === n);
   const contestOf = (p) => (races.find((r) => r.id === p.contestRaceId) || {}).district;
@@ -4099,14 +4112,36 @@ async function testFormerIncumbent() {
     const head = D.getElementById("senate-seat-" + race.id);
     const block = head && head.closest("section");
     const ids = block ? [...block.querySelectorAll(".card")].map((c) => c.getAttribute("data-id")) : [];
-    check("the seat block leads with who held it", ids[0] === holder.id, ids.join(","));
-    check("saying until when", !!block && /Held the seat until 2026-12-08/.test(block.textContent));
-    check("its winner is listed in the seat", ids.includes(race.winnerId));
+    check("the seat block leads with its winner, who holds it now, then who held it",
+      ids[0] === race.winnerId && ids[1] === holder.id, ids.join(","));
+    check("saying so", !!block && /Holds the seat \(won it in 2026\)/.test(block.textContent) &&
+      /Held the seat until 2026-12-08/.test(block.textContent));
+    const running = block && block.querySelector(".senate-running");
+    check("the winner is never listed as running for it",
+      !running || !running.querySelector('.card[data-id="' + race.winnerId + '"]'));
     const elsewhere = [...view.D.querySelectorAll(".card")]
       .filter((c) => c.getAttribute("data-id") === race.winnerId).length;
     check("and nowhere else", elsewhere === 1, `${elsewhere}`);
     const badge = block && block.querySelector('.card[data-id="' + holder.id + '"]');
     check("her card is badged a former member", !!badge && /Former member/.test(badge.textContent));
+  });
+
+  const ca = await buildPage("districts/ca.html", { now, data: (w) => {
+    const mover = w.legislatorsData.find((p) => !p.isCandidate && p.state === "CA" &&
+      /House/.test(p.chamber) && w.KYC.runsElsewhere(p));
+    if (mover) mover.formerMember = { left: "2027-01-03", via: "legislators-historical",
+                                      congress: 119 };
+    w.__mover = mover;
+  } });
+  await settle(50);
+  suite("districts/ca.html — a member who moved and has left", () => {
+    const { window, D, errors } = ca;
+    const mover = window.__mover;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("a California member ran in another district", !!mover);
+    const named = [...D.querySelectorAll(".mover")].some((m) => mover &&
+      m.textContent.indexOf(mover.name) !== -1);
+    check("they are not listed as holding one district and running in another", !named);
   });
 
   const state = await buildPage("states/fl.html", { now, data: departFlorida });

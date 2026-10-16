@@ -405,20 +405,28 @@ def _former_members(rows, record, profiles, seats_up, as_of=None):
     from .record import held_races
 
     on_roster = {p["id"] for p in profiles}
-    latest = {}
+    archived = {}
     for row in rows:
         bioguide = clean_str(row.get("Bioguide ID"), "").upper()
-        left = clean_str(row.get("Left Office"), "")
-        if bioguide and left and left > clean_str(
-                (latest.get(bioguide) or {}).get("Left Office"), ""):
-            latest[bioguide] = row
+        if bioguide and clean_str(row.get("Left Office"), ""):
+            archived.setdefault(bioguide, []).append(row)
     races = record.get("races") or {}
     incumbents = record.get("incumbents") or {}
     out = []
     for bioguide, rid in sorted(held_races(record).items()):
-        row = latest.get(bioguide)
-        if bioguide in on_roster or row is None:
+        if bioguide in on_roster or bioguide not in archived:
             continue
+        # The seat they held on the ballot, whatever they sat in last: a
+        # member who won another seat and later left is archived from it.
+        race = races.get(rid) or {}
+        district = race.get("district")
+        seat = {"Chamber": race.get("chamber"), "State": race.get("state"),
+                "District": "" if race.get("chamber") == "Senate" else (
+                    "At-Large" if district == 0 else f"District {district}")}
+        rows_of = sorted(archived[bioguide], key=lambda r: clean_str(r.get("Left Office"), ""))
+        same = [r for r in rows_of if clean_str(r.get("Chamber"), "") == seat["Chamber"]
+                and clean_str(r.get("State"), "") == seat["State"]]
+        row = dict(same[-1] if same else rows_of[-1], **seat)
         held = incumbents[rid]
         left = clean_str(row.get("Left Office"), "")
         profile = _build_member(row, 0, seats_up, None, person=None, as_of=as_of)
@@ -442,15 +450,24 @@ def _former_members(rows, record, profiles, seats_up, as_of=None):
 
 def _mark_record_roles(profiles, record, snapshot, field):
     """What the record says about each member: an appointee who held a seat
-    on the ballot (``appointed``, never "re-elected"), and a member seated
-    since Election Day in a seat they did not hold (``raceRole`` "winner",
-    with that race, never an incumbent of it and never "up")."""
+    on the ballot (``appointed``, never "re-elected"); a member seated since
+    Election Day for the term a race decided, in a seat they did not hold
+    (``raceRole`` "winner": that race's, never its incumbent); and anyone
+    else seated in such a seat since then (``raceRole`` "successor": in the
+    race only if they ran in it). Neither is "up" for the seat they now sit
+    in, and neither is ever called re-elected (``record.seat_changes``).
+
+    A winner who held another record seat - Andy Barr, KY-6 to the Senate;
+    Greg Casar, TX-35 to TX-37 - is still that race's incumbent, now
+    contesting this one: their held seat says where they went."""
     from . import candidates as field_mod
-    from .record import seated_winners
+    from .races import seat_label
+    from .record import held_races, seat_changes
 
     incumbents = record.get("incumbents") or {}
     appointed = {inc["bioguide"] for inc in incumbents.values() if inc and inc.get("appointed")}
-    won = seated_winners(record, snapshot) if snapshot else {}
+    changes = seat_changes(record, snapshot) if snapshot else {"winners": {}, "successors": {}}
+    held = held_races(record)
     people = {p["bioguide"]: p for p in (snapshot or {}).get("legislators", [])}
     filed = {}
     for row in (field or {}).get("candidates", []):
@@ -460,17 +477,36 @@ def _mark_record_roles(profiles, record, snapshot, field):
             continue
         if profile["id"] in appointed:
             profile["appointed"] = True
-        rid = won.get(profile["id"])
+        if profile["id"] in held:
+            # The seat they held on the ballot, whatever they sit in now:
+            # what counts them among a chamber's seats up (rule 1).
+            profile["heldRaceId"] = held[profile["id"]]
+        role, rid = "winner", changes["winners"].get(profile["id"])
+        if not rid:
+            role, rid = "successor", changes["successors"].get(profile["id"])
         if not rid:
             continue
-        profile.update(raceRole="winner", raceId=rid, seatUp2026=False, isUpIn2026=False,
-                       seekingReelection2026=False)
-        # Their filing for the race they won, by the id Congress's record
-        # lists for them: how their result reaches this profile.
+        # Their filing for that race, by the id Congress's record lists for
+        # them: how their result reaches this profile.
         mine = [i for i in (people.get(profile["id"]) or {}).get("fec") or []
                 if i in filed.get(rid, ())]
         if mine and not profile.get("fecCandidateId"):
             profile["fecCandidateId"] = mine[0]
+        profile["raceRole"] = role
+        mine_held = held.get(profile["id"])
+        if role == "successor" and not mine:
+            # Seated after the election for another term, and never ran in
+            # it: not part of the 2026 race at all.
+            profile["raceId"] = None
+        else:
+            profile["raceId"] = rid
+        if mine_held and mine_held != rid:
+            if profile["raceId"]:
+                profile.update(contestRaceId=rid, contestLabel=seat_label(rid))
+            profile["seekingReelection2026"] = False
+            profile["seatUp2026"] = profile["isUpIn2026"] = True
+        elif not mine_held:
+            profile.update(seatUp2026=False, isUpIn2026=False, seekingReelection2026=False)
 
 
 def _claimed_ids(profiles, people, record):

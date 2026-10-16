@@ -98,9 +98,16 @@ def build(profiles, races=None, committees=None, results=None):
     ]
 
     holders = [p for p in profiles if not p.get("isCandidate") and p.get("seatUp2026")]
-    senate_up = [p for p in holders if "Senate" in p["chamber"]]
-    house_up = [p for p in holders
-                if "House" in p["chamber"] and p["state"] not in TERRITORIES]
+
+    def held(p, kind):
+        # The seat they held on the ballot (``heldRaceId``, from the record),
+        # not the one they sit in: Andy Barr, KY-6, seated a senator.
+        if p.get("heldRaceId"):
+            return p["heldRaceId"].startswith(kind[0])
+        return kind in p["chamber"]
+
+    senate_up = [p for p in holders if held(p, "Senate")]
+    house_up = [p for p in holders if held(p, "House") and p["state"] not in TERRITORIES]
 
     summary = {
         "congress": 119,

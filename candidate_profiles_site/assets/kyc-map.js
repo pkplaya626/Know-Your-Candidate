@@ -148,16 +148,20 @@
     var status = KYC.contestStatus(defender);
     var counted = KYC.electionStatus().phase === "post-election";
     var party = defender.party === "Democrat" ? "Democratic" : defender.party;
+    // An appointee was never elected or nominated to the seat: never
+    // "re-elected", "renominated" or "lost re-election" (KYC.raceStatusOf).
+    var own = !defender.appointed && !defender.raceRole;
     return {
       fill: key === "vacant" ? VACANT_FILL : "var(--party-" + key + ")",
       text: code + ": 2026 Senate race — " + party + " seat (" +
         defender.name + (status === "eliminated" ? " lost the primary" :
           status === "advanced" ? " in a primary runoff" :
-          status === "elected" ? " re-elected" :
-          status === "defeated" ? " lost re-election" :
+          status === "elected" ? (own ? " re-elected" : " elected") :
+          status === "defeated" ? (own ? " lost re-election" : " lost the election") :
           status === "runoff" ? " in the general election runoff" :
           status === "nominee" && counted ? " awaiting result" :
-          status === "nominee" && defender.seekingReelection2026 ? " renominated" :
+          status === "nominee" && defender.seekingReelection2026 ?
+            (own ? " renominated" : " on the November ballot") :
           defender.seekingReelection2026 ? " running" :
           defender.contestLabel ? " running for " + defender.contestLabel :
           defender.alsoRunningSeat ? " running for " + defender.alsoRunningSeat :
@@ -278,7 +282,7 @@
     // for an appointee (KYC.raceStatusOf says the same).
     var race = KYC.raceStatus(item.raceStatus, "short", {
       own: !item.isCandidate && (!item.contestLabel || item.raceStatus === "unlisted") &&
-        item.raceRole !== "winner" && !(item.appointed && item.raceStatus !== "unlisted"),
+        !item.raceRole && !(item.appointed && item.raceStatus !== "unlisted"),
       unconfirmed: !!item.raceStatusUnconfirmed,
     });
     if (race) return badge(race, item);
@@ -362,14 +366,13 @@
         a.name.localeCompare(b.name)
       );
     };
-    // In the 2026 view a member seated in the seat since Election Day is
-    // its winner, listed with the people who ran; anywhere else, seated. A
-    // 2026 incumbent who has left is never "currently seated" (rule 27).
-    var won = function (x) { return mode === "senate2026" && x.raceRole === "winner"; };
-    var seated = people.filter(function (x) { return KYC.seated(x) && !won(x); }).sort(order);
+    // Whoever sits in the seat now holds it - a winner seated since Election
+    // Day included; a 2026 incumbent who has left is never "currently
+    // seated" (rule 27), and is listed apart.
+    var seated = people.filter(function (x) { return KYC.seated(x); }).sort(order);
     var former = people.filter(function (x) { return x.formerMember; }).sort(order);
     var running = people.filter(function (x) {
-      return (x.isCandidate || won(x)) && !KYC.offBallot(x.raceStatus);
+      return x.isCandidate && !KYC.offBallot(x.raceStatus);
     }).sort(order);
     var out = people.filter(function (x) { return x.isCandidate && KYC.offBallot(x.raceStatus); });
 

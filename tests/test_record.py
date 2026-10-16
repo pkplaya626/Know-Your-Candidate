@@ -248,6 +248,111 @@ class TestTheSpecialsSeated(unittest.TestCase):
                          ["S-FL-2026: in the record, not among today's seats"])
 
 
+class TestWhoWonASeat(unittest.TestCase):
+    """Seated in a 2026 seat since Election Day is not the same as having won
+    it: a special election for the rest of the old term, or an appointment
+    after a winner leaves, seats someone else (record.seat_changes). All
+    people here are fictional (Z8...), in real seats."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.record = sources.load_all(ROOT)["record"]
+
+    def seat(self, rid, **term):
+        race = self.record["races"][rid]
+        person = {"bioguide": "Z800001", "chamber": race["chamber"], "state": race["state"],
+                  "district": race.get("district"), "senateClass": race.get("senateClass"),
+                  "how": None}
+        person.update(term)
+        return record.seat_changes(self.record, {"legislators": [person]})
+
+    def test_the_term_the_race_decided_is_a_win(self):
+        self.assertEqual(self.seat("H-TX-23-2026", termStart="2027-01-03",
+                                   termEnd="2029-01-03")["winners"], {"Z800001": "H-TX-23-2026"})
+        # Florida's special: the rest of the class's term, seated in December.
+        self.assertEqual(self.seat("S-FL-2026", termStart="2026-12-08", termEnd="2029-01-03",
+                                   how="special-election")["winners"],
+                         {"Z800001": "S-FL-2026"})
+
+    def test_a_special_for_the_old_term_is_not(self):
+        # Texas's 23rd, filled the same day for the rest of the 119th: the
+        # regular race may have another winner (TX-18 in 2024).
+        found = self.seat("H-TX-23-2026", termStart="2026-11-12", termEnd="2027-01-03",
+                          how="special-election")
+        self.assertEqual(found["winners"], {})
+        self.assertEqual(found["successors"], {"Z800001": "H-TX-23-2026"})
+
+    def test_an_appointment_is_not(self):
+        found = self.seat("S-KY-2026", termStart="2027-06-10", termEnd="2028-11-07",
+                          how="appointment")
+        self.assertEqual(found["winners"], {})
+        self.assertEqual(found["successors"], {"Z800001": "S-KY-2026"})
+
+    def test_a_special_in_the_new_term_is_not(self):
+        found = self.seat("H-TX-23-2026", termStart="2027-09-01", termEnd="2029-01-03",
+                          how="special-election")
+        self.assertEqual(found["winners"], {})
+
+
+class TestAnIncumbentWhoWonAnotherSeat(unittest.TestCase):
+    """January 3: a representative who held a 2026 House seat and won the
+    state's Senate seat is still the House race's incumbent, contesting the
+    Senate race - not its incumbent, and its winner. Hypothetical: KY-6's and
+    Kentucky's Senate seat, by id only."""
+
+    @classmethod
+    def setUpClass(cls):
+        raw = sources.load_all(ROOT)
+        cls.record = raw["record"]
+        cls.house = cls.record["incumbents"]["H-KY-06-2026"]["bioguide"]
+        senator = cls.record["incumbents"]["S-KY-2026"]["bioguide"]
+        snapshot = copy.deepcopy(legislators.load_snapshot(ROOT))
+        people = [p for p in snapshot["legislators"] if p["bioguide"] != senator]
+        for p in people:
+            if p["bioguide"] == cls.house:
+                p.update(chamber="Senate", district=None, senateClass=2,
+                         termStart="2027-01-03", termEnd="2033-01-03", how=None)
+        snapshot["legislators"] = people
+        snapshot["fetched"] = "2027-01-04T07:20:00+00:00"
+        members = []
+        gone = []
+        for row in raw["members"]:
+            bid = (row.get("Bioguide ID") or "").upper()
+            if bid == senator:
+                gone.append(dict(row, **{"Left Office": "2027-01-03", "Last Congress": "119",
+                                         "Left Via": "legislators-historical"}))
+            elif bid == cls.house:
+                members.append(dict(row, Chamber="Senate", District="",
+                                    **{"Term Start": "2027-01-03"}))
+            else:
+                members.append(row)
+        roster = dict(raw, members=members, former=gone)
+        cls.profiles, _ = build_profiles(roster, snapshot=snapshot)
+        cls.races = {r["id"]: r for r in races.build(cls.profiles, record=cls.record)}
+        cls.person = next(p for p in cls.profiles if p["id"] == cls.house)
+
+    def test_they_won_the_senate_race(self):
+        self.assertEqual((self.person["raceRole"], self.person["raceId"]),
+                         ("winner", "S-KY-2026"))
+        self.assertEqual(self.races["S-KY-2026"]["winnerId"], self.house)
+        self.assertNotIn(self.house, self.races["S-KY-2026"]["incumbentIds"])
+
+    def test_and_still_held_the_house_seat(self):
+        self.assertEqual(self.person["heldRaceId"], "H-KY-06-2026")
+        self.assertEqual(self.person["contestRaceId"], "S-KY-2026")
+        self.assertTrue(self.person["seatUp2026"])
+        self.assertFalse(self.person["seekingReelection2026"])
+        house = self.races["H-KY-06-2026"]
+        self.assertEqual(house["incumbentIds"], [self.house])
+        self.assertTrue(house["openSeat"])
+
+    def test_counted_once_among_the_seats_up(self):
+        from kyc import summary
+        built = summary.build(self.profiles, races=list(self.races.values()))
+        self.assertEqual(built["election"]["senateSeatsUp"],
+                         sum(1 for rid in self.record["races"] if rid.startswith("S-")))
+
+
 class TestTheWinnersFiling(unittest.TestCase):
     """A special election's winner seated in December has a filing in the
     field, with its own FEC_ profile. One person: folded into the member

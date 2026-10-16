@@ -124,11 +124,11 @@ def assign(profiles):
     A sitting member gets the race for the seat they *hold*; their separate
     candidate profile gets the race for the seat they are *running for*, which
     is how a House member seeking a Senate seat ends up in two races. A
-    member seated since Election Day in a seat they won keeps the race the
-    build gave them (``raceRole`` "winner", ``record.seated_winners``).
+    member seated since Election Day in a record seat keeps the race the
+    build gave them (``raceRole``, ``record.seat_changes``).
     """
     for profile in profiles:
-        if profile.get("raceRole") == "winner":
+        if profile.get("raceRole"):
             continue
         chamber, state = profile["chamber"], profile["state"]
         if state in ("N/A", "") or not profile.get("seatUp2026"):
@@ -228,6 +228,9 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
             race = race_for(rid)
             join(race, profile, "candidateIds")
             race["winnerId"] = profile["id"]
+        elif profile.get("raceRole") == "successor":
+            if rid:
+                join(race_for(rid), profile, "candidateIds")
         elif not mine and rid:
             # Sitting in a seat the record has no holder for - a vacancy
             # filled before Election Day - so its incumbent at the election.

@@ -424,10 +424,11 @@
   }
 
   /** The same for a person: their contest's status, as a member when the
-   *  race is for the seat they hold. A member seated in a seat they won
-   *  (`raceRole` "winner") was elected, not re-elected; an appointee who
-   *  held the seat was never elected or nominated to it, so wins and losses
-   *  read as anyone's - only "not running for this seat" is theirs. */
+   *  race is for the seat they hold. A member seated since Election Day in
+   *  a seat they did not hold (`raceRole`) was elected, not re-elected; an
+   *  appointee who held the seat was never elected or nominated to it, so
+   *  wins and losses read as anyone's - only "not running for this seat" is
+   *  theirs. */
   function raceStatusOf(item, form, opts) {
     if (!item) return null;
     opts = opts || {};
@@ -437,7 +438,7 @@
       : byId(item.alsoRunningId) || {};
     var status = contestStatus(item);
     return raceStatus(status, form, {
-      own: !item.isCandidate && !item.contestLabel && item.raceRole !== "winner" &&
+      own: !item.isCandidate && !item.contestLabel && !item.raceRole &&
         !(item.appointed && status !== "unlisted"),
       unconfirmed: !!item.raceStatusUnconfirmed,
       source: record.raceStatusSource,

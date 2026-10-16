@@ -140,7 +140,8 @@
     var byId = {};
     races.forEach(function (r) { byId[r.id] = r; });
     return data.filter(function (p) {
-      return !p.isCandidate && p.state === code && p.chamber.indexOf("House") !== -1 &&
+      // Members who sit now (rule 27): a former member holds no district.
+      return KYC.seated(p) && p.state === code && p.chamber.indexOf("House") !== -1 &&
         KYC.runsElsewhere(p) && !KYC.offBallot(KYC.contestStatus(p));
     }).map(function (p) {
       var race = byId[p.contestRaceId];
@@ -693,7 +694,7 @@
    *  or which members are running in it now. */
   function caption(plan, n) {
     var people = redrawn() && plan === newPlan()
-      ? running(n).filter(function (p) { return !p.isCandidate; })
+      ? running(n).filter(function (p) { return KYC.seated(p); })
       : holdersOf[n] || [];
     return people.map(function (p) { return p.name; }).join(" · ");
   }

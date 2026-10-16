@@ -159,17 +159,56 @@ def held_races(record):
             for rid, inc in ((record or {}).get("incumbents") or {}).items() if inc}
 
 
-def seated_winners(record, snapshot):
-    """``{bioguide: race id}``: each member seated in a record race's seat
-    since Election Day who is not that race's record incumbent - its winner,
-    by the seating.
+# How long after a new Congress's terms begin a winner may still be seated
+# for the term the election decided - a contested count (New York's 22nd was
+# seated on 2021-02-11). Beyond it a seating is a special election or an
+# appointment, never the cycle's result.
+LATE_SEATING_DAYS = 90
+
+
+def decided_term(record, rid):
+    """``(latest seating day, term end)`` of the term record race *rid*'s
+    election decided: a House term to the next Congress, a Senate term of
+    six years, or - a special election - the rest of the seat's class term."""
+    import datetime
+
+    races = (record or {}).get("races") or {}
+    race = races[rid]
+    cycle = (record or {}).get("cycle") or cycle_mod.CYCLE
+    electing = (record or {}).get("electing") or cycle_mod.electing_congress(cycle)
+    begins = cycle_mod.congress_start(electing)
+    latest = (begins + datetime.timedelta(days=LATE_SEATING_DAYS)).isoformat()
+    if race.get("chamber") != "Senate":
+        return latest, cycle_mod.congress_start(electing + 1).isoformat()
+    if race.get("special"):
+        regular = 2022 + 2 * int(race.get("senateClass") or 0)
+        while regular <= cycle:
+            regular += 6
+        return latest, f"{regular + 1}-01-03"
+    return latest, cycle_mod.congress_start(electing + 3).isoformat()
+
+
+def seat_changes(record, snapshot):
+    """Who sits in a record race's seat since Election Day without having
+    held it in the record: ``{"winners": {bioguide: rid}, "successors":
+    {bioguide: rid}}``.
+
+    A **winner** was seated for the very term the race decided: seated
+    between Election Day and a few weeks into the new Congress, for a term
+    ending when that term ends, by election - not by appointment, and not by
+    a special election for some other term. Everyone else seated in the seat
+    since Election Day is a **successor**: Texas's 23rd district filled by a
+    special election on the same day for the rest of the old term, an
+    appointee after a 2026 winner resigns. Naming either of those the 2026
+    race's winner would name the wrong person (TX-18 in 2024: one person won
+    the special, another the regular race).
 
     The seat is the race's: same state and Senate class, or same state and
     district number (the races use the plan the election was held under,
     which is the plan the winners sit in). A record incumbent re-seated in
-    their own seat is not a winner of it; one seated in another seat - a
-    representative elected to the Senate, a member who ran in a renumbered
-    district - is that seat's winner, and still the incumbent of their own.
+    their own seat is neither; one seated in another seat - a representative
+    elected to the Senate, a member who ran in a renumbered district - is
+    that seat's winner, and still the incumbent of their own.
     """
     races = (record or {}).get("races") or {}
     held = (record or {}).get("incumbents") or {}
@@ -181,18 +220,32 @@ def seated_winners(record, snapshot):
             seats[("Senate", race["state"], race.get("senateClass"))] = rid
         else:
             seats[("House", race["state"], race.get("district"))] = rid
-    out = {}
+    out = {"winners": {}, "successors": {}}
     for person in (snapshot or {}).get("legislators", []):
-        if (person.get("termStart") or "") < day:
+        start = person.get("termStart") or ""
+        if start < day:
             continue
         if person.get("chamber") == "Senate":
             key = ("Senate", person.get("state"), person.get("senateClass"))
         else:
             key = ("House", person.get("state"), person.get("district") or 0)
         rid = seats.get(key)
-        if rid and (held.get(rid) or {}).get("bioguide") != person["bioguide"]:
-            out[person["bioguide"]] = rid
+        if not rid or (held.get(rid) or {}).get("bioguide") == person["bioguide"]:
+            continue
+        latest, ends = decided_term(record, rid)
+        how = person.get("how")
+        elected = how != "appointment" and (
+            races[rid].get("special") or how != "special-election")
+        kind = ("winners" if elected and start <= latest and person.get("termEnd") == ends
+                else "successors")
+        out[kind][person["bioguide"]] = rid
     return out
+
+
+def seated_winners(record, snapshot):
+    """``{bioguide: race id}`` for each race's winner by the seating
+    (:func:`seat_changes`)."""
+    return seat_changes(record, snapshot)["winners"]
 
 
 def senate_incumbents(record):
