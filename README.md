@@ -38,6 +38,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… officers` | Every lieutenant governor (NLGA) and secretary of state (NASS), cross-checked where the rosters overlap |
 | `… federal` | The President, the Vice President and the Cabinet: who holds each office, from the White House's pages, each office's own page and the Senate's roll-call votes (`--check` reports the cache) |
 | `… judiciary` | Every sitting federal judge, from the Federal Judicial Center's directory, and the Supreme Court's members as the Court lists them; a short read keeps the last cache (`--check` reports it) |
+| `… history` | The public offices each person has held: Congress from congress-legislators, every other office from Wikidata where the person's own Wikipedia article gives the same office the same years; a short read keeps the last cache (`--check` reports it). See [Public offices held](#public-offices-held) |
 | `… voting` | Each state's and D.C.'s official pages for checking registration, finding a polling place, voting absentee or early, and registering, as NASS's "Can I Vote" lists them; refused unless all 51 are there |
 | `… courts` | Each state's highest court and its members, read from the court's own roster |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
@@ -60,7 +61,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (1225 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (1345 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -129,6 +130,7 @@ CI asserts that a rebuild changes nothing.
 | `stategov.py` | Who runs each state: governor, chamber control, trifecta, checked against NCSL |
 | `campaigns.py` | Campaign websites from each candidate's FEC committee |
 | `enrich.py` | Fill filed candidates' gaps from their Wikipedia infobox and campaign site; check every linked campaign site |
+| `history.py` | The public offices each person has held, from congress-legislators and Wikidata, corroborated by the person's own article (the `history` command) |
 | `odds.py` | Prediction-market prices (Kalshi, Polymarket) and published polling averages for the 2026 Senate races |
 | `validate.py` | Data-quality checks |
 | `emit.py` | Write the data files atomically; verify the pages are wired up |
@@ -1018,6 +1020,64 @@ campaign's own issues page) - and the page shows it as a badge beside the
 value, with a tooltip saying exactly where it came from. See
 [Filling the gaps](#filling-the-gaps).
 
+## Public offices held
+
+Every profile, and every officer on the federal page, has a "Public offices
+held" panel, and a card names the latest office beyond the seat it is about
+("Fmr. Governor of Florida"). `python build_profile_site.py history` reads it;
+`kyc/history.py` builds it from two sources, each joined to the person by an
+id (rule 32):
+
+- **Congress** from congress-legislators, the same project as the membership
+  snapshot: every term of every member, by bioguide id. Consecutive terms in
+  one seat are one span ("U.S. Representative, Vermont, at large, 1991-2007,
+  8 terms").
+- **Every other public office** from Wikidata's "position held" on the
+  person's own item: the id congress-legislators records for a member, the
+  item of the article a challenger's election page links (rule 33), the
+  Cabinet history's id for an officer. A statement counts when it is not
+  deprecated or qualified into something else ("instance of: assistant"),
+  has a start, is not a seat in Congress, and is a public office or a
+  judgeship in a U.S. state or place. A federal post counts only when it is
+  on a reviewed list (the presidency, the Cabinet, a few more) or is an
+  ambassadorship or a federal judgeship by its class.
+
+An office is shown only where the person's own Wikipedia infobox gives the
+same office the same start and end years, and is otherwise withheld and
+reported - Wikidata's statements are the only free record of state and local
+office, and they are wrong often enough to matter (rule 69). Three
+agreements are shown, each said as such on the page:
+
+| Agreement | Shown as |
+|---|---|
+| The same years | the years |
+| Within a year at both ends | Wikidata's years, marked "±1 yr" |
+| The same start, where Wikidata records no end and the article does | the article's end, marked "end: Wikipedia" |
+
+"Acting" comes from the article's own entry. Years only: Wikidata often
+records the election and the article the swearing-in. A profile the site
+could not tie to an item reads "No linked record of public offices", with
+why; a record whose offices could not be confirmed says so. A read that fails
+or comes back short keeps the committed cache.
+
+What an agreement on office and years cannot check is checked on its own:
+
+- **The place.** An office's place is its Wikidata item's jurisdiction, and
+  a place below a state is shown only when it lies in a state the person is
+  tied to - their profile's, their seats in Congress, their statewide
+  offices. Wikidata's Jefferson County Judge/Executive is in Jefferson
+  County, Oklahoma; Mitch McConnell's office is shown without it
+  (`history-place`).
+- **The district.** A span that crosses a redistricting names no district.
+- **The name.** A position whose article is a list ("List of governors of
+  Colorado") is named by its label.
+- **What is current.** A seat in Congress is current while the membership
+  snapshot lists the person, by the bioguide id their seats were read
+  under, and the term runs past the snapshot's date - decided at build
+  time, so a read from October does not keep a senator who left on January
+  3 "since 1985". A seated member whose record holds no current seat is
+  reported (`history-behind`).
+
 ## Election flags and races
 
 Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
@@ -1042,6 +1102,7 @@ Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
 | `committeesPending` | The Congress whose committee rosters are not published yet. It is set from January 3, a chamber at a time, until that chamber's rosters are whole: every full committee has members and nine in ten of its members hold a seat (`legislators.committee_chambers`). It replaces the previous Congress's seats, and the profile and the guide say so. A member of a chamber whose rosters are whole but who holds no seat has none, and is not pending | Sitting members, early in a Congress |
 | `heldRaceId` | The 2026 race whose seat this record incumbent held, sitting or former, whatever they sit in now; what counts them among a chamber's seats up | Record incumbents |
 | `appointed` | The record says this incumbent was appointed to the seat on the ballot. Never "re-elected" or "renominated": they were not elected to it | Florida, Ohio, Oklahoma and South Carolina's appointed senators |
+| `politicalHistory` | `{wikidata, wikipedia, rows, withheld}`: the public offices the person has held, newest first. A row is `{office, where, district, from, to, current}`; a seat in Congress adds `congress` and `terms` (`district` 0 is at large); another office adds `agree` - `year-off` where the sources differ by a year, `start` where the end year is the article's alone. `withheld` counts offices Wikidata lists that the article does not confirm. See [Public offices held](#public-offices-held) | Members, and challengers whose election page links their article |
 | `otherIds` | A curated candidate's profile id (`CAND_n`) folded into the member they became, by the FEC id Congress's record lists for them; a link or market label saved under it opens the member | Curated candidates since seated |
 
 Each race (`kycRaces`) carries, beside `incumbentIds` and `candidateIds`:

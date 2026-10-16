@@ -169,11 +169,11 @@ def parse_date(value):
     return {"date": match.group(1), "precision": "year"} if match else None
 
 
-def infobox(text):
-    """The first infobox's ``{field: value}``, or {}."""
-    start = text.find("{{Infobox")
-    if start < 0:
-        return {}
+_COMMENT = re.compile(r"<!--.*?-->", re.S)
+
+
+def _template_end(text, start):
+    """The index just past the template that opens at *start*."""
     depth, i = 0, start
     while i < len(text):
         if text.startswith("{{", i):
@@ -181,10 +181,43 @@ def infobox(text):
         elif text.startswith("}}", i):
             depth, i = depth - 1, i + 2
             if depth == 0:
-                break
+                return i
         else:
             i += 1
-    body = text[start + 2:i - 2]
+    return len(text)
+
+
+def infoboxes(text):
+    """``[{field: value}]``: the article's first infobox, then each infobox
+    embedded in it, each block on its own. A long career keeps its earlier
+    offices in ``{{Infobox officeholder | embed = yes ...}}`` blocks inside
+    collapsed sections (Marco Rubio's Florida House seat), and each block
+    numbers its fields afresh, so Jeanne Shaheen's ``office5`` (a committee)
+    and ``state_senate5`` are different entries. An article may write
+    ``{{infobox officeholder`` (Donald Trump's). A comment is not the page's
+    text, and may hold a field the editors switched off."""
+    text = _COMMENT.sub("", text or "")
+    start = text.lower().find("{{infobox")
+    if start < 0:
+        return []
+    body = text[start + 2:_template_end(text, start) - 2]
+    blocks = [_fields(body)]
+    lower = body.lower()
+    at = lower.find("{{infobox")
+    while at >= 0:
+        stop = _template_end(body, at)
+        blocks.append(_fields(body[at + 2:stop - 2]))
+        at = lower.find("{{infobox", stop)
+    return blocks
+
+
+def infobox(text):
+    """The first infobox's own ``{field: value}``, or {}."""
+    return (infoboxes(text) or [{}])[0]
+
+
+def _fields(body):
+    """``{field: value}`` of one template's body, split on its own pipes."""
     fields, depth, current, key = {}, 0, "", None
     for chunk in re.split(r"(\{\{|\}\}|\[\[|\]\]|\|)", body):
         if chunk in ("{{", "[["):
@@ -372,7 +405,8 @@ def build(executive, votes, holders, texts):
                 mine = []
             used.update(id(c) for c in mine)
             names = [slot["title"], office["office"], *office["titles"]]
-            terms = office_terms(infobox(texts.get(person["title"]) or ""), names)
+            terms = [term for fields in infoboxes(texts.get(person["title"]) or "")
+                     for term in office_terms(fields, names)]
             # A person who held the office before, in another term: the
             # entry for this one is the one still open or ending after it
             # began.

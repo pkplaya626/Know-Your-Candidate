@@ -876,6 +876,50 @@ svg.district-map,
   font-size: var(--t-xs);
   font-weight: 700;
 }
+.card-held {
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+
+/* Public offices held (KYC.officesHeld): newest first, the years beside the
+ * office, the place under it. */
+.held-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s-2);
+}
+.held-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--s-3);
+  align-items: baseline;
+}
+.held-office { font-weight: 600; }
+.held-years {
+  color: var(--text-muted);
+  font-size: var(--t-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.held-where,
+.held-note {
+  grid-column: 1 / -1;
+  color: var(--text-muted);
+  font-size: var(--t-sm);
+}
+.held-note {
+  justify-self: start;
+  font-size: var(--t-xs);
+  border-bottom: 1px dotted var(--text-faint);
+  cursor: help;
+}
+.held-source {
+  margin: var(--s-3) 0 0;
+  color: var(--text-faint);
+  font-size: var(--t-xs);
+}
 .card .badge { margin-top: var(--s-1); }
 
 /* ------------------------------------------- prediction markets and polls */

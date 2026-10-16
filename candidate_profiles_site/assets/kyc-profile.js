@@ -83,6 +83,10 @@
       '            <span class="field-value subtle" id="profileModalCareers"></span></div>',
       "        </div>",
       "      </section>",
+      '      <section class="panel">',
+      '        <h3 class="panel-head">' + KYC.icon("landmark") + " Public offices held</h3>",
+      '        <div id="profileModalHeld"></div>',
+      "      </section>",
       '      <section class="panel" id="profileModalContactPanel" hidden>',
       '        <h3 class="panel-head">' + KYC.icon("link") + " Contact &amp; links</h3>",
       '        <div id="profileModalContact"></div>',
@@ -723,6 +727,12 @@
     }
     el("profileModalEducation").innerHTML = KYC.renderField(item, "education");
     el("profileModalCareers").innerHTML = KYC.renderField(item, "previous_professions");
+    // A member's record is found by their congress-legislators id; a
+    // challenger's only through the article their election page links.
+    el("profileModalHeld").innerHTML = KYC.officesHeld(item.politicalHistory, item.isCandidate
+      ? "This site finds a challenger\u2019s record only through the article their state\u2019s " +
+        "election page links. None is linked for this person, or it is not theirs."
+      : "This site has not read this member\u2019s record of offices.");
     el("profileModalReceipts").innerHTML = KYC.renderField(item, "receipts", { source: true });
     el("profileModalSpent").innerHTML = KYC.renderField(item, "disbursements");
     el("profileModalFunding").innerHTML = KYC.renderField(item, "funding_sources");

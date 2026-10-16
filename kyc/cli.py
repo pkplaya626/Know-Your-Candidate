@@ -136,6 +136,15 @@ def _build(args):
     else:
         print("  [warn] no enrichment cache; run 'enrich' to read candidates' "
               "articles and campaign sites")
+    # The offices each person has held, by id; a challenger's only while
+    # their profile links the article they were read from (rule 20).
+    from . import history as history_mod
+    lineage = history_mod.load_cache(args.root)
+    if lineage:
+        stats["history"] = history_mod.apply_cache(profiles, lineage, snapshot=snapshot)
+        print(f"  history: public offices for {stats['history']} people (read {lineage['read']})")
+    else:
+        print("  [warn] no political history cache; run 'history'")
 
     race_list = races_mod.build(profiles, candidates.filing_counts(field),
                                 results=outcomes, dates=results_mod.load_dates(args.root),
@@ -207,7 +216,8 @@ def _build(args):
                           voting=voting_mod.load_cache(args.root) or {},
                           federal=federal_mod.load_cache(args.root),
                           judiciary=judiciary_mod.load_cache(args.root),
-                          vacancies=vacancies_mod.load_cache(args.root))
+                          vacancies=vacancies_mod.load_cache(args.root),
+                          history=lineage)
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -437,6 +447,53 @@ def _age_date(stats):
     import datetime
 
     return datetime.date.fromisoformat(stats["ageAsOf"])
+
+
+def _history(args):
+    """The public offices each person has held (kyc/history.py): Congress
+    from congress-legislators, other offices from Wikidata where the
+    person's own Wikipedia article agrees. A read that fails keeps the
+    committed cache (rule 8)."""
+    from . import federal, history
+
+    if args.check:
+        cache = history.load_cache(args.root)
+        if not cache:
+            print(f"[error] no {history.CACHE_PATH}; run 'history'", file=sys.stderr)
+            return 2
+    else:
+        raw = _load(args)
+        if raw is None:
+            return 2
+        field = candidates.load_cache(args.root)
+        profiles, _stats = build_profiles(raw, snapshot=legislators.load_snapshot(args.root),
+                                          field=field, finance=fec.load_cache(args.root))
+        # The article each challenger's election page links (rule 33).
+        results_mod.apply_cache(profiles, results_mod.load_cache(args.root),
+                                field=screen_field(field, profiles, raw.get("record")))
+        try:
+            cache = history.fetch(profiles, executive=federal.load_cache(args.root))
+        except history.HistoryError as exc:
+            print(f"[error] {exc}; the committed cache is unchanged", file=sys.stderr)
+            return 2
+        lacking = history.short(cache, history.load_cache(args.root))
+        if lacking:
+            print(f"[error] the read came back short ({lacking}); the committed cache is "
+                  "unchanged", file=sys.stderr)
+            return 2
+    people = cache["people"]
+    offices = sum(len(p["offices"]) for p in people.values())
+    congress = sum(1 for p in people.values() if p["congress"])
+    print(f"  {len(people)} people: {congress} with service in Congress, {offices} other offices "
+          f"shown, {sum(len(p['withheld']) for p in people.values())} withheld (as read "
+          f"{cache['read']})")
+    for level, code, message, detail in history.problems(cache):
+        print(f"  [{level}] {code}: {message}")
+        for line in detail[:10]:
+            print(f"           - {line}")
+    if not args.check:
+        print(f"[ok] wrote {history.save_cache(cache, args.root)}")
+    return 0
 
 
 def _enrich(args):
@@ -1017,6 +1074,9 @@ def _verify(args):
     stats["results"] = (results_mod.apply_cache(profiles, outcomes, field=field)
                         if outcomes else 0)
     enrich.apply_cache(profiles, enrich.load_cache(args.root), as_of=_age_date(stats))
+    from . import history as history_mod
+    history_mod.apply_cache(profiles, history_mod.load_cache(args.root),
+                            snapshot=legislators.load_snapshot(args.root))
     race_list = races_mod.build(
         profiles, candidates.filing_counts(field),
         results=outcomes, dates=results_mod.load_dates(args.root),
@@ -1740,6 +1800,11 @@ def build_parser():
     jud.add_argument("--check", action="store_true",
                      help="report the committed cache; make no network call")
 
+    hist = add("history", help="the public offices each person has held: Congress from "
+                               "congress-legislators, other offices from Wikidata")
+    hist.add_argument("--check", action="store_true",
+                      help="report the committed cache; make no network call")
+
     vac = add("vacancies", help="vacancies in the federal courts, as uscourts.gov lists them")
     vac.add_argument("--check", action="store_true",
                      help="report the committed cache; make no network call")
@@ -1802,6 +1867,8 @@ def main(argv=None):
         return _judiciary(args)
     if args.command == "vacancies":
         return _vacancies(args)
+    if args.command == "history":
+        return _history(args)
     if args.command == "courts":
         return _courts(args)
     if args.command == "officers":

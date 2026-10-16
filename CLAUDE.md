@@ -43,6 +43,7 @@ data/voting_links.json      ──┤   (each state's official voting pages: NAS
 data/federal_executive.json ──┤   (President, VP, Cabinet: White House, office pages, Senate votes)
 data/judiciary.json         ──┤   (every sitting federal judge: FJC directory; the Supreme Court's own list)
 data/judicial_vacancies.json ─┤   (vacancies, announced vacancies and emergencies: uscourts.gov)
+data/political_history.json ──┤   (public offices held: congress-legislators; Wikidata the article confirms)
 data/record_2026.json       ──┤   (the frozen 2026 race set: record --freeze)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
@@ -95,7 +96,8 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `campaigns.json`, `enrichment.json`, `odds.json`,
   `census_governments.json`, `state_legislators.json`, `executives.json`,
   `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`,
-  `federal_executive.json`, `judiciary.json` and `judicial_vacancies.json` are caches, but
+  `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json` and
+  `political_history.json` are caches, but
   they *are* hand-editable. `stategov.js` is generated from the last five,
   with `kyc/ballot2026.py`: which state offices and legislative seats are on
   the 2026 ballot, a curated table citing each state's own record.
@@ -137,16 +139,17 @@ python build_profile_site.py voting           # each state's official voting pag
 python build_profile_site.py federal          # the President, VP and Cabinet (White House, office pages, Senate roll calls)
 python build_profile_site.py judiciary        # every sitting federal judge (FJC) and the Supreme Court as the Court lists it
 python build_profile_site.py vacancies        # vacancies in the federal courts, as uscourts.gov lists them
+python build_profile_site.py history          # public offices each person has held (congress-legislators, Wikidata, Wikipedia)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1119 tests, no dependencies
-npm install && npm test                       # 1325 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1146 tests, no dependencies
+npm install && npm test                       # 1345 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`,
-`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts. Run the
+`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -857,6 +860,38 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     generator plus `congress --apply --snapshot`, never committed. Their filing is folded in only by the FEC id Congress's
     record lists for them, a curated row's id kept as `otherIds`; without
     that id both profiles stay and `seated-unlinked` says so (rule 25).
+
+69. **An office held is shown where two sources agree on it.** Wikidata's
+    "position held" is the only free record of state and local offices,
+    and on a first read it put Ben McAdams in the mayoralty of Salt Lake
+    City (he was the county's mayor), Steven Horsford in the Nevada
+    Assembly (the Senate) and Darin LaHood in the office of U.S. Attorney
+    (he was an assistant). `kyc/history.py` shows an office only where the
+    person's own article - the item's sitelink, never a search - gives the
+    *same office* the same years; the first version compared years alone,
+    and a U.S. Senate term "confirmed" Jeanne Shaheen's state senate seat.
+    The article's infobox is read block by block: a long career keeps its
+    earlier offices in embedded `{{Infobox officeholder|embed=yes}}`
+    sections that number their fields afresh, so merged into one they
+    paired one block's office with another's years. What disagrees is
+    withheld and reported (`history-withheld`), never chosen between.
+    Congress comes from congress-legislators alone. A challenger's item is
+    the one their election page's article belongs to (rule 33), and the
+    offices attach only while the profile still links that article
+    (`history-stale`). A record that cannot be read is "No linked record",
+    never "none" (rule 19). The review of the first build found more an
+    agreement on office and years does not catch, each now refused:
+    Wikidata puts the Jefferson County Judge/Executive in Oklahoma, so
+    Mitch McConnell's Kentucky office read as Oklahoma's (a place below a
+    state is shown only in a state the person is tied to,
+    `history-place`); a span across a redistricting kept its first
+    district (it names none now); a position's article can be a list
+    ("List of governors of Colorado"); "Nebraska Legislature" stood for
+    any chamber, so a House abolished in 1937 was "corroborated"; and
+    "since 2013" was frozen at the read, so a senator who left on January
+    3 would have stayed current. Whether a seat in Congress is current is
+    the membership snapshot's to say, by the person's bioguide id, at
+    build time (`history-behind`).
 
 ## District maps
 

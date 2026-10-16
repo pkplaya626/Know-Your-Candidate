@@ -194,6 +194,16 @@ jobs:
         continue-on-error: true
         run: python build_profile_site.py voting
 
+      # The public offices each person has held: Congress from
+      # congress-legislators, every other office from Wikidata where the
+      # person's own Wikipedia article gives the same office the same years
+      # (kyc/history.py). After the results and the executive, whose
+      # articles and ids it reads. A read that fails or comes back short
+      # keeps the committed cache and stops nothing else in this run.
+      - name: Refresh the public offices each person has held
+        continue-on-error: true
+        run: python build_profile_site.py history
+
       # What a filed candidate's own sources say - the birth date, education
       # and occupation in the article their ballot page links; their
       # campaign's description of itself, its issues page and its portrait -

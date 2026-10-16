@@ -732,6 +732,96 @@ async function testDirectoryAsync() {
     })());
   });
 
+  suite("index.html — public offices held", () => {
+    const rows = (p) => (p.politicalHistory || {}).rows || [];
+    const member = window.legislatorsData.find((p) => KYC.seated(p) &&
+      rows(p).some((r) => r.congress) && rows(p).some((r) => !r.congress));
+    check("a member with Congress and another office exists", !!member);
+    if (member) {
+      KYC.profile.open(member.id);
+      const panel = D.getElementById("profileModalHeld");
+      const shown = [...panel.querySelectorAll(".held-row")];
+      check("one row per office, newest first", shown.length === rows(member).length &&
+        shown.every((li, i) => li.querySelector(".held-office").textContent === rows(member)[i].office));
+      check("the years are the record's",
+        shown.every((li, i) => li.querySelector(".held-years").textContent
+          .indexOf(KYC.heldYears(rows(member)[i])) === 0));
+      check("a seat in Congress names its state, never a code",
+        shown.filter((li, i) => rows(member)[i].congress).every((li) =>
+          !/^[A-Z]{2}\b/.test((li.querySelector(".held-where") || {}).textContent || "")));
+      const source = panel.querySelector(".held-source");
+      check("the sources are named and the person's item linked",
+        /congress-legislators/.test(source.textContent) &&
+        !!source.querySelector('a[href="https://www.wikidata.org/wiki/' +
+          member.politicalHistory.wikidata + '"]'));
+      check("its links open safely", [...source.querySelectorAll("a")]
+        .every((a) => a.target === "_blank" && /noopener/.test(a.rel)));
+      KYC.profile.close();
+    }
+    const atLarge = window.legislatorsData.find((p) => rows(p).some((r) => r.congress && r.district === 0));
+    check("an at-large seat exists in the records", !!atLarge);
+    if (atLarge) {
+      KYC.profile.open(atLarge.id);
+      check("an at-large seat says so (district 0 is not an absence)",
+        /, at large/.test(D.getElementById("profileModalHeld").textContent));
+      KYC.profile.close();
+    }
+    const differs = window.legislatorsData.find((p) => rows(p).some((r) => r.agree));
+    check("a row whose sources differ exists", !!differs);
+    if (differs) {
+      KYC.profile.open(differs.id);
+      const note = D.getElementById("profileModalHeld").querySelector(".held-note");
+      check("where the sources differ, the row says how",
+        !!note && /Wikidata/.test(note.getAttribute("title")));
+      KYC.profile.close();
+    }
+    const unlinked = window.legislatorsData.find((p) => p.isCandidate && !p.politicalHistory);
+    if (unlinked) {
+      KYC.profile.open(unlinked.id);
+      const absent = D.getElementById("profileModalHeld").querySelector(".kyc-absent");
+      check("no record is a claim about this site, and says why (rule 19)",
+        !!absent && /No linked record/.test(absent.textContent) &&
+        /election page/.test(absent.getAttribute("title")));
+      KYC.profile.close();
+    }
+    const host = window.legislatorsData.find((p) => p.politicalHistory);
+    const kept = host.politicalHistory;
+    host.politicalHistory = { rows: [{ office: '<img src=x onerror=alert(1)>', where: "<b>x</b>",
+      from: "2001", to: "2003" }], wikidata: '"><b>' };
+    KYC.profile.open(host.id);
+    // Elements, not markup: a serialised attribute keeps "<" as it is.
+    const held = D.getElementById("profileModalHeld");
+    check("an office's name is escaped, not interpreted", !held.querySelector("img, b") &&
+      held.querySelector(".held-office").textContent === "<img src=x onerror=alert(1)>");
+    KYC.profile.close();
+    host.politicalHistory = kept;
+    const cards = [...D.getElementById("results").querySelectorAll(".card")];
+    const lined = cards.filter((c) => c.querySelector(".card-held"));
+    check("cards name an earlier office", lined.length > 0);
+    check("each from the person's own record", lined.every((c) => rows(KYC.byId(c.getAttribute("data-id")))
+      .some((r) => KYC.heldText(r) === c.querySelector(".card-held").getAttribute("title"))));
+    // 91 sitting representatives once read "Fmr. U.S. Representative" under
+    // their own seat, because redistricting renumbered it.
+    check("never a seat in the card's own chamber", lined.every((c) => {
+      const item = KYC.byId(c.getAttribute("data-id"));
+      const senate = /senate/i.test(item.chamber);
+      return !(senate ? /^U\.S\. Senator\b/ : /^(U\.S\. Representative|Delegate|Resident Commissioner)\b/)
+        .test(c.querySelector(".card-held").getAttribute("title"));
+    }));
+    const climbing = window.legislatorsData.find((p) => /senate/i.test(p.chamber) && p.isCandidate &&
+      rows(p).some((r) => r.congress && r.current && r.office === "U.S. Representative"));
+    if (climbing) {
+      const tmp = D.createElement("div");
+      tmp.innerHTML = KYC.cards.card(climbing);
+      check("a representative running for the Senate is shown as one, not as a former one",
+        (tmp.querySelector(".card-held") || {}).textContent === "U.S. Representative",
+        (tmp.querySelector(".card-held") || {}).textContent);
+    }
+    const burlington = { office: "Mayor of Burlington", where: "Burlington, Vermont", from: "1981", to: "1989" };
+    check("a place the office already names is not said twice",
+      KYC.heldText(burlington) === "Mayor of Burlington, Vermont, 1981–1989", KYC.heldText(burlington));
+  });
+
   suite("index.html — contact & links", () => {
     const rosters = window.legislatorsData.some((p) => (p.committeeList || []).length);
     const member = window.legislatorsData.find(
@@ -4597,6 +4687,21 @@ async function testFederal() {
     check("and no party", !PARTY_WORDS.test(D.getElementById("officialModalMeta").textContent) &&
       !modal.querySelector(".party-tag"));
     KYC.official.close();
+    const record = d.offices.find((o) => o.holder && (o.holder.politicalHistory || {}).rows &&
+      o.holder.politicalHistory.rows.some((r) => r.congress));
+    check("an officer who served in Congress exists", !!record);
+    if (record) {
+      KYC.official.open(record.holder.id);
+      const head = [...modal.querySelectorAll(".panel-head")]
+        .find((h) => /Public offices held/.test(h.textContent));
+      check("their offices held are listed, from the same renderer as a profile's",
+        !!head && head.closest("section").querySelectorAll(".held-row").length ===
+          record.holder.politicalHistory.rows.length);
+      check("a seat in Congress names its state here too, with no state table loaded",
+        [...head.closest("section").querySelectorAll(".held-where")]
+          .every((el) => !/^[A-Z]{2}\b/.test(el.textContent)));
+      KYC.official.close();
+    }
   });
   await settle(50);
   suite("federal/index.html — a justice's dialog", () => {
