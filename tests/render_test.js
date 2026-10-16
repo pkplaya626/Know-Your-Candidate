@@ -4407,6 +4407,12 @@ async function testFederal() {
     check("the data loaded", !!d && d.offices.length > 0 && d.courts.length > 100);
     if (!d) return;
     const leaders = [...D.querySelectorAll(".fed-leader")];
+    const term = D.getElementById("executiveTerm");
+    const same = d.president.since === d.vicePresident.since && d.president.until === d.vicePresident.until;
+    check("a term they share is said once, above them", !same || (!!term &&
+      term.textContent.indexOf(d.president.since) !== -1 &&
+      [...D.querySelectorAll(".fed-leader")].every((c) => c.textContent.indexOf(d.president.until) === -1)),
+      term && term.textContent);
     check("the President, then the Vice President",
       leaders.length === 2 && leaders[0].textContent.indexOf(d.president.name) !== -1 &&
       leaders[1].textContent.indexOf(d.vicePresident.name) !== -1);

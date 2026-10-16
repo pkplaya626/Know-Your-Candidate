@@ -3504,6 +3504,8 @@ button.local-county-link {
 .fed-card p { margin: 0 0 var(--s-1); }
 .fed-card > div { min-width: 0; }
 .fed-fact { font-size: var(--t-sm); color: var(--text-muted); }
+.fed-term { margin: 0 0 var(--s-3); font-size: var(--t-sm); color: var(--text-muted); }
+.fed-term strong { color: var(--text); font-weight: 600; }
 .fed-fact-label {
   display: block;
   font-size: var(--t-xs);

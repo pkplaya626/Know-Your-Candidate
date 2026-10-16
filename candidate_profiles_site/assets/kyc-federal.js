@@ -164,12 +164,20 @@
 
   /* ---------------------------------------------------------------- hub */
 
-  function leaderCard(p) {
+  /** The President or Vice President. Their term is said once, above
+   *  both, when they share it; a card says its own only when they differ (a
+   *  Vice President who took office mid-term). */
+  function leaderCard(p, shared) {
     return '<li class="fed-card fed-leader">' + portrait(p.photo) +
       '<div><p class="fed-office">' + esc(p.office) + "</p>" +
       '<p class="fed-name">' + person(p.id, p.name) + "</p>" +
-      '<p class="faint">' + esc(p.party) + "; since " + esc(p.since) + ", term ends " +
-      esc(p.until) + "</p></div></li>";
+      '<p class="faint">' + esc(p.party) +
+      (shared ? "" : "; since " + esc(p.since) + ", term ends " + esc(p.until)) +
+      "</p></div></li>";
+  }
+
+  function sameTerm(a, b) {
+    return !!a && !!b && a.since === b.since && a.until === b.until;
   }
 
   function senateCell(holder) {
@@ -230,9 +238,13 @@
 
   function renderHub(d) {
     var asOf = d.asOf || {};
+    var shared = sameTerm(d.president, d.vicePresident);
     var html = section("executive", "The President and Vice President",
-      '<ul class="fed-cards fed-leaders">' + leaderCard(d.president) + leaderCard(d.vicePresident) +
-        "</ul>" +
+      (shared ? '<p class="fed-term" id="executiveTerm">The term: <strong>' +
+        esc(d.president.since) + "</strong> to <strong>" + esc(d.president.until) +
+        "</strong></p>" : "") +
+      '<ul class="fed-cards fed-leaders">' + leaderCard(d.president, shared) +
+        leaderCard(d.vicePresident, shared) + "</ul>" +
       '<p class="faint">Terms from ' + source(d.sources.executive.executive,
         "congress-legislators’ record of executive terms") + ", as of " + esc(asOf.executive) + ".</p>");
 
