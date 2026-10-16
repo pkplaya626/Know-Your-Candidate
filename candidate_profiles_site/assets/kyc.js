@@ -300,6 +300,14 @@
     advanced: { cls: "badge-warn", rank: 1,
       card: "In runoff", long: "In a primary runoff", mate: "In runoff", short: "In runoff",
       title: "Advanced to a primary runoff that has not yet been decided." },
+    // Louisiana's House seats: everyone qualified for the November 3 open
+    // primary is on that ballot, and nobody has won anything yet.
+    qualified: { cls: "badge-money", rank: 0,
+      card: "On the Nov 3 ballot", long: "On the November 3 open-primary ballot",
+      mate: "On the ballot", short: "On ballot",
+      title: "Qualified for the November 3 open primary, per the Secretary of State's " +
+        "list of qualified candidates.",
+      source: " Source: the Secretary of State's Candidate Inquiry." },
     defeated: { cls: "badge-danger", rank: 3,
       card: "Lost in November", long: "Lost the November election", mate: "Lost in November",
       short: "Lost",
@@ -343,7 +351,7 @@
     card: "Awaiting result", long: "On the November ballot: awaiting result",
     mate: "Awaiting result", short: "Awaiting result" };
 
-  var NOVEMBER = { nominee: true, elected: true, defeated: true, runoff: true };
+  var NOVEMBER = { nominee: true, elected: true, defeated: true, runoff: true, qualified: true };
   var OFF_BALLOT = { eliminated: true, withdrawn: true, unlisted: true };
 
   /** How to show *status* in *form* ("card", "long", "mate" or "short"):
@@ -357,7 +365,9 @@
     if (status === "unlisted" && opts.unconfirmed) spec = UNCONFIRMED;
     var own = (opts.own && spec.member) || {};
     var title = own.title || spec.title;
-    if (status === "nominee" && electionStatus(undefined, opts.now).phase === "post-election") {
+    var source = spec.source || SOURCE;
+    if ((status === "nominee" || status === "qualified") &&
+        electionStatus(undefined, opts.now).phase === "post-election") {
       var asOf = (meta().election || {}).resultsAsOf;
       spec = AWAITING;
       own = {};
@@ -367,7 +377,7 @@
     return {
       cls: own.cls || spec.cls,
       label: own[form] || spec[form],
-      title: form === "long" ? title + SOURCE : title,
+      title: form === "long" ? title + source : title,
       rank: spec.rank,
       off: !!spec.off,
     };

@@ -611,9 +611,9 @@ MULTI_NOMINEE_STATES = frozenset({"CA", "WA", "AK"})
 UNPRIMARIED_PARTIES = frozenset({"independent", "all", "other", "write-in", "none"})
 
 RACE_STATUSES = frozenset({"nominee", "eliminated", "withdrawn", "advanced", "unlisted",
-                           "elected", "defeated", "runoff"})
+                           "elected", "defeated", "runoff", "qualified"})
 # On the November ballot, before and after it is counted (results.NOVEMBER).
-NOVEMBER_STATUSES = frozenset({"nominee", "elected", "defeated", "runoff"})
+NOVEMBER_STATUSES = frozenset({"nominee", "elected", "defeated", "runoff", "qualified"})
 
 
 def _fold(text):
@@ -673,7 +673,9 @@ def check_results(profiles, races):
                 # the FEC is one nominee, and is reported separately.
                 line = p.get("ballotParty") or party_key(p["party"])
                 nominees[line].setdefault(_fold(p["name"]), p)
-        if race["state"] not in MULTI_NOMINEE_STATES:
+        # An open primary has no nominees: several of one party are expected.
+        if race["state"] not in MULTI_NOMINEE_STATES and not (race.get("results") or {}).get(
+                "fromQualifiedList"):
             for party, found in sorted(nominees.items()):
                 if len(found) > 1 and party not in UNPRIMARIED_PARTIES:
                     crowded.append(f"{race['id']}: {len(found)} {party} nominees - " +

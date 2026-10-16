@@ -168,14 +168,18 @@
         '">Open seat</span>');
     }
     if (race.primaryDate) {
-      var held = race.settled;
+      // A ballot read from a qualified list is not a held primary.
+      var listed = !!(race.results && race.results.fromQualifiedList);
+      var held = race.settled && !listed;
       badges.push(
         '<span class="badge badge-neutral" title="' +
         KYC.escapeAttr(held
           ? "Primary held " + race.primaryDate +
             (race.runoffDate ? "; runoff " + race.runoffDate : "") +
             ". Results from the state's Wikipedia election page."
-          : "Primary scheduled for " + race.primaryDate + ".") + '">' +
+          : "Primary scheduled for " + race.primaryDate + "." + (listed
+            ? " Who is on its ballot: the Secretary of State's list of qualified candidates."
+            : "")) + '">' +
         (held ? "Primary held " : "Primary ") + KYC.escapeHtml(race.primaryDate) +
         "</span>"
       );

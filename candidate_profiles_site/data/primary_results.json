@@ -1,5 +1,5 @@
 {
- "asOf": "2026-10-15",
+ "asOf": "2026-10-16",
  "calendarNotes": [
   {
    "kind": "open-primary",
@@ -378,14 +378,22 @@
  "missingPages": [],
  "pending": [
   "H-AS-00-2026",
-  "H-LA-01-2026",
-  "H-LA-02-2026",
-  "H-LA-03-2026",
-  "H-LA-04-2026",
-  "H-LA-05-2026",
-  "H-LA-06-2026",
   "H-MP-00-2026"
  ],
+ "qualified": {
+  "election": "11/03/2026",
+  "fetched": "2026-10-16",
+  "races": [
+   "H-LA-01-2026",
+   "H-LA-02-2026",
+   "H-LA-03-2026",
+   "H-LA-04-2026",
+   "H-LA-05-2026",
+   "H-LA-06-2026"
+  ],
+  "source": "Louisiana Secretary of State, Candidate Inquiry",
+  "url": "https://voterportal.sos.la.gov/CandidateInquiry"
+ },
  "races": {
   "H-AK-00-2026": {
    "about": {},
@@ -2627,7 +2635,11 @@
    "unmatched": {
     "Long Pham": "eliminated"
    },
-   "unsure": []
+   "unsure": [
+    "H2CA45208",
+    "H4CA47192",
+    "H8CA45056"
+   ]
   },
   "H-CA-43-2026": {
    "about": {},
@@ -2917,7 +2929,10 @@
    "unmatched": {
     "Lucinda KWH Jahn": "eliminated"
    },
-   "unsure": []
+   "unsure": [
+    "H0CA50210",
+    "H4CA48067"
+   ]
   },
   "H-CA-51-2026": {
    "about": {},
@@ -7076,6 +7091,210 @@
     "Jay J. Bowman": "nominee",
     "Jimmy Clifton Ausbrooks": "eliminated"
    },
+   "unsure": []
+  },
+  "H-LA-01-2026": {
+   "about": {},
+   "ambiguous": [],
+   "article": {},
+   "decided": {
+    "general": true,
+    "parties": [
+     "all"
+    ]
+   },
+   "label": {},
+   "page": "Louisiana Secretary of State, Candidate Inquiry",
+   "party": {
+    "H0LA01087": "republican",
+    "H4LA01162": "republican",
+    "H6LA01258": "democratic"
+   },
+   "site": {},
+   "source": "qualified",
+   "status": {
+    "H0LA01087": "qualified",
+    "H4LA01162": "qualified",
+    "H6LA01258": "qualified"
+   },
+   "unmatched": {
+    "E. \"Liddy\" Glass": "qualified"
+   },
+   "unsure": []
+  },
+  "H-LA-02-2026": {
+   "about": {},
+   "ambiguous": [],
+   "article": {},
+   "decided": {
+    "general": true,
+    "parties": [
+     "all"
+    ]
+   },
+   "label": {},
+   "page": "Louisiana Secretary of State, Candidate Inquiry",
+   "party": {
+    "H2LA02149": "democratic",
+    "H2LA02305": "libertarian",
+    "H4LA05171": "republican"
+   },
+   "site": {},
+   "source": "qualified",
+   "status": {
+    "H2LA02149": "qualified",
+    "H2LA02305": "qualified",
+    "H4LA05171": "qualified"
+   },
+   "unmatched": {
+    "Renada \"Honey\" Collins": "qualified",
+    "Walter \"Rocky\" Beach": "qualified"
+   },
+   "unsure": []
+  },
+  "H-LA-03-2026": {
+   "about": {},
+   "ambiguous": [],
+   "article": {},
+   "decided": {
+    "general": true,
+    "parties": [
+     "all"
+    ]
+   },
+   "label": {},
+   "page": "Louisiana Secretary of State, Candidate Inquiry",
+   "party": {
+    "H2LA03105": "independent",
+    "H4LA03135": "democratic",
+    "H6LA03148": "republican",
+    "H6LA03205": "democratic"
+   },
+   "site": {},
+   "source": "qualified",
+   "status": {
+    "H2LA03105": "qualified",
+    "H4LA03135": "qualified",
+    "H6LA03148": "qualified",
+    "H6LA03205": "qualified"
+   },
+   "unmatched": {
+    "Caleb \"With a C\" Walker": "qualified",
+    "Kate Cotten": "qualified"
+   },
+   "unsure": []
+  },
+  "H-LA-04-2026": {
+   "about": {},
+   "ambiguous": [],
+   "article": {},
+   "decided": {
+    "general": true,
+    "parties": [
+     "all"
+    ]
+   },
+   "label": {},
+   "page": "Louisiana Secretary of State, Candidate Inquiry",
+   "party": {
+    "H6LA04138": "republican",
+    "H6LA04187": "democratic",
+    "H6LA04195": "democratic",
+    "H6LA04203": "republican",
+    "H6LA04229": "republican"
+   },
+   "site": {},
+   "source": "qualified",
+   "status": {
+    "H6LA04138": "qualified",
+    "H6LA04187": "qualified",
+    "H6LA04195": "qualified",
+    "H6LA04203": "qualified",
+    "H6LA04229": "qualified"
+   },
+   "unmatched": {},
+   "unsure": []
+  },
+  "H-LA-05-2026": {
+   "about": {},
+   "ambiguous": [],
+   "article": {},
+   "decided": {
+    "general": true,
+    "parties": [
+     "all"
+    ]
+   },
+   "label": {},
+   "page": "Louisiana Secretary of State, Candidate Inquiry",
+   "party": {
+    "H2LA05282": "republican",
+    "H6LA05184": "republican",
+    "H6LA05200": "republican",
+    "H6LA05242": "republican",
+    "H6LA05283": "republican",
+    "H6LA05291": "democratic",
+    "H6LA05317": "republican",
+    "H6LA05325": "democratic",
+    "H6LA05333": "democratic",
+    "H6LA05341": "democratic"
+   },
+   "site": {},
+   "source": "qualified",
+   "status": {
+    "H2LA05282": "qualified",
+    "H6LA05184": "qualified",
+    "H6LA05200": "qualified",
+    "H6LA05242": "qualified",
+    "H6LA05283": "qualified",
+    "H6LA05291": "qualified",
+    "H6LA05317": "qualified",
+    "H6LA05325": "qualified",
+    "H6LA05333": "qualified",
+    "H6LA05341": "qualified"
+   },
+   "unmatched": {},
+   "unsure": []
+  },
+  "H-LA-06-2026": {
+   "about": {},
+   "ambiguous": [],
+   "article": {},
+   "decided": {
+    "general": true,
+    "parties": [
+     "all"
+    ]
+   },
+   "label": {},
+   "page": "Louisiana Secretary of State, Candidate Inquiry",
+   "party": {
+    "H4LA06047": "libertarian",
+    "H6LA05168": "republican",
+    "H6LA05226": "republican",
+    "H6LA05234": "republican",
+    "H6LA05259": "republican",
+    "H6LA05309": "democratic",
+    "H6LA06158": "republican",
+    "H6LA06174": "democratic",
+    "H6LA06182": "republican",
+    "H6LA06190": "democratic"
+   },
+   "site": {},
+   "source": "qualified",
+   "status": {
+    "H4LA06047": "qualified",
+    "H6LA05168": "qualified",
+    "H6LA05226": "qualified",
+    "H6LA05234": "qualified",
+    "H6LA05259": "qualified",
+    "H6LA05309": "qualified",
+    "H6LA06158": "qualified",
+    "H6LA06174": "qualified",
+    "H6LA06182": "qualified",
+    "H6LA06190": "qualified"
+   },
+   "unmatched": {},
    "unsure": []
   },
   "H-MA-01-2026": {
@@ -11732,7 +11951,7 @@
   "H-NY-23-2026": {
    "about": {
     "H2NY23228": "incumbent U.S. representative",
-    "H6NY23559": "college professor at St. Bonaventure University"
+    "H6NY23559": "professor at St. Bonaventure University"
    },
    "ambiguous": [],
    "article": {
@@ -16073,7 +16292,10 @@
     "Shannon Taylor": "withdrawn",
     "Tom Perriello": "nominee"
    },
-   "unsure": []
+   "unsure": [
+    "H6VA05217",
+    "H8VA05106"
+   ]
   },
   "H-VA-06-2026": {
    "about": {
@@ -17862,7 +18084,10 @@
     "Michael James Faris": "eliminated",
     "Valerie \"Dr Val\" Fredrick": "eliminated"
    },
-   "unsure": []
+   "unsure": [
+    "S6KY00260",
+    "S6KY00278"
+   ]
   },
   "S-LA-2026": {
    "about": {

@@ -809,9 +809,20 @@ def _results(args):
                 )
             for name in sorted(names):
                 aliases.setdefault(rid, []).append((name, key))
+        # Louisiana's House ballot before its November open primary. A failed
+        # read leaves those races pending, as they were; it is never read as
+        # nobody having qualified (rule 8).
+        from . import qualified as qualified_mod
+        try:
+            listed = qualified_mod.fetch()
+            print(f"  qualified: {sum(len(v) for v in listed[0].values())} candidates for "
+                  f"{len(listed[0])} Louisiana House seats ({qualified_mod.SOURCE})")
+        except Exception as exc:          # inconclusive: say so, conclude nothing
+            print(f"  [warn] Louisiana's qualified list could not be read: {exc}")
+            listed = None
         print("Reading primary results from Wikipedia ...")
         cache = results_mod.build(field, dates, today=datetime.date.today(), log=print,
-                                  aliases=aliases)
+                                  aliases=aliases, qualified=listed)
         print(f"  wrote {results_mod.save_cache(cache, args.root)}")
 
     import collections

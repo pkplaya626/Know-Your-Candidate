@@ -110,7 +110,7 @@ python build_profile_site.py geo              # regenerate map geometry only (bo
 python build_profile_site.py congress         # refresh membership (network)
 python build_profile_site.py field --check    # who is running, from the FEC
 python build_profile_site.py disclosures      # House and Senate disclosure links
-python build_profile_site.py results          # who is still in, from Wikipedia
+python build_profile_site.py results          # who is still in, from Wikipedia (and Louisiana's qualified list)
 python build_profile_site.py campaigns        # campaign websites from FEC committees
 python build_profile_site.py enrich           # fill gaps; check every campaign site
 python build_profile_site.py odds             # market prices and polling averages (writes odds.js)
@@ -747,6 +747,18 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     with its correct form is the same person (NM-1's "Okapareke" made the
     primary winner "withdrawn"), and a person is matched by any spelling
     the page gives them (ID-1's "Sarah Zabel Peterson" and "Sarah Zabel").
+
+64. **An open primary's ballot is the state's list, and a list is not a
+    result.** Louisiana's House seats vote first on November 3, so until the
+    count the site showed every FEC filer: LA-2 read "3 filed, none past
+    $5k" over a ballot of five. `results` reads the Secretary of State's
+    qualified list (`kyc/qualified.py`) for such a seat. Its people are
+    `qualified`, never "nominee", and a filer it does not name is not on the
+    ballot. The export carries addresses, phones and emails; only the name,
+    party, date and a withdrawal are kept. Its Outcome column has never held
+    a result, so any other value is refused, not guessed at. A failed read
+    leaves the seat pending (rule 8). After the count the results page
+    decides, as everywhere else.
 
 ## District maps
 
