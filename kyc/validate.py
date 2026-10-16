@@ -1327,7 +1327,7 @@ def check_voting_links(cache):
 
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
         results=None, field=None, enrichment=None, odds=None, district_maps=None,
-        district_error=None, voting=None):
+        district_error=None, voting=None, federal=None, judiciary=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_district_maps(races, district_maps, district_error)
@@ -1362,6 +1362,8 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_seats_contested(profiles)
     issues += check_guide()
     issues += check_ballot2026()
+    issues += check_federal(federal)
+    issues += check_judiciary(judiciary)
     if voting is not None:                 # None: the caller did not supply it
         issues += check_voting_links(voting)
     return issues
@@ -1464,6 +1466,32 @@ def check_former_wins(rows, record):
     return [Issue("warn", "former-winner-unplaced",
                   f"{len(lost)} archived members won a 2026 seat they did not hold; their "
                   f"race shows no winner for them", sorted(lost))]
+
+
+def check_federal(cache):
+    """The federal executive cache (kyc/federal.py), when the caller supplies
+    one: a term that has ended is an error, so a stale file never shows a
+    past President."""
+    if cache is None:
+        return []
+    from . import federal
+
+    return [Issue(level, code, message, detail)
+            for level, code, message, detail in federal.problems(cache)]
+
+
+def check_judiciary(cache):
+    """The federal judiciary cache (kyc/judiciary.py), when the caller
+    supplies one: every court present, nine justices and no retired one
+    among them, and no judge with a party."""
+    from . import federal_courts, judiciary
+
+    issues = [Issue("error", "federal-courts", f"the court table: {p}")
+              for p in federal_courts.check()]
+    if cache is not None:
+        issues += [Issue(level, code, message, detail)
+                   for level, code, message, detail in judiciary.problems(cache)]
+    return issues
 
 
 def check_guide():

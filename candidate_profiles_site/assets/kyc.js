@@ -46,6 +46,7 @@
     filter: "M3 5h18l-7 8v6l-4 2v-8z",
     sort: "M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4",
     landmark: "M3 9l9-5 9 5zM6 11v6M10 11v6M14 11v6M18 11v6M4 17h16M3 20h18",
+    scale: "M12 3v18M7 21h10M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2M2 16l3-8 3 8c-.9.7-1.9 1-3 1s-2.1-.3-3-1zM16 16l3-8 3 8c-.9.7-1.9 1-3 1s-2.1-.3-3-1z",
   };
 
   function iconSprite() {
@@ -919,9 +920,14 @@
       var hash = global.location.hash.replace(/^#\/?/, "");
       if (!hash) return { view: "list", params: {} };
 
-      var profile = hash.match(/^profile\/(.+)$/);
-      if (profile) {
-        return { view: "profile", id: decodeURIComponent(profile[1]), params: {} };
+      // A person: a profile, or a federal official (kyc-official.js).
+      var dialog = hash.match(/^(profile|official)\/(.+)$/);
+      if (dialog) {
+        try {
+          return { view: dialog[1], id: decodeURIComponent(dialog[2]), params: {} };
+        } catch (e) {
+          return { view: dialog[1], id: dialog[2], params: {} };
+        }
       }
 
       var params = {};
@@ -963,13 +969,22 @@
      * used to step back one at a time too, and every profile visited had
      * to be closed in turn. */
     writeProfile: function (id) {
-      var hash = "#/profile/" + encodeURIComponent(id);
+      router.writeDialog("profile", id);
+    },
+
+    /** A federal official's dialog: the same history as a profile's. */
+    writeOfficial: function (id) {
+      router.writeDialog("official", id);
+    },
+
+    writeDialog: function (kind, id) {
+      var hash = "#/" + kind + "/" + encodeURIComponent(id);
       if (global.location.hash === hash) return;
       var state = history.state;
       var depth = 1;
       if (state && state.kycProfile) {
         depth = (state.depth || 1) + 1;
-      } else if (/#\/profile\//.test(global.location.hash)) {
+      } else if (/#\/(profile|official)\//.test(global.location.hash)) {
         // A profile the reader landed on from a shared link: put the list
         // beneath it, so closing what they open from it ends on the list,
         // not on the profile they arrived at.
@@ -987,7 +1002,7 @@
      *  place and the page told to show it, since replaceState fires no
      *  event of its own. */
     clearProfile: function () {
-      if (!/#\/profile\//.test(global.location.hash)) return;
+      if (!/#\/(profile|official)\//.test(global.location.hash)) return;
       var state = history.state;
       if (state && state.kycProfile) {
         var depth = state.depth || 1;

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?><vote_summary>
+  <congress>119</congress>
+  <session>1</session>
+  <congress_year>2025</congress_year>
+  <votes>
+<vote>
+      <vote_number>00137</vote_number>
+      <vote_date>24-Mar</vote_date>
+      <issue>PN12-25</issue>
+      <question>On the Nomination
+         </question>
+      <result>Confirmed</result>
+      <vote_tally>
+        <yeas>60</yeas>
+        <nays>31</nays>
+      </vote_tally>
+      <title>Confirmation: Christopher Landau, of Maryland, to be Deputy Secretary of State</title>
+    </vote>
+<vote>
+      <vote_number>00135</vote_number>
+      <vote_date>14-Mar</vote_date>
+      <issue>PN12-25</issue>
+      <question>On the Cloture Motion
+         </question>
+      <result>Agreed to</result>
+      <vote_tally>
+        <yeas>63</yeas>
+        <nays>32</nays>
+      </vote_tally>
+      <title>Motion to Invoke Cloture: Christopher Landau to be Deputy Secretary of State</title>
+    </vote>
+<vote>
+      <vote_number>00094</vote_number>
+      <vote_date>26-Feb</vote_date>
+      <issue>PN11-17</issue>
+      <question>On the Nomination
+         </question>
+      <result>Confirmed</result>
+      <vote_tally>
+        <yeas>56</yeas>
+        <nays>43</nays>
+      </vote_tally>
+      <title>Confirmation: Jamieson Greer, of Maryland, to be U.S. Trade Representative</title>
+    </vote>
+<vote>
+      <vote_number>00089</vote_number>
+      <vote_date>24-Feb</vote_date>
+      <issue>PN11-17</issue>
+      <question>On the Cloture Motion
+         </question>
+      <result>Agreed to</result>
+      <vote_tally>
+        <yeas>54</yeas>
+        <nays>43</nays>
+      </vote_tally>
+      <title>Motion to Invoke Cloture: Jamieson Greer to be United States Trade Representative</title>
+    </vote>
+<vote>
+      <vote_number>00019</vote_number>
+      <vote_date>27-Jan</vote_date>
+      <issue>PN11-1</issue>
+      <question>On the Nomination
+         </question>
+      <result>Confirmed</result>
+      <vote_tally>
+        <yeas>68</yeas>
+        <nays>29</nays>
+      </vote_tally>
+      <title>Confirmation: Scott Bessent, of S.C., to be Secretary of the Treasury</title>
+    </vote>
+<vote>
+      <vote_number>00018</vote_number>
+      <vote_date>25-Jan</vote_date>
+      <issue>PN11-1</issue>
+      <question>On the Cloture Motion
+         </question>
+      <result>Agreed to</result>
+      <vote_tally>
+        <yeas>67</yeas>
+        <nays>23</nays>
+      </vote_tally>
+      <title>Motion to Invoke Cloture: Scott Bessent to be Secretary of the Treasury</title>
+    </vote>
+<vote>
+      <vote_number>00015</vote_number>
+      <vote_date>24-Jan</vote_date>
+      <issue>PN11-7</issue>
+      <question>On the Nomination
+         </question>
+      <result>Confirmed</result>
+      <vote_tally>
+        <yeas>50</yeas>
+        <nays>50</nays>
+      </vote_tally>
+      <title>Confirmation: Peter Hegseth, of Tennessee, to be Secretary of Defense</title>
+    </vote>
+<vote>
+      <vote_number>00014</vote_number>
+      <vote_date>23-Jan</vote_date>
+      <issue>PN11-7</issue>
+      <question>On the Cloture Motion
+         </question>
+      <result>Agreed to</result>
+      <vote_tally>
+        <yeas>51</yeas>
+        <nays>49</nays>
+      </vote_tally>
+      <title>Motion to Invoke Cloture: Peter Hegseth to be Secretary of Defense</title>
+    </vote>
+<vote>
+      <vote_number>00010</vote_number>
+      <vote_date>21-Jan</vote_date>
+      <issue>PN11-7</issue>
+      <question>On the Motion to Proceed
+         </question>
+      <result>Agreed to</result>
+      <vote_tally>
+        <yeas>53</yeas>
+        <nays>45</nays>
+      </vote_tally>
+      <title>Motion to Proceed to Executive Session to Consider the Nomination of Peter Hegseth to be Secretary of Defense</title>
+    </vote>
+<vote>
+      <vote_number>00008</vote_number>
+      <vote_date>20-Jan</vote_date>
+      <issue>PN11-13</issue>
+      <question>On the Nomination
+         </question>
+      <result>Confirmed</result>
+      <vote_tally>
+        <yeas>99</yeas>
+        <nays>0</nays>
+      </vote_tally>
+      <title>Confirmation: Marco Rubio, of Florida, to be Secretary of State</title>
+    </vote>
+</votes></vote_summary>
