@@ -896,9 +896,13 @@ async function testDirectoryAsync() {
   suite("index.html — in this race", () => {
     // A member with challengers still on the ballot: the dialog lists them.
     // The member must be contesting this seat: a member running elsewhere
-    // (LA-5's, for the Senate) is shown that race instead.
-    const race = window.kycRaces.find((r) => r.incumbentIds.length && r.candidateCount > 1 &&
-      r.settled && !(KYC.byId(r.incumbentIds[0]) || {}).contestLabel);
+    // (LA-5's, for the Senate), or seated since in a seat they won, is shown
+    // that race instead.
+    const race = window.kycRaces.find((r) => {
+      const holder = KYC.byId(r.incumbentIds[0]) || {};
+      return r.incumbentIds.length && r.candidateCount > 1 && r.settled &&
+        !holder.contestLabel && (holder.contestRaceId || holder.raceId) === r.id;
+    });
     check("a contested, settled race exists to test", !!race);
     if (race) {
       KYC.profile.open(race.incumbentIds[0]);
@@ -4143,13 +4147,14 @@ function seatSenateWinner(state) {
 }
 
 async function testSenateWinner() {
+  // Only while some House member is running for the Senate: after January 3
+  // the data holds the real case, and testFormerIncumbent's checks cover it.
   const state = senateWinnerState();
-  const built = state && await buildPage("states/" + state.toLowerCase() + ".html",
+  if (!state) return;
+  const built = await buildPage("states/" + state.toLowerCase() + ".html",
     { data: seatSenateWinner(state) });
-  if (built) await settle(50);
+  await settle(50);
   suite("states page — a representative seated in the Senate seat they won", () => {
-    check("a House member is running for the Senate today", !!state);
-    if (!built) return;
     const { window, D, errors } = built;
     const { mover, house } = window.__winner;
     check("no page errors", errors.length === 0, errors.join(" | "));
@@ -4183,6 +4188,9 @@ function senatePending(w) {
 async function testCommitteesPending() {
   const guide = await buildPage("government/congress.html", { data: senatePending });
   await settle(50);
+  // The House's rosters must be out for one chamber to be out before the
+  // other: in a new Congress before either is, the guide's own check covers it.
+  if (guide.window.legislatorsData.some((p) => p.chamber === "House" && p.committeesPending)) return;
   suite("government/congress.html — one chamber's committee rosters out, not the other's", () => {
     const { window, D, errors } = guide;
     check("no page errors", errors.length === 0, errors.join(" | "));
