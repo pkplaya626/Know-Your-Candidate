@@ -42,6 +42,7 @@ data/courts.json            ──┤   (each state's highest court, from the co
 data/voting_links.json      ──┤   (each state's official voting pages: NASS Can I Vote)
 data/federal_executive.json ──┤   (President, VP, Cabinet: White House, office pages, Senate votes)
 data/judiciary.json         ──┤   (every sitting federal judge: FJC directory; the Supreme Court's own list)
+data/judicial_vacancies.json ─┤   (vacancies, announced vacancies and emergencies: uscourts.gov)
 data/record_2026.json       ──┤   (the frozen 2026 race set: record --freeze)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
@@ -94,7 +95,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `campaigns.json`, `enrichment.json`, `odds.json`,
   `census_governments.json`, `state_legislators.json`, `executives.json`,
   `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`,
-  `federal_executive.json` and `judiciary.json` are caches, but
+  `federal_executive.json`, `judiciary.json` and `judicial_vacancies.json` are caches, but
   they *are* hand-editable. `stategov.js` is generated from the last five,
   with `kyc/ballot2026.py`: which state offices and legislative seats are on
   the 2026 ballot, a curated table citing each state's own record.
@@ -135,16 +136,17 @@ python build_profile_site.py courts           # each state's highest court, from
 python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
 python build_profile_site.py federal          # the President, VP and Cabinet (White House, office pages, Senate roll calls)
 python build_profile_site.py judiciary        # every sitting federal judge (FJC) and the Supreme Court as the Court lists it
+python build_profile_site.py vacancies        # vacancies in the federal courts, as uscourts.gov lists them
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1085 tests, no dependencies
-npm install && npm test                       # 1302 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1098 tests, no dependencies
+npm install && npm test                       # 1308 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`,
-`officers`, `courts`, `voting`, `federal`, `judiciary` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts. Run the
+`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.

@@ -1466,10 +1466,38 @@ a search that finds nobody says it searched the directory.
 Every file carries a content signature and is rewritten only when what it
 says changes; `verify` names a stale one. An official is never a profile:
 ids are `x-<name>` for an executive officer and `fjc-<nid>` for a judge, and
-nobody on these pages is counted among the members of Congress. The pages
-list who sits and never count vacancies: the directory lists judges, not
-judgeships. Guam's, the Northern Mariana Islands' and the Virgin Islands'
-courts say why nobody is listed, and that this is not a vacancy.
+nobody on these pages is counted among the members of Congress. The FJC's
+directory lists judges, not judgeships, so no vacancy is ever counted from
+it. Guam's, the Northern Mariana Islands' and the Virgin Islands' courts say
+why nobody is listed, and that this is not a vacancy.
+
+### Vacancies
+
+`python build_profile_site.py vacancies` reads the courts' own lists, which
+the Administrative Office of the U.S. Courts publishes on uscourts.gov, into
+`data/judicial_vacancies.json`. There are three lists:
+
+- **Current vacancies.** Each row gives the court, the judge whose seat is
+  vacant, why, since when, and any nominee with the nomination date. The
+  page's own summary gives the totals, and a read whose rows do not add up
+  to them is refused.
+- **Announced vacancies.** Judges who have said they will leave, with the
+  date where one is set.
+- **Judicial emergencies.** Each one is matched to its current vacancy by
+  court, judge and date.
+
+A row is placed on a court by the list's court code: "05 - TX-S" is the
+Southern District of Texas, and "05 - CCA" is the Fifth Circuit. The code
+must agree with `kyc/federal_courts.py`. A code the table does not know is
+kept and reported (`vacancy-court-unknown`), never guessed at. Names are
+shown as the list writes them, in reading order, and never matched to
+anyone's record.
+
+The hub gives the totals and each court's count. A court page lists its
+vacancies, its announced ones and any emergency. The build compares the two
+sources and warns (`vacancy-judge-not-senior`) when the list says a judge
+took senior status but the directory does not yet show it; the two are
+updated at different times, and the court page says so.
 
 ## Counties and local governments
 

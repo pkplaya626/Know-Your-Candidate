@@ -1,0 +1,614 @@
+{
+ "asOf": "2026-10-16",
+ "current": [
+  {
+   "code": "01 - MA",
+   "court": "ma",
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "since": "2025-05-31",
+   "vacatedBy": {
+    "listedAs": "Gorton,Nathaniel M.",
+    "name": "Nathaniel M. Gorton"
+   }
+  },
+  {
+   "code": "01 - MA",
+   "court": "ma",
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "since": "2025-07-31",
+   "vacatedBy": {
+    "listedAs": "Saylor,F. Dennis",
+    "name": "F. Dennis Saylor"
+   }
+  },
+  {
+   "code": "01 - ME",
+   "court": "me",
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "since": "2025-10-11",
+   "vacatedBy": {
+    "listedAs": "Torresen,Nancy",
+    "name": "Nancy Torresen"
+   }
+  },
+  {
+   "code": "02 - CT",
+   "court": "ct",
+   "nominated": null,
+   "nominee": null,
+   "reason": "Deceased",
+   "since": "2025-01-12",
+   "vacatedBy": {
+    "listedAs": "Meyer,Jeffrey Alker",
+    "name": "Jeffrey Alker Meyer"
+   }
+  },
+  {
+   "code": "02 - NY-S",
+   "court": "ny-s",
+   "emergency": true,
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "since": "2025-01-07",
+   "vacatedBy": {
+    "listedAs": "Caproni,Valerie E.",
+    "name": "Valerie E. Caproni"
+   }
+  },
+  {
+   "code": "02 - NY-S",
+   "court": "ny-s",
+   "emergency": true,
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "since": "2024-12-31",
+   "vacatedBy": {
+    "listedAs": "Schofield,Lorna G.",
+    "name": "Lorna G. Schofield"
+   }
+  },
+  {
+   "code": "02 - NY-S",
+   "court": "ny-s",
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "since": "2025-11-03",
+   "vacatedBy": {
+    "listedAs": "Seibel,Cathy",
+    "name": "Cathy Seibel"
+   }
+  },
+  {
+   "code": "04 - SC",
+   "court": "sc",
+   "emergency": true,
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "since": "2026-10-01",
+   "vacatedBy": {
+    "listedAs": "Cain,Timothy M.",
+    "name": "Timothy M. Cain"
+   }
+  },
+  {
+   "code": "04 - VA-E",
+   "court": "va-e",
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "since": "2026-05-13",
+   "vacatedBy": {
+    "listedAs": "Allen,Arenda L. Wright",
+    "name": "Arenda L. Wright Allen"
+   }
+  },
+  {
+   "code": "05 - LA-E",
+   "court": "la-e",
+   "nominated": "2026-09-14",
+   "nominee": {
+    "listedAs": "Mansfield,Peter M.",
+    "name": "Peter M. Mansfield"
+   },
+   "reason": "Senior",
+   "since": "2024-10-01",
+   "vacatedBy": {
+    "listedAs": "Africk,Lance M.",
+    "name": "Lance M. Africk"
+   }
+  },
+  {
+   "code": "05 - TX-N",
+   "court": "tx-n",
+   "emergency": true,
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "since": "2025-10-01",
+   "vacatedBy": {
+    "listedAs": "Boyle,Jane J.",
+    "name": "Jane J. Boyle"
+   }
+  },
+  {
+   "code": "05 - TX-N",
+   "court": "tx-n",
+   "emergency": true,
+   "nominated": "2026-09-14",
+   "nominee": {
+    "listedAs": "Coker,Courtney Leigh",
+    "name": "Courtney Leigh Coker"
+   },
+   "reason": "Senior",
+   "since": "2025-09-17",
+   "vacatedBy": {
+    "listedAs": "Godbey,David C.",
+    "name": "David C. Godbey"
+   }
+  },
+  {
+   "code": "05 - TX-S",
+   "court": "tx-s",
+   "emergency": true,
+   "nominated": "2026-09-14",
+   "nominee": {
+    "listedAs": "Bennett,Richard Wesley",
+    "name": "Richard Wesley Bennett"
+   },
+   "reason": "Senior",
+   "since": "2025-01-02",
+   "vacatedBy": {
+    "listedAs": "Hanen,Andrew S.",
+    "name": "Andrew S. Hanen"
+   }
+  },
+  {
+   "code": "05 - TX-W",
+   "court": "tx-w",
+   "emergency": true,
+   "nominated": null,
+   "nominee": null,
+   "reason": "Resigned",
+   "since": "2026-08-31",
+   "vacatedBy": {
+    "listedAs": "Albright,Alan D",
+    "name": "Alan D Albright"
+   }
+  },
+  {
+   "code": "06 - KY-E",
+   "court": "ky-e",
+   "nominated": "2026-09-14",
+   "nominee": {
+    "listedAs": "Ballou,Daniel Lewis",
+    "name": "Daniel Lewis Ballou"
+   },
+   "reason": "Retired",
+   "since": "2026-07-19",
+   "vacatedBy": {
+    "listedAs": "Van Tatenhove,Gregory F.",
+    "name": "Gregory F. Van Tatenhove"
+   }
+  },
+  {
+   "code": "06 - TN-E",
+   "court": "tn-e",
+   "nominated": "2026-09-14",
+   "nominee": {
+    "listedAs": "Adkisson,Samuel D.",
+    "name": "Samuel D. Adkisson"
+   },
+   "reason": "Senior",
+   "since": "2026-10-05",
+   "vacatedBy": {
+    "listedAs": "Varlan,Thomas A.",
+    "name": "Thomas A. Varlan"
+   }
+  },
+  {
+   "code": "07 - IL-N",
+   "court": "il-n",
+   "emergency": true,
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "since": "2026-09-30",
+   "vacatedBy": {
+    "listedAs": "Tharp,John Joseph",
+    "name": "John Joseph Tharp"
+   }
+  },
+  {
+   "code": "08 - MN",
+   "court": "mn",
+   "emergency": true,
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "since": "2026-07-01",
+   "vacatedBy": {
+    "listedAs": "Schiltz,Patrick J.",
+    "name": "Patrick J. Schiltz"
+   }
+  },
+  {
+   "code": "08 - ND",
+   "court": "nd",
+   "emergency": true,
+   "nominated": "2026-09-14",
+   "nominee": {
+    "listedAs": "Axt,Philip",
+    "name": "Philip Axt"
+   },
+   "reason": "Elevated",
+   "since": "2026-07-23",
+   "vacatedBy": {
+    "listedAs": "Traynor,Daniel Mack",
+    "name": "Daniel Mack Traynor"
+   }
+  },
+  {
+   "code": "09 - AK",
+   "court": "ak",
+   "nominated": "2026-09-14",
+   "nominee": {
+    "listedAs": "Reardon,Kyle Frederick",
+    "name": "Kyle Frederick Reardon"
+   },
+   "reason": "Resigned",
+   "since": "2024-07-08",
+   "vacatedBy": {
+    "listedAs": "Kindred,Joshua M.",
+    "name": "Joshua M. Kindred"
+   }
+  },
+  {
+   "code": "09 - CA-C",
+   "court": "ca-c",
+   "emergency": true,
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "since": "2026-09-19",
+   "vacatedBy": {
+    "listedAs": "Staton,Josephine L.",
+    "name": "Josephine L. Staton"
+   }
+  },
+  {
+   "code": "09 - CA-S",
+   "court": "ca-s",
+   "emergency": true,
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "since": "2021-08-01",
+   "vacatedBy": {
+    "listedAs": "Hayes,William Q.",
+    "name": "William Q. Hayes"
+   }
+  },
+  {
+   "code": "10 - NM",
+   "court": "nm",
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "since": "2026-02-01",
+   "vacatedBy": {
+    "listedAs": "Browning,James O.",
+    "name": "James O. Browning"
+   }
+  },
+  {
+   "code": "10 - OK-E",
+   "court": "ok-e",
+   "emergency": true,
+   "nominated": "2026-09-14",
+   "nominee": {
+    "listedAs": "West,Zachary Paul",
+    "name": "Zachary Paul West"
+   },
+   "reason": "Senior",
+   "since": "2026-01-27",
+   "vacatedBy": {
+    "listedAs": "White,Ronald A.",
+    "name": "Ronald A. White"
+   }
+  },
+  {
+   "code": "10 - OK-N",
+   "court": "ok-n",
+   "nominated": "2026-09-14",
+   "nominee": {
+    "listedAs": "Pemberton,Trevor Scott",
+    "name": "Trevor Scott Pemberton"
+   },
+   "reason": "Senior",
+   "since": "2025-03-01",
+   "vacatedBy": {
+    "listedAs": "Frizzell,Gregory K.",
+    "name": "Gregory K. Frizzell"
+   }
+  },
+  {
+   "code": "11 - AL-N",
+   "court": "al-n",
+   "nominated": "2026-07-14",
+   "nominee": {
+    "listedAs": "Cook,Gregory Carl",
+    "name": "Gregory Carl Cook"
+   },
+   "reason": "Senior",
+   "since": "2026-01-01",
+   "vacatedBy": {
+    "listedAs": "Proctor,R. David",
+    "name": "R. David Proctor"
+   }
+  },
+  {
+   "code": "11 - FL-M",
+   "court": "fl-m",
+   "emergency": true,
+   "nominated": "2026-09-14",
+   "nominee": {
+    "listedAs": "Long,Jr.,Robert E.",
+    "name": "Robert E. Long, Jr."
+   },
+   "reason": "Senior",
+   "since": "2024-11-02",
+   "vacatedBy": {
+    "listedAs": "Corrigan,Timothy J.",
+    "name": "Timothy J. Corrigan"
+   }
+  },
+  {
+   "code": "11 - GA-N",
+   "court": "ga-n",
+   "emergency": true,
+   "nominated": null,
+   "nominee": null,
+   "reason": "Retired",
+   "since": "2025-05-23",
+   "vacatedBy": {
+    "listedAs": "Batten Sr.,Timothy C.",
+    "name": "Timothy C. Batten Sr."
+   }
+  }
+ ],
+ "emergenciesUnmatched": [],
+ "fetched": "2026-10-16T20:02:03+00:00",
+ "future": [
+  {
+   "announced": "2026-07-15",
+   "code": "04 - NC-E",
+   "court": "nc-e",
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "vacancyDate": null,
+   "vacatedBy": {
+    "listedAs": "Boyle,Terrence William",
+    "name": "Terrence William Boyle"
+   }
+  },
+  {
+   "announced": "2026-03-13",
+   "code": "04 - NC-M",
+   "court": "nc-m",
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "vacancyDate": "2027-01-02",
+   "vacatedBy": {
+    "listedAs": "Osteen Jr.,William L.",
+    "name": "William L. Osteen Jr."
+   }
+  },
+  {
+   "announced": "2026-07-31",
+   "code": "04 - NC-M",
+   "court": "nc-m",
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "vacancyDate": null,
+   "vacatedBy": {
+    "listedAs": "Schroeder,Thomas D.",
+    "name": "Thomas D. Schroeder"
+   }
+  },
+  {
+   "announced": "2026-09-28",
+   "code": "05 - CCA",
+   "court": "ca5",
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "vacancyDate": null,
+   "vacatedBy": {
+    "listedAs": "Southwick,Leslie H.",
+    "name": "Leslie H. Southwick"
+   }
+  },
+  {
+   "announced": "2026-06-09",
+   "code": "05 - CCA",
+   "court": "ca5",
+   "nominated": "2026-07-14",
+   "nominee": {
+    "listedAs": "St. John,Anna",
+    "name": "Anna St. John"
+   },
+   "reason": "Senior",
+   "vacancyDate": null,
+   "vacatedBy": {
+    "listedAs": "Engelhardt,Kurt D.",
+    "name": "Kurt D. Engelhardt"
+   }
+  },
+  {
+   "announced": "2026-07-14",
+   "code": "05 - LA-E",
+   "court": "la-e",
+   "nominated": "2026-09-14",
+   "nominee": {
+    "listedAs": "Kelley,Bradford J.",
+    "name": "Bradford J. Kelley"
+   },
+   "reason": "Elevated",
+   "vacancyDate": null,
+   "vacatedBy": {
+    "listedAs": "St. John,Anna",
+    "name": "Anna St. John"
+   }
+  },
+  {
+   "announced": "2026-09-22",
+   "code": "07 - IN-N",
+   "court": "in-n",
+   "nominated": null,
+   "nominee": null,
+   "reason": "Retired",
+   "vacancyDate": "2027-07-08",
+   "vacatedBy": {
+    "listedAs": "Simon,Philip Peter",
+    "name": "Philip Peter Simon"
+   }
+  },
+  {
+   "announced": "2026-02-10",
+   "code": "07 - WI-W",
+   "court": "wi-w",
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "vacancyDate": null,
+   "vacatedBy": {
+    "listedAs": "Peterson,James D.",
+    "name": "James D. Peterson"
+   }
+  },
+  {
+   "announced": "2026-09-14",
+   "code": "08 - AR-E",
+   "court": "ar-e",
+   "nominated": null,
+   "nominee": null,
+   "reason": "Elevated",
+   "vacancyDate": null,
+   "vacatedBy": {
+    "listedAs": "Rudofsky,Lee P.",
+    "name": "Lee P. Rudofsky"
+   }
+  },
+  {
+   "announced": "2026-07-20",
+   "code": "08 - CCA",
+   "court": "ca8",
+   "nominated": "2026-09-14",
+   "nominee": {
+    "listedAs": "Rudofsky,Lee Philip",
+    "name": "Lee Philip Rudofsky"
+   },
+   "reason": "Senior",
+   "vacancyDate": null,
+   "vacatedBy": {
+    "listedAs": "Shepherd,Bobby E.",
+    "name": "Bobby E. Shepherd"
+   }
+  },
+  {
+   "announced": "2026-05-11",
+   "code": "08 - MO-W",
+   "court": "mo-w",
+   "nominated": "2026-09-14",
+   "nominee": {
+    "listedAs": "Osete,Jesus A.",
+    "name": "Jesus A. Osete"
+   },
+   "reason": "Senior",
+   "vacancyDate": "2027-05-11",
+   "vacatedBy": {
+    "listedAs": "Kays,David Gregory",
+    "name": "David Gregory Kays"
+   }
+  },
+  {
+   "announced": "2026-09-18",
+   "code": "08 - NE",
+   "court": "ne",
+   "nominated": null,
+   "nominee": null,
+   "reason": "Senior",
+   "vacancyDate": null,
+   "vacatedBy": {
+    "listedAs": "Rossiter Jr.,Robert F.",
+    "name": "Robert F. Rossiter Jr."
+   }
+  },
+  {
+   "announced": "2026-04-14",
+   "code": "09 - WA-E",
+   "court": "wa-e",
+   "nominated": null,
+   "nominee": null,
+   "reason": "Retired",
+   "vacancyDate": "2026-12-15",
+   "vacatedBy": {
+    "listedAs": "Rice,Thomas Owen",
+    "name": "Thomas Owen Rice"
+   }
+  },
+  {
+   "announced": "2026-02-24",
+   "code": "10 - CCA",
+   "court": "ca10",
+   "nominated": "2026-05-12",
+   "nominee": {
+    "listedAs": "Domenico,Daniel Desmond",
+    "name": "Daniel Desmond Domenico"
+   },
+   "reason": "Senior",
+   "vacancyDate": null,
+   "vacatedBy": {
+    "listedAs": "Tymkovich,Timothy M.",
+    "name": "Timothy M. Tymkovich"
+   }
+  },
+  {
+   "announced": "2026-05-12",
+   "code": "10 - CO",
+   "court": "co",
+   "nominated": null,
+   "nominee": null,
+   "reason": "Elevated",
+   "vacancyDate": null,
+   "vacatedBy": {
+    "listedAs": "Domenico,Daniel D.",
+    "name": "Daniel D. Domenico"
+   }
+  }
+ ],
+ "read": "2026-10-16",
+ "sources": {
+  "current": "https://www.uscourts.gov/data-news/judicial-vacancies/current-judicial-vacancies",
+  "emergencies": "https://www.uscourts.gov/data-news/judicial-vacancies/judicial-emergencies",
+  "future": "https://www.uscourts.gov/data-news/judicial-vacancies/future-judicial-vacancies"
+ },
+ "totals": {
+  "nominees": 11,
+  "vacancies": 28
+ },
+ "unplaced": []
+}

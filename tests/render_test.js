@@ -4432,7 +4432,6 @@ async function testFederal() {
       links.length === d.courts.length - 1 && new Set(links).size === links.length,
       `${links.length} links, ${d.courts.length} courts`);
     check("no court lists a party", !PARTY_WORDS.test(D.getElementById("courts").textContent));
-    check("nothing counts a vacancy", !/vacanc(y|ies) (on|at|in) /i.test(D.getElementById("federalBody").textContent));
     check("every link out opens safely", [...D.querySelectorAll('a[target="_blank"]')]
       .every((a) => /noopener/.test(a.getAttribute("rel") || "")));
     check("a table becomes cards on a phone: every cell says its column",
@@ -4459,6 +4458,12 @@ async function testFederal() {
     check("a tie the Vice President broke is said", !tie || [...D.querySelectorAll("#cabinet tr")]
       .some((tr) => tr.textContent.indexOf(tie.holder.name) !== -1 &&
         /the Vice President breaking the tie/.test(tr.textContent)));
+    const summary = D.getElementById("vacancySummary");
+    check("the vacancies are the courts' own count, dated", !!summary &&
+      summary.textContent.indexOf(d.vacancies.totals.vacancies + " vacancies") !== -1 &&
+      summary.textContent.indexOf(d.vacancies.asOf) !== -1, summary && summary.textContent);
+    check("each court's row gives its vacancies",
+      [...D.querySelectorAll("#courts thead")].every((h) => /Vacancies/.test(h.textContent)));
     check("the courts are said to be the Article III courts",
       /Article III/.test(D.getElementById("courts").textContent) &&
       !/Every federal court/.test(D.getElementById("federalBody").textContent));
@@ -4598,6 +4603,24 @@ async function testFederal() {
         note && note.textContent);
     });
   }
+
+  const withVacancies = ((ca1.window.kycFederal || {}).courts || []).find((c) => c.vacancies > 1);
+  const vacantPage = withVacancies && await buildPage("courts/" + withVacancies.id + ".html");
+  if (vacantPage) await settle(50);
+  suite("a court page's vacancies, as the courts list them", () => {
+    check("a court with vacancies exists to test", !!vacantPage);
+    if (!vacantPage) return;
+    const { window: w, D: doc, errors: errs } = vacantPage;
+    check("no page errors", errs.length === 0, errs.join(" | "));
+    const mine = w.kycCourt[withVacancies.id];
+    const rows = [...doc.querySelectorAll("#vacancies table:first-of-type tbody tr")];
+    check("a row for every vacancy the list gives this court", rows.length === mine.vacancies.length,
+      `${rows.length} rows, ${mine.vacancies.length} vacancies`);
+    check("an emergency says so", doc.querySelectorAll("#vacancies .badge").length ===
+      mine.vacancies.filter((r) => r.emergency).length);
+    check("it names its source and date", !!doc.querySelector('#vacancies a[href^="https://www.uscourts.gov/"]') &&
+      doc.getElementById("vacancies").textContent.indexOf(w.kycFederal.vacancies.asOf) !== -1);
+  });
 
   const guam = await buildPage("courts/gu.html");
   await settle(50);
