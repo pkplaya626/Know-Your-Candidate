@@ -618,13 +618,18 @@ class TestAgainstTheRealCache(unittest.TestCase):
     def test_no_race_was_resolved_before_its_primary(self):
         dates = results.load_dates(ROOT)
         as_of = datetime.date.fromisoformat(self.cache["asOf"])
-        for rid in self.cache["races"]:
+        for rid, race in self.cache["races"].items():
+            if race.get("source") == "qualified":
+                continue        # a qualified list is the ballot before its count
             parts = rid.split("-")
             state, office = parts[1], "S" if parts[0] == "S" else "H"
             self.assertTrue(results.primary_settled(dates, state, office, as_of), rid)
 
     def test_every_status_is_a_known_value(self):
-        allowed = {results.NOMINEE, results.ELIMINATED, results.WITHDRAWN, results.ADVANCED}
+        # Every status the reader writes: the primary's, November's (from the
+        # day after Election Day) and a qualified list's.
+        allowed = {results.NOMINEE, results.ELIMINATED, results.WITHDRAWN, results.ADVANCED,
+                   results.ELECTED, results.DEFEATED, results.RUNOFF, results.QUALIFIED}
         for race in self.cache["races"].values():
             for status in race["status"].values():
                 self.assertIn(status, allowed)

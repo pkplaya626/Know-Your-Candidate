@@ -532,6 +532,41 @@ Race headers show the primary date, who is on the November ballot, how many
 filers are out, and anyone the results put on the ballot with no FEC filing
 over $5,000 — leaving them off would make the header lie.
 
+### Louisiana's open primary
+
+Louisiana's House seats have no primary before November: the November 3
+vote is an open primary, with a December 12 runoff between the top two. So
+until the count no results page can say who is running, and the site showed
+the FEC's register in its place - "3 filed, none past $5k" for LA-2, whose
+ballot holds five. `results` now also reads the Secretary of State's
+Candidate Inquiry (`kyc/qualified.py`), which lists everyone who qualified
+for each seat and exports it as CSV. Qualifying closed on August 7.
+
+- A filer the list names is `qualified` ("On the Nov 3 ballot"). That is not
+  "nominee": nobody has won anything yet.
+- A qualified candidate with no FEC filing over $5,000 is named on the race,
+  as any other unprofiled nominee is.
+- A filer the list does not name is not on the ballot (`unlisted`).
+- The race header says "Primary 2026-11-03", not "Primary held", and names
+  the Secretary of State's list as the source.
+- Only the ballot's own words are kept: the name, the party, the day each
+  candidate qualified, and a withdrawal. The export also carries home
+  addresses, phone numbers and emails; none of it is stored.
+- The export's Outcome column has never held a result (checked on the 2024
+  export after its count), so any value other than "Withdrew" is refused.
+- A failed read of the list keeps the last one read, with its date
+  (`results.carry_qualified`), and `build --check` warns
+  (`qualified-list-stale`); with no list ever read, the seats stay pending.
+- Every status read from the list says so: "not on the Secretary of State's
+  list of candidates qualified for the November 3 open primary", and names
+  with no profile are "per the Secretary of State's list", never "per the
+  published results".
+- After the count, the results page decides, exactly as for every other race.
+  Until it marks a result - or while it cannot be fetched or has no section
+  for a seat - the list stays, its candidates read "Awaiting result", the
+  header reads "Primary held" with no result read yet, and three days on
+  `general-uncalled` lists the seat.
+
 ### After Election Day
 
 The same pages, read the same way, say who won. Nothing is read from the
@@ -901,7 +936,7 @@ Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
 | `raceId` | For a member, the seat they hold; for a challenger, the seat they filed for |
 | `contestRaceId` / `contestLabel` | A member contesting a *different* seat: a redrawn district, the other chamber |
 | `alsoRunningId` / `incumbentId` | Cross-link between a member and a separate profile for their own candidacy |
-| `raceStatus` / `raceStatusRace` | `nominee`, `advanced`, `eliminated`, `withdrawn` or `unlisted`; after Election Day also `elected`, `defeated` or `runoff` (a general-election runoff); and the race it refers to |
+| `raceStatus` / `raceStatusRace` | `nominee`, `advanced`, `eliminated`, `withdrawn` or `unlisted`; `qualified` for Louisiana's open-primary House ballot before its count; after Election Day also `elected`, `defeated` or `runoff` (a general-election runoff); and the race it refers to |
 | `ballotParty` / `fecParty` | The party the ballot lists, when it differs from the roster or FEC record |
 | `ballotLine` | For a nominee only: the November ballot line as the results page spells it ("Speak The Truth", "Party for Socialism and Liberation"), when it is not the line of the party shown. Never set for "none", a write-in or a line named after the candidate themselves (an independent petition reads as "Independent"); `party` is never overwritten by it |
 | `senateClass` | Sitting senators only: the constitutional class of the seat (1, 2 or 3), from the term record in `congress_snapshot.json`, keyed on bioguide id. `null` only when the build has no snapshot, which validation reports |

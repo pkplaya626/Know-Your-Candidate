@@ -75,11 +75,16 @@ ELECTED = "elected"
 DEFEATED = "defeated"
 RUNOFF = "runoff"
 
+# On a state's list of candidates qualified for a November open primary,
+# before it is counted (kyc/qualified.py: Louisiana's House seats). Not a
+# nominee: nobody has won anything yet.
+QUALIFIED = "qualified"
+
 # Off the November ballot: the primary settled them out. Someone DEFEATED in
 # November was on it, and stays in view beside the person who beat them.
 OFF_BALLOT = (ELIMINATED, WITHDRAWN, UNLISTED)
 # On the November ballot, before and after it is counted.
-NOVEMBER = (NOMINEE, ELECTED, DEFEATED, RUNOFF)
+NOVEMBER = (NOMINEE, ELECTED, DEFEATED, RUNOFF, QUALIFIED)
 
 
 class ResultsError(RuntimeError):
@@ -1627,12 +1632,53 @@ def match_names(wiki_names, field_rows, aliases=None):
 
 # --------------------------------------------------------------------- build
 
-def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=None):
+def _qualified_race(listed, rows, aliases, source):
+    """A race's entry from a state's list of qualified candidates.
+
+    The names are matched to filings as a results page's are. Anyone on the
+    list is QUALIFIED, or WITHDRAWN where the list marks a withdrawal; the
+    ballot's party is kept as a page's is. The list is the whole ballot, so
+    the contest is decided (``decided.general``) and a filer it does not
+    name is not on it.
+    """
+    status = {q["name"]: WITHDRAWN if q["withdrew"] else QUALIFIED for q in listed}
+    parties = {q["name"]: party_key(q["party"]) for q in listed}
+    matched, ambiguous = match_names(list(status), rows, aliases)
+    by_id, party = {}, {}
+    for name, cids in matched.items():
+        for cid in cids:
+            by_id[cid] = status[name]
+            party[cid] = parties[name]
+    return {
+        "page": source,
+        "source": "qualified",
+        "status": by_id,
+        "party": party,
+        "label": {}, "article": {}, "about": {}, "site": {},
+        "unsure": match_names.unsure,
+        "unmatched": {n: s for n, s in sorted(status.items())
+                      if n not in matched and n not in ambiguous},
+        "ambiguous": ambiguous,
+        "decided": {"general": True, "parties": ["all"]},
+    }
+
+
+def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=None,
+          qualified=None):
     """Resolve every settled race. Returns the cache structure.
 
     ``{"asOf": date, "races": {race_id: {"status": {candidate_id: status},
     "unmatched": [names], "page": title}}, "pending": [race_ids]}``
+
+    *qualified* is ``(races, meta)`` from :func:`kyc.qualified.fetch`: the
+    ballot of an open-primary seat before its count, used for a seat whose
+    page has decided nothing - before November 3, or after it until the
+    page marks a result.
     """
+    # Named apart from the loop's own ``listed`` (a race's ballot parties),
+    # which once overwrote it, so every Louisiana seat stayed pending.
+    qualified_lists, qualified_meta = qualified or ({}, {})
+    qualified_source = (qualified_meta or {}).get("source", "")
     from .candidates import race_id
 
     today = today or datetime.date.today()
@@ -1735,6 +1781,7 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                     f"complete open-primary result; left unsettled")
             continue
         matched, ambiguous = match_names(list(outcome), rows, (aliases or {}).get(rid))
+        unsure = match_names.unsure       # before _match_spellings calls it again
         matched = _match_spellings(outcome, boxes, rows, (aliases or {}).get(rid),
                                    matched, ambiguous)
         status, party, article, label, about, site = {}, {}, {}, {}, {}, {}
@@ -1770,7 +1817,7 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
             "site": site,
             # Ids a Wikipedia name fitted but could not be told apart. No
             # status, and no inference from their absence either.
-            "unsure": match_names.unsure,
+            "unsure": unsure,
             # Named on the page but matching no filing. Their status is kept:
             # a nominee with no FEC filing over $5,000 is still on the ballot,
             # and a race header that omits them is wrong.
@@ -1778,6 +1825,22 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
             "ambiguous": ambiguous,
             "decided": coverage(boxes, open_primary=is_open, runoff_held=held),
         }
+
+    # An open-primary seat its page has not settled - before its count, or
+    # after it while the page marks no result, cannot be fetched, is missing
+    # or has no section for it: the state's qualified list is its ballot
+    # (Louisiana's House seats, kyc/qualified.py). A failed page never takes
+    # the list away (rule 8).
+    for rid in sorted(qualified_lists):
+        if rid in races:
+            continue
+        races[rid] = _qualified_race(qualified_lists[rid], by_race.get(rid, []),
+                                     (aliases or {}).get(rid), qualified_source)
+        if rid in pending:
+            pending.remove(rid)
+        elif general_held(today):
+            log(f"    [warn] {rid}: still shown from the qualified list after Election Day; "
+                f"its page has no result this reader can use")
 
     log(f"    settled races with results: {len(races)}   "
         f"pending primaries: {len(pending)}   pages missing: {len(missing_pages)}   "
@@ -1787,6 +1850,9 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         "cycle": CYCLE,
         "races": races,
         "pending": sorted(pending),
+        # Where a qualified list was read, and when (kyc/qualified.py).
+        "qualified": (dict(qualified_meta or {}, races=sorted(qualified_lists))
+                      if qualified_lists else None),
         "missingPages": sorted(missing_pages),
         "fetchFailed": sorted(failed),
         # Pages that exist but whose districts could not be found. Every
@@ -1827,6 +1893,28 @@ def load_cache(root="."):
     return respect_open_primaries(cache)
 
 
+def carry_qualified(cache, previous):
+    """Keep the last qualified list read when this run could not read one.
+
+    A failed request is not evidence that nobody qualified (rule 8): every
+    race the previous cache showed from the list, and whose page has still
+    settled nothing, is kept as it was, with the day it was read.
+    """
+    if not previous or cache.get("qualified") or not previous.get("qualified"):
+        return []
+    kept = []
+    for rid, race in sorted((previous.get("races") or {}).items()):
+        if race.get("source") != "qualified" or rid in cache["races"]:
+            continue
+        cache["races"][rid] = race
+        if rid in cache.get("pending", []):
+            cache["pending"].remove(rid)
+        kept.append(rid)
+    if kept:
+        cache["qualified"] = dict(previous["qualified"], carried=True)
+    return kept
+
+
 def respect_open_primaries(cache):
     """Withdraw results a cache holds for an open-primary seat not yet decided.
 
@@ -1855,7 +1943,8 @@ def respect_open_primaries(cache):
                                     open_seat=True)):
             continue
         prefix = f"{office}-{state}-"
-        stale = [rid for rid in cache["races"] if rid.startswith(prefix)]
+        stale = [rid for rid, race in cache["races"].items() if rid.startswith(prefix)
+                 and race.get("source") != "qualified"]
         for rid in stale:
             del cache["races"][rid]
         if stale:
@@ -2070,6 +2159,7 @@ def apply_cache(profiles, cache, field=None):
             rid, status = by_id[candidate_id]
             profile["raceStatus"] = status
             profile["raceStatusRace"] = rid
+            _source_of(profile, races.get(rid))
             ballot_name = (races.get(rid, {}).get("claimed") or {}).get(candidate_id)
             # A hyphen alone changes nothing but the spelling, and the
             # hyphenated one is the person's: "Greene-Placentia" from the
@@ -2137,7 +2227,7 @@ def apply_cache(profiles, cache, field=None):
                     profile["contestLabel"] = seat_label(rid)
                     if profile.get("seatUp2026"):
                         profile["seekingReelection2026"] = False
-                elif status in (NOMINEE, ADVANCED, ELECTED, RUNOFF, DEFEATED):
+                elif status in (NOMINEE, ADVANCED, ELECTED, RUNOFF, DEFEATED, QUALIFIED):
                     # On their own seat's ballot, or were in November. That
                     # outranks a roster status line and a candidacy
                     # elsewhere: Russell Fry lost
@@ -2175,6 +2265,7 @@ def apply_cache(profiles, cache, field=None):
                     profile["raceStatusUnconfirmed"] = True
                 profile["raceStatus"] = UNLISTED
                 profile["raceStatusRace"] = rid
+                _source_of(profile, races[rid])
                 profile["seekingReelection2026"] = False
                 applied += 1
         elif profile.get("isCandidate") and candidate_id not in unsure:
@@ -2198,8 +2289,16 @@ def apply_cache(profiles, cache, field=None):
                     # and the page says exactly that.
                     profile["raceStatusUnconfirmed"] = True
                 profile["raceStatus"] = UNLISTED
+                _source_of(profile, races[rid])
                 applied += 1
     return applied
+
+
+def _source_of(profile, race):
+    """Where a status came from, when it is not a results page: a state's
+    qualified list (kyc/qualified.py). The page credits it, not Wikipedia."""
+    if (race or {}).get("source") == "qualified":
+        profile["raceStatusSource"] = "qualified"
 
 
 def _all_out(race, names):
@@ -2247,7 +2346,7 @@ def race_summary(cache, race_id):
     if not race:
         return None
     counts = {NOMINEE: 0, ELIMINATED: 0, WITHDRAWN: 0, ADVANCED: 0,
-              ELECTED: 0, DEFEATED: 0, RUNOFF: 0}
+              ELECTED: 0, DEFEATED: 0, RUNOFF: 0, QUALIFIED: 0}
     for status in race.get("status", {}).values():
         counts[status] = counts.get(status, 0) + 1
     unmatched = race.get("unmatched") or {}
@@ -2256,6 +2355,9 @@ def race_summary(cache, race_id):
     return {"nominees": counts[NOMINEE], "eliminated": counts[ELIMINATED],
             "withdrawn": counts[WITHDRAWN], "advanced": counts[ADVANCED],
             "elected": counts[ELECTED], "defeated": counts[DEFEATED], "runoff": counts[RUNOFF],
+            "qualified": counts[QUALIFIED],
+            # The race's ballot is a state's qualified list, not a result.
+            "fromQualifiedList": race.get("source") == "qualified",
             "otherNominees": sorted(n for n, st in unmatched.items() if st in NOVEMBER),
             "otherElected": sorted(n for n, st in unmatched.items() if st == ELECTED),
             "otherRunoff": sorted(n for n, st in unmatched.items() if st == RUNOFF)}

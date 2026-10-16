@@ -611,9 +611,9 @@ MULTI_NOMINEE_STATES = frozenset({"CA", "WA", "AK"})
 UNPRIMARIED_PARTIES = frozenset({"independent", "all", "other", "write-in", "none"})
 
 RACE_STATUSES = frozenset({"nominee", "eliminated", "withdrawn", "advanced", "unlisted",
-                           "elected", "defeated", "runoff"})
+                           "elected", "defeated", "runoff", "qualified"})
 # On the November ballot, before and after it is counted (results.NOVEMBER).
-NOVEMBER_STATUSES = frozenset({"nominee", "elected", "defeated", "runoff"})
+NOVEMBER_STATUSES = frozenset({"nominee", "elected", "defeated", "runoff", "qualified"})
 
 
 def _fold(text):
@@ -781,21 +781,29 @@ def check_results_pages(cache):
     # Three days after Election Day a race the page has not called is worth a
     # person's look: Alaska's ranked-choice count is published as a table,
     # not an Election box, and would read "Awaiting result" for weeks.
-    from .results import general_day, NOMINEE, NOVEMBER
+    from .results import general_day, NOMINEE, NOVEMBER, QUALIFIED
     import datetime
     as_of = cache.get("asOf") or ""
     if as_of and as_of > (general_day() + datetime.timedelta(days=3)).isoformat():
+        settled = set(NOVEMBER[1:]) - {QUALIFIED}
         uncalled = sorted(
             rid for rid, race in (cache.get("races") or {}).items()
-            if (race.get("decided") or {}).get("general")
-            and NOMINEE in (race.get("status") or {}).values()
-            and not set(NOVEMBER[1:]) & set((race.get("status") or {}).values()))
+            if race.get("source") == "qualified" or (
+                (race.get("decided") or {}).get("general")
+                and NOMINEE in (race.get("status") or {}).values()
+                and not settled & set((race.get("status") or {}).values())))
         if uncalled:
             issues.append(Issue("warn", "general-uncalled",
                                 f"{len(uncalled)} races have no November result on their "
                                 f"page three days after Election Day; check the page's "
                                 f"format (Alaska's ranked-choice table is not an Election "
-                                f"box)", uncalled))
+                                f"box; Louisiana's open-primary page may not mark its result "
+                                f"in one either)", uncalled))
+    listed = cache.get("qualified") or {}
+    if listed.get("carried"):
+        issues.append(Issue("warn", "qualified-list-stale",
+                            f"Louisiana's qualified list could not be read on {as_of}; the "
+                            f"list read on {listed.get('fetched')} is shown", listed.get("races")))
     overridden = [n["text"] for n in cache.get("calendarNotes") or []
                   if isinstance(n, dict) and n.get("kind") == "open-primary"]
     if overridden:

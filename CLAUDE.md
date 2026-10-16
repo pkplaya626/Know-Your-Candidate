@@ -110,7 +110,7 @@ python build_profile_site.py geo              # regenerate map geometry only (bo
 python build_profile_site.py congress         # refresh membership (network)
 python build_profile_site.py field --check    # who is running, from the FEC
 python build_profile_site.py disclosures      # House and Senate disclosure links
-python build_profile_site.py results          # who is still in, from Wikipedia
+python build_profile_site.py results          # who is still in, from Wikipedia (and Louisiana's qualified list)
 python build_profile_site.py campaigns        # campaign websites from FEC committees
 python build_profile_site.py enrich           # fill gaps; check every campaign site
 python build_profile_site.py odds             # market prices and polling averages (writes odds.js)
@@ -123,8 +123,8 @@ python build_profile_site.py courts           # each state's highest court, from
 python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 921 tests, no dependencies
-npm install && npm test                       # 1177 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 941 tests, no dependencies
+npm install && npm test                       # 1188 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -747,6 +747,20 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     with its correct form is the same person (NM-1's "Okapareke" made the
     primary winner "withdrawn"), and a person is matched by any spelling
     the page gives them (ID-1's "Sarah Zabel Peterson" and "Sarah Zabel").
+
+64. **An open primary's ballot is the state's list, and a list is not a
+    result.** Louisiana's House seats vote first on November 3, so until the
+    count the site showed every FEC filer: LA-2 read "3 filed, none past
+    $5k" over a ballot of five. `results` reads the Secretary of State's
+    qualified list (`kyc/qualified.py`) for such a seat. Its people are
+    `qualified`, never "nominee", and a filer it does not name is not on the
+    ballot. The export carries addresses, phones and emails; only the name,
+    party, date and a withdrawal are kept. Its Outcome column has never held
+    a result, so any other value is refused, not guessed at. A failed read
+    keeps the last list read (rule 8), and a page that fails after the count
+    never takes the list away. A status read from it credits the Secretary
+    of State, never "the published results". After the count the results
+    page decides, as everywhere else.
 
 ## District maps
 

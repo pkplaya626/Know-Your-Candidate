@@ -300,6 +300,14 @@
     advanced: { cls: "badge-warn", rank: 1,
       card: "In runoff", long: "In a primary runoff", mate: "In runoff", short: "In runoff",
       title: "Advanced to a primary runoff that has not yet been decided." },
+    // Louisiana's House seats: everyone qualified for the November 3 open
+    // primary is on that ballot, and nobody has won anything yet.
+    qualified: { cls: "badge-money", rank: 0,
+      card: "On the Nov 3 ballot", long: "On the November 3 open-primary ballot",
+      mate: "On the ballot", short: "On ballot",
+      title: "Qualified for the November 3 open primary, per the Secretary of State's " +
+        "list of qualified candidates.",
+      source: " Source: the Secretary of State's Candidate Inquiry." },
     defeated: { cls: "badge-danger", rank: 3,
       card: "Lost in November", long: "Lost the November election", mate: "Lost in November",
       short: "Lost",
@@ -343,7 +351,26 @@
     card: "Awaiting result", long: "On the November ballot: awaiting result",
     mate: "Awaiting result", short: "Awaiting result" };
 
-  var NOVEMBER = { nominee: true, elected: true, defeated: true, runoff: true };
+  var NOVEMBER = { nominee: true, elected: true, defeated: true, runoff: true, qualified: true };
+
+  /* A status read from a state's list of qualified candidates (Louisiana's
+   * House seats before their count) is the Secretary of State's word, not a
+   * results page's, and says so. */
+  var LISTED_SOURCE = " Source: the Secretary of State's Candidate Inquiry.";
+  var LISTED = {
+    unlisted: { cls: "badge-neutral", rank: 6, off: true,
+      card: "Not on the Nov 3 ballot", long: "Not on the November 3 open-primary ballot",
+      mate: "Not on ballot", short: "Not on ballot",
+      title: "Filed with the FEC but not on the Secretary of State's list of candidates " +
+        "qualified for the November 3 open primary.",
+      member: { cls: "badge-danger", card: "Not running for this seat",
+        long: "Not running for this seat in 2026", short: "Leaving seat",
+        title: "Not on the Secretary of State's list of candidates qualified for this seat; " +
+          "not seeking re-election to it." } },
+    withdrawn: { cls: "badge-neutral", rank: 5, off: true,
+      card: "Withdrew", long: "Withdrew from the 2026 race", mate: "Withdrew", short: "Withdrew",
+      title: "Withdrew, per the Secretary of State's list of qualified candidates." },
+  };
   var OFF_BALLOT = { eliminated: true, withdrawn: true, unlisted: true };
 
   /** How to show *status* in *form* ("card", "long", "mate" or "short"):
@@ -354,10 +381,14 @@
     var spec = RACE_STATUS[status];
     if (!spec) return null;
     opts = opts || {};
+    var listed = opts.source === "qualified";
+    if (listed && LISTED[status]) spec = LISTED[status];
     if (status === "unlisted" && opts.unconfirmed) spec = UNCONFIRMED;
     var own = (opts.own && spec.member) || {};
     var title = own.title || spec.title;
-    if (status === "nominee" && electionStatus(undefined, opts.now).phase === "post-election") {
+    var source = spec.source || (listed ? LISTED_SOURCE : SOURCE);
+    if ((status === "nominee" || status === "qualified") &&
+        electionStatus(undefined, opts.now).phase === "post-election") {
       var asOf = (meta().election || {}).resultsAsOf;
       spec = AWAITING;
       own = {};
@@ -367,7 +398,7 @@
     return {
       cls: own.cls || spec.cls,
       label: own[form] || spec[form],
-      title: form === "long" ? title + SOURCE : title,
+      title: form === "long" ? title + source : title,
       rank: spec.rank,
       off: !!spec.off,
     };
@@ -378,11 +409,25 @@
   function raceStatusOf(item, form, opts) {
     if (!item) return null;
     opts = opts || {};
+    // The source of the record contestStatus read: a member's own seat, or
+    // their filing's race when they run elsewhere.
+    var record = !runsElsewhere(item) || item.raceStatusRace === item.contestRaceId ? item
+      : byId(item.alsoRunningId) || {};
     return raceStatus(contestStatus(item), form, {
       own: !item.isCandidate && !item.contestLabel,
       unconfirmed: !!item.raceStatusUnconfirmed,
+      source: record.raceStatusSource,
       now: opts.now,
     });
+  }
+
+  /** Who says who is on a race's ballot, for a sentence: "per the published
+   *  results", or the Secretary of State's qualified list where that is the
+   *  ballot (Louisiana's House seats before their count). */
+  function ballotSource(race) {
+    return race && race.results && race.results.fromQualifiedList
+      ? "per the Secretary of State's list of qualified candidates"
+      : "per the published results";
   }
 
   /** True when the primary settled *status* out of the race. */
@@ -1410,6 +1455,7 @@
     ballotLineSuffix: ballotLineSuffix,
     raceStatus: raceStatus,
     raceStatusOf: raceStatusOf,
+    ballotSource: ballotSource,
     offBallot: offBallot,
     onNovemberBallot: onNovemberBallot,
     meta: meta,

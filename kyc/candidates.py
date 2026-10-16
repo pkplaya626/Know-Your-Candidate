@@ -291,6 +291,10 @@ _PARTICLES = {"VAN", "VON", "DER", "DEN", "DE", "DEL", "DELLA", "DI", "DA",
 
 def _cap(word):
     """Capitalise one name token, respecting the shapes that break .title()."""
+    # A quoted or bracketed nickname: 'OSCAR "OMAR"' is Oscar "Omar", not
+    # Oscar "omar", and "(JACK)" is (Jack).
+    if word[:1] in "\"'(\u201c\u2018":
+        return word[0] + _cap(word[1:]) if len(word) > 1 else word
     upper = word.upper()
     if upper.replace(".", "") in _SUFFIXES:
         return _SUFFIXES[upper.replace(".", "")]

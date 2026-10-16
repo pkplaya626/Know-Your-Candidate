@@ -860,3 +860,12 @@ class TestSenateDisclosures(unittest.TestCase):
         ])
         record = disclosures.pick_senate({"name": "Maria Cantwell", "state": "WA"}, reports)
         self.assertEqual(record["url"], "https://efdsearch.senate.gov/search/view/paper/p1/")
+
+
+class TestNicknameCase(unittest.TestCase):
+    def test_a_quoted_or_bracketed_nickname_keeps_its_capital(self):
+        from kyc.candidates import display_name
+        # Louisiana's LA-5 ballot: the FEC files him DANTZLER, OSCAR "OMAR".
+        self.assertEqual(display_name('DANTZLER, OSCAR "OMAR"'), 'Oscar "Omar" Dantzler')
+        self.assertEqual(display_name("SMITH, JOHN (JACK)"), "John (Jack) Smith")
+        self.assertEqual(display_name("O'BRIEN, PAT"), "Pat O'Brien")

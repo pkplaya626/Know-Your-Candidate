@@ -882,7 +882,10 @@ async function testDirectoryAsync() {
 
   suite("index.html — in this race", () => {
     // A member with challengers still on the ballot: the dialog lists them.
-    const race = window.kycRaces.find((r) => r.incumbentIds.length && r.candidateCount > 1 && r.settled);
+    // The member must be contesting this seat: a member running elsewhere
+    // (LA-5's, for the Senate) is shown that race instead.
+    const race = window.kycRaces.find((r) => r.incumbentIds.length && r.candidateCount > 1 &&
+      r.settled && !(KYC.byId(r.incumbentIds[0]) || {}).contestLabel);
     check("a contested, settled race exists to test", !!race);
     if (race) {
       KYC.profile.open(race.incumbentIds[0]);
@@ -3801,6 +3804,76 @@ function electionNight(window, meta) {
   window.__night = { called, runoff, open, winner };
 }
 
+/* Louisiana's House seats before their November 3 open primary: the
+ * Secretary of State's qualified list is the ballot. The fixture marks one
+ * race that way whatever the data holds, since after the count the results
+ * page decides instead. */
+function qualifiedRace(window) {
+  const byId = Object.fromEntries(window.legislatorsData.map((p) => [p.id, p]));
+  const race = window.kycRaces.find((r) => r.state === "LA" && r.chamber === "House" &&
+    r.candidateIds.length >= 2);
+  if (!race) return;
+  const people = race.candidateIds.map((id) => byId[id]).filter(Boolean);
+  people.forEach((p, i) => {
+    p.raceStatus = i === people.length - 1 ? "unlisted" : "qualified";
+    p.raceStatusSource = "qualified";
+  });
+  race.settled = true;
+  race.results = Object.assign({}, race.results, { fromQualifiedList: true,
+    otherNominees: ["Kate Cotten"] });
+  window.__qualified = { race, on: people.slice(0, -1), off: people[people.length - 1] };
+}
+
+async function testQualifiedBallot() {
+  const { window, D, errors } = await buildPage("states/la.html", { data: qualifiedRace });
+  const { race, on, off } = window.__qualified || {};
+  suite("states/la.html — the November 3 open primary's qualified list", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("a Louisiana House race to read", !!race);
+    if (!race) return;
+    const section = D.getElementById("race-" + race.id);
+    const head = section && section.querySelector(".race-head");
+    const date = head && [...head.querySelectorAll(".badge")].find((b) => /Primary/.test(b.textContent));
+    check("its primary is not called held", !!date && !/held/.test(date.textContent) &&
+      /2026-11-03/.test(date.textContent), date && date.textContent);
+    check("and says whose list the ballot is", /qualified candidates/.test(date.getAttribute("title")),
+      date && date.getAttribute("title"));
+    const card = (p) => section.querySelector('.card[data-id="' + p.id + '"]');
+    check("a qualified candidate is on the Nov 3 ballot, not a nominee",
+      on.every((p) => card(p) && /On the Nov 3 ballot/.test(card(p).textContent) &&
+        !/Won the primary/.test(card(p).innerHTML)));
+    check("a filer the list does not name is folded away",
+      !!card(off) && !!card(off).closest("details"));
+    const KYC = window.KYC;
+    const spec = KYC.raceStatus("qualified", "long");
+    check("the profile cites the Secretary of State, not a Wikipedia page",
+      /Secretary of State/.test(spec.title) && !/Wikipedia/.test(spec.title), spec.title);
+    const offBadge = card(off) && card(off).querySelector(".badge[title]");
+    check("a filer not on the list is credited to the Secretary of State, not the results",
+      !!offBadge && /Secretary of State's list/.test(offBadge.getAttribute("title")) &&
+        !/primary results/.test(offBadge.getAttribute("title")),
+      offBadge && offBadge.getAttribute("title"));
+    const unprofiled = head && [...head.querySelectorAll(".badge")].find((b) => /no profile here/.test(b.textContent));
+    check("names with no profile are credited to the list too",
+      !!unprofiled && /Secretary of State's list/.test(unprofiled.getAttribute("title")) &&
+        !/published results/.test(unprofiled.getAttribute("title")),
+      unprofiled && unprofiled.getAttribute("title"));
+  });
+  const after = await buildPage("states/la.html", { now: "2026-11-05T09:00:00", data: qualifiedRace });
+  suite("states/la.html — after the count, with no result read yet", () => {
+    const { race: r2, on: still } = after.window.__qualified || {};
+    const h2 = r2 && after.D.getElementById("race-" + r2.id).querySelector(".race-head");
+    const held = h2 && [...h2.querySelectorAll(".badge")].find((b) => /Primary/.test(b.textContent));
+    check("the primary is held, and no result has been read yet",
+      !!held && /Primary held/.test(held.textContent) && /no result has been read yet/.test(
+        held.getAttribute("title")) && !/scheduled/.test(held.getAttribute("title")),
+      held && held.getAttribute("title"));
+    const c = still && still[0] && after.D.querySelector('.card[data-id="' + still[0].id + '"]');
+    check("a qualified candidate reads Awaiting result", !!c && /Awaiting result/.test(c.textContent),
+      c && c.textContent);
+  });
+}
+
 async function testElectionNight() {
   const { window, D, errors } = await buildPage("states/ga.html",
     { now: "2026-11-05T09:00:00", data: electionNight });
@@ -3934,6 +4007,7 @@ async function testElectionNight() {
   if (!only || only === "index.html") await testAndroidBack();
   if (!only || only === "states") await testStates();
   if (!only || only === "states") await testElectionNight();
+  if (!only || only === "states") await testQualifiedBallot();
   if (!only || only === "redistricting") await testRedistricting();
   if (!only || only === "redistricting") await testDistrictPages();
   if (!only || only === "redistricting") await testFindMyDistrict();
