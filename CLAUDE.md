@@ -40,6 +40,8 @@ data/executives.json        ──┤   (every governor, from the NGA)
 data/statewide_officers.json ─┤   (lieutenant governors, secretaries of state, attorneys general)
 data/courts.json            ──┤   (each state's highest court, from the courts)
 data/voting_links.json      ──┤   (each state's official voting pages: NASS Can I Vote)
+data/federal_executive.json ──┤   (President, VP, Cabinet: White House, office pages, Senate votes)
+data/judiciary.json         ──┤   (every sitting federal judge: FJC directory; the Supreme Court's own list)
 data/record_2026.json       ──┤   (the frozen 2026 race set: record --freeze)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
@@ -55,6 +57,10 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              government/*.html  (generated: the guide, kyc/government_text.py)
                                              legislature/*.html (generated, one per state)
                                              counties/*.html    (generated, one per state)
+                                             federal/index.html (generated: the federal government)
+                                             courts/*.html      (generated, one per federal court)
+                                             data/federal.js    (the executive, the Supreme Court, the courts)
+                                             data/judiciary/*.js (one federal court's judges, and the judges' search)
                                              sitemap.xml        (generated)
                                              ├──> index.html    (grid, races, profiles)
                                              └──> map.html      (partisan map)
@@ -74,6 +80,8 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              assets/kyc-local.js
                                              assets/kyc-stategov.js
                                              assets/kyc-guide.js
+                                             assets/kyc-official.js
+                                             assets/kyc-federal.js
 ```
 
 - The root CSVs are the editorial source of truth. The state atlas and
@@ -85,7 +93,8 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `disclosures.json`, `primary_results.json`, `committees.json`,
   `campaigns.json`, `enrichment.json`, `odds.json`,
   `census_governments.json`, `state_legislators.json`, `executives.json`,
-  `partisan_composition.json`, `statewide_officers.json`, `courts.json` and `voting_links.json` are caches, but
+  `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`,
+  `federal_executive.json` and `judiciary.json` are caches, but
   they *are* hand-editable. `stategov.js` is generated from the last five,
   with `kyc/ballot2026.py`: which state offices and legislative seats are on
   the 2026 ballot, a curated table citing each state's own record.
@@ -124,15 +133,17 @@ python build_profile_site.py executives       # every governor (NGA), and NCSL's
 python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS), attorneys general
 python build_profile_site.py courts           # each state's highest court, from the court's own roster
 python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
+python build_profile_site.py federal          # the President, VP and Cabinet (White House, office pages, Senate roll calls)
+python build_profile_site.py judiciary        # every sitting federal judge (FJC) and the Supreme Court as the Court lists it
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 1020 tests, no dependencies
-npm install && npm test                       # 1235 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1076 tests, no dependencies
+npm install && npm test                       # 1292 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`,
-`officers`, `courts`, `voting` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts. Run the
+`officers`, `courts`, `voting`, `federal`, `judiciary` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -884,6 +895,14 @@ That check found a retirement note keyed `"Dick Durbin"` when the roster says
 - New dialogs use `KYC.createModal` so they get the focus trap for free; new
   menus use `KYC.createMenu` so they are keyboard-operable.
 - Headline figures come from `window.kycBuildMeta`, never typed into a page.
+- A federal official is never a profile. They open in `KYC.official`
+  (`kyc-official.js`) at `#/official/<id>`, with ids `x-<name>` and
+  `fjc-<nid>`, and nobody there counts as a member of Congress. A judge or a
+  Cabinet officer is shown without a party; a judge with the President who
+  appointed them.
+- A page's own code goes in `data-state` only when it is a state:
+  `kyc.js` remembers it as the reader's state. A court page carries its id
+  on its container (`data-court`).
 
 ## Conventions
 

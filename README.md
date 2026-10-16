@@ -36,6 +36,8 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… localgov` | Every local government from the Census listing, checked against the published counts |
 | `… executives` | Every governor from the NGA, and NCSL's count of each legislature's parties (`--check` reports the caches) |
 | `… officers` | Every lieutenant governor (NLGA) and secretary of state (NASS), cross-checked where the rosters overlap |
+| `… federal` | The President, the Vice President and the Cabinet: who holds each office, from the White House's pages, each office's own page and the Senate's roll-call votes (`--check` reports the cache) |
+| `… judiciary` | Every sitting federal judge, from the Federal Judicial Center's directory, and the Supreme Court's members as the Court lists them; a short read keeps the last cache (`--check` reports it) |
 | `… voting` | Each state's and D.C.'s official pages for checking registration, finding a polling place, voting absentee or early, and registering, as NASS's "Can I Vote" lists them; refused unless all 51 are there |
 | `… courts` | Each state's highest court and its members, read from the court's own roster |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
@@ -1331,6 +1333,114 @@ answer with a bot wall or challenge; Connecticut's, Nevada's and New York's
 refuse this pipeline's requests; Rhode Island's publishes only a PDF. Their
 pages name the court and say why its members are not listed, and nothing is
 taken from Wikipedia or Ballotpedia instead.
+
+## The federal executive
+
+`python build_profile_site.py federal` records who holds the federal
+executive's offices, in `data/federal_executive.json`. The federal
+government's page shows them (below).
+
+| Fact | Source | Notes |
+|---|---|---|
+| The President and Vice President: name, party, term, ids | congress-legislators' `executive.json`, the project behind the membership snapshot | A term that does not cover today is a build error, so a stale file never shows a past President |
+| That they are the White House's | whitehouse.gov/administration/ | The page's own links ("President Donald J. Trump"); a different name is reported |
+| Their portraits | Their own White House pages | The first image in the page's content |
+| Who the Cabinet is, and who holds each office | whitehouse.gov/administration/cabinet/ | The authority on which officials the President counts as Cabinet, and on nothing else (rule 55). A title the office table does not know stops the read |
+| That the office names them | The office's own page (`federal_offices`), the name beside the title (rule 56) | Seven departments answer every script with 403: that concludes nothing (rule 8), and the office is shown as the White House lists it. OMB's pages name no Director |
+| The Senate's confirmation | senate.gov's roll-call votes, no key | Found by the Senate's own wording of the office and the holder's surname - two signals, never a name alone. A voice vote has no roll call, and the record says none was found, not that there was no confirmation |
+
+The fifteen departments are the ones 5 U.S.C. 101 lists, in the order 3
+U.S.C. 19(d)(1) gives their heads in the line of succession - from the
+statute, never from a page, which lists people by surname. "Secretary of
+War" is the Secretary of Defense's secondary title under Executive Order
+14347; the statute and this table say Defense. No Cabinet officer is given a
+party: no source used states one, and the President's is not theirs.
+
+## The federal judiciary
+
+`python build_profile_site.py judiciary` records every sitting Article III
+judge in `data/judiciary.json`. The federal government's page and one page
+per court show them (below).
+
+| Fact | Source | Notes |
+|---|---|---|
+| Every judge's service on every court: appointed by, nominated, confirmed (and the vote), commissioned, senior status, chief judge | The Federal Judicial Center's Biographical Directory of Article III Federal Judges, exported nightly | The FJC is the judiciary's own research agency (28 U.S.C. 620); its `nid` is each judge's id and builds the link to their FJC page |
+| Birth, education, career | The same directory | The career is the FJC's own words, quoted, never paraphrased |
+| Who sits on the Supreme Court | supremecourt.gov's list of the justices (rule 57) | The directory's open Supreme Court rows include two retired justices, who are not members: read naively it seats eleven |
+| The courts, and the circuits | `kyc/federal_courts.py`, from 28 U.S.C. 41 and the directory's court names | 13 courts of appeals, 91 Article III district courts, the Court of International Trade; Guam's, the Northern Mariana Islands' and the Virgin Islands' courts are Article IV courts the directory does not cover, so their judges are not listed - "not in the directory", never "none" |
+
+A judge is sitting on a court when their service there has a commission and
+no termination; senior from the day senior status began, never before; the
+court's chief while their service as chief judge has begun and not ended. A
+confirmed nominee with no commission is not sitting, and the build says so.
+A judge sitting on several courts (a roving judgeship) is one person.
+
+Two things the directory's rows need read together:
+
+- **A chief judge on senior status.** A chief judge must be in regular
+  active service (28 U.S.C. 136(a)), so a record holding both cannot say
+  who is chief. Nobody is shown as that court's chief, the page says the
+  record is contradictory, and the build warns (`judge-record-conflict`).
+- **A statutory reassignment.** The Fifth Circuit's judges were reassigned
+  to the new Eleventh in 1981. The open row names no President and dates
+  the reassignment, so the appointment and the commission are taken from
+  the row the reassignment ended, and the seat says when it was reassigned.
+
+**Judges have no party.** The directory's "Party of Appointing President"
+columns describe the president, not the judge: they are dropped when the
+file is read, with its gender and race columns, so nothing later can show
+them, and a check fails if a judge's record ever carries a party. A judge is
+appointed by a president, by name.
+
+## The federal government's pages
+
+`federal/index.html` shows who holds the federal government's offices:
+
+- the President and the Vice President;
+- the Cabinet, the fifteen departments first in the order of succession,
+  each with the Senate's confirming vote and whether the office's own page
+  names them;
+- the Supreme Court, with retired justices listed apart;
+- every federal court, the courts of appeals and then each circuit's
+  district courts, with a search of every sitting judge.
+
+Each court has its own page, `courts/<id>.html` (`courts/ca5.html`,
+`courts/tx-s.html`): its chief judge, active judges and judges on senior
+status. A district court's page links to the circuit its appeals go to, and
+a circuit's page links to its district courts. The guide's executive and
+courts pages link to the federal page.
+
+A name opens the person's record in one dialog (`assets/kyc-official.js`):
+
+- a Cabinet officer's confirmation and office page;
+- a judge's every seat, with who appointed them, the dates and the vote;
+- a judge's earlier federal service, birth, education and career, in the
+  directory's words, and a link to their FJC page.
+
+`#/official/<id>` opens it as sent; on the hub, a judge's name opens their
+record on their court's page, which loads it.
+
+A tied Senate vote confirms only on the Vice President's vote (Article I,
+Section 3), and the page says so beside the tally. When the Senate's votes
+could not be read, an officer with no earlier finding reads "could not be
+read when last checked", never "no roll call found" (rule 19). The pages
+cover Article III judges and say so: the Court of Federal Claims, the Tax
+Court, and bankruptcy and magistrate judges are not in the directory, and
+a search that finds nobody says it searched the directory.
+
+| File | What it holds |
+|---|---|
+| `data/federal.js` (`kycFederal`) | The President, the Vice President, every Cabinet office, the Supreme Court's members, and an index of the courts with their counts and chief judges |
+| `data/judiciary/<court>.js` (`kycCourt[<court>]`) | One court's judges, loaded only by that court's page: 1,463 judges in one file would load on every page |
+| `data/judiciary/index.js` (`kycJudgesIndex`) | Every sitting judge's id, name, court and status, for the search |
+
+Every file carries a content signature and is rewritten only when what it
+says changes; `verify` names a stale one. An official is never a profile:
+ids are `x-<name>` for an executive officer and `fjc-<nid>` for a judge, and
+nobody on these pages is counted among the members of Congress. The pages
+list who sits and never count vacancies: the directory lists judges, not
+judgeships. Guam's, the Northern Mariana Islands' and the Virgin Islands'
+courts say why nobody is listed, and that this is not a vacancy.
 
 ## Counties and local governments
 

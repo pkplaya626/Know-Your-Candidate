@@ -30,6 +30,8 @@ from . import (
     voting as voting_mod,
 )
 from .profiles import build_profiles, screen_field
+from . import federal as federal_mod
+from . import judiciary as judiciary_mod
 
 
 def _load(args):
@@ -201,7 +203,9 @@ def _build(args):
                           results=outcomes, field=field, enrichment=enrichment,
                           odds=markets, district_maps=district_maps,
                           district_error=district_error,
-                          voting=voting_mod.load_cache(args.root) or {})
+                          voting=voting_mod.load_cache(args.root) or {},
+                          federal=federal_mod.load_cache(args.root),
+                          judiciary=judiciary_mod.load_cache(args.root))
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -294,6 +298,20 @@ def _build(args):
     gov_stats = stategov.stats(state_gov)
     print(f"[ok] state government: {gov_stats['governors']} governors; " + ", ".join(
         f"{n} {k}" for k, n in sorted(gov_stats["trifectas"].items())))
+
+    # The federal executive and courts (kyc/federal_build.py): one file for
+    # the hub, one per court, each rewritten only when what it says changed.
+    # What is wrong with either cache is validate's to report.
+    from . import federal_build
+    try:
+        fed_payload, fed_courts, fed_search, _ = federal_build.build(args.root)
+    except federal_build.FederalBuildError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 2
+    fed_written = emit.write_federal(fed_payload, fed_courts, fed_search, args.root)
+    print(f"[ok] federal government: {len(fed_payload['offices'])} Cabinet offices, "
+          f"{fed_payload['judges']:,} judges on {len(fed_courts)} courts; "
+          f"{len(fed_written)} file(s) rewritten")
 
     # The guide's maps: rewritten only when what they say changed.
     from . import government_maps
@@ -1091,6 +1109,21 @@ def _verify(args):
         print(f"  ok  {emit.STATEGOV_FILE} matches the governor, legislator and NCSL caches "
               f"({gov_expected[:16]}...)")
 
+    from . import federal_build
+    try:
+        fed = federal_build.build(args.root)
+    except federal_build.FederalBuildError as exc:
+        fed = None
+        problems.append(str(exc))
+    if fed is not None:
+        stale_fed = emit.check_federal(*fed[:3], root=args.root)
+        if stale_fed:
+            problems.append(f"{len(stale_fed)} federal file(s) are missing or stale: "
+                            + ", ".join(os.path.basename(p) for p, _ in stale_fed[:5]))
+        else:
+            print(f"  ok  {emit.FEDERAL_FILE} and {len(fed[1])} court files match the "
+                  f"executive and judiciary caches")
+
     from . import government_maps
     guide_expected = emit.government_signature(government_maps.payload())
     guide_committed = emit.read_signature(path=os.path.join(args.root, emit.GOVERNMENT_FILE))
@@ -1295,6 +1328,97 @@ def _officers(args):
     if not args.check:
         print(f"[ok] wrote {officers.save_cache(cache, args.root)}")
     return 0
+
+
+def _judiciary(args):
+    """Every sitting Article III judge, from the Federal Judicial Center's
+    directory, and the Supreme Court's members as the Court lists them
+    (kyc/judiciary.py). A source that cannot be read, or reads short, keeps
+    the committed cache (rule 8)."""
+    from . import federal_courts, judiciary
+
+    previous = judiciary.load_cache(args.root)
+    if args.check:
+        cache = previous
+        if not cache:
+            print(f"[error] no {judiciary.CACHE_PATH}; run 'judiciary'", file=sys.stderr)
+            return 2
+    else:
+        try:
+            cache = judiciary.fetch(previous=previous)
+        except judiciary.JudiciaryError as exc:
+            print(f"[error] {exc}; the committed cache is unchanged", file=sys.stderr)
+            return 2
+    # A retired justice is listed apart and never counted as sitting.
+    judges = {k: j for k, j in cache["judges"].items() if not j.get("retiredJustice")}
+    active = sum(1 for j in judges.values() if j["status"] == "active")
+    print(f"  {len(judges)} sitting judges: {active} active, {len(judges) - active} senior "
+          f"(directory as of {cache['asOf']})")
+    scotus = cache["courts"]["scotus"]
+    print("  Supreme Court: " + "; ".join(judges[i]["name"] for i in scotus["judges"]))
+    if scotus.get("retired"):
+        print("  retired justices, not members: "
+              + "; ".join(judges[i]["name"] for i in scotus["retired"]))
+    for kind in ("appeals", "trade", "district", "territorial"):
+        ids = [c for c, court in federal_courts.COURTS.items() if court["kind"] == kind]
+        listed = [c for c in ids if cache["courts"][c]["listed"]]
+        print(f"  {federal_courts.KINDS[kind]}: {len(ids)} courts, "
+              f"{sum(cache['courts'][c]['active'] for c in ids)} active and "
+              f"{sum(cache['courts'][c]['senior'] for c in ids)} senior judges"
+              + ("" if len(listed) == len(ids) else
+                 f"; {len(ids) - len(listed)} not in the FJC's directory of Article III judges"))
+    failed = 0
+    for level, code, message, detail in judiciary.problems(cache):
+        print(f"  [{level}] {code}: {message}")
+        for line in detail[:10]:
+            print(f"           - {line}")
+        failed += level == "error"
+    if not args.check:
+        print(f"[ok] wrote {judiciary.save_cache(cache, args.root)}")
+    return 1 if failed else 0
+
+
+def _federal(args):
+    """The federal executive (kyc/federal.py): who holds each office, from the
+    White House's pages, each office's own page and the Senate's roll calls.
+    A source that cannot be read keeps the last good cache (rule 8)."""
+    from . import federal
+
+    previous = federal.load_cache(args.root)
+    if args.check:
+        cache = previous
+        if not cache:
+            print(f"[error] no {federal.CACHE_PATH}; run 'federal'", file=sys.stderr)
+            return 2
+    else:
+        try:
+            cache = federal.fetch(previous=previous)
+        except federal.FederalError as exc:
+            print(f"[error] {exc}; the committed cache is unchanged", file=sys.stderr)
+            return 2
+    for person, title in ((cache["president"], "President"),
+                          (cache["vicePresident"], "Vice President")):
+        print(f"  {title}: {person['name']} ({person.get('party')}), "
+              f"{person['termStart']} to {person['termEnd']}")
+    for office in cache["offices"]:
+        holder = office.get("holder")
+        if not holder:
+            print(f"  {office['office']}: not listed by the White House")
+            continue
+        senate = holder.get("senate")
+        print(f"  {office['office']}: {holder['name']} - own page {holder['page']['status']}"
+              + (", acting" if holder["page"].get("acting") else "")
+              + (f"; confirmed {senate['date']}, {senate['yeas']}-{senate['nays']} "
+                 f"(vote {senate['vote']})" if senate else "; no Senate roll call found"))
+    failed = 0
+    for level, code, message, detail in federal.problems(cache):
+        print(f"  [{level}] {code}: {message}")
+        for line in detail[:10]:
+            print(f"           - {line}")
+        failed += level == "error"
+    if not args.check:
+        print(f"[ok] wrote {federal.save_cache(cache, args.root)}")
+    return 1 if failed else 0
 
 
 def _executives(args):
@@ -1570,6 +1694,16 @@ def build_parser():
     officers_cmd.add_argument("--check", action="store_true",
                               help="report the committed cache; make no network call")
 
+    jud = add("judiciary", help="every sitting federal judge (Federal Judicial Center) and the "
+                                 "Supreme Court as the Court lists it")
+    jud.add_argument("--check", action="store_true",
+                     help="report the committed cache; make no network call")
+
+    fed = add("federal", help="the President, the Vice President and the Cabinet, from the "
+                              "White House, each office's page and the Senate's votes")
+    fed.add_argument("--check", action="store_true",
+                     help="report the committed cache; make no network call")
+
     execs = add("executives", help="every governor, from the National Governors Association")
     execs.add_argument("--check", action="store_true",
                        help="report the committed cache; make no network call")
@@ -1617,6 +1751,10 @@ def main(argv=None):
         return _localgov(args)
     if args.command == "executives":
         return _executives(args)
+    if args.command == "federal":
+        return _federal(args)
+    if args.command == "judiciary":
+        return _judiciary(args)
     if args.command == "courts":
         return _courts(args)
     if args.command == "officers":

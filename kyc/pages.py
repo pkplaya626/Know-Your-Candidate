@@ -125,6 +125,10 @@ $search
                 <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
                 States &amp; territories
             </a>
+            <a class="nav-link" href="../federal/index.html"$federal_current>
+                <svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg>
+                Federal government
+            </a>
             <a class="nav-link" href="../government/index.html"$government_current>
                 <svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg>
                 How government works
@@ -229,6 +233,7 @@ def render_page(**fields):
     fields.setdefault("sidebar", _CONGRESS_SIDEBAR)
     fields.setdefault("states_current", "")
     fields.setdefault("government_current", "")
+    fields.setdefault("federal_current", "")
     fields.setdefault("jump_options", "")
     fields.setdefault("jump_attrs", "")
     return _PAGE.substitute(search=search, **fields)
@@ -528,6 +533,132 @@ def render_legislature_page(code, host, summary=None):
     )
 
 
+_FEDERAL_SIDEBAR = """
+        <nav class="sidebar-section" aria-label="Federal government">
+            <h2 class="sidebar-heading">Federal government</h2>
+            <p class="sidebar-note">Who holds the federal government's offices now, each from the
+                office's own record: the President, the Vice President and the Cabinet, the
+                Supreme Court, and every sitting Article III judge.</p>
+            <a class="nav-link nav-sub" href="../federal/index.html#executive">The President and Vice President</a>
+            <a class="nav-link nav-sub" href="../federal/index.html#cabinet">The Cabinet</a>
+            <a class="nav-link nav-sub" href="../federal/index.html#supreme-court">The Supreme Court</a>
+            <a class="nav-link nav-sub" href="../federal/index.html#courts">The Article III courts</a>
+        </nav>
+"""
+
+_FEDERAL_FOOTER = "\n".join([
+    "                <p><strong>Sources:</strong> the President and Vice President from",
+    "                    congress-legislators' record of their terms; the Cabinet as the White House",
+    "                    lists it, each officer checked on their office's own page and against the",
+    "                    Senate's roll-call vote confirming them; every Article III judge from the",
+    "                    Federal Judicial Center's Biographical Directory, and the Supreme Court's",
+    "                    members as the Court lists them. Judges are shown with the president who",
+    "                    appointed them, never with a party.</p>",
+    "                <p>Non-partisan and independent.</p>",
+])
+
+def _jump(codes):
+    """The "Jump to" list, written into the page: these pages load no build
+    metadata to fill it."""
+    from .government import jump_options
+    return jump_options(codes)
+
+
+_FEDERAL_SCRIPTS = (
+    "../data/federal.js",
+    "../data/judiciary/index.js",
+    "../assets/kyc-official.js",
+    "../assets/kyc-federal.js",
+)
+
+
+def render_federal_page(host, codes=()):
+    """The federal government's hub: the President, the Vice President, the
+    Cabinet, the Supreme Court and every federal court. The page carries no
+    names; ``assets/kyc-federal.js`` draws it from ``data/federal.js``."""
+    path = "federal/index.html"
+    canonical = f"https://{host}/{path}" if host else path
+    main = "\n".join([
+        '            <div id="federalContent" class="state-page federal-page" data-federal="hub">',
+        '                <header class="state-hero">',
+        '                    <p class="state-kicker">Federal government</p>',
+        '                    <h1 class="state-title">Who holds the federal government&#8217;s offices</h1>',
+        '                    <p class="districts-lede">The President and Vice President, the Cabinet, the',
+        '                        Supreme Court and every sitting Article III judge, each from the',
+        '                        office&#8217;s own record. Pick a name for the person&#8217;s record.</p>',
+        '                    <p class="state-links">',
+        '                        <a class="btn" href="../government/executive.html"><svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> How the executive works</a>',
+        '                        <a class="btn" href="../government/courts.html"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg> How the federal courts work</a>',
+        "                    </p>",
+        "                </header>",
+        '                <div id="federalBody">',
+        '                    <p class="results-bar" role="status">Loading&hellip;</p>',
+        "                </div>",
+        "            </div>",
+    ])
+    return render_page(
+        title=_e("Federal government — Know Your Candidate"),
+        og_title=_e("The federal government: who holds each office"),
+        description=_e("The President, the Vice President, the Cabinet, the Supreme Court and "
+                       "every sitting Article III judge, each from the office's own record."),
+        canonical=_e(canonical),
+        host=_e(host or ""),
+        code="",
+        page_kind="federal",
+        search="",
+        sidebar=_FEDERAL_SIDEBAR,
+        federal_current=' aria-current="page"',
+        jump_options=_jump(codes),
+        main=main,
+        footer=_FEDERAL_FOOTER,
+        scripts=_scripts(_FEDERAL_SCRIPTS),
+    )
+
+
+def render_court_page(court_id, host, codes=()):
+    """One federal court: its judges, the chief first, then active and senior
+    judges. ``assets/kyc-federal.js`` draws it from the court's data file."""
+    from .federal_courts import COURTS, KINDS
+
+    court = COURTS[court_id]
+    path = f"courts/{court_id}.html"
+    canonical = f"https://{host}/{path}" if host else path
+    main = "\n".join([
+        f'            <div id="federalContent" class="state-page federal-page" data-federal="court" data-court="{_e(court_id)}">',
+        '                <header class="state-hero">',
+        f'                    <p class="state-kicker">{_e(KINDS[court["kind"]])}</p>',
+        f'                    <h1 class="state-title">{_e(court["name"])}</h1>',
+        '                    <p class="state-links">',
+        '                        <a class="btn" href="../federal/index.html#courts"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg> The Article III courts</a>',
+        '                        <a class="btn" href="../government/courts.html"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg> How the federal courts work</a>',
+        "                    </p>",
+        "                </header>",
+        '                <div id="federalBody">',
+        '                    <p class="results-bar" role="status">Loading&hellip;</p>',
+        "                </div>",
+        "            </div>",
+    ])
+    scripts = ("../data/federal.js", f"../data/judiciary/{court_id}.js",
+               "../assets/kyc-official.js", "../assets/kyc-federal.js")
+    return render_page(
+        title=_e(f"{court['name']} — Know Your Candidate"),
+        og_title=_e(f"{court['name']}: its judges"),
+        description=_e(f"Every sitting judge of the {court['name']}: who appointed them, when "
+                       f"they were confirmed, their senior status, and their background."),
+        canonical=_e(canonical),
+        host=_e(host or ""),
+        code="",
+        page_kind="court",
+        search="",
+        sidebar=_FEDERAL_SIDEBAR,
+        federal_current=' aria-current="page"',
+        jump_options=_jump(codes),
+        main=main,
+        footer=_FEDERAL_FOOTER,
+        scripts=_scripts(scripts),
+    )
+
+
 _COUNTIES_SIDEBAR = """
         <div class="sidebar-section">
             <h2 class="sidebar-heading">Counties &amp; local governments</h2>
@@ -646,7 +777,7 @@ def render_redirect(target, host):
     ])
 
 
-def sitemap(host, codes, built=None, district_maps=(), guide=(), legislatures=()):
+def sitemap(host, codes, built=None, district_maps=(), guide=(), legislatures=(), courts=()):
     """``sitemap.xml`` listing the two hand-maintained pages and every state.
 
     Individual profiles live behind hash fragments, which crawlers do not
@@ -679,5 +810,9 @@ def sitemap(host, codes, built=None, district_maps=(), guide=(), legislatures=()
         url(f"legislature/{code.lower()}.html", "0.6", "weekly")
     for code in sorted(legislatures):
         url(f"counties/{code.lower()}.html", "0.5", "monthly")
+    if courts:
+        url("federal/index.html", "0.7")
+    for court in courts:
+        url(f"courts/{court}.html", "0.5")
     lines.append("</urlset>")
     return "\n".join(lines) + "\n"

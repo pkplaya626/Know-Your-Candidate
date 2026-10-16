@@ -1,0 +1,562 @@
+{
+ "asOf": "2026-10-16",
+ "fetched": "2026-10-16T17:53:29+00:00",
+ "offices": [
+  {
+   "body": "Department of State",
+   "holder": {
+    "name": "Marco Rubio",
+    "page": {
+     "status": "confirmed",
+     "url": "https://www.state.gov/biographies/marco-rubio/"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Marco-Rubio.jpeg",
+    "senate": {
+     "date": "2025-01-20",
+     "issue": "PN11-13",
+     "nays": 0,
+     "nominee": "Marco Rubio",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00008.htm",
+     "vote": "119-1-8",
+     "yeas": 99
+    },
+    "title": "Secretary of State"
+   },
+   "key": "state",
+   "kind": "department",
+   "office": "Secretary of State",
+   "order": 1
+  },
+  {
+   "body": "Department of the Treasury",
+   "holder": {
+    "name": "Scott Bessent",
+    "page": {
+     "status": "confirmed",
+     "url": "https://home.treasury.gov/about/general-information/officials"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Bessent.jpeg",
+    "senate": {
+     "date": "2025-01-27",
+     "issue": "PN11-1",
+     "nays": 29,
+     "nominee": "Scott Bessent",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00019.htm",
+     "vote": "119-1-19",
+     "yeas": 68
+    },
+    "title": "Secretary of the Treasury"
+   },
+   "key": "treasury",
+   "kind": "department",
+   "office": "Secretary of the Treasury",
+   "order": 2
+  },
+  {
+   "body": "Department of Defense",
+   "holder": {
+    "name": "Pete Hegseth",
+    "page": {
+     "status": "unreadable"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Pete-Hegseth.jpeg",
+    "senate": {
+     "date": "2025-01-24",
+     "issue": "PN11-7",
+     "nays": 50,
+     "nominee": "Peter Hegseth",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00015.htm",
+     "vote": "119-1-15",
+     "yeas": 50
+    },
+    "title": "Secretary of War"
+   },
+   "key": "defense",
+   "kind": "department",
+   "office": "Secretary of Defense",
+   "order": 3
+  },
+  {
+   "body": "Department of Justice",
+   "holder": {
+    "name": "Todd Blanche",
+    "page": {
+     "status": "confirmed",
+     "url": "https://www.justice.gov/ag"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/04/Todd-Blanche.jpg",
+    "senate": {
+     "date": "2026-08-08",
+     "issue": "PN1078",
+     "nays": 49,
+     "nominee": "Todd Blanche",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1192/vote_119_2_00230.htm",
+     "vote": "119-2-230",
+     "yeas": 50
+    },
+    "title": "Attorney General"
+   },
+   "key": "justice",
+   "kind": "department",
+   "office": "Attorney General",
+   "order": 4
+  },
+  {
+   "body": "Department of the Interior",
+   "holder": {
+    "name": "Doug Burgum",
+    "page": {
+     "status": "confirmed",
+     "url": "https://www.doi.gov/secretary-doug-burgum"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Doug-Burgum.jpeg",
+    "senate": {
+     "date": "2025-01-30",
+     "issue": "PN11-3",
+     "nays": 17,
+     "nominee": "Douglas Burgum",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00026.htm",
+     "vote": "119-1-26",
+     "yeas": 80
+    },
+    "title": "Secretary of the Interior"
+   },
+   "key": "interior",
+   "kind": "department",
+   "office": "Secretary of the Interior",
+   "order": 5
+  },
+  {
+   "body": "Department of Agriculture",
+   "holder": {
+    "name": "Brooke Rollins",
+    "page": {
+     "status": "unreadable"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Brooke-Rollins.jpeg",
+    "senate": {
+     "date": "2025-02-13",
+     "issue": "PN11-12",
+     "nays": 28,
+     "nominee": "Brooke Rollins",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00053.htm",
+     "vote": "119-1-53",
+     "yeas": 72
+    },
+    "title": "Secretary of Agriculture"
+   },
+   "key": "agriculture",
+   "kind": "department",
+   "office": "Secretary of Agriculture",
+   "order": 6
+  },
+  {
+   "body": "Department of Commerce",
+   "holder": {
+    "name": "Howard Lutnick",
+    "page": {
+     "status": "unreadable"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Howard-Lutnick.jpeg",
+    "senate": {
+     "date": "2025-02-18",
+     "issue": "PN11-9",
+     "nays": 45,
+     "nominee": "Howard Lutnick",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00057.htm",
+     "vote": "119-1-57",
+     "yeas": 51
+    },
+    "title": "Secretary of Commerce"
+   },
+   "key": "commerce",
+   "kind": "department",
+   "office": "Secretary of Commerce",
+   "order": 7
+  },
+  {
+   "body": "Department of Labor",
+   "holder": {
+    "name": "Keith Sonderling",
+    "page": {
+     "status": "unreadable"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/04/Keith-Sonderling.jpg",
+    "senate": {
+     "date": "2026-09-30",
+     "issue": "PN1129",
+     "nays": 41,
+     "nominee": "Keith Sonderling",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1192/vote_119_2_00256.htm",
+     "vote": "119-2-256",
+     "yeas": 47
+    },
+    "title": "Secretary of Labor"
+   },
+   "key": "labor",
+   "kind": "department",
+   "office": "Secretary of Labor",
+   "order": 8
+  },
+  {
+   "body": "Department of Health and Human Services",
+   "holder": {
+    "name": "Robert F. Kennedy, Jr.",
+    "page": {
+     "status": "unreadable"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Robert-F-Kennedy-Jr.jpeg",
+    "senate": {
+     "date": "2025-02-13",
+     "issue": "PN11-8",
+     "nays": 48,
+     "nominee": "Robert F. Kennedy, Jr.",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00052.htm",
+     "vote": "119-1-52",
+     "yeas": 52
+    },
+    "title": "Secretary of Health and Human Services"
+   },
+   "key": "hhs",
+   "kind": "department",
+   "office": "Secretary of Health and Human Services",
+   "order": 9
+  },
+  {
+   "body": "Department of Housing and Urban Development",
+   "holder": {
+    "name": "Scott Turner",
+    "page": {
+     "status": "confirmed",
+     "url": "https://www.hud.gov/aboutus/secretary"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Turner.jpeg",
+    "senate": {
+     "date": "2025-02-05",
+     "issue": "PN11-14",
+     "nays": 44,
+     "nominee": "Eric Turner",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00035.htm",
+     "vote": "119-1-35",
+     "yeas": 55
+    },
+    "title": "Secretary of Housing and Urban Development"
+   },
+   "key": "hud",
+   "kind": "department",
+   "office": "Secretary of Housing and Urban Development",
+   "order": 10
+  },
+  {
+   "body": "Department of Transportation",
+   "holder": {
+    "name": "Sean Duffy",
+    "page": {
+     "status": "unreadable"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Sean-Duffy.jpeg",
+    "senate": {
+     "date": "2025-01-28",
+     "issue": "PN11-6",
+     "nays": 22,
+     "nominee": "Sean Duffy",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00021.htm",
+     "vote": "119-1-21",
+     "yeas": 77
+    },
+    "title": "Secretary of Transportation"
+   },
+   "key": "transportation",
+   "kind": "department",
+   "office": "Secretary of Transportation",
+   "order": 11
+  },
+  {
+   "body": "Department of Energy",
+   "holder": {
+    "name": "Chris Wright",
+    "page": {
+     "status": "confirmed",
+     "url": "https://www.energy.gov/"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Chris-Wright.jpeg",
+    "senate": {
+     "date": "2025-02-03",
+     "issue": "PN11-15",
+     "nays": 38,
+     "nominee": "Christopher Wright",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00030.htm",
+     "vote": "119-1-30",
+     "yeas": 59
+    },
+    "title": "Secretary of Energy"
+   },
+   "key": "energy",
+   "kind": "department",
+   "office": "Secretary of Energy",
+   "order": 12
+  },
+  {
+   "body": "Department of Education",
+   "holder": {
+    "name": "Linda McMahon",
+    "page": {
+     "status": "unreadable"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Linda-McMahon.jpg",
+    "senate": {
+     "date": "2025-03-03",
+     "issue": "PN11-10",
+     "nays": 45,
+     "nominee": "Linda McMahon",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00099.htm",
+     "vote": "119-1-99",
+     "yeas": 51
+    },
+    "title": "Secretary of Education"
+   },
+   "key": "education",
+   "kind": "department",
+   "office": "Secretary of Education",
+   "order": 13
+  },
+  {
+   "body": "Department of Veterans Affairs",
+   "holder": {
+    "name": "Doug Collins",
+    "page": {
+     "status": "confirmed",
+     "url": "https://department.va.gov/about/"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Doug-Collins.jpeg",
+    "senate": {
+     "date": "2025-02-04",
+     "issue": "PN11-5",
+     "nays": 23,
+     "nominee": "Douglas Collins",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00032.htm",
+     "vote": "119-1-32",
+     "yeas": 77
+    },
+    "title": "Secretary of Veterans Affairs"
+   },
+   "key": "veterans",
+   "kind": "department",
+   "office": "Secretary of Veterans Affairs",
+   "order": 14
+  },
+  {
+   "body": "Department of Homeland Security",
+   "holder": {
+    "name": "Markwayne Mullin",
+    "page": {
+     "status": "confirmed",
+     "url": "https://www.dhs.gov/leadership"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/03/Markwayne-Mullin.jpg",
+    "senate": {
+     "date": "2026-03-23",
+     "issue": "PN858",
+     "nays": 45,
+     "nominee": "Markwayne Mullin",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1192/vote_119_2_00063.htm",
+     "vote": "119-2-63",
+     "yeas": 54
+    },
+    "title": "Secretary of Homeland Security"
+   },
+   "key": "homeland",
+   "kind": "department",
+   "office": "Secretary of Homeland Security",
+   "order": 15
+  },
+  {
+   "body": "Environmental Protection Agency",
+   "holder": {
+    "name": "Lee Zeldin",
+    "page": {
+     "status": "confirmed",
+     "url": "https://www.epa.gov/aboutepa/epa-administrator"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Lee-Zeldin.jpg",
+    "senate": {
+     "date": "2025-01-29",
+     "issue": "PN11-23",
+     "nays": 42,
+     "nominee": "Lee Zeldin",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00024.htm",
+     "vote": "119-1-24",
+     "yeas": 56
+    },
+    "title": "Administrator of the Environmental Protection Agency"
+   },
+   "key": "epa",
+   "kind": "cabinet-level",
+   "office": "Administrator of the Environmental Protection Agency",
+   "order": null
+  },
+  {
+   "body": "Office of Management and Budget",
+   "holder": {
+    "name": "Russ Vought",
+    "page": {
+     "status": "none"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Russ-Vought.jpg",
+    "senate": {
+     "date": "2025-02-06",
+     "issue": "PN11-22",
+     "nays": 47,
+     "nominee": "Russell Vought",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00037.htm",
+     "vote": "119-1-37",
+     "yeas": 53
+    },
+    "title": "Director of the Office of Management and Budget"
+   },
+   "key": "omb",
+   "kind": "cabinet-level",
+   "office": "Director of the Office of Management and Budget",
+   "order": null
+  },
+  {
+   "body": "Office of the United States Trade Representative",
+   "holder": {
+    "name": "Jamieson Greer",
+    "page": {
+     "status": "confirmed",
+     "url": "https://ustr.gov/about-us/biographies-key-officials"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Jamieson-Greer.jpg",
+    "senate": {
+     "date": "2025-02-26",
+     "issue": "PN11-17",
+     "nays": 43,
+     "nominee": "Jamieson Greer",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00094.htm",
+     "vote": "119-1-94",
+     "yeas": 56
+    },
+    "title": "United States Trade Representative"
+   },
+   "key": "ustr",
+   "kind": "cabinet-level",
+   "office": "United States Trade Representative",
+   "order": null
+  },
+  {
+   "body": "Office of the Director of National Intelligence",
+   "holder": {
+    "name": "Jay Clayton",
+    "page": {
+     "status": "unreadable"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/08/Jay-Clayton.jpg",
+    "senate": {
+     "date": "2026-07-28",
+     "issue": "PN1092",
+     "nays": 47,
+     "nominee": "Walter Clayton",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1192/vote_119_2_00211.htm",
+     "vote": "119-2-211",
+     "yeas": 51
+    },
+    "title": "Director of National Intelligence"
+   },
+   "key": "dni",
+   "kind": "cabinet-level",
+   "office": "Director of National Intelligence",
+   "order": null
+  },
+  {
+   "body": "Central Intelligence Agency",
+   "holder": {
+    "name": "John Ratcliffe",
+    "page": {
+     "status": "confirmed",
+     "url": "https://www.cia.gov/about/director-of-cia/"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/John-Ratcliffe.jpeg",
+    "senate": {
+     "date": "2025-01-23",
+     "issue": "PN11-19",
+     "nays": 25,
+     "nominee": "John Ratcliffe",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00013.htm",
+     "vote": "119-1-13",
+     "yeas": 74
+    },
+    "title": "Director of the Central Intelligence Agency"
+   },
+   "key": "cia",
+   "kind": "cabinet-level",
+   "office": "Director of the Central Intelligence Agency",
+   "order": null
+  },
+  {
+   "body": "Small Business Administration",
+   "holder": {
+    "name": "Kelly Loeffler",
+    "page": {
+     "status": "confirmed",
+     "url": "https://www.sba.gov/person/kelly-loeffler/"
+    },
+    "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Kelly-Loeffler.jpeg",
+    "senate": {
+     "date": "2025-02-19",
+     "issue": "PN11-18",
+     "nays": 46,
+     "nominee": "Kelly Loeffler",
+     "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00059.htm",
+     "vote": "119-1-59",
+     "yeas": 52
+    },
+    "title": "Administrator of the Small Business Administration"
+   },
+   "key": "sba",
+   "kind": "cabinet-level",
+   "office": "Administrator of the Small Business Administration",
+   "order": null
+  }
+ ],
+ "president": {
+  "ids": {
+   "ballotpedia": "Donald Trump",
+   "govtrack": 412733,
+   "opensecrets": "N00023864",
+   "votesmart": 15723,
+   "wikidata": "Q22686",
+   "wikipedia": "Donald Trump"
+  },
+  "name": "Donald J. Trump",
+  "page": "https://www.whitehouse.gov/administration/donald-j-trump/",
+  "party": "Republican",
+  "photo": "https://www.whitehouse.gov/wp-content/uploads/2025/06/President-Donald-Trump-Official-Presidential-Portrait.png",
+  "termEnd": "2029-01-20",
+  "termStart": "2025-01-20"
+ },
+ "problems": [],
+ "reviewed": "2026-10-16",
+ "sources": {
+  "administration": "https://www.whitehouse.gov/administration/",
+  "cabinet": "https://www.whitehouse.gov/administration/cabinet/",
+  "executive": "https://unitedstates.github.io/congress-legislators/executive.json"
+ },
+ "vicePresident": {
+  "ids": {
+   "ballotpedia": "J.D. Vance",
+   "bioguide": "V000137",
+   "govtrack": 456876,
+   "opensecrets": "N00048832",
+   "votesmart": 201794,
+   "wikidata": "Q28935729",
+   "wikipedia": "JD Vance"
+  },
+  "name": "J.D. Vance",
+  "page": "https://www.whitehouse.gov/administration/jd-vance/",
+  "party": "Republican",
+  "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/03/Vice-President-JD-Vance-3.jpg",
+  "termEnd": "2029-01-20",
+  "termStart": "2025-01-20"
+ }
+}
