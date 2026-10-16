@@ -1296,7 +1296,8 @@ async function testStates() {
     const gov = D.getElementById("state-government");
     const marks = gov ? [...gov.querySelectorAll(".gov-ballot-mark")] : [];
     check("the race list says what else the ballot elects",
-      !!note && /also elects the governor/.test(note.textContent) &&
+      !!note && /Of the state offices this site covers, the same ballot also elects the governor/
+        .test(note.textContent) && /ballot measures, which this site does not list/.test(note.textContent) &&
         /This site lists the candidates for Congress only/.test(note.textContent),
       note && note.textContent);
     check("the governor, each officer and each chamber is marked, linked to its source",
@@ -1313,8 +1314,29 @@ async function testStates() {
   suite("states/va.html — a state that elects none of it in 2026", () => {
     const note = va.D.querySelector("#races .state-note");
     check("says none of the offices covered here is elected this year",
-      !!note && /None of Virginia's statewide offices or legislative seats covered here/.test(note.textContent),
+      !!note && /None of Virginia's governor, lieutenant governor, attorney general, secretary of state or regular legislative seats/.test(note.textContent),
       note && note.textContent);
+  });
+
+  const gu = await buildPage("states/gu.html");
+  suite("states/gu.html — a territory's ballot is not only local", () => {
+    const note = gu.D.querySelector("#races .state-note");
+    check("names territorial contests, not only local ones",
+      !!note && /territorial and local contests/.test(note.textContent), note && note.textContent);
+  });
+  const az = await buildPage("map.html", { hash: "#/?state=AZ&mode=lt" });
+  suite("map.html — Arizona's first lieutenant governor", () => {
+    const text = az.D.getElementById("delegation").textContent;
+    check("a new office elected on Nov 3 is not called one the state lacks",
+      /No one holds this office yet/.test(text) && !/The state has no lieutenant governor/.test(text) &&
+        /On the Nov 3 ballot/.test(text), text.slice(0, 300));
+  });
+  const ks = await buildPage("map.html", { hash: "#/?state=KS&mode=legislature" });
+  suite("map.html — a chamber with no regular election", () => {
+    const marks = [...ks.D.querySelectorAll("#delegation .gov-ballot-mark")].map((a) => a.textContent);
+    check("says no regular elections, never that no seat is on the ballot",
+      marks.some((m) => /No regular elections in 2026/.test(m)) &&
+        !marks.some((m) => /No seats elected/.test(m)), marks.join(" | "));
   });
 
   suite("states/tx.html — how to vote here, from the state's own pages", () => {
@@ -3441,7 +3463,13 @@ async function testStateGov() {
       /elected on Nov 3/.test(shape(up[0]).getAttribute("aria-label")) &&
       /no governor's election in 2026/.test(shape("VA").getAttribute("aria-label")));
     check("the legend says what the colours mean",
-      /No governor's election in 2026/.test(D.getElementById("mapLegend").textContent));
+      /No governor's election in 2026/.test(D.getElementById("mapLegend").textContent) &&
+      /Not covered here/.test(D.getElementById("mapLegend").textContent));
+    const territory = D.querySelector('#usMap [data-state="GU"]');
+    check("a territory is drawn as not covered, never as electing no one",
+      !!territory && territory.style.fill !== "var(--surface-2)" &&
+        /not covered/.test(territory.getAttribute("aria-label")),
+      territory && territory.style.fill);
 
     D.querySelector('[data-mode="trifecta"]').click();
     const painted = stateCodes.filter((c) => shape(c).style.fill === "var(--party-r)").length;
@@ -3480,7 +3508,8 @@ async function testStateGov() {
       window.dispatchEvent(new window.Event("hashchange"));
       return D.getElementById("delegation").textContent;
     };
-    let text = pick("#/?state=AZ&mode=lt");
+    // Oregon has none; Arizona's is a new office first filled on Nov 3.
+    let text = pick("#/?state=OR&mode=lt");
     check("the Lt. governors view is selected, and only it, across every group",
       D.querySelectorAll('[data-mode][aria-pressed="true"]').length === 1 &&
       D.querySelector('[data-mode="lt"]').getAttribute("aria-pressed") === "true");
@@ -3488,7 +3517,7 @@ async function testStateGov() {
       /no lieutenant governor/.test(text) && /First in line/.test(text) &&
       /Secretary of State/.test(text), text.slice(0, 200));
     check("and is drawn as having no such office, not in a party colour",
-      !/party-/.test(shape("AZ").style.fill));
+      !/party-/.test(shape("OR").style.fill) && !/party-/.test(shape("AZ").style.fill));
     // Whichever state is vacant this week: the test must not fail the refresh
     // that fills New Jersey's office.
     const vacancy = stateCodes.find((c) => data.states[c].lt && data.states[c].lt.vacant);

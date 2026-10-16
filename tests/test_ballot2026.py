@@ -79,6 +79,25 @@ class TestCheck(unittest.TestCase):
             states["OH"]["upper"] = (name, total + 1, up, basis, src)
         self.assertIn("government_maps.SEATS", self.broken(grow))
 
+    def test_a_county_page_is_not_the_state_record(self):
+        def cite(states):
+            name, total, up, basis, _src = states["OH"]["upper"]
+            states["OH"]["upper"] = (name, total, up, basis,
+                                     "https://vote.franklincountyohio.gov/Candidates")
+        self.assertIn("compiled table", self.broken(cite))
+
+    def test_the_build_reports_a_broken_table(self):
+        from kyc import validate
+        self.assertEqual(validate.check_ballot2026(), [])
+        original = ballot2026.STATES
+        ballot2026.STATES = dict(original)
+        ballot2026.STATES.pop("OH")
+        try:
+            issues = validate.check_ballot2026()
+        finally:
+            ballot2026.STATES = original
+        self.assertEqual([i.level for i in issues], ["error"])
+
     def test_a_joint_ticket_is_elected_with_the_governor(self):
         def split(states):
             sel, up, note, src = states["OH"]["lt"]

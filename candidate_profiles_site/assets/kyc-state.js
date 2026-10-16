@@ -227,7 +227,7 @@
         '<h2 class="state-heading">2026 races for Congress in ' + KYC.escapeHtml(name) + "</h2>",
         '<p class="state-note">Each seat with the sitting member, everyone on the ' +
           "November ballot, and - folded under the race - everyone the primary removed. " +
-          alsoOnBallot(code, name) + "</p>",
+          alsoOnBallot(code, name, info.territory) + "</p>",
         (senateRaces.length + houseRaces.length > 3
           ? '<nav class="toolbar jump-row" aria-label="Jump to a race">' + jumps + "</nav>"
           : ""),
@@ -242,19 +242,25 @@
   /** What else the state's November 3 ballot elects, from the same table the
    *  State government section marks, in a sentence. This site lists the
    *  candidates for Congress only, and says so. */
-  function alsoOnBallot(code, name) {
+  function alsoOnBallot(code, name, territory) {
     var list = KYC.stategov ? KYC.stategov.ballotList(code) : null;
+    var rest = "special elections for vacant seats, other statewide, judicial and local " +
+      "contests, and ballot measures, which this site does not list";
     if (list === null) {
-      return "Your ballot may also hold local contests, which this site does not list.";
+      return territory
+        ? "Your ballot may also hold territorial and local contests, such as for governor " +
+          "and the legislature, which this site does not list."
+        : "Your ballot may also hold local contests, which this site does not list.";
     }
     if (!list) {
-      return "None of " + KYC.escapeHtml(name) + "'s statewide offices or legislative seats " +
-        "covered here is elected in 2026; the ballot may still hold local contests, which " +
-        "this site does not list.";
+      return "None of " + KYC.escapeHtml(name) + "'s governor, lieutenant governor, attorney " +
+        "general, secretary of state or regular legislative seats is elected in 2026; the " +
+        "ballot may still hold " + rest + ".";
     }
-    return "The same ballot also elects " + KYC.escapeHtml(list) + " (see " +
-      '<a class="state-jump" href="#state-government">State government</a>), and local offices. This site ' +
-      "lists the candidates for Congress only.";
+    return "Of the state offices this site covers, the same ballot also elects " +
+      KYC.escapeHtml(list) + " (see " +
+      '<a class="state-jump" href="#state-government">State government</a>). It may also hold ' +
+      rest + ". This site lists the candidates for Congress only.";
   }
 
   /* A link to a section of this page ("#state-government", from the guide)

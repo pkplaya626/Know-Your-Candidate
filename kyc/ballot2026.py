@@ -17,8 +17,10 @@ can hold lists state candidates, and names from a search are not data.
 
 Each office is ``(how it is filled, on the 2026 ballot, a note, source)``.
 Each chamber is ``(its name, seats, seats on the 2026 ballot, which, source)``;
-Nebraska's one chamber is its ``upper`` and its ``lower`` is None. Special
-elections to fill a single vacancy are not counted.
+Nebraska's one chamber is its ``upper`` and its ``lower`` is None. Only
+regular elections are counted: a special election to fill an unexpired term
+(two Kansas Senate seats in 2026, for one) is not, and the page says
+"regular" wherever a count could be read as the whole ballot.
 """
 
 import urllib.parse
@@ -34,8 +36,10 @@ SELECTIONS = ("elected", "elected-jointly-with-governor", "appointed",
 OFFICES = ("governor", "lt", "ag", "sos")
 TITLES = {"governor": "Governor", "lt": "Lieutenant governor", "ag": "Attorney general",
           "sos": "Secretary of state"}
-# Compiled tables are leads, never the cited source (rule 50).
-NOT_A_SOURCE = ("ncsl.org", "ballotpedia.org", "wikipedia.org", "270towin.com")
+# Compiled tables are leads, never the cited source (rule 50); a county's
+# page is not the state's record of a statewide count.
+NOT_A_SOURCE = ("ncsl.org", "ballotpedia.org", "wikipedia.org", "270towin.com",
+                "countyohio.gov")
 
 STATES = {
     "AK": {
@@ -163,8 +167,8 @@ STATES = {
             "4-year term; constitutional officer on the 2026 ballot",
             "https://portal.ct.gov/-/media/sots/electionservices/voter_guide/2026/2026_voter_guide_final.pdf"),
         "lt": ("elected-jointly-with-governor", True,
-            "Same ticket as the governor (e.g. Lamont/Bysiewicz on sample ballot)",
-            "https://portal.ct.gov/-/media/sots/electionservices/voter_guide/2026/2026_voter_guide_final.pdf"),
+            "elected jointly with the governor: one vote for both (Const. art. IV, s3)",
+            "https://www.cga.ct.gov/asp/Content/constitutions/Constitution_State_CT.pdf"),
         "ag": ("elected", True,
             "4-year term",
             "https://portal.ct.gov/-/media/sots/electionservices/voter_guide/2026/2026_voter_guide_final.pdf"),
@@ -621,8 +625,8 @@ STATES = {
             "2-year term; elected every even year",
             "https://www.sos.nh.gov/sites/g/files/ehbemt561/files/inline-documents/sonh/filing-for-office-2026.pdf"),
         "lt": ("no-such-office", False,
-            "New Hampshire has no lieutenant governor; the Senate president is first in succession",
-            "https://gc.nh.gov/rsa/html/LXIII/655/655-43.htm"),
+            "New Hampshire has no lieutenant governor; the Senate president is first in succession (Const. pt. II, art. 49)",
+            "https://www.nh.gov/glance/state-constitution/executive-power-governor"),
         "ag": ("appointed", False,
             "appointed by the governor and Executive Council (RSA 7:1, RSA 21-M:3; Const. Pt. II, Art. 46)",
             "https://gc.nh.gov/rsa/html/I/7/7-1.htm"),
@@ -731,7 +735,7 @@ STATES = {
             "https://www.ohiosos.gov/assets/dir2026-45-official-sample-ballot-november-3-2026.pdf"),
         "upper": ("Senate", 33, 17,
             "the 17 odd-numbered districts (4-year staggered terms, Ohio Const. art. II, s2)",
-            "https://vote.franklincountyohio.gov/Candidates/Elected-Officials"),
+            "https://codes.ohio.gov/ohio-constitution/section-2.2"),
         "lower": ("House of Representatives", 99, 99,
             "all (2-year terms, Ohio Const. art. II, s2)",
             "https://www.ohiosos.gov/assets/candidate-requirement-guide-2026.pdf"),
@@ -902,13 +906,13 @@ STATES = {
             "https://vote.utah.gov/2026-candidate-filings/"),
         "lt": ("elected-jointly-with-governor", False,
             "elected jointly with the governor (Utah Const. art. VII, s2); also the state's chief election officer",
-            "https://le.utah.gov/xcode/ArticleVII/Article_VII"),
+            "https://le.utah.gov/xcode/Articlevii/UC_AVII_1800010118000101.pdf"),
         "ag": ("elected", False,
             "4-year term; last elected 2024",
             "https://vote.utah.gov/2026-candidate-filings/"),
         "sos": ("no-such-office", False,
             "Utah has no secretary of state; the lieutenant governor performs those duties",
-            "https://le.utah.gov/xcode/ArticleVII/Article_VII"),
+            "https://le.utah.gov/xcode/Articlevii/UC_AVII_1800010118000101.pdf"),
         "upper": ("Senate", 29, 15,
             "districts 1, 5, 6, 7, 9, 11, 12, 13, 14, 18, 19, 20, 21, 23, 28",
             "https://vote.utah.gov/2026-candidate-filings/"),

@@ -84,6 +84,10 @@
       [FILL.R, "Elected Nov 3; the governor now is a Republican"],
       [FILL.D, "Elected Nov 3; the governor now is a Democrat"],
       [FILL.none, "No governor's election in 2026"],
+      // The territories and D.C. are not in the table: never the grey above,
+      // which would say they elect no one (Guam, the Virgin Islands and the
+      // Northern Mariana Islands all elect a governor on Nov 3).
+      [FILL.nonpartisan, "Not covered here (territories and D.C.)"],
     ],
   };
 
@@ -115,6 +119,8 @@
     var name = c.name === "Legislature" ? "Legislature" : c.name;
     return c.up === c.seats ? "all " + c.seats + " " + name + " seats"
       : c.up + " of the " + c.seats + " " + name + " seats";
+    // Regular elections: a special election for an unexpired term is not
+    // counted, and the sentence that uses this says so.
   }
 
   function andList(list) {
@@ -141,11 +147,17 @@
 
   /** A mark beside an office or chamber: on the November 3 ballot or not,
    *  linked to the state's own record that says so. */
-  function ballotMark(item, text) {
+  function ballotMark(item, text, more) {
     if (!item) return "";
     return '<a class="gov-ballot-mark' + (item.up ? " up" : "") + '" href="' +
       KYC.escapeAttr(item.source) + '" target="_blank" rel="noopener noreferrer" title="' +
-      KYC.escapeAttr(item.note || item.basis || "") + '">' + KYC.escapeHtml(text) + "</a>";
+      KYC.escapeAttr((item.note || item.basis || "") + (more || "")) + '">' +
+      KYC.escapeHtml(text) + "</a>";
+  }
+
+  function ballotItem(code, key) {
+    var b = ballot(code);
+    return (b && b.offices[key]) || null;
   }
 
   function officeMark(code, key) {
@@ -164,8 +176,9 @@
     var b = ballot(code);
     var c = b && b.chambers[which];
     if (!c) return "";
-    return ballotMark(c, !c.up ? "No seats elected in 2026"
-      : (c.up === c.seats ? "All " + c.seats : c.up + " of " + c.seats) + " seats on the Nov 3 ballot");
+    return ballotMark(c, !c.up ? "No regular elections in 2026"
+      : (c.up === c.seats ? "All " + c.seats : c.up + " of " + c.seats) + " seats on the Nov 3 ballot",
+      " Regular elections only: a special election to fill an unexpired term is not counted.");
   }
 
   function any(test) {
@@ -223,6 +236,9 @@
   function look(code, mode) {
     var s = state(code);
     var name = KYC.stateName(code);
+    if (mode === "governor2026" && !ballot(code)) {
+      return { fill: FILL.nonpartisan, text: name + ": not covered here" };
+    }
     if (!s) {
       return { fill: FILL.none, text: code === "DC"
         ? "D.C. has an elected mayor and council, not a governor"
@@ -234,9 +250,7 @@
                text: name + ": Gov. " + gov.name + " (" + gov.party + ")" };
     }
     if (mode === "governor2026") {
-      var b = ballot(code);
-      if (!b) return { fill: FILL.none, text: name + ": not covered" };
-      return b.offices.governor.up
+      return ballot(code).offices.governor.up
         ? { fill: FILL[gov.partyKey] || FILL.I,
             text: name + ": the governor is elected on Nov 3 (now Gov. " + gov.name + ", " + gov.party + ")" }
         : { fill: FILL.none, text: name + ": no governor's election in 2026" };
@@ -349,9 +363,12 @@
   }
 
   /** One statewide officer's row: the holder, or why there is none. */
-  function officerRow(kind, off, mark) {
+  function officerRow(kind, off, mark, item) {
     var label = OFFICES[kind].title;
     if (!off) return "";
+    // An office the roster lists as missing that is elected on Nov 3 is a
+    // new one (Arizona's lieutenant governor, Proposition 131 of 2022).
+    var fresh = off.none && item && item.up ? item : null;
     var body;
     if (off.disputed && kind === "ag") {
       body = '<p class="gov-officer-note">The sources disagree: ' +
@@ -374,6 +391,11 @@
         (off.office ? " " + link(off.office, "The office's site") + "." : "") + "</p>";
     } else if (off.vacant) {
       body = '<p class="gov-officer-note">Vacant, as the National Lieutenant Governors Association lists it.</p>';
+    } else if (off.none && kind === "lt" && fresh) {
+      body = '<p class="gov-officer-note">No one holds this office yet: ' +
+        KYC.escapeHtml(fresh.note) + "." +
+        (off.successor ? " First in line to succeed the governor until then: " +
+          KYC.escapeHtml(off.successor.title) + " " + who(off.successor) + "." : "") + "</p>";
     } else if (off.none && kind === "lt") {
       body = '<p class="gov-officer-note">The state has no lieutenant governor.' +
         (off.successor ? " First in line to succeed the governor: " +
@@ -469,8 +491,9 @@
       "</div></div>";
     if (s.lt || s.ag || s.sos) {
       html += '<p class="panel-subhead">Statewide officers</p><ul class="gov-officers">' +
-        officerRow("lt", s.lt, officeMark(code, "lt")) + officerRow("ag", s.ag, officeMark(code, "ag")) +
-        officerRow("sos", s.sos, officeMark(code, "sos")) + "</ul>";
+        officerRow("lt", s.lt, officeMark(code, "lt"), ballotItem(code, "lt")) +
+        officerRow("ag", s.ag, officeMark(code, "ag"), ballotItem(code, "ag")) +
+        officerRow("sos", s.sos, officeMark(code, "sos"), ballotItem(code, "sos")) + "</ul>";
     }
     if (s.upper) {
       html += '<p class="panel-subhead">Legislature</p><ul class="gov-chambers">' +
