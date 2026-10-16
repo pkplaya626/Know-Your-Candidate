@@ -549,6 +549,9 @@ def _congress(args):
     raw = _load(args)
     if raw is None:
         return 2
+    # The membership as committed, before this run writes a new one: who
+    # leaves is still in it, with the term a 2026 winner was seated for.
+    previous = legislators.load_snapshot(args.root)
 
     if args.check:
         snapshot = legislators.load_snapshot(args.root)
@@ -624,6 +627,9 @@ def _congress(args):
 
     drift = legislators.reconcile(raw["members"], snapshot, ended=ended)
     print(f"\n  reconciliation: {drift.summary()}")
+    for person in legislators.winners_leaving(drift, previous, raw.get("record")):
+        print(f"    - {person['name']} won {person['raceId']} and has left: the archive keeps "
+              f"the race and their FEC ids ({', '.join(person['fec']) or 'none listed'})")
 
     for person in drift.missing:
         seat = (

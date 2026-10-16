@@ -396,8 +396,11 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
 
 
 def _former_members(rows, record, profiles, seats_up, as_of=None):
-    """A profile for each record incumbent who has left Congress, from the
-    row ``congress --apply`` archived for them (``Former_Members.csv``).
+    """A profile for each record incumbent who has left Congress, and each
+    2026 winner who has, from the row ``congress --apply`` archived for them
+    (``Former_Members.csv``). A winner's row names the race and role
+    (``Race Role``, ``Race ID``) and their FEC ids (``fecIds``), so the race
+    keeps its winner and their filing stays theirs.
 
     The member shape and the bioguide id are kept, so their race, money,
     portrait, disclosures and every link already shared still find them;
@@ -421,8 +424,40 @@ def _former_members(rows, record, profiles, seats_up, as_of=None):
             archived.setdefault(bioguide, []).append(row)
     races = record.get("races") or {}
     incumbents = record.get("incumbents") or {}
+    held_by = held_races(record)
+    won = {}
+    for bioguide, rows_of in archived.items():
+        for row in rows_of:
+            rid = clean_str(row.get("Race ID"), "")
+            if (clean_str(row.get("Race Role"), "") == "winner" and rid in races
+                    and bioguide not in held_by):
+                won[bioguide] = (rid, row)
     out = []
-    for bioguide, rid in sorted(held_races(record).items()):
+    for bioguide, (rid, row) in sorted(won.items()):
+        if bioguide in on_roster:
+            continue
+        race = races[rid]
+        district = race.get("district")
+        seat = {"Chamber": race.get("chamber"), "State": race.get("state"),
+                "District": "" if race.get("chamber") == "Senate" else (
+                    "At-Large" if district == 0 else f"District {district}")}
+        row = dict(row, **seat)
+        left = clean_str(row.get("Left Office"), "")
+        profile = _build_member(row, 0, seats_up, None, person=None, as_of=as_of)
+        profile.update(
+            formerMember={"left": left, "via": clean_str(row.get("Left Via"), ""),
+                          "congress": int(clean_str(row.get("Last Congress"), "0") or 0) or None},
+            status=f"Former member: left office {left}",
+            term_start=f"{clean_str(row.get('Term Start'), 'N/A')[:10]} - {left}",
+            termEndYear=int(left[:4]), committees="",
+            raceRole="winner", raceId=rid,
+            fecIds=[i for i in clean_str(row.get("FEC IDs"), "").split(";") if i],
+            seatUp2026=False, isUpIn2026=False, seekingReelection2026=False)
+        if "Senate" in profile["chamber"]:
+            profile.update(senateClass=race.get("senateClass"), nextElection=None,
+                           senateSpecial=bool(race.get("special")))
+        out.append(profile)
+    for bioguide, rid in sorted(held_by.items()):
         if bioguide in on_roster or bioguide not in archived:
             continue
         # The seat they held on the ballot, whatever they sat in last: a
@@ -453,6 +488,16 @@ def _former_members(rows, record, profiles, seats_up, as_of=None):
             race = races.get(rid) or {}
             profile.update(senateClass=race.get("senateClass"), nextElection=None,
                            senateSpecial=bool(race.get("special")))
+        # A record incumbent who won another record seat and then left: still
+        # this race's incumbent (heldRaceId), and that race's winner.
+        elsewhere = next((r for r in rows_of if clean_str(r.get("Race Role"), "") == "winner"
+                          and clean_str(r.get("Race ID"), "") in races
+                          and clean_str(r.get("Race ID"), "") != rid), None)
+        if elsewhere is not None:
+            profile.update(raceRole="winner", raceId=clean_str(elsewhere.get("Race ID"), ""),
+                           fecIds=[i for i in clean_str(elsewhere.get("FEC IDs"), "").split(";")
+                                   if i],
+                           seekingReelection2026=False)
         out.append(profile)
     return out
 
@@ -490,6 +535,14 @@ def _mark_record_roles(profiles, record, snapshot, field):
             # The seat they held on the ballot, whatever they sit in now:
             # what counts them among a chamber's seats up (rule 1).
             profile["heldRaceId"] = held[profile["id"]]
+        if profile.get("formerMember") and profile.get("raceRole") == "winner":
+            # A winner who has left: their race and role are their archived
+            # row's, and their filing is found by the ids it kept.
+            mine = [i for i in profile.get("fecIds") or []
+                    if i in filed.get(profile["raceId"], ())]
+            if mine and not profile.get("fecCandidateId"):
+                profile["fecCandidateId"] = mine[0]
+            continue
         role, rid = "winner", changes["winners"].get(profile["id"])
         if not rid:
             role, rid = "successor", changes["successors"].get(profile["id"])
@@ -550,7 +603,12 @@ def _claimed_ids(profiles, people, record):
             continue
         if seated(profile):
             out |= set((people.get(profile["id"]) or {}).get("fec") or [])
-        elif profile["id"] in held:
+            continue
+        if profile.get("raceRole") == "winner" and profile.get("fecIds"):
+            # A 2026 winner who has left: the ids their archived row kept,
+            # for the chamber of the seat they won.
+            out |= {i for i in profile["fecIds"] if i[:1] == profile["raceId"][:1]}
+        if profile["id"] in held:
             rid = held[profile["id"]]
             out |= {i for i in (incumbents[rid] or {}).get("fec") or [] if i[:1] == rid[:1]}
     return out
@@ -900,6 +958,10 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
     for profile in profiles:
         if seated(profile):
             for filing in (people.get(profile["id"]) or {}).get("fec") or []:
+                owned[filing] = profile
+        elif profile.get("raceRole") == "winner":
+            # A 2026 winner who has left: the ids their archived row kept.
+            for filing in profile.get("fecIds") or []:
                 owned[filing] = profile
     for index, row in enumerate(candidates):
         filing = clean_str(row.get("FEC Candidate ID"), "")

@@ -494,6 +494,83 @@ class TestAMembersOwnSeat(unittest.TestCase):
         self.assertFalse(validate._new_term({"term_start": "Jan. 3, 2027 (if elected)"}))
 
 
+class TestAWinnerWhoLeaves(unittest.TestCase):
+    """A 2026 winner seated in December who leaves in March. The new
+    snapshot no longer holds them; the committed one does, so congress
+    --apply archives their row with the race they won and every FEC id
+    Congress's record listed (legislators.winners_leaving). The race keeps
+    its winner, now a former member, and their filing stays theirs - never a
+    second profile beside them, never a race with no winner."""
+
+    @classmethod
+    def setUpClass(cls):
+        from kyc import candidates
+
+        cls.raw = sources.load_all(ROOT)
+        cls.field = candidates.load_cache(ROOT)
+        cls.roster, cls.after, _florida, _ = specials_seated(
+            cls.raw, legislators.load_snapshot(ROOT))
+        filers = [r for r in screen_field(cls.field, build_profiles(cls.raw)[0],
+                                          cls.raw["record"])["candidates"]
+                  if candidates.race_id(r) == "S-FL-2026"
+                  and (r.get("receipts") or 0) >= candidates.STATUTORY_THRESHOLD
+                  and r.get("incumbent_challenge") != "I"]
+        if not filers:
+            raise unittest.SkipTest("no Florida Senate filer past the threshold")
+        cls.filing = max(filers, key=lambda r: r["receipts"])["candidate_id"]
+        for person in cls.after["legislators"]:
+            if person["bioguide"] == "Z900001":
+                person["fec"] = person["fecAll"] = [cls.filing]
+        cls.gone = copy.deepcopy(cls.after)
+        cls.gone["legislators"] = [p for p in cls.gone["legislators"]
+                                   if p["bioguide"] != "Z900001"]
+        historical = [{"id": {"bioguide": "Z900001"},
+                       "terms": [{"start": "2026-12-08", "end": "2027-03-01"}]}]
+        cls.gone["fetched"] = "2027-03-02T07:20:00+00:00"
+        ended = legislators.departures({"Z900001"}, cls.gone, historical)
+        cls.drift = legislators.Drift()
+        cls.drift.expected = [dict({"bioguide": "Z900001", "name": "Zora Example",
+                                    "chamber": "Senate"}, **ended["Z900001"])]
+        cls.marked = legislators.winners_leaving(cls.drift, cls.after, cls.raw["record"])
+
+    def test_the_archive_keeps_the_race_and_the_ids(self):
+        self.assertEqual([(p["raceRole"], p["raceId"], p["fec"]) for p in self.marked],
+                         [("winner", "S-FL-2026", [self.filing])])
+        row = next(r for r in self.roster["members"] if r.get("Bioguide ID") == "Z900001")
+        fields = [k for k in row if k != "_source"]
+        with tempfile.TemporaryDirectory() as tmp:
+            for chamber, name in legislators.ROSTER_FOR_CHAMBER.items():
+                legislators._write_rows(os.path.join(tmp, name), fields,
+                                        [row] if chamber == "Senate" else [])
+            legislators.apply(self.drift, tmp, today=datetime.date(2027, 3, 2))
+            _fields, former = legislators._read_rows(
+                os.path.join(tmp, legislators.FORMER_ROSTER))
+        self.assertEqual([(r["Bioguide ID"], r["Race Role"], r["Race ID"], r["FEC IDs"])
+                          for r in former], [("Z900001", "winner", "S-FL-2026", self.filing)])
+
+    def test_the_race_keeps_its_winner_and_the_filing_is_theirs(self):
+        row = next(r for r in self.roster["members"] if r.get("Bioguide ID") == "Z900001")
+        archived = dict(row, **{"Left Office": "2027-03-01", "Left Via": "legislators-historical",
+                                "Last Congress": "120", "Race Role": "winner",
+                                "Race ID": "S-FL-2026", "FEC IDs": self.filing})
+        roster = dict(self.roster,
+                      members=[r for r in self.roster["members"] if r is not row],
+                      former=list(self.roster.get("former") or []) + [archived])
+        profiles, _ = build_profiles(roster, snapshot=self.gone, field=self.field)
+        people = {p["id"]: p for p in profiles}
+        winner = people["Z900001"]
+        self.assertEqual((winner["raceRole"], winner["raceId"], winner["formerMember"]["left"],
+                          winner["fecCandidateId"]),
+                         ("winner", "S-FL-2026", "2027-03-01", self.filing))
+        self.assertFalse(record.seated(winner))
+        self.assertFalse([p for p in profiles if p["id"] != "Z900001" and self.filing in (
+            p.get("fecCandidateId"), p.get("rosterFecId"))])
+        race = next(r for r in races.build(profiles, record=self.raw["record"])
+                    if r["id"] == "S-FL-2026")
+        self.assertEqual(race["winnerId"], "Z900001")
+        self.assertEqual(validate.check_former_wins(roster["former"], self.raw["record"]), [])
+
+
 class TestTheSpecialsSeatedThroughApply(unittest.TestCase):
     """The December refresh end to end, on copies of the committed rosters:
     the specials' membership, what `congress --apply` does with it, then the

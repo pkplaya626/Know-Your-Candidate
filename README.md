@@ -334,7 +334,12 @@ atomically:
   and platform are the person's, and stay. A new term never changes a party,
   so a party difference is still an error for somebody to look at.
 - **Anyone who has left** moves, row and all, to `Former_Members.csv`, with
-  the day they left, the record that says so and their last Congress. Who
+  the day they left, the record that says so and their last Congress. A 2026
+  winner who leaves keeps the race they won. The committed snapshot they last
+  sat in still holds them, so their row also records `Race Role` "winner",
+  the `Race ID`, and every FEC id Congress's record listed for them
+  (`FEC IDs`, from `legislators.winners_leaving`). The race keeps its winner
+  and the filing stays theirs. Who
   has left is decided by bioguide id, never by name: `legislators-historical`
   lists them with a term ended by the day the snapshot was read, and the day
   it gives is the one written (for an appointee, the day their successor was
@@ -1031,7 +1036,7 @@ Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
 | `nextElection` | Sitting senators only: the year the seat is next on the November ballot, from the real term end date - a term ending 3 January is decided the November before; an appointee's term ending on election day is decided that year. Class II -> 2026, Class III -> 2028, Class I -> 2030, except a special |
 | `senateSpecial` | Sitting senators only: `true` when `nextElection` comes before the class's regular cycle - a special election for the rest of the term (Ohio and Florida's Class III seats in 2026) |
 | `rosterSeat` | For a curated challenger, the seat the roster gave them when the FEC filing says otherwise |
-| `formerMember` | `{left, via, congress}`: a record incumbent - who held a 2026 seat - who has since left Congress, built from their `Former_Members.csv` row with the same bioguide id, so their race, money, portrait and links still find them. Never counted as sitting: every "who represents me" view asks `record.seated` / `KYC.seated`. The term ends the day they left; the archived status line and committee seats are not shown | Record incumbents who have left |
+| `formerMember` | `{left, via, congress}`: a record incumbent - who held a 2026 seat - or a 2026 winner who has since left Congress. A winner keeps `raceRole` "winner" and `fecIds`, the FEC ids their archived row kept. Built from their `Former_Members.csv` row with the same bioguide id, so their race, money, portrait and links still find them. Never counted as sitting: every "who represents me" view asks `record.seated` / `KYC.seated`. The term ends the day they left; the archived status line and committee seats are not shown | Record incumbents who have left |
 | `raceRole` | `"winner"`: a member seated since Election Day for the term a 2026 race decided, in a seat they did not hold (`record.seat_changes`); `raceId` is that race, and they are its winner, never its incumbent, never "re-elected". `"successor"`: seated in such a seat since Election Day for another term - a special election for the rest of the old one, an appointment - and in the race only if they ran in it. A record incumbent who won another seat (Andy Barr, KY-6 to the Senate) keeps `contestRaceId` for it | Members seated in a 2026 seat they did not hold |
 | `committeesPending` | The Congress whose committee rosters are not published yet. It is set from January 3, a chamber at a time, until that chamber's rosters are whole: every full committee has members and nine in ten of its members hold a seat (`legislators.committee_chambers`). It replaces the previous Congress's seats, and the profile and the guide say so. A member of a chamber whose rosters are whole but who holds no seat has none, and is not pending | Sitting members, early in a Congress |
 | `heldRaceId` | The 2026 race whose seat this record incumbent held, sitting or former, whatever they sit in now; what counts them among a chamber's seats up | Record incumbents |
