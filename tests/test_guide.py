@@ -81,8 +81,11 @@ class TestNavigation(unittest.TestCase):
         # are one (kyc/government.py SITE_ANCHORS, assets/kyc-federal.js).
         with open(os.path.join(SITE, "assets", "kyc-federal.js"), encoding="utf-8") as handle:
             script = handle.read()
+        # The hub's sections and the changes section it always draws, read
+        # from the script, never added by hand.
         hub = script[script.index("function renderHub"):script.index("el(\"federalBody\").innerHTML = html")]
-        drawn = set(re.findall(r'section\("([a-z-]+)"', hub)) | {"changes"}
+        changes = script[script.index("function changesSection"):script.index("function renderHub")]
+        drawn = set(re.findall(r'section\("([a-z-]+)"', hub + changes))
         self.assertEqual(set(government.SITE_ANCHORS["federal/index.html"]), drawn)
         for target, _words in re.findall(r'\["([a-z]+\.html#[a-z-]+)", "([^"]+)"\]', script):
             slug, anchor = target[:-len(".html") - len(target.split("#")[1]) - 1], target.split("#")[1]
@@ -100,8 +103,11 @@ class TestNavigation(unittest.TestCase):
             "CT": {"county": None, "municipal": 30, "township": 149, "school": 17,
                    "special": 336, "total": 532}}})
         row = re.search(r"Connecticut</a></th>(.*?)</tr>", html).group(1)
-        self.assertIn('<td class="faint">none</td>', row)
+        self.assertIn('<td class="faint" title="No county governments.">none</td>', row)
         self.assertNotIn("<td>0</td>", row)
+        # A count of school districts is of independent ones (the guide's words).
+        self.assertIn("<th scope=\"col\">Independent school districts</th>", html)
+        self.assertNotIn(">School districts<", html)
 
 
 class TestGuideLinks(unittest.TestCase):

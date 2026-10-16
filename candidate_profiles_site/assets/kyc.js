@@ -1585,6 +1585,16 @@
       " gives the same office the same years." + escapeHtml(withheld) + "</p>";
   }
 
+  /** What a Cabinet office's holder is called, as the federal page and
+   *  the guide both say it: their own title where it is not the office's
+   *  ("Secretary of War" for the Secretary of Defense), else none, and
+   *  whether the office's page says they are acting. */
+  function holderRole(office) {
+    var h = (office && office.holder) || {};
+    return { title: h.title && h.title !== office.office ? h.title : "",
+             acting: !!(h.page || {}).acting };
+  }
+
   global.KYC = {
     // theme
     setTheme: setTheme,
@@ -1596,6 +1606,7 @@
     escapeAttr: escapeAttr,
     renderField: renderField,
     officesHeld: officesHeld,
+    holderRole: holderRole,
     heldText: heldText,
     heldYears: heldYears,
     sourceBadge: sourceBadge,

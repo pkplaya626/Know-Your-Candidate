@@ -1917,22 +1917,22 @@ SEE = {
         ("Every state's cities and towns, on a map", "site:counties/index.html")],
     ("local", "townships"): [("Every state's local governments, counted", "site:counties/index.html")],
     ("elections", "when"): [
-        ("The 2026 races", "site:index.html#/?view=race"),
+        ("The races on the ballot", "site:index.html#/?view=race"),
         ("The races on the partisan map", "site:map.html")],
     ("elections", "primaries"): [("Who is still on the ballot", "site:index.html")],
 }
 
 # Sections that list who holds the offices they explain, from the site's
 # data (assets/kyc-guide.js), never typed (rule 48): (page, section) ->
-# (what, the words a reader sees without the script).
+# (what, its heading, the words a reader sees without the script).
 HOLDERS = {
     ("executive", "president"): (
-        "executive", "Who holds these offices now is on the "
+        "executive", "Who holds these offices now", "Who holds these offices now is on the "
         "[federal government's page](site:federal/index.html#executive)."),
     ("executive", "departments"): (
-        "cabinet", "Who heads each department now is on the "
+        "cabinet", "Who heads each department now", "Who heads each department now is on the "
         "[federal government's page](site:federal/index.html#cabinet)."),
     ("courts", "supreme-court"): (
-        "justices", "The justices sitting now are on the "
+        "justices", "The justices sitting now", "The justices sitting now are on the "
         "[federal government's page](site:federal/index.html#supreme-court)."),
 }

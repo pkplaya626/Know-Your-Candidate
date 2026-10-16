@@ -1669,6 +1669,13 @@ async function testNavigation() {
     check("and Congress when it shows the sitting members",
       D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav") === "congress" &&
         D.querySelectorAll('.site-nav [aria-current]').length === 1);
+    // A chip writes the address without a hashchange: the mark follows it too.
+    D.querySelector('[data-group="role"][data-value="member"]').click();
+    const off = D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav");
+    D.querySelector('[data-group="role"][data-value="member"]').click();
+    const on = D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav");
+    check("and follows the role chip, both ways", off === "candidates" && on === "congress",
+      off + " / " + on);
     check("the guide is named Know Your Government",
       D.querySelector('.site-nav [data-nav="guide"]').textContent.trim() === "Know Your Government");
     check("the Congress and election boxes say where they are explained",
@@ -1691,6 +1698,7 @@ async function testNavigation() {
     check("Nebraska's one chamber", ne.querySelectorAll(".gov-chamber").length === 1, ne.textContent);
     check("the sidebar marks State legislatures",
       D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav") === "legislatures");
+    check("its state picker lists every state", D.getElementById("stateJump").options.length > 50);
     check("and links how legislatures work",
       !!D.querySelector('a[href="../government/states.html#legislatures"]'));
   });
@@ -1709,6 +1717,13 @@ async function testNavigation() {
       ct && ct.children[1].textContent === "none", ct && ct.children[1].textContent);
     check("the sidebar marks Counties & cities",
       D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav") === "local");
+    check("its state picker lists every state", D.getElementById("stateJump").options.length > 50);
+    const md = rows.find((r) => /Maryland/.test(r.textContent));
+    const col = [...D.querySelectorAll(".directory-table thead th")]
+      .findIndex((th) => th.textContent === "Independent school districts");
+    check("a state with no independent school districts says what that means",
+      col > 0 && /dependent/.test(md.children[col].getAttribute("title") || ""),
+      md && md.children[col] && md.children[col].outerHTML);
   });
 
   const exec = await buildPage("government/executive.html");
@@ -1727,10 +1742,38 @@ async function testNavigation() {
     const heads = D.querySelectorAll('.guide-live[data-live="cabinet"] li');
     check("every department's head", heads.length ===
       d.offices.filter((o) => o.kind === "department").length);
+    const list = D.querySelector('.guide-live[data-live="cabinet"]');
+    check("under a heading of its own, not the section's last subheading",
+      /Who heads each department now/.test((list.previousElementSibling || {}).textContent || ""));
+    // The federal page's words for a holder: their own title, and Acting.
+    const office = d.offices.find((o) => o.kind === "department" && o.holder);
+    const kept = office.holder.page;
+    office.holder.page = Object.assign({}, kept, { acting: true });
+    window.KYC.guide.live.cabinet(list);
+    const said = [...list.querySelectorAll("li")].find((li) => li.textContent.indexOf(office.holder.name) === 0);
+    office.holder.page = kept;
+    window.KYC.guide.live.cabinet(list);
+    check("an acting head is called acting, as the federal page calls them",
+      !!said && /Acting /.test(said.textContent), said && said.textContent);
+    const titled = d.offices.find((o) => o.holder && o.holder.title && o.holder.title !== o.office);
+    if (titled) {
+      check("and by their own title where it is not the office's",
+        [...list.querySelectorAll("li")].some((li) => li.textContent.indexOf(titled.holder.title) !== -1));
+    }
     check("each section says where it can be seen on this site",
       !!D.querySelector('#departments .guide-see a[href="../federal/index.html#cabinet"]'));
     check("the sidebar marks Know Your Government as this page's level",
       D.querySelector('.site-nav [aria-current]').getAttribute("data-nav") === "guide");
+  });
+
+  const hub = await buildPage("federal/index.html", { hash: "#supreme-court" });
+  await settle(50);
+  suite("federal/index.html — the hub holds two of the sidebar's entries", () => {
+    const { D } = hub;
+    check("Federal courts is marked on the courts' sections",
+      D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav") === "courts" &&
+        D.querySelectorAll('.site-nav [aria-current]').length === 1);
+    check("the changes section is always drawn, for the guide's link", !!D.getElementById("changes"));
   });
 
   const courts = await buildPage("government/courts.html");

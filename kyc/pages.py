@@ -359,6 +359,7 @@ def render_legislatures_index(host):
     seats by party and who holds a majority - drawn by
     ``assets/kyc-stategov.js`` from ``data/stategov.js``, the words of the
     state pages. The list itself is plain links, there without the script."""
+    from .government import jump_options
     from .government_maps import STATES
 
     path = "legislature/index.html"
@@ -405,39 +406,49 @@ def render_legislatures_index(host):
         search="",
         sidebar="",
         nav_current="legislatures",
+        jump_options=jump_options(STATES),
+        jump_attrs=' data-jump-to="legislature/{code}.html"',
         main=main,
         footer=footer,
         scripts=_scripts(("../data/stategov.js", "../assets/kyc-stategov.js")),
     )
 
 
-# The Census of Governments' kinds of local government, in the order the
-# guide explains them, and what each column says.
-_LOCAL_KINDS = (("county", "Counties"), ("municipal", "Cities and towns"),
-                ("township", "Towns and townships"), ("school", "School districts"),
-                ("special", "Special districts"), ("total", "All local governments"))
+def _local_kinds():
+    """The Census of Governments' kinds, as the guide's map words them
+    (government_maps.LOCAL_KINDS, one table): ``[(key, column, none)]``,
+    the total last. A count of school districts is of *independent* ones;
+    a state with none runs its schools as dependent systems."""
+    from .government_maps import LOCAL_KINDS, NONE_OF_KIND
+
+    kinds = [k for k in LOCAL_KINDS if k[0] != "total"] + [k for k in LOCAL_KINDS if k[0] == "total"]
+    return [(key, title.split(":")[0], NONE_OF_KIND.get(key, f"No {plural}."))
+            for key, _short, title, _one, plural in kinds]
 
 
 def render_counties_index(host, census=None):
     """Every state's local governments, counted by kind as the Census of
     Governments counts them, each state linked to its counties page. A
     state with none of a kind (an "X" in the Census table) reads "none",
-    never 0 (rule 49)."""
+    with what that means, never 0 (rule 49)."""
+    from .government import jump_options
     from .government_maps import STATES
 
     path = "counties/index.html"
     canonical = f"https://{host}/{path}" if host else path
     counts = (census or {}).get("states") or {}
+    kinds = _local_kinds()
 
-    def cell(code, kind):
+    def cell(code, kind, none):
         value = (counts.get(code) or {}).get(kind)
         if value is None:
-            return '<td class="faint">none</td>' if code in counts else "<td>&ndash;</td>"
+            return (f'<td class="faint" title="{_e(none)}">none</td>' if code in counts
+                    else "<td>&ndash;</td>")
         return f"<td>{value:,}</td>"
 
     rows = "\n".join(
         f'                        <tr><th scope="row"><a href="{_e(code.lower())}.html">'
-        f'{_e(state_name(code))}</a></th>' + "".join(cell(code, k) for k, _w in _LOCAL_KINDS) + "</tr>"
+        f'{_e(state_name(code))}</a></th>' + "".join(cell(code, k, n) for k, _w, n in kinds) + "</tr>"
         for code in sorted(STATES, key=state_name))
     year = (census or {}).get("year")
     main = "\n".join([
@@ -457,7 +468,7 @@ def render_counties_index(host, census=None):
         '                <div class="directory-scroll" tabindex="0" role="region" aria-label="Local governments by state">',
         '                    <table class="directory-table">',
         '                        <thead><tr><th scope="col">State</th>' +
-        "".join(f'<th scope="col">{_e(words)}</th>' for _k, words in _LOCAL_KINDS) + "</tr></thead>",
+        "".join(f'<th scope="col">{_e(words)}</th>' for _k, words, _n in kinds) + "</tr></thead>",
         "                        <tbody>",
         rows,
         "                        </tbody>",
@@ -469,8 +480,9 @@ def render_counties_index(host, census=None):
         "                <p><strong>Source:</strong> the U.S. Census Bureau's Census of Governments"
         + (f" ({_e(year)})" if year else "") + ", which counts every",
         '                    local government by state and kind. "None" is a state with no',
-        "                    government of that kind; Connecticut and Rhode Island, for one, have no",
-        "                    county governments.</p>",
+        "                    government of that kind: one with no county governments has none, and",
+        "                    one with no independent school districts runs its schools as dependent",
+        "                    systems of the state, a county or a city.</p>",
         "                <p>Non-partisan and independent.</p>",
     ])
     return render_page(
@@ -485,6 +497,8 @@ def render_counties_index(host, census=None):
         search="",
         sidebar="",
         nav_current="local",
+        jump_options=jump_options(STATES),
+        jump_attrs=' data-jump-to="counties/{code}.html"',
         main=main,
         footer=footer,
         scripts="",

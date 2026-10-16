@@ -411,7 +411,11 @@
     var departments = d.offices.filter(function (o) { return o.kind === "department"; })
       .sort(function (a, b) { return a.order - b.order; });
     target.innerHTML = '<ul class="guide-holders">' + departments.map(function (office) {
-      return office.holder ? officialItem(office.holder, office.office)
+      // The office, the holder's own title and an acting mark, as the
+      // federal page's card says them (KYC.holderRole).
+      var role = KYC.holderRole(office);
+      return office.holder ? officialItem(office.holder, (role.acting ? "Acting " : "") +
+          office.office + (role.title ? " (" + role.title + ")" : ""))
         : '<li><span class="faint">' + KYC.escapeHtml(office.office) +
           ": nobody listed by the White House</span></li>";
     }).join("") + "</ul>" + asOfNote((d.asOf || {}).executive);
@@ -428,6 +432,7 @@
 
   var LIVE = { committees: renderCommittees, executive: renderExecutive, cabinet: renderCabinet,
                justices: renderJustices };
+  KYC.guide = { live: LIVE };
 
   function applyRoute(route) {
     if (!KYC.profile) return;

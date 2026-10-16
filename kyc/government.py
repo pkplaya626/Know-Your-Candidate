@@ -88,7 +88,10 @@ def _after(here, sid, pad):
     lines = []
     live = HOLDERS.get((here, sid))
     if live:
-        lines += _block(("live", live[0], live[1]), here, pad)
+        # Its own heading: in a section that ends with a subheading
+        # ("Changes since 2025") the list would otherwise read as part of it.
+        lines.append(f'{pad}<h3 class="guide-subheading">{html.escape(live[1], quote=False)}</h3>')
+        lines += _block(("live", live[0], live[2]), here, pad)
     see = SEE.get((here, sid))
     if see:
         links = []
