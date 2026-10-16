@@ -271,7 +271,13 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
         # Lindsey Graham's seat (rule 17).
         seat_up = seats_up is not None and profile_id in seats_up
 
-        if seat_up:
+        snapshot_end = (term_ends or {}).get(profile_id)
+        if seat_up and snapshot_end and snapshot_end > ELECTION_YEAR + 1:
+            # A record incumbent re-seated for a new term - Ohio's special
+            # election's winner in December, every re-elected senator on
+            # January 3 - serves to the term the snapshot states.
+            end_year = snapshot_end
+        elif seat_up:
             end_year = ELECTION_YEAR + 1
         else:
             # The snapshot knows when the term actually ends. The fallback

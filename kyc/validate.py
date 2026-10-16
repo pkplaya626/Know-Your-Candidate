@@ -78,7 +78,7 @@ def check_record(profiles, record, snapshot=None):
     record's: a race only the record has, or a seat only today has, is an
     error, except for such an ended term (record.drift).
     """
-    from . import cycle as cycle_mod, races as races_mod, record as record_mod
+    from . import cycle as cycle_mod, record as record_mod
 
     if not record:
         return [Issue("error", "no-record",
@@ -94,14 +94,14 @@ def check_record(profiles, record, snapshot=None):
         f"{rid} ({inc['name']}, {inc['bioguide']})"
         for rid, inc in record["incumbents"].items()
         if rid in senate and inc and inc["bioguide"] not in sitting
-        and not (fetched and (inc.get("termEnd") or "9999") <= fetched))
+        and not (fetched and (inc.get("termEnd") or "9999") <= fetched)
+        and not record_mod.seat_filled(record, rid, snapshot))
     if unseated:
         issues.append(Issue("error", "unmatched-senate-seat",
                             f"{len(unseated)} of the record's Senate incumbents are not sitting "
                             f"members, and their terms have not ended", unseated))
     if snapshot and cycle_mod.phase(snapshot) == "campaign":
-        live = races_mod.contestable(
-            [p for p in profiles if not p.get("isCandidate")], races_mod.ELECTION_YEAR)
+        live = record_mod.live_races(profiles, snapshot)
         apart = record_mod.drift(record, live, snapshot)
         if apart:
             issues.append(Issue("error", "record-drift",

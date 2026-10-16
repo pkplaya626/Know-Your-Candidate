@@ -133,7 +133,7 @@ def assign(profiles):
     return profiles
 
 
-def build(profiles, filed_counts=None, results=None, dates=None, filed=None):
+def build(profiles, filed_counts=None, results=None, dates=None, filed=None, record=None):
     """Return the race list, most contested first.
 
     ``contested`` means somebody besides the incumbent is running: a
@@ -196,7 +196,11 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None):
         if profile["party"] not in race["parties"]:
             race["parties"].append(profile["party"])
 
+    frozen = (record or {}).get("races") or {}
     for race in races.values():
+        # A special election (Florida's, Ohio's): from the frozen record, so it
+        # stays one after the seat's winner is seated for the term to 2029.
+        race["special"] = bool((frozen.get(race["id"]) or {}).get("special"))
         race["candidateCount"] = len(race["candidateIds"])
         race["contested"] = race["candidateCount"] > 0
         race["isTerritory"] = race["state"] in TERRITORIES

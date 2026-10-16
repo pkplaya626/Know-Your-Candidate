@@ -122,6 +122,33 @@ def save(record, root=".", cycle=None, force=False):
     return path
 
 
+def live_races(profiles, snapshot, cycle=None):
+    """Today's race set, independent of any record: House seats from the
+    sitting members' districts, Senate seats from the snapshot's term dates.
+
+    The Senate half must not come from ``seatUp2026``: with a record that
+    flag *is* the record, and the drift check would compare the record with
+    itself."""
+    from . import legislators, races as races_mod
+
+    cycle = cycle or cycle_mod.CYCLE
+    members = [p for p in profiles if not p.get("isCandidate")]
+    house = {rid for rid in races_mod.contestable(members, cycle) if rid.startswith("H-")}
+    senate = {races_mod.race_id("Senate", p["state"], None)
+              for p in legislators.senators_up(snapshot, cycle)}
+    return house | senate
+
+
+def seat_filled(record, rid, snapshot):
+    """True when someone else now sits in a record Senate race's seat - same
+    state, same class: an appointee after a resignation. The seat is still
+    on the ballot; the departure is the roster's business (check_snapshot)."""
+    race = ((record or {}).get("races") or {}).get(rid) or {}
+    return any(p.get("chamber") == "Senate" and p.get("state") == race.get("state")
+               and p.get("senateClass") == race.get("senateClass")
+               for p in (snapshot or {}).get("legislators", []))
+
+
 def race_ids(record):
     return set((record or {}).get("races") or {})
 

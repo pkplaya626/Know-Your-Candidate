@@ -3991,6 +3991,31 @@ async function testElectionNight() {
   });
 }
 
+/* Ohio's special election after its winner is seated for the term to 2029:
+ * the senator's next election moves to 2028, and the seat block must stay
+ * with the 2026 specials, where its race is. */
+async function testReseatedSpecial() {
+  const { window, D, errors } = await buildPage("index.html", {
+    hash: "#/?view=senate",
+    data: (w) => {
+      const race = w.kycRaces.find((r) => r.id === "S-OH-2026");
+      const holder = race && w.legislatorsData.find((p) => p.id === race.incumbentIds[0]);
+      if (holder) holder.nextElection = 2028;
+      w.__ohio = race;
+    },
+  });
+  suite("index.html — a special-election seat after its winner is seated", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const race = window.__ohio;
+    check("Ohio's 2026 race is in the data, marked special", !!race && race.special === true);
+    const block = race && D.getElementById("senate-seat-" + race.id);
+    const group = block && block.closest(".senate-group-special");
+    check("its seat block stays with the 2026 special elections", !!group &&
+      /2026 special elections/.test(group.querySelector(".senate-group-title").textContent),
+      group ? group.querySelector(".senate-group-title").textContent : "not in a special group");
+  });
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "guide") await testGuide();
@@ -3999,6 +4024,7 @@ async function testElectionNight() {
   if (!only || only === "stategov") await testStateGov();
   if (!only || only === "index.html") await testDirectoryAsync();
   if (!only || only === "index.html") await testSenate();
+  if (!only || only === "index.html") await testReseatedSpecial();
   if (!only || only === "index.html") await testOdds();
   if (!only || only === "index.html") await testSeatRows();
   if (!only || only === "map.html") await testMap();

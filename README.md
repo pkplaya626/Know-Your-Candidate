@@ -555,9 +555,15 @@ is never "re-elected"). Its signature is pinned in `kyc/cycle.py`, so
 and the date arithmetic: which Congress sits on a date, which one an
 election elects, and the Congress the committed snapshot is of. Until the
 Congress the cycle elects is sitting, `build --check` compares today's seats
-with the record (`record-drift`); the only difference allowed is a seat
-whose appointee's term has ended. The surname table of 2026 Senate seats is
-gone.
+with the record (`record-drift`), reading today's Senate seats straight from
+the snapshot's term dates so the record is never compared with itself; the
+only difference allowed is a seat whose appointee's term has ended. A record
+incumbent re-seated for a new term reads that term's end, and each Senate
+race carries `special` from the record, so the Senate view keeps Ohio's and
+Florida's seats with the 2026 specials after their winners are seated. A
+senator who resigns early and is succeeded by an appointee in the same seat
+is the roster's business, not a lost race. The surname table of 2026 Senate
+seats is gone.
 
 ### Louisiana's open primary
 

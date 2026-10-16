@@ -136,7 +136,7 @@ def _build(args):
 
     race_list = races_mod.build(profiles, candidates.filing_counts(field),
                                 results=outcomes, dates=results_mod.load_dates(args.root),
-                                filed=candidates.filed_rows(field))
+                                filed=candidates.filed_rows(field), record=raw.get("record"))
     stats.update(races_mod.stats(race_list))
     markets = odds_mod.load_cache(args.root)
     if markets:
@@ -474,7 +474,7 @@ def _odds(args):
     screened = screen_field(field, profiles, raw.get("record"))
     race_list = races_mod.build(profiles, candidates.filing_counts(screened),
                                 results=outcomes, dates=results_mod.load_dates(args.root),
-                                filed=candidates.filed_rows(screened))
+                                filed=candidates.filed_rows(screened), record=raw.get("record"))
     by_id = {p["id"]: p for p in profiles}
 
     def people_of(race):
@@ -598,9 +598,9 @@ def _congress(args):
     from . import record as record_mod
     record = raw.get("record")
     if record:
-        # Today's seats, from the sitting members alone, as the record was frozen.
+        # Today's seats, from the sitting members and the snapshot's terms.
         sitting, _ = build_profiles(dict(raw, record=None), snapshot=snapshot)
-        live = races_mod.contestable(sitting, profiles_mod.ELECTION_YEAR)
+        live = record_mod.live_races(sitting, snapshot)
         apart = record_mod.drift(record, live, snapshot)
         if apart:
             print(f"\n  [warn] {len(apart)} races differ between the 2026 record and "
@@ -926,7 +926,7 @@ def _verify(args):
     race_list = races_mod.build(
         profiles, candidates.filing_counts(field),
         results=outcomes, dates=results_mod.load_dates(args.root),
-        filed=candidates.filed_rows(field),
+        filed=candidates.filed_rows(field), record=raw.get("record"),
     )
     stats.update(races_mod.stats(race_list))
     summary = summary_mod.build(profiles, races=race_list,
