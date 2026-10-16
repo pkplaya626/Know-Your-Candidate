@@ -3478,3 +3478,60 @@ button.local-county-link {
 /* Find my district: one button above the district tools, its answer under it. */
 .districts-locate { margin: 0 0 var(--s-3); }
 .districts-locate .state-note { margin-top: var(--s-2); }
+
+/* The federal government: federal/index.html and courts/<id>.html
+   (kyc-federal.js). Tables are the guide's (.guide-table, a card per row on
+   a phone); a name opens the official dialog (kyc-official.js). */
+.fed-section { margin: 0 0 var(--s-6); }
+.fed-leaders {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: var(--s-3);
+  margin: 0 0 var(--s-3);
+  padding: 0;
+  list-style: none;
+}
+.fed-leader {
+  display: flex;
+  gap: var(--s-3);
+  align-items: flex-start;
+  padding: var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+}
+.fed-leader p { margin: 0 0 var(--s-1); }
+.fed-photo {
+  flex: none;
+  width: 72px;
+  height: 90px;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: var(--radius-sm);
+  background: var(--surface-3);
+}
+.fed-office {
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.fed-name { font-size: var(--t-lg); }
+.fed-search { max-width: 32rem; margin: 0 0 var(--s-4); }
+.fed-search input {
+  width: 100%;
+  margin: var(--s-1) 0 var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  color: var(--text);
+  font: inherit;
+}
+.fed-results { margin: 0; padding: 0 0 0 1.15rem; font-size: var(--t-sm); line-height: 1.6; }
+.fed-related { font-size: var(--t-sm); color: var(--text-muted); }
+@media (max-width: 1000px) {
+  /* 16px, or iOS zooms the page when the field is tapped (rule 44). */
+  .fed-search input { font-size: 16px; }
+}

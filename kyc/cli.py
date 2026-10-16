@@ -299,6 +299,20 @@ def _build(args):
     print(f"[ok] state government: {gov_stats['governors']} governors; " + ", ".join(
         f"{n} {k}" for k, n in sorted(gov_stats["trifectas"].items())))
 
+    # The federal executive and courts (kyc/federal_build.py): one file for
+    # the hub, one per court, each rewritten only when what it says changed.
+    # What is wrong with either cache is validate's to report.
+    from . import federal_build
+    try:
+        fed_payload, fed_courts, fed_search, _ = federal_build.build(args.root)
+    except federal_build.FederalBuildError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 2
+    fed_written = emit.write_federal(fed_payload, fed_courts, fed_search, args.root)
+    print(f"[ok] federal government: {len(fed_payload['offices'])} Cabinet offices, "
+          f"{fed_payload['judges']:,} judges on {len(fed_courts)} courts; "
+          f"{len(fed_written)} file(s) rewritten")
+
     # The guide's maps: rewritten only when what they say changed.
     from . import government_maps
     guide_maps = government_maps.payload()
@@ -1093,6 +1107,21 @@ def _verify(args):
     else:
         print(f"  ok  {emit.STATEGOV_FILE} matches the governor, legislator and NCSL caches "
               f"({gov_expected[:16]}...)")
+
+    from . import federal_build
+    try:
+        fed = federal_build.build(args.root)
+    except federal_build.FederalBuildError as exc:
+        fed = None
+        problems.append(str(exc))
+    if fed is not None:
+        stale_fed = emit.check_federal(*fed[:3], root=args.root)
+        if stale_fed:
+            problems.append(f"{len(stale_fed)} federal file(s) are missing or stale: "
+                            + ", ".join(os.path.basename(p) for p, _ in stale_fed[:5]))
+        else:
+            print(f"  ok  {emit.FEDERAL_FILE} and {len(fed[1])} court files match the "
+                  f"executive and judiciary caches")
 
     from . import government_maps
     guide_expected = emit.government_signature(government_maps.payload())

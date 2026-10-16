@@ -17,6 +17,10 @@ GOVERNMENT_FILE = os.path.join(DATA_DIR, "government.js")
 STATEGOV_FILE = os.path.join(DATA_DIR, "stategov.js")
 # One file per state: its legislative districts and who sits for them.
 LEGISLATURE_DIR = os.path.join(DATA_DIR, "legislature")
+# The federal executive and courts: one file for the hub, one per court.
+FEDERAL_FILE = os.path.join(DATA_DIR, "federal.js")
+JUDICIARY_DIR = os.path.join(DATA_DIR, "judiciary")
+JUDGES_INDEX_FILE = os.path.join(JUDICIARY_DIR, "index.js")
 # One file per state: its counties and every local government in each.
 LOCAL_DIR = os.path.join(DATA_DIR, "local")
 # One file per state, each loaded only by that state's district page.
@@ -91,6 +95,26 @@ LEGISLATURE_PAGE_REQUIREMENTS = (
     "../assets/kyc-legislature.js",
 )
 
+# The federal government's hub: the offices and courts, every judge's name
+# for its search, the shared official dialog, then the page module.
+FEDERAL_PAGE_REQUIREMENTS = (
+    "../assets/kyc.js",
+    "../data/federal.js",
+    "../data/judiciary/index.js",
+    "../assets/kyc-official.js",
+    "../assets/kyc-federal.js",
+)
+
+# One federal court's page: the hub's data, that court's judges, the dialog,
+# the page module. "{code}" is the court's id.
+COURT_PAGE_REQUIREMENTS = (
+    "../assets/kyc.js",
+    "../data/federal.js",
+    "../data/judiciary/{code}.js",
+    "../assets/kyc-official.js",
+    "../assets/kyc-federal.js",
+)
+
 # A state's counties page: its counties and governments, the map, the page.
 COUNTIES_PAGE_REQUIREMENTS = (
     "../assets/kyc.js",
@@ -104,6 +128,8 @@ STATES_DIR = os.path.join(SITE_DIR, "states")
 DISTRICT_PAGES_DIR = os.path.join(SITE_DIR, "districts")
 LEGISLATURE_PAGES_DIR = os.path.join(SITE_DIR, "legislature")
 COUNTIES_PAGES_DIR = os.path.join(SITE_DIR, "counties")
+FEDERAL_PAGES_DIR = os.path.join(SITE_DIR, "federal")
+COURT_PAGES_DIR = os.path.join(SITE_DIR, "courts")
 # The guide to how government works: generated pages, one folder down. What
 # each loads depends on the page (kyc.government.scripts).
 GOVERNMENT_DIR = os.path.join(SITE_DIR, "government")
@@ -252,6 +278,10 @@ def render_state_pages(profiles, root=".", summary=None):
             pages.render_legislature_page(code, host, summary))
         out[os.path.join(COUNTIES_PAGES_DIR, f"{code.lower()}.html")] = (
             pages.render_counties_page(code, host))
+    from . import federal_courts
+    out[os.path.join(FEDERAL_PAGES_DIR, "index.html")] = pages.render_federal_page(host)
+    for cid in federal_courts.COURTS:
+        out[os.path.join(COURT_PAGES_DIR, f"{cid}.html")] = pages.render_court_page(cid, host)
     return out
 
 
@@ -294,10 +324,11 @@ def write_sitemap(profiles, root="."):
         return None
     path = os.path.join(root, SITEMAP_FILE)
     from .government_maps import STATES
+    from .federal_courts import COURTS
     _atomic_write(path, pages.sitemap(host, state_codes(profiles),
                                       district_maps=districts.all_codes(),
                                       guide=government.slugs(),
-                                      legislatures=STATES))
+                                      legislatures=STATES, courts=tuple(COURTS)))
     return path
 
 
@@ -430,6 +461,55 @@ def write_stategov(payload, root="."):
 def stategov_signature(payload):
     """Content hash of the state government data, excluding the build time."""
     return hashlib.sha256(_json(payload).encode("utf-8")).hexdigest()
+
+
+def federal_signature(payload):
+    """Content hash of a federal data file's payload, excluding the build time."""
+    return hashlib.sha256(_json(payload).encode("utf-8")).hexdigest()
+
+
+def write_federal(payload, per_court, search, root="."):
+    """Emit ``data/federal.js``, ``data/judiciary/<court>.js`` and
+    ``data/judiciary/index.js``, each only when its signature changed.
+    Returns ``[(path, size)]`` for the files written."""
+    os.makedirs(os.path.join(root, JUDICIARY_DIR), exist_ok=True)
+    source = "data/federal_executive.json, data/judiciary.json (kyc/federal_build.py)"
+    files = [(os.path.join(root, FEDERAL_FILE), "kycFederal", payload)]
+    files += [(os.path.join(root, JUDICIARY_DIR, f"{cid}.js"), None, court)
+              for cid, court in sorted(per_court.items())]
+    files.append((os.path.join(root, JUDGES_INDEX_FILE), "kycJudgesIndex", search))
+    written = []
+    for path, name, data in files:
+        signature = federal_signature(data)
+        if read_signature(path=path) == signature:
+            continue
+        if name is None:
+            # A court file adds itself to the courts the page has loaded.
+            body = ("window.kycCourt = window.kycCourt || {};\n"
+                    f"window.kycCourt[{_json(data['id'])}] = {_json(data)};\n"
+                    'window.kycCourtMeta = {"signature":"' + signature + '"};\n')
+        else:
+            body = (f"window.{name} = {_json(data)};\n"
+                    f'window.{name}Meta = {{"signature":"{signature}"}};\n')
+        text = _BANNER.format(source=source, built=build_timestamp()) + body
+        written.append((path, _atomic_write(path, text)))
+    return written
+
+
+def check_federal(payload, per_court, search, root="."):
+    """Federal data files that are missing or carry another signature."""
+    stale = []
+    files = [(os.path.join(root, FEDERAL_FILE), payload)]
+    files += [(os.path.join(root, JUDICIARY_DIR, f"{cid}.js"), court)
+              for cid, court in sorted(per_court.items())]
+    files.append((os.path.join(root, JUDGES_INDEX_FILE), search))
+    for path, data in files:
+        committed = read_signature(path=path)
+        if committed is None:
+            stale.append((path, "missing"))
+        elif committed != federal_signature(data):
+            stale.append((path, "stale"))
+    return stale
 
 
 def legislature_file(code, root="."):
@@ -588,7 +668,8 @@ def check_pages(root="."):
     for folder, required in ((STATES_DIR, STATE_PAGE_REQUIREMENTS),
                              (DISTRICT_PAGES_DIR, DISTRICT_PAGE_REQUIREMENTS),
                              (LEGISLATURE_PAGES_DIR, LEGISLATURE_PAGE_REQUIREMENTS),
-                             (COUNTIES_PAGES_DIR, COUNTIES_PAGE_REQUIREMENTS)):
+                             (COUNTIES_PAGES_DIR, COUNTIES_PAGE_REQUIREMENTS),
+                             (COURT_PAGES_DIR, COURT_PAGE_REQUIREMENTS)):
         directory = os.path.join(root, folder)
         if os.path.isdir(directory):
             for name in sorted(os.listdir(directory)):
@@ -596,6 +677,8 @@ def check_pages(root="."):
                     code = name[:-len(".html")]
                     checks[f"{os.path.basename(folder)}/{name}"] = tuple(
                         src.replace("{code}", code) for src in required)
+
+    checks["federal/index.html"] = FEDERAL_PAGE_REQUIREMENTS
 
     from . import government
     for slug in government.slugs():

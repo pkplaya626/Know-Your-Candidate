@@ -57,6 +57,10 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              government/*.html  (generated: the guide, kyc/government_text.py)
                                              legislature/*.html (generated, one per state)
                                              counties/*.html    (generated, one per state)
+                                             federal/index.html (generated: the federal government)
+                                             courts/*.html      (generated, one per federal court)
+                                             data/federal.js    (the executive, the Supreme Court, the courts)
+                                             data/judiciary/*.js (one federal court's judges, and the judges' search)
                                              sitemap.xml        (generated)
                                              ├──> index.html    (grid, races, profiles)
                                              └──> map.html      (partisan map)
@@ -76,6 +80,8 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              assets/kyc-local.js
                                              assets/kyc-stategov.js
                                              assets/kyc-guide.js
+                                             assets/kyc-official.js
+                                             assets/kyc-federal.js
 ```
 
 - The root CSVs are the editorial source of truth. The state atlas and
@@ -869,6 +875,14 @@ That check found a retirement note keyed `"Dick Durbin"` when the roster says
 - New dialogs use `KYC.createModal` so they get the focus trap for free; new
   menus use `KYC.createMenu` so they are keyboard-operable.
 - Headline figures come from `window.kycBuildMeta`, never typed into a page.
+- A federal official is never a profile. They open in `KYC.official`
+  (`kyc-official.js`) at `#/official/<id>`, with ids `x-<name>` and
+  `fjc-<nid>`, and nobody there counts as a member of Congress. A judge or a
+  Cabinet officer is shown without a party; a judge with the President who
+  appointed them.
+- A page's own code goes in `data-state` only when it is a state:
+  `kyc.js` remembers it as the reader's state. A court page carries its id
+  on its container (`data-court`).
 
 ## Conventions
 

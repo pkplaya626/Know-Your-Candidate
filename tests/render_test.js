@@ -4159,9 +4159,196 @@ async function testFormerIncumbent() {
   });
 }
 
+/* The federal government's pages (kyc-federal.js) and the official dialog
+ * (kyc-official.js), from data/federal.js and one court file each. An
+ * official is never a profile; a judge is shown with who appointed them,
+ * never with a party; a page lists who sits and never counts vacancies. */
+const PARTY_WORDS = /\b(Republican|Democrat(ic)?|Independent)\b/;
+
+async function testFederal() {
+  const hub = await buildPage("federal/index.html");
+  await settle(50);
+  const { window, D, errors } = hub;
+  const d = window.kycFederal;
+  suite("federal/index.html — who holds the federal government's offices", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("the data loaded", !!d && d.offices.length > 0 && d.courts.length > 100);
+    if (!d) return;
+    const leaders = [...D.querySelectorAll(".fed-leader")];
+    check("the President, then the Vice President",
+      leaders.length === 2 && leaders[0].textContent.indexOf(d.president.name) !== -1 &&
+      leaders[1].textContent.indexOf(d.vicePresident.name) !== -1);
+    const rows = [...D.querySelectorAll("#cabinet tbody tr")];
+    check("a row for every office the White House lists", rows.length === d.offices.length,
+      `${rows.length} rows, ${d.offices.length} offices`);
+    const departments = d.offices.filter((o) => o.kind === "department")
+      .sort((a, b) => a.order - b.order);
+    check("the departments first, in the order of succession", departments.every((o, i) =>
+      rows[i].querySelector("th").textContent.indexOf(o.office) === 0));
+    check("no Cabinet officer is shown with a party",
+      !PARTY_WORDS.test(D.getElementById("cabinet").textContent));
+    const justices = [...D.querySelectorAll("#supreme-court table")][0].querySelectorAll("tbody tr");
+    check("the Court's members as the Court lists them",
+      justices.length === d.supremeCourt.members.length, `${justices.length}`);
+    const retired = new Set((d.supremeCourt.retired || []).map((j) => j.id));
+    const first = [...D.querySelectorAll("#supreme-court table")][0];
+    check("a retired justice is never among them", [...first.querySelectorAll("[data-official]")]
+      .every((b) => !retired.has(b.getAttribute("data-official"))));
+    const links = [...D.querySelectorAll('#courts a[href^="../courts/"]')].map((a) => a.getAttribute("href"));
+    check("every court but the Supreme Court is linked, once",
+      links.length === d.courts.length - 1 && new Set(links).size === links.length,
+      `${links.length} links, ${d.courts.length} courts`);
+    check("no court lists a party", !PARTY_WORDS.test(D.getElementById("courts").textContent));
+    check("nothing counts a vacancy", !/vacanc(y|ies) (on|at|in) /i.test(D.getElementById("federalBody").textContent));
+    check("every link out opens safely", [...D.querySelectorAll('a[target="_blank"]')]
+      .every((a) => /noopener/.test(a.getAttribute("rel") || "")));
+    check("a table becomes cards on a phone: every cell says its column",
+      [...D.querySelectorAll(".guide-table td")].every((td) => td.getAttribute("data-label")));
+    check("the nav marks this page", (D.querySelector('.nav-link[aria-current="page"]') || {})
+      .getAttribute && D.querySelector('.nav-link[aria-current="page"]').getAttribute("href") ===
+      "../federal/index.html");
+    check("no state is remembered from this page", D.body.getAttribute("data-state") === "");
+  });
+
+  suite("federal/index.html — finding a judge", () => {
+    const input = D.getElementById("judgeSearch");
+    const chief = d.supremeCourt.members[0];
+    input.value = chief.sortName.split(",")[0];
+    input.dispatchEvent(new window.Event("input"));
+    const results = [...D.querySelectorAll("#judgeResults a")];
+    const link = results.find((a) => a.textContent === chief.name);
+    check("a surname finds the Chief Justice", !!link, results.map((a) => a.textContent).join(", "));
+    check("linking to them on their court's page", !!link &&
+      link.getAttribute("href") === "../courts/scotus.html#/official/" + encodeURIComponent(chief.id),
+      link && link.getAttribute("href"));
+    check("the search is in the address", /q=/.test(window.location.hash), window.location.hash);
+    input.value = "zzqxv nobody";
+    input.dispatchEvent(new window.Event("input"));
+    check("a name nobody has says so", /No sitting judge by that name/.test(
+      D.getElementById("judgeSearchCount").textContent));
+    input.value = "";
+    input.dispatchEvent(new window.Event("input"));
+  });
+
+  suite("federal/index.html — an official's dialog", () => {
+    const KYC = window.KYC;
+    const office = d.offices.find((o) => o.holder && o.holder.senate);
+    D.querySelector('#cabinet [data-official="' + office.holder.id + '"]').click();
+    const modal = D.getElementById("officialModal");
+    check("a Cabinet officer opens in the dialog", !!modal && !modal.hidden &&
+      D.getElementById("officialModalName").textContent === office.holder.name);
+    check("at their own address", window.location.hash === "#/official/" +
+      encodeURIComponent(office.holder.id), window.location.hash);
+    check("with the Senate's vote, linked to the Senate",
+      !!modal.querySelector('a[href^="https://www.senate.gov/"]'));
+    check("and no party", !PARTY_WORDS.test(D.getElementById("officialModalMeta").textContent) &&
+      !modal.querySelector(".party-tag"));
+    KYC.official.close();
+  });
+  await settle(50);
+  suite("federal/index.html — a justice's dialog", () => {
+    check("closing the last one left its address", !/official/.test(window.location.hash),
+      window.location.hash);
+    const modal = D.getElementById("officialModal");
+    const justice = d.supremeCourt.members[1];
+    D.querySelector('#supreme-court [data-official="' + justice.id + '"]').click();
+    const meta = D.getElementById("officialModalMeta").textContent;
+    check("a justice is shown with who appointed them, never a party",
+      /Appointed by/.test(meta) && !PARTY_WORDS.test(meta), meta);
+    check("and links to the Federal Judicial Center's page",
+      !!modal.querySelector('a[href^="https://www.fjc.gov/node/"]'));
+    check("Escape closes it", (() => {
+      D.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+      return modal.hidden;
+    })());
+  });
+
+  const president = d && d.president;
+  const deep = await buildPage("federal/index.html",
+    { hash: "#/official/" + encodeURIComponent(president ? president.id : "") });
+  await settle(50);
+  suite("federal/index.html — a shared link to the President", () => {
+    const { D: doc, errors: errs } = deep;
+    check("no page errors", errs.length === 0, errs.join(" | "));
+    const modal = doc.getElementById("officialModal");
+    check("opens the dialog", !!modal && !modal.hidden &&
+      doc.getElementById("officialModalName").textContent === president.name);
+    check("the President's party is shown: elected on a ticket",
+      doc.getElementById("officialModalMeta").textContent.indexOf(president.party) !== -1);
+  });
+
+  const gone = await buildPage("federal/index.html", { hash: "#/official/x-nobody-of-that-name" });
+  await settle(50);
+  suite("federal/index.html — a link to someone no longer listed", () => {
+    const { D: doc, errors: errs } = gone;
+    check("no page errors", errs.length === 0, errs.join(" | "));
+    check("says so, rather than showing someone else",
+      doc.getElementById("officialModalName").textContent === "No longer listed" &&
+      /may have left office/.test(doc.getElementById("officialModalBody").textContent));
+  });
+
+  const ca1 = await buildPage("courts/ca1.html");
+  await settle(50);
+  suite("courts/ca1.html — one court's judges", () => {
+    const { window: w, D: doc, errors: errs } = ca1;
+    check("no page errors", errs.length === 0, errs.join(" | "));
+    const mine = (w.kycCourt || {}).ca1;
+    const court = w.kycFederal.courts.find((c) => c.id === "ca1");
+    const people = [...doc.querySelectorAll("#federalBody tbody [data-official]")]
+      .map((b) => b.getAttribute("data-official"));
+    check("every judge the directory lists, once", !!mine && people.length === mine.judges.length &&
+      new Set(people).size === people.length, `${people.length}`);
+    check("the chief judge first", !!court.chief && people[0] === court.chief.id);
+    check("active judges, then senior", !!doc.getElementById("active") &&
+      (court.senior === 0 || !!doc.getElementById("senior")));
+    const below = w.kycFederal.courts.filter((c) => c.circuit === "1" && c.kind !== "appeals");
+    check("its district courts are linked", below.every((c) =>
+      !!doc.querySelector('.fed-related a[href="' + c.id + '.html"]')));
+    check("no judge is shown with a party", !PARTY_WORDS.test(doc.getElementById("federalBody").textContent));
+    check("no state is remembered from a court page", doc.body.getAttribute("data-state") === "");
+  });
+
+  const judge = ((ca1.window.kycCourt || {}).ca1 || { judges: [] }).judges.slice(-1)[0];
+  const deepJudge = await buildPage("courts/ca1.html",
+    { hash: "#/official/" + encodeURIComponent(judge ? judge.id : "") });
+  await settle(50);
+  suite("courts/ca1.html — a shared link to a judge", () => {
+    const { D: doc, errors: errs } = deepJudge;
+    check("no page errors", errs.length === 0, errs.join(" | "));
+    check("opens their record", !!judge &&
+      doc.getElementById("officialModalName").textContent === judge.name);
+    check("their own court is not a link away from itself",
+      !doc.querySelector('#officialModalBody a[href="ca1.html"]'));
+  });
+
+  const guam = await buildPage("courts/gu.html");
+  await settle(50);
+  suite("courts/gu.html — a territorial court", () => {
+    const { D: doc, errors: errs } = guam;
+    check("no page errors", errs.length === 0, errs.join(" | "));
+    const text = doc.getElementById("federalBody").textContent;
+    check("says why nobody is listed, and that it is not a vacancy",
+      /Article IV/.test(text) && /not a vacancy/.test(text) && !doc.querySelector("#federalBody table"));
+    check("and where its appeals go", !!doc.querySelector('.fed-related a[href="ca9.html"]'));
+  });
+
+  const scotus = await buildPage("courts/scotus.html");
+  await settle(50);
+  suite("courts/scotus.html — the Supreme Court's page", () => {
+    const { window: w, D: doc, errors: errs } = scotus;
+    check("no page errors", errs.length === 0, errs.join(" | "));
+    const members = w.kycFederal.supremeCourt.members.map((j) => j.id);
+    const listed = [...doc.querySelectorAll("#active [data-official]")].map((b) => b.getAttribute("data-official"));
+    check("the justices, the Chief Justice first", listed.join() === members.join(), listed.join());
+    const retired = (w.kycFederal.supremeCourt.retired || []).length;
+    check("retired justices apart", !retired || doc.querySelectorAll("#retired [data-official]").length === retired);
+  });
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "guide") await testGuide();
+  if (!only || only === "federal") await testFederal();
   if (!only || only === "legislature") await testLegislatures();
   if (!only || only === "counties") await testCounties();
   if (!only || only === "stategov") await testStateGov();

@@ -746,7 +746,9 @@ EXECUTIVE = {
                     "commissions and government corporations."),
     "lede": ("Article II vests the executive power in one person, the president. The federal "
              "government elects only the president and vice president; most states elect "
-             "several executive officials separately ([state governments](guide:states#executive))."),
+             "several executive officials separately ([state governments](guide:states#executive)). "
+             "Who holds each office now, the Cabinet with them, is on [the federal "
+             "government's page](site:federal/index.html)."),
     "sections": [
         {
             "id": "president",
@@ -933,7 +935,9 @@ COURTS = {
     "lede": ("Article III vests the judicial power of the United States in one Supreme Court "
              "and the lower courts Congress creates. Federal courts hear cases under federal "
              "law and the Constitution, and many disputes between citizens of different "
-             "states; [state courts](guide:states#courts) hear most of the rest."),
+             "states; [state courts](guide:states#courts) hear most of the rest. Every sitting "
+             "federal judge, court by court, is on [the federal government's "
+             "page](site:federal/index.html#courts)."),
     "sections": [
         {
             "id": "judges",

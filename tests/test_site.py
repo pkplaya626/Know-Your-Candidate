@@ -343,10 +343,11 @@ class TestStatePages(unittest.TestCase):
             relative = sorted(
                 os.path.relpath(w, os.path.join(tmp, emit.SITE_DIR)).replace(os.sep, "/")
                 for w in written)
-            # The guide's pages are checked in test_guide.py.
+            # The guide's pages are checked in test_guide.py, the federal
+            # pages in test_federal_pages.py.
             self.assertEqual([r for r in relative
                               if not r.startswith(("districts/", "government/", "legislature/",
-                                                    "counties/"))],
+                                                    "counties/", "courts/", "federal/"))],
                              ["redistricting/ca.html", "states/ak.html", "states/index.html",
                               "states/tx.html"])
             # A district map for every state and territory, whatever the roster.

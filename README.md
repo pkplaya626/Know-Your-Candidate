@@ -1336,8 +1336,8 @@ taken from Wikipedia or Ballotpedia instead.
 ## The federal executive
 
 `python build_profile_site.py federal` records who holds the federal
-executive's offices, in `data/federal_executive.json`. Nothing is on a page
-yet: the owner reviews the names before anything is published.
+executive's offices, in `data/federal_executive.json`. The federal
+government's page shows them (below).
 
 | Fact | Source | Notes |
 |---|---|---|
@@ -1358,7 +1358,8 @@ party: no source used states one, and the President's is not theirs.
 ## The federal judiciary
 
 `python build_profile_site.py judiciary` records every sitting Article III
-judge in `data/judiciary.json`. Nothing is on a page yet.
+judge in `data/judiciary.json`. The federal government's page and one page
+per court show them (below).
 
 | Fact | Source | Notes |
 |---|---|---|
@@ -1378,6 +1379,47 @@ columns describe the president, not the judge: they are dropped when the
 file is read, with its gender and race columns, so nothing later can show
 them, and a check fails if a judge's record ever carries a party. A judge is
 appointed by a president, by name.
+
+## The federal government's pages
+
+`federal/index.html` shows who holds the federal government's offices:
+
+- the President and the Vice President;
+- the Cabinet, the fifteen departments first in the order of succession,
+  each with the Senate's confirming vote and whether the office's own page
+  names them;
+- the Supreme Court, with retired justices listed apart;
+- every federal court, the courts of appeals and then each circuit's
+  district courts, with a search of every sitting judge.
+
+Each court has its own page, `courts/<id>.html` (`courts/ca5.html`,
+`courts/tx-s.html`): its chief judge, active judges and judges on senior
+status. A district court's page links to the circuit its appeals go to, and
+a circuit's page links to its district courts. The guide's executive and
+courts pages link to the federal page.
+
+A name opens the person's record in one dialog (`assets/kyc-official.js`):
+
+- a Cabinet officer's confirmation and office page;
+- a judge's every seat, with who appointed them, the dates and the vote;
+- a judge's earlier federal service, birth, education and career, in the
+  directory's words, and a link to their FJC page.
+
+`#/official/<id>` opens it as sent.
+
+| File | What it holds |
+|---|---|
+| `data/federal.js` (`kycFederal`) | The President, the Vice President, every Cabinet office, the Supreme Court's members, and an index of the courts with their counts and chief judges |
+| `data/judiciary/<court>.js` (`kycCourt[<court>]`) | One court's judges, loaded only by that court's page: 1,463 judges in one file would load on every page |
+| `data/judiciary/index.js` (`kycJudgesIndex`) | Every sitting judge's id, name, court and status, for the search |
+
+Every file carries a content signature and is rewritten only when what it
+says changes; `verify` names a stale one. An official is never a profile:
+ids are `x-<name>` for an executive officer and `fjc-<nid>` for a judge, and
+nobody on these pages is counted among the members of Congress. The pages
+list who sits and never count vacancies: the directory lists judges, not
+judgeships. Guam's, the Northern Mariana Islands' and the Virgin Islands'
+courts say why nobody is listed, and that this is not a vacancy.
 
 ## Counties and local governments
 
