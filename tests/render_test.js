@@ -60,6 +60,20 @@ function rewindToCampaign(window) {
   });
 }
 
+/* A page built on a clock before the new Congress is sworn in (noon,
+ * Eastern, January 3) sees the phase the build wrote then: the campaign's
+ * (kyc/cycle.phase). After January 3 the data says "record", and a check
+ * written for the campaign's views would otherwise read the archive. */
+const NEW_CONGRESS = new Date("2027-01-03T17:00:00Z");
+
+function phaseAt(now) {
+  return (window, meta) => {
+    if (meta && meta.election && new Date(now) < NEW_CONGRESS) {
+      meta.election = Object.assign({}, meta.election, { phase: "campaign" });
+    }
+  };
+}
+
 /* Run *hooks* once the profile data has loaded: profiles.js assigns
  * kycBuildMeta last, after legislatorsData and kycRaces. */
 function onData(window, hooks) {
@@ -116,8 +130,8 @@ function buildPage(page, opts) {
       });
       if (opts.now !== null) freezeClock(window, opts.now || CAMPAIGN_NOW);
       // opts.written: the data as a later refresh would write it, before the rewind.
-      onData(window, [opts.written, opts.now === undefined ? rewindToCampaign : null, opts.data]
-        .filter(Boolean));
+      onData(window, [opts.written, opts.now === undefined ? rewindToCampaign : null,
+        opts.now === null ? null : phaseAt(opts.now || CAMPAIGN_NOW), opts.data].filter(Boolean));
       if (opts.setup) opts.setup(window);
     },
   });
@@ -4220,6 +4234,78 @@ async function testCommitteesPending() {
   });
 }
 
+/* January 3, in the page: once the Congress the cycle elects is sitting
+ * (meta.election.phase "record", kyc/cycle.phase), the 2026 races are a
+ * record. Made from today's data: the phase is set, and each senator whose
+ * seat was on the 2026 ballot is given the next election a re-elected term
+ * would have. A redrawn state's new map is then held, and its old map is
+ * drawn in who last held each seat. */
+function recordPhase(w, meta) {
+  meta.election = Object.assign({}, meta.election, { phase: "record" });
+  w.legislatorsData.forEach((p) => {
+    if (w.KYC.seated(p) && /Senate/.test(p.chamber) && p.nextElection === 2026) {
+      p.nextElection = p.senateClass === 3 ? 2028 : 2032;
+      p.senateSpecial = false;
+    }
+  });
+}
+
+async function testRecordPhase() {
+  const senate = await buildPage("index.html", { hash: "#/?view=senate", data: recordPhase });
+  await settle(50);
+  suite("index.html — the Senate view once the new Congress sits", () => {
+    const { window, D, errors } = senate;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const titles = [...D.querySelectorAll(".senate-group-title")].map((h) => h.textContent);
+    check("no seat is said to be up in 2026", titles.length > 0 &&
+      titles.every((t) => !/2026/.test(t)), titles.join(" | "));
+    const ids = [...D.querySelectorAll(".senate-group .card")].map((c) => c.getAttribute("data-id"));
+    const sitting = window.legislatorsData.filter((p) => window.KYC.seated(p) && /Senate/.test(p.chamber));
+    check("every sitting senator once, and nobody else", ids.length === sitting.length &&
+      new Set(ids).size === ids.length && sitting.every((p) => ids.includes(p.id)),
+      `${ids.length} cards, ${sitting.length} senators`);
+  });
+
+  const after = await buildPage("index.html", { hash: "#/?view=senate", now: new Date("2026-11-20T12:00:00Z") });
+  await settle(50);
+  suite("index.html — the Senate view after Election Day, before January 3", () => {
+    const titles = [...after.D.querySelectorAll(".senate-group-title")].map((h) => h.textContent);
+    check("the 2026 seats are no longer \"up\"", titles.some((t) => /^2026 elections/.test(t)) &&
+      !titles.some((t) => /Up in 2026/.test(t)), titles.join(" | "));
+  });
+
+  const state = await buildPage("states/ky.html", { data: recordPhase });
+  await settle(50);
+  suite("states/ky.html — the headline once the new Congress sits", () => {
+    const strip = [...state.D.querySelectorAll(".state-summary .badge")].map((b) => b.textContent);
+    check("its 2026 figures say they are 2026's", strip.length > 3 &&
+      strip.filter((b) => /seat|challenger|primaries/.test(b)).every((b) => /2026/.test(b)),
+      strip.join(" | "));
+  });
+
+  const tx = await buildPage("districts/tx.html", { data: recordPhase });
+  await settle(50);
+  suite("districts/tx.html — a redrawn state once the new Congress sits", () => {
+    const { window, D, errors } = tx;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("no member is \"running in a different district\"", !D.querySelector(".mover-group") &&
+      !/Running in a different district/.test(D.getElementById("districtsApp").textContent));
+    const legend = D.querySelector(".party-legend").textContent;
+    check("the legend says the old map shows who last held each seat",
+      /by who last held it/.test(legend) && !/seats filled in November/.test(legend), legend);
+    const pick = D.getElementById("districtPick");
+    pick.value = pick.options[1].value;
+    pick.dispatchEvent(new window.Event("change", { bubbles: true }));
+    const labels = [...D.querySelectorAll(".district-fact-label")].map((f) => f.textContent);
+    check("the old map's district says who last held it",
+      labels.some((t) => /^(Last held by|No holder on the record)/.test(t)), labels.join(" | "));
+    check("the new map's district says who holds it, and the 2026 race as a record",
+      labels.some((t) => /^(Seat held by|No sitting member)/.test(t)) &&
+      labels.some((t) => /^In the 2026 race/.test(t)) &&
+      !labels.some((t) => /^(On the November ballot|Running)/.test(t)), labels.join(" | "));
+  });
+}
+
 async function testFormerIncumbent() {
   const now = new Date("2026-12-10T12:00:00Z");
   const grid = await buildPage("index.html", { hash: "#/?role=member&chamber=Senate", now,
@@ -4548,6 +4634,7 @@ async function testFederal() {
   if (!only || only === "index.html") await testSenate();
   if (!only || only === "index.html") await testReseatedSpecial();
   if (!only || only === "index.html") await testFormerIncumbent();
+  if (!only || only === "index.html") await testRecordPhase();
   if (!only || only === "states") await testSenateWinner();
   if (!only || only === "guide") await testCommitteesPending();
   if (!only || only === "index.html") await testOdds();

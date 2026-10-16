@@ -119,6 +119,10 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None):
         "delegates": len(delegates),
         "election": {
             "year": ELECTION_YEAR,
+            # "campaign" until the Congress this cycle elects is sitting, then
+            # "record": the cycle's races are a record, no longer the next
+            # election for any seat (kyc/cycle.phase).
+            "phase": _phase(snapshot),
             "senateSeatsUp": len(senate_up),
             "senateDefending": _split(senate_up),
             "houseSeatsUp": HOUSE_SEATS,
@@ -160,6 +164,17 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None):
     if committees:
         summary["committees"] = committee_table(committees, profiles)
     return summary
+
+
+def _phase(snapshot):
+    from . import cycle
+
+    if not snapshot:
+        return "campaign"
+    try:
+        return cycle.phase(snapshot)
+    except cycle.CycleError:
+        return "campaign"
 
 
 def _congress(snapshot):

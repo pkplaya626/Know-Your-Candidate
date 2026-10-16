@@ -1119,6 +1119,13 @@
     return global.kycBuildMeta || {};
   }
 
+  /** True once the Congress this cycle elects is sitting: the cycle's
+   *  races are then a record of what happened, and no longer the next
+   *  election for any seat (kyc/cycle.phase, from the data). */
+  function recordPhase() {
+    return (meta().election || {}).phase === "record";
+  }
+
   /* ================================================================ states */
 
   /** "TX" -> "Texas", from the build metadata (one table, in kyc/pages.py). */
@@ -1516,6 +1523,7 @@
     offBallot: offBallot,
     onNovemberBallot: onNovemberBallot,
     meta: meta,
+    recordPhase: recordPhase,
     portraitSrc: portraitSrc,
     portraitSrcset: portraitSrcset,
     portraitAttrs: portraitAttrs,
