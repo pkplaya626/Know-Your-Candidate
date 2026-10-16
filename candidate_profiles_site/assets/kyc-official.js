@@ -56,7 +56,8 @@
     var end = row.end ? (row.end.shown ? whenText(row.end.shown) : "") : "";
     if (row.end) {
       parts.push(start || end ? "in office " + (start || "?") + " to " + (end || "?")
-        : "in office, then left; the sources differ on the dates");
+        : "in office, then left; " + (row.end.differs ? "the sources differ on the dates"
+          : "the dates are not in both sources"));
     } else if (start) {
       parts.push("in office since " + start);
     } else if (row.start && row.start.differs) {

@@ -250,11 +250,15 @@ def office_terms(fields, names):
         seen.add(n)
         start_raw = fields.get(f"term_start{n}", "")
         note = re.search(r"\{\{\s*efn\s*\|\s*(Acting:[^{}]*)\}\}", start_raw, re.I)
-        status = _clean(fields.get(f"status{n}", "")).lower()
+        marks = {_clean(fields.get(f"{label}{n}", "")).lower() for label in ("status", "term_label")}
+        acting_note = _clean(note.group(1)) if note else None
         out.append({
             "start": parse_date(start_raw), "end": parse_date(fields.get(f"term_end{n}", "")),
-            "acting": acting or status == "acting",
-            "actingNote": _clean(note.group(1)) if note else None,
+            "acting": acting or "acting" in marks,
+            "actingNote": acting_note,
+            # "Acting: April 2, 2026 - August 10, 2026": when the acting
+            # service began, the note's own first date.
+            "actingStart": parse_date(acting_note.split(":", 1)[1]) if acting_note else None,
         })
     return out
 
@@ -297,6 +301,22 @@ def agree(a, b):
     return None
 
 
+def _held_from(person, vote_date, slack_days=7):
+    """True when the holder still held the office on or after the vote that
+    would have confirmed them: someone acting before a confirmation is the
+    nominee only if they served on past it (Keith Sonderling, acting from
+    April and confirmed in September); an acting officer who left before the
+    vote is never handed the nominee's confirmation. A week's slack for a
+    date recorded a day off."""
+    end = person.get("end")
+    if person.get("open") or not end:
+        return True
+    last = end["date"] + ("-12-31" if len(end["date"]) == 4 else
+                          "-28" if len(end["date"]) == 7 else "")
+    vote = datetime.date.fromisoformat(vote_date)
+    return datetime.date.fromisoformat(last) >= vote - datetime.timedelta(days=slack_days)
+
+
 def _surname(name):
     from .federal import _words
     words = _words(name or "")
@@ -337,9 +357,16 @@ def build(executive, votes, holders, texts):
                     "url": VOTE_URL.format(congress=vote["congress"], session=vote["session"],
                                            number=vote["number"])})
         rows, problems, used = [], [], set()
-        for person in sorted(slot["holders"].values(), key=lambda h: h["start"]["date"]):
+        ordered = sorted(slot["holders"].values(), key=lambda h: h["start"]["date"])
+        surnames = [_surname(reading_title(p["title"])) for p in ordered]
+        for person in ordered:
             surname = _surname(reading_title(person["title"]))
-            mine = [c for c in confirmations if _surname(c["nominee"]) == surname]
+            mine = [c for c in confirmations if _surname(c["nominee"]) == surname
+                    and id(c) not in used and _held_from(person, c["date"])]
+            if surnames.count(surname) > 1 and mine:
+                problems.append(f"{person['title']}: two holders of one surname; their "
+                                f"confirmation is not attached to either")
+                mine = []
             if len(mine) > 1:
                 problems.append(f"{person['title']}: {len(mine)} confirmations of one surname")
                 mine = []
@@ -365,6 +392,7 @@ def build(executive, votes, holders, texts):
                 "confirmed": mine[0] if mine else None,
                 "acting": bool(term and term["acting"]) or None,
                 "actingNote": term["actingNote"] if term else None,
+                "actingStart": term["actingStart"] if term else None,
                 "start": {"wikidata": person["start"], "wikipedia": term and term["start"],
                           "shown": agree(person["start"], term and term["start"])},
                 "end": None if person["open"] else {

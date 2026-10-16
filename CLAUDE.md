@@ -140,8 +140,8 @@ python build_profile_site.py vacancies        # vacancies in the federal courts,
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1113 tests, no dependencies
-npm install && npm test                       # 1323 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1119 tests, no dependencies
+npm install && npm test                       # 1325 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,

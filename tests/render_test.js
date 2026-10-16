@@ -4500,7 +4500,23 @@ async function testFederal() {
         .find((c) => c.querySelector(".fed-office").textContent === replaced.office);
       const prev = replaced && replaced.history[replaced.history.findIndex((r) => r.current) - 1];
       check("a card names whom its officer followed this term", !replaced ||
-        (!!card && card.textContent.indexOf("after " + prev.name) !== -1), card && card.textContent);
+        (!!card && (card.textContent.indexOf("after " + prev.name) !== -1 ||
+          card.textContent.indexOf("previously this term: " + prev.name) !== -1)), card && card.textContent);
+      const actingNotes = withHistory.flatMap((o) => o.history.filter((r) => r.actingNote && r.actingStart));
+      check("acting service before a confirmation is in the timeline", actingNotes.every((r) =>
+        [...changes.querySelectorAll("tbody tr")].some((tr) =>
+          tr.textContent.indexOf(r.name + " became acting") !== -1)), actingNotes.map((r) => r.name).join(", "));
+      const cards = [...D.querySelectorAll("#cabinet .fed-officer")];
+      check("'after' only where the hand-over is shown", withHistory.every((o) => {
+        const i = o.history.findIndex((r) => r.current);
+        if (i < 1) return true;
+        const prev = o.history[i - 1], now = o.history[i];
+        const same = prev.end && prev.end.shown && now.start && now.start.shown &&
+          prev.end.shown.precision === "day" && now.start.shown.precision === "day" &&
+          prev.end.shown.date === now.start.shown.date;
+        const card = cards.find((c) => c.querySelector(".fed-office").textContent === o.office);
+        return !card || card.textContent.indexOf((same ? "after " : "previously this term: ") + prev.name) !== -1;
+      }));
       check("no Wikidata label is shown for a person: names are the White House's, the Senate's " +
         "or an article's", withHistory.every((o) => o.history.every((r) =>
           r.current ? r.name === o.holder.name : !!(r.wikipedia || (r.confirmed && r.name === r.confirmed.nominee)))));

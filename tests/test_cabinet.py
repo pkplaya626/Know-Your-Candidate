@@ -109,6 +109,26 @@ class TestTheInfobox(unittest.TestCase):
         self.assertIsNone(cabinet.agree(day("2025-09-05"), None))
 
 
+FINK = """{{Infobox officeholder
+| office3      = [[United States Secretary of Health and Human Services]]
+| term_label3  = Acting
+| term_start3  = January 20, 2025
+| term_end3    = February 13, 2025
+}}"""
+
+
+class TestActingService(unittest.TestCase):
+    def test_a_term_label_says_acting(self):
+        # Dorothy Fink's entry has no "Acting" before the office's name.
+        terms = cabinet.office_terms(cabinet.infobox(FINK),
+                                     ["United States Secretary of Health and Human Services"])
+        self.assertTrue(terms[0]["acting"])
+
+    def test_acting_before_a_confirmation_has_its_own_start(self):
+        terms = cabinet.office_terms(cabinet.infobox(BLANCHE), ["United States Attorney General"])
+        self.assertEqual(terms[0]["actingStart"], day("2026-04-02"))
+
+
 class TestTheHistory(unittest.TestCase):
     def build(self, holders, votes, texts, current="Todd Blanche"):
         executive = {"president": {"termStart": SINCE},
@@ -157,6 +177,53 @@ class TestTheHistory(unittest.TestCase):
                          {"Pam Bondi": BONDI}, current="Todd Blanche")
         self.assertTrue(any("White House lists Todd Blanche" in p for p in out["problems"]))
         self.assertFalse(out["holders"][0]["current"])
+
+
+class TestWhoAConfirmationBelongsTo(unittest.TestCase):
+    def build(self, holders, votes):
+        executive = {"president": {"termStart": SINCE},
+                     "offices": [{"key": "labor", "holder": {"name": "Jane Smith"}}]}
+        labor = next(o for o in federal_offices.OFFICES if o["key"] == "labor")
+        return cabinet.build(executive, votes, {labor["wikidata"]: {
+            "title": "United States Secretary of Labor", "holders": holders}}, {})["labor"]
+
+    def holder(self, q, title, start, end=None):
+        return {"wikidata": q, "title": title, "start": day(start), "end": end and day(end),
+                "open": end is None}
+
+    def test_acting_then_confirmed_is_one_person_one_vote(self):
+        out = self.build({"Q1": self.holder("Q1", "Keith Sonderling", "2026-04-20")},
+                         [vote("Keith Sonderling", "Secretary of Labor", "2026-09-30")])
+        self.assertEqual(len(out["holders"]), 1)
+        self.assertEqual(out["holders"][0]["confirmed"]["date"], "2026-09-30")
+
+    def test_an_acting_officer_who_left_before_the_vote_is_not_handed_it(self):
+        out = self.build({"Q1": self.holder("Q1", "Vince Micone", "2025-01-20", "2025-03-01"),
+                          "Q2": self.holder("Q2", "Lori Chavez-DeRemer", "2025-03-11")},
+                         [vote("Vince Micone", "Secretary of Labor", "2025-03-10")])
+        self.assertIsNone(out["holders"][0]["confirmed"])
+
+    def test_two_holders_of_one_surname_get_neither_vote(self):
+        # Rules 3, 17 and 25: a shared surname never merges two people.
+        out = self.build({"Q1": self.holder("Q1", "John Smith", "2025-01-20", "2025-03-11"),
+                          "Q2": self.holder("Q2", "Jane Smith", "2025-03-11")},
+                         [vote("Jane Smith", "Secretary of Labor", "2025-03-10")])
+        self.assertTrue(all(r["confirmed"] is None for r in out["holders"] if r["wikidata"]))
+        self.assertTrue(any("two holders of one surname" in p for p in out["problems"]))
+
+
+class TestWhatThePageIsTold(unittest.TestCase):
+    def test_one_sources_date_is_not_a_disagreement(self):
+        from kyc import federal_build
+
+        alone = federal_build._when({"wikidata": day("2026-04-02"), "wikipedia": None, "shown": None})
+        self.assertEqual((alone["differs"], alone["sort"]), (False, "2026-04-02"))
+        both = federal_build._when({"wikidata": day("2026-04-02"), "wikipedia": day("2026-04-01"),
+                                    "shown": {"date": "2026-04", "precision": "month"}})
+        self.assertFalse(both["differs"])
+        apart = federal_build._when({"wikidata": day("2025-09-05"), "wikipedia": day("2024-01-25"),
+                                     "shown": None})
+        self.assertTrue(apart["differs"])
 
 
 class TestTheOfficeTable(unittest.TestCase):

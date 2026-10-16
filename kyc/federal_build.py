@@ -71,8 +71,11 @@ def _when(value):
     whether the sources gave one and disagreed."""
     if not value:
         return None
+    wikidata, wikipedia = value.get("wikidata"), value.get("wikipedia")
     return {"shown": value.get("shown"),
-            "differs": value.get("shown") is None and bool(value.get("wikidata"))}
+            # Disagreement needs two dates; one source alone is "not in both".
+            "differs": value.get("shown") is None and bool(wikidata) and bool(wikipedia),
+            "sort": (wikidata or wikipedia or {}).get("date")}
 
 
 def _change(row):
@@ -80,7 +83,7 @@ def _change(row):
     confirmed = row.get("confirmed")
     out = {
         "name": row["name"], "current": row.get("current"), "acting": row.get("acting"),
-        "actingNote": row.get("actingNote"),
+        "actingNote": row.get("actingNote"), "actingStart": row.get("actingStart"),
         "confirmed": {k: confirmed[k] for k in ("date", "yeas", "nays", "url", "vote", "nominee")}
         if confirmed else None,
         "start": _when(row.get("start")), "end": _when(row.get("end")),

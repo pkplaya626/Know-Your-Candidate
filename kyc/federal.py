@@ -483,6 +483,11 @@ def problems(cache, today=None):
     if not cache:
         return [("warn", "no-federal", "no federal executive cache; run 'federal'", [])]
     out = []
+    history = [f"{key}: {p}" for key, office in ((cache.get("changes") or {}).get("offices") or {}).items()
+               for p in office.get("problems") or []]
+    if history:
+        out.append(("warn", "cabinet-history", f"{len(history)} things in the Cabinet's history "
+                    f"since the term began could not be settled (kyc/cabinet.py)", history))
     for key, title in (("president", "President"), ("vicePresident", "Vice President")):
         person = cache.get(key) or {}
         if not person or not (person.get("termStart", "") <= today < person.get("termEnd", "")):

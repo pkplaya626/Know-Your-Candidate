@@ -215,9 +215,15 @@
     var start = now && now.start && now.start.shown ? KYC.official.whenText(now.start.shown) : "";
     var prev = before[before.length - 1];
     if (!start && !prev) return "";
+    // "After" only when the dates show one handing over to the other on the
+    // same day: an acting officer the record lacks may have served between.
+    var handover = prev && prev.end && prev.end.shown && now.start && now.start.shown &&
+      prev.end.shown.precision === "day" && now.start.shown.precision === "day" &&
+      prev.end.shown.date === now.start.shown.date;
     return '<p class="fed-fact"><span class="fed-fact-label">In office</span> ' +
       (start ? "Since " + esc(start) : "") +
-      (prev ? (start ? "; " : "") + "after " + esc(prev.name) + (prev.acting ? " (acting)" : "") : "") +
+      (prev ? (start ? "; " : "") + (handover ? "after " : "previously this term: ") +
+        esc(prev.name) + (prev.acting ? " (acting)" : "") : "") +
       "</p>";
   }
 
@@ -237,11 +243,18 @@
         if (row.acting && row.start && row.start.shown) {
           events.push({ sort: row.start.shown.date, when: KYC.official.whenText(row.start.shown),
             office: office, kind: "acting", row: row, text: row.name + " became acting" });
+        } else if (row.actingNote && row.actingStart) {
+          // Acting before being confirmed, as the person's own article puts it.
+          events.push({ sort: row.actingStart.date, when: KYC.official.whenText(row.actingStart),
+            office: office, kind: "acting", row: row,
+            text: row.name + " became acting (their Wikipedia article: \u201c" + row.actingNote + "\u201d)" });
         }
         if (row.end) {
           var shown = row.end.shown;
-          events.push({ sort: shown ? shown.date : "", when: shown ? KYC.official.whenText(shown)
-            : "Date differs between sources", office: office, kind: "left", row: row,
+          events.push({ sort: shown ? shown.date : row.end.sort || "", when: shown
+            ? KYC.official.whenText(shown)
+            : row.end.differs ? "Date differs between sources" : "Date not in both sources",
+            office: office, kind: "left", row: row,
             text: row.acting ? row.name + "’s service as acting ended"
               : row.name + " left the office" });
         }
@@ -343,10 +356,10 @@
       source(d.sources.executive.cabinet, "President’s Cabinet") + ", each checked on " +
       "the office’s own page and against the Senate’s roll-call votes, as of " +
       esc(asOf.executive) + ". A Cabinet officer is shown without a party.</p>" +
-      '<h3 class="panel-subhead">The heads of the fifteen executive departments, in the order ' +
-        "3 U.S.C. 19(d)(1) lists them</h3>" +
+      '<h3 class="fed-subhead">The heads of the fifteen executive departments, in the order ' +
+        '<span class="cite">3 U.S.C. 19(d)(1)</span> lists them</h3>' +
       '<ul class="fed-cards">' + departments.map(officeCard).join("") + "</ul>" +
-      (others.length ? '<h3 class="panel-subhead">Other officers the White House lists with ' +
+      (others.length ? '<h3 class="fed-subhead">Other officers the White House lists with ' +
         'the Cabinet</h3><ul class="fed-cards">' + others.map(officeCard).join("") + "</ul>" : ""));
 
     html += changesSection(d);
