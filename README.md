@@ -1127,6 +1127,42 @@ confirm it. A few offices need another official page
 few a different front door (`OFFICE_LINK`: USA.gov's West Virginia link is a
 404). A page that draws itself with JavaScript concludes nothing.
 
+### What else is on the November 3 ballot
+
+The site lists the candidates for Congress, but a reader's ballot holds
+more: 36 governorships, most lieutenant governors, attorneys general and
+secretaries of state, and 88 of the 99 legislative chambers (6,139 seats)
+are elected the same day. `kyc/ballot2026.py` says which, state by state:
+for each of the governor, lieutenant governor, attorney general and
+secretary of state, how the office is filled and whether it is on the 2026
+ballot; for each chamber, how many of its seats are. Every value cites the
+state's own constitution, statute or 2026 election pages - never NCSL,
+Ballotpedia or Wikipedia, which were leads only (rule 50) - and was
+researched state by state and then checked again by a second, independent
+reader (300 checks, one correction: West Virginia's Senate President holds
+the title of lieutenant governor as Tennessee's Speaker does).
+
+`ballot2026.check()` fails the build if a state is missing, an appointed
+office is marked as elected, a joint ticket's lieutenant governor is not
+elected with the governor, a source is a compiled table, or a chamber's size
+disagrees with `government_maps.SEATS` (rule 53). The counts on the page are
+derived, never typed.
+
+On the page:
+
+- each state page's list of races for Congress says what else the same
+  ballot elects, and that this site lists the candidates for Congress only;
+- the State government section and the map's state panel mark the governor,
+  each officer and each chamber "On the Nov 3 ballot" or why not (not
+  elected in 2026, appointed, chosen by the legislature, no such office),
+  each mark linked to its source;
+- the map has a "2026 governor's races" view: a state electing its governor
+  is drawn in the party of the governor now, every other state in the empty
+  grey.
+
+Who is running for these offices is not listed: no source keyed by an id the
+site can hold lists state candidates, and names from a search are not data.
+
 ## State high courts
 
 Every state page's "State government" section, and the map's state panel,

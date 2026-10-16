@@ -82,7 +82,7 @@
     if (info.senators) parts.push(plural(info.senators, "senator"));
     if (info.house) parts.push(plural(info.house, "representative"));
     if (info.delegates) parts.push(plural(info.delegates, "delegate"));
-    parts.push(plural(info.seatsUp, "seat") + " on the 2026 ballot");
+    parts.push(plural(info.seatsUp, "seat") + " in Congress on the 2026 ballot");
     if (info.open) parts.push(plural(info.open, "open seat"));
     parts.push(plural(info.challengersOnBallot, "challenger") + " on the ballot");
     if (info.challengersOut) parts.push(info.challengersOut + " out after the primaries");
@@ -227,8 +227,7 @@
         '<h2 class="state-heading">2026 races for Congress in ' + KYC.escapeHtml(name) + "</h2>",
         '<p class="state-note">Each seat with the sitting member, everyone on the ' +
           "November ballot, and - folded under the race - everyone the primary removed. " +
-          "Your ballot may also hold state and local contests, which this site does " +
-          "not list yet.</p>",
+          alsoOnBallot(code, name) + "</p>",
         (senateRaces.length + houseRaces.length > 3
           ? '<nav class="toolbar jump-row" aria-label="Jump to a race">' + jumps + "</nav>"
           : ""),
@@ -238,6 +237,24 @@
     }
 
     target.innerHTML = html.join("");
+  }
+
+  /** What else the state's November 3 ballot elects, from the same table the
+   *  State government section marks, in a sentence. This site lists the
+   *  candidates for Congress only, and says so. */
+  function alsoOnBallot(code, name) {
+    var list = KYC.stategov ? KYC.stategov.ballotList(code) : null;
+    if (list === null) {
+      return "Your ballot may also hold local contests, which this site does not list.";
+    }
+    if (!list) {
+      return "None of " + KYC.escapeHtml(name) + "'s statewide offices or legislative seats " +
+        "covered here is elected in 2026; the ballot may still hold local contests, which " +
+        "this site does not list.";
+    }
+    return "The same ballot also elects " + KYC.escapeHtml(list) + " (see " +
+      '<a class="state-jump" href="#state-government">State government</a>), and local offices. This site ' +
+      "lists the candidates for Congress only.";
   }
 
   /* A link to a section of this page ("#state-government", from the guide)
@@ -321,7 +338,7 @@
       // A jump within the page scrolls there and leaves the address alone.
       // A fragment left in it sent the reader back to that section when a
       // profile closed, however far they had read on (as jumpToSection says).
-      var jump = event.target.closest('.jump-row a[href^="#"]');
+      var jump = event.target.closest('.jump-row a[href^="#"], a.state-jump[href^="#"]');
       if (jump) {
         var target = doc.getElementById(jump.getAttribute("href").slice(1));
         if (target) {

@@ -1291,6 +1291,32 @@ async function testStates() {
   const { window, D, KYC } = await testShared("states/tx.html");
 
   // Nothing on the site said how, when or where to vote (audit CG-5).
+  suite("states/tx.html — the rest of the November 3 ballot", () => {
+    const note = D.querySelector("#races .state-note");
+    const gov = D.getElementById("state-government");
+    const marks = gov ? [...gov.querySelectorAll(".gov-ballot-mark")] : [];
+    check("the race list says what else the ballot elects",
+      !!note && /also elects the governor/.test(note.textContent) &&
+        /This site lists the candidates for Congress only/.test(note.textContent),
+      note && note.textContent);
+    check("the governor, each officer and each chamber is marked, linked to its source",
+      marks.length >= 6 && marks.every((a) => /^https:\/\//.test(a.getAttribute("href")) &&
+        a.target === "_blank" && /noopener/.test(a.rel)), marks.length + " marks");
+    check("a chamber says how many of its seats are up",
+      marks.some((a) => /seats on the Nov 3 ballot/.test(a.textContent)));
+    const jump = note && note.querySelector('a[href="#state-government"]');
+    if (jump) jump.click();
+    check("its link to State government leaves the address alone",
+      !!jump && !/state-government/.test(window.location.hash), window.location.hash);
+  });
+  const va = await buildPage("states/va.html");
+  suite("states/va.html — a state that elects none of it in 2026", () => {
+    const note = va.D.querySelector("#races .state-note");
+    check("says none of the offices covered here is elected this year",
+      !!note && /None of Virginia's statewide offices or legislative seats covered here/.test(note.textContent),
+      note && note.textContent);
+  });
+
   suite("states/tx.html — how to vote here, from the state's own pages", () => {
     const box = D.getElementById("voting");
     const want = window.kycBuildMeta.voting.TX;
@@ -1346,7 +1372,7 @@ async function testStates() {
     check("a jump leaves the address as it was", window.location.hash === before, window.location.hash);
     check("the race list says it covers Congress only",
       /2026 races for Congress in Texas/.test(D.getElementById("races").textContent) &&
-        /state and local contests/.test(D.getElementById("races").textContent));
+        /candidates for Congress only/.test(D.getElementById("races").textContent));
     const grids = [...content.querySelectorAll(".state-section > .card-grid")];
     check("both senators are shown", grids[0].querySelectorAll(".card").length === senators.length);
     check("the whole delegation is shown",
@@ -3399,6 +3425,23 @@ async function testStateGov() {
       !!D.querySelector('#delegation a[href^="https://www.nga.org/governors/"]'));
     check("the view is in the address", /mode=governor/.test(window.location.hash), window.location.hash);
     check("the legend follows the view", /Republican governor/.test(D.getElementById("mapLegend").textContent));
+
+    // Which governorships are elected on Nov 3: the current governor's party
+    // where one is, and the empty grey where none is.
+    D.querySelector('[data-mode="governor2026"]').click();
+    const up = stateCodes.filter((c) => data.states[c].ballot2026 &&
+      data.states[c].ballot2026.offices.governor.up);
+    check("every state has a 2026 ballot record", stateCodes.every((c) => !!data.states[c].ballot2026));
+    check("a governor's election is drawn in the governor's party, and no other state is",
+      up.length > 0 && stateCodes.every((c) => up.indexOf(c) !== -1
+        ? shape(c).style.fill === "var(--party-" + data.states[c].governor.partyKey.toLowerCase() + ")"
+        : shape(c).style.fill === "var(--surface-2)"),
+      up.length + " up");
+    check("its label says whether the governor is elected on Nov 3",
+      /elected on Nov 3/.test(shape(up[0]).getAttribute("aria-label")) &&
+      /no governor's election in 2026/.test(shape("VA").getAttribute("aria-label")));
+    check("the legend says what the colours mean",
+      /No governor's election in 2026/.test(D.getElementById("mapLegend").textContent));
 
     D.querySelector('[data-mode="trifecta"]').click();
     const painted = stateCodes.filter((c) => shape(c).style.fill === "var(--party-r)").length;
