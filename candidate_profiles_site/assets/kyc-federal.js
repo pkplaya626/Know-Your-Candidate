@@ -168,7 +168,7 @@
    *  both, when they share it; a card says its own only when they differ (a
    *  Vice President who took office mid-term). */
   function leaderCard(p, shared) {
-    return '<li class="fed-card fed-leader">' + portrait(p.photo) +
+    return '<li class="fed-card fed-leader">' + portrait(p) +
       '<div><p class="fed-office">' + esc(p.office) + "</p>" +
       '<p class="fed-name">' + person(p.id, p.name) + "</p>" +
       '<p class="faint">' + esc(p.party) +
@@ -202,9 +202,8 @@
     return '<span class="faint">No page names the head</span>';
   }
 
-  function portrait(photo) {
-    return photo ? '<img class="fed-photo" src="' + KYC.escapeAttr(photo) +
-      '" alt="" width="72" height="90" loading="lazy" decoding="async">' : "";
+  function portrait(person) {
+    return KYC.official.pictureTag(person, 72, "fed-photo");
   }
 
   /** One Cabinet office as a card: its holder's portrait and name, the
@@ -216,7 +215,7 @@
       return '<li class="fed-card fed-officer"><div><p class="fed-office">' + esc(office.office) +
         '</p><p class="faint">Nobody listed by the White House</p></div></li>';
     }
-    return '<li class="fed-card fed-officer">' + portrait(h.photo) +
+    return '<li class="fed-card fed-officer">' + portrait(h) +
       '<div><p class="fed-office">' + esc(office.office) + "</p>" +
       '<p class="fed-name">' + person(h.id, h.name) +
       ((h.page || {}).acting ? ' <span class="badge badge-warn">Acting</span>' : "") + "</p>" +
@@ -224,6 +223,18 @@
       '<p class="fed-fact"><span class="fed-fact-label">Senate vote</span> ' + senateCell(h) + "</p>" +
       '<p class="fed-fact"><span class="fed-fact-label">The office’s page</span> ' + pageCell(h) +
       "</p></div></li>";
+  }
+
+  /** A justice as a card: the Court's own portrait, role, appointment. */
+  function justiceCard(j) {
+    var seat = (j.seats || [])[0] || {};
+    return '<li class="fed-card fed-justice">' + portrait(j) +
+      '<div><p class="fed-office">' + esc(j.justice ? j.justice.role : seat.title) + "</p>" +
+      '<p class="fed-name">' + person(j.id, j.name) + "</p>" +
+      '<p class="fed-fact"><span class="fed-fact-label">Appointed by</span> ' +
+        esc(seat.appointedBy) + "</p>" +
+      '<p class="fed-fact"><span class="fed-fact-label">' + (j.justice ? "Took the oath" : "Commissioned") +
+        "</span> " + esc((j.justice && j.justice.oath) || seat.commissioned) + "</p></div></li>";
   }
 
   function justiceRows(justices) {
@@ -267,8 +278,12 @@
       '<p class="guide-lede">Its members as ' + source(d.sources.judiciary.supremeCourt,
         "the Court lists them") + ", with each justice’s appointment from the Federal " +
       "Judicial Center’s directory, as of " + esc(asOf.judiciary) + ". " +
-      '<a href="../courts/scotus.html">The Court’s page</a>.</p>' +
-      table("", ["Justice", "Role", "Appointed by", "Since"], justiceRows(scotus.members || [])) +
+      '<a href="../courts/scotus.html">The Court’s page</a>.' +
+      ((scotus.members || []).some(function (j) { return j.portrait; })
+        ? " Portraits: " + source((scotus.members.filter(function (j) { return j.portrait; })[0]
+            .portrait || {}).source, "Collection of the Supreme Court of the United States") + "."
+        : "") + "</p>" +
+      '<ul class="fed-cards">' + (scotus.members || []).map(justiceCard).join("") + "</ul>" +
       ((scotus.retired || []).length
         ? table("Retired justices, listed apart: they are not members of the Court",
           ["Justice", "Role", "Appointed by", "Since"], justiceRows(scotus.retired)) : ""));

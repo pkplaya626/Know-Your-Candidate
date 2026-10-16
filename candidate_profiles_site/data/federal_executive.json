@@ -1,6 +1,6 @@
 {
  "asOf": "2026-10-16",
- "fetched": "2026-10-16T17:53:29+00:00",
+ "fetched": "2026-10-16T21:22:52+00:00",
  "offices": [
   {
    "body": "Department of State",
@@ -11,6 +11,24 @@
      "url": "https://www.state.gov/biographies/marco-rubio/"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Marco-Rubio.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Marco-Rubio.jpeg?resize=453,600",
+      453
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Marco-Rubio.jpeg?resize=768,1017",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Marco-Rubio.jpeg?resize=907,1200",
+      907
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Marco-Rubio.jpeg",
+      967
+     ]
+    ],
     "senate": {
      "date": "2025-01-20",
      "issue": "PN11-13",
@@ -36,6 +54,24 @@
      "url": "https://home.treasury.gov/about/general-information/officials"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Bessent.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Bessent.jpeg?resize=428,600",
+      428
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Bessent.jpeg?resize=768,1078",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Bessent.jpeg?resize=855,1200",
+      855
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Bessent.jpeg",
+      912
+     ]
+    ],
     "senate": {
      "date": "2025-01-27",
      "issue": "PN11-1",
@@ -60,6 +96,24 @@
      "status": "unreadable"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Pete-Hegseth.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Pete-Hegseth.jpeg?resize=464,600",
+      464
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Pete-Hegseth.jpeg?resize=768,994",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Pete-Hegseth.jpeg?resize=927,1200",
+      927
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Pete-Hegseth.jpeg",
+      989
+     ]
+    ],
     "senate": {
      "date": "2025-01-24",
      "issue": "PN11-7",
@@ -85,6 +139,32 @@
      "url": "https://www.justice.gov/ag"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/04/Todd-Blanche.jpg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Todd-Blanche.jpg?resize=499,600",
+      499
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Todd-Blanche.jpg?resize=768,924",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Todd-Blanche.jpg?resize=997,1200",
+      997
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Todd-Blanche.jpg?resize=1276,1536",
+      1276
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Todd-Blanche.jpg?resize=1702,2048",
+      1702
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Todd-Blanche.jpg",
+      4985
+     ]
+    ],
     "senate": {
      "date": "2026-08-08",
      "issue": "PN1078",
@@ -110,6 +190,24 @@
      "url": "https://www.doi.gov/secretary-doug-burgum"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Doug-Burgum.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Doug-Burgum.jpeg?resize=400,600",
+      400
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Doug-Burgum.jpeg?resize=768,1152",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Doug-Burgum.jpeg?resize=800,1200",
+      800
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Doug-Burgum.jpeg",
+      853
+     ]
+    ],
     "senate": {
      "date": "2025-01-30",
      "issue": "PN11-3",
@@ -134,6 +232,24 @@
      "status": "unreadable"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Brooke-Rollins.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Brooke-Rollins.jpeg?resize=480,600",
+      480
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Brooke-Rollins.jpeg?resize=768,960",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Brooke-Rollins.jpeg?resize=960,1200",
+      960
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Brooke-Rollins.jpeg",
+      1024
+     ]
+    ],
     "senate": {
      "date": "2025-02-13",
      "issue": "PN11-12",
@@ -158,6 +274,24 @@
      "status": "unreadable"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Howard-Lutnick.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Howard-Lutnick.jpeg?resize=464,600",
+      464
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Howard-Lutnick.jpeg?resize=768,994",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Howard-Lutnick.jpeg?resize=927,1200",
+      927
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Howard-Lutnick.jpeg",
+      989
+     ]
+    ],
     "senate": {
      "date": "2025-02-18",
      "issue": "PN11-9",
@@ -182,6 +316,32 @@
      "status": "unreadable"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/04/Keith-Sonderling.jpg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Keith-Sonderling.jpg?resize=464,600",
+      464
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Keith-Sonderling.jpg?resize=768,994",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Keith-Sonderling.jpg?resize=927,1200",
+      927
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Keith-Sonderling.jpg?resize=1187,1536",
+      1187
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Keith-Sonderling.jpg?resize=1582,2048",
+      1582
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/04/Keith-Sonderling.jpg",
+      3408
+     ]
+    ],
     "senate": {
      "date": "2026-09-30",
      "issue": "PN1129",
@@ -206,6 +366,24 @@
      "status": "unreadable"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Robert-F-Kennedy-Jr.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Robert-F-Kennedy-Jr.jpeg?resize=450,600",
+      450
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Robert-F-Kennedy-Jr.jpeg?resize=768,1023",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Robert-F-Kennedy-Jr.jpeg?resize=901,1200",
+      901
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Robert-F-Kennedy-Jr.jpeg",
+      961
+     ]
+    ],
     "senate": {
      "date": "2025-02-13",
      "issue": "PN11-8",
@@ -231,6 +409,20 @@
      "url": "https://www.hud.gov/aboutus/secretary"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Turner.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Turner.jpeg?resize=480,600",
+      480
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Turner.jpeg?resize=768,960",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Scott-Turner.jpeg",
+      800
+     ]
+    ],
     "senate": {
      "date": "2025-02-05",
      "issue": "PN11-14",
@@ -255,6 +447,24 @@
      "status": "unreadable"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Sean-Duffy.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Sean-Duffy.jpeg?resize=478,600",
+      478
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Sean-Duffy.jpeg?resize=768,964",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Sean-Duffy.jpeg?resize=956,1200",
+      956
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Sean-Duffy.jpeg",
+      1020
+     ]
+    ],
     "senate": {
      "date": "2025-01-28",
      "issue": "PN11-6",
@@ -280,6 +490,24 @@
      "url": "https://www.energy.gov/"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Chris-Wright.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Chris-Wright.jpeg?resize=480,600",
+      480
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Chris-Wright.jpeg?resize=768,960",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Chris-Wright.jpeg?resize=960,1200",
+      960
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Chris-Wright.jpeg",
+      1024
+     ]
+    ],
     "senate": {
      "date": "2025-02-03",
      "issue": "PN11-15",
@@ -304,6 +532,24 @@
      "status": "unreadable"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Linda-McMahon.jpg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Linda-McMahon.jpg?resize=150,150",
+      150
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Linda-McMahon.jpg?resize=600,600",
+      600
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Linda-McMahon.jpg?resize=768,768",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Linda-McMahon.jpg",
+      943
+     ]
+    ],
     "senate": {
      "date": "2025-03-03",
      "issue": "PN11-10",
@@ -329,6 +575,16 @@
      "url": "https://department.va.gov/about/"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Doug-Collins.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Doug-Collins.jpeg?resize=480,600",
+      480
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Doug-Collins.jpeg",
+      720
+     ]
+    ],
     "senate": {
      "date": "2025-02-04",
      "issue": "PN11-5",
@@ -354,6 +610,16 @@
      "url": "https://www.dhs.gov/leadership"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/03/Markwayne-Mullin.jpg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/03/Markwayne-Mullin.jpg?resize=464,600",
+      464
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/03/Markwayne-Mullin.jpg",
+      500
+     ]
+    ],
     "senate": {
      "date": "2026-03-23",
      "issue": "PN858",
@@ -379,6 +645,16 @@
      "url": "https://www.epa.gov/aboutepa/epa-administrator"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Lee-Zeldin.jpg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Lee-Zeldin.jpg?resize=480,600",
+      480
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Lee-Zeldin.jpg",
+      500
+     ]
+    ],
     "senate": {
      "date": "2025-01-29",
      "issue": "PN11-23",
@@ -403,6 +679,7 @@
      "status": "none"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Russ-Vought.jpg",
+    "photoSet": [],
     "senate": {
      "date": "2025-02-06",
      "issue": "PN11-22",
@@ -428,6 +705,16 @@
      "url": "https://ustr.gov/about-us/biographies-key-officials"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Jamieson-Greer.jpg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Jamieson-Greer.jpg?resize=489,600",
+      489
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Jamieson-Greer.jpg",
+      603
+     ]
+    ],
     "senate": {
      "date": "2025-02-26",
      "issue": "PN11-17",
@@ -452,6 +739,32 @@
      "status": "unreadable"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/08/Jay-Clayton.jpg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/08/Jay-Clayton.jpg?resize=480,600",
+      480
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/08/Jay-Clayton.jpg?resize=768,960",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/08/Jay-Clayton.jpg?resize=960,1200",
+      960
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/08/Jay-Clayton.jpg?resize=1229,1536",
+      1229
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/08/Jay-Clayton.jpg?resize=1638,2048",
+      1638
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/08/Jay-Clayton.jpg",
+      2880
+     ]
+    ],
     "senate": {
      "date": "2026-07-28",
      "issue": "PN1092",
@@ -477,6 +790,24 @@
      "url": "https://www.cia.gov/about/director-of-cia/"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/John-Ratcliffe.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/John-Ratcliffe.jpeg?resize=480,600",
+      480
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/John-Ratcliffe.jpeg?resize=768,960",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/John-Ratcliffe.jpeg?resize=960,1200",
+      960
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/John-Ratcliffe.jpeg",
+      1024
+     ]
+    ],
     "senate": {
      "date": "2025-01-23",
      "issue": "PN11-19",
@@ -502,6 +833,24 @@
      "url": "https://www.sba.gov/person/kelly-loeffler/"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Kelly-Loeffler.jpeg",
+    "photoSet": [
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Kelly-Loeffler.jpeg?resize=480,600",
+      480
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Kelly-Loeffler.jpeg?resize=768,960",
+      768
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Kelly-Loeffler.jpeg?resize=960,1200",
+      960
+     ],
+     [
+      "https://www.whitehouse.gov/wp-content/uploads/2026/02/Kelly-Loeffler.jpeg",
+      1024
+     ]
+    ],
     "senate": {
      "date": "2025-02-19",
      "issue": "PN11-18",
@@ -532,6 +881,32 @@
   "page": "https://www.whitehouse.gov/administration/donald-j-trump/",
   "party": "Republican",
   "photo": "https://www.whitehouse.gov/wp-content/uploads/2025/06/President-Donald-Trump-Official-Presidential-Portrait.png",
+  "photoSet": [
+   [
+    "https://www.whitehouse.gov/wp-content/uploads/2025/06/President-Donald-Trump-Official-Presidential-Portrait.png?resize=600,338",
+    600
+   ],
+   [
+    "https://www.whitehouse.gov/wp-content/uploads/2025/06/President-Donald-Trump-Official-Presidential-Portrait.png?resize=768,432",
+    768
+   ],
+   [
+    "https://www.whitehouse.gov/wp-content/uploads/2025/06/President-Donald-Trump-Official-Presidential-Portrait.png?resize=1200,675",
+    1200
+   ],
+   [
+    "https://www.whitehouse.gov/wp-content/uploads/2025/06/President-Donald-Trump-Official-Presidential-Portrait.png?resize=1536,864",
+    1536
+   ],
+   [
+    "https://www.whitehouse.gov/wp-content/uploads/2025/06/President-Donald-Trump-Official-Presidential-Portrait.png?resize=2048,1152",
+    2048
+   ],
+   [
+    "https://www.whitehouse.gov/wp-content/uploads/2025/06/President-Donald-Trump-Official-Presidential-Portrait.png",
+    3000
+   ]
+  ],
   "termEnd": "2029-01-20",
   "termStart": "2025-01-20"
  },
@@ -556,6 +931,16 @@
   "page": "https://www.whitehouse.gov/administration/jd-vance/",
   "party": "Republican",
   "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/03/Vice-President-JD-Vance-3.jpg",
+  "photoSet": [
+   [
+    "https://www.whitehouse.gov/wp-content/uploads/2026/03/Vice-President-JD-Vance-3.jpg?resize=400,600",
+    400
+   ],
+   [
+    "https://www.whitehouse.gov/wp-content/uploads/2026/03/Vice-President-JD-Vance-3.jpg",
+    500
+   ]
+  ],
   "termEnd": "2029-01-20",
   "termStart": "2025-01-20"
  }

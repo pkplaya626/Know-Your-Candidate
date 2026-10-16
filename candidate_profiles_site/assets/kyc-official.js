@@ -28,6 +28,37 @@
     return global.kycFederal || {};
   }
 
+  /** An official's picture: the White House's photo with the sizes it
+   *  serves of that one file (rule 42), or a justice's official portrait.
+   *  ``{src, srcset, credit, source}``, or null. */
+  function picture(person) {
+    if (!person) return null;
+    if (person.photo) {
+      var sizes = person.photoSet || [];
+      return {
+        src: sizes.length ? sizes[0][0] : person.photo,
+        srcset: sizes.map(function (s) { return s[0] + " " + s[1] + "w"; }).join(", "),
+        credit: "Photo: The White House", source: null,
+      };
+    }
+    if (person.portrait && person.portrait.url) {
+      return { src: person.portrait.url, srcset: "", credit: "Portrait: " + person.portrait.credit,
+               source: person.portrait.source };
+    }
+    return null;
+  }
+
+  /** The markup for a picture *px* wide, lazy, decorative (the name is
+   *  beside it). */
+  function pictureTag(person, px, className) {
+    var p = picture(person);
+    if (!p) return "";
+    return '<img class="' + KYC.escapeAttr(className) + '" src="' + KYC.escapeAttr(p.src) + '"' +
+      (p.srcset ? ' srcset="' + KYC.escapeAttr(p.srcset) + '" sizes="' + px + 'px"' : "") +
+      ' alt="" width="' + px + '" height="' + Math.round(px * 1.25) +
+      '" loading="lazy" decoding="async">';
+  }
+
   /** Every official the page holds, by id: ``{kind, person, office}``. */
   function officials() {
     var out = {};
@@ -336,11 +367,15 @@
     // elsewhere, so only the hub, which holds everyone, says "no longer".
     el("officialModalName").textContent = person ? person.name :
       doc.body.getAttribute("data-page") === "court" ? "Not on this court" : "No longer listed";
-    portrait.hidden = !(person && person.photo);
-    if (person && person.photo) {
-      photo.src = person.photo;
+    var pic = picture(person);
+    portrait.hidden = !pic;
+    if (pic) {
+      photo.srcset = pic.srcset;
+      photo.sizes = pic.srcset ? "116px" : "";
+      photo.src = pic.src;
       photo.alt = person.name;
     } else {
+      photo.removeAttribute("srcset");
       photo.removeAttribute("src");
       photo.alt = "";
     }
@@ -348,6 +383,15 @@
     else if (found.kind === "leader") renderLeader(person);
     else if (found.kind === "officer") renderOfficer(person, found.office);
     else renderJudge(person);
+    // Whose picture it is: credited beside the record's own source.
+    if (pic) {
+      var credit = doc.createElement("span");
+      credit.className = "faint official-credit";
+      credit.innerHTML = "; " + (pic.source ? '<a href="' + KYC.escapeAttr(pic.source) +
+        '" target="_blank" rel="noopener noreferrer">' + KYC.escapeHtml(pic.credit) + "</a>"
+        : KYC.escapeHtml(pic.credit)) + ".";
+      el("officialModalSource").appendChild(credit);
+    }
   }
 
   function open(id, opts) {
@@ -432,6 +476,6 @@
 
   KYC.official = {
     open: open, close: close, isOpen: isOpen, ensure: ensure,
-    applyRoute: applyRoute, officials: officials,
+    applyRoute: applyRoute, officials: officials, pictureTag: pictureTag,
   };
 })(window);

@@ -71,6 +71,24 @@ class TestTheCabinetPage(unittest.TestCase):
         self.assertEqual(entries[0]["title"], "Secretary of the Treasury")
         self.assertTrue(entries[0]["photo"].startswith("https://www.whitehouse.gov/wp-content/"))
 
+    def test_a_portrait_keeps_only_sizes_of_its_own_file(self):
+        # The originals run to 6 MB; the White House serves smaller copies of
+        # the same file, and nothing else is a size of it (rule 42).
+        entries = federal.parse_cabinet(fixture("cabinet.html"))
+        for entry in entries:
+            self.assertTrue(entry["photoSet"], entry["name"])
+            self.assertTrue(all(url.split("?")[0] == entry["photo"] for url, _w in entry["photoSet"]))
+            widths = [w for _u, w in entry["photoSet"]]
+            self.assertEqual(widths, sorted(widths))
+            # The resized copies survive: their URLs hold commas, and a
+            # srcset split on commas kept only the originals.
+            self.assertTrue(any("?resize=" in url for url, _w in entry["photoSet"]), entry["name"])
+        tag = ('<img src="https://www.whitehouse.gov/wp-content/uploads/a.jpg" srcset="'
+               'https://www.whitehouse.gov/wp-content/uploads/a.jpg?resize=400,600 400w, '
+               'https://www.whitehouse.gov/wp-content/uploads/b.jpg?resize=300,450 300w">')
+        self.assertEqual(federal.photo_set(tag, "https://www.whitehouse.gov/wp-content/uploads/a.jpg"),
+                         [["https://www.whitehouse.gov/wp-content/uploads/a.jpg?resize=400,600", 400]])
+
     def test_an_entry_the_parser_cannot_read_stops_it(self):
         page = fixture("cabinet.html").replace("<h3 class", "<h4 class", 1)
         with self.assertRaises(federal.FederalError):

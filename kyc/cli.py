@@ -1399,7 +1399,7 @@ def _judiciary(args):
     print("  Supreme Court: " + "; ".join(judges[i]["name"] for i in scotus["judges"]))
     if scotus.get("retired"):
         print("  retired justices, not members: "
-              + "; ".join(judges[i]["name"] for i in scotus["retired"]))
+              + "; ".join(cache["judges"][i]["name"] for i in scotus["retired"]))
     for kind in ("appeals", "trade", "district", "territorial"):
         ids = [c for c, court in federal_courts.COURTS.items() if court["kind"] == kind]
         listed = [c for c in ids if cache["courts"][c]["listed"]]

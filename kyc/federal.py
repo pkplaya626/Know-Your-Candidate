@@ -120,12 +120,34 @@ def parse_administration(page):
     return out
 
 
+_IMG = re.compile(r'<img[^>]*\bsrc="(https://www\.whitehouse\.gov/wp-content/uploads/[^"?]+)'
+                  r'[^"]*"[^>]*>')
+
+
+def photo_set(tag, photo):
+    """The sizes the White House serves of *photo*, from its img tag's
+    srcset: ``[[url, width], ...]``, narrowest first. Only sizes of that one
+    file (rule 42); the originals run to 6 MB, and a card draws 72px."""
+    found = re.search(r'\bsrcset="([^"]+)"', tag)
+    out = []
+    # A candidate is "url widthw"; the URLs themselves hold commas
+    # ("?resize=428,600"), so the list is read by its pairs, never split on
+    # commas - which kept only the 6 MB originals.
+    for url, width in re.findall(r"(\S+)\s+(\d+)w", found.group(1) if found else ""):
+        url = html.unescape(url.lstrip(","))
+        if url.split("?")[0] == photo:
+            out.append([url, int(width)])
+    return sorted(out, key=lambda pair: pair[1])
+
+
 def portrait(page):
-    """The first image inside a White House page's main content, or None."""
+    """``(photo, sizes)``: the first image inside a White House page's main
+    content and the sizes of it the page lists, or ``(None, [])``."""
     main = page[page.find("<main"):page.find("</main>")] if "<main" in page else ""
-    match = re.search(r'<img[^>]*\bsrc="(https://www\.whitehouse\.gov/wp-content/uploads/[^"?]+)',
-                      main)
-    return match.group(1) if match else None
+    match = _IMG.search(main)
+    if not match:
+        return None, []
+    return match.group(1), photo_set(match.group(0), match.group(1))
 
 
 # ------------------------------------------------------------- the Cabinet
@@ -144,9 +166,10 @@ def parse_cabinet(page):
     headings = main.count('<h2 class="wp-block-heading has-text-align-center">')
     out = []
     for name, title, block in _ENTRY.findall(main):
-        img = re.search(r'<img[^>]*\bsrc="(https://www\.whitehouse\.gov/wp-content/uploads/[^"?]+)',
-                        block)
-        out.append({"name": _text(name), "title": _text(title), "photo": img.group(1) if img else None})
+        img = _IMG.search(block)
+        out.append({"name": _text(name), "title": _text(title),
+                    "photo": img.group(1) if img else None,
+                    "photoSet": photo_set(img.group(0), img.group(1)) if img else []})
     if not out or len(out) != headings:
         raise FederalError(f"read {len(out)} of the Cabinet page's {headings} entries")
     return out
@@ -360,7 +383,7 @@ def fetch(previous=None, today=None, read=None, log=print):
             continue
         person["page"] = listed[1]
         try:
-            person["photo"] = portrait(read(listed[1]))
+            person["photo"], person["photoSet"] = portrait(read(listed[1]))
         except FederalError as exc:
             log(f"  [warn] {exc}")
     entries = parse_cabinet(read(federal_offices.CABINET_URL))
@@ -384,7 +407,8 @@ def fetch(previous=None, today=None, read=None, log=print):
                                 "body": office["body"], "kind": "department",
                                 "order": order, "holder": None})
             continue
-        holder = {"name": entry["name"], "title": entry["title"], "photo": entry["photo"]}
+        holder = {"name": entry["name"], "title": entry["title"], "photo": entry["photo"],
+                  "photoSet": entry.get("photoSet") or []}
         if votes is not None:
             holder["senate"] = confirmation(office, entry["name"], votes)
         else:

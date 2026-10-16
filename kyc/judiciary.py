@@ -36,6 +36,8 @@ import io
 import json
 import os
 import re
+import time
+import urllib.parse
 import urllib.request
 
 from . import federal_courts
@@ -46,6 +48,12 @@ EXPORT_PAGE = ("https://www.fjc.gov/history/judges/"
                "biographical-directory-article-iii-federal-judges-export")
 JUDGE_PAGE = "https://www.fjc.gov/node/{nid}"
 SCOTUS_URL = "https://www.supremecourt.gov/about/members_text.aspx"
+# The justices' official portraits, on the Court's biographies page: each an
+# image with alt text "Name, Title". robots.txt asks for a second between
+# requests.
+PORTRAITS_URL = "https://www.supremecourt.gov/about/biographies.aspx"
+PORTRAIT_CREDIT = "Collection of the Supreme Court of the United States"
+COURT_PAUSE = 1.0
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "judiciary.json")
 USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
               "(KHTML, like Gecko) Chrome/124.0 Safari/537.36 know-your-candidate/1.0")
@@ -323,9 +331,59 @@ def join_justices(justices, judges, bios):
     return members, retired, problems
 
 
+_SUFFIXES = {"jr", "sr", "ii", "iii", "iv"}
+
+
+def parse_portraits(page):
+    """``[{first, last, title, url}]`` for each justice's picture on the
+    Court's biographies page, read from its alt text ("Samuel A. Alito, Jr.,
+    Associate Justice")."""
+    out = []
+    for tag in re.findall(r"<img[^>]*>", page):
+        src = re.search(r'\bsrc="([^"]*justice_pictures/[^"]+)"', tag)
+        alt = re.search(r'\balt="([^"]*)"', tag)
+        if not src or not alt:
+            continue
+        parts = [p.strip() for p in html.unescape(alt.group(1)).split(",") if p.strip()]
+        if len(parts) < 2:
+            continue
+        names = [p for p in parts[:-1] if _fold(p).rstrip(".") not in _SUFFIXES]
+        words = " ".join(names).split()
+        if len(words) < 2:
+            continue
+        out.append({"first": words[0], "last": words[-1], "title": parts[-1],
+                    "url": urllib.parse.urljoin(PORTRAITS_URL, src.group(1)).replace(" ", "%20")})
+    return out
+
+
+def join_portraits(images, members):
+    """``({nid: portrait}, problems)``: each sitting justice the build has
+    already joined to the directory (:func:`join_justices`) takes the one
+    picture of their surname and first name, within that closed set - the
+    page also pictures retired justices - and only when its title agrees
+    with their role. Any failure is all of them: ``({}, problems)``."""
+    by_key = {}
+    for image in images:
+        by_key.setdefault((_fold(image["last"]), _fold(image["first"])), []).append(image)
+    out, problems = {}, []
+    for justice, nid in members:
+        last, _, rest = justice["name"].partition(",")
+        first = rest.strip().split()[0] if rest.strip() else ""
+        hits = by_key.get((_fold(last), _fold(first)), [])
+        if len(hits) != 1:
+            problems.append(f"{justice['name']}: {len(hits)} pictures on the Court's page")
+            continue
+        chief = justice["role"] == "Chief Justice"
+        if chief != ("Chief Justice" in hits[0]["title"]):
+            problems.append(f"{justice['name']}: pictured as {hits[0]['title']!r}")
+            continue
+        out[nid] = {"url": hits[0]["url"], "credit": PORTRAIT_CREDIT, "source": PORTRAITS_URL}
+    return ({}, problems) if problems else (out, [])
+
+
 # ------------------------------------------------------------------ fetch
 
-def build(service_text, judges_text, scotus_page, today):
+def build(service_text, judges_text, scotus_page, today, portraits_page=None, image_ok=None):
     """The cache, or :class:`JudiciaryError` when a source is not what the
     pipeline knows."""
     bios = read_judges(judges_text)
@@ -342,6 +400,17 @@ def build(service_text, judges_text, scotus_page, today):
     members.sort(key=lambda m: (m[0]["role"] != "Chief Justice", m[0]["oath"] or ""))
     for nid in retired:
         judges[nid]["retiredJustice"] = True
+    portrait_problems = []
+    if portraits_page is not None:
+        portraits, portrait_problems = join_portraits(parse_portraits(portraits_page), members)
+        # An image that answers 404 or is not an image is a wrong address:
+        # none is shown. A check that concludes nothing (None) is not that.
+        failed = [nid for nid, p in portraits.items() if image_ok and image_ok(p["url"]) is False]
+        if failed:
+            portrait_problems.append(f"{len(failed)} of the justices' portraits did not load")
+            portraits = {}
+        for nid, picture in portraits.items():
+            judges[nid]["portrait"] = picture
     courts = {}
     for cid, court in federal_courts.COURTS.items():
         seats = [(j, s) for j in judges.values() for s in j["seats"] if s["court"] == cid]
@@ -378,13 +447,42 @@ def build(service_text, judges_text, scotus_page, today):
         "courts": courts,
         "pending": sorted(pending),
         "conflicts": conflicts,
+        "portraitProblems": portrait_problems,
     }
 
 
-def fetch(previous=None, today=None, read=None):
+def _image_ok(url):
+    """True when *url* answers with an image, False on a 404 or another
+    type, None when the request concludes nothing (rule 8)."""
+    time.sleep(COURT_PAUSE)
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT}, method="HEAD")
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            return response.headers.get("Content-Type", "").startswith("image/")
+    except urllib.error.HTTPError as exc:
+        return False if exc.code == 404 else None
+    except OSError:
+        return None
+
+
+def fetch(previous=None, today=None, read=None, image_ok=None):
+    live = read is None
     read = read or _get
     today = today or datetime.date.today().isoformat()
-    cache = build(read(SERVICE_URL), read(JUDGES_URL), read(SCOTUS_URL), today)
+    scotus = read(SCOTUS_URL)
+    if live:
+        time.sleep(COURT_PAUSE)
+    try:
+        portraits_page = read(PORTRAITS_URL)
+    except JudiciaryError:
+        portraits_page = None       # inconclusive: the last run's portraits stand
+    cache = build(read(SERVICE_URL), read(JUDGES_URL), scotus, today, portraits_page,
+                  image_ok or (_image_ok if live else None))
+    if portraits_page is None and previous:
+        for jid, judge in cache["judges"].items():
+            kept = ((previous.get("judges") or {}).get(jid) or {}).get("portrait")
+            if kept and judge.get("justice"):
+                judge["portrait"] = kept
     if previous and len(cache["judges"]) < SHRINK * len(previous.get("judges") or {}):
         raise JudiciaryError(f"the directory lists {len(cache['judges'])} sitting judges, the "
                              f"last read {len(previous['judges'])}: a truncated file is refused")
@@ -442,6 +540,10 @@ def problems(cache, today=None):
     party = sorted(j for j, rec in judges.items() if "party" in _keys(rec))
     if party:
         out.append(("error", "judge-party", "a judge's record carries a party", party[:10]))
+    if cache.get("portraitProblems"):
+        out.append(("warn", "justice-portraits",
+                    "the justices' portraits on the Court's page could not all be joined; none "
+                    "is shown", cache["portraitProblems"]))
     if cache.get("pending"):
         out.append(("warn", "judges-not-commissioned",
                     f"{len(cache['pending'])} confirmed judges are not commissioned yet and are "

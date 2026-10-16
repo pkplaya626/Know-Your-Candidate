@@ -41,6 +41,7 @@ def _leader(person, office):
         "party": person.get("party"),
         "since": person.get("termStart"), "until": person.get("termEnd"),
         "photo": person.get("photo"),
+        "photoSet": person.get("photoSet") or [],
         "links": {k: v for k, v in (
             ("whitehouse", person.get("page")),
             ("wikipedia", person["ids"].get("wikipedia")),
@@ -58,6 +59,7 @@ def _holder(office):
     return {
         "id": slug(holder["name"]), "name": holder["name"], "title": holder["title"],
         "photo": holder.get("photo"),
+        "photoSet": holder.get("photoSet") or [],
         "page": {k: page[k] for k in ("status", "url", "acting") if page.get(k)},
         "senate": holder.get("senate"),
         "senateUnread": bool(holder.get("senateUnread")),
@@ -67,7 +69,7 @@ def _holder(office):
 def _judge(record):
     """A judge as the pages show them: nothing a source did not state."""
     keep = ("id", "name", "sortName", "status", "seats", "prior", "born", "education",
-            "career", "otherNominations", "fjc", "justice", "retiredJustice")
+            "career", "otherNominations", "fjc", "justice", "retiredJustice", "portrait")
     return {k: record[k] for k in keep if record.get(k) not in (None, [], "")}
 
 

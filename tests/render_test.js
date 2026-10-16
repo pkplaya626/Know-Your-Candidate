@@ -4428,13 +4428,23 @@ async function testFederal() {
       rows[i].querySelector(".fed-office").textContent === o.office));
     check("no Cabinet officer is shown with a party",
       !PARTY_WORDS.test(D.getElementById("cabinet").textContent));
-    const justices = [...D.querySelectorAll("#supreme-court table")][0].querySelectorAll("tbody tr");
+    const justices = [...D.querySelectorAll("#supreme-court .fed-justice")];
     check("the Court's members as the Court lists them",
       justices.length === d.supremeCourt.members.length, `${justices.length}`);
     const retired = new Set((d.supremeCourt.retired || []).map((j) => j.id));
-    const first = [...D.querySelectorAll("#supreme-court table")][0];
-    check("a retired justice is never among them", [...first.querySelectorAll("[data-official]")]
-      .every((b) => !retired.has(b.getAttribute("data-official"))));
+    check("a retired justice is never among them", justices.every((c) =>
+      !retired.has(c.querySelector("[data-official]").getAttribute("data-official"))));
+    check("each justice the Court pictures is pictured", d.supremeCourt.members.every((j, i) =>
+      !j.portrait || (justices[i].querySelector("img.fed-photo") || {}).getAttribute &&
+        justices[i].querySelector("img.fed-photo").getAttribute("src") === j.portrait.url));
+    const sized = [...D.querySelectorAll("#cabinet img.fed-photo, #executive img.fed-photo")];
+    // A srcset is read by its "url widthw" pairs: the URLs hold commas.
+    const urlsOf = (img) => [...(img.getAttribute("srcset") || "").matchAll(/(\S+)\s+\d+w/g)]
+      .map((m) => m[1].replace(/^,/, ""));
+    check("an executive photo is drawn from the sizes of that one file", sized.length > 0 &&
+      sized.every((img) => urlsOf(img).every((u) =>
+        u.split("?")[0] === img.getAttribute("src").split("?")[0])) &&
+      sized.some((img) => urlsOf(img).length > 1));
     const links = [...D.querySelectorAll('#courts a[href^="../courts/"]')].map((a) => a.getAttribute("href"))
       .filter((href) => href.indexOf("#") === -1);
     check("every court but the Supreme Court is linked, once",
