@@ -227,7 +227,7 @@ def _governor(gov, problems=None):
 def build(root="."):
     """``(payload, problems)``: what ``data/stategov.js`` holds, and every
     disagreement between the sources."""
-    from . import courts, executives, officers, statelegs
+    from . import ballot2026, courts, executives, officers, statelegs
     exec_cache, leg_cache, ncsl, officer_cache = (
         executives.load_cache(root), statelegs.load_cache(root), load_ncsl(root),
         officers.load_cache(root))
@@ -252,6 +252,9 @@ def build(root="."):
         entry = {"governor": _governor(dict(governors[code], state=code), problems)}
         entry.update(officers.for_state(code, officer_cache, disputes))
         entry.update(courts.for_state(code, court_cache))
+        if code in ballot2026.STATES:
+            # Which of these offices and seats are elected on November 3.
+            entry["ballot2026"] = ballot2026.for_state(code)
         if code in STATES:
             entry.update(_legislature(code, legislators.get(code, []), ncsl["states"].get(code),
                                       entry["governor"]["partyKey"], problems))
@@ -278,6 +281,9 @@ def build(root="."):
                      officer_cache.get("fetched", "")[:10]],
             "daga": ["Democratic Attorneys General Association, members", officers.DAGA_URL,
                      officer_cache.get("fetched", "")[:10]],
+            # Each state's own record, linked per office and chamber.
+            "ballot2026": ["Each state's constitution, statutes and election office",
+                           "", ballot2026.REVIEWED],
         },
     }
     return payload, problems

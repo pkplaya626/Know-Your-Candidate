@@ -1127,6 +1127,53 @@ confirm it. A few offices need another official page
 few a different front door (`OFFICE_LINK`: USA.gov's West Virginia link is a
 404). A page that draws itself with JavaScript concludes nothing.
 
+### What else is on the November 3 ballot
+
+The site lists the candidates for Congress, but a reader's ballot holds
+more: 36 governorships, most lieutenant governors, attorneys general and
+secretaries of state, and 88 of the 99 legislative chambers (6,139 seats)
+are elected the same day. `kyc/ballot2026.py` says which, state by state:
+for each of the governor, lieutenant governor, attorney general and
+secretary of state, how the office is filled and whether it is on the 2026
+ballot; for each chamber, how many of its seats are up for regular election
+(a special election to fill an unexpired term is not counted, and the page
+says "regular" wherever a count could be read as the whole ballot). Every
+value cites the
+state's own constitution, statute or 2026 election pages - never NCSL,
+Ballotpedia or Wikipedia, which were leads only (rule 50) - and was
+researched state by state and then checked again by a second, independent
+reader (300 checks, one correction: West Virginia's Senate President holds
+the title of lieutenant governor as Tennessee's Speaker does).
+
+`ballot2026.check()`, run by `build --check` (`validate.check_ballot2026`),
+fails the build if a state is missing, an appointed
+office is marked as elected, a joint ticket's lieutenant governor is not
+elected with the governor, a source is a compiled table, or a chamber's size
+disagrees with `government_maps.SEATS` (rule 53); a county's page is not a
+state's record. The counts on the page are derived, never typed. The
+territories and D.C. are not in the table: the map draws them as "not
+covered", never as electing no one, and a territory's page says its ballot
+may hold territorial contests. Arizona's lieutenant governor, a new office
+first filled on November 3, reads "No one holds this office yet", not "no
+such office".
+
+On the page:
+
+- each state page's list of races for Congress says which of the offices
+  this site covers the same ballot also elects, that it may hold other
+  contests and measures this site does not list, and that the site lists the
+  candidates for Congress only;
+- the State government section and the map's state panel mark the governor,
+  each officer and each chamber "On the Nov 3 ballot" or why not (not
+  elected in 2026, appointed, chosen by the legislature, no such office),
+  each mark linked to its source;
+- the map has a "2026 governor's races" view: a state electing its governor
+  is drawn in the party of the governor now, every other state in the empty
+  grey.
+
+Who is running for these offices is not listed: no source keyed by an id the
+site can hold lists state candidates, and names from a search are not data.
+
 ## State high courts
 
 Every state page's "State government" section, and the map's state panel,

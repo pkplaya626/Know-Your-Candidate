@@ -1273,6 +1273,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_results_pages(results)
     issues += check_seats_contested(profiles)
     issues += check_guide()
+    issues += check_ballot2026()
     if voting is not None:                 # None: the caller did not supply it
         issues += check_voting_links(voting)
     return issues
@@ -1291,6 +1292,19 @@ def check_guide():
     return [Issue("error", "guide",
                   f"{len(problems)} problem(s) in the guide's text (kyc/government_text.py)",
                   problems)]
+
+
+def check_ballot2026():
+    """Which state offices and seats are on the 2026 ballot (kyc/ballot2026.py):
+    every state, a sourced value each, chamber sizes that agree with the seat
+    table. An error: the table is curated text nothing else checks."""
+    from . import ballot2026
+    try:
+        ballot2026.check()
+    except ballot2026.Ballot2026Error as exc:
+        return [Issue("error", "ballot2026", "the 2026 ballot table breaks its rules",
+                      str(exc).split("; "))]
+    return []
 
 
 def as_dict(issues, stats=None):

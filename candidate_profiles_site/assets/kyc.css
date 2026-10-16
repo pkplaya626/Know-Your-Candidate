@@ -3393,6 +3393,27 @@ button.local-county-link {
 .gov-chamber-seats { font-size: var(--t-sm); }
 .gov-chamber-seats .sep { margin: 0 var(--s-1); color: var(--text-faint); }
 .gov-chamber-holds { font-size: var(--t-sm); color: var(--text-muted); }
+/* On the November 3 ballot, or not: a small link to the state's own record. */
+.gov-ballot-mark {
+  display: inline-block;
+  margin-top: 2px;
+  padding: 0 var(--s-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+  text-decoration: none;
+}
+.gov-ballot-mark.up {
+  color: var(--warn-text);
+  background: color-mix(in srgb, var(--warn) 14%, transparent);
+  border-color: color-mix(in srgb, var(--warn) 34%, transparent);
+  font-weight: 600;
+}
+.gov-ballot-mark:focus-visible { text-decoration: underline; }
+@media (hover: hover) {
+  .gov-ballot-mark:hover { text-decoration: underline; }
+}
 
 .gov-note {
   margin: 0 0 var(--s-3);
