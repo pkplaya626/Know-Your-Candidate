@@ -3532,6 +3532,11 @@ async function testGuideMaps() {
       check("Texas is in the Fifth Circuit, with a link to that court",
         /Fifth Circuit/.test(D.getElementById("guideFacts").textContent) &&
         !!D.querySelector('#guideFacts a[href="https://www.ca5.uscourts.gov/"]'));
+      // The guide's map and the federal page are one set of courts.
+      const here = [...D.querySelectorAll("#guideFacts .guide-fact-courts a")].map((a) => a.getAttribute("href"));
+      check("Texas's own federal courts link to their judges: its court of appeals first",
+        here[0] === "../courts/ca5.html" && ["tx-n", "tx-s", "tx-e", "tx-w"]
+          .every((id) => here.includes("../courts/" + id + ".html")), here.join(" "));
     });
   }
   {

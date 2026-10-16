@@ -266,7 +266,25 @@
           '">' + KYC.icon("pin") + " " + KYC.escapeHtml(map.name(code)) +
           "'s governor, legislature and highest court: who holds each \u203a</a></p>"
         : "";
-      target.innerHTML = legislature + stateGov + local + order.map(function (id) {
+      // On the circuits map, the state's own federal courts - its court of
+      // appeals, then its district courts - each a link to its judges, as
+      // the federal page lists them (data/federal.js): the guide's map and
+      // the federal page's are one set of courts.
+      var here = page === "courts" && global.kycFederal
+        ? (global.kycFederal.courts || []).filter(function (c) {
+            return /^(appeals|district|territorial)$/.test(c.kind) && (c.states || []).indexOf(code) !== -1;
+          }).sort(function (a, b) {
+            return (a.kind === "appeals" ? 0 : 1) - (b.kind === "appeals" ? 0 : 1) ||
+              (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+          })
+        : [];
+      var courts = here.length
+        ? '<ul class="guide-fact-courts">' + here.map(function (c) {
+            return '<li><a href="' + KYC.escapeAttr(KYC.siteRoot() + "courts/" + encodeURIComponent(c.id) +
+              ".html") + '">' + KYC.icon("scale") + " " + KYC.escapeHtml(c.name) + " ›</a></li>";
+          }).join("") + "</ul>"
+        : "";
+      target.innerHTML = legislature + stateGov + local + courts + order.map(function (id) {
         var m = data.modes[id];
         var value = m.values[code];
         var fact = value === undefined ? m.outside : m.facts[code];
