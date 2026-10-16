@@ -163,10 +163,29 @@ def january(root=REPO):
         if rid not in holder and bid in members and bid not in taken \
                 and members[bid].get("seekingReelection2026"):
             holder[rid] = ("incumbent", bid)
-    # The specials: Florida's appointee re-seated, Ohio's replaced.
+    # The specials: while they are open, Florida's appointee is re-seated and
+    # Ohio's replaced. Once their winners are seated (December, in the data
+    # or in a December rehearsal's copy), whoever sits in those seats keeps
+    # them.
     oh = held["S-OH-2026"]
-    holder["S-FL-2026"] = ("incumbent", held["S-FL-2026"])
-    holder.pop("S-OH-2026", None)
+    sitting = legislators.by_bioguide(snap)
+    specials = ("S-FL-2026", "S-OH-2026")
+    still_open = all(
+        (sitting.get(record["incumbents"][rid]["bioguide"]) or {}).get("termEnd")
+        == record["incumbents"][rid]["termEnd"] for rid in specials)
+    if still_open:
+        holder["S-FL-2026"] = ("incumbent", held["S-FL-2026"])
+        holder.pop("S-OH-2026", None)
+    else:
+        for rid in specials:
+            race = record["races"][rid]
+            holder.pop(rid, None)
+            sitter = next((p for p in people.values() if p["chamber"] == "Senate"
+                           and p["state"] == race["state"]
+                           and p.get("senateClass") == race.get("senateClass")
+                           and (p.get("termStart") or "") >= "2026-11-03"), None)
+            if sitter:
+                holder[rid] = ("seated", sitter["bioguide"])
 
     # 3. Every other seat to a newcomer; every fifth with no FEC id.
     count = 0
@@ -177,6 +196,8 @@ def january(root=REPO):
         rows = filers.get(rid) or []
         row = rows[0] if rows else None
         count += 1
+        while f"Z9{count:05d}" in people:
+            count += 1          # an id already seated: a December winner
         bid = f"Z9{count:05d}"
         name = candidates.display_name(row.get("name")) if row else f"Newcomer {bid}"
         party = {"DEM": "Democrat", "REP": "Republican"}.get((row or {}).get("party"),
@@ -206,7 +227,7 @@ def january(root=REPO):
     seated_in = {bid: rid for rid, (_kind, bid) in holder.items()}
     gone = []
     for bid, p in list(people.items()):
-        if bid.startswith("Z9"):
+        if bid.startswith("Z9") and holder.get(seated_in.get(bid), ("",))[0] != "seated":
             continue
         rid = seated_in.get(bid)
         if rid:
