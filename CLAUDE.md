@@ -124,7 +124,7 @@ python build_profile_site.py voting           # each state's official voting pag
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python -m unittest discover tests             # 941 tests, no dependencies
-npm install && npm test                       # 1188 real-DOM checks (needs jsdom)
+npm install && npm test                       # 1201 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
