@@ -916,7 +916,11 @@ ROSTER_FOR_CHAMBER = {
 # archived, with when they left, the record that says so, and the last
 # Congress they served in.
 FORMER_ROSTER = "Former_Members.csv"
-FORMER_COLUMNS = ("Left Office", "Left Via", "Last Congress")
+# A 2026 winner who leaves keeps the race they won through their archived
+# row: the role and race the record gave them, and every FEC id Congress's
+# record listed for them, read from the snapshot they last sat in
+# (winners_leaving), since the new one no longer holds them.
+FORMER_COLUMNS = ("Left Office", "Left Via", "Last Congress", "Race Role", "Race ID", "FEC IDs")
 
 
 def _read_rows(path):
@@ -943,6 +947,31 @@ def _write_rows(path, fieldnames, rows):
 
 def _row_id(row):
     return str(row.get("Bioguide ID") or "").strip().upper()
+
+
+def winners_leaving(drift, previous, record):
+    """Mark each expected departure who won a record race's seat.
+
+    *previous* is the snapshot they last sat in - the committed one, read
+    before ``congress`` writes the new one - so :func:`record.seat_changes`
+    still sees their term. A winner's archived row then keeps the race
+    (``raceRole``, ``raceId``) and their FEC ids (``fec``), and the race
+    keeps its winner after they leave (``former-winner-unplaced`` otherwise).
+    Returns the people marked."""
+    from . import record as record_mod
+
+    if not previous or not record:
+        return []
+    winners = record_mod.seat_changes(record, previous)["winners"]
+    people = by_bioguide(previous)
+    marked = []
+    for gone in drift.expected:
+        rid = winners.get(gone["bioguide"])
+        if rid:
+            gone.update(raceRole="winner", raceId=rid,
+                        fec=list((people.get(gone["bioguide"]) or {}).get("fecAll") or []))
+            marked.append(gone)
+    return marked
 
 
 def apply(drift, root=".", today=None):
@@ -1010,8 +1039,8 @@ def apply(drift, root=".", today=None):
         path = os.path.join(root, FORMER_ROSTER)
         fieldnames, former = _read_rows(path)
         if not fieldnames:
-            first = next(iter(files.values()))["fieldnames"]
-            fieldnames = first + [c for c in FORMER_COLUMNS if c not in first]
+            fieldnames = list(next(iter(files.values()))["fieldnames"])
+        fieldnames = list(fieldnames) + [c for c in FORMER_COLUMNS if c not in fieldnames]
         kept = {(_row_id(r), r.get("Left Office")) for r in former}
         for held in files.values():
             for row in [r for r in held["rows"] if _row_id(r) in leaving]:
@@ -1021,7 +1050,10 @@ def apply(drift, root=".", today=None):
                 if (_row_id(row), gone["left"]) not in kept:
                     former.append(dict(row, **{"Left Office": gone["left"],
                                                "Left Via": gone["via"],
-                                               "Last Congress": str(last)}))
+                                               "Last Congress": str(last),
+                                               "Race Role": gone.get("raceRole", ""),
+                                               "Race ID": gone.get("raceId", ""),
+                                               "FEC IDs": ";".join(gone.get("fec") or [])}))
                     kept.add((_row_id(row), gone["left"]))
                     report["archived"].append(gone["name"])
                 held["rows"].remove(row)

@@ -1458,6 +1458,8 @@ def check_former_wins(rows, record):
         chamber, state = clean_str(row.get("Chamber"), ""), clean_str(row.get("State"), "")
         district = None if chamber == "Senate" else parse_district(row.get("District"), state)[0]
         rid = seats.get((chamber, state, district))
+        if clean_str(row.get("Race Role"), "") == "winner" and clean_str(row.get("Race ID"), ""):
+            continue            # archived with the race they won (winners_leaving)
         if (rid and bioguide not in held
                 and clean_str(row.get("Term Start"), "")[:10] >= day):
             lost.append(f"{clean_str(row.get('Name'), bioguide)} ({bioguide}): {rid}")
