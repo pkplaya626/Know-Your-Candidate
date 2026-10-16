@@ -1492,6 +1492,94 @@
   initTheme();
   ready(initShell);
 
+  /* ---------------------------------------------------------- offices held */
+
+  /* The public offices a person has held (kyc/history.py): service in
+   * Congress from congress-legislators, every other office from Wikidata
+   * where the person's own Wikipedia article gives the same office the same
+   * years. One renderer for the profile dialog, the officials' dialog and
+   * the grid's cards (rule 12). Years only: that is as far as the two
+   * sources are compared. */
+
+  function heldYears(row) {
+    if (row.current || !row.to) return "since " + row.from;
+    return row.to === row.from ? String(row.from) : row.from + "\u2013" + row.to;
+  }
+
+  /** Where an office was held: "Vermont, at large", "California's 12th
+   *  district", or the place and district Wikidata gives, unless the
+   *  office's name already says it ("Governor of Florida"). */
+  function heldPlace(row) {
+    if (row.congress) {
+      var state = row.where;
+      if (row.district === undefined) return state;
+      return row.district === 0 ? state + ", at large"
+        : state + "\u2019s " + ordinal(row.district) + " district";
+    }
+    var parts = [];
+    if (row.where && row.office.toLowerCase().indexOf(row.where.toLowerCase()) === -1) {
+      parts.push(row.where);
+    }
+    if (row.district) parts.push(row.district);
+    return parts.join(" \u00b7 ");
+  }
+
+  function heldText(row) {
+    var place = heldPlace(row);
+    return row.office + (place ? ", " + place : "") + ", " + heldYears(row);
+  }
+
+  var HELD_NOTES = {
+    "year-off": ["\u00b11 yr", "Wikidata and the person\u2019s Wikipedia article differ by a " +
+      "year here; the years shown are Wikidata\u2019s."],
+    start: ["end: Wikipedia", "Wikidata records no end to this office; the end year is the " +
+      "person\u2019s Wikipedia article\u2019s."],
+  };
+
+  /** The panel body for a record of offices held; *why* says, when there is
+   *  no record, why this site has none (a claim about us, rule 19). */
+  function officesHeld(record, why) {
+    if (!record) {
+      return '<p class="kyc-absent" title="' + escapeAttr(why || "") +
+        '">No linked record of public offices</p>';
+    }
+    var rows = record.rows || [];
+    var list = rows.length
+      ? '<ul class="held-list">' + rows.map(function (row) {
+          var note = HELD_NOTES[row.agree];
+          var place = heldPlace(row);
+          return '<li class="held-row">' +
+            '<span class="held-office">' + escapeHtml(row.office) + "</span>" +
+            '<span class="held-years">' + escapeHtml(heldYears(row)) +
+            (row.terms ? " \u00b7 " + row.terms + (row.terms === 1 ? " term" : " terms") : "") +
+            "</span>" +
+            (place ? '<span class="held-where">' + escapeHtml(place) + "</span>" : "") +
+            (note ? '<span class="held-note" title="' + escapeAttr(note[1]) + '">' +
+              escapeHtml(note[0]) + "</span>" : "") +
+            "</li>";
+        }).join("") + "</ul>"
+      : '<p class="kyc-absent">None that Wikidata and the person\u2019s Wikipedia article ' +
+        "both record</p>";
+    var article = record.wikipedia
+      ? '<a href="' + escapeAttr("https://en.wikipedia.org/wiki/" +
+          encodeURIComponent(record.wikipedia.replace(/ /g, "_"))) +
+        '" target="_blank" rel="noopener noreferrer">their Wikipedia article</a>'
+      : "their Wikipedia article";
+    var item = record.wikidata
+      ? '<a href="' + escapeAttr("https://www.wikidata.org/wiki/" + record.wikidata) +
+        '" target="_blank" rel="noopener noreferrer">Wikidata</a>'
+      : "Wikidata";
+    var withheld = record.withheld
+      ? " " + record.withheld + (record.withheld === 1 ? " more is" : " more are") +
+        " in Wikidata and not shown: the article gives other years."
+      : "";
+    return list + '<p class="held-source">' +
+      (rows.some(function (r) { return r.congress; })
+        ? "Congress: the congress-legislators project. " : "") +
+      "Other offices: " + item + ", where " + article +
+      " gives the same office the same years." + escapeHtml(withheld) + "</p>";
+  }
+
   global.KYC = {
     // theme
     setTheme: setTheme,
@@ -1502,6 +1590,9 @@
     escapeHtml: escapeHtml,
     escapeAttr: escapeAttr,
     renderField: renderField,
+    officesHeld: officesHeld,
+    heldText: heldText,
+    heldYears: heldYears,
     sourceBadge: sourceBadge,
     financePeriod: financePeriod,
     monthYear: monthYear,

@@ -95,6 +95,18 @@
     return "";
   }
 
+  /* The latest public office beyond the seat the card is about: "Fmr.
+   * Governor of Florida" on Rick Scott's, a state senator's own seat on a
+   * challenger's. The years are in the title and the dialog. */
+  function heldLine(item) {
+    var row = ((item.politicalHistory || {}).rows || []).filter(function (r) {
+      return !(r.congress && r.current);
+    })[0];
+    if (!row) return "";
+    return '<span class="card-held truncate" title="' + KYC.escapeAttr(KYC.heldText(row)) + '">' +
+      KYC.escapeHtml((row.current ? "" : "Fmr. ") + row.office) + "</span>";
+  }
+
   /* Every interpolation is escaped. The previous version put item.name,
    * item.party and the office label straight into innerHTML and carried an
    * onclick with the id interpolated into it; one delegated listener reads
@@ -111,6 +123,7 @@
       '<span class="card-body">',
       '<span class="card-name clamp-2">', KYC.escapeHtml(item.name), "</span>",
       '<span class="card-office truncate">', KYC.escapeHtml(item.officeLabel), "</span>",
+      heldLine(item),
       '<span class="card-party ', KYC.partyClass(item), '">',
       KYC.escapeHtml(item.party), "</span>",
       statusBadge(item),

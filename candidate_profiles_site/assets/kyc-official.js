@@ -255,6 +255,11 @@
     return absent("The office has no page naming its head");
   }
 
+  // An officer's record is found by the Wikidata item the Cabinet's history
+  // names them by (kyc/cabinet.py).
+  var NO_RECORD = "This site has no Wikidata item for this officer from the Cabinet\u2019s " +
+    "history, so their earlier offices are not listed.";
+
   function renderLeader(person) {
     el("officialModalKind").textContent = person.office;
     el("officialModalMeta").innerHTML =
@@ -266,6 +271,7 @@
       .map(function (r) { return linkChip(r[2](person.links[r[0]]), r[1]); });
     el("officialModalBody").innerHTML =
       '<div class="modal-column">' +
+      panel("landmark", "Public offices held", KYC.officesHeld(person.politicalHistory, NO_RECORD)) +
       panel("link", "Links", links.length ? '<div class="links-row">' + links.join("") + "</div>"
         : absent("No links recorded")) + "</div>" +
       '<div class="modal-column">' +
@@ -298,6 +304,7 @@
       '<div class="modal-column">' +
       panel("check", "The record", '<div class="field-grid">' + rows + "</div>") +
       (held ? panel("calendar", "This office since " + (since || "the term began"), held) : "") +
+      panel("landmark", "Public offices held", KYC.officesHeld(holder.politicalHistory, NO_RECORD)) +
       "</div>" +
       '<div class="modal-column">' +
       panel("info", "Where this comes from", '<p class="note-box">Listed by the White House ' +

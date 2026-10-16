@@ -1327,7 +1327,8 @@ def check_voting_links(cache):
 
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
         results=None, field=None, enrichment=None, odds=None, district_maps=None,
-        district_error=None, voting=None, federal=None, judiciary=None, vacancies=None):
+        district_error=None, voting=None, federal=None, judiciary=None, vacancies=None,
+        history=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_district_maps(races, district_maps, district_error)
@@ -1365,6 +1366,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_federal(federal)
     issues += check_judiciary(judiciary)
     issues += check_vacancies(vacancies, judiciary)
+    issues += check_history(history, profiles)
     if voting is not None:                 # None: the caller did not supply it
         issues += check_voting_links(voting)
     return issues
@@ -1507,6 +1509,19 @@ def check_vacancies(cache, judiciary=None):
 
     return [Issue(level, code, message, detail)
             for level, code, message, detail in vacancies.problems(cache, judiciary=judiciary)]
+
+
+def check_history(cache, profiles=None):
+    """The public offices each person has held (kyc/history.py), when the
+    caller supplies them: offices Wikidata lists that the person's own
+    article does not corroborate, articles that resolved to no person, and
+    offices read from an article a profile no longer links."""
+    if cache is None:
+        return []
+    from . import history
+
+    return [Issue(level, code, message, detail)
+            for level, code, message, detail in history.problems(cache, profiles)]
 
 
 def check_guide(today=None):
