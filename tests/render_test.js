@@ -4702,6 +4702,53 @@ async function testFederal() {
           .every((el) => !/^[A-Z]{2}\b/.test(el.textContent)));
       KYC.official.close();
     }
+    const filer = d.offices.find((o) => o.holder && o.holder.disclosures &&
+      (o.holder.disclosures.documents || []).length);
+    check("an officer with OGE reports exists", !!filer);
+    if (filer) {
+      KYC.official.open(filer.holder.id);
+      const head = [...modal.querySelectorAll(".panel-head")]
+        .find((h) => /Financial disclosures/.test(h.textContent));
+      const links = head ? [...head.closest("section").querySelectorAll("a")] : [];
+      const reports = links.filter((a) => /\/PAS\+Index\/[0-9A-F]{32}\/\$FILE\//.test(a.href));
+      check("their reports link to the files OGE serves",
+        reports.length === filer.holder.disclosures.documents.length);
+      check("never to OGE's request form, as though it were a report",
+        !links.some((a) => /201%20Request|201 Request/.test(a.href)));
+      check("and say whose filing they are, as OGE files it",
+        head.closest("section").textContent.indexOf(filer.holder.disclosures.filed) !== -1);
+      check("its links open safely", links.every((a) => a.target === "_blank" && /noopener/.test(a.rel)));
+      KYC.official.close();
+    }
+    // The absences, driven from fixtures so they always run.
+    const host = d.offices.find((o) => o.holder);
+    const kept = host.holder.disclosures;
+    const panelText = () => {
+      const head = [...modal.querySelectorAll(".panel-head")]
+        .find((h) => /Financial disclosures/.test(h.textContent));
+      return head ? head.closest("section").textContent : "";
+    };
+    host.holder.disclosures = { none: true, agency: "Department of Labor", position: "Secretary" };
+    KYC.official.open(host.holder.id);
+    check("read and nothing found says so, and never 'filed as' no one (rule 19)",
+      /lists no report/.test(panelText()) && !/Filed with the Office/.test(panelText()) &&
+        !/not filed|has not filed/i.test(panelText()), panelText());
+    KYC.official.close();
+    host.holder.disclosures = { notRead: true };
+    KYC.official.open(host.holder.id);
+    check("not read for this officer is a claim about this site, not the officer",
+      /has not read OGE/.test(panelText()) && !/lists no report/.test(panelText()), panelText());
+    KYC.official.close();
+    host.holder.disclosures = { filed: "Doe, Jane", agency: "Department of Labor", position: "Secretary",
+      documents: [{ kind: "annual", words: "Annual report, 2026", date: "2026-07-01",
+        url: "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/" + "A".repeat(32) + "/$FILE/x.pdf",
+        unchecked: true }] };
+    KYC.official.open(host.holder.id);
+    check("a report whose filer was not read is marked so",
+      !!modal.querySelector(".held-note") && /not checked/.test(panelText()) &&
+        /posted/.test(panelText()), panelText());
+    KYC.official.close();
+    host.holder.disclosures = kept;
   });
   await settle(50);
   suite("federal/index.html — a justice's dialog", () => {

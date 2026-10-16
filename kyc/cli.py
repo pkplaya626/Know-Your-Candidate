@@ -218,6 +218,10 @@ def _build(args):
                           judiciary=judiciary_mod.load_cache(args.root),
                           vacancies=vacancies_mod.load_cache(args.root),
                           history=lineage)
+    from . import oge as oge_mod
+    for level, code, message, detail in oge_mod.problems(oge_mod.load_cache(args.root),
+                                                         federal_mod.load_cache(args.root)):
+        issues.append(validate.Issue(level, code, message, detail))
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -1398,6 +1402,44 @@ def _officers(args):
     return 0
 
 
+def _oge(args):
+    """Financial disclosures of the President, the Vice President and the
+    Cabinet, from the Office of Government Ethics' index, attributed by
+    office (kyc/oge.py). A read that fails keeps the committed cache
+    (rule 8)."""
+    from . import federal, oge
+
+    executive = federal.load_cache(args.root)
+    if executive is None:
+        print(f"[error] no {federal.CACHE_PATH}; run 'federal'", file=sys.stderr)
+        return 2
+    previous = oge.load_cache(args.root)
+    if args.check:
+        cache = previous
+        if not cache:
+            print(f"[error] no {oge.CACHE_PATH}; run 'oge'", file=sys.stderr)
+            return 2
+    else:
+        try:
+            cache = oge.build(executive, previous=previous)
+        except oge.OGEError as exc:
+            print(f"[error] {exc}; the committed cache is unchanged", file=sys.stderr)
+            return 2
+    people = cache["people"]
+    print(f"  {sum(1 for p in people.values() if p['filed'])} of {len(people)} officers in OGE's "
+          f"index, {sum(1 for p in people.values() for d in p['documents'] if d['url'])} reports "
+          f"linked (read {cache['read']})")
+    failed = 0
+    for level, code, message, detail in oge.problems(cache, executive):
+        print(f"  [{level}] {code}: {message}")
+        for line in detail[:10]:
+            print(f"           - {line}")
+        failed += level == "error"
+    if not args.check:
+        print(f"[ok] wrote {oge.save_cache(cache, args.root)}")
+    return 1 if failed else 0
+
+
 def _vacancies(args):
     """Vacancies in the federal courts, as the courts list them on
     uscourts.gov: current, announced and emergencies (kyc/vacancies.py). A
@@ -1800,6 +1842,11 @@ def build_parser():
     jud.add_argument("--check", action="store_true",
                      help="report the committed cache; make no network call")
 
+    og = add("oge", help="financial disclosures of the President, the Vice President and the "
+                         "Cabinet, from the Office of Government Ethics")
+    og.add_argument("--check", action="store_true",
+                    help="report the committed cache; make no network call")
+
     hist = add("history", help="the public offices each person has held: Congress from "
                                "congress-legislators, other offices from Wikidata")
     hist.add_argument("--check", action="store_true",
@@ -1869,6 +1916,8 @@ def main(argv=None):
         return _vacancies(args)
     if args.command == "history":
         return _history(args)
+    if args.command == "oge":
+        return _oge(args)
     if args.command == "courts":
         return _courts(args)
     if args.command == "officers":

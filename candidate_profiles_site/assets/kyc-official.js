@@ -260,6 +260,55 @@
   var NO_RECORD = "This site has no Wikidata item for this officer from the Cabinet\u2019s " +
     "history, so their earlier offices are not listed.";
 
+  /* What the officer filed with the Office of Government Ethics, by office
+   * (kyc/oge.py): the latest of each kind, linked to the file OGE serves,
+   * and what OGE releases only on request counted. Never "not filed": the
+   * index is not every report (rule 19). */
+  var OGE_INDEX = "https://extapps2.oge.gov/201/Presiden.nsf/";
+
+  function disclosuresPanel(person) {
+    var d = person.disclosures;
+    var index = outLink(OGE_INDEX, "OGE\u2019s index");
+    var about = '<p class="faint">The Office of Government Ethics publishes the reports of the ' +
+      "President, the Vice President and the officers the Senate confirms: " + index + ".</p>";
+    if (!d || d.notRead) {
+      // A claim about this site, not the officer (rule 19).
+      return panel("scroll", "Financial disclosures", '<p class="kyc-absent">This site has not ' +
+        "read OGE\u2019s index for this officer yet.</p>" + about);
+    }
+    if (d.none) {
+      return panel("scroll", "Financial disclosures", '<p class="kyc-absent">' + (d.refused
+        ? "OGE\u2019s index files reports under this office for two people of this officer\u2019s " +
+          "surname, so neither\u2019s is shown."
+        : "OGE\u2019s index lists no report for this officer under this office.") + "</p>" + about);
+    }
+    var rows = (d.documents || []).map(function (doc) {
+      var when = whenText({ date: doc.date, precision: "day" });
+      var label = doc.count && doc.kind === "transaction"
+        ? doc.words + "s (" + doc.count + "), the latest posted " + when
+        : doc.words;
+      return "<li>" + outLink(doc.url, label) +
+        (doc.count && doc.kind === "transaction" ? "" : ' <span class="faint">posted ' +
+          '<span class="nowrap">' + KYC.escapeHtml(when) + "</span></span>") +
+        (doc.as ? ' <span class="faint">as ' + KYC.escapeHtml(doc.as) + "</span>" : "") +
+        (doc.amended ? ' <span class="faint">(amended)</span>' : "") +
+        (doc.unchecked ? ' <span class="faint held-note" title="' + KYC.escapeAttr(
+          "This report is a scan, or was not read: its filer\u2019s name was not checked in it. " +
+          "OGE\u2019s index files it under this officer and office.") + '">not checked</span>' : "") +
+        "</li>";
+    }).join("");
+    return panel("scroll", "Financial disclosures",
+      (rows ? '<ul class="bullets oge-docs">' + rows + "</ul>"
+        : '<p class="kyc-absent">OGE\u2019s index lists no report it publishes as a file.</p>') +
+      (d.onRequest ? '<p class="faint">' + d.onRequest + (d.onRequest === 1 ? " more is" : " more are") +
+        " listed in " + index + " and released on request.</p>" : "") +
+      '<p class="held-source">Filed with the Office of Government Ethics as \u201c' +
+      KYC.escapeHtml(d.filed) + "\u201d, " + KYC.escapeHtml(d.position) + ", " +
+      KYC.escapeHtml(d.agency) + ". Dates are the day OGE posted each report. Each report OGE " +
+      "generates was opened to check it names its filer" + ((d.documents || []).some(function (doc) { return doc.unchecked; })
+        ? "; one marked “not checked” is a scan, or could not be read" : "") + ".</p>");
+  }
+
   function renderLeader(person) {
     el("officialModalKind").textContent = person.office;
     el("officialModalMeta").innerHTML =
@@ -272,6 +321,7 @@
     el("officialModalBody").innerHTML =
       '<div class="modal-column">' +
       panel("landmark", "Public offices held", KYC.officesHeld(person.politicalHistory, NO_RECORD)) +
+      disclosuresPanel(person) +
       panel("link", "Links", links.length ? '<div class="links-row">' + links.join("") + "</div>"
         : absent("No links recorded")) + "</div>" +
       '<div class="modal-column">' +
@@ -306,7 +356,7 @@
       (held ? panel("calendar", "This office since " + (since || "the term began"), held) : "") +
       panel("landmark", "Public offices held", KYC.officesHeld(holder.politicalHistory, NO_RECORD)) +
       "</div>" +
-      '<div class="modal-column">' +
+      '<div class="modal-column">' + disclosuresPanel(holder) +
       panel("info", "Where this comes from", '<p class="note-box">Listed by the White House ' +
         "among the President’s Cabinet; checked on the office’s own page and " +
         "against the Senate’s roll-call votes. A Cabinet officer is shown without a " +

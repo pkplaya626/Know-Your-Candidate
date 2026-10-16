@@ -200,6 +200,19 @@ def build(root="."):
             sitting_on.setdefault(jid, []).append(cid)
     search = sorted(([jid, judges[jid]["name"], sitting_on[jid], judges[jid]["status"]]
                      for jid in sitting_on), key=lambda row: (row[1], row[0]))
+    # Each officer's financial disclosures (kyc/oge.py), by office, while the
+    # index was read for the officer who holds it now.
+    from . import oge
+    filed = (oge.load_cache(root) or {}).get("people") or {}
+    for key, person in [("president", payload["president"]),
+                        ("vicePresident", payload["vicePresident"])] + [
+            (o["key"], o["holder"]) for o in offices if o.get("holder")]:
+        found = filed.get(key)
+        # Not read for this holder is not "nothing filed" (rule 19).
+        person["disclosures"] = (oge.for_page(found) if found and found["holder"] == person["name"]
+                                 else {"notRead": True})
+    if filed:
+        payload["disclosuresRead"] = (oge.load_cache(root) or {}).get("read")
     # The offices each officer has held (kyc/history.py), by the same id.
     from . import history, legislators
     people = (history.load_cache(root) or {}).get("people") or {}

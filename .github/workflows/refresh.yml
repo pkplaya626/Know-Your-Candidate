@@ -171,6 +171,15 @@ jobs:
         continue-on-error: true
         run: python build_profile_site.py federal
 
+      # The financial reports the President, the Vice President and the
+      # Cabinet filed with the Office of Government Ethics, attributed by
+      # office and checked against the filer each report names
+      # (kyc/oge.py). After the executive, whose holders it reads. A read
+      # that fails keeps the committed cache.
+      - name: Refresh the officers' financial disclosures
+        continue-on-error: true
+        run: python build_profile_site.py oge
+
       # Every sitting federal judge, from the Federal Judicial Center's
       # nightly directory, and the Supreme Court as the Court lists it
       # (kyc/judiciary.py). A source that cannot be read, or reads short,
