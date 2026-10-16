@@ -256,7 +256,16 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
     if kind == "House":
         district_num, district_label = parse_district(row.get("District"), state)
 
-    status = overrides.status_override(profile_id, clean_str(row.get("Status"), "Active Member"))
+    # A curated status note is about the 2026 race; a member serving a term
+    # that began since Election Day has moved past it (a re-elected member,
+    # a winner), and their roster row says "Active Member".
+    status = clean_str(row.get("Status"), "Active Member")
+    from .cycle import CYCLE, general_election_day
+
+    new_term = bool(person) and (person.get("termStart") or "") >= \
+        general_election_day(CYCLE).isoformat()
+    if not new_term:
+        status = overrides.status_override(profile_id, status)
     not_seeking = overrides.is_not_seeking(status)
 
     # --- 2026 election derivation -------------------------------------
@@ -458,10 +467,10 @@ def _mark_record_roles(profiles, record, snapshot, field):
     in, and neither is ever called re-elected (``record.seat_changes``).
 
     A winner who held another record seat - Andy Barr, KY-6 to the Senate;
-    Greg Casar, TX-35 to TX-37 - is still that race's incumbent, now
-    contesting this one: their held seat says where they went."""
+    Greg Casar, TX-35 to TX-37 - is still that race's incumbent
+    (``heldRaceId``), and sits in the seat they won: never "running for"
+    it."""
     from . import candidates as field_mod
-    from .races import seat_label
     from .record import held_races, seat_changes
 
     incumbents = record.get("incumbents") or {}
@@ -501,12 +510,30 @@ def _mark_record_roles(profiles, record, snapshot, field):
         else:
             profile["raceId"] = rid
         if mine_held and mine_held != rid:
-            if profile["raceId"]:
-                profile.update(contestRaceId=rid, contestLabel=seat_label(rid))
             profile["seekingReelection2026"] = False
             profile["seatUp2026"] = profile["isUpIn2026"] = True
         elif not mine_held:
             profile.update(seatUp2026=False, isUpIn2026=False, seekingReelection2026=False)
+
+
+def _seated_in_race(candidate, profiles):
+    """The member seated since Election Day in the race a curated row is for
+    (``raceRole``), when their first and last names are exactly the row's."""
+    from .candidates import _fold
+    from .races import race_id
+    from .record import seated
+
+    rid = race_id(candidate["chamber"], candidate["state"], candidate.get("districtNum"))
+    words = _fold(candidate["name"]).split()
+    if len(words) < 2:
+        return None
+    for profile in profiles:
+        if not (seated(profile) and profile.get("raceRole") and profile.get("raceId") == rid):
+            continue
+        mine = _fold(profile["name"]).split()
+        if len(mine) >= 2 and (mine[0], mine[-1]) == (words[0], words[-1]):
+            return profile
+    return None
 
 
 def _claimed_ids(profiles, people, record):
@@ -679,12 +706,16 @@ def _cross_link(profiles):
         held = next((members[k] for k in _link_keys(profile) if k in members), None)
         if held is None or held["chamber"] == profile["chamber"]:
             continue
+        contest = races.race_id(profile["chamber"], profile["state"], profile.get("districtNum"))
+        if contest == races.race_id(held["chamber"], held["state"], held.get("districtNum")):
+            # A filing for the seat they sit in - a winner seated since -
+            # is not a run for another one.
+            continue
         profile["incumbentId"] = held["id"]
         profile["incumbentSeat"] = held["officeLabel"]
         held["alsoRunningId"] = profile["id"]
         held["alsoRunningSeat"] = profile["officeLabel"]
-        held["contestRaceId"] = races.race_id(profile["chamber"], profile["state"],
-                                              profile.get("districtNum"))
+        held["contestRaceId"] = contest
         held["contestLabel"] = profile["officeLabel"]
         if held.get("seatUp2026"):
             held["seekingReelection2026"] = False
@@ -759,6 +790,12 @@ def screen_field(field, profiles, record=None):
     return field_mod.screen(field, races_mod.contestable(profiles, ELECTION_YEAR, record))
 
 
+# The roster CSV's "Committee Assignments" column was typed for the 119th
+# Congress. It is shown only while that Congress sits: on January 3 it would
+# put every re-elected member on their old committees.
+CURATED_COMMITTEES_CONGRESS = 119
+
+
 def build_profiles(data, snapshot=None, field=None, finance=None, committees=None):
     """Build the unified profile list from loaded roster rows.
 
@@ -786,6 +823,23 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
     seats_up = term_ends = None
     people = {}
     record = (data or {}).get("record")
+    sitting = None
+    if snapshot:
+        from . import cycle as cycle_mod, legislators as legislators_mod
+
+        try:
+            sitting = cycle_mod.snapshot_congress(snapshot)
+        except cycle_mod.CycleError:
+            sitting = None
+        # A previous Congress's committee rosters are none at all.
+        committees = legislators_mod.committees_current(committees, snapshot)
+    curated_committees = sitting in (None, CURATED_COMMITTEES_CONGRESS)
+    from . import legislators as legislators_mod
+
+    # A chamber's rosters are used only once they are whole: a member on one
+    # of the three committees a partial roster lists would read as sitting
+    # on one.
+    published = legislators_mod.committee_chambers(committees, snapshot)
     if snapshot:
         from . import legislators
 
@@ -810,13 +864,21 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
     profiles = []
     for index, row in enumerate(members):
         bioguide = clean_str(row.get("Bioguide ID"), "").upper()
+        kind = (people.get(bioguide) or {}).get("chamber") or clean_str(row.get("Chamber"), "")
+        chamber = "senate" if "Senate" in kind else "house"
         seats = None
-        if committees and bioguide:
-            from . import legislators as legislators_mod
+        if committees and bioguide and chamber in published:
             seats = legislators_mod.assignments(committees, bioguide)
-        profiles.append(_build_member(row, index, seats_up, term_ends,
-                                      person=people.get(bioguide), assignments=seats,
-                                      as_of=as_of))
+        member = _build_member(row, index, seats_up, term_ends,
+                               person=people.get(bioguide), assignments=seats, as_of=as_of)
+        if not curated_committees and not seats:
+            # Never the previous Congress's seats from the roster column. A
+            # member of a chamber whose rosters are out holds none; anyone
+            # else's are not published yet, and the profile says so (rule 19).
+            member["committees"] = ""
+            if chamber not in published:
+                member["committeesPending"] = sitting
+        profiles.append(member)
 
     if record:
         profiles.extend(_former_members(data.get("former") or [], record, profiles,
@@ -840,11 +902,21 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
             for filing in (people.get(profile["id"]) or {}).get("fec") or []:
                 owned[filing] = profile
     for index, row in enumerate(candidates):
-        member = owned.get(clean_str(row.get("FEC Candidate ID"), ""))
+        filing = clean_str(row.get("FEC Candidate ID"), "")
+        member = owned.get(filing)
+        built = None
+        if not member:
+            # Or, until Congress's record lists that id, the member seated
+            # in the row's own race since it was decided, by exactly the
+            # row's first and last name (rule 25's same-seat signal).
+            built = _build_candidate(row, index, as_of=as_of)
+            member = _seated_in_race(built, profiles)
+            if member and filing and not member.get("fecCandidateId"):
+                member["fecCandidateId"] = filing
         if member and clean_str(row.get("ID"), ""):
             member.setdefault("otherIds", []).append(clean_str(row.get("ID"), ""))
             continue
-        profiles.append(_build_candidate(row, index, as_of=as_of))
+        profiles.append(built or _build_candidate(row, index, as_of=as_of))
 
     roster_count = len(profiles)
     if field:

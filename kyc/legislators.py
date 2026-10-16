@@ -222,20 +222,32 @@ def aliases(person, display, extra=()):
     return out
 
 
+def _all_fec_ids(entry):
+    """Every FEC candidate id the person has filed under, both chambers, with
+    any congress-legislators does not list (``overrides.MEMBER_FEC_IDS``)."""
+    from . import overrides
+
+    ids = list(entry.get("id", {}).get("fec") or [])
+    bioguide = str(entry.get("id", {}).get("bioguide") or "").upper()
+    extra = overrides.MEMBER_FEC_IDS.get(bioguide)
+    if extra and extra[0] not in ids:
+        ids.append(extra[0])
+    return ids
+
+
 def _fec_ids(entry, chamber):
     """FEC candidate ids for the seat this person currently holds.
 
     A long-serving senator carries their old House committee ids too, and
     attaching a House campaign's finance figures to a Senate profile is
     exactly the kind of silent, plausible-looking error this project exists
-    to avoid. Senate ids start with S, House ids with H.
+    to avoid. Senate ids start with S, House ids with H. A member with no id
+    for the chamber they sit in has none here: the other chamber's ids used
+    to stand in, which would have put a new senator's House money on their
+    Senate profile (rule 20).
     """
-    ids = entry.get("id", {}).get("fec") or []
     prefix = "S" if chamber == "Senate" else "H"
-    matching = [i for i in ids if i.startswith(prefix)]
-    # Fall back to every id rather than none: a caller that checks the state
-    # can still use them, and dropping them would lose real information.
-    return matching or list(ids)
+    return [i for i in _all_fec_ids(entry) if i.startswith(prefix)]
 
 
 def trim(entry, social=None):
@@ -279,7 +291,7 @@ def trim(entry, social=None):
         # Every FEC id, both chambers: a member's own candidacy for the other
         # chamber is linked through it, never through a name (rule 17).
         # ``fec`` above stays chamber-filtered, for finance.
-        "fecAll": sorted(set(ids.get("fec") or [])),
+        "fecAll": sorted(set(_all_fec_ids(entry))),
         # How the current term began and why it ends: an appointee's seat is
         # filled by a special election, and is never called "re-elected".
         "how": term.get("how"),
@@ -401,6 +413,67 @@ def load_committees(root="."):
     except (ValueError, OSError):
         return None
     return data if data.get("members") else None
+
+
+# Above this share of committee seats held by people no longer sitting, the
+# rosters are a previous Congress's: on January 3 about a fifth of the seats
+# go, and congress-legislators published the 119th's rosters two weeks after
+# its members (2025-01-17). A resignation or two mid-Congress stays far below.
+STALE_COMMITTEE_SHARE = 0.05
+
+
+def committees_current(committees, snapshot):
+    """*committees* when they are the sitting Congress's rosters, else None.
+
+    Shown as current, a previous Congress's rosters would put the members
+    who left on committees and the re-elected on seats they no longer hold.
+    """
+    if not committees or not snapshot:
+        return committees
+    sitting = {p["bioguide"] for p in snapshot.get("legislators", [])}
+    holders = list((committees.get("members") or {}).keys())
+    if not holders:
+        return None
+    gone = sum(1 for b in holders if b not in sitting)
+    return None if gone > STALE_COMMITTEE_SHARE * len(holders) else committees
+
+
+COMMITTEE_SEATED_SHARE = 0.9
+
+
+def committee_chambers(committees, snapshot):
+    """The chambers whose committee rosters are the sitting Congress's, and whole.
+
+    A new Congress's rosters arrive a chamber, and often a committee, at a
+    time. Shown as soon as anything is published, a member assigned to one
+    of three committees reads as sitting on one. A chamber's rosters count
+    once every one of its full committees has members and at least
+    ``COMMITTEE_SEATED_SHARE`` of its sitting members hold a seat on one of
+    them; until then its members' profiles say the assignments are not yet
+    published (rule 19).
+    """
+    if not committees:
+        return set()
+    if not snapshot:
+        return {"house", "senate"}
+    if committees_current(committees, snapshot) is None:
+        return set()
+    names = committees.get("committees") or {}
+    members = committees.get("members") or {}
+    filled = {seat["code"] for seats in members.values() for seat in seats}
+    out = set()
+    for chamber, label in (("house", "House"), ("senate", "Senate")):
+        full = {code for code, info in names.items()
+                if info.get("chamber") == chamber and not info.get("parent")}
+        sitting = [p["bioguide"] for p in snapshot.get("legislators", [])
+                   if p.get("chamber") == label]
+        holding = sum(1 for bioguide in sitting
+                      if any((names.get(seat["code"]) or {}).get("chamber") == chamber
+                             for seat in members.get(bioguide, [])))
+        if (full and full <= filled and sitting
+                and holding >= COMMITTEE_SEATED_SHARE * len(sitting)):
+            out.add(chamber)
+    return out
 
 
 def assignments(committees, bioguide):

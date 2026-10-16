@@ -470,9 +470,8 @@ INDEX = {
                      "ranked-choice counts, certification and recounts, and when winners "
                      "take office."),
                 ]),
-                ("p", "Know Your Candidate follows one part of all this: the members of the "
-                      "119th Congress, and everyone who has filed to run for their seats in "
-                      "November 2026. Start from the [profile grid](site:index.html), the "
+                ("p", "Know Your Candidate follows one part of all this: the members of "
+                      "Congress, and everyone who has filed to run for their seats. Start from the [profile grid](site:index.html), the "
                       "[partisan map](site:map.html) or [your state's page](site:states/index.html)."),
             ],
             "sources": ["const-art1", "const-art2", "const-art3", "const-amdt10", "cog-report",

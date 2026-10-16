@@ -226,7 +226,7 @@ def _build(args):
 
     summary = summary_mod.build(profiles, races=race_list,
                                 committees=legislators.load_committees(args.root),
-                                results=outcomes)
+                                results=outcomes, snapshot=snapshot)
     summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root))
     path, size = emit.write_profiles(
         profiles, stats, args.root, races=race_list, summary=summary
@@ -1017,7 +1017,8 @@ def _verify(args):
     stats.update(races_mod.stats(race_list))
     summary = summary_mod.build(profiles, races=race_list,
                                 committees=legislators.load_committees(args.root),
-                                results=outcomes)
+                                results=outcomes,
+                                snapshot=legislators.load_snapshot(args.root))
     summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root))
 
     problems = []

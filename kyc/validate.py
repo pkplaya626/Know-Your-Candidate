@@ -196,6 +196,15 @@ def check_placeholders(profiles):
                   sorted(stand_ins))]
 
 
+def _new_term(profile):
+    """A member serving a term begun since Election Day ("2027-01-03 - ...")."""
+    from .cycle import CYCLE, general_election_day
+
+    start = str(profile.get("term_start") or "")[:10]
+    return (bool(re.match(r"\d{4}-\d{2}-\d{2}$", start))
+            and start >= general_election_day(CYCLE).isoformat())
+
+
 def check_overrides(profiles, raw):
     """Flag curated entries that no longer match anything.
 
@@ -205,8 +214,11 @@ def check_overrides(profiles, raw):
     issues = []
 
     # Status notes are keyed on bioguide id only; one whose id is no longer
-    # a sitting member is invisible on the page but quietly wrong.
-    member_ids = {p["id"] for p in profiles if not p.get("isCandidate")}
+    # a member is invisible on the page but quietly wrong. A member serving a
+    # term begun since Election Day has moved past their 2026 note, which no
+    # longer applies (profiles._build_member) and can be deleted.
+    member_ids = {p["id"] for p in profiles if not p.get("isCandidate")
+                  and not p.get("raceRole") and not _new_term(p)}
     dead_ids = sorted(k for k in overrides.MEMBER_STATUS_BY_ID if k not in member_ids)
     if dead_ids:
         issues.append(Issue("warn", "stale-member-status",
@@ -227,9 +239,11 @@ def check_overrides(profiles, raw):
                             dead_photos))
 
     # Not an error, just useful: members who are also 2026 candidates.
+    from .record import seated
+
     duals = sorted(
         f"{p['name']}: {p['officeLabel']} -> {p['alsoRunningSeat']}"
-        for p in profiles if p.get("alsoRunningSeat")
+        for p in profiles if p.get("alsoRunningSeat") and seated(p)
     )
     if duals:
         issues.append(Issue("warn", "dual-role",
@@ -1342,6 +1356,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_duplicate_people(profiles)
     issues += check_results(profiles, races)
     issues += check_winners(profiles, races)
+    issues += check_member_filings(profiles, snapshot)
     issues += check_former_wins((raw or {}).get("former"), (raw or {}).get("record"))
     issues += check_results_pages(results)
     issues += check_seats_contested(profiles)
@@ -1373,11 +1388,53 @@ def check_winners(profiles, races):
                     and other.get("raceStatus") == "elected"):
                 twice.append(f"{race['id']}: {winner['name']} ({winner['id']}) is seated; "
                              f"{other['name']} ({other['id']}) is the filing marked elected")
-    if not twice:
+    issues = []
+    if twice:
+        issues.append(Issue(
+            "warn", "seated-unlinked",
+            f"{len(twice)} seated winners are not yet linked to their filing by an FEC "
+            f"id in congress-legislators; both profiles are shown", sorted(twice)))
+    # A winner with no filing at all: their money and their result reach no
+    # profile until congress-legislators lists the id, or an evidenced entry
+    # in overrides.MEMBER_FEC_IDS does.
+    unfiled = sorted(f"{p['name']} ({p['id']}): {p.get('raceId')}" for p in profiles
+                     if p.get("raceRole") == "winner" and not p.get("fecCandidateId"))
+    if unfiled:
+        issues.append(Issue("warn", "winner-no-filing",
+                            f"{len(unfiled)} seated winners have no FEC filing linked",
+                            unfiled))
+    return issues
+
+
+def check_member_filings(profiles, snapshot):
+    """A sitting member's own candidacy for another seat whose FEC id is not
+    among the ids congress-legislators lists for them (``fecAll``). Once they
+    sit in that chamber, their money and their win are linked through that
+    id or not at all; add it to ``overrides.MEMBER_FEC_IDS`` with evidence."""
+    from . import overrides
+
+    if not snapshot:
         return []
-    return [Issue("warn", "seated-unlinked",
-                  f"{len(twice)} seated winners are not yet linked to their filing by an FEC "
-                  f"id in congress-legislators; both profiles are shown", sorted(twice))]
+    known = {p["bioguide"]: set(p.get("fecAll") or []) for p in snapshot.get("legislators", [])}
+    for bioguide, (filing, _why) in overrides.MEMBER_FEC_IDS.items():
+        known.setdefault(bioguide, set()).add(filing)
+    by_id = {p["id"]: p for p in profiles}
+    missing = []
+    for member in profiles:
+        other = by_id.get(member.get("alsoRunningId") or "")
+        if member.get("isCandidate") or not other or member["id"] not in known:
+            continue
+        if other.get("raceId") and other.get("raceId") == member.get("raceId"):
+            continue            # a filing for the seat they sit in
+        filing = other.get("rosterFecId") or other.get("fecCandidateId")
+        if filing and filing not in known[member["id"]]:
+            missing.append(f"{member['name']} ({member['id']}): {filing} for "
+                           f"{other.get('officeLabel')}")
+    if not missing:
+        return []
+    return [Issue("warn", "member-candidacy-id-missing",
+                  f"{len(missing)} members' own candidacies for another seat are not among "
+                  f"their FEC ids in congress-legislators", sorted(missing))]
 
 
 def check_former_wins(rows, record):

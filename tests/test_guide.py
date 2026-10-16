@@ -170,6 +170,31 @@ class TestGuidePages(unittest.TestCase):
             self.assertEqual(results[page], (True, "ok"), page)
 
 
+class TestNoCongressIsTyped(unittest.TestCase):
+    """Which Congress sits is the data's word (rule 68): the guide's
+    "the members of the 119th Congress" would have gone on saying so after
+    January 3. A citation of a dated source (the Census's 119th Congress
+    boundary files) is the one place a number belongs."""
+
+    PATTERN = re.compile(r"[^.<>]*\b\d+(?:st|nd|rd|th) Congress[^.<>]*")
+
+    def found(self, text):
+        return [m.group(0).strip() for m in self.PATTERN.finditer(text)
+                if "artographic" not in m.group(0)]
+
+    def test_no_page_names_the_sitting_congress_by_number(self):
+        typed = []
+        for folder, _, files in os.walk(SITE):
+            for name in files:
+                if name.endswith(".html"):
+                    with open(os.path.join(folder, name), encoding="utf-8") as handle:
+                        typed += [f"{name}: {t}" for t in self.found(handle.read())]
+        for module in ("government_text.py", "pages.py"):
+            with open(os.path.join(ROOT, "kyc", module), encoding="utf-8") as handle:
+                typed += [f"{module}: {t}" for t in self.found(handle.read())]
+        self.assertEqual(typed, [])
+
+
 class TestEveryLocalLinkResolves(unittest.TestCase):
     """CI checked only the pages at the site's root, so every district page's
     "States & territories" link pointed at districts/index.html - a page that

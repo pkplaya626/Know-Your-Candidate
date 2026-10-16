@@ -39,15 +39,19 @@ class TestTheCommittedSnapshot(unittest.TestCase):
     def setUpClass(cls):
         cls.snapshot = legislators.load_snapshot(ROOT)
 
-    def test_it_is_the_119th_in_the_campaign(self):
-        self.assertEqual(cycle.snapshot_congress(self.snapshot), 119)
-        self.assertEqual(cycle.phase(self.snapshot), "campaign")
+    def test_the_phase_is_the_snapshots(self):
+        # The 119th until the 120th is sitting and read after noon on
+        # January 3, 2027; then the record.
+        sitting = cycle.snapshot_congress(self.snapshot)
+        self.assertIn(sitting, (119, 120))
+        self.assertEqual(cycle.phase(self.snapshot), "campaign" if sitting == 119 else "record")
 
     def test_a_snapshot_of_mixed_congresses_fails_loudly(self):
         mixed = copy.deepcopy(self.snapshot)
         house = [p for p in mixed["legislators"] if p["chamber"] == "House"]
+        other = "2027-01-03" if cycle.snapshot_congress(self.snapshot) == 119 else "2025-01-03"
         for person in house[: len(house) // 2]:
-            person["termStart"] = "2027-01-03"
+            person["termStart"] = other
         with self.assertRaises(cycle.CycleError):
             cycle.snapshot_congress(mixed)
 
@@ -303,6 +307,8 @@ class TestAnIncumbentWhoWonAnotherSeat(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         raw = sources.load_all(ROOT)
+        if cycle.phase(legislators.load_snapshot(ROOT)) != "campaign":
+            raise unittest.SkipTest("January 3 has happened: the committed data is the case")
         cls.record = raw["record"]
         cls.house = cls.record["incumbents"]["H-KY-06-2026"]["bioguide"]
         senator = cls.record["incumbents"]["S-KY-2026"]["bioguide"]
@@ -339,7 +345,10 @@ class TestAnIncumbentWhoWonAnotherSeat(unittest.TestCase):
 
     def test_and_still_held_the_house_seat(self):
         self.assertEqual(self.person["heldRaceId"], "H-KY-06-2026")
-        self.assertEqual(self.person["contestRaceId"], "S-KY-2026")
+        # They sit in the seat they won: never "running for" it.
+        self.assertIsNone(self.person.get("contestRaceId"))
+        self.assertIsNone(self.person.get("contestLabel"))
+        self.assertIsNone(self.person.get("alsoRunningId"))
         self.assertTrue(self.person["seatUp2026"])
         self.assertFalse(self.person["seekingReelection2026"])
         house = self.races["H-KY-06-2026"]
@@ -377,8 +386,9 @@ class TestTheWinnersFiling(unittest.TestCase):
         cls.filing = max(filers, key=lambda r: r["receipts"])["candidate_id"]
         # The profile the filing has today: curated (CAND_) or the field's.
         base = build_profiles(cls.raw, field=cls.field)[0]
-        cls.held_by = next(p["id"] for p in base if cls.filing in (
+        held = next(p for p in base if cls.filing in (
             p.get("fecCandidateId"), p.get("rosterFecId")) or p["id"] == "FEC_" + cls.filing)
+        cls.held_by, cls.held_name = held["id"], held["name"]
 
     def build(self, fec_ids):
         after = copy.deepcopy(self.after)
@@ -410,7 +420,78 @@ class TestTheWinnersFiling(unittest.TestCase):
         # Marked elected, the filing beside the seated winner is reported.
         people[self.held_by]["raceStatus"] = "elected"
         codes = [i.code for i in validate.check_winners(list(people.values()), built)]
-        self.assertEqual(codes, ["seated-unlinked"])
+        self.assertEqual(codes, ["seated-unlinked", "winner-no-filing"])
+
+    def test_a_filing_in_the_winners_own_name_is_theirs(self):
+        # Rule 25's same-seat signal: the member seated in the race the
+        # filing (or its curated row) is for, by exactly its first and last
+        # name. The id comes with it.
+        name = self.held_name.split()
+        first, last = name[0], name[-1]
+        after = copy.deepcopy(self.after)
+        for person in after["legislators"]:
+            if person["bioguide"] == "Z900001":
+                person.update(name=f"{first} {last}", last=last,
+                              nameParts={"first": first, "last": last})
+        members = [dict(r, Name=f"{first} {last}")
+                   if (r.get("Bioguide ID") or "").upper() == "Z900001" else r
+                   for r in self.roster["members"]]
+        profiles, _ = build_profiles(dict(self.roster, members=members), snapshot=after,
+                                     field=self.field)
+        people = {p["id"]: p for p in profiles}
+        self.assertNotIn(self.held_by, people)
+        self.assertEqual(people["Z900001"]["fecCandidateId"], self.filing)
+        self.assertEqual([i.code for i in validate.check_winners(
+            profiles, races.build(profiles, record=self.raw["record"]))], [])
+
+
+class TestAMembersOwnSeat(unittest.TestCase):
+    """A filing for the seat a member sits in is not a run for another one,
+    and the checks of members running elsewhere count only who sits."""
+
+    def member(self, **extra):
+        return dict({"id": "X000001", "name": "Pat Smith", "isCandidate": False,
+                     "chamber": "Senate", "state": "KY", "districtNum": None,
+                     "officeLabel": "Senate • KY", "seatUp2026": False}, **extra)
+
+    def filing(self, **extra):
+        return dict({"id": "FEC_S6KY00001", "name": "Pat Smith", "isCandidate": True,
+                     "chamber": "Senate (Candidate)", "state": "KY", "districtNum": None,
+                     "officeLabel": "Senate • KY"}, **extra)
+
+    def test_a_filing_for_their_own_seat_is_never_linked(self):
+        from kyc.profiles import _cross_link
+
+        member = self.member()
+        self.assertEqual(_cross_link([member, self.filing()]), 0)
+        self.assertNotIn("contestLabel", member)
+        house = self.filing(id="FEC_H6KY06001", chamber="House (Candidate)", districtNum=6,
+                            officeLabel="House • KY-6")
+        self.assertEqual(_cross_link([member, house]), 1)
+        self.assertEqual(member["contestRaceId"], "H-KY-06-2026")
+
+    def test_the_checks_count_only_who_sits(self):
+        former = self.member(alsoRunningSeat="House • KY-6", alsoRunningId="FEC_H6KY06001",
+                             formerMember={"left": "2027-01-03"})
+        issues = validate.check_overrides([former], {"members": [], "candidates": []})
+        self.assertNotIn("dual-role", [i.code for i in issues])
+
+    def test_a_filing_for_the_seat_they_sit_in_needs_no_id(self):
+        member = self.member(raceId="S-KY-2026", alsoRunningId="FEC_S6KY00001")
+        filing = self.filing(raceId="S-KY-2026", fecCandidateId="S6KY00001")
+        snapshot = {"legislators": [{"bioguide": "X000001", "fecAll": []}]}
+        self.assertEqual(validate.check_member_filings([member, filing], snapshot), [])
+        elsewhere = self.filing(id="FEC_H6KY06001", raceId="H-KY-06-2026",
+                                fecCandidateId="H6KY06001")
+        member["alsoRunningId"] = elsewhere["id"]
+        self.assertEqual([i.code for i in validate.check_member_filings(
+            [member, elsewhere], snapshot)], ["member-candidacy-id-missing"])
+
+    def test_a_new_term_is_from_election_day_on(self):
+        self.assertTrue(validate._new_term({"term_start": "2026-12-08 - 2029-01-03"}))
+        self.assertTrue(validate._new_term({"term_start": "2027-01-03 - 2029-01-03"}))
+        self.assertFalse(validate._new_term({"term_start": "2025-01-03 - 2027-01-03"}))
+        self.assertFalse(validate._new_term({"term_start": "Jan. 3, 2027 (if elected)"}))
 
 
 class TestTheSpecialsSeatedThroughApply(unittest.TestCase):
@@ -484,6 +565,9 @@ class TestRecordDrift(unittest.TestCase):
         cls.raw = sources.load_all(ROOT)
         cls.record = cls.raw["record"]
         cls.snapshot = legislators.load_snapshot(ROOT)
+        # Drift is checked only in the campaign phase (validate.check_record).
+        if cycle.phase(cls.snapshot) != "campaign":
+            raise unittest.SkipTest("drift is a campaign-phase check")
 
     def codes(self, snapshot):
         profiles, _ = build_profiles(self.raw, snapshot=snapshot)

@@ -231,9 +231,11 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
         elif profile.get("raceRole") == "successor":
             if rid:
                 join(race_for(rid), profile, "candidateIds")
-        elif not mine and rid:
+        elif not mine and rid and not (held.get(rid) or {}).get("bioguide"):
             # Sitting in a seat the record has no holder for - a vacancy
             # filled before Election Day - so its incumbent at the election.
+            # Anyone else in a seat the record names a holder for is not its
+            # incumbent, whatever the build could tell about them.
             holds(race_for(rid), profile)
 
     for race in races.values():
