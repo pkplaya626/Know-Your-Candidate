@@ -82,10 +82,15 @@
     if (info.senators) parts.push(plural(info.senators, "senator"));
     if (info.house) parts.push(plural(info.house, "representative"));
     if (info.delegates) parts.push(plural(info.delegates, "delegate"));
+    // Once the new Congress sits these are a record of 2026, and say so.
+    var rec = KYC.recordPhase();
     parts.push(plural(info.seatsUp, "seat") + " in Congress on the 2026 ballot");
-    if (info.open) parts.push(plural(info.open, "open seat"));
-    parts.push(plural(info.challengersOnBallot, "challenger") + " on the ballot");
-    if (info.challengersOut) parts.push(info.challengersOut + " out after the primaries");
+    if (info.open) parts.push(plural(info.open, "open seat") + (rec ? " in 2026" : ""));
+    parts.push(plural(info.challengersOnBallot, "challenger") +
+      (rec ? " on the 2026 ballot" : " on the ballot"));
+    if (info.challengersOut) {
+      parts.push(info.challengersOut + " out after the " + (rec ? "2026 " : "") + "primaries");
+    }
     return parts.map(function (t) {
       return '<span class="badge badge-neutral">' + KYC.escapeHtml(t) + "</span>";
     }).join(" ");
@@ -301,9 +306,11 @@
         '<span class="state-row-name">' + KYC.escapeHtml(info.name) +
           ' <span class="state-row-code">' + KYC.escapeHtml(c) + "</span></span>",
         '<span class="state-row-meta">' + KYC.escapeHtml(seats.join(", ")) + "</span>",
-        '<span class="state-row-meta">' + KYC.escapeHtml(plural(info.seatsUp, "seat") + " up") +
+        '<span class="state-row-meta">' + KYC.escapeHtml(plural(info.seatsUp, "seat") +
+          (KYC.recordPhase() ? " on the 2026 ballot" : " up")) +
           (info.open ? " &middot; " + KYC.escapeHtml(plural(info.open, "open seat")) : "") + "</span>",
-        '<span class="state-row-meta">' + KYC.escapeHtml(plural(info.challengersOnBallot, "challenger")) + " on the ballot</span>",
+        '<span class="state-row-meta">' + KYC.escapeHtml(plural(info.challengersOnBallot, "challenger")) +
+          (KYC.recordPhase() ? " on the 2026 ballot" : " on the ballot") + "</span>",
         "</a>",
       ].join("");
     });

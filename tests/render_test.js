@@ -60,6 +60,20 @@ function rewindToCampaign(window) {
   });
 }
 
+/* A page built on a clock before the new Congress is sworn in (noon,
+ * Eastern, January 3) sees the phase the build wrote then: the campaign's
+ * (kyc/cycle.phase). After January 3 the data says "record", and a check
+ * written for the campaign's views would otherwise read the archive. */
+const NEW_CONGRESS = new Date("2027-01-03T17:00:00Z");
+
+function phaseAt(now) {
+  return (window, meta) => {
+    if (meta && meta.election && new Date(now) < NEW_CONGRESS) {
+      meta.election = Object.assign({}, meta.election, { phase: "campaign" });
+    }
+  };
+}
+
 /* Run *hooks* once the profile data has loaded: profiles.js assigns
  * kycBuildMeta last, after legislatorsData and kycRaces. */
 function onData(window, hooks) {
@@ -116,8 +130,8 @@ function buildPage(page, opts) {
       });
       if (opts.now !== null) freezeClock(window, opts.now || CAMPAIGN_NOW);
       // opts.written: the data as a later refresh would write it, before the rewind.
-      onData(window, [opts.written, opts.now === undefined ? rewindToCampaign : null, opts.data]
-        .filter(Boolean));
+      onData(window, [opts.written, opts.now === undefined ? rewindToCampaign : null,
+        opts.now === null ? null : phaseAt(opts.now || CAMPAIGN_NOW), opts.data].filter(Boolean));
       if (opts.setup) opts.setup(window);
     },
   });
@@ -4258,6 +4272,15 @@ async function testRecordPhase() {
     const titles = [...after.D.querySelectorAll(".senate-group-title")].map((h) => h.textContent);
     check("the 2026 seats are no longer \"up\"", titles.some((t) => /^2026 elections/.test(t)) &&
       !titles.some((t) => /Up in 2026/.test(t)), titles.join(" | "));
+  });
+
+  const state = await buildPage("states/ky.html", { data: recordPhase });
+  await settle(50);
+  suite("states/ky.html — the headline once the new Congress sits", () => {
+    const strip = [...state.D.querySelectorAll(".state-summary .badge")].map((b) => b.textContent);
+    check("its 2026 figures say they are 2026's", strip.length > 3 &&
+      strip.filter((b) => /seat|challenger|primaries/.test(b)).every((b) => /2026/.test(b)),
+      strip.join(" | "));
   });
 
   const tx = await buildPage("districts/tx.html", { data: recordPhase });
