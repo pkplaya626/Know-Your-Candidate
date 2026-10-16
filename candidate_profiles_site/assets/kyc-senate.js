@@ -99,8 +99,13 @@
     var raceOf = raceIndex(races);
     var buckets = {};
     people.filter(isSenator).forEach(function (holder) {
-      var known = holder.senateClass && holder.nextElection;
-      var key = known ? holder.nextElection + (holder.senateSpecial ? "s" : "r") : "unknown";
+      // A senator in a race is grouped by the race: Ohio's special election
+      // stays a 2026 special after its winner is seated for the term to 2029.
+      var race = raceOf[holder.id];
+      var year = race ? race.year : holder.nextElection;
+      var special = race ? !!race.special : holder.senateSpecial;
+      var known = holder.senateClass && year;
+      var key = known ? year + (special ? "s" : "r") : "unknown";
       (buckets[key] = buckets[key] || []).push(holder);
     });
     return Object.keys(buckets).sort().map(function (key) {

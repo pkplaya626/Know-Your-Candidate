@@ -532,6 +532,39 @@ Race headers show the primary date, who is on the November ballot, how many
 filers are out, and anyone the results put on the ballot with no FEC filing
 over $5,000 — leaving them off would make the header lie.
 
+### The frozen 2026 race record
+
+Which seats are on the 2026 ballot used to be worked out on every build from
+whoever was sitting: a Senate seat was up because its senator's term ends at
+the election. That stops being true twice. When the Florida and Ohio special
+elections' winners are seated in December, their terms run to 2029, so the
+two seats would stop looking "up" and both races, with their results, would
+drop off the site. And on January 3 every term changes.
+
+So the race set is frozen once, from the 119th Congress, before the
+election: `python build_profile_site.py record --freeze` writes
+`data/record_2026.json` (475 races, 35 of them Senate). It holds, for each
+race, its chamber, state and district or Senate class and whether it is a
+special election; and for each, who held the seat, by bioguide id, with
+every FEC id the official membership lists for them (both chambers), the
+ids the site links through, and whether they were appointed (an appointee
+is never "re-elected"). Its signature is pinned in `kyc/cycle.py`, so
+`verify` fails if the set of races changes without a reviewed code change.
+
+`kyc/cycle.py` holds the cycle (`CYCLE = 2026`), the only value set by hand,
+and the date arithmetic: which Congress sits on a date, which one an
+election elects, and the Congress the committed snapshot is of. Until the
+Congress the cycle elects is sitting, `build --check` compares today's seats
+with the record (`record-drift`), reading today's Senate seats straight from
+the snapshot's term dates so the record is never compared with itself; the
+only difference allowed is a seat whose appointee's term has ended. A record
+incumbent re-seated for a new term reads that term's end, and each Senate
+race carries `special` from the record, so the Senate view keeps Ohio's and
+Florida's seats with the 2026 specials after their winners are seated. A
+senator who resigns early and is succeeded by an appointee in the same seat
+is the roster's business, not a lost race. The surname table of 2026 Senate
+seats is gone.
+
 ### Louisiana's open primary
 
 Louisiana's House seats have no primary before November: the November 3

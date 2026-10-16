@@ -293,20 +293,9 @@ NOT_A_PORTRAIT = {
         ("2026-10-02", "a hunting scene; no face at card size"),
 }
 
-# The 35 Senate seats on the 2026 ballot, keyed by state with the surname of
-# the sitting member of that seat. Previously duplicated verbatim inside both
-# index.html and map.html; it is pipeline data, so it belongs here.
-SENATE_SEATS_UP_2026 = {
-    "AK": "Sullivan", "AL": "Tuberville", "AR": "Cotton", "CO": "Hickenlooper",
-    "DE": "Coons", "FL": "Moody", "GA": "Ossoff", "IA": "Ernst", "ID": "Risch",
-    "IL": "Durbin", "KS": "Marshall", "KY": "McConnell", "LA": "Cassidy",
-    "MA": "Markey", "ME": "Collins", "MI": "Peters", "MN": "Smith",
-    "MS": "Hyde-Smith", "MT": "Daines", "NC": "Tillis", "NE": "Ricketts",
-    "NH": "Shaheen", "NJ": "Booker", "NM": "Lujan", "OH": "Husted",
-    "OK": "Armstrong", "OR": "Merkley", "RI": "Reed", "SC": "Graham",
-    "SD": "Rounds", "TN": "Hagerty", "TX": "Cornyn", "VA": "Warner",
-    "WV": "Capito", "WY": "Lummis",
-}
+# The 2026 Senate seats are no longer typed here. A surname table matched
+# Darline Graham to Lindsey Graham's seat; the seats are now the frozen race
+# record, keyed on bioguide ids (kyc/record.py, data/record_2026.json).
 
 # Seats whose first round is a nonpartisan ("jungle") primary held on general
 # election day, with a runoff after it. Keyed (state, office, cycle); laid over

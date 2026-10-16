@@ -346,7 +346,8 @@ class TestContestable(unittest.TestCase):
         up = {f"S-{p['state']}-2026" for p in self.profiles
               if not p["isCandidate"] and "Senate" in p["chamber"] and p["seatUp2026"]}
         self.assertEqual(senate, up)
-        self.assertEqual(len(senate), validate.EXPECTED_SENATE_UP_2026)
+        record = load_all(ROOT)["record"]
+        self.assertEqual(senate, {r for r in record["races"] if r.startswith("S-")})
         for state in ("CA", "NY", "PA", "AZ"):
             self.assertNotIn(f"S-{state}-2026", self.contests)
 

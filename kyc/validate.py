@@ -17,7 +17,6 @@ from .portraits import wikimedia_file
 # Expected chamber sizes for the 119th Congress.
 EXPECTED_SENATE_SEATS = 100
 EXPECTED_VOTING_HOUSE = 435
-EXPECTED_SENATE_UP_2026 = 35
 
 # Roster rows that stand in for an unresolved primary rather than a person.
 PLACEHOLDER_NAMES = ("democratic nominee", "republican nominee", "tbd", "vacant")
@@ -66,15 +65,48 @@ def check_chamber_sizes(profiles):
             f"{len(voting_house)} (vacancies and mid-term changes are normal)",
         ))
 
-    up = [p for p in senate if p["seatUp2026"]]
-    if len(up) != EXPECTED_SENATE_UP_2026:
-        matched = {p["state"] for p in up}
-        missing = sorted(set(overrides.SENATE_SEATS_UP_2026) - matched)
-        issues.append(Issue(
-            "error", "senate-up-2026",
-            f"Expected {EXPECTED_SENATE_UP_2026} Senate seats up in 2026, matched {len(up)}",
-            [f"no incumbent matched for: {', '.join(missing)}"] if missing else [],
-        ))
+    return issues
+
+
+def check_record(profiles, record, snapshot=None):
+    """The frozen race record (kyc/record.py) against today's members.
+
+    Every Senate race carries its class. Each one's incumbent is a sitting
+    member, or someone whose term has ended by the snapshot's date - a
+    special election's seat once its winner is seated. And, until the
+    Congress the cycle elects is sitting, today's seats must be the
+    record's: a race only the record has, or a seat only today has, is an
+    error, except for such an ended term (record.drift).
+    """
+    from . import cycle as cycle_mod, record as record_mod
+
+    if not record:
+        return [Issue("error", "no-record",
+                      "no frozen race record; run: python build_profile_site.py record --freeze")]
+    issues = []
+    senate = {rid: race for rid, race in record["races"].items() if race["chamber"] == "Senate"}
+    if not senate or any(not race.get("senateClass") for race in senate.values()):
+        issues.append(Issue("error", "record-senate",
+                            "the record's Senate races are missing or carry no class"))
+    sitting = {p["id"] for p in _members(profiles)}
+    fetched = ((snapshot or {}).get("fetched") or "")[:10]
+    unseated = sorted(
+        f"{rid} ({inc['name']}, {inc['bioguide']})"
+        for rid, inc in record["incumbents"].items()
+        if rid in senate and inc and inc["bioguide"] not in sitting
+        and not (fetched and (inc.get("termEnd") or "9999") <= fetched)
+        and not record_mod.seat_filled(record, rid, snapshot))
+    if unseated:
+        issues.append(Issue("error", "unmatched-senate-seat",
+                            f"{len(unseated)} of the record's Senate incumbents are not sitting "
+                            f"members, and their terms have not ended", unseated))
+    if snapshot and cycle_mod.phase(snapshot) == "campaign":
+        live = record_mod.live_races(profiles, snapshot)
+        apart = record_mod.drift(record, live, snapshot)
+        if apart:
+            issues.append(Issue("error", "record-drift",
+                                f"{len(apart)} races differ between the frozen record and "
+                                f"today's seats", apart))
     return issues
 
 
@@ -201,19 +233,6 @@ def check_overrides(profiles, raw):
         issues.append(Issue("warn", "stale-photo-override",
                             f"{len(dead_photos)} photo overrides match no candidate",
                             dead_photos))
-
-    unmatched_seats = sorted(
-        f"{st} ({surname})"
-        for st, surname in overrides.SENATE_SEATS_UP_2026.items()
-        if not any(
-            p["state"] == st and "Senate" in p["chamber"] and p["seatUp2026"]
-            for p in profiles if not p["isCandidate"]
-        )
-    )
-    if unmatched_seats:
-        issues.append(Issue("error", "unmatched-senate-seat",
-                            f"{len(unmatched_seats)} 2026 Senate seats matched no sitting member",
-                            unmatched_seats))
 
     # Not an error, just useful: members who are also 2026 candidates.
     duals = sorted(
@@ -424,19 +443,6 @@ def check_snapshot(profiles, raw, snapshot):
             f"{len(drift.changed)} roster fields disagree with the authoritative roster",
             [f"{c['name']}: {c['field']} roster={c['roster']!r} "
              f"authoritative={c['authoritative']!r}" for c in drift.changed],
-        ))
-
-    # The curated 2026 Senate table against the terms senators are serving.
-    derived = legislators.seats_up(snapshot, 2026)
-    curated = overrides.SENATE_SEATS_UP_2026
-    mismatched = sorted(set(derived) ^ set(curated))
-    if mismatched:
-        issues.append(Issue(
-            "warn", "senate-table-drift",
-            f"{len(mismatched)} states differ between the curated 2026 Senate "
-            f"table and the real term dates",
-            [f"{st}: curated={curated.get(st, '-')!r} "
-             f"authoritative={derived.get(st, '-')!r}" for st in mismatched],
         ))
 
     _ = profiles
@@ -1270,6 +1276,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_markup(profiles)
     issues += check_geometry(profiles, geo)
     issues += check_snapshot(profiles, raw, snapshot)
+    issues += check_record(profiles, (raw or {}).get("record"), snapshot)
     issues += check_senate_classes(profiles, snapshot)
     issues += check_finance(profiles, finance)
     issues += check_curated_candidates(profiles)

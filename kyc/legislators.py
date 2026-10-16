@@ -271,6 +271,14 @@ def trim(entry, social=None):
         "birthday": (entry.get("bio") or {}).get("birthday"),
         "wikipedia": ids.get("wikipedia"),
         "fec": _fec_ids(entry, chamber),
+        # Every FEC id, both chambers: a member's own candidacy for the other
+        # chamber is linked through it, never through a name (rule 17).
+        # ``fec`` above stays chamber-filtered, for finance.
+        "fecAll": sorted(set(ids.get("fec") or [])),
+        # How the current term began and why it ends: an appointee's seat is
+        # filled by a special election, and is never called "re-elected".
+        "how": term.get("how"),
+        "endType": term.get("end-type"),
         # How to reach the office, as the member's own term record states it.
         "url": term.get("url"),
         "phone": term.get("phone"),
