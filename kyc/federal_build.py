@@ -201,12 +201,14 @@ def build(root="."):
     search = sorted(([jid, judges[jid]["name"], sitting_on[jid], judges[jid]["status"]]
                      for jid in sitting_on), key=lambda row: (row[1], row[0]))
     # The offices each officer has held (kyc/history.py), by the same id.
-    from . import history
+    from . import history, legislators
     people = (history.load_cache(root) or {}).get("people") or {}
+    as_of, _sitting = history.membership(legislators.load_snapshot(root))
     for person in [payload["president"], payload["vicePresident"]] + [
             o["holder"] for o in offices if o.get("holder")]:
         if person["id"] in people:
-            person["politicalHistory"] = history.for_page(people[person["id"]])
+            # An officer does not sit in Congress (Art. I, sec. 6).
+            person["politicalHistory"] = history.for_page(people[person["id"]], as_of, False)
     _check_ids(payload, per_court)
     return payload, per_court, search, problems
 

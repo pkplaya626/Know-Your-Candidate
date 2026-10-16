@@ -1517,8 +1517,13 @@
         : state + "\u2019s " + ordinal(row.district) + " district";
     }
     var parts = [];
-    if (row.where && row.office.toLowerCase().indexOf(row.where.toLowerCase()) === -1) {
-      parts.push(row.where);
+    if (row.where) {
+      // "Mayor of Burlington" in "Burlington, Vermont" says the rest only.
+      var pieces = row.where.split(/,\s*/);
+      var office = row.office.toLowerCase();
+      if (office.indexOf(row.where.toLowerCase()) !== -1) pieces = [];
+      else if (office.indexOf(pieces[0].toLowerCase()) !== -1) pieces = pieces.slice(1);
+      if (pieces.length) parts.push(pieces.join(", "));
     }
     if (row.district) parts.push(row.district);
     return parts.join(" \u00b7 ");
@@ -1571,7 +1576,7 @@
       : "Wikidata";
     var withheld = record.withheld
       ? " " + record.withheld + (record.withheld === 1 ? " more is" : " more are") +
-        " in Wikidata and not shown: the article gives other years."
+        " in Wikidata and not shown: the article does not give the same office the same years."
       : "";
     return list + '<p class="held-source">' +
       (rows.some(function (r) { return r.congress; })

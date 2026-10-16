@@ -143,8 +143,8 @@ python build_profile_site.py history          # public offices each person has h
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1140 tests, no dependencies
-npm install && npm test                       # 1343 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1146 tests, no dependencies
+npm install && npm test                       # 1345 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -879,7 +879,19 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     the one their election page's article belongs to (rule 33), and the
     offices attach only while the profile still links that article
     (`history-stale`). A record that cannot be read is "No linked record",
-    never "none" (rule 19).
+    never "none" (rule 19). The review of the first build found more an
+    agreement on office and years does not catch, each now refused:
+    Wikidata puts the Jefferson County Judge/Executive in Oklahoma, so
+    Mitch McConnell's Kentucky office read as Oklahoma's (a place below a
+    state is shown only in a state the person is tied to,
+    `history-place`); a span across a redistricting kept its first
+    district (it names none now); a position's article can be a list
+    ("List of governors of Colorado"); "Nebraska Legislature" stood for
+    any chamber, so a House abolished in 1937 was "corroborated"; and
+    "since 2013" was frozen at the read, so a senator who left on January
+    3 would have stayed current. Whether a seat in Congress is current is
+    the membership snapshot's to say, by the person's bioguide id, at
+    build time (`history-behind`).
 
 ## District maps
 

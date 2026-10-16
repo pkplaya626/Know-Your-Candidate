@@ -172,7 +172,12 @@ class TestOneOffice(unittest.TestCase):
                      ("Member of the State Senate of New Hampshire", "United States Senator"),
                      ("Louisiana State Senate", "Louisiana House of Representatives"),
                      ("United States Secretary of State", "United States Secretary of Defense"),
-                     ("Mayor of Salt Lake City", "Mayor of Salt Lake County")]:
+                     ("Mayor of Salt Lake City", "Mayor of Salt Lake County"),
+                     # Rule 5: Virginia is not a part of West Virginia.
+                     ("Senate of Virginia", "West Virginia Senate"),
+                     # Nebraska's Legislature is its senate; its House of
+                     # Representatives ended in 1937 (Deb Fischer's item).
+                     ("Member of the Nebraska House of Representatives", "Nebraska Legislature")]:
             self.assertFalse(history.same_office(a, b), (a, b))
 
 
@@ -230,6 +235,34 @@ class TestCongress(unittest.TestCase):
         terms = [{"type": "rep", "state": "PR", "district": 0, "start": "2025-01-03", "end": "2029-01-03"}]
         out = history.congress_spans(terms, "2026-10-16")[0]
         self.assertEqual((out["office"], out["district"]), ("Resident Commissioner", None))
+
+    def test_puerto_ricos_four_year_term_is_one(self):
+        # congress-legislators lists it one Congress at a time.
+        terms = [{"type": "rep", "state": "PR", "district": 0, "start": "2025-01-03", "end": "2027-01-03"},
+                 {"type": "rep", "state": "PR", "district": 0, "start": "2027-01-03", "end": "2029-01-03"}]
+        self.assertEqual(history.congress_spans(terms, "2027-02-01")[0]["terms"], 1)
+
+    def test_what_is_current_is_the_memberships_to_say(self):
+        # Read in October; built after January 3, when the term had ended.
+        terms = [{"type": "sen", "state": "KY", "start": "1985-01-03", "end": "2027-01-03"}]
+        person = {"congress": history.congress_spans(terms, "2026-10-16"), "offices": []}
+        self.assertTrue(history.for_page(person, "2026-10-16", seated=True)["rows"][0]["current"])
+        gone = history.for_page(person, "2027-01-05", seated=False)["rows"][0]
+        self.assertEqual((gone["current"] if "current" in gone else False, gone["to"]), (False, "2027"))
+        # Not seated: never current, whatever the dates.
+        self.assertNotIn("current", history.for_page(person, "2026-10-16", seated=False)["rows"][0])
+
+
+class TestOneSpan(unittest.TestCase):
+    def test_a_span_across_a_redistricting_has_no_one_district(self):
+        rows = [dict(statement("QSEN", "2011-01-01"), district="D58",
+                     end={"year": "2012", "date": "2012-12-31", "precision": "day"}, id="a"),
+                dict(statement("QSEN", "2013-01-01"), district="D63",
+                     end={"year": "2024", "date": "2024-12-31", "precision": "day"}, id="b")]
+        merged = history.merge(rows)
+        self.assertEqual((len(merged), merged[0]["district"]), (1, None))
+        same = [dict(r, district="D58") for r in rows]
+        self.assertEqual(history.merge(same)[0]["district"], "D58")
 
 
 def statement(position, start="2001-01-01", rank="normal", meaning=()):
@@ -376,6 +409,8 @@ CLASSES = {"QGOVVA": [history.PUBLIC_OFFICE], "QMAYOR": [history.PUBLIC_OFFICE],
            "QVA": [history.ADMIN_ENTITY], "QRIC": [history.ADMIN_ENTITY], "QOH": [history.ADMIN_ENTITY],
            "Q30": [history.COUNTRY]}
 US = {"QVA", "QRIC", "QOH", "Q30"}
+# The state each place lies in (P131), by its item and its English label.
+STATE_OF = {"QVA": ("QVA", "Virginia"), "QRIC": ("QVA", "Virginia"), "QOH": ("QOH", "Ohio")}
 TEXTS = {
     "Tim Kaine": """{{Infobox officeholder
 | office1 = 38th [[Governor of Virginia]]
@@ -410,6 +445,11 @@ def fake_read(url, data=None):
         if "wdt:P17" in query:
             return {"results": {"bindings": [{"item": {"value": "http://www.wikidata.org/entity/" + q}}
                                              for q in asked if q in US]}}
+        if "wdt:P131*" in query:
+            return {"results": {"bindings": [
+                {"item": {"value": "http://www.wikidata.org/entity/" + q},
+                 "state": {"value": "http://www.wikidata.org/entity/" + STATE_OF[q][0]},
+                 "label": {"value": STATE_OF[q][1]}} for q in asked if q in STATE_OF]}}
         return {"results": {"bindings": [
             {"item": {"value": "http://www.wikidata.org/entity/" + q},
              "root": {"value": "http://www.wikidata.org/entity/" + r}}
@@ -454,6 +494,38 @@ class TestAFailedRead(unittest.TestCase):
         self.assertIn("people", history.short(fewer, old))
         thinner = {"people": {str(i): {"offices": [1]} for i in range(10)}}
         self.assertIn("offices", history.short(thinner, old))
+
+
+class TestThePlace(unittest.TestCase):
+    """Mitch McConnell held Jefferson County's office in Kentucky; Wikidata's
+    item for it is in Jefferson County, Oklahoma."""
+
+    entity = {"claims": {"P39": [position_held("QJUDGE", "1978-01-01", "1984-12-31")]}}
+    positions = {"QJUDGE": {"title": "Jefferson County Judge/Executive", "jurisdiction": "QJEFF"},
+                 "QJEFF": {"title": "Jefferson County, Oklahoma", "us": True, "state": "OK",
+                           "statewide": False}}
+    reach = {"QJUDGE": {history.PUBLIC_OFFICE}, "QJEFF": {history.ADMIN_ENTITY}}
+    terms = [term("1978", "1984", "Jefferson County Judge/Executive")]
+
+    def shown(self, home):
+        return history.offices_for(self.entity, self.positions, self.reach, set(), self.terms, {},
+                                   home)[0][0]
+
+    def test_a_place_in_another_state_is_not_shown(self):
+        office = self.shown({"KY"})
+        self.assertEqual((office["office"], office["where"]), ("Jefferson County Judge/Executive", None))
+        self.assertEqual(office["placeWithheld"], "Jefferson County, Oklahoma")
+        codes = {c for _l, c, _m, _d in history.problems(
+            {"read": "2026-10-16", "people": {"M000355": {"offices": [office]}}})}
+        self.assertIn("history-place", codes)
+
+    def test_a_place_in_the_persons_state_is(self):
+        self.assertEqual(self.shown({"OK"})["where"], "Jefferson County, Oklahoma")
+
+    def test_a_list_is_not_an_offices_name(self):
+        self.assertIsNone(history._title({"sitelinks": {"enwiki": {"title": "List of governors of Colorado"}}}))
+        self.assertEqual(history._title({"sitelinks": {"enwiki": {"title": "Governor of Colorado"}}}),
+                         "Governor of Colorado")
 
 
 class TestTheRead(unittest.TestCase):

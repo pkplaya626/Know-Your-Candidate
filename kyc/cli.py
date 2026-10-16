@@ -141,7 +141,7 @@ def _build(args):
     from . import history as history_mod
     lineage = history_mod.load_cache(args.root)
     if lineage:
-        stats["history"] = history_mod.apply_cache(profiles, lineage)
+        stats["history"] = history_mod.apply_cache(profiles, lineage, snapshot=snapshot)
         print(f"  history: public offices for {stats['history']} people (read {lineage['read']})")
     else:
         print("  [warn] no political history cache; run 'history'")
@@ -1075,7 +1075,8 @@ def _verify(args):
                         if outcomes else 0)
     enrich.apply_cache(profiles, enrich.load_cache(args.root), as_of=_age_date(stats))
     from . import history as history_mod
-    history_mod.apply_cache(profiles, history_mod.load_cache(args.root))
+    history_mod.apply_cache(profiles, history_mod.load_cache(args.root),
+                            snapshot=legislators.load_snapshot(args.root))
     race_list = races_mod.build(
         profiles, candidates.filing_counts(field),
         results=outcomes, dates=results_mod.load_dates(args.root),

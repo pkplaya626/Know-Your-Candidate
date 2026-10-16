@@ -798,13 +798,28 @@ async function testDirectoryAsync() {
     const cards = [...D.getElementById("results").querySelectorAll(".card")];
     const lined = cards.filter((c) => c.querySelector(".card-held"));
     check("cards name an earlier office", lined.length > 0);
-    check("from the record, beyond the seat the card is about", lined.every((c) => {
-      const row = rows(KYC.byId(c.getAttribute("data-id")))
-        .filter((r) => !(r.congress && r.current))[0];
-      return row && c.querySelector(".card-held").getAttribute("title") === KYC.heldText(row);
+    check("each from the person's own record", lined.every((c) => rows(KYC.byId(c.getAttribute("data-id")))
+      .some((r) => KYC.heldText(r) === c.querySelector(".card-held").getAttribute("title"))));
+    // 91 sitting representatives once read "Fmr. U.S. Representative" under
+    // their own seat, because redistricting renumbered it.
+    check("never a seat in the card's own chamber", lined.every((c) => {
+      const item = KYC.byId(c.getAttribute("data-id"));
+      const senate = /senate/i.test(item.chamber);
+      return !(senate ? /^U\.S\. Senator\b/ : /^(U\.S\. Representative|Delegate|Resident Commissioner)\b/)
+        .test(c.querySelector(".card-held").getAttribute("title"));
     }));
-    check("and never one the record does not hold", cards.filter((c) => !c.querySelector(".card-held"))
-      .every((c) => !rows(KYC.byId(c.getAttribute("data-id"))).some((r) => !(r.congress && r.current))));
+    const climbing = window.legislatorsData.find((p) => /senate/i.test(p.chamber) && p.isCandidate &&
+      rows(p).some((r) => r.congress && r.current && r.office === "U.S. Representative"));
+    if (climbing) {
+      const tmp = D.createElement("div");
+      tmp.innerHTML = KYC.cards.card(climbing);
+      check("a representative running for the Senate is shown as one, not as a former one",
+        (tmp.querySelector(".card-held") || {}).textContent === "U.S. Representative",
+        (tmp.querySelector(".card-held") || {}).textContent);
+    }
+    const burlington = { office: "Mayor of Burlington", where: "Burlington, Vermont", from: "1981", to: "1989" };
+    check("a place the office already names is not said twice",
+      KYC.heldText(burlington) === "Mayor of Burlington, Vermont, 1981–1989", KYC.heldText(burlington));
   });
 
   suite("index.html — contact & links", () => {

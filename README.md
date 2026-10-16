@@ -61,7 +61,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (1343 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (1345 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1059,6 +1059,24 @@ records the election and the article the swearing-in. A profile the site
 could not tie to an item reads "No linked record of public offices", with
 why; a record whose offices could not be confirmed says so. A read that fails
 or comes back short keeps the committed cache.
+
+What an agreement on office and years cannot check is checked on its own:
+
+- **The place.** An office's place is its Wikidata item's jurisdiction, and
+  a place below a state is shown only when it lies in a state the person is
+  tied to - their profile's, their seats in Congress, their statewide
+  offices. Wikidata's Jefferson County Judge/Executive is in Jefferson
+  County, Oklahoma; Mitch McConnell's office is shown without it
+  (`history-place`).
+- **The district.** A span that crosses a redistricting names no district.
+- **The name.** A position whose article is a list ("List of governors of
+  Colorado") is named by its label.
+- **What is current.** A seat in Congress is current while the membership
+  snapshot lists the person, by the bioguide id their seats were read
+  under, and the term runs past the snapshot's date - decided at build
+  time, so a read from October does not keep a senator who left on January
+  3 "since 1985". A seated member whose record holds no current seat is
+  reported (`history-behind`).
 
 ## Election flags and races
 

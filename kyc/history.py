@@ -39,6 +39,7 @@ A read that fails keeps the last cache (rule 8).
 
 import datetime
 import json
+import math
 import os
 import re
 import time
@@ -137,10 +138,20 @@ def congress_spans(terms, read_day):
         office = ("U.S. Senator" if chamber == "Senate" else
                   _TERRITORIES.get(state, "U.S. Representative"))
         current = span["end"] > read_day
+        terms = span["terms"]
+        if state == "PR":
+            # A four-year term, listed one Congress at a time (as
+            # kyc/profiles.py notes): counted by its length, not its rows.
+            years = (datetime.date.fromisoformat(span["end"]) -
+                     datetime.date.fromisoformat(span["start"])).days / 365.25
+            terms = max(1, math.ceil(years / 4 - 0.05))
         out.append({"office": office, "state": state,
                     "district": None if chamber == "Senate" or state in _TERRITORIES else district,
                     "from": span["start"][:4], "to": None if current else span["end"][:4],
-                    "terms": span["terms"], "current": current,
+                    # The dates themselves, so the build decides what is
+                    # current against the membership it builds from.
+                    "start": span["start"], "end": span["end"],
+                    "terms": terms, "current": current,
                     "source": "congress-legislators"})
     return out
 
@@ -305,10 +316,14 @@ def merge(rows):
                 if row["end"] is None or row["end"]["date"] > last["end"]["date"]:
                     last["end"] = row["end"]
                 last["ids"].append(row["id"])
-                if row["district"] and not last["district"]:
-                    last["district"] = row["district"]
+                last["districts"].add(row["district"])
                 continue
-        spans.append(dict(row, ids=[row["id"]]))
+        spans.append(dict(row, ids=[row["id"]], districts={row["district"]}))
+    # A span that crosses a redistricting has no one district: Tim Kennedy
+    # held New York's 58th Senate district, then another, in one span.
+    for span in spans:
+        named = span.pop("districts") - {None}
+        span["district"] = named.pop() if len(named) == 1 else None
     return spans
 
 
@@ -426,8 +441,19 @@ _MODIFIERS = {"lieutenant", "deputy", "assistant", "vice", "associate", "speaker
               "chairwoman", "chairperson", "chief", "presiding", "under", "principal"}
 
 
+# Two-word state names as one word, longest first (rule 5): "Virginia" is
+# not a part of "West Virginia".
+_STATE_WORDS = sorted((n.lower() for n in (
+    "West Virginia", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina",
+    "North Dakota", "South Carolina", "South Dakota", "Rhode Island", "District of Columbia",
+    "Puerto Rico", "American Samoa", "Northern Mariana Islands", "Virgin Islands")),
+    key=len, reverse=True)
+
+
 def _tokens(text):
     text = re.sub(r"\([^)]*\)", " ", (text or "").lower())
+    for name in _STATE_WORDS:
+        text = text.replace(name, name.replace(" ", ""))
     # "United States" is a place, and a distinguishing one: a U.S. senator
     # is not a state senator.
     text = re.sub(r"\bunited states\b|\bu\.\s?s\.", " us ", text)
@@ -449,12 +475,13 @@ def same_office(a, b):
     ta, tb = _tokens(a), _tokens(b)
     if not ta or not tb or ta & _MODIFIERS != tb & _MODIFIERS:
         return False
-    # "Nebraska Legislature" names the seat by the body; its chamber is the
-    # other name's ("Nebraska State Senator").
-    if "legislature" in ta and tb & _CHAMBERS:
-        ta = (ta - {"legislature"}) | (tb & _CHAMBERS)
-    elif "legislature" in tb and ta & _CHAMBERS:
-        tb = (tb - {"legislature"}) | (ta & _CHAMBERS)
+    # "Nebraska Legislature" names the seat by the body, whose members are
+    # senators ("Nebraska State Senator"); it never stands for another
+    # chamber - Nebraska's House of Representatives ended in 1937.
+    if "legislature" in ta and "senate" in tb:
+        ta = (ta - {"legislature"}) | {"senate"}
+    elif "legislature" in tb and "senate" in ta:
+        tb = (tb - {"legislature"}) | {"senate"}
     return ta <= tb or tb <= ta
 
 
@@ -503,8 +530,15 @@ def _display(name):
     return name[:1].upper() + name[1:] if name else None
 
 
-def offices_for(entity, positions, reach, allowed, terms, labels):
-    """``(shown, withheld)`` spans of other public offices for one person."""
+def offices_for(entity, positions, reach, allowed, terms, labels, home=()):
+    """``(shown, withheld)`` spans of other public offices for one person.
+
+    *home* is the states the person is tied to otherwise (their profile's,
+    their seats in Congress). A place below a state is shown only when its
+    state is one of those or of the person's statewide offices: Wikidata's
+    "Jefferson County Judge/Executive" is in Jefferson County, Oklahoma, and
+    Mitch McConnell held it in Kentucky. The office stays; the place goes,
+    and is reported (``placeWithheld``)."""
     by_position = {}
     for statement in statements(entity):
         if keep(statement, positions, reach, allowed) is None:
@@ -531,24 +565,43 @@ def offices_for(entity, positions, reach, allowed, terms, labels):
                 "to": article_end or (span["end"]["year"] if span["end"] else None),
                 "open": span["end"] is None and not article_end,
                 "agree": agreement, "source": "wikidata", "statements": span["ids"],
+                "_state": (positions.get(where) or {}).get("state"),
+                "_statewide": (positions.get(where) or {}).get("statewide", False),
             }
             (shown if agreement else withheld).append(entry)
+    states = set(home) | {e.get("_state") for e in shown if e.get("_statewide")}
+    for entry in shown + withheld:
+        entry.pop("_statewide", None)
+        state = entry.pop("_state", None)
+        if entry["where"] and state is not None and state not in states:
+            entry["placeWithheld"], entry["where"] = entry["where"], None
+        elif entry["where"] and state is None and not federal(entry["item"], reach, allowed):
+            # A place in no state Wikidata names cannot be checked.
+            entry["placeWithheld"], entry["where"] = entry["where"], None
     shown.sort(key=lambda e: e["from"], reverse=True)
     return shown, withheld
 
 
-def for_page(person):
+def for_page(person, as_of=None, seated=False):
     """What the page draws for one person: Congress and every other office
-    as one list, newest first, with the ids it links (rule 32)."""
+    as one list, newest first, with the ids it links (rule 32).
+
+    A seat in Congress is current only while its term runs past *as_of* -
+    the membership snapshot's date - and the person is *seated* in it: a
+    read made in October would otherwise go on saying "since 1985" of a
+    senator who left on January 3."""
     from .pages import state_name
 
     rows = []
     for span in person.get("congress") or []:
+        current = span["current"]
+        if as_of and span.get("end"):
+            current = bool(seated) and span["end"] > as_of
         # The state by name: the officials' page loads no state table.
         rows.append({"office": span["office"], "where": state_name(span["state"]),
                      "district": span["district"],
-                     "from": span["from"], "to": span["to"], "terms": span["terms"],
-                     "current": span["current"], "congress": True})
+                     "from": span["from"], "to": None if current else (span.get("end") or "")[:4] or span["to"],
+                     "terms": span["terms"], "current": current, "congress": True})
     for office in person.get("offices") or []:
         rows.append({"office": office["office"], "where": office["where"],
                      "district": office["district"], "from": office["from"], "to": office["to"],
@@ -581,16 +634,30 @@ def stale(profiles, cache):
     return out
 
 
-def apply_cache(profiles, cache):
+def membership(snapshot):
+    """``(as of, {bioguide})`` from the membership snapshot: the day it was
+    read and who sits."""
+    if not snapshot:
+        return None, set()
+    return ((snapshot.get("fetched") or "")[:10] or None,
+            {m.get("bioguide") for m in snapshot.get("legislators") or [] if m.get("bioguide")})
+
+
+def apply_cache(profiles, cache, snapshot=None):
     """Attach ``politicalHistory`` to each profile the cache knows, by id,
-    unless it was read from an article the profile no longer links."""
+    unless it was read from an article the profile no longer links. What
+    is current in Congress is the snapshot's to say: whether the person -
+    by the bioguide id their seats were read under, whichever profile shows
+    them - sits now."""
+    as_of, sitting = membership(snapshot)
     people = (cache or {}).get("people") or {}
     refused = {id(p) for p, _detail in stale(profiles, cache)}
     attached = 0
     for profile in profiles:
         found = people.get(profile["id"])
         if found and id(profile) not in refused:
-            profile["politicalHistory"] = for_page(found)
+            profile["politicalHistory"] = for_page(
+                found, as_of, not profile.get("formerMember") and found.get("bioguide") in sitting)
             attached += 1
     return attached
 
@@ -627,6 +694,24 @@ def problems(cache, profiles=None):
     if unread:
         out.append(("warn", "history-missing",
                     f"{len(unread)} members have no record of offices held; run 'history'", unread))
+    from .record import seated
+
+    # A seated member whose record holds no current seat was read before
+    # their present term began: the January 3 case.
+    behind = [f"{p['id']} ({p['name']})" for p in profiles or []
+              if seated(p) and p.get("politicalHistory") and not any(
+                  r.get("congress") and r.get("current") for r in p["politicalHistory"].get("rows", []))]
+    if behind:
+        out.append(("warn", "history-behind",
+                    f"{len(behind)} sitting members' records hold no current seat in Congress: "
+                    "they were read before this term; run 'history'", behind))
+    placed = [f"{key}: {w['office']} - {w['placeWithheld']}"
+              for key, person in people.items() for w in person.get("offices") or []
+              if w.get("placeWithheld")]
+    if placed:
+        out.append(("warn", "history-place",
+                    f"{len(placed)} offices are shown without their place: Wikidata puts it in a "
+                    "state the person is not otherwise tied to", placed))
     moved = [detail for _p, detail in stale(profiles or [], cache)]
     if moved:
         out.append(("warn", "history-stale",
@@ -708,6 +793,46 @@ def resolve_titles(wanted, read=None, wiki_read=None):
     return out, unresolved
 
 
+def _title(entity):
+    """An item's article title, unless the article is a list: "Governor of
+    Colorado" sitelinks to "List of governors of Colorado"."""
+    title = sitelink(entity)
+    return None if (title or "").startswith("List of") else title
+
+
+def _place_states(items, read=None):
+    """``{place: (state code, statewide)}``: the U.S. state (or D.C., or a
+    territory) each place lies in, by "located in" (P131), and whether the
+    place is that state itself."""
+    from .normalize import US_STATES
+
+    read = read or _get
+    codes = {name.lower(): code for name, code in US_STATES.items()}
+    out = {}
+    items = sorted(set(i for i in items if i))
+    for i in range(0, len(items), 150):
+        query = ("SELECT ?item ?state ?label WHERE { VALUES ?item {%s} "
+                 "VALUES ?kind { wd:Q35657 wd:Q1352230 wd:Q3551781 } "
+                 "?item wdt:P131* ?state . ?state wdt:P31 ?kind . "
+                 "?state rdfs:label ?label . FILTER(LANG(?label) = 'en') }") % (
+            " ".join("wd:" + q for q in items[i:i + 150]))
+        data = _results(read(SPARQL_URL, urllib.parse.urlencode({"query": query, "format": "json"}).encode()))
+        found = {}
+        for row in data:
+            item = row["item"]["value"].rsplit("/", 1)[1]
+            state = row["state"]["value"].rsplit("/", 1)[1]
+            code = codes.get(row["label"]["value"].lower())
+            if code:
+                found.setdefault(item, set()).add((code, state == item))
+        # A place in two states (a border town's item gone wrong) is in none.
+        for item, rows in found.items():
+            if len({code for code, _own in rows}) == 1:
+                out[item] = (next(iter(rows))[0], any(own for _code, own in rows))
+        if read is _get:
+            time.sleep(PAUSE)
+    return out
+
+
 def _us_places(items, read=None):
     """The items among *items* whose country (P17) is the United States."""
     read = read or _get
@@ -737,6 +862,7 @@ def fetch(profiles, executive=None, read=None, wiki_read=None, today=None):
     # article an election page links for a challenger; the executive cache's
     # ids for the President, the Vice President and the Cabinet.
     qids, wanted = {}, {}
+    by_profile = {p["id"]: p for p in profiles}
     for profile in profiles:
         member = None if profile.get("isCandidate") else by_bioguide.get(profile["id"])
         if member and member["id"].get("wikidata"):
@@ -770,7 +896,7 @@ def fetch(profiles, executive=None, read=None, wiki_read=None, today=None):
         if not jurisdiction and bodies.get(qid) in directed:
             jurisdiction = next((_item(c.get("mainsnak"))
                                  for c in _claims(directed[bodies[qid]], "P1001")), None)
-        info[qid] = {"title": sitelink(entity), "jurisdiction": jurisdiction,
+        info[qid] = {"title": _title(entity), "jurisdiction": jurisdiction,
                      "superclasses": [_item(c.get("mainsnak")) for c in _claims(entity, "P279")]}
         if jurisdiction:
             places.add(jurisdiction)
@@ -778,9 +904,12 @@ def fetch(profiles, executive=None, read=None, wiki_read=None, today=None):
         districts |= {s["district"] for s in statements(entity) if s["district"]}
     extra = entities(places | districts, read, props="labels|sitelinks")
     us = _us_places(places, read)
+    in_state = _place_states(places & us, read)
     for qid, entity in extra.items():
         info.setdefault(qid, {})
-        info[qid].update(title=info[qid].get("title") or sitelink(entity), us=qid in us)
+        info[qid].update(title=info[qid].get("title") or _title(entity), us=qid in us,
+                         state=in_state.get(qid, (None, False))[0],
+                         statewide=in_state.get(qid, (None, False))[1])
         labels[qid] = ((entity.get("labels") or {}).get("en") or {}).get("value")
     reach = classes(position_ids | places | districts, read)
 
@@ -794,14 +923,21 @@ def fetch(profiles, executive=None, read=None, wiki_read=None, today=None):
             continue
         title = sitelink(entity)
         member = by_bioguide.get(key) or by_wikidata.get(qid)
+        home = {t["state"] for t in (member or {}).get("terms") or []}
+        if by_profile.get(key, {}).get("state"):
+            home.add(by_profile[key]["state"])
         shown, withheld = offices_for(entity, info, reach, allowed,
-                                      infobox_terms(texts.get(title) or ""), labels)
+                                      infobox_terms(texts.get(title) or ""), labels, home)
         out[key] = {
             "wikidata": qid, "wikipedia": title,
             "congress": congress_spans(member["terms"], today) if member else [],
             "offices": shown, "withheld": withheld,
             "revision": entity.get("lastrevid"),
         }
+        if member:
+            # Whose seats these are: a member's candidacy profile (Ashley
+            # Hinson's for the Senate) sits in the House all the same.
+            out[key]["bioguide"] = member["id"]["bioguide"]
         if key in wanted:
             # The article the item was found through: the build attaches the
             # offices only while the profile links the same one.

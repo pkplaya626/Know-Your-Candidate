@@ -97,10 +97,15 @@
 
   /* The latest public office beyond the seat the card is about: "Fmr.
    * Governor of Florida" on Rick Scott's, a state senator's own seat on a
-   * challenger's. The years are in the title and the dialog. */
+   * challenger's, "U.S. Representative" on a representative's card for a
+   * Senate race. A seat in the card's own chamber is the card's subject,
+   * whichever district it was: a member whose district was renumbered is
+   * not a former representative. The years are in the title and the
+   * dialog. */
   function heldLine(item) {
+    var senate = String(item.chamber || "").toLowerCase().indexOf("senate") !== -1;
     var row = ((item.politicalHistory || {}).rows || []).filter(function (r) {
-      return !(r.congress && r.current);
+      return !(r.congress && (r.office === "U.S. Senator") === senate);
     })[0];
     if (!row) return "";
     return '<span class="card-held truncate" title="' + KYC.escapeAttr(KYC.heldText(row)) + '">' +
