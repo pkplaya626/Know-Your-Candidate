@@ -3,10 +3,15 @@
 import csv
 import os
 
-# Sitting members of the 119th Congress.
+# Members who have left, archived by ``congress --apply`` from the rosters
+# with the day they left and the record that says so.
+from .legislators import FORMER_ROSTER
+
+# Sitting members, of whichever Congress the membership snapshot is of:
+# ``congress --apply`` keeps them in step with it (kyc/legislators.py).
 MEMBER_ROSTERS = (
-    "Cleaned_House_119th.csv",
-    "Cleaned_Senate_119th.csv",
+    "Cleaned_House.csv",
+    "Cleaned_Senate.csv",
 )
 
 # 2026 candidates, in ascending order of precedence: later files win when the
@@ -72,6 +77,7 @@ def load_all(root="."):
 
     return {
         "members": members,
+        "former": read_csv(os.path.join(root, FORMER_ROSTER)),
         "candidates": candidates,
         "found": m_found + c_found,
         "missing": m_missing + c_missing,

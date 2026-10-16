@@ -130,6 +130,13 @@ def specials_seated(raw, snapshot):
     so it holds whatever today's snapshot already shows. Never committed."""
     held = raw["record"]["incumbents"]
     florida, ohio = held["S-FL-2026"]["bioguide"], held["S-OH-2026"]["bioguide"]
+    # Once the real winners are seated the committed data is the rehearsal,
+    # and a fixture built on it would rehearse a world that never happened.
+    sitting = legislators.by_bioguide(snapshot)
+    for rid in ("S-FL-2026", "S-OH-2026"):
+        appointee = held[rid]
+        if (sitting.get(appointee["bioguide"]) or {}).get("termEnd") != appointee["termEnd"]:
+            raise unittest.SkipTest(f"{rid}'s special election's winner has been seated")
     after = copy.deepcopy(snapshot)
     people = [p for p in after["legislators"] if p["bioguide"] != florida]
     if not any(p["bioguide"] == "Z900001" for p in people):
@@ -205,6 +212,68 @@ class TestTheSpecialsSeated(unittest.TestCase):
         early = dict(self.snapshot, fetched="2026-10-01T07:20:00+00:00")
         self.assertEqual(record.drift(self.record, live, early),
                          ["S-FL-2026: in the record, not among today's seats"])
+
+
+class TestTheSpecialsSeatedThroughApply(unittest.TestCase):
+    """The December refresh end to end, on copies of the committed rosters:
+    the specials' membership, what `congress --apply` does with it, then the
+    build's own checks. Florida's appointee leaves by the term the previous
+    snapshot gave her, with no name list and no hand edit."""
+
+    @classmethod
+    def setUpClass(cls):
+        import shutil
+
+        cls.raw = sources.load_all(ROOT)
+        _, cls.after, cls.florida, cls.ohio = specials_seated(
+            cls.raw, legislators.load_snapshot(ROOT))
+        if cls.florida not in legislators.roster_ids(cls.raw["members"]):
+            raise unittest.SkipTest("Florida's appointee has left the committed roster: "
+                                    "what this rehearses has happened")
+        # legislators-historical as it will read once she has left: her last
+        # day is the day her successor was seated, not the special election.
+        historical = [{"id": {"bioguide": cls.florida},
+                       "terms": [{"start": "2025-01-21", "end": "2026-12-08"}]}]
+        with tempfile.TemporaryDirectory() as tmp:
+            for name in sources.MEMBER_ROSTERS + (sources.FORMER_ROSTER,):
+                shutil.copy(os.path.join(ROOT, name), tmp)
+            rows = sources.load_rosters(sources.MEMBER_ROSTERS, tmp)[0]
+            absent = legislators.roster_ids(rows) - set(legislators.by_bioguide(cls.after))
+            ended = legislators.departures(absent, cls.after, historical=historical)
+            cls.drift = legislators.reconcile(rows, cls.after, ended=ended)
+            legislators.apply(cls.drift, tmp, today=datetime.date(2026, 12, 9))
+            cls.members = sources.load_rosters(sources.MEMBER_ROSTERS, tmp)[0]
+            cls.former = sources.read_csv(os.path.join(tmp, sources.FORMER_ROSTER))
+
+    def test_the_appointee_leaves_on_the_day_the_record_gives(self):
+        self.assertEqual([(p["bioguide"], p["via"]) for p in self.drift.expected],
+                         [(self.florida, "legislators-historical")])
+        self.assertEqual(self.drift.departed, [])
+        self.assertEqual([(r["Bioguide ID"], r["Left Office"], r["Last Congress"])
+                          for r in self.former], [(self.florida, "2026-12-08", "119")])
+
+    def test_the_winners_are_written_in(self):
+        ids = {r["Bioguide ID"] for r in self.members}
+        self.assertIn("Z900001", ids)
+        self.assertNotIn(self.florida, ids)
+        ohio = next(r for r in self.members if r["Bioguide ID"] == self.ohio)
+        # Renewed to the fixture's term - unless the committed roster already
+        # holds a later one, once the real winner has been seated.
+        was = next(r for r in self.raw["members"] if r["Bioguide ID"] == self.ohio)
+        self.assertEqual(ohio["Term Start"], max(was["Term Start"], "2026-12-08"))
+        self.assertEqual(ohio["Term End Date"], "2029-01-03")
+
+    def test_the_build_finds_nothing_wrong(self):
+        roster = dict(self.raw, members=self.members)
+        when = datetime.datetime(2026, 12, 9, 8)
+        errors = [i.code for i in validate.check_snapshot([], roster, self.after, now=when)
+                  if i.level == "error"]
+        self.assertEqual(errors, [])
+        profiles, _ = build_profiles(roster, snapshot=self.after)
+        self.assertEqual([i.code for i in validate.check_record(
+            profiles, self.raw["record"], self.after)], [])
+        ohio = next(p for p in profiles if p["id"] == self.ohio)
+        self.assertEqual(ohio["term_start"], "2026-12-08 - 2029-01-03")
 
 
 class TestRecordDrift(unittest.TestCase):

@@ -152,15 +152,25 @@ def apply_quality(profile):
 
 
 def _dedup_members(rows):
-    """One record per seat. Later rows win, matching the previous behaviour."""
+    """One record per person: their bioguide id, or for a row without one
+    (a "Vacant" placeholder) its seat. Later rows win.
+
+    Keyed on the seat alone, a member whose row still carried an old
+    district number and a newcomer seated at that number would have shared a
+    key, and one of them would have vanished with nothing said. Two people in
+    one seat is a ``duplicate-district`` error; one person on two rows is a
+    ``member-twice`` error."""
     seats = {}
     for row in rows:
         chamber = clean_str(row.get("Chamber"), "")
         state = clean_str(row.get("State"), "")
         name = clean_str(row.get("Name"), "")
         district_raw = clean_str(row.get("District"), "")
+        bioguide = clean_str(row.get("Bioguide ID"), "").upper()
 
-        if "House" in chamber:
+        if bioguide and bioguide != "N/A":
+            key = ("Member", bioguide)
+        elif "House" in chamber:
             num, _ = parse_district(district_raw, state)
             key = ("House", state, num if num is not None else district_raw.lower())
         elif "Vacant" in name:
@@ -250,8 +260,11 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
     not_seeking = overrides.is_not_seeking(status)
 
     # --- 2026 election derivation -------------------------------------
+    from .races import FOUR_YEAR_HOUSE_SEATS
+
     seat_up = False
     end_year = None
+    statutory = kind == "House" and state in FOUR_YEAR_HOUSE_SEATS
     if kind == "House":
         # Every House seat is a two-year term, so all of them are on the
         # 2026 ballot regardless of whether the incumbent is running - except
@@ -259,7 +272,14 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
         from .races import house_seat_up, house_term_end_year
 
         seat_up = house_seat_up(state, ELECTION_YEAR)
+        # The term the member is serving, as the snapshot states it: a
+        # representative re-elected in 2026 serves to 2029 from January 3.
+        # Except a four-year seat, which congress-legislators records one
+        # Congress at a time (Puerto Rico's 2025-2029 term is listed as
+        # 2025-2027), so there the statute decides.
         end_year = house_term_end_year(state, ELECTION_YEAR)
+        if not statutory:
+            end_year = (term_ends or {}).get(profile_id) or end_year
     elif kind == "Senate":
         # Prefer the authoritative snapshot, keyed on bioguide id. The
         # fallback matches a hand-typed surname against the member's name,
@@ -287,6 +307,20 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
                 row.get("Term Start")
             )
 
+    # The dates of the term being served come from the snapshot, which is
+    # read from Congress's own record: the roster's Term Start is the day a
+    # row was written, and on January 3 it still says 2025 for everyone
+    # re-elected. A House member would have read "2025-01-03 - 2029-01-03",
+    # a four-year House term. The roster's date is for a build without one.
+    term = _term_string(row.get("Term Start"), end_year)
+    if person and person.get("termStart") and person.get("termEnd") and not statutory:
+        term = f"{person['termStart']} - {person['termEnd']}"
+        if person.get("endType") == "special-election":
+            # An appointee's term ends at the special election, and they
+            # serve on until its winner is seated: a bare date would read as
+            # a term already over through November.
+            term += " (special election)"
+
     profile = {
         "id": profile_id,
         "name": display,
@@ -297,7 +331,7 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
         "districtNum": district_num,
         "officeLabel": office_label(chamber, state, district_label),
         "status": status,
-        "term_start": _term_string(row.get("Term Start"), end_year),
+        "term_start": term,
         "termEndYear": end_year,
         "electionYear": (end_year - 1) if end_year else None,
         "isCandidate": False,
@@ -632,8 +666,6 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
 
     profiles = []
     for index, row in enumerate(members):
-        if clean_str(row.get("Name"), "") in overrides.EXCLUDED_MEMBERS:
-            continue
         bioguide = clean_str(row.get("Bioguide ID"), "").upper()
         seats = None
         if committees and bioguide:

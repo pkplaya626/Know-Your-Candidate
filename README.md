@@ -27,7 +27,8 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… verify` | Check the committed data still matches the sources |
 | `… congress` | Refresh the membership snapshot (with contact details, accounts and committee rosters) and report roster drift |
 | `… congress --check` | Report drift from the committed snapshot; no network |
-| `… congress --apply` | Add newly seated members to the roster CSVs |
+| `… congress --apply` | Write the drift into the roster CSVs: add the newly seated, renew terms, archive whoever the records say left |
+| `… congress --apply --snapshot FILE` | The same from a given snapshot, with no download (a rehearsal; `--historical FILE` for legislators-historical) |
 | `… field` | Refresh the FEC register of everyone running in 2026 |
 | `… field --check` | Report the field from the committed cache; no network |
 | `… census` | Count each state's local governments from the Census of Governments (`--check` reads the cache) |
@@ -68,8 +69,8 @@ Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 ## How the data flows
 
 ```text
-Cleaned_House_119th.csv                  ─┐
-Cleaned_Senate_119th.csv                 ─┤
+Cleaned_House.csv                        ─┐
+Cleaned_Senate.csv                       ─┤
 Congressional_Candidates_2026.csv        ─┼─> kyc/ ─> data/profiles.js ─┬─> index.html
 Completed_Primary_Candidates_2026.csv    ─┤          data/geo.js       ─┤   (grid + races)
 Late_Primary_Candidates_2026.csv         ─┘          portraits.json     └─> map.html
@@ -311,16 +312,45 @@ as a silent shift in the output.
 ```bash
 python build_profile_site.py congress          # refresh, then report drift
 python build_profile_site.py congress --check  # report from the snapshot, offline
-python build_profile_site.py congress --apply  # write newly seated members in
+python build_profile_site.py congress --apply  # write the drift in
 ```
 
-`--apply` fills only the columns the dataset actually knows. Education, net
-worth, committees and platform are editorial research that no dataset
-supplies, so they stay empty and the provenance layer reports them as *No
-data* — which is true, and better than a plausible invention. Departed members
-are never removed automatically: a roster row may carry curated work, and
-taking someone out of Congress is a judgement that belongs in
-`overrides.EXCLUDED_MEMBERS` where it is visible.
+The rosters hold whoever the snapshot says is serving, of whichever Congress,
+so their names no longer claim one (`Cleaned_House.csv`,
+`Cleaned_Senate.csv`). `--apply` does three things, each file written
+atomically:
+
+- **Newly seated members** get a row with only the columns the dataset
+  actually knows. Education, net worth, committees and platform are editorial
+  research that no dataset supplies, so they stay empty and the provenance
+  layer reports them as *No data* — which is true, and better than a plausible
+  invention.
+- **A new term** — everyone re-elected, on January 3 — rewrites the row's
+  chamber, state, district, term dates and status. A representative elected to
+  the Senate moves to the Senate file, and their committee assignments are
+  emptied, since they described the House seat. Name, education, professions
+  and platform are the person's, and stay. A new term never changes a party,
+  so a party difference is still an error for somebody to look at.
+- **Anyone who has left** moves, row and all, to `Former_Members.csv`, with
+  the day they left, the record that says so and their last Congress. Who
+  has left is decided by bioguide id, never by name: `legislators-historical`
+  lists them with a term ended by the day the snapshot was read, and the day
+  it gives is the one written (for an appointee, the day their successor was
+  seated, not the special election's). That a term has ended is not evidence
+  on its own — on January 3 it is true of every House member, so a current
+  file that dropped someone by mistake would archive them. Anyone absent with
+  no such record stays in the roster, and the build's `departed-member` error
+  says so: an upstream fault until somebody shows otherwise. A failed
+  download of the historical file archives nobody.
+
+Running it twice changes nothing. Puerto Rico's Resident Commissioner is
+the exception to the term dates: congress-legislators records the four-year
+term one Congress at a time, so the statute (48 U.S.C. 891) decides it.
+
+Three days after a new Congress's terms begin, a snapshot of the old one is a
+build error (`snapshot-behind`). Every other check compares committed files
+with each other, so a refresh failing every day from January 3 would leave CI
+and the deploy green on the old Congress's data.
 
 `build` reads the snapshot when it is present and falls back to the CSVs alone
 when it is not, so the pipeline still works offline from a fresh clone.

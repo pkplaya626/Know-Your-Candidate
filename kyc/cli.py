@@ -541,6 +541,19 @@ def _congress(args):
         print(f"  snapshot: {snapshot['count']} legislators, fetched "
               f"{snapshot.get('fetched', '?')}"
               + (f" ({age} days ago)" if age is not None else ""))
+    elif args.snapshot:
+        try:
+            with open(args.snapshot, "r", encoding="utf-8") as handle:
+                snapshot = json.load(handle)
+        except (OSError, ValueError) as exc:
+            print(f"[error] could not read {args.snapshot}: {exc}", file=sys.stderr)
+            return 2
+        if not snapshot.get("legislators"):
+            print(f"[error] {args.snapshot} lists no legislators", file=sys.stderr)
+            return 2
+        path = legislators.save_snapshot(snapshot, args.root)
+        print(f"  wrote {path} from {args.snapshot} ({len(snapshot['legislators'])} "
+              f"legislators, read {snapshot.get('fetched', '?')})")
     else:
         print(f"Downloading the current roster from {legislators.SOURCE_URL} ...")
         try:
@@ -571,7 +584,26 @@ def _congress(args):
             print(f"  wrote {path} ({len(data['committees'])} committees, "
                   f"{len(data['members'])} members with assignments)")
 
-    drift = legislators.reconcile(raw["members"], snapshot)
+    # Whoever has left: by id, from legislators-historical, downloaded only
+    # when somebody has. A failed download decides nothing (rule 8): nobody is
+    # archived, those people stay "departed", and the build says so.
+    absent = legislators.roster_ids(raw["members"]) - set(legislators.by_bioguide(snapshot))
+    historical = None
+    if absent and args.historical:
+        try:
+            with open(args.historical, "r", encoding="utf-8") as handle:
+                historical = json.load(handle)
+        except (OSError, ValueError) as exc:
+            print(f"  [warn] could not read {args.historical}: {exc}")
+    elif absent and not args.check and not args.snapshot:
+        try:
+            historical = legislators.fetch(legislators.HISTORICAL_URL)
+            print(f"  legislators-historical: {len(historical)} people")
+        except legislators.LegislatorsError as exc:
+            print(f"  [warn] {exc}; nobody is archived this run")
+    ended = legislators.departures(absent, snapshot, historical=historical)
+
+    drift = legislators.reconcile(raw["members"], snapshot, ended=ended)
     print(f"\n  reconciliation: {drift.summary()}")
 
     for person in drift.missing:
@@ -583,9 +615,28 @@ def _congress(args):
               f"({person['chamber']} {seat}, {person['party']}, "
               f"since {person['termStart']})")
 
-    for person in drift.departed:
-        print(f"    - in the roster but no longer serving: {person['name']} "
+    for person in drift.expected:
+        print(f"    - left office {person['left']} ({person['via']}): {person['name']} "
               f"({person['bioguide']})")
+
+    for person in drift.departed:
+        print(f"    - in the roster, no longer serving, and no record of leaving: "
+              f"{person['name']} ({person['bioguide']})")
+
+    # Every re-elected member begins a new term on January 3: one line for
+    # those whose seat is unchanged, one each for a new seat.
+    renewed = [s for s in drift.reseated if not s["moved"]]
+    if renewed:
+        print(f"    ~ {len(renewed)} member{'s' if len(renewed) != 1 else ''} began a new "
+              f"term in the same seat")
+    for seat in drift.reseated:
+        if seat["moved"]:
+            moved = ", ".join(f"{c['field']} {c['roster']!r} -> {c['authoritative']!r}"
+                              for c in seat["moved"])
+            print(f"    ~ a new term in a new seat: {seat['name']} ({moved})")
+
+    for name in drift.twice:
+        print(f"    ! on more than one roster row: {name}")
 
     shown = drift.changed if args.verbose else drift.changed[:10]
     for change in shown:
@@ -612,24 +663,33 @@ def _congress(args):
                   f"today's seats")
 
     if args.apply:
-        if not drift.missing:
-            print("\n[ok] nothing to add.")
+        report = legislators.apply(drift, args.root)
+        for roster, names in sorted(report["added"].items()):
+            print(f"\n[ok] added {len(names)} row(s) to {roster}:")
+            for name in names:
+                print(f"       {name}")
+        for roster, names in sorted(report["reseated"].items()):
+            print(f"\n[ok] renewed the term of {len(names)} row(s) in {roster}")
+        if report["archived"]:
+            print(f"\n[ok] moved {len(report['archived'])} row(s) to "
+                  f"{legislators.FORMER_ROSTER}:")
+            for name in report["archived"]:
+                print(f"       {name}")
+        if not any(report.values()):
+            print("\n[ok] nothing to write.")
         else:
-            added = legislators.apply_missing(drift, args.root)
-            for roster, names in sorted(added.items()):
-                print(f"\n[ok] added {len(names)} row(s) to {roster}:")
-                for name in names:
-                    print(f"       {name}")
-            print("\nOnly the fields the dataset actually knows were filled. "
+            print("\nOnly the fields the dataset actually knows were written. "
                   "Run `python build_profile_site.py` to regenerate the site.")
         if drift.departed:
-            print("\n[note] departed members are not removed automatically. Add them "
-                  "to overrides.EXCLUDED_MEMBERS if the seat is genuinely gone.")
+            print(f"\n[error] {len(drift.departed)} roster member(s) are absent from "
+                  "the membership, and legislators-historical (if it could be read) does "
+                  "not say they left. They stay in the roster, and the build fails, "
+                  "until somebody looks.")
         return 0
 
     if not drift.clean:
-        print("\n[warn] the roster has drifted. Run `congress --apply` to add the "
-              "missing members, or `--verbose` to see every difference.")
+        print("\n[warn] the roster has drifted. Run `congress --apply` to write it in, "
+              "or `--verbose` to see every difference.")
     return 0
 
 
@@ -1478,7 +1538,14 @@ def build_parser():
     congress.add_argument("--check", action="store_true",
                           help="use the committed snapshot; make no network call")
     congress.add_argument("--apply", action="store_true",
-                          help="add newly seated members to the roster CSVs")
+                          help="write the drift into the roster CSVs: add the newly "
+                               "seated, renew terms, archive whoever the records say left")
+    congress.add_argument("--snapshot", metavar="FILE",
+                          help="take the membership from FILE, a congress_snapshot.json, "
+                               "instead of downloading it (a rehearsal)")
+    congress.add_argument("--historical", metavar="FILE",
+                          help="read legislators-historical.json from FILE instead of "
+                               "downloading it")
 
     local = add("localgov", help="every local government, county by county (Census listing)")
 
