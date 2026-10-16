@@ -326,7 +326,7 @@ class TestAnIncumbentWhoWonAnotherSeat(unittest.TestCase):
                                     **{"Term Start": "2027-01-03"}))
             else:
                 members.append(row)
-        roster = dict(raw, members=members, former=gone)
+        roster = dict(raw, members=members, former=list(raw.get("former") or []) + gone)
         cls.profiles, _ = build_profiles(roster, snapshot=snapshot)
         cls.races = {r["id"]: r for r in races.build(cls.profiles, record=cls.record)}
         cls.person = next(p for p in cls.profiles if p["id"] == cls.house)

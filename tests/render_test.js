@@ -2033,7 +2033,9 @@ async function testSenate() {
       upRaces.every((r, i) => !blocks[i] || ids(blocks[i])[0] === lead(r)));
     const race = upRaces.find((r) => r.candidateIds.some((id) => !offBallot(KYC.byId(id))));
     const block = seatOf(race);
-    const running = race ? race.candidateIds.map(KYC.byId).filter((p) => !offBallot(p)) : [];
+    // A winner seated in the seat holds it now, and leads the block instead.
+    const running = race ? race.candidateIds.map(KYC.byId)
+      .filter((p) => !offBallot(p) && p.id !== race.winnerId) : [];
     check("a 2026 seat lists its race's candidates after the incumbent", !!block &&
       running.length > 0 && running.every((p) => ids(block).indexOf(p.id) > 0 ||
         (p.incumbentId && ids(block).indexOf(p.incumbentId) > 0)),
