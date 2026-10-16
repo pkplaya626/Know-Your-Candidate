@@ -725,6 +725,22 @@ class TestANewCongress(unittest.TestCase):
         self.assertEqual(summary.build([], snapshot=snap)["congress"], 120)
         self.assertIsNone(summary.build([])["congress"])
 
+    def test_the_summary_says_when_the_races_are_a_record(self):
+        # The cycle's races stop being the next election once the Congress
+        # they elect is sitting - read after noon on January 3, never before
+        # (kyc/cycle.phase). The page reads it as KYC.recordPhase.
+        from kyc import summary
+
+        snap = snapshot_of(entry(chamber="rep", district=5, start="2027-01-03",
+                                 end="2029-01-03"))
+        snap["fetched"] = "2027-01-03T16:00:00+00:00"
+        self.assertEqual(summary.build([], snapshot=snap)["election"]["phase"], "campaign")
+        snap["fetched"] = "2027-01-04T07:20:00+00:00"
+        self.assertEqual(summary.build([], snapshot=snap)["election"]["phase"], "record")
+        today = snapshot_of(entry(chamber="rep", district=5))
+        self.assertEqual(summary.build([], snapshot=today)["election"]["phase"], "campaign")
+        self.assertEqual(summary.build([])["election"]["phase"], "campaign")
+
 
 class TestOneRowPerPerson(unittest.TestCase):
     """Members were deduplicated on their seat. A member whose row still

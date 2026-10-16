@@ -8,6 +8,12 @@
  * (Class I) - and puts everyone running for a 2026 seat beneath the
  * senator who holds it.
  *
+ * Once the Congress the cycle elects is sitting (KYC.recordPhase), the
+ * cycle's races are a record, not the next election for any seat: every
+ * senator is grouped by the year their seat is next decided, and the 2026
+ * results stay on the race view and the state pages. Before then, after
+ * Election Day, the cycle's group is "2026 elections", not "Up in 2026".
+ *
  * Nothing is derived here (rule 1). senateClass, nextElection and
  * senateSpecial come from the pipeline, keyed on bioguide id. A 2026 seat
  * is its race - every Senate race of the cycle, whoever holds the seat now:
@@ -100,8 +106,9 @@
     // Every Senate race is a seat, grouped by the race: Ohio's special
     // election stays a 2026 special after its winner is seated for the term
     // to 2029, and Florida's still has a seat after its appointee has left.
+    // Once the new Congress sits, no race is any seat's next election.
     races.forEach(function (race) {
-      if (race.chamber !== "Senate") return;
+      if (race.chamber !== "Senate" || KYC.recordPhase()) return;
       var holder = race.incumbentIds.map(KYC.byId).filter(Boolean)[0] || null;
       // Seated since Election Day for the term this race decided: the seat
       // is theirs now, shown as held, never as a challenger.
@@ -132,9 +139,11 @@
       var year = key === "unknown" ? null : parseInt(key, 10);
       var special = key.slice(-1) === "s";
       var classText = classes.map(function (c) { return "Class " + ROMAN[c]; }).join(", ");
+      // After Election Day the cycle's seats are no longer "up".
+      var past = year !== null && KYC.electionStatus(year).phase === "post-election";
       var title = year === null ? "Class or next election not known" :
         special ? year + " special elections – " + classText + " seats" :
-        "Up in " + year + " – " + classText;
+        (past ? year + " elections – " : "Up in " + year + " – ") + classText;
       return {
         key: key,
         year: year,

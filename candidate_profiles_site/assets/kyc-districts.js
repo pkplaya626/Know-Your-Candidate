@@ -17,6 +17,12 @@
  *
  * Which districts are picked out lives in the address (#/?d=3,6), so every
  * view can be shared.
+ *
+ * Once the Congress the cycle elects is sitting (KYC.recordPhase), its
+ * members sit for a redrawn state's new map: the new map is drawn in their
+ * parties, and the old map in the parties of who last held its seats - each
+ * race's incumbent, from the frozen record. The 2026 race is shown as a
+ * record, and members "running in a different district" are history.
  */
 (function (global) {
   "use strict";
@@ -96,8 +102,9 @@
 
   /* --------------------------------------------------------- the people */
 
-  /** Sitting House members by the district they hold - the old map's. A
-   *  former member holds nothing (rule 27). */
+  /** Sitting House members by the district they hold - on the map they sit
+   *  under: the old map's until the new Congress sits, then the new map's.
+   *  A former member holds nothing (rule 27). */
   var holdersOf = {};
   /** The 2026 House race for each new district. */
   var raceOf = {};
@@ -110,6 +117,37 @@
     races.forEach(function (r) {
       if (r.chamber === "House" && r.state === code) raceOf[r.district] = r;
     });
+  }
+
+  /** A redrawn state once the new Congress sits: its old map is a record. */
+  function archive() {
+    return KYC.recordPhase() && redrawn();
+  }
+
+  /** Who holds district *n* of *plan*: the sitting members, on the map they
+   *  sit under. A redrawn state's new map has nobody until the new Congress
+   *  sits; then its old map's seats are who last held them - the record's
+   *  incumbent of the race of that number, as a profile where they have one,
+   *  else by the record's name and party. */
+  function holders(plan, n) {
+    if (archive() && plan === state.plans[0]) {
+      var inc = (raceOf[n] || {}).incumbent;
+      if (!inc) return [];
+      return [KYC.byId(inc.profileId) || { name: inc.name, party: inc.party }];
+    }
+    if (redrawn() && plan === newPlan() && !KYC.recordPhase()) return [];
+    return holdersOf[n] || [];
+  }
+
+  /** Cards for people with a profile; a name and party for the rest. */
+  function peopleCards(list) {
+    var cards = list.filter(function (p) { return p.id; });
+    var names = list.filter(function (p) { return !p.id; });
+    return (cards.length ? '<div class="card-grid">' + cards.map(KYC.cards.card).join("") + "</div>" : "") +
+      names.map(function (p) {
+        return '<p class="state-note">' + KYC.escapeHtml(p.name) + " (" + KYC.escapeHtml(p.party) +
+          ")</p>";
+      }).join("");
   }
 
   /** Who is running in a new district: the race's people, less a member
@@ -137,6 +175,9 @@
    *  (TX-9 -> TX-18) and Julie Johnson (TX-32 -> TX-33) as running after
    *  both lost. Their status in the race they entered decides. */
   function moves() {
+    // Once the new Congress sits, every move has happened or not: the
+    // record of it is each race's.
+    if (KYC.recordPhase()) return [];
     var byId = {};
     races.forEach(function (r) { byId[r.id] = r; });
     return data.filter(function (p) {
@@ -528,24 +569,26 @@
 
   /** The party a district is drawn in: its sitting member's, on the map
    *  the members were elected under. A seat with no member on the roster is
-   *  vacant. A redrawn state's new map has no members yet - November fills
-   *  its seats - so it is drawn in none, never in a guess. */
+   *  vacant. A redrawn state's new map has no members until the new Congress
+   *  sits - November fills its seats - so it is drawn in none, never in a
+   *  guess; then the old map is drawn in who last held each seat. */
   function partyOf(plan, n) {
-    if (plan !== state.plans[0]) return "none";
-    var held = holdersOf[n] || [];
+    if (redrawn() && plan === newPlan() && !KYC.recordPhase()) return "none";
+    var held = holders(plan, n);
     return held.length ? KYC.partyKey(held[0]) : "vacant";
   }
 
   function tip(plan, n) {
     var where = seat(n) + " on the " + plan.title;
     var parts = [];
-    if (plan === state.plans[0]) {
-      var held = holdersOf[n] || [];
-      parts.push(held.length ? "held by " + held.map(function (p) {
+    var last = archive() && plan === state.plans[0];
+    if (plan === state.plans[0] || KYC.recordPhase()) {
+      var held = holders(plan, n);
+      parts.push(held.length ? (last ? "last held by " : "held by ") + held.map(function (p) {
         return p.name + " (" + p.party + ")";
-      }).join(", ") : "vacant: no sitting member");
+      }).join(", ") : last ? "no holder on the record" : "vacant: no sitting member");
     }
-    if (plan === newPlan()) {
+    if (plan === newPlan() && !KYC.recordPhase()) {
       var names = running(n).map(function (p) { return p.name; });
       if (names.length) parts.push(names.join(", ") + " on the ballot");
     }
@@ -693,9 +736,9 @@
   /** Names for the picked districts on the close-up: who held the seat,
    *  or which members are running in it now. */
   function caption(plan, n) {
-    var people = redrawn() && plan === newPlan()
+    var people = redrawn() && plan === newPlan() && !KYC.recordPhase()
       ? running(n).filter(function (p) { return KYC.seated(p); })
-      : holdersOf[n] || [];
+      : holders(plan, n);
     return people.map(function (p) { return p.name; }).join(" · ");
   }
 
@@ -734,7 +777,8 @@
       var words = spot && caption(plan, n);
       if (!words) return;
       var name = 12.5 / px, role = 10.5 / px;
-      var what = redrawn() && plan === newPlan() ? "running here in " + year : "holds this seat";
+      var what = redrawn() && plan === newPlan() && !KYC.recordPhase() ? "running here in " + year
+        : archive() && plan === state.plans[0] ? "held this seat" : "holds this seat";
       var half = spot[2] * 0.95, aside = spot[2] * 0.45 + 6 / px;
       // [x, y of the name line, y of the role line, anchor]
       var options = [
@@ -860,7 +904,8 @@
 
   /** The old map's district: who holds it, and where its land went. */
   function factOld(plan, n) {
-    var held = holdersOf[n] || [];
+    var held = holders(plan, n);
+    var last = archive();
     var went = state.flows.filter(function (f) { return f[0] === n && f[3] >= MIN_SHARE; })
       .map(function (f) { return [f[1], f[3]]; })
       .sort(function (a, b) { return b[1] - a[1]; });
@@ -868,9 +913,10 @@
       '<h4 class="district-fact-title"><span class="focus-swatch"></span>' +
       KYC.escapeHtml(seat(n)) + " on the " + KYC.escapeHtml(plan.title) + "</h4>" +
       (held.length
-        ? '<p class="district-fact-label">Seat held by</p><div class="card-grid">' +
-          held.map(KYC.cards.card).join("") + "</div>"
-        : '<p class="district-fact-label">No sitting member</p>') +
+        ? '<p class="district-fact-label">' + (last ? "Last held by" : "Seat held by") + "</p>" +
+          peopleCards(held)
+        : '<p class="district-fact-label">' + (last ? "No holder on the record" : "No sitting member") +
+          "</p>") +
       flowLine("Where its area went:", went, "new") +
       "</section>";
   }
@@ -878,16 +924,23 @@
   /** The new map's district: the 2026 race, and where its land came from. */
   function factNew(plan, n) {
     var race = raceOf[n];
-    var people = running(n);
+    var rec = KYC.recordPhase();
+    var held = rec ? holders(plan, n) : [];
+    var people = running(n).filter(function (p) { return held.indexOf(p) === -1; });
     var came = state.flows.filter(function (f) { return f[1] === n && f[2] >= MIN_SHARE; })
       .map(function (f) { return [f[0], f[2]]; })
       .sort(function (a, b) { return b[1] - a[1]; });
     var res = race && race.results;
     var unfiled = res && res.otherNominees && res.otherNominees.length ? res.otherNominees : [];
-    var who = race && race.settled ? "On the November ballot" : "Running";
+    var who = rec ? "In the " + raceYear(race) + " race" :
+      race && race.settled ? "On the November ballot" : "Running";
     return '<section class="district-fact' + focusClass(n) + '">' +
       '<h4 class="district-fact-title"><span class="focus-swatch"></span>' +
       KYC.escapeHtml(seat(n)) + " on the " + KYC.escapeHtml(plan.title) + "</h4>" +
+      (rec
+        ? '<p class="district-fact-label">' + (held.length ? "Seat held by" : "No sitting member") +
+          "</p>" + peopleCards(held)
+        : "") +
       (people.length
         ? '<p class="district-fact-label">' + who + '</p><div class="card-grid">' +
           people.map(KYC.cards.card).join("") + "</div>"
@@ -914,7 +967,8 @@
     var held = (holdersOf[n] || []).filter(function (p) { return people.indexOf(p) === -1; });
     var res = race && race.results;
     var unfiled = res && res.otherNominees && res.otherNominees.length ? res.otherNominees : [];
-    var who = race && race.settled ? "On the November ballot" : "Running in 2026";
+    var who = KYC.recordPhase() ? "In the " + raceYear(race) + " race" :
+      race && race.settled ? "On the November ballot" : "Running in 2026";
     return '<section class="district-fact' + focusClass(n) + '">' +
       '<h4 class="district-fact-title"><span class="focus-swatch"></span>' +
       KYC.escapeHtml(seat(n)) + "</h4>" +
@@ -939,6 +993,10 @@
           " page &rsaquo;</a></p>"
         : "") +
       "</section>";
+  }
+
+  function raceYear(race) {
+    return (race && race.year) || (KYC.meta().election || {}).year || "";
   }
 
   /* -------------------------------------------------------------- render */
@@ -1164,22 +1222,26 @@
 
   /** Which colour is which: only the parties the map actually shows. */
   function legend() {
-    var current = state.plans[0];
     var shown = {};
-    numbers(current).forEach(function (n) { shown[partyOf(current, n)] = true; });
+    (archive() ? state.plans : [state.plans[0]]).forEach(function (plan) {
+      numbers(plan).forEach(function (n) { shown[partyOf(plan, n)] = true; });
+    });
     var keys = [["d", "Democrat"], ["r", "Republican"], ["i", "Independent"],
       ["vacant", "Vacant seat"]].filter(function (p) { return shown[p[0]]; });
     var items = keys.map(function (p) {
       return '<span class="key"><span class="swatch party-fill-' + p[0] + '"></span>' +
         KYC.escapeHtml(p[1]) + "</span>";
     });
-    if (redrawn()) {
+    if (redrawn() && !archive()) {
       items.push('<span class="key"><span class="swatch party-fill-none"></span>' +
         "The " + KYC.escapeHtml(newPlan().title) + ": seats filled in November</span>");
     }
-    return '<p class="party-legend"><span class="party-legend-title">' +
-      (redrawn() ? "The " + KYC.escapeHtml(state.plans[0].title) + " is colored"
-        : "Colored") + " by the party of the member who holds each seat</span>" +
+    var title = archive()
+      ? "Colored by the party of the member who holds each seat; the " +
+        KYC.escapeHtml(state.plans[0].title) + " by who last held it"
+      : (redrawn() ? "The " + KYC.escapeHtml(state.plans[0].title) + " is colored"
+        : "Colored") + " by the party of the member who holds each seat";
+    return '<p class="party-legend"><span class="party-legend-title">' + title + "</span>" +
       items.join("") + "</p>";
   }
 
