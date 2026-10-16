@@ -31,6 +31,7 @@ from . import (
 )
 from .profiles import build_profiles, screen_field
 from . import federal as federal_mod
+from . import judiciary as judiciary_mod
 
 
 def _load(args):
@@ -203,7 +204,8 @@ def _build(args):
                           odds=markets, district_maps=district_maps,
                           district_error=district_error,
                           voting=voting_mod.load_cache(args.root) or {},
-                          federal=federal_mod.load_cache(args.root))
+                          federal=federal_mod.load_cache(args.root),
+                          judiciary=judiciary_mod.load_cache(args.root))
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -1298,6 +1300,53 @@ def _officers(args):
     return 0
 
 
+def _judiciary(args):
+    """Every sitting Article III judge, from the Federal Judicial Center's
+    directory, and the Supreme Court's members as the Court lists them
+    (kyc/judiciary.py). A source that cannot be read, or reads short, keeps
+    the committed cache (rule 8)."""
+    from . import federal_courts, judiciary
+
+    previous = judiciary.load_cache(args.root)
+    if args.check:
+        cache = previous
+        if not cache:
+            print(f"[error] no {judiciary.CACHE_PATH}; run 'judiciary'", file=sys.stderr)
+            return 2
+    else:
+        try:
+            cache = judiciary.fetch(previous=previous)
+        except judiciary.JudiciaryError as exc:
+            print(f"[error] {exc}; the committed cache is unchanged", file=sys.stderr)
+            return 2
+    judges = cache["judges"]
+    active = sum(1 for j in judges.values() if j["status"] == "active")
+    print(f"  {len(judges)} sitting judges: {active} active, {len(judges) - active} senior "
+          f"(directory as of {cache['asOf']})")
+    scotus = cache["courts"]["scotus"]
+    print("  Supreme Court: " + "; ".join(judges[i]["name"] for i in scotus["judges"]))
+    if scotus.get("retired"):
+        print("  retired justices, not members: "
+              + "; ".join(judges[i]["name"] for i in scotus["retired"]))
+    for kind in ("appeals", "trade", "district", "territorial"):
+        ids = [c for c, court in federal_courts.COURTS.items() if court["kind"] == kind]
+        listed = [c for c in ids if cache["courts"][c]["listed"]]
+        print(f"  {federal_courts.KINDS[kind]}: {len(ids)} courts, "
+              f"{sum(cache['courts'][c]['active'] for c in ids)} active and "
+              f"{sum(cache['courts'][c]['senior'] for c in ids)} senior judges"
+              + ("" if len(listed) == len(ids) else
+                 f"; {len(ids) - len(listed)} not in the FJC's directory of Article III judges"))
+    failed = 0
+    for level, code, message, detail in judiciary.problems(cache):
+        print(f"  [{level}] {code}: {message}")
+        for line in detail[:10]:
+            print(f"           - {line}")
+        failed += level == "error"
+    if not args.check:
+        print(f"[ok] wrote {judiciary.save_cache(cache, args.root)}")
+    return 1 if failed else 0
+
+
 def _federal(args):
     """The federal executive (kyc/federal.py): who holds each office, from the
     White House's pages, each office's own page and the Senate's roll calls.
@@ -1614,6 +1663,11 @@ def build_parser():
     officers_cmd.add_argument("--check", action="store_true",
                               help="report the committed cache; make no network call")
 
+    jud = add("judiciary", help="every sitting federal judge (Federal Judicial Center) and the "
+                                 "Supreme Court as the Court lists it")
+    jud.add_argument("--check", action="store_true",
+                     help="report the committed cache; make no network call")
+
     fed = add("federal", help="the President, the Vice President and the Cabinet, from the "
                               "White House, each office's page and the Senate's votes")
     fed.add_argument("--check", action="store_true",
@@ -1668,6 +1722,8 @@ def main(argv=None):
         return _executives(args)
     if args.command == "federal":
         return _federal(args)
+    if args.command == "judiciary":
+        return _judiciary(args)
     if args.command == "courts":
         return _courts(args)
     if args.command == "officers":

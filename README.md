@@ -37,6 +37,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… executives` | Every governor from the NGA, and NCSL's count of each legislature's parties (`--check` reports the caches) |
 | `… officers` | Every lieutenant governor (NLGA) and secretary of state (NASS), cross-checked where the rosters overlap |
 | `… federal` | The President, the Vice President and the Cabinet: who holds each office, from the White House's pages, each office's own page and the Senate's roll-call votes (`--check` reports the cache) |
+| `… judiciary` | Every sitting federal judge, from the Federal Judicial Center's directory, and the Supreme Court's members as the Court lists them; a short read keeps the last cache (`--check` reports it) |
 | `… voting` | Each state's and D.C.'s official pages for checking registration, finding a polling place, voting absentee or early, and registering, as NASS's "Can I Vote" lists them; refused unless all 51 are there |
 | `… courts` | Each state's highest court and its members, read from the court's own roster |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
@@ -1353,6 +1354,30 @@ statute, never from a page, which lists people by surname. "Secretary of
 War" is the Secretary of Defense's secondary title under Executive Order
 14347; the statute and this table say Defense. No Cabinet officer is given a
 party: no source used states one, and the President's is not theirs.
+
+## The federal judiciary
+
+`python build_profile_site.py judiciary` records every sitting Article III
+judge in `data/judiciary.json`. Nothing is on a page yet.
+
+| Fact | Source | Notes |
+|---|---|---|
+| Every judge's service on every court: appointed by, nominated, confirmed (and the vote), commissioned, senior status, chief judge | The Federal Judicial Center's Biographical Directory of Article III Federal Judges, exported nightly | The FJC is the judiciary's own research agency (28 U.S.C. 620); its `nid` is each judge's id and builds the link to their FJC page |
+| Birth, education, career | The same directory | The career is the FJC's own words, quoted, never paraphrased |
+| Who sits on the Supreme Court | supremecourt.gov's list of the justices (rule 57) | The directory's open Supreme Court rows include two retired justices, who are not members: read naively it seats eleven |
+| The courts, and the circuits | `kyc/federal_courts.py`, from 28 U.S.C. 41 and the directory's court names | 13 courts of appeals, 91 Article III district courts, the Court of International Trade; Guam's, the Northern Mariana Islands' and the Virgin Islands' courts are Article IV courts the directory does not cover, so their judges are not listed - "not in the directory", never "none" |
+
+A judge is sitting on a court when their service there has a commission and
+no termination; senior from the day senior status began, never before; the
+court's chief while their service as chief judge has begun and not ended. A
+confirmed nominee with no commission is not sitting, and the build says so.
+A judge sitting on several courts (a roving judgeship) is one person.
+
+**Judges have no party.** The directory's "Party of Appointing President"
+columns describe the president, not the judge: they are dropped when the
+file is read, with its gender and race columns, so nothing later can show
+them, and a check fails if a judge's record ever carries a party. A judge is
+appointed by a president, by name.
 
 ## Counties and local governments
 
