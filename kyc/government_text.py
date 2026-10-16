@@ -1710,8 +1710,8 @@ ELECTIONS = {
             "heading": "Primaries, and other ways candidates are nominated",
             "blocks": [
                 ("p", "In a partisan primary, voters choose a party's candidate for the general "
-                      "election; a nonpartisan primary narrows the field for an office. Each state "
-                      "decides who may vote in a party's primary. In a closed primary, only voters "
+                      "election; a nonpartisan primary narrows the field for an office. Who may vote "
+                      "in a party's primary varies by state. In a closed primary, only voters "
                       "affiliated with the party may take part. An open primary generally lets any "
                       "voter take part: in Virginia, any qualified voter may vote in a primary, but "
                       "no one may vote for the candidates of more than one party. In a partially "
@@ -1782,8 +1782,9 @@ ELECTIONS = {
                       "left. In Maine, when no one wins on the first count, ballots and memory "
                       "devices are brought from each town to a central count in Augusta. Alaska "
                       "counts mailed ballots that arrive up to 10 days after the election, or 15 "
-                      "days for ballots mailed from outside the United States. In both states a "
-                      "final result can take days."),
+                      "days for ballots mailed from outside the United States, so its final count "
+                      "waits for that window to close; in Maine the rounds are run only after the "
+                      "ballots reach Augusta."),
             ],
             "sources": ["me-rcv-faq", "ak-15-15-350", "ak-15-20-081"],
         },
@@ -1832,8 +1833,11 @@ ELECTIONS = {
             "heading": "Taking office",
             "blocks": [
                 ("p", "Under the Twentieth Amendment, the terms of senators and representatives end, "
-                      "and the new terms begin, at noon on January 3. The terms of the members "
-                      "elected on November 3, 2026 begin at noon on January 3, 2027."),
+                      "and the new terms begin, at noon on January 3. The regular terms of the "
+                      "members elected on November 3, 2026 begin at noon on January 3, 2027. A "
+                      "member elected to the rest of a vacant term, as in the special Senate "
+                      "elections on the same ballot, joins a term already running rather than one "
+                      "that begins on January 3."),
                 ("p", "The Constitution makes each house of Congress the judge of the elections, "
                       "returns and qualifications of its own members (Article I, Section 5), so a "
                       "dispute over who won a House or Senate seat can end up before that house."),
