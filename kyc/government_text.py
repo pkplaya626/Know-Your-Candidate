@@ -578,8 +578,8 @@ CONGRESS = {
             "blocks": [
                 ("p", "The Senate has 100 members, two from each state, elected by the state's "
                       "voters (Seventeenth Amendment) to six-year terms. The terms are staggered, "
-                      "so about a third of the seats are up every two years. [Which seats are up "
-                      "in 2026](site:index.html#/?view=senate)."),
+                      "so about a third of the seats are up every two years. [The Senate's seats "
+                      "by the year each is next decided](site:index.html#/?view=senate)."),
                 ("p", "The Senate alone gives or withholds its advice and consent (Article II, "
                       "Section 2): a treaty needs two-thirds of the senators present, and the "
                       "president's nominations of ambassadors, judges, cabinet secretaries and "
@@ -1664,6 +1664,17 @@ ELECTIONS = {
     "title": "How elections work",
     # This page was written and checked after the rest of the guide.
     "reviewed": "2026-10-16",
+    # Text about dated events goes stale on those dates: validate warns from
+    # each one until the page is checked again and "reviewed" moved past it.
+    "revisit": [
+        ("2026-11-04", "Alaska decided its ballot measure on its open primary and ranked-choice "
+                       "elections on November 3: say how, and whether the description of its "
+                       "elections still stands"),
+        ("2026-12-13", "Georgia's December 1 runoff, Louisiana's December 12 House elections and "
+                       "the certification deadlines have passed: put them in the past tense"),
+        ("2027-01-04", "the members elected on November 3, 2026 took office on January 3: put "
+                       "it in the past tense, and name the next election's dates"),
+    ],
     "description": ("When federal elections are held and who runs them; primaries, runoffs and "
                     "ranked-choice counts; how votes are counted, certified and recounted; and "
                     "when the people elected take office, with the sources each part was "

@@ -170,6 +170,24 @@ class TestGuidePages(unittest.TestCase):
             self.assertEqual(results[page], (True, "ok"), page)
 
 
+class TestDatedText(unittest.TestCase):
+    """Static prose about a dated event reads as still to come long after it
+    (rule 48). From each revisit date a page lists, validate warns until the
+    page is checked again and its "reviewed" moved past the date."""
+
+    def test_nothing_is_due_while_the_dates_are_ahead(self):
+        self.assertEqual(government.revisits("2026-10-16"), [])
+
+    def test_a_passed_date_is_due_until_the_page_is_checked_again(self):
+        from kyc import validate
+
+        due = government.revisits("2026-11-04")
+        self.assertEqual([(slug, day) for slug, day, _what in due], [("elections", "2026-11-04")])
+        self.assertEqual([i.code for i in validate.check_guide("2027-02-01")], ["guide-revisit"])
+        self.assertEqual(len(validate.check_guide("2027-02-01")[0].detail), 3)
+        self.assertEqual(validate.check_guide("2026-10-16"), [])
+
+
 class TestNoCongressIsTyped(unittest.TestCase):
     """Which Congress sits is the data's word (rule 68): the guide's
     "the members of the 119th Congress" would have gone on saying so after

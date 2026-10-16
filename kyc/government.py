@@ -465,6 +465,18 @@ def render_all(host, codes=()):
 
 # -------------------------------------------------------------- validation
 
+def revisits(today):
+    """``[(slug, date, what)]``: each page's dated text whose date has passed
+    since the page was last checked (``reviewed``)."""
+    out = []
+    for page in PAGES:
+        reviewed = page.get("reviewed", REVIEWED)
+        for day, what in page.get("revisit") or ():
+            if reviewed < day <= today:
+                out.append((page["slug"], day, what))
+    return out
+
+
 def check():
     """Problems with the guide's text, as strings. Empty when it is sound.
 
@@ -477,6 +489,10 @@ def check():
         for key in ("slug", "nav", "title", "lede", "description", "sections"):
             if not page.get(key):
                 problems.append(f"{page.get('slug', '?')}: missing {key}")
+        for entry in page.get("revisit") or ():
+            if (len(entry) != 2 or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(entry[0]))
+                    or not str(entry[1]).strip()):
+                problems.append(f"{page['slug']}: a revisit entry is not (date, what): {entry!r}")
         for section in page.get("sections", ()):
             cited.update(section.get("sources") or ())
             ids = seen_ids.setdefault(page.get("slug"), set())
