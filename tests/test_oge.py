@@ -103,6 +103,16 @@ class TestWhoseRowsTheyAre(unittest.TestCase):
         self.assertEqual(mine, [])
         self.assertTrue(trouble)
 
+    def test_a_surname_of_several_words(self):
+        rows = [row("De La Cruz, Monica", "Department of Labor", "Secretary", "2025-01-01",
+                    "Nominee 278", U(12))]
+        filed, mine, _o, _t = oge.attribute(rows, ("Department of Labor", "Secretary"),
+                                            "Monica De La Cruz")
+        self.assertEqual((filed, len(mine)), ("De La Cruz, Monica", 1))
+        # "Cruz" alone is someone else's surname.
+        self.assertEqual(oge.attribute(rows, ("Department of Labor", "Secretary"), "Ted Cruz")[0],
+                         None)
+
     def test_a_suffix_is_not_a_surname(self):
         self.assertEqual(oge.surname("Robert F. Kennedy, Jr."), "kennedy")
         self.assertEqual(oge.filed_surname("Kennedy Jr, Robert F"), "kennedy")
@@ -115,8 +125,13 @@ class TestTheReportNamesItsFiler(unittest.TestCase):
 
     def test_someone_else(self):
         pdf = report("Filer's Information", "Smith, John", "Secretary, Department of Labor")
-        self.assertEqual(oge.filer_named(pdf, "Smith, Jane")[:5], "named")
+        # One surname is not one person: Jane Smith's row, John Smith's report.
+        self.assertEqual(oge.filer_named(pdf, "Smith, Jane"), "other: Smith, John")
         self.assertEqual(oge.filer_named(pdf, "Rubio, Marco"), "other: Smith, John")
+
+    def test_a_suffix_written_on_the_report(self):
+        pdf = report("Filer's Information", "Kennedy Jr, Robert F")
+        self.assertEqual(oge.filer_named(pdf, "Kennedy, Robert F"), "named")
 
     def test_a_scan_concludes_nothing(self):
         self.assertEqual(oge.filer_named(b"%PDF-1.4 no text", "Rubio, Marco"), "unreadable")
@@ -153,7 +168,29 @@ class TestTheRead(unittest.TestCase):
         self.assertEqual(opened, [FILE.format(U(7), "report")])
 
 
+class TestThisAdministration(unittest.TestCase):
+    def test_a_report_from_an_earlier_tenure_is_not_the_officers_now(self):
+        rows = VOUGHT + [row("Vought, Russell", "Office of Management and Budget", "Director",
+                             "2021-02-03", "Termination", U(13))]
+        executive = {"president": {"termStart": "2025-01-20"}, "vicePresident": {},
+                     "offices": [{"key": "omb", "holder": {"name": "Russ Vought"}}]}
+        cache = oge.build(executive, read=lambda url: {"recordsFiltered": len(rows), "data": rows},
+                          read_pdf=lambda url: report("Filer's Information", "Vought, Russell"),
+                          today="2026-10-16")
+        kinds = {d["kind"] for d in cache["people"]["omb"]["documents"]}
+        self.assertNotIn("termination", kinds)
+        self.assertIn("annual", kinds)
+
+
 class TestWhatThePageIsGiven(unittest.TestCase):
+    def test_read_and_nothing_found_is_not_a_filing_by_no_one(self):
+        empty = {"holder": "Pat Nobody", "filed": None, "agency": "Department of Labor",
+                 "position": "Secretary", "documents": []}
+        page = oge.for_page(empty)
+        self.assertTrue(page["none"])
+        self.assertNotIn("filed", page)
+        self.assertTrue(oge.for_page(dict(empty, refused=True))["refused"])
+
     def test_the_latest_of_each_kind(self):
         person = {"holder": "Russ Vought", "filed": "Vought, Russell",
                   "agency": "Office of Management and Budget", "position": "Director",
@@ -188,6 +225,13 @@ class TestTheTables(unittest.TestCase):
         executive = {"offices": [{"key": "omb", "holder": {"name": "Someone New"}}]}
         codes = {c for _l, c, _m, _d in oge.problems(cache, executive, today="2026-10-16")}
         self.assertIn("oge-stale", codes)
+
+    def test_an_office_never_read_is_reported(self):
+        cache = {"read": "2026-10-16", "problems": [], "people": {}}
+        executive = {"offices": [{"key": "un", "holder": {"name": "Michael Waltz"}}]}
+        found = [d for _l, c, _m, d in oge.problems(cache, executive, today="2026-10-16")
+                 if c == "oge-stale"]
+        self.assertEqual(found, [["un: Michael Waltz (not read)"]])
 
 
 if __name__ == "__main__":

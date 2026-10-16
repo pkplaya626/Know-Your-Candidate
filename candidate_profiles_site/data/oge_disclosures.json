@@ -13,7 +13,6 @@
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/17E740413EA73B3485258E29002D9F37/$FILE/Blanche%2C%20Todd%20%20final278.pdf": "named",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/18353894FE440B3685258D430031A337/$FILE/Donald%20J.%20Trump%2010.20.2025%20278-T%20(2).pdf": "unreadable",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/18EEC1F42BF175A385258E27002DD95F/$FILE/Keith-Sonderling-2026-278ANNU.pdf": "named",
-  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/1D25F74CD7FBC59E852586710032F73B/$FILE/Russell-Vought-2021-278TERM.pdf": "named",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/1D97817A20B559D085258CA2002C8C51/$FILE/Pete-Hegseth-04.11.2025-278T.pdf": "named",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/1F2CA5D27DDE1D9085258D460031984D/$FILE/Lee-Zeldin-09-24-2025-278T.pdf": "named",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/22DA3D3F7F65344C85258CC8002C8F08/$FILE/Christopher-A-Wright-04.29.2025-278T.pdf": "named",
@@ -44,7 +43,6 @@
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/66A69EB879848CF885258CC9002C8582/$FILE/Howard-Lutnick-06.17.2025-278T.pdf": "named",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/69AEAA9D7455ACD585258E27002DDEE1/$FILE/Donald-J-Trump-2026-278ANNUAL.pdf": "unreadable",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/6DC06006E0C3364C85258DBE00531737/$FILE/Mullin%2C%20Markwayne%20final278.pdf": "named",
-  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/6E78B163F816EF6A852586630075291D/$FILE/Trump%2C%20Donald%20J.%202021Termination%20278.pdf": "unreadable",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/73C83ABF3FA5BB7585258E5A002DD055/$FILE/Brooke-L-Rollins-2026-278ANNU.pdf": "named",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/7C0B79B66E94715885258D4F00317C5D/$FILE/Doug-Burgum-09.18.2025-278T.pdf": "named",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/7C8BAED3285A48DD85258E6D002DDCCB/$FILE/Linda-E-McMahon-2026-278ANNU.pdf": "named",
@@ -139,7 +137,8 @@
    ],
    "filed": "Rollins, Brooke L",
    "holder": "Brooke Rollins",
-   "position": "Secretary"
+   "position": "Secretary",
+   "refused": null
   },
   "cia": {
    "agency": "Central Intelligence Agency",
@@ -193,7 +192,8 @@
    ],
    "filed": "Ratcliffe, John L",
    "holder": "John Ratcliffe",
-   "position": "Director"
+   "position": "Director",
+   "refused": null
   },
   "commerce": {
    "agency": "Department of Commerce",
@@ -292,7 +292,8 @@
    ],
    "filed": "Lutnick, Howard",
    "holder": "Howard Lutnick",
-   "position": "Secretary"
+   "position": "Secretary",
+   "refused": null
   },
   "defense": {
    "agency": "Department of Defense/Office of the Secretary",
@@ -358,7 +359,8 @@
    ],
    "filed": "Hegseth, Pete",
    "holder": "Pete Hegseth",
-   "position": "Secretary"
+   "position": "Secretary",
+   "refused": null
   },
   "dni": {
    "agency": "Office of Director of National Intelligence",
@@ -389,7 +391,8 @@
    ],
    "filed": "Clayton, Walter J",
    "holder": "Jay Clayton",
-   "position": "Director"
+   "position": "Director",
+   "refused": null
   },
   "education": {
    "agency": "Department of Education",
@@ -467,7 +470,8 @@
    ],
    "filed": "McMahon, Linda E",
    "holder": "Linda McMahon",
-   "position": "Secretary"
+   "position": "Secretary",
+   "refused": null
   },
   "energy": {
    "agency": "Department of Energy",
@@ -579,7 +583,8 @@
    ],
    "filed": "Wright, Christopher A",
    "holder": "Chris Wright",
-   "position": "Secretary"
+   "position": "Secretary",
+   "refused": null
   },
   "epa": {
    "agency": "Environmental Protection Agency",
@@ -657,7 +662,8 @@
    ],
    "filed": "Zeldin, Lee",
    "holder": "Lee Zeldin",
-   "position": "Administrator"
+   "position": "Administrator",
+   "refused": null
   },
   "hhs": {
    "agency": "Department of Health and Human Services",
@@ -722,7 +728,8 @@
    ],
    "filed": "Kennedy, Robert F",
    "holder": "Robert F. Kennedy, Jr.",
-   "position": "Secretary"
+   "position": "Secretary",
+   "refused": null
   },
   "homeland": {
    "agency": "Department of Homeland Security",
@@ -799,7 +806,8 @@
    ],
    "filed": "Mullin, Markwayne",
    "holder": "Markwayne Mullin",
-   "position": "Secretary"
+   "position": "Secretary",
+   "refused": null
   },
   "hud": {
    "agency": "Department of Housing and Urban Development",
@@ -877,7 +885,8 @@
    ],
    "filed": "Turner, Eric Scott",
    "holder": "Scott Turner",
-   "position": "Secretary"
+   "position": "Secretary",
+   "refused": null
   },
   "interior": {
    "agency": "Department of the Interior",
@@ -991,7 +1000,8 @@
    ],
    "filed": "Burgum, Douglas J",
    "holder": "Doug Burgum",
-   "position": "Secretary"
+   "position": "Secretary",
+   "refused": null
   },
   "justice": {
    "agency": "Department of Justice",
@@ -1034,7 +1044,8 @@
    ],
    "filed": "Blanche, Todd",
    "holder": "Todd Blanche",
-   "position": "Attorney General"
+   "position": "Attorney General",
+   "refused": null
   },
   "labor": {
    "agency": "Department of Labor",
@@ -1077,7 +1088,8 @@
    ],
    "filed": "Sonderling, Keith",
    "holder": "Keith Sonderling",
-   "position": "Secretary"
+   "position": "Secretary",
+   "refused": null
   },
   "omb": {
    "agency": "Office of Management and Budget",
@@ -1127,34 +1139,12 @@
      "title": "Director",
      "url": "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/7167678600B2C53F85258C0E003371C8/$FILE/Vought%2C%20Russell%20%20finalEA.pdf",
      "year": null
-    },
-    {
-     "amended": false,
-     "check": "named",
-     "date": "2021-02-03",
-     "kind": "termination",
-     "label": "Termination",
-     "office": true,
-     "request": false,
-     "title": "Director",
-     "url": "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/1D25F74CD7FBC59E852586710032F73B/$FILE/Russell-Vought-2021-278TERM.pdf",
-     "year": null
-    },
-    {
-     "amended": false,
-     "date": "2020-05-09",
-     "kind": "ethics",
-     "label": "Ethics Agreement",
-     "office": true,
-     "request": false,
-     "title": "Director",
-     "url": "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/9454E9B2C8520C71852585630027E879/$FILE/Vought%2C%20Russell%20%20FinalEA.pdf",
-     "year": null
     }
    ],
    "filed": "Vought, Russell",
    "holder": "Russ Vought",
-   "position": "Director"
+   "position": "Director",
+   "refused": null
   },
   "president": {
    "agency": "White House Office",
@@ -1422,23 +1412,12 @@
      "title": "President",
      "url": "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/4EC9A8E6DD078F2985258CA9002C9377/$FILE/Trump%2C%20Donald%20J.%202025%20Annual%20278.pdf",
      "year": 2025
-    },
-    {
-     "amended": false,
-     "check": "unreadable",
-     "date": "2021-01-20",
-     "kind": "termination",
-     "label": "Termination",
-     "office": true,
-     "request": false,
-     "title": "President",
-     "url": "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/6E78B163F816EF6A852586630075291D/$FILE/Trump%2C%20Donald%20J.%202021Termination%20278.pdf",
-     "year": null
     }
    ],
    "filed": "Trump, Donald J",
    "holder": "Donald J. Trump",
-   "position": "President"
+   "position": "President",
+   "refused": null
   },
   "sba": {
    "agency": "Small Business Administration",
@@ -1589,7 +1568,8 @@
    ],
    "filed": "Loeffler, Kelly",
    "holder": "Kelly Loeffler",
-   "position": "Administrator"
+   "position": "Administrator",
+   "refused": null
   },
   "state": {
    "agency": "Department of State",
@@ -1643,7 +1623,8 @@
    ],
    "filed": "Rubio, Marco",
    "holder": "Marco Rubio",
-   "position": "Secretary"
+   "position": "Secretary",
+   "refused": null
   },
   "transportation": {
    "agency": "Department of Transportation",
@@ -1721,7 +1702,8 @@
    ],
    "filed": "Duffy, Sean",
    "holder": "Sean Duffy",
-   "position": "Secretary"
+   "position": "Secretary",
+   "refused": null
   },
   "treasury": {
    "agency": "Department of the Treasury",
@@ -1832,7 +1814,8 @@
    ],
    "filed": "Bessent, Scott",
    "holder": "Scott Bessent",
-   "position": "Secretary"
+   "position": "Secretary",
+   "refused": null
   },
   "ustr": {
    "agency": "Office of the US Trade Representative",
@@ -1885,7 +1868,8 @@
    ],
    "filed": "Greer, Jamieson",
    "holder": "Jamieson Greer",
-   "position": "U.S. Trade Representative"
+   "position": "U.S. Trade Representative",
+   "refused": null
   },
   "veterans": {
    "agency": "Department of Veterans Affairs",
@@ -1939,7 +1923,8 @@
    ],
    "filed": "Collins, Doug",
    "holder": "Doug Collins",
-   "position": "Secretary"
+   "position": "Secretary",
+   "refused": null
   },
   "vicePresident": {
    "agency": "Office of the Vice President",
@@ -1971,7 +1956,8 @@
    ],
    "filed": "Vance, JD",
    "holder": "J.D. Vance",
-   "position": "Vice President"
+   "position": "Vice President",
+   "refused": null
   }
  },
  "problems": [],

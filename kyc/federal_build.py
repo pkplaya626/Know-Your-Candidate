@@ -208,8 +208,9 @@ def build(root="."):
                         ("vicePresident", payload["vicePresident"])] + [
             (o["key"], o["holder"]) for o in offices if o.get("holder")]:
         found = filed.get(key)
-        if found and found["holder"] == person["name"]:
-            person["disclosures"] = oge.for_page(found)
+        # Not read for this holder is not "nothing filed" (rule 19).
+        person["disclosures"] = (oge.for_page(found) if found and found["holder"] == person["name"]
+                                 else {"notRead": True})
     if filed:
         payload["disclosuresRead"] = (oge.load_cache(root) or {}).get("read")
     # The offices each officer has held (kyc/history.py), by the same id.

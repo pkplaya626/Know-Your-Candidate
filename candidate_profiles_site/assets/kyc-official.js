@@ -269,19 +269,26 @@
   function disclosuresPanel(person) {
     var d = person.disclosures;
     var index = outLink(OGE_INDEX, "OGE\u2019s index");
-    if (!d) {
-      return panel("scroll", "Financial disclosures", '<p class="kyc-absent">' +
-        "OGE\u2019s index lists no report for this officer under this office.</p>" +
-        '<p class="faint">The Office of Government Ethics publishes the reports of the ' +
-        "President, the Vice President and the officers the Senate confirms: " + index + ".</p>");
+    var about = '<p class="faint">The Office of Government Ethics publishes the reports of the ' +
+      "President, the Vice President and the officers the Senate confirms: " + index + ".</p>";
+    if (!d || d.notRead) {
+      // A claim about this site, not the officer (rule 19).
+      return panel("scroll", "Financial disclosures", '<p class="kyc-absent">This site has not ' +
+        "read OGE\u2019s index for this officer yet.</p>" + about);
+    }
+    if (d.none) {
+      return panel("scroll", "Financial disclosures", '<p class="kyc-absent">' + (d.refused
+        ? "OGE\u2019s index files reports under this office for two people of this officer\u2019s " +
+          "surname, so neither\u2019s is shown."
+        : "OGE\u2019s index lists no report for this officer under this office.") + "</p>" + about);
     }
     var rows = (d.documents || []).map(function (doc) {
       var when = whenText({ date: doc.date, precision: "day" });
       var label = doc.count && doc.kind === "transaction"
-        ? doc.words + "s (" + doc.count + "), the latest filed " + when
+        ? doc.words + "s (" + doc.count + "), the latest posted " + when
         : doc.words;
       return "<li>" + outLink(doc.url, label) +
-        (doc.count && doc.kind === "transaction" ? "" : ' <span class="faint">filed ' +
+        (doc.count && doc.kind === "transaction" ? "" : ' <span class="faint">posted ' +
           '<span class="nowrap">' + KYC.escapeHtml(when) + "</span></span>") +
         (doc.as ? ' <span class="faint">as ' + KYC.escapeHtml(doc.as) + "</span>" : "") +
         (doc.amended ? ' <span class="faint">(amended)</span>' : "") +
@@ -297,8 +304,8 @@
         " listed in " + index + " and released on request.</p>" : "") +
       '<p class="held-source">Filed with the Office of Government Ethics as \u201c' +
       KYC.escapeHtml(d.filed) + "\u201d, " + KYC.escapeHtml(d.position) + ", " +
-      KYC.escapeHtml(d.agency) + ". Each report OGE generates was opened to check it names " +
-      "its filer" + ((d.documents || []).some(function (doc) { return doc.unchecked; })
+      KYC.escapeHtml(d.agency) + ". Dates are the day OGE posted each report. Each report OGE " +
+      "generates was opened to check it names its filer" + ((d.documents || []).some(function (doc) { return doc.unchecked; })
         ? "; one marked “not checked” is a scan, or could not be read" : "") + ".</p>");
   }
 

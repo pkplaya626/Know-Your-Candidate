@@ -146,6 +146,30 @@ def filed_surname(listed):
     return re.sub(r"\s+(?:jr|sr|ii|iii|iv)\.?$", "", _fold(listed.split(",")[0]))
 
 
+def given(listed):
+    """OGE's "Last, First Middle" -> "first"."""
+    rest = listed.split(",", 1)[1] if "," in (listed or "") else ""
+    words = _fold(rest).replace(".", " ").split()
+    return words[0] if words else ""
+
+
+def same_filer(a, b):
+    """Two names OGE writes - the index's and a report's - name one filer:
+    the same surname past a suffix ("Kennedy Jr, Robert F" and "Kennedy,
+    Robert F") and the same first name. A Jane Smith's index row and a John
+    Smith's report are two people."""
+    return bool(given(a)) and filed_surname(a) == filed_surname(b) and given(a) == given(b)
+
+
+def holder_named(listed, holder):
+    """The index's "Last, First" is the holder's: their name, past a
+    suffix, ends with its surname - every word of it, so "De La Cruz,
+    Monica" is Monica De La Cruz."""
+    name = _fold(re.sub(r",?\s+(?:jr|sr|ii|iii|iv)\.?$", "", (holder or "").strip(), flags=re.I))
+    last = filed_surname(listed)
+    return bool(last) and (name == last or name.endswith(" " + last))
+
+
 def position(title):
     """OGE's position past its record number: "Director 2" -> "director"."""
     return _fold(re.sub(r"\s+\d+$", "", title or ""))
@@ -167,6 +191,8 @@ def document(row):
     label = " ".join((label + " " + rest).split())
     kind = next((k for k, pattern, _words, _gen in KINDS if re.search(pattern, label, re.I)), "other")
     year = re.search(r"\((\d{4})\)", label)
+    # The date is the day OGE's index posted the document, not the day it
+    # was signed: Linda McMahon's July 2025 report was posted in April 2026.
     return {"kind": kind, "label": label, "date": (row.get("docDate") or "")[:10],
             "url": url, "request": on_request,
             "year": int(year.group(1)) if kind == "annual" and year else None,
@@ -225,7 +251,7 @@ def filer_named(data, listed):
     name = next((s for s in strings[at + 1:at + 6] if s and "," in s), None)
     if not name:
         return "unreadable"
-    return "named" if filed_surname(name) == filed_surname(listed) else f"other: {name}"
+    return "named" if same_filer(name, listed) else f"other: {name}"
 
 
 # ------------------------------------------------------------------ build
@@ -236,7 +262,7 @@ def attribute(rows, office, holder):
     agency, title = office
     same_agency = [r for r in rows if _fold(r.get("agency")) == _fold(agency)]
     mine = [r for r in same_agency if position(r.get("title")) == position(title)
-            and filed_surname(r.get("name") or "") == surname(holder)]
+            and holder_named(r.get("name") or "", holder)]
     names = sorted({r["name"] for r in mine})
     if len(names) > 1:
         return None, [], [], [f"{holder}: OGE files {' and '.join(names)} under this office; "
@@ -262,12 +288,22 @@ def holders(executive):
     return out
 
 
+# A nominee files before the term begins: reports posted this long before
+# the administration's first day are its own; older ones belong to another
+# tenure - Donald Trump's report on leaving office in 2021 is not about the
+# office he holds now.
+TRANSITION_DAYS = 120
+
+
 def build(executive, read=None, read_pdf=None, previous=None, today=None):
     """The whole cache; :class:`OGEError` when the index cannot be read."""
     read = read or _get
     read_pdf = read_pdf or (lambda url: _get(url, raw=True))
     checked = dict((previous or {}).get("checked") or {})
     people, problems, searched = {}, [], {}
+    since = ((executive.get("president") or {}).get("termStart") or "")[:10]
+    bound = ((datetime.date.fromisoformat(since) - datetime.timedelta(days=TRANSITION_DAYS))
+             .isoformat() if since else "")
     for key, name in holders(executive):
         office = OFFICES.get(key)
         if office is None:
@@ -282,6 +318,8 @@ def build(executive, read=None, read_pdf=None, previous=None, today=None):
         for row in mine + [r for r in other if document(r)["kind"] == "annual"]:
             doc = dict(document(row), title=re.sub(r"\s+\d+$", "", row.get("title") or ""),
                        office=row in mine)
+            if bound and doc["date"] < bound:
+                continue
             generated = next((g for k, _p, _w, g in KINDS if k == doc["kind"]), False)
             if doc["url"] and generated:
                 # A file at an address never changes: a check is kept, a
@@ -302,7 +340,7 @@ def build(executive, read=None, read_pdf=None, previous=None, today=None):
             docs.append(doc)
         docs.sort(key=lambda d: (d["date"], d["label"]), reverse=True)
         people[key] = {"holder": name, "filed": filed, "agency": office[0], "position": office[1],
-                       "documents": docs}
+                       "documents": docs, "refused": bool(trouble) or None}
     return {"read": today or datetime.date.today().isoformat(),
             "source": INDEX_URL, "people": people, "problems": problems,
             # Only the checks of documents still listed are kept.
@@ -316,6 +354,10 @@ def for_page(person):
     OGE releases only on request counted."""
     if not person:
         return None
+    if not person.get("filed"):
+        # Read, and nothing is the holder's: never "filed as" no one.
+        return {"none": True, "refused": person.get("refused") or None,
+                "agency": person["agency"], "position": person["position"]}
     docs = person["documents"]
     linked = [d for d in docs if d["url"] and not (d.get("check") or "").startswith("other")]
     shown, seen = [], set()
@@ -396,12 +438,16 @@ def problems(cache, executive=None, today=None):
                     "without their filer's name having been read in them (scans, or not yet read)",
                     [f"{name}: {n}" for name, n in sorted(unread.items())]))
     if executive:
-        moved = [f"{key}: the cache read {cache['people'][key]['holder']}, the executive lists {name}"
-                 for key, name in holders(executive)
-                 if key in cache["people"] and cache["people"][key]["holder"] != name]
+        # Every holder the executive lists who was not read: a new holder of
+        # a read office, or one of an office never read. The page says the
+        # index was not read for them, never that it lists nothing.
+        moved = [f"{key}: {name}" + (f" (the cache read {cache['people'][key]['holder']})"
+                                     if key in cache["people"] else " (not read)")
+                 for key, name in holders(executive) if key in OFFICES and
+                 (cache["people"].get(key) or {}).get("holder") != name]
         if moved:
-            out.append(("warn", "oge-stale", f"{len(moved)} offices have a new holder since OGE "
-                        "was read; their filings are not shown; run 'oge'", moved))
+            out.append(("warn", "oge-stale", f"{len(moved)} officers' filings were not read for "
+                        "them; their dialogs say so; run 'oge'", moved))
     today = today or datetime.date.today().isoformat()
     age = (datetime.date.fromisoformat(today) - datetime.date.fromisoformat(cache["read"])).days
     if age > 21:
