@@ -68,9 +68,14 @@ def load_all(root="."):
             )
         )
 
+    from . import cycle
+
     return {
         "members": members,
         "candidates": candidates,
         "found": m_found + c_found,
         "missing": m_missing + c_missing,
+        # The frozen race record for the cycle (kyc/record.py), or None
+        # before one is frozen.
+        "record": cycle.load_record(root),
     }

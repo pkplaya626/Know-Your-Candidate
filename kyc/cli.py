@@ -77,7 +77,7 @@ def _build(args):
                                      finance=finance, committees=committees)
     # The same screen build_profiles applied: filedCount and validation must
     # count the field the profiles were built from.
-    field = screen_field(field, profiles)
+    field = screen_field(field, profiles, raw.get("record"))
     if field:
         print(f"  field: {field['count']} filings for races on the 2026 ballot "
               f"({stats['field_stale']} stale registrations and "
@@ -362,7 +362,7 @@ def _portraits(args):
                                  field=field, finance=finance)
     fec.apply_cache(profiles, finance)
     results_mod.apply_cache(profiles, results_mod.load_cache(args.root),
-                            field=screen_field(field, profiles))
+                            field=screen_field(field, profiles, raw.get("record")))
     cache, _summary = portraits.resolve_all(
         profiles, root=args.root, refresh=args.refresh
     )
@@ -393,7 +393,7 @@ def _campaigns(args):
     fec.apply_cache(profiles, finance)
     # Statuses decide who is worth a request: nobody the primary removed.
     results_mod.apply_cache(profiles, results_mod.load_cache(args.root),
-                            field=screen_field(field, profiles))
+                            field=screen_field(field, profiles, raw.get("record")))
     if args.check:
         cache = campaigns.load_cache(args.root)
         if not cache:
@@ -433,7 +433,7 @@ def _enrich(args):
     portraits.apply_cache(profiles, portraits.load_cache(args.root))
     # Who is still running, and the article and site the election page links.
     results_mod.apply_cache(profiles, results_mod.load_cache(args.root),
-                            field=screen_field(field, profiles))
+                            field=screen_field(field, profiles, raw.get("record")))
     if args.check:
         cache = enrich.load_cache(args.root)
         if not cache:
@@ -470,8 +470,8 @@ def _odds(args):
                                  field=field, finance=finance)
     fec.apply_cache(profiles, finance)
     outcomes = results_mod.load_cache(args.root)
-    results_mod.apply_cache(profiles, outcomes, field=screen_field(field, profiles))
-    screened = screen_field(field, profiles)
+    results_mod.apply_cache(profiles, outcomes, field=screen_field(field, profiles, raw.get("record")))
+    screened = screen_field(field, profiles, raw.get("record"))
     race_list = races_mod.build(profiles, candidates.filing_counts(screened),
                                 results=outcomes, dates=results_mod.load_dates(args.root),
                                 filed=candidates.filed_rows(screened))
@@ -594,19 +594,22 @@ def _congress(args):
     if len(shown) < len(drift.changed):
         print(f"    ... {len(drift.changed) - len(shown)} more (--verbose)")
 
-    # Cross-check the curated 2026 Senate table against the real term dates.
-    derived = legislators.seats_up(snapshot, profiles_mod.ELECTION_YEAR)
-    curated = overrides.SENATE_SEATS_UP_2026
-    only_derived = sorted(set(derived) - set(curated))
-    only_curated = sorted(set(curated) - set(derived))
-    if only_derived or only_curated:
-        print(f"\n  [warn] 2026 Senate seats disagree with {len(curated)} curated entries:")
-        if only_derived:
-            print(f"    on the ballot but not curated: {', '.join(only_derived)}")
-        if only_curated:
-            print(f"    curated but not on the ballot: {', '.join(only_curated)}")
-    else:
-        print(f"\n  ok  all {len(derived)} 2026 Senate seats agree with the curated table")
+    # The frozen race record against today's seats (kyc/record.py).
+    from . import record as record_mod
+    record = raw.get("record")
+    if record:
+        # Today's seats, from the sitting members alone, as the record was frozen.
+        sitting, _ = build_profiles(dict(raw, record=None), snapshot=snapshot)
+        live = races_mod.contestable(sitting, profiles_mod.ELECTION_YEAR)
+        apart = record_mod.drift(record, live, snapshot)
+        if apart:
+            print(f"\n  [warn] {len(apart)} races differ between the 2026 record and "
+                  f"today's seats:")
+            for line in apart:
+                print(f"    {line}")
+        else:
+            print(f"\n  ok  the 2026 record's {len(record['races'])} races agree with "
+                  f"today's seats")
 
     if args.apply:
         if not drift.missing:
@@ -654,7 +657,7 @@ def _field(args):
     if raw is None:
         return 2
     profiles, _ = build_profiles(raw, snapshot=legislators.load_snapshot(args.root))
-    cache = screen_field(cache, profiles)
+    cache = screen_field(cache, profiles, raw.get("record"))
     screened = cache["screened"]
     print(f"\n  {raw_count} registrations list {cache['cycle']}; set aside "
           f"{len(screened['stale'])} with no report since {screened['cycleStart']} "
@@ -769,7 +772,7 @@ def _results(args):
             return 2
         snapshot = legislators.load_snapshot(args.root)
         profiles, _ = build_profiles(raw, snapshot=snapshot)
-        field = screen_field(field, profiles)
+        field = screen_field(field, profiles, raw.get("record"))
         print(f"  field: {field['count']} filings for races on the 2026 ballot "
               f"({len(field['screened']['stale'])} stale and "
               f"{len(field['screened']['phantom'])} for absent races set aside)")
@@ -851,6 +854,39 @@ def _results(args):
     return 0
 
 
+def _record(args):
+    """Freeze the cycle's race record, or report the one on disk."""
+    from . import cycle as cycle_mod, record as record_mod
+
+    raw = _load(args)
+    if raw is None:
+        return 2
+    snapshot = legislators.load_snapshot(args.root)
+    if not args.freeze:
+        record = raw.get("record")
+        if not record:
+            print("  no record; run: python build_profile_site.py record --freeze")
+            return 1
+        print(f"  the {record['cycle']} record: {len(record['races'])} races, frozen from the "
+              f"{cycle_mod.ordinal(record['sittingCongress'])} Congress "
+              f"(snapshot {record['frozenFrom'].get('snapshotFetched')}); signature "
+              f"{cycle_mod.record_signature(record)}")
+        return 0
+    raw = dict(raw, record=None)          # frozen from the live seats, never itself
+    profiles, _ = build_profiles(raw, snapshot=snapshot)
+    try:
+        record = record_mod.freeze(profiles, snapshot)
+        path = record_mod.save(record, args.root, force=args.force)
+    except record_mod.RecordError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 2
+    senate = sum(1 for r in record["races"].values() if r["chamber"] == "Senate")
+    print(f"  wrote {path}: {len(record['races'])} races ({senate} Senate)")
+    print(f"  signature, to pin in cycle.RECORD_SIGNATURES[{record['cycle']}]:")
+    print(f"    {cycle_mod.record_signature(record)}")
+    return 0
+
+
 def _verify(args):
     """Assert the committed data files still match the sources.
 
@@ -882,7 +918,7 @@ def _verify(args):
     stats["disclosures"] = disclosures.apply_cache(profiles, filings) if filings else 0
     stats["campaign_sites"] = campaigns.apply_cache(profiles, campaigns.load_cache(args.root))
 
-    field = screen_field(candidates.load_cache(args.root), profiles)
+    field = screen_field(candidates.load_cache(args.root), profiles, raw.get("record"))
     outcomes = results_mod.load_cache(args.root)
     stats["results"] = (results_mod.apply_cache(profiles, outcomes, field=field)
                         if outcomes else 0)
@@ -899,6 +935,21 @@ def _verify(args):
     summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root))
 
     problems = []
+    from . import cycle as cycle_mod
+    record = raw.get("record")
+    if record is None:
+        problems.append(f"no {cycle_mod.record_path(args.root)}; run: "
+                        f"python build_profile_site.py record --freeze")
+    else:
+        pinned = cycle_mod.RECORD_SIGNATURES.get(record.get("cycle"))
+        found = cycle_mod.record_signature(record)
+        if found != pinned:
+            problems.append(f"the {record.get('cycle')} race record's races are {found[:16]}..., "
+                            f"cycle.RECORD_SIGNATURES pins {str(pinned)[:16]}...: the set "
+                            f"of races changed without a reviewed code change")
+        else:
+            print(f"  ok  the {record['cycle']} race record matches its pinned signature "
+                  f"({found[:16]}...)")
 
     expected = emit.data_signature(profiles, race_list, summary)
     committed = emit.read_signature(args.root)
@@ -1389,6 +1440,11 @@ def build_parser():
     disc.add_argument("--check", action="store_true",
                       help="use the committed cache; make no network call")
 
+    rec = add("record", help="the frozen record of the cycle's races (kyc/record.py)")
+    rec.add_argument("--freeze", action="store_true",
+                     help="write it from the sitting Congress; refuses to overwrite")
+    rec.add_argument("--force", action="store_true", help="replace an existing record")
+
     res = add("results", help="resolve primary results: who is still in each race")
     res.add_argument("--check", action="store_true",
                      help="use the committed cache; make no network call")
@@ -1499,6 +1555,8 @@ def main(argv=None):
         return _field(args)
     if args.command == "disclosures":
         return _disclosures(args)
+    if args.command == "record":
+        return _record(args)
     if args.command == "results":
         return _results(args)
     if args.command == "campaigns":

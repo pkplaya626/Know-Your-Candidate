@@ -34,8 +34,12 @@ def house_term_end_year(state, year=ELECTION_YEAR):
     return election + 1
 
 
-def contestable(profiles, year=ELECTION_YEAR):
-    """Every race id that genuinely exists in *year*, from the sitting members.
+def contestable(profiles, year=ELECTION_YEAR, record=None):
+    """Every race id that genuinely exists in *year*.
+
+    With a frozen *record* (kyc/record.py), its race set: the seats that were
+    on the ballot, whoever sits in them now. Without one, derived from the
+    sitting members, as the record itself was frozen:
 
     The FEC accepts a Senate filing from a state with no Senate seat on the
     ballot, and a House filing for a district the state does not have
@@ -52,6 +56,9 @@ def contestable(profiles, year=ELECTION_YEAR):
 
     Seat counts come from the roster, never from a hard-coded total.
     """
+    if record:
+        from .record import race_ids
+        return race_ids(record)
     senate, house = set(), {}
     for profile in profiles:
         if profile.get("isCandidate"):

@@ -1,6 +1,6 @@
 {
  "count": 539,
- "fetched": "2026-10-15T12:42:17+00:00",
+ "fetched": "2026-10-16T06:29:06+00:00",
  "legislators": [
   {
    "ballotpedia": "Robert B. Aderholt",
@@ -9,10 +9,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H6AL04098"
    ],
+   "fecAll": [
+    "H6AL04098"
+   ],
    "govtrack": 400004,
+   "how": null,
    "last": "Aderholt",
    "name": "Robert B. Aderholt",
    "nameParts": {
@@ -46,10 +51,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H0MA04192"
    ],
+   "fecAll": [
+    "H0MA04192"
+   ],
    "govtrack": 456825,
+   "how": null,
    "last": "Auchincloss",
    "name": "Jake Auchincloss",
    "nameParts": {
@@ -82,11 +92,18 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H2NV02395",
     "H1NV02017"
    ],
+   "fecAll": [
+    "H1NV02017",
+    "H2NV02395",
+    "S0NV00237"
+   ],
    "govtrack": 412500,
+   "how": null,
    "last": "Amodei",
    "name": "Mark E. Amodei",
    "nameParts": {
@@ -121,10 +138,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 12,
+   "endType": null,
    "fec": [
     "H4NC12100"
    ],
+   "fecAll": [
+    "H4NC12100"
+   ],
    "govtrack": 412607,
+   "how": null,
    "last": "Adams",
    "name": "Alma S. Adams",
    "nameParts": {
@@ -159,10 +181,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 33,
+   "endType": null,
    "fec": [
     "H2CA31125"
    ],
+   "fecAll": [
+    "H2CA31125"
+   ],
    "govtrack": 412615,
+   "how": null,
    "last": "Aguilar",
    "name": "Pete Aguilar",
    "nameParts": {
@@ -194,10 +221,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 12,
+   "endType": null,
    "fec": [
     "H2GA12121"
    ],
+   "fecAll": [
+    "H2GA12121"
+   ],
    "govtrack": 412625,
+   "how": null,
    "last": "Allen",
    "name": "Rick W. Allen",
    "nameParts": {
@@ -231,10 +263,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 19,
+   "endType": null,
    "fec": [
     "H6TX19099"
    ],
+   "fecAll": [
+    "H6TX19099"
+   ],
    "govtrack": 412726,
+   "how": null,
    "last": "Arrington",
    "name": "Jodey C. Arrington",
    "nameParts": {
@@ -268,10 +305,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H2MO04207"
    ],
+   "fecAll": [
+    "H2MO04207"
+   ],
    "govtrack": 456909,
+   "how": null,
    "last": "Alford",
    "name": "Mark Alford",
    "nameParts": {
@@ -305,10 +347,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H4RI01265"
    ],
+   "fecAll": [
+    "H4RI01265"
+   ],
    "govtrack": 456955,
+   "how": null,
    "last": "Amo",
    "name": "Gabe Amo",
    "nameParts": {
@@ -340,10 +387,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H4AZ03109"
    ],
+   "fecAll": [
+    "H4AZ03109"
+   ],
    "govtrack": 456972,
+   "how": null,
    "last": "Ansari",
    "name": "Yassamin Ansari",
    "nameParts": {
@@ -375,10 +427,15 @@
    "chamber": "Senate",
    "contactForm": "https://alsobrooks.senate.gov/",
    "district": null,
+   "endType": null,
    "fec": [
     "S4MD00327"
    ],
+   "fecAll": [
+    "S4MD00327"
+   ],
    "govtrack": 456965,
+   "how": null,
    "last": "Alsobrooks",
    "name": "Angela D. Alsobrooks",
    "nameParts": {
@@ -410,8 +467,11 @@
    "chamber": "Senate",
    "contactForm": null,
    "district": null,
+   "endType": null,
    "fec": [],
+   "fecAll": [],
    "govtrack": 457040,
+   "how": "appointment",
    "last": "Armstrong",
    "name": "Alan Armstrong",
    "nameParts": {
@@ -438,10 +498,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H2GA02031"
    ],
+   "fecAll": [
+    "H2GA02031"
+   ],
    "govtrack": 400030,
+   "how": null,
    "last": "Bishop",
    "name": "Sanford D. Bishop, Jr.",
    "nameParts": {
@@ -476,10 +541,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H0OR02127"
    ],
+   "fecAll": [
+    "H0OR02127"
+   ],
    "govtrack": 456842,
+   "how": null,
    "last": "Bentz",
    "name": "Cliff Bentz",
    "nameParts": {
@@ -512,10 +582,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H0OK05205"
    ],
+   "fecAll": [
+    "H0OK05205"
+   ],
    "govtrack": 456841,
+   "how": null,
    "last": "Bice",
    "name": "Stephanie I. Bice",
    "nameParts": {
@@ -547,10 +622,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H0CO03165"
    ],
+   "fecAll": [
+    "H0CO03165"
+   ],
    "govtrack": 456805,
+   "how": null,
    "last": "Boebert",
    "name": "Lauren Boebert",
    "nameParts": {
@@ -582,10 +662,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.baldwin.senate.gov/feedback",
    "district": null,
+   "endType": null,
    "fec": [
     "S2WI00219"
    ],
+   "fecAll": [
+    "H8WI00018",
+    "S2WI00219"
+   ],
    "govtrack": 400013,
+   "how": null,
    "last": "Baldwin",
    "name": "Tammy Baldwin",
    "nameParts": {
@@ -619,10 +705,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.boozman.senate.gov/public/index.cfm/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S0AR00150"
    ],
+   "fecAll": [
+    "H2AR03176",
+    "S0AR00150"
+   ],
    "govtrack": 400040,
+   "how": null,
    "last": "Boozman",
    "name": "John Boozman",
    "nameParts": {
@@ -656,10 +748,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.blackburn.senate.gov/email-me",
    "district": null,
+   "endType": null,
    "fec": [
     "S8TN00337"
    ],
+   "fecAll": [
+    "H2TN06030",
+    "S8TN00337"
+   ],
    "govtrack": 400032,
+   "how": null,
    "last": "Blackburn",
    "name": "Marsha Blackburn",
    "nameParts": {
@@ -694,10 +792,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 12,
+   "endType": null,
    "fec": [
     "H6FL09070"
    ],
+   "fecAll": [
+    "H6FL09070"
+   ],
    "govtrack": 412250,
+   "how": null,
    "last": "Bilirakis",
    "name": "Gus M. Bilirakis",
    "nameParts": {
@@ -732,10 +835,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 16,
+   "endType": null,
    "fec": [
     "H6FL13148"
    ],
+   "fecAll": [
+    "H6FL13148"
+   ],
    "govtrack": 412196,
+   "how": null,
    "last": "Buchanan",
    "name": "Vern Buchanan",
    "nameParts": {
@@ -769,10 +877,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.barrasso.senate.gov/public/index.cfm/contact-form",
    "district": null,
+   "endType": null,
    "fec": [
     "S6WY00068"
    ],
+   "fecAll": [
+    "S6WY00068"
+   ],
    "govtrack": 412251,
+   "how": null,
    "last": "Barrasso",
    "name": "John Barrasso",
    "nameParts": {
@@ -806,10 +919,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.bennet.senate.gov/public/index.cfm/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S0CO00211"
    ],
+   "fecAll": [
+    "S0CO00211"
+   ],
    "govtrack": 412330,
+   "how": null,
    "last": "Bennet",
    "name": "Michael F. Bennet",
    "nameParts": {
@@ -844,10 +962,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.blumenthal.senate.gov/contact/",
    "district": null,
+   "endType": null,
    "fec": [
     "S0CT00177"
    ],
+   "fecAll": [
+    "S0CT00177"
+   ],
    "govtrack": 412490,
+   "how": null,
    "last": "Blumenthal",
    "name": "Richard Blumenthal",
    "nameParts": {
@@ -881,10 +1004,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H2OR01133"
    ],
+   "fecAll": [
+    "H2OR01133"
+   ],
    "govtrack": 412501,
+   "how": null,
    "last": "Bonamici",
    "name": "Suzanne Bonamici",
    "nameParts": {
@@ -918,10 +1046,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H2OH03125"
    ],
+   "fecAll": [
+    "H2OH03125"
+   ],
    "govtrack": 412565,
+   "how": null,
    "last": "Beatty",
    "name": "Joyce Beatty",
    "nameParts": {
@@ -954,10 +1087,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H0KY06104"
    ],
+   "fecAll": [
+    "H0KY06104",
+    "S6KY00286"
+   ],
    "govtrack": 412541,
+   "how": null,
    "last": "Barr",
    "name": "Andy Barr",
    "nameParts": {
@@ -992,10 +1131,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 26,
+   "endType": null,
    "fec": [
     "H2CA00120"
    ],
+   "fecAll": [
+    "H2CA00120"
+   ],
    "govtrack": 412516,
+   "how": null,
    "last": "Brownley",
    "name": "Julia Brownley",
    "nameParts": {
@@ -1029,10 +1173,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H0CA03078"
    ],
+   "fecAll": [
+    "H0CA03078"
+   ],
    "govtrack": 412512,
+   "how": null,
    "last": "Bera",
    "name": "Ami Bera",
    "nameParts": {
@@ -1066,10 +1215,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.booker.senate.gov/?p=contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S4NJ00185"
    ],
+   "fecAll": [
+    "S4NJ00185"
+   ],
    "govtrack": 412598,
+   "how": null,
    "last": "Booker",
    "name": "Cory A. Booker",
    "nameParts": {
@@ -1104,10 +1258,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 36,
+   "endType": null,
    "fec": [
     "H6TX02079"
    ],
+   "fecAll": [
+    "H6TX02079"
+   ],
    "govtrack": 412655,
+   "how": null,
    "last": "Babin",
    "name": "Brian Babin",
    "nameParts": {
@@ -1139,10 +1298,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H4VA08224"
    ],
+   "fecAll": [
+    "H4VA08224"
+   ],
    "govtrack": 412657,
+   "how": null,
    "last": "Beyer",
    "name": "Donald S. Beyer, Jr.",
    "nameParts": {
@@ -1178,10 +1342,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 12,
+   "endType": null,
    "fec": [
     "H4IL12060"
    ],
+   "fecAll": [
+    "H4IL12060"
+   ],
    "govtrack": 412629,
+   "how": null,
    "last": "Bost",
    "name": "Mike Bost",
    "nameParts": {
@@ -1213,10 +1382,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H4PA13199"
    ],
+   "fecAll": [
+    "H4PA13199"
+   ],
    "govtrack": 412652,
+   "how": null,
    "last": "Boyle",
    "name": "Brendan F. Boyle",
    "nameParts": {
@@ -1249,10 +1423,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H6NE02125"
    ],
+   "fecAll": [
+    "H6NE02125"
+   ],
    "govtrack": 412713,
+   "how": null,
    "last": "Bacon",
    "name": "Don Bacon",
    "nameParts": {
@@ -1285,10 +1464,16 @@
    "chamber": "Senate",
    "contactForm": null,
    "district": null,
+   "endType": null,
    "fec": [
     "S4IN00196"
    ],
+   "fecAll": [
+    "H6IN03229",
+    "S4IN00196"
+   ],
    "govtrack": 412702,
+   "how": null,
    "last": "Banks",
    "name": "Jim Banks",
    "nameParts": {
@@ -1321,10 +1506,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 44,
+   "endType": null,
    "fec": [
     "H6CA44103"
    ],
+   "fecAll": [
+    "H6CA44103"
+   ],
    "govtrack": 412687,
+   "how": null,
    "last": "Barragán",
    "name": "Nanette Diaz Barragán",
    "nameParts": {
@@ -1357,10 +1547,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H6MI01226"
    ],
+   "fecAll": [
+    "H6MI01226"
+   ],
    "govtrack": 412709,
+   "how": null,
    "last": "Bergman",
    "name": "Jack Bergman",
    "nameParts": {
@@ -1393,10 +1588,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H6AZ05083"
    ],
+   "fecAll": [
+    "H6AZ05083"
+   ],
    "govtrack": 412683,
+   "how": null,
    "last": "Biggs",
    "name": "Andy Biggs",
    "nameParts": {
@@ -1429,10 +1629,16 @@
    "chamber": "Senate",
    "contactForm": null,
    "district": null,
+   "endType": null,
    "fec": [
     "S4DE00060"
    ],
+   "fecAll": [
+    "H6DE00206",
+    "S4DE00060"
+   ],
    "govtrack": 412689,
+   "how": null,
    "last": "Blunt Rochester",
    "name": "Lisa Blunt Rochester",
    "nameParts": {
@@ -1464,10 +1670,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.budd.senate.gov/contact/",
    "district": null,
+   "endType": null,
    "fec": [
     "S2NC00505"
    ],
+   "fecAll": [
+    "H6NC13129",
+    "S2NC00505"
+   ],
    "govtrack": 412712,
+   "how": null,
    "last": "Budd",
    "name": "Ted Budd",
    "nameParts": {
@@ -1500,10 +1712,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 12,
+   "endType": null,
    "fec": [
     "H8OH12180"
    ],
+   "fecAll": [
+    "H8OH12180"
+   ],
    "govtrack": 412747,
+   "how": null,
    "last": "Balderson",
    "name": "Troy Balderson",
    "nameParts": {
@@ -1535,10 +1752,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H8IN04199"
    ],
+   "fecAll": [
+    "H8IN04199"
+   ],
    "govtrack": 412777,
+   "how": null,
    "last": "Baird",
    "name": "James R. Baird",
    "nameParts": {
@@ -1571,10 +1793,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H8TN02119"
    ],
+   "fecAll": [
+    "H8TN02119"
+   ],
    "govtrack": 412817,
+   "how": null,
    "last": "Burchett",
    "name": "Tim Burchett",
    "nameParts": {
@@ -1604,10 +1831,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 11,
+   "endType": null,
    "fec": [
     "H2OH11169"
    ],
+   "fecAll": [
+    "H2OH11169"
+   ],
    "govtrack": 456863,
+   "how": null,
    "last": "Brown",
    "name": "Shontel M. Brown",
    "nameParts": {
@@ -1640,10 +1872,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H2FL04211"
    ],
+   "fecAll": [
+    "H2FL04211"
+   ],
    "govtrack": 456888,
+   "how": null,
    "last": "Bean",
    "name": "Aaron Bean",
    "nameParts": {
@@ -1676,10 +1913,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 13,
+   "endType": null,
    "fec": [
     "H2IL13153"
    ],
+   "fecAll": [
+    "H2IL13153"
+   ],
    "govtrack": 456901,
+   "how": null,
    "last": "Budzinski",
    "name": "Nikki Budzinski",
    "nameParts": {
@@ -1713,10 +1955,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H2MO07143"
    ],
+   "fecAll": [
+    "H2MO07143"
+   ],
    "govtrack": 456910,
+   "how": null,
    "last": "Burlison",
    "name": "Eric Burlison",
    "nameParts": {
@@ -1750,10 +1997,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H2OK02315"
    ],
+   "fecAll": [
+    "H2OK02315"
+   ],
    "govtrack": 456931,
+   "how": null,
    "last": "Brecheen",
    "name": "Josh Brecheen",
    "nameParts": {
@@ -1787,10 +2039,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 0,
+   "endType": null,
    "fec": [
     "H2VT01076"
    ],
+   "fecAll": [
+    "H2VT01076"
+   ],
    "govtrack": 456948,
+   "how": null,
    "last": "Balint",
    "name": "Becca Balint",
    "nameParts": {
@@ -1824,10 +2081,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.britt.senate.gov/contact/",
    "district": null,
+   "endType": null,
    "fec": [
     "S2AL00145"
    ],
+   "fecAll": [
+    "S2AL00145"
+   ],
    "govtrack": 456874,
+   "how": null,
    "last": "Britt",
    "name": "Katie Boyd Britt",
    "nameParts": {
@@ -1861,10 +2123,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H2MI07123"
    ],
+   "fecAll": [
+    "H2MI07123"
+   ],
    "govtrack": 456994,
+   "how": null,
    "last": "Barrett",
    "name": "Tom Barrett",
    "nameParts": {
@@ -1896,10 +2163,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H4WA05234"
    ],
+   "fecAll": [
+    "H4WA05234"
+   ],
    "govtrack": 457029,
+   "how": null,
    "last": "Baumgartner",
    "name": "Michael Baumgartner",
    "nameParts": {
@@ -1932,10 +2204,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 0,
+   "endType": null,
    "fec": [
     "H2AK01083"
    ],
+   "fecAll": [
+    "H2AK01083"
+   ],
    "govtrack": 456970,
+   "how": null,
    "last": "Begich",
    "name": "Nicholas J. Begich III",
    "nameParts": {
@@ -1969,10 +2246,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H4MO01134"
    ],
+   "fecAll": [
+    "H4MO01134",
+    "S4MO00250"
+   ],
    "govtrack": 456997,
+   "how": null,
    "last": "Bell",
    "name": "Wesley Bell",
    "nameParts": {
@@ -2004,10 +2287,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H4SC01313"
    ],
+   "fecAll": [
+    "H4SC01313"
+   ],
    "govtrack": 457020,
+   "how": null,
    "last": "Biggs",
    "name": "Sheri Biggs",
    "nameParts": {
@@ -2040,10 +2328,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H4OR05304"
    ],
+   "fecAll": [
+    "H4OR05304"
+   ],
    "govtrack": 457016,
+   "how": null,
    "last": "Bynum",
    "name": "Janelle S. Bynum",
    "nameParts": {
@@ -2076,10 +2369,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H4PA08124"
    ],
+   "fecAll": [
+    "H4PA08124"
+   ],
    "govtrack": 457018,
+   "how": null,
    "last": "Bresnahan",
    "name": "Robert P. Bresnahan, Jr.",
    "nameParts": {
@@ -2113,10 +2411,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 13,
+   "endType": null,
    "fec": [
     "H6GA13062"
    ],
+   "fecAll": [
+    "H6GA13062"
+   ],
    "govtrack": 457045,
+   "how": "special-election",
    "last": "Blair",
    "name": "Everton Blair Jr.",
    "nameParts": {
@@ -2144,10 +2447,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 41,
+   "endType": null,
    "fec": [
     "H2CA37023"
    ],
+   "fecAll": [
+    "H2CA37023"
+   ],
    "govtrack": 400057,
+   "how": null,
    "last": "Calvert",
    "name": "Ken Calvert",
    "nameParts": {
@@ -2182,10 +2490,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.cantwell.senate.gov/public/index.cfm/email-maria",
    "district": null,
+   "endType": null,
    "fec": [
     "S8WA00194"
    ],
+   "fecAll": [
+    "H2WA01054",
+    "S8WA00194"
+   ],
    "govtrack": 300018,
+   "how": null,
    "last": "Cantwell",
    "name": "Maria Cantwell",
    "nameParts": {
@@ -2218,10 +2532,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H2SC02042"
    ],
+   "fecAll": [
+    "H2SC02042"
+   ],
    "govtrack": 400075,
+   "how": null,
    "last": "Clyburn",
    "name": "James E. Clyburn",
    "nameParts": {
@@ -2257,10 +2576,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.crapo.senate.gov/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S8ID00027"
    ],
+   "fecAll": [
+    "H2ID02034",
+    "S8ID00027"
+   ],
    "govtrack": 300030,
+   "how": null,
    "last": "Crapo",
    "name": "Mike Crapo",
    "nameParts": {
@@ -2296,10 +2621,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.collins.senate.gov/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S6ME00159"
    ],
+   "fecAll": [
+    "S6ME00159"
+   ],
    "govtrack": 300025,
+   "how": null,
    "last": "Collins",
    "name": "Susan M. Collins",
    "nameParts": {
@@ -2334,10 +2664,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H0FL03175"
    ],
+   "fecAll": [
+    "H0FL03175"
+   ],
    "govtrack": 456806,
+   "how": null,
    "last": "Cammack",
    "name": "Kat Cammack",
    "nameParts": {
@@ -2370,10 +2705,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.capito.senate.gov/contact/contact-shelley",
    "district": null,
+   "endType": null,
    "fec": [
     "S4WV00159"
    ],
+   "fecAll": [
+    "H0WV02138",
+    "S4WV00159"
+   ],
    "govtrack": 400061,
+   "how": null,
    "last": "Capito",
    "name": "Shelley Moore Capito",
    "nameParts": {
@@ -2407,10 +2748,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 31,
+   "endType": null,
    "fec": [
     "H2TX31044"
    ],
+   "fecAll": [
+    "H2TX31044"
+   ],
    "govtrack": 400068,
+   "how": null,
    "last": "Carter",
    "name": "John R. Carter",
    "nameParts": {
@@ -2445,10 +2791,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H2OK04055"
    ],
+   "fecAll": [
+    "H2OK04055"
+   ],
    "govtrack": 400077,
+   "how": null,
    "last": "Cole",
    "name": "Tom Cole",
    "nameParts": {
@@ -2482,10 +2833,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H2HI02128"
    ],
+   "fecAll": [
+    "H2HI02128"
+   ],
    "govtrack": 400069,
+   "how": null,
    "last": "Case",
    "name": "Ed Case",
    "nameParts": {
@@ -2518,10 +2874,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.cornyn.senate.gov/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S2TX00106"
    ],
+   "fecAll": [
+    "S2TX00106"
+   ],
    "govtrack": 300027,
+   "how": null,
    "last": "Cornyn",
    "name": "John Cornyn",
    "nameParts": {
@@ -2554,10 +2915,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 21,
+   "endType": null,
    "fec": [
     "H4CA20082"
    ],
+   "fecAll": [
+    "H4CA20082"
+   ],
    "govtrack": 400618,
+   "how": null,
    "last": "Costa",
    "name": "Jim Costa",
    "nameParts": {
@@ -2590,10 +2956,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H4MO05234"
    ],
+   "fecAll": [
+    "H4MO05234"
+   ],
    "govtrack": 400639,
+   "how": null,
    "last": "Cleaver",
    "name": "Emanuel Cleaver",
    "nameParts": {
@@ -2628,10 +2999,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 28,
+   "endType": null,
    "fec": [
     "H2TX23082"
    ],
+   "fecAll": [
+    "H2TX23082"
+   ],
    "govtrack": 400657,
+   "how": null,
    "last": "Cuellar",
    "name": "Henry Cuellar",
    "nameParts": {
@@ -2665,11 +3041,17 @@
    "chamber": "House",
    "contactForm": null,
    "district": 14,
+   "endType": null,
    "fec": [
     "H6FL11126",
     "H6FL11134"
    ],
+   "fecAll": [
+    "H6FL11126",
+    "H6FL11134"
+   ],
    "govtrack": 412195,
+   "how": null,
    "last": "Castor",
    "name": "Kathy Castor",
    "nameParts": {
@@ -2703,10 +3085,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 9,
+   "endType": null,
    "fec": [
     "H4NY11138"
    ],
+   "fecAll": [
+    "H4NY11138"
+   ],
    "govtrack": 412221,
+   "how": null,
    "last": "Clarke",
    "name": "Yvette D. Clarke",
    "nameParts": {
@@ -2741,10 +3128,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 9,
+   "endType": null,
    "fec": [
     "H6TN09068"
    ],
+   "fecAll": [
+    "H6TN09068"
+   ],
    "govtrack": 412236,
+   "how": null,
    "last": "Cohen",
    "name": "Steve Cohen",
    "nameParts": {
@@ -2778,10 +3170,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H2CT02112"
    ],
+   "fecAll": [
+    "H2CT02112"
+   ],
    "govtrack": 412193,
+   "how": null,
    "last": "Courtney",
    "name": "Joe Courtney",
    "nameParts": {
@@ -2815,10 +3212,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H8IN07184"
    ],
+   "fecAll": [
+    "H8IN07184"
+   ],
    "govtrack": 412258,
+   "how": null,
    "last": "Carson",
    "name": "André Carson",
    "nameParts": {
@@ -2852,10 +3254,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.cassidy.senate.gov/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S4LA00107"
    ],
+   "fecAll": [
+    "H8LA00017",
+    "S4LA00107"
+   ],
    "govtrack": 412269,
+   "how": null,
    "last": "Cassidy",
    "name": "Bill Cassidy",
    "nameParts": {
@@ -2889,10 +3297,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 28,
+   "endType": null,
    "fec": [
     "H0CA32101"
    ],
+   "fecAll": [
+    "H0CA32101"
+   ],
    "govtrack": 412379,
+   "how": null,
    "last": "Chu",
    "name": "Judy Chu",
    "nameParts": {
@@ -2927,10 +3340,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H0AR01083"
    ],
+   "fecAll": [
+    "H0AR01083"
+   ],
    "govtrack": 412400,
+   "how": null,
    "last": "Crawford",
    "name": "Eric A. \"Rick\" Crawford",
    "nameParts": {
@@ -2966,10 +3384,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.coons.senate.gov/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S0DE00092"
    ],
+   "fecAll": [
+    "S0DE00092"
+   ],
    "govtrack": 412390,
+   "how": null,
    "last": "Coons",
    "name": "Christopher A. Coons",
    "nameParts": {
@@ -3004,10 +3427,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 20,
+   "endType": null,
    "fec": [
     "H2TX35011"
    ],
+   "fecAll": [
+    "H2TX35011"
+   ],
    "govtrack": 412576,
+   "how": null,
    "last": "Castro",
    "name": "Joaquin Castro",
    "nameParts": {
@@ -3042,10 +3470,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.cotton.senate.gov/contact/contact-tom",
    "district": null,
+   "endType": null,
    "fec": [
     "S4AR00103"
    ],
+   "fecAll": [
+    "H2AR04083",
+    "S4AR00103"
+   ],
    "govtrack": 412508,
+   "how": null,
    "last": "Cotton",
    "name": "Tom Cotton",
    "nameParts": {
@@ -3078,10 +3512,17 @@
    "chamber": "Senate",
    "contactForm": "https://www.cramer.senate.gov/contact/contact-kevin",
    "district": null,
+   "endType": null,
    "fec": [
     "S8ND00120"
    ],
+   "fecAll": [
+    "H0ND01026",
+    "H6ND00074",
+    "S8ND00120"
+   ],
    "govtrack": 412555,
+   "how": null,
    "last": "Cramer",
    "name": "Kevin Cramer",
    "nameParts": {
@@ -3115,10 +3556,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.cruz.senate.gov/?p=form&id=16",
    "district": null,
+   "endType": null,
    "fec": [
     "S2TX00312"
    ],
+   "fecAll": [
+    "S2TX00312"
+   ],
    "govtrack": 412573,
+   "how": null,
    "last": "Cruz",
    "name": "Ted Cruz",
    "nameParts": {
@@ -3152,10 +3598,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H4MA05084"
    ],
+   "fecAll": [
+    "H4MA05084"
+   ],
    "govtrack": 412600,
+   "how": null,
    "last": "Clark",
    "name": "Katherine M. Clark",
    "nameParts": {
@@ -3189,10 +3640,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H4GA01039"
    ],
+   "fecAll": [
+    "H4GA01039",
+    "S6GA00374"
+   ],
    "govtrack": 412622,
+   "how": null,
    "last": "Carter",
    "name": "Earl L. \"Buddy\" Carter",
    "nameParts": {
@@ -3227,10 +3684,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H6KY01110"
    ],
+   "fecAll": [
+    "H6KY01110"
+   ],
    "govtrack": 412676,
+   "how": null,
    "last": "Comer",
    "name": "James Comer",
    "nameParts": {
@@ -3262,10 +3724,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 46,
+   "endType": null,
    "fec": [
     "H6CA46116"
    ],
+   "fecAll": [
+    "H6CA46116"
+   ],
    "govtrack": 412688,
+   "how": null,
    "last": "Correa",
    "name": "J. Luis Correa",
    "nameParts": {
@@ -3299,10 +3766,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 24,
+   "endType": null,
    "fec": [
     "H6CA24303"
    ],
+   "fecAll": [
+    "H6CA24303"
+   ],
    "govtrack": 412686,
+   "how": null,
    "last": "Carbajal",
    "name": "Salud O. Carbajal",
    "nameParts": {
@@ -3336,10 +3808,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.cortezmasto.senate.gov/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S6NV00200"
    ],
+   "fecAll": [
+    "S6NV00200"
+   ],
    "govtrack": 412681,
+   "how": null,
    "last": "Cortez Masto",
    "name": "Catherine Cortez Masto",
    "nameParts": {
@@ -3372,10 +3849,16 @@
    "chamber": "Senate",
    "contactForm": null,
    "district": null,
+   "endType": null,
    "fec": [
     "S4UT00282"
    ],
+   "fecAll": [
+    "H8UT03238",
+    "S4UT00282"
+   ],
    "govtrack": 412740,
+   "how": null,
    "last": "Curtis",
    "name": "John R. Curtis",
    "nameParts": {
@@ -3409,10 +3892,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 27,
+   "endType": null,
    "fec": [
     "H8TX27049"
    ],
+   "fecAll": [
+    "H8TX27049"
+   ],
    "govtrack": 412746,
+   "how": null,
    "last": "Cloud",
    "name": "Michael Cloud",
    "nameParts": {
@@ -3445,10 +3933,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 9,
+   "endType": null,
    "fec": [
     "H0GA09246"
    ],
+   "fecAll": [
+    "H0GA09246"
+   ],
    "govtrack": 456813,
+   "how": null,
    "last": "Clyde",
    "name": "Andrew S. Clyde",
    "nameParts": {
@@ -3482,10 +3975,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H8IL06139"
    ],
+   "fecAll": [
+    "H8IL06139"
+   ],
    "govtrack": 412775,
+   "how": null,
    "last": "Casten",
    "name": "Sean Casten",
    "nameParts": {
@@ -3518,10 +4016,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H8VA06104"
    ],
+   "fecAll": [
+    "H8VA06104"
+   ],
    "govtrack": 412832,
+   "how": null,
    "last": "Cline",
    "name": "Ben Cline",
    "nameParts": {
@@ -3554,10 +4057,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H6MN02131"
    ],
+   "fecAll": [
+    "H6MN02131",
+    "S6MN00499"
+   ],
    "govtrack": 412789,
+   "how": null,
    "last": "Craig",
    "name": "Angie Craig",
    "nameParts": {
@@ -3588,10 +4097,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H8TX02166"
    ],
+   "fecAll": [
+    "H8TX02166"
+   ],
    "govtrack": 412820,
+   "how": null,
    "last": "Crenshaw",
    "name": "Dan Crenshaw",
    "nameParts": {
@@ -3624,10 +4138,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H8CO06229"
    ],
+   "fecAll": [
+    "H8CO06229"
+   ],
    "govtrack": 412762,
+   "how": null,
    "last": "Crow",
    "name": "Jason Crow",
    "nameParts": {
@@ -3658,11 +4177,17 @@
    "chamber": "House",
    "contactForm": null,
    "district": 31,
+   "endType": null,
    "fec": [
     "H8CA39174",
     "H4CA31170"
    ],
+   "fecAll": [
+    "H4CA31170",
+    "H8CA39174"
+   ],
    "govtrack": 412757,
+   "how": null,
    "last": "Cisneros",
    "name": "Gilbert Ray Cisneros, Jr.",
    "nameParts": {
@@ -3694,10 +4219,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H2LA02149"
    ],
+   "fecAll": [
+    "H2LA02149"
+   ],
    "govtrack": 456860,
+   "how": null,
    "last": "Carter",
    "name": "Troy A. Carter",
    "nameParts": {
@@ -3729,10 +4259,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 15,
+   "endType": null,
    "fec": [
     "H2OH15228"
    ],
+   "fecAll": [
+    "H2OH15228"
+   ],
    "govtrack": 456864,
+   "how": null,
    "last": "Carey",
    "name": "Mike Carey",
    "nameParts": {
@@ -3764,10 +4299,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 10,
+   "endType": null,
    "fec": [
     "H4GA10071"
    ],
+   "fecAll": [
+    "H4GA10071",
+    "S6GA00390"
+   ],
    "govtrack": 456895,
+   "how": null,
    "last": "Collins",
    "name": "Mike Collins",
    "nameParts": {
@@ -3801,10 +4342,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 30,
+   "endType": null,
    "fec": [
     "H2TX30178"
    ],
+   "fecAll": [
+    "H2TX30178",
+    "S6TX00552"
+   ],
    "govtrack": 456944,
+   "how": null,
    "last": "Crockett",
    "name": "Jasmine Crockett",
    "nameParts": {
@@ -3837,10 +4384,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 35,
+   "endType": null,
    "fec": [
     "H2TX35144"
    ],
+   "fecAll": [
+    "H2TX35144"
+   ],
    "govtrack": 456945,
+   "how": null,
    "last": "Casar",
    "name": "Greg Casar",
    "nameParts": {
@@ -3873,10 +4425,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H2AZ01354"
    ],
+   "fecAll": [
+    "H2AZ01354"
+   ],
    "govtrack": 456879,
+   "how": null,
    "last": "Crane",
    "name": "Elijah Crane",
    "nameParts": {
@@ -3908,10 +4465,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H2AZ02360"
    ],
+   "fecAll": [
+    "H2AZ02360"
+   ],
    "govtrack": 456880,
+   "how": null,
    "last": "Ciscomani",
    "name": "Juan Ciscomani",
    "nameParts": {
@@ -3945,10 +4507,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H4NJ03080"
    ],
+   "fecAll": [
+    "H4NJ03080"
+   ],
    "govtrack": 457008,
+   "how": null,
    "last": "Conaway",
    "name": "Herbert C. Conaway, Jr.",
    "nameParts": {
@@ -3980,10 +4547,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H6CO05142"
    ],
+   "fecAll": [
+    "H6CO05142"
+   ],
    "govtrack": 456983,
+   "how": null,
    "last": "Crank",
    "name": "Jeff Crank",
    "nameParts": {
@@ -4016,10 +4588,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 19,
+   "endType": null,
    "fec": [
     "H2FL14186"
    ],
+   "fecAll": [
+    "H2FL14186"
+   ],
    "govtrack": 456808,
+   "how": null,
    "last": "Donalds",
    "name": "Byron Donalds",
    "nameParts": {
@@ -4052,10 +4629,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H4IL07037"
    ],
+   "fecAll": [
+    "H4IL07037"
+   ],
    "govtrack": 400093,
+   "how": null,
    "last": "Davis",
    "name": "Danny K. Davis",
    "nameParts": {
@@ -4089,10 +4671,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H6CO01141"
    ],
+   "fecAll": [
+    "H6CO01141"
+   ],
    "govtrack": 400101,
+   "how": null,
    "last": "DeGette",
    "name": "Diana DeGette",
    "nameParts": {
@@ -4126,10 +4713,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H0CT03072"
    ],
+   "fecAll": [
+    "H0CT03072"
+   ],
    "govtrack": 400103,
+   "how": null,
    "last": "DeLauro",
    "name": "Rosa L. DeLauro",
    "nameParts": {
@@ -4163,10 +4755,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H2NC02287"
    ],
+   "fecAll": [
+    "H2NC02287"
+   ],
    "govtrack": 456912,
+   "how": null,
    "last": "Davis",
    "name": "Donald G. Davis",
    "nameParts": {
@@ -4199,10 +4796,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 37,
+   "endType": null,
    "fec": [
     "H4TX10028"
    ],
+   "fecAll": [
+    "H4TX10028"
+   ],
    "govtrack": 400111,
+   "how": null,
    "last": "Doggett",
    "name": "Lloyd Doggett",
    "nameParts": {
@@ -4237,10 +4839,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 17,
+   "endType": null,
    "fec": [
     "H2PA17103"
    ],
+   "fecAll": [
+    "H2PA17103"
+   ],
    "govtrack": 456936,
+   "how": null,
    "last": "Deluzio",
    "name": "Christopher R. Deluzio",
    "nameParts": {
@@ -4273,10 +4880,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.durbin.senate.gov/contact/",
    "district": null,
+   "endType": null,
    "fec": [
     "S6IL00151"
    ],
+   "fecAll": [
+    "H2IL20026",
+    "S6IL00151"
+   ],
    "govtrack": 300038,
+   "how": null,
    "last": "Durbin",
    "name": "Richard J. Durbin",
    "nameParts": {
@@ -4310,10 +4923,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 15,
+   "endType": null,
    "fec": [
     "H0TX15124"
    ],
+   "fecAll": [
+    "H0TX15124"
+   ],
    "govtrack": 456943,
+   "how": null,
    "last": "De La Cruz",
    "name": "Monica De La Cruz",
    "nameParts": {
@@ -4346,10 +4964,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 26,
+   "endType": null,
    "fec": [
     "H2FL25018"
    ],
+   "fecAll": [
+    "H2FL25018"
+   ],
    "govtrack": 400108,
+   "how": null,
    "last": "Diaz-Balart",
    "name": "Mario Diaz-Balart",
    "nameParts": {
@@ -4383,10 +5006,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H0TN04195"
    ],
+   "fecAll": [
+    "H0TN04195"
+   ],
    "govtrack": 412477,
+   "how": null,
    "last": "DesJarlais",
    "name": "Scott DesJarlais",
    "nameParts": {
@@ -4420,10 +5048,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H0WA08046"
    ],
+   "fecAll": [
+    "H0WA08046"
+   ],
    "govtrack": 412505,
+   "how": null,
    "last": "DelBene",
    "name": "Suzan K. DelBene",
    "nameParts": {
@@ -4457,10 +5090,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.daines.senate.gov/connect/email-steve",
    "district": null,
+   "endType": null,
    "fec": [
     "S2MT00096"
    ],
+   "fecAll": [
+    "H2MT01060",
+    "S2MT00096"
+   ],
    "govtrack": 412549,
+   "how": null,
    "last": "Daines",
    "name": "Steve Daines",
    "nameParts": {
@@ -4494,10 +5133,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.duckworth.senate.gov/content/contact-senator",
    "district": null,
+   "endType": null,
    "fec": [
     "S6IL00292"
    ],
+   "fecAll": [
+    "H6IL06141",
+    "S6IL00292"
+   ],
    "govtrack": 412533,
+   "how": null,
    "last": "Duckworth",
    "name": "Tammy Duckworth",
    "nameParts": {
@@ -4531,10 +5176,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 10,
+   "endType": null,
    "fec": [
     "H0CA10073"
    ],
+   "fecAll": [
+    "H0CA10073"
+   ],
    "govtrack": 412613,
+   "how": null,
    "last": "DeSaulnier",
    "name": "Mark DeSaulnier",
    "nameParts": {
@@ -4566,10 +5216,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H4MI12079"
    ],
+   "fecAll": [
+    "H4MI12079"
+   ],
    "govtrack": 412637,
+   "how": null,
    "last": "Dingell",
    "name": "Debbie Dingell",
    "nameParts": {
@@ -4602,10 +5257,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H6OH08315"
    ],
+   "fecAll": [
+    "H6OH08315"
+   ],
    "govtrack": 412675,
+   "how": null,
    "last": "Davidson",
    "name": "Warren Davidson",
    "nameParts": {
@@ -4638,10 +5298,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H6FL02208"
    ],
+   "fecAll": [
+    "H6FL02208"
+   ],
    "govtrack": 412691,
+   "how": null,
    "last": "Dunn",
    "name": "Neal P. Dunn",
    "nameParts": {
@@ -4674,10 +5339,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H8KS03155"
    ],
+   "fecAll": [
+    "H8KS03155"
+   ],
    "govtrack": 412780,
+   "how": null,
    "last": "Davids",
    "name": "Sharice Davids",
    "nameParts": {
@@ -4707,10 +5377,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H8PA04116"
    ],
+   "fecAll": [
+    "H8PA04116"
+   ],
    "govtrack": 412809,
+   "how": null,
    "last": "Dean",
    "name": "Madeleine Dean",
    "nameParts": {
@@ -4743,10 +5418,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H4MT02098"
    ],
+   "fecAll": [
+    "H4MT02098"
+   ],
    "govtrack": 457000,
+   "how": null,
    "last": "Downing",
    "name": "Troy Downing",
    "nameParts": {
@@ -4779,10 +5459,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H4OR03192"
    ],
+   "fecAll": [
+    "H4OR03192"
+   ],
    "govtrack": 457015,
+   "how": null,
    "last": "Dexter",
    "name": "Maxine Dexter",
    "nameParts": {
@@ -4815,10 +5500,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H8TX06266"
    ],
+   "fecAll": [
+    "H8TX06266"
+   ],
    "govtrack": 456862,
+   "how": null,
    "last": "Ellzey",
    "name": "Jake Ellzey",
    "nameParts": {
@@ -4849,10 +5539,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H2MS04258"
    ],
+   "fecAll": [
+    "H2MS04258"
+   ],
    "govtrack": 456911,
+   "how": null,
    "last": "Ezell",
    "name": "Mike Ezell",
    "nameParts": {
@@ -4885,10 +5580,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 11,
+   "endType": null,
    "fec": [
     "H2NC14050"
    ],
+   "fecAll": [
+    "H2NC14050"
+   ],
    "govtrack": 456914,
+   "how": null,
    "last": "Edwards",
    "name": "Chuck Edwards",
    "nameParts": {
@@ -4921,10 +5621,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H4MN06087"
    ],
+   "fecAll": [
+    "H4MN06087"
+   ],
    "govtrack": 412639,
+   "how": null,
    "last": "Emmer",
    "name": "Tom Emmer",
    "nameParts": {
@@ -4957,10 +5662,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.ernst.senate.gov/public/index.cfm/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S4IA00129"
    ],
+   "fecAll": [
+    "S4IA00129"
+   ],
    "govtrack": 412667,
+   "how": null,
    "last": "Ernst",
    "name": "Joni Ernst",
    "nameParts": {
@@ -4993,10 +5703,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H6PA02171"
    ],
+   "fecAll": [
+    "H6PA02171"
+   ],
    "govtrack": 412677,
+   "how": null,
    "last": "Evans",
    "name": "Dwight Evans",
    "nameParts": {
@@ -5028,10 +5743,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 13,
+   "endType": null,
    "fec": [
     "H2NY13096"
    ],
+   "fecAll": [
+    "H2NY13096"
+   ],
    "govtrack": 412718,
+   "how": null,
    "last": "Espaillat",
    "name": "Adriano Espaillat",
    "nameParts": {
@@ -5064,10 +5784,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H8KS04112"
    ],
+   "fecAll": [
+    "H8KS04112"
+   ],
    "govtrack": 412735,
+   "how": null,
    "last": "Estes",
    "name": "Ron Estes",
    "nameParts": {
@@ -5100,10 +5825,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 16,
+   "endType": null,
    "fec": [
     "H8TX16109"
    ],
+   "fecAll": [
+    "H8TX16109"
+   ],
    "govtrack": 412825,
+   "how": null,
    "last": "Escobar",
    "name": "Veronica Escobar",
    "nameParts": {
@@ -5136,10 +5866,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H4CO08034"
    ],
+   "fecAll": [
+    "H4CO08034"
+   ],
    "govtrack": 456984,
+   "how": null,
    "last": "Evans",
    "name": "Gabe Evans",
    "nameParts": {
@@ -5171,10 +5906,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H4MD03156"
    ],
+   "fecAll": [
+    "H4MD03156"
+   ],
    "govtrack": 456992,
+   "how": null,
    "last": "Elfreth",
    "name": "Sarah Elfreth",
    "nameParts": {
@@ -5207,10 +5947,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H4LA06211"
    ],
+   "fecAll": [
+    "H4LA06211"
+   ],
    "govtrack": 404067,
+   "how": null,
    "last": "Fields",
    "name": "Cleo Fields",
    "nameParts": {
@@ -5242,10 +5987,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H0TX04219"
    ],
+   "fecAll": [
+    "H0TX04219"
+   ],
    "govtrack": 456845,
+   "how": null,
    "last": "Fallon",
    "name": "Pat Fallon",
    "nameParts": {
@@ -5280,10 +6030,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H0IA04145"
    ],
+   "fecAll": [
+    "H0IA04145"
+   ],
    "govtrack": 456818,
+   "how": null,
    "last": "Feenstra",
    "name": "Randy Feenstra",
    "nameParts": {
@@ -5315,10 +6070,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H4NC05146"
    ],
+   "fecAll": [
+    "H4NC05146"
+   ],
    "govtrack": 400643,
+   "how": null,
    "last": "Foxx",
    "name": "Virginia Foxx",
    "nameParts": {
@@ -5352,11 +6112,17 @@
    "chamber": "House",
    "contactForm": null,
    "district": 11,
+   "endType": null,
    "fec": [
     "H8IL14067",
     "H2IL11124"
    ],
+   "fecAll": [
+    "H2IL11124",
+    "H8IL14067"
+   ],
    "govtrack": 412257,
+   "how": null,
    "last": "Foster",
    "name": "Bill Foster",
    "nameParts": {
@@ -5389,10 +6155,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H0TN03254"
    ],
+   "fecAll": [
+    "H0TN03254"
+   ],
    "govtrack": 412476,
+   "how": null,
    "last": "Fleischmann",
    "name": "Charles J. \"Chuck\" Fleischmann",
    "nameParts": {
@@ -5427,11 +6198,17 @@
    "chamber": "House",
    "contactForm": null,
    "district": 22,
+   "endType": null,
    "fec": [
     "H2FL14053",
     "H2FL22080"
    ],
+   "fecAll": [
+    "H2FL14053",
+    "H2FL22080"
+   ],
    "govtrack": 412529,
+   "how": null,
    "last": "Frankel",
    "name": "Lois Frankel",
    "nameParts": {
@@ -5465,10 +6242,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.fischer.senate.gov/public/index.cfm/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S2NE00094"
    ],
+   "fecAll": [
+    "S2NE00094"
+   ],
    "govtrack": 412556,
+   "how": null,
    "last": "Fischer",
    "name": "Deb Fischer",
    "nameParts": {
@@ -5502,10 +6284,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H6PA08277"
    ],
+   "fecAll": [
+    "H6PA08277"
+   ],
    "govtrack": 412721,
+   "how": null,
    "last": "Fitzpatrick",
    "name": "Brian K. Fitzpatrick",
    "nameParts": {
@@ -5539,10 +6326,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H8TX07140"
    ],
+   "fecAll": [
+    "H8TX07140"
+   ],
    "govtrack": 412824,
+   "how": null,
    "last": "Fletcher",
    "name": "Lizzie Fletcher",
    "nameParts": {
@@ -5575,10 +6367,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H8ID01124"
    ],
+   "fecAll": [
+    "H8ID01124"
+   ],
    "govtrack": 412773,
+   "how": null,
    "last": "Fulcher",
    "name": "Russ Fulcher",
    "nameParts": {
@@ -5611,10 +6408,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H0MN07091"
    ],
+   "fecAll": [
+    "H0MN07091"
+   ],
    "govtrack": 456828,
+   "how": null,
    "last": "Fischbach",
    "name": "Michelle Fischbach",
    "nameParts": {
@@ -5648,10 +6450,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H0WI05113"
    ],
+   "fecAll": [
+    "H0WI05113"
+   ],
    "govtrack": 456855,
+   "how": null,
    "last": "Fitzgerald",
    "name": "Scott Fitzgerald",
    "nameParts": {
@@ -5683,10 +6490,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 18,
+   "endType": null,
    "fec": [
     "H0FL15104"
    ],
+   "fecAll": [
+    "H0FL15104"
+   ],
    "govtrack": 456807,
+   "how": null,
    "last": "Franklin",
    "name": "Scott Franklin",
    "nameParts": {
@@ -5720,10 +6532,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H2NE01118"
    ],
+   "fecAll": [
+    "H2NE01118"
+   ],
    "govtrack": 456868,
+   "how": null,
    "last": "Flood",
    "name": "Mike Flood",
    "nameParts": {
@@ -5754,10 +6571,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H2MN01223"
    ],
+   "fecAll": [
+    "H2MN01223"
+   ],
    "govtrack": 456869,
+   "how": null,
    "last": "Finstad",
    "name": "Brad Finstad",
    "nameParts": {
@@ -5790,10 +6612,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 10,
+   "endType": null,
    "fec": [
     "H2FL10259"
    ],
+   "fecAll": [
+    "H2FL10259"
+   ],
    "govtrack": 456890,
+   "how": null,
    "last": "Frost",
    "name": "Maxwell Frost",
    "nameParts": {
@@ -5826,10 +6653,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H2NC06114"
    ],
+   "fecAll": [
+    "H2NC06114"
+   ],
    "govtrack": 456913,
+   "how": null,
    "last": "Foushee",
    "name": "Valerie P. Foushee",
    "nameParts": {
@@ -5863,10 +6695,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H2SC07280"
    ],
+   "fecAll": [
+    "H2SC07280",
+    "S6SC04403"
+   ],
    "govtrack": 456938,
+   "how": null,
    "last": "Fry",
    "name": "Russell Fry",
    "nameParts": {
@@ -5900,10 +6738,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.fetterman.senate.gov/contact/",
    "district": null,
+   "endType": null,
    "fec": [
     "S6PA00274"
    ],
+   "fecAll": [
+    "S6PA00274"
+   ],
    "govtrack": 456877,
+   "how": null,
    "last": "Fetterman",
    "name": "John Fetterman",
    "nameParts": {
@@ -5935,10 +6778,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 20,
+   "endType": null,
    "fec": [
     "H4CA20181"
    ],
+   "fecAll": [
+    "H4CA20181"
+   ],
    "govtrack": 456958,
+   "how": null,
    "last": "Fong",
    "name": "Vince Fong",
    "nameParts": {
@@ -5969,10 +6817,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H4AL02170"
    ],
+   "fecAll": [
+    "H4AL02170"
+   ],
    "govtrack": 456971,
+   "how": null,
    "last": "Figures",
    "name": "Shomari Figures",
    "nameParts": {
@@ -6005,10 +6858,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 0,
+   "endType": null,
    "fec": [
     "H4ND00061"
    ],
+   "fecAll": [
+    "H4ND00061"
+   ],
    "govtrack": 457006,
+   "how": null,
    "last": "Fedorchak",
    "name": "Julie Fedorchak",
    "nameParts": {
@@ -6041,10 +6899,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 30,
+   "endType": null,
    "fec": [
     "H4CA30149"
    ],
+   "fecAll": [
+    "H4CA30149"
+   ],
    "govtrack": 456979,
+   "how": null,
    "last": "Friedman",
    "name": "Laura Friedman",
    "nameParts": {
@@ -6077,10 +6940,15 @@
    "chamber": "House",
    "contactForm": "hhttps://fine.house.gov/address_authentication?form=/contact/email-me",
    "district": 6,
+   "endType": null,
    "fec": [
     "H6FL06258"
    ],
+   "fecAll": [
+    "H6FL06258"
+   ],
    "govtrack": 457035,
+   "how": null,
    "last": "Fine",
    "name": "Randy Fine",
    "nameParts": {
@@ -6109,10 +6977,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 14,
+   "endType": null,
    "fec": [
     "H0GA14030"
    ],
+   "fecAll": [
+    "H0GA14030"
+   ],
    "govtrack": 457041,
+   "how": null,
    "last": "Fuller",
    "name": "Clay Fuller",
    "nameParts": {
@@ -6139,10 +7012,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.grassley.senate.gov/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S0IA00028"
    ],
+   "fecAll": [
+    "S0IA00028"
+   ],
    "govtrack": 300048,
+   "how": null,
    "last": "Grassley",
    "name": "Chuck Grassley",
    "nameParts": {
@@ -6178,10 +7056,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H0MO06073"
    ],
+   "fecAll": [
+    "H0MO06073"
+   ],
    "govtrack": 400158,
+   "how": null,
    "last": "Graves",
    "name": "Sam Graves",
    "nameParts": {
@@ -6215,10 +7098,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 9,
+   "endType": null,
    "fec": [
     "H4TX09095"
    ],
+   "fecAll": [
+    "H4TX09095"
+   ],
    "govtrack": 400653,
+   "how": null,
    "last": "Green",
    "name": "Al Green",
    "nameParts": {
@@ -6252,10 +7140,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.gillibrand.senate.gov/contact/email-me",
    "district": null,
+   "endType": null,
    "fec": [
     "S0NY00410"
    ],
+   "fecAll": [
+    "H6NY20167",
+    "S0NY00410"
+   ],
    "govtrack": 412223,
+   "how": null,
    "last": "Gillibrand",
    "name": "Kirsten E. Gillibrand",
    "nameParts": {
@@ -6290,10 +7184,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H8KY02031"
    ],
+   "fecAll": [
+    "H8KY02031"
+   ],
    "govtrack": 412278,
+   "how": null,
    "last": "Guthrie",
    "name": "Brett Guthrie",
    "nameParts": {
@@ -6327,10 +7226,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H0CA10149"
    ],
+   "fecAll": [
+    "H0CA10149"
+   ],
    "govtrack": 412382,
+   "how": null,
    "last": "Garamendi",
    "name": "John Garamendi",
    "nameParts": {
@@ -6364,10 +7268,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 9,
+   "endType": null,
    "fec": [
     "H0AZ01259"
    ],
+   "fecAll": [
+    "H0AZ01259"
+   ],
    "govtrack": 412397,
+   "how": null,
    "last": "Gosar",
    "name": "Paul A. Gosar",
    "nameParts": {
@@ -6402,10 +7311,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 9,
+   "endType": null,
    "fec": [
     "H0VA09055"
    ],
+   "fecAll": [
+    "H0VA09055"
+   ],
    "govtrack": 412485,
+   "how": null,
    "last": "Griffith",
    "name": "H. Morgan Griffith",
    "nameParts": {
@@ -6440,10 +7354,16 @@
    "chamber": "Senate",
    "contactForm": null,
    "district": null,
+   "endType": null,
    "fec": [
     "S4AZ00139"
    ],
+   "fecAll": [
+    "H4AZ07043",
+    "S4AZ00139"
+   ],
    "govtrack": 412612,
+   "how": null,
    "last": "Gallego",
    "name": "Ruben Gallego",
    "nameParts": {
@@ -6475,10 +7395,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H4WI06048"
    ],
+   "fecAll": [
+    "H4WI06048"
+   ],
    "govtrack": 412661,
+   "how": null,
    "last": "Grothman",
    "name": "Glenn Grothman",
    "nameParts": {
@@ -6511,10 +7436,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 34,
+   "endType": null,
    "fec": [
     "H6TX15162"
    ],
+   "fecAll": [
+    "H6TX15162"
+   ],
    "govtrack": 412725,
+   "how": null,
    "last": "Gonzalez",
    "name": "Vicente Gonzalez",
    "nameParts": {
@@ -6547,10 +7477,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H6NJ05171"
    ],
+   "fecAll": [
+    "H6NJ05171"
+   ],
    "govtrack": 412714,
+   "how": null,
    "last": "Gottheimer",
    "name": "Josh Gottheimer",
    "nameParts": {
@@ -6582,10 +7517,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 34,
+   "endType": null,
    "fec": [
     "H8CA34266"
    ],
+   "fecAll": [
+    "H8CA34266"
+   ],
    "govtrack": 412739,
+   "how": null,
    "last": "Gomez",
    "name": "Jimmy Gomez",
    "nameParts": {
@@ -6618,10 +7558,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H8IL04134"
    ],
+   "fecAll": [
+    "H8IL04134"
+   ],
    "govtrack": 412774,
+   "how": null,
    "last": "García",
    "name": "Jesús G. \"Chuy\" García",
    "nameParts": {
@@ -6654,10 +7599,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 29,
+   "endType": null,
    "fec": [
     "H8TX29052"
    ],
+   "fecAll": [
+    "H8TX29052"
+   ],
    "govtrack": 412827,
+   "how": null,
    "last": "Garcia",
    "name": "Sylvia R. Garcia",
    "nameParts": {
@@ -6689,10 +7639,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H8TX05144"
    ],
+   "fecAll": [
+    "H8TX05144"
+   ],
    "govtrack": 412822,
+   "how": null,
    "last": "Gooden",
    "name": "Lance Gooden",
    "nameParts": {
@@ -6722,10 +7677,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H8MS03125"
    ],
+   "fecAll": [
+    "H8MS03125"
+   ],
    "govtrack": 412793,
+   "how": null,
    "last": "Guest",
    "name": "Michael Guest",
    "nameParts": {
@@ -6756,10 +7716,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H8ME02185"
    ],
+   "fecAll": [
+    "H8ME02185"
+   ],
    "govtrack": 412842,
+   "how": null,
    "last": "Golden",
    "name": "Jared F. Golden",
    "nameParts": {
@@ -6790,10 +7755,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 28,
+   "endType": null,
    "fec": [
     "H0FL26036"
    ],
+   "fecAll": [
+    "H0FL26036"
+   ],
    "govtrack": 456809,
+   "how": null,
    "last": "Gimenez",
    "name": "Carlos A. Gimenez",
    "nameParts": {
@@ -6826,10 +7796,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H0NY02234"
    ],
+   "fecAll": [
+    "H0NY02234"
+   ],
    "govtrack": 456836,
+   "how": null,
    "last": "Garbarino",
    "name": "Andrew R. Garbarino",
    "nameParts": {
@@ -6861,10 +7836,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 42,
+   "endType": null,
    "fec": [
     "H2CA47188"
    ],
+   "fecAll": [
+    "H2CA47188"
+   ],
    "govtrack": 456885,
+   "how": null,
    "last": "Garcia",
    "name": "Robert Garcia",
    "nameParts": {
@@ -6897,10 +7877,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 10,
+   "endType": null,
    "fec": [
     "H2NY10308"
    ],
+   "fecAll": [
+    "H2NY10308"
+   ],
    "govtrack": 456923,
+   "how": null,
    "last": "Goldman",
    "name": "Daniel S. Goldman",
    "nameParts": {
@@ -6933,10 +7918,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H2WA03217"
    ],
+   "fecAll": [
+    "H2WA03217"
+   ],
    "govtrack": 456949,
+   "how": null,
    "last": "Gluesenkamp Perez",
    "name": "Marie Gluesenkamp Perez",
    "nameParts": {
@@ -6969,10 +7959,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 12,
+   "endType": null,
    "fec": [
     "H4TX12065"
    ],
+   "fecAll": [
+    "H4TX12065"
+   ],
    "govtrack": 457021,
+   "how": null,
    "last": "Goldman",
    "name": "Craig A. Goldman",
    "nameParts": {
@@ -7005,11 +8000,17 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H4NY04158",
     "H2NY04244"
    ],
+   "fecAll": [
+    "H2NY04244",
+    "H4NY04158"
+   ],
    "govtrack": 457010,
+   "how": null,
    "last": "Gillen",
    "name": "Laura Gillen",
    "nameParts": {
@@ -7042,10 +8043,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 26,
+   "endType": null,
    "fec": [
     "H4TX26149"
    ],
+   "fecAll": [
+    "H4TX26149"
+   ],
    "govtrack": 457023,
+   "how": null,
    "last": "Gill",
    "name": "Brandon Gill",
    "nameParts": {
@@ -7078,10 +8084,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H4NH02399"
    ],
+   "fecAll": [
+    "H4NH02399"
+   ],
    "govtrack": 457007,
+   "how": null,
    "last": "Goodlander",
    "name": "Maggie Goodlander",
    "nameParts": {
@@ -7114,10 +8125,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 13,
+   "endType": null,
    "fec": [
     "H2CA13115"
    ],
+   "fecAll": [
+    "H2CA13115"
+   ],
    "govtrack": 456975,
+   "how": null,
    "last": "Gray",
    "name": "Adam Gray",
    "nameParts": {
@@ -7150,10 +8166,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H6AZ07121"
    ],
+   "fecAll": [
+    "H6AZ07121"
+   ],
    "govtrack": 457037,
+   "how": null,
    "last": "Grijalva",
    "name": "Adelita S. Grijalva",
    "nameParts": {
@@ -7181,10 +8202,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H6CA01285"
    ],
+   "fecAll": [
+    "H6CA01285"
+   ],
    "govtrack": 457043,
+   "how": null,
    "last": "Gallagher",
    "name": "James Gallagher",
    "nameParts": {
@@ -7211,8 +8237,11 @@
    "chamber": "Senate",
    "contactForm": null,
    "district": null,
+   "endType": null,
    "fec": [],
+   "fecAll": [],
    "govtrack": 457044,
+   "how": "appointment",
    "last": "Graham Nordone",
    "name": "Darline Graham",
    "nameParts": {
@@ -7239,10 +8268,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.hickenlooper.senate.gov/contact/",
    "district": null,
+   "endType": null,
    "fec": [
     "S0CO00575"
    ],
+   "fecAll": [
+    "S0CO00575"
+   ],
    "govtrack": 456797,
+   "how": null,
    "last": "Hickenlooper",
    "name": "John W. Hickenlooper",
    "nameParts": {
@@ -7276,10 +8310,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.hagerty.senate.gov/email-me/",
    "district": null,
+   "endType": null,
    "fec": [
     "S0TN00169"
    ],
+   "fecAll": [
+    "S0TN00169"
+   ],
    "govtrack": 456798,
+   "how": null,
    "last": "Hagerty",
    "name": "Bill Hagerty",
    "nameParts": {
@@ -7313,10 +8352,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H2MD05155"
    ],
+   "fecAll": [
+    "H2MD05155"
+   ],
    "govtrack": 400189,
+   "how": null,
    "last": "Hoyer",
    "name": "Steny H. Hoyer",
    "nameParts": {
@@ -7351,10 +8395,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.hirono.senate.gov/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S2HI00106"
    ],
+   "fecAll": [
+    "H6HI02251",
+    "S2HI00106"
+   ],
    "govtrack": 412200,
+   "how": null,
    "last": "Hirono",
    "name": "Mazie K. Hirono",
    "nameParts": {
@@ -7389,10 +8439,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.heinrich.senate.gov/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S2NM00088"
    ],
+   "fecAll": [
+    "H8NM01224",
+    "S2NM00088"
+   ],
    "govtrack": 412281,
+   "how": null,
    "last": "Heinrich",
    "name": "Martin Heinrich",
    "nameParts": {
@@ -7426,10 +8482,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H8CT04172"
    ],
+   "fecAll": [
+    "H8CT04172"
+   ],
    "govtrack": 412282,
+   "how": null,
    "last": "Himes",
    "name": "James A. Himes",
    "nameParts": {
@@ -7466,10 +8527,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H8MD01094"
    ],
+   "fecAll": [
+    "H8MD01094"
+   ],
    "govtrack": 412434,
+   "how": null,
    "last": "Harris",
    "name": "Andy Harris",
    "nameParts": {
@@ -7502,10 +8568,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H0MI02094"
    ],
+   "fecAll": [
+    "H0MI02094"
+   ],
    "govtrack": 412437,
+   "how": null,
    "last": "Huizenga",
    "name": "Bill Huizenga",
    "nameParts": {
@@ -7539,10 +8610,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.hoeven.senate.gov/contact/contact-the-senator",
    "district": null,
+   "endType": null,
    "fec": [
     "S0ND00093"
    ],
+   "fecAll": [
+    "S0ND00093"
+   ],
    "govtrack": 412494,
+   "how": null,
    "last": "Hoeven",
    "name": "John Hoeven",
    "nameParts": {
@@ -7576,10 +8652,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H2NV04011"
    ],
+   "fecAll": [
+    "H2NV04011"
+   ],
    "govtrack": 412559,
+   "how": null,
    "last": "Horsford",
    "name": "Steven Horsford",
    "nameParts": {
@@ -7612,10 +8693,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 9,
+   "endType": null,
    "fec": [
     "H2NC08185"
    ],
+   "fecAll": [
+    "H2NC08185"
+   ],
    "govtrack": 412550,
+   "how": null,
    "last": "Hudson",
    "name": "Richard Hudson",
    "nameParts": {
@@ -7648,10 +8734,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H2CA06259"
    ],
+   "fecAll": [
+    "H2CA06259"
+   ],
    "govtrack": 412511,
+   "how": null,
    "last": "Huffman",
    "name": "Jared Huffman",
    "nameParts": {
@@ -7685,10 +8776,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H4AR02141"
    ],
+   "fecAll": [
+    "H4AR02141"
+   ],
    "govtrack": 412609,
+   "how": null,
    "last": "Hill",
    "name": "J. French Hill",
    "nameParts": {
@@ -7722,10 +8818,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.hassan.senate.gov/content/contact-senator",
    "district": null,
+   "endType": null,
    "fec": [
     "S6NH00091"
    ],
+   "fecAll": [
+    "S6NH00091"
+   ],
    "govtrack": 412680,
+   "how": null,
    "last": "Hassan",
    "name": "Margaret Wood Hassan",
    "nameParts": {
@@ -7759,10 +8860,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H6LA03148"
    ],
+   "fecAll": [
+    "H6LA03148"
+   ],
    "govtrack": 412705,
+   "how": null,
    "last": "Higgins",
    "name": "Clay Higgins",
    "nameParts": {
@@ -7794,10 +8900,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.hydesmith.senate.gov/contact-senator",
    "district": null,
+   "endType": null,
    "fec": [
     "S8MS00261"
    ],
+   "fecAll": [
+    "S8MS00261"
+   ],
    "govtrack": 412743,
+   "how": null,
    "last": "Hyde-Smith",
    "name": "Cindy Hyde-Smith",
    "nameParts": {
@@ -7830,10 +8941,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H8CT05245"
    ],
+   "fecAll": [
+    "H8CT05245"
+   ],
    "govtrack": 412763,
+   "how": null,
    "last": "Hayes",
    "name": "Jahana Hayes",
    "nameParts": {
@@ -7866,10 +8982,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H8OK01157"
    ],
+   "fecAll": [
+    "H8OK01157",
+    "S6OK04247"
+   ],
    "govtrack": 412748,
+   "how": null,
    "last": "Hern",
    "name": "Kevin Hern",
    "nameParts": {
@@ -7902,10 +9024,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H8PA06087"
    ],
+   "fecAll": [
+    "H8PA06087"
+   ],
    "govtrack": 412810,
+   "how": null,
    "last": "Houlahan",
    "name": "Chrissy Houlahan",
    "nameParts": {
@@ -7938,10 +9065,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H0TN01118"
    ],
+   "fecAll": [
+    "H0TN01118"
+   ],
    "govtrack": 456844,
+   "how": null,
    "last": "Harshbarger",
    "name": "Diana Harshbarger",
    "nameParts": {
@@ -7972,10 +9104,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.hawley.senate.gov/contact-senator-hawley",
    "district": null,
+   "endType": null,
    "fec": [
     "S8MO00160"
    ],
+   "fecAll": [
+    "S8MO00160"
+   ],
    "govtrack": 412840,
+   "how": null,
    "last": "Hawley",
    "name": "Josh Hawley",
    "nameParts": {
@@ -8009,10 +9146,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 9,
+   "endType": null,
    "fec": [
     "H8CA10126"
    ],
+   "fecAll": [
+    "H8CA10126"
+   ],
    "govtrack": 412754,
+   "how": null,
    "last": "Harder",
    "name": "Josh Harder",
    "nameParts": {
@@ -8042,10 +9184,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H0IA01174"
    ],
+   "fecAll": [
+    "H0IA01174"
+   ],
    "govtrack": 456816,
+   "how": null,
    "last": "Hinson",
    "name": "Ashley Hinson",
    "nameParts": {
@@ -8076,10 +9223,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 9,
+   "endType": null,
    "fec": [
     "H6IN09143"
    ],
+   "fecAll": [
+    "H6IN09143"
+   ],
    "govtrack": 456903,
+   "how": null,
    "last": "Houchin",
    "name": "Erin Houchin",
    "nameParts": {
@@ -8112,10 +9264,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H2OR04095"
    ],
+   "fecAll": [
+    "H2OR04095"
+   ],
    "govtrack": 456932,
+   "how": null,
    "last": "Hoyle",
    "name": "Val T. Hoyle",
    "nameParts": {
@@ -8148,10 +9305,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 38,
+   "endType": null,
    "fec": [
     "H0TX07170"
    ],
+   "fecAll": [
+    "H0TX07170",
+    "S6TX00511"
+   ],
    "govtrack": 456946,
+   "how": null,
    "last": "Hunt",
    "name": "Wesley Hunt",
    "nameParts": {
@@ -8184,10 +9347,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 0,
+   "endType": null,
    "fec": [
     "H2WY00166"
    ],
+   "fecAll": [
+    "H2WY00166",
+    "S6WY00209"
+   ],
    "govtrack": 456951,
+   "how": null,
    "last": "Hageman",
    "name": "Harriet M. Hageman",
    "nameParts": {
@@ -8219,10 +9388,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H4AZ08108"
    ],
+   "fecAll": [
+    "H4AZ08108"
+   ],
    "govtrack": 456973,
+   "how": null,
    "last": "Hamadeh",
    "name": "Abraham J. Hamadeh",
    "nameParts": {
@@ -8250,10 +9424,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H4FL08168"
    ],
+   "fecAll": [
+    "H4FL08168"
+   ],
    "govtrack": 456986,
+   "how": null,
    "last": "Haridopolos",
    "name": "Mike Haridopolos",
    "nameParts": {
@@ -8284,10 +9463,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H4CO03357"
    ],
+   "fecAll": [
+    "H4CO03357"
+   ],
    "govtrack": 456982,
+   "how": null,
    "last": "Hurd",
    "name": "Jeff Hurd",
    "nameParts": {
@@ -8321,10 +9505,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 10,
+   "endType": null,
    "fec": [
     "H2NC13243"
    ],
+   "fecAll": [
+    "H2NC13243"
+   ],
    "govtrack": 457003,
+   "how": null,
    "last": "Harrigan",
    "name": "Pat Harrigan",
    "nameParts": {
@@ -8356,11 +9545,17 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H6NC09200",
     "H4NC08066"
    ],
+   "fecAll": [
+    "H4NC08066",
+    "H6NC09200"
+   ],
    "govtrack": 457002,
+   "how": null,
    "last": "Harris",
    "name": "Mark Harris",
    "nameParts": {
@@ -8393,10 +9588,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 0,
+   "endType": null,
    "fec": [
     "H4PR01010"
    ],
+   "fecAll": [
+    "H4PR01010"
+   ],
    "govtrack": 457019,
+   "how": null,
    "last": "Hernández Rivera",
    "name": "Pablo José Hernández",
    "nameParts": {
@@ -8428,10 +9628,15 @@
    "chamber": "Senate",
    "contactForm": null,
    "district": null,
+   "endType": "special-election",
    "fec": [
     "S6OH00304"
    ],
+   "fecAll": [
+    "S6OH00304"
+   ],
    "govtrack": 457032,
+   "how": "appointment",
    "last": "Husted",
    "name": "Jon Husted",
    "nameParts": {
@@ -8459,10 +9664,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 48,
+   "endType": null,
    "fec": [
     "H0CA48024"
    ],
+   "fecAll": [
+    "H0CA48024",
+    "S8CA00135"
+   ],
    "govtrack": 400196,
+   "how": null,
    "last": "Issa",
    "name": "Darrell Issa",
    "nameParts": {
@@ -8494,11 +9705,17 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H2MD04315",
     "H2MD04232"
    ],
+   "fecAll": [
+    "H2MD04232",
+    "H2MD04315"
+   ],
    "govtrack": 456905,
+   "how": null,
    "last": "Ivey",
    "name": "Glenn Ivey",
    "nameParts": {
@@ -8531,10 +9748,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H6GA04129"
    ],
+   "fecAll": [
+    "H6GA04129"
+   ],
    "govtrack": 412199,
+   "how": null,
    "last": "Johnson",
    "name": "Henry C. \"Hank\" Johnson, Jr.",
    "nameParts": {
@@ -8571,10 +9793,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H6OH04082"
    ],
+   "fecAll": [
+    "H6OH04082"
+   ],
    "govtrack": 412226,
+   "how": null,
    "last": "Jordan",
    "name": "Jim Jordan",
    "nameParts": {
@@ -8607,10 +9834,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.ronjohnson.senate.gov/public/index.cfm/email-the-senator",
    "district": null,
+   "endType": null,
    "fec": [
     "S0WI00197"
    ],
+   "fecAll": [
+    "S0WI00197"
+   ],
    "govtrack": 412496,
+   "how": null,
    "last": "Johnson",
    "name": "Ron Johnson",
    "nameParts": {
@@ -8644,10 +9876,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H2NY10092"
    ],
+   "fecAll": [
+    "H2NY10092"
+   ],
    "govtrack": 412561,
+   "how": null,
    "last": "Jeffries",
    "name": "Hakeem S. Jeffries",
    "nameParts": {
@@ -8681,10 +9918,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 14,
+   "endType": null,
    "fec": [
     "H2OH14064"
    ],
+   "fecAll": [
+    "H2OH14064"
+   ],
    "govtrack": 412566,
+   "how": null,
    "last": "Joyce",
    "name": "David P. Joyce",
    "nameParts": {
@@ -8719,10 +9961,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H6WA07458"
    ],
+   "fecAll": [
+    "H6WA07458"
+   ],
    "govtrack": 412730,
+   "how": null,
    "last": "Jayapal",
    "name": "Pramila Jayapal",
    "nameParts": {
@@ -8756,10 +10003,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H6LA04138"
    ],
+   "fecAll": [
+    "H6LA04138"
+   ],
    "govtrack": 412706,
+   "how": null,
    "last": "Johnson",
    "name": "Mike Johnson",
    "nameParts": {
@@ -8792,10 +10044,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 0,
+   "endType": null,
    "fec": [
     "H8SD01055"
    ],
+   "fecAll": [
+    "H8SD01055"
+   ],
    "govtrack": 412816,
+   "how": null,
    "last": "Johnson",
    "name": "Dusty Johnson",
    "nameParts": {
@@ -8825,10 +10082,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 13,
+   "endType": null,
    "fec": [
     "H8PA13125"
    ],
+   "fecAll": [
+    "H8PA13125"
+   ],
    "govtrack": 412812,
+   "how": null,
    "last": "Joyce",
    "name": "John Joyce",
    "nameParts": {
@@ -8858,10 +10120,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 13,
+   "endType": null,
    "fec": [
     "H0TX13228"
    ],
+   "fecAll": [
+    "H0TX13228"
+   ],
    "govtrack": 456847,
+   "how": null,
    "last": "Jackson",
    "name": "Ronny Jackson",
    "nameParts": {
@@ -8894,10 +10161,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 51,
+   "endType": null,
    "fec": [
     "H8CA49074"
    ],
+   "fecAll": [
+    "H8CA49074"
+   ],
    "govtrack": 456804,
+   "how": null,
    "last": "Jacobs",
    "name": "Sara Jacobs",
    "nameParts": {
@@ -8929,10 +10201,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 10,
+   "endType": null,
    "fec": [
     "H2MI10150"
    ],
+   "fecAll": [
+    "H2MI10150",
+    "S8MI00372"
+   ],
    "govtrack": 456907,
+   "how": null,
    "last": "James",
    "name": "John James",
    "nameParts": {
@@ -8966,10 +10244,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H2IL01349"
    ],
+   "fecAll": [
+    "H2IL01349"
+   ],
    "govtrack": 456899,
+   "how": null,
    "last": "Jackson",
    "name": "Jonathan L. Jackson",
    "nameParts": {
@@ -9001,10 +10284,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 32,
+   "endType": null,
    "fec": [
     "H4TX32089"
    ],
+   "fecAll": [
+    "H4TX32089"
+   ],
    "govtrack": 457024,
+   "how": null,
    "last": "Johnson",
    "name": "Julie Johnson",
    "nameParts": {
@@ -9037,10 +10325,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H4GA03126"
    ],
+   "fecAll": [
+    "H4GA03126"
+   ],
    "govtrack": 456987,
+   "how": null,
    "last": "Jack",
    "name": "Brian Jack",
    "nameParts": {
@@ -9073,10 +10366,15 @@
    "chamber": "Senate",
    "contactForm": null,
    "district": null,
+   "endType": null,
    "fec": [
     "S4WV00332"
    ],
+   "fecAll": [
+    "S4WV00332"
+   ],
    "govtrack": 456969,
+   "how": null,
    "last": "Justice",
    "name": "James C. Justice",
    "nameParts": {
@@ -9109,10 +10407,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 9,
+   "endType": null,
    "fec": [
     "H2OH09031"
    ],
+   "fecAll": [
+    "H2OH09031"
+   ],
    "govtrack": 400211,
+   "how": null,
    "last": "Kaptur",
    "name": "Marcy Kaptur",
    "nameParts": {
@@ -9146,10 +10449,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.klobuchar.senate.gov/public/index.cfm/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S6MN00267"
    ],
+   "fecAll": [
+    "S6MN00267"
+   ],
    "govtrack": 412242,
+   "how": null,
    "last": "Klobuchar",
    "name": "Amy Klobuchar",
    "nameParts": {
@@ -9182,10 +10490,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 9,
+   "endType": null,
    "fec": [
     "H0MA10082"
    ],
+   "fecAll": [
+    "H0MA10082"
+   ],
    "govtrack": 412435,
+   "how": null,
    "last": "Keating",
    "name": "William R. Keating",
    "nameParts": {
@@ -9219,10 +10532,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 16,
+   "endType": null,
    "fec": [
     "H0PA03271"
    ],
+   "fecAll": [
+    "H0PA03271"
+   ],
    "govtrack": 412465,
+   "how": null,
    "last": "Kelly",
    "name": "Mike Kelly",
    "nameParts": {
@@ -9255,10 +10573,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.kelly.senate.gov/contact/contact-form/",
    "district": null,
+   "endType": null,
    "fec": [
     "S0AZ00350"
    ],
+   "fecAll": [
+    "S0AZ00350"
+   ],
    "govtrack": 456794,
+   "how": null,
    "last": "Kelly",
    "name": "Mark Kelly",
    "nameParts": {
@@ -9291,10 +10614,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.king.senate.gov/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S2ME00109"
    ],
+   "fecAll": [
+    "S2ME00109"
+   ],
    "govtrack": 412545,
+   "how": null,
    "last": "King",
    "name": "Angus S. King, Jr.",
    "nameParts": {
@@ -9329,10 +10657,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.kaine.senate.gov/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S2VA00142"
    ],
+   "fecAll": [
+    "S2VA00142"
+   ],
    "govtrack": 412582,
+   "how": null,
    "last": "Kaine",
    "name": "Tim Kaine",
    "nameParts": {
@@ -9366,10 +10699,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H2IL02172"
    ],
+   "fecAll": [
+    "H2IL02172",
+    "S6IL00474"
+   ],
    "govtrack": 412595,
+   "how": null,
    "last": "Kelly",
    "name": "Robin L. Kelly",
    "nameParts": {
@@ -9403,10 +10742,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H6MS01131"
    ],
+   "fecAll": [
+    "H6MS01131"
+   ],
    "govtrack": 412673,
+   "how": null,
    "last": "Kelly",
    "name": "Trent Kelly",
    "nameParts": {
@@ -9439,10 +10783,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 17,
+   "endType": null,
    "fec": [
     "H4CA12055"
    ],
+   "fecAll": [
+    "H4CA12055"
+   ],
    "govtrack": 412684,
+   "how": null,
    "last": "Khanna",
    "name": "Ro Khanna",
    "nameParts": {
@@ -9475,10 +10824,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H6IL08147"
    ],
+   "fecAll": [
+    "H6IL08147",
+    "S6IL00482"
+   ],
    "govtrack": 412701,
+   "how": null,
    "last": "Krishnamoorthi",
    "name": "Raja Krishnamoorthi",
    "nameParts": {
@@ -9510,10 +10865,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H2TN07103"
    ],
+   "fecAll": [
+    "H2TN07103"
+   ],
    "govtrack": 412724,
+   "how": null,
    "last": "Kustoff",
    "name": "David Kustoff",
    "nameParts": {
@@ -9546,10 +10906,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.kennedy.senate.gov/public/email-me",
    "district": null,
+   "endType": null,
    "fec": [
     "S4LA00065"
    ],
+   "fecAll": [
+    "S4LA00065"
+   ],
    "govtrack": 412679,
+   "how": null,
    "last": "Kennedy",
    "name": "John Kennedy",
    "nameParts": {
@@ -9583,10 +10948,16 @@
    "chamber": "Senate",
    "contactForm": null,
    "district": null,
+   "endType": null,
    "fec": [
     "S4NJ00466"
    ],
+   "fecAll": [
+    "H8NJ03206",
+    "S4NJ00466"
+   ],
    "govtrack": 412797,
+   "how": null,
    "last": "Kim",
    "name": "Andy Kim",
    "nameParts": {
@@ -9617,10 +10988,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 40,
+   "endType": null,
    "fec": [
     "H8CA39240"
    ],
+   "fecAll": [
+    "H8CA39240"
+   ],
    "govtrack": 456802,
+   "how": null,
    "last": "Kim",
    "name": "Young Kim",
    "nameParts": {
@@ -9654,10 +11030,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H0NJ07261"
    ],
+   "fecAll": [
+    "H0NJ07261"
+   ],
    "govtrack": 456917,
+   "how": null,
    "last": "Kean",
    "name": "Thomas H. Kean, Jr.",
    "nameParts": {
@@ -9691,10 +11072,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H2VA02064"
    ],
+   "fecAll": [
+    "H2VA02064"
+   ],
    "govtrack": 456947,
+   "how": null,
    "last": "Kiggans",
    "name": "Jennifer A. Kiggans",
    "nameParts": {
@@ -9728,10 +11114,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 37,
+   "endType": null,
    "fec": [
     "H2CA37304"
    ],
+   "fecAll": [
+    "H2CA37304"
+   ],
    "govtrack": 456884,
+   "how": null,
    "last": "Kamlager-Dove",
    "name": "Sydney Kamlager-Dove",
    "nameParts": {
@@ -9764,10 +11155,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H2CA03157"
    ],
+   "fecAll": [
+    "H2CA03157"
+   ],
    "govtrack": 456881,
+   "how": null,
    "last": "Kiley",
    "name": "Kevin Kiley",
    "nameParts": {
@@ -9800,10 +11196,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 26,
+   "endType": null,
    "fec": [
     "H4NY26078"
    ],
+   "fecAll": [
+    "H4NY26078"
+   ],
    "govtrack": 456957,
+   "how": null,
    "last": "Kennedy",
    "name": "Timothy M. Kennedy",
    "nameParts": {
@@ -9836,10 +11237,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H4UT03260"
    ],
+   "fecAll": [
+    "H4UT03260"
+   ],
    "govtrack": 457025,
+   "how": null,
    "last": "Kennedy",
    "name": "Mike Kennedy",
    "nameParts": {
@@ -9872,10 +11278,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 0,
+   "endType": null,
    "fec": [
     "H4MP01022"
    ],
+   "fecAll": [
+    "H4MP01022"
+   ],
    "govtrack": 456999,
+   "how": null,
    "last": "King-Hinds",
    "name": "Kimberlyn King-Hinds",
    "nameParts": {
@@ -9908,10 +11319,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 13,
+   "endType": null,
    "fec": [
     "H4NC13116"
    ],
+   "fecAll": [
+    "H4NC13116"
+   ],
    "govtrack": 457004,
+   "how": null,
    "last": "Knott",
    "name": "Brad Knott",
    "nameParts": {
@@ -9943,10 +11359,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H0NM03102"
    ],
+   "fecAll": [
+    "H0NM03102"
+   ],
    "govtrack": 456835,
+   "how": null,
    "last": "Leger Fernandez",
    "name": "Teresa Leger Fernandez",
    "nameParts": {
@@ -9980,10 +11401,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 18,
+   "endType": null,
    "fec": [
     "H4CA16049"
    ],
+   "fecAll": [
+    "H4CA16049"
+   ],
    "govtrack": 400245,
+   "how": null,
    "last": "Lofgren",
    "name": "Zoe Lofgren",
    "nameParts": {
@@ -10016,10 +11442,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H4OK06056"
    ],
+   "fecAll": [
+    "H4OK06056"
+   ],
    "govtrack": 400247,
+   "how": null,
    "last": "Lucas",
    "name": "Frank D. Lucas",
    "nameParts": {
@@ -10054,10 +11485,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H8CT01046"
    ],
+   "fecAll": [
+    "H8CT01046"
+   ],
    "govtrack": 400233,
+   "how": null,
    "last": "Larson",
    "name": "John B. Larson",
    "nameParts": {
@@ -10092,10 +11528,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H0WA02080"
    ],
+   "fecAll": [
+    "H0WA02080"
+   ],
    "govtrack": 400232,
+   "how": null,
    "last": "Larsen",
    "name": "Rick Larsen",
    "nameParts": {
@@ -10129,10 +11570,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H2MA09072"
    ],
+   "fecAll": [
+    "H2MA09072",
+    "S0MA00083"
+   ],
    "govtrack": 400249,
+   "how": null,
    "last": "Lynch",
    "name": "Stephen F. Lynch",
    "nameParts": {
@@ -10167,10 +11614,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H8OH05036"
    ],
+   "fecAll": [
+    "H8OH05036"
+   ],
    "govtrack": 412256,
+   "how": null,
    "last": "Latta",
    "name": "Robert E. Latta",
    "nameParts": {
@@ -10205,10 +11657,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.lujan.senate.gov/contact/",
    "district": null,
+   "endType": null,
    "fec": [
     "S0NM00058"
    ],
+   "fecAll": [
+    "H8NM03196",
+    "S0NM00058"
+   ],
    "govtrack": 412293,
+   "how": null,
    "last": "Luján",
    "name": "Ben Ray Luján",
    "nameParts": {
@@ -10241,10 +11699,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.lummis.senate.gov/contact/contact-form/",
    "district": null,
+   "endType": null,
    "fec": [
     "S0WY00137"
    ],
+   "fecAll": [
+    "H8WY00148",
+    "S0WY00137"
+   ],
    "govtrack": 412294,
+   "how": null,
    "last": "Lummis",
    "name": "Cynthia M. Lummis",
    "nameParts": {
@@ -10277,10 +11741,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.lankford.senate.gov/contact/email",
    "district": null,
+   "endType": null,
    "fec": [
     "S4OK00232"
    ],
+   "fecAll": [
+    "H0OK05114",
+    "S4OK00232"
+   ],
    "govtrack": 412464,
+   "how": null,
    "last": "Lankford",
    "name": "James Lankford",
    "nameParts": {
@@ -10314,10 +11784,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.lee.senate.gov/public/index.cfm/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S0UT00165"
    ],
+   "fecAll": [
+    "S0UT00165"
+   ],
    "govtrack": 412495,
+   "how": null,
    "last": "Lee",
    "name": "Mike Lee",
    "nameParts": {
@@ -10351,10 +11826,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 36,
+   "endType": null,
    "fec": [
     "H4CA33119"
    ],
+   "fecAll": [
+    "H4CA33119"
+   ],
    "govtrack": 412616,
+   "how": null,
    "last": "Lieu",
    "name": "Ted Lieu",
    "nameParts": {
@@ -10387,10 +11867,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 11,
+   "endType": null,
    "fec": [
     "H4GA11061"
    ],
+   "fecAll": [
+    "H4GA11061"
+   ],
    "govtrack": 412624,
+   "how": null,
    "last": "Loudermilk",
    "name": "Barry Loudermilk",
    "nameParts": {
@@ -10423,10 +11908,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 16,
+   "endType": null,
    "fec": [
     "H6IL18088"
    ],
+   "fecAll": [
+    "H6IL18088"
+   ],
    "govtrack": 412674,
+   "how": null,
    "last": "LaHood",
    "name": "Darin LaHood",
    "nameParts": {
@@ -10458,10 +11948,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H6NV04020"
    ],
+   "fecAll": [
+    "H6NV04020"
+   ],
    "govtrack": 412802,
+   "how": null,
    "last": "Lee",
    "name": "Susie Lee",
    "nameParts": {
@@ -10493,10 +11988,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 49,
+   "endType": null,
    "fec": [
     "H8CA49058"
    ],
+   "fecAll": [
+    "H8CA49058"
+   ],
    "govtrack": 412760,
+   "how": null,
    "last": "Levin",
    "name": "Mike Levin",
    "nameParts": {
@@ -10529,10 +12029,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H2LA05126"
    ],
+   "fecAll": [
+    "H2LA05126",
+    "S6LA00664"
+   ],
    "govtrack": 456859,
+   "how": null,
    "last": "Letlow",
    "name": "Julia Letlow",
    "nameParts": {
@@ -10563,10 +12069,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 13,
+   "endType": null,
    "fec": [
     "H0FL13158"
    ],
+   "fecAll": [
+    "H0FL13158"
+   ],
    "govtrack": 456891,
+   "how": null,
    "last": "Luna",
    "name": "Anna Paulina Luna",
    "nameParts": {
@@ -10599,10 +12110,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 15,
+   "endType": null,
    "fec": [
     "H2FL15241"
    ],
+   "fecAll": [
+    "H2FL15241"
+   ],
    "govtrack": 456892,
+   "how": null,
    "last": "Lee",
    "name": "Laurel M. Lee",
    "nameParts": {
@@ -10635,10 +12151,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H2NY01190"
    ],
+   "fecAll": [
+    "H2NY01190"
+   ],
    "govtrack": 456920,
+   "how": null,
    "last": "LaLota",
    "name": "Nick LaLota",
    "nameParts": {
@@ -10671,10 +12192,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 17,
+   "endType": null,
    "fec": [
     "H2NY17162"
    ],
+   "fecAll": [
+    "H2NY17162"
+   ],
    "govtrack": 456924,
+   "how": null,
    "last": "Lawler",
    "name": "Michael Lawler",
    "nameParts": {
@@ -10708,10 +12234,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 23,
+   "endType": null,
    "fec": [
     "H2NY23228"
    ],
+   "fecAll": [
+    "H2NY23228"
+   ],
    "govtrack": 456927,
+   "how": null,
    "last": "Langworthy",
    "name": "Nicholas A. Langworthy",
    "nameParts": {
@@ -10744,10 +12275,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H2OH01194"
    ],
+   "fecAll": [
+    "H2OH01194"
+   ],
    "govtrack": 456928,
+   "how": null,
    "last": "Landsman",
    "name": "Greg Landsman",
    "nameParts": {
@@ -10780,10 +12316,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 12,
+   "endType": null,
    "fec": [
     "H2PA18200"
    ],
+   "fecAll": [
+    "H2PA18200"
+   ],
    "govtrack": 456935,
+   "how": null,
    "last": "Lee",
    "name": "Summer L. Lee",
    "nameParts": {
@@ -10817,10 +12358,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H2TX08182"
    ],
+   "fecAll": [
+    "H2TX08182"
+   ],
    "govtrack": 456942,
+   "how": null,
    "last": "Luttrell",
    "name": "Morgan Luttrell",
    "nameParts": {
@@ -10853,10 +12399,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 16,
+   "endType": null,
    "fec": [
     "H4NY16087"
    ],
+   "fecAll": [
+    "H4NY16087"
+   ],
    "govtrack": 457011,
+   "how": null,
    "last": "Latimer",
    "name": "George Latimer",
    "nameParts": {
@@ -10889,10 +12440,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 16,
+   "endType": null,
    "fec": [
     "H4CA16197"
    ],
+   "fecAll": [
+    "H4CA16197"
+   ],
    "govtrack": 456976,
+   "how": null,
    "last": "Liccardo",
    "name": "Sam T. Liccardo",
    "nameParts": {
@@ -10924,10 +12480,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.markey.senate.gov/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S4MA00028"
    ],
+   "fecAll": [
+    "H6MA07101",
+    "S4MA00028"
+   ],
    "govtrack": 400253,
+   "how": null,
    "last": "Markey",
    "name": "Edward J. Markey",
    "nameParts": {
@@ -10963,10 +12525,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H0SC01394"
    ],
+   "fecAll": [
+    "H0SC01394"
+   ],
    "govtrack": 456843,
+   "how": null,
    "last": "Mace",
    "name": "Nancy Mace",
    "nameParts": {
@@ -10999,10 +12566,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H4MA03022"
    ],
+   "fecAll": [
+    "H4MA03022"
+   ],
    "govtrack": 400263,
+   "how": null,
    "last": "McGovern",
    "name": "James P. McGovern",
    "nameParts": {
@@ -11038,10 +12610,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 11,
+   "endType": null,
    "fec": [
     "H0NY11078"
    ],
+   "fecAll": [
+    "H0NY11078"
+   ],
    "govtrack": 456837,
+   "how": null,
    "last": "Malliotakis",
    "name": "Nicole Malliotakis",
    "nameParts": {
@@ -11072,10 +12649,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.mcconnell.senate.gov/public/index.cfm?p=contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S2KY00012"
    ],
+   "fecAll": [
+    "S2KY00012"
+   ],
    "govtrack": 300072,
+   "how": null,
    "last": "McConnell",
    "name": "Mitch McConnell",
    "nameParts": {
@@ -11107,11 +12689,18 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H6MD07020",
     "H0MD07114"
    ],
+   "fecAll": [
+    "H0MD07114",
+    "H6MD07020",
+    "S6MD03185"
+   ],
    "govtrack": 407672,
+   "how": null,
    "last": "Mfume",
    "name": "Kweisi Mfume",
    "nameParts": {
@@ -11144,10 +12733,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H0KS01123"
    ],
+   "fecAll": [
+    "H0KS01123"
+   ],
    "govtrack": 456823,
+   "how": null,
    "last": "Mann",
    "name": "Tracey Mann",
    "nameParts": {
@@ -11180,10 +12774,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.moran.senate.gov/public/index.cfm/e-mail-jerry",
    "district": null,
+   "endType": null,
    "fec": [
     "S0KS00091"
    ],
+   "fecAll": [
+    "H6KS01096",
+    "S0KS00091"
+   ],
    "govtrack": 400284,
+   "how": null,
    "last": "Moran",
    "name": "Jerry Moran",
    "nameParts": {
@@ -11217,10 +12817,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.murray.senate.gov/write-to-patty/",
    "district": null,
+   "endType": null,
    "fec": [
     "S2WA00189"
    ],
+   "fecAll": [
+    "S2WA00189"
+   ],
    "govtrack": 300076,
+   "how": null,
    "last": "Murray",
    "name": "Patty Murray",
    "nameParts": {
@@ -11253,10 +12858,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 9,
+   "endType": null,
    "fec": [
     "H0MI10287"
    ],
+   "fecAll": [
+    "H0MI10287"
+   ],
    "govtrack": 456827,
+   "how": null,
    "last": "McClain",
    "name": "Lisa C. McClain",
    "nameParts": {
@@ -11289,10 +12899,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H8NY06048"
    ],
+   "fecAll": [
+    "H8NY06048"
+   ],
    "govtrack": 400271,
+   "how": null,
    "last": "Meeks",
    "name": "Gregory W. Meeks",
    "nameParts": {
@@ -11327,10 +12942,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H0MN04049"
    ],
+   "fecAll": [
+    "H0MN04049"
+   ],
    "govtrack": 400259,
+   "how": null,
    "last": "McCollum",
    "name": "Betty McCollum",
    "nameParts": {
@@ -11365,10 +12985,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.murkowski.senate.gov/public/index.cfm/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S4AK00099"
    ],
+   "fecAll": [
+    "S4AK00099"
+   ],
    "govtrack": 300075,
+   "how": null,
    "last": "Murkowski",
    "name": "Lisa Murkowski",
    "nameParts": {
@@ -11403,10 +13028,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 10,
+   "endType": null,
    "fec": [
     "H4TX10093"
    ],
+   "fecAll": [
+    "H4TX10093"
+   ],
    "govtrack": 400654,
+   "how": null,
    "last": "McCaul",
    "name": "Michael T. McCaul",
    "nameParts": {
@@ -11441,10 +13071,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H4WI04183"
    ],
+   "fecAll": [
+    "H4WI04183"
+   ],
    "govtrack": 400661,
+   "how": null,
    "last": "Moore",
    "name": "Gwen Moore",
    "nameParts": {
@@ -11478,10 +13113,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H6CA05195"
    ],
+   "fecAll": [
+    "H6CA05195"
+   ],
    "govtrack": 400663,
+   "how": null,
    "last": "Matsui",
    "name": "Doris O. Matsui",
    "nameParts": {
@@ -11516,10 +13156,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.murphy.senate.gov/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S2CT00132"
    ],
+   "fecAll": [
+    "H6CT05124",
+    "S2CT00132"
+   ],
    "govtrack": 412194,
+   "how": null,
    "last": "Murphy",
    "name": "Christopher Murphy",
    "nameParts": {
@@ -11554,10 +13200,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.merkley.senate.gov/contact/",
    "district": null,
+   "endType": null,
    "fec": [
     "S8OR00207"
    ],
+   "fecAll": [
+    "S8OR00207"
+   ],
    "govtrack": 412325,
+   "how": null,
    "last": "Merkley",
    "name": "Jeff Merkley",
    "nameParts": {
@@ -11591,11 +13242,17 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H8CA04152",
     "H6CA21135"
    ],
+   "fecAll": [
+    "H6CA21135",
+    "H8CA04152"
+   ],
    "govtrack": 412295,
+   "how": null,
    "last": "McClintock",
    "name": "Tom McClintock",
    "nameParts": {
@@ -11629,10 +13286,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H2KY04121"
    ],
+   "fecAll": [
+    "H2KY04121"
+   ],
    "govtrack": 412503,
+   "how": null,
    "last": "Massie",
    "name": "Thomas Massie",
    "nameParts": {
@@ -11666,10 +13328,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H2NY06116"
    ],
+   "fecAll": [
+    "H2NY06116"
+   ],
    "govtrack": 412560,
+   "how": null,
    "last": "Meng",
    "name": "Grace Meng",
    "nameParts": {
@@ -11701,10 +13368,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H4MI04126"
    ],
+   "fecAll": [
+    "H4MI04126"
+   ],
    "govtrack": 412634,
+   "how": null,
    "last": "Moolenaar",
    "name": "John R. Moolenaar",
    "nameParts": {
@@ -11738,10 +13410,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H4MA06090"
    ],
+   "fecAll": [
+    "H4MA06090",
+    "S6MA00296"
+   ],
    "govtrack": 412632,
+   "how": null,
    "last": "Moulton",
    "name": "Seth Moulton",
    "nameParts": {
@@ -11774,10 +13452,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.marshall.senate.gov/contact/",
    "district": null,
+   "endType": null,
    "fec": [
     "S0KS00315"
    ],
+   "fecAll": [
+    "H6KS01179",
+    "S0KS00315"
+   ],
    "govtrack": 412704,
+   "how": null,
    "last": "Marshall",
    "name": "Roger Marshall",
    "nameParts": {
@@ -11810,10 +13494,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 21,
+   "endType": null,
    "fec": [
     "H6FL18097"
    ],
+   "fecAll": [
+    "H6FL18097"
+   ],
    "govtrack": 412698,
+   "how": null,
    "last": "Mast",
    "name": "Brian J. Mast",
    "nameParts": {
@@ -11847,10 +13536,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 9,
+   "endType": null,
    "fec": [
     "H8PA10147"
    ],
+   "fecAll": [
+    "H8PA10147"
+   ],
    "govtrack": 412811,
+   "how": null,
    "last": "Meuser",
    "name": "Daniel Meuser",
    "nameParts": {
@@ -11881,10 +13575,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H8WV03097"
    ],
+   "fecAll": [
+    "H8WV03097"
+   ],
    "govtrack": 412837,
+   "how": null,
    "last": "Miller",
    "name": "Carol D. Miller",
    "nameParts": {
@@ -11916,10 +13615,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 25,
+   "endType": null,
    "fec": [
     "H8NY25105"
    ],
+   "fecAll": [
+    "H8NY25105"
+   ],
    "govtrack": 412749,
+   "how": null,
    "last": "Morelle",
    "name": "Joseph D. Morelle",
    "nameParts": {
@@ -11951,10 +13655,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H8GA06393"
    ],
+   "fecAll": [
+    "H8GA06393"
+   ],
    "govtrack": 412769,
+   "how": null,
    "last": "McBath",
    "name": "Lucy McBath",
    "nameParts": {
@@ -11986,10 +13695,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H0NC03172"
    ],
+   "fecAll": [
+    "H0NC03172"
+   ],
    "govtrack": 412845,
+   "how": null,
    "last": "Murphy",
    "name": "Gregory F. Murphy",
    "nameParts": {
@@ -12022,10 +13736,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 15,
+   "endType": null,
    "fec": [
     "H0IL15129"
    ],
+   "fecAll": [
+    "H0IL15129"
+   ],
    "govtrack": 456820,
+   "how": null,
    "last": "Miller",
    "name": "Mary E. Miller",
    "nameParts": {
@@ -12057,10 +13776,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H8AL02171"
    ],
+   "fecAll": [
+    "H8AL02171",
+    "S6AL00476"
+   ],
    "govtrack": 456800,
+   "how": null,
    "last": "Moore",
    "name": "Barry Moore",
    "nameParts": {
@@ -12091,10 +13816,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H0UT01205"
    ],
+   "fecAll": [
+    "H0UT01205"
+   ],
    "govtrack": 456851,
+   "how": null,
    "last": "Moore",
    "name": "Blake D. Moore",
    "nameParts": {
@@ -12128,10 +13858,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H0IN01150"
    ],
+   "fecAll": [
+    "H0IN01150"
+   ],
    "govtrack": 456821,
+   "how": null,
    "last": "Mrvan",
    "name": "Frank J. Mrvan",
    "nameParts": {
@@ -12163,10 +13898,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H8IA02043"
    ],
+   "fecAll": [
+    "H8IA02043"
+   ],
    "govtrack": 456817,
+   "how": null,
    "last": "Miller-Meeks",
    "name": "Mariannette Miller-Meeks",
    "nameParts": {
@@ -12198,10 +13938,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H2FL07156"
    ],
+   "fecAll": [
+    "H2FL07156"
+   ],
    "govtrack": 456889,
+   "how": null,
    "last": "Mills",
    "name": "Cory Mills",
    "nameParts": {
@@ -12233,10 +13978,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 23,
+   "endType": null,
    "fec": [
     "H2FL22171"
    ],
+   "fecAll": [
+    "H2FL22171"
+   ],
    "govtrack": 456893,
+   "how": null,
    "last": "Moskowitz",
    "name": "Jared Moskowitz",
    "nameParts": {
@@ -12270,10 +14020,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H0GA07273"
    ],
+   "fecAll": [
+    "H0GA07273"
+   ],
    "govtrack": 456894,
+   "how": null,
    "last": "McCormick",
    "name": "Richard McCormick",
    "nameParts": {
@@ -12306,10 +14061,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 0,
+   "endType": null,
    "fec": [
     "H2GU01031"
    ],
+   "fecAll": [
+    "H2GU01031"
+   ],
    "govtrack": 456896,
+   "how": null,
    "last": "Moylan",
    "name": "James C. Moylan",
    "nameParts": {
@@ -12342,10 +14102,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H2KY03206"
    ],
+   "fecAll": [
+    "H2KY03206"
+   ],
    "govtrack": 456904,
+   "how": null,
    "last": "McGarvey",
    "name": "Morgan McGarvey",
    "nameParts": {
@@ -12377,10 +14142,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H2OH16051"
    ],
+   "fecAll": [
+    "H2OH16051"
+   ],
    "govtrack": 456929,
+   "how": null,
    "last": "Miller",
    "name": "Max L. Miller",
    "nameParts": {
@@ -12414,10 +14184,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H2RI02184"
    ],
+   "fecAll": [
+    "H2RI02184"
+   ],
    "govtrack": 456937,
+   "how": null,
    "last": "Magaziner",
    "name": "Seth Magaziner",
    "nameParts": {
@@ -12449,10 +14224,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H2TX01112"
    ],
+   "fecAll": [
+    "H2TX01112"
+   ],
    "govtrack": 456940,
+   "how": null,
    "last": "Moran",
    "name": "Nathaniel Moran",
    "nameParts": {
@@ -12486,10 +14266,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 15,
+   "endType": null,
    "fec": [
     "H2CA14162"
    ],
+   "fecAll": [
+    "H2CA14162"
+   ],
    "govtrack": 456883,
+   "how": null,
    "last": "Mullin",
    "name": "Kevin Mullin",
    "nameParts": {
@@ -12522,10 +14307,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H2NJ08232"
    ],
+   "fecAll": [
+    "H2NJ08232"
+   ],
    "govtrack": 456918,
+   "how": null,
    "last": "Menendez",
    "name": "Robert Menendez",
    "nameParts": {
@@ -12559,10 +14349,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H4VA04066"
    ],
+   "fecAll": [
+    "H4VA04066"
+   ],
    "govtrack": 456953,
+   "how": null,
    "last": "McClellan",
    "name": "Jennifer L. McClellan",
    "nameParts": {
@@ -12593,10 +14388,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H4UT02296"
    ],
+   "fecAll": [
+    "H4UT02296"
+   ],
    "govtrack": 456956,
+   "how": null,
    "last": "Maloy",
    "name": "Celeste Maloy",
    "nameParts": {
@@ -12629,10 +14429,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 10,
+   "endType": null,
    "fec": [
     "H4NJ10176"
    ],
+   "fecAll": [
+    "H4NJ10176"
+   ],
    "govtrack": 456962,
+   "how": null,
    "last": "McIver",
    "name": "LaMonica McIver",
    "nameParts": {
@@ -12664,10 +14469,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H8PA15195"
    ],
+   "fecAll": [
+    "H8PA15195"
+   ],
    "govtrack": 457017,
+   "how": null,
    "last": "Mackenzie",
    "name": "Ryan Mackenzie",
    "nameParts": {
@@ -12700,10 +14510,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 22,
+   "endType": null,
    "fec": [
     "H4NY22085"
    ],
+   "fecAll": [
+    "H4NY22085"
+   ],
    "govtrack": 457013,
+   "how": null,
    "last": "Mannion",
    "name": "John W. Mannion",
    "nameParts": {
@@ -12736,10 +14551,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H4MD06340"
    ],
+   "fecAll": [
+    "H4MD06340"
+   ],
    "govtrack": 456993,
+   "how": null,
    "last": "McClain Delaney",
    "name": "April McClain Delaney",
    "nameParts": {
@@ -12772,10 +14592,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H4IN08249"
    ],
+   "fecAll": [
+    "H4IN08249"
+   ],
    "govtrack": 456989,
+   "how": null,
    "last": "Messmer",
    "name": "Mark B. Messmer",
    "nameParts": {
@@ -12806,10 +14631,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H4MN03118"
    ],
+   "fecAll": [
+    "H4MN03118"
+   ],
    "govtrack": 456996,
+   "how": null,
    "last": "Morrison",
    "name": "Kelly Morrison",
    "nameParts": {
@@ -12842,10 +14672,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H4WV02205"
    ],
+   "fecAll": [
+    "H4WV02205"
+   ],
    "govtrack": 457031,
+   "how": null,
    "last": "Moore",
    "name": "Riley M. Moore",
    "nameParts": {
@@ -12877,10 +14712,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 14,
+   "endType": null,
    "fec": [
     "H4NC14015"
    ],
+   "fecAll": [
+    "H4NC14015"
+   ],
    "govtrack": 457005,
+   "how": null,
    "last": "Moore",
    "name": "Tim Moore",
    "nameParts": {
@@ -12913,10 +14753,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H4MI08218"
    ],
+   "fecAll": [
+    "H4MI08218"
+   ],
    "govtrack": 456995,
+   "how": null,
    "last": "McDonald Rivet",
    "name": "Kristen McDonald Rivet",
    "nameParts": {
@@ -12949,10 +14794,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 0,
+   "endType": null,
    "fec": [
     "H4DE00045"
    ],
+   "fecAll": [
+    "H4DE00045"
+   ],
    "govtrack": 456985,
+   "how": null,
    "last": "McBride",
    "name": "Sarah McBride",
    "nameParts": {
@@ -12984,11 +14834,17 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H2VA07196",
     "H0VA07133"
    ],
+   "fecAll": [
+    "H0VA07133",
+    "H2VA07196"
+   ],
    "govtrack": 457026,
+   "how": null,
    "last": "McGuire",
    "name": "John J. McGuire III",
    "nameParts": {
@@ -13022,10 +14878,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H4NC06177"
    ],
+   "fecAll": [
+    "H4NC06177"
+   ],
    "govtrack": 457001,
+   "how": null,
    "last": "McDowell",
    "name": "Addison P. McDowell",
    "nameParts": {
@@ -13058,10 +14919,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 47,
+   "endType": null,
    "fec": [
     "H4CA47085"
    ],
+   "fecAll": [
+    "H4CA47085"
+   ],
    "govtrack": 456981,
+   "how": null,
    "last": "Min",
    "name": "Dave Min",
    "nameParts": {
@@ -13089,10 +14955,15 @@
    "chamber": "Senate",
    "contactForm": null,
    "district": null,
+   "endType": null,
    "fec": [
     "S4OH00192"
    ],
+   "fecAll": [
+    "S4OH00192"
+   ],
    "govtrack": 456967,
+   "how": null,
    "last": "Moreno",
    "name": "Bernie Moreno",
    "nameParts": {
@@ -13123,10 +14994,15 @@
    "chamber": "Senate",
    "contactForm": "https://mccormick.senate.gov/",
    "district": null,
+   "endType": null,
    "fec": [
     "S2PA00661"
    ],
+   "fecAll": [
+    "S2PA00661"
+   ],
    "govtrack": 456968,
+   "how": null,
    "last": "McCormick",
    "name": "David McCormick",
    "nameParts": {
@@ -13159,10 +15035,15 @@
    "chamber": "Senate",
    "contactForm": null,
    "district": null,
+   "endType": "special-election",
    "fec": [
     "S6FL00640"
    ],
+   "fecAll": [
+    "S6FL00640"
+   ],
    "govtrack": 457033,
+   "how": "appointment",
    "last": "Moody",
    "name": "Ashley Moody",
    "nameParts": {
@@ -13190,10 +15071,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 18,
+   "endType": null,
    "fec": [
     "H6TX18232"
    ],
+   "fecAll": [
+    "H6TX18232"
+   ],
    "govtrack": 457039,
+   "how": null,
    "last": "Menefee",
    "name": "Christian D. Menefee",
    "nameParts": {
@@ -13221,10 +15107,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 11,
+   "endType": null,
    "fec": [
     "H6NJ11286"
    ],
+   "fecAll": [
+    "H6NJ11286"
+   ],
    "govtrack": 457042,
+   "how": null,
    "last": "Mejia",
    "name": "Analilia Mejia",
    "nameParts": {
@@ -13251,10 +15142,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 12,
+   "endType": null,
    "fec": [
     "H2NY17071"
    ],
+   "fecAll": [
+    "H2NY17071"
+   ],
    "govtrack": 400289,
+   "how": null,
    "last": "Nadler",
    "name": "Jerrold Nadler",
    "nameParts": {
@@ -13288,10 +15184,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H8MA02041"
    ],
+   "fecAll": [
+    "H8MA02041"
+   ],
    "govtrack": 400291,
+   "how": null,
    "last": "Neal",
    "name": "Richard E. Neal",
    "nameParts": {
@@ -13325,10 +15226,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 22,
+   "endType": null,
    "fec": [
     "H0TX22302"
    ],
+   "fecAll": [
+    "H0TX22302"
+   ],
    "govtrack": 456848,
+   "how": null,
    "last": "Nehls",
    "name": "Troy E. Nehls",
    "nameParts": {
@@ -13361,10 +15267,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 0,
+   "endType": null,
    "fec": [
     "H0DC00058"
    ],
+   "fecAll": [
+    "H0DC00058"
+   ],
    "govtrack": 400295,
+   "how": null,
    "last": "Norton",
    "name": "Eleanor Holmes Norton",
    "nameParts": {
@@ -13400,10 +15311,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H4NJ01084"
    ],
+   "fecAll": [
+    "H4NJ01084"
+   ],
    "govtrack": 412606,
+   "how": null,
    "last": "Norcross",
    "name": "Donald Norcross",
    "nameParts": {
@@ -13437,10 +15353,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H4WA04104"
    ],
+   "fecAll": [
+    "H4WA04104"
+   ],
    "govtrack": 412660,
+   "how": null,
    "last": "Newhouse",
    "name": "Dan Newhouse",
    "nameParts": {
@@ -13473,10 +15394,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H8SC05158"
    ],
+   "fecAll": [
+    "H8SC05158",
+    "S6SC04445"
+   ],
    "govtrack": 412738,
+   "how": null,
    "last": "Norman",
    "name": "Ralph Norman",
    "nameParts": {
@@ -13509,10 +15436,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H8CO02160"
    ],
+   "fecAll": [
+    "H8CO02160"
+   ],
    "govtrack": 412761,
+   "how": null,
    "last": "Neguse",
    "name": "Joe Neguse",
    "nameParts": {
@@ -13543,10 +15475,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H2IA03119"
    ],
+   "fecAll": [
+    "H2IA03119"
+   ],
    "govtrack": 456898,
+   "how": null,
    "last": "Nunn",
    "name": "Zachary Nunn",
    "nameParts": {
@@ -13580,10 +15517,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 23,
+   "endType": null,
    "fec": [
     "H0CA08135"
    ],
+   "fecAll": [
+    "H0CA08135"
+   ],
    "govtrack": 456801,
+   "how": null,
    "last": "Obernolte",
    "name": "Jay Obernolte",
    "nameParts": {
@@ -13614,10 +15556,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H0UT04076"
    ],
+   "fecAll": [
+    "H0UT04076"
+   ],
    "govtrack": 456852,
+   "how": null,
    "last": "Owens",
    "name": "Burgess Owens",
    "nameParts": {
@@ -13651,10 +15598,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 14,
+   "endType": null,
    "fec": [
     "H8NY15148"
    ],
+   "fecAll": [
+    "H8NY15148"
+   ],
    "govtrack": 412804,
+   "how": null,
    "last": "Ocasio-Cortez",
    "name": "Alexandria Ocasio-Cortez",
    "nameParts": {
@@ -13685,10 +15637,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H8MN05239"
    ],
+   "fecAll": [
+    "H8MN05239"
+   ],
    "govtrack": 412791,
+   "how": null,
    "last": "Omar",
    "name": "Ilhan Omar",
    "nameParts": {
@@ -13718,10 +15675,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.ossoff.senate.gov/contact-us/",
    "district": null,
+   "endType": null,
    "fec": [
     "S8GA00180"
    ],
+   "fecAll": [
+    "H8GA06195",
+    "S8GA00180"
+   ],
    "govtrack": 456857,
+   "how": null,
    "last": "Ossoff",
    "name": "Jon Ossoff",
    "nameParts": {
@@ -13753,10 +15716,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H2TN05446"
    ],
+   "fecAll": [
+    "H2TN05446"
+   ],
    "govtrack": 456939,
+   "how": null,
    "last": "Ogles",
    "name": "Andrew Ogles",
    "nameParts": {
@@ -13789,10 +15757,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H4MD02232"
    ],
+   "fecAll": [
+    "H4MD02232"
+   ],
    "govtrack": 456991,
+   "how": null,
    "last": "Olszewski",
    "name": "Johnny Olszewski, Jr.",
    "nameParts": {
@@ -13825,11 +15798,17 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H8MO09146",
     "H4MO03221"
    ],
+   "fecAll": [
+    "H4MO03221",
+    "H8MO09146"
+   ],
    "govtrack": 456998,
+   "how": null,
    "last": "Onder",
    "name": "Robert F. Onder, Jr.",
    "nameParts": {
@@ -13863,10 +15842,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H8NJ03073"
    ],
+   "fecAll": [
+    "H8NJ03073",
+    "S6NJ00263"
+   ],
    "govtrack": 400308,
+   "how": null,
    "last": "Pallone",
    "name": "Frank Pallone, Jr.",
    "nameParts": {
@@ -13902,10 +15887,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 11,
+   "endType": null,
    "fec": [
     "H0TX11230"
    ],
+   "fecAll": [
+    "H0TX11230"
+   ],
    "govtrack": 456846,
+   "how": null,
    "last": "Pfluger",
    "name": "August Pfluger",
    "nameParts": {
@@ -13940,10 +15930,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.padilla.senate.gov/contact/",
    "district": null,
+   "endType": null,
    "fec": [
     "S2CA00955"
    ],
+   "fecAll": [
+    "S2CA00955"
+   ],
    "govtrack": 456856,
+   "how": null,
    "last": "Padilla",
    "name": "Alex Padilla",
    "nameParts": {
@@ -13976,10 +15971,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 11,
+   "endType": null,
    "fec": [
     "H8CA05035"
    ],
+   "fecAll": [
+    "H8CA05035"
+   ],
    "govtrack": 400314,
+   "how": null,
    "last": "Pelosi",
    "name": "Nancy Pelosi",
    "nameParts": {
@@ -14012,10 +16012,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.peters.senate.gov/contact/email-gary",
    "district": null,
+   "endType": null,
    "fec": [
     "S4MI00355"
    ],
+   "fecAll": [
+    "H8MI09068",
+    "S4MI00355"
+   ],
    "govtrack": 412305,
+   "how": null,
    "last": "Peters",
    "name": "Gary C. Peters",
    "nameParts": {
@@ -14050,10 +16056,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H8ME01120"
    ],
+   "fecAll": [
+    "H8ME01120",
+    "S0ME00038"
+   ],
    "govtrack": 412307,
+   "how": null,
    "last": "Pingree",
    "name": "Chellie Pingree",
    "nameParts": {
@@ -14088,10 +16100,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.paul.senate.gov/connect/email-rand",
    "district": null,
+   "endType": null,
    "fec": [
     "S0KY00156"
    ],
+   "fecAll": [
+    "S0KY00156"
+   ],
    "govtrack": 412492,
+   "how": null,
    "last": "Paul",
    "name": "Rand Paul",
    "nameParts": {
@@ -14125,10 +16142,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 10,
+   "endType": null,
    "fec": [
     "H2PA04135"
    ],
+   "fecAll": [
+    "H2PA04135"
+   ],
    "govtrack": 412569,
+   "how": null,
    "last": "Perry",
    "name": "Scott Perry",
    "nameParts": {
@@ -14162,10 +16184,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H2WI02124"
    ],
+   "fecAll": [
+    "H2WI02124"
+   ],
    "govtrack": 412585,
+   "how": null,
    "last": "Pocan",
    "name": "Mark Pocan",
    "nameParts": {
@@ -14199,10 +16226,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 50,
+   "endType": null,
    "fec": [
     "H2CA52089"
    ],
+   "fecAll": [
+    "H2CA52089"
+   ],
    "govtrack": 412523,
+   "how": null,
    "last": "Peters",
    "name": "Scott H. Peters",
    "nameParts": {
@@ -14236,10 +16268,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H4AL06098"
    ],
+   "fecAll": [
+    "H4AL06098"
+   ],
    "govtrack": 412608,
+   "how": null,
    "last": "Palmer",
    "name": "Gary J. Palmer",
    "nameParts": {
@@ -14273,10 +16310,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 0,
+   "endType": null,
    "fec": [
     "H2VI00082"
    ],
+   "fecAll": [
+    "H2VI00082"
+   ],
    "govtrack": 412659,
+   "how": null,
    "last": "Plaskett",
    "name": "Stacey E. Plaskett",
    "nameParts": {
@@ -14310,10 +16352,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 19,
+   "endType": null,
    "fec": [
     "H6CA20152"
    ],
+   "fecAll": [
+    "H6CA20152"
+   ],
    "govtrack": 412685,
+   "how": null,
    "last": "Panetta",
    "name": "Jimmy Panetta",
    "nameParts": {
@@ -14346,10 +16393,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H8NH01210"
    ],
+   "fecAll": [
+    "H8NH01210",
+    "S6NH00141"
+   ],
    "govtrack": 412795,
+   "how": null,
    "last": "Pappas",
    "name": "Chris Pappas",
    "nameParts": {
@@ -14379,10 +16432,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H8MA07032"
    ],
+   "fecAll": [
+    "H8MA07032"
+   ],
    "govtrack": 412782,
+   "how": null,
    "last": "Pressley",
    "name": "Ayanna Pressley",
    "nameParts": {
@@ -14415,10 +16473,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H8CO07045"
    ],
+   "fecAll": [
+    "H8CO07045"
+   ],
    "govtrack": 456886,
+   "how": null,
    "last": "Pettersen",
    "name": "Brittany Pettersen",
    "nameParts": {
@@ -14451,10 +16514,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 9,
+   "endType": null,
    "fec": [
     "H4NJ09194"
    ],
+   "fecAll": [
+    "H4NJ09194"
+   ],
    "govtrack": 457009,
+   "how": null,
    "last": "Pou",
    "name": "Nellie Pou",
    "nameParts": {
@@ -14487,10 +16555,15 @@
    "chamber": "House",
    "contactForm": "https://patronis.house.gov/contact/email-me",
    "district": 1,
+   "endType": null,
    "fec": [
     "H6FL01390"
    ],
+   "fecAll": [
+    "H6FL01390"
+   ],
    "govtrack": 457034,
+   "how": null,
    "last": "Patronis",
    "name": "Jimmy Patronis",
    "nameParts": {
@@ -14519,10 +16592,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H0IL05096"
    ],
+   "fecAll": [
+    "H0IL05096"
+   ],
    "govtrack": 412331,
+   "how": null,
    "last": "Quigley",
    "name": "Mike Quigley",
    "nameParts": {
@@ -14556,10 +16634,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.reed.senate.gov/contact/",
    "district": null,
+   "endType": null,
    "fec": [
     "S6RI00163"
    ],
+   "fecAll": [
+    "H0RI02071",
+    "S6RI00163"
+   ],
    "govtrack": 300081,
+   "how": null,
    "last": "Reed",
    "name": "Jack Reed",
    "nameParts": {
@@ -14594,10 +16678,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H0NC02125"
    ],
+   "fecAll": [
+    "H0NC02125"
+   ],
    "govtrack": 456831,
+   "how": null,
    "last": "Ross",
    "name": "Deborah K. Ross",
    "nameParts": {
@@ -14630,10 +16719,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H0KY05015"
    ],
+   "fecAll": [
+    "H0KY05015"
+   ],
    "govtrack": 400340,
+   "how": null,
    "last": "Rogers",
    "name": "Harold Rogers",
    "nameParts": {
@@ -14668,10 +16762,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H2AL03032"
    ],
+   "fecAll": [
+    "H2AL03032"
+   ],
    "govtrack": 400341,
+   "how": null,
    "last": "Rogers",
    "name": "Mike Rogers",
    "nameParts": {
@@ -14705,10 +16804,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 18,
+   "endType": null,
    "fec": [
     "H8NY19223"
    ],
+   "fecAll": [
+    "H8NY19223"
+   ],
    "govtrack": 456871,
+   "how": null,
    "last": "Ryan",
    "name": "Patrick Ryan",
    "nameParts": {
@@ -14738,10 +16842,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.risch.senate.gov/public/index.cfm?p=Email",
    "district": null,
+   "endType": null,
    "fec": [
     "S8ID00092"
    ],
+   "fecAll": [
+    "S8ID00092"
+   ],
    "govtrack": 412322,
+   "how": null,
    "last": "Risch",
    "name": "James E. Risch",
    "nameParts": {
@@ -14775,10 +16884,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 25,
+   "endType": null,
    "fec": [
     "H2CA36439"
    ],
+   "fecAll": [
+    "H2CA36439"
+   ],
    "govtrack": 412519,
+   "how": null,
    "last": "Ruiz",
    "name": "Raul Ruiz",
    "nameParts": {
@@ -14811,10 +16925,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 0,
+   "endType": null,
    "fec": [
     "H4AS00036"
    ],
+   "fecAll": [
+    "H4AS00036"
+   ],
    "govtrack": 412664,
+   "how": null,
    "last": "Radewagen",
    "name": "Aumua Amata Coleman Radewagen",
    "nameParts": {
@@ -14847,10 +16966,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H2NC07096"
    ],
+   "fecAll": [
+    "H2NC07096"
+   ],
    "govtrack": 412641,
+   "how": null,
    "last": "Rouzer",
    "name": "David Rouzer",
    "nameParts": {
@@ -14883,10 +17007,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.rounds.senate.gov/contact/email-mike",
    "district": null,
+   "endType": null,
    "fec": [
     "S4SD00049"
    ],
+   "fecAll": [
+    "S4SD00049"
+   ],
    "govtrack": 412669,
+   "how": null,
    "last": "Rounds",
    "name": "Mike Rounds",
    "nameParts": {
@@ -14919,10 +17048,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H6MD08457"
    ],
+   "fecAll": [
+    "H6MD08457"
+   ],
    "govtrack": 412708,
+   "how": null,
    "last": "Raskin",
    "name": "Jamie Raskin",
    "nameParts": {
@@ -14955,10 +17089,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.rosen.senate.gov/contact_jacky",
    "district": null,
+   "endType": null,
    "fec": [
     "S8NV00156"
    ],
+   "fecAll": [
+    "H6NV03139",
+    "S8NV00156"
+   ],
    "govtrack": 412715,
+   "how": null,
    "last": "Rosen",
    "name": "Jacky Rosen",
    "nameParts": {
@@ -14990,10 +17130,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H6FL04105"
    ],
+   "fecAll": [
+    "H6FL04105"
+   ],
    "govtrack": 412692,
+   "how": null,
    "last": "Rutherford",
    "name": "John H. Rutherford",
    "nameParts": {
@@ -15027,10 +17172,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 14,
+   "endType": null,
    "fec": [
     "H8PA18199"
    ],
+   "fecAll": [
+    "H8PA18199"
+   ],
    "govtrack": 412813,
+   "how": null,
    "last": "Reschenthaler",
    "name": "Guy Reschenthaler",
    "nameParts": {
@@ -15063,10 +17213,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H8TN06094"
    ],
+   "fecAll": [
+    "H8TN06094"
+   ],
    "govtrack": 412818,
+   "how": null,
    "last": "Rose",
    "name": "John W. Rose",
    "nameParts": {
@@ -15098,10 +17253,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 21,
+   "endType": null,
    "fec": [
     "H8TX21307"
    ],
+   "fecAll": [
+    "H8TX21307"
+   ],
    "govtrack": 412826,
+   "how": null,
    "last": "Roy",
    "name": "Chip Roy",
    "nameParts": {
@@ -15131,10 +17291,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H2IL03162"
    ],
+   "fecAll": [
+    "H2IL03162"
+   ],
    "govtrack": 456900,
+   "how": null,
    "last": "Ramirez",
    "name": "Delia C. Ramirez",
    "nameParts": {
@@ -15167,10 +17332,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.ricketts.senate.gov/contact/",
    "district": null,
+   "endType": null,
    "fec": [
     "S6NE00129"
    ],
+   "fecAll": [
+    "S6NE00129"
+   ],
    "govtrack": 456952,
+   "how": "special-election",
    "last": "Ricketts",
    "name": "Pete Ricketts",
    "nameParts": {
@@ -15203,10 +17373,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H4OH06165"
    ],
+   "fecAll": [
+    "H4OH06165"
+   ],
    "govtrack": 456959,
+   "how": null,
    "last": "Rulli",
    "name": "Michael A. Rulli",
    "nameParts": {
@@ -15234,10 +17409,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 29,
+   "endType": null,
    "fec": [
     "H4CA29141"
    ],
+   "fecAll": [
+    "H4CA29141"
+   ],
    "govtrack": 456978,
+   "how": null,
    "last": "Rivas",
    "name": "Luz M. Rivas",
    "nameParts": {
@@ -15270,10 +17450,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H4WA06117"
    ],
+   "fecAll": [
+    "H4WA06117"
+   ],
    "govtrack": 457030,
+   "how": null,
    "last": "Randall",
    "name": "Emily Randall",
    "nameParts": {
@@ -15301,10 +17486,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 19,
+   "endType": null,
    "fec": [
     "H8NY22177"
    ],
+   "fecAll": [
+    "H8NY22177"
+   ],
    "govtrack": 457012,
+   "how": null,
    "last": "Riley",
    "name": "Josh Riley",
    "nameParts": {
@@ -15336,10 +17526,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.sanders.senate.gov/contact/",
    "district": null,
+   "endType": null,
    "fec": [
     "S4VT00033"
    ],
+   "fecAll": [
+    "H8VT01016",
+    "S4VT00033"
+   ],
    "govtrack": 400357,
+   "how": null,
    "last": "Sanders",
    "name": "Bernard Sanders",
    "nameParts": {
@@ -15373,10 +17569,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.schumer.senate.gov/contact/email-chuck",
    "district": null,
+   "endType": null,
    "fec": [
     "S8NY00082"
    ],
+   "fecAll": [
+    "H0NY16010",
+    "S8NY00082"
+   ],
    "govtrack": 300087,
+   "how": null,
    "last": "Schumer",
    "name": "Charles E. Schumer",
    "nameParts": {
@@ -15412,10 +17614,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 27,
+   "endType": null,
    "fec": [
     "H8FL27185"
    ],
+   "fecAll": [
+    "H8FL27185"
+   ],
    "govtrack": 456810,
+   "how": null,
    "last": "Salazar",
    "name": "Maria Elvira Salazar",
    "nameParts": {
@@ -15448,10 +17655,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H6VA01117"
    ],
+   "fecAll": [
+    "H6VA01117"
+   ],
    "govtrack": 400364,
+   "how": null,
    "last": "Scott",
    "name": "Robert C. \"Bobby\" Scott",
    "nameParts": {
@@ -15487,10 +17699,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 17,
+   "endType": null,
    "fec": [
     "H2TX03126"
    ],
+   "fecAll": [
+    "H2TX03126"
+   ],
    "govtrack": 400367,
+   "how": null,
    "last": "Sessions",
    "name": "Pete Sessions",
    "nameParts": {
@@ -15524,10 +17741,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 32,
+   "endType": null,
    "fec": [
     "H6CA24113"
    ],
+   "fecAll": [
+    "H6CA24113"
+   ],
    "govtrack": 400371,
+   "how": null,
    "last": "Sherman",
    "name": "Brad Sherman",
    "nameParts": {
@@ -15562,10 +17784,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 9,
+   "endType": null,
    "fec": [
     "H6WA09025"
    ],
+   "fecAll": [
+    "H6WA09025"
+   ],
    "govtrack": 400379,
+   "how": null,
    "last": "Smith",
    "name": "Adam Smith",
    "nameParts": {
@@ -15599,10 +17826,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H8NJ04014"
    ],
+   "fecAll": [
+    "H8NJ04014"
+   ],
    "govtrack": 400380,
+   "how": null,
    "last": "Smith",
    "name": "Christopher H. Smith",
    "nameParts": {
@@ -15637,10 +17869,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H0IN05326"
    ],
+   "fecAll": [
+    "H0IN05326"
+   ],
    "govtrack": 456822,
+   "how": null,
    "last": "Spartz",
    "name": "Victoria Spartz",
    "nameParts": {
@@ -15671,10 +17908,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 9,
+   "endType": null,
    "fec": [
     "H8IL09067"
    ],
+   "fecAll": [
+    "H8IL09067"
+   ],
    "govtrack": 400360,
+   "how": null,
    "last": "Schakowsky",
    "name": "Janice D. Schakowsky",
    "nameParts": {
@@ -15710,10 +17952,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H8ID02064"
    ],
+   "fecAll": [
+    "H8ID02064"
+   ],
    "govtrack": 400376,
+   "how": null,
    "last": "Simpson",
    "name": "Michael K. Simpson",
    "nameParts": {
@@ -15749,10 +17996,16 @@
    "chamber": "Senate",
    "contactForm": null,
    "district": null,
+   "endType": null,
    "fec": [
     "S4CA00555"
    ],
+   "fecAll": [
+    "H0CA27085",
+    "S4CA00555"
+   ],
    "govtrack": 400361,
+   "how": null,
    "last": "Schiff",
    "name": "Adam B. Schiff",
    "nameParts": {
@@ -15786,10 +18039,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 38,
+   "endType": null,
    "fec": [
     "H2CA39078"
    ],
+   "fecAll": [
+    "H2CA39078"
+   ],
    "govtrack": 400355,
+   "how": null,
    "last": "Sánchez",
    "name": "Linda T. Sánchez",
    "nameParts": {
@@ -15824,10 +18082,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 10,
+   "endType": null,
    "fec": [
     "H0WA10034"
    ],
+   "fecAll": [
+    "H0WA10034"
+   ],
    "govtrack": 456854,
+   "how": null,
    "last": "Strickland",
    "name": "Marilyn Strickland",
    "nameParts": {
@@ -15859,10 +18122,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H6NE03115"
    ],
+   "fecAll": [
+    "H6NE03115"
+   ],
    "govtrack": 412217,
+   "how": null,
    "last": "Smith",
    "name": "Adrian Smith",
    "nameParts": {
@@ -15896,10 +18164,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H0LA01087"
    ],
+   "fecAll": [
+    "H0LA01087"
+   ],
    "govtrack": 412261,
+   "how": null,
    "last": "Scalise",
    "name": "Steve Scalise",
    "nameParts": {
@@ -15934,10 +18207,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.shaheen.senate.gov/contact/contact-jeanne",
    "district": null,
+   "endType": null,
    "fec": [
     "S0NH00219"
    ],
+   "fecAll": [
+    "S0NH00219"
+   ],
    "govtrack": 412323,
+   "how": null,
    "last": "Shaheen",
    "name": "Jeanne Shaheen",
    "nameParts": {
@@ -15971,11 +18249,17 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H4AZ06045",
     "H8AZ05097"
    ],
+   "fecAll": [
+    "H4AZ06045",
+    "H8AZ05097"
+   ],
    "govtrack": 412399,
+   "how": null,
    "last": "Schweikert",
    "name": "David Schweikert",
    "nameParts": {
@@ -16009,10 +18293,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.scott.senate.gov/contact/email-me",
    "district": null,
+   "endType": null,
    "fec": [
     "S4SC00240"
    ],
+   "fecAll": [
+    "H0SC01279",
+    "S4SC00240"
+   ],
    "govtrack": 412471,
+   "how": null,
    "last": "Scott",
    "name": "Tim Scott",
    "nameParts": {
@@ -16046,10 +18336,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H0AL07086"
    ],
+   "fecAll": [
+    "H0AL07086"
+   ],
    "govtrack": 412396,
+   "how": null,
    "last": "Sewell",
    "name": "Terri A. Sewell",
    "nameParts": {
@@ -16084,10 +18379,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H0IN03198"
    ],
+   "fecAll": [
+    "H0IN03198",
+    "S0IN00095"
+   ],
    "govtrack": 412392,
+   "how": null,
    "last": "Stutzman",
    "name": "Marlin A. Stutzman",
    "nameParts": {
@@ -16120,10 +18421,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H0GA08099"
    ],
+   "fecAll": [
+    "H0GA08099"
+   ],
    "govtrack": 412417,
+   "how": null,
    "last": "Scott",
    "name": "Austin Scott",
    "nameParts": {
@@ -16156,10 +18462,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 10,
+   "endType": null,
    "fec": [
     "H2IL10068"
    ],
+   "fecAll": [
+    "H2IL10068"
+   ],
    "govtrack": 412534,
+   "how": null,
    "last": "Schneider",
    "name": "Bradley Scott Schneider",
    "nameParts": {
@@ -16194,10 +18505,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.schatz.senate.gov/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S4HI00136"
    ],
+   "fecAll": [
+    "H6HI02244",
+    "S4HI00136"
+   ],
    "govtrack": 412507,
+   "how": null,
    "last": "Schatz",
    "name": "Brian Schatz",
    "nameParts": {
@@ -16232,10 +18549,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H4MO08162"
    ],
+   "fecAll": [
+    "H4MO08162"
+   ],
    "govtrack": 412596,
+   "how": null,
    "last": "Smith",
    "name": "Jason Smith",
    "nameParts": {
@@ -16269,10 +18591,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 21,
+   "endType": null,
    "fec": [
     "H4NY21079"
    ],
+   "fecAll": [
+    "H4NY21079"
+   ],
    "govtrack": 412648,
+   "how": null,
    "last": "Stefanik",
    "name": "Elise M. Stefanik",
    "nameParts": {
@@ -16306,10 +18633,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.sullivan.senate.gov/contact/email",
    "district": null,
+   "endType": null,
    "fec": [
     "S4AK00214"
    ],
+   "fecAll": [
+    "S4AK00214"
+   ],
    "govtrack": 412665,
+   "how": null,
    "last": "Sullivan",
    "name": "Dan Sullivan",
    "nameParts": {
@@ -16342,10 +18674,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 11,
+   "endType": null,
    "fec": [
     "H6PA16320"
    ],
+   "fecAll": [
+    "H6PA16320"
+   ],
    "govtrack": 412722,
+   "how": null,
    "last": "Smucker",
    "name": "Lloyd Smucker",
    "nameParts": {
@@ -16377,10 +18714,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 9,
+   "endType": null,
    "fec": [
     "H6FL09179"
    ],
+   "fecAll": [
+    "H6FL09179"
+   ],
    "govtrack": 412695,
+   "how": null,
    "last": "Soto",
    "name": "Darren Soto",
    "nameParts": {
@@ -16413,10 +18755,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H6NY03247"
    ],
+   "fecAll": [
+    "H6NY03247"
+   ],
    "govtrack": 412717,
+   "how": null,
    "last": "Suozzi",
    "name": "Thomas R. Suozzi",
    "nameParts": {
@@ -16448,10 +18795,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.smith.senate.gov/share-your-opinion/",
    "district": null,
+   "endType": null,
    "fec": [
     "S8MN00578"
    ],
+   "fecAll": [
+    "S8MN00578"
+   ],
    "govtrack": 412742,
+   "how": null,
    "last": "Smith",
    "name": "Tina Smith",
    "nameParts": {
@@ -16484,10 +18836,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H8PA07200"
    ],
+   "fecAll": [
+    "H8PA07200"
+   ],
    "govtrack": 412750,
+   "how": null,
    "last": "Scanlon",
    "name": "Mary Gay Scanlon",
    "nameParts": {
@@ -16520,10 +18877,16 @@
    "chamber": "Senate",
    "contactForm": null,
    "district": null,
+   "endType": null,
    "fec": [
     "S4MI00470"
    ],
+   "fecAll": [
+    "H8MI08102",
+    "S4MI00470"
+   ],
    "govtrack": 412784,
+   "how": null,
    "last": "Slotkin",
    "name": "Elissa Slotkin",
    "nameParts": {
@@ -16555,10 +18918,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H8AZ09040"
    ],
+   "fecAll": [
+    "H8AZ09040"
+   ],
    "govtrack": 412753,
+   "how": null,
    "last": "Stanton",
    "name": "Greg Stanton",
    "nameParts": {
@@ -16590,10 +18958,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H8MN08043"
    ],
+   "fecAll": [
+    "H8MN08043"
+   ],
    "govtrack": 412792,
+   "how": null,
    "last": "Stauber",
    "name": "Pete Stauber",
    "nameParts": {
@@ -16624,10 +18997,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H8WI01156"
    ],
+   "fecAll": [
+    "H8WI01156"
+   ],
    "govtrack": 412836,
+   "how": null,
    "last": "Steil",
    "name": "Bryan Steil",
    "nameParts": {
@@ -16657,10 +19035,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 17,
+   "endType": null,
    "fec": [
     "H8FL17053"
    ],
+   "fecAll": [
+    "H8FL17053"
+   ],
    "govtrack": 412766,
+   "how": null,
    "last": "Steube",
    "name": "W. Gregory Steube",
    "nameParts": {
@@ -16694,10 +19077,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 11,
+   "endType": null,
    "fec": [
     "H8MI11254"
    ],
+   "fecAll": [
+    "H8MI11254",
+    "S6MI00426"
+   ],
    "govtrack": 412786,
+   "how": null,
    "last": "Stevens",
    "name": "Haley M. Stevens",
    "nameParts": {
@@ -16729,10 +19118,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H8WA08189"
    ],
+   "fecAll": [
+    "H8WA08189"
+   ],
    "govtrack": 412835,
+   "how": null,
    "last": "Schrier",
    "name": "Kim Schrier",
    "nameParts": {
@@ -16763,10 +19157,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.rickscott.senate.gov/contact/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S8FL00273"
    ],
+   "fecAll": [
+    "S8FL00273"
+   ],
    "govtrack": 412838,
+   "how": null,
    "last": "Scott",
    "name": "Rick Scott",
    "nameParts": {
@@ -16799,10 +19198,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H2NM01144"
    ],
+   "fecAll": [
+    "H2NM01144"
+   ],
    "govtrack": 456861,
+   "how": null,
    "last": "Stansbury",
    "name": "Melanie A. Stansbury",
    "nameParts": {
@@ -16834,10 +19238,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H2AL05102"
    ],
+   "fecAll": [
+    "H2AL05102"
+   ],
    "govtrack": 456878,
+   "how": null,
    "last": "Strong",
    "name": "Dale W. Strong",
    "nameParts": {
@@ -16869,10 +19278,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H0MI03316"
    ],
+   "fecAll": [
+    "H0MI03316"
+   ],
    "govtrack": 456906,
+   "how": null,
    "last": "Scholten",
    "name": "Hillary J. Scholten",
    "nameParts": {
@@ -16905,10 +19319,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 13,
+   "endType": null,
    "fec": [
     "H2OH13264"
    ],
+   "fecAll": [
+    "H2OH13264"
+   ],
    "govtrack": 456930,
+   "how": null,
    "last": "Sykes",
    "name": "Emilia Strong Sykes",
    "nameParts": {
@@ -16942,11 +19361,17 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H2TX03290",
     "H2TX00064"
    ],
+   "fecAll": [
+    "H2TX00064",
+    "H2TX03290"
+   ],
    "govtrack": 456941,
+   "how": null,
    "last": "Self",
    "name": "Keith Self",
    "nameParts": {
@@ -16979,10 +19404,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 17,
+   "endType": null,
    "fec": [
     "H2IL17147"
    ],
+   "fecAll": [
+    "H2IL17147"
+   ],
    "govtrack": 456902,
+   "how": null,
    "last": "Sorensen",
    "name": "Eric Sorensen",
    "nameParts": {
@@ -17013,10 +19443,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H2OR06066"
    ],
+   "fecAll": [
+    "H2OR06066"
+   ],
    "govtrack": 456934,
+   "how": null,
    "last": "Salinas",
    "name": "Andrea Salinas",
    "nameParts": {
@@ -17049,10 +19484,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.schmitt.senate.gov/contact/",
    "district": null,
+   "endType": null,
    "fec": [
     "S2MO00544"
    ],
+   "fecAll": [
+    "S2MO00544"
+   ],
    "govtrack": 456875,
+   "how": null,
    "last": "Schmitt",
    "name": "Eric Schmitt",
    "nameParts": {
@@ -17086,10 +19526,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H4KS02164"
    ],
+   "fecAll": [
+    "H4KS02164"
+   ],
    "govtrack": 456990,
+   "how": null,
    "last": "Schmidt",
    "name": "Derek Schmidt",
    "nameParts": {
@@ -17122,10 +19567,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 6,
+   "endType": null,
    "fec": [
     "H4IN06185"
    ],
+   "fecAll": [
+    "H4IN06185"
+   ],
    "govtrack": 456988,
+   "how": null,
    "last": "Shreve",
    "name": "Jefferson Shreve",
    "nameParts": {
@@ -17158,10 +19608,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 10,
+   "endType": null,
    "fec": [
     "H4VA10279"
    ],
+   "fecAll": [
+    "H4VA10279"
+   ],
    "govtrack": 457028,
+   "how": null,
    "last": "Subramanyam",
    "name": "Suhas Subramanyam",
    "nameParts": {
@@ -17193,10 +19648,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 12,
+   "endType": null,
    "fec": [
     "H4CA12154"
    ],
+   "fecAll": [
+    "H4CA12154"
+   ],
    "govtrack": 456974,
+   "how": null,
    "last": "Simon",
    "name": "Lateefah Simon",
    "nameParts": {
@@ -17229,10 +19689,15 @@
    "chamber": "Senate",
    "contactForm": null,
    "district": null,
+   "endType": null,
    "fec": [
     "S4MT00183"
    ],
+   "fecAll": [
+    "S4MT00183"
+   ],
    "govtrack": 456966,
+   "how": null,
    "last": "Sheehy",
    "name": "Tim Sheehy",
    "nameParts": {
@@ -17260,10 +19725,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H0WI07101"
    ],
+   "fecAll": [
+    "H0WI07101"
+   ],
    "govtrack": 456791,
+   "how": null,
    "last": "Tiffany",
    "name": "Thomas P. Tiffany",
    "nameParts": {
@@ -17295,10 +19765,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H4MS02068"
    ],
+   "fecAll": [
+    "H4MS02068"
+   ],
    "govtrack": 400402,
+   "how": null,
    "last": "Thompson",
    "name": "Bennie G. Thompson",
    "nameParts": {
@@ -17333,10 +19808,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.thune.senate.gov/public/index.cfm/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S2SD00068"
    ],
+   "fecAll": [
+    "H6SD00085",
+    "S2SD00068"
+   ],
    "govtrack": 400546,
+   "how": null,
    "last": "Thune",
    "name": "John Thune",
    "nameParts": {
@@ -17370,10 +19851,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.tuberville.senate.gov/contact/contact-form/",
    "district": null,
+   "endType": null,
    "fec": [
     "S0AL00230"
    ],
+   "fecAll": [
+    "S0AL00230"
+   ],
    "govtrack": 456796,
+   "how": null,
    "last": "Tuberville",
    "name": "Tommy Tuberville",
    "nameParts": {
@@ -17406,10 +19892,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H8CA01109"
    ],
+   "fecAll": [
+    "H8CA01109"
+   ],
    "govtrack": 400403,
+   "how": null,
    "last": "Thompson",
    "name": "Mike Thompson",
    "nameParts": {
@@ -17444,11 +19935,17 @@
    "chamber": "House",
    "contactForm": null,
    "district": 10,
+   "endType": null,
    "fec": [
     "H2OH03067",
     "H2OH03091"
    ],
+   "fecAll": [
+    "H2OH03067",
+    "H2OH03091"
+   ],
    "govtrack": 400411,
+   "how": null,
    "last": "Turner",
    "name": "Michael R. Turner",
    "nameParts": {
@@ -17483,10 +19980,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 15,
+   "endType": null,
    "fec": [
     "H8PA05071"
    ],
+   "fecAll": [
+    "H8PA05071"
+   ],
    "govtrack": 412317,
+   "how": null,
    "last": "Thompson",
    "name": "Glenn Thompson",
    "nameParts": {
@@ -17520,10 +20022,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H8NV03036"
    ],
+   "fecAll": [
+    "H8NV03036"
+   ],
    "govtrack": 412318,
+   "how": null,
    "last": "Titus",
    "name": "Dina Titus",
    "nameParts": {
@@ -17557,10 +20064,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 20,
+   "endType": null,
    "fec": [
     "H8NY21203"
    ],
+   "fecAll": [
+    "H8NY21203"
+   ],
    "govtrack": 412319,
+   "how": null,
    "last": "Tonko",
    "name": "Paul Tonko",
    "nameParts": {
@@ -17594,10 +20106,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 39,
+   "endType": null,
    "fec": [
     "H2CA43245"
    ],
+   "fecAll": [
+    "H2CA43245"
+   ],
    "govtrack": 412520,
+   "how": null,
    "last": "Takano",
    "name": "Mark Takano",
    "nameParts": {
@@ -17631,10 +20148,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 35,
+   "endType": null,
    "fec": [
     "H4CA35031"
    ],
+   "fecAll": [
+    "H4CA35031"
+   ],
    "govtrack": 412617,
+   "how": null,
    "last": "Torres",
    "name": "Norma J. Torres",
    "nameParts": {
@@ -17669,10 +20191,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.tillis.senate.gov/public/index.cfm/email-me",
    "district": null,
+   "endType": null,
    "fec": [
     "S4NC00162"
    ],
+   "fecAll": [
+    "S4NC00162"
+   ],
    "govtrack": 412668,
+   "how": null,
    "last": "Tillis",
    "name": "Thom Tillis",
    "nameParts": {
@@ -17705,10 +20232,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 24,
+   "endType": null,
    "fec": [
     "H4NY22051"
    ],
+   "fecAll": [
+    "H4NY22051"
+   ],
    "govtrack": 412720,
+   "how": null,
    "last": "Tenney",
    "name": "Claudia Tenney",
    "nameParts": {
@@ -17739,10 +20271,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H8SC04250"
    ],
+   "fecAll": [
+    "H8SC04250"
+   ],
    "govtrack": 412815,
+   "how": null,
    "last": "Timmons",
    "name": "William R. Timmons IV",
    "nameParts": {
@@ -17775,10 +20312,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 12,
+   "endType": null,
    "fec": [
     "H8MI13250"
    ],
+   "fecAll": [
+    "H8MI13250"
+   ],
    "govtrack": 412787,
+   "how": null,
    "last": "Tlaib",
    "name": "Rashida Tlaib",
    "nameParts": {
@@ -17811,10 +20353,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H8MA03106"
    ],
+   "fecAll": [
+    "H8MA03106"
+   ],
    "govtrack": 412781,
+   "how": null,
    "last": "Trahan",
    "name": "Lori Trahan",
    "nameParts": {
@@ -17848,10 +20395,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 15,
+   "endType": null,
    "fec": [
     "H0NY15160"
    ],
+   "fecAll": [
+    "H0NY15160"
+   ],
    "govtrack": 456838,
+   "how": null,
    "last": "Torres",
    "name": "Ritchie Torres",
    "nameParts": {
@@ -17885,10 +20437,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H2HI02581"
    ],
+   "fecAll": [
+    "H2HI02581"
+   ],
    "govtrack": 456897,
+   "how": null,
    "last": "Tokuda",
    "name": "Jill N. Tokuda",
    "nameParts": {
@@ -17922,10 +20479,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 13,
+   "endType": null,
    "fec": [
     "H2MI13204"
    ],
+   "fecAll": [
+    "H2MI13204"
+   ],
    "govtrack": 456908,
+   "how": null,
    "last": "Thanedar",
    "name": "Shri Thanedar",
    "nameParts": {
@@ -17957,10 +20519,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H4OH02248"
    ],
+   "fecAll": [
+    "H4OH02248"
+   ],
    "govtrack": 457014,
+   "how": null,
    "last": "Taylor",
    "name": "David J. Taylor",
    "nameParts": {
@@ -17993,10 +20560,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 45,
+   "endType": null,
    "fec": [
     "H4CA45170"
    ],
+   "fecAll": [
+    "H4CA45170"
+   ],
    "govtrack": 456980,
+   "how": null,
    "last": "Tran",
    "name": "Derek Tran",
    "nameParts": {
@@ -18024,10 +20596,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 14,
+   "endType": null,
    "fec": [
     "H8IL14174"
    ],
+   "fecAll": [
+    "H8IL14174"
+   ],
    "govtrack": 412776,
+   "how": null,
    "last": "Underwood",
    "name": "Lauren Underwood",
    "nameParts": {
@@ -18057,10 +20634,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H2NY00010"
    ],
+   "fecAll": [
+    "H2NY00010"
+   ],
    "govtrack": 400416,
+   "how": null,
    "last": "Velázquez",
    "name": "Nydia M. Velázquez",
    "nameParts": {
@@ -18094,10 +20676,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.vanhollen.senate.gov/contact/email",
    "district": null,
+   "endType": null,
    "fec": [
     "S6MD03441"
    ],
+   "fecAll": [
+    "H2MD08126",
+    "S6MD03441"
+   ],
    "govtrack": 400415,
+   "how": null,
    "last": "Van Hollen",
    "name": "Chris Van Hollen",
    "nameParts": {
@@ -18131,10 +20719,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 22,
+   "endType": null,
    "fec": [
     "H2CA20094"
    ],
+   "fecAll": [
+    "H2CA20094"
+   ],
    "govtrack": 412515,
+   "how": null,
    "last": "Valadao",
    "name": "David G. Valadao",
    "nameParts": {
@@ -18166,10 +20759,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 52,
+   "endType": null,
    "fec": [
     "H2CA50026"
    ],
+   "fecAll": [
+    "H2CA50026"
+   ],
    "govtrack": 412522,
+   "how": null,
    "last": "Vargas",
    "name": "Juan Vargas",
    "nameParts": {
@@ -18203,10 +20801,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 33,
+   "endType": null,
    "fec": [
     "H2TX33073"
    ],
+   "fecAll": [
+    "H2TX33073"
+   ],
    "govtrack": 412579,
+   "how": null,
    "last": "Veasey",
    "name": "Marc A. Veasey",
    "nameParts": {
@@ -18241,10 +20844,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H8NJ02166"
    ],
+   "fecAll": [
+    "H8NJ02166"
+   ],
    "govtrack": 412796,
+   "how": null,
    "last": "Van Drew",
    "name": "Jefferson Van Drew",
    "nameParts": {
@@ -18277,10 +20885,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 24,
+   "endType": null,
    "fec": [
     "H0TX24209"
    ],
+   "fecAll": [
+    "H0TX24209"
+   ],
    "govtrack": 456850,
+   "how": null,
    "last": "Van Duyne",
    "name": "Beth Van Duyne",
    "nameParts": {
@@ -18313,10 +20926,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H0WI03175"
    ],
+   "fecAll": [
+    "H0WI03175"
+   ],
    "govtrack": 456950,
+   "how": null,
    "last": "Van Orden",
    "name": "Derrick Van Orden",
    "nameParts": {
@@ -18349,10 +20967,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H2NM02191"
    ],
+   "fecAll": [
+    "H2NM02191"
+   ],
    "govtrack": 456919,
+   "how": null,
    "last": "Vasquez",
    "name": "Gabe Vasquez",
    "nameParts": {
@@ -18384,10 +21007,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H4VA07234"
    ],
+   "fecAll": [
+    "H4VA07234"
+   ],
    "govtrack": 457027,
+   "how": null,
    "last": "Vindman",
    "name": "Eugene Simon Vindman",
    "nameParts": {
@@ -18420,10 +21048,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 7,
+   "endType": null,
    "fec": [
     "H6TN07161"
    ],
+   "fecAll": [
+    "H6TN07161"
+   ],
    "govtrack": 457038,
+   "how": null,
    "last": "Van Epps",
    "name": "Matt Van Epps",
    "nameParts": {
@@ -18450,10 +21083,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 43,
+   "endType": null,
    "fec": [
     "H4CA23011"
    ],
+   "fecAll": [
+    "H4CA23011"
+   ],
    "govtrack": 400422,
+   "how": null,
    "last": "Waters",
    "name": "Maxine Waters",
    "nameParts": {
@@ -18487,10 +21125,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.wicker.senate.gov/public/index.cfm/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S8MS00196"
    ],
+   "fecAll": [
+    "H4MS01078",
+    "S8MS00196"
+   ],
    "govtrack": 400432,
+   "how": null,
    "last": "Wicker",
    "name": "Roger F. Wicker",
    "nameParts": {
@@ -18525,10 +21169,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.wyden.senate.gov/contact/",
    "district": null,
+   "endType": null,
    "fec": [
     "S6OR00110"
    ],
+   "fecAll": [
+    "H0OR03026",
+    "S6OR00110"
+   ],
    "govtrack": 300100,
+   "how": null,
    "last": "Wyden",
    "name": "Ron Wyden",
    "nameParts": {
@@ -18562,10 +21212,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H0GA05301"
    ],
+   "fecAll": [
+    "H0GA05301"
+   ],
    "govtrack": 456811,
+   "how": null,
    "last": "Williams",
    "name": "Nikema Williams",
    "nameParts": {
@@ -18598,10 +21253,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.warnock.senate.gov/contact/",
    "district": null,
+   "endType": null,
    "fec": [
     "S0GA00559"
    ],
+   "fecAll": [
+    "S0GA00559"
+   ],
    "govtrack": 456858,
+   "how": null,
    "last": "Warnock",
    "name": "Raphael G. Warnock",
    "nameParts": {
@@ -18634,10 +21294,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H2SC02059"
    ],
+   "fecAll": [
+    "H2SC02059"
+   ],
    "govtrack": 400433,
+   "how": null,
    "last": "Wilson",
    "name": "Joe Wilson",
    "nameParts": {
@@ -18672,10 +21337,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 25,
+   "endType": null,
    "fec": [
     "H4FL20023"
    ],
+   "fecAll": [
+    "H4FL20023"
+   ],
    "govtrack": 400623,
+   "how": null,
    "last": "Wasserman Schultz",
    "name": "Debbie Wasserman Schultz",
    "nameParts": {
@@ -18709,10 +21379,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 5,
+   "endType": null,
    "fec": [
     "H4MI07103"
    ],
+   "fecAll": [
+    "H4MI07103"
+   ],
    "govtrack": 412213,
+   "how": null,
    "last": "Walberg",
    "name": "Tim Walberg",
    "nameParts": {
@@ -18746,10 +21421,17 @@
    "chamber": "Senate",
    "contactForm": "https://www.welch.senate.gov/email-peter/",
    "district": null,
+   "endType": null,
    "fec": [
     "S2VT00235"
    ],
+   "fecAll": [
+    "H6VT00160",
+    "H8VT00034",
+    "S2VT00235"
+   ],
    "govtrack": 412239,
+   "how": null,
    "last": "Welch",
    "name": "Peter Welch",
    "nameParts": {
@@ -18783,10 +21465,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.whitehouse.senate.gov/contact/email-sheldon",
    "district": null,
+   "endType": null,
    "fec": [
     "S6RI00221"
    ],
+   "fecAll": [
+    "S6RI00221"
+   ],
    "govtrack": 412247,
+   "how": null,
    "last": "Whitehouse",
    "name": "Sheldon Whitehouse",
    "nameParts": {
@@ -18820,10 +21507,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H8VA01147"
    ],
+   "fecAll": [
+    "H8VA01147"
+   ],
    "govtrack": 412255,
+   "how": null,
    "last": "Wittman",
    "name": "Robert J. Wittman",
    "nameParts": {
@@ -18858,10 +21550,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.warner.senate.gov/public/index.cfm?p=Contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S6VA00093"
    ],
+   "fecAll": [
+    "P80003023",
+    "S6VA00093"
+   ],
    "govtrack": 412321,
+   "how": null,
    "last": "Warner",
    "name": "Mark R. Warner",
    "nameParts": {
@@ -18896,10 +21594,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 11,
+   "endType": null,
    "fec": [
     "H0FL08208"
    ],
+   "fecAll": [
+    "H0FL08208",
+    "S4FL00256"
+   ],
    "govtrack": 412410,
+   "how": null,
    "last": "Webster",
    "name": "Daniel Webster",
    "nameParts": {
@@ -18932,10 +21636,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 24,
+   "endType": null,
    "fec": [
     "H0FL17068"
    ],
+   "fecAll": [
+    "H0FL17068"
+   ],
    "govtrack": 412412,
+   "how": null,
    "last": "Wilson",
    "name": "Frederica S. Wilson",
    "nameParts": {
@@ -18970,10 +21679,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 3,
+   "endType": null,
    "fec": [
     "H0AR03055"
    ],
+   "fecAll": [
+    "H0AR03055"
+   ],
    "govtrack": 412402,
+   "how": null,
    "last": "Womack",
    "name": "Steve Womack",
    "nameParts": {
@@ -19007,10 +21721,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H2MO02102"
    ],
+   "fecAll": [
+    "H2MO02102"
+   ],
    "govtrack": 412548,
+   "how": null,
    "last": "Wagner",
    "name": "Ann Wagner",
    "nameParts": {
@@ -19043,10 +21762,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 14,
+   "endType": null,
    "fec": [
     "H2TX14149"
    ],
+   "fecAll": [
+    "H2TX14149"
+   ],
    "govtrack": 412574,
+   "how": null,
    "last": "Weber",
    "name": "Randy K. Weber, Sr.",
    "nameParts": {
@@ -19082,10 +21806,16 @@
    "chamber": "House",
    "contactForm": null,
    "district": 25,
+   "endType": null,
    "fec": [
     "H2TX33040"
    ],
+   "fecAll": [
+    "H2TX33040",
+    "S2TX00270"
+   ],
    "govtrack": 412578,
+   "how": null,
    "last": "Williams",
    "name": "Roger Williams",
    "nameParts": {
@@ -19117,10 +21847,15 @@
    "chamber": "Senate",
    "contactForm": "https://www.warren.senate.gov/?p=email_senator",
    "district": null,
+   "endType": null,
    "fec": [
     "S2MA00170"
    ],
+   "fecAll": [
+    "S2MA00170"
+   ],
    "govtrack": 412542,
+   "how": null,
    "last": "Warren",
    "name": "Elizabeth Warren",
    "nameParts": {
@@ -19154,10 +21889,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 4,
+   "endType": null,
    "fec": [
     "H4AR04048"
    ],
+   "fecAll": [
+    "H4AR04048"
+   ],
    "govtrack": 412610,
+   "how": null,
    "last": "Westerman",
    "name": "Bruce Westerman",
    "nameParts": {
@@ -19189,10 +21929,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 12,
+   "endType": null,
    "fec": [
     "H4NJ12149"
    ],
+   "fecAll": [
+    "H4NJ12149"
+   ],
    "govtrack": 412644,
+   "how": null,
    "last": "Watson Coleman",
    "name": "Bonnie Watson Coleman",
    "nameParts": {
@@ -19225,10 +21970,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 8,
+   "endType": null,
    "fec": [
     "H4WI08119"
    ],
+   "fecAll": [
+    "H4WI08119"
+   ],
    "govtrack": 456963,
+   "how": null,
    "last": "Wied",
    "name": "Tony Wied",
    "nameParts": {
@@ -19260,10 +22010,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 27,
+   "endType": null,
    "fec": [
     "H4CA27111"
    ],
+   "fecAll": [
+    "H4CA27111"
+   ],
    "govtrack": 456977,
+   "how": null,
    "last": "Whitesides",
    "name": "George Whitesides",
    "nameParts": {
@@ -19296,10 +22051,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 11,
+   "endType": null,
    "fec": [
     "H6VA11066"
    ],
+   "fecAll": [
+    "H6VA11066"
+   ],
    "govtrack": 457036,
+   "how": null,
    "last": "Walkinshaw",
    "name": "James R. Walkinshaw",
    "nameParts": {
@@ -19327,10 +22087,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 14,
+   "endType": null,
    "fec": [
     "H0CA15213"
    ],
+   "fecAll": [
+    "H0CA15213"
+   ],
    "govtrack": 457046,
+   "how": null,
    "last": "Wahab",
    "name": "Aisha Wahab",
    "nameParts": {
@@ -19356,10 +22121,16 @@
    "chamber": "Senate",
    "contactForm": "https://www.young.senate.gov/contact",
    "district": null,
+   "endType": null,
    "fec": [
     "S6IN00191"
    ],
+   "fecAll": [
+    "H0IN09070",
+    "S6IN00191"
+   ],
    "govtrack": 412428,
+   "how": null,
    "last": "Young",
    "name": "Todd Young",
    "nameParts": {
@@ -19394,10 +22165,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 2,
+   "endType": null,
    "fec": [
     "H2IN02295"
    ],
+   "fecAll": [
+    "H2IN02295"
+   ],
    "govtrack": 456873,
+   "how": null,
    "last": "Yakym",
    "name": "Rudy Yakym III",
    "nameParts": {
@@ -19428,10 +22204,15 @@
    "chamber": "House",
    "contactForm": null,
    "district": 1,
+   "endType": null,
    "fec": [
     "H4MT01041"
    ],
+   "fecAll": [
+    "H4MT01041"
+   ],
    "govtrack": 412640,
+   "how": null,
    "last": "Zinke",
    "name": "Ryan K. Zinke",
    "nameParts": {

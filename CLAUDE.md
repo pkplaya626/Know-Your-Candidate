@@ -40,6 +40,7 @@ data/executives.json        ──┤   (every governor, from the NGA)
 data/statewide_officers.json ─┤   (lieutenant governors, secretaries of state, attorneys general)
 data/courts.json            ──┤   (each state's highest court, from the courts)
 data/voting_links.json      ──┤   (each state's official voting pages: NASS Can I Vote)
+data/record_2026.json       ──┤   (the frozen 2026 race set: record --freeze)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
@@ -111,6 +112,7 @@ python build_profile_site.py congress         # refresh membership (network)
 python build_profile_site.py field --check    # who is running, from the FEC
 python build_profile_site.py disclosures      # House and Senate disclosure links
 python build_profile_site.py results          # who is still in, from Wikipedia (and Louisiana's qualified list)
+python build_profile_site.py record           # the frozen 2026 race record (--freeze writes it; refuses to overwrite)
 python build_profile_site.py campaigns        # campaign websites from FEC committees
 python build_profile_site.py enrich           # fill gaps; check every campaign site
 python build_profile_site.py odds             # market prices and polling averages (writes odds.js)
@@ -123,7 +125,7 @@ python build_profile_site.py courts           # each state's highest court, from
 python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 941 tests, no dependencies
+python -m unittest discover tests             # 959 tests, no dependencies
 npm install && npm test                       # 1201 real-DOM checks (needs jsdom)
 ```
 
@@ -762,6 +764,20 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     never takes the list away. A status read from it credits the Secretary
     of State, never "the published results". After the count the results
     page decides, as everywhere else.
+
+65. **A cycle's races are frozen, not re-derived from whoever sits.** A
+    Senate seat was "up" because its senator's term ends at the election,
+    so the Florida and Ohio special elections' winners, seated in December
+    with terms to 2029, would have taken both races - and their results -
+    off the site, and January 3 would have taken all of them. The race set
+    is frozen once from the 119th Congress (`record --freeze`,
+    `data/record_2026.json`, signature pinned in `cycle.RECORD_SIGNATURES`
+    so a change is a reviewed code change); its incumbents are bioguide ids
+    with every FEC id the source lists (`fecAll`, both chambers) and whether
+    they were appointed. The surname table `SENATE_SEATS_UP_2026` is gone.
+    The cycle is set by hand in `kyc/cycle.py` and nowhere else; the sitting
+    Congress is the snapshot's, and the record phase begins only once it is
+    the Congress the cycle elects and was read after noon on January 3.
 
 ## District maps
 

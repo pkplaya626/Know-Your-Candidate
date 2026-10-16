@@ -462,24 +462,21 @@ class TestAgainstTheRealSnapshot(unittest.TestCase):
         senate = [p for p in self.snapshot["legislators"] if p["chamber"] == "Senate"]
         self.assertEqual(len(senate), 100)
 
-    def test_thirty_five_senate_seats_are_on_the_2026_ballot(self):
-        self.assertEqual(len(legislators.seats_up_ids(self.snapshot, 2026)), 35)
+    def test_the_record_and_todays_term_dates_agree(self):
+        # The frozen record's Senate races are the senators whose terms end
+        # at the 2026 election - or, once a special election's winner is
+        # seated, a seat whose appointee's term has ended (record.drift).
+        from kyc import races, record
+        profiles, _ = build_profiles(dict(self.raw, record=None), snapshot=self.snapshot)
+        live = races.contestable(profiles)
+        self.assertEqual(record.drift(self.raw["record"], live, self.snapshot), [])
 
-    def test_the_derived_and_curated_senate_tables_cover_the_same_states(self):
-        derived = legislators.seats_up(self.snapshot, 2026)
-        self.assertEqual(set(derived), set(overrides.SENATE_SEATS_UP_2026))
-
-    def test_building_with_the_snapshot_changes_nothing_today(self):
-        # The curated table and the real term dates agree right now, so this
-        # is a safe swap; the point is that the snapshot keeps agreeing after
-        # a seat changes hands and the hand-typed surname stops being right.
-        without, _ = build_profiles(self.raw)
-        with_snap, _ = build_profiles(self.raw, snapshot=self.snapshot)
-        up = lambda ps: sorted(
-            p["id"] for p in ps
-            if not p["isCandidate"] and "Senate" in p["chamber"] and p["seatUp2026"]
-        )
-        self.assertEqual(up(without), up(with_snap))
+    def test_the_senate_seats_up_are_the_records_incumbents(self):
+        from kyc import record
+        profiles, _ = build_profiles(self.raw, snapshot=self.snapshot)
+        up = {p["id"] for p in profiles
+              if not p["isCandidate"] and "Senate" in p["chamber"] and p["seatUp2026"]}
+        self.assertEqual(up, record.senate_incumbents(self.raw["record"]))
 
     def test_every_senator_has_a_term_end_year(self):
         profiles, _ = build_profiles(self.raw, snapshot=self.snapshot)

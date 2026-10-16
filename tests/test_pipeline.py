@@ -156,13 +156,17 @@ class TestBuild(unittest.TestCase):
         for profile in self.profiles:
             self.assertEqual(profile["photo_url"], profile["photos"][0])
 
-    def test_all_35_senate_seats_up_in_2026_are_matched(self):
-        self.assertEqual(self.stats["senate_seats_up"], 35)
+    def test_every_senate_seat_in_the_record_is_matched(self):
+        # The frozen record's Senate races (35 in 2026), each to its sitting
+        # incumbent - no count typed here.
+        senate = {r["state"] for r in self.raw["record"]["races"].values()
+                  if r["chamber"] == "Senate"}
+        self.assertEqual(self.stats["senate_seats_up"], len(senate))
         matched = {
             p["state"] for p in self.profiles
             if p["seatUp2026"] and not p["isCandidate"] and "Senate" in p["chamber"]
         }
-        self.assertEqual(matched, set(overrides.SENATE_SEATS_UP_2026))
+        self.assertEqual(matched, senate)
 
     def test_every_house_seat_is_up_in_2026(self):
         """Two-year terms: the whole House is on the ballot, not just retirees."""

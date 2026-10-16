@@ -266,11 +266,10 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
         # which is only ever approximately right: the table said "Graham" for
         # South Carolina meaning Lindsey Graham, and kept matching after the
         # seat changed hands purely because the new senator shares the name.
-        if seats_up is not None:
-            seat_up = profile_id in seats_up
-        else:
-            defender = overrides.SENATE_SEATS_UP_2026.get(state)
-            seat_up = bool(defender and defender.lower() in _fold(name).lower())
+        # With neither a record nor a snapshot, no seat is called up: the
+        # surname table this used to fall back on matched Darline Graham to
+        # Lindsey Graham's seat (rule 17).
+        seat_up = seats_up is not None and profile_id in seats_up
 
         if seat_up:
             end_year = ELECTION_YEAR + 1
@@ -563,17 +562,18 @@ def _apply_filings(profiles, field, finance):
     return moved, reseated
 
 
-def screen_field(field, profiles):
+def screen_field(field, profiles, record=None):
     """The FEC field without stale registrations or filings for absent races.
 
-    Only the sitting members in *profiles* are read, so this gives the same
-    answer before and after candidate profiles are appended.
+    The races are the frozen *record*'s when there is one (kyc/record.py);
+    otherwise only the sitting members in *profiles* are read, so this gives
+    the same answer before and after candidate profiles are appended.
     """
     if not field:
         return field
     from . import candidates as field_mod, races as races_mod
 
-    return field_mod.screen(field, races_mod.contestable(profiles, ELECTION_YEAR))
+    return field_mod.screen(field, races_mod.contestable(profiles, ELECTION_YEAR, record))
 
 
 def build_profiles(data, snapshot=None, field=None, finance=None, committees=None):
@@ -602,6 +602,7 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
     as_of = age_as_of(snapshot)
     seats_up = term_ends = None
     people = {}
+    record = (data or {}).get("record")
     if snapshot:
         from . import legislators
 
@@ -612,6 +613,13 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
             if (person.get("termEnd") or "")[:4].isdigit()
         }
         people = legislators.by_bioguide(snapshot)
+    if record:
+        # The senators whose seats were on the 2026 ballot when the record was
+        # frozen - not whoever's term happens to end now, which stops being
+        # true for Florida and Ohio once their special elections' winners are
+        # seated, and for everyone on January 3.
+        from .record import senate_incumbents
+        seats_up = senate_incumbents(record)
 
     members = _dedup_members(data["members"])
     candidates = _dedup_candidates(data["candidates"])
@@ -630,7 +638,7 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
                                       as_of=as_of))
 
     member_count = len(profiles)
-    field = screen_field(field, profiles)
+    field = screen_field(field, profiles, record)
 
     for index, row in enumerate(candidates):
         profiles.append(_build_candidate(row, index, as_of=as_of))
