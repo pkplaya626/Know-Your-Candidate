@@ -137,7 +137,8 @@ python build_profile_site.py federal          # the President, VP and Cabinet (W
 python build_profile_site.py judiciary        # every sitting federal judge (FJC) and the Supreme Court as the Court lists it
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
-python -m unittest discover tests             # 1081 tests, no dependencies
+python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
+python -m unittest discover tests             # 1085 tests, no dependencies
 npm install && npm test                       # 1302 real-DOM checks (needs jsdom)
 ```
 
