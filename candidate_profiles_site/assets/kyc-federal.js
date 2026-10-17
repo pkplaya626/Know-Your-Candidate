@@ -569,7 +569,9 @@
     var index = global.kycJudgesIndex || [];
     var courts = courtsById();
     if (!input) return;
-    var folded = index.map(function (row) { return KYC.foldText(row[1]); });
+    // A fifth entry is the directory's full name, where the name shown is
+    // the one the judge goes by ("A. Joe Fish", "Allen Joe Fish").
+    var folded = index.map(function (row) { return KYC.foldText(row[1] + (row[4] ? " " + row[4] : "")); });
 
     function run(typed) {
       var words = KYC.foldText(input.value).split(/\s+/).filter(Boolean);

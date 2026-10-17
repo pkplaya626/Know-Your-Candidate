@@ -412,7 +412,8 @@
 
     var born = judge.born ? [judge.born.city, judge.born.state].filter(Boolean).join(", ") +
       (judge.born.year ? (judge.born.city || judge.born.state ? ", " : "") + judge.born.year : "") : "";
-    var bio = field("Born", born ? KYC.escapeHtml(born) : absent("Not in the directory"));
+    var bio = (judge.fullName ? field("Full name", KYC.escapeHtml(judge.fullName)) : "") +
+      field("Born", born ? KYC.escapeHtml(born) : absent("Not in the directory"));
     if (judge.justice) {
       bio += field("Took the oath", KYC.escapeHtml(judge.justice.oath || "")) +
         field("Appointed from", KYC.escapeHtml(judge.justice.stateAppointedFrom || ""));

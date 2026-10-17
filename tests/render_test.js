@@ -4936,6 +4936,17 @@ async function testFederal() {
     }
     check("the count is of people", D.getElementById("judgeSearchCount") &&
       new Set(index.map((row) => row[0])).size === index.length);
+    // The directory's "A[llen] Joe Fish": shown as he goes by, found by both.
+    check("no judge's name carries the directory's brackets", index.every((row) => row[1].indexOf("[") === -1),
+      index.filter((row) => row[1].indexOf("[") !== -1).map((row) => row[1]).slice(0, 3).join(", "));
+    const bracketed = index.find((row) => row[4]);
+    if (bracketed) {
+      input.value = bracketed[4];
+      input.dispatchEvent(new window.Event("input"));
+      check("a judge is found by the full name the directory gives",
+        [...D.querySelectorAll("#judgeResults a")].some((a) => a.textContent === bracketed[1]),
+        bracketed[4] + " -> " + bracketed[1]);
+    }
     input.value = "";
     input.dispatchEvent(new window.Event("input"));
   });

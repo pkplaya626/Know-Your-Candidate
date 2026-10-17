@@ -96,7 +96,13 @@ def _judge(record):
     """A judge as the pages show them: nothing a source did not state."""
     keep = ("id", "name", "sortName", "status", "seats", "prior", "born", "education",
             "career", "otherNominations", "fjc", "justice", "retiredJustice", "portrait")
-    return {k: record[k] for k in keep if record.get(k) not in (None, [], "")}
+    out = {k: record[k] for k in keep if record.get(k) not in (None, [], "")}
+    # The name they go by; the directory's bracketed given name read out
+    # beside it (kyc/judiciary.py).
+    full = judiciary.full_name(out.get("name"))
+    if full:
+        out["name"], out["fullName"] = judiciary.display_name(out["name"]), full
+    return out
 
 
 def _opening(row):
@@ -166,7 +172,8 @@ def build(root="."):
             "id": cid, "name": court["name"], "kind": court["kind"],
             "circuit": court.get("circuit"), "states": list(court.get("states") or ()),
             "listed": held["listed"], "active": held["active"], "senior": held["senior"],
-            "chief": {"id": chief, "name": judges[chief]["name"]} if chief else None,
+            "chief": {"id": chief, "name": judiciary.display_name(judges[chief]["name"])}
+            if chief else None,
             "chiefUnsettled": bool(held.get("chiefUnsettled")),
             **({"token": colours[court["circuit"]]}
                if court["kind"] == "appeals" and court.get("states") else {}),
@@ -208,7 +215,12 @@ def build(root="."):
     for cid, held in courts["courts"].items():
         for jid in held["judges"]:
             sitting_on.setdefault(jid, []).append(cid)
-    search = sorted(([jid, judges[jid]["name"], sitting_on[jid], judges[jid]["status"]]
+    # A name the directory brackets is found by either form: the row carries
+    # the full name fifth, for the search only.
+    search = sorted(([jid, judiciary.display_name(judges[jid]["name"]), sitting_on[jid],
+                      judges[jid]["status"]] +
+                     ([judiciary.full_name(judges[jid]["name"])]
+                      if judiciary.full_name(judges[jid]["name"]) else [])
                      for jid in sitting_on), key=lambda row: (row[1], row[0]))
     # Each officer's financial disclosures (kyc/oge.py), by office, while the
     # index was read for the officer who holds it now.

@@ -1612,7 +1612,7 @@ a search that finds nobody says it searched the directory.
 |---|---|
 | `data/federal.js` (`kycFederal`) | The President, the Vice President, every Cabinet office, the Supreme Court's members, and an index of the courts with their counts and chief judges |
 | `data/judiciary/<court>.js` (`kycCourt[<court>]`) | One court's judges, loaded only by that court's page: 1,463 judges in one file would load on every page |
-| `data/judiciary/index.js` (`kycJudgesIndex`) | Every sitting judge's id, name, court and status, for the search |
+| `data/judiciary/index.js` (`kycJudgesIndex`) | Every sitting judge's id, name, court and status, for the search, and the directory's full name where it brackets a given name the judge does not use |
 
 Every file carries a content signature and is rewritten only when what it
 says changes; `verify` names a stale one. An official is never a profile:
@@ -1621,6 +1621,10 @@ nobody on these pages is counted among the members of Congress. The FJC's
 directory lists judges, not judgeships, so no vacancy is ever counted from
 it. Guam's, the Northern Mariana Islands' and the Virgin Islands' courts say
 why nobody is listed, and that this is not a vacancy.
+
+The directory brackets a given name a judge does not use ("A[llen] Joe
+Fish"). The pages show the name they go by, "A. Joe Fish"; the dialog gives
+the full name and the search finds either (`judiciary.display_name`).
 
 ### Vacancies
 

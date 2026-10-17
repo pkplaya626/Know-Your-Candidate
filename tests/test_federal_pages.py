@@ -132,6 +132,29 @@ class TestTheFiles(unittest.TestCase):
         self.assertIn('window.kycCourt["ca1"] = ', text)
 
 
+class TestJudgesNames(unittest.TestCase):
+    def test_no_name_shown_carries_the_directorys_brackets(self):
+        """FJC writes "A[llen] Joe Fish": shown as "A. Joe Fish", with the
+        full name beside it in the dialog and in the search."""
+        payload, courts, search, _ = built()
+        shown = [j for c in courts.values() for j in c["judges"] + c.get("retired", [])]
+        shown += payload["supremeCourt"]["members"] + payload["supremeCourt"]["retired"]
+        self.assertEqual([j["name"] for j in shown if "[" in j["name"]], [])
+        self.assertEqual([c["chief"]["name"] for c in payload["courts"]
+                          if c.get("chief") and "[" in c["chief"]["name"]], [])
+        self.assertEqual([row[1] for row in search if "[" in row[1]], [])
+        bracketed = [j for j in shown if j.get("fullName")]
+        for judge in bracketed:
+            self.assertNotIn("[", judge["fullName"])
+            self.assertEqual(judge["name"].split()[-1], judge["fullName"].split()[-1])
+        rows = {row[0]: row for row in search}
+        for judge in bracketed:
+            if judge["id"] in rows:
+                self.assertEqual(rows[judge["id"]][4], judge["fullName"])
+        self.assertTrue(all(len(row) == 4 for row in search if row[0] not in
+                            {j["id"] for j in bracketed}))
+
+
 class TestVacanciesAgainstTheDirectory(unittest.TestCase):
     def test_a_vacancy_whose_judge_the_directory_does_not_list_is_marked(self):
         """The courts' list says a judge took senior status; a judge on
