@@ -195,6 +195,17 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
         contest = profile.get("contestRaceId")
         if contest and contest != race["id"] and profile.get("alsoRunningId") is None:
             join(race_for(contest), profile, "candidateIds")
+        from .results import OFF_BALLOT
+        out = (profile.get("raceStatusRace") == contest
+               and profile.get("raceStatus") in OFF_BALLOT)
+        if (contest and contest != race["id"] and race["chamber"] == "House"
+                and contest.startswith(f"H-{race['state']}-") and not out):
+            # Running for the House again under the state's new district
+            # number: the seat they hold is open, but they are not leaving.
+            # Utah read "4 open seats" with all four members running, and
+            # the "Not seeking re-election" filter listed eleven nominees.
+            profile["renumbered"] = True
+            race["holderMoved"] = {"name": profile["name"], "to": seat_label(contest)}
 
     frozen = (record or {}).get("races") or {}
     held = (record or {}).get("incumbents") or {}
@@ -387,7 +398,7 @@ def stats(races):
         "races_with_filings": sum(1 for r in races if r.get("filedCount")),
         "races": len(races),
         "contested": len(contested),
-        "open_seats": sum(1 for r in races if r["openSeat"]),
+        "open_seats": sum(1 for r in races if r["openSeat"] and not r.get("holderMoved")),
         "senate_races": sum(1 for r in races if r["chamber"] == "Senate"),
         "house_races": sum(1 for r in races if r["chamber"] == "House"),
     }

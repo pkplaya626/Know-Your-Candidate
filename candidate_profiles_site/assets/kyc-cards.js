@@ -202,17 +202,27 @@
       var holder = race.incumbentIds.map(KYC.byId).filter(Boolean)[0];
       // The record names who held the seat even when they have no profile.
       var named = race.incumbent && race.incumbent.name;
+      // A mid-decade map keeps every district number, so a seat nobody
+      // holds is vacant, not new: FL-20 and TX-23 read "newly drawn".
       var why = !holder ? (named ? named + " no longer holds the seat." :
-          "A newly drawn seat with no sitting member.") :
+          "No sitting member: the seat is vacant.") :
         // Seated since in the seat they won elsewhere (kyc/record.py).
         holder.raceRole === "winner" && holder.raceId !== race.id
           ? holder.name + " won the race for " + holder.officeLabel.replace(/ • /, " ") + "." :
+        holder.contestLabel && KYC.offBallot(KYC.contestStatus(holder))
+          ? holder.name + " ran for " + holder.contestLabel.replace(/ • /, " ") +
+            " and is not on the November ballot." :
         holder.contestLabel ? holder.name + " is running for " + holder.contestLabel + "." :
         holder.alsoRunningSeat ? holder.name + " is running for " + holder.alsoRunningSeat + "." :
         KYC.offBallot(holder.raceStatus) ? holder.name + " is not on the November ballot." :
         holder.name + " is not seeking re-election.";
-      badges.push('<span class="badge badge-warn" title="' + KYC.escapeAttr(why) +
-        '">Open seat</span>');
+      var moved = race.holderMoved;
+      badges.push(moved
+        ? '<span class="badge badge-warn" title="' + KYC.escapeAttr(moved.name +
+            ", who holds this seat, is running for " + moved.to + " under the state's new " +
+            "district map, so nobody holding this number is on its ballot.") +
+          '">Holder running in ' + KYC.escapeHtml(moved.to.replace(/^House • /, "")) + "</span>"
+        : '<span class="badge badge-warn" title="' + KYC.escapeAttr(why) + '">Open seat</span>');
     }
     if (race.primaryDate) {
       // A ballot read from a qualified list is not a held primary.

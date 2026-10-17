@@ -50,8 +50,11 @@
         item.chamber.indexOf("Senate") !== -1;
     },
     // Incumbents whose seat is up but who are not running again.
+    // Not a member running again under a new district number (renumbered):
+    // they are seeking re-election, for a seat with another number.
     notSeeking: function (item) {
-      return item.seatUp2026 && !item.isCandidate && !item.seekingReelection2026;
+      return item.seatUp2026 && !item.isCandidate && !item.seekingReelection2026 &&
+        !item.renumbered;
     },
     contested: function (item) {
       return !!item.raceId && contestedRaces.has(item.raceId);

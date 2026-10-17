@@ -2368,6 +2368,42 @@ async function testBallotCounts() {
   });
 }
 
+/* A member running for the House again under the state's new district
+ * number is not leaving: Utah read "4 open seats" with all four members
+ * running, and "Not seeking re-election" listed eleven nominees. A member
+ * who ran under a new number and lost is leaving, and is listed. */
+async function testRenumbered() {
+  const { window, D, errors } = await buildPage("index.html", { hash: "#/?election=notSeeking" });
+  await settle(50);
+  const KYC = window.KYC;
+  suite("index.html — members running under a new district number", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const moved = window.kycRaces.filter((r) => r.holderMoved);
+    check("the data has seats whose holder runs under a new number", moved.length > 0);
+    const badge = moved.length && KYC.cards.raceBadges(moved[0]);
+    check("their seat says where the holder is running, not just 'Open seat'",
+      !!badge && /Holder running in/.test(badge) && !/>Open seat</.test(badge), moved[0] && moved[0].id);
+    const shown = new Set([...D.querySelectorAll("#results .card")].map((c) => c.getAttribute("data-id")));
+    const renumbered = window.legislatorsData.filter((p) => p.renumbered);
+    check("'Not seeking re-election' leaves out members running again under a new number",
+      shown.size > 0 && renumbered.length > 0 && renumbered.every((p) => !shown.has(p.id)),
+      renumbered.filter((p) => shown.has(p.id)).map((p) => p.name).join(", "));
+    const lost = window.legislatorsData.filter((p) => KYC.seated(p) && p.contestRaceId &&
+      p.contestRaceId.startsWith("H-" + p.state + "-") && KYC.offBallot(KYC.contestStatus(p)));
+    check("and keeps one who ran under a new number and lost",
+      lost.every((p) => shown.has(p.id) && !p.renumbered), lost.map((p) => p.name).join(", "));
+  });
+  const ut = await buildPage("states/ut.html");
+  await settle(50);
+  suite("states/ut.html — open seats are seats nobody holding them runs for", () => {
+    const strip = [...ut.D.querySelectorAll(".badge")].map((b) => b.textContent);
+    const info = ut.window.kycBuildMeta.states.UT;
+    check("the strip counts members under a new number apart from open seats",
+      info.renumbered > 0 && strip.some((t) => /running under a new district number/.test(t)) &&
+        !strip.some((t) => t === "4 open seats"), strip.join(" | "));
+  });
+}
+
 async function testSenate() {
   const { window, D, errors } = await buildPage("index.html", { hash: "#/?view=senate" });
   await settle(50);
@@ -5234,6 +5270,7 @@ async function testFederal() {
   if (!only || only === "index.html") await testDirectoryAsync();
   if (!only || only === "index.html") await testSenate();
   if (!only || only === "index.html") await testBallotCounts();
+  if (!only || only === "index.html") await testRenumbered();
   if (!only || only === "index.html") await testReseatedSpecial();
   if (!only || only === "index.html") await testFormerIncumbent();
   if (!only || only === "index.html") await testRecordPhase();

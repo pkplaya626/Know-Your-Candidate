@@ -126,9 +126,11 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None):
             "senateSeatsUp": len(senate_up),
             "senateDefending": _split(senate_up),
             "houseSeatsUp": HOUSE_SEATS,
+            # The grid's "Not seeking re-election" filter, counted alike: a
+            # member running again under a new district number is seeking it.
             "notSeeking": sum(
-                1 for p in senate_up + house_up
-                if not p.get("seekingReelection2026")
+                1 for p in holders
+                if not p.get("seekingReelection2026") and not p.get("renumbered")
             ),
             "challengers": sum(1 for p in profiles if p.get("isCandidate")),
             # Still in the race and with a profile here: nominees plus
@@ -211,7 +213,8 @@ def by_state(profiles, races=None):
             continue
         entry = out.setdefault(code, {
             "name": state_name(code), "senators": 0, "house": 0, "delegates": 0,
-            "seatsUp": 0, "open": 0, "challengersOnBallot": 0, "challengersOut": 0,
+            "seatsUp": 0, "open": 0, "renumbered": 0, "challengersOnBallot": 0,
+            "challengersOut": 0,
             "races": 0, "territory": code in TERRITORIES,
             # The state's own delegation by party, for its sidebar. A
             # territory's delegate sits in the House, so counts there.
@@ -265,7 +268,9 @@ def by_state(profiles, races=None):
                 (race.get("results") or {}).get("otherNominees") or [])
         entry["races"] += 1
         entry["seatsUp"] += 1
-        if race.get("openSeat"):
+        if race.get("holderMoved"):
+            entry["renumbered"] += 1
+        elif race.get("openSeat"):
             entry["open"] += 1
         if race.get("chamber") == "House":
             house_races[race["state"]] = house_races.get(race["state"], 0) + 1

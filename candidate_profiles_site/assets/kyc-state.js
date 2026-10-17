@@ -86,6 +86,9 @@
     var rec = KYC.recordPhase();
     parts.push(plural(info.seatsUp, "seat") + " in Congress on the 2026 ballot");
     if (info.open) parts.push(plural(info.open, "open seat") + (rec ? " in 2026" : ""));
+    if (info.renumbered) {
+      parts.push(plural(info.renumbered, "member") + " running under a new district number");
+    }
     parts.push(plural(info.challengersOnBallot, "challenger") +
       (rec ? " on the 2026 ballot" : " on the ballot"));
     if (info.challengersOut) {
