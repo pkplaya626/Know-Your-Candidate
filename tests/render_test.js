@@ -3670,6 +3670,25 @@ async function testLegislatures() {
       check("floterial members are listed under 'Not on the map'",
         off.length > 0 && off.every((p) => D.getElementById("legPanelBody").textContent.includes(p.name)),
         `${off.length}`);
+      // The state page and the legislatures directory count from
+      // data/stategov.js; this page must say the same numbers.
+      const sg = {};
+      new Function("window", fs.readFileSync(path.join(SITE, "data/stategov.js"), "utf8"))(sg);
+      const want = sg.kycStateGov.states.NH.lower;
+      const line = D.querySelector("#legPanelBody p").textContent;
+      const got = {};
+      [...line.matchAll(/(\d+) (Republican|Democratic|Independent)/g)].forEach((m) => { got[m[2][0]] = +m[1]; });
+      check("the party line counts them too, as the state page does",
+        ["R", "D", "I"].every((k) => (got[k] || 0) === (want[k] || 0)), line + " vs " + JSON.stringify(want));
+    });
+  }
+  {
+    const { window, D } = await buildPage("legislature/me.html", { hash: "#/?chamber=lower" });
+    suite("legislature/me.html — a non-voting tribal seat is no seat in the count", () => {
+      const c = window.kycLegislature.ME.chambers.lower;
+      const line = D.querySelector("#legPanelBody p").textContent;
+      const total = [...line.matchAll(/(\d+) [A-Z]/g)].reduce((n, m) => n + +m[1], 0);
+      check("the party line adds up to the members listed for its seats", total === c.listed, line);
     });
   }
   {
