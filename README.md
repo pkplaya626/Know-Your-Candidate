@@ -62,7 +62,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (1390 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (1391 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -276,7 +276,9 @@ its kind, the district maps, the legislature and county pages, and the
 Congress and election boxes in the sidebar - and each guide section ends
 with where its subject can be seen on this site now (`government_text.SEE`).
 The executive and Supreme Court sections list who holds those offices now,
-from `data/federal.js` (`government_text.HOLDERS`, rule 48). Every link is
+from `data/federal.js` (`government_text.HOLDERS`, rule 48). On the guide's circuits
+map a state's facts list its own federal courts - its court of appeals, then
+its district courts - each linked to its judges, from the same `federal.js`. Every link is
 checked: a guide section, by `government.href`; a section of the federal
 hub, against the sections its script draws (`government.SITE_ANCHORS`).
 
