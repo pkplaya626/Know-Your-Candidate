@@ -2138,8 +2138,12 @@ async function testRunningElsewhere() {
         (c.contestRaceId || c.raceId) === held.id);
       return opener ? { m, opener } : null;
     }).filter(Boolean);
+    // Once the new Congress sits, every member is in the seat they won, and
+    // nobody holds one seat while running for another (rule 68).
+    const movers = people.filter((m) => KYC.seated(m) && !m.isCandidate && m.contestRaceId &&
+      m.raceId && m.contestRaceId !== m.raceId);
     check("the data has a holder running elsewhere, in a race someone else is running in",
-      cases.length > 0, `${cases.length}`);
+      cases.length > 0 || !movers.length, `${cases.length} of ${movers.length} movers`);
     const wrong = cases.filter(({ m, opener }) => {
       KYC.profile.open(opener.id, { fromRoute: true });
       const row = D.querySelector(`#profileModalRace [data-goto="${m.id}"]`);
@@ -2421,15 +2425,18 @@ async function testBallotCounts() {
     // Top-two and top-four primaries send the leaders through whatever
     // their party: two Democrats "won" CA-11's primary and members read
     // "Renominated".
+    // A member through it for the seat they hold; not a winner seated since
+    // in a seat they did not hold, who was never renominated (rule 67).
     const through = W.legislatorsData.filter((p) => p.allPartyPrimary === "top-two" &&
-      W.KYC.seated(p) && !p.contestLabel && p.raceStatus === "nominee");
+      W.KYC.seated(p) && !p.contestLabel && !p.raceRole && p.raceStatus === "nominee");
     const badges = through.map((p) => W.KYC.cards.card(p));
     check("a member through a top-two primary reads 'Advanced to November', never 'Renominated'",
       through.length > 0 && badges.every((b) => /Advanced to November/.test(b) &&
         !/Renominated/.test(b) && /top two of the all-party primary/.test(b)),
-      `${through.length} members`);
+      `${through.length} members; ` + (badges.find((b) => !/Advanced to November/.test(b) ||
+        /Renominated/.test(b)) || "").replace(/\s+/g, " ").slice(0, 400));
     const elsewhere = W.legislatorsData.find((p) => !p.allPartyPrimary && p.raceStatus === "nominee" &&
-      W.KYC.seated(p) && !p.contestLabel);
+      W.KYC.seated(p) && !p.contestLabel && !p.raceRole);
     check("and a member renominated in a party primary still reads 'Renominated'",
       !!elsewhere && /Renominated/.test(W.KYC.cards.card(elsewhere)));
     check("a name the results may give a profile here is said to be that, not 'no profile'",
