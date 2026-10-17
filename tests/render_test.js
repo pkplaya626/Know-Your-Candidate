@@ -3464,6 +3464,19 @@ async function testGuide() {
         return /Vice Chairman/.test(lead.textContent) && !/Ex Officio/.test(row.textContent);
       })());
       check("names are escaped text, not markup", !/<script/i.test(live.innerHTML));
+      // A joint committee's roster may title only majority members: the
+      // cell says what the rosters name, never "None recorded".
+      const unnamedCells = [...live.querySelectorAll('td[data-label="Minority lead"] .lead-unnamed')];
+      check("a lead the rosters do not name is said to be not named, not 'none recorded'",
+        !/None recorded/.test(live.textContent) && unnamedCells.every((s) =>
+          s.textContent === "No minority lead named in the rosters"), live.textContent.slice(0, 200));
+      check("each table counts its committees with no minority lead named",
+        [...live.querySelectorAll("table")].every((t) => {
+          const n = t.querySelectorAll('td[data-label="Minority lead"] .lead-unnamed').length;
+          const note = t.closest(".guide-table-wrap").previousElementSibling;
+          const has = !!note && note.classList.contains("committees-unnamed");
+          return n ? has && /no member of the minority a leading title/.test(note.textContent) : !has;
+        }));
       const first = people[0];
       first.click();
       check("a name opens the shared profile dialog",
