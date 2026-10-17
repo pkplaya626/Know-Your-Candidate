@@ -1616,6 +1616,25 @@ async function testStates() {
       !!note && /Of the territorial offices this site covers, the same ballot also elects the governor/
         .test(note.textContent), note && note.textContent);
   });
+  /* Hawaii has no Senate race in 2026, yet the Senate view counted its
+   * House nominees under the Senate heading (audit 2026-10-17, RACES-06). */
+  const hiCode = "HI";
+  const hiSenate = await buildPage("map.html", { hash: "#/?state=" + hiCode + "&mode=senate" });
+  const hi2026 = await buildPage("map.html", { hash: "#/?state=" + hiCode + "&mode=senate2026" });
+  suite("map.html — a state with no Senate race in its Senate views", () => {
+    const hasRace = hiSenate.window.kycRaces.some((r) => r.state === hiCode && r.chamber === "Senate");
+    check("Hawaii has no 2026 Senate race in the data", !hasRace);
+    const senateText = hiSenate.D.getElementById("delegation").textContent;
+    check("the Senate view counts no House nominees", !/Also on the November ballot/.test(senateText),
+      senateText.slice(0, 300));
+    const text = hi2026.D.getElementById("delegation").textContent;
+    const next = hi2026.window.legislatorsData.filter((p) => p.state === hiCode &&
+      hi2026.window.KYC.seated(p) && /Senate/.test(p.chamber));
+    check("the 2026 Senate view says there is no race, and when each senator's seat is next up",
+      /No U\.S\. Senate election in Hawaii in 2026/.test(text) && next.length === 2 &&
+        next.every((p) => text.indexOf(p.nextElection + " (" + p.name + ")") !== -1) &&
+        !/Nothing to show/.test(text), text.slice(0, 300));
+  });
   const ks = await buildPage("map.html", { hash: "#/?state=KS&mode=legislature" });
   suite("map.html — a chamber with no regular election", () => {
     const marks = [...ks.D.querySelectorAll("#delegation .gov-ballot-mark")].map((a) => a.textContent);
