@@ -491,14 +491,33 @@
     }],
   ];
 
+  // An account is linked by the id the source holds where it holds one: an
+  // X id follows a renamed handle (RepMikeJohnson, now SpeakerJohnson, is
+  // "not found"). The pipeline gives a YouTube value its shape - a channel
+  // id is youtube_id, a handle starts with "@", anything else is a legacy
+  // username that still answers at /user/.
   var SOCIAL = [
+    ["twitter_id", "X", function (v) { return "https://x.com/i/user/" + encodeURIComponent(v); }],
     ["twitter", "X", function (v) { return "https://x.com/" + encodeURIComponent(v); }],
     ["facebook", "Facebook", function (v) { return "https://www.facebook.com/" + encodeURIComponent(v); }],
     ["instagram", "Instagram", function (v) { return "https://www.instagram.com/" + encodeURIComponent(v); }],
     ["youtube_id", "YouTube", function (v) { return "https://www.youtube.com/channel/" + encodeURIComponent(v); }],
-    ["youtube", "YouTube", function (v) { return "https://www.youtube.com/user/" + encodeURIComponent(v); }],
+    ["youtube", "YouTube", function (v) {
+      v = String(v);
+      return v.charAt(0) === "@"
+        ? "https://www.youtube.com/@" + encodeURIComponent(v.slice(1))
+        : "https://www.youtube.com/user/" + encodeURIComponent(v);
+    }],
     ["bluesky", "Bluesky", function (v) { return "https://bsky.app/profile/" + encodeURIComponent(v); }],
   ];
+
+  /** The handle a chip's tooltip names: "@SpeakerJohnson", never an id. */
+  function handleTitle(social, key, value) {
+    if (key === "twitter_id") return social.twitter ? "@" + social.twitter : "";
+    if (key === "youtube_id") return social.youtube ? handleTitle(social, "youtube", social.youtube) : "";
+    value = String(value);
+    return value.charAt(0) === "@" ? value : "@" + value;
+  }
 
   function linkChip(url, label, title) {
     return '<a class="link-chip" href="' + KYC.escapeAttr(url) +
@@ -536,15 +555,12 @@
     if (office.length) rows.push('<p class="modal-meta contact-office">' + office.join("") + "</p>");
 
     var social = [];
-    var seenYouTube = false;
+    var seen = {};
     SOCIAL.forEach(function (spec) {
       var value = item.social && item.social[spec[0]];
-      if (!value) return;
-      if (spec[1] === "YouTube") {
-        if (seenYouTube) return;
-        seenYouTube = true;
-      }
-      social.push(linkChip(spec[2](value), spec[1], "@" + value));
+      if (!value || seen[spec[1]]) return;
+      seen[spec[1]] = true;
+      social.push(linkChip(spec[2](value), spec[1], handleTitle(item.social, spec[0], value)));
     });
     if (social.length) {
       rows.push('<span class="field-label">Official accounts</span>' +
@@ -787,7 +803,8 @@
     // Every figure of money on the site is the FEC's (validate: finance-not-fec).
     el("profileModalSource").textContent = item.financeSource
       ? "Finance figures from the FEC" +
-        (item.financeAsOf ? ", through " + item.financeAsOf : "") +
+        (item.financeAsOf ? ", through " + item.financeAsOf +
+          (KYC.filedAhead(item) ? " as the report gives it" : "") : "") +
         (item.financeElection ? " (" + item.financeElection + " election period)" : "")
       : "";
   }

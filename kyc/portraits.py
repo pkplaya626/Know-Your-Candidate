@@ -372,39 +372,6 @@ def wiki_page_images(titles, log=None):
     return out
 
 
-def wiki_search_title(name):
-    """Best-guess article title for *name*.
-
-    Searched bare. Adding a topical hint ("NE politician") reorders results so
-    badly that the person's own article drops out of the top hits entirely.
-    """
-    try:
-        payload = _api({
-            "list": "search", "srsearch": name, "srlimit": "5", "srnamespace": "0",
-        })
-    except Exception:
-        return None
-
-    hits = [h.get("title", "") for h in payload.get("query", {}).get("search", [])]
-    lowered = name.lower()
-    surname = name.split()[-1].lower() if name.split() else ""
-
-    for title in hits:
-        if _BAD_TITLE.search(title):
-            continue
-        clean = title.lower()
-        # Exact article, or the standard "Name (politician)" disambiguation.
-        if clean == lowered or clean.startswith(f"{lowered} ("):
-            return title
-
-    # Fall back to a title that at least starts with the person's full name,
-    # so a loose match cannot attach a stranger's portrait to a candidate.
-    for title in hits:
-        if not _BAD_TITLE.search(title) and title.lower().startswith(lowered) and surname:
-            return title
-    return None
-
-
 # ------------------------------------------------------------------- cache
 
 def profile_key(profile):
@@ -505,23 +472,24 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
     """
     cache = load_cache(root)
 
-    # Candidates imported from the FEC's filing register are deliberately not
-    # resolved. Portrait resolution for a member goes through the
-    # authoritative bioguide -> Wikipedia mapping, which cannot pick the wrong
-    # person. For a filed candidate it is a bare title guess and a search, and
-    # the field contains 1,979 largely unknown people with ordinary names -
-    # "Michael Smith" resolves to an article about somebody else entirely.
-    # A silhouette says "we have no portrait", which is true. A stranger's
-    # face on a candidate's profile is the exact failure rule 3 exists for,
+    # Nobody's portrait is guessed (rule 24). A member's goes through the
+    # official photographs and the authoritative bioguide -> Wikipedia
+    # mapping, which cannot pick the wrong person. Anyone else has a title
+    # only where the state's election page links one: an editor's assertion
+    # about this person on this ballot, resolved through that title alone and
+    # checked after redirects. A title guessed from a name or found by a
+    # search is somebody else often enough - "Michael Smith", "Adam Hamilton
+    # (politician)" - and a silhouette says "we have no portrait", which is
+    # true. A stranger's face on a profile is the failure rule 3 exists for,
     # and nothing on the page would look wrong.
-    # The one exception is a filing the state's election page links to an
-    # article: that link is an editor's assertion about this person on this
-    # ballot, the same kind of authority as the bioguide mapping. Those are
-    # resolved through the title alone - never guessed, never searched.
     profiles = [p for p in profiles
                 if p.get("source") != "fec-field" or p.get("wikipedia")]
 
-    todo = [p for p in profiles if refresh or profile_key(p) not in cache]
+    # A cached portrait that came by a route no longer allowed - a search, a
+    # guessed title, an article the profile no longer links - is resolved
+    # again rather than kept (see :func:`route_ok`).
+    todo = [p for p in profiles if refresh or profile_key(p) not in cache
+            or not route_ok(p, cache[profile_key(p)])]
     todo = [p for p in todo if not cache.get(profile_key(p), {}).get("pinned")]
 
     if not todo:
@@ -567,48 +535,46 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
     except PortraitError as exc:
         log(f"    [warn] {exc}")
 
+    # The ballot page's own link is the only other route, for anyone it
+    # names - a curated row as much as a filer (rule 33). There is no third:
+    # titles guessed from a name ("Adam Hamilton (politician)", a 1930s
+    # photograph on the Kansas Senate candidate, who is the pastor) and a
+    # search for whoever was left are the guesses rule 24 forbids.
     wanted = {}
+    by_bioguide = set()
     for profile in remaining:
-        title = titles_by_bioguide.get(profile["id"].upper()) or (
-            profile.get("wikipedia") if profile.get("source") == "fec-field" else None)
+        title = titles_by_bioguide.get(profile["id"].upper())
+        if title:
+            by_bioguide.add(profile_key(profile))
+        elif profile.get("wikipediaVia") == "election-page" or profile.get("source") == "fec-field":
+            title = profile.get("wikipedia")
         if title:
             wanted[profile_key(profile)] = title
 
-    # --- Stage 3: guess the obvious article titles for everyone else. Never
-    # for a filed candidate: their only route is the ballot's own link.
-    guesses = {}
-    for profile in remaining:
-        key = profile_key(profile)
-        if key not in wanted and profile.get("source") != "fec-field":
-            guesses[key] = [profile["name"], f"{profile['name']} (politician)"]
-
-    lookup = list(wanted.values()) + [t for v in guesses.values() for t in v]
+    lookup = list(wanted.values())
     thumbs = wiki_page_images(lookup, log=log)
     log(f"    wikipedia pageimages: {len(thumbs)} thumbnails for {len(set(lookup))} titles")
 
     still = []
     for profile in remaining:
         key = profile_key(profile)
-        from_mapping = key in wanted
-        for title in ([wanted[key]] if from_mapping else guesses.get(key, [])):
-            found = thumbs.get(title)
-            if not found:
-                continue
-            # The bioguide -> Wikipedia mapping is authoritative and its title
-            # need not contain the surname (married names, pen names). A bare
-            # guess is not, and a redirect can land it on a topic page. A
-            # ballot page's link is trusted for the title but still checked
-            # after redirects, the way McGinnis's protest photo taught.
-            trusted = from_mapping and profile.get("source") != "fec-field"
-            if not trusted and not title_is_about(found[0], profile["name"]):
-                log(f"    [skip] {profile['name']} -> {found[0]!r} (not about them)")
-                continue
+        found = thumbs.get(wanted.get(key, ""))
+        # The bioguide -> Wikipedia mapping is authoritative and its title
+        # need not contain the surname (married names, pen names). A ballot
+        # page's link is trusted for the title but still checked after
+        # redirects, the way McGinnis's protest photo taught.
+        if found and (key in by_bioguide or title_is_about(found[0], profile["name"])):
             resolved[key] = {
                 "url": found[1], "via": "wikipedia",
                 "title": found[0], "name": profile["name"],
             }
-            break
+            # The title asked for, before redirects - the bioguide
+            # mapping's or the ballot page's link: what route_ok compares
+            # with the profile's own link.
+            resolved[key]["linked"] = wanted[key]
         else:
+            if found:
+                log(f"    [skip] {profile['name']} -> {found[0]!r} (not about them)")
             still.append(profile)
 
     # --- Stage 3b: a senator with no portrait on Wikipedia gets the official
@@ -627,25 +593,6 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
                     "url": url, "via": "congress.gov", "name": profile["name"],
                 }
     still = [p for p in still if profile_key(p) not in resolved]
-
-    # --- Stage 4: search Wikipedia for whoever is left - roster people only.
-    still = [p for p in still if p.get("source") != "fec-field"]
-    if still:
-        log(f"    searching wikipedia for {len(still)} remaining ...")
-        found_titles = {}
-        for profile in still:
-            title = wiki_search_title(profile["name"])
-            if title:
-                found_titles[profile_key(profile)] = title
-        extra = wiki_page_images(list(found_titles.values()), log=log)
-        for profile in still:
-            key = profile_key(profile)
-            hit = extra.get(found_titles.get(key, ""))
-            if hit and title_is_about(hit[0], profile["name"]):
-                resolved[key] = {
-                    "url": hit[1], "via": "wikipedia-search",
-                    "title": hit[0], "name": profile["name"],
-                }
 
     # --- Stage 5: check what we found, keeping anything not proven broken.
     def confirm(item):
@@ -711,13 +658,54 @@ def inherit_cross_links(profiles, cache):
     return shared
 
 
+# Routes that reach a photograph through an id: the House Clerk's and
+# congress.gov's official portraits (by bioguide id), and a member's own
+# portrait shared with their other candidacy (by profile id).
+_ID_ROUTES = ("clerk.house.gov", "congress.gov", "cross-link")
+
+
+def route_ok(profile, record):
+    """True when a cached portrait reached this profile by an allowed route.
+
+    Rule 24 for every profile: a member's portrait comes through their
+    bioguide id; anyone else's only through the article their ballot page
+    links (rule 33), checked after redirects to be about them. The cache
+    held portraits found earlier by guessing "<Name> (politician)" and by
+    searching a name - the Kansas Senate nominee, a pastor, carried a 1930s
+    photograph of another Adam Hamilton - and those are refused here, not
+    merely no longer looked for. A hand-pinned record stands on its own
+    evidence.
+    """
+    if record.get("pinned"):
+        return True
+    via = record.get("via")
+    if via in _ID_ROUTES:
+        return True
+    if via != "wikipedia":
+        return not record.get("url")
+    linked = record.get("linked") or record.get("title")
+    if not linked or linked != profile.get("wikipedia"):
+        return False
+    if profile_key(profile).startswith("bioguide:"):
+        # The bioguide -> Wikipedia mapping is authoritative, and its title
+        # need not contain the surname (married names, pen names).
+        return True
+    return ((profile.get("wikipediaVia") == "election-page"
+             or profile.get("source") == "fec-field")
+            and title_is_about(record.get("title") or "", profile["name"]))
+
+
 def apply_cache(profiles, cache):
-    """Put the resolved URL at the head of each profile's fallback chain."""
+    """Put the resolved URL at the head of each profile's fallback chain.
+
+    Only a portrait whose route :func:`route_ok` accepts; anything else
+    leaves the chain as :mod:`kyc.photos` built it, ending at the silhouette.
+    """
     hits = 0
     for profile in profiles:
         record = cache.get(profile_key(profile)) or {}
         url = record.get("url")
-        if not url:
+        if not url or not route_ok(profile, record):
             profile["photoSource"] = None
             continue
         profile["photos"] = [url] + [u for u in profile["photos"] if u != url]

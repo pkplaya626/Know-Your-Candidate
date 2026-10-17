@@ -661,10 +661,20 @@
    *  The pipeline records the period (financePeriod, financeElection,
    *  financeSince, financeAsOf); this only words it, and never fills a
    *  missing start date in. Plain text - callers escape it. */
+  /** True when the coverage end a report gives is after the build. */
+  function filedAhead(item) {
+    var built = String(meta().built || "").slice(0, 10);
+    return !!(item && item.financeAsOf && built && item.financeAsOf > built);
+  }
+
   function financePeriod(item) {
     if (!item || !item.financeSource) return "";
     var since = monthYear(item.financeSince);
     var through = monthYear(item.financeAsOf);
+    // A report can give a coverage end still to come (filed "through
+    // December 31" in October): it is the filer's date, shown as filed, not
+    // as a period that has passed.
+    if (through && filedAhead(item)) through += " (as filed)";
     var range = since && through ? ", " + since + " – " + through
       : through ? ", through " + through
       : since ? ", from " + since : "";
@@ -1672,6 +1682,7 @@
     heldYears: heldYears,
     sourceBadge: sourceBadge,
     financePeriod: financePeriod,
+    filedAhead: filedAhead,
     monthYear: monthYear,
     hasValue: hasValue,
     partyKey: partyKey,

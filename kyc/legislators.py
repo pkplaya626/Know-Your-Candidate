@@ -55,9 +55,13 @@ COMMITTEES_URL = (
 )
 COMMITTEES_FILE = os.path.join("candidate_profiles_site", "data", "committees.json")
 
-# The handles the page links. Ids (twitter_id, youtube_id) are kept for the
-# YouTube channel URL, which needs one; everything else links by handle.
-SOCIAL_KEYS = ("twitter", "facebook", "instagram", "youtube", "youtube_id",
+# The handles the page links, and the ids it links in their place: the
+# YouTube channel URL needs one, and an X account is linked by its id
+# (x.com/i/user/<id>), which follows a rename. Six members' handles answered
+# "User Profile Not Found" on 2026-10-17 - Speaker Johnson's RepMikeJohnson
+# among them, now SpeakerJohnson - and an abandoned handle can be registered
+# by anyone (rule 32: build the link from the id the source holds).
+SOCIAL_KEYS = ("twitter", "twitter_id", "facebook", "instagram", "youtube", "youtube_id",
                "bluesky", "mastodon")
 
 _UA = {"User-Agent": "know-your-candidate/2.1 (open-source civic data project)"}
@@ -182,6 +186,50 @@ def goes_by(person):
     if middle and not is_initial(middle.split()[0]):
         return _with_suffix(f"{middle} {last}", parts.get("suffix"))
     return None
+
+
+_ROSTER_NICKNAME = re.compile(r"^(\S+)\s+\(([^)]+)\)\s+(.+)$")
+
+
+def display_name(roster, person):
+    """The name a member is shown by: the one they go by, from records only.
+
+    The roster holds legal names ("John Reed", "Alejandro Padilla"), which
+    readers do not know them by; the committee table in the guide named
+    "Eric Crawford" for the chair readers know as Rick Crawford. *person*
+    is the member's congress-legislators record, looked up by bioguide id
+    (rules 3 and 17), and nothing here is a curated name map:
+
+    * a recorded nickname, with the surname: "Jack Reed", "Bernie Sanders";
+    * for a roster name opening with an initial, the real middle name
+      ("C. Franklin" is Scott Franklin);
+    * the roster's own parenthetical: "Nicole (Nikki) Budzinski" is Nikki
+      Budzinski;
+    * where ``official_full`` gives a shorter form of the roster's first
+      name with the same surname - the familiar form the member uses
+      officially: "Greg Casar", "Nick LaLota", "Val Hoyle". A longer one is
+      the formal name of someone the roster already shows familiarly ("Eli
+      Crane" is officially "Elijah Crane") and is not used.
+
+    Anything else keeps the roster spelling.
+    """
+    roster = " ".join(str(roster or "").split())
+    words = roster.split()
+    if not person or not words:
+        return roster
+    parts = person.get("nameParts") or {}
+    if parts.get("nickname") or is_initial(words[0]):
+        return goes_by(person) or roster
+    match = _ROSTER_NICKNAME.match(roster)
+    if match:
+        return f"{match.group(2).strip()} {match.group(3)}"
+    official = _QUOTED.sub("", parts.get("official_full") or "").split()
+    if len(official) >= 2 and len(words) >= 2 and not is_initial(official[0]):
+        first, mine = official[0], words[0]
+        if (fold_name(official[-1]) == fold_name(words[-1])
+                and len(first) < len(mine) and fold_name(first) != fold_name(mine)):
+            return " ".join([first] + words[1:])
+    return roster
 
 
 def aliases(person, display, extra=()):

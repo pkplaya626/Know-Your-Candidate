@@ -146,8 +146,8 @@ python build_profile_site.py oge              # the executive's financial report
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1216 tests, no dependencies
-npm install && npm test                       # 1495 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1243 tests, no dependencies
+npm install && npm test                       # 1510 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -258,6 +258,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     this cycle because they are running for a different seat - which is
     information, not an absence of it. Never fill that gap with the previous
     cycle's figures; 2024 receipts on a 2026 page read as current money.
+    The same goes for a share: "Funding sources" is of total receipts,
+    loans and transfers included, and a candidate's own loan is their own
+    money. Read from four contribution types, Jefferson Shreve, whose
+    $2,000,000 loan was 79% of what his campaign received, read "PACs 70%".
+    And a challenger's split is read from their own filing
+    (`fec.resolve_field`, the endpoint the incumbent's comes from), or
+    every challenger beside a member's breakdown read "No data".
 
 20. **Check attribution, do not trust it.** An FEC candidate id encodes its
     own office and state, so `validate.check_finance` compares every figure
@@ -282,13 +289,27 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     ever needs to move, move it to another legal definition, not to a number
     that makes the page look tidy.
 
-24. **Do not guess portraits for filed candidates.** The bioguide -> Wikipedia
-    mapping cannot pick the wrong person; a title guess for one of 1,979
-    largely unknown people can, and "Michael Smith" resolves to a stranger.
-    `portraits.resolve_all` skips `source == "fec-field"` and
+24. **Do not guess anyone's portrait.** The bioguide -> Wikipedia mapping
+    cannot pick the wrong person; a title guess or a name search can, and
+    "Michael Smith" resolves to a stranger. A portrait reaches a profile by
+    an id - the Clerk's, congress.gov's and the Biographical Directory's
+    photographs by bioguide id, the article the bioguide mapping names - or
+    through the article the person's ballot page links (rule 33), and by no
+    other route, for members and curated rows as much as filed candidates.
     `title_is_about` rejects a resolved title that does not contain the
     person's surname - which is how a photograph of an Iran war protest ended
-    up on Brian McGinnis's profile via a redirect.
+    up on Brian McGinnis's profile via a redirect. The guess came back
+    through every other door: on 2026-10-17 the New Jersey and Oregon
+    Republican Senate nominees showed a rugby league player and an Olympic
+    kayaker from `Special:FilePath/<Name>.jpg`, every member's fallback chain
+    ended in the same guesses ("Al_Green.jpg" is the singer), Kansas's
+    nominee carried a 1930s photograph found by guessing "Adam Hamilton
+    (politician)", and 24 of the 25 "hand-chosen" `CANDIDATE_PHOTOS` URLs
+    named files that did not exist. So `photos.py` builds no URL from a
+    name, `portraits.route_ok` refuses a cached portrait that did not come
+    by one of these routes (it is applied after the results, which carry
+    the ballot link), and `validate` fails on any `Special:FilePath` or
+    `Special:Redirect` URL in any profile's chain.
 
 25. **Report look-alike people; never merge them.** Alaska's Senate race holds
     both Dan Sullivan and a different Daniel J Sullivan.
@@ -356,7 +377,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "election-page"`), resolved through the title alone and still checked
     against the surname after redirects. That is how 201 challengers got a
     portrait without a single guess, and how Brian McGinnis's protest photo
-    was rejected a second time.
+    was rejected a second time. The link itself is checked the same way:
+    `enrich` follows every ballot link's redirects, and one that lands on a
+    section of another article, a list, an election or a party article is
+    withheld (`wikipediaWithheld`) - "Brian McGinnis" leads to the protest,
+    "Elijah Manley" to a party's 2016 primaries, and one candidate's link
+    was the Cascade Party of Washington's own article.
 
 34. **Fifty-seven near-identical pages are generated, not maintained.** The
     state pages come from one template and carry nothing but a state code;
@@ -940,8 +966,16 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     ballot. `candidates.registrations` also joins filings whose Form 1
     names the same committee (`committeeOf`, from the campaigns cache)
     when the money is the same to the cent; equal money alone never
-    joins anyone. A results-page name that was ambiguous only between one
-    person's registrations is theirs (`results._claim_unmatched`).
+    joins anyone. One committee and the very same filed name, letter for
+    letter, join whatever the money: Arthur Grahame Purves registered three
+    times for PURVES FOR CONGRESS as "PURVES, ARTHUR GRAHAME MR.", one
+    registration's totals also counted a second committee, and VA-11 listed
+    him as two Republican nominees. Filers off every ballot have no
+    committee in the campaigns cache, so a pair like Broden's in FL-1 is an
+    evidenced `SAME_PERSON_FILINGS` entry, and `validate` warns on two
+    profiles under one name in one race (`same-name-in-race`). A
+    results-page name that was ambiguous only between one person's
+    registrations is theirs (`results._claim_unmatched`).
 
 73. **A count is one formula, wherever it is shown.** The sidebar read
     587 challengers on the ballot, a state's strip 16 over race headers

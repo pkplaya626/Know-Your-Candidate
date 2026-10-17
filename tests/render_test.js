@@ -308,6 +308,16 @@ async function testShared(page) {
     check("a two-year House period carries no Senate caveat",
       house === "Raised for the 2026 election, Jan 2025 – Jun 2026", house);
 
+    // FEC_H4IA01127's report ran "through 2026-12-31" in October 2026.
+    const ahead = { financeSource: "FEC", chamber: "House (Candidate)",
+      financePeriod: "election", financeElection: 2026,
+      financeSince: "2025-01-01", financeAsOf: "2099-12-31" };
+    check("a coverage end still to come is shown as filed",
+      KYC.financePeriod(ahead) === "Raised for the 2026 election, Jan 2025 – Dec 2099 (as filed)",
+      KYC.financePeriod(ahead));
+    check("a coverage end already passed is not marked",
+      !KYC.filedAhead({ financeAsOf: "2000-06-30" }));
+
     const noStart = KYC.financePeriod({ financeSource: "FEC", chamber: "House (Candidate)",
       financePeriod: "election", financeElection: 2026, financeSince: null,
       financeAsOf: "2026-06-30" });
@@ -878,6 +888,12 @@ async function testDirectoryAsync() {
   });
 
   suite("index.html — contact & links", () => {
+    // Rule 24: CAND_40 and CAND_43 showed a rugby player and a kayaker from
+    // Special:FilePath/<Name>.jpg, and G000553's chain ended in the singer.
+    const guessed = window.legislatorsData.filter((p) =>
+      (p.photos || []).some((u) => /Special:(FilePath|Redirect)/.test(u)));
+    check("no portrait chain holds a file reached by a name",
+      guessed.length === 0, guessed.map((p) => p.id).slice(0, 5).join(" "));
     const rosters = window.legislatorsData.some((p) => (p.committeeList || []).length);
     const member = window.legislatorsData.find(
       (p) => KYC.seated(p) && p.website && p.social && p.social.twitter &&
@@ -890,8 +906,13 @@ async function testDirectoryAsync() {
       const links = [...D.getElementById("profileModalContact").querySelectorAll("a")];
       check("official website is linked",
         links.some((a) => a.href === member.website || a.href === member.website + "/"));
-      check("X account is linked from the handle",
-        links.some((a) => a.href === "https://x.com/" + encodeURIComponent(member.social.twitter)));
+      // By the id where the source holds one: it follows a renamed handle
+      // (RepMikeJohnson, "not found", is SpeakerJohnson).
+      check("X account is linked from its id, else the handle",
+        links.some((a) => a.href === (member.social.twitter_id
+          ? "https://x.com/i/user/" + encodeURIComponent(member.social.twitter_id)
+          : "https://x.com/" + encodeURIComponent(member.social.twitter))));
+      check("only one X chip", links.filter((a) => /^https:\/\/x\.com\//.test(a.href)).length === 1);
       check("GovTrack is linked from the id, not the name",
         links.some((a) => a.href.endsWith("/congress/members/" + member.refs.govtrack)));
       check("every outbound link opens safely",
@@ -917,6 +938,23 @@ async function testDirectoryAsync() {
           encodeURIComponent(runner.fecCandidateId) + "/"));
       KYC.profile.close();
     }
+    // A YouTube value is linked by its shape: 88 of 90 members' links were
+    // youtube.com/user/<value>, 404 for handles and channel ids alike.
+    [[{ youtube: "@RepAlford" }, "https://www.youtube.com/@RepAlford"],
+      [{ youtube_id: "UCjy0W7sksMz37IYY27tAZNQ", youtube: "RepX" },
+        "https://www.youtube.com/channel/UCjy0W7sksMz37IYY27tAZNQ"],
+      [{ youtube: "adamschiff" }, "https://www.youtube.com/user/adamschiff"]].forEach(([social, want]) => {
+      if (!member) return;
+      const kept = member.social;
+      member.social = social;
+      KYC.profile.open(member.id);
+      const yt = [...D.getElementById("profileModalContact").querySelectorAll("a")]
+        .filter((a) => /youtube\.com/.test(a.href)).map((a) => a.href);
+      check("a YouTube " + Object.keys(social)[0] + " is linked as " + want,
+        yt.length === 1 && yt[0] === want, yt.join(" "));
+      KYC.profile.close();
+      member.social = kept;
+    });
     const hostile = { id: "X_TEST", name: "Test", website: 'https://example.com/"><img src=x onerror=alert(1)>',
       isCandidate: true, social: { twitter: '"><b>x' } };
     // The renderer only ever sees data through the escaper; push one bad row
@@ -1250,9 +1288,11 @@ async function testDirectoryAsync() {
       franklin.name === "Scott Franklin", franklin.name);
     check("the roster spelling stays searchable", finds("F000472", "C. Franklin"));
     const list = D.getElementById("kycNames");
-    const option = [...list.options].find((o) => o.value === "James Clyburn");
+    // Shown by the name he goes by (his record's nickname); the roster's
+    // legal name is an alias.
+    const option = [...list.options].find((o) => o.value === "Jim Clyburn");
     check("suggestions keep the display name and carry the alias as a label",
-      !!option && /Jim Clyburn/.test(option.getAttribute("label") || ""),
+      !!option && /James/.test(option.getAttribute("label") || ""),
       option && option.getAttribute("label"));
     check("the initial-first roster spelling is not suggested; the display name is",
       ![...list.options].some((o) => o.value === "C. Franklin") &&
@@ -1260,14 +1300,14 @@ async function testDirectoryAsync() {
   });
 
   suite("index.html — alias search through the directory", () => {
-    window.location.hash = "#/?q=" + encodeURIComponent("Jim Clyburn");
+    window.location.hash = "#/?q=" + encodeURIComponent("James Clyburn");
     window.dispatchEvent(new window.Event("hashchange"));
     const ids = [...D.getElementById("results").querySelectorAll(".card")]
       .map((c) => c.getAttribute("data-id"));
-    check("a 'Jim Clyburn' search shows his card, and only his", ids.length === 1 && ids[0] === "C000537",
+    check("a 'James Clyburn' search shows his card, and only his", ids.length === 1 && ids[0] === "C000537",
       ids.slice(0, 5).join(","));
     const card = D.querySelector('#results .card[data-id="C000537"]');
-    check("and the card shows the display name", !!card && /James Clyburn/.test(card.textContent));
+    check("and the card shows the display name", !!card && /Jim Clyburn/.test(card.textContent));
     window.location.hash = "#/";
     window.dispatchEvent(new window.Event("hashchange"));
   });
