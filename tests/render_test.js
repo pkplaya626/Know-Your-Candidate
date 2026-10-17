@@ -1544,14 +1544,77 @@ async function testStates() {
   suite("states/gu.html — a territory's ballot is not only local", () => {
     const note = gu.D.querySelector("#races .state-note");
     check("names territorial contests, not only local ones",
-      !!note && /territorial and local contests/.test(note.textContent), note && note.textContent);
+      !!note && /territorial and local contests/.test(note.textContent) &&
+        !/state offices/.test(note.textContent), note && note.textContent);
   });
   const az = await buildPage("map.html", { hash: "#/?state=AZ&mode=lt" });
   suite("map.html — Arizona's first lieutenant governor", () => {
     const text = az.D.getElementById("delegation").textContent;
     check("a new office elected on Nov 3 is not called one the state lacks",
       /No one holds this office yet/.test(text) && !/The state has no lieutenant governor/.test(text) &&
-        /On the Nov 3, 2026 ballot/.test(text), text.slice(0, 300));
+        /This office is on the Nov 3, 2026 ballot/.test(text), text.slice(0, 300));
+  });
+
+  /* "On the Nov 3, 2026 ballot" sat under Brian Kemp, Gavin Newsom and Tim
+   * Walz, none of them on it (audit 2026-10-17, STATEGOV-01). The mark is the
+   * office's: it says "This office", sits on the office's label line, and
+   * never in the holder's block. */
+  const ga = await buildPage("states/ga.html");
+  suite("states/ga.html — the ballot mark belongs to the office, not the holder", () => {
+    const gov = ga.D.getElementById("state-government");
+    const marks = gov ? [...gov.querySelectorAll(".gov-ballot-mark.up")]
+      .filter((a) => !a.closest(".gov-chamber")) : [];
+    check("every office on the ballot is marked 'This office is on the Nov 3, 2026 ballot'",
+      marks.length >= 4 && marks.every((a) => a.textContent === "This office is on the Nov 3, 2026 ballot"),
+      marks.map((a) => a.textContent).join(" | "));
+    check("each mark sits on its office's label line",
+      marks.every((a) => a.parentElement.classList.contains("gov-office") &&
+        !!a.parentElement.querySelector(".gov-role, .gov-officer-role")));
+    check("no mark follows a holder's name",
+      !gov.querySelector(".gov-name ~ p .gov-ballot-mark, .gov-officer-name ~ p .gov-ballot-mark"));
+    check("nothing on the page says a person is on the ballot",
+      !/\bOn the Nov 3, 2026 ballot/.test(gov.textContent), gov.textContent.slice(0, 200));
+    check("no open-seat line without a cited source (Georgia has none in the table)",
+      !gov.querySelector(".gov-open-seat"));
+  });
+
+  const fl = await buildPage("states/fl.html");
+  suite("states/fl.html — an open seat, from the constitution's term limit", () => {
+    const open = fl.D.querySelector("#state-government .gov-open-seat");
+    const name = fl.window.kycStateGov.states.FL.governor.name;
+    check("says the governor is term-limited, with the source linked",
+      !!open && open.textContent.indexOf("Open seat: " + name + " is term-limited") === 0 &&
+        /^http/.test(open.querySelector("a").getAttribute("href")),
+      open && open.textContent);
+  });
+  const flAfter = await buildPage("states/fl.html", { now: "2026-11-05T09:00:00" });
+  suite("states/fl.html after Election Day — the office was on the ballot", () => {
+    const gov = flAfter.D.getElementById("state-government");
+    check("the mark is in the past tense",
+      /This office was on the Nov 3, 2026 ballot/.test(gov.textContent));
+    check("the open-seat line is gone: the office has a winner now",
+      !gov.querySelector(".gov-open-seat"));
+  });
+
+  suite("states/va.html — when an office not up in 2026 is next elected (PERSONA-19)", () => {
+    const next = [...va.D.querySelectorAll("#state-government .gov-next")];
+    const words = next.map((a) => a.textContent);
+    check("the governor is next elected in 2029, from the statute",
+      words.filter((w) => w === "Next elected: November 2029").length === 3 &&
+        next.every((a) => /law\.lis\.virginia\.gov|njleg|\.gov/.test(a.getAttribute("href"))),
+      words.join(" | "));
+    check("both chambers in 2027", words.filter((w) => w === "Next elected: November 2027").length === 2,
+      words.join(" | "));
+  });
+
+  suite("states/gu.html — a territory's governor is on the Nov 3 ballot (RACES-07)", () => {
+    const gov = gu.D.getElementById("state-government");
+    const note = gu.D.querySelector("#races .state-note");
+    check("the governor's office is marked on the ballot",
+      !!gov && /This office is on the Nov 3, 2026 ballot/.test(gov.textContent));
+    check("the race list names the territorial offices it elects",
+      !!note && /Of the territorial offices this site covers, the same ballot also elects the governor/
+        .test(note.textContent), note && note.textContent);
   });
   const ks = await buildPage("map.html", { hash: "#/?state=KS&mode=legislature" });
   suite("map.html — a chamber with no regular election", () => {
@@ -4391,14 +4454,28 @@ async function testStateGov() {
     check("its label says whether the governor is elected on Nov 3",
       /elected on Nov 3/.test(shape(up[0]).getAttribute("aria-label")) &&
       /no governor's election in 2026/.test(shape("VA").getAttribute("aria-label")));
-    check("the legend says what the colours mean",
-      /No governor's election in 2026/.test(D.getElementById("mapLegend").textContent) &&
-      /Not covered here/.test(D.getElementById("mapLegend").textContent));
-    const territory = D.querySelector('#usMap [data-state="GU"]');
-    check("a territory is drawn as not covered, never as electing no one",
-      !!territory && territory.style.fill !== "var(--surface-2)" &&
-        /not covered/.test(territory.getAttribute("aria-label")),
-      territory && territory.style.fill);
+    // The colour is the sitting governor's party, who may not be running
+    // (audit 2026-10-17, RACES-09): the legend says whose party it is.
+    const legendText = D.getElementById("mapLegend").textContent;
+    check("the legend says what the colours mean, and that the colour is the current governor's",
+      /No governor's election in 2026/.test(legendText) &&
+      /current governor: Republican/.test(legendText) && !/the governor now is/.test(legendText) &&
+      !/territories/.test(legendText), legendText);
+    // Guam, the Virgin Islands and the Northern Mariana Islands elect their
+    // governors on Nov 3 (RACES-07): drawn like any state, never "not covered".
+    ["GU", "VI", "MP"].forEach((t) => {
+      const shapeT = D.querySelector('#usMap [data-state="' + t + '"]');
+      check(t + " is drawn as electing its governor on Nov 3",
+        !!shapeT && shapeT.style.fill === "var(--party-" +
+          data.states[t].governor.partyKey.toLowerCase() + ")" &&
+          /elected on Nov 3/.test(shapeT.getAttribute("aria-label")),
+        shapeT && shapeT.getAttribute("aria-label"));
+    });
+    const pr = D.querySelector('#usMap [data-state="PR"]');
+    check("Puerto Rico, which elected its governor in 2024, is drawn as no election",
+      !!pr && pr.style.fill === "var(--surface-2)" &&
+        /no governor's election in 2026/.test(pr.getAttribute("aria-label")),
+      pr && pr.getAttribute("aria-label"));
 
     D.querySelector('[data-mode="trifecta"]').click();
     const painted = stateCodes.filter((c) => shape(c).style.fill === "var(--party-r)").length;

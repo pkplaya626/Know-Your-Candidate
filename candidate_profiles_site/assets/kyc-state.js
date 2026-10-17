@@ -314,11 +314,19 @@
         '<a href="https://www.dcboe.org/elections/2026-elections" target="_blank" ' +
         'rel="noopener noreferrer">D.C. Board of Elections</a>).';
     }
+    if (territory) {
+      // A territory's own record covers its governor only (ballot2026.TERRITORIES):
+      // its legislature and local offices are not in it, and are said so.
+      return (list
+        ? "Of the territorial offices this site covers, the same ballot also elects the " +
+          KYC.escapeHtml(list.replace(/^the /, "")) + " (see " +
+          '<a class="state-jump" href="#state-government">Territorial government</a>). '
+        : list === "" ? KYC.escapeHtml(name) + " does not elect its governor in 2026. " : "") +
+        "Your ballot may also hold territorial and local contests, such as for the " +
+        "legislature, which this site does not list.";
+    }
     if (list === null) {
-      return territory
-        ? "Your ballot may also hold territorial and local contests, such as for governor " +
-          "and the legislature, which this site does not list."
-        : "Your ballot may also hold local contests, which this site does not list.";
+      return "Your ballot may also hold local contests, which this site does not list.";
     }
     if (!list) {
       return "None of " + KYC.escapeHtml(name) + "'s governor, lieutenant governor, attorney " +

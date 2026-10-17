@@ -82,13 +82,14 @@
     ],
     governor2026: [
       // The year is part of the date: these pages are read long after it.
-      [FILL.R, "Elected Nov 3, 2026; the governor now is a Republican"],
-      [FILL.D, "Elected Nov 3, 2026; the governor now is a Democrat"],
+      // The colour is the sitting governor's party, who may not be running:
+      // the legend says whose party it is, not who is on the ballot.
+      [FILL.R, "Governor's election Nov 3, 2026 (current governor: Republican)"],
+      [FILL.D, "Governor's election Nov 3, 2026 (current governor: Democrat)"],
       [FILL.none, "No governor's election in 2026"],
-      // The territories and D.C. are not in the table: never the grey above,
-      // which would say they elect no one (Guam, the Virgin Islands and the
-      // Northern Mariana Islands all elect a governor on Nov 3).
-      [FILL.nonpartisan, "Not covered here (territories and D.C.)"],
+      // D.C. elects a mayor, not a governor: never the grey above, which
+      // would say it holds no election at all.
+      [FILL.nonpartisan, "D.C.: a mayor, not a governor"],
     ],
   };
 
@@ -161,16 +162,56 @@
     return (b && b.offices[key]) || null;
   }
 
+  /* The mark is the office's, never the holder's: "On the Nov 3, 2026
+   * ballot" printed under Brian Kemp, Gavin Newsom and Tim Walz read as a
+   * fact about each of them, and none of them is on it (audit 2026-10-17,
+   * STATEGOV-01). So it says "This office", and it sits on the office's own
+   * label line, above whoever holds it (rule 79). */
+  function after() {
+    return KYC.electionStatus(2026).phase === "post-election";
+  }
+
+  /** When an office or chamber not on this ballot is next elected, linked
+   *  to the record that gives the year (ballot2026.NEXT): never worked out
+   *  here from a term length. "" when the table has no year for it. */
+  function nextMark(item) {
+    if (!item || !item.next) return "";
+    return ' <a class="gov-next" href="' + KYC.escapeAttr(item.next.source) +
+      '" target="_blank" rel="noopener noreferrer">Next elected: November ' +
+      KYC.escapeHtml(String(item.next.year)) + "</a>";
+  }
+
   function officeMark(code, key) {
     var b = ballot(code);
     var item = b && b.offices[key];
     if (!item) return "";
-    if (item.up) return ballotMark(item, "On the Nov 3, 2026 ballot");
-    return ballotMark(item, item.selection === "elected" ||
-      item.selection === "elected-jointly-with-governor" ? "Not elected in 2026"
+    if (item.up) {
+      return ballotMark(item, "This office " + (after() ? "was" : "is") + " on the Nov 3, 2026 ballot");
+    }
+    var elected = item.selection === "elected" || item.selection === "elected-jointly-with-governor";
+    return ballotMark(item, elected ? "Not elected in 2026"
       : item.selection === "appointed" ? "Appointed, not elected"
       : item.selection === "chosen-by-legislature" ? "Chosen by the legislature, not elected"
-      : "No such office");
+      : "No such office") + (elected ? nextMark(item) : "");
+  }
+
+  /** Why an office on the ballot has no incumbent running for it, where a
+   *  cited source says so (ballot2026.OPEN_SEATS): the constitution's term
+   *  limit or the election office's list of candidates, never inferred.
+   *  Said only until the election: after it, the office has a winner. */
+  function openSeat(code, key) {
+    var b = ballot(code);
+    var item = b && b.offices[key];
+    var open = item && item.up && item.openSeat;
+    if (!open || after()) return "";
+    return '<p class="gov-open-seat">Open seat: ' + KYC.escapeHtml(open.text) + " (" +
+      link(open.source, open.cite) + ").</p>";
+  }
+
+  /** The office's label with its ballot mark beside it. */
+  function officeLine(cls, label, mark) {
+    return '<p class="gov-office"><span class="' + cls + '">' + KYC.escapeHtml(label) + "</span>" +
+      (mark ? " " + mark : "") + "</p>";
   }
 
   function chamberMark(code, which) {
@@ -179,7 +220,8 @@
     if (!c) return "";
     return ballotMark(c, !c.up ? "No regular elections in 2026"
       : (c.up === c.seats ? "All " + c.seats : c.up + " of " + c.seats) + " seats on the Nov 3, 2026 ballot",
-      " Regular elections only: a special election to fill an unexpired term is not counted.");
+      " Regular elections only: a special election to fill an unexpired term is not counted.") +
+      (!c.up ? nextMark(c) : "");
   }
 
   function any(test) {
@@ -241,7 +283,8 @@
     var s = state(code);
     var name = KYC.stateName(code);
     if (mode === "governor2026" && !ballot(code)) {
-      return { fill: FILL.nonpartisan, text: name + ": not covered here" };
+      return { fill: FILL.nonpartisan, text: code === "DC"
+        ? "D.C. elects a mayor, not a governor" : name + ": not covered here" };
     }
     if (!s) {
       return { fill: FILL.none, text: code === "DC"
@@ -258,7 +301,7 @@
         ? { fill: FILL[gov.partyKey] || FILL.I,
             text: name + ": the governor " +
               (KYC.electionStatus(2026).phase === "post-election" ? "was" : "is") +
-              " elected on Nov 3, 2026 (now Gov. " + gov.name + ", " + gov.party + ")" }
+              " elected on Nov 3, 2026 (current governor: " + gov.name + ", " + gov.party + ")" }
         : { fill: FILL.none, text: name + ": no governor's election in 2026" };
     }
     if (OFFICES[mode]) {
@@ -299,8 +342,10 @@
     }
     if (mode === "governor2026") {
       var b = ballot(code);
-      return !b ? '<span class="faint">Not covered</span>'
-        : b.offices.governor.up ? "Governor elected Nov 3" : "No governor's election in 2026";
+      return !b ? '<span class="faint">' + (code === "DC" ? "A mayor, not a governor" : "Not covered") + "</span>"
+        : b.offices.governor.up ? "Governor's election Nov 3"
+        : "No governor's election in 2026" + (b.offices.governor.next
+          ? "; next " + KYC.escapeHtml(String(b.offices.governor.next.year)) : "");
     }
     if (OFFICES[mode]) {
       var off = s[mode];
@@ -369,7 +414,7 @@
   }
 
   /** One statewide officer's row: the holder, or why there is none. */
-  function officerRow(kind, off, mark, item, place) {
+  function officerRow(kind, off, mark, item, place, open) {
     var label = OFFICES[kind].title;
     place = place || "The state";
     if (!off) return "";
@@ -431,9 +476,9 @@
         (contact.length ? '<p class="faint gov-contact">' + contact.join(" · ") + "</p>" : "");
     }
     var pictured = body.indexOf("gov-officer-photo") !== -1;
+    // The office's label carries the ballot mark, above the holder (rule 79).
     return '<li class="gov-officer' + (pictured ? "" : " gov-officer-text") + '">' +
-      '<span class="gov-officer-role">' + KYC.escapeHtml(label) + "</span>" + body +
-      (mark ? "<p>" + mark + "</p>" : "") + "</li>";
+      officeLine("gov-officer-role", label, mark) + (open || "") + body + "</li>";
   }
 
   /** A state's court of last resort: who sits on it, as the court lists
@@ -487,11 +532,10 @@
           '" alt="" width="72" height="72" loading="lazy" decoding="async">'
         : "") +
       '<div class="gov-who">' +
-      '<p class="gov-role">Governor</p>' +
+      officeLine("gov-role", "Governor", officeMark(code, "governor")) + openSeat(code, "governor") +
       '<p class="gov-name">' + KYC.escapeHtml(gov.name) + "</p>" +
       '<p class="gov-party party-' + key + '">' + KYC.escapeHtml(gov.party) + "</p>" +
       (gov.since ? '<p class="faint">In office since ' + KYC.escapeHtml(gov.since) + "</p>" : "") +
-      (officeMark(code, "governor") ? '<p>' + officeMark(code, "governor") + "</p>" : "") +
       '<p class="gov-links">' + (gov.website ? link(gov.website, "Governor's office") + " · " : "") +
       link(gov.profile, "NGA biography") + "</p>" +
       (contact ? '<p class="faint gov-contact">' + contact + "</p>" : "") +
@@ -500,9 +544,10 @@
     if (s.lt || s.ag || s.sos) {
       html += '<p class="panel-subhead">' + (s.territory ? "Territorial" : "Statewide") +
         ' officers</p><ul class="gov-officers">' +
-        officerRow("lt", s.lt, officeMark(code, "lt"), ballotItem(code, "lt"), place) +
-        officerRow("ag", s.ag, officeMark(code, "ag"), ballotItem(code, "ag"), place) +
-        officerRow("sos", s.sos, officeMark(code, "sos"), ballotItem(code, "sos"), place) + "</ul>";
+        officerRow("lt", s.lt, officeMark(code, "lt"), ballotItem(code, "lt"), place, openSeat(code, "lt")) +
+        officerRow("ag", s.ag, officeMark(code, "ag"), ballotItem(code, "ag"), place, openSeat(code, "ag")) +
+        officerRow("sos", s.sos, officeMark(code, "sos"), ballotItem(code, "sos"), place,
+          openSeat(code, "sos")) + "</ul>";
     }
     if (s.territory) {
       // Said, not left out without a word: a territory's legislature, its

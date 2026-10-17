@@ -3573,11 +3573,28 @@ button.local-county-link {
   color: var(--text-muted);
   text-decoration: none;
 }
+/* The office's mark, never a person's status: it sits on the office's label
+ * line in a neutral style, apart from the yellow the race badges use for
+ * people (rule 79). */
 .gov-ballot-mark.up {
-  color: var(--warn-text);
-  background: color-mix(in srgb, var(--warn) 14%, transparent);
-  border-color: color-mix(in srgb, var(--warn) 34%, transparent);
+  color: var(--text);
+  background: var(--surface-2);
+  border-color: var(--border-strong);
   font-weight: 600;
+}
+.gov-office {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px var(--s-2);
+}
+.gov-office { margin: 0; }
+.gov-office .gov-ballot-mark { margin-top: 0; }
+.gov-open-seat { margin: 2px 0 0; font-size: var(--t-sm); color: var(--text-muted); }
+.gov-next {
+  margin-left: var(--s-1);
+  font-size: var(--t-xs);
+  color: var(--text-muted);
 }
 .gov-ballot-mark:focus-visible { text-decoration: underline; }
 @media (hover: hover) {

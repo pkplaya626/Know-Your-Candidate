@@ -256,9 +256,18 @@ def build(root="."):
             entry["territory"] = True
         entry.update(officers.for_state(code, officer_cache, disputes))
         entry.update(courts.for_state(code, court_cache))
-        if code in ballot2026.STATES:
-            # Which of these offices and seats are elected on November 3.
+        if code in ballot2026.STATES or code in ballot2026.TERRITORIES:
+            # Which of these offices and seats are elected on November 3, and
+            # which of them has a holder a cited source says is not running.
             entry["ballot2026"] = ballot2026.for_state(code)
+            for key, item in entry["ballot2026"]["offices"].items():
+                holder = entry["governor"] if key == "governor" else entry.get(key) or {}
+                seat, problem = ballot2026.open_seat(code, key, holder.get("name"),
+                                                     holder.get("terms"))
+                if problem:
+                    problems.append(problem)
+                if seat:
+                    item["openSeat"] = seat
         if code in STATES:
             entry.update(_legislature(code, legislators.get(code, []), ncsl["states"].get(code),
                                       entry["governor"]["partyKey"], problems))
