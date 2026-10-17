@@ -3833,7 +3833,7 @@ async function testCounties() {
       CD.querySelector(`#localMap .district-statewide [data-dot="${unjoined}"]`)
         .dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
       check("a place with no government joined says so, and claims no government",
-        /no entry this site could tie/.test(body.textContent) && !body.querySelector(".local-item"),
+        /could not tie this place to one entry/.test(body.textContent) && !body.querySelector(".local-item"),
         body.textContent.slice(0, 160));
     }
   });
@@ -3952,10 +3952,43 @@ async function testCounties() {
       /records Fowler as an inactive governmental unit/.test(ksTown.D.getElementById("localPanelBody").textContent));
   });
   const la = await buildPage("counties/la.html", { hash: "#/?view=cities&city=2205000" });
-  suite("counties/la.html — a status that does not explain a missing government", () => {
+  suite("counties/la.html — a city its consolidated government governs", () => {
     const text = la.D.getElementById("localPanelBody").textContent;
-    check("Baton Rouge gives its status and says no government could be tied",
-      /partially consolidated/.test(text) && /no entry this site could tie/.test(text), text.slice(0, 240));
+    check("Baton Rouge gives its status, its government, and why that government is the parish's too",
+      /partially consolidated/.test(text) && /City-Parish of Baton Rouge-East Baton Rouge/.test(text) &&
+      /East Baton Rouge Parish has no separate parish government/.test(text) &&
+      !/incorporated since/.test(text), text.slice(0, 400));
+  });
+  const stGeorge = await buildPage("counties/la.html", { hash: "#/?view=cities&city=2267303" });
+  suite("counties/la.html — a place tied to no government names no single cause", () => {
+    const text = stGeorge.D.getElementById("localPanelBody").textContent;
+    check("St. George (2024) is told both causes, neither as the one",
+      /could not tie this place to one entry/.test(text) && /may file its government under another name/.test(text) &&
+      /may have been incorporated since 2022/.test(text), text.slice(0, 400));
+  });
+  const kc = await buildPage("counties/ks.html", { hash: "#/?view=cities&city=2036000" });
+  suite("counties/ks.html — Kansas City and the Unified Government", () => {
+    const text = kc.D.getElementById("localPanelBody").textContent;
+    check("Kansas City's government is the Unified Government, said as Wyandotte County's too",
+      /Unified Government of Wyandotte County and Kansas City/.test(text) &&
+      /Wyandotte County has no separate county government/.test(text), text.slice(0, 400));
+    kc.window.location.hash = "#/?view=cities";
+    kc.window.dispatchEvent(new kc.window.Event("hashchange"));
+  });
+  await new Promise((resolve) => setTimeout(resolve, 60));
+  suite("counties/ks.html — the township governments the map cannot place are counted", () => {
+    const body = kc.D.getElementById("localPanelBody").textContent;
+    const state = kc.window.kycLocal.KS;
+    const placed = new Set(Object.values(state.towns).concat(Object.values(state.cities))
+      .filter((c) => c[5]).map((c) => c[5].join(":")));
+    let left = 0;
+    Object.keys(state.governments).forEach((f) => state.governments[f].forEach((r, i) => {
+      if (r[0] === "township" && !placed.has(f + ":" + i)) left += 1;
+    }));
+    check("the lede no longer says every township is drawn, and counts those that are not",
+      !/every town or township that governs/.test(body) && left > 0 &&
+      body.indexOf(left + " more town or township governments in the 2022 listing could not be placed") !== -1,
+      left + " | " + body.slice(0, 500));
   });
   const mn = await buildPage("counties/mn.html", { hash: "#/?view=cities&city=2711100100" });
   suite("counties/mn.html — Show all, and a link without its view", () => {

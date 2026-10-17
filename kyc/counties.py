@@ -33,7 +33,7 @@ import json
 import os
 import re
 import unicodedata
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 from . import county_areas
 from . import districts as D
@@ -189,7 +189,7 @@ def _county_of(point, fitted):
 
 
 def build_cities(code, cities, listing, albers, fit, fitted):
-    """``(rows, problems)``: every incorporated place the map draws, as
+    """``(rows, problems, consolidated)``: every incorporated place the map draws, as
     ``{GEOID: [x, y, kind, name, county, ref, status]}`` where *ref* is
     ``[county code, index]`` of its government's row in the listing, or None,
     and *status* the Census's functional status where it is not "A".
@@ -228,9 +228,14 @@ def build_cities(code, cities, listing, albers, fit, fitted):
             [(pid, pass_places(pid, key), county) for pid, key, county in points if pid not in joined],
             [(ref, pass_governments(ref, key), county) for ref, key, county in governments
              if ref not in used]))
+    consolidated = {}
+    curated, problems = curated_joins(code, rows, listing, joined)
+    for pid, (ref, how) in curated.items():
+        joined[pid] = ref
+        if how == "consolidated":
+            consolidated[pid] = ref[0]
     for pid, (fips, i) in joined.items():
         rows[pid][5] = [fips, i]
-    problems = []
     unjoined = sorted(rows[p][3] for p in rows if rows[p][5] is None)
     if unjoined:
         problems.append(f"{code}: {len(unjoined)} place(s) joined to no government in the listing: "
@@ -245,7 +250,56 @@ def build_cities(code, cities, listing, albers, fit, fitted):
     if outside:
         problems.append(f"{code}: {len(outside)} place point(s) outside every drawn county: "
                         + ", ".join(outside[:12]))
-    return rows, problems
+    return rows, problems, consolidated
+
+
+def curated_joins(code, rows, listing, joined):
+    """``({place id: ((county, index), how)}, problems)``: the joins no name
+    can make, each with its evidence. *how* is "consolidated" for a city a
+    consolidated government in county_areas.AREAS governs (its row is the
+    one AREAS names in that area), else "listed" for an entry of
+    overrides.PLACE_GOVERNMENTS (its row found by the listing's own id).
+    An entry whose row is missing, named otherwise, in another county or
+    already joined is refused and reported; one the join no longer needs
+    is reported too (a stale override is invisible and quietly wrong)."""
+    from . import overrides
+
+    by_id = {g["id"]: ((fips, i), g) for fips, entry in listing["counties"].items()
+             for i, g in enumerate(entry["governments"])}
+    wanted = {}
+    for pid, area in county_areas.CONSOLIDATED_PLACES.items():
+        if pid in rows:
+            name = county_areas.AREAS[area][2]
+            found = [((area, i), g) for i, g in enumerate(
+                (listing["counties"].get(area) or {}).get("governments", [])) if g["name"] == name]
+            wanted[pid] = (found[0] if len(found) == 1 else None, name, "consolidated")
+    for pid, (gid, name, _why) in overrides.PLACE_GOVERNMENTS.items():
+        if pid in rows:
+            wanted[pid] = (by_id.get(gid), name, "listed")
+    used = set(joined.values())
+    out, problems = {}, []
+    for pid, (hit, name, how) in sorted(wanted.items()):
+        place = rows[pid][3]
+        if pid in joined:
+            problems.append(f"{code}: {place} ({pid}) is joined by name now; its curated join "
+                            f"to {name} is no longer needed")
+            continue
+        if hit is None or hit[1]["name"] != name:
+            problems.append(f"{code}: {place} ({pid}): the listing holds no {name!r} where the "
+                            f"curated join says; not joined")
+            continue
+        ref, gov = hit
+        if ref[0] != rows[pid][4]:
+            problems.append(f"{code}: {place} ({pid}) is in {rows[pid][4]}, {name} under {ref[0]}; "
+                            f"not joined")
+            continue
+        if ref in used or gov["type"] not in ("municipal", "township", "county"):
+            problems.append(f"{code}: {place} ({pid}): {name} is joined elsewhere or is not a "
+                            f"general government; not joined")
+            continue
+        used.add(ref)
+        out[pid] = (ref, how)
+    return out, problems
 
 
 # The functional statuses of a subdivision that governs (census.gov
@@ -257,7 +311,7 @@ def build_cities(code, cities, listing, albers, fit, fitted):
 GOVERNING = {"A", "B", "C", "G", "I"}
 
 
-def build_towns(code, cities, listing, albers, fit, drawn):
+def build_towns(code, cities, listing, albers, fit, drawn, on_places=frozenset()):
     """``(rows, problems)``: every county subdivision joined to a town or
     township government, as ``{GEOID: [x, y, kind, name, county, ref,
     status]}``, joined on the listing's own code for it, cross-checked by
@@ -273,6 +327,8 @@ def build_towns(code, cities, listing, albers, fit, drawn):
             if gov["type"] != "township":
                 continue
             sub = subdivisions.get(fips + gov["cousub"]) if gov.get("cousub") else None
+            if not sub and (fips, i) in on_places:
+                continue                 # on a place's point (overrides.PLACE_GOVERNMENTS)
             if not sub:
                 # The code may be in another county: the listing files the
                 # Town of Pomfret under the wrong Connecticut planning region.
@@ -373,8 +429,15 @@ def build_state(code, root=".", places=None):
     cities = load_cities(code, root)
     if not cities:
         raise CountiesError(f"no {CITIES_DIR}/{code.lower()}.json; run tools/fetch_local_maps.py")
-    city_rows, city_problems = build_cities(code, cities, listing, albers, fit, drawn)
-    town_rows, town_problems = build_towns(code, cities, listing, albers, fit, drawn)
+    city_rows, city_problems, consolidated = build_cities(code, cities, listing, albers, fit, drawn)
+    town_rows, town_problems = build_towns(code, cities, listing, albers, fit, drawn,
+                                           {tuple(r[5]) for r in city_rows.values() if r[5]})
+    # One government, one mark: a row a place is joined to (by name or a
+    # curated join) and a ring both claim would show it twice.
+    refs = Counter(tuple(r[5]) for r in list(city_rows.values()) + list(town_rows.values()) if r[5])
+    twice = sorted(r for r, n in refs.items() if n > 1)
+    if twice:
+        raise CountiesError(f"{code}: government rows joined twice: {twice[:6]}")
     return {
         "name": state_name(code),
         "page": page_path(code),
@@ -390,6 +453,9 @@ def build_state(code, root=".", places=None):
         "unmatched": unmatched,
         "statewide": statewide,
         "cities": city_rows,
+        # {place id: county area}: a city whose government is the
+        # consolidated one that also does the county's work.
+        "consolidatedPlaces": consolidated,
         "towns": town_rows,
         "problems": city_problems + town_problems,
         "sources": {"maps": "U.S. Census Bureau, cartographic boundary file of counties (1:5,000,000)",

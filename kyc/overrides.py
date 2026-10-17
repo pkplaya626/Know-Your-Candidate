@@ -348,6 +348,69 @@ GENERAL_RUNOFFS = {
                          "November 3 + 28 days = December 1, 2026"),
 }
 
+# Incorporated places the Census Bureau's 2022 Government Units listing files
+# under a name the city join (counties.match_cities) cannot tie to the place,
+# each joined here on the listing's own government id - never on a name
+# (rule 59). {place GEOID: (listing id, the listing's name, evidence)}. The
+# build refuses an entry whose id holds another name, lies in another county
+# than the place, or is joined elsewhere, and reports one the join no longer
+# needs. Checked 2026-10-16: in each case the place's county holds no other
+# government the place could be. Never a government the place replaced:
+# Rib Mountain and Lisbon, Wisconsin, and Baldwin and Empire, Minnesota,
+# incorporated from the towns and townships the 2022 listing holds (rule 59).
+PLACE_GOVERNMENTS = {
+    "0934460": ("07200620100000", "Borough of Groton Long Point Association",
+                "the Census maps the borough as Groton Long Point; its government is the "
+                "Groton Long Point Association, the only one under that name in the region"),
+    "1234132": ("10204430100000", "Village of Islamorada",
+                "the Census maps it as Islamorada, Village of Islands, the village's full name"),
+    "1326156": ("11105005000000", "County of Echols",
+                "Echols County and Statenville are one consolidated government, which the "
+                "Census maps as a place and lists as Echols County's county government"),
+    "1939675": ("16204000300000", "City of Jewell",
+                "the Census maps the city as Jewell Junction; the listing as Jewell, in the "
+                "same county, Hamilton"),
+    "2904248": ("26209500500000", "Village of Bellerive",
+                "the Census maps it as Bellerive Acres, the listing as Bellerive, both in "
+                "St. Louis County"),
+    "2925411": ("26205730100000", "Village of Fountain-N-Lake",
+                "the same name, spelled Fountain N' Lakes on the Census map"),
+    "2964478": ("26209507500000", "City of St Johns",
+                "the listing's St Johns, in St. Louis County, is the Census map's St. John"),
+    "2975814": ("26209508600000", "Village of Velda Hills",
+                "the Census maps it as Velda Village Hills, the listing as Velda Hills, both "
+                "in St. Louis County"),
+    "3709530": ("34201440100000", "Town of Cajah Mountain",
+                "the same name, spelled Cajah's Mountain on the Census map"),
+    "4030900": ("37204970100000", "Town of Grand Lake",
+                "the Census maps the town as Grand Lake Towne; the listing as Grand Lake, in "
+                "the same county, Mayes"),
+    "4811155": ("44215220100000", "Village of Buffalo Springs",
+                "the Census maps the village as Buffalo Springs Lake; the listing as Buffalo "
+                "Springs, in the same county, Lubbock"),
+    "5526350": ("50206500500000", "Village of Fontana",
+                "the Census maps the village by its full name, Fontana-on-Geneva Lake"),
+    "5624750": ("51200400500000", "Town of Grand Encampment",
+                "the Census maps the town as Encampment; its legal name is Grand Encampment"),
+    # Governments the listing files as towns or townships on a county
+    # subdivision code the Census has since replaced: the 2025 map draws each
+    # as an incorporated place with a subdivision of the same name and land,
+    # coextensive with it (functional status F), on a new code - Mount
+    # Lebanon 51696 -> 51794, Penn Hills 59032 -> 59040, Bridgewater 08085 ->
+    # 08130, Randolph 55955 -> 56000. The same government, reclassified, not
+    # a new one that replaced it.
+    "4251794": ("39300202300000", "Township of Mount Lebanon",
+                "the Census now maps the township as the municipality of Mount Lebanon"),
+    "4259040": ("39300202900000", "Township of Penn Hills",
+                "the Census now maps the township as the municipality of Penn Hills"),
+    "2508130": ("22301200200000", "Town of Bridgewater",
+                "the Census now maps the town, which has a city form of government, as "
+                "Bridgewater Town city"),
+    "2556000": ("22301102000000", "Town of Randolph",
+                "the Census now maps the town, which has a city form of government, as "
+                "Randolph Town city"),
+}
+
 # Phrases in a Status value that mean the incumbent is not on the 2026 ballot.
 NOT_SEEKING_MARKERS = ("retiring", "not running", "defeated", "ineligible", "resigned")
 
