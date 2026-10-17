@@ -1648,7 +1648,13 @@ The hub gives the totals and each court's count. A court page lists its
 vacancies, its announced ones and any emergency. The build compares the two
 sources and warns (`vacancy-judge-not-senior`) when the list says a judge
 took senior status but the directory does not yet show it; the two are
-updated at different times, and the court page says so.
+updated at different times, and the court page says so. When the list
+implies the judge still serves (a seat left for senior status, or one only
+announced) and the directory lists nobody of that surname on the court at
+all, it warns `vacancy-judge-not-listed` and the row says "Not listed by the
+FJC directory as serving on this court now", and nothing about why. The
+surname is compared without accents or a generational suffix ("Osteen Jr."
+is the directory's "Osteen"), and only to report, never to join.
 
 ### Financial disclosures
 

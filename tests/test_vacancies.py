@@ -107,9 +107,41 @@ class TestAgainstTheDirectory(unittest.TestCase):
         cache = build()
         judiciary = {"judges": {"fjc-1": {"sortName": "Gorton, Nathaniel",
                                           "seats": [{"court": "ma", "seniorSince": "2025-05-31"}]}}}
+        judiciary["judges"]["fjc-2"] = {"sortName": "Saylor, F. Dennis",
+                                        "seats": [{"court": "ma"}]}
         found = {code: detail for _l, code, _m, detail in vacancies.problems(cache, TODAY, judiciary)}
         self.assertNotIn("01 - MA: Nathaniel M. Gorton", found["vacancy-judge-not-senior"])
         self.assertIn("01 - MA: F. Dennis Saylor", found["vacancy-judge-not-senior"])
+        self.assertNotIn("01 - MA: F. Dennis Saylor", found.get("vacancy-judge-not-listed", []))
+
+    def test_a_senior_vacancy_whose_judge_the_directory_lists_nowhere_is_reported_apart(self):
+        """Browning (NM) and Proctor (AL-N): 'Took senior status' on the
+        courts' list, and not on their court in the directory at all."""
+        cache = build()
+        judiciary = {"judges": {"fjc-1": {"sortName": "Gorton, Nathaniel",
+                                          "seats": [{"court": "ma", "seniorSince": "2025-05-31"}]}}}
+        found = {code: detail for _l, code, _m, detail in vacancies.problems(cache, TODAY, judiciary)}
+        self.assertIn("01 - MA: F. Dennis Saylor", found["vacancy-judge-not-listed"])
+        self.assertNotIn("01 - MA: F. Dennis Saylor", found.get("vacancy-judge-not-senior", []))
+
+    def test_a_generational_suffix_does_not_hide_a_judge(self):
+        """The list writes "Osteen Jr.,William L."; the directory "Osteen,
+        William": the same surname, so he is not reported missing."""
+        judges = {"fjc-1": {"sortName": "Osteen, William", "seats": [{"court": "nc-m"}]}}
+        row = {"court": "nc-m", "reason": "Senior",
+               "vacatedBy": {"listedAs": "Osteen Jr.,William L.", "name": "William L. Osteen Jr."}}
+        self.assertEqual(len(vacancies.seats_held(row, judges)), 1)
+        self.assertFalse(vacancies.judge_unlisted(row, judges, future=True))
+        self.assertTrue(vacancies.judge_unlisted(dict(row, court="ne"), judges, future=True))
+
+    def test_only_a_reason_that_leaves_the_judge_serving_is_checked(self):
+        """A judge who died, retired or was elevated is expected to be gone."""
+        row = {"court": "ma", "reason": "Deceased",
+               "vacatedBy": {"listedAs": "Nobody,A.", "name": "A. Nobody"}}
+        self.assertFalse(vacancies.judge_unlisted(row, {}))
+        self.assertTrue(vacancies.judge_unlisted(dict(row, reason="Senior"), {}))
+        self.assertTrue(vacancies.judge_unlisted(row, {}, future=True))
+        self.assertFalse(vacancies.judge_unlisted(dict(row, vacatedBy=None, reason="Senior"), {}))
 
 
 class TestTheCommittedCache(unittest.TestCase):

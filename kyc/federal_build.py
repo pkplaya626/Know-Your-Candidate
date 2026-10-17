@@ -126,13 +126,23 @@ def build(root="."):
     judges = courts["judges"]
     # Each court's vacancies, as the courts list them, by the list's own
     # court code (kyc/vacancies.py); a code no court has stays unplaced.
+    # A judge the list implies still serves, whom the directory does not
+    # list on that court at all, is marked so on the row (vacancies.py).
     vacant, coming = {}, {}
+
+    def placed(row, future):
+        out = _opening(row)
+        if courts["courts"].get(row["court"], {}).get("listed") and \
+                vacancies.judge_unlisted(row, judges, future=future):
+            out["notInDirectory"] = True
+        return out
+
     for row in openings["current"]:
         if row.get("court"):
-            vacant.setdefault(row["court"], []).append(_opening(row))
+            vacant.setdefault(row["court"], []).append(placed(row, False))
     for row in openings["future"]:
         if row.get("court"):
-            coming.setdefault(row["court"], []).append(_opening(row))
+            coming.setdefault(row["court"], []).append(placed(row, True))
     offices = []
     # Who has held each office since the term began (kyc/cabinet.py).
     changes = executive.get("changes") or {}

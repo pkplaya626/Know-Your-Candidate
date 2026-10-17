@@ -5122,6 +5122,30 @@ async function testFederal() {
       mine.vacancies.filter((r) => r.emergency).length);
     check("it names its source and date", !!doc.querySelector('#vacancies a[href^="https://www.uscourts.gov/"]') &&
       doc.getElementById("vacancies").textContent.indexOf(w.kycFederal.vacancies.asOf) !== -1);
+    check("a judge the directory lists on the court carries no 'not listed' note",
+      doc.querySelectorAll("#vacancies .vacancy-unlisted").length ===
+        mine.vacancies.concat(mine.future || []).filter((r) => r.notInDirectory).length);
+  });
+
+  // A vacancy for senior status whose judge the directory no longer lists
+  // on the court (New Mexico's, in the committed data): a reader looking
+  // for them among the senior judges is told they are not there.
+  const unlistedCourt = ((ca1.window.kycFederal || {}).courts || []).find((c) => c.id === "nm");
+  const unlistedPage = unlistedCourt && await buildPage("courts/nm.html");
+  if (unlistedPage) await settle(50);
+  suite("a vacancy whose judge the directory does not list", () => {
+    if (!unlistedPage) return;
+    const { window: w, D: doc, errors: errs } = unlistedPage;
+    check("no page errors", errs.length === 0, errs.join(" | "));
+    const flagged = (w.kycCourt.nm.vacancies || []).concat(w.kycCourt.nm.future || [])
+      .filter((r) => r.notInDirectory);
+    const notes = [...doc.querySelectorAll("#vacancies .vacancy-unlisted")];
+    check("each such row says the directory does not list the judge, and no more",
+      notes.length === flagged.length && notes.every((n) =>
+        /Not listed by the FJC directory as serving on this court now/.test(n.textContent) &&
+        !/retired|resigned|died/i.test(n.textContent)), `${notes.length} notes, ${flagged.length} rows`);
+    check("and the judge is indeed not among the court's judges", flagged.every((r) =>
+      !w.kycCourt.nm.judges.some((j) => j.name === r.vacatedBy.name)));
   });
 
   const guam = await buildPage("courts/gu.html");

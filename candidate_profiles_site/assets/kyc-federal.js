@@ -136,6 +136,15 @@
     return p ? esc(p.name) : '<span class="faint">None yet</span>';
   }
 
+  /** The judge a vacancy names, and - where the list implies they still
+   *  serve but the directory lists nobody of that name on this court - a
+   *  note saying only that (kyc/vacancies.py), never why. */
+  function vacatedText(r) {
+    return personText(r.vacatedBy) + (r.notInDirectory
+      ? ' <span class="faint vacancy-unlisted">Not listed by the FJC directory as serving ' +
+        "on this court now</span>" : "");
+  }
+
   /** A court's vacancies, now and announced, as the courts list them. */
   function vacancySection(d, mine) {
     var v = d.vacancies || {};
@@ -152,7 +161,7 @@
     if (now.length) {
       body += table("", ["Seat vacated by", "Why", "Vacant since", "Nominee", "Nominated"],
         now.map(function (r) {
-          return "<tr><th scope=\"row\">" + personText(r.vacatedBy) +
+          return "<tr><th scope=\"row\">" + vacatedText(r) +
             (r.emergency ? ' <span class="badge badge-warn" title="Designated a judicial ' +
               'emergency by the courts">Judicial emergency</span>' : "") + "</th>" +
             cell("Why", esc(REASONS[r.reason] || r.reason || "")) +
@@ -165,7 +174,7 @@
       body += '<h3 class="panel-subhead">Announced</h3>' +
         table("", ["Judge leaving", "Why", "Announced", "Leaves", "Nominee", "Nominated"],
           later.map(function (r) {
-            return "<tr><th scope=\"row\">" + personText(r.vacatedBy) + "</th>" +
+            return "<tr><th scope=\"row\">" + vacatedText(r) + "</th>" +
               cell("Why", esc(REASONS[r.reason] || r.reason || "")) +
               cell("Announced", esc(r.announced || "")) +
               cell("Leaves", r.vacancyDate ? esc(r.vacancyDate) : '<span class="faint">Not yet set</span>') +

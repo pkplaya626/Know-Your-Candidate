@@ -11,7 +11,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from kyc import emit, federal_build, federal_courts, pages  # noqa: E402
+from kyc import emit, federal_build, federal_courts, judiciary, pages, vacancies  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 
@@ -130,6 +130,23 @@ class TestTheFiles(unittest.TestCase):
                 text = handle.read()
         self.assertIn("window.kycCourt = window.kycCourt || {};", text)
         self.assertIn('window.kycCourt["ca1"] = ', text)
+
+
+class TestVacanciesAgainstTheDirectory(unittest.TestCase):
+    def test_a_vacancy_whose_judge_the_directory_does_not_list_is_marked(self):
+        """The courts' list says a judge took senior status; a judge on
+        senior status still serves, so one the directory lists nowhere on
+        that court is marked on the row, and only then."""
+        _payload, courts, _, _ = built()
+        judges = judiciary.load_cache(ROOT)["judges"]
+        cache = vacancies.load_cache(ROOT)
+        for cid, court in courts.items():
+            for key, future in (("vacancies", False), ("future", True)):
+                rows = [r for r in cache["future" if future else "current"] if r.get("court") == cid]
+                self.assertEqual(len(rows), len(court[key]))
+                for raw, shown in zip(rows, court[key]):
+                    expected = bool(court["listed"]) and vacancies.judge_unlisted(raw, judges, future)
+                    self.assertEqual(bool(shown.get("notInDirectory")), expected, (cid, raw))
 
 
 class TestThePages(unittest.TestCase):
