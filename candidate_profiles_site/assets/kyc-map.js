@@ -284,6 +284,7 @@
       own: !item.isCandidate && (!item.contestLabel || item.raceStatus === "unlisted") &&
         !item.raceRole && !(item.appointed && item.raceStatus !== "unlisted"),
       unconfirmed: !!item.raceStatusUnconfirmed,
+      allParty: item.allPartyPrimary,
     });
     if (race) return badge(race, item);
     if (item.isCandidate) return '<span class="badge badge-money">Challenger</span>';

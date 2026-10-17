@@ -381,7 +381,8 @@
         : p.formerMember ? '<span class="badge badge-neutral" title="' +
           KYC.escapeAttr(KYC.formerText(p)) + '">Former member</span> ' : "";
       var spec = KYC.raceStatus(p.raceStatus, "mate",
-        { unconfirmed: !!p.raceStatusUnconfirmed, source: p.raceStatusSource });
+        { unconfirmed: !!p.raceStatusUnconfirmed, source: p.raceStatusSource,
+          allParty: p.allPartyPrimary });
       var status = spec
         ? '<span class="badge ' + spec.cls + '" title="' + KYC.escapeAttr(spec.title) + '">' +
           KYC.escapeHtml(spec.label) + KYC.ballotLineSuffix(p) + "</span>"

@@ -639,6 +639,19 @@ class TestNamesThePageMayUse(unittest.TestCase):
         self.assertNotIn("raceStatus", person)
         self.assertTrue(person["ballotUnknown"])
 
+    def test_through_an_all_party_primary_is_not_a_party_nomination(self):
+        # California's top two: nobody is a party's nominee.
+        ca = {"id": "FEC_H6CA11001", "fecCandidateId": "H6CA11001", "isCandidate": True,
+              "state": "CA", "chamber": "House (Candidate)", "districtNum": 11}
+        tx = dict(ca, id="FEC_H6TX11001", fecCandidateId="H6TX11001", state="TX")
+        cache = {"asOf": "2026-10-05", "races": {
+            "H-CA-11-2026": {"status": {"H6CA11001": "nominee"}, "unmatched": {}, "ambiguous": []},
+            "H-TX-11-2026": {"status": {"H6TX11001": "nominee"}, "unmatched": {}, "ambiguous": []}}}
+        results.apply_cache([ca, tx], cache)
+        self.assertEqual(ca["allPartyPrimary"], "top-two")
+        self.assertNotIn("allPartyPrimary", tx)
+        self.assertEqual(results.ALL_PARTY_PRIMARIES["AK"][0], "top-four")
+
     def test_one_name_two_filings_settles_neither(self):
         a = self.filer("H6NC04996", "Carlquist Lisa")
         b = self.filer("H6NC04995", "Lisa Carlquist")

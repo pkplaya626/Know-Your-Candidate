@@ -397,10 +397,26 @@
    *  `{cls, label, title, rank, off}`, or null for no status. Options:
    *  `own` - a sitting member, about the seat they hold; `unconfirmed` - the
    *  record's raceStatusUnconfirmed; `now` - the clock, for tests. */
+  /* Through to November from an all-party primary - California's and
+   * Washington's top two, Alaska's top four: nobody won a party's
+   * nomination, and two of one party can both go through. The pipeline
+   * says which (results.ALL_PARTY_PRIMARIES, `allPartyPrimary`). */
+  function allParty(kind) {
+    var top = kind === "top-four" ? "top four" : "top two";
+    var title = "Finished in the " + top + " of the all-party primary, which sends the leaders " +
+      "to November whatever their party; on the November ballot.";
+    return { cls: "badge-money", rank: 0,
+      card: "On the November ballot", long: "Advanced to the November ballot", mate: "On the ballot",
+      short: "Advanced", title: title,
+      member: { card: "Advanced to November", long: "Advanced to the November ballot",
+        short: "Advanced", mate: "Advanced", title: title } };
+  }
+
   function raceStatus(status, form, opts) {
     var spec = RACE_STATUS[status];
     if (!spec) return null;
     opts = opts || {};
+    if (status === "nominee" && opts.allParty) spec = allParty(opts.allParty);
     var listed = opts.source === "qualified";
     if (listed && LISTED[status]) spec = LISTED[status];
     if (status === "unlisted" && opts.unconfirmed) spec = UNCONFIRMED;
@@ -443,6 +459,7 @@
         !(item.appointed && status !== "unlisted"),
       unconfirmed: !!item.raceStatusUnconfirmed,
       source: record.raceStatusSource,
+      allParty: record.allPartyPrimary,
       now: opts.now,
     });
   }

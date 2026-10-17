@@ -86,6 +86,18 @@ OFF_BALLOT = (ELIMINATED, WITHDRAWN, UNLISTED)
 # On the November ballot, before and after it is counted.
 NOVEMBER = (NOMINEE, ELECTED, DEFEATED, RUNOFF, QUALIFIED)
 
+# Primaries in which every candidate runs on one ballot and the leaders go
+# through to November whatever their party, so nobody is a party's nominee
+# and two of one party can both go through: "Won the primary" and
+# "Renominated" were on 116 people in these states, two "winners" of one
+# party in nine races. The guide cites the same laws (government_text).
+ALL_PARTY_PRIMARIES = {
+    "CA": ("top-two", "Cal. Elections Code 8141.5; California Secretary of State, "
+                      "Primary elections in California"),
+    "WA": ("top-two", "RCW 29A.52.112"),
+    "AK": ("top-four", "AS 15.25.010"),
+}
+
 
 class ResultsError(RuntimeError):
     pass
@@ -2183,6 +2195,11 @@ def apply_cache(profiles, cache, field=None):
             rid, status = by_id[candidate_id]
             profile["raceStatus"] = status
             profile["raceStatusRace"] = rid
+            kind = ALL_PARTY_PRIMARIES.get(rid.split("-")[1])
+            if kind and status == NOMINEE:
+                # Through to November from an all-party primary: the page
+                # says "advanced", never "won" or "renominated".
+                profile["allPartyPrimary"] = kind[0]
             _source_of(profile, races.get(rid))
             ballot_name = (races.get(rid, {}).get("claimed") or {}).get(candidate_id)
             # A hyphen alone changes nothing but the spelling, and the

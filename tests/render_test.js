@@ -2346,6 +2346,20 @@ async function testBallotCounts() {
       unknown && unknown.name);
     const maybe = W.legislatorsData.find((p) => p.maybeNamed && p.maybeNamed.length && !p.raceStatus);
     const race = maybe && W.kycRaces.find((r) => r.id === maybe.raceId);
+    // Top-two and top-four primaries send the leaders through whatever
+    // their party: two Democrats "won" CA-11's primary and members read
+    // "Renominated".
+    const through = W.legislatorsData.filter((p) => p.allPartyPrimary === "top-two" &&
+      W.KYC.seated(p) && !p.contestLabel && p.raceStatus === "nominee");
+    const badges = through.map((p) => W.KYC.cards.card(p));
+    check("a member through a top-two primary reads 'Advanced to November', never 'Renominated'",
+      through.length > 0 && badges.every((b) => /Advanced to November/.test(b) &&
+        !/Renominated/.test(b) && /top two of the all-party primary/.test(b)),
+      `${through.length} members`);
+    const elsewhere = W.legislatorsData.find((p) => !p.allPartyPrimary && p.raceStatus === "nominee" &&
+      W.KYC.seated(p) && !p.contestLabel);
+    check("and a member renominated in a party primary still reads 'Renominated'",
+      !!elsewhere && /Renominated/.test(W.KYC.cards.card(elsewhere)));
     check("a name the results may give a profile here is said to be that, not 'no profile'",
       !maybe || (/Result not matched/.test(W.KYC.cards.card(maybe)) &&
         W.KYC.cards.unprofiledNames(race).maybe.some((m) => m.id === maybe.id) &&
