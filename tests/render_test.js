@@ -2938,6 +2938,71 @@ async function testOdds() {
         KYC.odds.percent(0.384) === "38%");
   });
 
+  /* What a market's prices cannot say (audit 2026-10-17): the one-line poll
+   * summary showed the alphabetically first average, undated (RACES-08);
+   * Kalshi's WY-AL prices added up to 128% and the bar rescaled them into a
+   * split neither number said (RACES-23); a party-only market priced a
+   * Republican win over a ballot of two Democrats (RACES-22). Each is read
+   * page-side, so data/odds.js stays a pure function of its cache (rule 41).
+   * The markets are injected: the real ones move twice a day. */
+  suite("index.html — what a market's prices cannot say", () => {
+    const render = (id, odds, race) => {
+      window.kycOdds.races[id] = odds;
+      const holder = D.createElement("div");
+      holder.innerHTML = KYC.odds.render(Object.assign({ id: id, label: "Test" }, race || {}),
+        { compact: true });
+      delete window.kycOdds.races[id];
+      return holder;
+    };
+    const polls = render("X_POLLS", { polls: { rows: [
+      { aggregator: "270toWin", updated: "October 4, 2026", url: "https://www.270towin.com/x",
+        results: [{ label: "A (D)", party: "d", pct: 51.0 }, { label: "B (R)", party: "r", pct: 43.4 }] },
+      { aggregator: "Decision Desk HQ", updated: "October 11, 2026", url: "https://decisiondeskhq.com/x",
+        results: [{ label: "A (D)", party: "d", pct: 52.2 }, { label: "B (R)", party: "r", pct: 43.8 }] },
+      { aggregator: "RealClearPolling", updated: "", url: "https://www.realclearpolling.com/x",
+        results: [{ label: "A (D)", party: "d", pct: 50.0 }, { label: "B (R)", party: "r", pct: 44.0 }] },
+    ] } });
+    const line = polls.querySelector(".odds-line");
+    check("the one-line summary is the most recent average, with its date",
+      !!line && /52\.2/.test(line.textContent) && /Decision Desk HQ, updated Oct 11/.test(line.textContent) &&
+        /2 more averages/.test(line.textContent), line && line.textContent);
+
+    const thin = render("X_THIN", { markets: [{ source: "kalshi", url: "https://kalshi.com/markets/x",
+      title: "x", outcomes: [{ label: "Gray", party: "r", price: 0.98 },
+        { label: "Kinney", party: "d", price: 0.30 }] }] });
+    check("prices that add up to 128% are quoted without a bar, and say why",
+      !thin.querySelector(".odds-bar") && /98%/.test(thin.textContent) && /30%/.test(thin.textContent) &&
+        /Thinly traded: these last prices add up to 128%/.test(thin.textContent), thin.textContent);
+    const fine = render("X_FINE", { markets: [{ source: "kalshi", url: "https://kalshi.com/markets/x",
+      title: "x", outcomes: [{ label: "Gray", party: "r", price: 0.95 },
+        { label: "Kinney", party: "d", price: 0.04 }] }] });
+    check("prices that add up to about a dollar keep their bar, with no note",
+      !!fine.querySelector(".odds-bar") && !fine.querySelector(".odds-flag"));
+
+    // A settled race whose November ballot is two or more Democrats, found
+    // in the data rather than named.
+    const onBallot = (race) => race.incumbentIds.concat(race.candidateIds).map(KYC.byId)
+      .filter((p) => p && (p.isCandidate || (p.contestRaceId || p.raceId) === race.id) &&
+        KYC.onNovemberBallot(p.isCandidate ? p.raceStatus : KYC.contestStatus(p)));
+    const same = window.kycRaces.find((r) => r.settled && !(r.results && r.results.otherNominees || []).length &&
+      onBallot(r).length >= 2 && onBallot(r).every((p) => p.party === "Democrat"));
+    check("the data holds a race whose November ballot is one party", !!same);
+    const partyMarket = { markets: [{ source: "polymarket", url: "https://polymarket.com/event/x",
+      title: "x", outcomes: [{ label: "Democratic Party", party: "d", price: 0.95 },
+        { label: "Republican Party", party: "r", price: 0.04 }] }] };
+    if (same) {
+      const shown = render(same.id, partyMarket, same);
+      check("a party-only market over a one-party ballot says it cannot tell them apart",
+        /Everyone on this November ballot is a Democrat; this market resolves on the party only/
+          .test(shown.textContent), same.id + ": " + shown.textContent);
+    }
+    const mixed = window.kycRaces.find((r) => r.settled && onBallot(r).some((p) => p.party === "Democrat") &&
+      onBallot(r).some((p) => p.party === "Republican"));
+    const plain = render(mixed.id, partyMarket, mixed);
+    check("a party-only market over a two-party ballot carries no such note",
+      !/Everyone on this November ballot/.test(plain.textContent), mixed.id);
+  });
+
   suite("index.html — a race's markets in the grid's race view", () => {
     window.location.hash = "#/";
     window.dispatchEvent(new window.Event("hashchange"));

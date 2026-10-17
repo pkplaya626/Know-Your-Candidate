@@ -1136,6 +1136,15 @@ select optgroup {
   color: var(--text-faint);
   line-height: 1.5;
 }
+/* What a market's prices cannot say: thin trading, or a party-only market
+ * over a ballot of one party. Muted text, not the warning colour: the note
+ * qualifies the prices, it does not raise an alarm. */
+.odds-flag {
+  margin: var(--s-1) 0 0;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
 .odds-compact { padding: var(--s-2) var(--s-3); }
 .odds-compact .odds-market { grid-template-columns: 5.5rem minmax(0, 1fr); }
 /* The compact rule has two classes, so the phone rule needs them too: with
