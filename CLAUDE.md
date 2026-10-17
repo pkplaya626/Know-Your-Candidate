@@ -146,8 +146,8 @@ python build_profile_site.py oge              # the executive's financial report
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1178 tests, no dependencies
-npm install && npm test                       # 1402 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1208 tests, no dependencies
+npm install && npm test                       # 1482 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -932,6 +932,46 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     directory's numbered notes and the guide's map all take their words
     from that one table, and a state's page calls its areas what the
     state does: parishes, boroughs and census areas, planning regions.
+
+72. **One campaign is one person, whatever names it filed under.** Six
+    candidates registered twice for one committee under two name forms
+    ("Dan" and "Daniel Miressi"); the name-keyed fold never met them, so
+    each appeared twice in their race and was counted twice as on the
+    ballot. `candidates.registrations` also joins filings whose Form 1
+    names the same committee (`committeeOf`, from the campaigns cache)
+    when the money is the same to the cent; equal money alone never
+    joins anyone. A results-page name that was ambiguous only between one
+    person's registrations is theirs (`results._claim_unmatched`).
+
+73. **A count is one formula, wherever it is shown.** The sidebar read
+    587 challengers on the ballot, a state's strip 16 over race headers
+    summing 58: the headers counted the people the results name with no
+    profile, the rest did not. Every "on the ballot" figure is now the
+    races' own sum (`summary.by_state`), and a figure that reads as what
+    it is not carries its note from one table (`government_maps.COUNT_NOTES`).
+    Say what a second source checks: "checked against NCSL" was read as
+    covering the seat counts, when only control was compared.
+
+74. **A status word must describe the race it badges, and what that race
+    decided.** California's and Washington's top two and Alaska's top
+    four advance whatever the party (`results.ALL_PARTY_PRIMARIES`), so
+    no one there "won the primary" or was "renominated". A member running
+    under a new district number is not leaving (`renumbered`, and the
+    seat they hold says `holderMoved`); one who ran there and lost is.
+    A race-mate's status is about the race it came from: Kevin Kiley was
+    "On the ballot" in CA-3, which he holds and is not running for. A filer
+    the results do not name after the primary is `ballotUnknown`, never
+    "the primary has not been held yet", and is not counted as on it.
+
+75. **Write a place's own words.** A territory or D.C. is never "the
+    state"; a legislature carries the name its constitution gives it
+    (General Assembly, General Court); a judge's name is shown without the
+    directory's brackets. A section's name comes from one helper shared by
+    its heading and its jump chip, and a page has one name in the
+    navigation, its title and the links to it. Where a city's name join
+    cannot work, a place is joined to a government only through the
+    listing's own id (`overrides.PLACE_GOVERNMENTS`, with its evidence) or
+    the government `county_areas` names, never to a town it replaced.
 
 ## District maps
 
