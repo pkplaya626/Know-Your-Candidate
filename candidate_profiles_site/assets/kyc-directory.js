@@ -477,9 +477,12 @@
       item.setAttribute("aria-checked", String(on));
       if (on) current = item.textContent.trim();
     });
-    doc.getElementById("sortLabel").textContent = current;
-    doc.getElementById("sortButton").setAttribute("aria-label", "Sort the cards: " + current);
+    var label = doc.getElementById("sortLabel");
+    var button = doc.getElementById("sortButton");
     var note = doc.getElementById("sortNote");
+    if (!label || !button || !note) return;       // never stop the list being drawn
+    label.textContent = current;
+    button.setAttribute("aria-label", "Sort the cards: " + current);
     note.hidden = !SORT_NOTES[state.view];
     if (SORT_NOTES[state.view]) note.textContent = SORT_NOTES[state.view];
   }
@@ -558,13 +561,35 @@
       return;
     }
     KYC.profile.ensure();
-    initChips();
-    initFiltersToggle();
-    initStateFilter();
-    initSearch();
-    initSort();
-    initCards();
+    /* Each part of the grid starts on its own. One that throws - a page and
+     * a script of two versions, as a reload minutes after a deploy gave -
+     * once stopped every part after it, and the grid sat on "Loading
+     * profiles..." until a chip was clicked. The list is drawn regardless,
+     * the page says something failed, and the error still reaches the
+     * console. */
+    var failed = [];
+    [initChips, initFiltersToggle, initStateFilter, initSearch, initSort, initCards]
+      .forEach(function (step) {
+        try { step(); } catch (err) { failed.push(err); }
+      });
     KYC.router.onChange(function () { applyRoute(KYC.router.read()); });
-    applyRoute(KYC.router.read());
+    try {
+      applyRoute(KYC.router.read());
+    } catch (err) {
+      // The draw itself failed: never "Loading profiles..." over nothing.
+      failed.push(err);
+      doc.getElementById("resultsLabel").textContent =
+        "The profiles could not be drawn. Reloading the page usually fixes it.";
+    }
+    if (failed.length) {
+      var note = doc.createElement("p");
+      note.className = "state-note results-failed";
+      note.setAttribute("role", "status");
+      note.textContent = "Part of this page did not start, so some controls may not respond. " +
+        "Reloading the page usually fixes it.";
+      var results = doc.getElementById("results");
+      results.parentNode.insertBefore(note, results);
+      failed.forEach(function (err) { global.setTimeout(function () { throw err; }); });
+    }
   });
 })(window);

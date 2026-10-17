@@ -104,8 +104,8 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   with `kyc/ballot2026.py`: which state offices and legislative seats are on
   the 2026 ballot, a curated table citing each state's own record.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
-  them only to check they load the right scripts in the right order; it never
-  rewrites them. `states/*.html`, `districts/*.html`, `government/*.html`
+  them to check they load the right scripts in the right order, and rewrites
+  nothing in them but the version stamps on their asset URLs (rule 76). `states/*.html`, `districts/*.html`, `government/*.html`
   and `sitemap.xml` are the opposite: generated from `kyc/pages.py` (the
   guide's words from `kyc/government_text.py`) on every build, never
   edited by hand, and `verify` fails when one on disk is not what the
@@ -146,8 +146,8 @@ python build_profile_site.py oge              # the executive's financial report
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1210 tests, no dependencies
-npm install && npm test                       # 1490 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1216 tests, no dependencies
+npm install && npm test                       # 1495 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -972,6 +972,22 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     cannot work, a place is joined to a government only through the
     listing's own id (`overrides.PLACE_GOVERNMENTS`, with its evidence) or
     the government `county_areas` names, never to a town it replaced.
+
+76. **A page and the code it runs are one version.** GitHub Pages serves
+    every file for ten minutes, and a reload refetches the page but keeps
+    scripts still in cache: minutes after a deploy, the new index.html ran
+    the previous kyc-directory.js, which threw looking for the sort's old
+    `<select>`, so the new sort menu did nothing and the grid sat on
+    "Loading profiles..." until a chip was clicked. Every local script and
+    stylesheet URL carries `?v=` and its file's content hash
+    (`kyc/assets.py`, line endings folded): generated pages are stamped as
+    they render, the build restamps the templates, and `verify` fails on a
+    stale stamp. The data files the code reads are stamped too, by their
+    content signature (so a rebuild of the same data restamps nothing,
+    rule 18) - all but `data/odds.js`, which the odds job may change alone
+    (rule 41). And no one part of a page's start may stop the rest: the
+    grid's start-up runs each step and its first draw on their own, draws
+    what it can, and says on the page that something failed.
 
 ## District maps
 

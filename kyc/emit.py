@@ -256,7 +256,7 @@ def state_codes(profiles):
                    if seated(p) and p.get("state") not in (None, "", "N/A")})
 
 
-def render_state_pages(profiles, root=".", summary=None):
+def render_state_pages(profiles, root=".", summary=None, stamp_from=None):
     """``{relative path: html}`` for every generated page: one per state, the
     index of states, one district map per state, the old address of the
     first one, the directories of legislatures and counties, and the guide,
@@ -291,13 +291,17 @@ def render_state_pages(profiles, root=".", summary=None):
     for cid in federal_courts.COURTS:
         out[os.path.join(COURT_PAGES_DIR, f"{cid}.html")] = pages.render_court_page(cid, host,
                                                                                     codes)
-    return out
+    # Each page's own code and data, at the versions it was built with
+    # (kyc/assets.py), read from *stamp_from* - the root, unless a test
+    # renders into a folder without them and says where they are.
+    from . import assets
+    return {path: assets.stamp(text, stamp_from or root) for path, text in out.items()}
 
 
-def write_state_pages(profiles, root=".", summary=None):
+def write_state_pages(profiles, root=".", summary=None, stamp_from=None):
     """Write one page per state plus the directory. Returns the paths."""
     written = []
-    for relative, text in render_state_pages(profiles, root, summary).items():
+    for relative, text in render_state_pages(profiles, root, summary, stamp_from).items():
         path = os.path.join(root, relative)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         _atomic_write(path, text)
@@ -305,14 +309,14 @@ def write_state_pages(profiles, root=".", summary=None):
     return written
 
 
-def check_state_pages(profiles, root=".", summary=None):
+def check_state_pages(profiles, root=".", summary=None, stamp_from=None):
     """State pages that differ from what the build would write now.
 
     They are generated, so ``verify`` regenerates them in memory and compares:
     a template edit that was never followed by a build is otherwise invisible.
     """
     stale = []
-    for relative, text in render_state_pages(profiles, root, summary).items():
+    for relative, text in render_state_pages(profiles, root, summary, stamp_from).items():
         path = os.path.join(root, relative)
         if not os.path.exists(path):
             stale.append((relative, "missing"))
@@ -610,8 +614,9 @@ def government_signature(payload):
 
 
 def script_sources(html):
-    """Every ``<script src="...">`` in *html*, in document order."""
-    return re.findall(r'<script[^>]*\bsrc="([^"]+)"', html)
+    """Every ``<script src="...">`` in *html*, in document order, without the
+    version stamp a local asset's URL carries (kyc/assets.py)."""
+    return [src.split("?v=")[0] for src in re.findall(r'<script[^>]*\bsrc="([^"]+)"', html)]
 
 
 # ------------------------------------------------------------------ hostname

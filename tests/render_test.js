@@ -102,7 +102,8 @@ function buildPage(page, opts) {
   const sources = [...html.matchAll(/<script[^>]*\bsrc="([^"]+)"[^>]*><\/script>/g)];
   for (const [tag, src] of sources) {
     // Relative to the page: the state pages sit one directory down.
-    const file = path.join(path.dirname(path.join(SITE, page)), ...src.split("/"));
+    // Without the version stamp a local asset's URL carries (kyc/assets.py).
+    const file = path.join(path.dirname(path.join(SITE, page)), ...src.split("?")[0].split("/"));
     if (!fs.existsSync(file)) throw new Error(`${page} references a missing ${src}`);
     html = html.replace(tag, () => "<script>\n" + fs.readFileSync(file, "utf8") + "\n</script>");
   }
@@ -137,7 +138,7 @@ function buildPage(page, opts) {
   });
 
   const { window } = dom;
-  const packed = { window, D: window.document, errors, sources: sources.map((m) => m[1]) };
+  const packed = { window, D: window.document, errors, sources: sources.map((m) => m[1].split("?v=")[0]) };
 
   // Wait for jsdom's own DOMContentLoaded rather than dispatching one. An
   // earlier version fired the event by hand, jsdom then fired its own, and
@@ -2529,6 +2530,36 @@ async function testPhoneMenus() {
   });
 }
 
+/* One part of the grid failing to start - as a stale script did, minutes
+ * after a deploy - must not leave it on "Loading profiles...". */
+async function testBootSurvivesAFailure() {
+  const { window, D } = await buildPage("index.html", {
+    // The sort's start throws, as the stale script's did.
+    data: (w) => { w.KYC.createMenu = () => { throw new Error("rehearsed failure"); }; },
+  });
+  await settle(50);
+  suite("index.html — the grid starts though one of its parts does not", () => {
+    check("the cards are drawn", D.querySelectorAll("#results .card").length > 0,
+      D.getElementById("resultsLabel").textContent);
+    const note = D.querySelector(".results-failed");
+    check("and the page says part of it did not start", !!note && /did not start/.test(note.textContent));
+    D.querySelector('.chip[data-group="chamber"][data-value="Senate"]').click();
+    check("the filters still work", [...D.querySelectorAll("#results .card")].every((c) =>
+      /Senate/.test(window.KYC.byId(c.getAttribute("data-id")).chamber)));
+  });
+  // The first draw itself failing: never "Loading profiles..." over nothing.
+  const broken = await buildPage("index.html", {
+    data: (w) => { w.KYC.matchesQuery = () => { throw new Error("rehearsed draw failure"); }; },
+  });
+  await settle(50);
+  suite("index.html — a draw that fails says so", () => {
+    const label = broken.D.getElementById("resultsLabel").textContent;
+    check("the label says the profiles could not be drawn, not that they are loading",
+      /could not be drawn/.test(label) && !/Loading/.test(label), label);
+    check("and the page says part of it did not start", !!broken.D.querySelector(".results-failed"));
+  });
+}
+
 async function testSenate() {
   const { window, D, errors } = await buildPage("index.html", { hash: "#/?view=senate" });
   await settle(50);
@@ -3259,7 +3290,8 @@ async function testDistrictPages() {
     check("56 pages", files.length === 56, `${files.length}`);
     const unwired = files.filter((f) => {
       const raw = fs.readFileSync(path.join(SITE, "districts", f), "utf8");
-      return raw.indexOf('src="../data/districts/' + f.replace(".html", ".js") + '"') === -1;
+      // With or without the version stamp its URL carries (kyc/assets.py).
+      return !new RegExp('src="\\.\\./data/districts/' + f.replace(".html", ".js") + '(\\?v=[0-9a-f]+)?"').test(raw);
     });
     check("each loads its own state's map and no other", unwired.length === 0, unwired.join(", "));
   });
@@ -5650,6 +5682,7 @@ async function testFederal() {
   if (!only || only === "index.html") await testBallotCounts();
   if (!only || only === "index.html") await testRenumbered();
   if (!only || only === "index.html") await testPhoneMenus();
+  if (!only || only === "index.html") await testBootSurvivesAFailure();
   if (!only || only === "index.html") await testReseatedSpecial();
   if (!only || only === "index.html") await testFormerIncumbent();
   if (!only || only === "index.html") await testRecordPhase();
