@@ -45,6 +45,8 @@ SOURCES = {
                      "https://constitution.congress.gov/constitution/amendment-25/"),
 
     # Federal statutes
+    "usc-2-8": ("2 U.S.C. 8 (when a House vacancy is filled)",
+                "https://www.law.cornell.edu/uscode/text/2/8"),
     "usc-3-19": ("3 U.S.C. 19 (presidential succession)",
                  "https://www.law.cornell.edu/uscode/text/3/19"),
     "usc-5-101": ("5 U.S.C. 101 (the executive departments)",
@@ -1678,7 +1680,9 @@ ELECTIONS = {
     "nav": "Elections",
     "title": "How elections work",
     # This page was written and checked after the rest of the guide.
-    "reviewed": "2026-10-16",
+    # The vacancies section was revised on 2026-10-17: two House seats
+    # empty since April 2026 had no special election called.
+    "reviewed": "2026-10-17",
     # Text about dated events goes stale on those dates: validate warns from
     # each one until the page is checked again and "reviewed" moved past it.
     "revisit": [
@@ -1883,14 +1887,17 @@ ELECTIONS = {
             "blocks": [
                 ("p", "When a House seat falls vacant, the Constitution has the state's governor "
                       "call an election to fill it (Article I, Section 2). It provides for no "
-                      "appointment, so the seat is empty until the special election."),
+                      "appointment, so the seat is empty until an election fills it. When that "
+                      "election is held is left to each state's law (2 U.S.C. 8), and a seat that "
+                      "falls vacant late in a Congress can stay empty until the regular November "
+                      "election, whose winner takes it when the new Congress meets."),
                 ("p", "Senate vacancies are covered by the Seventeenth Amendment: the governor "
                       "calls an election, and the state's legislature may let the governor appoint "
                       "a temporary senator until the voters fill the seat by election as the "
                       "legislature directs. Whether a governor may make that appointment, and when "
                       "the election is held, depends on each state's law."),
             ],
-            "sources": ["const-art1", "const-amdt17"],
+            "sources": ["const-art1", "const-amdt17", "usc-2-8"],
         },
     ],
 }

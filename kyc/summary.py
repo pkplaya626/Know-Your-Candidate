@@ -162,7 +162,7 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None):
         # page name that may be a profile's), and the names with no profile.
         maybe = sum(len((r.get("results") or {}).get("maybeProfiled") or {}) for r in races)
         summary["election"]["challengersWithProfile"] = sum(
-            r.get("candidateCount", 0) for r in races) + maybe
+            r.get("candidateCount", 0) for r in races if ballot_known(r)) + maybe
         summary["election"]["challengersUnprofiled"] = sum(
             len((r.get("results") or {}).get("otherNominees") or []) for r in races) - maybe
         summary["election"]["renumbered"] = sum(1 for r in races if r.get("holderMoved"))
@@ -198,6 +198,16 @@ def _congress(snapshot):
         return cycle.snapshot_congress(snapshot)
     except cycle.CycleError:
         return None
+
+
+def ballot_known(race):
+    """False for a race with no primary whose ballot nobody has read: its
+    filers are filers, not people on the ballot. A race with a primary
+    counts as it always has - its filers are on the ballot until the
+    primary decides otherwise. A race built without results or dates
+    (neither key present) is not known to have no primary."""
+    no_primary = "primaryDate" in race and not race["primaryDate"]
+    return not (no_primary and race.get("settled") is False)
 
 
 def by_state(profiles, races=None):
@@ -266,7 +276,14 @@ def by_state(profiles, races=None):
         entry = out.get(race.get("state"))
         if entry is None:
             continue
-        if counted:
+        if counted and not ballot_known(race):
+            # No primary and no ballot read yet (a territory before its
+            # list is published): people have filed, and nobody can yet be
+            # counted on the ballot. "0 challengers on the ballot" over six
+            # filers read as an uncontested seat (rule 22).
+            entry["challengersFiled"] = entry.get("challengersFiled", 0) + race.get(
+                "candidateCount", 0)
+        elif counted:
             entry["challengersOnBallot"] += race.get("candidateCount", 0) + len(
                 (race.get("results") or {}).get("otherNominees") or [])
         entry["races"] += 1
@@ -283,8 +300,30 @@ def by_state(profiles, races=None):
     for code, seats in house_races.items():
         balance = out[code]["balance"]["house"]
         balance["vacant"] += max(0, seats - sum(balance.values()))
+    _vacancies(out, profiles)
     _delegate_seats(out)
     return out
+
+
+def _vacancies(out, profiles):
+    """Each empty House seat's story, where ``overrides.SEAT_VACANCIES``
+    records it: who left, when, how, and whether a special election has
+    been called. "1 Vacant" alone left a reader of FL-20 and TX-23 - empty
+    since April 2026, with no special election - to guess why, or to assume
+    one was coming. Shown only while nobody sits in the seat: the entry
+    stops being shown the day someone is seated there, and ``validate``
+    reports it then."""
+    from .overrides import SEAT_VACANCIES
+    from .record import seated
+
+    held = {(p.get("state"), p.get("districtNum")) for p in profiles
+            if seated(p) and "House" in str(p.get("chamber") or "")}
+    for (code, district), entry in sorted(SEAT_VACANCIES.items()):
+        if code not in out or (code, district) in held:
+            continue
+        out[code].setdefault("vacancies", []).append({
+            "district": district, "name": entry["name"], "left": entry["left"],
+            "how": entry["how"], "special": entry["special"], "checked": entry["checked"]})
 
 
 def _delegate_seats(out):
