@@ -334,6 +334,25 @@ def agree(a, b):
     return None
 
 
+def overlaps(holders):
+    """The indexes of acting holders whose agreed end falls after the next
+    holder's agreed start, both to the day: Ingrid Kolb's acting service as
+    Secretary of Energy ends 2025-02-04 in both sources, and Chris Wright's
+    begins 2025-02-03 in both. Two people cannot hold one office for a day,
+    so the pages show neither the end nor a hand-over (rule 19: the sources
+    agree with each other, not with the record), and the build reports it.
+    No date is moved to fit: which one is wrong is not known here."""
+    out = []
+    for i in range(len(holders) - 1):
+        row, after = holders[i], holders[i + 1]
+        end = ((row.get("end") or {}).get("shown") or {})
+        start = ((after.get("start") or {}).get("shown") or {})
+        if (row.get("acting") and end.get("precision") == "day" and
+                start.get("precision") == "day" and end["date"] > start["date"]):
+            out.append(i)
+    return out
+
+
 def _held_from(person, vote_date, slack_days=7):
     """True when the holder still held the office on or after the vote that
     would have confirmed them: someone acting before a confirmation is the

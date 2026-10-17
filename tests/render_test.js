@@ -797,6 +797,12 @@ async function testDirectoryAsync() {
           member.politicalHistory.wikidata + '"]'));
       check("its links open safely", [...source.querySelectorAll("a")]
         .every((a) => a.target === "_blank" && /noopener/.test(a.rel)));
+      // Two sources' agreement is not a complete record, and the list says
+      // so before it starts (an officer's earlier office was missing).
+      const scope = panel.querySelector(".held-scope");
+      check("the list says other offices may be missing, before it starts", !!scope &&
+        /others may be missing/.test(scope.textContent) &&
+        !!(scope.compareDocumentPosition(panel.querySelector(".held-list")) & 4));
       KYC.profile.close();
     }
     const atLarge = window.legislatorsData.find((p) => rows(p).some((r) => r.congress && r.district === 0));
@@ -3643,6 +3649,19 @@ async function testGuide() {
         return /Vice Chairman/.test(lead.textContent) && !/Ex Officio/.test(row.textContent);
       })());
       check("names are escaped text, not markup", !/<script/i.test(live.innerHTML));
+      // A joint committee's roster may title only majority members: the
+      // cell says what the rosters name, never "None recorded".
+      const unnamedCells = [...live.querySelectorAll('td[data-label="Minority lead"] .lead-unnamed')];
+      check("a lead the rosters do not name is said to be not named, not 'none recorded'",
+        !/None recorded/.test(live.textContent) && unnamedCells.every((s) =>
+          s.textContent === "No minority lead named in the rosters"), live.textContent.slice(0, 200));
+      check("each table counts its committees with no minority lead named",
+        [...live.querySelectorAll("table")].every((t) => {
+          const n = t.querySelectorAll('td[data-label="Minority lead"] .lead-unnamed').length;
+          const note = t.closest(".guide-table-wrap").previousElementSibling;
+          const has = !!note && note.classList.contains("committees-unnamed");
+          return n ? has && /no member of the minority a leading title/.test(note.textContent) : !has;
+        }));
       const first = people[0];
       first.click();
       check("a name opens the shared profile dialog",
@@ -5148,6 +5167,17 @@ async function testFederal() {
       check("acting service before a confirmation is in the timeline", actingNotes.every((r) =>
         [...changes.querySelectorAll("tbody tr")].some((tr) =>
           tr.textContent.indexOf(r.name + " became acting") !== -1)), actingNotes.map((r) => r.name).join(", "));
+      // Labor: "Since 2026-04-20", an acting start, beside a September vote.
+      const actingNow = withHistory.filter((o) => o.history.some((r) => r.current && r.actingNote && r.actingStart));
+      check("a card whose officer was acting before confirmation says both, never 'Since' the acting start",
+        actingNow.every((o) => {
+          const row = o.history.find((r) => r.current);
+          const card = [...D.querySelectorAll("#cabinet .fed-officer")]
+            .find((c) => c.querySelector(".fed-office").textContent === o.office);
+          const text = card ? card.textContent : "";
+          return /Acting from /.test(text) && /their Wikipedia article/.test(text) &&
+            !/In office Since/.test(text) && (!row.confirmed || text.indexOf("then confirmed " + row.confirmed.date) !== -1);
+        }), actingNow.map((o) => o.office).join(", "));
       const cards = [...D.querySelectorAll("#cabinet .fed-officer")];
       check("'after' only where the hand-over is shown", withHistory.every((o) => {
         const i = o.history.findIndex((r) => r.current);
@@ -5159,6 +5189,14 @@ async function testFederal() {
         const card = cards.find((c) => c.querySelector(".fed-office").textContent === o.office);
         return !card || card.textContent.indexOf((same ? "after " : "previously this term: ") + prev.name) !== -1;
       }));
+      // An acting end both sources put after the successor's start is not
+      // shown as a date (Energy: Kolb to Feb 4, Wright from Feb 3).
+      const overlapped = withHistory.flatMap((o) => o.history.filter((r) => r.end && r.end.overlap));
+      check("an acting end after the successor took office is not shown as a date",
+        overlapped.every((r) => [...changes.querySelectorAll("tbody tr")].some((tr) =>
+          tr.textContent.indexOf(r.name + "’s service as acting ended") !== -1 &&
+          /Date not shown: both sources put it after the successor took office/.test(tr.textContent))),
+        overlapped.map((r) => r.name).join(", "));
       check("no Wikidata label is shown for a person: names are the White House's, the Senate's " +
         "or an article's", withHistory.every((o) => o.history.every((r) =>
           r.current ? r.name === o.holder.name : !!(r.wikipedia || (r.confirmed && r.name === r.confirmed.nominee)))));
@@ -5166,6 +5204,22 @@ async function testFederal() {
     check("the courts are said to be the Article III courts",
       /Article III/.test(D.getElementById("courts").textContent) &&
       !/Every federal court/.test(D.getElementById("federalBody").textContent));
+    // The section holds the Article IV territorial courts too: its title
+    // and lede may not promise only Article III courts, or their judges.
+    const courtsHead = D.querySelector("#courts .guide-subheading");
+    check("the section is the federal courts, not 'the Article III courts'",
+      !!courtsHead && courtsHead.textContent === "The federal courts", courtsHead && courtsHead.textContent);
+    const lede = D.getElementById("courtsLede");
+    check("the lede says the territorial courts' judges are not listed, and why", !!lede &&
+      /territorial district courts/.test(lede.textContent) && /but not their judges/.test(lede.textContent) &&
+      /Article IV/.test(lede.textContent), lede && lede.textContent);
+    const territorial = d.courts.filter((c) => !c.listed && c.kind === "territorial");
+    check("each territorial court's row says its judges serve under Article IV",
+      territorial.length === 3 && territorial.every((c) => {
+        const a = D.querySelector('#courts a[href="../courts/' + c.id + '.html"]');
+        const row = a && a.closest("tr");
+        return !!row && /Article IV judges: not in the directory/.test(row.textContent);
+      }), territorial.map((c) => c.id).join(", "));
   });
 
   suite("federal/index.html — the circuit map", () => {
@@ -5221,6 +5275,17 @@ async function testFederal() {
     }
     check("the count is of people", D.getElementById("judgeSearchCount") &&
       new Set(index.map((row) => row[0])).size === index.length);
+    // The directory's "A[llen] Joe Fish": shown as he goes by, found by both.
+    check("no judge's name carries the directory's brackets", index.every((row) => row[1].indexOf("[") === -1),
+      index.filter((row) => row[1].indexOf("[") !== -1).map((row) => row[1]).slice(0, 3).join(", "));
+    const bracketed = index.find((row) => row[4]);
+    if (bracketed) {
+      input.value = bracketed[4];
+      input.dispatchEvent(new window.Event("input"));
+      check("a judge is found by the full name the directory gives",
+        [...D.querySelectorAll("#judgeResults a")].some((a) => a.textContent === bracketed[1]),
+        bracketed[4] + " -> " + bracketed[1]);
+    }
     input.value = "";
     input.dispatchEvent(new window.Event("input"));
   });
@@ -5314,10 +5379,38 @@ async function testFederal() {
       /Appointed by/.test(meta) && !PARTY_WORDS.test(meta), meta);
     check("and links to the Federal Judicial Center's page",
       !!modal.querySelector('a[href^="https://www.fjc.gov/node/"]'));
+    // The directory's career field holds roles held now ("-present"): the
+    // panel keeps the directory's label, never "before the bench".
+    const heads = [...modal.querySelectorAll(".panel-head")].map((h) => h.textContent);
+    check("the career panel carries the directory's own label",
+      heads.some((h) => /Professional career/.test(h)) && !heads.some((h) => /before the bench/.test(h)),
+      heads.join(" | "));
     check("Escape closes it", (() => {
       D.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
       return modal.hidden;
     })());
+    // A retired justice: retired since a date, never "Since" their
+    // commission under a heading about retirement, nor "senior status".
+    const retired = (d.supremeCourt.retired || [])[0];
+    if (retired) {
+      const table = [...D.querySelectorAll("#supreme-court table")].find((t) =>
+        /Retired justices/.test(t.textContent));
+      const heads = table ? [...table.querySelectorAll("thead th")].map((th) => th.textContent) : [];
+      check("the retired justices' table says when each joined the Court and when they retired",
+        heads.includes("Joined the Court") && heads.includes("Retired") && !heads.includes("Since"),
+        heads.join(" | "));
+      const row = table && [...table.querySelectorAll("tbody tr")].find((tr) =>
+        tr.textContent.indexOf(retired.name) !== -1);
+      check("their retirement is the directory's senior-status date", !!row &&
+        row.querySelector('[data-label="Retired"]').textContent === retired.seats[0].seniorSince &&
+        row.querySelector('[data-label="Joined the Court"]').textContent === retired.seats[0].commissioned,
+        row && row.textContent);
+      D.querySelector('#supreme-court [data-official="' + retired.id + '"]').click();
+      const body = D.getElementById("officialModalBody").textContent;
+      check("their dialog says retired, not senior status",
+        /retired since/.test(body) && !/senior status since/.test(body), body.slice(0, 300));
+      window.KYC.official.close();
+    }
   });
 
   const president = d && d.president;
@@ -5407,6 +5500,30 @@ async function testFederal() {
       mine.vacancies.filter((r) => r.emergency).length);
     check("it names its source and date", !!doc.querySelector('#vacancies a[href^="https://www.uscourts.gov/"]') &&
       doc.getElementById("vacancies").textContent.indexOf(w.kycFederal.vacancies.asOf) !== -1);
+    check("a judge the directory lists on the court carries no 'not listed' note",
+      doc.querySelectorAll("#vacancies .vacancy-unlisted").length ===
+        mine.vacancies.concat(mine.future || []).filter((r) => r.notInDirectory).length);
+  });
+
+  // A vacancy for senior status whose judge the directory no longer lists
+  // on the court (New Mexico's, in the committed data): a reader looking
+  // for them among the senior judges is told they are not there.
+  const unlistedCourt = ((ca1.window.kycFederal || {}).courts || []).find((c) => c.id === "nm");
+  const unlistedPage = unlistedCourt && await buildPage("courts/nm.html");
+  if (unlistedPage) await settle(50);
+  suite("a vacancy whose judge the directory does not list", () => {
+    if (!unlistedPage) return;
+    const { window: w, D: doc, errors: errs } = unlistedPage;
+    check("no page errors", errs.length === 0, errs.join(" | "));
+    const flagged = (w.kycCourt.nm.vacancies || []).concat(w.kycCourt.nm.future || [])
+      .filter((r) => r.notInDirectory);
+    const notes = [...doc.querySelectorAll("#vacancies .vacancy-unlisted")];
+    check("each such row says the directory does not list the judge, and no more",
+      notes.length === flagged.length && notes.every((n) =>
+        /Not listed by the FJC directory as serving on this court now/.test(n.textContent) &&
+        !/retired|resigned|died/i.test(n.textContent)), `${notes.length} notes, ${flagged.length} rows`);
+    check("and the judge is indeed not among the court's judges", flagged.every((r) =>
+      !w.kycCourt.nm.judges.some((j) => j.name === r.vacatedBy.name)));
   });
 
   const guam = await buildPage("courts/gu.html");
@@ -5430,6 +5547,8 @@ async function testFederal() {
     check("the justices, the Chief Justice first", listed.join() === members.join(), listed.join());
     const retired = (w.kycFederal.supremeCourt.retired || []).length;
     check("retired justices apart", !retired || doc.querySelectorAll("#retired [data-official]").length === retired);
+    check("with the date each retired", !retired || [...doc.querySelectorAll("#retired thead th")]
+      .some((th) => th.textContent === "Retired"));
   });
 }
 

@@ -1098,8 +1098,11 @@ agreements are shown, each said as such on the page:
 "Acting" comes from the article's own entry. Years only: Wikidata often
 records the election and the article the swearing-in. A profile the site
 could not tie to an item reads "No linked record of public offices", with
-why; a record whose offices could not be confirmed says so. A read that fails
-or comes back short keeps the committed cache.
+why; a record whose offices could not be confirmed says so. A list opens by
+saying it holds only offices the sources agree on and that others may be
+missing: Keith Sonderling's listed only his Cabinet office while his OGE
+report beside it was filed as Deputy Secretary. A read that fails or comes
+back short keeps the committed cache.
 
 What an agreement on office and years cannot check is checked on its own:
 
@@ -1576,10 +1579,17 @@ President's term began (`kyc/cabinet.py`), into `changes` in
   sources differ and shows no date. An infobox entry is the office's exact
   name, past an ordinal and "Acting" - "Deputy Director of the Office of
   Management and Budget" is not its Director - and a person who held the
-  office before takes the entry of this term.
+  office before takes the entry of this term. An acting officer whose end
+  both sources put after the next holder's start (Ingrid Kolb's acting
+  service as Secretary of Energy to 2025-02-04, Chris Wright's from
+  2025-02-03) shows no end and says why; no date is moved to fit, and the
+  build warns `acting-overlaps-successor`.
 
 The hub lists every change newest first: confirmed, left, acting. Each
-card says since when and whom its officer followed, and the dialog lists
+card says since when and whom its officer followed - for an officer who
+served as acting before being confirmed, "Acting from" the date their
+article gives and "then confirmed" on the vote's date, never "Since" the
+acting start - and the dialog lists
 the office's holders this term. An acting officer Wikidata does not record
 is not listed, and the page says so. A failed read keeps the last history
 (rule 8).
@@ -1612,7 +1622,7 @@ a search that finds nobody says it searched the directory.
 |---|---|
 | `data/federal.js` (`kycFederal`) | The President, the Vice President, every Cabinet office, the Supreme Court's members, and an index of the courts with their counts and chief judges |
 | `data/judiciary/<court>.js` (`kycCourt[<court>]`) | One court's judges, loaded only by that court's page: 1,463 judges in one file would load on every page |
-| `data/judiciary/index.js` (`kycJudgesIndex`) | Every sitting judge's id, name, court and status, for the search |
+| `data/judiciary/index.js` (`kycJudgesIndex`) | Every sitting judge's id, name, court and status, for the search, and the directory's full name where it brackets a given name the judge does not use |
 
 Every file carries a content signature and is rewritten only when what it
 says changes; `verify` names a stale one. An official is never a profile:
@@ -1621,6 +1631,10 @@ nobody on these pages is counted among the members of Congress. The FJC's
 directory lists judges, not judgeships, so no vacancy is ever counted from
 it. Guam's, the Northern Mariana Islands' and the Virgin Islands' courts say
 why nobody is listed, and that this is not a vacancy.
+
+The directory brackets a given name a judge does not use ("A[llen] Joe
+Fish"). The pages show the name they go by, "A. Joe Fish"; the dialog gives
+the full name and the search finds either (`judiciary.display_name`).
 
 ### Vacancies
 
@@ -1648,7 +1662,13 @@ The hub gives the totals and each court's count. A court page lists its
 vacancies, its announced ones and any emergency. The build compares the two
 sources and warns (`vacancy-judge-not-senior`) when the list says a judge
 took senior status but the directory does not yet show it; the two are
-updated at different times, and the court page says so.
+updated at different times, and the court page says so. When the list
+implies the judge still serves (a seat left for senior status, or one only
+announced) and the directory lists nobody of that surname on the court at
+all, it warns `vacancy-judge-not-listed` and the row says "Not listed by the
+FJC directory as serving on this court now", and nothing about why. The
+surname is compared without accents or a generational suffix ("Osteen Jr."
+is the directory's "Osteen"), and only to report, never to join.
 
 ### Financial disclosures
 

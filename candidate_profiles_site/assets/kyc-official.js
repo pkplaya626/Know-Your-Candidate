@@ -54,7 +54,11 @@
     }
     var start = row.start && row.start.shown ? whenText(row.start.shown) : "";
     var end = row.end ? (row.end.shown ? whenText(row.end.shown) : "") : "";
-    if (row.end) {
+    if (row.end && row.end.overlap) {
+      // Both sources end it after the next holder began (kyc/cabinet.py).
+      parts.push((start ? "in office from " + start + "; " : "") + "the end is not shown: both " +
+        "sources put it after the successor took office");
+    } else if (row.end) {
       parts.push(start || end ? "in office " + (start || "?") + " to " + (end || "?")
         : "in office, then left; " + (row.end.differs ? "the sources differ on the dates"
           : "the dates are not in both sources"));
@@ -382,7 +386,12 @@
       if (seat.commissioned) parts.push("commissioned " + KYC.escapeHtml(seat.commissioned));
       if (seat.reassigned) parts.push("reassigned to this court by statute " + KYC.escapeHtml(seat.reassigned));
       if (seat.chiefSince) parts.push("chief since " + KYC.escapeHtml(seat.chiefSince));
-      if (seat.seniorSince) parts.push("senior status since " + KYC.escapeHtml(seat.seniorSince));
+      // A retired justice is "retired", as the status line above says, not
+      // on "senior status": one word for one status in one dialog.
+      if (seat.seniorSince) {
+        parts.push((judge.retiredJustice ? "retired since " : "senior status since ") +
+          KYC.escapeHtml(seat.seniorSince));
+      }
       return "<li><strong>" + KYC.escapeHtml(seat.title || "Judge") + "</strong>, " +
         (here || !c ? KYC.escapeHtml(name)
           : '<a href="' + KYC.escapeAttr(courtUrl(seat.court)) + '">' + KYC.escapeHtml(name) + "</a>") +
@@ -407,7 +416,8 @@
 
     var born = judge.born ? [judge.born.city, judge.born.state].filter(Boolean).join(", ") +
       (judge.born.year ? (judge.born.city || judge.born.state ? ", " : "") + judge.born.year : "") : "";
-    var bio = field("Born", born ? KYC.escapeHtml(born) : absent("Not in the directory"));
+    var bio = (judge.fullName ? field("Full name", KYC.escapeHtml(judge.fullName)) : "") +
+      field("Born", born ? KYC.escapeHtml(born) : absent("Not in the directory"));
     if (judge.justice) {
       bio += field("Took the oath", KYC.escapeHtml(judge.justice.oath || "")) +
         field("Appointed from", KYC.escapeHtml(judge.justice.stateAppointedFrom || ""));
@@ -434,7 +444,10 @@
       panel("user", "Biography", '<div class="field-grid">' + bio + "</div>") +
       "</div>" +
       '<div class="modal-column">' +
-      panel("scroll", "Career before the bench", career
+      // The directory's own label: its career field holds roles a judge
+      // holds now ("Chair of the board, Federal Judicial Center,
+      // 2005-present"), so it is not only a career before the bench.
+      panel("scroll", "Professional career", career
         ? '<ul class="bullets scroll-y scroll-box">' + career + "</ul>" : absent("Not in the directory")) +
       (judge.otherNominations
         ? panel("info", "Other nominations", '<p class="note-box">' + KYC.escapeHtml(judge.otherNominations) + "</p>")

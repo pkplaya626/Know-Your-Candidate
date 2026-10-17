@@ -104,6 +104,24 @@ def _rows(text):
 
 # ---------------------------------------------------------------- the people
 
+# The directory brackets the part of a given name a judge does not use:
+# "A[llen] Joe Fish" goes by A. Joe Fish, and his full given name is Allen.
+_UNUSED_NAME = re.compile(r"\b(\w)\[(\w+)\]")
+
+
+def display_name(name):
+    """The name a judge goes by, from the directory's own: a bracketed part
+    is shown as the initial before it ("A[llen] Joe Fish" -> "A. Joe Fish").
+    Nothing is typed in or looked up (rule 28)."""
+    return _UNUSED_NAME.sub(r"\1.", name or "")
+
+
+def full_name(name):
+    """The directory's name with its brackets read out ("Allen Joe Fish"),
+    or None when it has none: the dialog shows it and the search finds it."""
+    return _UNUSED_NAME.sub(r"\1\2", name) if name and _UNUSED_NAME.search(name) else None
+
+
 def read_judges(text):
     """``{nid: biography}`` from the directory's flat judges file."""
     out = {}

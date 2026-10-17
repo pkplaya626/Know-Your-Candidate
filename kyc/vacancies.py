@@ -238,6 +238,47 @@ def load_cache(root="."):
         return json.load(handle)
 
 
+# Generational suffixes: the courts' list writes them into the surname
+# ("Osteen Jr.,William L."), the directory after the given names.
+_SUFFIXES = {"jr", "sr", "ii", "iii", "iv"}
+
+
+def _surname(text):
+    """A surname folded for comparison: no accents, case, punctuation or
+    generational suffix. ``"Osteen Jr.,William L."`` -> ``"osteen"``."""
+    import unicodedata
+    plain = unicodedata.normalize("NFKD", (text or "").split(",")[0])
+    plain = "".join(c for c in plain if not unicodedata.combining(c)).lower()
+    words = re.sub(r"[^a-z' -]", " ", plain).replace("-", " ").split()
+    return " ".join(w for w in words if w not in _SUFFIXES)
+
+
+def seats_held(row, judges):
+    """The directory's seats on a vacancy's court held by a judge of the
+    surname the courts' list gives, or None when the row names no judge or
+    no court. A name is used here only to report a disagreement between
+    the two sources, never to join a record to anything (rule 17)."""
+    if not row.get("court") or not row.get("vacatedBy"):
+        return None
+    surname = _surname(row["vacatedBy"].get("listedAs") or "")
+    if not surname:
+        return None
+    return [seat for judge in judges.values() if _surname(judge.get("sortName")) == surname
+            for seat in judge.get("seats") or [] if seat.get("court") == row["court"]]
+
+
+def judge_unlisted(row, judges, future=False):
+    """True when the courts' list implies the judge still serves - a seat
+    left for senior status, or a vacancy only announced - and the directory
+    lists nobody of that surname on that court at all. Nothing is inferred
+    about why (rule 19): the page says only that the directory does not
+    list them."""
+    if not future and row.get("reason") != "Senior":
+        return False
+    seats = seats_held(row, judges)
+    return seats is not None and not seats
+
+
 def problems(cache, today=None, judiciary=None):
     """What a build says about the cache: ``[(level, code, message, detail)]``.
 
@@ -265,19 +306,28 @@ def problems(cache, today=None, judiciary=None):
                         f"run 'vacancies'", []))
     if judiciary:
         judges = judiciary.get("judges") or {}
-        disagree = []
+        disagree, absent = [], []
         for row in cache.get("current") or []:
-            if row.get("reason") != "Senior" or not row.get("court") or not row.get("vacatedBy"):
+            if row.get("reason") != "Senior":
                 continue
-            surname = row["vacatedBy"]["listedAs"].split(",")[0].strip().lower()
-            seated = [j for j in judges.values()
-                      if j.get("sortName", "").split(",")[0].strip().lower() == surname
-                      and any(s["court"] == row["court"] and s.get("seniorSince")
-                              for s in j.get("seats") or [])]
-            if not seated:
+            seats = seats_held(row, judges)
+            if seats is None:
+                continue
+            if not seats:
+                absent.append(f"{row['code']}: {row['vacatedBy']['name']}")
+            elif not any(s.get("seniorSince") for s in seats):
                 disagree.append(f"{row['code']}: {row['vacatedBy']['name']}")
+        for row in cache.get("future") or []:
+            if judge_unlisted(row, judges, future=True):
+                absent.append(f"{row['code']}: {row['vacatedBy']['name']} (announced)")
         if disagree:
             out.append(("warn", "vacancy-judge-not-senior",
                         f"{len(disagree)} vacancies for senior status name a judge the FJC's "
                         f"directory does not list as senior on that court", disagree))
+        if absent:
+            out.append(("warn", "vacancy-judge-not-listed",
+                        f"{len(absent)} vacancies name a judge the FJC's directory does not list "
+                        f"on that court at all, though the courts' list implies they still serve; "
+                        f"the court page says so beside the row. Check each judge's FJC page",
+                        absent))
     return out

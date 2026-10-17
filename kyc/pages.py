@@ -798,7 +798,7 @@ _FEDERAL_SIDEBAR = """
             <a class="nav-link nav-sub" href="../federal/index.html#cabinet">The Cabinet</a>
             <a class="nav-link nav-sub" href="../federal/index.html#changes">Changes since the term began</a>
             <a class="nav-link nav-sub" href="../federal/index.html#supreme-court">The Supreme Court</a>
-            <a class="nav-link nav-sub" href="../federal/index.html#courts">The Article III courts</a>
+            <a class="nav-link nav-sub" href="../federal/index.html#courts">The federal courts</a>
         </nav>
 """
 
@@ -895,6 +895,32 @@ _COURT_WORDS = {"supreme": "How the Supreme Court works",
                 "trade": "How the federal trial courts work"}
 
 
+def _court_og_title(court):
+    """A court page's share title: a territorial court's page lists no judges."""
+    if court["kind"] == "territorial":
+        return f"{court['name']}: its vacancies"
+    if court["kind"] == "supreme":
+        return f"{court['name']}: its justices"
+    return f"{court['name']}: its judges"
+
+
+def _court_description(court):
+    """What a court page holds, said for its kind: a territorial court's
+    judges are not in the directory the pages are built from, and a justice
+    does not take senior status. The territorial courts' ten-year terms are
+    the guide's checked text (``government_text``, "other-courts")."""
+    name = court["name"]
+    if court["kind"] == "territorial":
+        return (f"The {name}: an Article IV court whose judges serve ten-year terms. The Federal "
+                f"Judicial Center's directory lists Article III judges only, so its judges are "
+                f"not listed; its vacancies are, as the courts list them.")
+    if court["kind"] == "supreme":
+        return (f"Every justice of the {name}, as the Court lists them: who appointed them, "
+                f"when they were commissioned, and their background. Retired justices listed apart.")
+    return (f"Every sitting judge of the {name}: who appointed them, when they were "
+            f"commissioned, their senior status, and their background.")
+
+
 def render_court_page(court_id, host, codes=()):
     """One federal court: its judges, the chief first, then active and senior
     judges. ``assets/kyc-federal.js`` draws it from the court's data file."""
@@ -909,7 +935,7 @@ def render_court_page(court_id, host, codes=()):
         f'                    <p class="state-kicker">{_e(KINDS[court["kind"]])}</p>',
         f'                    <h1 class="state-title">{_e(court["name"])}</h1>',
         '                    <p class="state-links">',
-        '                        <a class="btn" href="../federal/index.html#courts"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg> The Article III courts</a>',
+        '                        <a class="btn" href="../federal/index.html#courts"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg> The federal courts</a>',
         f'                        <a class="btn" href="{_e(_learn("courts#" + _COURT_SECTIONS[court["kind"]]))}"><svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg> {_e(_COURT_WORDS[court["kind"]])}</a>',
         "                    </p>",
         "                </header>",
@@ -922,9 +948,8 @@ def render_court_page(court_id, host, codes=()):
                "../assets/kyc-official.js", "../assets/kyc-federal.js")
     return render_page(
         title=_e(f"{court['name']} — Know Your Candidate"),
-        og_title=_e(f"{court['name']}: its judges"),
-        description=_e(f"Every sitting judge of the {court['name']}: who appointed them, when "
-                       f"they were confirmed, their senior status, and their background."),
+        og_title=_e(_court_og_title(court)),
+        description=_e(_court_description(court)),
         canonical=_e(canonical),
         host=_e(host or ""),
         code="",
