@@ -855,16 +855,38 @@
    *  The theme picker used to be a CSS :hover popup, which meant it could not
    *  be opened by keyboard at all and behaved erratically on touch, where a
    *  tap fires hover and click together. */
-  function createMenu(button, panel) {
+  function createMenu(button, panel, opts) {
+    opts = opts || {};
+    /* An item picked while the menu's history step (below) is still to be
+     * undone. On a phone, closing steps back from that entry, and the step
+     * lands after anything run now: a sort written to the address at the
+     * pick was undone a moment later, back to the old order. So the pick
+     * runs once the step has landed (*opts.onSelect*). */
+    var picked = null;
+
     function isOpen() { return !panel.hidden; }
 
-    function close(fromHistory) {
+    function run() {
+      var item = picked;
+      picked = null;
+      if (item && opts.onSelect) opts.onSelect(item);
+    }
+
+    /* *handover*: another menu is opening and takes the history entry, so
+     * there is no step back - with two menus on a page, the step taken for
+     * the first closed the second as it opened. */
+    function close(fromHistory, handover) {
       if (!isOpen()) return;
       panel.hidden = true;
       button.setAttribute("aria-expanded", "false");
       doc.removeEventListener("keydown", onKey, true);
       doc.removeEventListener("click", onOutside, true);
-      if (fromHistory !== true && history.state && history.state.kycMenu) history.back();
+      if (handover) return;
+      if (fromHistory !== true && history.state && history.state.kycMenu) {
+        history.back();               // the pick runs on the popstate it fires
+        return;
+      }
+      run();
     }
 
     function open() {
@@ -882,7 +904,10 @@
     }
 
     global.addEventListener("popstate", function () {
-      if (!(history.state && history.state.kycMenu)) close(true);
+      if (!(history.state && history.state.kycMenu)) {
+        close(true);
+        run();
+      }
     });
 
     function onKey(event) {
@@ -894,16 +919,22 @@
     }
 
     function onOutside(event) {
-      if (!panel.contains(event.target) && event.target !== button) close();
+      if (panel.contains(event.target) || button.contains(event.target)) return;
+      var other = event.target.closest && event.target.closest("[data-kyc-menu]");
+      close(false, !!other);
     }
 
     button.setAttribute("aria-expanded", "false");
+    button.setAttribute("data-kyc-menu", "");
     button.addEventListener("click", function (event) {
       event.stopPropagation();
       if (isOpen()) close(); else open();
     });
     panel.addEventListener("click", function (event) {
-      if (event.target.closest(".menu-item")) close();
+      var item = event.target.closest(".menu-item");
+      if (!item) return;
+      picked = item;
+      close();
     });
 
     return { open: open, close: close, isOpen: isOpen };

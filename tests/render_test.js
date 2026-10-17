@@ -522,6 +522,7 @@ async function testDirectory() {
     // would be ignored and the menu would claim an order the cards lack.
     const offered = [...panel.querySelectorAll("[data-sort]")].map((b) => b.getAttribute("data-sort"));
     const took = offered.filter((key) => {
+      button.click();
       panel.querySelector(`[data-sort="${key}"]`).click();
       return panel.querySelector('[aria-checked="true"]').getAttribute("data-sort") === key;
     });
@@ -532,6 +533,12 @@ async function testDirectory() {
     check("the races view, which lists seats in their own order, says the sort is for the cards",
       !D.getElementById("sortNote").hidden);
     D.getElementById("raceViewToggle").click();
+    D.getElementById("senateViewToggle").click();
+    check("and in the Senate view it names that view, not the races view",
+      !D.getElementById("sortNote").hidden && /Senate view/.test(D.getElementById("sortNote").textContent) &&
+        !/races view/.test(D.getElementById("sortNote").textContent), D.getElementById("sortNote").textContent);
+    D.getElementById("senateViewToggle").click();
+    button.click();
     panel.querySelector('[data-sort="region"]').click();
   });
 
@@ -2449,6 +2456,44 @@ async function testRenumbered() {
     check("the strip counts members under a new number apart from open seats",
       info.renumbered > 0 && strip.some((t) => /running under a new district number/.test(t)) &&
         !strip.some((t) => t === "4 open seats"), strip.join(" | "));
+  });
+}
+
+/* On a phone a menu pushes a history entry so the back gesture closes it,
+ * and closing steps back from it. A sort picked there was written to the
+ * address, then undone a moment later when the step landed; and with the
+ * theme menu open, opening the sort menu closed it again. */
+async function testPhoneMenus() {
+  const { window, D } = await buildPage("index.html");
+  await settle(50);
+  window.matchMedia = (q) => ({ media: q, matches: /max-width: 1000px|pointer: coarse/.test(q),
+    addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const sortPanel = D.getElementById("sortPanel");
+  const themePanel = D.getElementById("themePanel");
+  D.getElementById("sortButton").click();
+  const pushed = !!(window.history.state && window.history.state.kycMenu);
+  D.querySelector('#sortPanel [data-sort="name"]').click();
+  await wait(300);
+  const label = D.getElementById("sortLabel").textContent;
+  const hash = window.location.hash;
+  const names = [...D.querySelectorAll("#results .card")].slice(0, 6)
+    .map((c) => window.KYC.byId(c.getAttribute("data-id")).name);
+  D.getElementById("themeButton").click();
+  await wait(50);
+  D.getElementById("sortButton").click();
+  await wait(300);
+  const sortStays = !sortPanel.hidden && themePanel.hidden;
+  D.getElementById("themeButton").click();
+  await wait(300);
+  const themeStays = !themePanel.hidden && sortPanel.hidden;
+  suite("index.html — menus on a phone", () => {
+    check("opening a menu on a phone gives the back gesture an entry to close it", pushed);
+    check("a sort picked on a phone holds after the menu's history step lands",
+      label === "Name, A to Z" && /[?&]sort=name\b/.test(hash) &&
+        names.every((n, i) => i === 0 || names[i - 1].localeCompare(n) <= 0), `${label} ${hash}`);
+    check("opening the sort menu while the theme menu is open keeps it open", sortStays);
+    check("and the other way round", themeStays);
   });
 }
 
@@ -5563,6 +5608,7 @@ async function testFederal() {
   if (!only || only === "index.html") await testSenate();
   if (!only || only === "index.html") await testBallotCounts();
   if (!only || only === "index.html") await testRenumbered();
+  if (!only || only === "index.html") await testPhoneMenus();
   if (!only || only === "index.html") await testReseatedSpecial();
   if (!only || only === "index.html") await testFormerIncumbent();
   if (!only || only === "index.html") await testRecordPhase();

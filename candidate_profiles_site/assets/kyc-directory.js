@@ -453,15 +453,22 @@
    * orders the cards only: the races and Senate views list seats in their
    * own order, and the menu says so there. */
   function initSort() {
-    var panel = doc.getElementById("sortPanel");
-    KYC.createMenu(doc.getElementById("sortButton"), panel);
-    panel.addEventListener("click", function (event) {
-      var item = event.target.closest("[data-sort]");
-      if (!item || !SORTS[item.getAttribute("data-sort")]) return;
-      state.sort = item.getAttribute("data-sort");
-      apply();
+    KYC.createMenu(doc.getElementById("sortButton"), doc.getElementById("sortPanel"), {
+      onSelect: function (item) {
+        var key = item.getAttribute("data-sort");
+        if (!SORTS[key]) return;
+        state.sort = key;
+        apply();
+      },
     });
   }
+
+  // What the sort does not order, in the view the reader is in.
+  var SORT_NOTES = {
+    race: "Sorting applies to the cards. The races view lists races seat by seat.",
+    senate: "Sorting applies to the cards. The Senate view lists seats by the year each is " +
+      "next on the ballot.",
+  };
 
   function syncSort() {
     var current = "";
@@ -472,7 +479,9 @@
     });
     doc.getElementById("sortLabel").textContent = current;
     doc.getElementById("sortButton").setAttribute("aria-label", "Sort the cards: " + current);
-    doc.getElementById("sortNote").hidden = state.view === "grid";
+    var note = doc.getElementById("sortNote");
+    note.hidden = !SORT_NOTES[state.view];
+    if (SORT_NOTES[state.view]) note.textContent = SORT_NOTES[state.view];
   }
 
   /* One delegated listener for the whole grid, rather than an inline onclick
