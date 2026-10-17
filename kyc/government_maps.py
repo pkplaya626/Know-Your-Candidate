@@ -498,7 +498,10 @@ def _local_about(kind, census_cache):
                 f"{state_name(ranked[0][1])} ({ranked[0][0]:,}).")
     if kind == "county":
         return (f"{total:,} county governments in 2022. Louisiana's are called parishes, and "
-                f"Alaska's organized boroughs are counted as counties. {_join(none)} have none.")
+                f"Alaska's organized boroughs are counted as counties. {_join(none)} have none. "
+                f"Elsewhere some county areas have no county government of their own: a city and "
+                f"county governed as one, an independent city outside any county, or an area "
+                f"with no government. Pick a state to see which.")
     if kind == "municipal":
         return f"{total:,} cities, towns, villages and boroughs in 2022."
     if kind == "township":
@@ -513,6 +516,7 @@ def _local_about(kind, census_cache):
 
 
 def _local(census_cache):
+    from . import county_areas
     from .pages import state_name
     states = census_cache["states"]
     the = _names()
@@ -533,12 +537,15 @@ def _local(census_cache):
         values, facts = {}, {}
         for code, counts in states.items():
             n = counts[kind]
+            # A state whose county areas are not all governed by a county
+            # says why, in the counties directory's words (county_areas).
+            why = county_areas.directory_note(code) if kind == "county" else ""
             if not n:
                 values[code] = "zero"
-                facts[code] = NONE_OF_KIND.get(kind, f"No {many}.")
+                facts[code] = why or NONE_OF_KIND.get(kind, f"No {many}.")
                 continue
             values[code] = next(k for lo, hi, k in keys if hi is None or n < hi)
-            facts[code] = f"{n:,} {one if n == 1 else many} in 2022."
+            facts[code] = f"{n:,} {one if n == 1 else many} in 2022." + (" " + why if why else "")
         if kind == "total":
             for code, counts in states.items():
                 parts = []

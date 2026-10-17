@@ -146,8 +146,8 @@ python build_profile_site.py oge              # the executive's financial report
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1172 tests, no dependencies
-npm install && npm test                       # 1391 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1178 tests, no dependencies
+npm install && npm test                       # 1402 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -915,6 +915,23 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     President's reports are) concludes nothing (rule 8) and is linked and
     marked "not checked". A holder with no row reads "OGE's index lists
     no report", never "not filed" (rule 19).
+
+71. **A map that draws a county the counts say has no government says
+    why.** The counties directory and the guide's map read "none" for
+    Rhode Island's county governments while its own page drew five
+    counties and listed governments in each, with no word on why; New
+    York's page read "0 local governments" for the Bronx, Brooklyn,
+    Queens and Staten Island, whose governments the Census files under
+    Manhattan. 112 county areas have no county government of their own.
+    `kyc/county_areas.AREAS` holds each by its Census code, from Appendix
+    A of the Census Bureau's 2022 Individual State Descriptions, with the
+    government that does its work as the listing names it. The build fails
+    on an area with no county government that the table does not explain,
+    and on an entry whose area has one, is renamed or gone, or whose
+    government the listing does not hold (rule 53). The county page, the
+    directory's numbered notes and the guide's map all take their words
+    from that one table, and a state's page calls its areas what the
+    state does: parishes, boroughs and census areas, planning regions.
 
 ## District maps
 

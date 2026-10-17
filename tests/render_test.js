@@ -1714,7 +1714,21 @@ async function testNavigation() {
     const ct = rows.find((r) => /Connecticut/.test(r.textContent));
     // Rule 49: a state with none of a kind is not a count of zero.
     check("a state with no county governments says none, not 0",
-      ct && ct.children[1].textContent === "none", ct && ct.children[1].textContent);
+      ct && /^none\d+$/.test(ct.children[1].textContent), ct && ct.children[1].textContent);
+    // Rhode Island read "none" here while its own page drew five counties.
+    const riRow = rows.find((r) => /Rhode Island/.test(r.textContent));
+    const riRef = riRow && riRow.children[1].querySelector("a.note-ref");
+    const riNote = riRef && D.querySelector(riRef.getAttribute("href"));
+    check("its none links a note that says why",
+      !!riNote && /geographic areas the state uses to organize its courts/.test(riNote.textContent),
+      riNote ? riNote.textContent : String(riRef));
+    const maRow = rows.find((r) => /Massachusetts/.test(r.textContent));
+    check("a state with fewer county governments than counties is noted too",
+      maRow && /^5\d+$/.test(maRow.children[1].textContent) &&
+      /Suffolk and Nantucket/.test(D.querySelector(maRow.children[1].querySelector("a.note-ref")
+        .getAttribute("href")).textContent), maRow && maRow.children[1].textContent);
+    check("a state whose every county area has a county government has no note",
+      !rows.find((r) => /^Texas/.test(r.textContent)).children[1].querySelector("a.note-ref"));
     check("the sidebar marks Counties & cities",
       D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav") === "local");
     check("its state picker lists every state", D.getElementById("stateJump").options.length > 50);
@@ -3545,7 +3559,8 @@ async function testGuideMaps() {
     const { D } = await buildPage("government/local.html", { hash: "#/?mode=local-county&state=CT" });
     suite("government/local.html — none is not zero", () => {
       check("Connecticut has no county governments, said in words",
-        /No county governments/.test(D.querySelector("#guideFacts .guide-fact.is-current").textContent));
+        /has no county governments: it abolished them in 1960/.test(
+          D.querySelector("#guideFacts .guide-fact.is-current").textContent));
     });
   }
 }
@@ -3781,6 +3796,40 @@ async function testCounties() {
     check("Berthoud links the county whose list holds its government, and says so",
       body.querySelector("[data-county]").getAttribute("data-county") === "08069" &&
       /under Larimer County/.test(body.textContent), body.textContent.slice(0, 200));
+  });
+  // Rule 71: the directory said Rhode Island had no county governments while
+  // its page drew five counties and said nothing about it.
+  const ri = await buildPage("counties/ri.html");
+  suite("counties/ri.html — counties with no county government say so", () => {
+    const body = ri.D.getElementById("localPanelBody").textContent;
+    check("no page errors", ri.errors.length === 0, ri.errors.join(" | "));
+    check("the state says it has no county governments, and what its counties are",
+      /Rhode Island has no county governments/.test(body) && /organize its courts/.test(body), body.slice(0, 300));
+    check("every county in the list under the map says it has no county government",
+      [...ri.D.querySelectorAll("#localRoster .leg-row")].every((r) => /no county government/.test(r.textContent)));
+    ri.D.querySelector('#localRoster [data-region="44001"]')
+      .dispatchEvent(new ri.window.MouseEvent("click", { bubbles: true }));
+    const panel = ri.D.getElementById("localPanelBody").textContent;
+    check("a county's panel says why it has no county government, above its governments",
+      /Bristol County has no county government/.test(panel) && /Town of Barrington/.test(panel), panel.slice(0, 300));
+  });
+  const ny = await buildPage("counties/ny.html", { hash: "#/?county=36005" });
+  suite("counties/ny.html — a borough's governments are listed under Manhattan", () => {
+    const body = ny.D.getElementById("localPanelBody");
+    check("the Bronx says it has none of its own, and why, not 0",
+      /No local governments of its own/.test(body.textContent) && /the Bronx, one of New York City/.test(body.textContent) &&
+      !/^0 /.test(body.textContent), body.textContent.slice(0, 300));
+    check("with a link to the county that lists the City of New York",
+      body.querySelector("[data-county]") && body.querySelector("[data-county]").getAttribute("data-county") === "36061");
+    check("and no empty filter", !body.querySelector("#localFilter"));
+  });
+  const parishes = await buildPage("counties/la.html");
+  suite("counties/la.html — parishes are called parishes", () => {
+    check("the map's button, the list and the state's count say parish",
+      parishes.D.querySelector('[data-view="counties"]').textContent === "Parishes" &&
+      parishes.D.getElementById("localRosterTitle").textContent === "Every parish" &&
+      / in 64 parishes \(2022\)/.test(parishes.D.getElementById("localPanelBody").textContent),
+      parishes.D.getElementById("localPanelBody").textContent.slice(0, 120));
   });
   const once = await buildPage("counties/tx.html", { hash: "#/?county=48201" });
   let draws = 0;

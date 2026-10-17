@@ -561,6 +561,12 @@ svg.district-map,
   left: 0;
   background: var(--surface-0);
 }
+/* Why a state's county governments are fewer than its counties: numbered
+ * from the county column, listed under the table. */
+.note-ref { margin-left: 0.15em; font-size: var(--t-xs); text-decoration: none; }
+.directory-notes { margin: 0 0 var(--s-4); padding-left: 1.6em; font-size: var(--t-sm); max-width: 70ch; }
+.directory-notes li { margin-bottom: var(--s-2); }
+.directory-notes li:target { background: var(--surface-2); outline: 2px solid var(--accent); }
 
 .app-main {
   display: flex;

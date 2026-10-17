@@ -12,7 +12,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from kyc import census, counties, localgov  # noqa: E402
+from kyc import census, counties, county_areas, localgov  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 
@@ -85,6 +85,77 @@ class TestCountyPages(unittest.TestCase):
         self.assertEqual(row, ["special", "Fire District No 1", "Dover", "https://example.org", "",
                                "Local Fire Protection", "inactive"])
 
+
+
+class TestCountyAreas(unittest.TestCase):
+    """A county area with no county government says why (rule 71): the
+    counties directory said Rhode Island had none while its page drew five
+    counties and said nothing."""
+
+    MAP = {"44001": {"name": "Bristol County"}, "44003": {"name": "Kent County"},
+           "44005": {"name": "Newport County"}, "44007": {"name": "Providence County"},
+           "44009": {"name": "Washington County"}}
+
+    def test_an_area_without_a_county_government_must_be_explained(self):
+        rows = {f: [["township", "Town of X"]] for f in self.MAP}
+        self.assertEqual(county_areas.check("RI", self.MAP, rows), [])
+        # Texas has a county government in every county: one missing is a
+        # build error, not a blank.
+        problems = county_areas.check("TX", {"48201": {"name": "Harris County"}},
+                                      {"48201": [["special", "Harris County MUD 1"]]})
+        self.assertEqual(len(problems), 1)
+        self.assertIn("does not say why", problems[0])
+
+    def test_an_explanation_that_no_longer_fits_fails(self):
+        # The listing holds a county government after all.
+        rows = {f: [["county", "County of X"]] if f == "44001" else [] for f in self.MAP}
+        self.assertTrue(any("listing holds one" in p
+                            for p in county_areas.check("RI", self.MAP, rows)))
+        # The area is renamed on the map, or gone from it.
+        renamed = dict(self.MAP, **{"44001": {"name": "Bristol Region"}})
+        self.assertTrue(any("the map calls it" in p
+                            for p in county_areas.check("RI", renamed, {})))
+        self.assertTrue(any("not on the map" in p for p in county_areas.check(
+            "RI", {f: v for f, v in self.MAP.items() if f != "44009"}, {})))
+        # The government said to do the county's work is not in the listing.
+        sf = {"06075": {"name": "San Francisco County"}}
+        self.assertTrue(any("holds no 'City and County of San Francisco'" in p
+                            for p in county_areas.check("CA", sf, {"06075": [["special", "X"]]})))
+
+    def test_real_states_build_with_every_area_explained(self):
+        for code in ("RI", "NY", "VA", "AK", "CT", "MA", "HI"):
+            page = counties.build_state(code, ROOT, {})
+            lacking = [f for f in page["counties"]
+                       if not any(r[0] == "county" for r in page["governments"].get(f, []))]
+            self.assertEqual(sorted(page["noCounty"]), sorted(lacking), code)
+            self.assertTrue(page["stateNote"], code)
+        tx = counties.build_state("TX", ROOT, {})
+        self.assertEqual(tx["noCounty"], {})
+        self.assertEqual(tx["stateNote"], "")
+
+    def test_a_borough_with_no_governments_points_to_where_they_are_listed(self):
+        page = counties.build_state("NY", ROOT, {})
+        bronx = page["noCounty"]["36005"]
+        self.assertEqual(bronx["filed"], "36061")
+        self.assertIn("the Bronx", bronx["note"])
+        self.assertIn("under New York County (Manhattan)", bronx["note"])
+        self.assertEqual(page["governments"].get("36005", []), [])
+
+    def test_a_state_names_its_own_areas(self):
+        self.assertEqual(county_areas.words("LA")[:2], ("parish", "parishes"))
+        self.assertEqual(county_areas.words("CT")[2], "Planning regions")
+        self.assertEqual(county_areas.words("TX"), county_areas.DEFAULT_WORDS)
+
+    def test_the_guide_counts_what_the_table_holds(self):
+        from kyc import government_text
+        text = " ".join(b[1] for s in government_text.LOCAL["sections"] if s["id"] == "counties"
+                        for b in s["blocks"] if b[0] == "p")
+        ma = [f for f in county_areas.AREAS if f.startswith("25")]
+        va = [f for f, e in county_areas.AREAS.items()
+              if f.startswith("51") and e[1] == county_areas.INDEPENDENT]
+        self.assertEqual((len(ma), len(va)), (9, 38))
+        self.assertIn("nine of Massachusetts's fourteen counties", text)
+        self.assertIn("Virginia's 38", text)
 
 
 class TestCities(unittest.TestCase):

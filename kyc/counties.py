@@ -35,6 +35,7 @@ import re
 import unicodedata
 from collections import defaultdict
 
+from . import county_areas
 from . import districts as D
 from . import geo, localgov, statelegs
 from .government_maps import STATES
@@ -364,6 +365,11 @@ def build_state(code, root=".", places=None):
         else:
             unmatched.append({"name": entry["name"], "fips": fips, "governments": rows})
     statewide = [_row(g) for g in listing.get("statewide", [])]
+    # A county area with no county government says why, from the Census
+    # Bureau's own list of them; one it cannot explain fails the build.
+    lacking = county_areas.check(code, found, governments)
+    if lacking:
+        raise CountiesError("; ".join(lacking))
     cities = load_cities(code, root)
     if not cities:
         raise CountiesError(f"no {CITIES_DIR}/{code.lower()}.json; run tools/fetch_local_maps.py")
@@ -380,6 +386,7 @@ def build_state(code, root=".", places=None):
         # A county too small to tap is in the list under the map.
         "insets": [],
         "governments": governments,
+        **county_areas.for_state(code, found, governments),
         "unmatched": unmatched,
         "statewide": statewide,
         "cities": city_rows,

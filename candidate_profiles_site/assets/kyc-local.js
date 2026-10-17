@@ -52,6 +52,12 @@
     ["township", "Town or township government"],
   ];
 
+  /* A county area with no county government of its own (Rhode Island's,
+   * Virginia's independent cities, New York City's boroughs...), keyed by
+   * code, with why: kyc/county_areas.py, from the Census Bureau's own list. */
+  var noCounty = (state && state.noCounty) || {};
+  var areaWords = (state && state.areaWords) || { one: "county", many: "counties" };
+
   function el(id) { return doc.getElementById(id); }
   function plural(n, word) { return n.toLocaleString("en-US") + " " + word + (n === 1 ? "" : "s"); }
 
@@ -173,7 +179,8 @@
   function look(fips) {
     var rows = state.governments[fips] || [];
     var n = counted(rows);
-    var title = state.counties[fips].name + ": " + plural(n, "local government");
+    var title = state.counties[fips].name + ": " + plural(n, "local government") +
+      (noCounty[fips] ? " (" + noCounty[fips].short + ")" : "");
     if (view === "cities") return { cls: "district-shape region-plain", title: title };
     return { cls: "district-shape region-" + shade(n), title: title };
   }
@@ -230,12 +237,19 @@
     var rows = state.governments[fips] || [];
     var county = state.counties[fips];
     var n = counted(rows);
+    var why = noCounty[fips];
     el("localPanelTitle").textContent = county.name;
     el("localPanelBody").innerHTML =
-      '<p class="local-total">' + plural(n, "local government") + " in 2022</p>" +
-      '<label class="sr-only" for="localFilter">Filter this county\'s governments</label>' +
-      '<input type="search" id="localFilter" class="local-filter" placeholder="Filter by name, kind or city" autocomplete="off">' +
-      '<div id="localGroups">' + groups(rows, "", fips) + "</div>";
+      '<p class="local-total">' + (n ? plural(n, "local government") : "No local governments of its own") +
+      " in 2022</p>" +
+      (why ? '<p class="gov-officer-note local-why">' + KYC.escapeHtml(why.note) + "</p>" +
+        (why.filed ? countyButton(why.filed) : "") : "") +
+      (rows.length
+        ? '<label class="sr-only" for="localFilter">Filter this county\'s governments</label>' +
+          '<input type="search" id="localFilter" class="local-filter" placeholder="Filter by name, kind or city" autocomplete="off">' +
+          '<div id="localGroups">' + groups(rows, "", fips) + "</div>"
+        : "");
+    if (!rows.length) return;
     el("localFilter").addEventListener("input", function () {
       el("localGroups").innerHTML = groups(rows, el("localFilter").value, fips);
     });
@@ -311,9 +325,10 @@
         (townCount ? ", and every town or township that governs, as a ring" : "") +
         ". Pick one on the map, or from the list below, to see its government.</p>"
       : '<p class="local-total">' + total.toLocaleString("en-US") + " local governments in " +
-        Object.keys(state.counties).length + " counties (2022).</p>" +
-        '<p class="faint">Pick a county on the map, or from the list below, to see every ' +
-        "government in it.</p>";
+        Object.keys(state.counties).length + " " + areaWords.many + " (2022).</p>" +
+        (state.stateNote ? '<p class="gov-officer-note local-why">' + KYC.escapeHtml(state.stateNote) + "</p>" : "") +
+        '<p class="faint">Pick ' + (/^[aeiou]/.test(areaWords.one) ? "an " : "a ") + areaWords.one +
+        " on the map, or from the list below, to see every government in it.</p>";
     el("localPanelBody").innerHTML = lede + extra;
   }
 
@@ -325,9 +340,11 @@
     });
     return ids.map(function (fips) {
       var n = counted(state.governments[fips] || []);
+      var why = noCounty[fips];
       return '<button type="button" class="leg-row" data-region="' + KYC.escapeAttr(fips) + '">' +
         '<span class="leg-row-district">' + KYC.escapeHtml(state.counties[fips].name) + "</span>" +
-        '<span class="leg-row-people">' + plural(n, "local government") + "</span></button>";
+        '<span class="leg-row-people">' + (n || !why ? plural(n, "local government") : "None of its own") +
+        (why ? " \u00b7 " + KYC.escapeHtml(why.short) : "") + "</span></button>";
     }).join("");
   }
 
@@ -376,7 +393,7 @@
         el("cityRows").innerHTML = cityRows(el("cityFilter").value);
       });
     } else {
-      el("localRosterTitle").textContent = "Every county";
+      el("localRosterTitle").textContent = "Every " + areaWords.one;
       el("localRoster").innerHTML = countyRoster();
     }
   }

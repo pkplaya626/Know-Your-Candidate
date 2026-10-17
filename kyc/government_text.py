@@ -1314,7 +1314,16 @@ LOCAL = {
                 ("p", "There were 3,031 county governments in 2022. Louisiana calls its counties "
                       "parishes, and Alaska's organized boroughs are counted as counties. "
                       "Connecticut (since 1960), Rhode Island and the District of Columbia have "
-                      "no county governments, and seven of Massachusetts's counties have none."),
+                      "no county governments, and nine of Massachusetts's fourteen counties have "
+                      "none of their own: seven have no government at all, and Suffolk and "
+                      "Nantucket are governed together with Boston and the town of Nantucket."),
+                ("p", "Elsewhere, too, a county area can lack a county government. A city and "
+                      "county can be governed as one, as in San Francisco, Denver, Philadelphia "
+                      "and New York City, whose five boroughs are counties. Virginia's 38 "
+                      "independent cities, Baltimore, St. Louis and Carson City lie outside any "
+                      "county. Alaska's Unorganized Borough, the area outside its organized "
+                      "boroughs, has no borough government. Each state's county page says which of its county "
+                      "areas have no county government, and why."),
                 ("p", "Counties carry out state duties, such as running courthouses and jails, "
                       "recording deeds, conducting elections and assessing property, and provide "
                       "local services such as roads, public health and, outside cities, policing. "

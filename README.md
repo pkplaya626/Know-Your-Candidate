@@ -62,7 +62,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (1391 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (1402 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -289,7 +289,8 @@ The two directories:
   (`KYC.stategov`, from `data/stategov.js`).
 - `counties/index.html` counts every state's local governments by kind, as
   the Census of Governments does; a state with none of a kind reads "none",
-  never 0 (rule 49).
+  never 0 (rule 49). Where a state's county governments are fewer than its
+  counties, a numbered note under the table says why (rule 71).
 
 - `/` focuses the search box from anywhere on any page; Escape hands focus
   back.
@@ -1708,6 +1709,21 @@ never a name. The listing prints names in capitals; the page shows them in
 title case (acronyms such as ISD kept, McX and O'X handled) and keeps the
 published form in the data. Many addresses are in capitals too: the scheme
 and host are lowered, the path kept as published.
+
+Not every county area has a county government. Rhode Island's five
+counties are geographic areas the state uses for its courts; Connecticut
+abolished county government in 1960, and its map shows the nine planning
+regions the Census has used in its place since 2022; seven Massachusetts
+counties have no government; and a city and county can be one government
+(San Francisco, Denver, Philadelphia, New York City's five boroughs) or a
+city can lie outside any county (Virginia's 38 independent cities,
+Baltimore, St. Louis, Carson City). `kyc/county_areas.py` holds all 112, by
+Census code, from Appendix A of the Census Bureau's 2022 Individual State
+Descriptions. Each one's panel says what it is and what governs it, the
+list under the map marks it, the state's summary says it once, and the
+build fails on one the table does not explain. A state's page calls its
+areas what the state does: parishes, boroughs and census areas, planning
+regions.
 
 What the listing does not hold is who serves: it names the title of a
 contact official, not the person. No free, authoritative national source

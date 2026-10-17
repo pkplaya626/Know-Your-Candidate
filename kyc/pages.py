@@ -431,6 +431,7 @@ def render_counties_index(host, census=None):
     Governments counts them, each state linked to its counties page. A
     state with none of a kind (an "X" in the Census table) reads "none",
     with what that means, never 0 (rule 49)."""
+    from . import county_areas
     from .government import jump_options
     from .government_maps import STATES
 
@@ -438,13 +439,22 @@ def render_counties_index(host, census=None):
     canonical = f"https://{host}/{path}" if host else path
     counts = (census or {}).get("states") or {}
     kinds = _local_kinds()
+    # A state whose county areas are not all governed by a county says why,
+    # in a numbered note under the table: "none" for Rhode Island, and 5 for
+    # Massachusetts's fourteen counties, are otherwise a puzzle (rule 71).
+    notes = [(code, county_areas.directory_note(code)) for code in sorted(STATES, key=state_name)]
+    notes = [(code, text) for code, text in notes if text]
+    number = {code: i + 1 for i, (code, _text) in enumerate(notes)}
 
     def cell(code, kind, none):
         value = (counts.get(code) or {}).get(kind)
+        mark = (f'<sup><a class="note-ref" href="#county-note-{_e(code.lower())}" '
+                f'aria-label="Note {number[code]}">{number[code]}</a></sup>'
+                if kind == "county" and code in number else "")
         if value is None:
-            return (f'<td class="faint" title="{_e(none)}">none</td>' if code in counts
+            return (f'<td class="faint" title="{_e(none)}">none{mark}</td>' if code in counts
                     else "<td>&ndash;</td>")
-        return f"<td>{value:,}</td>"
+        return f"<td>{value:,}{mark}</td>"
 
     rows = "\n".join(
         f'                        <tr><th scope="row"><a href="{_e(code.lower())}.html">'
@@ -474,6 +484,14 @@ def render_counties_index(host, census=None):
         "                        </tbody>",
         "                    </table>",
         "                </div>",
+        '                <h2 class="state-heading" id="countyNotes">Where a county area has no county government</h2>',
+        '                <p class="faint">A state can have fewer county governments than counties. '
+        "These are the places the Census Bureau lists as county areas without one, and what governs "
+        "them instead.</p>",
+        '                <ol class="directory-notes">',
+        *[f'                    <li id="county-note-{_e(code.lower())}"><a href="{_e(code.lower())}.html">'
+          f"{_e(state_name(code))}</a>: {_e(text)}</li>" for code, text in notes],
+        "                </ol>",
         "            </div>",
     ])
     footer = "\n".join([
@@ -482,7 +500,9 @@ def render_counties_index(host, census=None):
         '                    local government by state and kind. "None" is a state with no',
         "                    government of that kind: one with no county governments has none, and",
         "                    one with no independent school districts runs its schools as dependent",
-        "                    systems of the state, a county or a city.</p>",
+        "                    systems of the state, a county or a city. County areas without a county",
+        "                    government, and what governs them: "
+        f'<a href="{_e(county_areas.SOURCES["isd"][1])}" rel="noopener">{_e(county_areas.SOURCES["isd"][0])}</a>.</p>',
         "                <p>Non-partisan and independent.</p>",
     ])
     return render_page(
@@ -887,6 +907,7 @@ def render_counties_page(code, host):
     """A state's counties and every local government in each. The page
     carries the state code only; ``assets/kyc-local.js`` draws it from
     ``data/local/<st>.js``."""
+    from . import county_areas
     from .government import jump_options
     from .government_maps import STATES
 
@@ -894,13 +915,18 @@ def render_counties_page(code, host):
     path = f"counties/{code.lower()}.html"
     canonical = f"https://{host}/{path}" if host else path
     title = f"{name}: counties and local governments"
+    # What the state's map areas are called: parishes, boroughs and census
+    # areas, planning regions (kyc/county_areas.py).
+    one, many, button = county_areas.words(code)
+    a_one = ("an " if one[0] in "aeiou" else "a ") + one
+    why = [county_areas.SOURCES["isd"]] + ([county_areas.SOURCES["ct-fr"]] if code == "CT" else [])
     main = "\n".join([
         '            <div id="localContent" class="state-page local-page">',
         '                <header class="state-hero">',
         '                    <p class="state-kicker">Counties &amp; local governments</p>',
         f'                    <h1 class="state-title">{_e(name)}</h1>',
-        '                    <p class="districts-lede">Every county, city and town, township, school '
-        'district and special district, as the Census Bureau counted them in 2022. Pick a county to '
+        f'                    <p class="districts-lede">Every {_e(one)}, city and town, township, school '
+        f'district and special district, as the Census Bureau counted them in 2022. Pick {_e(a_one)} to '
         'see every government in it, or switch to cities and towns to find one place and its '
         'government, with a link to its own site where the Census lists one.</p>',
         '                    <p class="state-links">',
@@ -911,11 +937,11 @@ def render_counties_page(code, host):
         "                    </p>",
         "                </header>",
         '                <div class="segmented" role="group" aria-label="Map view">',
-        '                    <button type="button" data-view="counties" aria-pressed="true">Counties</button>',
+        f'                    <button type="button" data-view="counties" aria-pressed="true">{_e(button)}</button>',
         '                    <button type="button" data-view="cities" aria-pressed="false">Cities &amp; towns</button>',
         "                </div>",
-        '                <div class="party-legend" id="countyLegend" aria-label="Local governments per county">',
-        '                    <span class="party-legend-title">Local governments in each county</span>',
+        f'                <div class="party-legend" id="countyLegend" aria-label="Local governments per {_e(one)}">',
+        f'                    <span class="party-legend-title">Local governments in each {_e(one)}</span>',
         '                    <span class="key"><span class="swatch region-fill-scale-1"></span>Fewer than 10</span>',
         '                    <span class="key"><span class="swatch region-fill-scale-2"></span>10&ndash;24</span>',
         '                    <span class="key"><span class="swatch region-fill-scale-3"></span>25&ndash;49</span>',
@@ -933,7 +959,7 @@ def render_counties_page(code, host):
         "                    </aside>",
         "                </div>",
         '                <section class="leg-roster-section" aria-labelledby="localRosterTitle">',
-        '                    <h2 class="state-heading" id="localRosterTitle">Every county</h2>',
+        f'                    <h2 class="state-heading" id="localRosterTitle">Every {_e(one)}</h2>',
         '                    <div id="localRoster" class="leg-roster"></div>',
         "                </section>",
         "            </div>",
@@ -947,6 +973,9 @@ def render_counties_page(code, host):
         "                    place boundaries, joined to its government by name only where the join is",
         "                    one to one. Names are shown in title case; the listing prints them in",
         "                    capitals.</p>",
+        "                <p><strong>Where there is no county government:</strong> "
+        + "; ".join(f'<a href="{_e(url)}" rel="noopener">{_e(label)}</a>' for label, url in why)
+        + ".</p>",
         "                <p>Non-partisan and independent.</p>",
     ])
     scripts = [s.replace("{code}", code.lower()) for s in (
@@ -954,7 +983,7 @@ def render_counties_page(code, host):
     return render_page(
         title=_e(f"{title} — Know Your Candidate"),
         og_title=_e(title),
-        description=_e(f"Every county in {name} and every local government in each: cities, "
+        description=_e(f"Every {one} in {name} and every local government in each: cities, "
                        f"townships, school districts and special districts, with links."),
         canonical=_e(canonical),
         host=_e(host or ""),
