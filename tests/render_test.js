@@ -4077,6 +4077,9 @@ async function testStateGov() {
           return row && !row.querySelector(".gov-officer-name");
         })());
       check("and is drawn unconfirmed, not in a party colour", !/party-/.test(shape(listed).style.fill));
+      check("and the legend has a key for that grey",
+        /Not confirmed by the office/.test(D.getElementById("mapLegend").textContent),
+        D.getElementById("mapLegend").textContent);
     }
     const hi = data.states.HI.lt;
     if (hi && hi.disputed) {

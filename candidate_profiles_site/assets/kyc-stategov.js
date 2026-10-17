@@ -202,7 +202,10 @@
       if (any(function (s) { return s[mode] && s[mode].disputed; })) {
         rows.push([FILL.disputed, "Sources disagree"]);
       }
-      if (any(function (s) { return s[mode] && (s[mode].unconfirmed || s[mode].unlisted); })) {
+      // NASS's listing of a non-member is drawn in the same grey (look()).
+      if (any(function (s) {
+        return s[mode] && (s[mode].unconfirmed || s[mode].unlisted || s[mode].notMember);
+      })) {
         rows.push([FILL.vacant, "Not confirmed by the office"]);
       }
     } else if (mode !== "governor" && any(function (s) { return s.legislature === "disputed"; })) {
