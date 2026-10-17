@@ -2166,3 +2166,13 @@ the sidebar counts moved into the build metadata.
   Wikipedia page lists them, and for no House race.
   Kalshi's site turns away automated requests, so its links - to each
   market's series page - were not checked by a script.
+
+## Licence
+
+The code is under the MIT licence (`LICENSE`). The data this project
+compiles - the roster CSVs, the caches and generated files under
+`candidate_profiles_site/data/`, and the guide's prose - is under CC BY 4.0
+(`LICENSE-DATA.md`), credited as "Know Your Candidate
+(https://github.com/pkplaya626/Know-Your-Candidate), CC BY 4.0".
+Photographs and other sources' material keep their own terms;
+`LICENSE-DATA.md` lists them.
