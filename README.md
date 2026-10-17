@@ -263,7 +263,7 @@ else (`emit.check_nav`).
 | Elections 2026 (the cycle's year, `cycle.CYCLE`) | Candidates (the grid), Races & partisan map |
 | Federal | Congress (the grid's sitting members), President & Cabinet, Federal courts |
 | State | States & territories, State legislatures (`legislature/index.html`) |
-| Local | Counties & cities (`counties/index.html`) |
+| Local | Counties & local governments (`counties/index.html`) |
 | Learn | Know Your Government (the guide) |
 
 A page that *is* an entry's link is marked `aria-current="page"`; one that

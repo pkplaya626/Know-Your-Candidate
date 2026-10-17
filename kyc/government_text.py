@@ -537,7 +537,8 @@ INDEX = {
 
 CONGRESS = {
     "slug": "congress",
-    "nav": "Congress",
+    # Not "Congress": the site's navigation has that entry, for its members.
+    "nav": "How Congress works",
     "people": True,
     "title": "How Congress works",
     "description": ("What Congress does, how the Senate and the House differ, who runs each "
@@ -926,7 +927,9 @@ EXECUTIVE = {
 
 COURTS = {
     "slug": "courts",
-    "nav": "Federal courts",
+    # Not "Federal courts": the site's own navigation has that entry, for
+    # who sits on them (federal/index.html), in the same sidebar.
+    "nav": "How the federal courts work",
     "title": "The federal courts",
     "description": ("The Supreme Court, the 13 courts of appeals and 94 district courts, the "
                     "courts Congress has created outside Article III, and how federal judges "

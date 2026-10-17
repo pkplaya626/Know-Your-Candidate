@@ -435,7 +435,9 @@ def _map_main(page, modes):
         lines.append(f'{pad}    <p class="guide-sources"><span>Sources:</span> {"; ".join(links)}</p>')
         lines.append(f"{pad}</section>")
     lines.append(f'{pad}<div class="guide-more">')
-    lines.append(f'{pad}    <h3 class="guide-more-title">More about {html.escape(page["nav"].lower(), quote=False)}</h3>')
+    # Only the first letter is lowered: "How Congress works" keeps its capital.
+    about = page["nav"][:1].lower() + page["nav"][1:]
+    lines.append(f'{pad}    <h3 class="guide-more-title">More about {html.escape(about, quote=False)}</h3>')
     for section in page["sections"]:
         lines.extend(_section_lines(section, here, pad + "    ", collapsed=True))
     lines.append(f"{pad}</div>")

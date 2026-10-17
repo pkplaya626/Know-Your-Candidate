@@ -1778,8 +1778,11 @@ async function testNavigation() {
         .getAttribute("href")).textContent), maRow && maRow.children[1].textContent);
     check("a state whose every county area has a county government has no note",
       !rows.find((r) => /^Texas/.test(r.textContent)).children[1].querySelector("a.note-ref"));
-    check("the sidebar marks Counties & cities",
-      D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav") === "local");
+    const marked = D.querySelector('.site-nav [aria-current="page"]');
+    check("the sidebar marks Counties & local governments, the page's own name",
+      marked.getAttribute("data-nav") === "local" &&
+      marked.textContent.trim() === "Counties & local governments" && /^Counties & local governments/.test(D.title),
+      marked.textContent.trim() + " / " + D.title);
     check("its state picker lists every state", D.getElementById("stateJump").options.length > 50);
     check("and, listing only the states, is labelled so",
       D.querySelector('label[for="stateJump"]').textContent === "Jump to a state");
@@ -3411,6 +3414,15 @@ async function testGuide() {
         fs.readFileSync(path.join(SITE, page), "utf8")));
       check("one h1, the page's title", D.querySelectorAll("h1").length === 1 &&
         D.title.indexOf(D.querySelector("h1").textContent.trim()) === 0, D.title);
+      // "Federal courts" was both the site's link to who sits on them and
+      // the guide's link to how they work, in one sidebar.
+      const byText = {};
+      [...D.querySelectorAll(".sidebar a.nav-link")].forEach((a) => {
+        const t = a.textContent.trim();
+        (byText[t] = byText[t] || new Set()).add(a.getAttribute("href").replace(/#.*$/, ""));
+      });
+      const twice = Object.keys(byText).filter((t) => byText[t].size > 1);
+      check("no two sidebar links share a name and go to different pages", twice.length === 0, twice.join(", "));
       check("every section has a heading and its sources",
         [...D.querySelectorAll(".guide-section")].every((s) =>
           s.querySelector("h2.guide-heading") && s.querySelector(".guide-sources a[href^='https://']")));

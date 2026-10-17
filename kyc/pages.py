@@ -154,7 +154,7 @@ def nav_groups():
             ("legislatures", "legislature/index.html", "columns", "State legislatures"),
         )),
         ("Local", (
-            ("local", "counties/index.html", "layers", "Counties & cities"),
+            ("local", "counties/index.html", "layers", "Counties & local governments"),
         )),
         ("Learn", (
             ("guide", "government/index.html", "scroll", "Know Your Government"),
