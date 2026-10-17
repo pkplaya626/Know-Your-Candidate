@@ -369,8 +369,9 @@
   }
 
   /** One statewide officer's row: the holder, or why there is none. */
-  function officerRow(kind, off, mark, item) {
+  function officerRow(kind, off, mark, item, place) {
     var label = OFFICES[kind].title;
+    place = place || "The state";
     if (!off) return "";
     // An office the roster lists as missing that is elected on Nov 3 is a
     // new one (Arizona's lieutenant governor, Proposition 131 of 2022).
@@ -403,11 +404,11 @@
         (off.successor ? " First in line to succeed the governor until then: " +
           KYC.escapeHtml(off.successor.title) + " " + who(off.successor) + "." : "") + "</p>";
     } else if (off.none && kind === "lt") {
-      body = '<p class="gov-officer-note">The state has no lieutenant governor.' +
+      body = '<p class="gov-officer-note">' + place + " has no lieutenant governor." +
         (off.successor ? " First in line to succeed the governor: " +
           KYC.escapeHtml(off.successor.title) + " " + who(off.successor) + "." : "") + "</p>";
     } else if (off.none) {
-      body = '<p class="gov-officer-note">The state has no secretary of state' +
+      body = '<p class="gov-officer-note">' + place + " has no secretary of state" +
         (off.electionChief ? "; the lieutenant governor's office runs its elections." : ".") + "</p>";
     } else if (off.notMember) {
       body = '<p class="gov-officer-note">The National Association of Secretaries of State lists ' +
@@ -495,11 +496,20 @@
       link(gov.profile, "NGA biography") + "</p>" +
       (contact ? '<p class="faint gov-contact">' + contact + "</p>" : "") +
       "</div></div>";
+    var place = s.territory ? "The territory" : "The state";
     if (s.lt || s.ag || s.sos) {
-      html += '<p class="panel-subhead">Statewide officers</p><ul class="gov-officers">' +
-        officerRow("lt", s.lt, officeMark(code, "lt"), ballotItem(code, "lt")) +
-        officerRow("ag", s.ag, officeMark(code, "ag"), ballotItem(code, "ag")) +
-        officerRow("sos", s.sos, officeMark(code, "sos"), ballotItem(code, "sos")) + "</ul>";
+      html += '<p class="panel-subhead">' + (s.territory ? "Territorial" : "Statewide") +
+        ' officers</p><ul class="gov-officers">' +
+        officerRow("lt", s.lt, officeMark(code, "lt"), ballotItem(code, "lt"), place) +
+        officerRow("ag", s.ag, officeMark(code, "ag"), ballotItem(code, "ag"), place) +
+        officerRow("sos", s.sos, officeMark(code, "sos"), ballotItem(code, "sos"), place) + "</ul>";
+    }
+    if (s.territory) {
+      // Said, not left out without a word: a territory's legislature, its
+      // attorney general and its courts are in none of the sources read here.
+      html += '<p class="gov-note">' + KYC.escapeHtml(KYC.stateName(code)) + "'s legislature, " +
+        "attorney general and courts are not covered here: this site lists the governor and the " +
+        "officers the national associations of lieutenant governors and secretaries of state list.</p>";
     }
     if (s.upper) {
       html += '<p class="panel-subhead">Legislature</p><ul class="gov-chambers">' +
@@ -528,9 +538,9 @@
       (s.sos ? "Secretary of state: " + source("nass") + ". " : "") +
       (ballot(code) ? "What is on the Nov 3 ballot: each state's constitution, statutes and " +
         "election office, linked from each mark (checked " +
-        KYC.escapeHtml((data.sources.ballot2026 || [])[2] || "") + "). " : "") + "Seats: " +
-      (s.upper ? source("openstates") + (ncsl ? ", checked against " + source("ncsl") : "") :
-        "not covered") + ".</p>";
+        KYC.escapeHtml((data.sources.ballot2026 || [])[2] || "") + "). " : "") +
+      (s.upper ? "Seats: " + source("openstates") + (ncsl ? ", checked against " + source("ncsl") : "") +
+        "." : "") + "</p>";
     return html;
   }
 

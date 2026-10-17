@@ -111,6 +111,12 @@
     }).join('<span class="sep">/</span>');
   }
 
+  /* The government section's name, for its heading and its jump chip
+   * alike: D.C.'s is a local government, a territory's territorial. */
+  function govHeading(info) {
+    return code === "DC" ? "Local government" : info.territory ? "Territorial government" : "State government";
+  }
+
   function renderState() {
     var target = el("stateContent");
     var info = (KYC.meta().states || {})[code];
@@ -169,7 +175,7 @@
     var parts = [
       senators.length ? ["senators", "U.S. senators"] : null,
       house.length ? ["delegation", info.territory ? "Delegate" : "House delegation"] : null,
-      KYC.stategov && (KYC.stategov.state(code) || code === "DC") ? ["state-government", "State government"] : null,
+      KYC.stategov && (KYC.stategov.state(code) || code === "DC") ? ["state-government", govHeading(info)] : null,
       senateRaces.length + houseRaces.length ? ["races", "2026 races"] : null,
     ].filter(Boolean);
     if (parts.length > 1) {
@@ -208,8 +214,7 @@
     if (KYC.stategov && (KYC.stategov.state(code) || code === "DC")) {
       html.push(
         '<section class="state-section" id="state-government">',
-        '<h2 class="state-heading">' + (code === "DC" ? "Local government" :
-          info.territory ? "Territorial government" : "State government") + "</h2>",
+        '<h2 class="state-heading">' + govHeading(info) + "</h2>",
         '<div class="stategov">' + KYC.stategov.render(code, { links: false }) + "</div>",
         "</section>"
       );
@@ -254,6 +259,15 @@
     var list = KYC.stategov ? KYC.stategov.ballotList(code) : null;
     var rest = "special elections for vacant seats, other statewide, judicial and local " +
       "contests, and ballot measures, which this site does not list";
+    if (code === "DC") {
+      // D.C. has no governor or legislature; its own offices, as the D.C.
+      // Board of Elections lists them for 2026 (candidate list, July 2026).
+      return "Your ballot may also hold the District's own contests, such as for mayor, attorney " +
+        "general, the D.C. Council, the State Board of Education and Advisory Neighborhood " +
+        "Commissions, which this site does not list (" +
+        '<a href="https://www.dcboe.org/elections/2026-elections" target="_blank" ' +
+        'rel="noopener noreferrer">D.C. Board of Elections</a>).';
+    }
     if (list === null) {
       return territory
         ? "Your ballot may also hold territorial and local contests, such as for governor " +

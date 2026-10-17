@@ -4208,6 +4208,20 @@ async function testStateGov() {
     const section = pr.D.getElementById("state-government");
     check("headed as the territory's government, not local government",
       !!section && /Territorial government/.test(section.querySelector(".state-heading").textContent));
+    const chips = [...pr.D.querySelectorAll(".state-parts a")].map((a) => a.textContent);
+    check("its jump chip says what its heading says", chips.indexOf("Territorial government") !== -1 &&
+      chips.indexOf("State government") === -1, chips.join(" | "));
+    const text = section.textContent;
+    check("a territory is never called 'the state'",
+      /The territory has no lieutenant governor/.test(text) && !/The state has/.test(text), text.slice(0, 300));
+    check("it says its legislature, attorney general and courts are not covered, not just 'not covered'",
+      /Puerto Rico's legislature, attorney general and courts are not covered here/.test(text) &&
+      !/Seats: not covered/.test(text));
+  });
+  const guTerr = await buildPage("states/gu.html");
+  suite("states/gu.html — a territory with no secretary of state", () => {
+    const text = guTerr.D.getElementById("state-government").textContent;
+    check("says the territory has none", /The territory has no secretary of state/.test(text), text.slice(0, 300));
   });
 
   const tx = await buildPage("states/tx.html");
@@ -4238,6 +4252,15 @@ async function testStateGov() {
   suite("states/dc.html — D.C. has no governor", () => {
     const section = dc.D.getElementById("state-government");
     check("the page says so rather than showing nothing", !!section && /mayor/.test(section.textContent));
+    const note = dc.D.querySelector("#races .state-note");
+    check("its ballot is never said to hold a governor or legislature",
+      !!note && !/governor|legislature/.test(note.textContent) &&
+      /mayor, attorney general, the D\.C\. Council/.test(note.textContent) &&
+      !!note.querySelector('a[href="https://www.dcboe.org/elections/2026-elections"][rel~="noopener"]'),
+      note && note.textContent);
+    const chips = [...dc.D.querySelectorAll(".state-parts a")].map((a) => a.textContent);
+    check("its jump chip says Local government, as its heading does",
+      chips.indexOf("Local government") !== -1 && chips.indexOf("State government") === -1, chips.join(" | "));
   });
 }
 

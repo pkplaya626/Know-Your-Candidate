@@ -250,6 +250,10 @@ def build(root="."):
     states = {}
     for code in sorted(governors):
         entry = {"governor": _governor(dict(governors[code], state=code), problems)}
+        if code not in STATES:
+            # A territory: the page calls it one, and says its legislature
+            # and courts are not covered rather than leaving them out silently.
+            entry["territory"] = True
         entry.update(officers.for_state(code, officer_cache, disputes))
         entry.update(courts.for_state(code, court_cache))
         if code in ballot2026.STATES:
