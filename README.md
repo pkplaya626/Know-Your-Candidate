@@ -1586,7 +1586,10 @@ President's term began (`kyc/cabinet.py`), into `changes` in
   build warns `acting-overlaps-successor`.
 
 The hub lists every change newest first: confirmed, left, acting. Each
-card says since when and whom its officer followed, and the dialog lists
+card says since when and whom its officer followed - for an officer who
+served as acting before being confirmed, "Acting from" the date their
+article gives and "then confirmed" on the vote's date, never "Since" the
+acting start - and the dialog lists
 the office's holders this term. An acting officer Wikidata does not record
 is not listed, and the page says so. A failed read keeps the last history
 (rule 8).

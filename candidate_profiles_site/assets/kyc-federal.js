@@ -236,16 +236,24 @@
     var now = rows.filter(function (r) { return r.current; })[0];
     var before = now ? rows.slice(0, rows.indexOf(now)) : [];
     var start = now && now.start && now.start.shown ? KYC.official.whenText(now.start.shown) : "";
+    // Acting before being confirmed: "Since" an acting start, beside a
+    // later confirmation vote, read as confirmed service months before
+    // the vote. Both are said, the acting start credited to the article
+    // that alone gives it (as the changes list does).
+    var acting = now && now.actingNote && now.actingStart
+      ? "Acting from " + esc(KYC.official.whenText(now.actingStart)) +
+        " (their Wikipedia article)" +
+        (now.confirmed ? ", then confirmed " + esc(now.confirmed.date) : "") : "";
     var prev = before[before.length - 1];
-    if (!start && !prev) return "";
+    if (!start && !prev && !acting) return "";
     // "After" only when the dates show one handing over to the other on the
     // same day: an acting officer the record lacks may have served between.
     var handover = prev && prev.end && prev.end.shown && now.start && now.start.shown &&
       prev.end.shown.precision === "day" && now.start.shown.precision === "day" &&
       prev.end.shown.date === now.start.shown.date;
     return '<p class="fed-fact"><span class="fed-fact-label">In office</span> ' +
-      (start ? "Since " + esc(start) : "") +
-      (prev ? (start ? "; " : "") + (handover ? "after " : "previously this term: ") +
+      (acting || (start ? "Since " + esc(start) : "")) +
+      (prev ? (acting || start ? "; " : "") + (handover ? "after " : "previously this term: ") +
         esc(prev.name) + (prev.acting ? " (acting)" : "") : "") +
       "</p>";
   }

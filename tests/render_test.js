@@ -4866,6 +4866,17 @@ async function testFederal() {
       check("acting service before a confirmation is in the timeline", actingNotes.every((r) =>
         [...changes.querySelectorAll("tbody tr")].some((tr) =>
           tr.textContent.indexOf(r.name + " became acting") !== -1)), actingNotes.map((r) => r.name).join(", "));
+      // Labor: "Since 2026-04-20", an acting start, beside a September vote.
+      const actingNow = withHistory.filter((o) => o.history.some((r) => r.current && r.actingNote && r.actingStart));
+      check("a card whose officer was acting before confirmation says both, never 'Since' the acting start",
+        actingNow.every((o) => {
+          const row = o.history.find((r) => r.current);
+          const card = [...D.querySelectorAll("#cabinet .fed-officer")]
+            .find((c) => c.querySelector(".fed-office").textContent === o.office);
+          const text = card ? card.textContent : "";
+          return /Acting from /.test(text) && /their Wikipedia article/.test(text) &&
+            !/In office Since/.test(text) && (!row.confirmed || text.indexOf("then confirmed " + row.confirmed.date) !== -1);
+        }), actingNow.map((o) => o.office).join(", "));
       const cards = [...D.querySelectorAll("#cabinet .fed-officer")];
       check("'after' only where the hand-over is shown", withHistory.every((o) => {
         const i = o.history.findIndex((r) => r.current);
