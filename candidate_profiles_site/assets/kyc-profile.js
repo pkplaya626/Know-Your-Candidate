@@ -413,7 +413,8 @@
     };
     var html = shown.map(row).join("");
     if (shown.length > 1) {
-      html += '<p class="race-note race-order">' + KYC.escapeHtml(KYC.RACE_ORDER) + "</p>";
+      html += '<p class="race-note race-order">' + KYC.escapeHtml(KYC.raceOrderNote(shown, race)) +
+        "</p>";
     }
     if (out.length) {
       html += '<details class="race-out"><summary>' + out.length +
@@ -600,8 +601,12 @@
     var missing = quality.receipts === "no_filing";
     var tiles = { receipts: "profileModalReceipts", disbursements: "profileModalSpent",
                   funding_sources: "profileModalFunding" };
+    /* The funding box under them said "No data" - a claim that this site
+     * did not look (rule 19) - while the tiles beside it said the FEC had
+     * been checked: its quality is "unknown" when the money is not there. */
     FINANCE_FIELDS.forEach(function (field) {
-      if (quality[field] !== "no_filing") return;
+      if (quality[field] !== "no_filing" &&
+          !(field === "funding_sources" && missing && quality[field] !== "ok")) return;
       el(tiles[field]).innerHTML = '<span class="kyc-absent" title="' + KYC.escapeAttr(
         "Checked with the FEC: no filing for the " + chamber + " seat this member holds in this " +
         "cycle. Their campaign for " + filing.officeLabel + " files separately; its totals are " +
@@ -640,13 +645,13 @@
       if (item.contestLabel && !item.isCandidate) {
         var line = KYC.contestLine(item);
         link.hidden = false;
-        link.innerHTML = KYC.icon("branch") + " " + (line.renumbered
+        link.innerHTML = KYC.icon("branch") + ' <span class="cross-link-text">' + (line.renumbered
           ? (line.past ? "Ran" : "Running") + " for re-election in <strong>" +
             KYC.escapeHtml(item.contestLabel) +
             "</strong> under the new district map"
           : (line.past ? "Ran in 2026 for <strong>" : "Running in 2026 for <strong>") +
             KYC.escapeHtml(item.contestLabel) + "</strong> instead of " +
-            KYC.escapeHtml(item.officeLabel));
+            KYC.escapeHtml(item.officeLabel)) + "</span>";
         return;
       }
       link.hidden = true;
@@ -659,17 +664,18 @@
     var member = item.incumbentId ? KYC.byId(item.incumbentId) : null;
     var left = member && member.formerMember ? member.formerMember.left : null;
     // "Also running Senate • SC" beside Russell Fry's renomination, after
-    // he lost the Senate primary: a run that ended is "Also ran for".
+    // he lost the Senate primary: a run that ended is "Also ran for", a
+    // November loss included, as KYC.contestLine says it on the card.
     var other = item.alsoRunningId ? KYC.byId(item.alsoRunningId) : null;
-    var ended = other && KYC.offBallot(other.raceStatus);
+    var ended = !!other && (KYC.offBallot(other.raceStatus) || other.raceStatus === "defeated");
     var how = ended ? KYC.raceStatus(other.raceStatus, "mate") : null;
     link.innerHTML =
-      KYC.icon("branch") + " " +
+      KYC.icon("branch") + ' <span class="cross-link-text">' +
       (item.alsoRunningId ? (ended ? "Also ran for" : "Also running for")
         : left ? "Held until " + left : "Currently holds") +
       ' <button type="button" data-goto="' + KYC.escapeAttr(id) + '">' +
       KYC.escapeHtml(seat) + "</button>" +
-      (how ? " (" + KYC.escapeHtml(how.label.toLowerCase()) + ")" : "");
+      (how ? " (" + KYC.escapeHtml(how.label.toLowerCase()) + ")" : "") + "</span>";
   }
 
   function renderStatus(item) {
@@ -715,16 +721,19 @@
     // Where a member who is leaving is going, when a results page has made
     // them another office's nominee: that says more than "Retiring to run
     // for governor", which it replaces.
-    if (item.otherOffice && !item.isCandidate) {
+    if (KYC.otherOffice(item)) {
       pieces.push(KYC.otherOfficeBadge(item) + ' <a class="field-credit" href="' +
         KYC.escapeAttr(item.otherOffice.source) + '" target="_blank" rel="noopener noreferrer">' +
         "Source</a>");
       text = "";
     }
     // "Not running for re-election" said twice, once by the results and
-    // once by the roster's note, is said once.
-    if (race && /^incumbent not running for re-election/i.test(text) &&
-        /not running/i.test(race.label)) {
+    // once by the roster's note, is said once - and only when the note says
+    // nothing more: Eleanor Norton's "Not running for re-election in 2026
+    // (announced January 2026)." repeated her badge, while Cleo Fields's
+    // goes on to say where he is running.
+    var restated = /^(incumbent )?not running for re-election( in \d{4})?( \(announced [^)]*\))?\.?$/i;
+    if (race && /^not running/i.test(race.label) && restated.test(text)) {
       text = "";
     }
     if (text && text !== "Active Member" && text !== "N/A" &&
@@ -881,7 +890,9 @@
     renderVoting(sitting || item);
     renderCommittees(sitting || item);
     if (sitting) {
-      var from = '<p class="field-credit">From ' + KYC.escapeHtml(sitting.name) +
+      // In the filing's own name: "From Garland Barr's record" on Andy
+      // Barr's Senate filing read as someone else's (the roster's name).
+      var from = '<p class="field-credit">From ' + KYC.escapeHtml(item.name) +
         "’s record as the member for " + '<button type="button" class="link-button" data-goto="' +
         KYC.escapeAttr(sitting.id) + '">' + KYC.escapeHtml(sitting.officeLabel) + "</button></p>";
       el("profileModalVoting").insertAdjacentHTML("beforeend", from);

@@ -147,7 +147,7 @@ python tools/fetch_legislative_maps.py        # state senate and house boundarie
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
 python -m unittest discover tests             # 1226 tests, no dependencies
-npm install && npm test                       # 1535 real-DOM checks (needs jsdom)
+npm install && npm test                       # 1558 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -723,8 +723,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     biography, platform or committees. Biography comes from the
     ballot-linked article (rule 38), net worth from nowhere (rule 26), and
     a label speaks only of what its status knows. A member with no
-    primary line for their seat is "Not running for this seat", never "Not
-    on the ballot": Byron Donalds is on Florida's, for governor.
+    primary line for their seat is "Not running for re-election", never
+    "Not on the ballot": Byron Donalds is on Florida's, for governor. It is
+    the same words whether the results list a retiring member as withdrawn
+    or not at all - the two read differently side by side in the Senate
+    view - and only the hover, which cites its source, differs; an
+    appointee, never elected to the seat, is "Not running in 2026".
 
 62. **A refused name match is not an absence, and an unsettled person is
     never counted on the ballot.** The results page writes people as they
@@ -766,7 +770,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     reads a person through `KYC.standing` (the table, plus an unsettled
     filer) and a member's other run through `KYC.contestLine`; a race's
     people come in one order, the pipeline's (`races.order_people`: the
-    holder, then by surname), said under the race. The render suite builds pages on a frozen
+    holder, then by surname), said under the race - the holder clause only
+    when the list shown opens with one (`KYC.raceOrderNote`): under the
+    Senate view's "Running for this seat" it named Barry Moore as
+    Alabama's holder. A curated "another office's nominee"
+    (`overrides.OTHER_OFFICE_NOMINEES`) is in the past tense from the day
+    after Election Day (`KYC.otherOffice`), since this site does not read
+    that race's result. The render suite builds pages on a frozen
     campaign-season clock (`CAMPAIGN_NOW`) and reads the data back as it
     stood then (`rewindToCampaign`), or every check that looks for a
     nominee would fail on the first called race and hold each refresh. And

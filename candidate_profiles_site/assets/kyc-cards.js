@@ -327,7 +327,7 @@
     var running = people.filter(function (p) { return !offBallot(p); });
     var out = people.filter(offBallot);
     var body = '<div class="card-grid">' + running.map(card).join("") + "</div>" +
-      unprofiledNote(race) + orderNote(people);
+      unprofiledNote(race) + orderNote(running.length ? running : people, race, people.length);
     if (out.length) {
       body +=
         '<details class="race-out"><summary>' + out.length +
@@ -355,10 +355,13 @@
 
   /* How the people of a race are listed, under them, where there are two
    * or more to order (TRUST-15). The order is the pipeline's
-   * (races.order_people). */
-  function orderNote(people, cls) {
-    return people.length > 1
-      ? '<p class="race-order' + (cls ? " " + cls : "") + '">' + KYC.escapeHtml(KYC.RACE_ORDER) + "</p>"
+   * (races.order_people); the sentence names the holder only when *people*
+   * opens with one (KYC.raceOrderNote). *count*, when given, is how many
+   * the whole list holds. */
+  function orderNote(people, race, count) {
+    var n = count === undefined ? people.length : count;
+    return n > 1
+      ? '<p class="race-order">' + KYC.escapeHtml(KYC.raceOrderNote(people, race)) + "</p>"
       : "";
   }
 

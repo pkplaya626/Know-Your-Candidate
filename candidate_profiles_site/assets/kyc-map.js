@@ -313,8 +313,9 @@
     var race = KYC.standing(item, "short");
     // A member leaving for another office's ballot: the row is narrow, so
     // where they are going is in its hover, as the card names it.
-    if (race && item.otherOffice) {
-      race = { cls: race.cls, label: race.label, title: race.title + " " + item.otherOffice.text + "." };
+    var going = KYC.otherOffice(item);
+    if (race && going) {
+      race = { cls: race.cls, label: race.label, title: race.title + " " + going.text + "." };
     }
     if (race) return badge(race, item);
     if (item.isCandidate) return '<span class="badge badge-money">Challenger</span>';

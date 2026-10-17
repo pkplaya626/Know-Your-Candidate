@@ -204,7 +204,7 @@
                "Running for this seat (" + (running.length +
                  (race ? KYC.cards.unprofiledNames(race).none.length +
                    KYC.cards.unprofiledNames(race).maybe.length : 0)) + ")</p>" +
-               cards(running) + unlisted + KYC.cards.orderNote(running) + "</div>");
+               cards(running) + unlisted + KYC.cards.orderNote(running, race) + "</div>");
     }
     if (row.length) html.push('<div class="senate-seat-row">', row.join(""), "</div>");
     // The markets after the people still running, before those who left

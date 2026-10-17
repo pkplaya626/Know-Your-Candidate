@@ -1586,6 +1586,10 @@ select optgroup {
   gap: var(--s-2);
 }
 .modal-meta strong { color: var(--text); font-weight: 600; }
+/* The cross-link's sentence is one flex item, so it wraps as a sentence:
+ * as separate items its text runs stood side by side in three narrow
+ * columns on a phone. */
+.modal-meta .cross-link-text { display: block; min-width: 0; }
 .modal-meta button {
   border: 0;
   background: none;

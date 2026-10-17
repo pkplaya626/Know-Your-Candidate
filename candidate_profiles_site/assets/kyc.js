@@ -299,6 +299,21 @@
    * the race, behind a toggle. Someone who lost in November was on the
    * ballot, and stays in view beside the person who beat them. */
   var SOURCE = " Source: the state's Wikipedia election results page.";
+  /* A sitting member leaving the seat they hold, in the same words whether
+   * the results list them as withdrawn or do not list them: only the title,
+   * which cites its source, differs. */
+  function MEMBER_LEAVING(spec) {
+    return { cls: "badge-danger", card: "Not running for re-election",
+      long: "Not running for re-election in 2026", mate: "Not running for re-election",
+      short: "Leaving seat", title: spec.title };
+  }
+  /* An appointee was never elected to the seat, so is not "re-elected" or
+   * "not running for re-election": Alan Armstrong took Oklahoma's on an
+   * oath not to seek it. */
+  var APPOINTEE_LEAVING = { cls: "badge-danger", card: "Not running in 2026",
+    long: "Not running in 2026", mate: "Not running in 2026", short: "Leaving seat",
+    title: "Appointed to the seat; not named in the primary results or on the November " +
+      "ballot for it, so not seeking election to it." };
   var RACE_STATUS = {
     nominee: { cls: "badge-money", rank: 0,
       card: "On the November ballot", long: "On the November ballot", mate: "On the ballot",
@@ -345,22 +360,23 @@
     withdrawn: { cls: "badge-neutral", rank: 5, off: true,
       card: "Withdrew", long: "Withdrew from the 2026 race", mate: "Withdrew", short: "Withdrew",
       title: "Withdrew from the race, per the published results.",
-      member: { cls: "badge-danger", card: "Not running for re-election",
-        long: "Not running for re-election in 2026", mate: "Not running for re-election",
-        short: "Leaving seat",
+      member: MEMBER_LEAVING({
         title: "Not seeking re-election to this seat: the published results list them as " +
-          "withdrawn from its race." } },
+          "withdrawn from its race." }) },
     unlisted: { cls: "badge-neutral", rank: 6, off: true,
       card: "Not on primary ballot", long: "Not on the 2026 primary ballot", mate: "Not on ballot",
       short: "Not on ballot",
       title: "Filed with the FEC but was not listed in the primary results.",
       // About this seat only. "Not on the ballot" was false for a member on
       // another office's ballot: Byron Donalds, Florida's Republican nominee
-      // for governor, read it on the Florida page.
-      member: { cls: "badge-danger", card: "Not running for this seat",
-        long: "Not running for this seat in 2026", short: "Leaving seat",
+      // for governor, read it on the Florida page. The same words as a
+      // member who withdrew: which way the results page happened to list a
+      // retirement split the Senate view's retiring senators between "Not
+      // running for re-election" and "Not running for this seat", and the
+      // race-mate lists between that and "Not on ballot" (RACES-10).
+      member: MEMBER_LEAVING({
         title: "Not named in the primary results or on the November ballot for this seat; " +
-          "not seeking re-election to it." } },
+          "not seeking re-election to it." }) },
   };
 
   /* Not named on the results page, which does name someone like them who
@@ -398,25 +414,23 @@
       mate: "Not on ballot", short: "Not on ballot",
       title: "Filed with the FEC but not on the Secretary of State's list of candidates " +
         "qualified for the November 3 open primary.",
-      member: { cls: "badge-danger", card: "Not running for this seat",
-        long: "Not running for this seat in 2026", short: "Leaving seat",
+      member: MEMBER_LEAVING({
         title: "Not on the Secretary of State's list of candidates qualified for this seat; " +
-          "not seeking re-election to it." } },
+          "not seeking re-election to it." }) },
     withdrawn: { cls: "badge-neutral", rank: 5, off: true,
       card: "Withdrew", long: "Withdrew from the 2026 race", mate: "Withdrew", short: "Withdrew",
       title: "Withdrew, per the Secretary of State's list of qualified candidates.",
-      member: { cls: "badge-danger", card: "Not running for re-election",
-        long: "Not running for re-election in 2026", mate: "Not running for re-election",
-        short: "Leaving seat",
+      member: MEMBER_LEAVING({
         title: "Not seeking re-election to this seat: the Secretary of State's list of " +
-          "qualified candidates shows them as withdrawn." } },
+          "qualified candidates shows them as withdrawn." }) },
   };
   var OFF_BALLOT = { eliminated: true, withdrawn: true, unlisted: true };
 
   /** How to show *status* in *form* ("card", "long", "mate" or "short"):
    *  `{cls, label, title, rank, off}`, or null for no status. Options:
    *  `own` - a sitting member, about the seat they hold; `unconfirmed` - the
-   *  record's raceStatusUnconfirmed; `now` - the clock, for tests. */
+   *  record's raceStatusUnconfirmed; `appointed` - an appointee, who is
+   *  never "not running for re-election"; `now` - the clock, for tests. */
   /* Through to November from an all-party primary - California's and
    * Washington's top two, Alaska's top four: nobody won a party's
    * nomination, and two of one party can both go through. The pipeline
@@ -441,6 +455,7 @@
     if (listed && LISTED[status]) spec = LISTED[status];
     if (status === "unlisted" && opts.unconfirmed) spec = UNCONFIRMED;
     var own = (opts.own && spec.member) || {};
+    if (opts.own && opts.appointed && spec.member && spec.off) own = APPOINTEE_LEAVING;
     var title = own.title || spec.title;
     var source = spec.source || (listed ? LISTED_SOURCE : SOURCE);
     // An independent or a minor party's nominee reaches the ballot by
@@ -471,7 +486,7 @@
    *  race is for the seat they hold. A member seated since Election Day in
    *  a seat they did not hold (`raceRole`) was elected, not re-elected; an
    *  appointee who held the seat was never elected or nominated to it, so
-   *  wins and losses read as anyone's - only "not running for this seat" is
+   *  wins and losses read as anyone's - only "not running in 2026" is
    *  theirs. */
   function raceStatusOf(item, form, opts) {
     if (!item) return null;
@@ -485,6 +500,7 @@
       own: !item.isCandidate && !item.contestLabel && !item.raceRole &&
         !(item.appointed && status !== "unlisted"),
       unconfirmed: !!item.raceStatusUnconfirmed,
+      appointed: !!item.appointed,
       source: record.raceStatusSource,
       allParty: record.allPartyPrimary,
       minor: partyKey(item) === "i",
@@ -509,14 +525,33 @@
           "this person under another spelling. Not confirmed here, so the race counts them " +
           "once, under that name." };
     }
-    if (item.ballotUnknown) {
+    var noPrimary = !item.ballotUnknown && noPrimaryRace(item.raceId);
+    if (item.ballotUnknown || noPrimary) {
       return { cls: "badge-neutral", rank: 2, off: false, unknown: true,
         card: "Ballot status not known", long: "Ballot status not known",
         mate: "Ballot status not known", short: "Status not known",
-        title: "Filed with the FEC. The published results of this race do not name them, so " +
-          "whether they are on the November ballot is not known here." };
+        title: noPrimary
+          ? "Filed with the FEC. The election calendar lists no primary for this seat, and " +
+            "this site reads no list of who is on its November ballot, so whether they are " +
+            "on it is not known here."
+          : "Filed with the FEC. The published results of this race do not name them, so " +
+            "whether they are on the November ballot is not known here." };
     }
     return null;
+  }
+
+  /* A race with no primary in the calendar and no results read for it: the
+   * Northern Mariana Islands' delegate is elected in November with no
+   * primary, and its filer's card said "the primary has not been held
+   * yet" over a dialog with no status (PROFILES-06). */
+  function noPrimaryRace(raceId) {
+    var race = null;
+    (global.kycRaces || []).some(function (r) {
+      if (r.id === raceId) { race = r; return true; }
+      return false;
+    });
+    // null, not absent: a build without the calendar says nothing either way.
+    return !!race && race.primaryDate === null && !race.results;
   }
 
   /** Where *item* stands in their 2026 race, in *form*, for every view
@@ -600,21 +635,52 @@
     return at === undefined ? 1e6 : at;
   }
 
-  /** A member on another office's November ballot, as a badge: "Republican
-   *  nominee for Governor of Florida", from the curated, sourced
-   *  `otherOffice` (overrides.OTHER_OFFICE_NOMINEES), after *sep*; else "".
-   *  Byron Donalds read only "Not running for this seat" (FRESHNESS-09). */
-  function otherOfficeBadge(item, sep) {
-    var other = item && item.otherOffice;
-    if (!other || !other.text) return "";
-    return (sep || "") + '<span class="badge badge-warn other-office" title="' + escapeAttr(
-      "On the November 3 ballot for an office this site does not cover. Source: the " +
-      "election's Wikipedia page, which marks the primary's winner (read " + other.checked +
-      ").") + '">' + escapeHtml(other.text) + "</span>";
+  /** Where a member leaving their seat is going, from the curated, sourced
+   *  `otherOffice` (overrides.OTHER_OFFICE_NOMINEES): `{text, title, past}`,
+   *  or null. Byron Donalds read only "Not running for this seat"
+   *  (FRESHNESS-09). From the day after Election Day it is in the past
+   *  tense, by the reader's clock as every result is (rule 63): this site
+   *  does not read that race's result, and "Republican nominee for
+   *  Governor of Alabama" two months after the count would read as though
+   *  nothing had happened. *now* is for tests. */
+  function otherOffice(item, now) {
+    var other = item && !item.isCandidate && item.otherOffice;
+    if (!other || !other.text) return null;
+    var past = electionStatus(undefined, now).phase === "post-election";
+    var read = " Source: the election's Wikipedia page, which marks the primary's winner " +
+      "(read " + other.checked + ").";
+    return past
+      ? { past: true, text: "Was the " + other.text,
+          title: "Was on the November 3 ballot for an office this site does not cover; this " +
+            "site does not show that race's result." + read }
+      : { past: false, text: other.text,
+          title: "On the November 3 ballot for an office this site does not cover." + read };
+  }
+
+  /** The same as a badge, after *sep*; else "". */
+  function otherOfficeBadge(item, sep, now) {
+    var other = otherOffice(item, now);
+    if (!other) return "";
+    return (sep || "") + '<span class="badge ' + (other.past ? "badge-neutral" : "badge-warn") +
+      ' other-office" title="' + escapeAttr(other.title) + '">' + escapeHtml(other.text) +
+      "</span>";
   }
 
   /** The sentence that says how a race's people are ordered. */
   var RACE_ORDER = "The seat's holder first, then everyone else by surname.";
+  var RACE_ORDER_PLAIN = "Listed by surname.";
+
+  /** That sentence for *list*, the people a view shows of *race* in the
+   *  race's order: the holder clause only when the list opens with one of
+   *  the race's incumbents. Under the Senate view's "Running for this seat",
+   *  whose holder has a column of their own, and in a holder's own dialog,
+   *  it said the first person listed held the seat: Barry Moore, under
+   *  Alabama's. */
+  function raceOrderNote(list, race) {
+    var first = list && list[0];
+    var held = !!first && !!race && (race.incumbentIds || []).indexOf(first.id) !== -1;
+    return held ? RACE_ORDER : RACE_ORDER_PLAIN;
+  }
 
   /** Who says who is on a race's ballot, for a sentence: "per the published
    *  results", or the Secretary of State's qualified list where that is the
@@ -1842,9 +1908,12 @@
     standing: standing,
     otherCampaign: otherCampaign,
     contestLine: contestLine,
+    otherOffice: otherOffice,
     otherOfficeBadge: otherOfficeBadge,
     racePosition: racePosition,
     RACE_ORDER: RACE_ORDER,
+    RACE_ORDER_PLAIN: RACE_ORDER_PLAIN,
+    raceOrderNote: raceOrderNote,
     seated: seated,
     formerText: formerText,
     ordinal: ordinal,

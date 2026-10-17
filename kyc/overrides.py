@@ -127,6 +127,8 @@ MEMBER_STATUS_BY_ID = {
 # The profile drops an entry once its member starts a new term, `validate`
 # reports one whose member has gone (stale-other-office), and after Election
 # Day it reports them all, for the result to be read from the same page.
+# Until then the page says it in the past tense from the day after Election
+# Day ("Was the ..."), so a stale entry never reads as a race still to come.
 _GOV = "https://en.wikipedia.org/wiki/2026_{}_gubernatorial_election"
 OTHER_OFFICE_NOMINEES = {
     # Republican primary results, May 19: Tuberville 85.4%.
@@ -141,6 +143,10 @@ OTHER_OFFICE_NOMINEES = {
     # Republican primary results, August 4: James 50.05%.
     "J000307": ("Republican nominee for Governor of Michigan",
                 _GOV.format("Michigan"), "2026-10-17"),
+    # Republican primary results, August 6: Blackburn 43.6%. Her Senate
+    # seat is not up, so only her profile says it.
+    "B001243": ("Republican nominee for Governor of Tennessee",
+                _GOV.format("Tennessee"), "2026-10-17"),
     # Republican primary results, August 11: Tiffany 95.32%.
     "T000165": ("Republican nominee for Governor of Wisconsin",
                 _GOV.format("Wisconsin"), "2026-10-17"),
