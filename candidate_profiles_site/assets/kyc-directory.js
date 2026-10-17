@@ -573,7 +573,14 @@
         try { step(); } catch (err) { failed.push(err); }
       });
     KYC.router.onChange(function () { applyRoute(KYC.router.read()); });
-    applyRoute(KYC.router.read());
+    try {
+      applyRoute(KYC.router.read());
+    } catch (err) {
+      // The draw itself failed: never "Loading profiles..." over nothing.
+      failed.push(err);
+      doc.getElementById("resultsLabel").textContent =
+        "The profiles could not be drawn. Reloading the page usually fixes it.";
+    }
     if (failed.length) {
       var note = doc.createElement("p");
       note.className = "state-note results-failed";

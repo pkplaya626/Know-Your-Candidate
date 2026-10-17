@@ -217,6 +217,47 @@ class TestAssetVersions(unittest.TestCase):
             self.site(win, {"kyc.js": b"var a = 1;\r\nvar b = 2;\r\n"})
             self.assertEqual(assets.version("kyc.js", unix), assets.version("kyc.js", win))
 
+    def test_data_is_stamped_by_its_signature_and_odds_is_not(self):
+        # New code with data cached from before a deploy is the same mismatch;
+        # the odds job may change only data/odds.js (rule 41), so no page
+        # names its version.
+        from kyc import assets
+        with tempfile.TemporaryDirectory() as tmp:
+            self.site(tmp, {"kyc.js": b"var a;\n"})
+            data = os.path.join(tmp, "candidate_profiles_site", "data")
+            os.makedirs(os.path.join(data, "districts"))
+
+            def write(name, built, signature):
+                with open(os.path.join(data, *name.split("/")), "w", encoding="utf-8") as handle:
+                    handle.write(f"// Built: {built}\nwindow.x = 1;\n"
+                                 f'window.xMeta = {{"signature":"{signature}"}};\n')
+            write("profiles.js", "2026-10-16", "abcdef0123456789" * 4)
+            write("districts/ca.js", "2026-10-16", "0123456789abcdef" * 4)
+            write("odds.js", "2026-10-16", "fedcba9876543210" * 4)
+            html = ('<script src="../data/profiles.js"></script><script src="../data/odds.js"></script>'
+                    '<script src="../data/districts/ca.js"></script>')
+            out = assets.stamp(html, tmp)
+            self.assertIn('src="../data/profiles.js?v=abcdef0123"', out)
+            self.assertIn('src="../data/districts/ca.js?v=0123456789"', out)
+            self.assertIn('src="../data/odds.js"', out)
+            self.assertEqual(assets.unstamped(out), [])
+            # A rebuild of the same data - only the build time moves - restamps
+            # nothing (rule 18).
+            write("profiles.js", "2026-10-17", "abcdef0123456789" * 4)
+            self.assertEqual(assets.stamp(out, tmp), out)
+            # A data file the build did not write has nothing to stamp it with.
+            with open(os.path.join(data, "stray.js"), "w", encoding="utf-8") as handle:
+                handle.write("window.stray = 1;\n")
+            with self.assertRaises(ValueError):
+                assets.stamp('<script src="data/stray.js"></script>', tmp)
+
+    def test_a_root_without_its_code_fails_rather_than_borrowing_another(self):
+        from kyc import assets
+        with tempfile.TemporaryDirectory() as tmp:
+            os.makedirs(os.path.join(tmp, "candidate_profiles_site"))
+            with self.assertRaises(OSError):
+                assets.stamp('<script src="assets/kyc.js"></script>', tmp)
+
     def test_a_reference_to_a_missing_script_fails(self):
         from kyc import assets
         with tempfile.TemporaryDirectory() as tmp:
@@ -401,7 +442,7 @@ class TestStatePages(unittest.TestCase):
             os.makedirs(os.path.join(tmp, emit.SITE_DIR))
             with open(os.path.join(tmp, emit.CNAME_FILE), "w", encoding="utf-8") as f:
                 f.write("example.org\n")
-            written = emit.write_state_pages(people, tmp, summary={"states": {}})
+            written = emit.write_state_pages(people, tmp, summary={"states": {}}, stamp_from=ROOT)
             relative = sorted(
                 os.path.relpath(w, os.path.join(tmp, emit.SITE_DIR)).replace(os.sep, "/")
                 for w in written)
@@ -414,10 +455,10 @@ class TestStatePages(unittest.TestCase):
                               "states/tx.html"])
             # A district map for every state and territory, whatever the roster.
             self.assertEqual(len([r for r in relative if r.startswith("districts/")]), 56)
-            self.assertEqual(emit.check_state_pages(people, tmp, summary={"states": {}}), [])
+            self.assertEqual(emit.check_state_pages(people, tmp, summary={"states": {}}, stamp_from=ROOT), [])
             with open(os.path.join(tmp, emit.STATES_DIR, "tx.html"), "a", encoding="utf-8") as f:
                 f.write("<!-- edited by hand -->")
-            stale = emit.check_state_pages(people, tmp, summary={"states": {}})
+            stale = emit.check_state_pages(people, tmp, summary={"states": {}}, stamp_from=ROOT)
             self.assertEqual([os.path.basename(rel) for rel, _ in stale], ["tx.html"])
             self.assertEqual(stale[0][1], "stale")
             path = emit.write_sitemap(people, tmp)

@@ -146,8 +146,8 @@ python build_profile_site.py oge              # the executive's financial report
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1214 tests, no dependencies
-npm install && npm test                       # 1493 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1216 tests, no dependencies
+npm install && npm test                       # 1495 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -982,10 +982,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     stylesheet URL carries `?v=` and its file's content hash
     (`kyc/assets.py`, line endings folded): generated pages are stamped as
     they render, the build restamps the templates, and `verify` fails on a
-    stale stamp. Data files are not stamped (rule 41). And no one part of a
-    page's start may stop the rest: the grid's start-up runs each step on
-    its own, draws the list regardless, and says on the page that something
-    failed.
+    stale stamp. The data files the code reads are stamped too, by their
+    content signature (so a rebuild of the same data restamps nothing,
+    rule 18) - all but `data/odds.js`, which the odds job may change alone
+    (rule 41). And no one part of a page's start may stop the rest: the
+    grid's start-up runs each step and its first draw on their own, draws
+    what it can, and says on the page that something failed.
 
 ## District maps
 

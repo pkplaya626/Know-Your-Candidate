@@ -205,15 +205,15 @@ class TestGuidePages(unittest.TestCase):
             with open(os.path.join(tmp, emit.CNAME_FILE), "w", encoding="utf-8") as f:
                 f.write("example.org\n")
             people = [{"id": "X1", "state": "TX", "isCandidate": False}]
-            written = emit.write_state_pages(people, tmp, summary={"states": {}})
+            written = emit.write_state_pages(people, tmp, summary={"states": {}}, stamp_from=ROOT)
             guide = sorted(os.path.basename(w) for w in written
                            if os.path.normpath(emit.GOVERNMENT_DIR) in os.path.normpath(w))
             self.assertEqual(guide, sorted(f"{s}.html" for s in government.slugs()))
-            self.assertEqual(emit.check_state_pages(people, tmp, summary={"states": {}}), [])
+            self.assertEqual(emit.check_state_pages(people, tmp, summary={"states": {}}, stamp_from=ROOT), [])
             with open(os.path.join(tmp, emit.GOVERNMENT_DIR, "index.html"), "a",
                       encoding="utf-8") as f:
                 f.write("<!-- edited by hand -->")
-            stale = emit.check_state_pages(people, tmp, summary={"states": {}})
+            stale = emit.check_state_pages(people, tmp, summary={"states": {}}, stamp_from=ROOT)
             self.assertEqual([os.path.basename(rel) for rel, _ in stale], ["index.html"])
 
     def test_the_committed_guide_pages_are_wired(self):

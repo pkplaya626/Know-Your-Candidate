@@ -2547,6 +2547,17 @@ async function testBootSurvivesAFailure() {
     check("the filters still work", [...D.querySelectorAll("#results .card")].every((c) =>
       /Senate/.test(window.KYC.byId(c.getAttribute("data-id")).chamber)));
   });
+  // The first draw itself failing: never "Loading profiles..." over nothing.
+  const broken = await buildPage("index.html", {
+    data: (w) => { w.KYC.matchesQuery = () => { throw new Error("rehearsed draw failure"); }; },
+  });
+  await settle(50);
+  suite("index.html — a draw that fails says so", () => {
+    const label = broken.D.getElementById("resultsLabel").textContent;
+    check("the label says the profiles could not be drawn, not that they are loading",
+      /could not be drawn/.test(label) && !/Loading/.test(label), label);
+    check("and the page says part of it did not start", !!broken.D.querySelector(".results-failed"));
+  });
 }
 
 async function testSenate() {
@@ -3279,7 +3290,8 @@ async function testDistrictPages() {
     check("56 pages", files.length === 56, `${files.length}`);
     const unwired = files.filter((f) => {
       const raw = fs.readFileSync(path.join(SITE, "districts", f), "utf8");
-      return raw.indexOf('src="../data/districts/' + f.replace(".html", ".js") + '"') === -1;
+      // With or without the version stamp its URL carries (kyc/assets.py).
+      return !new RegExp('src="\\.\\./data/districts/' + f.replace(".html", ".js") + '(\\?v=[0-9a-f]+)?"').test(raw);
     });
     check("each loads its own state's map and no other", unwired.length === 0, unwired.join(", "));
   });
