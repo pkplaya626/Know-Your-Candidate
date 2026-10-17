@@ -1,5 +1,5 @@
 {
- "checked": "2026-10-15",
+ "checked": "2026-10-17",
  "people": {
   "A000055": {
    "checked": "2026-10-14",
@@ -2345,10 +2345,6 @@
     "url": "https://www.brianburley.com"
    }
   },
-  "FEC_H0FL23090": {
-   "checked": "2026-10-14",
-   "name": "Carla A Spalding"
-  },
   "FEC_H0GA14048": {
    "checked": "2026-10-14",
    "name": "John Cowan",
@@ -2885,10 +2881,6 @@
     "title": "David Tse-Chien Pan"
    }
   },
-  "FEC_H4CT04189": {
-   "checked": "2026-10-14",
-   "name": "Dan Miressi"
-  },
   "FEC_H4FL01197": {
    "checked": "2026-10-14",
    "name": "Jennifer Gay Valimont",
@@ -3246,6 +3238,18 @@
   "FEC_H4TN04270": {
    "checked": "2026-10-14",
    "name": "Victoria Broderick"
+  },
+  "FEC_H4TX14111": {
+   "checked": "2026-10-17",
+   "name": "Rhonda J Hart",
+   "site": {
+    "description": "A movement-driven grassroots campaign platform for Rhonda Hart, designed to mobilize voters, recruit volunteers, and fuel the fight for Texas 36.",
+    "final": "https://hart4congress.com/",
+    "reason": "ok",
+    "safe": true,
+    "status": 200,
+    "url": "https://www.hart4congress.com"
+   }
   },
   "FEC_H4TX21108": {
    "checked": "2026-10-14",
@@ -4110,9 +4114,9 @@
     "title": "Hilda Solis"
    }
   },
-  "FEC_H6CA41380": {
-   "checked": "2026-10-14",
-   "name": "Mitchell Lee Clemmons"
+  "FEC_H6CA39145": {
+   "checked": "2026-10-17",
+   "name": "Steve Manos"
   },
   "FEC_H6CA43188": {
    "checked": "2026-10-15",
@@ -4256,6 +4260,17 @@
     "title": "Melat Kiros"
    }
   },
+  "FEC_H6CO01331": {
+   "checked": "2026-10-17",
+   "name": "Christy Peterson",
+   "site": {
+    "final": "https://christyforamerica.us",
+    "reason": "ok",
+    "safe": true,
+    "status": 200,
+    "url": "https://christyforamerica.us"
+   }
+  },
   "FEC_H6CO03253": {
    "checked": "2026-10-14",
    "name": "Dwayne Romero",
@@ -4370,10 +4385,6 @@
   "FEC_H6CT04143": {
    "checked": "2026-10-14",
    "name": "Michael Goldstein"
-  },
-  "FEC_H6CT04150": {
-   "checked": "2026-10-14",
-   "name": "Daniel Miressi"
   },
   "FEC_H6CT05231": {
    "checked": "2026-10-14",
@@ -4822,10 +4833,6 @@
     "status": 200,
     "url": "https://www.michaelquirk4congress.com/"
    }
-  },
-  "FEC_H6FL18121": {
-   "checked": "2026-10-14",
-   "name": "Carla Arlene Spalding"
   },
   "FEC_H6FL18204": {
    "checked": "2026-10-14",
@@ -6054,24 +6061,9 @@
     "url": "https://www.larrydavisforcongress.com/"
    }
   },
-  "FEC_H6LA05176": {
-   "checked": "2026-10-14",
-   "name": "Larry W Foy"
-  },
   "FEC_H6LA05184": {
    "checked": "2026-10-14",
    "name": "Stewart Cathey Jr."
-  },
-  "FEC_H6LA05192": {
-   "checked": "2026-10-14",
-   "name": "Samuel Lee Wyatt",
-   "site": {
-    "final": "https://www.sammywyatt.com/",
-    "reason": "ok",
-    "safe": true,
-    "status": 200,
-    "url": "https://sammywyatt.com"
-   }
   },
   "FEC_H6LA05200": {
    "checked": "2026-10-14",
@@ -6084,10 +6076,6 @@
     "status": 200,
     "url": "https://www.cordellforcongress.com"
    }
-  },
-  "FEC_H6LA05218": {
-   "checked": "2026-10-14",
-   "name": "Dixon McMakin"
   },
   "FEC_H6LA05226": {
    "checked": "2026-10-14",
@@ -6141,10 +6129,6 @@
     "url": "https://mebruerforcongress.com"
    }
   },
-  "FEC_H6LA05275": {
-   "checked": "2026-10-14",
-   "name": "Tania Nyman"
-  },
   "FEC_H6LA05283": {
    "checked": "2026-10-14",
    "name": "Austin Magee"
@@ -6172,6 +6156,30 @@
    "checked": "2026-10-14",
    "name": "Michael Gabriel Firment"
   },
+  "FEC_H6LA05325": {
+   "checked": "2026-10-17",
+   "name": "Antonio Wilson",
+   "site": {
+    "final": "https://www.wilsonforlouisiana.com",
+    "issues": [
+     "Building Results That Last",
+     "Governing Commitments",
+     "Fuel the Future Forward",
+     "Decades Building Projects",
+     "Infrastructure Experience In Tallulah",
+     "Creating Local Jobs",
+     "Agriculture & Rural Communities",
+     "Builder's Economic Vision",
+     "Accountability You Can Track",
+     "Quick Navigation"
+    ],
+    "issuesUrl": "https://www.wilsonforlouisiana.com/services",
+    "reason": "ok",
+    "safe": true,
+    "status": 200,
+    "url": "https://www.wilsonforlouisiana.com"
+   }
+  },
   "FEC_H6LA05341": {
    "checked": "2026-10-15",
    "name": "Patricia Ann Moore",
@@ -6188,6 +6196,38 @@
   "FEC_H6LA06158": {
    "checked": "2026-10-14",
    "name": "Anjanita Monique Appeaning"
+  },
+  "FEC_H6LA06182": {
+   "checked": "2026-10-17",
+   "name": "Stephen Wagley",
+   "site": {
+    "final": "https://www.wagleyforcongress.com/",
+    "issues": [
+     "Protecting Life",
+     "Supporting our Businesses",
+     "Securing Our Border",
+     "Fighting for the MAGA Movement and President Trump",
+     "Defending the Second Amendment",
+     "Serving Local Law Enforcement",
+     "Protecting the Lousiana Vote"
+    ],
+    "issuesUrl": "https://www.wagleyforcongress.com/issues",
+    "reason": "moved to wagleyforcongress.com, still names the candidate",
+    "safe": true,
+    "status": 200,
+    "url": "https://stephenwagley.com"
+   }
+  },
+  "FEC_H6LA06190": {
+   "checked": "2026-10-17",
+   "name": "Patrick Wayne Forbes",
+   "site": {
+    "final": "https://www.patforbes.com/",
+    "reason": "ok",
+    "safe": true,
+    "status": 200,
+    "url": "https://patforbes.com"
+   }
   },
   "FEC_H6MA03100": {
    "checked": "2026-10-14",
@@ -7020,6 +7060,14 @@
     "url": "https://agerforcongress.com/"
    }
   },
+  "FEC_H6NC11321": {
+   "checked": "2026-10-17",
+   "name": "Jennifer Balkcom",
+   "wiki": {
+    "education": "Blue Ridge Community College (AA)",
+    "title": "Jennifer Balkcom"
+   }
+  },
   "FEC_H6NC12113": {
    "checked": "2026-10-14",
    "name": "John Jack Codiga",
@@ -7234,6 +7282,33 @@
   "FEC_H6NJ03184": {
    "checked": "2026-10-14",
    "name": "Michael Patrick McGuire"
+  },
+  "FEC_H6NJ03192": {
+   "checked": "2026-10-17",
+   "name": "Ryan Michael Kelly",
+   "site": {
+    "description": "Independent candidate for Congress in New Jersey’s 3rd District focused on affordability, accountability, and practical governance.",
+    "final": "https://www.kellyfornj03.com/en",
+    "issues": [
+     "The Choice in NJ-03",
+     "Military & Veterans",
+     "Affordability and the Cost of Living",
+     "Labor, Unions, and Workers’ Rights",
+     "Universal, Single-Payer Healthcare",
+     "Housing: Affordability, Public Housing, and Tenant Stability",
+     "Veterans, Service Members, and Military Families",
+     "Education, Workforce Readiness, and Student Loan Relief",
+     "Climate, Energy, and Public Utilities",
+     "Public Safety and Criminal Justice Reform",
+     "Second Amendment & Gun Safety",
+     "Civil Rights, Equality, and Personal Freedom"
+    ],
+    "issuesUrl": "https://www.kellyfornj03.com/en/issues",
+    "reason": "ok",
+    "safe": true,
+    "status": 200,
+    "url": "https://kellyfornj03.com"
+   }
   },
   "FEC_H6NJ04257": {
    "checked": "2026-10-14",
@@ -7945,6 +8020,10 @@
     "title": "Mark Tedford"
    }
   },
+  "FEC_H6OK03272": {
+   "checked": "2026-10-17",
+   "name": "Suzanne Byrd"
+  },
   "FEC_H6OK04155": {
    "checked": "2026-10-14",
    "name": "Mitchell Leigh Jacob",
@@ -8235,6 +8314,10 @@
   "FEC_H6RI01153": {
    "checked": "2026-10-14",
    "name": "Kellie Eleanor Keenan"
+  },
+  "FEC_H6RI01161": {
+   "checked": "2026-10-17",
+   "name": "Pedro Desouza"
   },
   "FEC_H6RI02318": {
    "checked": "2026-10-14",
@@ -8873,10 +8956,6 @@
    "checked": "2026-10-14",
    "name": "Tom Sell"
   },
-  "FEC_H6TX19230": {
-   "checked": "2026-10-14",
-   "name": "Donald R May"
-  },
   "FEC_H6TX20113": {
    "checked": "2026-10-14",
    "name": "Edgardo Rafael Baez",
@@ -9026,17 +9105,6 @@
     "born": "1960-11-10",
     "education": "Bishop College (BA); Southwestern Baptist Theological Seminary (MDiv); Graduate Theological Foundation (DMin)",
     "title": "Frederick Haynes III"
-   }
-  },
-  "FEC_H6TX30252": {
-   "checked": "2026-10-14",
-   "name": "Barbara Mallory Caraway",
-   "site": {
-    "final": "https://barbaraforcongress.com",
-    "reason": "ok",
-    "safe": true,
-    "status": 200,
-    "url": "https://barbaraforcongress.com"
    }
   },
   "FEC_H6TX31094": {
@@ -9250,6 +9318,10 @@
     "title": "Elaine Luria"
    }
   },
+  "FEC_H6VA02263": {
+   "checked": "2026-10-17",
+   "name": "Matthew Baker"
+  },
   "FEC_H6VA03121": {
    "checked": "2026-10-14",
    "name": "Edwin Rivera Jr."
@@ -9277,24 +9349,6 @@
     "safe": true,
     "status": 200,
     "url": "https://www.stevewoll.com"
-   }
-  },
-  "FEC_H6VA05217": {
-   "checked": "2026-10-14",
-   "name": "Thomas Perriello",
-   "site": {
-    "description": "A proud native Virginian, Tom Perriello has spent the last 25 years serving his community and country as a Congressman, diplomat, non-profit leader and teacher.",
-    "final": "https://www.tomperriello.com/",
-    "issuesUrl": "https://www.tomperriello.com/issues",
-    "reason": "moved to tomperriello.com, still names the candidate",
-    "safe": true,
-    "status": 200,
-    "url": "https://www.tomperriellova.com"
-   },
-   "wiki": {
-    "born": "1974-10-09",
-    "education": "Yale University (BA, JD)",
-    "title": "Tom Perriello"
    }
   },
   "FEC_H6VA06173": {
@@ -9345,6 +9399,20 @@
     "status": 200,
     "url": "https://dougforvirginia.com"
    }
+  },
+  "FEC_H6VA07312": {
+   "checked": "2026-10-17",
+   "name": "Randall Terry",
+   "wiki": {
+    "born": "1959-04-25",
+    "education": "Elim Bible Institute and College; Whitefield Theological Seminary (BA); Empire State University (BA); Norwich University (MA)",
+    "occupation": "Politician; activist; author",
+    "title": "Randall Terry"
+   }
+  },
+  "FEC_H6VA07353": {
+   "checked": "2026-10-17",
+   "name": "Alaha Ahrar"
   },
   "FEC_H6VA08252": {
    "checked": "2026-10-14",
@@ -9608,6 +9676,25 @@
     "safe": true,
     "status": 200,
     "url": "https://thurowforcongress.com"
+   }
+  },
+  "FEC_H6WI06241": {
+   "checked": "2026-10-17",
+   "name": "Elizabeth Fitzgibbon",
+   "site": {
+    "description": "Elizabeth is a mother, advocate, and independent candidate for Congress fighting to lower costs, restore accountability, and put the people ahead of party politics.",
+    "final": "https://www.fitzgibbonforcongress.com/",
+    "issues": [
+     "AFFORDABILITY",
+     "ACCOUNTABILITY",
+     "TRANSPARENCY",
+     "FINDING SOLUTIONS THAT LAST"
+    ],
+    "issuesUrl": "https://www.fitzgibbonforcongress.com/issues",
+    "reason": "moved to fitzgibbonforcongress.com, still names the candidate",
+    "safe": true,
+    "status": 200,
+    "url": "https://elizabethfitzgibbonforglenngrothmansseatincongress.org"
    }
   },
   "FEC_H6WI07207": {
@@ -9943,19 +10030,6 @@
     "url": "https://jeffwadlin.com"
    }
   },
-  "FEC_S6CO00549": {
-   "checked": "2026-10-14",
-   "name": "Robert Chew",
-   "site": {
-    "description": "I’m an independent who can’t be bought, can’t be bullied, and won’t give up. That’s my promise to you. Not the parties. Not the donors. YOU.",
-    "final": "https://bobchew2026.com/",
-    "issuesUrl": "https://bobchew2026.com/issues/",
-    "reason": "ok",
-    "safe": true,
-    "status": 200,
-    "url": "https://www.bobchew2026.com"
-   }
-  },
   "FEC_S6CO00556": {
    "checked": "2026-10-14",
    "name": "Bob Chew",
@@ -9986,10 +10060,6 @@
     "education": "Bates College (BS); Georgetown University (MS, MD, MBA)",
     "title": "Michael Katz (politician)"
    }
-  },
-  "FEC_S6FL00756": {
-   "checked": "2026-10-14",
-   "name": "Joshua Joseph Weil"
   },
   "FEC_S6FL00830": {
    "checked": "2026-10-14",
@@ -10069,6 +10139,18 @@
     "education": "Eastern Michigan University (B.A.); New England Law Boston (J.D.)",
     "occupation": "Attorney",
     "title": "John Deaton"
+   }
+  },
+  "FEC_S6MI00442": {
+   "checked": "2026-10-17",
+   "name": "Lydia Lynn Christensen",
+   "site": {
+    "description": "Lydia Christensen is an American politician from Michigan and a candidate for the United States Senate in 2026.",
+    "final": "https://www.lydialynnchristensen.com",
+    "reason": "ok",
+    "safe": true,
+    "status": 200,
+    "url": "https://www.lydialynnchristensen.com"
    }
   },
   "FEC_S6MN00440": {
@@ -10248,6 +10330,17 @@
     "safe": true,
     "status": 200,
     "url": "https://www.kasiesouthcarolina.com"
+   }
+  },
+  "FEC_S6TN00372": {
+   "checked": "2026-10-17",
+   "name": "Robert Thomas Jones",
+   "site": {
+    "final": "https://www.robertfortn.com/",
+    "reason": "ok",
+    "safe": true,
+    "status": 200,
+    "url": "https://robertfortn.com"
    }
   },
   "FEC_S6TN00398": {
@@ -11403,17 +11496,6 @@
     "safe": true,
     "status": 200,
     "url": "http://mikelevin.org"
-   }
-  },
-  "L000595": {
-   "checked": "2026-10-14",
-   "name": "Julia Letlow",
-   "site": {
-    "final": "https://www.julialetlow.com",
-    "reason": "ok",
-    "safe": true,
-    "status": 200,
-    "url": "https://www.julialetlow.com"
    }
   },
   "L000596": {
