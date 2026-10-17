@@ -674,7 +674,7 @@ def render_legislature_page(code, host, summary=None):
     """A state's legislature: its Senate and House districts on a map, and
     the members who sit for them. The page carries the state code only;
     ``assets/kyc-legislature.js`` draws it from ``data/legislature/<st>.js``."""
-    from .government_maps import LOWER_CHAMBER, SEATS, STATES
+    from .government_maps import LEGISLATURE_NAME, LOWER_CHAMBER, SEATS, STATES
     from .government import jump_options
 
     name = state_name(code)
@@ -688,7 +688,7 @@ def render_legislature_page(code, host, summary=None):
                 f"senators, each elected from a district on a nonpartisan ballot.")
         chambers = ""
     else:
-        title = f"{name} Legislature"
+        title = f"{name} {LEGISLATURE_NAME.get(code, 'Legislature')}"
         lede = (f"The {name} Senate has {senate} members and the {lower} {house}. Pick a "
                 f"district on the map to see who sits for it.")
         chambers = "\n".join([
@@ -746,7 +746,8 @@ def render_legislature_page(code, host, summary=None):
         "                    legislature publishes them; district boundaries from the U.S. Census",
         "                    Bureau's cartographic boundary files, as set for the 2024 elections.",
         "                    A seat with nobody listed may be vacant, or Open States may be behind",
-        "                    a special election.</p>",
+        "                    a special election. The legislature is called by the name its state",
+        "                    constitution gives it.</p>",
         "                <p>Non-partisan and independent.</p>",
     ])
     scripts = [s.replace("{code}", code.lower()) for s in (

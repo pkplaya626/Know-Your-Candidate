@@ -211,6 +211,22 @@ LOWER_CHAMBER = {
     "NE": None,                         # one chamber
 }
 
+# Legislatures whose state constitution names them other than "the
+# Legislature" (the legislature page's title: "Virginia General Assembly",
+# never "Virginia Legislature"). Massachusetts's constitution styles its
+# legislature "the General Court of Massachusetts" (Part II, c. 1, s. 1,
+# art. 1) and New Hampshire's "the general court"; Oregon's vests its
+# legislative power in "a Legislative Assembly" (art. IV, s. 1), as North
+# Dakota's does. Checked 2026-10-16 against Wikipedia's "List of U.S. state
+# legislatures" as a lead (rule 50), which names the same 23.
+LEGISLATURE_NAME = {
+    **{code: "General Assembly" for code in (
+        "AR", "CO", "CT", "DE", "GA", "IL", "IN", "IA", "KY", "MD", "MO", "NC", "OH", "PA",
+        "RI", "SC", "TN", "VT", "VA")},
+    "MA": "General Court", "NH": "General Court",
+    "ND": "Legislative Assembly", "OR": "Legislative Assembly",
+}
+
 NO_LINE_ITEM_VETO = ("IN", "NV", "NH", "NC", "RI", "VT")
 
 
