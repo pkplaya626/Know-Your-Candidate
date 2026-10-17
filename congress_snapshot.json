@@ -1,6 +1,6 @@
 {
  "count": 539,
- "fetched": "2026-10-17T17:18:54+00:00",
+ "fetched": "2026-10-17T19:58:19+00:00",
  "legislators": [
   {
    "ballotpedia": "Robert B. Aderholt",
@@ -34,6 +34,7 @@
    "social": {
     "facebook": "RobertAderholt",
     "twitter": "Robert_Aderholt",
+    "twitter_id": "76452765",
     "youtube": "RobertAderholt",
     "youtube_id": "UC71CAgpg1gbLTew_pfTneGA"
    },
@@ -76,6 +77,7 @@
    "social": {
     "facebook": "RepAuchincloss",
     "twitter": "RepAuchincloss",
+    "twitter_id": "1330278736554582016",
     "youtube": "RepAuchincloss"
    },
    "state": "MA",
@@ -121,6 +123,7 @@
     "facebook": "MarkAmodeiNV2",
     "instagram": "MarkAmodeiNV2",
     "twitter": "MarkAmodeiNV2",
+    "twitter_id": "402719755",
     "youtube": "markamodeinv2",
     "youtube_id": "UCjOGx2iqSn1r3BQxaVgYhYw"
    },
@@ -165,6 +168,7 @@
     "instagram": "repadams",
     "mastodon": "@RepAdams@mastodon.social",
     "twitter": "RepAdams",
+    "twitter_id": "2916086925",
     "youtube_id": "UCPI9ao1Cr1nxEUD2r-usRjQ"
    },
    "state": "NC",
@@ -205,6 +209,7 @@
    "social": {
     "facebook": "reppeteaguilar",
     "twitter": "RepPeteAguilar",
+    "twitter_id": "3018670151",
     "youtube_id": "UCxwbFLOlKDsXrwizV5jah7g"
    },
    "state": "CA",
@@ -247,6 +252,7 @@
     "facebook": "CongressmanRickAllen",
     "instagram": "Rep_RickAllen",
     "twitter": "RepRickAllen",
+    "twitter_id": "2964287128",
     "youtube_id": "UCZPoYXHFDAV17BGLMzGAmpg"
    },
    "state": "GA",
@@ -289,6 +295,7 @@
     "facebook": "JodeyArrington",
     "instagram": "repjodeyarrington",
     "twitter": "RepArrington",
+    "twitter_id": "816284664658874368",
     "youtube": "UC3lif8TFPOe-tJ2-pE4Rp7Q"
    },
    "state": "TX",
@@ -524,6 +531,7 @@
    "social": {
     "facebook": "sanfordbishop",
     "twitter": "SanfordBishop",
+    "twitter_id": "249410485",
     "youtube": "RepSanfordBishop",
     "youtube_id": "UCxF9veLBrkr_CqVq5eFYVGg"
    },
@@ -566,7 +574,8 @@
    "social": {
     "facebook": "RepBentz",
     "instagram": "repbentz",
-    "twitter": "RepBentz"
+    "twitter": "RepBentz",
+    "twitter_id": "1345788865911656454"
    },
    "state": "OR",
    "termEnd": "2027-01-03",
@@ -606,7 +615,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepStephanieBice",
-    "twitter": "RepBice"
+    "twitter": "RepBice",
+    "twitter_id": "1344260196227555334"
    },
    "state": "OK",
    "termEnd": "2027-01-03",
@@ -646,7 +656,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepBoebert",
-    "twitter": "RepBoebert"
+    "twitter": "RepBoebert",
+    "twitter_id": "1342989756611907584"
    },
    "state": "CO",
    "termEnd": "2027-01-03",
@@ -688,6 +699,7 @@
     "facebook": "senatortammybaldwin",
     "instagram": "senatorbaldwin",
     "twitter": "SenatorBaldwin",
+    "twitter_id": "1074518754",
     "youtube": "witammybaldwin",
     "youtube_id": "UC_XjYCRbbI2_TDDjJidwk0Q"
    },
@@ -731,6 +743,7 @@
     "facebook": "JohnBoozman",
     "instagram": "johnboozman",
     "twitter": "JohnBoozman",
+    "twitter_id": "5558312",
     "youtube": "BoozmanPressOffice",
     "youtube_id": "UC9vWHKL5OfIYh6kIV0rF2yw"
    },
@@ -775,6 +788,7 @@
     "facebook": "marshablackburn",
     "instagram": "marshablackburn",
     "twitter": "MarshaBlackburn",
+    "twitter_id": "278145569",
     "youtube": "RepMarshaBlackburn",
     "youtube_id": "UCvNnmu5mUm7xr8QXBlbtQ9w"
    },
@@ -818,6 +832,7 @@
     "facebook": "GusBilirakis",
     "instagram": "gusbilirakis",
     "twitter": "RepGusBilirakis",
+    "twitter_id": "26051676",
     "youtube": "RepGusBilirakis",
     "youtube_id": "UC2z1uu1n4-60xXs5x1mvLJw"
    },
@@ -860,6 +875,7 @@
     "facebook": "CongressmanBuchanan",
     "instagram": "repvern",
     "twitter": "VernBuchanan",
+    "twitter_id": "20467163",
     "youtube": "vernbuchanan",
     "youtube_id": "UCY4DEy41NxOTdcF8_XAVZvw"
    },
@@ -902,6 +918,7 @@
    "social": {
     "facebook": "johnbarrasso",
     "twitter": "SenJohnBarrasso",
+    "twitter_id": "202206694",
     "youtube": "barrassowyo",
     "youtube_id": "UC80PfiCAB2Fe1MFayWlR6GQ"
    },
@@ -945,6 +962,7 @@
     "facebook": "senbennetco",
     "instagram": "SenBennetCO",
     "twitter": "SenatorBennet",
+    "twitter_id": "224285242",
     "youtube": "SenatorBennet",
     "youtube_id": "UCXB3cljpMwTyCUyLr2ZVLow"
    },
@@ -987,6 +1005,7 @@
     "facebook": "SenBlumenthal",
     "instagram": "senblumenthal",
     "twitter": "SenBlumenthal",
+    "twitter_id": "278124059",
     "youtube": "SenatorBlumenthal",
     "youtube_id": "UCHH-fn3_LVt0Q4od56rOi5g"
    },
@@ -1029,6 +1048,7 @@
     "facebook": "congresswomanbonamici",
     "instagram": "RepBonamici",
     "twitter": "RepBonamici",
+    "twitter_id": "558769636",
     "youtube": "RepSuzanneBonamici",
     "youtube_id": "UC0IkAeEiwgzSRTD1TDSvuBw"
    },
@@ -1071,6 +1091,7 @@
     "facebook": "RepJoyceBeatty",
     "instagram": "repbeatty",
     "twitter": "RepBeatty",
+    "twitter_id": "1531521632",
     "youtube_id": "UCtVl3kb7Xvt3pY7l6x-M6LA"
    },
    "state": "OH",
@@ -1114,6 +1135,7 @@
     "facebook": "RepAndyBarr",
     "instagram": "RepAndyBarr",
     "twitter": "RepAndyBarr",
+    "twitter_id": "1089334250",
     "youtube": "RepAndyBarr",
     "youtube_id": "UCVL2s6x7f7H0ZJ-uwU0pQ6Q"
    },
@@ -1156,6 +1178,7 @@
     "facebook": "RepJuliaBrownley",
     "instagram": "RepBrownley",
     "twitter": "RepBrownley",
+    "twitter_id": "1243902714",
     "youtube": "RepJuliaBrownley",
     "youtube_id": "UCFrC4Ouk5R6xQztS9PZin_A"
    },
@@ -1198,6 +1221,7 @@
     "facebook": "RepAmiBera",
     "instagram": "repbera",
     "twitter": "RepBera",
+    "twitter_id": "950783972",
     "youtube": "repamibera",
     "youtube_id": "UClJCTCo53Zk6b4kUL-bbdzg"
    },
@@ -1241,6 +1265,7 @@
     "facebook": "SenatorCoryBooker",
     "instagram": "corybooker",
     "twitter": "SenBooker",
+    "twitter_id": "2167097881",
     "youtube": "SenCoryBooker",
     "youtube_id": "UC6FlymqNS1VettnVZa7goPA"
    },
@@ -1282,6 +1307,7 @@
    "social": {
     "facebook": "RepBrianBabin",
     "twitter": "RepBrianBabin",
+    "twitter_id": "2929491549",
     "youtube_id": "UCPVEZgw-VbDRbLV1MRGVQNQ"
    },
    "state": "TX",
@@ -1326,6 +1352,7 @@
     "instagram": "repdonbeyer",
     "mastodon": "@RepDonBeyer@mas.to",
     "twitter": "RepDonBeyer",
+    "twitter_id": "2962868158",
     "youtube_id": "UCPJGVbOVcAVGiBwq8qr_T9w"
    },
    "state": "VA",
@@ -1366,6 +1393,7 @@
    "social": {
     "facebook": "RepBost",
     "twitter": "RepBost",
+    "twitter_id": "2964877294",
     "youtube_id": "UCYA1psY06vSf3QadHuCrmjQ"
    },
    "state": "IL",
@@ -1407,6 +1435,7 @@
    "social": {
     "facebook": "CongressmanBoyle",
     "twitter": "CongBoyle",
+    "twitter_id": "4304448314",
     "youtube_id": "UCMP_Anj7lz4eZuSh8GwFqQQ"
    },
    "state": "PA",
@@ -1448,6 +1477,7 @@
     "facebook": "RepDonBacon",
     "instagram": "RepDonBacon",
     "twitter": "RepDonBacon",
+    "twitter_id": "818975124460335106",
     "youtube_id": "UCR9abI1lZzAZ6HwQXc-dLFQ"
    },
    "state": "NE",
@@ -1490,6 +1520,7 @@
     "facebook": "RepJimBanks",
     "instagram": "repjimbanks",
     "twitter": "RepJimBanks",
+    "twitter_id": "816131319033950208",
     "youtube_id": "UC_FR6TySW9uxvhjozkis6Xg"
    },
    "state": "IN",
@@ -1531,7 +1562,8 @@
    "social": {
     "facebook": "CongresswomanBarragan",
     "instagram": "repbarragan",
-    "twitter": "RepBarragan"
+    "twitter": "RepBarragan",
+    "twitter_id": "816833925456789505"
    },
    "state": "CA",
    "termEnd": "2027-01-03",
@@ -1572,6 +1604,7 @@
     "facebook": "RepJackBergman",
     "instagram": "RepJackBergman",
     "twitter": "RepJackBergman",
+    "twitter_id": "815241612154417152",
     "youtube": "RepJackBergman"
    },
    "state": "MI",
@@ -1613,6 +1646,7 @@
     "facebook": "RepAndyBiggs",
     "instagram": "repandybiggs",
     "twitter": "RepAndyBiggsAZ",
+    "twitter_id": "816652616625168388",
     "youtube_id": "UCqSq9kWOxk9yNTeILBCVC1w"
    },
    "state": "AZ",
@@ -1654,7 +1688,8 @@
    "social": {
     "facebook": "Rep.BluntRochester",
     "instagram": "senlbr",
-    "twitter": "SenLBR"
+    "twitter": "SenLBR",
+    "twitter_id": "817050219007328258"
    },
    "state": "DE",
    "termEnd": "2031-01-03",
@@ -1696,6 +1731,7 @@
     "facebook": "RepTedBudd",
     "instagram": "sentedbudd",
     "twitter": "RepTedBudd",
+    "twitter_id": "817138492614524928",
     "youtube": "@sentedbudd"
    },
    "state": "NC",
@@ -1736,6 +1772,7 @@
    "social": {
     "facebook": "RepTroyBalderson",
     "twitter": "RepBalderson",
+    "twitter_id": "1037341536592310272",
     "youtube": "UCm6vJzx-mu4Xr56FnQKRz0w"
    },
    "state": "OH",
@@ -1777,6 +1814,7 @@
    "social": {
     "facebook": "RepJimBaird",
     "twitter": "RepJimBaird",
+    "twitter_id": "1086316494450032640",
     "youtube": "UCAe6fGhotC9J9tR_QONYzFA"
    },
    "state": "IN",
@@ -1815,7 +1853,8 @@
    "phone": "202-225-5435",
    "senateClass": null,
    "social": {
-    "twitter": "RepTimBurchett"
+    "twitter": "RepTimBurchett",
+    "twitter_id": "1028854804087492613"
    },
    "state": "TN",
    "termEnd": "2027-01-03",
@@ -1856,7 +1895,8 @@
    "social": {
     "facebook": "RepShontelBrown",
     "mastodon": "@RepShontelBrown@mastodon.social",
-    "twitter": "RepShontelBrown"
+    "twitter": "RepShontelBrown",
+    "twitter_id": "1456381091598700556"
    },
    "state": "OH",
    "termEnd": "2027-01-03",
@@ -1897,7 +1937,8 @@
    "social": {
     "facebook": "100089355874563",
     "instagram": "RepAaronBean",
-    "twitter": "RepAaronBean"
+    "twitter": "RepAaronBean",
+    "twitter_id": "1604927550081359875"
    },
    "state": "FL",
    "termEnd": "2027-01-03",
@@ -1939,6 +1980,7 @@
     "facebook": "RepNikkiBudzinski",
     "instagram": "repnikki",
     "twitter": "RepNikkiB",
+    "twitter_id": "1603476713995911168",
     "youtube": "UCp0Ykb-qUGx3ekTH9MIEK-w"
    },
    "state": "IL",
@@ -1981,6 +2023,7 @@
     "facebook": "100089208900263",
     "instagram": "RepEricBurlison",
     "twitter": "RepEricBurlison",
+    "twitter_id": "1606342594765590528",
     "youtube": "UCuJFygzYhGiXMZHjhTQy20w"
    },
    "state": "MO",
@@ -2065,6 +2108,7 @@
     "facebook": "repbeccab",
     "instagram": "repbeccab",
     "twitter": "RepBeccaB",
+    "twitter_id": "1606115178210365448",
     "youtube": "YouTubeChannelID"
    },
    "state": "VT",
@@ -2473,6 +2517,7 @@
     "facebook": "70063393423",
     "instagram": "repkencalvert",
     "twitter": "KenCalvert",
+    "twitter_id": "22545491",
     "youtube": "RepKenCalvert",
     "youtube_id": "UC5MEj7YOX_QdKoqD_HRxP3A"
    },
@@ -2515,6 +2560,7 @@
    "social": {
     "facebook": "senatorcantwell",
     "twitter": "SenatorCantwell",
+    "twitter_id": "117501995",
     "youtube": "SenatorCantwell",
     "youtube_id": "UCN52UDqKgvHRk39ncySrIMw"
    },
@@ -2559,6 +2605,7 @@
     "facebook": "jameseclyburn",
     "instagram": "repjamesclyburn",
     "twitter": "RepJamesClyburn",
+    "twitter_id": "188019606",
     "youtube": "repjamesclyburn",
     "youtube_id": "UCIyU_UA_JEa14gvAwhquKqg"
    },
@@ -2604,6 +2651,7 @@
     "facebook": "mikecrapo",
     "instagram": "mikecrapo",
     "twitter": "MikeCrapo",
+    "twitter_id": "600463589",
     "youtube": "senatorcrapo",
     "youtube_id": "UCMHzKHg1BE7dEcFjnayw1lA"
    },
@@ -2647,6 +2695,7 @@
     "facebook": "susancollins",
     "instagram": "sensusancollins",
     "twitter": "SenatorCollins",
+    "twitter_id": "19726613",
     "youtube": "SenatorSusanCollins",
     "youtube_id": "UC6GYaBx5kT2r4PN8KENxC-w"
    },
@@ -2689,7 +2738,8 @@
    "social": {
     "facebook": "RepKatCammack",
     "instagram": "repkatcammack",
-    "twitter": "RepKatCammack"
+    "twitter": "RepKatCammack",
+    "twitter_id": "1344325638983987201"
    },
    "state": "FL",
    "termEnd": "2027-01-03",
@@ -2732,6 +2782,7 @@
     "facebook": "senshelley",
     "instagram": "sencapito",
     "twitter": "SenCapito",
+    "twitter_id": "193794406",
     "youtube_id": "UCbiXdR4XQ3vD9Xp5lfR9QXw"
    },
    "state": "WV",
@@ -2774,6 +2825,7 @@
     "facebook": "judgecarter",
     "instagram": "judgecarter",
     "twitter": "JudgeCarter",
+    "twitter_id": "18030431",
     "youtube": "repjohncarter",
     "youtube_id": "UC9pkaOrhPfouzkJ8oAdI-1w"
    },
@@ -2816,6 +2868,7 @@
     "facebook": "TomColeOK04",
     "instagram": "TomColeOK04",
     "twitter": "TomColeOK04",
+    "twitter_id": "23124635",
     "youtube": "reptomcole",
     "youtube_id": "UCvqzPm_YnNkfEHpm3SEMJMQ"
    },
@@ -2858,6 +2911,7 @@
     "facebook": "RepEdCase",
     "instagram": "repedcase",
     "twitter": "RepEdCase",
+    "twitter_id": "1081350574589833221",
     "youtube": "RepEdCase"
    },
    "state": "HI",
@@ -2898,6 +2952,7 @@
    "social": {
     "facebook": "sen.johncornyn",
     "twitter": "JohnCornyn",
+    "twitter_id": "13218102",
     "youtube": "senjohncornyn",
     "youtube_id": "UCyQwLQavlOaJ64YuY_VMtiQ"
    },
@@ -2939,6 +2994,7 @@
    "social": {
     "facebook": "RepJimCosta",
     "twitter": "RepJimCosta",
+    "twitter_id": "245451804",
     "youtube": "RepJimCostaCA20",
     "youtube_id": "UCVgXX23eJEai6GiBOKO6dvA"
    },
@@ -2982,6 +3038,7 @@
     "facebook": "emanuelcleaverii",
     "instagram": "repcleaver",
     "twitter": "RepCleaver",
+    "twitter_id": "163570705",
     "youtube": "repcleaver",
     "youtube_id": "UCVC-7CLFjXczoihr5FxDLsw"
    },
@@ -3024,6 +3081,7 @@
     "facebook": "152569121550",
     "instagram": "RepCuellar",
     "twitter": "RepCuellar",
+    "twitter_id": "210926192",
     "youtube": "henrycuellar",
     "youtube_id": "UCVgEOdJx3tyILO9EjZ-heEQ"
    },
@@ -3068,6 +3126,7 @@
     "facebook": "USRepKathyCastor",
     "instagram": "usrepkathycastor",
     "twitter": "USRepKCastor",
+    "twitter_id": "1880674038",
     "youtube": "RepKathyCastor",
     "youtube_id": "UC_irxhmLqVenTFPxDxznG6g"
    },
@@ -3111,6 +3170,7 @@
     "facebook": "repyvettedclarke",
     "instagram": "repyvettedclarke",
     "twitter": "RepYvetteClarke",
+    "twitter_id": "240812994",
     "youtube": "repyvetteclarke",
     "youtube_id": "UC8SuQiuL2P9fUHAxuRoTdUQ"
    },
@@ -3153,6 +3213,7 @@
     "facebook": "CongressmanSteveCohen",
     "instagram": "repcohen",
     "twitter": "RepCohen",
+    "twitter_id": "162069635",
     "youtube": "repcohen",
     "youtube_id": "UC_NJlnsOBjOameUwZk0rvsA"
    },
@@ -3195,6 +3256,7 @@
     "facebook": "joecourtney",
     "instagram": "repjoecourtney",
     "twitter": "RepJoeCourtney",
+    "twitter_id": "85396297",
     "youtube": "repcourtney",
     "youtube_id": "UCGVIfe1T2hO1Lx7ap5Wkv1w"
    },
@@ -3237,6 +3299,7 @@
     "facebook": "CongressmanAndreCarson",
     "instagram": "repandrecarson",
     "twitter": "RepAndreCarson",
+    "twitter_id": "199325935",
     "youtube": "repandrecarson",
     "youtube_id": "UCprUnnEgM2VUGmAKSaZXCSw"
    },
@@ -3280,6 +3343,7 @@
     "facebook": "SenBillCassidy",
     "instagram": "senbillcassidy",
     "twitter": "SenBillCassidy",
+    "twitter_id": "1017500185356853248",
     "youtube": "SenatorBillCassidy",
     "youtube_id": "UCCEyGhUzxgkxFzWCY-rxz8g"
    },
@@ -3323,6 +3387,7 @@
     "facebook": "RepJudyChu",
     "instagram": "repjudychu",
     "twitter": "RepJudyChu",
+    "twitter_id": "193732179",
     "youtube": "RepJudyChu",
     "youtube_id": "UCfcbYOvdEXZNelM8T05nK-w"
    },
@@ -3367,6 +3432,7 @@
     "facebook": "RepRickCrawford",
     "instagram": "reprickcrawford",
     "twitter": "RepRickCrawford",
+    "twitter_id": "233693291",
     "youtube": "RepRickCrawford",
     "youtube_id": "UCLKAkVl4BHRK73lmDiIgPYg"
    },
@@ -3410,6 +3476,7 @@
     "facebook": "senatorchriscoons",
     "instagram": "senatorchriscoons",
     "twitter": "ChrisCoons",
+    "twitter_id": "15324851",
     "youtube": "senatorchriscoons",
     "youtube_id": "UC2lOVbsddn1HIkcDnmCw6tA"
    },
@@ -3453,6 +3520,7 @@
     "instagram": "joaquincastrotx",
     "mastodon": "@Joaquincastrotx@mastodon.social",
     "twitter": "JoaquinCastrotx",
+    "twitter_id": "231510077",
     "youtube": "JoaquinCastroTX",
     "youtube_id": "UCsRxWnFdRiV2od1O5v5nEeQ"
    },
@@ -3495,6 +3563,7 @@
    "social": {
     "facebook": "SenatorTomCotton",
     "twitter": "SenTomCotton",
+    "twitter_id": "968650362",
     "youtube": "RepTomCotton",
     "youtube_id": "UCXEk6mokWBajIpNatbjnwSg"
    },
@@ -3539,6 +3608,7 @@
     "facebook": "CongressmanKevinCramer",
     "instagram": "repkevincramer",
     "twitter": "SenKevinCramer",
+    "twitter_id": "1048784496",
     "youtube": "kevincramer",
     "youtube_id": "UCqUPdO9XaAW-dvwwXKbIVdA"
    },
@@ -3581,6 +3651,7 @@
     "facebook": "SenatorTedCruz",
     "instagram": "sentedcruz",
     "twitter": "SenTedCruz",
+    "twitter_id": "1074480192",
     "youtube": "sentedcruz",
     "youtube_id": "UCOTZ-6H1rri1lSsj6IzhUyw"
    },
@@ -3624,6 +3695,7 @@
     "facebook": "CongresswomanClark",
     "instagram": "repkclark",
     "twitter": "RepKClark",
+    "twitter_id": "2293131060",
     "youtube_id": "UCgaI52w7QKI8LtkSeCCmSuw"
    },
    "state": "MA",
@@ -3668,6 +3740,7 @@
     "facebook": "congressmanbuddycarter",
     "instagram": "repbuddycarter",
     "twitter": "RepBuddyCarter",
+    "twitter_id": "2973870195",
     "youtube_id": "UCHQm49T6ikD_ioMAt50AwKQ"
    },
    "state": "GA",
@@ -3708,7 +3781,8 @@
    "social": {
     "facebook": "congressmancomer",
     "instagram": "congressmancomer",
-    "twitter": "RepJamesComer"
+    "twitter": "RepJamesComer",
+    "twitter_id": "1274852794206388225"
    },
    "state": "KY",
    "termEnd": "2027-01-03",
@@ -3750,6 +3824,7 @@
     "facebook": "RepLouCorrea",
     "instagram": "reploucorrea",
     "twitter": "RepLouCorrea",
+    "twitter_id": "815985039485837312",
     "youtube_id": "UCIKJJp4QJIDjnjodc23qKkw"
    },
    "state": "CA",
@@ -3792,6 +3867,7 @@
     "facebook": "repsaludcarbajal",
     "instagram": "repcarbajal",
     "twitter": "RepCarbajal",
+    "twitter_id": "816157667882373120",
     "youtube": "repcarbajal"
    },
    "state": "CA",
@@ -3833,6 +3909,7 @@
     "facebook": "SenatorCortezMasto",
     "instagram": "sencortezmasto",
     "twitter": "SenCortezMasto",
+    "twitter_id": "811313565760163844",
     "youtube_id": "UCip_83SiKUqwnUT57VOXrCg"
    },
    "state": "NV",
@@ -3876,6 +3953,7 @@
     "facebook": "RepJohnCurtis",
     "instagram": "repjohncurtis",
     "twitter": "RepJohnCurtis",
+    "twitter_id": "931614483050414080",
     "youtube_id": "UChAQ4MD-HigmGnImSoAKBVA"
    },
    "state": "UT",
@@ -3917,6 +3995,7 @@
     "facebook": "RepCloudTX",
     "instagram": "repcloudtx",
     "twitter": "RepCloudTX",
+    "twitter_id": "1039879658400112640",
     "youtube": "RepCloudTX"
    },
    "state": "TX",
@@ -3959,6 +4038,7 @@
     "facebook": "RepresentativeClyde",
     "instagram": "repclyde",
     "twitter": "Rep_Clyde",
+    "twitter_id": "1357017361568694274",
     "youtube": "UC-o-UOnLuu8pZxZpShG4s7A"
    },
    "state": "GA",
@@ -4000,7 +4080,8 @@
     "facebook": "RepSeanCasten",
     "instagram": "repseancasten",
     "mastodon": "@RepCasten@mastodon.social",
-    "twitter": "RepCasten"
+    "twitter": "RepCasten",
+    "twitter_id": "1083472286089396224"
    },
    "state": "IL",
    "termEnd": "2027-01-03",
@@ -4041,6 +4122,7 @@
     "facebook": "RepBenCline",
     "instagram": "repbencline",
     "twitter": "RepBenCline",
+    "twitter_id": "1072158357237174272",
     "youtube": "@congressmanbencline8000"
    },
    "state": "VA",
@@ -4081,7 +4163,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepAngieCraig",
-    "twitter": "RepAngieCraig"
+    "twitter": "RepAngieCraig",
+    "twitter_id": "1080222360643485698"
    },
    "state": "MN",
    "termEnd": "2027-01-03",
@@ -4122,6 +4205,7 @@
     "facebook": "RepDanCrenshaw",
     "instagram": "dancrenshawtx",
     "twitter": "RepDanCrenshaw",
+    "twitter_id": "1080894931311431682",
     "youtube": "UC2XDiCjAHtJqnSEzrHAY5IQ"
    },
    "state": "TX",
@@ -4161,7 +4245,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepJasonCrow",
-    "twitter": "RepJasonCrow"
+    "twitter": "RepJasonCrow",
+    "twitter_id": "1080191866509901826"
    },
    "state": "CO",
    "termEnd": "2027-01-03",
@@ -4243,7 +4328,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepTroyCarter",
-    "twitter": "RepTroyCarter"
+    "twitter": "RepTroyCarter",
+    "twitter_id": "1352760304271241218"
    },
    "state": "LA",
    "termEnd": "2027-01-03",
@@ -4283,6 +4369,7 @@
    "social": {
     "facebook": "RepMikeCarey",
     "twitter": "RepMikeCarey",
+    "twitter_id": "1457745193197780993",
     "youtube": "@congressmanmikecarey"
    },
    "state": "OH",
@@ -4326,7 +4413,8 @@
    "social": {
     "facebook": "RepMikeCollinsGA",
     "instagram": "repmikecollins",
-    "twitter": "RepMikeCollins"
+    "twitter": "RepMikeCollins",
+    "twitter_id": "1601030771124408325"
    },
    "state": "GA",
    "termEnd": "2027-01-03",
@@ -4368,7 +4456,8 @@
    "social": {
     "facebook": "RepJasmine",
     "instagram": "RepJasmine",
-    "twitter": "RepJasmine"
+    "twitter": "RepJasmine",
+    "twitter_id": "1609974443631157248"
    },
    "state": "TX",
    "termEnd": "2027-01-03",
@@ -4409,7 +4498,8 @@
    "social": {
     "facebook": "RepCasar",
     "instagram": "RepCasar",
-    "twitter": "RepCasar"
+    "twitter": "RepCasar",
+    "twitter_id": "1499512178013057032"
    },
    "state": "TX",
    "termEnd": "2027-01-03",
@@ -4449,6 +4539,7 @@
    "social": {
     "facebook": "100088851021670",
     "twitter": "RepEliCrane",
+    "twitter_id": "1608891205902794753",
     "youtube": "@rep.elicrane"
    },
    "state": "AZ",
@@ -4491,6 +4582,7 @@
     "facebook": "100089186535085",
     "instagram": "repjuanciscomani",
     "twitter": "RepCiscomani",
+    "twitter_id": "1603530970593775616",
     "youtube": "UCD329AYGX7YnMMSUaTKWHwA"
    },
    "state": "AZ",
@@ -4613,6 +4705,7 @@
    "social": {
     "instagram": "byrondonalds",
     "twitter": "RepDonaldsPress",
+    "twitter_id": "1343968646050283522",
     "youtube": "UCjy0W7sksMz37IYY27tAZNQ"
    },
    "state": "FL",
@@ -4654,6 +4747,7 @@
    "social": {
     "facebook": "CongressmanDKDavis",
     "twitter": "RepDannyDavis",
+    "twitter_id": "789244177",
     "youtube": "dannykdavis07",
     "youtube_id": "UCdhrT09_XMr31tuI8OcKsjQ"
    },
@@ -4696,6 +4790,7 @@
    "social": {
     "facebook": "DianaDeGette",
     "twitter": "RepDianaDeGette",
+    "twitter_id": "28599820",
     "youtube": "RepDianaDeGette",
     "youtube_id": "UCWFQCRTHwsHg9P1Hf-EQtew"
    },
@@ -4738,6 +4833,7 @@
    "social": {
     "facebook": "CongresswomanRosaDeLauro",
     "twitter": "RosaDeLauro",
+    "twitter_id": "140519774",
     "youtube": "rosadelauro",
     "youtube_id": "UC9ROfGBm7kSLCEDYwFF6McQ"
    },
@@ -4822,6 +4918,7 @@
     "facebook": "lloyddoggett",
     "instagram": "replloyddoggett",
     "twitter": "RepLloydDoggett",
+    "twitter_id": "153944899",
     "youtube": "doggett",
     "youtube_id": "UCN-kiLKyHPcfRVZ28sAHS_g"
    },
@@ -4864,7 +4961,8 @@
    "social": {
     "facebook": "RepChrisDeluzio",
     "instagram": "RepDeluzio",
-    "twitter": "RepDeluzio"
+    "twitter": "RepDeluzio",
+    "twitter_id": "1608934316779921408"
    },
    "state": "PA",
    "termEnd": "2027-01-03",
@@ -4906,6 +5004,7 @@
    "social": {
     "facebook": "SenatorDurbin",
     "twitter": "SenatorDurbin",
+    "twitter_id": "247334603",
     "youtube": "SenatorDurbin",
     "youtube_id": "UCkbixlNCxcKAffEhe3X5-lw"
    },
@@ -4989,6 +5088,7 @@
     "facebook": "mdiazbalart",
     "instagram": "repmariodb",
     "twitter": "MarioDB",
+    "twitter_id": "37094727",
     "youtube": "MarioDiazBalart",
     "youtube_id": "UCpEEd0Plxx5D78pI4a4mFTQ"
    },
@@ -5031,6 +5131,7 @@
     "facebook": "ScottDesJarlaisTN04",
     "instagram": "desjarlaistn04",
     "twitter": "DesJarlaisTN04",
+    "twitter_id": "235312723",
     "youtube": "ScottDesJarlaisTN04",
     "youtube_id": "UCvjuSLoi3hS0ECQvJLhwOkA"
    },
@@ -5074,6 +5175,7 @@
     "facebook": "RepDelBene",
     "instagram": "repdelbene",
     "twitter": "RepDelBene",
+    "twitter_id": "995193054",
     "youtube_id": "UCd00b7TpKDZIr-Ujhaktvjg"
    },
    "state": "WA",
@@ -5116,6 +5218,7 @@
     "facebook": "SteveDainesMT",
     "instagram": "stevedaines",
     "twitter": "SteveDaines",
+    "twitter_id": "11651202",
     "youtube": "SteveDainesMT",
     "youtube_id": "UC-ny-W5mEUGytiyMdXbQ20Q"
    },
@@ -5159,6 +5262,7 @@
     "facebook": "SenDuckworth",
     "instagram": "SenDuckworth",
     "twitter": "SenDuckworth",
+    "twitter_id": "1058520120",
     "youtube": "repduckworth",
     "youtube_id": "UCYRWRvUxtjaHnFMCbdd94tg"
    },
@@ -5200,7 +5304,8 @@
    "social": {
     "facebook": "RepMarkDeSaulnier",
     "instagram": "repdesaulnier",
-    "twitter": "RepDeSaulnier"
+    "twitter": "RepDeSaulnier",
+    "twitter_id": "2968007206"
    },
    "state": "CA",
    "termEnd": "2027-01-03",
@@ -5241,6 +5346,7 @@
     "facebook": "RepDebbieDingell",
     "instagram": "repdingell",
     "twitter": "RepDebDingell",
+    "twitter_id": "2970279814",
     "youtube_id": "UCnoP3KLT-HOvzDfC1-I-9lQ"
    },
    "state": "MI",
@@ -5282,6 +5388,7 @@
     "facebook": "CongressmanWarrenDavidson",
     "instagram": "instawarrendavidson",
     "twitter": "WarrenDavidson",
+    "twitter_id": "742735530287304704",
     "youtube_id": "UCMzuyZWzk44YRNesFzPTeUw"
    },
    "state": "OH",
@@ -5323,6 +5430,7 @@
    "social": {
     "facebook": "drnealdunnfl2",
     "twitter": "DrNealDunnFL2",
+    "twitter_id": "815952318487298048",
     "youtube_id": "UCRTGfrYP-RuDzJ2KGok7TRA"
    },
    "state": "FL",
@@ -5361,7 +5469,8 @@
    "phone": "202-225-2865",
    "senateClass": null,
    "social": {
-    "twitter": "RepDavids"
+    "twitter": "RepDavids",
+    "twitter_id": "1080516116395499522"
    },
    "state": "KS",
    "termEnd": "2027-01-03",
@@ -5402,6 +5511,7 @@
     "facebook": "RepMadeleineDean",
     "instagram": "repmadeleinedean",
     "twitter": "RepDean",
+    "twitter_id": "567508925",
     "youtube": "UCHj4veUyhPzzOW-Jvn7MqUg"
    },
    "state": "PA",
@@ -5523,7 +5633,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepJakeEllzey",
-    "twitter": "RepEllzey"
+    "twitter": "RepEllzey",
+    "twitter_id": "1366523868253458437"
    },
    "state": "TX",
    "termEnd": "2027-01-03",
@@ -5564,6 +5675,7 @@
     "facebook": "repezell",
     "instagram": "repmikeezell",
     "twitter": "RepEzell",
+    "twitter_id": "1602788004749344768",
     "youtube": "UCseRXy2_n4j97lndfkQ_hAw"
    },
    "state": "MS",
@@ -5605,7 +5717,8 @@
    "social": {
     "facebook": "RepChuckEdwards",
     "instagram": "repchuckedwards",
-    "twitter": "RepEdwards"
+    "twitter": "RepEdwards",
+    "twitter_id": "1602748099792879616"
    },
    "state": "NC",
    "termEnd": "2027-01-03",
@@ -5646,6 +5759,7 @@
     "facebook": "reptomemmer",
     "instagram": "reptomemmer",
     "twitter": "RepTomEmmer",
+    "twitter_id": "2914515430",
     "youtube": "RepTomEmmer"
    },
    "state": "MN",
@@ -5687,6 +5801,7 @@
     "facebook": "senjoniernst",
     "instagram": "senjoniernst",
     "twitter": "SenJoniErnst",
+    "twitter_id": "2856787757",
     "youtube_id": "UCLwrmtF_84FIcK3TyMs4MIw"
    },
    "state": "IA",
@@ -5727,7 +5842,8 @@
    "social": {
     "facebook": "RepDwightEvans",
     "instagram": "repdwightevans",
-    "twitter": "RepDwightEvans"
+    "twitter": "RepDwightEvans",
+    "twitter_id": "90639372"
    },
    "state": "PA",
    "termEnd": "2027-01-03",
@@ -5768,6 +5884,7 @@
     "facebook": "RepEspaillat",
     "instagram": "repadrianoespaillat",
     "twitter": "RepEspaillat",
+    "twitter_id": "817076257770835968",
     "youtube_id": "UCi0niBYFhEY70Dz8InbX5OQ"
    },
    "state": "NY",
@@ -5809,6 +5926,7 @@
     "facebook": "RepRonEstes",
     "instagram": "RepRonEstes",
     "twitter": "RepRonEstes",
+    "twitter_id": "854715071116849157",
     "youtube_id": "UC2clc28qcehIqotHQcthnWA"
    },
    "state": "KS",
@@ -5850,6 +5968,7 @@
     "facebook": "RepEscobar",
     "instagram": "repescobar",
     "twitter": "RepEscobar",
+    "twitter_id": "1075517806551154689",
     "youtube": "UC46TX2P8K0CA_4gZv8_R2Og"
    },
    "state": "TX",
@@ -6014,6 +6133,7 @@
     "facebook": "RepPatFallon",
     "instagram": "RepPatFallon",
     "twitter": "RepPatFallon",
+    "twitter_id": "1343258042704527362",
     "youtube": "RepPatFallon"
    },
    "state": "TX",
@@ -6054,7 +6174,8 @@
    "senateClass": null,
    "social": {
     "facebook": "repfeenstra",
-    "twitter": "RepFeenstra"
+    "twitter": "RepFeenstra",
+    "twitter_id": "1345135363761852416"
    },
    "state": "IA",
    "termEnd": "2027-01-03",
@@ -6095,6 +6216,7 @@
     "facebook": "RepVirginiaFoxx",
     "instagram": "repvirginiafoxx",
     "twitter": "VirginiaFoxx",
+    "twitter_id": "16256269",
     "youtube": "repvirginiafoxx",
     "youtube_id": "UCggineJcxJn80TRXxdQbx6w"
    },
@@ -6138,6 +6260,7 @@
    "social": {
     "facebook": "CongressmanBillFoster",
     "twitter": "RepBillFoster",
+    "twitter_id": "1080509366",
     "youtube": "RepBillFoster",
     "youtube_id": "UCicixINQr_-3cFHI2bJzFpQ"
    },
@@ -6181,6 +6304,7 @@
    "social": {
     "facebook": "repchuck",
     "twitter": "RepChuck",
+    "twitter_id": "235190657",
     "youtube": "repchuck",
     "youtube_id": "UCTtRrJkM-R-f2K0byCMvHgw"
    },
@@ -6225,6 +6349,7 @@
     "facebook": "RepLoisFrankel",
     "instagram": "reploisfrankel",
     "twitter": "RepLoisFrankel",
+    "twitter_id": "1077121945",
     "youtube": "reploisfrankel",
     "youtube_id": "UCEk5viAhxaW_2OK20-yBwzQ"
    },
@@ -6267,6 +6392,7 @@
     "facebook": "senatordebfischer",
     "instagram": "senatorfischer",
     "twitter": "SenatorFischer",
+    "twitter_id": "1071402577",
     "youtube": "senatordebfischer",
     "youtube_id": "UCrbEfZaG_WhB0PBHI1hefPQ"
    },
@@ -6310,6 +6436,7 @@
     "facebook": "repbrianfitzpatrick",
     "instagram": "repbrianfitz",
     "twitter": "RepBrianFitz",
+    "twitter_id": "816303263586914304",
     "youtube_id": "UCYMNcgHss4_Q5JY2vSvMpgw"
    },
    "state": "PA",
@@ -6351,6 +6478,7 @@
     "facebook": "RepFletcher",
     "instagram": "repfletcher",
     "twitter": "RepFletcher",
+    "twitter_id": "1075904377221722113",
     "youtube": "UCIWDLoDPvawP118TNWi-9rg"
    },
    "state": "TX",
@@ -6392,6 +6520,7 @@
     "facebook": "RepRussFulcher",
     "instagram": "RepRussFulcher",
     "twitter": "RepRussFulcher",
+    "twitter_id": "1078741899572240384",
     "youtube": "UCx2AS0O5frzPB8D6TqJ3Mqg"
    },
    "state": "ID",
@@ -6434,6 +6563,7 @@
     "facebook": "repfischbach",
     "instagram": "repfischbach",
     "twitter": "RepFischbach",
+    "twitter_id": "1344375287484723205",
     "youtube": "UCAxs5zhFdAkGbkRnuC3osDw"
    },
    "state": "MN",
@@ -6474,7 +6604,8 @@
    "senateClass": null,
    "social": {
     "facebook": "CongressmanScottFitzgerald",
-    "twitter": "RepFitzgerald"
+    "twitter": "RepFitzgerald",
+    "twitter_id": "1004891731"
    },
    "state": "WI",
    "termEnd": "2027-01-03",
@@ -6516,6 +6647,7 @@
     "facebook": "RepFranklin",
     "instagram": "RepFranklin",
     "twitter": "RepFranklin",
+    "twitter_id": "1343664721384398849",
     "youtube": "@RepFranklin"
    },
    "state": "FL",
@@ -6637,7 +6769,8 @@
    "social": {
     "facebook": "RepMaxwellFrost",
     "instagram": "RepMaxwellFrost",
-    "twitter": "RepMaxwellFrost"
+    "twitter": "RepMaxwellFrost",
+    "twitter_id": "1608494113174822925"
    },
    "state": "FL",
    "termEnd": "2027-01-03",
@@ -6679,6 +6812,7 @@
     "facebook": "RepValerieFoushee",
     "instagram": "repvaleriefoushee",
     "twitter": "ValerieFoushee",
+    "twitter_id": "1611471154732060692",
     "youtube": "@RepValerieFoushee"
    },
    "state": "NC",
@@ -6722,6 +6856,7 @@
     "facebook": "reprussellfry",
     "instagram": "reprussellfry",
     "twitter": "RepRussellFry",
+    "twitter_id": "1603514304354983941",
     "youtube": "@reprussellfry"
    },
    "state": "SC",
@@ -7039,6 +7174,7 @@
     "facebook": "grassley",
     "instagram": "senatorchuckgrassley",
     "twitter": "ChuckGrassley",
+    "twitter_id": "10615232",
     "youtube": "senchuckgrassley",
     "youtube_id": "UCiCPRkcLMInpDeOqGkMTt4w"
    },
@@ -7082,6 +7218,7 @@
     "facebook": "118514606128",
     "instagram": "repsamgraves",
     "twitter": "RepSamGraves",
+    "twitter_id": "29766367",
     "youtube_id": "UCdg2ybvoHsSW6t7iJnKHlNg"
    },
    "state": "MO",
@@ -7123,6 +7260,7 @@
     "facebook": "repalgreen",
     "instagram": "repalgreen",
     "twitter": "RepAlGreen",
+    "twitter_id": "156333623",
     "youtube": "RepAlGreen",
     "youtube_id": "UCFtgMZm1YUXaZ8OtOj-GDjA"
    },
@@ -7167,6 +7305,7 @@
     "facebook": "SenKirstenGillibrand",
     "instagram": "senkirstengillibrand",
     "twitter": "GillibrandNY",
+    "twitter_id": "899978622416695297",
     "youtube": "KirstenEGillibrand",
     "youtube_id": "UCVEloQogVsmnkd5vxJInmYg"
    },
@@ -7209,6 +7348,7 @@
     "facebook": "CongressmanGuthrie",
     "instagram": "repguthrie",
     "twitter": "RepGuthrie",
+    "twitter_id": "1908143071",
     "youtube": "BrettGuthrie",
     "youtube_id": "UCdJhDw-YbdH0RHfWK0sIfiw"
    },
@@ -7251,6 +7391,7 @@
     "facebook": "repgaramendi",
     "instagram": "repgaramendi",
     "twitter": "RepGaramendi",
+    "twitter_id": "88806753",
     "youtube": "garamendiCA10",
     "youtube_id": "UCRym1qsO72C39gX6pBu4icg"
    },
@@ -7294,6 +7435,7 @@
     "facebook": "repgosar",
     "instagram": "REPGOSAR",
     "twitter": "RepGosar",
+    "twitter_id": "240760644",
     "youtube": "repgosar",
     "youtube_id": "UC5orqw_9acsKWSRbrqTDXBw"
    },
@@ -7337,6 +7479,7 @@
     "facebook": "RepMorganGriffith",
     "instagram": "hmorgangriffith",
     "twitter": "RepMGriffith",
+    "twitter_id": "234057152",
     "youtube": "RepMorganGriffith",
     "youtube_id": "UCzxqD7EY_Rdvbc0spbaYkJA"
    },
@@ -7379,7 +7522,8 @@
    "social": {
     "facebook": "RepRubenGallego",
     "instagram": "reprubengallego",
-    "twitter": "RepRubenGallego"
+    "twitter": "RepRubenGallego",
+    "twitter_id": "2966570782"
    },
    "state": "AZ",
    "termEnd": "2031-01-03",
@@ -7420,6 +7564,7 @@
     "facebook": "RepGrothman",
     "instagram": "repglenngrothman",
     "twitter": "RepGrothman",
+    "twitter_id": "2976606250",
     "youtube_id": "UCui4k83Cot4aeVW_8T33fgg"
    },
    "state": "WI",
@@ -7461,6 +7606,7 @@
     "facebook": "USCongressmanVicenteGonzalez",
     "instagram": "repvicentegonzaleztx",
     "twitter": "RepGonzalez",
+    "twitter_id": "818536152588238849",
     "youtube_id": "UC5H6oYLKQ_xIXO5CG7fh4hw"
    },
    "state": "TX",
@@ -7501,7 +7647,8 @@
    "social": {
     "facebook": "RepJoshG",
     "instagram": "RepJoshG",
-    "twitter": "RepJoshG"
+    "twitter": "RepJoshG",
+    "twitter_id": "815310506596691968"
    },
    "state": "NJ",
    "termEnd": "2027-01-03",
@@ -7542,6 +7689,7 @@
     "facebook": "RepJimmyGomez",
     "instagram": "repjimmygomez",
     "twitter": "RepJimmyGomez",
+    "twitter_id": "2371339658",
     "youtube": "UCOmm091WM6D01xTdzsWNvbQ"
    },
    "state": "CA",
@@ -7583,7 +7731,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepChuyGarcia",
-    "twitter": "RepChuyGarcia"
+    "twitter": "RepChuyGarcia",
+    "twitter_id": "1082427779583541248"
    },
    "state": "IL",
    "termEnd": "2027-01-03",
@@ -7623,7 +7772,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepSylviaGarcia",
-    "twitter": "RepSylviaGarcia"
+    "twitter": "RepSylviaGarcia",
+    "twitter_id": "1080587263132733442"
    },
    "state": "TX",
    "termEnd": "2027-01-03",
@@ -7700,7 +7850,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepMichaelGuest",
-    "twitter": "RepMichaelGuest"
+    "twitter": "RepMichaelGuest",
+    "twitter_id": "1081243468327018496"
    },
    "state": "MS",
    "termEnd": "2027-01-03",
@@ -7739,7 +7890,8 @@
    "phone": "202-225-6306",
    "senateClass": null,
    "social": {
-    "twitter": "RepGolden"
+    "twitter": "RepGolden",
+    "twitter_id": "1080891667308298240"
    },
    "state": "ME",
    "termEnd": "2027-01-03",
@@ -7780,7 +7932,8 @@
    "social": {
     "facebook": "RepCarlosGimenez",
     "instagram": "repcarlosfl",
-    "twitter": "RepCarlos"
+    "twitter": "RepCarlos",
+    "twitter_id": "1343679195034103808"
    },
    "state": "FL",
    "termEnd": "2027-01-03",
@@ -7820,7 +7973,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepAndrewGarbarino",
-    "twitter": "RepGarbarino"
+    "twitter": "RepGarbarino",
+    "twitter_id": "1344349650447433729"
    },
    "state": "NY",
    "termEnd": "2027-01-03",
@@ -7861,7 +8015,8 @@
    "social": {
     "facebook": "reprobertgarcia",
     "instagram": "RepRobertGarcia",
-    "twitter": "RepRobertGarcia"
+    "twitter": "RepRobertGarcia",
+    "twitter_id": "1602792195878047744"
    },
    "state": "CA",
    "termEnd": "2027-01-03",
@@ -7902,7 +8057,8 @@
    "social": {
     "facebook": "RepDanGoldman",
     "instagram": "repdangoldman",
-    "twitter": "RepDanGoldman"
+    "twitter": "RepDanGoldman",
+    "twitter_id": "1610019555371372544"
    },
    "state": "NY",
    "termEnd": "2027-01-03",
@@ -7943,6 +8099,7 @@
     "facebook": "RepMGP",
     "instagram": "repmgp",
     "twitter": "RepMGP",
+    "twitter_id": "1603127874512453632",
     "youtube": "@repmgp"
    },
    "state": "WA",
@@ -8294,6 +8451,7 @@
     "facebook": "SenatorHick",
     "instagram": "senatorhick",
     "twitter": "SenatorHick",
+    "twitter_id": "1318728336923787264",
     "youtube": "UCU6pcq-AZA9wnmIPBj6ePwQ"
    },
    "state": "CO",
@@ -8336,6 +8494,7 @@
     "facebook": "SenatorBillHagerty",
     "instagram": "senatorhagerty",
     "twitter": "SenatorHagerty",
+    "twitter_id": "1346873610875654147",
     "youtube": "UCqLlLx05ScUwxVHvevyaDFg"
    },
    "state": "TN",
@@ -8378,6 +8537,7 @@
     "facebook": "WhipHoyer",
     "instagram": "repstenyhoyer",
     "twitter": "RepStenyHoyer",
+    "twitter_id": "22012091",
     "youtube": "LeaderHoyer",
     "youtube_id": "UCvxgqX65cdhHNjJn64cgY9g"
    },
@@ -8422,6 +8582,7 @@
     "facebook": "senatorhirono",
     "instagram": "maziehirono",
     "twitter": "MazieHirono",
+    "twitter_id": "92186819",
     "youtube": "CongresswomanHirono",
     "youtube_id": "UCcoKhxad156flzPYJ8JMFOA"
    },
@@ -8465,6 +8626,7 @@
     "facebook": "MartinHeinrich",
     "instagram": "senatormartinheinrich",
     "twitter": "MartinHeinrich",
+    "twitter_id": "1099199839",
     "youtube": "SenMartinHeinrich",
     "youtube_id": "UCBxh8IK5sMxY0Ln_0G2NYcg"
    },
@@ -8551,6 +8713,7 @@
    "social": {
     "facebook": "AndyHarrisMD",
     "twitter": "RepAndyHarrisMD",
+    "twitter_id": "960962340",
     "youtube": "RepAndyHarris",
     "youtube_id": "UCvUuV7FiJfJi1yux4qozgMg"
    },
@@ -8593,6 +8756,7 @@
     "facebook": "RepHuizenga",
     "instagram": "RepHuizenga",
     "twitter": "RepHuizenga",
+    "twitter_id": "233949261",
     "youtube": "RepHuizenga",
     "youtube_id": "UCQPlLLiMnysMmeJ5qUSSjQg"
    },
@@ -8635,6 +8799,7 @@
     "facebook": "SenatorJohnHoeven",
     "instagram": "senjohnhoeven",
     "twitter": "SenJohnHoeven",
+    "twitter_id": "382791093",
     "youtube": "senatorjohnhoevennd",
     "youtube_id": "UC1kQIC2Q_Fq9_NRqdb6eHiw"
    },
@@ -8677,6 +8842,7 @@
    "social": {
     "instagram": "rephorsford",
     "twitter": "RepHorsford",
+    "twitter_id": "389840566",
     "youtube": "UCNEpy5bPXiyAavRzYnPlhDQ"
    },
    "state": "NV",
@@ -8717,6 +8883,7 @@
    "social": {
     "facebook": "RepRichHudson",
     "twitter": "RepRichHudson",
+    "twitter_id": "935033864",
     "youtube": "RepRichHudson",
     "youtube_id": "UC9Q1qCvnQR7rHERjTjJl5Pg"
    },
@@ -8759,6 +8926,7 @@
     "facebook": "RepHuffman",
     "instagram": "rephuffman",
     "twitter": "RepHuffman",
+    "twitter_id": "1071102246",
     "youtube": "rephuffman",
     "youtube_id": "UCJU6SP1ppp1ZhSiqZLiFgDA"
    },
@@ -8802,6 +8970,7 @@
     "facebook": "RepFrenchHill",
     "instagram": "repfrenchhill",
     "twitter": "RepFrenchHill",
+    "twitter_id": "2953974395",
     "youtube_id": "UCT8uWroJtkwSsCJlVg0IKvQ"
    },
    "state": "AR",
@@ -8844,7 +9013,8 @@
    "social": {
     "facebook": "SenatorHassan",
     "instagram": "senatorhassan",
-    "twitter": "SenatorHassan"
+    "twitter": "SenatorHassan",
+    "twitter_id": "946549322"
    },
    "state": "NH",
    "termEnd": "2029-01-03",
@@ -8884,7 +9054,8 @@
    "social": {
     "facebook": "CongressmanClayHiggins",
     "instagram": "RepClayHiggins",
-    "twitter": "RepClayHiggins"
+    "twitter": "RepClayHiggins",
+    "twitter_id": "843636970538618880"
    },
    "state": "LA",
    "termEnd": "2027-01-03",
@@ -8925,6 +9096,7 @@
     "facebook": "SenatorCindyHydeSmith",
     "instagram": "sencindyhydesmith",
     "twitter": "SenHydeSmith",
+    "twitter_id": "983348251972816896",
     "youtube_id": "UCJHxkJhGST0NTlkzJHWV03Q"
    },
    "state": "MS",
@@ -8966,6 +9138,7 @@
     "facebook": "RepJahanaHayes",
     "instagram": "repjahanahayes",
     "twitter": "RepJahanaHayes",
+    "twitter_id": "1082086081238102018",
     "youtube": "UCXngpVME5LZjcdXxZQxSDQA"
    },
    "state": "CT",
@@ -9008,6 +9181,7 @@
    "social": {
     "facebook": "repkevinhern",
     "twitter": "repkevinhern",
+    "twitter_id": "1067818539179024386",
     "youtube": "UC9XRRGCgGOEtEOwUAo1rYZg"
    },
    "state": "OK",
@@ -9049,6 +9223,7 @@
     "facebook": "RepChrissyHoulahan",
     "instagram": "repchrissyhoulahan",
     "twitter": "RepHoulahan",
+    "twitter_id": "1052896620797460481",
     "youtube": "UCGydnnhsUZqFBscmcWcT-zQ"
    },
    "state": "PA",
@@ -9088,7 +9263,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepDianaHarshbarger",
-    "twitter": "RepHarshbarger"
+    "twitter": "RepHarshbarger",
+    "twitter_id": "1345787285179162624"
    },
    "state": "TN",
    "termEnd": "2027-01-03",
@@ -9130,6 +9306,7 @@
     "facebook": "SenatorHawley",
     "instagram": "senatorhawley",
     "twitter": "SenHawleyPress",
+    "twitter_id": "1080960924687704064",
     "youtube": "UCMzt8xq6qQ3XQ_DlNfJx0-w"
    },
    "state": "MO",
@@ -9168,7 +9345,8 @@
    "phone": "202-225-4540",
    "senateClass": null,
    "social": {
-    "twitter": "RepJoshHarder"
+    "twitter": "RepJoshHarder",
+    "twitter_id": "1080851152151953410"
    },
    "state": "CA",
    "termEnd": "2027-01-03",
@@ -9208,7 +9386,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepAshleyHinson",
-    "twitter": "RepAshleyHinson"
+    "twitter": "RepAshleyHinson",
+    "twitter_id": "1340783304304410625"
    },
    "state": "IA",
    "termEnd": "2027-01-03",
@@ -9249,7 +9428,8 @@
    "social": {
     "facebook": "RepHouchin",
     "instagram": "rephouchin",
-    "twitter": "RepHouchin"
+    "twitter": "RepHouchin",
+    "twitter_id": "1603694348725526528"
    },
    "state": "IN",
    "termEnd": "2027-01-03",
@@ -9290,7 +9470,8 @@
    "social": {
     "facebook": "repvalhoyle",
     "instagram": "RepHoyle",
-    "twitter": "repvalhoyle"
+    "twitter": "repvalhoyle",
+    "twitter_id": "1612865196489412608"
    },
    "state": "OR",
    "termEnd": "2027-01-03",
@@ -9332,7 +9513,8 @@
    "social": {
     "facebook": "RepWesleyHunt",
     "instagram": "repwph",
-    "twitter": "RepWesleyHunt"
+    "twitter": "RepWesleyHunt",
+    "twitter_id": "1602751001756311556"
    },
    "state": "TX",
    "termEnd": "2027-01-03",
@@ -9690,7 +9872,8 @@
    "senateClass": null,
    "social": {
     "facebook": "congressmandarrellissa",
-    "twitter": "repdarrellissa"
+    "twitter": "repdarrellissa",
+    "twitter_id": "63650107"
    },
    "state": "CA",
    "termEnd": "2027-01-03",
@@ -9733,7 +9916,8 @@
    "social": {
     "facebook": "RepGlennIvey",
     "instagram": "repglennivey",
-    "twitter": "RepGlennIvey"
+    "twitter": "RepGlennIvey",
+    "twitter_id": "1610111693836664834"
    },
    "state": "MD",
    "termEnd": "2027-01-03",
@@ -9777,6 +9961,7 @@
     "facebook": "115356957005",
     "instagram": "rephankjohnson",
     "twitter": "RepHankJohnson",
+    "twitter_id": "24745957",
     "youtube": "RepHankJohnson",
     "youtube_id": "UCqMici9I7nz_i-PN7eSYjwQ"
    },
@@ -9818,6 +10003,7 @@
    "social": {
     "facebook": "repjimjordan",
     "twitter": "Jim_Jordan",
+    "twitter_id": "18166778",
     "youtube": "RepJimJordan",
     "youtube_id": "UCPFBhS00ivPV585GlnNlyqA"
    },
@@ -9860,6 +10046,7 @@
     "facebook": "senronjohnson",
     "instagram": "senronjohnson",
     "twitter": "SenRonJohnson",
+    "twitter_id": "233737858",
     "youtube": "SenatorRonJohnson",
     "youtube_id": "UCG9XyTVtOAs7VX_q_QVHoaw"
    },
@@ -9903,6 +10090,7 @@
     "facebook": "RepHakeemJeffries",
     "instagram": "repjeffries",
     "twitter": "RepJeffries",
+    "twitter_id": "467823431",
     "youtube_id": "UCYVmbsjoNbQ4j-PCQIYgpWQ"
    },
    "state": "NY",
@@ -9945,6 +10133,7 @@
     "facebook": "RepDaveJoyce",
     "instagram": "repdavejoyce",
     "twitter": "RepDaveJoyce",
+    "twitter_id": "976969338",
     "youtube": "repdavejoyce",
     "youtube_id": "UCTu9xz2VYk-jtQv0TVsLyYA"
    },
@@ -9988,6 +10177,7 @@
     "instagram": "repjayapal",
     "mastodon": "@RepJayapal@mastodon.social",
     "twitter": "RepJayapal",
+    "twitter_id": "815733290955112448",
     "youtube_id": "UCmyD0_-2Oowkfwc_Raghclw"
    },
    "state": "WA",
@@ -10029,6 +10219,7 @@
     "facebook": "RepMikeJohnson",
     "instagram": "RepMikeJohnson",
     "twitter": "RepMikeJohnson",
+    "twitter_id": "827279765287559171",
     "youtube_id": "UCzqBEpeIaDEfvAtsA53Fx2Q"
    },
    "state": "LA",
@@ -10067,7 +10258,8 @@
    "phone": "202-225-2801",
    "senateClass": null,
    "social": {
-    "twitter": "RepDustyJohnson"
+    "twitter": "RepDustyJohnson",
+    "twitter_id": "1074782372594413569"
    },
    "state": "SD",
    "termEnd": "2027-01-03",
@@ -10105,7 +10297,8 @@
    "phone": "202-225-2431",
    "senateClass": null,
    "social": {
-    "twitter": "RepJohnJoyce"
+    "twitter": "RepJohnJoyce",
+    "twitter_id": "1082311988926124036"
    },
    "state": "PA",
    "termEnd": "2027-01-03",
@@ -10146,7 +10339,8 @@
    "social": {
     "facebook": "RepRonnyJackson",
     "instagram": "RepRonnyJackson",
-    "twitter": "RepRonnyJackson"
+    "twitter": "RepRonnyJackson",
+    "twitter_id": "1341903465610686464"
    },
    "state": "TX",
    "termEnd": "2027-01-03",
@@ -10186,7 +10380,8 @@
    "social": {
     "facebook": "RepSaraJacobs",
     "instagram": "repsarajacobs",
-    "twitter": "RepSaraJacobs"
+    "twitter": "RepSaraJacobs",
+    "twitter_id": "1345103905869455361"
    },
    "state": "CA",
    "termEnd": "2027-01-03",
@@ -10433,6 +10628,7 @@
     "facebook": "RepresentativeMarcyKaptur",
     "instagram": "repmarcykaptur",
     "twitter": "RepMarcyKaptur",
+    "twitter_id": "581141508",
     "youtube": "USRepMarcyKaptur",
     "youtube_id": "UCIJUNf22o09nO02oQPLKQ6w"
    },
@@ -10474,6 +10670,7 @@
    "senateClass": 1,
    "social": {
     "twitter": "SenAmyKlobuchar",
+    "twitter_id": "22044727",
     "youtube": "senatorklobuchar",
     "youtube_id": "UCvdeJsDsV51tFb_hVqvtYGA"
    },
@@ -10516,6 +10713,7 @@
    "social": {
     "facebook": "Congressman.Keating",
     "twitter": "USRepKeating",
+    "twitter_id": "232992031",
     "youtube": "RepBillKeating",
     "youtube_id": "UC7KPV4xdxO2dms9vl6tETmg"
    },
@@ -10557,6 +10755,7 @@
    "social": {
     "facebook": "191056827594903",
     "twitter": "MikeKellyPA",
+    "twitter_id": "935368364",
     "youtube": "repmikekelly",
     "youtube_id": "UCoz6u3ooQxoijsWvhoQ0D-A"
    },
@@ -10599,6 +10798,7 @@
     "facebook": "SenMarkKelly",
     "instagram": "senmarkkelly",
     "twitter": "SenMarkKelly",
+    "twitter_id": "1324926274888888320",
     "youtube": "SenMarkKelly"
    },
    "state": "AZ",
@@ -10641,6 +10841,7 @@
    "social": {
     "facebook": "SenatorAngusSKingJr",
     "twitter": "SenAngusKing",
+    "twitter_id": "1068481578",
     "youtube": "SenatorAngusKing",
     "youtube_id": "UCpp6lGvrmt0XU_lnD4Ak0gA"
    },
@@ -10727,6 +10928,7 @@
     "facebook": "reprobinkelly",
     "instagram": "reprobinkelly",
     "twitter": "RepRobinKelly",
+    "twitter_id": "1339931490",
     "youtube_id": "UCLhcNPX2nNQLNzwKW0nEykg"
    },
    "state": "IL",
@@ -10768,6 +10970,7 @@
     "facebook": "reptrentkelly",
     "instagram": "reptrentkelly",
     "twitter": "RepTrentKelly",
+    "twitter_id": "3317799825",
     "youtube_id": "UCtDrz-8tdg4ZgOAQHToSWaQ"
    },
    "state": "MS",
@@ -10809,6 +11012,7 @@
     "facebook": "RepRoKhanna",
     "instagram": "reprokhanna",
     "twitter": "RepRoKhanna",
+    "twitter_id": "816298918468259841",
     "youtube_id": "UCr4KOYv1o1oEQhy1jhhm3pQ"
    },
    "state": "CA",
@@ -10850,7 +11054,8 @@
    "social": {
     "facebook": "congressmanraja",
     "instagram": "congressmanraja",
-    "twitter": "CongressmanRaja"
+    "twitter": "CongressmanRaja",
+    "twitter_id": "814179031956488192"
    },
    "state": "IL",
    "termEnd": "2027-01-03",
@@ -10891,6 +11096,7 @@
     "facebook": "RepDavidKustoff",
     "instagram": "repdavidkustoff",
     "twitter": "RepDavidKustoff",
+    "twitter_id": "816012124505931780",
     "youtube_id": "UCK6U4plOKKMrCjv_h59spGQ"
    },
    "state": "TN",
@@ -10933,6 +11139,7 @@
     "facebook": "JohnKennedyLouisiana",
     "instagram": "SenJohnKennedy",
     "twitter": "SenJohnKennedy",
+    "twitter_id": "816683274076614656",
     "youtube": "UCDgjkA5Y_npoxeUiSW18JZQ"
    },
    "state": "LA",
@@ -11015,6 +11222,7 @@
     "facebook": "RepYoungKim",
     "instagram": "repyoungkim",
     "twitter": "RepYoungKim",
+    "twitter_id": "1344677401465397249",
     "youtube": "@RepYoungKim"
    },
    "state": "CA",
@@ -11057,7 +11265,8 @@
    "social": {
     "facebook": "CongressmanKean",
     "instagram": "congressmankean",
-    "twitter": "CongressmanKean"
+    "twitter": "CongressmanKean",
+    "twitter_id": "1607422757670641665"
    },
    "state": "NJ",
    "termEnd": "2027-01-03",
@@ -11181,6 +11390,7 @@
    "social": {
     "facebook": "100089382125341",
     "twitter": "RepKiley",
+    "twitter_id": "1610356961475809280",
     "youtube": "@repkevinkiley"
    },
    "state": "CA",
@@ -11386,6 +11596,7 @@
     "instagram": "repteresalf",
     "mastodon": "@RepTeresaLF@mastodon.social",
     "twitter": "RepTeresaLF",
+    "twitter_id": "1345147845926670337",
     "youtube": "@rep.teresalegerfernandez8059"
    },
    "state": "NM",
@@ -11426,6 +11637,7 @@
    "social": {
     "facebook": "zoelofgren",
     "twitter": "RepZoeLofgren",
+    "twitter_id": "267938462",
     "youtube": "RepZoeLofgren",
     "youtube_id": "UCOaQ79adORFcaTuJZoIFuZQ"
    },
@@ -11469,6 +11681,7 @@
     "facebook": "RepFrankLucas",
     "instagram": "repfranklucas",
     "twitter": "RepFrankLucas",
+    "twitter_id": "242772524",
     "youtube": "RepFrankLucas",
     "youtube_id": "UCdYZbKY8pkWAThqwC3fdVMg"
    },
@@ -11512,6 +11725,7 @@
     "facebook": "RepJohnLarson",
     "instagram": "RepJohnBLarson",
     "twitter": "RepJohnLarson",
+    "twitter_id": "50452197",
     "youtube": "RepJohnLarson",
     "youtube_id": "UCGPsvFF-9WfpdRSCcCrPLiQ"
    },
@@ -11554,6 +11768,7 @@
     "facebook": "RepRickLarsen",
     "instagram": "repricklarsen",
     "twitter": "RepRickLarsen",
+    "twitter_id": "404132211",
     "youtube": "congressmanlarsen",
     "youtube_id": "UCMv7LsJtiyO4AJcbRux5CxQ"
    },
@@ -11598,6 +11813,7 @@
     "facebook": "repstephenlynch",
     "instagram": "repstephenlynch",
     "twitter": "RepStephenLynch",
+    "twitter_id": "310310133",
     "youtube": "RepLynch",
     "youtube_id": "UCxL4zG0YWqC5XTO4af_FOgw"
    },
@@ -11641,6 +11857,7 @@
     "facebook": "boblatta",
     "instagram": "boblatta",
     "twitter": "BobLatta",
+    "twitter_id": "15394954",
     "youtube": "CongressmanBobLatta",
     "youtube_id": "UCVSBVHoWu-eWnBBQaMKZ_sQ"
    },
@@ -11684,7 +11901,8 @@
    "social": {
     "facebook": "SenatorLujan",
     "instagram": "senatorlujan",
-    "twitter": "SenatorLujan"
+    "twitter": "SenatorLujan",
+    "twitter_id": "19318314"
    },
    "state": "NM",
    "termEnd": "2027-01-03",
@@ -11726,7 +11944,8 @@
    "social": {
     "facebook": "sencynthialummis",
     "instagram": "sencynthialummis",
-    "twitter": "SenLummis"
+    "twitter": "SenLummis",
+    "twitter_id": "22831059"
    },
    "state": "WY",
    "termEnd": "2027-01-03",
@@ -11768,6 +11987,7 @@
     "facebook": "SenatorLankford",
     "instagram": "senatorlankford",
     "twitter": "SenatorLankford",
+    "twitter_id": "225921757",
     "youtube": "SenatorLankford",
     "youtube_id": "UCz8T6sK5fEycyWmVz6Vpe5Q"
    },
@@ -11810,6 +12030,7 @@
     "facebook": "senatormikelee",
     "instagram": "senmikelee",
     "twitter": "SenMikeLee",
+    "twitter_id": "88784440",
     "youtube": "senatormikelee",
     "youtube_id": "UCplVxs_j_sLAt0fkplXcl4A"
    },
@@ -11852,6 +12073,7 @@
     "facebook": "RepTedLieu",
     "instagram": "RepTedLieu",
     "twitter": "RepTedLieu",
+    "twitter_id": "3044993235",
     "youtube_id": "UC9qcJxTqfDNBnVul1IojlFg"
    },
    "state": "CA",
@@ -11893,6 +12115,7 @@
     "facebook": "reploudermilk",
     "instagram": "RepLoudermilk",
     "twitter": "RepLoudermilk",
+    "twitter_id": "2914163523",
     "youtube_id": "UC2Kfw8fjca8k3w3KpzL5tNg"
    },
    "state": "GA",
@@ -11933,6 +12156,7 @@
    "social": {
     "facebook": "replahood",
     "twitter": "RepLaHood",
+    "twitter_id": "3686482216",
     "youtube_id": "UCVRbtFwaBGcixZIkygtalRw"
    },
    "state": "IL",
@@ -11973,7 +12197,8 @@
    "social": {
     "facebook": "RepSusieLee",
     "instagram": "repsusielee",
-    "twitter": "RepSusieLee"
+    "twitter": "RepSusieLee",
+    "twitter_id": "1079061579973439488"
    },
    "state": "NV",
    "termEnd": "2027-01-03",
@@ -12014,6 +12239,7 @@
     "facebook": "RepMikeLevin",
     "instagram": "RepMikeLevin",
     "twitter": "RepMikeLevin",
+    "twitter_id": "1072134139560620033",
     "youtube": "UCYFDRohyZgoPy5rXOaVZO-A"
    },
    "state": "CA",
@@ -12054,7 +12280,8 @@
    "senateClass": null,
    "social": {
     "facebook": "repjulialetlow",
-    "twitter": "RepJuliaLetlow"
+    "twitter": "RepJuliaLetlow",
+    "twitter_id": "1382395679700439041"
    },
    "state": "LA",
    "termEnd": "2027-01-03",
@@ -12095,6 +12322,7 @@
    "social": {
     "instagram": "repluna",
     "twitter": "RepLuna",
+    "twitter_id": "1610230835289923584",
     "youtube": "@RepLuna"
    },
    "state": "FL",
@@ -12136,7 +12364,8 @@
    "social": {
     "facebook": "RepLaurelLee",
     "instagram": "replaurellee",
-    "twitter": "RepLaurelLee"
+    "twitter": "RepLaurelLee",
+    "twitter_id": "1608230657796227072"
    },
    "state": "FL",
    "termEnd": "2027-01-03",
@@ -12177,7 +12406,8 @@
    "social": {
     "facebook": "replalota",
     "instagram": "replalota",
-    "twitter": "RepLaLota"
+    "twitter": "RepLaLota",
+    "twitter_id": "1588581125177442305"
    },
    "state": "NY",
    "termEnd": "2027-01-03",
@@ -12219,6 +12449,7 @@
     "facebook": "RepMikeLawler",
     "instagram": "RepMikeLawler",
     "twitter": "RepMikeLawler",
+    "twitter_id": "1590372047015886853",
     "youtube": "@RepMikeLawler"
    },
    "state": "NY",
@@ -12384,7 +12615,8 @@
    "social": {
     "facebook": "100089328790942",
     "instagram": "repluttrelltx",
-    "twitter": "RepLuttrell"
+    "twitter": "RepLuttrell",
+    "twitter_id": "1603028043454447621"
    },
    "state": "TX",
    "termEnd": "2027-01-03",
@@ -12509,6 +12741,7 @@
     "facebook": "EdJMarkey",
     "instagram": "senmarkeymemes",
     "twitter": "SenMarkey",
+    "twitter_id": "21406834",
     "youtube": "RepMarkey",
     "youtube_id": "UCT1ujew5yQy2uMhGrjiKHoA"
    },
@@ -12551,7 +12784,8 @@
    "social": {
     "facebook": "RepNancyMace",
     "instagram": "repnancymace",
-    "twitter": "RepNancyMace"
+    "twitter": "RepNancyMace",
+    "twitter_id": "1343597700542038017"
    },
    "state": "SC",
    "termEnd": "2027-01-03",
@@ -12594,6 +12828,7 @@
     "facebook": "RepJimMcGovern",
     "instagram": "repmcgovern",
     "twitter": "RepMcGovern",
+    "twitter_id": "242426145",
     "youtube": "repjimmcgovern",
     "youtube_id": "UCpiUqp2ZF64tXqgR_EQo27g"
    },
@@ -12634,7 +12869,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepNicole",
-    "twitter": "RepMalliotakis"
+    "twitter": "RepMalliotakis",
+    "twitter_id": "1344750588026900481"
    },
    "state": "NY",
    "termEnd": "2027-01-03",
@@ -12674,7 +12910,8 @@
    "social": {
     "facebook": "mitchmcconnell",
     "instagram": "mcconnellpress",
-    "twitter": "McConnellPress"
+    "twitter": "McConnellPress",
+    "twitter_id": "339822881"
    },
    "state": "KY",
    "termEnd": "2027-01-03",
@@ -12718,6 +12955,7 @@
     "facebook": "RepKweisiMfume",
     "instagram": "repkweisimfume",
     "twitter": "RepKweisiMfume",
+    "twitter_id": "1276209702322438148",
     "youtube": "UCbE6PJy-4U0DxosEW2TBQRA"
    },
    "state": "MD",
@@ -12759,7 +12997,8 @@
    "social": {
     "facebook": "Congressman-Tracey-Mann-105522931489227",
     "instagram": "reptraceymann",
-    "twitter": "RepMann"
+    "twitter": "RepMann",
+    "twitter_id": "1345825008887721986"
    },
    "state": "KS",
    "termEnd": "2027-01-03",
@@ -12801,6 +13040,7 @@
     "facebook": "jerrymoran",
     "instagram": "senjerrymoran",
     "twitter": "JerryMoran",
+    "twitter_id": "18632666",
     "youtube": "senatorjerrymoran",
     "youtube_id": "UC1oRxeUPam6-53wPBZ3N02A"
    },
@@ -12842,6 +13082,7 @@
    "social": {
     "instagram": "senpattymurray",
     "twitter": "PattyMurray",
+    "twitter_id": "293131808",
     "youtube": "SenatorPattyMurray",
     "youtube_id": "UCb8jq3TvQ3AzKsexhWfFLoA"
    },
@@ -12884,7 +13125,8 @@
    "social": {
     "facebook": "RepLisaMcClain",
     "instagram": "replisamcclain",
-    "twitter": "RepLisaMcClain"
+    "twitter": "RepLisaMcClain",
+    "twitter_id": "1344032292432437248"
    },
    "state": "MI",
    "termEnd": "2027-01-03",
@@ -12926,6 +13168,7 @@
     "facebook": "gregorymeeksny05",
     "instagram": "repgregorymeeks",
     "twitter": "RepGregoryMeeks",
+    "twitter_id": "22812754",
     "youtube": "gwmeeks",
     "youtube_id": "UCljJnwgQS6Z6-NypDyqKJZQ"
    },
@@ -12969,6 +13212,7 @@
     "facebook": "repbettymccollum",
     "instagram": "repbettymccollum",
     "twitter": "BettyMcCollum04",
+    "twitter_id": "516880804",
     "youtube": "BMcCollum04",
     "youtube_id": "UC3sZJSdiZo2EBHbsOlsnI7A"
    },
@@ -13012,6 +13256,7 @@
     "facebook": "SenLisaMurkowski",
     "instagram": "senlisamurkowski",
     "twitter": "LisaMurkowski",
+    "twitter_id": "18061669",
     "youtube": "senatormurkowski",
     "youtube_id": "UCaigku16AErqvD0wRuwGb9A"
    },
@@ -13055,6 +13300,7 @@
     "facebook": "michaeltmccaul",
     "instagram": "congressman_mccaul",
     "twitter": "RepMcCaul",
+    "twitter_id": "26424123",
     "youtube": "MichaelTMcCaul",
     "youtube_id": "UCRw6sGE0PH7_FCeTT3PQRaA"
    },
@@ -13097,6 +13343,7 @@
     "facebook": "GwenSMoore",
     "instagram": "RepGwenMoore",
     "twitter": "RepGwenMoore",
+    "twitter_id": "22669526",
     "youtube": "RepGwenMoore",
     "youtube_id": "UCCs9o1XaSsCsqNpO0iO0_Ew"
    },
@@ -13140,6 +13387,7 @@
     "facebook": "doris.matsui",
     "instagram": "repdorismatsui",
     "twitter": "DorisMatsui",
+    "twitter_id": "38254095",
     "youtube": "RepDorisMatsui",
     "youtube_id": "UCSqqxVkvskHq3cY2MCbTZsw"
    },
@@ -13184,6 +13432,7 @@
     "facebook": "chrismurphyct",
     "instagram": "senchrismurphy",
     "twitter": "SenMurphyOffice",
+    "twitter_id": "2853793517",
     "youtube": "senchrismurphy",
     "youtube_id": "UCbcEa40PIFpLpdDe06n3F3Q"
    },
@@ -13226,6 +13475,7 @@
     "facebook": "jeffmerkley",
     "instagram": "senjeffmerkley",
     "twitter": "SenJeffMerkley",
+    "twitter_id": "29201047",
     "youtube": "SenatorJeffMerkley",
     "youtube_id": "UCRoXttCJhMnLVCxCaa6VnNQ"
    },
@@ -13270,6 +13520,7 @@
     "facebook": "81125319109",
     "instagram": "repmcclintock",
     "twitter": "RepMcClintock",
+    "twitter_id": "50152441",
     "youtube": "McClintockCA04",
     "youtube_id": "UCMh04KC4LfIzKoXh2Xws_pw"
    },
@@ -13312,6 +13563,7 @@
     "facebook": "RepThomasMassie",
     "instagram": "repthomasmassie",
     "twitter": "RepThomasMassie",
+    "twitter_id": "975200486",
     "youtube": "repthomasmassie",
     "youtube_id": "UCpmXOtvvXC3GE8o9VxYNK7g"
    },
@@ -13353,6 +13605,7 @@
    "social": {
     "facebook": "repgracemeng",
     "twitter": "RepGraceMeng",
+    "twitter_id": "1051127714",
     "youtube_id": "UCHg516zJKbIBtXFAJ0nu3XQ"
    },
    "state": "NY",
@@ -13395,6 +13648,7 @@
     "facebook": "RepMoolenaar",
     "instagram": "RepMoolenaar",
     "twitter": "RepMoolenaar",
+    "twitter_id": "2696643955",
     "youtube_id": "UCnMvVN4a8roZu4crE0UW2DA"
    },
    "state": "MI",
@@ -13437,6 +13691,7 @@
     "facebook": "CongressmanSethMoulton",
     "instagram": "repmoulton",
     "twitter": "RepMoulton",
+    "twitter_id": "3091316093",
     "youtube_id": "UC5w5qn7nj5Ljy69LTV7a_fQ"
    },
    "state": "MA",
@@ -13479,6 +13734,7 @@
     "facebook": "RogerMarshallMD",
     "instagram": "senrogermarshall",
     "twitter": "SenatorMarshall",
+    "twitter_id": "1336344005588738052",
     "youtube": "UCR3nOFMqBB-kRpKFwgapMaQ"
    },
    "state": "KS",
@@ -13521,6 +13777,7 @@
     "facebook": "repbrianmast",
     "instagram": "RepBrianMast",
     "twitter": "RepBrianMast",
+    "twitter_id": "814103950404239360",
     "youtube": "repbrianmast"
    },
    "state": "FL",
@@ -13560,7 +13817,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepMeuser",
-    "twitter": "RepMeuser"
+    "twitter": "RepMeuser",
+    "twitter_id": "1080574793630527505"
    },
    "state": "PA",
    "termEnd": "2027-01-03",
@@ -13600,7 +13858,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepCarolMiller",
-    "twitter": "RepCarolMiller"
+    "twitter": "RepCarolMiller",
+    "twitter_id": "1081318716573470720"
    },
    "state": "WV",
    "termEnd": "2027-01-03",
@@ -13640,7 +13899,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepJoeMorelle",
-    "twitter": "RepJoeMorelle"
+    "twitter": "RepJoeMorelle",
+    "twitter_id": "1064595993222615040"
    },
    "state": "NY",
    "termEnd": "2027-01-03",
@@ -13680,7 +13940,8 @@
    "social": {
     "facebook": "RepLucyMcBath",
     "instagram": "replucymcbath",
-    "twitter": "RepLucyMcBath"
+    "twitter": "RepLucyMcBath",
+    "twitter_id": "1082380458976051202"
    },
    "state": "GA",
    "termEnd": "2027-01-03",
@@ -13721,7 +13982,8 @@
    "social": {
     "facebook": "RepGregMurphy",
     "instagram": "repgregmurphy",
-    "twitter": "RepGregMurphy"
+    "twitter": "RepGregMurphy",
+    "twitter_id": "1173978070535024642"
    },
    "state": "NC",
    "termEnd": "2027-01-03",
@@ -13761,7 +14023,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepMaryMiller",
-    "twitter": "RepMaryMiller"
+    "twitter": "RepMaryMiller",
+    "twitter_id": "1343656635907125250"
    },
    "state": "IL",
    "termEnd": "2027-01-03",
@@ -13801,7 +14064,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepBarryMoore",
-    "twitter": "RepBarryMoore"
+    "twitter": "RepBarryMoore",
+    "twitter_id": "1339006078688825344"
    },
    "state": "AL",
    "termEnd": "2027-01-03",
@@ -13843,6 +14107,7 @@
     "facebook": "RepBlakeMoore",
     "instagram": "repblakemoore",
     "twitter": "RepBlakeMoore",
+    "twitter_id": "1337452596093587462",
     "youtube": "@RepBlakeMoore"
    },
    "state": "UT",
@@ -13883,7 +14148,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepMrvan",
-    "twitter": "RepMrvan"
+    "twitter": "RepMrvan",
+    "twitter_id": "1346205046036377601"
    },
    "state": "IN",
    "termEnd": "2027-01-03",
@@ -13923,7 +14189,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepMMM",
-    "twitter": "RepMMM"
+    "twitter": "RepMMM",
+    "twitter_id": "1345807954604412929"
    },
    "state": "IA",
    "termEnd": "2027-01-03",
@@ -14005,6 +14272,7 @@
     "facebook": "RepMoskowitz",
     "instagram": "repmoskowitz",
     "twitter": "RepMoskowitz",
+    "twitter_id": "1610009027743830018",
     "youtube": "@RepMoskowitz"
    },
    "state": "FL",
@@ -14046,7 +14314,8 @@
    "social": {
     "facebook": "100089135203690",
     "instagram": "reprichmccormick",
-    "twitter": "RepMcCormick"
+    "twitter": "RepMcCormick",
+    "twitter_id": "1610689483929780225"
    },
    "state": "GA",
    "termEnd": "2027-01-03",
@@ -14127,7 +14396,8 @@
    "social": {
     "facebook": "RepMcGarvey",
     "instagram": "repmcgarvey",
-    "twitter": "RepMcGarvey"
+    "twitter": "RepMcGarvey",
+    "twitter_id": "1610300298303787008"
    },
    "state": "KY",
    "termEnd": "2027-01-03",
@@ -14292,6 +14562,7 @@
     "facebook": "CongressmanKevinMullin",
     "instagram": "repkevinmullin",
     "twitter": "RepKevinMullin",
+    "twitter_id": "1610411994888409088",
     "youtube": "UCAenuXjUZagZyD4HQL7_2ZA"
    },
    "state": "CA",
@@ -14334,7 +14605,8 @@
    "social": {
     "facebook": "repmenendez",
     "instagram": "repmenendez",
-    "twitter": "RepMenendez"
+    "twitter": "RepMenendez",
+    "twitter_id": "1603468242852397057"
    },
    "state": "NJ",
    "termEnd": "2027-01-03",
@@ -15168,6 +15440,7 @@
    "social": {
     "facebook": "CongressmanNadler",
     "twitter": "RepJerryNadler",
+    "twitter_id": "40302336",
     "youtube": "congressmannadler",
     "youtube_id": "UCQKj0qU1e7o2f5ftSh-c9aQ"
    },
@@ -15210,6 +15483,7 @@
    "social": {
     "facebook": "reprichardneal",
     "twitter": "RepRichardNeal",
+    "twitter_id": "442824717",
     "youtube": "RepRichardENeal",
     "youtube_id": "UCZVtTydu0-MSK6G12GaKA4g"
    },
@@ -15252,7 +15526,8 @@
    "social": {
     "facebook": "RepTroyNehls",
     "instagram": "reptroynehls",
-    "twitter": "RepTroyNehls"
+    "twitter": "RepTroyNehls",
+    "twitter_id": "1347318288850825217"
    },
    "state": "TX",
    "termEnd": "2027-01-03",
@@ -15295,6 +15570,7 @@
     "instagram": "congresswomannorton",
     "mastodon": "@CongresswomanNorton@Mastodon.social",
     "twitter": "EleanorNorton",
+    "twitter_id": "23600262",
     "youtube": "EleanorHNorton",
     "youtube_id": "UChRrAXUGylfxJjbquC6aUjQ"
    },
@@ -15338,6 +15614,7 @@
     "facebook": "DonaldNorcrossNJ",
     "instagram": "donald_norcross",
     "twitter": "DonaldNorcross",
+    "twitter_id": "3122099613",
     "youtube_id": "UC7kXK_PyDiOT8YrdP0jYZHw"
    },
    "state": "NJ",
@@ -15379,6 +15656,7 @@
     "facebook": "RepNewhouse",
     "instagram": "repnewhouse",
     "twitter": "RepNewhouse",
+    "twitter_id": "2930635215",
     "youtube_id": "UCllbsv_aoIaPS6W3aSonZlw"
    },
    "state": "WA",
@@ -15421,6 +15699,7 @@
     "facebook": "RepRalphNorman",
     "instagram": "repralphnorman",
     "twitter": "RepRalphNorman",
+    "twitter_id": "880480631108644864",
     "youtube": "UCVVIZjUpGRB1pgQGDBVBU8Q"
    },
    "state": "SC",
@@ -15460,7 +15739,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepJoeNeguse",
-    "twitter": "RepJoeNeguse"
+    "twitter": "RepJoeNeguse",
+    "twitter_id": "1078749802765139968"
    },
    "state": "CO",
    "termEnd": "2027-01-03",
@@ -15502,6 +15782,7 @@
     "facebook": "RepZachNunn",
     "instagram": "repzachnunn",
     "twitter": "ZachNunn",
+    "twitter_id": "1610323831809363971",
     "youtube": "UCHcM0qd2GQ2CbOHSGZ06rrA"
    },
    "state": "IA",
@@ -15541,7 +15822,8 @@
    "phone": "202-225-5861",
    "senateClass": null,
    "social": {
-    "twitter": "JayObernolte"
+    "twitter": "JayObernolte",
+    "twitter_id": "272482466"
    },
    "state": "CA",
    "termEnd": "2027-01-03",
@@ -15583,6 +15865,7 @@
     "facebook": "CongressmanBurgessOwens",
     "instagram": "repburgessowens",
     "twitter": "RepBurgessOwens",
+    "twitter_id": "1344481217685692416",
     "youtube": "UCxeB7xjbLDJM9Yw6brXsX6Q"
    },
    "state": "UT",
@@ -15622,7 +15905,8 @@
    "senateClass": null,
    "social": {
     "facebook": "repaoc",
-    "twitter": "RepAOC"
+    "twitter": "RepAOC",
+    "twitter_id": "1079104563280527364"
    },
    "state": "NY",
    "termEnd": "2027-01-03",
@@ -15660,7 +15944,8 @@
    "phone": "202-225-4755",
    "senateClass": null,
    "social": {
-    "twitter": "Ilhan"
+    "twitter": "Ilhan",
+    "twitter_id": "1082334352711790593"
    },
    "state": "MN",
    "termEnd": "2027-01-03",
@@ -15701,7 +15986,8 @@
    "social": {
     "facebook": "SenOssoff",
     "instagram": "jonossoff",
-    "twitter": "SenOssoff"
+    "twitter": "SenOssoff",
+    "twitter_id": "1356714265894408196"
    },
    "state": "GA",
    "termEnd": "2027-01-03",
@@ -15871,6 +16157,7 @@
     "facebook": "repfrankpallone",
     "instagram": "repfrankpallone",
     "twitter": "FrankPallone",
+    "twitter_id": "31801993",
     "youtube": "repfrankpallone",
     "youtube_id": "UCN0_wn9hs1LI3UKkji2PP2A"
    },
@@ -15915,6 +16202,7 @@
     "facebook": "RepAugustPfluger",
     "instagram": "repaugustpfluger",
     "twitter": "RepPfluger",
+    "twitter_id": "1341120751399809026",
     "youtube": "UC8bJT16wpa7co50ELvpMTTg"
    },
    "state": "TX",
@@ -15956,7 +16244,8 @@
    "social": {
     "facebook": "SenAlexPadilla",
     "instagram": "SenAlexPadilla",
-    "twitter": "SenAlexPadilla"
+    "twitter": "SenAlexPadilla",
+    "twitter_id": "1351236267707654145"
    },
    "state": "CA",
    "termEnd": "2029-01-03",
@@ -15996,6 +16285,7 @@
    "social": {
     "facebook": "NancyPelosi",
     "twitter": "SpeakerPelosi",
+    "twitter_id": "15764644",
     "youtube": "nancypelosi",
     "youtube_id": "UCxPeEcH0xaCK9nBK98EFhDg"
    },
@@ -16040,6 +16330,7 @@
     "facebook": "SenGaryPeters",
     "instagram": "sengarypeters",
     "twitter": "SenGaryPeters",
+    "twitter_id": "236511574",
     "youtube": "RepGaryPeters",
     "youtube_id": "UC7LYNbnKSK2VZqQ98YROWHQ"
    },
@@ -16084,6 +16375,7 @@
     "instagram": "chelliepingree",
     "mastodon": "@chelliepingree@mastodon.social",
     "twitter": "ChelliePingree",
+    "twitter_id": "14984637",
     "youtube": "congresswomanpingree",
     "youtube_id": "UCLKaWFM7I84WcreDRhhhkVg"
    },
@@ -16126,6 +16418,7 @@
     "facebook": "SenatorRandPaul",
     "instagram": "senatorrandpaul",
     "twitter": "SenRandPaul",
+    "twitter_id": "1298624375692894210",
     "youtube": "SenatorRandPaul",
     "youtube_id": "UCeM9I-20oWUs8daIIpsNHoQ"
    },
@@ -16168,6 +16461,7 @@
     "facebook": "repscottperry",
     "instagram": "repscottperry",
     "twitter": "RepScottPerry",
+    "twitter_id": "18773159",
     "youtube": "RepScottPerry",
     "youtube_id": "UCzgrU5PT_HHRgf5hXPen4dQ"
    },
@@ -16210,6 +16504,7 @@
     "facebook": "repmarkpocan",
     "instagram": "repmarkpocan",
     "twitter": "RepMarkPocan",
+    "twitter_id": "1206227149",
     "youtube": "repmarkpocan",
     "youtube_id": "UCz5b47WER_u3dUGV_Zi70dQ"
    },
@@ -16253,6 +16548,7 @@
     "facebook": "RepScottPeters",
     "instagram": "repscottpeters",
     "twitter": "RepScottPeters",
+    "twitter_id": "1135486501",
     "youtube_id": "UCQK77QJxW7Xr-S3zqeMd-0g"
    },
    "state": "CA",
@@ -16295,6 +16591,7 @@
     "facebook": "CongressmanGaryPalmer",
     "instagram": "repgarypalmer",
     "twitter": "USRepGaryPalmer",
+    "twitter_id": "2861616083",
     "youtube_id": "UCYZfP-cNIvlJY3AcAc9OPpQ"
    },
    "state": "AL",
@@ -16337,6 +16634,7 @@
     "facebook": "repstaceyplaskett",
     "instagram": "stacey_plaskett",
     "twitter": "StaceyPlaskett",
+    "twitter_id": "2724095695",
     "youtube_id": "UC3V7biFZHDFHDFZy6cCSZUA"
    },
    "state": "VI",
@@ -16378,6 +16676,7 @@
     "facebook": "RepJimmyPanetta",
     "instagram": "repjimmypanetta",
     "twitter": "RepJimmyPanetta",
+    "twitter_id": "796736612554117120",
     "youtube_id": "UCmw-aERG51C96edMDPN7fXQ"
    },
    "state": "CA",
@@ -16417,7 +16716,8 @@
    "phone": "202-225-5456",
    "senateClass": null,
    "social": {
-    "twitter": "RepChrisPappas"
+    "twitter": "RepChrisPappas",
+    "twitter_id": "1067748650485497862"
    },
    "state": "NH",
    "termEnd": "2027-01-03",
@@ -16458,6 +16758,7 @@
     "facebook": "RepAyannaPressley",
     "instagram": "RepAyannaPressley",
     "twitter": "RepPressley",
+    "twitter_id": "1080584229510172678",
     "youtube": "UCkhjut8oXdxN7HGg5eRT9Fw"
    },
    "state": "MA",
@@ -16618,6 +16919,7 @@
     "facebook": "repmikequigley",
     "instagram": "repmikequigley",
     "twitter": "RepMikeQuigley",
+    "twitter_id": "56864092",
     "youtube": "RepMikeQuigley",
     "youtube_id": "UCDP13XegdoZ4bxYHxM34yAA"
    },
@@ -16662,6 +16964,7 @@
    "social": {
     "facebook": "SenJackReed",
     "twitter": "SenJackReed",
+    "twitter_id": "486694111",
     "youtube": "SenatorReed",
     "youtube_id": "UCT_aFVtsjxPwWKfO-PW_hPw"
    },
@@ -16704,7 +17007,8 @@
    "social": {
     "facebook": "RepDeborahRoss",
     "instagram": "repdeborahross",
-    "twitter": "RepDeborahRoss"
+    "twitter": "RepDeborahRoss",
+    "twitter_id": "1348683154815655940"
    },
    "state": "NC",
    "termEnd": "2027-01-03",
@@ -16746,6 +17050,7 @@
     "facebook": "CongressmanHalRogers",
     "instagram": "rephalrogers",
     "twitter": "RepHalRogers",
+    "twitter_id": "550401754",
     "youtube": "RepHalRogers",
     "youtube_id": "UChVFKLZkRoHQDhp4zNvEezQ"
    },
@@ -16788,6 +17093,7 @@
     "facebook": "CongressmanMikeDRogers",
     "instagram": "repmikerogersal",
     "twitter": "RepMikeRogersAL",
+    "twitter_id": "33977070",
     "youtube": "MikeRogersAL03",
     "youtube_id": "UCH-WUWuY0_dlKwJDSqKTJsg"
    },
@@ -16827,7 +17133,8 @@
    "phone": "202-225-5614",
    "senateClass": null,
    "social": {
-    "twitter": "RepPatRyanNY"
+    "twitter": "RepPatRyanNY",
+    "twitter_id": "1569400849130049537"
    },
    "state": "NY",
    "termEnd": "2027-01-03",
@@ -16868,6 +17175,7 @@
    "social": {
     "facebook": "senatorjimrisch",
     "twitter": "SenatorRisch",
+    "twitter_id": "1096059529",
     "youtube": "SenatorJamesRisch",
     "youtube_id": "UCncKW8xyT5UbPNO27YuQnBA"
    },
@@ -16909,6 +17217,7 @@
    "social": {
     "facebook": "CongressmanRaulRuizMD",
     "twitter": "RepRaulRuizMD",
+    "twitter_id": "1089859058",
     "youtube": "repraulruiz",
     "youtube_id": "UCSDk-cyNPCo1iy6rweSPmBw"
    },
@@ -16951,6 +17260,7 @@
    "social": {
     "facebook": "aumuaamata",
     "twitter": "RepAmata",
+    "twitter_id": "3026622545",
     "youtube_id": "UCGdrLQbt1PYDTPsampx4t1A"
    },
    "state": "AS",
@@ -16992,6 +17302,7 @@
     "facebook": "RepRouzer",
     "instagram": "repdavidrouzer",
     "twitter": "RepDavidRouzer",
+    "twitter_id": "834069080",
     "youtube_id": "UCBvOxpqoGi1HlHjX9v_gHZw"
    },
    "state": "NC",
@@ -17033,6 +17344,7 @@
     "facebook": "SenatorMikeRounds",
     "instagram": "senatorrounds",
     "twitter": "SenatorRounds",
+    "twitter_id": "2955485182",
     "youtube_id": "UC-pvzimyBdpdkcIfsicrfrQ"
    },
    "state": "SD",
@@ -17074,6 +17386,7 @@
     "facebook": "repraskin",
     "instagram": "repraskin",
     "twitter": "RepRaskin",
+    "twitter_id": "806906355214852096",
     "youtube_id": "UChxDE6vho5BfBTOqiBsDmKg"
    },
    "state": "MD",
@@ -17115,7 +17428,8 @@
    "social": {
     "facebook": "RepJackyRosen",
     "instagram": "repjackyrosen",
-    "twitter": "SenJackyRosen"
+    "twitter": "SenJackyRosen",
+    "twitter_id": "818554054309715969"
    },
    "state": "NV",
    "termEnd": "2031-01-03",
@@ -17157,6 +17471,7 @@
     "facebook": "RepRutherfordFL",
     "instagram": "reprutherfordfl",
     "twitter": "RepRutherfordFL",
+    "twitter_id": "828977216595849216",
     "youtube": "Reprutherfordfl"
    },
    "state": "FL",
@@ -17198,6 +17513,7 @@
     "facebook": "GReschenthaler",
     "instagram": "greschenthaler",
     "twitter": "GReschenthaler",
+    "twitter_id": "4205133682",
     "youtube": "RepGuyReschenthaler"
    },
    "state": "PA",
@@ -17238,7 +17554,8 @@
    "senateClass": null,
    "social": {
     "facebook": "repjohnrose",
-    "twitter": "RepJohnRose"
+    "twitter": "RepJohnRose",
+    "twitter_id": "1081312310059253763"
    },
    "state": "TN",
    "termEnd": "2027-01-03",
@@ -17276,7 +17593,8 @@
    "phone": "202-225-4236",
    "senateClass": null,
    "social": {
-    "twitter": "RepChipRoy"
+    "twitter": "RepChipRoy",
+    "twitter_id": "1082790600292925440"
    },
    "state": "TX",
    "termEnd": "2027-01-03",
@@ -17553,6 +17871,7 @@
    "social": {
     "facebook": "senatorsanders",
     "twitter": "SenSanders",
+    "twitter_id": "29442313",
     "youtube": "senatorsanders",
     "youtube_id": "UCD_DaKNac0Ta-2PeHuoQ1uA"
    },
@@ -17598,6 +17917,7 @@
     "facebook": "senschumer",
     "instagram": "senschumer",
     "twitter": "SenSchumer",
+    "twitter_id": "17494010",
     "youtube": "SenatorSchumer",
     "youtube_id": "UC-ABttxh8uQv_10qmwGaidw"
    },
@@ -17640,7 +17960,8 @@
    "social": {
     "facebook": "RepMariaSalazar",
     "instagram": "repmariasalazar",
-    "twitter": "RepMariaSalazar"
+    "twitter": "RepMariaSalazar",
+    "twitter_id": "1325928411689349120"
    },
    "state": "FL",
    "termEnd": "2027-01-03",
@@ -17683,6 +18004,7 @@
     "facebook": "RepBobbyScott",
     "instagram": "repbobbyscott",
     "twitter": "BobbyScott",
+    "twitter_id": "161791703",
     "youtube": "repbobbyscott",
     "youtube_id": "UCdNNcpw8arCsUp55JwK_QAA"
    },
@@ -17726,6 +18048,7 @@
     "facebook": "petesessions",
     "instagram": "congressmanpetesessions",
     "twitter": "PeteSessions",
+    "twitter_id": "24735461",
     "youtube": "@congressmanpetesessions"
    },
    "state": "TX",
@@ -17768,6 +18091,7 @@
     "facebook": "63158229861",
     "instagram": "congressmansherman",
     "twitter": "BradSherman",
+    "twitter_id": "30216513",
     "youtube": "shermanca27",
     "youtube_id": "UCPisrz6-SLwVy2l9Mcy8kug"
    },
@@ -17810,6 +18134,7 @@
     "facebook": "RepAdamSmith",
     "instagram": "repadamsmith",
     "twitter": "RepAdamSmith",
+    "twitter_id": "58928690",
     "youtube": "CongressmanAdamSmith",
     "youtube_id": "UCcrHso483LOfC6WwDnzAh-g"
    },
@@ -17893,7 +18218,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepSpartz",
-    "twitter": "RepSpartz"
+    "twitter": "RepSpartz",
+    "twitter_id": "1344845201479663621"
    },
    "state": "IN",
    "termEnd": "2027-01-03",
@@ -17936,6 +18262,7 @@
     "facebook": "janschakowsky",
     "instagram": "JanSchakowsky",
     "twitter": "JanSchakowsky",
+    "twitter_id": "24195214",
     "youtube": "repschakowsky",
     "youtube_id": "UCuCHHPSENUEaaeH8n_CYDXQ"
    },
@@ -17980,6 +18307,7 @@
     "facebook": "96007744606",
     "instagram": "congressmanmikesimpson",
     "twitter": "CongMikeSimpson",
+    "twitter_id": "76132891",
     "youtube": "CongMikeSimpson",
     "youtube_id": "UCNXe0rJJeULTAP_7oyQNw8g"
    },
@@ -18066,6 +18394,7 @@
     "facebook": "CongresswomanLindaSanchez",
     "instagram": "replindasanchez",
     "twitter": "RepLindaSanchez",
+    "twitter_id": "312134473",
     "youtube": "LindaTSanchez",
     "youtube_id": "UCu1K6uHxjMgj2mvzM7O9-ow"
    },
@@ -18107,7 +18436,8 @@
    "social": {
     "facebook": "RepStricklandWA",
     "instagram": "repstricklandwa",
-    "twitter": "RepStricklandWA"
+    "twitter": "RepStricklandWA",
+    "twitter_id": "1343646545955213312"
    },
    "state": "WA",
    "termEnd": "2027-01-03",
@@ -18148,6 +18478,7 @@
     "facebook": "repadriansmith",
     "instagram": "RepAdrianSmith",
     "twitter": "RepAdrianSmith",
+    "twitter_id": "296245061",
     "youtube": "RepAdrianSmith",
     "youtube_id": "UCIgn2z-hwxx_aeggnyhv54Q"
    },
@@ -18191,6 +18522,7 @@
     "facebook": "RepSteveScalise",
     "instagram": "stevescalise",
     "twitter": "SteveScalise",
+    "twitter_id": "1209417007",
     "youtube": "RepSteveScalise",
     "youtube_id": "UCmYveHBVXVBRxl7GiCL-gjw"
    },
@@ -18233,6 +18565,7 @@
     "facebook": "SenatorShaheen",
     "instagram": "senatorshaheen",
     "twitter": "SenatorShaheen",
+    "twitter_id": "109287731",
     "youtube": "senatorshaheen",
     "youtube_id": "UCjLZAZMbDrybHyttdEC9LFA"
    },
@@ -18277,6 +18610,7 @@
     "facebook": "repdavidschweikert",
     "instagram": "repdavid",
     "twitter": "RepDavid",
+    "twitter_id": "229197216",
     "youtube": "RepDavidSchweikert",
     "youtube_id": "UCVvuNVzkOUp7p_Pzkc6Zuvw"
    },
@@ -18320,6 +18654,7 @@
     "facebook": "SenatorTimScott",
     "instagram": "SenatorTimScott",
     "twitter": "SenatorTimScott",
+    "twitter_id": "217543151",
     "youtube": "SenatorTimScott",
     "youtube_id": "UCSfAsbG80CNInSKrtpKoL-w"
    },
@@ -18363,6 +18698,7 @@
     "facebook": "RepSewell",
     "instagram": "repterriasewell",
     "twitter": "RepTerriSewell",
+    "twitter_id": "381152398",
     "youtube": "RepSewell",
     "youtube_id": "UCHkEHtfrfUWOFtbUFQTQH7Q"
    },
@@ -18446,6 +18782,7 @@
    "social": {
     "facebook": "RepAustinScott",
     "twitter": "AustinScottGA08",
+    "twitter_id": "234797704",
     "youtube": "RepAustinScott",
     "youtube_id": "UC5M7eKHKQStktMyjieiHYZQ"
    },
@@ -18490,6 +18827,7 @@
     "facebook": "CongressmanBradSchneider",
     "instagram": "repschneider",
     "twitter": "RepSchneider",
+    "twitter_id": "1071840474",
     "youtube": "RepBradSchneider"
    },
    "state": "IL",
@@ -18533,6 +18871,7 @@
     "facebook": "SenBrianSchatz",
     "instagram": "senbrianschatz",
     "twitter": "SenBrianSchatz",
+    "twitter_id": "1262099252",
     "youtube": "senbrianschatz",
     "youtube_id": "UC8-mSYp2WqBiB_5iwtwKfow"
    },
@@ -18575,6 +18914,7 @@
    "social": {
     "facebook": "repjasonsmith",
     "twitter": "RepJasonSmith",
+    "twitter_id": "1623308912",
     "youtube": "RepJasonSmith",
     "youtube_id": "UCzj9-27Lr4gcqopmZAobXXg"
    },
@@ -18618,6 +18958,7 @@
     "facebook": "RepEliseStefanik",
     "instagram": "repstefanik",
     "twitter": "RepStefanik",
+    "twitter_id": "2962813893",
     "youtube_id": "UCHvf42C8Vw6QnjwO2L2ukKA"
    },
    "state": "NY",
@@ -18659,6 +19000,7 @@
     "facebook": "SenDanSullivan",
     "instagram": "sen_dansullivan",
     "twitter": "SenDanSullivan",
+    "twitter_id": "2891210047",
     "youtube_id": "UC7tXCm8gKlAhTFo2kuf5ylw"
    },
    "state": "AK",
@@ -18699,6 +19041,7 @@
    "social": {
     "facebook": "RepSmucker",
     "twitter": "RepSmucker",
+    "twitter_id": "41417564",
     "youtube_id": "UCs5iMvWy-oTHyf5HuwB7FCg"
    },
    "state": "PA",
@@ -18740,6 +19083,7 @@
     "facebook": "CongressmanDarrenSoto",
     "instagram": "RepDarrenSoto",
     "twitter": "RepDarrenSoto",
+    "twitter_id": "818713465653051392",
     "youtube": "repdarrensoto"
    },
    "state": "FL",
@@ -18821,7 +19165,8 @@
    "social": {
     "facebook": "USSenTinaSmith",
     "instagram": "senatortinasmith",
-    "twitter": "SenTinaSmith"
+    "twitter": "SenTinaSmith",
+    "twitter_id": "941000686275387392"
    },
    "state": "MN",
    "termEnd": "2027-01-03",
@@ -18862,7 +19207,8 @@
    "social": {
     "facebook": "repmgs",
     "instagram": "repmgs",
-    "twitter": "RepMGS"
+    "twitter": "RepMGS",
+    "twitter_id": "1067541214671577093"
    },
    "state": "PA",
    "termEnd": "2027-01-03",
@@ -18903,7 +19249,8 @@
    "social": {
     "facebook": "SenElissaSlotkin",
     "instagram": "senslotkin",
-    "twitter": "RepSlotkin"
+    "twitter": "RepSlotkin",
+    "twitter_id": "1078401427347857408"
    },
    "state": "MI",
    "termEnd": "2031-01-03",
@@ -18943,7 +19290,8 @@
    "social": {
     "facebook": "repgregstanton",
     "instagram": "repgregstanton",
-    "twitter": "RepGregStanton"
+    "twitter": "RepGregStanton",
+    "twitter_id": "1080885078425784320"
    },
    "state": "AZ",
    "termEnd": "2027-01-03",
@@ -18982,7 +19330,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepPeteStauber",
-    "twitter": "RepPeteStauber"
+    "twitter": "RepPeteStauber",
+    "twitter_id": "1075830599007510535"
    },
    "state": "MN",
    "termEnd": "2027-01-03",
@@ -19020,7 +19369,8 @@
    "phone": "202-225-3031",
    "senateClass": null,
    "social": {
-    "twitter": "RepBryanSteil"
+    "twitter": "RepBryanSteil",
+    "twitter_id": "1075205691621720064"
    },
    "state": "WI",
    "termEnd": "2027-01-03",
@@ -19062,6 +19412,7 @@
     "facebook": "RepGregSteube",
     "instagram": "repgregsteube",
     "twitter": "RepGregSteube",
+    "twitter_id": "1083125649609506816",
     "youtube": "@RepGregSteube"
    },
    "state": "FL",
@@ -19103,7 +19454,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepHaleyStevens",
-    "twitter": "RepHaleyStevens"
+    "twitter": "RepHaleyStevens",
+    "twitter_id": "1076161611033968640"
    },
    "state": "MI",
    "termEnd": "2027-01-03",
@@ -19142,7 +19494,8 @@
    "senateClass": null,
    "social": {
     "facebook": "repkimschrier",
-    "twitter": "RepKimSchrier"
+    "twitter": "RepKimSchrier",
+    "twitter_id": "1080462532815532032"
    },
    "state": "WA",
    "termEnd": "2027-01-03",
@@ -19183,6 +19536,7 @@
     "facebook": "RickScottSenOffice",
     "instagram": "flsenrickscott",
     "twitter": "SenRickScott",
+    "twitter_id": "131546062",
     "youtube_id": "UC-Y9pFmW4PYGZHkC8lcqSkQ"
    },
    "state": "FL",
@@ -19223,7 +19577,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepStansbury",
-    "twitter": "Rep_Stansbury"
+    "twitter": "Rep_Stansbury",
+    "twitter_id": "1404519992582942724"
    },
    "state": "NM",
    "termEnd": "2027-01-03",
@@ -19346,6 +19701,7 @@
     "facebook": "repemiliasykes",
     "instagram": "RepEmiliaSykes",
     "twitter": "RepEmiliaSykes",
+    "twitter_id": "1611527835742519297",
     "youtube": "@repemiliasykes"
    },
    "state": "OH",
@@ -19428,7 +19784,8 @@
    "senateClass": null,
    "social": {
     "instagram": "repericsorensen",
-    "twitter": "RepEricSorensen"
+    "twitter": "RepEricSorensen",
+    "twitter_id": "1611441794704674828"
    },
    "state": "IL",
    "termEnd": "2027-01-03",
@@ -19750,7 +20107,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepTiffany",
-    "twitter": "RepTiffany"
+    "twitter": "RepTiffany",
+    "twitter_id": "1267841066335682562"
    },
    "state": "WI",
    "termEnd": "2027-01-03",
@@ -19792,6 +20150,7 @@
     "facebook": "CongressmanBennieGThompson",
     "instagram": "benniegthompson",
     "twitter": "BennieGThompson",
+    "twitter_id": "82453460",
     "youtube": "RepBennieThompson",
     "youtube_id": "UCzt2pBxh0dI24kYrWretXRw"
    },
@@ -19835,6 +20194,7 @@
     "facebook": "LeaderJohnThune",
     "instagram": "senjohnthune",
     "twitter": "SenJohnThune",
+    "twitter_id": "296361085",
     "youtube": "johnthune",
     "youtube_id": "UCRu6lpRfxhkDGUrKDgQNZYQ"
    },
@@ -19877,7 +20237,8 @@
    "social": {
     "facebook": "SenatorTuberville",
     "instagram": "sentuberville",
-    "twitter": "SenTuberville"
+    "twitter": "SenTuberville",
+    "twitter_id": "1345739193721487362"
    },
    "state": "AL",
    "termEnd": "2027-01-03",
@@ -19919,6 +20280,7 @@
     "facebook": "RepMikeThompson",
     "mastodon": "@repthompson@mastodon.social",
     "twitter": "RepThompson",
+    "twitter_id": "303861808",
     "youtube": "CongressmanMThompson",
     "youtube_id": "UC6pGbtqHZYZmScFGSz5bbdg"
    },
@@ -19964,6 +20326,7 @@
     "facebook": "RepMikeTurner",
     "instagram": "repmiketurner",
     "twitter": "RepMikeTurner",
+    "twitter_id": "51228911",
     "youtube": "CongressmanTurner",
     "youtube_id": "UC-6Ss-aZ3OPisf9GdVGtN8g"
    },
@@ -20006,6 +20369,7 @@
     "facebook": "CongressmanGT",
     "instagram": "congressman_gt",
     "twitter": "CongressmanGT",
+    "twitter_id": "18967498",
     "youtube": "CongressmanGT",
     "youtube_id": "UCNWX7lbWWvnNdzVMFI9DRiQ"
    },
@@ -20048,6 +20412,7 @@
     "facebook": "CongresswomanTitus",
     "instagram": "dinatitusnv",
     "twitter": "RepDinaTitus",
+    "twitter_id": "122174004",
     "youtube": "CongresswomanTitus",
     "youtube_id": "UC_US4jNqECuMSNrB7yVCbbw"
    },
@@ -20090,6 +20455,7 @@
     "facebook": "reppaultonko",
     "instagram": "reppaultonko",
     "twitter": "RepPaulTonko",
+    "twitter_id": "84119348",
     "youtube": "reppaultonko",
     "youtube_id": "UC3P2SGFmmuCYRsjeso0hOQQ"
    },
@@ -20132,6 +20498,7 @@
     "facebook": "RepMarkTakano",
     "instagram": "repmarktakano",
     "twitter": "RepMarkTakano",
+    "twitter_id": "1037321378",
     "youtube": "RepMarkTakano",
     "youtube_id": "UCJg4F1irmSFeKoXZBaZbX2w"
    },
@@ -20176,6 +20543,7 @@
     "instagram": "repnormatorres",
     "mastodon": "@repnormatorres@mstdn.social",
     "twitter": "NormaJTorres",
+    "twitter_id": "236279233",
     "youtube_id": "UCvWY4qKP6--o3pIJY7hhKDg"
    },
    "state": "CA",
@@ -20217,6 +20585,7 @@
     "facebook": "SenatorThomTillis",
     "instagram": "senthomtillis",
     "twitter": "SenThomTillis",
+    "twitter_id": "2964174789",
     "youtube_id": "UCUD9VGV4SSGWjGdbn37Ea2w"
    },
    "state": "NC",
@@ -20256,7 +20625,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepClaudiaTenney",
-    "twitter": "RepTenney"
+    "twitter": "RepTenney",
+    "twitter_id": "797201048490430465"
    },
    "state": "NY",
    "termEnd": "2027-01-03",
@@ -20297,7 +20667,8 @@
    "social": {
     "facebook": "reptimmons",
     "instagram": "reptimmons",
-    "twitter": "RepTimmons"
+    "twitter": "RepTimmons",
+    "twitter_id": "1079770852302958592"
    },
    "state": "SC",
    "termEnd": "2027-01-03",
@@ -20338,6 +20709,7 @@
     "facebook": "RepRashida",
     "instagram": "reprashida",
     "twitter": "RepRashida",
+    "twitter_id": "1079769536730140672",
     "youtube": "UCl5GK07sD5TZIhKcsDNSExA"
    },
    "state": "MI",
@@ -20380,6 +20752,7 @@
     "instagram": "reploritrahan",
     "mastodon": "@RepLoriTrahan@mastodon.social",
     "twitter": "RepLoriTrahan",
+    "twitter_id": "1079802482640019456",
     "youtube": "UCsRXg0BmoS4Rkjz-pqX1PmQ"
    },
    "state": "MA",
@@ -20422,6 +20795,7 @@
     "facebook": "RepRitchie",
     "instagram": "repritchie",
     "twitter": "RepRitchie",
+    "twitter_id": "1276403757224546304",
     "youtube": "@RepRitchie"
    },
    "state": "NY",
@@ -20464,6 +20838,7 @@
     "facebook": "RepJillTokuda",
     "instagram": "repjilltokuda",
     "twitter": "RepJillTokuda",
+    "twitter_id": "1610730477563805699",
     "youtube": "UCBXwZrEZWQiSXebInVuYuvw"
    },
    "state": "HI",
@@ -20504,7 +20879,8 @@
    "social": {
     "facebook": "CongressmanShriThanedar",
     "instagram": "RepShriThanedar",
-    "twitter": "RepShriThanedar"
+    "twitter": "RepShriThanedar",
+    "twitter_id": "1610719275265802253"
    },
    "state": "MI",
    "termEnd": "2027-01-03",
@@ -20619,7 +20995,8 @@
    "phone": "202-225-2976",
    "senateClass": null,
    "social": {
-    "twitter": "RepUnderwood"
+    "twitter": "RepUnderwood",
+    "twitter_id": "1080539438508400642"
    },
    "state": "IL",
    "termEnd": "2027-01-03",
@@ -20660,6 +21037,7 @@
    "social": {
     "facebook": "8037068318",
     "twitter": "NydiaVelazquez",
+    "twitter_id": "164369297",
     "youtube": "nydiavelazquez",
     "youtube_id": "UCqMKPkKeeHFOOiZ9vxhXGVg"
    },
@@ -20703,6 +21081,7 @@
     "facebook": "chrisvanhollen",
     "instagram": "chrisvanhollen",
     "twitter": "ChrisVanHollen",
+    "twitter_id": "18137749",
     "youtube": "RepChrisVanHollen",
     "youtube_id": "UCkpfJWu1N9Okd6PE_NidtBQ"
    },
@@ -20744,7 +21123,8 @@
    "senateClass": null,
    "social": {
     "facebook": "CongressmanDavidValadao",
-    "twitter": "RepDavidValadao"
+    "twitter": "RepDavidValadao",
+    "twitter_id": "1128514404"
    },
    "state": "CA",
    "termEnd": "2027-01-03",
@@ -20785,6 +21165,7 @@
     "facebook": "RepJuanVargas",
     "instagram": "repjuanvargas",
     "twitter": "RepJuanVargas",
+    "twitter_id": "1260172386",
     "youtube": "RepJuanVargas",
     "youtube_id": "UCpMthf8y7bEMJH_td0dznRQ"
    },
@@ -20828,6 +21209,7 @@
     "facebook": "CongressmanMarcVeasey",
     "instagram": "repveasey",
     "twitter": "RepVeasey",
+    "twitter_id": "1074129612",
     "youtube": "marcveasey",
     "youtube_id": "UC2CRp1KF5uljZyhDRPR-72Q"
    },
@@ -20870,6 +21252,7 @@
     "facebook": "CongressmanJVD",
     "instagram": "jeffvandrew",
     "twitter": "Congressman_JVD",
+    "twitter_id": "1468677099594698757",
     "youtube": "UCc5AGO_bQLeiv313Bbr35fg"
    },
    "state": "NJ",
@@ -20911,7 +21294,8 @@
    "social": {
     "facebook": "RepBethVanDuyne",
     "instagram": "repbethvanduyne",
-    "twitter": "RepBethVanDuyne"
+    "twitter": "RepBethVanDuyne",
+    "twitter_id": "1339633259349745670"
    },
    "state": "TX",
    "termEnd": "2027-01-03",
@@ -20952,7 +21336,8 @@
    "social": {
     "facebook": "RepVanOrden",
     "instagram": "RepVanOrden",
-    "twitter": "RepVanOrden"
+    "twitter": "RepVanOrden",
+    "twitter_id": "1598778014401269760"
    },
    "state": "WI",
    "termEnd": "2027-01-03",
@@ -21109,6 +21494,7 @@
     "facebook": "MaxineWaters",
     "instagram": "repmaxinewaters",
     "twitter": "RepMaxineWaters",
+    "twitter_id": "36686040",
     "youtube": "MaxineWaters",
     "youtube_id": "UCOQ2js1VYFlo74n7Ns8WsLQ"
    },
@@ -21153,6 +21539,7 @@
     "facebook": "SenatorWicker",
     "instagram": "senatorwicker",
     "twitter": "SenatorWicker",
+    "twitter_id": "264219447",
     "youtube": "SenatorWicker",
     "youtube_id": "UCIlKHiTjSkcQP_knBcXHWSg"
    },
@@ -21196,6 +21583,7 @@
     "facebook": "senatorronwyden",
     "instagram": "ronwyden",
     "twitter": "RonWyden",
+    "twitter_id": "250188760",
     "youtube": "senronwyden",
     "youtube_id": "UCsd3UEaoLoqX60P88BdpGGw"
    },
@@ -21238,7 +21626,8 @@
    "social": {
     "facebook": "RepNikemaWilliams",
     "instagram": "repnikema",
-    "twitter": "RepNikema"
+    "twitter": "RepNikema",
+    "twitter_id": "1345461797361504259"
    },
    "state": "GA",
    "termEnd": "2027-01-03",
@@ -21279,6 +21668,7 @@
    "social": {
     "facebook": "SenatorWarnock",
     "twitter": "SenatorWarnock",
+    "twitter_id": "1352287997853622273",
     "youtube": "senatorwarnock"
    },
    "state": "GA",
@@ -21321,6 +21711,7 @@
     "facebook": "JoeWilson",
     "instagram": "repjoewilson",
     "twitter": "RepJoeWilson",
+    "twitter_id": "254082173",
     "youtube": "RepJoeWilson",
     "youtube_id": "UC3aR1B8m7Z1uycO65yDnpCg"
    },
@@ -21363,6 +21754,7 @@
     "facebook": "RepDWS",
     "instagram": "RepDWSTweets",
     "twitter": "RepDWStweets",
+    "twitter_id": "1140648348",
     "youtube": "RepWassermanSchultz",
     "youtube_id": "UCfHQiJVvMlYbVAxrMSLdO4w"
    },
@@ -21405,6 +21797,7 @@
     "facebook": "RepWalberg",
     "instagram": "repwalberg",
     "twitter": "RepWalberg",
+    "twitter_id": "237862972",
     "youtube": "RepWalberg",
     "youtube_id": "UChpf3_3Wn8f3qSJbsYXrhvg"
    },
@@ -21449,6 +21842,7 @@
     "facebook": "PeterWelch",
     "instagram": "reppeterwelch",
     "twitter": "PeterWelch",
+    "twitter_id": "1410590874",
     "youtube": "reppeterwelch",
     "youtube_id": "UC0YfApJx6qNaAQ-ir93U8xA"
    },
@@ -21491,6 +21885,7 @@
     "facebook": "SenatorWhitehouse",
     "instagram": "SenWhitehouse",
     "twitter": "SenWhitehouse",
+    "twitter_id": "242555999",
     "youtube": "SenatorWhitehouse",
     "youtube_id": "UCnG0N70SNBkNqvIMLodPTIA"
    },
@@ -21534,6 +21929,7 @@
     "facebook": "RepRobWittman",
     "instagram": "reprobwittman",
     "twitter": "RobWittman",
+    "twitter_id": "15356407",
     "youtube": "RobWittman",
     "youtube_id": "UCIqIb-OaTbkIdU426eYIdPg"
    },
@@ -21578,6 +21974,7 @@
     "facebook": "MarkRWarner",
     "instagram": "senatorwarner",
     "twitter": "MarkWarner",
+    "twitter_id": "7429102",
     "youtube": "SenatorMarkWarner",
     "youtube_id": "UCwyivNlEGf4sGd1oDLfY5jw"
    },
@@ -21620,6 +22017,7 @@
    "social": {
     "facebook": "RepWebster",
     "twitter": "RepWebster",
+    "twitter_id": "281540744",
     "youtube": "repdanwebster",
     "youtube_id": "UCCoX4VdU7U11eGEA0lbRtLw"
    },
@@ -21663,6 +22061,7 @@
     "facebook": "RepWilson",
     "instagram": "repwilson",
     "twitter": "RepWilson",
+    "twitter_id": "234014087",
     "youtube": "repfredericawilson",
     "youtube_id": "UCP5QBhng_lHv-vJgE_h7lpA"
    },
@@ -21705,6 +22104,7 @@
     "facebook": "RepSteveWomack",
     "instagram": "rep_stevewomack",
     "twitter": "Rep_SteveWomack",
+    "twitter_id": "234469322",
     "youtube": "CongressmanWomack",
     "youtube_id": "UCXJbUDLYX-wGIhRuN66hqZw"
    },
@@ -21747,6 +22147,7 @@
     "facebook": "RepAnnWagner",
     "instagram": "repannwagner",
     "twitter": "RepAnnWagner",
+    "twitter_id": "1051446626",
     "youtube_id": "UCy2v2DXXvQnbRc8Zx77Dnsg"
    },
    "state": "MO",
@@ -21790,6 +22191,7 @@
     "facebook": "TXRandy14",
     "instagram": "TXRandy14",
     "twitter": "TXRandy14",
+    "twitter_id": "1058051748",
     "youtube": "TXRandy14",
     "youtube_id": "UCJSZRrAcd5i1bHLjR66PZdg"
    },
@@ -21832,6 +22234,7 @@
    "social": {
     "facebook": "RepRogerWilliams",
     "twitter": "RepRWilliams",
+    "twitter_id": "1077446982",
     "youtube_id": "UCBtfmMMQarjtLB9U_pWMOhw"
    },
    "state": "TX",
@@ -21873,6 +22276,7 @@
     "facebook": "senatorelizabethwarren",
     "instagram": "senwarren",
     "twitter": "SenWarren",
+    "twitter_id": "970207298",
     "youtube": "senelizabethwarren",
     "youtube_id": "UCTH9zV8Imw09J5bOoTR18_A"
    },
@@ -21914,6 +22318,7 @@
    "social": {
     "facebook": "RepWesterman",
     "twitter": "RepWesterman",
+    "twitter_id": "2852998461",
     "youtube_id": "UCNshPbmupCwP5a7Hi79jETQ"
    },
    "state": "AR",
@@ -21955,6 +22360,7 @@
     "facebook": "RepBonnie",
     "instagram": "repbonnie",
     "twitter": "RepBonnie",
+    "twitter_id": "2968451607",
     "youtube_id": "UCrxEaX0VKZKwg3930du2D5A"
    },
    "state": "NJ",
@@ -22149,6 +22555,7 @@
     "facebook": "SenatorToddYoung",
     "instagram": "sentoddyoung",
     "twitter": "SenToddYoung",
+    "twitter_id": "234128524",
     "youtube": "RepToddYoung",
     "youtube_id": "UCuknj4PGn91gHDNAfboZEgQ"
    },
@@ -22189,7 +22596,8 @@
    "senateClass": null,
    "social": {
     "facebook": "RepRudyYakym",
-    "twitter": "RepRudyYakym"
+    "twitter": "RepRudyYakym",
+    "twitter_id": "1605665632858607617"
    },
    "state": "IN",
    "termEnd": "2027-01-03",

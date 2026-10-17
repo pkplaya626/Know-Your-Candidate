@@ -77,6 +77,7 @@
  },
  "bioguide:A000383": {
   "height": 1280,
+  "linked": "Alan S. Armstrong",
   "name": "Alan Armstrong",
   "set": [
    [
@@ -1713,6 +1714,7 @@
  },
  "bioguide:G000608": {
   "height": 5389,
+  "linked": "Darline Graham Nordone",
   "name": "Darline Graham Nordone",
   "set": [
    [
@@ -4823,7 +4825,6 @@
    ]
   ],
   "title": "Abdul El-Sayed",
-  "unverified": true,
   "url": "https://upload.wikimedia.org/wikipedia/commons/8/82/Abdul_El-Sayed_meet-and-greet_by_Conlan_Houston_5_%28cropped%29.jpg",
   "via": "wikipedia",
   "width": 685
@@ -4857,30 +4858,30 @@
   "width": 280
  },
  "person:adam hamilton|KS|S": {
-  "height": 8296,
+  "height": 1080,
   "name": "Adam Hamilton",
   "set": [
    [
     120,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Adam_Hamilton%2C_1930s.jpg/120px-Adam_Hamilton%2C_1930s.jpg"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png/120px-Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png"
    ],
    [
     250,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Adam_Hamilton%2C_1930s.jpg/250px-Adam_Hamilton%2C_1930s.jpg"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png/250px-Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png"
    ],
    [
     330,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Adam_Hamilton%2C_1930s.jpg/330px-Adam_Hamilton%2C_1930s.jpg"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png/330px-Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png"
    ],
    [
     500,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Adam_Hamilton%2C_1930s.jpg/500px-Adam_Hamilton%2C_1930s.jpg"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png/500px-Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png"
    ]
   ],
-  "title": "Adam Hamilton (politician)",
-  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Adam_Hamilton%2C_1930s.jpg/960px-Adam_Hamilton%2C_1930s.jpg",
+  "title": "Adam Hamilton (pastor)",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png/960px-Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png",
   "via": "wikipedia",
-  "width": 6304
+  "width": 1020
  },
  "person:adam hollier|MI|H": {
   "height": 2491,
@@ -5046,7 +5047,6 @@
    ]
   ],
   "title": "Alex Vindman",
-  "unverified": true,
   "url": "https://upload.wikimedia.org/wikipedia/commons/7/7a/Alexander_Vindman_Television_Interview.png",
   "via": "wikipedia",
   "width": 936
@@ -5351,7 +5351,7 @@
   "title": "Annie Andrews (pediatrician)",
   "unverified": true,
   "url": "https://upload.wikimedia.org/wikipedia/commons/6/69/Annie_Andrews_Greenville_%28cropped_2%29.jpg",
-  "via": "wikipedia-search",
+  "via": "wikipedia",
   "width": 956
  },
  "person:anthony sabatini|FL|H": {
@@ -6111,7 +6111,7 @@
   ],
   "title": "Charles Booker (American politician)",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3d/Charles_solar_panels_%28cropped%29.jpg/960px-Charles_solar_panels_%28cropped%29.jpg",
-  "via": "wikipedia-search",
+  "via": "wikipedia",
   "width": 1492
  },
  "person:charlie hatcher|TN|H": {
@@ -6592,6 +6592,7 @@
  },
  "person:dale romans|KY|S": {
   "height": 2246,
+  "linked": "Dale Lewis Romans",
   "name": "Dale Romans",
   "set": [
    [
@@ -6876,9 +6877,23 @@
   "via": "unresolved"
  },
  "person:david smith|OR|S": {
+  "height": 252,
   "name": "David Smith",
-  "url": null,
-  "via": "unresolved"
+  "set": [
+   [
+    120,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/David_Brock_Smith.jpg/120px-David_Brock_Smith.jpg"
+   ],
+   [
+    184,
+    "https://upload.wikimedia.org/wikipedia/commons/8/81/David_Brock_Smith.jpg"
+   ]
+  ],
+  "title": "David Brock Smith",
+  "unverified": true,
+  "url": "https://upload.wikimedia.org/wikipedia/commons/8/81/David_Brock_Smith.jpg",
+  "via": "wikipedia",
+  "width": 184
  },
  "person:david trone|MD|H": {
   "height": 4200,
@@ -6935,6 +6950,7 @@
  },
  "person:deanna gordon|KY|H": {
   "height": 3304,
+  "linked": "Deanna Frazier Gordon",
   "name": "Deanna Gordon",
   "set": [
    [
@@ -7888,9 +7904,9 @@
   "via": "wikipedia",
   "width": 2133
  },
- "person:jacqui irwin v|CA|H": {
+ "person:jacqui v irwin|CA|H": {
   "height": 1706,
-  "name": "Jacqui Irwin V",
+  "name": "Jacqui V Irwin",
   "set": [
    [
     120,
@@ -7916,7 +7932,8 @@
  },
  "person:james (j.d.) david ford|IN|H": {
   "height": 498,
-  "name": "James (j.d.) David Ford",
+  "linked": "J.D. Ford",
+  "name": "James (J.d.) David Ford",
   "set": [
    [
     120,
@@ -7936,7 +7953,6 @@
    ]
   ],
   "title": "J. D. Ford",
-  "unverified": true,
   "url": "https://upload.wikimedia.org/wikipedia/commons/7/74/JD_Ford%2C_Indy_Pride_Parade_2023_%282%29_%28cropped%29.jpg",
   "via": "wikipedia",
   "width": 381
@@ -8359,6 +8375,33 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/Rep._Jeffrey_Hulum_III_%28cropped%29.jpg/960px-Rep._Jeffrey_Hulum_III_%28cropped%29.jpg",
   "via": "wikipedia",
   "width": 1147
+ },
+ "person:jennifer balkcom|NC|H": {
+  "height": 540,
+  "linked": "Jennifer Balkcom",
+  "name": "Jennifer Balkcom",
+  "set": [
+   [
+    120,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Rep._Jennifer_Balkcom.jpg/120px-Rep._Jennifer_Balkcom.jpg"
+   ],
+   [
+    250,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Rep._Jennifer_Balkcom.jpg/250px-Rep._Jennifer_Balkcom.jpg"
+   ],
+   [
+    330,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Rep._Jennifer_Balkcom.jpg/330px-Rep._Jennifer_Balkcom.jpg"
+   ],
+   [
+    386,
+    "https://upload.wikimedia.org/wikipedia/commons/1/1a/Rep._Jennifer_Balkcom.jpg"
+   ]
+  ],
+  "title": "Jennifer Balkcom",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/1/1a/Rep._Jennifer_Balkcom.jpg",
+  "via": "wikipedia",
+  "width": 386
  },
  "person:jennifer konfrst|IA|H": {
   "height": 2100,
@@ -9221,30 +9264,30 @@
   "via": "unresolved"
  },
  "person:ken paxton|TX|S": {
-  "height": 2175,
+  "height": 2406,
   "name": "Ken Paxton",
   "set": [
    [
     120,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/K_Paxton.jpg/120px-K_Paxton.jpg"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Ken_Paxton_%2854816860552%29_%28cropped%29.jpg/120px-Ken_Paxton_%2854816860552%29_%28cropped%29.jpg"
    ],
    [
     250,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/K_Paxton.jpg/250px-K_Paxton.jpg"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Ken_Paxton_%2854816860552%29_%28cropped%29.jpg/250px-Ken_Paxton_%2854816860552%29_%28cropped%29.jpg"
    ],
    [
     330,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/K_Paxton.jpg/330px-K_Paxton.jpg"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Ken_Paxton_%2854816860552%29_%28cropped%29.jpg/330px-Ken_Paxton_%2854816860552%29_%28cropped%29.jpg"
    ],
    [
     500,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/K_Paxton.jpg/500px-K_Paxton.jpg"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Ken_Paxton_%2854816860552%29_%28cropped%29.jpg/500px-Ken_Paxton_%2854816860552%29_%28cropped%29.jpg"
    ]
   ],
   "title": "Ken Paxton",
-  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/K_Paxton.jpg/960px-K_Paxton.jpg",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Ken_Paxton_%2854816860552%29_%28cropped%29.jpg/960px-Ken_Paxton_%2854816860552%29_%28cropped%29.jpg",
   "via": "wikipedia",
-  "width": 1661
+  "width": 1828
  },
  "person:kevin hern|OK|S": {
   "height": 4200,
@@ -9894,6 +9937,7 @@
    ]
   ],
   "title": "Mark Baisley",
+  "unverified": true,
   "url": "https://upload.wikimedia.org/wikipedia/commons/a/ac/Mark_Baisley_in_2024_%28cropped%29.jpg",
   "via": "wikipedia",
   "width": 914
@@ -10724,9 +10768,8 @@
    ]
   ],
   "title": "Mike Rogers (Michigan politician)",
-  "unverified": true,
   "url": "https://upload.wikimedia.org/wikipedia/commons/6/6d/Mike_Rogers_in_November_2019_%283x4_cropped%29.jpg",
-  "via": "wikipedia-search",
+  "via": "wikipedia",
   "width": 822
  },
  "person:mike simmons|IL|H": {
@@ -10948,6 +10991,33 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/Nina_Schwalbe_%28cropped%29.jpg/960px-Nina_Schwalbe_%28cropped%29.jpg",
   "via": "wikipedia",
   "width": 1242
+ },
+ "person:nirav shah|ME|S": {
+  "height": 2672,
+  "linked": "Nirav D. Shah",
+  "name": "Nirav Shah",
+  "set": [
+   [
+    120,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Dr_Nirav_D_Shah_portrait.webp/120px-Dr_Nirav_D_Shah_portrait.webp"
+   ],
+   [
+    250,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Dr_Nirav_D_Shah_portrait.webp/250px-Dr_Nirav_D_Shah_portrait.webp"
+   ],
+   [
+    330,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Dr_Nirav_D_Shah_portrait.webp/330px-Dr_Nirav_D_Shah_portrait.webp"
+   ],
+   [
+    500,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Dr_Nirav_D_Shah_portrait.webp/500px-Dr_Nirav_D_Shah_portrait.webp"
+   ]
+  ],
+  "title": "Nirav D. Shah",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Dr_Nirav_D_Shah_portrait.webp/960px-Dr_Nirav_D_Shah_portrait.webp",
+  "via": "wikipedia",
+  "width": 2000
  },
  "person:oliver g. gilbert iii|FL|H": {
   "height": 3935,
@@ -11218,6 +11288,60 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1e/Ralph_Norman_official_photo_%28cropped_3%29.jpg/960px-Ralph_Norman_official_photo_%28cropped_3%29.jpg",
   "via": "wikipedia",
   "width": 2800
+ },
+ "person:randall terry|NJ|H": {
+  "height": 3451,
+  "linked": "Randall Terry",
+  "name": "Randall Terry",
+  "set": [
+   [
+    120,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Randall_Terry_by_Gage_Skidmore.jpg/120px-Randall_Terry_by_Gage_Skidmore.jpg"
+   ],
+   [
+    250,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Randall_Terry_by_Gage_Skidmore.jpg/250px-Randall_Terry_by_Gage_Skidmore.jpg"
+   ],
+   [
+    330,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Randall_Terry_by_Gage_Skidmore.jpg/330px-Randall_Terry_by_Gage_Skidmore.jpg"
+   ],
+   [
+    500,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Randall_Terry_by_Gage_Skidmore.jpg/500px-Randall_Terry_by_Gage_Skidmore.jpg"
+   ]
+  ],
+  "title": "Randall Terry",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Randall_Terry_by_Gage_Skidmore.jpg/960px-Randall_Terry_by_Gage_Skidmore.jpg",
+  "via": "wikipedia",
+  "width": 2652
+ },
+ "person:randall terry|VA|H": {
+  "height": 3451,
+  "linked": "Randall Terry",
+  "name": "Randall Terry",
+  "set": [
+   [
+    120,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Randall_Terry_by_Gage_Skidmore.jpg/120px-Randall_Terry_by_Gage_Skidmore.jpg"
+   ],
+   [
+    250,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Randall_Terry_by_Gage_Skidmore.jpg/250px-Randall_Terry_by_Gage_Skidmore.jpg"
+   ],
+   [
+    330,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Randall_Terry_by_Gage_Skidmore.jpg/330px-Randall_Terry_by_Gage_Skidmore.jpg"
+   ],
+   [
+    500,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Randall_Terry_by_Gage_Skidmore.jpg/500px-Randall_Terry_by_Gage_Skidmore.jpg"
+   ]
+  ],
+  "title": "Randall Terry",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Randall_Terry_by_Gage_Skidmore.jpg/960px-Randall_Terry_by_Gage_Skidmore.jpg",
+  "via": "wikipedia",
+  "width": 2652
  },
  "person:raymond edward smith jr.|NC|H": {
   "height": 1800,
@@ -11778,6 +11902,7 @@
  },
  "person:saddam salim|VA|H": {
   "height": 2240,
+  "linked": "Saddam Salim",
   "name": "Saddam Salim",
   "set": [
    [
@@ -12234,7 +12359,6 @@
    ]
   ],
   "title": "Steve Toth",
-  "unverified": true,
   "url": "https://upload.wikimedia.org/wikipedia/commons/4/4e/SteveToth--EagleForum--TX2Debate--GraceChurch--SpringTX--08Jan2026_%28cropped%29.jpg",
   "via": "wikipedia",
   "width": 300
@@ -12290,6 +12414,7 @@
  },
  "person:taylor r darling|NY|H": {
   "height": 802,
+  "linked": "Taylor Darling (politician)",
   "name": "Taylor R Darling",
   "set": [
    [
@@ -12310,7 +12435,6 @@
    ]
   ],
   "title": "Taylor Darling",
-  "unverified": true,
   "url": "https://upload.wikimedia.org/wikipedia/commons/0/00/%2803-12-24%29_Taylor_Darling.jpg",
   "via": "wikipedia",
   "width": 605
@@ -12405,6 +12529,33 @@
   ],
   "title": "Tom Perriello",
   "unverified": true,
+  "url": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Official_portrait_of_Thomas_Perriello%2C_U.S._Special_Envoy_for_Sudan.jpg",
+  "via": "wikipedia",
+  "width": 396
+ },
+ "person:thomas stuart price perriello|VA|H": {
+  "height": 495,
+  "linked": "Tom Perriello",
+  "name": "Thomas Stuart Price Perriello",
+  "set": [
+   [
+    120,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Official_portrait_of_Thomas_Perriello%2C_U.S._Special_Envoy_for_Sudan.jpg/120px-Official_portrait_of_Thomas_Perriello%2C_U.S._Special_Envoy_for_Sudan.jpg"
+   ],
+   [
+    250,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Official_portrait_of_Thomas_Perriello%2C_U.S._Special_Envoy_for_Sudan.jpg/250px-Official_portrait_of_Thomas_Perriello%2C_U.S._Special_Envoy_for_Sudan.jpg"
+   ],
+   [
+    330,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Official_portrait_of_Thomas_Perriello%2C_U.S._Special_Envoy_for_Sudan.jpg/330px-Official_portrait_of_Thomas_Perriello%2C_U.S._Special_Envoy_for_Sudan.jpg"
+   ],
+   [
+    396,
+    "https://upload.wikimedia.org/wikipedia/commons/1/1d/Official_portrait_of_Thomas_Perriello%2C_U.S._Special_Envoy_for_Sudan.jpg"
+   ]
+  ],
+  "title": "Tom Perriello",
   "url": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Official_portrait_of_Thomas_Perriello%2C_U.S._Special_Envoy_for_Sudan.jpg",
   "via": "wikipedia",
   "width": 396
