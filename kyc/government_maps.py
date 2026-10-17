@@ -480,6 +480,17 @@ NONE_OF_KIND = {
     "school": ("No independent school districts: its public schools are run by the state, a county "
                "or a city, as dependent school systems."),
 }
+# A count that reads as something it is not. Virginia's one "independent
+# school district" in the Census table is no school system: the 2022
+# listing files Eastern Virginia Medical School (Norfolk) as one, and
+# Virginia's public schools are dependent systems of its counties and
+# cities (cog-isd). Said wherever the count is: the guide's school map and
+# the counties directory. tests/test_localgov.py holds the listing to it.
+COUNT_NOTES = {
+    ("VA", "school"): ("The one is Eastern Virginia Medical School, in Norfolk, which the Census "
+                       "Bureau's 2022 listing files as a school district; Virginia's public schools "
+                       "are dependent systems of its counties and cities."),
+}
 
 
 def _bins(numbers):
@@ -561,6 +572,7 @@ def _local(census_cache):
                 facts[code] = why or NONE_OF_KIND.get(kind, f"No {many}.")
                 continue
             values[code] = next(k for lo, hi, k in keys if hi is None or n < hi)
+            why = " ".join(filter(None, (why, COUNT_NOTES.get((code, kind)))))
             facts[code] = f"{n:,} {one if n == 1 else many} in 2022." + (" " + why if why else "")
         if kind == "total":
             for code, counts in states.items():

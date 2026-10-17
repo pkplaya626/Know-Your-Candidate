@@ -157,6 +157,20 @@ class TestCountyAreas(unittest.TestCase):
         self.assertIn("nine of Massachusetts's fourteen counties", text)
         self.assertIn("Virginia's 38", text)
 
+    def test_virginias_one_school_district_is_the_one_the_guide_names(self):
+        # The guide said Virginia had only dependent systems while its own
+        # map and the directory counted one independent school district.
+        from kyc import government_maps, government_text
+        schools = [(fips, g["name"]) for fips, e in localgov.load("VA", ROOT)["counties"].items()
+                   for g in e["governments"] if g["type"] == "school"]
+        self.assertEqual(schools, [("51710", "Eastern Virginia Medical School")])
+        self.assertEqual(census.load_cache(ROOT)["states"]["VA"]["school"], 1)
+        text = " ".join(b[1] for s in government_text.LOCAL["sections"] if s["id"] == "schools"
+                        for b in s["blocks"] if b[0] == "p")
+        self.assertNotIn("North Carolina, Virginia", text)
+        self.assertIn("Eastern Virginia Medical School", text)
+        self.assertIn("Eastern Virginia Medical School", government_maps.COUNT_NOTES[("VA", "school")])
+
 
 class TestCities(unittest.TestCase):
     """A place is joined to its government by name only where the join is

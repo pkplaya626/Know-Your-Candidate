@@ -448,7 +448,7 @@ def render_counties_index(host, census=None):
     with what that means, never 0 (rule 49)."""
     from . import county_areas
     from .government import jump_options
-    from .government_maps import STATES
+    from .government_maps import COUNT_NOTES, STATES
 
     path = "counties/index.html"
     canonical = f"https://{host}/{path}" if host else path
@@ -469,6 +469,9 @@ def render_counties_index(host, census=None):
         if value is None:
             return (f'<td class="faint" title="{_e(none)}">none{mark}</td>' if code in counts
                     else "<td>&ndash;</td>")
+        if (code, kind) in COUNT_NOTES:
+            mark += (f'<sup><a class="note-ref" href="#count-note-{_e(code.lower())}-{_e(kind)}" '
+                     f'aria-label="What this count is">*</a></sup>')
         return f"<td>{value:,}{mark}</td>"
 
     rows = "\n".join(
@@ -513,6 +516,9 @@ def render_counties_index(host, census=None):
         "                        </tbody>",
         "                    </table>",
         "                </div>",
+        *[f'                <p class="faint" id="count-note-{_e(code.lower())}-{_e(kind)}">* '
+          f'{_e(state_name(code))}, {_e(dict((k, w) for k, w, _n in kinds)[kind].lower())}: '
+          f"{_e(text)}</p>" for (code, kind), text in sorted(COUNT_NOTES.items())],
         f'                <p class="faint directory-outside">{_e(outside)}</p>',
         '                <h2 class="state-heading" id="countyNotes">Where a county area has no county government</h2>',
         '                <p class="faint">A state can have fewer county governments than counties. '

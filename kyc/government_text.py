@@ -1469,8 +1469,11 @@ LOCAL = {
                       "superintendent to run the schools."),
                 ("p", "Elsewhere the schools are run by a city, county or state government, and "
                       "the Census Bureau counts them as part of that government, a dependent "
-                      "school system. Alaska, Hawaii, Maryland, North Carolina, Virginia and the "
-                      "District of Columbia have only dependent systems."),
+                      "school system. Alaska, Hawaii, Maryland, North Carolina and the District of "
+                      "Columbia have only dependent systems. Virginia's public schools are "
+                      "dependent systems too; the one independent school district the Census "
+                      "Bureau counted there in 2022 is Eastern Virginia Medical School, in "
+                      "Norfolk."),
             ],
             "sources": ["cog-report", "cog-isd"],
         },
