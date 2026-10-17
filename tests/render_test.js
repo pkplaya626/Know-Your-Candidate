@@ -5029,6 +5029,12 @@ async function testFederal() {
       /Appointed by/.test(meta) && !PARTY_WORDS.test(meta), meta);
     check("and links to the Federal Judicial Center's page",
       !!modal.querySelector('a[href^="https://www.fjc.gov/node/"]'));
+    // The directory's career field holds roles held now ("-present"): the
+    // panel keeps the directory's label, never "before the bench".
+    const heads = [...modal.querySelectorAll(".panel-head")].map((h) => h.textContent);
+    check("the career panel carries the directory's own label",
+      heads.some((h) => /Professional career/.test(h)) && !heads.some((h) => /before the bench/.test(h)),
+      heads.join(" | "));
     check("Escape closes it", (() => {
       D.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
       return modal.hidden;

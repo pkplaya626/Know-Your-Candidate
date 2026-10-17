@@ -439,7 +439,10 @@
       panel("user", "Biography", '<div class="field-grid">' + bio + "</div>") +
       "</div>" +
       '<div class="modal-column">' +
-      panel("scroll", "Career before the bench", career
+      // The directory's own label: its career field holds roles a judge
+      // holds now ("Chair of the board, Federal Judicial Center,
+      // 2005-present"), so it is not only a career before the bench.
+      panel("scroll", "Professional career", career
         ? '<ul class="bullets scroll-y scroll-box">' + career + "</ul>" : absent("Not in the directory")) +
       (judge.otherNominations
         ? panel("info", "Other nominations", '<p class="note-box">' + KYC.escapeHtml(judge.otherNominations) + "</p>")
