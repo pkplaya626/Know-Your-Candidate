@@ -116,7 +116,7 @@ $nav
 $sidebar
         <nav class="sidebar-section push" aria-label="Jump to a state">
             <h2 class="sidebar-heading">Jump to</h2>
-            <label class="sr-only" for="stateJump">Jump to a state or territory</label>
+            <label class="sr-only" for="stateJump">$jump_label</label>
             <select id="stateJump" class="select"$jump_attrs>
                 <option value="">Choose a state&hellip;</option>$jump_options
             </select>
@@ -266,6 +266,12 @@ def render_page(**fields):
     fields["nav"] = nav_html("../", fields.pop("nav_current", None), fields.pop("nav_how", "page"))
     fields.setdefault("jump_options", "")
     fields.setdefault("jump_attrs", "")
+    # An empty list is filled on the page with every state and territory; a
+    # list written here (the legislature and county pages) may hold only
+    # the fifty states, and its label says what it holds.
+    options = fields["jump_options"]
+    whole = not options or any(f'value="{c}"' in options for c in TERRITORIES)
+    fields["jump_label"] = "Jump to a state or territory" if whole else "Jump to a state"
     return _PAGE.substitute(search=search, **fields)
 
 # The state pages render everything from profiles.js on the client.
@@ -391,6 +397,9 @@ def render_legislatures_index(host):
         '                <ul class="directory-list">',
         rows,
         "                </ul>",
+        '                <p class="faint directory-outside">The fifty state legislatures. The District of',
+        '                    Columbia has <a href="../states/dc.html">a mayor and a council</a>, not a',
+        "                    legislature, and the territories&#8217; legislatures are not covered here.</p>",
         "            </div>",
     ])
     footer = "\n".join([
@@ -467,6 +476,20 @@ def render_counties_index(host, census=None):
         f'{_e(state_name(code))}</a></th>' + "".join(cell(code, k, n) for k, _w, n in kinds) + "</tr>"
         for code in sorted(STATES, key=state_name))
     year = (census or {}).get("year")
+    # D.C. and the territories are not in the table, and it says why. D.C.'s
+    # count is the same table's, as the guide's map shows it; the scope is
+    # the guide's (government_maps: "the Census of Governments covers the
+    # states and D.C.").
+    dc = counts.get("DC") or {}
+    dc_kinds = [(dc.get(k), w) for k, w in (("municipal", "municipal government"),
+                                             ("special", "special district")) if dc.get(k)]
+    outside = ("The District of Columbia has no counties, so it is not in this table" +
+               (f"; the Census Bureau counted {dc['total']:,} local governments there"
+                f"{' in ' + _e(year) if year else ''}: " +
+                " and ".join(f"{n:,} {w}{'' if n == 1 else 's'}" for n, w in dc_kinds)
+                if dc.get("total") else "") +
+               ". The five territories are outside the Census of Governments, which covers the "
+               "states and D.C.")
     main = "\n".join([
         '            <div id="countiesDirectory" class="state-page directory-page">',
         '                <header class="state-hero">',
@@ -490,6 +513,7 @@ def render_counties_index(host, census=None):
         "                        </tbody>",
         "                    </table>",
         "                </div>",
+        f'                <p class="faint directory-outside">{_e(outside)}</p>',
         '                <h2 class="state-heading" id="countyNotes">Where a county area has no county government</h2>',
         '                <p class="faint">A state can have fewer county governments than counties. '
         "These are the places the Census Bureau lists as county areas without one, and what governs "

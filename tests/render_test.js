@@ -1732,6 +1732,14 @@ async function testNavigation() {
     const rows = D.querySelectorAll(".directory-row");
     check("one row per state, each linked to its legislature", rows.length === 50 &&
       [...rows].every((r) => r.querySelector('a.directory-name[href$=".html"]')));
+    const outside = D.querySelector(".directory-outside");
+    const said = outside ? outside.textContent.replace(/\s+/g, " ") : "";
+    check("it says D.C. and the territories are not listed, and why D.C. is not",
+      /District of Columbia has a mayor and a council/.test(said) &&
+      /territories’ legislatures are not covered here/.test(said) &&
+      !!outside.querySelector('a[href="../states/dc.html"]'), said);
+    check("its jump list, of the fifty states, is labelled so",
+      D.querySelector('label[for="stateJump"]').textContent === "Jump to a state");
     const mn = D.querySelector('[data-facts="MN"]');
     check("each chamber's seats by party, in the state pages' words",
       mn.querySelectorAll(".gov-chamber").length === 2 && /seats/.test(mn.textContent), mn.textContent);
@@ -1773,6 +1781,15 @@ async function testNavigation() {
     check("the sidebar marks Counties & cities",
       D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav") === "local");
     check("its state picker lists every state", D.getElementById("stateJump").options.length > 50);
+    check("and, listing only the states, is labelled so",
+      D.querySelector('label[for="stateJump"]').textContent === "Jump to a state");
+    const outside = D.querySelector(".directory-outside");
+    const dcCounts = JSON.parse(fs.readFileSync(path.join(SITE, "data/census_governments.json"), "utf8")).states.DC;
+    check("it says why D.C. and the territories are not in the table, with D.C.'s count from the data",
+      !!outside && /District of Columbia has no counties/.test(outside.textContent) &&
+      outside.textContent.indexOf("counted " + dcCounts.total + " local governments") !== -1 &&
+      /five territories are outside the Census of Governments/.test(outside.textContent),
+      outside && outside.textContent);
     const md = rows.find((r) => /Maryland/.test(r.textContent));
     const col = [...D.querySelectorAll(".directory-table thead th")]
       .findIndex((th) => th.textContent === "Independent school districts");
