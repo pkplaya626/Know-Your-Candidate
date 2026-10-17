@@ -534,6 +534,15 @@ def _possessive(name):
 UNCHANGED_NOTES = {
     "MO": ("A map passed in 2025 was suspended by a referendum petition, and the courts "
            "have kept these districts in place for 2026."),
+    # Voters approved the amendment on April 21, 2026 (51.7% to 48.3%); the
+    # Supreme Court of Virginia struck it down 4-3 on May 8, 2026, for want
+    # of an intervening general election between the legislature's two
+    # passages (Va. Const. art. XII, sec. 1); the U.S. Supreme Court denied
+    # an emergency application on May 15, 2026. Virginia Mercury, 2026-05-08
+    # and 2026-05-18; NPR, 2026-05-15; CNN, 2026-05-15.
+    "VA": ("Voters approved a redistricting amendment on April 21, 2026, but the Supreme "
+           "Court of Virginia struck it down on May 8 and the U.S. Supreme Court declined to "
+           "intervene, leaving these districts in place."),
 }
 
 

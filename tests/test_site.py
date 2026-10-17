@@ -390,6 +390,11 @@ class TestStatePages(unittest.TestCase):
                       pages.district_page_text("IA", 4)[1])
         self.assertIn("at large", pages.district_page_text("AK", 1)[1])
         self.assertIn("non-voting delegate", pages.district_page_text("GU", 1)[1])
+        # A state whose map nearly changed says why it did not: a reader who
+        # heard of Virginia's April referendum read only "used again".
+        va = pages.district_page_text("VA", 11)[1]
+        self.assertIn("struck it down on May 8", va)
+        self.assertEqual(va.count("used again in 2026"), 1)
         self.assertIn("not on the ballot in 2026", pages.district_page_text("PR", 1)[1])
         self.assertIn("referendum", pages.district_page_text("MO", 8)[1])
         self.assertEqual(pages.district_page_text("MP", 1)[0],
