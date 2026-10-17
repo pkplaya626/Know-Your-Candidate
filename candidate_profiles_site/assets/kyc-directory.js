@@ -276,6 +276,7 @@
   function apply(opts) {
     syncStateLink();
     syncViewToggles();
+    syncSort();
     syncNav();
     visible = data.filter(matches);
     visible.sort(SORTS[state.sort] || SORTS.region);
@@ -444,12 +445,31 @@
     );
   }
 
+  /* The sort is a menu (KYC.createMenu), so it is drawn in the theme's own
+   * colours and opens the same way on a phone, where it is an icon. It
+   * orders the cards only: the races and Senate views list seats in their
+   * own order, and the menu says so there. */
   function initSort() {
-    var select = doc.getElementById("sortBy");
-    select.addEventListener("change", function () {
-      state.sort = select.value;
+    var panel = doc.getElementById("sortPanel");
+    KYC.createMenu(doc.getElementById("sortButton"), panel);
+    panel.addEventListener("click", function (event) {
+      var item = event.target.closest("[data-sort]");
+      if (!item || !SORTS[item.getAttribute("data-sort")]) return;
+      state.sort = item.getAttribute("data-sort");
       apply();
     });
+  }
+
+  function syncSort() {
+    var current = "";
+    Array.prototype.forEach.call(doc.querySelectorAll("#sortPanel [data-sort]"), function (item) {
+      var on = item.getAttribute("data-sort") === state.sort;
+      item.setAttribute("aria-checked", String(on));
+      if (on) current = item.textContent.trim();
+    });
+    doc.getElementById("sortLabel").textContent = current;
+    doc.getElementById("sortButton").setAttribute("aria-label", "Sort the cards: " + current);
+    doc.getElementById("sortNote").hidden = state.view === "grid";
   }
 
   /* One delegated listener for the whole grid, rather than an inline onclick
@@ -511,7 +531,6 @@
 
     doc.getElementById("searchInput").value = state.q;
     doc.getElementById("stateSelect").value = state.state;
-    doc.getElementById("sortBy").value = state.sort;
     doc.getElementById("raceViewToggle")
       .setAttribute("aria-pressed", String(state.view === "race"));
     syncChips();

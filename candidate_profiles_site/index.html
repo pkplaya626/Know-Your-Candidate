@@ -51,16 +51,45 @@
     </div>
 
     <div class="header-actions">
-        <div class="sort-control">
-            <svg class="icon" aria-hidden="true"><use href="#i-sort"/></svg>
-            <label class="sr-only" for="sortBy">Sort results</label>
-            <select id="sortBy" class="select select-bare">
-                <option value="region">Sort: by region</option>
-                <option value="senate26">Sort: 2026 Senate races</option>
-                <option value="name">Sort: by name</option>
-                <option value="age-desc">Sort: oldest first</option>
-                <option value="age-asc">Sort: youngest first</option>
-            </select>
+        <!-- The sort is the site's own menu, like the theme picker beside it:
+             a native select's list is drawn by the browser, and over this
+             header's transparent field it came out white, its options in
+             the theme's white text. -->
+        <div class="menu sort-control">
+            <button type="button" class="btn-sort" id="sortButton" aria-haspopup="true"
+                    aria-label="Sort the cards: Senate, then House, by state">
+                <svg class="icon" aria-hidden="true"><use href="#i-sort"/></svg>
+                <span class="sort-current">Sort: <span id="sortLabel">Senate, then House, by state</span></span>
+            </button>
+            <div class="menu-panel sort-panel" id="sortPanel" role="menu" aria-label="Sort the cards" hidden>
+                <p class="menu-note" id="sortNote" hidden>Sorting applies to the cards. The races
+                    view lists races seat by seat.</p>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-sort="region" aria-checked="true">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Senate, then House, by state
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-sort="senate26" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    2026 Senate races first
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-sort="name" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Name, A to Z
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-sort="age-desc" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Oldest first
+                </button>
+                <button type="button" class="menu-item" role="menuitemradio"
+                        data-sort="age-asc" aria-checked="false">
+                    <svg class="icon check" aria-hidden="true"><use href="#i-check"/></svg>
+                    Youngest first
+                </button>
+            </div>
         </div>
 
         <div class="menu">

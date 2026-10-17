@@ -483,15 +483,56 @@ async function testDirectory() {
     // The sort, a select as wide as "Sort: 2026 Senate races", took 184px of
     // a 390px header and left the search field 0-13px wide.
     const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
-    const sort = D.getElementById("sortBy");
-    const control = sort.closest(".sort-control");
-    check("on a phone the sort is an icon over its own menu",
+    const button = D.getElementById("sortButton");
+    const control = button && button.closest(".sort-control");
+    check("on a phone the sort is an icon that opens its menu",
       !!control && !!control.querySelector('use[href="#i-sort"]') &&
         !!D.getElementById("i-sort") &&
-        /\.sort-control select\s*\{[^}]*opacity:\s*0/.test(css));
-    check("and keeps its label", !!D.querySelector('label[for="sortBy"]'));
+        /\.btn-sort \.sort-current,\s*\.btn-sort::after\s*\{\s*display:\s*none/.test(css));
+    check("and keeps a name when its words are hidden",
+      /^Sort the cards: /.test(button.getAttribute("aria-label") || ""));
     check("no field or menu is under 16px on a phone, so iOS never zooms in",
-      /\.search input,\s*\.select,\s*\.select-bare,\s*\.text-input\s*\{\s*font-size:\s*16px/.test(css));
+      /\.search input,\s*\.select,\s*\.text-input\s*\{\s*font-size:\s*16px/.test(css));
+    // A native list drawn white under the theme's white text showed only the
+    // highlighted option.
+    check("a native menu's options take the theme's colours",
+      /select option,\s*select optgroup\s*\{[^}]*background-color:\s*var\(--surface-1\);[^}]*color:\s*var\(--text\)/.test(css));
+  });
+
+  suite("index.html — the sort is the site's own menu", () => {
+    const button = D.getElementById("sortButton");
+    const panel = D.getElementById("sortPanel");
+    check("closed until asked", panel.hidden && button.getAttribute("aria-expanded") === "false");
+    button.click();
+    check("a click opens it, the current order checked",
+      !panel.hidden && button.getAttribute("aria-expanded") === "true" &&
+      panel.querySelector('[aria-checked="true"]').getAttribute("data-sort") === "region");
+    panel.querySelector('[data-sort="name"]').click();
+    const names = [...D.querySelectorAll("#results .card")].slice(0, 6)
+      .map((c) => KYC.byId(c.getAttribute("data-id")).name);
+    check("picking an order closes the menu, sorts the cards and names the order",
+      panel.hidden && D.getElementById("sortLabel").textContent === "Name, A to Z" &&
+      names.length === 6 && names.every((n, i) => i === 0 || names[i - 1].localeCompare(n) <= 0) &&
+      /Name, A to Z/.test(button.getAttribute("aria-label")), names.join(", "));
+    check("and puts it in the address", /[?&]sort=name\b/.test(window.location.hash), window.location.hash);
+    check("only one order is checked",
+      panel.querySelectorAll('[aria-checked="true"]').length === 1 &&
+      panel.querySelector('[aria-checked="true"]').getAttribute("data-sort") === "name");
+    // Every order the menu offers is one the grid sorts by: an unknown one
+    // would be ignored and the menu would claim an order the cards lack.
+    const offered = [...panel.querySelectorAll("[data-sort]")].map((b) => b.getAttribute("data-sort"));
+    const took = offered.filter((key) => {
+      panel.querySelector(`[data-sort="${key}"]`).click();
+      return panel.querySelector('[aria-checked="true"]').getAttribute("data-sort") === key;
+    });
+    check("every order offered is one the grid knows", took.length === offered.length && offered.length === 5,
+      offered.join(" "));
+    check("the cards view says nothing about races", D.getElementById("sortNote").hidden);
+    D.getElementById("raceViewToggle").click();
+    check("the races view, which lists seats in their own order, says the sort is for the cards",
+      !D.getElementById("sortNote").hidden);
+    D.getElementById("raceViewToggle").click();
+    panel.querySelector('[data-sort="region"]').click();
   });
 
   suite("index.html — portraits come in sizes of one photograph", () => {
