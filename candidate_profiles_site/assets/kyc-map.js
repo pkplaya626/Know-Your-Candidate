@@ -116,7 +116,10 @@
       else fill = "var(--split)";
       return {
         fill: fill,
-        text: code + " Senate: " + s.r + "R, " + s.d + "D" + (s.i ? ", " + s.i + "I" : ""),
+        // D.C. and the territories elect no senators: "0R, 0D" read as a
+        // count of senators found.
+        text: !seats ? code + ": no senators (not a state)" :
+          code + " Senate: " + s.r + "R, " + s.d + "D" + (s.i ? ", " + s.i + "I" : ""),
       };
     }
 
@@ -178,19 +181,33 @@
 
   /* --------------------------------------------------------------- legend */
 
+  /* Each key is a fill some state is drawn in. The Senate's "Independent"
+   * swatch matched no state - Maine and Vermont each have one independent
+   * and are drawn as split - and D.C.'s and the territories' fill had no
+   * key at all; "No race in 2026" showed a lighter grey than its states. */
   var LEGENDS = {
     senate: [
       ["var(--party-r)", "Both Republican"],
       ["var(--party-d)", "Both Democratic"],
-      ["var(--split)", "Split delegation"],
-      ["var(--party-i)", "Independent"],
+      ["var(--split)", "Split, or one independent"],
+      ["var(--party-i)", "Both independent", "allIndependent"],
+      [NONE_FILL, "No senators (D.C. and territories)"],
     ],
     senate2026: [
       ["var(--party-r)", "Republican seat up"],
       ["var(--party-d)", "Democratic seat up"],
-      ["var(--surface-1)", "No race in 2026"],
+      [NONE_FILL, "No race in 2026"],
     ],
   };
+
+  /* Does any state's delegation in *chamber* consist only of independents? */
+  function allIndependent(chamber) {
+    var states = (KYC.meta() || {}).states || {};
+    return Object.keys(states).some(function (code) {
+      var b = ((states[code] || {}).balance || {})[chamber] || {};
+      return b.I > 0 && !b.D && !b.R;
+    });
+  }
 
   function drawLegend() {
     var target = doc.getElementById("mapLegend");
@@ -207,14 +224,16 @@
         '<span class="ramp" style="background:linear-gradient(to right,',
         "var(--party-r),var(--split),var(--party-d))\"></span>",
         '<span class="party-d">All D</span></span>',
-        '<span class="key"><span class="swatch" style="background:var(--party-i)">',
-        "</span>Independent</span>",
+        allIndependent("house")
+          ? '<span class="key"><span class="swatch" style="background:var(--party-i)"></span>' +
+            "All independent</span>" : "",
         '<span class="key"><span class="swatch" style="background:var(--text-faint)">',
         "</span>Vacant</span>",
       ].join("");
       return;
     }
     target.innerHTML = LEGENDS[mode]
+      .filter(function (entry) { return !entry[2] || allIndependent("senate"); })
       .map(function (entry) {
         return '<span class="key"><span class="swatch" style="background:' +
           entry[0] + '"></span>' + KYC.escapeHtml(entry[1]) + "</span>";

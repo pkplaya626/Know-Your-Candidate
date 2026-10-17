@@ -1324,6 +1324,17 @@ async function testMap() {
   suite("map.html — modes", () => {
     const senateFill = D.querySelector('[data-state="TX"]').style.fill;
     check("Senate mode fills states", !!senateFill, senateFill);
+    // Every key is a fill some state is drawn in, and every fill has a key:
+    // "Independent" matched no state, and D.C.'s grey had no key.
+    const keys = [...D.querySelectorAll("#mapLegend .swatch")].map((s) => s.style.background);
+    const fills = new Set([...D.querySelectorAll("#usMap .state")].map((s) => s.style.fill));
+    check("each Senate key is a fill a state is drawn in, and each fill has a key",
+      keys.every((k) => fills.has(k)) && [...fills].every((f) => keys.indexOf(f) !== -1),
+      `keys ${keys.join(", ")} | fills ${[...fills].join(", ")}`);
+    const dc = D.querySelector('[data-state="DC"]');
+    check("D.C. says it has no senators, not '0R, 0D'",
+      !!dc && /no senators/.test(dc.getAttribute("aria-label") || "") &&
+        !/0R, 0D/.test(dc.getAttribute("aria-label") || ""), dc && dc.getAttribute("aria-label"));
 
     D.querySelector('[data-mode="house"]').click();
     check("House mode blends by delegation share",
