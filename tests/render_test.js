@@ -3534,9 +3534,11 @@ async function testGuideMaps() {
         !!D.querySelector('#guideFacts a[href="https://www.ca5.uscourts.gov/"]'));
       // The guide's map and the federal page are one set of courts.
       const here = [...D.querySelectorAll("#guideFacts .guide-fact-courts a")].map((a) => a.getAttribute("href"));
+      // Exactly these: a court from another state, or a nationwide one, would pass a superset check.
       check("Texas's own federal courts link to their judges: its court of appeals first",
-        here[0] === "../courts/ca5.html" && ["tx-n", "tx-s", "tx-e", "tx-w"]
-          .every((id) => here.includes("../courts/" + id + ".html")), here.join(" "));
+        here[0] === "../courts/ca5.html" && here.length === 5 &&
+        here.slice(1).sort().join(" ") === ["tx-e", "tx-n", "tx-s", "tx-w"]
+          .map((id) => "../courts/" + id + ".html").join(" "), here.join(" "));
     });
   }
   {
