@@ -109,8 +109,10 @@
     return courts.map(function (c) {
       return "<tr><th scope=\"row\">" + courtLink(c, prefix) + "</th>" +
         cell("Chief judge", chiefCell(c, prefix)) +
+        // A territorial court's judges serve under Article IV, and the
+        // directory lists Article III judges only: the row says so itself.
         cell("Judges", c.listed ? esc(counts(c)) :
-          '<span class="faint">Not in the directory</span>') +
+          '<span class="faint" data-article-iv>Article IV judges: not in the directory</span>') +
         cell("Vacancies", vacancyCount(c)) + "</tr>";
     });
   }
@@ -405,11 +407,13 @@
       'placeholder="A judge’s name" aria-describedby="judgeSearchCount">' +
       '<p class="faint" id="judgeSearchCount" role="status"></p>' +
       '<ul class="fed-results" id="judgeResults"></ul></div>' +
-      '<p class="guide-lede">Every sitting judge of each court whose judges are appointed under ' +
-      "Article III, from the " +
+      '<p class="guide-lede" id="courtsLede">Every sitting judge of each court whose judges are ' +
+      "appointed under Article III, from the " +
       source(d.sources.judiciary.directory, "Federal Judicial Center’s Biographical Directory") +
-      " as of " + esc(asOf.judiciary) + ", and the three territorial district courts. The " +
-      "Court of Federal Claims, the Tax Court, and bankruptcy and magistrate judges are not " +
+      " as of " + esc(asOf.judiciary) + ". The three territorial district courts (Guam, the " +
+      "Northern Mariana Islands and the Virgin Islands) are listed, but not their judges: they " +
+      "serve ten-year terms under Article IV, and the directory lists Article III judges only. " +
+      "The Court of Federal Claims, the Tax Court, and bankruptcy and magistrate judges are not " +
       "in it.</p>" + vacancySummary(d) +
       "<h3 class=\"panel-subhead\">Courts of appeals</h3>" +
       table("", COURT_HEADS, courtRows(appeals, "../courts/"));
@@ -426,7 +430,7 @@
       body += '<h3 class="panel-subhead">Court of International Trade</h3>' +
         table("", COURT_HEADS, courtRows(trade, "../courts/"));
     }
-    html += section("courts", "The Article III courts", body);
+    html += section("courts", "The federal courts", body);
     el("federalBody").innerHTML = html;
     initSearch();
     initCircuitMap(d);

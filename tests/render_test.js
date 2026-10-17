@@ -4865,6 +4865,22 @@ async function testFederal() {
     check("the courts are said to be the Article III courts",
       /Article III/.test(D.getElementById("courts").textContent) &&
       !/Every federal court/.test(D.getElementById("federalBody").textContent));
+    // The section holds the Article IV territorial courts too: its title
+    // and lede may not promise only Article III courts, or their judges.
+    const courtsHead = D.querySelector("#courts .guide-subheading");
+    check("the section is the federal courts, not 'the Article III courts'",
+      !!courtsHead && courtsHead.textContent === "The federal courts", courtsHead && courtsHead.textContent);
+    const lede = D.getElementById("courtsLede");
+    check("the lede says the territorial courts' judges are not listed, and why", !!lede &&
+      /territorial district courts/.test(lede.textContent) && /but not their judges/.test(lede.textContent) &&
+      /Article IV/.test(lede.textContent), lede && lede.textContent);
+    const territorial = d.courts.filter((c) => !c.listed && c.kind === "territorial");
+    check("each territorial court's row says its judges serve under Article IV",
+      territorial.length === 3 && territorial.every((c) => {
+        const a = D.querySelector('#courts a[href="../courts/' + c.id + '.html"]');
+        const row = a && a.closest("tr");
+        return !!row && /Article IV judges: not in the directory/.test(row.textContent);
+      }), territorial.map((c) => c.id).join(", "));
   });
 
   suite("federal/index.html — the circuit map", () => {

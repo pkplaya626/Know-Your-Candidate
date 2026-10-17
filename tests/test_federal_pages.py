@@ -143,6 +143,29 @@ class TestThePages(unittest.TestCase):
         for judge in courts["ca1"]["judges"]:
             self.assertNotIn(judge["name"], html)
 
+    def test_a_court_page_describes_what_its_kind_holds(self):
+        """A territorial court's judges are not in the directory, and a
+        justice takes no senior status: neither page promises them."""
+        def description(cid):
+            html = pages.render_court_page(cid, "example.org")
+            return re.search(r'<meta name="description" content="([^"]*)"', html).group(1)
+        for cid in ("gu", "mp", "vi"):
+            text = description(cid)
+            self.assertIn("Article IV", text)
+            self.assertIn("not listed", text)
+            self.assertNotIn("Every sitting judge", text)
+        self.assertNotIn("senior status", description("scotus"))
+        self.assertIn("justice", description("scotus"))
+        self.assertIn("Every sitting judge", description("ca1"))
+
+    def test_no_page_calls_the_courts_it_links_the_article_iii_courts(self):
+        """The hub's courts section holds the Article IV territorial courts."""
+        for html in (pages.render_court_page("gu", "example.org"),
+                     pages.render_court_page("ca1", "example.org"),
+                     pages.render_federal_page("example.org")):
+            self.assertNotIn("The Article III courts", html)
+            self.assertIn('href="../federal/index.html#courts"', html)
+
     def test_the_hub_carries_no_names(self):
         html = pages.render_federal_page("example.org")
         payload, _, _, _ = built()
