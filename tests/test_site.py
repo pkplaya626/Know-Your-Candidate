@@ -928,7 +928,7 @@ class TestRefreshWorkflow(unittest.TestCase):
         self.assertIn('branch="refresh/congress-$(date -u +%Y-%m-%d)-${{ github.run_id }}"',
                       self.text)
 
-    def test_runs_twice_a_week_until_the_election_then_daily_through_the_runoffs(self):
+    def test_runs_twice_a_week_then_daily_into_the_election_and_through_the_runoffs(self):
         self.assertIn('cron: "20 7 * * *"', self.text)
         self.assertIn('"2026-11-03"', self.text)
         self.assertIn('"2026-12-15"', self.text)      # after Louisiana's Dec 12 runoff
@@ -954,8 +954,14 @@ class TestRefreshWorkflow(unittest.TestCase):
             return subprocess.run([bash, "-eo", "pipefail", "-c", body], capture_output=True,
                                   text=True, check=True).stdout.strip()
 
-        self.assertEqual(due("2026-10-19", "1"), "run=true")     # Monday before
-        self.assertEqual(due("2026-10-21", "3"), "run=false")    # Wednesday before
+        self.assertEqual(due("2026-10-12", "1"), "run=true")     # a Monday in October
+        self.assertEqual(due("2026-10-14", "3"), "run=false")    # a Wednesday before Q3 day
+        # Daily from the Q3 deadline: a Thursday run read before the filings
+        # left every nominee's money at June 30 for four days (2026-10-17).
+        self.assertEqual(due("2026-10-15", "4"), "run=true")
+        self.assertEqual(due("2026-10-17", "6"), "run=true")     # a Saturday
+        self.assertEqual(due("2026-10-21", "3"), "run=true")     # the day before pre-general reports
+        self.assertEqual(due("2026-11-02", "1"), "run=true")     # the eve
         self.assertEqual(due("2026-11-03", "2"), "run=false")    # Election Day itself
         self.assertEqual(due("2026-11-04", "3"), "run=true")     # the morning after
         self.assertEqual(due("2026-12-13", "7"), "run=true")     # Louisiana's runoff
