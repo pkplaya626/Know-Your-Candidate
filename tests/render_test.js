@@ -3939,6 +3939,25 @@ async function testCounties() {
     check("offers no cities view", hawaii.D.querySelector(".segmented").hidden &&
       !hawaii.D.querySelector("#localMap .map-dot"));
   });
+  const nj = await buildPage("counties/nj.html");
+  suite("counties/nj.html — the statewide list says what the listing says", () => {
+    const body = nj.D.getElementById("localPanelBody").textContent;
+    check("filed under the state, never 'run by the state' (Jersey City's schools are not)",
+      /listing files these under the state rather than under a county/.test(body) &&
+      !/Run by the state/.test(body), body.slice(-400));
+  });
+  const nc = await buildPage("counties/nc.html", { hash: "#/?county=37001" });
+  suite("counties/nc.html — a county's count and the school systems under it", () => {
+    const rows = nc.window.kycLocal.NC.governments["37001"];
+    const dependent = rows.filter((r) => r[0] === "dependent").length;
+    const body = nc.D.getElementById("localPanelBody").textContent;
+    check("the headline counts the governments, not the dependent school systems",
+      body.indexOf((rows.length - dependent) + " local governments in 2022") === 0 && dependent > 0,
+      body.slice(0, 80));
+    check("and the school systems under it say why they are not counted",
+      /School systems run by another government/.test(body) &&
+      /Not counted as local governments: the Census Bureau counts a school system/.test(body));
+  });
   const tx = await buildPage("states/tx.html");
   suite("states/tx.html — links to its counties", () => {
     check("the state page links to its counties page",

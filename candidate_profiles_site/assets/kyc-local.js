@@ -61,6 +61,13 @@
   function el(id) { return doc.getElementById(id); }
   function plural(n, word) { return n.toLocaleString("en-US") + " " + word + (n === 1 ? "" : "s"); }
 
+  /* Why the dependent systems listed under a county are not in its count:
+   * the Census Bureau's own classification (2022 Census of Governments,
+   * Individual State Descriptions). Said once, under the group, wherever it
+   * is listed: a county, an area off the map, or the statewide list. */
+  var DEPENDENT_NOTE = "Not counted as local governments: the Census Bureau counts a school system " +
+    "run by a state, county, city or town as part of the government that runs it.";
+
   function counted(rows) {
     return rows.filter(function (r) { return r[0] !== "dependent"; }).length;
   }
@@ -228,6 +235,7 @@
       if (!mine.length) return;
       html += '<h3 class="local-group">' + KYC.escapeHtml(KINDS[kind]) +
         ' <span class="faint">' + mine.length + "</span></h3>" +
+        (kind === "dependent" ? '<p class="faint local-dependent">' + DEPENDENT_NOTE + "</p>" : "") +
         '<ul class="local-list">' + mine.join("") + "</ul>";
     });
     return html || '<p class="faint">Nothing matches.</p>';
@@ -314,7 +322,9 @@
         '<p class="faint">The Census listing files these under a county area that is not on the ' +
         "current county map.</p>" + groups(u.governments, "", u.fips);
     }).join("") + (state.statewide.length
-      ? '<p class="leg-subhead">Statewide</p><p class="faint">Run by the state, with no county.</p>' +
+      // What the listing says, no more: it files these with no county.
+      ? '<p class="leg-subhead">Statewide</p><p class="faint">The Census Bureau\'s 2022 listing files ' +
+        "these under the state rather than under a county.</p>" +
         groups(state.statewide, "") : "");
     el("localPanelTitle").textContent = state.name;
     var townCount = Object.keys(towns).length;
