@@ -2388,7 +2388,10 @@ async function testBallotCounts() {
     check("the strip equals the race headers added up",
       !!strip && Number(strip.split(" ")[0]) === heads, `${strip} vs ${heads}`);
     const national = window.kycBuildMeta.election.challengersOnBallot;
-    const all = races.reduce((n, r) => n + (r.candidateCount || 0) +
+    // A race with no primary whose ballot has not been read counts its
+    // filers as filed, not on the ballot (summary.ballot_known).
+    const known = (r) => !("primaryDate" in r && !r.primaryDate && r.settled === false);
+    const all = races.filter(known).reduce((n, r) => n + (r.candidateCount || 0) +
       ((r.results || {}).otherNominees || []).length, 0);
     check("and the national figure is every race's, added up", national === all, `${national} vs ${all}`);
   });
@@ -4669,6 +4672,132 @@ function electionNight(window, meta) {
  * Secretary of State's qualified list is the ballot. The fixture marks one
  * race that way whatever the data holds, since after the count the results
  * page decides instead. */
+/* Rule 77: once a state certifies its November candidates, its list is the
+ * ballot. Read from the data as built: Alaska's at-large seat showed two of
+ * its four certified names and called the other two withdrawn; American
+ * Samoa, with no primary, read "0 challengers on the ballot" over six. */
+async function testCertifiedBallots() {
+  const ak = await buildPage("states/ak.html");
+  suite("states/ak.html — the Division of Elections' list is the November ballot", () => {
+    check("no page errors", ak.errors.length === 0, ak.errors.join(" | "));
+    const race = ak.window.kycRaces.find((r) => r.id === "H-AK-00-2026");
+    const res = (race && race.results) || {};
+    check("the at-large race is certified by the Division of Elections",
+      /Alaska Division of Elections/.test(res.certifiedBy || "") && res.certifiedComplete,
+      res.certifiedBy);
+    const section = ak.D.getElementById("race-H-AK-00-2026");
+    const shown = section ? [...section.querySelectorAll(".card")].filter((c) => !c.closest("details"))
+      .map((c) => c.textContent).join(" ") + " " +
+      [...section.querySelectorAll(".race-note")].map((n) => n.textContent).join(" ") : "";
+    check("Hafner and McDermott, promoted when four finishers withdrew, are on it",
+      /Hafner/.test(shown) && /McDermott/.test(shown), shown.slice(0, 400));
+    const folded = section ? [...section.querySelectorAll("details .card")].map((c) => c.textContent).join(" ") : "";
+    check("and neither is folded away as no longer running",
+      !/Hafner|McDermott/.test(folded), folded.slice(0, 300));
+    const note = section && [...section.querySelectorAll(".race-note")].find((n) =>
+      /Also on the November ballot/.test(n.textContent));
+    check("a name with no profile is credited to the list, with its party",
+      !note || (/per the Alaska Division of Elections/.test(note.textContent) &&
+        /\((Democrat|Democratic|Libertarian|Nonpartisan)\)/.test(note.textContent)),
+      note && note.textContent);
+  });
+
+  const as = await buildPage("states/as.html");
+  suite("states/as.html — a territory with no primary, after its list is read", () => {
+    check("no page errors", as.errors.length === 0, as.errors.join(" | "));
+    const strip = as.D.querySelector(".state-summary").textContent;
+    const race = as.window.kycRaces.find((r) => r.id === "H-AS-00-2026");
+    const res = (race && race.results) || {};
+    check("the race is the Election Office's certified list",
+      /American Samoa Election Office/.test(res.certifiedBy || ""), res.certifiedBy);
+    check("its challengers are counted on the ballot, never 0 over six certified",
+      !/\b0 challengers on the ballot/.test(strip) && /[1-9]\d* challengers? on the ballot/.test(strip),
+      strip);
+  });
+
+  // A territory with no primary whose ballot has not been read counts its
+  // filers as filed, not as on the ballot (RACES-13).
+  const mp = await buildPage("states/mp.html");
+  suite("states/mp.html — no primary and no list read yet", () => {
+    const info = mp.window.kycBuildMeta.states.MP || {};
+    const strip = mp.D.querySelector(".state-summary").textContent;
+    check("filers are counted as filed, and never as on the ballot",
+      !info.challengersFiled || (new RegExp(info.challengersFiled + " challengers? filed; ballot not yet published")
+        .test(strip) && !/challengers? on the ballot/.test(strip)), strip);
+    check("the page writes Northern Mariana Islands' (rule 75)",
+      !/Islands's/.test(mp.D.body.textContent) && /Northern Mariana Islands' /.test(mp.D.body.textContent));
+  });
+  const vi = await buildPage("states/vi.html");
+  suite("states/vi.html — a plural name's possessive", () => {
+    check("never Virgin Islands's", !/Islands's/.test(vi.D.body.textContent));
+  });
+
+  // PERSONA-09: a nominee with no profile carries their party.
+  const withParty = (window) => window.kycRaces.find((r) => r.results &&
+    Object.keys(r.results.otherParties || {}).length && r.state !== "LA");
+  const probe = await buildPage("index.html");
+  const partyRace = withParty(probe.window);
+  probe.window.close();
+  if (partyRace) {
+    const page = await buildPage("states/" + partyRace.state.toLowerCase() + ".html");
+    suite(`states/${partyRace.state.toLowerCase()}.html — names with no profile carry their party`, () => {
+      const section = page.D.getElementById("race-" + partyRace.id);
+      const text = section ? section.textContent : "";
+      const parties = partyRace.results.otherParties;
+      check("each is printed with the party the ballot gives it",
+        Object.keys(parties).every((n) => text.indexOf(n + " (" + parties[n] + ")") !== -1),
+        JSON.stringify(parties));
+    });
+  } else {
+    suite("names with no profile carry their party", () => {
+      check("a race with a nominee who has no profile and a known party", false);
+    });
+  }
+
+  // PERSONA-20: the ballot's name, with the FEC's beneath it.
+  const named = await buildPage("index.html");
+  const renamed = named.window.legislatorsData.find((p) => p.fecName && p.fecName !== p.name);
+  named.window.close();
+  if (renamed) {
+    const page = await buildPage("index.html", { hash: "#/profile/" + renamed.id });
+    await settle();
+    suite("index.html — a candidate the ballot names differently from the FEC", () => {
+      const head = page.D.getElementById("profileModalName").textContent;
+      const fec = page.D.getElementById("profileModalFecName");
+      check("the dialog leads with the ballot's name", head === renamed.name, head);
+      check("and says what the FEC files them under", !!fec && !fec.hidden &&
+        fec.textContent === "Files with the FEC as " + renamed.fecName, fec && fec.textContent);
+    });
+  }
+
+  // RACES-05, FRESHNESS-12: an empty seat says who left, when, and that no
+  // special election has been called. Campaign season only: on January 3
+  // the seats are filled.
+  const tx = await buildPage("states/tx.html");
+  const vacancies = (tx.window.kycBuildMeta.states.TX || {}).vacancies || [];
+  if (!tx.window.KYC.recordPhase()) {
+    suite("states/tx.html — an empty House seat says why", () => {
+      check("the build records TX-23's vacancy", vacancies.some((v) => v.district === 23),
+        JSON.stringify(vacancies));
+      const notes = [...tx.D.querySelectorAll("#delegation .state-note")].map((n) => n.textContent).join(" ");
+      check("the delegation says who left, when, and that no special election was called",
+        vacancies.every((v) => notes.indexOf("District " + v.district + ": Vacant since ") !== -1 &&
+          notes.indexOf("(" + v.name + " " + v.how + ")") !== -1) &&
+          /no special election called as of [A-Z][a-z]{2} \d{1,2}, \d{4}/.test(notes), notes);
+    });
+    const fl = await buildPage("districts/fl.html", { hash: "#/?d=20" });
+    suite("districts/fl.html — the old map's empty FL-20", () => {
+      check("no page errors", fl.errors.length === 0, fl.errors.join(" | "));
+      const facts = [...fl.D.querySelectorAll(".district-fact")].filter((f) =>
+        /Vacant since Apr 21, 2026 \(Sheila Cherfilus-McCormick resigned\)/.test(f.textContent));
+      const cards = [...fl.D.querySelectorAll(".plan-card")];
+      check("the old map's FL-20 says who left and when, and only it does",
+        facts.length === 1 && cards.length === 2 && cards[0].contains(facts[0]),
+        facts.length + " notes on " + cards.length + " maps");
+    });
+  }
+}
+
 function qualifiedRace(window) {
   const byId = Object.fromEntries(window.legislatorsData.map((p) => [p.id, p]));
   const race = window.kycRaces.find((r) => r.state === "LA" && r.chamber === "House" &&
@@ -5697,6 +5826,7 @@ async function testFederal() {
   if (!only || only === "states") await testStates();
   if (!only || only === "states") await testElectionNight();
   if (!only || only === "states") await testQualifiedBallot();
+if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "redistricting") await testRedistricting();
   if (!only || only === "redistricting") await testDistrictPages();
   if (!only || only === "redistricting") await testFindMyDistrict();

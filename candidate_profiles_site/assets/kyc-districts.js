@@ -903,6 +903,15 @@
   }
 
   /** The old map's district: who holds it, and where its land went. */
+  /** Why a seat on the map the members sit under is empty, where the
+   *  build records it: who left, when, and whether a special election has
+   *  been called. Only the old map's seat - the new map's district of the
+   *  same number is another place (FL-20 kept 3% of its land). */
+  function vacancyLine(n) {
+    var v = archive() ? null : KYC.vacancyOf(code, n);
+    return v ? '<p class="state-note">' + KYC.escapeHtml(KYC.vacancyNote(v)) + "</p>" : "";
+  }
+
   function factOld(plan, n) {
     var held = holders(plan, n);
     var last = archive();
@@ -916,7 +925,7 @@
         ? '<p class="district-fact-label">' + (last ? "Last held by" : "Seat held by") + "</p>" +
           peopleCards(held)
         : '<p class="district-fact-label">' + (last ? "No holder on the record" : "No sitting member") +
-          "</p>") +
+          "</p>" + vacancyLine(n)) +
       flowLine("Where its area went:", went, "new") +
       "</section>";
   }
@@ -972,7 +981,7 @@
       (held.length
         ? '<p class="district-fact-label">Seat held by</p><div class="card-grid">' +
           held.map(KYC.cards.card).join("") + "</div>"
-        : "") +
+        : vacancyLine(n)) +
       (!race
         ? '<p class="state-note">No race for this seat in 2026.</p>'
         : people.length

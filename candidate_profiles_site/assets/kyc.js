@@ -391,6 +391,23 @@
       card: "Withdrew", long: "Withdrew from the 2026 race", mate: "Withdrew", short: "Withdrew",
       title: "Withdrew, per the Secretary of State's list of qualified candidates." },
   };
+  /* A status a state's certified list of November candidates set (rule 77):
+   * the list's word, credited to the office that published it. Only what
+   * the list says differently from a results page is here. */
+  var CERTIFIED = {
+    nominee: { title: "On the state's certified list of candidates for the November 3 ballot." },
+    unlisted: { cls: "badge-neutral", rank: 6, off: true,
+      card: "Not on the November ballot", long: "Not on the November ballot",
+      mate: "Not on ballot", short: "Not on ballot",
+      title: "Filed with the FEC but not on the state's certified list of candidates for the " +
+        "November 3 ballot.",
+      member: { cls: "badge-danger", card: "Not running for this seat",
+        long: "Not running for this seat in 2026", short: "Leaving seat",
+        title: "Not on the state's certified list of candidates for this seat; not seeking " +
+          "re-election to it." } },
+    withdrawn: { title: "Withdrew, per the state's certified list of candidates." },
+    eliminated: { title: "Lost the primary, per the state's certified list of candidates." },
+  };
   var OFF_BALLOT = { eliminated: true, withdrawn: true, unlisted: true };
 
   /** How to show *status* in *form* ("card", "long", "mate" or "short"):
@@ -419,10 +436,26 @@
     if (status === "nominee" && opts.allParty) spec = allParty(opts.allParty);
     var listed = opts.source === "qualified";
     if (listed && LISTED[status]) spec = LISTED[status];
-    if (status === "unlisted" && opts.unconfirmed) spec = UNCONFIRMED;
+    var certified = opts.source === "certified" && CERTIFIED[status];
+    if (certified) {
+      // The list's own words where they differ; the rest as for any result.
+      var merged = {};
+      Object.keys(spec).forEach(function (k) { merged[k] = spec[k]; });
+      Object.keys(certified).forEach(function (k) { merged[k] = certified[k]; });
+      if (!certified.member && spec.member) {
+        merged.member = { title: certified.title };
+        Object.keys(spec.member).forEach(function (k) {
+          if (k !== "title") merged.member[k] = spec.member[k];
+        });
+      }
+      spec = merged;
+    }
+    if (status === "unlisted" && opts.unconfirmed && !certified) spec = UNCONFIRMED;
     var own = (opts.own && spec.member) || {};
     var title = own.title || spec.title;
-    var source = spec.source || (listed ? LISTED_SOURCE : SOURCE);
+    var source = spec.source || (listed ? LISTED_SOURCE : certified
+      ? " Source: " + (opts.sourceName || "the state's certified list of candidates") + "."
+      : SOURCE);
     if ((status === "nominee" || status === "qualified") &&
         electionStatus(undefined, opts.now).phase === "post-election") {
       var asOf = (meta().election || {}).resultsAsOf;
@@ -459,6 +492,7 @@
         !(item.appointed && status !== "unlisted"),
       unconfirmed: !!item.raceStatusUnconfirmed,
       source: record.raceStatusSource,
+      sourceName: record.raceStatusSourceName,
       allParty: record.allPartyPrimary,
       now: opts.now,
     });
@@ -468,9 +502,15 @@
    *  results", or the Secretary of State's qualified list where that is the
    *  ballot (Louisiana's House seats before their count). */
   function ballotSource(race) {
-    return race && race.results && race.results.fromQualifiedList
-      ? "per the Secretary of State's list of qualified candidates"
-      : "per the published results";
+    var res = (race && race.results) || {};
+    if (res.fromQualifiedList) return "per the Secretary of State's list of qualified candidates";
+    // A state's certified November ballot (rule 77), named by its office;
+    // a party's list of its own nominees only adds to the results.
+    if (res.certifiedBy) {
+      return res.certifiedComplete ? "per the " + res.certifiedBy
+        : "per the published results and the " + res.certifiedBy;
+    }
+    return "per the published results";
   }
 
   /** True when the primary settled *status* out of the race. */
@@ -651,6 +691,38 @@
     var m = /^(\d{4})-(\d{2})/.exec(String(iso || ""));
     if (!m || +m[2] < 1 || +m[2] > 12) return "";
     return MONTHS[+m[2] - 1] + " " + m[1];
+  }
+
+  /** "2026-04-21" -> "Apr 21, 2026"; anything that is not an ISO date -> "". */
+  function dayMonthYear(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ""));
+    if (!m || +m[2] < 1 || +m[2] > 12) return "";
+    return MONTHS[+m[2] - 1] + " " + (+m[3]) + ", " + m[1];
+  }
+
+  /** Plain text for an empty House seat (summary.py, from
+   *  overrides.SEAT_VACANCIES): who left it, when and how, and whether a
+   *  special election has been called, as of the day that was checked.
+   *  "Vacant" alone left FL-20's and TX-23's readers to assume one was
+   *  coming. One sentence for the state page and the district map alike. */
+  function vacancyNote(v) {
+    if (!v) return "";
+    return "Vacant since " + dayMonthYear(v.left) + " (" + v.name + " " + v.how + "); " +
+      v.special + " as of " + dayMonthYear(v.checked) + ".";
+  }
+
+  /** A place's possessive, as kyc/pages.py writes it (rule 75): "Virgin
+   *  Islands'", never "Virgin Islands's"; "Texas's". */
+  function possessive(name) {
+    name = String(name || "");
+    return name + (/Islands$/.test(name) ? "'" : "'s");
+  }
+
+  /** The vacancy record for *code*'s House district *n*, or null. */
+  function vacancyOf(code, n) {
+    var list = ((meta().states || {})[code] || {}).vacancies || [];
+    for (var i = 0; i < list.length; i++) if (list[i].district === n) return list[i];
+    return null;
   }
 
   /** Plain text saying what period a profile's money covers, or "".
@@ -1673,6 +1745,10 @@
     sourceBadge: sourceBadge,
     financePeriod: financePeriod,
     monthYear: monthYear,
+    dayMonthYear: dayMonthYear,
+    vacancyNote: vacancyNote,
+    vacancyOf: vacancyOf,
+    possessive: possessive,
     hasValue: hasValue,
     partyKey: partyKey,
     partyClass: partyClass,

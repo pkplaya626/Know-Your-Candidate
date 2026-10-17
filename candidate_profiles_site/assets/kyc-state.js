@@ -69,7 +69,7 @@
           KYC.escapeAttr(links[v[0]]) + '">' + KYC.icon("link") + " " +
           KYC.escapeHtml(labels[v[0]] || v[1]) + "</a>";
       }).join(" ") + "</p>" +
-      '<p class="state-note">Each link is ' + KYC.escapeHtml(place) + "'s own official page, " +
+      '<p class="state-note">Each link is ' + KYC.escapeHtml(KYC.possessive(place)) + " own official page, " +
         "from the National Association of Secretaries of State’s " + '<a href="' +
         KYC.escapeAttr(all._source || "https://www.nass.org/can-I-vote") + '" target="_blank" ' +
         'rel="noopener noreferrer">Can I Vote</a>' + dated +
@@ -118,13 +118,29 @@
     if (info.renumbered) {
       parts.push(plural(info.renumbered, "member") + " running under a new district number");
     }
-    parts.push(plural(info.challengersOnBallot, "challenger") +
-      (rec ? " on the 2026 ballot" : " on the ballot"));
+    parts = parts.concat(challengerWords(info, rec));
     if (info.challengersOut) {
       parts.push(plural(info.challengersOut, "challenger") + " out after the " +
         (rec ? "2026 " : "") + "primaries");
     }
     return badges(parts);
+  }
+
+  /* Who is running against the seats' holders, as the races count them:
+   * on the ballot, and - where there is no primary and no ballot has been
+   * read (a territory before its list is published) - filed, which is not
+   * the same claim. American Samoa read "0 challengers on the ballot" over
+   * six filers and a race card saying so. */
+  function challengerWords(info, rec) {
+    var out = [];
+    if (info.challengersOnBallot || !info.challengersFiled) {
+      out.push(plural(info.challengersOnBallot, "challenger") +
+        (rec ? " on the 2026 ballot" : " on the ballot"));
+    }
+    if (info.challengersFiled) {
+      out.push(plural(info.challengersFiled, "challenger") + " filed; ballot not yet published");
+    }
+    return out;
   }
 
   function badges(parts) {
@@ -248,8 +264,14 @@
             '-year term (<a href="https://www.law.cornell.edu/uscode/text/48/891" target="_blank" ' +
             'rel="noopener noreferrer">48 U.S.C. § 891</a>). The seat was last on the ballot in ' +
             info.houseTerm.last + " and is next in " + info.houseTerm.next + ", so no seat in Congress " +
-            "is on " + KYC.escapeHtml(name) + "'s 2026 ballot.</p>"
+            "is on " + KYC.escapeHtml(KYC.possessive(name)) + " 2026 ballot.</p>"
           : "",
+        // Each empty seat: who left, when, and whether a special election
+        // has been called (summary.py, overrides.SEAT_VACANCIES).
+        (info.vacancies || []).map(function (v) {
+          return '<p class="state-note">District ' + v.district + ": " +
+            KYC.escapeHtml(KYC.vacancyNote(v)) + "</p>";
+        }).join(""),
         '<div class="card-grid">' + house.map(cards.card).join("") + "</div>",
         "</section>"
       );
@@ -285,7 +307,7 @@
         // ballot left out the governor, the legislature and every local race.
         '<h2 class="state-heading">2026 races for Congress in ' + KYC.escapeHtml(name) + "</h2>",
         '<p class="state-note">Each seat with the sitting member, everyone on the ' +
-          "November ballot, and - folded under the race - everyone the primary removed. " +
+          "November ballot, and - folded under the race - everyone no longer running. " +
           alsoOnBallot(code, name, info.territory) + "</p>",
         (senateRaces.length + houseRaces.length > 3
           ? '<nav class="toolbar jump-row" aria-label="Jump to a race">' + jumps + "</nav>"
@@ -321,7 +343,7 @@
         : "Your ballot may also hold local contests, which this site does not list.";
     }
     if (!list) {
-      return "None of " + KYC.escapeHtml(name) + "'s governor, lieutenant governor, attorney " +
+      return "None of " + KYC.escapeHtml(KYC.possessive(name)) + " governor, lieutenant governor, attorney " +
         "general, secretary of state or regular legislative seats is elected in 2026; the " +
         "ballot may still hold " + rest + ".";
     }
@@ -371,8 +393,8 @@
           : '<span class="state-row-meta">' + KYC.escapeHtml(plural(info.seatsUp, "seat") +
             (KYC.recordPhase() ? " on the 2026 ballot" : " up")) +
             (info.open ? " &middot; " + KYC.escapeHtml(plural(info.open, "open seat")) : "") + "</span>" +
-            '<span class="state-row-meta">' + KYC.escapeHtml(plural(info.challengersOnBallot, "challenger")) +
-            (KYC.recordPhase() ? " on the 2026 ballot" : " on the ballot") + "</span>",
+            '<span class="state-row-meta">' +
+            KYC.escapeHtml(challengerWords(info, KYC.recordPhase()).join(" · ")) + "</span>",
         "</a>",
       ].join("");
     });
