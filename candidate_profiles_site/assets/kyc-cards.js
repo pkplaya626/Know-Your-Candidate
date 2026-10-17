@@ -22,8 +22,9 @@
 
   function raceBadge(item) {
     // "Renominated" is about the seat a member holds; a member on another
-    // seat's ballot is simply on it.
-    var spec = KYC.raceStatusOf(item, "card");
+    // seat's ballot is simply on it. A filer the results do not settle
+    // reads as the dialog and the map read them (KYC.standing).
+    var spec = KYC.standing(item, "card");
     if (!spec) return "";
     // A nominee on another line than their party's says so, or a primary
     // loser on a minor-party line reads as a second Democratic nominee.
@@ -55,35 +56,25 @@
      * district - is leaving this one, and the reader should see where they
      * went before anything else. */
     if (!item.isCandidate && item.contestLabel) {
-      return '<span class="badge badge-warn" title="' + KYC.escapeAttr(
-        "Filed for " + item.contestLabel + " in 2026; not seeking re-election to " +
-        item.officeLabel + "."
-      ) + '">Running for ' + KYC.escapeHtml(item.contestLabel.replace(/ • /, " ")) +
-        "</span>" + (raceBadge(item) ? " " + raceBadge(item) : "");
+      var line = KYC.contestLine(item);
+      return '<span class="badge ' + line.cls + '" title="' + KYC.escapeAttr(line.title) + '">' +
+        KYC.escapeHtml(line.label) + "</span>" + (raceBadge(item) ? " " + raceBadge(item) : "");
     }
     /* A sitting member the primary eliminated is leaving too, and a reader
-     * should see that before "seat up". */
+     * should see that before "seat up" - and where they are going, when a
+     * results page has made them another office's nominee. */
     if (!item.isCandidate && KYC.offBallot(item.raceStatus)) {
-      return raceBadge(item);
+      return raceBadge(item) + KYC.otherOfficeBadge(item, " ");
     }
     if (/retiring|not running|defeated|ineligible|resigned/.test(status)) {
-      return '<span class="badge badge-danger">Leaving in ’26</span>';
+      return '<span class="badge badge-danger">Leaving in ’26</span>' +
+        KYC.otherOfficeBadge(item, " ");
     }
     if (item.isCandidate) {
       /* The primary has been held and the published results do not name
        * them (an independent, a minor party's filer): not "the primary has
-       * not been held yet", and not counted as on the ballot. */
-      if (!item.raceStatus && item.maybeNamed && item.maybeNamed.length) {
-        return '<span class="badge badge-neutral" title="' + KYC.escapeAttr(
-          "The published results name " + item.maybeNamed.join(" and ") + ", who may be this " +
-          "person under another spelling. Not confirmed here, so the race counts them once, " +
-          "under that name.") + '">Result not matched</span>';
-      }
-      if (!item.raceStatus && item.ballotUnknown) {
-        return '<span class="badge badge-neutral" title="Filed with the FEC. The published ' +
-          'results of this race do not name them, so whether they are on the November ballot ' +
-          'is not known here.">Ballot status not known</span>';
-      }
+       * not been held yet", and not counted as on the ballot. raceBadge
+       * says so, as KYC.standing words it for every view. */
       return raceBadge(item) ||
         '<span class="badge badge-money" title="Filed with the FEC; the primary has not been held yet.">2026 challenger</span>';
     }
@@ -336,7 +327,7 @@
     var running = people.filter(function (p) { return !offBallot(p); });
     var out = people.filter(offBallot);
     var body = '<div class="card-grid">' + running.map(card).join("") + "</div>" +
-      unprofiledNote(race);
+      unprofiledNote(race) + orderNote(people);
     if (out.length) {
       body +=
         '<details class="race-out"><summary>' + out.length +
@@ -360,6 +351,15 @@
       odds,
       "</section>",
     ].join("");
+  }
+
+  /* How the people of a race are listed, under them, where there are two
+   * or more to order (TRUST-15). The order is the pipeline's
+   * (races.order_people). */
+  function orderNote(people, cls) {
+    return people.length > 1
+      ? '<p class="race-order' + (cls ? " " + cls : "") + '">' + KYC.escapeHtml(KYC.RACE_ORDER) + "</p>"
+      : "";
   }
 
   /* The people the published results put on the November ballot whom no
@@ -401,6 +401,7 @@
   KYC.cards = {
     unprofiledNames: unprofiledNames,
     unprofiledNote: unprofiledNote,
+    orderNote: orderNote,
     offBallot: offBallot,
     raceBadge: raceBadge,
     statusBadge: statusBadge,

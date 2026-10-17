@@ -339,9 +339,17 @@
       card: "Lost primary", long: "Lost the 2026 primary", mate: "Lost primary",
       short: "Lost primary",
       title: "Did not win the primary, per the published results." },
+    // A sitting member who withdrew from their own seat's race is not
+    // running for re-election: "Withdrew" on Thom Tillis and Tommy
+    // Tuberville read as quitting a campaign mid-way (TRUST-18).
     withdrawn: { cls: "badge-neutral", rank: 5, off: true,
       card: "Withdrew", long: "Withdrew from the 2026 race", mate: "Withdrew", short: "Withdrew",
-      title: "Withdrew from the race, per the published results." },
+      title: "Withdrew from the race, per the published results.",
+      member: { cls: "badge-danger", card: "Not running for re-election",
+        long: "Not running for re-election in 2026", mate: "Not running for re-election",
+        short: "Leaving seat",
+        title: "Not seeking re-election to this seat: the published results list them as " +
+          "withdrawn from its race." } },
     unlisted: { cls: "badge-neutral", rank: 6, off: true,
       card: "Not on primary ballot", long: "Not on the 2026 primary ballot", mate: "Not on ballot",
       short: "Not on ballot",
@@ -371,6 +379,13 @@
     card: "Awaiting result", long: "On the November ballot: awaiting result",
     mate: "Awaiting result", short: "Awaiting result" };
 
+  var MINOR_NOMINEE = { cls: "badge-money", rank: 0,
+    card: "On the November ballot", long: "On the November ballot", mate: "On the ballot",
+    short: "On ballot",
+    title: "On the general election ballot, per the published results. Independent and " +
+      "minor-party candidates get there by petition or by their party's nomination, not " +
+      "necessarily by a primary." };
+
   var NOVEMBER = { nominee: true, elected: true, defeated: true, runoff: true, qualified: true };
 
   /* A status read from a state's list of qualified candidates (Louisiana's
@@ -389,7 +404,12 @@
           "not seeking re-election to it." } },
     withdrawn: { cls: "badge-neutral", rank: 5, off: true,
       card: "Withdrew", long: "Withdrew from the 2026 race", mate: "Withdrew", short: "Withdrew",
-      title: "Withdrew, per the Secretary of State's list of qualified candidates." },
+      title: "Withdrew, per the Secretary of State's list of qualified candidates.",
+      member: { cls: "badge-danger", card: "Not running for re-election",
+        long: "Not running for re-election in 2026", mate: "Not running for re-election",
+        short: "Leaving seat",
+        title: "Not seeking re-election to this seat: the Secretary of State's list of " +
+          "qualified candidates shows them as withdrawn." } },
   };
   var OFF_BALLOT = { eliminated: true, withdrawn: true, unlisted: true };
 
@@ -423,6 +443,13 @@
     var own = (opts.own && spec.member) || {};
     var title = own.title || spec.title;
     var source = spec.source || (listed ? LISTED_SOURCE : SOURCE);
+    // An independent or a minor party's nominee reaches the ballot by
+    // petition or by their party's nomination, mostly without a primary:
+    // "Won the primary" was false for Dan Osborn and 57 others (PROFILES-17).
+    if (status === "nominee" && spec === RACE_STATUS.nominee && opts.minor && !opts.own) {
+      spec = MINOR_NOMINEE;
+      title = spec.title;
+    }
     if ((status === "nominee" || status === "qualified") &&
         electionStatus(undefined, opts.now).phase === "post-election") {
       var asOf = (meta().election || {}).resultsAsOf;
@@ -460,9 +487,134 @@
       unconfirmed: !!item.raceStatusUnconfirmed,
       source: record.raceStatusSource,
       allParty: record.allPartyPrimary,
+      minor: partyKey(item) === "i",
       now: opts.now,
     });
   }
+
+  /* A filer the published results do not settle: they name someone who
+   * may be this person under another spelling (maybeNamed), or they do not
+   * name them at all, after the primary (ballotUnknown). Neither is "the
+   * primary has not been held", and neither is on the ballot as far as
+   * this site can say. The dialog showed no status for them at all while
+   * their card said "Ballot status not known", and the map counted them as
+   * challengers (PROFILES-06, RACES-04). */
+  function unsettled(item) {
+    if (!item || !item.isCandidate || item.raceStatus) return null;
+    if (item.maybeNamed && item.maybeNamed.length) {
+      return { cls: "badge-neutral", rank: 2, off: false, unknown: true,
+        card: "Result not matched", long: "Result not matched", mate: "Result not matched",
+        short: "Not matched",
+        title: "The published results name " + item.maybeNamed.join(" and ") + ", who may be " +
+          "this person under another spelling. Not confirmed here, so the race counts them " +
+          "once, under that name." };
+    }
+    if (item.ballotUnknown) {
+      return { cls: "badge-neutral", rank: 2, off: false, unknown: true,
+        card: "Ballot status not known", long: "Ballot status not known",
+        mate: "Ballot status not known", short: "Status not known",
+        title: "Filed with the FEC. The published results of this race do not name them, so " +
+          "whether they are on the November ballot is not known here." };
+    }
+    return null;
+  }
+
+  /** Where *item* stands in their 2026 race, in *form*, for every view
+   *  (rule 63's one table): KYC.raceStatusOf, or a filer the results do not
+   *  settle, or null. `unknown` marks the second, which no count of who is
+   *  on the ballot includes. */
+  function standing(item, form, opts) {
+    var spec = raceStatusOf(item, form, opts);
+    if (spec) return spec;
+    var open = unsettled(item);
+    if (!open) return null;
+    return { cls: open.cls, label: open[form] || open.card, title: open.title,
+             rank: open.rank, off: false, unknown: true };
+  }
+
+  /** The filing profile of a member's run for another seat, when it is the
+   *  race they contest (alsoRunningId), else null. Its money is that
+   *  campaign's: shown beside the member's, labelled, never as theirs
+   *  (rule 68: a member carries only their own chamber's FEC ids). */
+  function otherCampaign(item) {
+    if (!runsElsewhere(item) || !item.alsoRunningId) return null;
+    var filing = byId(item.alsoRunningId);
+    return filing && filing.id !== item.id && filing.raceId === item.contestRaceId ? filing : null;
+  }
+
+  /** A sitting member's run for a seat other than the one they hold, as
+   *  one badge's words for every view: `{cls, label, title, past}`, or
+   *  null. Running again under a new district number is re-election, not
+   *  leaving (rule 74): "Running in CA-40 (redrawn)". A run that ended in
+   *  a loss or a withdrawal is in the past tense: "Ran for Senate IL"
+   *  read "Running for" beside "Lost primary" into October (GRID-15). */
+  function contestLine(item) {
+    if (!item || item.isCandidate || !item.contestLabel) return null;
+    var seat = item.contestLabel.replace(/ • /, " ");
+    var status = contestStatus(item);
+    var past = OFF_BALLOT[status] || status === "defeated";
+    var end = String(item.term_start || "").split(" - ")[1] || "";
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(end)) end = "";
+    if (item.renumbered) {
+      var number = seat.replace(/^House /, "");
+      return past
+        ? { cls: "badge-neutral", past: true, renumbered: true,
+            label: "Ran in " + number + " (redrawn)",
+            title: "Ran for re-election under the state's new district map, in " +
+              item.contestLabel + ", and " +
+              (status === "defeated" ? "lost in November" : "is not on its November ballot") +
+              "; holds " + item.officeLabel + (end ? " until " + end : "") + "." }
+        : { cls: "badge-neutral", past: false, renumbered: true,
+            label: "Running in " + number + " (redrawn)",
+            title: "Running for re-election under the state's new district map, in " +
+              item.contestLabel + "; holds " + item.officeLabel + " until the new term begins." };
+    }
+    if (past) {
+      return { cls: "badge-neutral", past: true, label: "Ran for " + seat,
+        title: "Ran for " + item.contestLabel + " in 2026 and " +
+          (status === "defeated" ? "lost in November" : "is not on its November ballot") +
+          "; not seeking re-election to " + item.officeLabel +
+          (end ? ", whose term ends " + end : "") + "." };
+    }
+    return { cls: "badge-warn", past: false, label: "Running for " + seat,
+      title: "Running for " + item.contestLabel + " in 2026; not seeking re-election to " +
+        item.officeLabel + "." };
+  }
+
+  /* Each race lists its people in one order, decided by the pipeline
+   * (races.order_people): the seat's holder first, then by surname. A view
+   * that lists people from several races - the map's state panel - keeps
+   * that order within each race. */
+  var racePositions = null;
+  function racePosition(item) {
+    if (racePositions === null) {
+      racePositions = {};
+      (global.kycRaces || []).forEach(function (race) {
+        race.incumbentIds.concat(race.candidateIds).forEach(function (id, i) {
+          if (racePositions[race.id + " " + id] === undefined) racePositions[race.id + " " + id] = i;
+        });
+      });
+    }
+    var rid = item && (item.isCandidate ? item.raceId : (item.contestRaceId || item.raceId));
+    var at = racePositions[rid + " " + (item && item.id)];
+    return at === undefined ? 1e6 : at;
+  }
+
+  /** A member on another office's November ballot, as a badge: "Republican
+   *  nominee for Governor of Florida", from the curated, sourced
+   *  `otherOffice` (overrides.OTHER_OFFICE_NOMINEES), after *sep*; else "".
+   *  Byron Donalds read only "Not running for this seat" (FRESHNESS-09). */
+  function otherOfficeBadge(item, sep) {
+    var other = item && item.otherOffice;
+    if (!other || !other.text) return "";
+    return (sep || "") + '<span class="badge badge-warn other-office" title="' + escapeAttr(
+      "On the November 3 ballot for an office this site does not cover. Source: the " +
+      "election's Wikipedia page, which marks the primary's winner (read " + other.checked +
+      ").") + '">' + escapeHtml(other.text) + "</span>";
+  }
+
+  /** The sentence that says how a race's people are ordered. */
+  var RACE_ORDER = "The seat's holder first, then everyone else by surname.";
 
   /** Who says who is on a race's ballot, for a sentence: "per the published
    *  results", or the Secretary of State's qualified list where that is the
@@ -1112,6 +1264,9 @@
     // Other names the member's own record gives ("Jim Clyburn" for James
     // Clyburn); derived in the pipeline from the bioguide-keyed record.
     (item.aliases || []).forEach(function (alias) { parts.push(String(alias)); });
+    // The party's name as the chip says it: "Democratic" found 26 people
+    // and the Democratic chip 541, because the FEC's word is "Democrat".
+    if (item.party === "Democrat") parts.push("Democratic");
     item.__search = foldText(parts.join(" "));
     return item.__search;
   }
@@ -1684,6 +1839,12 @@
     ballotLineSuffix: ballotLineSuffix,
     raceStatus: raceStatus,
     raceStatusOf: raceStatusOf,
+    standing: standing,
+    otherCampaign: otherCampaign,
+    contestLine: contestLine,
+    otherOfficeBadge: otherOfficeBadge,
+    racePosition: racePosition,
+    RACE_ORDER: RACE_ORDER,
     seated: seated,
     formerText: formerText,
     ordinal: ordinal,

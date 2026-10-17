@@ -2102,6 +2102,217 @@ async function testDeepLinks() {
   }
 }
 
+/* ======================================================= people's wording */
+
+/* What the pages say about a person's race, found wrong by the 2026-10-17
+ * audit: a member listed as their own opponent, a member's Senate filing
+ * calling them "not a sitting member", "No filing this cycle" on a member
+ * whose Senate campaign had raised millions, "Running for" after a loss,
+ * "Withdrew" on senators who retired, an independent who "won the
+ * primary", and a filer whose card, dialog and map row disagreed. */
+async function testPeopleWording() {
+  const { window, D, errors } = await buildPage("index.html");
+  await settle(50);
+  const KYC = window.KYC;
+  const people = window.legislatorsData;
+  const races = window.kycRaces;
+  const text = (id) => (D.getElementById(id).textContent || "").replace(/\s+/g, " ").trim();
+  const opened = (p, fn) => {
+    KYC.profile.open(p.id, { fromRoute: true });
+    try { return fn(); } finally { KYC.profile.close(); }
+  };
+  const twins = people.filter((p) => p.isCandidate && p.incumbentId &&
+    KYC.seated(KYC.byId(p.incumbentId)));
+  const members = people.filter((p) => KYC.seated(p) && p.alsoRunningId);
+
+  suite("index.html — one person is never their own opponent (PROFILES-02)", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("the data has members with a filing for another seat", members.length > 0 && twins.length > 0);
+    const selfListed = members.concat(twins).filter((p) => opened(p, () => {
+      const other = p.alsoRunningId || p.incumbentId;
+      return !!D.querySelector(`#profileModalRace [data-goto="${other}"]`);
+    }));
+    check("neither the member nor their filing lists the other in its race",
+      selfListed.length === 0, selfListed.map((p) => p.name + " " + p.id).join(", "));
+  });
+
+  suite("index.html — a member's filing is a sitting member's (PROFILES-03)", () => {
+    const wrong = twins.filter((p) => opened(p, () =>
+      /not a sitting member/.test(text("profileModalVoting") + text("profileModalCommittees")) ||
+      !D.querySelector(`#profileModalVoting [data-goto="${p.incumbentId}"]`)));
+    check("their voting record and committees are the member's, and say whose",
+      twins.length > 0 && wrong.length === 0, wrong.map((p) => p.name).join(", "));
+  });
+
+  suite("index.html — a member running elsewhere has that campaign's money (PERSONA-07)", () => {
+    const running = people.filter((p) => KYC.otherCampaign(p));
+    const missing = running.filter((p) => (p.quality || {}).receipts === "no_filing");
+    check("the data has members with no filing for their seat and one for another",
+      missing.length > 0, `${missing.length} of ${running.length}`);
+    const wrong = running.filter((p) => opened(p, () => {
+      const filing = KYC.otherCampaign(p);
+      const note = D.getElementById("profileModalOtherCampaign");
+      const tiles = text("profileModalReceipts") + text("profileModalSpent");
+      return /No filing this cycle/.test(tiles) || note.hidden ||
+        !note.textContent.includes(filing.fecCandidateId) ||
+        !note.textContent.includes(filing.officeLabel) ||
+        !note.querySelector(`[data-goto="${filing.id}"]`) ||
+        (KYC.hasValue(filing, "receipts") && !note.textContent.includes(filing.receipts));
+    }));
+    check("never 'No filing this cycle'; the other campaign's totals, its office and FEC id",
+      wrong.length === 0, wrong.map((p) => p.name).join(", "));
+    check("a missing filing is named for the seat held", missing.every((p) => opened(p, () =>
+      /^No (House|Senate) filing$/.test(text("profileModalReceipts")))),
+      missing.length ? opened(missing[0], () => text("profileModalReceipts")) : "");
+    check("a member running nowhere else has no such line", opened(people.find((p) =>
+      KYC.seated(p) && !p.contestRaceId), () => D.getElementById("profileModalOtherCampaign").hidden));
+  });
+
+  suite("index.html — a run that ended is in the past tense (PROFILES-07, PROFILES-04)", () => {
+    const off = people.filter((p) => p.isCandidate && KYC.offBallot(p.raceStatus));
+    const sample = ["eliminated", "withdrawn", "unlisted"].map((s) =>
+      off.find((p) => p.raceStatus === s)).filter(Boolean);
+    check("the data has someone who lost, withdrew and was never listed", sample.length === 3);
+    const wrong = sample.filter((p) => opened(p, () => {
+      const label = text("profileModalRegionLabel");
+      return label !== (p.raceStatus === "unlisted" ? "Filed for" : "Ran for") ||
+        !D.getElementById("profileModalTermWrap").hidden;
+    }));
+    check("'Ran for' (or 'Filed for'), with no term 'if elected'", wrong.length === 0,
+      wrong.map((p) => p.name + ": " + opened(p, () => text("profileModalRegionLabel"))).join(", "));
+    const live = people.find((p) => p.isCandidate && p.raceStatus === "nominee");
+    check("a nominee is still 'Running for', with the term", opened(live, () =>
+      text("profileModalRegionLabel") === "Running for" &&
+      !D.getElementById("profileModalTermWrap").hidden));
+    // An appointee serves until the special election's winner is sworn in
+    // (PROFILES-21), and that sentence may wrap: held on one line it ran
+    // off a phone's screen.
+    const appointees = people.filter((p) => KYC.seated(p) && /sworn in/.test(p.term_start || ""));
+    check("an appointee's term runs to the winner's swearing-in, and wraps",
+      appointees.length > 0 && appointees.every((p) => opened(p, () => {
+        const parts = [...D.querySelectorAll("#profileModalTerm > span")];
+        return !/\(special election\)/.test(text("profileModalTerm")) &&
+          parts.some((s) => /sworn in/.test(s.textContent) && !s.classList.contains("nowrap"));
+      })), appointees.map((p) => p.term_start).join(" | "));
+    const lostElsewhere = people.filter((p) => KYC.seated(p) && p.alsoRunningId &&
+      KYC.offBallot((KYC.byId(p.alsoRunningId) || {}).raceStatus));
+    check("a member whose other run ended reads 'Also ran for', never 'Also running'",
+      lostElsewhere.length > 0 && lostElsewhere.every((p) => opened(p, () =>
+        /Also ran for/.test(text("profileModalCrossLink")) &&
+        !/Also running/.test(text("profileModalCrossLink")))),
+      lostElsewhere.map((p) => opened(p, () => text("profileModalCrossLink"))).slice(0, 2).join(" | "));
+  });
+
+  suite("index.html — a member who withdrew is not running for re-election (TRUST-18)", () => {
+    const withdrew = people.filter((p) => KYC.seated(p) && !p.contestLabel &&
+      p.raceStatus === "withdrawn" && !p.appointed);
+    check("the data has sitting members the results list as withdrawn", withdrew.length > 0);
+    const wrong = withdrew.filter((p) => !/Not running for re-election/.test(KYC.cards.statusBadge(p)) ||
+      />Withdrew</.test(KYC.cards.statusBadge(p)));
+    check("their card says 'Not running for re-election', not 'Withdrew'", wrong.length === 0,
+      wrong.map((p) => p.name).join(", "));
+    check("and so does their profile", withdrew.every((p) => opened(p, () =>
+      /Not running for re-election in 2026/.test(text("profileModalStatus")) &&
+      !/Withdrew/.test(text("profileModalStatus")))));
+    check("a challenger who withdrew still 'Withdrew'", /Withdrew/.test(KYC.cards.statusBadge(
+      people.find((p) => p.isCandidate && p.raceStatus === "withdrawn"))));
+  });
+
+  suite("index.html — where a member who is leaving is going (FRESHNESS-09)", () => {
+    const going = people.filter((p) => KYC.seated(p) && p.otherOffice);
+    check("the data has members on another office's ballot", going.length >= 4,
+      going.map((p) => p.name).join(", "));
+    check("each card names it", going.every((p) => KYC.cards.statusBadge(p).includes(
+      KYC.escapeHtml(p.otherOffice.text))));
+    check("each profile names it, with its source", going.every((p) => opened(p, () =>
+      text("profileModalStatus").includes(p.otherOffice.text) &&
+      !!D.querySelector(`#profileModalStatus a[href="${p.otherOffice.source}"]`))));
+  });
+
+  suite("index.html — an independent did not win a primary (PROFILES-17)", () => {
+    // Not a top-two or top-four state's, where everyone did run in the
+    // all-party primary and the badge says so.
+    const minor = people.filter((p) => p.isCandidate && p.raceStatus === "nominee" &&
+      KYC.partyKey(p) === "i" && !p.allPartyPrimary);
+    const major = people.find((p) => p.isCandidate && p.raceStatus === "nominee" &&
+      p.party === "Republican");
+    check("the data has independent and minor-party nominees", minor.length > 0);
+    check("none is told they won the primary", minor.every((p) =>
+      !/primary/i.test(KYC.raceStatusOf(p, "card").title.replace(/not necessarily by a primary/, ""))));
+    check("a party's nominee still won its primary", /Won the primary/.test(
+      KYC.raceStatusOf(major, "card").title));
+  });
+
+  suite("index.html — one status for an unsettled filer, everywhere (PROFILES-06)", () => {
+    const unsettled = people.filter((p) => p.isCandidate && !p.raceStatus &&
+      (p.ballotUnknown || (p.maybeNamed || []).length));
+    check("the data has filers the results do not settle", unsettled.length > 0);
+    const wrong = unsettled.filter((p) => {
+      const spec = KYC.standing(p, "card");
+      return !spec || !spec.unknown || !KYC.cards.statusBadge(p).includes(spec.label) ||
+        !opened(p, () => text("profileModalStatus").includes(KYC.standing(p, "long").label));
+    });
+    check("the dialog shows the card's status", wrong.length === 0, wrong.map((p) => p.name).join(", "));
+  });
+
+  suite("index.html — the people in a race, in one order (TRUST-15)", () => {
+    const race = races.find((r) => r.id === "S-NC-2026") || races.find((r) => r.candidateIds.length > 2);
+    const surnameOrder = race.candidateIds.map(KYC.byId).map((p) => p.name);
+    const member = KYC.byId(race.incumbentIds[0]);
+    const shown = opened(member, () => [...D.querySelectorAll("#profileModalRace > .race-mate")]
+      .map((b) => b.getAttribute("data-goto")));
+    const expected = race.candidateIds.filter((id) => shown.includes(id));
+    check("the profile lists a race's people in the race's order",
+      shown.length > 1 && JSON.stringify(shown) === JSON.stringify(expected), surnameOrder.join(", "));
+    check("and says what the order is", opened(member, () =>
+      text("profileModalRace").includes(KYC.RACE_ORDER)));
+  });
+
+  suite("index.html — the 2026 Senate races chip (GRID-10, GRID-21)", () => {
+    const chip = D.querySelector('[data-group="election"][data-value="senateUp26"]');
+    check("it is named for the races", /2026 Senate races/.test(chip.textContent), chip.textContent);
+    chip.click();
+    const cards = [...D.querySelectorAll("#results .card")].map((c) => KYC.byId(c.getAttribute("data-id")));
+    const nominees = people.filter((p) => p.isCandidate && /^S-/.test(p.raceId || "") &&
+      p.raceStatus === "nominee");
+    check("it shows the people running for those seats, not only who holds them",
+      nominees.every((p) => cards.includes(p)), `${cards.length} cards`);
+    check("each person once: a member running for the Senate as their filing",
+      !cards.some((p) => p && p.alsoRunningId && cards.includes(KYC.byId(p.alsoRunningId)) &&
+        /^S-/.test(p.contestRaceId || "")));
+    chip.click();
+    const party = D.querySelector('[data-group="party"][data-value="Independent"]');
+    check("the third chip says it holds every other party", /Independent &\s*third party/.test(
+      party.textContent), party.textContent);
+    check("no one's party reads 'None'", !people.some((p) => p.party === "None"));
+    const democrats = people.filter((p) => p.party === "Democrat");
+    check("searching the chip's word finds the party's people",
+      democrats.length > 0 && democrats.every((p) => KYC.matchesQuery(p, "Democratic")));
+  });
+  window.close();
+
+  // The map's state panel: a filer whose place on the ballot is not known
+  // is not a challenger there either (RACES-04).
+  const map = await buildPage("map.html", { hash: "#/?state=FL&mode=house" });
+  await settle(50);
+  suite("map.html — an unsettled filer is not counted as a challenger (RACES-04)", () => {
+    const M = map.window.KYC;
+    const fl = map.window.legislatorsData.filter((p) => p.state === "FL" && p.isCandidate &&
+      /^House/.test(p.chamber));
+    const unknown = fl.filter((p) => (M.standing(p, "short") || {}).unknown);
+    const running = fl.filter((p) => !M.offBallot(p.raceStatus) && !unknown.includes(p));
+    const head = map.D.getElementById("showChallengers");
+    const count = head ? Number(head.querySelector("span").textContent) : 0;
+    check("Florida has filers the results do not settle", unknown.length > 0);
+    check("the challenger count leaves them out", count === running.length, `${count} vs ${running.length}`);
+    const unsure = map.D.getElementById("unsureRows");
+    check("and they are listed apart, under their status",
+      !!unsure && unsure.querySelectorAll(".person-row").length === unknown.length &&
+      !/Challenger/.test(unsure.textContent));
+  });
+  map.window.close();
+}
+
 /* ====================================================== running elsewhere */
 
 /* A member contesting another seat has a primary result for the seat they
@@ -2148,12 +2359,24 @@ async function testRunningElsewhere() {
     const wrong = cases.filter(({ m, opener }) => {
       KYC.profile.open(opener.id, { fromRoute: true });
       const row = D.querySelector(`#profileModalRace [data-goto="${m.id}"]`);
-      const bad = !row || !/Running for/.test(row.textContent) || !!row.closest(".race-out");
+      // "Running for Senate GA", "Running in CA-40 (redrawn)", or, once that
+      // run is over, "Ran for House TX-18" (KYC.contestLine).
+      const line = KYC.contestLine(m);
+      const words = line.past ? /Ran for/ : line.renumbered ? /Running in .*\(redrawn\)/ : /Running for/;
+      const bad = !row || !words.test(row.textContent) || !!row.closest(".race-out");
       KYC.profile.close();
       return bad;
     });
-    check("each reads 'Running for' that race, and is not folded under 'no longer in this race'",
-      wrong.length === 0, wrong.map(({ m }) => m.name).join(", "));
+    check("each reads where they went - running, redrawn, or ran - and is not folded under " +
+      "'no longer in this race'", wrong.length === 0, wrong.map(({ m }) => m.name).join(", "));
+    check("a member whose run ended reads it in the past tense", cases.some(({ m }) =>
+      KYC.contestLine(m).past) && cases.every(({ m }) =>
+      KYC.contestLine(m).past === (KYC.offBallot(KYC.contestStatus(m)) ||
+        KYC.contestStatus(m) === "defeated")));
+    check("a renumbered member is running for re-election, not leaving", people.filter((m) =>
+      m.renumbered).every((m) => /\(redrawn\)/.test(KYC.cards.statusBadge(m)) &&
+      !/not seeking re-election/.test(KYC.cards.statusBadge(m))),
+      people.filter((m) => m.renumbered).map((m) => KYC.cards.statusBadge(m)).slice(0, 1).join(""));
   });
 
   suite("members running for another seat — their race, not their seat", () => {
@@ -2660,21 +2883,38 @@ async function testSenate() {
     // The people running, after whoever holds or held the seat.
     const runningIds = (b) => [...b.querySelectorAll(".senate-running .card, .senate-out .card")]
       .map((c) => c.getAttribute("data-id"));
-    const ranks = (b) => runningIds(b).map((id) => {
-      const st = KYC.contestStatus(KYC.byId(id));
-      return st === "nominee" ? 0 : st === "advanced" ? 1 : 2;
-    });
-    check("nominees, then runoffs, then still running", blocks.filter(Boolean).every((b) => {
-      const r = ranks(b);
-      return r.every((v, i) => i === 0 || r[i - 1] <= v);
+    // One order for a race's people in every view (TRUST-15): the race's
+    // own, which the pipeline sorts by surname.
+    check("the people running are in the race's own order", upRaces.every((r, i) => {
+      const b = blocks[i];
+      if (!b) return true;
+      const at = runningIds(b).filter((id) => !offBallot(KYC.byId(id)))
+        .map((id) => KYC.racePosition(KYC.byId(id)));
+      return at.every((v, j) => j === 0 || at[j - 1] <= v);
     }));
+    check("and the order is said under them", blocks.filter(Boolean).some((b) =>
+      b.querySelector(".senate-running .race-order")));
+    // The Senate filing's profile, as the state page and the map show it -
+    // never the House member's, whose money is the House seat's (RACES-03).
     const movers = people.filter((p) => !p.isCandidate && /House/.test(p.chamber) &&
       /^S-/.test(p.contestRaceId || "") && !offBallot(p));
-    check("a member running for a Senate seat appears under it, once", movers.every((p) => {
-      const b = seatOf(races.find((r) => r.id === p.contestRaceId));
-      const shown = b ? ids(b) : [];
-      return shown.includes(p.id) && !shown.includes(p.alsoRunningId);
-    }), movers.map((p) => p.name).join(", "));
+    check("a member running for a Senate seat appears under it, once, as that filing",
+      movers.length > 0 && movers.every((p) => {
+        const race = races.find((r) => r.id === p.contestRaceId);
+        const b = seatOf(race);
+        const shown = b ? ids(b) : [];
+        const filing = race.candidateIds.includes(p.alsoRunningId) ? p.alsoRunningId : p.id;
+        return shown.includes(filing) && shown.filter((id) => id === p.id ||
+          id === p.alsoRunningId).length === 1;
+      }), movers.map((p) => p.name).join(", "));
+    const stateOf = (race) => [...race.incumbentIds, ...race.candidateIds];
+    check("the same profile the race lists, as the state page and the map list it",
+      movers.every((p) => {
+        const race = races.find((r) => r.id === p.contestRaceId);
+        const shown = ids(seatOf(race));
+        return shown.filter((id) => stateOf(race).includes(id) ||
+          id === race.winnerId).length === shown.length;
+      }));
 
     const outIds = upRaces.flatMap((r) => r.candidateIds).filter((id) => offBallot(KYC.byId(id)));
     const anyOut = () => [...results.querySelectorAll(".card")]
@@ -5706,6 +5946,7 @@ async function testFederal() {
   if (!only || only === "links") await testDeepLinks();
   if (!only || only === "links") await testFoldedIds();
   if (!only || only === "links") await testRunningElsewhere();
+  if (!only || only === "index.html") await testPeopleWording();
   if (!only || only === "contrast") testContrast();
 
   let failed = 0;

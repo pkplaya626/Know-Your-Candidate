@@ -1169,6 +1169,12 @@ select optgroup {
 .race-out {
   margin-top: var(--s-4);
 }
+/* How a race's people are ordered, said once under them (TRUST-15). */
+.race-order {
+  margin: var(--s-2) 0 0;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
 .race-out > summary {
   cursor: pointer;
   padding: var(--s-2) var(--s-3);
