@@ -888,6 +888,12 @@ select optgroup {
   background: var(--surface-3);
   border-color: var(--border);
 }
+/* A badge that explains itself in the guide: underlined, so it reads as
+ * the link it is (a hover title cannot be reached by touch). */
+a.badge-link {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 .badge-accent {
   color: var(--accent);
   background: color-mix(in srgb, var(--accent) 14%, transparent);
@@ -2425,6 +2431,13 @@ select optgroup {
 }
 .state-links .btn { text-decoration: none; }
 .vote-box .state-note { margin-top: var(--s-2); }
+.vote-dates {
+  margin: var(--s-3) 0 0;
+  padding-left: var(--s-5);
+  font-size: var(--t-sm);
+  color: var(--text);
+}
+.vote-dates li + li { margin-top: var(--s-1); }
 .state-section { margin-bottom: var(--s-6); }
 .state-heading {
   display: flex;

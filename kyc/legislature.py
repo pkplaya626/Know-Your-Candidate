@@ -33,7 +33,10 @@ STATE_NOTES = {
            "(Agee v. Benson, approved July 26, 2024). The new lines take effect with the "
            "November 3, 2026 election; this map shows the districts the sitting senators "
            "were elected in.",
-           "https://www.michigan.gov/micrc/mapping-process-2024/final-remedial-state-senate-plan"),
+           # The plan's own page now redirects to /micrc/404 (audit
+           # 2026-10-17, LINKS-08); the Commission's mapping-process page
+           # holds the "2024 State Senate remedial plan" documents.
+           "https://www.michigan.gov/micrc/mapping-process"),
     "MS": ("After a court-ordered redraw, Mississippi held special elections in November 2025 "
            "under new lines in Senate districts 1, 2, 11, 19, 34, 41, 42, 44 and 45 and House "
            "districts 16, 22, 36, 39 and 41. In May 2026 the Supreme Court vacated that order, "

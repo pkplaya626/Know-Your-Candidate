@@ -344,5 +344,33 @@ class TestCommitted(unittest.TestCase):
                 self.assertLessEqual(cache[code]["headshotBytes"], stategov.HEADSHOT_MAX_BYTES, code)
 
 
+class TestOfficeLinks(unittest.TestCase):
+    """Five secretaries of state's biography links and Indiana's governor
+    link answered 404; New Jersey's and Virginia's governors had no website
+    (audit 2026-10-17, LINKS-08, LINKS-09)."""
+
+    def test_a_dead_biography_is_dropped_and_the_office_page_kept(self):
+        entry = {"sos": {"name": "Shenna Bellows", "bio": "https://www.maine.gov/sos/about/bio.html",
+                         "website": "https://www.maine.gov/sos/"}}
+        self.assertEqual(stategov.office_links("ME", entry), [])
+        self.assertNotIn("bio", entry["sos"])
+        self.assertEqual(entry["sos"]["website"], "https://www.maine.gov/sos/")
+
+    def test_a_missing_website_is_filled_from_the_offices_own(self):
+        entry = {"governor": {"name": "Mikie Sherrill"}}
+        stategov.office_links("NJ", entry)
+        self.assertEqual(entry["governor"]["website"], "https://nj.gov/governor/")
+
+    def test_an_entry_the_roster_no_longer_needs_is_reported_not_applied(self):
+        entry = {"governor": {"name": "Mike Braun", "website": "https://www.in.gov/gov/new.htm"}}
+        problems = stategov.office_links("IN", entry)
+        self.assertEqual(entry["governor"]["website"], "https://www.in.gov/gov/new.htm")
+        self.assertTrue(problems and "may be unneeded" in problems[0])
+
+    def test_the_build_applies_every_entry(self):
+        _payload, problems = stategov.build(ROOT)
+        self.assertFalse([p for p in problems if "OFFICE_LINKS" in p], problems)
+
+
 if __name__ == "__main__":
     unittest.main()

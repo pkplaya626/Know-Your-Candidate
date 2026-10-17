@@ -46,21 +46,61 @@
   var VOTING = [
     ["status", "Check your registration"],
     ["polling", "Find your polling place"],
+    ["sample", "See a sample ballot"],
     ["absentee", "Vote absentee or early"],
     ["register", "Register to vote"],
+    ["info", "Election information"],
+    ["results", "Official results"],
   ];
+  var MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July",
+                     "August", "September", "October", "November", "December"];
+
+  function longDate(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ""));
+    return m ? MONTH_NAMES[+m[2] - 1] + " " + (+m[3]) + ", " + m[1] : "";
+  }
+
+  function outLink(href, text) {
+    return '<a href="' + KYC.escapeAttr(href) + '" target="_blank" rel="noopener noreferrer">' +
+      KYC.escapeHtml(text) + "</a>";
+  }
+
+  /* A December round, said on the page of the state that holds one, with
+   * the state's own page that gives the date (voting.key_dates): Georgia's
+   * page never mentioned its December 1 runoff, Louisiana's never its
+   * December 12 House round (audit 2026-10-17, PERSONA-06, FRESHNESS-11). */
+  function keyDates(all, code) {
+    var dates = (all._keyDates || {})[code] || [];
+    if (!dates.length) return "";
+    return '<ul class="vote-dates">' + dates.map(function (d) {
+      return "<li><strong>" + KYC.escapeHtml(longDate(d.date)) + ".</strong> " +
+        KYC.escapeHtml(d.text) + " on this date (" + outLink(d.source, d.cite) + ").</li>";
+    }).join("") + "</ul>";
+  }
+
   function votingBlock(code, name) {
     var all = KYC.meta().voting || {};
     var links = all[code];
     if (!links) return "";
     // A per-state label where NASS's kind does not fit the state: North
-    // Dakota does not register voters (overrides.VOTING_LINKS).
+    // Dakota does not register voters (overrides.VOTING_LINKS); a
+    // territory's office words its own pages (voting.TERRITORY_LINKS).
     var labels = (all._labels || {})[code] || {};
     var place = code === "DC" ? "the District of Columbia" : name;
+    var office = (all._territories || {})[code];
     var dated = all._listed
       ? " (listed " + KYC.escapeHtml(all._listed) +
         (all._opened ? "; each link opened " + KYC.escapeHtml(all._opened) : "") + ")"
       : "";
+    var from = office
+      ? "Each link is " + KYC.escapeHtml(place) + "'s election office's own page (" +
+        outLink(office, "the election office") + "); the national association of secretaries " +
+        "of state lists no territory" + (all._opened ? " (each link opened " +
+        KYC.escapeHtml(all._opened) + ")" : "") + "."
+      : "Each link is " + KYC.escapeHtml(place) + "'s own official page: the first four from " +
+        "the National Association of Secretaries of State’s " +
+        outLink(all._source || "https://www.nass.org/can-I-vote", "Can I Vote") + dated +
+        "; the rest as the election office's own site links them.";
     return '<section class="state-section vote-box" id="voting" aria-labelledby="votingHead">' +
       '<h2 class="state-heading" id="votingHead">' + KYC.icon("vote") + " Voting in " +
         KYC.escapeHtml(place) + "</h2>" +
@@ -69,11 +109,14 @@
           KYC.escapeAttr(links[v[0]]) + '">' + KYC.icon("link") + " " +
           KYC.escapeHtml(labels[v[0]] || v[1]) + "</a>";
       }).join(" ") + "</p>" +
-      '<p class="state-note">Each link is ' + KYC.escapeHtml(place) + "'s own official page, " +
-        "from the National Association of Secretaries of State’s " + '<a href="' +
-        KYC.escapeAttr(all._source || "https://www.nass.org/can-I-vote") + '" target="_blank" ' +
-        'rel="noopener noreferrer">Can I Vote</a>' + dated +
-        ". Deadlines, hours and ID rules are on those pages.</p>" +
+      keyDates(all, code) +
+      '<p class="state-note">' + from + " " +
+        // The deadlines are vote.gov's to state, never typed here, and the
+        // page never calls one passed (STATEGOV-11, PERSONA-03).
+        (links.deadlines ? "Registration deadlines, and whether you can register on Election " +
+          "Day, are on " + outLink(links.deadlines, "vote.gov's page for " +
+            (code === "DC" ? "D.C." : name)) + ", from the U.S. Election Assistance Commission. " : "") +
+        "Hours and ID rules are on the election office's pages.</p>" +
       "</section>";
   }
 
@@ -118,13 +161,28 @@
     if (info.renumbered) {
       parts.push(plural(info.renumbered, "member") + " running under a new district number");
     }
-    parts.push(plural(info.challengersOnBallot, "challenger") +
-      (rec ? " on the 2026 ballot" : " on the ballot"));
+    parts = parts.concat(runningWords(info, rec));
     if (info.challengersOut) {
-      parts.push(plural(info.challengersOut, "challenger") + " out after the " +
+      parts.push(plural(info.challengersOut, "candidate") + " out after the " +
         (rec ? "2026 " : "") + "primaries");
     }
     return badges(parts);
+  }
+
+  /** Who is on the ballot besides members running for their own seats, in
+   *  the race headers' words: "challengers" where someone holds the seat on
+   *  the ballot, "candidates" for an open seat, where nobody is challenging
+   *  anyone. Wyoming's two open seats read "4 challengers" over two race
+   *  heads that said "candidates" (audit 2026-10-17, RACES-14). The two
+   *  figures sum to the race headers' total (summary.by_state, rule 73). */
+  function runningWords(info, rec) {
+    var where = rec ? " on the 2026 ballot" : " on the ballot";
+    var open = info.openCandidates || 0;
+    var held = (info.challengersOnBallot || 0) - open;
+    var out = [];
+    if (held || !open) out.push(plural(held, "challenger") + where);
+    if (open) out.push(plural(open, "candidate") + " for open seats" + where);
+    return out;
   }
 
   function badges(parts) {
@@ -379,8 +437,8 @@
           : '<span class="state-row-meta">' + KYC.escapeHtml(plural(info.seatsUp, "seat") +
             (KYC.recordPhase() ? " on the 2026 ballot" : " up")) +
             (info.open ? " &middot; " + KYC.escapeHtml(plural(info.open, "open seat")) : "") + "</span>" +
-            '<span class="state-row-meta">' + KYC.escapeHtml(plural(info.challengersOnBallot, "challenger")) +
-            (KYC.recordPhase() ? " on the 2026 ballot" : " on the ballot") + "</span>",
+            '<span class="state-row-meta">' +
+            KYC.escapeHtml(runningWords(info, KYC.recordPhase()).join(" · ")) + "</span>",
         "</a>",
       ].join("");
     });

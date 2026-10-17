@@ -345,6 +345,21 @@
     ].join("");
   }
 
+  /** The 2026 Senate view of a state with no Senate race: said, with when
+   *  each sitting senator's seat is next on the ballot (the pipeline's
+   *  nextElection, from the term), not "Nothing to show" (RACES-06). */
+  function noSenateRace(code) {
+    var name = KYC.escapeHtml(KYC.stateName(code));
+    var senators = (global.legislatorsData || []).filter(function (p) {
+      return p.state === code && KYC.seated(p) && /Senate/.test(p.chamber) && p.nextElection;
+    }).sort(function (a, b) { return a.nextElection - b.nextElection; });
+    if (!senators.length) return "No U.S. Senate election in " + name + " in 2026.";
+    return "No U.S. Senate election in " + name + " in 2026. Its senators' seats are next on the " +
+      "ballot in " + senators.map(function (p) {
+        return p.nextElection + " (" + KYC.escapeHtml(p.name) + ")";
+      }).join(" and ") + ".";
+  }
+
   function showPanel(code) {
     var list = doc.getElementById("delegation");
     var counts = tally(code);
@@ -379,8 +394,9 @@
 
     if (!people.length) {
       list.innerHTML =
-        '<div class="empty-state">' + KYC.icon("info") +
-        "<p>Nothing to show for " + KYC.escapeHtml(code) + " in this view.</p></div>";
+        '<div class="empty-state">' + KYC.icon("info") + "<p>" + (mode === "senate2026"
+          ? noSenateRace(code) : "Nothing to show for " + KYC.escapeHtml(code) + " in this view.") +
+        "</p></div>";
       return;
     }
 
@@ -447,10 +463,11 @@
     }
     // The people the results put on the ballot with no profile here: by
     // name for the state's Senate seat, counted for its House seats, with
-    // the state page that lists them race by race.
+    // the state page that lists them race by race. Only the view's own
+    // chamber: the Senate view counted Hawaii's House nominees under a
+    // Senate heading (audit 2026-10-17, RACES-06).
     var stateRaces = (global.kycRaces || []).filter(function (r) {
-      return r.state === code && (mode === "senate2026" ? r.chamber === "Senate"
-        : mode === "house" ? r.chamber === "House" : true);
+      return r.state === code && (mode === "house" ? r.chamber === "House" : r.chamber === "Senate");
     });
     if (mode === "senate2026") {
       html += stateRaces.map(function (r) { return KYC.cards.unprofiledNote(r, "panel-note"); }).join("");

@@ -75,6 +75,197 @@ OFFICIAL_HOSTS = {
     "voteks.org": "KS",                    # the Secretary of State's voter site
     "msegov.com": "MS",                    # the Secretary of State's portal
     "okelections.us": "OK",                # the State Election Board
+    # Texas's election-night results, linked as "Election Results" from the
+    # Secretary of State's votetexas.gov (checked 2026-10-17).
+    "txelections.civixapps.com": "TX",
+    # The Commonwealth Election Commission of the Northern Mariana Islands,
+    # and Puerto Rico's State Elections Commission (CEE); vote.gov lists both.
+    "votecnmi.gov.mp": "MP",
+    "ceepur.org": "PR",
+}
+
+# Pages NASS does not list, each the state's own and each opened on
+# 2026-10-17 from the link the election office's home page gives it (audit
+# 2026-10-17: RACES-16, RACES-20, STATEGOV-14). Checked like NASS's links
+# (``check_links``) and held to the same domains (``official``).
+#
+# "results": where the state publishes its returns. Nothing else on the
+# site pointed a reader to an official count on election night, and this
+# site's own results come from Wikipedia, read twice a week. Every
+# jurisdiction has one (validate fails a gap).
+RESULTS = {
+    "AK": "https://www.elections.alaska.gov/election-results/",
+    "AL": "https://www2.alabamavotes.gov/electionnight/statewideresultsbycontest.aspx",
+    "AR": "https://www.sos.arkansas.gov/elections/research/election-results",
+    "AZ": "https://results.arizona.vote/",
+    "CA": "https://electionresults.sos.ca.gov/",
+    "CO": "https://www.coloradosos.gov/pubs/elections/resultsData.html",
+    "CT": "https://portal.ct.gov/sots/election-services/election-results/election-results",
+    "DC": "https://electionresults.dcboe.org/",
+    "DE": "https://elections.delaware.gov/results/index.html",
+    "FL": "https://results.elections.myflorida.com/",
+    "GA": "https://results.sos.ga.gov/results/public/Georgia",
+    "HI": "https://elections.hawaii.gov/election-results/",
+    "IA": "https://electionresults.iowa.gov/IA/",
+    "ID": "https://voteidaho.gov/election-results/",
+    "IL": "https://www.elections.il.gov/electionoperations/ElectionVoteTotals.aspx",
+    "IN": "https://enr.indianavoters.in.gov/site/index.html",
+    "KS": "https://sos.ks.gov/elections/election-results.html",
+    "KY": "https://elect.ky.gov/results/Pages/default.aspx",
+    "LA": "https://voterportal.sos.la.gov/Graphical",
+    "MA": "https://electionstats.state.ma.us/",
+    "MD": "https://elections.maryland.gov/elections/2026/index.html",
+    "ME": "https://www.maine.gov/sos/elections-voting/election-results-data",
+    "MI": "https://www.michigan.gov/sos/elections/election-results-and-data",
+    "MN": "https://www.sos.mn.gov/elections-voting/election-results",
+    "MO": "https://www.sos.mo.gov/elections/results",
+    "MS": "https://www.sos.ms.gov/elections-voting/election-results",
+    "MT": "https://sosmt.gov/elections/results/",
+    "NC": "https://www.ncsbe.gov/results-data/election-results",
+    "ND": "https://www.sos.nd.gov/elections/election-results",
+    "NE": "https://electionresults.nebraska.gov/",
+    "NH": "https://www.sos.nh.gov/elections/elections/election-results",
+    "NJ": "https://www.nj.gov/state/elections/election-information-results.shtml",
+    "NM": "https://www.sos.nm.gov/voting-and-elections/election-results/",
+    "NV": "https://silverstateelection.nv.gov/",
+    "NY": "https://nyenr.elections.ny.gov/",
+    "OH": "https://www.ohiosos.gov/elections/election-results-and-data/",
+    "OK": "https://results.okelections.us/",
+    "OR": "https://sos.oregon.gov/elections/pages/historical-data.aspx",
+    "PA": "https://www.electionreturns.pa.gov/",
+    "RI": "https://electionresults.ri.gov/results/public/rhodeisland",
+    "SC": "https://scvotes.gov/elections-statistics/election-results/",
+    "SD": "https://electionresults.sd.gov/Default.aspx",
+    "TN": "https://sos.tn.gov/elections/results",
+    "TX": "https://goelect.txelections.civixapps.com/ivis-enr-ui/races",
+    "UT": "https://vote.utah.gov/election-results-data-historical-information/",
+    "VA": "https://www.elections.virginia.gov/resultsreports/election-results/",
+    "VT": "https://sos.vermont.gov/elections/election-info-resources/elections-results-data/",
+    "WA": "https://www.sos.wa.gov/elections/data-research/election-data-and-maps/election-results-and-voters-pamphlets",
+    "WI": "https://elections.wi.gov/elections/election-results",
+    "WV": "https://sos.wv.gov/elections/election-data/historical-election-results-and-turnout",
+    "WY": "https://sos.wyo.gov/Elections/ElectionResults.aspx",
+}
+
+# "sample": a statewide page where a voter sees the ballot they will get,
+# only where the election office links one ("Get My Sample Ballot",
+# "What's on the ballot?"). Elsewhere sample ballots are the counties' and
+# no link is shown rather than a guess.
+SAMPLE_BALLOTS = {
+    "AK": "https://www.elections.alaska.gov/sample-ballots/",
+    "AL": "https://www.sos.alabama.gov/alabama-votes/2026-general-election-sample-ballots",
+    "DC": "https://www.dcboe.org/elections/2026-elections",
+    "LA": "https://www.sos.la.gov/elections-voting/sample-ballots",
+    "MI": "https://mvic.sos.state.mi.us/PublicBallot/Index",
+    "MN": "https://www.sos.mn.gov/elections-voting/whats-on-my-ballot",
+    "ND": "https://vip.sos.nd.gov/WhereToVote.aspx?tab=AddressandVotingTimes",
+    "NM": "https://voterportal.servis.sos.state.nm.us/WhereToVote.aspx",
+    "SC": "https://vrems.scvotes.sc.gov/Voter/Login?PageMode=Sampleballot",
+    "SD": "https://vip.sdsos.gov/VIPLogin.aspx",
+    "WI": "https://myvote.wi.gov/en-us/Whats-On-My-Ballot",
+}
+
+# "deadlines": vote.gov's page for the jurisdiction, from vote.gov/register's
+# own list (read 2026-10-17). Each lists the online, mail and in-person
+# registration deadlines as the state sets them ("29 days before Election
+# Day"), and says where a state registers on Election Day; the U.S. Election
+# Assistance Commission keeps it. No date is typed here: a deadline that
+# changes is vote.gov's and the state's to say, and this site never calls
+# one passed (STATEGOV-11, PERSONA-03).
+VOTE_GOV = "https://vote.gov/register"
+DEADLINES = {code: f"{VOTE_GOV}/{slug}" for code, slug in {
+    "AK": "alaska", "AL": "alabama", "AR": "arkansas", "AS": "american-samoa", "AZ": "arizona",
+    "CA": "california", "CO": "colorado", "CT": "connecticut", "DC": "district-of-columbia",
+    "DE": "delaware", "FL": "florida", "GA": "georgia", "GU": "guam", "HI": "hawaii",
+    "IA": "iowa", "ID": "idaho", "IL": "illinois", "IN": "indiana", "KS": "kansas",
+    "KY": "kentucky", "LA": "louisiana", "MA": "massachusetts", "MD": "maryland", "ME": "maine",
+    "MI": "michigan", "MN": "minnesota", "MO": "missouri", "MP": "northern-mariana-islands",
+    "MS": "mississippi", "MT": "montana", "NC": "north-carolina", "ND": "north-dakota",
+    "NE": "nebraska", "NH": "new-hampshire", "NJ": "new-jersey", "NM": "new-mexico",
+    "NV": "nevada", "NY": "new-york", "OH": "ohio", "OK": "oklahoma", "OR": "oregon",
+    "PA": "pennsylvania", "PR": "puerto-rico", "RI": "rhode-island", "SC": "south-carolina",
+    "SD": "south-dakota", "TN": "tennessee", "TX": "texas", "UT": "utah", "VA": "virginia",
+    "VI": "us-virgin-islands", "VT": "vermont", "WA": "washington", "WI": "wisconsin",
+    "WV": "west-virginia", "WY": "wyoming"}.items()}
+
+# NASS lists no territory, so a territory's page said nothing about voting
+# (audit 2026-10-17, RACES-07, STATEGOV-15). Each link is the territory's
+# election office's own, from its home page (checked 2026-10-17), with the
+# office's own words where a kind's usual label would say more than the page
+# does: the CNMI's lookup needs an account, and its registration form is a
+# PDF. {code: {kind: (url, label or None)}}. Guam's Election Commission
+# refused connections on 2026-10-17; its 2026 page was read that morning.
+TERRITORY_LINKS = {
+    "GU": {"info": ("https://gec.guam.gov/2026-general-election-info/",
+                    "2026 general election: early voting and sample ballots")},
+    "VI": {"status": ("https://app.vivote.gov/lookup", None),
+           "polling": ("https://vivote.gov/elections/polling-places/", "Find your voting center"),
+           "absentee": ("https://vivote.gov/voters/absentee-ballot/", "Vote absentee"),
+           "register": ("https://vivote.gov/voters/register-to-vote/", None)},
+    "MP": {"status": ("https://www.votecnmi.gov.mp/voter/are-you-a-registered-voter.php",
+                      "Check your registration (account needed)"),
+           "polling": ("https://www.votecnmi.gov.mp/polling-places.php", None),
+           "sample": ("https://www.votecnmi.gov.mp/downloads/2026/2026_GE_BALLOT_SPECIMEN.pdf",
+                      "Specimen ballot (PDF)"),
+           "register": ("https://www.votecnmi.gov.mp/downloads/registration_package-f.pdf",
+                        "Registration package (PDF)"),
+           "info": ("https://www.votecnmi.gov.mp/voter/2026-ge-important-dates",
+                    "2026 general election: important dates")},
+    "AS": {"absentee": ("https://www.aselectionoffice.gov/absentee-voting", "Vote absentee"),
+           "register": ("https://www.aselectionoffice.gov/registration", None)},
+    "PR": {"register": ("https://ww2.ceepur.org/Home/ServiciosElector",
+                        "Voter services (in Spanish)")},
+}
+# A second round in December, on the page of the state that holds one
+# (audit 2026-10-17, PERSONA-06, FRESHNESS-11): Georgia's page never
+# mentioned its December 1 runoff, Louisiana's never its December 12 House
+# round. The dates are the overrides' (GENERAL_RUNOFFS, OPEN_PRIMARY_SEATS),
+# where the results reader uses them; this names the state's own page that
+# gives each, and validate fails a date with none.
+KEY_DATE_SOURCES = {
+    "GA": ("Georgia.gov, General election runoff, December 1, 2026",
+           "https://georgia.gov/events/2026-12-01/election-day-general-election-runoff"),
+    "LA": ("Louisiana Secretary of State, release of May 14, 2026 on the fall House races",
+           "https://www.sos.la.gov/media/dcvl5ojl/051426-fall-house-races.pdf"),
+}
+
+
+def key_dates():
+    """``{code: [{"date", "text", "source", "cite"}]}`` from the overrides'
+    December dates. A state with no KEY_DATE_SOURCES entry is left out here
+    and reported by ``unsourced_key_dates``."""
+    from .overrides import GENERAL_RUNOFFS, OPEN_PRIMARY_SEATS
+
+    out = {}
+    for code, (date, _evidence) in sorted(GENERAL_RUNOFFS.items()):
+        if code in KEY_DATE_SOURCES:
+            label, url = KEY_DATE_SOURCES[code]
+            out.setdefault(code, []).append({
+                "date": date, "source": url, "cite": label,
+                "text": "If no candidate for an office wins a majority of the votes on "
+                        "November 3, the top two meet in a runoff"})
+    for (code, office, _cycle), seat in sorted(OPEN_PRIMARY_SEATS.items()):
+        if code in KEY_DATE_SOURCES and seat.get("runoff"):
+            label, url = KEY_DATE_SOURCES[code]
+            chamber = "U.S. House" if office == "H" else "U.S. Senate"
+            out.setdefault(code, []).append({
+                "date": seat["runoff"], "source": url, "cite": label,
+                "text": f"The {chamber} vote on November 3 is an open primary; a seat no "
+                        f"candidate wins with a majority is decided at a general election"})
+    return out
+
+
+def unsourced_key_dates():
+    from .overrides import GENERAL_RUNOFFS, OPEN_PRIMARY_SEATS
+    codes = set(GENERAL_RUNOFFS) | {code for (code, _o, _c), seat in OPEN_PRIMARY_SEATS.items()
+                                    if seat.get("runoff")}
+    return sorted(codes - set(KEY_DATE_SOURCES))
+
+
+TERRITORY_SOURCES = {
+    "GU": "https://gec.guam.gov/", "VI": "https://vivote.gov/",
+    "MP": "https://www.votecnmi.gov.mp/", "AS": "https://www.aselectionoffice.gov/",
+    "PR": "https://ww2.ceepur.org/",
 }
 
 
@@ -249,7 +440,19 @@ def effective(cache):
                     shown[kind] = {"url": fix[1], **({"label": fix[2]} if fix[2] else {})}
                 continue
             shown[kind] = {"url": url}
+        for kind, table in (("sample", SAMPLE_BALLOTS), ("results", RESULTS),
+                            ("deadlines", DEADLINES)):
+            if code in table:
+                shown[kind] = {"url": table[code]}
         out[code] = shown
+    if out:
+        # The territories, which NASS does not list: their election offices'
+        # own pages, and vote.gov's.
+        for code, links in TERRITORY_LINKS.items():
+            shown = {kind: {"url": url, **({"label": label} if label else {})}
+                     for kind, (url, label) in links.items()}
+            shown["deadlines"] = {"url": DEADLINES[code]}
+            out[code] = shown
     return out
 
 
@@ -288,6 +491,9 @@ def for_page(cache):
         if named:
             labels[code] = named
     out["_labels"] = labels
+    out["_keyDates"] = key_dates()
+    out["_territories"] = dict(TERRITORY_SOURCES)
+    out["_voteGov"] = VOTE_GOV
     out["_source"] = cache.get("source") or SOURCE
     out["_listed"] = (cache.get("fetched") or "")[:10]
     out["_opened"] = cache.get("linksChecked") or ""

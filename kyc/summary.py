@@ -217,7 +217,7 @@ def by_state(profiles, races=None):
         entry = out.setdefault(code, {
             "name": state_name(code), "senators": 0, "house": 0, "delegates": 0,
             "seatsUp": 0, "open": 0, "renumbered": 0, "challengersOnBallot": 0,
-            "challengersOut": 0,
+            "challengersOut": 0, "openCandidates": 0,
             "races": 0, "territory": code in TERRITORIES,
             # The state's own delegation by party, for its sidebar. A
             # territory's delegate sits in the House, so counts there.
@@ -267,8 +267,14 @@ def by_state(profiles, races=None):
         if entry is None:
             continue
         if counted:
-            entry["challengersOnBallot"] += race.get("candidateCount", 0) + len(
+            listed = race.get("candidateCount", 0) + len(
                 (race.get("results") or {}).get("otherNominees") or [])
+            entry["challengersOnBallot"] += listed
+            if race.get("openSeat"):
+                # Of them, the people running for a seat nobody holds on its
+                # ballot: candidates, not challengers (RACES-14). The total
+                # stays the race headers' sum (rule 73); the page splits it.
+                entry["openCandidates"] += listed
         entry["races"] += 1
         entry["seatsUp"] += 1
         if race.get("holderMoved"):

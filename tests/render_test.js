@@ -1629,15 +1629,26 @@ async function testStates() {
     const want = window.kycBuildMeta.voting.TX;
     const links = box ? [...box.querySelectorAll(".state-links a")] : [];
     check("a 'Voting in Texas' block", !!box && /Voting in Texas/.test(box.textContent));
-    check("its four links are the ones NASS lists for Texas",
-      links.length === 4 && ["status", "polling", "absentee", "register"].every((k) =>
+    check("its four NASS links are the ones NASS lists for Texas",
+      ["status", "polling", "absentee", "register"].every((k) =>
         links.some((a) => a.getAttribute("href") === want[k])),
       links.map((a) => a.getAttribute("href")).join(" "));
+    // Where to read the count on election night (audit 2026-10-17, RACES-20).
+    check("an 'Official results' link to the state's own results page",
+      links.some((a) => a.textContent.trim() === "Official results" && a.getAttribute("href") === want.results),
+      want.results);
     check("each opens in a new tab, without an opener",
       links.every((a) => a.target === "_blank" && /noopener/.test(a.rel)));
     check("it names NASS's Can I Vote and the dates it was listed and opened",
       !!box.querySelector('a[href^="https://www.nass.org/"]') && /listed \d{4}-\d{2}-\d{2}/.test(box.textContent) &&
         /each link opened \d{4}-\d{2}-\d{2}/.test(box.textContent), box.textContent);
+    // Deadlines are vote.gov's, linked, never typed or called passed
+    // (STATEGOV-11, PERSONA-03).
+    check("registration deadlines link to vote.gov's page for the state, with no date typed",
+      !!box.querySelector('a[href="https://vote.gov/register/texas"]') &&
+        !/deadline (?:has )?passed|closed on/i.test(box.textContent) &&
+        !/\b(?:January|February|March|April|May|June|July|August|September|October) \d/.test(box.textContent),
+      box.textContent);
   });
   const nd = await buildPage("states/nd.html");
   suite("states/nd.html — a state that does not register voters", () => {
@@ -1649,11 +1660,72 @@ async function testStates() {
   suite("states/dc.html — the District of Columbia", () => {
     const text = (dc.D.getElementById("voting") || {}).textContent || "";
     check("the heading says 'the District of Columbia'", /Voting in the District of Columbia/.test(text), text.slice(0, 60));
+    // NASS linked "Voting by Special Ballot"; D.C. mails every voter a
+    // ballot (STATEGOV-10).
+    const absentee = [...dc.D.querySelectorAll("#voting .state-links a")]
+      .find((a) => /absentee/.test(a.textContent));
+    check("its absentee link is the Board's mail-ballot page, not special ballots",
+      !!absentee && /mail-ballot/.test(absentee.getAttribute("href")), absentee && absentee.getAttribute("href"));
+  });
+  const wy = await buildPage("states/wy.html");
+  suite("states/wy.html — no lookup, no 'Check your registration'", () => {
+    const links = [...wy.D.querySelectorAll("#voting .state-links a")];
+    check("Wyoming's registering page is not offered twice as a registration check",
+      !links.some((a) => /Check your registration/.test(a.textContent)) &&
+        links.some((a) => /Register to vote/.test(a.textContent)), links.map((a) => a.textContent).join(" | "));
+  });
+  suite("states/wy.html — open seats have candidates, not challengers (RACES-14)", () => {
+    const strip = wy.D.querySelector(".state-hero") || wy.D.body;
+    const info = wy.window.kycBuildMeta.states.WY;
+    check("the summary calls open-seat candidates candidates",
+      info.openCandidates > 0 && new RegExp(info.openCandidates + " candidates? for open seats").test(strip.textContent) &&
+        !/\d+ challengers? on the ballot/.test(strip.textContent), strip.textContent.slice(0, 400));
   });
   const guam = await buildPage("states/gu.html");
-  suite("states/gu.html — no NASS listing, no voting block", () => {
-    check("a territory NASS does not cover shows no voting links, rather than a guess",
-      !guam.D.getElementById("voting") && !/Voting in Guam/.test(guam.D.body.textContent));
+  suite("states/gu.html — a territory's own election office (RACES-07)", () => {
+    const box = guam.D.getElementById("voting");
+    const links = box ? [...box.querySelectorAll(".state-links a")] : [];
+    check("a 'Voting in Guam' block from Guam's own election office, and vote.gov's deadlines",
+      !!box && /Voting in Guam/.test(box.textContent) && links.length > 0 &&
+        links.every((a) => /\.gov\//.test(a.getAttribute("href"))) &&
+        !!box.querySelector('a[href="https://vote.gov/register/guam"]') &&
+        !/Can I Vote/.test(box.textContent), box && box.textContent);
+  });
+  const georgia = await buildPage("states/ga.html");
+  suite("states/ga.html — the December 1 runoff (PERSONA-06)", () => {
+    const dates = georgia.D.querySelector("#voting .vote-dates");
+    check("the voting block names December 1, 2026, with the state's page that gives it",
+      !!dates && /December 1, 2026/.test(dates.textContent) && /runoff/.test(dates.textContent) &&
+        /^https:\/\/georgia\.gov\//.test(dates.querySelector("a").getAttribute("href")),
+      dates && dates.textContent);
+    const heads = [...georgia.D.querySelectorAll("#races .race-head")];
+    check("each Georgia race head says a runoff follows on Dec 1 if no one has a majority, linked to the guide",
+      heads.length > 0 && heads.every((h) => [...h.querySelectorAll("a.badge")].some((a) =>
+        /Runoff Dec 1 if no majority/.test(a.textContent) && /elections\.html#runoffs$/.test(a.getAttribute("href")))));
+  });
+  const la = await buildPage("states/la.html");
+  suite("states/la.html — the December 12 House round (PERSONA-06)", () => {
+    const dates = la.D.querySelector("#voting .vote-dates");
+    check("the voting block names December 12, 2026",
+      !!dates && /December 12, 2026/.test(dates.textContent) && /open primary/.test(dates.textContent),
+      dates && dates.textContent);
+    const house = [...la.D.querySelectorAll('#races section.race[id^="race-H-"] .race-head')];
+    check("each House race head says it is an open primary with a general on Dec 12",
+      house.length > 0 && house.every((h) => /Open primary Nov 3/.test(h.textContent) &&
+        /General Dec 12 if no majority/.test(h.textContent)));
+    const senate = la.D.querySelector('#races section.race[id^="race-S-"] .race-head');
+    check("the Senate race, with closed party primaries, carries neither",
+      !senate || !/Open primary|Dec 12/.test(senate.textContent));
+  });
+  const ca = await buildPage("states/ca.html");
+  suite("states/ca.html — the top-two primary, visible (RACES-11)", () => {
+    const heads = [...ca.D.querySelectorAll("#races .race-head")];
+    check("every race head says 'Top-two primary', linked to the guide's primaries section",
+      heads.length > 0 && heads.every((h) => [...h.querySelectorAll("a.badge")].some((a) =>
+        a.textContent === "Top-two primary" && /elections\.html#primaries$/.test(a.getAttribute("href")))));
+    const tx = [...D.querySelectorAll("#races .race-head")];
+    check("a state with party primaries carries no such badge",
+      tx.length > 0 && !tx.some((h) => /Top-two|Top-four|Open primary/.test(h.textContent)));
   });
 
   suite("states/tx.html — one state's page", () => {
@@ -2443,13 +2515,16 @@ async function testBallotCounts() {
   const races = window.kycRaces;
   suite("states/mi.html — the state's count is its race headers' sum", () => {
     check("no page errors", errors.length === 0, errors.join(" | "));
-    const strip = [...D.querySelectorAll(".badge")].map((b) => b.textContent)
-      .find((t) => / (challenger|challengers) on the ballot$/.test(t));
+    // The strip splits challengers (held seats) from open-seat candidates
+    // (RACES-14); the two still add up to the race headers' sum.
+    const strip = [...D.querySelectorAll(".state-hero .badge")].map((b) => b.textContent)
+      .filter((t) => / (challengers?|candidates? for open seats) on the ballot$/.test(t));
+    const stripSum = strip.reduce((n, t) => n + Number(t.split(" ")[0]), 0);
     const heads = [...D.querySelectorAll(".race-head .badge-money")]
       .map((b) => (/^(\d+) (challenger|candidate)s? on the ballot$/.exec(b.textContent) || [])[1])
       .filter(Boolean).reduce((n, x) => n + Number(x), 0);
     check("the strip equals the race headers added up",
-      !!strip && Number(strip.split(" ")[0]) === heads, `${strip} vs ${heads}`);
+      strip.length > 0 && stripSum === heads, `${strip.join(" + ")} vs ${heads}`);
     const national = window.kycBuildMeta.election.challengersOnBallot;
     const all = races.reduce((n, r) => n + (r.candidateCount || 0) +
       ((r.results || {}).otherNominees || []).length, 0);

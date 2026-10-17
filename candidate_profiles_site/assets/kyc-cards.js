@@ -194,6 +194,55 @@
 
   /** The badges that summarise a race: its November result, open seat,
    *  primary date, how many are on the ballot, how many filed. */
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  /** "2026-12-01" -> "Dec 1". */
+  function shortDate(iso) {
+    var m = /^\d{4}-(\d{2})-(\d{2})$/.exec(String(iso || ""));
+    return m ? MONTHS[+m[1] - 1] + " " + (+m[2]) : "";
+  }
+
+  /* How the race's ballot is decided, visibly and linked to the guide that
+   * explains it: a top-two ballot of two Democrats read like a misprint
+   * with the rule only in a hover title (audit 2026-10-17, RACES-11), and
+   * Georgia's and Louisiana's December rounds were on no state page
+   * (PERSONA-06). The pipeline says which (races.ballot_kind, from tables
+   * citing each statute); nothing here knows a state. */
+  var KIND = {
+    "top-two": ["Top-two primary", "primaries",
+      "Every candidate ran on one primary ballot, and the two with the most votes go to November " +
+      "whatever their party."],
+    "top-four": ["Top-four primary", "primaries",
+      "Every candidate ran on one primary ballot, and the four with the most votes go to November " +
+      "whatever their party; November is decided by ranked-choice voting."],
+    "open": ["Open primary Nov 3", "primaries",
+      "Every candidate runs on one ballot on November 3; a candidate with a majority of the votes " +
+      "is elected."],
+  };
+
+  function guideLink(section, cls, title, text) {
+    return '<a class="badge ' + cls + '" href="' +
+      KYC.escapeAttr(KYC.siteRoot() + "government/elections.html#" + section) + '" title="' +
+      KYC.escapeAttr(title) + '">' + KYC.escapeHtml(text) + "</a>";
+  }
+
+  function ballotKindBadges(race) {
+    var out = [];
+    var kind = KIND[race.primaryKind];
+    if (kind) out.push(guideLink(kind[1], "badge-neutral badge-link", kind[2], kind[0]));
+    if (race.generalRunoff) {
+      var when = shortDate(race.generalRunoff);
+      out.push(guideLink("runoffs", "badge-neutral badge-link",
+        race.primaryKind === "open"
+          ? "If no candidate wins a majority on November 3, the top two, of any party, meet on " +
+            when + "."
+          : "If no candidate wins a majority on November 3, the top two meet in a runoff on " +
+            when + ".",
+        (race.primaryKind === "open" ? "General " : "Runoff ") + when + " if no majority"));
+    }
+    return out;
+  }
+
   function raceBadges(race) {
     var badges = [];
     var outcome = outcomeBadge(race);
@@ -256,6 +305,7 @@
         "</span>"
       );
     }
+    badges = badges.concat(ballotKindBadges(race));
 
     /* "No declared challenger" was a claim about our roster dressed up as
      * a fact about the race, and it was wrong for 372 of them. filedCount

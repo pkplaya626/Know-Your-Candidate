@@ -1316,6 +1316,21 @@ def check_voting_links(cache):
         issues.append(Issue("warn", "voting-override-stale",
                             f"{len(stale)} overrides.VOTING_LINKS entries no longer match "
                             f"what NASS lists; each may be unneeded", stale))
+    # Where to read the count and the deadlines, for every state and D.C.
+    # (audit 2026-10-17, RACES-20, STATEGOV-11): curated in kyc/voting.py.
+    gaps += [f"{code}: no {kind} page" for code in sorted(voting.JURISDICTIONS)
+             for kind, table in (("results", voting.RESULTS), ("deadlines", voting.DEADLINES))
+             if code not in table]
+    gaps += [f"{code}: a December date in the overrides with no page that gives it "
+             f"(voting.KEY_DATE_SOURCES)" for code in voting.unsourced_key_dates()]
+    checked = cache.get("links") or {}
+    unchecked = sorted(f"{code} {kind}: {link['url']}"
+                       for code, links in voting.effective(cache).items()
+                       for kind, link in links.items() if link["url"] not in checked)
+    if unchecked:
+        issues.append(Issue("warn", "voting-links-unchecked",
+                            f"{len(unchecked)} voting links have not been opened; run 'voting'",
+                            unchecked))
     if gaps:
         issues.append(Issue("error", "voting-links-incomplete",
                             f"{len(gaps)} official voting pages are missing", gaps))
