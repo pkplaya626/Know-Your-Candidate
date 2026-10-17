@@ -315,12 +315,29 @@ class TestVoteview(unittest.TestCase):
         ]
         self.assertEqual(set(voteview.latest_scores(rows)), {"D4"})
 
-    def test_labels_span_the_spectrum(self):
-        self.assertIn("Solidly Progressive", voteview.describe(-0.75))
-        self.assertIn("Moderate Democrat", voteview.describe(-0.25))
-        self.assertIn("Centrist", voteview.describe(0.0))
-        self.assertIn("Moderate Republican", voteview.describe(0.25))
-        self.assertIn("Solidly Conservative", voteview.describe(0.75))
+    def test_labels_span_the_spectrum_in_the_scales_own_words(self):
+        self.assertIn("well left of centre", voteview.describe(-0.75))
+        self.assertIn("(left of centre", voteview.describe(-0.25))
+        self.assertIn("near the centre", voteview.describe(0.0))
+        self.assertIn("(right of centre", voteview.describe(0.25))
+        self.assertIn("well right of centre", voteview.describe(0.75))
+
+    def test_no_label_names_a_party(self):
+        # "Moderate Republican" was on Kevin Kiley, an independent, and
+        # "Moderate Democrat" on Angus King.
+        for score in (-1.0, -0.4, -0.25, -0.1, 0.0, 0.1, 0.25, 0.4, 1.0):
+            text = voteview.describe(score, 119)
+            for word in ("Democrat", "Republican", "Progressive", "Conservative", "Swing"):
+                self.assertNotIn(word, text)
+
+    def test_the_congress_goes_with_the_score(self):
+        self.assertEqual(voteview.describe(0.41, 119),
+                         "DW-NOMINATE: +0.41 (well right of centre; 119th Congress)")
+        self.assertIn("101st Congress", voteview.describe(0.0, 101))
+        self.assertIn("112th Congress", voteview.describe(0.0, 112))
+        rows = [{"bioguide_id": "K1", "congress": "119", "nominate_dim1": "0.25"}]
+        self.assertEqual(voteview.build_alignment_map(rows)["K1"],
+                         "DW-NOMINATE: +0.25 (right of centre; 119th Congress)")
 
     def test_nothing_is_derived_from_the_score(self):
         # "~92% Party Loyalty" was 80 + 30 x |score|, shown as a statistic and
@@ -331,7 +348,7 @@ class TestVoteview(unittest.TestCase):
             self.assertNotIn("%", text)
             self.assertNotIn("Loyalty", text)
             self.assertNotIn("Independent", text)
-        self.assertEqual(voteview.describe(0.41), "DW-NOMINATE: +0.41 (Solidly Conservative)")
+        self.assertEqual(voteview.describe(0.41), "DW-NOMINATE: +0.41 (well right of centre)")
 
 
 if __name__ == "__main__":

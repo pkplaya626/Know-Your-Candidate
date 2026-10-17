@@ -67,33 +67,45 @@ def latest_scores(rows):
     return latest
 
 
-def describe(dim1):
+def _ordinal(n):
+    return f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
+
+
+def describe(dim1, congress=None):
     """Render a DW-NOMINATE first-dimension score as a display string.
 
-    The first dimension runs roughly -1 (left) to +1 (right). Nothing else is
-    derived from it. A "~92% Party Loyalty" figure used to follow, computed as
-    80 + 30 x distance from centre: a formula shown as a statistic, given even
-    to independents with no party to be loyal to. A party-unity rate has to be
-    counted from roll calls, not inferred from a score.
+    The first dimension runs roughly -1 (left) to +1 (right), and the words
+    say where on that scale, in the scale's own terms. They were party
+    names ("Moderate Republican", "Moderate Democrat"), which put a party
+    on independents - Kevin Kiley and Angus King - and on anyone whose
+    score sat past their own party's. The Congress the score is from goes
+    with it: a score is a record of votes in one Congress.
+
+    Nothing else is derived from it. A "~92% Party Loyalty" figure used to
+    follow, computed as 80 + 30 x distance from centre: a formula shown as a
+    statistic, given even to independents with no party to be loyal to. A
+    party-unity rate has to be counted from roll calls, not inferred from a
+    score.
     """
     if dim1 < -0.4:
-        label = "Solidly Progressive"
+        label = "well left of centre"
     elif dim1 < -0.1:
-        label = "Moderate Democrat"
+        label = "left of centre"
     elif dim1 <= 0.1:
-        label = "Centrist / Swing Voter"
+        label = "near the centre"
     elif dim1 <= 0.4:
-        label = "Moderate Republican"
+        label = "right of centre"
     else:
-        label = "Solidly Conservative"
-
-    return f"DW-NOMINATE: {dim1:+.2f} ({label})"
+        label = "well right of centre"
+    tail = f"; {_ordinal(congress)} Congress" if congress else ""
+    return f"DW-NOMINATE: {dim1:+.2f} ({label}{tail})"
 
 
 def build_alignment_map(rows=None):
     """``{bioguide_id: alignment string}`` for every scored member."""
     rows = fetch_members() if rows is None else rows
-    return {bg: describe(dim1) for bg, (_, dim1) in latest_scores(rows).items()}
+    return {bg: describe(dim1, congress)
+            for bg, (congress, dim1) in latest_scores(rows).items()}
 
 
 def apply_to_roster(path, alignment_map):

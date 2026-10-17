@@ -244,13 +244,17 @@
 
     var value = parseFloat(score[1]);
     var pct = Math.max(0, Math.min(100, ((value + 1) / 2) * 100));
-    var label = (text.match(/\(([^)]+)\)/) || [])[1] || "";
-    var tone = value <= -0.1 ? "party-d" : value >= 0.1 ? "party-r" : "";
+    // "(right of centre; 119th Congress)": where on the scale, in its own
+    // words - never a party's name, or an independent read as one - and the
+    // Congress whose votes it scores. Not drawn in a party's colour either.
+    var inner = ((text.match(/\(([^)]+)\)/) || [])[1] || "").split(";");
+    var label = inner[0].trim();
+    var congress = (inner[1] || "").trim();
 
     target.innerHTML = [
       '<div class="ideology">',
       '  <div class="ideology-head">',
-      '    <span class="ideology-score ' + tone + '">',
+      '    <span class="ideology-score">',
       (value > 0 ? "+" : "") + value.toFixed(2),
       label ? '<span class="label">' + KYC.escapeHtml(label) + "</span>" : "",
       "    </span>",
@@ -261,6 +265,10 @@
       "  </div>",
       '  <div class="ideology-axis"><span>-1.0 left</span>' +
       "<span>centre</span><span>right +1.0</span></div>",
+      '  <p class="held-source">Source: <a href="https://voteview.com/" target="_blank" ' +
+      'rel="noopener noreferrer">Voteview</a> DW-NOMINATE, first dimension' +
+      (congress ? ", from roll calls in the " + KYC.escapeHtml(congress) : "") +
+      ". A score places votes on a left-right scale; it is not a party label.</p>",
       "</div>",
     ].join("");
   }

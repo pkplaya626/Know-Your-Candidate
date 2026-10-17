@@ -1170,6 +1170,17 @@ async function testDirectoryAsync() {
       merged.length > 0 && merged.every((p) => KYC.byId("FEC_" + p.fecCandidateId) === p),
       merged.filter((p) => KYC.byId("FEC_" + p.fecCandidateId) !== p).map((p) => p.name).join(", "));
 
+    // A DW-NOMINATE score is a place on a left-right scale, never a party's
+    // name: an independent read "Moderate Republican".
+    const independent = window.legislatorsData.find((p) => KYC.seated(p) && p.party === "Independent" &&
+      /DW-NOMINATE/.test(p.voting_alignment || ""));
+    KYC.profile.open(independent.id);
+    const voting = D.getElementById("profileModalVoting").textContent;
+    KYC.profile.close();
+    check("an independent's score is in the scale's words, with its source and Congress",
+      /of centre|near the centre/.test(voting) && !/Republican|Democrat/.test(voting) &&
+        /Voteview/.test(voting) && /\d+(st|nd|rd|th) Congress/.test(voting), voting.replace(/\s+/g, " "));
+
     // Rule 27: a challenger is running for the seat, not representing it.
     const challenger = window.legislatorsData.find((p) => p.isCandidate);
     const seated = window.legislatorsData.find((p) => KYC.seated(p));

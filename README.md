@@ -108,7 +108,7 @@ CI asserts that a rebuild changes nothing.
 | `photos.py` | Runtime portrait fallback chain (safety net) |
 | `portraits.py` | Build-time portrait resolution and checking |
 | `fec.py` | Campaign finance from the OpenFEC API |
-| `voteview.py` | DW-NOMINATE ideology scores |
+| `voteview.py` | DW-NOMINATE ideology scores: the first dimension, worded on its own left-right scale (never a party's name) with the Congress the score is from |
 | `profiles.py` | Assemble profiles; derive 2026 election flags and field provenance |
 | `races.py` | Group profiles into the seats they contest |
 | `legislators.py` | The authoritative membership, and reconciliation against it |
