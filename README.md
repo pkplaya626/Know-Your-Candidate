@@ -263,7 +263,7 @@ else (`emit.check_nav`).
 | Elections 2026 (the cycle's year, `cycle.CYCLE`) | Candidates (the grid), Races & partisan map |
 | Federal | Congress (the grid's sitting members), President & Cabinet, Federal courts |
 | State | States & territories, State legislatures (`legislature/index.html`) |
-| Local | Counties & cities (`counties/index.html`) |
+| Local | Counties & local governments (`counties/index.html`) |
 | Learn | Know Your Government (the guide) |
 
 A page that *is* an entry's link is marked `aria-current="page"`; one that
@@ -1753,12 +1753,22 @@ The listing's place codes are not the boundary file's (Texarkana, Texas:
 the state, and only where the join is one to one: in three passes over what
 the last left - name and legal form, name, then name without the forms after
 it ("Phenix City" is the listing's "CITY OF PHENIX") - and, where a name is
-shared, only by the county the place's point lies in. 19,451 places join. The
-rest are places incorporated since the 2022 listing (Mableton, Georgia;
-Mountain House, California), consolidated governments the two sources name
-differently (Baton Rouge's city-parish), and a handful of spellings that
-disagree ("Cajah's Mountain"). They are drawn, say that no government is
-joined, and are reported by the build; nothing is matched to its nearest name.
+shared, only by the county the place's point lies in. 19,451 places join by
+name. Two kinds no name can join are curated, each with its evidence and
+checked on every build: a city whose government is the consolidated one
+`county_areas.AREAS` names (Kansas City, Kansas, and the Unified Government
+of Wyandotte County and Kansas City; Baton Rouge and its city-parish:
+`county_areas.CONSOLIDATED_PLACES`), whose panel says that government also
+does the county's work; and a place the listing files under another name
+("Cajah's Mountain", Encampment's Town of Grand Encampment) or on a
+subdivision code the Census has since replaced (Mount Lebanon,
+Pennsylvania), joined on the listing's own government id
+(`overrides.PLACE_GOVERNMENTS`). The rest are mostly places incorporated
+since the 2022 listing (Mableton, Georgia; Mountain House, California). They
+are drawn, say that no government could be tied to them - the listing may
+name it otherwise, or the place may be newer - and are reported by the
+build; nothing is matched to its nearest name, and a place is never joined
+to a town or township it replaced (Rib Mountain, Wisconsin).
 
 Towns and townships are joined the other way: the listing gives each the
 Census code of its county subdivision, and the subdivision boundaries
@@ -1767,8 +1777,10 @@ whose Census table counts town or township governments) carry the same
 code. 16,167 of the 16,214 are placed on their own code, the name checked
 against the boundary file's. The other 47 changed after 2022 - Wisconsin's
 Town of Madison was dissolved, Rib Mountain became a village, two
-Massachusetts towns took city charters - and stay listed under their county;
-none is placed by its name. In Connecticut, Massachusetts and the rest of New
+Massachusetts towns took city charters - and stay listed under their county
+unless curated onto their place's point as above; none is placed by its
+name. The cities view counts the ones left off the map, from the data, under
+its lede. In Connecticut, Massachusetts and the rest of New
 England, where the town is the local government, the town rings are most of
 the map.
 

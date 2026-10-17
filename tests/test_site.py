@@ -459,6 +459,19 @@ class TestStatePages(unittest.TestCase):
                   "results": {"otherNominees": ["E F"]}}]
         self.assertEqual(summary.by_state(people, races)["MI"]["challengersOnBallot"], 4)
 
+    def test_puerto_ricos_seat_says_its_title_and_when_it_is_elected(self):
+        # The state page read "1 delegate - 0 seats in Congress on the 2026
+        # ballot - 0 challengers", with no reason: the Resident Commissioner
+        # serves four years (48 U.S.C. 891), elected in 2024 and 2028.
+        people = [member(id="PR1", state="PR", chamber="House", districtNum=0),
+                  member(id="G1", state="GU", chamber="House", districtNum=0, seatUp2026=True)]
+        by_state = summary.by_state(people, [{"id": "H-GU-00-2026", "state": "GU"}])
+        self.assertEqual(by_state["PR"]["delegateTitle"], "Resident Commissioner")
+        self.assertEqual(by_state["PR"]["houseTerm"], {"years": 4, "last": 2024, "next": 2028})
+        self.assertEqual(by_state["PR"]["seatsUp"], 0)
+        self.assertEqual(by_state["GU"]["delegateTitle"], "Delegate")
+        self.assertNotIn("houseTerm", by_state["GU"])
+
     def test_each_state_has_its_own_balance_and_its_vacancies(self):
         # The roster holds no row for a seat nobody holds; the races cover
         # every seat, so a race with no member is a vacancy, not a gap.

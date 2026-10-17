@@ -139,6 +139,20 @@ AREAS = {
 }
 
 # What a state calls the areas its map is drawn in: (one, many, the map's button).
+# Cities the Census maps as places of their own whose government is the
+# consolidated one AREAS names - a name the city join (counties.match_cities)
+# cannot tie to the place, since the government's name is not the city's.
+# Each government's own name names the city. {place GEOID: county area}.
+# The place is joined to the row AREAS names in that area, and its panel
+# says the government also does the county's work. Not every place in such
+# an area: St. George, Louisiana, incorporated in East Baton Rouge Parish in
+# 2024, has a government of its own the 2022 listing does not hold.
+CONSOLIDATED_PLACES = {
+    "2036000": "20209",   # Kansas City, Kansas
+    "2205000": "22033",   # Baton Rouge
+    "1332528": "13239",   # Georgetown-Quitman County
+}
+
 AREA_WORDS = {
     "AK": ("borough or census area", "boroughs and census areas", "Boroughs"),
     "CT": ("planning region", "planning regions", "Planning regions"),

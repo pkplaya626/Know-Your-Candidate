@@ -116,7 +116,7 @@ $nav
 $sidebar
         <nav class="sidebar-section push" aria-label="Jump to a state">
             <h2 class="sidebar-heading">Jump to</h2>
-            <label class="sr-only" for="stateJump">Jump to a state or territory</label>
+            <label class="sr-only" for="stateJump">$jump_label</label>
             <select id="stateJump" class="select"$jump_attrs>
                 <option value="">Choose a state&hellip;</option>$jump_options
             </select>
@@ -154,7 +154,7 @@ def nav_groups():
             ("legislatures", "legislature/index.html", "columns", "State legislatures"),
         )),
         ("Local", (
-            ("local", "counties/index.html", "layers", "Counties & cities"),
+            ("local", "counties/index.html", "layers", "Counties & local governments"),
         )),
         ("Learn", (
             ("guide", "government/index.html", "scroll", "Know Your Government"),
@@ -266,6 +266,12 @@ def render_page(**fields):
     fields["nav"] = nav_html("../", fields.pop("nav_current", None), fields.pop("nav_how", "page"))
     fields.setdefault("jump_options", "")
     fields.setdefault("jump_attrs", "")
+    # An empty list is filled on the page with every state and territory; a
+    # list written here (the legislature and county pages) may hold only
+    # the fifty states, and its label says what it holds.
+    options = fields["jump_options"]
+    whole = not options or any(f'value="{c}"' in options for c in TERRITORIES)
+    fields["jump_label"] = "Jump to a state or territory" if whole else "Jump to a state"
     return _PAGE.substitute(search=search, **fields)
 
 # The state pages render everything from profiles.js on the client.
@@ -308,7 +314,13 @@ def render_state(code, host, summary=None):
     """The HTML for one state's page."""
     name = state_name(code)
     info = ((summary or {}).get("states") or {}).get(code) or {}
-    if code in TERRITORIES:
+    if code in TERRITORIES and info.get("houseTerm"):
+        # Puerto Rico: a four-year seat with no 2026 race (summary._delegate_seats).
+        title = info.get("delegateTitle", "Delegate")
+        description = (f"{name}'s {title} in the U.S. House, elected for a "
+                       f"{info['houseTerm']['years']}-year term and next on the ballot in "
+                       f"{info['houseTerm']['next']}, and who governs {name}.")
+    elif code in TERRITORIES:
         what = "delegate to the U.S. House" if info.get("house", 0) <= 1 else "delegates"
         description = (f"{name}'s {what}, the 2026 race for the seat, and every "
                        f"candidate who has filed - who is on the ballot and who is out.")
@@ -385,13 +397,16 @@ def render_legislatures_index(host):
         '                <ul class="directory-list">',
         rows,
         "                </ul>",
+        '                <p class="faint directory-outside">The fifty state legislatures. The District of',
+        '                    Columbia has <a href="../states/dc.html">a mayor and a council</a>, not a',
+        "                    legislature, and the territories&#8217; legislatures are not covered here.</p>",
         "            </div>",
     ])
     footer = "\n".join([
         "                <p><strong>Sources:</strong> members and their parties from Open States, as",
-        "                    each legislature publishes them, counted against the National Conference",
-        "                    of State Legislatures' figures; a chamber's control is shown only where",
-        "                    the two agree. A seat with nobody listed counts for no one.</p>",
+        "                    each legislature publishes them. Which party holds each chamber is checked",
+        "                    against the National Conference of State Legislatures' figures and shown",
+        "                    only where the two agree. A seat with nobody listed counts for no one.</p>",
         "                <p>Non-partisan and independent.</p>",
     ])
     return render_page(
@@ -433,7 +448,7 @@ def render_counties_index(host, census=None):
     with what that means, never 0 (rule 49)."""
     from . import county_areas
     from .government import jump_options
-    from .government_maps import STATES
+    from .government_maps import COUNT_NOTES, STATES
 
     path = "counties/index.html"
     canonical = f"https://{host}/{path}" if host else path
@@ -454,6 +469,9 @@ def render_counties_index(host, census=None):
         if value is None:
             return (f'<td class="faint" title="{_e(none)}">none{mark}</td>' if code in counts
                     else "<td>&ndash;</td>")
+        if (code, kind) in COUNT_NOTES:
+            mark += (f'<sup><a class="note-ref" href="#count-note-{_e(code.lower())}-{_e(kind)}" '
+                     f'aria-label="What this count is">*</a></sup>')
         return f"<td>{value:,}{mark}</td>"
 
     rows = "\n".join(
@@ -461,6 +479,20 @@ def render_counties_index(host, census=None):
         f'{_e(state_name(code))}</a></th>' + "".join(cell(code, k, n) for k, _w, n in kinds) + "</tr>"
         for code in sorted(STATES, key=state_name))
     year = (census or {}).get("year")
+    # D.C. and the territories are not in the table, and it says why. D.C.'s
+    # count is the same table's, as the guide's map shows it; the scope is
+    # the guide's (government_maps: "the Census of Governments covers the
+    # states and D.C.").
+    dc = counts.get("DC") or {}
+    dc_kinds = [(dc.get(k), w) for k, w in (("municipal", "municipal government"),
+                                             ("special", "special district")) if dc.get(k)]
+    outside = ("The District of Columbia has no counties, so it is not in this table" +
+               (f"; the Census Bureau counted {dc['total']:,} local governments there"
+                f"{' in ' + _e(year) if year else ''}: " +
+                " and ".join(f"{n:,} {w}{'' if n == 1 else 's'}" for n, w in dc_kinds)
+                if dc.get("total") else "") +
+               ". The five territories are outside the Census of Governments, which covers the "
+               "states and D.C.")
     main = "\n".join([
         '            <div id="countiesDirectory" class="state-page directory-page">',
         '                <header class="state-hero">',
@@ -484,6 +516,10 @@ def render_counties_index(host, census=None):
         "                        </tbody>",
         "                    </table>",
         "                </div>",
+        *[f'                <p class="faint" id="count-note-{_e(code.lower())}-{_e(kind)}">* '
+          f'{_e(state_name(code))}, {_e(dict((k, w) for k, w, _n in kinds)[kind].lower())}: '
+          f"{_e(text)}</p>" for (code, kind), text in sorted(COUNT_NOTES.items())],
+        f'                <p class="faint directory-outside">{_e(outside)}</p>',
         '                <h2 class="state-heading" id="countyNotes">Where a county area has no county government</h2>',
         '                <p class="faint">A state can have fewer county governments than counties. '
         "These are the places the Census Bureau lists as county areas without one, and what governs "
@@ -653,7 +689,7 @@ def render_legislature_page(code, host, summary=None):
     """A state's legislature: its Senate and House districts on a map, and
     the members who sit for them. The page carries the state code only;
     ``assets/kyc-legislature.js`` draws it from ``data/legislature/<st>.js``."""
-    from .government_maps import LOWER_CHAMBER, SEATS, STATES
+    from .government_maps import LEGISLATURE_NAME, LOWER_CHAMBER, SEATS, STATES
     from .government import jump_options
 
     name = state_name(code)
@@ -667,7 +703,7 @@ def render_legislature_page(code, host, summary=None):
                 f"senators, each elected from a district on a nonpartisan ballot.")
         chambers = ""
     else:
-        title = f"{name} Legislature"
+        title = f"{name} {LEGISLATURE_NAME.get(code, 'Legislature')}"
         lede = (f"The {name} Senate has {senate} members and the {lower} {house}. Pick a "
                 f"district on the map to see who sits for it.")
         chambers = "\n".join([
@@ -725,7 +761,8 @@ def render_legislature_page(code, host, summary=None):
         "                    legislature publishes them; district boundaries from the U.S. Census",
         "                    Bureau's cartographic boundary files, as set for the 2024 elections.",
         "                    A seat with nobody listed may be vacant, or Open States may be behind",
-        "                    a special election.</p>",
+        "                    a special election. The legislature is called by the name its state",
+        "                    constitution gives it.</p>",
         "                <p>Non-partisan and independent.</p>",
     ])
     scripts = [s.replace("{code}", code.lower()) for s in (

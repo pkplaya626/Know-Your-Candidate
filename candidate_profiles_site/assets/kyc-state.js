@@ -77,11 +77,40 @@
       "</section>";
   }
 
+  /* A non-voting member's title, as summary.py gives it: Puerto Rico's
+   * Resident Commissioner is not a "delegate". */
+  function delegateTitle(info) {
+    return info.delegateTitle || "Delegate";
+  }
+
+  /* Who holds the state's seats, in words: the hero and the directory of
+   * states say it the same way. */
+  function seatWords(info) {
+    var seats = [];
+    if (info.senators) seats.push(plural(info.senators, "senator"));
+    if (info.house) seats.push(plural(info.house, "representative"));
+    if (info.delegates) {
+      var title = delegateTitle(info);
+      seats.push(plural(info.delegates, title === "Delegate" ? "delegate" : title));
+    }
+    return seats;
+  }
+
+  /* A House seat elected for longer than two years and not on this
+   * cycle's ballot (Puerto Rico's): why it has no race, in place of the
+   * zeros. */
+  function offCycle(info) {
+    var term = info.houseTerm;
+    if (!term || info.races) return "";
+    return delegateTitle(info) + ": a " + term.years + "-year term, next on the ballot in " + term.next;
+  }
+
   function summaryStrip(info) {
-    var parts = [];
-    if (info.senators) parts.push(plural(info.senators, "senator"));
-    if (info.house) parts.push(plural(info.house, "representative"));
-    if (info.delegates) parts.push(plural(info.delegates, "delegate"));
+    var parts = seatWords(info);
+    if (offCycle(info)) {
+      parts.push(offCycle(info));
+      return badges(parts);
+    }
     // Once the new Congress sits these are a record of 2026, and say so.
     var rec = KYC.recordPhase();
     parts.push(plural(info.seatsUp, "seat") + " in Congress on the 2026 ballot");
@@ -95,6 +124,10 @@
       parts.push(plural(info.challengersOut, "challenger") + " out after the " +
         (rec ? "2026 " : "") + "primaries");
     }
+    return badges(parts);
+  }
+
+  function badges(parts) {
     return parts.map(function (t) {
       return '<span class="badge badge-neutral">' + KYC.escapeHtml(t) + "</span>";
     }).join(" ");
@@ -113,6 +146,12 @@
     return order.filter(function (o) { return counts[o[0]]; }).map(function (o) {
       return '<span class="party-' + o[0] + '">' + counts[o[0]] + " " + o[1] + "</span>";
     }).join('<span class="sep">/</span>');
+  }
+
+  /* The government section's name, for its heading and its jump chip
+   * alike: D.C.'s is a local government, a territory's territorial. */
+  function govHeading(info) {
+    return code === "DC" ? "Local government" : info.territory ? "Territorial government" : "State government";
   }
 
   function renderState() {
@@ -172,8 +211,8 @@
      * screens down with the only way to them inside the closed drawer. */
     var parts = [
       senators.length ? ["senators", "U.S. senators"] : null,
-      house.length ? ["delegation", info.territory ? "Delegate" : "House delegation"] : null,
-      KYC.stategov && (KYC.stategov.state(code) || code === "DC") ? ["state-government", "State government"] : null,
+      house.length ? ["delegation", info.territory ? delegateTitle(info) : "House delegation"] : null,
+      KYC.stategov && (KYC.stategov.state(code) || code === "DC") ? ["state-government", govHeading(info)] : null,
       senateRaces.length + houseRaces.length ? ["races", "2026 races"] : null,
     ].filter(Boolean);
     if (parts.length > 1) {
@@ -199,9 +238,18 @@
     if (house.length) {
       html.push(
         '<section class="state-section" id="delegation">',
-        '<h2 class="state-heading">' + (info.territory ? "Delegate to the U.S. House" : "U.S. House delegation") +
+        '<h2 class="state-heading">' + (info.territory ? KYC.escapeHtml(delegateTitle(info)) +
+          " to the U.S. House" : "U.S. House delegation") +
           ' <span class="balance">' + balance(house,
             ((info.balance || {}).house || {}).vacant) + "</span></h2>",
+        offCycle(info)
+          ? '<p class="state-note">' + KYC.escapeHtml(name) + " elects its " +
+            KYC.escapeHtml(delegateTitle(info)) + " at large for a " + info.houseTerm.years +
+            '-year term (<a href="https://www.law.cornell.edu/uscode/text/48/891" target="_blank" ' +
+            'rel="noopener noreferrer">48 U.S.C. § 891</a>). The seat was last on the ballot in ' +
+            info.houseTerm.last + " and is next in " + info.houseTerm.next + ", so no seat in Congress " +
+            "is on " + KYC.escapeHtml(name) + "'s 2026 ballot.</p>"
+          : "",
         '<div class="card-grid">' + house.map(cards.card).join("") + "</div>",
         "</section>"
       );
@@ -212,8 +260,7 @@
     if (KYC.stategov && (KYC.stategov.state(code) || code === "DC")) {
       html.push(
         '<section class="state-section" id="state-government">',
-        '<h2 class="state-heading">' + (code === "DC" ? "Local government" :
-          info.territory ? "Territorial government" : "State government") + "</h2>",
+        '<h2 class="state-heading">' + govHeading(info) + "</h2>",
         '<div class="stategov">' + KYC.stategov.render(code, { links: false }) + "</div>",
         "</section>"
       );
@@ -258,6 +305,15 @@
     var list = KYC.stategov ? KYC.stategov.ballotList(code) : null;
     var rest = "special elections for vacant seats, other statewide, judicial and local " +
       "contests, and ballot measures, which this site does not list";
+    if (code === "DC") {
+      // D.C. has no governor or legislature; its own offices, as the D.C.
+      // Board of Elections lists them for 2026 (candidate list, July 2026).
+      return "Your ballot may also hold the District's own contests, such as for mayor, attorney " +
+        "general, the D.C. Council, the State Board of Education and Advisory Neighborhood " +
+        "Commissions, which this site does not list (" +
+        '<a href="https://www.dcboe.org/elections/2026-elections" target="_blank" ' +
+        'rel="noopener noreferrer">D.C. Board of Elections</a>).';
+    }
     if (list === null) {
       return territory
         ? "Your ballot may also hold territorial and local contests, such as for governor " +
@@ -303,20 +359,20 @@
 
     var rows = codes.map(function (c) {
       var info = states[c];
-      var seats = [];
-      if (info.senators) seats.push(plural(info.senators, "senator"));
-      if (info.house) seats.push(plural(info.house, "representative"));
-      if (info.delegates) seats.push(plural(info.delegates, "delegate"));
+      var seats = seatWords(info);
+      var off = offCycle(info);
       return [
         '<a class="state-row" href="' + KYC.escapeAttr(KYC.stateUrl(c)) + '" data-state="' + KYC.escapeAttr(c) + '">',
         '<span class="state-row-name">' + KYC.escapeHtml(info.name) +
           ' <span class="state-row-code">' + KYC.escapeHtml(c) + "</span></span>",
         '<span class="state-row-meta">' + KYC.escapeHtml(seats.join(", ")) + "</span>",
-        '<span class="state-row-meta">' + KYC.escapeHtml(plural(info.seatsUp, "seat") +
-          (KYC.recordPhase() ? " on the 2026 ballot" : " up")) +
-          (info.open ? " &middot; " + KYC.escapeHtml(plural(info.open, "open seat")) : "") + "</span>",
-        '<span class="state-row-meta">' + KYC.escapeHtml(plural(info.challengersOnBallot, "challenger")) +
-          (KYC.recordPhase() ? " on the 2026 ballot" : " on the ballot") + "</span>",
+        off
+          ? '<span class="state-row-meta">' + KYC.escapeHtml(off) + '</span><span class="state-row-meta"></span>'
+          : '<span class="state-row-meta">' + KYC.escapeHtml(plural(info.seatsUp, "seat") +
+            (KYC.recordPhase() ? " on the 2026 ballot" : " up")) +
+            (info.open ? " &middot; " + KYC.escapeHtml(plural(info.open, "open seat")) : "") + "</span>" +
+            '<span class="state-row-meta">' + KYC.escapeHtml(plural(info.challengersOnBallot, "challenger")) +
+            (KYC.recordPhase() ? " on the 2026 ballot" : " on the ballot") + "</span>",
         "</a>",
       ].join("");
     });

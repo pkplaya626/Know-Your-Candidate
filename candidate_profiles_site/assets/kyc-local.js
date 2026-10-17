@@ -56,10 +56,19 @@
    * Virginia's independent cities, New York City's boroughs...), keyed by
    * code, with why: kyc/county_areas.py, from the Census Bureau's own list. */
   var noCounty = (state && state.noCounty) || {};
+  // {place id: county area}: a city governed by its area's consolidated government.
+  var consolidated = (state && state.consolidatedPlaces) || {};
   var areaWords = (state && state.areaWords) || { one: "county", many: "counties" };
 
   function el(id) { return doc.getElementById(id); }
   function plural(n, word) { return n.toLocaleString("en-US") + " " + word + (n === 1 ? "" : "s"); }
+
+  /* Why the dependent systems listed under a county are not in its count:
+   * the Census Bureau's own classification (2022 Census of Governments,
+   * Individual State Descriptions). Said once, under the group, wherever it
+   * is listed: a county, an area off the map, or the statewide list. */
+  var DEPENDENT_NOTE = "Not counted as local governments: the Census Bureau counts a school system " +
+    "run by a state, county, city or town as part of the government that runs it.";
 
   function counted(rows) {
     return rows.filter(function (r) { return r[0] !== "dependent"; }).length;
@@ -228,6 +237,7 @@
       if (!mine.length) return;
       html += '<h3 class="local-group">' + KYC.escapeHtml(KINDS[kind]) +
         ' <span class="faint">' + mine.length + "</span></h3>" +
+        (kind === "dependent" ? '<p class="faint local-dependent">' + DEPENDENT_NOTE + "</p>" : "") +
         '<ul class="local-list">' + mine.join("") + "</ul>";
     });
     return html || '<p class="faint">Nothing matches.</p>';
@@ -282,17 +292,25 @@
     }
     if (row) {
       body += '<h3 class="local-group">Its government</h3><ul class="local-list">' + item(row, "") + "</ul>" +
+        // A city whose government is the consolidated one that also does
+        // its county's work (Kansas City, Kansas): said, in the county's words.
+        (consolidated[id] && noCounty[consolidated[id]]
+          ? '<p class="gov-officer-note local-why">' + KYC.escapeHtml(noCounty[consolidated[id]].note) + "</p>"
+          : "") +
         '<p class="faint">As the Census Bureau listed it in 2022' +
         (filed !== here ? ", under " + KYC.escapeHtml(state.counties[filed].name) : "") +
         ", with its own website where the Bureau has one.</p>";
     } else if (!NOT_GOVERNING[c[6]]) {
       // Not joined is not "no government" (rule 19): the build found no
       // government in the listing it could tie to this place one to one.
-      // Why is not guessed; the listing's date is a fact. A status that
-      // explains the absence (inactive, nonfunctioning) says it instead.
-      body += '<p class="gov-officer-note">The Census Bureau\'s 2022 listing of governments has no ' +
-        "entry this site could tie to this place by its name alone, so none is shown here. The " +
-        "listing is from 2022; a place incorporated since then is not in it.</p>";
+      // Why is not guessed - the listing may name it otherwise, or the place
+      // may be newer than the listing - and neither cause is claimed alone.
+      // A status that explains the absence (inactive, nonfunctioning) says
+      // it instead.
+      body += '<p class="gov-officer-note">This site could not tie this place to one entry in the ' +
+        "Census Bureau's 2022 listing of governments, so no government is shown here. The listing " +
+        "may file its government under another name, or the place may have been incorporated " +
+        "since 2022.</p>";
     }
     var shared = (samePoint[c[0] + "," + c[1]] || []).filter(function (other) { return other !== id; });
     if (shared.length) {
@@ -306,6 +324,19 @@
     el("localPanelBody").innerHTML = body;
   }
 
+  /* The town and township governments in the listing that no ring and no
+   * place is joined to: changed after 2022, or on a subdivision the Census
+   * says does not govern (kyc/counties.py build_towns reports each). */
+  function unplacedTowns() {
+    var n = 0;
+    Object.keys(state.governments).forEach(function (fips) {
+      state.governments[fips].forEach(function (r, i) {
+        if (r[0] === "township" && !cityOfRow[fips + ":" + i]) n += 1;
+      });
+    });
+    return n;
+  }
+
   function showState() {
     var total = 0;
     Object.keys(state.governments).forEach(function (f) { total += counted(state.governments[f]); });
@@ -314,16 +345,25 @@
         '<p class="faint">The Census listing files these under a county area that is not on the ' +
         "current county map.</p>" + groups(u.governments, "", u.fips);
     }).join("") + (state.statewide.length
-      ? '<p class="leg-subhead">Statewide</p><p class="faint">Run by the state, with no county.</p>' +
+      // What the listing says, no more: it files these with no county.
+      ? '<p class="leg-subhead">Statewide</p><p class="faint">The Census Bureau\'s 2022 listing files ' +
+        "these under the state rather than under a county.</p>" +
         groups(state.statewide, "") : "");
     el("localPanelTitle").textContent = state.name;
     var townCount = Object.keys(towns).length;
+    var unplaced = unplacedTowns();
     var lede = view === "cities"
       ? '<p class="local-total">' + plural(cityIds.length - townCount, "incorporated place") + " (2025)" +
         (townCount ? " and " + plural(townCount, "town or township government") : "") + ".</p>" +
         '<p class="faint">Every city, town, village and borough, at a point inside it' +
-        (townCount ? ", and every town or township that governs, as a ring" : "") +
-        ". Pick one on the map, or from the list below, to see its government.</p>"
+        (townCount ? ", and each town or township government placed on its county subdivision, as a ring" : "") +
+        ". Pick one on the map, or from the list below, to see its government.</p>" +
+        // Rule 60 places a town only by its Census code; what the code no
+        // longer finds is said here, counted from the data, not left out.
+        (unplaced ? '<p class="faint">' + plural(unplaced, "more town or township government") +
+          " in the 2022 listing could not be placed on the map by its Census code, and " +
+          (unplaced === 1 ? "is" : "are") + " listed under " + (unplaced === 1 ? "its" : "their") + " " +
+          areaWords.one + ".</p>" : "")
       : '<p class="local-total">' + total.toLocaleString("en-US") + " local governments in " +
         Object.keys(state.counties).length + " " + areaWords.many + " (2022).</p>" +
         (state.stateNote ? '<p class="gov-officer-note local-why">' + KYC.escapeHtml(state.stateNote) + "</p>" : "") +

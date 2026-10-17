@@ -250,6 +250,10 @@ def build(root="."):
     states = {}
     for code in sorted(governors):
         entry = {"governor": _governor(dict(governors[code], state=code), problems)}
+        if code not in STATES:
+            # A territory: the page calls it one, and says its legislature
+            # and courts are not covered rather than leaving them out silently.
+            entry["territory"] = True
         entry.update(officers.for_state(code, officer_cache, disputes))
         entry.update(courts.for_state(code, court_cache))
         if code in ballot2026.STATES:
@@ -289,6 +293,21 @@ def build(root="."):
     return payload, problems
 
 
+def filled_where_vacant(code, which, ours, theirs):
+    """Open States names more members for a chamber than NCSL counts seated:
+    someone listed may have left. Only *which party holds* the chamber is
+    compared on the page; the seat counts are Open States', so this is
+    reported for a person to check against the chamber's own roster - never
+    changed on NCSL's word alone, since NCSL can lag a special election too.
+    A seat Open States lists nobody for and NCSL fills is the opposite lag,
+    and is already said on the page ("nobody listed")."""
+    seated = theirs.get("D", 0) + theirs.get("R", 0) + theirs.get("other", 0)
+    if ours["listed"] > seated and theirs.get("vacant"):
+        return [f"{code} {which}: Open States lists {ours['listed']} members, NCSL {seated} with "
+                f"{theirs['vacant']} vacant; check the chamber's own roster for a member who has left"]
+    return []
+
+
 def _legislature(code, records, theirs, governor_key, problems):
     upper_seats, lower_seats = SEATS[code]
     out = {"upper": dict(chamber(records, "upper", upper_seats),
@@ -304,6 +323,7 @@ def _legislature(code, records, theirs, governor_key, problems):
     for which in ("upper", "lower"):
         if not theirs:
             continue
+        problems.extend(filled_where_vacant(code, which, out[which], theirs[which]))
         ncsl = majority(theirs[which], theirs[which]["seats"] or out[which]["seats"])
         if ncsl != out[which]["majority"]:
             disputed = True

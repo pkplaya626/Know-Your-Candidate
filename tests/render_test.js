@@ -1755,6 +1755,14 @@ async function testNavigation() {
     const rows = D.querySelectorAll(".directory-row");
     check("one row per state, each linked to its legislature", rows.length === 50 &&
       [...rows].every((r) => r.querySelector('a.directory-name[href$=".html"]')));
+    const outside = D.querySelector(".directory-outside");
+    const said = outside ? outside.textContent.replace(/\s+/g, " ") : "";
+    check("it says D.C. and the territories are not listed, and why D.C. is not",
+      /District of Columbia has a mayor and a council/.test(said) &&
+      /territories’ legislatures are not covered here/.test(said) &&
+      !!outside.querySelector('a[href="../states/dc.html"]'), said);
+    check("its jump list, of the fifty states, is labelled so",
+      D.querySelector('label[for="stateJump"]').textContent === "Jump to a state");
     const mn = D.querySelector('[data-facts="MN"]');
     check("each chamber's seats by party, in the state pages' words",
       mn.querySelectorAll(".gov-chamber").length === 2 && /seats/.test(mn.textContent), mn.textContent);
@@ -1793,9 +1801,21 @@ async function testNavigation() {
         .getAttribute("href")).textContent), maRow && maRow.children[1].textContent);
     check("a state whose every county area has a county government has no note",
       !rows.find((r) => /^Texas/.test(r.textContent)).children[1].querySelector("a.note-ref"));
-    check("the sidebar marks Counties & cities",
-      D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav") === "local");
+    const marked = D.querySelector('.site-nav [aria-current="page"]');
+    check("the sidebar marks Counties & local governments, the page's own name",
+      marked.getAttribute("data-nav") === "local" &&
+      marked.textContent.trim() === "Counties & local governments" && /^Counties & local governments/.test(D.title),
+      marked.textContent.trim() + " / " + D.title);
     check("its state picker lists every state", D.getElementById("stateJump").options.length > 50);
+    check("and, listing only the states, is labelled so",
+      D.querySelector('label[for="stateJump"]').textContent === "Jump to a state");
+    const outside = D.querySelector(".directory-outside");
+    const dcCounts = JSON.parse(fs.readFileSync(path.join(SITE, "data/census_governments.json"), "utf8")).states.DC;
+    check("it says why D.C. and the territories are not in the table, with D.C.'s count from the data",
+      !!outside && /District of Columbia has no counties/.test(outside.textContent) &&
+      outside.textContent.indexOf("counted " + dcCounts.total + " local governments") !== -1 &&
+      /five territories are outside the Census of Governments/.test(outside.textContent),
+      outside && outside.textContent);
     const md = rows.find((r) => /Maryland/.test(r.textContent));
     const col = [...D.querySelectorAll(".directory-table thead th")]
       .findIndex((th) => th.textContent === "Independent school districts");
@@ -3544,6 +3564,15 @@ async function testGuide() {
         fs.readFileSync(path.join(SITE, page), "utf8")));
       check("one h1, the page's title", D.querySelectorAll("h1").length === 1 &&
         D.title.indexOf(D.querySelector("h1").textContent.trim()) === 0, D.title);
+      // "Federal courts" was both the site's link to who sits on them and
+      // the guide's link to how they work, in one sidebar.
+      const byText = {};
+      [...D.querySelectorAll(".sidebar a.nav-link")].forEach((a) => {
+        const t = a.textContent.trim();
+        (byText[t] = byText[t] || new Set()).add(a.getAttribute("href").replace(/#.*$/, ""));
+      });
+      const twice = Object.keys(byText).filter((t) => byText[t].size > 1);
+      check("no two sidebar links share a name and go to different pages", twice.length === 0, twice.join(", "));
       check("every section has a heading and its sources",
         [...D.querySelectorAll(".guide-section")].every((s) =>
           s.querySelector("h2.guide-heading") && s.querySelector(".guide-sources a[href^='https://']")));
@@ -3820,6 +3849,25 @@ async function testLegislatures() {
       check("floterial members are listed under 'Not on the map'",
         off.length > 0 && off.every((p) => D.getElementById("legPanelBody").textContent.includes(p.name)),
         `${off.length}`);
+      // The state page and the legislatures directory count from
+      // data/stategov.js; this page must say the same numbers.
+      const sg = {};
+      new Function("window", fs.readFileSync(path.join(SITE, "data/stategov.js"), "utf8"))(sg);
+      const want = sg.kycStateGov.states.NH.lower;
+      const line = D.querySelector("#legPanelBody p").textContent;
+      const got = {};
+      [...line.matchAll(/(\d+) (Republican|Democratic|Independent)/g)].forEach((m) => { got[m[2][0]] = +m[1]; });
+      check("the party line counts them too, as the state page does",
+        ["R", "D", "I"].every((k) => (got[k] || 0) === (want[k] || 0)), line + " vs " + JSON.stringify(want));
+    });
+  }
+  {
+    const { window, D } = await buildPage("legislature/me.html", { hash: "#/?chamber=lower" });
+    suite("legislature/me.html — a non-voting tribal seat is no seat in the count", () => {
+      const c = window.kycLegislature.ME.chambers.lower;
+      const line = D.querySelector("#legPanelBody p").textContent;
+      const total = [...line.matchAll(/(\d+) [A-Z]/g)].reduce((n, m) => n + +m[1], 0);
+      check("the party line adds up to the members listed for its seats", total === c.listed, line);
     });
   }
   {
@@ -3935,7 +3983,7 @@ async function testCounties() {
       CD.querySelector(`#localMap .district-statewide [data-dot="${unjoined}"]`)
         .dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
       check("a place with no government joined says so, and claims no government",
-        /no entry this site could tie/.test(body.textContent) && !body.querySelector(".local-item"),
+        /could not tie this place to one entry/.test(body.textContent) && !body.querySelector(".local-item"),
         body.textContent.slice(0, 160));
     }
   });
@@ -4054,10 +4102,43 @@ async function testCounties() {
       /records Fowler as an inactive governmental unit/.test(ksTown.D.getElementById("localPanelBody").textContent));
   });
   const la = await buildPage("counties/la.html", { hash: "#/?view=cities&city=2205000" });
-  suite("counties/la.html — a status that does not explain a missing government", () => {
+  suite("counties/la.html — a city its consolidated government governs", () => {
     const text = la.D.getElementById("localPanelBody").textContent;
-    check("Baton Rouge gives its status and says no government could be tied",
-      /partially consolidated/.test(text) && /no entry this site could tie/.test(text), text.slice(0, 240));
+    check("Baton Rouge gives its status, its government, and why that government is the parish's too",
+      /partially consolidated/.test(text) && /City-Parish of Baton Rouge-East Baton Rouge/.test(text) &&
+      /East Baton Rouge Parish has no separate parish government/.test(text) &&
+      !/incorporated since/.test(text), text.slice(0, 400));
+  });
+  const stGeorge = await buildPage("counties/la.html", { hash: "#/?view=cities&city=2267303" });
+  suite("counties/la.html — a place tied to no government names no single cause", () => {
+    const text = stGeorge.D.getElementById("localPanelBody").textContent;
+    check("St. George (2024) is told both causes, neither as the one",
+      /could not tie this place to one entry/.test(text) && /may file its government under another name/.test(text) &&
+      /may have been incorporated since 2022/.test(text), text.slice(0, 400));
+  });
+  const kc = await buildPage("counties/ks.html", { hash: "#/?view=cities&city=2036000" });
+  suite("counties/ks.html — Kansas City and the Unified Government", () => {
+    const text = kc.D.getElementById("localPanelBody").textContent;
+    check("Kansas City's government is the Unified Government, said as Wyandotte County's too",
+      /Unified Government of Wyandotte County and Kansas City/.test(text) &&
+      /Wyandotte County has no separate county government/.test(text), text.slice(0, 400));
+    kc.window.location.hash = "#/?view=cities";
+    kc.window.dispatchEvent(new kc.window.Event("hashchange"));
+  });
+  await new Promise((resolve) => setTimeout(resolve, 60));
+  suite("counties/ks.html — the township governments the map cannot place are counted", () => {
+    const body = kc.D.getElementById("localPanelBody").textContent;
+    const state = kc.window.kycLocal.KS;
+    const placed = new Set(Object.values(state.towns).concat(Object.values(state.cities))
+      .filter((c) => c[5]).map((c) => c[5].join(":")));
+    let left = 0;
+    Object.keys(state.governments).forEach((f) => state.governments[f].forEach((r, i) => {
+      if (r[0] === "township" && !placed.has(f + ":" + i)) left += 1;
+    }));
+    check("the lede no longer says every township is drawn, and counts those that are not",
+      !/every town or township that governs/.test(body) && left > 0 &&
+      body.indexOf(left + " more town or township governments in the 2022 listing could not be placed") !== -1,
+      left + " | " + body.slice(0, 500));
   });
   const mn = await buildPage("counties/mn.html", { hash: "#/?view=cities&city=2711100100" });
   suite("counties/mn.html — Show all, and a link without its view", () => {
@@ -4088,6 +4169,25 @@ async function testCounties() {
   suite("counties/hi.html — a state with no incorporated place", () => {
     check("offers no cities view", hawaii.D.querySelector(".segmented").hidden &&
       !hawaii.D.querySelector("#localMap .map-dot"));
+  });
+  const nj = await buildPage("counties/nj.html");
+  suite("counties/nj.html — the statewide list says what the listing says", () => {
+    const body = nj.D.getElementById("localPanelBody").textContent;
+    check("filed under the state, never 'run by the state' (Jersey City's schools are not)",
+      /listing files these under the state rather than under a county/.test(body) &&
+      !/Run by the state/.test(body), body.slice(-400));
+  });
+  const nc = await buildPage("counties/nc.html", { hash: "#/?county=37001" });
+  suite("counties/nc.html — a county's count and the school systems under it", () => {
+    const rows = nc.window.kycLocal.NC.governments["37001"];
+    const dependent = rows.filter((r) => r[0] === "dependent").length;
+    const body = nc.D.getElementById("localPanelBody").textContent;
+    check("the headline counts the governments, not the dependent school systems",
+      body.indexOf((rows.length - dependent) + " local governments in 2022") === 0 && dependent > 0,
+      body.slice(0, 80));
+    check("and the school systems under it say why they are not counted",
+      /School systems run by another government/.test(body) &&
+      /Not counted as local governments: the Census Bureau counts a school system/.test(body));
   });
   const tx = await buildPage("states/tx.html");
   suite("states/tx.html — links to its counties", () => {
@@ -4227,6 +4327,9 @@ async function testStateGov() {
           return row && !row.querySelector(".gov-officer-name");
         })());
       check("and is drawn unconfirmed, not in a party colour", !/party-/.test(shape(listed).style.fill));
+      check("and the legend has a key for that grey",
+        /Not confirmed by the office/.test(D.getElementById("mapLegend").textContent),
+        D.getElementById("mapLegend").textContent);
     }
     const hi = data.states.HI.lt;
     if (hi && hi.disputed) {
@@ -4302,6 +4405,10 @@ async function testStateGov() {
   suite("states/ak.html — its state government", () => {
     const section = ak.D.getElementById("state-government");
     check("the state page has a state government section", !!section);
+    const sources = section.querySelector(".gov-sources").textContent;
+    check("its sources say NCSL checks which party holds a chamber, not the seat counts",
+      /Seats: Open States[^.]*\. Which party holds each chamber is checked against National Conference/.test(sources),
+      sources);
     const heads = [...ak.D.querySelectorAll("#stateContent .state-heading")].map((h) => h.textContent);
     check("it follows the congressional delegation (rule 27)",
       heads.findIndex((h) => /State government/.test(h)) > heads.findIndex((h) => /House/.test(h)), heads.join(" | "));
@@ -4317,6 +4424,41 @@ async function testStateGov() {
     const section = pr.D.getElementById("state-government");
     check("headed as the territory's government, not local government",
       !!section && /Territorial government/.test(section.querySelector(".state-heading").textContent));
+    const chips = [...pr.D.querySelectorAll(".state-parts a")].map((a) => a.textContent);
+    check("its jump chip says what its heading says", chips.indexOf("Territorial government") !== -1 &&
+      chips.indexOf("State government") === -1, chips.join(" | "));
+    const text = section.textContent;
+    check("a territory is never called 'the state'",
+      /The territory has no lieutenant governor/.test(text) && !/The state has/.test(text), text.slice(0, 300));
+    check("it says its legislature, attorney general and courts are not covered, not just 'not covered'",
+      /Puerto Rico's legislature, attorney general and courts are not covered here/.test(text) &&
+      !/Seats: not covered/.test(text));
+  });
+  suite("states/pr.html — the Resident Commissioner, and why no seat is on the 2026 ballot", () => {
+    const hero = pr.D.querySelector(".state-summary").textContent;
+    check("the hero names the office and its next election, not zeros",
+      /1 Resident Commissioner/.test(hero) && /Resident Commissioner: a 4-year term, next on the ballot in 2028/.test(hero) &&
+      !/delegate/.test(hero) && !/0 seats in Congress/.test(hero) && !/0 challengers/.test(hero), hero);
+    const delegation = pr.D.getElementById("delegation");
+    check("the section is headed Resident Commissioner, and says why it has no race",
+      /Resident Commissioner to the U\.S\. House/.test(delegation.querySelector(".state-heading").textContent) &&
+      /last on the ballot in 2024 and is next in 2028/.test(delegation.textContent) &&
+      !!delegation.querySelector('a[href="https://www.law.cornell.edu/uscode/text/48/891"]'),
+      delegation.textContent.slice(0, 300));
+    const chips = [...pr.D.querySelectorAll(".state-parts a")].map((a) => a.textContent);
+    check("its jump chip says Resident Commissioner", chips.indexOf("Resident Commissioner") !== -1, chips.join(" | "));
+  });
+  const statesIndex = await buildPage("states/index.html");
+  suite("states/index.html — Puerto Rico's row says the same as its page", () => {
+    const row = statesIndex.D.querySelector('.state-row[data-state="PR"]');
+    check("Resident Commissioner, next on the ballot in 2028",
+      !!row && /1 Resident Commissioner/.test(row.textContent) && /next on the ballot in 2028/.test(row.textContent) &&
+      !/challenger/.test(row.textContent), row && row.textContent);
+  });
+  const guTerr = await buildPage("states/gu.html");
+  suite("states/gu.html — a territory with no secretary of state", () => {
+    const text = guTerr.D.getElementById("state-government").textContent;
+    check("says the territory has none", /The territory has no secretary of state/.test(text), text.slice(0, 300));
   });
 
   const tx = await buildPage("states/tx.html");
@@ -4347,6 +4489,15 @@ async function testStateGov() {
   suite("states/dc.html — D.C. has no governor", () => {
     const section = dc.D.getElementById("state-government");
     check("the page says so rather than showing nothing", !!section && /mayor/.test(section.textContent));
+    const note = dc.D.querySelector("#races .state-note");
+    check("its ballot is never said to hold a governor or legislature",
+      !!note && !/governor|legislature/.test(note.textContent) &&
+      /mayor, attorney general, the D\.C\. Council/.test(note.textContent) &&
+      !!note.querySelector('a[href="https://www.dcboe.org/elections/2026-elections"][rel~="noopener"]'),
+      note && note.textContent);
+    const chips = [...dc.D.querySelectorAll(".state-parts a")].map((a) => a.textContent);
+    check("its jump chip says Local government, as its heading does",
+      chips.indexOf("Local government") !== -1 && chips.indexOf("State government") === -1, chips.join(" | "));
   });
 }
 

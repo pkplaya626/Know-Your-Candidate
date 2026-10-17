@@ -280,4 +280,22 @@ def by_state(profiles, races=None):
     for code, seats in house_races.items():
         balance = out[code]["balance"]["house"]
         balance["vacant"] += max(0, seats - sum(balance.values()))
+    _delegate_seats(out)
     return out
+
+
+def _delegate_seats(out):
+    """A non-voting member's title (Puerto Rico's is "Resident
+    Commissioner", not "delegate"), and for a House seat that is not on this
+    cycle's ballot, why: its term and the years it is elected, from the
+    statute races.FOUR_YEAR_HOUSE_SEATS encodes - never typed into a page."""
+    from .history import DELEGATE_TITLES
+    from .races import ELECTION_YEAR, FOUR_YEAR_HOUSE_SEATS, house_seat_up, house_term_end_year
+
+    for code, entry in out.items():
+        if code in DELEGATE_TITLES:
+            entry["delegateTitle"] = DELEGATE_TITLES[code]
+        period = FOUR_YEAR_HOUSE_SEATS.get(code)
+        if period and not house_seat_up(code, ELECTION_YEAR):
+            following = house_term_end_year(code, ELECTION_YEAR) - 1
+            entry["houseTerm"] = {"years": period, "last": following - period, "next": following}

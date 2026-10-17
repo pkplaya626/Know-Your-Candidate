@@ -159,6 +159,21 @@ class TestLegislaturePage(unittest.TestCase):
         self.assertEqual(len(upper["districts"]), 49)
         self.assertEqual(sum(len(v) for v in upper["members"].values()), upper["listed"])
 
+    def test_a_legislature_is_called_by_its_constitutional_name(self):
+        # Every page read "<State> Legislature": "Virginia Legislature",
+        # "Massachusetts Legislature", "Oregon Legislature".
+        from kyc import pages
+        from kyc.government_maps import LEGISLATURE_NAME, STATES
+
+        self.assertEqual(len(LEGISLATURE_NAME), 23)
+        self.assertTrue(set(LEGISLATURE_NAME) <= set(STATES))
+        for code, title in (("VA", "Virginia General Assembly"), ("MA", "Massachusetts General Court"),
+                            ("OR", "Oregon Legislative Assembly"), ("TX", "Texas Legislature"),
+                            ("NE", "Nebraska Legislature")):
+            html = pages.render_legislature_page(code, "")
+            self.assertIn(f'<h1 class="state-title">{title}</h1>', html)
+            self.assertIn(f"<title>{title} — Know Your Candidate</title>", html)
+
     def test_states_whose_lines_changed_say_so(self):
         self.assertIn("2026", legislature.STATE_NOTES["MI"][0])
         self.assertIn("unsettled", legislature.STATE_NOTES["MS"][0])
