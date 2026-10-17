@@ -842,7 +842,13 @@ def _same_spelling(a, b):
     if len(a) < 2 or len(b) < 2:
         return False
     if a[-1] != b[-1] and a[-1] not in b and b[-1] not in a:
-        return False
+        # One surname written with a space and with a hyphen: CA-40's page
+        # lists "Esther Kim Varet" and its results box "Esther Kim-Varet".
+        # Kept apart, both fitted her one filing once the matcher folded
+        # surnames (Black Wolf / BLACKWOLF), the filing read "ambiguous" and
+        # a primary loser became "Not on the November ballot".
+        return any(x == y and gx and gy and any(_given_fits(p, q) for p in gx for q in gy)
+                   for x, gx in _surname_forms(a) for y, gy in _surname_forms(b))
     if (len(a) >= 3 and len(b) >= 3 and len(a[1]) == 1 and len(b[1]) == 1
             and a[1] != b[1]):
         # Two middle initials that disagree are two people: Alaska's Senate
@@ -1529,6 +1535,9 @@ for _formal, _shorts in NICKNAMES.items():
         _FORMAL.setdefault(_short, set()).add(_formal)
 
 
+_INNER_APOSTROPHE = re.compile("(?<=[a-z])['’](?=[a-z])")
+
+
 def _tokens(name):
     """Folded name words, without suffixes, honorifics or quote marks.
 
@@ -1537,7 +1546,11 @@ def _tokens(name):
     ``HENRY C. 'HANK'`` - stays as a word of its own, because it is the name
     the ballot uses.
     """
-    text = _fold(name).replace(".", " ").replace('"', " ").replace("'", " ")
+    text = _fold(name).replace(".", " ").replace('"', " ")
+    # An apostrophe inside a word is part of the name: "D'ARRIGO, TONY C"
+    # read as surname "arrigo" with a middle "d", which disagreed with the
+    # filing's "c", and Florida's certified "Tony D'Arrigo" matched no one.
+    text = _INNER_APOSTROPHE.sub("", text).replace("'", " ").replace("’", " ")
     text = text.replace("(", " ").replace(")", " ")     # "(RANDY)", "(J.D.)"
     words = [w for w in text.split() if w]
     while len(words) > 1 and words[-1] in _SUFFIX_TOKENS:
@@ -1748,6 +1761,36 @@ def certified_party_key(label):
     return "independent" if text in _NO_PARTY else party_key(label)
 
 
+def list_party_words(label):
+    """A certified list's party label in the words the site uses beside a
+    name: "Democratic" for Alaska's "Democrat" and Colorado's "Democratic
+    Party", "Libertarian" for Florida's "Libertarian Party of Florida"; a
+    party of another name, or no party ("Unaffiliated", "No Party
+    Affiliation"), as the list prints it; "" for none printed."""
+    text = str(label or "").strip()
+    key = certified_party_key(text)
+    if key is None:
+        return ""
+    if key in LINE_LABELS and key != "independent" and not _names_a_party(text, key):
+        return LINE_LABELS[key]
+    return text
+
+
+def _cased(name):
+    """A name a list prints in capitals, as a name is written: "ALEX
+    MCMENEMY" -> "Alex McMenemy", "D'ARRIGO" -> "D'Arrigo". Any other name
+    as printed."""
+    if not name.isupper():
+        return name
+
+    def word(w):
+        if w.strip(".,") in ("II", "III", "IV"):
+            return w
+        out =re.sub(r"[A-Za-z]+", lambda m: m.group(0)[:1] + m.group(0)[1:].lower(), w)
+        return re.sub(r"\bMc([a-z])", lambda m: "Mc" + m.group(1).upper(), out)
+    return " ".join(word(w) for w in name.split())
+
+
 def _names_a_party(label, key):
     """True when a list's party label is a party's own name that the key
     alone would lose: Florida's "Independent Party of Florida" is a party,
@@ -1829,30 +1872,44 @@ def certify_race(race, spec, rows, aliases=None):
     complete = bool(spec.get("complete"))
     names = race.setdefault("names", {})
     other_party = race.setdefault("unmatchedParty", {})
-    changed, named, loose = {}, set(), []
+    changed, named, loose, unprinted = {}, set(), [], []
     for item in spec["entries"]:
         name, kind = item["name"], item["kind"]
         cids = _certified_ids(name, rows, aliases)
         named.update(cids)
         key = certified_party_key(item.get("party"))
         if kind in (WRITE_IN, UNOPPOSED):
+            # Named, not printed. A matched one keeps the page's status and
+            # is never "not on the state's certified list" (apply_cache);
+            # an unmatched one may still be a page nominee's other spelling.
+            if cids:
+                race.setdefault("certifiedUnprinted", {}).update(
+                    {cid: kind for cid in cids})
+            else:
+                unprinted.append(name)
             continue
         # The page's own spelling of someone the list names gives way to
-        # the list's: one person, one status.
-        for page_name in [n for n in unmatched
-                          if _one_person(n, name) and (cids or n != name)]:
+        # the list's: one person, one status - but not to capitals: Texas
+        # prints "ALEX MCMENEMY", and the page's "Alex McMenemy" is his name.
+        popped = [n for n in unmatched if _one_person(n, name) and (cids or n != name)]
+        for page_name in popped:
             unmatched.pop(page_name)
             other_party.pop(page_name, None)
         if not cids:
-            loose.append(item)
+            loose.append(dict(item, name=popped[0] if popped and name.isupper()
+                              else _cased(name)))
             continue
         for cid in cids:
             if kind == BALLOT:
-                names[cid] = name             # as the ballot prints it
-                if item.get("party"):
-                    # Printed beside a name with no profile, in the list's
-                    # words: Colorado's "Unaffiliated", not "Independent".
-                    race.setdefault("listParty", {})[cid] = item["party"]
+                race.setdefault("listNames", {})[cid] = name      # as printed
+                if not name.isupper():
+                    names[cid] = name
+                # Printed beside a name with no profile, in the site's words
+                # for the five parties and the list's for any other:
+                # Colorado's "Unaffiliated", not "Independent". A list that
+                # prints no party (American Samoa's) gives none, and the
+                # filing's is not put in its place.
+                race.setdefault("listParty", {})[cid] = list_party_words(item.get("party"))
             now = status.get(cid)
             if kind == BALLOT:
                 new = now if now in (ELECTED, DEFEATED, RUNOFF) else NOMINEE
@@ -1875,14 +1932,14 @@ def certify_race(race, spec, rows, aliases=None):
         if item["kind"] == BALLOT:
             unmatched[item["name"]] = NOMINEE
             if item.get("party"):
-                other_party[item["name"]] = item["party"]
+                other_party[item["name"]] = list_party_words(item["party"])
         elif item["kind"] == LIST_WITHDREW:
             unmatched.setdefault(item["name"], WITHDRAWN)
         elif item["kind"] == LOST_PRIMARY:
             unmatched.setdefault(item["name"], ELIMINATED)
     if complete:
         printed = [i["name"] for i in spec["entries"] if i["kind"] == BALLOT]
-        loose_printed = [i["name"] for i in loose if i["kind"] == BALLOT]
+        loose_printed = [i["name"] for i in loose if i["kind"] == BALLOT] + unprinted
         held = []
         for cid, now in list(status.items()):
             if cid in named or now not in (NOMINEE, ADVANCED, QUALIFIED):
@@ -1896,7 +1953,8 @@ def certify_race(race, spec, rows, aliases=None):
             status[cid] = UNLISTED
             changed[cid] = UNLISTED
         for page_name, now in list(unmatched.items()):
-            if now in NOVEMBER and not any(_one_person(page_name, n) for n in printed):
+            if now in NOVEMBER and not any(_one_person(page_name, n)
+                                           for n in printed + unprinted):
                 unmatched[page_name] = UNLISTED
         race["certifiedHeld"] = sorted(held)
         decided = race.setdefault("decided", {"general": False, "parties": []})
@@ -2451,6 +2509,82 @@ def _near(a, b):
     return edits + (len(b) - j) + (len(a) - i) <= 1
 
 
+def _display_key(name):
+    """A name as shown, without case, full stops, commas or extra spaces."""
+    return " ".join(str(name or "").replace(".", " ").replace(",", " ").lower().split())
+
+
+def _drops_hyphen(mine, theirs):
+    """The same words, where *mine* is hyphenated and *theirs* is not:
+    "Conyears-Ervin" is kept against a page's "Conyears Ervin"."""
+    return (_sequence(mine) == _sequence(theirs) and "-" in (mine or "")
+            and "-" not in (theirs or ""))
+
+
+def _shorter_given(page, filed):
+    """Is the page's first given name a short form of the filed one -
+    "Bob" for Robert, "Chris" for Christopher - and not the other way?"""
+    if not page or not filed or page == filed:
+        return False
+    if page in NICKNAMES.get(filed, ()):
+        return True
+    return len(page) >= 3 and len(page) < len(filed) and filed.startswith(page)
+
+
+def _ballot_name(profile, race, cid):
+    """``(name to show, how)`` for a filed candidate, or ``(None, alias)``.
+
+    The FEC holds the name a person filed under; the ballot and the press
+    often use another. Which source may replace it, and when:
+
+    - a name settled word for word or through an evidenced
+      ``overrides.RESULT_NAMES`` alias (rule 62), whether the matcher, the
+      claim or a state's list settled it: shown unless it is the filed
+      words again with nothing added but a lost hyphen. "Neil J.
+      Gillespie", whom the FEC misspells "GILESPIE"; "Yen Bailey" for
+      "Huy-Yen Cam Bailey";
+    - a state's certified list (rule 77), as printed, unless it differs
+      only in case and full stops, drops a hyphen, or is printed in
+      capitals: Alaska's "Daniel J. Sullivan Jr." beside Senator Dan
+      Sullivan;
+    - the results page's name only where it adds a hyphen to the same
+      words ("Greene-Placentia") or its first name is the short form of the
+      filed one ("Bob Harvie" for ROBERT J). A page that writes the formal
+      name ("Matthew Dunlap") does not replace the name a campaign filed
+      under, and that form is returned as an alias instead.
+
+    Only a filed candidate's name changes; a member's comes from Congress.
+    """
+    from . import overrides
+
+    if profile.get("source") != "fec-field":
+        return None, None
+    mine = profile.get("name") or ""
+    claimed = (race.get("claimed") or {}).get(cid)
+    listed = (race.get("listNames") or {}).get(cid)
+    page = (race.get("names") or {}).get(cid)
+    alias = (overrides.RESULT_NAMES.get(cid) or (None,))[0]
+    exact = claimed or (alias if alias in (page, listed) else None)
+    if exact:
+        same = _sequence(mine) == _sequence(exact)
+        if mine != exact and (not same or ("-" in exact and "-" not in mine)):
+            return exact, ("certified-list" if exact == listed else "election-page")
+        return None, None
+    if listed and not listed.isupper():
+        if _display_key(listed) != _display_key(mine) and not _drops_hyphen(mine, listed):
+            return listed, "certified-list"
+        return None, None
+    if not page or page == mine or _display_key(page) == _display_key(mine):
+        return None, None
+    if _sequence(page) == _sequence(mine):
+        return (page, "election-page") if "-" in page and "-" not in mine else (None, None)
+    ours, theirs = _tokens(mine), _tokens(page)
+    if (len(ours) >= 2 and len(theirs) >= 2 and ours[-1] == theirs[-1]
+            and _shorter_given(theirs[0], ours[0])):
+        return page, "election-page"
+    return None, page if _words(page) != _words(mine) else None
+
+
 def apply_cache(profiles, cache, field=None):
     """Set ``raceStatus`` on every filed candidate the results name.
 
@@ -2505,34 +2639,22 @@ def apply_cache(profiles, cache, field=None):
                 # says "advanced", never "won" or "renominated".
                 profile["allPartyPrimary"] = kind[0]
             _source_of(profile, races.get(rid), candidate_id)
-            ballot_name = (races.get(rid, {}).get("claimed") or {}).get(candidate_id)
-            if not ballot_name and profile.get("source") == "fec-field":
-                # A name the matcher settled (rule 62's matcher, or the
-                # state's certified list) that is another form of the given
-                # name - "Bob Harvie" for "HARVIE, ROBERT J" - is the one
-                # the ballot, the press and the markets use.
-                page = (race.get("names") or {}).get(candidate_id)
-                mine, theirs = _tokens(profile.get("name")), _tokens(page or "")
-                if (page and len(mine) >= 2 and len(theirs) >= 2 and mine[0] != theirs[0]
-                        and _words(page) != _words(profile.get("name"))):
-                    ballot_name = page
-            # A hyphen alone changes nothing but the spelling, and the
-            # hyphenated one is the person's: "Greene-Placentia" from the
-            # page, "Conyears-Ervin" kept against the page's "Conyears Ervin".
-            same_words = _sequence(profile.get("name")) == _sequence(ballot_name)
-            if (ballot_name and profile.get("source") == "fec-field"
-                    and profile.get("name") != ballot_name
-                    and (not same_words or ("-" in ballot_name and "-" not in profile["name"]))):
-                # The name on the ballot, for a filing settled exactly or by
-                # the campaign's own committee: "Lisa Carlquist", not the
-                # FEC's reversed "Carlquist Lisa"; "Max Ganorkar", whose
-                # filing says Mahesh. The filed form stays searchable.
+            ballot_name, via = _ballot_name(profile, race, candidate_id)
+            if ballot_name:
+                # The name on the ballot: "Lisa Carlquist", not the FEC's
+                # reversed "Carlquist Lisa"; "Max Ganorkar", whose filing
+                # says Mahesh; Alaska's "Daniel J. Sullivan Jr.". The filed
+                # form stays searchable, and the page says "files with the
+                # FEC as" it (PERSONA-20).
                 profile["aliases"] = sorted(set(profile.get("aliases") or []) | {profile["name"]})
-                # The page says "files with the FEC as" this (PERSONA-20).
                 profile["fecName"] = profile["name"]
                 profile["name"] = ballot_name
-                profile["nameVia"] = ("certified-list" if candidate_id in
-                                      (race.get("certifiedIds") or {}) else "election-page")
+                profile["nameVia"] = via
+            elif via and via != profile.get("name"):
+                # Another form the page uses - "Matthew Dunlap" for a
+                # campaign filed as "Matt Dunlap" - finds them, and is not
+                # shown in place of the name they campaign under.
+                profile["aliases"] = sorted(set(profile.get("aliases") or []) | {via})
             if candidate_id in about_of and profile.get("source") == "fec-field":
                 # The election page's own description of a filed candidate,
                 # shown as their background and credited to the page.
@@ -2638,6 +2760,13 @@ def apply_cache(profiles, cache, field=None):
                 # (rule 77), and it does not name them - unless a name on it
                 # that matched no filing may be theirs.
                 race = races[rid]
+                if candidate_id in (race.get("certifiedUnprinted") or {}):
+                    # The list names them - a certified write-in, or
+                    # Florida's unopposed candidate - and prints them not:
+                    # neither "on the November ballot" nor "not on the
+                    # state's certified list".
+                    profile["ballotUnknown"] = True
+                    continue
                 maybe = [n for n in _maybe_named(profile, race)
                          if (race.get("unmatched") or {}).get(n) in NOVEMBER]
                 if maybe:
@@ -2842,8 +2971,12 @@ def race_summary(cache, race_id):
             "certifiedBy": (race.get("certified") or {}).get("source") or None,
             "certifiedAsOf": (race.get("certified") or {}).get("fetched") or None,
             "certifiedComplete": bool((race.get("certified") or {}).get("complete")),
-            "otherParties": {n: p for n, p in sorted((race.get("unmatchedParty") or {}).items())
-                             if unmatched.get(n) in NOVEMBER and p},
+            # One vocabulary beside every name: "Libertarian", whether the
+            # list printed "Libertarian Party" or "Libertarian Party of
+            # Florida", as the cards beside them say.
+            "otherParties": {n: list_party_words(p)
+                             for n, p in sorted((race.get("unmatchedParty") or {}).items())
+                             if unmatched.get(n) in NOVEMBER and list_party_words(p)},
             "otherNominees": sorted(n for n, st in unmatched.items() if st in NOVEMBER),
             "otherElected": sorted(n for n, st in unmatched.items() if st == ELECTED),
             "otherRunoff": sorted(n for n, st in unmatched.items() if st == RUNOFF)}

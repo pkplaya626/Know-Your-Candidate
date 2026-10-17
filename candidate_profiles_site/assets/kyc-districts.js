@@ -902,7 +902,6 @@
       }).join(", ") + "</p>";
   }
 
-  /** The old map's district: who holds it, and where its land went. */
   /** Why a seat on the map the members sit under is empty, where the
    *  build records it: who left, when, and whether a special election has
    *  been called. Only the old map's seat - the new map's district of the
@@ -912,6 +911,7 @@
     return v ? '<p class="state-note">' + KYC.escapeHtml(KYC.vacancyNote(v)) + "</p>" : "";
   }
 
+  /** The old map's district: who holds it, and where its land went. */
   function factOld(plan, n) {
     var held = holders(plan, n);
     var last = archive();

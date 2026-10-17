@@ -392,21 +392,27 @@
       title: "Withdrew, per the Secretary of State's list of qualified candidates." },
   };
   /* A status a state's certified list of November candidates set (rule 77):
-   * the list's word, credited to the office that published it. Only what
-   * the list says differently from a results page is here. */
+   * the list's word, credited to the office that published it (the source
+   * line names it - a territory's is never "the state's"). Only what the
+   * list says differently from a results page is here. A member the list
+   * puts on the ballot is on it, never "renominated": a list is not a
+   * primary, and American Samoa holds none. */
   var CERTIFIED = {
-    nominee: { title: "On the state's certified list of candidates for the November 3 ballot." },
+    nominee: { title: "On the certified list of candidates for the November 3 ballot.",
+      member: { card: "On the November ballot", long: "On the November ballot",
+        short: "On ballot", mate: "On the ballot",
+        title: "On the certified list of candidates for the November 3 ballot." } },
     unlisted: { cls: "badge-neutral", rank: 6, off: true,
       card: "Not on the November ballot", long: "Not on the November ballot",
       mate: "Not on ballot", short: "Not on ballot",
-      title: "Filed with the FEC but not on the state's certified list of candidates for the " +
+      title: "Filed with the FEC but not on the certified list of candidates for the " +
         "November 3 ballot.",
       member: { cls: "badge-danger", card: "Not running for this seat",
         long: "Not running for this seat in 2026", short: "Leaving seat",
-        title: "Not on the state's certified list of candidates for this seat; not seeking " +
+        title: "Not on the certified list of candidates for this seat; not seeking " +
           "re-election to it." } },
-    withdrawn: { title: "Withdrew, per the state's certified list of candidates." },
-    eliminated: { title: "Lost the primary, per the state's certified list of candidates." },
+    withdrawn: { title: "Withdrew, per the certified list of candidates." },
+    eliminated: { title: "Lost the primary, per the certified list of candidates." },
   };
   var OFF_BALLOT = { eliminated: true, withdrawn: true, unlisted: true };
 
@@ -454,7 +460,7 @@
     var own = (opts.own && spec.member) || {};
     var title = own.title || spec.title;
     var source = spec.source || (listed ? LISTED_SOURCE : certified
-      ? " Source: " + (opts.sourceName || "the state's certified list of candidates") + "."
+      ? " Source: " + (opts.sourceName || "the certified list of candidates") + "."
       : SOURCE);
     if ((status === "nominee" || status === "qualified") &&
         electionStatus(undefined, opts.now).phase === "post-election") {
@@ -693,11 +699,15 @@
     return MONTHS[+m[2] - 1] + " " + m[1];
   }
 
-  /** "2026-04-21" -> "Apr 21, 2026"; anything that is not an ISO date -> "". */
+  // A date in a sentence, as the profile writes a term ("Jan. 3, 2027").
+  var LONG_MONTHS = ["Jan.", "Feb.", "March", "April", "May", "June",
+                     "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec."];
+
+  /** "2026-04-21" -> "April 21, 2026"; anything that is not an ISO date -> "". */
   function dayMonthYear(iso) {
     var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ""));
     if (!m || +m[2] < 1 || +m[2] > 12) return "";
-    return MONTHS[+m[2] - 1] + " " + (+m[3]) + ", " + m[1];
+    return LONG_MONTHS[+m[2] - 1] + " " + (+m[3]) + ", " + m[1];
   }
 
   /** Plain text for an empty House seat (summary.py, from

@@ -120,7 +120,71 @@ AS = ("<p>Candidates for the 2026 Midterm Election</p>"
       "<p>HOUSE OF REPRESENTATIVES</p><p>Fetui F. Fetu Jr.</p>")
 
 
+def tx_row(office, name, party, cand_type=None, declared="A", filing="CG", active="A",
+           election="2026 NOVEMBER GENERAL ELECTION"):
+    """One row of the Texas service's answer, as read on 2026-10-17, with
+    the address, email and occupation it also carries left out."""
+    return {"cdCandType": cand_type, "cdParty": party, "cdStatus": active,
+            "cdDeclarationStatus": declared, "cdFilingStatus": filing,
+            "txFullNameBallot": name, "txOfficeName": office + " ",
+            "txElectionName": election}
+
+
+def tx_page(drop=None, extra=()):
+    import json
+    rows = [tx_row("U. S. SENATOR", "KEN PAXTON", "R", active=None),
+            tx_row("U. S. SENATOR", "JAMES TALARICO", "D", "RGCAN"),
+            tx_row("U. S. SENATOR", "TED BROWN", "L", active=None),
+            tx_row("U. S. SENATOR", "AVERY AYERS", "W", "WRTIN"),
+            # Rejected as an independent, then a write-in: neither printed.
+            tx_row("U. S. SENATOR", "JADE SIMMONS", "I", "RGCAN", declared="R", filing=None),
+            tx_row("U. S. SENATOR", "JADE SIMMONS", "W", "WRTIN", active=None)]
+    for n in [n for n in range(1, 39) if n != drop]:
+        office = f"U. S. REPRESENTATIVE DISTRICT {n}"
+        rows += [tx_row(office, f"REP NUMBER{n}", "R"), tx_row(office, f"DEM NUMBER{n}", "D")]
+    # TX-38's Green nominee: the record is marked inactive, and Harris
+    # County's ballot order prints him all the same.
+    rows.append(tx_row("U. S. REPRESENTATIVE DISTRICT 38", "ALEX MCMENEMY", "G", "RGCAN",
+                       active="I"))
+    rows.append(tx_row("STATE SENATOR, DISTRICT 18", "LOIS W. KOLKHORST", "R"))
+    return json.dumps(rows + list(extra))
+
+
 class TestReaders(unittest.TestCase):
+    def test_texas_reads_the_secretary_of_states_qualified_list(self):
+        out = certified.parse_texas(tx_page())
+        senate = [(e["name"], e["party"], e["kind"]) for e in out["S-TX-2026"]]
+        self.assertIn(("TED BROWN", "Libertarian", "ballot"), senate)
+        self.assertIn(("AVERY AYERS", "", "write-in"), senate)
+        self.assertIn(("JADE SIMMONS", "", "write-in"), senate)
+        self.assertNotIn(("JADE SIMMONS", "Independent", "ballot"), senate)   # rejected
+        self.assertEqual(sum(1 for e in senate if e[2] == "ballot"), 3)
+        self.assertIn(("ALEX MCMENEMY", "Green", "ballot"),
+                      [(e["name"], e["party"], e["kind"]) for e in out["H-TX-38-2026"]])
+        self.assertEqual(len([r for r in out if r.startswith("H-")]), 38)     # no state seats
+
+    def test_texas_refuses_what_it_does_not_know(self):
+        for page in (tx_page(drop=5),                       # a district missing
+                     tx_page(extra=[tx_row("U. S. SENATOR", "A B", "R", declared="P",
+                                           filing=None)]),  # a status not known
+                     tx_page(extra=[tx_row("U. S. SENATOR", "A B", "X")]),
+                     tx_page(extra=[tx_row("U. S. SENATOR", "A B", "R",
+                                           election="2026 REPUBLICAN PRIMARY ELECTION")]),
+                     "<html>maintenance</html>", "[]"):
+            with self.assertRaises(certified.CertifiedError):
+                certified.parse_texas(page)
+        withdrew = certified.parse_texas(tx_page(extra=[
+            tx_row("U. S. SENATOR", "SAM QUIT", "L", declared="WDE", filing=None)]))
+        self.assertIn({"name": "SAM QUIT", "party": "Libertarian", "kind": "withdrawn"},
+                      withdrew["S-TX-2026"])
+
+    def test_texas_is_read_with_a_post_and_credited_to_its_page(self):
+        self.assertEqual(certified.POSTS[certified.TX_URL]["electionId"], certified.TX_ELECTION)
+        self.assertEqual(certified.SHOWN[certified.TX_URL], certified.TX_PAGE)
+        # Texas's own list replaced the party's; a curated list would
+        # overwrite the one read (fetch applies them last).
+        self.assertNotIn("TX", overrides.CERTIFIED_BALLOTS)
+
     def test_alaska_prints_six_and_reads_write_ins_as_write_ins(self):
         out = certified.parse_alaska(AK)
         senate = {e["name"]: e["kind"] for e in out["S-AK-2026"]}
@@ -178,7 +242,8 @@ class TestReaders(unittest.TestCase):
     def test_nothing_but_name_party_and_kind_is_kept(self):
         for parse, page in ((certified.parse_alaska, AK), (certified.parse_florida, fl_page()),
                             (certified.parse_colorado, co_page()),
-                            (certified.parse_american_samoa, AS)):
+                            (certified.parse_american_samoa, AS),
+                            (certified.parse_texas, tx_page())):
             for entries in parse(page).values():
                 for e in entries:
                     self.assertEqual(set(e), {"name", "party", "kind"})
@@ -189,11 +254,13 @@ class TestReaders(unittest.TestCase):
             if "alaska" in url:
                 raise OSError("timeout")
             return {certified.FL_URL: fl_page(), certified.CO_URL: co_page(),
-                    certified.AS_URL: AS}[url]
+                    certified.AS_URL: AS, certified.TX_URL: tx_page()}[url]
         lists, failed = certified.fetch(read=read, log=lambda *_: None, sleep=lambda s: None,
                                         today=datetime.date(2026, 10, 17))
         self.assertEqual(failed, ["AK"])
         self.assertNotIn("AK", lists)
+        # A list read from a service links the page a reader can open.
+        self.assertEqual(lists["TX"]["url"], certified.TX_PAGE)
         previous = {"certified": {"AK": {"source": "x", "fetched": "2026-10-10",
                                          "complete": True, "races": {}}}}
         self.assertEqual(certified.carry(lists, failed, previous), ["AK"])
@@ -380,9 +447,10 @@ class TestOverlay(unittest.TestCase):
         filed = {r: {"candidate_id": r, "name": n, "party": p} for r, n, p in (
             ("H4AK00164", "ERIC, HAFNER", "DEM"),)}
         below = races._below_threshold(cache, "H-AK-00-2026", filed, set())
-        # The party in the list's own words: Alaska prints "Democrat".
+        # Alaska prints "Democrat"; beside the name it reads as every other
+        # race note does, "Democratic" (one vocabulary, not each list's).
         self.assertEqual(below, [{"id": "H4AK00164", "name": "Eric Hafner",
-                                  "status": "nominee", "party": "Democrat"}])
+                                  "status": "nominee", "party": "Democratic"}])
 
     def test_an_unaffiliated_candidate_is_not_called_independent(self):
         rows = [row("H6CO07130", "KRZECZKOWSKI, JOE", "CO", 7, "IND")]
@@ -393,6 +461,114 @@ class TestOverlay(unittest.TestCase):
                                "party": "IND"}}
         below = races._below_threshold(cache, "H-CO-07-2026", filed, set())
         self.assertEqual(below[0]["party"], "Unaffiliated")
+
+    def test_one_vocabulary_of_parties_beside_names(self):
+        # Alaska "Democrat", Colorado "Libertarian Party", Florida
+        # "Libertarian Party of Florida": three spellings of two parties
+        # beside cards that say "Democratic" and "Libertarian".
+        for printed, shown in (("Democrat", "Democratic"), ("Republican Party", "Republican"),
+                               ("Libertarian Party of Florida", "Libertarian"),
+                               ("Green", "Green"), ("Unity Party", "Unity Party"),
+                               ("Independent Party of Florida", "Independent Party of Florida"),
+                               ("Unaffiliated", "Unaffiliated"), ("", "")):
+            self.assertEqual(results.list_party_words(printed), shown, printed)
+
+    def test_a_list_that_prints_no_party_gives_none(self):
+        # American Samoa prints five names and no party; the filing's
+        # "Democratic" beside one of them read as the list's.
+        rows = [row("H6AS00099", "YOUNG, SANDRA KING", "AS", 0, "DEM")]
+        race = results.certify_race(None, spec([("Sandra King Young", "", "ballot")],
+                                               source="American Samoa Election Office"), rows)
+        filed = {"H6AS00099": {"candidate_id": "H6AS00099", "name": "YOUNG, SANDRA KING",
+                               "party": "DEM"}}
+        below = races._below_threshold({"races": {"H-AS-00-2026": race}}, "H-AS-00-2026",
+                                       filed, set())
+        self.assertEqual(below[0]["party"], "")
+
+    def test_a_list_in_capitals_never_replaces_a_name(self):
+        # Texas prints "ALEX MCMENEMY"; the page's "Alex McMenemy" is how
+        # his name is written, and a profile keeps its own spelling.
+        page = {"page": "x", "status": {"H6TX38001": "nominee"},
+                "names": {"H6TX38001": "Jon Bonck"}, "party": {},
+                "unmatched": {"Alex McMenemy": "nominee"}, "ambiguous": [],
+                "decided": {"general": True, "parties": ["republican", "democratic"]}}
+        rows = [row("H6TX38001", "BONCK, JON", "TX", 38, "REP")]
+        race = results.certify_race(page, spec([("JON BONCK", "Republican", "ballot"),
+                                                ("ALEX MCMENEMY", "Green", "ballot")],
+                                               source="Texas Secretary of State"), rows)
+        self.assertEqual(race["names"]["H6TX38001"], "Jon Bonck")
+        self.assertEqual(race["listNames"]["H6TX38001"], "JON BONCK")
+        self.assertEqual(race["unmatched"], {"Alex McMenemy": "nominee"})
+        self.assertEqual(race["unmatchedParty"], {"Alex McMenemy": "Green"})
+        person = filer("H6TX38001", "Jon Bonck", "TX", 38, "Republican")
+        results.apply_cache([person], {"races": {"H-TX-38-2026": race}})
+        self.assertEqual((person["name"], person["raceStatus"]), ("Jon Bonck", "nominee"))
+        self.assertNotIn("fecName", person)
+        # With no page spelling to keep, written as a name is written.
+        alone = results.certify_race(None, spec([("ALEX MCMENEMY", "Green", "ballot"),
+                                                 ("TONY D'ARRIGO", "Independent", "ballot"),
+                                                 ("JOHN Q. PUBLIC III", "Green", "ballot")]), [])
+        self.assertEqual(sorted(alone["unmatched"]),
+                         ["Alex McMenemy", "John Q. Public III", "Tony D'Arrigo"])
+
+    def test_the_list_gives_the_name_it_prints(self):
+        # Alaska's Senate race: two Republicans the site showed as "Dan
+        # Sullivan" and "Daniel J Sullivan"; the ballot tells them apart.
+        rows = [row("S6AK00326", "SULLIVAN, DANIEL J", "AK", None, "REP", office="S"),
+                row("S4AK00214", "SULLIVAN, DAN", "AK", None, "REP", office="S")]
+        page = {"page": "x", "status": {"S4AK00214": "nominee"}, "party": {},
+                "unmatched": {}, "ambiguous": [], "decided": {"general": True, "parties": []}}
+        race = results.certify_race(page, spec([("Dan S. Sullivan", "Republican", "ballot"),
+                                                ("Daniel J. Sullivan Jr.", "Republican",
+                                                 "ballot")]), rows)
+        person = filer("S6AK00326", "Daniel J Sullivan", "AK", None, "Republican",
+                       chamber="Senate (Candidate)")
+        results.apply_cache([person], {"races": {"S-AK-2026": race}})
+        self.assertEqual((person["name"], person["fecName"], person["nameVia"]),
+                         ("Daniel J. Sullivan Jr.", "Daniel J Sullivan", "certified-list"))
+        # The FEC misspells Florida's Senate nominee "GILESPIE"; the list and
+        # his committee say Gillespie (overrides.RESULT_NAMES).
+        rows = [row("S6FL00863", "GILESPIE, NEIL JOSEPH", "FL", None, "NPA", office="S")]
+        race = results.certify_race(None, spec([("Neil J. Gillespie", "No Party Affiliation",
+                                                 "ballot")]), rows)
+        neil = filer("S6FL00863", "Neil Joseph Gilespie", "FL", None, "No Party Affiliation",
+                     chamber="Senate (Candidate)")
+        results.apply_cache([neil], {"races": {"S-FL-2026": race}})
+        self.assertEqual((neil["name"], neil["fecName"]), ("Neil J. Gillespie",
+                                                           "Neil Joseph Gilespie"))
+        # Only case and full stops apart is the same name.
+        same = filer("S6AK00326", "Daniel J Sullivan", "AK", None, "Republican",
+                     chamber="Senate (Candidate)")
+        race["listNames"] = {"S6AK00326": "Daniel J. Sullivan"}
+        results.apply_cache([same], {"races": {"S-AK-2026": dict(
+            race, status={"S6AK00326": "nominee"})}})
+        self.assertEqual(same["name"], "Daniel J Sullivan")
+
+    def test_a_certified_write_in_is_neither_on_nor_off_the_ballot(self):
+        rows = [row("H4CO01187", "WREN, JOHN", "CO", 1, "IND")]
+        race = results.certify_race(None, spec([("Jane Doe", "Democratic Party", "ballot"),
+                                                ("John Wren", "Unaffiliated", "write-in")],
+                                               source="Colorado Secretary of State"), rows)
+        person = filer("H4CO01187", "John Wren", "CO", 1, "Independent")
+        results.apply_cache([person], {"races": {"H-CO-01-2026": race}})
+        self.assertNotIn("raceStatus", person)        # not "not on the certified list"
+        self.assertTrue(person["ballotUnknown"])
+
+    def test_an_unprinted_name_may_be_a_page_nominee(self):
+        # Florida prints no uncontested race. A page nominee the list names
+        # as unopposed under another spelling is not struck off; nor is a
+        # page name the list holds as unopposed.
+        page = {"page": "x", "status": {"H6FL10001": "nominee"}, "party": {},
+                "unmatched": {"Pat Alone": "nominee"}, "ambiguous": [],
+                "decided": {"general": True, "parties": []}}
+        rows = [row("H6FL10001", "FROST, MAXWELL ALEJANDRO", "FL", 10, "DEM")]
+        race = results.certify_race(page, spec([("Maxwell Alejandro Frostt", "Democratic",
+                                                 "unopposed"),
+                                                ("Pat Alone", "Republican", "unopposed")],
+                                               source="Florida Division of Elections"), rows)
+        self.assertEqual(race["status"]["H6FL10001"], "nominee")
+        self.assertEqual(race["certifiedHeld"], ["H6FL10001"])
+        self.assertEqual(race["unmatched"]["Pat Alone"], "nominee")
 
 
 if __name__ == "__main__":

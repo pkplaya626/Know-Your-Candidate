@@ -421,9 +421,15 @@ def _below_threshold(results, rid, filed, profiled, people=()):
 def _party_shown(race, cid, row):
     """The party to print beside a nominee with no profile: the ballot's
     line as the page or the state's list gives it, else the filing's."""
-    from .results import LINE_LABELS, party_key
+    from .results import LINE_LABELS, list_party_words, party_key
 
-    line = (race.get("listParty") or {}).get(cid) or (race.get("label") or {}).get(cid)
+    listed = race.get("listParty") or {}
+    if cid in listed:
+        # The state's list is the authority on the line it prints, and one
+        # that prints none (American Samoa's) gives none: the filing's
+        # "Democratic" beside one of five names read as the list's word.
+        return list_party_words(listed[cid])
+    line = (race.get("label") or {}).get(cid)
     if line:
         return line
     key = (race.get("party") or {}).get(cid)

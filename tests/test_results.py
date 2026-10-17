@@ -261,6 +261,27 @@ class TestResolving(unittest.TestCase):
         self.assertEqual(out["Caitlyn Gegen"], "nominee")
         self.assertNotIn("Caitlyn Gegan", out)
 
+    def test_a_surname_with_a_space_and_with_a_hyphen_is_one_person(self):
+        # CA-40: the page lists "Esther Kim Varet" among those eliminated and
+        # its results box says "Esther Kim-Varet". Two spellings fitted her
+        # one filing (VARET, ESTHER KIM), and a primary loser read "Not on
+        # the November ballot (unconfirmed)".
+        boxes = results.parse_boxes(box("Primary results", ("Young Kim", 100, True),
+                                        ("Esther Kim-Varet", 50, False)))
+        boxes.append((results.ELIMINATED_LIST, [{"name": "Esther Kim Varet", "won": False,
+                                                 "withdrawn": False, "votes": None,
+                                                 "party": None, "article": None}]))
+        out = results.resolve_race(boxes)
+        self.assertEqual(out, {"Young Kim": "nominee", "Esther Kim-Varet": "eliminated"})
+        rows = [{"candidate_id": "H6CA40309", "name": "VARET, ESTHER KIM"},
+                {"candidate_id": "H8CA39240", "name": "KIM, YOUNG"}]
+        found, ambiguous = results.match_names(list(out), rows)
+        self.assertEqual(found["Esther Kim-Varet"], ["H6CA40309"])
+        self.assertEqual(ambiguous, [])
+        self.assertTrue(results._same_spelling("Esther Kim Varet", "Esther Kim-Varet"))
+        # The given name must still fit.
+        self.assertFalse(results._same_spelling("Ann Kim Varet", "Esther Kim-Varet"))
+
     def test_two_people_in_one_table_are_never_one(self):
         # Alaska's top-four primary lists Senator "Dan S. Sullivan" and
         # "Daniel J. Sullivan Jr."; folded into one, the second - certified
@@ -841,6 +862,64 @@ class TestNamesThePageMayUse(unittest.TestCase):
         cache["races"]["H-NC-04-2026"]["names"] = {"H6PA01001": "Robert Harvie"}
         results.apply_cache([same], cache)
         self.assertEqual(same["name"], "Robert J Harvie")
+
+    def test_the_formal_name_on_a_page_does_not_replace_the_campaigns(self):
+        # The results tables write "Matthew Dunlap" and "Michael Sacks";
+        # they campaign, and filed, as Matt Dunlap and Mike Sacks. A page's
+        # formal form finds them and is not shown in their place.
+        person = self.filer("H6ME02171", "Matt Dunlap", "DUNLAP, MATT")
+        cache = self.cache({})
+        cache["races"]["H-NC-04-2026"].update(status={"H6ME02171": "nominee"},
+                                              names={"H6ME02171": "Matthew Dunlap"})
+        results.apply_cache([person], cache)
+        self.assertEqual(person["name"], "Matt Dunlap")
+        self.assertNotIn("fecName", person)
+        self.assertIn("Matthew Dunlap", person["aliases"])
+
+    def test_a_name_the_matcher_settled_keeps_the_pages_hyphen(self):
+        # Once the matcher folded surnames (Black Wolf / BLACKWOLF), it
+        # settled "Bernadette Greene-Placentia" itself, and the rename that
+        # ran only for claimed names put back the FEC's unhyphenated form.
+        for page, filed_as in (("Bernadette Greene-Placentia", "Bernadette Greene Placentia"),
+                               ("Priscilla Williams-Till", "Priscilla Williams Till")):
+            person = self.filer("H4AZ08082", filed_as)
+            cache = self.cache({})
+            cache["races"]["H-NC-04-2026"].update(status={"H4AZ08082": "nominee"},
+                                                  names={"H4AZ08082": page})
+            results.apply_cache([person], cache)
+            self.assertEqual((person["name"], person["fecName"]), (page, filed_as))
+        # And a hyphen the page drops is not taken from the person.
+        kept = self.filer("H6GA13001", "Keisha Conyears-Ervin")
+        cache = self.cache({})
+        cache["races"]["H-NC-04-2026"].update(status={"H6GA13001": "nominee"},
+                                              names={"H6GA13001": "Keisha Conyears Ervin"})
+        results.apply_cache([kept], cache)
+        self.assertEqual(kept["name"], "Keisha Conyears-Ervin")
+
+    def test_an_evidenced_alias_the_matcher_used_is_the_name_shown(self):
+        # Florida's "Yen Bailey" is an overrides.RESULT_NAMES alias for
+        # "BAILEY, HUY-YEN CAM"; settled by id, it lost the claimed path
+        # that used to show it.
+        person = self.filer("H4FL02138", "Huy-Yen Cam Bailey", "BAILEY, HUY-YEN CAM")
+        cache = self.cache({})
+        cache["races"]["H-NC-04-2026"].update(status={"H4FL02138": "nominee"},
+                                              names={"H4FL02138": "Yen Bailey"})
+        results.apply_cache([person], cache)
+        self.assertEqual((person["name"], person["nameVia"]), ("Yen Bailey", "election-page"))
+
+    def test_an_apostrophe_is_part_of_a_surname(self):
+        # Florida certifies "Tony D'Arrigo"; the FEC files "D'ARRIGO, TONY
+        # C". Split at the apostrophe, "D" read as a middle initial that
+        # disagreed with "C", and he matched no one.
+        rows = [{"candidate_id": "H4FL13234", "name": "D'ARRIGO, TONY C"},
+                {"candidate_id": "H6FL13001", "name": "LUNA, ANNA PAULINA"}]
+        found, _ = results.match_names(["Tony D'Arrigo"], rows)
+        self.assertEqual(found, {"Tony D'Arrigo": ["H4FL13234"]})
+        found, _ = results.match_names(["Tony D’Arrigo"], rows)
+        self.assertEqual(found, {"Tony D’Arrigo": ["H4FL13234"]})
+        # A quoted nickname still stands on its own.
+        self.assertEqual(results._tokens("HENRY C. 'HANK' SMITH"),
+                         ["henry", "c", "hank", "smith"])
 
     def test_validate_lists_what_is_unsettled(self):
         from kyc import validate

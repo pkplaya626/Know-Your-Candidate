@@ -25,6 +25,10 @@ ballot (rule 77). Each reader below reads one state's published list:
   struck through has withdrawn; "Write in? Y" is not printed.
 * American Samoa: the Election Office's list of candidates the
   Commissioner of Elections has certified. The territory holds no primary.
+* Texas: the Secretary of State's list of qualified candidates for the
+  general election, read from the JSON service its candidate search draws
+  from. It prints names in capitals, as the ballot does; they are matched
+  as any name is, and never replace a profile's own spelling.
 
 Lists published only as a PDF (Iowa, Nebraska) are transcribed in
 ``overrides.CERTIFIED_BALLOTS``, with the document and the day it was read;
@@ -321,6 +325,89 @@ def parse_american_samoa(page):
     return {house("AS", 0): out}
 
 
+# ------------------------------------------------------------------- Texas
+
+# The Secretary of State's candidate search (Election Advisory 2026-22,
+# 2026-08-28: "The list of candidates for federal, state, and district
+# offices, as certified by the Secretary of State"). The page draws itself
+# from this JSON service; the election is the 2026 November General
+# Election's id, and every row is checked to carry its name.
+TX_PAGE = "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+TX_URL = ("https://goelect.txelections.civixapps.com/api-ivis-cbp/api/cbp/"
+          "findQualifiedCandidates")
+TX_ELECTION = 53815
+TX_ELECTION_NAME = "2026 NOVEMBER GENERAL ELECTION"
+TX_SOURCE = ("Texas Secretary of State, qualified candidates for the 2026 November "
+             "General Election (federal offices)")
+TX_HOUSE_SEATS = 38
+# The service's own party codes (its getPoliticalParties list, read
+# 2026-10-17). W marks a write-in, not a party.
+TX_PARTIES = {"D": "Democratic", "R": "Republican", "L": "Libertarian", "G": "Green",
+              "I": "Independent"}
+_TX_HOUSE = re.compile(r"^U\. ?S\. REPRESENTATIVE DISTRICT (\d+)$")
+_TX_SENATE = "U. S. SENATOR"
+# Requests the reader sends as a POST, with this JSON body.
+POSTS = {TX_URL: {"electionYear": YEAR, "electionId": TX_ELECTION, "officeType": "FD"}}
+# The page a reader is sent to for a list read from a service.
+SHOWN = {TX_URL: TX_PAGE}
+
+
+def parse_texas(page):
+    """``{race_id: [entry]}`` from the Secretary of State's qualified list.
+
+    A declaration ACCEPTED with the filing status "Candidate in the General
+    Election" (CG) is printed, unless it is a write-in (candidate type
+    WRTIN, party W); a REJECTED declaration was never on it and is left
+    out; WITHDREW is withdrawn. Checked on 2026-10-17 against Harris
+    County's ballot order: every CG candidate of TX-18 and TX-38 is printed
+    there, the write-ins are not, and the record's own active flag
+    (``cdStatus``) is not what decides it (TX-38's Green nominee carries
+    "I" and is printed).
+    """
+    import json
+
+    try:
+        rows = json.loads(page)
+    except ValueError:
+        raise CertifiedError("the Texas list is not JSON") from None
+    if not isinstance(rows, list) or not rows:
+        raise CertifiedError("the Texas list holds no candidates")
+    races = {}
+    for row in rows:
+        if (row.get("txElectionName") or "").strip() != TX_ELECTION_NAME:
+            raise CertifiedError(f"a Texas row from {row.get('txElectionName')!r}")
+        office = re.sub(r"\s+", " ", row.get("txOfficeName") or "").strip()
+        house_seat = _TX_HOUSE.match(office)
+        if house_seat:
+            rid = house("TX", house_seat.group(1))
+        elif office == _TX_SENATE:
+            rid = senate("TX")
+        else:
+            continue
+        name = _quotes(re.sub(r"\s+", " ", row.get("txFullNameBallot") or "").strip())
+        declared, filing = row.get("cdDeclarationStatus"), row.get("cdFilingStatus")
+        code = (row.get("cdParty") or "").upper()
+        write_in = row.get("cdCandType") == "WRTIN" or code == "W"
+        if declared == "R":
+            continue                        # rejected: never certified
+        if declared == "WDE":
+            kind = WITHDRAWN
+        elif declared == "A" and filing == "CG":
+            kind = WRITE_IN if write_in else BALLOT
+        else:
+            raise CertifiedError(f"unknown Texas status {declared!r}/{filing!r} for {name}")
+        if not write_in and code not in TX_PARTIES:
+            raise CertifiedError(f"unknown Texas party {code!r} for {name}")
+        races.setdefault(rid, []).append(entry(name, TX_PARTIES.get(code, ""), kind))
+    seats = sorted(int(rid.split("-")[2]) for rid in races if rid.startswith("H-"))
+    if seats != list(range(1, TX_HOUSE_SEATS + 1)) or senate("TX") not in races:
+        raise CertifiedError(f"the Texas list covers House seats {seats}")
+    for rid, out in races.items():
+        if not any(e["kind"] == BALLOT for e in out):
+            raise CertifiedError(f"the Texas list prints nobody for {rid}")
+    return races
+
+
 # -------------------------------------------------------------------- read
 
 READERS = (
@@ -328,11 +415,20 @@ READERS = (
     ("FL", FL_URL, FL_SOURCE, parse_florida),
     ("CO", CO_URL, CO_SOURCE, parse_colorado),
     ("AS", AS_URL, AS_SOURCE, parse_american_samoa),
+    ("TX", TX_URL, TX_SOURCE, parse_texas),
 )
 
 
 def _read(url):
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    import json
+
+    body = POSTS.get(url)
+    headers = {"User-Agent": USER_AGENT}
+    data = None
+    if body is not None:
+        data = json.dumps(body).encode("utf-8")
+        headers["Content-Type"] = "application/json"
+    request = urllib.request.Request(url, data=data, headers=headers)
     with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
         return response.read().decode("utf-8", "replace")
 
@@ -368,7 +464,8 @@ def fetch(read=_read, log=print, sleep=time.sleep, today=None):
             log(f"    [warn] {state}'s certified list could not be read: {exc}")
             failed.append(state)
             continue
-        lists[state] = {"source": source, "url": url, "fetched": today.isoformat(),
+        lists[state] = {"source": source, "url": SHOWN.get(url, url),
+                        "fetched": today.isoformat(),
                         "complete": True, "races": races}
         printed = sum(1 for es in races.values() for e in es if e["kind"] == BALLOT)
         log(f"    {state}: {printed} printed on the ballot in {len(races)} races ({source})")

@@ -128,8 +128,10 @@
 
   /* Who is running against the seats' holders, as the races count them:
    * on the ballot, and - where there is no primary and no ballot has been
-   * read (a territory before its list is published) - filed, which is not
-   * the same claim. American Samoa read "0 challengers on the ballot" over
+   * read (a territory whose list this site has no reader for) - filed,
+   * which is not the same claim, and says what was not done: it checked no
+   * list, which is not to say none is published (rule 19). American
+   * Samoa read "0 challengers on the ballot" over
    * six filers and a race card saying so. */
   function challengerWords(info, rec) {
     var out = [];
@@ -138,7 +140,7 @@
         (rec ? " on the 2026 ballot" : " on the ballot"));
     }
     if (info.challengersFiled) {
-      out.push(plural(info.challengersFiled, "challenger") + " filed; ballot not yet published");
+      out.push(plural(info.challengersFiled, "challenger") + " filed; ballot list not checked");
     }
     return out;
   }

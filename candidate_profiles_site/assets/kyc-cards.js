@@ -397,7 +397,10 @@
     }
     u.maybe.forEach(function (m) {
       var who = KYC.byId(m.id);
-      parts.push("The results also name " + KYC.escapeHtml(m.name) + ", who may be " +
+      // Credited to whoever named them: Florida's certified list, not "the
+      // results", named FL-13's Tony D'Arrigo.
+      parts.push("Also named, " + KYC.escapeHtml(KYC.ballotSource(race)) + ": " +
+        KYC.escapeHtml(m.name) + ", who may be " +
         KYC.escapeHtml(who ? who.name : "a candidate with a profile here") +
         " under another spelling; this site has not confirmed it.");
     });

@@ -4722,7 +4722,7 @@ async function testCertifiedBallots() {
     const info = mp.window.kycBuildMeta.states.MP || {};
     const strip = mp.D.querySelector(".state-summary").textContent;
     check("filers are counted as filed, and never as on the ballot",
-      !info.challengersFiled || (new RegExp(info.challengersFiled + " challengers? filed; ballot not yet published")
+      !info.challengersFiled || (new RegExp(info.challengersFiled + " challengers? filed; ballot list not checked")
         .test(strip) && !/challengers? on the ballot/.test(strip)), strip);
     check("the page writes Northern Mariana Islands' (rule 75)",
       !/Islands's/.test(mp.D.body.textContent) && /Northern Mariana Islands' /.test(mp.D.body.textContent));
@@ -4789,7 +4789,7 @@ async function testCertifiedBallots() {
     suite("districts/fl.html — the old map's empty FL-20", () => {
       check("no page errors", fl.errors.length === 0, fl.errors.join(" | "));
       const facts = [...fl.D.querySelectorAll(".district-fact")].filter((f) =>
-        /Vacant since Apr 21, 2026 \(Sheila Cherfilus-McCormick resigned\)/.test(f.textContent));
+        /Vacant since April 21, 2026 \(Sheila Cherfilus-McCormick resigned\); no special election called as of Oct\. 17, 2026/.test(f.textContent));
       const cards = [...fl.D.querySelectorAll(".plan-card")];
       check("the old map's FL-20 says who left and when, and only it does",
         facts.length === 1 && cards.length === 2 && cards[0].contains(facts[0]),

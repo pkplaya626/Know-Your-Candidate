@@ -365,9 +365,12 @@ SEAT_PRIMARY_DATES = {
 # as congress-legislators' legislators-historical records it (the bioguide id
 # is the key into it), how, and whether a special election has been called,
 # each with the day it was checked. Shown on the delegation and the district
-# map (RACES-05, FRESHNESS-12) while nobody sits there; validate reports an
-# entry for a seat someone now sits in, or a date legislators-historical
-# does not give. Re-check `special` before moving `checked`.
+# map (RACES-05, FRESHNESS-12) while nobody sits there. validate reports an
+# entry for a seat someone now sits in, and one whose member the snapshot
+# still seats; it cannot check `left`, which the build has no offline record
+# of (neither member is in Former_Members.csv), so check it by hand against
+# legislators-historical when adding an entry. Re-check `special` before
+# moving `checked`.
 SEAT_VACANCIES = {
     ("FL", 20): {
         "bioguide": "C001127", "name": "Sheila Cherfilus-McCormick", "left": "2026-04-21",
@@ -435,19 +438,6 @@ CERTIFIED_BALLOTS = {
                              ("David J. Else", "Legal Marijuana NOW"),
                              ("Macey Budke", "Nebraska Working People"),
                              ("Mark Cohen", "By Petition")],
-        },
-    },
-    # Texas's Secretary of State lists no 2026 election in its candidate
-    # search (candidate.texas-election.com, checked 2026-10-17). The
-    # Libertarian Party nominates by convention, and its own list of its
-    # 2026 nominees names these two House candidates; not the whole ballot.
-    "TX": {
-        "source": "Libertarian Party of Texas, 2026 candidates (its convention nominees)",
-        "url": "https://www.lptexas.org/candidates",
-        "read": "2026-10-17", "complete": False,
-        "races": {
-            "H-TX-26-2026": [("Phil Gray", "Libertarian")],
-            "H-TX-34-2026": [("Chris Royal", "Libertarian")],
         },
     },
 }
