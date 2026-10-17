@@ -57,7 +57,8 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/districts/*.js (one district map per state)
                                              states/*.html      (generated, one per state)
                                              districts/*.html   (generated, one per state)
-                                             government/*.html  (generated: the guide, kyc/government_text.py)
+                                             government/*.html  (generated: Know Your Government, kyc/government_text.py)
+                                             legislature/index.html, counties/index.html (generated directories)
                                              legislature/*.html (generated, one per state)
                                              counties/*.html    (generated, one per state)
                                              federal/index.html (generated: the federal government)
@@ -145,8 +146,8 @@ python build_profile_site.py oge              # the executive's financial report
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1167 tests, no dependencies
-npm install && npm test                       # 1353 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1172 tests, no dependencies
+npm install && npm test                       # 1390 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,

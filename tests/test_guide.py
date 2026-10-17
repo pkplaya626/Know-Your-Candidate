@@ -1,4 +1,5 @@
-"""Tests for the guide to how government works (kyc/government.py).
+"""Tests for Know Your Government, the guide (kyc/government.py), and the
+site's navigation around it (kyc/pages.py).
 
 The guide is static text about institutions, generated into pages like the
 state pages. What can go wrong with it is what goes wrong with any page here:
@@ -58,6 +59,55 @@ class TestGuideText(unittest.TestCase):
                      "Steve Scalise", "Chuck Grassley", "John Roberts", "Donald Trump",
                      "Vance"):
             self.assertNotIn(name, text)
+
+
+class TestNavigation(unittest.TestCase):
+    """The sidebar, by level of government: one table (pages.nav_groups)."""
+
+    def test_every_entry_leads_to_a_page(self):
+        generated = {"legislature/index.html", "counties/index.html"}
+        for _heading, entries in pages.nav_groups():
+            for key, path, _icon, _label in entries:
+                page = path.split("#")[0]
+                self.assertTrue(os.path.isfile(os.path.join(SITE, *page.split("/"))) or page in generated,
+                                (key, path))
+
+    def test_the_hand_maintained_pages_carry_it(self):
+        for page, ok, note in emit.check_nav(ROOT):
+            self.assertTrue(ok, (page, note))
+
+    def test_the_hubs_sections_are_the_guides_to_name(self):
+        # The guide may link a section the hub's script draws; the two lists
+        # are one (kyc/government.py SITE_ANCHORS, assets/kyc-federal.js).
+        with open(os.path.join(SITE, "assets", "kyc-federal.js"), encoding="utf-8") as handle:
+            script = handle.read()
+        # The hub's sections and the changes section it always draws, read
+        # from the script, never added by hand.
+        hub = script[script.index("function renderHub"):script.index("el(\"federalBody\").innerHTML = html")]
+        changes = script[script.index("function changesSection"):script.index("function renderHub")]
+        drawn = set(re.findall(r'section\("([a-z-]+)"', hub + changes))
+        self.assertEqual(set(government.SITE_ANCHORS["federal/index.html"]), drawn)
+        for target, _words in re.findall(r'\["([a-z]+\.html#[a-z-]+)", "([^"]+)"\]', script):
+            slug, anchor = target[:-len(".html") - len(target.split("#")[1]) - 1], target.split("#")[1]
+            self.assertIn(anchor, government._section_ids(slug), target)
+
+    def test_a_section_the_hub_does_not_draw_is_refused(self):
+        with self.assertRaises(ValueError):
+            government.href("site:federal/index.html#nowhere", "executive")
+        # A route the page's script reads is not a section.
+        self.assertEqual(government.href("site:index.html#/?role=member", "congress")[0],
+                         "../index.html#/?role=member")
+
+    def test_none_is_not_zero(self):
+        html = pages.render_counties_index("", {"year": "2022", "states": {
+            "CT": {"county": None, "municipal": 30, "township": 149, "school": 17,
+                   "special": 336, "total": 532}}})
+        row = re.search(r"Connecticut</a></th>(.*?)</tr>", html).group(1)
+        self.assertIn('<td class="faint" title="No county governments.">none</td>', row)
+        self.assertNotIn("<td>0</td>", row)
+        # A count of school districts is of independent ones (the guide's words).
+        self.assertIn("<th scope=\"col\">Independent school districts</th>", html)
+        self.assertNotIn(">School districts<", html)
 
 
 class TestGuideLinks(unittest.TestCase):

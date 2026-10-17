@@ -75,28 +75,49 @@
 
 <div class="app-body">
     <aside class="sidebar scroll-y" id="sidebar" aria-label="Navigation and summary">
-        <nav class="sidebar-section" aria-label="Views">
-            <a class="nav-link" href="../index.html">
-                <svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg>
-                Profile grid
+        <nav class="sidebar-section site-nav" aria-label="Site">
+            <h2 class="nav-group">Elections 2026</h2>
+            <a class="nav-link" href="../index.html" data-nav="candidates">
+                <svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>
+                Candidates
             </a>
-            <a class="nav-link" href="../map.html">
+            <a class="nav-link" href="../map.html" data-nav="races">
                 <svg class="icon" aria-hidden="true"><use href="#i-map"/></svg>
-                Partisan map
+                Races &amp; partisan map
             </a>
-            <a class="nav-link" href="../states/index.html">
+            <h2 class="nav-group">Federal</h2>
+            <a class="nav-link" href="../index.html#/?role=member" data-nav="congress">
+                <svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg>
+                Congress
+            </a>
+            <a class="nav-link" href="../federal/index.html#executive" data-nav="executive">
+                <svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>
+                President &amp; Cabinet
+            </a>
+            <a class="nav-link" href="../federal/index.html#supreme-court" data-nav="courts">
+                <svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg>
+                Federal courts
+            </a>
+            <h2 class="nav-group">State</h2>
+            <a class="nav-link" href="../states/index.html" data-nav="states">
                 <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
                 States &amp; territories
             </a>
-            <a class="nav-link" href="../federal/index.html">
-                <svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg>
-                Federal government
-            </a>
-            <a class="nav-link" href="../government/index.html">
-                <svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg>
-                How government works
+            <a class="nav-link" href="../legislature/index.html" data-nav="legislatures">
+                <svg class="icon" aria-hidden="true"><use href="#i-columns"/></svg>
+                State legislatures
             </a>
             <div id="yourState" hidden></div>
+            <h2 class="nav-group">Local</h2>
+            <a class="nav-link" href="../counties/index.html" data-nav="local">
+                <svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg>
+                Counties &amp; cities
+            </a>
+            <h2 class="nav-group">Learn</h2>
+            <a class="nav-link" href="../government/index.html" data-nav="guide" aria-current="true">
+                <svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg>
+                Know Your Government
+            </a>
         </nav>
 
         <nav class="sidebar-section" aria-label="In this guide">
@@ -180,7 +201,7 @@
         <div class="content scroll-y">
             <article id="guideContent" class="state-page guide-page">
                 <header class="state-hero">
-                    <p class="state-kicker">How government works</p>
+                    <p class="state-kicker">Know Your Government</p>
                     <h1 class="state-title">The president and the executive branch</h1>
                     <p class="guide-lede">Article II vests the executive power in one person, the president. The federal government elects only the president and vice president; most states elect several executive officials separately (<a href="states.html#executive">state governments</a>). Who holds each office now, the Cabinet with them, is on <a href="../federal/index.html">the federal government's page</a>.</p>
                 </header>
@@ -198,6 +219,11 @@
                     <p>The president is elected to a four-year term and may be elected no more than twice (Twenty-second Amendment). The president commands the armed forces; may grant reprieves and pardons for federal offenses, except in cases of impeachment; makes treaties with the consent of two-thirds of the senators present; and appoints ambassadors, judges and other officers with the Senate's consent (Article II, Section 2). The president signs or vetoes the bills Congress passes (Article I, Section 7) and must “take Care that the Laws be faithfully executed” (Article II, Section 3).</p>
                     <p>Executive orders are the president's directions to the executive branch. The Constitution does not mention them: each must rest on the president's own constitutional powers or on authority Congress has given by law, and courts can set aside one that rests on neither (Youngstown Sheet &amp; Tube Co. v. Sawyer, 1952).</p>
                     <p>The vice president becomes president if the office falls vacant (Twenty-fifth Amendment), and presides over the Senate, breaking ties there. After the vice president, the line of succession runs to the Speaker of the House, the Senate's president pro tempore, and then the cabinet secretaries in the order the statute lists them, roughly the order in which their offices were first created (3 U.S.C. 19).</p>
+                    <h3 class="guide-subheading">Who holds these offices now</h3>
+                    <div class="guide-live" data-live="executive">
+                        <p class="results-bar" role="status">Who holds these offices now is on the <a href="../federal/index.html#executive">federal government's page</a>.</p>
+                    </div>
+                    <p class="guide-see"><span>See it on this site:</span> <a href="../federal/index.html#executive">The President and Vice President</a></p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://constitution.congress.gov/constitution/article-1/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article I</a>; <a href="https://constitution.congress.gov/constitution/article-2/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article II</a>; <a href="https://constitution.congress.gov/constitution/amendment-22/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Twenty-second Amendment</a>; <a href="https://constitution.congress.gov/constitution/amendment-25/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Twenty-fifth Amendment</a>; <a href="https://www.law.cornell.edu/uscode/text/3/19" target="_blank" rel="noopener noreferrer">3 U.S.C. 19 (presidential succession)</a>; <a href="https://www.law.cornell.edu/supremecourt/text/343/579" target="_blank" rel="noopener noreferrer">Youngstown Sheet &amp; Tube Co. v. Sawyer, 343 U.S. 579 (1952)</a></p>
                 </section>
                 <section class="guide-section" id="eop" aria-labelledby="eop-title">
@@ -239,6 +265,11 @@
                     <h3 class="guide-subheading" id="changes">Changes since 2025</h3>
                     <p>Executive Order 14347 of September 5, 2025 lets the Department of Defense and its secretary use “Department of War” and “Secretary of War” as secondary titles, in correspondence, public communications, ceremonies and documents other than statutes. The department's name in law is still the Department of Defense (10 U.S.C. 111). On July 22, 2026 the House passed a defense authorization bill that would rename it; on July 14 the Senate had declined, 50-46, to take up its own version, and the rename has not become law.</p>
                     <p>The Department of Education still exists in law (20 U.S.C. 3411), and Congress has not passed a bill to abolish it. Since 2025 it has handed the day-to-day running of many of its programs to other departments under interagency agreements. Among them: career, technical and adult education, and from November 2025 Title I and other school and college grant programs, to Labor; Indian education to Interior; student loans to Treasury (March 2026); and, from June 2026, special education to Health and Human Services and civil rights enforcement to Justice.</p>
+                    <h3 class="guide-subheading">Who heads each department now</h3>
+                    <div class="guide-live" data-live="cabinet">
+                        <p class="results-bar" role="status">Who heads each department now is on the <a href="../federal/index.html#cabinet">federal government's page</a>.</p>
+                    </div>
+                    <p class="guide-see"><span>See it on this site:</span> <a href="../federal/index.html#cabinet">Who heads each department</a><span class="sep" aria-hidden="true"> · </span><a href="../federal/index.html#changes">Changes in the Cabinet since the term began</a></p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.law.cornell.edu/uscode/text/5/101" target="_blank" rel="noopener noreferrer">5 U.S.C. 101 (the executive departments)</a>; <a href="https://www.law.cornell.edu/uscode/text/3/19" target="_blank" rel="noopener noreferrer">3 U.S.C. 19 (presidential succession)</a>; <a href="https://www.law.cornell.edu/uscode/text/10/111" target="_blank" rel="noopener noreferrer">10 U.S.C. 111 (the Department of Defense)</a>; <a href="https://www.govinfo.gov/content/pkg/FR-2025-09-10/pdf/2025-17508.pdf" target="_blank" rel="noopener noreferrer">Executive Order 14347, 90 FR 43893 (Sept. 10, 2025)</a>; <a href="https://www.dailypress.senate.gov/tuesday-july-14-2026/" target="_blank" rel="noopener noreferrer">U.S. Senate floor log, July 14, 2026</a>; <a href="https://www.congress.gov/crs-product/IN12704" target="_blank" rel="noopener noreferrer">Congressional Research Service, Insight IN12704</a>; <a href="https://www.law.cornell.edu/uscode/text/20/3411" target="_blank" rel="noopener noreferrer">20 U.S.C. 3411 (Department of Education)</a>; <a href="https://www.ed.gov/about/news/press-release/us-department-of-education-announces-six-new-agency-partnerships-break-federal-bureaucracy" target="_blank" rel="noopener noreferrer">U.S. Department of Education: six new agency partnerships (Nov. 18, 2025)</a>; <a href="https://www.ed.gov/media/document/ed-treasury-interagency-agreement-federal-student-assistance-partnership-march-19-2026-113468.pdf" target="_blank" rel="noopener noreferrer">U.S. Department of Education: Education–Treasury interagency agreement</a>; <a href="https://www.ed.gov/about/news/press-release/us-department-of-education-announces-additional-partnerships-strengthen-coordination-individuals-disabilities-programs-bolster-civil-rights" target="_blank" rel="noopener noreferrer">U.S. Department of Education: additional partnerships (June 16, 2026)</a></p>
                 </section>
                 <section class="guide-section" id="agencies" aria-labelledby="agencies-title">
@@ -272,6 +303,7 @@
     </main>
 </div>
 
+<script src="../data/federal.js"></script>
 <script src="../assets/kyc-guide.js"></script>
 </body>
 </html>

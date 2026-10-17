@@ -1,4 +1,4 @@
-"""How government works: the guide's pages.
+"""Know Your Government: the guide's pages.
 
 The site is about the people who hold one set of offices. The guide is about
 the offices themselves, and the governments around Congress: the executive
@@ -21,7 +21,7 @@ import os
 import re
 
 from . import pages
-from .government_text import PAGES, REVIEWED, SOURCES
+from .government_text import HOLDERS, PAGES, REVIEWED, SEE, SOURCES
 
 FOLDER = "government"
 # The site's own pages, which a "site:" link must name.
@@ -72,10 +72,36 @@ def _page(slug):
 
 
 def scripts(slug):
-    """The scripts a guide page loads after ``kyc.js``, in order."""
-    if _map_modes(slug):
-        return _MAP_SCRIPTS
-    return _PEOPLE_SCRIPTS if _page(slug).get("people") else _PLAIN_SCRIPTS
+    """The scripts a guide page loads after ``kyc.js``, in order. A page
+    that lists who holds an office (:data:`HOLDERS`) loads the federal
+    government's data before the guide's module."""
+    base = (_MAP_SCRIPTS if _map_modes(slug) else
+            _PEOPLE_SCRIPTS if _page(slug).get("people") else _PLAIN_SCRIPTS)
+    if any(page == slug for page, _sid in HOLDERS):
+        base = base[:-1] + ("../data/federal.js",) + base[-1:]
+    return base
+
+
+def _after(here, sid, pad):
+    """What follows a section's text: who holds its offices now, and where
+    on the site its subject can be seen (:data:`SEE`)."""
+    lines = []
+    live = HOLDERS.get((here, sid))
+    if live:
+        # Its own heading: in a section that ends with a subheading
+        # ("Changes since 2025") the list would otherwise read as part of it.
+        lines.append(f'{pad}<h3 class="guide-subheading">{html.escape(live[1], quote=False)}</h3>')
+        lines += _block(("live", live[0], live[2]), here, pad)
+    see = SEE.get((here, sid))
+    if see:
+        links = []
+        for words, target in see:
+            url, external = href(target, here)
+            extra = ' target="_blank" rel="noopener noreferrer"' if external else ""
+            links.append(f'<a href="{_e(url)}"{extra}>{html.escape(words, quote=False)}</a>')
+        lines.append(f'{pad}<p class="guide-see"><span>See it on this site:</span> '
+                     + '<span class="sep" aria-hidden="true"> · </span>'.join(links) + "</p>")
+    return lines
 
 
 def _e(text):
@@ -104,6 +130,15 @@ def _section_ids(slug):
     return ids
 
 
+# Pages the same build writes, which a fresh checkout has before its first
+# build: the directories the guide links.
+_GENERATED = {"legislature/index.html", "counties/index.html"}
+# The sections a site page's script draws, which a link may name: the
+# federal hub's (assets/kyc-federal.js; tests/test_guide.py holds the two
+# to each other).
+SITE_ANCHORS = {"federal/index.html": ("executive", "cabinet", "changes", "supreme-court", "courts")}
+
+
 def href(target, here):
     """``(href, external)`` for a link target written on page *here*.
 
@@ -126,8 +161,11 @@ def href(target, here):
         if not rest or rest.startswith(("/", ".")):
             raise ValueError(f"{here}: site link {rest!r} must be relative to the root")
         page = rest.split("#")[0].split("?")[0]
-        if not os.path.isfile(os.path.join(SITE, *page.split("/"))):
+        if not os.path.isfile(os.path.join(SITE, *page.split("/"))) and page not in _GENERATED:
             raise ValueError(f"{here}: no site page {page!r}")
+        anchor = rest.partition("#")[2]
+        if anchor and not anchor.startswith("/") and anchor not in SITE_ANCHORS.get(page, ()):
+            raise ValueError(f"{here}: no section {anchor!r} on site page {page!r}")
         return "../" + rest, False
     if kind == "state":
         if rest not in pages.STATE_NAMES:
@@ -254,7 +292,7 @@ def _main(page):
     lines = [
         '            <article id="guideContent" class="state-page guide-page">',
         '                <header class="state-hero">',
-        '                    <p class="state-kicker">How government works</p>',
+        '                    <p class="state-kicker">Know Your Government</p>',
         f'                    <h1 class="state-title">{inline(page["title"], here)}</h1>',
         f'                    <p class="guide-lede">{inline(page["lede"], here)}</p>',
         "                </header>",
@@ -277,6 +315,7 @@ def _main(page):
                      f'{html.escape(section["heading"], quote=False)}</h2>')
         for block in section["blocks"]:
             lines.extend(_block(block, here, pad + "    "))
+        lines.extend(_after(here, sid, pad + "    "))
         if not section.get("sources"):
             raise ValueError(f"{here}#{sid}: a section with no sources")
         lines.append(f'{pad}    <p class="guide-sources"><span>Sources:</span> '
@@ -328,6 +367,7 @@ def _section_lines(section, here, pad, collapsed):
         lines.append(f'{pad}    <summary>{html.escape(section["heading"], quote=False)}</summary>')
     for block in section["blocks"]:
         lines.extend(_block(block, here, pad + "    "))
+    lines.extend(_after(here, sid, pad + "    "))
     lines.append(f'{pad}    <p class="guide-sources"><span>Sources:</span> '
                  f'{_sources(section["sources"], here)}</p>')
     if collapsed:
@@ -346,7 +386,7 @@ def _map_main(page, modes):
     lines = [
         '    <main class="app-main" id="stateMain">',
         '        <header class="guide-map-head">',
-        '            <p class="state-kicker">How government works</p>',
+        '            <p class="state-kicker">Know Your Government</p>',
         f'            <h1 class="guide-map-title">{inline(page["title"], here)}</h1>',
         '        </header>',
         '        <div class="toolbar">',
@@ -448,7 +488,8 @@ def render(slug, host, codes=()):
         code="",
         page_kind=f"guide-{slug}" if modes else "guide",
         search="",
-        government_current=' aria-current="page"' if slug == "index" else "",
+        nav_current="guide",
+        nav_how="page" if slug == "index" else "true",
         sidebar=_sidebar(slug, people),
         jump_options="" if people else jump_options(codes),
         # On a map page the list picks the state on the map (kyc-guide.js).
@@ -510,4 +551,9 @@ def check():
             problems.append(f"source {key!r} is not an https URL: {url}")
     if slugs()[0] != "index":
         problems.append("the guide's first page must be its index")
+    # Every "see it" and "who holds it" entry belongs to a section there is.
+    for table, name in ((SEE, "SEE"), (HOLDERS, "HOLDERS")):
+        for page, sid in table:
+            if page not in slugs() or sid not in _section_ids(page):
+                problems.append(f"{name} names a section the guide does not have: {page}#{sid}")
     return problems

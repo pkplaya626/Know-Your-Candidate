@@ -46,9 +46,21 @@
       "</tr></thead><tbody>" + rows.join("") + "</tbody></table></div>";
   }
 
+  /* Where Know Your Government explains each of the hub's sections
+   * (kyc/government.py checks these sections exist: tests/test_guide.py). */
+  var LEARN = {
+    executive: ["executive.html#president", "How the presidency works"],
+    cabinet: ["executive.html#departments", "How the executive departments work"],
+    "supreme-court": ["courts.html#supreme-court", "How the Supreme Court works"],
+    courts: ["courts.html#appeals", "How the federal courts are organized"],
+  };
+
   function section(id, title, body) {
+    var learn = LEARN[id];
     return '<section class="fed-section" id="' + KYC.escapeAttr(id) + '">' +
-      '<h2 class="guide-subheading">' + esc(title) + "</h2>" + body + "</section>";
+      '<div class="section-head"><h2 class="guide-subheading">' + esc(title) + "</h2>" +
+      (learn ? '<a class="learn-link" href="' + KYC.escapeAttr("../government/" + learn[0]) + '">' +
+        KYC.icon("scroll") + " " + esc(learn[1]) + "</a>" : "") + "</div>" + body + "</section>";
   }
 
   function source(url, text) {
@@ -277,11 +289,16 @@
 
   function changesSection(d) {
     var events = changeEvents(d);
-    if (!events.length) return "";
+    var meta = d.changes || {};
+    // Always drawn: the guide links #changes (government_text.SEE).
+    if (!events.length) {
+      return section("changes", "Changes since the term began",
+        '<p class="faint">No change in the Cabinet is recorded since ' + esc(meta.since || "the term began") +
+        (meta.read ? ", as read " + esc(meta.read) : "") + ".</p>");
+    }
     var recent = events.slice(0, 12);
     var earlier = events.slice(12);
     var heads = ["When", "Office", "What happened"];
-    var meta = d.changes || {};
     return section("changes", "Changes since the term began",
       '<p class="guide-lede">Who was confirmed, who left and who served as acting in each ' +
       "office since " + esc(meta.since || "") + ", newest first. Confirmations are the " +
@@ -303,11 +320,12 @@
       return '<li class="fed-card fed-officer"><div><p class="fed-office">' + esc(office.office) +
         '</p><p class="faint">Nobody listed by the White House</p></div></li>';
     }
+    var role = KYC.holderRole(office);
     return '<li class="fed-card fed-officer">' + portrait(h) +
       '<div><p class="fed-office">' + esc(office.office) + "</p>" +
       '<p class="fed-name">' + person(h.id, h.name) +
-      ((h.page || {}).acting ? ' <span class="badge badge-warn">Acting</span>' : "") + "</p>" +
-      (h.title && h.title !== office.office ? '<p class="faint">' + esc(h.title) + "</p>" : "") +
+      (role.acting ? ' <span class="badge badge-warn">Acting</span>' : "") + "</p>" +
+      (role.title ? '<p class="faint">' + esc(role.title) + "</p>" : "") +
       tenureLine(office) +
       '<p class="fed-fact"><span class="fed-fact-label">Senate vote</span> ' + senateCell(h) + "</p>" +
       '<p class="fed-fact"><span class="fed-fact-label">The office’s page</span> ' + pageCell(h) +
@@ -675,6 +693,20 @@
       return;
     }
     if (root.getAttribute("data-federal") === "court") renderCourt(d); else renderHub(d);
+    // The hub holds two of the sidebar's entries: the courts' sections are
+    // Federal courts, the rest President & Cabinet.
+    if (root.getAttribute("data-federal") === "hub") {
+      var syncNav = function () {
+        var courts = /^#(supreme-court|courts)\b/.test(global.location.hash);
+        Array.prototype.forEach.call(global.document.querySelectorAll(
+            '.site-nav [data-nav="executive"], .site-nav [data-nav="courts"]'), function (link) {
+          if ((link.getAttribute("data-nav") === "courts") === courts) link.setAttribute("aria-current", "page");
+          else link.removeAttribute("aria-current");
+        });
+      };
+      syncNav();
+      global.addEventListener("hashchange", syncNav);
+    }
     // A portrait that will not load is dropped, never shown broken.
     root.addEventListener("error", function (event) {
       if (event.target.classList && event.target.classList.contains("fed-photo")) {

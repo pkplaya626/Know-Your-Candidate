@@ -156,7 +156,9 @@
         ? ' <a class="btn" href="' + KYC.escapeAttr(KYC.siteRoot() + "legislature/" +
           code.toLowerCase() + ".html") + '">' + KYC.icon("landmark") + " State legislature</a>" +
           ' <a class="btn" href="' + KYC.escapeAttr(KYC.siteRoot() + "counties/" +
-          code.toLowerCase() + ".html") + '">' + KYC.icon("layers") + " Counties &amp; local governments</a>"
+          code.toLowerCase() + ".html") + '">' + KYC.icon("layers") + " Counties &amp; local governments</a>" +
+          ' <a class="btn" href="' + KYC.escapeAttr(KYC.siteRoot() + "government/states.html") + '">' +
+          KYC.icon("scroll") + " How states are governed</a>"
         : "",
       "</p>",
       "</header>"

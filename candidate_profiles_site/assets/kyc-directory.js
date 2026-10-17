@@ -261,9 +261,22 @@
   /* `quiet` renders without writing the filters into the URL, for the grid
    * drawn underneath a profile someone landed on directly - writing it then
    * would replace the profile link they arrived on. */
+  /* The sidebar names the view: Congress for the sitting members,
+   * Candidates otherwise (pages.nav_groups). Every redraw passes here, a
+   * chip's as much as a link's. */
+  function syncNav() {
+    var here = state.role === "member" ? "congress" : "candidates";
+    Array.prototype.forEach.call(doc.querySelectorAll('.site-nav [data-nav="candidates"], ' +
+        '.site-nav [data-nav="congress"]'), function (link) {
+      if (link.getAttribute("data-nav") === here) link.setAttribute("aria-current", "page");
+      else link.removeAttribute("aria-current");
+    });
+  }
+
   function apply(opts) {
     syncStateLink();
     syncViewToggles();
+    syncNav();
     visible = data.filter(matches);
     visible.sort(SORTS[state.sort] || SORTS.region);
     listDrawn = true;

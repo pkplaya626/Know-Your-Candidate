@@ -62,7 +62,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (1353 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (1390 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -117,7 +117,7 @@ CI asserts that a rebuild changes nothing.
 | `geo.py` | Decode the state atlas into SVG path data |
 | `summary.py` | Chamber balance, election headline figures, per-state figures |
 | `pages.py` | The shared page template, the state pages, the states directory and the sitemap |
-| `government.py` | The guide to how government works: renders its pages and refuses a broken link or an uncited section |
+| `government.py` | Know Your Government, the guide: renders its pages and refuses a broken link or an uncited section |
 | `government_text.py` | The guide's words and the sources each section was checked against |
 | `government_maps.py` | What the guide's maps say about each state, every value with its source |
 | `census.py` | The Census of Governments' counts of local governments by state (the `census` command) |
@@ -252,6 +252,42 @@ layout is the same. What they do differently is handled too:
   an element of the site nor block one of its files.
 
 ### Getting around
+
+The sidebar is the same on every page, grouped by level of government. It is
+one table, `pages.nav_groups`: the generated pages render it, and the build
+fails when the hand-maintained `index.html` or `map.html` carries anything
+else (`emit.check_nav`).
+
+| Group | Entries |
+|---|---|
+| Elections 2026 (the cycle's year, `cycle.CYCLE`) | Candidates (the grid), Races & partisan map |
+| Federal | Congress (the grid's sitting members), President & Cabinet, Federal courts |
+| State | States & territories, State legislatures (`legislature/index.html`) |
+| Local | Counties & cities (`counties/index.html`) |
+| Learn | Know Your Government (the guide) |
+
+A page that *is* an entry's link is marked `aria-current="page"`; one that
+belongs to an entry (a state's legislature, a court) `aria-current="true"`.
+The grid marks Congress while it shows the sitting members.
+
+The guide and the data link each other. Each data page says where Know Your
+Government explains it - the federal hub's sections, each court's page by
+its kind, the district maps, the legislature and county pages, and the
+Congress and election boxes in the sidebar - and each guide section ends
+with where its subject can be seen on this site now (`government_text.SEE`).
+The executive and Supreme Court sections list who holds those offices now,
+from `data/federal.js` (`government_text.HOLDERS`, rule 48). Every link is
+checked: a guide section, by `government.href`; a section of the federal
+hub, against the sections its script draws (`government.SITE_ANCHORS`).
+
+The two directories:
+
+- `legislature/index.html` lists every state legislature, each chamber's
+  seats by party and who holds a majority, in the words of the state pages
+  (`KYC.stategov`, from `data/stategov.js`).
+- `counties/index.html` counts every state's local governments by kind, as
+  the Census of Governments does; a state with none of a kind reads "none",
+  never 0 (rule 49).
 
 - `/` focuses the search box from anywhere on any page; Escape hands focus
   back.
@@ -1137,9 +1173,9 @@ They are linked from everywhere a state is named: the race headers in the
 grid, the profile dialog's "Represents" line, the state filter in the sidebar,
 the map's delegation panel, the footer, and `sitemap.xml`.
 
-## How government works
+## Know Your Government
 
-`government/` is a guide to the offices around the people this site covers:
+`government/` is the guide to the offices around the people this site covers:
 Congress, the executive and the federal courts, state governments, local
 governments and tribal nations, and how elections work. Its eight pages are
 generated, like the state pages, from the shared template in `kyc/pages.py`,

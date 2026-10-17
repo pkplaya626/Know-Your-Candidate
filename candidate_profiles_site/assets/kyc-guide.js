@@ -1,4 +1,4 @@
-/* Know Your Candidate - the guide to how government works.
+/* Know Your Candidate - Know Your Government, the guide.
  *
  * The guide's words are written into each page by kyc/government.py, with
  * the sources each section was checked against. This module adds only what
@@ -382,7 +382,57 @@
 
   /* ----------------------------------------------------------------- boot */
 
-  var LIVE = { committees: renderCommittees };
+  /* --------------------------------------------- who holds the office now */
+
+  /* The executive and the Supreme Court as data/federal.js lists them, each
+   * name opening the person's record on the federal government's page. The
+   * guide's words name no one (rule 48); these lists are the data's. */
+  function officialItem(person, role) {
+    return '<li><a href="' + KYC.escapeAttr("../federal/index.html#/official/" +
+      encodeURIComponent(person.id)) + '">' + KYC.escapeHtml(person.name) + "</a>" +
+      (role ? ' <span class="faint">' + KYC.escapeHtml(role) + "</span>" : "") + "</li>";
+  }
+
+  function asOfNote(date) {
+    return date ? '<p class="faint">As of ' + KYC.escapeHtml(date) + ".</p>" : "";
+  }
+
+  function renderExecutive(target) {
+    var d = global.kycFederal;
+    if (!d || !d.president) return;
+    target.innerHTML = '<ul class="guide-holders">' +
+      officialItem(d.president, "President") + officialItem(d.vicePresident, "Vice President") +
+      "</ul>" + asOfNote((d.asOf || {}).executive);
+  }
+
+  function renderCabinet(target) {
+    var d = global.kycFederal;
+    if (!d || !d.offices) return;
+    var departments = d.offices.filter(function (o) { return o.kind === "department"; })
+      .sort(function (a, b) { return a.order - b.order; });
+    target.innerHTML = '<ul class="guide-holders">' + departments.map(function (office) {
+      // The office, the holder's own title and an acting mark, as the
+      // federal page's card says them (KYC.holderRole).
+      var role = KYC.holderRole(office);
+      return office.holder ? officialItem(office.holder, (role.acting ? "Acting " : "") +
+          office.office + (role.title ? " (" + role.title + ")" : ""))
+        : '<li><span class="faint">' + KYC.escapeHtml(office.office) +
+          ": nobody listed by the White House</span></li>";
+    }).join("") + "</ul>" + asOfNote((d.asOf || {}).executive);
+  }
+
+  function renderJustices(target) {
+    var d = global.kycFederal;
+    var members = ((d || {}).supremeCourt || {}).members;
+    if (!members || !members.length) return;
+    target.innerHTML = '<ul class="guide-holders">' + members.map(function (j) {
+      return officialItem(j, (j.justice || {}).role || "");
+    }).join("") + "</ul>" + asOfNote((d.asOf || {}).judiciary);
+  }
+
+  var LIVE = { committees: renderCommittees, executive: renderExecutive, cabinet: renderCabinet,
+               justices: renderJustices };
+  KYC.guide = { live: LIVE };
 
   function applyRoute(route) {
     if (!KYC.profile) return;

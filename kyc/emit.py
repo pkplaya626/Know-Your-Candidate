@@ -132,7 +132,7 @@ LEGISLATURE_PAGES_DIR = os.path.join(SITE_DIR, "legislature")
 COUNTIES_PAGES_DIR = os.path.join(SITE_DIR, "counties")
 FEDERAL_PAGES_DIR = os.path.join(SITE_DIR, "federal")
 COURT_PAGES_DIR = os.path.join(SITE_DIR, "courts")
-# The guide to how government works: generated pages, one folder down. What
+# Know Your Government, the guide: generated pages, one folder down. What
 # each loads depends on the page (kyc.government.scripts).
 GOVERNMENT_DIR = os.path.join(SITE_DIR, "government")
 # The first district page lived here for a day; the address still answers.
@@ -259,7 +259,8 @@ def state_codes(profiles):
 def render_state_pages(profiles, root=".", summary=None):
     """``{relative path: html}`` for every generated page: one per state, the
     index of states, one district map per state, the old address of the
-    first one, and the guide to how government works."""
+    first one, the directories of legislatures and counties, and the guide,
+    Know Your Government."""
     from . import districts, government, pages
 
     host = canonical_host(root)
@@ -274,7 +275,11 @@ def render_state_pages(profiles, root=".", summary=None):
         out[path] = pages.render_redirect(target, host)
     for relative, text in government.render_all(host, state_codes(profiles)).items():
         out[os.path.join(SITE_DIR, *relative.split("/"))] = text
+    from . import census
     from .government_maps import STATES
+    out[os.path.join(LEGISLATURE_PAGES_DIR, "index.html")] = pages.render_legislatures_index(host)
+    out[os.path.join(COUNTIES_PAGES_DIR, "index.html")] = pages.render_counties_index(
+        host, census.load_cache(root))
     for code in STATES:
         out[os.path.join(LEGISLATURE_PAGES_DIR, f"{code.lower()}.html")] = (
             pages.render_legislature_page(code, host, summary))
@@ -678,12 +683,16 @@ def check_pages(root="."):
         directory = os.path.join(root, folder)
         if os.path.isdir(directory):
             for name in sorted(os.listdir(directory)):
-                if name.endswith(".html"):
+                # A folder's directory page is checked on its own, below.
+                if name.endswith(".html") and not (name == "index.html" and folder != STATES_DIR):
                     code = name[:-len(".html")]
                     checks[f"{os.path.basename(folder)}/{name}"] = tuple(
                         src.replace("{code}", code) for src in required)
 
     checks["federal/index.html"] = FEDERAL_PAGE_REQUIREMENTS
+    checks["legislature/index.html"] = ("../assets/kyc.js", "../data/stategov.js",
+                                        "../assets/kyc-stategov.js")
+    checks["counties/index.html"] = ("../assets/kyc.js",)
 
     from . import government
     for slug in government.slugs():
@@ -718,4 +727,32 @@ def check_pages(root="."):
                 problems.append(f"{src} is referenced but does not exist")
 
         results.append((page, not problems, "; ".join(problems) if problems else "ok"))
+    results += check_nav(root)
     return results
+
+
+# The hand-maintained pages and the navigation entry each is.
+NAV_PAGES = {"index.html": "candidates", "map.html": "races"}
+
+
+def check_nav(root="."):
+    """``[(page, ok, note)]``: whether index.html and map.html carry the
+    navigation the generated pages render (pages.nav_groups). They are
+    edited by hand, and a sidebar that disagrees with the rest of the site
+    looks entirely normal on the page it is on."""
+    from . import pages
+
+    out = []
+    for page, current in NAV_PAGES.items():
+        path = os.path.join(root, SITE_DIR, page)
+        if not os.path.exists(path):
+            continue
+        with open(path, "r", encoding="utf-8") as handle:
+            text = handle.read()
+        want = pages.nav_html("", current)
+        start = text.find('        <nav class="sidebar-section site-nav"')
+        found = text[start:text.find("</nav>", start) + len("</nav>")] if start >= 0 else ""
+        out.append((f"{page} (navigation)", found == want,
+                    "ok" if found == want else
+                    "its navigation is not pages.nav_html(\"\", %r): copy it from there" % current))
+    return out
