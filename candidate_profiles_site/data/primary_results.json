@@ -1,5 +1,5 @@
 {
- "asOf": "2026-10-16",
+ "asOf": "2026-10-17",
  "calendarNotes": [
   {
    "kind": "open-primary",
@@ -382,7 +382,7 @@
  ],
  "qualified": {
   "election": "11/03/2026",
-  "fetched": "2026-10-16",
+  "fetched": "2026-10-17",
   "races": [
    "H-LA-01-2026",
    "H-LA-02-2026",
@@ -10669,7 +10669,7 @@
   },
   "H-NJ-10-2026": {
    "about": {
-    "H4NJ10135": "perennial candidate and nominee for this district in the 2024 special and regular elections",
+    "H4NJ10135": "small business owner, perennial candidate, and nominee for this district in the 2024 special and regular elections",
     "H4NJ10176": "incumbent U.S. representative"
    },
    "ambiguous": [],
@@ -16250,13 +16250,13 @@
   "H-VA-05-2026": {
    "about": {
     "H0VA07133": "incumbent U.S. representative",
-    "H6VA05241": "vocational therapist"
+    "H6VA05241": "vocational therapist",
+    "H8VA05106": "former special envoy for Sudan (2024–2025), former U.S. representative (2009–2011)"
    },
-   "ambiguous": [
-    "Tom Perriello"
-   ],
+   "ambiguous": [],
    "article": {
-    "H0VA07133": "John McGuire (Virginia politician)"
+    "H0VA07133": "John McGuire (Virginia politician)",
+    "H8VA05106": "Tom Perriello"
    },
    "decided": {
     "general": true,
@@ -16272,7 +16272,8 @@
     "H6VA05191": "democratic",
     "H6VA05209": "democratic",
     "H6VA05233": "republican",
-    "H6VA05241": "independent"
+    "H6VA05241": "independent",
+    "H8VA05106": "democratic"
    },
    "site": {},
    "status": {
@@ -16285,17 +16286,14 @@
     "H6VA05209": "eliminated",
     "H6VA05233": "eliminated",
     "H6VA05241": "nominee",
-    "H6VA05266": "withdrawn"
+    "H6VA05266": "withdrawn",
+    "H8VA05106": "nominee"
    },
    "unmatched": {
     "Salaam Bhatti": "withdrawn",
-    "Shannon Taylor": "withdrawn",
-    "Tom Perriello": "nominee"
+    "Shannon Taylor": "withdrawn"
    },
-   "unsure": [
-    "H6VA05217",
-    "H8VA05106"
-   ]
+   "unsure": []
   },
   "H-VA-06-2026": {
    "about": {

@@ -170,7 +170,8 @@
    "party": "D",
    "partyKey": "D",
    "selection": "Chosen by the legislature",
-   "title": "Attorney General"
+   "unconfirmed": true,
+   "unreadable": true
   },
   "MI": {
    "listedBy": "Democratic Attorneys General Association",
@@ -410,7 +411,7 @@
    "title": "Attorney General"
   }
  },
- "fetched": "2026-10-15T13:13:03+00:00",
+ "fetched": "2026-10-17T18:07:17+00:00",
  "lt": {
   "AK": {
    "name": "Nancy Dahlstrom",
