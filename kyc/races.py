@@ -138,7 +138,56 @@ def assign(profiles):
     return profiles
 
 
-def build(profiles, filed_counts=None, results=None, dates=None, filed=None, record=None):
+_SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
+
+
+def _words(text):
+    import re
+    import unicodedata
+
+    text = re.sub(r"\([^)]*\)|\"[^\"]*\"|“[^”]*”", " ", str(text or ""))
+    folded = "".join(c for c in unicodedata.normalize("NFD", text)
+                     if unicodedata.category(c) != "Mn")
+    words = [w.strip(".,").lower() for w in folded.replace(",", " ").split()]
+    words = [w for w in words if w]
+    while len(words) > 1 and words[-1] in _SUFFIXES:
+        words.pop()
+    return words
+
+
+def surname(profile, filed=None, people=None):
+    """The surname *profile* is listed under in a race: the one Congress's
+    record gives a member (*people*, the snapshot by bioguide id), or the
+    one their FEC filing gives ("WASSERMAN SCHULTZ, DEBBIE"), when it ends
+    the name the page shows; otherwise the shown name's last word, less a
+    suffix. A filing under a legal name ("ARENHOLZ, ASHLEY HINSON") or with
+    its names swapped ("LISA, CARLQUIST") does not end the shown name, so
+    it never puts someone under a name the reader cannot see."""
+    shown = _words(profile.get("name"))
+    row = (filed or {}).get(profile.get("fecCandidateId")) or {}
+    candidates = [((people or {}).get(profile.get("id")) or {}).get("last")]
+    for name in (profile.get("filedName"), row.get("name")):
+        if name and "," in name:
+            candidates.append(name.split(",")[0])
+    for last in candidates:
+        words = _words(last)
+        if words and len(words) < len(shown) and shown[-len(words):] == words:
+            return " ".join(words)
+    return shown[-1] if shown else ""
+
+
+def order_people(ids, by_id, filed=None, people=None):
+    """*ids* in the one order every view lists a race's people in: by
+    surname, then by the whole name shown (TRUST-15). A race's sitting
+    member is listed first by the page, from ``incumbentIds``."""
+    def key(pid):
+        person = by_id.get(pid) or {}
+        return (surname(person, filed, people), " ".join(_words(person.get("name"))), pid)
+    return sorted(ids, key=key)
+
+
+def build(profiles, filed_counts=None, results=None, dates=None, filed=None, record=None,
+          snapshot=None):
     """Return the race list, most contested first.
 
     ``contested`` means somebody besides the incumbent is running: a
@@ -254,7 +303,17 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
             # incumbent, whatever the build could tell about them.
             holds(race_for(rid), profile)
 
+    from .legislators import by_bioguide
+
+    people = by_bioguide(snapshot)
     for race in races.values():
+        # One order for the people in a race, in every view that lists them:
+        # the race view had them in build order (curated rows first, then
+        # filings by registration) and the profile by first name, so North
+        # Carolina's Senate race read Cooper, Whatley, Dublin in one and
+        # Dublin, Whatley, Cooper in the other.
+        race["candidateIds"] = order_people(race["candidateIds"], by_id, filed, people)
+        race["incumbentIds"] = order_people(race["incumbentIds"], by_id, filed, people)
         # A special election (Florida's, Ohio's): from the frozen record, so it
         # stays one after the seat's winner is seated for the term to 2029.
         race["special"] = bool((frozen.get(race["id"]) or {}).get("special"))
