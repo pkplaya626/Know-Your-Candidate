@@ -85,10 +85,17 @@
       '<span class="faint">-' + KYC.escapeHtml(p.state) + "</span></span>" + extra + "</button>";
   }
 
+  /** A lead the rosters do not name reads as that, a claim about the
+   *  rosters: "None recorded" read as though the minority had no leader or
+   *  the data were broken (most joint committees title only majority
+   *  members, one from each chamber). */
+  var UNNAMED = { "Chair": "No chair named in the rosters",
+    "Minority lead": "No minority lead named in the rosters" };
+
   function leadCell(leads, standard, label) {
     if (!leads.length) {
-      return '<td data-label="' + KYC.escapeAttr(label) + '"><span class="faint">' +
-        "None recorded</span></td>";
+      return '<td data-label="' + KYC.escapeAttr(label) + '"><span class="faint lead-unnamed">' +
+        KYC.escapeHtml(UNNAMED[label] || "Not named in the rosters") + "</span></td>";
     }
     return '<td data-label="' + KYC.escapeAttr(label) + '">' +
       leads.map(function (l) { return personButton(l, standard); }).join("<br>") + "</td>";
@@ -139,8 +146,17 @@
         }
         return;
       }
+      // Counted from the rosters, so the note cannot outlive them.
+      var unnamed = rows.filter(function (row) { return !row.minority.length; }).length;
       html += '<h3 class="guide-subheading">' + KYC.escapeHtml(chamber[1]) +
         ' <span class="faint">' + rows.length + "</span></h3>" +
+        (unnamed ? '<p class="faint committees-unnamed" data-chamber="' + KYC.escapeAttr(chamber[0]) +
+          '">' + (unnamed === rows.length
+            ? (unnamed === 1 ? "This committee’s roster gives" : "Each of these committees’ rosters gives")
+            : unnamed === 1 ? "One of these committees’ rosters gives"
+            : unnamed + " of these committees’ rosters give") +
+          " no member of the minority a leading title, so no minority lead is shown for " +
+          (unnamed === 1 ? "it" : "them") + ".</p>" : "") +
         '<div class="guide-table-wrap"><table class="guide-table guide-committees">' +
         '<thead><tr><th scope="col">Committee</th><th scope="col">Chair</th>' +
         '<th scope="col">Minority lead</th></tr></thead><tbody>' +
@@ -250,7 +266,8 @@
         data.modes.legislature.values[code] !== undefined
         ? '<p class="guide-fact-link"><a href="' + KYC.escapeAttr(KYC.siteRoot() + "legislature/" +
           code.toLowerCase() + ".html") + '">' + KYC.icon("landmark") + " " +
-          KYC.escapeHtml(map.name(code)) + " Legislature: every district and member ›</a></p>"
+          KYC.escapeHtml(map.name(code) + " " + ((data.legislatureNames || {})[code] || "Legislature")) +
+          ": every district and member ›</a></p>"
         : "";
       // On the local map, the state's counties and every government in each.
       var local = page === "local" && data.modes["local-total"] &&

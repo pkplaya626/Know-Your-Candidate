@@ -86,6 +86,18 @@ OFF_BALLOT = (ELIMINATED, WITHDRAWN, UNLISTED)
 # On the November ballot, before and after it is counted.
 NOVEMBER = (NOMINEE, ELECTED, DEFEATED, RUNOFF, QUALIFIED)
 
+# Primaries in which every candidate runs on one ballot and the leaders go
+# through to November whatever their party, so nobody is a party's nominee
+# and two of one party can both go through: "Won the primary" and
+# "Renominated" were on 116 people in these states, two "winners" of one
+# party in nine races. The guide cites the same laws (government_text).
+ALL_PARTY_PRIMARIES = {
+    "CA": ("top-two", "Cal. Elections Code 8141.5; California Secretary of State, "
+                      "Primary elections in California"),
+    "WA": ("top-two", "RCW 29A.52.112"),
+    "AK": ("top-four", "AS 15.25.010"),
+}
+
 
 class ResultsError(RuntimeError):
     pass
@@ -2014,12 +2026,20 @@ def _claim_unmatched(profiles, races, field=None):
     from . import overrides
     from .candidates import display_name, race_id
 
-    filers = {}
+    filers, filed = {}, {}
     for row in (field or {}).get("candidates", []) if isinstance(field, dict) else []:
         rid = race_id(row)
         if rid:
             filers.setdefault(rid, []).append(
                 (row["candidate_id"], _words(display_name(row.get("name")))))
+            filed.setdefault(rid, []).append(row)
+    # One person's several registrations (candidates.registrations: one
+    # committee, the same money), as the profile that holds them.
+    kept_of = {}
+    for profile in profiles:
+        for other in profile.get("otherFecIds") or []:
+            if profile.get("fecCandidateId"):
+                kept_of[other] = profile["fecCandidateId"]
 
     named = {cid for race in races.values() for cid in (race.get("status") or {})}
     waiting = {}
@@ -2039,8 +2059,24 @@ def _claim_unmatched(profiles, races, field=None):
             continue
         fits = {}
         ambiguous = set(race.get("ambiguous") or [])
+        mine = {cid for _p, cid in people}
         for name in unmatched:
             if name in ambiguous:
+                # Ambiguous when read only because two of its fits were one
+                # person's two registrations: "Dan Miressi" fitted both "DAN"
+                # and "DANIEL", filed for one committee. Read again over every
+                # filer in the race, each person's registrations as one, a
+                # single fit that is a profile here is that person - and any
+                # other filer the name fits still leaves it ambiguous.
+                rows = [dict(row, candidate_id=kept_of.get(row["candidate_id"],
+                                                           row["candidate_id"]))
+                        for row in filed.get(rid, [])]
+                again, _still = match_names([name], rows)
+                ids = again.get(name) or []
+                folded = any(kept_of.get(row["candidate_id"]) == (ids or [None])[0]
+                             for row in filed.get(rid, []))
+                if len(ids) == 1 and ids[0] in mine and folded:
+                    fits[name] = ids[0]
                 continue
             alias = [cid for _p, cid in people
                      if (overrides.RESULT_NAMES.get(cid) or (None,))[0] == name]
@@ -2159,6 +2195,11 @@ def apply_cache(profiles, cache, field=None):
             rid, status = by_id[candidate_id]
             profile["raceStatus"] = status
             profile["raceStatusRace"] = rid
+            kind = ALL_PARTY_PRIMARIES.get(rid.split("-")[1])
+            if kind and status == NOMINEE:
+                # Through to November from an all-party primary: the page
+                # says "advanced", never "won" or "renominated".
+                profile["allPartyPrimary"] = kind[0]
             _source_of(profile, races.get(rid))
             ballot_name = (races.get(rid, {}).get("claimed") or {}).get(candidate_id)
             # A hyphen alone changes nothing but the spelling, and the
@@ -2272,8 +2313,27 @@ def apply_cache(profiles, cache, field=None):
                 _source_of(profile, races[rid])
                 profile["seekingReelection2026"] = False
                 applied += 1
-        elif profile.get("isCandidate") and candidate_id not in unsure:
+        elif profile.get("isCandidate"):
             rid = _race_of(profile)
+            if candidate_id in unsure and not (rid in races and _maybe_named(profile, races[rid])):
+                continue
+            # Unsure - a page name fitted them and another filing alike - is
+            # still decided when every name that may be them is out: Josh
+            # Weil withdrew from Florida's Senate race and, with no status,
+            # read as a challenger whose primary had not been held, counted
+            # on the ballot. Otherwise they are undecided, as below.
+            if rid in races and not decided_for(races[rid], profile.get("party")) and (
+                    (races[rid].get("decided") or {}).get("parties")
+                    or set((races[rid].get("status") or {}).values()) & set(NOVEMBER)):
+                # The primary has been held - the page decided another
+                # party's, or names its nominees (Florida holds no primary
+                # for an unopposed one) - but not a contest of theirs: an
+                # independent or a minor party's filer the page does not
+                # name, such as FL-18's Deva Simmons. Whether they
+                # are on the November ballot is not known here (rule 19), and
+                # never "the primary has not been held yet".
+                profile["ballotUnknown"] = True
+                continue
             if rid in races and decided_for(races[rid], profile.get("party")):
                 # A refused match is not an absence: "Max Ganorkar" is the
                 # NC-4 Republican nominee and was shown as "Not on the 2026

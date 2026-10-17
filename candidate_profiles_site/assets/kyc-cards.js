@@ -70,6 +70,20 @@
       return '<span class="badge badge-danger">Leaving in ’26</span>';
     }
     if (item.isCandidate) {
+      /* The primary has been held and the published results do not name
+       * them (an independent, a minor party's filer): not "the primary has
+       * not been held yet", and not counted as on the ballot. */
+      if (!item.raceStatus && item.maybeNamed && item.maybeNamed.length) {
+        return '<span class="badge badge-neutral" title="' + KYC.escapeAttr(
+          "The published results name " + item.maybeNamed.join(" and ") + ", who may be this " +
+          "person under another spelling. Not confirmed here, so the race counts them once, " +
+          "under that name.") + '">Result not matched</span>';
+      }
+      if (!item.raceStatus && item.ballotUnknown) {
+        return '<span class="badge badge-neutral" title="Filed with the FEC. The published ' +
+          'results of this race do not name them, so whether they are on the November ballot ' +
+          'is not known here.">Ballot status not known</span>';
+      }
       return raceBadge(item) ||
         '<span class="badge badge-money" title="Filed with the FEC; the primary has not been held yet.">2026 challenger</span>';
     }
@@ -188,17 +202,34 @@
       var holder = race.incumbentIds.map(KYC.byId).filter(Boolean)[0];
       // The record names who held the seat even when they have no profile.
       var named = race.incumbent && race.incumbent.name;
+      // A mid-decade map keeps every district number, so a seat nobody
+      // holds is vacant, not new: FL-20 and TX-23 read "newly drawn".
       var why = !holder ? (named ? named + " no longer holds the seat." :
-          "A newly drawn seat with no sitting member.") :
+          "No sitting member: the seat is vacant.") :
         // Seated since in the seat they won elsewhere (kyc/record.py).
         holder.raceRole === "winner" && holder.raceId !== race.id
           ? holder.name + " won the race for " + holder.officeLabel.replace(/ • /, " ") + "." :
+        holder.contestLabel && KYC.offBallot(KYC.contestStatus(holder))
+          ? holder.name + " ran for " + holder.contestLabel.replace(/ • /, " ") +
+            " and is not on the November ballot." :
         holder.contestLabel ? holder.name + " is running for " + holder.contestLabel + "." :
         holder.alsoRunningSeat ? holder.name + " is running for " + holder.alsoRunningSeat + "." :
         KYC.offBallot(holder.raceStatus) ? holder.name + " is not on the November ballot." :
         holder.name + " is not seeking re-election.";
-      badges.push('<span class="badge badge-warn" title="' + KYC.escapeAttr(why) +
-        '">Open seat</span>');
+      if (race.holderMoved) {
+        why = race.holderMoved.name + ", who holds this seat, is running for " +
+          race.holderMoved.to.replace(/ • /, " ") + " under the state's new district map; no " +
+          "sitting member is on this seat's ballot.";
+      }
+      badges.push('<span class="badge badge-warn" title="' + KYC.escapeAttr(why) + '">Open seat</span>');
+    } else if (race.holderMoved) {
+      // Not open - a member is running here under the new number - but its
+      // holder is on another seat's ballot, and the reader should see where.
+      badges.push('<span class="badge badge-neutral" title="' + KYC.escapeAttr(
+        race.holderMoved.name + ", who holds this seat, is running for " +
+        race.holderMoved.to.replace(/ • /, " ") + " under the state's new district map.") +
+        '">Holder running in ' + KYC.escapeHtml(race.holderMoved.to.replace(/^House • /, "")) +
+        "</span>");
     }
     if (race.primaryDate) {
       // A ballot read from a qualified list is not a held primary.
@@ -233,11 +264,21 @@
     // Nominees the results page names with no profile here: a filing under
     // $5,000, or none. They are on the ballot, so they count (rule 22).
     var unprofiled = res && res.otherNominees ? res.otherNominees.length : 0;
-    if (race.contested) {
+    var noProfile = unprofiledNames(race).none;
+    if (race.contested && !(race.candidateCount + unprofiled) && race.ballotUnknown) {
+      // Nobody known to be on the ballot, and someone who may be: never
+      // "No challenger on the ballot", never "0 challengers".
+      badges.push('<span class="badge badge-neutral" title="' + KYC.escapeAttr(
+        "Filed with the FEC; the published results do not name them, so whether they are on " +
+        "the November ballot is not known here.") + '">' + race.ballotUnknown +
+        " filed, ballot status not known</span>");
+    } else if (race.contested) {
       var running = race.candidateCount + unprofiled;
+      // With nobody holding the seat on the ballot, nobody is challenging.
+      var word = race.openSeat ? "candidate" : "challenger";
       badges.push(
         '<span class="badge badge-money">' + running +
-        " challenger" + (running === 1 ? "" : "s") +
+        " " + word + (running === 1 ? "" : "s") +
         (race.settled ? " on the ballot" : "") + "</span>"
       );
     } else if (race.settled && res) {
@@ -265,13 +306,13 @@
 
     /* People the results page puts on the ballot but the FEC has no
      * filing for. Leaving them off would make the header lie. */
-    if (unprofiled) {
+    if (noProfile.length) {
       badges.push(
         '<span class="badge badge-warn" title="' + KYC.escapeAttr(
           "On the November ballot " + KYC.ballotSource(race) + ", with no FEC filing " +
           "over $5,000 - the point at which federal law treats someone as a " +
-          "candidate - so no profile here: " + res.otherNominees.join(", ")
-        ) + '">' + unprofiled + " with no profile here</span>"
+          "candidate - so no profile here: " + noProfile.join(", ")
+        ) + '">' + noProfile.length + " with no profile here</span>"
       );
     }
 
@@ -294,7 +335,8 @@
     opts = opts || {};
     var running = people.filter(function (p) { return !offBallot(p); });
     var out = people.filter(offBallot);
-    var body = '<div class="card-grid">' + running.map(card).join("") + "</div>";
+    var body = '<div class="card-grid">' + running.map(card).join("") + "</div>" +
+      unprofiledNote(race);
     if (out.length) {
       body +=
         '<details class="race-out"><summary>' + out.length +
@@ -320,7 +362,45 @@
     ].join("");
   }
 
+  /* The people the published results put on the November ballot whom no
+   * profile here matches, split into those with no profile at all and
+   * those whose name may be a profile's under another spelling. */
+  function unprofiledNames(race) {
+    var res = (race && race.results) || {};
+    var maybe = res.maybeProfiled || {};
+    var names = res.otherNominees || [];
+    return {
+      none: names.filter(function (n) { return !maybe[n]; }),
+      maybe: names.filter(function (n) { return maybe[n]; })
+        .map(function (n) { return { name: n, id: maybe[n] }; }),
+    };
+  }
+
+  /* One visible line for them, in every view that lists a race: the race
+   * sections, the profile's race panel, the district pages, the Senate view
+   * and the map's state panel. Left out, a member with a named November
+   * opponent read as unopposed, and Tennessee's Senate seat listed two
+   * people running over a ballot of nine. */
+  function unprofiledNote(race, cls) {
+    var u = unprofiledNames(race);
+    var parts = [];
+    if (u.none.length) {
+      parts.push("Also on the November ballot, " + KYC.escapeHtml(KYC.ballotSource(race)) +
+        ", with no FEC filing over $5,000 and so no profile here: " +
+        KYC.escapeHtml(u.none.join(", ")) + ".");
+    }
+    u.maybe.forEach(function (m) {
+      var who = KYC.byId(m.id);
+      parts.push("The results also name " + KYC.escapeHtml(m.name) + ", who may be " +
+        KYC.escapeHtml(who ? who.name : "a candidate with a profile here") +
+        " under another spelling; this site has not confirmed it.");
+    });
+    return parts.length ? '<p class="' + (cls || "race-note") + '">' + parts.join(" ") + "</p>" : "";
+  }
+
   KYC.cards = {
+    unprofiledNames: unprofiledNames,
+    unprofiledNote: unprofiledNote,
     offBallot: offBallot,
     raceBadge: raceBadge,
     statusBadge: statusBadge,

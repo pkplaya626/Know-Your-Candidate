@@ -397,10 +397,26 @@
    *  `{cls, label, title, rank, off}`, or null for no status. Options:
    *  `own` - a sitting member, about the seat they hold; `unconfirmed` - the
    *  record's raceStatusUnconfirmed; `now` - the clock, for tests. */
+  /* Through to November from an all-party primary - California's and
+   * Washington's top two, Alaska's top four: nobody won a party's
+   * nomination, and two of one party can both go through. The pipeline
+   * says which (results.ALL_PARTY_PRIMARIES, `allPartyPrimary`). */
+  function allParty(kind) {
+    var top = kind === "top-four" ? "top four" : "top two";
+    var title = "Finished in the " + top + " of the all-party primary, which sends the leaders " +
+      "to November whatever their party; on the November ballot.";
+    return { cls: "badge-money", rank: 0,
+      card: "On the November ballot", long: "Advanced to the November ballot", mate: "On the ballot",
+      short: "Advanced", title: title,
+      member: { card: "Advanced to November", long: "Advanced to the November ballot",
+        short: "Advanced", mate: "Advanced", title: title } };
+  }
+
   function raceStatus(status, form, opts) {
     var spec = RACE_STATUS[status];
     if (!spec) return null;
     opts = opts || {};
+    if (status === "nominee" && opts.allParty) spec = allParty(opts.allParty);
     var listed = opts.source === "qualified";
     if (listed && LISTED[status]) spec = LISTED[status];
     if (status === "unlisted" && opts.unconfirmed) spec = UNCONFIRMED;
@@ -443,6 +459,7 @@
         !(item.appointed && status !== "unlisted"),
       unconfirmed: !!item.raceStatusUnconfirmed,
       source: record.raceStatusSource,
+      allParty: record.allPartyPrimary,
       now: opts.now,
     });
   }
@@ -838,16 +855,38 @@
    *  The theme picker used to be a CSS :hover popup, which meant it could not
    *  be opened by keyboard at all and behaved erratically on touch, where a
    *  tap fires hover and click together. */
-  function createMenu(button, panel) {
+  function createMenu(button, panel, opts) {
+    opts = opts || {};
+    /* An item picked while the menu's history step (below) is still to be
+     * undone. On a phone, closing steps back from that entry, and the step
+     * lands after anything run now: a sort written to the address at the
+     * pick was undone a moment later, back to the old order. So the pick
+     * runs once the step has landed (*opts.onSelect*). */
+    var picked = null;
+
     function isOpen() { return !panel.hidden; }
 
-    function close(fromHistory) {
+    function run() {
+      var item = picked;
+      picked = null;
+      if (item && opts.onSelect) opts.onSelect(item);
+    }
+
+    /* *handover*: another menu is opening and takes the history entry, so
+     * there is no step back - with two menus on a page, the step taken for
+     * the first closed the second as it opened. */
+    function close(fromHistory, handover) {
       if (!isOpen()) return;
       panel.hidden = true;
       button.setAttribute("aria-expanded", "false");
       doc.removeEventListener("keydown", onKey, true);
       doc.removeEventListener("click", onOutside, true);
-      if (fromHistory !== true && history.state && history.state.kycMenu) history.back();
+      if (handover) return;
+      if (fromHistory !== true && history.state && history.state.kycMenu) {
+        history.back();               // the pick runs on the popstate it fires
+        return;
+      }
+      run();
     }
 
     function open() {
@@ -865,7 +904,10 @@
     }
 
     global.addEventListener("popstate", function () {
-      if (!(history.state && history.state.kycMenu)) close(true);
+      if (!(history.state && history.state.kycMenu)) {
+        close(true);
+        run();
+      }
     });
 
     function onKey(event) {
@@ -877,16 +919,22 @@
     }
 
     function onOutside(event) {
-      if (!panel.contains(event.target) && event.target !== button) close();
+      if (panel.contains(event.target) || button.contains(event.target)) return;
+      var other = event.target.closest && event.target.closest("[data-kyc-menu]");
+      close(false, !!other);
     }
 
     button.setAttribute("aria-expanded", "false");
+    button.setAttribute("data-kyc-menu", "");
     button.addEventListener("click", function (event) {
       event.stopPropagation();
       if (isOpen()) close(); else open();
     });
     panel.addEventListener("click", function (event) {
-      if (event.target.closest(".menu-item")) close();
+      var item = event.target.closest(".menu-item");
+      if (!item) return;
+      picked = item;
+      close();
     });
 
     return { open: open, close: close, isOpen: isOpen };
@@ -1260,10 +1308,18 @@
       challengers.textContent = String(
         running !== undefined ? running : (election.challengers || 0)
       );
-      if (running !== undefined && election.challengers) {
-        challengers.title = election.challengers + " filed with the FEC; " +
-          (election.challengers - running) + " lost a primary, withdrew, or were " +
-          "not on the primary ballot";
+      // The same count as every race header: everyone on the ballot but a
+      // member running for the seat they hold, profile or not.
+      if (running !== undefined) {
+        challengers.title = "Everyone on the 2026 ballot except members running for the seat " +
+          "they hold, open-seat candidates included: " +
+          (election.challengersWithProfile !== undefined
+            ? election.challengersWithProfile + " with a profile here" +
+              (election.renumbered ? " (" + election.renumbered + " of them members running " +
+                "under a new district number)" : "") + ", " +
+              election.challengersUnprofiled + " named by the published results with no FEC " +
+              "filing over $5,000"
+            : running + " in all") + ".";
       }
     }
   }
@@ -1549,8 +1605,13 @@
         '">No linked record of public offices</p>';
     }
     var rows = record.rows || [];
+    // The list is what two sources agree on, not a full record: it says so
+    // before it starts, or its heading reads as complete (an officer's
+    // earlier office can be in their OGE filings and not here).
     var list = rows.length
-      ? '<ul class="held-list">' + rows.map(function (row) {
+      ? '<p class="held-scope faint">Only offices the sources below agree on; ' +
+        "others may be missing.</p>" +
+        '<ul class="held-list">' + rows.map(function (row) {
           var note = HELD_NOTES[row.agree];
           var place = heldPlace(row);
           return '<li class="held-row">' +

@@ -116,7 +116,7 @@ $nav
 $sidebar
         <nav class="sidebar-section push" aria-label="Jump to a state">
             <h2 class="sidebar-heading">Jump to</h2>
-            <label class="sr-only" for="stateJump">Jump to a state or territory</label>
+            <label class="sr-only" for="stateJump">$jump_label</label>
             <select id="stateJump" class="select"$jump_attrs>
                 <option value="">Choose a state&hellip;</option>$jump_options
             </select>
@@ -154,7 +154,7 @@ def nav_groups():
             ("legislatures", "legislature/index.html", "columns", "State legislatures"),
         )),
         ("Local", (
-            ("local", "counties/index.html", "layers", "Counties & cities"),
+            ("local", "counties/index.html", "layers", "Counties & local governments"),
         )),
         ("Learn", (
             ("guide", "government/index.html", "scroll", "Know Your Government"),
@@ -266,6 +266,12 @@ def render_page(**fields):
     fields["nav"] = nav_html("../", fields.pop("nav_current", None), fields.pop("nav_how", "page"))
     fields.setdefault("jump_options", "")
     fields.setdefault("jump_attrs", "")
+    # An empty list is filled on the page with every state and territory; a
+    # list written here (the legislature and county pages) may hold only
+    # the fifty states, and its label says what it holds.
+    options = fields["jump_options"]
+    whole = not options or any(f'value="{c}"' in options for c in TERRITORIES)
+    fields["jump_label"] = "Jump to a state or territory" if whole else "Jump to a state"
     return _PAGE.substitute(search=search, **fields)
 
 # The state pages render everything from profiles.js on the client.
@@ -308,7 +314,13 @@ def render_state(code, host, summary=None):
     """The HTML for one state's page."""
     name = state_name(code)
     info = ((summary or {}).get("states") or {}).get(code) or {}
-    if code in TERRITORIES:
+    if code in TERRITORIES and info.get("houseTerm"):
+        # Puerto Rico: a four-year seat with no 2026 race (summary._delegate_seats).
+        title = info.get("delegateTitle", "Delegate")
+        description = (f"{name}'s {title} in the U.S. House, elected for a "
+                       f"{info['houseTerm']['years']}-year term and next on the ballot in "
+                       f"{info['houseTerm']['next']}, and who governs {name}.")
+    elif code in TERRITORIES:
         what = "delegate to the U.S. House" if info.get("house", 0) <= 1 else "delegates"
         description = (f"{name}'s {what}, the 2026 race for the seat, and every "
                        f"candidate who has filed - who is on the ballot and who is out.")
@@ -385,13 +397,16 @@ def render_legislatures_index(host):
         '                <ul class="directory-list">',
         rows,
         "                </ul>",
+        '                <p class="faint directory-outside">The fifty state legislatures. The District of',
+        '                    Columbia has <a href="../states/dc.html">a mayor and a council</a>, not a',
+        "                    legislature, and the territories&#8217; legislatures are not covered here.</p>",
         "            </div>",
     ])
     footer = "\n".join([
         "                <p><strong>Sources:</strong> members and their parties from Open States, as",
-        "                    each legislature publishes them, counted against the National Conference",
-        "                    of State Legislatures' figures; a chamber's control is shown only where",
-        "                    the two agree. A seat with nobody listed counts for no one.</p>",
+        "                    each legislature publishes them. Which party holds each chamber is checked",
+        "                    against the National Conference of State Legislatures' figures and shown",
+        "                    only where the two agree. A seat with nobody listed counts for no one.</p>",
         "                <p>Non-partisan and independent.</p>",
     ])
     return render_page(
@@ -431,26 +446,53 @@ def render_counties_index(host, census=None):
     Governments counts them, each state linked to its counties page. A
     state with none of a kind (an "X" in the Census table) reads "none",
     with what that means, never 0 (rule 49)."""
+    from . import county_areas
     from .government import jump_options
-    from .government_maps import STATES
+    from .government_maps import COUNT_NOTES, STATES
 
     path = "counties/index.html"
     canonical = f"https://{host}/{path}" if host else path
     counts = (census or {}).get("states") or {}
     kinds = _local_kinds()
+    # A state whose county areas are not all governed by a county says why,
+    # in a numbered note under the table: "none" for Rhode Island, and 5 for
+    # Massachusetts's fourteen counties, are otherwise a puzzle (rule 71).
+    notes = [(code, county_areas.directory_note(code)) for code in sorted(STATES, key=state_name)]
+    notes = [(code, text) for code, text in notes if text]
+    number = {code: i + 1 for i, (code, _text) in enumerate(notes)}
 
     def cell(code, kind, none):
         value = (counts.get(code) or {}).get(kind)
+        mark = (f'<sup><a class="note-ref" href="#county-note-{_e(code.lower())}" '
+                f'aria-label="Note {number[code]}">{number[code]}</a></sup>'
+                if kind == "county" and code in number else "")
         if value is None:
-            return (f'<td class="faint" title="{_e(none)}">none</td>' if code in counts
+            return (f'<td class="faint" title="{_e(none)}">none{mark}</td>' if code in counts
                     else "<td>&ndash;</td>")
-        return f"<td>{value:,}</td>"
+        if (code, kind) in COUNT_NOTES:
+            mark += (f'<sup><a class="note-ref" href="#count-note-{_e(code.lower())}-{_e(kind)}" '
+                     f'aria-label="What this count is">*</a></sup>')
+        return f"<td>{value:,}{mark}</td>"
 
     rows = "\n".join(
         f'                        <tr><th scope="row"><a href="{_e(code.lower())}.html">'
         f'{_e(state_name(code))}</a></th>' + "".join(cell(code, k, n) for k, _w, n in kinds) + "</tr>"
         for code in sorted(STATES, key=state_name))
     year = (census or {}).get("year")
+    # D.C. and the territories are not in the table, and it says why. D.C.'s
+    # count is the same table's, as the guide's map shows it; the scope is
+    # the guide's (government_maps: "the Census of Governments covers the
+    # states and D.C.").
+    dc = counts.get("DC") or {}
+    dc_kinds = [(dc.get(k), w) for k, w in (("municipal", "municipal government"),
+                                             ("special", "special district")) if dc.get(k)]
+    outside = ("The District of Columbia has no counties, so it is not in this table" +
+               (f"; the Census Bureau counted {dc['total']:,} local governments there"
+                f"{' in ' + _e(year) if year else ''}: " +
+                " and ".join(f"{n:,} {w}{'' if n == 1 else 's'}" for n, w in dc_kinds)
+                if dc.get("total") else "") +
+               ". The five territories are outside the Census of Governments, which covers the "
+               "states and D.C.")
     main = "\n".join([
         '            <div id="countiesDirectory" class="state-page directory-page">',
         '                <header class="state-hero">',
@@ -474,6 +516,18 @@ def render_counties_index(host, census=None):
         "                        </tbody>",
         "                    </table>",
         "                </div>",
+        *[f'                <p class="faint" id="count-note-{_e(code.lower())}-{_e(kind)}">* '
+          f'{_e(state_name(code))}, {_e(dict((k, w) for k, w, _n in kinds)[kind].lower())}: '
+          f"{_e(text)}</p>" for (code, kind), text in sorted(COUNT_NOTES.items())],
+        f'                <p class="faint directory-outside">{_e(outside)}</p>',
+        '                <h2 class="state-heading" id="countyNotes">Where a county area has no county government</h2>',
+        '                <p class="faint">A state can have fewer county governments than counties. '
+        "These are the places the Census Bureau lists as county areas without one, and what governs "
+        "them instead.</p>",
+        '                <ol class="directory-notes">',
+        *[f'                    <li id="county-note-{_e(code.lower())}"><a href="{_e(code.lower())}.html">'
+          f"{_e(state_name(code))}</a>: {_e(text)}</li>" for code, text in notes],
+        "                </ol>",
         "            </div>",
     ])
     footer = "\n".join([
@@ -482,7 +536,9 @@ def render_counties_index(host, census=None):
         '                    local government by state and kind. "None" is a state with no',
         "                    government of that kind: one with no county governments has none, and",
         "                    one with no independent school districts runs its schools as dependent",
-        "                    systems of the state, a county or a city.</p>",
+        "                    systems of the state, a county or a city. County areas without a county",
+        "                    government, and what governs them: "
+        f'<a href="{_e(county_areas.SOURCES["isd"][1])}" rel="noopener">{_e(county_areas.SOURCES["isd"][0])}</a>.</p>',
         "                <p>Non-partisan and independent.</p>",
     ])
     return render_page(
@@ -514,6 +570,15 @@ def _possessive(name):
 UNCHANGED_NOTES = {
     "MO": ("A map passed in 2025 was suspended by a referendum petition, and the courts "
            "have kept these districts in place for 2026."),
+    # Voters approved the amendment on April 21, 2026 (51.7% to 48.3%); the
+    # Supreme Court of Virginia struck it down 4-3 on May 8, 2026, for want
+    # of an intervening general election between the legislature's two
+    # passages (Va. Const. art. XII, sec. 1); the U.S. Supreme Court denied
+    # an emergency application on May 15, 2026. Virginia Mercury, 2026-05-08
+    # and 2026-05-18; NPR, 2026-05-15; CNN, 2026-05-15.
+    "VA": ("Voters approved a redistricting amendment on April 21, 2026, but the Supreme "
+           "Court of Virginia struck it down on May 8 and the U.S. Supreme Court declined to "
+           "intervene, leaving these districts in place."),
 }
 
 
@@ -624,7 +689,7 @@ def render_legislature_page(code, host, summary=None):
     """A state's legislature: its Senate and House districts on a map, and
     the members who sit for them. The page carries the state code only;
     ``assets/kyc-legislature.js`` draws it from ``data/legislature/<st>.js``."""
-    from .government_maps import LOWER_CHAMBER, SEATS, STATES
+    from .government_maps import LEGISLATURE_NAME, LOWER_CHAMBER, SEATS, STATES
     from .government import jump_options
 
     name = state_name(code)
@@ -638,7 +703,7 @@ def render_legislature_page(code, host, summary=None):
                 f"senators, each elected from a district on a nonpartisan ballot.")
         chambers = ""
     else:
-        title = f"{name} Legislature"
+        title = f"{name} {LEGISLATURE_NAME.get(code, 'Legislature')}"
         lede = (f"The {name} Senate has {senate} members and the {lower} {house}. Pick a "
                 f"district on the map to see who sits for it.")
         chambers = "\n".join([
@@ -696,7 +761,8 @@ def render_legislature_page(code, host, summary=None):
         "                    legislature publishes them; district boundaries from the U.S. Census",
         "                    Bureau's cartographic boundary files, as set for the 2024 elections.",
         "                    A seat with nobody listed may be vacant, or Open States may be behind",
-        "                    a special election.</p>",
+        "                    a special election. The legislature is called by the name its state",
+        "                    constitution gives it.</p>",
         "                <p>Non-partisan and independent.</p>",
     ])
     scripts = [s.replace("{code}", code.lower()) for s in (
@@ -732,7 +798,7 @@ _FEDERAL_SIDEBAR = """
             <a class="nav-link nav-sub" href="../federal/index.html#cabinet">The Cabinet</a>
             <a class="nav-link nav-sub" href="../federal/index.html#changes">Changes since the term began</a>
             <a class="nav-link nav-sub" href="../federal/index.html#supreme-court">The Supreme Court</a>
-            <a class="nav-link nav-sub" href="../federal/index.html#courts">The Article III courts</a>
+            <a class="nav-link nav-sub" href="../federal/index.html#courts">The federal courts</a>
         </nav>
 """
 
@@ -829,6 +895,32 @@ _COURT_WORDS = {"supreme": "How the Supreme Court works",
                 "trade": "How the federal trial courts work"}
 
 
+def _court_og_title(court):
+    """A court page's share title: a territorial court's page lists no judges."""
+    if court["kind"] == "territorial":
+        return f"{court['name']}: its vacancies"
+    if court["kind"] == "supreme":
+        return f"{court['name']}: its justices"
+    return f"{court['name']}: its judges"
+
+
+def _court_description(court):
+    """What a court page holds, said for its kind: a territorial court's
+    judges are not in the directory the pages are built from, and a justice
+    does not take senior status. The territorial courts' ten-year terms are
+    the guide's checked text (``government_text``, "other-courts")."""
+    name = court["name"]
+    if court["kind"] == "territorial":
+        return (f"The {name}: an Article IV court whose judges serve ten-year terms. The Federal "
+                f"Judicial Center's directory lists Article III judges only, so its judges are "
+                f"not listed; its vacancies are, as the courts list them.")
+    if court["kind"] == "supreme":
+        return (f"Every justice of the {name}, as the Court lists them: who appointed them, "
+                f"when they were commissioned, and their background. Retired justices listed apart.")
+    return (f"Every sitting judge of the {name}: who appointed them, when they were "
+            f"commissioned, their senior status, and their background.")
+
+
 def render_court_page(court_id, host, codes=()):
     """One federal court: its judges, the chief first, then active and senior
     judges. ``assets/kyc-federal.js`` draws it from the court's data file."""
@@ -843,7 +935,7 @@ def render_court_page(court_id, host, codes=()):
         f'                    <p class="state-kicker">{_e(KINDS[court["kind"]])}</p>',
         f'                    <h1 class="state-title">{_e(court["name"])}</h1>',
         '                    <p class="state-links">',
-        '                        <a class="btn" href="../federal/index.html#courts"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg> The Article III courts</a>',
+        '                        <a class="btn" href="../federal/index.html#courts"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg> The federal courts</a>',
         f'                        <a class="btn" href="{_e(_learn("courts#" + _COURT_SECTIONS[court["kind"]]))}"><svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg> {_e(_COURT_WORDS[court["kind"]])}</a>',
         "                    </p>",
         "                </header>",
@@ -856,9 +948,8 @@ def render_court_page(court_id, host, codes=()):
                "../assets/kyc-official.js", "../assets/kyc-federal.js")
     return render_page(
         title=_e(f"{court['name']} — Know Your Candidate"),
-        og_title=_e(f"{court['name']}: its judges"),
-        description=_e(f"Every sitting judge of the {court['name']}: who appointed them, when "
-                       f"they were confirmed, their senior status, and their background."),
+        og_title=_e(_court_og_title(court)),
+        description=_e(_court_description(court)),
         canonical=_e(canonical),
         host=_e(host or ""),
         code="",
@@ -887,6 +978,7 @@ def render_counties_page(code, host):
     """A state's counties and every local government in each. The page
     carries the state code only; ``assets/kyc-local.js`` draws it from
     ``data/local/<st>.js``."""
+    from . import county_areas
     from .government import jump_options
     from .government_maps import STATES
 
@@ -894,13 +986,18 @@ def render_counties_page(code, host):
     path = f"counties/{code.lower()}.html"
     canonical = f"https://{host}/{path}" if host else path
     title = f"{name}: counties and local governments"
+    # What the state's map areas are called: parishes, boroughs and census
+    # areas, planning regions (kyc/county_areas.py).
+    one, many, button = county_areas.words(code)
+    a_one = ("an " if one[0] in "aeiou" else "a ") + one
+    why = [county_areas.SOURCES["isd"]] + ([county_areas.SOURCES["ct-fr"]] if code == "CT" else [])
     main = "\n".join([
         '            <div id="localContent" class="state-page local-page">',
         '                <header class="state-hero">',
         '                    <p class="state-kicker">Counties &amp; local governments</p>',
         f'                    <h1 class="state-title">{_e(name)}</h1>',
-        '                    <p class="districts-lede">Every county, city and town, township, school '
-        'district and special district, as the Census Bureau counted them in 2022. Pick a county to '
+        f'                    <p class="districts-lede">Every {_e(one)}, city and town, township, school '
+        f'district and special district, as the Census Bureau counted them in 2022. Pick {_e(a_one)} to '
         'see every government in it, or switch to cities and towns to find one place and its '
         'government, with a link to its own site where the Census lists one.</p>',
         '                    <p class="state-links">',
@@ -911,11 +1008,11 @@ def render_counties_page(code, host):
         "                    </p>",
         "                </header>",
         '                <div class="segmented" role="group" aria-label="Map view">',
-        '                    <button type="button" data-view="counties" aria-pressed="true">Counties</button>',
+        f'                    <button type="button" data-view="counties" aria-pressed="true">{_e(button)}</button>',
         '                    <button type="button" data-view="cities" aria-pressed="false">Cities &amp; towns</button>',
         "                </div>",
-        '                <div class="party-legend" id="countyLegend" aria-label="Local governments per county">',
-        '                    <span class="party-legend-title">Local governments in each county</span>',
+        f'                <div class="party-legend" id="countyLegend" aria-label="Local governments per {_e(one)}">',
+        f'                    <span class="party-legend-title">Local governments in each {_e(one)}</span>',
         '                    <span class="key"><span class="swatch region-fill-scale-1"></span>Fewer than 10</span>',
         '                    <span class="key"><span class="swatch region-fill-scale-2"></span>10&ndash;24</span>',
         '                    <span class="key"><span class="swatch region-fill-scale-3"></span>25&ndash;49</span>',
@@ -933,7 +1030,7 @@ def render_counties_page(code, host):
         "                    </aside>",
         "                </div>",
         '                <section class="leg-roster-section" aria-labelledby="localRosterTitle">',
-        '                    <h2 class="state-heading" id="localRosterTitle">Every county</h2>',
+        f'                    <h2 class="state-heading" id="localRosterTitle">Every {_e(one)}</h2>',
         '                    <div id="localRoster" class="leg-roster"></div>',
         "                </section>",
         "            </div>",
@@ -947,6 +1044,9 @@ def render_counties_page(code, host):
         "                    place boundaries, joined to its government by name only where the join is",
         "                    one to one. Names are shown in title case; the listing prints them in",
         "                    capitals.</p>",
+        "                <p><strong>Where there is no county government:</strong> "
+        + "; ".join(f'<a href="{_e(url)}" rel="noopener">{_e(label)}</a>' for label, url in why)
+        + ".</p>",
         "                <p>Non-partisan and independent.</p>",
     ])
     scripts = [s.replace("{code}", code.lower()) for s in (
@@ -954,7 +1054,7 @@ def render_counties_page(code, host):
     return render_page(
         title=_e(f"{title} — Know Your Candidate"),
         og_title=_e(title),
-        description=_e(f"Every county in {name} and every local government in each: cities, "
+        description=_e(f"Every {one} in {name} and every local government in each: cities, "
                        f"townships, school districts and special districts, with links."),
         canonical=_e(canonical),
         host=_e(host or ""),

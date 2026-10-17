@@ -208,9 +208,15 @@
                "<p>" + KYC.escapeHtml(race.incumbent.name + " (" + race.incumbent.party + ")") +
                "</p></div>");
     }
-    if (running.length) {
+    // The people the results name with no profile here, in words: in a
+    // badge's hover only, Tennessee's seat listed two running over nine.
+    var unlisted = race ? KYC.cards.unprofiledNote(race) : "";
+    if (running.length || unlisted) {
       row.push('<div class="senate-side senate-running"><p class="senate-role">' +
-               "Running for this seat (" + running.length + ")</p>" + cards(running) + "</div>");
+               "Running for this seat (" + (running.length +
+                 (race ? KYC.cards.unprofiledNames(race).none.length +
+                   KYC.cards.unprofiledNames(race).maybe.length : 0)) + ")</p>" +
+               cards(running) + unlisted + "</div>");
     }
     if (row.length) html.push('<div class="senate-seat-row">', row.join(""), "</div>");
     // The markets after the people still running, before those who left

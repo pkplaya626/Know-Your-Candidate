@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Alaska: counties and local governments — Know Your Candidate</title>
-<meta name="description" content="Every county in Alaska and every local government in each: cities, townships, school districts and special districts, with links.">
+<meta name="description" content="Every borough or census area in Alaska and every local government in each: cities, townships, school districts and special districts, with links.">
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#0d0f12" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
@@ -12,7 +12,7 @@
 <meta property="og:url" content="https://candidates.radicalrelay.us/counties/ak.html">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Alaska: counties and local governments">
-<meta property="og:description" content="Every county in Alaska and every local government in each: cities, townships, school districts and special districts, with links.">
+<meta property="og:description" content="Every borough or census area in Alaska and every local government in each: cities, townships, school districts and special districts, with links.">
 <meta property="og:image" content="https://candidates.radicalrelay.us/assets/social-card.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -111,7 +111,7 @@
             <h2 class="nav-group">Local</h2>
             <a class="nav-link" href="../counties/index.html" data-nav="local" aria-current="true">
                 <svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg>
-                Counties &amp; cities
+                Counties &amp; local governments
             </a>
             <h2 class="nav-group">Learn</h2>
             <a class="nav-link" href="../government/index.html" data-nav="guide">
@@ -128,7 +128,7 @@
 
         <nav class="sidebar-section push" aria-label="Jump to a state">
             <h2 class="sidebar-heading">Jump to</h2>
-            <label class="sr-only" for="stateJump">Jump to a state or territory</label>
+            <label class="sr-only" for="stateJump">Jump to a state</label>
             <select id="stateJump" class="select" data-jump-to="counties/{code}.html">
                 <option value="">Choose a state&hellip;</option>
                 <option value="AL">Alabama (AL)</option>
@@ -191,7 +191,7 @@
                 <header class="state-hero">
                     <p class="state-kicker">Counties &amp; local governments</p>
                     <h1 class="state-title">Alaska</h1>
-                    <p class="districts-lede">Every county, city and town, township, school district and special district, as the Census Bureau counted them in 2022. Pick a county to see every government in it, or switch to cities and towns to find one place and its government, with a link to its own site where the Census lists one.</p>
+                    <p class="districts-lede">Every borough or census area, city and town, township, school district and special district, as the Census Bureau counted them in 2022. Pick a borough or census area to see every government in it, or switch to cities and towns to find one place and its government, with a link to its own site where the Census lists one.</p>
                     <p class="state-links">
                         <a class="btn" href="../states/ak.html"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> Alaska page</a>
                         <a class="btn" href="../legislature/ak.html"><svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> State legislature</a>
@@ -200,11 +200,11 @@
                     </p>
                 </header>
                 <div class="segmented" role="group" aria-label="Map view">
-                    <button type="button" data-view="counties" aria-pressed="true">Counties</button>
+                    <button type="button" data-view="counties" aria-pressed="true">Boroughs</button>
                     <button type="button" data-view="cities" aria-pressed="false">Cities &amp; towns</button>
                 </div>
-                <div class="party-legend" id="countyLegend" aria-label="Local governments per county">
-                    <span class="party-legend-title">Local governments in each county</span>
+                <div class="party-legend" id="countyLegend" aria-label="Local governments per borough or census area">
+                    <span class="party-legend-title">Local governments in each borough or census area</span>
                     <span class="key"><span class="swatch region-fill-scale-1"></span>Fewer than 10</span>
                     <span class="key"><span class="swatch region-fill-scale-2"></span>10&ndash;24</span>
                     <span class="key"><span class="swatch region-fill-scale-3"></span>25&ndash;49</span>
@@ -222,7 +222,7 @@
                     </aside>
                 </div>
                 <section class="leg-roster-section" aria-labelledby="localRosterTitle">
-                    <h2 class="state-heading" id="localRosterTitle">Every county</h2>
+                    <h2 class="state-heading" id="localRosterTitle">Every borough or census area</h2>
                     <div id="localRoster" class="leg-roster"></div>
                 </section>
             </div>
@@ -236,6 +236,7 @@
                     place boundaries, joined to its government by name only where the join is
                     one to one. Names are shown in title case; the listing prints them in
                     capitals.</p>
+                <p><strong>Where there is no county government:</strong> <a href="https://www.census.gov/content/dam/Census/library/publications/2024/econ/2022ISD.pdf" rel="noopener">U.S. Census Bureau: 2022 Census of Governments, Individual State Descriptions, Appendix A (County-Type Areas Without County Government)</a>.</p>
                 <p>Non-partisan and independent.</p>
             </footer>
         </div>

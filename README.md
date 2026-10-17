@@ -62,7 +62,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (1391 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (1490 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -108,7 +108,7 @@ CI asserts that a rebuild changes nothing.
 | `photos.py` | Runtime portrait fallback chain (safety net) |
 | `portraits.py` | Build-time portrait resolution and checking |
 | `fec.py` | Campaign finance from the OpenFEC API |
-| `voteview.py` | DW-NOMINATE ideology scores |
+| `voteview.py` | DW-NOMINATE ideology scores: the first dimension, worded on its own left-right scale (never a party's name) with the Congress the score is from |
 | `profiles.py` | Assemble profiles; derive 2026 election flags and field provenance |
 | `races.py` | Group profiles into the seats they contest |
 | `legislators.py` | The authoritative membership, and reconciliation against it |
@@ -263,7 +263,7 @@ else (`emit.check_nav`).
 | Elections 2026 (the cycle's year, `cycle.CYCLE`) | Candidates (the grid), Races & partisan map |
 | Federal | Congress (the grid's sitting members), President & Cabinet, Federal courts |
 | State | States & territories, State legislatures (`legislature/index.html`) |
-| Local | Counties & cities (`counties/index.html`) |
+| Local | Counties & local governments (`counties/index.html`) |
 | Learn | Know Your Government (the guide) |
 
 A page that *is* an entry's link is marked `aria-current="page"`; one that
@@ -289,7 +289,8 @@ The two directories:
   (`KYC.stategov`, from `data/stategov.js`).
 - `counties/index.html` counts every state's local governments by kind, as
   the Census of Governments does; a state with none of a kind reads "none",
-  never 0 (rule 49).
+  never 0 (rule 49). Where a state's county governments are fewer than its
+  counties, a numbered note under the table says why (rule 71).
 
 - `/` focuses the search box from anywhere on any page; Escape hands focus
   back.
@@ -1097,8 +1098,11 @@ agreements are shown, each said as such on the page:
 "Acting" comes from the article's own entry. Years only: Wikidata often
 records the election and the article the swearing-in. A profile the site
 could not tie to an item reads "No linked record of public offices", with
-why; a record whose offices could not be confirmed says so. A read that fails
-or comes back short keeps the committed cache.
+why; a record whose offices could not be confirmed says so. A list opens by
+saying it holds only offices the sources agree on and that others may be
+missing: Keith Sonderling's listed only his Cabinet office while his OGE
+report beside it was filed as Deputy Secretary. A read that fails or comes
+back short keeps the committed cache.
 
 What an agreement on office and years cannot check is checked on its own:
 
@@ -1575,10 +1579,17 @@ President's term began (`kyc/cabinet.py`), into `changes` in
   sources differ and shows no date. An infobox entry is the office's exact
   name, past an ordinal and "Acting" - "Deputy Director of the Office of
   Management and Budget" is not its Director - and a person who held the
-  office before takes the entry of this term.
+  office before takes the entry of this term. An acting officer whose end
+  both sources put after the next holder's start (Ingrid Kolb's acting
+  service as Secretary of Energy to 2025-02-04, Chris Wright's from
+  2025-02-03) shows no end and says why; no date is moved to fit, and the
+  build warns `acting-overlaps-successor`.
 
 The hub lists every change newest first: confirmed, left, acting. Each
-card says since when and whom its officer followed, and the dialog lists
+card says since when and whom its officer followed - for an officer who
+served as acting before being confirmed, "Acting from" the date their
+article gives and "then confirmed" on the vote's date, never "Since" the
+acting start - and the dialog lists
 the office's holders this term. An acting officer Wikidata does not record
 is not listed, and the page says so. A failed read keeps the last history
 (rule 8).
@@ -1611,7 +1622,7 @@ a search that finds nobody says it searched the directory.
 |---|---|
 | `data/federal.js` (`kycFederal`) | The President, the Vice President, every Cabinet office, the Supreme Court's members, and an index of the courts with their counts and chief judges |
 | `data/judiciary/<court>.js` (`kycCourt[<court>]`) | One court's judges, loaded only by that court's page: 1,463 judges in one file would load on every page |
-| `data/judiciary/index.js` (`kycJudgesIndex`) | Every sitting judge's id, name, court and status, for the search |
+| `data/judiciary/index.js` (`kycJudgesIndex`) | Every sitting judge's id, name, court and status, for the search, and the directory's full name where it brackets a given name the judge does not use |
 
 Every file carries a content signature and is rewritten only when what it
 says changes; `verify` names a stale one. An official is never a profile:
@@ -1620,6 +1631,10 @@ nobody on these pages is counted among the members of Congress. The FJC's
 directory lists judges, not judgeships, so no vacancy is ever counted from
 it. Guam's, the Northern Mariana Islands' and the Virgin Islands' courts say
 why nobody is listed, and that this is not a vacancy.
+
+The directory brackets a given name a judge does not use ("A[llen] Joe
+Fish"). The pages show the name they go by, "A. Joe Fish"; the dialog gives
+the full name and the search finds either (`judiciary.display_name`).
 
 ### Vacancies
 
@@ -1647,7 +1662,13 @@ The hub gives the totals and each court's count. A court page lists its
 vacancies, its announced ones and any emergency. The build compares the two
 sources and warns (`vacancy-judge-not-senior`) when the list says a judge
 took senior status but the directory does not yet show it; the two are
-updated at different times, and the court page says so.
+updated at different times, and the court page says so. When the list
+implies the judge still serves (a seat left for senior status, or one only
+announced) and the directory lists nobody of that surname on the court at
+all, it warns `vacancy-judge-not-listed` and the row says "Not listed by the
+FJC directory as serving on this court now", and nothing about why. The
+surname is compared without accents or a generational suffix ("Osteen Jr."
+is the directory's "Osteen"), and only to report, never to join.
 
 ### Financial disclosures
 
@@ -1709,6 +1730,21 @@ title case (acronyms such as ISD kept, McX and O'X handled) and keeps the
 published form in the data. Many addresses are in capitals too: the scheme
 and host are lowered, the path kept as published.
 
+Not every county area has a county government. Rhode Island's five
+counties are geographic areas the state uses for its courts; Connecticut
+abolished county government in 1960, and its map shows the nine planning
+regions the Census has used in its place since 2022; seven Massachusetts
+counties have no government; and a city and county can be one government
+(San Francisco, Denver, Philadelphia, New York City's five boroughs) or a
+city can lie outside any county (Virginia's 38 independent cities,
+Baltimore, St. Louis, Carson City). `kyc/county_areas.py` holds all 112, by
+Census code, from Appendix A of the Census Bureau's 2022 Individual State
+Descriptions. Each one's panel says what it is and what governs it, the
+list under the map marks it, the state's summary says it once, and the
+build fails on one the table does not explain. A state's page calls its
+areas what the state does: parishes, boroughs and census areas, planning
+regions.
+
 What the listing does not hold is who serves: it names the title of a
 contact official, not the person. No free, authoritative national source
 lists local officials, so the page says what each government is and links
@@ -1737,12 +1773,22 @@ The listing's place codes are not the boundary file's (Texarkana, Texas:
 the state, and only where the join is one to one: in three passes over what
 the last left - name and legal form, name, then name without the forms after
 it ("Phenix City" is the listing's "CITY OF PHENIX") - and, where a name is
-shared, only by the county the place's point lies in. 19,451 places join. The
-rest are places incorporated since the 2022 listing (Mableton, Georgia;
-Mountain House, California), consolidated governments the two sources name
-differently (Baton Rouge's city-parish), and a handful of spellings that
-disagree ("Cajah's Mountain"). They are drawn, say that no government is
-joined, and are reported by the build; nothing is matched to its nearest name.
+shared, only by the county the place's point lies in. 19,451 places join by
+name. Two kinds no name can join are curated, each with its evidence and
+checked on every build: a city whose government is the consolidated one
+`county_areas.AREAS` names (Kansas City, Kansas, and the Unified Government
+of Wyandotte County and Kansas City; Baton Rouge and its city-parish:
+`county_areas.CONSOLIDATED_PLACES`), whose panel says that government also
+does the county's work; and a place the listing files under another name
+("Cajah's Mountain", Encampment's Town of Grand Encampment) or on a
+subdivision code the Census has since replaced (Mount Lebanon,
+Pennsylvania), joined on the listing's own government id
+(`overrides.PLACE_GOVERNMENTS`). The rest are mostly places incorporated
+since the 2022 listing (Mableton, Georgia; Mountain House, California). They
+are drawn, say that no government could be tied to them - the listing may
+name it otherwise, or the place may be newer - and are reported by the
+build; nothing is matched to its nearest name, and a place is never joined
+to a town or township it replaced (Rib Mountain, Wisconsin).
 
 Towns and townships are joined the other way: the listing gives each the
 Census code of its county subdivision, and the subdivision boundaries
@@ -1751,8 +1797,10 @@ whose Census table counts town or township governments) carry the same
 code. 16,167 of the 16,214 are placed on their own code, the name checked
 against the boundary file's. The other 47 changed after 2022 - Wisconsin's
 Town of Madison was dissolved, Rib Mountain became a village, two
-Massachusetts towns took city charters - and stay listed under their county;
-none is placed by its name. In Connecticut, Massachusetts and the rest of New
+Massachusetts towns took city charters - and stay listed under their county
+unless curated onto their place's point as above; none is placed by its
+name. The cities view counts the ones left off the map, from the data, under
+its lede. In Connecticut, Massachusetts and the rest of New
 England, where the town is the local government, the town rings are most of
 the map.
 

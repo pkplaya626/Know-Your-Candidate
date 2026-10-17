@@ -152,7 +152,12 @@ class TestGuideMaps(unittest.TestCase):
     def test_a_local_view_says_none_when_there_is_none(self):
         local = {m["id"]: m for m in government_maps.modes(ROOT)["local"]}
         self.assertEqual(local["local-county"]["values"]["CT"], "zero")
-        self.assertIn("No county governments", local["local-county"]["facts"]["CT"])
+        self.assertIn("has no county governments", local["local-county"]["facts"]["CT"])
+        # A state with fewer county governments than counties says why, in
+        # the counties directory's words.
+        self.assertIn("Suffolk and Nantucket", local["local-county"]["facts"]["MA"])
+        self.assertTrue(local["local-county"]["facts"]["MA"].startswith("5 county governments"))
+        self.assertNotIn("separate", local["local-county"]["facts"]["TX"])
         self.assertIn("No town or township", local["local-township"]["facts"]["TX"])
 
     def test_bins_rise_and_are_round(self):

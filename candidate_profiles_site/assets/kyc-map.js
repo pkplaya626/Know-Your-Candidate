@@ -116,7 +116,10 @@
       else fill = "var(--split)";
       return {
         fill: fill,
-        text: code + " Senate: " + s.r + "R, " + s.d + "D" + (s.i ? ", " + s.i + "I" : ""),
+        // D.C. and the territories elect no senators: "0R, 0D" read as a
+        // count of senators found.
+        text: !seats ? code + ": no senators (not a state)" :
+          code + " Senate: " + s.r + "R, " + s.d + "D" + (s.i ? ", " + s.i + "I" : ""),
       };
     }
 
@@ -160,6 +163,8 @@
           status === "defeated" ? (own ? " lost re-election" : " lost the election") :
           status === "runoff" ? " in the general election runoff" :
           status === "nominee" && counted ? " awaiting result" :
+          // Through a top-two or top-four primary, nobody is renominated.
+          status === "nominee" && defender.allPartyPrimary ? " advanced to November" :
           status === "nominee" && defender.seekingReelection2026 ?
             (own ? " renominated" : " on the November ballot") :
           defender.seekingReelection2026 ? " running" :
@@ -178,19 +183,33 @@
 
   /* --------------------------------------------------------------- legend */
 
+  /* Each key is a fill some state is drawn in. The Senate's "Independent"
+   * swatch matched no state - Maine and Vermont each have one independent
+   * and are drawn as split - and D.C.'s and the territories' fill had no
+   * key at all; "No race in 2026" showed a lighter grey than its states. */
   var LEGENDS = {
     senate: [
       ["var(--party-r)", "Both Republican"],
       ["var(--party-d)", "Both Democratic"],
-      ["var(--split)", "Split delegation"],
-      ["var(--party-i)", "Independent"],
+      ["var(--split)", "Split, or one independent"],
+      ["var(--party-i)", "Both independent", "allIndependent"],
+      [NONE_FILL, "No senators (D.C. and territories)"],
     ],
     senate2026: [
       ["var(--party-r)", "Republican seat up"],
       ["var(--party-d)", "Democratic seat up"],
-      ["var(--surface-1)", "No race in 2026"],
+      [NONE_FILL, "No race in 2026"],
     ],
   };
+
+  /* Does any state's delegation in *chamber* consist only of independents? */
+  function allIndependent(chamber) {
+    var states = (KYC.meta() || {}).states || {};
+    return Object.keys(states).some(function (code) {
+      var b = ((states[code] || {}).balance || {})[chamber] || {};
+      return b.I > 0 && !b.D && !b.R;
+    });
+  }
 
   function drawLegend() {
     var target = doc.getElementById("mapLegend");
@@ -207,14 +226,16 @@
         '<span class="ramp" style="background:linear-gradient(to right,',
         "var(--party-r),var(--split),var(--party-d))\"></span>",
         '<span class="party-d">All D</span></span>',
-        '<span class="key"><span class="swatch" style="background:var(--party-i)">',
-        "</span>Independent</span>",
+        allIndependent("house")
+          ? '<span class="key"><span class="swatch" style="background:var(--party-i)"></span>' +
+            "All independent</span>" : "",
         '<span class="key"><span class="swatch" style="background:var(--text-faint)">',
         "</span>Vacant</span>",
       ].join("");
       return;
     }
     target.innerHTML = LEGENDS[mode]
+      .filter(function (entry) { return !entry[2] || allIndependent("senate"); })
       .map(function (entry) {
         return '<span class="key"><span class="swatch" style="background:' +
           entry[0] + '"></span>' + KYC.escapeHtml(entry[1]) + "</span>";
@@ -269,7 +290,9 @@
   }
 
   function contestBadge(item) {
-    var spec = KYC.raceStatus(KYC.contestStatus(item), "short");
+    // The status of the race they are in, worded as KYC.raceStatusOf words
+    // it: "Advanced" from a top-two primary, never "Nominee: won the primary".
+    var spec = KYC.raceStatusOf(item, "short");
     return spec ? badge(spec, item) : "";
   }
 
@@ -284,6 +307,7 @@
       own: !item.isCandidate && (!item.contestLabel || item.raceStatus === "unlisted") &&
         !item.raceRole && !(item.appointed && item.raceStatus !== "unlisted"),
       unconfirmed: !!item.raceStatusUnconfirmed,
+      allParty: item.allPartyPrimary,
     });
     if (race) return badge(race, item);
     if (item.isCandidate) return '<span class="badge badge-money">Challenger</span>';
@@ -420,6 +444,26 @@
       html += '<p class="panel-subhead">No challenger still on the ballot ' +
         '<span title="Lost the primary, withdrew, or were not on the primary ballot">' +
         out.length + " out</span></p>";
+    }
+    // The people the results put on the ballot with no profile here: by
+    // name for the state's Senate seat, counted for its House seats, with
+    // the state page that lists them race by race.
+    var stateRaces = (global.kycRaces || []).filter(function (r) {
+      return r.state === code && (mode === "senate2026" ? r.chamber === "Senate"
+        : mode === "house" ? r.chamber === "House" : true);
+    });
+    if (mode === "senate2026") {
+      html += stateRaces.map(function (r) { return KYC.cards.unprofiledNote(r, "panel-note"); }).join("");
+    } else {
+      var unnamed = stateRaces.reduce(function (n, r) {
+        return n + KYC.cards.unprofiledNames(r).none.length;
+      }, 0);
+      if (unnamed) {
+        html += '<p class="panel-note">Also on the November ballot, per the published results, ' +
+          "with no profile here: " + unnamed + (unnamed === 1 ? " person" : " people") +
+          '. <a href="' + KYC.escapeAttr(KYC.stateUrl(code)) + '">Each race on the ' +
+          KYC.escapeHtml(KYC.stateName(code)) + " page \u203a</a></p>";
+      }
     }
     list.innerHTML = html;
     list.scrollTop = 0;

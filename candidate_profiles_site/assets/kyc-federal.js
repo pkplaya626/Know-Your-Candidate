@@ -109,8 +109,10 @@
     return courts.map(function (c) {
       return "<tr><th scope=\"row\">" + courtLink(c, prefix) + "</th>" +
         cell("Chief judge", chiefCell(c, prefix)) +
+        // A territorial court's judges serve under Article IV, and the
+        // directory lists Article III judges only: the row says so itself.
         cell("Judges", c.listed ? esc(counts(c)) :
-          '<span class="faint">Not in the directory</span>') +
+          '<span class="faint" data-article-iv>Article IV judges: not in the directory</span>') +
         cell("Vacancies", vacancyCount(c)) + "</tr>";
     });
   }
@@ -134,6 +136,15 @@
     return p ? esc(p.name) : '<span class="faint">None yet</span>';
   }
 
+  /** The judge a vacancy names, and - where the list implies they still
+   *  serve but the directory lists nobody of that name on this court - a
+   *  note saying only that (kyc/vacancies.py), never why. */
+  function vacatedText(r) {
+    return personText(r.vacatedBy) + (r.notInDirectory
+      ? ' <span class="faint vacancy-unlisted">Not listed by the FJC directory as serving ' +
+        "on this court now</span>" : "");
+  }
+
   /** A court's vacancies, now and announced, as the courts list them. */
   function vacancySection(d, mine) {
     var v = d.vacancies || {};
@@ -150,7 +161,7 @@
     if (now.length) {
       body += table("", ["Seat vacated by", "Why", "Vacant since", "Nominee", "Nominated"],
         now.map(function (r) {
-          return "<tr><th scope=\"row\">" + personText(r.vacatedBy) +
+          return "<tr><th scope=\"row\">" + vacatedText(r) +
             (r.emergency ? ' <span class="badge badge-warn" title="Designated a judicial ' +
               'emergency by the courts">Judicial emergency</span>' : "") + "</th>" +
             cell("Why", esc(REASONS[r.reason] || r.reason || "")) +
@@ -163,7 +174,7 @@
       body += '<h3 class="panel-subhead">Announced</h3>' +
         table("", ["Judge leaving", "Why", "Announced", "Leaves", "Nominee", "Nominated"],
           later.map(function (r) {
-            return "<tr><th scope=\"row\">" + personText(r.vacatedBy) + "</th>" +
+            return "<tr><th scope=\"row\">" + vacatedText(r) + "</th>" +
               cell("Why", esc(REASONS[r.reason] || r.reason || "")) +
               cell("Announced", esc(r.announced || "")) +
               cell("Leaves", r.vacancyDate ? esc(r.vacancyDate) : '<span class="faint">Not yet set</span>') +
@@ -225,16 +236,24 @@
     var now = rows.filter(function (r) { return r.current; })[0];
     var before = now ? rows.slice(0, rows.indexOf(now)) : [];
     var start = now && now.start && now.start.shown ? KYC.official.whenText(now.start.shown) : "";
+    // Acting before being confirmed: "Since" an acting start, beside a
+    // later confirmation vote, read as confirmed service months before
+    // the vote. Both are said, the acting start credited to the article
+    // that alone gives it (as the changes list does).
+    var acting = now && now.actingNote && now.actingStart
+      ? "Acting from " + esc(KYC.official.whenText(now.actingStart)) +
+        " (their Wikipedia article)" +
+        (now.confirmed ? ", then confirmed " + esc(now.confirmed.date) : "") : "";
     var prev = before[before.length - 1];
-    if (!start && !prev) return "";
+    if (!start && !prev && !acting) return "";
     // "After" only when the dates show one handing over to the other on the
     // same day: an acting officer the record lacks may have served between.
     var handover = prev && prev.end && prev.end.shown && now.start && now.start.shown &&
       prev.end.shown.precision === "day" && now.start.shown.precision === "day" &&
       prev.end.shown.date === now.start.shown.date;
     return '<p class="fed-fact"><span class="fed-fact-label">In office</span> ' +
-      (start ? "Since " + esc(start) : "") +
-      (prev ? (start ? "; " : "") + (handover ? "after " : "previously this term: ") +
+      (acting || (start ? "Since " + esc(start) : "")) +
+      (prev ? (acting || start ? "; " : "") + (handover ? "after " : "previously this term: ") +
         esc(prev.name) + (prev.acting ? " (acting)" : "") : "") +
       "</p>";
   }
@@ -265,6 +284,7 @@
           var shown = row.end.shown;
           events.push({ sort: shown ? shown.date : row.end.sort || "", when: shown
             ? KYC.official.whenText(shown)
+            : row.end.overlap ? "Date not shown: both sources put it after the successor took office"
             : row.end.differs ? "Date differs between sources" : "Date not in both sources",
             office: office, kind: "left", row: row,
             text: row.acting ? row.name + "’s service as acting ended"
@@ -344,13 +364,18 @@
         "</span> " + esc((j.justice && j.justice.oath) || seat.commissioned) + "</p></div></li>";
   }
 
-  function justiceRows(justices) {
+  /** Retired justices: when each joined the Court and when they retired,
+   *  never a bare "Since" under a heading about retirement. A retired
+   *  justice's retirement is the directory's senior-status date. */
+  function retiredRows(justices) {
     return justices.map(function (j) {
       var seat = (j.seats || [])[0] || {};
       return "<tr><th scope=\"row\">" + person(j.id, j.name) + "</th>" +
-        cell("Role", esc(j.justice ? j.justice.role : seat.title)) +
+        cell("Role", esc(seat.title)) +
         cell("Appointed by", esc(seat.appointedBy)) +
-        cell("Since", esc((j.justice && j.justice.oath) || seat.commissioned)) + "</tr>";
+        cell("Joined the Court", esc(seat.commissioned)) +
+        cell("Retired", seat.seniorSince ? esc(seat.seniorSince)
+          : '<span class="faint">Not in the directory</span>') + "</tr>";
     });
   }
 
@@ -395,7 +420,8 @@
       '<ul class="fed-cards">' + (scotus.members || []).map(justiceCard).join("") + "</ul>" +
       ((scotus.retired || []).length
         ? table("Retired justices, listed apart: they are not members of the Court",
-          ["Justice", "Role", "Appointed by", "Since"], justiceRows(scotus.retired)) : ""));
+          ["Justice", "Role", "Appointed by", "Joined the Court", "Retired"],
+          retiredRows(scotus.retired)) : ""));
 
     var courts = d.courts.filter(function (c) { return c.kind !== "supreme"; });
     var appeals = courts.filter(function (c) { return c.kind === "appeals"; });
@@ -405,11 +431,13 @@
       'placeholder="A judge’s name" aria-describedby="judgeSearchCount">' +
       '<p class="faint" id="judgeSearchCount" role="status"></p>' +
       '<ul class="fed-results" id="judgeResults"></ul></div>' +
-      '<p class="guide-lede">Every sitting judge of each court whose judges are appointed under ' +
-      "Article III, from the " +
+      '<p class="guide-lede" id="courtsLede">Every sitting judge of each court whose judges are ' +
+      "appointed under Article III, from the " +
       source(d.sources.judiciary.directory, "Federal Judicial Center’s Biographical Directory") +
-      " as of " + esc(asOf.judiciary) + ", and the three territorial district courts. The " +
-      "Court of Federal Claims, the Tax Court, and bankruptcy and magistrate judges are not " +
+      " as of " + esc(asOf.judiciary) + ". The three territorial district courts (Guam, the " +
+      "Northern Mariana Islands and the Virgin Islands) are listed, but not their judges: they " +
+      "serve ten-year terms under Article IV, and the directory lists Article III judges only. " +
+      "The Court of Federal Claims, the Tax Court, and bankruptcy and magistrate judges are not " +
       "in it.</p>" + vacancySummary(d) +
       "<h3 class=\"panel-subhead\">Courts of appeals</h3>" +
       table("", COURT_HEADS, courtRows(appeals, "../courts/"));
@@ -426,7 +454,7 @@
       body += '<h3 class="panel-subhead">Court of International Trade</h3>' +
         table("", COURT_HEADS, courtRows(trade, "../courts/"));
     }
-    html += section("courts", "The Article III courts", body);
+    html += section("courts", "The federal courts", body);
     el("federalBody").innerHTML = html;
     initSearch();
     initCircuitMap(d);
@@ -550,7 +578,9 @@
     var index = global.kycJudgesIndex || [];
     var courts = courtsById();
     if (!input) return;
-    var folded = index.map(function (row) { return KYC.foldText(row[1]); });
+    // A fifth entry is the directory's full name, where the name shown is
+    // the one the judge goes by ("A. Joe Fish", "Allen Joe Fish").
+    var folded = index.map(function (row) { return KYC.foldText(row[1] + (row[4] ? " " + row[4] : "")); });
 
     function run(typed) {
       var words = KYC.foldText(input.value).split(/\s+/).filter(Boolean);
@@ -591,7 +621,9 @@
     return el("federalContent").getAttribute("data-court");
   }
 
-  function judgeRows(judges, senior) {
+  /** *since* names a last column of the seat's senior-status date: "Senior
+   *  status since" for a judge, "Retired" for a retired justice. */
+  function judgeRows(judges, since) {
     return judges.map(function (j) {
       var seat = (j.seats || []).filter(function (s) {
         return s.court === courtId();
@@ -601,7 +633,7 @@
         cell("Title", esc((j.justice && j.justice.role) || seat.title)) +
         cell("Appointed by", esc(seat.appointedBy)) +
         cell("Commissioned", esc(seat.commissioned)) +
-        (senior ? cell("Senior status since", esc(seat.seniorSince)) : "") + "</tr>";
+        (since ? cell(since, esc(seat.seniorSince)) : "") + "</tr>";
     });
   }
 
@@ -651,12 +683,12 @@
       html += section("senior", "Judges on senior status",
         '<p class="guide-lede">A judge on senior status keeps the office and may hear a ' +
         "reduced caseload; taking it opens a seat the President may fill (28 U.S.C. 371).</p>" +
-        table("", heads.concat(["Senior status since"]), judgeRows(senior, true)));
+        table("", heads.concat(["Senior status since"]), judgeRows(senior, "Senior status since")));
     }
     if ((mine.retired || []).length) {
       html += section("retired", "Retired justices",
         '<p class="guide-lede">Listed apart: they are not members of the Court.</p>' +
-        table("", heads, judgeRows(mine.retired, false)));
+        table("", heads.concat(["Retired"]), judgeRows(mine.retired, "Retired")));
     }
     target.innerHTML = html + vacancySection(d, mine) + related(court, courts);
   }

@@ -483,15 +483,63 @@ async function testDirectory() {
     // The sort, a select as wide as "Sort: 2026 Senate races", took 184px of
     // a 390px header and left the search field 0-13px wide.
     const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
-    const sort = D.getElementById("sortBy");
-    const control = sort.closest(".sort-control");
-    check("on a phone the sort is an icon over its own menu",
+    const button = D.getElementById("sortButton");
+    const control = button && button.closest(".sort-control");
+    check("on a phone the sort is an icon that opens its menu",
       !!control && !!control.querySelector('use[href="#i-sort"]') &&
         !!D.getElementById("i-sort") &&
-        /\.sort-control select\s*\{[^}]*opacity:\s*0/.test(css));
-    check("and keeps its label", !!D.querySelector('label[for="sortBy"]'));
+        /\.btn-sort \.sort-current,\s*\.btn-sort::after\s*\{\s*display:\s*none/.test(css));
+    check("and keeps a name when its words are hidden",
+      /^Sort the cards: /.test(button.getAttribute("aria-label") || ""));
     check("no field or menu is under 16px on a phone, so iOS never zooms in",
-      /\.search input,\s*\.select,\s*\.select-bare,\s*\.text-input\s*\{\s*font-size:\s*16px/.test(css));
+      /\.search input,\s*\.select,\s*\.text-input\s*\{\s*font-size:\s*16px/.test(css));
+    // A native list drawn white under the theme's white text showed only the
+    // highlighted option.
+    check("a native menu's options take the theme's colours",
+      /select option,\s*select optgroup\s*\{[^}]*background-color:\s*var\(--surface-1\);[^}]*color:\s*var\(--text\)/.test(css));
+  });
+
+  suite("index.html — the sort is the site's own menu", () => {
+    const button = D.getElementById("sortButton");
+    const panel = D.getElementById("sortPanel");
+    check("closed until asked", panel.hidden && button.getAttribute("aria-expanded") === "false");
+    button.click();
+    check("a click opens it, the current order checked",
+      !panel.hidden && button.getAttribute("aria-expanded") === "true" &&
+      panel.querySelector('[aria-checked="true"]').getAttribute("data-sort") === "region");
+    panel.querySelector('[data-sort="name"]').click();
+    const names = [...D.querySelectorAll("#results .card")].slice(0, 6)
+      .map((c) => KYC.byId(c.getAttribute("data-id")).name);
+    check("picking an order closes the menu, sorts the cards and names the order",
+      panel.hidden && D.getElementById("sortLabel").textContent === "Name, A to Z" &&
+      names.length === 6 && names.every((n, i) => i === 0 || names[i - 1].localeCompare(n) <= 0) &&
+      /Name, A to Z/.test(button.getAttribute("aria-label")), names.join(", "));
+    check("and puts it in the address", /[?&]sort=name\b/.test(window.location.hash), window.location.hash);
+    check("only one order is checked",
+      panel.querySelectorAll('[aria-checked="true"]').length === 1 &&
+      panel.querySelector('[aria-checked="true"]').getAttribute("data-sort") === "name");
+    // Every order the menu offers is one the grid sorts by: an unknown one
+    // would be ignored and the menu would claim an order the cards lack.
+    const offered = [...panel.querySelectorAll("[data-sort]")].map((b) => b.getAttribute("data-sort"));
+    const took = offered.filter((key) => {
+      button.click();
+      panel.querySelector(`[data-sort="${key}"]`).click();
+      return panel.querySelector('[aria-checked="true"]').getAttribute("data-sort") === key;
+    });
+    check("every order offered is one the grid knows", took.length === offered.length && offered.length === 5,
+      offered.join(" "));
+    check("the cards view says nothing about races", D.getElementById("sortNote").hidden);
+    D.getElementById("raceViewToggle").click();
+    check("the races view, which lists seats in their own order, says the sort is for the cards",
+      !D.getElementById("sortNote").hidden);
+    D.getElementById("raceViewToggle").click();
+    D.getElementById("senateViewToggle").click();
+    check("and in the Senate view it names that view, not the races view",
+      !D.getElementById("sortNote").hidden && /Senate view/.test(D.getElementById("sortNote").textContent) &&
+        !/races view/.test(D.getElementById("sortNote").textContent), D.getElementById("sortNote").textContent);
+    D.getElementById("senateViewToggle").click();
+    button.click();
+    panel.querySelector('[data-sort="region"]').click();
   });
 
   suite("index.html — portraits come in sizes of one photograph", () => {
@@ -756,6 +804,12 @@ async function testDirectoryAsync() {
           member.politicalHistory.wikidata + '"]'));
       check("its links open safely", [...source.querySelectorAll("a")]
         .every((a) => a.target === "_blank" && /noopener/.test(a.rel)));
+      // Two sources' agreement is not a complete record, and the list says
+      // so before it starts (an officer's earlier office was missing).
+      const scope = panel.querySelector(".held-scope");
+      check("the list says other offices may be missing, before it starts", !!scope &&
+        /others may be missing/.test(scope.textContent) &&
+        !!(scope.compareDocumentPosition(panel.querySelector(".held-list")) & 4));
       KYC.profile.close();
     }
     const atLarge = window.legislatorsData.find((p) => rows(p).some((r) => r.congress && r.district === 0));
@@ -1107,7 +1161,8 @@ async function testDirectoryAsync() {
       const html = KYC.cards.raceBadges(r);
       const n = r.results.otherNominees.length;
       return /No challenger on the ballot/.test(html) ||
-        html.indexOf(n + " challenger") === -1 || html.indexOf(n + " with no profile here") === -1;
+        (html.indexOf(n + " challenger") === -1 && html.indexOf(n + " candidate") === -1) ||
+        html.indexOf(n + " with no profile here") === -1;
     });
     check("each counts them as challengers and says they have no profile here",
       badly.length === 0, badly.slice(0, 3).map((r) => r.id + ": " + KYC.cards.raceBadges(r)).join(" | "));
@@ -1127,6 +1182,17 @@ async function testDirectoryAsync() {
     check("a curated profile answers to its own filing's id",
       merged.length > 0 && merged.every((p) => KYC.byId("FEC_" + p.fecCandidateId) === p),
       merged.filter((p) => KYC.byId("FEC_" + p.fecCandidateId) !== p).map((p) => p.name).join(", "));
+
+    // A DW-NOMINATE score is a place on a left-right scale, never a party's
+    // name: an independent read "Moderate Republican".
+    const independent = window.legislatorsData.find((p) => KYC.seated(p) && p.party === "Independent" &&
+      /DW-NOMINATE/.test(p.voting_alignment || ""));
+    KYC.profile.open(independent.id);
+    const voting = D.getElementById("profileModalVoting").textContent;
+    KYC.profile.close();
+    check("an independent's score is in the scale's words, with its source and Congress",
+      /of centre|near the centre/.test(voting) && !/Republican|Democrat/.test(voting) &&
+        /Voteview/.test(voting) && /\d+(st|nd|rd|th) Congress/.test(voting), voting.replace(/\s+/g, " "));
 
     // Rule 27: a challenger is running for the seat, not representing it.
     const challenger = window.legislatorsData.find((p) => p.isCandidate);
@@ -1271,6 +1337,25 @@ async function testMap() {
   suite("map.html — modes", () => {
     const senateFill = D.querySelector('[data-state="TX"]').style.fill;
     check("Senate mode fills states", !!senateFill, senateFill);
+    // Every key is a fill some state is drawn in, and every fill has a key:
+    // "Independent" matched no state, and D.C.'s grey had no key.
+    const keys = [...D.querySelectorAll("#mapLegend .swatch")].map((s) => s.style.background);
+    const fills = new Set([...D.querySelectorAll("#usMap .state")].map((s) => s.style.fill));
+    check("each Senate key is a fill a state is drawn in, and each fill has a key",
+      keys.every((k) => fills.has(k)) && [...fills].every((f) => keys.indexOf(f) !== -1),
+      `keys ${keys.join(", ")} | fills ${[...fills].join(", ")}`);
+    // Alaska's senator went through a top-four primary: "advanced", never
+    // "renominated" (the card and profile already said so).
+    D.querySelector('[data-mode="senate2026"]').click();
+    const ak = D.querySelector('[data-state="AK"]');
+    const akText = (ak && ak.getAttribute("aria-label")) || "";
+    check("a senator through Alaska's top four reads 'advanced', not 'renominated'",
+      !/renominated/.test(akText) && (!/nominee/i.test(akText) || /advanced/.test(akText)), akText);
+    D.querySelector('[data-mode="senate"]').click();
+    const dc = D.querySelector('[data-state="DC"]');
+    check("D.C. says it has no senators, not '0R, 0D'",
+      !!dc && /no senators/.test(dc.getAttribute("aria-label") || "") &&
+        !/0R, 0D/.test(dc.getAttribute("aria-label") || ""), dc && dc.getAttribute("aria-label"));
 
     D.querySelector('[data-mode="house"]').click();
     check("House mode blends by delegation share",
@@ -1691,6 +1776,14 @@ async function testNavigation() {
     const rows = D.querySelectorAll(".directory-row");
     check("one row per state, each linked to its legislature", rows.length === 50 &&
       [...rows].every((r) => r.querySelector('a.directory-name[href$=".html"]')));
+    const outside = D.querySelector(".directory-outside");
+    const said = outside ? outside.textContent.replace(/\s+/g, " ") : "";
+    check("it says D.C. and the territories are not listed, and why D.C. is not",
+      /District of Columbia has a mayor and a council/.test(said) &&
+      /territories’ legislatures are not covered here/.test(said) &&
+      !!outside.querySelector('a[href="../states/dc.html"]'), said);
+    check("its jump list, of the fifty states, is labelled so",
+      D.querySelector('label[for="stateJump"]').textContent === "Jump to a state");
     const mn = D.querySelector('[data-facts="MN"]');
     check("each chamber's seats by party, in the state pages' words",
       mn.querySelectorAll(".gov-chamber").length === 2 && /seats/.test(mn.textContent), mn.textContent);
@@ -1714,10 +1807,36 @@ async function testNavigation() {
     const ct = rows.find((r) => /Connecticut/.test(r.textContent));
     // Rule 49: a state with none of a kind is not a count of zero.
     check("a state with no county governments says none, not 0",
-      ct && ct.children[1].textContent === "none", ct && ct.children[1].textContent);
-    check("the sidebar marks Counties & cities",
-      D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav") === "local");
+      ct && /^none\d+$/.test(ct.children[1].textContent), ct && ct.children[1].textContent);
+    // Rhode Island read "none" here while its own page drew five counties.
+    const riRow = rows.find((r) => /Rhode Island/.test(r.textContent));
+    const riRef = riRow && riRow.children[1].querySelector("a.note-ref");
+    const riNote = riRef && D.querySelector(riRef.getAttribute("href"));
+    check("its none links a note that says why",
+      !!riNote && /geographic areas the state uses to organize its courts/.test(riNote.textContent),
+      riNote ? riNote.textContent : String(riRef));
+    const maRow = rows.find((r) => /Massachusetts/.test(r.textContent));
+    check("a state with fewer county governments than counties is noted too",
+      maRow && /^5\d+$/.test(maRow.children[1].textContent) &&
+      /Suffolk and Nantucket/.test(D.querySelector(maRow.children[1].querySelector("a.note-ref")
+        .getAttribute("href")).textContent), maRow && maRow.children[1].textContent);
+    check("a state whose every county area has a county government has no note",
+      !rows.find((r) => /^Texas/.test(r.textContent)).children[1].querySelector("a.note-ref"));
+    const marked = D.querySelector('.site-nav [aria-current="page"]');
+    check("the sidebar marks Counties & local governments, the page's own name",
+      marked.getAttribute("data-nav") === "local" &&
+      marked.textContent.trim() === "Counties & local governments" && /^Counties & local governments/.test(D.title),
+      marked.textContent.trim() + " / " + D.title);
     check("its state picker lists every state", D.getElementById("stateJump").options.length > 50);
+    check("and, listing only the states, is labelled so",
+      D.querySelector('label[for="stateJump"]').textContent === "Jump to a state");
+    const outside = D.querySelector(".directory-outside");
+    const dcCounts = JSON.parse(fs.readFileSync(path.join(SITE, "data/census_governments.json"), "utf8")).states.DC;
+    check("it says why D.C. and the territories are not in the table, with D.C.'s count from the data",
+      !!outside && /District of Columbia has no counties/.test(outside.textContent) &&
+      outside.textContent.indexOf("counted " + dcCounts.total + " local governments") !== -1 &&
+      /five territories are outside the Census of Governments/.test(outside.textContent),
+      outside && outside.textContent);
     const md = rows.find((r) => /Maryland/.test(r.textContent));
     const col = [...D.querySelectorAll(".directory-table thead th")]
       .findIndex((th) => th.textContent === "Independent school districts");
@@ -2008,6 +2127,34 @@ async function testRunningElsewhere() {
     return text;
   };
 
+  suite("a race's panel says where its holder went, not that race's result", () => {
+    // Kevin Kiley read "On the ballot" in CA-3, which he holds and is not
+    // running for; Al Green "Lost primary" in TX-9, though he lost TX-18's.
+    const races = window.kycRaces;
+    const cases = people.filter((m) => KYC.seated(m) && !m.isCandidate && m.contestRaceId &&
+      m.raceId && m.contestRaceId !== m.raceId).map((m) => {
+      const held = races.find((r) => r.id === m.raceId && r.incumbentIds.indexOf(m.id) !== -1);
+      const opener = held && held.candidateIds.map(KYC.byId).find((c) => c && c.id !== m.id &&
+        (c.contestRaceId || c.raceId) === held.id);
+      return opener ? { m, opener } : null;
+    }).filter(Boolean);
+    // Once the new Congress sits, every member is in the seat they won, and
+    // nobody holds one seat while running for another (rule 68).
+    const movers = people.filter((m) => KYC.seated(m) && !m.isCandidate && m.contestRaceId &&
+      m.raceId && m.contestRaceId !== m.raceId);
+    check("the data has a holder running elsewhere, in a race someone else is running in",
+      cases.length > 0 || !movers.length, `${cases.length} of ${movers.length} movers`);
+    const wrong = cases.filter(({ m, opener }) => {
+      KYC.profile.open(opener.id, { fromRoute: true });
+      const row = D.querySelector(`#profileModalRace [data-goto="${m.id}"]`);
+      const bad = !row || !/Running for/.test(row.textContent) || !!row.closest(".race-out");
+      KYC.profile.close();
+      return bad;
+    });
+    check("each reads 'Running for' that race, and is not folded under 'no longer in this race'",
+      wrong.length === 0, wrong.map(({ m }) => m.name).join(", "));
+  });
+
   suite("members running for another seat — their race, not their seat", () => {
     check("the data has members whose held-seat result differs from their race",
       decided.length > 0 && nominees.length > 0, `${decided.length} decided, ${nominees.length} nominees`);
@@ -2221,6 +2368,167 @@ function testContrast() {
 
 /* The Senate by the year each seat is next decided. Every expected number
  * here is computed from the data the page loaded, never typed in. */
+/* Everyone on the ballot, counted one way: the sidebar, a state's strip and
+ * its race headers read 587, 16 and 58 for the same people. The people the
+ * results name with no profile here are named in every view of a race, and
+ * nobody is said to await a primary that has been held. */
+async function testBallotCounts() {
+  const { window, D, errors } = await buildPage("states/mi.html");
+  await settle(50);
+  const KYC = window.KYC;
+  const races = window.kycRaces;
+  suite("states/mi.html — the state's count is its race headers' sum", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const strip = [...D.querySelectorAll(".badge")].map((b) => b.textContent)
+      .find((t) => / (challenger|challengers) on the ballot$/.test(t));
+    const heads = [...D.querySelectorAll(".race-head .badge-money")]
+      .map((b) => (/^(\d+) (challenger|candidate)s? on the ballot$/.exec(b.textContent) || [])[1])
+      .filter(Boolean).reduce((n, x) => n + Number(x), 0);
+    check("the strip equals the race headers added up",
+      !!strip && Number(strip.split(" ")[0]) === heads, `${strip} vs ${heads}`);
+    const national = window.kycBuildMeta.election.challengersOnBallot;
+    const all = races.reduce((n, r) => n + (r.candidateCount || 0) +
+      ((r.results || {}).otherNominees || []).length, 0);
+    check("and the national figure is every race's, added up", national === all, `${national} vs ${all}`);
+  });
+
+  const index = await buildPage("index.html", { hash: "#/?view=senate" });
+  await settle(50);
+  const W = index.window;
+  const I = index.D;
+  suite("index.html — the people the results name with no profile here", () => {
+    const seat = W.kycRaces.find((r) => r.chamber === "Senate" &&
+      KYC.cards && W.KYC.cards.unprofiledNames(r).none.length >= 2);
+    check("a Senate seat has people the results name with no profile here", !!seat);
+    const block = seat && I.getElementById("senate-seat-" + seat.id);
+    const section = block && block.closest("section");
+    const names = seat ? W.KYC.cards.unprofiledNames(seat).none : [];
+    check("the Senate view names them in words, not only in a badge's hover",
+      !!section && names.every((n) => [...section.querySelectorAll(".race-note")]
+        .some((p) => p.textContent.indexOf(n) !== -1)), seat && seat.id);
+    const unknown = W.legislatorsData.find((p) => p.ballotUnknown && !p.raceStatus);
+    const badge = unknown && W.KYC.cards.card(unknown);
+    // A race whose only challenger's place on the ballot is not known says
+    // that, never "No challenger on the ballot" or "0 challengers".
+    const lone = Object.assign({}, W.kycRaces.find((r) => r.settled && r.results), {
+      candidateCount: 0, contested: true, ballotUnknown: 1, openSeat: false });
+    lone.results = Object.assign({}, lone.results, { otherNominees: [], maybeProfiled: {} });
+    const loneBadges = W.KYC.cards.raceBadges(lone);
+    check("a race whose only challenger's ballot status is unknown never says nobody is running",
+      /ballot status not known/.test(loneBadges) && !/No challenger/.test(loneBadges) &&
+        !/>0 (challengers|candidates)/.test(loneBadges), loneBadges.replace(/<[^>]+>/g, " | "));
+    check("a filer the results do not name, after the primary, is not said to await it",
+      !unknown || (/Ballot status not known/.test(badge) && !/has not been held yet/.test(badge)),
+      unknown && unknown.name);
+    const maybe = W.legislatorsData.find((p) => p.maybeNamed && p.maybeNamed.length && !p.raceStatus);
+    const race = maybe && W.kycRaces.find((r) => r.id === maybe.raceId);
+    // Top-two and top-four primaries send the leaders through whatever
+    // their party: two Democrats "won" CA-11's primary and members read
+    // "Renominated".
+    // A member through it for the seat they hold; not a winner seated since
+    // in a seat they did not hold, who was never renominated (rule 67).
+    const through = W.legislatorsData.filter((p) => p.allPartyPrimary === "top-two" &&
+      W.KYC.seated(p) && !p.contestLabel && !p.raceRole && p.raceStatus === "nominee");
+    const badges = through.map((p) => W.KYC.cards.card(p));
+    check("a member through a top-two primary reads 'Advanced to November', never 'Renominated'",
+      through.length > 0 && badges.every((b) => /Advanced to November/.test(b) &&
+        !/Renominated/.test(b) && /top two of the all-party primary/.test(b)),
+      `${through.length} members; ` + (badges.find((b) => !/Advanced to November/.test(b) ||
+        /Renominated/.test(b)) || "").replace(/\s+/g, " ").slice(0, 400));
+    const elsewhere = W.legislatorsData.find((p) => !p.allPartyPrimary && p.raceStatus === "nominee" &&
+      W.KYC.seated(p) && !p.contestLabel && !p.raceRole);
+    check("and a member renominated in a party primary still reads 'Renominated'",
+      !!elsewhere && /Renominated/.test(W.KYC.cards.card(elsewhere)));
+    check("a name the results may give a profile here is said to be that, not 'no profile'",
+      !maybe || (/Result not matched/.test(W.KYC.cards.card(maybe)) &&
+        W.KYC.cards.unprofiledNames(race).maybe.some((m) => m.id === maybe.id) &&
+        /who may be/.test(W.KYC.cards.unprofiledNote(race))),
+      maybe && maybe.name);
+  });
+}
+
+/* A member running for the House again under the state's new district
+ * number is not leaving: Utah read "4 open seats" with all four members
+ * running, and "Not seeking re-election" listed eleven nominees. A member
+ * who ran under a new number and lost is leaving, and is listed. */
+async function testRenumbered() {
+  const { window, D, errors } = await buildPage("index.html", { hash: "#/?election=notSeeking" });
+  await settle(50);
+  const KYC = window.KYC;
+  suite("index.html — members running under a new district number", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const moved = window.kycRaces.filter((r) => r.holderMoved);
+    check("the data has seats whose holder runs under a new number", moved.length > 0);
+    // Open means no sitting member on the seat's ballot: a holder's move
+    // is in the open seat's explanation, or its own badge when a member is
+    // running there under the new number.
+    const wrong = moved.filter((r) => {
+      const badge = KYC.cards.raceBadges(r);
+      const mover = r.candidateIds.map(KYC.byId).some((p) => p && p.renumbered && p.contestRaceId === r.id);
+      return r.openSeat === mover || (r.openSeat ? !/new district map/.test(badge)
+        : !/Holder running in/.test(badge) || />Open seat</.test(badge));
+    });
+    check("a renumbered seat is open only when no member runs there, and says where its holder went",
+      moved.length > 0 && wrong.length === 0, wrong.map((r) => r.id).join(", "));
+    const shown = new Set([...D.querySelectorAll("#results .card")].map((c) => c.getAttribute("data-id")));
+    const renumbered = window.legislatorsData.filter((p) => p.renumbered);
+    check("'Not seeking re-election' leaves out members running again under a new number",
+      shown.size > 0 && renumbered.length > 0 && renumbered.every((p) => !shown.has(p.id)),
+      renumbered.filter((p) => shown.has(p.id)).map((p) => p.name).join(", "));
+    const lost = window.legislatorsData.filter((p) => KYC.seated(p) && p.contestRaceId &&
+      p.contestRaceId.startsWith("H-" + p.state + "-") && KYC.offBallot(KYC.contestStatus(p)));
+    check("and keeps one who ran under a new number and lost",
+      lost.every((p) => shown.has(p.id) && !p.renumbered), lost.map((p) => p.name).join(", "));
+  });
+  const ut = await buildPage("states/ut.html");
+  await settle(50);
+  suite("states/ut.html — open seats are seats nobody holding them runs for", () => {
+    const strip = [...ut.D.querySelectorAll(".badge")].map((b) => b.textContent);
+    const info = ut.window.kycBuildMeta.states.UT;
+    check("the strip counts members under a new number apart from open seats",
+      info.renumbered > 0 && strip.some((t) => /running under a new district number/.test(t)) &&
+        !strip.some((t) => t === "4 open seats"), strip.join(" | "));
+  });
+}
+
+/* On a phone a menu pushes a history entry so the back gesture closes it,
+ * and closing steps back from it. A sort picked there was written to the
+ * address, then undone a moment later when the step landed; and with the
+ * theme menu open, opening the sort menu closed it again. */
+async function testPhoneMenus() {
+  const { window, D } = await buildPage("index.html");
+  await settle(50);
+  window.matchMedia = (q) => ({ media: q, matches: /max-width: 1000px|pointer: coarse/.test(q),
+    addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const sortPanel = D.getElementById("sortPanel");
+  const themePanel = D.getElementById("themePanel");
+  D.getElementById("sortButton").click();
+  const pushed = !!(window.history.state && window.history.state.kycMenu);
+  D.querySelector('#sortPanel [data-sort="name"]').click();
+  await wait(300);
+  const label = D.getElementById("sortLabel").textContent;
+  const hash = window.location.hash;
+  const names = [...D.querySelectorAll("#results .card")].slice(0, 6)
+    .map((c) => window.KYC.byId(c.getAttribute("data-id")).name);
+  D.getElementById("themeButton").click();
+  await wait(50);
+  D.getElementById("sortButton").click();
+  await wait(300);
+  const sortStays = !sortPanel.hidden && themePanel.hidden;
+  D.getElementById("themeButton").click();
+  await wait(300);
+  const themeStays = !themePanel.hidden && sortPanel.hidden;
+  suite("index.html — menus on a phone", () => {
+    check("opening a menu on a phone gives the back gesture an entry to close it", pushed);
+    check("a sort picked on a phone holds after the menu's history step lands",
+      label === "Name, A to Z" && /[?&]sort=name\b/.test(hash) &&
+        names.every((n, i) => i === 0 || names[i - 1].localeCompare(n) <= 0), `${label} ${hash}`);
+    check("opening the sort menu while the theme menu is open keeps it open", sortStays);
+    check("and the other way round", themeStays);
+  });
+}
+
 async function testSenate() {
   const { window, D, errors } = await buildPage("index.html", { hash: "#/?view=senate" });
   await settle(50);
@@ -3339,6 +3647,15 @@ async function testGuide() {
         fs.readFileSync(path.join(SITE, page), "utf8")));
       check("one h1, the page's title", D.querySelectorAll("h1").length === 1 &&
         D.title.indexOf(D.querySelector("h1").textContent.trim()) === 0, D.title);
+      // "Federal courts" was both the site's link to who sits on them and
+      // the guide's link to how they work, in one sidebar.
+      const byText = {};
+      [...D.querySelectorAll(".sidebar a.nav-link")].forEach((a) => {
+        const t = a.textContent.trim();
+        (byText[t] = byText[t] || new Set()).add(a.getAttribute("href").replace(/#.*$/, ""));
+      });
+      const twice = Object.keys(byText).filter((t) => byText[t].size > 1);
+      check("no two sidebar links share a name and go to different pages", twice.length === 0, twice.join(", "));
       check("every section has a heading and its sources",
         [...D.querySelectorAll(".guide-section")].every((s) =>
           s.querySelector("h2.guide-heading") && s.querySelector(".guide-sources a[href^='https://']")));
@@ -3409,6 +3726,19 @@ async function testGuide() {
         return /Vice Chairman/.test(lead.textContent) && !/Ex Officio/.test(row.textContent);
       })());
       check("names are escaped text, not markup", !/<script/i.test(live.innerHTML));
+      // A joint committee's roster may title only majority members: the
+      // cell says what the rosters name, never "None recorded".
+      const unnamedCells = [...live.querySelectorAll('td[data-label="Minority lead"] .lead-unnamed')];
+      check("a lead the rosters do not name is said to be not named, not 'none recorded'",
+        !/None recorded/.test(live.textContent) && unnamedCells.every((s) =>
+          s.textContent === "No minority lead named in the rosters"), live.textContent.slice(0, 200));
+      check("each table counts its committees with no minority lead named",
+        [...live.querySelectorAll("table")].every((t) => {
+          const n = t.querySelectorAll('td[data-label="Minority lead"] .lead-unnamed').length;
+          const note = t.closest(".guide-table-wrap").previousElementSibling;
+          const has = !!note && note.classList.contains("committees-unnamed");
+          return n ? has && /no member of the minority a leading title/.test(note.textContent) : !has;
+        }));
       const first = people[0];
       first.click();
       check("a name opens the shared profile dialog",
@@ -3522,6 +3852,15 @@ async function testGuideMaps() {
     });
   }
   {
+    const { D } = await buildPage("government/states.html", { hash: "#/?mode=legislature&state=VA" });
+    suite("government/states.html — a legislature's link reads as its page does", () => {
+      const link = D.querySelector('#guideFacts a[href$="legislature/va.html"]');
+      check("Virginia's link says General Assembly, the name on the page it opens",
+        !!link && /Virginia General Assembly/.test(link.textContent) && !/Virginia Legislature/.test(link.textContent),
+        link && link.textContent);
+    });
+  }
+  {
     const { D } = await buildPage("government/courts.html", { hash: "#/?state=TX" });
     suite("government/courts.html — circuits are numbered", () => {
       const labels = Object.fromEntries([...D.querySelectorAll("#mapLabels .state-code")]
@@ -3545,7 +3884,8 @@ async function testGuideMaps() {
     const { D } = await buildPage("government/local.html", { hash: "#/?mode=local-county&state=CT" });
     suite("government/local.html — none is not zero", () => {
       check("Connecticut has no county governments, said in words",
-        /No county governments/.test(D.querySelector("#guideFacts .guide-fact.is-current").textContent));
+        /has no county governments: it abolished them in 1960/.test(
+          D.querySelector("#guideFacts .guide-fact.is-current").textContent));
     });
   }
 }
@@ -3614,6 +3954,25 @@ async function testLegislatures() {
       check("floterial members are listed under 'Not on the map'",
         off.length > 0 && off.every((p) => D.getElementById("legPanelBody").textContent.includes(p.name)),
         `${off.length}`);
+      // The state page and the legislatures directory count from
+      // data/stategov.js; this page must say the same numbers.
+      const sg = {};
+      new Function("window", fs.readFileSync(path.join(SITE, "data/stategov.js"), "utf8"))(sg);
+      const want = sg.kycStateGov.states.NH.lower;
+      const line = D.querySelector("#legPanelBody p").textContent;
+      const got = {};
+      [...line.matchAll(/(\d+) (Republican|Democratic|Independent)/g)].forEach((m) => { got[m[2][0]] = +m[1]; });
+      check("the party line counts them too, as the state page does",
+        ["R", "D", "I"].every((k) => (got[k] || 0) === (want[k] || 0)), line + " vs " + JSON.stringify(want));
+    });
+  }
+  {
+    const { window, D } = await buildPage("legislature/me.html", { hash: "#/?chamber=lower" });
+    suite("legislature/me.html — a non-voting tribal seat is no seat in the count", () => {
+      const c = window.kycLegislature.ME.chambers.lower;
+      const line = D.querySelector("#legPanelBody p").textContent;
+      const total = [...line.matchAll(/(\d+) [A-Z]/g)].reduce((n, m) => n + +m[1], 0);
+      check("the party line adds up to the members listed for its seats", total === c.listed, line);
     });
   }
   {
@@ -3729,7 +4088,7 @@ async function testCounties() {
       CD.querySelector(`#localMap .district-statewide [data-dot="${unjoined}"]`)
         .dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
       check("a place with no government joined says so, and claims no government",
-        /no entry this site could tie/.test(body.textContent) && !body.querySelector(".local-item"),
+        /could not tie this place to one entry/.test(body.textContent) && !body.querySelector(".local-item"),
         body.textContent.slice(0, 160));
     }
   });
@@ -3782,6 +4141,40 @@ async function testCounties() {
       body.querySelector("[data-county]").getAttribute("data-county") === "08069" &&
       /under Larimer County/.test(body.textContent), body.textContent.slice(0, 200));
   });
+  // Rule 71: the directory said Rhode Island had no county governments while
+  // its page drew five counties and said nothing about it.
+  const ri = await buildPage("counties/ri.html");
+  suite("counties/ri.html — counties with no county government say so", () => {
+    const body = ri.D.getElementById("localPanelBody").textContent;
+    check("no page errors", ri.errors.length === 0, ri.errors.join(" | "));
+    check("the state says it has no county governments, and what its counties are",
+      /Rhode Island has no county governments/.test(body) && /organize its courts/.test(body), body.slice(0, 300));
+    check("every county in the list under the map says it has no county government",
+      [...ri.D.querySelectorAll("#localRoster .leg-row")].every((r) => /no county government/.test(r.textContent)));
+    ri.D.querySelector('#localRoster [data-region="44001"]')
+      .dispatchEvent(new ri.window.MouseEvent("click", { bubbles: true }));
+    const panel = ri.D.getElementById("localPanelBody").textContent;
+    check("a county's panel says why it has no county government, above its governments",
+      /Bristol County has no county government/.test(panel) && /Town of Barrington/.test(panel), panel.slice(0, 300));
+  });
+  const ny = await buildPage("counties/ny.html", { hash: "#/?county=36005" });
+  suite("counties/ny.html — a borough's governments are listed under Manhattan", () => {
+    const body = ny.D.getElementById("localPanelBody");
+    check("the Bronx says it has none of its own, and why, not 0",
+      /No local governments of its own/.test(body.textContent) && /the Bronx, one of New York City/.test(body.textContent) &&
+      !/^0 /.test(body.textContent), body.textContent.slice(0, 300));
+    check("with a link to the county that lists the City of New York",
+      body.querySelector("[data-county]") && body.querySelector("[data-county]").getAttribute("data-county") === "36061");
+    check("and no empty filter", !body.querySelector("#localFilter"));
+  });
+  const parishes = await buildPage("counties/la.html");
+  suite("counties/la.html — parishes are called parishes", () => {
+    check("the map's button, the list and the state's count say parish",
+      parishes.D.querySelector('[data-view="counties"]').textContent === "Parishes" &&
+      parishes.D.getElementById("localRosterTitle").textContent === "Every parish" &&
+      / in 64 parishes \(2022\)/.test(parishes.D.getElementById("localPanelBody").textContent),
+      parishes.D.getElementById("localPanelBody").textContent.slice(0, 120));
+  });
   const once = await buildPage("counties/tx.html", { hash: "#/?county=48201" });
   let draws = 0;
   new once.window.MutationObserver((records) => {
@@ -3814,10 +4207,43 @@ async function testCounties() {
       /records Fowler as an inactive governmental unit/.test(ksTown.D.getElementById("localPanelBody").textContent));
   });
   const la = await buildPage("counties/la.html", { hash: "#/?view=cities&city=2205000" });
-  suite("counties/la.html — a status that does not explain a missing government", () => {
+  suite("counties/la.html — a city its consolidated government governs", () => {
     const text = la.D.getElementById("localPanelBody").textContent;
-    check("Baton Rouge gives its status and says no government could be tied",
-      /partially consolidated/.test(text) && /no entry this site could tie/.test(text), text.slice(0, 240));
+    check("Baton Rouge gives its status, its government, and why that government is the parish's too",
+      /partially consolidated/.test(text) && /City-Parish of Baton Rouge-East Baton Rouge/.test(text) &&
+      /East Baton Rouge Parish has no separate parish government/.test(text) &&
+      !/incorporated since/.test(text), text.slice(0, 400));
+  });
+  const stGeorge = await buildPage("counties/la.html", { hash: "#/?view=cities&city=2267303" });
+  suite("counties/la.html — a place tied to no government names no single cause", () => {
+    const text = stGeorge.D.getElementById("localPanelBody").textContent;
+    check("St. George (2024) is told both causes, neither as the one",
+      /could not tie this place to one entry/.test(text) && /may file its government under another name/.test(text) &&
+      /may have been incorporated since 2022/.test(text), text.slice(0, 400));
+  });
+  const kc = await buildPage("counties/ks.html", { hash: "#/?view=cities&city=2036000" });
+  suite("counties/ks.html — Kansas City and the Unified Government", () => {
+    const text = kc.D.getElementById("localPanelBody").textContent;
+    check("Kansas City's government is the Unified Government, said as Wyandotte County's too",
+      /Unified Government of Wyandotte County and Kansas City/.test(text) &&
+      /Wyandotte County has no separate county government/.test(text), text.slice(0, 400));
+    kc.window.location.hash = "#/?view=cities";
+    kc.window.dispatchEvent(new kc.window.Event("hashchange"));
+  });
+  await new Promise((resolve) => setTimeout(resolve, 60));
+  suite("counties/ks.html — the township governments the map cannot place are counted", () => {
+    const body = kc.D.getElementById("localPanelBody").textContent;
+    const state = kc.window.kycLocal.KS;
+    const placed = new Set(Object.values(state.towns).concat(Object.values(state.cities))
+      .filter((c) => c[5]).map((c) => c[5].join(":")));
+    let left = 0;
+    Object.keys(state.governments).forEach((f) => state.governments[f].forEach((r, i) => {
+      if (r[0] === "township" && !placed.has(f + ":" + i)) left += 1;
+    }));
+    check("the lede no longer says every township is drawn, and counts those that are not",
+      !/every town or township that governs/.test(body) && left > 0 &&
+      body.indexOf(left + " more town or township governments in the 2022 listing could not be placed") !== -1,
+      left + " | " + body.slice(0, 500));
   });
   const mn = await buildPage("counties/mn.html", { hash: "#/?view=cities&city=2711100100" });
   suite("counties/mn.html — Show all, and a link without its view", () => {
@@ -3848,6 +4274,25 @@ async function testCounties() {
   suite("counties/hi.html — a state with no incorporated place", () => {
     check("offers no cities view", hawaii.D.querySelector(".segmented").hidden &&
       !hawaii.D.querySelector("#localMap .map-dot"));
+  });
+  const nj = await buildPage("counties/nj.html");
+  suite("counties/nj.html — the statewide list says what the listing says", () => {
+    const body = nj.D.getElementById("localPanelBody").textContent;
+    check("filed under the state, never 'run by the state' (Jersey City's schools are not)",
+      /listing files these under the state rather than under a county/.test(body) &&
+      !/Run by the state/.test(body), body.slice(-400));
+  });
+  const nc = await buildPage("counties/nc.html", { hash: "#/?county=37001" });
+  suite("counties/nc.html — a county's count and the school systems under it", () => {
+    const rows = nc.window.kycLocal.NC.governments["37001"];
+    const dependent = rows.filter((r) => r[0] === "dependent").length;
+    const body = nc.D.getElementById("localPanelBody").textContent;
+    check("the headline counts the governments, not the dependent school systems",
+      body.indexOf((rows.length - dependent) + " local governments in 2022") === 0 && dependent > 0,
+      body.slice(0, 80));
+    check("and the school systems under it say why they are not counted",
+      /School systems run by another government/.test(body) &&
+      /Not counted as local governments: the Census Bureau counts a school system/.test(body));
   });
   const tx = await buildPage("states/tx.html");
   suite("states/tx.html — links to its counties", () => {
@@ -3987,6 +4432,9 @@ async function testStateGov() {
           return row && !row.querySelector(".gov-officer-name");
         })());
       check("and is drawn unconfirmed, not in a party colour", !/party-/.test(shape(listed).style.fill));
+      check("and the legend has a key for that grey",
+        /Not confirmed by the office/.test(D.getElementById("mapLegend").textContent),
+        D.getElementById("mapLegend").textContent);
     }
     const hi = data.states.HI.lt;
     if (hi && hi.disputed) {
@@ -4062,6 +4510,10 @@ async function testStateGov() {
   suite("states/ak.html — its state government", () => {
     const section = ak.D.getElementById("state-government");
     check("the state page has a state government section", !!section);
+    const sources = section.querySelector(".gov-sources").textContent;
+    check("its sources say NCSL checks which party holds a chamber, not the seat counts",
+      /Seats: Open States[^.]*\. Which party holds each chamber is checked against National Conference/.test(sources),
+      sources);
     const heads = [...ak.D.querySelectorAll("#stateContent .state-heading")].map((h) => h.textContent);
     check("it follows the congressional delegation (rule 27)",
       heads.findIndex((h) => /State government/.test(h)) > heads.findIndex((h) => /House/.test(h)), heads.join(" | "));
@@ -4077,6 +4529,41 @@ async function testStateGov() {
     const section = pr.D.getElementById("state-government");
     check("headed as the territory's government, not local government",
       !!section && /Territorial government/.test(section.querySelector(".state-heading").textContent));
+    const chips = [...pr.D.querySelectorAll(".state-parts a")].map((a) => a.textContent);
+    check("its jump chip says what its heading says", chips.indexOf("Territorial government") !== -1 &&
+      chips.indexOf("State government") === -1, chips.join(" | "));
+    const text = section.textContent;
+    check("a territory is never called 'the state'",
+      /The territory has no lieutenant governor/.test(text) && !/The state has/.test(text), text.slice(0, 300));
+    check("it says its legislature, attorney general and courts are not covered, not just 'not covered'",
+      /Puerto Rico's legislature, attorney general and courts are not covered here/.test(text) &&
+      !/Seats: not covered/.test(text));
+  });
+  suite("states/pr.html — the Resident Commissioner, and why no seat is on the 2026 ballot", () => {
+    const hero = pr.D.querySelector(".state-summary").textContent;
+    check("the hero names the office and its next election, not zeros",
+      /1 Resident Commissioner/.test(hero) && /Resident Commissioner: a 4-year term, next on the ballot in 2028/.test(hero) &&
+      !/delegate/.test(hero) && !/0 seats in Congress/.test(hero) && !/0 challengers/.test(hero), hero);
+    const delegation = pr.D.getElementById("delegation");
+    check("the section is headed Resident Commissioner, and says why it has no race",
+      /Resident Commissioner to the U\.S\. House/.test(delegation.querySelector(".state-heading").textContent) &&
+      /last on the ballot in 2024 and is next in 2028/.test(delegation.textContent) &&
+      !!delegation.querySelector('a[href="https://www.law.cornell.edu/uscode/text/48/891"]'),
+      delegation.textContent.slice(0, 300));
+    const chips = [...pr.D.querySelectorAll(".state-parts a")].map((a) => a.textContent);
+    check("its jump chip says Resident Commissioner", chips.indexOf("Resident Commissioner") !== -1, chips.join(" | "));
+  });
+  const statesIndex = await buildPage("states/index.html");
+  suite("states/index.html — Puerto Rico's row says the same as its page", () => {
+    const row = statesIndex.D.querySelector('.state-row[data-state="PR"]');
+    check("Resident Commissioner, next on the ballot in 2028",
+      !!row && /1 Resident Commissioner/.test(row.textContent) && /next on the ballot in 2028/.test(row.textContent) &&
+      !/challenger/.test(row.textContent), row && row.textContent);
+  });
+  const guTerr = await buildPage("states/gu.html");
+  suite("states/gu.html — a territory with no secretary of state", () => {
+    const text = guTerr.D.getElementById("state-government").textContent;
+    check("says the territory has none", /The territory has no secretary of state/.test(text), text.slice(0, 300));
   });
 
   const tx = await buildPage("states/tx.html");
@@ -4107,6 +4594,15 @@ async function testStateGov() {
   suite("states/dc.html — D.C. has no governor", () => {
     const section = dc.D.getElementById("state-government");
     check("the page says so rather than showing nothing", !!section && /mayor/.test(section.textContent));
+    const note = dc.D.querySelector("#races .state-note");
+    check("its ballot is never said to hold a governor or legislature",
+      !!note && !/governor|legislature/.test(note.textContent) &&
+      /mayor, attorney general, the D\.C\. Council/.test(note.textContent) &&
+      !!note.querySelector('a[href="https://www.dcboe.org/elections/2026-elections"][rel~="noopener"]'),
+      note && note.textContent);
+    const chips = [...dc.D.querySelectorAll(".state-parts a")].map((a) => a.textContent);
+    check("its jump chip says Local government, as its heading does",
+      chips.indexOf("Local government") !== -1 && chips.indexOf("State government") === -1, chips.join(" | "));
   });
 }
 
@@ -4757,6 +5253,17 @@ async function testFederal() {
       check("acting service before a confirmation is in the timeline", actingNotes.every((r) =>
         [...changes.querySelectorAll("tbody tr")].some((tr) =>
           tr.textContent.indexOf(r.name + " became acting") !== -1)), actingNotes.map((r) => r.name).join(", "));
+      // Labor: "Since 2026-04-20", an acting start, beside a September vote.
+      const actingNow = withHistory.filter((o) => o.history.some((r) => r.current && r.actingNote && r.actingStart));
+      check("a card whose officer was acting before confirmation says both, never 'Since' the acting start",
+        actingNow.every((o) => {
+          const row = o.history.find((r) => r.current);
+          const card = [...D.querySelectorAll("#cabinet .fed-officer")]
+            .find((c) => c.querySelector(".fed-office").textContent === o.office);
+          const text = card ? card.textContent : "";
+          return /Acting from /.test(text) && /their Wikipedia article/.test(text) &&
+            !/In office Since/.test(text) && (!row.confirmed || text.indexOf("then confirmed " + row.confirmed.date) !== -1);
+        }), actingNow.map((o) => o.office).join(", "));
       const cards = [...D.querySelectorAll("#cabinet .fed-officer")];
       check("'after' only where the hand-over is shown", withHistory.every((o) => {
         const i = o.history.findIndex((r) => r.current);
@@ -4768,6 +5275,14 @@ async function testFederal() {
         const card = cards.find((c) => c.querySelector(".fed-office").textContent === o.office);
         return !card || card.textContent.indexOf((same ? "after " : "previously this term: ") + prev.name) !== -1;
       }));
+      // An acting end both sources put after the successor's start is not
+      // shown as a date (Energy: Kolb to Feb 4, Wright from Feb 3).
+      const overlapped = withHistory.flatMap((o) => o.history.filter((r) => r.end && r.end.overlap));
+      check("an acting end after the successor took office is not shown as a date",
+        overlapped.every((r) => [...changes.querySelectorAll("tbody tr")].some((tr) =>
+          tr.textContent.indexOf(r.name + "’s service as acting ended") !== -1 &&
+          /Date not shown: both sources put it after the successor took office/.test(tr.textContent))),
+        overlapped.map((r) => r.name).join(", "));
       check("no Wikidata label is shown for a person: names are the White House's, the Senate's " +
         "or an article's", withHistory.every((o) => o.history.every((r) =>
           r.current ? r.name === o.holder.name : !!(r.wikipedia || (r.confirmed && r.name === r.confirmed.nominee)))));
@@ -4775,6 +5290,22 @@ async function testFederal() {
     check("the courts are said to be the Article III courts",
       /Article III/.test(D.getElementById("courts").textContent) &&
       !/Every federal court/.test(D.getElementById("federalBody").textContent));
+    // The section holds the Article IV territorial courts too: its title
+    // and lede may not promise only Article III courts, or their judges.
+    const courtsHead = D.querySelector("#courts .guide-subheading");
+    check("the section is the federal courts, not 'the Article III courts'",
+      !!courtsHead && courtsHead.textContent === "The federal courts", courtsHead && courtsHead.textContent);
+    const lede = D.getElementById("courtsLede");
+    check("the lede says the territorial courts' judges are not listed, and why", !!lede &&
+      /territorial district courts/.test(lede.textContent) && /but not their judges/.test(lede.textContent) &&
+      /Article IV/.test(lede.textContent), lede && lede.textContent);
+    const territorial = d.courts.filter((c) => !c.listed && c.kind === "territorial");
+    check("each territorial court's row says its judges serve under Article IV",
+      territorial.length === 3 && territorial.every((c) => {
+        const a = D.querySelector('#courts a[href="../courts/' + c.id + '.html"]');
+        const row = a && a.closest("tr");
+        return !!row && /Article IV judges: not in the directory/.test(row.textContent);
+      }), territorial.map((c) => c.id).join(", "));
   });
 
   suite("federal/index.html — the circuit map", () => {
@@ -4830,6 +5361,17 @@ async function testFederal() {
     }
     check("the count is of people", D.getElementById("judgeSearchCount") &&
       new Set(index.map((row) => row[0])).size === index.length);
+    // The directory's "A[llen] Joe Fish": shown as he goes by, found by both.
+    check("no judge's name carries the directory's brackets", index.every((row) => row[1].indexOf("[") === -1),
+      index.filter((row) => row[1].indexOf("[") !== -1).map((row) => row[1]).slice(0, 3).join(", "));
+    const bracketed = index.find((row) => row[4]);
+    if (bracketed) {
+      input.value = bracketed[4];
+      input.dispatchEvent(new window.Event("input"));
+      check("a judge is found by the full name the directory gives",
+        [...D.querySelectorAll("#judgeResults a")].some((a) => a.textContent === bracketed[1]),
+        bracketed[4] + " -> " + bracketed[1]);
+    }
     input.value = "";
     input.dispatchEvent(new window.Event("input"));
   });
@@ -4923,10 +5465,38 @@ async function testFederal() {
       /Appointed by/.test(meta) && !PARTY_WORDS.test(meta), meta);
     check("and links to the Federal Judicial Center's page",
       !!modal.querySelector('a[href^="https://www.fjc.gov/node/"]'));
+    // The directory's career field holds roles held now ("-present"): the
+    // panel keeps the directory's label, never "before the bench".
+    const heads = [...modal.querySelectorAll(".panel-head")].map((h) => h.textContent);
+    check("the career panel carries the directory's own label",
+      heads.some((h) => /Professional career/.test(h)) && !heads.some((h) => /before the bench/.test(h)),
+      heads.join(" | "));
     check("Escape closes it", (() => {
       D.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
       return modal.hidden;
     })());
+    // A retired justice: retired since a date, never "Since" their
+    // commission under a heading about retirement, nor "senior status".
+    const retired = (d.supremeCourt.retired || [])[0];
+    if (retired) {
+      const table = [...D.querySelectorAll("#supreme-court table")].find((t) =>
+        /Retired justices/.test(t.textContent));
+      const heads = table ? [...table.querySelectorAll("thead th")].map((th) => th.textContent) : [];
+      check("the retired justices' table says when each joined the Court and when they retired",
+        heads.includes("Joined the Court") && heads.includes("Retired") && !heads.includes("Since"),
+        heads.join(" | "));
+      const row = table && [...table.querySelectorAll("tbody tr")].find((tr) =>
+        tr.textContent.indexOf(retired.name) !== -1);
+      check("their retirement is the directory's senior-status date", !!row &&
+        row.querySelector('[data-label="Retired"]').textContent === retired.seats[0].seniorSince &&
+        row.querySelector('[data-label="Joined the Court"]').textContent === retired.seats[0].commissioned,
+        row && row.textContent);
+      D.querySelector('#supreme-court [data-official="' + retired.id + '"]').click();
+      const body = D.getElementById("officialModalBody").textContent;
+      check("their dialog says retired, not senior status",
+        /retired since/.test(body) && !/senior status since/.test(body), body.slice(0, 300));
+      window.KYC.official.close();
+    }
   });
 
   const president = d && d.president;
@@ -5016,6 +5586,30 @@ async function testFederal() {
       mine.vacancies.filter((r) => r.emergency).length);
     check("it names its source and date", !!doc.querySelector('#vacancies a[href^="https://www.uscourts.gov/"]') &&
       doc.getElementById("vacancies").textContent.indexOf(w.kycFederal.vacancies.asOf) !== -1);
+    check("a judge the directory lists on the court carries no 'not listed' note",
+      doc.querySelectorAll("#vacancies .vacancy-unlisted").length ===
+        mine.vacancies.concat(mine.future || []).filter((r) => r.notInDirectory).length);
+  });
+
+  // A vacancy for senior status whose judge the directory no longer lists
+  // on the court (New Mexico's, in the committed data): a reader looking
+  // for them among the senior judges is told they are not there.
+  const unlistedCourt = ((ca1.window.kycFederal || {}).courts || []).find((c) => c.id === "nm");
+  const unlistedPage = unlistedCourt && await buildPage("courts/nm.html");
+  if (unlistedPage) await settle(50);
+  suite("a vacancy whose judge the directory does not list", () => {
+    if (!unlistedPage) return;
+    const { window: w, D: doc, errors: errs } = unlistedPage;
+    check("no page errors", errs.length === 0, errs.join(" | "));
+    const flagged = (w.kycCourt.nm.vacancies || []).concat(w.kycCourt.nm.future || [])
+      .filter((r) => r.notInDirectory);
+    const notes = [...doc.querySelectorAll("#vacancies .vacancy-unlisted")];
+    check("each such row says the directory does not list the judge, and no more",
+      notes.length === flagged.length && notes.every((n) =>
+        /Not listed by the FJC directory as serving on this court now/.test(n.textContent) &&
+        !/retired|resigned|died/i.test(n.textContent)), `${notes.length} notes, ${flagged.length} rows`);
+    check("and the judge is indeed not among the court's judges", flagged.every((r) =>
+      !w.kycCourt.nm.judges.some((j) => j.name === r.vacatedBy.name)));
   });
 
   const guam = await buildPage("courts/gu.html");
@@ -5039,6 +5633,8 @@ async function testFederal() {
     check("the justices, the Chief Justice first", listed.join() === members.join(), listed.join());
     const retired = (w.kycFederal.supremeCourt.retired || []).length;
     check("retired justices apart", !retired || doc.querySelectorAll("#retired [data-official]").length === retired);
+    check("with the date each retired", !retired || [...doc.querySelectorAll("#retired thead th")]
+      .some((th) => th.textContent === "Retired"));
   });
 }
 
@@ -5051,6 +5647,9 @@ async function testFederal() {
   if (!only || only === "stategov") await testStateGov();
   if (!only || only === "index.html") await testDirectoryAsync();
   if (!only || only === "index.html") await testSenate();
+  if (!only || only === "index.html") await testBallotCounts();
+  if (!only || only === "index.html") await testRenumbered();
+  if (!only || only === "index.html") await testPhoneMenus();
   if (!only || only === "index.html") await testReseatedSpecial();
   if (!only || only === "index.html") await testFormerIncumbent();
   if (!only || only === "index.html") await testRecordPhase();

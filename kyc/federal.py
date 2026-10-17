@@ -488,6 +488,18 @@ def problems(cache, today=None):
     if history:
         out.append(("warn", "cabinet-history", f"{len(history)} things in the Cabinet's history "
                     f"since the term began could not be settled (kyc/cabinet.py)", history))
+    from . import cabinet
+    overlapping = [f"{key}: {office['holders'][i]['name']} acting to "
+                   f"{office['holders'][i]['end']['shown']['date']}, "
+                   f"{office['holders'][i + 1]['name']} from "
+                   f"{office['holders'][i + 1]['start']['shown']['date']}"
+                   for key, office in ((cache.get("changes") or {}).get("offices") or {}).items()
+                   for i in cabinet.overlaps(office.get("holders") or [])]
+    if overlapping:
+        out.append(("warn", "acting-overlaps-successor",
+                    f"{len(overlapping)} acting officers' service ends, in both sources, after "
+                    f"the next holder's begins; the end is not shown. Check the office's record",
+                    overlapping))
     for key, title in (("president", "President"), ("vicePresident", "Vice President")):
         person = cache.get(key) or {}
         if not person or not (person.get("termStart", "") <= today < person.get("termEnd", "")):

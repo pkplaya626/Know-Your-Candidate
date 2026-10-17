@@ -390,6 +390,11 @@ class TestStatePages(unittest.TestCase):
                       pages.district_page_text("IA", 4)[1])
         self.assertIn("at large", pages.district_page_text("AK", 1)[1])
         self.assertIn("non-voting delegate", pages.district_page_text("GU", 1)[1])
+        # A state whose map nearly changed says why it did not: a reader who
+        # heard of Virginia's April referendum read only "used again".
+        va = pages.district_page_text("VA", 11)[1]
+        self.assertIn("struck it down on May 8", va)
+        self.assertEqual(va.count("used again in 2026"), 1)
         self.assertIn("not on the ballot in 2026", pages.district_page_text("PR", 1)[1])
         self.assertIn("referendum", pages.district_page_text("MO", 8)[1])
         self.assertEqual(pages.district_page_text("MP", 1)[0],
@@ -439,6 +444,43 @@ class TestStatePages(unittest.TestCase):
         self.assertEqual(by_state["TX"]["name"], "Texas")
         self.assertEqual(by_state["GU"]["delegates"], 1)
         self.assertTrue(by_state["GU"]["territory"])
+
+    def test_a_states_ballot_count_is_the_sum_of_its_race_headers(self):
+        # Michigan's page read "16 challengers on the ballot" over race
+        # headers summing 58: the headers count the people the results name
+        # with no profile here, and the strip did not.
+        people = [
+            member(id="C1", state="MI", isCandidate=True, raceStatus="nominee"),
+            member(id="C2", state="MI", isCandidate=True, ballotUnknown=True),
+        ]
+        races = [{"id": "S-MI-2026", "state": "MI", "openSeat": True, "candidateCount": 1,
+                  "results": {"otherNominees": ["A B", "C D"]}},
+                 {"id": "H-MI-01-2026", "state": "MI", "openSeat": False, "candidateCount": 0,
+                  "results": {"otherNominees": ["E F"]}}]
+        self.assertEqual(summary.by_state(people, races)["MI"]["challengersOnBallot"], 4)
+
+    def test_the_sidebar_breakdown_adds_up_without_subtracting(self):
+        # The tooltip printed 812 - 556 = 256 names "with no FEC filing over
+        # $5,000"; 245 exist. Each part is counted from the races.
+        with open(os.path.join(ROOT, emit.DATA_FILE), encoding="utf-8") as handle:
+            text = handle.read()
+        meta = json.JSONDecoder().raw_decode(text.split("window.kycBuildMeta = ", 1)[1])[0]
+        e = meta["election"]
+        self.assertEqual(e["challengersWithProfile"] + e["challengersUnprofiled"],
+                         e["challengersOnBallot"])
+
+    def test_puerto_ricos_seat_says_its_title_and_when_it_is_elected(self):
+        # The state page read "1 delegate - 0 seats in Congress on the 2026
+        # ballot - 0 challengers", with no reason: the Resident Commissioner
+        # serves four years (48 U.S.C. 891), elected in 2024 and 2028.
+        people = [member(id="PR1", state="PR", chamber="House", districtNum=0),
+                  member(id="G1", state="GU", chamber="House", districtNum=0, seatUp2026=True)]
+        by_state = summary.by_state(people, [{"id": "H-GU-00-2026", "state": "GU"}])
+        self.assertEqual(by_state["PR"]["delegateTitle"], "Resident Commissioner")
+        self.assertEqual(by_state["PR"]["houseTerm"], {"years": 4, "last": 2024, "next": 2028})
+        self.assertEqual(by_state["PR"]["seatsUp"], 0)
+        self.assertEqual(by_state["GU"]["delegateTitle"], "Delegate")
+        self.assertNotIn("houseTerm", by_state["GU"])
 
     def test_each_state_has_its_own_balance_and_its_vacancies(self):
         # The roster holds no row for a seat nobody holds; the races cover

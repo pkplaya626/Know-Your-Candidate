@@ -11,7 +11,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from kyc import emit, federal_build, federal_courts, pages  # noqa: E402
+from kyc import emit, federal_build, federal_courts, judiciary, pages, vacancies  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 
@@ -132,6 +132,64 @@ class TestTheFiles(unittest.TestCase):
         self.assertIn('window.kycCourt["ca1"] = ', text)
 
 
+class TestCabinetHistory(unittest.TestCase):
+    def test_an_acting_end_after_the_successor_began_is_not_shown(self):
+        """Neither date is moved; the end is withheld and says why."""
+        from kyc import cabinet, federal
+        payload, _, _, _ = built()
+        cache = federal.load_cache(ROOT)
+        offices = (cache.get("changes") or {}).get("offices") or {}
+        for office in payload["offices"]:
+            held = (offices.get(office["key"]) or {}).get("holders") or []
+            found = cabinet.overlaps(held)
+            for i, row in enumerate(office.get("history") or []):
+                if i in found:
+                    self.assertIsNone(row["end"]["shown"])
+                    self.assertTrue(row["end"]["overlap"])
+                else:
+                    self.assertNotIn("overlap", row.get("end") or {})
+
+
+class TestJudgesNames(unittest.TestCase):
+    def test_no_name_shown_carries_the_directorys_brackets(self):
+        """FJC writes "A[llen] Joe Fish": shown as "A. Joe Fish", with the
+        full name beside it in the dialog and in the search."""
+        payload, courts, search, _ = built()
+        shown = [j for c in courts.values() for j in c["judges"] + c.get("retired", [])]
+        shown += payload["supremeCourt"]["members"] + payload["supremeCourt"]["retired"]
+        self.assertEqual([j["name"] for j in shown if "[" in j["name"]], [])
+        self.assertEqual([c["chief"]["name"] for c in payload["courts"]
+                          if c.get("chief") and "[" in c["chief"]["name"]], [])
+        self.assertEqual([row[1] for row in search if "[" in row[1]], [])
+        bracketed = [j for j in shown if j.get("fullName")]
+        for judge in bracketed:
+            self.assertNotIn("[", judge["fullName"])
+            self.assertEqual(judge["name"].split()[-1], judge["fullName"].split()[-1])
+        rows = {row[0]: row for row in search}
+        for judge in bracketed:
+            if judge["id"] in rows:
+                self.assertEqual(rows[judge["id"]][4], judge["fullName"])
+        self.assertTrue(all(len(row) == 4 for row in search if row[0] not in
+                            {j["id"] for j in bracketed}))
+
+
+class TestVacanciesAgainstTheDirectory(unittest.TestCase):
+    def test_a_vacancy_whose_judge_the_directory_does_not_list_is_marked(self):
+        """The courts' list says a judge took senior status; a judge on
+        senior status still serves, so one the directory lists nowhere on
+        that court is marked on the row, and only then."""
+        _payload, courts, _, _ = built()
+        judges = judiciary.load_cache(ROOT)["judges"]
+        cache = vacancies.load_cache(ROOT)
+        for cid, court in courts.items():
+            for key, future in (("vacancies", False), ("future", True)):
+                rows = [r for r in cache["future" if future else "current"] if r.get("court") == cid]
+                self.assertEqual(len(rows), len(court[key]))
+                for raw, shown in zip(rows, court[key]):
+                    expected = bool(court["listed"]) and vacancies.judge_unlisted(raw, judges, future)
+                    self.assertEqual(bool(shown.get("notInDirectory")), expected, (cid, raw))
+
+
 class TestThePages(unittest.TestCase):
     def test_a_court_page_loads_its_own_court_and_carries_no_names(self):
         html = pages.render_court_page("ca1", "example.org")
@@ -142,6 +200,29 @@ class TestThePages(unittest.TestCase):
         payload, courts, _, _ = built()
         for judge in courts["ca1"]["judges"]:
             self.assertNotIn(judge["name"], html)
+
+    def test_a_court_page_describes_what_its_kind_holds(self):
+        """A territorial court's judges are not in the directory, and a
+        justice takes no senior status: neither page promises them."""
+        def description(cid):
+            html = pages.render_court_page(cid, "example.org")
+            return re.search(r'<meta name="description" content="([^"]*)"', html).group(1)
+        for cid in ("gu", "mp", "vi"):
+            text = description(cid)
+            self.assertIn("Article IV", text)
+            self.assertIn("not listed", text)
+            self.assertNotIn("Every sitting judge", text)
+        self.assertNotIn("senior status", description("scotus"))
+        self.assertIn("justice", description("scotus"))
+        self.assertIn("Every sitting judge", description("ca1"))
+
+    def test_no_page_calls_the_courts_it_links_the_article_iii_courts(self):
+        """The hub's courts section holds the Article IV territorial courts."""
+        for html in (pages.render_court_page("gu", "example.org"),
+                     pages.render_court_page("ca1", "example.org"),
+                     pages.render_federal_page("example.org")):
+            self.assertNotIn("The Article III courts", html)
+            self.assertIn('href="../federal/index.html#courts"', html)
 
     def test_the_hub_carries_no_names(self):
         html = pages.render_federal_page("example.org")

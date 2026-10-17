@@ -197,6 +197,22 @@ class TestControl(unittest.TestCase):
         self.assertEqual(out["lower"]["ncsl"], "D")
         self.assertEqual(len(problems), 1)
 
+    def test_a_member_listed_for_a_seat_ncsl_calls_vacant_is_reported(self):
+        # Open States named someone for all 180 seats of Georgia's House
+        # while NCSL listed one vacant: a member who has left may still be
+        # shown as sitting. Reported, not changed on NCSL's word.
+        theirs = {"upper": {"seats": 31, "D": 12, "R": 19, "other": 0, "vacant": 0},
+                  "lower": {"seats": 150, "D": 61, "R": 88, "other": 0, "vacant": 1}}
+        out, problems = self._state("TX", {"R": 19, "D": 12}, {"R": 88, "D": 62}, theirs)
+        self.assertEqual(problems, ["TX lower: Open States lists 150 members, NCSL 149 with 1 vacant; "
+                                    "check the chamber's own roster for a member who has left"])
+        self.assertEqual(out["lower"]["D"], 62)
+        # The other way round - nobody listed where NCSL has a member - is
+        # Open States lagging, and the page already says "nobody listed".
+        theirs["lower"] = {"seats": 150, "D": 62, "R": 88, "other": 0, "vacant": 0}
+        _, problems = self._state("TX", {"R": 19, "D": 12}, {"R": 88, "D": 61}, theirs)
+        self.assertEqual(problems, [])
+
     def test_nebraska_cannot_be_a_trifecta(self):
         out, _ = self._state("NE", {"N": 49}, {})
         self.assertEqual((out["legislature"], out["trifecta"]), ("nonpartisan", "nonpartisan"))

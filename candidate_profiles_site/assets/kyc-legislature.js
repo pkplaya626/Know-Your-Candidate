@@ -99,9 +99,14 @@
     Object.keys(c.members).forEach(function (id) { everyone = everyone.concat(c.members[id]); });
     var missing = c.seats - c.listed;
     var unplaced = state.unplaced.filter(function (p) { return p.chamber === chamber; });
+    // A member the map cannot draw (New Hampshire's floterial seats) still
+    // holds a seat and counts in the chamber's parties, as the state page
+    // counts them; a non-voting tribal representative holds none of its
+    // seats and counts in neither (kyc/statelegs.py).
+    var seated = everyone.concat(unplaced.filter(function (p) { return !p.tribalSeat; }));
     el("legPanelTitle").textContent = state.name + " " + c.title;
     el("legPanelBody").innerHTML =
-      "<p>" + KYC.escapeHtml(c.seats + " seats" + (everyone.length ? ": " + partyCounts(everyone) : "")) + ".</p>" +
+      "<p>" + KYC.escapeHtml(c.seats + " seats" + (seated.length ? ": " + partyCounts(seated) : "")) + ".</p>" +
       (missing > 0 ? '<p class="faint">Open States lists nobody for ' + missing +
         (missing === 1 ? " seat" : " seats") + ". They may be vacant, or the record may be behind a special election.</p>" : "") +
       (unplaced.length ? '<p class="leg-subhead">Not on the map</p>' +

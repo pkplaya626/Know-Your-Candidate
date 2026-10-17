@@ -179,6 +179,35 @@ class TestTheHistory(unittest.TestCase):
         self.assertFalse(out["holders"][0]["current"])
 
 
+class TestAnActingEndAfterTheSuccessorBegan(unittest.TestCase):
+    """Energy: Kolb acting to 2025-02-04 in both sources, Wright from
+    2025-02-03 in both - one office, two holders, for a day."""
+
+    @staticmethod
+    def day(date):
+        return {"shown": {"date": date, "precision": "day"}}
+
+    def test_it_is_found(self):
+        holders = [{"name": "Ingrid Kolb", "acting": True, "start": self.day("2025-01-20"),
+                    "end": self.day("2025-02-04")},
+                   {"name": "Chris Wright", "start": self.day("2025-02-03"), "current": True}]
+        self.assertEqual(cabinet.overlaps(holders), [0])
+
+    def test_a_same_day_hand_over_is_not(self):
+        holders = [{"name": "A", "acting": True, "end": self.day("2025-02-03")},
+                   {"name": "B", "start": self.day("2025-02-03")}]
+        self.assertEqual(cabinet.overlaps(holders), [])
+
+    def test_only_an_acting_officer_and_only_to_the_day(self):
+        holders = [{"name": "A", "end": self.day("2025-02-04")},
+                   {"name": "B", "start": self.day("2025-02-03")}]
+        self.assertEqual(cabinet.overlaps(holders), [])
+        holders = [{"name": "A", "acting": True,
+                    "end": {"shown": {"date": "2025-02", "precision": "month"}}},
+                   {"name": "B", "start": self.day("2025-02-03")}]
+        self.assertEqual(cabinet.overlaps(holders), [])
+
+
 class TestWhoAConfirmationBelongsTo(unittest.TestCase):
     def build(self, holders, votes):
         executive = {"president": {"termStart": SINCE},

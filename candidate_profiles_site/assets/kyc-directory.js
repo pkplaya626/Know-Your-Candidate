@@ -50,8 +50,11 @@
         item.chamber.indexOf("Senate") !== -1;
     },
     // Incumbents whose seat is up but who are not running again.
+    // Not a member running again under a new district number (renumbered):
+    // they are seeking re-election, for a seat with another number.
     notSeeking: function (item) {
-      return item.seatUp2026 && !item.isCandidate && !item.seekingReelection2026;
+      return item.seatUp2026 && !item.isCandidate && !item.seekingReelection2026 &&
+        !item.renumbered;
     },
     contested: function (item) {
       return !!item.raceId && contestedRaces.has(item.raceId);
@@ -276,6 +279,7 @@
   function apply(opts) {
     syncStateLink();
     syncViewToggles();
+    syncSort();
     syncNav();
     visible = data.filter(matches);
     visible.sort(SORTS[state.sort] || SORTS.region);
@@ -444,12 +448,40 @@
     );
   }
 
+  /* The sort is a menu (KYC.createMenu), so it is drawn in the theme's own
+   * colours and opens the same way on a phone, where it is an icon. It
+   * orders the cards only: the races and Senate views list seats in their
+   * own order, and the menu says so there. */
   function initSort() {
-    var select = doc.getElementById("sortBy");
-    select.addEventListener("change", function () {
-      state.sort = select.value;
-      apply();
+    KYC.createMenu(doc.getElementById("sortButton"), doc.getElementById("sortPanel"), {
+      onSelect: function (item) {
+        var key = item.getAttribute("data-sort");
+        if (!SORTS[key]) return;
+        state.sort = key;
+        apply();
+      },
     });
+  }
+
+  // What the sort does not order, in the view the reader is in.
+  var SORT_NOTES = {
+    race: "Sorting applies to the cards. The races view lists races seat by seat.",
+    senate: "Sorting applies to the cards. The Senate view lists seats by the year each is " +
+      "next on the ballot.",
+  };
+
+  function syncSort() {
+    var current = "";
+    Array.prototype.forEach.call(doc.querySelectorAll("#sortPanel [data-sort]"), function (item) {
+      var on = item.getAttribute("data-sort") === state.sort;
+      item.setAttribute("aria-checked", String(on));
+      if (on) current = item.textContent.trim();
+    });
+    doc.getElementById("sortLabel").textContent = current;
+    doc.getElementById("sortButton").setAttribute("aria-label", "Sort the cards: " + current);
+    var note = doc.getElementById("sortNote");
+    note.hidden = !SORT_NOTES[state.view];
+    if (SORT_NOTES[state.view]) note.textContent = SORT_NOTES[state.view];
   }
 
   /* One delegated listener for the whole grid, rather than an inline onclick
@@ -511,7 +543,6 @@
 
     doc.getElementById("searchInput").value = state.q;
     doc.getElementById("stateSelect").value = state.state;
-    doc.getElementById("sortBy").value = state.sort;
     doc.getElementById("raceViewToggle")
       .setAttribute("aria-pressed", String(state.view === "race"));
     syncChips();

@@ -153,8 +153,24 @@ class TestRacesWithContests(unittest.TestCase):
         self.assertEqual(race_list["H-TX-35-2026"]["incumbentIds"], ["C001131"])
         self.assertTrue(race_list["H-TX-35-2026"]["openSeat"])
         self.assertEqual(race_list["H-TX-37-2026"]["candidateIds"], ["C001131"])
-        self.assertTrue(race_list["H-TX-37-2026"]["openSeat"])   # nobody holds it
+        # Nobody holds TX-37, but a sitting member is on its ballot under
+        # Texas's new map, so it is not open; TX-35, which he holds and no
+        # sitting member is running for, is - and says where he went.
+        self.assertFalse(race_list["H-TX-37-2026"]["openSeat"])
+        self.assertTrue(casar["renumbered"])
+        self.assertEqual(race_list["H-TX-35-2026"]["holderMoved"]["to"], "House • TX-37")
         self.assertEqual(race_list["H-TX-37-2026"]["label"], "TX-37 — U.S. House")
+
+    def test_a_move_in_a_state_whose_map_did_not_change_is_not_a_renumbering(self):
+        # Iowa's map did not change: a member running in a neighbouring
+        # district is running for another seat, not under a new number.
+        m = member("Z000001", "Zed Example", "IA", 1, fec="H2IA01001")
+        m.update(contestRaceId="H-IA-02-2026", contestLabel="House • IA-2",
+                 seekingReelection2026=False)
+        race_list = {r["id"]: r for r in races.build([m])}
+        self.assertNotIn("renumbered", m)
+        self.assertNotIn("holderMoved", race_list["H-IA-01-2026"])
+        self.assertTrue(race_list["H-IA-02-2026"]["openSeat"])
 
     def test_a_member_with_a_separate_candidacy_is_not_added_twice(self):
         stevens = member("S001215", "Haley Stevens", "MI", 11)

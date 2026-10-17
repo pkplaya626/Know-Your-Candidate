@@ -96,7 +96,13 @@ def _judge(record):
     """A judge as the pages show them: nothing a source did not state."""
     keep = ("id", "name", "sortName", "status", "seats", "prior", "born", "education",
             "career", "otherNominations", "fjc", "justice", "retiredJustice", "portrait")
-    return {k: record[k] for k in keep if record.get(k) not in (None, [], "")}
+    out = {k: record[k] for k in keep if record.get(k) not in (None, [], "")}
+    # The name they go by; the directory's bracketed given name read out
+    # beside it (kyc/judiciary.py).
+    full = judiciary.full_name(out.get("name"))
+    if full:
+        out["name"], out["fullName"] = judiciary.display_name(out["name"]), full
+    return out
 
 
 def _opening(row):
@@ -126,13 +132,23 @@ def build(root="."):
     judges = courts["judges"]
     # Each court's vacancies, as the courts list them, by the list's own
     # court code (kyc/vacancies.py); a code no court has stays unplaced.
+    # A judge the list implies still serves, whom the directory does not
+    # list on that court at all, is marked so on the row (vacancies.py).
     vacant, coming = {}, {}
+
+    def placed(row, future):
+        out = _opening(row)
+        if courts["courts"].get(row["court"], {}).get("listed") and \
+                vacancies.judge_unlisted(row, judges, future=future):
+            out["notInDirectory"] = True
+        return out
+
     for row in openings["current"]:
         if row.get("court"):
-            vacant.setdefault(row["court"], []).append(_opening(row))
+            vacant.setdefault(row["court"], []).append(placed(row, False))
     for row in openings["future"]:
         if row.get("court"):
-            coming.setdefault(row["court"], []).append(_opening(row))
+            coming.setdefault(row["court"], []).append(placed(row, True))
     offices = []
     # Who has held each office since the term began (kyc/cabinet.py).
     changes = executive.get("changes") or {}
@@ -144,6 +160,12 @@ def build(root="."):
         held = ((changes.get("offices") or {}).get(office["key"]) or {}).get("holders")
         if held:
             entry["history"] = [_change(row) for row in held]
+            # An acting end the sources put after the successor's start is
+            # not shown, and says why (kyc/cabinet.py overlaps).
+            from . import cabinet
+            for i in cabinet.overlaps(held):
+                end = entry["history"][i]["end"]
+                end["shown"], end["overlap"] = None, True
         offices.append(entry)
     # The circuit map's colours: the guide's, from one table (rule 12).
     from . import geo
@@ -156,7 +178,8 @@ def build(root="."):
             "id": cid, "name": court["name"], "kind": court["kind"],
             "circuit": court.get("circuit"), "states": list(court.get("states") or ()),
             "listed": held["listed"], "active": held["active"], "senior": held["senior"],
-            "chief": {"id": chief, "name": judges[chief]["name"]} if chief else None,
+            "chief": {"id": chief, "name": judiciary.display_name(judges[chief]["name"])}
+            if chief else None,
             "chiefUnsettled": bool(held.get("chiefUnsettled")),
             **({"token": colours[court["circuit"]]}
                if court["kind"] == "appeals" and court.get("states") else {}),
@@ -198,7 +221,12 @@ def build(root="."):
     for cid, held in courts["courts"].items():
         for jid in held["judges"]:
             sitting_on.setdefault(jid, []).append(cid)
-    search = sorted(([jid, judges[jid]["name"], sitting_on[jid], judges[jid]["status"]]
+    # A name the directory brackets is found by either form: the row carries
+    # the full name fifth, for the search only.
+    search = sorted(([jid, judiciary.display_name(judges[jid]["name"]), sitting_on[jid],
+                      judges[jid]["status"]] +
+                     ([judiciary.full_name(judges[jid]["name"])]
+                      if judiciary.full_name(judges[jid]["name"]) else [])
                      for jid in sitting_on), key=lambda row: (row[1], row[0]))
     # Each officer's financial disclosures (kyc/oge.py), by office, while the
     # index was read for the officer who holds it now.

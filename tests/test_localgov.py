@@ -12,9 +12,15 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from kyc import census, counties, localgov  # noqa: E402
+from kyc import census, counties, county_areas, localgov  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
+
+
+def localgov_states():
+    """``{state code: its two-digit FIPS code}``."""
+    from kyc.geo import FIPS_TO_STATE
+    return {code: fips for fips, code in FIPS_TO_STATE.items()}
 
 
 class TestNames(unittest.TestCase):
@@ -87,6 +93,91 @@ class TestCountyPages(unittest.TestCase):
 
 
 
+class TestCountyAreas(unittest.TestCase):
+    """A county area with no county government says why (rule 71): the
+    counties directory said Rhode Island had none while its page drew five
+    counties and said nothing."""
+
+    MAP = {"44001": {"name": "Bristol County"}, "44003": {"name": "Kent County"},
+           "44005": {"name": "Newport County"}, "44007": {"name": "Providence County"},
+           "44009": {"name": "Washington County"}}
+
+    def test_an_area_without_a_county_government_must_be_explained(self):
+        rows = {f: [["township", "Town of X"]] for f in self.MAP}
+        self.assertEqual(county_areas.check("RI", self.MAP, rows), [])
+        # Texas has a county government in every county: one missing is a
+        # build error, not a blank.
+        problems = county_areas.check("TX", {"48201": {"name": "Harris County"}},
+                                      {"48201": [["special", "Harris County MUD 1"]]})
+        self.assertEqual(len(problems), 1)
+        self.assertIn("does not say why", problems[0])
+
+    def test_an_explanation_that_no_longer_fits_fails(self):
+        # The listing holds a county government after all.
+        rows = {f: [["county", "County of X"]] if f == "44001" else [] for f in self.MAP}
+        self.assertTrue(any("listing holds one" in p
+                            for p in county_areas.check("RI", self.MAP, rows)))
+        # The area is renamed on the map, or gone from it.
+        renamed = dict(self.MAP, **{"44001": {"name": "Bristol Region"}})
+        self.assertTrue(any("the map calls it" in p
+                            for p in county_areas.check("RI", renamed, {})))
+        self.assertTrue(any("not on the map" in p for p in county_areas.check(
+            "RI", {f: v for f, v in self.MAP.items() if f != "44009"}, {})))
+        # The government said to do the county's work is not in the listing.
+        sf = {"06075": {"name": "San Francisco County"}}
+        self.assertTrue(any("holds no 'City and County of San Francisco'" in p
+                            for p in county_areas.check("CA", sf, {"06075": [["special", "X"]]})))
+
+    def test_real_states_build_with_every_area_explained(self):
+        for code in ("RI", "NY", "VA", "AK", "CT", "MA", "HI"):
+            page = counties.build_state(code, ROOT, {})
+            lacking = [f for f in page["counties"]
+                       if not any(r[0] == "county" for r in page["governments"].get(f, []))]
+            self.assertEqual(sorted(page["noCounty"]), sorted(lacking), code)
+            self.assertTrue(page["stateNote"], code)
+        tx = counties.build_state("TX", ROOT, {})
+        self.assertEqual(tx["noCounty"], {})
+        self.assertEqual(tx["stateNote"], "")
+
+    def test_a_borough_with_no_governments_points_to_where_they_are_listed(self):
+        page = counties.build_state("NY", ROOT, {})
+        bronx = page["noCounty"]["36005"]
+        self.assertEqual(bronx["filed"], "36061")
+        self.assertIn("the Bronx", bronx["note"])
+        self.assertIn("under New York County (Manhattan)", bronx["note"])
+        self.assertEqual(page["governments"].get("36005", []), [])
+
+    def test_a_state_names_its_own_areas(self):
+        self.assertEqual(county_areas.words("LA")[:2], ("parish", "parishes"))
+        self.assertEqual(county_areas.words("CT")[2], "Planning regions")
+        self.assertEqual(county_areas.words("TX"), county_areas.DEFAULT_WORDS)
+
+    def test_the_guide_counts_what_the_table_holds(self):
+        from kyc import government_text
+        text = " ".join(b[1] for s in government_text.LOCAL["sections"] if s["id"] == "counties"
+                        for b in s["blocks"] if b[0] == "p")
+        ma = [f for f in county_areas.AREAS if f.startswith("25")]
+        va = [f for f, e in county_areas.AREAS.items()
+              if f.startswith("51") and e[1] == county_areas.INDEPENDENT]
+        self.assertEqual((len(ma), len(va)), (9, 38))
+        self.assertIn("nine of Massachusetts's fourteen counties", text)
+        self.assertIn("Virginia's 38", text)
+
+    def test_virginias_one_school_district_is_the_one_the_guide_names(self):
+        # The guide said Virginia had only dependent systems while its own
+        # map and the directory counted one independent school district.
+        from kyc import government_maps, government_text
+        schools = [(fips, g["name"]) for fips, e in localgov.load("VA", ROOT)["counties"].items()
+                   for g in e["governments"] if g["type"] == "school"]
+        self.assertEqual(schools, [("51710", "Eastern Virginia Medical School")])
+        self.assertEqual(census.load_cache(ROOT)["states"]["VA"]["school"], 1)
+        text = " ".join(b[1] for s in government_text.LOCAL["sections"] if s["id"] == "schools"
+                        for b in s["blocks"] if b[0] == "p")
+        self.assertNotIn("North Carolina, Virginia", text)
+        self.assertIn("Eastern Virginia Medical School", text)
+        self.assertIn("Eastern Virginia Medical School", government_maps.COUNT_NOTES[("VA", "school")])
+
+
 class TestCities(unittest.TestCase):
     """A place is joined to its government by name only where the join is
     one to one; anything else is reported and left unjoined (rule 51)."""
@@ -141,8 +232,15 @@ class TestCities(unittest.TestCase):
             refs = [tuple(c[5]) for c in page["cities"].values() if c[5]]
             self.assertEqual(len(refs), len(set(refs)), code)
             listing = localgov.load(code, ROOT)
+            # A curated join may name the town or county government the
+            # listing files the place's government as (Mount Lebanon's
+            # township, Echols County); every other is a municipal one.
+            from kyc import overrides
+            curated = {tuple(c[5]) for pid, c in page["cities"].items()
+                       if c[5] and pid in overrides.PLACE_GOVERNMENTS}
             for fips, i in refs:
-                self.assertEqual(listing["counties"][fips]["governments"][i]["type"], "municipal",
+                kind = listing["counties"][fips]["governments"][i]["type"]
+                self.assertEqual(kind, "municipal" if (fips, i) not in curated else kind,
                                  (code, fips, i))
             width, height = page["viewBox"][2], page["viewBox"][3]
             for pid, (x, y, kind, name, county, ref, status) in page["cities"].items():
@@ -156,6 +254,58 @@ class TestCities(unittest.TestCase):
                 for name in unjoined[:12]:
                     self.assertIn(name, report, code)
         self.assertNotIn("problems", maps["TX"])
+
+    def test_a_city_its_consolidated_government_governs_is_joined_to_it(self):
+        # Kansas City and Baton Rouge read "a place incorporated since 2022
+        # is not in it" though both are 19th-century cities whose government
+        # is the one county_areas.AREAS names.
+        for code, pid, area in (("KS", "2036000", "20209"), ("LA", "2205000", "22033"),
+                                ("GA", "1332528", "13239")):
+            page = counties.build_state(code, ROOT, {})
+            fips, i = page["cities"][pid][5]
+            self.assertEqual(page["governments"][fips][i][1], county_areas.AREAS[area][2], code)
+            self.assertEqual(page["consolidatedPlaces"].get(pid), area)
+        # Not every place in such an area: St. George incorporated in 2024.
+        la = counties.build_state("LA", ROOT, {})
+        self.assertIsNone(la["cities"]["2267303"][5])
+
+    def test_every_curated_join_holds_in_the_committed_data(self):
+        from kyc import overrides
+        by_state = {}
+        for pid in overrides.PLACE_GOVERNMENTS:
+            code = next(c for c, s in localgov_states().items() if pid[:2] == s)
+            by_state.setdefault(code, []).append(pid)
+        for code, pids in by_state.items():
+            problems = []
+            page = counties.build(ROOT, [code], problems)[code]
+            listing = localgov.load(code, ROOT)
+            for pid in pids:
+                ref = page["cities"][pid][5]
+                self.assertIsNotNone(ref, (code, pid, problems))
+                gov = listing["counties"][ref[0]]["governments"][ref[1]]
+                self.assertEqual((gov["id"], gov["name"]), overrides.PLACE_GOVERNMENTS[pid][:2])
+            self.assertFalse([p for p in problems if "curated" in p], problems)
+        # A government the place replaced is never joined (rule 59).
+        for code, name in (("WI", "Rib Mountain"), ("WI", "Lisbon"), ("MN", "Baldwin"), ("MN", "Empire")):
+            page = counties.build_state(code, ROOT, {})
+            self.assertTrue(all(c[5] is None for c in page["cities"].values() if c[3] == name), name)
+
+    def test_a_curated_join_that_no_longer_fits_is_refused(self):
+        listing = {"counties": {"56007": {"governments": [
+            {"id": "X1", "name": "Town of Grand Encampment", "type": "municipal"}]}}}
+        rows = {"5624750": [0, 0, "town", "Encampment", "56007", None, ""]}
+        out, problems = counties.curated_joins("WY", rows, listing, {})
+        self.assertEqual(out, {})                     # the listing's id is not the one recorded
+        self.assertIn("not joined", problems[0])
+        listing["counties"]["56007"]["governments"][0]["id"] = "51200400500000"
+        out, problems = counties.curated_joins("WY", rows, listing, {})
+        self.assertEqual((out, problems), ({"5624750": (("56007", 0), "listed")}, []))
+        rows["5624750"][4] = "56001"                  # the place in another county
+        out, problems = counties.curated_joins("WY", rows, listing, {})
+        self.assertEqual(out, {})
+        rows["5624750"][4] = "56007"
+        out, problems = counties.curated_joins("WY", rows, listing, {"5624750": ("56007", 0)})
+        self.assertIn("no longer needed", problems[0])  # the name join found it on its own
 
     def test_hawaii_has_counties_and_no_incorporated_place(self):
         page = counties.build_state("HI", ROOT, {})
@@ -321,11 +471,14 @@ class TestTowns(unittest.TestCase):
                 self.assertTrue(counties.same_town(gov["census"], name), (code, sid))
                 self.assertTrue(0 <= x <= width and 0 <= y <= height, (code, name))
                 placed += 1
-            # A state with town governments places nearly all of them; what
+            # A state with town governments places nearly all of them, on a
+            # ring or on a place's point (overrides.PLACE_GOVERNMENTS); what
             # it does not place is in what the build reports.
             towns = [g for e in listing["counties"].values() for g in e["governments"]
                      if g["type"] == "township"]
-            if len(towns) != len(page["towns"]):
+            on_places = sum(1 for c in page["cities"].values() if c[5] and
+                            listing["counties"][c[5][0]]["governments"][c[5][1]]["type"] == "township")
+            if len(towns) != len(page["towns"]) + on_places:
                 self.assertTrue(any(p.startswith(f"{code}: ") and "town or township" in p
                                     for p in problems), code)
             if not towns:

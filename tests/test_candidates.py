@@ -117,7 +117,12 @@ class TestCacheShape(unittest.TestCase):
         cache = candidates.build_cache([filing()])
         with tempfile.TemporaryDirectory() as tmp:
             candidates.save_cache(cache, tmp)
-            self.assertEqual(candidates.load_cache(tmp), cache)
+            loaded = candidates.load_cache(tmp)
+            # Each filing's committee, from the campaigns cache, rides along
+            # so every build merges one person's registrations alike; it is
+            # never written back.
+            self.assertEqual(loaded.pop("committeeOf"), {})
+            self.assertEqual(loaded, cache)
 
     def test_missing_cache_is_absence_not_failure(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -751,6 +756,30 @@ class TestRegistrations(unittest.TestCase):
         rows = [self.filing("H6FL01275", 1, 86975.7, "2024-11-15", end="2025-06-30"),
                 self.filing("H6FL22180", 22, 23613.0, "2026-05-08", end="2026-07-29")]
         self.assertEqual(candidates.registrations(rows), {})
+
+    def test_one_committee_under_two_name_forms_is_one_person(self):
+        # "MIRESSI, DAN" and "MIRESSI, DANIEL" filed for one committee,
+        # C00941310, with the same money: two profiles in CT-4, counted
+        # twice as on the ballot, until the committee joined them.
+        rows = [self.filing("H4CT04189", 4, 10721.85, "2024-01-19", name="MIRESSI, DAN"),
+                self.filing("H6CT04150", 4, 10721.85, "2026-03-01", name="MIRESSI, DANIEL")]
+        self.assertEqual(candidates.registrations(rows), {})
+        same = {"H4CT04189": "C00941310", "H6CT04150": "C00941310"}
+        self.assertEqual(candidates.registrations(rows, same), {"H6CT04150": ["H4CT04189"]})
+
+    def test_one_committee_is_not_enough_without_the_same_money(self):
+        rows = [self.filing("H4CT04189", 4, 10721.85, "2024-01-19", name="MIRESSI, DAN"),
+                self.filing("H6CT04150", 4, 999.0, "2026-03-01", name="MIRESSI, DANIEL")]
+        same = {"H4CT04189": "C00941310", "H6CT04150": "C00941310"}
+        self.assertEqual(candidates.registrations(rows, same), {})
+
+    def test_the_same_money_under_two_committees_is_two_people(self):
+        # Many filers share $0 and a quarter's end; names that differ and
+        # committees that differ are two people whatever the money says.
+        rows = [self.filing("H6NV01001", 1, 5000.0, "2026-02-01", name="SMITH, JOHN"),
+                self.filing("H6NV01002", 1, 5000.0, "2026-02-01", name="JONES, MARY")]
+        self.assertEqual(candidates.registrations(
+            rows, {"H6NV01001": "C00000001", "H6NV01002": "C00000002"}), {})
 
     def test_the_choice_is_stable_when_statements_tie(self):
         rows = [self.filing("H6TX10262", 10, 9000.0, "2026-01-02"),

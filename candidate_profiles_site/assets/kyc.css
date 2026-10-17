@@ -561,6 +561,12 @@ svg.district-map,
   left: 0;
   background: var(--surface-0);
 }
+/* Why a state's county governments are fewer than its counties: numbered
+ * from the county column, listed under the table. */
+.note-ref { margin-left: 0.15em; font-size: var(--t-xs); text-decoration: none; }
+.directory-notes { margin: 0 0 var(--s-4); padding-left: 1.6em; font-size: var(--t-sm); max-width: 70ch; }
+.directory-notes li { margin-bottom: var(--s-2); }
+.directory-notes li:target { background: var(--surface-2); outline: 2px solid var(--accent); }
 
 .app-main {
   display: flex;
@@ -708,19 +714,55 @@ svg.district-map,
   background-size: 5px 5px, 5px 5px;
   background-repeat: no-repeat;
 }
-.select-bare {
-  border-color: transparent;
-  background-color: transparent;
+/* A native menu's list is drawn by the browser. Over a transparent field
+ * Chrome drew it white while the options kept the theme's white text, so
+ * every option but the highlighted one was invisible: give the list the
+ * theme's own colours. */
+select option,
+select optgroup {
+  background-color: var(--surface-1);
+  color: var(--text);
+}
+
+/* The grid's sort: a button over a menu, like the theme picker. */
+.sort-control { display: flex; align-items: center; }
+.btn-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 36px;
+  padding: 0 var(--s-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: none;
   color: var(--text-muted);
+  font: inherit;
   font-weight: 600;
   font-size: var(--t-sm);
-  width: auto;
+  white-space: nowrap;
+  cursor: pointer;
 }
+.btn-sort::after {
+  content: "";
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid currentColor;
+}
+.btn-sort[aria-expanded="true"] { color: var(--text); border-color: var(--border); }
 @media (hover: hover) {
-  .select-bare:hover { color: var(--text); border-color: var(--border); }
+  .btn-sort:hover { color: var(--text); border-color: var(--border); }
 }
-.sort-control { position: relative; display: flex; align-items: center; }
-.sort-control .icon { display: none; }
+.btn-sort:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sort-control .btn-sort .icon { display: none; }
+.sort-panel { min-width: 240px; }
+.sort-panel .menu-item { white-space: nowrap; }
+.menu-note {
+  margin: 0 0 var(--s-1);
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: var(--t-sm);
+}
 .filters-toggle { display: none; }
 .filters-count { color: var(--text-muted); font-weight: 600; }
 
@@ -2065,7 +2107,6 @@ svg.district-map,
   textarea,
   .search input,
   .select,
-  .select-bare,
   .text-input { font-size: 16px; }
 }
 
@@ -2165,26 +2206,15 @@ svg.district-map,
   /* The grid's sort is an icon over its own menu. As a labelled select it
    * took 184px of a 390px header and left the search box 13px wide - 0 at
    * 360px, where nothing a reader typed could be seen. */
-  .sort-control {
+  .btn-sort {
     width: 44px;
     height: 44px;
     justify-content: center;
-    border-radius: var(--radius);
-    color: var(--text-muted);
+    padding: 0;
   }
-  .sort-control .icon { display: block; }
-  .sort-control select {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-  }
-  .sort-control:focus-within {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
+  .sort-control .btn-sort .icon { display: block; }
+  .btn-sort .sort-current,
+  .btn-sort::after { display: none; }
 }
 
 /* Narrower than any phone at 100% - a phone at 130% page zoom or more - the
@@ -3596,6 +3626,8 @@ button.local-county-link {
 }
 .gov-officer-name { font-weight: 700; color: var(--text); }
 .gov-officer-note { font-size: var(--t-sm); color: var(--text-muted); }
+/* A line under a panel's lists: who else is on the ballot, and where. */
+.panel-note { margin: var(--s-2) 0; font-size: var(--t-sm); color: var(--text-muted); }
 
 /* A state's highest court: names in two columns where there is room. */
 .gov-court {

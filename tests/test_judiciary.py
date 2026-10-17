@@ -238,5 +238,18 @@ class TestTheCommittedCache(unittest.TestCase):
                 self.assertTrue(court["listed"] and court["judges"], cid)
 
 
+class TestNamesAJudgeGoesBy(unittest.TestCase):
+    def test_a_bracketed_given_name_is_shown_as_its_initial(self):
+        self.assertEqual(judiciary.display_name("A[llen] Joe Fish"), "A. Joe Fish")
+        self.assertEqual(judiciary.full_name("A[llen] Joe Fish"), "Allen Joe Fish")
+        self.assertEqual(judiciary.display_name("R[obert] Lanier Anderson, III"),
+                         "R. Lanier Anderson, III")
+
+    def test_a_plain_name_is_unchanged(self):
+        self.assertEqual(judiciary.display_name("John G. Roberts, Jr."), "John G. Roberts, Jr.")
+        self.assertIsNone(judiciary.full_name("John G. Roberts, Jr."))
+        self.assertEqual(judiciary.display_name(None), "")
+
+
 if __name__ == "__main__":
     unittest.main()

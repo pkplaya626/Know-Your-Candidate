@@ -211,6 +211,22 @@ LOWER_CHAMBER = {
     "NE": None,                         # one chamber
 }
 
+# Legislatures whose state constitution names them other than "the
+# Legislature" (the legislature page's title: "Virginia General Assembly",
+# never "Virginia Legislature"). Massachusetts's constitution styles its
+# legislature "the General Court of Massachusetts" (Part II, c. 1, s. 1,
+# art. 1) and New Hampshire's "the general court"; Oregon's vests its
+# legislative power in "a Legislative Assembly" (art. IV, s. 1), as North
+# Dakota's does. Checked 2026-10-16 against Wikipedia's "List of U.S. state
+# legislatures" as a lead (rule 50), which names the same 23.
+LEGISLATURE_NAME = {
+    **{code: "General Assembly" for code in (
+        "AR", "CO", "CT", "DE", "GA", "IL", "IN", "IA", "KY", "MD", "MO", "NC", "OH", "PA",
+        "RI", "SC", "TN", "VT", "VA")},
+    "MA": "General Court", "NH": "General Court",
+    "ND": "Legislative Assembly", "OR": "Legislative Assembly",
+}
+
 NO_LINE_ITEM_VETO = ("IN", "NV", "NH", "NC", "RI", "VT")
 
 
@@ -464,6 +480,17 @@ NONE_OF_KIND = {
     "school": ("No independent school districts: its public schools are run by the state, a county "
                "or a city, as dependent school systems."),
 }
+# A count that reads as something it is not. Virginia's one "independent
+# school district" in the Census table is no school system: the 2022
+# listing files Eastern Virginia Medical School (Norfolk) as one, and
+# Virginia's public schools are dependent systems of its counties and
+# cities (cog-isd). Said wherever the count is: the guide's school map and
+# the counties directory. tests/test_localgov.py holds the listing to it.
+COUNT_NOTES = {
+    ("VA", "school"): ("The one is Eastern Virginia Medical School, in Norfolk, which the Census "
+                       "Bureau's 2022 listing files as a school district; Virginia's public schools "
+                       "are dependent systems of its counties and cities."),
+}
 
 
 def _bins(numbers):
@@ -498,7 +525,10 @@ def _local_about(kind, census_cache):
                 f"{state_name(ranked[0][1])} ({ranked[0][0]:,}).")
     if kind == "county":
         return (f"{total:,} county governments in 2022. Louisiana's are called parishes, and "
-                f"Alaska's organized boroughs are counted as counties. {_join(none)} have none.")
+                f"Alaska's organized boroughs are counted as counties. {_join(none)} have none. "
+                f"Elsewhere some county areas have no county government of their own: a city and "
+                f"county governed as one, an independent city outside any county, or an area "
+                f"with no government. Pick a state to see which.")
     if kind == "municipal":
         return f"{total:,} cities, towns, villages and boroughs in 2022."
     if kind == "township":
@@ -513,6 +543,7 @@ def _local_about(kind, census_cache):
 
 
 def _local(census_cache):
+    from . import county_areas
     from .pages import state_name
     states = census_cache["states"]
     the = _names()
@@ -533,12 +564,16 @@ def _local(census_cache):
         values, facts = {}, {}
         for code, counts in states.items():
             n = counts[kind]
+            # A state whose county areas are not all governed by a county
+            # says why, in the counties directory's words (county_areas).
+            why = county_areas.directory_note(code) if kind == "county" else ""
             if not n:
                 values[code] = "zero"
-                facts[code] = NONE_OF_KIND.get(kind, f"No {many}.")
+                facts[code] = why or NONE_OF_KIND.get(kind, f"No {many}.")
                 continue
             values[code] = next(k for lo, hi, k in keys if hi is None or n < hi)
-            facts[code] = f"{n:,} {one if n == 1 else many} in 2022."
+            why = " ".join(filter(None, (why, COUNT_NOTES.get((code, kind)))))
+            facts[code] = f"{n:,} {one if n == 1 else many} in 2022." + (" " + why if why else "")
         if kind == "total":
             for code, counts in states.items():
                 parts = []
@@ -602,6 +637,9 @@ def payload():
             out["modes"][m["id"]] = entry
             for key in m["sources"]:
                 out["sources"][key] = list(SOURCES[key])
+    # What each legislature is called, so the guide's link to its page reads
+    # as the page does ("Virginia General Assembly", not "... Legislature").
+    out["legislatureNames"] = dict(sorted(LEGISLATURE_NAME.items()))
     return out
 
 

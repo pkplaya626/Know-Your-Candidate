@@ -244,13 +244,17 @@
 
     var value = parseFloat(score[1]);
     var pct = Math.max(0, Math.min(100, ((value + 1) / 2) * 100));
-    var label = (text.match(/\(([^)]+)\)/) || [])[1] || "";
-    var tone = value <= -0.1 ? "party-d" : value >= 0.1 ? "party-r" : "";
+    // "(right of centre; 119th Congress)": where on the scale, in its own
+    // words - never a party's name, or an independent read as one - and the
+    // Congress whose votes it scores. Not drawn in a party's colour either.
+    var inner = ((text.match(/\(([^)]+)\)/) || [])[1] || "").split(";");
+    var label = inner[0].trim();
+    var congress = (inner[1] || "").trim();
 
     target.innerHTML = [
       '<div class="ideology">',
       '  <div class="ideology-head">',
-      '    <span class="ideology-score ' + tone + '">',
+      '    <span class="ideology-score">',
       (value > 0 ? "+" : "") + value.toFixed(2),
       label ? '<span class="label">' + KYC.escapeHtml(label) + "</span>" : "",
       "    </span>",
@@ -261,6 +265,10 @@
       "  </div>",
       '  <div class="ideology-axis"><span>-1.0 left</span>' +
       "<span>centre</span><span>right +1.0</span></div>",
+      '  <p class="held-source">Source: <a href="https://voteview.com/" target="_blank" ' +
+      'rel="noopener noreferrer">Voteview</a> DW-NOMINATE, first dimension' +
+      (congress ? ", from roll calls in the " + KYC.escapeHtml(congress) : "") +
+      ". A score places votes on a left-right scale; it is not a party label.</p>",
       "</div>",
     ].join("");
   }
@@ -349,6 +357,7 @@
       .filter(function (id) { return id !== item.id; })
       .map(KYC.byId).filter(Boolean);
     var order = function (p) {
+      if (!p.isCandidate && p.contestRaceId && p.contestRaceId !== race.id) return 2;
       var spec = KYC.raceStatus(p.raceStatus, "mate");
       return spec ? spec.rank : 2;          // between a runoff and a loss
     };
@@ -357,8 +366,21 @@
       if (ra !== rb) return ra - rb;
       return order(a) - order(b) || a.name.localeCompare(b.name);
     });
-    var out = others.filter(function (p) { return KYC.cards && KYC.cards.offBallot(p); });
-    var shown = others.filter(function (p) { return !(KYC.cards && KYC.cards.offBallot(p)); });
+    /* A member who holds this seat and is contesting another - a redrawn
+     * district's new number, the other chamber - has a status about that
+     * other race. Read as this race's, Kevin Kiley was "On the ballot" in
+     * CA-3, which he holds and is not running for, and Al Green was
+     * "Lost primary" in TX-9, though he lost TX-18's. Said as where they
+     * went, and never folded under "no longer in this race". */
+    var elsewhere = function (p) {
+      return !p.isCandidate && !!p.contestRaceId && p.contestRaceId !== race.id;
+    };
+    var out = others.filter(function (p) {
+      return !elsewhere(p) && KYC.cards && KYC.cards.offBallot(p);
+    });
+    var shown = others.filter(function (p) {
+      return elsewhere(p) || !(KYC.cards && KYC.cards.offBallot(p));
+    });
     el("profileModalRaceTitle").textContent = race.label;
     // The markets on this race, compactly, after the people in it.
     el("profileModalRaceOdds").innerHTML = KYC.odds ? KYC.odds.render(race, { compact: true }) : "";
@@ -367,11 +389,20 @@
         : p.formerMember ? '<span class="badge badge-neutral" title="' +
           KYC.escapeAttr(KYC.formerText(p)) + '">Former member</span> ' : "";
       var spec = KYC.raceStatus(p.raceStatus, "mate",
-        { unconfirmed: !!p.raceStatusUnconfirmed, source: p.raceStatusSource });
+        { unconfirmed: !!p.raceStatusUnconfirmed, source: p.raceStatusSource,
+          allParty: p.allPartyPrimary });
       var status = spec
         ? '<span class="badge ' + spec.cls + '" title="' + KYC.escapeAttr(spec.title) + '">' +
           KYC.escapeHtml(spec.label) + KYC.ballotLineSuffix(p) + "</span>"
         : "";
+      if (elsewhere(p)) {
+        var there = KYC.raceStatusOf(p, "mate");
+        var label = (p.contestLabel || "another seat").replace(/ • /, " ");
+        status = '<span class="badge badge-warn" title="' + KYC.escapeAttr(
+          "Holds this seat and is running for " + label + " in 2026, not for this one" +
+          (there ? ": " + there.title : ".")) + '">Running for ' + KYC.escapeHtml(label) +
+          (there ? " &middot; " + KYC.escapeHtml(there.label) : "") + "</span>";
+      }
       return '<button type="button" class="race-mate" data-goto="' + KYC.escapeAttr(p.id) + '">' +
         '<img ' + KYC.portraitAttrs(p, "36px") + ' alt="" loading="lazy" ' +
         'data-photo-idx="0" data-profile="' + KYC.escapeAttr(p.id) + '">' +
@@ -389,11 +420,7 @@
      * member with a named November opponent read as unopposed. */
     var res = race.results || null;
     var unfiled = res && res.otherNominees && res.otherNominees.length ? res.otherNominees : [];
-    if (unfiled.length) {
-      html += '<p class="race-note">Also on the November ballot, ' + KYC.ballotSource(race) +
-        ", with no FEC filing over $5,000 and so no profile here: " +
-        KYC.escapeHtml(unfiled.join(", ")) + ".</p>";
-    }
+    if (unfiled.length) html += KYC.cards.unprofiledNote(race);
     if (!others.length && !unfiled.length) html = aloneNote(race);
     panel.hidden = false;
     target.innerHTML = redrawnNote(item, race) + html;

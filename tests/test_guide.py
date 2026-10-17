@@ -103,8 +103,12 @@ class TestNavigation(unittest.TestCase):
             "CT": {"county": None, "municipal": 30, "township": 149, "school": 17,
                    "special": 336, "total": 532}}})
         row = re.search(r"Connecticut</a></th>(.*?)</tr>", html).group(1)
-        self.assertIn('<td class="faint" title="No county governments.">none</td>', row)
+        self.assertIn('<td class="faint" title="No county governments.">none<sup>', row)
         self.assertNotIn("<td>0</td>", row)
+        # And says why, in a note under the table the cell links to.
+        self.assertIn('href="#county-note-ct"', row)
+        self.assertIn('id="county-note-ct"', html)
+        self.assertIn("abolished them in 1960", html)
         # A count of school districts is of independent ones (the guide's words).
         self.assertIn("<th scope=\"col\">Independent school districts</th>", html)
         self.assertNotIn(">School districts<", html)
