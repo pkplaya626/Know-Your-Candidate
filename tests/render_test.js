@@ -4222,6 +4222,10 @@ async function testStateGov() {
   suite("states/ak.html — its state government", () => {
     const section = ak.D.getElementById("state-government");
     check("the state page has a state government section", !!section);
+    const sources = section.querySelector(".gov-sources").textContent;
+    check("its sources say NCSL checks which party holds a chamber, not the seat counts",
+      /Seats: Open States[^.]*\. Which party holds each chamber is checked against National Conference/.test(sources),
+      sources);
     const heads = [...ak.D.querySelectorAll("#stateContent .state-heading")].map((h) => h.textContent);
     check("it follows the congressional delegation (rule 27)",
       heads.findIndex((h) => /State government/.test(h)) > heads.findIndex((h) => /House/.test(h)), heads.join(" | "));

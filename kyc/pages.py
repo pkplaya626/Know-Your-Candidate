@@ -404,9 +404,9 @@ def render_legislatures_index(host):
     ])
     footer = "\n".join([
         "                <p><strong>Sources:</strong> members and their parties from Open States, as",
-        "                    each legislature publishes them, counted against the National Conference",
-        "                    of State Legislatures' figures; a chamber's control is shown only where",
-        "                    the two agree. A seat with nobody listed counts for no one.</p>",
+        "                    each legislature publishes them. Which party holds each chamber is checked",
+        "                    against the National Conference of State Legislatures' figures and shown",
+        "                    only where the two agree. A seat with nobody listed counts for no one.</p>",
         "                <p>Non-partisan and independent.</p>",
     ])
     return render_page(

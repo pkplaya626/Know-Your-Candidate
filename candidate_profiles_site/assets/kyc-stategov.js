@@ -539,8 +539,11 @@
       (ballot(code) ? "What is on the Nov 3 ballot: each state's constitution, statutes and " +
         "election office, linked from each mark (checked " +
         KYC.escapeHtml((data.sources.ballot2026 || [])[2] || "") + "). " : "") +
-      (s.upper ? "Seats: " + source("openstates") + (ncsl ? ", checked against " + source("ncsl") : "") +
-        "." : "") + "</p>";
+      // Only which party holds each chamber is compared with NCSL; the seat
+      // counts are Open States' own (stategov.filled_where_vacant reports
+      // where the two counts part).
+      (s.upper ? "Seats: " + source("openstates") + "." + (ncsl ? " Which party holds each chamber " +
+        "is checked against " + source("ncsl") + "." : "") : "") + "</p>";
     return html;
   }
 
