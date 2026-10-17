@@ -367,8 +367,13 @@ class TestNomineesUnderTheThreshold(unittest.TestCase):
         self.assertTrue(race["contested"])
         self.assertEqual(race["candidateCount"], 0)            # still no profile
         self.assertEqual(race["results"]["belowThreshold"],
-                         [{"id": "H6TX12169", "name": "Angela Rodriguez Prilliman", "status": "nominee"}])
+                         [{"id": "H6TX12169", "name": "Angela Rodriguez Prilliman", "status": "nominee",
+                           "party": "Democratic"}])
         self.assertEqual(race["results"]["otherNominees"], ["Angela Rodriguez Prilliman"])
+        # Named with her party (PERSONA-09): a bare name beside a market
+        # line for "Republican party" left the reader to guess who was whom.
+        self.assertEqual(race["results"]["otherParties"],
+                         {"Angela Rodriguez Prilliman": "Democratic"})
 
     def test_the_incumbents_own_registration_is_never_a_challenger(self):
         # A member matched under an id their profile does not carry is still

@@ -126,7 +126,7 @@ python build_profile_site.py geo              # regenerate map geometry only (bo
 python build_profile_site.py congress         # refresh membership (network)
 python build_profile_site.py field --check    # who is running, from the FEC
 python build_profile_site.py disclosures      # House and Senate disclosure links
-python build_profile_site.py results          # who is still in, from Wikipedia (and Louisiana's qualified list)
+python build_profile_site.py results          # who is still in, from Wikipedia (Louisiana's qualified list; the states' certified ballots)
 python build_profile_site.py record           # the frozen 2026 race record (--freeze writes it; refuses to overwrite)
 python build_profile_site.py campaigns        # campaign websites from FEC committees
 python build_profile_site.py enrich           # fill gaps; check every campaign site
@@ -146,8 +146,8 @@ python build_profile_site.py oge              # the executive's financial report
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1216 tests, no dependencies
-npm install && npm test                       # 1495 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1251 tests, no dependencies
+npm install && npm test                       # 1513 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -988,6 +988,34 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (rule 41). And no one part of a page's start may stop the rest: the
     grid's start-up runs each step and its first draw on their own, draws
     what it can, and says on the page that something failed.
+
+77. **Once a state certifies its November candidates, its list is the
+    ballot.** A results page says who won a primary, not who is printed in
+    November. Audited on 2026-10-17, Alaska's at-large seat showed two
+    people on the ballot over a certified four, and called the two it left
+    out "withdrawn": four other top-four finishers had withdrawn and
+    promoted them. Alaska's certified Daniel J. Sullivan Jr. read "Not on
+    the 2026 primary ballot", thirteen qualified Florida candidates and
+    every Colorado minor-party and unaffiliated candidate were missing, and
+    American Samoa, which holds no primary, read "0 challengers on the
+    ballot" over six certified names. `kyc/certified.py` reads each list a
+    script can (Alaska, Florida, Colorado, American Samoa); a PDF list, or
+    a party's own list of its convention nominees, is transcribed in
+    `overrides.CERTIFIED_BALLOTS` with its document and the day it was
+    read. `results.certify_race` lays a list over the page: whom it prints
+    is on the ballot whatever the page said; where it is the whole ballot,
+    a filer it does not name is not on it, unless a name it prints that
+    matched no filing may be theirs. Names are matched as a results page's
+    are (rule 62). A certified write-in is not printed, and is not read as
+    on the ballot. Rule 64's limits hold: only the name, party, office and
+    what the list says of the person are kept, and a failed read keeps the
+    last list. Short of a list, a minor-party or unaffiliated filer missing
+    from a page's November table is "ballot status not known", never off
+    the ballot: those tables are copied from the major parties' primaries.
+    And a primary winner missing from the November table beside a name a
+    letter from theirs ("Gegen", "Gegan") is undecided, never "withdrawn";
+    a seat whose primary was not its state's (Alabama's four August
+    districts) carries its own date in `overrides.SEAT_PRIMARY_DATES`.
 
 ## District maps
 

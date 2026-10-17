@@ -191,6 +191,19 @@ def effective_dates(dates, senate_states=(), log=None):
     return out, notes
 
 
+def seat_slot(dates, rid):
+    """``{"primary", "runoff"}`` for one seat: the state's calendar, or the
+    seat's own where ``overrides.SEAT_PRIMARY_DATES`` holds one (Alabama's
+    four districts moved to an August special primary)."""
+    from .overrides import SEAT_PRIMARY_DATES
+
+    fixed = SEAT_PRIMARY_DATES.get(rid)
+    if fixed:
+        return {"primary": fixed["primary"], "runoff": fixed.get("runoff")}
+    parts = rid.split("-")
+    return dict((dates or {}).get((parts[1], "S" if parts[0] == "S" else "H")) or {})
+
+
 def open_primary(state, office, cycle=CYCLE):
     """True for a seat whose first round is a nonpartisan primary in November."""
     from .overrides import OPEN_PRIMARY_SEATS
@@ -830,6 +843,12 @@ def _same_spelling(a, b):
         return False
     if a[-1] != b[-1] and a[-1] not in b and b[-1] not in a:
         return False
+    if (len(a) >= 3 and len(b) >= 3 and len(a[1]) == 1 and len(b[1]) == 1
+            and a[1] != b[1]):
+        # Two middle initials that disagree are two people: Alaska's Senate
+        # page has "Dan S. Sullivan" and "Daniel J. Sullivan Jr.", and read
+        # as one, the second - certified for the November ballot - vanished.
+        return False
     return any(_given_fits(x, y) for x in a[:-1] for y in b[:-1])
 
 
@@ -842,8 +861,10 @@ def _near_spellings(boxes):
     matched no filing. Two different people whose names are a letter apart
     would be listed together somewhere - in one primary, or on one November
     ballot - so names that share a table are never merged; the given names
-    must be the same words, and the surnames six letters or more and one
-    letter apart. The spelling kept is the one more tables use.
+    must be the same words, and the surnames five letters or more and one
+    letter apart. The spelling kept is the one more tables use. Six, as it
+    once was, left GA-9's Democratic primary winner Caitlyn Gegen "withdrawn"
+    beside a November nominee spelt "Caitlyn Gegan" with no profile.
     """
     tables, order, uses = [], [], collections.Counter()
     for _title, rows in boxes:
@@ -860,7 +881,7 @@ def _near_spellings(boxes):
         for other in ranked[i + 1:]:
             b = _tokens(other)
             if (other in alias or len(a) < 2 or len(b) < 2 or a[:-1] != b[:-1]
-                    or a[-1] == b[-1] or min(len(a[-1]), len(b[-1])) < 6
+                    or a[-1] == b[-1] or min(len(a[-1]), len(b[-1])) < 5
                     or not _near(a[-1], b[-1])):
                 continue
             if any(kept in t and other in t for t in tables):
@@ -879,6 +900,9 @@ def _canonical(boxes):
     (:func:`_near_spellings`).
     """
     near = _near_spellings(boxes)
+    # Two names in one table are two people, however alike: a top-four
+    # primary listed both Alaska Sullivans.
+    tables = [{near.get(r["name"], r["name"]) for r in rows} for _title, rows in boxes]
     seen = []
     out = []
     for title, rows in boxes:
@@ -886,7 +910,8 @@ def _canonical(boxes):
         for row in rows:
             name = near.get(row["name"], row["name"])
             if name not in seen:
-                same = [s for s in seen if _same_spelling(s, name)]
+                same = [s for s in seen if _same_spelling(s, name)
+                        and not any(s in t and name in t for t in tables)]
                 if len(same) == 1:
                     name = same[0]
                 else:
@@ -1563,6 +1588,35 @@ def _same_person(a, b):
     return a == b
 
 
+def _surname_forms(tokens):
+    """``[(surname, given words)]`` with spaces and hyphens folded out of
+    the surname: "Michael Black Wolf" is ``("blackwolf", ["michael"])`` as
+    well as ``("wolf", ["michael", "black"])``."""
+    forms = [(tokens[-1].replace("-", ""), tokens[:-1])]
+    if len(tokens) >= 3:
+        forms.append(((tokens[-2] + tokens[-1]).replace("-", ""), tokens[:-2]))
+    return forms
+
+
+def _folded_surname_fit(ballot, filed):
+    """Does a given name fit once the surnames' spaces and hyphens are
+    folded away? ``None`` when the folded surnames differ.
+
+    Montana's page writes "Michael Black Wolf"; the FEC files "BLACKWOLF,
+    MICHAEL JAMES". Read as two surnames, he was "Not on the 2026 primary
+    ballot" beside the page's unmatched "Michael Black Wolf: eliminated".
+    The letters of the surname must be the same, in order; only the gaps
+    between them are ignored.
+    """
+    fit = None
+    for surname, given in _surname_forms(ballot):
+        for other, other_given in _surname_forms(filed):
+            if surname != other or not given or not other_given:
+                continue
+            fit = bool(fit) or any(_given_fits(b, g) for b in given for g in other_given)
+    return fit
+
+
 def match_names(wiki_names, field_rows, aliases=None):
     """``{wiki_name: [candidate_ids]}`` where the filings that fit are one person.
 
@@ -1613,7 +1667,9 @@ def match_names(wiki_names, field_rows, aliases=None):
             elif w[-1] in f[1:]:
                 given_ok = f[0] == w[0]
             else:
-                continue
+                given_ok = _folded_surname_fit(w, f)
+                if given_ok is None:
+                    continue
             if given_ok:
                 fits.setdefault(cid, f)
         fits = list(fits.items())
@@ -1675,8 +1731,191 @@ def _qualified_race(listed, rows, aliases, source):
     }
 
 
+_NO_PARTY = ("nonpartisan", "undeclared", "unaffiliated", "no party affiliation", "no party",
+             "by petition", "independent")
+
+
+def certified_party_key(label):
+    """The party key of a certified list's party label. "Nonpartisan" is a
+    person with no party, not an all-party primary (:func:`party_key`'s
+    reading of a table title). A list that prints no party at all - American
+    Samoa's, for an election held without parties - says nothing about one,
+    and ``None`` is returned: read as "Independent", it would have relabelled
+    a Democratic filer."""
+    text = str(label or "").strip().lower()
+    if not text:
+        return None
+    return "independent" if text in _NO_PARTY else party_key(label)
+
+
+def _names_a_party(label, key):
+    """True when a list's party label is a party's own name that the key
+    alone would lose: Florida's "Independent Party of Florida" is a party,
+    not the absence of one."""
+    text = str(label or "").strip()
+    if not text or key is None:
+        return False
+    return key not in BALLOT_LABELS or (key == "independent" and text.lower() not in _NO_PARTY)
+
+
+def _certified_ids(name, rows, aliases):
+    """The filing ids a certified list's name is, by the rules a results
+    page's name is matched by (rule 62): the matcher; an evidenced alias in
+    ``overrides.RESULT_NAMES``; or the filing's own words in any order (a
+    bracketed nickname aside), unique among every filer in the race."""
+    from . import overrides
+    from .candidates import display_name
+
+    found, _ambiguous = match_names([name], rows, aliases)
+    if found.get(name):
+        return found[name]
+    ids = {row["candidate_id"] for row in rows}
+    alias = [cid for cid, (alias_name, _why) in overrides.RESULT_NAMES.items()
+             if cid in ids and alias_name == name]
+    if len(alias) == 1:
+        return alias
+    words = _words(name)
+    same = {row["candidate_id"] for row in rows
+            if len(words) >= 2 and words in _word_forms(display_name(row.get("name")))}
+    return sorted(same) if len(same) == 1 else []
+
+
+def _one_person(a, b):
+    """Two spellings, a page's and a list's, that are one person: the same
+    words, a spelling the page itself would fold together, or a letter-apart
+    surname under the same given names."""
+    if _words(a) == _words(b) or _same_spelling(a, b):
+        return True
+    x, y = _tokens(a), _tokens(b)
+    return len(x) >= 2 and x[:-1] == y[:-1] and _near(x[-1], y[-1])
+
+
+def certify_race(race, spec, rows, aliases=None):
+    """Lay a state's certified list over a race's results (rule 77).
+
+    *race* is the results page's entry, or ``None`` for a seat no page
+    decided (American Samoa holds no primary). *spec* is one state's list
+    (kyc/certified.py) and its entries for this race under ``"entries"``.
+
+    - Someone the list prints is on the November ballot (NOMINEE) whatever
+      the page said - "withdrawn" included: Alaska promoted Eric Hafner and
+      Jim McDermott when four top-four finishers withdrew, and the page's
+      reading of that had them out. After the count a result stands.
+    - Someone the list marks withdrawn, or as having lost the primary, is
+      that, unless a result already says so.
+    - A write-in and a Florida candidate unopposed in November are named but
+      not printed: their status is left as the page has it.
+    - Where the list is the whole ballot (``complete``), a filer the page
+      put on the November ballot and the list does not name is not on it
+      (UNLISTED), unless a name on the list that matched no filing may be
+      theirs; and a page name on its November ballot that the list does
+      not name is not counted on it.
+
+    Every status the list set is recorded under ``certifiedIds``, so the
+    page credits the list for it and not the results page.
+    """
+    from .certified import BALLOT, LOST_PRIMARY, UNOPPOSED, WITHDRAWN as LIST_WITHDREW, WRITE_IN
+
+    race = race or {"page": None, "source": "certified", "status": {}, "party": {},
+                    "label": {}, "article": {}, "about": {}, "site": {}, "unsure": [],
+                    "unmatched": {}, "ambiguous": [], "decided": {"general": False,
+                                                                  "parties": []}}
+    status = race.setdefault("status", {})
+    party = race.setdefault("party", {})
+    label = race.setdefault("label", {})
+    unmatched = race.setdefault("unmatched", {})
+    if isinstance(unmatched, list):
+        unmatched = race["unmatched"] = {}
+    complete = bool(spec.get("complete"))
+    names = race.setdefault("names", {})
+    other_party = race.setdefault("unmatchedParty", {})
+    changed, named, loose = {}, set(), []
+    for item in spec["entries"]:
+        name, kind = item["name"], item["kind"]
+        cids = _certified_ids(name, rows, aliases)
+        named.update(cids)
+        key = certified_party_key(item.get("party"))
+        if kind in (WRITE_IN, UNOPPOSED):
+            continue
+        # The page's own spelling of someone the list names gives way to
+        # the list's: one person, one status.
+        for page_name in [n for n in unmatched
+                          if _one_person(n, name) and (cids or n != name)]:
+            unmatched.pop(page_name)
+            other_party.pop(page_name, None)
+        if not cids:
+            loose.append(item)
+            continue
+        for cid in cids:
+            if kind == BALLOT:
+                names[cid] = name             # as the ballot prints it
+                if item.get("party"):
+                    # Printed beside a name with no profile, in the list's
+                    # words: Colorado's "Unaffiliated", not "Independent".
+                    race.setdefault("listParty", {})[cid] = item["party"]
+            now = status.get(cid)
+            if kind == BALLOT:
+                new = now if now in (ELECTED, DEFEATED, RUNOFF) else NOMINEE
+                if key:
+                    party[cid] = key
+                    if _names_a_party(item.get("party"), key):
+                        label[cid] = item["party"]
+            elif kind == LIST_WITHDREW:
+                new = now if now in (ELIMINATED, WITHDRAWN, ELECTED, DEFEATED) else WITHDRAWN
+            elif kind == LOST_PRIMARY:
+                new = now if now in (ELIMINATED, WITHDRAWN) else ELIMINATED
+            else:
+                continue
+            if new != now:
+                status[cid] = new
+                changed[cid] = new
+    # Names the list holds that match no filing: on the race by name, in the
+    # list's spelling, with the list's party.
+    for item in loose:
+        if item["kind"] == BALLOT:
+            unmatched[item["name"]] = NOMINEE
+            if item.get("party"):
+                other_party[item["name"]] = item["party"]
+        elif item["kind"] == LIST_WITHDREW:
+            unmatched.setdefault(item["name"], WITHDRAWN)
+        elif item["kind"] == LOST_PRIMARY:
+            unmatched.setdefault(item["name"], ELIMINATED)
+    if complete:
+        printed = [i["name"] for i in spec["entries"] if i["kind"] == BALLOT]
+        loose_printed = [i["name"] for i in loose if i["kind"] == BALLOT]
+        held = []
+        for cid, now in list(status.items()):
+            if cid in named or now not in (NOMINEE, ADVANCED, QUALIFIED):
+                continue
+            row = next((r for r in rows if r["candidate_id"] == cid), None)
+            mine = _row_name(row)
+            if mine and any(_one_person(mine, n) or _maybe_named(
+                    {"name": mine}, {"unmatched": {n: NOMINEE}}) for n in loose_printed):
+                held.append(cid)          # the list may name them another way
+                continue
+            status[cid] = UNLISTED
+            changed[cid] = UNLISTED
+        for page_name, now in list(unmatched.items()):
+            if now in NOVEMBER and not any(_one_person(page_name, n) for n in printed):
+                unmatched[page_name] = UNLISTED
+        race["certifiedHeld"] = sorted(held)
+        decided = race.setdefault("decided", {"general": False, "parties": []})
+        decided["general"] = True
+    race["certifiedIds"] = dict(sorted(changed.items()))
+    race["certified"] = {k: spec[k] for k in ("source", "url", "fetched", "complete")
+                         if k in spec}
+    if spec.get("carried"):
+        race["certified"]["carried"] = True
+    return race
+
+
+def _row_name(row):
+    from .candidates import display_name
+    return display_name(row.get("name")) if row else ""
+
+
 def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=None,
-          qualified=None):
+          qualified=None, certified=None):
     """Resolve every settled race. Returns the cache structure.
 
     ``{"asOf": date, "races": {race_id: {"status": {candidate_id: status},
@@ -1771,14 +2010,17 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         title, section = pages[(state, office)].get(key, (None, None))
         if not section:
             continue
-        slot = dates.get((state, office)) or {}
+        slot = seat_slot(dates, rid)
         is_open = open_primary(state, office)
+        if not primary_settled({(state, office): slot}, state, office, today, open_seat=is_open):
+            pending.append(rid)          # this seat's own primary is still to come
+            continue
         boxes = parse_boxes(section)
         nominees = infobox_nominees(section)
         if nominees:
             boxes.append((INFOBOX_TITLE, nominees))
         boxes.extend(candidate_lists(section))
-        held = runoff_held(dates, state, office, today)
+        held = runoff_held({(state, office): slot}, state, office, today)
         outcome = resolve_race(boxes, has_runoff=bool(slot.get("runoff")),
                                open_primary=is_open, runoff_held=held,
                                general_held=general_held(today),
@@ -1797,6 +2039,7 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         matched = _match_spellings(outcome, boxes, rows, (aliases or {}).get(rid),
                                    matched, ambiguous)
         status, party, article, label, about, site = {}, {}, {}, {}, {}, {}
+        names = {}
         listed = ballot_parties(boxes)
         linked = ballot_articles(boxes)
         spelled = ballot_labels(boxes)
@@ -1805,6 +2048,7 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         for name, cids in matched.items():
             for cid in cids:
                 status[cid] = outcome[name]
+                names[cid] = name                 # as the page writes them
                 if listed.get(name):
                     party[cid] = listed[name]
                 if linked.get(name):
@@ -1834,6 +2078,12 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
             # a nominee with no FEC filing over $5,000 is still on the ballot,
             # and a race header that omits them is wrong.
             "unmatched": {name: outcome[name] for name in sorted(set(outcome) - set(matched))},
+            # The page's name for each filing it matched, and the party of
+            # each name it matched to none - shown beside that name.
+            "names": names,
+            "unmatchedParty": {name: _party_label(listed.get(name), spelled.get(name))
+                               for name in sorted(set(outcome) - set(matched))
+                               if _party_label(listed.get(name), spelled.get(name))},
             "ambiguous": ambiguous,
             "decided": coverage(boxes, open_primary=is_open, runoff_held=held),
         }
@@ -1854,6 +2104,21 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
             log(f"    [warn] {rid}: still shown from the qualified list after Election Day; "
                 f"its page has no result this reader can use")
 
+    # A state's certified list of November candidates, laid over whatever
+    # the page decided (rule 77). Louisiana's open-primary seats keep their
+    # qualified list (rule 64).
+    for state, spec in sorted((certified or {}).items()):
+        for rid, entries in sorted(spec.get("races", {}).items()):
+            if (races.get(rid) or {}).get("source") == "qualified":
+                continue
+            races[rid] = certify_race(races.get(rid), dict(spec, entries=entries),
+                                      by_race.get(rid, []), (aliases or {}).get(rid))
+            if rid in pending:
+                pending.remove(rid)
+            for cid in races[rid].get("certifiedHeld") or []:
+                log(f"    [warn] {rid}: {cid} is on the page's November ballot and not "
+                    f"matched on {state}'s certified list; left as the page has them")
+
     log(f"    settled races with results: {len(races)}   "
         f"pending primaries: {len(pending)}   pages missing: {len(missing_pages)}   "
         f"fetches failed: {len(failed)}   unparsed: {len(unparsed)}")
@@ -1865,6 +2130,9 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         # Where a qualified list was read, and when (kyc/qualified.py).
         "qualified": (dict(qualified_meta or {}, races=sorted(qualified_lists))
                       if qualified_lists else None),
+        # Each state's certified list as read, so a failed read next time
+        # can keep it (kyc/certified.py, rule 8): names, parties and kinds.
+        "certified": dict(sorted((certified or {}).items())) or None,
         "missingPages": sorted(missing_pages),
         "fetchFailed": sorted(failed),
         # Pages that exist but whose districts could not be found. Every
@@ -1987,6 +2255,20 @@ def _words(name):
     return frozenset(part for word in _tokens(name or "") for part in word.split("-") if part)
 
 
+_PARENTHESISED = re.compile(r"\([^()]*\)")
+
+
+def _word_forms(name):
+    """The name's words (:func:`_words`), and the same without a nickname
+    the filer put in brackets: "WIRTH, CYNTHIA (CINDE)" is also the page's
+    "Cynthia Wirth". Taking the bracket out is all it does; the nickname
+    never stands in for the name it follows."""
+    forms = {_words(name)}
+    if name and _PARENTHESISED.search(name):
+        forms.add(_words(_PARENTHESISED.sub(" ", name)))
+    return {f for f in forms if f}
+
+
 def _sequence(name):
     """A name's folded words in order, hyphens as spaces: "Conyears-Ervin"
     and "Conyears Ervin" are one spelling; "Carlquist Lisa" and "Lisa
@@ -2030,8 +2312,8 @@ def _claim_unmatched(profiles, races, field=None):
     for row in (field or {}).get("candidates", []) if isinstance(field, dict) else []:
         rid = race_id(row)
         if rid:
-            filers.setdefault(rid, []).append(
-                (row["candidate_id"], _words(display_name(row.get("name")))))
+            for words in _word_forms(display_name(row.get("name"))):
+                filers.setdefault(rid, []).append((row["candidate_id"], words))
             filed.setdefault(rid, []).append(row)
     # One person's several registrations (candidates.registrations: one
     # committee, the same money), as the profile that holds them.
@@ -2077,12 +2359,20 @@ def _claim_unmatched(profiles, races, field=None):
                              for row in filed.get(rid, []))
                 if len(ids) == 1 and ids[0] in mine and folded:
                     fits[name] = ids[0]
-                continue
+                    continue
+                if not filed.get(rid):
+                    # Only the register can say no other filer has these
+                    # words, and without it an ambiguous name stays so.
+                    continue
             alias = [cid for _p, cid in people
                      if (overrides.RESULT_NAMES.get(cid) or (None,))[0] == name]
             words = _words(name)
-            same = [(p, cid) for p, cid in people if len(words) >= 2 and
-                    words in (_words(p.get("name")), _words(p.get("filedName")))]
+            # Ambiguous to the matcher - "Daniel J. Sullivan Jr." fits both
+            # Alaska Sullivans' filings, "Cynthia Wirth" both of IN-6's
+            # names for one filing - is still settled by an exact signal:
+            # the filing's own words, unique among every filer below.
+            same = [(p, cid) for p, cid in people if len(words) >= 2 and any(
+                words in _word_forms(n) for n in (p.get("name"), p.get("filedName")) if n)]
             if alias:
                 found = set(alias)
             else:
@@ -2193,6 +2483,20 @@ def apply_cache(profiles, cache, field=None):
             candidate_id = profile["id"]     # matched through a roster alias
         if candidate_id and candidate_id in by_id:
             rid, status = by_id[candidate_id]
+            race = races.get(rid) or {}
+            if (status == WITHDRAWN and profile.get("isCandidate")
+                    and candidate_id not in (race.get("certifiedIds") or {})
+                    and race.get("source") != "qualified"):
+                # "Withdrawn" is the page's reading of a primary winner it
+                # does not find on its November ballot. If that ballot names
+                # someone who may be them - a letter apart, another form of
+                # the name - the absence is not established (rule 62).
+                november = [n for n in _maybe_named(profile, race)
+                            if (race.get("unmatched") or {}).get(n) in NOVEMBER]
+                if november:
+                    cache["unclear"].append((profile["name"], rid, november))
+                    profile["maybeNamed"] = november
+                    continue
             profile["raceStatus"] = status
             profile["raceStatusRace"] = rid
             kind = ALL_PARTY_PRIMARIES.get(rid.split("-")[1])
@@ -2200,8 +2504,18 @@ def apply_cache(profiles, cache, field=None):
                 # Through to November from an all-party primary: the page
                 # says "advanced", never "won" or "renominated".
                 profile["allPartyPrimary"] = kind[0]
-            _source_of(profile, races.get(rid))
+            _source_of(profile, races.get(rid), candidate_id)
             ballot_name = (races.get(rid, {}).get("claimed") or {}).get(candidate_id)
+            if not ballot_name and profile.get("source") == "fec-field":
+                # A name the matcher settled (rule 62's matcher, or the
+                # state's certified list) that is another form of the given
+                # name - "Bob Harvie" for "HARVIE, ROBERT J" - is the one
+                # the ballot, the press and the markets use.
+                page = (race.get("names") or {}).get(candidate_id)
+                mine, theirs = _tokens(profile.get("name")), _tokens(page or "")
+                if (page and len(mine) >= 2 and len(theirs) >= 2 and mine[0] != theirs[0]
+                        and _words(page) != _words(profile.get("name"))):
+                    ballot_name = page
             # A hyphen alone changes nothing but the spelling, and the
             # hyphenated one is the person's: "Greene-Placentia" from the
             # page, "Conyears-Ervin" kept against the page's "Conyears Ervin".
@@ -2214,8 +2528,11 @@ def apply_cache(profiles, cache, field=None):
                 # FEC's reversed "Carlquist Lisa"; "Max Ganorkar", whose
                 # filing says Mahesh. The filed form stays searchable.
                 profile["aliases"] = sorted(set(profile.get("aliases") or []) | {profile["name"]})
+                # The page says "files with the FEC as" this (PERSONA-20).
+                profile["fecName"] = profile["name"]
                 profile["name"] = ballot_name
-                profile["nameVia"] = "election-page"
+                profile["nameVia"] = ("certified-list" if candidate_id in
+                                      (race.get("certifiedIds") or {}) else "election-page")
             if candidate_id in about_of and profile.get("source") == "fec-field":
                 # The election page's own description of a filed candidate,
                 # shown as their background and credited to the page.
@@ -2310,11 +2627,28 @@ def apply_cache(profiles, cache, field=None):
                     profile["raceStatusUnconfirmed"] = True
                 profile["raceStatus"] = UNLISTED
                 profile["raceStatusRace"] = rid
-                _source_of(profile, races[rid])
+                _source_of(profile, races[rid], candidate_id,
+                           absent=bool((races[rid].get("certified") or {}).get("complete")))
                 profile["seekingReelection2026"] = False
                 applied += 1
         elif profile.get("isCandidate"):
             rid = _race_of(profile)
+            if rid in races and (races[rid].get("certified") or {}).get("complete"):
+                # The state's certified list is the whole November ballot
+                # (rule 77), and it does not name them - unless a name on it
+                # that matched no filing may be theirs.
+                race = races[rid]
+                maybe = [n for n in _maybe_named(profile, race)
+                         if (race.get("unmatched") or {}).get(n) in NOVEMBER]
+                if maybe:
+                    cache["unclear"].append((profile["name"], rid, maybe))
+                    profile["maybeNamed"] = maybe
+                    continue
+                profile["raceStatus"] = UNLISTED
+                profile["raceStatusRace"] = rid
+                _source_of(profile, race, candidate_id, absent=True)
+                applied += 1
+                continue
             if candidate_id in unsure and not (rid in races and _maybe_named(profile, races[rid])):
                 continue
             # Unsure - a page name fitted them and another filing alike - is
@@ -2322,7 +2656,7 @@ def apply_cache(profiles, cache, field=None):
             # Weil withdrew from Florida's Senate race and, with no status,
             # read as a challenger whose primary had not been held, counted
             # on the ballot. Otherwise they are undecided, as below.
-            if rid in races and not decided_for(races[rid], profile.get("party")) and (
+            if rid in races and not _own_contest_decided(races[rid], profile.get("party"), rid) and (
                     (races[rid].get("decided") or {}).get("parties")
                     or set((races[rid].get("status") or {}).values()) & set(NOVEMBER)):
                 # The primary has been held - the page decided another
@@ -2331,7 +2665,11 @@ def apply_cache(profiles, cache, field=None):
                 # independent or a minor party's filer the page does not
                 # name, such as FL-18's Deva Simmons. Whether they
                 # are on the November ballot is not known here (rule 19), and
-                # never "the primary has not been held yet".
+                # never "the primary has not been held yet". Nor is a minor
+                # party's or an unaffiliated filer off it because the page's
+                # November table leaves them out: those tables are copied
+                # from the major parties' primaries, and Colorado's
+                # certified list held seventeen more names than the pages.
                 profile["ballotUnknown"] = True
                 continue
             if rid in races and decided_for(races[rid], profile.get("party")):
@@ -2352,23 +2690,100 @@ def apply_cache(profiles, cache, field=None):
                     # reading is right, they are off the November ballot,
                     # and the page says exactly that.
                     profile["raceStatusUnconfirmed"] = True
+                elif _given_name_kin(profile, races[rid], field, rid):
+                    # The page names someone of their first name, unique in
+                    # the race, who lost or withdrew: CA-2's "Nicolette
+                    # Niman" is Nicolette Hahn, on the June ballot as
+                    # Nicolette Hahn Niman. Not a match - nothing is
+                    # claimed - but "Not on the 2026 primary ballot" may be
+                    # false, and "not on the November ballot" is true
+                    # whichever reading is right.
+                    profile["raceStatusUnconfirmed"] = True
                 profile["raceStatus"] = UNLISTED
                 _source_of(profile, races[rid])
                 applied += 1
     return applied
 
 
-def _source_of(profile, race):
+_MAJOR = ("democratic", "republican")
+
+
+def _own_contest_decided(race, party, rid=""):
+    """Has the page settled the contest this filer was in?
+
+    As :func:`decided_for`, except that a November table alone does not
+    settle a minor party's or an unaffiliated filer: such a party holds no
+    primary the page tabulates, and a November table copied from the major
+    parties' primaries leaves its people out. Their absence from it is
+    "ballot status not known", never "not on the ballot" (rule 19).
+    """
+    decided = race.get("decided")
+    if decided is None:
+        return True
+    parties = set(decided.get("parties") or [])
+    key = party_key(party)
+    if "all" in parties or key in parties:
+        return True
+    if decided.get("general") and (rid.split("-") + [""])[1] in ALL_PARTY_PRIMARIES:
+        # California's, Washington's and Alaska's primaries hold every
+        # filer whatever the party: a November table there is the result
+        # of everyone's contest. CA-2's Nicolette Hahn, No Party
+        # Preference, ran in it and lost.
+        return True
+    return bool(decided.get("general")) and key in _MAJOR
+
+
+def _given_name_kin(profile, race, field, rid):
+    """Off-ballot page names that share this person's first name and that
+    nobody else in the race could be: one only weakens an "unlisted"."""
+    from .candidates import display_name
+
+    names = [n for n in (profile.get("name"), profile.get("filedName")) if n]
+    firsts = {(_tokens(display_name(n) if "," in n else n) or [""])[0] for n in names}
+    firsts = {f for f in firsts if len(f) >= 3}
+    if not firsts:
+        return []
+    unmatched = race.get("unmatched") or {}
+    kin = [n for n in unmatched if len(_tokens(n)) >= 2 and _tokens(n)[0] in firsts]
+    if len(kin) != 1 or unmatched[kin[0]] not in (ELIMINATED, WITHDRAWN):
+        return []
+    from .candidates import race_id
+    mine = {profile.get("fecCandidateId")} | set(profile.get("otherFecIds") or [])
+    for row in (field or {}).get("candidates", []) if isinstance(field, dict) else []:
+        if row.get("candidate_id") in mine or race_id(row) != rid:
+            continue
+        if (_tokens(display_name(row.get("name"))) or [""])[0] in firsts:
+            return []                 # another filer has that first name
+    return kin
+
+
+def _source_of(profile, race, cid=None, absent=False):
     """Where a status came from, when it is not a results page: a state's
-    qualified list (kyc/qualified.py). The page credits it, not Wikipedia."""
-    if (race or {}).get("source") == "qualified":
+    qualified list (kyc/qualified.py), or its certified list of November
+    candidates (kyc/certified.py) where that list set the status or the
+    person is absent from it. The page credits it, not Wikipedia."""
+    race = race or {}
+    if race.get("source") == "qualified":
         profile["raceStatusSource"] = "qualified"
+        return
+    certified = race.get("certified") or {}
+    if certified and (absent or cid in (race.get("certifiedIds") or {})):
+        profile["raceStatusSource"] = "certified"
+        profile["raceStatusSourceName"] = certified.get("source", "")
 
 
 def _all_out(race, names):
     """True when every page name that may be this person is off the ballot."""
     unmatched = race.get("unmatched") or {}
-    return all(unmatched.get(name) in (ELIMINATED, WITHDRAWN) for name in names)
+    return all(unmatched.get(name) in OFF_BALLOT for name in names)
+
+
+def _party_label(key, spelled=None):
+    """A party to show beside a name: the page's own minor-party label, or
+    the name of a party key it knows; "" when it knows none."""
+    if spelled:
+        return spelled
+    return LINE_LABELS.get(key or "", "")
 
 
 BALLOT_LABELS = {"democratic": "Democrat", "republican": "Republican",
@@ -2422,6 +2837,13 @@ def race_summary(cache, race_id):
             "qualified": counts[QUALIFIED],
             # The race's ballot is a state's qualified list, not a result.
             "fromQualifiedList": race.get("source") == "qualified",
+            # Who certified the November ballot, where a state's list was
+            # read (rule 77), and the party of each name with no profile.
+            "certifiedBy": (race.get("certified") or {}).get("source") or None,
+            "certifiedAsOf": (race.get("certified") or {}).get("fetched") or None,
+            "certifiedComplete": bool((race.get("certified") or {}).get("complete")),
+            "otherParties": {n: p for n, p in sorted((race.get("unmatchedParty") or {}).items())
+                             if unmatched.get(n) in NOVEMBER and p},
             "otherNominees": sorted(n for n, st in unmatched.items() if st in NOVEMBER),
             "otherElected": sorted(n for n, st in unmatched.items() if st == ELECTED),
             "otherRunoff": sorted(n for n, st in unmatched.items() if st == RUNOFF)}

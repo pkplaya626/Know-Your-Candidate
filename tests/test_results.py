@@ -240,10 +240,43 @@ class TestResolving(unittest.TestCase):
                    ("Michael Johnston", 4, False))
         out = results.resolve_race(results.parse_boxes(text))
         self.assertEqual(out, {"Michael Johnson": "nominee", "Michael Johnston": "eliminated"})
-        # Nor are different given names, or short surnames, ever folded.
+        # Nor are different given names, or surnames under five letters,
+        # ever folded.
         self.assertEqual(results._near_spellings([
             ("A", [{"name": "Ann Okpareke"}]), ("B", [{"name": "Bea Okapareke"}]),
-            ("C", [{"name": "Jo Smith"}]), ("D", [{"name": "Jo Smyth"}])]), {})
+            ("C", [{"name": "Jo Rice"}]), ("D", [{"name": "Jo Rise"}])]), {})
+
+    def test_a_five_letter_surname_a_letter_apart_is_the_primary_winner(self):
+        # GA-9, 2026-10-17: the Democratic primary's marked winner is
+        # "Caitlyn Gegen" and the November table says "Caitlyn Gegan". Read
+        # as two people, the winner was "withdrawn" and her profile folded
+        # away under "no longer in this race".
+        text = "\n".join([
+            box("Democratic primary results", ("Caitlyn Gegen", 25570, True),
+                ("Nick Alex", 17056, False)),
+            box("2026 Georgia's 9th congressional district election",
+                ("Andrew Clyde", 0, False), ("Caitlyn Gegan", 0, False)),
+        ])
+        out = results.resolve_race(results.parse_boxes(text))
+        self.assertEqual(out["Caitlyn Gegen"], "nominee")
+        self.assertNotIn("Caitlyn Gegan", out)
+
+    def test_two_people_in_one_table_are_never_one(self):
+        # Alaska's top-four primary lists Senator "Dan S. Sullivan" and
+        # "Daniel J. Sullivan Jr."; folded into one, the second - certified
+        # for November - vanished from the race.
+        text = "\n".join([
+            box("Nonpartisan primary results", ("Dan S. Sullivan", 90000, True),
+                ("Daniel J. Sullivan Jr.", 4107, True), ("Ann Smith", 10, False)),
+            box("2026 United States Senate election in Alaska",
+                ("Dan S. Sullivan", 0, False)),
+        ])
+        out = results.resolve_race(results.parse_boxes(text))
+        self.assertIn("Daniel J. Sullivan Jr.", out)
+        self.assertEqual(out["Dan S. Sullivan"], "nominee")
+        # Two middle initials that disagree are two people anywhere.
+        self.assertFalse(results._same_spelling("Dan S. Sullivan", "Daniel J. Sullivan Jr."))
+        self.assertTrue(results._same_spelling("Norma J. Torres", "Norma Torres"))
 
     def test_a_row_with_a_nested_template_on_its_own_line_is_read(self):
         # 2022 Georgia Senate: "{{nowrap|...}}" in the candidate and change
@@ -370,6 +403,28 @@ class TestCalendarGate(unittest.TestCase):
 
     def test_unknown_state_is_never_settled(self):
         self.assertFalse(results.primary_settled({}, "ZZ", "H", datetime.date(2026, 9, 13)))
+
+    def test_a_seat_with_its_own_primary_keeps_its_own_date(self):
+        # Alabama's 1st, 2nd, 6th and 7th districts were postponed to an
+        # August 11 special primary; every Alabama House race read "Primary
+        # held 2026-05-19" because the calendar is kept per state.
+        dates = {("AL", "H"): {"primary": "2026-05-19", "runoff": "2026-06-16"}}
+        for n in (1, 2, 6, 7):
+            slot = results.seat_slot(dates, f"H-AL-0{n}-2026")
+            self.assertEqual(slot, {"primary": "2026-08-11", "runoff": None})
+            # Read before August 11, its results would have been the May
+            # primary's.
+            self.assertFalse(results.primary_settled({("AL", "H"): slot}, "AL", "H",
+                                                     datetime.date(2026, 8, 1)))
+        self.assertEqual(results.seat_slot(dates, "H-AL-03-2026"),
+                         {"primary": "2026-05-19", "runoff": "2026-06-16"})
+        self.assertEqual(results.seat_slot(dates, "S-AL-2026"), {})
+
+    def test_every_seat_date_names_its_source(self):
+        from kyc import overrides
+        for rid, slot in overrides.SEAT_PRIMARY_DATES.items():
+            self.assertRegex(slot["primary"], r"^2026-\d{2}-\d{2}$", rid)
+            self.assertIn("read 20", slot["source"], rid)
 
 
 class TestApplying(unittest.TestCase):
@@ -608,7 +663,7 @@ class TestNamesThePageMayUse(unittest.TestCase):
         results.apply_cache([person], cache, field=field)
         self.assertEqual(person["raceStatus"], "eliminated")
         # Another filer the name fits still leaves it alone.
-        other = dict(person)
+        other = dict(person, name="Daniel Miressi")     # as filed, before the rename
         other.pop("raceStatus", None)
         field["candidates"].append({"candidate_id": "H6CT04999", "name": "MIRESSI, DANIELLE",
                                     "office": "H", "state": "CT", "district_number": 4})
@@ -661,6 +716,132 @@ class TestNamesThePageMayUse(unittest.TestCase):
         self.assertNotEqual(b.get("raceStatus"), "nominee")
         self.assertIn("Lisa Carlquist", cache["races"]["H-NC-04-2026"]["unmatched"])
 
+    def test_a_bracketed_nickname_is_not_part_of_the_filed_words(self):
+        # IN-6: the filing is "WIRTH, CYNTHIA (CINDE)"; the page names
+        # "Cynthia Wirth" the nominee and "Cinde Wirth" elsewhere, so the
+        # matcher found both ambiguous and her profile had no status at all.
+        person = self.filer("H6IN06230", "Cynthia (Cinde) Wirth", "WIRTH, CYNTHIA (CINDE)")
+        person.update(state="IN", districtNum=6)
+        field = {"candidates": [
+            {"candidate_id": "H6IN06230", "name": "WIRTH, CYNTHIA (CINDE)", "office": "H",
+             "state": "IN", "district_number": 6},
+            {"candidate_id": "H4IN06185", "name": "SHREVE, JEFFERSON", "office": "H",
+             "state": "IN", "district_number": 6}]}
+        cache = {"asOf": "2026-10-17", "races": {"H-IN-06-2026": {
+            "status": {"H4IN06185": "nominee"},
+            "unmatched": {"Cinde Wirth": "withdrawn", "Cynthia Wirth": "nominee"},
+            "ambiguous": ["Cinde Wirth", "Cynthia Wirth"], "unsure": ["H6IN06230"]}}}
+        results.apply_cache([person], cache, field=field)
+        self.assertEqual(person["raceStatus"], "nominee")
+        # The nickname never stands in for the name it follows.
+        self.assertIn("Cinde Wirth", cache["races"]["H-IN-06-2026"]["unmatched"])
+
+    def test_an_ambiguous_name_is_claimed_only_with_the_whole_register(self):
+        # Alaska: "Daniel J. Sullivan Jr." fits both Sullivans' filings, and
+        # is word for word "SULLIVAN, DANIEL J" - unique among every filer.
+        person = self.filer("S6AK00326", "Daniel J Sullivan", "SULLIVAN, DANIEL J")
+        person.update(state="AK", chamber="Senate (Candidate)", districtNum=None)
+        field = {"candidates": [
+            {"candidate_id": "S6AK00326", "name": "SULLIVAN, DANIEL J", "office": "S",
+             "state": "AK"},
+            {"candidate_id": "S4AK00214", "name": "SULLIVAN, DAN", "office": "S", "state": "AK"}]}
+
+        def cache():
+            return {"asOf": "2026-10-17", "races": {"S-AK-2026": {
+                "status": {"S4AK00214": "nominee"},
+                "unmatched": {"Daniel J. Sullivan Jr.": "nominee"},
+                "ambiguous": ["Daniel J. Sullivan Jr."],
+                "unsure": ["S4AK00214", "S6AK00326"]}}}
+        results.apply_cache([person], cache(), field=field)
+        self.assertEqual(person["raceStatus"], "nominee")
+        # Without the register no one can say no other filer has the words.
+        alone = dict(person)
+        alone.pop("raceStatus")
+        results.apply_cache([alone], cache())
+        self.assertNotEqual(alone.get("raceStatus"), "nominee")
+
+    def test_a_surname_written_as_two_words_is_one_surname(self):
+        # Montana: the page's "Michael Black Wolf" lost the Democratic
+        # primary; the FEC files "BLACKWOLF, MICHAEL JAMES MR.".
+        rows = [{"candidate_id": "S6MT00246", "name": "BLACKWOLF, MICHAEL JAMES MR."},
+                {"candidate_id": "S6MT00253", "name": "WALSH, REILLY"}]
+        found, ambiguous = results.match_names(["Michael Black Wolf"], rows)
+        self.assertEqual(found, {"Michael Black Wolf": ["S6MT00246"]})
+        # The letters of the surname must still be the same.
+        found, _ = results.match_names(["Michael Black Wolfe"], rows)
+        self.assertEqual(found, {})
+
+    def test_a_first_name_the_page_lists_as_beaten_only_weakens_unlisted(self):
+        # CA-2: Nicolette Hahn was on the June ballot as Nicolette Hahn
+        # Niman; the page writes "Nicolette Niman", eliminated. Not a match,
+        # but "Not on the 2026 primary ballot" was not true either.
+        # She files as No Party Affiliation, and California's page titles
+        # its table "Primary results": a top-two primary holds everyone, so
+        # her contest was decided whatever her party (not "ballot unknown").
+        person = self.filer("H6CA02317", "Nicolette G. Hahn", "HAHN, NICOLETTE G.")
+        person.update(state="CA", districtNum=2, party="No Party Affiliation")
+        cache = {"asOf": "2026-10-17", "races": {"H-CA-02-2026": {
+            "status": {}, "unmatched": {"Nicolette Niman": "eliminated"}, "ambiguous": [],
+            "decided": {"general": True, "parties": ["primary results"]}}}}
+        results.apply_cache([person], cache)
+        self.assertEqual(person["raceStatus"], "unlisted")
+        self.assertTrue(person["raceStatusUnconfirmed"])     # "Not on the November ballot"
+        # A nominee of that first name changes nothing: no claim is made.
+        other = self.filer("H6CA02317", "Nicolette G. Hahn", "HAHN, NICOLETTE G.")
+        other.update(state="CA", districtNum=2)
+        cache["races"]["H-CA-02-2026"]["unmatched"] = {"Nicolette Niman": "nominee"}
+        results.apply_cache([other], cache)
+        self.assertEqual(other["raceStatus"], "unlisted")
+        self.assertNotIn("raceStatusUnconfirmed", other)
+
+    def test_a_minor_party_filer_missing_from_the_november_table_is_unknown(self):
+        # Colorado's pages list the major parties' nominees; its certified
+        # list adds Libertarian, Unity and unaffiliated candidates in every
+        # district. Shimon Blau (unaffiliated, $184,749) read "Not on the
+        # 2026 primary ballot".
+        person = self.filer("H6CO01356", "Shimon Blau", "BLAU, SHIMON")
+        person.update(state="CO", districtNum=1, party="Unaffiliated")
+        cache = {"asOf": "2026-10-17", "races": {"H-CO-01-2026": {
+            "status": {"H6CO01001": "nominee"}, "unmatched": {}, "ambiguous": [],
+            "decided": {"general": True, "parties": ["democratic", "republican"]}}}}
+        results.apply_cache([person], cache)
+        self.assertNotIn("raceStatus", person)
+        self.assertTrue(person["ballotUnknown"])
+        # A major party's filer the November table leaves out is still out.
+        dem = self.filer("H6CO01999", "Jane Roe", "ROE, JANE")
+        dem.update(state="CO", districtNum=1, party="Democrat")
+        results.apply_cache([dem], cache)
+        self.assertEqual(dem["raceStatus"], "unlisted")
+
+    def test_a_withdrawal_read_from_a_near_name_on_the_ballot_is_not_settled(self):
+        # Whatever the folding misses, a primary winner the page calls
+        # "withdrawn" while its November table holds a name that may be
+        # theirs is undecided, never "Withdrew from the 2026 race".
+        person = self.filer("H6GA09284", "Caitlyn Gegen", "GEGEN, CAITLYN")
+        person.update(state="GA", districtNum=9)
+        cache = {"asOf": "2026-10-17", "races": {"H-GA-09-2026": {
+            "status": {"H6GA09284": "withdrawn"}, "unmatched": {"Caitlyn Gegan": "nominee"},
+            "ambiguous": []}}}
+        results.apply_cache([person], cache)
+        self.assertNotIn("raceStatus", person)
+        self.assertEqual(person["maybeNamed"], ["Caitlyn Gegan"])
+
+    def test_a_nickname_the_page_settled_is_the_name_shown(self):
+        # PA-1: the page and the markets say "Bob Harvie"; the FEC files
+        # "HARVIE, ROBERT J". The page's name is shown and the filed one
+        # kept, for "Files with the FEC as".
+        person = self.filer("H6PA01001", "Robert J Harvie", "HARVIE, ROBERT J")
+        cache = self.cache({})
+        cache["races"]["H-NC-04-2026"].update(status={"H6PA01001": "nominee"},
+                                              names={"H6PA01001": "Bob Harvie"})
+        results.apply_cache([person], cache)
+        self.assertEqual((person["name"], person["fecName"]), ("Bob Harvie", "Robert J Harvie"))
+        # A middle initial dropped is not another name.
+        same = self.filer("H6PA01001", "Robert J Harvie", "HARVIE, ROBERT J")
+        cache["races"]["H-NC-04-2026"]["names"] = {"H6PA01001": "Robert Harvie"}
+        results.apply_cache([same], cache)
+        self.assertEqual(same["name"], "Robert J Harvie")
+
     def test_validate_lists_what_is_unsettled(self):
         from kyc import validate
         issues = validate.check_results_pages(
@@ -680,17 +861,22 @@ class TestAgainstTheRealCache(unittest.TestCase):
         dates = results.load_dates(ROOT)
         as_of = datetime.date.fromisoformat(self.cache["asOf"])
         for rid, race in self.cache["races"].items():
-            if race.get("source") == "qualified":
-                continue        # a qualified list is the ballot before its count
+            if race.get("source") in ("qualified", "certified"):
+                continue        # a state's list is the ballot, with or without a primary
             parts = rid.split("-")
             state, office = parts[1], "S" if parts[0] == "S" else "H"
-            self.assertTrue(results.primary_settled(dates, state, office, as_of), rid)
+            slot = results.seat_slot(dates, rid)
+            self.assertTrue(results.primary_settled({(state, office): slot}, state, office,
+                                                    as_of), rid)
 
     def test_every_status_is_a_known_value(self):
         # Every status the reader writes: the primary's, November's (from the
-        # day after Election Day) and a qualified list's.
+        # day after Election Day), a qualified list's, and "unlisted" where a
+        # state's certified list leaves out someone the page put on the
+        # November ballot (rule 77).
         allowed = {results.NOMINEE, results.ELIMINATED, results.WITHDRAWN, results.ADVANCED,
-                   results.ELECTED, results.DEFEATED, results.RUNOFF, results.QUALIFIED}
+                   results.ELECTED, results.DEFEATED, results.RUNOFF, results.QUALIFIED,
+                   results.UNLISTED}
         for race in self.cache["races"].values():
             for status in race["status"].values():
                 self.assertIn(status, allowed)

@@ -293,7 +293,8 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
         if filed_counts is not None:
             race["filedCount"] = filed_counts.get(race["id"], 0)
         if dates:
-            slot = dates.get((race["state"], "S" if race["chamber"] == "Senate" else "H")) or {}
+            from .results import seat_slot
+            slot = seat_slot(dates, race["id"])
             race["primaryDate"] = slot.get("primary")
             race["runoffDate"] = slot.get("runoff")
         if results is not None:
@@ -315,6 +316,9 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
                     summary["belowThreshold"] = below
                     summary["otherNominees"] = sorted(
                         set(summary["otherNominees"]) | {b["name"] for b in below})
+                    summary["otherParties"] = dict(sorted(
+                        {**(summary.get("otherParties") or {}),
+                         **{b["name"]: b["party"] for b in below if b["party"]}}.items()))
                     for key, wanted in (("otherElected", "elected"), ("otherRunoff", "runoff")):
                         summary[key] = sorted(set(summary.get(key) or ()) | {
                             b["name"] for b in below if b["status"] == wanted})
@@ -401,13 +405,38 @@ def _below_threshold(results, rid, filed, profiled, people=()):
             continue
         if row.get("incumbent_challenge") == "I":
             continue
-        name = display_name(row.get("name"))
+        # The name the ballot or the results page gives them where one was
+        # matched to this filing: Alaska's "Eric Hafner", whom the FEC
+        # files as "ERIC, HAFNER".
+        name = (race.get("names") or {}).get(cid) or display_name(row.get("name"))
         key = tuple(sorted(_sequence(name)))
         if key in seen:
             continue
         seen.add(key)
-        out.append({"id": cid, "name": name, "status": status})
+        out.append({"id": cid, "name": name, "status": status,
+                    "party": _party_shown(race, cid, row)})
     return sorted(out, key=lambda b: b["name"])
+
+
+def _party_shown(race, cid, row):
+    """The party to print beside a nominee with no profile: the ballot's
+    line as the page or the state's list gives it, else the filing's."""
+    from .results import LINE_LABELS, party_key
+
+    line = (race.get("listParty") or {}).get(cid) or (race.get("label") or {}).get(cid)
+    if line:
+        return line
+    key = (race.get("party") or {}).get(cid)
+    if key in LINE_LABELS:
+        return LINE_LABELS[key]
+    # The filing's party only where it names one: "UNK", "NNE" and the like
+    # say nothing, and are never shown as "Independent".
+    if str(row.get("party") or "").upper() in _NAMED_FEC_PARTIES:
+        return LINE_LABELS[party_key(row["party"])]
+    return ""
+
+
+_NAMED_FEC_PARTIES = ("DEM", "DFL", "REP", "LIB", "GRE", "GRN", "IND")
 
 
 def stats(races):
