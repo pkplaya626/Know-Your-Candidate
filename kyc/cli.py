@@ -346,6 +346,10 @@ def _build(args):
     sitemap_path = emit.write_sitemap(profiles, args.root)
     if sitemap_path:
         print(f"[ok] wrote {sitemap_path}")
+    from . import assets
+    restamped = assets.stamp_templates(args.root)
+    if restamped:
+        print(f"[ok] restamped the asset versions in {', '.join(restamped)}")
 
     for page, ok, note in emit.check_pages(args.root):
         if ok and page.startswith(("states/", "districts/")):
@@ -1242,6 +1246,13 @@ def _verify(args):
             print(f"  ok  {page} loads its data in the right order")
         else:
             problems.append(f"{page}: {note}")
+    from . import assets
+    stale_stamps = assets.stamp_templates(args.root, write=False)
+    if stale_stamps:
+        problems.append(f"{', '.join(stale_stamps)}: a script or stylesheet changed and its "
+                        f"version stamp did not; run the build (kyc/assets.py)")
+    else:
+        print(f"  ok  {', '.join(assets.TEMPLATES)} load their code at its current version")
 
     for name, ok, note in emit.check_hostname(args.root):
         if ok:

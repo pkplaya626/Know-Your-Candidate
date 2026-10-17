@@ -291,7 +291,9 @@ def render_state_pages(profiles, root=".", summary=None):
     for cid in federal_courts.COURTS:
         out[os.path.join(COURT_PAGES_DIR, f"{cid}.html")] = pages.render_court_page(cid, host,
                                                                                     codes)
-    return out
+    # Each page's own code, at the version it was built with (kyc/assets.py).
+    from . import assets
+    return {path: assets.stamp(text, root) for path, text in out.items()}
 
 
 def write_state_pages(profiles, root=".", summary=None):
@@ -610,8 +612,9 @@ def government_signature(payload):
 
 
 def script_sources(html):
-    """Every ``<script src="...">`` in *html*, in document order."""
-    return re.findall(r'<script[^>]*\bsrc="([^"]+)"', html)
+    """Every ``<script src="...">`` in *html*, in document order, without the
+    version stamp a local asset's URL carries (kyc/assets.py)."""
+    return [src.split("?v=")[0] for src in re.findall(r'<script[^>]*\bsrc="([^"]+)"', html)]
 
 
 # ------------------------------------------------------------------ hostname

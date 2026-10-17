@@ -102,7 +102,8 @@ function buildPage(page, opts) {
   const sources = [...html.matchAll(/<script[^>]*\bsrc="([^"]+)"[^>]*><\/script>/g)];
   for (const [tag, src] of sources) {
     // Relative to the page: the state pages sit one directory down.
-    const file = path.join(path.dirname(path.join(SITE, page)), ...src.split("/"));
+    // Without the version stamp a local asset's URL carries (kyc/assets.py).
+    const file = path.join(path.dirname(path.join(SITE, page)), ...src.split("?")[0].split("/"));
     if (!fs.existsSync(file)) throw new Error(`${page} references a missing ${src}`);
     html = html.replace(tag, () => "<script>\n" + fs.readFileSync(file, "utf8") + "\n</script>");
   }
@@ -137,7 +138,7 @@ function buildPage(page, opts) {
   });
 
   const { window } = dom;
-  const packed = { window, D: window.document, errors, sources: sources.map((m) => m[1]) };
+  const packed = { window, D: window.document, errors, sources: sources.map((m) => m[1].split("?v=")[0]) };
 
   // Wait for jsdom's own DOMContentLoaded rather than dispatching one. An
   // earlier version fired the event by hand, jsdom then fired its own, and
@@ -2526,6 +2527,25 @@ async function testPhoneMenus() {
         names.every((n, i) => i === 0 || names[i - 1].localeCompare(n) <= 0), `${label} ${hash}`);
     check("opening the sort menu while the theme menu is open keeps it open", sortStays);
     check("and the other way round", themeStays);
+  });
+}
+
+/* One part of the grid failing to start - as a stale script did, minutes
+ * after a deploy - must not leave it on "Loading profiles...". */
+async function testBootSurvivesAFailure() {
+  const { window, D } = await buildPage("index.html", {
+    // The sort's start throws, as the stale script's did.
+    data: (w) => { w.KYC.createMenu = () => { throw new Error("rehearsed failure"); }; },
+  });
+  await settle(50);
+  suite("index.html — the grid starts though one of its parts does not", () => {
+    check("the cards are drawn", D.querySelectorAll("#results .card").length > 0,
+      D.getElementById("resultsLabel").textContent);
+    const note = D.querySelector(".results-failed");
+    check("and the page says part of it did not start", !!note && /did not start/.test(note.textContent));
+    D.querySelector('.chip[data-group="chamber"][data-value="Senate"]').click();
+    check("the filters still work", [...D.querySelectorAll("#results .card")].every((c) =>
+      /Senate/.test(window.KYC.byId(c.getAttribute("data-id")).chamber)));
   });
 }
 
@@ -5650,6 +5670,7 @@ async function testFederal() {
   if (!only || only === "index.html") await testBallotCounts();
   if (!only || only === "index.html") await testRenumbered();
   if (!only || only === "index.html") await testPhoneMenus();
+  if (!only || only === "index.html") await testBootSurvivesAFailure();
   if (!only || only === "index.html") await testReseatedSpecial();
   if (!only || only === "index.html") await testFormerIncumbent();
   if (!only || only === "index.html") await testRecordPhase();
