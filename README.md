@@ -1098,8 +1098,11 @@ agreements are shown, each said as such on the page:
 "Acting" comes from the article's own entry. Years only: Wikidata often
 records the election and the article the swearing-in. A profile the site
 could not tie to an item reads "No linked record of public offices", with
-why; a record whose offices could not be confirmed says so. A read that fails
-or comes back short keeps the committed cache.
+why; a record whose offices could not be confirmed says so. A list opens by
+saying it holds only offices the sources agree on and that others may be
+missing: Keith Sonderling's listed only his Cabinet office while his OGE
+report beside it was filed as Deputy Secretary. A read that fails or comes
+back short keeps the committed cache.
 
 What an agreement on office and years cannot check is checked on its own:
 

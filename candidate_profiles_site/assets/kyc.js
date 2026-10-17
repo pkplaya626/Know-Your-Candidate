@@ -1549,8 +1549,13 @@
         '">No linked record of public offices</p>';
     }
     var rows = record.rows || [];
+    // The list is what two sources agree on, not a full record: it says so
+    // before it starts, or its heading reads as complete (an officer's
+    // earlier office can be in their OGE filings and not here).
     var list = rows.length
-      ? '<ul class="held-list">' + rows.map(function (row) {
+      ? '<p class="held-scope faint">Only offices the sources below agree on; ' +
+        "others may be missing.</p>" +
+        '<ul class="held-list">' + rows.map(function (row) {
           var note = HELD_NOTES[row.agree];
           var place = heldPlace(row);
           return '<li class="held-row">' +

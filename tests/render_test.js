@@ -797,6 +797,12 @@ async function testDirectoryAsync() {
           member.politicalHistory.wikidata + '"]'));
       check("its links open safely", [...source.querySelectorAll("a")]
         .every((a) => a.target === "_blank" && /noopener/.test(a.rel)));
+      // Two sources' agreement is not a complete record, and the list says
+      // so before it starts (an officer's earlier office was missing).
+      const scope = panel.querySelector(".held-scope");
+      check("the list says other offices may be missing, before it starts", !!scope &&
+        /others may be missing/.test(scope.textContent) &&
+        !!(scope.compareDocumentPosition(panel.querySelector(".held-list")) & 4));
       KYC.profile.close();
     }
     const atLarge = window.legislatorsData.find((p) => rows(p).some((r) => r.congress && r.district === 0));
