@@ -106,8 +106,11 @@ def federal_items():
 
 # --------------------------------------------------------------- Congress
 
-_TERRITORIES = {"PR": "Resident Commissioner", "DC": "Delegate", "GU": "Delegate", "VI": "Delegate",
-                "AS": "Delegate", "MP": "Delegate"}
+# The title of each non-voting House member's office; summary.by_state
+# gives the state pages the same words.
+DELEGATE_TITLES = {"PR": "Resident Commissioner", "DC": "Delegate", "GU": "Delegate", "VI": "Delegate",
+                   "AS": "Delegate", "MP": "Delegate"}
+_TERRITORIES = DELEGATE_TITLES
 
 
 def _seat(term):

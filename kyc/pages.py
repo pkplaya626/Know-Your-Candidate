@@ -308,7 +308,13 @@ def render_state(code, host, summary=None):
     """The HTML for one state's page."""
     name = state_name(code)
     info = ((summary or {}).get("states") or {}).get(code) or {}
-    if code in TERRITORIES:
+    if code in TERRITORIES and info.get("houseTerm"):
+        # Puerto Rico: a four-year seat with no 2026 race (summary._delegate_seats).
+        title = info.get("delegateTitle", "Delegate")
+        description = (f"{name}'s {title} in the U.S. House, elected for a "
+                       f"{info['houseTerm']['years']}-year term and next on the ballot in "
+                       f"{info['houseTerm']['next']}, and who governs {name}.")
+    elif code in TERRITORIES:
         what = "delegate to the U.S. House" if info.get("house", 0) <= 1 else "delegates"
         description = (f"{name}'s {what}, the 2026 race for the seat, and every "
                        f"candidate who has filed - who is on the ballot and who is out.")

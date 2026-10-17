@@ -4218,6 +4218,27 @@ async function testStateGov() {
       /Puerto Rico's legislature, attorney general and courts are not covered here/.test(text) &&
       !/Seats: not covered/.test(text));
   });
+  suite("states/pr.html — the Resident Commissioner, and why no seat is on the 2026 ballot", () => {
+    const hero = pr.D.querySelector(".state-summary").textContent;
+    check("the hero names the office and its next election, not zeros",
+      /1 Resident Commissioner/.test(hero) && /Resident Commissioner: a 4-year term, next on the ballot in 2028/.test(hero) &&
+      !/delegate/.test(hero) && !/0 seats in Congress/.test(hero) && !/0 challengers/.test(hero), hero);
+    const delegation = pr.D.getElementById("delegation");
+    check("the section is headed Resident Commissioner, and says why it has no race",
+      /Resident Commissioner to the U\.S\. House/.test(delegation.querySelector(".state-heading").textContent) &&
+      /last on the ballot in 2024 and is next in 2028/.test(delegation.textContent) &&
+      !!delegation.querySelector('a[href="https://www.law.cornell.edu/uscode/text/48/891"]'),
+      delegation.textContent.slice(0, 300));
+    const chips = [...pr.D.querySelectorAll(".state-parts a")].map((a) => a.textContent);
+    check("its jump chip says Resident Commissioner", chips.indexOf("Resident Commissioner") !== -1, chips.join(" | "));
+  });
+  const statesIndex = await buildPage("states/index.html");
+  suite("states/index.html — Puerto Rico's row says the same as its page", () => {
+    const row = statesIndex.D.querySelector('.state-row[data-state="PR"]');
+    check("Resident Commissioner, next on the ballot in 2028",
+      !!row && /1 Resident Commissioner/.test(row.textContent) && /next on the ballot in 2028/.test(row.textContent) &&
+      !/challenger/.test(row.textContent), row && row.textContent);
+  });
   const guTerr = await buildPage("states/gu.html");
   suite("states/gu.html — a territory with no secretary of state", () => {
     const text = guTerr.D.getElementById("state-government").textContent;
