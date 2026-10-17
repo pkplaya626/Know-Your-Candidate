@@ -1579,7 +1579,11 @@ President's term began (`kyc/cabinet.py`), into `changes` in
   sources differ and shows no date. An infobox entry is the office's exact
   name, past an ordinal and "Acting" - "Deputy Director of the Office of
   Management and Budget" is not its Director - and a person who held the
-  office before takes the entry of this term.
+  office before takes the entry of this term. An acting officer whose end
+  both sources put after the next holder's start (Ingrid Kolb's acting
+  service as Secretary of Energy to 2025-02-04, Chris Wright's from
+  2025-02-03) shows no end and says why; no date is moved to fit, and the
+  build warns `acting-overlaps-successor`.
 
 The hub lists every change newest first: confirmed, left, acting. Each
 card says since when and whom its officer followed, and the dialog lists

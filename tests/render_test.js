@@ -4877,6 +4877,14 @@ async function testFederal() {
         const card = cards.find((c) => c.querySelector(".fed-office").textContent === o.office);
         return !card || card.textContent.indexOf((same ? "after " : "previously this term: ") + prev.name) !== -1;
       }));
+      // An acting end both sources put after the successor's start is not
+      // shown as a date (Energy: Kolb to Feb 4, Wright from Feb 3).
+      const overlapped = withHistory.flatMap((o) => o.history.filter((r) => r.end && r.end.overlap));
+      check("an acting end after the successor took office is not shown as a date",
+        overlapped.every((r) => [...changes.querySelectorAll("tbody tr")].some((tr) =>
+          tr.textContent.indexOf(r.name + "’s service as acting ended") !== -1 &&
+          /Date not shown: both sources put it after the successor took office/.test(tr.textContent))),
+        overlapped.map((r) => r.name).join(", "));
       check("no Wikidata label is shown for a person: names are the White House's, the Senate's " +
         "or an article's", withHistory.every((o) => o.history.every((r) =>
           r.current ? r.name === o.holder.name : !!(r.wikipedia || (r.confirmed && r.name === r.confirmed.nominee)))));

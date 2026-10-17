@@ -132,6 +132,24 @@ class TestTheFiles(unittest.TestCase):
         self.assertIn('window.kycCourt["ca1"] = ', text)
 
 
+class TestCabinetHistory(unittest.TestCase):
+    def test_an_acting_end_after_the_successor_began_is_not_shown(self):
+        """Neither date is moved; the end is withheld and says why."""
+        from kyc import cabinet, federal
+        payload, _, _, _ = built()
+        cache = federal.load_cache(ROOT)
+        offices = (cache.get("changes") or {}).get("offices") or {}
+        for office in payload["offices"]:
+            held = (offices.get(office["key"]) or {}).get("holders") or []
+            found = cabinet.overlaps(held)
+            for i, row in enumerate(office.get("history") or []):
+                if i in found:
+                    self.assertIsNone(row["end"]["shown"])
+                    self.assertTrue(row["end"]["overlap"])
+                else:
+                    self.assertNotIn("overlap", row.get("end") or {})
+
+
 class TestJudgesNames(unittest.TestCase):
     def test_no_name_shown_carries_the_directorys_brackets(self):
         """FJC writes "A[llen] Joe Fish": shown as "A. Joe Fish", with the

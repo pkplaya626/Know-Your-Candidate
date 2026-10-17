@@ -54,7 +54,11 @@
     }
     var start = row.start && row.start.shown ? whenText(row.start.shown) : "";
     var end = row.end ? (row.end.shown ? whenText(row.end.shown) : "") : "";
-    if (row.end) {
+    if (row.end && row.end.overlap) {
+      // Both sources end it after the next holder began (kyc/cabinet.py).
+      parts.push((start ? "in office from " + start + "; " : "") + "the end is not shown: both " +
+        "sources put it after the successor took office");
+    } else if (row.end) {
       parts.push(start || end ? "in office " + (start || "?") + " to " + (end || "?")
         : "in office, then left; " + (row.end.differs ? "the sources differ on the dates"
           : "the dates are not in both sources"));

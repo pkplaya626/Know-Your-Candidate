@@ -276,6 +276,7 @@
           var shown = row.end.shown;
           events.push({ sort: shown ? shown.date : row.end.sort || "", when: shown
             ? KYC.official.whenText(shown)
+            : row.end.overlap ? "Date not shown: both sources put it after the successor took office"
             : row.end.differs ? "Date differs between sources" : "Date not in both sources",
             office: office, kind: "left", row: row,
             text: row.acting ? row.name + "’s service as acting ended"

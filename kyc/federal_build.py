@@ -160,6 +160,12 @@ def build(root="."):
         held = ((changes.get("offices") or {}).get(office["key"]) or {}).get("holders")
         if held:
             entry["history"] = [_change(row) for row in held]
+            # An acting end the sources put after the successor's start is
+            # not shown, and says why (kyc/cabinet.py overlaps).
+            from . import cabinet
+            for i in cabinet.overlaps(held):
+                end = entry["history"][i]["end"]
+                end["shown"], end["overlap"] = None, True
         offices.append(entry)
     # The circuit map's colours: the guide's, from one table (rule 12).
     from . import geo
