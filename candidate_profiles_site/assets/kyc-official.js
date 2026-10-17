@@ -382,7 +382,12 @@
       if (seat.commissioned) parts.push("commissioned " + KYC.escapeHtml(seat.commissioned));
       if (seat.reassigned) parts.push("reassigned to this court by statute " + KYC.escapeHtml(seat.reassigned));
       if (seat.chiefSince) parts.push("chief since " + KYC.escapeHtml(seat.chiefSince));
-      if (seat.seniorSince) parts.push("senior status since " + KYC.escapeHtml(seat.seniorSince));
+      // A retired justice is "retired", as the status line above says, not
+      // on "senior status": one word for one status in one dialog.
+      if (seat.seniorSince) {
+        parts.push((judge.retiredJustice ? "retired since " : "senior status since ") +
+          KYC.escapeHtml(seat.seniorSince));
+      }
       return "<li><strong>" + KYC.escapeHtml(seat.title || "Judge") + "</strong>, " +
         (here || !c ? KYC.escapeHtml(name)
           : '<a href="' + KYC.escapeAttr(courtUrl(seat.court)) + '">' + KYC.escapeHtml(name) + "</a>") +

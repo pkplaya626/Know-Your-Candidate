@@ -355,13 +355,18 @@
         "</span> " + esc((j.justice && j.justice.oath) || seat.commissioned) + "</p></div></li>";
   }
 
-  function justiceRows(justices) {
+  /** Retired justices: when each joined the Court and when they retired,
+   *  never a bare "Since" under a heading about retirement. A retired
+   *  justice's retirement is the directory's senior-status date. */
+  function retiredRows(justices) {
     return justices.map(function (j) {
       var seat = (j.seats || [])[0] || {};
       return "<tr><th scope=\"row\">" + person(j.id, j.name) + "</th>" +
-        cell("Role", esc(j.justice ? j.justice.role : seat.title)) +
+        cell("Role", esc(seat.title)) +
         cell("Appointed by", esc(seat.appointedBy)) +
-        cell("Since", esc((j.justice && j.justice.oath) || seat.commissioned)) + "</tr>";
+        cell("Joined the Court", esc(seat.commissioned)) +
+        cell("Retired", seat.seniorSince ? esc(seat.seniorSince)
+          : '<span class="faint">Not in the directory</span>') + "</tr>";
     });
   }
 
@@ -406,7 +411,8 @@
       '<ul class="fed-cards">' + (scotus.members || []).map(justiceCard).join("") + "</ul>" +
       ((scotus.retired || []).length
         ? table("Retired justices, listed apart: they are not members of the Court",
-          ["Justice", "Role", "Appointed by", "Since"], justiceRows(scotus.retired)) : ""));
+          ["Justice", "Role", "Appointed by", "Joined the Court", "Retired"],
+          retiredRows(scotus.retired)) : ""));
 
     var courts = d.courts.filter(function (c) { return c.kind !== "supreme"; });
     var appeals = courts.filter(function (c) { return c.kind === "appeals"; });
@@ -604,7 +610,9 @@
     return el("federalContent").getAttribute("data-court");
   }
 
-  function judgeRows(judges, senior) {
+  /** *since* names a last column of the seat's senior-status date: "Senior
+   *  status since" for a judge, "Retired" for a retired justice. */
+  function judgeRows(judges, since) {
     return judges.map(function (j) {
       var seat = (j.seats || []).filter(function (s) {
         return s.court === courtId();
@@ -614,7 +622,7 @@
         cell("Title", esc((j.justice && j.justice.role) || seat.title)) +
         cell("Appointed by", esc(seat.appointedBy)) +
         cell("Commissioned", esc(seat.commissioned)) +
-        (senior ? cell("Senior status since", esc(seat.seniorSince)) : "") + "</tr>";
+        (since ? cell(since, esc(seat.seniorSince)) : "") + "</tr>";
     });
   }
 
@@ -664,12 +672,12 @@
       html += section("senior", "Judges on senior status",
         '<p class="guide-lede">A judge on senior status keeps the office and may hear a ' +
         "reduced caseload; taking it opens a seat the President may fill (28 U.S.C. 371).</p>" +
-        table("", heads.concat(["Senior status since"]), judgeRows(senior, true)));
+        table("", heads.concat(["Senior status since"]), judgeRows(senior, "Senior status since")));
     }
     if ((mine.retired || []).length) {
       html += section("retired", "Retired justices",
         '<p class="guide-lede">Listed apart: they are not members of the Court.</p>' +
-        table("", heads, judgeRows(mine.retired, false)));
+        table("", heads.concat(["Retired"]), judgeRows(mine.retired, "Retired")));
     }
     target.innerHTML = html + vacancySection(d, mine) + related(court, courts);
   }

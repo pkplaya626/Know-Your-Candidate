@@ -5033,6 +5033,28 @@ async function testFederal() {
       D.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
       return modal.hidden;
     })());
+    // A retired justice: retired since a date, never "Since" their
+    // commission under a heading about retirement, nor "senior status".
+    const retired = (d.supremeCourt.retired || [])[0];
+    if (retired) {
+      const table = [...D.querySelectorAll("#supreme-court table")].find((t) =>
+        /Retired justices/.test(t.textContent));
+      const heads = table ? [...table.querySelectorAll("thead th")].map((th) => th.textContent) : [];
+      check("the retired justices' table says when each joined the Court and when they retired",
+        heads.includes("Joined the Court") && heads.includes("Retired") && !heads.includes("Since"),
+        heads.join(" | "));
+      const row = table && [...table.querySelectorAll("tbody tr")].find((tr) =>
+        tr.textContent.indexOf(retired.name) !== -1);
+      check("their retirement is the directory's senior-status date", !!row &&
+        row.querySelector('[data-label="Retired"]').textContent === retired.seats[0].seniorSince &&
+        row.querySelector('[data-label="Joined the Court"]').textContent === retired.seats[0].commissioned,
+        row && row.textContent);
+      D.querySelector('#supreme-court [data-official="' + retired.id + '"]').click();
+      const body = D.getElementById("officialModalBody").textContent;
+      check("their dialog says retired, not senior status",
+        /retired since/.test(body) && !/senior status since/.test(body), body.slice(0, 300));
+      window.KYC.official.close();
+    }
   });
 
   const president = d && d.president;
@@ -5169,6 +5191,8 @@ async function testFederal() {
     check("the justices, the Chief Justice first", listed.join() === members.join(), listed.join());
     const retired = (w.kycFederal.supremeCourt.retired || []).length;
     check("retired justices apart", !retired || doc.querySelectorAll("#retired [data-official]").length === retired);
+    check("with the date each retired", !retired || [...doc.querySelectorAll("#retired thead th")]
+      .some((th) => th.textContent === "Retired"));
   });
 }
 
