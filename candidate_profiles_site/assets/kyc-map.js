@@ -421,6 +421,26 @@
         '<span title="Lost the primary, withdrew, or were not on the primary ballot">' +
         out.length + " out</span></p>";
     }
+    // The people the results put on the ballot with no profile here: by
+    // name for the state's Senate seat, counted for its House seats, with
+    // the state page that lists them race by race.
+    var stateRaces = (global.kycRaces || []).filter(function (r) {
+      return r.state === code && (mode === "senate2026" ? r.chamber === "Senate"
+        : mode === "house" ? r.chamber === "House" : true);
+    });
+    if (mode === "senate2026") {
+      html += stateRaces.map(function (r) { return KYC.cards.unprofiledNote(r, "panel-note"); }).join("");
+    } else {
+      var unnamed = stateRaces.reduce(function (n, r) {
+        return n + KYC.cards.unprofiledNames(r).none.length;
+      }, 0);
+      if (unnamed) {
+        html += '<p class="panel-note">Also on the November ballot, per the published results, ' +
+          "with no profile here: " + unnamed + (unnamed === 1 ? " person" : " people") +
+          '. <a href="' + KYC.escapeAttr(KYC.stateUrl(code)) + '">Each race on the ' +
+          KYC.escapeHtml(KYC.stateName(code)) + " page \u203a</a></p>";
+      }
+    }
     list.innerHTML = html;
     list.scrollTop = 0;
 

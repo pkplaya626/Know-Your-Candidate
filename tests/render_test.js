@@ -1148,7 +1148,8 @@ async function testDirectoryAsync() {
       const html = KYC.cards.raceBadges(r);
       const n = r.results.otherNominees.length;
       return /No challenger on the ballot/.test(html) ||
-        html.indexOf(n + " challenger") === -1 || html.indexOf(n + " with no profile here") === -1;
+        (html.indexOf(n + " challenger") === -1 && html.indexOf(n + " candidate") === -1) ||
+        html.indexOf(n + " with no profile here") === -1;
     });
     check("each counts them as challengers and says they have no profile here",
       badly.length === 0, badly.slice(0, 3).map((r) => r.id + ": " + KYC.cards.raceBadges(r)).join(" | "));
@@ -2276,6 +2277,59 @@ function testContrast() {
 
 /* The Senate by the year each seat is next decided. Every expected number
  * here is computed from the data the page loaded, never typed in. */
+/* Everyone on the ballot, counted one way: the sidebar, a state's strip and
+ * its race headers read 587, 16 and 58 for the same people. The people the
+ * results name with no profile here are named in every view of a race, and
+ * nobody is said to await a primary that has been held. */
+async function testBallotCounts() {
+  const { window, D, errors } = await buildPage("states/mi.html");
+  await settle(50);
+  const KYC = window.KYC;
+  const races = window.kycRaces;
+  suite("states/mi.html — the state's count is its race headers' sum", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const strip = [...D.querySelectorAll(".badge")].map((b) => b.textContent)
+      .find((t) => / (challenger|challengers) on the ballot$/.test(t));
+    const heads = [...D.querySelectorAll(".race-head .badge-money")]
+      .map((b) => (/^(\d+) (challenger|candidate)s? on the ballot$/.exec(b.textContent) || [])[1])
+      .filter(Boolean).reduce((n, x) => n + Number(x), 0);
+    check("the strip equals the race headers added up",
+      !!strip && Number(strip.split(" ")[0]) === heads, `${strip} vs ${heads}`);
+    const national = window.kycBuildMeta.election.challengersOnBallot;
+    const all = races.reduce((n, r) => n + (r.candidateCount || 0) +
+      ((r.results || {}).otherNominees || []).length, 0);
+    check("and the national figure is every race's, added up", national === all, `${national} vs ${all}`);
+  });
+
+  const index = await buildPage("index.html", { hash: "#/?view=senate" });
+  await settle(50);
+  const W = index.window;
+  const I = index.D;
+  suite("index.html — the people the results name with no profile here", () => {
+    const seat = W.kycRaces.find((r) => r.chamber === "Senate" &&
+      KYC.cards && W.KYC.cards.unprofiledNames(r).none.length >= 2);
+    check("a Senate seat has people the results name with no profile here", !!seat);
+    const block = seat && I.getElementById("senate-seat-" + seat.id);
+    const section = block && block.closest("section");
+    const names = seat ? W.KYC.cards.unprofiledNames(seat).none : [];
+    check("the Senate view names them in words, not only in a badge's hover",
+      !!section && names.every((n) => [...section.querySelectorAll(".race-note")]
+        .some((p) => p.textContent.indexOf(n) !== -1)), seat && seat.id);
+    const unknown = W.legislatorsData.find((p) => p.ballotUnknown && !p.raceStatus);
+    const badge = unknown && W.KYC.cards.card(unknown);
+    check("a filer the results do not name, after the primary, is not said to await it",
+      !unknown || (/Ballot status not known/.test(badge) && !/has not been held yet/.test(badge)),
+      unknown && unknown.name);
+    const maybe = W.legislatorsData.find((p) => p.maybeNamed && p.maybeNamed.length && !p.raceStatus);
+    const race = maybe && W.kycRaces.find((r) => r.id === maybe.raceId);
+    check("a name the results may give a profile here is said to be that, not 'no profile'",
+      !maybe || (/Result not matched/.test(W.KYC.cards.card(maybe)) &&
+        W.KYC.cards.unprofiledNames(race).maybe.some((m) => m.id === maybe.id) &&
+        /who may be/.test(W.KYC.cards.unprofiledNote(race))),
+      maybe && maybe.name);
+  });
+}
+
 async function testSenate() {
   const { window, D, errors } = await buildPage("index.html", { hash: "#/?view=senate" });
   await settle(50);
@@ -5141,6 +5195,7 @@ async function testFederal() {
   if (!only || only === "stategov") await testStateGov();
   if (!only || only === "index.html") await testDirectoryAsync();
   if (!only || only === "index.html") await testSenate();
+  if (!only || only === "index.html") await testBallotCounts();
   if (!only || only === "index.html") await testReseatedSpecial();
   if (!only || only === "index.html") await testFormerIncumbent();
   if (!only || only === "index.html") await testRecordPhase();

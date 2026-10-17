@@ -591,6 +591,54 @@ class TestNamesThePageMayUse(unittest.TestCase):
         results.apply_cache([person], self.cache({"Mark Su": "eliminated"}))
         self.assertEqual(person["raceStatus"], "unlisted")
 
+    def test_a_name_ambiguous_only_between_one_persons_registrations_is_theirs(self):
+        # "Dan Miressi" fitted "MIRESSI, DAN" and "MIRESSI, DANIEL", one
+        # committee's two registrations, so the fetch left it ambiguous and
+        # he read as a challenger whose primary had not been held.
+        person = self.filer("H6CT04150", "Daniel Miressi", "MIRESSI, DANIEL")
+        person.update(state="CT", districtNum=4, otherFecIds=["H4CT04189"])
+        field = {"candidates": [
+            {"candidate_id": "H6CT04150", "name": "MIRESSI, DANIEL", "office": "H",
+             "state": "CT", "district_number": 4},
+            {"candidate_id": "H4CT04189", "name": "MIRESSI, DAN", "office": "H",
+             "state": "CT", "district_number": 4}]}
+        cache = {"asOf": "2026-10-05", "races": {"H-CT-04-2026": {
+            "status": {}, "unmatched": {"Dan Miressi": "eliminated"},
+            "ambiguous": ["Dan Miressi"], "unsure": ["H4CT04189", "H6CT04150"]}}}
+        results.apply_cache([person], cache, field=field)
+        self.assertEqual(person["raceStatus"], "eliminated")
+        # Another filer the name fits still leaves it alone.
+        other = dict(person)
+        other.pop("raceStatus", None)
+        field["candidates"].append({"candidate_id": "H6CT04999", "name": "MIRESSI, DANIELLE",
+                                    "office": "H", "state": "CT", "district_number": 4})
+        cache["races"]["H-CT-04-2026"].update(unmatched={"Dan Miressi": "eliminated"}, status={})
+        results.apply_cache([other], cache, field=field)
+        self.assertNotEqual(other.get("raceStatus"), "eliminated")
+
+    def test_unsure_and_every_possible_name_out_is_off_the_ballot(self):
+        # Josh Weil withdrew; a second Weil filing made the fetch unsure,
+        # and he was counted on Florida's Senate ballot with no status.
+        person = self.filer("H6NC04998", "Joshua Joseph Weil", "WEIL, JOSHUA JOSEPH")
+        cache = self.cache({"Josh Weil": "withdrawn"})
+        cache["races"]["H-NC-04-2026"].update(ambiguous=["Josh Weil"],
+                                              unsure=["H2NC04466", "H6NC04998"])
+        results.apply_cache([person], cache)
+        self.assertEqual(person["raceStatus"], "unlisted")
+        self.assertTrue(person["raceStatusUnconfirmed"])
+
+    def test_a_filer_whose_party_held_no_primary_is_not_said_to_await_one(self):
+        # FL-18's Deva Simmons, no party: the page names both parties'
+        # nominees and not her. Whether she is on the November ballot is
+        # not known here, and she is not counted as on it.
+        person = self.filer("H6NC04994", "Deva Simmons", "SIMMONS, DEVA")
+        person["party"] = "No Party Affiliation"
+        cache = self.cache({})
+        cache["races"]["H-NC-04-2026"]["decided"] = {"general": False, "parties": []}
+        results.apply_cache([person], cache)
+        self.assertNotIn("raceStatus", person)
+        self.assertTrue(person["ballotUnknown"])
+
     def test_one_name_two_filings_settles_neither(self):
         a = self.filer("H6NC04996", "Carlquist Lisa")
         b = self.filer("H6NC04995", "Lisa Carlquist")

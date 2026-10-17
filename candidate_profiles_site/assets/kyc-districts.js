@@ -945,10 +945,7 @@
         ? '<p class="district-fact-label">' + who + '</p><div class="card-grid">' +
           people.map(KYC.cards.card).join("") + "</div>"
         : '<p class="district-fact-label">' + who + ": nobody with a profile here</p>") +
-      (unfiled.length
-        ? '<p class="state-note">Also on the ballot, ' + KYC.ballotSource(race) + ', with no FEC ' +
-          "filing over $5,000: " + KYC.escapeHtml(unfiled.join(", ")) + ".</p>"
-        : "") +
+      (unfiled.length ? KYC.cards.unprofiledNote(race, "state-note") : "") +
       flowLine("Where its area came from:", came, "old") +
       (race
         ? '<p class="district-flow"><a class="race-state-link" href="' +
@@ -982,10 +979,7 @@
           ? '<p class="district-fact-label">' + who + '</p><div class="card-grid">' +
             people.map(KYC.cards.card).join("") + "</div>"
           : '<p class="district-fact-label">' + who + ": nobody with a profile here</p>") +
-      (unfiled.length
-        ? '<p class="state-note">Also on the ballot, ' + KYC.ballotSource(race) + ', with no FEC ' +
-          "filing over $5,000: " + KYC.escapeHtml(unfiled.join(", ")) + ".</p>"
-        : "") +
+      (unfiled.length ? KYC.cards.unprofiledNote(race, "state-note") : "") +
       (race
         ? '<p class="district-flow"><a class="race-state-link" href="' +
           KYC.escapeAttr(KYC.stateUrl(code) + "#race-" + race.id) + '">The ' +

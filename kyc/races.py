@@ -301,9 +301,26 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
                 # "Sarah Zabel Peterson" were two challengers).
                 from .results import _maybe_named
                 named = {"unmatched": {n: "nominee" for n in summary["otherNominees"]}}
+                # Nor is anyone whose place on the ballot is not known
+                # (results.apply_cache: ``ballotUnknown``).
                 still = [pid for pid in race["candidateIds"] if on_ballot(by_id[pid]) and not (
-                    not by_id[pid].get("raceStatus") and _maybe_named(by_id[pid], named))]
+                    not by_id[pid].get("raceStatus") and _maybe_named(by_id[pid], named))
+                    and not by_id[pid].get("ballotUnknown")]
                 race["candidateCount"] = len(still)
+                # A page name that may be a profile here under another
+                # spelling is counted as the name; the page says whose it may
+                # be, never "no profile here" (IN-6's "Cynthia Wirth" and the
+                # profile "Cynthia (Cinde) Wirth").
+                maybe = {}
+                for pid in race["candidateIds"]:
+                    person = by_id[pid]
+                    if person.get("raceStatus"):
+                        continue
+                    for name in person.get("maybeNamed") or []:
+                        if name in summary["otherNominees"]:
+                            maybe[name] = pid
+                if maybe:
+                    summary["maybeProfiled"] = maybe
                 race["contested"] = bool(still) or bool(summary["otherNominees"])
                 race["results"]["unlisted"] = sum(
                     1 for pid in race["candidateIds"]

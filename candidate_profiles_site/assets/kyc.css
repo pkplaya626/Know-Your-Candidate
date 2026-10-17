@@ -3626,6 +3626,8 @@ button.local-county-link {
 }
 .gov-officer-name { font-weight: 700; color: var(--text); }
 .gov-officer-note { font-size: var(--t-sm); color: var(--text-muted); }
+/* A line under a panel's lists: who else is on the ballot, and where. */
+.panel-note { margin: var(--s-2) 0; font-size: var(--t-sm); color: var(--text-muted); }
 
 /* A state's highest court: names in two columns where there is room. */
 .gov-court {

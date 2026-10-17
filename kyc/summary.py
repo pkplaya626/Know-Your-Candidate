@@ -131,11 +131,13 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None):
                 if not p.get("seekingReelection2026")
             ),
             "challengers": sum(1 for p in profiles if p.get("isCandidate")),
-            # Still in the race: nominees plus everyone whose primary is yet
-            # to come. Off-ballot people are counted but not "declared".
-            "challengersOnBallot": sum(
+            # Still in the race and with a profile here: nominees plus
+            # everyone whose primary is yet to come. The headline figure,
+            # challengersOnBallot, is the races' own count (below).
+            "challengersProfiled": sum(
                 1 for p in profiles if p.get("isCandidate")
                 and p.get("raceStatus") not in ("eliminated", "withdrawn", "unlisted")
+                and not p.get("ballotUnknown")
             ),
             "filedCandidates": sum(
                 1 for p in profiles if p.get("source") == "fec-field"
@@ -154,6 +156,11 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None):
             "open": sum(1 for r in races if r.get("openSeat")),
         }
     summary["states"] = by_state(profiles, races)
+    # On the ballot, as every race header counts it: the sidebar read 587
+    # while the race headers summed to 840, the difference the nominees the
+    # results name with no profile here (rule 22).
+    summary["election"]["challengersOnBallot"] = sum(
+        s["challengersOnBallot"] for s in summary["states"].values())
     if races is not None:
         # The same vacancies, nationally: 433 members of a 435-seat House
         # read as a complete chamber when two seats were empty.
@@ -214,7 +221,7 @@ def by_state(profiles, races=None):
         if p.get("isCandidate"):
             if p.get("raceStatus") in ("eliminated", "withdrawn", "unlisted"):
                 entry["challengersOut"] += 1
-            else:
+            elif not p.get("ballotUnknown"):
                 entry["challengersOnBallot"] += 1
             continue
         if p.get("formerMember"):
@@ -241,10 +248,21 @@ def by_state(profiles, races=None):
         # member, and "38 seats on the 2026 ballot" sat over 39 races.
         for entry in out.values():
             entry["seatsUp"] = 0
+    # Once the races are counted (races.build), a state's figure is the sum
+    # of its race headers: the profiles still on the ballot, and the people
+    # the published results put there with no profile here. Counted from the
+    # profiles alone, Michigan's page read 16 over race headers summing 58.
+    counted = any("candidateCount" in race for race in races or [])
+    if counted:
+        for entry in out.values():
+            entry["challengersOnBallot"] = 0
     for race in races or []:
         entry = out.get(race.get("state"))
         if entry is None:
             continue
+        if counted:
+            entry["challengersOnBallot"] += race.get("candidateCount", 0) + len(
+                (race.get("results") or {}).get("otherNominees") or [])
         entry["races"] += 1
         entry["seatsUp"] += 1
         if race.get("openSeat"):

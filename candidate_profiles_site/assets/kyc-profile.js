@@ -389,11 +389,7 @@
      * member with a named November opponent read as unopposed. */
     var res = race.results || null;
     var unfiled = res && res.otherNominees && res.otherNominees.length ? res.otherNominees : [];
-    if (unfiled.length) {
-      html += '<p class="race-note">Also on the November ballot, ' + KYC.ballotSource(race) +
-        ", with no FEC filing over $5,000 and so no profile here: " +
-        KYC.escapeHtml(unfiled.join(", ")) + ".</p>";
-    }
+    if (unfiled.length) html += KYC.cards.unprofiledNote(race);
     if (!others.length && !unfiled.length) html = aloneNote(race);
     panel.hidden = false;
     target.innerHTML = redrawnNote(item, race) + html;

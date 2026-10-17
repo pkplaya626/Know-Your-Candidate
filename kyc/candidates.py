@@ -144,6 +144,8 @@ def build_cache(rows, cycle=CYCLE):
 
 
 def save_cache(cache, root="."):
+    # committeeOf is read from the campaigns cache on load, never stored here.
+    cache = {k: v for k, v in cache.items() if k != "committeeOf"}
     path = os.path.join(root, CACHE_PATH)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     tmp = f"{path}.tmp"
@@ -163,7 +165,20 @@ def load_cache(root="."):
             cache = json.load(handle)
     except (ValueError, OSError):
         return None
-    return cache if cache.get("candidates") else None
+    if not cache.get("candidates"):
+        return None
+    cache["committeeOf"] = committee_of(root)
+    return cache
+
+
+def committee_of(root="."):
+    """``{candidate id: committee id}``: the committee each filing's Form 1
+    names, from the campaigns cache (``campaigns``). Two registrations whose
+    committee is one and the same are one campaign (:func:`registrations`)."""
+    from . import campaigns
+    found = campaigns.load_cache(root) or {}
+    return {cid: entry["committee_id"] for cid, entry in found.items()
+            if isinstance(entry, dict) and entry.get("committee_id")}
 
 
 # ------------------------------------------------------------------- shaping
@@ -412,37 +427,63 @@ def same_committee(a, b):
                                                "coverage_end_date"))
 
 
-def registrations(rows):
+def registrations(rows, committees=None):
     """``{kept id: [other ids]}`` for people registered under several ids.
 
-    Within one name, state and office, filings that report the same
-    committee's money are one person. The registration kept is the one with
-    the latest statement of candidacy (last_f2_date) - Ronda Kennedy filed for
-    NV-3 in 2025 and NV-4 in 2026, and the lower id had put her in the wrong
-    race - then the lowest id, so the choice never flips between refreshes.
+    Within one state and office, filings that report the same committee's
+    money are one person when either their names fold alike or their Form 1
+    names one and the same committee (*committees*, ``{candidate id:
+    committee id}``). The committee is the exact signal the name is not:
+    "Dan Miressi" and "Daniel Miressi", "Bob Chew" and "Robert Chew" each
+    filed twice for one committee, and each appeared twice in their race,
+    counted twice as on the ballot. Equal money alone is never enough: many
+    filers share $0 and a quarter's end. The registration kept is the one
+    with the latest statement of candidacy (last_f2_date) - Ronda Kennedy
+    filed for NV-3 in 2025 and NV-4 in 2026, and the lower id had put her in
+    the wrong race - then the lowest id, so the choice never flips between
+    refreshes.
     """
+    committees = committees or {}
+    by_id = {row["candidate_id"]: row for row in rows}
+    parent = {cid: cid for cid in by_id}
+
+    def root(cid):
+        while parent[cid] != cid:
+            parent[cid] = parent[parent[cid]]
+            cid = parent[cid]
+        return cid
+
+    def join(a, b):
+        ra, rb = root(a), root(b)
+        if ra != rb:
+            parent[max(ra, rb)] = min(ra, rb)
+
     groups = collections.defaultdict(list)
     for row in rows:
         key = (_fold(display_name(row.get("name"))), row.get("state"), row.get("office"))
         groups[key].append(row)
-    kept = {}
+        committee = committees.get(row["candidate_id"])
+        if committee:
+            groups[("committee", committee, row.get("state"), row.get("office"))].append(row)
     for members in groups.values():
-        clusters = []
-        for row in sorted(members, key=lambda r: r["candidate_id"]):
-            for cluster in clusters:
-                if same_committee(cluster[0], row):
-                    cluster.append(row)
+        members = sorted(members, key=lambda r: r["candidate_id"])
+        for i, row in enumerate(members):
+            for other in members[:i]:
+                if same_committee(other, row):
+                    join(other["candidate_id"], row["candidate_id"])
                     break
-            else:
-                clusters.append([row])
-        for cluster in clusters:
-            if len(cluster) < 2:
-                continue
-            best = sorted(cluster, key=lambda r: (
-                -int((r.get("last_f2_date") or "0000-00-00")[:10].replace("-", "")),
-                r["candidate_id"]))[0]
-            kept[best["candidate_id"]] = sorted(
-                r["candidate_id"] for r in cluster if r is not best)
+    clusters = collections.defaultdict(list)
+    for cid in sorted(by_id):
+        clusters[root(cid)].append(by_id[cid])
+    kept = {}
+    for cluster in clusters.values():
+        if len(cluster) < 2:
+            continue
+        best = sorted(cluster, key=lambda r: (
+            -int((r.get("last_f2_date") or "0000-00-00")[:10].replace("-", "")),
+            r["candidate_id"]))[0]
+        kept[best["candidate_id"]] = sorted(
+            r["candidate_id"] for r in cluster if r is not best)
     # Curated same-person pairs, each with its evidence (overrides).
     from . import overrides
     present = {r["candidate_id"] for r in rows}
@@ -501,7 +542,7 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
                 incumbents[(rid, words[0], words[-1])] = p
 
     rows = eligible(cache, threshold)
-    merged = registrations(rows)
+    merged = registrations(rows, (cache or {}).get("committeeOf"))
     folded = {other for others in merged.values() for other in others}
 
     profiles, skipped = [], 0

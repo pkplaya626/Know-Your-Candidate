@@ -440,6 +440,20 @@ class TestStatePages(unittest.TestCase):
         self.assertEqual(by_state["GU"]["delegates"], 1)
         self.assertTrue(by_state["GU"]["territory"])
 
+    def test_a_states_ballot_count_is_the_sum_of_its_race_headers(self):
+        # Michigan's page read "16 challengers on the ballot" over race
+        # headers summing 58: the headers count the people the results name
+        # with no profile here, and the strip did not.
+        people = [
+            member(id="C1", state="MI", isCandidate=True, raceStatus="nominee"),
+            member(id="C2", state="MI", isCandidate=True, ballotUnknown=True),
+        ]
+        races = [{"id": "S-MI-2026", "state": "MI", "openSeat": True, "candidateCount": 1,
+                  "results": {"otherNominees": ["A B", "C D"]}},
+                 {"id": "H-MI-01-2026", "state": "MI", "openSeat": False, "candidateCount": 0,
+                  "results": {"otherNominees": ["E F"]}}]
+        self.assertEqual(summary.by_state(people, races)["MI"]["challengersOnBallot"], 4)
+
     def test_each_state_has_its_own_balance_and_its_vacancies(self):
         # The roster holds no row for a seat nobody holds; the races cover
         # every seat, so a race with no member is a vacancy, not a gap.

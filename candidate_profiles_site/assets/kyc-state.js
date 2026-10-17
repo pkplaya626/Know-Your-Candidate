@@ -89,7 +89,8 @@
     parts.push(plural(info.challengersOnBallot, "challenger") +
       (rec ? " on the 2026 ballot" : " on the ballot"));
     if (info.challengersOut) {
-      parts.push(info.challengersOut + " out after the " + (rec ? "2026 " : "") + "primaries");
+      parts.push(plural(info.challengersOut, "challenger") + " out after the " +
+        (rec ? "2026 " : "") + "primaries");
     }
     return parts.map(function (t) {
       return '<span class="badge badge-neutral">' + KYC.escapeHtml(t) + "</span>";

@@ -1260,10 +1260,16 @@
       challengers.textContent = String(
         running !== undefined ? running : (election.challengers || 0)
       );
-      if (running !== undefined && election.challengers) {
-        challengers.title = election.challengers + " filed with the FEC; " +
-          (election.challengers - running) + " lost a primary, withdrew, or were " +
-          "not on the primary ballot";
+      // The same count as every race header: everyone on the ballot but a
+      // member running for the seat they hold, profile or not.
+      if (running !== undefined) {
+        challengers.title = "Everyone on the 2026 ballot except members running for the seat " +
+          "they hold, open-seat candidates included: " +
+          (election.challengersProfiled !== undefined
+            ? election.challengersProfiled + " with a profile here, " +
+              (running - election.challengersProfiled) + " named by the published results " +
+              "with no FEC filing over $5,000"
+            : running + " in all") + ".";
       }
     }
   }
