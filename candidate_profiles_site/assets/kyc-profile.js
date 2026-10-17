@@ -349,6 +349,7 @@
       .filter(function (id) { return id !== item.id; })
       .map(KYC.byId).filter(Boolean);
     var order = function (p) {
+      if (!p.isCandidate && p.contestRaceId && p.contestRaceId !== race.id) return 2;
       var spec = KYC.raceStatus(p.raceStatus, "mate");
       return spec ? spec.rank : 2;          // between a runoff and a loss
     };
@@ -357,8 +358,21 @@
       if (ra !== rb) return ra - rb;
       return order(a) - order(b) || a.name.localeCompare(b.name);
     });
-    var out = others.filter(function (p) { return KYC.cards && KYC.cards.offBallot(p); });
-    var shown = others.filter(function (p) { return !(KYC.cards && KYC.cards.offBallot(p)); });
+    /* A member who holds this seat and is contesting another - a redrawn
+     * district's new number, the other chamber - has a status about that
+     * other race. Read as this race's, Kevin Kiley was "On the ballot" in
+     * CA-3, which he holds and is not running for, and Al Green was
+     * "Lost primary" in TX-9, though he lost TX-18's. Said as where they
+     * went, and never folded under "no longer in this race". */
+    var elsewhere = function (p) {
+      return !p.isCandidate && !!p.contestRaceId && p.contestRaceId !== race.id;
+    };
+    var out = others.filter(function (p) {
+      return !elsewhere(p) && KYC.cards && KYC.cards.offBallot(p);
+    });
+    var shown = others.filter(function (p) {
+      return elsewhere(p) || !(KYC.cards && KYC.cards.offBallot(p));
+    });
     el("profileModalRaceTitle").textContent = race.label;
     // The markets on this race, compactly, after the people in it.
     el("profileModalRaceOdds").innerHTML = KYC.odds ? KYC.odds.render(race, { compact: true }) : "";
@@ -372,6 +386,14 @@
         ? '<span class="badge ' + spec.cls + '" title="' + KYC.escapeAttr(spec.title) + '">' +
           KYC.escapeHtml(spec.label) + KYC.ballotLineSuffix(p) + "</span>"
         : "";
+      if (elsewhere(p)) {
+        var there = KYC.raceStatusOf(p, "mate");
+        var label = (p.contestLabel || "another seat").replace(/ • /, " ");
+        status = '<span class="badge badge-warn" title="' + KYC.escapeAttr(
+          "Holds this seat and is running for " + label + " in 2026, not for this one" +
+          (there ? ": " + there.title : ".")) + '">Running for ' + KYC.escapeHtml(label) +
+          (there ? " &middot; " + KYC.escapeHtml(there.label) : "") + "</span>";
+      }
       return '<button type="button" class="race-mate" data-goto="' + KYC.escapeAttr(p.id) + '">' +
         '<img ' + KYC.portraitAttrs(p, "36px") + ' alt="" loading="lazy" ' +
         'data-photo-idx="0" data-profile="' + KYC.escapeAttr(p.id) + '">' +

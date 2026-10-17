@@ -2064,6 +2064,30 @@ async function testRunningElsewhere() {
     return text;
   };
 
+  suite("a race's panel says where its holder went, not that race's result", () => {
+    // Kevin Kiley read "On the ballot" in CA-3, which he holds and is not
+    // running for; Al Green "Lost primary" in TX-9, though he lost TX-18's.
+    const races = window.kycRaces;
+    const cases = people.filter((m) => KYC.seated(m) && !m.isCandidate && m.contestRaceId &&
+      m.raceId && m.contestRaceId !== m.raceId).map((m) => {
+      const held = races.find((r) => r.id === m.raceId && r.incumbentIds.indexOf(m.id) !== -1);
+      const opener = held && held.candidateIds.map(KYC.byId).find((c) => c && c.id !== m.id &&
+        (c.contestRaceId || c.raceId) === held.id);
+      return opener ? { m, opener } : null;
+    }).filter(Boolean);
+    check("the data has a holder running elsewhere, in a race someone else is running in",
+      cases.length > 0, `${cases.length}`);
+    const wrong = cases.filter(({ m, opener }) => {
+      KYC.profile.open(opener.id, { fromRoute: true });
+      const row = D.querySelector(`#profileModalRace [data-goto="${m.id}"]`);
+      const bad = !row || !/Running for/.test(row.textContent) || !!row.closest(".race-out");
+      KYC.profile.close();
+      return bad;
+    });
+    check("each reads 'Running for' that race, and is not folded under 'no longer in this race'",
+      wrong.length === 0, wrong.map(({ m }) => m.name).join(", "));
+  });
+
   suite("members running for another seat — their race, not their seat", () => {
     check("the data has members whose held-seat result differs from their race",
       decided.length > 0 && nominees.length > 0, `${decided.length} decided, ${nominees.length} nominees`);
