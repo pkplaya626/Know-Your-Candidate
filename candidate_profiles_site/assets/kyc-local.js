@@ -311,8 +311,13 @@
         "Census Bureau's 2022 listing of governments, so no government is shown here. The listing " +
         "may file its government under another name, or the place may have been incorporated " +
         "since 2022.</p>";
+    } else if (here && noCounty[here]) {
+      // A city the Census records as not functioning, in an area one
+      // consolidated government runs (Tribune, in Greeley County's unified
+      // government): what governs it, in the county's words.
+      body += '<p class="gov-officer-note local-why">' + KYC.escapeHtml(noCounty[here].note) + "</p>";
     }
-    var shared = (samePoint[c[0] + "," + c[1]] || []).filter(function (other) { return other !== id; });
+    var shared =(samePoint[c[0] + "," + c[1]] || []).filter(function (other) { return other !== id; });
     if (shared.length) {
       body += '<p class="faint">At the same point: ' + shared.map(function (other) {
         return '<button type="button" class="sidebar-link local-county-link" data-city="' +

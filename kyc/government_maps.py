@@ -637,6 +637,9 @@ def payload():
             out["modes"][m["id"]] = entry
             for key in m["sources"]:
                 out["sources"][key] = list(SOURCES[key])
+    # What each legislature is called, so the guide's link to its page reads
+    # as the page does ("Virginia General Assembly", not "... Legislature").
+    out["legislatureNames"] = dict(sorted(LEGISLATURE_NAME.items()))
     return out
 
 

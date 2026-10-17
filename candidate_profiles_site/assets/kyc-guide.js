@@ -266,7 +266,8 @@
         data.modes.legislature.values[code] !== undefined
         ? '<p class="guide-fact-link"><a href="' + KYC.escapeAttr(KYC.siteRoot() + "legislature/" +
           code.toLowerCase() + ".html") + '">' + KYC.icon("landmark") + " " +
-          KYC.escapeHtml(map.name(code)) + " Legislature: every district and member ›</a></p>"
+          KYC.escapeHtml(map.name(code) + " " + ((data.legislatureNames || {})[code] || "Legislature")) +
+          ": every district and member ›</a></p>"
         : "";
       // On the local map, the state's counties and every government in each.
       var local = page === "local" && data.modes["local-total"] &&

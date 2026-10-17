@@ -142,7 +142,8 @@ AREAS = {
 # Cities the Census maps as places of their own whose government is the
 # consolidated one AREAS names - a name the city join (counties.match_cities)
 # cannot tie to the place, since the government's name is not the city's.
-# Each government's own name names the city. {place GEOID: county area}.
+# Each government's own name names the city, or a record of its own or the
+# Census Bureau's does, cited beside it. {place GEOID: county area}.
 # The place is joined to the row AREAS names in that area, and its panel
 # says the government also does the county's work. Not every place in such
 # an area: St. George, Louisiana, incorporated in East Baton Rouge Parish in
@@ -151,6 +152,15 @@ CONSOLIDATED_PLACES = {
     "2036000": "20209",   # Kansas City, Kansas
     "2205000": "22033",   # Baton Rouge
     "1332528": "13239",   # Georgetown-Quitman County
+    # Houma: the Terrebonne Parish Consolidated Government's audit reports
+    # (tpcg.org, 2007 and 2011) say the city's and the parish's governments
+    # were separate until the home rule charter voters approved on July 11,
+    # 1981, which consolidated them.
+    "2236255": "22109",
+    # Not Tribune, Kansas: the Census maps the unified government as its own
+    # place ("Greeley County unified government", a balance), joined by
+    # name, and records Tribune as a nonfunctioning legal entity - as it
+    # does Louisville. Its panel says so, with its area's note.
 }
 
 AREA_WORDS = {

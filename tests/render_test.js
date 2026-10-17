@@ -1344,6 +1344,14 @@ async function testMap() {
     check("each Senate key is a fill a state is drawn in, and each fill has a key",
       keys.every((k) => fills.has(k)) && [...fills].every((f) => keys.indexOf(f) !== -1),
       `keys ${keys.join(", ")} | fills ${[...fills].join(", ")}`);
+    // Alaska's senator went through a top-four primary: "advanced", never
+    // "renominated" (the card and profile already said so).
+    D.querySelector('[data-mode="senate2026"]').click();
+    const ak = D.querySelector('[data-state="AK"]');
+    const akText = (ak && ak.getAttribute("aria-label")) || "";
+    check("a senator through Alaska's top four reads 'advanced', not 'renominated'",
+      !/renominated/.test(akText) && (!/nominee/i.test(akText) || /advanced/.test(akText)), akText);
+    D.querySelector('[data-mode="senate"]').click();
     const dc = D.querySelector('[data-state="DC"]');
     check("D.C. says it has no senators, not '0R, 0D'",
       !!dc && /no senators/.test(dc.getAttribute("aria-label") || "") &&
@@ -2396,6 +2404,15 @@ async function testBallotCounts() {
         .some((p) => p.textContent.indexOf(n) !== -1)), seat && seat.id);
     const unknown = W.legislatorsData.find((p) => p.ballotUnknown && !p.raceStatus);
     const badge = unknown && W.KYC.cards.card(unknown);
+    // A race whose only challenger's place on the ballot is not known says
+    // that, never "No challenger on the ballot" or "0 challengers".
+    const lone = Object.assign({}, W.kycRaces.find((r) => r.settled && r.results), {
+      candidateCount: 0, contested: true, ballotUnknown: 1, openSeat: false });
+    lone.results = Object.assign({}, lone.results, { otherNominees: [], maybeProfiled: {} });
+    const loneBadges = W.KYC.cards.raceBadges(lone);
+    check("a race whose only challenger's ballot status is unknown never says nobody is running",
+      /ballot status not known/.test(loneBadges) && !/No challenger/.test(loneBadges) &&
+        !/>0 (challengers|candidates)/.test(loneBadges), loneBadges.replace(/<[^>]+>/g, " | "));
     check("a filer the results do not name, after the primary, is not said to await it",
       !unknown || (/Ballot status not known/.test(badge) && !/has not been held yet/.test(badge)),
       unknown && unknown.name);
@@ -2435,9 +2452,17 @@ async function testRenumbered() {
     check("no page errors", errors.length === 0, errors.join(" | "));
     const moved = window.kycRaces.filter((r) => r.holderMoved);
     check("the data has seats whose holder runs under a new number", moved.length > 0);
-    const badge = moved.length && KYC.cards.raceBadges(moved[0]);
-    check("their seat says where the holder is running, not just 'Open seat'",
-      !!badge && /Holder running in/.test(badge) && !/>Open seat</.test(badge), moved[0] && moved[0].id);
+    // Open means no sitting member on the seat's ballot: a holder's move
+    // is in the open seat's explanation, or its own badge when a member is
+    // running there under the new number.
+    const wrong = moved.filter((r) => {
+      const badge = KYC.cards.raceBadges(r);
+      const mover = r.candidateIds.map(KYC.byId).some((p) => p && p.renumbered && p.contestRaceId === r.id);
+      return r.openSeat === mover || (r.openSeat ? !/new district map/.test(badge)
+        : !/Holder running in/.test(badge) || />Open seat</.test(badge));
+    });
+    check("a renumbered seat is open only when no member runs there, and says where its holder went",
+      moved.length > 0 && wrong.length === 0, wrong.map((r) => r.id).join(", "));
     const shown = new Set([...D.querySelectorAll("#results .card")].map((c) => c.getAttribute("data-id")));
     const renumbered = window.legislatorsData.filter((p) => p.renumbered);
     check("'Not seeking re-election' leaves out members running again under a new number",
@@ -3817,6 +3842,15 @@ async function testGuideMaps() {
       check("Indiana is picked, and its fact says it has no line-item veto",
         D.getElementById("panelState").textContent === "Indiana" &&
         /cannot veto single items/.test(D.querySelector("#guideFacts .guide-fact.is-current").textContent));
+    });
+  }
+  {
+    const { D } = await buildPage("government/states.html", { hash: "#/?mode=legislature&state=VA" });
+    suite("government/states.html — a legislature's link reads as its page does", () => {
+      const link = D.querySelector('#guideFacts a[href$="legislature/va.html"]');
+      check("Virginia's link says General Assembly, the name on the page it opens",
+        !!link && /Virginia General Assembly/.test(link.textContent) && !/Virginia Legislature/.test(link.textContent),
+        link && link.textContent);
     });
   }
   {

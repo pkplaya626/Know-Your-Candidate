@@ -459,6 +459,16 @@ class TestStatePages(unittest.TestCase):
                   "results": {"otherNominees": ["E F"]}}]
         self.assertEqual(summary.by_state(people, races)["MI"]["challengersOnBallot"], 4)
 
+    def test_the_sidebar_breakdown_adds_up_without_subtracting(self):
+        # The tooltip printed 812 - 556 = 256 names "with no FEC filing over
+        # $5,000"; 245 exist. Each part is counted from the races.
+        with open(os.path.join(ROOT, emit.DATA_FILE), encoding="utf-8") as handle:
+            text = handle.read()
+        meta = json.JSONDecoder().raw_decode(text.split("window.kycBuildMeta = ", 1)[1])[0]
+        e = meta["election"]
+        self.assertEqual(e["challengersWithProfile"] + e["challengersUnprofiled"],
+                         e["challengersOnBallot"])
+
     def test_puerto_ricos_seat_says_its_title_and_when_it_is_elected(self):
         # The state page read "1 delegate - 0 seats in Congress on the 2026
         # ballot - 0 challengers", with no reason: the Resident Commissioner

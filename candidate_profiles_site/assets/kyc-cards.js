@@ -216,13 +216,20 @@
         holder.alsoRunningSeat ? holder.name + " is running for " + holder.alsoRunningSeat + "." :
         KYC.offBallot(holder.raceStatus) ? holder.name + " is not on the November ballot." :
         holder.name + " is not seeking re-election.";
-      var moved = race.holderMoved;
-      badges.push(moved
-        ? '<span class="badge badge-warn" title="' + KYC.escapeAttr(moved.name +
-            ", who holds this seat, is running for " + moved.to + " under the state's new " +
-            "district map, so nobody holding this number is on its ballot.") +
-          '">Holder running in ' + KYC.escapeHtml(moved.to.replace(/^House • /, "")) + "</span>"
-        : '<span class="badge badge-warn" title="' + KYC.escapeAttr(why) + '">Open seat</span>');
+      if (race.holderMoved) {
+        why = race.holderMoved.name + ", who holds this seat, is running for " +
+          race.holderMoved.to.replace(/ • /, " ") + " under the state's new district map; no " +
+          "sitting member is on this seat's ballot.";
+      }
+      badges.push('<span class="badge badge-warn" title="' + KYC.escapeAttr(why) + '">Open seat</span>');
+    } else if (race.holderMoved) {
+      // Not open - a member is running here under the new number - but its
+      // holder is on another seat's ballot, and the reader should see where.
+      badges.push('<span class="badge badge-neutral" title="' + KYC.escapeAttr(
+        race.holderMoved.name + ", who holds this seat, is running for " +
+        race.holderMoved.to.replace(/ • /, " ") + " under the state's new district map.") +
+        '">Holder running in ' + KYC.escapeHtml(race.holderMoved.to.replace(/^House • /, "")) +
+        "</span>");
     }
     if (race.primaryDate) {
       // A ballot read from a qualified list is not a held primary.
@@ -258,7 +265,14 @@
     // $5,000, or none. They are on the ballot, so they count (rule 22).
     var unprofiled = res && res.otherNominees ? res.otherNominees.length : 0;
     var noProfile = unprofiledNames(race).none;
-    if (race.contested) {
+    if (race.contested && !(race.candidateCount + unprofiled) && race.ballotUnknown) {
+      // Nobody known to be on the ballot, and someone who may be: never
+      // "No challenger on the ballot", never "0 challengers".
+      badges.push('<span class="badge badge-neutral" title="' + KYC.escapeAttr(
+        "Filed with the FEC; the published results do not name them, so whether they are on " +
+        "the November ballot is not known here.") + '">' + race.ballotUnknown +
+        " filed, ballot status not known</span>");
+    } else if (race.contested) {
       var running = race.candidateCount + unprofiled;
       // With nobody holding the seat on the ballot, nobody is challenging.
       var word = race.openSeat ? "candidate" : "challenger";

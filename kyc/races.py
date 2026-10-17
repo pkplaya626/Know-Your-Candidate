@@ -195,10 +195,15 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
         contest = profile.get("contestRaceId")
         if contest and contest != race["id"] and profile.get("alsoRunningId") is None:
             join(race_for(contest), profile, "candidateIds")
+        from .districts import REDRAWN
         from .results import OFF_BALLOT
         out = (profile.get("raceStatusRace") == contest
                and profile.get("raceStatus") in OFF_BALLOT)
+        # Only where the state's map changed: in a state whose map did not,
+        # a member running in a neighbouring district is running for
+        # another seat, not under a new number.
         if (contest and contest != race["id"] and race["chamber"] == "House"
+                and race["state"] in REDRAWN
                 and contest.startswith(f"H-{race['state']}-") and not out):
             # Running for the House again under the state's new district
             # number: the seat they hold is open, but they are not leaving.
@@ -264,6 +269,13 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
         # open by definition.
         if not race["incumbentIds"]:
             race["openSeat"] = True
+        # Open means no sitting member is on this seat's ballot. A member
+        # running here under the state's new district number is: UT-4 read
+        # "Open seat" with Mike Kennedy its nominee, while UT-1, which no
+        # member is running for, did not count as open.
+        if any(by_id[pid].get("renumbered") and by_id[pid].get("contestRaceId") == race["id"]
+               for pid in race["candidateIds"]):
+            race["openSeat"] = False
         if record:
             # Who held the seat on the ballot, from the record: named even
             # when they have no profile here, and said to be seated only
@@ -332,7 +344,14 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
                             maybe[name] = pid
                 if maybe:
                     summary["maybeProfiled"] = maybe
-                race["contested"] = bool(still) or bool(summary["otherNominees"])
+                # A filer whose place on the ballot is not known is not
+                # counted as on it - nor is the race said to have nobody:
+                # "No challenger on the ballot" would be a claim the site
+                # cannot make (rule 19).
+                race["ballotUnknown"] = sum(
+                    1 for pid in race["candidateIds"] if by_id[pid].get("ballotUnknown"))
+                race["contested"] = (bool(still) or bool(summary["otherNominees"])
+                                     or bool(race["ballotUnknown"]))
                 race["results"]["unlisted"] = sum(
                     1 for pid in race["candidateIds"]
                     if by_id[pid].get("raceStatus") == "unlisted"
@@ -398,7 +417,7 @@ def stats(races):
         "races_with_filings": sum(1 for r in races if r.get("filedCount")),
         "races": len(races),
         "contested": len(contested),
-        "open_seats": sum(1 for r in races if r["openSeat"] and not r.get("holderMoved")),
+        "open_seats": sum(1 for r in races if r["openSeat"]),
         "senate_races": sum(1 for r in races if r["chamber"] == "Senate"),
         "house_races": sum(1 for r in races if r["chamber"] == "House"),
     }

@@ -133,14 +133,6 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None):
                 if not p.get("seekingReelection2026") and not p.get("renumbered")
             ),
             "challengers": sum(1 for p in profiles if p.get("isCandidate")),
-            # Still in the race and with a profile here: nominees plus
-            # everyone whose primary is yet to come. The headline figure,
-            # challengersOnBallot, is the races' own count (below).
-            "challengersProfiled": sum(
-                1 for p in profiles if p.get("isCandidate")
-                and p.get("raceStatus") not in ("eliminated", "withdrawn", "unlisted")
-                and not p.get("ballotUnknown")
-            ),
             "filedCandidates": sum(
                 1 for p in profiles if p.get("source") == "fec-field"
             ),
@@ -163,6 +155,17 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None):
     # results name with no profile here (rule 22).
     summary["election"]["challengersOnBallot"] = sum(
         s["challengersOnBallot"] for s in summary["states"].values())
+    if races is not None and any("candidateCount" in r for r in races):
+        # Its two parts, each counted from the races, so the sidebar's
+        # breakdown needs no subtraction: profiles still on the ballot
+        # (members running under a new district number among them, and a
+        # page name that may be a profile's), and the names with no profile.
+        maybe = sum(len((r.get("results") or {}).get("maybeProfiled") or {}) for r in races)
+        summary["election"]["challengersWithProfile"] = sum(
+            r.get("candidateCount", 0) for r in races) + maybe
+        summary["election"]["challengersUnprofiled"] = sum(
+            len((r.get("results") or {}).get("otherNominees") or []) for r in races) - maybe
+        summary["election"]["renumbered"] = sum(1 for r in races if r.get("holderMoved"))
     if races is not None:
         # The same vacancies, nationally: 433 members of a 435-seat House
         # read as a complete chamber when two seats were empty.
@@ -270,7 +273,7 @@ def by_state(profiles, races=None):
         entry["seatsUp"] += 1
         if race.get("holderMoved"):
             entry["renumbered"] += 1
-        elif race.get("openSeat"):
+        if race.get("openSeat"):
             entry["open"] += 1
         if race.get("chamber") == "House":
             house_races[race["state"]] = house_races.get(race["state"], 0) + 1

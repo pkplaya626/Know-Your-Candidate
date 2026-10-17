@@ -163,6 +163,8 @@
           status === "defeated" ? (own ? " lost re-election" : " lost the election") :
           status === "runoff" ? " in the general election runoff" :
           status === "nominee" && counted ? " awaiting result" :
+          // Through a top-two or top-four primary, nobody is renominated.
+          status === "nominee" && defender.allPartyPrimary ? " advanced to November" :
           status === "nominee" && defender.seekingReelection2026 ?
             (own ? " renominated" : " on the November ballot") :
           defender.seekingReelection2026 ? " running" :
@@ -288,7 +290,9 @@
   }
 
   function contestBadge(item) {
-    var spec = KYC.raceStatus(KYC.contestStatus(item), "short");
+    // The status of the race they are in, worded as KYC.raceStatusOf words
+    // it: "Advanced" from a top-two primary, never "Nominee: won the primary".
+    var spec = KYC.raceStatusOf(item, "short");
     return spec ? badge(spec, item) : "";
   }
 

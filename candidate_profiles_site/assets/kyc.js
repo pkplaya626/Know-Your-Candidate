@@ -1313,10 +1313,12 @@
       if (running !== undefined) {
         challengers.title = "Everyone on the 2026 ballot except members running for the seat " +
           "they hold, open-seat candidates included: " +
-          (election.challengersProfiled !== undefined
-            ? election.challengersProfiled + " with a profile here, " +
-              (running - election.challengersProfiled) + " named by the published results " +
-              "with no FEC filing over $5,000"
+          (election.challengersWithProfile !== undefined
+            ? election.challengersWithProfile + " with a profile here" +
+              (election.renumbered ? " (" + election.renumbered + " of them members running " +
+                "under a new district number)" : "") + ", " +
+              election.challengersUnprofiled + " named by the published results with no FEC " +
+              "filing over $5,000"
             : running + " in all") + ".";
       }
     }
