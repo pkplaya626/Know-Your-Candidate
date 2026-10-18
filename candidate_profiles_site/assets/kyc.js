@@ -880,6 +880,25 @@
     return !first || first === "placeholder" ? SILHOUETTE : first;
   }
 
+  /** Has the build found a portrait for *item* (rule 24: none is guessed)? */
+  function hasPortrait(item) {
+    return portraitSrc(item) !== SILHOUETTE;
+  }
+
+  /** "Mary Gay Scanlon" -> "MS", "Ralph Abraham Jr." -> "RA": the letters
+   *  a card shows in a disc where there is no portrait. A race of six grey
+   *  silhouettes was the largest thing on its cards and said nothing
+   *  (audit 2026-10-17, VISUALS-16). */
+  function monogram(name) {
+    var words = String(name || "").replace(/\([^)]*\)|"[^"]*"/g, " ")
+      .split(/[\s,]+/).filter(function (w) {
+        return w && !/^(jr|sr|ii|iii|iv|v|md|phd|dr|mr|mrs|ms)\.?$/i.test(w) && /\p{L}/u.test(w);
+      });
+    if (!words.length) return "";
+    var letter = function (w) { return (w.match(/\p{L}/u) || [""])[0].toUpperCase(); };
+    return words.length === 1 ? letter(words[0]) : letter(words[0]) + letter(words[words.length - 1]);
+  }
+
   /* Sizes of the first portrait for a srcset, when the build found several
    * of the same photograph: the browser then fetches one sharp at this
    * screen's density, rather than a 960px original for a 38px circle. */
@@ -2779,6 +2798,8 @@
     portraitSrc: portraitSrc,
     portraitSrcset: portraitSrcset,
     portraitAttrs: portraitAttrs,
+    hasPortrait: hasPortrait,
+    monogram: monogram,
     setPortrait: setPortrait,
     handleImageFallback: handleImageFallback,
     SILHOUETTE: SILHOUETTE,

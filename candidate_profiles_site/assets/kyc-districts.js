@@ -1242,11 +1242,21 @@
       legend(),
       "</section>",
       '<div class="plan-grid', redrawn() ? "" : " single", '" id="planGrid"></div>',
-      '<div class="districts-sources">', (state.sources || []).map(function (line) {
-        return "<p>" + KYC.escapeHtml(line) + "</p>";
-      }).join(""), "</div>"
+      '<div class="districts-sources">', (state.sources || []).map(sourceLine).join(""), "</div>"
     );
     return html.join("");
+  }
+
+  /** A source line, its addresses as links named by their host: Florida's
+   *  printed a 72-character address that ran off a 320px screen (TECH-07). */
+  function sourceLine(line) {
+    var parts = String(line).split(/(https?:\/\/[^\s)]+)/);
+    return "<p>" + parts.map(function (part, i) {
+      if (i % 2 === 0) return KYC.escapeHtml(part);
+      var host = part.replace(/^https?:\/\/([^/]+).*$/, "$1");
+      return '<a href="' + KYC.escapeAttr(part) + '" rel="noopener" target="_blank">' +
+        KYC.escapeHtml(host) + "</a>";
+    }).join("") + "</p>";
   }
 
   /** Which colour is which: only the parties the map actually shows. */

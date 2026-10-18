@@ -455,8 +455,10 @@ async function testDirectory() {
       more.click();
       return cards().length > before;
     })(), `${cards().length} after Show more`);
+    // A card with no portrait has no image to load, only its initials.
     check("portraits lazy-load",
-      grid.querySelectorAll('img[loading="lazy"]').length === cards().length);
+      grid.querySelectorAll('img[loading="lazy"]').length ===
+        [...cards()].filter((c) => !c.classList.contains("card-no-photo")).length);
     check("cards are buttons, not clickable divs",
       [...cards()].every((c) => c.tagName === "BUTTON"));
     check("no inline onclick handlers anywhere",
@@ -635,6 +637,23 @@ async function testDirectory() {
     check("a srcset is escaped like everything else",
       !/"onerror/.test(KYC.portraitAttrs(
         { photos: ["https://u.test/x.jpg"], photoSet: [[120, 'https://u.test/"onerror="1']] }, "38px")));
+
+    // A race of six grey silhouettes said nothing (VISUALS-16): no
+    // portrait is a disc of initials, and no portrait is guessed (rule 24).
+    const bare = window.legislatorsData.find((p) => !KYC.hasPortrait(p));
+    const pictured = window.legislatorsData.find((p) => KYC.hasPortrait(p));
+    const holder = D.createElement("div");
+    holder.innerHTML = KYC.cards.card(bare) + KYC.cards.card(pictured);
+    const [bareCard, picturedCard] = holder.querySelectorAll(".card");
+    check("a card with no portrait shows the person's initials in a disc, and no silhouette",
+      !!bare && !bareCard.querySelector("img") &&
+        bareCard.querySelector(".card-monogram").textContent === KYC.monogram(bare.name) &&
+        KYC.monogram(bare.name).length >= 1, bare && bare.name);
+    check("a card with a portrait keeps it", !!picturedCard.querySelector(".card-photo img"));
+    check("initials skip suffixes, nicknames and punctuation",
+      KYC.monogram("Ralph Abraham Jr.") === "RA" && KYC.monogram('James "Jim" O\'Brien') === "JO" &&
+        KYC.monogram("Mary Gay Scanlon") === "MS" && KYC.monogram("Ana Ortiz (write-in)") === "AO",
+      [KYC.monogram("Ralph Abraham Jr."), KYC.monogram('James "Jim" O\'Brien')].join(" "));
 
     const real = window.legislatorsData.find((p) => p.photoSet && p.photos.length > 1);
     check("the build lists sizes for Wikimedia portraits", !!real);
@@ -3429,6 +3448,30 @@ function testContrast() {
   });
   testColourVision(css);
   testMotion();
+  testPhoneRules(css);
+}
+
+/* A phone's first screen and its width. jsdom has no layout, so these
+ * assert the rules; a CDP sweep of every page at 320px measured them. */
+function testPhoneRules(css) {
+  const media = (max) => [...css.matchAll(new RegExp("@media \\(max-width: " + max + "px\\) \\{([\\s\\S]*?)\\n\\}", "g"))]
+    .map((m) => m[1]).join("\n");
+  const phone = media(600);
+  suite("kyc.css — a phone's first screen, and nothing wider than it", () => {
+    // California's first senator started at 1,147px under seven badges, six
+    // full-width buttons and four jump chips (TECH-14, VISUALS-02).
+    check("a page's links and its jump chips each take one row that scrolls sideways",
+      /\.state-links,\s*\.jump-row\.state-parts\s*\{[^}]*flex-wrap:\s*nowrap;[^}]*overflow-x:\s*auto/.test(phone));
+    check("a state's figures read as one line of text", /\.state-summary \.badge\s*\{[^}]*display:\s*inline/.test(phone));
+    check("the map's ten views are one menu on a phone",
+      /\.map-view-group\s*\{\s*display:\s*none;?\s*\}/.test(media(760)) &&
+        /\.map-mode-pick\s*\{[^}]*display:\s*flex/.test(media(760)));
+    // A 260px phone laid out at 287px, cutting off the profile's close
+    // button (PERSONA-21); Indiana's record, one unbreakable word, at 434px.
+    check("the home page's state menu is capped by the screen, not the column",
+      /\.intro-pick \.select\s*\{[^}]*max-width:\s*min\(20rem, calc\(100vw - 3rem\)\)/.test(css));
+    check("a legislature's quoted record wraps anywhere", /\.leg-ballot\s*\{\s*overflow-wrap:\s*anywhere/.test(css));
+  });
 }
 
 /* Six scrollIntoView calls passed { behavior: "smooth" }, which overrides
@@ -4719,6 +4762,13 @@ async function testDistrictPages() {
     const legend = fl.D.querySelector(".party-legend").textContent;
     check("a key names the party as an adjective, as every other legend does",
       /Democratic/.test(legend) && !/Democrat(?!ic)/.test(legend), legend);
+    // A 72-character address ran off a 320px screen (TECH-07): a source's
+    // address is a link named by its host.
+    const sources = fl.D.querySelector(".districts-sources");
+    const link = sources && sources.querySelector('a[href^="https://edr.state.fl.us/"]');
+    check("a source's address is a link named by its host, not printed whole",
+      !!link && link.textContent === "edr.state.fl.us" && !/https?:\/\//.test(sources.textContent),
+      sources && sources.textContent.slice(0, 200));
   });
   suite("districts/fl.html — a seat with no member", () => {
     const vacant = fl.window.kycRaces.filter((r) => r.state === "FL" && r.chamber === "House")

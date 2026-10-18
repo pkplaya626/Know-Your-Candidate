@@ -177,14 +177,20 @@
    * under an age sort, where a search matched (kyc-directory.js). */
   function card(item, opts) {
     var note = opts && opts.note;
+    // No portrait (rule 24 guesses none): a disc with the person's
+    // initials, not a 150x190 grey silhouette (VISUALS-16).
+    var photo = KYC.hasPortrait(item)
+      ? ['<span class="card-photo">',
+        // Cards measured 146-171px wide from a phone to a 2,000px screen.
+        '<img ', KYC.portraitAttrs(item, "165px"),
+        ' alt="" loading="lazy" decoding="async" data-photo-idx="0" data-profile="',
+        KYC.escapeAttr(item.id), '">', "</span>"].join("")
+      : '<span class="card-photo card-monogram" aria-hidden="true">' +
+        KYC.escapeHtml(KYC.monogram(item.name)) + "</span>";
     return [
-      '<button type="button" class="card" data-id="', KYC.escapeAttr(item.id), '">',
-      '<span class="card-photo">',
-      // Cards measured 146-171px wide from a phone to a 2,000px screen.
-      '<img ', KYC.portraitAttrs(item, "165px"),
-      ' alt="" loading="lazy" decoding="async" data-photo-idx="0" data-profile="',
-      KYC.escapeAttr(item.id), '">',
-      "</span>",
+      '<button type="button" class="card', KYC.hasPortrait(item) ? "" : " card-no-photo",
+      '" data-id="', KYC.escapeAttr(item.id), '">',
+      photo,
       '<span class="card-body">',
       '<span class="card-name clamp-2">', KYC.escapeHtml(item.name), "</span>",
       '<span class="card-office truncate">', KYC.escapeHtml(item.officeLabel), "</span>",
