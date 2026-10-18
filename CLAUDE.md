@@ -50,6 +50,7 @@ data/political_history.json ──┤   (public offices held: congress-legislato
 data/oge_disclosures.json   ──┤   (the executive's financial reports: Office of Government Ethics, by office)
 data/tribal_leaders.json    ──┤   (every tribal government and its leader: BIA Tribal Leaders Directory)
 data/local_sites.json       ──┤   (each local government's listed website, opened: localgov --check-sites)
+data/roll_calls.json        ──┤   (every roll call of the Congress: House Clerk, Senate LIS; votes)
 data/record_2026.json       ──┤   (the frozen 2026 race set: record --freeze)
 data/departed_members.json  ──┤   (who left this Congress: congress, from legislators-historical)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
@@ -72,6 +73,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              courts/*.html      (generated, one per federal court)
                                              data/federal.js    (the executive, the Supreme Court, the courts)
                                              data/judiciary/*.js (one federal court's judges, and the judges' search)
+                                             data/votes/*.js    (each chamber's roll calls, loaded by the profile dialog on demand)
                                              about.html, 404.html (generated: the site's frame, kyc/pages.py)
                                              districts/index.html, courts/index.html (generated directories)
                                              site.webmanifest   (generated)
@@ -115,6 +117,8 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   they *are* hand-editable. `stategov.js` is generated from the last five,
   with `kyc/ballot2026.py`: which state offices and legislative seats are on
   the 2026 ballot, a curated table citing each state's own record.
+  `roll_calls.json`, written by `votes`, is a cache too; `data/votes/*.js`
+  is generated from it alone.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them to check they load the right scripts in the right order, and rewrites
   nothing in them but the version stamps on their asset URLs (rule 76); they
@@ -164,6 +168,7 @@ python build_profile_site.py vacancies        # vacancies in the federal courts,
 python build_profile_site.py history          # public offices each person has held (congress-legislators, Wikidata, Wikipedia)
 python build_profile_site.py oge              # the executive's financial reports (Office of Government Ethics), by office
 python build_profile_site.py tribes           # every tribal government and its leader (BIA Tribal Leaders Directory)
+python build_profile_site.py votes            # every roll call of the Congress (House Clerk, Senate LIS); resumes (rule 89)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
@@ -174,7 +179,7 @@ npm install && npm test                       # 2232 real-DOM checks (needs jsdo
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`,
-`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
+`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes`, `votes` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -1384,6 +1389,34 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     runoff says what it decides (`RUNOFF_WORDS`): Arkansas's December 1 is
     not a runoff for Congress. The cycle's dates are reread each cycle, and
     `check` refuses a date outside it.
+
+89. **A vote is a member's by the record's id, inside a term they served,
+    and an absence from the record is not a missed vote.** "How did my
+    representative vote" had no answer but a DW-NOMINATE score
+    (PERSONA-15). `kyc/rollcalls.py` reads every roll call from the House
+    Clerk's XML (bioguide ids) and the Senate's LIS XML (LIS ids, mapped
+    through congress-legislators), and gives a vote to a member only by
+    that id and only on a day congress-legislators has them serving in that
+    chamber: the first House roll call of 2025 lists Matt Gaetz, who never
+    took his seat (`overrides.ROLL_CALL_NON_MEMBERS`), and a member seated
+    in a special election is listed in nothing before it. The record's
+    words for each id are checked against the member - its state, and its
+    surname among their name's words, never a first name (the Senate
+    writes "John Reed" for Jack Reed) - and an id that disagrees gives
+    nobody anything (`votes-unattributed`). The Clerk writes a delegate's
+    state "XX" in the Committee of the Whole's roll calls; that passes only
+    for a member who sits for D.C. or a territory. Read on 2026-10-18, the
+    Clerk listed the Speaker in 172 of 253 roll calls: one he does not vote
+    in names him nowhere. Counted as missed, he would have read as absent
+    from a third of the House's votes, so only a record's "Not Voting" is
+    missed, the rest is said apart with the House's own rule quoted (Rule
+    I, clause 7; Rule III, clause 3(a)). The Clerk answers a roll call it
+    has not posted with HTTP 200 and an "Error sanitizing file" note: not
+    a file (rule 52), and it ends the run there without concluding
+    anything (rule 8). Nothing is chosen: no "key votes", which would be an
+    editorial list. The votes are in `data/votes/<chamber>.js`, loaded on
+    demand from the stamped URLs every profile page names in its
+    `onDemandData` template (rule 76), never in `profiles.js`.
 
 ## District maps
 

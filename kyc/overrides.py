@@ -850,6 +850,20 @@ COURT_ROSTERS = {
            "Cloudflare answers a headless Chrome 'Just a moment...'."),
 }
 
+# Ids a chamber's roll calls list that belong to no member of that Congress,
+# with what the record shows and why (kyc/rollcalls.py). Their votes are
+# given to nobody either way (rule 17); an entry here only says the build
+# need not warn about it, and validate warns once the id is a member's after
+# all. Keyed on the record's id, never a name.
+ROLL_CALL_NON_MEMBERS = {
+    "G000578": (
+        "Matt Gaetz, re-elected for FL-1 in 2024, did not take the seat in the 119th "
+        "Congress: congress-legislators gives him no term in it, and FL-1's next member, "
+        "Jimmy Patronis (P000622), was seated on 2025-04-02 after a special election. The "
+        "Clerk's roll call 1 of 2025 (the call of the House by states, 2025-01-03) lists "
+        "'Gaetz' (FL) as Not Voting; read 2026-10-18."),
+}
+
 # Phrases in a Status value that mean the incumbent is not on the 2026 ballot.
 NOT_SEEKING_MARKERS = ("retiring", "not running", "defeated", "ineligible", "resigned")
 

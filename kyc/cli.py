@@ -263,6 +263,11 @@ def _build(args):
     from . import judge_links as judge_links_mod
     for level, code, message, detail in judge_links_mod.problems(judge_links_mod.load_cache(args.root)):
         issues.append(validate.Issue(level, code, message, detail))
+    # The roll calls (kyc/rollcalls.py): votes given to nobody, and why.
+    from . import rollcalls
+    roll_calls = rollcalls.load_cache(args.root)
+    for level, code, message, detail in rollcalls.problems(roll_calls, snapshot):
+        issues.append(validate.Issue(level, code, message, detail))
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -294,6 +299,11 @@ def _build(args):
         profiles, stats, args.root, races=race_list, summary=summary
     )
     print(f"\n[ok] wrote {path} ({size / 1024:.0f} KB)")
+
+    # Each chamber's roll calls, before any page that names them is stamped.
+    vote_files = emit.write_votes(rollcalls.payloads(roll_calls), args.root)
+    for vote_path, vote_size in vote_files:
+        print(f"[ok] wrote {vote_path} ({vote_size / 1024:.0f} KB)")
 
     if geo:
         geo_path, geo_size = emit.write_geo(geo, args.root)
@@ -1257,6 +1267,14 @@ def _verify(args):
     else:
         print(f"  ok  {emit.DATA_FILE} matches the rosters ({expected[:16]}...)")
 
+    from . import rollcalls
+    stale_votes = emit.check_votes(rollcalls.payloads(rollcalls.load_cache(args.root)), args.root)
+    if stale_votes:
+        problems.append(f"{len(stale_votes)} vote file(s) are {stale_votes[0][1]}: "
+                        + ", ".join(os.path.basename(p) for p, _ in stale_votes))
+    else:
+        print(f"  ok  {emit.VOTES_DIR}: both chambers match {rollcalls.CACHE_PATH}")
+
     stale_pages = emit.check_state_pages(profiles, args.root, summary=summary)
     if stale_pages:
         problems.append(f"{len(stale_pages)} state page(s) are {stale_pages[0][1]}: "
@@ -1649,6 +1667,51 @@ def _oge(args):
     if not args.check:
         print(f"[ok] wrote {oge.save_cache(cache, args.root)}")
     return 1 if failed else 0
+
+
+def _votes(args):
+    """Every roll call of the Congress the 2026 record is about, from the
+    House Clerk's and the Senate's own records, attributed to members by id
+    (kyc/rollcalls.py). Resumable: what each run reads is saved as it goes,
+    and a source that refuses or fails keeps what was read (rule 8)."""
+    from . import rollcalls
+
+    previous = rollcalls.load_cache(args.root)
+    if args.check:
+        cache = previous
+        if not cache:
+            print(f"[error] no {rollcalls.CACHE_PATH}; run 'votes'", file=sys.stderr)
+            return 2
+    else:
+        chambers = (args.chamber,) if args.chamber else rollcalls.CHAMBERS
+        failed = None
+        try:
+            cache = rollcalls.fetch(previous, chambers=chambers, limit=args.limit,
+                                    pause=args.pause,
+                                    save=lambda c: rollcalls.save_cache(c, args.root))
+        except rollcalls.RollCallError as exc:
+            failed = exc
+            cache = rollcalls.load_cache(args.root)
+            if not cache:
+                print(f"[error] {exc}", file=sys.stderr)
+                return 2
+        if failed:
+            print(f"  [warn] {failed}; what was read is saved, and the next run goes on "
+                  "from there")
+    for chamber in rollcalls.CHAMBERS:
+        part = cache.get(chamber) or {}
+        rolls = part.get("rolls") or []
+        print(f"  {chamber}: {len(rolls)} roll calls"
+              + (f", {rolls[0]['date']} to {rolls[-1]['date']}" if rolls else "")
+              + f" (read {part.get('read') or 'never'})")
+    for level, code, message, detail in rollcalls.problems(
+            cache, legislators.load_snapshot(args.root)):
+        print(f"  [{level}] {code}: {message}")
+        for line in detail[:10]:
+            print(f"           - {line}")
+    if not args.check:
+        print(f"[ok] wrote {rollcalls.CACHE_PATH}")
+    return 0
 
 
 def _vacancies(args):
@@ -2117,6 +2180,17 @@ def build_parser():
     og.add_argument("--check", action="store_true",
                     help="report the committed cache; make no network call")
 
+    vt = add("votes", help="every roll call of the Congress, from the House Clerk's and the "
+                           "Senate's records, attributed to members by id")
+    vt.add_argument("--check", action="store_true",
+                    help="report the committed cache; make no network call")
+    vt.add_argument("--chamber", choices=("house", "senate"),
+                    help="read one chamber only")
+    vt.add_argument("--limit", type=int, default=None,
+                    help="read at most this many roll calls a chamber this run")
+    vt.add_argument("--pause", type=float, default=1.0,
+                    help="seconds between requests (never less than 1)")
+
     hist = add("history", help="the public offices each person has held: Congress from "
                                "congress-legislators, other offices from Wikidata")
     hist.add_argument("--check", action="store_true",
@@ -2194,6 +2268,9 @@ def main(argv=None):
         return _history(args)
     if args.command == "oge":
         return _oge(args)
+    if args.command == "votes":
+        args.pause = max(1.0, args.pause)
+        return _votes(args)
     if args.command == "courts":
         return _courts(args)
     if args.command == "officers":

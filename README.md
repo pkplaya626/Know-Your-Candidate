@@ -40,6 +40,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… federal` | The President, the Vice President and the Cabinet: who holds each office, from the White House's pages, each office's own page and the Senate's roll-call votes (`--check` reports the cache) |
 | `… judiciary` | Every sitting federal judge, from the Federal Judicial Center's directory, and the Supreme Court's members as the Court lists them; the territorial courts' judges from each court's own site; each judge's Wikipedia article and portrait through the FJC id on Wikidata. A short read keeps the last cache (`--check` reports it) |
 | `… oge` | The financial reports the President, the Vice President and the Cabinet filed with the Office of Government Ethics, attributed by office and checked against the filer each report names (`--check` reports the cache). See [Financial disclosures](#financial-disclosures) |
+| `… votes` | Every roll call of the 119th Congress, from the House Clerk's and the Senate's own XML records, attributed to members by id: one request a second, saved as it goes and resumed by the next run (`--chamber`, `--limit`; `--check` reports the cache). See [How members voted](#how-members-voted) |
 | `… history` | The public offices each person has held: Congress from congress-legislators, every other office from Wikidata where the person's own Wikipedia article gives the same office the same years; a short read keeps the last cache (`--check` reports it). See [Public offices held](#public-offices-held) |
 | `… voting` | Each state's and D.C.'s official pages for checking registration, finding a polling place, voting absentee or early, and registering, as NASS's "Can I Vote" lists them; refused unless all 51 are there. Then opens every link shown, NASS's and the curated results, sample-ballot, vote.gov and territory pages alike |
 | `… courts` | Each state's highest court and its members, read from the court's own roster |
@@ -72,7 +73,8 @@ Python 3.9+ and the standard library. Nothing to install.
 `--verbose portraits` and `portraits --verbose` do the same thing.
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
-`campaigns`, `enrich`, `odds` and `congress` touch the network. `build` and
+`campaigns`, `enrich`, `odds`, `votes` and `congress` touch the network, with
+the other refresh commands listed above. `build` and
 `verify` are fully offline and read the committed caches and snapshot.
 
 ## How the data flows
@@ -138,6 +140,7 @@ CI asserts that a rebuild changes nothing.
 | `enrich.py` | Fill filed candidates' gaps from their Wikipedia infobox and campaign site; check every linked campaign site |
 | `oge.py` | The executive's financial reports from the Office of Government Ethics, by office (the `oge` command) |
 | `history.py` | The public offices each person has held, from congress-legislators and Wikidata, corroborated by the person's own article (the `history` command) |
+| `rollcalls.py` | Every roll call of the Congress from the House Clerk's and the Senate's records, each vote attributed to a member by id inside a term they served (the `votes` command); writes `data/votes/house.js` and `data/votes/senate.js` |
 | `odds.py` | Prediction-market prices (Kalshi, Polymarket) and published polling averages for the 2026 Senate races |
 | `validate.py` | Data-quality checks |
 | `emit.py` | Write the data files atomically; verify the pages are wired up |
@@ -1247,6 +1250,65 @@ that source in `fieldSources` - `wikipedia` (an article's infobox),
 campaign's own issues page) - and the page shows it as a badge beside the
 value, with a tooltip saying exactly where it came from. See
 [Filling the gaps](#filling-the-gaps).
+
+## How members voted
+
+A member's profile shows how they voted in the roll calls of the 119th
+Congress: the most recent first, ten at a time, each with its date, the
+question, the bill or nomination and its title as the record gives it, the
+member's vote in the record's own word ("Yea", "Aye", "Not Voting", a name in
+an election of the Speaker), the result, and a link to the official record.
+A search box finds any of their votes by a bill's title or its number, typed
+as a reader types it ("H.R. 1", "hr1", "S 5", "PN1129"; a number is matched
+whole, so H.R. 1 is not H.R. 10). Beside them: how many roll calls the record
+lists them as not voting in, of how many it lists them in. No votes are
+chosen for the reader; there is no "key votes" list.
+
+`python build_profile_site.py votes` reads the two official records into
+`data/roll_calls.json` (`kyc/rollcalls.py`):
+
+- **The House**: the Clerk's XML, one file a roll call
+  (`clerk.house.gov/evs/<year>/roll<NNN>.xml`), each vote keyed by bioguide
+  id. A number the Clerk has not posted is answered with HTTP 200 and an
+  "Error sanitizing file" note, which is not a file and concludes nothing:
+  the run stops there and the next one asks again.
+- **The Senate**: each session's vote menu, then each vote's LIS XML, keyed
+  by the senator's LIS member id, which congress-legislators maps to their
+  bioguide id.
+
+One request a second, saved every 25 roll calls; a run that stops keeps what
+it read, and a refused or failed request ends the run rather than skipping a
+vote. The weekly refresh reads what is new.
+
+A vote reaches a profile only by an id the record holds, and only inside a
+term congress-legislators gives the member in that chamber, so a vote cast
+before someone was seated, or under another member's id, never appears on
+their profile. The record's own words for each id - its state, its surname -
+are checked against the member the id names, and an id that disagrees gives
+nobody its votes (the build says so: `votes-unattributed`). The Clerk writes
+a delegate's state as "XX", accepted only for a member who sits for D.C. or
+a territory. A member who left keeps the votes they cast. An id the record
+lists for no member of the Congress (Matt Gaetz, who did not take his seat,
+is in the first roll call) is an evidenced entry in
+`overrides.ROLL_CALL_NON_MEMBERS`.
+
+Roll calls held while a member served that do not list them at all are never
+counted as missed, and the profile says how many: the Clerk lists a Speaker
+who does not vote nowhere, and a delegate only in the Committee of the
+Whole's roll calls. Each is said with the House's own rule, quoted (Rule I,
+clause 7; Rule III, clause 3(a)).
+
+The build writes `data/votes/house.js` and `data/votes/senate.js`, each
+rewritten only when its content signature changes. They are not in
+`profiles.js`: every page that opens a profile names them, with their version
+stamps, in an inert `<template id="onDemandData">`, and the dialog loads a
+chamber's file the first time one of its members is opened (`KYC.loadData`).
+While it loads the panel says so, and if it fails, that it failed.
+
+The left-right score from Voteview stays beside the votes, headed "Voting
+record, left to right (Voteview)". A senator whose seat is not on the 2026
+ballot reads "Seat up in 2028" (or 2030) in the dialog, as on the card; a
+seat on the 2026 ballot says so through its race.
 
 ## Public offices held
 

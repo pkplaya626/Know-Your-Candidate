@@ -28,6 +28,13 @@ LOCAL_DIR = os.path.join(DATA_DIR, "local")
 COURT_COUNTIES_FILE = os.path.join(DATA_DIR, "courtcounties.js")
 # One file per state, each loaded only by that state's district page.
 DISTRICTS_DIR = os.path.join(DATA_DIR, "districts")
+# Each chamber's roll calls and how every member voted in them
+# (kyc/rollcalls.py), loaded by the profile dialog the first time a member of
+# that chamber is opened, so profiles.js does not carry them.
+VOTES_DIR = os.path.join(DATA_DIR, "votes")
+# The global each chamber's file assigns, and its path under data/.
+VOTES_GLOBALS = {"house": "kycVotesHouse", "senate": "kycVotesSenate"}
+VOTES_FILES = {chamber: f"votes/{chamber}.js" for chamber in VOTES_GLOBALS}
 
 # The scripts each page must load, in the order it must load them. The build
 # never rewrites a page; it only reports when one has drifted out of step with
@@ -542,6 +549,42 @@ def write_federal(payload, per_court, search, root="."):
     return written
 
 
+def votes_file(chamber, root="."):
+    return os.path.join(root, DATA_DIR, *VOTES_FILES[chamber].split("/"))
+
+
+def write_votes(payloads, root="."):
+    """Emit ``data/votes/<chamber>.js`` for each chamber, each only when its
+    signature changed. Returns ``[(path, size)]`` for the files written."""
+    written = []
+    for chamber, name in sorted(VOTES_GLOBALS.items()):
+        data = payloads[chamber]
+        path = votes_file(chamber, root)
+        signature = federal_signature(data)
+        if read_signature(path=path) == signature:
+            continue
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        text = (_BANNER.format(source="data/roll_calls.json (kyc/rollcalls.py)",
+                               built=build_timestamp())
+                + f"window.{name} = {_json(data)};\n"
+                + f'window.{name}Meta = {{"signature":"{signature}"}};\n')
+        written.append((path, _atomic_write(path, text)))
+    return written
+
+
+def check_votes(payloads, root="."):
+    """Vote files that are missing or carry another signature."""
+    stale = []
+    for chamber in sorted(VOTES_GLOBALS):
+        path = votes_file(chamber, root)
+        committed = read_signature(path=path)
+        if committed is None:
+            stale.append((path, "missing"))
+        elif committed != federal_signature(payloads[chamber]):
+            stale.append((path, "stale"))
+    return stale
+
+
 def check_federal(payload, per_court, search, root="."):
     """Federal data files that are missing or carry another signature."""
     stale = []
@@ -687,6 +730,13 @@ def script_sources(html):
     return [src.split("?v=")[0] for src in re.findall(r'<script[^>]*\bsrc="([^"]+)"', html)]
 
 
+def on_demand_sources(html):
+    """The data files *html* names in its ``<template id="onDemandData">``,
+    loaded only when wanted (``KYC.loadData``), without their stamps."""
+    block = re.search(r'<template id="onDemandData">(.*?)</template>', html, re.S)
+    return script_sources(block.group(1)) if block else []
+
+
 # ------------------------------------------------------------------ hostname
 
 CNAME_FILE = os.path.join(SITE_DIR, "CNAME")
@@ -796,6 +846,22 @@ def check_pages(root="."):
         loaded = script_sources(text)
 
         problems = inline_script_problems(text)
+        # The profile dialog loads a member's votes on demand, from the files
+        # the page names in its inert template (KYC.loadData): a page that
+        # opens profiles and names none would say the votes failed to load.
+        dialog = [src for src in loaded if src.endswith("assets/kyc-profile.js")]
+        if dialog:
+            prefix = dialog[0][:-len("assets/kyc-profile.js")]
+            lazy = on_demand_sources(text)
+            absent = [prefix + "data/" + VOTES_FILES[c] for c in sorted(VOTES_FILES)
+                      if prefix + "data/" + VOTES_FILES[c] not in lazy]
+            if absent:
+                problems.append("opens profiles but its onDemandData template does not name "
+                                + ", ".join(absent))
+            for src in lazy:
+                if not os.path.exists(os.path.normpath(os.path.join(os.path.dirname(path),
+                                                                    *src.split("/")))):
+                    problems.append(f"{src} is named on demand but does not exist")
         missing = [src for src in required if src not in loaded]
         if missing:
             problems.append("does not load " + ", ".join(missing))

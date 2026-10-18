@@ -7280,7 +7280,9 @@ async function testSearchAndFilters() {
   typeInto(lazy.window, lazy.D, "zzz");
   await settle(250);
   suite("search — the officials' data comes on demand", () => {
-    const srcs = [...template.content.querySelectorAll("script")].map((s) => s.getAttribute("src"));
+    // The officials' files; the votes' are the profile dialog's (testVotes).
+    const srcs = [...template.content.querySelectorAll("script")].map((s) => s.getAttribute("src"))
+      .filter((s) => !/^data\/votes\//.test(s));
     check("the page names each file with its version", srcs.length === 3 &&
       srcs.every((s) => /^data\/[a-z/]+\.js\?v=[0-9a-f]{10}$/.test(s)), srcs.join(" "));
     const added = [...lazy.D.querySelectorAll("head script[src]")].slice(before).map((s) => s.getAttribute("src"));
@@ -8943,8 +8945,191 @@ async function testFrame() {
   });
 }
 
+/* How members voted (PERSONA-15, PROFILES-25): a member's roll calls from the
+ * House Clerk's and the Senate's records, loaded on demand, the most recent
+ * first, searchable by a bill's title or number, with the count of roll calls
+ * the record lists them as not voting in. jsdom fetches no script, so the
+ * suite loads the files as the page would have. */
+function loadVotes(window) {
+  ["house", "senate"].forEach((chamber) => {
+    window.eval(fs.readFileSync(path.join(SITE, "data", "votes", chamber + ".js"), "utf8"));
+  });
+}
+
+async function testVotes() {
+  const { window, D, errors } = await buildPage("index.html", { setup: loadVotes });
+  await settle(50);
+  const KYC = window.KYC;
+  const house = window.kycVotesHouse;
+  const senate = window.kycVotesSenate;
+  const text = (id) => (D.getElementById(id) || { textContent: "" }).textContent.replace(/\s+/g, " ");
+  const compact = (s) => KYC.searchFold(s).replace(/[^a-z0-9]/g, "");
+  const has = (file, p) => file.members[p.id] && file.members[p.id].listed >= 20;
+  const member = window.legislatorsData.find((p) => !p.isCandidate && KYC.seated(p) &&
+    /House/.test(p.chamber) && has(house, p) && !house.members[p.id].delegate);
+
+  suite("profile — how a member voted (PERSONA-15)", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("each chamber's file holds its roll calls and its members' votes",
+      house.rolls.length > 100 && Object.keys(house.members).length > 400 &&
+        senate.rolls.length > 100 && Object.keys(senate.members).length >= 100,
+      `${house.rolls.length} House, ${senate.rolls.length} Senate roll calls`);
+    check("profiles.js does not carry them", !window.legislatorsData.some((p) => p.votes));
+    KYC.profile.open(member.id);
+    const entry = house.members[member.id];
+    const rows = [...D.querySelectorAll("#profileModalVoteList .vote-row")];
+    check("a member's dialog shows how they voted", !D.getElementById("profileModalVotesPanel").hidden &&
+      /How they voted/.test(D.getElementById("profileModalVotesPanel").textContent));
+    check("the ten most recent first", rows.length === 10 && (() => {
+      const shown = [...entry.votes].map((c, i) => [c, i]).filter(([c]) => c !== ".")
+        .map(([, i]) => i).reverse().slice(0, 10);
+      return rows.every((row, k) => row.querySelector("a").href === house.rolls[shown[k]][7]);
+    })(), rows.length);
+    check("each with the record's word for the vote, and a link to the official record",
+      rows.every((row) => Object.values(house.codes).indexOf(row.querySelector(".vote-cast").textContent) !== -1 &&
+        /^https:\/\/clerk\.house\.gov\/Votes\/\d{5,8}$/.test(row.querySelector("a").href)));
+    const summary = text("profileModalVotes");
+    check("the roll calls the record lists them as not voting in, counted by the pipeline",
+      summary.indexOf("Not voting in " + entry.notVoting.toLocaleString() + " of " +
+        entry.listed.toLocaleString() + " roll calls") !== -1, summary.slice(0, 160));
+    check("the record and the Congress are named", /House Clerk’s roll-call record of the \d+(st|nd|rd|th) Congress/.test(summary));
+    check("the left-right score keeps its place, named as Voteview's",
+      /Voting record, left to right \(Voteview\)/.test(D.getElementById("profileModal").textContent));
+
+    // A bill's number as a reader types it.
+    const index = [...entry.votes].findIndex((c, i) => c !== "." && /^H R \d+$/.test(house.rolls[i][3]));
+    const measure = house.rolls[index][3];
+    const input = D.getElementById("profileModalVoteSearch");
+    input.value = measure.replace("H R ", "H.R. ");
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+  });
+  await settle(250);
+  suite("profile — searching a member's votes", () => {
+    const entry = house.members[member.id];
+    const measure = D.getElementById("profileModalVoteSearch").value;
+    const found = [...D.querySelectorAll("#profileModalVoteList .vote-row")];
+    const want = compact(measure);
+    check("a bill's number finds its votes", found.length > 0 &&
+      found.every((row) => {
+        const roll = house.rolls.find((r) => r[7] === row.querySelector("a").href);
+        return compact(roll[3]) === want || compact(roll[4] + " " + roll[5]).indexOf(want) !== -1;
+      }), measure + ": " + found.length);
+    check("and never a longer number that starts the same ('H.R. 1' is not H.R. 10)",
+      found.every((row) => !new RegExp("^" + want + "\\d").test(compact(row.querySelector("strong") ? row.querySelector("strong").textContent : ""))));
+    check("the count says what matched", /match(es)? “/.test(text("profileModalVoteList")));
+    const input = D.getElementById("profileModalVoteSearch");
+    input.value = "zzzz no such bill";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    void entry;
+  });
+  await settle(250);
+  suite("profile — a search that finds nothing says so", () => {
+    check("none of their votes match", /None of their votes match/.test(text("profileModalVoteList")) &&
+      !D.querySelector("#profileModalVoteList .vote-row"));
+    const input = D.getElementById("profileModalVoteSearch");
+    input.value = "";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+  });
+  await settle(250);
+  suite("profile — more votes on request", () => {
+    D.querySelector("[data-votes-more]").click();
+    check("ten more", D.querySelectorAll("#profileModalVoteList .vote-row").length === 20);
+    KYC.profile.close();
+
+    // Rule 17: a vote cast before a member was seated never reaches them.
+    // Only while the Congress the votes are of sits (rule 68): after January
+    // 3 a re-elected member's term begins after every vote of the last one.
+    if (oldCongressSits(window)) {
+      const late = window.legislatorsData.filter((p) => KYC.seated(p) && house.members[p.id] &&
+        /House/.test(p.chamber) && String(p.term_start || "").slice(0, 10) > house.first);
+      check("a member seated mid-Congress has no vote from before their seat",
+        late.length > 0 && late.every((p) => [...house.members[p.id].votes].every((c, i) =>
+          c === "." || house.rolls[i][1] >= String(p.term_start).slice(0, 10))),
+        late.map((p) => p.name).join(", "));
+    }
+
+    const senator = window.legislatorsData.find((p) => KYC.seated(p) && /Senate/.test(p.chamber) &&
+      has(senate, p));
+    KYC.profile.open(senator.id);
+    const link = D.querySelector("#profileModalVoteList .vote-row a");
+    check("a senator's votes link the Senate's record", !!link &&
+      /^https:\/\/www\.senate\.gov\/legislative\/LIS\/roll_call_votes\/vote\d{4}\/vote_\d+_\d_\d{5}\.htm$/.test(link.href),
+      link && link.href);
+    check("and name the Senate's record", /the Senate’s roll-call record/.test(text("profileModalVotes")));
+    KYC.profile.close();
+
+    const challenger = window.legislatorsData.find((p) => p.isCandidate && !p.incumbentId);
+    KYC.profile.open(challenger.id);
+    check("a challenger has no votes panel (rule 27)", D.getElementById("profileModalVotesPanel").hidden);
+    KYC.profile.close();
+
+    // When are they next up (PROFILES-25), in the card's words.
+    if (oldCongressSits(window)) {
+      const later = window.legislatorsData.find((p) => KYC.seated(p) && /Senate/.test(p.chamber) &&
+        !p.seatUp2026 && p.electionYear);
+      KYC.profile.open(later.id);
+      check("a seat not on the 2026 ballot says when it next is, of the seat",
+        text("profileModalStatus").indexOf("Seat up in " + later.electionYear) !== -1 &&
+          !/On the ballot in/.test(text("profileModalStatus")), text("profileModalStatus"));
+      KYC.profile.close();
+    }
+    const speaker = window.legislatorsData.find((p) => house.members[p.id] && house.members[p.id].asSpeaker);
+    if (speaker) {
+      KYC.profile.open(speaker.id);
+      check("the Speaker's roll calls quote the House's rule beside the count",
+        /House Rule I, clause 7/.test(text("profileModalVotes")) &&
+          /not required to vote/.test(text("profileModalVotes")), text("profileModalVotes").slice(0, 400));
+      KYC.profile.close();
+    }
+    const delegate = window.legislatorsData.find((p) => house.members[p.id] && house.members[p.id].delegate);
+    if (delegate) {
+      KYC.profile.open(delegate.id);
+      check("a delegate's count says where the record lists them, with the rule",
+        /Committee of the Whole/.test(text("profileModalVotes")) &&
+          /House Rule III, clause 3\(a\)/.test(text("profileModalVotes")), text("profileModalVotes").slice(0, 400));
+      KYC.profile.close();
+    }
+    check("no errors", errors.length === 0, errors.join(" | "));
+  });
+
+  // Loaded on demand from the stamped URL the page names (rule 76), and
+  // "Loading" until it comes.
+  const lazy = await buildPage("index.html");
+  await settle(50);
+  const before = lazy.D.querySelectorAll("head script[src]").length;
+  const someone = lazy.window.legislatorsData.find((p) => !p.isCandidate && lazy.window.KYC.seated(p) &&
+    /House/.test(p.chamber));
+  lazy.window.KYC.profile.open(someone.id);
+  suite("profile — a chamber's votes come on demand", () => {
+    const srcs = [...lazy.D.getElementById("onDemandData").content.querySelectorAll("script")]
+      .map((s) => s.getAttribute("src")).filter((s) => /votes/.test(s));
+    check("the page names both chambers' files with their versions", srcs.length === 2 &&
+      srcs.every((s) => /^data\/votes\/(house|senate)\.js\?v=[0-9a-f]{10}$/.test(s)), srcs.join(" "));
+    const added = [...lazy.D.querySelectorAll("head script[src]")].slice(before).map((s) => s.getAttribute("src"));
+    check("and fetches the House's when a representative is opened",
+      added.length === 1 && added[0] === srcs.find((s) => /house/.test(s)), added.join(" "));
+    check("saying so while it loads", /Loading their votes/.test(lazy.D.getElementById("profileModalVotes").textContent));
+  });
+
+  // A state page a folder down names them too, "../data/votes/...".
+  const state = await buildPage("states/oh.html", { setup: loadVotes });
+  await settle(80);
+  suite("profile — votes on a state page", () => {
+    const srcs = [...state.D.getElementById("onDemandData").content.querySelectorAll("script")]
+      .map((s) => s.getAttribute("src"));
+    check("named from one folder down", srcs.length === 2 && srcs.every((s) => /^\.\.\/data\/votes\//.test(s)),
+      srcs.join(" "));
+    const ohio = state.window.legislatorsData.find((p) => p.state === "OH" && !p.isCandidate &&
+      state.window.KYC.seated(p) && has(state.window.kycVotesHouse, p));
+    state.window.KYC.profile.open(ohio.id);
+    check("and the dialog shows the member's votes there",
+      state.D.querySelectorAll("#profileModalVoteList .vote-row").length === 10);
+  });
+}
+
 (async function main() {
   const only = process.argv[2];
+  if (!only || only === "index.html" || only === "votes") await testVotes();
   if (!only || only === "guide") await testGuide();
   if (!only || only === "federal") await testFederal();
   if (!only || only === "legislature") await testLegislatures();
