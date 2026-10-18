@@ -1720,7 +1720,8 @@ a.badge-link {
   color: var(--text-muted);
   overflow-wrap: anywhere;
 }
-.modal-credit a { color: inherit; }
+/* Muted like the line, but underlined: a link must look like one. */
+.modal-credit a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 /* The FEC's name for someone the ballot names otherwise (PERSONA-20). */
 .modal-aka {
   margin: 0;

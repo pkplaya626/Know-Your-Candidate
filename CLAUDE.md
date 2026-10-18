@@ -166,8 +166,8 @@ python tools/fetch_legislative_maps.py        # state senate and house boundarie
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1654 tests, no dependencies
-npm install && npm test                       # 2123 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1682 tests, no dependencies
+npm install && npm test                       # 2142 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1385,14 +1385,31 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     government photograph names its host, a campaign's its website, and a
     fallback that loads instead is credited by its own host.
     `validate` fails a shown photograph with no credit and a Commons one
-    with no recorded licence. A portrait not on Wikimedia is weighed when
+    with no recorded licence, a judge's (`judge_links`, read with the
+    file's size) included. A portrait not on Wikimedia is weighed when
     found: one campaign's was a 5 MB PNG for a 165px card. Over 300 KB or
     1,200px it is taken at its host's own resizer's 500px, the same file
     (rule 42), or passed over for the next picture, and the refusal is
-    kept. No srcset offers a size wider than a 2x screen needs. A state
-    officer's photograph comes only from their office or their
-    association's roster, matched by state, with the surname in the file
-    and the office-confirmed name (rule 56) - never a search.
+    kept; a server that gzips an image is read through it (Missouri's
+    attorney general's headshot read as "not an image"). No srcset offers
+    a size wider than a 2x screen needs. A state officer's photograph
+    comes only from their office or their association's roster, matched by
+    state, never a search. No attorney general had one: NAAG's member
+    pages answer every script and a headless browser with a Cloudflare
+    challenge, and a party association's photograph is the party's. So
+    `officers.add_ag_photos` reads the office's own pages - those that
+    confirmed the name (rule 56), and the attorney general's page they
+    link - and takes only an image carrying the surname whose words say it
+    is a likeness ("headshot", "photo of") or are nothing but the name and
+    title. Arkansas's "AG-Griffin-Logo.png" is alt-texted "Tim Griffin
+    Attorney General of Arkansas", Arizona's "AG Mayes talking to a
+    townhall crowd": a logo, a banner or a scene is refused by its words,
+    a landscape frame by its shape. A NASS card filed under the state's
+    code ("AZ.jpg") cannot carry a surname; it is shown only through an
+    evidenced `overrides.OFFICER_PHOTOS` entry, which names the holder it
+    was checked for and is withheld, and said, once the roster names
+    someone else. Every build lists the confirmed officers still shown
+    without one.
 
 ## District maps
 
