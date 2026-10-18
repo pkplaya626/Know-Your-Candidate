@@ -74,6 +74,18 @@ function phaseAt(now) {
   };
 }
 
+/* Whether the data is from before the Congress its cycle elects sits.
+ * The suite rewinds the phase and the clock, not the membership: in the
+ * January rehearsal (tools/rehearse_changeover.py) every member sits in the
+ * seat they won, and the campaign's cases - a member running for another
+ * seat, a member leaving theirs, a renumbered member - describe nobody
+ * (rule 68). A check that asks the data for such cases asks only while
+ * the old Congress sits. The Congress elected in year Y is (Y - 1786) / 2. */
+function oldCongressSits(window) {
+  const meta = window.kycBuildMeta;
+  return meta.congress < (meta.election.year - 1786) / 2;
+}
+
 /* Run *hooks* once the profile data has loaded: profiles.js assigns
  * kycBuildMeta last, after legislatorsData and kycRaces. */
 function onData(window, hooks) {
@@ -2124,10 +2136,13 @@ async function testPeopleWording() {
   const twins = people.filter((p) => p.isCandidate && p.incumbentId &&
     KYC.seated(KYC.byId(p.incumbentId)));
   const members = people.filter((p) => KYC.seated(p) && p.alsoRunningId);
+  // The campaign's cases exist only while the old Congress sits.
+  const campaign = oldCongressSits(window);
 
   suite("index.html — one person is never their own opponent (PROFILES-02)", () => {
     check("no page errors", errors.length === 0, errors.join(" | "));
-    check("the data has members with a filing for another seat", members.length > 0 && twins.length > 0);
+    check("the data has members with a filing for another seat",
+      !campaign || (members.length > 0 && twins.length > 0));
     const selfListed = members.concat(twins).filter((p) => opened(p, () => {
       const other = p.alsoRunningId || p.incumbentId;
       return !!D.querySelector(`#profileModalRace [data-goto="${other}"]`);
@@ -2141,11 +2156,11 @@ async function testPeopleWording() {
       /not a sitting member/.test(text("profileModalVoting") + text("profileModalCommittees")) ||
       !D.querySelector(`#profileModalVoting [data-goto="${p.incumbentId}"]`)));
     check("their voting record and committees are the member's, and say whose",
-      twins.length > 0 && wrong.length === 0, wrong.map((p) => p.name).join(", "));
+      (twins.length > 0 || !campaign) && wrong.length === 0, wrong.map((p) => p.name).join(", "));
     // In the name the filing is shown under: "From Garland Barr's record" on
     // Andy Barr's Senate filing read as another man's.
     const renamed = twins.filter((p) => KYC.byId(p.incumbentId).name !== p.name);
-    check("in the filing's own name", renamed.length > 0 && renamed.every((p) => opened(p, () =>
+    check("in the filing's own name", (renamed.length > 0 || !campaign) && renamed.every((p) => opened(p, () =>
       text("profileModalVoting").includes("From " + p.name + "’s record"))),
       renamed.map((p) => p.name).join(", "));
   });
@@ -2198,8 +2213,16 @@ async function testPeopleWording() {
     // (PROFILES-21), and that sentence may wrap: held on one line it ran
     // off a phone's screen.
     const appointees = people.filter((p) => KYC.seated(p) && /sworn in/.test(p.term_start || ""));
+    // Only while a special election's seat is still held by its appointee
+    // on the term they were appointed to: in December the winner is sworn
+    // in (a winnerId, or the appointee's own new term), rule 67.
+    const election = KYC.electionStatus(window.kycBuildMeta.election.year).date.toISOString().slice(0, 10);
+    const awaiting = races.some((r) => r.special && !r.winnerId && r.incumbentIds.some((id) => {
+      const p = KYC.byId(id);
+      return p && KYC.seated(p) && p.appointed && String(p.term_start || "").slice(0, 10) < election;
+    }));
     check("an appointee's term runs to the winner's swearing-in, and wraps",
-      appointees.length > 0 && appointees.every((p) => opened(p, () => {
+      (appointees.length > 0 || !awaiting) && appointees.every((p) => opened(p, () => {
         const parts = [...D.querySelectorAll("#profileModalTerm > span")];
         return !/\(special election\)/.test(text("profileModalTerm")) &&
           parts.some((s) => /sworn in/.test(s.textContent) && !s.classList.contains("nowrap"));
@@ -2207,7 +2230,7 @@ async function testPeopleWording() {
     const lostElsewhere = people.filter((p) => KYC.seated(p) && p.alsoRunningId &&
       KYC.offBallot((KYC.byId(p.alsoRunningId) || {}).raceStatus));
     check("a member whose other run ended reads 'Also ran for', never 'Also running'",
-      lostElsewhere.length > 0 && lostElsewhere.every((p) => opened(p, () =>
+      (lostElsewhere.length > 0 || !campaign) && lostElsewhere.every((p) => opened(p, () =>
         /Also ran for/.test(text("profileModalCrossLink")) &&
         !/Also running/.test(text("profileModalCrossLink")))),
       lostElsewhere.map((p) => opened(p, () => text("profileModalCrossLink"))).slice(0, 2).join(" | "));
@@ -2261,7 +2284,7 @@ async function testPeopleWording() {
     const restating = people.filter((p) => KYC.seated(p) && !p.otherOffice &&
       /^(incumbent )?not running for re-election( in \d{4})?( \([^)]*\))?\.?$/i.test(p.status || "") &&
       /^Not running/.test((KYC.standing(p, "long") || {}).label || ""));
-    check("the data has a roster note that only restates the badge", restating.length > 0);
+    check("the data has a roster note that only restates the badge", restating.length > 0 || !campaign);
     check("it is not shown beside the badge", restating.every((p) => opened(p, () =>
       (text("profileModalStatus").match(/not running for re-election/gi) || []).length === 1)),
       restating.map((p) => opened(p, () => text("profileModalStatus"))).slice(0, 2).join(" | "));
@@ -2273,12 +2296,12 @@ async function testPeopleWording() {
 
   suite("index.html — where a member who is leaving is going (FRESHNESS-09)", () => {
     const going = people.filter((p) => KYC.seated(p) && p.otherOffice);
-    check("the data has members on another office's ballot", going.length >= 4,
+    check("the data has members on another office's ballot", going.length >= 4 || !campaign,
       going.map((p) => p.name).join(", "));
     // The card of a member leaving their seat; one whose seat is not up
     // (Marsha Blackburn) says it in the profile.
     const leavingSeat = going.filter((p) => KYC.offBallot(p.raceStatus));
-    check("each card of a member leaving their seat names it", leavingSeat.length > 0 &&
+    check("each card of a member leaving their seat names it", (leavingSeat.length > 0 || !campaign) &&
       leavingSeat.every((p) => KYC.cards.statusBadge(p).includes(KYC.escapeHtml(p.otherOffice.text))));
     check("each profile names it, with its source", going.every((p) => opened(p, () =>
       text("profileModalStatus").includes(p.otherOffice.text) &&
@@ -2357,12 +2380,16 @@ async function testPeopleWording() {
       text("profileModalRace").includes(KYC.RACE_ORDER_PLAIN)));
     // The holder's own dialog leaves the holder out, so nobody listed holds
     // the seat: "The seat's holder first" put Barry Moore in Tuberville's.
-    const holders = races.map((r) => KYC.byId(r.incumbentIds[0]))
-      .filter((p) => p && KYC.seated(p) && !p.contestRaceId);
+    // While the old Congress sits: from January 3 a 2026 incumbent who
+    // moved (Kevin Kiley, CA-3 to CA-6) sits in the seat they won, and its
+    // race's record holder, listed first, is someone else (rule 67).
+    const holders = campaign ? races.map((r) => KYC.byId(r.incumbentIds[0]))
+      .filter((p) => p && KYC.seated(p) && !p.contestRaceId) : [];
     const wrongHolder = holders.filter((p) => opened(p, () =>
       text("profileModalRace").includes(KYC.RACE_ORDER)));
     check("a holder's own dialog never says its first name holds the seat",
-      holders.length > 0 && wrongHolder.length === 0, wrongHolder.slice(0, 3).map((p) => p.name).join(", "));
+      (holders.length > 0 || !campaign) && wrongHolder.length === 0,
+      wrongHolder.slice(0, 3).map((p) => p.name).join(", "));
     // A challenger's dialog lists the holder first, and says so.
     const seatHeld = races.find((r) => r.incumbentIds.length && KYC.byId(r.incumbentIds[0]) &&
       KYC.seated(KYC.byId(r.incumbentIds[0])) && !KYC.byId(r.incumbentIds[0]).contestRaceId &&
@@ -2517,11 +2544,13 @@ async function testRunningElsewhere() {
     });
     check("each reads where they went - running, redrawn, or ran - and is not folded under " +
       "'no longer in this race'", wrong.length === 0, wrong.map(({ m }) => m.name).join(", "));
-    check("a member whose run ended reads it in the past tense", cases.some(({ m }) =>
-      KYC.contestLine(m).past) && cases.every(({ m }) =>
+    // Both only while the old Congress sits: from January 3 the movers sit
+    // in the seats they won, and a renumbered member who lost has left.
+    check("a member whose run ended reads it in the past tense", (cases.some(({ m }) =>
+      KYC.contestLine(m).past) || !oldCongressSits(window)) && cases.every(({ m }) =>
       KYC.contestLine(m).past === (KYC.offBallot(KYC.contestStatus(m)) ||
         KYC.contestStatus(m) === "defeated")));
-    check("a renumbered member is running for re-election, not leaving", people.filter((m) =>
+    check("a renumbered member is running for re-election, not leaving", !oldCongressSits(window) || people.filter((m) =>
       m.renumbered).every((m) => /\(redrawn\)/.test(KYC.cards.statusBadge(m)) &&
       !/not seeking re-election/.test(KYC.cards.statusBadge(m))),
       people.filter((m) => m.renumbered).map((m) => KYC.cards.statusBadge(m)).slice(0, 1).join(""));
