@@ -1011,6 +1011,12 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
             seats = legislators_mod.assignments(committees, bioguide)
         member = _build_member(row, index, seats_up, term_ends,
                                person=people.get(bioguide), assignments=seats, as_of=as_of)
+        # Speaker, floor leader, whip: the posts congress-legislators lists
+        # for this bioguide id in the Congress the snapshot is of, never
+        # typed, and never the previous Congress's (legislators.held_posts).
+        posts = legislators_mod.held_posts(people.get(bioguide), sitting)
+        if posts:
+            member["leadership"] = posts
         if not curated_committees and not seats:
             # Never the previous Congress's seats from the roster column. A
             # member of a chamber whose rosters are out holds none; anyone

@@ -11,16 +11,25 @@ Markup, kept deliberately small (``government.inline``):
     [label](target)   a link; the target is #section, guide:page#section,
                       site:path-from-the-root, state:TX, or an https URL.
 
+    voting:           the reader's own state's voting section, once known.
+    {{key}}           a count the build takes from a table (government.figures).
+
 Blocks: ("p", text) ("note", text) ("h3", text[, id]) ("ul", [text, ...])
         ("roles", [(term, text), ...]) ("table", {caption, head, rows})
         ("chart", {top, items: [(title, text)], caption}) ("cards", [(title,
-        target, text), ...]) ("live", key, fallback text)
+        target, text), ...]) ("live", key, fallback text) ("guide-cards",)
+        ("flow", {steps: [(title, text[, [(title, text)]])], caption})
+        ("checks", {branches: [(branch, [(on, how)])], caption})
+        ("ladder", {columns: [(heading, [(court, text)])], paths, caption})
+        ("timeline", {items: [(iso date, label, title, [text | (status, words)])],
+        caption}) ("redrawn",) ("voting-picker",)
+Figures are page text in HTML boxes, never SVG text (rule 46).
 
 Never name a person who holds an office here: who holds one comes from the
 data, on the page (``assets/kyc-guide.js``), so it cannot go stale.
 """
 
-REVIEWED = "2026-10-05"
+REVIEWED = "2026-10-18"
 
 # key -> (title, URL). Primary sources wherever one exists.
 SOURCES = {
@@ -109,6 +118,30 @@ SOURCES = {
                      "https://www.law.cornell.edu/uscode/text/49/24301"),
     "usc-50-1803": ("50 U.S.C. 1803 (Foreign Intelligence Surveillance Court)",
                     "https://www.law.cornell.edu/uscode/text/50/1803"),
+    "usc-18-1151": ("18 U.S.C. 1151 (Indian country defined)",
+                    "https://www.law.cornell.edu/uscode/text/18/1151"),
+    "usc-18-1152": ("18 U.S.C. 1152 (General Crimes Act)",
+                    "https://www.law.cornell.edu/uscode/text/18/1152"),
+    "usc-18-19": ("18 U.S.C. 19 (petty offense defined)",
+                  "https://www.law.cornell.edu/uscode/text/18/19"),
+    "usc-2-2a": ("2 U.S.C. 2a (apportionment of representatives)",
+                 "https://www.law.cornell.edu/uscode/text/2/2a"),
+    "usc-2-2c": ("2 U.S.C. 2c (single-member districts)",
+                 "https://www.law.cornell.edu/uscode/text/2/2c"),
+    "usc-2-641": ("2 U.S.C. 641 (budget reconciliation)",
+                  "https://www.law.cornell.edu/uscode/text/2/641"),
+    "usc-5-551": ("5 U.S.C. 551 (agency defined)",
+                  "https://www.law.cornell.edu/uscode/text/5/551"),
+    "usc-5-552": ("5 U.S.C. 552 (Freedom of Information Act)",
+                  "https://www.law.cornell.edu/uscode/text/5/552"),
+    "usc-5-552a": ("5 U.S.C. 552a (Privacy Act)",
+                   "https://www.law.cornell.edu/uscode/text/5/552a"),
+    "usc-5-553": ("5 U.S.C. 553 (rulemaking)",
+                  "https://www.law.cornell.edu/uscode/text/5/553"),
+    "usc-52-10301": ("52 U.S.C. 10301 (Voting Rights Act, section 2)",
+                     "https://www.law.cornell.edu/uscode/text/52/10301"),
+    "usc-52-30101": ("52 U.S.C. 30101 (candidate, federal office and independent expenditure "
+                     "defined)", "https://www.law.cornell.edu/uscode/text/52/30101"),
     "usc-18-1153": ("18 U.S.C. 1153 (Major Crimes Act)",
                     "https://www.law.cornell.edu/uscode/text/18/1153"),
     "usc-18-1162": ("18 U.S.C. 1162 (Public Law 280: criminal jurisdiction)",
@@ -157,6 +190,20 @@ SOURCES = {
              "https://www.law.cornell.edu/supremecourt/text/11-393"),
     "wilcox": ("Trump v. Wilcox, No. 24A966 (order of May 22, 2025)",
                "https://www.supremecourt.gov/opinions/24pdf/24a966_1b8e.pdf"),
+    "wesberry": ("Wesberry v. Sanders, 376 U.S. 1 (1964)",
+                 "https://www.law.cornell.edu/supremecourt/text/376/1"),
+    "reynolds": ("Reynolds v. Sims, 377 U.S. 533 (1964)",
+                 "https://www.law.cornell.edu/supremecourt/text/377/533"),
+    "rucho": ("Rucho v. Common Cause, 588 U.S. 684 (2019)",
+              "https://www.law.cornell.edu/supremecourt/text/18-422"),
+    "mcgirt": ("McGirt v. Oklahoma, 591 U.S. 894 (2020)",
+               "https://www.law.cornell.edu/supremecourt/text/18-9526"),
+    "castro-huerta": ("Oklahoma v. Castro-Huerta, 597 U.S. 629 (2022)",
+                      "https://www.law.cornell.edu/supremecourt/text/21-429"),
+    "callais": ("Louisiana v. Callais, 608 U.S. 85 (2026)",
+                "https://www.supremecourt.gov/opinions/25pdf/608us1r29_n648.pdf"),
+    "onder": ("People Not Politicians v. Onder, No. 26A388 (order of Sept. 25, 2026)",
+              "https://www.supremecourt.gov/opinions/25pdf/26a388_q86b.pdf"),
     "slaughter": ("Trump v. Slaughter, 609 U.S. 422 (2026)",
                   "https://www.supremecourt.gov/opinions/25pdf/609us2r62_g314.pdf"),
     "cook": ("Trump v. Cook, 609 U.S. 528 (2026)",
@@ -181,13 +228,27 @@ SOURCES = {
                     "https://clerk.house.gov/Votes"),
     "congress-committees": ("Congress.gov: Committees of the U.S. Congress",
                             "https://www.congress.gov/committees"),
-    "congress-legislators": ("congress-legislators: committee membership",
+    "congress-legislators": ("congress-legislators: members, committee rosters and leadership posts",
                              "https://github.com/unitedstates/congress-legislators"),
     "gao": ("Government Accountability Office: About", "https://www.gao.gov/about"),
     "cbo": ("Congressional Budget Office: Overview", "https://www.cbo.gov/about/overview"),
     "crs": ("2 U.S.C. 166 (Congressional Research Service)",
             "https://www.law.cornell.edu/uscode/text/2/166"),
     "aoc": ("Architect of the Capitol: About", "https://www.aoc.gov/about-us"),
+    "house-legislative-process": ("U.S. House of Representatives: The Legislative Process",
+                                  "https://www.house.gov/the-house-explained/the-legislative-process"),
+    "rules-house": ("House Committee on Rules: About",
+                    "https://rules.house.gov/about"),
+    "senate-glossary": ("U.S. Senate: Glossary",
+                        "https://www.senate.gov/about/research-tools/glossary.htm"),
+    "senate-cloture": ("U.S. Senate: Filibuster and Cloture",
+                       "https://www.senate.gov/about/powers-procedures/filibusters-cloture/overview.htm"),
+    "house-find": ("U.S. House of Representatives: Find your representative",
+                   "https://www.house.gov/representatives/find-your-representative"),
+    "senate-contact": ("U.S. Senate: Contacting U.S. senators",
+                       "https://www.senate.gov/senators/senators-contact.htm"),
+    "crs-casework": ("Congressional Research Service, Casework in a Congressional Office "
+                     "(RL33209)", "https://www.congress.gov/crs-product/RL33209"),
 
     # The executive
     "eo-8248": ("Executive Order 8248 (1939), establishing the Executive Office of the President",
@@ -207,6 +268,10 @@ SOURCES = {
     "ed-2026-06": ("U.S. Department of Education: additional partnerships (June 16, 2026)",
                    "https://www.ed.gov/about/news/press-release/us-department-of-education-announces-additional-partnerships-strengthen-coordination-individuals-disabilities-programs-bolster-civil-rights"),
 
+    "regulations-gov": ("Regulations.gov, the federal government's rulemaking portal",
+                        "https://www.regulations.gov/"),
+    "foia-gov": ("FOIA.gov: Frequently asked questions", "https://www.foia.gov/faq.html"),
+
     # The courts
     "uscourts-structure": ("U.S. Courts: Court Role and Structure",
                            "https://www.uscourts.gov/about-federal-courts/court-role-and-structure"),
@@ -218,6 +283,8 @@ SOURCES = {
                    "https://www.census.gov/library/publications/2026/econ/govtorg2225.html"),
     "cog-isd": ("U.S. Census Bureau: 2022 Census of Governments, Individual State Descriptions",
                 "https://www.census.gov/content/dam/Census/library/publications/2024/econ/2022ISD.pdf"),
+    "bia-tld": ("Bureau of Indian Affairs: Tribal Leaders Directory",
+                "https://www.bia.gov/service/tribal-leaders-directory"),
     "bia-list": ("Bureau of Indian Affairs: Indian Entities Recognized (91 FR 4102, Jan. 30, 2026)",
                  "https://www.govinfo.gov/content/pkg/FR-2026-01-30/html/2026-01899.htm"),
     "bia-faq": ("Bureau of Indian Affairs: What is a federally recognized tribe?",
@@ -266,6 +333,8 @@ SOURCES = {
     "tx-glo": ("Texas General Land Office: About the GLO", "https://www.glo.texas.gov/about-glo"),
     "tx-rrc": ("Railroad Commission of Texas: RRC History",
                "https://www.rrc.texas.gov/about-us/rrc-history/"),
+    "tx-testify": ("Texas Legislature Online: Frequently asked questions (testifying and "
+                   "committee schedules)", "https://capitol.texas.gov/resources/faq.aspx"),
 
     # Local governments
     "nlc-delegation": ("National League of Cities: Cities 101, Delegation of Power",
@@ -291,6 +360,8 @@ SOURCES = {
                  "https://www.justice.gov/tribal/2013-and-2022-reauthorizations-violence-against-women-act-vawa"),
     "bia-pl280": ("Bureau of Indian Affairs: What is Public Law 280?",
                   "https://www.bia.gov/faqs/what-public-law-280-and-where-does-it-apply"),
+    "rcfp-guide": ("Reporters Committee for Freedom of the Press: Open Government Guide",
+                   "https://www.rcfp.org/open-government-guide/"),
 
     # How elections work (checked 2026-10-16)
     "const-amdt20": ("U.S. Constitution, Twentieth Amendment",
@@ -360,8 +431,23 @@ SOURCES = {
     "me-rcv-faq": ("Maine Secretary of State, Ranked-choice voting: frequently asked questions",
                    "https://www.maine.gov/sos/elections-voting/"
                    "ranked-choice-voting-frequently-asked-questions"),
+    "me-21a-723a": ("Maine Revised Statutes, Title 21-A, section 723-A (ranked-choice "
+                    "voting)", "https://legislature.maine.gov/statutes/21-A/title21-Asec723-A.html"),
+    "me-sjc-2026": ("Maine Supreme Judicial Court, Opinion of the Justices, 2026 ME 32",
+                    "https://www.courts.maine.gov/courts/sjc/lawcourt/2026/26me032.pdf"),
     "az-16-661": ("Arizona Revised Statutes 16-661 (automatic recounts)",
                   "https://www.azleg.gov/ars/16/00661.htm"),
+    "fec-register": ("Federal Election Commission: Registering as a candidate",
+                     "https://www.fec.gov/help-candidates-and-committees/filing-reports/"
+                     "registering-candidate/"),
+    "fec-limits": ("Federal Election Commission: Contribution limits for 2025-2026",
+                   "https://www.fec.gov/help-candidates-and-committees/candidate-taking-receipts/"
+                   "contribution-limits/"),
+    "fec-ie": ("Federal Election Commission: Making independent expenditures",
+               "https://www.fec.gov/help-candidates-and-committees/making-independent-expenditures/"),
+    "nass-can-i-vote": ("National Association of Secretaries of State: Can I Vote",
+                        "https://www.nass.org/can-I-vote"),
+    "vote-gov": ("Vote.gov", "https://vote.gov/"),
     "fl-102-141": ("Florida Statutes 102.141 (canvassing boards and recounts)",
                    "https://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute"
                    "&URL=0100-0199/0102/Sections/0102.141.html"),
@@ -372,8 +458,10 @@ SOURCES = {
 
 INDEX = {
     "slug": "index",
-    "nav": "Overview",
-    "title": "How American government is organized",
+    # The site's navigation calls the guide by this name, and its first
+    # page is the guide's front door: one name for both (rule 75).
+    "title": "Know Your Government",
+    "card": "How the levels of American government fit together.",
     "description": ("A plain-language guide to American government: Congress, the president and "
                     "the federal courts; state governments; counties, cities, townships, school "
                     "and special districts; and tribal nations, with the sources each part was "
@@ -448,47 +536,69 @@ INDEX = {
                 ("p", "In all, the Census Bureau counted 90,837 local governments in 2022. Its "
                       "count for 2025, published in May 2026, is 91,438, mostly because of new "
                       "special districts."),
-                ("cards", [
-                    ("How Congress works", "guide:congress",
-                     "The Senate and the House: what each does, who runs them, and who chairs "
-                     "each committee now."),
-                    ("The president and the executive branch", "guide:executive",
-                     "The presidency, the Executive Office, the 15 departments and the "
-                     "independent agencies."),
-                    ("The federal courts", "guide:courts",
-                     "The Supreme Court, the courts of appeals and district courts, and the "
-                     "courts Congress has created outside Article III."),
-                    ("State governments", "guide:states",
-                     "Legislatures, governors and the other officials states elect, executive "
-                     "councils, and state courts."),
-                    ("Local governments", "guide:local",
-                     "Counties, cities, towns and townships, school districts and special "
-                     "districts."),
-                    ("Tribal nations", "guide:tribal",
-                     "Sovereignty, tribal governments and courts, and who has jurisdiction in "
-                     "Indian country."),
-                    ("How elections work", "guide:elections",
-                     "When elections are held and who runs them, primaries and runoffs, "
-                     "ranked-choice counts, certification and recounts, and when winners "
-                     "take office."),
+                ("guide-cards",),
+                ("p", "Know Your Candidate shows who holds these offices now, each from the "
+                      "record that keeps it:"),
+                ("ul", [
+                    "Congress: every member, and everyone who has filed to run for their "
+                    "seats, on the [profile grid](site:index.html) and the [partisan "
+                    "map](site:map.html).",
+                    "[The federal government](site:federal/index.html): the President, the Vice "
+                    "President, the Cabinet and every sitting federal judge, court by court.",
+                    "[Each state's page](site:states/index.html): its members of Congress, its "
+                    "governor, lieutenant governor, attorney general and secretary of state, its "
+                    "highest court, and its official voting pages.",
+                    "[Every state legislature](site:legislature/index.html): each district on a "
+                    "map, and who represents it.",
+                    "[Every county and local government](site:counties/index.html): each "
+                    "state's counties, and the governments in each, by kind.",
+                    "[Tribal governments](site:government/tribal.html#/?mode=tribes): each "
+                    "one and its leader, as the Bureau of Indian Affairs lists them.",
                 ]),
-                ("p", "Know Your Candidate follows one part of all this: the members of "
-                      "Congress, and everyone who has filed to run for their seats. Start from the [profile grid](site:index.html), the "
-                      "[partisan map](site:map.html) or [your state's page](site:states/index.html)."),
             ],
             "sources": ["const-art1", "const-art2", "const-art3", "const-amdt10", "cog-report",
-                        "bia-list"],
+                        "bia-list", "bia-tld"],
         },
         {
             "id": "together",
             "heading": "How the levels fit together",
             "blocks": [
-                ("h3", "Checks within the federal government"),
-                ("p", "No money may be drawn from the Treasury except as Congress appropriates it "
-                      "by law (Article I, Section 9), which gives Congress control over what "
-                      "every agency may spend. The courts can set aside a law or an official act "
-                      "that conflicts with the Constitution, a power the Supreme Court asserted in "
-                      "Marbury v. Madison (1803)."),
+                ("h3", "Checks within the federal government", "checks"),
+                ("p", "Each branch can stop or undo some of what the others do. The main checks, "
+                      "and where the Constitution or the law provides them:"),
+                ("checks", {
+                    "branches": [
+                        ("Congress", [
+                            ("The president", "can pass a bill again over the president's veto, "
+                             "by two-thirds of each chamber (Article I, Section 7)."),
+                            ("The president", "decides what may be spent: no money leaves the "
+                             "Treasury unless Congress appropriates it (Article I, Section 9)."),
+                            ("The president", "through the Senate, approves or rejects the president's "
+                             "treaties and nominees (Article II, Section 2)."),
+                            ("The president and the courts", "can impeach and remove the president, "
+                             "judges and other officers (Article I, Sections 2 and 3; Article II, Section 4)."),
+                            ("The courts", "creates the lower courts and sets the number of "
+                             "justices by law (Article III, Section 1; 28 U.S.C. 1)."),
+                        ]),
+                        ("The president", [
+                            ("Congress", "can veto a bill (Article I, Section 7)."),
+                            ("The courts", "nominates the justices and the other Article III "
+                             "judges, who take office only with the Senate's consent (Article II, "
+                             "Section 2)."),
+                            ("The courts", "can pardon federal offenses, except in cases of "
+                             "impeachment (Article II, Section 2)."),
+                        ]),
+                        ("The courts", [
+                            ("Congress", "can set aside a law that conflicts with the "
+                             "Constitution, a power the Supreme Court asserted in Marbury v. "
+                             "Madison (1803)."),
+                            ("The president", "can set aside an official act that rests neither "
+                             "on the Constitution nor on a law (Youngstown Sheet & Tube Co. v. "
+                             "Sawyer, 1952)."),
+                        ]),
+                    ],
+                    "caption": ("Who checks whom. Each arrow names the branch a power acts on."),
+                }),
                 ("h3", "The federal government and the states"),
                 ("p", "Federal law made under the Constitution overrides conflicting state law "
                       "(Article VI). But the federal government has only the powers the "
@@ -498,10 +608,43 @@ INDEX = {
                       "or health care. The Supreme Court has set limits on those conditions too "
                       "(South Dakota v. Dole, 1987; NFIB v. Sebelius, 2012)."),
                 ("h3", "Two court systems"),
+                ("ladder", {
+                    "columns": [
+                        ("A state's courts", [
+                            ("Supreme court", "The court of last resort on state law. Texas and "
+                             "Oklahoma have two: one for civil cases, one for criminal."),
+                            ("Intermediate appeals courts", "In most states. Hear appeals from "
+                             "the trial courts."),
+                            ("Trial courts", "Felonies and larger civil cases."),
+                            ("Courts of limited jurisdiction", "Misdemeanors, traffic cases and "
+                             "small claims."),
+                        ]),
+                        ("The federal courts", [
+                            ("The Supreme Court", "Nine justices. Chooses the cases it hears."),
+                            ("Courts of appeals", "Thirteen. Hear appeals from the district "
+                             "courts."),
+                            ("District courts", "Ninety-four trial courts."),
+                            ("Magistrate judges and bankruptcy courts", "Part of the district "
+                             "courts."),
+                        ]),
+                    ],
+                    "paths": [
+                        ("Up either ladder:", "a losing party can usually appeal to the court "
+                         "above; a highest court mostly chooses the appeals it hears."),
+                        ("Across to the Supreme Court:", "a state's highest court's decision on "
+                         "a question of federal law can be taken to the U.S. Supreme Court, by "
+                         "a petition for a writ of certiorari that the Court may grant or refuse."),
+                        ("Across to federal court:", "a civil case filed in a state court that "
+                         "could have been filed in a federal one can be removed to the federal "
+                         "district court (28 U.S.C. 1441)."),
+                    ],
+                    "caption": "The two court systems, highest court at the top.",
+                }),
                 ("p", "State courts have the final word on what state law means. The U.S. Supreme "
                       "Court may review a state court decision that turns on federal law, but not "
-                      "one that rests on an adequate and independent ground in state law "
-                      "(Michigan v. Long, 1983). A civil case filed in state court can be moved "
+                      "one that rests on an adequate and independent ground in state law: one "
+                      "that would stand on state law alone, whatever the answer to the federal "
+                      "question (Michigan v. Long, 1983). A civil case filed in state court can be moved "
                       "(“removed”) to federal court if it could have been filed there in the "
                       "first place: because it arises under federal law, for example, or is "
                       "between citizens of different states (28 U.S.C. 1441). A criminal case can "
@@ -526,12 +669,14 @@ INDEX = {
                 ("h3", "Tribal nations"),
                 ("p", "Tribal nations are neither states nor parts of states. They deal with the "
                       "federal government government-to-government, and criminal jurisdiction in "
-                      "Indian country is divided among tribal, federal and state governments by "
+                      "Indian country (reservations and other Indian lands, as federal law "
+                      "defines them) is divided among tribal, federal and state governments by "
                       "statutes and court decisions. [Who has jurisdiction](guide:tribal#jurisdiction)."),
             ],
-            "sources": ["const-art1", "const-art6", "marbury", "printz", "dole", "nfib",
-                        "michigan-long", "usc-28-1441", "usc-28-1442", "nlc-delegation",
-                        "naco-primer"],
+            "sources": ["const-art1", "const-art2", "const-art3", "const-art6", "usc-28-1",
+                        "marbury", "youngstown", "printz", "dole", "nfib", "michigan-long",
+                        "usc-28-1441", "usc-28-1442", "uscourts-structure", "nlc-delegation",
+                        "naco-primer", "usc-18-1151"],
         },
     ],
 }
@@ -540,9 +685,10 @@ INDEX = {
 CONGRESS = {
     "slug": "congress",
     # Not "Congress": the site's navigation has that entry, for its members.
-    "nav": "How Congress works",
     "people": True,
     "title": "How Congress works",
+    "card": ("The Senate and the House: what each does, who runs them, how a bill becomes "
+             "law, how districts are drawn, and who chairs each committee now."),
     "description": ("What Congress does, how the Senate and the House differ, who runs each "
                     "chamber, the officers and agencies that serve them, and who chairs each "
                     "committee today."),
@@ -566,7 +712,7 @@ CONGRESS = {
                       "president signs it, or does not return it within ten days (Sundays "
                       "excepted) while Congress is in session. If the president vetoes it, "
                       "Congress can override the veto by a two-thirds vote in each chamber "
-                      "(Section 7)."),
+                      "(Section 7). [The steps in between](#lawmaking)."),
                 ("p", "Congress also oversees how the laws are carried out, through hearings, "
                       "investigations and reports, and it can remove federal officers: the House "
                       "impeaches, by a simple majority in practice, and the Senate tries the "
@@ -574,6 +720,60 @@ CONGRESS = {
                       "I, Sections 2 and 3; Article II, Section 4)."),
             ],
             "sources": ["const-art1", "const-art2"],
+        },
+        {
+            "id": "lawmaking",
+            "heading": "How a bill becomes law",
+            "blocks": [
+                ("p", "A bill can start in either chamber, except that a bill for raising "
+                      "revenue must start in the House (Article I, Section 7). One that becomes "
+                      "law passes these steps:"),
+                ("flow", {
+                    "steps": [
+                        ("Introduced", "A representative or a senator introduces it."),
+                        ("Committee", "It is referred to a committee, which can hold hearings "
+                         "and mark it up: debate, amend and rewrite it. A bill the committee "
+                         "does not report usually goes no further."),
+                        ("On the floor of its chamber", "In the House, for most major bills "
+                         "the Rules Committee proposes a special rule, setting the terms of "
+                         "debate and which amendments may be offered, which the House adopts "
+                         "before taking up the bill; the bill then passes by a simple majority. "
+                         "On the Senate floor, debate has no time limit unless the Senate sets "
+                         "one, so opponents can hold a bill up by debating it at length or by "
+                         "other delays: a filibuster. Ending debate, called cloture, takes "
+                         "three-fifths of the senators duly chosen and sworn, 60 when every seat "
+                         "is filled. Most business moves instead by unanimous consent: an "
+                         "agreement setting aside the rules to speed things up, which any one "
+                         "senator can block by objecting."),
+                        ("The other chamber", "The bill then goes to the other chamber, through "
+                         "its own committee and its own floor in the same way."),
+                        ("The same words", "Both chambers must pass identical text. Where their "
+                         "versions differ, a conference committee of members of both may work "
+                         "out a compromise, which then goes back to each for a vote."),
+                        ("The president", "Has ten days, Sundays excepted, to act on the bill.", [
+                            ("Signs it", "It becomes law."),
+                            ("Does nothing", "It becomes law after ten days, unless Congress has "
+                             "adjourned and so prevented its return. Then it does not: a pocket "
+                             "veto, which Congress cannot override."),
+                            ("Vetoes it", "It goes back to the chamber where it started, with "
+                             "the president's objections."),
+                        ]),
+                        ("Override", "A vetoed bill becomes law if two-thirds of each chamber "
+                         "pass it again."),
+                    ],
+                    "caption": ("The path Article I, Section 7 sets, through each chamber's "
+                                "rules."),
+                }),
+                ("h3", "The exception: budget reconciliation"),
+                ("p", "One kind of bill cannot be filibustered. Under the Congressional Budget "
+                      "Act of 1974, a reconciliation bill changes existing law to bring taxes "
+                      "and spending in line with a budget resolution Congress has adopted, and "
+                      "the Senate's debate on it is limited to 20 hours (2 U.S.C. 641), so it "
+                      "can pass by a simple majority. Since the 2010s, the Senate has also ended "
+                      "debate on nominations by a simple majority."),
+            ],
+            "sources": ["const-art1", "house-legislative-process", "rules-house",
+                        "senate-glossary", "senate-cloture", "usc-2-641"],
         },
         {
             "id": "senate",
@@ -602,8 +802,9 @@ CONGRESS = {
                      "Chosen by the majority party's senators. By the Senate's precedents the "
                      "presiding officer recognizes the majority leader first, which lets the "
                      "leader decide what the Senate takes up and when, move to end debate "
-                     "(cloture), and negotiate the unanimous-consent agreements under which "
-                     "most of its business is done."),
+                     "([cloture](#lawmaking)), and negotiate the unanimous-consent agreements "
+                     "under which most of its business is done: agreements that set the terms "
+                     "of debate, and that any one senator can block by objecting."),
                     ("Minority leader",
                      "Chosen by the minority party's senators to lead their side in debate and "
                      "in negotiation with the majority."),
@@ -616,6 +817,13 @@ CONGRESS = {
                      "confirmation hearings for nominees. The senior member of the minority is "
                      "the ranking member. [Who holds each post now](#committees)."),
                 ]),
+                ("h3", "Who holds these posts now", "senate-leaders"),
+                ("live", "leaders-senate",
+                 "With JavaScript on, this page lists the senators who hold the Senate's "
+                 "leadership posts now. The Senate lists them on [its own "
+                 "site](https://www.senate.gov/senators/leadership.htm)."),
+                ("p", "The vice president, the Senate's president, is on [the federal "
+                      "government's page](site:federal/index.html#executive)."),
                 ("h3", "Officers who are not senators"),
                 ("roles", [
                     ("Secretary of the Senate",
@@ -627,8 +835,8 @@ CONGRESS = {
                      "absent senators to attend."),
                     ("Parliamentarian",
                      "Advises the presiding officer, without regard to party, on the Senate's "
-                     "rules and precedents, including what a budget reconciliation bill may "
-                     "contain under the Congressional Budget Act."),
+                     "rules and precedents, including what a [budget reconciliation "
+                     "bill](#lawmaking) may contain under the Congressional Budget Act."),
                     ("Legal and legislative counsel",
                      "The Office of Senate Legal Counsel represents the Senate in court; the "
                      "Office of the Legislative Counsel drafts bills and amendments for "
@@ -637,7 +845,7 @@ CONGRESS = {
             ],
             "sources": ["const-art1", "const-art2", "const-amdt17", "usc-3-19",
                         "senate-leadership", "senate-pro-tem", "senate-recognition",
-                        "senate-officers"],
+                        "senate-officers", "congress-legislators"],
         },
         {
             "id": "house",
@@ -645,7 +853,8 @@ CONGRESS = {
             "blocks": [
                 ("p", "The House has 435 voting members, each elected from a district to a "
                       "two-year term. Seats are divided among the states by population after "
-                      "each census, and every state has at least one (Article I, Section 2). "
+                      "each census, and every state has at least one (Article I, Section 2; "
+                      "[how districts are drawn](#districts)). "
                       "Since every term ends together, all 435 voting seats are on the ballot "
                       "every two years. Six more members can serve and vote on committees but "
                       "not on the House floor: delegates from the District of Columbia, Guam, "
@@ -671,6 +880,11 @@ CONGRESS = {
                      "As in the Senate, the majority chairs every committee and the ranking "
                      "member leads the minority's side. [Who holds each post now](#committees)."),
                 ]),
+                ("h3", "Who holds these posts now", "house-leaders"),
+                ("live", "leaders-house",
+                 "With JavaScript on, this page lists the representatives who hold the "
+                 "House's leadership posts now. The House lists them on [its own "
+                 "site](https://www.house.gov/leadership)."),
                 ("h3", "Officers who are not members"),
                 ("roles", [
                     ("Clerk",
@@ -683,13 +897,59 @@ CONGRESS = {
                      "Runs the House's finances, payroll, technology and purchasing."),
                     ("Parliamentarian",
                      "Advises, without regard to party, on the House's rules and precedents, "
-                     "including whether an amendment is germane."),
+                     "including whether an amendment is germane: on the subject of the bill."),
                     ("Chaplain",
                      "Opens each day's session with a prayer and offers pastoral care."),
                 ]),
             ],
             "sources": ["const-art1", "usc-3-19", "house-explained", "house-leadership",
-                        "house-officers", "clerk-votes"],
+                        "house-officers", "clerk-votes", "congress-legislators"],
+        },
+        {
+            "id": "districts",
+            "heading": "How House districts are drawn",
+            "blocks": [
+                ("p", "After each census the 435 seats are shared out again among the states. "
+                      "The president sends Congress each state's population and the number of "
+                      "seats it would get under the method of equal proportions, at least one "
+                      "each, and the Clerk of the House certifies each state's number to its "
+                      "governor (2 U.S.C. 2a). A state with more than one seat elects its "
+                      "representatives from districts established by law, one representative "
+                      "to a district (2 U.S.C. 2c)."),
+                ("p", "Each state decides who draws its districts: in most a legislature "
+                      "passes the map as a law, in some a commission or a court draws it. Each "
+                      "map that changed for 2026 ([below](#redrawn)) says on its district page "
+                      "who drew it."),
+                ("p", "Federal law limits every map. Districts must be equal in population as "
+                      "nearly as is practicable (Wesberry v. Sanders, 1964), and so must the "
+                      "districts of both chambers of a state legislature (Reynolds v. Sims, "
+                      "1964). Section 2 of the Voting Rights Act forbids any voting practice, a "
+                      "map among them, that results in denying or abridging the right to vote "
+                      "on account of race (52 U.S.C. 10301). In Louisiana v. Callais, decided "
+                      "on April 29, 2026, the Supreme Court held 6-3 that Louisiana's 2024 map "
+                      "was an unconstitutional racial gerrymander because section 2 did not "
+                      "require its second majority-Black district, and read section 2 to impose "
+                      "liability only where the evidence supports a strong inference that a "
+                      "state drew its districts to give minority voters less opportunity "
+                      "because of their race. The Court had held in 2019 that claims of "
+                      "partisan gerrymandering cannot be decided by the federal courts (Rucho v. "
+                      "Common Cause); state constitutions and statutes can still give state "
+                      "courts standards to apply."),
+                ("h3", "The maps that changed for 2026", "redrawn"),
+                ("p", "A map usually lasts until the next census, but a state can redraw "
+                      "sooner, and these did for the 2026 election. Each links its districts "
+                      "before and after:"),
+                ("redrawn",),
+                ("p", "Missouri's 2025 map is not among them. Enough voters signed a "
+                      "referendum petition against it that, as Missouri's Supreme Court held on "
+                      "September 3, 2026, it does not take effect unless voters approve it in "
+                      "the 2026 election. On September 25 the U.S. Supreme Court told the "
+                      "federal courts not to bar the 2022 map from Missouri's 2026 "
+                      "congressional election, or to require the 2025 one (People Not "
+                      "Politicians v. Onder)."),
+            ],
+            "sources": ["usc-2-2a", "usc-2-2c", "wesberry", "reynolds", "usc-52-10301",
+                        "callais", "rucho", "onder"],
         },
         {
             "id": "committees",
@@ -711,6 +971,32 @@ CONGRESS = {
             ],
             "sources": ["congress-committees", "congress-legislators", "senate-leadership",
                         "house-leadership"],
+        },
+        {
+            "id": "reaching",
+            "heading": "Reaching your members",
+            "blocks": [
+                ("p", "Everyone in a state has one representative, for the district they live "
+                      "in, and two senators. The District of Columbia and each territory elect "
+                      "one delegate, or Puerto Rico's resident commissioner, and no senators. "
+                      "[Find yours by state](site:states/index.html) or on [the partisan "
+                      "map](site:map.html): each member's profile here gives their office's "
+                      "phone number and address and their official website, as the "
+                      "congress-legislators project records them, and a contact form where that "
+                      "record lists one. For senators it mostly does; for representatives it "
+                      "rarely does, and a representative's form is on their own website. The "
+                      "[House](https://www.house.gov/representatives/find-your-representative) "
+                      "and the [Senate](https://www.senate.gov/senators/senators-contact.htm) "
+                      "list their members too."),
+                ("p", "Members' offices also help the people they represent with federal "
+                      "agencies, work called casework. Staff can ask an agency to look at a "
+                      "case and move it through its normal steps, but cannot make it decide in "
+                      "the constituent's favor. An agency generally will not discuss a "
+                      "person's records with the office without that person's signed consent, "
+                      "under the Privacy Act (5 U.S.C. 552a)."),
+            ],
+            "sources": ["house-find", "senate-contact", "congress-legislators", "crs-casework",
+                        "usc-5-552a"],
         },
         {
             "id": "support",
@@ -741,8 +1027,9 @@ CONGRESS = {
 
 EXECUTIVE = {
     "slug": "executive",
-    "nav": "The executive",
-    "title": "The president and the executive branch",
+    "title": "How the executive branch works",
+    "card": ("The presidency, the Executive Office, the 15 departments and the independent "
+             "agencies, and how to comment on a rule or ask for records."),
     "description": ("What the president and vice president do, the Executive Office of the "
                     "President, the 15 executive departments, and the independent agencies, "
                     "commissions and government corporations."),
@@ -917,11 +1204,37 @@ EXECUTIVE = {
                       "case has not been finally decided. A year earlier, in Trump v. Wilcox "
                       "(May 22, 2025), the Court had let the president remove members of the "
                       "National Labor Relations Board and the Merit Systems Protection Board "
-                      "while their cases went on, describing the Federal Reserve as a "
-                      "“uniquely structured, quasi-private entity”."),
+                      "while their cases went on, describing the Federal Reserve, in the "
+                      "Court's words, as a “uniquely structured, quasi-private entity”."),
             ],
             "sources": ["usc-15-41", "usc-12-242", "usc-39-201", "usc-49-24301", "slaughter",
                         "cook", "wilcox"],
+        },
+        {
+            "id": "taking-part",
+            "heading": "Commenting on rules and asking for records",
+            "blocks": [
+                ("p", "Agencies write rules under the laws Congress passes. Under the "
+                      "Administrative Procedure Act an agency generally publishes notice of a proposed rule in the Federal "
+                      "Register and gives anyone interested the chance to send in written "
+                      "data, views or arguments, which it must consider; a final rule is "
+                      "generally published at least 30 days before it takes effect (5 U.S.C. "
+                      "553). There are exceptions, among them military and foreign affairs, "
+                      "interpretive rules and policy statements, and cases where the agency "
+                      "finds notice impracticable, unnecessary or contrary to the public "
+                      "interest. Anyone may also petition an agency to issue, change or repeal "
+                      "a rule. Each notice says how to comment, and many proposed rules can be "
+                      "found and commented on at [Regulations.gov](https://www.regulations.gov/)."),
+                ("p", "The Freedom of Information Act lets any person ask a federal agency for "
+                      "its records, which it must release unless one of the Act's exemptions "
+                      "applies, such as classified information or personal privacy (5 U.S.C. "
+                      "552). It covers the executive branch, not Congress or the federal courts "
+                      "(5 U.S.C. 551). Each agency answers its own requests; "
+                      "[FOIA.gov](https://www.foia.gov/) says where to send one. Every state "
+                      "has public-records and open-meetings laws of its own ([local "
+                      "governments](guide:local#taking-part))."),
+            ],
+            "sources": ["usc-5-553", "regulations-gov", "usc-5-552", "usc-5-551", "foia-gov"],
         },
     ],
 }
@@ -931,8 +1244,9 @@ COURTS = {
     "slug": "courts",
     # Not "Federal courts": the site's own navigation has that entry, for
     # who sits on them (federal/index.html), in the same sidebar.
-    "nav": "How the federal courts work",
-    "title": "The federal courts",
+    "title": "How the federal courts work",
+    "card": ("The Supreme Court, the courts of appeals and district courts, and the courts "
+             "Congress has created outside Article III."),
     "description": ("The Supreme Court, the 13 courts of appeals and 94 district courts, the "
                     "courts Congress has created outside Article III, and how federal judges "
                     "are chosen."),
@@ -1015,9 +1329,10 @@ COURTS = {
                     ("Magistrate judges",
                      "Appointed by each district court's judges, for eight years if full-time "
                      "and four if part-time (28 U.S.C. 631). They handle warrants, first "
-                     "appearances, bail and pretrial matters. They can try petty offenses, "
-                     "other misdemeanors if the defendant agrees, and civil cases if the "
-                     "parties agree (18 U.S.C. 3401; 28 U.S.C. 636)."),
+                     "appearances, bail and pretrial matters. They can try petty offenses "
+                     "(the least serious federal crimes, punishable by no more than six months "
+                     "in prison: 18 U.S.C. 19), other misdemeanors if the defendant agrees, "
+                     "and civil cases if the parties agree (18 U.S.C. 3401; 28 U.S.C. 636)."),
                     ("Bankruptcy judges",
                      "The 90 bankruptcy courts are units of the district courts (28 U.S.C. "
                      "151). Their judges are appointed by the court of appeals for the circuit "
@@ -1025,7 +1340,7 @@ COURTS = {
                 ]),
             ],
             "sources": ["uscourts-structure", "uscourts-judgeships", "usc-28-251", "usc-28-631",
-                        "usc-28-636", "usc-18-3401", "usc-28-151", "usc-28-152"],
+                        "usc-28-636", "usc-18-3401", "usc-18-19", "usc-28-151", "usc-28-152"],
         },
         {
             "id": "other-courts",
@@ -1036,8 +1351,9 @@ COURTS = {
                 ("roles", [
                     ("U.S. Tax Court",
                      "Nineteen judges, appointed by the president with the Senate's consent to "
-                     "15-year terms. Taxpayers can dispute a tax deficiency there before paying "
-                     "it (26 U.S.C. 7443)."),
+                     "15-year terms. Taxpayers can dispute a tax deficiency, more tax than "
+                     "they reported that the IRS says they owe, there before paying it (26 "
+                     "U.S.C. 7443)."),
                     ("U.S. Court of Federal Claims",
                      "Sixteen judges with 15-year terms. Hears claims for money against the "
                      "United States, challenges to federal contract awards, and vaccine-injury "
@@ -1078,8 +1394,17 @@ COURTS = {
 
 STATES = {
     "slug": "states",
-    "nav": "State governments",
-    "title": "State governments",
+    "title": "How state governments work",
+    "card": ("Legislatures, governors and the other officials states elect, executive "
+             "councils, state courts, and what is on the 2026 ballot."),
+    # The count of states with no lieutenant governor is a figure from the
+    # map's table, true until Arizona's first takes office.
+    "revisit": [
+        ("2027-01-05", "Arizona's first lieutenant governor took office in January 2027: move "
+                       "Arizona out of SENATE_PRESIDES['none'] and say how its Senate is led"),
+        ("2026-11-04", "the 2026 ballot map describes an election that has happened: put it "
+                       "in the past tense, or replace it with the next cycle's"),
+    ],
     "description": ("How state governments are organized: legislatures and who presides over "
                     "them, governors and the other officials states elect, executive councils, "
                     "and state courts."),
@@ -1119,8 +1444,11 @@ STATES = {
                       "[West Virginia](https://www.wvlegislature.gov/). Nebraska's single chamber "
                       "has 49 members, called senators, elected without party labels on the "
                       "ballot."),
-                ("p", "Who presides varies. In about 26 states the lieutenant governor is the "
-                      "president of the senate; elsewhere the senate elects its own president. "
+                ("p", "Who presides varies. In {{ltgov-presides}} states the lieutenant "
+                      "governor is the president of the senate (in Nebraska, of its one-chamber "
+                      "Legislature). Tennessee's and West Virginia's senates elect their own "
+                      "leader, whom the law also titles lieutenant governor, and elsewhere the "
+                      "senate elects its own president. "
                       "Lower chambers elect a speaker, who usually controls committee "
                       "assignments, the referral of bills and the floor calendar. In Texas the "
                       "lieutenant governor presides over the Senate and, with the Speaker of the "
@@ -1170,8 +1498,10 @@ STATES = {
                 ("h3", "Other statewide officials"),
                 ("roles", [
                     ("Lieutenant governor",
-                     "Usually first in line to succeed the governor, and in about 26 states the "
-                     "president of the senate. A few states have none."),
+                     "Usually first in line to succeed the governor, and in {{ltgov-presides}} "
+                     "states the president of the senate ([who presides, state by "
+                     "state](site:government/states.html#/?mode=presides)). {{no-ltgov}} states "
+                     "have none."),
                     ("Attorney general",
                      "The state's chief legal officer: represents the state and its agencies in "
                      "court, defends its laws, enforces consumer-protection and other laws, and "
@@ -1196,6 +1526,12 @@ STATES = {
                       "state lands and mineral rights whose income supports public schools, and "
                       "the three members of the Railroad Commission, which, despite its name, "
                       "regulates the state's oil and gas industry and pipelines."),
+                ("h3", "On the 2026 ballot", "ballot-2026"),
+                ("p", "On November 3, 2026, {{governors-2026}} states elect a governor, and "
+                      "{{chambers-2026}} of the {{chambers}} state legislative chambers hold "
+                      "regular elections for some or all of their seats. [The 2026 ballot "
+                      "map](site:government/states.html#/?mode=ballot) shows which offices and "
+                      "how many seats each state elects, with the state's own record for each."),
             ],
             "sources": ["ncsl-veto", "ncsl-leaders", "ncsl-elections", "tx-glo", "tx-rrc"],
         },
@@ -1276,14 +1612,29 @@ STATES = {
             ],
             "sources": ["nycourts", "tx-courts", "ok-occa", "ok-const-7", "mo-plan"],
         },
+        {
+            "id": "taking-part",
+            "heading": "Following your legislature",
+            "blocks": [
+                ("p", "A legislature's committees hold hearings on bills, and many take "
+                      "testimony from the public. In Texas, for example, the Legislature's site "
+                      "posts each committee's hearing schedule, and a member of the public must "
+                      "register electronically before testifying at a House committee hearing. "
+                      "Each legislature's own site says how it works there; [every state "
+                      "legislature](site:legislature/index.html), on this site, links to its "
+                      "own and lists who represents each district."),
+            ],
+            "sources": ["tx-testify"],
+        },
     ],
 }
 
 
 LOCAL = {
     "slug": "local",
-    "nav": "Local governments",
-    "title": "Local governments",
+    "title": "How local governments work",
+    "card": ("Counties, cities, towns and townships, school districts and special districts, "
+             "and the laws that open their meetings and records."),
     "description": ("Counties, cities, towns and townships, school districts and special "
                     "districts: where their powers come from, how they are organized, who runs "
                     "them, and how many there are."),
@@ -1412,8 +1763,8 @@ LOCAL = {
                      "Voters elect commissioners who together act as the council, and each runs "
                      "a department. Devised in Galveston, Texas, after the hurricane of 1900, "
                      "and now uncommon: 3.2 percent of the municipalities in the same survey. "
-                     "Portland, Oregon, the largest city still using it, replaced it with a "
-                     "mayor and a larger council on January 1, 2025."),
+                     "Portland, Oregon, the largest city to keep it, replaced it with a mayor "
+                     "and a larger council on January 1, 2025."),
                     ("Town meeting",
                      "In much of New England the town's voters meet, usually once a year, to "
                      "adopt the budget and local laws, and an elected select board runs the "
@@ -1515,14 +1866,30 @@ LOCAL = {
             ],
             "sources": ["cog-report", "cog-isd"],
         },
+        {
+            "id": "taking-part",
+            "heading": "Open meetings and public records",
+            "blocks": [
+                ("p", "Every state has open-meetings and public-records laws, and they "
+                      "generally reach its local governments' councils and boards as well as "
+                      "the state's own agencies. What each law requires, and "
+                      "what it exempts, differs from state to state; the Reporters Committee "
+                      "for Freedom of the Press's [Open Government "
+                      "Guide](https://www.rcfp.org/open-government-guide/) sets out each "
+                      "state's. Federal agencies' records are requested under the Freedom of "
+                      "Information Act instead ([the executive branch](guide:executive#taking-part))."),
+            ],
+            "sources": ["rcfp-guide"],
+        },
     ],
 }
 
 
 TRIBAL = {
     "slug": "tribal",
-    "nav": "Tribal nations",
-    "title": "Tribal nations",
+    "title": "How tribal nations govern",
+    "card": ("Sovereignty, tribal governments and courts, and who has jurisdiction in Indian "
+             "country."),
     "description": ("How tribal nations govern themselves: their sovereignty and recognition, "
                     "tribal governments and courts, and how jurisdiction in Indian country is "
                     "shared with the federal government and the states."),
@@ -1597,8 +1964,11 @@ TRIBAL = {
                      "Enforce tribal law under the tribe's own authority, often alongside "
                      "federal and state officers."),
                 ]),
+                ("p", "[The tribal governments map](site:government/tribal.html#/?mode=tribes) "
+                      "lists each tribal government under the state its office is in, with the "
+                      "leader the Bureau of Indian Affairs' Tribal Leaders Directory names."),
             ],
-            "sources": ["usc-25-5123", "bia-faq"],
+            "sources": ["usc-25-5123", "bia-faq", "bia-tld"],
         },
         {
             "id": "courts",
@@ -1626,9 +1996,11 @@ TRIBAL = {
                      "governing body, for four-year terms."),
                 ]),
                 ("p", "The Indian Civil Rights Act of 1968 applies most of the Bill of Rights' "
-                      "protections to tribal governments and limits the sentences tribal courts "
-                      "can impose, to one year for an offense. The Tribal Law and Order Act of "
-                      "2010 raised the limit to three years for one offense and nine years in "
+                      "protections to tribal governments. It also limits the sentences tribal "
+                      "courts can impose: six months and a $500 fine for an offense as passed "
+                      "in 1968, and since a 1986 amendment one year and a $5,000 fine (25 "
+                      "U.S.C. 1302(a)(7)). The Tribal Law and Order Act of 2010 raised the limit "
+                      "to three years and a $15,000 fine for one offense, and nine years in "
                       "all, for a tribe that provides added protections, among them a licensed "
                       "defense lawyer and a law-trained judge."),
             ],
@@ -1638,14 +2010,21 @@ TRIBAL = {
             "id": "jurisdiction",
             "heading": "Who has jurisdiction in Indian country",
             "blocks": [
-                ("p", "Which government can prosecute a crime in Indian country depends on where "
-                      "it happened, who committed it and who the victim was."),
+                ("p", "Indian country is a term federal law defines: all land within an "
+                      "Indian reservation, all dependent Indian communities, and Indian "
+                      "allotments whose Indian titles have not been extinguished (18 U.S.C. "
+                      "1151). Which government can prosecute a crime there depends on where it "
+                      "happened, who committed it and who the victim was."),
                 ("ul", [
-                    "Federal: the Major Crimes Act (18 U.S.C. 1153) gives federal courts "
-                    "jurisdiction over a list of serious crimes, among them murder, kidnapping, "
-                    "felony assault and sexual abuse, committed by an Indian in Indian country. "
-                    "It generally does not apply in the six Public Law 280 states below. Tribes "
-                    "can also prosecute Indian defendants, within the sentencing limits above.",
+                    "Federal: the General Crimes Act (18 U.S.C. 1152) extends federal criminal "
+                    "law to Indian country, except for crimes one Indian commits against "
+                    "another, an Indian already punished under tribal law, and cases a treaty "
+                    "leaves to the tribe. The Major Crimes Act (18 U.S.C. 1153) gives federal "
+                    "courts jurisdiction over a list of serious crimes, among them murder, "
+                    "kidnapping, felony assault and sexual abuse, committed by an Indian in "
+                    "Indian country. Neither generally applies in the six Public Law 280 states "
+                    "below. Tribes can also prosecute Indian defendants, within the sentencing "
+                    "limits above.",
                     "Tribal: in Oliphant v. Suquamish Indian Tribe (1978), the Supreme Court held "
                     "that tribes cannot prosecute non-Indians unless Congress authorizes it. "
                     "Congress did so in the Violence Against Women Act of 2013 for domestic and "
@@ -1666,10 +2045,23 @@ TRIBAL = {
                     "choice: Arizona, Florida, Idaho, Iowa, Montana, Nevada, North Dakota, South "
                     "Dakota, Utah and Washington. Some jurisdiction has since been returned to "
                     "the federal government and the tribes.",
+                    "State, where federal law still applies: in Oklahoma v. Castro-Huerta "
+                    "(2022) the Supreme Court held 5-4 that the federal government and a state "
+                    "have concurrent jurisdiction to prosecute crimes non-Indians commit "
+                    "against Indians in Indian country, and that a state has criminal "
+                    "jurisdiction in Indian country unless it is preempted. That is so in "
+                    "every state but the six Public Law 280 names, where the General Crimes "
+                    "Act does not apply and the state holds that jurisdiction in place of the "
+                    "federal government (18 U.S.C. 1162). Two years "
+                    "earlier, in McGirt v. Oklahoma (2020), the Court had held 5-4 that the "
+                    "Creek Nation's reservation was never disestablished and remains Indian "
+                    "country, so Oklahoma cannot prosecute Indians there for the crimes the "
+                    "Major Crimes Act covers.",
                 ]),
             ],
-            "sources": ["usc-18-1153", "oliphant", "usc-25-1304", "doj-vawa", "usc-18-1162",
-                        "usc-28-1360", "bia-pl280", "bryan"],
+            "sources": ["usc-18-1151", "usc-18-1152", "usc-18-1153", "oliphant", "usc-25-1304",
+                        "doj-vawa", "usc-18-1162", "usc-28-1360", "bia-pl280", "bryan",
+                        "castro-huerta", "mcgirt"],
         },
     ],
 }
@@ -1677,12 +2069,16 @@ TRIBAL = {
 
 ELECTIONS = {
     "slug": "elections",
-    "nav": "Elections",
     "title": "How elections work",
+    "card": ("When elections are held and who runs them, primaries and runoffs, campaign "
+             "money, running for office, the count, and when winners take office."),
     # This page was written and checked after the rest of the guide.
     # The vacancies section was revised on 2026-10-17: two House seats
-    # empty since April 2026 had no special election called.
-    "reviewed": "2026-10-17",
+    # empty since April 2026 had no special election called. Campaign money,
+    # running for office, the voting links and the timeline were added and
+    # Maine's ranked-choice scope corrected on 2026-10-18 (GUIDE-11, -23,
+    # -25, -29, -30).
+    "reviewed": "2026-10-18",
     # Text about dated events goes stale on those dates: validate warns from
     # each one until the page is checked again and "reviewed" moved past it.
     "revisit": [
@@ -1702,8 +2098,24 @@ ELECTIONS = {
              "who may vote in a primary, how a winner is decided, when the count ends - is set "
              "by each state. This page explains the parts readers ask about in November and "
              "December, with examples from states' own laws. It is a guide, not legal advice: "
-             "for your own ballot, use [your state's official voting pages](site:states/index.html)."),
+             "for your own ballot, use [your state's official voting pages](voting:)."),
     "sections": [
+        {
+            "id": "before",
+            "heading": "Before you vote",
+            "blocks": [
+                ("p", "Registration deadlines, voter identification, early voting and voting by "
+                      "mail are set by each state, and are on its election office's own pages. "
+                      "Each state's page on this site links them, as the National Association "
+                      "of Secretaries of State's Can I Vote directory lists them, for the 50 "
+                      "states and the District of Columbia: checking your registration, finding "
+                      "your polling place, voting absentee or early, and registering."),
+                ("voting-picker",),
+                ("p", "[Vote.gov](https://vote.gov/), from the federal government, links each "
+                      "state's registration too."),
+            ],
+            "sources": ["nass-can-i-vote", "vote-gov"],
+        },
         {
             "id": "when",
             "heading": "When federal elections are held",
@@ -1782,6 +2194,65 @@ ELECTIONS = {
                         "la-sos-house-2026", "va-24-2-509", "va-24-2-510", "ct-chap-153"],
         },
         {
+            "id": "funding",
+            "heading": "How campaigns are funded",
+            "blocks": [
+                ("p", "Under federal law a person becomes a candidate for Congress once their "
+                      "campaign has raised or spent more than $5,000 (52 U.S.C. 30101(2)). "
+                      "Within 15 days they must file a statement of candidacy with the Federal "
+                      "Election Commission, naming a principal campaign committee, which "
+                      "registers within 10 days more and reports what it raises and spends. "
+                      "This site takes its line from that sum, counting money raised only: a "
+                      "challenger has a profile once their campaign reports $5,000 or more "
+                      "raised, while each race's count of who has filed includes everyone, and "
+                      "a nominee under it is named all the same."),
+                ("p", "For the 2025-26 elections an individual may give a candidate's committee "
+                      "up to $3,500 per election, a primary, general, runoff and special "
+                      "election each counting separately, and a multicandidate PAC up to $5,000 "
+                      "per election. An individual may give a national party committee up to "
+                      "$44,300 a year, and a political action committee (PAC), including one a "
+                      "corporation or a union has set up, up to $5,000 a year. The limits on "
+                      "gifts to a candidate and to a national party rise with inflation in "
+                      "odd-numbered years."),
+                ("p", "Spending that is not coordinated with a candidate is not a contribution, "
+                      "and has no limit. An independent expenditure is a communication "
+                      "expressly advocating the election or defeat of a clearly identified "
+                      "candidate, made without the cooperation of the candidate, their campaign "
+                      "or a party (52 U.S.C. 30101(17)), and whoever makes one reports it to "
+                      "the FEC, in some cases within 24 or 48 hours. Committees that make only "
+                      "independent expenditures, often called super PACs, may accept unlimited "
+                      "contributions, corporations' and unions' among them."),
+                ("p", "The money on each profile here is what the candidate's own campaign "
+                      "committees reported to the FEC for the election: what they raised, what "
+                      "they spent and the cash they had left, as of the date shown. It does not "
+                      "include what parties, PACs or super PACs spend on their own for or "
+                      "against the candidate."),
+            ],
+            "sources": ["usc-52-30101", "fec-register", "fec-limits", "fec-ie"],
+        },
+        {
+            "id": "running",
+            "heading": "Running for office",
+            "blocks": [
+                ("p", "A candidate for Congress registers with the FEC once their campaign "
+                      "passes $5,000 ([above](#funding)); the FEC's guide to [registering as a "
+                      "candidate](https://www.fec.gov/help-candidates-and-committees/filing-reports/registering-candidate/) "
+                      "explains how. Getting on the ballot is a separate matter, set by each "
+                      "state's law: where and by when to file, whether a fee or a petition is "
+                      "needed, and how a party nominates. Each state's chief election official "
+                      "publishes those rules; the U.S. Election Assistance Commission lists who "
+                      "runs elections in each state."),
+                ("p", "The FEC regulates campaigns only for federal office: president, vice "
+                      "president, senator and representative, and Congress's delegates and "
+                      "resident commissioner (52 U.S.C. 30101(3)). Candidates for state and "
+                      "local offices file, and report their money, under state law. [The 2026 "
+                      "ballot map](site:government/states.html#/?mode=ballot) shows which state "
+                      "offices each state elects this year, with the state's own record for "
+                      "each."),
+            ],
+            "sources": ["fec-register", "usc-52-30101", "eac-in-charge", "const-art1"],
+        },
+        {
             "id": "runoffs",
             "heading": "Runoffs",
             "blocks": [
@@ -1805,8 +2276,13 @@ ELECTIONS = {
             "heading": "Ranked-choice voting",
             "blocks": [
                 ("p", "Maine and Alaska decide their federal general elections by ranked-choice "
-                      "voting, and Maine also uses it in its state-level primaries. Voters rank the "
-                      "candidates in order of preference instead of choosing one."),
+                      "voting. Maine also uses it in its primaries for Congress, governor and "
+                      "the legislature, but not in its general elections for governor or the "
+                      "legislature: "
+                      "its Supreme Judicial Court has advised, in 2017 and again in April 2026, "
+                      "that the state constitution requires those to be decided by plurality. "
+                      "Voters rank the candidates in "
+                      "order of preference instead of choosing one."),
                 ("p", "The count goes in rounds. If a candidate has more than half of the first "
                       "choices, that candidate wins. If not, under Alaska's law the last-place "
                       "candidate is eliminated and each of that candidate's ballots moves to the "
@@ -1819,7 +2295,8 @@ ELECTIONS = {
                       "waits for that window to close; in Maine the rounds are run only after the "
                       "ballots reach Augusta."),
             ],
-            "sources": ["me-rcv-faq", "ak-15-15-350", "ak-15-20-081"],
+            "sources": ["me-rcv-faq", "me-21a-723a", "me-sjc-2026", "ak-15-15-350",
+                        "ak-15-20-081"],
         },
         {
             "id": "counting",
@@ -1860,6 +2337,54 @@ ELECTIONS = {
                       "5 p.m. on the third business day after the canvass is completed."),
             ],
             "sources": ["az-16-661", "fl-102-141", "tx-el-212"],
+        },
+        {
+            "id": "after",
+            "heading": "From Election Day to January 3",
+            "blocks": [
+                ("p", "The dates the law and the states set between the vote and the new "
+                      "Congress, and beside them what this site's races show at each point, "
+                      "in the words its profiles use."),
+                ("timeline", {
+                    "items": [
+                        # Each step's words, and between them the statuses
+                        # this site shows then, as (key, words without the
+                        # script); kyc-guide.js writes KYC.raceStatus's own.
+                        ("2026-11-03", "Nov 3", "Election Day", [
+                            "Polls close and the count begins. Louisiana's House seats hold "
+                            "their open primary. Until then a nominee here reads",
+                            ("nominee", "On the November ballot"), "."]),
+                        ("2026-11-04", "Nov 4", "The results are read", [
+                            "From the day after, this site reads the published results. Until a "
+                            "race's winner is marked, its nominees read",
+                            ("awaiting", "Awaiting result"), "; then the winner reads",
+                            ("elected", "Elected"), "and the others",
+                            ("defeated", "Lost in November"), "."]),
+                        ("2026-11-10", "Nov 10", "California's late mail", [
+                            "The last day for ballots postmarked by Election Day to reach a "
+                            "California county."]),
+                        ("2026-12-01", "Dec 1", "Georgia's runoff", [
+                            "Where no one won a majority in a Georgia general election, the top "
+                            "two meet again. They read", ("runoff", "In the runoff"),
+                            "until it is decided."]),
+                        ("2026-12-03", "Dec 3", "California's counties certify", [
+                            "The deadline for California's counties to certify their results."]),
+                        ("2026-12-07", "Dec 7", "Texas's state canvass", [
+                            "The last day for Texas's state canvass."]),
+                        ("2026-12-11", "Dec 11", "California certifies", [
+                            "California's Secretary of State certifies the statewide results."]),
+                        ("2026-12-12", "Dec 12", "Louisiana's House general election", [
+                            "Where no one won a majority on November 3, the top two meet."]),
+                        ("2027-01-03", "Jan 3, 2027", "The new Congress", [
+                            "At noon the terms of the members elected on November 3 begin "
+                            "(Twentieth Amendment)."]),
+                    ],
+                    "caption": ("From the sources below. A step already past is marked Done, and "
+                                "the next one to come is marked Next."),
+                }),
+            ],
+            "sources": ["usc-2-7", "ca-sos-2026-dates", "ga-runoff-2026", "tx-sos-2026-calendar",
+                        "la-sos-house-2026", "const-amdt20"],
         },
         {
             "id": "taking-office",
@@ -1917,6 +2442,9 @@ SEE = {
         ("Every state's districts, on a map", "site:states/index.html")],
     ("congress", "committees"): [
         ("Each member's committees, in their profile", "site:index.html#/?role=member")],
+    ("congress", "districts"): [("Every state's district map", "site:states/index.html")],
+    ("congress", "reaching"): [
+        ("Your state's members of Congress", "site:states/index.html")],
     ("executive", "president"): [
         ("The President and Vice President", "site:federal/index.html#executive")],
     ("executive", "departments"): [
@@ -1942,6 +2470,7 @@ SEE = {
         ("The races on the ballot", "site:index.html#/?view=race"),
         ("The races on the partisan map", "site:map.html")],
     ("elections", "primaries"): [("Who is still on the ballot", "site:index.html")],
+    ("elections", "funding"): [("Each candidate's money, in their profile", "site:index.html")],
 }
 
 # Sections that list who holds the offices they explain, from the site's

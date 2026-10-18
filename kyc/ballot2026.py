@@ -214,7 +214,7 @@ STATES = {
             "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeCode=ATG"),
         "sos": ("appointed", False,
             "Appointed by the governor, confirmed by the Senate (s.20.10 F.S.)",
-            "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=0000-0099/0020/Sections/0020.10.html"),
+            "https://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=0000-0099/0020/Sections/0020.10.html"),
         "upper": ("Senate", 40, 20,
             "the 20 even-numbered districts (2-40)",
             "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeCode=STS"),

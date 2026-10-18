@@ -1495,6 +1495,31 @@ def _voting(args):
     return 0
 
 
+def _tribes(args):
+    """Every tribal government and its leader, as the BIA's Tribal Leaders
+    Directory lists them (kyc/tribes.py), for the guide's tribal map."""
+    from . import tribes
+    if args.check:
+        cache = tribes.load_cache(args.root)
+        if not cache:
+            print(f"[error] no {tribes.CACHE_PATH}; run 'tribes'", file=sys.stderr)
+            return 2
+    else:
+        try:
+            cache = tribes.fetch()
+        except tribes.TribesError as exc:
+            print(f"[error] {exc}", file=sys.stderr)
+            return 2
+        print(f"[ok] wrote {tribes.save_cache(cache, args.root)}")
+    placed, _ = tribes.placed(cache)
+    print(f"  {cache.get('count')} rows, edited {cache.get('edited')}: "
+          f"{sum(len(v) for v in placed.values())} listed in {len(placed)} states "
+          f"(source: {cache.get('source')})")
+    for line in tribes.problems(cache):
+        print(f"  [warn] {line}")
+    return 0
+
+
 def _officers(args):
     """Every lieutenant governor and secretary of state, from the NLGA's and
     NASS's own rosters, cross-checked where they overlap (kyc/officers.py)."""
@@ -1992,6 +2017,11 @@ def build_parser():
     courts_cmd.add_argument("--check", action="store_true",
                             help="report the committed cache; make no network call")
 
+    tribes_cmd = add("tribes", help="every tribal government and its leader (BIA Tribal Leaders "
+                                    "Directory)")
+    tribes_cmd.add_argument("--check", action="store_true",
+                            help="report the committed cache; make no network call")
+
     voting_cmd = add("voting", help="each state's official voting pages (NASS Can I Vote)")
     voting_cmd.add_argument("--check", action="store_true",
                             help="report the committed cache; make no network call")
@@ -2093,6 +2123,8 @@ def main(argv=None):
         return _officers(args)
     if args.command == "voting":
         return _voting(args)
+    if args.command == "tribes":
+        return _tribes(args)
     if args.command == "verify":
         return _verify(args)
     if args.command == "congress":

@@ -97,6 +97,77 @@ class TestTrim(unittest.TestCase):
         self.assertEqual(trimmed["fec"], [])
         self.assertEqual(trimmed["fecAll"], ["H2WA01054"])
 
+    def test_leadership_posts_held_now_in_this_chamber_are_kept(self):
+        # The guide defined the Speaker's job and never said who holds it.
+        person = entry(chamber="rep", district=4)
+        person["leadership_roles"] = [
+            {"title": "Speaker of the House", "chamber": "house", "start": "2025-01-03"},
+            {"title": "House Republican Conference Vice Chair", "chamber": "house",
+             "start": "2021-01-03", "end": "2023-01-03"},
+            {"title": "Senate Majority Whip", "chamber": "senate", "start": "2025-01-03"},
+        ]
+        trimmed = legislators.trim(person, as_of="2026-10-17")
+        self.assertEqual(trimmed["leadership"],
+                         [{"title": "Speaker of the House", "chamber": "house",
+                           "start": "2025-01-03"}])
+        # A post whose end has not come is held.
+        person["leadership_roles"][1].update(start="2025-01-03", end="2027-01-03")
+        self.assertEqual(len(legislators.trim(person, as_of="2026-10-17")["leadership"]), 2)
+        self.assertNotIn("leadership", legislators.trim(entry(chamber="rep", district=4)))
+
+    def test_a_previous_congress_post_left_open_upstream_is_not_held(self):
+        # congress-legislators leaves the sitting Congress's posts without an
+        # end and closes them only after the next Congress begins: read on
+        # January 4, 2027, the 119th's Speaker still looks current. A post
+        # counts only when its entry began in the Congress sitting on the
+        # day the snapshot was read (rule 68).
+        person = entry(chamber="rep", district=4, start="2027-01-03", end="2029-01-03")
+        person["leadership_roles"] = [
+            {"title": "Speaker of the House", "chamber": "house", "start": "2025-01-03"},
+        ]
+        self.assertNotIn("leadership", legislators.trim(person, as_of="2027-01-04"))
+        self.assertEqual(legislators.trim(person, as_of="2026-12-31")["leadership"],
+                         [{"title": "Speaker of the House", "chamber": "house",
+                           "start": "2025-01-03"}])
+        # Once the new Congress's post is recorded it is held again, and a
+        # post taken mid-Congress (Mike Johnson's, 2023-10-25) is the
+        # Congress's own.
+        person["leadership_roles"].append(
+            {"title": "Speaker of the House", "chamber": "house", "start": "2027-01-03"})
+        self.assertEqual(len(legislators.trim(person, as_of="2027-01-04")["leadership"]), 1)
+        person["leadership_roles"] = [
+            {"title": "Speaker of the House", "chamber": "house", "start": "2023-10-25",
+             "end": "2025-01-03"}]
+        self.assertEqual(len(legislators.trim(person, as_of="2024-06-01")["leadership"]), 1)
+
+    def test_a_snapshot_carried_into_a_new_congress_names_no_old_leader(self):
+        # The rehearsal's January membership copies the snapshot as it was
+        # read in October, as a refresh does until congress-legislators
+        # records the new posts: the re-elected Speaker is seated and his
+        # entry still lists the 119th's post. Only a post begun in the
+        # Congress the snapshot is of is shown.
+        person = {"leadership": [
+            {"title": "Speaker of the House", "chamber": "house", "start": "2025-01-03"},
+            {"title": "House Majority Whip", "chamber": "house", "start": "2027-01-03"}]}
+        self.assertEqual(legislators.held_posts(person, 119),
+                         ["Speaker of the House", "House Majority Whip"])
+        self.assertEqual(legislators.held_posts(person, 120), ["House Majority Whip"])
+        # A post with no recorded start, or no Congress to check, is nobody's.
+        self.assertEqual(legislators.held_posts(
+            {"leadership": [{"title": "Speaker of the House", "chamber": "house"}]}, 119), [])
+        self.assertEqual(legislators.held_posts(person, None), [])
+
+    def test_a_post_the_record_words_otherwise_is_shown_in_the_chambers_words(self):
+        # "Senate Republican Committee Chair" beside a Senate committee's
+        # chair read as one more; the Senate calls it the Republican
+        # Senatorial Committee's.
+        person = {"leadership": [{"title": "Senate Republican Committee Chair",
+                                  "chamber": "senate", "start": "2025-01-03"}]}
+        self.assertEqual(legislators.held_posts(person, 119),
+                         ["Republican Senatorial Committee Chair"])
+        for old, (new, why) in overrides.LEADERSHIP_TITLES.items():
+            self.assertTrue(new and why and old != new)
+
     def test_an_evidenced_id_congress_legislators_lacks_is_added(self):
         # Ashley Hinson's Senate filing, under her legal name (overrides).
         bioguide, (filing, _why) = next(iter(overrides.MEMBER_FEC_IDS.items()))

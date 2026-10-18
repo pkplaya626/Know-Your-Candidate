@@ -95,6 +95,29 @@ class TestCommittees(unittest.TestCase):
         self.assertEqual(legislators.assignments(data, "Z999999"), [])
         self.assertEqual(legislators.assignments(None, "A000001"), [])
 
+    def test_a_minority_chair_title_takes_the_bodys_own_style(self):
+        # The narcotics caucus's rosters title both leads "Chairman"; the
+        # caucus styles its minority lead Co-Chair (overrides.COMMITTEE_TITLES).
+        from kyc import validate
+
+        membership = {"SCNC": [
+            {"name": "A", "party": "majority", "rank": 1, "title": "Chairman", "bioguide": "A000001"},
+            {"name": "B", "party": "minority", "rank": 1, "title": "Chairman", "bioguide": "B000002"}]}
+        committees = [{"name": "United States Senate Caucus on International Narcotics Control",
+                       "thomas_id": "SCNC", "type": "senate"}]
+        data = legislators.build_committees(membership, committees, fetched="x")
+        self.assertEqual(legislators.assignments(data, "A000001")[0]["title"], "Chairman")
+        self.assertEqual(legislators.assignments(data, "B000002")[0]["title"], "Co-Chair")
+        # Another body's minority "Chairman" is reported, not restyled.
+        odd = [{"name": "C", "committeeList": [
+            {"code": "SSXX", "title": "Chairman", "side": "minority"}]}]
+        codes = [i.code for i in validate.check_committee_titles(odd)]
+        self.assertIn("committee-minority-chair", codes)
+        self.assertIn("stale-committee-title", codes)
+        ok = [{"name": "B", "committeeList": [
+            {"code": "SCNC", "title": "Co-Chair", "side": "minority"}]}]
+        self.assertEqual(validate.check_committee_titles(ok), [])
+
 
 class TestMemberProfile(unittest.TestCase):
     row = {"Bioguide ID": "C001131", "Name": "Gregorio Casar", "Chamber": "House",

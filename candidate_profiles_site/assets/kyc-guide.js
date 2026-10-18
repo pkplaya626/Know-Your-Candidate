@@ -21,10 +21,19 @@
   // A majority's lead is titled Chair, Chairman, Chairwoman or Cochairman.
   var CHAIR = /^(co-?)?chair(man|woman)?$/i;
   var CHAMBERS = [
-    ["house", "House committees"],
-    ["senate", "Senate committees"],
-    ["joint", "Joint committees"],
+    ["house", "House committees", "committee", "committees"],
+    ["senate", "Senate committees", "committee", "committees"],
+    ["joint", "Joint committees", "committee", "committees"],
+    // Not committees, so the note under them does not call them that.
+    ["other", "Caucuses and commissions", "body", "bodies"],
   ];
+
+  /* A caucus or a commission on the rosters is not a committee of either
+   * chamber: the Senate's narcotics caucus was counted among its
+   * committees. Listed apart, by the name the rosters give it. */
+  function groupOf(info) {
+    return /\b(Caucus|Commission)\b/.test(info.name || "") ? "other" : info.chamber;
+  }
 
   /** The minority's lead: its ranking member - or, where a committee gives
    *  the minority the vice chair (Senate Ethics, Intelligence, Indian
@@ -131,13 +140,13 @@
     var html = "";
     CHAMBERS.forEach(function (chamber) {
       var rows = codes.map(function (c) { return leads[c]; }).filter(function (row) {
-        return row.info.chamber === chamber[0];
+        return groupOf(row.info) === chamber[0];
       }).sort(function (a, b) {
         return sortName(a.info.name).localeCompare(sortName(b.info.name));
       });
       if (!rows.length) {
         // One chamber's rosters can be out before the other's.
-        var waiting = chamber[0] !== "joint" && pendingIn(chamber[0]);
+        var waiting = (chamber[0] === "house" || chamber[0] === "senate") && pendingIn(chamber[0]);
         if (waiting) {
           html += '<h3 class="guide-subheading">' + KYC.escapeHtml(chamber[1]) + "</h3>" +
             '<p class="results-bar" role="status">' +
@@ -152,9 +161,10 @@
         ' <span class="faint">' + rows.length + "</span></h3>" +
         (unnamed ? '<p class="faint committees-unnamed" data-chamber="' + KYC.escapeAttr(chamber[0]) +
           '">' + (unnamed === rows.length
-            ? (unnamed === 1 ? "This committee’s roster gives" : "Each of these committees’ rosters gives")
-            : unnamed === 1 ? "One of these committees’ rosters gives"
-            : unnamed + " of these committees’ rosters give") +
+            ? (unnamed === 1 ? "This " + chamber[2] + "’s roster gives"
+              : "Each of these " + chamber[3] + "’ rosters gives")
+            : unnamed === 1 ? "One of these " + chamber[3] + "’ rosters gives"
+            : unnamed + " of these " + chamber[3] + "’ rosters give") +
           " no member of the minority a leading title, so no minority lead is shown for " +
           (unnamed === 1 ? "it" : "them") + ".</p>" : "") +
         '<div class="guide-table-wrap"><table class="guide-table guide-committees">' +
@@ -247,8 +257,14 @@
       }).join("");
     }
 
-    function sourceLinks(keys) {
-      return keys.map(function (key) {
+    /* A state's fact cites the view's general sources and its own: a source
+     * scoped to other states (kyc/government_maps.py "scoped") is not about
+     * this one. */
+    function sourceLinks(m, code) {
+      var scoped = m.scoped || {};
+      return m.sources.filter(function (key) {
+        return !scoped[key] || scoped[key].indexOf(code) !== -1;
+      }).map(function (key) {
         var s = data.sources[key];
         return s ? '<a href="' + KYC.escapeAttr(s[1]) + '" target="_blank" rel="noopener noreferrer">' +
           KYC.escapeHtml(s[0]) + "</a>" : "";
@@ -308,15 +324,48 @@
         if (!fact) return "";
         var e = value === undefined ? null : entry(m, value);
         var link = m.links && m.links[code];
+        var cited = sourceLinks(m, code);
+        // A view that names who is there (the tribal governments, each with
+        // its leader) lists them under its fact, in its own view only.
+        var rows = id === mode && m.lists && m.lists[code];
+        var listed = rows ? factList(rows) : "";
         return '<div class="guide-fact' + (id === mode ? " is-current" : "") + '">' +
           '<p class="guide-fact-title">' +
           (e ? '<span class="swatch" style="background:' + fill(e.token) + '"></span>' : "") +
           KYC.escapeHtml(m.label) + (e ? ' <span class="faint">' + KYC.escapeHtml(e.label) + "</span>" : "") +
-          "</p><p>" + KYC.escapeHtml(fact) + "</p>" +
-          (link ? '<p><a href="' + KYC.escapeAttr(link[1]) +
+          "</p><p>" + KYC.escapeHtml(fact) + "</p>" + listed +
+          (link ?'<p><a href="' + KYC.escapeAttr(link[1]) +
             '" target="_blank" rel="noopener noreferrer">' + KYC.escapeHtml(link[0]) + " ›</a></p>" : "") +
-          '<p class="guide-sources"><span>Sources:</span> ' + sourceLinks(m.sources) + "</p></div>";
+          (cited ? '<p class="guide-sources"><span>Sources:</span> ' + cited + "</p>" : "") + "</div>";
       }).join("");
+    }
+
+    /* Who is there, each with their leader as the source lists them. A
+     * leader the source marks as disputed says so in words. Alaska's 229
+     * governments were one list of 10,000px on a phone before anything
+     * else on the panel: past LIST_OPEN rows, the first LIST_SHOWN are
+     * shown and the rest open on request. */
+    var LIST_OPEN = 30, LIST_SHOWN = 20;
+    function factList(rows) {
+      var who = function (r) {
+        return (r[1] ? ' <span class="faint">' + KYC.escapeHtml(r[1]) +
+          (r[2] ? ", " + KYC.escapeHtml(r[2]) : "") + "</span>"
+          : ' <span class="faint">no leader listed</span>') +
+          (r[4] ? ' <span class="badge badge-neutral">leadership disputed</span>' : "");
+      };
+      var item = function (row) {
+        return "<li>" + KYC.escapeHtml(row[0]) + who(row) +
+          (row[3] && row[3].length ? "<ul>" + row[3].map(function (sub) {
+            return "<li>" + KYC.escapeHtml(sub[0]) + who(sub) + "</li>";
+          }).join("") + "</ul>" : "") + "</li>";
+      };
+      if (rows.length <= LIST_OPEN) {
+        return '<ul class="guide-fact-list">' + rows.map(item).join("") + "</ul>";
+      }
+      return '<ul class="guide-fact-list">' + rows.slice(0, LIST_SHOWN).map(item).join("") + "</ul>" +
+        '<details class="guide-fact-more"><summary>Show the other ' + (rows.length - LIST_SHOWN) +
+        " of " + rows.length + '</summary><ul class="guide-fact-list">' +
+        rows.slice(LIST_SHOWN).map(item).join("") + "</ul></details>";
     }
 
     function showHead() {
@@ -465,9 +514,143 @@
     }).join("") + "</ul>" + asOfNote((d.asOf || {}).judiciary);
   }
 
+  /* ------------------------------------------------------ chamber leaders */
+
+  /* Who holds each leadership post the page explains, from the posts
+   * congress-legislators records for each sitting member's bioguide id
+   * (profile.leadership): the Speaker and the floor leaders were defined
+   * and never named. The principal posts first, in the order the page
+   * explains them; a party's other posts (conference chairs, policy
+   * committees) after. */
+  var LEAD_ORDER = [/^Speaker/, /^President Pro Tempore/, /^(House |Senate )?Majority Leader$/,
+    /^(House |Senate )?Minority Leader$/, /^(House |Senate )?Majority Whip$/,
+    /^(House |Senate )?Minority Whip$/];
+
+  function leadRank(title) {
+    for (var i = 0; i < LEAD_ORDER.length; i++) if (LEAD_ORDER[i].test(title)) return i;
+    return LEAD_ORDER.length;
+  }
+
+  function renderLeaders(target, chamber) {
+    var rows = [];
+    (global.legislatorsData || []).forEach(function (person) {
+      if (!KYC.seated(person)) return;
+      if ((chamber === "senate") !== /Senate/.test(person.chamber || "")) return;
+      (person.leadership || []).forEach(function (title) {
+        rows.push({ person: person, title: title, rank: leadRank(title) });
+      });
+    });
+    if (!(global.legislatorsData || []).length) return;  // the fallback stays: each chamber's own list
+    if (!rows.length) {
+      // A new Congress's posts reach the record days after it sits, and the
+      // previous Congress's are never shown in their place
+      // (legislators.held_posts): say so, and where to look meanwhile.
+      var info = global.kycBuildMeta || {};
+      var own = chamber === "senate"
+        ? '<a href="https://www.senate.gov/senators/leadership.htm">the Senate&#8217;s own list</a>'
+        : '<a href="https://www.house.gov/leadership">the House&#8217;s own list</a>';
+      target.innerHTML = '<p class="faint guide-pending">The congress-legislators record lists nobody in a ' +
+        (chamber === "senate" ? "Senate" : "House") + " leadership post for the " +
+        (info.congress ? KYC.escapeHtml(KYC.ordinal(info.congress)) + " Congress" : "sitting Congress") +
+        " yet. Until it does, see " + own + ".</p>";
+      return;
+    }
+    rows.sort(function (a, b) {
+      return a.rank - b.rank || a.title.localeCompare(b.title);
+    });
+    target.innerHTML = '<ul class="guide-holders guide-leaders">' + rows.map(function (row) {
+      return "<li>" + personButton({ person: row.person, title: row.title }, /^$/) + "</li>";
+    }).join("") + "</ul>" +
+      '<p class="faint">From the congress-legislators project&#8217;s record of each member&#8217;s ' +
+      "leadership posts.</p>";
+  }
+
+  /* ------------------------------------------------- the reader's voting */
+
+  /* "Your state's official voting pages" sent every reader to the states'
+   * index, two clicks from the links they came for. With a state this
+   * browser remembers (KYC.rememberedState), the link opens that state's
+   * voting section; the picker opens any state's. */
+  function votingUrl(code) {
+    return KYC.stateUrl(code) + "#voting";
+  }
+
+  function initVoting() {
+    var code = KYC.rememberedState ? KYC.rememberedState() : "";
+    var known = code && doc.querySelector('#stateJump option[value="' + code + '"]');
+    Array.prototype.forEach.call(doc.querySelectorAll("a[data-voting-link]"), function (a) {
+      if (known) {
+        a.href = votingUrl(code);
+        a.title = known.textContent.replace(/\s*\([A-Z]{2}\)$/, "") + "'s official voting pages";
+      }
+    });
+    var form = doc.querySelector("form[data-voting-picker]");
+    if (!form) return;
+    var select = form.querySelector("select");
+    if (known && select.querySelector('option[value="' + code + '"]')) select.value = code;
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      if (select.value) global.location.href = votingUrl(select.value);
+    });
+  }
+
+  /* ------------------------------------------------------------ timeline */
+
+  /* The steps from Election Day to January 3: those past are marked done,
+   * the next one as next, by the reader's own date. A step's status words
+   * are the site's one table's (KYC.raceStatus, rule 63), never a copy. */
+  var AFTER_ELECTION = new Date(Date.UTC(2026, 10, 5, 12));
+  var BEFORE_ELECTION = new Date(Date.UTC(2026, 10, 1, 12));
+
+  /* Each step names the status as it reads at that step, whatever today
+   * is: a nominee "On the November ballot" before Election Day and
+   * "Awaiting result" after it, until a winner is marked. */
+  function statusSpec(key) {
+    return key === "awaiting" ? KYC.raceStatus("nominee", "card", { now: AFTER_ELECTION })
+      : KYC.raceStatus(key, "card", { now: BEFORE_ELECTION });
+  }
+
+  function initTimeline(now) {
+    now = now || new Date();
+    var today = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
+      ("0" + now.getDate()).slice(-2);
+    Array.prototype.forEach.call(doc.querySelectorAll(".guide-timeline-steps"), function (list) {
+      var next = false;
+      Array.prototype.forEach.call(list.children, function (li) {
+        var day = li.getAttribute("data-date") || "";
+        var isNext = !next && day >= today;
+        li.classList.toggle("is-past", day < today);
+        li.classList.toggle("is-next", isNext);
+        if (day >= today) next = true;
+        // In words, not only a border and a tick drawn by CSS: the
+        // highlighted step read as "today" (the figcaption says what each
+        // word means).
+        var old = li.querySelector(".guide-timeline-tag");
+        if (old) old.parentNode.removeChild(old);
+        var word = day < today ? "Done" : isNext ? "Next" : "";
+        var time = li.querySelector("time");
+        if (word && time) {
+          var tag = doc.createElement("span");
+          tag.className = "guide-timeline-tag";
+          tag.textContent = word;
+          time.appendChild(tag);
+        }
+      });
+    });
+    Array.prototype.forEach.call(doc.querySelectorAll(".guide-status[data-status]"), function (chip) {
+      var spec = KYC.raceStatus && statusSpec(chip.getAttribute("data-status"));
+      if (!spec) return;
+      chip.textContent = spec.label;
+      if (spec.cls) chip.classList.add(spec.cls);
+      chip.title = spec.title || "";
+    });
+  }
+
   var LIVE = { committees: renderCommittees, executive: renderExecutive, cabinet: renderCabinet,
-               justices: renderJustices };
-  KYC.guide = { live: LIVE };
+               justices: renderJustices,
+               "leaders-senate": function (t) { renderLeaders(t, "senate"); },
+               "leaders-house": function (t) { renderLeaders(t, "house"); } };
+  KYC.guide = { live: LIVE, initTimeline: initTimeline };
 
   function applyRoute(route) {
     if (!KYC.profile) return;
@@ -475,8 +658,15 @@
     if (KYC.profile.isOpen()) KYC.profile.close();
   }
 
+  /* One part of the page failing must not stop the rest (rule 76). */
+  function safely(fn) {
+    try { fn(); } catch (e) { if (global.console) global.console.error(e); }
+  }
+
   KYC.ready(function () {
-    initMap();
+    safely(initMap);
+    safely(initVoting);
+    safely(function () { initTimeline(); });
     var blocks = doc.querySelectorAll(".guide-live[data-live]");
     Array.prototype.forEach.call(blocks, function (block) {
       var fill = LIVE[block.getAttribute("data-live")];

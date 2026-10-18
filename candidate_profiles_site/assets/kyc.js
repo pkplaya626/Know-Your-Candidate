@@ -2256,6 +2256,7 @@
     stateUrl: stateUrl,
     siteRoot: siteRoot,
     rememberState: rememberState,
+    rememberedState: rememberedState,
     renderRememberedState: renderRememberedState,
   };
 })(window);
