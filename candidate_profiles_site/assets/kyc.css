@@ -3923,6 +3923,31 @@ button.local-county-link {
    (kyc-federal.js). Tables are the guide's (.guide-table, a card per row on
    a phone); a name opens the official dialog (kyc-official.js). */
 .fed-section { margin: 0 0 var(--s-6); }
+/* A court's active judges by the President who appointed them (FEDERAL-22):
+ * one square per judge, one row per President, each row named in words. A
+ * category colour, never a party's: a judge is shown without a party. */
+/* The line of succession: every row the same height and weight, whether
+   its name opens an official's record or a member's profile. */
+.fed-succession li { padding: var(--s-1) 0; }
+.fed-succession a { font-weight: 600; }
+.fed-succession .guide-person { display: inline; min-height: 0; padding: 0; }
+@media (pointer: coarse) {
+  .fed-succession li { min-height: 44px; padding: var(--s-2) 0; }
+}
+.fed-appointers { margin: 0 0 var(--s-4); max-width: 40rem; }
+.fed-appointers figcaption { margin: 0 0 var(--s-2); font-size: var(--t-sm); color: var(--text-muted); }
+.fed-appointers ul { list-style: none; margin: 0; padding: 0; }
+.fed-appointer {
+  display: grid; grid-template-columns: minmax(8rem, 11rem) 1fr; gap: var(--s-1) var(--s-3);
+  align-items: center; padding: 2px 0; font-size: var(--t-sm);
+}
+.fed-appointer-bar { display: flex; align-items: center; min-width: 0; }
+.fed-appointer-units { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; }
+.fed-appointer-units i { display: block; width: 10px; height: 10px; border-radius: 2px; background: var(--cat-1); }
+.fed-appointer-n { margin-left: var(--s-2); color: var(--text); font-variant-numeric: tabular-nums; }
+.fed-appointers-courts { display: grid; gap: var(--s-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); }
+.fed-appointers-courts .fed-appointers { margin: 0; }
+@media (forced-colors: active) { .fed-appointer-units i { background: CanvasText; } }
 .fed-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));

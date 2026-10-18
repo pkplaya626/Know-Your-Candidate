@@ -352,6 +352,20 @@
     return html || '<p class="faint">Nothing matches.</p>';
   }
 
+  /* The county's federal district court, and its division, as 28 U.S.C.
+   * 81-131 place it (kyc/court_districts.py, data/courtcounties.js): which
+   * federal court covers this county. */
+  function courtLine(fips) {
+    var s = (global.kycCourtCounties || {})[code];
+    var c = s && (s.all || (s.counties || {})[fips]);
+    if (!c || !s.names[c[0]]) return "";
+    return '<p class="local-court">Federal district court: <a href="../courts/' +
+      KYC.escapeAttr(c[0]) + '.html">' + KYC.escapeHtml(s.names[c[0]]) + "</a>" +
+      (c[1] ? ", " + KYC.escapeHtml(c[1]) + " Division" : "") +
+      (c[2] ? '<br><span class="faint">The statute keeps part of it in another district: ' +
+        KYC.escapeHtml(c[2]) + ".</span>" : "") + "</p>";
+  }
+
   function showCounty(fips) {
     var rows = state.governments[fips] || [];
     var county = state.counties[fips];
@@ -360,7 +374,7 @@
     el("localPanelTitle").textContent = county.name;
     el("localPanelBody").innerHTML =
       '<p class="local-total">' + (n ? plural(n, "local government") : "No local governments of its own") +
-      " in 2022</p>" +
+      " in 2022</p>" + courtLine(fips) +
       (why ? '<p class="gov-officer-note local-why">' + KYC.escapeHtml(why.note) + "</p>" +
         (why.filed ? countyButton(why.filed) : "") : "") +
       (rows.length

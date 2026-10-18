@@ -190,6 +190,94 @@ class TestVacanciesAgainstTheDirectory(unittest.TestCase):
                     self.assertEqual(bool(shown.get("notInDirectory")), expected, (cid, raw))
 
 
+def _judge(jid, sort, court, senior=None):
+    return jid, {"id": jid, "sortName": sort, "status": "senior" if senior else "active",
+                 "seats": [{"court": court, "seniorSince": senior}]}
+
+
+class TestWhoSits(unittest.TestCase):
+    """FEDERAL-01, -V1, -16 and -25: the two sources disagree about Judge
+    Varlan; announced vacancies have not happened; a confirmed judge with
+    no commission is not sitting."""
+
+    CACHE = {"asOf": "2026-10-17", "current": [
+        {"court": "tn-e", "reason": "Senior", "since": "2026-10-05",
+         "vacatedBy": {"listedAs": "Varlan,Thomas A.", "name": "Thomas A. Varlan"}},
+        # After the list's own date: not yet senior by either source.
+        {"court": "tn-m", "reason": "Senior", "since": "2026-11-01",
+         "vacatedBy": {"listedAs": "Later,Ann", "name": "Ann Later"}},
+        {"court": "ca8", "reason": "Senior", "since": "2026-01-01",
+         "nominee": {"listedAs": "Rudofsky,Lee Philip", "name": "Lee Philip Rudofsky"},
+         "vacatedBy": {"listedAs": "Shepherd,Bobby E.", "name": "Bobby E. Shepherd"}},
+    ], "future": [
+        {"court": "ar-e", "reason": "Elevated",
+         "vacatedBy": {"listedAs": "Rudofsky,Lee P.", "name": "Lee P. Rudofsky"}},
+        {"court": "co", "reason": "Elevated",
+         "vacatedBy": {"listedAs": "Nobody,Named", "name": "Named Nobody"}},
+    ]}
+
+    def test_a_judge_senior_by_the_list_and_active_by_the_directory_is_found(self):
+        judges = dict([_judge("fjc-1", "Varlan, Thomas", "tn-e"),
+                       _judge("fjc-2", "Later, Ann", "tn-m"),
+                       _judge("fjc-3", "Shepherd, Bobby", "ca8", senior="2026-01-01")])
+        found = vacancies.listed_senior(self.CACHE, judges)
+        self.assertEqual(list(found), [("tn-e", "fjc-1")])
+
+    def test_two_judges_of_one_surname_settle_nothing(self):
+        judges = dict([_judge("fjc-1", "Varlan, Thomas", "tn-e"),
+                       _judge("fjc-9", "Varlan, Other", "tn-e")])
+        self.assertEqual(vacancies.listed_senior(self.CACHE, judges), {})
+
+    def test_an_elevation_names_the_court_the_judge_is_nominated_to(self):
+        self.assertEqual(vacancies.nominated_to(self.CACHE["future"][0], self.CACHE), "ca8")
+        self.assertIsNone(vacancies.nominated_to(self.CACHE["future"][1], self.CACHE))
+
+    def test_the_committed_data_counts_varlan_senior_and_says_so(self):
+        payload, courts, search, _ = built()
+        cache = vacancies.load_cache(ROOT)
+        judges = judiciary.load_cache(ROOT)["judges"]
+        listed = vacancies.listed_senior(cache, judges)
+        held = judiciary.load_cache(ROOT)["courts"]
+        for (cid, jid), row in listed.items():
+            court = next(c for c in payload["courts"] if c["id"] == cid)
+            self.assertEqual(court["active"], held[cid]["active"] - court["listedSenior"])
+            judge = next(j for j in courts[cid]["judges"] if j["id"] == jid)
+            self.assertEqual(judge["listedSenior"], {"since": row["since"]})
+            self.assertEqual(next(r for r in search if r[0] == jid)[3], "listed-senior")
+        # Nobody else is moved.
+        moved = {jid for (_c, jid) in listed}
+        self.assertFalse([j for c in courts.values() for j in c["judges"]
+                          if j.get("listedSenior") and j["id"] not in moved])
+
+    def test_announced_rows_are_marked_future_and_carry_the_other_court(self):
+        _payload, courts, _, _ = built()
+        for court in courts.values():
+            self.assertTrue(all(r.get("future") for r in court["future"]))
+            self.assertFalse(any(r.get("future") for r in court["vacancies"]))
+            for row in court["future"]:
+                if row.get("nominatedTo"):
+                    self.assertEqual(row["reason"], "Elevated")
+                    self.assertIn(row["nominatedTo"]["id"], federal_courts.COURTS)
+
+    def test_a_confirmed_judge_without_a_commission_is_listed_apart(self):
+        payload, courts, search, _ = built()
+        pending = [p for p in judiciary.load_cache(ROOT).get("pending") or [] if isinstance(p, dict)]
+        for row in pending:
+            listed = courts[row["court"]].get("pending") or []
+            self.assertIn(row["name"], [p["name"] for p in listed])
+            self.assertNotIn(row["name"], [j["name"] for j in courts[row["court"]]["judges"]])
+            self.assertNotIn(row["name"], [r[1] for r in search])
+
+    def test_the_hub_lists_every_vacancy_with_its_court(self):
+        payload, _courts, _, _ = built()
+        cache = vacancies.load_cache(ROOT)
+        rows = payload["vacancies"]["rows"]
+        placed = [r for r in cache["current"] + cache["future"] if r.get("court")]
+        self.assertEqual(len(rows), len(placed))
+        self.assertEqual(payload["vacancies"]["futureNominees"],
+                         sum(1 for r in cache["future"] if r.get("nominee")))
+
+
 class TestThePages(unittest.TestCase):
     def test_a_court_page_loads_its_own_court_and_carries_no_names(self):
         html = pages.render_court_page("ca1", "example.org")

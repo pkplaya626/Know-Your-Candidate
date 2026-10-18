@@ -603,6 +603,17 @@ def circuits():
     return out
 
 
+def federal_for_state(code):
+    """``[[court id, name], ...]``: a state's own district courts, then the
+    court of appeals its appeals go to (28 U.S.C. 41, 81-131); empty for a
+    place with neither (American Samoa)."""
+    districts = [[cid, c["name"]] for cid, c in COURTS.items()
+                 if c["kind"] in ("district", "territorial") and code in (c.get("states") or ())]
+    appeals = [[cid, c["name"]] for cid, c in COURTS.items()
+               if c["kind"] == "appeals" and code in (c.get("states") or ())]
+    return districts + appeals
+
+
 def circuit_colours(near):
     """A colour token for each circuit such that no two circuits whose
     states share a border share one: greedy, in circuit order, over *near*

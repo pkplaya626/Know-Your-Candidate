@@ -42,6 +42,13 @@
     return KYC.dateWords(w.date);
   }
 
+  /** Why a date is shown only to its year or month: Wikidata and the
+   *  person's article agree no further. */
+  function precisionNote(w) {
+    return "Wikidata and their Wikipedia article agree only on the " +
+      (w && w.precision === "month" ? "month" : "year");
+  }
+
   /** One holder of an office this term, in words: confirmed, acting, in
    *  office from and to - each date only where the sources agree. */
   function tenureText(row) {
@@ -67,7 +74,8 @@
         : "in office, then left; " + (row.end.differs ? "the sources differ on the dates"
           : "the dates are not in both sources"));
     } else if (start) {
-      parts.push("in office since " + start);
+      parts.push("in office since " + start + (row.start.shown.precision !== "day"
+        ? " (" + precisionNote(row.start.shown) + ")" : ""));
     } else if (row.start && row.start.differs) {
       parts.push("the sources differ on when they took office");
     }
@@ -88,8 +96,12 @@
       };
     }
     if (person.portrait && person.portrait.url) {
-      return { src: person.portrait.url, srcset: "", credit: "Portrait: " + person.portrait.credit,
-               source: person.portrait.source };
+      // A judge's from Wikimedia Commons, through the FJC id (rule 42:
+      // only sizes of that one file); a justice's, the Court's own.
+      var set = person.portrait.set || [];
+      return { src: person.portrait.url,
+               srcset: set.map(function (s) { return s[1] + " " + s[0] + "w"; }).join(", "),
+               credit: "Portrait: " + person.portrait.credit, source: person.portrait.source };
     }
     return null;
   }
@@ -114,6 +126,11 @@
     });
     (data.offices || []).forEach(function (office) {
       if (office.holder) out[office.holder.id] = { kind: "officer", person: office.holder, office: office };
+    });
+    // Who held a Cabinet office this term and left it: a former record at
+    // the same address, never "nobody here" (kyc/federal_build.py).
+    (data.former || []).forEach(function (p) {
+      if (!out[p.id]) out[p.id] = { kind: "former", person: p };
     });
     var scotus = data.supremeCourt || {};
     (scotus.members || []).concat(scotus.retired || []).forEach(function (j) {
@@ -264,7 +281,7 @@
     if (page.status === "unreadable") {
       return absent("The office’s own page could not be read when last checked; this says nothing either way");
     }
-    return absent("The office has no page naming its head");
+    return absent("Not checked: this site reads no page of the office’s own for its head");
   }
 
   // An officer's record is found by the Wikidata item the Cabinet's history
@@ -321,6 +338,25 @@
         ? "; one marked “not checked” is a scan, or could not be read" : "") + ".</p>");
   }
 
+  /** The federal posts the officer's latest report to OGE lists for the
+   *  year before it, in the report's own words and attributed to it
+   *  (kyc/oge.py other_positions): quoted beside the offices two sources
+   *  agree on, never merged into them (rule 69). Only from a report whose
+   *  filer's name was read in it (rule 70). */
+  function otherPositionsPanel(person) {
+    var listed = (person.disclosures || {}).otherPositions;
+    if (!listed || !(listed.rows || []).length) return "";
+    return panel("scroll", "Other federal posts, as their OGE report lists them",
+      '<ul class="bullets oge-positions">' + listed.rows.map(function (row) {
+        return "<li>" + KYC.escapeHtml(row) + "</li>";
+      }).join("") + "</ul>" +
+      '<p class="held-source">In the words of their ' + outLink(listed.url,
+        listed.words.charAt(0).toLowerCase() + listed.words.slice(1)) + ", filed with the " +
+      "Office of Government Ethics and posted " + KYC.escapeHtml(KYC.dateWords(listed.date)) + " (“Other Federal Government " +
+      "Positions Held During the Preceding 12 Months”), checked to name its filer. Not checked " +
+      "against a second source.</p>");
+  }
+
   function renderLeader(person) {
     el("officialModalKind").textContent = person.office;
     el("officialModalMeta").innerHTML =
@@ -333,6 +369,7 @@
     el("officialModalBody").innerHTML =
       '<div class="modal-column">' +
       panel("landmark", "Public offices held", KYC.officesHeld(person.politicalHistory, NO_RECORD)) +
+      otherPositionsPanel(person) +
       disclosuresPanel(person) +
       panel("link", "Links", links.length ? '<div class="links-row">' + links.join("") + "</div>"
         : absent("No links recorded")) + "</div>" +
@@ -340,6 +377,72 @@
       panel("info", "Where this comes from", '<p class="note-box">The term’s dates and ' +
         "party are from congress-legislators’ record of executive terms; the portrait is " +
         "the White House’s.</p>") + "</div>";
+    el("officialModalSource").textContent = "As of " + KYC.dateWords((federal().asOf || {}).executive || "");
+  }
+
+  /** The office's own links: the agency's website and contact page as
+   *  USA.gov lists them, and the page that names its head. */
+  function officeLinks(office) {
+    var site = office.site || {};
+    var out = [];
+    if (site.url) out.push(linkChip(site.url, office.body + " website"));
+    if (site.contact) out.push(linkChip(site.contact, "Contact " + office.body));
+    return out;
+  }
+
+  /** "Left office 2025-03-30" - or, where the sources do not agree on the
+   *  day, that they do not - for one row of an office's history. */
+  function leftText(row) {
+    var verb = row.acting ? "Acting service ended" : "Left office";
+    if (row.end && row.end.shown) return verb + " " + whenText(row.end.shown);
+    if (row.end && row.end.overlap) {
+      return verb + "; the date is not shown: both sources put it after the successor took office";
+    }
+    return verb + "; " + (row.end && row.end.differs ? "the sources differ on the date"
+      : "the date is not in both sources");
+  }
+
+  /** Someone who held a Cabinet office this term and has left it: what
+   *  the record says about their time in it, and a banner saying they
+   *  left - as a former member's profile does (rule 67). */
+  function renderFormer(person) {
+    var held = person.held || [];
+    var last = held[held.length - 1] || {};
+    el("officialModalKind").textContent = "Former, this term";
+    el("officialModalMeta").innerHTML = "<span>" + KYC.icon("landmark") + " <strong>" +
+      KYC.escapeHtml((last.acting ? "Acting " : "") + (last.office || "")) + "</strong></span>" +
+      '<span class="badge badge-warn">' + KYC.escapeHtml(leftText(last)) + "</span>";
+    var since = (federal().changes || {}).since;
+    var rows = held.map(function (row) {
+      return "<li><strong>" + KYC.escapeHtml((row.acting ? "Acting " : "") + row.office) + "</strong><br>" +
+        KYC.escapeHtml(tenureText(row)) +
+        (row.confirmed && row.confirmed.url ? "<br>" + outLink(row.confirmed.url,
+          "The Senate’s roll call on the confirmation") : "") +
+        "</li>";
+    }).join("");
+    var links = REFERENCE.filter(function (r) { return (person.links || {})[r[0]]; })
+      .map(function (r) { return linkChip(r[2](person.links[r[0]]), r[1]); });
+    if ((person.links || {}).wikidata) {
+      links.push(linkChip("https://www.wikidata.org/wiki/" + encodeURIComponent(person.links.wikidata), "Wikidata"));
+    }
+    el("officialModalBody").innerHTML =
+      '<div class="modal-column">' +
+      '<p class="state-note" id="officialLeft">' + KYC.escapeHtml(leftText(last)) + ". They no " +
+      "longer hold this office; this is the record of their time in it since " +
+      KYC.escapeHtml(since ? KYC.dateWords(since) : "the term began") + ".</p>" +
+      panel("calendar", "In office this term", '<ol class="bullets fed-history">' + rows + "</ol>" +
+        '<p class="faint">Confirmations from the Senate’s roll calls; who held the office from ' +
+        "Wikidata; dates where Wikidata and the person’s Wikipedia article agree.</p>") +
+      (person.politicalHistory ? panel("landmark", "Public offices held",
+        KYC.officesHeld(person.politicalHistory, NO_RECORD)) : "") +
+      "</div>" +
+      '<div class="modal-column">' +
+      panel("link", "Links", links.length ? '<div class="links-row">' + links.join("") + "</div>"
+        : absent("No links recorded")) +
+      panel("info", "Where this comes from", '<p class="note-box">The Cabinet’s changes since ' +
+        "the term began: who held each office from Wikidata, checked against the person’s " +
+        "Wikipedia article, and the Senate’s roll-call votes. A Cabinet officer is shown " +
+        "without a party.</p>") + "</div>";
     el("officialModalSource").textContent = "As of " + KYC.dateWords((federal().asOf || {}).executive || "");
   }
 
@@ -365,10 +468,15 @@
     el("officialModalBody").innerHTML =
       '<div class="modal-column">' +
       panel("check", "The record", '<div class="field-grid">' + rows + "</div>") +
-      (held ? panel("calendar", "This office since " + (since || "the term began"), held) : "") +
+      (held ? panel("calendar", "This office since " + (since ? KYC.dateWords(since) : "the term began"),
+        held) : "") +
       panel("landmark", "Public offices held", KYC.officesHeld(holder.politicalHistory, NO_RECORD)) +
+      otherPositionsPanel(holder) +
       "</div>" +
       '<div class="modal-column">' + disclosuresPanel(holder) +
+      (officeLinks(office).length ? panel("link", "Links", '<div class="links-row">' +
+        officeLinks(office).join("") + "</div>" + '<p class="faint">The agency’s website and ' +
+        "contact page as USA.gov’s index of agencies lists them.</p>") : "") +
       panel("info", "Where this comes from", '<p class="note-box">Listed by the White House ' +
         "among the President’s Cabinet; checked on the office’s own page and " +
         "against the Senate’s roll-call votes. A Cabinet officer is shown without a " +
@@ -413,8 +521,12 @@
     var c = court(first.court);
     el("officialModalKind").textContent = judge.justice ? "Supreme Court" :
       (c ? c.name : "Federal judge");
+    // Senior by the courts' list, active by the directory: both said, and
+    // neither picked silently (kyc/vacancies.py listed_senior).
     var status = judge.retiredJustice ? "Retired justice, not a member of the Court" :
-      judge.status === "senior" ? "Senior status" : "Active service";
+      judge.status === "senior" ? "Senior status" :
+      judge.listedSenior ? "Senior status from " + judge.listedSenior.since + " by the courts’ " +
+        "list of vacancies; the FJC directory still lists active service" : "Active service";
     el("officialModalMeta").innerHTML =
       "<span>" + KYC.icon("landmark") + " <strong>" +
       KYC.escapeHtml(judge.justice ? judge.justice.role : (first.title || "Judge")) + "</strong></span>" +
@@ -426,9 +538,16 @@
       (judge.born.year ? (judge.born.city || judge.born.state ? ", " : "") + judge.born.year : "") : "";
     var bio = (judge.fullName ? field("Full name", KYC.escapeHtml(judge.fullName)) : "") +
       field("Born", born ? KYC.escapeHtml(born) : absent("Not in the directory"));
+    // The day a justice took the oath is the Court's; the commission, in
+    // the seat above, is the directory's. Both are dated; they differ.
     if (judge.justice) {
-      bio += field("Took the oath", KYC.escapeHtml(judge.justice.oath || "")) +
+      bio += field("Took the oath", KYC.escapeHtml(judge.justice.oath || "") +
+          ' <span class="faint">(the Court’s list)</span>') +
         field("Appointed from", KYC.escapeHtml(judge.justice.stateAppointedFrom || ""));
+    } else if (judge.courtService && judge.courtService.oath) {
+      bio += field("Took the oath", KYC.escapeHtml(judge.courtService.oath) +
+          ' <span class="faint">(the Court’s list)</span>') +
+        (judge.courtService.ended ? field("Left the Court", KYC.escapeHtml(judge.courtService.ended)) : "");
     }
     var education = (judge.education || []).map(function (e) {
       return "<li>" + KYC.escapeHtml([e.degree, e.school, e.year].filter(Boolean).join(", ")) + "</li>";
@@ -461,7 +580,17 @@
         ? panel("info", "Other nominations", '<p class="note-box">' + KYC.escapeHtml(judge.otherNominations) + "</p>")
         : "") +
       panel("link", "Links", '<div class="links-row">' +
-        (judge.fjc ? linkChip(judge.fjc, "Federal Judicial Center") : "") + "</div>") +
+        (judge.fjc ? linkChip(judge.fjc, "Federal Judicial Center") : "") +
+        // Through the FJC id on Wikidata (P2736), never a name search
+        // (kyc/judge_links.py, FEDERAL-05).
+        (judge.wikipedia ? linkChip("https://en.wikipedia.org/wiki/" +
+          encodeURIComponent(String(judge.wikipedia).replace(/ /g, "_")), "Wikipedia") : "") +
+        (judge.wikidata ? linkChip("https://www.wikidata.org/wiki/" + encodeURIComponent(judge.wikidata),
+          "Wikidata") : "") +
+        (c && c.site ? linkChip(c.site, "The court’s website") : "") + "</div>" +
+        (judge.wikipedia || judge.wikidata ? '<p class="faint">Wikipedia and Wikidata through the ' +
+          "Wikidata item that carries this judge’s Federal Judicial Center id, checked to carry " +
+          "their surname; never a search by name.</p>" : "")) +
       "</div>";
     el("officialModalSource").textContent = "Federal Judicial Center, Biographical Directory of " +
       "Article III Federal Judges, as of " + KYC.dateWords((federal().asOf || {}).judiciary || "");
@@ -509,6 +638,7 @@
     if (!found) renderMissing(id);
     else if (found.kind === "leader") renderLeader(person);
     else if (found.kind === "officer") renderOfficer(person, found.office);
+    else if (found.kind === "former") renderFormer(person);
     else renderJudge(person);
     // Whose picture it is: credited beside the record's own source.
     if (pic) {
@@ -611,6 +741,6 @@
   KYC.official = {
     open: open, close: close, isOpen: isOpen, ensure: ensure,
     applyRoute: applyRoute, officials: officials, pictureTag: pictureTag,
-    whenText: whenText, tenureText: tenureText,
+    whenText: whenText, tenureText: tenureText, precisionNote: precisionNote,
   };
 })(window);

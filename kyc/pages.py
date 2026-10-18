@@ -1179,10 +1179,104 @@ _FEDERAL_SCRIPTS = (
 )
 
 
-def render_federal_page(host, codes=(), dates=None):
+def _prerendered(rows, note):
+    """The page's first contents, written into its HTML so a reader without
+    script, and a crawler, see the names (FEDERAL-12); the page's own module
+    draws the full view over them from the same data."""
+    return "\n".join(['                <div class="fed-prerendered">'] + rows + [
+        f'                    <p class="faint">{note}</p>', "                </div>"])
+
+
+def _federal_static(federal):
+    """The hub's names, as plain lists, from the payload ``data/federal.js``
+    holds (kyc/federal_build.py)."""
+    if not federal:
+        return '                    <p class="results-bar" role="status">Loading&hellip;</p>'
+    rows = ['                    <h2 class="guide-subheading">The President and Vice President</h2>',
+            '                    <ul class="fed-static">']
+    for key in ("president", "vicePresident"):
+        person = federal[key]
+        rows.append(f"                        <li>{_e(person['office'])}: {_e(person['name'])}</li>")
+    rows += ["                    </ul>",
+             '                    <h2 class="guide-subheading">The Cabinet</h2>',
+             '                    <ul class="fed-static">']
+    for office in federal["offices"]:
+        holder = office.get("holder")
+        rows.append(f"                        <li>{_e(office['office'])}: "
+                    + (_e(holder["name"]) if holder else "nobody listed by the White House") + "</li>")
+    rows += ["                    </ul>",
+             '                    <h2 class="guide-subheading">The Supreme Court</h2>',
+             '                    <ul class="fed-static">']
+    for justice in federal["supremeCourt"]["members"]:
+        role = (justice.get("justice") or {}).get("role") or "Justice"
+        rows.append(f"                        <li>{_e(role)}: {_e(justice['name'])}</li>")
+    rows += ["                    </ul>",
+             '                    <h2 class="guide-subheading">The federal courts</h2>',
+             '                    <ul class="fed-static">']
+    for court in federal["courts"]:
+        if court["kind"] == "supreme":
+            continue
+        chief = f" (chief judge: {_e(court['chief']['name'])})" if court.get("chief") else ""
+        rows.append(f'                        <li><a href="../courts/{_e(court["id"])}.html">'
+                    f"{_e(court['name'])}</a>{chief}</li>")
+    rows.append("                    </ul>")
+    return _prerendered(rows, f"As of {_e(federal['asOf']['executive'])}; the full page needs "
+                              f"JavaScript.")
+
+
+def _court_static(court_id, federal, court):
+    """One court's judges, as a plain table, from its data file's payload."""
+    if not federal or not court:
+        return '                    <p class="results-bar" role="status">Loading&hellip;</p>'
+    if not court["listed"]:
+        own = court.get("courtList") or {}
+        rows = ['                    <p>This court&#8217;s judges serve ten-year terms under '
+                "Article IV and are not in the Federal Judicial Center&#8217;s directory of "
+                "Article III judges"
+                + (", so they are named as the court&#8217;s own website lists them.</p>"
+                   if own.get("judges") else ".</p>")]
+        if own.get("judges"):
+            rows.append('                    <ul class="fed-static">')
+            rows += [f"                        <li>{_e(j['title'])}: {_e(j['name'])}</li>"
+                     for j in own["judges"]]
+            rows.append("                    </ul>")
+    else:
+        rows = ['                    <table class="guide-table fed-table">',
+                '                        <thead><tr><th scope="col">Judge</th><th scope="col">Title</th>'
+                '<th scope="col">Appointed by</th><th scope="col">Status</th></tr></thead>',
+                "                        <tbody>"]
+        for judge in court["judges"] + court.get("retired", []):
+            seat = next((s for s in judge.get("seats") or [] if s.get("court") == court_id),
+                        (judge.get("seats") or [{}])[0])
+            title = (judge.get("justice") or {}).get("role") or seat.get("title") or "Judge"
+            status = ("Retired justice" if judge.get("retiredJustice")
+                      else "Senior status" if judge.get("status") == "senior" or judge.get("listedSenior")
+                      else "Active")
+            name = (f'<a href="{_e(judge["fjc"])}">{_e(judge["name"])}</a>' if judge.get("fjc")
+                    else _e(judge["name"]))
+            rows.append(f"                            <tr><th scope=\"row\">{name}</th>"
+                        f"<td>{_e(title)}</td><td>{_e(seat.get('appointedBy') or '')}</td>"
+                        f"<td>{status}</td></tr>")
+        rows += ["                        </tbody>", "                    </table>"]
+    site = next((c.get("site") for c in federal["courts"] if c["id"] == court_id), None)
+    if site:
+        rows.append(f'                    <p>The court&#8217;s website: <a href="{_e(site)}">{_e(site)}</a></p>')
+    if court["listed"]:
+        note = (f"From the Federal Judicial Center&#8217;s directory as of "
+                f"{_e(federal['asOf']['judiciary'])}")
+    elif (court.get("courtList") or {}).get("judges"):
+        note = f"From the court&#8217;s own website, read {_e(court['courtList']['read'])}"
+    else:
+        note = "The court&#8217;s own list of its judges could not be read"
+    return _prerendered(rows, note + "; the full page needs JavaScript.")
+
+
+def render_federal_page(host, codes=(), dates=None, federal=None):
     """The federal government's hub: the President, the Vice President, the
-    Cabinet, the Supreme Court and every federal court. The page carries no
-    names; ``assets/kyc-federal.js`` draws it from ``data/federal.js``."""
+    Cabinet, the Supreme Court and every federal court.
+    ``assets/kyc-federal.js`` draws it from ``data/federal.js``; with that
+    payload (*federal*), the names are written into the HTML too, for a
+    reader without script and for a crawler (FEDERAL-12)."""
     path = "federal/index.html"
     canonical = f"https://{host}/{path}" if host else path
     main = "\n".join([
@@ -1199,7 +1293,7 @@ def render_federal_page(host, codes=(), dates=None):
         "                    </p>",
         "                </header>",
         '                <div id="federalBody">',
-        '                    <p class="results-bar" role="status">Loading&hellip;</p>',
+        _federal_static(federal),
         "                </div>",
         "            </div>",
     ])
@@ -1272,9 +1366,23 @@ def _court_description(court):
             f"commissioned, their senior status, and their background.")
 
 
-def render_court_page(court_id, host, codes=(), dates=None):
+def _court_counts(court_id, federal):
+    """The chief and the counts, for a court page's description, as the
+    hub's index gives them; nothing without the payload."""
+    found = next((c for c in (federal or {}).get("courts") or [] if c["id"] == court_id), None)
+    if not found or not found["listed"] or found["kind"] == "supreme":
+        return ""
+    chief = f" Chief judge: {found['chief']['name']}." if found.get("chief") else ""
+    return (f"{chief} {found['active']} active and {found['senior']} senior judges as of "
+            f"{federal['asOf']['judiciary']}.")
+
+
+def render_court_page(court_id, host, codes=(), dates=None, federal=None,
+                      court_data=None):
     """One federal court: its judges, the chief first, then active and senior
-    judges. ``assets/kyc-federal.js`` draws it from the court's data file."""
+    judges. ``assets/kyc-federal.js`` draws it from the court's data file;
+    with the hub's payload and the court's (*federal*, *court_data*), its
+    judges are written into the HTML too (FEDERAL-12)."""
     from .federal_courts import COURTS, KINDS
 
     court = COURTS[court_id]
@@ -1291,7 +1399,7 @@ def render_court_page(court_id, host, codes=(), dates=None):
         "                    </p>",
         "                </header>",
         '                <div id="federalBody">',
-        '                    <p class="results-bar" role="status">Loading&hellip;</p>',
+        _court_static(court_id, federal, court_data),
         "                </div>",
         "            </div>",
     ])
@@ -1300,7 +1408,7 @@ def render_court_page(court_id, host, codes=(), dates=None):
     return render_page(
         title=_e(f"{court['name']} — Know Your Candidate"),
         og_title=_e(_court_og_title(court)),
-        description=_e(_court_description(court)),
+        description=_e(_court_description(court) + _court_counts(court_id, federal)),
         canonical=_e(canonical),
         host=_e(host or ""),
         code="",
@@ -1404,7 +1512,8 @@ def render_counties_page(code, host, listed=None):
         + ".</p>",
     ])
     scripts = [s.replace("{code}", code.lower()) for s in (
-        "../data/local/{code}.js", "../assets/kyc-regionmap.js", "../assets/kyc-local.js")]
+        "../data/local/{code}.js", "../data/courtcounties.js", "../assets/kyc-regionmap.js",
+        "../assets/kyc-local.js")]
     return render_page(
         title=_e(f"{title} — Know Your Candidate"),
         og_title=_e(title),
