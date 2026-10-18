@@ -2207,9 +2207,13 @@ the USGS point that is out of town.
 ### Find who represents you
 
 The home page's hero, every state page, and every legislature and county page
-open with **Find who represents you**: a ZIP code box and a **Use my
-location** button, with **How to vote in your state** beside them
-(`assets/kyc-findrep.js`). One answer names, each linked:
+open with **Find who represents you**, and the map page's sidebar holds it
+too: a ZIP code box and a **Use my location** button, with **How to vote in
+your state** beside them (`assets/kyc-findrep.js`). The voting button goes to
+the state page's voting block (on the states list it waits until a state is
+known). A ZIP code typed into the grid's search is answered by the panel,
+and the empty grid says so with a button back to the answer. One answer
+names, each linked:
 
 - the U.S. representative, on the map members sit under, and the 2026 House
   race, on the map for 2026 where the state was redrawn (in Athens, Ohio:
@@ -2217,10 +2221,19 @@ location** button, with **How to vote in your state** beside them
   words, nominees with no profile here included;
 - both senators, and any Senate race on the ballot;
 - the state senator and representative, from the legislature page's own
-  file, linked to their district there; a district with nobody listed says
-  "nobody listed", and members the map cannot place are pointed to;
+  file, with their party in words and their district as the legislature
+  names it ("District I", "Chittenden-16"), linked to the district there; a
+  district with nobody listed says "nobody listed", and members the map
+  cannot place are pointed to;
 - the county, by the county page's own name for it (a parish, a borough, a
-  planning region, an independent city), linked to its governments.
+  planning region, an independent city), linked to its governments; in a
+  territory, its municipio, municipality, island or district, as the Census
+  Bureau calls them (`lookup.TERRITORY_AREAS`); none for D.C. and Guam, each
+  its own county-equivalent.
+
+The legislature and county pages load no `profiles.js`, so the state's name,
+its district map and its own lookup come from the lookup index
+(`lookup.place_info`), and members of Congress are linked on the state page.
 
 Everything happens on the device. The page downloads this site's file for the
 reader's state, `data/lookup/<st>.js`, and looks the ZIP code or the point up
@@ -2232,7 +2245,8 @@ script, which the site never does, and it would send the address away.
 A ZIP code is not a place (rule 85). The Census Bureau maps ZIP codes as ZIP
 Code Tabulation Areas, built from the addresses in each block; a ZIP code used
 only for post office boxes, or created since 2020, has none, and the answer
-says so. A ZIP area's share of a district is a share of its land, from the
+says so. A ZIP code across a state line says so before either state's answer,
+and links each state's own lookup. A ZIP area's share of a district is a share of its land, from the
 Bureau's relationship files: to the 119th Congress's districts, to the 2024
 state legislative districts (the session year of every legislature map on
 the site), and to the counties, except Connecticut's, whose planning regions
@@ -2250,7 +2264,12 @@ redrawn state's own plan for the 2026 map), simplified to 30 m or a
 thirty-thousandth of the state's size, and on the legislature file's own
 lines through the projection it carries (`projection`). Within 400 m of a
 line, plus the browser's own stated accuracy, the answer names both sides and
-says why. Only the states whose box holds the point are loaded, and only
+says why, naming the kind of line: a congressional or state legislative
+district line, a county line, or the state line and the shore. The
+legislature's lines are coarser (simplified at 120-300 m and rounded for
+drawing), so their margin is wider by what each file records (`lineErrorKm`),
+and the answer says so. A state whose file did not load is never answered
+with a neighbour's whose edge is near. Only the states whose box holds the point are loaded, and only
 the reader's state's files are fetched for a ZIP code
 (`data/lookup/index.js`: each ZIP prefix's states, and every file's
 versioned address, rule 76).

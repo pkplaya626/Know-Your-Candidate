@@ -4292,6 +4292,154 @@ async function testFindRep() {
     check("no page errors on the legislature and county pages",
       legPage.errors.length + coPage.errors.length === 0, legPage.errors.concat(coPage.errors).join(" | "));
   });
+
+  await testFindRepReview(legPage, coPage);
+}
+
+/* The PR #104 review: the legislature and county pages load no profiles.js,
+ * and the panel there named "OH Senate", sent "How to vote" to a #voting the
+ * page does not have, and dropped the district map and the state's lookup. */
+async function testFindRepReview(legPage, coPage) {
+  suite("the panel on pages without profiles.js names the state and links what it has", () => {
+    for (const [label, built] of [["legislature", legPage], ["county", coPage]]) {
+      const top = built.slot.querySelector(".findrep-form .findrep-vote a");
+      check(label + " page: 'How to vote in Ohio' goes to the state page's voting block, " +
+        "not a #voting the page does not have",
+        !!top && top.getAttribute("href") === "../states/oh.html#voting" &&
+          /How to vote in Ohio/.test(top.textContent) && !built.D.getElementById("voting"),
+        top && top.outerHTML);
+      check(label + " page: the answer calls the state Ohio, never OH",
+        /ZIP 45701, Ohio/.test(built.text) && !/\bOH (Senate|House)\b/.test(built.text) &&
+          !/How to vote in OH\b/.test(built.text), built.text.slice(0, 160));
+      check(label + " page: it links the district map and Ohio's own lookup",
+        !!built.out.querySelector('a[href^="../districts/oh.html#/?"]') &&
+          /Check with Ohio's own lookup/.test(built.text), built.text.slice(-300));
+      check(label + " page: no note about House rows the answer does not show",
+        !/redrawn for 2026/.test(built.text));
+    }
+    const leg = legPage.window.kycLegislature.OH;
+    check("the legislature page's answer names the chambers in full",
+      !!answerRow(legPage.out, "Ohio " + leg.chambers.upper.title) &&
+        !!answerRow(legPage.out, "Ohio " + leg.chambers.lower.title));
+  });
+
+  // A district picked in the answer is selected on the page, and the map,
+  // below the panel, is brought into view.
+  const scrolled = [];
+  const picked = await askZip("legislature/oh.html", "45701", { setup: (w) => {
+    w.Element.prototype.scrollIntoView = function () { scrolled.push(this.id); };
+  } });
+  const link = picked.out.querySelector('a[href^="../legislature/oh.html#/?d="]');
+  if (link) link.click();
+  await until(() => scrolled.indexOf("legMap") !== -1, 1000);
+  suite("legislature/oh.html — a district picked in the panel's answer", () => {
+    check("is selected, and the map is brought into view",
+      !!link && /d=/.test(picked.window.location.hash) && scrolled.indexOf("legMap") !== -1,
+      picked.window.location.hash + " " + scrolled.join(","));
+  });
+
+  // The territories' and D.C.'s areas, in their own words (rule 75).
+  const sanJuan = await askZip("index.html", "00901");
+  const dc = await askZip("index.html", "20001");
+  suite("index.html — D.C. and the territories: no 'County' (rule 75)", () => {
+    check("Puerto Rico's area is a municipio", !answerRow(sanJuan.out, "County") &&
+      !!answerRow(sanJuan.out, "Municipio"), sanJuan.text.slice(0, 300));
+    check("D.C. is its own county-equivalent: no row for it", /ZIP 20001/.test(dc.text) &&
+      !answerRow(dc.out, "County"), dc.text.slice(0, 300));
+  });
+
+  // The legislature's members in the legislature page's words.
+  const omaha = await askZip("index.html", "68102");
+  const anchorage = await askZip("index.html", "99501");
+  suite("index.html — a state legislator's party and district, in words", () => {
+    check("Nebraska's members are Nonpartisan, never '(N)'",
+      /Nonpartisan/.test(omaha.text) && !/\(N\)/.test(omaha.text), omaha.text.slice(0, 400));
+    const ak = anchorage.window.kycLegislature && anchorage.window.kycLegislature.AK;
+    const entry = anchorage.window.kycLookup.AK.zips["99501"];
+    const upper = ak && answerRow(anchorage.out, "Alaska " + ak.chambers.upper.title);
+    const names = (entry.su || []).map((p) => ak.chambers.upper.districts[p[0]].name);
+    check("Alaska's lettered Senate district reads 'District I', not 'I'",
+      !!upper && names.length > 0 && names.every((n) => upper.textContent.indexOf("District " + n) !== -1),
+      upper && upper.textContent);
+  });
+
+  // A ZIP code across a state line says so, first, and links each state's lookup.
+  const crossing = await askZip("index.html", "42223");
+  suite("index.html — a ZIP code across a state line", () => {
+    const note = crossing.out.querySelector(".findrep-crosses");
+    const states = crossing.out.querySelectorAll(".findrep-place");
+    check("says it crosses a state line, naming each state with its share",
+      !!note && states.length === 2 && /crosses a state line/.test(note.textContent) &&
+        /Kentucky/.test(note.textContent) && /Tennessee/.test(note.textContent),
+      note && note.textContent);
+    check("and links each state's own lookup",
+      /Check with Kentucky's own lookup/.test(crossing.text) &&
+        /Check with Tennessee's own lookup/.test(crossing.text), crossing.text.slice(-400));
+  });
+
+  // Just inside Missouri, a block from the Kansas line.
+  const kc = await askHere("index.html", 39.09, -94.6050, 25);
+  const kcFailed = await buildPage("index.html", { refuse: /^\/data\/lookup\/mo\.js$/,
+    setup: at(39.09, -94.6050, 0, 25) });
+  const failedSlot = kcFailed.D.querySelector("[data-findrep]");
+  failedSlot.querySelector("[data-findrep-locate]").click();
+  const failedOut = failedSlot.querySelector(".findrep-result");
+  await until(() => !failedOut.hidden && !/Finding your location/.test(failedOut.textContent));
+  const hit = await kc.window.KYC.findRep.where(-94.6050, 39.09, 25);
+  const kansas = await kc.window.KYC.findRep.where(-94.6050, 39.09, 25, "KS");
+  suite("index.html — a location near a state line", () => {
+    const inMissouri = /Your location, Missouri/.test(kc.text);
+    check("the point is within Kansas's margin too, so the refusal below is a real test",
+      kansas.code === "KS" && kansas.found.cd.kind !== "none" && !kansas.found.cd.inside.length, kansas.code + " " +
+        (kansas.found && kansas.found.cd.kind));
+    check("Kansas City, Missouri, a block from Kansas, is answered for Missouri", inMissouri,
+      kc.text.slice(0, 120));
+    check("and says it is near the state's border, which a district line note would not",
+      /Missouri's border or shore/.test(kc.text) && /If you live across the state line/.test(kc.text),
+      kc.text.slice(-500));
+    check("with Missouri's file refused, the neighbour's edge is not answered: it did not load",
+      !inMissouri || (/did not load/.test(failedOut.textContent) &&
+        !/Your location, Kansas/.test(failedOut.textContent)), failedOut.textContent);
+    check("the legislature's coarser lines are read with a wider margin, by the file's own figure",
+      !!hit.leg && hit.leg.lineErrorKm > 0 &&
+        Math.abs(hit.legMarginKm - (hit.marginKm + hit.leg.lineErrorKm)) < 1e-9,
+      hit.leg && [hit.marginKm, hit.legMarginKm, hit.leg.lineErrorKm].join(" "));
+  });
+
+  // The grid: a ZIP code in the search says where it was answered.
+  const searched = await buildPage("index.html", { hash: "#/?q=45701" });
+  const senate = await buildPage("index.html", { hash: "#/?view=senate&q=45701" });
+  const senateOut = senate.D.querySelector("[data-findrep] .findrep-result");
+  await until(() => /ZIP 45701, Ohio/.test(senateOut.textContent));
+  suite("index.html — the grid's empty state for a ZIP code", () => {
+    const note = searched.D.querySelector("#noResults .empty-zip");
+    check("says the ZIP code was answered above, with a way there that keeps the search",
+      !!note && !note.hidden && /answered\s+above/.test(note.textContent) &&
+        !!note.querySelector("button[data-findrep-reveal]") && !note.querySelector('a[href="#findrep"]'),
+      note && note.outerHTML);
+    check("and the results label says so",
+      /ZIP code answered above/.test(searched.D.getElementById("resultsLabel").textContent));
+    check("the Senate view hands a ZIP code to the panel too", /ZIP 45701, Ohio/.test(senateOut.textContent),
+      senateOut.textContent.slice(0, 120));
+  });
+
+  // The states index: no "How to vote" link to the page the reader is on.
+  const list = await buildPage("states/index.html");
+  const listVote = list.D.querySelector("[data-findrep] [data-findrep-vote]");
+  suite("states/index.html — the voting button waits for a state", () => {
+    check("hidden until a state is known, never a link to this page",
+      !!listVote && (listVote.hidden || !/states\/index\.html$/.test(listVote.getAttribute("href"))),
+      listVote && listVote.outerHTML);
+  });
+
+  // The map page's sidebar (RACES-12).
+  const onMap = await askZip("map.html", "45701");
+  suite("map.html — find who represents you in the sidebar (RACES-12)", () => {
+    check("the sidebar holds the panel", !!onMap.slot && !!onMap.slot.closest(".sidebar"));
+    check("and answers a ZIP code", /ZIP 45701, Ohio/.test(onMap.text) &&
+      !!answerRow(onMap.out, "U.S. senators"), onMap.text.slice(0, 200));
+    check("no page errors", onMap.errors.length === 0, onMap.errors.join(" | "));
+  });
 }
 
 // Never "between" one district, or none.

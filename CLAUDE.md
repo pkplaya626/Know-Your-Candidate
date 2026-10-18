@@ -1303,6 +1303,21 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     the same lines: the Census Bureau's 1:500,000 boundaries and each
     redrawn state's own plan, near a line within 400 m plus the browser's
     stated accuracy, each map's own district in the address (`d=`, `was=`).
+    The state legislature's districts are not on those lines but on the
+    legislature page's, simplified at 120-300 m and rounded to 0.1 map unit,
+    so a reader 500 m from a Texas house line was named one legislator with
+    no caveat: each legislature file says how far its lines may stray
+    (`lineErrorKm`, `legislature.line_error_km`, from the tool's own
+    `statelegs.map_tolerance_m`), the margin there is wider by it, and the
+    answer gives both margins. The panel is on pages without profiles.js
+    too, where it read "OH Senate" and sent "How to vote" to a `#voting`
+    the page did not have, which its router read as clearing the reader's
+    selection: a state's name, district map and own lookup come from the
+    lookup index (`lookup.place_info`), and `#voting` is used only where
+    the page holds that block. A note names the kind of line that is near
+    (a district line, a county line, the state line or the shore); a ZIP
+    code across a state line says so first; and a file that failed to load
+    is never answered with a neighbour's edge.
     A ZIP area's share of a district is a share of its land, from the
     Census relationship files of the vintage the pages draw (the 2024
     legislative districts; counties by the 2020 file except where they

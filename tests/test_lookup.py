@@ -199,6 +199,33 @@ class TestIndex(unittest.TestCase):
         self.assertEqual(index["zip3"]["061"], ["CT"])
         self.assertEqual(index["whole"], lookup.WHOLE)
 
+    def test_each_state_carries_its_name_map_and_own_lookup(self):
+        # The legislature and county pages load no profiles.js, so the panel
+        # there read "OH Senate" and "How to vote in OH" and linked neither
+        # the district map nor Ohio's own lookup (PR #104 review).
+        payloads = {"OH": {"zips": {}, "box": [0, 0, 1, 1]},
+                    "GU": {"zips": {}, "box": [0, 0, 1, 1]}}
+        voting = {"OH": {"status": "https://voterlookup.ohiosos.gov/", "polling": "https://p/"},
+                  "_labels": {}}
+        states = lookup.index(payloads, {}, voting)["states"]
+        self.assertEqual(states["OH"], {
+            "name": "Ohio", "check": "https://voterlookup.ohiosos.gov/",
+            "map": {"page": "districts/oh.html", "redrawn": "OH" in districts.REDRAWN}})
+        self.assertEqual(states["GU"]["name"], "Guam")
+        self.assertNotIn("check", states["GU"])
+        # The polling page stands in where a state has no status page.
+        voting["OH"].pop("status")
+        self.assertEqual(lookup.index(payloads, {}, voting)["states"]["OH"]["check"], "https://p/")
+
+    def test_the_page_reads_the_states_words_from_the_index(self):
+        with open(os.path.join(ROOT, emit.SITE_DIR, "assets", "kyc-findrep.js"),
+                  encoding="utf-8") as handle:
+            text = handle.read()
+        self.assertIn("placeOf(code).check", text)
+        self.assertIn("placeOf(code).map", text)
+        self.assertNotIn("KYC.meta().voting", text)
+        self.assertNotIn("KYC.meta().districtMaps", text)
+
     def test_the_page_holds_the_same_threshold(self):
         with open(os.path.join(ROOT, emit.SITE_DIR, "assets", "kyc-findrep.js"),
                   encoding="utf-8") as handle:
@@ -279,11 +306,64 @@ class TestVendoredLookup(unittest.TestCase):
         self.assertTrue(counties)
         self.assertTrue(all(c.startswith("091") for c in counties), sorted(counties)[:5])
 
+    def test_territories_call_their_areas_by_their_own_words(self):
+        # "County: Adjuntas Municipio", "County: Guam" (rule 75).
+        self.assertEqual(self.payloads["PR"]["area"], "municipio")
+        self.assertEqual(self.payloads["VI"]["area"], "island")
+        self.assertEqual(self.payloads["MP"]["area"], "municipality")
+        self.assertEqual(self.payloads["AS"]["area"], "district or island")
+        for code in ("DC", "GU"):
+            self.assertNotIn("area", self.payloads[code])
+            self.assertEqual(len(self.payloads[code]["co"]), 1)
+        self.assertEqual(set(lookup.TERRITORY_AREAS) & set(districts.all_codes()),
+                         set(lookup.TERRITORY_AREAS))
+
     def test_the_legislature_files_carry_their_projection(self):
         path = os.path.join(ROOT, emit.LEGISLATURE_DIR, "oh.js")
         with open(path, encoding="utf-8") as handle:
             text = handle.read()
         self.assertRegex(text, r'"projection":\{"parallels":\[')
+
+
+class TestLegislatureLines(unittest.TestCase):
+    """The state legislature's lines are the legislature page's, simplified
+    at 120-300 m and rounded to 0.1 map unit: a location is placed on them
+    with a margin widened by that, never the lookup lines' 400 m alone
+    (PR #104 review)."""
+
+    def test_the_tool_and_the_build_share_one_tolerance(self):
+        import fetch_legislative_maps as tool
+        from kyc import statelegs
+        small = [({}, [[(-71.1, 42.3), (-71.0, 42.4)]])]
+        texas = [({}, [[(-106.6, 25.8), (-93.5, 36.5)]])]
+        self.assertEqual(tool.tolerance_for(small), statelegs.MAP_TOLERANCE_M)
+        self.assertEqual(tool.tolerance_for(texas),
+                         statelegs.map_tolerance_m([(-106.6, 25.8), (-93.5, 36.5)]))
+        self.assertTrue(statelegs.MAP_TOLERANCE_M < tool.tolerance_for(texas)
+                        < statelegs.MAP_MAX_TOLERANCE_M)
+
+    def test_the_line_error_is_the_tolerance_and_the_rounding(self):
+        from kyc import legislature
+        # 212 m, and half of 0.1 unit on both axes at 1.265 km a unit.
+        self.assertEqual(legislature.line_error_km(212, 1.265), 0.31)
+        self.assertEqual(legislature.line_error_km(120, 0.0), 0.12)
+
+    def test_every_legislature_file_says_how_far_its_lines_may_stray(self):
+        from kyc import statelegs
+        folder = os.path.join(ROOT, emit.LEGISLATURE_DIR)
+        files = [f for f in os.listdir(folder) if f.endswith(".js")]
+        self.assertGreaterEqual(len(files), 50)
+        for name in files:
+            with open(os.path.join(folder, name), encoding="utf-8") as handle:
+                found = re.search(r'"lineErrorKm":([0-9.]+)', handle.read())
+            self.assertIsNotNone(found, name)
+            self.assertGreaterEqual(float(found.group(1)), statelegs.MAP_TOLERANCE_M / 1000, name)
+
+    def test_the_page_widens_its_margin_by_it(self):
+        with open(os.path.join(ROOT, emit.SITE_DIR, "assets", "kyc-findrep.js"),
+                  encoding="utf-8") as handle:
+            text = handle.read()
+        self.assertRegex(text, r"marginKm \+ \(\(leg && isFinite\(leg\.lineErrorKm\)\)")
 
 
 if __name__ == "__main__":
