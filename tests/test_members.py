@@ -264,7 +264,10 @@ class TestTheIssuesTheirSiteLists(unittest.TestCase):
                      "Project Requests", "Member-Designated Transportation Project Disclosure Page",
                      "My Caucuses", "Committee Work", "Travel Abroad", "2019 in Review",
                      "Bills I've Sponsored/Co-Sponsored", "Legislative Action",
-                     "Military Academy Nomination Application Form"):
+                     "Military Academy Nomination Application Form",
+                     "Appropriations Request Disclosures", "Constituent Services",
+                     "2025 End of Year Report", "FY 2026 Requested Community Projects",
+                     "Coronavirus Updates", "Current Legislation", "COVID and Community Resources"):
             self.assertTrue(members.furniture(text), text)
             self.assertEqual(members.topic(text, "Rick Larsen", OTHERS), "", text)
         for text in ("Natural Resources", "Water Resources", "Appropriations", "Small Business"):

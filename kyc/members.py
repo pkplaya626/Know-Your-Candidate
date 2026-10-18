@@ -256,7 +256,9 @@ _NOT_A_TOPIC = re.compile(r"\b(?:news\s+alert|press\s+releases?|fact\s+sheet|faq
                           r"disclosure\s+page|legislative\s+action|committee\s+work|"
                           r"my\s+caucuses|travel\s+abroad|passports?|academy\s+nominations?|"
                           r"application\s+form|bills?\s+i\S*\s+(?:co-?)?sponsored|"
-                          r"sponsored\s*/\s*co-?sponsored|\d{4}\s+in\s+review|annual\s+report)\b|"
+                          r"sponsored\s*/\s*co-?sponsored|\d{4}\s+in\s+review|annual\s+report|"
+                          r"year\s+report|request\s+disclosures?|constituent\s+services|"
+                          r"community\s+projects)\b|"
                           r"\boffices?$|\bupdates?$|current\s+legislation|^covid\b.*\bresources$|"
                           r"^(?:legislation|cpf(?:\s+requests?)?|grants?)$",
                           re.I)
