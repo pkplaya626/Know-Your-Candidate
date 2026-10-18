@@ -8162,7 +8162,15 @@ async function testFederalAudit() {
       const file = (/\/commons\/(?:thumb\/)?([0-9a-f]\/[0-9a-f]{2}\/[^/]+)/.exec(withLinks.judge.portrait.set[0][1]) || [])[1];
       check("a portrait, in sizes of one Wikimedia file only (rule 42)", !!file && urls.length > 1 &&
         urls.every((u) => u.startsWith("https://upload.wikimedia.org/") && u.includes(file)), urls.join(" "));
-      check("credited, with a link to the file", /Wikimedia Commons/.test(doc.getElementById("officialModalSource").textContent));
+      // Rule 87: its author and licence, as the file's own page gives them,
+      // on the line under the name, linked to the file.
+      const credit = doc.getElementById("officialModalPhotoCredit");
+      const p = withLinks.judge.portrait;
+      check("a judge's Commons portrait carries its licence", !!p.licence, JSON.stringify(p));
+      check("credited under the name with its author, licence and Commons, linked to the file",
+        !credit.hidden && credit.textContent.indexOf("Photo: " + (p.by ? p.by + ", " : "") + p.licence +
+          ", via Wikimedia Commons") === 0 && !!credit.querySelector('a[href="' + p.source + '"]'),
+        credit.textContent);
     });
   }
 }

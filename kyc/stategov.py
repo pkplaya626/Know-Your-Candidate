@@ -256,6 +256,27 @@ def officer_photos(code, entry):
     return problems
 
 
+def unpictured(states):
+    """One line per office naming the confirmed holders the card shows
+    without a photograph (STATEGOV-13): a person's to look for one from
+    their office or its association, never a search."""
+    out = []
+    for office, label in (("governor", "governors"), ("lt", "lieutenant governors"),
+                          ("sos", "secretaries of state"), ("ag", "attorneys general")):
+        codes = []
+        for code, entry in sorted(states.items()):
+            holder = entry.get(office) or {}
+            if not holder.get("name") or any(holder.get(k) for k in (
+                    "unconfirmed", "disputed", "unlisted", "vacant", "none", "notMember")):
+                continue
+            if not holder.get("headshot" if office == "governor" else "photo"):
+                codes.append(code)
+        if codes:
+            out.append(f"{len(codes)} {label} have no photograph from their office or its "
+                       f"association: {', '.join(codes)}")
+    return out
+
+
 def office_links(code, entry):
     """Apply ``overrides.OFFICE_LINKS`` to one state's offices, in place.
     Returns a problem for each entry whose roster no longer lists what it
@@ -357,6 +378,7 @@ def build(root="."):
     missing = [c for c in STATES if c not in states]
     if missing:
         problems.append(f"no governor for {', '.join(missing)}")
+    problems.extend(unpictured(states))
     payload = {
         "states": states,
         "sources": {
