@@ -146,8 +146,8 @@ python build_profile_site.py oge              # the executive's financial report
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1259 tests, no dependencies
-npm install && npm test                       # 1578 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1299 tests, no dependencies
+npm install && npm test                       # 1637 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1062,6 +1062,32 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (rule 41). And no one part of a page's start may stop the rest: the
     grid's start-up runs each step and its first draw on their own, draws
     what it can, and says on the page that something failed.
+
+79. **A mark about an office sits on the office, and "not running" is a
+    source's word.** "On the Nov 3, 2026 ballot" sat under Brian Kemp,
+    Gavin Newsom, Tim Walz and every officer whose office is elected, in the
+    style the race badges use for people; it read as a fact about each, and
+    none of them is on that ballot. The mark says "This office is on the
+    Nov 3, 2026 ballot" and sits on the office's label line, never in the
+    holder's block. Who is not running is said only where a cited source
+    says so (`ballot2026.OPEN_SEATS`): the constitution's term limit, read
+    with the NGA's count of the governor's terms, or the election office's
+    certified list for that office - never news, and never a term limit for
+    anyone else, since a term-limited officer may be on the ballot for
+    another office. `stategov` withholds an entry whose holder has changed.
+    Every other office on the ballot says by name that this was not checked
+    (`holderStatus` "unchecked"): silence beside Georgia's governor, with
+    "Open seat" beside Alaska's, read as "Brian Kemp is running" (rule 19).
+    A voting link is credited to its own source, link by link - "the first
+    four from NASS" credited NASS with eleven curated sample-ballot pages -
+    and "each link opened" is said only of links found live.
+    A next election year is a statute's or the state's record's
+    (`ballot2026.NEXT`), never a term length's: Virginia's governor was
+    elected in 2025 and is next elected in 2029, its legislature in 2027.
+    The same goes for a market: a party-only market over a ballot of two
+    Democrats, or last prices that add up to 128%, is quoted with a note
+    saying what it cannot tell, read page-side so `data/odds.js` stays the
+    cache's (rule 41).
 
 ## District maps
 

@@ -185,6 +185,113 @@
 
   /** The badges that summarise a race: its November result, open seat,
    *  primary date, how many are on the ballot, how many filed. */
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  /** "2026-12-01" -> "Dec 1". */
+  function shortDate(iso) {
+    var m = /^\d{4}-(\d{2})-(\d{2})$/.exec(String(iso || ""));
+    return m ? MONTHS[+m[1] - 1] + " " + (+m[2]) : "";
+  }
+
+  /* How the race's ballot is decided, visibly and linked to the guide that
+   * explains it: a top-two ballot of two Democrats read like a misprint
+   * with the rule only in a hover title (audit 2026-10-17, RACES-11), and
+   * Georgia's and Louisiana's December rounds were on no state page
+   * (PERSONA-06). The pipeline says which (races.ballot_kind, from tables
+   * citing each statute); nothing here knows a state. */
+  var KIND = {
+    "top-two": ["Top-two primary", "primaries",
+      "Every candidate ran on one primary ballot, and the two with the most votes go to November " +
+      "whatever their party."],
+    "top-four": ["Top-four primary", "primaries",
+      "Every candidate ran on one primary ballot, and the four with the most votes go to November " +
+      "whatever their party; November is decided by ranked-choice voting."],
+    "open": ["Open primary Nov 3", "primaries",
+      "Every candidate runs on one ballot on November 3; a candidate with a majority of the votes " +
+      "is elected."],
+  };
+
+  function guideLink(section, cls, title, text) {
+    return '<a class="badge ' + cls + '" href="' +
+      KYC.escapeAttr(KYC.siteRoot() + "government/elections.html#" + section) + '" title="' +
+      KYC.escapeAttr(title) + '">' + KYC.escapeHtml(text) + "</a>";
+  }
+
+  function todayIso() {
+    var now = new Date();
+    return now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
+      ("0" + now.getDate()).slice(-2);
+  }
+
+  /** Whether the race's primary has been held, and the words that say so.
+   *  A ballot read from a qualified list is not a held primary until its
+   *  date has passed. */
+  function primaryState(race) {
+    var listed = !!(race.results && race.results.fromQualifiedList);
+    var held = race.settled && (!listed || race.primaryDate < todayIso());
+    return {
+      held: held,
+      title: held && listed
+        ? "Primary held " + race.primaryDate + (race.runoffDate ? "; runoff " + race.runoffDate : "") +
+          ". Its ballot was the Secretary of State's list of qualified candidates; no result " +
+          "has been read yet."
+        : held
+        ? "Primary held " + race.primaryDate +
+          (race.runoffDate ? "; runoff " + race.runoffDate : "") +
+          ". Results from the state's Wikipedia election page."
+        : "Primary scheduled for " + race.primaryDate + "." + (listed
+          ? " Who is on its ballot: the Secretary of State's list of qualified candidates."
+          : ""),
+    };
+  }
+
+  /* The badges follow the race through the election (rule 63): "Runoff
+   * Dec 1 if no majority" stayed on a race decided on November 3, and read
+   * in the future tense after December 1 (PR #94 review). A race with one
+   * marked winner has no December round; one the results send to a runoff
+   * says so without the "if"; a date that has passed is "held". And an
+   * open primary's date is said once, on its own badge: Louisiana's House
+   * heads read "Primary 2026-11-03" beside "Open primary Nov 3". */
+  function ballotKindBadges(race) {
+    var out = [];
+    var today = todayIso();
+    var kind = KIND[race.primaryKind];
+    if (kind) {
+      var title = kind[2];
+      var text = kind[0];
+      if (race.primaryKind === "open" && race.primaryDate) {
+        // The primary's own badge, folded in: one date, once.
+        var primary = primaryState(race);
+        text = (primary.held ? "Open primary held " : "Open primary ") + shortDate(race.primaryDate);
+        title = primary.title + " " + title;
+      }
+      out.push(guideLink(kind[1], "badge-neutral badge-link", title, text));
+    }
+    if (race.generalRunoff) {
+      var after = KYC.electionStatus().phase === "post-election" && race.settled;
+      var res = race.results || {};
+      if (after && namesWith(race, "elected", res.otherElected).length === 1) return out;
+      var going = after && namesWith(race, "runoff", res.otherRunoff).length > 0;
+      var when = shortDate(race.generalRunoff);
+      var held = race.generalRunoff < today;
+      var round = race.primaryKind === "open" ? "General " : "Runoff ";
+      out.push(guideLink("runoffs", "badge-neutral badge-link",
+        held
+          ? "The date set for a " + (race.primaryKind === "open" ? "general election" : "runoff") +
+            " if no candidate won a majority on November 3: " + when + "."
+          : going
+          ? "No candidate won a majority on November 3; the top two meet on " + when + "."
+          : race.primaryKind === "open"
+          ? "If no candidate wins a majority on November 3, the top two, of any party, meet on " +
+            when + "."
+          : "If no candidate wins a majority on November 3, the top two meet in a runoff on " +
+            when + ".",
+        round + (held ? (going ? "held " + when : when + ", if one was needed")
+          : going ? when : when + " if no majority")));
+    }
+    return out;
+  }
+
   function raceBadges(race) {
     var badges = [];
     var outcome = outcomeBadge(race);
@@ -222,31 +329,16 @@
         '">Holder running in ' + KYC.escapeHtml(race.holderMoved.to.replace(/^House • /, "")) +
         "</span>");
     }
-    if (race.primaryDate) {
-      // A ballot read from a qualified list is not a held primary.
-      var listed = !!(race.results && race.results.fromQualifiedList);
-      var now = new Date();
-      var today = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
-        ("0" + now.getDate()).slice(-2);
-      var past = race.primaryDate < today;
-      var held = race.settled && (!listed || past);
+    // An open primary's date is on its own badge (ballotKindBadges).
+    if (race.primaryDate && race.primaryKind !== "open") {
+      var primary = primaryState(race);
       badges.push(
-        '<span class="badge badge-neutral" title="' +
-        KYC.escapeAttr(held && listed
-          ? "Primary held " + race.primaryDate + (race.runoffDate ? "; runoff " + race.runoffDate : "") +
-            ". Its ballot was the Secretary of State's list of qualified candidates; no result " +
-            "has been read yet."
-          : held
-          ? "Primary held " + race.primaryDate +
-            (race.runoffDate ? "; runoff " + race.runoffDate : "") +
-            ". Results from the state's Wikipedia election page."
-          : "Primary scheduled for " + race.primaryDate + "." + (listed
-            ? " Who is on its ballot: the Secretary of State's list of qualified candidates."
-            : "")) + '">' +
-        (held ? "Primary held " : "Primary ") + KYC.escapeHtml(race.primaryDate) +
+        '<span class="badge badge-neutral" title="' + KYC.escapeAttr(primary.title) + '">' +
+        (primary.held ? "Primary held " : "Primary ") + KYC.escapeHtml(race.primaryDate) +
         "</span>"
       );
     }
+    badges = badges.concat(ballotKindBadges(race));
 
     /* "No declared challenger" was a claim about our roster dressed up as
      * a fact about the race, and it was wrong for 372 of them. filedCount

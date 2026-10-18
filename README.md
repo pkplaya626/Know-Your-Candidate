@@ -40,7 +40,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… judiciary` | Every sitting federal judge, from the Federal Judicial Center's directory, and the Supreme Court's members as the Court lists them; a short read keeps the last cache (`--check` reports it) |
 | `… oge` | The financial reports the President, the Vice President and the Cabinet filed with the Office of Government Ethics, attributed by office and checked against the filer each report names (`--check` reports the cache). See [Financial disclosures](#financial-disclosures) |
 | `… history` | The public offices each person has held: Congress from congress-legislators, every other office from Wikidata where the person's own Wikipedia article gives the same office the same years; a short read keeps the last cache (`--check` reports it). See [Public offices held](#public-offices-held) |
-| `… voting` | Each state's and D.C.'s official pages for checking registration, finding a polling place, voting absentee or early, and registering, as NASS's "Can I Vote" lists them; refused unless all 51 are there |
+| `… voting` | Each state's and D.C.'s official pages for checking registration, finding a polling place, voting absentee or early, and registering, as NASS's "Can I Vote" lists them; refused unless all 51 are there. Then opens every link shown, NASS's and the curated results, sample-ballot, vote.gov and territory pages alike |
 | `… courts` | Each state's highest court and its members, read from the court's own roster |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
 | `… results` | Read each state's primary results from Wikipedia: who is still in |
@@ -63,7 +63,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (1578 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (1637 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1365,7 +1365,8 @@ they run the state's elections; and each chamber's seats by party.
 | Lieutenant governors, and who is first in line where there is none | National Lieutenant Governors Association, members | `officers` writes `data/statewide_officers.json` |
 | Secretaries of state: party, elected or appointed, chief election official, contact | National Association of Secretaries of State, membership roster | `officers` |
 | Attorneys general: who holds the office | The office's own website, linked from USA.gov's page for the state | `officers` |
-| How to vote: registration status, polling place, absentee and early voting, registering | Each state's own pages, as NASS's "Can I Vote" (nass.org/can-I-vote) lists them; no date or deadline is typed in. Shown as "Voting in <State>" on the state page; territories, which NASS does not cover, show none | `voting` writes `data/voting_links.json` |
+| How to vote: registration status, polling place, absentee and early voting, registering | Each state's own pages, as NASS's "Can I Vote" (nass.org/can-I-vote) lists them; no date or deadline is typed in. Shown as "Voting in <State>" on the state page | `voting` writes `data/voting_links.json` |
+| Official results, sample ballots, registration deadlines, territories | `voting.RESULTS` (every state and D.C.) and `voting.SAMPLE_BALLOTS` (where the election office links a statewide one), each the office's own page; vote.gov's page for each state and territory for deadlines, linked and never typed; the territories' election offices (`voting.TERRITORY_LINKS`); Georgia's December 1 runoff and Louisiana's December 12 House round from `overrides.GENERAL_RUNOFFS` and `OPEN_PRIMARY_SEATS`, each with the state's page that gives it (`voting.KEY_DATE_SOURCES`) | curated in `kyc/voting.py`; opened by `voting` with NASS's links |
 | Attorneys general: party | Republican and Democratic Attorneys General Associations, members | `officers` |
 
 A party holds a chamber when it has more than half of **all** its seats; a
@@ -1453,12 +1454,28 @@ fails the build if a state is missing, an appointed
 office is marked as elected, a joint ticket's lieutenant governor is not
 elected with the governor, a source is a compiled table, or a chamber's size
 disagrees with `government_maps.SEATS` (rule 53); a county's page is not a
-state's record. The counts on the page are derived, never typed. The
-territories and D.C. are not in the table: the map draws them as "not
-covered", never as electing no one, and a territory's page says its ballot
-may hold territorial contests. Arizona's lieutenant governor, a new office
+state's record. The counts on the page are derived, never typed.
+`ballot2026.TERRITORIES` covers the territories' governors and lieutenant
+governors: Guam's and the Virgin Islands' from the Organic Acts (48 U.S.C.
+1422, 1591), the Northern Mariana Islands' from its Commission's certified
+list; American Samoa and Puerto Rico elected theirs in 2024. D.C. elects a
+mayor, and the map says so. Arizona's lieutenant governor, a new office
 first filled on November 3, reads "No one holds this office yet", not "no
 such office".
+
+Two more tables, each checked by `ballot2026.check()`:
+
+- `NEXT`: when an office or chamber that is not on the 2026 ballot is next
+  elected, only where a statute or the state's own record gives the year
+  (Virginia's governor in 2029 by Va. Code 24.2-210, its legislature in
+  2027), with the month where it is not November (Louisiana's October
+  round reads "Next election: October 2027"). Never computed from a term
+  length; an office without an entry shows no year.
+- `OPEN_SEATS`: an office on the ballot whose holder is not running for it,
+  only from the constitution's term limit (read with the NGA's count of the
+  governor's terms) or the election office's certified list of candidates
+  for that office. `stategov` withholds an entry, and says so in the build,
+  when the office's holder is someone else or the NGA counts fewer terms.
 
 On the page:
 
@@ -1466,13 +1483,21 @@ On the page:
   this site covers the same ballot also elects, that it may hold other
   contests and measures this site does not list, and that the site lists the
   candidates for Congress only;
-- the State government section and the map's state panel mark the governor,
-  each officer and each chamber "On the Nov 3 ballot" or why not (not
-  elected in 2026, appointed, chosen by the legislature, no such office),
-  each mark linked to its source;
+- the State government section and the map's state panel mark each office on
+  its own label line - "This office is on the Nov 3, 2026 ballot", never
+  under the person who holds it, who may not be running - or say why not
+  (not elected in 2026, with "Next elected: November <year>" where `NEXT`
+  has it; appointed; chosen by the legislature; no such office), each mark
+  linked to its source. Where `OPEN_SEATS` has the office, "Open seat:
+  <holder> is term-limited" or "is not on the list of candidates for this
+  office", or, where that list names them, "<holder> is on the list of
+  candidates for this office", with the source, until Election Day. Every
+  other office on the ballot says "Whether <holder> is running for this
+  office is not checked here" (`holderStatus` "unchecked"), so no office
+  is silent beside another's "Open seat";
 - the map has a "2026 governor's races" view: a state electing its governor
-  is drawn in the party of the governor now, every other state in the empty
-  grey.
+  is drawn in the party of its current governor, every other state in the
+  empty grey, and the legend says the colour is the current governor's.
 
 Who is running for these offices is not listed: no source keyed by an id the
 site can hold lists state candidates, and names from a search are not data.
