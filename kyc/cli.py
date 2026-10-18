@@ -325,6 +325,10 @@ def _build(args):
         return 2
     for problem in city_problems:
         print(f"  [warn] {problem}")
+    from . import localsites
+    for problem in localsites.problems(localsites.load_cache(args.root),
+                                       set(localsites.targets(args.root))):
+        print(f"  [warn] {problem}")
     written_local = emit.write_local(local_maps, args.root)
     local_stats = counties_mod.stats(local_maps)
     print(f"[ok] counties: {local_stats['counties']:,} counties, {local_stats['governments']:,} "
@@ -1358,10 +1362,34 @@ def _verify(args):
     return 0
 
 
+def _local_sites(args):
+    """Open every website the Census listing gives a local government and
+    record what it is now (kyc/localsites.py)."""
+    from . import localsites
+    codes = [c.strip().upper() for c in (args.states or "").split(",") if c.strip()] or None
+    recheck = tuple(v.strip() for v in (args.recheck or "").split(",") if v.strip())
+    unknown = [v for v in recheck if v not in localsites.VERDICTS]
+    if unknown:
+        print(f"[error] --recheck: not a verdict: {', '.join(unknown)}", file=sys.stderr)
+        return 2
+    cache = localsites.check_all(args.root, codes=codes, workers=args.workers, limit=args.limit,
+                                 refresh=args.refresh, recheck=recheck)
+    counts = localsites.summary(cache)
+    total = sum(counts.values())
+    print(f"[ok] {total:,} addresses in {localsites.CACHE_PATH}: " + ", ".join(
+        f"{counts[v]:,} {v}" for v in localsites.VERDICTS if counts.get(v)))
+    withdrawn = sum(counts.get(v, 0) for v in localsites.WITHDRAWN)
+    print(f"     {withdrawn:,} withdrawn by the build; {counts.get(localsites.UNREAD, 0):,} could "
+          f"not be read and stay linked, marked unchecked")
+    return 0
+
+
 def _localgov(args):
     """Every local government, county by county, checked against the
     published table before anything is written (kyc/localgov.py)."""
     from . import census, localgov
+    if getattr(args, "check_sites", False):
+        return _local_sites(args)
     table = census.load_cache(args.root)
     if not table:
         print(f"[error] no {census.CACHE_PATH}; run 'census' first", file=sys.stderr)
@@ -1970,6 +1998,20 @@ def build_parser():
                                "downloading it")
 
     local = add("localgov", help="every local government, county by county (Census listing)")
+    local.add_argument("--check-sites", action="store_true",
+                       help="open every listed website and record what it is now "
+                            "(data/local_sites.json); one request at a time per host")
+    local.add_argument("--workers", type=int, default=24,
+                       help="hosts checked at once (default 24)")
+    local.add_argument("--limit", type=int, default=None,
+                       help="check at most this many addresses this run (it resumes)")
+    local.add_argument("--refresh", action="store_true",
+                       help="check every address again, not only those due")
+    local.add_argument("--recheck", default="",
+                       help="also check again every address with these verdicts, comma-separated "
+                            "(after a change to how one is reached; gambling stays for a person)")
+    local.add_argument("--states", default="",
+                       help="only these states, comma-separated codes")
 
     courts_cmd = add("courts", help="every state's highest court and its members, from the courts")
     courts_cmd.add_argument("--check", action="store_true",

@@ -23,8 +23,8 @@
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
 <link rel="manifest" href="../site.webmanifest">
-<link rel="stylesheet" href="../assets/kyc.css?v=819f96cd4b">
-<script src="../assets/kyc.js?v=e6e155c31b"></script>
+<link rel="stylesheet" href="../assets/kyc.css?v=3872a158ef">
+<script src="../assets/kyc.js?v=d73df1952a"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Know Your Candidate","item":"https://candidates.radicalrelay.us/"},{"@type":"ListItem","position":2,"name":"Know Your Government","item":"https://candidates.radicalrelay.us/government/index.html"},{"@type":"ListItem","position":3,"name":"How elections work","item":"https://candidates.radicalrelay.us/government/elections.html"}]}</script>
 </head>
 <body data-root="../" data-state="" data-page="guide">
@@ -136,20 +136,20 @@
 
         <nav class="sidebar-section" aria-label="In this guide">
             <h2 class="sidebar-heading">In this guide</h2>
-            <a class="nav-link nav-sub" href="index.html">Know Your Government</a>
+            <a class="nav-link nav-sub" href="index.html">Overview</a>
             <a class="nav-link nav-sub" href="congress.html">How Congress works</a>
-            <a class="nav-link nav-sub" href="executive.html">How the executive branch works</a>
+            <a class="nav-link nav-sub" href="executive.html">The executive</a>
             <a class="nav-link nav-sub" href="courts.html">How the federal courts work</a>
-            <a class="nav-link nav-sub" href="states.html">How state governments work</a>
-            <a class="nav-link nav-sub" href="local.html">How local governments work</a>
-            <a class="nav-link nav-sub" href="tribal.html">How tribal nations govern</a>
-            <a class="nav-link nav-sub" href="elections.html" aria-current="page">How elections work</a>
+            <a class="nav-link nav-sub" href="states.html">State governments</a>
+            <a class="nav-link nav-sub" href="local.html">Local governments</a>
+            <a class="nav-link nav-sub" href="tribal.html">Tribal nations</a>
+            <a class="nav-link nav-sub" href="elections.html" aria-current="page">Elections</a>
         </nav>
 
         <nav class="sidebar-section push" aria-label="Jump to a state">
             <h2 class="sidebar-heading">Jump to</h2>
             <label class="sr-only" for="stateJump">Jump to a state or territory</label>
-            <select id="stateJump" class="select" data-jump-to="states/{code}.html#voting">
+            <select id="stateJump" class="select">
                 <option value="">Choose a state&hellip;</option>
                 <option value="AL">Alabama (AL)</option>
                 <option value="AK">Alaska (AK)</option>
@@ -218,37 +218,22 @@
                 <header class="state-hero">
                     <p class="state-kicker">Know Your Government</p>
                     <h1 class="state-title">How elections work</h1>
-                    <p class="guide-lede">Federal law fixes the day of the November election, but nearly everything else - who may vote in a primary, how a winner is decided, when the count ends - is set by each state. This page explains the parts readers ask about in November and December, with examples from states' own laws. It is a guide, not legal advice: for your own ballot, use <a href="../states/index.html" data-voting-link>your state's official voting pages</a>.</p>
+                    <p class="guide-lede">Federal law fixes the day of the November election, but nearly everything else - who may vote in a primary, how a winner is decided, when the count ends - is set by each state. This page explains the parts readers ask about in November and December, with examples from states' own laws. It is a guide, not legal advice: for your own ballot, use <a href="../states/index.html">your state's official voting pages</a>.</p>
                 </header>
                 <nav class="guide-toc" aria-labelledby="guideTocTitle">
                     <h2 class="guide-toc-title" id="guideTocTitle">On this page</h2>
                     <ol>
-                        <li><a href="#before">Before you vote</a></li>
                         <li><a href="#when">When federal elections are held</a></li>
                         <li><a href="#who-runs">Who runs elections</a></li>
                         <li><a href="#primaries">Primaries, and other ways candidates are nominated</a></li>
-                        <li><a href="#funding">How campaigns are funded</a></li>
-                        <li><a href="#running">Running for office</a></li>
                         <li><a href="#runoffs">Runoffs</a></li>
                         <li><a href="#ranked-choice">Ranked-choice voting</a></li>
                         <li><a href="#counting">Counting, canvassing and certification</a></li>
                         <li><a href="#recounts">Recounts</a></li>
-                        <li><a href="#after">From Election Day to January 3</a></li>
                         <li><a href="#taking-office">Taking office</a></li>
                         <li><a href="#vacancies">Filling vacancies</a></li>
                     </ol>
                 </nav>
-                <section class="guide-section" id="before" aria-labelledby="before-title">
-                    <h2 class="guide-heading" id="before-title">Before you vote</h2>
-                    <p>Registration deadlines, voter identification, early voting and voting by mail are set by each state, and are on its election office's own pages. Each state's page on this site links them, as the National Association of Secretaries of State's Can I Vote directory lists them, for the 50 states and the District of Columbia: checking your registration, finding your polling place, voting absentee or early, and registering.</p>
-                    <form class="guide-voting" action="../states/index.html" data-voting-picker>
-                        <label for="votingState">Your state or territory</label>
-                        <select id="votingState" class="select"><option value="">Choose…</option><option value="AL">Alabama</option><option value="AK">Alaska</option><option value="AS">American Samoa</option><option value="AZ">Arizona</option><option value="AR">Arkansas</option><option value="CA">California</option><option value="CO">Colorado</option><option value="CT">Connecticut</option><option value="DE">Delaware</option><option value="DC">District of Columbia</option><option value="FL">Florida</option><option value="GA">Georgia</option><option value="GU">Guam</option><option value="HI">Hawaii</option><option value="ID">Idaho</option><option value="IL">Illinois</option><option value="IN">Indiana</option><option value="IA">Iowa</option><option value="KS">Kansas</option><option value="KY">Kentucky</option><option value="LA">Louisiana</option><option value="ME">Maine</option><option value="MD">Maryland</option><option value="MA">Massachusetts</option><option value="MI">Michigan</option><option value="MN">Minnesota</option><option value="MS">Mississippi</option><option value="MO">Missouri</option><option value="MT">Montana</option><option value="NE">Nebraska</option><option value="NV">Nevada</option><option value="NH">New Hampshire</option><option value="NJ">New Jersey</option><option value="NM">New Mexico</option><option value="NY">New York</option><option value="NC">North Carolina</option><option value="ND">North Dakota</option><option value="MP">Northern Mariana Islands</option><option value="OH">Ohio</option><option value="OK">Oklahoma</option><option value="OR">Oregon</option><option value="PA">Pennsylvania</option><option value="PR">Puerto Rico</option><option value="RI">Rhode Island</option><option value="SC">South Carolina</option><option value="SD">South Dakota</option><option value="TN">Tennessee</option><option value="TX">Texas</option><option value="UT">Utah</option><option value="VT">Vermont</option><option value="VI">Virgin Islands</option><option value="VA">Virginia</option><option value="WA">Washington</option><option value="WV">West Virginia</option><option value="WI">Wisconsin</option><option value="WY">Wyoming</option></select>
-                        <button type="submit" class="btn">Open its voting pages</button>
-                    </form>
-                    <p><a href="https://vote.gov/" target="_blank" rel="noopener noreferrer">Vote.gov</a>, from the federal government, links each state's registration too.</p>
-                    <p class="guide-sources"><span>Sources:</span> <a href="https://www.nass.org/can-I-vote" target="_blank" rel="noopener noreferrer">National Association of Secretaries of State: Can I Vote</a>; <a href="https://vote.gov/" target="_blank" rel="noopener noreferrer">Vote.gov</a></p>
-                </section>
                 <section class="guide-section" id="when" aria-labelledby="when-title">
                     <h2 class="guide-heading" id="when-title">When federal elections are held</h2>
                     <p>Federal law sets the day of the general election for Congress: the Tuesday after the first Monday in November of every even-numbered year (2 U.S.C. 7). In 2026 that is November 3. Every House seat is on that ballot, because House terms are two years.</p>
@@ -273,21 +258,6 @@
                     <p class="guide-see"><span>See it on this site:</span> <a href="../index.html">Who is still on the ballot</a></p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.eac.gov/voters/primary-election-types" target="_blank" rel="noopener noreferrer">U.S. Election Assistance Commission, Primary election types</a>; <a href="https://law.lis.virginia.gov/vacode/title24.2/chapter5/section24.2-530/" target="_blank" rel="noopener noreferrer">Code of Virginia 24.2-530 (who may vote in a primary)</a>; <a href="https://www.sos.la.gov/elections-voting/how-candidates-are-elected" target="_blank" rel="noopener noreferrer">Louisiana Secretary of State, How candidates are elected</a>; <a href="https://www.sos.ca.gov/elections/primary-elections-california" target="_blank" rel="noopener noreferrer">California Secretary of State, Primary elections in California</a>; <a href="https://app.leg.wa.gov/RCW/default.aspx?cite=29A.52.112" target="_blank" rel="noopener noreferrer">Revised Code of Washington 29A.52.112 (the top-two primary)</a>; <a href="https://www.akleg.gov/basis/statutes.asp?media=print&amp;secStart=15.25.010&amp;secEnd=15.25.010" target="_blank" rel="noopener noreferrer">Alaska Statutes 15.25.010 (the primary)</a>; <a href="https://www.akleg.gov/basis/statutes.asp?media=print&amp;secStart=15.15.350&amp;secEnd=15.15.350" target="_blank" rel="noopener noreferrer">Alaska Statutes 15.15.350 (ranked-choice general elections)</a>; <a href="https://www.elections.alaska.gov/petitions-and-ballot-measures/" target="_blank" rel="noopener noreferrer">Alaska Division of Elections, Petitions and ballot measures</a>; <a href="https://www.sos.la.gov/media/dcvl5ojl/051426-fall-house-races.pdf" target="_blank" rel="noopener noreferrer">Louisiana Secretary of State, release of May 14, 2026 on the fall House races</a>; <a href="https://law.lis.virginia.gov/vacode/title24.2/chapter5/section24.2-509/" target="_blank" rel="noopener noreferrer">Code of Virginia 24.2-509 (how a party nominates)</a>; <a href="https://law.lis.virginia.gov/vacode/title24.2/chapter5/section24.2-510/" target="_blank" rel="noopener noreferrer">Code of Virginia 24.2-510 (nominations other than by primary)</a>; <a href="https://www.cga.ct.gov/current/pub/chap_153.htm" target="_blank" rel="noopener noreferrer">Connecticut General Statutes, chapter 153 (nominations and primaries)</a></p>
                 </section>
-                <section class="guide-section" id="funding" aria-labelledby="funding-title">
-                    <h2 class="guide-heading" id="funding-title">How campaigns are funded</h2>
-                    <p>Under federal law a person becomes a candidate for Congress once their campaign has raised or spent more than $5,000 (52 U.S.C. 30101(2)). Within 15 days they must file a statement of candidacy with the Federal Election Commission, naming a principal campaign committee, which registers within 10 days more and reports what it raises and spends. This site takes its line from that sum, counting money raised only: a challenger has a profile once their campaign reports $5,000 or more raised, while each race's count of who has filed includes everyone, and a nominee under it is named all the same.</p>
-                    <p>For the 2025-26 elections an individual may give a candidate's committee up to $3,500 per election, a primary, general, runoff and special election each counting separately, and a multicandidate PAC up to $5,000 per election. An individual may give a national party committee up to $44,300 a year, and a political action committee (PAC), including one a corporation or a union has set up, up to $5,000 a year. The limits on gifts to a candidate and to a national party rise with inflation in odd-numbered years.</p>
-                    <p>Spending that is not coordinated with a candidate is not a contribution, and has no limit. An independent expenditure is a communication expressly advocating the election or defeat of a clearly identified candidate, made without the cooperation of the candidate, their campaign or a party (52 U.S.C. 30101(17)), and whoever makes one reports it to the FEC, in some cases within 24 or 48 hours. Committees that make only independent expenditures, often called super PACs, may accept unlimited contributions, corporations' and unions' among them.</p>
-                    <p>The money on each profile here is what the candidate's own campaign committees reported to the FEC for the election: what they raised, what they spent and the cash they had left, as of the date shown. It does not include what parties, PACs or super PACs spend on their own for or against the candidate.</p>
-                    <p class="guide-see"><span>See it on this site:</span> <a href="../index.html">Each candidate's money, in their profile</a></p>
-                    <p class="guide-sources"><span>Sources:</span> <a href="https://www.law.cornell.edu/uscode/text/52/30101" target="_blank" rel="noopener noreferrer">52 U.S.C. 30101 (candidate, federal office and independent expenditure defined)</a>; <a href="https://www.fec.gov/help-candidates-and-committees/filing-reports/registering-candidate/" target="_blank" rel="noopener noreferrer">Federal Election Commission: Registering as a candidate</a>; <a href="https://www.fec.gov/help-candidates-and-committees/candidate-taking-receipts/contribution-limits/" target="_blank" rel="noopener noreferrer">Federal Election Commission: Contribution limits for 2025-2026</a>; <a href="https://www.fec.gov/help-candidates-and-committees/making-independent-expenditures/" target="_blank" rel="noopener noreferrer">Federal Election Commission: Making independent expenditures</a></p>
-                </section>
-                <section class="guide-section" id="running" aria-labelledby="running-title">
-                    <h2 class="guide-heading" id="running-title">Running for office</h2>
-                    <p>A candidate for Congress registers with the FEC once their campaign passes $5,000 (<a href="#funding">above</a>); the FEC's guide to <a href="https://www.fec.gov/help-candidates-and-committees/filing-reports/registering-candidate/" target="_blank" rel="noopener noreferrer">registering as a candidate</a> explains how. Getting on the ballot is a separate matter, set by each state's law: where and by when to file, whether a fee or a petition is needed, and how a party nominates. Each state's chief election official publishes those rules; the U.S. Election Assistance Commission lists who runs elections in each state.</p>
-                    <p>The FEC regulates campaigns only for federal office: president, vice president, senator and representative, and Congress's delegates and resident commissioner (52 U.S.C. 30101(3)). Candidates for state and local offices file, and report their money, under state law. <a href="../government/states.html#/?mode=ballot">The 2026 ballot map</a> shows which state offices each state elects this year, with the state's own record for each.</p>
-                    <p class="guide-sources"><span>Sources:</span> <a href="https://www.fec.gov/help-candidates-and-committees/filing-reports/registering-candidate/" target="_blank" rel="noopener noreferrer">Federal Election Commission: Registering as a candidate</a>; <a href="https://www.law.cornell.edu/uscode/text/52/30101" target="_blank" rel="noopener noreferrer">52 U.S.C. 30101 (candidate, federal office and independent expenditure defined)</a>; <a href="https://www.eac.gov/who-is-in-charge-of-elections-in-my-state" target="_blank" rel="noopener noreferrer">U.S. Election Assistance Commission, Who is in charge of elections in my state?</a>; <a href="https://constitution.congress.gov/constitution/article-1/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article I</a></p>
-                </section>
                 <section class="guide-section" id="runoffs" aria-labelledby="runoffs-title">
                     <h2 class="guide-heading" id="runoffs-title">Runoffs</h2>
                     <p>Some states require a winner to have a majority of the votes, not just the most. When no one has a majority, the leaders meet again in a runoff. In Texas, a primary candidate needs a majority of the votes to win a party's nomination, and a runoff primary is held when no one has one.</p>
@@ -297,9 +267,9 @@
                 </section>
                 <section class="guide-section" id="ranked-choice" aria-labelledby="ranked-choice-title">
                     <h2 class="guide-heading" id="ranked-choice-title">Ranked-choice voting</h2>
-                    <p>Maine and Alaska decide their federal general elections by ranked-choice voting. Maine also uses it in its primaries for Congress, governor and the legislature, but not in its general elections for governor or the legislature: its Supreme Judicial Court has advised, in 2017 and again in April 2026, that the state constitution requires those to be decided by plurality. Voters rank the candidates in order of preference instead of choosing one.</p>
+                    <p>Maine and Alaska decide their federal general elections by ranked-choice voting, and Maine also uses it in its state-level primaries. Voters rank the candidates in order of preference instead of choosing one.</p>
                     <p>The count goes in rounds. If a candidate has more than half of the first choices, that candidate wins. If not, under Alaska's law the last-place candidate is eliminated and each of that candidate's ballots moves to the next candidate ranked on it, and the rounds repeat until someone wins; Maine eliminates the lowest-ranked candidates round by round until two are left. In Maine, when no one wins on the first count, ballots and memory devices are brought from each town to a central count in Augusta. Alaska counts mailed ballots that arrive up to 10 days after the election, or 15 days for ballots mailed from outside the United States, so its final count waits for that window to close; in Maine the rounds are run only after the ballots reach Augusta.</p>
-                    <p class="guide-sources"><span>Sources:</span> <a href="https://www.maine.gov/sos/elections-voting/ranked-choice-voting-frequently-asked-questions" target="_blank" rel="noopener noreferrer">Maine Secretary of State, Ranked-choice voting: frequently asked questions</a>; <a href="https://legislature.maine.gov/statutes/21-A/title21-Asec723-A.html" target="_blank" rel="noopener noreferrer">Maine Revised Statutes, Title 21-A, section 723-A (ranked-choice voting)</a>; <a href="https://www.courts.maine.gov/courts/sjc/lawcourt/2026/26me032.pdf" target="_blank" rel="noopener noreferrer">Maine Supreme Judicial Court, Opinion of the Justices, 2026 ME 32</a>; <a href="https://www.akleg.gov/basis/statutes.asp?media=print&amp;secStart=15.15.350&amp;secEnd=15.15.350" target="_blank" rel="noopener noreferrer">Alaska Statutes 15.15.350 (ranked-choice general elections)</a>; <a href="https://www.akleg.gov/basis/statutes.asp?media=print&amp;secStart=15.20.081&amp;secEnd=15.20.081" target="_blank" rel="noopener noreferrer">Alaska Statutes 15.20.081 (absentee ballots)</a></p>
+                    <p class="guide-sources"><span>Sources:</span> <a href="https://www.maine.gov/sos/elections-voting/ranked-choice-voting-frequently-asked-questions" target="_blank" rel="noopener noreferrer">Maine Secretary of State, Ranked-choice voting: frequently asked questions</a>; <a href="https://www.akleg.gov/basis/statutes.asp?media=print&amp;secStart=15.15.350&amp;secEnd=15.15.350" target="_blank" rel="noopener noreferrer">Alaska Statutes 15.15.350 (ranked-choice general elections)</a>; <a href="https://www.akleg.gov/basis/statutes.asp?media=print&amp;secStart=15.20.081&amp;secEnd=15.20.081" target="_blank" rel="noopener noreferrer">Alaska Statutes 15.20.081 (absentee ballots)</a></p>
                 </section>
                 <section class="guide-section" id="counting" aria-labelledby="counting-title">
                     <h2 class="guide-heading" id="counting-title">Counting, canvassing and certification</h2>
@@ -312,25 +282,6 @@
                     <h2 class="guide-heading" id="recounts-title">Recounts</h2>
                     <p>Recounts are governed by state law. Three examples. Arizona recounts automatically when the margin between the top two candidates is one-half of one percent or less of the votes cast for both. Florida orders a recount when the unofficial returns show a candidate lost by one-half of a percent or less of the votes cast for the office, unless the losing candidate asks in writing that none be made. In Texas a candidate must ask: one condition is that the difference between the candidate and the winner is less than 10 percent of the winner's votes, and as a general rule the petition is due by 5 p.m. on the third business day after the canvass is completed.</p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.azleg.gov/ars/16/00661.htm" target="_blank" rel="noopener noreferrer">Arizona Revised Statutes 16-661 (automatic recounts)</a>; <a href="https://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&amp;URL=0100-0199/0102/Sections/0102.141.html" target="_blank" rel="noopener noreferrer">Florida Statutes 102.141 (canvassing boards and recounts)</a>; <a href="https://tcss.legis.texas.gov/resources/EL/pdf/EL.212.pdf" target="_blank" rel="noopener noreferrer">Texas Election Code, chapter 212 (recounts)</a></p>
-                </section>
-                <section class="guide-section" id="after" aria-labelledby="after-title">
-                    <h2 class="guide-heading" id="after-title">From Election Day to January 3</h2>
-                    <p>The dates the law and the states set between the vote and the new Congress, and beside them what this site's races show at each point, in the words its profiles use.</p>
-                    <figure class="guide-timeline">
-                        <ol class="guide-timeline-steps">
-                            <li data-date="2026-11-03"><time datetime="2026-11-03">Nov 3</time><strong>Election Day</strong><span>Polls close and the count begins. Louisiana's House seats hold their open primary. Until then a nominee here reads <span class="badge guide-status" data-status="nominee">On the November ballot</span>.</span></li>
-                            <li data-date="2026-11-04"><time datetime="2026-11-04">Nov 4</time><strong>The results are read</strong><span>From the day after, this site reads the published results. Until a race's winner is marked, its nominees read <span class="badge guide-status" data-status="awaiting">Awaiting result</span>; then the winner reads <span class="badge guide-status" data-status="elected">Elected</span> and the others <span class="badge guide-status" data-status="defeated">Lost in November</span>.</span></li>
-                            <li data-date="2026-11-10"><time datetime="2026-11-10">Nov 10</time><strong>California's late mail</strong><span>The last day for ballots postmarked by Election Day to reach a California county.</span></li>
-                            <li data-date="2026-12-01"><time datetime="2026-12-01">Dec 1</time><strong>Georgia's runoff</strong><span>Where no one won a majority in a Georgia general election, the top two meet again. They read <span class="badge guide-status" data-status="runoff">In the runoff</span> until it is decided.</span></li>
-                            <li data-date="2026-12-03"><time datetime="2026-12-03">Dec 3</time><strong>California's counties certify</strong><span>The deadline for California's counties to certify their results.</span></li>
-                            <li data-date="2026-12-07"><time datetime="2026-12-07">Dec 7</time><strong>Texas's state canvass</strong><span>The last day for Texas's state canvass.</span></li>
-                            <li data-date="2026-12-11"><time datetime="2026-12-11">Dec 11</time><strong>California certifies</strong><span>California's Secretary of State certifies the statewide results.</span></li>
-                            <li data-date="2026-12-12"><time datetime="2026-12-12">Dec 12</time><strong>Louisiana's House general election</strong><span>Where no one won a majority on November 3, the top two meet.</span></li>
-                            <li data-date="2027-01-03"><time datetime="2027-01-03">Jan 3, 2027</time><strong>The new Congress</strong><span>At noon the terms of the members elected on November 3 begin (Twentieth Amendment).</span></li>
-                        </ol>
-                        <figcaption>From the sources below. A step already past is marked Done, and the next one to come is marked Next.</figcaption>
-                    </figure>
-                    <p class="guide-sources"><span>Sources:</span> <a href="https://www.law.cornell.edu/uscode/text/2/7" target="_blank" rel="noopener noreferrer">2 U.S.C. 7 (the day of the House election)</a>; <a href="https://www.sos.ca.gov/elections/upcoming-elections/general-election-november-3-2026/key-dates-deadlines" target="_blank" rel="noopener noreferrer">California Secretary of State, November 3, 2026 general election: key dates and deadlines</a>; <a href="https://georgia.gov/events/2026-12-01/election-day-general-election-runoff" target="_blank" rel="noopener noreferrer">Georgia.gov, General election runoff, December 1, 2026</a>; <a href="https://www.sos.texas.gov/elections/laws/advisory2026-21-november-3-election-law-calendar.shtml" target="_blank" rel="noopener noreferrer">Texas Secretary of State, Advisory 2026-21: the November 3, 2026 election law calendar</a>; <a href="https://www.sos.la.gov/media/dcvl5ojl/051426-fall-house-races.pdf" target="_blank" rel="noopener noreferrer">Louisiana Secretary of State, release of May 14, 2026 on the fall House races</a>; <a href="https://constitution.congress.gov/constitution/amendment-20/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Twentieth Amendment</a></p>
                 </section>
                 <section class="guide-section" id="taking-office" aria-labelledby="taking-office-title">
                     <h2 class="guide-heading" id="taking-office-title">Taking office</h2>
@@ -346,14 +297,14 @@
                     <p class="guide-sources"><span>Sources:</span> <a href="https://constitution.congress.gov/constitution/article-1/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Article I</a>; <a href="https://constitution.congress.gov/constitution/amendment-17/" target="_blank" rel="noopener noreferrer">U.S. Constitution, Seventeenth Amendment</a>; <a href="https://www.law.cornell.edu/uscode/text/2/8" target="_blank" rel="noopener noreferrer">2 U.S.C. 8 (when a House vacancy is filled)</a></p>
                 </section>
                 <nav class="guide-pager" aria-label="Guide pages">
-                    <a class="guide-pager-link" rel="prev" href="tribal.html"><span>Previous</span> How tribal nations govern</a>
+                    <a class="guide-pager-link" rel="prev" href="tribal.html"><span>Previous</span> Tribal nations</a>
                 </nav>
             </article>
 
             <footer class="site-footer">
                 <p><strong>About this guide:</strong> a plain-language summary of how
                     American government is organized. Each section lists the sources
-                    it was checked against, on <time datetime="2026-10-18">Oct. 18, 2026</time>.
+                    it was checked against, on <time datetime="2026-10-17">Oct. 17, 2026</time>.
                     It describes offices and institutions; where it names who holds
                     one today, that comes from the same data as the rest of the site.
                     It is not legal advice.</p>
@@ -363,6 +314,6 @@
     </main>
 </div>
 
-<script src="../assets/kyc-guide.js?v=e9f487133f"></script>
+<script src="../assets/kyc-guide.js?v=87949fc74a"></script>
 </body>
 </html>

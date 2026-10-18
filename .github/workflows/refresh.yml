@@ -249,6 +249,18 @@ jobs:
       - name: Fill gaps from candidates' articles and campaign sites
         run: python build_profile_site.py enrich
 
+      # The websites the Census listed for local governments, looked at
+      # again so a domain that lapses into gambling or parking is withdrawn
+      # by a run rather than found by a reader (rule 78). Oldest first and
+      # capped, so each run takes a share and every address is looked at
+      # within about six weeks even on a weekly schedule; the build warns
+      # once one has gone 60 days. A look that concludes nothing never
+      # undoes a withdrawal, and plain gambling stays for a person.
+      - name: Look again at local governments' listed websites
+        continue-on-error: true
+        timeout-minutes: 45
+        run: python build_profile_site.py localgov --check-sites --limit 6000
+
       # Market prices are not refreshed here: .github/workflows/odds.yml
       # does that every twelve hours and publishes on its own. The build
       # below leaves data/odds.js alone unless odds.json changed, so this
