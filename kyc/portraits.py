@@ -330,14 +330,31 @@ def credit_all(cache, log=print):
 def measure(url, timeout=_TIMEOUT):
     """``{"bytes", "width", "height"}`` of the image at *url*, from its
     first 64 KB and the size the server reports, or ``None`` when it could
-    not be told (rule 8: unknown is not too big)."""
-    headers = dict(_UA, Range="bytes=0-65535")
+    not be told (rule 8: unknown is not too big). A JPEG whose metadata
+    runs past 64 KB before its dimensions (the NGA's 7.6 MB headshot of
+    Ohio's governor carries 100 KB of it) is read again to 512 KB."""
+    for span_end in (65535, 524287):
+        found = _measure_head(url, span_end, timeout)
+        if found is None:
+            return None
+        total, size = found
+        if size:
+            return {"bytes": total, "width": size[0], "height": size[1]} if total else None
+        if not total or total <= span_end + 1:
+            return None
+    return None
+
+
+def _measure_head(url, span_end, timeout):
+    """``(total bytes or None, (width, height) or None)`` from the first
+    *span_end* + 1 bytes of *url*, or ``None`` when it is not an image."""
+    headers = dict(_UA, Range=f"bytes=0-{span_end}")
     try:
         req = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(req, timeout=timeout) as response:
             if not (response.headers.get("Content-Type") or "").startswith("image/"):
                 return None
-            head = response.read(65536)
+            head = response.read(span_end + 1)
             total = None
             span = response.headers.get("Content-Range") or ""
             if "/" in span and span.rsplit("/", 1)[1].isdigit():
@@ -346,10 +363,7 @@ def measure(url, timeout=_TIMEOUT):
                 total = int(response.headers["Content-Length"])
     except Exception:
         return None
-    size = image_size(head)
-    if not total or not size:
-        return None
-    return {"bytes": total, "width": size[0], "height": size[1]}
+    return total, image_size(head)
 
 
 _measure_gap = 1.0

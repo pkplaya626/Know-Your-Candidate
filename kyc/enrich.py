@@ -42,7 +42,7 @@ from concurrent.futures import ThreadPoolExecutor
 from . import overrides
 from .legislators import age_on
 from .normalize import fill_field, looks_like_date
-from .photos import campaign_credit, smaller_form, too_heavy
+from .photos import campaign_credit, lighter_form, too_heavy
 from .portraits import article_is_theirs, image_size, surname_of, title_is_about
 from .results import OFF_BALLOT
 
@@ -970,74 +970,83 @@ def _read_one(profile, url, pause=1.0, extract=True, rivals=()):
     return record
 
 
-def take_portrait(record, pictures, tries=3):
-    """Put the first of *pictures* that is head-and-shoulders shaped and not
-    too heavy (``photos.too_heavy``) in *record*, with its measured weight.
+def _weigh(url):
+    """An image's weight, for ``photos.lighter_form``; ``None`` unread."""
+    return portrait_check(url, True)[1]
 
-    A heavy one is passed over for the next, and said: a site's 1.3 MB
-    original was downloaded for a 165px card (TECH-13). It does not use up
-    one of the *tries*, but no more than twice as many are fetched."""
+
+def lighten(record, picture, weight):
+    """Put *picture* in *record* as its portrait, at a lighter form of the
+    same file when it is too heavy (``photos.lighter_form``: the host's own
+    resizer, or Photon). A heavy file with no lighter form is still taken -
+    a nominee's only likeness is not withheld for its weight; eleven were,
+    and showed the silhouette beside an opponent's photograph - and the
+    weight is said in ``portraitHeavy`` either way (TECH-13)."""
+    why = too_heavy(weight)
+    if why:
+        found = lighter_form(picture, weight, _weigh)
+        record["portraitHeavy"] = [{"url": picture, "why": why,
+                                    "kept": not found}]
+        if found:
+            picture, weight = found
+    else:
+        record.pop("portraitHeavy", None)
+    record["portrait"] = picture
+    if weight:
+        record["portraitWeight"] = weight
+    return picture
+
+
+def take_portrait(record, pictures, tries=3):
+    """Put the first of *pictures* that is head-and-shoulders shaped in
+    *record*, with its measured weight, lightened if it is too heavy
+    (:func:`lighten`)."""
     record.pop("portrait", None)
     record.pop("portraitWeight", None)
     record.pop("portraitHeavy", None)
-    heavy, shaped, fetched = [], 0, 0
-    for picture, hinted in pictures:
-        if shaped >= tries or fetched >= 2 * tries:
-            break
-        fetched += 1
+    for picture, hinted in pictures[:tries]:
         verdict, weight = portrait_check(picture, hinted)
-        if verdict is not True:
-            shaped += 1
-            continue
-        why = too_heavy(weight)
-        if why:
-            heavy.append({"url": picture, "why": why})
-            # The same photograph, smaller, from the host's own resizer.
-            smaller = smaller_form(picture)
-            if not smaller:
-                continue
-            fetched += 1
-            verdict, weight = portrait_check(smaller, hinted)
-            if verdict is not True or too_heavy(weight):
-                continue
-            picture = smaller
-        record["portrait"] = picture
-        if weight:
-            record["portraitWeight"] = weight
-        break
-    if heavy:
-        record["portraitHeavy"] = heavy
-    return record.get("portrait")
+        if verdict is True:
+            return lighten(record, picture, weight)
+    return None
 
 
 def measure_portraits(cache, log=print, pause=1.0):
     """Weigh each cached campaign-site portrait that has no recorded weight,
-    and take the next picture the site offers for one that is too heavy.
-    Returns how many were weighed. A site is read again only for that."""
+    and lighten one that is too heavy (:func:`lighten`). Returns how many
+    were weighed.
+
+    Only the image is fetched, never the site: a picture is chosen by the
+    full read (``_read_one``), which first checks that the page names the
+    candidate (rule 38) and is not spam or parking (rule 39). A record whose
+    picture an earlier run refused for its weight alone (``portraitHeavy``
+    with no ``portrait``) has that same picture weighed again and taken,
+    lightened where it can be."""
     people = (cache or {}).get("people") or {}
     weighed = 0
     for entry in people.values():
         for key in ("site", "listed"):
             record = entry.get(key) or {}
-            if not record.get("portrait") or "portraitWeight" in record:
+            refused = record.get("portraitHeavy") or []
+            if record.get("portrait"):
+                # A heavy one kept at full size is tried again each run.
+                if "portraitWeight" in record and not too_heavy(record["portraitWeight"]):
+                    continue
+                picture = record["portrait"]
+            elif refused:
+                picture = refused[0]["url"]
+            else:
                 continue
             time.sleep(pause)
-            verdict, weight = portrait_check(record["portrait"], True)
+            weight = _weigh(picture)
             if not weight:
                 continue                       # could not tell: kept (rule 8)
             weighed += 1
-            if not too_heavy(weight):
-                record["portraitWeight"] = weight
-                continue
-            log(f"    {entry.get('name')}: {record['portrait']} is {too_heavy(weight)}; "
-                "reading the site for the next picture")
-            final, status, markup = fetch(record.get("final") or record["url"])
-            pictures = portrait(parse_page(markup), final, {"name": entry.get("name") or ""}) \
-                if status == 200 else []
-            skip = set(record.get("notPortraits") or ())
-            first = record["portrait"]
-            take_portrait(record, [(first, True)] + [p for p in pictures
-                                                     if p[0] not in skip and p[0] != first])
+            lighten(record, picture, weight)
+            if record.get("portraitHeavy"):
+                state = ("kept at full size" if record["portraitHeavy"][0]["kept"]
+                         else "taken smaller")
+                log(f"    {entry.get('name')}: {picture} is {too_heavy(weight)}; {state}")
     return weighed
 
 
@@ -1315,10 +1324,10 @@ def apply_cache(profiles, cache, as_of=None):
                                               "campaign-site"):
             counts["issues"] += 1
         if shown.get("portrait") and too_heavy(shown.get("portraitWeight")):
-            # Weighed and found too heavy before the next picture could be
-            # read; the next read takes the next one (take_portrait).
+            # No lighter form of it was found (lighten): shown all the same,
+            # lazily, and counted for the build's report (TECH-13).
             counts["portrait_heavy"] += 1
-        elif shown.get("portrait") and not profile.get("photoSource") \
+        if shown.get("portrait") and not profile.get("photoSource") \
                 and profile.get("source") == "fec-field" \
                 and shown["portrait"] not in overrides.NOT_A_PORTRAIT:
             photos = [u for u in profile.get("photos") or [] if u != shown["portrait"]]

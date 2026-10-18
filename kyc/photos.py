@@ -15,6 +15,8 @@ nominees. Behind every member's official sources sat the same guess -
 "Al_Green.jpg" is the singer - one outage away from the page (rule 24).
 """
 
+import re
+
 from .normalize import is_missing
 from .overrides import CANDIDATE_PHOTOS
 
@@ -160,16 +162,21 @@ def assign_credits(profiles):
 
 
 SMALLER_WIDTH = 500
+# The widths a heavy file is asked for, widest first: 500px is sharp in any
+# box the pages draw, 330px is a 165px card on a 2x screen, and a PNG that
+# is still too heavy at 500 usually is not at 330.
+SMALLER_WIDTHS = (500, 330)
+PHOTON_HOSTS = ("i0.wp.com", "i1.wp.com", "i2.wp.com", "i3.wp.com")
+SQUARESPACE_WIDTHS = (100, 300, 500, 750, 1000, 1500, 2500)
 
 
-def smaller_form(url, width=SMALLER_WIDTH):
+def host_resized(url, width=SMALLER_WIDTH):
     """*url* at *width* pixels wide from its host's own resizing service, or
     ``None``. Squarespace's image CDN (``format=500w``), imgix and
     WordPress.com's Photon (``w=500``, on ``i0.wp.com`` and its siblings)
     serve any upload at a width asked for: the same file, so the same
     photograph (rule 42), checked again for shape and weight before it is
-    taken. Nothing is guessed: a host without such a service has no smaller
-    form here."""
+    taken."""
     import urllib.parse
 
     try:
@@ -179,11 +186,84 @@ def smaller_form(url, width=SMALLER_WIDTH):
     host = (parts.hostname or "").lower()
     query = urllib.parse.parse_qsl(parts.query, keep_blank_values=True)
     if host == "images.squarespace-cdn.com":
+        # Squarespace serves a fixed set of widths and the original for any
+        # other: the widest of its set no wider than asked.
+        width = max((w for w in SQUARESPACE_WIDTHS if w <= width), default=SQUARESPACE_WIDTHS[0])
         query = [(k, v) for k, v in query if k != "format"] + [("format", f"{width}w")]
-    elif host.endswith(".imgix.net") or host in ("i0.wp.com", "i1.wp.com", "i2.wp.com",
-                                                   "i3.wp.com"):
+    elif host.endswith(".imgix.net") or host in PHOTON_HOSTS:
         query = [(k, v) for k, v in query if k not in ("w", "resize", "fit")] + [("w", str(width))]
     else:
         return None
     smaller = urllib.parse.urlunsplit(parts._replace(query=urllib.parse.urlencode(query)))
     return smaller if smaller != url else None
+
+
+def photon_form(url, width=SMALLER_WIDTH):
+    """*url* at *width* pixels wide through WordPress.com's public image
+    resizer (Photon, ``i0.wp.com/<host>/<path>?w=``), or ``None``.
+
+    Photon fetches the very file at that address and scales it, so what it
+    serves is the same photograph (rule 42), and it answers 404 for a file
+    that is not there, never another image. It is used for a file whose own
+    host has no resizer: eleven November nominees' only portraits were
+    campaign uploads of 1-2.6 MB or 2,048px, and 27 governors' NGA
+    headshots ran 320 KB to 7.6 MB for a 40px circle (TECH-13). Only a plain
+    https address of an image file is asked for: Photon drops a query
+    string, which could name another file."""
+    import urllib.parse
+
+    try:
+        parts = urllib.parse.urlsplit(str(url or ""))
+    except ValueError:
+        return None
+    host = (parts.hostname or "").lower()
+    if (parts.scheme != "https" or not host or parts.query or parts.port
+            or host in PHOTON_HOSTS or host.endswith(".imgix.net")
+            or host == "images.squarespace-cdn.com"
+            or not re.search(r"\.(?:jpe?g|png|gif|webp)$", parts.path, re.I)):
+        return None
+    return f"https://i0.wp.com/{host}{parts.path}?w={int(width)}&ssl=1"
+
+
+def smaller_form(url, width=SMALLER_WIDTH):
+    """*url* at *width* pixels wide: from its host's own resizer
+    (:func:`host_resized`), or else through Photon (:func:`photon_form`);
+    ``None`` when neither serves it. Nothing is guessed - no size suffix a
+    host might have generated - and whatever comes back is weighed and
+    checked for shape before it is used."""
+    return host_resized(url, width) or photon_form(url, width)
+
+
+def smaller_forms(url):
+    """:func:`smaller_form` at each of :data:`SMALLER_WIDTHS`, widest first."""
+    out = []
+    for width in SMALLER_WIDTHS:
+        form = smaller_form(url, width)
+        if form and form not in out:
+            out.append(form)
+    return out
+
+
+def same_shape(original, smaller):
+    """Whether *smaller* (a weight: ``{"bytes", "width", "height"}``) is
+    *original* scaled down: narrower, at the same proportions to within 2%
+    (a resizer rounds a pixel). A resizer that answered with some other
+    image - a placeholder, an error picture - has some other shape."""
+    try:
+        ratio = original["width"] / original["height"]
+        scaled = smaller["width"] / smaller["height"]
+    except (KeyError, TypeError, ZeroDivisionError):
+        return False
+    return smaller["width"] < original["width"] and abs(scaled - ratio) <= 0.02 * ratio
+
+
+def lighter_form(url, weight, weigh):
+    """``(form, its weight)``: the widest of :func:`smaller_forms` of *url*
+    that is within the caps (:func:`too_heavy`) and is the same picture
+    scaled (:func:`same_shape` against *weight*, the original's), or
+    ``None``. *weigh* reads a URL's weight, ``None`` when it cannot."""
+    for form in smaller_forms(url):
+        found = weigh(form)
+        if found and not too_heavy(found) and same_shape(weight, found):
+            return form, found
+    return None

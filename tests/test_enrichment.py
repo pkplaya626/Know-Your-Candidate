@@ -1451,42 +1451,119 @@ class TestPortraitWeights(unittest.TestCase):
         self.assertIn("KB", photos.too_heavy({"bytes": 1_330_007, "width": 876, "height": 1024}))
         self.assertIn("px", photos.too_heavy({"bytes": 90_000, "width": 1638, "height": 2048}))
 
-    def test_a_heavy_picture_is_passed_over_for_the_next_and_said(self):
-        heavy, light = "https://smith.com/smith-big.png", "https://smith.com/smith-head.jpg"
+    def test_a_heavy_picture_is_taken_lighter_and_said(self):
+        heavy = "https://smith.com/wp-content/uploads/smith-big.png"
+        photon = "https://i0.wp.com/smith.com/wp-content/uploads/smith-big.png?w=500&ssl=1"
         weights = {heavy: (True, {"bytes": 1_300_000, "width": 876, "height": 1024}),
-                   light: (True, {"bytes": 60_000, "width": 400, "height": 500})}
+                   photon: (True, {"bytes": 160_000, "width": 500, "height": 584})}
         record = {}
         with mock.patch.object(enrich, "portrait_check", side_effect=lambda u, h: weights[u]):
-            enrich.take_portrait(record, [(heavy, True), (light, False)])
-        self.assertEqual(record["portrait"], light)
-        self.assertEqual(record["portraitWeight"]["bytes"], 60_000)
-        self.assertEqual(record["portraitHeavy"][0]["url"], heavy)
+            enrich.take_portrait(record, [(heavy, True)])
+        self.assertEqual(record["portrait"], photon)
+        self.assertEqual(record["portraitWeight"]["bytes"], 160_000)
+        self.assertEqual(record["portraitHeavy"],
+                         [{"url": heavy, "why": "1300 KB, over 300 KB", "kept": False}])
 
-    def test_a_heavy_upload_is_taken_at_its_hosts_own_smaller_size(self):
-        big = ("https://images.squarespace-cdn.com/content/v1/abc/def/Jane+Smith+Headshot.png"
-               "?format=1500w")
-        small = enrich.smaller_form(big)
-        self.assertEqual(small, "https://images.squarespace-cdn.com/content/v1/abc/def/"
-                                "Jane+Smith+Headshot.png?format=500w")
-        self.assertIn("w=500", enrich.smaller_form("https://run.imgix.net/a/b.jpg?w=2048&q=75"))
-        # No resizing service: nothing guessed.
-        self.assertIsNone(enrich.smaller_form("https://smith.com/wp-content/smith-876x1024.png"))
-        weights = {big: (True, {"bytes": 5_100_000, "width": 1500, "height": 2300}),
-                   small: (True, {"bytes": 60_000, "width": 500, "height": 767})}
+    def test_a_nominees_only_likeness_is_not_withheld_for_its_weight(self):
+        """Eleven November nominees showed the silhouette once their only
+        portrait was refused as heavy; the reviewer's diff found them."""
+        heavy = "https://cdn.example.com/a/smith.png?v=3"     # no resizer, a query string
+        weights = {heavy: (True, {"bytes": 306_000, "width": 800, "height": 913})}
         record = {}
         with mock.patch.object(enrich, "portrait_check", side_effect=lambda u, h: weights[u]):
-            enrich.take_portrait(record, [(big, True)])
-        self.assertEqual(record["portrait"], small)
-        self.assertEqual(record["portraitHeavy"], [{"url": big, "why": "5100 KB, over 300 KB"}])
-
-    def test_a_cached_heavy_portrait_is_not_shown(self):
-        site = dict(TestApplyEnrichment.SAFE_SITE,
-                    portraitWeight={"bytes": 1_300_000, "width": 876, "height": 1024})
+            enrich.take_portrait(record, [(heavy, True)])
+        self.assertEqual(record["portrait"], heavy)
+        self.assertTrue(record["portraitHeavy"][0]["kept"])
+        site = dict(TestApplyEnrichment.SAFE_SITE, portrait=heavy,
+                    portraitWeight=weights[heavy][1])
         profile = _challenger(campaignSite="https://janesmith.com")
         counts = enrich.apply_cache([profile], TestApplyEnrichment().cache(site=site),
                                     as_of=TestApplyEnrichment.AS_OF)
-        self.assertEqual(profile["photos"], ["placeholder"])
+        self.assertEqual(profile["photos"][0], heavy)
         self.assertEqual(counts["portrait_heavy"], 1)
+
+    def test_a_resizer_answering_with_another_picture_is_not_taken(self):
+        heavy = "https://smith.com/smith.jpg"
+        weights = {heavy: (True, {"bytes": 900_000, "width": 1600, "height": 2000}),
+                   # A square "image not found" card, not the portrait scaled.
+                   photos.photon_form(heavy, 500): (True, {"bytes": 9_000, "width": 500,
+                                                           "height": 500}),
+                   photos.photon_form(heavy, 330): (False, None)}
+        record = {}
+        with mock.patch.object(enrich, "portrait_check", side_effect=lambda u, h: weights[u]):
+            enrich.take_portrait(record, [(heavy, True)])
+        self.assertEqual(record["portrait"], heavy)
+        self.assertTrue(record["portraitHeavy"][0]["kept"])
+
+    def test_smaller_forms_come_from_the_same_file(self):
+        big = ("https://images.squarespace-cdn.com/content/v1/abc/def/Jane+Smith+Headshot.png"
+               "?format=1500w")
+        self.assertEqual(photos.smaller_forms(big), [
+            "https://images.squarespace-cdn.com/content/v1/abc/def/Jane+Smith+Headshot.png"
+            "?format=500w",
+            # Squarespace serves 300w, not 330w.
+            "https://images.squarespace-cdn.com/content/v1/abc/def/Jane+Smith+Headshot.png"
+            "?format=300w"])
+        self.assertIn("w=500", photos.smaller_form("https://run.imgix.net/a/b.jpg?w=2048&q=75"))
+        self.assertEqual(photos.smaller_form("https://smith.com/wp-content/smith-876x1024.png"),
+                         "https://i0.wp.com/smith.com/wp-content/smith-876x1024.png?w=500&ssl=1")
+        # Photon drops a query string, which could name another file; and it
+        # is never asked for a page, plain http or another resizer's URL.
+        for url in ("https://smith.com/smith.png?1784490997", "https://smith.com/about",
+                    "http://smith.com/smith.jpg",
+                    "https://i0.wp.com/smith.com/smith.jpg?w=500"):
+            self.assertIsNone(photos.photon_form(url), url)
+        self.assertTrue(photos.same_shape({"width": 800, "height": 913},
+                                          {"width": 499, "height": 570}))
+        self.assertFalse(photos.same_shape({"width": 800, "height": 913},
+                                           {"width": 500, "height": 500}))
+        self.assertFalse(photos.same_shape({"width": 400, "height": 500},
+                                           {"width": 400, "height": 500}))
+
+    def test_a_portrait_refused_for_its_weight_is_weighed_again_and_never_read_from_the_site(self):
+        heavy = "https://smith.com/wp-content/uploads/smith.png"
+        photon = photos.photon_form(heavy, 500)
+        cache = {"people": {"FEC_H6XX01001": {"name": "Jane Smith", "site": {
+            "url": "https://smith.com", "safe": True,
+            "portraitHeavy": [{"url": heavy, "why": "1330 KB, over 300 KB"}]}}}}
+        weights = {heavy: (True, {"bytes": 1_330_000, "width": 876, "height": 1024}),
+                   photon: (True, {"bytes": 120_000, "width": 500, "height": 584})}
+        with mock.patch.object(enrich, "portrait_check", side_effect=lambda u, h: weights[u]), \
+                mock.patch.object(enrich, "fetch", side_effect=AssertionError("site read")), \
+                mock.patch.object(enrich.time, "sleep"):
+            self.assertEqual(enrich.measure_portraits(cache, log=lambda *a: None), 1)
+        record = cache["people"]["FEC_H6XX01001"]["site"]
+        self.assertEqual(record["portrait"], photon)
+        self.assertFalse(record["portraitHeavy"][0]["kept"])
+
+    def test_a_gzipped_image_is_read_through_its_encoding(self):
+        """Missouri's attorney general's headshot came gzipped and read as
+        'not an image'."""
+        import gzip
+
+        jpeg = (b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00"
+                b"\xff\xc0\x00\x11\x08" + (500).to_bytes(2, "big") + (400).to_bytes(2, "big")
+                + b"\x03\x01\x22\x00\x02\x11\x01\x03\x11\x01" + b"\x00" * 64)
+        body = gzip.compress(jpeg)
+
+        class Response:
+            status = 200
+            headers = {"Content-Type": "image/jpeg", "Content-Encoding": "gzip",
+                       "Content-Length": str(len(body))}
+
+            def read(self, n):
+                return body[:n]
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+        with mock.patch.object(enrich.urllib.request, "urlopen", return_value=Response()):
+            shape, weight = enrich.portrait_check("https://ago.mo.gov/hanaway.jpg", True)
+        self.assertTrue(shape)
+        self.assertEqual(weight, {"bytes": len(body), "width": 400, "height": 500})
 
     def test_a_portrait_is_measured_from_its_first_bytes_and_the_size_the_server_gives(self):
         png = (b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR" + (335).to_bytes(4, "big")

@@ -6170,12 +6170,19 @@
      "Winning CD-24 takes a team"
     ],
     "issuesUrl": "https://bobsmithforcongress.com/issues/",
+    "portrait": "https://i0.wp.com/bobsmithforcongress.com/wp-content/uploads/bob-smith-headshot-2026-09.jpg?w=500&ssl=1",
     "portraitHeavy": [
      {
+      "kept": false,
       "url": "https://bobsmithforcongress.com/wp-content/uploads/bob-smith-headshot-2026-09.jpg",
       "why": "1638x2048px, over 1200px"
      }
     ],
+    "portraitWeight": {
+     "bytes": 23260,
+     "height": 625,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -6188,12 +6195,19 @@
    "site": {
     "description": "Running to bring Leadership & Commonsense Solutions to Washington for the people of the Inland Empire and Imperial County.",
     "final": "https://joemalesforca.com",
+    "portrait": "https://i0.wp.com/joemalesforca.com/wp-content/uploads/2025/04/Adobe-Express-file-5-e1744046921739-847x1024.png?w=500&ssl=1",
     "portraitHeavy": [
      {
+      "kept": false,
       "url": "https://joemalesforca.com/wp-content/uploads/2025/04/Adobe-Express-file-5-e1744046921739-847x1024.png",
       "why": "499 KB, over 300 KB"
      }
     ],
+    "portraitWeight": {
+     "bytes": 182458,
+     "height": 604,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -7039,12 +7053,19 @@
      "reason": "HTTP 403",
      "status": 403
     },
+    "portrait": "https://assets.nationbuilder.com/themes/6a526eb8300636d1e3f480c1/attachments/original/1784490997/michael-no-tint.png?1784490997",
     "portraitHeavy": [
      {
+      "kept": true,
       "url": "https://assets.nationbuilder.com/themes/6a526eb8300636d1e3f480c1/attachments/original/1784490997/michael-no-tint.png?1784490997",
       "why": "306 KB, over 300 KB"
      }
     ],
+    "portraitWeight": {
+     "bytes": 306579,
+     "height": 913,
+     "width": 800
+    },
     "reason": "moved to michaelquirkforcongress.com, still names the candidate",
     "safe": true,
     "status": 200,
@@ -10347,12 +10368,19 @@
     "description": "Independent candidate Robert P. Henri is running for Congress to force votes on major reforms Americans already support and hold lawmakers accountable if they fail to follow through.",
     "final": "https://projectduecourse.org/",
     "issuesUrl": "https://projectduecourse.org/issues",
+    "portrait": "https://i0.wp.com/projectduecourse.org/RPH_Candidate_Photo.jpg?w=330&ssl=1",
     "portraitHeavy": [
      {
+      "kept": false,
       "url": "https://projectduecourse.org/RPH_Candidate_Photo.jpg",
       "why": "582 KB, over 300 KB"
      }
     ],
+    "portraitWeight": {
+     "bytes": 162038,
+     "height": 438,
+     "width": 330
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -10400,12 +10428,19 @@
      "National Security and Foreign Policy"
     ],
     "issuesUrl": "https://www.moniqueforcongress.com/issues/",
+    "portrait": "https://i0.wp.com/www.moniqueforcongress.com/images/despain-large.png?w=330&ssl=1",
     "portraitHeavy": [
      {
+      "kept": false,
       "url": "https://www.moniqueforcongress.com/images/despain-large.png",
       "why": "1290 KB, over 300 KB"
      }
     ],
+    "portraitWeight": {
+     "bytes": 147294,
+     "height": 524,
+     "width": 330
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -10570,12 +10605,19 @@
      "Voting Rights"
     ],
     "issuesUrl": "https://www.nancymannion.com/Priorities/",
+    "portrait": "https://i0.wp.com/www.nancymannion.com/img/Nancy-Mannion-Main.png?w=500&ssl=1",
     "portraitHeavy": [
      {
+      "kept": false,
       "url": "https://www.nancymannion.com/img/Nancy-Mannion-Main.png",
       "why": "375 KB, over 300 KB"
      }
     ],
+    "portraitWeight": {
+     "bytes": 178798,
+     "height": 595,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -10589,12 +10631,19 @@
     "description": "Alan Bradstock, a veteran and former FBI agent with 20 years of service, is running as the Democratic Congressional Candidate in Pennsylvania’s 14th District.",
     "final": "https://www.bradstockforcongress.com/",
     "issuesUrl": "https://www.bradstockforcongress.com/issues",
+    "portrait": "https://images.squarespace-cdn.com/content/v1/6897cada8764414f9733ee5d/51b95d22-2439-4280-9610-178c96eb48e1/Alan+Smiles+at+Park+2.png?format=300w",
     "portraitHeavy": [
      {
+      "kept": false,
       "url": "https://images.squarespace-cdn.com/content/v1/6897cada8764414f9733ee5d/51b95d22-2439-4280-9610-178c96eb48e1/Alan+Smiles+at+Park+2.png?format=1500w",
       "why": "2584 KB, over 300 KB"
      }
     ],
+    "portraitWeight": {
+     "bytes": 180096,
+     "height": 400,
+     "width": 300
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -11125,12 +11174,19 @@
      "Upholding Humane Foreign Policy"
     ],
     "issuesUrl": "https://chelseyhockettforcongress.com/issues.html",
+    "portrait": "https://i0.wp.com/chelseyhockettforcongress.com/images/chelsey.jpg?w=500&ssl=1",
     "portraitHeavy": [
      {
+      "kept": false,
       "url": "https://chelseyhockettforcongress.com/images/chelsey.jpg",
       "why": "713 KB, over 300 KB"
      }
     ],
+    "portraitWeight": {
+     "bytes": 34180,
+     "height": 750,
+     "width": 499
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -11933,12 +11989,19 @@
     "description": "I’m running for Congress to keep that dream within reach for working families and ensure the next generation has the same chance to build a meaningful life.",
     "final": "https://www.melineforcongress.com/",
     "issuesUrl": "https://www.melineforcongress.com/priorities",
+    "portrait": "https://i0.wp.com/cdn.prod.website-files.com/6a039d746f415ed9d732b21a/6a0d3f104322eac0caa7131e_spencer-meline-headshot-cropped.png?w=500&ssl=1",
     "portraitHeavy": [
      {
+      "kept": false,
       "url": "https://cdn.prod.website-files.com/6a039d746f415ed9d732b21a/6a0d3f104322eac0caa7131e_spencer-meline-headshot-cropped.png",
       "why": "1690 KB, over 300 KB"
      }
     ],
+    "portraitWeight": {
+     "bytes": 207934,
+     "height": 437,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -12113,16 +12176,19 @@
      "Supreme Court Reform"
     ],
     "issuesUrl": "https://rickcrosson.com/priorities/",
+    "portrait": "https://i0.wp.com/rickcrosson.com/wp-content/uploads/2025/12/rick-swearing-in.jpg?w=500&ssl=1",
     "portraitHeavy": [
      {
+      "kept": false,
       "url": "https://rickcrosson.com/wp-content/uploads/2025/12/rick-swearing-in.jpg",
       "why": "1536x2048px, over 1200px"
-     },
-     {
-      "url": "https://rickcrosson.com/wp-content/uploads/2025/12/rick-uniform-edited.jpg",
-      "why": "1213x1617px, over 1200px"
      }
     ],
+    "portraitWeight": {
+     "bytes": 14094,
+     "height": 666,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -12192,12 +12258,19 @@
    "name": "Angelica Maria Duenas",
    "site": {
     "final": "https://angelica4congress.com/",
+    "portrait": "https://i0.wp.com/angelica4congress.com/wp-content/uploads/2026/09/angelica_SFV_v2-876x1024.png?w=330&ssl=1",
     "portraitHeavy": [
      {
+      "kept": false,
       "url": "https://angelica4congress.com/wp-content/uploads/2026/09/angelica_SFV_v2-876x1024.png",
       "why": "1330 KB, over 300 KB"
      }
     ],
+    "portraitWeight": {
+     "bytes": 138580,
+     "height": 385,
+     "width": 329
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -12554,12 +12627,19 @@
      "Bring Back Courage and Common Sense"
     ],
     "issuesUrl": "https://micheletafoya.com/issues/",
+    "portrait": "https://i0.wp.com/micheletafoya.com/wp-content/uploads/2026/01/Headshot_Update_Tafoya-963x1024.png?w=500&ssl=1",
     "portraitHeavy": [
      {
+      "kept": false,
       "url": "https://micheletafoya.com/wp-content/uploads/2026/01/Headshot_Update_Tafoya-963x1024.png",
       "why": "1130 KB, over 300 KB"
      }
     ],
+    "portraitWeight": {
+     "bytes": 218618,
+     "height": 531,
+     "width": 499
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,

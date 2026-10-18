@@ -351,8 +351,7 @@ OFFICE_LINKS = {
 }
 
 
-# Photographs of state officers whose roster has none, or one too heavy to
-# show (STATEGOV-13), each looked at on the day given: {(state, office):
+# Photographs of state officers whose roster has none (STATEGOV-13), each looked at on the day given: {(state, office):
 # {name, photo, page, by, weight, checked, evidence}}. office is "governor",
 # "lt", "ag" or "sos". An entry is shown only while the roster names that
 # very person as the holder (stategov.officer_photos): once the office
@@ -379,13 +378,6 @@ _NASS_CARD = ("NASS's roster card names {} beside this photograph, filed as {} i
 # office's own pages (officers.add_ag_photos); NAAG's member pages answer a
 # script and a headless browser with a Cloudflare challenge.
 OFFICER_PHOTOS = {
-    # The NGA's headshot is 2.9 MB (stategov.HEADSHOT_MAX_BYTES is 1 MB).
-    ("NM", "governor"): _officer_photo(
-        "Michelle Lujan Grisham",
-        "https://www.governor.state.nm.us/assets/www.governor.state.nm.us/wp-content/uploads/"
-        "2018/12/Michelle-Lujan-Grisham.jpg",
-        "https://www.governor.state.nm.us/", "Office of the Governor of New Mexico",
-        (68244, 320, 320), "The governor's home page, alt 'Governor Michelle Lujan Grisham'."),
     ("AZ", "sos"): _officer_photo(
         "Adrian Fontes", _NASS + "2024-07/AZ.jpg?itok=-XCD586X", "https://www.nass.org/membership",
         _NASS_BY, (24106, 355, 450), _NASS_CARD.format(

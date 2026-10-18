@@ -195,7 +195,7 @@ def _card_photo(fragment):
     host's own resizer. Virginia's lieutenant governor's card carried a
     plain ``src`` and lost its photograph because only a srcset was read
     (STATEGOV-13)."""
-    from .photos import smaller_form
+    from .photos import host_resized
 
     img = re.search(r'<img[^>]*\bsrcset="([^"]+)"', fragment)
     if img:
@@ -204,7 +204,7 @@ def _card_photo(fragment):
     if not img:
         return ""
     src = html.unescape(img.group(1))
-    return smaller_form(src, 300) or src
+    return host_resized(src, 300) or src
 
 
 def parse_nlga(page):

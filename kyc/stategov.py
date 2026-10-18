@@ -72,10 +72,6 @@ def coalition_holds(code, records, chambers):
                        f"belong to {max(sessions) if sessions else 'an unknown one'}")
     return True, ""
 
-# The NGA posts no smaller copy of its headshots, and a guessed size URL is
-# a 404. Most are 0.3-0.9 MB; one is 7.6 MB, for a 72px circle. A headshot
-# whose size is unknown or above this is left off the card.
-HEADSHOT_MAX_BYTES = 1_000_000
 
 
 class StateGovError(RuntimeError):
@@ -217,10 +213,33 @@ def _governor(gov, problems=None):
     for key in ("website", "phone", "address"):
         if gov.get(key):
             out[key] = gov[key]
-    if gov.get("headshot") and 0 < (gov.get("headshotBytes") or 0) <= HEADSHOT_MAX_BYTES:
-        out["headshot"] = gov["headshot"]
+    shown = headshot(gov)
+    if shown:
+        out["headshot"] = shown
         out["headshotBy"] = "National Governors Association"
     return out
+
+
+def headshot(gov):
+    """The NGA headshot the card shows, or ``""``: the file itself when it is
+    within the caps every portrait is held to (``photos.too_heavy``), else
+    the same file smaller (``executives.weigh_headshot``), else none - the
+    NGA's run to 7.6 MB, for a circle of 40-72px (TECH-13). A headshot
+    never weighed is not shown: unknown is not small."""
+    from .photos import too_heavy
+
+    if not gov.get("headshot"):
+        return ""
+    weight = gov.get("headshotWeight") or (
+        {"bytes": gov["headshotBytes"]} if gov.get("headshotBytes") else None)
+    if not weight:
+        return ""
+    if not too_heavy(weight):
+        return gov["headshot"]
+    small = gov.get("headshotSmallWeight")
+    if gov.get("headshotSmall") and small and not too_heavy(small):
+        return gov["headshotSmall"]
+    return ""
 
 
 def officer_photos(code, entry):

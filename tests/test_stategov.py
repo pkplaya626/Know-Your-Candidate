@@ -274,12 +274,48 @@ class TestControl(unittest.TestCase):
             with self.assertRaises(stategov.StateGovError):
                 stategov.build(empty)
 
-    def test_a_heavy_or_unmeasured_headshot_is_left_off(self):
+    def test_a_heavy_headshot_is_shown_smaller_and_an_unmeasured_one_not_at_all(self):
+        """TECH-13: 27 of the NGA's 55 headshots weighed 320 KB-7.6 MB, for a
+        40-72px circle; a 1 MB cap let 25 of them through."""
         base = {"name": "A", "party": "Republican", "partyKey": "R", "profile": "p", "terms": [],
                 "headshot": "https://www.nga.org/x.jpg"}
-        self.assertIn("headshot", stategov._governor(dict(base, headshotBytes=400_000)))
-        self.assertNotIn("headshot", stategov._governor(dict(base, headshotBytes=7_617_284)))
+        light = {"bytes": 120_000, "width": 800, "height": 800}
+        heavy = {"bytes": 981_392, "width": 2000, "height": 3000}
+        small = ("https://i0.wp.com/www.nga.org/x.jpg?w=500&ssl=1",
+                 {"bytes": 50_450, "width": 500, "height": 750})
+        self.assertEqual(stategov._governor(dict(base, headshotWeight=light))["headshot"],
+                         base["headshot"])
+        self.assertNotIn("headshot", stategov._governor(dict(base, headshotWeight=heavy)))
+        self.assertNotIn("headshot", stategov._governor(dict(base, headshotBytes=400_000)))
         self.assertNotIn("headshot", stategov._governor(dict(base, headshotBytes=None)))
+        shown = stategov._governor(dict(base, headshotWeight=heavy, headshotSmall=small[0],
+                                        headshotSmallWeight=small[1]))
+        self.assertEqual(shown["headshot"], small[0])
+        self.assertEqual(shown["headshotBy"], "National Governors Association")
+
+    def test_a_headshot_is_weighed_and_found_smaller_in_the_same_file(self):
+        from unittest import mock
+        url = "https://www.nga.org/wp-content/uploads/2019/01/Gov-Mike-DeWine.jpg"
+        photon = "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/01/Gov-Mike-DeWine.jpg"
+        weights = {url: {"bytes": 7_617_284, "width": 3930, "height": 4912},
+                   photon + "?w=500&ssl=1": {"bytes": 47_104, "width": 500, "height": 624}}
+        gov = {"headshot": url}
+        with mock.patch.object(executives.time, "sleep"):
+            executives.weigh_headshot(gov, weigh=weights.get)
+        self.assertEqual(gov["headshotSmall"], photon + "?w=500&ssl=1")
+        self.assertEqual(stategov.headshot(gov), photon + "?w=500&ssl=1")
+        # Unreadable now: the last weights read of the same file stand (rule 8).
+        again = {"headshot": url}
+        with mock.patch.object(executives.time, "sleep"):
+            executives.weigh_headshot(again, old=gov, weigh=lambda u: None)
+        self.assertEqual(again["headshotSmall"], gov["headshotSmall"])
+        # A resizer answering with some other picture is not taken.
+        odd = {"headshot": url}
+        with mock.patch.object(executives.time, "sleep"):
+            executives.weigh_headshot(odd, weigh=lambda u: weights[url] if u == url else
+                                      {"bytes": 9_000, "width": 500, "height": 500})
+        self.assertNotIn("headshotSmall", odd)
+        self.assertEqual(stategov.headshot(odd), "")
 
 
 class TestNcsl(unittest.TestCase):
@@ -337,13 +373,20 @@ class TestCommitted(unittest.TestCase):
                 self.assertTrue(ours.get("note") or ours["trifecta"] == "disputed", code)
 
     def test_no_headshot_on_the_page_is_heavier_than_the_cap(self):
+        from kyc.photos import too_heavy
         cache = executives.load_cache(ROOT)["governors"]
         payload, _ = stategov.build(ROOT)
         for code, entry in payload["states"].items():
             # The NGA's; a governor's own office's is weighed in its
             # overrides.OFFICER_PHOTOS entry (TestOfficerPhotos).
-            if entry["governor"].get("headshot") and not entry["governor"].get("headshotPage"):
-                self.assertLessEqual(cache[code]["headshotBytes"], stategov.HEADSHOT_MAX_BYTES, code)
+            shown = entry["governor"].get("headshot")
+            if shown and not entry["governor"].get("headshotPage"):
+                gov = cache[code]
+                weight = (gov.get("headshotWeight") if shown == gov["headshot"]
+                          else gov.get("headshotSmallWeight"))
+                self.assertIn(shown, (gov["headshot"], gov.get("headshotSmall")), code)
+                self.assertEqual(too_heavy(weight), "", code)
+                self.assertIsNotNone(weight, code)
 
 
 class TestOfficeLinks(unittest.TestCase):
@@ -403,7 +446,15 @@ class TestOfficerPhotos(unittest.TestCase):
         self.assertNotIn("photo", unconfirmed[office])
 
     def test_a_governors_photograph_is_a_headshot_and_the_roster_s_own_stands(self):
-        code, office, photo = self.entry(office="governor")
+        from unittest import mock
+
+        from kyc import overrides
+        code, photo = "ZZ", overrides._officer_photo(
+            "Pat Doe", "https://gov.example.gov/doe.jpg", "https://gov.example.gov/",
+            "Office of the Governor", (60_000, 320, 320), "The governor's home page.")
+        patch = mock.patch.dict(overrides.OFFICER_PHOTOS, {(code, "governor"): photo})
+        patch.start()
+        self.addCleanup(patch.stop)
         entry = {"governor": {"name": photo["name"]}}
         stategov.officer_photos(code, entry)
         self.assertEqual(entry["governor"]["headshot"], photo["photo"])

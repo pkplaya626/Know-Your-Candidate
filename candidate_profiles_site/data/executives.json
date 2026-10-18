@@ -6,6 +6,17 @@
    "born": "May 5, 1961",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/09/Gov_Dunleavy_Sep2023_square-scaled.jpg",
    "headshotBytes": 530764,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/09/Gov_Dunleavy_Sep2023_square-scaled.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 27882,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 530764,
+    "height": 2560,
+    "width": 2560
+   },
    "name": "Mike Dunleavy",
    "party": "Republican",
    "partyKey": "R",
@@ -27,6 +38,17 @@
    "born": "October 15, 1944",
    "headshot": "https://www.nga.org/wp-content/uploads/2018/01/Governor-Ivey-2019-Headshot-scaled.jpg",
    "headshotBytes": 891271,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2018/01/Governor-Ivey-2019-Headshot-scaled.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 52061,
+    "height": 646,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 891271,
+    "height": 2560,
+    "width": 1980
+   },
    "name": "Kay Ivey",
    "party": "Republican",
    "partyKey": "R",
@@ -49,6 +71,11 @@
    "born": "August 13, 1982",
    "headshot": "https://www.nga.org/wp-content/uploads/2023/01/Governor-Headshot-sanders-e1756131825437.jpg",
    "headshotBytes": 35060,
+   "headshotWeight": {
+    "bytes": 35060,
+    "height": 482,
+    "width": 462
+   },
    "name": "Sarah Huckabee Sanders",
    "party": "Republican",
    "partyKey": "R",
@@ -69,6 +96,11 @@
    "born": "December 31, 1955",
    "headshot": "https://www.nga.org/wp-content/uploads/2025/01/GOV_PULA_2025.jpg",
    "headshotBytes": 139195,
+   "headshotWeight": {
+    "bytes": 139195,
+    "height": 738,
+    "width": 738
+   },
    "name": "Pula’ali’i Nikolao Pula",
    "party": "Republican",
    "partyKey": "R",
@@ -84,6 +116,17 @@
    "born": "December 28, 1969",
    "headshot": "https://www.nga.org/wp-content/uploads/2023/01/governor-katie-hobbs-scaled.jpeg",
    "headshotBytes": 484937,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2023/01/governor-katie-hobbs-scaled.jpeg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 21342,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 484937,
+    "height": 2560,
+    "width": 2560
+   },
    "name": "Katie Hobbs",
    "party": "Democratic",
    "partyKey": "D",
@@ -104,6 +147,17 @@
    "born": "October 10, 1967",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/09/1200px-Gavin_Newsom_official_photo_square.jpg",
    "headshotBytes": 333044,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/09/1200px-Gavin_Newsom_official_photo_square.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 46900,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 333044,
+    "height": 1200,
+    "width": 1199
+   },
    "name": "Gavin Newsom",
    "party": "Democratic",
    "partyKey": "D",
@@ -125,6 +179,11 @@
    "born": "May 12, 1975",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/01/Colorado-Jared-Polis-November-2019.jpg",
    "headshotBytes": 96431,
+   "headshotWeight": {
+    "bytes": 96431,
+    "height": 665,
+    "width": 665
+   },
    "name": "Jared Polis",
    "party": "Democratic",
    "partyKey": "D",
@@ -146,6 +205,17 @@
    "born": "January 3, 1954",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/09/govlamont-scaled.jpg",
    "headshotBytes": 670568,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/09/govlamont-scaled.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 53231,
+    "height": 750,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 670568,
+    "height": 2560,
+    "width": 1706
+   },
    "name": "Ned Lamont",
    "party": "Democratic",
    "partyKey": "D",
@@ -167,6 +237,11 @@
    "born": "September 21, 1971",
    "headshot": "https://www.nga.org/wp-content/uploads/2025/01/matt-meyer_800x600.jpg",
    "headshotBytes": 247790,
+   "headshotWeight": {
+    "bytes": 247790,
+    "height": 600,
+    "width": 800
+   },
    "name": "Matt Meyer",
    "party": "Democratic",
    "partyKey": "D",
@@ -187,6 +262,17 @@
    "born": "September 14, 1978",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/09/Ron_DeSantis_Official_Portrait_113th_Congress.jpg",
    "headshotBytes": 253788,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/09/Ron_DeSantis_Official_Portrait_113th_Congress.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 40430,
+    "height": 500,
+    "width": 499
+   },
+   "headshotWeight": {
+    "bytes": 253788,
+    "height": 1361,
+    "width": 1360
+   },
    "name": "Ron DeSantis",
    "party": "Republican",
    "partyKey": "R",
@@ -208,6 +294,11 @@
    "born": "November 2, 1963",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/09/GovBrianKemp_2024WEB.jpg",
    "headshotBytes": 119787,
+   "headshotWeight": {
+    "bytes": 119787,
+    "height": 1000,
+    "width": 1000
+   },
    "name": "Brian Kemp",
    "party": "Republican",
    "partyKey": "R",
@@ -229,6 +320,17 @@
    "born": "November 8, 1950",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/09/GUAM-LOURDES-LEON-GUERRERO_square-scaled.jpg",
    "headshotBytes": 480862,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/09/GUAM-LOURDES-LEON-GUERRERO_square-scaled.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 32392,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 480862,
+    "height": 2560,
+    "width": 2560
+   },
    "name": "Lou Leon Guerrero",
    "party": "Democratic",
    "partyKey": "D",
@@ -246,6 +348,11 @@
    "born": "February 11, 1970",
    "headshot": "https://www.nga.org/wp-content/uploads/2022/12/Governor_Josh_Green.jpg",
    "headshotBytes": 32040,
+   "headshotWeight": {
+    "bytes": 32040,
+    "height": 400,
+    "width": 400
+   },
    "name": "Josh Green",
    "party": "Democratic",
    "partyKey": "D",
@@ -266,6 +373,17 @@
    "born": "August 4, 1959",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/09/Governor-Reynolds-2025-Headshot_square.jpg",
    "headshotBytes": 317504,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/09/Governor-Reynolds-2025-Headshot_square.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 31621,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 317504,
+    "height": 1920,
+    "width": 1920
+   },
    "name": "Kim Reynolds",
    "party": "Republican",
    "partyKey": "R",
@@ -288,6 +406,11 @@
    "born": "February 15, 1954",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/09/governor_little_square.jpg",
    "headshotBytes": 28731,
+   "headshotWeight": {
+    "bytes": 28731,
+    "height": 400,
+    "width": 400
+   },
    "name": "Brad Little",
    "party": "Republican",
    "partyKey": "R",
@@ -309,6 +432,17 @@
    "born": "January 19, 1965",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/09/2026-JB-Headshot.jpg",
    "headshotBytes": 292439,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/09/2026-JB-Headshot.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 30492,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 292439,
+    "height": 1920,
+    "width": 1920
+   },
    "name": "JB Pritzker",
    "party": "Democratic",
    "partyKey": "D",
@@ -326,6 +460,17 @@
    "born": "March 24, 1954",
    "headshot": "https://www.nga.org/wp-content/uploads/2025/01/GMB-FInal-Headshot_square.jpg",
    "headshotBytes": 355202,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2025/01/GMB-FInal-Headshot_square.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 34027,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 355202,
+    "height": 1920,
+    "width": 1920
+   },
    "name": "Mike Braun",
    "party": "Republican",
    "partyKey": "R",
@@ -346,6 +491,11 @@
    "born": "January 24, 1950",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/09/kelly_square.jpg",
    "headshotBytes": 102987,
+   "headshotWeight": {
+    "bytes": 102987,
+    "height": 786,
+    "width": 786
+   },
    "name": "Laura Kelly",
    "party": "Democratic",
    "partyKey": "D",
@@ -367,6 +517,17 @@
    "born": "November 29, 1977",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/12/Governor-Beshear_Official-Picture_square-scaled.jpg",
    "headshotBytes": 730524,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/12/Governor-Beshear_Official-Picture_square-scaled.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 28532,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 730524,
+    "height": 2560,
+    "width": 2560
+   },
    "name": "Andy Beshear",
    "party": "Democratic",
    "partyKey": "D",
@@ -388,6 +549,17 @@
    "born": "December 23, 1970",
    "headshot": "https://www.nga.org/wp-content/uploads/2024/01/Governor-Landry-Official-Portrait_square-scaled.jpg",
    "headshotBytes": 440584,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2024/01/Governor-Landry-Official-Portrait_square-scaled.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 24966,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 440584,
+    "height": 2560,
+    "width": 2560
+   },
    "name": "Jeff Landry",
    "party": "Republican",
    "partyKey": "R",
@@ -408,6 +580,11 @@
    "born": "February 8, 1971",
    "headshot": "https://www.nga.org/wp-content/uploads/2023/01/Maura_Healey_square.jpg",
    "headshotBytes": 70107,
+   "headshotWeight": {
+    "bytes": 70107,
+    "height": 570,
+    "width": 569
+   },
    "name": "Maura Healey",
    "party": "Democratic",
    "partyKey": "D",
@@ -428,6 +605,17 @@
    "born": "October 15, 1978",
    "headshot": "https://www.nga.org/wp-content/uploads/2023/01/governor-wes-moore-official-portrait_square.jpg",
    "headshotBytes": 322893,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2023/01/governor-wes-moore-official-portrait_square.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 33606,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 322893,
+    "height": 1637,
+    "width": 1637
+   },
    "name": "Wes Moore",
    "party": "Democratic",
    "partyKey": "D",
@@ -448,6 +636,17 @@
    "born": "December 30, 1947",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/09/3218_Gov-Janet-Mills-20230307_square-scaled.jpg",
    "headshotBytes": 880536,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/09/3218_Gov-Janet-Mills-20230307_square-scaled.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 35240,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 880536,
+    "height": 2560,
+    "width": 2560
+   },
    "name": "Janet Mills",
    "party": "Democratic",
    "partyKey": "D",
@@ -469,6 +668,17 @@
    "born": "August 23, 1971",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/09/GovWhitmerPortMaster_square-scaled.jpg",
    "headshotBytes": 456877,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/09/GovWhitmerPortMaster_square-scaled.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 25963,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 456877,
+    "height": 2560,
+    "width": 2560
+   },
    "name": "Gretchen Whitmer",
    "party": "Democratic",
    "partyKey": "D",
@@ -490,6 +700,17 @@
    "born": "April 6, 1964",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/09/Governor-Walz-2024_square.jpg",
    "headshotBytes": 603148,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/09/Governor-Walz-2024_square.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 37316,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 603148,
+    "height": 2304,
+    "width": 2304
+   },
    "name": "Tim Walz",
    "party": "Democratic",
    "partyKey": "D",
@@ -511,6 +732,17 @@
    "born": "January 17, 1962",
    "headshot": "https://www.nga.org/wp-content/uploads/2025/01/Governor-Mike-Kehoe_square-scaled.jpg",
    "headshotBytes": 646315,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2025/01/Governor-Mike-Kehoe_square-scaled.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 36757,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 646315,
+    "height": 2560,
+    "width": 2560
+   },
    "name": "Mike Kehoe",
    "party": "Republican",
    "partyKey": "R",
@@ -531,6 +763,11 @@
    "born": "July 10, 1948",
    "headshot": "https://www.nga.org/wp-content/uploads/2025/07/David-M-Apatang-Head-Shot.jpg",
    "headshotBytes": 52106,
+   "headshotWeight": {
+    "bytes": 52106,
+    "height": 922,
+    "width": 768
+   },
    "name": "David M. Apatang",
    "party": "Republican",
    "partyKey": "R",
@@ -547,6 +784,11 @@
    "born": "June 5, 1974",
    "headshot": "https://www.nga.org/wp-content/uploads/2020/01/headshot-governor-tate-reeves_R_square.jpg",
    "headshotBytes": 27215,
+   "headshotWeight": {
+    "bytes": 27215,
+    "height": 296,
+    "width": 296
+   },
    "name": "Tate Reeves",
    "party": "Republican",
    "partyKey": "R",
@@ -567,6 +809,11 @@
    "born": "April 17, 1961",
    "headshot": "https://www.nga.org/wp-content/uploads/2020/11/Montana-Greg-Gianforte-January-2021.jpg",
    "headshotBytes": 53074,
+   "headshotWeight": {
+    "bytes": 53074,
+    "height": 300,
+    "width": 300
+   },
    "name": "Greg Gianforte",
    "party": "Republican",
    "partyKey": "R",
@@ -588,6 +835,11 @@
    "born": "September 13, 1966",
    "headshot": "https://www.nga.org/wp-content/uploads/2025/01/Josh-Stein_NC.jpg",
    "headshotBytes": 107118,
+   "headshotWeight": {
+    "bytes": 107118,
+    "height": 895,
+    "width": 895
+   },
    "name": "Josh Stein",
    "party": "Democratic",
    "partyKey": "D",
@@ -608,6 +860,11 @@
    "born": "October 8, 1976",
    "headshot": "https://www.nga.org/wp-content/uploads/2024/12/GovernorArmstrong.jpg",
    "headshotBytes": 180973,
+   "headshotWeight": {
+    "bytes": 180973,
+    "height": 1080,
+    "width": 1080
+   },
    "name": "Kelly Armstrong",
    "party": "Republican",
    "partyKey": "R",
@@ -628,6 +885,11 @@
    "born": "December 31, 1955",
    "headshot": "https://www.nga.org/wp-content/uploads/2023/01/Governor_Pillen.png",
    "headshotBytes": 193981,
+   "headshotWeight": {
+    "bytes": 193981,
+    "height": 502,
+    "width": 502
+   },
    "name": "Jim Pillen",
    "party": "Republican",
    "partyKey": "R",
@@ -648,6 +910,17 @@
    "born": "June 27, 1968",
    "headshot": "https://www.nga.org/wp-content/uploads/2025/01/ayotte_portrait-for-online.jpg",
    "headshotBytes": 291575,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2025/01/ayotte_portrait-for-online.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 50803,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 291575,
+    "height": 1333,
+    "width": 1333
+   },
    "name": "Kelly Ayotte",
    "party": "Republican",
    "partyKey": "R",
@@ -667,6 +940,11 @@
    "born": "January 19, 1972",
    "headshot": "https://www.nga.org/wp-content/uploads/2026/01/home-gov_official_square.jpg",
    "headshotBytes": 190347,
+   "headshotWeight": {
+    "bytes": 190347,
+    "height": 750,
+    "width": 750
+   },
    "name": "Mikie Sherrill",
    "party": "Democratic",
    "partyKey": "D",
@@ -685,6 +963,17 @@
    "born": "October 24, 1959",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/02/New-Mexico-Michelle-Lujan-Grisham-January-2018.jpg",
    "headshotBytes": 2897534,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/02/New-Mexico-Michelle-Lujan-Grisham-January-2018.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 52511,
+    "height": 750,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 2897534,
+    "height": 5760,
+    "width": 3840
+   },
    "name": "Michelle Lujan Grisham",
    "party": "Democratic",
    "partyKey": "D",
@@ -706,6 +995,17 @@
    "born": "November 8, 1962",
    "headshot": "https://www.nga.org/wp-content/uploads/2023/01/Governor-Joe-Lombardo_Official-Photo-scaled.jpg",
    "headshotBytes": 495613,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2023/01/Governor-Joe-Lombardo_Official-Photo-scaled.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 27402,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 495613,
+    "height": 2560,
+    "width": 2560
+   },
    "name": "Joe Lombardo",
    "party": "Republican",
    "partyKey": "R",
@@ -726,6 +1026,11 @@
    "born": "August 27, 1958",
    "headshot": "https://www.nga.org/wp-content/uploads/2021/08/GovernorHochul.jpg",
    "headshotBytes": 27239,
+   "headshotWeight": {
+    "bytes": 27239,
+    "height": 400,
+    "width": 400
+   },
    "name": "Kathy Hochul",
    "party": "Democratic",
    "partyKey": "D",
@@ -747,6 +1052,17 @@
    "born": "January 5, 1947",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/01/Gov-Mike-DeWine.jpg",
    "headshotBytes": 7617284,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/01/Gov-Mike-DeWine.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 47104,
+    "height": 624,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 7617284,
+    "height": 4912,
+    "width": 3930
+   },
    "name": "Mike DeWine",
    "party": "Republican",
    "partyKey": "R",
@@ -768,6 +1084,17 @@
    "born": "December 28, 1972",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/06/Oklahoma-Kevin-Stitt-June-2019.jpg",
    "headshotBytes": 780790,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/06/Oklahoma-Kevin-Stitt-June-2019.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 44358,
+    "height": 625,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 780790,
+    "height": 3000,
+    "width": 2400
+   },
    "name": "Kevin Stitt",
    "party": "Republican",
    "partyKey": "R",
@@ -789,6 +1116,17 @@
    "born": "September 30, 1966",
    "headshot": "https://www.nga.org/wp-content/uploads/2023/01/Governor-Tina-Kotek_Official.jpg",
    "headshotBytes": 182431,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2023/01/Governor-Tina-Kotek_Official.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 35542,
+    "height": 549,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 182431,
+    "height": 1256,
+    "width": 1143
+   },
    "name": "Tina Kotek",
    "party": "Democratic",
    "partyKey": "D",
@@ -805,6 +1143,17 @@
    "born": "June 20, 1973",
    "headshot": "https://www.nga.org/wp-content/uploads/2023/01/JDS_headshot.png",
    "headshotBytes": 348737,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2023/01/JDS_headshot.png?w=330&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 46944,
+    "height": 330,
+    "width": 330
+   },
+   "headshotWeight": {
+    "bytes": 348737,
+    "height": 500,
+    "width": 500
+   },
    "name": "Josh Shapiro",
    "party": "Democratic",
    "partyKey": "D",
@@ -824,6 +1173,17 @@
    "born": "August 5, 1976",
    "headshot": "https://www.nga.org/wp-content/uploads/2025/01/Governor_Jenniffer_Gonzalez-scaled.jpg",
    "headshotBytes": 847825,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2025/01/Governor_Jenniffer_Gonzalez-scaled.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 42790,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 847825,
+    "height": 2560,
+    "width": 2560
+   },
    "name": "Jenniffer González-Colón",
    "party": "Republican",
    "partyKey": "R",
@@ -839,6 +1199,11 @@
    "born": "June 16, 1951",
    "headshot": "https://www.nga.org/wp-content/uploads/2021/03/Gov-Dan-Mckee-400.png",
    "headshotBytes": 224356,
+   "headshotWeight": {
+    "bytes": 224356,
+    "height": 400,
+    "width": 400
+   },
    "name": "Dan McKee",
    "party": "Democratic",
    "partyKey": "D",
@@ -860,6 +1225,17 @@
    "born": "May 27, 1947",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/09/McMaster-Gov.-2025a-full-size_square-scaled.jpg",
    "headshotBytes": 396223,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/09/McMaster-Gov.-2025a-full-size_square-scaled.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 24989,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 396223,
+    "height": 2560,
+    "width": 2560
+   },
    "name": "Henry McMaster",
    "party": "Republican",
    "partyKey": "R",
@@ -882,6 +1258,17 @@
    "born": "February 5, 1959",
    "headshot": "https://www.nga.org/wp-content/uploads/2025/01/Governor-Rhoden-square-scaled.jpg",
    "headshotBytes": 658114,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2025/01/Governor-Rhoden-square-scaled.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 31532,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 658114,
+    "height": 2560,
+    "width": 2560
+   },
    "name": "Larry Rhoden",
    "party": "Republican",
    "partyKey": "R",
@@ -902,6 +1289,17 @@
    "born": "October 9, 1959",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/09/GBL_2022_square.jpg",
    "headshotBytes": 429513,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/09/GBL_2022_square.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 38034,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 429513,
+    "height": 1920,
+    "width": 1920
+   },
    "name": "Bill Lee",
    "party": "Republican",
    "partyKey": "R",
@@ -922,6 +1320,11 @@
    "born": "November 13, 1957",
    "headshot": "https://www.nga.org/wp-content/uploads/2018/07/TX_Gov_Greg_Abbott.png",
    "headshotBytes": 293563,
+   "headshotWeight": {
+    "bytes": 293563,
+    "height": 400,
+    "width": 400
+   },
    "name": "Greg Abbott",
    "party": "Republican",
    "partyKey": "R",
@@ -940,6 +1343,17 @@
    "born": "July 11, 1975",
    "headshot": "https://www.nga.org/wp-content/uploads/2021/01/Governor_Cox_official_square-scaled.jpg",
    "headshotBytes": 590114,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2021/01/Governor_Cox_official_square-scaled.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 22876,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 590114,
+    "height": 2560,
+    "width": 2560
+   },
    "name": "Spencer Cox",
    "party": "Republican",
    "partyKey": "R",
@@ -960,6 +1374,17 @@
    "born": "August 7, 1979",
    "headshot": "https://www.nga.org/wp-content/uploads/2026/01/Abigail_Spanberger_2026.jpg",
    "headshotBytes": 208846,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2026/01/Abigail_Spanberger_2026.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 38075,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 208846,
+    "height": 1240,
+    "width": 1240
+   },
    "name": "Abigail Spanberger",
    "party": "Democratic",
    "partyKey": "D",
@@ -978,6 +1403,11 @@
    "born": "February 21, 1968",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/09/gov_bryan_square.jpg",
    "headshotBytes": 67312,
+   "headshotWeight": {
+    "bytes": 67312,
+    "height": 538,
+    "width": 538
+   },
    "name": "Albert Bryan",
    "party": "Democratic",
    "partyKey": "D",
@@ -995,6 +1425,17 @@
    "born": "August 4, 1958",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/02/Vermont-Phil-Scott-November-2018.jpg",
    "headshotBytes": 981392,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/02/Vermont-Phil-Scott-November-2018.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 50450,
+    "height": 750,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 981392,
+    "height": 3000,
+    "width": 2000
+   },
    "name": "Phil Scott",
    "party": "Republican",
    "partyKey": "R",
@@ -1019,6 +1460,11 @@
    "born": "February 23, 1965",
    "headshot": "https://www.nga.org/wp-content/uploads/2025/01/Bob_Ferguson.jpg",
    "headshotBytes": 29086,
+   "headshotWeight": {
+    "bytes": 29086,
+    "height": 433,
+    "width": 433
+   },
    "name": "Bob Ferguson",
    "party": "Democratic",
    "partyKey": "D",
@@ -1039,6 +1485,17 @@
    "born": "November 5, 1951",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/09/Wisconsin-Tony-Evers-January-2019.jpg",
    "headshotBytes": 449584,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/09/Wisconsin-Tony-Evers-January-2019.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 40125,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 449584,
+    "height": 2000,
+    "width": 2000
+   },
    "name": "Tony Evers",
    "party": "Democratic",
    "partyKey": "D",
@@ -1060,6 +1517,17 @@
    "born": "December 21, 1967",
    "headshot": "https://www.nga.org/wp-content/uploads/2025/01/Patrick-Morrisey-scaled-1.jpg",
    "headshotBytes": 290551,
+   "headshotSmall": "https://i0.wp.com/www.nga.org/wp-content/uploads/2025/01/Patrick-Morrisey-scaled-1.jpg?w=500&ssl=1",
+   "headshotSmallWeight": {
+    "bytes": 33998,
+    "height": 500,
+    "width": 500
+   },
+   "headshotWeight": {
+    "bytes": 290551,
+    "height": 1732,
+    "width": 1732
+   },
    "name": "Patrick Morrisey",
    "party": "Republican",
    "partyKey": "R",
@@ -1080,6 +1548,11 @@
    "born": "March 14, 1957",
    "headshot": "https://www.nga.org/wp-content/uploads/2019/01/Wyoming-Mark-Gordon-November-2019.jpg",
    "headshotBytes": 179103,
+   "headshotWeight": {
+    "bytes": 179103,
+    "height": 959,
+    "width": 958
+   },
    "name": "Mark Gordon",
    "party": "Republican",
    "partyKey": "R",
