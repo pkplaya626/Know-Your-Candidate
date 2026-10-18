@@ -241,10 +241,12 @@
       [NONE_FILL, "No senators (D.C. and territories)"],
     ],
     senate2026: [
-      ["var(--party-r)", "Republican seat, incumbent running"],
-      [tint("r"), "Republican seat, open", "open:r"],
-      ["var(--party-d)", "Democratic seat, incumbent running"],
-      [tint("d"), "Democratic seat, open", "open:d"],
+      // "Open" is the race's own word: no member who holds the seat is on
+      // its ballot. The other key claims nothing about who is running.
+      ["var(--party-r)", "Republican seat up"],
+      [tint("r"), "Open Republican seat", "open:r"],
+      ["var(--party-d)", "Democratic seat up"],
+      [tint("d"), "Open Democratic seat", "open:d"],
       ["special", "Special election (outlined)", "special"],
       [NONE_FILL, "No race in 2026"],
     ],
@@ -263,9 +265,12 @@
     });
   }
 
+  /** A legend key's swatch, drawn as the map draws its fill (hatched where
+   *  the map hatches), naming that fill in data-fill. */
   function swatch(fill) {
-    if (fill === "special") return '<span class="swatch swatch-special"></span>';
-    return '<span class="swatch" style="background:' + KYC.swatchFill(fill) + '"></span>';
+    if (fill === "special") return '<span class="swatch swatch-special" data-fill="special"></span>';
+    return '<span class="swatch" data-fill="' + KYC.escapeAttr(KYC.svgFill(fill)) +
+      '" style="background:' + KYC.swatchFill(fill) + '"></span>';
   }
 
   /* Does any state's delegation in *chamber* consist only of independents? */

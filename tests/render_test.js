@@ -1480,7 +1480,8 @@ async function testMap() {
     check("Senate mode fills states", !!senateFill, senateFill);
     // Every key is a fill some state is drawn in, and every fill has a key:
     // "Independent" matched no state, and D.C.'s grey had no key.
-    const keys = [...D.querySelectorAll("#mapLegend .swatch")].map((s) => s.style.background);
+    // A key names the fill it stands for (data-fill), hatched or not.
+    const keys = [...D.querySelectorAll("#mapLegend .swatch")].map((s) => s.getAttribute("data-fill"));
     const fills = new Set([...D.querySelectorAll("#usMap .state")].map((s) => s.style.fill));
     check("each Senate key is a fill a state is drawn in, and each fill has a key",
       keys.every((k) => fills.has(k)) && [...fills].every((f) => keys.indexOf(f) !== -1),
@@ -1531,9 +1532,11 @@ async function testMap() {
         !/renominated|re-elected|re-election/.test(label(p.state))),
       appointees.map((p) => label(p.state)).join(" | "));
     // White on the empty grey was 1.15:1 (light) and dark on dark 1.02:1.
-    const greys = [...D.querySelectorAll(".map-callout")].filter((c) => /surface/.test(c.style.background || ""));
+    // "None" is hatched now, and the hatch is the callout's edge.
+    const greys = [...D.querySelectorAll(".map-callout")].filter((c) => /none-fill|surface/.test(c.style.background || ""));
     check("a callout on the empty grey takes the page's text colour and an edge",
-      greys.length > 0 && greys.every((c) => c.style.color === "var(--text)" && /text-faint/.test(c.style.borderColor || "")),
+      greys.length > 0 && greys.every((c) => c.style.color === "var(--text)" &&
+        (c.classList.contains("is-hatched") || /text-faint/.test(c.style.borderColor || ""))),
       greys.length + " grey callouts");
     check("party is an adjective in the label, as in the legend",
       ![...D.querySelectorAll("#usMap .state")].some((s) =>
@@ -5090,9 +5093,16 @@ async function testGuideMaps() {
       }
       // A faint fill writes its callout in the theme's text colour.
       const faint = [...D.querySelectorAll("#mapLabels .map-callout")]
-        .filter((c) => /scale-[123]|cat-4|surface-2/.test(c.style.background));
+        .filter((c) => /scale-[123]|none-fill|surface-2/.test(c.style.background));
       check("callouts on faint fills use the light ink", faint.every((c) => c.style.color === "var(--text)"),
         `${faint.length} faint callouts`);
+      // A category's callout writes in the ink kyc.css names for it, the
+      // colour that reads on it in each theme.
+      const cats = [...D.querySelectorAll("#mapLabels .map-callout")]
+        .filter((c) => /var\(--cat-[1-4]\)/.test(c.style.background));
+      check("a category's callout uses its own ink", cats.every((c) =>
+        c.style.color === "var(--" + c.style.background.match(/cat-[1-4]/)[0] + "-ink)"),
+        cats.filter((c) => !/-ink/.test(c.style.color)).map((c) => c.textContent).join(", "));
     });
   }
 
@@ -6098,7 +6108,7 @@ async function testStateGov() {
     check("a governor's election is drawn in the governor's party, and no other state is",
       up.length > 0 && stateCodes.every((c) => up.indexOf(c) !== -1
         ? shape(c).style.fill === "var(--party-" + data.states[c].governor.partyKey.toLowerCase() + ")"
-        : shape(c).style.fill === "var(--surface-2)"),
+        : shape(c).style.fill === window.KYC.svgFill("var(--none-fill)")),
       up.length + " up");
     check("its label says whether the governor is elected on Nov 3",
       /elected on Nov 3/.test(shape(up[0]).getAttribute("aria-label")) &&
@@ -6122,7 +6132,7 @@ async function testStateGov() {
     });
     const pr = D.querySelector('#usMap [data-state="PR"]');
     check("Puerto Rico, which elected its governor in 2024, is drawn as no election",
-      !!pr && pr.style.fill === "var(--surface-2)" &&
+      !!pr && pr.style.fill === window.KYC.svgFill("var(--none-fill)") &&
         /no governor's election in 2026/.test(pr.getAttribute("aria-label")),
       pr && pr.getAttribute("aria-label"));
 
@@ -6133,7 +6143,10 @@ async function testStateGov() {
       painted === counted && counted > 0, `${painted} painted, ${counted} in the data`);
     check("a state without a trifecta is divided", (() => {
       const divided = stateCodes.filter((c) => data.states[c].trifecta === "divided");
-      return divided.length > 0 && divided.every((c) => shape(c).style.fill === "var(--split)");
+      // Hatched as well as coloured: to a deuteranope the split colour
+      // alone was the Democratic blue (VISUALS-03).
+      return divided.length > 0 && divided.every((c) =>
+        shape(c).style.fill === window.KYC.svgFill("var(--split)") && /hatch-split/.test(shape(c).style.fill));
     })());
 
     window.location.hash = "#/?state=GU&mode=legislature";
@@ -7831,12 +7844,25 @@ async function testFederal() {
       svg && `${svg.querySelectorAll("[data-state]").length}`);
     check("no word is SVG text (rule 46)", !!svg && !svg.querySelector("text"));
     // The territory strip's own caption is the map's, not a state's.
-    const words = [...D.querySelectorAll("#circuitLabels .map-label")].map((s) => s.textContent)
-      .filter((w) => !/Territories/.test(w));
+    const labels = [...D.querySelectorAll("#circuitLabels .map-label")]
+      .filter((s) => !/Territories/.test(s.textContent));
     const circuits = new Set(d.courts.filter((c) => c.token).map((c) => c.circuit).concat(["–"]));
-    check("each state carries its circuit's number, never its code", words.length >= 50 &&
-      words.every((w) => circuits.has(w)) && words.includes("5") && words.includes("9"),
-      words.filter((w) => !circuits.has(w)).slice(0, 5).join(", "));
+    // On its shape a state carries the number alone; a word drawn away from
+    // its shape (a callout, a territory's tile) names the place as well:
+    // the Northeast's callouts read "2, 1, 1, 1, 2" and the territories
+    // "1, 3, 9, 9" with nothing saying which was which (VISUALS-17).
+    const away = (s) => s.classList.contains("map-callout") || s.classList.contains("territory-label");
+    const inside = labels.filter((s) => !away(s)).map((s) => s.textContent);
+    const outside = labels.filter(away).map((s) => s.textContent);
+    check("each state carries its circuit's number, never its code", inside.length >= 30 &&
+      inside.every((w) => circuits.has(w)) && inside.includes("5") && inside.includes("9"),
+      inside.filter((w) => !circuits.has(w)).slice(0, 5).join(", "));
+    check("a callout or a territory's tile names its place beside the number",
+      // D.C.'s circuit is named "DC" itself, so its word is the code once.
+      outside.length >= 6 && outside.every((w) => w === "DC" ||
+        (/^[A-Z]{2} \S+$/.test(w) && circuits.has(w.slice(3)))) &&
+        ["PR", "GU", "VI", "MP"].every((t) => outside.some((w) => w.indexOf(t + " ") === 0)),
+      outside.join(", "));
     const texas = svg && svg.querySelector('[data-state="TX"]');
     if (texas) texas.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
     const panel = D.getElementById("circuitPanel");
