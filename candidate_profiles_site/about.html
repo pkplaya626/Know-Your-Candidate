@@ -23,7 +23,7 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<link rel="stylesheet" href="assets/kyc.css?v=bb1115b5b9">
+<link rel="stylesheet" href="assets/kyc.css?v=a751722dc2">
 <script src="assets/kyc.js?v=e6e155c31b"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Know Your Candidate","item":"https://candidates.radicalrelay.us/"},{"@type":"ListItem","position":2,"name":"About & sources","item":"https://candidates.radicalrelay.us/about.html"}]}</script>
 </head>
@@ -300,9 +300,12 @@
                             and campaign sites. Those sites see your IP address when your browser
                             fetches an image, as any website would; this site asks your browser
                             not to tell them which page you were reading.</li>
-                        <li>&#8220;Find my district&#8221; asks your browser for your location
-                            and places it on the map on your device. It is never sent
-                            anywhere.</li>
+                        <li>&#8220;Find my district&#8221; and &#8220;Find who represents you&#8221;
+                            ask your browser for your location, or take a ZIP code you type, and
+                            look it up on your device, in this site&#8217;s own file for your
+                            state. Neither is ever sent anywhere; the host sees only which
+                            state&#8217;s file was fetched, as it would for that state&#8217;s
+                            page.</li>
                         <li>The site is served by GitHub Pages, which receives your IP address
                             with each request, as any web host does; see
                             <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub&#8217;s

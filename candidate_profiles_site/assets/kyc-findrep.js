@@ -476,12 +476,13 @@
 
   /** Each of *parts* (``[[id, share]]``, or ids alone for a point), as
    *  *one(id)*'s words, with the share where there is more than one. */
-  function each(parts, one, joiner) {
-    var shares = parts.length > 1 && parts[0].length === 2 && typeof parts[0][1] === "number";
+  function each(parts, one) {
+    var shares = parts.length > 1 && Array.isArray(parts[0]) && typeof parts[0][1] === "number";
     return parts.map(function (p) {
       var id = Array.isArray(p) ? p[0] : p;
-      return (shares ? '<span class="findrep-share">' + pct(p[1]) + "</span> " : "") + one(id);
-    }).join(joiner || "<br>");
+      return '<div class="findrep-item">' +
+        (shares ? '<span class="findrep-share">' + pct(p[1]) + "</span> " : "") + one(id) + "</div>";
+    }).join("");
   }
 
   /** The House member for *n*, or what the build records about the seat. */
@@ -544,9 +545,9 @@
       var sr = senateRaces(code);
       if (sr.length) {
         rows.push(row(record ? "The Senate race" : "Senate race", sr.map(function (r) {
-          return raceLine(code, r, (r.special ? "Special election" : "U.S. Senate") + " in " +
-            KYC.stateName(code));
-        }).join("<br>")));
+          return '<div class="findrep-item">' + raceLine(code, r, (r.special ? "Special election"
+            : "U.S. Senate") + " in " + KYC.stateName(code)) + "</div>";
+        }).join("")));
       }
     }
     return rows;
@@ -587,10 +588,10 @@
       });
       var unplaced = (leg.unplaced || []).filter(function (m) { return m.chamber === chamber; });
       if (unplaced.length) {
-        body += '<br><span class="findrep-note">' + unplaced.length + " member" +
+        body += '<div class="findrep-note">' + unplaced.length + " member" +
           (unplaced.length === 1 ? " of this chamber is" : "s of this chamber are") +
           " not placed on a district map; " + '<a href="' + KYC.escapeAttr(page) +
-          '">the legislature page lists them</a>.</span>';
+          '">the legislature page lists them</a>.</div>';
       }
       rows.push(row(title, body));
     });

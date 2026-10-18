@@ -7772,7 +7772,7 @@ async function testFrame() {
     check("privacy as the code behaves: no cookies or analytics, two settings kept on the device, " +
       "the location never sent", /No cookies, no analytics/.test(text) &&
         /theme you picked and the last state you looked at/.test(text) &&
-        /never sent anywhere/.test(text));
+        /Neither is ever sent anywhere/.test(text) && /ZIP code/.test(text));
     check("accessibility: the standard aimed at, its limits, and how to report",
       /WCAG\)? 2\.2 at level AA/.test(text) && /Known limits/.test(text));
     check("the refresh schedule, in words", /every day from Oct\. 15 to Nov\. 2, 2026/.test(text) &&
