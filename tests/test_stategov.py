@@ -381,7 +381,7 @@ class TestOfficerPhotos(unittest.TestCase):
     def entry(self, **who):
         from kyc.overrides import OFFICER_PHOTOS
         (code, office), photo = next((k, v) for k, v in sorted(OFFICER_PHOTOS.items())
-                                     if k[1] == who.get("office", "ag"))
+                                     if k[1] == who.get("office", "sos"))
         return code, office, photo
 
     def test_a_photograph_is_given_while_the_roster_names_its_person(self):

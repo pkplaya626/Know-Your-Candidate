@@ -825,11 +825,15 @@ def portrait_check(url, hinted=False):
                 return False, None
             data = response.read(MAX_BODY + 1)
             length = response.headers.get("Content-Length") or ""
+            encoding = response.headers.get("Content-Encoding")
     except urllib.error.HTTPError as exc:
         return (None if exc.code in (403, 429) or exc.code >= 500 else False), None
     except Exception:
         return None, None
-    size = image_size(data)
+    # Some servers gzip an image when asked for gzip at all (Missouri's
+    # attorney general's headshot): its size is read from the image, its
+    # weight is what crossed the wire.
+    size = image_size(_decoded(data, encoding) or b"")
     if not size or not all(size):
         return None, None
     width, height = size

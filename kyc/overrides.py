@@ -361,16 +361,9 @@ _NASS_CARD = ("NASS's roster card names {} beside this photograph, filed as {} i
               "they took office ({}); a head-and-shoulders portrait. {}")
 
 
-def _naag(name, slug, path, weight):
-    """An attorney general's photograph on their NAAG member page."""
-    return _officer_photo(
-        name, "https://www.naag.org/wp-content/uploads/" + path,
-        f"https://www.naag.org/attorney-general/{slug}/", "National Association of Attorneys General",
-        weight, "NAAG's member page: its heading is this state's attorney general, its text names "
-        "the holder the office's own page confirmed beside the title (officers.names_holder) and "
-        "the file carries their surname. NAAG's pages refuse a script; read by hand.")
-
-
+# An attorney general's photograph is read by the pipeline from the
+# office's own pages (officers.add_ag_photos); NAAG's member pages answer a
+# script and a headless browser with a Cloudflare challenge.
 OFFICER_PHOTOS = {
     # The NGA's headshot is 2.9 MB (stategov.HEADSHOT_MAX_BYTES is 1 MB).
     ("NM", "governor"): _officer_photo(
@@ -401,12 +394,13 @@ OFFICER_PHOTOS = {
             "The same man as the office's own headshot on sos.ms.gov/about-us/biography, which is "
             "2.9 MB.")),
     ("NY", "sos"): _officer_photo(
-        "Walter Mosley",
-        "https://dos.ny.gov/sites/g/files/oee926/files/styles/wysiwyg/public/media/2024/06/"
-        "img_2053.jpg?itok=F4mQaNh_",
-        "https://dos.ny.gov/about-our-executive-team", "New York Department of State",
-        (83390, 352, 440), "The department's executive team page, alt 'Walter T. Mosley "
-        "Headshot'; the same photograph as NASS's card for New York (NY.jpg)."),
+        "Walter Mosley", _NASS + "2024-06/NY.jpg?itok=Jors_L6r", "https://www.nass.org/membership",
+        _NASS_BY, (17599, 355, 450),
+        "NASS's roster card names Walter Mosley beside this photograph, filed as NY.jpg in June "
+        "2024; a head-and-shoulders portrait, the same photograph as the department's own "
+        "'Walter T. Mosley Headshot' on dos.ny.gov/about-our-executive-team. dos.ny.gov answers "
+        "a script and a headless browser with a Cloudflare challenge, so a reader's browser may "
+        "be refused it too: NASS's copy is linked."),
     ("SD", "sos"): _officer_photo(
         "Monae Johnson",
         "https://sdsos.gov/general-information/assets/Secretary%20Johnson_Pic2024.5.jpg",
