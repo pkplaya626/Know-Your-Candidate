@@ -4519,8 +4519,9 @@ async function testFindRep() {
       !!legPage.slot && legPage.served.every((s) => !/legislature\//.test(s)) &&
         !!legPage.out.querySelector('a[href="../legislature/oh.html#/?d=' +
           legPage.window.kycLookup.OH.zips["45701"].su[0][0] + '"]'), legPage.served.join(", "));
-    check("and sends the reader to the state page for Congress, which it does not load",
-      !!legPage.out.querySelector('a[href="../states/oh.html#findrep"]'));
+    check("and sends the reader to the state page for Congress, which it does not load, " +
+      "carrying the ZIP code in the fragment",
+      !!legPage.out.querySelector('a[href="../states/oh.html#findrep?zip=45701"]'));
     check("the county page has it, naming the county on that page",
       !!coPage.slot && !!coPage.out.querySelector('a[href^="../counties/oh.html#/?county="]'));
     check("no page errors on the legislature and county pages",
@@ -4528,6 +4529,49 @@ async function testFindRep() {
   });
 
   await testFindRepReview(legPage, coPage);
+  await testFindRepSecondReview();
+}
+
+/* The PR #104 second review: a page with no profiles spoke of congressional
+ * lines it lists none of, and lost the ZIP code on the way to the state
+ * page; the grid's search did not take ZIP+4. */
+async function testFindRepSecondReview() {
+  // Downtown Dallas: near a congressional line and a state legislative one.
+  const legHere = await askHere("legislature/tx.html", 32.7767, -96.797);
+  const stateHere = await askHere("states/tx.html", 32.7767, -96.797);
+  // The legislature page's link, followed: the state page asks the ZIP code.
+  const followed = await buildPage("states/oh.html", { hash: "#findrep?zip=45701" });
+  const followedOut = followed.D.querySelector("[data-findrep] .findrep-result");
+  await until(() => /ZIP 45701, Ohio/.test(followedOut.textContent));
+  // ZIP+4, the panel's own form, typed into the grid's search.
+  const plus4 = await buildPage("index.html", { hash: "#/?q=43215-1234" });
+  const plus4Out = plus4.D.querySelector("[data-findrep] .findrep-result");
+  await until(() => /ZIP 43215, Ohio/.test(plus4Out.textContent));
+  suite("the panel where no profiles load, and ZIP+4 in the grid (PR #104 second review)", () => {
+    check("the state page, at the same spot, does speak of a congressional line (the check below is not vacuous)",
+      /congressional district line|several congressional districts/.test(stateHere.text), stateHere.text.slice(-400));
+    check("the legislature page's notes speak of no congressional line it does not list",
+      !/congressional district line|congressional districts meet|several congressional/.test(legHere.text) &&
+        /state legislative district line/.test(legHere.text), legHere.text.slice(-400));
+    const congress = answerRow(legHere.out, "Congress");
+    check("and its Congress link, for a location, says to use it again on the state page",
+      !!congress && /use your location again/.test(congress.textContent) &&
+        !!congress.querySelector('a[href="../states/tx.html#findrep"]'), congress && congress.innerHTML);
+    const mapLink = legHere.out.querySelector("a[href*='districts/']");
+    check("its district map link says it is the congressional map",
+      !mapLink || /congressional district/.test(mapLink.textContent), mapLink && mapLink.textContent);
+    check("the state page asks a ZIP code the link carried, and drops it from the address",
+      /ZIP 45701, Ohio/.test(followedOut.textContent) && !/zip=/.test(followed.window.location.href) &&
+        followed.D.querySelector("[data-findrep] .findrep-zip").value === "45701",
+      followed.window.location.href);
+    check("the grid hands ZIP+4 to the panel by its first five digits",
+      /ZIP 43215, Ohio/.test(plus4Out.textContent) &&
+        /ZIP code is answered above/.test(plus4.D.getElementById("resultsLabel").textContent),
+      plus4Out.textContent.slice(0, 120));
+    check("no page errors", legHere.errors.length + stateHere.errors.length + followed.errors.length +
+      plus4.errors.length === 0,
+      legHere.errors.concat(stateHere.errors, followed.errors, plus4.errors).join(" | "));
+  });
 }
 
 /* The PR #104 review: the legislature and county pages load no profiles.js,

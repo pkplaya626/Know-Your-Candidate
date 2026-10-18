@@ -677,11 +677,16 @@
    * in the address, closing a profile returned to it and jumped the reader
    * back to the section, however far they had read on. */
   function jumpToSection() {
-    var hash = global.location.hash;
-    if (!/^#[A-Za-z][\w-]*$/.test(hash)) return;
-    var section = doc.getElementById(hash.slice(1));
+    // "#findrep?zip=43215" is the legislature and county pages' link to this
+    // page's members of Congress: the ZIP code the reader gave there is
+    // asked here, not lost (PR #104 review). A fragment is never sent to a
+    // server, and it is dropped from the address below.
+    var m = /^#([A-Za-z][\w-]*)(?:\?zip=(\d{5}))?$/.exec(global.location.hash);
+    if (!m) return;
+    var section = doc.getElementById(m[1]);
     if (!section) return;
     if (section.scrollIntoView) section.scrollIntoView({ block: "start" });
+    if (m[2] && m[1] === "findrep" && KYC.findRep) KYC.findRep.ask(m[2]);
     if (global.history && global.history.replaceState) {
       global.history.replaceState(global.history.state, "", global.location.pathname + global.location.search);
     }

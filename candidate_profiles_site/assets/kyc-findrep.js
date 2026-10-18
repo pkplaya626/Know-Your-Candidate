@@ -515,6 +515,15 @@
     return KYC.siteRoot() + info.page + (params.length ? "#/?" + params.join("&") : "");
   }
 
+  /** The link to the congressional district map. A page with no profiles
+   *  names no congressional district, and "the district map" there read as
+   *  its own legislature's or county's map. */
+  function mapLink(href) {
+    return '<a href="' + KYC.escapeAttr(href) + '">' + (people().length
+      ? "See it on the district map" : "See your congressional district on its map") +
+      " &rsaquo;</a>";
+  }
+
   /* ============================================================ rendering */
 
   function row(term, body) {
@@ -567,13 +576,19 @@
 
   /** The federal rows: House member, House race, senators, Senate races.
    *  *now* and *next* are ``[[district, share]]`` or district lists, on the
-   *  map members sit under and the map for the 2026 race. */
-  function federalRows(code, now, next) {
+   *  map members sit under and the map for the 2026 race. On a page with
+   *  no profiles (a legislature's, a county's) Congress is a link to the
+   *  state page's panel: with *zip5* it carries the ZIP code in the
+   *  fragment, which no request sends, and the state page asks it there
+   *  (kyc-state.js jumpToSection); a location is not put in an address,
+   *  so the reader is told to use it again (PR #104 review). */
+  function federalRows(code, now, next, zip5) {
     var rows = [];
     if (!people().length) {
-      rows.push(row("Congress", '<a href="' + KYC.escapeAttr(KYC.stateUrl(code) + "#findrep") +
-        '">Your members of Congress, on the ' + KYC.escapeHtml(nameOf(code)) +
-        " page &rsaquo;</a>"));
+      rows.push(row("Congress", '<a href="' + KYC.escapeAttr(KYC.stateUrl(code) + "#findrep" +
+        (zip5 ? "?zip=" + zip5 : "")) + '">Your members of Congress, on the ' +
+        KYC.escapeHtml(nameOf(code)) + " page &rsaquo;</a>" +
+        (zip5 ? "" : " There, use your location again.")));
       return rows;
     }
     var info = stateInfo(code);
@@ -749,14 +764,18 @@
     found.forEach(function (f) {
       var e = f.entry, data = f.data, code = f.code, w = whole();
       var key = plans(data);
-      function pick(parts) {
+      // *shown* is false for a level this page does not list (Congress,
+      // on a page with no profiles): its split is not this answer's to
+      // speak of (PR #104 review).
+      function pick(parts, shown) {
         parts = (parts || []).slice().sort(shareSort);
         if (parts.length && parts[0][1] >= w) return [parts[0][0]];
-        if (parts.length > 1) split = true;
+        if (parts.length > 1 && shown !== false) split = true;
         return parts;
       }
-      var now = pick(e[key.now]), next = pick(e[key.race]);
-      var rows = federalRows(code, now, next)
+      var federal = people().length > 0;
+      var now = pick(e[key.now], federal), next = pick(e[key.race], federal);
+      var rows = federalRows(code, now, next, code5)
         .concat(legislatureRows(code, f.leg, { upper: pick(e.su), lower: pick(e.sl) }, f.legFailed))
         .concat(countyRows(code, data, pick(e.co)));
       var head = "ZIP " + KYC.escapeHtml(code5) + ", " + KYC.escapeHtml(nameOf(code)) +
@@ -765,7 +784,7 @@
       var redrawn = redrawnNote(code, data);
       if (redrawn) notes.push(redrawn);
       var map = districtsPage(code, ids(now), ids(next));
-      if (map) notes.push('<a href="' + KYC.escapeAttr(map) + '">See it on the district map &rsaquo;</a>');
+      if (map) notes.push(mapLink(map));
       out.push(answer(head, code, rows, notes) + sourcesNote(data));
     });
     // Every state the ZIP reaches has its own lookup to check with, where
@@ -806,9 +825,10 @@
   function pointNotes(hit, levels, accuracy) {
     var notes = [];
     var name = KYC.escapeHtml(placeWords(hit.code));
-    var crowded = unique(levels.filter(function (l) { return reach(l.f).length > MAX_NEAR; })
+    var listed = levels.filter(function (l) { return !l.unlisted; });
+    var crowded = unique(listed.filter(function (l) { return reach(l.f).length > MAX_NEAR; })
       .map(function (l) { return l.many; }));
-    var lines = levels.filter(function (l) { return l.f && l.f.kind === "line"; });
+    var lines = listed.filter(function (l) { return l.f && l.f.kind === "line"; });
     var lineWords = unique(lines.map(function (l) { return l.line; }));
     var leg = lines.some(function (l) { return l.leg; });
     var inside = inState(hit.found);
@@ -850,9 +870,15 @@
     var code = hit.code, data = hit.data, f = hit.found, key = plans(data);
     var lf = hit.legFound || {};
     var area = data.area;
+    // A page with no profiles lists no congressional district (Congress
+    // is a link to the state page), so its notes do not speak of their
+    // lines: "near a congressional district line ... so each one in reach
+    // is listed" stood over none listed (PR #104 review). They still tell
+    // the state's border and shore (`unlisted`).
+    var unlisted = !people().length;
     var levels = [
-      { f: f[key.now], line: "a congressional district line", many: "congressional districts" },
-      { f: f[key.race], line: "a congressional district line", many: "congressional districts" },
+      { f: f[key.now], line: "a congressional district line", many: "congressional districts", unlisted: unlisted },
+      { f: f[key.race], line: "a congressional district line", many: "congressional districts", unlisted: unlisted },
       { f: area ? f.co : null, line: area ? (/^[aeiou]/i.test(area) ? "an " : "a ") + area + " line" : "",
         many: area ? area + " lines" : "" },
       { f: lf.upper, line: "a state legislative district line", many: "state legislative districts", leg: true },
@@ -868,7 +894,7 @@
     var redrawn = redrawnNote(code, data);
     if (redrawn) notes.push(redrawn);
     var map = districtsPage(code, now, next);
-    if (map) notes.push('<a href="' + KYC.escapeAttr(map) + '">See it on the district map &rsaquo;</a>');
+    if (map) notes.push(mapLink(map));
     if (said.unsure) notes.push(officialLookup(code));
     return answer("Your location, " + KYC.escapeHtml(nameOf(code)), code, rows, notes) +
       sourcesNote(data);

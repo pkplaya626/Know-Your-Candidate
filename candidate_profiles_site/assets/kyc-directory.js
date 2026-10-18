@@ -287,10 +287,11 @@
   /* No profile carries a ZIP code: "85004" in the search found nobody and
    * said to try a state code (GRID-06). A ZIP code is answered by "Find who
    * represents you" in the hero instead, once per ZIP code typed, whatever
-   * the grid finds: a profile's text can hold the number too. */
+   * the grid finds: a profile's text can hold the number too. ZIP+4 is
+   * the panel's own form ("43215-1234"), asked by its first five digits. */
   var askedZip = "";
   function searchedZip() {
-    var m = /^(\d{5})$/.exec(String(state.q || "").trim());
+    var m = /^(\d{5})(?:-?\d{4})?$/.exec(String(state.q || "").trim());
     return m && KYC.findRep ? m[1] : "";
   }
 
@@ -1111,8 +1112,11 @@
       // Searching from 800px down the list left the reader among the
       // matches with the count off-screen - under the keyboard, on
       // Samsung Internet, where it shrinks the page.
+      // A ZIP code is answered in the hero, and the panel brings itself
+      // into view (KYC.findRep.ask): scrolling to the results line after
+      // it left the reader below the answer (PR #104 review).
       var label = doc.getElementById("resultsLabel");
-      if (label && label.getBoundingClientRect().top < 0) {
+      if (label && !searchedZip() && label.getBoundingClientRect().top < 0) {
         label.scrollIntoView({ block: "start" });
       }
     };
