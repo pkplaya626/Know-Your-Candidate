@@ -95,7 +95,15 @@ def fmt_curr(val):
         return raw
     if math.isnan(amount):
         return "N/A"
-    return f"${amount:,.2f}"
+    return money(amount)
+
+
+def money(amount):
+    """``-$582.63``, never ``$-582.63``: the sign goes before the dollar sign.
+    A committee's cash on hand can be filed below zero, and Python's format
+    puts the minus after the "$" it was given."""
+    amount = float(amount)
+    return f"-${-amount:,.2f}" if amount < 0 else f"${amount:,.2f}"
 
 
 def parse_state_abbrev(office_str):

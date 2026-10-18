@@ -59,6 +59,7 @@
       '    <div class="modal-identity">',
       '      <span class="badge badge-neutral" id="profileModalChamber"></span>',
       '      <h2 class="modal-name" id="profileModalName"></h2>',
+      '      <p class="modal-aka" id="profileModalFecName" hidden></p>',
       '      <p class="modal-meta">',
       '        <span>' + KYC.icon("pin") +
       '          <span id="profileModalRegionLabel">Represents</span> <strong id="profileModalRegion"></strong>' +
@@ -511,14 +512,59 @@
     }],
   ];
 
+  // An account is linked by the id the source holds where it holds one: an
+  // X id follows a renamed handle (RepMikeJohnson, now SpeakerJohnson, is
+  // "not found"). The pipeline gives a YouTube value its shape - a channel
+  // id is youtube_id, a handle starts with "@", anything else is a legacy
+  // username that still answers at /user/.
   var SOCIAL = [
+    ["twitter_id", "X", function (v) { return "https://x.com/i/user/" + encodeURIComponent(v); }],
     ["twitter", "X", function (v) { return "https://x.com/" + encodeURIComponent(v); }],
     ["facebook", "Facebook", function (v) { return "https://www.facebook.com/" + encodeURIComponent(v); }],
     ["instagram", "Instagram", function (v) { return "https://www.instagram.com/" + encodeURIComponent(v); }],
     ["youtube_id", "YouTube", function (v) { return "https://www.youtube.com/channel/" + encodeURIComponent(v); }],
-    ["youtube", "YouTube", function (v) { return "https://www.youtube.com/user/" + encodeURIComponent(v); }],
+    ["youtube", "YouTube", function (v) {
+      v = String(v);
+      return v.charAt(0) === "@"
+        ? "https://www.youtube.com/@" + encodeURIComponent(v.slice(1))
+        : "https://www.youtube.com/user/" + encodeURIComponent(v);
+    }],
     ["bluesky", "Bluesky", function (v) { return "https://bsky.app/profile/" + encodeURIComponent(v); }],
   ];
+
+  /**
+   * A chip's tooltip. An account linked by its id names no handle: the id
+   * follows a rename, and the source's handle beside it may be the old one
+   * (Speaker Johnson's id leads to SpeakerJohnson; the source still says
+   * RepMikeJohnson, which X answers "not found" for and anyone could take).
+   */
+  function handleTitle(social, key, value) {
+    if (key === "twitter_id") return "X account, linked by its id";
+    if (key === "youtube_id") return "YouTube channel, linked by its id";
+    value = String(value);
+    return value.charAt(0) === "@" ? value : "@" + value;
+  }
+
+  /**
+   * The funding split, each label kept on one line with its share ("Transfers
+   * from other committees <1%" broke between label and value at 390px), and,
+   * where adjustments brought the receipts below the parts, what the shares
+   * are of: Shri Thanedar's add up to $3,968,600 beside "Raised $3,194,222".
+   */
+  function fundingHtml(item) {
+    if (!item.fundingBreakdown || !KYC.hasValue(item, "funding_sources")) {
+      return KYC.renderField(item, "funding_sources");
+    }
+    var html = String(item.funding_sources).split(", ").map(function (pair) {
+      return '<span class="funding-part">' + KYC.escapeHtml(pair) + "</span>";
+    }).join(", ");
+    if (item.fundingBase) {
+      html += '<span class="funding-base">Shares of ' + KYC.escapeHtml(item.fundingBase) +
+        " received, before adjustments the FEC deducts to reach the " +
+        KYC.escapeHtml(item.receipts || "") + " raised.</span>";
+    }
+    return html;
+  }
 
   function linkChip(url, label, title) {
     return '<a class="link-chip" href="' + KYC.escapeAttr(url) +
@@ -556,15 +602,12 @@
     if (office.length) rows.push('<p class="modal-meta contact-office">' + office.join("") + "</p>");
 
     var social = [];
-    var seenYouTube = false;
+    var seen = {};
     SOCIAL.forEach(function (spec) {
       var value = item.social && item.social[spec[0]];
-      if (!value) return;
-      if (spec[1] === "YouTube") {
-        if (seenYouTube) return;
-        seenYouTube = true;
-      }
-      social.push(linkChip(spec[2](value), spec[1], "@" + value));
+      if (!value || seen[spec[1]]) return;
+      seen[spec[1]] = true;
+      social.push(linkChip(spec[2](value), spec[1], handleTitle(item.social, spec[0], value)));
     });
     if (social.length) {
       rows.push('<span class="field-label">Official accounts</span>' +
@@ -781,6 +824,12 @@
 
   function render(item) {
     el("profileModalName").textContent = item.name;
+    // The name on the ballot, where the results page or the state's list
+    // settled it, with the registration it was matched to beneath: a
+    // reader who searches the FEC for "Bob Harvie" finds Robert J Harvie.
+    var fecName = el("profileModalFecName");
+    fecName.hidden = !(item.fecName && item.fecName !== item.name);
+    fecName.textContent = fecName.hidden ? "" : "Files with the FEC as " + item.fecName;
     // officeLabel is normalised in kyc/profiles.py. The pages used to rebuild
     // it from chamber + state + district in three separate places, which is
     // how "House • AL-District 3" and "House • TX-TX-32" once shipped.
@@ -882,7 +931,7 @@
       : "This site has not read this member\u2019s record of offices.");
     el("profileModalReceipts").innerHTML = KYC.renderField(item, "receipts", { source: true });
     el("profileModalSpent").innerHTML = KYC.renderField(item, "disbursements");
-    el("profileModalFunding").innerHTML = KYC.renderField(item, "funding_sources");
+    el("profileModalFunding").innerHTML = fundingHtml(item);
 
     var cashWrap = el("profileModalCashWrap");
     cashWrap.hidden = !item.cashOnHand;
@@ -922,7 +971,8 @@
     // Every figure of money on the site is the FEC's (validate: finance-not-fec).
     el("profileModalSource").textContent = item.financeSource
       ? "Finance figures from the FEC" +
-        (item.financeAsOf ? ", through " + KYC.dateWords(item.financeAsOf) : "") +
+        (item.financeAsOf ? ", through " + KYC.dateWords(item.financeAsOf) +
+          (KYC.filedAhead(item) ? ", a date still to come" : "") : "") +
         (item.financeElection ? " (" + item.financeElection + " election period)" : "")
       : "";
   }

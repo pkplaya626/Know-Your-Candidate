@@ -590,6 +590,53 @@ class TestStatePages(unittest.TestCase):
                          {"generalRunoff": "2026-12-01"})
         self.assertEqual(races_mod.ballot_kind({"state": "TX", "chamber": "House", "year": 2026}), {})
 
+    def test_filers_with_no_primary_and_no_ballot_are_not_counted_on_it(self):
+        # American Samoa read "0 challengers on the ballot" over a race card
+        # saying "6 filed": with no primary and no list read, its filers are
+        # filers - counted apart, never as on the ballot (rule 22).
+        people = [member(id="C1", state="MP", isCandidate=True)]
+        races = [{"id": "H-MP-00-2026", "state": "MP", "openSeat": False, "candidateCount": 1,
+                  "settled": False, "primaryDate": None, "results": None}]
+        by_state = summary.by_state(people, races)
+        self.assertEqual(by_state["MP"]["challengersOnBallot"], 0)
+        self.assertEqual(by_state["MP"]["challengersFiled"], 1)
+        # Once its list is read the race is settled and counts as any other.
+        races[0].update(settled=True, results={"otherNominees": ["A B"]})
+        by_state = summary.by_state(people, races)
+        self.assertEqual(by_state["MP"]["challengersOnBallot"], 2)
+        self.assertNotIn("challengersFiled", by_state["MP"])
+        # And the national breakdown still adds up.
+        races[0].update(settled=False, results=None)
+        e = summary.build(people, races=races)["election"]
+        self.assertEqual(e["challengersWithProfile"] + e["challengersUnprofiled"],
+                         e["challengersOnBallot"])
+
+    def test_an_empty_seat_says_who_left_and_when(self):
+        # FL-20 and TX-23 read only "Vacant" for six months, with no word
+        # of who left, when, or that no special election was called.
+        from kyc import overrides
+        people = [member(id="H1", state="TX", chamber="House", districtNum=22)]
+        races = [{"id": f"H-TX-{n}-2026", "state": "TX", "chamber": "House", "district": n}
+                 for n in (22, 23)]
+        by_state = summary.by_state(people, races)
+        entry = overrides.SEAT_VACANCIES[("TX", 23)]
+        self.assertEqual(by_state["TX"]["vacancies"], [{
+            "district": 23, "name": entry["name"], "left": entry["left"], "how": entry["how"],
+            "special": entry["special"], "checked": entry["checked"]}])
+        # Not a word once someone sits there; validate says the entry is stale.
+        people.append(member(id="H2", state="TX", chamber="House", districtNum=23))
+        self.assertNotIn("vacancies", summary.by_state(people, races)["TX"])
+        codes = [i.code for i in validate.check_seat_vacancies(people)]
+        self.assertIn("seat-vacancy-filled", codes)
+
+    def test_every_vacancy_entry_names_a_date_and_who_left(self):
+        from kyc import overrides
+        for key, entry in overrides.SEAT_VACANCIES.items():
+            for field in ("bioguide", "name", "left", "how", "special", "checked", "source"):
+                self.assertTrue(entry.get(field), (key, field))
+            self.assertRegex(entry["left"], r"^\d{4}-\d{2}-\d{2}$")
+            self.assertRegex(entry["checked"], r"^\d{4}-\d{2}-\d{2}$")
+
     def test_the_sidebar_breakdown_adds_up_without_subtracting(self):
         # The tooltip printed 812 - 556 = 256 names "with no FEC filing over
         # $5,000"; 245 exist. Each part is counted from the races.

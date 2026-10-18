@@ -500,21 +500,22 @@
     if (mode === "senate2026") {
       html += stateRaces.map(function (r) { return KYC.cards.unprofiledNote(r, "panel-note"); }).join("");
     } else {
-      /* Whose word each name is, counted apart (rule 64): once the count
-       * has begun, some of Louisiana's districts read from the results pages
-       * while others are still the Secretary of State's list, and one
-       * sentence crediting either would credit the other's names to it. */
-      var bySource = { results: 0, listed: 0 };
+      /* Whose word each name is, counted apart (rules 64 and 77): once the
+       * count has begun, some of Louisiana's districts read from the results
+       * pages while others are still the Secretary of State's list, and a
+       * state's certified list sets some races and not others. One sentence
+       * crediting one source would credit the others' names to it. */
+      var bySource = {};
+      var order = [];
       stateRaces.forEach(function (r) {
         var n = KYC.cards.unprofiledNames(r).none.length;
-        bySource[r.results && r.results.fromQualifiedList ? "listed" : "results"] += n;
+        if (!n) return;
+        var source = KYC.ballotSource(r);
+        if (!(source in bySource)) { bySource[source] = 0; order.push(source); }
+        bySource[source] += n;
       });
       var people = function (n) { return n + (n === 1 ? " person" : " people"); };
-      var parts = [];
-      if (bySource.results) parts.push(people(bySource.results) + " per Wikipedia’s results pages");
-      if (bySource.listed) {
-        parts.push(people(bySource.listed) + " per the Secretary of State’s list of qualified candidates");
-      }
+      var parts = order.map(function (source) { return people(bySource[source]) + " " + source; });
       if (parts.length) {
         html += '<p class="panel-note">Also on the November ballot, with no profile here: ' +
           KYC.escapeHtml(parts.join(", and ")) +

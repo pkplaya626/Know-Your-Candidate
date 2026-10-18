@@ -258,12 +258,15 @@ _CONGRESS_SOURCES = """\
                     <code>congress-legislators</code> dataset; the candidate field and
                     campaign finance from the Federal Election Commission; primary results
                     from each state's Wikipedia election page<span data-results-read hidden>,
-                    as last read on <time data-results-as-of></time></span>; portraits from
-                    Congress.gov and Wikipedia.</p>
+                    as last read on <time data-results-as-of></time></span>; the November
+                    ballot, where this site reads one, from the certified list of candidates
+                    its election office publishes, credited on each race it sets; portraits
+                    from Congress.gov and Wikipedia.</p>
                 <p><strong>Who counts as a candidate:</strong> everyone the FEC records
                     as having raised or spent more than $5,000 for the 2026 cycle
-                    (52&nbsp;U.S.C.&nbsp;&sect;30101(2)). People the primary removed stay on
-                    record and are shown under each race.</p>"""
+                    (52&nbsp;U.S.C.&nbsp;&sect;30101(2)). People no longer in a race - beaten
+                    in a primary, withdrawn, or left off a certified list - stay on record
+                    and are shown under each race.</p>"""
 
 
 # ------------------------------------------------------- the site's frame

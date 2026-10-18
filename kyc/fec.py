@@ -282,6 +282,15 @@ def totals(candidate_id, election_year=CYCLE):
         "pac_contributions": row.get("other_political_committee_contributions"),
         "party_contributions": row.get("political_party_committee_contributions"),
         "self_funding": row.get("candidate_contribution"),
+        # The rest of what the FEC counts as receipts. Without them the
+        # shares were of four categories only, and Jefferson Shreve's
+        # $2,000,000 loan to his own campaign - 79% of his receipts - left
+        # him reading "PACs 70%".
+        "candidate_loans": row.get("loans_made_by_candidate"),
+        "other_loans": row.get("all_other_loans"),
+        "transfers": row.get("transfers_from_other_authorized_committee"),
+        "offsets": row.get("offsets_to_operating_expenditures"),
+        "other_receipts": row.get("other_receipts"),
         "coverage_end": (row.get("coverage_end_date") or "")[:10],
     }
 
@@ -295,7 +304,13 @@ def profile_key(profile):
     one the member goes by ("C. Franklin" shows as Scott Franklin); keying on
     the roster spelling keeps the cached filing attached to the same person
     instead of reading as "nobody has looked".
+
+    A filer from the FEC's register is keyed on their candidate id (rule 17):
+    the field holds people who share a name and a state, and their money is
+    looked up by that id alone (:func:`resolve_field`).
     """
+    if profile.get("source") == "fec-field" and profile.get("fecCandidateId"):
+        return f"fec:{profile['fecCandidateId']}"
     name = profile.get("rosterName") or profile["name"]
     return f"{name.lower()}|{profile['state']}|{'S' if 'Senate' in profile['chamber'] else 'H'}"
 
@@ -389,10 +404,17 @@ def resolve_all(profiles, root=".", limit=None, refresh=False, snapshot=None,
         record = cache.get(profile_key(profile))
         if record is None:
             return True
+        # Read before loans and transfers were: its shares would be of the
+        # wrong total, so it is read again (and a run resumes after a stop).
+        if record.get("receipts") is not None and "candidate_loans" not in record:
+            return True
         roster_id = profile.get("rosterFecId")
         return bool(roster_id) and record.get("candidate_id") != roster_id
 
-    todo = [p for p in profiles if refresh or stale(p)]
+    # A filer from the field is looked up by id alone (resolve_field), never
+    # through the name search below.
+    todo = [p for p in profiles
+            if p.get("source") != "fec-field" and (refresh or stale(p))]
 
     if limit:
         todo = todo[:limit]
@@ -483,6 +505,83 @@ def resolve_all(profiles, root=".", limit=None, refresh=False, snapshot=None,
                    "by_id": by_id}
 
 
+# On ``--refresh`` a challenger's own totals are read again once they are this
+# many days old, at most FIELD_PER_RUN a run, oldest first. Re-reading all
+# ~590 every day would more than double the daily refresh's requests; this
+# reads each about weekly and spreads the load across the days.
+FIELD_STALE_DAYS = 6
+FIELD_PER_RUN = 150
+
+
+def resolve_field(profiles, root=".", refresh=False, limit=None, log=print, today=None):
+    """Each filer's own totals, through their candidate id alone.
+
+    The register the field comes from (``/candidates/totals/``) reports only
+    itemized individual gifts, so a split built from it would understate
+    individual giving (see :mod:`kyc.candidates`). Every challenger still on a
+    ballot is looked up here instead, at ``/candidate/{id}/totals/`` - the
+    endpoint members' figures come from - so a challenger's funding line is
+    read the same way as the incumbent's beside them. One request each,
+    paced by :func:`_get` (rule 37); the cache is written every 25, so an
+    interrupted run resumes where it stopped.
+
+    Anyone never read (or cached before loans were recorded) is always read.
+    ``refresh`` adds the records read :data:`FIELD_STALE_DAYS` or more days
+    ago - one with no ``read`` date counts as oldest - up to
+    :data:`FIELD_PER_RUN` of them, oldest first.
+    """
+    import datetime
+    today = today or datetime.datetime.now(datetime.timezone.utc).date()
+    cache = load_cache(root)
+    wanted = [p for p in profiles
+              if p.get("source") == "fec-field" and p.get("fecCandidateId")]
+
+    def read_on(profile):
+        try:
+            return datetime.date.fromisoformat(
+                (cache.get(profile_key(profile)) or {}).get("read") or "")
+        except ValueError:
+            return None
+
+    todo = [p for p in wanted if "candidate_loans" not in
+            (cache.get(profile_key(p)) or {})]
+    if refresh:
+        unread = {p["id"] for p in todo}
+        stale = [p for p in wanted if p["id"] not in unread
+                 and (read_on(p) is None
+                      or (today - read_on(p)).days >= FIELD_STALE_DAYS)]
+        stale.sort(key=lambda p: read_on(p) or datetime.date.min)
+        todo += stale[:FIELD_PER_RUN]
+    if limit:
+        todo = todo[:limit]
+    log(f"  finance: {len(todo)} of {len(wanted)} filers on a ballot to look up")
+    found = stopped = 0
+    for done, profile in enumerate(todo, start=1):
+        candidate_id = profile["fecCandidateId"]
+        try:
+            figures = totals(candidate_id)
+        except FecError as exc:
+            log(f"  [stop] {exc}")
+            stopped = 1
+            break
+        except KeyboardInterrupt:
+            log(f"  [stop] interrupted after {done} of {len(todo)}")
+            stopped = 1
+            break
+        if figures:
+            cache[profile_key(profile)] = {"found": True, "name": profile["name"],
+                                           "candidate_id": candidate_id,
+                                           "via": "fec-field", "read": today.isoformat(),
+                                           **figures}
+            found += 1
+        if done % 25 == 0:
+            save_cache(cache, root)
+            log(f"    {done}/{len(todo)} looked up ({found} with totals)")
+    save_cache(cache, root)
+    log(f"  finance: {found} filers' own totals read")
+    return cache, {"found": found, "stopped": stopped, "wanted": len(wanted)}
+
+
 def period_fields(election_year, start, end):
     """The profile fields that say what period a money figure covers.
 
@@ -513,7 +612,83 @@ def period_fields(election_year, start, end):
 
 
 def _money(value):
-    return f"${float(value):,.2f}" if value is not None else None
+    from .normalize import money
+    return money(value) if value is not None else None
+
+
+# Every kind of receipt the FEC's totals report, as (label, cache field(s)).
+# Their sum is the receipts figure: contributions (individual, PAC, party,
+# the candidate's own) plus loans, transfers from the campaign's other
+# committees, and offsets and other receipts. The candidate's own money is
+# one line whether given or lent: a loan from the candidate is their money
+# in the campaign until it is repaid, and the FEC reports it as theirs - and
+# the label says so when a loan is in it (SELF_WITH_LOANS). The labels are
+# read by people who do not know the FEC's categories, so each says whose
+# money it is: "Transfers" alone did not say from whom.
+FUNDING_PARTS = (
+    ("Individual", ("individual_contributions",)),
+    ("PACs", ("pac_contributions",)),
+    ("Party", ("party_contributions",)),
+    ("Self-funded", ("self_funding", "candidate_loans")),
+    ("Bank and other loans", ("other_loans",)),
+    ("Transfers from other committees", ("transfers",)),
+    ("Other", ("offsets", "other_receipts")),
+)
+SELF_WITH_LOANS = "Self-funded (incl. loans)"
+
+
+def funding(record):
+    """``(breakdown, line)`` for one FEC totals record, or ``(None, None)``.
+
+    Each share is of the record's total receipts, never of the categories
+    that happened to be read: the first version summed four contribution
+    types and called that 100%, so a candidate whose campaign was mostly
+    his own loan read as PAC-funded (Jefferson Shreve, IN-6: loans $2,000,000
+    of $2,532,230 received, shown as "PACs 70%"). A record cached before the
+    loans and transfers were read has no breakdown at all - its shares would
+    be of the wrong total - until ``finance --refresh`` reads it again.
+
+    A category can be negative (an adjustment the FEC deducts: Shri
+    Thanedar's other receipts are -$774,378 against $2,970,000 of his own
+    loans). Negative parts are left out and the shares are then of the
+    positive parts, which add up to more than the receipts figure;
+    :func:`funding_base` gives that larger sum so the page can say what the
+    shares are of. Shares of the net figure would add up to more than 100%.
+    """
+    if "candidate_loans" not in record:
+        return None, None
+    parts = {}
+    for label, fields in FUNDING_PARTS:
+        amount = sum(float(record.get(f) or 0) for f in fields)
+        if label == "Self-funded" and float(record.get("candidate_loans") or 0) > 0:
+            label = SELF_WITH_LOANS
+        if amount > 0:
+            parts[label] = round(amount, 2)
+    if not parts:
+        return None, None
+    total = float(record.get("receipts") or 0)
+    # Refunds can leave a category above the net total; never show a share
+    # of a total smaller than its parts.
+    total = max(total, sum(parts.values()))
+
+    def share(amount):
+        ratio = amount / total
+        return "<1%" if ratio < 0.005 else f"{ratio:.0%}"
+
+    line = ", ".join(f"{label} {share(amount)}"
+                     for label, amount in sorted(parts.items(), key=lambda kv: -kv[1]))
+    return parts, line
+
+
+def funding_base(record, parts):
+    """The sum the shares are of, when it is not the receipts figure: the
+    positive parts, where adjustments brought the net total below them.
+    ``None`` when the shares are of the receipts shown beside them."""
+    if not parts:
+        return None
+    receipts = float(record.get("receipts") or 0)
+    gross = round(sum(parts.values()), 2)
+    return gross if gross - receipts >= 0.01 else None
 
 
 def apply_cache(profiles, cache):
@@ -529,6 +704,10 @@ def apply_cache(profiles, cache):
             # not this person's. Show nothing until resolve_all looks again.
             continue
 
+        if record.get("receipts") is None and profile.get("source") == "fec-field":
+            # A filer's money is the field register's until their own totals
+            # are read; an empty answer takes nothing away (rule 8).
+            continue
         if record.get("receipts") is None:
             # We identified this person at the FEC and it holds nothing for
             # this cycle. That is a different fact from "nobody has looked",
@@ -558,27 +737,19 @@ def apply_cache(profiles, cache):
             record.get("coverage_end")))
         profile["fecCandidateId"] = record.get("candidate_id")
 
-        breakdown = {
-            "Individual": record.get("individual_contributions"),
-            "PACs": record.get("pac_contributions"),
-            "Party": record.get("party_contributions"),
-            "Self-funded": record.get("self_funding"),
-        }
-        profile["fundingBreakdown"] = {
-            k: float(v) for k, v in breakdown.items() if v
-        }
-
+        breakdown, line = funding(record)
+        profile.pop("fundingBreakdown", None)
+        profile.pop("fundingBase", None)
         quality = profile.setdefault("quality", {})
         quality.pop("receipts", None)
         quality.pop("disbursements", None)
-        if profile["fundingBreakdown"]:
+        if breakdown:
+            profile["fundingBreakdown"] = breakdown
             quality.pop("funding_sources", None)
-            profile["funding_sources"] = ", ".join(
-                f"{k} {v / sum(profile['fundingBreakdown'].values()):.0%}"
-                for k, v in sorted(
-                    profile["fundingBreakdown"].items(), key=lambda kv: -kv[1]
-                )
-            )
+            profile["funding_sources"] = line
+            base = funding_base(record, breakdown)
+            if base is not None:
+                profile["fundingBase"] = _money(base)
         profile["hasRealFinance"] = True
         applied += 1
     return applied

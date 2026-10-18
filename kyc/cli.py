@@ -106,15 +106,6 @@ def _build(args):
         print(f"  campaigns: {stats['campaign_sites']} profiles with a campaign website"
               f" ({withheld} withheld as lapsed or hijacked)")
 
-    cache = portraits.load_cache(args.root)
-    if cache:
-        stats["portraits"] = portraits.apply_cache(profiles, cache)
-        print(f"  portraits: {stats['portraits']}/{len(profiles)} verified "
-              f"({100 * stats['portraits'] / max(len(profiles), 1):.0f}%)")
-    else:
-        stats["portraits"] = 0
-        print("  [warn] no portrait cache; run 'portraits' to resolve them")
-
     outcomes = results_mod.load_cache(args.root)
     stats["results"] = (results_mod.apply_cache(profiles, outcomes, field=field)
                         if outcomes else 0)
@@ -125,11 +116,28 @@ def _build(args):
         print("  [warn] no primary results; run 'results'. Eliminated candidates "
               "will still show as running.")
 
+    # After the results: a challenger's portrait comes only through the
+    # article their ballot page links, and that link - and the name on the
+    # ballot the portrait cache is keyed on - arrives with them (rule 24).
+    # A link that leads somewhere else is withheld first, so it delivers no
+    # portrait either (rule 33).
+    enrichment = enrich.load_cache(args.root)
+    withheld = enrich.withhold_links(profiles, enrichment)
+    cache = portraits.load_cache(args.root)
+    if cache:
+        stats["portraits"] = portraits.apply_cache(profiles, cache)
+        print(f"  portraits: {stats['portraits']}/{len(profiles)} verified "
+              f"({100 * stats['portraits'] / max(len(profiles), 1):.0f}%)")
+    else:
+        stats["portraits"] = 0
+        print("  [warn] no portrait cache; run 'portraits' to resolve them")
+
     # After the results: who is still running, and the article and campaign
     # site their state's election page links, both arrive with them.
-    enrichment = enrich.load_cache(args.root)
     if enrichment:
         filled = enrich.apply_cache(profiles, enrichment, as_of=_age_date(stats))
+        if withheld:
+            filled["wikipedia_withheld"] += withheld
         stats["enriched"] = dict(sorted(filled.items()))
         print("  enrich: " + ", ".join(f"{n} {k}" for k, n in sorted(filled.items()))
               + f" (read {enrichment.get('checked')})")
@@ -402,6 +410,8 @@ def _portraits(args):
     fec.apply_cache(profiles, finance)
     results_mod.apply_cache(profiles, results_mod.load_cache(args.root),
                             field=screen_field(field, profiles, raw.get("record")))
+    # A ballot link that leads somewhere else is not resolved (rule 33).
+    enrich.withhold_links(profiles, enrich.load_cache(args.root))
     cache, _summary = portraits.resolve_all(
         profiles, root=args.root, refresh=args.refresh
     )
@@ -516,7 +526,6 @@ def _enrich(args):
                                      field=field, finance=finance)
     fec.apply_cache(profiles, finance)
     campaigns.apply_cache(profiles, campaigns.load_cache(args.root))
-    portraits.apply_cache(profiles, portraits.load_cache(args.root))
     # Who is still running, and the article and site the election page links.
     results_mod.apply_cache(profiles, results_mod.load_cache(args.root),
                             field=screen_field(field, profiles, raw.get("record")))
@@ -525,11 +534,18 @@ def _enrich(args):
         if not cache:
             print(f"[error] no {enrich.CACHE_PATH}; run 'enrich' first.", file=sys.stderr)
             return 2
+        # As in build: a withheld link delivers no portrait (rule 33), and a
+        # campaign-site portrait is taken only where none came by id or link.
+        withheld = enrich.withhold_links(profiles, cache)
+        portraits.apply_cache(profiles, portraits.load_cache(args.root))
         filled = enrich.apply_cache(profiles, cache, as_of=_age_date(stats))
+        if withheld:
+            filled["wikipedia_withheld"] += withheld
         print("  enrich: " + ", ".join(f"{n} {k}" for k, n in sorted(filled.items())))
     else:
         cache, _counts = enrich.resolve_all(profiles, root=args.root, refresh=args.refresh,
-                                            limit=args.limit)
+                                            limit=args.limit,
+                                            only_unreachable=args.unreachable)
         print(f"\n[ok] enrichment cache: {enrich.CACHE_PATH}")
     found = enrich.problems(profiles, cache)
     for title, lines in (("withdrawn as hijacked or parked", found["withdrawn"]),
@@ -606,9 +622,30 @@ def _finance(args):
     profiles, _ = build_profiles(raw, snapshot=snapshot)
     field = candidates.load_cache(args.root)
     active = {r["candidate_id"] for r in (field or {}).get("candidates", [])}
-    fec.resolve_all(profiles, root=args.root, limit=args.limit,
-                    refresh=args.refresh, snapshot=snapshot, active_ids=active,
-                    record=raw.get("record"))
+    if not args.field_only:
+        _cache, stats = fec.resolve_all(profiles, root=args.root, limit=args.limit,
+                                        refresh=args.refresh, snapshot=snapshot,
+                                        active_ids=active, record=raw.get("record"))
+        if stats.get("stopped"):
+            # A stop keeps every figure already cached, dated as it was read,
+            # and the next run resumes. It is not fatal: the daily refresh
+            # runs the field and the results after this step, and a 429 here
+            # must not keep a day's results off the site.
+            print("  [warn] finance stopped early; cached figures kept, "
+                  "the next run resumes")
+            return 0
+    # Then every challenger still on a ballot, by their own filing's id: who
+    # that is comes from the results, as on the page.
+    finance = fec.load_cache(args.root)
+    profiles, _ = build_profiles(raw, snapshot=snapshot, field=field, finance=finance)
+    fec.apply_cache(profiles, finance)
+    results_mod.apply_cache(profiles, results_mod.load_cache(args.root),
+                            field=screen_field(field, profiles, raw.get("record")))
+    _cache, stats = fec.resolve_field([p for p in profiles if enrich.running(p)],
+                                      root=args.root, refresh=args.refresh, limit=args.limit)
+    if stats.get("stopped"):
+        print("  [warn] challengers' totals stopped early; cached figures kept, "
+              "the next run resumes")
     print(f"\n[ok] finance cache: {fec.CACHE_PATH}")
     return 0
 
@@ -984,10 +1021,19 @@ def _results(args):
         except Exception as exc:          # inconclusive: say so, conclude nothing
             print(f"  [warn] Louisiana's qualified list could not be read: {exc}")
             listed = None
-        print("Reading primary results from Wikipedia ...")
         previous = results_mod.load_cache(args.root)
+        # Each state's certified November ballot, where one is published
+        # (rule 77). A state whose list cannot be read keeps the last one
+        # read; it is never read as nobody being certified (rule 8).
+        from . import certified as certified_mod
+        print("Reading the states' certified November ballots ...")
+        ballots, unread = certified_mod.fetch(log=print)
+        for state in certified_mod.carry(ballots, unread, previous):
+            print(f"  [warn] kept {state}'s certified list read on "
+                  f"{ballots[state].get('fetched')}")
+        print("Reading primary results from Wikipedia ...")
         cache = results_mod.build(field, dates, today=datetime.date.today(), log=print,
-                                  aliases=aliases, qualified=listed)
+                                  aliases=aliases, qualified=listed, certified=ballots)
         kept = results_mod.carry_qualified(cache, previous)
         if kept:
             print(f"  [warn] kept the qualified list read on "
@@ -1073,8 +1119,6 @@ def _verify(args):
         committees=legislators.load_committees(args.root),
     )
     stats["fec"] = fec.apply_cache(profiles, finance) if finance else 0
-    cache = portraits.load_cache(args.root)
-    stats["portraits"] = portraits.apply_cache(profiles, cache) if cache else 0
     filings = disclosures.load_cache(args.root)
     stats["disclosures"] = disclosures.apply_cache(profiles, filings) if filings else 0
     stats["campaign_sites"] = campaigns.apply_cache(profiles, campaigns.load_cache(args.root))
@@ -1083,7 +1127,11 @@ def _verify(args):
     outcomes = results_mod.load_cache(args.root)
     stats["results"] = (results_mod.apply_cache(profiles, outcomes, field=field)
                         if outcomes else 0)
-    enrich.apply_cache(profiles, enrich.load_cache(args.root), as_of=_age_date(stats))
+    enrichment = enrich.load_cache(args.root)
+    enrich.withhold_links(profiles, enrichment)
+    cache = portraits.load_cache(args.root)
+    stats["portraits"] = portraits.apply_cache(profiles, cache) if cache else 0
+    enrich.apply_cache(profiles, enrichment, as_of=_age_date(stats))
     from . import history as history_mod
     history_mod.apply_cache(profiles, history_mod.load_cache(args.root),
                             snapshot=legislators.load_snapshot(args.root))
@@ -1818,6 +1866,8 @@ def build_parser():
                       help="read at most N people this run")
     rich.add_argument("--refresh", action="store_true",
                       help="read everyone again, not just those read over six days ago")
+    rich.add_argument("--unreachable", action="store_true",
+                      help="read again only the committee sites the last read could not reach")
 
     field = add("field", help="refresh the FEC register of 2026 candidates")
     field.add_argument("--check", action="store_true",
@@ -1896,6 +1946,8 @@ def build_parser():
                        help="stop after N lookups (useful on a rate-limited key)")
     money.add_argument("--refresh", action="store_true",
                        help="re-query profiles already cached")
+    money.add_argument("--field-only", action="store_true",
+                       help="only the challengers still on a ballot, by their own filing")
 
     _add_build_flags(add("refresh", help="fetch, then build"))
     return parser

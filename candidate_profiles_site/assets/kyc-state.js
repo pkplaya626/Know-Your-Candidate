@@ -63,9 +63,9 @@
     VI: "the U.S. Virgin Islands",
   };
 
-  function possessive(place) {
-    return place + (/s$/.test(place) ? "'" : "'s");
-  }
+  // One possessive for every page, as kyc/pages.py writes it (rules 12 and
+  // 75): "Virgin Islands'", "Texas's" - this file's own copy wrote "Texas'".
+  var possessive = KYC.possessive;
 
   /** "“A”, “B” and “C”": the links of *kinds*, by the words on them. */
   function quoted(kinds, labels) {
@@ -240,8 +240,16 @@
     var open = info.openCandidates || 0;
     var held = (info.challengersOnBallot || 0) - open;
     var out = [];
-    if (held || !open) out.push(plural(held, "challenger") + where);
+    if ((held || !open) && (held || !info.challengersFiled)) out.push(plural(held, "challenger") + where);
     if (open) out.push(plural(open, "candidate") + " for open seats" + where);
+    // Where there is no primary and no ballot list was read (a territory
+    // whose list this site has no reader for): filed, which is not the same
+    // claim, and says what was not done - it checked no list, which is not
+    // to say none is published (rule 19). American Samoa read "0
+    // challengers on the ballot" over six filers.
+    if (info.challengersFiled) {
+      out.push(plural(info.challengersFiled, "challenger") + " filed; ballot list not checked");
+    }
     return out;
   }
 
@@ -366,8 +374,14 @@
             '-year term (<a href="https://www.law.cornell.edu/uscode/text/48/891" target="_blank" ' +
             'rel="noopener noreferrer">48 U.S.C. § 891</a>). The seat was last on the ballot in ' +
             info.houseTerm.last + " and is next in " + info.houseTerm.next + ", so no seat in Congress " +
-            "is on " + KYC.escapeHtml(name) + "'s 2026 ballot.</p>"
+            "is on " + KYC.escapeHtml(KYC.possessive(name)) + " 2026 ballot.</p>"
           : "",
+        // Each empty seat: who left, when, and whether a special election
+        // has been called (summary.py, overrides.SEAT_VACANCIES).
+        (info.vacancies || []).map(function (v) {
+          return '<p class="state-note">District ' + v.district + ": " +
+            KYC.escapeHtml(KYC.vacancyNote(v)) + "</p>";
+        }).join(""),
         '<div class="card-grid">' + house.map(cards.card).join("") + "</div>",
         "</section>"
       );
@@ -403,7 +417,7 @@
         // ballot left out the governor, the legislature and every local race.
         '<h2 class="state-heading">2026 races for Congress in ' + KYC.escapeHtml(name) + "</h2>",
         '<p class="state-note">Each seat with the sitting member, everyone on the ' +
-          "November ballot, and - folded under the race - everyone the primary removed. " +
+          "November ballot, and - folded under the race - everyone no longer running. " +
           alsoOnBallot(code, name, info.territory) + "</p>",
         (senateRaces.length + houseRaces.length > 3
           ? '<nav class="toolbar jump-row" aria-label="Jump to a race">' + jumps + "</nav>"
@@ -447,7 +461,7 @@
       return "Your ballot may also hold local contests, which this site does not list.";
     }
     if (!list) {
-      return "None of " + KYC.escapeHtml(name) + "'s governor, lieutenant governor, attorney " +
+      return "None of " + KYC.escapeHtml(KYC.possessive(name)) + " governor, lieutenant governor, attorney " +
         "general, secretary of state or regular legislative seats is elected in 2026; the " +
         "ballot may still hold " + rest + ".";
     }

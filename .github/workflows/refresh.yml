@@ -126,9 +126,13 @@ jobs:
       # --refresh: without it `fec.resolve_all` fetches only profiles missing
       # from the cache, so every cached incumbent kept the totals of the day
       # they were first looked up while challengers' totals moved weekly.
-      # Request budget (the key allows 1000 an hour): about 540 members by id
-      # at one request each, ~60 roster challengers at up to two, ~45 pages of
-      # the field, and the campaign lookups below - capped to stay under it.
+      # Request budget (the key answers 60 a minute; fec._get paces to it,
+      # rule 37): about 540 members by id at one request each, ~60 roster
+      # challengers at up to two, then up to 150 on-ballot challengers' own
+      # totals (fec.FIELD_PER_RUN, each re-read about weekly), ~45 pages of
+      # the field, and the campaign lookups below. A stop here is a warning,
+      # not a failure: cached figures stay and the next run resumes, so the
+      # field and results steps below still run.
       - name: Refresh campaign finance
         env:
           FEC_API_KEY: ${{ secrets.FEC_API_KEY }}

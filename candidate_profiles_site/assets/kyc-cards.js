@@ -486,15 +486,24 @@
    * people running over a ballot of nine. */
   function unprofiledNote(race, cls) {
     var u = unprofiledNames(race);
+    var parties = ((race && race.results) || {}).otherParties || {};
     var parts = [];
     if (u.none.length) {
+      // Each with their party, as the ballot or the results give it: a
+      // bare name beside a market line for "Republican party" left the
+      // reader to guess which of two names it was.
       parts.push("Also on the November ballot, " + KYC.escapeHtml(KYC.ballotSource(race)) +
         ", with no FEC filing over $5,000 and so no profile here: " +
-        KYC.escapeHtml(u.none.join(", ")) + ".");
+        u.none.map(function (n) {
+          return KYC.escapeHtml(n) + (parties[n] ? " (" + KYC.escapeHtml(parties[n]) + ")" : "");
+        }).join(", ") + ".");
     }
     u.maybe.forEach(function (m) {
       var who = KYC.byId(m.id);
-      parts.push("The results also name " + KYC.escapeHtml(m.name) + ", who may be " +
+      // Credited to whoever named them: Florida's certified list, not "the
+      // results", named FL-13's Tony D'Arrigo.
+      parts.push("Also named, " + KYC.escapeHtml(KYC.ballotSource(race)) + ": " +
+        KYC.escapeHtml(m.name) + ", who may be " +
         KYC.escapeHtml(who ? who.name : "a candidate with a profile here") +
         " under another spelling; this site has not confirmed it.");
     });

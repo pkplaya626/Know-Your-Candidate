@@ -52,7 +52,10 @@ class TestSnapshotContacts(unittest.TestCase):
         snapshot = legislators.build_snapshot([entry()], social=social, fetched="x")
         person = snapshot["legislators"][0]
         self.assertEqual(person["social"],
-                         {"twitter": "RepCasar", "facebook": "RepCasar", "youtube_id": "UC123"})
+                         {"twitter": "RepCasar", "facebook": "RepCasar", "youtube_id": "UC123",
+                          # Kept: the page links an X account by its id,
+                          # which follows a renamed handle.
+                          "twitter_id": "1"})
 
     def test_a_missing_social_file_is_an_absence(self):
         snapshot = legislators.build_snapshot([entry()], social=None, fetched="x")

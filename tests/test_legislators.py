@@ -1123,12 +1123,18 @@ class TestNamesOnTheRealRoster(unittest.TestCase):
         people = self.snapshot["legislators"]
         self.assertTrue(all(p.get("nameParts", {}).get("last") for p in people))
 
+    def test_no_redisplayed_member_carries_a_comma_suffix(self):
+        odd = [p["name"] for mid, p in self.members.items()
+               if p["name"] != self.roster.get(mid) and ", " in p["name"]]
+        self.assertEqual(odd, [])
+
     def test_no_member_displays_as_a_bare_initial(self):
         initial_first = [p["name"] for p in self.members.values()
                          if legislators.is_initial(p["name"].split()[0])]
         self.assertEqual(initial_first, [])
 
-    def test_only_initial_first_names_are_redisplayed(self):
+    def test_a_redisplayed_name_comes_from_the_members_own_record(self):
+        people = {p["bioguide"]: p for p in self.snapshot["legislators"]}
         changed = 0
         for member_id, profile in self.members.items():
             roster = self.roster.get(member_id)
@@ -1136,23 +1142,94 @@ class TestNamesOnTheRealRoster(unittest.TestCase):
                 self.assertNotIn("rosterName", profile)
                 continue
             changed += 1
-            self.assertTrue(legislators.is_initial(roster.split()[0]), roster)
+            self.assertEqual(profile["name"],
+                             legislators.display_name(roster, people[member_id]))
+            nickname = (people[member_id].get("nameParts") or {}).get("nickname")
+            if nickname:
+                self.assertTrue(profile["name"].startswith(nickname + " "), profile["name"])
+            # Every word of the shown name is in the record or the roster.
+            record = " ".join(str(v) for v in (people[member_id].get("nameParts") or {}).values())
+            for word in profile["name"].replace(",", "").replace("(", "").replace(")", "").split():
+                self.assertTrue(word in record or word in roster, (word, profile["name"]))
             self.assertEqual(profile["rosterName"], roster)
             self.assertIn(roster, profile["aliases"])
         self.assertGreater(changed, 0)
 
+    def test_display_name_rules(self):
+        def person(**parts):
+            return {"nameParts": parts}
+        # A recorded nickname.
+        self.assertEqual(legislators.display_name("John Reed", person(
+            first="John", last="Reed", nickname="Jack", official_full="Jack Reed")), "Jack Reed")
+        # Shown without the record's suffix, as every other member is; the
+        # suffixed form stays an alias.
+        self.assertEqual(legislators.display_name("Henry Johnson", person(
+            first="Henry", middle="C.", last="Johnson", suffix="Jr.", nickname="Hank",
+            official_full='Henry C. "Hank" Johnson, Jr.')), "Hank Johnson")
+        # The roster's own parenthetical.
+        self.assertEqual(legislators.display_name("Charles (Chuck) Edwards", person(
+            first="Charles", last="Edwards", official_full="Chuck Edwards")), "Chuck Edwards")
+        # A shorter first name in official_full is the familiar form ...
+        self.assertEqual(legislators.display_name("Gregorio Casar", person(
+            first="Gregorio", last="Casar", official_full="Greg Casar")), "Greg Casar")
+        self.assertEqual(legislators.display_name("Valerie Hoyle", person(
+            first="Valerie", last="Hoyle", official_full="Val T. Hoyle")), "Val Hoyle")
+        # ... a longer one is the formal name of someone already shown familiarly.
+        self.assertEqual(legislators.display_name("Eli Crane", person(
+            first="Elijah", last="Crane", official_full="Elijah Crane")), "Eli Crane")
+        self.assertEqual(legislators.display_name("Dan Goldman", person(
+            first="Daniel", last="Goldman", official_full="Daniel S. Goldman")), "Dan Goldman")
+        # Another surname in the record is never borrowed.
+        self.assertEqual(legislators.display_name("Ann Smith", person(
+            first="Ann", last="Jones", official_full="An Jones")), "Ann Smith")
+        # No record, no change.
+        self.assertEqual(legislators.display_name("Ann Smith", None), "Ann Smith")
+
+    def campaign_roster(self):
+        """The checks that name members by bioguide id describe the 119th
+        Congress's roster. From January 3 the snapshot is the 120th's (the CI
+        rehearsal builds one), some of them are not in it, and Andy Barr's
+        Senate run is over (rule 68): those checks stop there, while the
+        general ones above keep running on whichever roster is committed."""
+        from kyc import cycle
+        if cycle.snapshot_congress(self.snapshot) >= cycle.electing_congress():
+            self.skipTest("the committed snapshot is the new Congress's roster")
+
+    def test_members_are_shown_by_the_name_they_go_by(self):
+        """The roster's legal names read "John Reed" and "Bernard Sanders";
+        congress-legislators, by bioguide id, records Jack and Bernie. The
+        Kentucky Senate run read "Andy Barr" beside his member card's
+        "Garland Barr", and the two were never linked."""
+        self.campaign_roster()
+        self.assertEqual(self.members["R000122"]["name"], "Jack Reed")
+        self.assertEqual(self.members["S000033"]["name"], "Bernie Sanders")
+        self.assertEqual(self.members["C001087"]["name"], "Rick Crawford")
+        self.assertEqual(self.members["B001282"]["name"], "Andy Barr")
+        self.assertEqual(self.members["C001131"]["name"], "Greg Casar")
+        self.assertEqual(self.members["E000246"]["name"], "Chuck Edwards")
+        self.assertEqual(self.members["C001132"]["name"], "Eli Crane")
+        self.assertIn("John Reed", self.members["R000122"]["aliases"])
+        self.assertEqual(self.members["B001282"].get("alsoRunningId"), "CAND_36")
+        # The finance cache still keys on the roster spelling.
+        self.assertEqual(fec.profile_key(self.members["R000122"]), "john reed|RI|S")
+
     def test_scott_franklin_and_french_hill(self):
+        self.campaign_roster()
         self.assertEqual(self.members["F000472"]["name"], "Scott Franklin")
         self.assertEqual(self.members["H001072"]["name"], "French Hill")
 
     def test_the_finance_cache_still_keys_on_the_roster_spelling(self):
         # A changed key would read as "nobody has looked" for every
         # re-displayed member.
+        self.campaign_roster()
         self.assertEqual(fec.profile_key(self.members["F000472"]), "c. franklin|FL|H")
 
     def test_voters_names_are_aliases(self):
-        self.assertIn("Jim Clyburn", self.members["C000537"]["aliases"])
-        self.assertIn("Hank Johnson", self.members["J000288"]["aliases"])
+        self.campaign_roster()
+        self.assertIn("James Clyburn", self.members["C000537"]["aliases"])
+        # Now the name he is shown by; the suffixed form stays searchable.
+        self.assertEqual(self.members["J000288"]["name"], "Hank Johnson")
+        self.assertIn("Hank Johnson, Jr.", self.members["J000288"]["aliases"])
         self.assertIn("Lou Correa", self.members["C001110"]["aliases"])
 
     def test_aliases_never_repeat_the_display_name(self):

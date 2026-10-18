@@ -659,30 +659,48 @@ def check_duplicate_people(profiles):
         normal = unicodedata.normalize("NFD", str(text))
         return "".join(c for c in normal if unicodedata.category(c) != "Mn").lower()
 
+    def words(name):
+        # A suffix is not a surname: Alaska's certified list prints "Daniel
+        # J. Sullivan Jr.", and read as "Jr." the pair beside Senator Dan
+        # Sullivan stopped being reported.
+        out = [w.strip(",") for w in fold(name).split()]
+        while len(out) > 1 and out[-1].rstrip(".") in ("jr", "sr", "ii", "iii", "iv"):
+            out.pop()
+        return out
+
     by_race = collections.defaultdict(list)
     for profile in profiles:
         if profile.get("raceId"):
             by_race[profile["raceId"]].append(profile)
 
-    pairs = []
+    pairs, same = [], []
     for rid, people in sorted(by_race.items()):
         for i, first in enumerate(people):
             for second in people[i + 1:]:
-                a, b = fold(first["name"]).split(), fold(second["name"]).split()
+                a, b = words(first["name"]), words(second["name"])
                 if not a or not b or a[-1] != b[-1]:
                     continue
+                line = (f"{rid}: {first['name']} ({first['id']}) / "
+                        f"{second['name']} ({second['id']})")
+                # The very same name twice in one race is what VA-11 showed
+                # for Arthur Grahame Purves: one man, counted as two nominees.
+                if a == b:
+                    same.append(line)
                 # Same surname, and one given name is a prefix of the other:
                 # "Dan"/"Daniel", "Stephen"/"Stephen Edward".
-                if a[0] == b[0] or a[0].startswith(b[0]) or b[0].startswith(a[0]):
-                    pairs.append(
-                        f"{rid}: {first['name']} ({first['id']}) / "
-                        f"{second['name']} ({second['id']})"
-                    )
-    if not pairs:
-        return []
-    return [Issue("warn", "possible-duplicate-person",
-                  f"{len(pairs)} pairs in one race may be the same person filed twice",
-                  pairs)]
+                elif a[0] == b[0] or a[0].startswith(b[0]) or b[0].startswith(a[0]):
+                    pairs.append(line)
+    issues = []
+    if same:
+        issues.append(Issue(
+            "warn", "same-name-in-race",
+            f"{len(same)} races list two profiles under one name: fold them on an exact "
+            "signal (rules 25, 72) or confirm they are two people", same))
+    if pairs:
+        issues.append(Issue(
+            "warn", "possible-duplicate-person",
+            f"{len(pairs)} pairs in one race may be the same person filed twice", pairs))
+    return issues
 
 
 # States whose primaries send more than one person per party to November.
@@ -1028,6 +1046,162 @@ def check_photo_sets(profiles):
     return [Issue("error", "photo-set-mixes-photographs",
                   f"{len(mixed)} srcset(s) list a file other than the portrait they size",
                   mixed)]
+
+
+def check_guessed_photos(profiles):
+    """No portrait is reached by a name (rule 24), on any profile.
+
+    ``Special:FilePath/<Name>.jpg`` serves whoever uploaded under the name:
+    the New Jersey and Oregon Republican Senate nominees showed a rugby
+    player and an Olympic kayaker, and every member's chain ended in the same
+    guess. A portrait found by searching a name is the same guess one step
+    removed ("wikipedia-search" in the portrait cache).
+    """
+    from .photos import is_guessed
+
+    found = []
+    for p in profiles:
+        guesses = [u for u in p.get("photos") or [] if is_guessed(u)]
+        if guesses:
+            found.append(f"{p['id']} ({p['name']}): {guesses[0]}")
+        elif p.get("photoSource") == "wikipedia-search":
+            found.append(f"{p['id']} ({p['name']}): found by a search")
+    if not found:
+        return []
+    return [Issue("error", "photo-guessed",
+                  f"{len(found)} profiles carry a portrait reached by a name, not an id "
+                  "or a ballot-linked article", found)]
+
+
+# Every profile field that holds an address the page links or loads.
+URL_FIELDS = ("website", "contactForm", "campaignSite", "electionPageSite",
+              "disclosureUrl", "campaignIssuesUrl", "photo_url")
+
+
+def bad_url(url):
+    """True unless *url* is an http(s) address with a host. Rep. Randy
+    Fine's contact form arrived from congress-legislators as "hhttps://...":
+    the browser treats that as an unknown scheme and the link goes nowhere."""
+    import urllib.parse
+
+    text = str(url or "")
+    if not text or any(c.isspace() for c in text):
+        return True
+    try:
+        parts = urllib.parse.urlsplit(text)
+    except ValueError:
+        return True
+    return parts.scheme not in ("http", "https") or "." not in (parts.hostname or "")
+
+
+def check_outbound_urls(profiles):
+    """Every outbound address on a profile is one a browser can open."""
+    from .photos import PLACEHOLDER
+
+    found = []
+    for p in profiles:
+        urls = [(field, p.get(field)) for field in URL_FIELDS
+                if p.get(field) and p.get(field) != PLACEHOLDER]
+        urls += [("photos", u) for u in p.get("photos") or [] if u != PLACEHOLDER]
+        urls += [("photoSet", size[1]) for size in p.get("photoSet") or []
+                 if isinstance(size, (list, tuple)) and len(size) > 1]
+        for field, url in urls:
+            if bad_url(url):
+                found.append(f"{p['id']} ({p['name']}) {field}: {url!r}")
+    if not found:
+        return []
+    return [Issue("error", "url-malformed",
+                  f"{len(found)} outbound addresses are not http(s) with a host; correct "
+                  "the source or record the fix in overrides with evidence", found)]
+
+
+def check_member_link_overrides(snapshot):
+    """The dated corrections to members' links still match what they correct.
+
+    ``MEMBER_CONTACT_FORMS``, ``YOUTUBE_LEGACY_NAMES``,
+    ``YOUTUBE_HANDLE_CORRECTIONS`` and ``DEAD_X_HANDLES`` each apply only while congress-legislators holds exactly the value they
+    were checked against; an entry the source has moved past is stale, and a
+    YouTube legacy name nobody has checked is linked at /user/ unverified.
+    """
+    from . import overrides
+    from .profiles import _CHANNEL_ID
+
+    people = {p.get("bioguide"): p for p in (snapshot or {}).get("legislators") or []}
+    if not people:
+        return []
+    stale, unchecked = [], []
+    for bioguide, (value, _fixed, _why) in overrides.MEMBER_CONTACT_FORMS.items():
+        if (people.get(bioguide) or {}).get("contactForm") != value:
+            stale.append(f"MEMBER_CONTACT_FORMS {bioguide}: the source no longer holds {value!r}")
+    for bioguide, (value, _shape, _why) in overrides.YOUTUBE_LEGACY_NAMES.items():
+        if ((people.get(bioguide) or {}).get("social") or {}).get("youtube") != value:
+            stale.append(f"YOUTUBE_LEGACY_NAMES {bioguide}: the source no longer holds {value!r}")
+    for bioguide, (value, _fixed, _date, _why) in overrides.YOUTUBE_HANDLE_CORRECTIONS.items():
+        if ((people.get(bioguide) or {}).get("social") or {}).get("youtube") != value:
+            stale.append(f"YOUTUBE_HANDLE_CORRECTIONS {bioguide}: the source no longer "
+                         f"holds {value!r}")
+    for bioguide, (handle, _date, _why) in overrides.DEAD_X_HANDLES.items():
+        social = (people.get(bioguide) or {}).get("social") or {}
+        if social.get("twitter") != handle or social.get("twitter_id"):
+            stale.append(f"DEAD_X_HANDLES {bioguide}: the source no longer holds {handle!r} "
+                         "without an id")
+    for bioguide, person in sorted(people.items()):
+        social = person.get("social") or {}
+        value = social.get("youtube")
+        if (value and not social.get("youtube_id") and not value.startswith("@")
+                and not _CHANNEL_ID.match(value)
+                and (overrides.YOUTUBE_LEGACY_NAMES.get(bioguide) or (None,))[0] != value):
+            unchecked.append(f"{bioguide} ({person.get('name')}): youtube {value!r}")
+    issues = []
+    if stale:
+        issues.append(Issue("warn", "stale-link-override",
+                            f"{len(stale)} member link corrections no longer match the source",
+                            stale))
+    if unchecked:
+        issues.append(Issue("warn", "youtube-unchecked",
+                            f"{len(unchecked)} YouTube legacy names are linked at /user/ "
+                            "unchecked; check each and record it in YOUTUBE_LEGACY_NAMES",
+                            unchecked))
+    return issues
+
+
+def check_wikipedia_withheld(profiles):
+    """Ballot-page links that lead somewhere other than the person's article.
+
+    "Brian McGinnis" redirects to a protest, "Elijah Manley" to a party's
+    primaries, one link was a party's own article. enrich withholds each
+    (rule 33); listed so a person can see what the page linked.
+    """
+    found = sorted(
+        f"{p['id']} ({p['name']}): {w.get('title')!r} -> "
+        f"{w.get('landsOn') or 'no article'}"
+        for p in profiles for w in [p.get("wikipediaWithheld")] if w)
+    if not found:
+        return []
+    return [Issue("warn", "wikipedia-not-about",
+                  f"{len(found)} Wikipedia links from election pages lead to an article "
+                  "not about the person; withheld", found)]
+
+
+def check_future_coverage(profiles, today=None):
+    """A profile's money reported through a date after the build.
+
+    Copied from the filer's report (a committee files "through December 31"
+    in October); the page shows it as filed, and this lists it.
+    """
+    import datetime
+
+    if today is None:
+        from .emit import build_timestamp
+        today = datetime.date.fromisoformat(build_timestamp()[:10])
+    found = sorted(f"{p['id']} ({p['name']}): through {p['financeAsOf']}"
+                   for p in profiles
+                   if (p.get("financeAsOf") or "") > today.isoformat())
+    if not found:
+        return []
+    return [Issue("warn", "finance-future-coverage",
+                  f"{len(found)} profiles' FEC figures report coverage ending after "
+                  f"{today.isoformat()}; shown as filed", found)]
 
 
 def check_portrait_overrides(enrichment):
@@ -1377,6 +1551,11 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_fields(profiles)
     issues += check_placeholders(profiles)
     issues += check_photo_sets(profiles)
+    issues += check_guessed_photos(profiles)
+    issues += check_outbound_urls(profiles)
+    issues += check_wikipedia_withheld(profiles)
+    issues += check_member_link_overrides(snapshot)
+    issues += check_future_coverage(profiles)
     issues += check_overrides(profiles, raw)
     issues += check_campaign_blocklist(campaigns)
     issues += check_campaign_sites(profiles, enrichment)
@@ -1397,6 +1576,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_results(profiles, races)
     issues += check_winners(profiles, races)
     issues += check_member_filings(profiles, snapshot)
+    issues += check_seat_vacancies(profiles, snapshot)
     issues += check_former_wins((raw or {}).get("former"), (raw or {}).get("record"))
     issues += check_results_pages(results)
     issues += check_seats_contested(profiles)
@@ -1477,6 +1657,36 @@ def check_member_filings(profiles, snapshot):
     return [Issue("warn", "member-candidacy-id-missing",
                   f"{len(missing)} members' own candidacies for another seat are not among "
                   f"their FEC ids in congress-legislators", sorted(missing))]
+
+
+def check_seat_vacancies(profiles, snapshot=None):
+    """``overrides.SEAT_VACANCIES`` against the membership: an entry for a
+    seat someone sits in is stale (the page stops showing it, and the entry
+    should go), and one whose departed member the snapshot still seats is
+    wrong."""
+    from . import overrides
+    from .record import seated
+
+    sitting = {(p.get("state"), p.get("districtNum")) for p in profiles
+               if seated(p) and "House" in str(p.get("chamber") or "")}
+    seated_ids = {p.get("bioguide") for p in (snapshot or {}).get("legislators", [])}
+    stale, wrong = [], []
+    for (code, district), entry in sorted(overrides.SEAT_VACANCIES.items()):
+        if (code, district) in sitting:
+            stale.append(f"{code}-{district}: someone now sits in the seat {entry['name']} left")
+        if entry.get("bioguide") in seated_ids:
+            wrong.append(f"{code}-{district}: {entry['name']} ({entry['bioguide']}) is still "
+                         f"in the membership snapshot")
+    issues = []
+    if stale:
+        issues.append(Issue("warn", "seat-vacancy-filled",
+                            f"{len(stale)} overrides.SEAT_VACANCIES entries are for seats now "
+                            f"filled; remove them", stale))
+    if wrong:
+        issues.append(Issue("error", "seat-vacancy-seated",
+                            f"{len(wrong)} overrides.SEAT_VACANCIES entries name a member who "
+                            f"still sits", wrong))
+    return issues
 
 
 def check_former_wins(rows, record):

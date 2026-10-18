@@ -50,13 +50,14 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… enrich` | Fill gaps for everyone still running from their Wikipedia infobox and campaign site, and check every linked campaign site |
 | `… enrich --check` | Report what the committed cache fills; no network |
 | `… enrich --refresh` | Read everyone again, not only those read more than six days ago |
+| `… enrich --unreachable` | Read again only the committee sites the last read could not reach (trying "www." added or taken away), and check where every ballot-page Wikipedia link leads |
 | `… odds` | Kalshi and Polymarket prices for each 2026 race and for control of both chambers, and the polling averages each Senate race's Wikipedia page lists; writes `data/odds.json` and `data/odds.js` |
 | `… odds --check` | Report market and polling coverage from the committed cache; no network |
 | `… geo` | Regenerate only the map geometry: the national map and the before-and-after district maps |
 | `… fetch` | Refresh DW-NOMINATE scores from Voteview into the roster CSVs |
 | `… portraits` | Resolve and check a portrait URL for every profile |
 | `… portraits --refresh` | Re-resolve every portrait, not just the missing ones |
-| `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`) |
+| `… finance --limit N` | Look up FEC campaign finance totals (needs `FEC_API_KEY`): members, then every challenger still on a ballot by their own filing (`--field-only` for the second part alone) |
 | `… refresh` | `fetch`, then `build` |
 | `python tools/fetch_district_maps.py` | Rebuild `district_maps/`: every state's district boundaries, the new 2026 maps, and the towns to label (network) |
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
@@ -553,7 +554,12 @@ audit found 54 decided races reading "No challenger on the ballot" over a
 second nominee: TX-12's Democratic nominee raised nothing, and California's
 top-two seats were the worst hit. The results page had already matched each
 one to an FEC id. `races.build` names them from that filing
-(`results.belowThreshold`, `{id, name, status}`) and adds them to `otherNominees`.
+(`results.belowThreshold`, `{id, name, status, party}`) and adds them to `otherNominees`.
+Each such name is printed with its party (`results.otherParties`, `{name: party}`):
+the ballot's line as the results page or the state's certified list gives it,
+else the filing's party where the FEC names one ("Alan Aversa (Republican)").
+A bare name beside a market line for "Republican party" left the reader to
+guess which of two names it was.
 `contested` is true once anyone besides the incumbent is on the ballot, and
 the card counts them: "1 challenger on the ballot · 1 with no profile here".
 The FEC's incumbent flag keeps an incumbent's own second registration out.
@@ -751,6 +757,60 @@ for each seat and exports it as CSV. Qualifying closed on August 7.
   for a seat - the list stays, its candidates read "Awaiting result", the
   header reads "Primary held" with no result read yet, and three days on
   `general-uncalled` lists the seat.
+
+### The states' certified ballots
+
+A results page says who won a primary; it does not say who is on the
+November ballot. Audited on 2026-10-17 against the states' own lists, the
+site showed Alaska's at-large seat with two people on the ballot over a
+certified four, and said the two it left out had withdrawn, when it was four
+other top-four finishers who withdrew and promoted them. It also left out a certified Alaska
+Senate candidate, thirteen qualified Florida candidates, Colorado's minor-party
+and unaffiliated candidates in every district, and called American Samoa's
+seat uncontested over six certified names. Once a state has certified its
+general-election candidates, its list is the ballot (rule 77):
+
+- `kyc/certified.py` reads the published lists: Alaska's Division of
+  Elections, Florida's Division of Elections (federal offices), Colorado's
+  Secretary of State, American Samoa's Election Office and Texas's Secretary
+  of State (its qualified-candidate search, read from the JSON service the
+  page draws from: an accepted declaration in the general election is
+  printed, a rejected one never was). A list published only as a PDF is
+  transcribed in `overrides.CERTIFIED_BALLOTS` with its document and the day
+  it was read (Iowa, Nebraska). Only an election office's list is a ballot: a
+  party's list of its convention nominees is not, since the state may still
+  refuse them.
+- The name a profile shows comes from its source's authority: a name settled
+  word for word or by an evidenced `overrides.RESULT_NAMES` alias ("Neil J.
+  Gillespie", whom the FEC files as GILESPIE); a certified list's printed name
+  unless it differs only in case and full stops, drops a hyphen, or is printed
+  in capitals (Texas's is; "Daniel J. Sullivan Jr." is Alaska's); a results
+  page's only where it adds a hyphen or its first name is the short form of
+  the filed one ("Bob Harvie"). A page's formal form of a campaign's name
+  ("Matthew Dunlap" for Matt Dunlap) is an alias, never the name shown.
+- Party words beside a name with no profile are the site's ("Democratic",
+  "Libertarian") whatever the list prints, a party of another name as printed,
+  and none where the list prints none (American Samoa's).
+- A filing is matched to a listed name as a results page's name is (rule 62):
+  the matcher, an evidenced `overrides.RESULT_NAMES` alias, or the filing's
+  own words in any order, a bracketed nickname aside, unique in the race.
+- Someone the list prints is on the November ballot, whatever the page said:
+  "withdrawn" included, and reads "On the November ballot" - never
+  "Renominated", since a list is not a primary. A certified write-in, and a
+  Florida candidate unopposed in November (Florida prints no uncontested
+  race), is not read as printed, nor as left off the list; an unmatched one
+  may still be a page nominee's other spelling and holds them.
+- Where the list is the whole ballot, a filer it does not name is "Not on the
+  November ballot" - unless a name on it that matched no filing may be theirs
+  (`maybeNamed`) - and a page name it does not print is not counted on it.
+- A listed name with no FEC filing over $5,000 is named on the race with the
+  list's party. Every status the list set credits it: "per the Alaska Division
+  of Elections, ..." on the race, and the list's name in the badge's title.
+- Only the name as printed, the party, the office and district, and what the
+  list says of the person (printed, withdrew, lost the primary, write-in) are
+  kept; the lists' addresses, phone numbers and emails are not. A list that
+  cannot be read, or reads as something it should not, is refused and the last
+  one read is kept (rule 8).
 
 ### After Election Day
 
@@ -970,7 +1030,7 @@ URL, and `validate` fails a `photoSet` that names another file.
 | Field | What it holds |
 |---|---|
 | `photos` | The fallback chain the page walks on a load error, ending in `"placeholder"` (the silhouette) |
-| `photoSource` | Where the first entry came from: `clerk.house.gov`, `congress.gov`, `wikipedia`, `wikipedia-search`, `cross-link` or `campaign-site` |
+| `photoSource` | Where the first entry came from: `clerk.house.gov`, `congress.gov`, `wikipedia` (the article the bioguide mapping names, or the one the ballot page links), `cross-link` (the same person's other profile) or `campaign-site` |
 | `photoSet` | `[[width, url], ...]`, smallest first: sizes of the first entry's photograph for the page's `srcset`. Wikimedia portraits only |
 
 Set `"pinned": true` on a cache entry to stop the resolver overwriting a
@@ -983,12 +1043,21 @@ Two rules are load-bearing here, both learned the hard way:
   about 160 working portraits.
 - **Never search with a topical hint.** Searching `Dan Osborn NE politician`
   pushes his own article out of the top results; `Dan Osborn` returns it first.
+- **Never guess at all (rule 24).** Nothing in a chain is built from a name.
+  The chains used to end in `Special:FilePath/<Name>.jpg`, and the files
+  those names reach are whoever uploaded under them: two Senate nominees
+  showed a rugby league player and an Olympic kayaker. Titles guessed from a
+  name and name searches are gone too; a cached portrait is applied only
+  when it came by an id or the ballot page's own link (`portraits.route_ok`),
+  and `validate` fails on any `Special:FilePath` or `Special:Redirect` URL.
 
 The fallback chain used to link the unitedstates project's images at
 `theunitedstates.io`. That domain lapsed: on 2026-10-03 it resolved to a
 domain-parking network, so every member's chain pointed twice at a host anyone
-could buy. The chain now uses the project's GitHub Pages copy, as a last
-resort, because it is often an older photograph.
+could buy. The chain now uses the project's GitHub Pages copy, because it is
+often an older photograph, and then the Biographical Directory's own
+photograph (`bioguide.congress.gov/photo/<ID>.jpg`); its old host,
+`bioguideretro.congress.gov`, answered 404 for every member on 2026-10-17.
 
 ## Campaign finance
 
@@ -1013,6 +1082,24 @@ Chris Coons showed $4,168,081 (2025-26) beside challengers measured from
 | `financeSince` | The FEC's coverage start date; `null` when the cache predates it - never filled in |
 | `financePeriod` | `election` for an election-period total, `cycle` for a member record cached before the election-period lookup (the 2025-26 cycle), until the next `finance` refresh replaces it |
 | `financeElection` | The election an election-period total is for: 2026 for anyone on this year's ballot, 2028 or 2030 for a senator not up this year |
+| `fundingBreakdown`, `funding_sources` | What the receipts were, by kind: Individual, PACs, Party, Self-funded (the candidate's own contributions; "Self-funded (incl. loans)" when a loan from the candidate is in it), Bank and other loans, Transfers from other committees (the campaign's other committees) and Other (offsets and other receipts). Each share is of total receipts, or of `fundingBase` where a negative adjustment brought the receipts below the parts. A record cached before loans and transfers were read has no breakdown until `finance` reads it again |
+| `fundingBase` | The sum the funding shares are of, where it is not the receipts figure: the positive parts, when an adjustment the FEC deducts (a negative category) brought the net receipts below them. The page says so beside the split |
+
+A coverage end the filer gave that is still to come ("through 2026-12-31" in
+October) is shown "as filed", and `validate` lists it
+(`finance-future-coverage`). A negative figure reads `-$582.63`.
+
+**Shares are of everything received.** They were once of four contribution
+types only, so a candidate's own loan counted for nothing: Jefferson Shreve
+(IN-6), whose $2,000,000 loan was 79% of what his campaign received, read
+"PACs 70%, Individual 30%".
+
+**A challenger's split is their own filing's.** The field register
+(`/candidates/totals/`) reports only itemized individual gifts, so no split is
+built from it. `finance` reads every challenger still on a ballot from
+`/candidate/{id}/totals/`, the endpoint members' figures come from, keyed on
+their candidate id (`fec:<id>`) - about 550 requests, paced at the key's 60 a
+minute (rule 37), resumable from the cache.
 
 The profile dialog words these under the money ("Raised for the 2026
 election, Jan 2021 - Aug 2026") and says when a Senate period spans the
@@ -1206,7 +1293,7 @@ Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
 | `contestRaceId` / `contestLabel` | A member contesting a *different* seat: a redrawn district, the other chamber. Never set for a winner seated since in the seat they won (`raceRole`); their held seat is `heldRaceId` |
 | `alsoRunningId` / `incumbentId` | Cross-link between a member and a separate profile for their own candidacy, matched first by any FEC id Congress's record lists for the member, then by name and state. The member's profile links that campaign's totals, labelled with its office and FEC id; they are never folded into the member's own (rule 68) |
 | `otherOffice` | Sitting members only: `{text, source, checked}` when they are another office's November nominee ("Republican nominee for Governor of Florida"), from `overrides.OTHER_OFFICE_NOMINEES`, each the winner the election's results page marks, read on `checked`. From the day after Election Day the page says it in the past tense ("Was the ..."), since this site does not read that race's result. Dropped once the member starts a new term |
-| `raceStatus` / `raceStatusRace` | `nominee`, `advanced`, `eliminated`, `withdrawn` or `unlisted`; `qualified` for Louisiana's open-primary House ballot before its count; after Election Day also `elected`, `defeated` or `runoff` (a general-election runoff); and the race it refers to |
+| `raceStatus` / `raceStatusRace` | `nominee`, `advanced`, `eliminated`, `withdrawn` or `unlisted`; `qualified` for Louisiana's open-primary House ballot before its count; a state's certified list of November candidates, where one was read, decides `nominee` and `unlisted` over the results page (`raceStatusSource: "certified"`, rule 77); after Election Day also `elected`, `defeated` or `runoff` (a general-election runoff); and the race it refers to |
 | `ballotParty` / `fecParty` | The party the ballot lists, when it differs from the roster or FEC record |
 | `ballotLine` | For a nominee only: the November ballot line as the results page spells it ("Speak The Truth", "Party for Socialism and Liberation"), when it is not the line of the party shown. Never set for "none", a write-in or a line named after the candidate themselves (an independent petition reads as "Independent"); `party` is never overwritten by it |
 | `senateClass` | Sitting senators only: the constitutional class of the seat (1, 2 or 3), from the term record in `congress_snapshot.json`, keyed on bioguide id. `null` only when the build has no snapshot, which validation reports |
@@ -2036,15 +2123,19 @@ confirm it, and the answer stays above the map rather than scrolling away.
 | Field | Source | Who has it |
 |---|---|---|
 | `website`, `phone`, `office`, `contactForm` | The member's current term record in `congress-legislators` | Sitting members |
-| `social` (`twitter`, `facebook`, `instagram`, `youtube_id`, `bluesky`) | `legislators-social-media`, the project's verified account list | Sitting members |
+| `social` (`twitter`, `twitter_id`, `facebook`, `instagram`, `youtube`, `youtube_id`, `bluesky`) | `legislators-social-media`, the project's verified account list. An X account is linked by `twitter_id` (`x.com/i/user/<id>`, which follows a renamed handle) where the file holds one; a handle X answers "not found" for with no id is dropped (`overrides.DEAD_X_HANDLES`). A YouTube value is given its shape in the pipeline: a channel id (`UC...`) becomes `youtube_id` (`/channel/`), an `@handle` stays one (`/@handle`), and a legacy username is linked as `overrides.YOUTUBE_LEGACY_NAMES` found it on a dated check, or dropped | Sitting members |
 | `refs` (`govtrack`, `opensecrets`, `votesmart`, `ballotpedia`) | Reference ids from `congress-legislators` | Sitting members |
-| `wikipedia` | The bioguide mapping for members; the state ballot page's own link for filed candidates (`wikipediaVia`) | Members, and candidates the ballot page links |
+| `wikipedia` | The bioguide mapping for members; the state ballot page's own link for filed candidates (`wikipediaVia`), kept only while it leads, through its redirects, to a whole article about them (`enrich`) | Members, and candidates the ballot page links |
+| `wikipediaWithheld` | `{title, landsOn}`: a ballot-page link withheld because it leads to a section of another article, a list, an election or a party ("Brian McGinnis" redirects to a protest), or to a title without their surname that `overrides.ARTICLE_UNDER_ANOTHER_NAME` does not record. Not shown; `validate` lists it | Candidates whose ballot link is not their article |
 | `aliases` | Other names a voter may search by, all from the member's own `congress-legislators` record (matched on bioguide id): `official_full` without its quoted nickname, nickname + surname (+ suffix), and the Wikipedia title without its disambiguator ("Jim Clyburn", "Hank Johnson"). Names that fold to the display name are dropped. Searched, never displayed as the name. For a filed candidate renamed to the ballot's spelling (`nameVia`), the FEC's filed form ("Mahesh Ganorkar", "Carlquist Lisa") | Sitting members whose record adds a name; filed candidates renamed from the ballot |
-| `nameVia` | `"election-page"` when the name shown is the results page's spelling for this filing, settled word for word or by an evidenced `overrides.RESULT_NAMES` entry ("Max Ganorkar", whose filing says Mahesh) | Filed candidates the results page names differently |
+| `nameVia` | `"election-page"` when the name shown is the results page's spelling for this filing, settled word for word, by an evidenced `overrides.RESULT_NAMES` entry ("Max Ganorkar", whose filing says Mahesh), or by the rule-62 matcher where the page adds a hyphen or uses the short form of the filed given name ("Bob Harvie" for "HARVIE, ROBERT J"; never the formal form of a filed nickname); `"certified-list"` when it is the certified list's printed name (never one printed in capitals) | Filed candidates the results page names differently |
+| `fecName` | The name the FEC files them under, set beside `nameVia`; the profile shows "Files with the FEC as ..." under the ballot's name | Filed candidates the results page names differently |
+| `raceStatusSourceName` | Set with `raceStatusSource: "certified"`: the certified list that set the status, or that does not name the person ("Alaska Division of Elections, 2026 General Election candidate list"), credited in the badge's title | Filers in states whose certified list was read |
 | `raceStatusUnconfirmed` | Set beside `raceStatus: "unlisted"` when the results page does not name the person but names someone similar who lost or withdrew. Off the November ballot either way, and shown as "Not on the November ballot", never "not on the primary ballot" | Filers in decided races |
 | `maybeNamed` | Results-page names that may be this person under another spelling, one of them on the ballot. No status is inferred, and the race counts the person once, as that name | Filers the page may name differently |
-| `rosterName` | The roster CSV's spelling, set only when it opens with a bare initial ("C. Franklin") and `name` was replaced by the name the record says they go by (nickname + surname, else a real middle name + surname). Keys the finance cache and stays searchable | Five sitting members |
-| `campaignSite`, `campaignCommittee` | The principal campaign committee's Form 1 at the FEC (`data/campaigns.json`); for a challenger whose committee filed none, or filed one that failed the check, the race page's "Campaign websites" list (`campaignSiteVia: "election-page"`) once `enrich` has confirmed the site names them | Everyone on a ballot with an FEC id |
+| `unprinted` | `{kind, source}`: a complete certified list names the person but does not print them - `"write-in"` (a declared or certified write-in candidate) or `"unopposed"` (Florida does not print an uncontested race). Shown as "Write-in candidate" or "Unopposed, not printed", credited to the list; counted neither on the ballot nor off it (`ballotUnknown` is set beside it) | Filers a certified list names as a write-in |
+| `rosterName` | The roster CSV's spelling, set when `name` was replaced by the name the member's own `congress-legislators` record (by bioguide id) says they go by: a recorded nickname + surname ("Jack Reed", "Bernie Sanders"); for a bare initial ("C. Franklin") a real middle name + surname; the roster's own parenthetical ("Chuck Edwards"); or a shorter form of the first name in `official_full` ("Greg Casar"). Keys the finance cache and stays searchable | About fifty sitting members |
+| `campaignSite`, `campaignCommittee` | The principal campaign committee's Form 1 at the FEC (`data/campaigns.json`); for a challenger whose committee filed none, or filed one that failed the check, the race page's "Campaign websites" list (`campaignSiteVia: "election-page"`) once `enrich` has confirmed the site names them. Where the filed address cannot be reached at all and the same site answers with "www." added or taken away, naming the candidate, that form (`enrich --unreachable` re-reads only those) | Everyone on a ballot with an FEC id |
 | `electionPageSite` | The site the race page lists, held back until `enrich` has read it; never shown directly | Filed candidates the race page lists one for |
 | `campaignQuote` | The campaign home page's own description of itself, quoted (`enrich`) | Challengers still running whose site describes itself |
 | `campaignIssuesUrl` | The page the campaign site links as its issues, platform or priorities | Challengers still running |

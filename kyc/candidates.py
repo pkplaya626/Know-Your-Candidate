@@ -274,9 +274,20 @@ def filing_counts(cache, year=CYCLE):
     registration whose last report predates the cycle is not a 2026 filing,
     and a filing for a seat that is not on the ballot is not a filing for any
     race we show.
+
+    People, not registrations: a person :func:`registrations` folds (one
+    committee's money under several ids, or an evidenced same-person pair)
+    is counted once, as they are shown once. Arthur Purves's three
+    registrations made VA-11 read "22 filed" over a race listing him once
+    (rule 73: one formula for a count).
     """
+    rows = (cache or {}).get("candidates", [])
+    merged = registrations(rows, (cache or {}).get("committeeOf"))
+    folded = {other for others in merged.values() for other in others}
     counts = {}
-    for row in (cache or {}).get("candidates", []):
+    for row in rows:
+        if row["candidate_id"] in folded:
+            continue
         rid = race_id(row, year)
         if rid:
             counts[rid] = counts.get(rid, 0) + 1
@@ -365,8 +376,18 @@ def display_name(filed_name):
         surname, given = "", parts[0]
 
     words = given.split()
+
+    def initial_v(index):
+        # A lone "V" after a given name is a middle initial, not "the Fifth":
+        # "IRWIN, JACQUI V" is Jacqui V Irwin, "HILLEARY, WILLIAM V." is
+        # William V. Hilleary. Only after an honorific ("MARKERT, GEORGE
+        # WASHINGTON MR V") does the filing set it apart as a suffix.
+        word = words[index]
+        return (word.upper().rstrip(".") == "V" and index > 0
+                and (word.endswith(".") or bare(words[index - 1]) not in _HONORIFICS))
+
     # A suffix can also trail the given names: "DOE, JOHN JR".
-    while words and bare(words[-1]) in _SUFFIXES:
+    while words and bare(words[-1]) in _SUFFIXES and not initial_v(len(words) - 1):
         suffix = words.pop()
     words = [w for w in words if bare(w) not in _HONORIFICS]
     if not words:
@@ -468,11 +489,17 @@ def registrations(rows, committees=None):
         committee = committees.get(row["candidate_id"])
         if committee:
             groups[("committee", committee, row.get("state"), row.get("office"))].append(row)
-    for members in groups.values():
+    for key, members in groups.items():
         members = sorted(members, key=lambda r: r["candidate_id"])
         for i, row in enumerate(members):
             for other in members[:i]:
-                if same_committee(other, row):
+                # One committee's Form 1 and the very same filed name are two
+                # exact signals together, whatever the money: Arthur Grahame
+                # Purves registered three times for PURVES FOR CONGRESS, and
+                # one registration's totals also count a second committee,
+                # so the money differed and VA-11 listed him twice.
+                if same_committee(other, row) or (
+                        key[0] == "committee" and same_filed_name(other, row)):
                     join(other["candidate_id"], row["candidate_id"])
                     break
     clusters = collections.defaultdict(list)
@@ -493,8 +520,22 @@ def registrations(rows, committees=None):
     for other, (target, _why) in overrides.SAME_PERSON_FILINGS.items():
         if other in present and target in present:
             moved = kept.pop(other, [])
-            kept[target] = sorted(set(kept.get(target, [])) | {other} | set(moved))
+            # The target may already be folded under another registration
+            # of this person: that cluster moves to the target as well.
+            holder = next((k for k, v in kept.items() if target in v), None)
+            if holder is not None:
+                moved = moved + [holder] + kept.pop(holder)
+            kept[target] = sorted((set(kept.get(target, [])) | {other} | set(moved))
+                                  - {target})
     return kept
+
+
+def same_filed_name(a, b):
+    """True when two registrations carry the very same filed name, letter for
+    letter (case and spacing aside). Used only with a shared committee."""
+    def norm(row):
+        return " ".join(str(row.get("name") or "").upper().split())
+    return bool(norm(a)) and norm(a) == norm(b)
 
 
 def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
@@ -513,9 +554,14 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
     seen_ids = {p["fecCandidateId"] for p in existing if p.get("fecCandidateId")}
     # Ids already attached to a roster profile through the finance cache.
     seen_ids |= set(claimed or ())
+    # A member shown by the name they go by ("Jack Reed") keeps the roster's
+    # legal one ("John Reed", rosterName) for these matches too.
+    def names_of(p):
+        return [n for n in (p["name"], p.get("rosterName")) if n]
+
     seen_people = {
-        (_fold(p["name"]), p["state"], "S" if "Senate" in p["chamber"] else "H")
-        for p in existing
+        (_fold(name), p["state"], "S" if "Senate" in p["chamber"] else "H")
+        for p in existing for name in names_of(p)
     }
 
     # Sitting members, by the seat they hold and their exact first and last
@@ -532,17 +578,18 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
     for p in existing:
         if p.get("isCandidate"):
             continue
-        words = _fold(p["name"]).split()
-        if len(words) >= 2 and p.get("raceId") is not None:
-            incumbents[(p["raceId"], words[0], words[-1])] = p
-        elif len(words) >= 2:
-            senate = "Senate" in p.get("chamber", "")
-            rid = race_id({
-                "state": p["state"], "office": "S" if senate else "H",
-                "district_number": p.get("districtNum"),
-            })
-            if rid:
-                incumbents[(rid, words[0], words[-1])] = p
+        for name in names_of(p):
+            words = _fold(name).split()
+            if len(words) >= 2 and p.get("raceId") is not None:
+                incumbents[(p["raceId"], words[0], words[-1])] = p
+            elif len(words) >= 2:
+                senate = "Senate" in p.get("chamber", "")
+                rid = race_id({
+                    "state": p["state"], "office": "S" if senate else "H",
+                    "district_number": p.get("districtNum"),
+                })
+                if rid:
+                    incumbents[(rid, words[0], words[-1])] = p
 
     rows = eligible(cache, threshold)
     merged = registrations(rows, (cache or {}).get("committeeOf"))

@@ -1692,6 +1692,12 @@ a.badge-link {
   font-size: var(--t-sm);
   color: var(--text-muted);
 }
+/* The FEC's name for someone the ballot names otherwise (PERSONA-20). */
+.modal-aka {
+  margin: 0;
+  font-size: var(--t-sm);
+  color: var(--text-muted);
+}
 .modal-meta > * {
   display: inline-flex;
   align-items: center;
@@ -1817,6 +1823,18 @@ a.badge-link {
   font-size: var(--t-xs);
   color: var(--text-muted);
   line-height: 1.5;
+}
+
+/* A funding label stays on one line with its share. */
+.funding-part {
+  white-space: nowrap;
+}
+
+.funding-base {
+  display: block;
+  margin-top: var(--s-1);
+  font-size: var(--t-xs);
+  color: var(--text-muted);
 }
 
 /* A campaign's description of itself, quoted from its website. */

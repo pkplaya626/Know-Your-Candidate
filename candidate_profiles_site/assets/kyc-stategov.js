@@ -564,7 +564,7 @@
     if (s.territory) {
       // Said, not left out without a word: a territory's legislature, its
       // attorney general and its courts are in none of the sources read here.
-      html += '<p class="gov-note">' + KYC.escapeHtml(KYC.stateName(code)) + "'s legislature, " +
+      html += '<p class="gov-note">' + KYC.escapeHtml(KYC.possessive(KYC.stateName(code))) + " legislature, " +
         "attorney general and courts are not covered here: this site lists the governor and the " +
         "officers the national associations of lieutenant governors and secretaries of state list.</p>";
     }

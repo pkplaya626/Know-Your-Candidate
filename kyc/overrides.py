@@ -7,40 +7,23 @@ the source of truth wherever they are correct.
 
 from urllib.parse import urlsplit
 
-# Photo overrides for people the automated Bioguide/Wikipedia chain misses or
-# resolves to the wrong image.
+# Photo overrides for candidates, keyed on (name, state) and applied ONLY to
+# candidate rows. A bare-name key is unsafe: Rep. Mike Rogers (AL-3) and 2026
+# Senate candidate Mike Rogers (MI) are different people, and a name-keyed
+# override put the Michigan candidate's portrait on the Alabama congressman's
+# profile.
 #
-# Keyed on (name, state) and applied ONLY to candidate rows. A bare-name key
-# is unsafe: Rep. Mike Rogers (AL-3) and 2026 Senate candidate Mike Rogers (MI)
-# are different people, and a name-keyed override put the Michigan candidate's
-# portrait on the Alabama congressman's profile.
-CANDIDATE_PHOTOS = {
-    ("James Talarico", "TX"): "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/James_Talarico.jpg/800px-James_Talarico.jpg",
-    ("Ken Paxton", "TX"): "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Ken_Paxton_official_photo_%28cropped%29.jpg/800px-Ken_Paxton_official_photo_%28cropped%29.jpg",
-    ("Mike Rogers", "MI"): "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Mike_Rogers_official_portrait.jpg/800px-Mike_Rogers_official_portrait.jpg",
-    ("Abdul El-Sayed", "MI"): "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Abdul_El-Sayed_by_Gage_Skidmore.jpg/800px-Abdul_El-Sayed_by_Gage_Skidmore.jpg",
-    ("Roy Cooper", "NC"): "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Roy_Cooper_official_photo.jpg/800px-Roy_Cooper_official_photo.jpg",
-    ("Dan Osborn", "NE"): "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Dan_Osborn_for_Senate_%28cropped%29.jpg/800px-Dan_Osborn_for_Senate_%28cropped%29.jpg",
-    ("Michael Whatley", "NC"): "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Michael_Whatley_in_2024.jpg/800px-Michael_Whatley_in_2024.jpg",
-    ("Charles Booker", "KY"): "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Charles_Booker.jpg/800px-Charles_Booker.jpg",
-    ("Andy Barr", "KY"): "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Andy_Barr_official_photo.jpg/800px-Andy_Barr_official_photo.jpg",
-    ("Juliana Stratton", "IL"): "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Juliana_Stratton.jpg/800px-Juliana_Stratton.jpg",
-    ("Ashley Hinson", "IA"): "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Ashley_Hinson_Official_Portrait.jpg/800px-Ashley_Hinson_Official_Portrait.jpg",
-    ("Mike Collins", "GA"): "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Mike_Collins_118th_Congress.jpg/800px-Mike_Collins_118th_Congress.jpg",
-    ("Julia Letlow", "LA"): "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Julia_Letlow_official_portrait.jpg/800px-Julia_Letlow_official_portrait.jpg",
-    ("Sherrod Brown", "OH"): "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Sherrod_Brown_official_photo_2019.jpg/800px-Sherrod_Brown_official_photo_2019.jpg",
-    ("Barry Moore", "AL"): "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Barry_Moore_117th_U.S_Congress.jpg/800px-Barry_Moore_117th_U.S_Congress.jpg",
-    ("Kevin Hern", "OK"): "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Kevin_Hern_118th_Congress.jpg/800px-Kevin_Hern_118th_Congress.jpg",
-    ("Alex Vindman", "FL"): "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Alexander_Vindman_official_portrait.jpg/800px-Alexander_Vindman_official_portrait.jpg",
-    ("Colin Allred", "TX"): "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Colin_Allred_official_photo.jpg/800px-Colin_Allred_official_photo.jpg",
-    ("Brad Lander", "NY"): "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Brad_Lander_by_Gage_Skidmore.jpg/800px-Brad_Lander_by_Gage_Skidmore.jpg",
-    ("Steve Toth", "TX"): "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Steve_Toth_Texas_House.jpg/800px-Steve_Toth_Texas_House.jpg",
-    ("Troy Jackson", "ME"): "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Troy_Jackson_2019.jpg/800px-Troy_Jackson_2019.jpg",
-    ("Josh Turek", "IA"): "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Josh_Turek.jpg/800px-Josh_Turek.jpg",
-    ("Mark Baisley", "CO"): "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Mark_Baisley_2023.jpg/800px-Mark_Baisley_2023.jpg",
-    ("Marquita Bradshaw", "TN"): "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Marquita_Bradshaw.jpg/800px-Marquita_Bradshaw.jpg",
-    ("Annie Andrews", "SC"): "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Annie_Andrews_portrait.jpg/800px-Annie_Andrews_portrait.jpg",
-}
+# {(name, state): (the file's upload.wikimedia.org URL, date checked,
+# evidence)}, the evidence being the file's own Commons page. Empty: checked
+# on 2026-10-17 against the Commons API, 24 of the 25 URLs that stood here
+# named files that do not exist ("Roy_Cooper_official_photo.jpg",
+# "Mike_Rogers_official_portrait.jpg"), file names made up from the person's
+# name - the guess rule 24 forbids, waiting for whoever uploads under that
+# name - and the 25th, Barry Moore's, asked for an 800px size Wikimedia
+# refuses (HTTP 400). A candidate's portrait comes through the article their
+# ballot page links (portraits, rule 33) or their own campaign site (enrich,
+# rule 38).
+CANDIDATE_PHOTOS = {}
 
 # There is no list of members to leave out. Whoever has left is decided by
 # bioguide id from Congress's own records (legislators.departures) and moved
@@ -183,6 +166,24 @@ SAME_PERSON_FILINGS = {
     # 2026-10-02.
     "H6NV03204": ("H4NV03225", "one article on the results page; totals differ by "
                                "a single $28,832.67 transfer"),
+    # Each pair below is one principal campaign committee whose Form 1 lists
+    # both ids, as the FEC's /candidate/{id}/committees/ gave it on
+    # 2026-10-17. They are off every ballot, so the campaigns cache (which
+    # reads committees only for people still running) does not hold the
+    # committee that rule 72 joins them on; the money is equal to the cent.
+    "H6FL01440": ("H6FL01457", "FL-1: committee C00894337 BRODEN FOR HOUSE lists both; "
+                               "$19,541.21 in and out on each"),
+    "H6TX38107": ("H6TX38099", "TX-38: committee C00928077 WILLIAM TAGGART FOR CONGRESS "
+                               "lists both; $9,995.08 in and out on each"),
+    "S6ME00316": ("S6ME00324", "Maine Senate: committee C00902759 CARMEN4SENATE.COM lists "
+                               "both ('Carmem' is a misspelling); $17,759.71 on each"),
+    # VA-11: committee C00959106 PURVES FOR CONGRESS lists all three, filed as
+    # "PURVES, ARTHUR GRAHAME MR."; the same name and committee fold them
+    # (rule 72). H6VA11249 is the one kept: its totals also count his second
+    # committee, C00951277, and run to 2026-09-30, where H6VA11256's stop at
+    # 2026-08-27 - so the race shows his current money, not a stale $5,142.86.
+    "H6VA11256": ("H6VA11249", "VA-11: committee C00959106 lists H6VA11249, H6VA11256 and "
+                               "H6VA11264, all filed as PURVES, ARTHUR GRAHAME MR."),
 }
 
 # The name a results page uses for a filing the matcher cannot connect to it:
@@ -382,7 +383,108 @@ BLOCKED_CAMPAIGN_HOSTS = {
     "drkumar4congress.com": ("dead", "2026-10-02", "every form of the address answers HTTP 404"),
     "abudahbisa.org": ("unrelated", "2026-10-02",
                        "an electronics shop's page; nothing about a campaign"),
+    # From the 2026-10-17 reader audit, each confirmed that day at 1.1.1.1
+    # and 8.8.8.8 and fetched again by hand.
+    "trevordforme.com": ("hijacked", "2026-10-17",
+                         "www and bare 302 to ww38.trevordforme.com on a parking network "
+                         "(103.224.212.210); one browser was sent to a 'Security Check' "
+                         "software download, another saw 'This domain may be for sale'"),
+    "rickwallenforcongress.com": ("hijacked", "2026-10-17",
+                                  "301 to www.leopard-outpost.com, an unrelated domain that "
+                                  "does not exist in DNS (NXDOMAIN at both resolvers)"),
+    "zabelforcongress.com": ("dead", "2026-10-17", "www and bare NXDOMAIN at two resolvers"),
+    "johnmcbride4congress.com": ("dead", "2026-10-17",
+                                 "www and bare SERVFAIL at two resolvers: nobody can reach it"),
+    "drkednermaximeforcongress.com": ("dead", "2026-10-17",
+                                      "the domain is registered but neither www nor bare has "
+                                      "an address record at two resolvers"),
+    "gordonchaffin.com": ("unrelated", "2026-10-17",
+                          "'High Skill Dog Care', a business page; nothing about a campaign"),
 }
+
+# A member's contact-form address that congress-legislators holds in a form
+# no browser can open, keyed on bioguide id: {bioguide: (the source's value,
+# the address used instead, evidence)}. Applied only while the source still
+# holds exactly that value; validate reports an entry that no longer matches.
+MEMBER_CONTACT_FORMS = {
+    "F000484": ("hhttps://fine.house.gov/address_authentication?form=/contact/email-me",
+                "https://fine.house.gov/contact/",
+                "2026-10-17: the scheme 'hhttps' is a typo upstream, and the address "
+                "with it corrected answers HTTP 404; the office's contact page answers 200"),
+}
+
+# YouTube names in congress-legislators that are neither a channel id (UC...)
+# nor an @handle: legacy usernames, which youtube.com/user/<name> served.
+# Most no longer do. Each was fetched on 2026-10-17, both as /user/<name>
+# and as /@<name>, and an @handle kept only where its channel's own title
+# names the member: {bioguide: (the source's value, "user" | "handle" |
+# None, what was seen)}. None drops the link: neither form exists, or the
+# value is not a name at all. validate lists any legacy name not here.
+YOUTUBE_LEGACY_NAMES = {
+    "A000148": ("RepAuchincloss", "handle", "/user/ 404; /@ is 'Rep. Auchincloss'"),
+    "B001301": ("RepJackBergman", None, "/user/ and /@ both 404"),
+    "B001318": ("YouTubeChannelID", None, "placeholder text upstream, not a channel"),
+    "C001055": ("RepEdCase", "handle", "/user/ 404; /@ is 'Congressman Ed Case'"),
+    "C001112": ("repcarbajal", "handle", "/user/ 404; /@ is 'Congressman Salud Carbajal'"),
+    "C001115": ("RepCloudTX", "handle", "/user/ 404; /@ is 'Rep. Michael Cloud'"),
+    "E000294": ("RepTomEmmer", "handle", "/user/ 404; /@ is 'Rep. Tom Emmer'"),
+    "F000246": ("RepPatFallon", "handle", "/user/ 404; /@ is 'Rep. Pat Fallon'"),
+    "K000377": ("SenMarkKelly", "handle", "/user/ 404; /@ is 'Senator Mark Kelly'"),
+    "M001199": ("repbrianmast", "handle", "/user/ 404; /@ is 'Congressman Brian Mast'"),
+    "R000609": ("Reprutherfordfl", "handle", "/user/ 404; /@ is 'Rep. John H. Rutherford'"),
+    "R000610": ("RepGuyReschenthaler", None, "/user/ and /@ both 404"),
+    "S001150": ("adamschiff", "user", "/user/ is 'Sen. Adam Schiff'; /@ 404"),
+    "S001190": ("RepBradSchneider", "user", "/user/ is 'Rep. Brad Schneider'"),
+    "S001200": ("repdarrensoto", "handle", "/user/ 404; /@ is 'Rep. Darren Soto'"),
+    "W000790": ("senatorwarnock", "handle",
+                "/user/ 404; /@ is 'Senator Reverend Raphael Warnock'"),
+}
+
+# YouTube @handles in congress-legislators that YouTube answers 404 for,
+# with the handle the member's own House or Senate site links instead (None
+# drops the link when the office links none). {bioguide: (the source's
+# value, the handle the office links or None, date, what was seen)}. Applied
+# only while the source holds exactly that value; validate reports an entry
+# the source has moved past.
+YOUTUBE_HANDLE_CORRECTIONS = {
+    "H001100": ("@RepJeffHurd03", "@RepJeffHurd", "2026-10-17",
+                "youtube.com/@RepJeffHurd03 answers 404; hurd.house.gov links "
+                "youtube.com/@RepJeffHurd, which answers 200 with his floor speeches"),
+}
+
+# X handles in congress-legislators that X answers "User Profile Not Found"
+# for, where the file holds no twitter_id to link the account by instead
+# (an id follows a rename: x.com/i/user/827279765287559171 is Speaker
+# Johnson's, 307 to SpeakerJohnson, where his RepMikeJohnson is 404).
+# {bioguide: (the handle, date, what was seen)}. The handle is dropped while
+# the source still holds exactly it with no id; validate reports an entry
+# that no longer matches.
+DEAD_X_HANDLES = {
+    "M001219": ("JMoylanforGuam", "2026-10-17",
+                "x.com/JMoylanforGuam answers 404 'User Profile Not Found', as a "
+                "nonsense handle does, while x.com/SpeakerJohnson answers 200; "
+                "congress-legislators lists no twitter_id for him"),
+}
+
+# A ballot page's link that redirects to the person's own article under a
+# title without their surname (rule 33). Without an entry here such a link is
+# withheld: "any living person's article" would also let a redirect to a
+# spouse or a namesake through, and its infobox be quoted onto this profile.
+# {profile id: (the title the link must land on, date, evidence)}.
+ARTICLE_UNDER_ANOTHER_NAME = {
+    "FEC_H4FL20098": ("Uncle Luke", "2026-10-17",
+                      "FL-20's 2026 election page links 'Luther Campbell', which redirects to "
+                      "'Uncle Luke'; that article (Q3267867) opens 'Luther Roderick Campbell "
+                      "(born December 22, 1960), also known by his stage names Luke or "
+                      "Uncle Luke'"),
+}
+
+
+def article_alias(profile_id):
+    """The title a ballot link is known to land on for this profile, or None."""
+    entry = ARTICLE_UNDER_ANOTHER_NAME.get(profile_id)
+    return entry[0] if entry else None
+
 
 # Images on a campaign's own site that `enrich` would take as the candidate's
 # portrait but that are not one, keyed on the image URL: (date checked, what it
@@ -420,6 +522,111 @@ OPEN_PRIMARY_SEATS = {
         "runoff": "2026-12-12",
         "source": "https://en.wikipedia.org/w/index.php?oldid=1377090557 "
                   "(Louisiana Secretary of State, 2026-07-08; Act 7, 2026 R.S.)",
+    },
+}
+
+# Seats whose 2026 primary was not the state's (results.seat_dates), keyed on
+# race id: {"primary", "runoff", "source"}. A per-state calendar cannot hold
+# them, and the four Alabama seats read "Primary held 2026-05-19" for a
+# primary held in August.
+#
+# Alabama: after the Supreme Court stayed the court-drawn map, Governor Ivey's
+# special primary proclamation of 2026-05-12 postponed the primaries for the
+# 1st, 2nd, 6th and 7th districts to a special primary on August 11, 2026,
+# under the Legislature's 2023 plan, with no runoff; the winners go to the
+# November 3 ballot (governor.alabama.gov newsroom, 2026-05-12; Alabama Public
+# Radio, 2026-08-10; read 2026-10-17).
+_AL_SPECIAL = {"primary": "2026-08-11", "runoff": None,
+               "source": "https://governor.alabama.gov/newsroom/2026/05/governor-ivey-celebrates-"
+                         "major-court-victory-in-states-redistricting-battle-calls-special-"
+                         "election-for-alabama-drawn-congressional-map/ (special primary "
+                         "proclamation of 2026-05-12; read 2026-10-17)"}
+SEAT_PRIMARY_DATES = {
+    "H-AL-01-2026": _AL_SPECIAL,
+    "H-AL-02-2026": _AL_SPECIAL,
+    "H-AL-06-2026": _AL_SPECIAL,
+    "H-AL-07-2026": _AL_SPECIAL,
+}
+
+# House seats left empty during the 119th Congress with no special election
+# to fill them, keyed (state, district): who left, the day their term ended
+# as congress-legislators' legislators-historical records it (the bioguide id
+# is the key into it), how, and whether a special election has been called,
+# each with the day it was checked. Shown on the delegation and the district
+# map (RACES-05, FRESHNESS-12) while nobody sits there. validate reports an
+# entry for a seat someone now sits in, and one whose member the snapshot
+# still seats; it cannot check `left`, which the build has no offline record
+# of (neither member is in Former_Members.csv), so check it by hand against
+# legislators-historical when adding an entry. Re-check `special` before
+# moving `checked`.
+SEAT_VACANCIES = {
+    ("FL", 20): {
+        "bioguide": "C001127", "name": "Sheila Cherfilus-McCormick", "left": "2026-04-21",
+        "how": "resigned", "special": "no special election called", "checked": "2026-10-17",
+        "source": "legislators-historical (term end 2026-04-21); House Press Gallery, party "
+                  "breakdown: resigned 04/21/26; Wikipedia, 119th United States Congress: no "
+                  "special election before the 2026 elections; read 2026-10-17",
+    },
+    ("TX", 23): {
+        "bioguide": "G000594", "name": "Tony Gonzales", "left": "2026-04-14",
+        "how": "resigned", "special": "no special election called", "checked": "2026-10-17",
+        "source": "legislators-historical (term end 2026-04-14); House Press Gallery, party "
+                  "breakdown: resigned 04/14/2026; Texas Tribune: the governor has called no "
+                  "special election; read 2026-10-17",
+    },
+}
+
+# Certified November ballots published only as a PDF, which the standard
+# library cannot read (kyc/certified.py reads the HTML ones), transcribed from
+# the document named, printed names only: name and party as the list gives
+# them, in its order. ``complete`` says the list is the whole ballot for its
+# races, so that a filer it does not name is not on the ballot (rule 77); a
+# list that is not (a party's own list of its nominees) only adds names.
+# Re-read the document before the election and move ``read``.
+CERTIFIED_BALLOTS = {
+    "IA": {
+        "source": "Iowa Secretary of State, Candidate List, November 3, 2026 General Election "
+                  "(last updated 8/14/2026)",
+        "url": "https://sos.iowa.gov/sites/default/files/2026-08/2026%20General%20-%20Candidate"
+               "%20List%20Database%20-%20All%20Elections_0.pdf",
+        "read": "2026-10-17", "complete": True,
+        "races": {
+            "S-IA-2026": [("Ashley Hinson", "Republican"), ("Josh Turek", "Democratic"),
+                          ("Thomas Laehn", "Libertarian")],
+            "H-IA-01-2026": [("Mariannette Miller-Meeks", "Republican"),
+                             ("Christina Bohannan", "Democratic"),
+                             ("Michael Bridgford", "No Party")],
+            # Rick Stewart: kept on the ballot by the State Objections Panel
+            # on June 15 (KCRG); the Cerro Gordo County list revised 9/3/2026
+            # prints the same four.
+            "H-IA-02-2026": [("Joe Mitchell", "Republican"), ("Lindsay James", "Democratic"),
+                             ("Rick Stewart", "Libertarian"), ("Dave Bushaw", "No Party")],
+            "H-IA-03-2026": [("Zach Nunn", "Republican"), ("Sarah Trone Garriott", "Democratic")],
+            "H-IA-04-2026": [("Chris McGowan", "Republican"), ("Dave Dawson", "Democratic")],
+        },
+    },
+    "NE": {
+        "source": "Nebraska Secretary of State, Final Statewide General Candidate List, "
+                  "November 3, 2026 General Election (9/11/2026)",
+        "url": "https://sos.nebraska.gov/sites/default/files/doc/elections/2026/"
+               "Final_Statewide_General_Candidate_Filing_List_9.11.26.pdf",
+        "read": "2026-10-17", "complete": True,
+        "races": {
+            # Mike Marvin suspended his campaign on August 21 and stays on
+            # the ballot (Nebraska Examiner via WOWT, 2026-09-02); the
+            # certified list prints him.
+            "S-NE-2026": [("Pete Ricketts", "Republican"), ("Mike Marvin", "Legal Marijuana NOW"),
+                          ("Robin Richards", "Nebraska Working People"),
+                          ("Chuck Conboy", "America First"), ("Dan Osborn", "By Petition")],
+            "H-NE-01-2026": [("Mike Flood", "Republican"), ("Chris Backemeyer", "Democratic"),
+                             ("Nik Sandman", "Libertarian"), ("Dan Hartong", "America First")],
+            "H-NE-02-2026": [("Brinker Harding", "Republican"), ("Denise Powell", "Democratic"),
+                             ("Eric Michael Foreman", "Libertarian")],
+            "H-NE-03-2026": [("Adrian Smith", "Republican"), ("Becky Kelly Stille", "Democratic"),
+                             ("David J. Else", "Legal Marijuana NOW"),
+                             ("Macey Budke", "Nebraska Working People"),
+                             ("Mark Cohen", "By Petition")],
+        },
     },
 }
 
