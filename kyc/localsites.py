@@ -18,16 +18,24 @@ host a person has confirmed goes in ``overrides.BLOCKED_LOCAL_HOSTS``.
 The build (``kyc/counties.py``) withdraws an address whose verdict is in
 ``WITHDRAWN`` and labels the rest with the day they were checked:
 
-* ``gambling`` - the page, or where it redirects, is gambling spam;
+* ``gambling`` - the page, or where it redirects, is gambling spam (one
+  passage of a real page's text is withdrawn but waits for a person: see
+  ``STICKY``);
 * ``parked``, ``for-sale``, ``expired`` - a registrar's parking page (the
   ``window.location = "/lander"`` script of rule 39 included), a domain
   marketplace, an expired-domain notice;
-* ``elsewhere`` - it redirects to another site whose page does not name the
-  government (the Ringtown Borough Municipal Authority's goes to a funeral
-  home). A page names it with its distinctive words and a word for its
-  kind in the title ("Pettisville Schools"), its whole name as a phrase,
-  or a .gov host; the place's name alone is not the government's (Alma's
-  address opens its chamber of commerce);
+* ``business`` - it redirects to a page whose title says it is a
+  business's: Alma's address opens its chamber of commerce, Haverhill's an
+  estate agent's listings, the Ringtown Borough Municipal Authority's a
+  funeral home;
+* ``elsewhere`` - it redirects to another site whose title and address
+  carry no word of the government's name, whose text does not carry all
+  of them, and which is not a government host. A page that names part of
+  it - "City of Greenfield" for the listing's Town of Greenfield - is
+  ``unread``: perhaps its own site under the name it uses, never claimed
+  not to be. A page names it, and the move is kept (``moved``), with its
+  distinctive words and a word for its kind in the title ("Pettisville
+  Schools"), its whole name as a phrase, or a .gov host;
 * ``dead`` - the host does not exist: it fails here and both dns.google and
   Cloudflare answer NXDOMAIN, or no address, for it (rule 35's second
   resolver);
@@ -71,16 +79,28 @@ PARKED = "parked"
 FOR_SALE = "for-sale"
 EXPIRED = "expired"
 ELSEWHERE = "elsewhere"
+BUSINESS = "business"
 DEAD = "dead"
 GONE = "gone"
-VERDICTS = (OK, MOVED, UNREAD, GAMBLING, PARKED, FOR_SALE, EXPIRED, ELSEWHERE, DEAD, GONE)
-WITHDRAWN = (GAMBLING, PARKED, FOR_SALE, EXPIRED, ELSEWHERE, DEAD, GONE)
+VERDICTS = (OK, MOVED, UNREAD, GAMBLING, PARKED, FOR_SALE, EXPIRED, ELSEWHERE, BUSINESS, DEAD, GONE)
+WITHDRAWN = (GAMBLING, PARKED, FOR_SALE, EXPIRED, ELSEWHERE, BUSINESS, DEAD, GONE)
 # What a later check never clears: a domain once used for gambling spam
-# under a government's name is not linked again without a person's look.
+# under a government's name is not linked again without a person's look -
+# where the spam was plain: in the page's title or headings, on the site a
+# lapsed address now redirects to, or all over its text. One match in a
+# real page's text is not plain: "Schedule your slot online" on the
+# Keansburg schools' blood-drive notice read as gambling on 2026-10-17.
+# Such a verdict is withdrawn, looked at again, and reported for a person
+# to confirm in overrides.BLOCKED_LOCAL_HOSTS (``seen`` says which).
 STICKY = (GAMBLING,)
+PLAIN = ("head", "redirect", "text")
 # A conclusive verdict is looked at again after this many days, so a site
 # that comes back is linked again; an unread one on every run.
 STALE_DAYS = 30
+# The build warns once a listed address was last checked longer ago than
+# this: the weekly refresh checks the oldest first, and an address it has
+# not reached in two cycles says the refresh is not running.
+WARN_DAYS = 60
 
 TIMEOUT = 20
 MAX_BODY = 600_000
@@ -105,6 +125,19 @@ _SPAM_MORE = re.compile(
     r"\b[a-z]*(?:bet|slot|toto|win)(?:88|888|77|777|99|138|4d)\b|\bpgbet|"
     "nh\u00e0\\s+c\u00e1i|c\u00e1\\s+c\u01b0\u1ee3c|\\bqh88|"
     "\u30ab\u30b8\u30ce|\u535a\u5f69|\u767e\u5bb6\u4e50|\u5a31\u4e50\u57ce", re.I)
+# "Slot online" is English too: "Schedule your slot online" (the Keansburg
+# schools' blood drive), "Secure your 15-minute slot online" (the Landfill
+# of North Iowa's Saturday drop-off). A slot someone books is not a slot
+# machine; the phrase is taken out before the spam signatures are read.
+_BOOKED_SLOT = re.compile(
+    r"\b(?:your|a|an|the|my|our|their|this|that|one|time|appointment|delivery|pickup|pick-up)"
+    r"\s+(?:[\w-]+\s+){0,2}slots?\s+online\b", re.I)
+# A title that says what it is, and it is a business: the Alma address
+# opens its chamber of commerce, Haverhill's an estate agent's listings,
+# the Ringtown Borough Municipal Authority's a funeral home.
+_BUSINESS = re.compile(
+    r"chamber\s+of\s+commerce|homes?\s+for\s+sale|real\s+estate\s+(?:agents?|listings?|for\s+sale)|"
+    r"\brealty\b|\brealtors?\b|\bfuneral\b|\bcremation\b|\bmortuary\b", re.I)
 _FOR_SALE = re.compile(
     r"domain\s+(?:name\s+)?(?:is|may\s+be)\s+for\s+sale|buy\s+this\s+domain|"
     r"this\s+domain\s+is\s+for\s+sale|make\s+an\s+offer\s+on\s+this\s+domain|"
@@ -173,6 +206,30 @@ def fold(text):
     return "".join(ch for ch in text if not unicodedata.combining(ch)).lower()
 
 
+def near(a, b):
+    """Whether two words of six letters or more are one slip apart: a
+    letter added, dropped, changed, or two letters swapped. The listing
+    misspells names ("Las Virgenes Muncipal", "Kinneola", "Davenport
+    Commmunity"); the bodies' own pages spell them right."""
+    if a == b:
+        return True
+    if min(len(a), len(b)) < 6 or abs(len(a) - len(b)) > 1:
+        return False
+    if len(a) == len(b):
+        diff = [i for i in range(len(a)) if a[i] != b[i]]
+        return len(diff) == 1 or (len(diff) == 2 and diff[1] == diff[0] + 1
+                                  and a[diff[0]] == b[diff[1]] and a[diff[1]] == b[diff[0]])
+    if len(a) > len(b):
+        a, b = b, a
+    i = 0
+    while i < len(a) and a[i] == b[i]:
+        i += 1
+    return a[i:] == b[i + 1:]
+
+
+_GENERIC_LONG = sorted(w for w in _GENERIC if len(w) >= 6)
+
+
 def distinctive(name):
     """The words of a government's name that tell it from others of its
     kind: ``["covina"]`` for "Covina Valley Unified School District"."""
@@ -181,22 +238,54 @@ def distinctive(name):
     from .localgov import expand_name
     words = re.findall(r"[a-z0-9]+", fold(expand_name(name)))
     return [w for w in words if w not in _GENERIC and w not in _GENERATED
-            and len(w) >= 3 and not w.isdigit()]
+            and len(w) >= 3 and not w.isdigit()
+            # A misspelt generic word is still generic ("Muncipal").
+            and not any(near(w, g) for g in _GENERIC_LONG)]
+
+
+class _Words:
+    """A text's words, for asking whether a name's words are among them -
+    as words, one slip apart, or run together ("DesPlaines" for "Des
+    Plaines", "Twentynine" for "Twenty-Nine", "O'Neill" for "Oneill")."""
+
+    def __init__(self, text):
+        tokens = re.findall(r"[a-z0-9]+", fold(text))
+        self.words = set(tokens)
+        self.pairs = {a + b for a, b in zip(tokens, tokens[1:])}
+        self._long = [w for w in self.words if len(w) >= 5]
+
+    def has(self, word):
+        return (word in self.words or word in self.pairs
+                or (len(word) >= 6 and any(near(word, w) for w in self._long)))
+
+    def found(self, words):
+        """Which of *words* (a name's distinctive words, in order) are here."""
+        out = {w for w in words if self.has(w)}
+        for a, b in zip(words, words[1:]):
+            if a + b in self.words:
+                out |= {a, b}
+        return out
 
 
 def names_government(names, text):
     """True when *text* names one of *names* - every distinctive word of it,
     as words - and ``None`` when no name has a distinctive word to look for."""
-    seen = set(re.findall(r"[a-z0-9]+", fold(text)))
+    seen = _Words(text)
     tried = False
     for name in names:
         words = distinctive(name)
         if not words:
             continue
         tried = True
-        if all(w in seen for w in words):
+        if seen.found(words) >= set(words):
             return True
     return False if tried else None
+
+
+def names_part(names, text):
+    """Whether *text* carries any distinctive word of one of *names*."""
+    seen = _Words(text)
+    return any(seen.found(distinctive(n)) for n in names)
 
 
 def head_word(name):
@@ -280,36 +369,40 @@ def names_in_title(names, head):
     Hampshire Real Estate" the Town of Haverhill. A municipality's title
     may call itself its official website instead ("Salisbury, MA |
     Official Website", on its web host's platform)."""
-    seen = set(re.findall(r"[a-z0-9]+", fold(head)))
+    seen = _Words(head)
     if re.search(r"\bofficial\s+(?:web\s*)?site\b", fold(head)):
-        seen.add(_OFFICIAL)
+        seen.words.add(_OFFICIAL)
     for name in names:
         words = distinctive(name)
-        if not words or not all(w in seen for w in words):
+        if not words or not seen.found(words) >= set(words):
             continue
         kinds = set()
-        for word in re.findall(r"[a-z]+", fold(name)):
+        from .localgov import expand_name
+        for word in re.findall(r"[a-z]+", fold(expand_name(name))):
             kinds |= _KIND_WORDS.get(word, set())
-        if kinds & seen:
+        if kinds & seen.words:
             return True
     return False
 
 
-def in_host(names, host):
+def in_host(names, host, every=True):
     """Whether a host's name spells out every distinctive word of one of
-    *names* ("dewittcountyil.gov" for the County of De Witt)."""
+    *names* ("dewittcountyil.gov" for the County of De Witt) - or, with
+    *every* false, any one of four letters or more ("29palmswater.com" for
+    the Twenty-Nine Palms Water District)."""
     label = re.sub(r"[^a-z0-9]", "", bare(host).rsplit(".", 1)[0])
     for name in names:
         words = distinctive(name)
-        if words and all(w in label for w in words):
+        if every and words and all(w in label for w in words):
+            return True
+        if not every and any(len(w) >= 4 and w in label for w in words):
             return True
     return False
 
 
 def names_place(names, head):
     """Whether *head* carries any distinctive word of one of *names*."""
-    seen = set(re.findall(r"[a-z0-9]+", fold(head)))
-    return any(w in seen for n in names for w in distinctive(n))
+    return names_part(names, head)
 
 
 def bare(host):
@@ -547,9 +640,33 @@ def resolves_here(host):
 
 # ---------------------------------------------------------------- the check
 
+def gambling_at(head, body, moved):
+    """Where a page shows gambling spam - ``"head"`` (its title, headings or
+    description), ``"redirect"`` (anywhere on a site a lapsed address now
+    sends visitors to), ``"text"`` (throughout its text) or ``"once"`` (once
+    or twice in its text) - or ``""``. A slot someone books online is not a
+    slot machine."""
+    head, body = _BOOKED_SLOT.sub(" ", head), _BOOKED_SLOT.sub(" ", body)
+    if enrich._SPAM.search(head) or _SPAM_MORE.search(head) or enrich._GAMBLING.search(head):
+        return "head"
+    spam, more, words = (len(enrich._SPAM.findall(body)), len(_SPAM_MORE.findall(body)),
+                         len(enrich._GAMBLING.findall(body)))
+    if not (spam or more >= 3 or words >= 5):
+        return ""
+    if moved:
+        return "redirect"
+    return "text" if spam + more + words >= 3 else "once"
+
+
 def assess(names, url, seen):
     """``(verdict, evidence, final url)`` for what :func:`visit` saw, before
     any DNS or second-request confirmation (the caller does those)."""
+    return _assess(names, url, seen)[:3]
+
+
+def _assess(names, url, seen):
+    """:func:`assess`, and where a gambling page showed its spam
+    (:func:`gambling_at`; ``""`` for any other verdict)."""
     chain = seen["chain"]
     final = chain[-1]
     start, end = urllib.parse.urlsplit(url).hostname or "", urllib.parse.urlsplit(final).hostname or ""
@@ -558,18 +675,19 @@ def assess(names, url, seen):
     moved = not same_site(start, end) and bare(start) not in final.lower()
     where = f"redirects to {bare(end)}: " if moved else ""
     if moved and _on(end, _SIGN_IN_HOSTS):
-        return UNREAD, f"redirects to {bare(end)}, which asks visitors to sign in", final
+        return UNREAD, f"redirects to {bare(end)}, which asks visitors to sign in", final, ""
     if _on(end, _MARKET_HOSTS):
-        return FOR_SALE, f"redirects to {bare(end)}, a domain marketplace", final
+        return FOR_SALE, f"redirects to {bare(end)}, a domain marketplace", final, ""
     if _on(end, _PARKING_HOSTS):
-        return PARKED, f"redirects to {bare(end)}, a parking service", final
+        return PARKED, f"redirects to {bare(end)}, a parking service", final, ""
     if urllib.parse.urlsplit(final).path.rstrip("/").endswith("/lander"):
-        return PARKED, f"{where}a script sends visitors to a parking lander ({bare(end)}/lander)", final
+        return (PARKED, f"{where}a script sends visitors to a parking lander ({bare(end)}/lander)",
+                final, "")
     status = seen["status"]
     if status is None:
-        return UNREAD, seen["error"] or "could not be reached", final
+        return UNREAD, seen["error"] or "could not be reached", final, ""
     if 300 <= status < 400:
-        return UNREAD, f"HTTP {status} without a usable redirect", final
+        return UNREAD, f"HTTP {status} without a usable redirect", final, ""
     markup = seen["markup"]
     page = enrich.parse_page(markup)
     head = " ".join([page.title] + [page.meta.get(k, "") for k in
@@ -578,29 +696,29 @@ def assess(names, url, seen):
     body = page.body
     title = _snippet(page.title or (page.headings[0][1] if page.headings else ""), 60)
     quoted = f" ('{title}')" if title else ""
-    if (enrich._SPAM.search(head) or enrich._SPAM.search(body) or _SPAM_MORE.search(head)
-            or enrich._GAMBLING.search(head) or len(enrich._GAMBLING.findall(body)) >= 5
-            or len(_SPAM_MORE.findall(body)) >= 3):
-        return GAMBLING, f"{where}gambling page{quoted}", final
+    spam = gambling_at(head, body, moved)
+    if spam:
+        once = " (one passage of its text)" if spam == "once" else ""
+        return GAMBLING, f"{where}gambling page{quoted}{once}", final, spam
     if status != 200:
         if status in (404, 410):
-            return (GONE if not moved else UNREAD), f"{where}HTTP {status}", final
-        return UNREAD, f"{where}HTTP {status}", final
+            return (GONE if not moved else UNREAD), f"{where}HTTP {status}", final, ""
+        return UNREAD, f"{where}HTTP {status}", final, ""
     small = len(body) < 2500
     if _FOR_SALE.search(head) or (small and _FOR_SALE.search(body)):
-        return FOR_SALE, f"{where}domain for sale{quoted}", final
+        return FOR_SALE, f"{where}domain for sale{quoted}", final, ""
     if _EXPIRED.search(head) or (small and _EXPIRED.search(body)):
-        return EXPIRED, f"{where}expired domain{quoted}", final
+        return EXPIRED, f"{where}expired domain{quoted}", final, ""
     if (enrich._PARKED.search(head) or (small and enrich._PARKED.search(body))
             or enrich._PARKING_CODE.search(page.small) or _PARKED_MORE.search(head)
             or (small and _PARKED_MORE.search(body))):
-        return PARKED, f"{where}parked domain{quoted}", final
+        return PARKED, f"{where}parked domain{quoted}", final, ""
     if _PLACEHOLDER.search(head) or (small and _PLACEHOLDER.search(body)):
-        return UNREAD, f"{where}a web server's placeholder page{quoted}", final
+        return UNREAD, f"{where}a web server's placeholder page{quoted}", final, ""
     if enrich._SPAM.search(page.hidden) or enrich._GAMBLING.search(page.hidden):
-        return OK, f"{where}answers, and hides gambling links in its page{quoted}", final
+        return OK, f"{where}answers, and hides gambling links in its page{quoted}", final, ""
     if not moved:
-        return OK, "", final
+        return OK, "", final, ""
     text = " ".join([head, body] + [h for _t, h in page.headings])
     named = names_government(names, text)
     # A move is kept where the new page names the government: in its title
@@ -612,12 +730,37 @@ def assess(names, url, seen):
             or (named and _official(end))
             or (_official(start) and bare(end).endswith(".gov") and names_place(names, head))
             or (bare(end).endswith(".gov") and in_host(names, end))):
-        return MOVED, f"redirects to {bare(end)}, which names it{quoted}", final
+        return MOVED, f"redirects to {bare(end)}, which names it{quoted}", final, ""
     if len(body) < 200:
-        return UNREAD, f"redirects to {bare(end)}, with too little text to tell{quoted}", final
+        return UNREAD, f"redirects to {bare(end)}, with too little text to tell{quoted}", final, ""
     if named is None:
-        return UNREAD, f"redirects to {bare(end)}; its name has no word to look for{quoted}", final
-    return ELSEWHERE, f"redirects to {bare(end)}, which does not name it{quoted}", final
+        return UNREAD, f"redirects to {bare(end)}; its name has no word to look for{quoted}", final, ""
+    # A title that says the page is a business's - a chamber of commerce,
+    # an estate agent, a funeral home - is not the government's, whatever
+    # place it names.
+    if _BUSINESS.search(head):
+        return BUSINESS, f"redirects to {bare(end)}, a business's page{quoted}", final, ""
+    # Otherwise a page that names any part of it - a word of its name in
+    # the title or the address, all of them in its text, or a host only a
+    # government can hold - may well be its own, under the name it uses
+    # itself: "City of Greenfield" for the listing's Town of Greenfield,
+    # "Bartlett Fire District" on bartlettilfd.gov for the
+    # Bartlett-Countryside Fire Protection District, "Welcome - Miamisburg,
+    # OH". The first full run withdrew such pages as "elsewhere" and the
+    # page said they did not name the body; a failed match concludes
+    # nothing (rule 8).
+    if names_part(names, head) or in_host(names, end, every=False) or named or _official(end):
+        return (UNREAD, f"redirects to {bare(end)}, which names part of it; not confirmed as its "
+                        f"site{quoted}", final, "")
+    return ELSEWHERE, (f"redirects to {bare(end)}, whose page and address name none of "
+                       f"it{quoted}"), final, ""
+
+
+def sticky(entry):
+    """Whether a verdict stays whatever a later check finds: gambling spam
+    seen plainly (``PLAIN``). An entry from before ``seen`` was recorded
+    stays too, until a person looks."""
+    return bool(entry) and entry.get("verdict") in STICKY and entry.get("seen", "head") in PLAIN
 
 
 def check_one(url, names, gate, visit_fn=visit, doh_fn=doh, resolves=resolves_here,
@@ -626,7 +769,7 @@ def check_one(url, names, gate, visit_fn=visit, doh_fn=doh, resolves=resolves_he
     "final"?}``."""
     today = today or datetime.date.today().isoformat()
     seen = visit_fn(url, gate)
-    verdict, evidence, final = assess(names, url, seen)
+    verdict, evidence, final, spam = _assess(names, url, seen)
     if seen.get("dnsHost") and verdict == UNREAD:
         host = seen["dnsHost"]
         # A local lookup that fails while many run at once can be this
@@ -643,7 +786,7 @@ def check_one(url, names, gate, visit_fn=visit, doh_fn=doh, resolves=resolves_he
         if retried:
             sleep(2)
             seen = visit_fn(url, gate)
-            verdict, evidence, final = assess(names, url, seen)
+            verdict, evidence, final, spam = _assess(names, url, seen)
     if seen.get("dnsHost") and verdict == UNREAD:
         host = seen["dnsHost"]
         own = len(seen["chain"]) == 1
@@ -672,6 +815,8 @@ def check_one(url, names, gate, visit_fn=visit, doh_fn=doh, resolves=resolves_he
         else:
             evidence = f"{evidence}, twice"
     entry = {"checked": today, "verdict": verdict}
+    if spam:
+        entry["seen"] = spam
     if evidence:
         entry["evidence"] = evidence
     if seen.get("insecure"):
@@ -732,29 +877,49 @@ def targets(root=".", codes=None):
     return out
 
 
+def last_look(entry):
+    """The day an address was last looked at: its verdict's day, or a later
+    try that concluded nothing and so left the verdict as it was."""
+    return max((entry or {}).get("checked", ""), (entry or {}).get("tried", ""))
+
+
 def due(entry, today, refresh=False, recheck=()):
     """Whether an address needs looking at today. *recheck* names verdicts
     to look at again whatever their date - after a change to how a verdict
     is reached (never a sticky one: that takes a person, rule 39)."""
     if not entry:
         return True
-    if entry.get("verdict") in recheck and entry.get("verdict") not in STICKY:
+    if entry.get("verdict") in recheck and not sticky(entry):
         return True
-    if entry.get("verdict") in STICKY and not refresh:
+    if sticky(entry) and not refresh:
         return False
     if refresh or entry.get("verdict") == UNREAD:
         return True
     try:
-        then = datetime.date.fromisoformat(entry.get("checked", ""))
+        then = datetime.date.fromisoformat(last_look(entry))
     except ValueError:
         return True
     return (datetime.date.fromisoformat(today) - then).days >= STALE_DAYS
 
 
+def merge(old, new, today):
+    """What the cache keeps when *new* is today's look at an address whose
+    entry was *old*. Plain gambling stays whatever is seen later (rule 39),
+    and a look that concludes nothing (``unread``) does not undo a
+    withdrawal (rule 8): the verdict and its day stay, and the try is
+    dated beside them."""
+    if old and ((sticky(old) and new.get("verdict") != GAMBLING)
+                or (old.get("verdict") in WITHDRAWN and new.get("verdict") == UNREAD)):
+        return dict(old, tried=today)
+    return new
+
+
 def check_all(root=".", codes=None, workers=24, limit=None, refresh=False, retry_unread=True,
               log=print, save_every=500, check=check_one, recheck=()):
     """Open every address that is due, many hosts at once and one request at
-    a time per host; saves the cache as it goes, so a stopped run resumes."""
+    a time per host; saves the cache as it goes, so a stopped run resumes.
+    The addresses looked at longest ago go first, so a run capped with
+    *limit* each week (the refresh workflow) works through all of them."""
     cache = load_cache(root)
     cache["source"] = SOURCE
     sites = cache.setdefault("sites", {})
@@ -770,7 +935,7 @@ def check_all(root=".", codes=None, workers=24, limit=None, refresh=False, retry
         host = bare(urllib.parse.urlsplit(u).hostname or "")
         rank[u] = seen_hosts.get(host, 0)
         seen_hosts[host] = rank[u] + 1
-    todo.sort(key=lambda u: (rank[u], u))
+    todo.sort(key=lambda u: (last_look(sites.get(u)), rank[u], u))
     if limit:
         todo = todo[:limit]
     log(f"[..] {len(todo):,} of {len(wanted):,} addresses to check, {workers} at a time")
@@ -786,12 +951,7 @@ def check_all(root=".", codes=None, workers=24, limit=None, refresh=False, retry
             entry = {"checked": today, "verdict": UNREAD,
                      "evidence": _snippet(f"check failed: {type(exc).__name__} {exc}", 100)}
         with lock:
-            old = sites.get(url)
-            if old and old.get("verdict") in STICKY and entry["verdict"] not in STICKY:
-                old = dict(old, checked=today)
-                sites[url] = old
-            else:
-                sites[url] = entry
+            sites[url] = merge(sites.get(url), entry, today)
             done[0] += 1
             if done[0] % save_every == 0:
                 save_cache(cache, root)
@@ -852,7 +1012,7 @@ def stale_blocks(addresses):
     return sorted(k for k in overrides.BLOCKED_LOCAL_HOSTS if k not in used)
 
 
-def problems(cache, addresses):
+def problems(cache, addresses, today=None):
     """What the build reports about the website check, as strings."""
     out = [f"overrides.BLOCKED_LOCAL_HOSTS[{k!r}] matches no listed website; remove it"
            for k in stale_blocks(addresses)]
@@ -861,6 +1021,29 @@ def problems(cache, addresses):
     if unchecked:
         out.append(f"{len(unchecked):,} listed local-government websites have never been checked "
                    f"(run 'localgov --check-sites'); they are linked and marked unchecked")
+    # A check is a day's finding, and domains keep lapsing (rule 39): the
+    # weekly refresh looks at the oldest first, so an old one means it is
+    # not running.
+    today = datetime.date.fromisoformat(today or datetime.date.today().isoformat())
+    old = []
+    for url in addresses:
+        try:
+            then = datetime.date.fromisoformat(last_look(sites.get(url)))
+        except ValueError:
+            continue
+        if (today - then).days > WARN_DAYS:
+            old.append(url)
+    if old:
+        out.append(f"{len(old):,} listed local-government websites were last checked more than "
+                   f"{WARN_DAYS} days ago; the weekly refresh runs 'localgov --check-sites "
+                   f"--limit', oldest first - is it running?")
+    # Gambling seen once in a page's text is withdrawn, and waits for a
+    # person: a real page can say "slot" in a sentence the signatures read.
+    for url in sorted(u for u, e in sites.items() if u in addresses and e.get("verdict") == GAMBLING
+                      and not sticky(e) and not blocked(u)):
+        out.append(f"{url}: gambling seen in one passage of its text ({sites[url].get('evidence', '')}); "
+                   f"look, and record it in overrides.BLOCKED_LOCAL_HOSTS, or clear it in "
+                   f"{CACHE_PATH}")
     hidden = sorted(u for u, e in sites.items() if u in addresses and e.get("verdict") == OK
                     and "hides gambling" in e.get("evidence", ""))
     for url in hidden:

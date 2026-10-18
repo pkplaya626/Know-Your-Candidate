@@ -119,9 +119,25 @@ _AREA_SUFFIX = re.compile(r"\s+(?:County|Parish|Borough|Census Area|City and Bor
                           r"Planning Region)$")
 
 
-def map_label(name):
-    """A county's name on the map: "Milwaukee", not "Milwaukee County"."""
-    return _AREA_SUFFIX.sub("", name) or name
+def map_label(name, taken=()):
+    """A county's name on the map: "Milwaukee", not "Milwaukee County" -
+    but "Richmond County" where *taken* (the state's independent cities'
+    own names) has a Richmond: a bare "Richmond" on Virginia's Northern
+    Neck reads as the city, a hundred miles off, and "Baltimore" beside
+    Baltimore City as the city itself."""
+    short = _AREA_SUFFIX.sub("", name) or name
+    return name if short in taken else short
+
+
+def city_names(code, names):
+    """The bare names of a state's independent cities ("Richmond", "St.
+    Louis", "Baltimore"), from the Census's "Richmond city"."""
+    out = set()
+    for fips, name in names.items():
+        entry = county_areas.AREAS.get(fips)
+        if entry and entry[1] == county_areas.INDEPENDENT and name.endswith(" city"):
+            out.add(name[:-len(" city")])
+    return out
 
 
 def label_aspect(label):
@@ -488,9 +504,10 @@ def build_state(code, root=".", places=None, sites=None):
     # where the name fits (rule 43): written 11px tall at whatever width the
     # page draws, the label goes in where a box its shape fits round its
     # point, and the list under the map names every one.
+    taken = city_names(code, {f: c["name"] for f, c in found.items()})
     for fips, county in found.items():
         county["name"] = county_areas.local_name(fips, county["name"])
-        county["label"] = map_label(county["name"])
+        county["label"] = map_label(county["name"], taken)
         county["labelRoom"] = geo._round(geo.box_room(
             county["at"][0], county["at"][1], drawn[fips][0], label_aspect(county["label"])))
     cities = load_cities(code, root)

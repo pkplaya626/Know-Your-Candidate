@@ -81,8 +81,14 @@
     parked: "the web address the Census listed now shows a parking or placeholder page",
     "for-sale": "the web address the Census listed is now a domain for sale",
     expired: "the web address the Census listed has expired",
-    gambling: "the web address the Census listed now leads to a gambling site",
-    elsewhere: "the web address the Census listed now leads to a site that does not name it",
+    // A redirect to a slot site, or the address's own page carrying the
+    // spam: either way, gambling spam is what it shows.
+    gambling: "the web address the Census listed now shows gambling spam",
+    // What the check saw, not a judgement of whose site it is: a page
+    // that names any word of the government is never withdrawn as this.
+    elsewhere: "the web address the Census listed now redirects to another site, whose title " +
+      "and address do not name it",
+    business: "the web address the Census listed now redirects to a business's site",
   };
 
   function day(iso) {
@@ -97,35 +103,51 @@
   }
 
   /* Said once in every panel that lists governments (rule 53): who holds
-   * office is an absence here, not an oversight, and where to look. */
-  var WHO_SERVES = "Who holds office in these governments is not listed here: no free national " +
-    "source names local officials. A government's own website, linked from its name where the " +
-    "Census Bureau listed one, names its elected officials and when they are elected.";
-  var WHO_SERVES_ONE = "Who holds office in this government is not listed here: no free national " +
-    "source names local officials. Its own website, where it has one, names them and when they " +
-    "are elected.";
-  /* What the panel's links are, in a sentence: the Census's 2022 addresses,
-   * checked on the latest day any of them was, and what that check did. */
+   * office is an absence here, not an oversight, and where to look - said
+   * as where people usually look, not as what every site holds: many
+   * districts and authorities have appointed boards, and many sites list
+   * neither their officials nor their elections. */
+  var NO_OFFICIALS = "no free national source names local officials.";
+  var WHO_SERVES = "Who holds office in these governments is not listed here: " + NO_OFFICIALS +
+    " A government's own website, linked from its name where the Census Bureau listed one, is " +
+    "usually where its officials, and how they are chosen, are listed.";
+  function whoServesOne(row) {
+    var start = "Who holds office in this government is not listed here: " + NO_OFFICIALS + " ";
+    var usual = "a government's own website is usually where its officials, and how they are " +
+      "chosen, are listed.";
+    if (row[3]) {
+      return start + "Its own website, linked above, is usually where its officials, and how they " +
+        "are chosen, are listed.";
+    }
+    if (WITHDRAWN[site(row).verdict]) {
+      return start + "The website address the Census Bureau listed for it is withdrawn (see above); " + usual;
+    }
+    return start + "The Census Bureau listed no website for it; " + usual;
+  }
+  /* What the panel's links are: the Census's 2022 addresses, checked on
+   * the days the check reached them, and what that check did. */
   function sitesNote(rows) {
-    var latest = "", unread = 0, unchecked = 0, withdrawn = 0;
+    var first = "", latest = "", unread = 0, unchecked = 0, withdrawn = 0;
     rows.forEach(function (r) {
       var parts = (r[7] || "").split(" ");
       if (parts[1] && parts[1] > latest) latest = parts[1];
+      if (parts[1] && (!first || parts[1] < first)) first = parts[1];
       if (parts[0] === "unread") unread += 1;
       if (r[3] && !parts[0]) unchecked += 1;
       if (!r[3] && WITHDRAWN[parts[0]]) withdrawn += 1;
     });
     if (!latest && !unchecked) return "";
     var text = "Each website is the one the Census Bureau listed in 2022" +
-      (latest ? ", checked by this site on " + day(latest) : "") + ".";
+      (!latest ? "" : first === latest ? ", checked by this site on " + day(latest)
+        : ", checked by this site between " + day(first) + " and " + day(latest)) + ".";
     if (withdrawn) {
-      text += " " + plural(withdrawn, "link") + " that now " + (withdrawn === 1 ? "leads" : "lead") +
-        " to a parked, expired, for-sale or gambling domain, to another site that does not name " +
-        "the government, or nowhere, " + (withdrawn === 1 ? "is" : "are") + " withdrawn, and the list says why.";
+      text += " " + plural(withdrawn, "link") + (withdrawn === 1 ? " is" : " are") + " withdrawn, " +
+        "and each says why: the address now leads nowhere, to a parked, for-sale, expired or " +
+        "gambling domain, or to another site.";
     }
     if (unread) {
-      text += " " + plural(unread, "website") + " could not be read when checked and " +
-        (unread === 1 ? "is" : "are") + " linked as listed.";
+      text += " " + plural(unread, "website") + " could not be confirmed when checked, and " +
+        (unread === 1 ? "is" : "are") + " linked as listed and marked so.";
     }
     if (unchecked) {
       text += " " + plural(unchecked, "website") + " " + (unchecked === 1 ? "has" : "have") +
@@ -275,22 +297,28 @@
     var checked = site(row);
     // The name as the Census lists it ("Fairfax Co Schs"), where the page
     // writes its abbreviations out (kyc/localgov.expand_name).
-    var listed = row[8] ? ' title="' + KYC.escapeAttr("Listed by the Census Bureau as \u201c" + row[8] +
-      "\u201d") + '"' : "";
+    var listed = row[8] ? "Listed by the Census Bureau as \u201c" + row[8] + "\u201d. " : "";
     var linkTitle = checked.verdict === "ok"
       ? "Website as listed by the Census in 2022, checked " + checked.day
       : checked.verdict === "unread"
-        ? "Website as listed by the Census in 2022; it could not be read when checked " + checked.day
+        ? "Website as listed by the Census in 2022; not confirmed when checked " + checked.day
         : "Website as listed by the Census in 2022, not checked";
+    // One title, on the outermost element: a browser shows only the
+    // innermost, so the listing's name on a span inside the link hid the
+    // link's check entirely. On a phone neither shows, so a link the check
+    // could not confirm also says so in the row.
     var name = row[3]
       ? '<a href="' + KYC.escapeAttr(row[3]) + '" target="_blank" rel="noopener noreferrer" title="' +
-        KYC.escapeAttr(linkTitle) + '"><span' + listed + ">" + KYC.escapeHtml(row[1]) + "</span></a>"
-      : "<span" + listed + ">" + KYC.escapeHtml(row[1]) + "</span>";
+        KYC.escapeAttr(listed + linkTitle) + '">' + KYC.escapeHtml(row[1]) + "</a>"
+      : listed ? '<span title="' + KYC.escapeAttr(listed.trim()) + '">' + KYC.escapeHtml(row[1]) + "</span>"
+        : KYC.escapeHtml(row[1]);
     var gone = !row[3] && WITHDRAWN[checked.verdict]
       ? "website withdrawn: " + WITHDRAWN[checked.verdict] + (checked.day ? " (checked " + checked.day + ")" : "")
       : "";
+    var unsure = row[3] && checked.verdict === "unread" ? "website not confirmed when checked"
+      : row[3] && !checked.verdict ? "website not checked" : "";
     var bits = [row[5], row[2] ? "mailing address in " + row[2] : "", size(row),
-      row[6] === "inactive" ? "listed as inactive" : "", gone]
+      row[6] === "inactive" ? "listed as inactive" : "", gone, unsure]
       .filter(Boolean).map(KYC.escapeHtml);
     var place = key && cityOfRow[key];
     var pin = place
@@ -338,7 +366,7 @@
       (rows.length
         ? '<p class="faint local-who">' + WHO_SERVES + "</p>" +
           '<label class="sr-only" for="localFilter">' + KYC.escapeHtml("Filter the governments in " +
-          county.name) + "</label>" +
+          (/^City of /.test(county.name) ? "the " : "") + county.name) + "</label>" +
           '<input type="search" id="localFilter" class="local-filter" placeholder="Filter by name, kind or city" autocomplete="off">' +
           '<div id="localGroups">' + groups(rows, "", fips) + "</div>" +
           (sitesNote(rows) ? '<p class="faint local-sites">' + KYC.escapeHtml(sitesNote(rows)) + "</p>" : "")
@@ -384,7 +412,7 @@
         '<p class="faint">As the Census Bureau listed it in 2022' +
         (filed !== here ? ", under " + KYC.escapeHtml(state.counties[filed].name) : "") +
         ", with the website the Bureau listed, as this site last found it.</p>" +
-        '<p class="faint local-who">' + WHO_SERVES_ONE + "</p>";
+        '<p class="faint local-who">' + KYC.escapeHtml(whoServesOne(row)) + "</p>";
     } else if (!NOT_GOVERNING[c[6]]) {
       // Not joined is not "no government" (rule 19): the build found no
       // government in the listing it could tie to this place one to one.
@@ -465,10 +493,15 @@
 
   /* ---------------------------------------------------------------- roster */
 
+  function sortName(name) { return name.replace(/^City of /, ""); }
+
   function countyRoster(filter) {
     var q = KYC.foldText ? KYC.foldText(filter || "") : (filter || "").toLowerCase();
+    // Alphabetical by the place's own name: Virginia's City of Richmond
+    // sorts under R, not among the C's.
     var ids = Object.keys(state.counties).sort(function (a, b) {
-      return state.counties[a].name.localeCompare(state.counties[b].name);
+      return sortName(state.counties[a].name).localeCompare(sortName(state.counties[b].name)) ||
+        state.counties[a].name.localeCompare(state.counties[b].name);
     }).filter(function (fips) {
       if (!q) return true;
       var text = state.counties[fips].name;
@@ -668,6 +701,9 @@
       // (kyc/counties.py labelRoom: the box's half-height, in map units);
       // only in the counties view, where nothing else is drawn on them.
       fits: function (r, px) { return (r.labelRoom || 0) * px >= LABEL_HALF_PX; },
+      // Names only where a quarter of the counties have room for theirs;
+      // the picked county is always named.
+      minShare: 0.25,
       labelClass: "county-label",
       showLabels: function () { return view === "counties"; },
       onSelect: function (fips) { pick(fips); },

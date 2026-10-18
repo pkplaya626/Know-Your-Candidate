@@ -210,6 +210,16 @@ def local_name(fips, name):
     return "City of " + name[:-len(" city")]
 
 
+def with_article(name):
+    """"The City of Richmond" in a sentence; "Baltimore City" as it is."""
+    return "The " + name if name.startswith("City of ") else name
+
+
+def _the_city(name):
+    """"the City of St. Louis" inside a sentence."""
+    return "the " + name if name.startswith("City of ") else name
+
+
 def words(code):
     """``(one, many, button)``: what the state's map areas are called."""
     return AREA_WORDS.get(code, DEFAULT_WORDS)
@@ -250,9 +260,12 @@ def note(code, fips, counties):
     if kind == INDEPENDENT:
         apart = {"24510": " Baltimore County, next to it, is a separate county.",
                  "29510": " St. Louis County, next to it, is a separate county."}.get(fips, "")
-        return (f"{name} is an independent city, outside any county: {_the(gov)} also does the "
-                f"work a county does elsewhere, and the Census Bureau counts it as a city."
-                + apart)
+        # "The City of Richmond is ...: its government ...", once: the
+        # listing's own name for the government spells it another way
+        # ("City of St Louis").
+        return (f"{with_article(name)} is an independent city, outside any county: its "
+                f"government also does the work a county does elsewhere, and the Census Bureau "
+                f"counts it as a city." + apart)
     if kind == STATE:
         return (f"{name} has no county government. It is the Kalaupapa Settlement on Molokai, run "
                 f"by the state Department of Health, and the Census Bureau counts it as part of the "
@@ -320,6 +333,7 @@ def _few(code, counties, lacking):
     if not lacking:
         return ""
     names = [local_name(f, counties[f]["name"]) for f in lacking]
+    names[0] = with_article(names[0])
     unit = {"AK": "borough", "LA": "parish"}.get(code, "county")
     joined = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
     one = len(names) == 1
@@ -389,7 +403,7 @@ def directory_note(code):
     unit = {"AK": "borough", "LA": "parish"}.get(code, "county")
     phrases = []
     for kind in (CONSOLIDATED, INDEPENDENT, STATE, UNORGANIZED, CENSUS_AREA, REGION):
-        names = [local_name(f, e[0]) for f, e in mine if e[1] == kind]
+        names = [_the_city(local_name(f, e[0])) for f, e in mine if e[1] == kind]
         if not names:
             continue
         one = len(names) == 1

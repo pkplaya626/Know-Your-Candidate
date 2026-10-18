@@ -105,16 +105,28 @@ ABBREVIATIONS = {
     "Spec": "Special", "Oper": "Operated", "Supt": "Superintendent", "Voc": "Vocational",
     "Vlg": "Village", "Dev": "Development", "Muni": "Municipal", "Mun": "Municipal",
     "Bd": "Board", "Educ": "Education", "Hosp": "Hospital", "Lib": "Library",
-    "Mgmt": "Management", "Ctr": "Center", "Hts": "Heights", "Spgs": "Springs",
+    "Mgmt": "Management", "Hts": "Heights", "Spgs": "Springs",
     "Cnty": "County", "Dept": "Department", "Coop": "Cooperative", "Redev": "Redevelopment",
     "Prot": "Protection", "Protec": "Protection", "Conserv": "Conservation", "Uf": "Union Free",
     "Wtr": "Water", "Improv": "Improvement", "Transp": "Transportation", "Util": "Utility",
-    "Svcs": "Services", "Rec": "Recreation", "Coll": "College", "Reclamatn": "Reclamation",
-    "Emerg": "Emergency", "Agric": "Agricultural",
+    "Svcs": "Services", "Reclamatn": "Reclamation",
+    "Emerg": "Emergency", "Agric": "Agricultural", "Mtn": "Mountain", "Vlly": "Valley",
+    "Cntrl": "Central",
+    # Texas's underground water conservation districts: both listed ("High
+    # Plains Uwcd 1", "Llano Estacado Uwcd") are filed as water districts.
+    "Uwcd": "Underground Water Conservation District",
 }
 _EDUCATION = {"Sch", "Schs", "School", "Schools", "Schl", "Sh", "Schdt"}
-_COMMUNITY_NEXT = _EDUCATION | {"College", "Coll", "Services", "Serv", "Service", "Ctr", "Center",
+# Not "Ctr": the "Island Co Emergency Svcs Comm Ctr" and the "West Cities
+# Comm Ctr JPA" are communications centers - 911 dispatch - not community
+# centers, and "Comm Ctr" is left as filed.
+_COMMUNITY_NEXT = _EDUCATION | {"College", "Coll", "Services", "Serv", "Service",
                                 "Unit", "Hospital", "Dev", "Development", "Facilities"}
+# "Rec" is Recreation in a park or recreation district's name, Reclamation
+# in the Colton-San Bernardino "Water Rec Auth", Recovery in Corpus
+# Christi's "Aquifer Storage & Rec": written out only before these words,
+# and never after Water.
+_RECREATION_NEXT = {"Park", "Area", "District", "Dist", "Board", "Facilities", "Ds"}
 _VALLEY_NEXT = _EDUCATION | {"Unif", "Unified", "Elem", "Union", "Ctl", "Central", "Jt", "Joint",
                              "Water", "Comm", "Cmty", "Fire", "Sanitary", "Hosp"}
 _COLLEGE_BEFORE = {"Cmty", "Cmnty", "Comm", "Community"}
@@ -154,6 +166,22 @@ def _in_context(word, before, after):
         return "Transportation"
     if word == "Sep" and before in ("Mun", "Municipal"):
         return "Separate"
+    if word == "Rec" and after in _RECREATION_NEXT and before not in ("Water", "Wastewater", "Wtr"):
+        return "Recreation"
+    # A "Coll" is a college only after Community: Marshall County's "Mental
+    # Health Coll" is a collaborative.
+    if word == "Coll" and before in _COLLEGE_BEFORE:
+        return "College"
+    if word == "Ctr" and before != "Comm":
+        return "Center"
+    # Ohio's and New York's school districts: "Buckeye Cent Loc Sch Dist",
+    # "Pymatuning Vall Loc Sch Dist" ("Three Cent Flat" is a place).
+    if word == "Cent" and after in _EDUCATION | {"Loc"}:
+        return "Central"
+    if word == "Loc" and after in _EDUCATION:
+        return "Local"
+    if word == "Vall" and after in _EDUCATION | {"Loc"}:
+        return "Valley"
     return None
 
 
