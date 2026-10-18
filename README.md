@@ -62,7 +62,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (1531 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (1617 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1143,7 +1143,8 @@ Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
 | `seekingReelection2026` | Seat is up **and** the incumbent is on the ballot for it |
 | `raceId` | For a member, the seat they hold; for a challenger, the seat they filed for |
 | `contestRaceId` / `contestLabel` | A member contesting a *different* seat: a redrawn district, the other chamber. Never set for a winner seated since in the seat they won (`raceRole`); their held seat is `heldRaceId` |
-| `alsoRunningId` / `incumbentId` | Cross-link between a member and a separate profile for their own candidacy |
+| `alsoRunningId` / `incumbentId` | Cross-link between a member and a separate profile for their own candidacy, matched first by any FEC id Congress's record lists for the member, then by name and state. The member's profile links that campaign's totals, labelled with its office and FEC id; they are never folded into the member's own (rule 68) |
+| `otherOffice` | Sitting members only: `{text, source, checked}` when they are another office's November nominee ("Republican nominee for Governor of Florida"), from `overrides.OTHER_OFFICE_NOMINEES`, each the winner the election's results page marks, read on `checked`. From the day after Election Day the page says it in the past tense ("Was the ..."), since this site does not read that race's result. Dropped once the member starts a new term |
 | `raceStatus` / `raceStatusRace` | `nominee`, `advanced`, `eliminated`, `withdrawn` or `unlisted`; `qualified` for Louisiana's open-primary House ballot before its count; after Election Day also `elected`, `defeated` or `runoff` (a general-election runoff); and the race it refers to |
 | `ballotParty` / `fecParty` | The party the ballot lists, when it differs from the roster or FEC record |
 | `ballotLine` | For a nominee only: the November ballot line as the results page spells it ("Speak The Truth", "Party for Socialism and Liberation"), when it is not the line of the party shown. Never set for "none", a write-in or a line named after the candidate themselves (an independent petition reads as "Independent"); `party` is never overwritten by it |
@@ -1439,8 +1440,9 @@ Two more tables, each checked by `ballot2026.check()`:
 - `NEXT`: when an office or chamber that is not on the 2026 ballot is next
   elected, only where a statute or the state's own record gives the year
   (Virginia's governor in 2029 by Va. Code 24.2-210, its legislature in
-  2027). Never computed from a term length; an office without an entry
-  shows no year.
+  2027), with the month where it is not November (Louisiana's October
+  round reads "Next election: October 2027"). Never computed from a term
+  length; an office without an entry shows no year.
 - `OPEN_SEATS`: an office on the ballot whose holder is not running for it,
   only from the constitution's term limit (read with the NGA's count of the
   governor's terms) or the election office's certified list of candidates
@@ -1460,7 +1462,11 @@ On the page:
   has it; appointed; chosen by the legislature; no such office), each mark
   linked to its source. Where `OPEN_SEATS` has the office, "Open seat:
   <holder> is term-limited" or "is not on the list of candidates for this
-  office", with the source, until Election Day;
+  office", or, where that list names them, "<holder> is on the list of
+  candidates for this office", with the source, until Election Day. Every
+  other office on the ballot says "Whether <holder> is running for this
+  office is not checked here" (`holderStatus` "unchecked"), so no office
+  is silent beside another's "Open seat";
 - the map has a "2026 governor's races" view: a state electing its governor
   is drawn in the party of its current governor, every other state in the
   empty grey, and the legend says the colour is the current governor's.

@@ -279,9 +279,13 @@
     var seat = item.contestLabel.split(" • ");
     var label = seat[0] === "House" && seat[1] ? seat[1]
       : seat[1] === item.state ? seat[0] : seat.join(" ");
-    return '<span class="badge badge-warn contest" title="' +
-      KYC.escapeAttr("Running for " + item.contestLabel) + '">Running for ' +
-      KYC.escapeHtml(label) + "</span>";
+    // The shared words (KYC.contestLine): "Ran for" after a loss, and a
+    // renumbered seat is "(redrawn)", re-election rather than leaving.
+    var line = KYC.contestLine(item);
+    var words = line.renumbered ? (line.past ? "Ran in " : "Running in ") + label + " (redrawn)"
+      : (line.past ? "Ran for " : "Running for ") + label;
+    return '<span class="badge ' + line.cls + ' contest" title="' +
+      KYC.escapeAttr(line.title) + '">' + KYC.escapeHtml(words) + "</span>";
   }
 
   function badge(spec, item) {
@@ -303,12 +307,16 @@
     // The Truth line": not a second Democratic nominee.
     // Never "Re-elected" for a member who won a seat they did not hold, or
     // for an appointee (KYC.raceStatusOf says the same).
-    var race = KYC.raceStatus(item.raceStatus, "short", {
-      own: !item.isCandidate && (!item.contestLabel || item.raceStatus === "unlisted") &&
-        !item.raceRole && !(item.appointed && item.raceStatus !== "unlisted"),
-      unconfirmed: !!item.raceStatusUnconfirmed,
-      allParty: item.allPartyPrimary,
-    });
+    // The one status for this person (KYC.standing), so a filer the results
+    // do not name reads "Status not known" here as on their card, never
+    // "Challenger" (RACES-04).
+    var race = KYC.standing(item, "short");
+    // A member leaving for another office's ballot: the row is narrow, so
+    // where they are going is in its hover, as the card names it.
+    var going = KYC.otherOffice(item);
+    if (race && going) {
+      race = { cls: race.cls, label: race.label, title: race.title + " " + going.text + "." };
+    }
     if (race) return badge(race, item);
     if (item.isCandidate) return '<span class="badge badge-money">Challenger</span>';
     if (/retiring|not running|defeated|ineligible|resigned/.test(status)) {
@@ -400,9 +408,12 @@
       return;
     }
 
+    // By seat, then in each race's own order (the pipeline's: the seat's
+    // holder, then by surname - TRUST-15).
     var order = function (a, b) {
       return (
         KYC.districtOrder(a) - KYC.districtOrder(b) ||
+        KYC.racePosition(a) - KYC.racePosition(b) ||
         a.name.localeCompare(b.name)
       );
     };
@@ -411,9 +422,18 @@
     // seated" (rule 27), and is listed apart.
     var seated = people.filter(function (x) { return KYC.seated(x); }).sort(order);
     var former = people.filter(function (x) { return x.formerMember; }).sort(order);
+    // A filer the published results do not settle is not counted as a
+    // challenger: Florida's House panel read "2026 challengers 52" over
+    // race headers summing 42 (RACES-04). They are listed apart, under the
+    // words their cards use.
+    var unknown = function (x) {
+      var spec = KYC.standing(x, "short");
+      return !!(spec && spec.unknown);
+    };
     var running = people.filter(function (x) {
-      return x.isCandidate && !KYC.offBallot(x.raceStatus);
+      return x.isCandidate && !KYC.offBallot(x.raceStatus) && !unknown(x);
     }).sort(order);
+    var unsure = people.filter(function (x) { return x.isCandidate && unknown(x); }).sort(order);
     var out = people.filter(function (x) { return x.isCandidate && KYC.offBallot(x.raceStatus); });
 
     /* Texas has 37 representatives and 191 filed challengers. Listing all 228
@@ -461,6 +481,14 @@
         '<span title="Lost the primary, withdrew, or were not on the primary ballot">' +
         out.length + " out</span></p>";
     }
+    if (unsure.length) {
+      html +=
+        '<button type="button" class="panel-subhead expander" id="showUnsure"' +
+        ' aria-expanded="false" aria-controls="unsureRows">' +
+        KYC.icon("chevron") + " Filed; ballot status not known <span>" + unsure.length +
+        "</span></button>" +
+        '<div id="unsureRows" hidden>' + unsure.map(personRow).join("") + "</div>";
+    }
     // The people the results put on the ballot with no profile here: by
     // name for the state's Senate seat, counted for its House seats, with
     // the state page that lists them race by race. Only the view's own
@@ -485,16 +513,17 @@
     list.innerHTML = html;
     list.scrollTop = 0;
 
-    var toggle = doc.getElementById("showChallengers");
-    if (toggle) {
+    [["showChallengers", "challengerRows"], ["showUnsure", "unsureRows"]].forEach(function (pair) {
+      var toggle = doc.getElementById(pair[0]);
+      if (!toggle) return;
       toggle.addEventListener("click", function () {
-        var rows = doc.getElementById("challengerRows");
+        var rows = doc.getElementById(pair[1]);
         var open = rows.hidden;
         rows.hidden = !open;
         toggle.setAttribute("aria-expanded", String(open));
         toggle.classList.toggle("open", open);
       });
-    }
+    });
   }
 
   function select(code, opts) {

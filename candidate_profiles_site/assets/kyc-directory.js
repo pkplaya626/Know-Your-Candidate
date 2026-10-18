@@ -42,12 +42,20 @@
   var offBallot = KYC.cards.offBallot;
 
   var ELECTION_TEST = {
-    // The 35 Senate seats on the 2026 ballot: who held each, by the seat
-    // they held (heldRaceId, from the pipeline), not the one they sit in.
+    // The 2026 Senate races: who held each seat on the ballot, by the seat
+    // they held (heldRaceId, from the pipeline), and everyone running for
+    // them. The chip showed only the holders - Tuberville, Ernst, Durbin
+    // and the rest leaving - and none of the people on the ballot (GRID-10).
+    // A member running for the Senate is there once, as their filing's
+    // profile, which is the one the race lists, or as themselves when they
+    // have none. The key stays, so links shared under it still work.
     senateUp26: function (item) {
-      if (item.heldRaceId) return item.heldRaceId.indexOf("S-") === 0;
-      return item.seatUp2026 && !item.isCandidate &&
-        item.chamber.indexOf("Senate") !== -1;
+      var senate = function (id) { return String(id || "").indexOf("S-") === 0; };
+      if (item.heldRaceId && senate(item.heldRaceId)) return true;
+      if (!item.heldRaceId && item.seatUp2026 && !item.isCandidate &&
+          item.chamber.indexOf("Senate") !== -1) return true;
+      if (!item.isCandidate) return senate(item.contestRaceId) && !KYC.otherCampaign(item);
+      return senate(item.raceId);
     },
     // Incumbents whose seat is up but who are not running again.
     // Not a member running again under a new district number (renumbered):
