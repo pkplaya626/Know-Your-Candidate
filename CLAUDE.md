@@ -152,8 +152,8 @@ python build_profile_site.py oge              # the executive's financial report
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1266 tests, no dependencies
-npm install && npm test                       # 1617 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1302 tests, no dependencies
+npm install && npm test                       # 1796 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1108,7 +1108,7 @@ That check found a retirement note keyed `"Dick Durbin"` when the roster says
 - Add a regression test for any data bug fixed — `tests/test_pipeline.py` for
   core parsing, `tests/test_enrichment.py` for provenance/portraits/FEC/races,
   `tests/test_geo.py` for map geometry, `tests/test_districts.py` for the
-  before-and-after district maps, `tests/test_site.py` for summary
+  before-and-after district maps, `tests/test_frame.py` for the site's frame (about, 404, footers, header tags), `tests/test_site.py` for summary
   figures, emitted files and page wiring, `tests/render_test.js` for anything
   visible on a page.
 - When changing profile fields, update the field tables in `README.md`.
