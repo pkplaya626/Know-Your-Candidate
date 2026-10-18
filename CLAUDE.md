@@ -970,7 +970,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     `kycBuildMeta.congress` into `[data-congress]`; committee rosters are
     shown only while their members sit (`committees_current`) and the
     curated column only while the 119th does, otherwise
-    `committeesPending` says the new rosters are not published yet; a
+    `committeesPending` says the new rosters are not published yet;
+    leadership posts count only when their record began in the sitting
+    Congress (`legislators.held_posts`, checked at build time), because
+    congress-legislators leaves the old Congress's Speaker and leaders
+    open-ended and a re-elected Speaker passes every "seated" test; a
     status note stops at a new term; a member has only their own chamber's
     FEC ids, with any upstream lacks in `overrides.MEMBER_FEC_IDS`, and
     `member-candidacy-id-missing` lists the next one. Tests that describe

@@ -1400,9 +1400,17 @@ here in a different way:
   (`KYC.raceStatus`), and the step a reader is at is marked by their date.
 - **Leaders come from the data.** The Speaker, the floor leaders, the whips
   and the other party posts are listed from congress-legislators'
-  `leadership_roles`, kept per bioguide id in the snapshot (`leadership`) and
-  shown on each member's profile while they sit; tribal leaders from the
-  BIA's directory; a caucus's own style for its minority lead
+  `leadership_roles`, kept per bioguide id in the snapshot (`leadership`,
+  with each post's start) and shown on each member's profile while they
+  sit. A post counts only when its record began in the Congress the
+  snapshot is of (`legislators.held_posts`): the record leaves the sitting
+  Congress's posts open-ended until after the next begins, so in January
+  the lists say the new Congress's leaders are not recorded yet rather
+  than name the last one's. A title the record words as something else is
+  shown in the chamber's words (`overrides.LEADERSHIP_TITLES`: the Senate's
+  "Republican Senatorial Committee Chair"). Tribal leaders come from the
+  BIA's directory, with a disputed leadership said in words and the
+  directory's asterisks dropped; a caucus's own style for its minority lead
   (`overrides.COMMITTEE_TITLES`, "Co-Chair") with the evidence.
 - **Only the page that shows people loads them.** The Congress page loads
   `profiles.js` like a state page; the others load only `kyc.js` and
@@ -2174,7 +2182,7 @@ confirm it, and the answer stays above the map rather than scrolling away.
 | `campaignIssuesUrl` | The page the campaign site links as its issues, platform or priorities | Challengers still running |
 | `disclosureUrl`, `disclosureSource` | The member's latest annual financial disclosure: `house-clerk` (a PDF from the Clerk's annual index) or `senate-efd` (a report in the Senate's eFD system) | Members with a filing on record |
 | `committeeList`, `committeesSource` | `committee-membership-current`, with rank and title (`data/committees.json`); a titled seat also carries `side` (`majority` or `minority`), because a title alone cannot say which - "Vice Chairman" leads the minority on Senate Ethics and Intelligence | Sitting members |
-| `leadership` | The party and chamber posts congress-legislators' `leadership_roles` lists for the member's bioguide id now (Speaker, floor leaders, whips, conference officers); shown on the profile and the guide's Congress page while they sit | Sitting members who hold one |
+| `leadership` | The party and chamber posts congress-legislators' `leadership_roles` lists for the member's bioguide id in the Congress the snapshot is of (Speaker, floor leaders, whips, conference officers; never the previous Congress's open-ended posts), in the chamber's words where `overrides.LEADERSHIP_TITLES` says so; shown on the profile and the guide's Congress page while they sit | Sitting members who hold one |
 | `fecCandidateId` | Links the FEC's own candidate page | Everyone the FEC knows |
 | `rosterFecId` | The curated roster's `FEC Candidate ID` column; the finance lookup takes it as the person's authoritative id, and `validate` checks its office and state against the profile | Curated candidates |
 | `otherFecIds` | The same person's other FEC registrations (one committee's money reported under several ids, or a curated pair in `overrides.SAME_PERSON_FILINGS`); a link shared under any of them opens this profile | People registered more than once |
