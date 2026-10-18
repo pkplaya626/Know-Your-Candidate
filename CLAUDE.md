@@ -40,6 +40,7 @@ data/executives.json        ──┤   (every governor, from the NGA)
 data/statewide_officers.json ─┤   (lieutenant governors, secretaries of state, attorneys general)
 data/courts.json            ──┤   (each state's highest court, from the courts)
 data/voting_links.json      ──┤   (each state's official voting pages: NASS Can I Vote)
+data/voting_dates.json      ──┤   (each jurisdiction's key dates, from its own pages: hand-edited, kyc/voting_dates.py)
 data/federal_executive.json ──┤   (President, VP, Cabinet: White House, office pages, Senate votes)
 data/judiciary.json         ──┤   (every sitting federal judge: FJC directory; the Supreme Court's own list)
 data/judicial_vacancies.json ─┤   (vacancies, announced vacancies and emergencies: uscourts.gov)
@@ -102,7 +103,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `disclosures.json`, `primary_results.json`, `committees.json`,
   `campaigns.json`, `enrichment.json`, `odds.json`,
   `census_governments.json`, `state_legislators.json`, `executives.json`,
-  `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`,
+  `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`, `voting_dates.json`,
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
   `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json` and `local_sites.json` are caches, but
   they *are* hand-editable. `stategov.js` is generated from the last five,
@@ -159,8 +160,8 @@ python build_profile_site.py tribes           # every tribal government and its 
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1541 tests, no dependencies
-npm install && npm test                       # 1987 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1566 tests, no dependencies
+npm install && npm test                       # 2011 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1285,6 +1286,29 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Democrats, or last prices that add up to 128%, is quoted with a note
     saying what it cannot tell, read page-side so `data/odds.js` stays the
     cache's (rule 41).
+
+84. **A date a reader acts on is the office's own, and is said passed on
+    the reader's day.** Seventeen days before the election every state page
+    offered "Register to vote" - Georgia's twelve days after its deadline -
+    and gave no early-voting or mail-ballot date, because typing dates in
+    was refused as drift. Each jurisdiction's dates are now a hand-edited
+    cache, `data/voting_dates.json`, read from the election office's own
+    pages, calendars and statutes and re-opened by a second reader. Every
+    value the page shows carries its page's address and words
+    (`voting_dates.SHOWN`; a time or "postmarked" may stand on its date's
+    source), on the jurisdiction's own domain or an evidenced entry in
+    `OFFICIAL_ELSEWHERE`; a compiled table is refused wherever it appears
+    (rule 50), vote.gov included, and vote.gov's deadlines page is not
+    shown beside the state's own dates (rule 53). A December date the
+    results reader also holds must be the same date in both. The pipeline
+    writes the words; the page only decides, on the reader's own calendar
+    day, which have passed: "Register to vote" then says when it closed,
+    and from the day after the election only a ballot still arriving and a
+    runoff stay, the runoff in the past tense once gone (rule 63). A null
+    is a gap and says nothing; a researcher's note is never shown. A
+    runoff says what it decides (`RUNOFF_WORDS`): Arkansas's December 1 is
+    not a runoff for Congress. The cycle's dates are reread each cycle, and
+    `check` refuses a date outside it.
 
 ## District maps
 
