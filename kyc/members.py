@@ -306,6 +306,10 @@ def names_someone(text, own, others):
         if full and re.search(r"(?<![a-z0-9])" + re.escape(full) + r"(?![a-z0-9])", seen):
             return True
     folded = enrich.fold(text)
+    for name in others.get("bare", ()):
+        # A coinage on a name that stands alone: "Obamacare", "Bidenomics".
+        if name and re.search(r"(?<![a-z])" + re.escape(name) + r"[a-z]+", folded):
+            return True
     for word in words & set(others.get("surnames", ())):
         if word in others.get("bare", ()):
             return True
@@ -722,12 +726,22 @@ def read_site(profile, others, pause=PAUSE, render=chrome_dom, fetch=_markup_of,
     return record
 
 
+# The recent Presidents and Vice Presidents, whom a banner filed among a
+# member's issues names as often as the sitting ones ("Biden's Border
+# Crisis"). Biden and Obama name someone alone, and in coinages
+# ("Obamacare"); the others only as a name, since Harris, Clinton and Bush
+# are also counties and a plant.
+FORMER = ("Joe Biden", "Kamala Harris", "Barack Obama", "Mike Pence",
+          "George W. Bush", "Dick Cheney", "Bill Clinton", "Hillary Clinton", "Al Gore")
+FORMER_BARE = ("biden", "obama")
+
+
 def people_named(profiles, executive=None):
-    """The names a platform line may not carry: every member's, and the
-    President's, the Vice President's and the Cabinet's (``others`` for
-    :func:`names_someone`)."""
-    full, surnames, bare = set(), set(), set()
-    names = [p.get("name") for p in profiles if is_member(p)]
+    """The names a platform line may not carry: every member's, the
+    President's, the Vice President's and the Cabinet's, and recent former
+    ones' (``others`` for :func:`names_someone`)."""
+    full, surnames, bare = set(), set(), set(FORMER_BARE)
+    names = [p.get("name") for p in profiles if is_member(p)] + list(FORMER)
     executive = executive or {}
     top = [(executive.get(k) or {}).get("name") for k in ("president", "vicePresident")]
     cabinet = [((o.get("holder") or {}).get("name")) for o in executive.get("offices") or []]

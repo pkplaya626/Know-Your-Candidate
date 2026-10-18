@@ -228,6 +228,15 @@ class TestTheIssuesTheirSiteLists(unittest.TestCase):
                                              "Steny Hoyer", OTHERS),
                          ["Federal Employees", "Jobs & the Economy", "Environment"])
 
+    def test_a_former_president_is_someone_else_too(self):
+        others = members.people_named([], {"president": {"name": "Donald J. Trump"},
+                                           "vicePresident": {"name": "J.D. Vance"}})
+        for text, named in (("Biden's Border Crisis", True), ("Repeal Obamacare", True),
+                            ("Bidenomics", True), ("Trump Accounts", True),
+                            ("President Clinton's Legacy", True), ("Harris County Flooding", False),
+                            ("Clinton River Restoration", False), ("Advance Directives", False)):
+            self.assertEqual(members.names_someone(text, "Rick Larsen", others), named, text)
+
     def test_the_index_is_the_link_that_says_issues_before_one_that_says_priorities(self):
         home = self.page('<a href="/about/priorities">Priorities</a>'
                          '<a href="/issues/">On the Issues</a>'
