@@ -2871,7 +2871,7 @@
    },
    "ambiguous": [],
    "article": {
-    "H4AL06098": "Gary Palmer"
+    "H4AL06098": "Gary Palmer (politician)"
    },
    "decided": {
     "general": true,
@@ -6821,7 +6821,7 @@
   "H-DE-00-2026": {
    "about": {
     "H4DE00045": "incumbent U.S. Representative",
-    "H6DE01121": "medical doctor"
+    "H6DE01121": "medical doctor and candidate for Maryland's 1st congressional district in 2008"
    },
    "ambiguous": [],
    "article": {
@@ -6890,6 +6890,8 @@
    "listNames": {
     "H4FL01197": "Gay Valimont",
     "H6FL01390": "Jimmy Patronis",
+    "H6FL01515": "Douglas Chico",
+    "H6FL01523": "John Frankman",
     "H6FL01549": "Tyler L. Davis"
    },
    "listParty": {
@@ -6900,7 +6902,7 @@
    "names": {
     "H4FL01197": "Gay Valimont",
     "H6FL01390": "Jimmy Patronis",
-    "H6FL01515": "Douglas C. Chico",
+    "H6FL01515": "Douglas Chico",
     "H6FL01523": "John Frankman",
     "H6FL01549": "Tyler L. Davis"
    },
@@ -6954,8 +6956,18 @@
    },
    "label": {},
    "listNames": {
+    "H4FL01247": "Keith Gross",
+    "H4FL02138": "Yen Bailey",
+    "H6FL02281": "Nicholas Zateslo",
     "H6FL02299": "Amanda Marie Green",
-    "H6FL02331": "Austin Rogers"
+    "H6FL02315": "Evan Power",
+    "H6FL02323": "Nick Lewis",
+    "H6FL02331": "Austin Rogers",
+    "H6FL02349": "Audie Rowell",
+    "H6FL02356": "Jim Norton",
+    "H6FL02364": "Luke Murphy",
+    "H6FL02380": "Lee Jones",
+    "H6FL02398": "Brice Barnes"
    },
    "listParty": {
     "H6FL02299": "Democratic",
@@ -6963,6 +6975,7 @@
    },
    "names": {
     "H4FL01247": "Keith Gross",
+    "H4FL02138": "Yen Bailey",
     "H6FL02281": "Nicholas Zateslo",
     "H6FL02299": "Amanda Marie Green",
     "H6FL02315": "Evan Power",
@@ -7035,7 +7048,10 @@
    "listNames": {
     "H0FL03175": "Kat Cammack",
     "H6FL03099": "Seth Harp",
-    "H6FL03149": "Mike Klein"
+    "H6FL03115": "Troy Albers",
+    "H6FL03131": "George Hubac",
+    "H6FL03149": "Mike Klein",
+    "H8FL03020": "Tom Wells"
    },
    "listParty": {
     "H0FL03175": "Republican",
@@ -7108,6 +7124,8 @@
    "listNames": {
     "H2FL04211": "Aaron Bean",
     "H4FL04068": "Todd Schaefer",
+    "H6FL04204": "Brit Robinson",
+    "H6FL04220": "Michael Kirwan",
     "H6FL04246": "Mike Sell",
     "H6FL05193": "LaShonda \"L.J.\" Holloway"
    },
@@ -7179,7 +7197,10 @@
    "label": {},
    "listNames": {
     "H6FL04105": "John H. Rutherford",
-    "H6FL05250": "Rachel Grage"
+    "H6FL05201": "Mark Kaye",
+    "H6FL05235": "Mark Heggestad",
+    "H6FL05250": "Rachel Grage",
+    "H6FL05284": "Alex Hazen"
    },
    "listParty": {
     "H6FL04105": "Republican",
@@ -7241,8 +7262,15 @@
    },
    "label": {},
    "listNames": {
+    "H6FL06241": "Aaron Baker",
     "H6FL06258": "Randy Fine",
-    "H6FL06340": "Eric Yonce"
+    "H6FL06324": "Aaron Baker",
+    "H6FL06332": "Ronnie \"Ron\" Murchinson-Rivera",
+    "H6FL06340": "Eric Yonce",
+    "H6FL06357": "Charles Gambaro",
+    "H6FL06381": "Robert David Cooper II",
+    "H6FL06407": "Steve Morgan",
+    "H6FL06415": "Dan Bilzerian"
    },
    "listParty": {
     "H6FL06258": "Republican",
@@ -7252,11 +7280,11 @@
     "H6FL06241": "Aaron Baker",
     "H6FL06258": "Randy Fine",
     "H6FL06324": "Aaron Baker",
-    "H6FL06332": "Ronnie Murchinson-Rivera",
+    "H6FL06332": "Ronnie \"Ron\" Murchinson-Rivera",
     "H6FL06340": "Eric Yonce",
     "H6FL06357": "Charles Gambaro",
     "H6FL06373": "Will Furry",
-    "H6FL06381": "Robert Cooper",
+    "H6FL06381": "Robert David Cooper II",
     "H6FL06407": "Steve Morgan",
     "H6FL06415": "Dan Bilzerian",
     "H6FL21067": "Amr Metwally"
@@ -7324,9 +7352,14 @@
    },
    "label": {},
    "listNames": {
+    "H2FL07156": "Cory Lee Mills",
+    "H4FL07152": "Michael Don Johnson",
+    "H6FL07165": "Marialana Kinter",
     "H6FL07215": "Bale Dalton",
+    "H6FL07223": "Sarah Ulrich",
     "H6FL07231": "Ryan Elijah",
-    "H6FL07249": "Christopher Dennison"
+    "H6FL07249": "Christopher Dennison",
+    "H6FL08213": "Alan Grayson"
    },
    "listParty": {
     "H6FL07215": "Democratic",
@@ -7334,8 +7367,8 @@
     "H6FL07249": "Libertarian"
    },
    "names": {
-    "H2FL07156": "Cory Mills",
-    "H4FL07152": "Mike Johnson",
+    "H2FL07156": "Cory Lee Mills",
+    "H4FL07152": "Michael Don Johnson",
     "H6FL07165": "Marialana Kinter",
     "H6FL07173": "Noah Widmann",
     "H6FL07215": "Bale Dalton",
@@ -7449,15 +7482,21 @@
    },
    "label": {},
    "listNames": {
+    "H4FL09182": "Thomas E. Chalifoux Jr.",
+    "H4FL09190": "Marcus Carter",
     "H6FL09179": "Darren Soto",
-    "H6FL09294": "Dan Green"
+    "H6FL09252": "Justin Story",
+    "H6FL09278": "Ben Butler",
+    "H6FL09286": "Jorge Martinez",
+    "H6FL09294": "Dan Green",
+    "H6FL10185": "Steve Rance"
    },
    "listParty": {
     "H6FL09179": "Democratic",
     "H6FL09294": "Republican"
    },
    "names": {
-    "H4FL09182": "Thomas Chalifoux",
+    "H4FL09182": "Thomas E. Chalifoux Jr.",
     "H4FL09190": "Marcus Carter",
     "H6FL09179": "Darren Soto",
     "H6FL09252": "Justin Story",
@@ -7570,7 +7609,13 @@
    "label": {},
    "listNames": {
     "H4FL11089": "Ralph Groves",
+    "H6FL11233": "Dan Williams",
+    "H6FL11241": "Royal Webster",
+    "H6FL11266": "Ivette Palomo",
+    "H6FL11282": "Tim Wilkins",
+    "H6FL11316": "Nizam Razack",
     "H6FL11332": "Joe Strada",
+    "H6FL11340": "Carey Baker",
     "H6FL11357": "James Pericola"
    },
    "listParty": {
@@ -7652,6 +7697,7 @@
    "listNames": {
     "H6FL09070": "Gus Michael Bilirakis",
     "H6FL12231": "Branden Scrivener",
+    "H6FL15192": "Darren McAuley",
     "H6FL15200": "Kimberly Overman"
    },
    "listParty": {
@@ -7714,7 +7760,9 @@
    "label": {},
    "listNames": {
     "H0FL13158": "Anna Paulina Luna",
+    "H4FL13176": "John William Liccione",
     "H4FL13234": "Tony D'Arrigo",
+    "H6FL13254": "Brandt Robinson",
     "H6FL13312": "Leela Gray"
    },
    "listParty": {
@@ -7724,12 +7772,12 @@
    },
    "names": {
     "H0FL13158": "Anna Paulina Luna",
-    "H4FL13176": "John Liccione",
+    "H4FL13176": "John William Liccione",
     "H4FL13234": "Tony D'Arrigo",
     "H6FL13221": "Jeff Moore",
     "H6FL13239": "Earle Ford",
     "H6FL13247": "Reggie Paros",
-    "H6FL13254": "Timothy Brandt Robinson",
+    "H6FL13254": "Brandt Robinson",
     "H6FL13262": "Karla Kemp",
     "H6FL13312": "Leela Gray",
     "H6FL14138": "Amaro Lionheart",
@@ -7769,7 +7817,7 @@
    "ambiguous": [],
    "article": {
     "H6FL11126": "Kathy Castor",
-    "H6FL14229": "Kevin Steele",
+    "H6FL14229": "Kevin Steele (politician)",
     "H6FL14237": "Mike Beltran"
    },
    "certified": {
@@ -7791,7 +7839,14 @@
    },
    "label": {},
    "listNames": {
+    "H2FL11125": "Gavriel E. Soriano",
+    "H4FL14117": "Robert \"Rocky\" Rochford",
+    "H4FL14141": "John Peters",
     "H6FL11126": "Kathy Castor",
+    "H6FL14161": "Ergin \"Batman\" Tek",
+    "H6FL14195": "Michael Marcel",
+    "H6FL14211": "Bea Valenti",
+    "H6FL14229": "Kevin M. Steele",
     "H6FL14237": "Mike Beltran",
     "H6FL14245": "Brian Lambert"
    },
@@ -7801,7 +7856,7 @@
     "H6FL14245": "Libertarian"
    },
    "names": {
-    "H2FL11125": "Gavriel Soriano",
+    "H2FL11125": "Gavriel E. Soriano",
     "H4FL14117": "Robert \"Rocky\" Rochford",
     "H4FL14141": "John Peters",
     "H6FL11126": "Kathy Castor",
@@ -7810,7 +7865,7 @@
     "H6FL14179": "Dan Weldon",
     "H6FL14195": "Michael Marcel",
     "H6FL14211": "Bea Valenti",
-    "H6FL14229": "Kevin Steele",
+    "H6FL14229": "Kevin M. Steele",
     "H6FL14237": "Mike Beltran",
     "H6FL14245": "Brian Lambert"
    },
@@ -7874,6 +7929,7 @@
    "label": {},
    "listNames": {
     "H2FL15241": "Laurel Lee",
+    "H6FL12199": "Christopher Irizarry",
     "H6FL15168": "Robert People"
    },
    "listParty": {
@@ -7882,7 +7938,7 @@
    },
    "names": {
     "H2FL15241": "Laurel Lee",
-    "H6FL12199": "Chris Irizarry",
+    "H6FL12199": "Christopher Irizarry",
     "H6FL15168": "Robert People",
     "H6FL15226": "Steve Champion"
    },
@@ -7932,7 +7988,13 @@
    },
    "label": {},
    "listNames": {
+    "H2FL13139": "Jan Schneider",
+    "H4FL16179": "Eddie Speir",
     "H6FL06365": "Mark Davis",
+    "H6FL16109": "Glenn Pearson",
+    "H6FL16117": "Jon Harris",
+    "H6FL16125": "Tamika Lyles",
+    "H6FL16133": "Ed Pope",
     "H6FL16141": "Sydney Gruters",
     "H6FL16158": "Kelly Kirschner"
    },
@@ -8011,6 +8073,7 @@
    "label": {},
    "listNames": {
     "H4FL17060": "Matthew Montavon",
+    "H6FL17065": "Allen L. Spence Jr.",
     "H6FL17081": "Michael J. Quirk",
     "H8FL17053": "Greg Steube"
    },
@@ -8021,7 +8084,7 @@
    },
    "names": {
     "H4FL17060": "Matthew Montavon",
-    "H6FL17065": "Allen Spence",
+    "H6FL17065": "Allen L. Spence Jr.",
     "H6FL17081": "Michael J. Quirk",
     "H8FL17053": "Greg Steube"
    },
@@ -8128,9 +8191,20 @@
    },
    "label": {},
    "listNames": {
+    "H4FL14091": "Robert M. Neeld",
+    "H6FL19111": "Howard Sapp",
+    "H6FL19129": "Jim Oberweis",
     "H6FL19137": "Jim Schwartzel",
+    "H6FL19145": "Mike Pedersen",
+    "H6FL19160": "Ola Hawatmeh",
+    "H6FL19178": "Madison Cawthorn",
+    "H6FL19186": "Catalina Lauf",
+    "H6FL19194": "John Strand",
+    "H6FL19228": "Chris Collins",
     "H6FL19277": "Victor Arias",
-    "H6FL19319": "Seth Haskin"
+    "H6FL19301": "Linda J. Sawyer",
+    "H6FL19319": "Seth Haskin",
+    "H6FL19335": "Greg \"Tex\" Bukowski"
    },
    "listParty": {
     "H6FL19137": "Republican",
@@ -8138,7 +8212,7 @@
     "H6FL19319": "No Party Affiliation"
    },
    "names": {
-    "H4FL14091": "Robert Neeld",
+    "H4FL14091": "Robert M. Neeld",
     "H4FL26095": "Johnny Fratto",
     "H6FL19111": "Howard Sapp",
     "H6FL19129": "Jim Oberweis",
@@ -8152,7 +8226,7 @@
     "H6FL19210": "Stephen Elliott",
     "H6FL19228": "Chris Collins",
     "H6FL19277": "Victor Arias",
-    "H6FL19301": "Linda Sawyer",
+    "H6FL19301": "Linda J. Sawyer",
     "H6FL19319": "Seth Haskin",
     "H6FL19335": "Greg \"Tex\" Bukowski"
    },
@@ -8232,9 +8306,15 @@
     "H6FL20119": "Independent Party of Florida"
    },
    "listNames": {
+    "H2FL20159": "Dale V.C. Holness",
     "H4FL20023": "Debbie Wasserman Schultz",
+    "H4FL20098": "Luther \"UncleLuke\" Campbell",
+    "H6FL20069": "Rod Joseph",
+    "H6FL20077": "Elijah Manley",
     "H6FL20119": "Kedner Maxime",
-    "H6FL20143": "Brent Andersen"
+    "H6FL20127": "Lateresa \"LA\" Jones",
+    "H6FL20143": "Brent Andersen",
+    "H8FL20032": "Sheila Cherfilus-McCormick"
    },
    "listParty": {
     "H4FL20023": "Democratic",
@@ -8242,13 +8322,13 @@
     "H6FL20143": "Republican"
    },
    "names": {
-    "H2FL20159": "Dale Holness",
+    "H2FL20159": "Dale V.C. Holness",
     "H4FL20023": "Debbie Wasserman Schultz",
-    "H4FL20098": "Luther Campbell",
+    "H4FL20098": "Luther \"UncleLuke\" Campbell",
     "H6FL20069": "Rod Joseph",
     "H6FL20077": "Elijah Manley",
     "H6FL20119": "Kedner Maxime",
-    "H6FL20127": "Lateresa Jones",
+    "H6FL20127": "Lateresa \"LA\" Jones",
     "H6FL20135": "Maisha Williams",
     "H6FL20143": "Brent Andersen",
     "H6FL20150": "Clifford Fleetwood",
@@ -8321,6 +8401,7 @@
    "label": {},
    "listNames": {
     "H6FL18097": "Brian Mast",
+    "H6FL21034": "Bernard Taylor",
     "H6FL21075": "James T. Martin",
     "H6FL21109": "Alexander Cooke"
    },
@@ -8384,7 +8465,13 @@
    "label": {},
    "listNames": {
     "H6FL21059": "Pia Dandiya",
-    "H6FL22248": "Casey Askar"
+    "H6FL22156": "David Burck",
+    "H6FL22180": "Michael Thompson",
+    "H6FL22206": "Belinda Keiser",
+    "H6FL22214": "Terri Hasdorff",
+    "H6FL22222": "Kaysia Earley",
+    "H6FL22248": "Casey Askar",
+    "H6FL25035": "Michael Carbonara"
    },
    "listParty": {
     "H6FL21059": "Democratic",
@@ -8465,7 +8552,10 @@
    "label": {},
    "listNames": {
     "H2FL14053": "Lois Frankel",
-    "H2FL21132": "Deborah Adeimy"
+    "H2FL21132": "Deborah Adeimy",
+    "H4FL23134": "Mark Piper",
+    "H6FL22107": "Victoria Doyle",
+    "H6FL22172": "Paola Branda"
    },
    "listParty": {
     "H2FL14053": "Democratic",
@@ -8540,8 +8630,14 @@
    },
    "label": {},
    "listNames": {
+    "H0FL17092": "Roderick Vereen",
+    "H0FL17118": "Rudolph Moise",
     "H6FL14203": "Te Mayonna Brown",
-    "H6FL24095": "Oliver G. Gilbert III"
+    "H6FL24079": "Jean Monestime",
+    "H6FL24087": "Shevrin \"Shev\" Jones",
+    "H6FL24095": "Oliver G. Gilbert III",
+    "H6FL24111": "Kendrick Meek",
+    "H6FL24129": "Marshall L. Davis Sr."
    },
    "listParty": {
     "H6FL14203": "Republican",
@@ -8549,15 +8645,15 @@
    },
    "names": {
     "H0FL17092": "Roderick Vereen",
-    "H0FL17118": "Rudy Moise",
+    "H0FL17118": "Rudolph Moise",
     "H2FL24037": "Christine Sanon-Jules",
     "H6FL14203": "Te Mayonna Brown",
     "H6FL24061": "Andy Daro",
     "H6FL24079": "Jean Monestime",
-    "H6FL24087": "Shevrin Jones",
+    "H6FL24087": "Shevrin \"Shev\" Jones",
     "H6FL24095": "Oliver G. Gilbert III",
-    "H6FL24111": "Kendrick Meek Jr.",
-    "H6FL24129": "Marshall Davis Sr.",
+    "H6FL24111": "Kendrick Meek",
+    "H6FL24129": "Marshall L. Davis Sr.",
     "W000808": "Frederica Wilson"
    },
    "page": "2026 United States House of Representatives elections in Florida",
@@ -8622,7 +8718,12 @@
    },
    "label": {},
    "listNames": {
+    "H2FL20043": "Joseph \"Joe\" Kaufman",
+    "H2FL21108": "Dan Franzese",
     "H2FL22171": "Jared Moskowitz",
+    "H6FL23139": "Raven Harrison",
+    "H6FL23147": "George R. Moraitis",
+    "H6FL23154": "Oliver Adams Larkin",
     "H6FL23188": "Scott Singer",
     "H6FL25068": "Peter Jassenoff"
    },
@@ -8632,12 +8733,12 @@
     "H6FL25068": "Libertarian"
    },
    "names": {
-    "H2FL20043": "Joseph Kaufman",
+    "H2FL20043": "Joseph \"Joe\" Kaufman",
     "H2FL21108": "Dan Franzese",
     "H2FL22171": "Jared Moskowitz",
     "H6FL23139": "Raven Harrison",
-    "H6FL23147": "George Moraitis",
-    "H6FL23154": "Oliver Larkin",
+    "H6FL23147": "George R. Moraitis",
+    "H6FL23154": "Oliver Adams Larkin",
     "H6FL23188": "Scott Singer",
     "H6FL25068": "Peter Jassenoff"
    },
@@ -8751,6 +8852,8 @@
    },
    "label": {},
    "listNames": {
+    "H4FL27028": "Michael Arias V.",
+    "H6FL27072": "Robin Peguero",
     "H6FL27098": "Eliott Rodriguez",
     "H8FL27185": "Maria Elvira Salazar"
    },
@@ -8759,7 +8862,7 @@
     "H8FL27185": "Republican"
    },
    "names": {
-    "H4FL27028": "Vincent Michael Arias",
+    "H4FL27028": "Michael Arias V.",
     "H4FL27036": "Mike Davey",
     "H6FL27056": "Richard Lamondin",
     "H6FL27072": "Robin Peguero",
@@ -9160,7 +9263,7 @@
    },
    "ambiguous": [],
    "article": {
-    "H0GA08099": "Austin Scott"
+    "H0GA08099": "Austin Scott (politician)"
    },
    "decided": {
     "general": true,
@@ -14593,7 +14696,7 @@
    },
    "ambiguous": [],
    "article": {
-    "H6MS01131": "Trent Kelly",
+    "H6MS01131": "Trent Kelly (politician)",
     "H6MS01305": "Kelvin Buck"
    },
    "decided": {
@@ -16662,7 +16765,7 @@
    "ambiguous": [],
    "article": {
     "H0NM03102": "Teresa Leger Fernández",
-    "H6NM03083": "Martin Zamora"
+    "H6NM03083": "Martin R. Zamora"
    },
    "decided": {
     "general": true,
@@ -20529,13 +20632,15 @@
     "H6SD01117": "Casey Crabtree",
     "H6SD01133": "Billy Mawhiney",
     "H6SD01141": "Nicole Gronli",
-    "H6SD01158": "James Bialota Jr."
+    "H6SD01158": "James Bialota Jr.",
+    "H6SD01166": "Jack Pittman"
    },
    "page": "2026 United States House of Representatives election in South Dakota",
    "party": {
     "H6SD01109": "republican",
     "H6SD01141": "democratic",
-    "H6SD01158": "republican"
+    "H6SD01158": "republican",
+    "H6SD01166": "independent"
    },
    "site": {
     "H6SD01109": "https://martyjackley.com/"
@@ -20545,7 +20650,8 @@
     "H6SD01117": "withdrawn",
     "H6SD01133": "withdrawn",
     "H6SD01141": "nominee",
-    "H6SD01158": "eliminated"
+    "H6SD01158": "eliminated",
+    "H6SD01166": "nominee"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -22575,7 +22681,7 @@
    },
    "ambiguous": [],
    "article": {
-    "H2TX33040": "Roger Williams"
+    "H2TX33040": "Roger Williams (Texas politician)"
    },
    "certified": {
     "complete": true,
@@ -25425,18 +25531,22 @@
     "H6WY01207": "Keith Goodenough"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
     ]
    },
-   "label": {},
+   "label": {
+    "H0WY01051": "Constitution Party"
+   },
    "names": {
+    "H0WY01051": "Jeffrey Haggit",
     "H6WY00217": "Chuck Gray",
     "H6WY00225": "Jillian Balow",
     "H6WY00233": "David Giralt",
     "H6WY00241": "Bo Biteman",
+    "H6WY01108": "Daniel Workman",
     "H6WY01116": "Reid Rasner",
     "H6WY01140": "Kevin Christensen",
     "H6WY01157": "Frank Chapman",
@@ -25447,10 +25557,12 @@
    },
    "page": "2026 United States House of Representatives election in Wyoming",
    "party": {
+    "H0WY01051": "constitution party",
     "H6WY00217": "republican",
     "H6WY00225": "republican",
     "H6WY00233": "republican",
     "H6WY00241": "republican",
+    "H6WY01108": "independent",
     "H6WY01116": "republican",
     "H6WY01140": "republican",
     "H6WY01165": "republican",
@@ -25462,10 +25574,12 @@
     "H6WY00217": "https://chuckforwyoming.com/"
    },
    "status": {
+    "H0WY01051": "nominee",
     "H6WY00217": "nominee",
     "H6WY00225": "eliminated",
     "H6WY00233": "eliminated",
     "H6WY00241": "eliminated",
+    "H6WY01108": "nominee",
     "H6WY01116": "eliminated",
     "H6WY01140": "eliminated",
     "H6WY01157": "withdrawn",
@@ -25476,10 +25590,12 @@
    },
    "unmatched": {
     "Elena del Real": "eliminated",
-    "John Romero-Martinez": "eliminated"
+    "John Romero-Martinez": "eliminated",
+    "Shawn Johnson": "nominee"
    },
    "unmatchedParty": {
-    "Elena del Real": "Democratic"
+    "Elena del Real": "Democratic",
+    "Shawn Johnson": "Libertarian"
    },
    "unsure": []
   },
@@ -25918,8 +26034,15 @@
    "label": {},
    "listNames": {
     "S6FL00640": "Ashley Moody",
+    "S6FL00764": "Neelam Taneja Perry",
+    "S6FL00772": "Neelam Taneja Perry",
+    "S6FL00780": "Neelam Taneja Perry",
     "S6FL00830": "Angie Nixon",
-    "S6FL00863": "Neil J. Gillespie"
+    "S6FL00848": "Chris Gleason",
+    "S6FL00855": "Alex Vindman",
+    "S6FL00863": "Neil J. Gillespie",
+    "S6FL00871": "Neelam Taneja Perry",
+    "S6FL00897": "Ernest \"Ernie\" Rivera"
    },
    "listParty": {
     "S6FL00640": "Republican",
@@ -25939,7 +26062,7 @@
     "S6FL00855": "Alex Vindman",
     "S6FL00863": "Neil J. Gillespie",
     "S6FL00871": "Neelam Taneja Perry",
-    "S6FL00897": "Ernie Rivera"
+    "S6FL00897": "Ernest \"Ernie\" Rivera"
    },
    "page": "2026 United States Senate election in Florida",
    "party": {
@@ -27255,10 +27378,7 @@
     "S4NJ00532": "former Deputy Mayor of Tabernacle Township and perennial candidate",
     "S6NJ00495": "{{cite web"
    },
-   "ambiguous": [
-    "Natalie Lynn Rivera",
-    "Natalie Rivera"
-   ],
+   "ambiguous": [],
    "article": {
     "S4NJ00185": "Cory Booker"
    },
@@ -27281,6 +27401,7 @@
     "S4NJ00532": "Justin Murphy",
     "S6NJ00354": "Saxon Callahan",
     "S6NJ00388": "Lisa McCormick",
+    "S6NJ00396": "Natalie Rivera",
     "S6NJ00404": "Chris Fields",
     "S6NJ00412": "Alex Zdan",
     "S6NJ00420": "Richard Tabor",
@@ -27294,6 +27415,7 @@
     "S4NJ00185": "democratic",
     "S4NJ00532": "republican",
     "S6NJ00388": "democratic",
+    "S6NJ00396": "republican",
     "S6NJ00404": "democratic",
     "S6NJ00412": "republican",
     "S6NJ00420": "republican",
@@ -27311,6 +27433,7 @@
     "S4NJ00532": "nominee",
     "S6NJ00354": "withdrawn",
     "S6NJ00388": "eliminated",
+    "S6NJ00396": "eliminated",
     "S6NJ00404": "eliminated",
     "S6NJ00412": "eliminated",
     "S6NJ00420": "eliminated",
@@ -27318,16 +27441,10 @@
     "S6NJ00495": "nominee"
    },
    "unmatched": {
-    "Alex Hammerli": "withdrawn",
-    "Natalie Lynn Rivera": "withdrawn",
-    "Natalie Rivera": "eliminated"
+    "Alex Hammerli": "withdrawn"
    },
-   "unmatchedParty": {
-    "Natalie Rivera": "Republican"
-   },
-   "unsure": [
-    "S6NJ00396"
-   ]
+   "unmatchedParty": {},
+   "unsure": []
   },
   "S-NM-2026": {
    "about": {

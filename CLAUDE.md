@@ -1034,10 +1034,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     matched as a results page's are (rule 62), with an apostrophe inside a
     surname kept ("D'Arrigo") and a surname written with a space or a
     hyphen one spelling ("Kim Varet", "Kim-Varet"), or one person's two
-    spellings on a page fit one filing twice and it reads "ambiguous". The
-    name shown is chosen by its source: an exact or evidenced match, a
-    list's printed name (never one in capitals), and a page's only for a
-    hyphen or a short form of the filed first name. When the matcher began
+    spellings on a page fit one filing twice and it reads "ambiguous" -
+    as New Jersey's "Natalie Rivera" and "Natalie Lynn Rivera" did, under
+    two headings' Withdrawn lists that the parser had gathered into one
+    "table" (it splits them back now). The name shown is chosen by its
+    source: an exact or evidenced match, a list's name for anyone it holds,
+    printed or not (Florida's "Yen Bailey" lost the primary; never a name
+    in capitals), and a page's only for a hyphen or a short form of the
+    filed first name. A person's article is the one a piped link names
+    over a bare link's redirect (NM-3's "Martin R. Zamora"). When the matcher began
     settling names that used to be claimed, the Florida Senate nominee lost
     "Gillespie" to the FEC's misspelling, and a page's "Matthew" replaced a
     campaign's "Matt". A certified write-in is not printed, and is not read

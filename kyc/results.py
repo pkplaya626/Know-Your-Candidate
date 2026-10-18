@@ -1012,6 +1012,9 @@ def _match_spellings(outcome, boxes, rows, aliases, matched, ambiguous):
     return matched
 
 
+_COUNTY_CONVENTION = re.compile(r"\bcounty\b.*\bconvention\b", re.I)
+
+
 def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
                  general_held=False, general_runoff=False, general_runoff_held=False):
     """Who is still standing, from a race's results tables.
@@ -1087,7 +1090,13 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
     # Who lost a decided contest. Nothing below may turn them into anything
     # else: a convention's "Withdrawn" list naming a primary loser, or a
     # ''(withdrawn)'' on their primary row, does not undo the count.
-    lost = _losers(primaries, runoffs) - {r["name"] for r in generals if not r["withdrawn"]}
+    # A county convention is not one of them: New Jersey's award the
+    # county's ballot line, and the primary comes after. NJ-7's Megan
+    # O'Rourke lost two and withdrew before the primary; once the page's
+    # two apostrophes were read as one name, those tables made her
+    # "eliminated" - "Lost the primary" - over the Withdrawn list.
+    decided = {t: rows for t, rows in primaries.items() if not _COUNTY_CONVENTION.search(t)}
+    lost = _losers(decided, runoffs) - {r["name"] for r in generals if not r["withdrawn"]}
     for name in lost:
         status[name] = ELIMINATED
 
@@ -1601,7 +1610,11 @@ for _formal, _shorts in NICKNAMES.items():
         _FORMAL.setdefault(_short, set()).add(_formal)
 
 
-_INNER_APOSTROPHE = re.compile("(?<=[a-z])['’](?=[a-z])")
+# Only after a one-letter prefix (D', O', L'): elsewhere an apostrophe
+# still parts the word, as it always did, so TX-37's page "Ge'Neill Gary"
+# still fits the filing's "GARY, GE'NELL" on "Ge", where joined the two
+# given names disagreed and a primary loser lost her result.
+_INNER_APOSTROPHE = re.compile(r"(?<=\b[a-z])['’](?=[a-z])")
 
 
 def _tokens(name):

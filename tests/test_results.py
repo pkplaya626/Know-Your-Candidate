@@ -949,6 +949,14 @@ class TestNamesThePageMayUse(unittest.TestCase):
         self.assertEqual(found, {"Tony D'Arrigo": ["H4FL13234"]})
         found, _ = results.match_names(["Tony D’Arrigo"], rows)
         self.assertEqual(found, {"Tony D’Arrigo": ["H4FL13234"]})
+        # Only after a one-letter prefix: TX-37's page writes "Ge'Neill
+        # Gary", the FEC "GARY, GE'NELL". Joined, the given names disagreed
+        # and a primary loser lost her result (it held on "Ge" before).
+        rows = [{"candidate_id": "H6TX37026", "name": "GARY, GE'NELL"},
+                {"candidate_id": "H6TX37001", "name": "PENA, LAUREN B"}]
+        found, _ = results.match_names(["Ge'Neill Gary"], rows)
+        self.assertEqual(found, {"Ge'Neill Gary": ["H6TX37026"]})
+        self.assertEqual(results._tokens("Megan O’Rourke"), ["megan", "orourke"])
         # A quoted nickname still stands on its own.
         self.assertEqual(results._tokens("HENRY C. 'HANK' SMITH"),
                          ["henry", "c", "hank", "smith"])
@@ -1205,11 +1213,21 @@ class TestWithdrawals(unittest.TestCase):
         ])
         boxes = results.parse_boxes(text) + results.candidate_lists(text)
         out = results.resolve_race(boxes)
-        self.assertEqual(out, {"Alex Zdan": "nominee", "Natalie Rivera": "eliminated"})
+        # A county convention awards a ballot line, not the primary: losing
+        # one does not outrank the Withdrawn list (main read her
+        # "eliminated", "Lost the primary", and NJ-7's Megan O'Rourke too).
+        self.assertEqual(out, {"Alex Zdan": "nominee", "Natalie Rivera": "withdrawn"})
         rows = [{"candidate_id": "S6NJ00396", "name": "RIVERA, NATALIE"},
                 {"candidate_id": "S6NJ00412", "name": "ZDAN, ALEX"}]
         found, ambiguous = results.match_names(list(out), rows)
         self.assertEqual((found["Natalie Rivera"], ambiguous), (["S6NJ00396"], []))
+        # A primary's loss still stands over a Withdrawn list.
+        text = "\n".join([
+            box("Republican primary results", ("Alex Zdan", 50, True), ("Pat Late", 5, False)),
+            "====Withdrawn====", "* Pat Late, after the count",
+        ])
+        boxes = results.parse_boxes(text) + results.candidate_lists(text)
+        self.assertEqual(results.resolve_race(boxes)["Pat Late"], "eliminated")
         # Two alike names under one heading are still two people.
         text = "====Withdrawn====\n* Dan Sullivan, a\n* Daniel Sullivan, b\n"
         boxes = results.candidate_lists(text)
