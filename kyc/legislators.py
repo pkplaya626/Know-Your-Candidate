@@ -308,21 +308,51 @@ def _fec_ids(entry, chamber):
 def leadership(entry, chamber, as_of=None):
     """The member's party and chamber leadership posts held on *as_of*, as
     congress-legislators records them (``leadership_roles``): ``[{"title",
-    "chamber"}]``, the current chamber's only. A post with an end date
-    before *as_of* is over; one with none is held. The guide named the
-    Speaker and the floor leaders' jobs and never who held them (rule 48:
-    from the data, never typed)."""
+    "chamber", "start"}]``, the current chamber's only. The guide named the Speaker
+    and the floor leaders' jobs and never who held them (rule 48: from the
+    data, never typed).
+
+    The record opens one entry per post per Congress and leaves the current
+    one without an end until someone closes it, after the next Congress has
+    begun. So a post is held on *as_of* only when its entry began in the
+    Congress sitting then (``cycle.congress_start``): on January 4, 2027 the
+    119th's Speaker, still open-ended upstream, is not the 120th's, and
+    until the new posts are recorded nobody is shown holding one (rule 68).
+    A post with an end date before *as_of* is over."""
     side = "senate" if chamber == "Senate" else "house"
+    opened = None
+    if as_of:
+        from . import cycle
+        opened = cycle.congress_start(cycle.congress_for_date(as_of)).isoformat()
     out = []
     for role in entry.get("leadership_roles") or []:
         title = (role.get("title") or "").strip()
+        start = str(role.get("start") or "")
         end = str(role.get("end") or "")
         if not title or (role.get("chamber") or "") != side:
             continue
         if end and (not as_of or end < as_of):
             continue
-        out.append({"title": title, "chamber": side})
+        if opened and (not start or start < opened):
+            continue
+        out.append({"title": title, "chamber": side, "start": start})
     return out
+
+
+def held_posts(person, congress):
+    """The titles of the leadership posts a snapshot entry holds in the
+    *congress*th Congress: those whose record began on or after its first
+    day. Checked again at build time, against the Congress the snapshot is
+    of, because a snapshot carried into a new Congress (or the rehearsal's
+    fictional one) still holds the old Congress's open-ended posts, and a
+    re-elected Speaker passes every "is seated" test (rule 68). With no
+    Congress to check against, nobody holds one."""
+    if not congress:
+        return []
+    from . import cycle
+    opened = cycle.congress_start(congress).isoformat()
+    return [post["title"] for post in (person or {}).get("leadership") or []
+            if str(post.get("start") or "") >= opened]
 
 
 def trim(entry, social=None, as_of=None):

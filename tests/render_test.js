@@ -4623,6 +4623,49 @@ async function testGuide() {
 
     if (slug !== "congress") continue;
 
+    suite(`${page} — who leads each chamber, from the data`, () => {
+      // Who leads each chamber, from each member's leadership posts.
+      const leaders = D.querySelector('.guide-live[data-live="leaders-house"]');
+      const speaker = window.legislatorsData.find((p) => KYC.seated(p) &&
+        (p.leadership || []).includes("Speaker of the House"));
+      check("the House's leaders are named from the data, the Speaker first",
+        !speaker || (leaders.querySelector(".guide-person") &&
+          leaders.querySelector(".guide-person").getAttribute("data-id") === speaker.id &&
+          /Speaker of the House/.test(leaders.querySelector(".guide-person").textContent)),
+        leaders.textContent.slice(0, 120));
+      const senateLeads = [...D.querySelectorAll('.guide-live[data-live="leaders-senate"] .guide-person')];
+      check("every name in the Senate's list is a sitting senator holding that post",
+        senateLeads.every((b) => {
+          const p = KYC.byId(b.getAttribute("data-id"));
+          return p && KYC.seated(p) && /Senate/.test(p.chamber || "") &&
+            (p.leadership || []).some((t) => b.textContent.includes(t));
+        }), `${senateLeads.length} senators`);
+      // A new Congress's posts reach the record days after it sits; until
+      // then nobody is shown holding one, and the list says so rather than
+      // naming the last Congress's leaders (legislators.held_posts).
+      for (const ch of ["house", "senate"]) {
+        const box = D.querySelector(`.guide-live[data-live="leaders-${ch}"]`);
+        const any = window.legislatorsData.some((p) => KYC.seated(p) &&
+          (ch === "senate") === /Senate/.test(p.chamber || "") && (p.leadership || []).length);
+        check(`the ${ch === "senate" ? "Senate" : "House"} list names its leaders, or says this Congress's are not recorded yet`,
+          any ? box.querySelectorAll(".guide-person").length > 0
+            : /lists nobody in a \w+ leadership post for the \d+(st|nd|rd|th) Congress yet/.test(box.textContent),
+          box.textContent.slice(0, 160));
+      }
+      {
+        const saved = window.legislatorsData.map((p) => p.leadership);
+        window.legislatorsData.forEach((p) => { delete p.leadership; });
+        const box = D.createElement("div");
+        window.KYC.guide.live["leaders-senate"](box);
+        window.legislatorsData.forEach((p, i) => { if (saved[i]) p.leadership = saved[i]; });
+        check("with no post recorded for the sitting Congress, the list names nobody and says so",
+          !box.querySelector(".guide-person") &&
+            new RegExp(`for the ${KYC.ordinal(window.kycBuildMeta.congress)} Congress yet`).test(box.textContent) &&
+            !!box.querySelector('a[href="https://www.senate.gov/senators/leadership.htm"]'),
+          box.textContent);
+      }
+    });
+
     suite(`${page} — who leads each committee, from the data`, () => {
       const live = D.querySelector('.guide-live[data-live="committees"]');
       const table = KYC.meta().committees || {};
@@ -4657,22 +4700,6 @@ async function testGuide() {
         check("the caucus's minority lead is its Co-Chair, as the caucus styles it",
           /Co-Chair/.test(lead) && !/Chairman/.test(lead), lead);
       }
-      // Who leads each chamber, from each member's leadership posts.
-      const leaders = D.querySelector('.guide-live[data-live="leaders-house"]');
-      const speaker = window.legislatorsData.find((p) => KYC.seated(p) &&
-        (p.leadership || []).includes("Speaker of the House"));
-      check("the House's leaders are named from the data, the Speaker first",
-        !speaker || (leaders.querySelector(".guide-person") &&
-          leaders.querySelector(".guide-person").getAttribute("data-id") === speaker.id &&
-          /Speaker of the House/.test(leaders.querySelector(".guide-person").textContent)),
-        leaders.textContent.slice(0, 120));
-      const senateLeads = [...D.querySelectorAll('.guide-live[data-live="leaders-senate"] .guide-person')];
-      check("every name in the Senate's list is a sitting senator holding that post",
-        senateLeads.every((b) => {
-          const p = KYC.byId(b.getAttribute("data-id"));
-          return p && KYC.seated(p) && /Senate/.test(p.chamber || "") &&
-            (p.leadership || []).some((t) => b.textContent.includes(t));
-        }), `${senateLeads.length} senators`);
       const people = [...live.querySelectorAll(".guide-person")];
       check("every name is a sitting member who holds a titled seat on that committee",
         people.length > 80 && people.every((b) => {

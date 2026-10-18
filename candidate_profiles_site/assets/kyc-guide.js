@@ -519,7 +519,21 @@
         rows.push({ person: person, title: title, rank: leadRank(title) });
       });
     });
-    if (!rows.length) return;      // the fallback stays: a link to each chamber's own list
+    if (!(global.legislatorsData || []).length) return;  // the fallback stays: each chamber's own list
+    if (!rows.length) {
+      // A new Congress's posts reach the record days after it sits, and the
+      // previous Congress's are never shown in their place
+      // (legislators.held_posts): say so, and where to look meanwhile.
+      var info = global.kycBuildMeta || {};
+      var own = chamber === "senate"
+        ? '<a href="https://www.senate.gov/senators/leadership.htm">the Senate&#8217;s own list</a>'
+        : '<a href="https://www.house.gov/leadership">the House&#8217;s own list</a>';
+      target.innerHTML = '<p class="faint guide-pending">The congress-legislators record lists nobody in a ' +
+        (chamber === "senate" ? "Senate" : "House") + " leadership post for the " +
+        (info.congress ? KYC.escapeHtml(KYC.ordinal(info.congress)) + " Congress" : "sitting Congress") +
+        " yet. Until it does, see " + own + ".</p>";
+      return;
+    }
     rows.sort(function (a, b) {
       return a.rank - b.rank || a.title.localeCompare(b.title);
     });
