@@ -1507,6 +1507,62 @@
     return "party-" + partyKey(item);
   }
 
+  /* ------------------------------------------------------------- hatches */
+
+  /* "Split" and "none" are told apart from the colours around them by a
+   * hatch as well as a colour, a cue that does not depend on seeing hue:
+   * to a deuteranope the old split lilac was the Democratic blue, and every
+   * divided state read as Democratic (audit 2026-10-17, VISUALS-03). A map
+   * draws the patterns in its own SVG at its own scale (hatchDefs) and
+   * names them on the SVG as custom properties (hatchVars); a shape's fill
+   * then names the property with its plain colour as the fallback
+   * (svgFill), so a map with no patterns still draws the colour. One fill
+   * per shape, no clip or mask (rule 45). */
+  var HATCHES = {
+    "split": ["var(--split)", "var(--split-hatch)", 0.4],
+    "split-soft": ["color-mix(in srgb, var(--split) 70%, var(--surface-1))",
+      "color-mix(in srgb, var(--split-hatch) 70%, var(--surface-1))", 0.4],
+    "none": ["var(--none-fill)", "var(--none-hatch)", 0.22],
+  };
+  var HATCHED = { "var(--split)": "split", "var(--none-fill)": "none" };
+
+  /** The patterns, *unit* map units apart (about 6px on screen), with ids
+   *  that begin with *prefix*. */
+  function hatchDefs(prefix, unit) {
+    var u = (+unit || 6).toFixed(2);
+    var w = function (share) { return (unit * share).toFixed(2); };
+    return "<defs>" + Object.keys(HATCHES).map(function (key) {
+      var h = HATCHES[key];
+      return '<pattern id="' + prefix + "hatch-" + key + '" patternUnits="userSpaceOnUse" width="' +
+        u + '" height="' + u + '" patternTransform="rotate(45)">' +
+        '<rect width="' + u + '" height="' + u + '" style="fill:' + h[0] + '"/>' +
+        '<rect width="' + w(h[2]) + '" height="' + u + '" style="fill:' + h[1] + '"/></pattern>';
+    }).join("") + "</defs>";
+  }
+
+  /** The style that names the patterns for the shapes inside an SVG. */
+  function hatchVars(prefix) {
+    return Object.keys(HATCHES).map(function (key) {
+      return "--hatch-" + key + ":url(#" + prefix + "hatch-" + key + ")";
+    }).join(";");
+  }
+
+  /** A shape's fill: a hatched colour names its pattern, the colour after. */
+  function svgFill(fill) {
+    var key = HATCHED[fill];
+    return key ? "var(--hatch-" + key + ", " + fill + ")" : fill;
+  }
+
+  /** The same fill as an HTML background, for a legend swatch or a callout. */
+  function swatchFill(fill) {
+    var key = HATCHED[fill];
+    if (!key) return fill;
+    var h = HATCHES[key];
+    var edge = (5 * h[2]).toFixed(1);
+    return "repeating-linear-gradient(135deg, " + h[1] + " 0 " + edge + "px, " + h[0] + " " +
+      edge + "px 5px)";
+  }
+
   /* Search across everything a voter might reasonably type, not just name
    * and state. Absent fields are excluded so "not disclosed" does not match
    * every profile at once. */
@@ -2202,6 +2258,10 @@
     hasValue: hasValue,
     partyKey: partyKey,
     partyClass: partyClass,
+    hatchDefs: hatchDefs,
+    hatchVars: hatchVars,
+    svgFill: svgFill,
+    swatchFill: swatchFill,
     seatStrip: seatStrip,
     seatKey: seatKey,
     // data

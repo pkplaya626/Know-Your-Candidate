@@ -1255,7 +1255,7 @@
     (archive() ? state.plans : [state.plans[0]]).forEach(function (plan) {
       numbers(plan).forEach(function (n) { shown[partyOf(plan, n)] = true; });
     });
-    var keys = [["d", "Democrat"], ["r", "Republican"], ["i", "Independent"],
+    var keys = [["d", "Democratic"], ["r", "Republican"], ["i", "Independent"],
       ["vacant", "Vacant seat"]].filter(function (p) { return shown[p[0]]; });
     var items = keys.map(function (p) {
       return '<span class="key"><span class="swatch party-fill-' + p[0] + '"></span>' +

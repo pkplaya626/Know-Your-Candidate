@@ -11,6 +11,7 @@
  *                                      ink: "var(--text)" }; },  // ink: a callout's text, optional
  *     label: function (code) { return code; },   // optional: the word drawn on a state
  *     onSelect: function (code) { ... },          // a click, Enter or Space
+ *     marked: function (code) { return false; },   // optional: outline the state
  *   });
  *   map.draw(); map.paint();
  *
@@ -88,21 +89,52 @@
         labels.push({ x: x, y: y, html: html, cls: cls, extra: extra || "" });
       }
 
+      /* A word's box in map units, for the collision pass below: 11px bold
+       * capitals run about 0.68em each, with the backing's padding either
+       * side. Generous, so a box that clears here clears on screen. */
+      var CHAR = 0.68 * size;
+      var PAD = 0.5 * size;
+      function boxAt(x, y, text, minWidth) {
+        var bw = Math.max(minWidth || 0, String(text).length * CHAR + PAD);
+        return { x: x, y: y, w: bw, h: size * 1.3 };
+      }
+      function hits(a, b) {
+        return Math.abs(a.x - b.x) * 2 < a.w + b.w && Math.abs(a.y - b.y) * 2 < a.h + b.h;
+      }
+      var placed = [];
+      function free(b) {
+        return !placed.some(function (o) { return hits(b, o); });
+      }
+
+      /* A word drawn away from its shape - a callout, a territory's tile -
+       * carries the place's code with the view's value: the circuit map's
+       * Northeast callouts read "2, 1, 1, 1, 2" and its territories "1, 3,
+       * 9, 9" with nothing saying which was which (VISUALS-17). A word
+       * inside its shape needs only the value. */
+      function awayText(code) {
+        var word = String(labelText(code));
+        return word === code ? code : code + " " + word;
+      }
+
       // A callout: the state's word in a box of its colour, joined to it.
-      var w = size * 2.3;
       var h = size * 1.4;
       var lines = [];
-      function callout(code, cx, cy) {
+      function calloutWidth(code) {
+        return Math.max(size * 2.3, awayText(code).length * CHAR + PAD);
+      }
+      function callout(code, cx, cy, cw) {
         var at = geo.states[code].label;
         lines.push('<line class="callout-line" x1="' + at[0] + '" y1="' + at[1] + '" x2="' +
-          (cx - w / 2).toFixed(1) + '" y2="' + cy.toFixed(1) + '"/>');
-        label(cx, cy, KYC.escapeHtml(labelText(code)), "map-callout",
+          (cx - cw / 2).toFixed(1) + '" y2="' + cy.toFixed(1) + '"/>');
+        label(cx, cy, KYC.escapeHtml(awayText(code)), "map-callout",
           ' data-state="' + KYC.escapeAttr(code) + '"');
+        placed.push({ x: cx, y: cy, w: cw, h: h });
       }
 
       var parts = [];
       var column = [];
       var beside = [];
+      var fits = [];
       Object.keys(geo.states).sort().forEach(function (code) {
         var shape = geo.states[code];
         parts.push(shapeMarkup(code, shape.name, shape.d));
@@ -110,43 +142,99 @@
         // edges, not at its centroid (kyc/geo.py polylabel).
         if (!shape.label) return;
         if ((shape.labelRoom || 0) * px >= FIT_PX) {
-          label(shape.label[0], shape.label[1], KYC.escapeHtml(labelText(code)), "state-code");
+          fits.push(code);
         } else if (inStrip.indexOf(code) === -1) {
           // D.C. is named in the strip below, so it needs no callout.
           (shape.label[0] >= EAST ? column : beside).push(code);
         }
       });
 
+      /* No word may sit on another (TECH-08): at 320-390px, Mississippi's
+       * code sat on Alabama's and Arkansas's, and West Virginia's callout on
+       * Vermont's and New Hampshire's, so one read "WV T". The roomiest
+       * states keep their place; a code that would cover one already placed
+       * moves half a line up or down, and failing that becomes a callout. */
+      var fitted = [];
+      fits.sort(function (a, b) {
+        return (geo.states[b].labelRoom || 0) - (geo.states[a].labelRoom || 0) || (a < b ? -1 : 1);
+      }).forEach(function (code) {
+        var at = geo.states[code].label;
+        var text = labelText(code);
+        var tries = [[0, 0], [0, -0.55], [0, 0.55], [-0.35, 0], [0.35, 0], [0, -1.1], [0, 1.1]];
+        for (var i = 0; i < tries.length; i++) {
+          var b = boxAt(at[0] + tries[i][0] * CHAR * 2, at[1] + tries[i][1] * size * 1.3, text);
+          if (free(b)) {
+            placed.push(b);
+            fitted.push([code, b]);
+            return;
+          }
+        }
+        (at[0] >= EAST ? column : beside).push(code);
+      });
+
+      /* A callout beside its state, unless it would cover a word already
+       * placed or reach the column of callouts in the Atlantic: then it
+       * joins that column. */
+      var colWidth = Math.max.apply(null, [size * 2.3].concat(column.concat(beside).map(calloutWidth)));
+      var colLeft = box[2] - 6 / px - colWidth;
+      var besideAt = [];
+      beside.forEach(function (code) {
+        var shape = geo.states[code];
+        var cw = calloutWidth(code);
+        var b = { x: shape.bounds[2] + 6 / px + cw / 2, y: shape.label[1], w: cw, h: h };
+        var tries = [0, -1, 1].map(function (dy) { return { x: b.x, y: b.y + dy * h, w: cw, h: h }; });
+        var spot = tries.filter(function (t) { return free(t) && t.x + cw / 2 < colLeft - 3 / px; })[0];
+        if (spot) {
+          placed.push(spot);
+          besideAt.push([code, spot]);
+        } else {
+          column.push(code);
+        }
+      });
+      placed = placed.filter(function (b) { return besideAt.every(function (e) { return e[1] !== b; }); });
+
+      fitted.forEach(function (f) {
+        label(f[1].x, f[1].y, KYC.escapeHtml(labelText(f[0])), "state-code");
+      });
       var gap = h + 3 / px;
-      var cx = box[2] - 6 / px - w / 2;
+      var cx = box[2] - 6 / px - colWidth / 2;
       var y = -Infinity;
       column.sort(function (a, b) { return geo.states[a].label[1] - geo.states[b].label[1]; })
         .forEach(function (code) {
           y = Math.max(geo.states[code].label[1], y + gap, COLUMN_TOP + h / 2);
-          callout(code, cx, y);
+          callout(code, cx, y, colWidth);
         });
-      beside.forEach(function (code) {
-        var shape = geo.states[code];
-        callout(code, shape.bounds[2] + 6 / px + w / 2, shape.label[1]);
+      besideAt.forEach(function (e) {
+        callout(e[0], e[1].x, e[1].y, e[1].w);
       });
 
       // Territories are not in the atlas - three of them sit thousands of miles
       // outside the frame - so they get a strip of schematic shapes, at least
-      // 28px across so each can be tapped, below the column of callouts.
+      // 28px across so each can be tapped, below the column of callouts. On
+      // a narrow phone the row did not fit beside its caption and American
+      // Samoa fell off the right edge (TECH-08): the caption goes above it.
       var tile = Math.max(40, 28 / px);
       var step = tile + Math.max(6, 10 / px);
+      var need = strip.length * step - (step - tile);
       var top = Math.max(STRIP_Y, y + h / 2 + 8 / px);
       var tileHeight = tile * 35 / 40;
-      label(STRIP_LEFT - 10 / px, top + tileHeight / 2,
-        "Territories &amp; D.C.<br>(not to scale)", "territory-caption anchor-end");
+      var left = STRIP_LEFT;
+      var caption = "Territories &amp; D.C.<br>(not to scale)";
+      if (STRIP_LEFT + need > box[2] - 6 / px) {
+        left = Math.max(6 / px, (box[2] - need) / 2);
+        label(left, top + size * 0.7, caption.replace("<br>", " "), "territory-caption anchor-start");
+        top += size * 1.6;
+      } else {
+        label(STRIP_LEFT - 10 / px, top + tileHeight / 2, caption, "territory-caption anchor-end");
+      }
       var territories = [];
       strip.forEach(function (territory, i) {
-        var x = STRIP_LEFT + i * step;
+        var x = left + i * step;
         territories.push(
           '<g transform="translate(' + x.toFixed(1) + "," + top.toFixed(1) + ") scale(" +
           (tile / 40).toFixed(3) + ')">' +
           shapeMarkup(territory.code, territory.name, territory.d, null, "state--detached") + "</g>");
-        label(x + tile / 2, top + tileHeight + size * 0.8, KYC.escapeHtml(labelText(territory.code)),
+        label(x + tile / 2, top + tileHeight + size * 0.8, KYC.escapeHtml(awayText(territory.code)),
           "territory-label");
       });
 
@@ -154,7 +242,9 @@
       // than the atlas itself.
       var height = top + tileHeight + size * 1.6;
       svg.setAttribute("viewBox", box[0] + " " + box[1] + " " + box[2] + " " + height.toFixed(1));
-      svg.innerHTML =
+      // The hatches (KYC.hatchDefs) about 6px apart on screen at this width.
+      svg.setAttribute("style", KYC.hatchVars(ids.svg + "-"));
+      svg.innerHTML = KYC.hatchDefs(ids.svg + "-", 6 / px) +
         '<g id="mapStates">' + parts.join("") + "</g>" +
         '<g aria-hidden="true">' + lines.join("") + "</g>" +
         '<g id="mapTerritories">' + territories.join("") + "</g>";
@@ -236,7 +326,9 @@
         function (node) {
           var code = node.getAttribute("data-state");
           var shown = look(code);
-          node.style.fill = shown.fill;
+          node.style.fill = KYC.svgFill(shown.fill);
+          // A mark the caller draws as an outline (a special election).
+          node.classList.toggle("is-marked", !!(opts.marked && opts.marked(code)));
           node.setAttribute("aria-pressed", String(code === selected));
           var title = node.querySelector("title");
           if (title) title.textContent = shown.text;
@@ -248,16 +340,20 @@
         function (node) {
           var code = node.getAttribute("data-state");
           var shown = look(code);
-          node.style.background = shown.fill;
+          // A hatched fill hatches the box's edge, never behind the word.
+          var hatch = KYC.swatchFill(shown.fill);
+          node.style.background = hatch === shown.fill ? shown.fill
+            : "linear-gradient(" + shown.fill + ", " + shown.fill + ") padding-box, " + hatch + " border-box";
+          node.classList.toggle("is-hatched", hatch !== shown.fill);
           // A callout's word is dark on the bright fills of the partisan
           // map; a faint fill names its own ink so the word stays legible.
           // A surface grey (a state with no value) takes the page's text
           // colour unless told otherwise: the inverse text was 1.15:1 on it
           // in the light theme and 1.02:1 in the dark.
-          var surface = /--surface-/.test(shown.fill || "");
+          var surface = /--surface-|--none-fill/.test(shown.fill || "");
           node.style.color = shown.ink || (surface ? "var(--text)" : "");
           // A grey box on the grey page needs an edge to be seen as a box.
-          node.style.borderColor = surface ? "var(--text-faint)" : "";
+          node.style.borderColor = surface && hatch === shown.fill ? "var(--text-faint)" : "";
           node.classList.toggle("is-selected", code === selected);
         }
       );

@@ -68,10 +68,14 @@
   /** Who held the state's 2026 Senate seat, from its race: a senator who
    *  has since left still defends it for their party, and the record names
    *  them even with no profile here. */
-  function senateDefender(code) {
-    var race = (global.kycRaces || []).filter(function (r) {
+  function senateRace(code) {
+    return (global.kycRaces || []).filter(function (r) {
       return r.chamber === "Senate" && r.state === code;
-    })[0];
+    })[0] || null;
+  }
+
+  function senateDefender(code) {
+    var race = senateRace(code);
     if (!race) return null;
     var holder = race.incumbentIds.map(KYC.byId).filter(Boolean)[0];
     if (holder) return holder;
@@ -82,18 +86,46 @@
   /* ---------------------------------------------------------------- fills */
 
   var VACANT_FILL = "var(--text-faint)";
-  var NONE_FILL = "var(--surface-2)";
+  /* Nothing to show is the grey kept for that (--none-fill, hatched by
+   * KYC.svgFill): the page's own surface made those states black holes in
+   * the dark and AMOLED themes (VISUALS-19, RACES-17). */
+  var NONE_FILL = "var(--none-fill)";
   var UNKNOWN_FILL = "var(--surface-3)";
+  var SPLIT_FILL = "var(--split)";
+  var I_FILL = "var(--party-i-fill)";
 
-  function mix(demShare) {
-    // 0 = wholly Republican, 1 = wholly Democratic; the midpoint reads as the
-    // split colour rather than a muddy blend of the two party colours.
-    var pct = Math.round(Math.max(0, Math.min(1, demShare)) * 100);
-    if (pct >= 50) {
-      return "color-mix(in srgb, var(--party-d) " + ((pct - 50) * 2) +
-        "%, var(--split))";
-    }
-    return "color-mix(in srgb, var(--party-r) " + ((50 - pct) * 2) + "%, var(--split))";
+  /** A party's colour, lighter in weight: a majority short of the whole
+   *  delegation, or an open seat. Mixed toward the card, so it is a step of
+   *  lightness from the party's own colour, which a reader who cannot see
+   *  hue still tells apart. */
+  function tint(key) {
+    return "color-mix(in srgb, var(--party-" + key + ") 60%, var(--surface-1))";
+  }
+
+  /* The House view in five labelled steps. A continuous ramp from red
+   * through purple to blue had no values on it, so a reader could learn a
+   * delegation's split only by clicking each state, and to a deuteranope
+   * its Democratic half was one colour (VISUALS-09, VISUALS-03). An even
+   * delegation is the hatched split. */
+  var HOUSE_STEPS = [
+    ["allR", "var(--party-r)", "All R"],
+    ["majR", tint("r"), "R majority"],
+    ["even", SPLIT_FILL, "Even"],
+    ["majD", tint("d"), "D majority"],
+    ["allD", "var(--party-d)", "All D"],
+  ];
+
+  function houseStep(d, r) {
+    if (!d) return HOUSE_STEPS[0];
+    if (!r) return HOUSE_STEPS[4];
+    return d > r ? HOUSE_STEPS[3] : d < r ? HOUSE_STEPS[1] : HOUSE_STEPS[2];
+  }
+
+  /** The word's colour on a fill a callout is drawn in: the split and the
+   *  tints are mid-tones, where the page's text reads and the inverse does
+   *  not. */
+  function inkFor(fill) {
+    return fill === SPLIT_FILL ? "var(--split-ink)" : /color-mix/.test(fill) ? "var(--text)" : "";
   }
 
   function stateMode() {
@@ -112,10 +144,11 @@
       if (!seats) fill = NONE_FILL;
       else if (s.r === seats) fill = "var(--party-r)";
       else if (s.d === seats) fill = "var(--party-d)";
-      else if (s.i === seats) fill = "var(--party-i)";
-      else fill = "var(--split)";
+      else if (s.i === seats) fill = I_FILL;
+      else fill = SPLIT_FILL;
       return {
         fill: fill,
+        ink: inkFor(fill),
         // D.C. and the territories elect no senators: "0R, 0D" read as a
         // count of senators found.
         text: !seats ? code + ": no senators (not a state)" :
@@ -129,11 +162,12 @@
       var fill2;
       if (!held && h.vacant) fill2 = VACANT_FILL;
       else if (!held) fill2 = NONE_FILL;
-      else if (h.i === held) fill2 = "var(--party-i)";
-      else if (!(h.d + h.r)) fill2 = "var(--party-i)";
-      else fill2 = mix(h.d / (h.d + h.r));
+      else if (h.i === held) fill2 = I_FILL;
+      else if (!(h.d + h.r)) fill2 = I_FILL;
+      else fill2 = houseStep(h.d, h.r)[1];
       return {
         fill: fill2,
+        ink: inkFor(fill2),
         text: code + " House: " + h.r + "R, " + h.d + "D" +
           (h.i ? ", " + h.i + "I" : "") + (h.vacant ? ", " + h.vacant + " vacant" : ""),
       };
@@ -154,9 +188,18 @@
     // An appointee was never elected or nominated to the seat: never
     // "re-elected", "renominated" or "lost re-election" (KYC.raceStatusOf).
     var own = !defender.appointed && !defender.raceRole;
+    // An open seat is the party's colour lighter in weight; a special
+    // election is outlined (RACES-21). Both were only in the hover text,
+    // which a touch reader never sees.
+    var race = senateRace(code) || {};
+    var fill3 = key === "vacant" ? VACANT_FILL : race.openSeat && key !== "i" ? tint(key)
+      : key === "i" ? I_FILL : "var(--party-" + key + ")";
     return {
-      fill: key === "vacant" ? VACANT_FILL : "var(--party-" + key + ")",
-      text: code + ": 2026 Senate race — " + party + " seat (" +
+      fill: fill3,
+      ink: inkFor(fill3),
+      special: !!race.special,
+      text: code + ": 2026 Senate race — " + (race.special ? "special election, " : "") +
+        (race.openSeat ? "open " : "") + party + " seat (" +
         defender.name + (status === "eliminated" ? " lost the primary" :
           status === "advanced" ? " in a primary runoff" :
           status === "elected" ? (own ? " re-elected" : " elected") :
@@ -179,6 +222,8 @@
   var map = KYC.usmap.create({
     look: appearance,
     onSelect: function (code) { select(code); },
+    // A special election's state is outlined (RACES-21).
+    marked: function (code) { return mode === "senate2026" && !!appearance(code).special; },
   });
 
   /* --------------------------------------------------------------- legend */
@@ -191,16 +236,37 @@
     senate: [
       ["var(--party-r)", "Both Republican"],
       ["var(--party-d)", "Both Democratic"],
-      ["var(--split)", "Split, or one independent"],
-      ["var(--party-i)", "Both independent", "allIndependent"],
+      [SPLIT_FILL, "Split, or one independent"],
+      [I_FILL, "Both independent", "allIndependent"],
       [NONE_FILL, "No senators (D.C. and territories)"],
     ],
     senate2026: [
-      ["var(--party-r)", "Republican seat up"],
-      ["var(--party-d)", "Democratic seat up"],
+      ["var(--party-r)", "Republican seat, incumbent running"],
+      [tint("r"), "Republican seat, open", "open:r"],
+      ["var(--party-d)", "Democratic seat, incumbent running"],
+      [tint("d"), "Democratic seat, open", "open:d"],
+      ["special", "Special election (outlined)", "special"],
       [NONE_FILL, "No race in 2026"],
     ],
   };
+
+  /** Is a legend key's fill drawn on some state? Only keys the map uses. */
+  function legendShown(entry) {
+    var want = entry[2];
+    if (!want) return true;
+    if (want === "allIndependent") return allIndependent("senate");
+    var races = (global.kycRaces || []).filter(function (r) { return r.chamber === "Senate"; });
+    if (want === "special") return races.some(function (r) { return r.special; });
+    return races.some(function (r) {
+      var held = senateDefender(r.state);
+      return r.openSeat && held && KYC.partyKey(held) === want.split(":")[1];
+    });
+  }
+
+  function swatch(fill) {
+    if (fill === "special") return '<span class="swatch swatch-special"></span>';
+    return '<span class="swatch" style="background:' + KYC.swatchFill(fill) + '"></span>';
+  }
 
   /* Does any state's delegation in *chamber* consist only of independents? */
   function allIndependent(chamber) {
@@ -215,30 +281,26 @@
     var target = doc.getElementById("mapLegend");
     if (stateMode()) {
       target.innerHTML = KYC.stategov.legend(mode).map(function (entry) {
-        return '<span class="key"><span class="swatch" style="background:' +
-          entry[0] + '"></span>' + KYC.escapeHtml(entry[1]) + "</span>";
+        return '<span class="key">' + swatch(entry[0]) + KYC.escapeHtml(entry[1]) + "</span>";
       }).join("");
       return;
     }
     if (mode === "house") {
-      target.innerHTML = [
-        '<span class="key"><span class="party-r">All R</span>',
-        '<span class="ramp" style="background:linear-gradient(to right,',
-        "var(--party-r),var(--split),var(--party-d))\"></span>",
-        '<span class="party-d">All D</span></span>',
-        allIndependent("house")
-          ? '<span class="key"><span class="swatch" style="background:var(--party-i)"></span>' +
-            "All independent</span>" : "",
-        '<span class="key"><span class="swatch" style="background:var(--text-faint)">',
-        "</span>Vacant</span>",
-      ].join("");
+      // Each step says what it counts: "R majority" is more Republican
+      // than Democratic members, short of all of them.
+      target.innerHTML = HOUSE_STEPS.map(function (step) {
+        return '<span class="key" data-step="' + step[0] + '">' + swatch(step[1]) +
+          KYC.escapeHtml(step[2]) + "</span>";
+      }).join("") +
+        (allIndependent("house")
+          ? '<span class="key">' + swatch(I_FILL) + "All independent</span>" : "") +
+        '<span class="key">' + swatch(VACANT_FILL) + "Vacant</span>";
       return;
     }
     target.innerHTML = LEGENDS[mode]
-      .filter(function (entry) { return !entry[2] || allIndependent("senate"); })
+      .filter(legendShown)
       .map(function (entry) {
-        return '<span class="key"><span class="swatch" style="background:' +
-          entry[0] + '"></span>' + KYC.escapeHtml(entry[1]) + "</span>";
+        return '<span class="key">' + swatch(entry[0]) + KYC.escapeHtml(entry[1]) + "</span>";
       })
       .join("");
   }
@@ -440,10 +502,21 @@
      * in one scroll buries the delegation the reader clicked the state to
      * see, so the challengers sit behind a count they can open. */
     var html = "";
-    if (mode === "senate2026" && KYC.odds) {
-      var seatRace = (global.kycRaces || []).filter(function (r) {
-        return r.chamber === "Senate" && r.state === code;
-      })[0];
+    /* The 2026 race view leads with the race: the people still in it,
+     * listed, then what the markets quote, then who holds the seat. Texas
+     * led with John Cornyn, "Lost primary", and folded its two nominees
+     * away under "2026 challengers" (VISUALS-10). The delegation views
+     * keep who is seated first (rule 27). */
+    var raceFirst = mode === "senate2026";
+    if (raceFirst && running.length) {
+      html += '<p class="panel-subhead">Still in the race <span>' + running.length + "</span>" +
+        (out.length
+          ? ' <span class="faint" title="Lost the primary, withdrew, or were not on the primary ballot">' +
+            out.length + " out</span>"
+          : "") + "</p>" + running.map(personRow).join("");
+    }
+    if (raceFirst && KYC.odds) {
+      var seatRace = senateRace(code);
       if (seatRace) html += KYC.odds.render(seatRace, { compact: true });
     }
     if (seated.length) {
@@ -465,7 +538,9 @@
         KYC.escapeAttr(KYC.siteRoot() + districtMap.page) + '">' +
         (districtMap.redrawn ? "Old and new district lines \u203a" : "District map \u203a") + "</a></p>";
     }
-    if (running.length) {
+    if (raceFirst && running.length) {
+      // Listed above.
+    } else if (running.length) {
       html +=
         '<button type="button" class="panel-subhead expander" id="showChallengers"' +
         ' aria-expanded="false" aria-controls="challengerRows">' +
@@ -594,10 +669,22 @@
   function initStatePicker() {
     var picker = doc.getElementById("mapStateSelect");
     if (!picker) return;
-    map.codes().sort().forEach(function (code) {
+    // D.C. is both a shape and a tile in the territory strip; it was listed
+    // twice, and every option was a bare code (VISUALS-V2). Named and in
+    // name order, as every other picker on the site.
+    var seen = {};
+    map.codes().filter(function (code) {
+      if (seen[code]) return false;
+      seen[code] = true;
+      return true;
+    }).map(function (code) {
+      return { code: code, name: KYC.stateName(code) || map.name(code) };
+    }).sort(function (a, b) {
+      return a.name.replace(/^the /i, "").localeCompare(b.name.replace(/^the /i, ""));
+    }).forEach(function (place) {
       var option = doc.createElement("option");
-      option.value = code;
-      option.textContent = code;
+      option.value = place.code;
+      option.textContent = place.name + " (" + place.code + ")";
       picker.appendChild(option);
     });
     picker.addEventListener("change", function () {

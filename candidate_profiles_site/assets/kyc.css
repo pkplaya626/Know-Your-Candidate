@@ -44,10 +44,33 @@
   --party-r: #ff6f64;
   --party-i: #ffc24d;
   --party-vacant: var(--text-muted);
-  --split: #b98cff;
+  /* An independent's colour where it fills a shape. The same as the text
+   * colour here; the light theme's amber text (4.5:1 on white) was the
+   * same olive as its Republican red to a deuteranope (2.3 in OKLab x100),
+   * so its fill is a lighter amber of its own (audit 2026-10-17,
+   * VISUALS-04). */
+  --party-i-fill: var(--party-i);
+  /* "Split" and "divided" sit between the parties in lightness, not only in
+   * hue: the old lilac was 0.8 from the Democratic blue to a deuteranope,
+   * and every divided state read as Democratic (VISUALS-03). Where it fills
+   * a shape it is also hatched (--split-hatch, kyc.js hatchFill), a cue
+   * that is not colour at all. render_test.js runs the Machado protanopia,
+   * deuteranopia and tritanopia matrices over these tokens. */
+  --split: #8a5cd6;
+  --split-hatch: #c9b0f7;
+  /* A word on the split fill: white here, the text colour in light. */
+  --split-ink: #ffffff;
+  /* Nothing to show (no race, no senators, none of a thing): a grey kept
+   * for that alone, lighter than the page so the country keeps its
+   * outline - the page's own surface made those states black holes in the
+   * dark and AMOLED themes (VISUALS-19, RACES-17) - and hatched where it
+   * fills a shape. */
+  --none-fill: #2b313a;
+  --none-hatch: #4a5361;
 
   --money-in: #46d17d;
-  --money-out: #ff6f64;
+  /* Money out is plain text: a Democrat's "Spent" was in Republican red. */
+  --money-out: var(--text);
   /* A badge's word over its own 14% tint. The same as the colour except in
    * the light theme, where 11px bold text needs 4.5:1 and the plain colours
    * reached 4.17-4.42 (redefined there). */
@@ -55,8 +78,12 @@
   --warn-text: var(--warn);
   --danger-text: var(--danger);
 
-  --warn: #ffc24d;
-  --danger: #ff6f64;
+  /* Status colours never alias a party's (VISUALS-06): "Lost primary" was
+   * the Republican red and "Open seat" the independents' amber. An
+   * attention status is magenta; an "out" status is slate, outlined with a
+   * dashed edge (.badge-danger). */
+  --warn: #f08bd8;
+  --danger: #aab4c3;
 
   /* Districts picked out on the redistricting maps. Teal, magenta and lime,
      because red, blue, amber and purple already mean a party here. */
@@ -66,19 +93,31 @@
 
   /* The guide's maps colour categories that are not parties - which
      legislatures have an Assembly, which circuit hears a state's appeals -
-     so they never use red, blue, amber or purple. Defined from the focus
-     colours and the text, they follow every theme. */
-  --cat-1: var(--focus-1);
-  --cat-2: var(--focus-2);
-  --cat-3: var(--focus-3);
-  --cat-4: color-mix(in srgb, var(--text-muted) 55%, var(--surface-1));
+     so they never use red, blue, amber or purple, and never grey, which
+     means "none" (VISUALS-08). Teal, magenta, olive, deep green and the
+     text colour: each pair at least 10 apart (OKLab x100) under
+     protanopia, deuteranopia and tritanopia in every theme, and each at
+     least 3:1 on the page. Teal and magenta were 3.7 apart to a
+     deuteranope, which erased the judges map's main distinction
+     (VISUALS-07). */
+  --cat-1: #2ec4b6;
+  --cat-2: #be39af;
+  --cat-3: #799f4a;
+  --cat-4: #3b6d4a;
   --cat-5: var(--text);
-  /* Counts (the local map): one hue, five steps, faint to full. */
-  --scale-1: color-mix(in srgb, var(--focus-1) 18%, var(--surface-2));
-  --scale-2: color-mix(in srgb, var(--focus-1) 38%, var(--surface-2));
-  --scale-3: color-mix(in srgb, var(--focus-1) 58%, var(--surface-2));
-  --scale-4: color-mix(in srgb, var(--focus-1) 78%, var(--surface-2));
-  --scale-5: var(--focus-1);
+  /* The word a callout writes on each, at 4.5:1 or better. */
+  --cat-1-ink: var(--text-inverse);
+  --cat-2-ink: #ffffff;
+  --cat-3-ink: var(--text-inverse);
+  --cat-4-ink: var(--text);
+  /* Counts (the local map): one hue, five steps. The first starts at 40%:
+     at 18% it was 1.4:1 from "None" and from the page (GUIDE-16), and
+     "None" is hatched besides. */
+  --scale-1: color-mix(in srgb, var(--cat-1) 40%, var(--surface-2));
+  --scale-2: color-mix(in srgb, var(--cat-1) 55%, var(--surface-2));
+  --scale-3: color-mix(in srgb, var(--cat-1) 70%, var(--surface-2));
+  --scale-4: color-mix(in srgb, var(--cat-1) 85%, var(--surface-2));
+  --scale-5: var(--cat-1);
 
   /* State codes on the partisan map, over any party colour. */
   --map-label: #ffffff;
@@ -136,6 +175,8 @@
   --text-muted: #97a0ad;
   --text-faint: #737b89;
   --text-inverse: #000000;
+  --none-fill: #22252b;
+  --none-hatch: #3d434d;
 }
 
 /* "only light": a reader who chose Light keeps it. Samsung Internet's dark
@@ -164,20 +205,33 @@
   --party-d: #14549e;
   --party-r: #b3261e;
   --party-i: #815500;
-  --split: #6b3fbe;
+  --party-i-fill: #d29a1e;
+  --split: #b59be6;
+  --split-hatch: #7a5cc4;
+  --split-ink: var(--text);
+  --none-fill: #d9dee6;
+  --none-hatch: #9aa4b2;
 
   --money-in: #12703a;
-  --money-out: #b3261e;
   --money-in-text: #0e5c2f;
-  --warn-text: #6b4600;
-  --danger-text: #8f1d17;
+  --warn-text: #8a1b6c;
+  --danger-text: #4f5a69;
 
-  --warn: #815500;
-  --danger: #b3261e;
+  --warn: #a2207f;
+  --danger: #4f5a69;
 
   --focus-1: #0e7c72;
   --focus-2: #a5228f;
   --focus-3: #557a0d;
+
+  --cat-1: #0e7c72;
+  --cat-2: #e658be;
+  --cat-3: #7a9765;
+  --cat-4: #195232;
+  --cat-1-ink: var(--text-inverse);
+  --cat-2-ink: var(--text);
+  --cat-3-ink: var(--text);
+  --cat-4-ink: var(--text-inverse);
 
   --shadow-1: 0 1px 2px rgb(16 20 26 / 0.08);
   --shadow-2: 0 4px 16px rgb(16 20 26 / 0.12);
@@ -929,10 +983,13 @@ a.badge-link {
   background: color-mix(in srgb, var(--warn) 14%, transparent);
   border-color: color-mix(in srgb, var(--warn) 34%, transparent);
 }
+/* An "out" status (lost, eliminated, not running): slate with a dashed
+ * edge, in no party's colour (VISUALS-06). */
 .badge-danger {
   color: var(--danger-text);
   background: color-mix(in srgb, var(--danger) 14%, transparent);
-  border-color: color-mix(in srgb, var(--danger) 34%, transparent);
+  border-color: color-mix(in srgb, var(--danger) 60%, transparent);
+  border-style: dashed;
 }
 .badge-money {
   color: var(--money-in-text);
@@ -1124,7 +1181,7 @@ a.badge-link {
 .odds-seg { display: block; height: 100%; }
 .odds-seg-d { background: var(--party-d); }
 .odds-seg-r { background: var(--party-r); }
-.odds-seg-i { background: var(--party-i); }
+.odds-seg-i { background: var(--party-i-fill); }
 .odds-legend {
   grid-column: 2;
   display: flex;
@@ -1920,12 +1977,33 @@ a.badge-link {
   height: 8px;
   border: 1px solid var(--border);
   border-radius: var(--radius-pill);
-  background: linear-gradient(
-    to right,
-    var(--party-d) 0%,
-    var(--split) 50%,
-    var(--party-r) 100%
-  );
+  /* Neutral ink: the caption says the score is not a party label, and a
+   * blue-to-red track said it was (TRUST-12, VISUALS-05). The centre is
+   * marked; every sitting member of the chamber is a tick
+   * (.ideology-peer), so a score is read against the chamber. */
+  background: var(--surface-3);
+}
+.ideology-track::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -3px;
+  bottom: -3px;
+  width: 1px;
+  background: var(--border-strong);
+}
+.ideology-peer {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  width: 1px;
+  background: var(--text-faint);
+  opacity: 0.55;
+}
+.ideology-place {
+  margin-top: var(--s-2);
+  font-size: var(--t-sm);
+  color: var(--text-muted);
 }
 .ideology-marker {
   position: absolute;
@@ -1988,6 +2066,9 @@ a.badge-link {
   border-radius: 2px;
   border: 1px solid var(--border);
 }
+/* The map's state panel before a state is picked: no empty grey pill
+ * (VISUALS-11). */
+#panelCounts:empty { display: none; }
 
 /* Every state is a focusable button in the SVG, so the map is operable
    from the keyboard rather than mouse-only. */
@@ -2052,6 +2133,19 @@ a.badge-link {
   .us-map-labels .map-callout:hover { border-color: var(--text); }
 }
 .us-map-labels .map-callout.is-selected { outline: 2px solid var(--text); outline-offset: 0; }
+/* A hatched fill's callout: the hatch is its edge, never behind its word. */
+.us-map-labels .map-callout.is-hatched { border: 2px solid transparent; }
+/* A state the view marks (a special election): a dashed outline, and the
+ * legend's key drawn the same way (RACES-21). */
+.state.is-marked {
+  stroke: var(--text);
+  stroke-width: 2;
+  stroke-dasharray: 5 3;
+}
+.map-legend .swatch-special {
+  background: transparent;
+  border: 2px dashed var(--text);
+}
 /* A territory's code and the strip's caption sit on the page itself. */
 .us-map-labels .territory-label {
   background: none;
@@ -2859,7 +2953,7 @@ a.badge-link {
  * no members until November and is left plain. */
 .district-shape.party-d { fill: color-mix(in srgb, var(--party-d) 70%, var(--surface-1)); }
 .district-shape.party-r { fill: color-mix(in srgb, var(--party-r) 70%, var(--surface-1)); }
-.district-shape.party-i { fill: color-mix(in srgb, var(--party-i) 70%, var(--surface-1)); }
+.district-shape.party-i { fill: color-mix(in srgb, var(--party-i-fill) 70%, var(--surface-1)); }
 .district-shape.party-vacant {
   fill: color-mix(in srgb, var(--party-vacant) 35%, var(--surface-1));
 }
@@ -2905,7 +2999,7 @@ a.badge-link {
 }
 .swatch.party-fill-d { background: color-mix(in srgb, var(--party-d) 70%, var(--surface-1)); }
 .swatch.party-fill-r { background: color-mix(in srgb, var(--party-r) 70%, var(--surface-1)); }
-.swatch.party-fill-i { background: color-mix(in srgb, var(--party-i) 70%, var(--surface-1)); }
+.swatch.party-fill-i { background: color-mix(in srgb, var(--party-i-fill) 70%, var(--surface-1)); }
 .swatch.party-fill-vacant {
   background: color-mix(in srgb, var(--party-vacant) 35%, var(--surface-1));
 }
@@ -3727,8 +3821,16 @@ a.badge-link {
 .leg-subhead { margin-top: var(--s-4) !important; font-weight: 700; color: var(--text); }
 
 /* A district's two parties, half and half: the split colour of the map. */
-.district-shape.party-split { fill: color-mix(in srgb, var(--split) 70%, var(--surface-1)); }
-.swatch.party-fill-split { background: color-mix(in srgb, var(--split) 70%, var(--surface-1)); }
+.district-shape.party-split {
+  fill: var(--hatch-split-soft, color-mix(in srgb, var(--split) 70%, var(--surface-1)));
+}
+/* The legend's swatch is hatched as the map is (kyc-regionmap.js draws the
+ * pattern in each map, VISUALS-03). */
+.swatch.party-fill-split {
+  background: repeating-linear-gradient(135deg,
+    color-mix(in srgb, var(--split-hatch) 70%, var(--surface-1)) 0 2px,
+    color-mix(in srgb, var(--split) 70%, var(--surface-1)) 2px 5px);
+}
 /* A seat elected without a party label (Nebraska's Legislature) is a
  * neutral of its own, apart from a seat with nobody listed, which is left
  * plain and outlined (audit 2026-10-17, STATEGOV-06). */
@@ -3759,7 +3861,7 @@ a.badge-link {
 }
 .seat-d { background: var(--party-d); }
 .seat-r { background: var(--party-r); }
-.seat-i { background: var(--party-i); }
+.seat-i { background: var(--party-i-fill); }
 .seat-n { background: color-mix(in srgb, var(--text-muted) 45%, var(--surface-1)); }
 .seat-none { background: transparent; border-color: var(--text-muted); }
 .seat-half {
