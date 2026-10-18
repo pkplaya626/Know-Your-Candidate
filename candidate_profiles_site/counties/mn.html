@@ -19,9 +19,13 @@
 <meta property="og:image:alt" content="Know Your Candidate">
 <meta property="og:site_name" content="Know Your Candidate">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="referrer" content="no-referrer">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../assets/kyc.css?v=b4fbce4424">
-<script src="../assets/kyc.js?v=b804f1b0c7"></script>
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="manifest" href="../site.webmanifest">
+<link rel="stylesheet" href="../assets/kyc.css?v=01c66ddaa8">
+<script src="../assets/kyc.js?v=5fe7159c2c"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Know Your Candidate","item":"https://candidates.radicalrelay.us/"},{"@type":"ListItem","position":2,"name":"Counties & local governments","item":"https://candidates.radicalrelay.us/counties/index.html"},{"@type":"ListItem","position":3,"name":"Minnesota","item":"https://candidates.radicalrelay.us/counties/mn.html"}]}</script>
 </head>
 <body data-root="../" data-state="MN" data-page="counties">
 
@@ -37,9 +41,15 @@
     <a class="brand" href="../index.html">
         <svg class="icon" aria-hidden="true"><use href="#i-vote"/></svg>
         <span class="brand-name">Know Your Candidate</span>
-        <span class="brand-sub" data-congress>U.S. Congress</span>
+        <span class="brand-sub">Counties &amp; local governments</span>
     </a>
 
+    <form class="search" role="search" action="../index.html" data-site-search>
+        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <label class="sr-only" for="siteSearch">Search candidates and members of Congress</label>
+        <input type="search" id="siteSearch" name="q" autocomplete="off" spellcheck="false"
+               placeholder="Search candidates and members&hellip;" data-placeholder-short="Search&hellip;">
+    </form>
 
     <div class="header-actions">
         <div class="menu">
@@ -94,7 +104,7 @@
                 <svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>
                 President &amp; Cabinet
             </a>
-            <a class="nav-link" href="../federal/index.html#supreme-court" data-nav="courts">
+            <a class="nav-link" href="../courts/index.html" data-nav="courts">
                 <svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg>
                 Federal courts
             </a>
@@ -117,6 +127,10 @@
             <a class="nav-link" href="../government/index.html" data-nav="guide">
                 <svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg>
                 Know Your Government
+            </a>
+            <a class="nav-link" href="../about.html" data-nav="about">
+                <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+                About &amp; sources
             </a>
         </nav>
 
@@ -183,6 +197,7 @@
                 <option value="WY">Wyoming (WY)</option>
             </select>
         </nav>
+        <p class="sidebar-section sidebar-built">Sources read on <time datetime="2026-10-06">Oct. 6, 2026</time> &middot; <a href="../about.html">About &amp; sources</a></p>
     </aside>
 
     <main class="app-main" id="stateMain">
@@ -230,14 +245,14 @@
             <footer class="site-footer">
                 <p><strong>Sources:</strong> every government, its county, website, city,
                     population or enrollment, from the U.S. Census Bureau's 2022 Census of
-                    Governments: Government Units listing, checked against the Bureau's
+                    Governments: Government Units listing, read on <time datetime="2026-10-06">Oct. 6, 2026</time>, checked against the Bureau's
                     published counts for every state; county lines from its cartographic
                     boundary file; every incorporated place and its legal form from its 2025
                     place boundaries, joined to its government by name only where the join is
                     one to one. Names are shown in title case; the listing prints them in
                     capitals.</p>
                 <p><strong>Where there is no county government:</strong> <a href="https://www.census.gov/content/dam/Census/library/publications/2024/econ/2022ISD.pdf" rel="noopener">U.S. Census Bureau: 2022 Census of Governments, Individual State Descriptions, Appendix A (County-Type Areas Without County Government)</a>.</p>
-                <p>Non-partisan and independent.</p>
+                <p class="footer-meta">Non-partisan and independent. Sources read on <time datetime="2026-10-06">Oct. 6, 2026</time>. <a href="../about.html">About &amp; sources</a> &middot; <a href="https://github.com/pkplaya626/Know-Your-Candidate/issues/new?template=correction.yml&amp;page=https%3A%2F%2Fcandidates.radicalrelay.us%2Fcounties%2Fmn.html" data-report target="_blank" rel="noopener noreferrer">Report a problem</a></p>
             </footer>
         </div>
     </main>

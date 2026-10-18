@@ -233,7 +233,8 @@ class TestThePages(unittest.TestCase):
     def test_every_federal_page_loads_its_scripts_in_order(self):
         found = {page: (ok, note) for page, ok, note in emit.check_pages(ROOT)
                  if page.startswith(("federal/", "courts/"))}
-        self.assertEqual(len(found), len(federal_courts.COURTS) + 1)
+        # Every court, the hub, and the folder's own directory of courts.
+        self.assertEqual(len(found), len(federal_courts.COURTS) + 2)
         self.assertEqual({p: n for p, (ok, n) in found.items() if not ok}, {})
 
     def test_the_sitemap_lists_every_court(self):

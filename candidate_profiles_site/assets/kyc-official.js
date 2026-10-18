@@ -22,6 +22,8 @@
   var dialog = null;
   var root = null;
   var current = null;
+  // The page's own title, put back when the dialog closes.
+  var baseTitle = null;
   var routed = false;
 
   function federal() {
@@ -31,11 +33,13 @@
   var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August",
     "September", "October", "November", "December"];
 
-  /** An agreed date at its precision: "2025-02-05", "March 2026", "2026". */
+  /** An agreed date at its precision: "Feb. 5, 2025", "March 2026", "2026".
+   *  A day is in words, as every view writes one (KYC.dateWords): the dialog
+   *  read "In office since 2025-01-20" beside the page's "Oct. 17, 2026". */
   function whenText(w) {
     if (!w || !w.date) return "";
     if (w.precision === "month") return MONTHS[Number(w.date.slice(5, 7)) - 1] + " " + w.date.slice(0, 4);
-    return w.date;
+    return KYC.dateWords(w.date);
   }
 
   /** One holder of an office this term, in words: confirmed, acting, in
@@ -46,7 +50,7 @@
     if (row.actingNote) parts.push(row.actingNote.replace(/^Acting:/, "acting"));
     else if (row.acting) parts.push("acting");
     if (row.confirmed) {
-      parts.push("confirmed " + row.confirmed.date + " (" + row.confirmed.yeas + "\u2013" +
+      parts.push("confirmed " + KYC.dateWords(row.confirmed.date) + " (" + row.confirmed.yeas + "\u2013" +
         row.confirmed.nays + (row.confirmed.yeas === row.confirmed.nays
           ? ", the Vice President breaking the tie" : "") + ")");
     } else {
@@ -163,8 +167,12 @@
       "  </header>",
       '  <div class="modal-body scroll-y" id="officialModalBody"></div>',
       '  <footer class="modal-footer">',
-      '    <span id="officialModalSource"></span>',
-      '    <span style="display:flex;gap:8px">',
+      '    <span class="modal-footer-notes"><span id="officialModalSource"></span>',
+      // The same way to report an error as a profile's (TRUST-03).
+      '    <a class="report-link" id="officialModalReport" data-report target="_blank"' +
+      ' rel="noopener noreferrer" href="' + KYC.escapeAttr(KYC.reportUrl()) + '">' +
+      KYC.icon("flag") + " Report a problem with this record</a></span>",
+      '    <span class="modal-footer-actions">',
       '      <button type="button" class="btn" id="officialModalCopy">' +
       KYC.icon("share") + " Copy link</button>",
       '      <button type="button" class="btn" data-close>Close</button>',
@@ -237,7 +245,7 @@
     // (Article I, Section 3).
     return "Confirmed " + KYC.escapeHtml(s.yeas + "–" + s.nays) +
       (s.yeas === s.nays ? ", the Vice President breaking the tie," : "") + " on " +
-      KYC.escapeHtml(s.date) + " (" + outLink(s.url, "roll call " + s.vote) + ")" +
+      KYC.escapeHtml(KYC.dateWords(s.date)) + " (" + outLink(s.url, "roll call " + s.vote) + ")" +
       (s.nominee && s.nominee !== holder.name
         ? '<br><span class="faint">The Senate’s record names them ' +
           KYC.escapeHtml(s.nominee) + "</span>" : "");
@@ -332,7 +340,7 @@
       panel("info", "Where this comes from", '<p class="note-box">The term’s dates and ' +
         "party are from congress-legislators’ record of executive terms; the portrait is " +
         "the White House’s.</p>") + "</div>";
-    el("officialModalSource").textContent = "As of " + ((federal().asOf || {}).executive || "");
+    el("officialModalSource").textContent = "As of " + KYC.dateWords((federal().asOf || {}).executive || "");
   }
 
   function renderOfficer(holder, office) {
@@ -365,7 +373,7 @@
         "among the President’s Cabinet; checked on the office’s own page and " +
         "against the Senate’s roll-call votes. A Cabinet officer is shown without a " +
         "party.</p>") + "</div>";
-    el("officialModalSource").textContent = "As of " + ((federal().asOf || {}).executive || "");
+    el("officialModalSource").textContent = "As of " + KYC.dateWords((federal().asOf || {}).executive || "");
   }
 
   /* ------------------------------------------------------------- a judge */
@@ -378,19 +386,19 @@
       var here = !!page && page.getAttribute("data-court") === seat.court;
       var parts = [];
       if (seat.appointedBy) parts.push("Appointed by " + KYC.escapeHtml(seat.appointedBy));
-      if (seat.nominated) parts.push("nominated " + KYC.escapeHtml(seat.nominated));
+      if (seat.nominated) parts.push("nominated " + KYC.escapeHtml(KYC.dateWords(seat.nominated)));
       if (seat.confirmed) {
-        parts.push("confirmed " + KYC.escapeHtml(seat.confirmed) +
+        parts.push("confirmed " + KYC.escapeHtml(KYC.dateWords(seat.confirmed)) +
           (seat.vote ? " (" + KYC.escapeHtml(vote(seat.vote)) + ")" : ""));
       }
-      if (seat.commissioned) parts.push("commissioned " + KYC.escapeHtml(seat.commissioned));
-      if (seat.reassigned) parts.push("reassigned to this court by statute " + KYC.escapeHtml(seat.reassigned));
-      if (seat.chiefSince) parts.push("chief since " + KYC.escapeHtml(seat.chiefSince));
+      if (seat.commissioned) parts.push("commissioned " + KYC.escapeHtml(KYC.dateWords(seat.commissioned)));
+      if (seat.reassigned) parts.push("reassigned to this court by statute " + KYC.escapeHtml(KYC.dateWords(seat.reassigned)));
+      if (seat.chiefSince) parts.push("chief since " + KYC.escapeHtml(KYC.dateWords(seat.chiefSince)));
       // A retired justice is "retired", as the status line above says, not
       // on "senior status": one word for one status in one dialog.
       if (seat.seniorSince) {
         parts.push((judge.retiredJustice ? "retired since " : "senior status since ") +
-          KYC.escapeHtml(seat.seniorSince));
+          KYC.escapeHtml(KYC.dateWords(seat.seniorSince)));
       }
       return "<li><strong>" + KYC.escapeHtml(seat.title || "Judge") + "</strong>, " +
         (here || !c ? KYC.escapeHtml(name)
@@ -456,7 +464,7 @@
         (judge.fjc ? linkChip(judge.fjc, "Federal Judicial Center") : "") + "</div>") +
       "</div>";
     el("officialModalSource").textContent = "Federal Judicial Center, Biographical Directory of " +
-      "Article III Federal Judges, as of " + ((federal().asOf || {}).judiciary || "");
+      "Article III Federal Judges, as of " + KYC.dateWords((federal().asOf || {}).judiciary || "");
   }
 
   /* --------------------------------------------------------- not listed */
@@ -527,6 +535,12 @@
     ensure();
     current = id;
     render(id, found);
+    el("officialModalReport").setAttribute("data-profile", id);
+    // A tab or a bookmark names the person, as a profile's does (GRID-24).
+    if (baseTitle === null) baseTitle = doc.title;
+    var shown = el("officialModalName").textContent;
+    // The pages' own separator: "North Carolina — Know Your Candidate".
+    if (shown) doc.title = shown + " — Know Your Candidate";
     if (!(opts && opts.fromRoute)) KYC.router.writeOfficial(id);
     dialog.open();
     return !!found;
@@ -558,6 +572,7 @@
     dialog = KYC.createModal(root, {
       onClose: function () {
         current = null;
+        if (baseTitle !== null) doc.title = baseTitle;
         if (routed) {
           routed = false;
           return;

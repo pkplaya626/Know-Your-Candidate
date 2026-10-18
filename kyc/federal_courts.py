@@ -573,6 +573,11 @@ COURTS = {
 
 KINDS = {"supreme": "Supreme Court", "appeals": "Court of appeals", "trade": "Court of International Trade",
          "district": "District court", "territorial": "Territorial district court"}
+# Each kind's plural, written out: "Court of appeals" + "s" was "Court of
+# appealss" on the courts' index.
+KIND_PLURALS = {"supreme": "Supreme Court", "appeals": "Courts of appeals",
+                "trade": "Courts of International Trade", "district": "District courts",
+                "territorial": "Territorial district courts"}
 
 
 def fjc_name(court_id):

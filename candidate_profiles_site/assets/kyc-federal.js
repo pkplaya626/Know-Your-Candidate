@@ -26,6 +26,12 @@
     return doc.getElementById(id);
   }
 
+  /** A day in words, escaped: "Oct. 17, 2026", as the footer under it
+   *  writes the same day (KYC.dateWords; anything else as it is). */
+  function day(text) {
+    return esc(KYC.dateWords(text == null ? "" : text));
+  }
+
   function esc(text) {
     return KYC.escapeHtml(text == null ? "" : String(text));
   }
@@ -151,7 +157,7 @@
     var now = mine.vacancies || [];
     var later = mine.future || [];
     var src = source((v.sources || {}).current, "the courts’ list of vacancies");
-    var body = '<p class="guide-lede">From ' + src + ", as of " + esc(v.asOf) + ".";
+    var body = '<p class="guide-lede">From ' + src + ", as of " + day(v.asOf) + ".";
     if (!now.length && !later.length) {
       return section("vacancies", "Vacancies", body + " It lists no vacancy on this court, " +
         "and none announced.</p>");
@@ -167,7 +173,7 @@
             cell("Why", esc(REASONS[r.reason] || r.reason || "")) +
             cell("Vacant since", esc(r.since || "")) +
             cell("Nominee", personText(r.nominee)) +
-            cell("Nominated", esc(r.nominated || "")) + "</tr>";
+            cell("Nominated", day(r.nominated || "")) + "</tr>";
         }));
     }
     if (later.length) {
@@ -179,7 +185,7 @@
               cell("Announced", esc(r.announced || "")) +
               cell("Leaves", r.vacancyDate ? esc(r.vacancyDate) : '<span class="faint">Not yet set</span>') +
               cell("Nominee", personText(r.nominee)) +
-              cell("Nominated", esc(r.nominated || "")) + "</tr>";
+              cell("Nominated", day(r.nominated || "")) + "</tr>";
           }));
     }
     return section("vacancies", "Vacancies", body);
@@ -195,7 +201,7 @@
       '<div><p class="fed-office">' + esc(p.office) + "</p>" +
       '<p class="fed-name">' + person(p.id, p.name) + "</p>" +
       '<p class="faint">' + esc(p.party) +
-      (shared ? "" : "; since " + esc(p.since) + ", term ends " + esc(p.until)) +
+      (shared ? "" : "; since " + day(p.since) + ", term ends " + day(p.until)) +
       "</p></div></li>";
   }
 
@@ -210,15 +216,18 @@
     }
     if (!s) return '<span class="faint">No confirming roll call found</span>';
     return '<a href="' + KYC.escapeAttr(s.url) + '" target="_blank" rel="noopener noreferrer">' +
-      esc(s.yeas + "–" + s.nays) + "</a>, " + esc(s.date) +
+      esc(s.yeas + "–" + s.nays) + "</a>, " + day(s.date) +
       (s.yeas === s.nays ? ", the Vice President breaking the tie" : "");
   }
 
+  /* Never "confirmed": the cell sits beside the Senate vote, where that
+   * word means confirmation, and an acting officer would have read as
+   * "Confirmed on its page (acting)" next to "No confirming roll call". */
   function pageCell(holder) {
     var page = (holder && holder.page) || {};
     if (page.status === "confirmed") {
       return '<a href="' + KYC.escapeAttr(page.url) + '" target="_blank" rel="noopener noreferrer">' +
-        "Named there</a>" + (page.acting ? " (acting)" : "");
+        "Named on the office's site</a>" + (page.acting ? ", as acting" : "");
     }
     if (page.status === "unconfirmed") return '<span class="faint">Not named there when last read</span>';
     if (page.status === "unreadable") return '<span class="faint">Could not be read</span>';
@@ -321,7 +330,7 @@
     var heads = ["When", "Office", "What happened"];
     return section("changes", "Changes since the term began",
       '<p class="guide-lede">Who was confirmed, who left and who served as acting in each ' +
-      "office since " + esc(meta.since || "") + ", newest first. Confirmations are the " +
+      "office since " + day(meta.since || "") + ", newest first. Confirmations are the " +
       "Senate’s roll calls; who held each office comes from Wikidata, and a date is shown only " +
       "to the day, month or year on which Wikidata and the person’s Wikipedia article agree" +
       (meta.read ? ", as read " + esc(meta.read) : "") + ". An acting officer Wikidata does not " +
@@ -389,7 +398,7 @@
       '<ul class="fed-cards fed-leaders">' + leaderCard(d.president, shared) +
         leaderCard(d.vicePresident, shared) + "</ul>" +
       '<p class="faint">Terms from ' + source(d.sources.executive.executive,
-        "congress-legislators’ record of executive terms") + ", as of " + esc(asOf.executive) + ".</p>");
+        "congress-legislators’ record of executive terms") + ", as of " + day(asOf.executive) + ".</p>");
 
     var departments = d.offices.filter(function (o) { return o.kind === "department"; })
       .sort(function (a, b) { return a.order - b.order; });
@@ -398,7 +407,7 @@
       '<p class="guide-lede">Who the White House lists in the ' +
       source(d.sources.executive.cabinet, "President’s Cabinet") + ", each checked on " +
       "the office’s own page and against the Senate’s roll-call votes, as of " +
-      esc(asOf.executive) + ". A Cabinet officer is shown without a party.</p>" +
+      day(asOf.executive) + ". A Cabinet officer is shown without a party.</p>" +
       '<h3 class="fed-subhead">The heads of the fifteen executive departments, in the order ' +
         '<span class="cite">3 U.S.C. 19(d)(1)</span> lists them</h3>' +
       '<ul class="fed-cards">' + departments.map(officeCard).join("") + "</ul>" +
@@ -411,7 +420,7 @@
     html += section("supreme-court", "The Supreme Court",
       '<p class="guide-lede">Its members as ' + source(d.sources.judiciary.supremeCourt,
         "the Court lists them") + ", with each justice’s appointment from the Federal " +
-      "Judicial Center’s directory, as of " + esc(asOf.judiciary) + ". " +
+      "Judicial Center’s directory, as of " + day(asOf.judiciary) + ". " +
       '<a href="../courts/scotus.html">The Court’s page</a>.' +
       ((scotus.members || []).some(function (j) { return j.portrait; })
         ? " Portraits: " + source((scotus.members.filter(function (j) { return j.portrait; })[0]
@@ -434,7 +443,7 @@
       '<p class="guide-lede" id="courtsLede">Every sitting judge of each court whose judges are ' +
       "appointed under Article III, from the " +
       source(d.sources.judiciary.directory, "Federal Judicial Center’s Biographical Directory") +
-      " as of " + esc(asOf.judiciary) + ". The three territorial district courts (Guam, the " +
+      " as of " + day(asOf.judiciary) + ". The three territorial district courts (Guam, the " +
       "Northern Mariana Islands and the Virgin Islands) are listed, but not their judges: they " +
       "serve ten-year terms under Article IV, and the directory lists Article III judges only. " +
       "The Court of Federal Claims, the Tax Court, and bankruptcy and magistrate judges are not " +
@@ -465,7 +474,7 @@
     if (!v) return "";
     return '<p class="guide-lede" id="vacancySummary">' + source(v.sources.current,
       "The courts list") + " " + esc(v.totals.vacancies) + " vacancies, " +
-      esc(v.totals.nominees) + " with a nominee pending, as of " + esc(v.asOf) + "; " +
+      esc(v.totals.nominees) + " with a nominee pending, as of " + day(v.asOf) + "; " +
       esc(v.emergencies) + " of them designated judicial emergencies, and " +
       source(v.sources.future, v.future + " more announced") + ".</p>";
   }
@@ -661,7 +670,7 @@
     var html = '<p class="guide-lede">' + esc(id === "scotus" ? active.length + " justices"
       : counts(court) + " judges") + ", from the " +
       source(d.sources.judiciary.directory, "Federal Judicial Center’s Biographical Directory") +
-      " as of " + esc(asOf) + (id === "scotus" ? "; its members as " +
+      " as of " + day(asOf) + (id === "scotus" ? "; its members as " +
         source(d.sources.judiciary.supremeCourt, "the Court lists them") : "") +
       ".</p>";
     // A chief the directory also lists on senior status: nobody is shown as

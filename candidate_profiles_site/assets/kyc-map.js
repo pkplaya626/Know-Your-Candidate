@@ -500,16 +500,40 @@
     if (mode === "senate2026") {
       html += stateRaces.map(function (r) { return KYC.cards.unprofiledNote(r, "panel-note"); }).join("");
     } else {
-      var unnamed = stateRaces.reduce(function (n, r) {
-        return n + KYC.cards.unprofiledNames(r).none.length;
-      }, 0);
-      if (unnamed) {
-        html += '<p class="panel-note">Also on the November ballot, per the published results, ' +
-          "with no profile here: " + unnamed + (unnamed === 1 ? " person" : " people") +
+      /* Whose word each name is, counted apart (rules 64 and 77): once the
+       * count has begun, some of Louisiana's districts read from the results
+       * pages while others are still the Secretary of State's list, and a
+       * state's certified list sets some races and not others. One sentence
+       * crediting one source would credit the others' names to it. */
+      var bySource = {};
+      var order = [];
+      stateRaces.forEach(function (r) {
+        var n = KYC.cards.unprofiledNames(r).none.length;
+        if (!n) return;
+        var source = KYC.ballotSource(r);
+        if (!(source in bySource)) { bySource[source] = 0; order.push(source); }
+        bySource[source] += n;
+      });
+      var people = function (n) { return n + (n === 1 ? " person" : " people"); };
+      var parts = order.map(function (source) { return people(bySource[source]) + " " + source; });
+      if (parts.length) {
+        html += '<p class="panel-note">Also on the November ballot, with no profile here: ' +
+          KYC.escapeHtml(parts.join(", and ")) +
           '. <a href="' + KYC.escapeAttr(KYC.stateUrl(code)) + '">Each race on the ' +
           KYC.escapeHtml(KYC.stateName(code)) + " page \u203a</a></p>";
       }
     }
+    /* The pages the statuses above were read from, linked, as a race's
+     * head links its own (TRUST-06): one link per page, since a state's
+     * House races share one results page. */
+    var seenSource = {};
+    var sources = stateRaces.map(function (r) {
+      var url = r.results && r.results.sourceUrl;
+      if (!url || seenSource[url]) return "";
+      seenSource[url] = true;
+      return KYC.resultsSourceHtml(r);
+    }).filter(Boolean);
+    if (sources.length) html += '<p class="panel-note race-results">' + sources.join(" ") + "</p>";
     list.innerHTML = html;
     list.scrollTop = 0;
 
@@ -552,6 +576,11 @@
         );
       }
     );
+    // The footer names this view's sources: the national view of Congress
+    // named none (TECH-11). The state panels date their own.
+    Array.prototype.forEach.call(doc.querySelectorAll("[data-sources]"), function (line) {
+      line.hidden = (" " + line.getAttribute("data-sources") + " ").indexOf(" " + mode + " ") === -1;
+    });
     drawLegend();
     map.paint();
     if (selected) showPanel(selected);

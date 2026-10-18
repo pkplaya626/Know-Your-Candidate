@@ -33,8 +33,9 @@ ASSETS_DIR = os.path.join(SITE_DIR, "assets")
 TEMPLATES = ("index.html", "map.html")
 
 # src="assets/kyc.js", href="../assets/kyc.css?v=0123456789": the URL, the
-# file's name, and any stamp it already carries (replaced).
-_REF = re.compile(r'((?:src|href)=")((?:\.\./)*assets/([A-Za-z0-9_.-]+\.(?:js|css)))'
+# file's name, and any stamp it already carries (replaced). The 404 page's
+# URLs start at the root ("/assets/kyc.js"): GitHub serves it at any depth.
+_REF = re.compile(r'((?:src|href)=")((?:/|(?:\.\./)*)assets/([A-Za-z0-9_.-]+\.(?:js|css)))'
                   r'(?:\?v=[0-9a-f]*)?(")')
 # src="../data/districts/ca.js": a data file, by its path under data/.
 _DATA = re.compile(r'(src=")((?:\.\./)*data/([A-Za-z0-9_./-]+\.js))(?:\?v=[0-9a-f]*)?(")')

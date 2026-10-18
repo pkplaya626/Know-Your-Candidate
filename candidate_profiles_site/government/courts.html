@@ -19,9 +19,13 @@
 <meta property="og:image:alt" content="Know Your Candidate">
 <meta property="og:site_name" content="Know Your Candidate">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="referrer" content="no-referrer">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../assets/kyc.css?v=b4fbce4424">
-<script src="../assets/kyc.js?v=b804f1b0c7"></script>
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="manifest" href="../site.webmanifest">
+<link rel="stylesheet" href="../assets/kyc.css?v=01c66ddaa8">
+<script src="../assets/kyc.js?v=5fe7159c2c"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Know Your Candidate","item":"https://candidates.radicalrelay.us/"},{"@type":"ListItem","position":2,"name":"Know Your Government","item":"https://candidates.radicalrelay.us/government/index.html"},{"@type":"ListItem","position":3,"name":"The federal courts","item":"https://candidates.radicalrelay.us/government/courts.html"}]}</script>
 </head>
 <body data-root="../" data-state="" data-page="guide-courts">
 
@@ -37,9 +41,15 @@
     <a class="brand" href="../index.html">
         <svg class="icon" aria-hidden="true"><use href="#i-vote"/></svg>
         <span class="brand-name">Know Your Candidate</span>
-        <span class="brand-sub" data-congress>U.S. Congress</span>
+        <span class="brand-sub">Know Your Government</span>
     </a>
 
+    <form class="search" role="search" action="../index.html" data-site-search>
+        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <label class="sr-only" for="siteSearch">Search candidates and members of Congress</label>
+        <input type="search" id="siteSearch" name="q" autocomplete="off" spellcheck="false"
+               placeholder="Search candidates and members&hellip;" data-placeholder-short="Search&hellip;">
+    </form>
 
     <div class="header-actions">
         <div class="menu">
@@ -94,7 +104,7 @@
                 <svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>
                 President &amp; Cabinet
             </a>
-            <a class="nav-link" href="../federal/index.html#supreme-court" data-nav="courts">
+            <a class="nav-link" href="../courts/index.html" data-nav="courts">
                 <svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg>
                 Federal courts
             </a>
@@ -117,6 +127,10 @@
             <a class="nav-link" href="../government/index.html" data-nav="guide" aria-current="true">
                 <svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg>
                 Know Your Government
+            </a>
+            <a class="nav-link" href="../about.html" data-nav="about">
+                <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+                About &amp; sources
             </a>
         </nav>
 
@@ -195,6 +209,7 @@
                 <option value="WY">Wyoming (WY)</option>
             </select>
         </nav>
+        <p class="sidebar-section sidebar-built"><a href="../about.html">About &amp; sources</a></p>
     </aside>
 
     <main class="app-main" id="stateMain">
@@ -291,11 +306,11 @@
             <footer class="site-footer">
                 <p><strong>About this guide:</strong> a plain-language summary of how
                     American government is organized. Each section lists the sources
-                    it was checked against, on <time datetime="2026-10-05">2026-10-05</time>.
+                    it was checked against, on <time datetime="2026-10-05">Oct. 5, 2026</time>.
                     It describes offices and institutions; where it names who holds
                     one today, that comes from the same data as the rest of the site.
                     It is not legal advice.</p>
-                <p>Non-partisan and independent.</p>
+                <p class="footer-meta">Non-partisan and independent. <a href="../about.html">About &amp; sources</a> &middot; <a href="https://github.com/pkplaya626/Know-Your-Candidate/issues/new?template=correction.yml&amp;page=https%3A%2F%2Fcandidates.radicalrelay.us%2Fgovernment%2Fcourts.html" data-report target="_blank" rel="noopener noreferrer">Report a problem</a></p>
             </footer>
         </div>
     </aside>

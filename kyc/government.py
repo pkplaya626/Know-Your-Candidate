@@ -375,7 +375,7 @@ def _section_lines(section, here, pad, collapsed):
     return lines
 
 
-def _map_main(page, modes):
+def _map_main(page, modes, footer):
     """The map layout of map.html: a toolbar of views over the map, and a
     panel that shows the picked state's facts, what the current view means,
     and the page's text below them."""
@@ -443,7 +443,7 @@ def _map_main(page, modes):
     lines.append(f"{pad}</div>")
     lines.extend(_pager(here))
     lines.append(f'{pad}<footer class="site-footer">')
-    lines.append(_footer(page))
+    lines.append(footer)
     lines.append(f"{pad}</footer>")
     lines += ["        </div>", "    </aside>"]
     return "\n".join(lines)
@@ -455,12 +455,10 @@ def _footer(page):
     return "\n".join([
         "                <p><strong>About this guide:</strong> a plain-language summary of how",
         "                    American government is organized. Each section lists the sources",
-        f'                    it was checked against, on <time datetime="{_e(reviewed)}">'
-        f"{_e(reviewed)}</time>.",
+        f"                    it was checked against, on {pages.time_html(reviewed)}.",
         "                    It describes offices and institutions; where it names who holds",
         "                    one today, that comes from the same data as the rest of the site.",
         "                    It is not legal advice.</p>",
-        "                <p>Non-partisan and independent.</p>",
     ])
 
 
@@ -479,8 +477,14 @@ def render(slug, host, codes=()):
     canonical = f"https://{host}/{path}" if host else path
     people = bool(page.get("people"))
     modes = _map_modes(slug)
-    layout = ({"main_block": _map_main(page, modes)} if modes else
-              {"main": _main(page), "footer": _footer(page)})
+    # A map page writes its footer into its own panel, through the same
+    # helper that ends every other page (rule 12).
+    layout = ({"main_block": _map_main(page, modes, pages.footer_html(
+                  _footer(page), "../", None, f"https://{host}/{path}" if host else None))}
+              if modes else {"main": _main(page), "footer": _footer(page)})
+    crumbs = [pages._HOME, (pages.section_name("guide"), page_path("index"))]
+    if slug != "index":
+        crumbs.append((page["title"], path))
     return pages.render_page(
         title=_e(f"{page['title']} — Know Your Candidate"),
         og_title=_e(page["title"]),
@@ -496,6 +500,7 @@ def render(slug, host, codes=()):
         jump_options="" if people else jump_options(codes),
         # On a map page the list picks the state on the map (kyc-guide.js).
         jump_attrs=' data-jump="map"' if modes else "",
+        crumbs=crumbs,
         scripts="\n".join(f'<script src="{_e(src)}"></script>' for src in scripts(slug)),
         **layout,
     )

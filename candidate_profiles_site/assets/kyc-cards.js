@@ -35,7 +35,7 @@
     var campaign = KYC.contestStatus(item) === "nominee" &&
       KYC.electionStatus().phase !== "post-election";
     var title = line ? "On the general election ballot on the " + line +
-      " line, per the published results." + (campaign ? "" : " " + spec.title) : spec.title;
+      " line, per Wikipedia's results page." + (campaign ? "" : " " + spec.title) : spec.title;
     return '<span class="badge ' + spec.cls + '" title="' + KYC.escapeAttr(title) +
       '">' + KYC.escapeHtml(spec.label) + KYC.ballotLineSuffix(item) + "</span>";
   }
@@ -90,12 +90,17 @@
     if (KYC.partyKey(item) === "vacant") {
       return '<span class="badge badge-neutral">Vacant seat</span>';
     }
+    /* The badge speaks of the seat, never the person: the data knows when
+     * the term ends (electionYear is its last year, less one), not whether
+     * the senator will run. "On the ballot in 2028" claimed the second. The
+     * year in full: "Up in ’28" was shorthand a reader had to decode
+     * (TRUST-17). */
     if (item.chamber.indexOf("Senate") !== -1 && item.seatUp2026) {
-      return '<span class="badge badge-warn">Seat up in ’26</span>';
+      return '<span class="badge badge-warn">Seat up in 2026</span>';
     }
     if (item.chamber.indexOf("Senate") !== -1 && item.electionYear) {
-      return '<span class="badge badge-neutral">Up in ’' +
-        String(item.electionYear).slice(2) + "</span>";
+      return '<span class="badge badge-neutral">Seat up in ' +
+        KYC.escapeHtml(String(item.electionYear)) + "</span>";
     }
     return "";
   }
@@ -114,7 +119,7 @@
     })[0];
     if (!row) return "";
     return '<span class="card-held truncate" title="' + KYC.escapeAttr(KYC.heldText(row)) + '">' +
-      KYC.escapeHtml((row.current ? "" : "Fmr. ") + row.office) + "</span>";
+      KYC.escapeHtml((row.current ? "" : "Former ") + row.office) + "</span>";
   }
 
   /* Every interpolation is escaped. The previous version put item.name,
@@ -232,14 +237,15 @@
     return {
       held: held,
       title: held && listed
-        ? "Primary held " + race.primaryDate + (race.runoffDate ? "; runoff " + race.runoffDate : "") +
+        ? "Primary held " + KYC.dateWords(race.primaryDate) +
+          (race.runoffDate ? "; runoff " + KYC.dateWords(race.runoffDate) : "") +
           ". Its ballot was the Secretary of State's list of qualified candidates; no result " +
           "has been read yet."
         : held
-        ? "Primary held " + race.primaryDate +
-          (race.runoffDate ? "; runoff " + race.runoffDate : "") +
+        ? "Primary held " + KYC.dateWords(race.primaryDate) +
+          (race.runoffDate ? "; runoff " + KYC.dateWords(race.runoffDate) : "") +
           ". Results from the state's Wikipedia election page."
-        : "Primary scheduled for " + race.primaryDate + "." + (listed
+        : "Primary scheduled for " + KYC.dateWords(race.primaryDate) + "." + (listed
           ? " Who is on its ballot: the Secretary of State's list of qualified candidates."
           : ""),
     };
@@ -334,7 +340,7 @@
       var primary = primaryState(race);
       badges.push(
         '<span class="badge badge-neutral" title="' + KYC.escapeAttr(primary.title) + '">' +
-        (primary.held ? "Primary held " : "Primary ") + KYC.escapeHtml(race.primaryDate) +
+        (primary.held ? "Primary held " : "Primary ") + KYC.escapeHtml(KYC.dateWords(race.primaryDate)) +
         "</span>"
       );
     }
@@ -352,7 +358,7 @@
       // Nobody known to be on the ballot, and someone who may be: never
       // "No challenger on the ballot", never "0 challengers".
       badges.push('<span class="badge badge-neutral" title="' + KYC.escapeAttr(
-        "Filed with the FEC; the published results do not name them, so whether they are on " +
+        "Filed with the FEC; Wikipedia's results page does not name them, so whether they are on " +
         "the November ballot is not known here.") + '">' + race.ballotUnknown +
         " filed, ballot status not known</span>");
     } else if (race.contested) {
@@ -403,11 +409,13 @@
       badges.push(
         '<span class="badge badge-neutral" title="' +
         KYC.escapeAttr(
-          "Total filings with the FEC for this seat, including the sitting " +
+          "Everyone registered with the FEC for this seat, including the sitting " +
           "member and everyone below the $5,000 threshold."
-        ) + '">' + race.filedCount + " filed in total</span>"
+        ) + '">' + race.filedCount + " registered with the FEC</span>"
       );
     }
+    // Where the statuses above were read, linked (TRUST-06).
+    badges.push(KYC.resultsSourceHtml(race));
     return badges.join("");
   }
 

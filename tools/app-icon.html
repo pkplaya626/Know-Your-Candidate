@@ -1,0 +1,29 @@
+<!doctype html><meta charset="utf-8">
+<title>App icon source</title>
+<!--
+  Source for candidate_profiles_site/assets/apple-touch-icon.png (180x180)
+  and assets/icon-512.png (512x512), the icons a phone uses when the site is
+  added to its home screen (site.webmanifest). The same shield as
+  assets/favicon.svg, on a full square: iOS rounds the corners itself.
+
+  Regenerate with a 180x180 and a 512x512 window at device scale 1:
+
+    chrome --headless --disable-gpu --window-size=180,180 \
+      --force-device-scale-factor=1 --hide-scrollbars \
+      --screenshot=candidate_profiles_site/assets/apple-touch-icon.png \
+      "tools/app-icon.html"
+-->
+<style>
+  * { margin:0 }
+  html, body { width:100vw; height:100vh; overflow:hidden; background:#12161c }
+  svg { display:block; width:100vw; height:100vh }
+</style>
+<svg viewBox="0 0 32 32" aria-hidden="true">
+  <rect width="32" height="32" fill="#12161c"/>
+  <g transform="translate(16 16) scale(0.78) translate(-16 -16)">
+    <path d="M16 4 L27 9 v9c0 6-4.6 8.9-11 10-6.4-1.1-11-4-11-10V9z"
+          fill="none" stroke="#4da3ff" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="M11 16.2 l3.4 3.4 6.6-6.9" fill="none" stroke="#4da3ff"
+          stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
