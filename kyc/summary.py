@@ -155,6 +155,10 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None):
     # results name with no profile here (rule 22).
     summary["election"]["challengersOnBallot"] = sum(
         s["challengersOnBallot"] for s in summary["states"].values())
+    # Of them, the people running for open seats, whom nobody is challenging:
+    # the sidebar shows the two apart, as the state strips do (RACES-14).
+    summary["election"]["openCandidates"] = sum(
+        s["openCandidates"] for s in summary["states"].values())
     if races is not None and any("candidateCount" in r for r in races):
         # Its two parts, each counted from the races, so the sidebar's
         # breakdown needs no subtraction: profiles still on the ballot

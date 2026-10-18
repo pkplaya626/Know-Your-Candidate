@@ -52,9 +52,9 @@
       KYC.escapeHtml(label) + "</a>";
   }
 
-  /* Prices that add up to far more or less than a dollar are last trades on
-   * a market few people trade (Kalshi's WY-AL read Gray 98% and Kinney 30%):
-   * a bar would rescale them into a split neither number says, so the
+  /* Prices that add up to far more or less than a dollar (Kalshi's WY-AL
+   * read Gray 98% and Kinney 30%): a bar would rescale them into a split
+   * neither number says, so the
    * prices are quoted as they are and say why there is no bar. The band is
    * validate's odds-incoherent band. Read here, page-side, so data/odds.js
    * stays a pure function of the cache (rule 41). */
@@ -113,8 +113,14 @@
     if (!shown.length) return "";
     var check = coherent(market);
     var same = partyOnly(market) ? oneParty(race) : "";
-    var notes = (check.ok ? "" : '<p class="odds-flag">Thinly traded: these last prices add up to ' +
-        Math.round(check.sum * 100) + "%, not 100%, so they are quoted without a bar.</p>") +
+    // Only what is measured: the sum. The site holds no trading volume, so
+    // it never says "thinly traded"; Kalshi's figures are last trades,
+    // which can be old, while Polymarket's are its displayed prices, and a
+    // sum short of 100% there may be an outcome it closed (PR #94 review).
+    var notes = (check.ok ? "" : '<p class="odds-flag">' +
+        (market.source === "kalshi" ? "These last-traded prices" : "These prices") + " add up to " +
+        Math.round(check.sum * 100) + "%, not 100%, so they are quoted without a bar" +
+        (market.source === "kalshi" ? "; they may be stale." : ".") + "</p>") +
       (same ? '<p class="odds-flag">Everyone on this November ballot is a ' + KYC.escapeHtml(same) +
         "; this market resolves on the party only, so it cannot tell them apart.</p>" : "");
     var total = shown.reduce(function (sum, o) { return sum + o.price; }, 0) || 1;

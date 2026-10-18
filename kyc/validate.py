@@ -1323,14 +1323,20 @@ def check_voting_links(cache):
              if code not in table]
     gaps += [f"{code}: a December date in the overrides with no page that gives it "
              f"(voting.KEY_DATE_SOURCES)" for code in voting.unsourced_key_dates()]
+    # A link never opened, or opened and not found live (a 403, a timeout:
+    # rule 8 concludes nothing from either): the page says it could not be
+    # reached, and this lists it, so "unknown" is never counted as checked.
     checked = cache.get("links") or {}
-    unchecked = sorted(f"{code} {kind}: {link['url']}"
+    unchecked = sorted(f"{code} {kind}: {link['url']} "
+                       f"({checked.get(link['url'], 'never opened')})"
                        for code, links in voting.effective(cache).items()
-                       for kind, link in links.items() if link["url"] not in checked)
+                       for kind, link in links.items()
+                       if checked.get(link["url"]) not in (voting.LIVE, voting.DEAD))
     if unchecked:
         issues.append(Issue("warn", "voting-links-unchecked",
-                            f"{len(unchecked)} voting links have not been opened; run 'voting'",
-                            unchecked))
+                            f"{len(unchecked)} voting links were not found live when last "
+                            f"opened, or never opened; run 'voting', and have a person open "
+                            f"any that stay unknown", unchecked))
     if gaps:
         issues.append(Issue("error", "voting-links-incomplete",
                             f"{len(gaps)} official voting pages are missing", gaps))

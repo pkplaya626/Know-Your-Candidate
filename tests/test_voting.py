@@ -224,6 +224,45 @@ class TestMorePages(unittest.TestCase):
         self.assertIn("mail-ballot", shown["DC"]["absentee"])
         self.assertNotIn("status", shown["WY"])
 
+    def test_each_link_says_where_it_came_from(self):
+        # "The first four from NASS" credited NASS with eleven states'
+        # sample-ballot pages, Wyoming's results page and D.C.'s override
+        # (PR #94 review): the page now credits NASS only with what NASS lists.
+        dc = overrides.VOTING_LINKS[("DC", "absentee")]
+        wy = overrides.VOTING_LINKS[("WY", "status")]
+        shown = voting.for_page(cache_of(DC={"absentee": dc[0]}, WY={"status": wy[0]}))
+        self.assertEqual(shown["_nass"]["TX"], sorted(voting.PAGES))
+        self.assertEqual(shown["_nass"]["MN"], sorted(voting.PAGES))
+        self.assertNotIn("sample", shown["_nass"]["MN"])
+        self.assertNotIn("absentee", shown["_nass"]["DC"])
+        self.assertEqual(shown["_nass"]["WY"], ["absentee", "polling", "register"])
+        self.assertEqual(shown["_nass"]["GU"], [])
+        effective = voting.effective(cache_of())
+        self.assertEqual(effective["TX"]["deadlines"]["from"], voting.VOTE_GOV_FROM)
+        self.assertEqual(effective["TX"]["results"]["from"], voting.OFFICE)
+        self.assertEqual(effective["VI"]["polling"]["from"], voting.OFFICE)
+
+    def test_a_link_not_found_live_is_never_called_opened(self):
+        # Guam's only link could not be reached on 2026-10-17, and the page
+        # said "each link opened" over it.
+        cache = cache_of()
+        shown_urls = {link["url"] for links in voting.effective(cache).values()
+                      for link in links.values()}
+        cache["links"] = {url: voting.LIVE for url in shown_urls}
+        cache["links"][voting.TERRITORY_LINKS["GU"]["info"][0]] = voting.UNKNOWN
+        cache["links"][voting.DEADLINES["TX"]] = voting.UNKNOWN
+        shown = voting.for_page(cache)
+        self.assertEqual(shown["_unreached"], {"GU": ["info"], "TX": ["deadlines"]})
+        unchecked = [i for i in validate.check_voting_links(cache) if i.code == "voting-links-unchecked"]
+        self.assertEqual(len(unchecked), 1)
+        self.assertEqual(len(unchecked[0].detail), 2)
+        self.assertTrue(all("(unknown)" in line for line in unchecked[0].detail))
+
+    def test_the_december_rounds_say_what_the_date_was_once_it_has_passed(self):
+        for entries in voting.key_dates().values():
+            for entry in entries:
+                self.assertTrue(entry["past"].startswith("The date set for"), entry)
+
     def test_the_december_rounds_come_from_the_overrides_with_a_source(self):
         dates = voting.key_dates()
         self.assertEqual(dates["GA"][0]["date"], overrides.GENERAL_RUNOFFS["GA"][0])

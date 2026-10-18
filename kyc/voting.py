@@ -168,8 +168,9 @@ SAMPLE_BALLOTS = {
 # "deadlines": vote.gov's page for the jurisdiction, from vote.gov/register's
 # own list (read 2026-10-17). Each lists the online, mail and in-person
 # registration deadlines as the state sets them ("29 days before Election
-# Day"), and says where a state registers on Election Day; the U.S. Election
-# Assistance Commission keeps it. No date is typed here: a deadline that
+# Day"), and says where a state registers on Election Day. vote.gov is the
+# General Services Administration's site, run with the Election Assistance
+# Commission; the page calls it the federal government's voting site. No date is typed here: a deadline that
 # changes is vote.gov's and the state's to say, and this site never calls
 # one passed (STATEGOV-11, PERSONA-03).
 VOTE_GOV = "https://vote.gov/register"
@@ -187,6 +188,10 @@ DEADLINES = {code: f"{VOTE_GOV}/{slug}" for code, slug in {
     "SD": "south-dakota", "TN": "tennessee", "TX": "texas", "UT": "utah", "VA": "virginia",
     "VI": "us-virgin-islands", "VT": "vermont", "WA": "washington", "WI": "wisconsin",
     "WV": "west-virginia", "WY": "wyoming"}.items()}
+# vote.gov's own words where "Registration deadlines" would say what its page
+# does not: North Dakota's reads "Voter registration is not required in North
+# Dakota" (opened 2026-10-17).
+DEADLINE_LABELS = {"ND": "No registration needed (vote.gov)"}
 
 # NASS lists no territory, so a territory's page said nothing about voting
 # (audit 2026-10-17, RACES-07, STATEGOV-15). Each link is the territory's
@@ -243,7 +248,11 @@ def key_dates():
             out.setdefault(code, []).append({
                 "date": date, "source": url, "cite": label,
                 "text": "If no candidate for an office wins a majority of the votes on "
-                        "November 3, the top two meet in a runoff"})
+                        "November 3, the top two meet in a runoff",
+                # Said once the date has passed (rule 63): what the date
+                # was, never what will happen on it.
+                "past": "The date set for a runoff in any race no candidate won with a "
+                        "majority of the votes on November 3"})
     for (code, office, _cycle), seat in sorted(OPEN_PRIMARY_SEATS.items()):
         if code in KEY_DATE_SOURCES and seat.get("runoff"):
             label, url = KEY_DATE_SOURCES[code]
@@ -251,7 +260,9 @@ def key_dates():
             out.setdefault(code, []).append({
                 "date": seat["runoff"], "source": url, "cite": label,
                 "text": f"The {chamber} vote on November 3 is an open primary; a seat no "
-                        f"candidate wins with a majority is decided at a general election"})
+                        f"candidate wins with a majority is decided at a general election",
+                "past": f"The date set for a general election for any {chamber} seat no "
+                        f"candidate won with a majority in the November 3 open primary"})
     return out
 
 
@@ -262,10 +273,14 @@ def unsourced_key_dates():
     return sorted(codes - set(KEY_DATE_SOURCES))
 
 
+# Each territory's election office, by the name its own site gives it
+# (checked 2026-10-17), so the page names the office it credits (rule 75).
 TERRITORY_SOURCES = {
-    "GU": "https://gec.guam.gov/", "VI": "https://vivote.gov/",
-    "MP": "https://www.votecnmi.gov.mp/", "AS": "https://www.aselectionoffice.gov/",
-    "PR": "https://ww2.ceepur.org/",
+    "GU": ("https://gec.guam.gov/", "Guam Election Commission"),
+    "VI": ("https://vivote.gov/", "Election System of the Virgin Islands"),
+    "MP": ("https://www.votecnmi.gov.mp/", "Commonwealth Election Commission"),
+    "AS": ("https://www.aselectionoffice.gov/", "American Samoa Election Office"),
+    "PR": ("https://ww2.ceepur.org/", "Comisi\u00f3n Estatal de Elecciones"),
 }
 
 
@@ -421,9 +436,19 @@ def fetch(get=_get, status=_status, check=True, pause=1.0, sleep=time.sleep):
 
 # ------------------------------------------------------------- what is shown
 
+# Where each link shown comes from, for the page to say link by link: the
+# sentence "the first four from NASS" credited NASS with a curated sample
+# ballot page, Wyoming's results page and D.C.'s override (PR #94 review).
+# An override's replacement is the office's own page, not NASS's.
+NASS = "nass"
+OFFICE = "office"
+VOTE_GOV_FROM = "vote.gov"
+
+
 def effective(cache):
-    """``{code: {kind: {"url", "label"?}}}``: NASS's links with the evidenced
-    replacements applied, and nothing a replacement drops.
+    """``{code: {kind: {"url", "from", "label"?}}}``: NASS's links with the
+    evidenced replacements applied, nothing a replacement drops, and the
+    curated pages beside them; ``from`` is NASS, OFFICE or VOTE_GOV_FROM.
 
     An override applies only while NASS still lists the URL it replaces;
     once NASS changes its entry, NASS's is shown and validate says so.
@@ -437,21 +462,25 @@ def effective(cache):
             fix = overrides.VOTING_LINKS.get((code, kind))
             if fix and fix[0] == url:
                 if fix[1]:
-                    shown[kind] = {"url": fix[1], **({"label": fix[2]} if fix[2] else {})}
+                    shown[kind] = {"url": fix[1], "from": OFFICE,
+                                   **({"label": fix[2]} if fix[2] else {})}
                 continue
-            shown[kind] = {"url": url}
+            shown[kind] = {"url": url, "from": NASS}
         for kind, table in (("sample", SAMPLE_BALLOTS), ("results", RESULTS),
                             ("deadlines", DEADLINES)):
             if code in table:
-                shown[kind] = {"url": table[code]}
+                shown[kind] = {"url": table[code],
+                               "from": VOTE_GOV_FROM if kind == "deadlines" else OFFICE}
+        if code in DEADLINE_LABELS and "deadlines" in shown:
+            shown["deadlines"]["label"] = DEADLINE_LABELS[code]
         out[code] = shown
     if out:
         # The territories, which NASS does not list: their election offices'
         # own pages, and vote.gov's.
         for code, links in TERRITORY_LINKS.items():
-            shown = {kind: {"url": url, **({"label": label} if label else {})}
+            shown = {kind: {"url": url, "from": OFFICE, **({"label": label} if label else {})}
                      for kind, (url, label) in links.items()}
-            shown["deadlines"] = {"url": DEADLINES[code]}
+            shown["deadlines"] = {"url": DEADLINES[code], "from": VOTE_GOV_FROM}
             out[code] = shown
     return out
 
@@ -483,16 +512,27 @@ def for_page(cache):
     if not cache:
         return {}
     status = cache.get("links") or {}
-    out, labels = {}, {}
+    out, labels, nass, unreached = {}, {}, {}, {}
     for code, links in effective(cache).items():
         out[code] = {kind: link["url"] for kind, link in links.items()
                      if status.get(link["url"]) != DEAD}
         named = {kind: link["label"] for kind, link in links.items() if link.get("label")}
         if named:
             labels[code] = named
+        # Which links NASS lists, so the page credits NASS with those and no
+        # others; and which were not found live when the links were opened,
+        # so the page never says "each link opened" over one that could not
+        # be reached (Guam's only link, on 2026-10-17).
+        nass[code] = sorted(kind for kind in out[code] if links[kind]["from"] == NASS)
+        missed = sorted(kind for kind in out[code] if status.get(links[kind]["url"]) != LIVE)
+        if missed:
+            unreached[code] = missed
     out["_labels"] = labels
+    out["_nass"] = nass
+    out["_unreached"] = unreached
     out["_keyDates"] = key_dates()
-    out["_territories"] = dict(TERRITORY_SOURCES)
+    out["_territories"] = {code: {"url": url, "name": name}
+                           for code, (url, name) in TERRITORY_SOURCES.items()}
     out["_voteGov"] = VOTE_GOV
     out["_source"] = cache.get("source") or SOURCE
     out["_listed"] = (cache.get("fetched") or "")[:10]

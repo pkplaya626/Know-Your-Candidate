@@ -3612,7 +3612,7 @@ button.local-county-link {
 }
 .gov-office { margin: 0; }
 .gov-office .gov-ballot-mark { margin-top: 0; }
-.gov-open-seat { margin: 2px 0 0; font-size: var(--t-sm); color: var(--text-muted); }
+.gov-holder-status { margin: 2px 0 0; font-size: var(--t-sm); color: var(--text-muted); }
 .gov-next {
   margin-left: var(--s-1);
   font-size: var(--t-xs);

@@ -176,9 +176,12 @@
    *  here from a term length. "" when the table has no year for it. */
   function nextMark(item) {
     if (!item || !item.next) return "";
+    // A month other than November is Louisiana's October first round, which
+    // a runoff may follow: "Next election", not "Next elected".
     return ' <a class="gov-next" href="' + KYC.escapeAttr(item.next.source) +
-      '" target="_blank" rel="noopener noreferrer">Next elected: November ' +
-      KYC.escapeHtml(String(item.next.year)) + "</a>";
+      '" target="_blank" rel="noopener noreferrer">' +
+      (item.next.month ? "Next election: " + KYC.escapeHtml(item.next.month) : "Next elected: November") +
+      " " + KYC.escapeHtml(String(item.next.year)) + "</a>";
   }
 
   function officeMark(code, key) {
@@ -195,17 +198,26 @@
       : "No such office") + (elected ? nextMark(item) : "");
   }
 
-  /** Why an office on the ballot has no incumbent running for it, where a
-   *  cited source says so (ballot2026.OPEN_SEATS): the constitution's term
-   *  limit or the election office's list of candidates, never inferred.
-   *  Said only until the election: after it, the office has a winner. */
+  /** Whether the holder of an office on the ballot is running for it
+   *  (ballot2026.open_seat): "Open seat" where a cited source - the
+   *  constitution's term limit or the election office's list of candidates
+   *  - says they are not, the list's word where it names them, and, for
+   *  every other office on the ballot, that this was not checked. One office
+   *  silent beside another that said "Open seat" read as "the holder is
+   *  running" (PR #94 review, rule 19). Said only until the election: after
+   *  it, the office has a winner. */
   function openSeat(code, key) {
     var b = ballot(code);
     var item = b && b.offices[key];
-    var open = item && item.up && item.openSeat;
-    if (!open || after()) return "";
-    return '<p class="gov-open-seat">Open seat: ' + KYC.escapeHtml(open.text) + " (" +
-      link(open.source, open.cite) + ").</p>";
+    var status = item && item.up && item.holderStatus;
+    if (!status || after()) return "";
+    if (status.why === "unchecked") {
+      return '<p class="gov-holder-status gov-holder-unchecked">' + KYC.escapeHtml(status.text) +
+        ".</p>";
+    }
+    return '<p class="gov-holder-status' + (status.why === "listed" ? "" : " gov-open-seat") + '">' +
+      (status.why === "listed" ? "" : "Open seat: ") + KYC.escapeHtml(status.text) + " (" +
+      link(status.source, status.cite) + ").</p>";
   }
 
   /** The office's label with its ballot mark beside it. */
