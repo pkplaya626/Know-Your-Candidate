@@ -175,6 +175,15 @@ def _build(args):
         print(f"  history: public offices for {stats['history']} people (read {lineage['read']})")
     else:
         print("  [warn] no political history cache; run 'history'")
+    # Members' education, careers and platform, each from a source tied to
+    # them by id and badged; the roster's typed columns are never read (rule 86).
+    from . import members as members_mod
+    member_sources = members_mod.load_cache(args.root)
+    filled = members_mod.apply_cache(profiles, member_sources)
+    stats["member_sources"] = dict(sorted(filled.items()))
+    if member_sources:
+        print("  members: " + ", ".join(f"{n} {k}" for k, n in sorted(filled.items()))
+              + f" (read {member_sources.get('read')})")
 
     race_list = races_mod.build(profiles, candidates.filing_counts(field),
                                 results=outcomes, dates=results_mod.load_dates(args.root),
@@ -252,6 +261,8 @@ def _build(args):
     from . import oge as oge_mod
     for level, code, message, detail in oge_mod.problems(oge_mod.load_cache(args.root),
                                                          federal_mod.load_cache(args.root)):
+        issues.append(validate.Issue(level, code, message, detail))
+    for level, code, message, detail in members_mod.problems(profiles, member_sources):
         issues.append(validate.Issue(level, code, message, detail))
     errors = [i for i in issues if i.level == "error"]
 
@@ -543,6 +554,41 @@ def _history(args):
             print(f"           - {line}")
     if not args.check:
         print(f"[ok] wrote {history.save_cache(cache, args.root)}")
+    return 0
+
+
+def _members(args):
+    """Members' platforms, education, careers, contact pages and district
+    offices, each from a source tied to the member by id (kyc/members.py).
+    A read that fails keeps the last one (rule 8)."""
+    from . import federal, members
+
+    raw = _load(args)
+    if raw is None:
+        return 2
+    from .cycle import snapshot_congress
+
+    snapshot = legislators.load_snapshot(args.root)
+    profiles, _stats = build_profiles(raw, snapshot=snapshot,
+                                      committees=legislators.load_committees(args.root))
+    if args.check:
+        cache = members.load_cache(args.root)
+        if not cache:
+            print(f"[error] no {members.CACHE_PATH}; run 'members'", file=sys.stderr)
+            return 2
+    else:
+        ids = set(args.id) if args.id else None
+        cache = members.refresh(profiles, root=args.root, executive=federal.load_cache(args.root),
+                                limit=args.limit, sites=not args.no_sites, ids=ids,
+                                congress=snapshot_congress(snapshot) if snapshot else None,
+                                key=fec.api_key(args.root))
+        print(f"[ok] wrote {members.CACHE_PATH}")
+    counts = members.apply_cache(profiles, cache)
+    print("  members: " + ", ".join(f"{n} {k}" for k, n in sorted(counts.items())))
+    for level, code, message, detail in members.problems(profiles, cache):
+        print(f"  [{level}] {code}: {message}")
+        for line in (detail if args.verbose else detail[:10]):
+            print(f"           - {line}")
     return 0
 
 
@@ -1166,6 +1212,8 @@ def _verify(args):
     from . import history as history_mod
     history_mod.apply_cache(profiles, history_mod.load_cache(args.root),
                             snapshot=legislators.load_snapshot(args.root))
+    from . import members as members_mod
+    members_mod.apply_cache(profiles, members_mod.load_cache(args.root))
     race_list = races_mod.build(
         profiles, candidates.filing_counts(field),
         results=outcomes, dates=results_mod.load_dates(args.root),
@@ -2040,6 +2088,17 @@ def build_parser():
     og.add_argument("--check", action="store_true",
                     help="report the committed cache; make no network call")
 
+    mem = add("members", help="members' platforms (official sites), education and careers "
+                              "(their Wikipedia infobox), contact pages and district offices")
+    mem.add_argument("--check", action="store_true",
+                     help="report what the committed cache fills; no network")
+    mem.add_argument("--limit", type=int, default=None,
+                     help="read at most N official sites this run")
+    mem.add_argument("--id", action="append", default=None,
+                     help="read this member's official site again (a bioguide id; repeatable)")
+    mem.add_argument("--no-sites", action="store_true",
+                     help="read the district offices and articles only")
+
     hist = add("history", help="the public offices each person has held: Congress from "
                                "congress-legislators, other offices from Wikidata")
     hist.add_argument("--check", action="store_true",
@@ -2115,6 +2174,8 @@ def main(argv=None):
         return _vacancies(args)
     if args.command == "history":
         return _history(args)
+    if args.command == "members":
+        return _members(args)
     if args.command == "oge":
         return _oge(args)
     if args.command == "courts":

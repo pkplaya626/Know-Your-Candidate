@@ -40,6 +40,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… federal` | The President, the Vice President and the Cabinet: who holds each office, from the White House's pages, each office's own page and the Senate's roll-call votes (`--check` reports the cache) |
 | `… judiciary` | Every sitting federal judge, from the Federal Judicial Center's directory, and the Supreme Court's members as the Court lists them; a short read keeps the last cache (`--check` reports it) |
 | `… oge` | The financial reports the President, the Vice President and the Cabinet filed with the Office of Government Ethics, attributed by office and checked against the filer each report names (`--check` reports the cache). See [Financial disclosures](#financial-disclosures) |
+| `… members` | Each sitting member's education and earlier careers (the Congressional Directory, by their official web address; their Wikipedia infobox by their id where the Directory has none), the issues their official website lists, a checked contact page and their offices at home (`congress-legislators`); a read that concludes nothing keeps the last one (`--check` reports the cache, `--id` re-reads one site, `--no-sites` skips the sites). See [A member's biography and platform](#a-members-biography-and-platform) |
 | `… history` | The public offices each person has held: Congress from congress-legislators, every other office from Wikidata where the person's own Wikipedia article gives the same office the same years; a short read keeps the last cache (`--check` reports it). See [Public offices held](#public-offices-held) |
 | `… voting` | Each state's and D.C.'s official pages for checking registration, finding a polling place, voting absentee or early, and registering, as NASS's "Can I Vote" lists them; refused unless all 51 are there. Then opens every link shown, NASS's and the curated results, sample-ballot, vote.gov and territory pages alike |
 | `… courts` | Each state's highest court and its members, read from the court's own roster |
@@ -442,15 +443,15 @@ so their names no longer claim one (`Cleaned_House.csv`,
 atomically:
 
 - **Newly seated members** get a row with only the columns the dataset
-  actually knows. Education, net worth, committees and platform are editorial
-  research that no dataset supplies, so they stay empty and the provenance
-  layer reports them as *No data* — which is true, and better than a plausible
-  invention.
+  actually knows. Education, net worth, committees and platform stay empty:
+  the roster's columns for them are never shown (rule 86), and `members`
+  fills a member's education, careers and platform from sources tied to them
+  by id - see [A member's biography and platform](#a-members-biography-and-platform).
 - **A new term** — everyone re-elected, on January 3 — rewrites the row's
   chamber, state, district, term dates and status. A representative elected to
   the Senate moves to the Senate file, and their committee assignments are
-  emptied, since they described the House seat. Name, education, professions
-  and platform are the person's, and stay. A new term never changes a party,
+  emptied, since they described the House seat. The name is the person's,
+  and stays. A new term never changes a party,
   so a party difference is still an error for somebody to look at.
 - **Anyone who has left** moves, row and all, to `Former_Members.csv`, with
   the day they left, the record that says so and their last Congress. A 2026
@@ -1217,10 +1218,43 @@ values are excluded from search, so "not disclosed" does not match everyone.
 
 A field the pipeline filled from a named source rather than a roster records
 that source in `fieldSources` - `wikipedia` (an article's infobox),
-`election-page` (the race page's description) or `campaign-site` (the
-campaign's own issues page) - and the page shows it as a badge beside the
-value, with a tooltip saying exactly where it came from. See
+`election-page` (the race page's description), `campaign-site` (the
+campaign's own issues page), or for a member `congressional-directory`,
+`member-wikipedia` (the article their id maps to) or `official-site` (the
+issues their official website lists) - and the page shows it as a badge
+beside the value, with a tooltip saying exactly where it came from. A
+member's `platforms` whose site was read and lists no issues has the quality
+`not_listed`, shown as "Not listed on their official site". See
 [Filling the gaps](#filling-the-gaps).
+
+## A member's biography and platform
+
+The rosters' Education, Previous Professions and "Policy Focus & Platforms"
+columns were typed by hand, with no source, in wording that was not
+even-handed: one member's platform read "Anti-abortion legislation" while four
+others' read "Pro-life advocacy", and forty Democrats had "Reproductive rights"
+where eighty-nine Republicans had "border security" (TRUST-05). They reached
+537 member profiles unbadged, reading as fact. None of it is shown now (rule
+86); `validate` fails a profile whose education, careers or platform has no
+source the page can name (`bio-unsourced`). `python build_profile_site.py
+members` writes `data/members.json`, and each field is filled from a source
+tied to the member by id, never by a search on their name:
+
+| What | From | Shown as |
+|---|---|---|
+| Education, earlier careers | The [Official Congressional Directory](https://www.govinfo.gov/app/collection/cdir) (GovInfo, the latest edition for the sitting Congress): each member's "education:" and "professional history:" (with any "military service:"), in its words. An entry is joined to a member by the office web address printed under it, which must be the address `congress-legislators` lists for their bioguide id, and its printed name must carry their surname | The field, badged **Congressional Directory** |
+| Education, where the Directory has none | The infobox of the Wikipedia article `congress-legislators` maps the bioguide id to, its title checked against the surname after redirects | The field, badged **Wikipedia** |
+| The issues they work on | Their official website (the `.house.gov` / `.senate.gov` address `congress-legislators` lists): the page its home page links as "Issues" (or "Priorities"), read one level down - its links to its own issue pages, in their words - or the site's own "Issues" menu, or that page's list or headings. Nothing that names the member or anyone else ("Trump's One Big Beautiful Betrayal") | Bullets badged **Official site**, dated and linked to that page; "Not listed on their official site" where the site lists none |
+| A contact form | The page the home page links as Contact (or Email me), fetched and seen to hold a form to write to the office - not a site search or a newsletter sign-up - or to lead to one; only where `congress-legislators` holds none | The *Contact form* chip, its title saying when it was checked |
+| Offices at home | `congress-legislators`' `legislators-district-offices`, by bioguide id: address, phone and hours | *District offices* (a senator's *State offices*), under a line saying a federal agency problem is casework for them |
+
+The Biographical Directory (bioguide.congress.gov) answers HTTP 403 to a
+script and a Cloudflare challenge to headless Chrome (2026-10-18), so it is
+linked from every member's profile but not read. A site that turns the
+request away, or draws itself with script, concludes nothing (rule 8) until
+headless Chrome has read it too, and a read that concludes nothing keeps the
+last good one. Official sites are read one request at a time, 1.5 seconds
+apart, and again after 27 days.
 
 ## Public offices held
 
@@ -2239,7 +2273,10 @@ confirm it, and the answer stays above the map rather than scrolling away.
 
 | Field | Source | Who has it |
 |---|---|---|
-| `website`, `phone`, `office`, `contactForm` | The member's current term record in `congress-legislators` | Sitting members |
+| `website`, `phone`, `office`, `contactForm` | The member's current term record in `congress-legislators`; where it holds no `contactForm`, the contact page the member's official site links, fetched and seen to hold a form (`contactFormVia: "official-site"`, `contactFormChecked`: the day) | Sitting members |
+| `districtOffices`, `districtOfficesRead` | `[{building, address, suite, city, state, zip, phone, hours}]` from `congress-legislators`' `legislators-district-offices`, by bioguide id, and the day it was read (`members`) | Sitting members it lists |
+| `officialIssuesUrl`, `platformRead` | The official-site page the member's `platforms` was read from, and the day; `platformRead` alone where the site lists no issues | Sitting members whose site was read |
+| `directoryEdition` | The Congressional Directory edition (`CDIR-2026-02-20`) a member's education or careers came from | Members in the Directory |
 | `social` (`twitter`, `twitter_id`, `facebook`, `instagram`, `youtube`, `youtube_id`, `bluesky`) | `legislators-social-media`, the project's verified account list. An X account is linked by `twitter_id` (`x.com/i/user/<id>`, which follows a renamed handle) where the file holds one; a handle X answers "not found" for with no id is dropped (`overrides.DEAD_X_HANDLES`). A YouTube value is given its shape in the pipeline: a channel id (`UC...`) becomes `youtube_id` (`/channel/`), an `@handle` stays one (`/@handle`), and a legacy username is linked as `overrides.YOUTUBE_LEGACY_NAMES` found it on a dated check, or dropped | Sitting members |
 | `refs` (`govtrack`, `opensecrets`, `votesmart`, `ballotpedia`) | Reference ids from `congress-legislators` | Sitting members |
 | `wikipedia` | The bioguide mapping for members; the state ballot page's own link for filed candidates (`wikipediaVia`), kept only while it leads, through its redirects, to a whole article about them (`enrich`) | Members, and candidates the ballot page links |

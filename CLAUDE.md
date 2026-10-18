@@ -47,6 +47,7 @@ data/political_history.json ──┤   (public offices held: congress-legislato
 data/oge_disclosures.json   ──┤   (the executive's financial reports: Office of Government Ethics, by office)
 data/tribal_leaders.json    ──┤   (every tribal government and its leader: BIA Tribal Leaders Directory)
 data/local_sites.json       ──┤   (each local government's listed website, opened: localgov --check-sites)
+data/members.json           ──┤   (members' platforms, education, careers, offices: members)
 data/record_2026.json       ──┤   (the frozen 2026 race set: record --freeze)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
@@ -108,6 +109,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   they *are* hand-editable. `stategov.js` is generated from the last five,
   with `kyc/ballot2026.py`: which state offices and legislative seats are on
   the 2026 ballot, a curated table citing each state's own record.
+  `members.json` (`members`, rule 86) is a hand-editable cache too.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them to check they load the right scripts in the right order, and rewrites
   nothing in them but the version stamps on their asset URLs (rule 76); they
@@ -155,6 +157,7 @@ python build_profile_site.py judiciary        # every sitting federal judge (FJC
 python build_profile_site.py vacancies        # vacancies in the federal courts, as uscourts.gov lists them
 python build_profile_site.py history          # public offices each person has held (congress-legislators, Wikidata, Wikipedia)
 python build_profile_site.py oge              # the executive's financial reports (Office of Government Ethics), by office
+python build_profile_site.py members          # members' education and careers (Congressional Directory), platform (official site), offices
 python build_profile_site.py tribes           # every tribal government and its leader (BIA Tribal Leaders Directory)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
@@ -165,7 +168,7 @@ npm install && npm test                       # 1987 real-DOM checks (needs jsdo
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`,
-`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts. Run the
+`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes`, `members` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -1285,6 +1288,30 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Democrats, or last prices that add up to 128%, is quoted with a note
     saying what it cannot tell, read page-side so `data/odds.js` stays the
     cache's (rule 41).
+
+86. **A member's biography is a source's words, and says which.** The
+    rosters' Education, Previous Professions and "Policy Focus & Platforms"
+    columns were typed with no source and reached 537 member profiles
+    unbadged, in uneven words: "Anti-abortion legislation" for one member,
+    "Pro-life advocacy" for four others (TRUST-05). `profiles` never reads
+    them, and `validate` fails any education, careers or platform without a
+    source the page badges (`bio-unsourced`). `kyc/members.py` fills them by
+    id: education and careers from the Congressional Directory, joined on
+    the office web address congress-legislators lists for the bioguide id
+    and cross-checked against the printed surname (the Biographical
+    Directory refuses scripts); education from the infobox of the article
+    the id maps to where the Directory has none; the platform from the
+    official site's own issues list, one level, in its words, never a line
+    naming the member or anyone else ("Trump's One Big Beautiful Betrayal"
+    is a banner under Van Hollen's issues path). An "On The Issues" link
+    can lead to a page whose children are a voting record (Matsui's
+    /legislative-work), so pages filed under an issues path win. A site
+    read that lists none is "Not listed on their official site", never "No
+    data" and never the typed text; a refusal concludes nothing until
+    headless Chrome has tried (rule 8). A contact page is linked only once a
+    fetch shows a form to write with: a soft 200 is not one. A challenger's
+    dialog leads with the race, then the money, the platform and the
+    biography, and its absences are said once (PROFILES-18).
 
 ## District maps
 

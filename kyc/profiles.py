@@ -405,8 +405,14 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
         "seekingReelection2026": seat_up and not not_seeking,
         "age": _age(row, as_of),
         "birthdate": clean_str(row.get("Birthdate"), "Unknown"),
-        "education": clean_str(row.get("Education"), "N/A"),
-        "previous_professions": clean_str(row.get("Previous Professions"), "N/A"),
+        # The roster's Education, Previous Professions and "Policy Focus &
+        # Platforms" columns were typed with no source and in uneven words
+        # ("Anti-abortion legislation" for one member, "Pro-life advocacy"
+        # for four others; TRUST-05). They are never read: each field is
+        # filled from a source tied to the member by id, and badged
+        # (kyc/members.py, rule 86), or reads as an absence.
+        "education": "",
+        "previous_professions": "",
         # Money comes from the FEC alone (fec.apply_cache; validate's
         # finance-not-fec). The roster's totals and its "Individual/PAC
         # contributions" line are never read: a member the FEC lookup missed
@@ -414,7 +420,7 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
         "receipts": "",
         "disbursements": "",
         "funding_sources": "",
-        "platforms": clean_str(row.get("Policy Focus & Platforms"), "N/A"),
+        "platforms": "",
         "voting_alignment": clean_str(row.get("Projected/Historical Voting Alignment"), "N/A"),
         "committees": clean_str(row.get("Committee Assignments"), "None"),
         "photos": member_photos(name, bioguide),

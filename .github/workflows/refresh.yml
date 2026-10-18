@@ -240,6 +240,19 @@ jobs:
         continue-on-error: true
         run: python build_profile_site.py history
 
+      # Members' education and careers from the Congressional Directory (on
+      # GovInfo, through the api.data.gov key the FEC uses), the issues their
+      # official sites list, a checked contact page, and their offices at
+      # home (kyc/members.py, rule 86). Sites read in the last 27 days are
+      # skipped and a run reads at most 150, one request at a time; a read
+      # that concludes nothing keeps the last one.
+      - name: Refresh members' biographies, platforms and offices
+        continue-on-error: true
+        timeout-minutes: 40
+        env:
+          FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
+        run: python build_profile_site.py members --limit 150
+
       # What a filed candidate's own sources say - the birth date, education
       # and occupation in the article their ballot page links; their
       # campaign's description of itself, its issues page and its portrait -
