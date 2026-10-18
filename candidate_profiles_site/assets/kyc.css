@@ -2612,6 +2612,60 @@ a.badge-link {
   color: var(--text);
 }
 .vote-dates li + li { margin-top: var(--s-1); }
+.vote-src { color: var(--text-muted); }
+/* Where a date stands on the reader's calendar: words, never colour alone. */
+.vote-when {
+  display: inline-block;
+  padding: 0 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.vote-when.is-now { border-color: var(--accent); color: var(--text); }
+.vote-lead {
+  margin: 0 0 var(--s-3);
+  font-weight: 700;
+}
+/* VISUALS-25: the state's dates in order, as page text (rule 46). It wraps
+ * rather than scrolling sideways, so a phone shows every date. */
+.vote-cal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin: 0 0 var(--s-3);
+  padding: 0;
+  list-style: none;
+}
+.vote-cal-item {
+  display: flex;
+  flex-direction: column;
+  min-width: 6.5em;
+  max-width: 11em;
+  padding: var(--s-1) var(--s-2);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+}
+.vote-cal-date { font-weight: 700; font-size: var(--t-sm); white-space: nowrap; }
+.vote-cal-label { font-size: var(--t-xs); color: var(--text-muted); }
+.vote-cal-item.is-past { background: transparent; border-top-style: dotted; }
+.vote-cal-item.is-past .vote-cal-date { color: var(--text-muted); }
+/* Three marks, three meanings: a window under way carries the accent bar;
+ * Election Day a thicker one and a bold label; today is a dashed box with
+ * a bar in the text colour (PR #102 review: one blue bar meant all three). */
+.vote-cal-item.is-now { border-top-color: var(--accent); }
+.vote-cal-item.is-election { border-top: 6px solid var(--accent); }
+.vote-cal-item.is-election .vote-cal-label { color: var(--text); font-weight: 700; }
+.vote-cal-item.is-today {
+  min-width: 0;
+  border-style: dashed;
+  border-top: 3px solid var(--text);
+  background: transparent;
+}
+.vote-cal-item.is-today .vote-cal-label { color: var(--text); font-weight: 700; }
 .state-section { margin-bottom: var(--s-6); }
 .state-heading {
   display: flex;
@@ -4141,6 +4195,31 @@ button.local-county-link {
    (kyc-federal.js). Tables are the guide's (.guide-table, a card per row on
    a phone); a name opens the official dialog (kyc-official.js). */
 .fed-section { margin: 0 0 var(--s-6); }
+/* A court's active judges by the President who appointed them (FEDERAL-22):
+ * one square per judge, one row per President, each row named in words. A
+ * category colour, never a party's: a judge is shown without a party. */
+/* The line of succession: every row the same height and weight, whether
+   its name opens an official's record or a member's profile. */
+.fed-succession li { padding: var(--s-1) 0; }
+.fed-succession a { font-weight: 600; }
+.fed-succession .guide-person { display: inline; min-height: 0; padding: 0; }
+@media (pointer: coarse) {
+  .fed-succession li { min-height: 44px; padding: var(--s-2) 0; }
+}
+.fed-appointers { margin: 0 0 var(--s-4); max-width: 40rem; }
+.fed-appointers figcaption { margin: 0 0 var(--s-2); font-size: var(--t-sm); color: var(--text-muted); }
+.fed-appointers ul { list-style: none; margin: 0; padding: 0; }
+.fed-appointer {
+  display: grid; grid-template-columns: minmax(8rem, 11rem) 1fr; gap: var(--s-1) var(--s-3);
+  align-items: center; padding: 2px 0; font-size: var(--t-sm);
+}
+.fed-appointer-bar { display: flex; align-items: center; min-width: 0; }
+.fed-appointer-units { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; }
+.fed-appointer-units i { display: block; width: 10px; height: 10px; border-radius: 2px; background: var(--cat-1); }
+.fed-appointer-n { margin-left: var(--s-2); color: var(--text); font-variant-numeric: tabular-nums; }
+.fed-appointers-courts { display: grid; gap: var(--s-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); }
+.fed-appointers-courts .fed-appointers { margin: 0; }
+@media (forced-colors: active) { .fed-appointer-units i { background: CanvasText; } }
 .fed-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));

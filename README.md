@@ -38,7 +38,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… executives` | Every governor from the NGA, and NCSL's count of each legislature's parties (`--check` reports the caches) |
 | `… officers` | Every lieutenant governor (NLGA) and secretary of state (NASS), cross-checked where the rosters overlap |
 | `… federal` | The President, the Vice President and the Cabinet: who holds each office, from the White House's pages, each office's own page and the Senate's roll-call votes (`--check` reports the cache) |
-| `… judiciary` | Every sitting federal judge, from the Federal Judicial Center's directory, and the Supreme Court's members as the Court lists them; a short read keeps the last cache (`--check` reports it) |
+| `… judiciary` | Every sitting federal judge, from the Federal Judicial Center's directory, and the Supreme Court's members as the Court lists them; the territorial courts' judges from each court's own site; each judge's Wikipedia article and portrait through the FJC id on Wikidata. A short read keeps the last cache (`--check` reports it) |
 | `… oge` | The financial reports the President, the Vice President and the Cabinet filed with the Office of Government Ethics, attributed by office and checked against the filer each report names (`--check` reports the cache). See [Financial disclosures](#financial-disclosures) |
 | `… members` | Each sitting member's education and earlier careers (the Congressional Directory, by their official web address; their Wikipedia infobox by their id where the Directory has none), the issues their official website lists, a checked contact page and their offices at home (`congress-legislators`); a read that concludes nothing keeps the last one (`--check` reports the cache, `--id` re-reads one site, `--no-sites` skips the sites). See [A member's biography and platform](#a-members-biography-and-platform) |
 | `… history` | The public offices each person has held: Congress from congress-legislators, every other office from Wikidata where the person's own Wikipedia article gives the same office the same years; a short read keeps the last cache (`--check` reports it). See [Public offices held](#public-offices-held) |
@@ -64,9 +64,10 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… refresh` | `fetch`, then `build` |
 | `python tools/fetch_district_maps.py` | Rebuild `district_maps/`: every state's district boundaries, the new 2026 maps, and the towns to label (network) |
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
+| `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (1987 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (2123 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1563,8 +1564,9 @@ they run the state's elections; and each chamber's seats by party.
 | Lieutenant governors, and who is first in line where there is none | National Lieutenant Governors Association, members | `officers` writes `data/statewide_officers.json` |
 | Secretaries of state: party, elected or appointed, chief election official, contact | National Association of Secretaries of State, membership roster | `officers` |
 | Attorneys general: who holds the office | The office's own website, linked from USA.gov's page for the state | `officers` |
-| How to vote: registration status, polling place, absentee and early voting, registering | Each state's own pages, as NASS's "Can I Vote" (nass.org/can-I-vote) lists them; no date or deadline is typed in. Shown as "Voting in <State>" on the state page | `voting` writes `data/voting_links.json` |
-| Official results, sample ballots, registration deadlines, territories | `voting.RESULTS` (every state and D.C.) and `voting.SAMPLE_BALLOTS` (where the election office links a statewide one), each the office's own page; vote.gov's page for each state and territory for deadlines, linked and never typed; the territories' election offices (`voting.TERRITORY_LINKS`); Georgia's December 1 runoff and Louisiana's December 12 House round from `overrides.GENERAL_RUNOFFS` and `OPEN_PRIMARY_SEATS`, each with the state's page that gives it (`voting.KEY_DATE_SOURCES`) | curated in `kyc/voting.py`; opened by `voting` with NASS's links |
+| How to vote: registration status, polling place, absentee and early voting, registering | Each state's own pages, as NASS's "Can I Vote" (nass.org/can-I-vote) lists them. Shown as "Voting in <State>" on the state page | `voting` writes `data/voting_links.json` |
+| Key dates: registration deadlines (online, by mail, in person), same-day registration, early voting, mail-ballot application and return deadlines, a late-arriving ballot's last day, runoffs | Each jurisdiction's election office: its pages, calendars and statutes, read 2026-10-17 and every value re-opened by a second researcher. Every value shown carries the page's address and its words, on the jurisdiction's own domains; a compiled table (NCSL, Ballotpedia, Wikipedia, vote.gov, Vote.org, fvap.gov, usa.gov) is refused as a source. Where same-day registration exists, a deadline before Election Day is called the regular deadline, and where it happens is quoted in the office's words. Shown in words and as a calendar strip in "Voting in <State>", each line linked, and marked passed on the reader's own calendar day; "Register to vote" says when registration closed. From the day after the election only a ballot still arriving and a runoff stay | hand-edited `data/voting_dates.json`, checked by `kyc/voting_dates.py` |
+| Official results, sample ballots, registration deadlines, territories | `voting.RESULTS` (every state and D.C.) and `voting.SAMPLE_BALLOTS` (where the election office links a statewide one), each the office's own page; vote.gov's page for deadlines only where the jurisdiction's own record (above) does not say when registration closes; the territories' election offices (`voting.TERRITORY_LINKS`) | curated in `kyc/voting.py`; opened by `voting` with NASS's links |
 | Attorneys general: party | Republican and Democratic Attorneys General Associations, members | `officers` |
 
 A party holds a chamber when it has more than half of **all** its seats; a
@@ -1794,7 +1796,11 @@ per court show them (below).
 | Every judge's service on every court: appointed by, nominated, confirmed (and the vote), commissioned, senior status, chief judge | The Federal Judicial Center's Biographical Directory of Article III Federal Judges, exported nightly | The FJC is the judiciary's own research agency (28 U.S.C. 620); its `nid` is each judge's id and builds the link to their FJC page |
 | Birth, education, career | The same directory | The career is the FJC's own words, quoted, never paraphrased |
 | Who sits on the Supreme Court | supremecourt.gov's list of the justices (rule 57) | The directory's open Supreme Court rows include two retired justices, who are not members: read naively it seats eleven |
-| The courts, and the circuits | `kyc/federal_courts.py`, from 28 U.S.C. 41 and the directory's court names | 13 courts of appeals, 91 Article III district courts, the Court of International Trade; Guam's, the Northern Mariana Islands' and the Virgin Islands' courts are Article IV courts the directory does not cover, so their judges are not listed - "not in the directory", never "none" |
+| The courts, and the circuits | `kyc/federal_courts.py`, from 28 U.S.C. 41 and the directory's court names | 13 courts of appeals, 91 Article III district courts, the Court of International Trade; Guam's, the Northern Mariana Islands' and the Virgin Islands' courts are Article IV courts the directory does not cover |
+| The territorial courts' judges | Each court's own website (`kyc/territorial_courts.py`): Guam's "Judicial Officers" page, the Northern Mariana Islands' banner, each Virgin Islands judge's own page | A recipe per court, as for the state high courts (rule 57): district judges only, never more than the statute's seats (48 U.S.C. 1424b, 1614, 1821), at most one chief; a page not read keeps the last roster, and one never read says so - never "none". Shown by name and title, with nothing to open |
+| A judge's Wikipedia article, Wikidata item and portrait | The FJC's own page for the judge's `nid`, whose canonical address is the judge's slug; the Wikidata item carrying that slug as P2736 (`kyc/judge_links.py`) | Two ids, never a name. Two items for one slug, a label or article title without the surname, an item whose year of birth is not the directory's (or that gives none), two images or two articles: nothing. A portrait is a JPEG, PNG or WebP no more than a fifth wider than tall, not in `overrides.NOT_A_PORTRAIT`, drawn from Wikimedia's sizes of that one file (rule 42) and credited to Wikimedia Commons. Read by `judiciary`; a failure keeps the last links |
+| Each court's website | uscourts.gov's list of court websites (`kyc/court_info.py`) | Joined to the court ids by the circuit, state and district the list names, never by host name (`ca-n` is `cand.uscourts.gov`); every host the judiciary's own; each address fetched once |
+| Which district court, and which division, covers each county | 28 U.S.C. 81-131 as govinfo publishes it (`tools/fetch_court_districts.py`, `kyc/court_districts.py`) into `data/court_districts.json`, with the amendments since the edition | The statute's names joined to the Census counties by name within the state; every county of a state of several districts placed exactly once or the build fails; a Code spelling or typo is an evidenced alias; Virginia's independent cities placed by their neighbours only where all agree |
 
 A judge is sitting on a court when their service there has a commission and
 no termination; senior from the day senior status began, never before; the
@@ -1846,9 +1852,10 @@ from its biographies page, credited to the Collection of the Supreme Court
 of the United States. Each is joined only to the nine justices already
 joined to the directory, since the page also pictures retired justices, and
 only when its caption's title agrees with the justice's role. Any failure
-shows none (`justice-portraits`). Lower-court judges have no portraits:
-Wikidata's images for them fail too many of rule 38's tests to show
-unreviewed.
+shows none (`justice-portraits`). Every other judge's portrait is the image
+of the Wikidata item that carries their FJC id (above), never one found by
+name; the shape and surname checks withhold what is not a likeness, and the
+`judiciary` run lists each one withheld.
 
 ### Changes in the Cabinet
 
@@ -1898,7 +1905,38 @@ A name opens the person's record in one dialog (`assets/kyc-official.js`):
 - a Cabinet officer's confirmation and office page;
 - a judge's every seat, with who appointed them, the dates and the vote;
 - a judge's earlier federal service, birth, education and career, in the
-  directory's words, and a link to their FJC page.
+  directory's words, and links to their FJC page, their court's website and,
+  through the FJC id, their Wikipedia article and Wikidata item;
+- a Cabinet officer who has left since the term began, as a record of their
+  time in office with a "Left office" banner, at the same id; the changes
+  table links their name;
+- the other federal posts a Cabinet officer's own OGE report lists for the
+  last twelve months, quoted in its words and attributed, only from a
+  report checked to name its filer (rule 70), and apart from the offices
+  two sources agree on (rule 69).
+
+The hub also lists the line of succession (3 U.S.C. 19): the Vice
+President, the Speaker and the President pro tempore from congress-
+legislators' leadership roles, checked against the current membership, then
+the department heads in the statute's order, with the statute's caveat for
+an acting head. Each Cabinet card links the department's website as USA.gov's
+index of agencies gives it, whether or not the office's own page could be
+checked.
+
+A court's page also shows its active judges by the President who appointed
+them, a row per President with a square per judge and the count in words
+(`appointers`, counted over the same judges as its "active" figure), in a
+category colour and never a party's; the hub shows the courts of appeals
+the same way. A "This court" block links the court's website, PACER's case
+locator and CourtListener, and, for a district court, each division, where
+court is held and its counties. Each county's panel names its district
+court and division, from `data/courtcounties.js` - one small file for every
+county, which the county pages load beside their own state's data - and each
+state page lists its federal courts.
+
+The court pages and the hub carry their names in their HTML, written from
+the same payload as their data files, for a reader without script and for a
+crawler; the page's module draws over them.
 
 `#/official/<id>` opens it as sent; on the hub, a judge's name opens their
 record on their court's page, which loads it.
@@ -1908,8 +1946,10 @@ Section 3), and the page says so beside the tally. When the Senate's votes
 could not be read, an officer with no earlier finding reads "could not be
 read when last checked", never "no roll call found" (rule 19). The pages
 cover Article III judges and say so: the Court of Federal Claims, the Tax
-Court, and bankruptcy and magistrate judges are not in the directory, and
-a search that finds nobody says it searched the directory.
+Court, the Court of Appeals for Veterans Claims and the Court of Appeals for
+the Armed Forces (each linked to its own list of judges), and bankruptcy and
+magistrate judges are not in the directory, and a search that finds nobody
+says it searched the directory.
 
 | File | What it holds |
 |---|---|
@@ -1923,7 +1963,18 @@ ids are `x-<name>` for an executive officer and `fjc-<nid>` for a judge, and
 nobody on these pages is counted among the members of Congress. The FJC's
 directory lists judges, not judgeships, so no vacancy is ever counted from
 it. Guam's, the Northern Mariana Islands' and the Virgin Islands' courts say
-why nobody is listed, and that this is not a vacancy.
+why the directory does not list their judges, and name them as each court's
+own site does.
+
+Who sits is two sources' word (rule 82). A judge the courts' vacancy list
+has on senior status by a date on or before its own as-of date, whom the
+directory still lists as active, is counted senior, and the row, the dialog
+and the hub say which source says what. Announced vacancies are in the
+future tense ("Will take senior status", "Nominated to the Fifth Circuit"),
+and a confirmed judge with no commission is listed apart, under "Confirmed,
+not yet commissioned", and counted nowhere. The hub's "Vacancies and
+nominees" table lists every vacancy, now and announced, with its court and
+nominee.
 
 The directory brackets a given name a judge does not use ("A[llen] Joe
 Fish"). The pages show the name they go by, "A. Joe Fish"; the dialog gives
