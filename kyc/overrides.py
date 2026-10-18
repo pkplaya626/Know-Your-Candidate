@@ -286,6 +286,53 @@ VOTING_LINKS = {
     ("ND", "status"): (
         "https://www.sos.nd.gov/elections", None, None,
         "no registration to check; NASS lists the general Elections page"),
+    # Audit 2026-10-17, STATEGOV-10. Nevada's absentee link (a page under
+    # "voters-with-disabilities") is held: it answered 403 to a plain
+    # request and drew a blank page in headless Chrome, which concludes
+    # nothing (rule 8) until a person opens it.
+    ("DC", "absentee"): (
+        "https://www.dcboe.org/voters/casting-your-vote/voting-by-special-ballot",
+        "https://www.dcboe.org/voters/casting-your-vote/mail-ballot-instructions", None,
+        "NASS links 'Voting by Special Ballot', a ballot cast at the polls when a voter's "
+        "eligibility is in question; D.C. mails every voter a ballot, and this is the Board's "
+        "'Mail Ballot Instructions', linked from dcboe.org (title read 2026-10-17)"),
+    ("WY", "status"): (
+        "https://sos.wyo.gov/Elections/State/RegisteringToVote.aspx", None, None,
+        "NASS lists 'Registering to Vote in Wyoming' - the same page as 'register', with no "
+        "lookup on it - so 'Check your registration' led to no check (read 2026-10-17)"),
+}
+
+# Links on a state's government block that the rosters give wrongly, each
+# opened on 2026-10-17 (audit 2026-10-17, LINKS-08, LINKS-09):
+# {(state, office, field): (what the roster lists, or None for nothing;
+# what to show instead, or None to show nothing; evidence)}. office is
+# "governor", "lt", "ag" or "sos"; field is "website" or "bio". A dead
+# biography is dropped, never guessed at: the office's own home page is
+# already linked beside it ("Office"). An entry applies only while the
+# roster still lists what it replaces, and stategov reports one that no
+# longer matches, so the next refresh cannot put a dead link back silently.
+OFFICE_LINKS = {
+    ("ME", "sos", "bio"): ("https://www.maine.gov/sos/about/bio.html", None,
+                           "404 'Sorry, but I can't find that page'"),
+    ("LA", "sos", "bio"): ("https://www.sos.la.gov/OurOffice/LearnAboutNancyLandry/Pages/default.aspx",
+                           None, "404 'Oops! Page not found'"),
+    ("WV", "sos", "bio"): ("https://sos.wv.gov/about/Pages/KWBio.aspx", None,
+                           "404 'Page not found | WV Secretary of State'"),
+    ("VT", "sos", "bio"): ("https://sos.vermont.gov/secretary-s-desk/secretary-copeland-hanzas/", None,
+                           "404 'Page not found | Secretary of State'"),
+    ("KS", "sos", "bio"): ("https://sos.ks.gov/about-the-office/schwab-biography.html", None,
+                           "redirects to /messages/page404.html, 'Page Not Found', with status 200"),
+    ("AZ", "sos", "bio"): ("https://azsos.gov/about-office/about-secretary", None,
+                           "404 'Page not found | Arizona Secretary of State'"),
+    ("IN", "governor", "website"): ("https://www.in.gov/gov/index.htm", "https://www.in.gov/gov/",
+                                    "the NGA's link answers 404 'Governor Braun: Error - Page Not "
+                                    "Found'; /gov/ is 'Governor Braun: Governor Home'"),
+    # The NGA's pages for the two governors sworn in in January 2026 carry no
+    # website; each is the office's own, titled with the governor's office.
+    ("NJ", "governor", "website"): (None, "https://nj.gov/governor/",
+                                    "'Office of New Jersey Governor Mikie Sherrill'"),
+    ("VA", "governor", "website"): (None, "https://www.governor.virginia.gov/",
+                                    "'Governor of Virginia'"),
 }
 
 # Campaign websites that must never be linked, keyed on the host the FEC

@@ -162,5 +162,116 @@ class TestValidate(unittest.TestCase):
         self.assertEqual(voting.dead_links(cache), [])
 
 
+class TestMorePages(unittest.TestCase):
+    """What NASS does not list (audit 2026-10-17): where the state publishes
+    its count (RACES-20), a sample ballot where the office links one
+    (RACES-16), vote.gov's registration deadlines (STATEGOV-11), the
+    territories' own offices (RACES-07) and the December rounds (PERSONA-06)."""
+
+    def test_every_state_and_dc_has_a_results_page_and_vote_gov_deadlines(self):
+        self.assertEqual(set(voting.RESULTS), voting.JURISDICTIONS)
+        self.assertTrue(voting.JURISDICTIONS <= set(voting.DEADLINES))
+
+    def test_every_curated_link_is_on_its_states_own_domain(self):
+        for table in (voting.RESULTS, voting.SAMPLE_BALLOTS, voting.DEADLINES):
+            for code, url in table.items():
+                self.assertTrue(voting.official(url, code), f"{code}: {url}")
+        for code, links in voting.TERRITORY_LINKS.items():
+            for kind, (url, _label) in links.items():
+                self.assertTrue(voting.official(url, code), f"{code} {kind}: {url}")
+
+    def test_deadlines_are_vote_govs_pages_only(self):
+        self.assertTrue(all(url.startswith(voting.VOTE_GOV + "/") for url in voting.DEADLINES.values()))
+
+    def test_the_page_gets_them(self):
+        shown = voting.for_page(cache_of())
+        self.assertEqual(shown["TX"]["results"], voting.RESULTS["TX"])
+        self.assertEqual(shown["TX"]["deadlines"], "https://vote.gov/register/texas")
+        self.assertNotIn("sample", shown["TX"])
+        self.assertEqual(shown["MI"]["sample"], voting.SAMPLE_BALLOTS["MI"])
+
+    def test_the_territories_get_their_offices_pages(self):
+        shown = voting.for_page(cache_of())
+        for code in ("GU", "VI", "MP", "AS", "PR"):
+            self.assertIn(code, shown)
+            self.assertEqual(shown[code]["deadlines"], voting.DEADLINES[code])
+            self.assertIn(code, shown["_territories"])
+        self.assertEqual(shown["_labels"]["MP"]["sample"], "Specimen ballot (PDF)")
+
+    def test_a_curated_link_found_dead_is_not_shown(self):
+        cache = cache_of()
+        cache["links"] = {voting.RESULTS["OH"]: voting.DEAD}
+        self.assertNotIn("results", voting.for_page(cache)["OH"])
+
+    def test_a_missing_results_page_fails(self):
+        original = dict(voting.RESULTS)
+        voting.RESULTS.pop("OH")
+        try:
+            codes = sorted(i.code for i in validate.check_voting_links(cache_of()))
+        finally:
+            voting.RESULTS.clear()
+            voting.RESULTS.update(original)
+        self.assertIn("voting-links-incomplete", codes)
+
+    def test_unopened_links_are_reported(self):
+        codes = sorted(i.code for i in validate.check_voting_links(cache_of()))
+        self.assertIn("voting-links-unchecked", codes)
+
+    def test_dc_mail_ballots_and_wyoming_has_no_lookup(self):
+        dc = overrides.VOTING_LINKS[("DC", "absentee")]
+        wy = overrides.VOTING_LINKS[("WY", "status")]
+        shown = voting.for_page(cache_of(DC={"absentee": dc[0]}, WY={"status": wy[0]}))
+        self.assertIn("mail-ballot", shown["DC"]["absentee"])
+        self.assertNotIn("status", shown["WY"])
+
+    def test_each_link_says_where_it_came_from(self):
+        # "The first four from NASS" credited NASS with eleven states'
+        # sample-ballot pages, Wyoming's results page and D.C.'s override
+        # (PR #94 review): the page now credits NASS only with what NASS lists.
+        dc = overrides.VOTING_LINKS[("DC", "absentee")]
+        wy = overrides.VOTING_LINKS[("WY", "status")]
+        shown = voting.for_page(cache_of(DC={"absentee": dc[0]}, WY={"status": wy[0]}))
+        self.assertEqual(shown["_nass"]["TX"], sorted(voting.PAGES))
+        self.assertEqual(shown["_nass"]["MN"], sorted(voting.PAGES))
+        self.assertNotIn("sample", shown["_nass"]["MN"])
+        self.assertNotIn("absentee", shown["_nass"]["DC"])
+        self.assertEqual(shown["_nass"]["WY"], ["absentee", "polling", "register"])
+        self.assertEqual(shown["_nass"]["GU"], [])
+        effective = voting.effective(cache_of())
+        self.assertEqual(effective["TX"]["deadlines"]["from"], voting.VOTE_GOV_FROM)
+        self.assertEqual(effective["TX"]["results"]["from"], voting.OFFICE)
+        self.assertEqual(effective["VI"]["polling"]["from"], voting.OFFICE)
+
+    def test_a_link_not_found_live_is_never_called_opened(self):
+        # Guam's only link could not be reached on 2026-10-17, and the page
+        # said "each link opened" over it.
+        cache = cache_of()
+        shown_urls = {link["url"] for links in voting.effective(cache).values()
+                      for link in links.values()}
+        cache["links"] = {url: voting.LIVE for url in shown_urls}
+        cache["links"][voting.TERRITORY_LINKS["GU"]["info"][0]] = voting.UNKNOWN
+        cache["links"][voting.DEADLINES["TX"]] = voting.UNKNOWN
+        shown = voting.for_page(cache)
+        self.assertEqual(shown["_unreached"], {"GU": ["info"], "TX": ["deadlines"]})
+        unchecked = [i for i in validate.check_voting_links(cache) if i.code == "voting-links-unchecked"]
+        self.assertEqual(len(unchecked), 1)
+        self.assertEqual(len(unchecked[0].detail), 2)
+        self.assertTrue(all("(unknown)" in line for line in unchecked[0].detail))
+
+    def test_the_december_rounds_say_what_the_date_was_once_it_has_passed(self):
+        for entries in voting.key_dates().values():
+            for entry in entries:
+                self.assertTrue(entry["past"].startswith("The date set for"), entry)
+
+    def test_the_december_rounds_come_from_the_overrides_with_a_source(self):
+        dates = voting.key_dates()
+        self.assertEqual(dates["GA"][0]["date"], overrides.GENERAL_RUNOFFS["GA"][0])
+        self.assertEqual(dates["LA"][0]["date"], overrides.OPEN_PRIMARY_SEATS[("LA", "H", 2026)]["runoff"])
+        self.assertEqual(voting.unsourced_key_dates(), [])
+        for entries in dates.values():
+            for entry in entries:
+                self.assertTrue(entry["source"].startswith("https://"))
+
+
 if __name__ == "__main__":
     unittest.main()

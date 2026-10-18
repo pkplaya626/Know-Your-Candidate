@@ -1556,14 +1556,129 @@ async function testStates() {
   suite("states/gu.html — a territory's ballot is not only local", () => {
     const note = gu.D.querySelector("#races .state-note");
     check("names territorial contests, not only local ones",
-      !!note && /territorial and local contests/.test(note.textContent), note && note.textContent);
+      !!note && /territorial and local contests/.test(note.textContent) &&
+        !/state offices/.test(note.textContent), note && note.textContent);
   });
   const az = await buildPage("map.html", { hash: "#/?state=AZ&mode=lt" });
   suite("map.html — Arizona's first lieutenant governor", () => {
     const text = az.D.getElementById("delegation").textContent;
     check("a new office elected on Nov 3 is not called one the state lacks",
       /No one holds this office yet/.test(text) && !/The state has no lieutenant governor/.test(text) &&
-        /On the Nov 3, 2026 ballot/.test(text), text.slice(0, 300));
+        /This office is on the Nov 3, 2026 ballot/.test(text), text.slice(0, 300));
+  });
+
+  /* "On the Nov 3, 2026 ballot" sat under Brian Kemp, Gavin Newsom and Tim
+   * Walz, none of them on it (audit 2026-10-17, STATEGOV-01). The mark is the
+   * office's: it says "This office", sits on the office's label line, and
+   * never in the holder's block. */
+  const ga = await buildPage("states/ga.html");
+  suite("states/ga.html — the ballot mark belongs to the office, not the holder", () => {
+    const gov = ga.D.getElementById("state-government");
+    const marks = gov ? [...gov.querySelectorAll(".gov-ballot-mark.up")]
+      .filter((a) => !a.closest(".gov-chamber")) : [];
+    check("every office on the ballot is marked 'This office is on the Nov 3, 2026 ballot'",
+      marks.length >= 4 && marks.every((a) => a.textContent === "This office is on the Nov 3, 2026 ballot"),
+      marks.map((a) => a.textContent).join(" | "));
+    check("each mark sits on its office's label line",
+      marks.every((a) => a.parentElement.classList.contains("gov-office") &&
+        !!a.parentElement.querySelector(".gov-role, .gov-officer-role")));
+    check("no mark follows a holder's name",
+      !gov.querySelector(".gov-name ~ p .gov-ballot-mark, .gov-officer-name ~ p .gov-ballot-mark"));
+    check("nothing on the page says a person is on the ballot",
+      !/\bOn the Nov 3, 2026 ballot/.test(gov.textContent), gov.textContent.slice(0, 200));
+    // Kemp, Jones, Carr and Raffensperger are on none of the November 3
+    // ballot's lists (PERSONA-02): each office says so, citing the list.
+    const sg = ga.window.kycStateGov.states.GA;
+    const open = [...gov.querySelectorAll(".gov-open-seat")].map((p) => p.textContent);
+    check("each of the four offices says its holder is not on the list, with the list linked",
+      ["governor", "lt", "ag", "sos"].every((k) => open.some((t) =>
+        t.indexOf("Open seat: " + sg[k].name + " is not on the list of candidates for this office") === 0)) &&
+        [...gov.querySelectorAll(".gov-open-seat a")].every((a) => /sos\.ga\.gov/.test(a.getAttribute("href"))),
+      open.join(" | "));
+  });
+
+  /* Silence beside one office read as "the holder is running" once another
+   * office said "Open seat" (PR #94 review, rule 19): every office on the
+   * ballot says something about its holder, and where nothing was read, it
+   * says that. Minnesota's lists were not read. */
+  const mnGov = await buildPage("states/mn.html");
+  suite("states/mn.html — an office whose list was not read says so, by name", () => {
+    const gov = mnGov.D.getElementById("state-government");
+    const sg = mnGov.window.kycStateGov.states.MN;
+    const up = Object.keys(sg.ballot2026.offices).filter((k) => sg.ballot2026.offices[k].up);
+    const lines = [...gov.querySelectorAll(".gov-holder-unchecked")].map((p) => p.textContent);
+    check("every office on the ballot carries a holder line",
+      up.length >= 4 && gov.querySelectorAll(".gov-holder-status").length === up.length,
+      up.join(",") + " / " + gov.querySelectorAll(".gov-holder-status").length);
+    check("Tim Walz's office says it was not checked, and claims nothing either way",
+      lines.indexOf("Whether " + sg.governor.name + " is running for this office is not checked here.") !== -1 &&
+        !gov.querySelector(".gov-open-seat"), lines.join(" | "));
+  });
+  const caGov = await buildPage("states/ca.html");
+  suite("states/ca.html — the certified list read both ways", () => {
+    const lines = [...caGov.D.querySelectorAll("#state-government .gov-holder-status")].map((p) => p.textContent);
+    check("Newsom is not on it; Bonta is, without an 'Open seat' label",
+      lines.some((t) => /^Open seat: Gavin Newsom is not on the list/.test(t)) &&
+        lines.some((t) => /^Rob Bonta is on the list of candidates for this office/.test(t)),
+      lines.join(" | "));
+  });
+
+  const fl = await buildPage("states/fl.html");
+  suite("states/fl.html — an open seat, from the constitution's term limit", () => {
+    const open = fl.D.querySelector("#state-government .gov-open-seat");
+    const name = fl.window.kycStateGov.states.FL.governor.name;
+    check("says the governor is term-limited, with the source linked",
+      !!open && open.textContent.indexOf("Open seat: " + name + " is term-limited") === 0 &&
+        /^http/.test(open.querySelector("a").getAttribute("href")),
+      open && open.textContent);
+  });
+  const flAfter = await buildPage("states/fl.html", { now: "2026-11-05T09:00:00" });
+  suite("states/fl.html after Election Day — the office was on the ballot", () => {
+    const gov = flAfter.D.getElementById("state-government");
+    check("the mark is in the past tense",
+      /This office was on the Nov 3, 2026 ballot/.test(gov.textContent));
+    check("the open-seat line is gone: the office has a winner now",
+      !gov.querySelector(".gov-open-seat"));
+  });
+
+  suite("states/va.html — when an office not up in 2026 is next elected (PERSONA-19)", () => {
+    const next = [...va.D.querySelectorAll("#state-government .gov-next")];
+    const words = next.map((a) => a.textContent);
+    check("the governor is next elected in 2029, from the statute",
+      words.filter((w) => w === "Next elected: November 2029").length === 3 &&
+        next.every((a) => /law\.lis\.virginia\.gov|njleg|\.gov/.test(a.getAttribute("href"))),
+      words.join(" | "));
+    check("both chambers in 2027", words.filter((w) => w === "Next elected: November 2027").length === 2,
+      words.join(" | "));
+  });
+
+  suite("states/gu.html — a territory's governor is on the Nov 3 ballot (RACES-07)", () => {
+    const gov = gu.D.getElementById("state-government");
+    const note = gu.D.querySelector("#races .state-note");
+    check("the governor's office is marked on the ballot",
+      !!gov && /This office is on the Nov 3, 2026 ballot/.test(gov.textContent));
+    check("the race list names the territorial offices it elects",
+      !!note && /Of the territorial offices this site covers, the same ballot also elects the governor/
+        .test(note.textContent), note && note.textContent);
+  });
+  /* Hawaii has no Senate race in 2026, yet the Senate view counted its
+   * House nominees under the Senate heading (audit 2026-10-17, RACES-06). */
+  const hiCode = "HI";
+  const hiSenate = await buildPage("map.html", { hash: "#/?state=" + hiCode + "&mode=senate" });
+  const hi2026 = await buildPage("map.html", { hash: "#/?state=" + hiCode + "&mode=senate2026" });
+  suite("map.html — a state with no Senate race in its Senate views", () => {
+    const hasRace = hiSenate.window.kycRaces.some((r) => r.state === hiCode && r.chamber === "Senate");
+    check("Hawaii has no 2026 Senate race in the data", !hasRace);
+    const senateText = hiSenate.D.getElementById("delegation").textContent;
+    check("the Senate view counts no House nominees", !/Also on the November ballot/.test(senateText),
+      senateText.slice(0, 300));
+    const text = hi2026.D.getElementById("delegation").textContent;
+    const next = hi2026.window.legislatorsData.filter((p) => p.state === hiCode &&
+      hi2026.window.KYC.seated(p) && /Senate/.test(p.chamber));
+    check("the 2026 Senate view says there is no race, and when each senator's seat is next up",
+      /No U\.S\. Senate election in Hawaii in 2026/.test(text) && next.length === 2 &&
+        next.every((p) => text.indexOf(p.nextElection + " (" + p.name + ")") !== -1) &&
+        !/Nothing to show/.test(text), text.slice(0, 300));
   });
   const ks = await buildPage("map.html", { hash: "#/?state=KS&mode=legislature" });
   suite("map.html — a chamber with no regular election", () => {
@@ -1578,16 +1693,82 @@ async function testStates() {
     const want = window.kycBuildMeta.voting.TX;
     const links = box ? [...box.querySelectorAll(".state-links a")] : [];
     check("a 'Voting in Texas' block", !!box && /Voting in Texas/.test(box.textContent));
-    check("its four links are the ones NASS lists for Texas",
-      links.length === 4 && ["status", "polling", "absentee", "register"].every((k) =>
+    check("its four NASS links are the ones NASS lists for Texas",
+      ["status", "polling", "absentee", "register"].every((k) =>
         links.some((a) => a.getAttribute("href") === want[k])),
       links.map((a) => a.getAttribute("href")).join(" "));
+    // Where to read the count on election night (audit 2026-10-17, RACES-20).
+    check("an 'Official results' link to the state's own results page",
+      links.some((a) => a.textContent.trim() === "Official results" && a.getAttribute("href") === want.results),
+      want.results);
     check("each opens in a new tab, without an opener",
       links.every((a) => a.target === "_blank" && /noopener/.test(a.rel)));
     check("it names NASS's Can I Vote and the dates it was listed and opened",
-      !!box.querySelector('a[href^="https://www.nass.org/"]') && /listed \d{4}-\d{2}-\d{2}/.test(box.textContent) &&
-        /each link opened \d{4}-\d{2}-\d{2}/.test(box.textContent), box.textContent);
+      !!box.querySelector('a[href^="https://www.nass.org/"]') && /listed (?:it|them) on \d{4}-\d{2}-\d{2}/.test(box.textContent) &&
+        /Each link opened \d{4}-\d{2}-\d{2}/.test(box.textContent), box.textContent);
+    // Deadlines are vote.gov's, linked, never typed or called passed
+    // (STATEGOV-11, PERSONA-03).
+    check("registration deadlines link to vote.gov's page for the state, with no date typed",
+      !!box.querySelector('a[href="https://vote.gov/register/texas"]') &&
+        !/deadline (?:has )?passed|closed on/i.test(box.textContent) &&
+        !/\b(?:January|February|March|April|May|June|July|August|September|October) \d/.test(box.textContent),
+      box.textContent);
   });
+  suite("states/tx.html — the deadlines come before the form (PR #94 review)", () => {
+    const kinds = [...D.querySelectorAll("#voting .state-links a")].map((a) => a.getAttribute("data-kind"));
+    const deadlines = D.querySelector('#voting .state-links a[data-kind="deadlines"]');
+    check("'Registration deadlines (vote.gov)' is a button, just before 'Register to vote'",
+      !!deadlines && deadlines.textContent.trim() === "Registration deadlines (vote.gov)" &&
+        kinds.indexOf("deadlines") === kinds.indexOf("register") - 1, kinds.join(" "));
+    const note = D.querySelector("#voting .state-note").textContent;
+    check("vote.gov is the federal government's voting site, not the EAC's",
+      /vote\.gov, the federal government's voting site/.test(note) && !/Election Assistance/.test(note), note);
+  });
+
+  /* "The first four from NASS" credited NASS with a curated sample-ballot
+   * page and left out NASS's own registration link; on Wyoming's page, its
+   * results page (PR #94 review). Each link's source is named by its words. */
+  const mnVote = await buildPage("states/mn.html");
+  suite("states/mn.html — each link credited to its own source", () => {
+    const note = mnVote.D.querySelector("#voting .state-note").textContent;
+    const nassPart = note.slice(0, note.indexOf("Can I Vote"));
+    check("NASS is credited with registration, polling, absentee and registering, and not the sample ballot",
+      /“Check your registration”/.test(nassPart) && /“Register to vote”/.test(nassPart) &&
+        !/sample ballot/.test(nassPart) && !/first four/.test(note), note);
+    check("the sample ballot and results are the election office's own",
+      /“See a sample ballot” and “Official results” are Minnesota's election office's own pages/.test(note), note);
+    const missed = mnVote.window.kycBuildMeta.voting._unreached.MN || [];
+    check("a link not found live is never called opened",
+      missed.length ? /could not be confirmed/.test(note) && !/Each link opened/.test(note)
+        : /Each link opened/.test(note), missed.join(",") + " / " + note);
+  });
+  const wyVote = await buildPage("states/wy.html");
+  suite("states/wy.html — no results page credited to NASS", () => {
+    const note = wyVote.D.querySelector("#voting .state-note").textContent;
+    const nassPart = note.slice(0, note.indexOf("Can I Vote"));
+    check("NASS's three links, and only them", !/Official results/.test(nassPart) &&
+      /“Official results” is Wyoming's election office's own page/.test(note), note);
+  });
+  const mpVote = await buildPage("states/mp.html");
+  const viVote = await buildPage("states/vi.html");
+  const guVote = await buildPage("states/gu.html");
+  suite("territories — their own names, and their offices by name (rule 75)", () => {
+    const mp = mpVote.D.getElementById("voting").textContent;
+    const vi = viVote.D.getElementById("voting").textContent;
+    check("'the Northern Mariana Islands', never 'Northern Mariana Islands's'",
+      /Voting in the Northern Mariana Islands/.test(mp) && !/Islands's/.test(mp) &&
+        /the Commonwealth Election Commission's own page/.test(mp), mp);
+    check("'the U.S. Virgin Islands', and the Election System by name",
+      /Voting in the U\.S\. Virgin Islands/.test(vi) && /Election System of the Virgin Islands/.test(vi) &&
+        !/Islands's/.test(vi), vi);
+    check("NASS spelled as its name", /National Association of Secretaries of State lists no territory/.test(mp) &&
+      !/national association/.test(mp), mp);
+    const gu = guVote.D.getElementById("voting").textContent;
+    const missed = guVote.window.kycBuildMeta.voting._unreached.GU || [];
+    check("Guam's link that could not be reached is not called opened",
+      missed.indexOf("info") !== -1 && /could not be confirmed/.test(gu) && !/Each link opened/.test(gu), gu);
+  });
+
   const nd = await buildPage("states/nd.html");
   suite("states/nd.html — a state that does not register voters", () => {
     const text = (nd.D.getElementById("voting") || {}).textContent || "";
@@ -1598,11 +1779,75 @@ async function testStates() {
   suite("states/dc.html — the District of Columbia", () => {
     const text = (dc.D.getElementById("voting") || {}).textContent || "";
     check("the heading says 'the District of Columbia'", /Voting in the District of Columbia/.test(text), text.slice(0, 60));
+    // NASS linked "Voting by Special Ballot"; D.C. mails every voter a
+    // ballot (STATEGOV-10).
+    const absentee = [...dc.D.querySelectorAll("#voting .state-links a")]
+      .find((a) => /absentee/.test(a.textContent));
+    check("its absentee link is the Board's mail-ballot page, not special ballots",
+      !!absentee && /mail-ballot/.test(absentee.getAttribute("href")), absentee && absentee.getAttribute("href"));
+  });
+  const wy = await buildPage("states/wy.html");
+  suite("states/wy.html — no lookup, no 'Check your registration'", () => {
+    const links = [...wy.D.querySelectorAll("#voting .state-links a")];
+    check("Wyoming's registering page is not offered twice as a registration check",
+      !links.some((a) => /Check your registration/.test(a.textContent)) &&
+        links.some((a) => /Register to vote/.test(a.textContent)), links.map((a) => a.textContent).join(" | "));
+  });
+  suite("states/wy.html — open seats have candidates, not challengers (RACES-14)", () => {
+    const strip = wy.D.querySelector(".state-hero") || wy.D.body;
+    const info = wy.window.kycBuildMeta.states.WY;
+    check("the summary calls open-seat candidates candidates",
+      info.openCandidates > 0 && new RegExp(info.openCandidates + " candidates? for open seats").test(strip.textContent) &&
+        !/\d+ challengers? on the ballot/.test(strip.textContent), strip.textContent.slice(0, 400));
   });
   const guam = await buildPage("states/gu.html");
-  suite("states/gu.html — no NASS listing, no voting block", () => {
-    check("a territory NASS does not cover shows no voting links, rather than a guess",
-      !guam.D.getElementById("voting") && !/Voting in Guam/.test(guam.D.body.textContent));
+  suite("states/gu.html — a territory's own election office (RACES-07)", () => {
+    const box = guam.D.getElementById("voting");
+    const links = box ? [...box.querySelectorAll(".state-links a")] : [];
+    check("a 'Voting in Guam' block from Guam's own election office, and vote.gov's deadlines",
+      !!box && /Voting in Guam/.test(box.textContent) && links.length > 0 &&
+        links.every((a) => /\.gov\//.test(a.getAttribute("href"))) &&
+        !!box.querySelector('a[href="https://vote.gov/register/guam"]') &&
+        !/Can I Vote/.test(box.textContent), box && box.textContent);
+  });
+  const georgia = await buildPage("states/ga.html");
+  suite("states/ga.html — the December 1 runoff (PERSONA-06)", () => {
+    const dates = georgia.D.querySelector("#voting .vote-dates");
+    check("the voting block names December 1, 2026, with the state's page that gives it",
+      !!dates && /December 1, 2026/.test(dates.textContent) && /runoff/.test(dates.textContent) &&
+        /^https:\/\/georgia\.gov\//.test(dates.querySelector("a").getAttribute("href")),
+      dates && dates.textContent);
+    const heads = [...georgia.D.querySelectorAll("#races .race-head")];
+    check("each Georgia race head says a runoff follows on Dec 1 if no one has a majority, linked to the guide",
+      heads.length > 0 && heads.every((h) => [...h.querySelectorAll("a.badge")].some((a) =>
+        /Runoff Dec 1 if no majority/.test(a.textContent) && /elections\.html#runoffs$/.test(a.getAttribute("href")))));
+  });
+  const la = await buildPage("states/la.html");
+  suite("states/la.html — the December 12 House round (PERSONA-06)", () => {
+    const dates = la.D.querySelector("#voting .vote-dates");
+    check("the voting block names December 12, 2026",
+      !!dates && /December 12, 2026/.test(dates.textContent) && /open primary/.test(dates.textContent),
+      dates && dates.textContent);
+    const house = [...la.D.querySelectorAll('#races section.race[id^="race-H-"] .race-head')];
+    check("each House race head says it is an open primary with a general on Dec 12",
+      house.length > 0 && house.every((h) => /Open primary Nov 3/.test(h.textContent) &&
+        /General Dec 12 if no majority/.test(h.textContent)));
+    // The same date was said twice, in two formats (PR #94 review).
+    check("the open primary's date is said once, on its own badge",
+      house.every((h) => !/Primary 2026-11-03/.test(h.textContent)), house.map((h) => h.textContent).join(" | "));
+    const senate = la.D.querySelector('#races section.race[id^="race-S-"] .race-head');
+    check("the Senate race, with closed party primaries, carries neither",
+      !senate || !/Open primary|Dec 12/.test(senate.textContent));
+  });
+  const ca = await buildPage("states/ca.html");
+  suite("states/ca.html — the top-two primary, visible (RACES-11)", () => {
+    const heads = [...ca.D.querySelectorAll("#races .race-head")];
+    check("every race head says 'Top-two primary', linked to the guide's primaries section",
+      heads.length > 0 && heads.every((h) => [...h.querySelectorAll("a.badge")].some((a) =>
+        a.textContent === "Top-two primary" && /elections\.html#primaries$/.test(a.getAttribute("href")))));
+    const tx = [...D.querySelectorAll("#races .race-head")];
+    check("a state with party primaries carries no such badge",
+      tx.length > 0 && !tx.some((h) => /Top-two|Top-four|Open primary/.test(h.textContent)));
   });
 
   suite("states/tx.html — one state's page", () => {
@@ -2780,13 +3025,16 @@ async function testBallotCounts() {
   const races = window.kycRaces;
   suite("states/mi.html — the state's count is its race headers' sum", () => {
     check("no page errors", errors.length === 0, errors.join(" | "));
-    const strip = [...D.querySelectorAll(".badge")].map((b) => b.textContent)
-      .find((t) => / (challenger|challengers) on the ballot$/.test(t));
+    // The strip splits challengers (held seats) from open-seat candidates
+    // (RACES-14); the two still add up to the race headers' sum.
+    const strip = [...D.querySelectorAll(".state-hero .badge")].map((b) => b.textContent)
+      .filter((t) => / (challengers?|candidates? for open seats) on the ballot$/.test(t));
+    const stripSum = strip.reduce((n, t) => n + Number(t.split(" ")[0]), 0);
     const heads = [...D.querySelectorAll(".race-head .badge-money")]
       .map((b) => (/^(\d+) (challenger|candidate)s? on the ballot$/.exec(b.textContent) || [])[1])
       .filter(Boolean).reduce((n, x) => n + Number(x), 0);
     check("the strip equals the race headers added up",
-      !!strip && Number(strip.split(" ")[0]) === heads, `${strip} vs ${heads}`);
+      strip.length > 0 && stripSum === heads, `${strip.join(" + ")} vs ${heads}`);
     const national = window.kycBuildMeta.election.challengersOnBallot;
     const all = races.reduce((n, r) => n + (r.candidateCount || 0) +
       ((r.results || {}).otherNominees || []).length, 0);
@@ -2797,6 +3045,22 @@ async function testBallotCounts() {
   await settle(50);
   const W = index.window;
   const I = index.D;
+  /* The sidebar called open-seat candidates "Challengers on the ballot"
+   * after the state strips stopped (RACES-14, PR #94 review); on both
+   * pages that carry it, the two rows now add up to the national figure. */
+  const mapSidebar = await buildPage("map.html");
+  suite("index.html and map.html — the sidebar splits challengers from open-seat candidates", () => {
+    const e = W.kycBuildMeta.election;
+    [["index.html", I], ["map.html", mapSidebar.D]].forEach(([page, doc]) => {
+      const ch = doc.getElementById("challengerCount");
+      const open = doc.getElementById("openCandidateCount");
+      check(page + ": both rows, adding up to everyone on the ballot besides members running for their seat",
+        !!ch && !!open && e.openCandidates > 0 &&
+          Number(ch.textContent) + Number(open.textContent) === e.challengersOnBallot &&
+          Number(open.textContent) === e.openCandidates,
+        (ch && ch.textContent) + " + " + (open && open.textContent) + " vs " + e.challengersOnBallot);
+    });
+  });
   suite("index.html — the people the results name with no profile here", () => {
     const seat = W.kycRaces.find((r) => r.chamber === "Senate" &&
       KYC.cards && W.KYC.cards.unprofiledNames(r).none.length >= 2);
@@ -3298,6 +3562,81 @@ async function testOdds() {
     check("prices are written as the market writes them",
       KYC.odds.percent(0.995) === ">99%" && KYC.odds.percent(0.004) === "<1%" &&
         KYC.odds.percent(0.384) === "38%");
+  });
+
+  /* What a market's prices cannot say (audit 2026-10-17): the one-line poll
+   * summary showed the alphabetically first average, undated (RACES-08);
+   * Kalshi's WY-AL prices added up to 128% and the bar rescaled them into a
+   * split neither number said (RACES-23); a party-only market priced a
+   * Republican win over a ballot of two Democrats (RACES-22). Each is read
+   * page-side, so data/odds.js stays a pure function of its cache (rule 41).
+   * The markets are injected: the real ones move twice a day. */
+  suite("index.html — what a market's prices cannot say", () => {
+    const render = (id, odds, race) => {
+      window.kycOdds.races[id] = odds;
+      const holder = D.createElement("div");
+      holder.innerHTML = KYC.odds.render(Object.assign({ id: id, label: "Test" }, race || {}),
+        { compact: true });
+      delete window.kycOdds.races[id];
+      return holder;
+    };
+    const polls = render("X_POLLS", { polls: { rows: [
+      { aggregator: "270toWin", updated: "October 4, 2026", url: "https://www.270towin.com/x",
+        results: [{ label: "A (D)", party: "d", pct: 51.0 }, { label: "B (R)", party: "r", pct: 43.4 }] },
+      { aggregator: "Decision Desk HQ", updated: "October 11, 2026", url: "https://decisiondeskhq.com/x",
+        results: [{ label: "A (D)", party: "d", pct: 52.2 }, { label: "B (R)", party: "r", pct: 43.8 }] },
+      { aggregator: "RealClearPolling", updated: "", url: "https://www.realclearpolling.com/x",
+        results: [{ label: "A (D)", party: "d", pct: 50.0 }, { label: "B (R)", party: "r", pct: 44.0 }] },
+    ] } });
+    const line = polls.querySelector(".odds-line");
+    check("the one-line summary is the most recent average, with its date",
+      !!line && /52\.2/.test(line.textContent) && /Decision Desk HQ, updated Oct 11/.test(line.textContent) &&
+        /2 more averages/.test(line.textContent), line && line.textContent);
+
+    const thin = render("X_THIN", { markets: [{ source: "kalshi", url: "https://kalshi.com/markets/x",
+      title: "x", outcomes: [{ label: "Gray", party: "r", price: 0.98 },
+        { label: "Kinney", party: "d", price: 0.30 }] }] });
+    check("prices that add up to 128% are quoted without a bar, and say why",
+      !thin.querySelector(".odds-bar") && /98%/.test(thin.textContent) && /30%/.test(thin.textContent) &&
+        /These last-traded prices add up to 128%, not 100%/.test(thin.textContent) &&
+        /may be stale/.test(thin.textContent), thin.textContent);
+    // The site holds no volume: it says what it measured, never why
+    // (PR #94 review). Polymarket's are displayed prices, not last trades.
+    check("no claim about trading volume", !/thin/i.test(thin.textContent), thin.textContent);
+    const poly = render("X_POLY", { markets: [{ source: "polymarket", url: "https://polymarket.com/event/x",
+      title: "x", outcomes: [{ label: "Democratic Party", party: "d", price: 0.70 },
+        { label: "Republican Party", party: "r", price: 0.12 }] }] });
+    check("a Polymarket sum short of 100% is not called last trades or stale",
+      /These prices add up to 82%, not 100%/.test(poly.textContent) &&
+        !/last-traded|stale/.test(poly.textContent), poly.textContent);
+    const fine = render("X_FINE", { markets: [{ source: "kalshi", url: "https://kalshi.com/markets/x",
+      title: "x", outcomes: [{ label: "Gray", party: "r", price: 0.95 },
+        { label: "Kinney", party: "d", price: 0.04 }] }] });
+    check("prices that add up to about a dollar keep their bar, with no note",
+      !!fine.querySelector(".odds-bar") && !fine.querySelector(".odds-flag"));
+
+    // A settled race whose November ballot is two or more Democrats, found
+    // in the data rather than named.
+    const onBallot = (race) => race.incumbentIds.concat(race.candidateIds).map(KYC.byId)
+      .filter((p) => p && (p.isCandidate || (p.contestRaceId || p.raceId) === race.id) &&
+        KYC.onNovemberBallot(p.isCandidate ? p.raceStatus : KYC.contestStatus(p)));
+    const same = window.kycRaces.find((r) => r.settled && !(r.results && r.results.otherNominees || []).length &&
+      onBallot(r).length >= 2 && onBallot(r).every((p) => p.party === "Democrat"));
+    check("the data holds a race whose November ballot is one party", !!same);
+    const partyMarket = { markets: [{ source: "polymarket", url: "https://polymarket.com/event/x",
+      title: "x", outcomes: [{ label: "Democratic Party", party: "d", price: 0.95 },
+        { label: "Republican Party", party: "r", price: 0.04 }] }] };
+    if (same) {
+      const shown = render(same.id, partyMarket, same);
+      check("a party-only market over a one-party ballot says it cannot tell them apart",
+        /Everyone on this November ballot is a Democrat; this market resolves on the party only/
+          .test(shown.textContent), same.id + ": " + shown.textContent);
+    }
+    const mixed = window.kycRaces.find((r) => r.settled && onBallot(r).some((p) => p.party === "Democrat") &&
+      onBallot(r).some((p) => p.party === "Republican"));
+    const plain = render(mixed.id, partyMarket, mixed);
+    check("a party-only market over a two-party ballot carries no such note",
+      !/Everyone on this November ballot/.test(plain.textContent), mixed.id);
   });
 
   suite("index.html — a race's markets in the grid's race view", () => {
@@ -4816,14 +5155,28 @@ async function testStateGov() {
     check("its label says whether the governor is elected on Nov 3",
       /elected on Nov 3/.test(shape(up[0]).getAttribute("aria-label")) &&
       /no governor's election in 2026/.test(shape("VA").getAttribute("aria-label")));
-    check("the legend says what the colours mean",
-      /No governor's election in 2026/.test(D.getElementById("mapLegend").textContent) &&
-      /Not covered here/.test(D.getElementById("mapLegend").textContent));
-    const territory = D.querySelector('#usMap [data-state="GU"]');
-    check("a territory is drawn as not covered, never as electing no one",
-      !!territory && territory.style.fill !== "var(--surface-2)" &&
-        /not covered/.test(territory.getAttribute("aria-label")),
-      territory && territory.style.fill);
+    // The colour is the sitting governor's party, who may not be running
+    // (audit 2026-10-17, RACES-09): the legend says whose party it is.
+    const legendText = D.getElementById("mapLegend").textContent;
+    check("the legend says what the colours mean, and that the colour is the current governor's",
+      /No governor's election in 2026/.test(legendText) &&
+      /current governor: Republican/.test(legendText) && !/the governor now is/.test(legendText) &&
+      !/territories/.test(legendText), legendText);
+    // Guam, the Virgin Islands and the Northern Mariana Islands elect their
+    // governors on Nov 3 (RACES-07): drawn like any state, never "not covered".
+    ["GU", "VI", "MP"].forEach((t) => {
+      const shapeT = D.querySelector('#usMap [data-state="' + t + '"]');
+      check(t + " is drawn as electing its governor on Nov 3",
+        !!shapeT && shapeT.style.fill === "var(--party-" +
+          data.states[t].governor.partyKey.toLowerCase() + ")" &&
+          /elected on Nov 3/.test(shapeT.getAttribute("aria-label")),
+        shapeT && shapeT.getAttribute("aria-label"));
+    });
+    const pr = D.querySelector('#usMap [data-state="PR"]');
+    check("Puerto Rico, which elected its governor in 2024, is drawn as no election",
+      !!pr && pr.style.fill === "var(--surface-2)" &&
+        /no governor's election in 2026/.test(pr.getAttribute("aria-label")),
+      pr && pr.getAttribute("aria-label"));
 
     D.querySelector('[data-mode="trifecta"]').click();
     const painted = stateCodes.filter((c) => shape(c).style.fill === "var(--party-r)").length;
@@ -5119,9 +5472,10 @@ async function testQualifiedBallot() {
     if (!race) return;
     const section = D.getElementById("race-" + race.id);
     const head = section && section.querySelector(".race-head");
-    const date = head && [...head.querySelectorAll(".badge")].find((b) => /Primary/.test(b.textContent));
+    // One badge says the open primary and its date (PR #94 review).
+    const date = head && [...head.querySelectorAll(".badge")].find((b) => /Open primary/.test(b.textContent));
     check("its primary is not called held", !!date && !/held/.test(date.textContent) &&
-      /2026-11-03/.test(date.textContent), date && date.textContent);
+      /Nov 3/.test(date.textContent), date && date.textContent);
     check("and says whose list the ballot is", /qualified candidates/.test(date.getAttribute("title")),
       date && date.getAttribute("title"));
     const card = (p) => section.querySelector('.card[data-id="' + p.id + '"]');
@@ -5149,9 +5503,9 @@ async function testQualifiedBallot() {
   suite("states/la.html — after the count, with no result read yet", () => {
     const { race: r2, on: still } = after.window.__qualified || {};
     const h2 = r2 && after.D.getElementById("race-" + r2.id).querySelector(".race-head");
-    const held = h2 && [...h2.querySelectorAll(".badge")].find((b) => /Primary/.test(b.textContent));
+    const held = h2 && [...h2.querySelectorAll(".badge")].find((b) => /Open primary/.test(b.textContent));
     check("the primary is held, and no result has been read yet",
-      !!held && /Primary held/.test(held.textContent) && /no result has been read yet/.test(
+      !!held && /Open primary held Nov 3/.test(held.textContent) && /no result has been read yet/.test(
         held.getAttribute("title")) && !/scheduled/.test(held.getAttribute("title")),
       held && held.getAttribute("title"));
     const c = still && still[0] && after.D.querySelector('.card[data-id="' + still[0].id + '"]');
@@ -5224,6 +5578,15 @@ async function testElectionNight() {
     check("Won by appears once per called race, and nowhere else",
       D.querySelectorAll(".race-head").length > 0 &&
         [...D.querySelectorAll(".race-head")].filter((x) => /Won by/.test(x.textContent)).length === 1);
+    // The December badge follows the race (rule 63; PR #94 review): gone
+    // from a race decided on November 3, without its "if" on a race the
+    // results send to a runoff, and conditional only where nothing is marked.
+    check("a race decided on Nov 3 carries no December runoff badge",
+      !!h && !/Runoff Dec/.test(h.textContent), h && h.textContent);
+    check("a race in a runoff says the runoff's date without 'if no majority'",
+      !!r && /Runoff Dec 1/.test(r.textContent) && !/if no majority/.test(r.textContent), r && r.textContent);
+    check("an unmarked race keeps the conditional badge", !!o && /Runoff Dec 1 if no majority/.test(o.textContent),
+      o && o.textContent);
 
     won.click();
     const status = D.getElementById("profileModalStatus");
@@ -5231,6 +5594,18 @@ async function testElectionNight() {
       !!status && /(Re-)?[Ee]lected in November/.test(status.textContent),
       status && status.textContent);
     D.querySelector("#profileModal .modal-footer [data-close]").click();
+  });
+
+  const december = await buildPage("states/ga.html", { now: "2026-12-05T09:00:00", data: electionNight });
+  suite("states/ga.html after December 1 — the runoff is in the past tense", () => {
+    const dates = december.D.querySelector("#voting .vote-dates");
+    check("the key date says what the date was, not what will happen on it",
+      !!dates && /December 1, 2026/.test(dates.textContent) && /The date set for a runoff/.test(dates.textContent) &&
+        !/meet in a runoff on this date/.test(dates.textContent), dates && dates.textContent);
+    const heads = [...december.D.querySelectorAll(".race-head")].map((x) => x.textContent).join(" ");
+    check("no race head still says 'Runoff Dec 1 if no majority'",
+      heads.length > 0 && !/if no majority/.test(heads) && /Runoff (held Dec 1|Dec 1, if one was needed)/.test(heads),
+      heads.slice(0, 300));
   });
 
   const before = await buildPage("states/ga.html", { now: CAMPAIGN_NOW, data: electionNight });

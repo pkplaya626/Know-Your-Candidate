@@ -138,6 +138,36 @@ def assign(profiles):
     return profiles
 
 
+def ballot_kind(race):
+    """How the race's ballot is decided, for a badge the reader can see:
+    ``primaryKind`` ("top-two", "top-four" or "open") and
+    ``generalRunoff`` (the date of a runoff after Nov 3 if no one has a
+    majority), each only where the race has one.
+
+    California's two-Democrat top-two ballots read like a misprint with
+    the rule only in a hover title (audit 2026-10-17, RACES-11), and
+    Georgia's and Louisiana's December rounds appeared on no state page
+    (PERSONA-06). Every value comes from a table that cites the statute:
+    ``results.ALL_PARTY_PRIMARIES``, ``overrides.OPEN_PRIMARY_SEATS`` and
+    ``overrides.GENERAL_RUNOFFS``; nothing is typed here.
+    """
+    from .overrides import GENERAL_RUNOFFS, OPEN_PRIMARY_SEATS
+    from .results import ALL_PARTY_PRIMARIES
+
+    out = {}
+    code = race["state"]
+    office = "S" if race["chamber"] == "Senate" else "H"
+    open_seat = OPEN_PRIMARY_SEATS.get((code, office, race.get("year", ELECTION_YEAR)))
+    if open_seat:
+        out["primaryKind"] = "open"
+        out["generalRunoff"] = open_seat.get("runoff")
+    elif code in ALL_PARTY_PRIMARIES:
+        out["primaryKind"] = ALL_PARTY_PRIMARIES[code][0]
+    if code in GENERAL_RUNOFFS and "generalRunoff" not in out:
+        out["generalRunoff"] = GENERAL_RUNOFFS[code][0]
+    return out
+
+
 _SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
 
 
@@ -355,6 +385,7 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
             slot = dates.get((race["state"], "S" if race["chamber"] == "Senate" else "H")) or {}
             race["primaryDate"] = slot.get("primary")
             race["runoffDate"] = slot.get("runoff")
+        race.update(ballot_kind(race))
         if results is not None:
             from .results import race_summary
             summary = race_summary(results, race["id"])
