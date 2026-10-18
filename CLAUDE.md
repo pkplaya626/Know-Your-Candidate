@@ -65,6 +65,9 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              courts/*.html      (generated, one per federal court)
                                              data/federal.js    (the executive, the Supreme Court, the courts)
                                              data/judiciary/*.js (one federal court's judges, and the judges' search)
+                                             about.html, 404.html (generated: the site's frame, kyc/pages.py)
+                                             districts/index.html, courts/index.html (generated directories)
+                                             site.webmanifest   (generated)
                                              sitemap.xml        (generated)
                                              ├──> index.html    (grid, races, profiles)
                                              └──> map.html      (partisan map)
@@ -105,8 +108,11 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   the 2026 ballot, a curated table citing each state's own record.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them to check they load the right scripts in the right order, and rewrites
-  nothing in them but the version stamps on their asset URLs (rule 76). `states/*.html`, `districts/*.html`, `government/*.html`
-  and `sitemap.xml` are the opposite: generated from `kyc/pages.py` (the
+  nothing in them but the version stamps on their asset URLs (rule 76); they
+  must carry the frame `kyc/pages.py` writes (navigation, footer line,
+  sidebar freshness line, the home page's structured data: `emit.check_nav`).
+  `states/*.html`, `districts/*.html`, `government/*.html`, `about.html`,
+  `404.html` and `sitemap.xml` are the opposite: generated from `kyc/pages.py` (the
   guide's words from `kyc/government_text.py`) on every build, never
   edited by hand, and `verify` fails when one on disk is not what the
   template would write.
@@ -268,7 +274,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Pages serves from; the canonical links, `og:url`, `robots.txt` and
     `sitemap.xml` must agree, and `verify` fails when they do not. A
     half-finished rename looks completely normal locally. Never put a hostname
-    in a new file without adding it to `emit._HOST_REFERENCES`.
+    in a new file without adding it to `emit._HOST_REFERENCES`. Every own
+    address on the home page is checked, its structured data's too, and the
+    share card's source (`tools/social-card.html`), whose PNG prints the
+    host: after a rename, regenerate it. No image carries the Congress's
+    number; the card read "The 119th Congress" until 2026-10 (rule 68).
 
 22. **A roster of challengers is not the field.** 57 curated challengers made
     the site report 436 of 474 races as having no declared challenger when
@@ -968,7 +978,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (General Assembly, General Court); a judge's name is shown without the
     directory's brackets. A section's name comes from one helper shared by
     its heading and its jump chip, and a page has one name in the
-    navigation, its title and the links to it. Where a city's name join
+    navigation, its title and the links to it. The tag beside the site's
+    name is the section's (`pages.brand_sub`, from the navigation's labels):
+    "U.S. Congress" stood over 219 pages about counties, courts and the
+    guide, and only a page that loads profiles.js names the Congress. Where a city's name join
     cannot work, a place is joined to a government only through the
     listing's own id (`overrides.PLACE_GOVERNMENTS`, with its evidence) or
     the government `county_areas` names, never to a town it replaced.
