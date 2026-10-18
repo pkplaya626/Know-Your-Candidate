@@ -40,6 +40,37 @@
       '">' + KYC.escapeHtml(spec.label) + KYC.ballotLineSuffix(item) + "</span>";
   }
 
+  /* The badges a card shows about a seat rather than a race, in one table
+   * with the words the key on the grid gives them (legend, GRID-19). */
+  var SEAT_BADGES = {
+    former: { cls: "badge-neutral", label: "Former member",
+      title: "Held this seat in the 2026 race and has since left Congress." },
+    leaving: { cls: "badge-danger", label: "Leaving in ’26",
+      title: "The member’s status line says they are retiring or not running for this seat " +
+        "again." },
+    challenger: { cls: "badge-money", label: "2026 challenger",
+      title: "Filed with the FEC; the primary has not been held yet." },
+    vacant: { cls: "badge-neutral", label: "Vacant seat", title: "Nobody holds this seat now." },
+    up: { cls: "badge-warn", label: "Seat up in 2026",
+      title: "This Senate seat’s term ends in January 2027, so the seat is on the 2026 ballot." },
+    later: { cls: "badge-neutral", label: "Seat up in 2028 or 2030",
+      title: "The year this Senate seat is next on the ballot. It says when the term ends, not " +
+        "whether the senator will run." },
+    running: { cls: "badge-warn", label: "Running for …",
+      title: "A sitting member running for another seat in 2026; the badge names it." },
+    redrawn: { cls: "badge-neutral", label: "Running in … (redrawn)",
+      title: "A sitting member running for re-election under the state’s new district map, " +
+        "for the district the badge names." },
+    ran: { cls: "badge-neutral", label: "Ran for …",
+      title: "A sitting member who ran for another seat in 2026 and is not on its November ballot." },
+  };
+
+  function seatBadge(key, label, title) {
+    var spec = SEAT_BADGES[key];
+    return '<span class="badge ' + spec.cls + '" title="' + KYC.escapeAttr(title || spec.title) +
+      '">' + KYC.escapeHtml(label || spec.label) + "</span>";
+  }
+
   function statusBadge(item) {
     var status = String(item.status || "").toLowerCase();
 
@@ -47,9 +78,8 @@
      * race went. Never "seat up", never a sitting member's badge. */
     if (item.formerMember) {
       var how = raceBadge(item);
-      return '<span class="badge badge-neutral" title="' +
-        KYC.escapeAttr(KYC.formerText(item) + "; held this seat in the 2026 race.") +
-        '">Former member</span>' + (how ? " " + how : "");
+      return seatBadge("former", null, KYC.formerText(item) + "; held this seat in the 2026 race.") +
+        (how ? " " + how : "");
     }
 
     /* A member contesting another seat - the other chamber, or a redrawn
@@ -67,16 +97,14 @@
       return raceBadge(item) + KYC.otherOfficeBadge(item, " ");
     }
     if (/retiring|not running|defeated|ineligible|resigned/.test(status)) {
-      return '<span class="badge badge-danger">Leaving in ’26</span>' +
-        KYC.otherOfficeBadge(item, " ");
+      return seatBadge("leaving") + KYC.otherOfficeBadge(item, " ");
     }
     if (item.isCandidate) {
       /* The primary has been held and the published results do not name
        * them (an independent, a minor party's filer): not "the primary has
        * not been held yet", and not counted as on the ballot. raceBadge
        * says so, as KYC.standing words it for every view. */
-      return raceBadge(item) ||
-        '<span class="badge badge-money" title="Filed with the FEC; the primary has not been held yet.">2026 challenger</span>';
+      return raceBadge(item) || seatBadge("challenger");
     }
     /* Won (or is in the runoff for) the primary for the seat they hold:
      * "Renominated" says more than "seat up", and "Re-elected" or "Lost
@@ -88,7 +116,7 @@
       if (renominated) return renominated;
     }
     if (KYC.partyKey(item) === "vacant") {
-      return '<span class="badge badge-neutral">Vacant seat</span>';
+      return seatBadge("vacant");
     }
     /* The badge speaks of the seat, never the person: the data knows when
      * the term ends (electionYear is its last year, less one), not whether
@@ -96,13 +124,32 @@
      * year in full: "Up in ’28" was shorthand a reader had to decode
      * (TRUST-17). */
     if (item.chamber.indexOf("Senate") !== -1 && item.seatUp2026) {
-      return '<span class="badge badge-warn">Seat up in 2026</span>';
+      return seatBadge("up");
     }
     if (item.chamber.indexOf("Senate") !== -1 && item.electionYear) {
-      return '<span class="badge badge-neutral">Seat up in ' +
-        KYC.escapeHtml(String(item.electionYear)) + "</span>";
+      return seatBadge("later", "Seat up in " + item.electionYear,
+                       "The year this Senate seat is next on the ballot.");
     }
     return "";
+  }
+
+  /** The key to every status word a card shows: where someone stands in
+   *  their race (KYC.raceStatusLegend, from the table that words the
+   *  badges), then what the seat badges mean. Collapsed until asked for. */
+  function legend() {
+    var row = function (spec) {
+      return '<div class="legend-row"><dt><span class="badge ' + KYC.escapeAttr(spec.cls) + '">' +
+        KYC.escapeHtml(spec.label) + "</span></dt><dd>" + KYC.escapeHtml(spec.title) + "</dd></div>";
+    };
+    var seats = Object.keys(SEAT_BADGES).map(function (k) { return SEAT_BADGES[k]; });
+    return '<details class="status-legend"><summary>What the labels on the cards mean</summary>' +
+      '<h3 class="legend-heading">Where someone stands in their 2026 race</h3>' +
+      '<dl class="legend-list">' + KYC.raceStatusLegend().map(row).join("") + "</dl>" +
+      '<h3 class="legend-heading">About the seat</h3>' +
+      '<dl class="legend-list">' + seats.map(row).join("") + "</dl>" +
+      '<p class="legend-note">A card’s own badge names the source its status was read ' +
+      "from: Wikipedia’s results page for the state, or the state’s list of " +
+      "candidates.</p></details>";
   }
 
   /* The latest public office beyond the seat the card is about: "Fmr.
@@ -126,7 +173,10 @@
    * item.party and the office label straight into innerHTML and carried an
    * onclick with the id interpolated into it; one delegated listener reads
    * data-id instead. */
-  function card(item) {
+  /* *opts.note* is a line the view adds under the card's facts: an age
+   * under an age sort, where a search matched (kyc-directory.js). */
+  function card(item, opts) {
+    var note = opts && opts.note;
     return [
       '<button type="button" class="card" data-id="', KYC.escapeAttr(item.id), '">',
       '<span class="card-photo">',
@@ -142,6 +192,7 @@
       '<span class="card-party ', KYC.partyClass(item), '">',
       KYC.escapeHtml(item.party), "</span>",
       statusBadge(item),
+      note ? '<span class="card-note clamp-2">' + KYC.escapeHtml(note) + "</span>" : "",
       "</span></button>",
     ].join("");
   }
@@ -422,18 +473,62 @@
   /** One race: its header, the people still in it, and the people the
    *  primary removed folded underneath. *people* is the already-filtered
    *  list of profiles to show; *opts.title* overrides the heading. */
+  /* A seat's holder who is running for another seat is not one of the
+   * people running for this one: CA-3's grid opened with "Kevin Kiley -
+   * Running for House CA-6; On the November ballot", and a reader skimming
+   * it saw three people on CA-3's ballot (RACES-18). They are one line
+   * above it, which says where they are running. */
+  function elsewhere(race, p) {
+    return !p.isCandidate && (race.incumbentIds || []).indexOf(p.id) !== -1 &&
+      !!p.contestRaceId && p.contestRaceId !== race.id && !!p.contestLabel;
+  }
+
+  function heldByLine(p) {
+    var line = KYC.contestLine(p);
+    var seat = String(p.contestLabel).replace(/ • /, " ").replace(/^House /, "");
+    var what = !line ? "is running for " + seat
+      : line.renumbered ? (line.past ? "ran in " + seat + " under the state’s new district map, " +
+          "and is not on its November ballot" : "is running in " + seat + " under the state’s " +
+          "new district map")
+      : line.past ? "ran for " + seat + " and is not on its November ballot"
+      : "is running for " + seat;
+    return '<p class="race-held">Held by <button type="button" class="link-button" data-id="' +
+      KYC.escapeAttr(p.id) + '">' + KYC.escapeHtml(p.name) + "</button>, who " +
+      KYC.escapeHtml(what) + ".</p>";
+  }
+
+  /* The people the primary removed, folded under the race. With
+   * *opts.lazyOut* their cards are drawn only when the list is opened
+   * (fillOut): the grid's race view built 2,515 cards, 3.3 MB of markup,
+   * most of them folded away (GRID-14). */
+  var lazyPeople = {};
+
+  function fillOut(details) {
+    var key = details.getAttribute("data-out-race");
+    var people = lazyPeople[key];
+    var grid = details.querySelector(".card-grid");
+    if (!people || !grid || grid.childElementCount) return;
+    grid.innerHTML = people.map(function (p) { return card(p); }).join("");
+  }
+
   function raceSection(race, people, opts) {
     opts = opts || {};
+    var moved = people.filter(function (p) { return elsewhere(race, p); });
+    people = people.filter(function (p) { return moved.indexOf(p) === -1; });
     var running = people.filter(function (p) { return !offBallot(p); });
     var out = people.filter(offBallot);
-    var body = '<div class="card-grid">' + running.map(card).join("") + "</div>" +
+    var body = moved.map(heldByLine).join("") +
+      '<div class="card-grid">' + running.map(function (p) { return card(p); }).join("") + "</div>" +
       unprofiledNote(race) + orderNote(running.length ? running : people, race, people.length);
     if (out.length) {
+      if (opts.lazyOut) lazyPeople[race.id] = out;
       body +=
-        '<details class="race-out"><summary>' + out.length +
+        '<details class="race-out"' + (opts.lazyOut ? ' data-out-race="' +
+          KYC.escapeAttr(race.id) + '"' : "") + "><summary>" + out.length +
         " no longer in this race &mdash; lost the primary, withdrew, or were " +
         "not on the primary ballot</summary>" +
-        '<div class="card-grid">' + out.map(card).join("") + "</div></details>";
+        '<div class="card-grid">' + (opts.lazyOut ? "" : out.map(function (p) { return card(p); })
+          .join("")) + "</div></details>";
     }
     var title = opts.title || race.label;
     var link = opts.stateLink === false ? "" :
@@ -520,5 +615,7 @@
     card: card,
     raceBadges: raceBadges,
     raceSection: raceSection,
+    fillOut: fillOut,
+    legend: legend,
   };
 })(window);
