@@ -19,9 +19,13 @@
 <meta property="og:image:alt" content="Know Your Candidate">
 <meta property="og:site_name" content="Know Your Candidate">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="referrer" content="no-referrer">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../assets/kyc.css?v=9203051e1f">
-<script src="../assets/kyc.js?v=275dfa6f45"></script>
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="manifest" href="../site.webmanifest">
+<link rel="stylesheet" href="../assets/kyc.css?v=447df54aa1">
+<script src="../assets/kyc.js?v=60eaad2b00"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Know Your Candidate","item":"https://candidates.radicalrelay.us/"},{"@type":"ListItem","position":2,"name":"Federal courts","item":"https://candidates.radicalrelay.us/courts/index.html"},{"@type":"ListItem","position":3,"name":"U.S. District Court for the Southern District of Georgia","item":"https://candidates.radicalrelay.us/courts/ga-s.html"}]}</script>
 </head>
 <body data-root="../" data-state="" data-page="court">
 
@@ -37,9 +41,15 @@
     <a class="brand" href="../index.html">
         <svg class="icon" aria-hidden="true"><use href="#i-vote"/></svg>
         <span class="brand-name">Know Your Candidate</span>
-        <span class="brand-sub" data-congress>U.S. Congress</span>
+        <span class="brand-sub">Federal courts</span>
     </a>
 
+    <form class="search" role="search" action="../index.html" data-site-search>
+        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <label class="sr-only" for="siteSearch">Search candidates and members of Congress</label>
+        <input type="search" id="siteSearch" name="q" autocomplete="off" spellcheck="false"
+               placeholder="Search candidates and members&hellip;" data-placeholder-short="Search&hellip;">
+    </form>
 
     <div class="header-actions">
         <div class="menu">
@@ -118,6 +128,10 @@
                 <svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg>
                 Know Your Government
             </a>
+            <a class="nav-link" href="../about.html" data-nav="about">
+                <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+                About &amp; sources
+            </a>
         </nav>
 
         <nav class="sidebar-section" aria-label="Federal government">
@@ -195,6 +209,7 @@
                 <option value="WY">Wyoming (WY)</option>
             </select>
         </nav>
+        <p class="sidebar-section sidebar-built">Sources read on <time datetime="2026-10-17">Oct. 17, 2026</time> &middot; <a href="../about.html">About &amp; sources</a></p>
     </aside>
 
     <main class="app-main" id="stateMain">
@@ -214,15 +229,12 @@
             </div>
 
             <footer class="site-footer">
-                <p><strong>Sources:</strong> the President and Vice President from
-                    congress-legislators' record of their terms; the Cabinet as the White House
-                    lists it, each officer checked on their office's own page and against the
-                    Senate's roll-call vote confirming them; every Article III judge from the
-                    Federal Judicial Center's Biographical Directory, and the Supreme Court's
-                    members as the Court lists them; vacancies as the courts list them on
-                    uscourts.gov. Judges are shown with the president who appointed them,
-                    never with a party.</p>
-                <p>Non-partisan and independent.</p>
+                <p><strong>Sources:</strong>
+                    every sitting judge from the Federal Judicial Center's Biographical
+                    Directory, as read on <time datetime="2026-10-17">Oct. 17, 2026</time>; vacancies, announced vacancies and
+                    judicial emergencies as the courts list them on uscourts.gov, as read on <time datetime="2026-10-17">Oct. 17, 2026</time>. Judges are shown with the president who appointed
+                    them, never with a party.</p>
+                <p class="footer-meta">Non-partisan and independent. Sources read on <time datetime="2026-10-17">Oct. 17, 2026</time>. <a href="../about.html">About &amp; sources</a> &middot; <a href="https://github.com/pkplaya626/Know-Your-Candidate/issues/new?template=correction.yml&amp;page=https%3A%2F%2Fcandidates.radicalrelay.us%2Fcourts%2Fga-s.html" data-report target="_blank" rel="noopener noreferrer">Report a problem</a></p>
             </footer>
         </div>
     </main>
@@ -230,7 +242,7 @@
 
 <script src="../data/federal.js?v=1dffbcc812"></script>
 <script src="../data/judiciary/ga-s.js?v=8597179e2a"></script>
-<script src="../assets/kyc-official.js?v=d237bcc36f"></script>
-<script src="../assets/kyc-federal.js?v=d621465b62"></script>
+<script src="../assets/kyc-official.js?v=670d42d033"></script>
+<script src="../assets/kyc-federal.js?v=1a1a374d4e"></script>
 </body>
 </html>

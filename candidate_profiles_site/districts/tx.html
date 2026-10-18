@@ -19,9 +19,13 @@
 <meta property="og:image:alt" content="Know Your Candidate">
 <meta property="og:site_name" content="Know Your Candidate">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="referrer" content="no-referrer">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../assets/kyc.css?v=9203051e1f">
-<script src="../assets/kyc.js?v=275dfa6f45"></script>
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="manifest" href="../site.webmanifest">
+<link rel="stylesheet" href="../assets/kyc.css?v=447df54aa1">
+<script src="../assets/kyc.js?v=60eaad2b00"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Know Your Candidate","item":"https://candidates.radicalrelay.us/"},{"@type":"ListItem","position":2,"name":"States & territories","item":"https://candidates.radicalrelay.us/states/index.html"},{"@type":"ListItem","position":3,"name":"Texas","item":"https://candidates.radicalrelay.us/states/tx.html"},{"@type":"ListItem","position":4,"name":"Texas's House districts, before and after the 2025 map","item":"https://candidates.radicalrelay.us/districts/tx.html"}]}</script>
 </head>
 <body data-root="../" data-state="TX" data-page="districts">
 
@@ -124,6 +128,10 @@
                 <svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg>
                 Know Your Government
             </a>
+            <a class="nav-link" href="../about.html" data-nav="about">
+                <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+                About &amp; sources
+            </a>
         </nav>
 
         <div class="sidebar-section">
@@ -159,6 +167,7 @@
                 <option value="">Choose a state&hellip;</option>
             </select>
         </nav>
+        <p class="sidebar-section sidebar-built">Data built <time data-built>&mdash;</time> &middot; <a href="../about.html">About &amp; sources</a></p>
     </aside>
 
     <main class="app-main" id="stateMain">
@@ -185,25 +194,25 @@
                     membership, contact details and committee rosters from the
                     <code>congress-legislators</code> dataset; the candidate field and
                     campaign finance from the Federal Election Commission; primary results
-                    from each state's Wikipedia election page; portraits from Congress.gov
-                    and Wikipedia.</p>
+                    from each state's Wikipedia election page<span data-results-read hidden>,
+                    as last read on <time data-results-as-of></time></span>; portraits from
+                    Congress.gov and Wikipedia.</p>
                 <p><strong>Who counts as a candidate:</strong> everyone the FEC records
                     as having raised or spent more than $5,000 for the 2026 cycle
                     (52&nbsp;U.S.C.&nbsp;&sect;30101(2)). People the primary removed stay on
                     record and are shown under each race.</p>
-                <p>Non-partisan and independent. Data built
-                    <time id="buildStamp">&mdash;</time>.</p>
+                <p class="footer-meta">Non-partisan and independent. Data built <time id="buildStamp">&mdash;</time>. <a href="../about.html">About &amp; sources</a> &middot; <a href="https://github.com/pkplaya626/Know-Your-Candidate/issues/new?template=correction.yml&amp;page=https%3A%2F%2Fcandidates.radicalrelay.us%2Fdistricts%2Ftx.html" data-report target="_blank" rel="noopener noreferrer">Report a problem</a></p>
             </footer>
         </div>
     </main>
 </div>
 
-<script src="../data/profiles.js?v=a5cc3f3ed2"></script>
+<script src="../data/profiles.js?v=af53256cc4"></script>
 <script src="../data/odds.js"></script>
 <script src="../data/districts/tx.js?v=1f74bed8a6"></script>
-<script src="../assets/kyc-odds.js?v=568b120d85"></script>
-<script src="../assets/kyc-cards.js?v=cdbe0a8847"></script>
-<script src="../assets/kyc-profile.js?v=4798d930e9"></script>
-<script src="../assets/kyc-districts.js?v=ba8120faf5"></script>
+<script src="../assets/kyc-odds.js?v=3428dfe4a3"></script>
+<script src="../assets/kyc-cards.js?v=4b22643612"></script>
+<script src="../assets/kyc-profile.js?v=ad8edb36b0"></script>
+<script src="../assets/kyc-districts.js?v=69a634d8dd"></script>
 </body>
 </html>
