@@ -149,7 +149,7 @@ class _Anchors(html.parser.HTMLParser):
     words long, and the cards whose blurbs ran longer were dropped, leaving
     a partial list that looked whole."""
 
-    _BLOCKS = ("h1", "h2", "h3", "h4", "h5", "h6", "p", "div", "br", "li")
+    _BLOCKS = ("h1", "h2", "h3", "h4", "h5", "h6", "p", "div", "li")
     _SKIP = ("script", "style", "noscript", "template", "svg")
 
     def __init__(self):
@@ -162,10 +162,6 @@ class _Anchors(html.parser.HTMLParser):
         elif tag == "a":
             self._href, self._chunks = dict(attrs).get("href") or "", [[]]
         elif self._chunks is not None and tag in self._BLOCKS:
-            self._chunks.append([])
-
-    def handle_startendtag(self, tag, attrs):
-        if tag == "br" and self._chunks is not None:
             self._chunks.append([])
 
     def handle_endtag(self, tag):
@@ -195,9 +191,14 @@ def anchors(markup):
     return parser.links
 
 
+_BREAK = re.compile(r"<br\b[^>]*>", re.I)
+
+
 def parse(markup):
     """:func:`kyc.enrich.parse_page`, with each link labelled as
-    :func:`anchors` reads it."""
+    :func:`anchors` reads it. A line break is a space: Senator Whitehouse's
+    headings are "Honoring<br>Veterans", which read as "HonoringVeterans"."""
+    markup = _BREAK.sub(" ", markup or "")
     page = enrich.parse_page(markup)
     page.links = anchors(markup)
     return page
@@ -252,7 +253,8 @@ _NOT_A_TOPIC = re.compile(r"\b(?:news\s+alert|press\s+releases?|fact\s+sheet|faq
                           r"disclosure\s+page|legislative\s+action|committee\s+work|"
                           r"my\s+caucuses|travel\s+abroad|passports?|academy\s+nominations?|"
                           r"application\s+form|bills?\s+i\S*\s+(?:co-?)?sponsored|"
-                          r"sponsored\s*/\s*co-?sponsored|\d{4}\s+in\s+review)\b|"
+                          r"sponsored\s*/\s*co-?sponsored|\d{4}\s+in\s+review|annual\s+report)\b|"
+                          r"\boffices?$|"
                           r"^(?:legislation|cpf(?:\s+requests?)?|grants?)$",
                           re.I)
 _TITLES = r"(?:president|vice\s+president|senator|sen|rep|representative|congressman|" \
@@ -630,12 +632,17 @@ def page_issues(page, index_url, home, own, others):
     return items[:MAX_ISSUES] if 3 <= len(items) <= MAX_ISSUES else []
 
 
-def heading_issues(page, own, others):
+def heading_issues(page, own, others, home=None):
     """An issues page that links no issue pages: its section headings at one
-    level, read as a campaign's are (rule 38)."""
+    level, read as a campaign's are (rule 38). A heading the home page
+    carries too is the site's frame, not the page's list: Senators Kennedy's
+    and Murkowski's issues pages end in their offices' cities, under
+    headings, as every page of their sites does."""
     rivals = sorted(others.get("surnames", ()))
-    return [i for i in enrich.issue_headings(page, own, rivals=rivals, limit=MAX_ISSUES)
-            if topic(i, own, others)]
+    framed = {" ".join(t.split()).lower() for _, t in (home.headings if home else ())}
+    items = [i for i in enrich.issue_headings(page, own, rivals=rivals, limit=MAX_ISSUES)
+             if topic(i, own, others) and " ".join(i.split()).lower() not in framed]
+    return items if len(items) >= 3 else []
 
 
 # ------------------------------------------------------------- contact pages
@@ -799,7 +806,7 @@ def read_site(profile, others, pause=PAUSE, render=chrome_dom, fetch=_markup_of,
                 break
     if not record.get("issues"):
         for where, shown in pages:
-            items = heading_issues(shown, name, others)
+            items = heading_issues(shown, name, others, home=page)
             if items:
                 record.update(issues=items, issuesUrl=where, how="headings")
                 break

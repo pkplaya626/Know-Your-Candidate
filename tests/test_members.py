@@ -189,6 +189,25 @@ class TestTheIssuesTheirSiteLists(unittest.TestCase):
                 '<a href="/media">Media</a><a href="/videos">Videos</a></nav>')
         self.assertEqual(members.menu_issues(flat, site + "/", site, "Marsha Blackburn", OTHERS), [])
 
+    def test_headings_the_home_page_carries_too_are_the_sites_frame(self):
+        # Senator Kennedy's issues page ends in his offices' cities, under
+        # headings, as every page of his site does: no list of issues.
+        frame = "".join(f"<h3>{c}</h3><p>{'x ' * 10}</p>" for c in
+                        ("Washington D.C", "Alexandria", "Baton Rouge", "Monroe"))
+        home = members.parse("<h1>Home</h1>" + frame)
+        issues = members.parse("<h1>Issues</h1>" + frame)
+        self.assertEqual(members.heading_issues(issues, "John Kennedy", OTHERS, home=home), [])
+        listed = members.parse("<h1>Issues</h1>" + "".join(
+            f"<h3>{t}</h3><p>{'y ' * 30}</p>" for t in ("Agriculture", "Energy", "Veterans"))
+            + frame)
+        self.assertEqual(members.heading_issues(listed, "John Kennedy", OTHERS, home=home),
+                         ["Agriculture", "Energy", "Veterans"])
+        # A line break is a space ("Honoring<br>Veterans").
+        self.assertEqual(members.parse("<h3>Honoring<br>Veterans</h3>").headings,
+                         [("h3", "Honoring Veterans")])
+        self.assertTrue(members.furniture("Des Moines Office"))
+        self.assertTrue(members.furniture("Annual Report"))
+
     def test_the_senates_firewall_is_no_page(self):
         page = members.parse("<title>Senate.gov - Unauthorized</title><p>Sorry, a potential "
                              "security risk was detected in your submitted request." + "x " * 200)
