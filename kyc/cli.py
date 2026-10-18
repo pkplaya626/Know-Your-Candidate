@@ -1397,27 +1397,40 @@ def _courts(args):
             return 2
         read, problems = cache["courts"], []
     else:
-        read, problems = courts.fetch()
+        read, problems = courts.fetch(root=args.root)
         # A court that could not be read this time keeps its last good read
         # (rule 8): a timeout is not a court with no members.
-        before = (courts.load_cache(args.root) or {}).get("courts", {})
+        old = courts.load_cache(args.root) or {}
+        before = old.get("courts", {})
         for code in sorted(set(courts.COURTS) - set(read)):
             if code in before:
-                read[code] = before[code]
-                problems.append(f"{code}: kept the last good read")
+                # With the day it was read, which this run's save does not
+                # change: dated by the cache's "fetched", rewritten every
+                # run, a court that never read again would never grow old.
+                read[code] = dict(before[code], read=before[code].get("read")
+                                  or str(old.get("fetched") or "")[:10])
+                problems.append(f"{code}: kept the last good read, of {read[code]['read']}")
         problems.extend(courts.shrunk(before, read))
+        problems.extend(courts.changed(before, read))
     for code, court in sorted(read.items()):
         short = court["seats"] - court["listed"]
         print(f"  {code}: {court['listed']} of {court['seats']}" + (f" ({short} with nobody listed)"
               if short else "") + (f"; chief {court['chief']}" if court["chief"] else "; no chief listed"))
-    missing = [c for c in STATES if c not in read and c not in courts.UNREADABLE]
+    curated = courts.curated()
+    unfit = courts.curated_errors()
+    for problem in unfit:
+        print(f"  [error] {problem}", file=sys.stderr)
+    problems.extend(courts.curated_stale())
+    problems.extend(courts.stale({"courts": read}))
+    missing = [c for c in STATES if c not in read and c not in courts.UNREADABLE and c not in curated]
     for problem in problems:
         print(f"  [warn] {problem}")
-    print(f"  {len(read)} courts read; {len(courts.UNREADABLE)} cannot be read by a script"
+    print(f"  {len(read)} courts read; {len(curated)} read by hand from the court's own page "
+          f"({', '.join(sorted(curated))}); {len(courts.UNREADABLE)} cannot be read at all"
           + (f"; no recipe or no result for {', '.join(missing)}" if missing else ""))
     if not args.check:
         print(f"[ok] wrote {courts.save_cache(read, args.root)}")
-    return 0
+    return 2 if unfit else 0
 
 
 def _voting(args):

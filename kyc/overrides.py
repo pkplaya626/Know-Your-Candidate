@@ -734,6 +734,55 @@ LEADERSHIP_TITLES = {
         "Chair' Scott, Tim (R-SC), among the party leadership"),
 }
 
+# State high courts whose own sites refuse every automated reader - a plain
+# request and the headless Chrome of tools/read_court_pages.mjs alike (a
+# Cloudflare or Akamai wall, a 403) - read once by hand, in an ordinary
+# windowed Chrome, on the court's own page and nowhere else (rule 57). Each is
+# (the court's page, the day it was read, the members in the court's order,
+# the chief or "" when the page names none, what the page says, quoted).
+# The build checks each against its seats and chief as it would a read
+# roster, and warns once one is STALE_DAYS old (kyc/courts.py):
+# read the page again, then move the date or change the names. The page
+# says each was read by hand, and on which day.
+COURT_ROSTERS = {
+    "MO": ("https://www.courts.mo.gov/page.jsp?id=133", "2026-10-18",
+           ("W. Brent Powell", "Zel M. Fischer", "Robin Ransom", "Paul C. Wilson",
+            "Kelly C. Broniec", "Ginger K. Gooch", "Mary R. Russell"),
+           "W. Brent Powell",
+           "'The current Supreme Court of Missouri judges are:', then one per line: 'Chief "
+           "Justice W. Brent Powell', 'Judge Zel M. Fischer', 'Judge Robin Ransom', 'Judge Paul "
+           "C. Wilson', 'Judge Kelly C. Broniec', 'Judge Ginger K. Gooch', 'Judge Mary R. "
+           "Russell'. A headless Chrome gets 'Error 403' and a notice that access 'by a site "
+           "data scraper or any similar software' is prohibited."),
+    "NH": ("https://www.courts.nh.gov/our-courts/supreme-court/about/justices", "2026-10-18",
+           ("Patrick E. Donovan", "Melissa B. Countway", "Bryan K. Gould", "Daniel E. Will"),
+           "",
+           "One per line: 'Senior Associate Justice Patrick E. Donovan', 'Justice Melissa B. "
+           "Countway', 'Justice Bryan K. Gould', 'Justice Daniel E. Will'. The page names no "
+           "chief justice (a Senior Associate Justice is not one), and lists 'Senior Associate "
+           "Justice Anna Barbara Hantz Marconi - February 12, 2026' and 'Senior Associate "
+           "Justice James P. Bassett - August 31, 2025' under 'Recent retirements'. Akamai "
+           "answers a headless Chrome 'Access Denied'."),
+    "NV": ("https://nvcourts.gov/supreme/court_information/the_supreme_court_of_nevada_justices",
+           "2026-10-18",
+           ("Kristina Pickering", "Linda Marie Bell", "Ron D. Parraguirre", "Patricia Lee",
+            "Elissa F. Cadish", "Douglas Herndon", "Lidia S. Stiglich"),
+           "Douglas Herndon",
+           "'Justice Kristina Pickering, Justice Linda Marie Bell, Justice Ron D. Parraguirre, "
+           "Justice Patricia Lee, Justice Elissa F. Cadish, Chief Justice Douglas Herndon, "
+           "Justice Lidia S. Stiglich', and the same seven under 'SUPREME COURT OF NEVADA "
+           "JUSTICES'. Cloudflare answers a headless Chrome 'Just a moment...'."),
+    "NY": ("https://www.nycourts.gov/ctapps/", "2026-10-18",
+           ("Shirley Troutman", "Madeline Singas", "Jenny Rivera", "Rowan D. Wilson",
+            "Michael J. Garcia", "Anthony Cannataro", "Caitlin J. Halligan"),
+           "Rowan D. Wilson",
+           "The menu 'JUDGES OF THE COURT': 'Hon. Shirley Troutman', 'Hon. Madeline Singas', "
+           "'Hon. Jenny Rivera', 'Hon. Rowan D. Wilson', 'Hon. Michael J. Garcia', 'Hon. "
+           "Anthony Cannataro', 'Hon. Caitlin J. Halligan'; the same page: 'On September 24, "
+           "2026, Chief Judge Rowan D. Wilson conducted a statewide public hearing'. "
+           "Cloudflare answers a headless Chrome 'Just a moment...'."),
+}
+
 # Phrases in a Status value that mean the incumbent is not on the 2026 ballot.
 NOT_SEEKING_MARKERS = ("retiring", "not running", "defeated", "ineligible", "resigned")
 
