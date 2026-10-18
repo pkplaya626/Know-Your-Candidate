@@ -198,21 +198,148 @@ def fetch(codes, pause=0.5, timeout=60):
     for code in codes:
         url = OPENSTATES_URL.format(st=code.lower())
         request = urllib.request.Request(url, headers={"User-Agent": "know-your-candidate"})
-        try:
-            with urllib.request.urlopen(request, timeout=timeout) as response:
-                text = response.read().decode("utf-8")
-        except OSError as exc:
-            raise StateLegislatorsError(f"{code}: could not fetch {url}: {exc}") from exc
+        # A failed lookup is tried again before it fails the refresh: one
+        # missed DNS answer is not a missing file (rule 8).
+        for attempt in range(3):
+            try:
+                with urllib.request.urlopen(request, timeout=timeout) as response:
+                    text = response.read().decode("utf-8")
+                break
+            except OSError as exc:
+                if attempt == 2:
+                    raise StateLegislatorsError(f"{code}: could not fetch {url}: {exc}") from exc
+                time.sleep(5 * (attempt + 1))
         out[code] = parse(text, code)
         time.sleep(pause)
     return out
 
 
-def save_cache(by_state, root="."):
+# ------------------------------------------------------------------ images
+
+# How long an answer about a portrait stands before it is asked again. The
+# refresh runs daily near the election; about 6,500 images at a polite pace
+# take ten minutes, so each is re-read about once a fortnight.
+IMAGE_RECHECK_DAYS = 14
+
+
+def secure(url):
+    """The address a page served over https loads *url* from: browsers
+    upgrade an http:// image on such a page, and block it if the upgrade
+    fails, so an http:// portrait is only as good as its https:// copy."""
+    return "https://" + url[len("http://"):] if url.startswith("http://") else url
+
+
+def check_portrait(url, timeout=25):
+    """``True`` the address serves an image, ``False`` it definitely does
+    not, ``None`` could not tell - ``portraits.check_image``'s tristate, made
+    stricter for hosts this project does not know: only a 404 or 410 (how
+    Kansas answers for its missing portraits) is ``False``. A 200 that is
+    not an image, a refusal (401, 403: a bot wall), a throttle, a server
+    error or a failed connection concludes nothing (rule 8):
+    Texas's host refused every connection from one machine and served the
+    same files to another.
+
+    It asks with GET, never HEAD: Massachusetts answers HEAD for every
+    member's portrait with 404 and GET with the image, and South Dakota
+    answers HEAD with an HTML page where GET redirects to the photograph.
+    The first run asked HEAD first and called 211 working portraits
+    missing. Only the headers are read."""
+    import urllib.error
+
+    from .portraits import _UA
+    try:
+        req = urllib.request.Request(url, headers=_UA, method="GET")
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            if response.status != 200:
+                return None
+            ctype = (response.headers.get("Content-Type") or "").lower()
+            # A page where an image should be may be a soft 404 or a bot
+            # wall's "Request Rejected" with status 200 (rule 52): it
+            # concludes nothing.
+            return True if ctype.startswith("image") else None
+    except urllib.error.HTTPError as exc:
+        return False if exc.code in (404, 410) else None
+    except Exception:
+        return None
+
+
+def check_images(by_state, previous=None, today=None, check=None, pause=0.5, workers=8):
+    """Mark each record's portrait ``imageStatus`` "ok" or "broken", the
+    tristate way (``check_portrait``, rule 8): only a definite answer - a
+    404 or 410 - is "broken", and a throttled,
+    refused or timed-out request leaves the last answer standing, or none.
+
+    Kansas's member pages name portraits the legislature no longer serves
+    (123 of 165 failed to load, audit 2026-10-17, STATEGOV-03); the page
+    drops a "broken" one rather than drawing nothing in its place. An answer
+    younger than ``IMAGE_RECHECK_DAYS`` is carried over from *previous* (the
+    last cache) for the same person and address. Requests are spread over
+    hosts, one at a time to each, *pause* seconds apart.
+
+    Returns ``{code: {"ok": n, "broken": n, "unknown": n}}``."""
+    import concurrent.futures
+    import urllib.parse
+
+    from .legislature import search_thumbnail
+    check = check or check_portrait
+    today = today or datetime.date.today()
+    before = {}
+    for records in ((previous or {}).get("states") or {}).values():
+        for r in records:
+            if r.get("imageStatus") and r.get("imageChecked"):
+                before[(r["id"], r.get("image"))] = (r["imageStatus"], r["imageChecked"])
+    todo = {}
+    for records in by_state.values():
+        for r in records:
+            url = r.get("image")
+            if not url or search_thumbnail(url):
+                continue
+            status, checked = before.get((r["id"], url), (None, None))
+            if status:
+                r["imageStatus"], r["imageChecked"] = status, checked
+                age = (today - datetime.date.fromisoformat(checked)).days
+                if age < IMAGE_RECHECK_DAYS:
+                    continue
+            todo.setdefault(secure(url), []).append(r)
+    by_host = {}
+    for url in todo:
+        by_host.setdefault(urllib.parse.urlsplit(url).hostname or "", []).append(url)
+
+    def run(urls):
+        out = {}
+        for i, url in enumerate(urls):
+            if i and pause:
+                time.sleep(pause)
+            out[url] = check(url)
+        return out
+
+    answers = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+        for result in pool.map(run, [by_host[h] for h in sorted(by_host)]):
+            answers.update(result)
+    for url, records in todo.items():
+        verdict = answers.get(url)
+        if verdict is None:
+            continue                    # could not tell: the last answer stands
+        for r in records:
+            r["imageStatus"] = "ok" if verdict else "broken"
+            r["imageChecked"] = today.isoformat()
+    counts = {}
+    for code, records in by_state.items():
+        c = counts.setdefault(code, {"ok": 0, "broken": 0, "unknown": 0})
+        for r in records:
+            if r.get("image") and not search_thumbnail(r["image"]):
+                c[r.get("imageStatus") or "unknown"] += 1
+    return counts
+
+
+def save_cache(by_state, root=".", fetched=None):
+    """Write the cache. *fetched* keeps the date the roster was read when
+    only its portraits were checked again (``statelegs --images-only``)."""
     payload = {
         "source": SOURCE,
         "url": OPENSTATES_URL.format(st="<st>"),
-        "fetched": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+        "fetched": fetched or datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
         "states": {code: sorted(by_state[code], key=lambda r: (r["chamber"], r["district"], r["name"]))
                    for code in sorted(by_state)},
     }

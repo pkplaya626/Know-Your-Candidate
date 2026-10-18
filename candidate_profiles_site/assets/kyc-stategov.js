@@ -401,6 +401,8 @@
       '<span class="gov-chamber-name">' + KYC.escapeHtml(c.title) + "</span>" +
       '<span class="gov-chamber-seats">' + pills(c) + ' <span class="faint">of ' + seatWord(c.seats) +
       (unlisted > 0 ? "; " + unlisted + " with nobody listed" : "") + "</span></span>" +
+      // One square per seat, as on the legislature page (KYC.seatStrip).
+      (KYC.seatStrip ? KYC.seatStrip(c) : "") +
       '<span class="gov-chamber-holds">' + KYC.escapeHtml(holds) +
       (c.ncsl ? ' <span class="badge badge-warn">NCSL: ' +
         KYC.escapeHtml(c.ncsl === "none" ? "no majority" : PARTY[c.ncsl] + " majority") + "</span>" : "") +
@@ -577,7 +579,8 @@
     if (s.upper) {
       html += '<p class="panel-subhead">Legislature</p><ul class="gov-chambers">' +
         chamberRow(s.upper, code, chamberMark(code, "upper")) +
-        (s.lower ? chamberRow(s.lower, code, chamberMark(code, "lower")) : "") + "</ul>";
+        (s.lower ? chamberRow(s.lower, code, chamberMark(code, "lower")) : "") + "</ul>" +
+        (KYC.seatKey ? KYC.seatKey([s.upper, s.lower]) : "");
       if (s.note) {
         html += '<p class="gov-note">' + KYC.escapeHtml(s.note) + " " +
           link(s.noteSource, "Legislature's roster") + "</p>";
@@ -624,11 +627,13 @@
    * state's chambers, in the words of its state page. The list is plain
    * links without this. */
   function directory() {
+    var drawn = [];
     Array.prototype.forEach.call(global.document.querySelectorAll("[data-facts]"), function (cell) {
       var s = state(cell.getAttribute("data-facts"));
       if (!s) return;
       var code = cell.getAttribute("data-facts");
       var chambers = [s.upper, s.lower].filter(Boolean);
+      drawn = drawn.concat(chambers);
       cell.innerHTML = '<ul class="gov-chambers">' + chambers.map(function (c) {
         return chamberRow(c, code, "");
       }).join("") + "</ul>" +
@@ -637,6 +642,9 @@
               return c.toUpperCase();
             })) + ".</p>" : "");
     });
+    // One key for every strip in the list, above it.
+    var list = global.document.querySelector("#legislatureDirectory .directory-list");
+    if (list && drawn.length && KYC.seatKey) list.insertAdjacentHTML("beforebegin", KYC.seatKey(drawn));
   }
 
   KYC.ready(function () {

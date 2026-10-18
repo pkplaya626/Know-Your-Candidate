@@ -32,7 +32,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… field` | Refresh the FEC register of everyone running in 2026 |
 | `… field --check` | Report the field from the committed cache; no network |
 | `… census` | Count each state's local governments from the Census of Governments (`--check` reads the cache) |
-| `… statelegs` | Every state legislator from Open States, matched to the district maps (`--check` re-matches the cache) |
+| `… statelegs` | Every state legislator from Open States, matched to the district maps, each portrait checked (`--check` re-matches the cache; `--images-only` checks the portraits again without refetching; `--no-images` skips them) |
 | `… localgov` | Every local government from the Census listing, checked against the published counts |
 | `… executives` | Every governor from the NGA, and NCSL's count of each legislature's parties (`--check` reports the caches) |
 | `… officers` | Every lieutenant governor (NLGA) and secretary of state (NASS), cross-checked where the rosters overlap |
@@ -63,7 +63,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (1862 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (1914 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1464,6 +1464,20 @@ The map is `assets/kyc-regionmap.js`, a renderer for any regions keyed by
 any id - counties and towns are next - built on the district pages'
 techniques: one definition per shape, labels as page text at 11px for the
 drawn width, close-ups planned by `kyc/districts.insets`.
+
+What a member's card and a chamber's summary show (`kyc/legislature.py`,
+audit 2026-10-17):
+
+| On the page | From | Rule |
+|---|---|---|
+| Party, and "Also on the ... line" | Open States' party label, split at "/": New York's and Connecticut's fusion lines are not parties, so "Democratic/Working Families" counts as Democratic | `party_name`, `fusion_lines` |
+| District office phone, capitol phone and address | Open States' `district_voice`, `capitol_voice`, `capitol_address`, labelled as which office; the bulk export carries no capitol phone today | `_person` |
+| One page, labelled as what it is | The member's page on a host of `LEGISLATURE_HOSTS` ("Official page"); never a file, a party caucus's page on the legislature's host, a past numbered General Assembly or Legislature (Illinois's `GA=`, Arizona's `legislature=`, Delaware's `/AssemblyMember/150/`), a page whose address names another member and not them (Rhode Island's roster links some twenty members to one colleague's page), a page for the other chamber, or one keyed to another district (`districts_in`: Kentucky's `DistrictNumber=`, Louisiana's `H_Reps/members?ID=`, Texas's `?district=`, California's `sdNN`, Florida's `/Senators/sNN`), which shows whoever holds that seat now - Open States keeps a senator's old House pages. A page chosen for two members is neither's. Where only the legislature's list of their bills is linked (Connecticut), "Bills on the legislature's site"; where only a past session's page is (33 in Indiana, 9 in Hawaii), it is shown with its session, a fallback, never as current; where the legislature's site has nothing, their page on a party caucus's site (`CAUCUS_SITES`: every Michigan legislator's), "Party caucus page: <caucus>", or the chamber's member list (Alabama's ALISON). Alabama's old ALIS pages are not used: they time out. A member with none says so on the card, and `build` and `build --check` count each kind | `member_page`, `pages_for` |
+| Portrait | Open States' image, unless it is a search engine's thumbnail (gstatic, googleusercontent) or `statelegs` confirmed it missing - a GET answered 404 or 410 (never HEAD, which Massachusetts answers 404 for portraits it serves). A 200 that is not an image, a refusal, a throttle or a timeout concludes nothing (rule 8); each answer stands 14 days. `statelegs --images-only` checks again without refetching the roster | `check_portrait`, `check_images` |
+| Seats by party, majority, coalition note | The state page's own count (`stategov.chamber`) and note (`stategov.COALITIONS`); a different answer is a build error | `_count` |
+| One square per seat | The same count: Republicans from the left and Democrats from the right, as the counts beside them read, nobody listed as an outline, a tick above and below at half the seats (none for Nebraska's nonpartisan chamber). Also on every state page and the directory, with one key each (`KYC.seatStrip`, `KYC.seatKey`) | rules 51, 73 |
+| Seats on the Nov 3 ballot, and which districts | `ballot2026`'s record, read into districts only where its list or rule names exactly as many seats as it says are up; the term only where that record states one. A district the record names for a special election for the rest of a term (Kansas Senate 24 and 25, Nebraska 41, New Mexico Senate 33, Colorado Senate 17, 21, 29 and 31, ...) is marked `special` and its panel says first that it is on the ballot; a special naming no district on the map fails the build. The record is quoted only where it says more than "all" or "none" | `seats_up`, `specials`, `term_years` |
+| Floterial district | New Hampshire's floterial members are named with their district under "Not on the map", where RSA 662:5 makes the district floterial (`NH_FLOTERIAL`, 39 districts, each the union of base districts); any other unplaced district is "unmatched" | `unplaced_why` |
 
 ## Governors and party control
 
