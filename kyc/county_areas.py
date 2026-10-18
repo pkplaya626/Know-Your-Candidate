@@ -196,6 +196,30 @@ STATE_NOTES = {
 }
 
 
+def local_name(fips, name):
+    """An area's name as its state writes it (rule 75). The Census names an
+    independent city "Alexandria city"; Virginia's code and the city itself
+    say "City of Alexandria", Missouri's charter city is the City of St.
+    Louis, and Maryland writes "Baltimore City". Carson City is its own
+    name. Every other area keeps the Census's name."""
+    entry = AREAS.get(fips)
+    if not entry or entry[1] != INDEPENDENT or not name.endswith(" city"):
+        return name
+    if fips == "24510":
+        return "Baltimore City"
+    return "City of " + name[:-len(" city")]
+
+
+def with_article(name):
+    """"The City of Richmond" in a sentence; "Baltimore City" as it is."""
+    return "The " + name if name.startswith("City of ") else name
+
+
+def _the_city(name):
+    """"the City of St. Louis" inside a sentence."""
+    return "the " + name if name.startswith("City of ") else name
+
+
 def words(code):
     """``(one, many, button)``: what the state's map areas are called."""
     return AREA_WORDS.get(code, DEFAULT_WORDS)
@@ -219,8 +243,9 @@ def note(code, fips, counties):
     entry = AREAS.get(fips)
     if not entry:
         return None
-    name, kind, gov, filed = entry
-    unit = _unit(code, name)
+    census_name, kind, gov, filed = entry
+    unit = _unit(code, census_name)
+    name = local_name(fips, census_name)
     if kind == CONSOLIDATED:
         place = "town" if gov.startswith("Town of ") else "city"
         if fips in BOROUGHS:
@@ -235,9 +260,12 @@ def note(code, fips, counties):
     if kind == INDEPENDENT:
         apart = {"24510": " Baltimore County, next to it, is a separate county.",
                  "29510": " St. Louis County, next to it, is a separate county."}.get(fips, "")
-        return (f"{name} is an independent city, outside any county: {_the(gov)} also does the "
-                f"work a county does elsewhere, and the Census Bureau counts it as a city."
-                + apart)
+        # "The City of Richmond is ...: its government ...", once: the
+        # listing's own name for the government spells it another way
+        # ("City of St Louis").
+        return (f"{with_article(name)} is an independent city, outside any county: its "
+                f"government also does the work a county does elsewhere, and the Census Bureau "
+                f"counts it as a city." + apart)
     if kind == STATE:
         return (f"{name} has no county government. It is the Kalaupapa Settlement on Molokai, run "
                 f"by the state Department of Health, and the Census Bureau counts it as part of the "
@@ -284,10 +312,16 @@ def for_state(code, counties, governments):
             if filed:
                 out[fips]["filed"] = filed
     one, many, button = words(code)
+    # Virginia's independent cities are not counties, and the count says so:
+    # "95 counties and 38 independent cities", not "133 counties".
+    cities = sum(1 for f in counties if (AREAS.get(f) or ("", ""))[1] == INDEPENDENT)
+    rest = len(counties) - cities
+    count = f"{rest:,} {one if rest == 1 else many}" + (
+        f" and {cities} independent cit{'y' if cities == 1 else 'ies'}" if cities else "")
     listed = {"CT": " Its towns and cities are listed here by planning region.",
               "RI": " Its cities and towns are listed here by the county they lie in."}
     return {
-        "areaWords": {"one": one, "many": many, "button": button},
+        "areaWords": {"one": one, "many": many, "button": button, "count": count},
         "stateNote": (STATE_NOTES[code] + listed.get(code, "") if code in STATE_NOTES
                       else _few(code, counties, sorted(out))),
         "noCounty": out,
@@ -298,7 +332,8 @@ def _few(code, counties, lacking):
     """A state with a few such areas and no note of its own names them."""
     if not lacking:
         return ""
-    names = [counties[f]["name"] for f in lacking]
+    names = [local_name(f, counties[f]["name"]) for f in lacking]
+    names[0] = with_article(names[0])
     unit = {"AK": "borough", "LA": "parish"}.get(code, "county")
     joined = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
     one = len(names) == 1
@@ -368,7 +403,7 @@ def directory_note(code):
     unit = {"AK": "borough", "LA": "parish"}.get(code, "county")
     phrases = []
     for kind in (CONSOLIDATED, INDEPENDENT, STATE, UNORGANIZED, CENSUS_AREA, REGION):
-        names = [e[0] for _f, e in mine if e[1] == kind]
+        names = [_the_city(local_name(f, e[0])) for f, e in mine if e[1] == kind]
         if not names:
             continue
         one = len(names) == 1

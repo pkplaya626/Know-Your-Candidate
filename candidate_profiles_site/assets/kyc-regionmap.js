@@ -22,6 +22,15 @@
  *     dots: function () { return [{ id, at: [x, y], cls, title, px }]; },
  *     // px: the dot's radius on screen (default DOT_PX).
  *     onDot: function (id) {},
+ *     // Optional, for labels that are names rather than numbers (a
+ *     // county's): whether a region's label fits at *px* screen pixels
+ *     // per map unit; the share of regions that must have room before any
+ *     // is named (a picked one is named whatever its room); the labels'
+ *     // class, and whether the current view shows them.
+ *     fits: function (region, px) { return true; },
+ *     minShare: 0.25,
+ *     labelClass: "county-label",
+ *     showLabels: function () { return true; },
  *   });
  *   map.render();
  */
@@ -76,15 +85,41 @@
       }).join("");
     }
 
+    function labelled() {
+      return !opts.showLabels || opts.showLabels();
+    }
+
     function labels(frame, px, mine) {
+      if (!labelled()) return "";
+      // Names (opts.fits): drawn only where a fair share of the map's
+      // regions has room for one. Texas at 1280px had room for one name of
+      // 254, "Pecos", and a lone name reads as the pick or a highlight.
+      var named = true;
+      if (opts.fits) {
+        var room = mine.filter(function (id) { return regions[id].label && opts.fits(regions[id], px); });
+        named = room.length >= (opts.minShare || 0) * mine.length;
+      }
       return '<div class="map-labels" aria-hidden="true">' + mine.map(function (id) {
         var r = regions[id];
         var picked = id === selected;
-        if (!r.label || (!picked && r.room * px < LABEL_ROOM)) return "";
-        return '<span class="map-label district-num' + (picked ? " is-focus" : "") +
-          ' anchor-middle" style="left:' + ((r.at[0] - frame[0]) / frame[2] * 100).toFixed(3) +
+        if (!r.label) return "";
+        var left = (r.at[0] - frame[0]) / frame[2] * 100;
+        var anchor = "anchor-middle";
+        if (opts.fits) {
+          // The picked region is always named (rule 43: never dropped),
+          // where it has no room too - over its point, kept on the map.
+          if (!picked && !(named && opts.fits(r, px))) return "";
+          if (picked && !opts.fits(r, px)) anchor = left < 20 ? "anchor-start" : left > 80 ? "anchor-end" : anchor;
+        } else if (!picked && r.room * px < LABEL_ROOM) {
+          return "";
+        }
+        // A name keeps its size when picked: it was measured to fit at 11px.
+        var size = picked && !opts.fits ? 13 : LABEL_PX;
+        return '<span class="map-label ' + (opts.labelClass || "district-num") +
+          (picked ? " is-focus" : "") +
+          " " + anchor + '" style="left:' + left.toFixed(3) +
           "%;top:" + ((r.at[1] - frame[1]) / frame[3] * 100).toFixed(3) + "%;font-size:" +
-          (picked ? 13 : LABEL_PX) + 'px">' + KYC.escapeHtml(r.label) + "</span>";
+          size + 'px">' + KYC.escapeHtml(r.label) + "</span>";
       }).join("") + "</div>";
     }
 
@@ -137,8 +172,10 @@
 
     var drawn = false;
     // With no words on the regions, a pick changes nothing but which shape
-    // and dot are marked, so it can mark them in place.
-    var unlabelled = ids.every(function (id) { return !regions[id].label; });
+    // and dot are marked, so it can mark them in place. A view that hides
+    // its labels (the county map's cities view) counts as unlabelled.
+    var noLabels = ids.every(function (id) { return !regions[id].label; });
+    function unlabelled() { return noLabels || !labelled(); }
 
     function render() {
       drawn = true;
@@ -181,7 +218,7 @@
     function select(region, dot, redraw) {
       region = region || "";
       dot = dot || "";
-      if (redraw || !drawn || !unlabelled) {
+      if (redraw || !drawn || !unlabelled()) {
         selected = region;
         selectedDot = dot;
         render();

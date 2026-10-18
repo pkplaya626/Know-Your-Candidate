@@ -12,7 +12,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from kyc import census, counties, county_areas, localgov  # noqa: E402
+from kyc import census, counties, county_areas, localgov, localsites, overrides  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 
@@ -87,10 +87,541 @@ class TestCountyPages(unittest.TestCase):
     def test_a_row_says_what_the_page_shows(self):
         row = counties._row({"type": "special", "name": "Fire District No 1", "city": "Dover",
                              "web": "https://example.org", "function": "Local Fire Protection",
-                             "inactive": True})
+                             "inactive": True}, {"sites": {}})
         self.assertEqual(row, ["special", "Fire District No 1", "Dover", "https://example.org", "",
-                               "Local Fire Protection", "inactive"])
+                               "Local Fire Protection", "inactive", "", ""])
 
+    def test_a_census_filing_category_reads_in_plain_words(self):
+        # STATEGOV-09: "Other Single Function Districts" is the Census's
+        # function code, not a description.
+        row = counties._row({"type": "special", "name": "X", "function": "Other Single Function Districts"},
+                            {"sites": {}})
+        self.assertEqual(row[5], "Single-purpose district")
+
+
+class TestReadableNames(unittest.TestCase):
+    """STATEGOV-09, PERSONA-17: 6,500 names on the county pages read in the
+    Census's abbreviations ("Fairfax Co Schs", "Amador Co Spl Schs Oper by
+    Co Supt"). They are written out from a closed table, and the listing's
+    own form is kept beside them."""
+
+    def test_the_listings_abbreviations_are_written_out(self):
+        cases = {
+            "Fairfax Co Schs": "Fairfax County Schools",
+            "Amador Co Spl Schs Oper by Co Supt":
+                "Amador County Special Schools Operated by County Superintendent",
+            "Covina Val Unif Sch Dist": "Covina Valley Unified School District",
+            "Los Angeles Co Off of Education": "Los Angeles County Office of Education",
+            "Bethpage Uf Sch Dist": "Bethpage Union Free School District",
+            "Trion Ind Sch Dist": "Trion Independent School District",
+            "School Admin Dist 52": "School Administrative District 52",
+            "Cayuga Co Comm Coll": "Cayuga County Community College",
+        }
+        for listed, written in cases.items():
+            self.assertEqual(localgov.expand_name(listed), written, listed)
+
+    def test_a_word_that_means_two_things_is_read_from_its_neighbours(self):
+        # "Ind" is Indiana here, "Val" a name, "Comm" a commission.
+        self.assertEqual(localgov.expand_name("Northern Ind Commuter Trans District"),
+                         "Northern Ind Commuter Transportation District")
+        self.assertEqual(localgov.expand_name("Val Verde Co"), "Val Verde County")
+        self.assertEqual(localgov.expand_name("W Contra Costa Transp Adv Comm (Wcctac)"),
+                         "W Contra Costa Transportation Adv Comm (Wcctac)")
+        self.assertEqual(localgov.expand_name("South California Cmty Co Districts"),
+                         "South California Community College Districts")
+        # "Co" ending a name after "Improvement" may be a company: as filed.
+        self.assertEqual(localgov.expand_name("Pine Flat District Improvement Co"),
+                         "Pine Flat District Improvement Co")
+        self.assertEqual(localgov.expand_name("Drainage District 31 Stoddard Co"),
+                         "Drainage District 31 Stoddard County")
+        # A 911 dispatch center, a reclamation authority, an aquifer's
+        # storage and recovery, a collaborative: as filed, never renamed
+        # into a community center, a recreation authority or a college.
+        for name, written in (
+                ("Island Co Emergency Svcs Comm Ctr", "Island County Emergency Services Comm Ctr"),
+                ("West Cities Comm Ctr JPA (Westcomm)", "West Cities Comm Ctr JPA (Westcomm)"),
+                ("Colton-San Bernardino Regional Tertiary Trtmnt & Water Rec Auth",
+                 "Colton-San Bernardino Regional Tertiary Trtmnt & Water Rec Authority"),
+                ("Corpus Christi Aquifer Storage & Rec Cons Dist",
+                 "Corpus Christi Aquifer Storage & Rec Cons District"),
+                ("Marshall County Family Services and Childrens Mental Health Coll",
+                 "Marshall County Family Services and Childrens Mental Health Coll"),
+                ("Ridgecrest Ranchos Rec Park Dist", "Ridgecrest Ranchos Recreation Park District"),
+                ("Northwest Miss Community Coll", "Northwest Miss Community College"),
+                ("Desert Ctr Unif Sch Dist", "Desert Center Unified School District"),
+                ("Buckeye Cent Loc Sch Dist", "Buckeye Central Local School District"),
+                ("Three Cent Flat Community Services District", "Three Cent Flat Community Services District"),
+                ("Hoosic Vlly Cntrl Sch Dist at Schaghticoke",
+                 "Hoosic Valley Central School District at Schaghticoke"),
+                ("Cheyenne Mtn Sch Dist 12", "Cheyenne Mountain School District 12")):
+            self.assertEqual(localgov.expand_name(name), written, name)
+
+    def test_a_name_without_abbreviations_is_left_alone(self):
+        for name in ("City of St. Louis", "Town of Mt Vernon", "County of Fairfax", ""):
+            self.assertEqual(localgov.expand_name(name), name)
+
+    def test_the_page_keeps_the_listings_name_beside_the_written_one(self):
+        rows = counties._for_reading([["dependent", "Fairfax Co Schs", "", "", "", "", "", "", ""],
+                                      ["county", "County of Fairfax", "", "", "", "", "", "", ""]])
+        self.assertEqual(rows[0][1], "Fairfax County Schools")
+        self.assertEqual(rows[0][8], "Fairfax Co Schs")
+        self.assertEqual(rows[1][8], "")
+
+    def test_the_built_page_writes_virginias_school_system_out(self):
+        page = counties.build_state("VA", ROOT, {})
+        rows = page["governments"]["51059"]
+        schools = [r for r in rows if r[8] == "Fairfax Co Schs"]
+        self.assertEqual([r[1] for r in schools], ["Fairfax County Schools"])
+
+
+class TestSiteCheck(unittest.TestCase):
+    """LINKS-07, TRUST-07: the 39,452 websites the Census listed in 2022 were
+    linked unchecked; about one in a hundred led to gambling, parked or
+    for-sale domains under a public body's name (rule 78)."""
+
+    NAMES = ["Town of Clinton"]
+
+    def seen(self, chain, status=200, markup="", error=""):
+        return {"chain": chain, "status": status, "markup": markup, "error": error,
+                "dnsHost": "", "insecure": False}
+
+    def test_a_redirect_to_a_slot_site_is_gambling(self):
+        verdict, evidence, _final = localsites.assess(self.NAMES, "http://clintonct.com/", self.seen(
+            ["http://clintonct.com/", "https://id-pgdemoslot.com/"],
+            markup="<title>Demo Slot Fury of Anubis</title><p>main slot demo gratis</p>"))
+        self.assertEqual(verdict, localsites.GAMBLING)
+        self.assertIn("id-pgdemoslot.com", evidence)
+
+    def test_the_lander_script_is_parking(self):
+        verdict, _e, _f = localsites.assess(["Town of Providence Village"], "http://townofprovidencevillage.com/",
+                                            self.seen(["http://townofprovidencevillage.com/",
+                                                       "http://townofprovidencevillage.com/lander"]))
+        self.assertEqual(verdict, localsites.PARKED)
+
+    def test_a_marketplace_is_for_sale(self):
+        verdict, _e, _f = localsites.assess(["City of Imperial"], "http://www.imperialne.com", self.seen(
+            ["http://www.imperialne.com", "https://www.hugedomains.com/domain_profile.cfm?d=imperialne.com"]))
+        self.assertEqual(verdict, localsites.FOR_SALE)
+
+    def test_a_parking_page_of_links_is_parked(self):
+        markup = ('<title>rutlandcity.com</title><meta name="description" content="Find the best '
+                  'information and most relevant links on all topics related to rutlandcity.com.">')
+        verdict, _e, _f = localsites.assess(["City of Rutland"], "http://www.rutlandcity.com",
+                                            self.seen(["http://www.rutlandcity.com"], markup=markup))
+        self.assertEqual(verdict, localsites.PARKED)
+
+    def test_a_move_to_a_page_naming_the_government_is_kept(self):
+        markup = "<title>Home - Town of Peacham, Vermont</title><p>" + "Selectboard minutes. " * 30 + "</p>"
+        verdict, _e, final = localsites.assess(["Town of Peacham"], "http://www.peacham.net",
+                                               self.seen(["http://www.peacham.net", "https://peachamvt.org/"],
+                                                         markup=markup))
+        self.assertEqual((verdict, final), (localsites.MOVED, "https://peachamvt.org/"))
+
+    def test_a_move_to_a_business_that_names_the_place_is_a_business(self):
+        # Ringtown's municipal authority's address opens a funeral home in
+        # Ringtown; Haverhill's an estate agent's Haverhill listings.
+        markup = ("<title>Funeral Home &amp; Cremation Ringtown, PA</title><p>" +
+                  "Serving families of Ringtown borough and Schuylkill County. " * 10 + "</p>")
+        verdict, _e, _f = localsites.assess(["Ringtown Borough Municipal Authority"],
+                                            "http://www.ringtownborough.com",
+                                            self.seen(["http://www.ringtownborough.com",
+                                                       "https://www.ringtownfuneral.com/"], markup=markup))
+        self.assertEqual(verdict, localsites.BUSINESS)
+
+    def moved_to(self, names, start, end, title, body="Board minutes and agendas. " * 20):
+        markup = f"<title>{title}</title><p>{body}</p>"
+        return localsites.assess(names, start, self.seen([start, end], markup=markup))[0]
+
+    def test_a_new_site_titled_with_the_place_and_its_kind_is_the_government_moved(self):
+        # The first full run withdrew 115 addresses as "elsewhere"; most were
+        # school districts and authorities on new domains whose titles say
+        # "Pettisville Schools" or "Chattanooga Airport", not the listing's
+        # full name.
+        for names, start, end, title in (
+                (["Pettisville Local School District"], "http://blackbirds.pettisville.k12.oh.us",
+                 "https://pettisvilleschools.org/", "Pettisville Schools"),
+                (["Chattanooga Metropolitan Airport Authority"], "http://chattairport.com",
+                 "https://flycha.com/", "Chattanooga Airport"),
+                (["Aspen Valley Hospital District"], "http://www.aspenhospital.org",
+                 "https://aspenvalleyhealth.org/", "Aspen Valley Health | For You. For Life."),
+                (["Bend-La Pine Admin School District 1", "Bend-La Pine Admin Sch Dist 1"],
+                 "http://www.bend.k12.or.us", "https://blschools.org/", "Home - Bend-La Pine Schools"),
+                (["Town of Salisbury"], "http://www.salisburyma.gov.example",
+                 "https://ma-salisbury.civicplus.com/", "Salisbury, MA | Official Website"),
+                (["Thurston County Public Utility District"], "http://www.thurstonpud.com",
+                 "https://thurstonpud.org/", "Official site of Thurston PUD"),
+                # The listing's own initials for a school district, and
+                # Washington's "benefit area" for a transit authority.
+                (["North Santiam SD 29 J"], "http://www.nsantiam.k12.or.us/",
+                 "https://www.nssd29j.org/", "Home - North Santiam School District"),
+                (["Kitsap County Public Transportation Benefit Area Authority"],
+                 "http://www.kitsaptransit.org", "https://www.kitsaptransit.com/",
+                 "Kitsap Transit | Kitsap Transit")):
+            self.assertEqual(self.moved_to(names, start, end, title), localsites.MOVED, title)
+
+    def test_a_title_naming_the_place_but_not_the_government_is_not_kept(self):
+        # A business says what it is; a page that names nothing of the
+        # government, at an address that names nothing of it, is elsewhere.
+        for names, start, end, title, verdict in (
+                (["City of Alma"], "http://www.almawisconsin.com/", "https://almawisconsin.org/",
+                 "Alma Chamber of Commerce | Alma, Wisconsin", localsites.BUSINESS),
+                (["Town of Haverhill"], "http://www.haverhillnh.com", "https://beangroup.com/x",
+                 "Haverhill, New Hampshire Real Estate | Homes for Sale", localsites.BUSINESS),
+                (["Town of Sullivan"], "http://www.townofsullivan.com", "https://stlaw.example.com/",
+                 "Welcome! | St. Lawrence County", localsites.ELSEWHERE)):
+            self.assertEqual(self.moved_to(names, start, end, title), verdict, title)
+
+    def test_a_gov_host_that_spells_the_name_is_the_government(self):
+        # Only a government can hold a .gov name.
+        self.assertEqual(self.moved_to(["County of De Witt"], "http://www.dewittcountyill.com",
+                                       "https://dewittcountyil.gov/", "Home"), localsites.MOVED)
+        # Another host that spells it may be its own, and is not withdrawn.
+        self.assertEqual(self.moved_to(["County of De Witt"], "http://www.dewittcountyill.com",
+                                       "https://dewitt.example.com/", "Home"), localsites.UNREAD)
+
+    def test_a_move_whose_page_names_the_body_its_own_way_is_never_elsewhere(self):
+        # The first run withdrew these as "elsewhere" and the page said the
+        # new site did not name the government. Some are the body's own
+        # site under the name it uses, some are written as the listing
+        # misspells or abbreviates them; a failed match concludes nothing.
+        kept = (
+            (["Des Plaines Valley Mosquito Abatement District"], "http://www.desplainesvalleymad.com",
+             "https://dvmad.org/", "Home - DesPlaines Valley Mosquito Abatement District"),
+            (["Hoosic Vlly Cntrl Sch Dist at Schaghticoke"], "http://www.hoosicvalley.k12.ny.us",
+             "https://hoosicvalley.org/", "Homepage | Hoosic Valley Central School District at Schaghticoke"),
+            (["Las Virgenes Muncipal Water District"], "http://www.lvmwd.com", "https://www.lvmwd.gov/",
+             "Homepage Las Virgenes Municipal Water District"),
+            (["Kinneola Irrigation District"], "http://www.kinneloairrigationdistrict.info",
+             "https://www.kinneloairrigationdistrictca.gov/", "Homepage Kinneloa Irrigation District"),
+            (["Davenport Commmunity School District"], "http://www.davenport.k12.ia.us/",
+             "https://www.davenportschools.org/", "Home - Davenport Community School District"),
+            (["Twenty-Nine Palms Water District"], "http://www.29palmswater.org", "http://29palmswater.com",
+             "Twentynine Palms Water District"),
+            (["City of Oneill"], "http://www.cityofoneill.com", "https://cityofoneillnebraska.com/",
+             "City of O'Neill, Nebraska - Home"),
+            (["Buckeye Cent Loc Sch Dist"], "http://www.buckeye-central.k12.oh.us/",
+             "https://www.buckeye-central.org", "Home - Buckeye Central Local School District"),
+            (["High Plains Uwcd 1"], "http://www.hpwd.com/", "https://www.hpwd.org/",
+             "Homepage High Plains Underground Water Conservation District"),
+        )
+        for names, start, end, title in kept:
+            self.assertEqual(self.moved_to(names, start, end, title), localsites.MOVED, title)
+        unsure = (
+            (["Bartlett-Countryside Fire Protection District"], "http://www.bartlettfire.com",
+             "https://www.bartlettilfd.gov/", "Bartlett Fire District, IL | Official Website"),
+            (["Town of Greenfield"], "http://www.greenfieldtn.com", "https://www.greenfieldtn.org/",
+             "City of Greenfield - Home"),
+            (["City of Miamisburg"], "http://www.ci.miamisburg.oh.us/", "https://cityofmiamisburg.com/",
+             "Welcome - Miamisburg, OH"),
+            (["Cheyenne Mtn Sch Dist 12"], "http://www.cmsd.k12.co.us/", "https://www.cmsd12.org/",
+             "Home | Cheyenne Mountain"),
+        )
+        for names, start, end, title in unsure:
+            self.assertIn(self.moved_to(names, start, end, title), (localsites.MOVED, localsites.UNREAD), title)
+            self.assertNotIn(self.moved_to(names, start, end, title), localsites.WITHDRAWN, title)
+
+    def test_one_slip_in_a_long_word_is_the_same_word(self):
+        self.assertTrue(localsites.near("kinneola", "kinneloa"))
+        self.assertTrue(localsites.near("commmunity", "community"))
+        self.assertTrue(localsites.near("muncipal", "municipal"))
+        self.assertFalse(localsites.near("alma", "alms"))          # too short to say
+        self.assertFalse(localsites.near("hamilton", "hampton"))
+        # A misspelt generic word is not a word to look for.
+        self.assertEqual(localsites.distinctive("Las Virgenes Muncipal Water District"), ["las", "virgenes"])
+
+    def test_the_listings_abbreviations_are_not_words_to_look_for(self):
+        self.assertEqual(localsites.distinctive("Central Ind Sch Dist"), [])
+        self.assertEqual(localsites.distinctive("Covina Val Unif Sch Dist"), ["covina"])
+        # A name with nothing distinctive concludes nothing on a page that
+        # does not carry it whole.
+        self.assertEqual(self.moved_to(["Central Independent School District", "Central Ind Sch Dist"],
+                                       "http://central.k12.mn.us", "https://isd108.org/",
+                                       "Central Public Schools"), localsites.UNREAD)
+
+    def test_a_slot_booked_online_is_not_gambling(self):
+        # Both shipped as "now leads to a gambling site" on 2026-10-17, and
+        # the verdict could never be cleared.
+        for names, url, sentence in (
+                (["Keansburg Borough School District"], "http://www.keansburg.k12.nj.us",
+                 "Blood drive on Friday. Appointments encouraged, though walk-ins are welcome! "
+                 "Schedule your slot online: https://tinyurl.com/KeansburgHSBloodDr"),
+                (["Landfill of North Iowa"], "http://www.landfillnorthiowa.org/",
+                 "Appointments For Saturday Drop Off. Secure your 15-minute slot online to guarantee "
+                 "your weekend disposal.")):
+            markup = (f"<title>Home - {names[0]}</title><p>{sentence}</p>" +
+                      "<p>Board meeting agendas and minutes.</p>" * 30)
+            verdict, _e, _f = localsites.assess(names, url, self.seen([url], markup=markup))
+            self.assertEqual(verdict, localsites.OK, names[0])
+
+    def test_gambling_once_in_a_page_is_withdrawn_but_waits_for_a_person(self):
+        markup = ("<title>City of White Hall</title><p>Situs tiger227 Min Depo 20.000 Maxwin</p>" +
+                  "<p>Council minutes.</p>" * 30)
+
+        def visit(url, gate):
+            return {"chain": [url], "status": 200, "markup": markup, "error": "", "dnsHost": "",
+                    "insecure": False}
+        entry = localsites.check_one("http://www.whitehallcitygov.com", ["City of White Hall"], self.gate(),
+                                     visit_fn=visit, today="2026-10-18")
+        self.assertEqual((entry["verdict"], entry["seen"]), (localsites.GAMBLING, "once"))
+        self.assertFalse(localsites.sticky(entry))
+        # Looked at again with the rest, and cleared if the page is clean.
+        self.assertTrue(localsites.due(entry, "2026-10-19", recheck=("gambling",)))
+        clean = {"checked": "2026-10-19", "verdict": "ok"}
+        self.assertEqual(localsites.merge(entry, clean, "2026-10-19"), clean)
+        # And reported for a person to confirm.
+        # (White Hall's own host is now in BLOCKED_LOCAL_HOSTS: another's.)
+        found = localsites.problems({"sites": {"http://www.townofx.example": entry}},
+                                    {"http://www.townofx.example"}, today="2026-10-18")
+        self.assertTrue(any("one passage" in p for p in found), found)
+
+    def test_gambling_in_a_title_or_on_a_redirect_is_plain(self):
+        title = localsites.gambling_at("Situs Slot Gacor Hari Ini", "", False)
+        redirect = localsites.gambling_at("Home", "slot gacor maxwin", True)
+        self.assertEqual((title, redirect), ("head", "redirect"))
+        for seen in (title, redirect):
+            self.assertTrue(localsites.sticky({"verdict": "gambling", "seen": seen}))
+        # Recorded before ``seen`` was: stays until a person looks.
+        self.assertTrue(localsites.sticky({"verdict": "gambling"}))
+
+    def test_gambling_brands_built_on_a_lucky_number_are_gambling(self):
+        verdict, _e, _f = localsites.assess(["Campbell County Fire Protection District"], "http://ccfd1ky.com/",
+                                            self.seen(["http://ccfd1ky.com/", "https://texasluxuryhomeremodeling.com/"],
+                                                      markup="<title>PGBET888</title><p>" + "x " * 300 + "</p>"))
+        self.assertEqual(verdict, localsites.GAMBLING)
+
+    def test_a_sign_in_wall_and_a_bot_wall_conclude_nothing(self):
+        verdict, _e, _f = localsites.assess(["SAU 13"], "http://sites.google.com/view/sau-13/home", self.seen(
+            ["http://sites.google.com/view/sau-13/home", "https://accounts.google.com/v3/signin/identifier"],
+            markup="<title>Sign in</title>"))
+        self.assertEqual(verdict, localsites.UNREAD)
+        for status in (403, 429, 503):
+            verdict, _e, _f = localsites.assess(self.NAMES, "http://x.org", self.seen(["http://x.org"], status))
+            self.assertEqual(verdict, localsites.UNREAD, status)
+        verdict, _e, _f = localsites.assess(self.NAMES, "http://x.org",
+                                            self.seen(["http://x.org"], None, error="timed out"))
+        self.assertEqual(verdict, localsites.UNREAD)
+
+    def test_a_site_moved_onto_a_platform_under_its_own_address_has_not_left(self):
+        verdict, _e, _f = localsites.assess(["Rollinsford School District"], "http://www.rollinsford.k12.nh.us/",
+                                            self.seen(["http://www.rollinsford.k12.nh.us/",
+                                                       "https://sites.google.com/a/rollinsford.k12.nh.us/x/"],
+                                                      markup="<title>Home</title>" + "<p>School news</p>" * 40))
+        self.assertEqual(verdict, localsites.OK)
+
+    def gate(self):
+        return localsites._Gate(interval=0, sleep=lambda s: None)
+
+    def test_dead_only_when_two_public_resolvers_confirm_it(self):
+        def visit(url, gate):
+            return {"chain": [url], "status": None, "markup": "", "error": "x does not resolve",
+                    "dnsHost": "www.daytonny.org", "insecure": False}
+        dead = localsites.check_one("http://www.daytonny.org", ["Town of Dayton"], self.gate(), visit_fn=visit,
+                                    doh_fn=lambda h, g: ("nxdomain", "nxdomain"), resolves=lambda h: False,
+                                    today="2026-10-17")
+        self.assertEqual(dead["verdict"], localsites.DEAD)
+        for answers in (("nxdomain", None), ("exists",), ("nxdomain", "exists"), ("servfail",)):
+            entry = localsites.check_one("http://www.daytonny.org", ["Town of Dayton"], self.gate(),
+                                         visit_fn=visit, doh_fn=lambda h, g, a=answers: a,
+                                         resolves=lambda h: False, sleep=lambda s: None, today="2026-10-17")
+            self.assertEqual(entry["verdict"], localsites.UNREAD, answers)
+        # A lame delegation (SERVFAIL) is said as such, and is not a death.
+        self.assertIn("name servers do not answer", entry["evidence"])
+        # It resolves on a second look here: nothing is concluded.
+        entry = localsites.check_one("http://www.daytonny.org", ["Town of Dayton"], self.gate(), visit_fn=visit,
+                                     doh_fn=lambda h, g: ("nxdomain", "nxdomain"), resolves=lambda h: True,
+                                     sleep=lambda s: None, today="2026-10-17")
+        self.assertEqual(entry["verdict"], localsites.UNREAD)
+
+    def test_a_lookup_this_machine_dropped_is_tried_again(self):
+        # 48 checks at once lost about 4,700 lookups at this machine's
+        # resolver that dns.google answered: such an address is read again,
+        # not left unread.
+        visits = []
+
+        def visit(url, gate):
+            visits.append(url)
+            if len(visits) == 1:
+                return {"chain": [url], "status": None, "markup": "", "error": "x does not resolve",
+                        "dnsHost": "www.daytonny.org", "insecure": False}
+            return {"chain": [url], "status": 200, "markup": "<title>Town of Dayton</title>" + "<p>x</p>" * 50,
+                    "error": "", "dnsHost": "", "insecure": False}
+        looks = iter([False, True])
+        entry = localsites.check_one("http://www.daytonny.org", ["Town of Dayton"], self.gate(), visit_fn=visit,
+                                     doh_fn=lambda h, g: ("exists",), resolves=lambda h: next(looks),
+                                     sleep=lambda s: None, today="2026-10-17")
+        self.assertEqual((entry["verdict"], len(visits)), (localsites.OK, 2))
+
+    def test_a_page_not_found_is_gone_only_when_seen_twice(self):
+        answers = iter([404, 200])
+
+        def visit(url, gate):
+            return {"chain": [url], "status": next(answers), "markup": "<title>Town of X</title>" + "<p>x</p>" * 50,
+                    "error": "", "dnsHost": "", "insecure": False}
+        entry = localsites.check_one("http://x.org/a", ["Town of X"], self.gate(), visit_fn=visit,
+                                     sleep=lambda s: None, today="2026-10-17")
+        self.assertEqual(entry["verdict"], localsites.UNREAD)
+        answers = iter([404, 404])
+        entry = localsites.check_one("http://x.org/a", ["Town of X"], self.gate(), visit_fn=visit,
+                                     sleep=lambda s: None, today="2026-10-17")
+        self.assertEqual(entry["verdict"], localsites.GONE)
+
+    def test_the_build_withdraws_what_the_check_refused_and_dates_the_rest(self):
+        cache = {"sites": {
+            "http://a.org": {"checked": "2026-10-17", "verdict": "gambling", "evidence": "x"},
+            "http://b.org": {"checked": "2026-10-17", "verdict": "moved", "final": "https://c.gov/"},
+            "http://d.org": {"checked": "2026-10-16", "verdict": "unread", "evidence": "HTTP 403"},
+            "http://e.org": {"checked": "2026-10-17", "verdict": "dead"},
+        }}
+        self.assertEqual(localsites.status("http://a.org", cache), ("", "gambling 2026-10-17"))
+        self.assertEqual(localsites.status("http://b.org", cache), ("http://b.org", "ok 2026-10-17"))
+        self.assertEqual(localsites.status("http://d.org", cache), ("http://d.org", "unread 2026-10-16"))
+        self.assertEqual(localsites.status("http://e.org", cache), ("", "dead 2026-10-17"))
+        self.assertEqual(localsites.status("http://never.org", cache), ("http://never.org", ""))
+        # A person's look outranks the cache.
+        self.assertEqual(localsites.status("http://www.clintonct.com/", cache)[0], "")
+
+    def test_a_gambling_verdict_is_never_cleared_by_a_later_check(self):
+        old = {"checked": "2026-10-01", "verdict": "gambling", "seen": "head"}
+        self.assertFalse(localsites.due(old, "2026-12-01"))
+        kept = localsites.merge(old, {"checked": "2026-12-01", "verdict": "ok"}, "2026-12-01")
+        # The verdict keeps its own day: the later look did not see it.
+        self.assertEqual((kept["verdict"], kept["checked"], kept["tried"]),
+                         ("gambling", "2026-10-01", "2026-12-01"))
+        self.assertTrue(localsites.due({"checked": "2026-10-17", "verdict": "unread"}, "2026-10-17"))
+        self.assertFalse(localsites.due({"checked": "2026-10-17", "verdict": "ok"}, "2026-10-20"))
+        self.assertTrue(localsites.due({"checked": "2026-09-01", "verdict": "dead"}, "2026-10-17"))
+
+    def test_a_look_that_concludes_nothing_never_undoes_a_withdrawal(self):
+        old = {"checked": "2026-10-17", "verdict": "parked", "evidence": "parked domain"}
+        kept = localsites.merge(old, {"checked": "2026-11-20", "verdict": "unread",
+                                      "evidence": "HTTP 403"}, "2026-11-20")
+        self.assertEqual((kept["verdict"], kept["checked"], kept["tried"]),
+                         ("parked", "2026-10-17", "2026-11-20"))
+        # The try counts as a look: not due again the next day.
+        self.assertFalse(localsites.due(kept, "2026-11-21"))
+        # A conclusive look replaces it.
+        fresh = {"checked": "2026-11-20", "verdict": "ok"}
+        self.assertEqual(localsites.merge(old, fresh, "2026-11-20"), fresh)
+
+    def test_a_capped_run_looks_at_the_oldest_first(self):
+        import tempfile, shutil
+        tmp = tempfile.mkdtemp()
+        try:
+            os.makedirs(os.path.join(tmp, os.path.dirname(localsites.CACHE_PATH)))
+            sites = {"http://a.org": {"checked": "2026-01-02", "verdict": "ok"},
+                     "http://b.org": {"checked": "2025-12-01", "verdict": "ok"},
+                     "http://c.org": {"checked": "2026-01-01", "verdict": "unread"}}
+            localsites.save_cache({"sites": sites}, tmp)
+            looked = []
+            real = localsites.targets
+            localsites.targets = lambda root, codes=None: {u: ["Town of X"] for u in sites}
+            try:
+                localsites.check_all(tmp, workers=1, limit=2, log=lambda *a: None,
+                                     check=lambda url, names, gate, today: (
+                                         looked.append(url) or {"checked": today, "verdict": "ok"}))
+            finally:
+                localsites.targets = real
+            self.assertEqual(sorted(looked), ["http://b.org", "http://c.org"])
+        finally:
+            shutil.rmtree(tmp)
+
+    def test_the_build_warns_when_the_checks_grow_old(self):
+        cache = {"sites": {"http://a.org": {"checked": "2026-10-17", "verdict": "ok"}}}
+        self.assertFalse([p for p in localsites.problems(cache, {"http://a.org"}, today="2026-12-01")
+                          if "days ago" in p])
+        self.assertTrue([p for p in localsites.problems(cache, {"http://a.org"}, today="2026-12-20")
+                         if "days ago" in p])
+
+    def test_the_refresh_looks_at_the_local_sites_again(self):
+        # Rule 39: domains keep lapsing; a one-off sweep goes stale.
+        with open(os.path.join(ROOT, ".github", "workflows", "refresh.yml"), encoding="utf-8") as handle:
+            self.assertIn("localgov --check-sites --limit", handle.read())
+
+    def test_one_request_at_a_time_per_host(self):
+        clock = [0.0]
+        waits = []
+        gate = localsites._Gate(interval=1.0, sleep=lambda s: (waits.append(s), clock.__setitem__(0, clock[0] + s)),
+                                clock=lambda: clock[0])
+        with gate.hold("www.a.org"):
+            pass
+        with gate.hold("a.org"):          # the same host, but for "www."
+            pass
+        with gate.hold("b.org"):
+            pass
+        self.assertEqual(waits, [1.0])
+
+    def test_every_blocked_host_is_a_listed_website(self):
+        addresses = set(localsites.targets(ROOT))
+        self.assertEqual(localsites.stale_blocks(addresses), [])
+        for key, (kind, day, seen) in overrides.BLOCKED_LOCAL_HOSTS.items():
+            self.assertIn(kind, localsites.WITHDRAWN, key)
+            self.assertRegex(day, r"^\d{4}-\d{2}-\d{2}$")
+            self.assertTrue(seen, key)
+
+    def test_the_committed_cache_is_well_formed(self):
+        cache = localsites.load_cache(ROOT)
+        for url, entry in cache["sites"].items():
+            self.assertIn(entry.get("verdict"), localsites.VERDICTS, url)
+            self.assertRegex(entry.get("checked", ""), r"^\d{4}-\d{2}-\d{2}$", url)
+            if entry["verdict"] in localsites.WITHDRAWN:
+                self.assertTrue(entry.get("evidence"), url)
+
+    def test_no_withdrawn_address_is_linked_on_a_county_page(self):
+        cache = localsites.load_cache(ROOT)
+        refused = {u for u, e in cache["sites"].items() if e["verdict"] in localsites.WITHDRAWN}
+        page = counties.build_state("CT", ROOT, {})
+        rows = [r for rows in page["governments"].values() for r in rows] + page["statewide"]
+        rows += [r for u in page["unmatched"] for r in u["governments"]]
+        self.assertFalse([r[3] for r in rows if r[3] in refused or localsites.blocked(r[3])])
+        clinton = [r for r in rows if r[1] == "Town of Clinton"]
+        self.assertTrue(clinton and clinton[0][3] == "" and clinton[0][7].startswith("gambling "))
+
+
+
+class TestAreaNames(unittest.TestCase):
+    """STATEGOV-20: Virginia's independent cities were headed in the
+    Census's casing ("Alexandria city") and counted as counties."""
+
+    def test_an_independent_city_is_named_as_its_state_names_it(self):
+        self.assertEqual(county_areas.local_name("51510", "Alexandria city"), "City of Alexandria")
+        self.assertEqual(county_areas.local_name("24510", "Baltimore city"), "Baltimore City")
+        self.assertEqual(county_areas.local_name("29510", "St. Louis city"), "City of St. Louis")
+        self.assertEqual(county_areas.local_name("32510", "Carson City"), "Carson City")
+        self.assertEqual(county_areas.local_name("51059", "Fairfax County"), "Fairfax County")
+
+    def test_virginia_counts_its_counties_and_its_cities_apart(self):
+        page = counties.build_state("VA", ROOT, {})
+        self.assertEqual(page["areaWords"]["count"], "95 counties and 38 independent cities")
+        self.assertEqual(page["counties"]["51510"]["name"], "City of Alexandria")
+        self.assertIn("City of Alexandria is an independent city", page["noCounty"]["51510"]["note"])
+        self.assertEqual(counties.build_state("DE", ROOT, {})["areaWords"]["count"], "3 counties")
+
+    def test_a_sentence_names_the_city_with_its_article_and_once(self):
+        page = counties.build_state("MO", ROOT, {})
+        note = page["noCounty"]["29510"]["note"]
+        self.assertTrue(note.startswith("The City of St. Louis is an independent city"), note)
+        self.assertNotIn("St Louis", note)
+        self.assertTrue(page["stateNote"].startswith("The City of St. Louis "), page["stateNote"])
+        self.assertIn("the City of St. Louis is", county_areas.directory_note("MO"))
+
+    def test_a_county_named_like_a_city_keeps_its_county_word_on_the_map(self):
+        # A bare "Richmond" on the Northern Neck read as the City of
+        # Richmond; "Baltimore" beside Baltimore City as the city.
+        labels = {st: {c["label"] for c in counties.build_state(st, ROOT, {})["counties"].values()}
+                  for st in ("VA", "MD", "MO")}
+        for st, want in (("VA", "Richmond County"), ("VA", "Fairfax County"), ("MD", "Baltimore County"),
+                         ("MO", "St. Louis County"), ("VA", "Loudoun")):
+            self.assertIn(want, labels[st], want)
+        for st, bare in (("VA", "Richmond"), ("MD", "Baltimore"), ("MO", "St. Louis")):
+            self.assertNotIn(bare, labels[st], bare)
+
+    def test_a_county_is_named_on_the_map_only_where_its_name_fits(self):
+        page = counties.build_state("WI", ROOT, {})
+        for fips, county in page["counties"].items():
+            self.assertEqual(county["label"], county["name"].replace(" County", ""))
+            self.assertGreaterEqual(county["labelRoom"], 0)
+        # A long name needs more room than a short one at the same point.
+        self.assertGreater(counties.label_aspect("Fond du Lac"), counties.label_aspect("Iron"))
 
 
 class TestCountyAreas(unittest.TestCase):

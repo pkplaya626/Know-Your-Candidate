@@ -37,14 +37,18 @@ from collections import Counter, defaultdict
 
 from . import county_areas
 from . import districts as D
-from . import geo, localgov, statelegs
+from . import geo, localgov, localsites, statelegs
 from .government_maps import STATES
 from .pages import state_name
 
 FOLDER = "counties"
 CITIES_DIR = "local_maps"
 
-# Compact rows for the page: [type, name, city, web, size, function, flags].
+# Compact rows for the page: [type, name, city, web, size, function, flags,
+# site, listed]. *site* is what the website check found ("ok 2026-10-17",
+# "unread 2026-10-17", or a withdrawal - "dead 2026-10-17" with *web*
+# empty - kyc/localsites.py), "" when never checked; *listed* the
+# listing's own abbreviated name where the page writes it out.
 KIND_ORDER = ("county", "municipal", "township", "school", "special", "dependent")
 
 
@@ -67,11 +71,78 @@ def web_address(url):
     return f"{match.group(1).lower()}://{match.group(2).lower()}{match.group(3)}"
 
 
-def _row(gov):
+# The Census's function codes that read as its own filing categories,
+# in plain words (the rest - "Local Fire Protection", "Libraries" - read
+# as they are).
+FUNCTIONS = {
+    "Other Single Function Districts": "Single-purpose district",
+    "Other Multi-Function Districts": "Multi-purpose district",
+    "Miscellaneous Commercial Activities": "Commercial activities",
+    "Other Natural Resources": "Natural resources",
+    "Other Public Welfare": "Public welfare",
+    "Other Corrections": "Corrections",
+    "Water Supply Utility": "Water supply",
+    "Public Mass Transit Utility": "Public transit",
+    "Electric Power Utility": "Electric power",
+    "Gas Supply Utility": "Gas supply",
+}
+
+
+def _row(gov, sites=None):
     size = gov.get("population", gov.get("enrollment"))
-    return [gov["type"], gov["name"], gov.get("city", ""), web_address(gov.get("web", "")),
-            size if size is not None else "", gov.get("function", ""),
-            "inactive" if gov.get("inactive") else ""]
+    web, site = localsites.status(web_address(gov.get("web", "")), sites)
+    function = gov.get("function", "")
+    return [gov["type"], gov["name"], gov.get("city", ""), web,
+            size if size is not None else "", FUNCTIONS.get(function, function),
+            "inactive" if gov.get("inactive") else "", site, ""]
+
+
+def _for_reading(rows):
+    """Each row's name with the listing's abbreviations written out, the
+    listing's form kept beside it. Done last: every join and check reads
+    the listing's own names."""
+    for row in rows:
+        written = localgov.expand_name(row[1])
+        if written != row[1]:
+            row[1], row[8] = written, row[1]
+    return rows
+
+
+# A map label's size on screen, in pixels: 11px text on a backing
+# (kyc-regionmap.js, .map-label). LABEL_CHAR_PX is the measured average
+# advance of a county name's letters at 11px, LABEL_PAD_PX the backing's
+# padding either side, LABEL_HEIGHT_PX the backing's height.
+LABEL_CHAR_PX = 7.4
+LABEL_PAD_PX = 2.5
+LABEL_HEIGHT_PX = 14
+_AREA_SUFFIX = re.compile(r"\s+(?:County|Parish|Borough|Census Area|City and Borough|Municipality|"
+                          r"Planning Region)$")
+
+
+def map_label(name, taken=()):
+    """A county's name on the map: "Milwaukee", not "Milwaukee County" -
+    but "Richmond County" where *taken* (the state's independent cities'
+    own names) has a Richmond: a bare "Richmond" on Virginia's Northern
+    Neck reads as the city, a hundred miles off, and "Baltimore" beside
+    Baltimore City as the city itself."""
+    short = _AREA_SUFFIX.sub("", name) or name
+    return name if short in taken else short
+
+
+def city_names(code, names):
+    """The bare names of a state's independent cities ("Richmond", "St.
+    Louis", "Baltimore"), from the Census's "Richmond city"."""
+    out = set()
+    for fips, name in names.items():
+        entry = county_areas.AREAS.get(fips)
+        if entry and entry[1] == county_areas.INDEPENDENT and name.endswith(" city"):
+            out.add(name[:-len(" city")])
+    return out
+
+
+def label_aspect(label):
+    """How many times wider than tall a label's backing is."""
+    return (len(label) * LABEL_CHAR_PX + 2 * LABEL_PAD_PX) / LABEL_HEIGHT_PX
 
 
 def load_cities(code, root="."):
@@ -376,7 +447,7 @@ def build_towns(code, cities, listing, albers, fit, drawn, on_places=frozenset()
     return rows, problems
 
 
-def build_state(code, root=".", places=None):
+def build_state(code, root=".", places=None, sites=None):
     topo = statelegs.load_map(code, root)
     if not topo or "counties" not in (topo.get("objects") or {}):
         raise CountiesError(f"no county map for {code}; run tools/fetch_legislative_maps.py")
@@ -413,19 +484,32 @@ def build_state(code, root=".", places=None):
             "room": geo._round(geo.signed_distance(at[0], at[1], fitted)),
         }
 
+    if sites is None:
+        sites = localsites.load_cache(root)
     governments, unmatched = {}, []
     for fips, entry in sorted(listing["counties"].items()):
-        rows = [_row(g) for g in entry["governments"]]
+        rows = [_row(g, sites) for g in entry["governments"]]
         if fips in found:
             governments[fips] = rows
         else:
             unmatched.append({"name": entry["name"], "fips": fips, "governments": rows})
-    statewide = [_row(g) for g in listing.get("statewide", [])]
+    statewide = [_row(g, sites) for g in listing.get("statewide", [])]
     # A county area with no county government says why, from the Census
     # Bureau's own list of them; one it cannot explain fails the build.
     lacking = county_areas.check(code, found, governments)
     if lacking:
         raise CountiesError("; ".join(lacking))
+    # Checked against the Census's names; shown in the state's own words
+    # ("City of Alexandria", not "Alexandria city"), and labelled on the map
+    # where the name fits (rule 43): written 11px tall at whatever width the
+    # page draws, the label goes in where a box its shape fits round its
+    # point, and the list under the map names every one.
+    taken = city_names(code, {f: c["name"] for f, c in found.items()})
+    for fips, county in found.items():
+        county["name"] = county_areas.local_name(fips, county["name"])
+        county["label"] = map_label(county["name"], taken)
+        county["labelRoom"] = geo._round(geo.box_room(
+            county["at"][0], county["at"][1], drawn[fips][0], label_aspect(county["label"])))
     cities = load_cities(code, root)
     if not cities:
         raise CountiesError(f"no {CITIES_DIR}/{code.lower()}.json; run tools/fetch_local_maps.py")
@@ -438,6 +522,8 @@ def build_state(code, root=".", places=None):
     twice = sorted(r for r, n in refs.items() if n > 1)
     if twice:
         raise CountiesError(f"{code}: government rows joined twice: {twice[:6]}")
+    for rows in list(governments.values()) + [u["governments"] for u in unmatched] + [statewide]:
+        _for_reading(rows)
     return {
         "name": state_name(code),
         "page": page_path(code),
@@ -445,8 +531,9 @@ def build_state(code, root=".", places=None):
         "counties": found,
         "outline": D._counties(topo, raw_arcs, fit)["outline"],
         "places": towns,
-        # No close-ups: they make room for labels, and counties carry none.
-        # A county too small to tap is in the list under the map.
+        # No close-ups: 254 Texas names will not fit at 11px on a phone
+        # (rule 43), so a county without room for its name is named in the
+        # list under the map, which a filter searches, and on hover.
         "insets": [],
         "governments": governments,
         **county_areas.for_state(code, found, governments),
@@ -469,9 +556,10 @@ def build(root=".", codes=None, problems=None):
     """Every state's page data. What the city join left undone is no part
     of the page: it is added to *problems* for the build to report."""
     places = D.load_places(root)
+    sites = localsites.load_cache(root)
     maps = {}
     for code in codes or STATES:
-        maps[code] = build_state(code, root, places)
+        maps[code] = build_state(code, root, places, sites)
         found = maps[code].pop("problems")
         if problems is not None:
             problems.extend(found)

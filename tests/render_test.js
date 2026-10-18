@@ -2155,24 +2155,32 @@ async function testNavigation() {
     const rows = [...D.querySelectorAll(".directory-table tbody tr")];
     check("one row per state, linked to its counties page", rows.length === 50 &&
       rows.every((r) => r.querySelector('a[href$=".html"]')));
+    const heads = [...D.querySelectorAll(".directory-table thead th")].map((th) => th.textContent);
+    // STATEGOV-19, VISUALS-13: the total was the seventh column, off a
+    // 1280px screen; it is the first number now, and the headers wrap.
+    check("the total is the first number after the state",
+      heads[1] === "All local governments", heads.join(" | "));
+    check("the long headers may wrap, so the table fits a desktop",
+      D.querySelector(".directory-table").classList.contains("directory-wrap"));
+    const cc = heads.indexOf("County governments");
     const ct = rows.find((r) => /Connecticut/.test(r.textContent));
     // Rule 49: a state with none of a kind is not a count of zero.
     check("a state with no county governments says none, not 0",
-      ct && /^none\d+$/.test(ct.children[1].textContent), ct && ct.children[1].textContent);
+      ct && /^none\d+$/.test(ct.children[cc].textContent), ct && ct.children[cc].textContent);
     // Rhode Island read "none" here while its own page drew five counties.
     const riRow = rows.find((r) => /Rhode Island/.test(r.textContent));
-    const riRef = riRow && riRow.children[1].querySelector("a.note-ref");
+    const riRef = riRow && riRow.children[cc].querySelector("a.note-ref");
     const riNote = riRef && D.querySelector(riRef.getAttribute("href"));
     check("its none links a note that says why",
       !!riNote && /geographic areas the state uses to organize its courts/.test(riNote.textContent),
       riNote ? riNote.textContent : String(riRef));
     const maRow = rows.find((r) => /Massachusetts/.test(r.textContent));
     check("a state with fewer county governments than counties is noted too",
-      maRow && /^5\d+$/.test(maRow.children[1].textContent) &&
-      /Suffolk and Nantucket/.test(D.querySelector(maRow.children[1].querySelector("a.note-ref")
-        .getAttribute("href")).textContent), maRow && maRow.children[1].textContent);
+      maRow && /^5\d+$/.test(maRow.children[cc].textContent) &&
+      /Suffolk and Nantucket/.test(D.querySelector(maRow.children[cc].querySelector("a.note-ref")
+        .getAttribute("href")).textContent), maRow && maRow.children[cc].textContent);
     check("a state whose every county area has a county government has no note",
-      !rows.find((r) => /^Texas/.test(r.textContent)).children[1].querySelector("a.note-ref"));
+      !rows.find((r) => /^Texas/.test(r.textContent)).children[cc].querySelector("a.note-ref"));
     const marked = D.querySelector('.site-nav [aria-current="page"]');
     check("the sidebar marks Counties & local governments, the page's own name",
       marked.getAttribute("data-nav") === "local" &&
@@ -5312,6 +5320,131 @@ async function testCounties() {
       parishes.D.getElementById("localRosterTitle").textContent === "Every parish" &&
       / in 64 parishes \(2022\)/.test(parishes.D.getElementById("localPanelBody").textContent),
       parishes.D.getElementById("localPanelBody").textContent.slice(0, 120));
+  });
+  // STATEGOV-20: an independent city in Virginia's words, and counted apart.
+  const va = await buildPage("counties/va.html", { hash: "#/?county=51510" });
+  suite("counties/va.html — independent cities in the state's own words", () => {
+    check("no page errors", va.errors.length === 0, va.errors.join(" | "));
+    check("Alexandria is headed City of Alexandria, not the Census's 'Alexandria city'",
+      va.D.getElementById("localPanelTitle").textContent === "City of Alexandria");
+    const label = va.D.querySelector('label[for="localFilter"]');
+    check("its filter is not called a county's", !!label && !/county/i.test(label.textContent) &&
+      /in the City of Alexandria$/.test(label.textContent), label && label.textContent);
+    // An independent city sorts under its own name, not among the C's.
+    const order = [...va.D.querySelectorAll("#countyRows [data-region]")].map((r) => r.getAttribute("data-region"));
+    const at = (fips) => order.indexOf(fips);
+    check("the list sorts the City of Richmond under R, between Rappahannock and Richmond County",
+      at("51157") < at("51760") && at("51760") < at("51159") && at("51033") < at("51059") &&
+      at("51510") < at("51013"), [at("51157"), at("51760"), at("51159")].join(" "));
+    va.D.querySelector('#localRoster [data-region="51059"]')
+      .dispatchEvent(new va.window.MouseEvent("click", { bubbles: true }));
+    const body = va.D.getElementById("localPanelBody");
+    // STATEGOV-09, PERSONA-17: "Fairfax Co Schs", written out, the listing's form kept.
+    const schools = [...body.querySelectorAll(".local-item")].find((li) => /Fairfax County Schools/.test(li.textContent));
+    check("a Census abbreviation is written out, the listing's form in its title",
+      !!schools && /Fairfax Co Schs/.test(schools.querySelector('[title^="Listed by"]').getAttribute("title")) &&
+      !/Co Schs/.test(body.textContent), schools && schools.innerHTML);
+    // A browser shows only the innermost title: one per name, on the link.
+    check("a linked name carries one title, the listing's name and the link's check together",
+      [...body.querySelectorAll(".local-name a")].every((a) => !a.querySelector("[title]")) &&
+      [...body.querySelectorAll(".local-name a[title^='Listed by']")].every((a) =>
+        /Website as listed by the Census in 2022/.test(a.getAttribute("title"))));
+    // A link the check could not confirm says so on the row, for a phone.
+    const unsure = Object.values(va.window.kycLocal.VA.governments).flat()
+      .filter((r) => r[3] && /^unread /.test(r[7] || ""));
+    check("the data has links the check could not confirm", unsure.length > 0);
+    check("the place line is the mailing address, said so",
+      /mailing address in Fairfax/.test(body.textContent), body.textContent.slice(0, 300));
+    // STATEGOV-08, PERSONA-16: who serves is an absence here, said once, with where to look.
+    check("the panel says who holds office is not listed here, and where to look",
+      /Who holds office in these governments is not listed here/.test(body.textContent) &&
+      /own website/.test(body.textContent));
+    // Many listed bodies have appointed boards, and many sites list neither.
+    check("it does not claim every site names elected officials and their elections",
+      !/names its elected officials|when they are elected/.test(body.textContent) &&
+      /usually where its officials, and how they are chosen, are listed/.test(body.textContent));
+    const rowsVa = [...body.querySelectorAll(".local-item")];
+    const unconfirmed = rowsVa.filter((li) => /website not confirmed when checked/.test(li.textContent));
+    check("a row whose link the check could not confirm says so in words",
+      unconfirmed.every((li) => !!li.querySelector("a")) &&
+      rowsVa.filter((li) => li.querySelector("a") && /not confirmed/.test(li.querySelector("a").getAttribute("title")))
+        .length === unconfirmed.length, `${unconfirmed.length}`);
+    va.window.location.hash = "#/";
+  });
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  suite("counties/va.html — the state's count", () => {
+    const text = va.D.getElementById("localPanelBody").textContent;
+    check("counts its counties and independent cities apart",
+      / in 95 counties and 38 independent cities \(2022\)/.test(text), text.slice(0, 160));
+    check("and says who serves is not listed", /not listed here/.test(text));
+  });
+  // LINKS-07, TRUST-07, rule 78: a listed website that now leads to
+  // gambling, parking or nowhere is withdrawn, and the list says so.
+  const ctSites = await buildPage("counties/ct.html");
+  suite("counties/ct.html — a local website the check refused is withdrawn", () => {
+    const W = ctSites.window, CD = ctSites.D;
+    const govs = W.kycLocal.CT.governments;
+    const where = Object.keys(govs).find((f) => govs[f].some((r) => r[1] === "Town of Clinton"));
+    CD.querySelector(`#localRoster [data-region="${where}"]`)
+      .dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
+    const item = [...CD.querySelectorAll("#localPanelBody .local-item")]
+      .find((li) => li.querySelector(".local-name").textContent.trim() === "Town of Clinton");
+    check("the Town of Clinton's old address, now a slot site, is not linked",
+      !!item && !item.querySelector("a"), item && item.innerHTML);
+    check("and its line says why, and when",
+      !!item && /website withdrawn: .*gambling spam \(checked [A-Z][a-z]{2} \d{1,2}, \d{4}\)/.test(item.textContent),
+      item && item.textContent);
+    const links = [...CD.querySelectorAll("#localPanelBody .local-name a")];
+    check("every link left says what it is: the Census's 2022 address, and whether it was checked",
+      links.length > 0 && links.every((a) => /Website as listed by the Census in 2022/.test(a.getAttribute("title"))));
+    const note = CD.querySelector("#localPanelBody .local-sites");
+    check("the panel says what its websites are and when they were checked",
+      !!note && /listed in 2022/.test(note.textContent) && /withdrawn, and each says why/.test(note.textContent),
+      note && note.textContent);
+    const all = Object.values(govs).flat();
+    check("no withdrawn row keeps an address",
+      all.every((r) => !/^(dead|gone|parked|for-sale|expired|gambling|elsewhere|business) /.test(r[7] || "") || r[3] === ""));
+  });
+  // VISUALS-14: county names on the map where they fit, as page text.
+  const wi = await buildPage("counties/wi.html");
+  suite("counties/wi.html — county names on the map", () => {
+    const W = wi.window, WD = wi.D;
+    const counties = W.kycLocal.WI.counties;
+    const labels = [...WD.querySelectorAll("#localMap .map-labels .county-label")];
+    check("names counties where the build measured room, as page text, never SVG text (rule 46)",
+      labels.length > 10 && !WD.querySelector("#localMap svg text"), `${labels.length}`);
+    check("each label is a county's own name", labels.every((l) =>
+      Object.values(counties).some((c) => c.label === l.textContent)));
+    check("only where it fits at the width drawn",
+      labels.length < Object.keys(counties).length);
+    const filter = WD.getElementById("countyFilter");
+    check("the list under the map has a filter, above its grid, not in it",
+      !!filter && !filter.closest(".leg-roster") && !!WD.querySelector("#countyRows.leg-roster"));
+    filter.value = "milw";
+    filter.dispatchEvent(new W.Event("input"));
+    const rows = [...WD.querySelectorAll("#countyRows [data-region]")];
+    check("and finds a county by name", rows.length === 1 && /Milwaukee/.test(rows[0].textContent),
+      rows.map((r) => r.textContent).join(" | "));
+    WD.querySelector('[data-view="cities"]').dispatchEvent(new W.MouseEvent("click", { bubbles: true }));
+    check("the cities view, which draws its dots over the counties, has no county names",
+      !WD.querySelector("#localMap .county-label"));
+    const cityFilter = WD.getElementById("cityFilter");
+    // STATEGOV-07: inside the 3-column grid the filter was one cell, 15,000px tall.
+    check("the cities filter sits above the list's grid, not in it",
+      !!cityFilter && !cityFilter.closest(".leg-roster") && !!WD.querySelector("#cityRows.leg-roster") &&
+      !WD.getElementById("localRoster").classList.contains("leg-roster"));
+  });
+  // VISUALS-14 review: Texas had room for one name, "Pecos", which read as
+  // the pick; picking Harris left "Pecos" the only word on the map.
+  const txNames = await buildPage("counties/tx.html", { hash: "#/?county=48201" });
+  suite("counties/tx.html — names only where a fair share fit; the pick always", () => {
+    const labels = [...txNames.D.querySelectorAll("#localMap .county-label")];
+    const all = Object.keys(txNames.window.kycLocal.TX.counties).length;
+    const focus = labels.filter((l) => l.classList.contains("is-focus"));
+    check("the picked county is named, room or not (rule 43)",
+      focus.length === 1 && focus[0].textContent === "Harris", labels.map((l) => l.textContent).join(" | "));
+    check("and no lone name of another county stands for the rest",
+      labels.length === 1 || labels.length - 1 >= 0.25 * all, `${labels.length} of ${all}`);
   });
   const once = await buildPage("counties/tx.html", { hash: "#/?county=48201" });
   let draws = 0;

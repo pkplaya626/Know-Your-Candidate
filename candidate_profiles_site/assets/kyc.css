@@ -559,7 +559,28 @@ svg.district-map,
 .directory-table th[scope="row"], .directory-table thead th:first-child { text-align: left; }
 /* On a phone the table scrolls in its own box, the state's name held at
  * its left edge; the page itself never scrolls sideways. */
-.directory-scroll { overflow-x: auto; max-width: 100%; }
+.directory-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+  /* A table wider than its box says so: a shade at the edge that has more
+   * (the two "local" covers scroll with the table and hide the shade at
+   * an edge with nothing beyond it). macOS and iOS hide the scrollbar. */
+  background:
+    linear-gradient(to right, var(--surface-0) 40%, transparent) left / 2.5rem 100% no-repeat local,
+    linear-gradient(to left, var(--surface-0) 40%, transparent) right / 2.5rem 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, color-mix(in srgb, var(--text) 22%, transparent), transparent)
+      left / 0.9rem 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, color-mix(in srgb, var(--text) 22%, transparent), transparent)
+      right / 0.9rem 100% no-repeat scroll;
+}
+/* The counties directory's long headers wrap, so its seven columns fit a
+ * desktop screen; the total is the first number. */
+.directory-wrap thead th {
+  white-space: normal;
+  vertical-align: bottom;
+  min-width: 5.5rem;
+  max-width: 8.5rem;
+}
 .directory-table th[scope="row"] {
   position: sticky;
   left: 0;
@@ -2940,6 +2961,8 @@ a.badge-link {
 .map-label.anchor-start { transform: translate(0, -50%); }
 .map-label.anchor-end { transform: translate(-100%, -50%); }
 .district-num { font-weight: 700; }
+/* A county's name on its map, where kyc/counties.py measured room for it. */
+.county-label { font-weight: 600; }
 .district-caption { font-weight: 600; }
 .county-name {
   background: color-mix(in srgb, var(--surface-0) 55%, transparent);
