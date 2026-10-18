@@ -32,7 +32,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… field` | Refresh the FEC register of everyone running in 2026 |
 | `… field --check` | Report the field from the committed cache; no network |
 | `… census` | Count each state's local governments from the Census of Governments (`--check` reads the cache) |
-| `… statelegs` | Every state legislator from Open States, matched to the district maps (`--check` re-matches the cache) |
+| `… statelegs` | Every state legislator from Open States, matched to the district maps, each portrait checked (`--check` re-matches the cache; `--images-only` checks the portraits again without refetching; `--no-images` skips them) |
 | `… localgov` | Every local government from the Census listing, checked against the published counts |
 | `… executives` | Every governor from the NGA, and NCSL's count of each legislature's parties (`--check` reports the caches) |
 | `… officers` | Every lieutenant governor (NLGA) and secretary of state (NASS), cross-checked where the rosters overlap |
@@ -63,7 +63,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (1660 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (1679 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1402,6 +1402,20 @@ The map is `assets/kyc-regionmap.js`, a renderer for any regions keyed by
 any id - counties and towns are next - built on the district pages'
 techniques: one definition per shape, labels as page text at 11px for the
 drawn width, close-ups planned by `kyc/districts.insets`.
+
+What a member's card and a chamber's summary show (`kyc/legislature.py`,
+audit 2026-10-17):
+
+| On the page | From | Rule |
+|---|---|---|
+| Party, and "Also on the ... line" | Open States' party label, split at "/": New York's and Connecticut's fusion lines are not parties, so "Democratic/Working Families" counts as Democratic | `party_name`, `fusion_lines` |
+| District office phone, capitol phone and address | Open States' `district_voice`, `capitol_voice`, `capitol_address`, labelled as which office; the bulk export carries no capitol phone today | `_person` |
+| One "Official page" | The member's page on a host of `LEGISLATURE_HOSTS`: never a file, a chamber's list, a party caucus's page (even on the legislature's host), a past numbered General Assembly or Legislature (Illinois's `GA=`, Arizona's `legislature=`), or a page whose address names another member and not them (Rhode Island's roster links some twenty members to one colleague's page); the current session's page first. A member with none (Michigan's, linked only from caucus sites) has no link, and the build counts them | `official_page` |
+| Portrait | Open States' image, unless it is a search engine's thumbnail (gstatic, googleusercontent) or `statelegs` confirmed it missing - a GET answered 404 or 410 (never HEAD, which Massachusetts answers 404 for portraits it serves). A 200 that is not an image, a refusal, a throttle or a timeout concludes nothing (rule 8); each answer stands 14 days. `statelegs --images-only` checks again without refetching the roster | `check_portrait`, `check_images` |
+| Seats by party, majority, coalition note | The state page's own count (`stategov.chamber`) and note (`stategov.COALITIONS`); a different answer is a build error | `_count` |
+| One square per seat | The same count: Democrats from the left, Republicans from the right, nobody listed as an outline, a line at half the seats. Also on every state page and the directory (`KYC.seatStrip`) | rules 51, 73 |
+| Seats on the Nov 3 ballot, and which districts | `ballot2026`'s record, read into districts only where its list or rule names exactly as many seats as it says are up; the term only where that record states one | `seats_up`, `term_years` |
+| Floterial district | New Hampshire's floterial members are named with their district under "Not on the map" | `unplaced_why` |
 
 ## Governors and party control
 
