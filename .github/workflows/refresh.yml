@@ -214,6 +214,14 @@ jobs:
         continue-on-error: true
         run: python build_profile_site.py voting
 
+      # Every tribal government and its leader, as the BIA's Tribal Leaders
+      # Directory lists them (kyc/tribes.py). Refused unless every row the
+      # service counts comes back once; a failed read keeps the committed
+      # cache and stops nothing else in this run.
+      - name: Refresh the tribal leaders directory
+        continue-on-error: true
+        run: python build_profile_site.py tribes
+
       # The public offices each person has held: Congress from
       # congress-legislators, every other office from Wikidata where the
       # person's own Wikipedia article gives the same office the same years
