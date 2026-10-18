@@ -155,8 +155,8 @@ python build_profile_site.py oge              # the executive's financial report
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1395 tests, no dependencies
-npm install && npm test                       # 1858 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1414 tests, no dependencies
+npm install && npm test                       # 1862 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -705,11 +705,32 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "vacant" (rule 19). "Chief" is the chief: Arizona's Vice Chief Justice,
     Utah's and Washington's Associate Chief Justice and Kentucky's Deputy
     Chief Justice are not, and Utah's page, which names no chief since its
-    chief justice retired, is shown as naming none. A court whose page a
-    script cannot read is in `UNREADABLE` with what was seen, and listed
-    without members - never filled from Wikipedia or Ballotpedia. Recipes
-    run case-insensitively, so a pattern that must see capitals scopes it
+    chief justice retired, is shown as naming none. Recipes run
+    case-insensitively, so a pattern that must see capitals scopes it
     (`(?-i:...)`): Montana's matched "is" and "was" as names.
+
+    A page a plain request cannot read is not yet unreadable. Ten courts
+    once showed nobody, among them New York's Court of Appeals. They are
+    read now in four ways:
+    - A page that draws itself with JavaScript, or answers only a
+      browser, is read in a headless Chrome (`browser: True`,
+      `tools/read_court_pages.mjs`). That Chrome uses its own headless user
+      agent, and a page that answered with an error status is not read.
+    - A PDF roster is read from its own text (`pdf_lines`), and the date it
+      gives itself is shown. A move along a line joins text and adds no
+      space: the first reader spelled "Keou gh" and "Taft -Carter".
+    - A site that refuses every automated reader is read by hand from the
+      court's page, in `overrides.COURT_ROSTERS`, with the day and the
+      page's words quoted. It is checked like a read roster, and the page
+      says "read by hand on" that day.
+    - Only a court nobody can read stays in `UNREADABLE`, listed without
+      members and never filled from Wikipedia or Ballotpedia.
+
+    A run with no Chrome keeps each court's last good read (rule 8), and the
+    build warns once a read, kept or by hand, is `courts.STALE_DAYS` old.
+    Count what a new recipe reads against the page: Louisiana's first read
+    five of seven, and Tennessee's missed a justice whose card linked his
+    old court.
 
 58. **A shapefile says its own encoding.** `read_dbf` decoded every layer
     as Latin-1, dBase's default, and the Census writes UTF-8 and says so in
