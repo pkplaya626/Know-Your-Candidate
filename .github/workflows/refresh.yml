@@ -92,6 +92,14 @@ jobs:
         with:
           python-version: "3.12"
 
+      # The courts command reads four courts' pages in the runner's own
+      # Chrome through tools/read_court_pages.mjs, which needs Node's
+      # built-in WebSocket (Node 22 or later). Without it those courts keep
+      # their last good read and the run says so (rule 57).
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+
       - name: Refresh the membership snapshot and apply any drift
         id: reconcile
         run: |

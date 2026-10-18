@@ -10,6 +10,7 @@
     "Jude Pate",
     "Aimee A. Oravec"
    ],
+   "read": "2026-10-18",
    "seats": 5,
    "url": "https://courts.alaska.gov/judges/index.htm"
   },
@@ -25,6 +26,7 @@
     "Nicholas Bronni",
     "Rhonda K. Wood"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://www.arcourts.gov/courts/supreme-court/justices"
   },
@@ -40,6 +42,7 @@
     "Kathryn H. King",
     "Maria Elena Cruz"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://www.azcourts.gov/meetthejustices"
   },
@@ -54,6 +57,7 @@
     "Joshua P. Groban",
     "Kelli M. Evans"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://supreme.courts.ca.gov/about-court/justices-court"
   },
@@ -69,8 +73,25 @@
     "Maria E. Berkenkotter",
     "Susan Blanco"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://www.coloradojudicial.gov/supreme-court/supreme-court-judges-and-staff"
+  },
+  "CT": {
+   "chief": "Raheem L. Mullins",
+   "listed": 7,
+   "members": [
+    "Raheem L. Mullins",
+    "Andrew J. McDonald",
+    "Gregory T. D’Auria",
+    "Steven D. Ecker",
+    "Joan K. Alexander",
+    "Nora R. Dannehy",
+    "William H. Bright, Jr."
+   ],
+   "read": "2026-10-18",
+   "seats": 7,
+   "url": "https://www.jud.ct.gov/external/supapp/supjustices.htm"
   },
   "DE": {
    "chief": "Collins J. Seitz, Jr.",
@@ -82,6 +103,7 @@
     "N. Christopher Griffiths",
     "Morgan T. Zurn"
    ],
+   "read": "2026-10-18",
    "seats": 5,
    "url": "https://courts.delaware.gov/supreme/justices.aspx"
   },
@@ -97,6 +119,7 @@
     "Meredith L. Barrios",
     "Adam Tanenbaum"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://supremecourt.flcourts.gov/Justices"
   },
@@ -114,6 +137,7 @@
     "Andrew A. Pinson",
     "Benjamin A. Land"
    ],
+   "read": "2026-10-18",
    "seats": 9,
    "url": "https://www.gasupreme.us/court-information/biographies/"
   },
@@ -126,6 +150,7 @@
     "Todd W. Eddins",
     "Lisa M. Ginoza"
    ],
+   "read": "2026-10-18",
    "seats": 5,
    "url": "https://www.courts.state.hi.us/courts/supreme/justices/justices"
   },
@@ -141,6 +166,7 @@
     "Matthew McDermott",
     "David May"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://www.iowacourts.gov/iowa-courts/supreme-court/justices/"
   },
@@ -154,6 +180,7 @@
     "Colleen D. Zahn",
     "Cynthia K.C. Meyer"
    ],
+   "read": "2026-10-18",
    "seats": 5,
    "url": "https://isc.idaho.gov/about-the-courts/sc-justices"
   },
@@ -169,6 +196,7 @@
     "Mary K. O'Brien",
     "Sanjay T. Tailor"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://www.illinoiscourts.gov/courts/supreme-court/meet-the-justices/"
   },
@@ -182,6 +210,7 @@
     "Christopher M. Goff",
     "Derek R. Molter"
    ],
+   "read": "2026-10-18",
    "seats": 5,
    "url": "https://www.in.gov/courts/supreme/justices/"
   },
@@ -197,6 +226,7 @@
     "Larkin Walsh",
     "K. Christopher Jayaram"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://www.kscourts.gov/About-the-Courts/Supreme-Court/Supreme-Court-Justices"
   },
@@ -212,8 +242,41 @@
     "Pamela R. Goodwine",
     "Michelle M. Keller"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://www.kycourts.gov/Courts/Supreme-Court/Pages/default.aspx"
+  },
+  "LA": {
+   "chief": "John L. Weimer",
+   "listed": 7,
+   "members": [
+    "John L. Weimer",
+    "William H. Burris",
+    "John Michael Guidry",
+    "Cade R. Cole",
+    "Jay B. McCallum",
+    "Jefferson Hughes",
+    "Piper D. Griffin"
+   ],
+   "read": "2026-10-18",
+   "seats": 7,
+   "url": "https://www.lasc.org/About/Biography"
+  },
+  "MA": {
+   "chief": "Kimberly S. Budd",
+   "listed": 7,
+   "members": [
+    "Kimberly S. Budd",
+    "Frank M. Gaziano",
+    "Scott L. Kafker",
+    "Dalila Argaez Wendlandt",
+    "Serge Georges, Jr.",
+    "Elizabeth N. Dewar",
+    "Gabrielle R. Wolohojian"
+   ],
+   "read": "2026-10-18",
+   "seats": 7,
+   "url": "https://www.mass.gov/info-details/supreme-judicial-court-justices"
   },
   "MD": {
    "chief": "Matthew Fader",
@@ -227,6 +290,7 @@
     "Angela M. Eaves",
     "Peter K. Killough"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://www.mdcourts.gov/scm/justices"
   },
@@ -242,6 +306,7 @@
     "Julia M. Lipez",
     "Christopher C. Taub"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://www.courts.maine.gov/courts/sjc/justices.html"
   },
@@ -257,6 +322,7 @@
     "Kimberly A. Thomas",
     "Noah P. Hood"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://www.courts.michigan.gov/courts/supreme-court/justices/"
   },
@@ -272,6 +338,7 @@
     "Sarah E. Hennesy",
     "Reynaldo A. Aligada, Jr."
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://mncourts.gov/supremecourt/supreme-court-justices"
   },
@@ -289,6 +356,7 @@
     "Celeste Embrey Wilson",
     "Amanda Jones Tollison"
    ],
+   "read": "2026-10-18",
    "seats": 9,
    "url": "https://courts.ms.gov/appellatecourts/sc/scjustices.php"
   },
@@ -304,6 +372,7 @@
     "James A. Rice",
     "Ingrid Gustafson"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://courts.mt.gov/Courts/Supreme/About/bios/"
   },
@@ -319,6 +388,7 @@
     "Trey Allen",
     "Allison Riggs"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://www.nccourts.gov/courts/supreme-court/meet-the-justices"
   },
@@ -332,6 +402,7 @@
     "Douglas A. Bahr",
     "Mark A. Friese"
    ],
+   "read": "2026-10-18",
    "seats": 5,
    "url": "https://www.ndcourts.gov/supreme-court/justices"
   },
@@ -347,6 +418,7 @@
     "Jason M. Bergevin",
     "John R. Freudenberg"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://nebraskajudicial.gov/courts/supreme-court/supreme-court-justices"
   },
@@ -362,6 +434,7 @@
     "Michael Noriega",
     "John Jay Hoffman"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://www.njcourts.gov/public/museum/meet-the-justices"
   },
@@ -375,6 +448,7 @@
     "David K. Thomson",
     "Briana H. Zamora"
    ],
+   "read": "2026-10-18",
    "seats": 5,
    "url": "https://supremecourt.nmcourts.gov/about-this-court/supreme-court-justices/"
   },
@@ -390,6 +464,7 @@
     "Daniel R. Hawkins",
     "Megan E. Shanahan"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://www.supremecourt.ohio.gov/courts/judicial-system/supreme-court-of-ohio/justices-overview/"
   },
@@ -407,6 +482,7 @@
     "M. John Kane IV",
     "Travis Jett"
    ],
+   "read": "2026-10-18",
    "seats": 9,
    "url": "https://oksc.oscn.net/justices/"
   },
@@ -420,6 +496,7 @@
     "Robert L. Hudson",
     "Scott Rowland"
    ],
+   "read": "2026-10-18",
    "seats": 5,
    "url": "https://www.okcca.net/judges/"
   },
@@ -435,6 +512,7 @@
     "Rebecca A. Duncan",
     "Aruna A. Masih"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://www.courts.oregon.gov/courts/appellate/supreme/Pages/justices.aspx"
   },
@@ -450,8 +528,23 @@
     "P. Kevin Brobson",
     "Daniel D. McCaffery"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://www.pacourts.us/courts/supreme-court/supreme-court-justices"
+  },
+  "RI": {
+   "chief": "Paul A. Suttell",
+   "listed": 4,
+   "members": [
+    "Paul A. Suttell",
+    "William P. Robinson III",
+    "Erin Lynch Prata",
+    "Melissa A. Long"
+   ],
+   "read": "2026-10-18",
+   "revised": "2026-06-05",
+   "seats": 5,
+   "url": "https://www.courts.ri.gov/Public-Resources/Documents/JudicialRoster.pdf"
   },
   "SC": {
    "chief": "John W. Kittredge",
@@ -462,6 +555,7 @@
     "D. Garrison Hill",
     "Letitia H. Verdin"
    ],
+   "read": "2026-10-18",
    "seats": 5,
    "url": "https://www.sccourts.org/courts/supreme-court/justices/"
   },
@@ -475,8 +569,23 @@
     "Scott P. Myren",
     "Robert Gusinsky"
    ],
+   "read": "2026-10-18",
    "seats": 5,
    "url": "https://ujs.sd.gov/supreme-court/"
+  },
+  "TN": {
+   "chief": "Jeffrey S. Bivins",
+   "listed": 5,
+   "members": [
+    "Jeffrey S. Bivins",
+    "Sarah Campbell",
+    "Dwight E. Tarwater",
+    "Mary L. Wagner",
+    "Kyle Hixson"
+   ],
+   "read": "2026-10-18",
+   "seats": 5,
+   "url": "https://www.tncourts.gov/courts/supreme-court"
   },
   "TX": {
    "chief": "Jimmy Blacklock",
@@ -492,6 +601,7 @@
     "James P. Sullivan",
     "Kyle D. Hawkins"
    ],
+   "read": "2026-10-18",
    "seats": 9,
    "url": "https://www.txcourts.gov/supreme/about-the-court/justices/"
   },
@@ -509,6 +619,7 @@
     "Lee Finley",
     "Gina G. Parker"
    ],
+   "read": "2026-10-18",
    "seats": 9,
    "url": "https://www.txcourts.gov/cca/about-the-court/judges/"
   },
@@ -524,6 +635,7 @@
     "Jay T. Jorgensen",
     "Matthew L. Bell"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://www.utcourts.gov/en/courts/other-court-info/judges-bios/appellate-courts/supreme-court.html"
   },
@@ -539,6 +651,7 @@
     "Thomas P. Mann",
     "Junius P. Fulton, III"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://www.vacourts.gov/courts/scv/home"
   },
@@ -552,6 +665,7 @@
     "Christina E. Nolan",
     "Michael P. Drescher"
    ],
+   "read": "2026-10-18",
    "seats": 5,
    "url": "https://www.vtcourts.gov/supreme-court"
   },
@@ -569,6 +683,7 @@
     "Colleen M. Melody",
     "Theodore J. Angelis"
    ],
+   "read": "2026-10-18",
    "seats": 9,
    "url": "https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices"
   },
@@ -584,6 +699,7 @@
     "Susan M. Crawford",
     "Chris Taylor"
    ],
+   "read": "2026-10-18",
    "seats": 7,
    "url": "https://www.wicourts.gov/courts/supreme/justices/index.htm"
   },
@@ -597,6 +713,7 @@
     "H.L. Kirkpatrick",
     "James W. Flanigan"
    ],
+   "read": "2026-10-18",
    "seats": 5,
    "url": "https://www.courtswv.gov/appellate-courts/supreme-court-of-appeals/justices-staff"
   },
@@ -610,9 +727,10 @@
     "Robert C. Jarosh",
     "Bridget Hill"
    ],
+   "read": "2026-10-18",
    "seats": 5,
    "url": "https://www.wyocourts.gov/supreme-court/"
   }
  },
- "fetched": "2026-10-17T18:09:13+00:00"
+ "fetched": "2026-10-18T09:22:11+00:00"
 }
