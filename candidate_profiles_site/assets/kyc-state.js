@@ -327,7 +327,7 @@
           ' <a class="btn" href="' + KYC.escapeAttr(KYC.siteRoot() + "counties/" +
           code.toLowerCase() + ".html") + '">' + KYC.icon("layers") + " Counties &amp; local governments</a>" +
           ' <a class="btn" href="' + KYC.escapeAttr(KYC.siteRoot() + "government/states.html") + '">' +
-          KYC.icon("scroll") + " How states are governed</a>"
+          KYC.icon("scroll") + " How state governments work</a>"
         : "",
       "</p>",
       "</header>"

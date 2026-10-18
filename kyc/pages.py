@@ -525,6 +525,7 @@ DATED_CACHES = (
     ("statecourts", "courts.json", ("fetched",)),
     ("voting", "voting_links.json", ("linksChecked", "fetched")),
     ("census", "census_governments.json", ("fetched",)),
+    ("tribes", "tribal_leaders.json", ("fetched",)),
     ("executive", "federal_executive.json", ("asOf", "fetched")),
     ("judiciary", "judiciary.json", ("asOf", "fetched")),
     ("vacancies", "judicial_vacancies.json", ("asOf", "read", "fetched")),
@@ -795,7 +796,7 @@ def render_counties_index(host, census=None, dates=None):
         + (f" in {_e(year)}" if year else "") + '. Pick a state for its counties on a map and every',
         '                        government in each.</p>',
         '                    <p class="state-links">',
-        f'                        <a class="btn" href="{_e(_learn("local"))}"><svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg> How local governments work</a>',
+        f'                        <a class="btn" href="{_e(_learn("local"))}"><svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg> {_e(_guide_name("local"))}</a>',
         '                        <a class="btn" href="../states/index.html"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> States &amp; territories</a>',
         "                    </p>",
         "                </header>",
@@ -1025,7 +1026,7 @@ def render_legislature_page(code, host, summary=None, dates=None):
         f'                        <a class="btn" href="../{_e(page_path(code))}"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> {_e(name)} page</a>',
         f'                        <a class="btn" href="../districts/{_e(code.lower())}.html"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg> Congressional districts</a>',
         f'                        <a class="btn" href="../counties/{_e(code.lower())}.html"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg> Counties &amp; local governments</a>',
-        '                        <a class="btn" href="../government/states.html"><svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> How states are governed</a>',
+        f'                        <a class="btn" href="{_e(_learn("states"))}"><svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> {_e(_guide_name("states"))}</a>',
         "                    </p>",
         "                </header>",
         '                <div class="toolbar legislature-toolbar">',
@@ -1179,8 +1180,8 @@ def render_federal_page(host, codes=(), dates=None):
         '                        Supreme Court and every sitting Article III judge, each from the',
         '                        office&#8217;s own record. Pick a name for the person&#8217;s record.</p>',
         '                    <p class="state-links">',
-        '                        <a class="btn" href="../government/executive.html"><svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> How the executive works</a>',
-        '                        <a class="btn" href="../government/courts.html"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg> How the federal courts work</a>',
+        f'                        <a class="btn" href="{_e(_learn("executive"))}"><svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> {_e(_guide_name("executive"))}</a>',
+        f'                        <a class="btn" href="{_e(_learn("courts"))}"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg> {_e(_guide_name("courts"))}</a>',
         "                    </p>",
         "                </header>",
         '                <div id="federalBody">',
@@ -1219,6 +1220,15 @@ def _learn(target):
 
     url, _external = government.href("guide:" + target, "index")
     return "../government/" + url
+
+
+def _guide_name(slug):
+    """A guide page's one name, for a link to the whole page (rule 75):
+    the federal page called the executive's "How the executive works", the
+    page itself "The president and the executive branch"."""
+    from . import government
+
+    return government.name(slug)
 
 
 # Where the guide explains each kind of federal court, and what to call it.
@@ -1343,7 +1353,7 @@ def render_counties_page(code, host, listed=None):
         f'                        <a class="btn" href="../{_e(page_path(code))}"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> {_e(name)} page</a>',
         f'                        <a class="btn" href="../legislature/{_e(code.lower())}.html"><svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> State legislature</a>',
         f'                        <a class="btn" href="../districts/{_e(code.lower())}.html"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg> Congressional districts</a>',
-        '                        <a class="btn" href="../government/local.html"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg> How local government works</a>',
+        f'                        <a class="btn" href="{_e(_learn("local"))}"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg> {_e(_guide_name("local"))}</a>',
         "                    </p>",
         "                </header>",
         '                <div class="segmented" role="group" aria-label="Map view">',
@@ -1499,6 +1509,10 @@ DATASETS = (
      '<a href="https://www.census.gov/programs-surveys/cog.html">Census of Governments</a> (2022)',
      "Every county, city, town, township, school district and special district", "fixed",
      "census"),
+    ("Tribal governments",
+     '<a href="https://www.bia.gov/service/tribal-leaders-directory">BIA Tribal Leaders '
+     'Directory</a>',
+     "Each tribal government, the state of its office, and its leader", "refresh", "tribes"),
     ("Maps", "U.S. Census Bureau boundary files; each redrawn state's enacted plan",
      "States, congressional and legislative districts, counties, places", "maps", None),
     ("Know Your Government", "The primary sources each section cites",

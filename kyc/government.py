@@ -71,6 +71,42 @@ def _page(slug):
     raise KeyError(slug)
 
 
+def name(slug):
+    """A guide page's one name: its title, its <h1>, its entry in the
+    guide's navigation, its card on the overview, the pager's link to it
+    and every other page's link to it (rule 75). The navigation said "How
+    the federal courts work" over a page titled "The federal courts", and
+    "Elections" over "How elections work"."""
+    return _page(slug)["title"]
+
+
+# ----------------------------------------------------------------- figures
+
+# A count the text states that a table elsewhere in the build determines,
+# written {{key}}: "In {{ltgov-presides}} states". The text said "about 26"
+# lieutenant governors preside while the map, from the same table, coloured
+# 24 (rule 73).
+_FIGURE = re.compile(r"\{\{([a-z0-9-]+)\}\}")
+
+
+def figures():
+    from . import government_maps
+    return government_maps.figures()
+
+
+def _figures(text, here):
+    if "{{" not in text:
+        return text
+    table = figures()
+
+    def put(match):
+        key = match.group(1)
+        if key not in table:
+            raise ValueError(f"{here}: no figure {key!r}")
+        return str(table[key])
+    return _FIGURE.sub(put, text)
+
+
 def scripts(slug):
     """The scripts a guide page loads after ``kyc.js``, in order. A page
     that lists who holds an office (:data:`HOLDERS`) loads the federal
@@ -82,7 +118,7 @@ def scripts(slug):
     return base
 
 
-def _after(here, sid, pad):
+def _after(here, sid, pad, level=3):
     """What follows a section's text: who holds its offices now, and where
     on the site its subject can be seen (:data:`SEE`)."""
     lines = []
@@ -90,7 +126,7 @@ def _after(here, sid, pad):
     if live:
         # Its own heading: in a section that ends with a subheading
         # ("Changes since 2025") the list would otherwise read as part of it.
-        lines.append(f'{pad}<h3 class="guide-subheading">{html.escape(live[1], quote=False)}</h3>')
+        lines.append(f'{pad}<h{level} class="guide-subheading">{html.escape(live[1], quote=False)}</h{level}>')
         lines += _block(("live", live[0], live[2]), here, pad)
     see = SEE.get((here, sid))
     if see:
@@ -139,10 +175,18 @@ _GENERATED = {"legislature/index.html", "counties/index.html"}
 SITE_ANCHORS = {"federal/index.html": ("executive", "cabinet", "changes", "supreme-court", "courts")}
 
 
+#   voting:                the reader's state's voting section (VOTING)
+# The elections page sent "your state's official voting pages" to the
+# states' index, two clicks from the registration and polling-place links.
+VOTING = "voting:"
+
+
 def href(target, here):
     """``(href, external)`` for a link target written on page *here*.
 
     Raises ``ValueError`` for a target that leads nowhere."""
+    if target == VOTING:
+        return "../states/index.html", False
     if target.startswith("https://"):
         return target, True
     if target.startswith("#"):
@@ -186,13 +230,20 @@ def _text(segment, here):
 
 
 def inline(text, here):
-    """Escape *text* for HTML, turning ``[label](target)`` into links."""
+    """Escape *text* for HTML, turning ``[label](target)`` into links and
+    ``{{key}}`` into the figure the build counts (:func:`figures`)."""
+    text = _figures(text, here)
     out = []
     last = 0
     for match in _LINK.finditer(text):
         out.append(_text(text[last:match.start()], here))
-        url, external = href(match.group(2), here)
+        target = match.group(2)
+        url, external = href(target, here)
         extra = ' target="_blank" rel="noopener noreferrer"' if external else ""
+        if target == VOTING:
+            # The reader's own state's voting section, once the page knows
+            # their state (kyc-guide.js); the states' index until then.
+            extra += " data-voting-link"
         out.append(f'<a href="{_e(url)}"{extra}>'
                    f'{html.escape(match.group(1), quote=False)}</a>')
         last = match.end()
@@ -224,7 +275,161 @@ def _table(spec, here, pad):
     return lines
 
 
-def _block(block, here, pad):
+def _flow(spec, here, pad):
+    """A process drawn as boxes joined by a line (kyc.css .guide-flow): page
+    text in HTML, never SVG text (rule 46). A step's options are the ways
+    it can end, side by side."""
+    lines = [f'{pad}<figure class="guide-flow">',
+             f'{pad}    <ol class="guide-flow-steps">']
+    for step in spec["steps"]:
+        lines.append(f'{pad}        <li class="guide-flow-step"><strong>{inline(step[0], here)}</strong>'
+                     f'<span>{inline(step[1], here)}</span>')
+        if len(step) > 2 and step[2]:
+            lines.append(f'{pad}            <ul class="guide-flow-options">')
+            for title, text in step[2]:
+                lines.append(f'{pad}                <li><strong>{inline(title, here)}</strong>'
+                             f'<span>{inline(text, here)}</span></li>')
+            lines.append(f"{pad}            </ul>")
+        lines.append(f"{pad}        </li>")
+    lines.append(f"{pad}    </ol>")
+    if spec.get("caption"):
+        lines.append(f'{pad}    <figcaption>{inline(spec["caption"], here)}</figcaption>')
+    return lines + [f"{pad}</figure>"]
+
+
+def _checks(spec, here, pad):
+    """Who checks whom: a box per branch, each listing its checks on the
+    others, an arrow and the branch it acts on before each."""
+    lines = [f'{pad}<figure class="guide-checks">',
+             f'{pad}    <ul class="guide-checks-row">']
+    for branch, checks in spec["branches"]:
+        lines.append(f'{pad}        <li class="guide-checks-branch"><strong>{inline(branch, here)}</strong>')
+        lines.append(f'{pad}            <ul>')
+        for target, how in checks:
+            lines.append(f'{pad}                <li><span class="guide-checks-on">'
+                         f'<span aria-hidden="true">→ </span>{inline(target, here)}:</span> '
+                         f'{inline(how, here)}</li>')
+        lines.append(f"{pad}            </ul>")
+        lines.append(f"{pad}        </li>")
+    lines.append(f"{pad}    </ul>")
+    if spec.get("caption"):
+        lines.append(f'{pad}    <figcaption>{inline(spec["caption"], here)}</figcaption>')
+    return lines + [f"{pad}</figure>"]
+
+
+def _ladder(spec, here, pad):
+    """Court systems side by side, highest court first, with the paths a
+    case takes between them below."""
+    lines = [f'{pad}<figure class="guide-ladder">',
+             f'{pad}    <div class="guide-ladder-row">']
+    for heading, rungs in spec["columns"]:
+        lines.append(f'{pad}        <div class="guide-ladder-col">')
+        lines.append(f'{pad}            <p class="guide-ladder-head">{inline(heading, here)}</p>')
+        lines.append(f'{pad}            <ol class="guide-ladder-rungs">')
+        for court, text in rungs:
+            lines.append(f'{pad}                <li><strong>{inline(court, here)}</strong>'
+                         f'<span>{inline(text, here)}</span></li>')
+        lines.append(f"{pad}            </ol>")
+        lines.append(f"{pad}        </div>")
+    lines.append(f"{pad}    </div>")
+    if spec.get("paths"):
+        lines.append(f'{pad}    <ul class="guide-ladder-paths">')
+        for title, text in spec["paths"]:
+            lines.append(f'{pad}        <li><strong>{inline(title, here)}</strong> {inline(text, here)}</li>')
+        lines.append(f"{pad}    </ul>")
+    if spec.get("caption"):
+        lines.append(f'{pad}    <figcaption>{inline(spec["caption"], here)}</figcaption>')
+    return lines + [f"{pad}</figure>"]
+
+
+_DATE = re.compile(r"\d{4}-\d{2}-\d{2}$")
+
+# The statuses a timeline step may name: keys of KYC.raceStatus's table
+# (assets/kyc.js RACE_STATUS), and "awaiting", a nominee after Election Day.
+TIMELINE_STATUSES = ("nominee", "awaiting", "elected", "defeated", "runoff")
+
+
+def _timeline(spec, here, pad):
+    """Dated steps in order. Each may name the result statuses this site
+    shows at that step: their words are the site's one status table's
+    (KYC.raceStatus), filled in by kyc-guide.js; the words written here are
+    what a page without the script shows."""
+    lines = [f'{pad}<figure class="guide-timeline">',
+             f'{pad}    <ol class="guide-timeline-steps">']
+    last = ""
+    for day, label, title, parts in spec["items"]:
+        if not _DATE.match(day) or day < last:
+            raise ValueError(f"{here}: timeline dates must be ISO dates in order: {day!r}")
+        last = day
+        words = []
+        for part in parts:
+            if isinstance(part, str):
+                # Punctuation closes up on the status before it.
+                words.append(("" if part[:1] in ".,;:" or not words else " ") + inline(part, here))
+            else:
+                key, text = part
+                if key not in TIMELINE_STATUSES:
+                    raise ValueError(f"{here}: no status {key!r} in the site's table")
+                words.append(f' <span class="badge guide-status" data-status="{_e(key)}">'
+                             f'{html.escape(text, quote=False)}</span>')
+        lines.append(f'{pad}        <li data-date="{_e(day)}"><time datetime="{_e(day)}">'
+                     f'{html.escape(label, quote=False)}</time><strong>{inline(title, here)}</strong>'
+                     f'<span>{"".join(words)}</span></li>')
+    lines.append(f"{pad}    </ol>")
+    if spec.get("caption"):
+        lines.append(f'{pad}    <figcaption>{inline(spec["caption"], here)}</figcaption>')
+    return lines + [f"{pad}</figure>"]
+
+
+def _redrawn(here, pad):
+    """The states whose 2026 House map is not 2024's, as kyc/districts.REDRAWN
+    records each from the enacting body's own record, each linking its
+    before-and-after district page. Read from the table, never retyped, so
+    a state added there is listed here."""
+    from . import districts
+    lines = [f'{pad}<ul class="guide-list guide-redrawn">']
+    for code in sorted(districts.REDRAWN, key=pages.state_name):
+        after = districts.REDRAWN[code].get("after") or {}
+        words = [f'<a href="../{_e(districts.PAGE_DIR)}/{_e(code.lower())}.html">'
+                 f'{html.escape(pages.state_name(code), quote=False)}</a>:']
+        if after.get("title"):
+            words.append(html.escape(after["title"], quote=False))
+        if after.get("drawnBy"):
+            words.append("— drawn by " + html.escape(after["drawnBy"], quote=False))
+        lines.append(f"{pad}    <li>{' '.join(words)}.</li>")
+    return lines + [f"{pad}</ul>"]
+
+
+def _voting_picker(here, pad):
+    """A state picker that opens that state's voting section."""
+    options = "".join(
+        f'<option value="{_e(code)}">{_e(pages.state_name(code))}</option>'
+        for code in sorted(pages.STATE_NAMES, key=pages.state_name))
+    return [f'{pad}<form class="guide-voting" action="../states/index.html" data-voting-picker>',
+            f'{pad}    <label for="votingState">Your state or territory</label>',
+            f'{pad}    <select id="votingState" class="select"><option value="">Choose…</option>'
+            f"{options}</select>",
+            f'{pad}    <button type="submit" class="btn">Open its voting pages</button>',
+            f"{pad}</form>"]
+
+
+def _cards(here, pad):
+    """A card for every page of the guide after this one, each with its
+    one name (:func:`name`) and its own summary."""
+    lines = [f'{pad}<ul class="guide-cards">']
+    for page in PAGES:
+        if page["slug"] == here:
+            continue
+        lines.append(f'{pad}    <li><a class="guide-card" href="{_e(page["slug"])}.html">'
+                     f'<strong>{html.escape(name(page["slug"]), quote=False)}</strong>'
+                     f'<span>{html.escape(page["card"], quote=False)}</span></a></li>')
+    return lines + [f"{pad}</ul>"]
+
+
+def _block(block, here, pad, level=3):
+    """One block of a section's text. *level* is the level of the section's
+    subheadings: h3 on a page of sections, h4 inside a map page's folded
+    sections, whose own titles are h3."""
     kind = block[0]
     if kind == "p":
         return [f"{pad}<p>{inline(block[1], here)}</p>"]
@@ -232,7 +437,21 @@ def _block(block, here, pad):
         return [f'{pad}<p class="guide-note">{inline(block[1], here)}</p>']
     if kind == "h3":
         anchor = f' id="{_e(block[2])}"' if len(block) > 2 else ""
-        return [f'{pad}<h3 class="guide-subheading"{anchor}>{inline(block[1], here)}</h3>']
+        return [f'{pad}<h{level} class="guide-subheading"{anchor}>{inline(block[1], here)}</h{level}>']
+    if kind == "flow":
+        return _flow(block[1], here, pad)
+    if kind == "checks":
+        return _checks(block[1], here, pad)
+    if kind == "ladder":
+        return _ladder(block[1], here, pad)
+    if kind == "timeline":
+        return _timeline(block[1], here, pad)
+    if kind == "redrawn":
+        return _redrawn(here, pad)
+    if kind == "voting-picker":
+        return _voting_picker(here, pad)
+    if kind == "guide-cards":
+        return _cards(here, pad)
     if kind == "ul":
         return ([f'{pad}<ul class="guide-list">'] +
                 [f"{pad}    <li>{inline(item, here)}</li>" for item in block[1]] +
@@ -292,8 +511,11 @@ def _main(page):
     lines = [
         '            <article id="guideContent" class="state-page guide-page">',
         '                <header class="state-hero">',
-        '                    <p class="state-kicker">Know Your Government</p>',
-        f'                    <h1 class="state-title">{inline(page["title"], here)}</h1>',
+        # The guide's own front page is named Know Your Government already.
+        '                    <p class="state-kicker">'
+        + ("A guide to American government" if here == "index" else "Know Your Government")
+        + "</p>",
+        f'                    <h1 class="state-title">{html.escape(name(here), quote=False)}</h1>',
         f'                    <p class="guide-lede">{inline(page["lede"], here)}</p>',
         "                </header>",
     ]
@@ -333,11 +555,11 @@ def _pager(here):
     if at > 0:
         prev = _page(order[at - 1])
         links.append(f'<a class="guide-pager-link" rel="prev" href="{_e(order[at - 1])}.html">'
-                     f'<span>Previous</span> {html.escape(prev["nav"], quote=False)}</a>')
+                     f'<span>Previous</span> {html.escape(name(prev["slug"]), quote=False)}</a>')
     if at + 1 < len(order):
         nxt = _page(order[at + 1])
         links.append(f'<a class="guide-pager-link next" rel="next" href="{_e(order[at + 1])}.html">'
-                     f'<span>Next</span> {html.escape(nxt["nav"], quote=False)}</a>')
+                     f'<span>Next</span> {html.escape(name(nxt["slug"]), quote=False)}</a>')
     return (['                <nav class="guide-pager" aria-label="Guide pages">'] +
             [f"                    {link}" for link in links] +
             ["                </nav>"])
@@ -350,24 +572,30 @@ def _sidebar(here, people):
     for page in PAGES:
         current = ' aria-current="page"' if page["slug"] == here else ""
         lines.append(f'            <a class="nav-link nav-sub" href="{_e(page["slug"])}.html"'
-                     f'{current}>{html.escape(page["nav"], quote=False)}</a>')
+                     f'{current}>{html.escape(name(page["slug"]), quote=False)}</a>')
     lines.append("        </nav>")
     sidebar = "\n".join(lines) + "\n"
     # A page that loads the profiles can show the chambers' balance too.
     return sidebar + (pages._CONGRESS_SIDEBAR if people else "")
 
 
-def _section_lines(section, here, pad, collapsed):
+def _section_lines(section, here, pad, collapsed, first=False):
     """One of the page's text sections; folded into a <details> on a map
-    page, where it reads below the panel's facts."""
+    page, where it reads below the panel's facts.
+
+    Its title is a heading inside the <summary>, so a screen reader's list
+    of headings and a search engine find the page's sections (they were
+    bare <summary> text), and the first section is open: a reader landing
+    on the federal courts' page saw a map and five closed rows."""
     sid = section["id"]
     lines = []
     if collapsed:
-        lines.append(f'{pad}<details class="guide-more-section" id="{_e(sid)}">')
-        lines.append(f'{pad}    <summary>{html.escape(section["heading"], quote=False)}</summary>')
+        lines.append(f'{pad}<details class="guide-more-section" id="{_e(sid)}"{" open" if first else ""}>')
+        lines.append(f'{pad}    <summary><h3 class="guide-more-heading">'
+                     f'{html.escape(section["heading"], quote=False)}</h3></summary>')
     for block in section["blocks"]:
-        lines.extend(_block(block, here, pad + "    "))
-    lines.extend(_after(here, sid, pad + "    "))
+        lines.extend(_block(block, here, pad + "    ", level=4 if collapsed else 3))
+    lines.extend(_after(here, sid, pad + "    ", level=4 if collapsed else 3))
     lines.append(f'{pad}    <p class="guide-sources"><span>Sources:</span> '
                  f'{_sources(section["sources"], here)}</p>')
     if collapsed:
@@ -387,7 +615,7 @@ def _map_main(page, modes, footer):
         '    <main class="app-main" id="stateMain">',
         '        <header class="guide-map-head">',
         '            <p class="state-kicker">Know Your Government</p>',
-        f'            <h1 class="guide-map-title">{inline(page["title"], here)}</h1>',
+        f'            <h1 class="guide-map-title">{html.escape(name(here), quote=False)}</h1>',
         '        </header>',
         '        <div class="toolbar">',
         '            <div class="map-legend" id="mapLegend" aria-live="polite"></div>',
@@ -408,7 +636,7 @@ def _map_main(page, modes, footer):
         "        </div>",
         "    </main>",
         "",
-        f'    <aside class="detail-panel" aria-label="{_e(page["nav"])}, state by state">',
+        f'    <aside class="detail-panel" aria-label="{_e(name(here))}, state by state">',
         '        <div class="detail-head">',
         '            <div class="detail-title">',
         '                <h2>',
@@ -435,11 +663,11 @@ def _map_main(page, modes, footer):
         lines.append(f'{pad}    <p class="guide-sources"><span>Sources:</span> {"; ".join(links)}</p>')
         lines.append(f"{pad}</section>")
     lines.append(f'{pad}<div class="guide-more">')
-    # Only the first letter is lowered: "How Congress works" keeps its capital.
-    about = page["nav"][:1].lower() + page["nav"][1:]
-    lines.append(f'{pad}    <h3 class="guide-more-title">More about {html.escape(about, quote=False)}</h3>')
-    for section in page["sections"]:
-        lines.extend(_section_lines(section, here, pad + "    ", collapsed=True))
+    # The page's text: an h2, like the panel's own heading, over the
+    # sections' h3s.
+    lines.append(f'{pad}    <h2 class="guide-more-title">Sections of this page</h2>')
+    for i, section in enumerate(page["sections"]):
+        lines.extend(_section_lines(section, here, pad + "    ", collapsed=True, first=i == 0))
     lines.append(f"{pad}</div>")
     lines.extend(_pager(here))
     lines.append(f'{pad}<footer class="site-footer">')
@@ -484,10 +712,10 @@ def render(slug, host, codes=()):
               if modes else {"main": _main(page), "footer": _footer(page)})
     crumbs = [pages._HOME, (pages.section_name("guide"), page_path("index"))]
     if slug != "index":
-        crumbs.append((page["title"], path))
+        crumbs.append((name(slug), path))
     return pages.render_page(
-        title=_e(f"{page['title']} — Know Your Candidate"),
-        og_title=_e(page["title"]),
+        title=_e(f"{name(slug)} — Know Your Candidate"),
+        og_title=_e(name(slug)),
         description=_e(page["description"]),
         canonical=_e(canonical),
         host=_e(host or ""),
@@ -498,8 +726,10 @@ def render(slug, host, codes=()):
         nav_how="page" if slug == "index" else "true",
         sidebar=_sidebar(slug, people),
         jump_options="" if people else jump_options(codes),
-        # On a map page the list picks the state on the map (kyc-guide.js).
-        jump_attrs=' data-jump="map"' if modes else "",
+        # On a map page the list picks the state on the map (kyc-guide.js);
+        # on the elections page it opens the state's voting section.
+        jump_attrs=(' data-jump="map"' if modes else
+                    ' data-jump-to="states/{code}.html#voting"' if slug == "elections" else ""),
         crumbs=crumbs,
         scripts="\n".join(f'<script src="{_e(src)}"></script>' for src in scripts(slug)),
         **layout,
@@ -534,7 +764,7 @@ def check():
     cited = set()
     seen_ids = {}
     for page in PAGES:
-        for key in ("slug", "nav", "title", "lede", "description", "sections"):
+        for key in ("slug", "title", "card", "lede", "description", "sections"):
             if not page.get(key):
                 problems.append(f"{page.get('slug', '?')}: missing {key}")
         for entry in page.get("revisit") or ():

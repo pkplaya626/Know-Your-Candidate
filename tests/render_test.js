@@ -963,6 +963,23 @@ async function testDirectoryAsync() {
             member.committeeList.filter((c) => !(table[c.code] || {}).parent).length);
       KYC.profile.close();
     }
+    // A leadership post congress-legislators records for a sitting member
+    // is on their profile (GUIDE-12); a member who holds none shows none.
+    const leader = window.legislatorsData.find((p) => KYC.seated(p) && (p.leadership || []).length);
+    if (leader) {
+      KYC.profile.open(leader.id);
+      const posts = D.querySelector("#profileModalCommittees .leadership-posts");
+      check("a member's leadership posts are on their profile",
+        !!posts && leader.leadership.every((t) => posts.textContent.includes(t)),
+        leader.name + ": " + (posts ? posts.textContent : "none"));
+      KYC.profile.close();
+      const plain = window.legislatorsData.find((p) => KYC.seated(p) && !p.isCandidate &&
+        !(p.leadership || []).length);
+      KYC.profile.open(plain.id);
+      check("a member with no post shows none",
+        !D.querySelector("#profileModalCommittees .leadership-posts"));
+      KYC.profile.close();
+    }
     const runner = window.legislatorsData.find((p) => p.isCandidate && p.campaignSite);
     check("a candidate with a campaign site exists", !!runner);
     if (runner) {
@@ -4576,7 +4593,10 @@ async function testGuide() {
       const byText = {};
       [...D.querySelectorAll(".sidebar a.nav-link")].forEach((a) => {
         const t = a.textContent.trim();
-        (byText[t] = byText[t] || new Set()).add(a.getAttribute("href").replace(/#.*$/, ""));
+        // Resolved: the site's "Know Your Government" (../government/index.html)
+        // and the guide's own first page (index.html) are one page, one name.
+        (byText[t] = byText[t] || new Set()).add(
+          new window.URL(a.getAttribute("href"), window.location.href).pathname);
       });
       const twice = Object.keys(byText).filter((t) => byText[t].size > 1);
       check("no two sidebar links share a name and go to different pages", twice.length === 0, twice.join(", "));
@@ -4624,7 +4644,35 @@ async function testGuide() {
       check("a row for every full committee with a titled seat", rows.length === expected.size,
         `${rows.length} rows, ${expected.size} committees`);
       check("House, Senate and joint committees each have a table",
-        live.querySelectorAll("table").length === 3);
+        live.querySelectorAll("table").length >= 3);
+      // The Senate's narcotics caucus is not a Senate committee, and its
+      // minority lead is its Co-Chair, not a second Chairman.
+      const caucus = rows.find((r) => /Caucus on International Narcotics Control/.test(r.textContent));
+      if (caucus) {
+        let head = caucus.closest(".guide-table-wrap").previousElementSibling;
+        while (head && head.tagName !== "H3") head = head.previousElementSibling;
+        check("a caucus is listed apart from the committees",
+          /Caucuses and commissions/.test(head ? head.textContent : ""), head && head.textContent);
+        const lead = caucus.querySelector('td[data-label="Minority lead"]').textContent;
+        check("the caucus's minority lead is its Co-Chair, as the caucus styles it",
+          /Co-Chair/.test(lead) && !/Chairman/.test(lead), lead);
+      }
+      // Who leads each chamber, from each member's leadership posts.
+      const leaders = D.querySelector('.guide-live[data-live="leaders-house"]');
+      const speaker = window.legislatorsData.find((p) => KYC.seated(p) &&
+        (p.leadership || []).includes("Speaker of the House"));
+      check("the House's leaders are named from the data, the Speaker first",
+        !speaker || (leaders.querySelector(".guide-person") &&
+          leaders.querySelector(".guide-person").getAttribute("data-id") === speaker.id &&
+          /Speaker of the House/.test(leaders.querySelector(".guide-person").textContent)),
+        leaders.textContent.slice(0, 120));
+      const senateLeads = [...D.querySelectorAll('.guide-live[data-live="leaders-senate"] .guide-person')];
+      check("every name in the Senate's list is a sitting senator holding that post",
+        senateLeads.every((b) => {
+          const p = KYC.byId(b.getAttribute("data-id"));
+          return p && KYC.seated(p) && /Senate/.test(p.chamber || "") &&
+            (p.leadership || []).some((t) => b.textContent.includes(t));
+        }), `${senateLeads.length} senators`);
       const people = [...live.querySelectorAll(".guide-person")];
       check("every name is a sitting member who holds a titled seat on that committee",
         people.length > 80 && people.every((b) => {
@@ -4804,6 +4852,92 @@ async function testGuideMaps() {
         here[0] === "../courts/ca5.html" && here.length === 5 &&
         here.slice(1).sort().join(" ") === ["tx-e", "tx-n", "tx-s", "tx-w"]
           .map((id) => "../courts/" + id + ".html").join(" "), here.join(" "));
+    });
+  }
+  {
+    // A state's fact cites only the general sources and its own: Oklahoma's
+    // "Choosing judges" cited New Jersey's courts and a Utah bill.
+    const { D } = await buildPage("government/states.html", { hash: "#/?mode=judges&state=OK" });
+    suite("government/states.html — a fact cites its own state's sources", () => {
+      const facts = D.getElementById("guideFacts").textContent;
+      check("Oklahoma's facts cite neither New Jersey's court nor Utah's bill nor Arizona's amendment",
+        !/New Jersey Courts|Utah S\.B\. 134|Arizona Legislature|Nebraska Legislature/.test(facts),
+        facts.slice(0, 300));
+      check("and still cite the general sources", /Book of the States/.test(facts));
+      const first = D.querySelector("details.guide-more-section");
+      check("the page's first section is open, its title a heading",
+        first.open && !!first.querySelector("summary > h3"));
+    });
+  }
+  {
+    const { D } = await buildPage("government/states.html", { hash: "#/?mode=ballot&state=TX" });
+    suite("government/states.html — the 2026 ballot, state by state", () => {
+      const fact = D.querySelector("#guideFacts .guide-fact.is-current");
+      check("Texas's 2026 ballot names its offices and seats",
+        /governor/.test(fact.textContent) && /16 of the 31 seats in the Senate/.test(fact.textContent),
+        fact.textContent.slice(0, 200));
+      check("citing Texas's own record, not another state's",
+        /Texas's own record/.test(fact.textContent) && !/Alabama's own record/.test(fact.textContent));
+    });
+  }
+  {
+    const { D } = await buildPage("government/tribal.html", { hash: "#/?state=OK" });
+    suite("government/tribal.html — state jurisdiction since 2022", () => {
+      const fact = D.querySelector("#guideFacts .guide-fact.is-current").textContent;
+      check("Oklahoma's fact names Castro-Huerta and McGirt, and cites both",
+        /Castro-Huerta/.test(fact) && /McGirt v\. Oklahoma/.test(fact) &&
+        /591 U\.S\. 894/.test(fact) && /597 U\.S\. 629/.test(fact), fact.slice(0, 300));
+    });
+  }
+  {
+    // Which nations have their office in a state, and who leads each, as
+    // the BIA's directory lists them (GUIDE-18).
+    const { window, D } = await buildPage("government/tribal.html", { hash: "#/?mode=tribes&state=ME" });
+    suite("government/tribal.html — tribal governments and their leaders", () => {
+      const mode = window.kycGovernment.modes.tribes;
+      const rows = mode.lists.ME;
+      const fact = D.querySelector("#guideFacts .guide-fact.is-current");
+      const items = [...fact.querySelectorAll(".guide-fact-list > li")];
+      check("every government the directory places in Maine is listed under the fact",
+        rows.length > 0 && items.length === rows.length, `${items.length} of ${rows.length}`);
+      check("each with the leader and title the directory gives, or says it gives none",
+        items.every((li, i) => rows[i][1] ? li.textContent.includes(rows[i][1])
+          : /no leader listed/.test(li.textContent)));
+      const nested = rows.filter((r) => r[3].length);
+      check("a band the directory lists under its tribe is named with it",
+        nested.every((r) => items.some((li) => li.firstChild.textContent.trim() === r[0] &&
+          li.querySelectorAll("ul > li").length === r[3].length)), nested.length);
+      check("the fact cites the directory", /Tribal Leaders Directory/.test(fact.textContent));
+      const other = D.querySelector('#guideFacts .guide-fact:not(.is-current) .guide-fact-list');
+      check("another view's fact carries no list", !other);
+    });
+  }
+  {
+    const { window, D } = await buildPage("government/elections.html", {
+      setup: (w) => w.localStorage.setItem("kycState", "TX") });
+    const K = window.KYC;
+    suite("government/elections.html — the reader's voting pages, and the count's timeline", () => {
+      const link = D.querySelector("a[data-voting-link]");
+      check("the voting link opens the remembered state's voting section",
+        /states\/tx\.html#voting$/.test(link.getAttribute("href")), link.getAttribute("href"));
+      check("the picker starts on the remembered state", D.getElementById("votingState").value === "TX");
+      check("the jump list opens a state's voting section",
+        D.getElementById("stateJump").getAttribute("data-jump-to") === "states/{code}.html#voting");
+      const chip = (key) => D.querySelector(`.guide-status[data-status="${key}"]`).textContent;
+      check("each step's status words are the site's own (KYC.raceStatus)",
+        chip("elected") === K.raceStatus("elected", "card").label &&
+        chip("defeated") === K.raceStatus("defeated", "card").label &&
+        chip("runoff") === K.raceStatus("runoff", "card").label &&
+        chip("awaiting") === K.raceStatus("nominee", "card",
+          { now: new window.Date(Date.UTC(2026, 10, 5, 12)) }).label &&
+        chip("awaiting") !== chip("nominee"), chip("awaiting"));
+      check("on the campaign clock Election Day is next and nothing is past",
+        D.querySelector(".guide-timeline-steps li.is-next").getAttribute("data-date") === "2026-11-03" &&
+        !D.querySelector(".guide-timeline-steps li.is-past"));
+      K.guide.initTimeline(new window.Date(Date.UTC(2026, 11, 5, 12)));
+      check("in December the steps passed are marked done and the next is Texas's canvass",
+        D.querySelector(".guide-timeline-steps li.is-next").getAttribute("data-date") === "2026-12-07" &&
+        D.querySelectorAll(".guide-timeline-steps li.is-past").length === 5);
     });
   }
   {

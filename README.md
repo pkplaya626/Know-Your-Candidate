@@ -42,6 +42,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… history` | The public offices each person has held: Congress from congress-legislators, every other office from Wikidata where the person's own Wikipedia article gives the same office the same years; a short read keeps the last cache (`--check` reports it). See [Public offices held](#public-offices-held) |
 | `… voting` | Each state's and D.C.'s official pages for checking registration, finding a polling place, voting absentee or early, and registering, as NASS's "Can I Vote" lists them; refused unless all 51 are there. Then opens every link shown, NASS's and the curated results, sample-ballot, vote.gov and territory pages alike |
 | `… courts` | Each state's highest court and its members, read from the court's own roster |
+| `… tribes` | Every tribal government and its leader, from the BIA's Tribal Leaders Directory, by the state of its office; refused unless every row the service counts comes back once (`--check` reports the cache) |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
 | `… results` | Read each state's primary results from Wikipedia: who is still in |
 | `… results --check` | Report the results from the committed cache; no network |
@@ -63,7 +64,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (1858 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (1885 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1385,6 +1386,24 @@ here in a different way:
   `site:map.html`, `state:TX` or an `https://` URL. `validate.check_guide`
   fails on a missing page, section or state, an unknown source, or a source
   no section cites.
+- **One name per page.** A guide page's title, heading, navigation entry,
+  card, pager link and every other page's link to it are one string
+  (`government.name`), and a test fails on a link that calls a page anything
+  else.
+- **Counts come from the tables they describe.** "In {{ltgov-presides}}
+  states the lieutenant governor presides" is filled from the map's own
+  table (`government_maps.figures`), so the text and the map cannot
+  disagree; the 2026 ballot counts come from `kyc/ballot2026.py`.
+- **Figures are page text.** How a bill becomes law, who checks whom, the two
+  court ladders and the Election Day to January 3 timeline are HTML boxes,
+  never SVG text (rule 46). The timeline's status words are the site's own
+  (`KYC.raceStatus`), and the step a reader is at is marked by their date.
+- **Leaders come from the data.** The Speaker, the floor leaders, the whips
+  and the other party posts are listed from congress-legislators'
+  `leadership_roles`, kept per bioguide id in the snapshot (`leadership`) and
+  shown on each member's profile while they sit; tribal leaders from the
+  BIA's directory; a caucus's own style for its minority lead
+  (`overrides.COMMITTEE_TITLES`, "Co-Chair") with the evidence.
 - **Only the page that shows people loads them.** The Congress page loads
   `profiles.js` like a state page; the others load only `kyc.js` and
   `kyc-guide.js`, and carry their "Jump to" list in the HTML.
@@ -1401,10 +1420,10 @@ sources. `#/?state=TX&mode=veto` opens any view as sent.
 
 | Page | Views | Source |
 |---|---|---|
-| State governments | Legislature (chambers and seats), who presides over the senate, line-item veto, how high-court justices are chosen | NCSL; Book of the States 2022, tables 4.14, 5.1 and 5.6, checked for changes through October 2026 |
+| State governments | Legislature (chambers and seats), who presides over the senate, line-item veto, how high-court justices are chosen, what each state elects on November 3, 2026 | NCSL; Book of the States 2022, tables 4.14, 5.1 and 5.6, checked for changes through October 2026; `kyc/ballot2026.py`, each state's own record |
 | Federal courts | The circuit each state's appeals go to, numbered on the map | 28 U.S.C. 41; 48 U.S.C. 1824 |
 | Local governments | Counts of every kind of local government, and of counties, municipalities, townships, school districts and special districts | Census of Governments 2022, table CG2200ORG02 (`census` command) |
-| Tribal nations | Public Law 280: the six states the law names and the ten that took jurisdiction later | 18 U.S.C. 1162; BIA |
+| Tribal nations | Public Law 280: the six states the law names and the ten that took jurisdiction later; tribal governments by the state of their office, each with its leader | 18 U.S.C. 1162; BIA; the BIA's Tribal Leaders Directory (`tribes` command) |
 
 The data is `kyc/government_maps.py`, emitted as `data/government.js`
 (rewritten only when it changes; `verify` checks its signature). A view must
@@ -2141,6 +2160,7 @@ confirm it, and the answer stays above the map rather than scrolling away.
 | `campaignIssuesUrl` | The page the campaign site links as its issues, platform or priorities | Challengers still running |
 | `disclosureUrl`, `disclosureSource` | The member's latest annual financial disclosure: `house-clerk` (a PDF from the Clerk's annual index) or `senate-efd` (a report in the Senate's eFD system) | Members with a filing on record |
 | `committeeList`, `committeesSource` | `committee-membership-current`, with rank and title (`data/committees.json`); a titled seat also carries `side` (`majority` or `minority`), because a title alone cannot say which - "Vice Chairman" leads the minority on Senate Ethics and Intelligence | Sitting members |
+| `leadership` | The party and chamber posts congress-legislators' `leadership_roles` lists for the member's bioguide id now (Speaker, floor leaders, whips, conference officers); shown on the profile and the guide's Congress page while they sit | Sitting members who hold one |
 | `fecCandidateId` | Links the FEC's own candidate page | Everyone the FEC knows |
 | `rosterFecId` | The curated roster's `FEC Candidate ID` column; the finance lookup takes it as the person's authoritative id, and `validate` checks its office and state against the profile | Curated candidates |
 | `otherFecIds` | The same person's other FEC registrations (one committee's money reported under several ids, or a curated pair in `overrides.SAME_PERSON_FILINGS`); a link shared under any of them opens this profile | People registered more than once |

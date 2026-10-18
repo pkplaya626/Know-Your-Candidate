@@ -174,5 +174,94 @@ class TestGuideMaps(unittest.TestCase):
                 self.assertTrue(payload["sources"][key][1].startswith("https://"))
 
 
+def _mode(mode_id):
+    return next(m for items in government_maps.modes().values() for m in items
+                if m["id"] == mode_id)
+
+
+class TestEachFactCitesItsOwn(unittest.TestCase):
+    """Oklahoma's fact on choosing judges cited New Jersey's courts and a
+    Utah bill; Tennessee's senate president an Arizona amendment; every
+    state's legislature two Nebraska pages."""
+
+    def test_a_states_fact_cites_only_the_general_sources_and_its_own(self):
+        judges = _mode("judges")
+        self.assertNotIn("nj-supreme", government_maps.sources_for(judges, "OK"))
+        self.assertNotIn("ut-sb134", government_maps.sources_for(judges, "OK"))
+        self.assertIn("ut-sb134", government_maps.sources_for(judges, "UT"))
+        self.assertIn("bots-5-6", government_maps.sources_for(judges, "OK"))
+        self.assertNotIn("az-prop131", government_maps.sources_for(_mode("presides"), "TN"))
+        self.assertIn("az-prop131", government_maps.sources_for(_mode("presides"), "AZ"))
+        self.assertNotIn("nebraska", government_maps.sources_for(_mode("legislature"), "OK"))
+        self.assertIn("nebraska", government_maps.sources_for(_mode("legislature"), "NE"))
+
+    def test_the_payload_carries_the_scope_the_page_reads(self):
+        payload = government_maps.payload()
+        self.assertEqual(payload["modes"]["judges"]["scoped"]["nj-supreme"], ["NJ"])
+
+    def test_a_scope_naming_a_source_the_view_does_not_cite_is_refused(self):
+        mode = dict(_mode("veto"), scoped={"bryan": ["OK"]})
+        original = government_maps.modes
+
+        def fake(root="."):
+            found = original(root)
+            found["states"] = [mode]
+            return found
+        government_maps.modes = fake
+        try:
+            self.assertTrue(any("scoped source 'bryan'" in p for p in government_maps.check()))
+        finally:
+            government_maps.modes = original
+
+
+class TestPublicLaw280(unittest.TestCase):
+    """Every state's fact credited state jurisdiction in Indian country only
+    to Public Law 280; since Castro-Huerta (2022) every state shares some."""
+
+    def test_every_state_not_named_in_the_law_cites_castro_huerta(self):
+        pl280 = _mode("pl280")
+        for code in government_maps.STATES:
+            if code in government_maps.PL280_MANDATORY:
+                self.assertNotIn("castro-huerta", government_maps.sources_for(pl280, code))
+                continue
+            self.assertIn("Castro-Huerta", pl280["facts"][code], code)
+            self.assertIn("castro-huerta", government_maps.sources_for(pl280, code), code)
+
+    def test_oklahomas_fact_names_mcgirt(self):
+        pl280 = _mode("pl280")
+        self.assertIn("McGirt v. Oklahoma", pl280["facts"]["OK"])
+        self.assertIn("mcgirt", government_maps.sources_for(pl280, "OK"))
+        self.assertNotIn("mcgirt", government_maps.sources_for(pl280, "KS"))
+
+
+class TestTheBallotMap(unittest.TestCase):
+    """The state-government guide never said which state offices are on the
+    2026 ballot, though kyc/ballot2026.py holds a sourced record of each."""
+
+    def test_every_state_has_a_value_its_own_record_and_the_tables_counts(self):
+        from kyc import ballot2026
+
+        mode = _mode("ballot")
+        self.assertEqual(sorted(mode["values"]), government_maps.STATES)
+        for code in government_maps.STATES:
+            own = government_maps.sources_for(mode, code)
+            urls = {government_maps.SOURCES[key][1] for key in own}
+            record = ballot2026.for_state(code)
+            wanted = {o["source"] for o in record["offices"].values()} | {
+                c["source"] for c in record["chambers"].values()}
+            self.assertEqual(urls, wanted, code)
+        governors = sum(1 for v in mode["values"].values() if v in ("both", "governor"))
+        self.assertEqual(governors, ballot2026.stats()["governor"])
+        self.assertIn("16 of the 31 seats in the Senate", mode["facts"]["TX"])
+        self.assertIn(str(ballot2026.stats()["governor"]), mode["about"])
+
+    def test_the_text_states_the_tables_counts(self):
+        from kyc import ballot2026
+
+        figures = government_maps.figures()
+        self.assertEqual(figures["governors-2026"], ballot2026.stats()["governor"])
+        self.assertEqual(figures["chambers-2026"], ballot2026.stats()["chambersUp"])
+
+
 if __name__ == "__main__":
     unittest.main()

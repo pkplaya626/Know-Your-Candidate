@@ -1397,8 +1397,8 @@ a.badge-link {
 .contact-office { margin: 0 0 var(--s-2); }
 .contact-office a { color: inherit; }
 
-.committee { align-items: flex-start; }
-.committee .badge { margin-left: var(--s-2); vertical-align: middle; }
+.committee, .leadership-posts { align-items: flex-start; }
+.committee .badge, .leadership-posts .badge { margin-left: var(--s-2); vertical-align: middle; }
 .committee-subs {
   display: block;
   margin-top: 2px;
@@ -3188,11 +3188,177 @@ a.badge-link {
   font-size: var(--t-sm);
 }
 .guide-chart-row span { color: var(--text-muted); line-height: 1.45; }
-.guide-chart figcaption {
+.guide-chart figcaption,
+.guide-flow figcaption,
+.guide-checks figcaption,
+.guide-ladder figcaption,
+.guide-timeline figcaption {
   margin-top: var(--s-2);
   font-size: var(--t-sm);
   color: var(--text-muted);
 }
+
+/* A process as boxes on a line: how a bill becomes law. Page text in
+ * HTML, never SVG text (rule 46); the line is each box's border. */
+.guide-flow { margin: 0 0 var(--s-5); max-width: 72ch; }
+.guide-flow-steps {
+  counter-reset: flow;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.guide-flow-step {
+  counter-increment: flow;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  margin: 0 0 var(--s-3) var(--s-6);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+  font-size: var(--t-sm);
+  line-height: 1.5;
+}
+.guide-flow-step::before {
+  content: counter(flow);
+  position: absolute;
+  left: calc(-1 * var(--s-6));
+  top: var(--s-3);
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--surface-3);
+  color: var(--text);
+  font-weight: 700;
+  font-size: var(--t-xs);
+  line-height: 1.6rem;
+  text-align: center;
+}
+/* The connector: one line through every step's number, from the first
+ * to the last. The numbers sit on it. */
+.guide-flow-steps { position: relative; }
+.guide-flow-steps::before {
+  content: "";
+  position: absolute;
+  left: calc(0.8rem - 1px);
+  top: calc(var(--s-3) + 0.8rem);
+  bottom: var(--s-6);
+  border-left: 2px solid var(--border-strong);
+}
+.guide-flow-step::before { z-index: 1; }
+.guide-flow-step > span { color: var(--text-muted); }
+.guide-flow-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  gap: var(--s-2);
+  margin: var(--s-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.guide-flow-options li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding: var(--s-2) var(--s-3);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+.guide-flow-options span { color: var(--text-muted); }
+
+/* Who checks whom: a box per branch, its checks on the others inside. */
+.guide-checks { margin: 0 0 var(--s-5); }
+.guide-checks-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: var(--s-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.guide-checks-branch {
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+  font-size: var(--t-sm);
+}
+.guide-checks-branch > strong { display: block; margin-bottom: var(--s-2); font-size: var(--t-md); }
+.guide-checks-branch ul { margin: 0; padding: 0; list-style: none; }
+.guide-checks-branch li { margin: 0 0 var(--s-2); color: var(--text-muted); line-height: 1.5; }
+.guide-checks-on { font-weight: 700; color: var(--text); }
+
+/* The two court systems side by side, highest court first. */
+.guide-ladder { margin: 0 0 var(--s-5); }
+.guide-ladder-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: var(--s-4);
+}
+.guide-ladder-head { margin: 0 0 var(--s-2); font-weight: 700; font-size: var(--t-md); }
+.guide-ladder-rungs { margin: 0; padding: 0; list-style: none; }
+.guide-ladder-rungs li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  margin: 0 0 var(--s-4);
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+  font-size: var(--t-sm);
+}
+/* An appeal goes up: a short line from each court to the one above. */
+.guide-ladder-rungs li + li::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: calc(-1 * var(--s-4) - 1px);
+  height: var(--s-4);
+  border-left: 2px solid var(--border-strong);
+}
+.guide-ladder-rungs span { color: var(--text-muted); }
+.guide-ladder-paths {
+  margin: 0;
+  padding-left: var(--s-5);
+  font-size: var(--t-sm);
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+.guide-ladder-paths strong { color: var(--text); }
+
+/* Dated steps from Election Day to January 3; kyc-guide.js marks the
+ * past ones done and the next one as next. */
+.guide-timeline { margin: 0 0 var(--s-5); max-width: 72ch; }
+.guide-timeline-steps { margin: 0; padding: 0; list-style: none; }
+.guide-timeline-steps li {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: var(--s-1) var(--s-3);
+  padding: var(--s-2) 0 var(--s-2) var(--s-3);
+  border-left: 3px solid var(--border);
+  font-size: var(--t-sm);
+  line-height: 1.5;
+}
+.guide-timeline-steps time { grid-row: span 2; font-weight: 700; }
+.guide-timeline-steps span { color: var(--text-muted); }
+.guide-timeline-steps .badge { margin-left: var(--s-1); }
+.guide-timeline-steps li.is-past { border-left-color: var(--border-strong); }
+.guide-timeline-steps li.is-past time::after { content: " ✓"; color: var(--text-muted); }
+.guide-timeline-steps li.is-next { border-left-color: var(--accent); background: var(--surface-2); }
+
+/* The elections page's state picker: opens that state's voting section. */
+.guide-voting {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-3);
+  margin: 0 0 var(--s-4);
+}
+.guide-voting label { font-weight: 600; font-size: var(--t-sm); }
 
 .guide-cards {
   display: grid;
@@ -3435,6 +3601,15 @@ a.badge-link {
 }
 .guide-fact-courts li + li { margin-top: var(--s-1); }
 .guide-fact-courts a { display: inline-flex; align-items: center; gap: var(--s-2); }
+/* A view's list under its fact: each tribal government and its leader. */
+.guide-fact-list {
+  margin: var(--s-2) 0;
+  padding-left: var(--s-5);
+  font-size: var(--t-sm);
+  line-height: 1.5;
+}
+.guide-fact-list li + li { margin-top: var(--s-1); }
+.guide-fact-list ul { margin: var(--s-1) 0 0; padding-left: var(--s-4); }
 
 /* The page's text, folded under the facts. */
 .guide-more { margin-top: var(--s-5); }
@@ -3461,6 +3636,9 @@ a.badge-link {
   transition: transform 0.15s var(--ease);
 }
 .guide-more-section[open] > summary::before { transform: rotate(90deg); }
+/* A section's title is a heading inside its summary (a screen reader's
+ * list of headings finds it), set in the summary's own type. */
+.guide-more-heading { display: inline; margin: 0; font: inherit; }
 .guide-more-section .guide-roles { grid-template-columns: 1fr; }
 .guide-more-section .guide-table { font-size: var(--t-xs); }
 @media (pointer: coarse) {

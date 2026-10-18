@@ -45,6 +45,7 @@ data/judiciary.json         ──┤   (every sitting federal judge: FJC direct
 data/judicial_vacancies.json ─┤   (vacancies, announced vacancies and emergencies: uscourts.gov)
 data/political_history.json ──┤   (public offices held: congress-legislators; Wikidata the article confirms)
 data/oge_disclosures.json   ──┤   (the executive's financial reports: Office of Government Ethics, by office)
+data/tribal_leaders.json    ──┤   (every tribal government and its leader: BIA Tribal Leaders Directory)
 data/record_2026.json       ──┤   (the frozen 2026 race set: record --freeze)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
@@ -102,7 +103,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `census_governments.json`, `state_legislators.json`, `executives.json`,
   `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`,
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
-  `political_history.json` and `oge_disclosures.json` are caches, but
+  `political_history.json`, `oge_disclosures.json` and `tribal_leaders.json` are caches, but
   they *are* hand-editable. `stategov.js` is generated from the last five,
   with `kyc/ballot2026.py`: which state offices and legislative seats are on
   the 2026 ballot, a curated table citing each state's own record.
@@ -152,16 +153,17 @@ python build_profile_site.py judiciary        # every sitting federal judge (FJC
 python build_profile_site.py vacancies        # vacancies in the federal courts, as uscourts.gov lists them
 python build_profile_site.py history          # public offices each person has held (congress-legislators, Wikidata, Wikipedia)
 python build_profile_site.py oge              # the executive's financial reports (Office of Government Ethics), by office
+python build_profile_site.py tribes           # every tribal government and its leader (BIA Tribal Leaders Directory)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1395 tests, no dependencies
-npm install && npm test                       # 1858 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1436 tests, no dependencies
+npm install && npm test                       # 1885 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`,
-`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts. Run the
+`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -609,7 +611,18 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     a page checked on another day carries its own `"reviewed"` date.
     Who holds an office is never typed in: the Congress page renders
     committee leads from the rosters, and a committee's minority lead is
-    found by the seat's `side`, not its title.
+    found by the seat's `side`, not its title. The 2026-10-17 audit found
+    the same rosters titling the narcotics caucus's minority lead
+    "Chairman", two chairmen of one panel: a minority seat with a chair's
+    title is a build warning until the body's own style is recorded, with
+    evidence, in `overrides.COMMITTEE_TITLES`. The Speaker and the party
+    leaders come from congress-legislators' `leadership_roles`, tribal
+    leaders from the BIA's directory. A count the text states that a table
+    determines is written `{{key}}` and filled from that table: the text
+    said "about 26" lieutenant governors preside over the map's 24. A page
+    has one name (`government.name`) wherever it is named (rule 75), a
+    state's fact on a map cites the general sources and its own (`scoped`),
+    never another state's, and a figure is page text, never SVG (rule 46).
 
 49. **A map of every state is a claim about every state.** The guide's maps
     (`kyc/government_maps.py`) must give each of the fifty a sourced value,
