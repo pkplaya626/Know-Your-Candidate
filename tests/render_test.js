@@ -117,6 +117,11 @@ function buildPage(page, opts) {
     // Without the version stamp a local asset's URL carries (kyc/assets.py).
     const file = path.join(path.dirname(path.join(SITE, page)), ...src.split("?")[0].split("/"));
     if (!fs.existsSync(file)) throw new Error(`${page} references a missing ${src}`);
+    // opts.block: scripts that "failed to load", to see what a reader is told.
+    if ((opts.block || []).some((b) => src.split("?")[0].endsWith(b))) {
+      html = html.replace(tag, () => "");
+      continue;
+    }
     html = html.replace(tag, () => "<script>\n" + fs.readFileSync(file, "utf8") + "\n</script>");
   }
 
@@ -871,6 +876,9 @@ async function testDirectoryAsync() {
       const note = D.getElementById("profileModalHeld").querySelector(".held-note");
       check("where the sources differ, the row says how",
         !!note && /Wikidata/.test(note.getAttribute("title")));
+      // A phone shows no tooltip: the note's words are on the page (FEDERAL-20).
+      check("and says it in visible words, not only a tooltip",
+        !!note && /Wikidata/.test(note.textContent) && /Wikipedia/.test(note.textContent), note && note.textContent);
       KYC.profile.close();
     }
     const unlinked = window.legislatorsData.find((p) => p.isCandidate && !p.politicalHistory);
@@ -5584,6 +5592,16 @@ async function testCounties() {
         !/party-/.test(s.getAttribute("class"))));
     check("no text inside the map's SVG (rule 46)", !D.querySelector("#localMap svg text"));
     check("a shared county link opens that county", D.getElementById("localPanelTitle").textContent === "Harris County");
+    // FEDERAL-08: which federal court covers the county, from 28 U.S.C. 124,
+    // through the one small file the county pages load.
+    const court = D.querySelector("#localPanelBody .local-court");
+    check("the county names its federal district court and division, linked to the court's page",
+      !!court && /Southern District of Texas/.test(court.textContent) &&
+      /Houston Division/.test(court.textContent) &&
+      !!court.querySelector('a[href="../courts/tx-s.html"]'), court ? court.textContent : "none");
+    check("the court table loads before the page's module",
+      sources.indexOf("../data/courtcounties.js") > -1 &&
+      sources.indexOf("../data/courtcounties.js") < sources.indexOf("../assets/kyc-local.js"));
     const rows = state.governments["48201"];
     const listed = D.querySelectorAll("#localPanelBody .local-item").length;
     check("every government and school system in the county is listed", listed === rows.length,
@@ -7081,8 +7099,9 @@ async function testFederal() {
     const term = D.getElementById("executiveTerm");
     const same = d.president.since === d.vicePresident.since && d.president.until === d.vicePresident.until;
     check("a term they share is said once, above them", !same || (!!term &&
-      term.textContent.indexOf(d.president.since) !== -1 &&
-      [...D.querySelectorAll(".fed-leader")].every((c) => c.textContent.indexOf(d.president.until) === -1)),
+      term.textContent.indexOf(window.KYC.dateWords(d.president.since)) !== -1 &&
+      [...D.querySelectorAll(".fed-leader")].every((c) =>
+        c.textContent.indexOf(window.KYC.dateWords(d.president.until)) === -1)),
       term && term.textContent);
     check("the President, then the Vice President",
       leaders.length === 2 && leaders[0].textContent.indexOf(d.president.name) !== -1 &&
@@ -7116,7 +7135,9 @@ async function testFederal() {
       sized.every((img) => urlsOf(img).every((u) =>
         u.split("?")[0] === img.getAttribute("src").split("?")[0])) &&
       sized.some((img) => urlsOf(img).length > 1));
-    const links = [...D.querySelectorAll('#courts table a[href^="../courts/"]')].map((a) => a.getAttribute("href"))
+    // The court tables; the list of vacancies links courts again, by row.
+    const links = [...D.querySelectorAll('#courts table a[href^="../courts/"]')]
+      .filter((a) => !a.closest("#vacancy-list")).map((a) => a.getAttribute("href"))
       .filter((href) => href.indexOf("#") === -1);
     check("every court but the Supreme Court is linked, once",
       links.length === d.courts.length - 1 && new Set(links).size === links.length,
@@ -7157,7 +7178,8 @@ async function testFederal() {
       summary.textContent.indexOf(d.vacancies.totals.vacancies + " vacancies") !== -1 &&
       summary.textContent.indexOf(window.KYC.dateWords(d.vacancies.asOf)) !== -1, summary && summary.textContent);
     check("each court's row gives its vacancies",
-      [...D.querySelectorAll("#courts thead")].every((h) => /Vacancies/.test(h.textContent)));
+      [...D.querySelectorAll("#courts thead")].filter((h) => !h.closest("#vacancy-list"))
+        .every((h) => /Vacancies/.test(h.textContent)));
     const changes = D.getElementById("changes");
     const withHistory = d.offices.filter((o) => (o.history || []).length);
     check("the Cabinet's changes since the term began are listed", !withHistory.length ||
@@ -7190,7 +7212,8 @@ async function testFederal() {
             .find((c) => c.querySelector(".fed-office").textContent === o.office);
           const text = card ? card.textContent : "";
           return /Acting from /.test(text) && /their Wikipedia article/.test(text) &&
-            !/In office Since/.test(text) && (!row.confirmed || text.indexOf("then confirmed " + row.confirmed.date) !== -1);
+            !/In office Since/.test(text) && (!row.confirmed ||
+              text.indexOf("then confirmed " + window.KYC.dateWords(row.confirmed.date)) !== -1);
         }), actingNow.map((o) => o.office).join(", "));
       const cards = [...D.querySelectorAll("#cabinet .fed-officer")];
       check("'after' only where the hand-over is shown", withHistory.every((o) => {
@@ -7224,15 +7247,22 @@ async function testFederal() {
     check("the section is the federal courts, not 'the Article III courts'",
       !!courtsHead && courtsHead.textContent === "The federal courts", courtsHead && courtsHead.textContent);
     const lede = D.getElementById("courtsLede");
-    check("the lede says the territorial courts' judges are not listed, and why", !!lede &&
-      /territorial district courts/.test(lede.textContent) && /but not their judges/.test(lede.textContent) &&
+    check("the lede says the territorial courts' judges are not in the directory, why, and from where",
+      !!lede && /territorial district courts/.test(lede.textContent) &&
+      /not in the directory/.test(lede.textContent) && /court’s own website/.test(lede.textContent) &&
       /Article IV/.test(lede.textContent), lede && lede.textContent);
     const territorial = d.courts.filter((c) => !c.listed && c.kind === "territorial");
     check("each territorial court's row says its judges serve under Article IV",
       territorial.length === 3 && territorial.every((c) => {
         const a = D.querySelector('#courts a[href="../courts/' + c.id + '.html"]');
         const row = a && a.closest("tr");
-        return !!row && /Article IV judges: not in the directory/.test(row.textContent);
+        // FEDERAL-06: with the court's own list read, its count and chief,
+        // attributed; otherwise that the directory does not hold them.
+        return !!row && (c.courtListed
+          ? /Article IV judgeships? filled, by the court’s list/.test(row.textContent) &&
+            (!c.courtListed.chief || (row.textContent.includes(c.courtListed.chief) &&
+              /the court’s list/.test(row.textContent)))
+          : /Article IV judges: not in the directory/.test(row.textContent));
       }), territorial.map((c) => c.id).join(", "));
   });
 
@@ -7410,14 +7440,19 @@ async function testFederal() {
       const table = [...D.querySelectorAll("#supreme-court table")].find((t) =>
         /Retired justices/.test(t.textContent));
       const heads = table ? [...table.querySelectorAll("thead th")].map((th) => th.textContent) : [];
-      check("the retired justices' table says when each joined the Court and when they retired",
-        heads.includes("Joined the Court") && heads.includes("Retired") && !heads.includes("Since"),
+      check("the retired justices' table says when each took the oath and when they retired",
+        heads.includes("Took the oath") && heads.includes("Retired") && !heads.includes("Since"),
         heads.join(" | "));
       const row = table && [...table.querySelectorAll("tbody tr")].find((tr) =>
         tr.textContent.indexOf(retired.name) !== -1);
-      check("their retirement is the directory's senior-status date", !!row &&
-        row.querySelector('[data-label="Retired"]').textContent === retired.seats[0].seniorSince &&
-        row.querySelector('[data-label="Joined the Court"]').textContent === retired.seats[0].commissioned,
+      // FEDERAL-11: one "took the oath" date for a justice on every page -
+      // the Court's own, never the commission (Kennedy: 1988-02-18, not -11).
+      check("their retirement is the directory's senior-status date, their start the Court's oath", !!row &&
+        row.querySelector('[data-label="Retired"]').textContent ===
+          window.KYC.dateWords(retired.seats[0].seniorSince) &&
+        !!retired.courtService &&
+        row.querySelector('[data-label="Took the oath"]').textContent ===
+          window.KYC.dateWords(retired.courtService.oath),
         row && row.textContent);
       D.querySelector('#supreme-court [data-official="' + retired.id + '"]').click();
       const body = D.getElementById("officialModalBody").textContent;
@@ -7546,8 +7581,23 @@ async function testFederal() {
     const { D: doc, errors: errs } = guam;
     check("no page errors", errs.length === 0, errs.join(" | "));
     const text = doc.getElementById("federalBody").textContent;
-    check("says why nobody is listed, and that it is not a vacancy",
-      /Article IV/.test(text) && /not a vacancy/.test(text) && !doc.querySelector("#federalBody table"));
+    const own = guam.window.kycCourt.gu.courtList;
+    check("says why its judges are not in the directory", /Article IV/.test(text) && /ten-year terms/.test(text));
+    // FEDERAL-06: the judges the court's own site lists, attributed and
+    // dated, never more than its seats, and nothing to open (no FJC record).
+    if (own && !own.unread) {
+      const names = [...doc.querySelectorAll("#courtList tbody th")].map((th) => th.textContent);
+      check("its judges, as the court lists them", names.length === own.judges.length &&
+        own.judges.every((j) => names.some((n) => n.startsWith(j.name))), names.join(" | "));
+      check("no more than the statute's seats, at most one chief", own.judges.length <= own.seats &&
+        own.judges.filter((j) => j.chief).length <= 1);
+      check("attributed to the court's own website, with the day it was read",
+        !!doc.querySelector('#courtList a[href="' + own.source + '"]') &&
+        text.includes(guam.window.KYC.dateWords(own.read)));
+      check("with no record to open", !doc.querySelector("#courtList [data-official]"));
+    } else {
+      check("a list never read says so, and that it is not a vacancy", /not a vacancy/.test(text));
+    }
     check("and where its appeals go", !!doc.querySelector('.fed-related a[href="ca9.html"]'));
   });
 
@@ -7563,7 +7613,450 @@ async function testFederal() {
     check("retired justices apart", !retired || doc.querySelectorAll("#retired [data-official]").length === retired);
     check("with the date each retired", !retired || [...doc.querySelectorAll("#retired thead th")]
       .some((th) => th.textContent === "Retired"));
+    // FEDERAL-11: the justices' column is "Justice", their date the oath
+    // the Court lists - the same date the hub's cards give.
+    const heads = [...doc.querySelectorAll("#active thead th")].map((th) => th.textContent);
+    check("the justices are headed 'Justice', dated by the oath", heads[0] === "Justice" &&
+      heads.includes("Took the oath") && !heads.includes("Commissioned"), heads.join(" | "));
+    const first = w.kycFederal.supremeCourt.members[0];
+    const cellText = (doc.querySelector('#active tbody tr [data-label="Took the oath"]') || {}).textContent;
+    check("with the Court's own oath date, as on the hub",
+      cellText === w.KYC.dateWords(first.justice.oath), cellText);
   });
+
+  await testFederalAudit();
+}
+
+/* The reader-side audit of 2026-10-17 (FEDERAL-*): who sits, announced
+ * vacancies, the hub's vacancies and nominees, the executive's departed
+ * officers, the line of succession, the agencies' own websites. */
+async function testFederalAudit() {
+  const hub = await buildPage("federal/index.html");
+  await settle(50);
+  const { window, D, errors } = hub;
+  const d = window.kycFederal;
+  suite("federal/index.html — vacancies and nominees, in one place", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const list = D.getElementById("vacancy-list");
+    const rows = list ? list.querySelectorAll("tbody tr").length : 0;
+    check("every vacancy, now and announced, has a row", rows === d.vacancies.rows.length,
+      `${rows} rows, ${d.vacancies.rows.length} vacancies`);
+    // In the courts' tables' order: by circuit, then by the name shown -
+    // never by the hidden code (the District of Alaska before Alabama's).
+    const circuits = d.courts.filter((c) => c.kind === "appeals").map((c) => c.circuit);
+    const byId = Object.fromEntries(d.courts.map((c) => [c.id, c]));
+    const shown = (tr) => tr.querySelector("th a").getAttribute("href").replace(/^.*\//, "").replace(/\.html$/, "");
+    [...list.querySelectorAll("table")].forEach((t) => {
+      const keys = [...t.querySelectorAll("tbody tr")].map((tr) => {
+        const c = byId[shown(tr)];
+        return [circuits.indexOf(c.circuit), c.kind === "appeals" ? 0 : 1, tr.querySelector("th a").textContent];
+      });
+      check("the " + t.querySelector("caption").textContent + " table is in the courts' order",
+        keys.every((k, i) => i === 0 || (keys[i - 1][0] < k[0] || (keys[i - 1][0] === k[0] &&
+          (keys[i - 1][1] < k[1] || (keys[i - 1][1] === k[1] && keys[i - 1][2] <= k[2]))))),
+        keys.map((k) => k[2]).slice(0, 8).join(" | "));
+    });
+    check("no empty Nominated cell", ![...list.querySelectorAll('[data-label="Nominated"]')]
+      .some((c) => !c.textContent.trim()));
+    const summary = D.getElementById("vacancySummary").textContent;
+    check("the summary counts the nominees for announced vacancies too",
+      !d.vacancies.futureNominees || summary.indexOf((d.vacancies.totals.nominees + d.vacancies.futureNominees) +
+        " nominees are pending in all") !== -1, summary);
+    check("a judicial emergency is defined in words a phone shows, not a tooltip",
+      /A judicial emergency is a vacancy the courts have designated as one/.test(summary) &&
+      !D.querySelector('#courts .badge[title]'));
+    // A court with announced vacancies only: not "None listed" (ca5).
+    const announced = d.courts.find((c) => !c.vacancies && c.future);
+    const row = announced && D.querySelector('#courts a[href="../courts/' + announced.id + '.html"]').closest("tr");
+    check("a court with only announced vacancies says so in its row", !announced ||
+      (/announced/.test(row.querySelector('[data-label="Vacancies"]').textContent) &&
+       !/None listed/.test(row.textContent)), row && row.textContent);
+    // FEDERAL-V1: a judge nominated to another court is a nominee, not appointed.
+    const texts = [...list.querySelectorAll('[data-label="Why"]')].map((c) => c.textContent);
+    const future = d.vacancies.rows.filter((r) => r.future);
+    check("no announced vacancy is told in the past tense",
+      future.length > 0 && !texts.slice(texts.length - future.length).some((t) =>
+        /^(Took senior status|Retired|Resigned|Appointed to another court)$/.test(t)),
+      texts.slice(texts.length - future.length).join(" | "));
+    const elevated = future.find((r) => r.nominatedTo);
+    check("an elevation names the court the judge is nominated to", !elevated || texts.some((t) =>
+      t === "Nominated to the " + elevated.nominatedTo.name.replace(/^U\.S\. /, "")), texts.join(" | "));
+    // FEDERAL-17: the contradictory chief is a reader's sentence.
+    const unsettled = d.courts.find((c) => c.chiefUnsettled);
+    const cell = unsettled && D.querySelector('#courts a[href="../courts/' + unsettled.id + '.html"]')
+      .closest("tr").querySelector('[data-label="Chief judge"]');
+    check("a chief the directory contradicts reads 'Not settled', linked to why", !unsettled ||
+      (/^Not settled \(see the court’s page\)$/.test(cell.textContent) &&
+       !!cell.querySelector('a[href$="#chiefUnsettled"]')), cell && cell.textContent);
+    // FEDERAL-24: the Article I courts are named and linked.
+    const lede = D.getElementById("courtsLede");
+    check("the national courts outside the directory are named and linked",
+      (d.otherCourts || []).length === 4 && d.otherCourts.every((c) =>
+        lede.textContent.indexOf(c.name) !== -1 && !!lede.querySelector('a[href="' + c.judges + '"]')),
+      lede.textContent);
+  });
+
+  suite("federal/index.html — Varlan: senior by the courts' list, active by the directory", () => {
+    const moving = d.courts.filter((c) => c.listedSenior);
+    check("such a court exists in the committed data", moving.length > 0);
+    moving.forEach((c) => {
+      const row = D.querySelector('#courts a[href="../courts/' + c.id + '.html"]').closest("tr");
+      const judges = row.querySelector('[data-label="Judges"]').textContent;
+      check(c.id + ": counted senior, and the row says by which source",
+        /senior by the courts’ list of vacancies, not yet by the FJC directory/.test(judges), judges);
+    });
+  });
+
+  suite("federal/index.html — the executive: websites, succession, former officers", () => {
+    const cards = [...D.querySelectorAll("#cabinet .fed-officer")];
+    const sited = d.offices.filter((o) => o.holder && o.site);
+    check("every office the directory lists a website for links it, checked or not (FEDERAL-07)",
+      sited.length >= 20 && sited.every((o) => cards.some((c) =>
+        c.querySelector(".fed-office").textContent === o.office &&
+        !!c.querySelector('a[href="' + o.site.url + '"]'))), `${sited.length}`);
+    check("no link reads 'Named there'", !/Named there/.test(D.getElementById("cabinet").textContent));
+    const line = [...D.querySelectorAll("#succession .fed-succession li")];
+    check("the line of succession names the Vice President, the Speaker, the President pro tempore, " +
+      "then the departments", line.length === d.succession.length && line.length === 18 &&
+      /Vice President/.test(line[0].textContent) && /Speaker of the House/.test(line[1].textContent) &&
+      /President pro tempore/.test(line[2].textContent) && /Secretary of State/.test(line[3].textContent),
+      line.map((li) => li.textContent).slice(0, 4).join(" | "));
+    check("the congressional officers link to their profiles",
+      d.succession.filter((p) => p.kind === "member").every((p) =>
+        !!D.querySelector('#succession a[href="../index.html#/profile/' + p.id + '"]')));
+    check("the acting-officer caveat is said", /3 U\.S\.C\. 19\(e\)/.test(D.getElementById("succession").textContent));
+    const lede = D.querySelector("#succession .guide-lede").textContent;
+    check("the Vice President succeeds by the Constitution, the rest by the statute",
+      /First the Vice President \(the 25th Amendment\)/.test(lede) &&
+      !/if the office and the Vice Presidency were both empty \(3 U\.S\.C\. 19\)/.test(lede), lede);
+    check("an office nobody is named for says why",
+      d.succession.filter((p) => p.kind === "missing").every((p) => !p.reason ||
+        line.some((li) => li.textContent.indexOf(p.reason) !== -1)));
+    check("no date on a Cabinet card is left as 2025-01-24",
+      !/\b\d{4}-\d{2}-\d{2}\b/.test(D.getElementById("cabinet").textContent));
+    // FEDERAL-13: no bare "Since 2025" beside an exact confirmation date.
+    const rough = d.offices.filter((o) => (o.history || []).some((r) => r.current && r.start &&
+      r.start.shown && r.start.shown.precision !== "day" && !r.actingNote));
+    check("a start known only to the year says why, beside the vote's day", rough.every((o) => {
+      const card = cards.find((c) => c.querySelector(".fed-office").textContent === o.office);
+      const fact = card ? card.textContent : "";
+      return !/In office Since \d{4}(?!-)/.test(fact) && /agree only on the (year|month)/.test(fact);
+    }), rough.map((o) => o.office).join(", "));
+    // FEDERAL-18: the federal posts a filer-checked OGE report lists,
+    // quoted and attributed, apart from the offices two sources agree on.
+    const poster = d.offices.find((o) => o.holder && ((o.holder.disclosures || {}).otherPositions || {}).rows &&
+      o.holder.disclosures.otherPositions.rows.length);
+    check("an officer whose OGE report lists other federal posts exists", !!poster);
+    if (poster) {
+      window.KYC.official.open(poster.holder.id);
+      const head = [...D.querySelectorAll("#officialModal .panel-head")]
+        .find((h) => /Other federal posts, as their OGE report lists them/.test(h.textContent));
+      const section = head && head.closest("section");
+      check("they are listed in the report's words, linked to the report",
+        !!section && poster.holder.disclosures.otherPositions.rows.every((r) => section.textContent.indexOf(r) !== -1) &&
+        !!section.querySelector('a[href="' + poster.holder.disclosures.otherPositions.url + '"]'),
+        section && section.textContent.slice(0, 200));
+      const held = [...D.querySelectorAll("#officialModal .panel-head")]
+        .find((h) => /Public offices held/.test(h.textContent));
+      const items = section ? [...section.querySelectorAll(".oge-positions li")] : [];
+      check("'Present' is dated as the report's, never as today's",
+        items.every((li) => !/Present\)/.test(li.textContent) ||
+          /“Present” as of the report, posted [A-Z]/.test(li.textContent)),
+        items.map((li) => li.textContent).join(" | "));
+      check("and never merged into the offices two sources agree on", !!held &&
+        !poster.holder.disclosures.otherPositions.rows.some((r) =>
+          held.closest("section").textContent.indexOf(r) !== -1));
+      window.KYC.official.close();
+    }
+    const former = d.former || [];
+    check("the departed officers are records (FEDERAL-19)", former.length > 0 &&
+      former.every((p) => window.KYC.official.officials()[p.id]));
+    const bondi = former[0];
+    const button = bondi && D.querySelector('#changes [data-official="' + bondi.id + '"]');
+    check("their names in the changes table open them", !!button);
+    if (button) {
+      button.click();
+      const body = D.getElementById("officialModalBody").textContent;
+      check("their record opens with a banner saying they left",
+        D.getElementById("officialModalName").textContent === bondi.name &&
+        /^They no longer hold this office/.test(D.getElementById("officialLeft").textContent) &&
+        /(Left office|Acting service ended)/.test(D.getElementById("officialModalMeta").textContent) &&
+        // Said once: the subheading has the day, the banner does not repeat it.
+        !/Left office/.test(D.getElementById("officialLeft").textContent) &&
+        !/Nobody here by this link/.test(body), body.slice(0, 200));
+      window.KYC.official.close();
+    }
+  });
+
+  const tne = await buildPage("courts/tn-e.html");
+  await settle(50);
+  suite("courts/tn-e.html — a judge the two sources disagree about (FEDERAL-01)", () => {
+    const { window: w, D: doc, errors: errs } = tne;
+    check("no page errors", errs.length === 0, errs.join(" | "));
+    const moved = w.kycCourt["tn-e"].judges.filter((j) => j.listedSenior);
+    check("the committed data has one", moved.length === 1);
+    moved.forEach((j) => {
+      check("not among the active judges", !doc.querySelector('#active [data-official="' + j.id + '"]'));
+      const row = doc.querySelector('#senior [data-official="' + j.id + '"]');
+      const tr = row && row.closest("tr");
+      check("among the senior, with which source says what", !!tr &&
+        /uscourts\.gov lists senior status from/.test(tr.textContent) &&
+        /FJC directory has not recorded it yet/.test(tr.textContent), tr && tr.textContent);
+      row.click();
+      const meta = doc.getElementById("officialModalMeta").textContent;
+      check("their dialog says both", /by the courts’ list of vacancies/.test(meta) &&
+        /FJC directory still lists active service/.test(meta), meta);
+      w.KYC.official.close();
+    });
+  });
+
+  const lae = await buildPage("courts/la-e.html");
+  await settle(50);
+  suite("courts/la-e.html — a sitting judge nominated to another court (FEDERAL-V1)", () => {
+    const { window: w, D: doc, errors: errs } = lae;
+    check("no page errors", errs.length === 0, errs.join(" | "));
+    const later = w.kycCourt["la-e"].future || [];
+    const rows = [...doc.querySelectorAll("#vacancies table")].pop();
+    const why = rows ? [...rows.querySelectorAll('[data-label="Why"]')].map((c) => c.textContent) : [];
+    check("an announced elevation is a nomination, never 'Appointed to another court'",
+      later.length > 0 && why.length === later.length &&
+      !why.some((t) => /Appointed to another court/.test(t)) && why.some((t) => /^Nominated to/.test(t)),
+      why.join(" | "));
+  });
+
+  const txs = await buildPage("courts/tx-s.html");
+  await settle(50);
+  suite("courts/tx-s.html — confirmed, not yet commissioned (FEDERAL-25)", () => {
+    const { window: w, D: doc, errors: errs } = txs;
+    check("no page errors", errs.length === 0, errs.join(" | "));
+    const pending = w.kycCourt["tx-s"].pending || [];
+    const section = doc.getElementById("pending");
+    check("listed apart, and not counted", pending.length === 0 || (!!section &&
+      pending.every((p) => section.textContent.indexOf(p.name) !== -1) &&
+      !pending.some((p) => (doc.getElementById("active") || {}).textContent.indexOf(p.name) !== -1)),
+      section && section.textContent.slice(0, 200));
+  });
+
+  suite("courts/tx-s.html — how to reach the court (LINKS-13, FEDERAL-21)", () => {
+    const { window: w, D: doc } = txs;
+    const court = w.kycFederal.courts.find((c) => c.id === "tx-s");
+    const block = doc.getElementById("this-court");
+    check("the court's own website is linked", !!block && !!court.site &&
+      !!block.querySelector('a[href="' + court.site + '"][rel~="noopener"]'));
+    check("with where to find a case", !!block.querySelector('a[href="https://pcl.uscourts.gov/"]'));
+    const units = w.kycCourt["tx-s"].divisions || [];
+    const items = block ? [...block.querySelectorAll(".fed-divisions > li")] : [];
+    check("each division, where it sits and its counties, from 28 U.S.C. 81-131",
+      units.length > 1 && items.length === units.length &&
+      /Houston Division/.test(block.textContent) && /College Station/.test(block.textContent) &&
+      /Harris County/.test(block.textContent), block && block.textContent.slice(0, 300));
+  });
+
+  const ISO = /\b\d{4}-\d{2}-\d{2}\b/;
+  const lae2 = lae;
+  suite("courts/la-e.html — the areas in Louisiana's words", () => {
+    const block = lae2.D.getElementById("this-court");
+    const covers = block && [...block.querySelectorAll(".fed-fact")].find((f) => /Covers/.test(f.textContent));
+    const summaries = block ? [...block.querySelectorAll(".fed-counties summary")].map((x) => x.textContent) : [];
+    check("parishes, never counties", !!covers && /\d+ parishes/.test(covers.textContent) &&
+      !/count(y|ies)/.test(covers.textContent) && summaries.length > 0 &&
+      summaries.every((x) => /^(\d+ parish(es)?|List them by name)$/.test(x)), (covers && covers.textContent) + " | " + summaries.join(" | "));
+    check("a site of a district court mentions jury service", /jury service/.test(block.textContent));
+  });
+  const ca9 = await buildPage("courts/ca9.html");
+  await settle(50);
+  suite("courts/ca9.html — an appellate court's website", () => {
+    const block = ca9.D.getElementById("this-court");
+    check("no jury service at a court that holds no jury trials", !!block &&
+      !/jury service/.test(block.textContent) && /opinions, the docket/.test(block.textContent),
+      block && block.textContent.slice(0, 200));
+  });
+  const cod = await buildPage("courts/co.html");
+  await settle(50);
+  suite("courts/co.html — one division, and a judge nominated to another court", () => {
+    const { window: w, D: doc, errors: errs } = cod;
+    check("no page errors", errs.length === 0, errs.join(" | "));
+    const items = [...doc.querySelectorAll("#this-court .fed-divisions > li")];
+    check("an undivided court's list begins with a capital", items.length === 1 &&
+      /^Court is held at /.test(items[0].textContent), items.map((i) => i.textContent.slice(0, 40)).join(" | "));
+    const nominated = w.kycCourt.co.judges.filter((j) => j.nominatedTo);
+    check("the committed data has a judge nominated to the Tenth Circuit", nominated.length === 1 &&
+      nominated[0].nominatedTo.id === "ca10");
+    nominated.forEach((j) => {
+      w.KYC.official.open(j.id);
+      const note = doc.getElementById("officialNominated");
+      check("their own record says so, dated in words", !!note &&
+        /Nominated to the Court of Appeals for the Tenth Circuit/.test(note.textContent) &&
+        /pending in the Senate/.test(note.textContent) && !ISO.test(note.textContent) &&
+        !!note.querySelector('a[href$="ca10.html"]'), note && note.textContent);
+      w.KYC.official.close();
+    });
+    const empty = [...doc.querySelectorAll('#vacancies [data-label="Nominated"]')]
+      .filter((c) => !c.textContent.trim());
+    check("no empty Nominated cell", empty.length === 0);
+  });
+  suite("courts/tn-e.html — dates in words in the dialog", () => {
+    const { window: w, D: doc } = tne;
+    const moved = w.kycCourt["tn-e"].judges.filter((j) => j.listedSenior);
+    moved.forEach((j) => {
+      w.KYC.official.open(j.id);
+      const meta = doc.getElementById("officialModalMeta").textContent;
+      check("the listed senior status is dated in words", !ISO.test(meta) && /Senior status from [A-Z]/.test(meta), meta);
+      w.KYC.official.close();
+    });
+  });
+
+  const county = await buildPage("counties/tx.html", { hash: "#/?county=48201" });
+  await settle(50);
+  suite("counties/tx.html — which federal court covers a county (FEDERAL-08)", () => {
+    const { D: doc, errors: errs } = county;
+    check("no page errors", errs.length === 0, errs.join(" | "));
+    const line = doc.querySelector("#localPanelBody .local-court");
+    check("Harris County's panel names its district and division, linked",
+      !!line && /Southern District of Texas, Houston Division/.test(line.textContent) &&
+      !!line.querySelector('a[href="../courts/tx-s.html"]'), line && line.textContent);
+  });
+  const durham = await buildPage("counties/nc.html", { hash: "#/?county=37063" });
+  await settle(50);
+  suite("counties/nc.html — a county the statute splits", () => {
+    const line = durham.D.querySelector("#localPanelBody .local-court");
+    check("says part of it is in another district, in the statute's words",
+      !!line && /Middle District of North Carolina/.test(line.textContent) && /Butner/.test(line.textContent),
+      line && line.textContent);
+    check("and names that district, linked",
+      !!line && /Part of it \(the Federal Correctional Institution, Butner/.test(line.textContent) &&
+      /is in the Eastern District of North Carolina/.test(line.textContent) &&
+      !!line.querySelector('a[href="../courts/nc-e.html"]'), line && line.textContent);
+  });
+  const richmond = await buildPage("counties/va.html", { hash: "#/?county=51760" });
+  await settle(50);
+  suite("counties/va.html — an independent city the statute does not name", () => {
+    const line = richmond.D.querySelector("#localPanelBody .local-court");
+    const placed = (richmond.window.kycCourtCounties.VA.counties || {})["51760"] || [];
+    check("says it is placed by the land around it, when it is", !!line && (placed[4] === "neighbours"
+      ? /The statute does not name this city/.test(line.textContent)
+      : !/The statute does not name this city/.test(line.textContent)), line && line.textContent);
+  });
+
+  const state = await buildPage("states/tx.html");
+  await settle(50);
+  suite("states/tx.html — the state's federal courts", () => {
+    const { D: doc, errors: errs } = state;
+    check("no page errors", errs.length === 0, errs.join(" | "));
+    const line = doc.querySelector(".gov-federal-courts");
+    check("lists its four district courts and its court of appeals, each linked",
+      !!line && ["tx-n", "tx-s", "tx-e", "tx-w", "ca5"].every((id) =>
+        !!line.querySelector('a[href$="courts/' + id + '.html"]')), line && line.textContent);
+    check("and says where to find which covers a county",
+      !!doc.querySelector('.gov-federal-courts + .faint a[href$="counties/tx.html"]'));
+  });
+
+  suite("federal/index.html — the circuit map points to the county map", () => {
+    const svg = D.getElementById("circuitMap");
+    const texas = svg && svg.querySelector('[data-state="TX"]');
+    if (texas) texas.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    check("a state of several districts links its county map",
+      !!D.querySelector('#circuitPanel a[href="../counties/tx.html"]'), D.getElementById("circuitPanel").textContent);
+  });
+
+  const blank = await buildPage("courts/ca1.html", { block: ["judiciary/ca1.js"] });
+  await settle(50);
+  suite("a court page whose data did not load (FEDERAL-15)", () => {
+    const text = blank.D.getElementById("federalBody").textContent;
+    check("speaks to a reader, never shows a build command",
+      !/python|build_profile_site/.test(text) && /could not be loaded|Loading/.test(text), text.slice(0, 200));
+    // FEDERAL-12: the names written into the page stay when its data fails.
+    const judges = blank.window.kycFederal.courts.find((c) => c.id === "ca1");
+    check("and keeps the judges' names the page carries in its HTML",
+      !!blank.D.querySelector("#federalBody .fed-prerendered") &&
+      (!judges || !judges.chief || text.indexOf(judges.chief.name) !== -1), text.slice(0, 200));
+  });
+
+  const ca1Page = await buildPage("courts/ca1.html");
+  await settle(50);
+  suite("courts/ca1.html — who appointed the active judges (FEDERAL-22)", () => {
+    const { window: w, D: doc } = ca1Page;
+    const court = w.kycFederal.courts.find((c) => c.id === "ca1");
+    const fig = doc.querySelector('.fed-appointers[data-court="ca1"]');
+    const rows = fig ? [...fig.querySelectorAll(".fed-appointer")] : [];
+    check("a row per appointing President, named in words", rows.length === court.appointers.length &&
+      rows.every((r, i) => r.querySelector(".fed-appointer-name").textContent === court.appointers[i][0]),
+      rows.map((r) => r.textContent).join(" | "));
+    check("a square per active judge, and the count in words",
+      rows.reduce((n, r) => n + r.querySelectorAll(".fed-appointer-units i").length, 0) === court.active &&
+      rows.every((r, i) => r.querySelector(".fed-appointer-n").textContent.endsWith(String(court.appointers[i][1]))));
+    check("no party named or coloured", !!fig && !PARTY_WORDS.test(fig.textContent) &&
+      !fig.querySelector('[class*="party"]'));
+    const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+    check("its squares are a category colour, never a party's",
+      /\.fed-appointer-units i \{[^}]*background: var\(--cat-1\)/.test(css));
+  });
+
+  const hubPage = await buildPage("federal/index.html");
+  await settle(50);
+  suite("federal/index.html — the courts of appeals by appointing President (FEDERAL-22)", () => {
+    const { window: w, D: doc } = hubPage;
+    const strips = doc.querySelectorAll("#appointersByCircuit .fed-appointers");
+    const appeals = w.kycFederal.courts.filter((c) => c.kind === "appeals" && c.listed);
+    check("one per court of appeals", strips.length === appeals.length, `${strips.length}`);
+  });
+
+  // FEDERAL-12: the names are in the HTML a crawler, or a reader without
+  // script, receives - the page's own module draws over them.
+  suite("the federal pages carry their names in their HTML (FEDERAL-12)", () => {
+    const fed = hubPage.window.kycFederal;
+    const raw = fs.readFileSync(path.join(SITE, "courts", "ca1.html"), "utf8");
+    const court = fed.courts.find((c) => c.id === "ca1");
+    check("a court page names its judges", !!court.chief && raw.includes(court.chief.name) &&
+      /<table class="guide-table fed-table">/.test(raw));
+    check("and its counts in its description", new RegExp('<meta name="description"[^>]*' +
+      court.active + " active").test(raw));
+    const hubRaw = fs.readFileSync(path.join(SITE, "federal", "index.html"), "utf8");
+    const holder = fed.offices.find((o) => o.holder);
+    check("the hub names the President, a Cabinet officer and the Chief Justice",
+      hubRaw.includes(fed.president.name) && hubRaw.includes(holder.holder.name) &&
+      hubRaw.includes(fed.supremeCourt.members[0].name));
+    check("and the drawn page replaces them", !hubPage.D.querySelector("#federalBody .fed-prerendered"));
+  });
+
+  // FEDERAL-04, -05: a judge's article and portrait through the FJC id on
+  // Wikidata, never a search; only Wikimedia's sizes of one file.
+  const withLinks = (() => {
+    for (const c of hubPage.window.kycFederal.courts) {
+      if (!c.listed || c.kind === "supreme") continue;
+      const file = path.join(SITE, "data", "judiciary", c.id + ".js");
+      if (!fs.existsSync(file)) continue;
+      const m = /^window\.kycCourt\[[^\]]+\] = (.*);$/m.exec(fs.readFileSync(file, "utf8"));
+      if (!m) continue;
+      let data;
+      try { data = JSON.parse(m[1]); } catch (e) { continue; }
+      const j = data.judges.find((x) => x.wikipedia && x.portrait && x.portrait.set);
+      if (j) return { court: c.id, judge: j };
+    }
+    return null;
+  })();
+  if (withLinks) {
+    const linked = await buildPage("courts/" + withLinks.court + ".html",
+      { hash: "#/official/" + encodeURIComponent(withLinks.judge.id) });
+    await settle(50);
+    suite("a judge's record links their article and shows their portrait (FEDERAL-04, -05)", () => {
+      const { D: doc, errors: errs } = linked;
+      check("no page errors", errs.length === 0, errs.join(" | "));
+      const body = doc.getElementById("officialModalBody");
+      const wiki = [...body.querySelectorAll("a")].find((a) => /en\.wikipedia\.org\/wiki\//.test(a.href));
+      check("the article the Wikidata item names", !!wiki &&
+        decodeURIComponent(wiki.href).replace(/_/g, " ").endsWith(withLinks.judge.wikipedia), wiki && wiki.href);
+      check("never a search", ![...body.querySelectorAll("a")].some((a) => /search|Special:Search/i.test(a.href)));
+      check("the court's own website", [...body.querySelectorAll("a")].some((a) => /uscourts\.gov/.test(a.href)));
+      const photo = doc.getElementById("officialModalPhoto");
+      const urls = (photo.getAttribute("srcset") || "").split(",").map((x) => x.trim().split(" ")[0]).filter(Boolean)
+        .concat([photo.getAttribute("src")]);
+      const file = (/\/commons\/(?:thumb\/)?([0-9a-f]\/[0-9a-f]{2}\/[^/]+)/.exec(withLinks.judge.portrait.set[0][1]) || [])[1];
+      check("a portrait, in sizes of one Wikimedia file only (rule 42)", !!file && urls.length > 1 &&
+        urls.every((u) => u.startsWith("https://upload.wikimedia.org/") && u.includes(file)), urls.join(" "));
+      check("credited, with a link to the file", /Wikimedia Commons/.test(doc.getElementById("officialModalSource").textContent));
+    });
+  }
 }
 
 /* ============================================================ the frame */

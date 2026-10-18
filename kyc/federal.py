@@ -362,6 +362,107 @@ def senate_votes(congress, read=None):
     return votes
 
 
+# ---------------------------------------------- the agencies' own websites
+
+USAGOV_URL = "https://www.usa.gov/agencies/{slug}"
+_FIELD = r'field--name-field-{name}\b[^>]*>\s*<a href="(https?://[^"]+)"'
+
+
+def government_host(url):
+    """True for an address on a .gov or .mil host: a domain only the
+    government can hold, never one that can lapse and be bought (rule 35)."""
+    from urllib.parse import urlparse
+
+    host = (urlparse(url or "").hostname or "").lower()
+    return host.endswith((".gov", ".mil"))
+
+
+# Hosts USA.gov lists over plain http that answer the same pages over
+# https (checked 2026-10-18: each answered 200 at its https address,
+# without redirecting back). A host that redirects https to http - the
+# District of Colorado's court site - is not here, and keeps its own word.
+SERVES_HTTPS = {"www.ustr.gov", "www.sba.gov"}
+
+
+def _secure(url):
+    """*url* over https where its host is known to serve it."""
+    from urllib.parse import urlparse
+
+    if url and url.startswith("http://") and (urlparse(url).hostname or "").lower() in SERVES_HTTPS:
+        return "https://" + url[len("http://"):]
+    return url
+
+
+def parse_agency(page):
+    """``{"url", "contact"}`` from an agency's USA.gov entry: the website and
+    the contact page it lists, each only where it gives one and only on a
+    government host. None when the page lists no such website - the page
+    then concludes nothing."""
+    site = re.search(_FIELD.format(name="website"), page)
+    if not site or not government_host(html.unescape(site.group(1))):
+        return None
+    contact = re.search(_FIELD.format(name="contact-link"), page)
+    contact = html.unescape(contact.group(1)) if contact else None
+    return {"url": _secure(html.unescape(site.group(1))),
+            **({"contact": _secure(contact)} if contact and government_host(contact) else {})}
+
+
+def agency_sites(read, previous=None, log=print, pause=1.0):
+    """``{office key: {url, contact, source}}`` for each office the table
+    gives a USA.gov entry. An entry that cannot be read keeps the last
+    run's (rule 8)."""
+    before = previous or {}
+    out = {}
+    for office in federal_offices.OFFICES:
+        slug = office.get("usagov")
+        if not slug:
+            continue
+        url = USAGOV_URL.format(slug=slug)
+        try:
+            found = parse_agency(read(url))
+        except FederalError as exc:
+            found = None
+            log(f"  [warn] {exc}")
+        if read is _get:
+            time.sleep(pause)
+        if found:
+            out[office["key"]] = dict(found, source=url)
+        elif before.get(office["key"]):
+            out[office["key"]] = before[office["key"]]
+    return out
+
+
+# ------------------------------------------------ the line of succession
+
+LEGISLATORS_URL = "https://unitedstates.github.io/congress-legislators/legislators-current.json"
+# The two congressional officers 3 U.S.C. 19(a) and (b) place after the
+# Vice President, as congress-legislators titles their leadership roles.
+SUCCESSION_ROLES = (("speaker", "Speaker of the House"),
+                    ("presidentProTempore", "President Pro Tempore of the Senate"))
+
+
+def parse_succession(rows, today):
+    """``({role: {bioguide, name, since}}, problems)``: the member holding
+    each role on *today* - a role with no end, or one ending after today.
+    None, or two, for a role is a problem and names nobody: the line is
+    never guessed at."""
+    out, problems = {}, []
+    for key, title in SUCCESSION_ROLES:
+        holders = []
+        for person in rows:
+            for role in person.get("leadership_roles") or []:
+                if role.get("title") == title and (role.get("start") or "") <= today and \
+                        (not role.get("end") or role["end"] > today):
+                    holders.append((person, role))
+        if len(holders) != 1:
+            problems.append(f"congress-legislators lists {len(holders)} current holders of {title}")
+            continue
+        person, role = holders[0]
+        out[key] = {"bioguide": person["id"]["bioguide"], "name": _full_name(person["name"]),
+                    "since": role.get("start"), "title": title}
+    return out, problems
+
+
 def fetch(previous=None, today=None, read=None, log=print, history_read=None):
     """The whole cache. Raises :class:`FederalError` when the White House's
     pages or the executive file cannot be read, so the last good cache
@@ -429,15 +530,27 @@ def fetch(previous=None, today=None, read=None, log=print, history_read=None):
         log(f"  {office['office']}: {entry['name']} - page {holder['page']['status']}, Senate "
             + ("votes not read" if holder.get("senateUnread")
                else (holder.get("senate") or {}).get("vote", "no roll call found")))
+    # The Speaker and the President pro tempore, next in the line of
+    # succession after the Vice President: congress-legislators' record of
+    # leadership roles, by bioguide id (rule 17). Unread keeps the last.
+    try:
+        succession, trouble = parse_succession(json.loads(read(LEGISLATORS_URL)), today)
+        problems += trouble
+    except (FederalError, ValueError) as exc:
+        log(f"  [warn] {exc}; the last line of succession is kept")
+        succession = (previous or {}).get("succession") or {}
     cache = {
         "fetched": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
         "asOf": today,
         "reviewed": federal_offices.REVIEWED,
         "sources": {"executive": EXECUTIVE_URL, "administration": federal_offices.ADMINISTRATION_URL,
-                    "cabinet": federal_offices.CABINET_URL},
+                    "cabinet": federal_offices.CABINET_URL, "leadership": LEGISLATORS_URL,
+                    "agencies": "https://www.usa.gov/agency-index"},
         "president": leaders["president"],
         "vicePresident": leaders["vicePresident"],
         "offices": offices,
+        "succession": succession,
+        "sites": agency_sites(read, (previous or {}).get("sites"), log),
         "problems": problems,
     }
     # Who has held each office this term (kyc/cabinet.py). Without the
