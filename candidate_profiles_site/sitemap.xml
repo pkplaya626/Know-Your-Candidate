@@ -11,6 +11,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://candidates.radicalrelay.us/about.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://candidates.radicalrelay.us/states/index.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -294,6 +299,11 @@
     <loc>https://candidates.radicalrelay.us/states/wy.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://candidates.radicalrelay.us/districts/index.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://candidates.radicalrelay.us/districts/ak.html</loc>
@@ -1129,6 +1139,11 @@
     <loc>https://candidates.radicalrelay.us/federal/index.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://candidates.radicalrelay.us/courts/index.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://candidates.radicalrelay.us/courts/scotus.html</loc>

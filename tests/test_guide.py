@@ -285,14 +285,22 @@ class TestEveryLocalLinkResolves(unittest.TestCase):
                     if ref.startswith(("http:", "https:", "data:", "mailto:")):
                         continue
                     target = ref.split("#")[0].split("?")[0]
-                    if target and not os.path.exists(os.path.join(folder, *target.split("/"))):
+                    # A URL from the root (the 404 page's) is the site's.
+                    base = SITE if target.startswith("/") else folder
+                    if target and not os.path.exists(
+                            os.path.join(base, *target.lstrip("/").split("/"))):
                         missing.append(f"{os.path.relpath(path, SITE)} -> {ref}")
         self.assertEqual(missing, [])
 
     def test_a_district_page_reaches_the_states_index(self):
         html = pages.render_district_page("CA", "example.org")
         self.assertIn('href="../states/index.html"', html)
-        self.assertNotIn('href="index.html"', html)
+        # "index.html" from a district page is the district maps' own
+        # directory now, which exists and is linked under its name; it once
+        # pointed at a page that did not.
+        self.assertIn(f'href="index.html"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg> '
+                      f'{pages.DISTRICTS_INDEX_NAME}</a>', html)
+        self.assertTrue(os.path.exists(os.path.join(SITE, "districts", "index.html")))
 
 
 if __name__ == "__main__":

@@ -3057,6 +3057,22 @@ def on_ballot(profile):
     return profile.get("raceStatus") not in OFF_BALLOT
 
 
+def results_source_url(race):
+    """The address of the page a race's statuses were read from: the
+    Secretary of State's Candidate Inquiry for a ballot read from its
+    qualified list, else the Wikipedia results page the cache names, or
+    ``None`` when it names none."""
+    import urllib.parse
+
+    if (race or {}).get("source") == "qualified":
+        from .qualified import PORTAL
+        return PORTAL
+    title = str((race or {}).get("page") or "").strip()
+    if not title:
+        return None
+    return "https://en.wikipedia.org/wiki/" + urllib.parse.quote(title.replace(" ", "_"))
+
+
 def race_summary(cache, race_id):
     """``{"nominees": n, "eliminated": n, "withdrawn": n, ...}`` or ``None``.
 
@@ -3079,6 +3095,10 @@ def race_summary(cache, race_id):
             "qualified": counts[QUALIFIED],
             # The race's ballot is a state's qualified list, not a result.
             "fromQualifiedList": race.get("source") == "qualified",
+            # Where a reader checks it (TRUST-06): the results page the
+            # statuses were read from, by the title the cache holds (rule 32),
+            # or the Secretary of State's list a qualified ballot came from.
+            "sourceUrl": results_source_url(race),
             # Who certified the November ballot, where a state's list was
             # read (rule 77), and the party of each name with no profile.
             "certifiedBy": (race.get("certified") or {}).get("source") or None,

@@ -122,7 +122,7 @@ function buildPage(page, opts) {
 
   const dom = new JSDOM(html, {
     runScripts: "dangerously",
-    url: "https://kyc.local/" + page + (opts.hash || ""),
+    url: "https://kyc.local/" + page + (opts.search || "") + (opts.hash || ""),
     pretendToBeVisual: true,
     virtualConsole: vc,
     beforeParse(window) {
@@ -516,7 +516,27 @@ async function testDirectory() {
     check("and keeps a name when its words are hidden",
       /^Sort the cards: /.test(button.getAttribute("aria-label") || ""));
     check("no field or menu is under 16px on a phone, so iOS never zooms in",
-      /\.search input,\s*\.select,\s*\.text-input\s*\{\s*font-size:\s*16px/.test(css));
+      /\.search input,\s*\.search-page input,\s*\.select,\s*\.text-input\s*\{\s*font-size:\s*16px/.test(css));
+    // A rule more specific than the phone's bare "input" that sets the
+    // field's font wins over it: the 404 page's search was 14px on a phone
+    // (".search-page input { font: inherit }"). Every such selector is in the
+    // phone rule, or has its own 16px rule.
+    const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
+    const phoneRule = bare.match(/@media \(max-width: 1000px\), \(pointer: coarse\) \{\s*([^{}]+)\{\s*font-size:\s*16px;?\s*\}/);
+    const covered = new Set((phoneRule ? phoneRule[1] : "").split(",").map((s) => s.trim()));
+    const fieldSel = /(?:^|[\s>+~])(?:input|select|textarea)(?![\w-])(?![^\s>+~]*\[type="?(?:checkbox|radio|range)"?\])[^\s>+~]*$/;
+    const rules = [...bare.matchAll(/([^{}]+)\{([^{}]*)\}/g)];
+    const ownSixteen = new Set();
+    rules.forEach((m) => { if (/font-size\s*:\s*16px/.test(m[2])) m[1].split(",").forEach((s) => ownSixteen.add(s.trim())); });
+    const shrunk = [];
+    rules.forEach((m) => {
+      if (!/(^|;|\s)font(-size)?\s*:/.test(m[2])) return;
+      m[1].split(",").map((s) => s.trim()).forEach((sel) => {
+        if (fieldSel.test(sel) && !covered.has(sel) && !ownSixteen.has(sel)) shrunk.push(sel);
+      });
+    });
+    check("and no field's own rule sets its font below that rule's reach",
+      !!phoneRule && shrunk.length === 0, shrunk.join(" | "));
     // A native list drawn white under the theme's white text showed only the
     // highlighted option.
     check("a native menu's options take the theme's colours",
@@ -2075,8 +2095,9 @@ async function testNavigation() {
     check("five groups, from elections to learning", JSON.stringify(heads) === JSON.stringify(GROUPS),
       heads.join(" | "));
     const keys = [...D.querySelectorAll(".site-nav [data-nav]")].map((a) => a.getAttribute("data-nav"));
-    check("nine places to go", keys.join(",") ===
-      "candidates,races,congress,executive,courts,states,legislatures,local,guide", keys.join(","));
+    check("ten places to go, About & sources last", keys.join(",") ===
+      "candidates,races,congress,executive,courts,states,legislatures,local,guide,about",
+      keys.join(","));
     check("the grid is Candidates",
       D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav") === "candidates");
     window.location.hash = "#/?role=member";
@@ -4026,8 +4047,11 @@ async function testFindMyDistrict() {
   suite("districts/pa.html — find my district", () => {
     check("no page errors", errors.length === 0, errors.join(" | "));
     const button = D.getElementById("locateMe");
-    check("a Find my district button, saying the location stays on the device",
-      !!button && /not sent anywhere/.test(button.getAttribute("title")));
+    // In visible words beside it: a phone never shows a title (TRUST-10).
+    const note = D.getElementById("locateNote");
+    check("a Find my district button, saying in view that the location stays on the device",
+      !!button && !!note && button.getAttribute("aria-describedby") === "locateNote" &&
+        /never sent anywhere/.test(note.textContent) && !note.hidden);
     // Several towns share a name (three Franklins): any one of them will do.
     const off = places.PA.filter((p) => state.places.some((d) => d[0] === p[0])).filter((p) => {
       const xy = KYC.districtMap.project(p[1], p[2]);
@@ -4150,7 +4174,9 @@ async function testDistrictPages() {
       scrolled.map((s) => s.className).join(" | "));
   });
 
-  const files = fs.readdirSync(path.join(SITE, "districts")).filter((f) => f.endsWith(".html"));
+  // The folder's own directory (districts/index.html) is not a state's map.
+  const files = fs.readdirSync(path.join(SITE, "districts"))
+    .filter((f) => f.endsWith(".html") && f !== "index.html");
   suite("districts/ — one page per state and territory", () => {
     check("56 pages", files.length === 56, `${files.length}`);
     const unwired = files.filter((f) => {
@@ -4374,8 +4400,9 @@ async function testAndroidBack() {
     check("picking a theme closes the menu and takes its entry off", menuPopped);
     check("a short placeholder on a phone", D.getElementById("searchInput").placeholder === "Search…",
       D.getElementById("searchInput").placeholder);
-    check("a term's dates never break inside a date", spans.length === 2 &&
-      spans.every((x) => /^\d{4}-\d{2}-\d{2}$/.test(x)), spans.join(" | "));
+    // In words, as a candidate's term reads (PROFILES-19): "Jan. 3, 2025".
+    check("a term's dates never break inside a date, and read in words", spans.length === 2 &&
+      spans.every((x) => /^[A-Z][a-z]+\.? \d{1,2}, \d{4}$/.test(x)), spans.join(" | "));
     const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
     check("a chosen Light theme opts out of forced dark (Samsung Internet, Brave)",
       /\[data-theme="light"\] \{[^}]*color-scheme: only light/.test(css));
@@ -4654,10 +4681,12 @@ async function testGuide() {
       check(`${page} links to the guide`, raw.includes(`href="${prefix}government/index.html"`));
     }
     // Every district page's "States & territories" pointed at a
-    // districts/index.html that never existed.
+    // districts/index.html that never existed. It exists now, as the
+    // district maps' directory, and each district page links it by name.
     const district = fs.readFileSync(path.join(SITE, "districts/ca.html"), "utf8");
     check("a district page's states link reaches the states index",
-      district.includes('href="../states/index.html"') && !/href="index\.html"/.test(district));
+      district.includes('href="../states/index.html"') &&
+        (!/href="index\.html"/.test(district) || fs.existsSync(path.join(SITE, "districts/index.html"))));
   });
 }
 
@@ -5635,7 +5664,7 @@ async function testStateGov() {
     check("the state page has a state government section", !!section);
     const sources = section.querySelector(".gov-sources").textContent;
     check("its sources say NCSL checks which party holds a chamber, not the seat counts",
-      /Seats: Open States[^.]*\. Which party holds each chamber is checked against National Conference/.test(sources),
+      /Seats: Open States.*?\)\. Which party holds each chamber is checked against National Conference/.test(sources),
       sources);
     const heads = [...ak.D.querySelectorAll("#stateContent .state-heading")].map((h) => h.textContent);
     check("it follows the congressional delegation (rule 27)",
@@ -6517,7 +6546,7 @@ async function testFederal() {
     const summary = D.getElementById("vacancySummary");
     check("the vacancies are the courts' own count, dated", !!summary &&
       summary.textContent.indexOf(d.vacancies.totals.vacancies + " vacancies") !== -1 &&
-      summary.textContent.indexOf(d.vacancies.asOf) !== -1, summary && summary.textContent);
+      summary.textContent.indexOf(window.KYC.dateWords(d.vacancies.asOf)) !== -1, summary && summary.textContent);
     check("each court's row gives its vacancies",
       [...D.querySelectorAll("#courts thead")].every((h) => /Vacancies/.test(h.textContent)));
     const changes = D.getElementById("changes");
@@ -6875,7 +6904,7 @@ async function testFederal() {
     check("an emergency says so", doc.querySelectorAll("#vacancies .badge").length ===
       mine.vacancies.filter((r) => r.emergency).length);
     check("it names its source and date", !!doc.querySelector('#vacancies a[href^="https://www.uscourts.gov/"]') &&
-      doc.getElementById("vacancies").textContent.indexOf(w.kycFederal.vacancies.asOf) !== -1);
+      doc.getElementById("vacancies").textContent.indexOf(w.KYC.dateWords(w.kycFederal.vacancies.asOf)) !== -1);
     check("a judge the directory lists on the court carries no 'not listed' note",
       doc.querySelectorAll("#vacancies .vacancy-unlisted").length ===
         mine.vacancies.concat(mine.future || []).filter((r) => r.notInDirectory).length);
@@ -6928,6 +6957,312 @@ async function testFederal() {
   });
 }
 
+/* ============================================================ the frame */
+
+/* What lets a reader trust the site (the 2026-10-17 audit): who runs it and
+ * where every fact comes from (about.html), a way to report an error from
+ * every page and dialog, a 404 page with the way back, the section each page
+ * is in, and each page's own sources with the date they were read. */
+const WORD_DATE = /(Jan|Feb|March|April|May|June|July|Aug|Sept|Oct|Nov|Dec)\.? \d{1,2}, \d{4}/;
+const ISSUE_FORM = "https://github.com/pkplaya626/Know-Your-Candidate/issues/new?template=correction.yml";
+
+async function testFrame() {
+  const PAGES = ["index.html", "map.html", "about.html", "404.html", "states/ca.html",
+    "districts/ca.html", "districts/index.html", "legislature/index.html", "legislature/nc.html",
+    "counties/index.html", "counties/nc.html", "federal/index.html", "courts/index.html",
+    "courts/ca9.html", "courts/gu.html", "government/index.html", "government/congress.html"];
+  // The tag beside the site's name (VISUALS-01): the section, as the
+  // navigation names it; "U.S. Congress" only where profiles.js says which.
+  const TAGS = [["legislature/", "State legislatures"], ["counties/", "Counties & local governments"],
+    ["federal/", "Federal government"], ["courts/", "Federal courts"],
+    ["government/", "Know Your Government"], ["about.html", "About & sources"]];
+  for (const page of PAGES) {
+    const { window, D, errors } = await buildPage(page);
+    await settle(30);
+    const raw = fs.readFileSync(path.join(SITE, page), "utf8");
+    suite(`${page} — the site's frame`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("exactly one h1", D.querySelectorAll("h1").length === 1,
+        `${D.querySelectorAll("h1").length}`);
+      const report = D.querySelector(".site-footer a[data-report]");
+      // Aimed as it is followed, at the address the reader is on then.
+      if (report) report.dispatchEvent(new window.FocusEvent("focusin", { bubbles: true }));
+      check("the footer's Report a problem opens the issue form, naming this page",
+        !!report && report.href.indexOf(ISSUE_FORM) === 0 &&
+          report.href.indexOf("&page=" + encodeURIComponent(window.location.href)) !== -1,
+        report && report.href);
+      const about = [...D.querySelectorAll(".site-footer a")].find((a) => /about\.html$/.test(a.href));
+      check("the footer links About & sources", !!about && about.textContent.trim() === "About & sources");
+      const side = D.querySelector(".sidebar-built");
+      check("the sidebar says how fresh the page is and links About & sources, out of the " +
+        "grid's endless scroll", !!side && !!side.querySelector('a[href$="about.html"]'),
+        side && side.textContent.replace(/\s+/g, " "));
+      const congress = /<script src="(\.\.\/)?data\/profiles\.js/.test(raw);
+      const tag = D.querySelector(".brand-sub");
+      const want = TAGS.find(([prefix]) => page.indexOf(prefix) === 0);
+      if (want) {
+        check(`the header names the section: ${want[1]}`, !!tag && tag.textContent.trim() === want[1] &&
+          !tag.hasAttribute("data-congress"), tag && tag.textContent);
+      }
+      check("data-congress only where profiles.js loads", !tag || !tag.hasAttribute("data-congress") ||
+        congress, tag && tag.outerHTML);
+      if (congress && !/^government\//.test(page)) {
+        check("the sidebar's build date, in words", !!side && WORD_DATE.test(side.textContent),
+          side && side.textContent.replace(/\s+/g, " "));
+      }
+      // Structured data: a breadcrumb trail on every generated page.
+      const blocks = [...D.querySelectorAll('script[type="application/ld+json"]')]
+        .map((s) => { try { return JSON.parse(s.textContent); } catch (e) { return { bad: s.textContent }; } });
+      check("structured data parses", blocks.every((b) => !b.bad), JSON.stringify(blocks).slice(0, 200));
+      if (!/^(index|map|404)\.html$/.test(page)) {
+        const crumbs = blocks.find((b) => b["@type"] === "BreadcrumbList");
+        const items = (crumbs && crumbs.itemListElement) || [];
+        const canonical = D.querySelector('link[rel="canonical"]').getAttribute("href");
+        check("a breadcrumb trail from the site to this page", items.length >= 2 &&
+          items[0].name === "Know Your Candidate" &&
+          items[items.length - 1].item === canonical, JSON.stringify(items).slice(0, 300));
+      }
+    });
+  }
+
+  // A page's own sources, with the date each was read (TECH-12, FEDERAL-14).
+  const footerOf = async (page) => {
+    const { D } = await buildPage(page);
+    return D.querySelector(".site-footer").textContent.replace(/\s+/g, " ");
+  };
+  const leg = await footerOf("legislature/nc.html");
+  const county = await footerOf("counties/nc.html");
+  const court = await footerOf("courts/ca9.html");
+  const fed = await footerOf("federal/index.html");
+  suite("each page names its own sources, dated", () => {
+    check("a legislature: Open States, as read on a date", new RegExp("Open States.*as read on " +
+      WORD_DATE.source).test(leg), leg);
+    check("and portraits are each legislature's, not Open States' public domain",
+      !/public domain/.test(leg) && /portraits as each legislature publishes them/.test(leg), leg);
+    check("a county page: the 2022 Census of Governments and when its listing was read",
+      new RegExp("2022 Census of Governments.*listing, read on " + WORD_DATE.source).test(county), county);
+    check("a court: the FJC and uscourts.gov, dated, and not the President's or the Cabinet's",
+      /Federal Judicial Center/.test(court) && /uscourts\.gov, as read on/.test(court) &&
+        !/Cabinet|Vice President from/.test(court), court);
+    check("the federal hub dates the executive, the judges and the vacancies",
+      (fed.match(/as read on/g) || []).length >= 3, fed);
+  });
+
+  // about.html: who runs the site, and what it does with a reader's data.
+  const about = await buildPage("about.html");
+  suite("about.html — who runs the site, and on what", () => {
+    const text = about.D.body.textContent.replace(/\s+/g, " ");
+    const hrefs = [...about.D.querySelectorAll("a")].map((a) => a.getAttribute("href"));
+    check("independent and non-partisan, with no campaign, party or government tie, money or ads",
+      /independent, non-partisan project/.test(text) &&
+        /not affiliated with any campaign, party, candidate or government office/.test(text) &&
+        /takes no money from any of them/.test(text) && /no advertising/.test(text));
+    check("not an official election source, nor legal advice; ask the state's election office",
+      /not an official election source/.test(text) && /legal advice/.test(text) &&
+        /election office/.test(text));
+    check("the repository, the MIT licence and CC BY 4.0, linked",
+      hrefs.indexOf("https://github.com/pkplaya626/Know-Your-Candidate") !== -1 &&
+        hrefs.some((h) => /\/blob\/main\/LICENSE$/.test(h)) &&
+        hrefs.some((h) => /\/blob\/main\/LICENSE-DATA\.md$/.test(h)) &&
+        /MIT/.test(text) && /CC BY 4\.0/.test(text));
+    check("privacy as the code behaves: no cookies or analytics, two settings kept on the device, " +
+      "the location never sent", /No cookies, no analytics/.test(text) &&
+        /theme you picked and the last state you looked at/.test(text) &&
+        /never sent anywhere/.test(text));
+    check("accessibility: the standard aimed at, its limits, and how to report",
+      /WCAG\)? 2\.2 at level AA/.test(text) && /Known limits/.test(text));
+    check("the refresh schedule, in words", /every day from Oct\. 15 to Nov\. 2, 2026/.test(text) &&
+      /every 12 hours/.test(text), (text.match(/The scheduled refresh[^.]*\./) || [""])[0]);
+    const rows = [...about.D.querySelectorAll(".about-table tbody tr")];
+    check("a table of every dataset: its source, what it covers, when it is read",
+      rows.length >= 15 && rows.every((r) => r.querySelectorAll("td").length === 4),
+      `${rows.length} rows`);
+    check("each read date in words, or where the reader finds the date instead",
+      rows.every((r) => { const last = r.lastElementChild.textContent.trim();
+        return last === "–" || WORD_DATE.test(last) || /^(Each|In the repository)/.test(last); }),
+      rows.map((r) => r.lastElementChild.textContent.trim()).join(" | "));
+    const fecRow = rows.find((r) => /Who is running/.test(r.textContent));
+    check("the FEC's figures say where their date is, not a dash",
+      !!fecRow && /run through/.test(fecRow.lastElementChild.textContent), fecRow && fecRow.textContent);
+    check("the hand-kept rosters are a source of their own, and the page does not say every fact is a script's",
+      rows.some((r) => /kept by hand/.test(r.textContent)) && !/Every fact is read from a source by a script/.test(text) &&
+        /Most facts are read/.test(text));
+    check("a report needs a GitHub account, and the page says so", /needs a free GitHub account/.test(text));
+    check("the maps' limit as it is: no list of every state", /no view lists every state/.test(text) &&
+      !/list beside or below/.test(text));
+    check("the schedule's words: not 'the eve of the election'", !/eve of the election/.test(text));
+    check("names no person and no email address", !/mailto:|@[a-z]/i.test(about.D.body.innerHTML.replace(
+      /"@(context|type)"/g, "")));
+  });
+
+  // 404.html: GitHub serves it at any depth, so every address is the root's.
+  const missing = await buildPage("404.html");
+  suite("404.html — the way back from any address", () => {
+    const local = [...missing.D.querySelectorAll("a[href], link[href], script[src]")]
+      .map((e) => e.getAttribute("href") || e.getAttribute("src"))
+      .filter((u) => !/^(https?:|#|mailto:)/.test(u));
+    check("every local address starts at the root", local.length > 5 && local.every((u) => u[0] === "/"),
+      local.filter((u) => u[0] !== "/").join(" "));
+    check("a search box, and every section", !!missing.D.querySelector('form[data-site-search] input[name="q"]') &&
+      missing.D.querySelectorAll(".directory-list a").length >= 9);
+    check("not indexed, and not in the sitemap", !!missing.D.querySelector('meta[name="robots"][content="noindex"]') &&
+      !/404\.html/.test(fs.readFileSync(path.join(SITE, "sitemap.xml"), "utf8")));
+  });
+
+  // The home page answers ?q=, the address its SearchAction gives.
+  const searched = await buildPage("index.html", { search: "?q=Warren" });
+  await settle(80);
+  suite("index.html — a search from another page, or a search engine", () => {
+    const site = [...searched.D.querySelectorAll('script[type="application/ld+json"]')]
+      .map((s) => JSON.parse(s.textContent)).find((b) => b["@type"] === "WebSite");
+    check("the WebSite's SearchAction is the grid's ?q=", !!site &&
+      /\/index\.html\?q=\{search_term_string\}$/.test(site.potentialAction.target.urlTemplate));
+    check("index.html?q= fills the search", searched.D.getElementById("searchInput").value === "Warren",
+      searched.D.getElementById("searchInput").value);
+  });
+
+  // The profile dialog: its report link, its title, the Senate's terms.
+  const grid = await buildPage("index.html");
+  await settle(50);
+  suite("the profile dialog — report, title, plain words", () => {
+    const { window, D } = grid;
+    const KYC = window.KYC;
+    const base = D.title;
+    const senator = window.legislatorsData.find((p) => p.disclosureSource === "senate-efd" && p.disclosureUrl);
+    check("a senator with a Senate disclosure link", !!senator);
+    if (!senator) return;
+    KYC.profile.open(senator.id);
+    const link = D.getElementById("profileModalReport");
+    link.dispatchEvent(new window.FocusEvent("focusin", { bubbles: true }));
+    check("Report a problem with this profile names the profile and its address",
+      !!link && link.href.indexOf(ISSUE_FORM) === 0 &&
+        link.href.indexOf("&profile=" + encodeURIComponent(senator.id)) !== -1 &&
+        link.href.indexOf(encodeURIComponent("#/profile/")) !== -1, link && link.href);
+    check("the tab names the person while the profile is open (GRID-24)",
+      D.title.indexOf(senator.name) === 0 && /Know Your Candidate$/.test(D.title), D.title);
+    const disclosure = D.getElementById("profileModalDisclosure").textContent;
+    check("the Senate's terms-of-use step is visible text, not a hover title (TRUST-16)",
+      /Senate financial disclosure/.test(disclosure) && /accept them, then open this link again/.test(disclosure) &&
+        !/eFD/.test(disclosure), disclosure);
+    const age = D.getElementById("profileModalAge").textContent;
+    check("a birth date in words", !/\d{4}-\d{2}-\d{2}/.test(age), age);
+    const voting = D.getElementById("profileModalVoting").textContent.replace(/\s+/g, " ");
+    check("the voting record in plain words, its method named after what it is",
+      !/first dimension/.test(voting) && (/left-right score/.test(voting) || /No congressional voting/.test(voting)), voting);
+    KYC.profile.close();
+    check("closing gives the page its title back", D.title === base, D.title);
+  });
+
+  // TRUST-06: a race's statuses are Wikipedia's reading, and the race links it.
+  suite("a race head links the page its statuses come from", () => {
+    const { window } = grid;
+    const KYC = window.KYC;
+    const race = (window.kycRaces || []).find((r) => r.results && r.results.sourceUrl &&
+      !r.results.fromQualifiedList);
+    if (!race) { check("no race names a results page in this data; nothing to check", true); return; }
+    const html = KYC.cards.raceBadges(race);
+    const holder = window.document.createElement("div");
+    holder.innerHTML = html;
+    const a = holder.querySelector(".race-source a");
+    check("Results: Wikipedia, with the day it was read, linked to the page",
+      !!a && /^https:\/\/en\.wikipedia\.org\/wiki\//.test(a.getAttribute("href")) &&
+        /^Results: Wikipedia/.test(a.textContent) && a.getAttribute("rel").indexOf("noopener") !== -1,
+      a && a.outerHTML);
+    check("and 'not the state's certified count' is page text, not only a hover",
+      /not the state\u2019s certified count/.test(holder.textContent), holder.textContent);
+    // The profile dialog, where a named person reads "Lost the 2026 primary",
+    // links the same page (TRUST-06).
+    const person = window.legislatorsData.find((p) => (p.contestRaceId || p.raceId) === race.id);
+    if (person) {
+      KYC.profile.open(person.id);
+      const block = window.document.getElementById("profileModalRace");
+      const link = block && block.querySelector(".race-source a");
+      check("the profile dialog's race links the results page it was read from",
+        !!link && link.getAttribute("href") === race.results.sourceUrl,
+        block && block.textContent.replace(/\s+/g, " ").slice(-200));
+      KYC.profile.close();
+    }
+    check("and the words say whose results they are", race.results.certifiedComplete
+      ? KYC.ballotSource(race) === "per the " + race.results.certifiedBy
+      : /^per Wikipedia's results page/.test(KYC.ballotSource(race)), KYC.ballotSource(race));
+  });
+
+  // map.html: the national views name their sources (TECH-11).
+  const map = await buildPage("map.html");
+  await settle(50);
+  suite("map.html — each view's sources", () => {
+    const { D } = map;
+    const shown = () => [...D.querySelectorAll("[data-sources]")].filter((p) => !p.hidden)
+      .map((p) => p.getAttribute("data-sources"));
+    check("the Senate view names congress-legislators and the FEC",
+      shown().length === 1 && /\bsenate\b/.test(shown()[0]), shown().join(" | "));
+    D.querySelector('[data-mode="governor"]').click();
+    check("a governors' view names the governors' sources instead",
+      shown().length === 1 && /\bgovernor\b/.test(shown()[0]), shown().join(" | "));
+    const footer = D.querySelector(".map-footer");
+    const panel = D.querySelector(".detail-panel");
+    check("the footer follows the state's panel in the page, so a phone reads the panel first",
+      !!footer && !!panel && !!(panel.compareDocumentPosition(footer) & map.window.Node.DOCUMENT_POSITION_FOLLOWING) &&
+        !footer.closest("main"));
+    check("the header has the site's search, as every page does (TECH-12)",
+      !!D.querySelector('.app-header form[data-site-search] input[name="q"]'));
+    check("the sources line does not credit the FEC with the race set (rule 65)",
+      !/the 2026 races,\s+the candidate field/.test(D.querySelector('[data-sources~="senate"]').textContent));
+    check("the state-government line says what picking a state shows",
+      /Pick a\s+state to see each source and the date it was read/.test(
+        D.querySelector('[data-sources~="governor"]').textContent));
+  });
+
+  // The new directories: words a reader can read, under one name each.
+  const districtsDir = await buildPage("districts/index.html");
+  const courtsDir = await buildPage("courts/index.html");
+  suite("the district and court directories", () => {
+    const rows = [...districtsDir.D.querySelectorAll(".directory-row")];
+    check("a state's row does not repeat its name under it",
+      rows.length > 50 && rows.every((r) => {
+        const name = r.querySelector(".directory-name").textContent;
+        const facts = r.querySelector(".directory-facts");
+        return !!facts && facts.tagName === "DIV" && facts.textContent.indexOf(name) === -1;
+      }), rows.slice(0, 3).map((r) => r.textContent).join(" | "));
+    check("its title, heading and breadcrumb are one name",
+      districtsDir.D.querySelector("h1").textContent.trim() === "District maps" &&
+        /^District maps —/.test(districtsDir.D.title));
+    const headings = [...courtsDir.D.querySelectorAll("h2.state-heading")].map((h) => h.textContent.trim());
+    check("each kind of court in its own plural", headings.indexOf("Courts of appeals") !== -1 &&
+      headings.indexOf("District courts") !== -1 && !headings.some((h) => /ss$/.test(h)), headings.join(" | "));
+    check("the courts' page is named as the navigation names it, and the navigation leads to it",
+      courtsDir.D.querySelector("h1").textContent.trim() === "Federal courts" &&
+        !!courtsDir.D.querySelector('.site-nav a[data-nav="courts"][href$="courts/index.html"]'));
+  });
+
+  // A senator's card speaks of the seat, never of the person's future:
+  // the data knows when a term ends, not who will run (rule 61).
+  suite("a senator's seat badge", () => {
+    const { window } = grid;
+    const KYC = window.KYC;
+    const senators = window.legislatorsData.filter((p) => !p.isCandidate && /Senate/.test(p.chamber) &&
+      p.electionYear && !p.seatUp2026);
+    const badges = senators.map((p) => KYC.cards.statusBadge(p)).join(" ");
+    check("'Seat up in <year>', never 'On the ballot in <year>'",
+      senators.length > 0 && !/On the ballot in 20/.test(badges) && /Seat up in 20\d\d/.test(badges),
+      badges.slice(0, 200));
+    check("the build stamp is the reader's own day", KYC.localDay(new window.Date(2026, 9, 17, 23, 30)) === "2026-10-17");
+  });
+
+  // TECH-04: the footer does not paint in view and jump away.
+  suite("room is kept for what the scripts draw", () => {
+    const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+    check("a district page's boxes are no wider than the panel: a one-line 'Former ...' pushed " +
+      "Vermont's page past a phone's width",
+      /\.district-facts \{[^}]*grid-template-columns: minmax\(0, 1fr\)/.test(css) &&
+        /\.district-fact \.card-grid \{ grid-template-columns: minmax\(0, 1fr\)/.test(css));
+    check("the grid, a state page and a district page hold a screen while loading",
+      /#results:empty\):has\(#noResults\[hidden\]\) #results/.test(css) &&
+        /#stateContent:has\(> \.results-bar:only-child\)/.test(css) &&
+        /#districtsApp:has\(> \.results-bar:only-child\)/.test(css));
+  });
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "guide") await testGuide();
@@ -6967,6 +7302,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "links") await testRunningElsewhere();
   if (!only || only === "index.html") await testPeopleWording();
   if (!only || only === "index.html") await testPeopleWordingAfterElection();
+  if (!only || only === "frame") await testFrame();
   if (!only || only === "contrast") testContrast();
 
   let failed = 0;

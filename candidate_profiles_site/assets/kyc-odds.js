@@ -146,7 +146,7 @@
       (bar ? '<div class="odds-bar" role="img" aria-label="' +
         KYC.escapeAttr(source[0] + ": " + spoken) + '">' + bar + "</div>" : "") +
       '<div class="odds-legend">' + legend +
-        (hidden ? '<span class="odds-item odds-faint">' + hidden + " more under 1%</span>" : "") +
+        (hidden ? '<span class="odds-item odds-faint">' + hidden + " more priced under 1%</span>" : "") +
       "</div>" + notes + "</div>";
   }
 

@@ -430,6 +430,7 @@ class TestStatePages(unittest.TestCase):
         self.assertEqual(locs, [
             "<loc>https://example.org/</loc>",
             "<loc>https://example.org/map.html</loc>",
+            "<loc>https://example.org/about.html</loc>",
             "<loc>https://example.org/states/index.html</loc>",
             "<loc>https://example.org/states/ak.html</loc>",
             "<loc>https://example.org/states/tx.html</loc>",
@@ -451,10 +452,15 @@ class TestStatePages(unittest.TestCase):
             self.assertEqual([r for r in relative
                               if not r.startswith(("districts/", "government/", "legislature/",
                                                     "counties/", "courts/", "federal/"))],
-                             ["redistricting/ca.html", "states/ak.html", "states/index.html",
+                             ["404.html", "about.html", "redistricting/ca.html",
+                              "site.webmanifest", "states/ak.html", "states/index.html",
                               "states/tx.html"])
-            # A district map for every state and territory, whatever the roster.
-            self.assertEqual(len([r for r in relative if r.startswith("districts/")]), 56)
+            # A district map for every state and territory, whatever the
+            # roster, and the folder's own directory of them.
+            self.assertEqual(len([r for r in relative if r.startswith("districts/")
+                                  and r != "districts/index.html"]), 56)
+            self.assertIn("districts/index.html", relative)
+            self.assertIn("courts/index.html", relative)
             self.assertEqual(emit.check_state_pages(people, tmp, summary={"states": {}}, stamp_from=ROOT), [])
             with open(os.path.join(tmp, emit.STATES_DIR, "tx.html"), "a", encoding="utf-8") as f:
                 f.write("<!-- edited by hand -->")
@@ -483,8 +489,10 @@ class TestStatePages(unittest.TestCase):
         self.assertEqual(emit.script_sources(html), [
             s.replace("{code}", "ca") for s in emit.DISTRICT_PAGE_REQUIREMENTS])
         results = {p: (ok, note) for p, ok, note in emit.check_pages(ROOT)}
-        district_pages = [p for p in results if p.startswith("districts/")]
+        district_pages = [p for p in results if p.startswith("districts/")
+                          and p != "districts/index.html"]
         self.assertEqual(len(district_pages), 56)
+        self.assertEqual(results["districts/index.html"], (True, "ok"))
         self.assertTrue(all(results[p] == (True, "ok") for p in district_pages))
 
     def test_a_district_page_says_only_what_its_seats_are(self):
@@ -697,7 +705,7 @@ class TestHostnameConsistency(unittest.TestCase):
     """
 
     def site(self, tmp, host="example.test", robots_host=None, sitemap_host=None,
-             page_host=None):
+             page_host=None, card_host=None):
         site = os.path.join(tmp, emit.SITE_DIR)
         os.makedirs(site, exist_ok=True)
         with open(os.path.join(site, "CNAME"), "w", encoding="utf-8") as f:
@@ -709,6 +717,9 @@ class TestHostnameConsistency(unittest.TestCase):
             f.write("Sitemap: https://%s/sitemap.xml\n" % (robots_host or host))
         with open(os.path.join(site, "sitemap.xml"), "w", encoding="utf-8") as f:
             f.write("<loc>https://%s/</loc>" % (sitemap_host or host))
+        os.makedirs(os.path.join(tmp, "tools"), exist_ok=True)
+        with open(os.path.join(tmp, "tools", "social-card.html"), "w", encoding="utf-8") as f:
+            f.write('<div class="host">%s</div>' % (card_host or host))
         return tmp
 
     def problems(self, root):
@@ -728,6 +739,24 @@ class TestHostnameConsistency(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             found = self.problems(self.site(tmp, page_host="old.test"))
             self.assertEqual(len(found), 2, found)   # both pages
+
+    def test_a_stale_share_card_is_caught(self):
+        # The card prints the host into its image; its source is checked.
+        with tempfile.TemporaryDirectory() as tmp:
+            found = self.problems(self.site(tmp, card_host="old.test"))
+            self.assertEqual(len(found), 1, found)
+            self.assertIn("social-card.html", found[0])
+
+    def test_a_stale_host_in_the_home_pages_structured_data_is_caught(self):
+        # The canonical link agreed and the JSON-LD did not: every address
+        # of the site's own on the page is read, not only the first.
+        with tempfile.TemporaryDirectory() as tmp:
+            self.site(tmp)
+            with open(os.path.join(tmp, emit.SITE_DIR, "index.html"), "a", encoding="utf-8") as f:
+                f.write('<script type="application/ld+json">{"url":"https://old.test/"}</script>')
+            found = self.problems(tmp)
+            self.assertEqual(len(found), 1, found)
+            self.assertIn("index.html", found[0])
 
     def test_a_stale_sitemap_is_caught(self):
         with tempfile.TemporaryDirectory() as tmp:

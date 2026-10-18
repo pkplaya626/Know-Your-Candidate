@@ -65,6 +65,9 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              courts/*.html      (generated, one per federal court)
                                              data/federal.js    (the executive, the Supreme Court, the courts)
                                              data/judiciary/*.js (one federal court's judges, and the judges' search)
+                                             about.html, 404.html (generated: the site's frame, kyc/pages.py)
+                                             districts/index.html, courts/index.html (generated directories)
+                                             site.webmanifest   (generated)
                                              sitemap.xml        (generated)
                                              ├──> index.html    (grid, races, profiles)
                                              └──> map.html      (partisan map)
@@ -105,13 +108,19 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   the 2026 ballot, a curated table citing each state's own record.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them to check they load the right scripts in the right order, and rewrites
-  nothing in them but the version stamps on their asset URLs (rule 76). `states/*.html`, `districts/*.html`, `government/*.html`
-  and `sitemap.xml` are the opposite: generated from `kyc/pages.py` (the
+  nothing in them but the version stamps on their asset URLs (rule 76); they
+  must carry the frame `kyc/pages.py` writes (navigation, footer line,
+  sidebar freshness line, the home page's structured data: `emit.check_nav`).
+  `states/*.html`, `districts/*.html`, `government/*.html`, `about.html`,
+  `404.html` and `sitemap.xml` are the opposite: generated from `kyc/pages.py` (the
   guide's words from `kyc/government_text.py`) on every build, never
   edited by hand, and `verify` fails when one on disk is not what the
   template would write.
 - Shared page behaviour belongs in `assets/`, not in a page. Neither page
-  contains an inline `<script>` block.
+  contains an inline `<script>` block of code. The one inline block allowed
+  is structured data (`<script type="application/ld+json">`, written by
+  `pages.jsonld`), and `emit.inline_script_problems` fails any other, or one
+  that does not parse as JSON.
 
 ## Commands
 
@@ -146,8 +155,8 @@ python build_profile_site.py oge              # the executive's financial report
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1374 tests, no dependencies
-npm install && npm test                       # 1679 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1395 tests, no dependencies
+npm install && npm test                       # 1858 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -281,7 +290,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Pages serves from; the canonical links, `og:url`, `robots.txt` and
     `sitemap.xml` must agree, and `verify` fails when they do not. A
     half-finished rename looks completely normal locally. Never put a hostname
-    in a new file without adding it to `emit._HOST_REFERENCES`.
+    in a new file without adding it to `emit._HOST_REFERENCES`. Every own
+    address on the home page is checked, its structured data's too, and the
+    share card's source (`tools/social-card.html`), whose PNG prints the
+    host: after a rename, regenerate it. No image carries the Congress's
+    number; the card read "The 119th Congress" until 2026-10 (rule 68).
 
 22. **A roster of challengers is not the field.** 57 curated challengers made
     the site report 436 of 474 races as having no declared challenger when
@@ -797,7 +810,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     the same words whether the results list a retiring member as withdrawn
     or not at all - the two read differently side by side in the Senate
     view - and only the hover, which cites its source, differs; an
-    appointee, never elected to the seat, is "Not running in 2026".
+    appointee, never elected to the seat, is "Not running in 2026". A
+    future year speaks of the seat: a senator's card says "Seat up in
+    2028", never "On the ballot in 2028", because the data knows when the
+    term ends, not who will run.
 
 62. **A refused name match is not an absence, and an unsettled person is
     never counted on the ballot.** The results page writes people as they
@@ -1070,7 +1086,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (General Assembly, General Court); a judge's name is shown without the
     directory's brackets. A section's name comes from one helper shared by
     its heading and its jump chip, and a page has one name in the
-    navigation, its title and the links to it. Where a city's name join
+    navigation, its title and the links to it. The tag beside the site's
+    name is the section's (`pages.brand_sub`, from the navigation's labels):
+    "U.S. Congress" stood over 219 pages about counties, courts and the
+    guide, and only a page that loads profiles.js names the Congress. Where a city's name join
     cannot work, a place is joined to a government only through the
     listing's own id (`overrides.PLACE_GOVERNMENTS`, with its evidence) or
     the government `county_areas` names, never to a town it replaced.
@@ -1194,7 +1213,7 @@ That check found a retirement note keyed `"Dick Durbin"` when the roster says
 
 - One stylesheet (`assets/kyc.css`) and one behaviour module per concern in
   `assets/`. Nothing duplicated between the two pages; neither page has an
-  inline `<script>`.
+  inline `<script>` but structured data (`application/ld+json`).
 - Colours come from CSS custom properties (`--party-d`, `--money-in`, …), never
   hex literals, so all three themes stay consistent. The map's continuous
   House scale uses `color-mix()` against those same properties, which is why
@@ -1226,7 +1245,7 @@ That check found a retirement note keyed `"Dick Durbin"` when the roster says
 - Add a regression test for any data bug fixed — `tests/test_pipeline.py` for
   core parsing, `tests/test_enrichment.py` for provenance/portraits/FEC/races,
   `tests/test_geo.py` for map geometry, `tests/test_districts.py` for the
-  before-and-after district maps, `tests/test_site.py` for summary
+  before-and-after district maps, `tests/test_frame.py` for the site's frame (about, 404, footers, header tags), `tests/test_site.py` for summary
   figures, emitted files and page wiring, `tests/render_test.js` for anything
   visible on a page.
 - When changing profile fields, update the field tables in `README.md`.

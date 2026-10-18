@@ -1,0 +1,50 @@
+# The form behind every "Report a problem" link on the site (kyc/pages.py
+# report_url, KYC.reportUrl in assets/kyc.js). GitHub fills a field from the
+# query parameter named for its id, so the `page` and `profile` ids below are
+# part of that contract: renaming one empties it on every report.
+name: Report a problem
+description: Something on the site is wrong, out of date, missing, broken or hard to use.
+title: "Correction: "
+labels: ["correction"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. This site makes claims about real, named people, and a wrong one matters.
+        Reports are public: please do not include private information about yourself or anyone else.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of problem is it?
+      options:
+        - A fact about a person is wrong (a status, a seat, a party, a date, money)
+        - Something is out of date
+        - Something is missing
+        - A link or a page is broken
+        - The page is hard to use (accessibility)
+        - Something else
+    validations:
+      required: true
+  - type: input
+    id: page
+    attributes:
+      label: Page
+      description: Filled in from the page you were on.
+      placeholder: The address of the page
+  - type: input
+    id: profile
+    attributes:
+      label: Profile or record
+      description: Filled in when you reported from a profile or an official's record.
+  - type: textarea
+    id: what
+    attributes:
+      label: What is wrong?
+      description: What the site says, and what it should say.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Where is the right answer published?
+      description: A link to the official or primary source, if you have one (a state's results, a court's roster, an FEC filing).

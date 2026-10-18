@@ -208,7 +208,10 @@ jobs:
                   if ref.startswith(("http:", "https:", "data:", "mailto:", "#")):
                       continue
                   target = ref.split("#")[0].split("?")[0]
-                  if target and not (page.parent / target).exists():
+                  # The 404 page's URLs start at the root: GitHub serves it
+                  # at any depth.
+                  base = site if target.startswith("/") else page.parent
+                  if target and not (base / target.lstrip("/")).exists():
                       missing.append(f"{page.relative_to(site)} -> {ref}")
           if missing:
               sys.exit("Broken local references:\n  " + "\n  ".join(missing))

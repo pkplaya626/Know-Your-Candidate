@@ -413,7 +413,7 @@
     var s = data.sources[key];
     if (!s) return "";
     return '<a href="' + KYC.escapeAttr(s[1]) + '" target="_blank" rel="noopener noreferrer">' +
-      KYC.escapeHtml(s[0]) + "</a>" + (s[2] ? " (" + KYC.escapeHtml(s[2]) + ")" : "");
+      KYC.escapeHtml(s[0]) + "</a>" + (s[2] ? " (" + KYC.escapeHtml(KYC.dateWords(s[2])) + ")" : "");
   }
 
   function link(href, text) {
@@ -598,7 +598,7 @@
       (s.sos ? "Secretary of state: " + source("nass") + ". " : "") +
       (ballot(code) ? "What is on the Nov 3 ballot: each state's constitution, statutes and " +
         "election office, linked from each mark (checked " +
-        KYC.escapeHtml((data.sources.ballot2026 || [])[2] || "") + "). " : "") +
+        KYC.escapeHtml(KYC.dateWords((data.sources.ballot2026 || [])[2] || "")) + "). " : "") +
       // Only which party holds each chamber is compared with NCSL; the seat
       // counts are Open States' own (stategov.filled_where_vacant reports
       // where the two counts part).
