@@ -86,13 +86,15 @@
    *  serves of that one file (rule 42), or a justice's official portrait.
    *  ``{src, srcset, credit}``, or null; ``credit`` is the one-line
    *  credit ``KYC.photoCreditHtml`` prints (rule 87). */
-  function picture(person) {
+  function picture(person, px) {
     if (!person) return null;
+    // No size wider than a 2x screen needs at *px* (KYC.cappedSrcset).
+    var drawn = (px || 116) + "px";
     if (person.photo) {
       var sizes = person.photoSet || [];
       return {
         src: sizes.length ? sizes[0][0] : person.photo,
-        srcset: sizes.map(function (s) { return s[0] + " " + s[1] + "w"; }).join(", "),
+        srcset: KYC.cappedSrcset(sizes.map(function (s) { return [s[1], s[0]]; }), drawn),
         credit: { by: "The White House" },
       };
     }
@@ -104,10 +106,10 @@
       var p = person.portrait;
       var set = p.set || [];
       return { src: p.url,
-               srcset: set.map(function (s) { return s[1] + " " + s[0] + "w"; }).join(", "),
+               srcset: KYC.cappedSrcset(set, drawn),
                credit: p.licence
                  ? { by: p.by, licence: p.licence, licenceUrl: p.licenceUrl, page: p.source,
-                     via: "Wikimedia Commons" }
+                     via: "Wikimedia Commons", authorUnrecorded: !!p.authorUnrecorded }
                  : { by: p.credit, page: p.source } };
     }
     return null;
@@ -116,7 +118,7 @@
   /** The markup for a picture *px* wide, lazy, decorative (the name is
    *  beside it). */
   function pictureTag(person, px, className) {
-    var p = picture(person);
+    var p = picture(person, px);
     if (!p) return "";
     return '<img class="' + KYC.escapeAttr(className) + '" src="' + KYC.escapeAttr(p.src) + '"' +
       (p.srcset ? ' srcset="' + KYC.escapeAttr(p.srcset) + '" sizes="' + px + 'px"' : "") +
@@ -646,7 +648,7 @@
     // elsewhere, so only the hub, which holds everyone, says "no longer".
     el("officialModalName").textContent = person ? person.name :
       doc.body.getAttribute("data-page") === "court" ? "Not on this court" : "No longer listed";
-    var pic = picture(person);
+    var pic = picture(person, 116);
     portrait.hidden = !pic;
     if (pic) {
       photo.srcset = pic.srcset;

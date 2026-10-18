@@ -886,15 +886,23 @@
   function portraitSrcset(item, sizes) {
     var set = item && item.photoSet;
     if (!set || !set.length || portraitSrc(item) === SILHOUETTE) return "";
-    // No size wider than a 2x screen needs (TECH-13): a 165px card on a 3x
-    // phone fetched a 494px original where the 330px file is sharp enough.
-    // The smallest size at least that wide is the last one offered.
+    return cappedSrcset(set, sizes);
+  }
+
+  /** A srcset of ``[[width, url], ...]`` (one photograph's sizes) for an
+   *  image drawn *sizes* wide ("116px"), offering no size wider than a 2x
+   *  screen needs (TECH-13): a 165px card on a 3x phone fetched a 494px
+   *  original where the 330px file is sharp enough, and a judge's 116px
+   *  portrait fetched the Commons original. The smallest size at least
+   *  that wide is the last one offered. */
+  function cappedSrcset(set, sizes) {
+    var sorted = (set || []).slice().sort(function (a, b) { return a[0] - b[0]; });
     var px = parseFloat(sizes);
     var cap = px > 0 ? 2 * px : Infinity;
     var kept = [];
-    for (var i = 0; i < set.length; i++) {
-      kept.push(set[i]);
-      if (set[i][0] >= cap) break;
+    for (var i = 0; i < sorted.length; i++) {
+      kept.push(sorted[i]);
+      if (sorted[i][0] >= cap) break;
     }
     return kept.map(function (entry) { return entry[1] + " " + entry[0] + "w"; }).join(", ");
   }
@@ -958,6 +966,8 @@
     }
     var parts = [];
     if (credit.by) parts.push(credit.via ? escapeHtml(credit.by) : anchor(credit.page, credit.by));
+    // The licence asks for the author and the file's page names none.
+    else if (credit.authorUnrecorded) parts.push("author not recorded on Commons");
     if (credit.licence) parts.push(anchor(credit.licenceUrl, credit.licence));
     var line = parts.length ? "Photo: " + parts.join(", ") : "Photo";
     if (credit.via) line += (parts.length ? ", via " : " via ") + anchor(credit.page, credit.via);
@@ -2723,6 +2733,7 @@
     portraitAttrs: portraitAttrs,
     setPortrait: setPortrait,
     shownPhotoCredit: shownPhotoCredit,
+    cappedSrcset: cappedSrcset,
     photoCreditHtml: photoCreditHtml,
     handleImageFallback: handleImageFallback,
     SILHOUETTE: SILHOUETTE,

@@ -273,9 +273,14 @@ def file_page(url):
 def credit_fields(credit):
     """What a portrait carries of its Commons file's credit (rule 87): the
     author and licence its description page gives, never typed in."""
-    out = {"licence": credit["licence"]}
+    from .portraits import CREDIT_FORM
+
+    out = {"licence": credit["licence"], "creditForm": credit.get("form") or CREDIT_FORM}
     if credit.get("by"):
         out["by"] = credit["by"]
+    elif credit.get("attribution"):
+        # The licence asks for the author; the file's page names none.
+        out["authorUnrecorded"] = True
     if credit.get("licenceUrl"):
         out["licenceUrl"] = credit["licenceUrl"]
     return out
@@ -392,12 +397,16 @@ def credit_portraits(cache, info_of=None, log=print):
     Returns ``(credited, withdrawn)``. A file the read did not answer for
     keeps its portrait and is asked about again (rule 8) - ``validate``
     fails it meanwhile, since shown uncredited is the defect (rule 87)."""
+    from .portraits import CREDIT_FORM
     if info_of is None:
         from .portraits import file_info as info_of
     judges = (cache or {}).get("judges") or {}
+    # A credit read by an earlier form of the reading is read again: the
+    # first printed Commons' hidden spans and uploaders' sentences.
     todo = {nid: entry["portrait"] for nid, entry in judges.items()
             if (entry.get("portrait") or {}).get("credit") == "Wikimedia Commons"
-            and not entry["portrait"].get("licence")}
+            and (not entry["portrait"].get("licence")
+                 or entry["portrait"].get("creditForm") != CREDIT_FORM)}
     if not todo:
         return 0, 0
     if log:
@@ -414,6 +423,8 @@ def credit_portraits(cache, info_of=None, log=print):
             cache.setdefault("problems", []).append(why)
             withdrawn += 1
         else:
+            for key in ("by", "authorUnrecorded", "licenceUrl"):
+                portrait.pop(key, None)
             portrait.update(credit_fields(credit))
             credited += 1
     return credited, withdrawn

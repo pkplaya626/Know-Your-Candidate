@@ -267,45 +267,121 @@ def image_sizes(urls, log=None):
 
 _CREDIT_FIELDS = "Artist|LicenseShortName|LicenseUrl|AttributionRequired|NonFree"
 
+# Which reading of a file's description page a stored credit is. A credit
+# read by an earlier form is read again: the first printed Commons' hidden
+# duplicate spans, uploaders' sentences and file names as authors.
+CREDIT_FORM = 2
+
+# Licence codes Commons gives where the licence has a name.
+LICENCE_NAMES = {
+    "PDM-owner": "Public Domain Mark",
+    "PDM": "Public Domain Mark",
+    "FAL": "Free Art License",
+}
+
+_HIDDEN = re.compile(
+    r"<(?P<tag>[a-z][a-z0-9]*)\b[^>]*\bstyle\s*=\s*\"[^\"]*display\s*:\s*none[^\"]*\"[^>]*>"
+    r".*?</(?P=tag)\s*>", re.I | re.S)
+_FILE_NAME = re.compile(r"[^\s:/]+\.(?:jpe?g|png|gif|tiff?|svg|webp)\b", re.I)
+# What Commons' templates say where no author is known: {{Unknown|author}},
+# "unidentified photographer", a sentence about not knowing.
+_NO_AUTHOR = re.compile(
+    r"^(?:unknown|unidentified|anonymous|not known|author unknown|no author|"
+    r"photographer unknown|unnamed|n/?a\b|i do not know|i don't know)", re.I)
+# What an uploader adds to the author's line about themselves.
+_UPLOADER = re.compile(
+    r"\s*(?:\(\s*talk\s*\)|(?:the )?original uploader was\b.*$|"
+    r"later versions?(?:\(s\))? (?:were|was) uploaded by\b.*$|"
+    r"(?<=\.)\s*\S+ at [A-Z][a-z]+ Wikipedia\b\s*\.?)", re.I | re.S)
+
 
 def plain_text(fragment):
-    """Text with its HTML gone: Commons gives an author as markup
-    (``<a href="//commons.wikimedia.org/wiki/User:X">X</a> from Peoria``)."""
+    """Text with its HTML gone, and what Commons hides from readers gone
+    with it: an author given as ``Unknown author<span style="display:
+    none;">Unknown author</span>`` read "Unknown author Unknown author"
+    under five profiles' and six judges' photographs."""
     import html as html_mod
 
-    text = re.sub(r"<[^>]+>", " ", str(fragment or ""))
+    text = _HIDDEN.sub(" ", str(fragment or ""))
+    text = re.sub(r"<[^>]+>", " ", text)
     return " ".join(html_mod.unescape(text).split())
+
+
+def author_of(fragment):
+    """The author a Commons file's ``Artist`` field names, as a reader should
+    see it, or ``None`` where it names no one.
+
+    Each line of a list is read alone, without a leading file name (Judge
+    Keenan's photograph is cut from another file: "Warner_Keenan_Webb.jpg:
+    Mark Warner" and "derivative work: Athenchen"), an uploader's note
+    about themselves or "(talk)". What is left is no author when it is a
+    form of "unknown", a sentence about not knowing ("I do not know the
+    name of the photographer ..."), a bare address or a file name; a phrase
+    said twice is said once."""
+    raw = _HIDDEN.sub(" ", str(fragment or ""))
+    items = re.findall(r"<li\b[^>]*>(.*?)</li>", raw, re.I | re.S) or [raw]
+    out = []
+    for item in items:
+        text = plain_text(item)
+        text = re.sub(rf"^{_FILE_NAME.pattern}\s*:\s*", "", text, flags=re.I)
+        # An interwiki link's prefix: "en:United States District Court ...".
+        text = re.sub(r"^[a-z]{2,3}:(?=[A-Z])", "", text)
+        cleaned = _UPLOADER.sub("", text).strip(" ;,")
+        text = " ".join((cleaned or text).split())
+        # A sentence's full stop, not an initial's ("S.D.N.Y.").
+        text = re.sub(r"(?:(?<=[a-z]{2})|(?<=\)))\s*\.$", "", text)
+        half = len(text) // 2
+        if len(text) % 2 == 1 and text[:half] == text[half + 1:]:
+            text = text[:half]
+        if (not text or _NO_AUTHOR.search(text) or re.search(r"(?:^|\s)I\s", text)
+                or re.fullmatch(r"(?:https?:)?//\S+|https?://\S+", text)
+                or _FILE_NAME.fullmatch(text)):
+            continue
+        if text not in out:
+            out.append(text)
+    return "; ".join(out) or None
+
+
+def licence_name(code):
+    """A licence as a reader can read it: Commons' code where it is a name
+    ("CC BY-SA 4.0", "Public domain"), the name where it is only a code."""
+    code = plain_text(code) or None
+    return LICENCE_NAMES.get(code, code) if code else None
 
 
 def credit_of(info):
     """The credit a Commons file's own description page gives it:
-    ``{"by", "licence", "licenceUrl", "file", "attribution", "nonFree"}``.
-    ``licence`` is ``None`` when the page records none, which ``validate``
-    refuses (rule 87)."""
+    ``{"by", "licence", "licenceUrl", "file", "attribution", "nonFree",
+    "form"}``. ``by`` is ``None`` where the page names no author
+    (:func:`author_of`); ``licence`` is ``None`` when the page records
+    none, which ``validate`` refuses (rule 87)."""
     meta = info.get("extmetadata") or {}
 
     def field(name):
         return plain_text((meta.get(name) or {}).get("value")) or None
 
     return {
-        "by": field("Artist"),
-        "licence": field("LicenseShortName"),
+        "by": author_of((meta.get("Artist") or {}).get("value")),
+        "licence": licence_name((meta.get("LicenseShortName") or {}).get("value")),
         "licenceUrl": field("LicenseUrl"),
         "file": info.get("descriptionurl") or None,
         "attribution": (field("AttributionRequired") or "").lower() == "true",
         "nonFree": (field("NonFree") or "").lower() == "true",
+        "form": CREDIT_FORM,
     }
 
 
 def credit_all(cache, log=print):
     """Give each Wikimedia portrait in *cache* its file's ``credit``.
 
-    Only records that have none are asked about, fifty to a request, one
-    request a second. A file the API does not describe stays without one
-    and is asked about again next run; ``validate`` fails its portrait
-    meanwhile, since showing it uncredited is the defect this fixes."""
+    Only records that have none, or one read by an earlier form
+    (:data:`CREDIT_FORM`), are asked about, fifty to a request, one request
+    a second. A file the API does not describe keeps what it had, and one
+    that never had a credit is not shown until it has one
+    (:func:`apply_cache`); it is asked about again next run."""
     todo = {key: record for key, record in cache.items()
-            if record.get("url") and wikimedia_file(record["url"]) and "credit" not in record}
+            if record.get("url") and wikimedia_file(record["url"])
+            and (record.get("credit") or {}).get("form") != CREDIT_FORM}
     if not todo:
         return 0
     log(f"    credits: reading {len(todo)} Wikimedia file description(s) ...")
@@ -917,6 +993,12 @@ def apply_cache(profiles, cache):
             # else: it is not shown here.
             profile["photoSource"] = None
             continue
+        if wikimedia_file(url) and not (record.get("credit") or {}).get("licence"):
+            # Its credit has not been read yet (Commons did not answer): it
+            # waits for the next run rather than show uncredited or hold the
+            # build (rule 8), and the next photograph or the silhouette shows.
+            profile["photoSource"] = None
+            continue
         profile["photos"] = [url] + [u for u in profile["photos"] if u != url]
         profile["photo_url"] = url
         profile["photoSource"] = record.get("via")
@@ -934,6 +1016,11 @@ def commons_credit(credit):
     the file's page, as the file's description page records them - or, with
     no recorded licence, ``licence`` ``None``, which ``validate`` fails."""
     credit = credit or {}
-    return {"by": credit.get("by"), "licence": credit.get("licence"),
-            "licenceUrl": credit.get("licenceUrl"), "page": credit.get("file"),
-            "via": "Wikimedia Commons"}
+    out = {"by": credit.get("by"), "licence": credit.get("licence"),
+           "licenceUrl": credit.get("licenceUrl"), "page": credit.get("file"),
+           "via": "Wikimedia Commons"}
+    if credit.get("attribution") and not credit.get("by"):
+        # The licence asks for the author and the page names none: the line
+        # says so, and links the file's page (rule 87).
+        out["authorUnrecorded"] = True
+    return out

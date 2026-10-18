@@ -160,6 +160,28 @@ class TestTheJoin(unittest.TestCase):
         self.assertNotIn("portrait", cache["judges"]["100"])
         self.assertTrue(cache["problems"])
 
+    def test_a_credit_of_the_first_reading_is_read_again_and_cleaned(self):
+        """Six judges read "Unknown author Unknown author" (a hidden span),
+        Judge Forrest an uploader's three-line sentence, and Judge Moore's
+        CC BY-SA file no author at all."""
+        good, _ = self.join(entity("Q1", "example-ann", images=["Ann Example.jpg"]))
+        old = dict(good["100"]["portrait"], by="Unknown author Unknown author")
+        old.pop("creditForm", None)
+        unknown = {"width": 400, "height": 500, "extmetadata": {
+            "Artist": {"value": 'Unknown author<span style="display: none;">Unknown author'
+                                '</span>'},
+            "LicenseShortName": {"value": "CC BY-SA 4.0"},
+            "AttributionRequired": {"value": "true"}}}
+        cache = {"judges": {"100": {"portrait": old}}}
+        self.assertEqual(jl.credit_portraits(cache, lambda urls: {u: unknown for u in urls},
+                                             log=None), (1, 0))
+        portrait = cache["judges"]["100"]["portrait"]
+        self.assertNotIn("by", portrait)
+        self.assertTrue(portrait["authorUnrecorded"])
+        self.assertEqual(portrait["licence"], "CC BY-SA 4.0")
+        self.assertEqual(jl.credit_portraits(cache, lambda urls: {u: unknown for u in urls},
+                                             log=None), (0, 0))   # once per form
+
     def test_two_items_for_one_id_name_nobody(self):
         joined, problems = self.join(entity("Q1", "example-ann"), entity("Q2", "example-ann"))
         self.assertEqual(joined, {})

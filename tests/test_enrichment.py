@@ -283,7 +283,7 @@ class TestPortraitSizes(unittest.TestCase):
                  "photos": ["placeholder"]}
         cache = {
             portraits.profile_key(member): {"url": self.THUMB, "via": "wikipedia", "set": sizes,
-                                            "title": "A B"},
+                                            "title": "A B", "credit": {"licence": "CC0"}},
             portraits.profile_key(plain): {"url": "https://clerk.house.gov/x.jpg", "via": "clerk.house.gov"},
         }
         portraits.inherit_cross_links([member, running, plain], cache)
@@ -1376,7 +1376,7 @@ class TestPhotoCredits(unittest.TestCase):
 
     def test_only_uncredited_wikimedia_files_are_asked_about(self):
         cache = {"a": {"url": self.FILE}, "b": {"url": self.FILE.replace("7f", "8e"),
-                                               "credit": {"licence": "CC0"}},
+                                               "credit": {"licence": "CC0", "form": portraits.CREDIT_FORM}},
                  "c": {"url": "https://clerk.house.gov/images/members/S001156.jpg"},
                  "d": {"url": None}}
         with mock.patch.object(portraits, "file_info",
@@ -1385,6 +1385,80 @@ class TestPhotoCredits(unittest.TestCase):
         self.assertEqual(info.call_args[0][0], [self.FILE])
         self.assertEqual(cache["a"]["credit"]["licence"], "CC BY-SA 3.0")
         self.assertNotIn("credit", cache["c"])
+
+    def test_what_commons_hides_or_says_of_no_one_is_not_printed_as_an_author(self):
+        """The first credits printed "Unknown author Unknown author" (a
+        hidden duplicate span), an uploader's sentence about not knowing the
+        photographer, a file name and a bare address as authors."""
+        author = portraits.author_of
+        self.assertIsNone(author('Unknown author<span style="display: none;">Unknown '
+                                 'author</span>'))
+        self.assertIsNone(author("<p>I do not know the name of the photographer, but do know "
+                                 "that the photo was taken by a Federal \n</p>\nemployee."))
+        self.assertIsNone(author("Unidentified. Likely a governmental picture, which would "
+                                 "amount to a protected use."))
+        self.assertIsNone(author("unidentified photographer"))
+        self.assertIsNone(author('<a href="https://www.ilnd.uscourts.gov/x.pdf">'
+                                 'https://www.ilnd.uscourts.gov/x.pdf</a>'))
+        self.assertIsNone(author(None))
+        self.assertEqual(author(
+            '<ul><li><a href="//commons.wikimedia.org/wiki/File:Warner_Keenan_Webb.jpg">'
+            'Warner_Keenan_Webb.jpg</a>: <a href="https://www.flickr.com/people/x">Mark Warner'
+            '</a></li>\n<li>derivative work: <a href="//commons.wikimedia.org/wiki/User:A">'
+            'Athenchen</a> (<a href="//commons.wikimedia.org/wiki/User_talk:A"><span '
+            'class="signature-talk">talk</span></a>)</li></ul>'),
+            "Mark Warner; derivative work: Athenchen")
+        self.assertEqual(author("United States Department of Justice. Billyboy01 at English "
+                                "Wikipedia . Later version(s) were uploaded by Jeremyb at "
+                                "English Wikipedia ."), "United States Department of Justice")
+        self.assertEqual(author("United States Department of Justice The original uploader "
+                                "was Billyboy01 at English Wikipedia ."),
+                         "United States Department of Justice")
+        # An uploader who is the author keeps their name; an initial its stop.
+        self.assertEqual(author("Billyboy01 at English Wikipedia"),
+                         "Billyboy01 at English Wikipedia")
+        self.assertEqual(author("U.S. Government -- Judiciary -- S.D.N.Y."),
+                         "U.S. Government -- Judiciary -- S.D.N.Y.")
+        self.assertEqual(author("en:United States District Court for the Southern District "
+                                "of Ohio"),
+                         "United States District Court for the Southern District of Ohio")
+        self.assertEqual(portraits.licence_name("PDM-owner"), "Public Domain Mark")
+        self.assertEqual(portraits.licence_name("CC BY-SA 4.0"), "CC BY-SA 4.0")
+
+    def test_a_licence_asking_for_an_author_the_file_does_not_name_says_so(self):
+        info = {"descriptionurl": "https://commons.wikimedia.org/wiki/File:Judge_Moore.jpg",
+                "extmetadata": {"LicenseShortName": {"value": "CC BY-SA 4.0"},
+                                "AttributionRequired": {"value": "true"}}}
+        credit = portraits.commons_credit(portraits.credit_of(info))
+        self.assertIsNone(credit["by"])
+        self.assertTrue(credit["authorUnrecorded"])
+        self.assertEqual(credit["page"], info["descriptionurl"])
+        public = dict(info, extmetadata={"LicenseShortName": {"value": "Public domain"},
+                                         "AttributionRequired": {"value": "false"}})
+        self.assertNotIn("authorUnrecorded",
+                         portraits.commons_credit(portraits.credit_of(public)))
+
+    def test_a_credit_read_by_an_earlier_form_is_read_again(self):
+        cache = {"a": {"url": self.FILE, "credit": {"licence": "CC BY-SA 3.0",
+                                                    "by": "Unknown author Unknown author"}}}
+        with mock.patch.object(portraits, "file_info",
+                               return_value={self.FILE: self.INFO}):
+            self.assertEqual(portraits.credit_all(cache, log=lambda *a: None), 1)
+        self.assertEqual(cache["a"]["credit"]["form"], portraits.CREDIT_FORM)
+        self.assertEqual(cache["a"]["credit"]["by"],
+                         "Gage Skidmore from Peoria, AZ, United States of America")
+
+    def test_a_commons_portrait_whose_credit_is_unread_waits_rather_than_hold_the_build(self):
+        """A 429 from Commons left a new portrait without its licence, and
+        validate's error held the whole refresh, results included."""
+        member = {"id": "F000001", "isCandidate": False, "name": "Thomas Feely", "state": "AZ",
+                  "photos": ["placeholder"], "wikipedia": "Thomas Feely"}
+        key = portraits.profile_key(member)
+        record = {"url": self.FILE, "via": "wikipedia", "title": "Thomas Feely"}
+        portraits.apply_cache([member], {key: record})
+        self.assertEqual(member["photos"], ["placeholder"])
+        self.assertNotIn("photoCredit", member)
+        self.assertEqual(validate.check_photo_credits([member]), [])
 
     def test_a_profile_carries_its_portraits_credit_and_a_fair_use_file_is_not_shown(self):
         member = {"id": "F000001", "isCandidate": False, "name": "Thomas Feely", "state": "AZ",
