@@ -45,6 +45,7 @@ data/judiciary.json         ──┤   (every sitting federal judge: FJC direct
 data/judicial_vacancies.json ─┤   (vacancies, announced vacancies and emergencies: uscourts.gov)
 data/political_history.json ──┤   (public offices held: congress-legislators; Wikidata the article confirms)
 data/oge_disclosures.json   ──┤   (the executive's financial reports: Office of Government Ethics, by office)
+data/local_sites.json       ──┤   (each local government's listed website, opened: localgov --check-sites)
 data/record_2026.json       ──┤   (the frozen 2026 race set: record --freeze)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
@@ -102,7 +103,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `census_governments.json`, `state_legislators.json`, `executives.json`,
   `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`,
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
-  `political_history.json` and `oge_disclosures.json` are caches, but
+  `political_history.json`, `oge_disclosures.json` and `local_sites.json` are caches, but
   they *are* hand-editable. `stategov.js` is generated from the last five,
   with `kyc/ballot2026.py`: which state offices and legislative seats are on
   the 2026 ballot, a curated table citing each state's own record.
@@ -143,6 +144,7 @@ python build_profile_site.py odds             # market prices and polling averag
 python build_profile_site.py census           # local governments by state (Census of Governments)
 python build_profile_site.py statelegs        # every state legislator (Open States), matched to districts
 python build_profile_site.py localgov         # every local government (Census listing), checked
+python build_profile_site.py localgov --check-sites  # open every listed local website; resumes (rule 78)
 python build_profile_site.py executives       # every governor (NGA), and NCSL's party counts
 python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS), attorneys general
 python build_profile_site.py courts           # each state's highest court, from the court's own roster
@@ -155,8 +157,8 @@ python build_profile_site.py oge              # the executive's financial report
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1423 tests, no dependencies
-npm install && npm test                       # 1910 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1454 tests, no dependencies
+npm install && npm test                       # 1932 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1161,6 +1163,39 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     letter from theirs ("Gegen", "Gegan") is undecided, never "withdrawn";
     a seat whose primary was not its state's (Alabama's four August
     districts) carries its own date in `overrides.SEAT_PRIMARY_DATES`.
+
+78. **A public body's website is checked before it is linked, and a
+    move is kept only where the new page names the body.** The county
+    pages linked the 39,452 websites in the Census's 2022 listing
+    unchecked: Clinton, Connecticut's opened a slot-machine demo,
+    Vermilion Parish's SBOBET88, Bismarck's a parked page, Switzerland
+    County's a GoDaddy for-sale page - under each government's name.
+    `localgov --check-sites` (`kyc/localsites.py`) opens every address,
+    one request at a time per host and redirects followed by hand with
+    cookies (a `window.location = "/lander"` page is parking, rule 39),
+    and writes `data/local_sites.json` with the day and the evidence. The
+    build withdraws gambling, parked, for-sale and expired pages, a page
+    gone twice (404, 410), a host NXDOMAIN or without an address here and
+    at both dns.google and Cloudflare (rule 35), and a cross-host redirect
+    to a page that does not name the body; the line says why and when,
+    and every other link says it is the Census's 2022 address and when it
+    was checked. A 403, 429, 5xx, timeout, sign-in or bot wall, a server's
+    placeholder page and a SERVFAIL (a lame delegation) conclude nothing
+    (rule 8). "Names the body" is its distinctive words *and* a word for
+    its kind in the title ("Pettisville Schools"), its whole name as a
+    phrase, or a `.gov` host: the first full run withdrew 115 moves as
+    "elsewhere", most of them school districts and authorities on new
+    domains, because it asked a title for the listing's full name - and
+    for the listing's abbreviations ("Ind", "Sch") as if they were words of
+    it. A place's name alone is not enough: Alma's address opens its
+    chamber of commerce, Haverhill's an estate agent's listings. And 48
+    checks at once dropped about 4,700 lookups at this machine's resolver
+    that dns.google answered: a local failure is looked up again before
+    it is believed. A gambling verdict is never cleared by a later run; a
+    person's finding goes in `overrides.BLOCKED_LOCAL_HOSTS`. The run of
+    2026-10-17/18 withdrew 7,664 of 39,447 governments' links: 5,090 dead,
+    1,179 gone, 513 elsewhere, 351 for sale, 257 gambling, 254 parked and
+    20 expired; 4,988 could not be read and stay linked, marked so.
 
 79. **A mark about an office sits on the office, and "not running" is a
     source's word.** "On the Nov 3, 2026 ballot" sat under Brian Kemp,

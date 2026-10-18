@@ -34,6 +34,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… census` | Count each state's local governments from the Census of Governments (`--check` reads the cache) |
 | `… statelegs` | Every state legislator from Open States, matched to the district maps, each portrait checked (`--check` re-matches the cache; `--images-only` checks the portraits again without refetching; `--no-images` skips them) |
 | `… localgov` | Every local government from the Census listing, checked against the published counts |
+| `… localgov --check-sites` | Open every website the listing gives a local government - many hosts at once, one request at a time per host - and record what each is now in `data/local_sites.json` (hand-editable; a stopped run resumes; `--recheck VERDICT` looks again at one kind, `--states`, `--limit`) |
 | `… executives` | Every governor from the NGA, and NCSL's count of each legislature's parties (`--check` reports the caches) |
 | `… officers` | Every lieutenant governor (NLGA) and secretary of state (NASS), cross-checked where the rosters overlap |
 | `… federal` | The President, the Vice President and the Cabinet: who holds each office, from the White House's pages, each office's own page and the Senate's roll-call votes (`--check` reports the cache) |
@@ -63,7 +64,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (1910 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (1932 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -124,7 +125,8 @@ CI asserts that a rebuild changes nothing.
 | `census.py` | The Census of Governments' counts of local governments by state (the `census` command) |
 | `statelegs.py` | Every state legislator, from Open States, matched to a Census district (the `statelegs` command) |
 | `legislature.py` | Each state's legislature page data: projected districts, close-ups and the members in each |
-| `localgov.py` | Every local government, county by county, from the Census listing (the `localgov` command) |
+| `localgov.py` | Every local government, county by county, from the Census listing (the `localgov` command), and the listing's abbreviations written out |
+| `localsites.py` | Whether each local government's listed website still is one (the `localgov --check-sites` command), and what the build withdraws |
 | `counties.py` | Each state's counties page data: projected counties, the governments in each, and every incorporated place joined to its government |
 | `executives.py` | Every governor, from the National Governors Association's roster (the `executives` command) |
 | `officers.py` | Lieutenant governors and secretaries of state, from their associations' rosters (the `officers` command) |
@@ -1947,7 +1949,37 @@ regions.
 What the listing does not hold is who serves: it names the title of a
 contact official, not the person. No free, authoritative national source
 lists local officials, so the page says what each government is and links
-its own site rather than guessing who runs it.
+its own site rather than guessing who runs it - and every panel that lists
+governments says so in a line of its own, with where to look.
+
+The listing abbreviates ("Fairfax Co Schs", "Covina Val Unif Sch Dist").
+The page writes the abbreviations out from a closed table of whole words
+(`localgov.ABBREVIATIONS`; a word that means two things, such as "Co" or
+"Val", only where its neighbours say which) and keeps the Census's form in
+the name's title. It never guesses an official name: "Fairfax County
+Schools", not "Fairfax County Public Schools". The place beside a
+government is its mailing address, and is labelled so; the Census's
+function categories read in plain words ("Single-purpose district"). An
+independent city is named as its state names it ("City of Alexandria",
+"Baltimore City"), and Virginia's count reads "95 counties and 38
+independent cities". The map names a county where an 11px label fits at
+the width it is drawn (`labelRoom`, page text over the map, rule 46);
+every county is in the list under the map, which has a filter.
+
+The websites are the ones the Census listed in 2022, and in October 2026
+about one in a hundred led to gambling, parked or for-sale domains under a
+public body's name. `localgov --check-sites` opens every one (rule 78) and
+writes what it found to `data/local_sites.json`, address by address, with
+the day and the evidence. The build withdraws an address that is now
+gambling, parked, for sale or expired, that redirects to a site whose page
+does not name the government, that is gone (404 or 410, twice), or whose
+host does not exist (NXDOMAIN, or no address, here and at dns.google and
+Cloudflare); the government's line says why and when. Everything else is
+linked and labelled "Website as listed by the Census in 2022, checked
+Oct 17, 2026" (its own day), or as could not be read; a 403, a 429, a timeout or a bot wall
+concludes nothing. A person's own finding goes in
+`overrides.BLOCKED_LOCAL_HOSTS`, and a gambling verdict is never cleared by
+a later check.
 
 ### Cities and towns
 
