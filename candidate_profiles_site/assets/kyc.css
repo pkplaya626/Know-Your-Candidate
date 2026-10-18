@@ -1059,6 +1059,23 @@ a.badge-link {
   contain-intrinsic-size: auto 700px;
 }
 .race .card { content-visibility: visible; }
+/* On a phone a state page's people are rows, not portrait tiles: a 52px
+ * portrait (or initials) beside the name, seat, party and status.
+ * California's page was 50,000-60,000px, about 60 screens, mostly
+ * 150x190 portraits two to a row and every member twice (VISUALS-15). */
+@media (max-width: 600px) {
+  #stateContent .card-grid { grid-template-columns: minmax(0, 1fr); gap: var(--s-3); }
+  #stateContent .card {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--s-3);
+    contain-intrinsic-size: auto 88px;
+  }
+  #stateContent .card-photo { flex: none; width: 52px; }
+  #stateContent .card .card-photo.card-monogram { width: 52px; height: 52px; font-size: var(--t-md); }
+  #stateContent .card-body { flex: 1; min-width: 0; }
+  #stateContent .race { contain-intrinsic-size: auto 400px; }
+}
 
 .card-photo {
   position: relative;

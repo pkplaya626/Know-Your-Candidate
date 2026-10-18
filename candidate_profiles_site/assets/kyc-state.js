@@ -592,11 +592,14 @@
       );
     }
 
-    /* The 2026 races, one section each, in ballot order. */
+    /* The 2026 races, one section each, in ballot order. On a phone each
+     * race's markets are closed until opened: as tall as its people, they
+     * made California's page about 60 screens long (VISUALS-15). */
+    var phone = !!(global.matchMedia && global.matchMedia("(max-width: 600px)").matches);
     var raceHtml = senateRaces.concat(houseRaces).map(function (race) {
       var people = peopleIn(race);
       return cards.raceSection(race, people, { title: districtLabel(race), stateLink: false,
-                                               fullOdds: true });
+                                               fullOdds: true, collapsedOdds: phone });
     }).join("");
     if (raceHtml) {
       /* Texas has 38 districts; a row of jump chips saves the scroll. */

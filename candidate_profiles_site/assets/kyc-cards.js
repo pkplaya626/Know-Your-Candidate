@@ -543,7 +543,7 @@
       KYC.escapeHtml(KYC.stateName(race.state)) + " &rsaquo;</a>";
     // The people first, then the markets: a reader came for who is running,
     // and 61% of House market blocks only show a 95-99% favourite.
-    var odds = KYC.odds ? KYC.odds.render(race, { compact: !opts.fullOdds }) : "";
+    var odds = KYC.odds ? KYC.odds.render(race, { compact: !opts.fullOdds, collapsed: !!opts.collapsedOdds }) : "";
     return [
       '<section class="race" id="', KYC.escapeAttr("race-" + race.id), '">',
       '<div class="race-head"><h3 class="race-title">',

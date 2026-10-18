@@ -3463,6 +3463,13 @@ function testPhoneRules(css) {
     check("a page's links and its jump chips each take one row that scrolls sideways",
       /\.state-links,\s*\.jump-row\.state-parts\s*\{[^}]*flex-wrap:\s*nowrap;[^}]*overflow-x:\s*auto/.test(phone));
     check("a state's figures read as one line of text", /\.state-summary \.badge\s*\{[^}]*display:\s*inline/.test(phone));
+    // California's page was about 60 screens of portrait tiles (VISUALS-15).
+    check("a state page's people are rows on a phone, not portrait tiles",
+      /#stateContent \.card\s*\{[^}]*flex-direction:\s*row/.test(phone) &&
+        /#stateContent \.card-photo\s*\{[^}]*width:\s*52px/.test(phone));
+    const stateJs = fs.readFileSync(path.join(SITE, "assets", "kyc-state.js"), "utf8");
+    check("and its races' markets are closed there", /collapsedOdds: phone/.test(stateJs) &&
+      /matchMedia\("\(max-width: 600px\)"\)/.test(stateJs));
     check("the map's ten views are one menu on a phone",
       /\.map-view-group\s*\{\s*display:\s*none;?\s*\}/.test(media(760)) &&
         /\.map-mode-pick\s*\{[^}]*display:\s*flex/.test(media(760)));
@@ -4329,6 +4336,10 @@ async function testOdds() {
       check("and the note says the site has no relationship with the markets",
         /no relationship with these markets and earns no money from them/.test(slot.textContent));
       KYC.profile.close();
+      // A state page on a phone closes each race's markets too (VISUALS-15).
+      const race = window.kycRaces.find((r) => r.id === member.raceId);
+      const html = KYC.cards.raceSection(race, [member], { fullOdds: true, collapsedOdds: true });
+      check("a race section can show its markets closed", /<details class="odds odds-compact odds-collapsed"/.test(html));
     }
   });
 }
