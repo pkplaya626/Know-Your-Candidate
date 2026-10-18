@@ -660,11 +660,45 @@
   function statewide(plan) {
     var frame = state.viewBox.slice();
     var px = drawnAt / frame[2];
+    /* The picked districts' larger numbers are placed in the order they
+     * were picked, and one that would cover another steps a line or a
+     * width aside, staying inside its district's box: on Texas's map at
+     * 390px, TX-35's and TX-37's sat 6px apart and "37" hid "35"
+     * (RACES-24). Failing that it stays at its own point. The outline
+     * marks the picked district itself, so its number may sit beside it. */
+    var placedPicks = [];
+    function pickedAt(n, size) {
+      var district = plan.districts[n];
+      var at = district.at;
+      var box = textBox(at[0], at[1], numLabel(n), size, "middle");
+      var w = box[2] - box[0], h = box[3] - box[1];
+      var tries = [[0, 0], [0, h], [0, -h], [w, 0], [-w, 0], [w, h], [-w, h], [w, -h], [-w, -h],
+        [0, 2 * h], [0, -2 * h]];
+      for (var i = 0; i < tries.length; i++) {
+        var x = at[0] + tries[i][0] * 1.05, y = at[1] + tries[i][1] * 1.05;
+        var b = textBox(x, y, numLabel(n), size, "middle");
+        // By its district: within a label's size of the district's box,
+        // since a district can be smaller than its picked number.
+        var inside = x >= district.box[0] - w && x <= district.box[2] + w &&
+          y >= district.box[1] - h && y <= district.box[3] + h;
+        if ((i === 0 || inside) && !collides(b, placedPicks)) {
+          placedPicks.push(b);
+          return [x, y];
+        }
+      }
+      placedPicks.push(box);
+      return at;
+    }
+    var spotOf = {};
+    focus.forEach(function (n) {
+      if (plan.districts[n]) spotOf[n] = pickedAt(n, 15 / px);
+    });
     var labels = numbers(plan).map(function (n) {
       var district = plan.districts[n];
       var picked = focus.indexOf(n) !== -1;
       if (!picked && !fitsAt(district, px)) return null;
-      return text("district-num" + focusClass(n), district.at[0], district.at[1],
+      var at = picked && spotOf[n] ? spotOf[n] : district.at;
+      return text("district-num" + focusClass(n), at[0], at[1],
                   (picked ? 15 : NUMBER_PX) / px, numLabel(n));
     });
     var lines = state.insets.map(function (inset) {

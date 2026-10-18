@@ -5067,6 +5067,27 @@ async function testMapOnAPhone() {
 }
 
 async function testDistrictsOnAPhone() {
+  // Two picked districts' numbers printed on top of each other on Texas's
+  // statewide map at 390px: "37" 6px from "35" and covering it (RACES-24).
+  for (const width of [302, 360, 620]) {
+    const page = await buildPage("districts/tx.html", { hash: "#/?d=35,37", setup: drawnAt(width) });
+    await settle(50);
+    suite(`districts/tx.html#/?d=35,37 — the picked numbers drawn ${width}px wide`, () => {
+      const layer = page.D.querySelector(".district-statewide + .map-labels");
+      const vb = page.D.querySelector(".district-statewide").getAttribute("viewBox").split(" ").map(Number);
+      const height = width * vb[3] / vb[2];
+      const boxes = [...(layer ? layer.querySelectorAll(".is-focus") : [])].map((s) => {
+        const size = parseFloat(s.style.fontSize);
+        const w = (s.textContent.length * 0.6 + 0.44) * size;
+        return { t: s.textContent, x: parseFloat(s.style.left) / 100 * width,
+          y: parseFloat(s.style.top) / 100 * height, w, h: size * 1.24 };
+      });
+      const hit = (a, b) => Math.abs(a.x - b.x) * 2 < a.w + b.w && Math.abs(a.y - b.y) * 2 < a.h + b.h;
+      check("both picked districts are numbered, neither on the other",
+        boxes.length === 2 && !hit(boxes[0], boxes[1]),
+        boxes.map((b) => `${b.t}@${b.x.toFixed(0)},${b.y.toFixed(0)}`).join(" "));
+    });
+  }
   // Numbers were sized for a 620px map and scaled with it: on a phone every
   // one was 4px tall. They are 11px at the width the map is drawn, written
   // where they fit, and every district is numbered somewhere.
