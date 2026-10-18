@@ -279,6 +279,56 @@ def judge_unlisted(row, judges, future=False):
     return seats is not None and not seats
 
 
+def listed_senior(cache, judges):
+    """``{(court, judge id): row}``: the judges the courts' list has on
+    senior status by its own as-of date, whom the directory still lists in
+    active service on that court. Neither source is chosen silently: the
+    pages keep the judge out of the active count and say on their row which
+    source says what. A name only points at the row to annotate - exactly
+    one judge of that surname on that court, active there - and never
+    joins anything else (rule 17)."""
+    out = {}
+    for row in (cache or {}).get("current") or []:
+        if row.get("reason") != "Senior" or not row.get("since") or not row.get("court") \
+                or not row.get("vacatedBy") or row["since"] > (cache.get("asOf") or ""):
+            continue
+        surname = _surname(row["vacatedBy"].get("listedAs") or "")
+        named = [jid for jid, judge in judges.items() if _surname(judge.get("sortName")) == surname
+                 and any(s.get("court") == row["court"] for s in judge.get("seats") or [])]
+        if len(named) != 1:
+            continue
+        seat = next(s for s in judges[named[0]]["seats"] if s.get("court") == row["court"])
+        if not seat.get("seniorSince"):
+            out[(row["court"], named[0])] = row
+    return out
+
+
+def _given(listed):
+    """The first given name a list writes: ``"Rudofsky,Lee Philip"`` ->
+    ``"lee"``."""
+    parts = [p.strip() for p in (listed or "").split(",") if p.strip()]
+    rest = [p for p in parts[1:] if not _SUFFIX.match(p)]
+    words = rest[0].split() if rest else []
+    return _surname(words[0]) if words else ""
+
+
+def nominated_to(row, cache):
+    """The court a judge leaving for another court ("Elevated") is
+    nominated to, from the same lists: the one row, current or announced,
+    whose nominee has the judge's surname and first given name. None when
+    no row, or more than one, names them - the page then says only that the
+    judge was nominated to another court."""
+    if row.get("reason") != "Elevated" or not row.get("vacatedBy"):
+        return None
+    listed = row["vacatedBy"].get("listedAs") or ""
+    key = (_surname(listed), _given(listed))
+    found = {other["court"] for other in (cache.get("current") or []) + (cache.get("future") or [])
+             if other.get("nominee") and other.get("court") and other["court"] != row.get("court")
+             and (_surname(other["nominee"].get("listedAs")),
+                  _given(other["nominee"].get("listedAs"))) == key}
+    return found.pop() if len(found) == 1 else None
+
+
 def problems(cache, today=None, judiciary=None):
     """What a build says about the cache: ``[(level, code, message, detail)]``.
 

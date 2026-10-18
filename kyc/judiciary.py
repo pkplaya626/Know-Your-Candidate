@@ -189,8 +189,19 @@ def sitting(rows, bios, today):
         commissioned = _date(row.get("Commission Date"), "commission date")
         name = row["Court Name"].strip()
         if not commissioned:
-            if _date(row.get("Confirmation Date"), "confirmation date"):
-                pending.append(f"{row['Judge Name']}: confirmed for {name}, not yet commissioned")
+            confirmed = _date(row.get("Confirmation Date"), "confirmation date")
+            if confirmed:
+                # Confirmed, not yet commissioned: not sitting, and listed
+                # apart on the court's page, never counted among its judges.
+                nid = row.get("nid", "").strip()
+                pending.append({
+                    "name": display_name((bios.get(nid) or {}).get("name") or row["Judge Name"]),
+                    "courtName": name,
+                    "court": names.get(name),
+                    "appointedBy": row.get("Appointing President", "").strip() or None,
+                    "nominated": _date(row.get("Nomination Date"), "nomination date"),
+                    "confirmed": confirmed, "vote": _vote(row),
+                    "fjc": JUDGE_PAGE.format(nid=nid) if nid else None})
             continue
         if commissioned > today:
             continue
@@ -299,9 +310,11 @@ def _long_date(text):
         raise JudiciaryError(f"a date on the Court's page the parser does not read: {text!r}") from exc
 
 
-def parse_justices(page):
+def parse_justices(page, ended=False):
     """``[{name, role, state, appointedBy, oath}]`` for the sitting justices:
-    the Court's own table rows with no end of service."""
+    the Court's own table rows with no end of service. With *ended*, the
+    rows that have one instead, each with its ``ended`` date: a retired
+    justice's oath and last day are the Court's own."""
     out = []
     tables = _TABLES.findall(page)
     if {t for t, _ in tables} != {"Chief Justices", "Associate Justices"}:
@@ -312,11 +325,44 @@ def parse_justices(page):
                      for c in re.findall(r"<td[^>]*>(.*?)</td>", row, re.S)]
             if len(cells) != 5:
                 continue
-            name, state, appointed, oath, ended = cells
+            name, state, appointed, oath, end = cells
+            if bool(end) != ended:
+                continue
             if ended:
+                # Former justices' rows carry footnote marks ("(a) October
+                # 19, 1789"); a date that still does not read is no date.
+                out.append({"name": name, "role": heading[:-1], "oath": _loose_date(oath),
+                            "ended": _loose_date(end)})
                 continue
             out.append({"name": name, "role": heading[:-1], "state": state,
                         "appointedBy": appointed, "oath": _long_date(oath)})
+    return out
+
+
+def _loose_date(text):
+    try:
+        return _long_date(re.sub(r"\([a-z*]+\)", " ", text or ""))
+    except JudiciaryError:
+        return None
+
+
+def join_retired(page, retired, bios):
+    """``{nid: {"oath", "ended"}}`` for each retired justice the Court's
+    page lists as having left the Court, joined as the members are - by
+    surname and first name, uniquely, among the retired justices only. A
+    retired justice the page does not settle gets nothing (their table then
+    shows the directory's dates)."""
+    out = {}
+    former = parse_justices(page, ended=True)
+    for nid in retired:
+        bio = bios.get(nid, {})
+        hits = [j for j in former
+                if _fold(j["name"].partition(",")[0]) == _fold(bio.get("last", ""))
+                and _fold((j["name"].partition(",")[2].strip().split() or [""])[0])
+                == _fold(bio.get("first", ""))]
+        # Two rows for one name (a justice who served twice) settle nothing.
+        if len(hits) == 1:
+            out[nid] = {"oath": hits[0]["oath"], "ended": hits[0]["ended"]}
     return out
 
 
@@ -418,6 +464,10 @@ def build(service_text, judges_text, scotus_page, today, portraits_page=None, im
     members.sort(key=lambda m: (m[0]["role"] != "Chief Justice", m[0]["oath"] or ""))
     for nid in retired:
         judges[nid]["retiredJustice"] = True
+    # A retired justice's oath and last day, as the Court lists them: the
+    # same "took the oath" date the members carry (one date, both pages).
+    for nid, served in join_retired(scotus_page, retired, bios).items():
+        judges[nid]["courtService"] = served
     portrait_problems = []
     if portraits_page is not None:
         portraits, portrait_problems = join_portraits(parse_portraits(portraits_page), members)
@@ -463,7 +513,7 @@ def build(service_text, judges_text, scotus_page, today, portraits_page=None, im
         "judges": {j["id"]: {k: v for k, v in j.items() if k != "nid"}
                    for j in sorted(judges.values(), key=lambda j: j["id"])},
         "courts": courts,
-        "pending": sorted(pending),
+        "pending": sorted(pending, key=lambda p: (p["courtName"], p["name"])),
         "conflicts": conflicts,
         "portraitProblems": portrait_problems,
     }
@@ -527,6 +577,14 @@ def load_cache(root="."):
         return json.load(handle)
 
 
+def pending_text(row):
+    """A confirmed, uncommissioned judge in words. Older caches kept only
+    the words."""
+    if isinstance(row, str):
+        return row
+    return f"{row['name']}: confirmed for {row['courtName']}, not yet commissioned"
+
+
 def _keys(value):
     """Every key anywhere in a nested record."""
     if isinstance(value, dict):
@@ -565,7 +623,7 @@ def problems(cache, today=None):
     if cache.get("pending"):
         out.append(("warn", "judges-not-commissioned",
                     f"{len(cache['pending'])} confirmed judges are not commissioned yet and are "
-                    f"not listed as sitting", cache["pending"]))
+                    f"not listed as sitting", [pending_text(p) for p in cache["pending"]]))
     if cache.get("conflicts"):
         out.append(("warn", "judge-record-conflict",
                     f"{len(cache['conflicts'])} judges' directory records contradict themselves; "
