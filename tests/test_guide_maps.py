@@ -123,6 +123,13 @@ class TestGuideMaps(unittest.TestCase):
                 if a and b and a != b:
                     self.assertNotEqual(colour[a], colour[b], f"{code} ({a}) and {other} ({b})")
 
+    def test_the_circuit_map_says_its_colours_group_nothing(self):
+        # Four colours for twelve circuits read as four groups (audit
+        # 2026-10-17, GUIDE-31): the number is the key, and the text says so.
+        about = government_maps._circuits()["about"]
+        self.assertIn("The number on each state is its circuit", about)
+        self.assertIn("only tell neighbouring circuits apart and do not group them", about)
+
     def test_every_state_is_in_one_circuit_and_samoa_in_none(self):
         values = government_maps._circuits()["values"]
         for code in government_maps.STATES:

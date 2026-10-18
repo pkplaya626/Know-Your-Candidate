@@ -1364,7 +1364,18 @@ async function testDirectoryAsync() {
       /DW-NOMINATE/.test(p.voting_alignment || ""));
     KYC.profile.open(independent.id);
     const voting = D.getElementById("profileModalVoting").textContent;
+    const ticks = D.querySelectorAll("#profileModalVoting .ideology-peer").length;
     KYC.profile.close();
+    // The track was a blue-to-red gradient under a caption saying the score
+    // is not a party label (TRUST-12, VISUALS-05): neutral ink, with every
+    // sitting member of the chamber as a tick to read the score against.
+    const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+    const track = (css.match(/\n\.ideology-track\s*\{[^}]*\}/) || [""])[0];
+    check("the score's track is drawn in no party's colour",
+      !!track && !/--party-|--split|gradient/.test(track), track.replace(/\s+/g, " "));
+    check("and the chamber's members are ticks on it, counted in words",
+      ticks > 50 && /Each tick is a sitting member of the (House|Senate)/.test(voting) &&
+        /\d+ of \d+ score further left, \d+ further right/.test(voting), `${ticks} ticks`);
     check("an independent's score is in the scale's words, with its source and Congress",
       /of centre|near the centre/.test(voting) && !/Republican|Democrat/.test(voting) &&
         /Voteview/.test(voting) && /\d+(st|nd|rd|th) Congress/.test(voting), voting.replace(/\s+/g, " "));
@@ -1648,6 +1659,35 @@ async function testMap() {
     check("House mode lists the whole delegation",
       D.querySelectorAll("#delegation .person-row").length > 20,
       `${D.querySelectorAll("#delegation .person-row").length} rows`);
+
+    // The 2026 race view leads with the race: Texas's led with John
+    // Cornyn, "Lost primary", and folded its nominees away under "2026
+    // challengers" (VISUALS-10). The delegation views keep who is seated
+    // first (rule 27).
+    D.querySelector('[data-mode="senate2026"]').click();
+    const panel = D.getElementById("delegation");
+    const race26 = window.kycRaces.find((r) => r.chamber === "Senate" && r.state === "TX");
+    const stillIn = [...panel.querySelectorAll(".panel-subhead")].find((h) => /Still in the race/.test(h.textContent));
+    const heldBy = [...panel.querySelectorAll(".panel-subhead")].find((h) => /held by|Seat held/i.test(h.textContent));
+    check("the 2026 race view lists the people still in the race first, open",
+      !!race26 && !!stillIn && !panel.querySelector("#showChallengers") &&
+        (!heldBy || (stillIn.compareDocumentPosition(heldBy) & 4)) &&
+        [...panel.querySelectorAll(".person-row")].filter((r) => !r.closest("[hidden]")).length >= 2,
+      [...panel.querySelectorAll(".panel-subhead")].map((h) => h.textContent.trim()).join(" | "));
+    D.querySelector('[data-mode="senate"]').click();
+  });
+
+  suite("map.html — the state picker and the empty panel", () => {
+    // D.C. was listed twice, and every option a bare code (VISUALS-V2).
+    const options = [...D.querySelectorAll("#mapStateSelect option")].filter((o) => o.value);
+    const values = options.map((o) => o.value);
+    check("each place once, by name and code",
+      new Set(values).size === values.length && values.length === 56 &&
+        options.every((o) => o.textContent === KYC.stateName(o.value) + " (" + o.value + ")"),
+      `${values.length} options; ${options.slice(0, 3).map((o) => o.textContent).join(", ")}`);
+    const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+    // A blank grey pill sat in the panel before a state was picked (VISUALS-11).
+    check("the panel's counts take no room while empty", /#panelCounts:empty\s*\{\s*display:\s*none/.test(css));
   });
 
   suite("map.html — the delegation panel leads with who holds the seat", () => {
@@ -3609,6 +3649,13 @@ function testColourVision(css) {
         ["vacant-fill", "vacant-ink"], ["none-fill", "text"], ["nonpartisan-fill", "text-inverse"],
         ["cat-1", "cat-1-ink"], ["cat-2", "cat-2-ink"], ["cat-3", "cat-3-ink"], ["cat-4", "cat-4-ink"]]
         .map(([f, ink]) => [f, ratio(resolve(t, `var(--${f})`), resolve(t, `var(--${ink})`))]);
+      // Grey means "none": the Eleventh Circuit drawn in it read as missing
+      // data (VISUALS-08). Every category has a hue (OKLab chroma).
+      const greyish = [1, 2, 3, 4].filter((n) => {
+        const [, a, b] = oklab(rgb(resolve(t, `var(--cat-${n})`)).map(lin));
+        return Math.hypot(a, b) < 0.05;
+      });
+      check(`${name}: no guide category is grey`, greyish.length === 0, greyish.map((n) => "cat-" + n).join(", "));
       check(`${name}: a callout's word on its fill, 4.5:1`, inks.every((p) => p[1] >= 4.5),
         inks.map((p) => `${p[0]} ${p[1].toFixed(2)}`).join(" / "));
       // No status or money colour is a party's (VISUALS-06): "Lost primary"
