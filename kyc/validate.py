@@ -1555,8 +1555,6 @@ def check_voting_links(cache):
     gaps += [f"{code}: no {kind} page" for code in sorted(voting.JURISDICTIONS)
              for kind, table in (("results", voting.RESULTS), ("deadlines", voting.DEADLINES))
              if code not in table]
-    gaps += [f"{code}: a December date in the overrides with no page that gives it "
-             f"(voting.KEY_DATE_SOURCES)" for code in voting.unsourced_key_dates()]
     # A link never opened, or opened and not found live (a 403, a timeout:
     # rule 8 concludes nothing from either): the page says it could not be
     # reached, and this lists it, so "unknown" is never counted as checked.
@@ -1583,7 +1581,7 @@ def check_voting_links(cache):
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
         results=None, field=None, enrichment=None, odds=None, district_maps=None,
         district_error=None, voting=None, federal=None, judiciary=None, vacancies=None,
-        history=None):
+        history=None, voting_dates=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_district_maps(races, district_maps, district_error)
@@ -1632,7 +1630,27 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_history(history, profiles)
     if voting is not None:                 # None: the caller did not supply it
         issues += check_voting_links(voting)
+    if voting_dates is not None:
+        issues += check_voting_dates(voting_dates)
     return issues
+
+
+def check_voting_dates(data):
+    """Each jurisdiction's key dates (kyc/voting_dates.py): every value the
+    page shows sourced to the jurisdiction's own official page, never to a
+    compiled table (rule 50), every date in the cycle and in order, and the
+    December dates the same as the results reader's (rule 53). An error: a
+    wrong deadline sends a reader to the polls too late. A jurisdiction whose
+    record breaks a rule is left off the page until it is fixed."""
+    from . import voting_dates
+    if not data:
+        return [Issue("error", "voting-dates-missing",
+                      f"no {voting_dates.CACHE_PATH}; state pages give no voting dates")]
+    found = voting_dates.problems(data)
+    if found:
+        return [Issue("error", "voting-dates", f"{len(found)} problems in the voting dates "
+                      f"(kyc/voting_dates.py)", found)]
+    return []
 
 
 def check_winners(profiles, races):

@@ -1831,23 +1831,48 @@ async function testStates() {
     check("it names NASS's Can I Vote and the dates it was listed and opened",
       !!box.querySelector('a[href^="https://www.nass.org/"]') && /listed (?:it|them) on \d{4}-\d{2}-\d{2}/.test(box.textContent) &&
         /Each link opened \d{4}-\d{2}-\d{2}/.test(box.textContent), box.textContent);
-    // Deadlines are vote.gov's, linked, never typed or called passed
-    // (STATEGOV-11, PERSONA-03).
-    check("registration deadlines link to vote.gov's page for the state, with no date typed",
-      !!box.querySelector('a[href="https://vote.gov/register/texas"]') &&
-        !/deadline (?:has )?passed|closed on/i.test(box.textContent) &&
-        !/\b(?:January|February|March|April|May|June|July|August|September|October) \d/.test(box.textContent),
-      box.textContent);
+    // The deadlines are Texas's own, dated and linked; vote.gov's compiled
+    // page is not shown beside them (rules 50 and 53; STATEGOV-11).
+    check("no vote.gov deadlines link where the state's own dates are shown",
+      !box.querySelector('a[href^="https://vote.gov/"]'), box.textContent);
   });
-  suite("states/tx.html — the deadlines come before the form (PR #94 review)", () => {
-    const kinds = [...D.querySelectorAll("#voting .state-links a")].map((a) => a.getAttribute("data-kind"));
-    const deadlines = D.querySelector('#voting .state-links a[data-kind="deadlines"]');
-    check("'Registration deadlines (vote.gov)' is a button, just before 'Register to vote'",
-      !!deadlines && deadlines.textContent.trim() === "Registration deadlines (vote.gov)" &&
-        kinds.indexOf("deadlines") === kinds.indexOf("register") - 1, kinds.join(" "));
-    const note = D.querySelector("#voting .state-note").textContent;
-    check("vote.gov is the federal government's voting site, not the EAC's",
-      /vote\.gov, the federal government's voting site/.test(note) && !/Election Assistance/.test(note), note);
+
+  /* The jurisdiction's own dates, on the reader's calendar (audit
+   * 2026-10-17, STATEGOV-11, PERSONA-03, FRESHNESS-11, VISUALS-25). Built
+   * at CAMPAIGN_NOW, October 20. */
+  suite("states/tx.html — Texas's dates, each linked to its own office (STATEGOV-11)", () => {
+    const want = window.kycBuildMeta.voting._dates.states.TX;
+    const items = [...D.querySelectorAll("#voting .vote-dates li")];
+    check("every line with a date links an official page of Texas's",
+      items.length > 0 && items.every((li) => [...li.querySelectorAll(".vote-src a")].every((a) =>
+        /^https:\/\/[^/]*(?:texas\.gov|state\.tx\.us)\//.test(a.getAttribute("href")))) &&
+        items.every((li) => li.querySelector(".vote-src a")), items.map((li) => li.textContent).join(" | "));
+    const reg = items.find((li) => li.getAttribute("data-kind") === "register");
+    check("the registration deadline is said in words, and called passed on October 20",
+      !!reg && /October 5, 2026/.test(reg.textContent) && /Passed/.test(reg.textContent), reg && reg.textContent);
+    const early = items.find((li) => li.getAttribute("data-kind") === "early");
+    check("early voting October 19-30 is under way",
+      !!early && /October 19 – October 30, 2026/.test(early.textContent) && /Under way/.test(early.textContent),
+      early && early.textContent);
+    check("the lead says registration closed", /Registration for November 3 closed on October 5, 2026/.test(
+      (D.querySelector("#voting .vote-lead") || {}).textContent || ""));
+    const button = D.querySelector('#voting .state-links a[data-kind="register"]');
+    check("'Register to vote' says it closed for November 3, never offering itself as open",
+      !!button && button.getAttribute("data-closed") === "true" && /closed for Nov 3 on Oct 5/.test(button.textContent),
+      button && button.textContent);
+    check("the page shows every line the pipeline wrote", items.length === want.lines.length,
+      items.length + " of " + want.lines.length);
+  });
+  suite("states/tx.html — the calendar strip is page text (VISUALS-25, rule 46)", () => {
+    const strip = D.querySelector("#voting ol.vote-cal");
+    const cells = strip ? [...strip.querySelectorAll("li")] : [];
+    check("a strip of the dates in order, Election Day among them",
+      cells.length > 2 && cells.some((li) => li.classList.contains("is-election") && /Nov 3/.test(li.textContent)),
+      strip && strip.textContent);
+    check("a mark for today, between the past and the future",
+      cells.some((li) => li.classList.contains("is-today") && /Oct 20/.test(li.textContent)), strip && strip.textContent);
+    check("passed dates are marked passed", cells.some((li) => li.classList.contains("is-past") && /Oct 5/.test(li.textContent)));
+    check("no SVG text in the voting block", !D.querySelector("#voting svg text"));
   });
 
   /* "The first four from NASS" credited NASS with a curated sample-ballot
@@ -1929,18 +1954,33 @@ async function testStates() {
   suite("states/gu.html — a territory's own election office (RACES-07)", () => {
     const box = guam.D.getElementById("voting");
     const links = box ? [...box.querySelectorAll(".state-links a")] : [];
-    check("a 'Voting in Guam' block from Guam's own election office, and vote.gov's deadlines",
+    check("a 'Voting in Guam' block from Guam's own election office, with its own dates",
       !!box && /Voting in Guam/.test(box.textContent) && links.length > 0 &&
         links.every((a) => /\.gov\//.test(a.getAttribute("href"))) &&
-        !!box.querySelector('a[href="https://vote.gov/register/guam"]') &&
+        !box.querySelector('a[href^="https://vote.gov/"]') &&
+        /October 19, 2026/.test(box.textContent) &&
         !/Can I Vote/.test(box.textContent), box && box.textContent);
+    // The Commission refused connections on 2026-10-17: its pages are
+    // linked as the Internet Archive captured them, and say so.
+    const archived = [...box.querySelectorAll(".vote-src a")].filter((a) => /web\.archive\.org/.test(a.href));
+    check("an archived page of the Commission's is labelled as archived",
+      archived.length > 0 && archived.every((a) => /gec\.guam\.gov \(archived \d{4}-\d{2}-\d{2}\)/.test(a.textContent)),
+      archived.map((a) => a.textContent).join(" | "));
+    // Sources are separated by semicolons, so a label's own date never
+    // reads as another source (PR #102 review).
+    const lists = [...box.querySelectorAll(".vote-src")].map((el) => el.textContent);
+    check("a line's sources are separated by semicolons", lists.every((t) => !/\), gec/.test(t)), lists.join(" | "));
+    const runoff = box.querySelector('.vote-dates li[data-kind="runoff"]');
+    check("Guam's November 17 runoff names the offices it decides",
+      !!runoff && /November 17, 2026/.test(runoff.textContent) && /Delegate/.test(runoff.textContent),
+      runoff && runoff.textContent);
   });
   const georgia = await buildPage("states/ga.html");
   suite("states/ga.html — the December 1 runoff (PERSONA-06)", () => {
-    const dates = georgia.D.querySelector("#voting .vote-dates");
+    const dates = georgia.D.querySelector('#voting .vote-dates li[data-kind="runoff"]');
     check("the voting block names December 1, 2026, with the state's page that gives it",
       !!dates && /December 1, 2026/.test(dates.textContent) && /runoff/.test(dates.textContent) &&
-        /^https:\/\/georgia\.gov\//.test(dates.querySelector("a").getAttribute("href")),
+        /^https:\/\/sos\.ga\.gov\//.test(dates.querySelector(".vote-src a").getAttribute("href")),
       dates && dates.textContent);
     const heads = [...georgia.D.querySelectorAll("#races .race-head")];
     check("each Georgia race head says a runoff follows on Dec 1 if no one has a majority, linked to the guide",
@@ -1964,6 +2004,162 @@ async function testStates() {
     check("the Senate race, with closed party primaries, carries neither",
       !senate || !/Open primary|Dec 12/.test(senate.textContent));
   });
+  /* Registration, as the reader's calendar day finds it (STATEGOV-11,
+   * PERSONA-03): open, closing today, closed with a same-day route. */
+  const maVote = await buildPage("states/ma.html");
+  const nvVote = await buildPage("states/nv.html");
+  const ncVote = await buildPage("states/nc.html");
+  const nhVote = await buildPage("states/nh.html");
+  suite("state pages — whether registration is still open, on the reader's day", () => {
+    const lead = (p) => (p.D.querySelector("#voting .vote-lead") || {}).textContent || "";
+    const button = (p) => p.D.querySelector('#voting .state-links a[data-kind="register"]');
+    check("Massachusetts on October 20: open until October 24",
+      /Registration for November 3 is open until October 24, 2026/.test(lead(maVote)) &&
+        button(maVote) && !button(maVote).hasAttribute("data-closed"), lead(maVote));
+    // NRS 293.560(1)(a)(3): online registration runs through Election
+    // Day; October 20 is the last day to be mailed a ballot (PR #102 review).
+    check("Nevada on October 20: registration runs through Election Day, never 'the last day'",
+      /You can still register for November 3, through Election Day \(online\)/.test(lead(nvVote)) &&
+        !/last day|open until|closed/i.test(lead(nvVote)), lead(nvVote));
+    const nvMail = nvVote.D.querySelector('#voting .vote-dates li[data-kind="mailreg"]');
+    check("Nevada's October 20 is the last day to register and still be mailed a ballot",
+      !!nvMail && /October 20, 2026/.test(nvMail.textContent) && /mailed a ballot/.test(nvMail.textContent) &&
+        /Today/.test(nvMail.textContent), nvMail && nvMail.textContent);
+    check("North Carolina after its deadline: the regular deadline, same-day registration until October 31",
+      /The regular deadline to register for November 3 was October 9, 2026; you can still register and vote at the same time, until October 31, 2026/.test(lead(ncVote)) &&
+        !!ncVote.D.querySelector('#voting .vote-dates li[data-kind="sameday"]') &&
+        button(ncVote) && !button(ncVote).hasAttribute("data-closed"), lead(ncVote));
+  });
+
+  /* A state where a reader can register and vote at once never reads
+   * "the last day" or "open until" over a regular deadline: Illinois's
+   * page said "Today is the last day to register" on October 18, with
+   * grace-period registration running to November 3 (PR #102 review). */
+  const ilDay = await buildPage("states/il.html", { now: "2026-10-18T09:00:00" });
+  const caDay = await buildPage("states/ca.html", { now: "2026-10-19T09:00:00" });
+  const wiVote = await buildPage("states/wi.html");
+  const dcVote = await buildPage("states/dc.html");
+  suite("same-day states — a regular deadline is never the last chance (PR #102 review)", () => {
+    const lead = (p) => (p.D.querySelector("#voting .vote-lead") || {}).textContent || "";
+    const never = /last day|open until|closes|closed/i;
+    check("Illinois on October 18, its online deadline: today is the regular deadline, and registering goes on",
+      /^Today is the regular deadline to register for November 3 \(online\); after it you can still register and vote at the same time/.test(lead(ilDay)) &&
+        !never.test(lead(ilDay)), lead(ilDay));
+    check("California on October 19: the same, by every method",
+      /^Today is the regular deadline to register for November 3 \(online, by mail or in person\); after it you can still register/.test(lead(caDay)) &&
+        !never.test(lead(caDay)), lead(caDay));
+    check("Wisconsin before its in-person deadline: the regular deadline, not 'open until'",
+      /^The regular deadline to register for November 3 is October 30, 2026 \(in person\)/.test(lead(wiVote)) &&
+        !never.test(lead(wiVote)), lead(wiVote));
+    for (const [name, p] of [["Illinois", ilDay], ["California", caDay], ["Wisconsin", wiVote], ["D.C.", dcVote]]) {
+      const regs = [...p.D.querySelectorAll('#voting .vote-dates li[data-kind="register"]')].map((li) => li.textContent);
+      check(name + ": no deadline line or strip label reads as the last chance to register",
+        regs.length > 0 && regs.every((t) => /Regular deadline to register/.test(t) && !/Last day/.test(t)) &&
+          ![...p.D.querySelectorAll("#voting ol.vote-cal li")].some((li) => /Registration closes/.test(li.textContent)),
+        regs.join(" | "));
+      const sameDay = p.D.querySelector('#voting .vote-dates li[data-kind="sameday"]');
+      check(name + ": the same-day line quotes the office's words, with the page they are from",
+        !!sameDay && /in the office's words, “/.test(sameDay.textContent) &&
+          !!sameDay.querySelector(".vote-src a"), sameDay && sameDay.textContent);
+      const button = p.D.querySelector('#voting .state-links a[data-kind="register"]');
+      check(name + ": 'Register to vote' is not marked closed", !!button && !button.hasAttribute("data-closed"));
+    }
+    check("D.C. shows no in-person date counted to a Sunday its office is closed",
+      !/October 25/.test(dcVote.D.getElementById("voting").textContent));
+  });
+  const ncLate = await buildPage("states/nc.html", { now: "2026-11-02T09:00:00" });
+  suite("states/nc.html once same-day registration has ended (PR #102 review)", () => {
+    const lead = (ncLate.D.querySelector("#voting .vote-lead") || {}).textContent || "";
+    check("the lead says same-day registration ended on October 31",
+      /same-day registration ended on October 31, 2026/.test(lead) && !/is below/.test(lead), lead);
+    const button = ncLate.D.querySelector('#voting .state-links a[data-kind="register"]');
+    check("'Register to vote' says same-day registration ended",
+      !!button && button.getAttribute("data-closed") === "true" &&
+        /same-day registration ended Oct 31/.test(button.textContent), button && button.textContent);
+  });
+  suite("states/nh.html — vote.gov's deadlines only where the record gives none (PR #94 review)", () => {
+    const kinds = [...nhVote.D.querySelectorAll("#voting .state-links a")].map((a) => a.getAttribute("data-kind"));
+    const deadlines = nhVote.D.querySelector('#voting .state-links a[data-kind="deadlines"]');
+    check("'Registration deadlines (vote.gov)' is a button, just before 'Register to vote'",
+      !!deadlines && deadlines.textContent.trim() === "Registration deadlines (vote.gov)" &&
+        kinds.indexOf("deadlines") === kinds.indexOf("register") - 1, kinds.join(" "));
+    const note = nhVote.D.querySelector("#voting .state-note").textContent;
+    check("vote.gov is the federal government's voting site, not the EAC's",
+      /vote\.gov, the federal government's voting site/.test(note) && !/Election Assistance/.test(note), note);
+    check("no lead sentence claims a deadline the record does not hold",
+      !nhVote.D.querySelector("#voting .vote-lead"));
+  });
+  const coVote = await buildPage("states/co.html", { now: "2026-10-18T09:00:00" });
+  const nyLate = await buildPage("states/ny.html", { now: "2026-10-28T09:00:00" });
+  suite("state pages — the strip's Today mark, and the button's note (PR #102 review)", () => {
+    const strip = [...coVote.D.querySelectorAll("#voting ol.vote-cal li")];
+    check("Colorado on October 18, before its first date: Today comes first",
+      strip.length > 1 && strip[0].classList.contains("is-today"), strip.map((li) => li.textContent).join(" | "));
+    const mp = mpVote.D.querySelector('#voting .state-links a[data-kind="register"]');
+    check("the Northern Marianas' button reads as one label with one pair of brackets",
+      !!mp && /\(PDF; closed for Nov 3 on Sep 4\)$/.test(mp.textContent.trim()), mp && mp.textContent);
+    // New York's record does not say whether it registers voters at once:
+    // the lead gives the deadline, and the button claims no more.
+    const ny = nyLate.D.querySelector('#voting .state-links a[data-kind="register"]');
+    const nyLead = (nyLate.D.querySelector("#voting .vote-lead") || {}).textContent || "";
+    check("New York after its deadline: the deadline was, and the button is not marked closed",
+      /^The deadline to register for November 3 was/.test(nyLead) && !!ny && !ny.hasAttribute("data-closed"),
+      nyLead + " / " + (ny && ny.textContent));
+  });
+  const msVote = await buildPage("states/ms.html");
+  suite("states/ms.html — the strip says whose runoff December 1 is", () => {
+    const strip = [...msVote.D.querySelectorAll("#voting ol.vote-cal li")].map((li) => li.textContent);
+    check("not a bare 'Runoff' on a page about federal races",
+      strip.some((t) => /Dec 1Judicial, school board runoff/.test(t)), strip.join(" | "));
+  });
+  const arVote = await buildPage("states/ar.html");
+  const prVote = await buildPage("states/pr.html");
+  const ndVote = await buildPage("states/nd.html");
+  suite("state pages — a December date says what it decides", () => {
+    const runoff = arVote.D.querySelector('#voting .vote-dates li[data-kind="runoff"]');
+    check("Arkansas's December 1 is not a runoff for federal offices",
+      !!runoff && /county and municipal/.test(runoff.textContent) && /not for federal offices/.test(runoff.textContent),
+      runoff && runoff.textContent);
+    const pr = prVote.D.getElementById("voting").textContent;
+    check("Puerto Rico holds no election on November 3", /No election is held in Puerto Rico on November 3, 2026/.test(pr), pr);
+    const nd = ndVote.D.getElementById("voting").textContent;
+    check("North Dakota: no voter registration, said from its own page, and no vote.gov link",
+      /North Dakota has no voter registration/.test(nd) &&
+        !ndVote.D.querySelector('#voting a[href^="https://vote.gov/"]'), nd);
+  });
+
+  /* After Election Day the block keeps what still matters: a mailed
+   * ballot that may still arrive, a runoff (FRESHNESS-11). */
+  const caAfter = await buildPage("states/ca.html", { now: "2026-11-05T09:00:00" });
+  const gaAfter = await buildPage("states/ga.html", { now: "2026-11-05T09:00:00" });
+  suite("state pages after Election Day — only what still matters", () => {
+    const kinds = (p) => [...p.D.querySelectorAll("#voting .vote-dates li")].map((li) => li.getAttribute("data-kind"));
+    check("California keeps the mailed ballots arriving by November 10, and nothing about registering",
+      kinds(caAfter).join(",") === "arrive" && !caAfter.D.querySelector("#voting .vote-lead"), kinds(caAfter).join(","));
+    check("Georgia keeps its December 1 runoff alone", kinds(gaAfter).join(",") === "runoff", kinds(gaAfter).join(","));
+    const button = gaAfter.D.querySelector('#voting .state-links a[data-kind="register"]');
+    check("'Register to vote' is not marked closed once the election is past",
+      !!button && !button.hasAttribute("data-closed") && button.textContent.trim() === "Register to vote",
+      button && button.textContent);
+    const strip = [...caAfter.D.querySelectorAll("#voting ol.vote-cal li")].map((li) => li.textContent);
+    check("the strip shows Election Day as past and the date still to come",
+      strip.some((t) => /Nov 3/.test(t)) && strip.some((t) => /Nov 10/.test(t)), strip.join(" | "));
+  });
+  const viAfter = await buildPage("states/vi.html", { now: "2026-11-05T09:00:00" });
+  const gaLater = await buildPage("states/ga.html", { now: "2026-12-14T09:00:00" });
+  suite("after Election Day — a ballot still arriving, a runoff gone (PR #102 review)", () => {
+    const kinds = [...viAfter.D.querySelectorAll("#voting .vote-dates li")].map((li) => li.getAttribute("data-kind"));
+    check("the Virgin Islands keep the mail ballots due by November 13", kinds.includes("return"), kinds.join(","));
+    const strip = [...gaLater.D.querySelectorAll("#voting ol.vote-cal li")].map((li) => li.textContent);
+    check("Georgia's strip names December 1 for what it was, after it",
+      strip.some((t) => /Dec 1Runoff date/.test(t)) && !strip.some((t) => /if needed/.test(t)), strip.join(" | "));
+  });
+  const caLate = await buildPage("states/ca.html", { now: "2026-11-12T09:00:00" });
+  suite("states/ca.html once the last ballot could arrive — no dates left to show", () => {
+    check("no dated lines and no strip", !caLate.D.querySelector("#voting .vote-dates") &&
+      !caLate.D.querySelector("#voting ol.vote-cal"));
+  });
+
   const ca = await buildPage("states/ca.html");
   suite("states/ca.html — the top-two primary, visible (RACES-11)", () => {
     const heads = [...ca.D.querySelectorAll("#races .race-head")];

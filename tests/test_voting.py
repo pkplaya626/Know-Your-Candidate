@@ -258,20 +258,6 @@ class TestMorePages(unittest.TestCase):
         self.assertEqual(len(unchecked[0].detail), 2)
         self.assertTrue(all("(unknown)" in line for line in unchecked[0].detail))
 
-    def test_the_december_rounds_say_what_the_date_was_once_it_has_passed(self):
-        for entries in voting.key_dates().values():
-            for entry in entries:
-                self.assertTrue(entry["past"].startswith("The date set for"), entry)
-
-    def test_the_december_rounds_come_from_the_overrides_with_a_source(self):
-        dates = voting.key_dates()
-        self.assertEqual(dates["GA"][0]["date"], overrides.GENERAL_RUNOFFS["GA"][0])
-        self.assertEqual(dates["LA"][0]["date"], overrides.OPEN_PRIMARY_SEATS[("LA", "H", 2026)]["runoff"])
-        self.assertEqual(voting.unsourced_key_dates(), [])
-        for entries in dates.values():
-            for entry in entries:
-                self.assertTrue(entry["source"].startswith("https://"))
-
 
 if __name__ == "__main__":
     unittest.main()
