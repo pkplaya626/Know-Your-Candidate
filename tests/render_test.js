@@ -1231,7 +1231,8 @@ async function testDirectoryAsync() {
     check("the absent fields are said once, in one line",
       !absent.hidden && /No data/.test(absent.textContent) &&
         /age, education, previous careers or public offices held/.test(absent.textContent) &&
-        bio.querySelectorAll(".kyc-absent").length === 1, absent.textContent);
+        [...bio.querySelectorAll(".kyc-absent")].filter((s) => !s.closest("[hidden]")).length === 1,
+      absent.textContent);
     check("and the empty rows are not shown",
       D.getElementById("profileModalEducationField").hidden &&
         D.getElementById("profileModalCareersField").hidden &&
@@ -1313,15 +1314,23 @@ async function testDirectoryAsync() {
     });
     delete host.__search;
 
-    // A roster platform with commas inside its items (Edward Markey's).
-    const markey = KYC.byId("M000133");
-    if (markey) {
-      KYC.profile.open(markey.id);
+    // A platform with commas inside its items (an official site's
+    // "Telecommunications, technology, and digital privacy").
+    const listed = window.legislatorsData.find((p) => !p.isCandidate && KYC.seated(p));
+    if (listed) {
+      const keep = { platforms: listed.platforms, quality: listed.quality, fieldSources: listed.fieldSources };
+      listed.platforms = "Telecommunications, technology, and digital privacy; Veterans";
+      listed.quality = {};
+      listed.fieldSources = Object.assign({}, listed.fieldSources, { platforms: "official-site" });
+      delete listed.__search;
+      KYC.profile.open(listed.id);
       const items = [...D.querySelectorAll("#profileModalPlatform .bullets li")].map((li) => li.textContent);
       check("an item with commas inside it stays one bullet",
         items.includes("Telecommunications, technology, and digital privacy") &&
           !items.some((t) => /^(and|or) /.test(t)), items.join(" | "));
       KYC.profile.close();
+      Object.assign(listed, keep);
+      delete listed.__search;
     }
 
     const quoted = window.legislatorsData.find((p) => p.campaignQuote);
@@ -8340,8 +8349,13 @@ async function testFrame() {
     check("the FEC's figures say where their date is, not a dash",
       !!fecRow && /run through/.test(fecRow.lastElementChild.textContent), fecRow && fecRow.textContent);
     check("the hand-kept rosters are a source of their own, and the page does not say every fact is a script's",
-      rows.some((r) => /kept by hand/.test(r.textContent)) && !/Every fact is read from a source by a script/.test(text) &&
+      /kept by hand/.test(text) && !/Every fact is read from a source by a script/.test(text) &&
         /Most facts are read/.test(text));
+    // Rule 86: the rosters' typed biographies are no longer a source.
+    check("a member's biography is not said to be kept by hand",
+      !rows.some((r) => /rosters in this site's repository/.test(r.textContent)) &&
+        rows.some((r) => /Congressional Directory/.test(r.textContent)) &&
+        !/rosters' biographies/.test(text));
     check("a report needs a GitHub account, and the page says so", /needs a free GitHub account/.test(text));
     check("the maps' limit as it is: no list of every state", /no view lists every state/.test(text) &&
       !/list beside or below/.test(text));
