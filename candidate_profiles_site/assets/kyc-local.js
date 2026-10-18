@@ -70,6 +70,70 @@
   var DEPENDENT_NOTE = "Not counted as local governments: the Census Bureau counts a school system " +
     "run by a state, county, city or town as part of the government that runs it.";
 
+  /* What the website check (kyc/localsites.py, rule 78) found at an
+   * address the Census listed, for the ones the build withdrew: row[7] is
+   * "<verdict> <date>" and row[3] is then empty. */
+  var WITHDRAWN = {
+    // NXDOMAIN, or a name with no address (www.herndonva.gov): either way
+    // the address leads nowhere, which is all the line claims.
+    dead: "the web address the Census listed no longer leads to any site",
+    gone: "the web page the Census listed is gone",
+    parked: "the web address the Census listed now shows a parking or placeholder page",
+    "for-sale": "the web address the Census listed is now a domain for sale",
+    expired: "the web address the Census listed has expired",
+    gambling: "the web address the Census listed now leads to a gambling site",
+    elsewhere: "the web address the Census listed now leads to a site that does not name it",
+  };
+
+  function day(iso) {
+    var d = new Date(iso + "T12:00:00Z");
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+  }
+
+  function site(row) {
+    var parts = (row[7] || "").split(" ");
+    return { verdict: parts[0] || "", day: parts[1] ? day(parts[1]) : "" };
+  }
+
+  /* Said once in every panel that lists governments (rule 53): who holds
+   * office is an absence here, not an oversight, and where to look. */
+  var WHO_SERVES = "Who holds office in these governments is not listed here: no free national " +
+    "source names local officials. A government's own website, linked from its name where the " +
+    "Census Bureau listed one, names its elected officials and when they are elected.";
+  var WHO_SERVES_ONE = "Who holds office in this government is not listed here: no free national " +
+    "source names local officials. Its own website, where it has one, names them and when they " +
+    "are elected.";
+  /* What the panel's links are, in a sentence: the Census's 2022 addresses,
+   * checked on the latest day any of them was, and what that check did. */
+  function sitesNote(rows) {
+    var latest = "", unread = 0, unchecked = 0, withdrawn = 0;
+    rows.forEach(function (r) {
+      var parts = (r[7] || "").split(" ");
+      if (parts[1] && parts[1] > latest) latest = parts[1];
+      if (parts[0] === "unread") unread += 1;
+      if (r[3] && !parts[0]) unchecked += 1;
+      if (!r[3] && WITHDRAWN[parts[0]]) withdrawn += 1;
+    });
+    if (!latest && !unchecked) return "";
+    var text = "Each website is the one the Census Bureau listed in 2022" +
+      (latest ? ", checked by this site on " + day(latest) : "") + ".";
+    if (withdrawn) {
+      text += " " + plural(withdrawn, "link") + " that now " + (withdrawn === 1 ? "leads" : "lead") +
+        " to a parked, expired, for-sale or gambling domain, to another site that does not name " +
+        "the government, or nowhere, " + (withdrawn === 1 ? "is" : "are") + " withdrawn, and the list says why.";
+    }
+    if (unread) {
+      text += " " + plural(unread, "website") + " could not be read when checked and " +
+        (unread === 1 ? "is" : "are") + " linked as listed.";
+    }
+    if (unchecked) {
+      text += " " + plural(unchecked, "website") + " " + (unchecked === 1 ? "has" : "have") +
+        " not been checked yet.";
+    }
+    return text;
+  }
+
   function counted(rows) {
     return rows.filter(function (r) { return r[0] !== "dependent"; }).length;
   }
@@ -93,6 +157,9 @@
   });
   function isTown(id) { return Object.prototype.hasOwnProperty.call(towns, id); }
   var TOWN_PX = 2.3;
+  /* Half an 11px county label's backing, in screen pixels
+   * (kyc/counties.LABEL_HEIGHT_PX / 2). */
+  var LABEL_HALF_PX = 7;
   var SHARED_PX = 5.8;
   var cityIds = Object.keys(cities).sort(function (a, b) {
     return cities[a][3].localeCompare(cities[b][3], "en") || a.localeCompare(b);
@@ -205,11 +272,25 @@
   /* One government. *key* ("48201:12") finds the place joined to it, which
    * gets a button that shows it on the cities map. */
   function item(row, key) {
+    var checked = site(row);
+    // The name as the Census lists it ("Fairfax Co Schs"), where the page
+    // writes its abbreviations out (kyc/localgov.expand_name).
+    var listed = row[8] ? ' title="' + KYC.escapeAttr("Listed by the Census Bureau as \u201c" + row[8] +
+      "\u201d") + '"' : "";
+    var linkTitle = checked.verdict === "ok"
+      ? "Website as listed by the Census in 2022, checked " + checked.day
+      : checked.verdict === "unread"
+        ? "Website as listed by the Census in 2022; it could not be read when checked " + checked.day
+        : "Website as listed by the Census in 2022, not checked";
     var name = row[3]
-      ? '<a href="' + KYC.escapeAttr(row[3]) + '" target="_blank" rel="noopener noreferrer">' +
-        KYC.escapeHtml(row[1]) + "</a>"
-      : KYC.escapeHtml(row[1]);
-    var bits = [row[5], row[2], size(row), row[6] === "inactive" ? "listed as inactive" : ""]
+      ? '<a href="' + KYC.escapeAttr(row[3]) + '" target="_blank" rel="noopener noreferrer" title="' +
+        KYC.escapeAttr(linkTitle) + '"><span' + listed + ">" + KYC.escapeHtml(row[1]) + "</span></a>"
+      : "<span" + listed + ">" + KYC.escapeHtml(row[1]) + "</span>";
+    var gone = !row[3] && WITHDRAWN[checked.verdict]
+      ? "website withdrawn: " + WITHDRAWN[checked.verdict] + (checked.day ? " (checked " + checked.day + ")" : "")
+      : "";
+    var bits = [row[5], row[2] ? "mailing address in " + row[2] : "", size(row),
+      row[6] === "inactive" ? "listed as inactive" : "", gone]
       .filter(Boolean).map(KYC.escapeHtml);
     var place = key && cityOfRow[key];
     var pin = place
@@ -229,7 +310,7 @@
       rows.forEach(function (r, i) {
         if (r[0] !== kind) return;
         if (q) {
-          var text = r[1] + " " + r[5] + " " + r[2];
+          var text = r[1] + " " + r[5] + " " + r[2] + " " + (r[8] || "");
           if ((KYC.foldText ? KYC.foldText(text) : text.toLowerCase()).indexOf(q) === -1) return;
         }
         mine.push(item(r, fips ? fips + ":" + i : ""));
@@ -255,9 +336,12 @@
       (why ? '<p class="gov-officer-note local-why">' + KYC.escapeHtml(why.note) + "</p>" +
         (why.filed ? countyButton(why.filed) : "") : "") +
       (rows.length
-        ? '<label class="sr-only" for="localFilter">Filter this county\'s governments</label>' +
+        ? '<p class="faint local-who">' + WHO_SERVES + "</p>" +
+          '<label class="sr-only" for="localFilter">' + KYC.escapeHtml("Filter the governments in " +
+          county.name) + "</label>" +
           '<input type="search" id="localFilter" class="local-filter" placeholder="Filter by name, kind or city" autocomplete="off">' +
-          '<div id="localGroups">' + groups(rows, "", fips) + "</div>"
+          '<div id="localGroups">' + groups(rows, "", fips) + "</div>" +
+          (sitesNote(rows) ? '<p class="faint local-sites">' + KYC.escapeHtml(sitesNote(rows)) + "</p>" : "")
         : "");
     if (!rows.length) return;
     el("localFilter").addEventListener("input", function () {
@@ -299,7 +383,8 @@
           : "") +
         '<p class="faint">As the Census Bureau listed it in 2022' +
         (filed !== here ? ", under " + KYC.escapeHtml(state.counties[filed].name) : "") +
-        ", with its own website where the Bureau has one.</p>";
+        ", with the website the Bureau listed, as this site last found it.</p>" +
+        '<p class="faint local-who">' + WHO_SERVES_ONE + "</p>";
     } else if (!NOT_GOVERNING[c[6]]) {
       // Not joined is not "no government" (rule 19): the build found no
       // government in the listing it could tie to this place one to one.
@@ -370,19 +455,26 @@
           (unplaced === 1 ? "is" : "are") + " listed under " + (unplaced === 1 ? "its" : "their") + " " +
           areaWords.one + ".</p>" : "")
       : '<p class="local-total">' + total.toLocaleString("en-US") + " local governments in " +
-        Object.keys(state.counties).length + " " + areaWords.many + " (2022).</p>" +
+        (areaWords.count || Object.keys(state.counties).length + " " + areaWords.many) + " (2022).</p>" +
         (state.stateNote ? '<p class="gov-officer-note local-why">' + KYC.escapeHtml(state.stateNote) + "</p>" : "") +
         '<p class="faint">Pick ' + (/^[aeiou]/.test(areaWords.one) ? "an " : "a ") + areaWords.one +
-        " on the map, or from the list below, to see every government in it.</p>";
+        " on the map, or from the list below, to see every government in it.</p>" +
+        '<p class="faint local-who">' + WHO_SERVES + "</p>";
     el("localPanelBody").innerHTML = lede + extra;
   }
 
   /* ---------------------------------------------------------------- roster */
 
-  function countyRoster() {
+  function countyRoster(filter) {
+    var q = KYC.foldText ? KYC.foldText(filter || "") : (filter || "").toLowerCase();
     var ids = Object.keys(state.counties).sort(function (a, b) {
       return state.counties[a].name.localeCompare(state.counties[b].name);
+    }).filter(function (fips) {
+      if (!q) return true;
+      var text = state.counties[fips].name;
+      return (KYC.foldText ? KYC.foldText(text) : text.toLowerCase()).indexOf(q) !== -1;
     });
+    if (!ids.length) return '<p class="faint">Nothing matches.</p>';
     return ids.map(function (fips) {
       var n = counted(state.governments[fips] || []);
       var why = noCounty[fips];
@@ -425,6 +517,8 @@
       : "");
   }
 
+  /* The filter sits above the list's grid, never in it: inside the grid
+   * it was one cell, stretched 15,000px tall beside the list on a desktop. */
   function roster() {
     listAll = false;
     if (view === "cities") {
@@ -439,7 +533,14 @@
       });
     } else {
       el("localRosterTitle").textContent = "Every " + areaWords.one;
-      el("localRoster").innerHTML = countyRoster();
+      el("localRoster").innerHTML =
+        '<label class="sr-only" for="countyFilter">' + KYC.escapeHtml("Filter the " + areaWords.many) + "</label>" +
+        '<input type="search" id="countyFilter" class="local-filter" placeholder="' +
+        KYC.escapeAttr("Find a " + areaWords.one + " by name") + '" autocomplete="off">' +
+        '<div id="countyRows" class="leg-roster">' + countyRoster("") + "</div>";
+      el("countyFilter").addEventListener("input", function () {
+        el("countyRows").innerHTML = countyRoster(el("countyFilter").value);
+      });
     }
   }
 
@@ -563,6 +664,12 @@
       outline: state.outline,
       look: look,
       dots: cityDots,
+      // A county's name where an 11px label's box fits round its point
+      // (kyc/counties.py labelRoom: the box's half-height, in map units);
+      // only in the counties view, where nothing else is drawn on them.
+      fits: function (r, px) { return (r.labelRoom || 0) * px >= LABEL_HALF_PX; },
+      labelClass: "county-label",
+      showLabels: function () { return view === "counties"; },
       onSelect: function (fips) { pick(fips); },
       onDot: function (id) { pickCity(id); },
     });

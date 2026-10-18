@@ -724,12 +724,15 @@ def render_legislatures_index(host, dates=None):
 def _local_kinds():
     """The Census of Governments' kinds, as the guide's map words them
     (government_maps.LOCAL_KINDS, one table): ``[(key, column, none)]``,
-    the total last. A count of school districts is of *independent* ones;
-    a state with none runs its schools as dependent systems."""
+    the total first - the figure a reader came for, which as the last of
+    seven columns sat off a 1280px screen. A count of school districts is
+    of *independent* ones; a state with none runs its schools as dependent
+    systems."""
     from .government_maps import LOCAL_KINDS, NONE_OF_KIND
 
-    kinds = [k for k in LOCAL_KINDS if k[0] != "total"] + [k for k in LOCAL_KINDS if k[0] == "total"]
-    return [(key, title.split(":")[0], NONE_OF_KIND.get(key, f"No {plural}."))
+    kinds = [k for k in LOCAL_KINDS if k[0] == "total"] + [k for k in LOCAL_KINDS if k[0] != "total"]
+    return [(key, "All local governments" if key == "total" else title.split(":")[0],
+             NONE_OF_KIND.get(key, f"No {plural}."))
             for key, _short, title, _one, plural in kinds]
 
 
@@ -800,7 +803,7 @@ def render_counties_index(host, census=None, dates=None):
         "                    </p>",
         "                </header>",
         '                <div class="directory-scroll" tabindex="0" role="region" aria-label="Local governments by state">',
-        '                    <table class="directory-table">',
+        '                    <table class="directory-table directory-wrap">',
         '                        <thead><tr><th scope="col">State</th>' +
         "".join(f'<th scope="col">{_e(words)}</th>' for _k, words, _n in kinds) + "</tr></thead>",
         "                        <tbody>",
@@ -1381,7 +1384,7 @@ def render_counties_page(code, host, listed=None):
         "                </div>",
         '                <section class="leg-roster-section" aria-labelledby="localRosterTitle">',
         f'                    <h2 class="state-heading" id="localRosterTitle">Every {_e(one)}</h2>',
-        '                    <div id="localRoster" class="leg-roster"></div>',
+        '                    <div id="localRoster"></div>',
         "                </section>",
         "            </div>",
     ])

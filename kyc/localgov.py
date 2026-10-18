@@ -90,6 +90,87 @@ def display_name(name):
     return "".join(out)
 
 
+# The listing's abbreviations, written out for reading ("Covina Val Unif Sch
+# Dist" is the Covina Valley Unified School District). A closed table of
+# whole words, each read from the listing's own uses, never a guess at a
+# government's official name: the Census's words stay beside it (``census``
+# in the cache, a title on the page). A word that means two things is
+# written out only where its neighbours say which.
+ABBREVIATIONS = {
+    "Dist": "District", "Dists": "Districts", "Dt": "District", "Sch": "School",
+    "Schs": "Schools", "Schl": "School", "Elem": "Elementary", "Unif": "Unified",
+    "Jt": "Joint", "Twp": "Township", "Twps": "Townships", "Boro": "Borough",
+    "Auth": "Authority", "Assoc": "Association", "Reg": "Regional", "Pub": "Public",
+    "Ctl": "Central", "Cmty": "Community", "Cmnty": "Community", "Spl": "Special",
+    "Spec": "Special", "Oper": "Operated", "Supt": "Superintendent", "Voc": "Vocational",
+    "Vlg": "Village", "Dev": "Development", "Muni": "Municipal", "Mun": "Municipal",
+    "Bd": "Board", "Educ": "Education", "Hosp": "Hospital", "Lib": "Library",
+    "Mgmt": "Management", "Ctr": "Center", "Hts": "Heights", "Spgs": "Springs",
+    "Cnty": "County", "Dept": "Department", "Coop": "Cooperative", "Redev": "Redevelopment",
+    "Prot": "Protection", "Protec": "Protection", "Conserv": "Conservation", "Uf": "Union Free",
+    "Wtr": "Water", "Improv": "Improvement", "Transp": "Transportation", "Util": "Utility",
+    "Svcs": "Services", "Rec": "Recreation", "Coll": "College", "Reclamatn": "Reclamation",
+    "Emerg": "Emergency", "Agric": "Agricultural",
+}
+_EDUCATION = {"Sch", "Schs", "School", "Schools", "Schl", "Sh", "Schdt"}
+_COMMUNITY_NEXT = _EDUCATION | {"College", "Coll", "Services", "Serv", "Service", "Ctr", "Center",
+                                "Unit", "Hospital", "Dev", "Development", "Facilities"}
+_VALLEY_NEXT = _EDUCATION | {"Unif", "Unified", "Elem", "Union", "Ctl", "Central", "Jt", "Joint",
+                             "Water", "Comm", "Cmty", "Fire", "Sanitary", "Hosp"}
+_COLLEGE_BEFORE = {"Cmty", "Cmnty", "Comm", "Community"}
+
+
+def _in_context(word, before, after):
+    """The written-out form of an abbreviation that means two things, or
+    ``None`` where its neighbours do not say which."""
+    if word == "Co":                                   # 1,132 uses, all but one a county
+        # "Pine Flat District Improvement Co" may be a company: left as filed.
+        if not after and before in ("Improvement", "Improv", "Imp"):
+            return None
+        return "College" if before in _COLLEGE_BEFORE else "County"
+    if word == "Ind" and after in _EDUCATION:          # not Indiana's "Northern Ind Commuter"
+        return "Independent"
+    if word == "Comm" and after in _COMMUNITY_NEXT:    # not a "Transp Adv Comm"ission
+        return "Community"
+    if word == "Val" and after in _VALLEY_NEXT:        # not Val Verde
+        return "Valley"
+    if word == "Cons":
+        if after in _EDUCATION | {"Ind", "ISD"}:
+            return "Consolidated"
+        if before in ("Resource", "Resources", "Res", "Water") and after in ("Dist", "Dt", "District"):
+            return "Conservation"
+    if word == "Serv":
+        if before == "Educational":
+            return "Service"
+        if before in _COLLEGE_BEFORE:
+            return "Services"
+    if word == "Off" and after == "of":
+        return "Office"
+    if word == "Admin" and after in ("Dist", "District"):
+        return "Administrative"
+    if word == "Imp" and (after in ("Dist", "District", "Dist.") or after.startswith("#")):
+        return "Improvement"
+    if word == "Trans" and after in ("Dev", "Development", "District"):
+        return "Transportation"
+    if word == "Sep" and before in ("Mun", "Municipal"):
+        return "Separate"
+    return None
+
+
+def expand_name(name):
+    """*name* (as :func:`display_name` gives it) with the listing's
+    abbreviations written out: "Fairfax Co Schs" -> "Fairfax County
+    Schools". Only whole words separated by spaces are read; anything else
+    is left as published."""
+    words = (name or "").split(" ")
+    out = []
+    for i, word in enumerate(words):
+        before = words[i - 1] if i else ""
+        after = words[i + 1] if i + 1 < len(words) else ""
+        out.append(_in_context(word, before, after) or ABBREVIATIONS.get(word) or word)
+    return " ".join(out)
+
+
 # ------------------------------------------------------------------ parsing
 
 def _num(text):
