@@ -480,8 +480,10 @@
       var links = [off.website ? link(off.website, "Office") : "", off.office ? link(off.office, "Office") : "",
         off.bio ? link(off.bio, "Biography") : ""].filter(Boolean);
       var contact = [off.phone, off.email, off.address].filter(Boolean).map(KYC.escapeHtml);
+      // A holder without a photograph keeps the photograph's column, an
+      // empty circle, so the names line up down the card (STATEGOV-13).
       body = (off.photo ? '<img class="gov-officer-photo" src="' + KYC.escapeAttr(off.photo) +
-          '" alt="" width="40" height="40" loading="lazy" decoding="async">' : "") +
+          '" alt="" width="40" height="40" loading="lazy" decoding="async">' : NO_PHOTO) +
         '<p class="gov-officer-name">' + who(off) + "</p>" +
         (off.title.toLowerCase() !== label.toLowerCase()
           ? '<p class="faint">' + KYC.escapeHtml(off.title) + "</p>" : "") +
@@ -665,12 +667,20 @@
       (court.readOn ? "read by hand, " : "") + KYC.escapeHtml(KYC.dateWords(day)) + ").";
   }
 
+  /* The empty circle a named officer's row shows without a photograph. */
+  var NO_PHOTO = '<span class="gov-officer-photo gov-officer-nophoto" aria-hidden="true"></span>';
+
   /* An NGA headshot that fails to load leaves the card without one, not a
    * broken image. Error events do not bubble, so this listens on capture. */
   global.document.addEventListener("error", function (event) {
     var img = event.target;
-    if (img && img.classList &&
-        (img.classList.contains("gov-portrait") || img.classList.contains("gov-officer-photo"))) {
+    if (img && img.classList && img.classList.contains("gov-officer-photo")) {
+      // The row keeps its column, as a holder never pictured does.
+      var holder = global.document.createElement("span");
+      holder.className = "gov-officer-photo gov-officer-nophoto";
+      holder.setAttribute("aria-hidden", "true");
+      img.replaceWith(holder);
+    } else if (img && img.classList && img.classList.contains("gov-portrait")) {
       img.remove();
     }
   }, true);

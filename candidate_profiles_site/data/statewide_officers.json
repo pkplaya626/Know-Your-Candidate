@@ -45,6 +45,13 @@
    "office": "https://www.azag.gov/",
    "party": "D",
    "partyKey": "D",
+   "photo": "https://i0.wp.com/www.azag.gov/sites/default/files/2025-09/Attorney%20General%20Mayes%20Headshot_Circle%20Crop%20Smiling.png?w=300&ssl=1",
+   "photoPage": "https://www.azag.gov/",
+   "photoWeight": {
+    "bytes": 82254,
+    "height": 300,
+    "width": 300
+   },
    "title": "Attorney General"
   },
   "CA": {
@@ -53,6 +60,13 @@
    "office": "https://www.oag.ca.gov/",
    "party": "D",
    "partyKey": "D",
+   "photo": "https://i0.wp.com/www.oag.ca.gov/sites/default/files/media/ag-bonta-official-2.jpg?w=300&ssl=1",
+   "photoPage": "https://www.oag.ca.gov/",
+   "photoWeight": {
+    "bytes": 8728,
+    "height": 450,
+    "width": 300
+   },
    "title": "Attorney General"
   },
   "CO": {
@@ -336,6 +350,13 @@
    "office": "https://www.njoag.gov/",
    "party": "D",
    "partyKey": "D",
+   "photo": "https://i0.wp.com/www.njoag.gov/wp-content/uploads/2026/01/DAVENPORT_07_FINAL-scaled.jpg?w=300&ssl=1",
+   "photoPage": "https://www.njoag.gov/about/meet-attorney-general-davenport/",
+   "photoWeight": {
+    "bytes": 8662,
+    "height": 375,
+    "width": 300
+   },
    "selection": "Appointed by the governor",
    "title": "Attorney General"
   },
@@ -452,6 +473,13 @@
    "office": "https://atg.sd.gov/",
    "party": "R",
    "partyKey": "R",
+   "photo": "https://i0.wp.com/atg.sd.gov/img/AG_Marty_Jackley_0007a.jpg?w=300&ssl=1",
+   "photoPage": "https://atg.sd.gov/OurOffice/bio.aspx",
+   "photoWeight": {
+    "bytes": 11176,
+    "height": 449,
+    "width": 300
+   },
    "title": "Attorney General"
   },
   "TN": {
@@ -543,7 +571,7 @@
    "title": "Attorney General"
   }
  },
- "fetched": "2026-10-18T21:16:07+00:00",
+ "fetched": "2026-10-18T22:56:19+00:00",
  "lt": {
   "AK": {
    "name": "Nancy Dahlstrom",

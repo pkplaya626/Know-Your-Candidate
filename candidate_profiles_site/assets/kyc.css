@@ -4150,6 +4150,8 @@ button.local-county-link {
   object-position: center 20%;
   background: var(--surface-3);
 }
+/* No photograph: the circle's place, faintly, so the names line up. */
+.gov-officer-nophoto { display: block; background: none; border: 1px dashed var(--border); }
 .gov-officer-name { font-weight: 700; color: var(--text); }
 .gov-officer-note { font-size: var(--t-sm); color: var(--text-muted); }
 /* A line under a panel's lists: who else is on the ballot, and where. */

@@ -66,7 +66,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (2251 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (2256 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1061,7 +1061,7 @@ URL, and `validate` fails a `photoSet` that names another file.
 | `photos` | The fallback chain the page walks on a load error, ending in `"placeholder"` (the silhouette) |
 | `photoSource` | Where the first entry came from: `clerk.house.gov`, `congress.gov`, `wikipedia` (the article the bioguide mapping names, or the one the ballot page links), `cross-link` (the same person's other profile) or `campaign-site` |
 | `photoSet` | `[[width, url], ...]`, smallest first: sizes of the first entry's photograph for the page's `srcset`. Wikimedia portraits only |
-| `photoCredit` | Whose photograph the first entry is: `{by, licence, licenceUrl, page, via}`. A Commons file's author and licence as its own description page records them (`via: "Wikimedia Commons"`, `page` the file's page); a government portrait's host (`by: "U.S. House of Representatives"`); a campaign's website (`by`, `page` the site). Absent for the silhouette |
+| `photoCredit` | Whose photograph the first entry is: `{by, licence, licenceUrl, page, via, authorUnrecorded?}`. A Commons file's author and licence as its own description page records them (`via: "Wikimedia Commons"`, `page` the file's page; `by` null where the page names no author, and `authorUnrecorded` where its licence asks for one); a government portrait's host (`by: "U.S. House of Representatives"`); a campaign's website (`by`, `page` the site). Absent for the silhouette |
 
 ### Credits and weights
 
@@ -1072,9 +1072,14 @@ BY-SA 3.0, via Wikimedia Commons", the licence linked to its deed and
 Wikimedia portraits were CC BY or CC BY-SA, whose terms require exactly that,
 and none was credited. `portraits` reads each Commons file's `Artist`,
 `LicenseShortName` and `LicenseUrl` from its `extmetadata` (fifty files a
-request, one request a second), strips the markup from the author, and keeps
-them in the cache as `credit`; a file Wikipedia holds as non-free is not
-shown. A fallback photograph that loads in the first one's place is credited
+request, one request a second), strips the markup from the author - with
+what Commons hides (a duplicate "Unknown author" span), an uploader's note
+about themselves, a leading file name, and any "unknown" or sentence that
+names no one (`portraits.author_of`) - names a licence code ("PDM-owner" is
+the Public Domain Mark), and keeps them in the cache as `credit`, with the
+`form` of the reading so an older one is read again; a file Wikipedia holds
+as non-free is not shown, and one whose credit Commons has not yet answered
+for waits for the next run. A fallback photograph that loads in the first one's place is credited
 by its host, from `kycBuildMeta.photoCredits`. `validate` fails a photograph
 with no credit (`photo-uncredited`) and a Commons portrait with no recorded
 licence (`photo-licence-missing`).
@@ -1082,14 +1087,19 @@ licence (`photo-licence-missing`).
 A portrait not on Wikimedia is one file at one size, so its weight is
 recorded when it is found: `bytes`, `width` and `height` in the portrait
 cache for the House Clerk's (50-100 KB, 335px), `portraitWeight` in the
-enrichment cache for a campaign's. A campaign image over 300 KB or 1,200px
-(`photos.MAX_PORTRAIT_BYTES`, `MAX_PORTRAIT_PX`) is not taken: Squarespace's
-and imgix's own resizers serve the same upload at 500px, and that is taken
-instead when it passes the same checks; otherwise the site's next picture is
-tried, and the refusal is kept as `portraitHeavy`. On 2026-10-18 that refused
-23 of 43 campaign portraits (one a 5 MB PNG), and 10 came back at 500px. The
-page offers a srcset no size wider than a 2x screen needs for the width it
-draws, so a 165px card stops at the 330px file.
+enrichment cache for a campaign's, `headshotWeight` in the executives cache
+for a governor's NGA headshot. An image over 300 KB or 1,200px
+(`photos.MAX_PORTRAIT_BYTES`, `MAX_PORTRAIT_PX`) is shown smaller from the
+same file (`photos.lighter_form`): its host's own resizer (Squarespace,
+imgix) or WordPress.com's Photon (`i0.wp.com/<host>/<path>?w=500`), at 500px
+or 330px, once that copy is weighed, within the caps and the same shape as
+the original. Where neither serves it, the original is shown all the same,
+and `portraitHeavy` says so (`kept: true`). On 2026-10-18, 21 of the
+campaign portraits were over the caps: 20 are shown smaller, one at full
+size; 33 of the 55 governors' headshots are shown through Photon
+(`headshotSmall`). The page offers a srcset no size wider than a 2x screen
+needs for the width it draws, so a 165px card stops at the 330px file and a
+judge's 116px portrait at the 250px one.
 
 Set `"pinned": true` on a cache entry to stop the resolver overwriting a
 hand-corrected URL.

@@ -573,22 +573,72 @@ def _img_tags(page):
 
 
 def _file_words(url):
+    """The words of an image's file name: split at separators, at a change
+    of case ("AgLizMurrillHeadshot") and between letters and digits."""
     path = urllib.parse.unquote(urllib.parse.urlsplit(url).path)
-    return _fold(path.rsplit("/", 1)[-1].rsplit(".", 1)[0].replace("_", " ").replace("-", " "))
+    stem = path.rsplit("/", 1)[-1].rsplit(".", 1)[0]
+    stem = re.sub(r"(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])", " ", stem)
+    stem = re.sub(r"(?<=[A-Za-z])(?=\d)|(?<=\d)(?=[A-Za-z])", " ", stem)
+    return _fold(stem.replace("_", " ").replace("-", " "))
+
+
+def _compound_of(word, pieces, wanted):
+    """Whether *word* is made of *pieces* end to end with *wanted* among
+    them: "agmurrillheadshot" is ag + murrill + headshot. "carrie" is not
+    carr + anything, nor "stanford" stan + ford unless "stan" is a piece."""
+    best = {0: False}
+    for end in range(1, len(word) + 1):
+        for start in range(end):
+            if start in best and word[start:end] in pieces:
+                best[end] = best.get(end, False) or best[start] or word[start:end] == wanted
+    return best.get(len(word), False)
+
+
+def _names_someone_else(words, surname, firsts, middles):
+    """Whether *words* put a first name other than the holder's before
+    their surname: "Solicitor General Jessica Ford" on Aaron Ford's
+    pages. Initials and the holder's middle names are passed over; a title
+    word or nothing before the surname is no one else (rule 56)."""
+    for at, word in enumerate(words):
+        if word != surname:
+            continue
+        before = at - 1
+        while before >= 0 and (len(words[before]) == 1 or words[before] in middles):
+            before -= 1
+        if before < 0:
+            continue
+        word = words[before]
+        if word in firsts or word in _TITLE_WORDS or any(c.isdigit() for c in word):
+            continue
+        return True
+    return False
 
 
 def likeness_candidates(name, code, pages):
     """The images on the office's *pages* that may be *name*'s likeness,
     best first: ``[(urls, page, hinted)]``, *urls* the sizes of one file to
     try, smallest useful first. Only what the words around an image say is
-    read here; whether it is head-and-shoulders shaped is the fetch's."""
+    read here; whether it is head-and-shoulders shaped is the fetch's.
+
+    The surname must be a word of the alt text or of the file name, or
+    the file name's run-together words must break into the holder's name,
+    title and likeness words with the surname among them
+    ("AgLizMurrillHeadshot"): "Carrie-Smith-Headshot" is not Chris Carr's,
+    nor "jane-stanford-portrait" Aaron Ford's. And neither may put another
+    first name before the surname (rule 56): "Solicitor General Jessica
+    Ford headshot" is not the attorney general's face. An evidenced
+    ``NAME_FORMS`` short form counts as the holder's first name."""
     from .pages import state_name
 
     words = [w for w in _fold(name).split() if w not in _SUFFIX]
     if len(words) < 2:
         return []
     surname = words[-1]
+    firsts = {words[0]} | {_fold(form).split()[0] for form, office_form in NAME_FORMS.items()
+                           if office_form == name and _fold(form).split()}
+    middles = set(words[1:-1])
     plain = set(words) | _TITLE_WORDS | set(_fold(state_name(code)).split()) | {code.lower()}
+    pieces = plain | firsts | set(_LIKENESS_FILE) | {"official", "photo", "pic", "img"}
     found, seen = [], set()
     for page_url, page in pages:
         for src, srcset, alt, klass in _img_tags(page):
@@ -599,7 +649,13 @@ def likeness_candidates(name, code, pages):
             said = _fold(alt)
             file = _file_words(url)
             flat = file.replace(" ", "")
-            if surname not in said.split() and surname.replace(" ", "") not in flat:
+            in_alt = surname in said.split()
+            in_file = surname in file.split() or any(
+                _compound_of(word, pieces, surname) for word in file.split())
+            if not (in_alt or in_file):
+                continue
+            if _names_someone_else(said.split(), surname, firsts, middles) \
+                    or _names_someone_else(file.split(), surname, firsts, middles):
                 continue
             if _NOT_LIKENESS.search(" ".join((said, file, _fold(klass)))) \
                     or any(word in flat for word in _NOT_LIKENESS_FILE):
@@ -608,7 +664,8 @@ def likeness_candidates(name, code, pages):
                 or any(word in flat for word in _LIKENESS_FILE)
             # Nothing but the name and the title, in the alt text or, with
             # its counters set aside, the file name ("AG_Marty_Jackley_0007a").
-            named = [w for w in file.split() if not any(c.isdigit() for c in w)]
+            named = [w for w in file.split()
+                     if len(w) > 1 and not any(c.isdigit() for c in w)]
             if not hinted and not (said.split() and set(said.split()) <= plain) \
                     and not (surname in named and set(named) <= plain):
                 continue
@@ -739,7 +796,27 @@ def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
         else:
             problems.append(f"{code}: the office's own pages show no photograph of "
                             f"{row['name']} that passes the checks")
+        problems.extend(photo_changes(code, old, row))
     return problems
+
+
+def photo_changes(code, old, row):
+    """What changed in an attorney general's photograph since the last
+    read, said so a person looks at it: a photograph added, changed or
+    dropped beside a named official is a claim about their face, and a
+    40px circle is not looked at by anyone else (rule 87, like courts'
+    ``changed``)."""
+    was, now = (old or {}).get("photo"), row.get("photo")
+    if was == now:
+        return []
+    who = row.get("name") or (old or {}).get("name") or "the attorney general"
+    if not was:
+        return [f"{code}: photograph added for {who}: {now} (from {row.get('photoPage')}); "
+                "look at it"]
+    if not now:
+        return [f"{code}: photograph dropped for {who} (was {was})"]
+    return [f"{code}: photograph changed for {who}: {was} -> {now} "
+            f"(from {row.get('photoPage')}); look at it"]
 
 
 def attorneys_general(raga, daga, office_texts):

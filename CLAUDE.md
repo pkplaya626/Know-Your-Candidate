@@ -168,8 +168,8 @@ python tools/fetch_legislative_maps.py        # state senate and house boundarie
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1700 tests, no dependencies
-npm install && npm test                       # 2251 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1711 tests, no dependencies
+npm install && npm test                       # 2256 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1397,22 +1397,43 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     fallback that loads instead is credited by its own host.
     `validate` fails a shown photograph with no credit and a Commons one
     with no recorded licence, a judge's (`judge_links`, read with the
-    file's size) included. A portrait not on Wikimedia is weighed when
-    found: one campaign's was a 5 MB PNG for a 165px card. Over 300 KB or
-    1,200px it is taken at its host's own resizer's 500px, the same file
-    (rule 42), or passed over for the next picture, and the refusal is
-    kept; a server that gzips an image is read through it (Missouri's
-    attorney general's headshot read as "not an image"). No srcset offers
-    a size wider than a 2x screen needs. A state officer's photograph
+    file's size) included. A credit is the file page's words with what
+    Commons hides or says of no one taken out (`portraits.author_of`): a
+    hidden duplicate span printed "Unknown author Unknown author" under
+    ten photographs, an uploader's sentence about not knowing the
+    photographer ran to four lines on a phone, a file name stood as an
+    author and "PDM-owner" as a licence. Where the licence asks for an
+    author the page does not name, the line says "author not recorded on
+    Commons" and links the file. A new Commons portrait whose credit
+    could not be read waits off the page for the next run (rule 8) rather
+    than fail the build. A portrait not on Wikimedia is weighed when
+    found: one campaign's was a 5 MB PNG for a 165px card, and 27 of the
+    NGA's governors' headshots weighed 320 KB to 7.6 MB for a 40px
+    circle. Over 300 KB or 1,200px it is shown smaller from the same file
+    - its host's own resizer, or WordPress.com's Photon, which fetches
+    that very address and scales it (rule 42) - once the smaller copy is
+    weighed and found the same shape (`photos.lighter_form`). Where
+    neither serves it, it is shown all the same and said
+    (`portraitHeavy`): withholding them left eleven November nominees
+    with the silhouette beside an opponent's photograph. The House
+    Clerk's are only weighed; every one is within the caps. A server that
+    gzips an image is read through it (Missouri's attorney general's
+    headshot read as "not an image"). No srcset offers a size wider than
+    a 2x screen needs, the officials' dialog's included. A state officer's photograph
     comes only from their office or their association's roster, matched by
     state, never a search. No attorney general had one: NAAG's member
     pages answer every script and a headless browser with a Cloudflare
     challenge, and a party association's photograph is the party's. So
     `officers.add_ag_photos` reads the office's own pages - those that
     confirmed the name (rule 56), and the attorney general's page they
-    link - and takes only an image carrying the surname whose words say it
-    is a likeness ("headshot", "photo of") or are nothing but the name and
-    title. Arkansas's "AG-Griffin-Logo.png" is alt-texted "Tim Griffin
+    link - and takes only an image carrying the surname as a word, or in
+    run-together words of the holder's name and title
+    ("AgLizMurrillHeadshot"), with no other first name before it, whose
+    words say it is a likeness ("headshot", "photo of") or are nothing but
+    the name and title. A substring test would take "Carrie-Smith-Headshot"
+    for Chris Carr and "Solicitor General Jessica Ford headshot" for Aaron
+    Ford, and every photograph added, changed or dropped is reported for a
+    person to look at. Arkansas's "AG-Griffin-Logo.png" is alt-texted "Tim Griffin
     Attorney General of Arkansas", Arizona's "AG Mayes talking to a
     townhall crowd": a logo, a banner or a scene is refused by its words,
     a landscape frame by its shape. A NASS card filed under the state's

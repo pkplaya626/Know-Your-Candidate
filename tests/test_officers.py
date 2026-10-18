@@ -465,7 +465,8 @@ class TestAttorneyGeneralPhotos(unittest.TestCase):
         self.assertEqual(rows["AR"]["photo"], "https://ag.example.gov/img/Mills.jpg")
         self.assertEqual(rows["AR"]["photoPage"], "https://ag.example.gov/meet-tim/")
         self.assertNotIn("photo", rows["NC"])          # never an unconfirmed holder's
-        self.assertEqual(problems, [])
+        self.assertEqual(len(problems), 1)
+        self.assertIn("photograph added for Tim Griffin", problems[0])
 
     def test_a_read_that_concludes_nothing_keeps_the_same_persons_last_photo(self):
         check = self.weigh({"https://ag.example.gov/img/Griffin-headshot.jpg": "unknown"})
@@ -483,6 +484,43 @@ class TestAttorneyGeneralPhotos(unittest.TestCase):
         rows = {"AR": {"name": "Someone Else"}}
         officers.add_ag_photos(rows, {"AR": [self.HOME]}, old, check=check, pause=0, get=get)
         self.assertNotIn("photo", rows["AR"])
+
+    def test_a_colleague_sharing_letters_or_a_surname_is_not_the_attorney_general(self):
+        """A substring test took "Carrie-Smith-Headshot" for Chris Carr and
+        "jane-stanford-portrait" for Aaron Ford, and nothing looked at a
+        first name: "Solicitor General Jessica Ford headshot" passed too."""
+        def taken(name, code, tag):
+            return [u[-1] for u, _, _ in officers.likeness_candidates(
+                name, code, [("https://ag.example.gov/", tag)])]
+        self.assertEqual(taken("Chris Carr", "GA", '<img src="/uploads/Carrie-Smith-Headshot.jpg" '
+                                                   'alt="Chief of Staff Carrie Smith">'), [])
+        self.assertEqual(taken("Aaron Ford", "NV", '<img src="/img/jane-stanford-portrait.jpg" '
+                                                   'alt="">'), [])
+        self.assertEqual(taken("Aaron Ford", "NV", '<img src="/uploads/staff-07.jpg" '
+                                                   'alt="Solicitor General Jessica Ford headshot">'),
+                         [])
+        self.assertEqual(taken("Aaron Ford", "NV", '<img src="/u/jessicafordheadshot.jpg" alt="">'),
+                         [])
+        # The holder, with a middle initial, in run-together words, or by an
+        # evidenced short form (NAME_FORMS), is still found.
+        self.assertTrue(taken("Aaron Ford", "NV", '<img src="/uploads/staff-07.jpg" '
+                                                  'alt="Attorney General Aaron D. Ford headshot">'))
+        self.assertTrue(taken("Liz Murrill", "LA", '<img src="/i/aglizmurrillheadshot.jpg" alt="">'))
+        self.assertTrue(taken("Liz Murrill", "LA", '<img src="/i/AgLizMurrillHeadshot.jpg" alt="">'))
+        self.assertTrue(taken("Letitia James", "NY", '<img src="/u/x.jpg" '
+                                                     'alt="Attorney General Tish James headshot">'))
+
+    def test_a_photograph_added_changed_or_dropped_is_said(self):
+        old = {"name": "Tim Griffin", "photo": "https://ag.example.gov/old.jpg"}
+        self.assertEqual(officers.photo_changes("AR", old, dict(old)), [])
+        added = officers.photo_changes("AR", {}, {"name": "Tim Griffin", "photo": "https://a/x.jpg",
+                                                  "photoPage": "https://a/"})
+        self.assertIn("added", added[0])
+        changed = officers.photo_changes("AR", old, {"name": "Tim Griffin",
+                                                     "photo": "https://ag.example.gov/new.jpg"})
+        self.assertIn("changed", changed[0])
+        self.assertIn("old.jpg", changed[0])
+        self.assertIn("dropped", officers.photo_changes("AR", old, {"name": "Tim Griffin"})[0])
 
     def test_the_page_is_told_whose_photograph_it_is(self):
         cache = {"lt": {}, "sos": {}, "ag": {"AR": {

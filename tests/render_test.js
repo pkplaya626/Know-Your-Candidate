@@ -721,6 +721,21 @@ async function testDirectory() {
       via: "Wikimedia Commons" });
     check("a credit is escaped, and links only http(s)",
       !/<img/.test(hostile) && !/javascript:/.test(hostile) && /CC BY 4\.0/.test(hostile), hostile);
+    // A licence asking for an author the file's page does not name says so,
+    // and still links the file's page; it never prints a placeholder name.
+    const unrecorded = KYC.photoCreditHtml({ by: null, licence: "CC BY-SA 4.0",
+      page: "https://commons.wikimedia.org/wiki/File:Judge_Moore.jpg", via: "Wikimedia Commons",
+      authorUnrecorded: true });
+    check("a credit with no recorded author says so, and links the file",
+      /^Photo: author not recorded on Commons, /.test(unrecorded.replace(/<[^>]+>/g, "")) &&
+        /File:Judge_Moore\.jpg/.test(unrecorded), unrecorded);
+    const shownCredits = window.legislatorsData
+      .map((p) => KYC.photoCreditHtml(p.photoCredit).replace(/<[^>]+>/g, ""))
+      .filter(Boolean);
+    check("no credit prints a doubled phrase, a file name or an uploader's sentence",
+      shownCredits.length > 0 && shownCredits.every((t) =>
+        !/Unknown author Unknown author|\.jpe?g\s*:|I do not know|uploader|PDM-owner/i.test(t)),
+      shownCredits.filter((t) => /Unknown author Unknown|\.jpe?g\s*:|I do not know/i.test(t))[0]);
     const profileJs = fs.readFileSync(path.join(SITE, "assets", "kyc-profile.js"), "utf8");
     check("the dialog sets its portrait through setPortrait",
       /KYC\.setPortrait\(photo, item, "116px"\)/.test(profileJs) && !/photo\.src\s*=/.test(profileJs));
@@ -6345,6 +6360,18 @@ async function testStateGov() {
       check("and the sources say whose photograph it is (rule 87)",
         sources.indexOf("attorney general, " + ag.photoBy) !== -1, sources);
     }
+    // A named holder without a photograph keeps the photograph's column, so
+    // the row lines up with the pictured rows above it.
+    const bare = stateCodes.find((c) => data.states[c].ag && data.states[c].ag.name &&
+      !data.states[c].ag.photo && !data.states[c].ag.unconfirmed && !data.states[c].ag.disputed);
+    if (bare) {
+      pick("#/?state=" + bare + "&mode=ag");
+      const row = [...D.querySelectorAll("#delegation .gov-officer")].find((li) =>
+        li.textContent.indexOf(data.states[bare].ag.name) !== -1);
+      check("an unpictured attorney general's row keeps the photograph's column",
+        !!row && !row.classList.contains("gov-officer-text") &&
+        !!row.querySelector(".gov-officer-nophoto[aria-hidden='true']"));
+    }
   });
 
   suite("state government — the data", () => {
@@ -7797,7 +7824,12 @@ async function testFederal() {
     check("an executive photo is drawn from the sizes of that one file", sized.length > 0 &&
       sized.every((img) => urlsOf(img).every((u) =>
         u.split("?")[0] === img.getAttribute("src").split("?")[0])) &&
-      sized.some((img) => urlsOf(img).length > 1));
+      sized.some((img) => urlsOf(img).length > 0));
+    // TECH-13: a 72px photo is offered no size wider than a 2x screen needs.
+    const widthsOf = (img) => [...(img.getAttribute("srcset") || "").matchAll(/\s(\d+)w/g)]
+      .map((m) => parseInt(m[1], 10));
+    check("and offered no size wider than a 2x screen needs", sized.every((img) =>
+      widthsOf(img).filter((w) => w >= 144).length <= 1));
     // The court tables; the list of vacancies links courts again, by row.
     const links = [...D.querySelectorAll('#courts table a[href^="../courts/"]')]
       .filter((a) => !a.closest("#vacancy-list")).map((a) => a.getAttribute("href"))
@@ -8746,9 +8778,16 @@ async function testFederalAudit() {
       const p = withLinks.judge.portrait;
       check("a judge's Commons portrait carries its licence", !!p.licence, JSON.stringify(p));
       check("credited under the name with its author, licence and Commons, linked to the file",
-        !credit.hidden && credit.textContent.indexOf("Photo: " + (p.by ? p.by + ", " : "") + p.licence +
+        !credit.hidden && credit.textContent.indexOf("Photo: " + (p.by ? p.by + ", " :
+          p.authorUnrecorded ? "author not recorded on Commons, " : "") + p.licence +
           ", via Wikimedia Commons") === 0 && !!credit.querySelector('a[href="' + p.source + '"]'),
         credit.textContent);
+      // TECH-13: the 116px portrait is offered no size wider than a 2x
+      // screen needs; a 3x phone fetched the Commons original.
+      const widths = (photo.getAttribute("srcset") || "").split(",").map((x) =>
+        parseInt(x.trim().split(" ")[1], 10)).filter((w) => w > 0);
+      check("the dialog's srcset stops at the first size a 2x screen needs",
+        widths.length > 0 && widths.filter((w) => w >= 232).length <= 1, widths.join(" "));
     });
   }
 }
