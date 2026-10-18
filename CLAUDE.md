@@ -1405,7 +1405,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     the page holds that block. A note names the kind of line that is near
     (a district line, a county line, the state line or the shore); a ZIP
     code across a state line says so first; and a file that failed to load
-    is never answered with a neighbour's edge.
+    is never answered with a neighbour's edge. A place is in its own words
+    there too (rule 75): "the District of Columbia" in a sentence
+    (`place`), and no "if you live across the state line" by Puerto Rico's
+    shore, or Hawaii's (`alone`: no state meets it across a land line).
     A ZIP area's share of a district is a share of its land, from the
     Census relationship files of the vintage the pages draw (the 2024
     legislative districts; counties by the 2020 file except where they
