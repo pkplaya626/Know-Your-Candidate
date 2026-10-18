@@ -33,6 +33,16 @@ LOOKUP_DIR = "lookup_maps"
 WHOLE = 0.99
 
 
+# D.C. and the territories have no county page, so their county-equivalents
+# are called what the Census Bureau's Geographic Areas Reference Manual calls
+# them there (rule 75): Puerto Rico's municipios, American Samoa's three
+# districts and two islands, the Northern Mariana Islands' municipalities and
+# the Virgin Islands' islands. D.C. and Guam are each one county-equivalent,
+# the place itself, so the answer shows no row for it (None).
+TERRITORY_AREAS = {"PR": "municipio", "AS": "district or island", "MP": "municipality",
+                   "VI": "island", "DC": None, "GU": None}
+
+
 class LookupMapError(RuntimeError):
     """Raised when a lookup file is missing or disagrees with the maps."""
 
@@ -99,7 +109,7 @@ def build_state(code, root=".", local=None, legislature=None, seats=None):
     if not counties:
         raise LookupMapError(f"{code}: lookup map has no counties")
     names = {geoid: g["properties"]["name"] for geoid, g in counties.items()}
-    area, no_county = "county", {}
+    area, no_county = TERRITORY_AREAS.get(code, "county"), {}
     if local is not None:
         if set(local["counties"]) != set(counties):
             raise LookupMapError(f"{code}: lookup counties and the county page's differ: "
@@ -154,7 +164,8 @@ def build_state(code, root=".", local=None, legislature=None, seats=None):
             payload[out_key] = {str(n): rings(g) for n, g in sorted(numbered[key].items())}
     payload["co"] = {geoid: rings(g) for geoid, g in sorted(counties.items())}
     payload["names"] = names
-    payload["area"] = area
+    if area:
+        payload["area"] = area
     # D.C. and the territories have no county page to link.
     payload["countyPages"] = local is not None
     if no_county:
@@ -224,11 +235,32 @@ def build(root=".", codes=None, local=None, legislatures=None, district_maps=Non
     return out
 
 
-def index(payloads, stamps):
+def place_info(codes, voting=None):
+    """``{code: {name, map?, check?}}``: what the answer says of each state
+    on any page, profiles.js loaded or not - the legislature and county
+    pages load none (PR #104 review): its name, its district map page
+    (``districts.index``) and its own lookup page from *voting*
+    (``voting.for_page``), the one "Check with Ohio's own lookup" links."""
+    maps = D.index()
+    out = {}
+    for code in sorted(codes):
+        entry = {"name": state_name(code)}
+        if code in maps:
+            entry["map"] = {"page": maps[code]["page"], "redrawn": bool(maps[code]["redrawn"])}
+        links = (voting or {}).get(code) or {}
+        check = links.get("status") or links.get("polling")
+        if check:
+            entry["check"] = check
+        out[code] = entry
+    return out
+
+
+def index(payloads, stamps, voting=None):
     """``data/lookup/index.js``'s payload: which states each ZIP's first
-    three digits reach, each state's box, and the versioned path of each
-    file the lookup loads. *stamps* is ``{code: {"lookup": path,
-    "legislature": path}}``, paths relative to the site's root."""
+    three digits reach, each state's box and words (``place_info``), and
+    the versioned path of each file the lookup loads. *stamps* is ``{code:
+    {"lookup": path, "legislature": path}}``, paths relative to the site's
+    root; *voting* is ``voting.for_page``'s."""
     zip3 = {}
     for code, payload in sorted(payloads.items()):
         for zcta in payload["zips"]:
@@ -238,6 +270,7 @@ def index(payloads, stamps):
     return {"whole": WHOLE,
             "zip3": {k: zip3[k] for k in sorted(zip3)},
             "boxes": {code: p["box"] for code, p in sorted(payloads.items())},
+            "states": place_info(payloads, voting),
             "files": {code: stamps[code] for code in sorted(stamps)}}
 
 

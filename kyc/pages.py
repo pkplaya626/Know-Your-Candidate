@@ -514,9 +514,11 @@ _DISTRICT_SCRIPTS = (
 
 # "Find who represents me" on a state's legislature and county pages: the
 # panel (kyc-findrep.js) is written into this slot, first on the page.
-def _findrep_slot(code):
+# *view* is the id of the page's map: a district picked in the answer is
+# selected on this page, and the panel scrolls the map into view.
+def _findrep_slot(code, view):
     return (f'                <section class="state-section findrep" id="findrep" data-findrep '
-            f'data-findrep-state="{_e(code)}"></section>')
+            f'data-findrep-state="{_e(code)}" data-findrep-view="{_e(view)}"></section>')
 
 
 def _e(text):
@@ -1061,7 +1063,7 @@ def render_legislature_page(code, host, summary=None, dates=None):
         f'                        <a class="btn" href="{_e(_learn("states"))}"><svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> {_e(_guide_name("states"))}</a>',
         "                    </p>",
         "                </header>",
-        _findrep_slot(code),
+        _findrep_slot(code, "legMap"),
         '                <div class="toolbar legislature-toolbar">',
         chambers,
         '                    <div class="party-legend" aria-label="Colours">',
@@ -1389,7 +1391,7 @@ def render_counties_page(code, host, listed=None):
         f'                        <a class="btn" href="{_e(_learn("local"))}"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg> {_e(_guide_name("local"))}</a>',
         "                    </p>",
         "                </header>",
-        _findrep_slot(code),
+        _findrep_slot(code, "localMap"),
         '                <div class="segmented" role="group" aria-label="Map view">',
         f'                    <button type="button" data-view="counties" aria-pressed="true">{_e(button)}</button>',
         '                    <button type="button" data-view="cities" aria-pressed="false">Cities &amp; towns</button>',

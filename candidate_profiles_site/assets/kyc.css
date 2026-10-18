@@ -1529,6 +1529,12 @@ a.badge-link {
   .findrep-row { grid-template-columns: 1fr; gap: 0; }
   .findrep-vote { margin-left: 0; }
 }
+/* In the map page's sidebar the panel is one narrow column. */
+.sidebar .findrep-title { font-size: var(--t-md); }
+.sidebar .findrep-row { grid-template-columns: 1fr; gap: 0; }
+.sidebar .findrep-vote { margin-left: 0; }
+.findrep-crosses { color: var(--text); font-weight: 600; }
+.empty-zip { margin-top: var(--s-2); }
 
 .results-bar {
   display: flex;

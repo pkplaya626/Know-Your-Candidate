@@ -56,10 +56,12 @@ PAGE_REQUIREMENTS = {
         "data/geo.js",
         "data/odds.js",
         "data/stategov.js",
+        "data/lookup/index.js",
         "assets/kyc-odds.js",
         "assets/kyc-cards.js",
         "assets/kyc-profile.js",
         "assets/kyc-stategov.js",
+        "assets/kyc-findrep.js",
         "assets/kyc-usmap.js",
         "assets/kyc-map.js",
     ),
@@ -510,7 +512,8 @@ def write_lookup_index(payload, root="."):
         return None
     os.makedirs(os.path.dirname(path), exist_ok=True)
     text = (
-        _BANNER.format(source="lookup_maps/*.json, data/lookup/*.js, data/legislature/*.js",
+        _BANNER.format(source="lookup_maps/*.json, data/lookup/*.js, data/legislature/*.js, "
+                       "data/voting_links.json",
                        built=build_timestamp())
         + f"window.kycLookupIndex = {_json(payload)};\n"
         + 'window.kycLookupIndexMeta = {"signature":"' + signature + '"};\n'
@@ -533,7 +536,9 @@ def check_lookup(payloads, root="."):
             problems.append((path, "stale"))
     if problems:
         return problems
-    index = lookup.index(payloads, lookup_stamps(payloads, root))
+    from . import voting
+    index = lookup.index(payloads, lookup_stamps(payloads, root),
+                         voting.for_page(voting.load_cache(root)))
     path = os.path.join(root, LOOKUP_INDEX_FILE)
     committed = read_signature(path=path)
     if committed is None:

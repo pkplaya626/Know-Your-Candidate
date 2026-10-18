@@ -87,7 +87,7 @@ TERRITORY_FIPS = {"60": "AS", "66": "GU", "69": "MP"}
 
 # States whose county-equivalents are not the 2020 relationship file's.
 # Connecticut's nine planning regions replaced its eight counties as
-# county-equivalents in 2022 (Federal Register 87 FR 31636, June 6, 2022);
+# county-equivalents in 2022 (Federal Register 87 FR 34235, June 6, 2022);
 # the county pages draw the planning regions (cb_2025 counties), so the
 # 2020 file's county codes name nothing on them.
 COUNTIES_CHANGED = {"CT"}

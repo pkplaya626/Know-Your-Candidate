@@ -175,15 +175,48 @@
    * said to try a state code (GRID-06). A ZIP code is answered by "Find who
    * represents you" in the hero instead, once per ZIP code typed. */
   var askedZip = "";
-  function askZip() {
+  function searchedZip() {
     var m = /^(\d{5})$/.exec(state.q || "");
-    if (!m || m[1] === askedZip || !KYC.findRep) return;
-    askedZip = m[1];
-    KYC.findRep.ask(m[1]);
+    return m && KYC.findRep ? m[1] : "";
+  }
+
+  function askZip() {
+    var zip = searchedZip();
+    zipNote(zip);
+    if (!zip || zip === askedZip) return;
+    askedZip = zip;
+    KYC.findRep.ask(zip);
+  }
+
+  /* The empty grid says where the ZIP code was answered, with a way there:
+   * on a wide screen the hero scrolls away with the results (PR #104
+   * review). A button, not a "#findrep" link, which the router would read
+   * as a view and clear the search. */
+  function zipNote(zip) {
+    var empty = doc.getElementById("noResults");
+    if (!empty) return;
+    var note = empty.querySelector(".empty-zip");
+    if (!zip) {
+      if (note) note.hidden = true;
+      return;
+    }
+    if (!note) {
+      note = doc.createElement("p");
+      note.className = "empty-zip";
+      empty.appendChild(note);
+      empty.addEventListener("click", function (event) {
+        if (event.target.closest && event.target.closest("[data-findrep-reveal]")) KYC.findRep.reveal();
+      });
+    }
+    note.hidden = false;
+    note.innerHTML = "No profile carries a ZIP code: " + KYC.escapeHtml(zip) + " is answered " +
+      "above, under Find who represents you. " +
+      '<button type="button" class="btn" data-findrep-reveal>See the answer</button>';
   }
 
   function emptyLabel() {
     var typed = (doc.getElementById("searchInput") || {}).value || state.q;
+    if (searchedZip()) return "No profiles match “" + typed.trim() + "”: ZIP code answered above";
     return state.q ? "No profiles match “" + typed.trim() + "” with these filters"
       : "No profiles match these filters";
   }
@@ -200,6 +233,7 @@
     grid.className = "senate-view";
     grid.innerHTML = view.html;
     empty.hidden = view.people > 0;
+    if (!view.people) askZip();
   }
 
   function syncViewToggles() {

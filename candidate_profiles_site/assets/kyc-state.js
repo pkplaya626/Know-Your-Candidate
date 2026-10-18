@@ -531,7 +531,8 @@
       '<h1 class="state-title">States &amp; territories</h1>',
       '<p class="state-summary">One page each: who holds the seats, the 2026 races, and everyone who has filed.</p>',
       "</header>",
-      '<section class="state-section findrep" id="findrep" data-findrep></section>',
+      // The list of states is right here: no "How to vote" link to this page.
+      '<section class="state-section findrep" id="findrep" data-findrep data-findrep-list></section>',
       '<div class="state-list" id="stateList">' + rows.join("") + "</div>",
     ].join("");
     if (KYC.findRep) KYC.findRep.mountAll(target);

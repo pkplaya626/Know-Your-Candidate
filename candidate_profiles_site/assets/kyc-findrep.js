@@ -22,7 +22,15 @@
  * their location for an exact answer. A location near a line says so, as
  * the district pages do: the boundaries are the Census Bureau's at
  * 1:500,000, so within NEAR_KM of a line no one can say which side a home is
- * on from them, and the state's own lookup is linked.
+ * on from them, and the state's own lookup is linked. The state legislature's
+ * districts are placed on the legislature page's own lines, which are drawn
+ * more coarsely, so their margin is wider by what that file records
+ * (``lineErrorKm``, kyc/legislature.py), and the answer gives both margins.
+ *
+ * The pages without profiles.js (the legislature and county pages) still
+ * name each state, link its district map and its own lookup: those words
+ * come from the lookup index (``states``, kyc/lookup.place_info), never
+ * KYC.meta(), which is empty there.
  *
  * Who holds a seat is the profiles' (KYC.seated, rule 27) and the
  * legislature files'; a seat with no one listed is "nobody listed", never
@@ -197,6 +205,19 @@
     return (i && i.whole) || WHOLE;
   }
 
+  /** What the build says of a state for this answer, on any page: its
+   *  name, its district map and its own lookup (kyc/lookup.place_info). */
+  function placeOf(code) {
+    var i = index();
+    return (i && i.states && i.states[code]) || {};
+  }
+
+  /** "Ohio", never "OH": the legislature and county pages load no
+   *  profiles.js, so KYC.stateName would give the code there. */
+  function nameOf(code) {
+    return placeOf(code).name || KYC.stateName(code);
+  }
+
   /** One state's lookup file, decoded: its shapes as rings of degrees. */
   function lookupOf(code) {
     var have = (global.kycLookup || {})[code];
@@ -287,8 +308,16 @@
     return out;
   }
 
+  /** The margin a point is placed on a legislature file's lines with: the
+   *  lookup's, widened by how far those coarser lines may stray from the
+   *  Census Bureau's (kyc/legislature.line_error_km). */
+  function legislatureMargin(leg, marginKm) {
+    return marginKm + ((leg && isFinite(leg.lineErrorKm)) ? leg.lineErrorKm : 0);
+  }
+
   /** The state legislature's districts at a point, from the legislature
-   *  file's own lines and projection. */
+   *  file's own lines and projection, within *marginKm* of a line
+   *  (legislatureMargin). */
   function legislatureAt(leg, lon, lat, marginKm) {
     var at = leg && project(leg.projection, lon, lat);
     if (!at) return null;
@@ -335,15 +364,23 @@
       var hit = all.filter(function (a) { return inState(a.found); })[0] ||
         all.filter(function (a) { return a.found.cd.kind !== "none"; })[0];
       // A state whose file did not load is not a state the point is not
-      // in: "not in any state" from a failed download is a silent error.
-      if (!hit && failed) throw new Error("a lookup file did not load");
+      // in: "not in any state" from a failed download is a silent error,
+      // and so is the neighbour whose edge is near when the file of the
+      // state the point is inside is the one that failed.
+      if (failed && !all.some(function (a) { return inState(a.found); })) {
+        throw new Error("a lookup file did not load");
+      }
       if (!hit) return { code: null, tried: codes.length, loaded: all.length };
+      hit.marginKm = marginKm;
       return legislatureOf(hit.code).then(function (leg) {
         hit.leg = leg;
-        hit.legFound = legislatureAt(leg, lon, lat, marginKm);
-        hit.marginKm = marginKm;
+        hit.legMarginKm = legislatureMargin(leg, marginKm);
+        hit.legFound = legislatureAt(leg, lon, lat, hit.legMarginKm);
         return hit;
-      }, function () { return hit; });
+      }, function () {
+        hit.legFailed = true;
+        return hit;
+      });
     });
   }
 
@@ -360,7 +397,7 @@
         if (!entry) return null;
         return legislatureOf(code).then(function (leg) {
           return { code: code, data: data, entry: entry, leg: leg };
-        }, function () { return { code: code, data: data, entry: entry, leg: null }; });
+        }, function () { return { code: code, data: data, entry: entry, leg: null, legFailed: true }; });
       });
     })).then(function (all) {
       return all.filter(Boolean).sort(function (a, b) {
@@ -462,7 +499,7 @@
   }
 
   function districtsPage(code, now, next) {
-    var info = (KYC.meta().districtMaps || {})[code];
+    var info = placeOf(code).map;
     if (!info) return "";
     var params = [];
     if (next && next.length) params.push("d=" + next.slice(0, MAX_NEAR).join(","));
@@ -529,7 +566,7 @@
     var rows = [];
     if (!people().length) {
       rows.push(row("Congress", '<a href="' + KYC.escapeAttr(KYC.stateUrl(code) + "#findrep") +
-        '">Your members of Congress, on the ' + KYC.escapeHtml(KYC.stateName(code)) +
+        '">Your members of Congress, on the ' + KYC.escapeHtml(nameOf(code)) +
         " page &rsaquo;</a>"));
       return rows;
     }
@@ -550,23 +587,40 @@
       if (sr.length) {
         rows.push(row(record ? "The Senate race" : "Senate race", sr.map(function (r) {
           return '<div class="findrep-item">' + raceLine(code, r, (r.special ? "Special election"
-            : "U.S. Senate") + " in " + KYC.stateName(code)) + "</div>";
+            : "U.S. Senate") + " in " + nameOf(code)) + "</div>";
         }).join("")));
       }
     }
     return rows;
   }
 
+  /** "District 7", "District 10A", "District I" (Alaska's Senate is
+   *  lettered); a name that carries its own words - "Chittenden-16",
+   *  "Hillsborough 06", "10th Bristol" - as it is. */
   function districtName(c, id) {
     var d = c.districts[id];
-    var name = d ? d.name : id;
-    return /^\d+[A-Z]?$/.test(name) ? "District " + name : name;
+    var name = String(d ? d.name : id);
+    return /[a-z\s]/.test(name) ? name : "District " + name;
+  }
+
+  /** "Bob Hallstrom (Nonpartisan)": the party in the legislature page's
+   *  words (kyc-legislature.js), never a bare key letter. */
+  function memberWords(m) {
+    var party = m.party || "";
+    return KYC.escapeHtml(m.name) + (party ? " (" + KYC.escapeHtml(party) + ")" : "");
   }
 
   /** The state legislature rows, one per chamber, from the legislature
    *  file. The people listed for a district are the file's, linked to the
-   *  district on the legislature page; nobody listed is said so. */
-  function legislatureRows(code, leg, picks) {
+   *  district on the legislature page; nobody listed is said so. *failed*:
+   *  the file did not load, which is said, never left out (a level missing
+   *  from the answer reads as none). */
+  function legislatureRows(code, leg, picks, failed) {
+    if (!leg && failed) {
+      return [row("State legislature", "did not load. " + '<a href="' +
+        KYC.escapeAttr(KYC.siteRoot() + "legislature/" + code.toLowerCase() + ".html") +
+        '">Find your district on the legislature page &rsaquo;</a>')];
+    }
     if (!leg) return [];
     var rows = [];
     var page = KYC.siteRoot() + leg.page;
@@ -574,7 +628,7 @@
       var c = leg.chambers[chamber];
       var parts = picks[chamber];
       if (!c) return;
-      var title = KYC.escapeHtml(stateWord(code) + " " + c.title);
+      var title = KYC.escapeHtml(nameOf(code) + " " + c.title);
       if (!parts || !parts.length) {
         // Said, not dropped: a level missing from the answer reads as none.
         rows.push(row(title, "not found on its district map; " + '<a href="' +
@@ -586,9 +640,7 @@
         var href = page + "#/?" + (chamber === "lower" ? "chamber=lower&" : "") + "d=" +
           encodeURIComponent(id);
         return '<a href="' + KYC.escapeAttr(href) + '">' + KYC.escapeHtml(districtName(c, id)) +
-          "</a>: " + (members.length ? members.map(function (m) {
-            return KYC.escapeHtml(m.name) + (m.partyKey ? " (" + KYC.escapeHtml(m.partyKey) + ")" : "");
-          }).join(", ") : "nobody listed");
+          "</a>: " + (members.length ? members.map(memberWords).join(", ") : "nobody listed");
       });
       var unplaced = (leg.unplaced || []).filter(function (m) { return m.chamber === chamber; });
       if (unplaced.length) {
@@ -602,13 +654,13 @@
     return rows;
   }
 
-  function stateWord(code) {
-    return KYC.stateName(code);
-  }
-
+  /** The county row, in the county page's words ("Parish", "Borough");
+   *  in a territory, the Census Bureau's ("Municipio"). D.C. and Guam are
+   *  each one county-equivalent, the place itself, and carry no area word:
+   *  no row (kyc/lookup.TERRITORY_AREAS). */
   function countyRows(code, data, parts) {
-    if (!parts || !parts.length) return [];
-    var word = data.area || "county";
+    if (!parts || !parts.length || !data.area) return [];
+    var word = data.area;
     var label = word.charAt(0).toUpperCase() + word.slice(1);
     return [row(KYC.escapeHtml(label), each(parts, function (geoid) {
       var name = (data.names || {})[geoid] || geoid;
@@ -623,15 +675,14 @@
 
   /** "Check with Ohio's own lookup", from the state's voting pages. */
   function officialLookup(code) {
-    var links = (KYC.meta().voting || {})[code] || {};
-    var url = links.status || links.polling;
+    var url = placeOf(code).check;
     return url ? '<a href="' + KYC.escapeAttr(url) + '" target="_blank" rel="noopener noreferrer">' +
-      "Check with " + KYC.escapeHtml(KYC.possessive(KYC.stateName(code))) + " own lookup &rsaquo;</a>" : "";
+      "Check with " + KYC.escapeHtml(KYC.possessive(nameOf(code))) + " own lookup &rsaquo;</a>" : "";
   }
 
   function voteLink(code) {
     return '<a class="btn" href="' + KYC.escapeAttr(KYC.stateUrl(code) + "#voting") + '">' +
-      KYC.icon("vote") + " How to vote in " + KYC.escapeHtml(KYC.stateName(code)) + "</a>";
+      KYC.icon("vote") + " How to vote in " + KYC.escapeHtml(nameOf(code)) + "</a>";
   }
 
   /** The plan a seat is held under, and the plan of the 2026 race: a
@@ -656,6 +707,15 @@
       "</details>";
   }
 
+  /** "Ohio's House map was redrawn for 2026 ...", only where the answer
+   *  shows the House rows it explains: the legislature and county pages
+   *  show none (they load no profiles.js). */
+  function redrawnNote(code, data) {
+    if (!data.next || KYC.recordPhase() || !people().length) return "";
+    return KYC.escapeHtml(KYC.possessive(nameOf(code))) + " House map was redrawn for 2026: " +
+      "the representative is the one elected on the old map, the race is on the new one.";
+  }
+
   /** The answer for a ZIP code, from ``zip()``'s list. */
   function zipAnswer(code5, found) {
     if (!found.length) {
@@ -666,6 +726,16 @@
     }
     var out = [];
     var split = false;
+    var crosses = found.length > 1;
+    if (crosses) {
+      // Said first, before either state's answer: a reader reading only
+      // the first would take its state for theirs.
+      out.push('<p class="findrep-note findrep-crosses">ZIP ' + KYC.escapeHtml(code5) +
+        " crosses a state line: " + list(found.map(function (f) {
+          return pct(landIn(f.entry)) + " of its land is in " + KYC.escapeHtml(nameOf(f.code));
+        })) + ". Each state's answer is below, and every share in them is of the whole ZIP " +
+        "area. Use your location to know which is yours.</p>");
+    }
     found.forEach(function (f) {
       var e = f.entry, data = f.data, code = f.code, w = whole();
       var key = plans(data);
@@ -677,15 +747,13 @@
       }
       var now = pick(e[key.now]), next = pick(e[key.race]);
       var rows = federalRows(code, now, next)
-        .concat(legislatureRows(code, f.leg, { upper: pick(e.su), lower: pick(e.sl) }))
+        .concat(legislatureRows(code, f.leg, { upper: pick(e.su), lower: pick(e.sl) }, f.legFailed))
         .concat(countyRows(code, data, pick(e.co)));
-      var head = "ZIP " + KYC.escapeHtml(code5) + ", " + KYC.escapeHtml(KYC.stateName(code)) +
-        (found.length > 1 ? " (" + pct(landIn(e)) + " of its land)" : "");
+      var head = "ZIP " + KYC.escapeHtml(code5) + ", " + KYC.escapeHtml(nameOf(code)) +
+        (crosses ? " (" + pct(landIn(e)) + " of its land)" : "");
       var notes = [];
-      if (data.next && !KYC.recordPhase()) {
-        notes.push(KYC.escapeHtml(KYC.stateName(code)) + "'s House map was redrawn for 2026: the " +
-          "representative is the one elected on the old map, the race is on the new one.");
-      }
+      var redrawn = redrawnNote(code, data);
+      if (redrawn) notes.push(redrawn);
       var map = districtsPage(code, ids(now), ids(next));
       if (map) notes.push('<a href="' + KYC.escapeAttr(map) + '">See it on the district map &rsaquo;</a>');
       out.push(answer(head, code, rows, notes) + sourcesNote(data));
@@ -696,8 +764,9 @@
         "location for an exact answer, or your state's own lookup."
       : "The Census Bureau's ZIP Code Tabulation Areas follow ZIP codes closely but not " +
         "exactly; a few addresses fall outside their ZIP code's area.";
-    return out.join("") + '<p class="findrep-note">' + caveat + " " +
-      officialLookup(found[0].code) + "</p>";
+    // Every state the ZIP reaches has its own lookup to check with.
+    var checks = found.map(function (f) { return officialLookup(f.code); }).filter(Boolean);
+    return out.join("") + '<p class="findrep-note">' + caveat + " " + checks.join(" ") + "</p>";
   }
 
   function ids(parts) {
@@ -715,6 +784,44 @@
     return "about " + (Math.round(metres / 100) / 10) + " km";
   }
 
+  function unique(items) {
+    return items.filter(function (x, i) { return x && items.indexOf(x) === i; });
+  }
+
+  /** What the answer for a location says it cannot say, by what kind of
+   *  line is near and at which level: a district line, a county line, the
+   *  state line or the shore, or several districts at once. */
+  function pointNotes(hit, levels, accuracy) {
+    var notes = [];
+    var name = KYC.escapeHtml(nameOf(hit.code));
+    var crowded = unique(levels.filter(function (l) { return reach(l.f).length > MAX_NEAR; })
+      .map(function (l) { return l.many; }));
+    var lines = levels.filter(function (l) { return l.f && l.f.kind === "line"; });
+    var lineWords = unique(lines.map(function (l) { return l.line; }));
+    var leg = lines.some(function (l) { return l.leg; });
+    var edge = levels.some(function (l) { return !l.leg && l.f && (l.f.kind === "edge" || l.f.kind === "out"); });
+    var browser = accuracy >= 100 ? ", and your browser placed you to within " + distance(accuracy) : "";
+    if (crowded.length) {
+      notes.push("You are where several " + list(crowded) + " meet; the boundaries here cannot " +
+        "tell which you are in, so each one in reach is listed.");
+    } else if (lineWords.length) {
+      notes.push("You are near " + list(lineWords) + ", so each one in reach is listed: the " +
+        "boundaries here are the Census Bureau's at 1:500,000, and within " +
+        distance(NEAR_KM * 1000) + " of a line they cannot say which side you are on" +
+        (leg ? " (" + distance((NEAR_KM + (hit.leg.lineErrorKm || 0)) * 1000) + " for the state " +
+          "legislature's districts, which this site draws more coarsely)" : "") + browser + ".");
+    }
+    if (edge) {
+      notes.push(inState(hit.found)
+        ? "You are within " + distance(hit.marginKm * 1000) + " of " + KYC.escapeHtml(
+          KYC.possessive(nameOf(hit.code))) + " border or shore. If you live across the state " +
+          "line, this is not your answer: type your ZIP code, or check with your state."
+        : "Your location is at the edge of " + name + " or just outside it, by these " +
+          "boundaries; the nearest districts are listed.");
+    }
+    return { notes: notes, unsure: !!(crowded.length || lineWords.length || edge) };
+  }
+
   /** The answer for a location, from ``where()``. */
   function pointAnswer(hit, accuracy) {
     if (!hit.code) {
@@ -723,44 +830,29 @@
         '">Find your state &rsaquo;</a></p>';
     }
     var code = hit.code, data = hit.data, f = hit.found, key = plans(data);
-    var crowded = [];
-    function pick(found) {
-      var r = reach(found);
-      if (r.length > MAX_NEAR) crowded.push(r);
-      return r;
-    }
-    var now = pick(f[key.now]), next = pick(f[key.race]);
-    var legPicks = {};
-    if (hit.legFound) {
-      Object.keys(hit.legFound).forEach(function (chamber) {
-        legPicks[chamber] = pick(hit.legFound[chamber]);
-      });
-    }
+    var lf = hit.legFound || {};
+    var area = data.area;
+    var levels = [
+      { f: f[key.now], line: "a congressional district line", many: "congressional districts" },
+      { f: f[key.race], line: "a congressional district line", many: "congressional districts" },
+      { f: area ? f.co : null, line: area ? (/^[aeiou]/i.test(area) ? "an " : "a ") + area + " line" : "",
+        many: area ? area + " lines" : "" },
+      { f: lf.upper, line: "a state legislative district line", many: "state legislative districts", leg: true },
+      { f: lf.lower, line: "a state legislative district line", many: "state legislative districts", leg: true },
+    ];
+    var now = reach(f[key.now]), next = reach(f[key.race]);
     var rows = federalRows(code, now, next)
-      .concat(legislatureRows(code, hit.leg, legPicks))
-      .concat(countyRows(code, data, pick(f.co)));
-    var notes = [];
-    var unsure = [f[key.now], f[key.race], f.co].concat(hit.legFound
-      ? [hit.legFound.upper, hit.legFound.lower] : []).some(function (x) {
-      return x && x.kind !== "in" && x.kind !== "none";
-    });
-    if (crowded.length) {
-      notes.push("You are where several districts meet; the boundaries here cannot tell " +
-        "which you are in, so each one in reach is listed.");
-    } else if (unsure) {
-      notes.push("Where two districts are listed, you are near the line between them: the " +
-        "boundaries here are the Census Bureau's at 1:500,000, and within about " +
-        (NEAR_KM * 1000) + " m of a line they cannot say which side you are on" +
-        (accuracy >= 100 ? ", and your browser placed you to within " + distance(accuracy) : "") + ".");
-    }
-    if (data.next && !KYC.recordPhase()) {
-      notes.push(KYC.escapeHtml(KYC.stateName(code)) + "'s House map was redrawn for 2026: the " +
-        "representative is the one elected on the old map, the race is on the new one.");
-    }
+      .concat(legislatureRows(code, hit.leg, { upper: reach(lf.upper), lower: reach(lf.lower) },
+        hit.legFailed))
+      .concat(countyRows(code, data, reach(f.co)));
+    var said = pointNotes(hit, levels, accuracy);
+    var notes = said.notes;
+    var redrawn = redrawnNote(code, data);
+    if (redrawn) notes.push(redrawn);
     var map = districtsPage(code, now, next);
     if (map) notes.push('<a href="' + KYC.escapeAttr(map) + '">See it on the district map &rsaquo;</a>');
-    if (unsure || crowded.length) notes.push(officialLookup(code));
-    return answer("Your location, " + KYC.escapeHtml(KYC.stateName(code)), code, rows, notes) +
+    if (said.unsure) notes.push(officialLookup(code));
+    return answer("Your location, " + KYC.escapeHtml(nameOf(code)), code, rows, notes) +
       sourcesNote(data);
   }
 
@@ -779,10 +871,15 @@
     slot.setAttribute("data-findrep-ready", "1");
     var code = slot.getAttribute("data-findrep-state") || "";
     var uid = "findrep" + (++mounted);
+    // "#voting" only where this page holds the voting block (the state
+    // page). On a legislature or county page the router would read it as
+    // a selection and clear the reader's, and there is no block to reach:
+    // the button goes to the state page's (PR #104 review).
     var vote = code
-      ? '<a class="btn" href="#voting">' + KYC.icon("vote") + " How to vote in " +
-        KYC.escapeHtml(KYC.stateName(code)) + "</a>"
-      : voteHome();
+      ? '<a class="btn" href="' + KYC.escapeAttr(doc.getElementById("voting") ? "#voting"
+        : KYC.stateUrl(code) + "#voting") + '">' + KYC.icon("vote") + " How to vote in " +
+        KYC.escapeHtml(nameOf(code)) + "</a>"
+      : voteHome(slot.hasAttribute("data-findrep-list"));
     slot.innerHTML =
       '<h2 class="findrep-title" id="' + uid + 'Title">' + KYC.icon("pin") +
         " Find who represents you</h2>" +
@@ -806,6 +903,20 @@
     function show(html) {
       out.hidden = false;
       out.innerHTML = html;
+    }
+    // A district picked in the answer on its own page (the legislature
+    // page's, the county page's) is selected by the page's router; the map
+    // is below the panel, so it is brought into view.
+    var view = slot.getAttribute("data-findrep-view");
+    if (view) {
+      out.addEventListener("click", function (event) {
+        var a = event.target && event.target.closest && event.target.closest("a[href]");
+        if (!a || a.pathname !== global.location.pathname || !/^#\//.test(a.hash || "")) return;
+        global.setTimeout(function () {
+          var target = doc.getElementById(view);
+          if (target && target.scrollIntoView) target.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 0);
+      });
     }
     form.addEventListener("submit", function (event) {
       event.preventDefault();
@@ -858,35 +969,56 @@
   var mounted = 0;
 
   /** The home page's "How to vote in your state": the remembered state's
-   *  voting block, or the list of states. */
-  function voteHome() {
+   *  voting block, or the list of states. On the list of states itself
+   *  (*listHere*), a link to the page the reader is on does nothing, so it
+   *  waits, hidden, for a state to be known (remember). */
+  function voteHome(listHere) {
     var code = KYC.rememberedState();
-    var known = code && (KYC.meta().states || {})[code];
+    var known = code && placeOf(code).name;
     return '<a class="btn" data-findrep-vote href="' + KYC.escapeAttr(known
-      ? KYC.stateUrl(code) + "#voting" : KYC.siteRoot() + "states/index.html") + '">' +
-      KYC.icon("vote") + " How to vote in " + KYC.escapeHtml(known ? KYC.stateName(code) : "your state") +
+      ? KYC.stateUrl(code) + "#voting" : KYC.siteRoot() + "states/index.html") + '"' +
+      (!known && listHere ? " hidden" : "") + ">" +
+      KYC.icon("vote") + " How to vote in " + KYC.escapeHtml(known ? nameOf(code) : "your state") +
       "</a>";
   }
 
   /** A reader's state, remembered in this browser for the sidebar and the
    *  home page's voting link - a per-viewer convenience (kyc.js). */
   function remember(code) {
-    if (!code || !(KYC.meta().states || {})[code]) return;
+    if (!code || !placeOf(code).name) return;
     KYC.rememberState(code);
     Array.prototype.forEach.call(doc.querySelectorAll("[data-findrep-vote]"), function (a) {
+      a.hidden = false;
       a.setAttribute("href", KYC.stateUrl(code) + "#voting");
-      a.innerHTML = KYC.icon("vote") + " How to vote in " + KYC.escapeHtml(KYC.stateName(code));
+      a.innerHTML = KYC.icon("vote") + " How to vote in " + KYC.escapeHtml(nameOf(code));
     });
   }
 
   /** Look *zip5* up in the page's first panel, as if typed there: the
-   *  grid's search hands a ZIP code over (kyc-directory.js). */
+   *  grid's search hands a ZIP code over (kyc-directory.js). The panel is
+   *  brought into view if it has scrolled away. */
   function ask(zip5) {
     var slot = doc.querySelector("[data-findrep][data-findrep-ready]");
     if (!slot) return false;
     slot.querySelector(".findrep-zip").value = zip5;
     slot.querySelector("form").dispatchEvent(new global.Event("submit",
       { bubbles: true, cancelable: true }));
+    var box = slot.getBoundingClientRect();
+    if ((box.bottom < 0 || box.top > (global.innerHeight || 0)) && slot.scrollIntoView) {
+      slot.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    return true;
+  }
+
+  /** Bring the page's panel into view and put the reader in its answer. */
+  function reveal() {
+    var slot = doc.querySelector("[data-findrep][data-findrep-ready]");
+    if (!slot) return false;
+    if (slot.scrollIntoView) slot.scrollIntoView({ behavior: "smooth", block: "start" });
+    var out = slot.querySelector(".findrep-result");
+    var target = out && !out.hidden ? out : slot.querySelector(".findrep-zip");
+    if (target === out) out.setAttribute("tabindex", "-1");
+    target.focus({ preventScroll: true });
     return true;
   }
 
@@ -908,6 +1040,7 @@
     ROUGH_KM: ROUGH_KM,
     mount: mount,
     ask: ask,
+    reveal: reveal,
     mountAll: mountAll,
     where: where,
     zip: zip,

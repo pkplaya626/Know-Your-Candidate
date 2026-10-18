@@ -365,15 +365,20 @@
         '<a href="' + KYC.escapeAttr(KYC.siteRoot() + "states/index.html") +
         '">Find your state &rsaquo;</a>', focus: null };
     }
+    var names = ["the map members were elected on", "the map for 2026"];
     // A precise fix where more districts meet than the page can show is
-    // not an approximate location: say where it is (RACES-02).
-    if (reaches.some(function (r) { return r.length > MAX_FOCUS; })) {
-      return { html: "You are where several districts meet (" + seats(reach) + "); the " +
+    // not an approximate location: say where it is (RACES-02), naming the
+    // districts of the map they meet on, not the other map's.
+    var crowded = reaches.map(function (r, i) {
+      if (r.length <= MAX_FOCUS) return "";
+      return (found.length > 1 ? "on " + names[i] + ", " : "") + seats(r);
+    }).filter(Boolean);
+    if (crowded.length) {
+      return { html: "You are where several districts meet (" + crowded.join("; ") + "); the " +
         "boundaries this page holds cannot tell which you are in." + check +
         whoHere(now, reach), focus: picks.focus, was: picks.was };
     }
     var phrases = found.map(phrase);
-    var names = ["the map members were elected on", "the map for 2026"];
     var first;
     if (found.length === 1 || phrases[0] === phrases[1]) {
       first = (found.length > 1 ? "On both maps, " : "") + phrases[0] + ".";
