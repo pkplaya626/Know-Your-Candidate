@@ -168,6 +168,32 @@ class TestTheIssuesTheirSiteLists(unittest.TestCase):
         self.assertEqual(items, ["Agriculture", "Energy & Conservation", "Health Care",
                                  "Veterans Affairs"])
 
+    def test_a_menu_built_of_divs(self):
+        # Senator Blackburn's "Issues" is a link in a toggle beside a
+        # collapsed panel of issue links; no list element anywhere.
+        markup = (
+            '<div class="menu-item"><a href="/about">About Marsha</a></div>'
+            '<div class="menu-item dropdown"><div class="menu-toggle"><a href="/issues">Issues</a>'
+            '<button>Toggle Submenu</button></div><div class="collapse"><div class="panel">'
+            '<div class="menu-item"><a href="/agriculture">Agriculture</a></div>'
+            '<div class="menu-item"><a href="/china">China</a></div>'
+            '<div class="menu-item"><a href="/health-care">Health Care</a></div>'
+            '<div class="menu-item"><a href="/protecting-life">Protecting Life</a></div>'
+            '</div></div></div>'
+            '<div class="menu-item"><a href="/news">Newsroom</a></div>')
+        site = "https://www.blackburn.senate.gov"
+        self.assertEqual(members.menu_issues(markup, site + "/", site, "Marsha Blackburn", OTHERS),
+                         ["Agriculture", "China", "Health Care", "Protecting Life"])
+        # A flat bar is not a menu of its first item.
+        flat = ('<nav><a href="/issues">Issues</a><a href="/news">News</a>'
+                '<a href="/media">Media</a><a href="/videos">Videos</a></nav>')
+        self.assertEqual(members.menu_issues(flat, site + "/", site, "Marsha Blackburn", OTHERS), [])
+
+    def test_the_senates_firewall_is_no_page(self):
+        page = members.parse("<title>Senate.gov - Unauthorized</title><p>Sorry, a potential "
+                             "security risk was detected in your submitted request." + "x " * 200)
+        self.assertFalse(members.readable(200, page))
+
     def test_fewer_than_three_is_not_a_list(self):
         markup = '<a href="/issues/a">Agriculture</a><a href="/issues/b">Energy</a>'
         self.assertEqual(members.listed_issues(self.page(markup), "https://x.house.gov/issues",
@@ -415,13 +441,25 @@ class TestApplied(unittest.TestCase):
                                          "Veterans"])}
         members.apply_cache([larsen], dict(self.CACHE, sites=sites))
         self.assertEqual(larsen["platforms"], "Agriculture; Health Care; Veterans")
-        # Fewer than three left is no list: the site was read and lists none.
+        # Fewer than three left is no list, but the page is there: linked,
+        # never called empty.
         larsen = member()
         sites = {"L000560": dict(self.CACHE["sites"]["L000560"],
                                  issues=["Agriculture", "Project Requests", "Committee Work"])}
         members.apply_cache([larsen], dict(self.CACHE, sites=sites))
-        self.assertEqual(larsen["quality"]["platforms"], "not_listed")
+        self.assertEqual(larsen["quality"]["platforms"], "see_site")
+        self.assertEqual(larsen["officialIssuesUrl"], "https://larsen.house.gov/issues/")
         self.assertNotIn("platforms", larsen.get("fieldSources", {}))
+
+    def test_an_issues_page_with_no_list_read_is_linked_not_called_empty(self):
+        # Senator Sanders's issues page is prose under tabs: there is a
+        # page, and no list this reader can take in its words.
+        larsen = member()
+        sites = {"L000560": {"url": "https://larsen.house.gov", "verdict": "none",
+                             "pageRead": "https://larsen.house.gov/issues/", "read": "2026-10-18"}}
+        members.apply_cache([larsen], dict(self.CACHE, sites=sites))
+        self.assertEqual(larsen["quality"]["platforms"], "see_site")
+        self.assertEqual(larsen["officialIssuesUrl"], "https://larsen.house.gov/issues/")
 
     def test_a_challenger_is_never_touched(self):
         challenger = member(id="H6WA02123", isCandidate=True)

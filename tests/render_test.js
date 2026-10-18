@@ -1177,6 +1177,19 @@ async function testDirectoryAsync() {
       platform.textContent);
     check("and it is not searchable as a platform", !KYC.matchesQuery(host, "not listed on their official"));
     KYC.profile.close();
+
+    // An issues page with no list this site could read: linked, never
+    // called empty.
+    host.quality = { platforms: "see_site" };
+    host.officialIssuesUrl = host.website + "/issues/";
+    delete host.__search;
+    KYC.profile.open(host.id);
+    check("an issues page with no list read is linked, not called empty",
+      /issues page/.test(platform.textContent) && !/Not listed/.test(platform.textContent) &&
+        !/No data/.test(platform.textContent) &&
+        [...platform.querySelectorAll("a")].some((a) => a.href === host.website + "/issues/"),
+      platform.textContent);
+    KYC.profile.close();
     Object.keys(saved).forEach((k) => {
       if (saved[k] === undefined) delete host[k]; else host[k] = saved[k];
     });

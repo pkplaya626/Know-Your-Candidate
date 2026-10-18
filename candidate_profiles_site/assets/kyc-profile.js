@@ -235,10 +235,17 @@
       }
     } else if (!item.campaignQuote) {
       html += KYC.renderField(item, "platforms");
-      if ((item.quality || {}).platforms === "not_listed" && item.website) {
+      var absence = (item.quality || {}).platforms;
+      if (absence === "not_listed" && item.website) {
         html += '<p class="field-credit">Read' +
           (item.platformRead ? " on " + KYC.escapeHtml(KYC.dateWords(item.platformRead)) : "") +
           ": " + outLink(item.website, "their official website") + "</p>";
+      } else if (absence === "see_site" && item.officialIssuesUrl) {
+        // An issues page this site could not read a list from: linked,
+        // never called empty (rule 86).
+        html += '<p class="field-credit">Read' +
+          (item.platformRead ? " on " + KYC.escapeHtml(KYC.dateWords(item.platformRead)) : "") +
+          ": " + outLink(item.officialIssuesUrl, "their issues page") + "</p>";
       }
     }
 

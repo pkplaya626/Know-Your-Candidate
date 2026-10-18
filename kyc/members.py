@@ -129,7 +129,10 @@ def chrome_dom(url, timeout=90):
 # A page that is a gate, not the site: a bot wall's challenge, a refusal.
 _GATE = re.compile(r"access\s+denied|request\s+rejected|just\s+a\s+moment|attention\s+required|"
                    r"verify\s+you\s+are\s+(?:a\s+)?human|are\s+you\s+a\s+robot|"
-                   r"enable\s+javascript\s+(?:and\s+cookies\s+)?to\s+continue", re.I)
+                   r"enable\s+javascript\s+(?:and\s+cookies\s+)?to\s+continue|"
+                   # The Senate's firewall: "Senate.gov - Unauthorized ... a
+                   # potential security risk was detected" (2026-10-18).
+                   r"\bunauthorized\b|potential\s+security\s+risk", re.I)
 
 
 def readable(status, page):
@@ -414,14 +417,114 @@ def menus(markup):
             for label, href, children in parser.found]
 
 
+class _Tree(html.parser.HTMLParser):
+    """The page's elements as a tree, enough to find a link's submenu: each
+    node is ``[tag, children]`` and a link ``["a", children, href, text]``."""
+
+    _VOID = ("area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta",
+             "source", "track", "wbr")
+    _SKIP = ("script", "style", "noscript", "template", "svg")
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.root = ["root", []]
+        self.stack, self._skip, self._link = [self.root], 0, None
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self._SKIP:
+            self._skip += 1
+            return
+        if self._skip or tag in self._VOID:
+            return
+        node = [tag, []]
+        if tag == "a":
+            node += [dict(attrs).get("href") or "", []]
+            self._link = node
+        self.stack[-1][1].append(node)
+        self.stack.append(node)
+
+    def handle_endtag(self, tag):
+        if tag in self._SKIP:
+            self._skip = max(self._skip - 1, 0)
+            return
+        if self._skip:
+            return
+        for depth in range(len(self.stack) - 1, 0, -1):
+            if self.stack[depth][0] == tag:
+                for node in self.stack[depth:]:
+                    if node[0] == "a":
+                        self._link = None
+                del self.stack[depth:]
+                break
+
+    def handle_data(self, data):
+        if not self._skip and self._link is not None:
+            self._link[3].append(data)
+
+
+def _links_under(node, depth=0):
+    """``[(depth, href, text)]`` of every link under *node*, in order."""
+    out = []
+    for child in node[1]:
+        if child[0] == "a":
+            out.append((depth + 1, child[2], " ".join("".join(child[3]).split())))
+        out += _links_under(child, depth + 1)
+    return out
+
+
+def nested_menus(markup, wanted=lambda href, text: True):
+    """``[(label, href, [(href, text)])]``: each link and the submenu built
+    of ``<div>``s under it, which :func:`menus` reads only from lists.
+    Senator Blackburn's "Issues" is a link in a toggle, beside a collapsed
+    panel of nineteen issue links. The submenu is the links of the nearest
+    element around the link that holds other links, kept only when every
+    one of them comes after the link and sits deeper than it - a flat bar
+    of "Home | Issues | Media" is not a menu of Issues."""
+    parser = _Tree()
+    try:
+        parser.feed(markup or "")
+        parser.close()
+    except Exception:            # a malformed page still yields what it had
+        pass
+    out = []
+
+    def walk(node, ancestors):
+        for child in node[1]:
+            if child[0] == "a":
+                text = " ".join("".join(child[3]).split())
+                if not wanted(child[2], text):
+                    continue
+                for ancestor in reversed(ancestors + [node]):
+                    links = _links_under(ancestor)
+                    if len(links) < 4:
+                        continue
+                    mine = next((i for i, l in enumerate(links)
+                                 if l[1] == child[2] and l[2] == text), None)
+                    if mine == 0:
+                        own_depth = links[0][0]
+                        rest = links[1:]
+                        # A submenu, not the rest of the page under one wrapper.
+                        if len(rest) <= 2 * MAX_ISSUES and all(d > own_depth for d, _, _ in rest):
+                            out.append((text, child[2], [(h, t) for _, h, t in rest]))
+                    break
+            else:
+                walk(child, ancestors + [node])
+
+    walk(parser.root, [])
+    return out
+
+
 def menu_issues(markup, base, website, own, others):
     """The issues a site's own "Issues" menu lists, one item per page it
     links, in the menu's words: Senator Boozman's site has no issues index
     to read, and lists its nine issues under that menu."""
-    for label, href, children in menus(markup):
+    def is_index(href, label):
         last = urllib.parse.urlsplit(urllib.parse.urljoin(base, href or "")).path
         last = last.rstrip("/").rsplit("/", 1)[-1]
-        if not (any(p.match(label) for p in _INDEX_TEXT) or (href and _INDEX_PATH.match(last))):
+        return any(p.match(label) for p in _INDEX_TEXT) or bool(href and _INDEX_PATH.match(last))
+
+    for label, href, children in menus(markup) + nested_menus(markup, is_index):
+        if not is_index(href, label):
             continue
         items, targets = [], set()
         for child_href, text in children:
@@ -1124,10 +1227,21 @@ def apply_cache(profiles, cache):
         elif (site.get("verdict") == "none" or (site.get("verdict") == "listed" and not listed)) \
                 and profile.get("quality", {}).get("platforms"):
             # Read, and the site lists no issues: said as that, not as "No
-            # data", which is a claim that nobody looked (rule 19).
-            profile["quality"]["platforms"] = "not_listed"
+            # data", which is a claim that nobody looked (rule 19). A site
+            # with an issues page that gave no list this reader could take
+            # in its own words (Senator Sanders's is prose under tabs,
+            # Kiggans's is drawn by script) is not "not listed": the page
+            # is linked for the reader instead.
             profile["platformRead"] = site.get("read")
-            counts["platform_not_listed"] += 1
+            page = site.get("pageRead") or (site.get("issuesUrl")
+                                             if site.get("verdict") == "listed" else None)
+            if page:
+                profile["quality"]["platforms"] = "see_site"
+                profile["officialIssuesUrl"] = page
+                counts["platform_see_site"] += 1
+            else:
+                profile["quality"]["platforms"] = "not_listed"
+                counts["platform_not_listed"] += 1
         if site.get("contact") and not profile.get("contactForm"):
             profile["contactForm"] = site["contact"]
             profile["contactFormVia"] = SITE_SOURCE

@@ -883,6 +883,7 @@
     unknown: "No data",
     no_filing: "No filing this cycle",
     not_listed: "Not listed on their official site",
+    see_site: "On their official site's issues page",
   };
   var ABSENT_TITLE = {
     not_disclosed: "No public disclosure exists for this field.",
@@ -890,6 +891,8 @@
     // Work this site did (rule 19): it read the member's official website.
     not_listed: "This site read the member's official website and found no page or menu " +
       "listing the issues they work on.",
+    see_site: "This site read the member's official website and found an issues page, but no " +
+      "list of issues it could take in the page's own words. The page is linked.",
     // The only absence that reports work we actually did.
     no_filing: "Checked with the FEC: this candidate has no filing for the "
       + "current cycle. Members running for a different seat file under a "
