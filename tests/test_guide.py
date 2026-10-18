@@ -295,7 +295,12 @@ class TestEveryLocalLinkResolves(unittest.TestCase):
     def test_a_district_page_reaches_the_states_index(self):
         html = pages.render_district_page("CA", "example.org")
         self.assertIn('href="../states/index.html"', html)
-        self.assertNotIn('href="index.html"', html)
+        # "index.html" from a district page is the district maps' own
+        # directory now, which exists and is linked under its name; it once
+        # pointed at a page that did not.
+        self.assertIn(f'href="index.html"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg> '
+                      f'{pages.DISTRICTS_INDEX_NAME}</a>', html)
+        self.assertTrue(os.path.exists(os.path.join(SITE, "districts", "index.html")))
 
 
 if __name__ == "__main__":

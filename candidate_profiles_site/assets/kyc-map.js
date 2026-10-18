@@ -500,19 +500,39 @@
     if (mode === "senate2026") {
       html += stateRaces.map(function (r) { return KYC.cards.unprofiledNote(r, "panel-note"); }).join("");
     } else {
-      var unnamed = stateRaces.reduce(function (n, r) {
-        return n + KYC.cards.unprofiledNames(r).none.length;
-      }, 0);
-      if (unnamed) {
-        // Whose word it is: a state's qualified list, or the results pages.
-        var listed = stateRaces.every(function (r) { return r.results && r.results.fromQualifiedList; });
-        html += '<p class="panel-note">Also on the November ballot, ' +
-          (listed ? KYC.escapeHtml(KYC.ballotSource(stateRaces[0])) : "per Wikipedia’s results pages") + ", " +
-          "with no profile here: " + unnamed + (unnamed === 1 ? " person" : " people") +
+      /* Whose word each name is, counted apart (rule 64): once the count
+       * has begun, some of Louisiana's districts read from the results pages
+       * while others are still the Secretary of State's list, and one
+       * sentence crediting either would credit the other's names to it. */
+      var bySource = { results: 0, listed: 0 };
+      stateRaces.forEach(function (r) {
+        var n = KYC.cards.unprofiledNames(r).none.length;
+        bySource[r.results && r.results.fromQualifiedList ? "listed" : "results"] += n;
+      });
+      var people = function (n) { return n + (n === 1 ? " person" : " people"); };
+      var parts = [];
+      if (bySource.results) parts.push(people(bySource.results) + " per Wikipedia’s results pages");
+      if (bySource.listed) {
+        parts.push(people(bySource.listed) + " per the Secretary of State’s list of qualified candidates");
+      }
+      if (parts.length) {
+        html += '<p class="panel-note">Also on the November ballot, with no profile here: ' +
+          KYC.escapeHtml(parts.join(", and ")) +
           '. <a href="' + KYC.escapeAttr(KYC.stateUrl(code)) + '">Each race on the ' +
           KYC.escapeHtml(KYC.stateName(code)) + " page \u203a</a></p>";
       }
     }
+    /* The pages the statuses above were read from, linked, as a race's
+     * head links its own (TRUST-06): one link per page, since a state's
+     * House races share one results page. */
+    var seenSource = {};
+    var sources = stateRaces.map(function (r) {
+      var url = r.results && r.results.sourceUrl;
+      if (!url || seenSource[url]) return "";
+      seenSource[url] = true;
+      return KYC.resultsSourceHtml(r);
+    }).filter(Boolean);
+    if (sources.length) html += '<p class="panel-note race-results">' + sources.join(" ") + "</p>";
     list.innerHTML = html;
     list.scrollTop = 0;
 

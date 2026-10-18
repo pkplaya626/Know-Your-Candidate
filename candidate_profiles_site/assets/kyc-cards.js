@@ -90,12 +90,16 @@
     if (KYC.partyKey(item) === "vacant") {
       return '<span class="badge badge-neutral">Vacant seat</span>';
     }
+    /* The badge speaks of the seat, never the person: the data knows when
+     * the term ends (electionYear is its last year, less one), not whether
+     * the senator will run. "On the ballot in 2028" claimed the second. The
+     * year in full: "Up in ’28" was shorthand a reader had to decode
+     * (TRUST-17). */
     if (item.chamber.indexOf("Senate") !== -1 && item.seatUp2026) {
-      return '<span class="badge badge-warn">Seat up in ’26</span>';
+      return '<span class="badge badge-warn">Seat up in 2026</span>';
     }
     if (item.chamber.indexOf("Senate") !== -1 && item.electionYear) {
-      // In words: "Up in ’28" was shorthand a reader had to decode (TRUST-17).
-      return '<span class="badge badge-neutral">On the ballot in ' +
+      return '<span class="badge badge-neutral">Seat up in ' +
         KYC.escapeHtml(String(item.electionYear)) + "</span>";
     }
     return "";

@@ -437,6 +437,11 @@
     var unfiled = res && res.otherNominees && res.otherNominees.length ? res.otherNominees : [];
     if (unfiled.length) html += KYC.cards.unprofiledNote(race);
     if (!others.length && !unfiled.length) html = aloneNote(race);
+    /* Where the statuses in this dialog were read: "Lost the 2026 primary"
+     * about a named person, with the page that says so (TRUST-06), as the
+     * race's card on a state page links it. */
+    var source = KYC.resultsSourceHtml(race);
+    if (source) html += '<p class="race-note race-results">' + source + "</p>";
     panel.hidden = false;
     target.innerHTML = redrawnNote(item, race) + html;
   }
@@ -931,7 +936,8 @@
     render(item);
     // A tab, a bookmark or a history entry names the person (GRID-24).
     if (baseTitle === null) baseTitle = doc.title;
-    doc.title = item.name + " \u2013 " + item.officeLabel + " | Know Your Candidate";
+    // The pages' own separator: "North Carolina \u2014 Know Your Candidate".
+    doc.title = item.name + " (" + item.officeLabel + ") \u2014 Know Your Candidate";
     el("profileModalReport").setAttribute("data-profile", item.id);
     if (!(opts && opts.fromRoute)) {
       KYC.router.writeProfile(item.id);

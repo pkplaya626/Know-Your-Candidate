@@ -23,8 +23,8 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<link rel="stylesheet" href="assets/kyc.css?v=30ffba8e12">
-<script src="assets/kyc.js?v=d33ff378f0"></script>
+<link rel="stylesheet" href="assets/kyc.css?v=9e70c2658b">
+<script src="assets/kyc.js?v=7ab6301f1c"></script>
 </head>
 <body>
 
@@ -42,6 +42,13 @@
         <span class="brand-name">Know Your Candidate</span>
         <span class="brand-sub">Races &amp; partisan map</span>
     </a>
+
+    <form class="search" role="search" action="index.html" data-site-search>
+        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <label class="sr-only" for="siteSearch">Search candidates and members of Congress</label>
+        <input type="search" id="siteSearch" name="q" autocomplete="off" spellcheck="false"
+               placeholder="Search candidates and members&hellip;" data-placeholder-short="Search&hellip;">
+    </form>
 
     <div class="header-actions">
         <div class="menu">
@@ -75,7 +82,7 @@
     </div>
 </header>
 
-<div class="app-body">
+<div class="app-body map-body">
 
     <aside class="sidebar scroll-y" id="sidebar" aria-label="Navigation and summary">
         <nav class="sidebar-section site-nav" aria-label="Site">
@@ -97,7 +104,7 @@
                 <svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>
                 President &amp; Cabinet
             </a>
-            <a class="nav-link" href="federal/index.html#supreme-court" data-nav="courts">
+            <a class="nav-link" href="courts/index.html" data-nav="courts">
                 <svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg>
                 Federal courts
             </a>
@@ -202,22 +209,6 @@
                  role="group" aria-label="Map of U.S. states and territories.
                  Each state is a button that opens its delegation."></svg>
         </div>
-        <!-- Where each view's colours come from. The state panels name their
-             own sources, dated; these lines cover the national view of each. -->
-        <footer class="site-footer map-footer">
-            <p data-sources="senate senate2026 house"><strong>Sources:</strong> who holds
-                each seat from the <code>congress-legislators</code> dataset; the 2026 races,
-                the candidate field and campaign finance from the Federal Election Commission;
-                primary results from each state's Wikipedia election page<span data-results-read hidden>,
-                as last read on <time data-results-as-of></time></span>.</p>
-            <p data-sources="governor lt ag sos governor2026 legislature trifecta" hidden>
-                <strong>Sources:</strong> governors from the National Governors Association;
-                lieutenant governors, secretaries of state and attorneys general from their
-                associations and each office's own site; seats and party control from Open
-                States, checked against the National Conference of State Legislatures. Pick a
-                state for each source with the date it was read.</p>
-            <p class="footer-meta">Non-partisan and independent. Data built <time id="buildStamp">&mdash;</time>. <a href="about.html">About &amp; sources</a> &middot; <a href="https://github.com/pkplaya626/Know-Your-Candidate/issues/new?template=correction.yml" data-report target="_blank" rel="noopener noreferrer">Report a problem</a></p>
-        </footer>
     </main>
 
     <aside class="detail-panel" aria-label="State delegation">
@@ -240,6 +231,27 @@
             </div>
         </div>
     </aside>
+
+    <!-- Where each view's colours come from. The state panels name their
+         own sources, dated; these lines cover the national view of each.
+         After the panel in the page, so a phone reads the map, then the
+         state picked on it, then the footer; on a wide screen the layout's
+         grid puts it under the map (.map-body). -->
+    <footer class="site-footer map-footer">
+        <p data-sources="senate senate2026 house"><strong>Sources:</strong> who holds
+            each seat from the <code>congress-legislators</code> dataset; which seats are
+            up in 2026 from this site's record of who held each seat when the cycle began;
+            the candidate field and campaign finance from the Federal Election Commission;
+            primary results from each state's Wikipedia election page<span data-results-read hidden>,
+            as last read on <time data-results-as-of></time></span>.</p>
+        <p data-sources="governor lt ag sos governor2026 legislature trifecta" hidden>
+            <strong>Sources:</strong> governors from the National Governors Association;
+            lieutenant governors, secretaries of state and attorneys general from their
+            associations and each office's own site; seats and party control from Open
+            States, checked against the National Conference of State Legislatures. Pick a
+            state to see each source and the date it was read.</p>
+        <p class="footer-meta">Non-partisan and independent. Data built <time id="buildStamp">&mdash;</time>. <a href="about.html">About &amp; sources</a> &middot; <a href="https://github.com/pkplaya626/Know-Your-Candidate/issues/new?template=correction.yml" data-report target="_blank" rel="noopener noreferrer">Report a problem</a></p>
+    </footer>
 </div>
 
 <script src="data/profiles.js?v=f33c085761"></script>
@@ -247,10 +259,10 @@
 <script src="data/odds.js"></script>
 <script src="data/stategov.js?v=49c32a4359"></script>
 <script src="assets/kyc-odds.js?v=1852f17dc4"></script>
-<script src="assets/kyc-cards.js?v=f72b60d34d"></script>
-<script src="assets/kyc-profile.js?v=5704e723c3"></script>
-<script src="assets/kyc-stategov.js?v=d5432b9ca4"></script>
+<script src="assets/kyc-cards.js?v=e7fe809e4b"></script>
+<script src="assets/kyc-profile.js?v=d3d67cf390"></script>
+<script src="assets/kyc-stategov.js?v=db9b80c368"></script>
 <script src="assets/kyc-usmap.js?v=d1ac1c1524"></script>
-<script src="assets/kyc-map.js?v=2a931cad9a"></script>
+<script src="assets/kyc-map.js?v=738f69a15b"></script>
 </body>
 </html>

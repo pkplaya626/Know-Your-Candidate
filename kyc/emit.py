@@ -634,6 +634,28 @@ def government_signature(payload):
     return hashlib.sha256(_json(payload).encode("utf-8")).hexdigest()
 
 
+def inline_script_problems(html):
+    """What is wrong with *html*'s inline ``<script>`` blocks: a page runs
+    no inline code (CLAUDE.md), and the one inline block allowed is
+    structured data, ``type="application/ld+json"``, which must parse as
+    JSON. An inline block with any other type, or none, is code."""
+    import json
+
+    problems = []
+    for attrs, body in re.findall(r"<script\b([^>]*)>(.*?)</script>", html, re.S | re.I):
+        if re.search(r"\bsrc=", attrs):
+            continue
+        kind = re.search(r'\btype="([^"]*)"', attrs)
+        if not kind or kind.group(1).strip().lower() != "application/ld+json":
+            problems.append("an inline <script> that is not application/ld+json")
+            continue
+        try:
+            json.loads(body)
+        except ValueError:
+            problems.append("an application/ld+json block that is not JSON")
+    return problems
+
+
 def script_sources(html):
     """Every ``<script src="...">`` in *html*, in document order, without the
     version stamp a local asset's URL carries (kyc/assets.py)."""
@@ -745,9 +767,10 @@ def check_pages(root="."):
             results.append((page, False, "missing"))
             continue
         with open(path, "r", encoding="utf-8") as handle:
-            loaded = script_sources(handle.read())
+            text = handle.read()
+        loaded = script_sources(text)
 
-        problems = []
+        problems = inline_script_problems(text)
         missing = [src for src in required if src not in loaded]
         if missing:
             problems.append("does not load " + ", ".join(missing))

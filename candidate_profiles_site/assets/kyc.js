@@ -705,10 +705,12 @@
     var title = listed
       ? "The Secretary of State's list of candidates qualified for this seat"
       : "The state's election results page on Wikipedia, which this site reads for who " +
-        "won, lost or withdrew. It is not the state's certified count.";
-    return '<a class="race-source" href="' + escapeAttr(r.sourceUrl) +
+        "won, lost or withdrew.";
+    // The caveat is page text: a title is a hover a phone never shows.
+    var note = listed ? "" : '<span class="race-source-note"> (not the state\u2019s certified count)</span>';
+    return '<span class="race-source"><a href="' + escapeAttr(r.sourceUrl) +
       '" target="_blank" rel="noopener noreferrer" title="' + escapeAttr(title) + '">' +
-      escapeHtml(label) + "</a>";
+      escapeHtml(label) + "</a>" + note + "</span>";
   }
 
   /** True when the primary settled *status* out of the race. */
@@ -904,6 +906,15 @@
     var m = /^(\d{4})-(\d{2})-(\d{2})(?:$|T)/.exec(text);
     if (!m || +m[2] < 1 || +m[2] > 12 || +m[3] < 1 || +m[3] > 31) return text;
     return MONTH_WORDS[+m[2] - 1] + " " + +m[3] + ", " + m[1];
+  }
+
+  /* The reader's own calendar day of a moment, as "2026-10-17". The build
+   * stamp is UTC: built at 01:53 UTC on the 18th, every page read "Data
+   * built Oct. 18, 2026" to a reader whose evening was still the 17th, a
+   * day in their future beside results "read on Oct. 17". */
+  function localDay(date) {
+    function two(n) { return (n < 10 ? "0" : "") + n; }
+    return date.getFullYear() + "-" + two(date.getMonth() + 1) + "-" + two(date.getDate());
   }
 
   /* --------------------------------------------------------- report a problem */
@@ -1834,7 +1845,7 @@
         Array.prototype.slice.call(doc.querySelectorAll("time[data-built]")));
       stamps.forEach(function (stamp) {
         if (!stamp) return;
-        stamp.textContent = dateWords(built.toISOString().slice(0, 10));
+        stamp.textContent = dateWords(localDay(built));
         stamp.setAttribute("datetime", built.toISOString());
       });
     }
@@ -2033,6 +2044,7 @@
     ballotSource: ballotSource,
     resultsSourceHtml: resultsSourceHtml,
     dateWords: dateWords,
+    localDay: localDay,
     REPO_URL: REPO_URL,
     reportUrl: reportUrl,
     offBallot: offBallot,

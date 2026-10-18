@@ -545,6 +545,10 @@ svg.district-map,
 .directory-name { font-weight: 700; }
 .directory-facts .gov-chambers { margin-top: var(--s-2); }
 .directory-facts p { margin: var(--s-1) 0 0; }
+/* A heading after a list of courts or states starts a new group, not the
+   last card's caption. */
+.directory-list + .state-heading { margin-top: var(--s-6); }
+.directory-row > .directory-facts:not(:empty) { margin-top: var(--s-1); }
 .directory-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 .directory-table th, .directory-table td {
   padding: var(--s-2) var(--s-3);
@@ -1519,9 +1523,14 @@ a.badge-link {
   align-self: center;
   font-size: var(--t-xs);
   color: var(--text-muted);
+}
+.race-source a {
+  color: inherit;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+.race-source-note { color: var(--text-faint); }
+.race-results .race-source + .race-source::before { content: "\00b7\00a0"; }
 .about-page .guide-section { margin-top: var(--s-6); }
 .about-page .guide-section p,
 .about-page .guide-section li { max-width: 72ch; line-height: 1.65; }
@@ -2222,6 +2231,7 @@ a.badge-link {
   select,
   textarea,
   .search input,
+  .search-page input,
   .select,
   .text-input { font-size: 16px; }
 }
@@ -2370,7 +2380,7 @@ a.badge-link {
   /* A person in a district's box is a row, not a portrait card alone in
    * half a grid: four boxes took 1,700px for four people. */
   .district-fact { padding: var(--s-3); }
-  .district-fact .card-grid { grid-template-columns: 1fr; gap: var(--s-3); }
+  .district-fact .card-grid { grid-template-columns: minmax(0, 1fr); gap: var(--s-3); }
   .district-fact .card { flex-direction: row; align-items: flex-start; gap: var(--s-3); }
   .district-fact .card-photo { flex: none; width: 64px; }
   .district-fact .card-body { flex: 1; min-width: 0; }
@@ -2921,12 +2931,17 @@ a.badge-link {
 }
 .town-dot { fill: var(--text); stroke: var(--surface-0); pointer-events: none; }
 
+/* One column no wider than the panel: a grid's auto column grows to its
+ * widest unbreakable line, and a card's one-line "Former Member of the State
+ * Senate of Vermont" pushed Vermont's page 9px past a phone's width. */
 .district-facts {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--s-3);
   margin-top: var(--s-4);
 }
 .district-fact {
+  min-width: 0;
   padding: var(--s-3) var(--s-4);
   border: 1px solid var(--border);
   border-left: 5px solid var(--border-strong);
@@ -3313,6 +3328,22 @@ a.badge-link {
   flex: none;
   margin: 0;
   padding: var(--s-2) var(--s-4) var(--s-3);
+  background: var(--surface-0);
+}
+/* map.html's footer follows the state panel in the page, so a phone reads
+ * the map, the state picked on it, then the footer: inside <main> it sat
+ * between the map and the delegation. On a wide screen the three columns
+ * are a grid, and the footer takes the row under the map. */
+@media (min-width: 1001px) {
+  .app-body.map-body {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  .map-body > .sidebar { grid-column: 1; grid-row: 1 / 3; }
+  .map-body > .app-main { grid-column: 2; grid-row: 1; }
+  .map-body > .detail-panel { grid-column: 3; grid-row: 1 / 3; min-height: 0; }
+  .map-body > .map-footer { grid-column: 2; grid-row: 2; }
 }
 .guide-panel .guide-sources { margin-top: var(--s-2); }
 .guide-panel .guide-pager { margin-top: var(--s-5); }

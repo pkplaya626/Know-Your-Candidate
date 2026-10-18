@@ -23,8 +23,8 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<link rel="stylesheet" href="assets/kyc.css?v=30ffba8e12">
-<script src="assets/kyc.js?v=d33ff378f0"></script>
+<link rel="stylesheet" href="assets/kyc.css?v=9e70c2658b">
+<script src="assets/kyc.js?v=7ab6301f1c"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Know Your Candidate","item":"https://candidates.radicalrelay.us/"},{"@type":"ListItem","position":2,"name":"About & sources","item":"https://candidates.radicalrelay.us/about.html"}]}</script>
 </head>
 <body data-root="" data-state="" data-page="about">
@@ -104,7 +104,7 @@
                 <svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>
                 President &amp; Cabinet
             </a>
-            <a class="nav-link" href="federal/index.html#supreme-court" data-nav="courts">
+            <a class="nav-link" href="courts/index.html" data-nav="courts">
                 <svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg>
                 Federal courts
             </a>
@@ -206,19 +206,19 @@
                 <header class="state-hero">
                     <p class="state-kicker">About</p>
                     <h1 class="state-title">About &amp; sources</h1>
-                    <p class="districts-lede">Who runs this site, where every fact on it comes
-                        from, how often it is read again, and how to tell us when something is
-                        wrong.</p>
+                    <p class="districts-lede">Whose site this is, where the facts on it come
+                        from, how often they are read again, and how to tell us when something
+                        is wrong.</p>
                 </header>
                 <section class="guide-section" id="who">
-                    <h2 class="state-heading">Who runs this site</h2>
+                    <h2 class="state-heading">An independent project</h2>
                     <p>Know Your Candidate is an independent, non-partisan project. Its code
                         and data are public, at <a href="https://github.com/pkplaya626/Know-Your-Candidate">https://github.com/pkplaya626/Know-Your-Candidate</a>, so anyone can
                         see how each fact was reached, and every change to them is recorded
                         there.</p>
                     <p>It is not affiliated with any campaign, party, candidate or government
                         office, takes no money from any of them, and carries no
-                        advertising.</p>
+                        advertising. It is served by GitHub Pages.</p>
                 </section>
                 <section class="guide-section" id="not-official">
                     <h2 class="state-heading">What this site is not</h2>
@@ -233,17 +233,20 @@
                     <p>This site makes claims about real, named people, and a wrong one
                         matters. If something is wrong, out of date or missing, or a page does
                         not work for you, <a href="https://github.com/pkplaya626/Know-Your-Candidate/issues/new?template=correction.yml" data-report target="_blank"
-                        rel="noopener noreferrer">open a report on GitHub</a>. Every profile and
-                        page has the same link, which fills in where you were. Please say what
-                        is wrong and, if you can, where the right answer is published.</p>
+                        rel="noopener noreferrer">open a report on GitHub</a> (it needs a free
+                        GitHub account). Every profile and page has the same link, which fills
+                        in where you were. Please say what is wrong and, if you can, where the
+                        right answer is published.</p>
                     <p>Reports and the corrections made from them are public: each is an
                         issue in the repository, and each fix a change anyone can read.</p>
                 </section>
                 <section class="guide-section" id="data">
                     <h2 class="state-heading">Where the data comes from</h2>
-                    <p>Every fact is read from a source by a script, checked, and published
-                        with that source named beside it. Where a source says nothing, the site
-                        says so, rather than guessing. The repository's
+                    <p>Most facts are read from a named source by a script and checked before
+                        they are published. The member rosters' biographies, and the decisions
+                        no source can settle alone, are kept by hand in the repository, where
+                        each change is public. Where a source says nothing, the site says so,
+                        rather than guessing. The repository's
                         <a href="https://github.com/pkplaya626/Know-Your-Candidate#readme">README</a> lists every field and where it comes
                         from.</p>
                     <div class="directory-scroll" tabindex="0" role="region" aria-label="Data sources">
@@ -251,14 +254,16 @@
                             <thead><tr><th scope="col">Data</th><th scope="col">Source</th><th scope="col">Covers</th><th scope="col">Read again</th><th scope="col">Last read</th></tr></thead>
                             <tbody>
                         <tr><th scope="row">Members of Congress</th><td data-label="Source"><a href="https://github.com/unitedstates/congress-legislators">congress-legislators</a></td><td data-label="Covers">Every member: seat, party, term, contact details, ids for outbound links</td><td data-label="Read again">Each scheduled refresh</td><td data-label="Last read"><time datetime="2026-10-17">Oct. 17, 2026</time></td></tr>
+                        <tr><th scope="row">Members&#x27; biographies</th><td data-label="Source">The member rosters in this site's repository, kept by hand</td><td data-label="Covers">Education, earlier careers and stated priorities, where the rosters hold them</td><td data-label="Read again">When a change is needed; each change is a public commit</td><td data-label="Last read">In the repository&#x27;s history</td></tr>
+                        <tr><th scope="row">Editorial decisions</th><td data-label="Source">This site's repository: each decision recorded with its evidence and date</td><td data-label="Covers">What no source can settle alone: a lapsed campaign site, one person filed under two names</td><td data-label="Read again">When a change is needed; each change is a public commit</td><td data-label="Last read">Each decision gives its date</td></tr>
                         <tr><th scope="row">Committee seats</th><td data-label="Source"><a href="https://github.com/unitedstates/congress-legislators">congress-legislators</a></td><td data-label="Covers">Each committee&#x27;s members, with their rank and title</td><td data-label="Read again">Each scheduled refresh</td><td data-label="Last read"><time datetime="2026-10-17">Oct. 17, 2026</time></td></tr>
-                        <tr><th scope="row">Who is running, and their money</th><td data-label="Source"><a href="https://www.fec.gov/data/">Federal Election Commission</a></td><td data-label="Covers">Everyone registered for 2026; receipts, spending and cash on hand</td><td data-label="Read again">Each scheduled refresh</td><td data-label="Last read">&ndash;</td></tr>
+                        <tr><th scope="row">Who is running, and their money</th><td data-label="Source"><a href="https://www.fec.gov/data/">Federal Election Commission</a></td><td data-label="Covers">Everyone registered for 2026; receipts, spending and cash on hand</td><td data-label="Read again">Each scheduled refresh</td><td data-label="Last read">Each profile gives the date its figures run through</td></tr>
                         <tr><th scope="row">Primary results and who is on the ballot</th><td data-label="Source">Each state's results page on Wikipedia; Louisiana's Secretary of State for its qualified candidates</td><td data-label="Covers">Who won, lost or withdrew; who is on the November ballot</td><td data-label="Read again">Each scheduled refresh</td><td data-label="Last read"><time datetime="2026-10-17">Oct. 17, 2026</time></td></tr>
-                        <tr><th scope="row">Financial disclosures</th><td data-label="Source"><a href="https://disclosures-clerk.house.gov/">House Clerk</a> and <a href="https://efdsearch.senate.gov/">Senate eFD</a></td><td data-label="Covers">A link to each member&#x27;s latest annual report</td><td data-label="Read again">Each scheduled refresh</td><td data-label="Last read">&ndash;</td></tr>
+                        <tr><th scope="row">Financial disclosures</th><td data-label="Source"><a href="https://disclosures-clerk.house.gov/">House Clerk</a> and <a href="https://efdsearch.senate.gov/">Senate eFD</a></td><td data-label="Covers">A link to each member&#x27;s latest annual report</td><td data-label="Read again">Each scheduled refresh</td><td data-label="Last read">Each profile names its report&#x27;s year</td></tr>
                         <tr><th scope="row">Voting record</th><td data-label="Source"><a href="https://voteview.com/">Voteview</a></td><td data-label="Covers">A left-to-right score from each member&#x27;s roll-call votes</td><td data-label="Read again">By hand, from time to time</td><td data-label="Last read">&ndash;</td></tr>
                         <tr><th scope="row">Campaign websites and candidates&#x27; own words</th><td data-label="Source">Each committee's FEC filing; the article a race page links; the campaign's own site</td><td data-label="Covers">Websites, and what a campaign says about itself, quoted</td><td data-label="Read again">Each scheduled refresh</td><td data-label="Last read"><time datetime="2026-10-17">Oct. 17, 2026</time></td></tr>
                         <tr><th scope="row">Public offices held</th><td data-label="Source">congress-legislators; Wikidata, where the person's own Wikipedia article agrees</td><td data-label="Covers">Offices each person has held, with years</td><td data-label="Read again">Each scheduled refresh</td><td data-label="Last read"><time datetime="2026-10-17">Oct. 17, 2026</time></td></tr>
-                        <tr><th scope="row">Market prices and polling averages</th><td data-label="Source">Kalshi, Polymarket; each race's Wikipedia page for polling averages</td><td data-label="Covers">Published prices and averages, never a forecast of this site&#x27;s</td><td data-label="Read again">Every 12 hours, until polls close</td><td data-label="Last read">&ndash;</td></tr>
+                        <tr><th scope="row">Market prices and polling averages</th><td data-label="Source">Kalshi, Polymarket; each race's Wikipedia page for polling averages</td><td data-label="Covers">Published prices and averages, never a forecast of this site&#x27;s</td><td data-label="Read again">Every 12 hours, until polls close</td><td data-label="Last read">Each price gives the day it was read</td></tr>
                         <tr><th scope="row">Governors and party control</th><td data-label="Source"><a href="https://www.nga.org/governors/">National Governors Association</a>; Open States and the National Conference of State Legislatures</td><td data-label="Covers">Every governor; which party holds each chamber, where the two agree</td><td data-label="Read again">Each scheduled refresh</td><td data-label="Last read"><time datetime="2026-10-17">Oct. 17, 2026</time></td></tr>
                         <tr><th scope="row">Statewide officers</th><td data-label="Source">NLGA, NASS, the attorneys general's associations, and each office's own site</td><td data-label="Covers">Lieutenant governors, secretaries of state, attorneys general</td><td data-label="Read again">Each scheduled refresh</td><td data-label="Last read"><time datetime="2026-10-17">Oct. 17, 2026</time></td></tr>
                         <tr><th scope="row">State legislators</th><td data-label="Source"><a href="https://openstates.org/">Open States</a></td><td data-label="Covers">Every state legislator and their district</td><td data-label="Read again">Each scheduled refresh</td><td data-label="Last read"><time datetime="2026-10-17">Oct. 17, 2026</time></td></tr>
@@ -274,7 +279,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <p id="schedule">The scheduled refresh runs every day from Oct. 15 to Nov. 2, 2026 and from Nov. 4 to Dec. 15, 2026, the eve of the election and the six weeks after it, and from Jan. 3 to Jan. 14, 2027, as the new Congress is sworn in. On other days it runs on Mondays and Thursdays before Election Day and on Mondays after it. Each run is published only once every check passes. Market prices and polling averages are read every 12 hours, at 00:47 and 12:47 UTC, and stop when the first polls close on Election Day: prices that move on early returns would read as results.</p>
+                    <p id="schedule">The scheduled refresh runs every day from Oct. 15 to Nov. 2, 2026 and from Nov. 4 to Dec. 15, 2026, the weeks before the election and the six weeks after it, and from Jan. 3 to Jan. 14, 2027, as the new Congress is sworn in. On other days it runs on Mondays and Thursdays before Election Day and on Mondays after it. Each run is published only once every check passes. Market prices and polling averages are read every 12 hours, at 00:47 and 12:47 UTC, and stop when the first polls close on Election Day: prices that move on early returns would read as results.</p>
                     <p><strong>Who counts as a candidate:</strong> everyone the FEC records as
                         having raised or spent more than $5,000 for the 2026 cycle
                         (52&nbsp;U.S.C.&nbsp;&sect;30101(2)). Everyone who has registered is
@@ -313,8 +318,10 @@
                         close; each page has a link to skip to its content; fields are large
                         enough on a phone that it does not zoom on its own; and the words on
                         the maps are page text, so they stay readable in forced dark modes.</p>
-                    <p>Known limits: the maps are visual, so every map has a list beside or
-                        below it that holds the same facts; documents this site links, such
+                    <p>Known limits: the maps are visual. On a map of the states, each state
+                        is a button that names it, and picking one shows its facts as text,
+                        but no view lists every state's value at once. Documents this site
+                        links, such
                         as disclosure PDFs and the Senate's disclosure site, are their
                         publishers' and may not be accessible. If anything here is hard to use,
                         <a href="https://github.com/pkplaya626/Know-Your-Candidate/issues/new?template=correction.yml" target="_blank" rel="noopener noreferrer">tell us

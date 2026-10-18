@@ -196,6 +196,12 @@ class TestTheAboutPage(unittest.TestCase):
                 keys |= set(re.findall(r'var (?:THEME|STATE)_KEY = "([^"]+)"', js))
                 self.assertNotIn("sessionStorage", js, name)
                 self.assertNotIn("indexedDB", js, name)
+                # Every use of the store names one of the two keys: a third
+                # (localStorage.setItem("kycSort", ...)) would make the
+                # About page's "two settings" false and pass the line above.
+                for use in re.finditer(r"localStorage\b(.{0,40})", js):
+                    self.assertRegex(use.group(1), r"^\.(?:get|set|remove)Item\((?:THEME|STATE)_KEY\b",
+                                     f"{name}: localStorage{use.group(1)}")
         self.assertEqual(keys, {"kycTheme", "kycState"})
         self.assertIn("the theme you picked and the last state you looked at", self.html)
 
@@ -268,6 +274,54 @@ class TestNotFoundAndFolders(unittest.TestCase):
         for icon in manifest["icons"]:
             self.assertTrue(os.path.exists(os.path.join(ROOT, "candidate_profiles_site",
                                                         *icon["src"].split("/"))), icon["src"])
+
+
+class TestReviewOfTheFrame(unittest.TestCase):
+    """What the two reviews of the frame (PR #95) found."""
+
+    def test_each_kind_of_court_is_headed_in_its_own_plural(self):
+        html = pages.render_courts_index("example.org")
+        headings = re.findall(r'<h2 class="state-heading">([^<]+)</h2>', html)
+        self.assertIn("Courts of appeals", headings)
+        self.assertIn("District courts", headings)
+        self.assertFalse([h for h in headings if h.endswith("ss")], headings)
+        self.assertIn('<h1 class="state-title">Federal courts</h1>', html)
+        self.assertIn("<title>Federal courts — Know Your Candidate</title>", html)
+
+    def test_the_navigation_leads_to_the_courts_index(self):
+        self.assertIn('href="../courts/index.html" data-nav="courts"', pages.nav_html("../"))
+
+    def test_a_district_directory_row_does_not_repeat_the_states_name(self):
+        html = pages.render_districts_index("example.org", {"states": {"TX": {"house": 38}}})
+        for name, facts in re.findall(r'>([^<]+)</a><div class="directory-facts">([^<]+)</div>', html):
+            self.assertNotIn(name, facts)
+        self.assertIn("<h1 class=\"state-title\">District maps</h1>", html)
+
+    def test_a_territorial_courts_footer_dates_the_directory_not_the_absence(self):
+        text = footer(pages.render_court_page("vi", "example.org", dates=DATES))
+        self.assertIn("Biographical Directory, as read on", text)
+        self.assertNotIn("not listed, as read on", text)
+        self.assertNotIn("president who appointed", text)
+        # Each source carries its date; the last line does not repeat them.
+        self.assertEqual(text.count("read on"), 2, text)
+        self.assertNotIn("Sources read", text)
+
+    def test_the_about_page_names_the_hand_kept_rosters_and_overclaims_nothing(self):
+        text = re.sub(r"\s+", " ", pages.render_about("example.org", DATES))
+        self.assertNotIn("Every fact is read from a source by a script", text)
+        self.assertIn("Most facts are read from a named source by a script", text)
+        self.assertIn("kept by hand", text)
+        self.assertIn("needs a free GitHub account", text)
+        self.assertNotIn("eve of the election", text)
+        self.assertNotIn("list beside or below", text)
+        self.assertIn("Each profile gives the date its figures run through", text)
+
+    def test_an_inline_script_is_structured_data_or_nothing(self):
+        self.assertEqual(emit.inline_script_problems(pages.jsonld({"a": 1})), [])
+        self.assertTrue(emit.inline_script_problems("<script>alert(1)</script>"))
+        self.assertTrue(emit.inline_script_problems('<script type="module">x()</script>'))
+        self.assertTrue(emit.inline_script_problems('<script type="application/ld+json">{x</script>'))
+        self.assertEqual(emit.inline_script_problems('<script src="a.js"></script>'), [])
 
 
 class TestStructuredData(unittest.TestCase):
