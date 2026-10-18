@@ -627,9 +627,17 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     printed every page Open States read - up to eighteen raw URLs, past
     sessions' pages, PDFs - and among them Rhode Island's roster links some
     twenty representatives to one colleague's page. A card links one
-    `legislature.official_page`: a member's page on the legislature's own
-    host, never a caucus's, a past numbered assembly's, or one whose address
-    names another member and not them (rule 3). A portrait that is a search
+    `legislature.member_page`: a member's page on the legislature's own
+    host, never a past numbered assembly's, or one whose address names
+    another member and not them (rule 3), or another chamber or district.
+    The first fix chose by host alone and linked 79 senators to their old
+    House pages or another district's: Kentucky, Louisiana, Texas and
+    Florida key a page by seat, so it shows whoever holds that seat now.
+    Label the link as what it is - a bill list, a past session's page, a
+    caucus's page, the chamber's list - and a district the 2026 record
+    names for a special election is on the ballot, never "not up". A
+    floterial seat is one RSA 662:5 makes floterial (`NH_FLOTERIAL`); any
+    other unplaced name is unmatched. A portrait that is a search
     engine's thumbnail is not shown; one is dropped as missing only when a
     GET answers 404 or 410 (`statelegs.check_portrait`). Texas's host
     refused one machine every connection (rule 8), and HEAD lies:
