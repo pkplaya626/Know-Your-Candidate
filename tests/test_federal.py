@@ -212,6 +212,74 @@ class TestWhenTheSenateCannotBeRead(unittest.TestCase):
         self.assertNotIn("senateUnread", kept)
 
 
+class TestTheAgenciesOwnSites(unittest.TestCase):
+    """FEDERAL-07: every office links its agency's own website, read from
+    USA.gov's directory, whatever its head-name check concluded."""
+
+    def test_the_website_and_contact_page_are_read(self):
+        found = federal.parse_agency(fixture("usagov_defense.html"))
+        self.assertEqual(found, {"url": "https://www.defense.gov/",
+                                 "contact": "https://www.defense.gov/Contact/"})
+
+    def test_a_page_with_no_website_concludes_nothing(self):
+        self.assertIsNone(federal.parse_agency("<html><h1>Not found</h1></html>"))
+
+    def test_only_a_government_host_is_linked(self):
+        # A .com can lapse and be bought (rule 35); a .gov or .mil cannot.
+        page = fixture("usagov_defense.html").replace("https://www.defense.gov/Contact/",
+                                                       "https://defense-contact.example.com/")
+        self.assertEqual(federal.parse_agency(page), {"url": "https://www.defense.gov/"})
+        self.assertIsNone(federal.parse_agency(page.replace("https://www.defense.gov/\"",
+                                                            "https://defense.example.com/\"")))
+
+    def test_every_committed_site_is_on_a_government_host(self):
+        cache = federal.load_cache(ROOT)
+        for key, site in ((cache or {}).get("sites") or {}).items():
+            self.assertTrue(federal.government_host(site["url"]), key)
+            if site.get("contact"):
+                self.assertTrue(federal.government_host(site["contact"]), key)
+
+    def test_an_unread_entry_keeps_the_last(self):
+        def read(url):
+            raise federal.FederalError("HTTP Error 503")
+        before = {"state": {"url": "https://www.state.gov/", "source": "x"}}
+        sites = federal.agency_sites(read, before, log=lambda *_a: None, pause=0)
+        self.assertEqual(sites, before)
+
+    def test_every_office_but_the_chief_of_staff_has_an_entry(self):
+        missing = [o["key"] for o in federal_offices.OFFICES if not o.get("usagov")]
+        self.assertEqual(missing, ["chief-of-staff"])
+
+
+class TestTheLineOfSuccession(unittest.TestCase):
+    """FEDERAL-23: the Speaker and the President pro tempore, by bioguide id,
+    from congress-legislators' leadership roles; never typed in."""
+
+    def rows(self):
+        return json.loads(fixture("legislators_leadership.json"))
+
+    def test_the_current_holders_are_read(self):
+        found, problems = federal.parse_succession(self.rows(), "2026-10-17")
+        self.assertEqual(problems, [])
+        self.assertEqual(found["speaker"]["bioguide"], "J000299")
+        self.assertEqual(found["presidentProTempore"]["bioguide"], "G000386")
+
+    def test_an_earlier_holder_is_not_current(self):
+        # Patty Murray held the office until 2025-01-03.
+        found, _ = federal.parse_succession(self.rows(), "2024-06-01")
+        self.assertEqual(found["presidentProTempore"]["bioguide"], "M001111")
+
+    def test_two_holders_name_nobody(self):
+        rows = self.rows()
+        rows[0]["leadership_roles"] = rows[0]["leadership_roles"] + [
+            {"title": "Speaker of the House", "chamber": "house", "start": "2026-01-01"}]
+        rows[1]["leadership_roles"] = rows[1]["leadership_roles"] + [
+            {"title": "Speaker of the House", "chamber": "house", "start": "2026-01-01"}]
+        found, problems = federal.parse_succession(rows, "2026-10-17")
+        self.assertNotIn("speaker", found)
+        self.assertTrue(problems)
+
+
 class TestTheBuildsWord(unittest.TestCase):
     def test_a_term_that_has_ended_is_an_error(self):
         cache = {"president": {"name": "P", "termStart": "2025-01-20", "termEnd": "2029-01-20"},

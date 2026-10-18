@@ -215,6 +215,57 @@ class TestWhatThePageIsGiven(unittest.TestCase):
         self.assertTrue(doc["unchecked"])
 
 
+def report(*strings):
+    """A report's first page as OGE's generator draws it: each string a Tj."""
+    body = b" ".join(b"(" + s.replace("(", "\\(").replace(")", "\\)").encode("latin-1") + b") Tj"
+                     for s in strings)
+    return b"stream\n" + zlib.compress(body) + b"\nendstream"
+
+
+class TestOtherFederalPositions(unittest.TestCase):
+    """FEDERAL-18: Keith Sonderling's record showed only Secretary of Labor;
+    his own nomination report, linked beside it, lists the acting posts he
+    held in the year before. They are quoted from the report, attributed,
+    and never merged into the offices two sources agree on (rule 69)."""
+
+    HEAD = ("Filer's Information", "Sonderling, Keith E", "", "Secretary, Department of Labor",
+            "Other Federal Government Positions Held During the Preceding 12 Months:", "")
+
+    def test_each_entry_is_read_with_its_dates_in_the_reports_words(self):
+        data = report(*self.HEAD, "Acting Director, Institute of Museum and Library Services "
+                      "(3/2025 - 11/2025)", "", "Acting Secretary of Labor, Department of Labor",
+                      "(4/2026 - Present)", "Names of Congressional Committees Considering Nomination:")
+        self.assertEqual(oge.other_positions(data), [
+            "Acting Director, Institute of Museum and Library Services (3/2025 - 11/2025)",
+            "Acting Secretary of Labor, Department of Labor (4/2026 - Present)"])
+
+    def test_none_listed_is_an_empty_list_and_a_list_not_read_whole_is_nothing(self):
+        self.assertEqual(oge.other_positions(report(*self.HEAD, "None", "Electronic Signature - x")), [])
+        unread = report(*self.HEAD, "Acting Director, Somewhere", "Electronic Signature - x")
+        self.assertIsNone(oge.other_positions(unread))
+        self.assertIsNone(oge.other_positions(report("Filer's Information", "Doe, Jane")))
+        self.assertIsNone(oge.other_positions(None))
+
+    def test_only_a_report_that_names_its_filer_is_quoted(self):
+        named = dict(oge.document(LABOR_NOMINEE), title="Secretary", office=True, check="named")
+        other = dict(named, url=named["url"].replace("A", "B"), check="other: Someone, Else",
+                     date="2026-09-01")
+        person = {"holder": "Keith Sonderling", "filed": "Sonderling, Keith",
+                  "agency": "Department of Labor", "position": "Secretary",
+                  "documents": [other, named]}
+        positions = {named["url"]: ["Acting Director, X (3/2025 - 11/2025)"],
+                     other["url"]: ["Not his (1/2025 - 2/2025)"]}
+        listed = oge.for_page(person, positions)["otherPositions"]
+        self.assertEqual(listed["rows"], ["Acting Director, X (3/2025 - 11/2025)"])
+        self.assertEqual(listed["url"], named["url"])
+        unchecked = dict(person, documents=[dict(named, check="unreadable")])
+        self.assertNotIn("otherPositions", oge.for_page(unchecked, positions))
+
+
+LABOR_NOMINEE = row("Sonderling, Keith", "Department of Labor", "Secretary", "2026-07-17",
+                    "Nominee 278", U(41))
+
+
 class TestTheTables(unittest.TestCase):
     def test_every_office_has_ogEs_words(self):
         self.assertEqual(oge.check([o["key"] for o in federal_offices.OFFICES]), [])
