@@ -76,7 +76,9 @@ def _text(fragment):
     return re.sub(r"\s+", " ", text).strip()
 
 
-_SUFFIX = re.compile(r"^(?:jr|sr|ii|iii|iv|v)\.?$", re.I)
+# Not "V": Florida prints "Arias, V. Michael", whose "V." is his first
+# initial, and read as a suffix it made him "Michael Arias V.".
+_SUFFIX = re.compile(r"^(?:jr|sr|ii|iii|iv)\.?$", re.I)
 
 
 def _quotes(name):

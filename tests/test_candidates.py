@@ -48,6 +48,15 @@ class TestDisplayName(unittest.TestCase):
         self.check("DOE, JOHN JR.", "John Doe Jr.")
         self.check("KENNEDY, JOHN F III", "John F Kennedy III")
 
+    def test_a_lone_v_is_an_initial_not_the_fifth(self):
+        # The CA-26 nominee read "Jacqui Irwin V".
+        self.check("IRWIN, JACQUI V", "Jacqui V Irwin")
+        self.check("HILLEARY, WILLIAM V.", "William V Hilleary")
+        # Set apart by an honorific or its own comma, it is the filing's suffix.
+        self.check("MARKERT, GEORGE WASHINGTON MR V", "George Washington Markert V")
+        self.check("SMITH, JOHN, V", "John Smith V")
+        self.check("TAGGART, WILLIAM M IV", "William M Taggart IV")
+
     def test_an_honorific_is_dropped(self):
         # "Brian J Mr. Burley" reads as noise, and Mr. is not part of a name.
         self.check("BURLEY, BRIAN J MR.", "Brian J Burley")
@@ -443,6 +452,17 @@ class TestDuplicateDetection(unittest.TestCase):
         self.assertEqual([i.code for i in issues], ["possible-duplicate-person"])
         self.assertEqual(issues[0].level, "warn")
 
+    def test_a_suffix_does_not_hide_the_pair(self):
+        # The certified list's "Daniel J. Sullivan Jr." beside Senator Dan
+        # Sullivan: read as surname "Jr.", the pair went unreported (rule 25).
+        pair = [self.person("A", "Dan Sullivan"),
+                self.person("B", "Daniel J. Sullivan Jr.")]
+        issues = validate.check_duplicate_people(pair)
+        self.assertEqual([i.code for i in issues], ["possible-duplicate-person"])
+        pair = [self.person("A", "John Smith Jr."), self.person("B", "John Smith")]
+        self.assertEqual([i.code for i in validate.check_duplicate_people(pair)],
+                         ["same-name-in-race"])
+
     def test_different_surnames_are_not_flagged(self):
         pair = [self.person("A", "Dan Sullivan"), self.person("B", "Dan Murkowski")]
         self.assertEqual(validate.check_duplicate_people(pair), [])
@@ -793,6 +813,26 @@ class TestRegistrations(unittest.TestCase):
         rows = [self.filing("H4CT04189", 4, 10721.85, "2024-01-19", name="MIRESSI, DAN"),
                 self.filing("H6CT04150", 4, 999.0, "2026-03-01", name="MIRESSI, DANIEL")]
         same = {"H4CT04189": "C00941310", "H6CT04150": "C00941310"}
+        self.assertEqual(candidates.registrations(rows, same), {})
+
+    def test_one_committee_and_the_very_same_filed_name_is_one_person(self):
+        # VA-11: PURVES FOR CONGRESS (C00959106) lists H6VA11249 and
+        # H6VA11256, both filed as "PURVES, ARTHUR GRAHAME MR."; one's totals
+        # also count a second committee, so the money differs, and the race
+        # listed two Republican nominees. (Other ids here: the real pair is
+        # also an evidenced SAME_PERSON_FILINGS entry.)
+        name = "PURVES, ARTHUR GRAHAME MR."
+        rows = [self.filing("H6VA11001", 11, 30844.59, "2026-01-05", name=name),
+                self.filing("H6VA11002", 11, 5142.86, "2026-02-01", name=name)]
+        self.assertEqual(candidates.registrations(rows), {})
+        same = {"H6VA11001": "C00959106", "H6VA11002": "C00959106"}
+        self.assertEqual(candidates.registrations(rows, same), {"H6VA11002": ["H6VA11001"]})
+        # The race's "filed" count counts him once, as the race lists him.
+        other = self.filing("H6VA11003", 11, 100.0, "2026-02-01", name="DOE, JANE")
+        cache = {"candidates": rows + [other], "committeeOf": same}
+        self.assertEqual(candidates.filing_counts(cache), {"H-NV-11-2026": 2})  # the helper files in NV
+        # A different name form on one committee still needs the same money.
+        rows[1] = self.filing("H6VA11002", 11, 5142.86, "2026-02-01", name="PURVES, A G")
         self.assertEqual(candidates.registrations(rows, same), {})
 
     def test_the_same_money_under_two_committees_is_two_people(self):

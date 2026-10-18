@@ -238,6 +238,9 @@ class TestReaders(unittest.TestCase):
         self.assertEqual(certified.last_first("Sullivan, Daniel J. Jr."), "Daniel J. Sullivan Jr.")
         self.assertEqual(certified.last_first("Rivera , Ernest “Ernie”".replace(" ,", ",")),
                          'Ernest "Ernie" Rivera')
+        # A first initial is not a suffix: Florida's "Arias, V. Michael".
+        self.assertEqual(certified.last_first("Arias, V. Michael"), "V. Michael Arias")
+        self.assertEqual(certified.last_first("Gilbert, Oliver G. III"), "Oliver G. Gilbert III")
 
     def test_nothing_but_name_party_and_kind_is_kept(self):
         for parse, page in ((certified.parse_alaska, AK), (certified.parse_florida, fl_page()),

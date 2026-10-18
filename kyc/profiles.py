@@ -210,12 +210,62 @@ def _contact(person):
                      ("contactForm", "contactForm"), ("wikipedia", "wikipedia")):
         if person.get(src):
             out[dst] = person[src]
+    fixed = overrides.MEMBER_CONTACT_FORMS.get(person.get("bioguide"))
+    if fixed and person.get("contactForm") == fixed[0]:
+        # Only while the source still holds the value the entry corrects.
+        out["contactForm"] = fixed[1]
     refs = {k: person[k] for k in ("govtrack", "opensecrets", "votesmart", "ballotpedia")
             if person.get(k)}
     if refs:
         out["refs"] = refs
-    if person.get("social"):
-        out["social"] = dict(person["social"])
+    social = social_handles(person.get("social"), person.get("bioguide"))
+    if social:
+        out["social"] = social
+    return out
+
+
+_CHANNEL_ID = re.compile(r"^UC[\w-]{22}$")
+
+
+def social_handles(social, bioguide=None):
+    """The member's accounts, each in the shape the page links it by.
+
+    congress-legislators' ``youtube`` holds three kinds of value, and the
+    page built one URL for all of them, youtube.com/user/<value>, which
+    answered 404 for 88 of 90 members whose record has no channel id
+    (2026-10-17). A channel id (UC + 22 characters) is a ``youtube_id``,
+    linked as /channel/<id>; an @handle stays one, linked as /@handle; a
+    legacy username is linked as the dated check in
+    ``overrides.YOUTUBE_LEGACY_NAMES`` found it, or as /user/ until one is
+    made (validate's ``youtube-unchecked`` lists it). ``twitter_id`` is kept:
+    the page links the account by it, which follows a renamed handle.
+    """
+    out = dict(social or {})
+    value = out.get("youtube")
+    if value and _CHANNEL_ID.match(value):
+        out.setdefault("youtube_id", value)
+        out.pop("youtube")
+    elif value and value.startswith("@"):
+        # A handle YouTube answers 404 for, as the member's office links it
+        # instead (or dropped), while the source still holds exactly it.
+        fixed = overrides.YOUTUBE_HANDLE_CORRECTIONS.get(bioguide)
+        if fixed and fixed[0] == value:
+            if fixed[1]:
+                out["youtube"] = fixed[1]
+            else:
+                out.pop("youtube")
+    elif value:
+        checked = overrides.YOUTUBE_LEGACY_NAMES.get(bioguide)
+        if checked and checked[0] == value:
+            if checked[1] == "handle":
+                out["youtube"] = "@" + value
+            elif checked[1] is None:
+                out.pop("youtube")
+    # A handle X answers "not found" for, with no id to follow a rename by:
+    # dropped, because an abandoned handle can be registered by anyone.
+    dead = overrides.DEAD_X_HANDLES.get(bioguide)
+    if dead and out.get("twitter") == dead[0] and not out.get("twitter_id"):
+        out.pop("twitter")
     return out
 
 
@@ -239,14 +289,15 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
     bioguide = row.get("Bioguide ID")
     profile_id = clean_str(bioguide, "") or f"CURR_{index}"
 
-    # The roster holds legal names, and five of them open with a bare initial
-    # ("C. Franklin" is Scott Franklin). Only those are re-displayed, as the
-    # name the member's own congress-legislators record says they go by; the
-    # roster spelling stays searchable and keeps keying the name-keyed caches.
-    display = name
-    words = name.split()
-    if person and words and legislators.is_initial(words[0]):
-        display = legislators.goes_by(person) or name
+    # The roster holds legal names: "John Reed" is Jack Reed, "Garland Barr"
+    # Andy Barr, and five open with a bare initial ("C. Franklin" is Scott
+    # Franklin). Each is shown by the name the member's own
+    # congress-legislators record - matched on bioguide id, never on a name
+    # (rules 3, 17) - says they go by (legislators.display_name). The roster
+    # spelling stays searchable and keeps keying the name-keyed caches
+    # (``rosterName``). The same person's curated Senate-run row already
+    # read "Andy Barr" beside "Garland Barr".
+    display = legislators.display_name(name, person) or name
 
     chamber = clean_str(row.get("Chamber"), "")
     kind = _chamber_kind(chamber)
@@ -770,9 +821,12 @@ def _cross_link(profiles, people=None):
     by_fec = {}
     for profile in profiles:
         if not profile["isCandidate"]:
-            key = _link_key(profile)
-            if key:
-                members[key] = profile
+            # The name shown and the roster's legal one: the FEC files a
+            # member's other run under either ("Earl Leroy Carter").
+            for name in (profile["name"], profile.get("rosterName")):
+                key = _link_key(profile, name) if name else None
+                if key:
+                    members.setdefault(key, profile)
             # Every FEC id Congress's own record lists for a sitting member,
             # either chamber (rule 17): Andy Barr's Kentucky Senate filing
             # (S6KY00286) never met his member card, which the roster names

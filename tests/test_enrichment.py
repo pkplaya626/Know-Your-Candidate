@@ -122,14 +122,57 @@ class TestPortraits(unittest.TestCase):
         profile = {
             "id": "X1", "isCandidate": True, "name": "A B", "state": "TX",
             "photos": ["https://old/1.jpg", "placeholder"],
+            "wikipedia": "A B (politician)", "wikipediaVia": "election-page",
         }
         cache = {
-            portraits.profile_key(profile): {"url": "https://new/2.jpg", "via": "wikipedia"}
+            portraits.profile_key(profile): {"url": "https://new/2.jpg", "via": "wikipedia",
+                                             "title": "A B", "linked": "A B (politician)"}
         }
         portraits.apply_cache([profile], cache)
         self.assertEqual(profile["photos"][0], "https://new/2.jpg")
         self.assertEqual(profile["photo_url"], "https://new/2.jpg")
         self.assertEqual(profile["photoSource"], "wikipedia")
+
+    def test_a_portrait_by_a_route_rule_24_forbids_is_not_applied(self):
+        """The cache held portraits found by guessing "<Name> (politician)"
+        and by searching a name: Kansas's Senate nominee Adam Hamilton, a
+        pastor his ballot page links, carried a 1930s photograph of another
+        Adam Hamilton. A cached record is applied only by an id or the
+        article the profile links."""
+        def profile(**extra):
+            return dict({"id": "CAND_18", "isCandidate": True, "name": "Adam Hamilton",
+                         "state": "KS", "chamber": "Senate (Candidate)",
+                         "photos": ["placeholder"]}, **extra)
+        linked = {"wikipedia": "Adam Hamilton (pastor)", "wikipediaVia": "election-page"}
+        guessed = {"url": "https://x/1930s.jpg", "via": "wikipedia",
+                   "title": "Adam Hamilton (politician)"}
+        searched = {"url": "https://x/s.jpg", "via": "wikipedia-search",
+                    "title": "Adam Hamilton (pastor)"}
+        right = {"url": "https://x/pastor.jpg", "via": "wikipedia",
+                 "title": "Adam Hamilton (pastor)", "linked": "Adam Hamilton (pastor)"}
+        for record, ok in ((guessed, False), (searched, False), (right, True)):
+            person = profile(**linked)
+            portraits.apply_cache([person], {portraits.profile_key(person): record})
+            self.assertEqual(person["photos"][0] != "placeholder", ok, record)
+        # The right article, but the profile no longer links it.
+        person = profile()
+        portraits.apply_cache([person], {portraits.profile_key(person): right})
+        self.assertEqual(person["photos"], ["placeholder"])
+        self.assertIsNone(person["photoSource"])
+        # A redirect that lands on another subject is refused even when linked.
+        person = profile(wikipedia="Brian McGinnis", wikipediaVia="election-page",
+                         name="Brian McGinnis")
+        protest = {"url": "https://x/p.jpg", "via": "wikipedia", "linked": "Brian McGinnis",
+                   "title": "Protests against the 2026 Iran war"}
+        self.assertFalse(portraits.route_ok(person, protest))
+        # A member's: by bioguide id, or the article the mapping names.
+        member = {"id": "G000553", "isCandidate": False, "name": "Al Green", "state": "TX",
+                  "wikipedia": "Al Green (politician)"}
+        self.assertTrue(portraits.route_ok(member, {"url": "u", "via": "clerk.house.gov"}))
+        self.assertTrue(portraits.route_ok(member, {"url": "u", "via": "wikipedia",
+                                                    "title": "Al Green (politician)"}))
+        self.assertFalse(portraits.route_ok(member, {"url": "u", "via": "wikipedia",
+                                                     "title": "Al Green"}))
 
 
 class TestPortraitSizes(unittest.TestCase):
@@ -233,13 +276,14 @@ class TestPortraitSizes(unittest.TestCase):
     def test_apply_cache_and_cross_links_carry_the_sizes(self):
         sizes = [[120, self.THUMB.replace("960px", "120px")]]
         member = {"id": "M1", "isCandidate": False, "name": "A B", "state": "AZ",
-                  "photos": ["placeholder"], "alsoRunningId": "C1"}
+                  "photos": ["placeholder"], "alsoRunningId": "C1", "wikipedia": "A B"}
         running = {"id": "C1", "isCandidate": True, "name": "A B", "state": "AZ",
                    "photos": ["placeholder"], "incumbentId": "M1"}
         plain = {"id": "M2", "isCandidate": False, "name": "C D", "state": "AZ",
                  "photos": ["placeholder"]}
         cache = {
-            portraits.profile_key(member): {"url": self.THUMB, "via": "wikipedia", "set": sizes},
+            portraits.profile_key(member): {"url": self.THUMB, "via": "wikipedia", "set": sizes,
+                                            "title": "A B"},
             portraits.profile_key(plain): {"url": "https://clerk.house.gov/x.jpg", "via": "clerk.house.gov"},
         }
         portraits.inherit_cross_links([member, running, plain], cache)
@@ -270,7 +314,6 @@ class TestPortraitSizes(unittest.TestCase):
                                   return_value={"S000001": "Sue Senate", "S000002": "Sam Bare"}), \
                 mock.patch.object(portraits, "wiki_page_images",
                                   return_value={"Sue Senate": ("Sue Senate", article)}), \
-                mock.patch.object(portraits, "wiki_search_title", return_value=None), \
                 mock.patch.object(portraits, "size_all", return_value=0):
             portraits.resolve_all([house, senate, bare], refresh=True, log=lambda *a: None)
         self.assertEqual(saved[portraits.profile_key(house)]["url"],
@@ -325,7 +368,8 @@ class TestFec(unittest.TestCase):
             fec.profile_key(profile): {
                 "receipts": 100.0, "disbursements": 40.0, "cash_on_hand": 60.0,
                 "individual_contributions": 75.0, "pac_contributions": 25.0,
-                "coverage_end": "2026-06-30", "candidate_id": "H0TX00001",
+                "candidate_loans": 0, "coverage_end": "2026-06-30",
+                "candidate_id": "H0TX00001",
             }
         }
         fec.apply_cache([profile], cache)
@@ -334,6 +378,57 @@ class TestFec(unittest.TestCase):
         self.assertEqual(profile["financeAsOf"], "2026-06-30")
         self.assertNotIn("receipts", profile["quality"])
         self.assertIn("Individual 75%", profile["funding_sources"])
+
+    def test_a_candidates_own_loan_is_self_funding_and_shares_are_of_receipts(self):
+        """Jefferson Shreve (IN-6) lent his campaign $2,000,000 of the
+        $2,532,230 it received, and read "PACs 70%, Individual 30%": the
+        shares were of four contribution types, and his loan was none."""
+        record = {
+            "receipts": 2532230.0, "individual_contributions": 145824.0,
+            "pac_contributions": 375750.0, "party_contributions": 0,
+            "self_funding": 0, "candidate_loans": 2000000.0, "other_loans": 0,
+            "transfers": 10000.0, "offsets": 556.0, "other_receipts": 100.0,
+        }
+        breakdown, line = fec.funding(record)
+        self.assertEqual(line, "Self-funded (incl. loans) 79%, PACs 15%, Individual 6%, "
+                               "Transfers from other committees <1%, Other <1%")
+        self.assertEqual(breakdown["Self-funded (incl. loans)"], 2000000.0)
+        self.assertNotIn("Party", breakdown)
+        self.assertIsNone(fec.funding_base(record, breakdown))
+        # Only a loan earns the words; a gift alone is "Self-funded".
+        _parts, gift = fec.funding({"receipts": 100.0, "individual_contributions": 90.0,
+                                    "self_funding": 10.0, "candidate_loans": 0})
+        self.assertEqual(gift, "Individual 90%, Self-funded 10%")
+        # No label holds the ", " the page splits pairs on.
+        self.assertFalse([label for label, _f in fec.FUNDING_PARTS if ", " in label])
+        self.assertNotIn(", ", fec.SELF_WITH_LOANS)
+
+    def test_a_negative_adjustment_says_what_the_shares_are_of(self):
+        """Shri Thanedar: loans $2,970,000 of $3,194,222 received, with other
+        receipts of -$774,378. The shares are of the positive parts, and the
+        profile says that sum, since it is not the receipts shown."""
+        record = {"receipts": 3194222.05, "individual_contributions": 912720.0,
+                  "pac_contributions": 85880.0, "party_contributions": 0,
+                  "self_funding": 0, "candidate_loans": 2970000.0, "other_loans": 0,
+                  "transfers": 0, "offsets": 0, "other_receipts": -774377.68}
+        breakdown, line = fec.funding(record)
+        self.assertNotIn("Other", breakdown)
+        self.assertEqual(fec.funding_base(record, breakdown), 3968600.0)
+        self.assertTrue(line.startswith("Self-funded (incl. loans) 75%"), line)
+        profile = {"name": "Shri Thanedar", "state": "MI", "chamber": "House", "quality": {}}
+        fec.apply_cache([profile], {fec.profile_key(profile): dict(record, candidate_id="H2MI13204")})
+        self.assertEqual(profile["fundingBase"], "$3,968,600.00")
+        self.assertEqual(profile["receipts"], "$3,194,222.05")
+
+    def test_a_record_read_before_loans_were_has_no_split(self):
+        # Its shares would be of the wrong total; finance reads it again.
+        self.assertEqual(fec.funding({"receipts": 10.0, "individual_contributions": 10.0}),
+                         (None, None))
+
+    def test_refunds_never_push_a_share_past_the_whole(self):
+        breakdown, line = fec.funding({"receipts": 50.0, "individual_contributions": 80.0,
+                                       "candidate_loans": 20.0})
+        self.assertEqual(line, "Individual 80%, Self-funded (incl. loans) 20%")
 
     def test_profiles_without_fec_data_are_untouched(self):
         profile = {"name": "A B", "state": "TX", "chamber": "House",
@@ -1267,8 +1362,8 @@ class TestEnrichmentAgainstTheRealCache(unittest.TestCase):
             field=candidates.load_cache(ROOT), finance=finance)
         fec.apply_cache(cls.profiles, finance)
         campaigns.apply_cache(cls.profiles, campaigns.load_cache(ROOT))
-        portraits.apply_cache(cls.profiles, portraits.load_cache(ROOT))
         results.apply_cache(cls.profiles, results.load_cache(ROOT))
+        portraits.apply_cache(cls.profiles, portraits.load_cache(ROOT))
         cls.cache = cache
         enrich.apply_cache(cls.profiles, cache,
                            as_of=datetime.date.fromisoformat(stats["ageAsOf"]))
@@ -1285,6 +1380,32 @@ class TestEnrichmentAgainstTheRealCache(unittest.TestCase):
             if profile.get("photoSource") == "campaign-site":
                 self.assertEqual(profile.get("source"), "fec-field", profile["name"])
                 self.assertTrue(profile["photos"][0].startswith("https://"), profile["name"])
+
+    def test_no_portrait_is_reached_by_a_name(self):
+        """Rule 24, for every profile: the NJ and OR Republican Senate
+        nominees showed a rugby player and an Olympic kayaker from
+        Special:FilePath/<Name>.jpg, and Rep. Al Green's chain ended in the
+        singer's photograph."""
+        by_id = {p["id"]: p for p in self.profiles}
+        self.assertEqual(validate.check_guessed_photos(self.profiles), [])
+        self.assertEqual(by_id["CAND_40"]["photos"], ["placeholder"])
+        self.assertFalse([u for u in by_id["G000553"]["photos"] if "wikipedia.org/wiki/" in u])
+        # Oregon's nominee has the photograph of the article his ballot page
+        # links ("David Brock Smith"), checked to be about him (rule 33).
+        self.assertIn("David_Brock_Smith", by_id["CAND_43"]["photos"][0])
+        self.assertEqual(by_id["CAND_43"]["photoSource"], "wikipedia")
+        # Kansas's Adam Hamilton is the pastor his ballot page links, not the
+        # 1930s "Adam Hamilton (politician)" a title guess found.
+        self.assertNotIn("1930s", by_id["CAND_18"]["photos"][0])
+        self.assertNotIn("wikipedia-search", {p.get("photoSource") for p in self.profiles})
+
+    def test_a_guessed_photo_fails_the_build(self):
+        bad = {"id": "CAND_40", "name": "Justin Murphy",
+               "photos": ["https://en.wikipedia.org/wiki/Special:FilePath/Justin_Murphy.jpg",
+                          "placeholder"]}
+        issues = validate.check_guessed_photos([bad])
+        self.assertEqual([i.code for i in issues], ["photo-guessed"])
+        self.assertEqual(issues[0].level, "error")
 
     def test_no_profile_links_a_site_the_cache_found_hijacked(self):
         for profile in self.profiles:
@@ -1317,3 +1438,315 @@ class TestPortraitOverrides(unittest.TestCase):
     def test_an_entry_no_site_offers_any_more_is_reported(self):
         issues = validate.check_portrait_overrides({"people": {}})
         self.assertEqual([i.code for i in issues], ["stale-portrait-override"])
+
+
+class TestPeopleDataAudit(unittest.TestCase):
+    """The 2026-10-17 reader audit's findings about people's links and money."""
+
+    def running(self, **extra):
+        return dict({"id": "FEC_H6NC02213", "isCandidate": True, "source": "fec-field",
+                     "name": "Brian McGinnis", "state": "NC", "chamber": "House (Candidate)",
+                     "raceStatus": "nominee", "photos": ["placeholder"]}, **extra)
+
+    # --- Wikipedia links (LINKS-10, PROFILES-13)
+    def test_a_ballot_link_must_lead_to_the_persons_own_article(self):
+        about = enrich.link_is_about
+        self.assertFalse(about({"to": "Protests against the 2026 Iran war",
+                                "fragment": "Washington D.C."}, "Brian McGinnis"))
+        self.assertFalse(about({"to": "2016 Green Party presidential primaries"},
+                               "Elijah Manley"))
+        self.assertFalse(about({"to": "Cascade Party of Washington"}, "Antony Barran"))
+        self.assertFalse(about({"to": "2026 United States House of Representatives elections "
+                                      "in Georgia", "fragment": "District 11"}, "John Cowan"))
+        self.assertFalse(about({"missing": True}, "Jane Doe"))
+        self.assertTrue(about({"to": "David Brock Smith"}, "David Smith"))
+        self.assertTrue(about({"to": "Adam Hamilton (pastor)"}, "Adam Hamilton"))
+        # A living person's article under another name is theirs only by an
+        # evidenced alias: a redirect to a living spouse or namesake is one too.
+        self.assertFalse(about({"to": "Uncle Luke", "living": True}, "Luther Campbell"))
+        self.assertFalse(about({"to": "Jill Biden", "living": True}, "Joe Smith"))
+        self.assertTrue(about({"to": "Uncle Luke", "living": True}, "Luther Campbell",
+                              alias="Uncle Luke"))
+        self.assertFalse(about({"to": "Uncle Luke", "fragment": "Career"}, "Luther Campbell",
+                               alias="Uncle Luke"))
+        self.assertFalse(about({"to": "2016 Green Party presidential primaries",
+                                "living": True}, "Elijah Manley"))
+
+    def test_link_targets_follow_redirects_and_keep_the_section(self):
+        payload = {"query": {
+            "normalized": [{"from": "brian McGinnis", "to": "Brian McGinnis"}],
+            "redirects": [{"from": "Brian McGinnis", "to": "Protests against the 2026 Iran war",
+                           "tofragment": "Washington D.C."}],
+            "pages": [{"title": "Protests against the 2026 Iran war"},
+                      {"title": "Nobody Here", "missing": True},
+                      {"title": "Roy Cooper",
+                       "categories": [{"ns": 14, "title": "Category:Living people"}]}]}}
+        with mock.patch.object(portraits, "_api", return_value=payload):
+            found = enrich.link_targets(["brian McGinnis", "Nobody Here", "Roy Cooper"],
+                                        log=lambda *a: None)
+        self.assertEqual(found["brian McGinnis"], {"to": "Protests against the 2026 Iran war",
+                                                   "fragment": "Washington D.C.",
+                                                   "living": False})
+        self.assertEqual(found["Nobody Here"], {"missing": True})
+        self.assertEqual(found["Roy Cooper"], {"to": "Roy Cooper", "fragment": None,
+                                               "living": True})
+        # A failed batch concludes nothing (rule 8).
+        with mock.patch.object(portraits, "_api", side_effect=OSError("429")):
+            self.assertEqual(enrich.link_targets(["Roy Cooper"], log=lambda *a: None), {})
+
+    def test_a_link_to_another_subject_is_withheld_from_anyone(self):
+        cache = {"people": {}, "links": {
+            "Brian McGinnis": {"to": "Protests against the 2026 Iran war",
+                               "fragment": "Washington D.C."},
+            "Roy Cooper": {"to": "Roy Cooper", "fragment": None}}}
+        withdrawn = self.running(wikipedia="Brian McGinnis", wikipediaVia="election-page",
+                                 raceStatus="withdrawn")
+        fine = self.running(id="CAND_1", name="Roy Cooper", wikipedia="Roy Cooper",
+                            wikipediaVia="election-page")
+        unchecked = self.running(id="X2", name="Jo Doe", wikipedia="Jo Doe",
+                                 wikipediaVia="election-page")
+        counts = enrich.apply_cache([withdrawn, fine, unchecked], cache)
+        self.assertNotIn("wikipedia", withdrawn)
+        self.assertEqual(withdrawn["wikipediaWithheld"]["landsOn"],
+                         "Protests against the 2026 Iran war#Washington D.C.")
+        self.assertEqual(fine["wikipedia"], "Roy Cooper")
+        self.assertEqual(unchecked["wikipedia"], "Jo Doe")
+        self.assertEqual(counts["wikipedia_withheld"], 1)
+        issues = validate.check_wikipedia_withheld([withdrawn, fine])
+        self.assertEqual([i.code for i in issues], ["wikipedia-not-about"])
+
+    def test_the_alias_is_one_answer_for_link_portrait_infobox_and_history(self):
+        from kyc import overrides
+        profile = {"id": "FEC_H4FL20098", "name": "Luther Campbell"}
+        self.assertEqual(overrides.article_alias("FEC_H4FL20098"), "Uncle Luke")
+        self.assertTrue(portraits.article_is_theirs("Uncle Luke", profile))
+        self.assertFalse(portraits.article_is_theirs("Uncle Luke",
+                                                     {"id": "X", "name": "Luther Campbell"}))
+        self.assertTrue(portraits.article_is_theirs("Luther Campbell (politician)",
+                                                    {"id": "X", "name": "Luther Campbell"}))
+        kept = self.running(id="FEC_H4FL20098", name="Luther Campbell",
+                            wikipedia="Luther Campbell", wikipediaVia="election-page")
+        enrich.withhold_links([kept], {"links": {"Luther Campbell": {
+            "to": "Uncle Luke", "fragment": None, "living": True}}})
+        self.assertEqual(kept["wikipedia"], "Luther Campbell")
+
+    def test_a_withheld_link_delivers_no_portrait(self):
+        # A redirect to a section of an article whose title carries the
+        # surname passes title_is_about; the link check withholds it, and it
+        # must do so before the portrait is applied.
+        profile = self.running(id="FEC_H6XX00001", name="Jane Doe", wikipedia="Jane Doe",
+                               wikipediaVia="election-page", photos=["placeholder"])
+        record = {"url": "https://upload.wikimedia.org/doe-family.jpg", "via": "wikipedia",
+                  "title": "Doe family", "linked": "Jane Doe", "name": "Jane Doe"}
+        cache = {portraits.profile_key(profile): record}
+        self.assertTrue(portraits.route_ok(profile, record))  # the hole, before withholding
+        withheld = enrich.withhold_links([profile], {"links": {"Jane Doe": {
+            "to": "Doe family", "fragment": "Jane Doe", "living": False}}})
+        self.assertEqual(withheld, 1)
+        portraits.apply_cache([profile], cache)
+        self.assertNotIn(record["url"], profile["photos"])
+        # And every command that applies portraits withholds first.
+        import inspect
+        from kyc import cli
+        for command in (cli._build, cli._enrich, cli._verify, cli._portraits):
+            source = inspect.getsource(command)
+            first = min(i for i in (source.find("portraits.apply_cache"),
+                                    source.find("portraits.resolve_all")) if i >= 0)
+            self.assertLess(source.find("enrich.withhold_links"), first, command.__name__)
+            self.assertGreaterEqual(source.find("enrich.withhold_links"), 0, command.__name__)
+
+    # --- campaign sites (LINKS-11)
+    def test_other_form_adds_or_drops_www(self):
+        self.assertEqual(enrich.other_form("https://www.martyjackley.com/"),
+                         "https://martyjackley.com/")
+        self.assertEqual(enrich.other_form("https://landsmanforcongress.com"),
+                         "https://www.landsmanforcongress.com")
+        self.assertIsNone(enrich.other_form("not a url"))
+
+    def test_an_unreachable_site_is_tried_in_its_other_form(self):
+        profile = self.running(name="Marty Jackley")
+        good = {"url": "https://martyjackley.com/", "final": "https://martyjackley.com/",
+                "status": 200, "safe": True, "reason": "ok"}
+        dead = {"url": "https://www.martyjackley.com/", "final": "https://www.martyjackley.com/",
+                "status": None, "safe": None, "reason": "unreachable"}
+        with mock.patch.object(enrich, "_read_one", side_effect=[dead, good]), \
+                mock.patch.object(enrich.time, "sleep"):
+            record = enrich.read_site(profile, "https://www.martyjackley.com/")
+        self.assertEqual(record["url"], "https://www.martyjackley.com/")
+        self.assertEqual(record["working"], "https://martyjackley.com/")
+        # The other form must itself name the candidate, or nothing changes.
+        unnamed = dict(good, safe=False, reason=enrich.UNNAMED)
+        with mock.patch.object(enrich, "_read_one", side_effect=[dead, unnamed]), \
+                mock.patch.object(enrich.time, "sleep"):
+            record = enrich.read_site(profile, "https://www.martyjackley.com/")
+        self.assertNotIn("working", record)
+        # A hijacked answer is a verdict, never retried.
+        hijacked = dict(dead, status=200, safe=False, reason=enrich.HIJACKED)
+        with mock.patch.object(enrich, "_read_one", side_effect=[hijacked]) as read:
+            enrich.read_site(profile, "https://www.martyjackley.com/")
+        self.assertEqual(read.call_count, 1)
+
+    def test_the_working_form_is_linked(self):
+        profile = self.running(id="J000301", isCandidate=False, source=None,
+                               name="Dusty Johnson", campaignSite="https://www.example-dj.com/")
+        site = {"url": "https://www.example-dj.com/", "working": "https://example-dj.com/",
+                "final": "https://example-dj.com/", "status": 200, "safe": True}
+        counts = enrich.apply_cache([profile], {"people": {"J000301": {"site": site}}})
+        self.assertEqual(profile["campaignSite"], "https://example-dj.com/")
+        self.assertEqual(counts["site_form"], 1)
+
+    def test_the_hijacked_hosts_of_the_audit_are_blocked(self):
+        from kyc import overrides
+        for url in ("https://www.trevordforme.com", "https://www.rickwallenforcongress.com/",
+                    "http://zabelforcongress.com"):
+            self.assertTrue(overrides.blocked_campaign_host(url), url)
+
+    # --- outbound addresses (LINKS-V1, PROFILES-15)
+    def test_an_address_a_browser_cannot_open_fails_the_build(self):
+        bad = {"id": "F000484", "name": "Randy Fine",
+               "contactForm": "hhttps://fine.house.gov/address_authentication?form=/contact/email-me",
+               "photos": ["https://clerk.house.gov/x.jpg", "placeholder"]}
+        issues = validate.check_outbound_urls([bad])
+        self.assertEqual([i.code for i in issues], ["url-malformed"])
+        self.assertEqual(issues[0].level, "error")
+        good = dict(bad, contactForm="https://fine.house.gov/contact/")
+        self.assertEqual(validate.check_outbound_urls([good]), [])
+        for url in ("www.example.com", "https://localhost/x", "javascript:alert(1)",
+                    "https://exa mple.com"):
+            self.assertTrue(validate.bad_url(url), url)
+
+    def test_fines_contact_form_is_corrected_only_while_the_typo_stands(self):
+        from kyc import profiles as profiles_mod
+        typo = "hhttps://fine.house.gov/address_authentication?form=/contact/email-me"
+        out = profiles_mod._contact({"bioguide": "F000484", "contactForm": typo})
+        self.assertEqual(out["contactForm"], "https://fine.house.gov/contact/")
+        later = "https://fine.house.gov/contact/form"
+        out = profiles_mod._contact({"bioguide": "F000484", "contactForm": later})
+        self.assertEqual(out["contactForm"], later)
+
+    # --- social accounts (LINKS-02, PROFILES-23, LINKS-03)
+    def test_youtube_values_are_linked_by_their_shape(self):
+        from kyc.profiles import social_handles
+        channel = social_handles({"youtube": "UCjy0W7sksMz37IYY27tAZNQ"}, "A000379")
+        self.assertEqual(channel, {"youtube_id": "UCjy0W7sksMz37IYY27tAZNQ"})
+        self.assertEqual(social_handles({"youtube": "@RepAlford"}, "A000379"),
+                         {"youtube": "@RepAlford"})
+        # Legacy names as checked: a handle now, still /user/, or gone.
+        self.assertEqual(social_handles({"youtube": "repcarbajal"}, "C001112"),
+                         {"youtube": "@repcarbajal"})
+        self.assertEqual(social_handles({"youtube": "adamschiff"}, "S001150"),
+                         {"youtube": "adamschiff"})
+        self.assertEqual(social_handles({"youtube": "RepJackBergman"}, "B001301"), {})
+        # An @handle YouTube answers 404 for: the one the member's office links.
+        self.assertEqual(social_handles({"youtube": "@RepJeffHurd03"}, "H001100"),
+                         {"youtube": "@RepJeffHurd"})
+        self.assertEqual(social_handles({"youtube": "@RepJeffHurd03"}, "X000000"),
+                         {"youtube": "@RepJeffHurd03"})
+
+    def test_an_x_account_is_linked_by_its_id_and_a_dead_handle_dropped(self):
+        from kyc.profiles import social_handles
+        johnson = social_handles({"twitter": "RepMikeJohnson",
+                                  "twitter_id": "827279765287559171"}, "J000299")
+        self.assertEqual(johnson["twitter_id"], "827279765287559171")
+        self.assertEqual(social_handles({"twitter": "JMoylanforGuam"}, "M001219"), {})
+        # With an id the account is followed, not dropped.
+        self.assertIn("twitter", social_handles({"twitter": "JMoylanforGuam",
+                                                 "twitter_id": "1"}, "M001219"))
+
+    def test_the_link_corrections_match_the_snapshot(self):
+        from kyc import legislators
+        snapshot = legislators.load_snapshot(ROOT)
+        self.assertEqual(validate.check_member_link_overrides(snapshot), [])
+        moved = {"legislators": [{"bioguide": "M001219", "social": {"twitter": "NewHandle"}}]}
+        codes = [i.code for i in validate.check_member_link_overrides(moved)]
+        self.assertIn("stale-link-override", codes)
+        fixed = {"legislators": [{"bioguide": "H001100", "social": {"youtube": "@RepJeffHurd"}}]}
+        issues = validate.check_member_link_overrides(fixed)
+        self.assertTrue(any("YOUTUBE_HANDLE_CORRECTIONS H001100" in line
+                            for i in issues for line in i.detail))
+
+    # --- money (PROFILES-11)
+    def test_a_negative_amount_puts_the_sign_first(self):
+        self.assertEqual(normalize.fmt_curr(-582.63), "-$582.63")
+        self.assertEqual(fec._money(-582.63), "-$582.63")
+        self.assertEqual(normalize.fmt_curr(0), "$0.00")
+
+    def test_coverage_after_the_build_is_listed(self):
+        import datetime
+        people = [{"id": "FEC_H4IA01127", "name": "A", "financeAsOf": "2026-12-31"},
+                  {"id": "B", "name": "B", "financeAsOf": "2026-09-30"}]
+        issues = validate.check_future_coverage(people, today=datetime.date(2026, 10, 17))
+        self.assertEqual([i.code for i in issues], ["finance-future-coverage"])
+        self.assertEqual(len(issues[0].detail), 1)
+
+    # --- each challenger's own totals (PROFILES-10, TRUST-13, PERSONA-13)
+    def test_a_challengers_split_comes_from_their_own_filing(self):
+        profile = {"id": "FEC_H6IN09242", "isCandidate": True, "source": "fec-field",
+                   "fecCandidateId": "H6IN09242", "name": "Bradley Meyer", "state": "IN",
+                   "chamber": "House (Candidate)", "quality": {}}
+        figures = {"election_year": 2026, "receipts": 200000.0,
+                   "individual_contributions": 182793.12, "party_contributions": 930.0,
+                   "candidate_loans": 11339.03, "self_funding": 0, "pac_contributions": 0,
+                   "coverage_end": "2026-09-30"}
+        saved = {}
+        with mock.patch.object(fec, "totals", return_value=figures) as asked, \
+                mock.patch.object(fec, "load_cache", return_value={}), \
+                mock.patch.object(fec, "save_cache", side_effect=lambda c, r: saved.update(c)):
+            fec.resolve_field([profile], log=lambda *a: None)
+        asked.assert_called_once_with("H6IN09242")
+        self.assertIn("fec:H6IN09242", saved)
+        fec.apply_cache([profile], saved)
+        self.assertEqual(profile["funding_sources"],
+                         "Individual 91%, Self-funded (incl. loans) 6%, Party <1%")
+        self.assertTrue(saved["fec:H6IN09242"]["read"])
+
+    def test_a_refresh_rereads_only_old_challenger_totals_a_batch_at_a_time(self):
+        # The daily refresh must not re-read ~590 challengers every day.
+        import datetime
+        today = datetime.date(2026, 10, 17)
+        people = [{"id": f"FEC_H6XX{n:05d}", "source": "fec-field",
+                   "fecCandidateId": f"H6XX{n:05d}", "name": f"P{n}", "state": "XX",
+                   "chamber": "House (Candidate)"} for n in range(fec.FIELD_PER_RUN + 40)]
+        cache = {}
+        for n, person in enumerate(people):
+            age = 2 if n < 20 else 10 + n  # the first twenty were read this week
+            cache[fec.profile_key(person)] = {
+                "candidate_id": person["fecCandidateId"], "candidate_loans": 0,
+                "receipts": 1.0, "read": (today - datetime.timedelta(days=age)).isoformat()}
+        new = {"id": "FEC_H6XX99999", "source": "fec-field", "fecCandidateId": "H6XX99999",
+               "name": "New", "state": "XX", "chamber": "House (Candidate)"}
+        asked = []
+        with mock.patch.object(fec, "totals",
+                               side_effect=lambda cid: asked.append(cid) or None), \
+                mock.patch.object(fec, "load_cache", return_value=cache), \
+                mock.patch.object(fec, "save_cache"):
+            fec.resolve_field(people + [new], log=lambda *a: None, today=today)
+            self.assertEqual(asked, ["H6XX99999"])  # without --refresh, only the unread
+            asked.clear()
+            fec.resolve_field(people + [new], refresh=True, log=lambda *a: None, today=today)
+        self.assertEqual(asked[0], "H6XX99999")
+        self.assertEqual(len(asked), 1 + fec.FIELD_PER_RUN)
+        # Oldest first; nobody read this week.
+        self.assertEqual(asked[1], people[-1]["fecCandidateId"])
+        self.assertFalse({p["fecCandidateId"] for p in people[:20]} & set(asked))
+
+    def test_a_stopped_finance_run_does_not_fail_the_refresh(self):
+        # refresh.yml runs the field and the results after this step.
+        from types import SimpleNamespace
+        from kyc import cli
+        args = SimpleNamespace(root=ROOT, limit=None, refresh=True, field_only=False)
+        with mock.patch.object(cli, "_load", return_value={}), \
+                mock.patch.object(cli.legislators, "load_snapshot", return_value={}), \
+                mock.patch.object(cli, "build_profiles", return_value=([], {})), \
+                mock.patch.object(cli.candidates, "load_cache", return_value={}), \
+                mock.patch.object(fec, "resolve_all", return_value=({}, {"stopped": 1})):
+            self.assertEqual(cli._finance(args), 0)
+        with mock.patch.object(cli, "_load", return_value={}), \
+                mock.patch.object(cli.legislators, "load_snapshot", return_value={}), \
+                mock.patch.object(cli, "build_profiles", return_value=([], {})), \
+                mock.patch.object(cli.candidates, "load_cache", return_value={}), \
+                mock.patch.object(fec, "load_cache", return_value={}), \
+                mock.patch.object(cli.results_mod, "load_cache", return_value={}), \
+                mock.patch.object(fec, "resolve_field", return_value=({}, {"stopped": 1})):
+            self.assertEqual(cli._finance(SimpleNamespace(**{**vars(args),
+                                                             "field_only": True})), 0)
