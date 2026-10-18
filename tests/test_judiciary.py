@@ -59,8 +59,26 @@ class TestTheDirectory(unittest.TestCase):
         self.assertFalse(set(scotus["retired"]) & set(scotus["judges"]))
         self.assertTrue(all(self.judges[i].get("retiredJustice") for i in scotus["retired"]))
 
+    def test_a_retired_justice_carries_the_courts_own_oath_date(self):
+        # FEDERAL-11: the hub's retired table gave Kennedy's commission
+        # (1988-02-11) as the day he joined; the Court lists his oath,
+        # 1988-02-18 - the date the members' cards use.
+        scotus = self.cache["courts"]["scotus"]
+        served = {self.judges[i]["name"]: self.judges[i].get("courtService")
+                  for i in scotus["retired"]}
+        kennedy = next(v for k, v in served.items() if "Kennedy" in k)
+        self.assertEqual(kennedy, {"oath": "1988-02-18", "ended": "2018-07-31"})
+        breyer = next(v for k, v in served.items() if "Breyer" in k)
+        self.assertEqual(breyer["oath"], "1994-08-03")
+
     def test_a_confirmed_judge_without_a_commission_is_not_sitting(self):
-        self.assertTrue(any("not yet commissioned" in p for p in self.cache["pending"]))
+        pending = [p for p in self.cache["pending"] if "Colmenero" in p["name"]]
+        self.assertEqual(len(pending), 1)
+        # Kept with the court and the confirmation, for the court's page
+        # to list apart (never counted among its judges).
+        self.assertEqual(pending[0]["court"], "tx-s")
+        self.assertRegex(pending[0]["confirmed"], r"^\d{4}-\d{2}-\d{2}$")
+        self.assertIn("not yet commissioned", judiciary.pending_text(pending[0]))
         self.assertFalse(any(j["name"].startswith("Angela") and "Colmenero" in j["name"]
                              for j in self.judges.values()))
 

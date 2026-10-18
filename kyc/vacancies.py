@@ -279,6 +279,91 @@ def judge_unlisted(row, judges, future=False):
     return seats is not None and not seats
 
 
+def listed_senior(cache, judges):
+    """``{(court, judge id): row}``: the judges the courts' list has on
+    senior status by its own as-of date, whom the directory still lists in
+    active service on that court. Neither source is chosen silently: the
+    pages keep the judge out of the active count and say on their row which
+    source says what. A name only points at the row to annotate - exactly
+    one judge of that surname on that court, active there - and never
+    joins anything else (rule 17)."""
+    out = {}
+    for row in (cache or {}).get("current") or []:
+        if row.get("reason") != "Senior" or not row.get("since") or not row.get("court") \
+                or not row.get("vacatedBy") or row["since"] > (cache.get("asOf") or ""):
+            continue
+        jid = judge_of(row, judges)
+        if jid is None:
+            continue
+        seat = next(s for s in judges[jid]["seats"] if s.get("court") == row["court"])
+        if not seat.get("seniorSince"):
+            out[(row["court"], jid)] = row
+    return out
+
+
+def judge_of(row, judges):
+    """The one judge on the row's court with the surname *and* first given
+    name the list writes for the judge leaving, or None. A surname alone
+    would point at a colleague of that name when the judge who left is
+    missing from the directory (rule 17), so both must agree, and only
+    one judge may fit."""
+    listed = (row.get("vacatedBy") or {}).get("listedAs") or ""
+    surname, given = _surname(listed), _given(listed)
+    if not surname or not given or not row.get("court"):
+        return None
+    named = [jid for jid, judge in judges.items()
+             if _surname(judge.get("sortName")) == surname and _given(judge.get("sortName")) == given
+             and any(s.get("court") == row["court"] for s in judge.get("seats") or [])]
+    return named[0] if len(named) == 1 else None
+
+
+def _given(listed):
+    """The first given name a list writes: ``"Rudofsky,Lee Philip"`` ->
+    ``"lee"``."""
+    parts = [p.strip() for p in (listed or "").split(",") if p.strip()]
+    rest = [p for p in parts[1:] if not _SUFFIX.match(p)]
+    words = rest[0].split() if rest else []
+    return _surname(words[0]) if words else ""
+
+
+def pending_elevations(cache, judges):
+    """``{judge id: {"court", "nominated"}}``: sitting judges the announced
+    list has leaving for another court ("Elevated"), with the court and the
+    day of the nomination the lists give, for the judge's own record. The
+    judge is found by :func:`judge_of`, the other court by
+    :func:`nomination_of`."""
+    out = {}
+    for row in (cache or {}).get("future") or []:
+        other = nomination_of(row, cache)
+        jid = judge_of(row, judges) if other else None
+        if jid:
+            out[jid] = {"court": other["court"], "nominated": other.get("nominated")}
+    return out
+
+
+def nominated_to(row, cache):
+    """The court of :func:`nomination_of`, or None."""
+    other = nomination_of(row, cache)
+    return other["court"] if other else None
+
+
+def nomination_of(row, cache):
+    """The nomination of a judge leaving for another court ("Elevated"),
+    from the same lists: the one row, current or announced, on another
+    court, whose nominee has the judge's surname and first given name. None
+    when no row, or more than one, names them - the page then says only
+    that the judge was nominated to another court."""
+    if row.get("reason") != "Elevated" or not row.get("vacatedBy"):
+        return None
+    listed = row["vacatedBy"].get("listedAs") or ""
+    key = (_surname(listed), _given(listed))
+    found = [other for other in (cache.get("current") or []) + (cache.get("future") or [])
+             if other.get("nominee") and other.get("court") and other["court"] != row.get("court")
+             and (_surname(other["nominee"].get("listedAs")),
+                  _given(other["nominee"].get("listedAs"))) == key]
+    return found[0] if len(found) == 1 else None
+
+
 def problems(cache, today=None, judiciary=None):
     """What a build says about the cache: ``[(level, code, message, detail)]``.
 

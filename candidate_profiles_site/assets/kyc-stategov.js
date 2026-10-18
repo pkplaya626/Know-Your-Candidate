@@ -495,6 +495,26 @@
       officeLine("gov-officer-role", label, mark) + (open || "") + body + "</li>";
   }
 
+  /** The federal courts for a state: its district courts and the court of
+   *  appeals, each linked to its page; with several districts, where to find
+   *  which covers a county (the county pages, 28 U.S.C. 81-131). */
+  function federalCourtsBlock(list, code) {
+    if (!list || !list.length) return "";
+    var districts = list.filter(function (c) { return !/Court of Appeals/.test(c[1]); });
+    var appeals = list.filter(function (c) { return /Court of Appeals/.test(c[1]); });
+    var a = function (c) {
+      return '<a href="' + KYC.escapeAttr(KYC.siteRoot() + "courts/" + c[0] + ".html") + '">' +
+        KYC.escapeHtml(c[1].replace(/^U\.S\. (District Court for the |Court of Appeals for the )/, "")) + "</a>";
+    };
+    return '<p class="panel-subhead">Federal courts</p>' +
+      '<p class="gov-federal-courts">' + (districts.length > 1 ? "District courts: " : "District court: ") +
+      districts.map(a).join(", ") + (appeals.length ? "; appeals go to the " + appeals.map(a).join(", ") : "") +
+      ".</p>" + (districts.length > 1
+        ? '<p class="faint">Which district covers a county is on <a href="' +
+          KYC.escapeAttr(KYC.siteRoot() + "counties/" + code.toLowerCase() + ".html") +
+          '">the county pages</a>, from 28 U.S.C. 81-131.</p>' : "");
+  }
+
   /** A state's court of last resort: who sits on it, as the court lists
    * them, or why its roster could not be read. No party: a justice is not
    * a party's officeholder. */
@@ -588,7 +608,7 @@
       }
       html += '<p class="gov-trifecta">' + KYC.escapeHtml(trifectaText(s.trifecta)) + ".</p>";
     }
-    html += courtBlock(s.court) + courtBlock(s.criminalCourt);
+    html += courtBlock(s.court) + courtBlock(s.criminalCourt) + federalCourtsBlock(s.federalCourts, code);
     if (opts && opts.links && s.upper) {
       var lower = code.toLowerCase();
       html += '<p class="gov-pages">' +

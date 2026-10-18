@@ -1555,8 +1555,6 @@ def check_voting_links(cache):
     gaps += [f"{code}: no {kind} page" for code in sorted(voting.JURISDICTIONS)
              for kind, table in (("results", voting.RESULTS), ("deadlines", voting.DEADLINES))
              if code not in table]
-    gaps += [f"{code}: a December date in the overrides with no page that gives it "
-             f"(voting.KEY_DATE_SOURCES)" for code in voting.unsourced_key_dates()]
     # A link never opened, or opened and not found live (a 403, a timeout:
     # rule 8 concludes nothing from either): the page says it could not be
     # reached, and this lists it, so "unknown" is never counted as checked.
@@ -1583,7 +1581,7 @@ def check_voting_links(cache):
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
         results=None, field=None, enrichment=None, odds=None, district_maps=None,
         district_error=None, voting=None, federal=None, judiciary=None, vacancies=None,
-        history=None):
+        history=None, voting_dates=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_district_maps(races, district_maps, district_error)
@@ -1626,12 +1624,33 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_guide()
     issues += check_ballot2026()
     issues += check_federal(federal)
+    issues += check_succession(federal, snapshot)
     issues += check_judiciary(judiciary)
     issues += check_vacancies(vacancies, judiciary)
     issues += check_history(history, profiles)
     if voting is not None:                 # None: the caller did not supply it
         issues += check_voting_links(voting)
+    if voting_dates is not None:
+        issues += check_voting_dates(voting_dates)
     return issues
+
+
+def check_voting_dates(data):
+    """Each jurisdiction's key dates (kyc/voting_dates.py): every value the
+    page shows sourced to the jurisdiction's own official page, never to a
+    compiled table (rule 50), every date in the cycle and in order, and the
+    December dates the same as the results reader's (rule 53). An error: a
+    wrong deadline sends a reader to the polls too late. A jurisdiction whose
+    record breaks a rule is left off the page until it is fixed."""
+    from . import voting_dates
+    if not data:
+        return [Issue("error", "voting-dates-missing",
+                      f"no {voting_dates.CACHE_PATH}; state pages give no voting dates")]
+    found = voting_dates.problems(data)
+    if found:
+        return [Issue("error", "voting-dates", f"{len(found)} problems in the voting dates "
+                      f"(kyc/voting_dates.py)", found)]
+    return []
 
 
 def check_winners(profiles, races):
@@ -1777,14 +1796,32 @@ def check_federal(cache):
             for level, code, message, detail in federal.problems(cache)]
 
 
+def check_succession(cache, snapshot):
+    """The Speaker and the President pro tempore in the line of succession
+    (kyc/federal_build.py): an office the federal page cannot fill - none
+    recorded, a holder chosen before the sitting Congress began, or one not
+    seated - is a warning, so the page's "Nobody listed" is never silent."""
+    if cache is None or snapshot is None:
+        return []
+    from . import federal_build
+
+    _officers, problems = federal_build.congressional_officers(cache, snapshot)
+    return [Issue("warn", "succession-unnamed",
+                  f"the federal page names nobody for {len(problems)} congressional office(s) "
+                  f"in the line of succession", problems)] if problems else []
+
+
 def check_judiciary(cache):
     """The federal judiciary cache (kyc/judiciary.py), when the caller
     supplies one: every court present, nine justices and no retired one
-    among them, and no judge with a party."""
-    from . import federal_courts, judiciary
+    among them, and no judge with a party; and each court's own website on
+    a host of the judiciary's own (kyc/court_info.py)."""
+    from . import court_info, federal_courts, judiciary
 
     issues = [Issue("error", "federal-courts", f"the court table: {p}")
               for p in federal_courts.check()]
+    issues += [Issue("error", "court-sites", f"the courts' websites: {p}")
+               for p in court_info.check()]
     if cache is not None:
         issues += [Issue(level, code, message, detail)
                    for level, code, message, detail in judiciary.problems(cache)]
