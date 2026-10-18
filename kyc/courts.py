@@ -16,9 +16,16 @@ checked against the court's seats (``government_maps.HIGH_COURTS``): fewer
 names than seats is "nobody listed" for the rest, never "vacant" unless the
 court says so (rule 19), and more is an error, not a court.
 
-Where a court's site cannot be read by a script - a bot wall, a page with no
-content until JavaScript runs - the court is listed without its members and
-the page says why. Nothing comes from Wikipedia or Ballotpedia.
+A court whose page has no content until JavaScript runs, or that answers a
+browser but not a plain request, is read in a headless Chrome
+(``tools/read_court_pages.mjs``, Node with no dependencies); a run with no
+Chrome keeps each such court's last good read and says so. A roster the
+court publishes as a PDF is read from the file's own text (``pdf_lines``).
+A court whose site refuses every automated reader (a bot wall) is read by
+hand from its own page, with the day and the page's words, in
+``overrides.COURT_ROSTERS``, and the page says so. A court nobody can read
+is listed without its members and the page says why. Nothing comes from
+Wikipedia or Ballotpedia.
 """
 
 import datetime
@@ -28,6 +35,7 @@ import os
 import re
 import time
 import urllib.request
+import zlib
 
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "courts.json")
 USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -305,49 +313,233 @@ COURTS = {
         "item": r'<h2 class="title_header">\s*(?P<name>[^<]+?)\s*</h2>\s*<div class="cms_metadata2 cms_title"'
                 r"[^>]*>\s*(?P<title>[^<]+?)\s*</div>",
     },
+    # Read in a headless Chrome (tools/read_court_pages.mjs), checked
+    # 2026-10-17. Each answers a plain request with a reset connection, a
+    # 403 or a script challenge, or draws its roster only once JavaScript
+    # runs; each answers the browser with its roster.
+    "CT": {
+        "url": "https://www.jud.ct.gov/external/supapp/supjustices.htm",
+        "browser": True,
+        # The list under "Biographies of Justices"; the retired are
+        # commented out, and a Senior Justice would not be a member.
+        "section": [r"Biographies of Justices", r"</section>"],
+        "item": r'<li><a href="[^"]*">(?P<name>(?P<title>(?:Chief\s+)?Justice)\s+[^<]+)</a>',
+    },
+    "LA": {
+        "url": "https://www.lasc.org/About/Biography",
+        "browser": True,
+        # A table drawn by the page's script: name, then title. The header's
+        # "Hon. John L. Weimer, Chief Justice" is not in a table row. A name
+        # may sit in <strong>, a bold <span> or neither, and a title cell's
+        # <p> may carry a style: the first recipe, which took only the
+        # first two, read five of seven.
+        "item": r'<a [^>]*href="/Biography\?p=[^"]*"[^>]*>(?P<name>(?:(?!</a>).){1,200}?)</a>'
+                r"</p></td><td><p[^>]*>(?P<title>[^<]+)",
+    },
+    "MA": {
+        "url": "https://www.mass.gov/info-details/supreme-judicial-court-justices",
+        "browser": True,
+        # One heading per justice; the page's other headings are "Contact"
+        # and "Related".
+        "item": r'<h2 class="ma__comp-heading[^"]*"[^>]*>\s*(?P<name>(?P<title>(?:Chief\s+)?Justice)\s+[^<]+?)'
+                r"\s*</h2>",
+    },
+    "TN": {
+        "url": "https://www.tncourts.gov/courts/supreme-court",
+        "browser": True,
+        # The cards under "Supreme Court Justices", up to the next heading.
+        # The photograph's caption above them is older (it names a justice
+        # the cards do not). A card may link anywhere: Justice Kyle Hixson's
+        # still links his Court of Criminal Appeals page (2026-10-18).
+        "section": [r">\s*Supreme Court Justices\s*</div>", r"<h2"],
+        "item": r'<a href="[^"]+" class="card-link\s*">\s*'
+                r"(?P<name>(?P<title>(?:Chief\s+)?Justice)\s+[^<]+?)\s*</a>",
+    },
+    "RI": {
+        "url": "https://www.courts.ri.gov/Public-Resources/Documents/JudicialRoster.pdf",
+        # The judiciary's roster of every court, as a PDF: its text is read
+        # from the file itself (pdf_lines), the Supreme Court's block only.
+        # "Justice (Vacant)" is the court saying a seat is empty, not a name.
+        "format": "pdf",
+        "dated": r"Revised\s+([A-Z][a-z]+ \d{1,2}, \d{4})",
+        "section": [r"(?m)^Supreme Court - ", r"(?m)^Superior Court - "],
+        "item": r"(?m)^(?P<name>(?P<title>(?:Chief\s+)?Justice)\s+(?!\(Vacant\))[^\n]+)$",
+    },
 }
 
+# The browser reader: a Node script (no dependencies) that drives a headless
+# Chrome and writes each page as drawn. A run without Node or Chrome reads
+# none of these courts, and each keeps its last good read (rule 8).
+BROWSER_TOOL = os.path.join("tools", "read_court_pages.mjs")
 
-# Courts whose roster a script cannot read, with what was seen on
-# 2026-10-05. Listed on the page without members, and why: never guessed
-# from another source (rule 50).
+
+# Courts whose roster nobody here can read, with what was seen. Listed on
+# the page without members, and why: never guessed from another source
+# (rule 50). Alabama's site reset every connection on 2026-10-05, and on
+# 2026-10-17 and 2026-10-18 from a plain request, a headless Chrome and a
+# windowed Chrome alike (the plain http:// address answers only with a
+# redirect to the https:// one that resets).
 UNREADABLE = {
     "AL": ("https://judicial.alabama.gov/appellate/supremecourt",
            "The court's site reset every connection"),
-    "LA": ("https://www.lasc.org/Justices",
-           "The court's page shows its justices only once JavaScript runs"),
-    "MA": ("https://www.mass.gov/orgs/supreme-judicial-court",
-           "The state's site refuses automated requests"),
-    "MO": ("https://www.courts.mo.gov/",
-           "The court's site answers automated requests with a challenge page"),
-    "NH": ("https://www.courts.nh.gov/our-courts/supreme-court",
-           "The court's site refuses automated requests"),
-    "RI": ("https://www.courts.ri.gov/Public-Resources/Documents/JudicialRoster.pdf",
-           "The court publishes its roster only as a PDF"),
-    "TN": ("https://www.tncourts.gov/courts/supreme-court/judges",
-           "The court's site answers automated requests with a challenge page"),
-    # These three answer a browser but refuse this pipeline's requests (a
-    # reset connection, or 403), which is not to be worked around.
-    "CT": ("https://www.jud.ct.gov/external/supapp/supjustices.htm",
-           "The court's site refuses automated requests"),
-    "NV": ("https://nvcourts.gov/supreme/court_information/the_supreme_court_of_nevada_justices",
-           "The court's site refuses automated requests"),
-    "NY": ("https://www.nycourts.gov/ctapps/",
-           "The court's site refuses automated requests"),
 }
+
+# A roster grows stale without a sound: a court kept at its last good read
+# week after week (a page the browser reader could not draw, a recipe the
+# page outgrew), or a roster read by hand (overrides.COURT_ROSTERS). Past
+# this many days since its read, the build says so.
+STALE_DAYS = 45
 
 
 class CourtsError(RuntimeError):
     """A roster could not be read, or does not fit its court."""
 
 
-def _get(url, headers=None, timeout=60):
+def _get_bytes(url, headers=None, timeout=60):
     request = urllib.request.Request(url, headers=dict({"User-Agent": USER_AGENT}, **(headers or {})))
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
-            return response.read().decode("utf-8", errors="replace")
+            return response.read()
     except OSError as exc:
         raise CourtsError(f"could not fetch {url}: {exc}") from exc
+
+
+def _get(url, headers=None, timeout=60):
+    return _get_bytes(url, headers, timeout).decode("utf-8", errors="replace")
+
+
+# ------------------------------------------------------------- a PDF's text
+
+_PDF_TOKEN = re.compile(rb"\((?:\\.|[^\\)])*\)|<<|>>|\[|\]|<[0-9A-Fa-f\s]*>|/[^\s/\[\]()<>]+|"
+                        rb"[-+]?(?:\d+\.?\d*|\.\d+)|[A-Za-z'\"*]+")
+_PDF_ESCAPES = {ord("n"): b"\n", ord("r"): b"\r", ord("t"): b"\t", ord("b"): b"\b", ord("f"): b"\f"}
+
+
+def _pdf_string(token):
+    """A PDF literal string ``(...)`` as text (WinAnsi, as a simple
+    TrueType font without its own encoding writes it)."""
+    body, out, i = token[1:-1], bytearray(), 0
+    while i < len(body):
+        if body[i] == 0x5C and i + 1 < len(body):
+            nxt = body[i + 1]
+            octal = re.match(rb"[0-7]{1,3}", body[i + 1:i + 4])
+            if octal:
+                out.append(int(octal.group(), 8) & 0xFF)
+                i += 1 + len(octal.group())
+                continue
+            out += _PDF_ESCAPES.get(nxt, bytes([nxt]))
+            i += 2
+            continue
+        out.append(body[i])
+        i += 1
+    return bytes(out).decode("cp1252", errors="replace")
+
+
+def pdf_lines(data):
+    """The lines of text a PDF draws, in the order its content streams draw
+    them, with the standard library alone: each Flate-compressed (or plain)
+    stream's text operators. A move to a new line (``Td``/``TD`` down,
+    ``Tm``, ``T*``, ``'``, the end of a text block) ends a line; a wide gap
+    inside a ``TJ`` array is a space. Enough for a roster typed in a word
+    processor - not for a scan, which has no text to read."""
+    lines = []
+    for match in re.finditer(rb"<<(.*?)>>\s*stream\r?\n(.*?)\r?\nendstream", data, re.S):
+        head, body = match.groups()
+        if b"/FlateDecode" in head:
+            try:
+                body = zlib.decompress(body)
+            except zlib.error:
+                continue
+        elif b"/Filter" in head:
+            continue
+        # A page's content is operators in ASCII. A font or an image is
+        # binary, and holds "BT" by chance: its bytes are not text.
+        if not re.search(rb"(?:^|\s)BT\s", body) or sum(b > 0x7E for b in body[:4096]) > 400:
+            continue
+        current, operands = [], []
+
+        def flush():
+            text = " ".join("".join(current).split())
+            if text:
+                lines.append(text)
+            current.clear()
+
+        for token in _PDF_TOKEN.findall(body):
+            if token.startswith(b"("):
+                operands.append(_pdf_string(token))
+            elif re.fullmatch(rb"[-+]?(?:\d+\.?\d*|\.\d+)", token):
+                operands.append(float(token))
+            elif token in (b"[", b"]", b"<<", b">>") or token.startswith((b"/", b"<")):
+                continue
+            elif token == b"Tj":
+                current.extend(o for o in operands if isinstance(o, str))
+                operands = []
+            elif token == b"TJ":
+                for item in operands:
+                    if isinstance(item, str):
+                        current.append(item)
+                    elif item < -250:            # a gap wider than a quarter of the font
+                        current.append(" ")
+                operands = []
+            elif token in (b"'", b'"'):
+                flush()
+                current.extend(o for o in operands if isinstance(o, str))
+                operands = []
+            elif token in (b"Td", b"TD"):
+                numbers = [o for o in operands if isinstance(o, float)]
+                # Down a line ends it. A move along the line adds nothing: a
+                # word processor writes its spaces as text and moves on to
+                # the next run within a word ("Keou" then "gh" is Keough).
+                if len(numbers) >= 2 and abs(numbers[-1]) > 0.01:
+                    flush()
+                operands = []
+            elif token in (b"Tm", b"T*", b"ET"):
+                flush()
+                operands = []
+            else:
+                operands = []
+        flush()
+    return lines
+
+
+# ------------------------------------------------------- a browser's page
+
+def read_with_browser(pages, root=".", out_dir=None):
+    """``({code: html}, problems)`` for ``{code: url}``, each page as a
+    headless Chrome drew it (``BROWSER_TOOL``). A page the browser could not
+    read, or that answered with an error status (a bot wall's 403), is left
+    out and reported. No Node, no Chrome or no WebSocket reads nothing: the
+    courts keep their last good read, and the run says why (rule 8)."""
+    import subprocess
+    import tempfile
+    if not pages:
+        return {}, []
+    out_dir = out_dir or tempfile.mkdtemp(prefix="kyc-court-pages-")
+    command = ["node", os.path.join(root, BROWSER_TOOL), "--out", out_dir] + [
+        f"{code}={url}" for code, url in sorted(pages.items())]
+    try:
+        done = subprocess.run(command, capture_output=True, text=True, timeout=900)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return {}, [f"the browser reader did not run ({exc}); "
+                    f"{', '.join(sorted(pages))} keep their last read"]
+    if done.returncode != 0:
+        why = (done.stderr.strip().splitlines() or [f"exit {done.returncode}"])[-1]
+        return {}, [f"the browser reader did not run ({why}); {', '.join(sorted(pages))} keep their last read"]
+    try:
+        with open(os.path.join(out_dir, "manifest.json"), encoding="utf-8") as handle:
+            manifest = json.load(handle)["pages"]
+    except (OSError, ValueError, KeyError) as exc:
+        return {}, [f"the browser reader wrote no manifest ({exc})"]
+    found, problems = {}, []
+    for code in sorted(pages):
+        entry = manifest.get(code) or {}
+        if entry.get("error") or not 200 <= int(entry.get("status") or 0) < 300:
+            problems.append(f"{code}: the browser read {entry.get('status') or 'nothing'} "
+                            f"{entry.get('error') or entry.get('title') or ''} from {pages[code]}".rstrip())
+            continue
+        with open(os.path.join(out_dir, f"{code}.html"), encoding="utf-8") as handle:
+            found[code] = handle.read()
+    return found, problems
 
 
 def _text(fragment):
@@ -437,20 +629,31 @@ def extract(page, recipe):
     return out
 
 
-def read_court(code, recipe, seats):
+def read_court(code, recipe, seats, page=None):
     """``{"members": [...], "chief": name, "listed", "seats", "url"}``, or
     raises when the page does not fit the court: no names, more names than
     seats, or more than one chief. A failed request is tried again before
-    the court counts as unread: one dropped connection lost Mississippi."""
-    page = None
-    for wait in (3, 10, 0):
-        try:
-            page = _get(recipe["url"], recipe.get("headers"))
-            break
-        except CourtsError:
-            if not wait:
-                raise
-            time.sleep(wait)
+    the court counts as unread: one dropped connection lost Mississippi.
+    A ``browser`` recipe reads *page*, as the browser reader drew it."""
+    if recipe.get("browser"):
+        if page is None:
+            raise CourtsError(f"{code}: the browser did not read {recipe['url']}")
+    else:
+        for wait in (3, 10, 0):
+            try:
+                data = _get_bytes(recipe["url"], recipe.get("headers"))
+                break
+            except CourtsError:
+                if not wait:
+                    raise
+                time.sleep(wait)
+        if recipe.get("format") == "pdf":
+            if not data.startswith(b"%PDF"):
+                raise CourtsError(f"{code}: {recipe['url']} did not answer with a PDF")
+            page = "\n".join(pdf_lines(data))
+            recipe = {k: v for k, v in recipe.items() if k != "format"}
+        else:
+            page = data.decode("utf-8", errors="replace")
     members = extract(page, recipe)
     if not members:
         raise CourtsError(f"{code}: no members read from {recipe['url']}")
@@ -459,22 +662,39 @@ def read_court(code, recipe, seats):
     chiefs = [n for n, chief in members if chief]
     if len(chiefs) > 1:
         raise CourtsError(f"{code}: more than one chief read: {', '.join(chiefs)}")
-    return {"members": [n for n, _ in members], "chief": chiefs[0] if chiefs else "",
-            "listed": len(members), "seats": seats, "url": recipe.get("link", recipe["url"])}
+    out = {"members": [n for n, _ in members], "chief": chiefs[0] if chiefs else "",
+           "listed": len(members), "seats": seats, "url": recipe.get("link", recipe["url"]),
+           # The day it was read: a court that later keeps this read
+           # (rule 8) carries the day, and stale() says when it is old.
+           "read": datetime.date.today().isoformat()}
+    if recipe.get("dated"):
+        # The date the court's own document says it was revised: a roster
+        # file can be months old, and the page says so.
+        found = re.search(recipe["dated"], page)
+        if not found:
+            raise CourtsError(f"{code}: the roster no longer says when it was revised")
+        out["revised"] = datetime.datetime.strptime(found.group(1), "%B %d, %Y").date().isoformat()
+    return out
 
 
-def fetch(codes=None, pause=1.0):
-    """``(courts, problems)`` for every court with a recipe."""
+def fetch(codes=None, pause=1.0, root="."):
+    """``(courts, problems)`` for every court with a recipe. The courts a
+    browser must read are read first, together, by the browser reader."""
     from .government_maps import HIGH_COURTS
     courts, problems = {}, []
-    for code in sorted(codes or COURTS):
+    codes = sorted(codes or COURTS)
+    drawn, browser_problems = read_with_browser(
+        {c: COURTS[c]["url"] for c in codes if COURTS[c].get("browser")}, root)
+    problems.extend(browser_problems)
+    for code in codes:
         recipe = COURTS[code]
         seats = recipe.get("seats", HIGH_COURTS.get(code[:2], ("", 0))[1])
         try:
-            courts[code] = read_court(code, recipe, seats)
+            courts[code] = read_court(code, recipe, seats, drawn.get(code))
         except CourtsError as exc:
             problems.append(str(exc))
-        time.sleep(pause)
+        if not recipe.get("browser"):
+            time.sleep(pause)
     return courts, problems
 
 
@@ -500,6 +720,14 @@ def for_state(code, cache):
         if read:
             court.update(members=read["members"], chief=read["chief"], seats=read["seats"],
                          url=read["url"])
+            if read.get("revised"):
+                court["revised"] = read["revised"]
+        elif entry_code in curated():
+            roster = curated()[entry_code]
+            # Read by hand (overrides.COURT_ROSTERS): the page says so, and
+            # on which day.
+            court.update(members=list(roster["members"]), chief=roster["chief"], url=roster["url"],
+                         readOn=roster["read"])
         elif entry_code in UNREADABLE:
             court.update(unreadable=UNREADABLE[entry_code][1], url=UNREADABLE[entry_code][0],
                          seats=seats if key == "court" else CRIMINAL_SEATS.get(entry_code, 0))
@@ -514,6 +742,63 @@ def for_state(code, cache):
 
 
 CRIMINAL_SEATS = {"TX-CCA": 9, "OK-CCA": 5}
+
+
+def curated():
+    """``{code: {"url", "read", "members", "chief", "evidence"}}``: the
+    rosters a person read from a court's own page, where the court's site
+    refuses every automated reader (``overrides.COURT_ROSTERS``)."""
+    from .overrides import COURT_ROSTERS
+    return {code: dict(zip(("url", "read", "members", "chief", "evidence"), entry))
+            for code, entry in COURT_ROSTERS.items()}
+
+
+def curated_problems(today=None):
+    """Every curated roster that does not fit its court, as a read roster
+    would be refused (more names than seats, a chief who is not a member,
+    a court with a recipe or no seats), and every one read by hand more
+    than ``STALE_DAYS`` ago. Errors and warnings alike are returned for the
+    build to print; the tests fail on the first kind."""
+    from .government_maps import HIGH_COURTS
+    today = today or datetime.date.today()
+    problems = []
+    for code, roster in sorted(curated().items()):
+        seats = HIGH_COURTS.get(code, ("", 0))[1]
+        members = list(roster["members"])
+        if code in COURTS or code in UNREADABLE:
+            problems.append(f"{code}: a curated roster for a court the pipeline reads or calls unreadable")
+        if not members or len(members) > seats or len(set(members)) != len(members):
+            problems.append(f"{code}: the curated roster lists {len(members)} for {seats} seats")
+        if roster["chief"] and roster["chief"] not in members:
+            problems.append(f"{code}: the curated chief {roster['chief']} is not among its members")
+        if not roster["url"].startswith("https://") or not roster["evidence"]:
+            problems.append(f"{code}: a curated roster needs the court's page and what it says")
+        age = (today - datetime.date.fromisoformat(roster["read"])).days
+        if age > STALE_DAYS:
+            problems.append(f"{code}: the court's roster was read by hand {age} days ago "
+                            f"({roster['read']}); read {roster['url']} again and update "
+                            "overrides.COURT_ROSTERS")
+    return problems
+
+
+def stale(cache, today=None):
+    """A court whose members come from a read more than ``STALE_DAYS`` old:
+    the refresh kept its last good read (rule 8) every week since. A read
+    from before reads carried their day counts from the cache's."""
+    today = today or datetime.date.today()
+    fetched = str((cache or {}).get("fetched") or "")[:10]
+    out = []
+    for code, court in sorted(((cache or {}).get("courts") or {}).items()):
+        day = court.get("read") or fetched
+        try:
+            age = (today - datetime.date.fromisoformat(day)).days
+        except ValueError:
+            out.append(f"{code}: the cache does not say when the court's roster was read")
+            continue
+        if age > STALE_DAYS:
+            out.append(f"{code}: the court's roster was last read {age} days ago ({day}); "
+                       "'courts' has kept that read since - look at why it no longer reads")
+    return out
 
 
 def shrunk(before, after):

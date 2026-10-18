@@ -273,6 +273,8 @@ def build(root="."):
     for code, office, theirs, ours in disputes:
         problems.append(f"{code}: NASS lists {theirs} as {office}, NLGA {ours}; neither is shown")
     problems.extend(officers.ag_problems(officer_cache.get("ag", {})))
+    problems.extend(courts.curated_problems())
+    problems.extend(courts.stale(court_cache))
     states = {}
     for code in sorted(governors):
         entry = {"governor": _governor(dict(governors[code], state=code), problems)}

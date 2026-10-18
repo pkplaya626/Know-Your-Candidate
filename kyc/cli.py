@@ -1370,7 +1370,7 @@ def _courts(args):
             return 2
         read, problems = cache["courts"], []
     else:
-        read, problems = courts.fetch()
+        read, problems = courts.fetch(root=args.root)
         # A court that could not be read this time keeps its last good read
         # (rule 8): a timeout is not a court with no members.
         before = (courts.load_cache(args.root) or {}).get("courts", {})
@@ -1383,10 +1383,16 @@ def _courts(args):
         short = court["seats"] - court["listed"]
         print(f"  {code}: {court['listed']} of {court['seats']}" + (f" ({short} with nobody listed)"
               if short else "") + (f"; chief {court['chief']}" if court["chief"] else "; no chief listed"))
-    missing = [c for c in STATES if c not in read and c not in courts.UNREADABLE]
+    curated = courts.curated()
+    problems.extend(courts.curated_problems())
+    # A kept read older than the last run keeps that run's day.
+    problems.extend(courts.stale({"courts": read, "fetched": (courts.load_cache(args.root) or {})
+                                  .get("fetched")}))
+    missing = [c for c in STATES if c not in read and c not in courts.UNREADABLE and c not in curated]
     for problem in problems:
         print(f"  [warn] {problem}")
-    print(f"  {len(read)} courts read; {len(courts.UNREADABLE)} cannot be read by a script"
+    print(f"  {len(read)} courts read; {len(curated)} read by hand from the court's own page "
+          f"({', '.join(sorted(curated))}); {len(courts.UNREADABLE)} cannot be read at all"
           + (f"; no recipe or no result for {', '.join(missing)}" if missing else ""))
     if not args.check:
         print(f"[ok] wrote {courts.save_cache(read, args.root)}")
