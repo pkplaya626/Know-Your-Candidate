@@ -23,6 +23,9 @@ JUDICIARY_DIR = os.path.join(DATA_DIR, "judiciary")
 JUDGES_INDEX_FILE = os.path.join(JUDICIARY_DIR, "index.js")
 # One file per state: its counties and every local government in each.
 LOCAL_DIR = os.path.join(DATA_DIR, "local")
+# Which federal district court, and division, covers each county
+# (kyc/court_districts.py, 28 U.S.C. 81-131), for the county pages.
+COURT_COUNTIES_FILE = os.path.join(DATA_DIR, "courtcounties.js")
 # One file per state, each loaded only by that state's district page.
 DISTRICTS_DIR = os.path.join(DATA_DIR, "districts")
 
@@ -121,6 +124,7 @@ COURT_PAGE_REQUIREMENTS = (
 COUNTIES_PAGE_REQUIREMENTS = (
     "../assets/kyc.js",
     "../data/local/{code}.js",
+    "../data/courtcounties.js",
     "../assets/kyc-regionmap.js",
     "../assets/kyc-local.js",
 )
@@ -304,14 +308,20 @@ def render_state_pages(profiles, root=".", summary=None, stamp_from=None):
             pages.render_legislature_page(code, host, summary, dates))
         out[os.path.join(COUNTIES_PAGES_DIR, f"{code.lower()}.html")] = (
             pages.render_counties_page(code, host, pages.listing_date(code, root)))
-    from . import federal_courts
+    from . import federal_build, federal_courts
+    # The names, written into the federal pages too (FEDERAL-12): from the
+    # same payload as data/federal.js, so verify sees a page that disagrees.
+    try:
+        fed, fed_courts, _search, _problems = federal_build.build(root)
+    except federal_build.FederalBuildError:
+        fed, fed_courts = None, {}
     out[os.path.join(FEDERAL_PAGES_DIR, "index.html")] = pages.render_federal_page(
-        host, codes, dates)
+        host, codes, dates, fed)
     out[os.path.join(COURT_PAGES_DIR, "index.html")] = pages.render_courts_index(
         host, codes, dates)
     for cid in federal_courts.COURTS:
         out[os.path.join(COURT_PAGES_DIR, f"{cid}.html")] = pages.render_court_page(
-            cid, host, codes, dates)
+            cid, host, codes, dates, fed, fed_courts.get(cid))
     # Each page's own code and data, at the versions it was built with
     # (kyc/assets.py), read from *stamp_from* - the root, unless a test
     # renders into a folder without them and says where they are.
@@ -507,7 +517,8 @@ def write_federal(payload, per_court, search, root="."):
     ``data/judiciary/index.js``, each only when its signature changed.
     Returns ``[(path, size)]`` for the files written."""
     os.makedirs(os.path.join(root, JUDICIARY_DIR), exist_ok=True)
-    source = ("data/federal_executive.json, data/judiciary.json, data/political_history.json, "
+    source = ("data/federal_executive.json, data/judiciary.json, data/judicial_vacancies.json, "
+              "data/judge_links.json, data/court_districts.json, data/political_history.json, "
               "data/oge_disclosures.json (kyc/federal_build.py)")
     files = [(os.path.join(root, FEDERAL_FILE), "kycFederal", payload)]
     files += [(os.path.join(root, JUDICIARY_DIR, f"{cid}.js"), None, court)
@@ -576,6 +587,20 @@ def write_legislature(maps, root="."):
         )
         written.append((path, _atomic_write(path, text)))
     return written
+
+
+def write_court_counties(payload, root="."):
+    """Emit ``data/courtcounties.js``: each county's federal district court
+    and division, rewritten only when its signature changes."""
+    path = os.path.join(root, COURT_COUNTIES_FILE)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    text = (
+        _BANNER.format(source="data/court_districts.json, 28 U.S.C. 81-131 "
+                              "(kyc/court_districts.py)", built=build_timestamp())
+        + f"window.kycCourtCounties = {_json(payload)};\n"
+        + 'window.kycCourtCountiesMeta = {"signature":"' + federal_signature(payload) + '"};\n'
+    )
+    return path, _atomic_write(path, text)
 
 
 def local_file(code, root="."):

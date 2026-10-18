@@ -291,6 +291,11 @@ def build(root="."):
         entry.update(officers.for_state(code, officer_cache, disputes))
         problems.extend(office_links(code, entry))
         entry.update(courts.for_state(code, court_cache))
+        # Its federal courts: the district courts in it and its court of
+        # appeals (kyc/federal_courts.py), each linked to its own page.
+        from .federal_courts import federal_for_state
+        if federal_for_state(code):
+            entry["federalCourts"] = federal_for_state(code)
         if code in ballot2026.STATES or code in ballot2026.TERRITORIES:
             # Which of these offices and seats are elected on November 3, and
             # for each office on it, whether a cited source says its holder

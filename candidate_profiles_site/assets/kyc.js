@@ -2480,11 +2480,13 @@
     return row.office + (place ? ", " + place : "") + ", " + heldYears(row);
   }
 
+  // Said in words on the page: a phone shows no tooltip (FEDERAL-20).
   var HELD_NOTES = {
-    "year-off": ["\u00b11 yr", "Wikidata and the person\u2019s Wikipedia article differ by a " +
-      "year here; the years shown are Wikidata\u2019s."],
-    start: ["end: Wikipedia", "Wikidata records no end to this office; the end year is the " +
-      "person\u2019s Wikipedia article\u2019s."],
+    "year-off": ["years differ by one between Wikidata and Wikipedia; Wikidata\u2019s shown",
+      "Wikidata and the person\u2019s Wikipedia article differ by a year here; the years " +
+      "shown are Wikidata\u2019s."],
+    start: ["end year from Wikipedia; Wikidata records none", "Wikidata records no end to " +
+      "this office; the end year is the person\u2019s Wikipedia article\u2019s."],
   };
 
   /** The panel body for a record of offices held; *why* says, when there is

@@ -256,6 +256,11 @@ def _build(args):
     departed_rows, departed_problems = _departed(args.root, snapshot, profiles)
     for level, code, message, detail in departed_problems:
         issues.append(validate.Issue(level, code, message, detail))
+    # What the judges' Wikipedia and portrait join withheld (kyc/judge_links.py):
+    # said by every build, not only by the refresh that found it.
+    from . import judge_links as judge_links_mod
+    for level, code, message, detail in judge_links_mod.problems(judge_links_mod.load_cache(args.root)):
+        issues.append(validate.Issue(level, code, message, detail))
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -364,11 +369,20 @@ def _build(args):
     # What is wrong with either cache is validate's to report.
     from . import federal_build
     try:
-        fed_payload, fed_courts, fed_search, _ = federal_build.build(args.root)
+        fed_payload, fed_courts, fed_search, fed_problems = federal_build.build(args.root)
     except federal_build.FederalBuildError as exc:
         print(f"[error] {exc}", file=sys.stderr)
         return 2
+    # What the pages leave out and why (an office in the line of succession
+    # nobody can be named for): said here as well as by validate.
+    for problem in fed_problems:
+        print(f"  [warn] federal pages: {problem}")
     fed_written = emit.write_federal(fed_payload, fed_courts, fed_search, args.root)
+    from . import court_districts
+    county_courts = court_districts.county_courts(args.root)
+    if emit.read_signature(path=os.path.join(args.root, emit.COURT_COUNTIES_FILE)) != \
+            emit.federal_signature(county_courts):
+        fed_written.append(emit.write_court_counties(county_courts, args.root))
     print(f"[ok] federal government: {len(fed_payload['offices'])} Cabinet offices, "
           f"{fed_payload['judges']:,} judges on {len(fed_courts)} courts; "
           f"{len(fed_written)} file(s) rewritten")
@@ -1311,6 +1325,14 @@ def _verify(args):
         else:
             print(f"  ok  {emit.FEDERAL_FILE} and {len(fed[1])} court files match the "
                   f"executive and judiciary caches")
+    from . import court_districts
+    county_courts = emit.read_signature(path=os.path.join(args.root, emit.COURT_COUNTIES_FILE))
+    if county_courts is None:
+        problems.append(f"{emit.COURT_COUNTIES_FILE} is missing or carries no signature")
+    elif county_courts != emit.federal_signature(court_districts.county_courts(args.root)):
+        problems.append(f"{emit.COURT_COUNTIES_FILE} is stale")
+    else:
+        print(f"  ok  {emit.COURT_COUNTIES_FILE} matches 28 U.S.C. 81-131 as read")
 
     from . import government_maps
     guide_expected = emit.government_signature(government_maps.payload())
@@ -1677,6 +1699,12 @@ def _judiciary(args):
         except judiciary.JudiciaryError as exc:
             print(f"[error] {exc}; the committed cache is unchanged", file=sys.stderr)
             return 2
+        # The territorial courts' judges, from each court's own site
+        # (kyc/territorial_courts.py); a page not read keeps the last roster.
+        from . import territorial_courts
+        cache["territorial"], trouble = territorial_courts.fetch((previous or {}).get("territorial"))
+        for line in trouble:
+            print(f"  [warn] territorial court: {line}; its last roster stands")
     # A retired justice is listed apart and never counted as sitting.
     judges = {k: j for k, j in cache["judges"].items() if not j.get("retiredJustice")}
     active = sum(1 for j in judges.values() if j["status"] == "active")
@@ -1703,6 +1731,21 @@ def _judiciary(args):
         failed += level == "error"
     if not args.check:
         print(f"[ok] wrote {judiciary.save_cache(cache, args.root)}")
+        # Each judge's Wikipedia article and portrait, joined through the
+        # FJC id on Wikidata (kyc/judge_links.py). A failure keeps the last
+        # links and does not fail the refresh (rule 8).
+        from . import judge_links
+        try:
+            links = judge_links.refresh(cache, args.root)
+        except judge_links.JudgeLinksError as exc:
+            print(f"  [warn] judge links: {exc}; the committed links are unchanged")
+        else:
+            print(f"  judge links: {len(links['judges'])} judges on Wikidata, "
+                  f"{sum(1 for j in links['judges'].values() if j.get('portrait'))} portraits, "
+                  f"{len(links['problems'])} withheld; {links['unread']} FJC pages to read again")
+            for line in links["problems"][:10]:
+                print(f"           - {line}")
+            print(f"[ok] wrote {judge_links.CACHE_PATH}")
     return 1 if failed else 0
 
 
