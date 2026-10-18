@@ -155,8 +155,8 @@ python build_profile_site.py oge              # the executive's financial report
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1395 tests, no dependencies
-npm install && npm test                       # 1858 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1423 tests, no dependencies
+npm install && npm test                       # 1910 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -631,10 +631,31 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     names districts as each legislature does ("10th Bristol", "Belknap 1",
     "10A"); the Census names them its own way. `statelegs.norm` reduces both
     alike and anything left over is reported and shown under "Not on the
-    map" - New Hampshire's floterial seats, Maine's tribal representatives.
-    A nearest-name match would put someone on the wrong district, and a map
-    makes that look entirely normal. A seat with nobody listed is "nobody
-    listed", never "vacant" (rule 19).
+    map" - New Hampshire's floterial seats, Maine's tribal representatives,
+    each card naming the district it holds. A nearest-name match would put
+    someone on the wrong district, and a map makes that look entirely
+    normal. A seat with nobody listed is "nobody listed", never "vacant"
+    (rule 19): its own legend entry and an outlined square in the seat
+    strip, never folded in with Nebraska's nonpartisan seats. The cards
+    printed every page Open States read - up to eighteen raw URLs, past
+    sessions' pages, PDFs - and among them Rhode Island's roster links some
+    twenty representatives to one colleague's page. A card links one
+    `legislature.member_page`: a member's page on the legislature's own
+    host, never a past numbered assembly's, or one whose address names
+    another member and not them (rule 3), or another chamber or district.
+    The first fix chose by host alone and linked 79 senators to their old
+    House pages or another district's: Kentucky, Louisiana, Texas and
+    Florida key a page by seat, so it shows whoever holds that seat now.
+    Label the link as what it is - a bill list, a past session's page, a
+    caucus's page, the chamber's list - and a district the 2026 record
+    names for a special election is on the ballot, never "not up". A
+    floterial seat is one RSA 662:5 makes floterial (`NH_FLOTERIAL`); any
+    other unplaced name is unmatched. A portrait that is a search
+    engine's thumbnail is not shown; one is dropped as missing only when a
+    GET answers 404 or 410 (`statelegs.check_portrait`). Texas's host
+    refused one machine every connection (rule 8), and HEAD lies:
+    Massachusetts answers it 404 for portraits GET serves, and the first
+    run called 211 working portraits missing.
 
 52. **A rejection page is not a file.** The Census server answers a burst -
     and New Mexico's 2025 senate file, always - with "Request Rejected" and
@@ -665,6 +686,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     list items, or Alabama's governor gets the leadership page and the logo.
     And the NGA's pages are themselves wrong about two governors' first day
     in office, so a date is shown only where Wikidata records the same one.
+    The legislature pages showed Alaska's seat counts and a red map with no
+    word of its coalitions, and split New York's Senate into six "parties"
+    by fusion line. They now carry the state page's count, majority and note
+    (`legislature._count` fails the build if the two disagree), count
+    "Democratic/Working Families" as Democratic with its line named apart,
+    and draw one square per seat, since an area map gives a chamber of
+    dense city districts to its rural party (Minnesota's tied House).
 
 55. **An association's roster is the authority on its members, and only
     on them.** NASS's member for Alaska, Hawaii and Utah is the lieutenant
