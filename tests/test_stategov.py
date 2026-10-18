@@ -340,7 +340,9 @@ class TestCommitted(unittest.TestCase):
         cache = executives.load_cache(ROOT)["governors"]
         payload, _ = stategov.build(ROOT)
         for code, entry in payload["states"].items():
-            if entry["governor"].get("headshot"):
+            # The NGA's; a governor's own office's is weighed in its
+            # overrides.OFFICER_PHOTOS entry (TestOfficerPhotos).
+            if entry["governor"].get("headshot") and not entry["governor"].get("headshotPage"):
                 self.assertLessEqual(cache[code]["headshotBytes"], stategov.HEADSHOT_MAX_BYTES, code)
 
 
@@ -370,6 +372,69 @@ class TestOfficeLinks(unittest.TestCase):
     def test_the_build_applies_every_entry(self):
         _payload, problems = stategov.build(ROOT)
         self.assertFalse([p for p in problems if "OFFICE_LINKS" in p], problems)
+
+
+class TestOfficerPhotos(unittest.TestCase):
+    """STATEGOV-13: no attorney general had a photograph, and two governors,
+    a lieutenant governor and six secretaries of state had none."""
+
+    def entry(self, **who):
+        from kyc.overrides import OFFICER_PHOTOS
+        (code, office), photo = next((k, v) for k, v in sorted(OFFICER_PHOTOS.items())
+                                     if k[1] == who.get("office", "ag"))
+        return code, office, photo
+
+    def test_a_photograph_is_given_while_the_roster_names_its_person(self):
+        code, office, photo = self.entry()
+        entry = {office: {"name": photo["name"]}}
+        self.assertEqual(stategov.officer_photos(code, entry), [])
+        self.assertEqual(entry[office]["photo"], photo["photo"])
+        self.assertEqual(entry[office]["photoBy"], photo["by"])
+        self.assertEqual(entry[office]["photoPage"], photo["page"])
+
+    def test_a_new_holder_gets_no_ones_photograph_and_it_is_said(self):
+        code, office, _photo = self.entry()
+        entry = {office: {"name": "Somebody Else"}}
+        problems = stategov.officer_photos(code, entry)
+        self.assertNotIn("photo", entry[office])
+        self.assertTrue(problems and "no photograph is shown" in problems[0], problems)
+        unconfirmed = {office: {"name": _photo["name"], "unconfirmed": True}}
+        stategov.officer_photos(code, unconfirmed)
+        self.assertNotIn("photo", unconfirmed[office])
+
+    def test_a_governors_photograph_is_a_headshot_and_the_roster_s_own_stands(self):
+        code, office, photo = self.entry(office="governor")
+        entry = {"governor": {"name": photo["name"]}}
+        stategov.officer_photos(code, entry)
+        self.assertEqual(entry["governor"]["headshot"], photo["photo"])
+        own = {"governor": {"name": photo["name"], "headshot": "https://www.nga.org/x.jpg"}}
+        problems = stategov.officer_photos(code, own)
+        self.assertEqual(own["governor"]["headshot"], "https://www.nga.org/x.jpg")
+        self.assertTrue(problems and "may be unneeded" in problems[0], problems)
+
+    def test_every_entry_is_a_light_photograph_carrying_its_evidence(self):
+        from kyc.overrides import OFFICER_PHOTOS
+        from kyc.photos import too_heavy
+        for (code, office), photo in OFFICER_PHOTOS.items():
+            with self.subTest(code=code, office=office):
+                self.assertIn(office, ("governor", "lt", "ag", "sos"))
+                self.assertTrue(photo["photo"].startswith("https://"))
+                self.assertTrue(photo["page"].startswith("https://"))
+                self.assertTrue(photo["by"] and photo["evidence"])
+                self.assertRegex(photo["checked"], r"^\d{4}-\d{2}-\d{2}$")
+                self.assertEqual(too_heavy(photo["weight"]), "")
+                self.assertLessEqual(photo["weight"]["bytes"], 300_000)
+
+    def test_no_headshot_or_photograph_is_shown_uncredited(self):
+        payload, _ = stategov.build(ROOT)
+        for code, entry in payload["states"].items():
+            gov = entry["governor"]
+            if gov.get("headshot"):
+                self.assertTrue(gov.get("headshotBy"), code)
+            for office in ("lt", "ag", "sos"):
+                person = entry.get(office) or {}
+                if person.get("photo"):
+                    self.assertTrue(person.get("photoBy"), (code, office))
 
 
 if __name__ == "__main__":

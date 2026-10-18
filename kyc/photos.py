@@ -157,3 +157,33 @@ def assign_credits(profiles):
         else:
             profile.pop("photoCredit", None)
     return credited
+
+
+SMALLER_WIDTH = 500
+
+
+def smaller_form(url, width=SMALLER_WIDTH):
+    """*url* at *width* pixels wide from its host's own resizing service, or
+    ``None``. Squarespace's image CDN (``format=500w``), imgix and
+    WordPress.com's Photon (``w=500``, on ``i0.wp.com`` and its siblings)
+    serve any upload at a width asked for: the same file, so the same
+    photograph (rule 42), checked again for shape and weight before it is
+    taken. Nothing is guessed: a host without such a service has no smaller
+    form here."""
+    import urllib.parse
+
+    try:
+        parts = urllib.parse.urlsplit(str(url or ""))
+    except ValueError:
+        return None
+    host = (parts.hostname or "").lower()
+    query = urllib.parse.parse_qsl(parts.query, keep_blank_values=True)
+    if host == "images.squarespace-cdn.com":
+        query = [(k, v) for k, v in query if k != "format"] + [("format", f"{width}w")]
+    elif host.endswith(".imgix.net") or host in ("i0.wp.com", "i1.wp.com", "i2.wp.com",
+                                                   "i3.wp.com"):
+        query = [(k, v) for k, v in query if k not in ("w", "resize", "fit")] + [("w", str(width))]
+    else:
+        return None
+    smaller = urllib.parse.urlunsplit(parts._replace(query=urllib.parse.urlencode(query)))
+    return smaller if smaller != url else None

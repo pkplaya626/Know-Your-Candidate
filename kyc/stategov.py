@@ -219,7 +219,41 @@ def _governor(gov, problems=None):
             out[key] = gov[key]
     if gov.get("headshot") and 0 < (gov.get("headshotBytes") or 0) <= HEADSHOT_MAX_BYTES:
         out["headshot"] = gov["headshot"]
+        out["headshotBy"] = "National Governors Association"
     return out
+
+
+def officer_photos(code, entry):
+    """Apply ``overrides.OFFICER_PHOTOS`` to one state's offices, in place:
+    a photograph for a holder whose roster has none, while the roster names
+    the person the entry was checked for. Returns a problem for each entry
+    that no longer fits - the office changed hands, or the roster now has a
+    photograph of its own - so a stale one is never shown (rule 87)."""
+    from .overrides import OFFICER_PHOTOS
+
+    problems = []
+    for (state, office), photo in sorted(OFFICER_PHOTOS.items()):
+        if state != code:
+            continue
+        holder = entry.get(office)
+        field, by_field, page_field = (("headshot", "headshotBy", "headshotPage")
+                                       if office == "governor"
+                                       else ("photo", "photoBy", "photoPage"))
+        name = " ".join(str((holder or {}).get("name") or "").split())
+        if (not isinstance(holder, dict) or holder.get("unconfirmed") or holder.get("disputed")
+                or holder.get("notMember") or name != photo["name"]):
+            problems.append(f"{code} {office}: overrides.OFFICER_PHOTOS is for {photo['name']}; "
+                            f"the roster names {name or 'no confirmed holder'}, so no "
+                            "photograph is shown")
+            continue
+        if holder.get(field):
+            problems.append(f"{code} {office}: the roster now has a photograph of {name}; "
+                            "overrides.OFFICER_PHOTOS may be unneeded")
+            continue
+        holder[field] = photo["photo"]
+        holder[by_field] = photo["by"]
+        holder[page_field] = photo["page"]
+    return problems
 
 
 def office_links(code, entry):
@@ -290,6 +324,7 @@ def build(root="."):
             entry["territory"] = True
         entry.update(officers.for_state(code, officer_cache, disputes))
         problems.extend(office_links(code, entry))
+        problems.extend(officer_photos(code, entry))
         entry.update(courts.for_state(code, court_cache))
         if code in ballot2026.STATES or code in ballot2026.TERRITORIES:
             # Which of these offices and seats are elected on November 3, and

@@ -204,6 +204,36 @@ class TestForState(unittest.TestCase):
             nlga_entry(n.title(), "A B (D), Lieutenant Governor") for n in US_STATES if n != "NEW JERSEY")
         self.assertNotIn("photo", officers.parse_nlga(page)["NJ"])
 
+    def test_an_nlga_card_with_only_a_src_keeps_its_photo(self):
+        # Virginia's card carried a plain src, no srcset, and Ghazala
+        # Hashmi lost her photograph (STATEGOV-13). The host's own resizer
+        # gives the same file at 300px.
+        from kyc.normalize import US_STATES
+        card = nlga_entry("Virginia", "Ghazala Hashmi (D), Lieutenant Governor").replace(
+            'src="https://i0.wp.com/nlga.us/x.jpg" srcset="'
+            'https://i0.wp.com/nlga.us/x.jpg?w=400 400w, '
+            'https://i0.wp.com/nlga.us/x.jpg?resize=150%2C150 150w"',
+            'src="https://i0.wp.com/nlga.us/wp-content/uploads/2026/03/Hashmi1.jpg?w=800&#038;ssl=1"')
+        page = card + "".join(nlga_entry(n.title(), "A B (D), Lieutenant Governor")
+                              for n in US_STATES if n != "VIRGINIA")
+        self.assertEqual(officers.parse_nlga(page)["VA"]["photo"],
+                         "https://i0.wp.com/nlga.us/wp-content/uploads/2026/03/Hashmi1.jpg"
+                         "?ssl=1&w=300")
+
+    def test_a_roster_photograph_says_whose_it_is(self):
+        cache = {"lt": {"AL": {"name": "Will Ainsworth", "party": "R", "partyKey": "R",
+                               "title": "Lieutenant Governor",
+                               "photo": "https://i0.wp.com/nlga.us/Will-Ainsworth.jpg"}},
+                 "sos": {"AL": {"name": "Wes Allen", "party": "R", "partyKey": "R",
+                                "title": "Secretary of State", "electionChief": True,
+                                "photo": "https://www.nass.org/AL-Allen-2023.jpg"}},
+                 "ag": {"AL": {"name": "Steve Marshall"}}}
+        out = officers.for_state("AL", cache, [])
+        self.assertEqual(out["lt"]["photoBy"], officers.NLGA_BY)
+        self.assertEqual(out["sos"]["photoBy"], officers.NASS_BY)
+        out["ag"]["photo"] = "x"
+        self.assertNotIn("photo", cache["ag"]["AL"])   # the cache is not written through
+
     def test_a_nass_photo_must_carry_the_surname(self):
         self.assertTrue(officers._surname_in("Wes Allen", "https://x/AL-Allen-2023.jpg?itok=1"))
         self.assertFalse(officers._surname_in("Steve Simon", "https://x/MN-SOS-2023.jpg"))

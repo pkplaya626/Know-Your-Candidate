@@ -189,6 +189,24 @@ def _smallest(srcset):
     return best[1] if best else ""
 
 
+def _card_photo(fragment):
+    """The photograph on an NLGA card: the smallest size its srcset offers,
+    or - for a card that has only a ``src`` - that file at 300px from the
+    host's own resizer. Virginia's lieutenant governor's card carried a
+    plain ``src`` and lost its photograph because only a srcset was read
+    (STATEGOV-13)."""
+    from .photos import smaller_form
+
+    img = re.search(r'<img[^>]*\bsrcset="([^"]+)"', fragment)
+    if img:
+        return _smallest(img.group(1))
+    img = re.search(r'<img[^>]*\bsrc="(https://[^"]+)"', fragment)
+    if not img:
+        return ""
+    src = html.unescape(img.group(1))
+    return smaller_form(src, 300) or src
+
+
 def parse_nlga(page):
     """``{code: officer}`` from NLGA's member list: the lieutenant governor,
     or the officer first in line where a state has none."""
@@ -204,9 +222,9 @@ def parse_nlga(page):
             if not name:
                 raise OfficersError(f"NLGA {code}: no name and party in {who!r}")
             entry.update(name=name, party=party, partyKey=party_key(party))
-            img = re.search(r'<img[^>]*\bsrcset="([^"]+)"', before)
-            if img and _surname_in(name, _smallest(img.group(1))):
-                entry["photo"] = _smallest(img.group(1))
+            photo = _card_photo(before)
+            if photo and _surname_in(name, photo):
+                entry["photo"] = photo
         site = re.search(r'<a href="([^"]+)"[^>]*>\s*<span class="elementor-icon-list-text">\s*'
                          r'Website', after)
         if site:
@@ -620,6 +638,17 @@ def _surname_in(name, url):
     return bool(surname) and surname in file
 
 
+NASS_BY = "National Association of Secretaries of State"
+NLGA_BY = "National Lieutenant Governors Association"
+
+
+def _credited(person, by):
+    """*person* with whose photograph it is, when it has one (rule 87)."""
+    if person.get("photo"):
+        person["photoBy"] = by
+    return person
+
+
 def for_state(code, cache, disputes):
     """``{"lt": ..., "sos": ...}`` for one state, as the page shows them.
     *disputes* is ``overlaps(...)``: an office the rosters disagree about
@@ -630,15 +659,16 @@ def for_state(code, cache, disputes):
     if (code, "Lieutenant Governor") in named:
         out["lt"] = {"disputed": list(named[(code, "Lieutenant Governor")])}
     elif lt and lieutenant(lt):
-        out["lt"] = {"vacant": True, "title": lt["title"]} if lt.get("vacant") else _person(lt)
+        out["lt"] = ({"vacant": True, "title": lt["title"]} if lt.get("vacant")
+                     else _credited(_person(lt), NLGA_BY))
     elif lt:
         # No lieutenant governor. The officer first in line is named only
         # when that office is neither vacant nor in dispute.
         out["lt"] = {"none": True}
         if not lt.get("vacant") and (code, office_of(lt["title"])) not in named:
-            out["lt"]["successor"] = _person(lt)
+            out["lt"]["successor"] = _credited(_person(lt), NLGA_BY)
     if code in cache.get("ag", {}):
-        out["ag"] = cache["ag"][code]
+        out["ag"] = dict(cache["ag"][code])
     sos = cache["sos"].get(code)
     if (code, "Secretary of State") in named:
         out["sos"] = {"disputed": list(named[(code, "Secretary of State")])}
@@ -650,7 +680,7 @@ def for_state(code, cache, disputes):
             del person["photo"]
         if sos.get("member") is False and not sos.get("officeConfirms"):
             person["notMember"] = True
-        out["sos"] = person
+        out["sos"] = _credited(person, NASS_BY)
     return out
 
 

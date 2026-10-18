@@ -336,6 +336,86 @@ OFFICE_LINKS = {
                                     "'Governor of Virginia'"),
 }
 
+
+# Photographs of state officers whose roster has none, or one too heavy to
+# show (STATEGOV-13), each looked at on the day given: {(state, office):
+# {name, photo, page, by, weight, checked, evidence}}. office is "governor",
+# "lt", "ag" or "sos". An entry is shown only while the roster names that
+# very person as the holder (stategov.officer_photos): once the office
+# changes hands the build says so and shows nothing, never a predecessor's
+# face (rule 87). Never from a search - the office's own page, or the
+# association whose roster names them.
+def _officer_photo(name, photo, page, by, weight, evidence, checked="2026-10-18"):
+    return {"name": name, "photo": photo, "page": page, "by": by,
+            "weight": dict(zip(("bytes", "width", "height"), weight)),
+            "checked": checked, "evidence": evidence}
+
+
+_NASS = "https://www.nass.org/sites/default/files/styles/secretary/public/"
+_NASS_BY = "National Association of Secretaries of State"
+# NASS files its members' photographs under the state's code, which
+# officers._surname_in cannot tie to a person; each of these was looked at
+# and was uploaded after its holder took office, so it cannot be a
+# predecessor's.
+_NASS_CARD = ("NASS's roster card names {} beside this photograph, filed as {} in {}, after "
+              "they took office ({}); a head-and-shoulders portrait. {}")
+
+
+def _naag(name, slug, path, weight):
+    """An attorney general's photograph on their NAAG member page."""
+    return _officer_photo(
+        name, "https://www.naag.org/wp-content/uploads/" + path,
+        f"https://www.naag.org/attorney-general/{slug}/", "National Association of Attorneys General",
+        weight, "NAAG's member page: its heading is this state's attorney general, its text names "
+        "the holder the office's own page confirmed beside the title (officers.names_holder) and "
+        "the file carries their surname. NAAG's pages refuse a script; read by hand.")
+
+
+OFFICER_PHOTOS = {
+    # The NGA's headshot is 2.9 MB (stategov.HEADSHOT_MAX_BYTES is 1 MB).
+    ("NM", "governor"): _officer_photo(
+        "Michelle Lujan Grisham",
+        "https://www.governor.state.nm.us/assets/www.governor.state.nm.us/wp-content/uploads/"
+        "2018/12/Michelle-Lujan-Grisham.jpg",
+        "https://www.governor.state.nm.us/", "Office of the Governor of New Mexico",
+        (68244, 320, 320), "The governor's home page, alt 'Governor Michelle Lujan Grisham'."),
+    ("AZ", "sos"): _officer_photo(
+        "Adrian Fontes", _NASS + "2024-07/AZ.jpg?itok=-XCD586X", "https://www.nass.org/membership",
+        _NASS_BY, (24106, 355, 450), _NASS_CARD.format(
+            "Adrian Fontes", "AZ.jpg", "July 2024", "January 2023",
+            "azsos.gov refuses a script (HTTP 403).")),
+    ("MN", "sos"): _officer_photo(
+        "Steve Simon", _NASS + "2024-07/MN.jpg?itok=eqzGnPsy", "https://www.nass.org/membership",
+        _NASS_BY, (18126, 355, 450), _NASS_CARD.format(
+            "Steve Simon", "MN.jpg", "July 2024", "January 2015",
+            "sos.mn.gov answers a script with a bot check.")),
+    ("VT", "sos"): _officer_photo(
+        "Sarah Copeland Hanzas", _NASS + "2023-07/VT.jpg?itok=OT3AvScG",
+        "https://www.nass.org/membership", _NASS_BY, (23856, 355, 450), _NASS_CARD.format(
+            "Sarah Copeland Hanzas", "VT.jpg", "July 2023", "January 2023",
+            "sos.vermont.gov shows no photograph of her a script can find.")),
+    ("MS", "sos"): _officer_photo(
+        "Michael Watson", _NASS + "2022-07/MS.jpg?itok=3rNYOJpS", "https://www.nass.org/membership",
+        _NASS_BY, (22287, 355, 450), _NASS_CARD.format(
+            "Michael Watson", "MS.jpg", "July 2022", "January 2020",
+            "The same man as the office's own headshot on sos.ms.gov/about-us/biography, which is "
+            "2.9 MB.")),
+    ("NY", "sos"): _officer_photo(
+        "Walter Mosley",
+        "https://dos.ny.gov/sites/g/files/oee926/files/styles/wysiwyg/public/media/2024/06/"
+        "img_2053.jpg?itok=F4mQaNh_",
+        "https://dos.ny.gov/about-our-executive-team", "New York Department of State",
+        (83390, 352, 440), "The department's executive team page, alt 'Walter T. Mosley "
+        "Headshot'; the same photograph as NASS's card for New York (NY.jpg)."),
+    ("SD", "sos"): _officer_photo(
+        "Monae Johnson",
+        "https://sdsos.gov/general-information/assets/Secretary%20Johnson_Pic2024.5.jpg",
+        "https://sdsos.gov/about-the-office/about-secretary-johnson.aspx",
+        "South Dakota Secretary of State", (16591, 310, 431),
+        "The office's 'About Secretary Johnson' page; the same photograph as NASS's card for "
+        "South Dakota."),
+}
+
 # Campaign websites that must never be linked, keyed on the host the FEC
 # committee registered (lower case; a key without "www." also covers the
 # "www." form). The FEC keeps whatever site a committee once filed, and a

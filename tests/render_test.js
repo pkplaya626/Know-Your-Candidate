@@ -6086,10 +6086,32 @@ async function testStateGov() {
         !/party-/.test(shape(unconfirmed).style.fill) &&
         /Not confirmed by the office/.test(D.getElementById("mapLegend").textContent));
     }
+    // STATEGOV-13: no attorney general had a photograph, so their rows read
+    // differently from every row above them.
+    const pictured = stateCodes.find((c) => data.states[c].ag && data.states[c].ag.photo &&
+      !data.states[c].ag.unconfirmed);
+    check("attorneys general are pictured", !!pictured);
+    if (pictured) {
+      const ag = data.states[pictured].ag;
+      pick("#/?state=" + pictured + "&mode=ag");
+      check("a confirmed attorney general's row carries their photograph",
+        [...D.querySelectorAll("#delegation .gov-officer-photo")].some((i) =>
+          i.getAttribute("src") === ag.photo));
+      const sources = (D.querySelector("#delegation .gov-sources") || {}).textContent || "";
+      check("and the sources say whose photograph it is (rule 87)",
+        sources.indexOf("attorney general, " + ag.photoBy) !== -1, sources);
+    }
   });
 
   suite("state government — the data", () => {
     check("every state has a governor", stateCodes.every((c) => data.states[c] && data.states[c].governor.name));
+    const uncredited = stateCodes.filter((c) => {
+      const s = data.states[c];
+      return (s.governor.headshot && !s.governor.headshotBy) ||
+        ["lt", "ag", "sos"].some((k) => s[k] && s[k].photo && !s[k].photoBy);
+    });
+    check("every photograph on a state's card says whose it is (rule 87)", !uncredited.length,
+      uncredited.join(","));
     check("a majority is more than half of all seats", stateCodes.every((c) => {
       const s = data.states[c];
       return ["upper", "lower"].every((k) => {

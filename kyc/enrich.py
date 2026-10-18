@@ -42,7 +42,7 @@ from concurrent.futures import ThreadPoolExecutor
 from . import overrides
 from .legislators import age_on
 from .normalize import fill_field, looks_like_date
-from .photos import campaign_credit, too_heavy
+from .photos import campaign_credit, smaller_form, too_heavy
 from .portraits import article_is_theirs, image_size, surname_of, title_is_about
 from .results import OFF_BALLOT
 
@@ -1004,32 +1004,6 @@ def take_portrait(record, pictures, tries=3):
     if heavy:
         record["portraitHeavy"] = heavy
     return record.get("portrait")
-
-
-SMALLER_WIDTH = 500
-
-
-def smaller_form(url):
-    """*url* at ``SMALLER_WIDTH`` pixels wide from its host's own resizing
-    service, or ``None``. Squarespace's image CDN (``format=500w``) and imgix
-    (``w=500``) serve any upload at a width asked for: the same file, so the
-    same photograph (rule 42), checked again for shape and weight before it
-    is taken. Nothing is guessed: a host without such a service has no
-    smaller form here."""
-    try:
-        parts = urllib.parse.urlsplit(str(url or ""))
-    except ValueError:
-        return None
-    host = (parts.hostname or "").lower()
-    query = urllib.parse.parse_qsl(parts.query, keep_blank_values=True)
-    if host == "images.squarespace-cdn.com":
-        query = [(k, v) for k, v in query if k != "format"] + [("format", f"{SMALLER_WIDTH}w")]
-    elif host.endswith(".imgix.net"):
-        query = [(k, v) for k, v in query if k != "w"] + [("w", str(SMALLER_WIDTH))]
-    else:
-        return None
-    smaller = urllib.parse.urlunsplit(parts._replace(query=urllib.parse.urlencode(query)))
-    return smaller if smaller != url else None
 
 
 def measure_portraits(cache, log=print, pause=1.0):

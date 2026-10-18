@@ -611,8 +611,29 @@
       // where the two counts part).
       (s.upper ? "Seats: " + source("openstates") + "." + (ncsl ? " Which party holds each chamber " +
         "is checked against " + source("ncsl") + "." : "") : "") +
-      courtSource(s.court) + courtSource(s.criminalCourt) + "</p>";
+      courtSource(s.court) + courtSource(s.criminalCourt) + photoSources(s) + "</p>";
     return html;
+  }
+
+  /** Whose each photograph on the card is (rule 87): the roster's
+   *  association, or the office whose page it was taken from. */
+  function photoSources(s) {
+    var gov = s.governor || {};
+    var rows = [["governor", gov.headshot && gov.headshotBy, gov.headshotPage]];
+    [["lieutenant governor", s.lt], ["attorney general", s.ag], ["secretary of state", s.sos]]
+      .forEach(function (pair) {
+        var off = pair[1] || {};
+        // Only a row that draws its holder's photograph (officerRow's last
+        // branch) credits one.
+        var drawn = off.photo && !(off.disputed || off.unlisted || off.unconfirmed ||
+          off.vacant || off.none || off.notMember);
+        rows.push([pair[0], drawn && off.photoBy, off.photoPage]);
+      });
+    var said = rows.filter(function (row) { return row[1]; }).map(function (row) {
+      return KYC.escapeHtml(row[0].toLowerCase()) + ", " +
+        (row[2] ? link(row[2], row[1]) : KYC.escapeHtml(row[1]));
+    });
+    return said.length ? " Photographs: " + said.join("; ") + "." : "";
   }
 
   /** A court's line in the list of sources: whose roster, and the day it
