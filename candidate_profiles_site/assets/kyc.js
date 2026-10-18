@@ -463,11 +463,14 @@
     var top = kind === "top-four" ? "top four" : "top two";
     var title = "Finished in the " + top + " of the all-party primary, which sends the leaders " +
       "to November whatever their party; on the November ballot.";
-    return { cls: "badge-money", rank: 0,
-      card: "On the November ballot", long: "Advanced to the November ballot", mate: "On the ballot",
-      short: "Advanced", title: title,
-      member: { card: "Advanced to November", long: "Advanced to the November ballot",
-        short: "Advanced", mate: "Advanced", title: title } };
+    // One outcome, one label: the member read "Advanced to November" and a
+    // challenger through the same primary "On the November ballot", which
+    // the key defined as winning a primary nobody there wins (GRID-19,
+    // rule 74).
+    var words = { card: "Advanced to November", long: "Advanced to the November ballot",
+      short: "Advanced", mate: "Advanced", title: title };
+    return { cls: "badge-money", rank: 0, card: words.card, long: words.long, mate: words.mate,
+      short: words.short, title: title, member: words };
   }
 
   function raceStatus(status, form, opts) {
@@ -634,6 +637,9 @@
    *  which a phone never shows). `[{cls, label, title}]`, in rank order.
    *  The title is the badge's own, but where a status is read from more
    *  than one kind of source the badge on a card names its source. */
+  var NOMINEE_KEY = "Will appear on the November general election ballot: a party's nominee, " +
+    "or an independent or minor-party candidate there by petition or their party's nomination.";
+
   function raceStatusLegend() {
     var seen = {};
     var out = [];
@@ -649,12 +655,15 @@
     };
     Object.keys(RACE_STATUS).forEach(function (status) {
       var spec = RACE_STATUS[status];
-      add(spec);
+      // A badge's own title says how its holder got there; the key's entry
+      // covers everyone who carries the words. "Won the primary" was false
+      // for an independent on the ballot by petition (rule 74).
+      add(spec, status === "nominee" ? NOMINEE_KEY : undefined);
       member(spec);
     });
-    var top = allParty("top-two");
-    add(top);
-    member(top);
+    add(allParty("top-two"), "Finished in the top two (California, Washington) or the top four " +
+      "(Alaska) of an all-party primary, which sends the leaders to November whatever their " +
+      "party; on the November ballot.");
     add(LISTED.unlisted);
     add(UNCONFIRMED);
     add(APPOINTEE_LEAVING);
@@ -1596,6 +1605,10 @@
     // The party's name as the chip says it: "Democratic" found 26 people
     // and the Democratic chip 541, because the FEC's word is "Democrat".
     if (item.party === "Democrat") office.push("Democratic");
+    // A leadership post held, as the profile shows it (by bioguide id, from
+    // congress-legislators): "Speaker" found only a "motivational speaker"
+    // in a challenger's text, never the Speaker (GRID-05).
+    if (seated(item)) (item.leadership || []).forEach(function (t) { office.push(String(t)); });
     var body = [];
     SEARCH_FIELDS.forEach(function (field) {
       if (NAME_FIELDS.indexOf(field) !== -1 || OFFICE_FIELDS.indexOf(field) !== -1) return;
@@ -1659,11 +1672,17 @@
     return words[words.length - 1] || "";
   }
 
+  function wholeWord(term) {
+    return new RegExp("(?:^|[^a-z0-9])" + escapeRegex(term) + "(?![a-z0-9])");
+  }
+
   /** How well *query* names someone known as any of *names*: 0 for the
-   *  name itself, 1 for every word found at a word's start in one of the
-   *  names (a first name's short form counts: "Jim" for James), 2 for a
-   *  query whose last word is the surname ("Skip Rankin"), else -1. For
-   *  people a reader looks up by name: the judges, the officials. */
+   *  name itself, 1 for every word found whole in one of the names (a
+   *  first name's short form counts: "Jim" for James), 1.5 for every word
+   *  found where a word starts, some only in part ("Roberts" in
+   *  "Robertson", "pelo" while typing Pelosi), 2 for a query whose last
+   *  word is the surname alone ("Skip Rankin"), else -1. For people a
+   *  reader looks up by name: the judges, the officials. */
   function nameScore(query, names) {
     var q = searchFold(query);
     if (!q) return -1;
@@ -1673,13 +1692,17 @@
       return n.replace(/,/g, "") === q || joinInitials(n.replace(/,/g, "")) === joined;
     })) return 0;
     var terms = q.split(" ");
-    var all = function (name) {
+    var all = function (name, test) {
       return terms.every(function (term, i) {
         var forms = [term].concat(i === 0 && terms.length > 1 ? NICKNAMES[term] || [] : []);
-        return forms.some(function (form) { return wordStart(form).test(name); });
+        return forms.some(function (form) { return test(form).test(name); });
       });
     };
-    if (folded.some(function (n) { return all(n) || all(joinInitials(n)); })) return 1;
+    var found = function (test) {
+      return folded.some(function (n) { return all(n, test) || all(joinInitials(n), test); });
+    };
+    if (found(wholeWord)) return 1;
+    if (found(wordStart)) return 1.5;
     var last = terms[terms.length - 1];
     if (terms.length > 1 && folded.some(function (n) { return lastName(n) === last; })) return 2;
     return -1;
@@ -1786,10 +1809,36 @@
 
   /** "OH-9", "Ohio's House seats", "Kansas": what a place query asked for,
    *  for the results line. */
+  function houseSeats(code) {
+    var info = (meta().states || {})[code] || {};
+    return (info.house || 0) + (info.delegates || 0);
+  }
+
+  /** Why a seat a query names does not exist, in a sentence, or "": "AZ at
+   *  large" and "Ohio 99" were answered as AZ-AL and OH-99, seats nobody
+   *  holds or runs for. The count of seats is the build's (one at large
+   *  answers "1" too); a state with none listed concludes nothing. */
+  function seatNote(place) {
+    if (!place || place.district === undefined || place.any) return "";
+    var seats = houseSeats(place.state);
+    if (!seats) return "";
+    var name = stateName(place.state);
+    if (seats === 1) {
+      return place.district <= 1 ? "" : name + " has one House seat, elected at large (" +
+        place.state + "-AL).";
+    }
+    if (place.district >= 1 && place.district <= seats) return "";
+    return name + (place.district === 0 ? " has no at-large seat" : " has no district " +
+      place.district) + "; its districts are numbered 1 to " + seats + ".";
+  }
+
   function placeLabel(place) {
     if (!place) return "";
     if (place.district !== undefined) {
-      var seat = place.district === 0 ? "AL" : String(place.district);
+      if (seatNote(place)) return "";
+      // A state with one seat: its "1" is the at-large seat, and is named so.
+      var seat = place.district === 0 || (!place.any && houseSeats(place.state) === 1)
+        ? "AL" : String(place.district);
       return place.any ? "district " + seat + " in every state" : place.state + "-" + seat;
     }
     var name = stateName(place.state);
@@ -1818,7 +1867,7 @@
     }
     var two = place && /^[a-z]{2}$/.test(q);
     compiled = { query: query, place: place, seat: seat, terms: terms, exact: exact,
-                 two: two, label: placeLabel(place) };
+                 two: two, label: placeLabel(place), note: seatNote(place) };
     return compiled;
   }
 
@@ -1931,7 +1980,7 @@
     var finish = function (ok) {
       var calls = demanded[file] || [];
       // A failed fetch can be asked for again.
-      demanded[file] = ok ? [] : null;
+      demanded[file] = ok && global[name] !== undefined ? [] : null;
       calls.forEach(function (fn) { fn(ok && global[name] !== undefined); });
     };
     script.onload = function () { finish(true); };
@@ -2632,6 +2681,7 @@
     queryScore: queryScore,
     queryPlace: function (query) { return compileQuery(query).place; },
     queryLabel: function (query) { return compileQuery(query).label; },
+    queryNote: function (query) { return compileQuery(query).note; },
     searchSnippet: searchSnippet,
     searchFold: searchFold,
     nameScore: nameScore,

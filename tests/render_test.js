@@ -3266,6 +3266,21 @@ async function testBallotCounts() {
         !/Renominated/.test(b) && /top two of the all-party primary/.test(b)),
       `${through.length} members; ` + (badges.find((b) => !/Advanced to November/.test(b) ||
         /Renominated/.test(b)) || "").replace(/\s+/g, " ").slice(0, 400));
+    // One outcome, one label (GRID-19): a challenger through the same
+    // primary read "On the November ballot", which the key defined as
+    // winning a primary nobody there wins.
+    const mates = W.legislatorsData.filter((p) => p.allPartyPrimary && p.isCandidate &&
+      p.raceStatus === "nominee");
+    const mateBadges = mates.map((p) => W.KYC.cards.card(p));
+    check("a challenger through it reads the same 'Advanced to November' as the member",
+      mates.length > 0 && mateBadges.every((b) => /Advanced to November/.test(b) &&
+        !/On the November ballot/.test(b)),
+      `${mates.length} challengers; ` + (mateBadges.find((b) => !/Advanced to November/.test(b)) || "")
+        .replace(/\s+/g, " ").slice(0, 300));
+    const key = W.KYC.raceStatusLegend();
+    const onBallot = key.find((row) => row.label === "On the November ballot");
+    check("the key does not say everyone 'On the November ballot' won a primary (rule 74)",
+      !!onBallot && !/Won the primary/.test(onBallot.title), onBallot && onBallot.title);
     const elsewhere = W.legislatorsData.find((p) => !p.allPartyPrimary && p.raceStatus === "nominee" &&
       W.KYC.seated(p) && !p.contestLabel && !p.raceRole);
     check("and a member renominated in a party primary still reads 'Renominated'",
@@ -6772,6 +6787,12 @@ async function testSearchAndFilters() {
       .map((p) => KYC.stateName(p.state));
     check("the default order is by state name", states.every((s, i) => i === 0 ||
       states[i - 1].localeCompare(s) <= 0), states.slice(0, 4).join(", "));
+    // Within a seat by surname, as the races say they list people.
+    const seat = (p) => [p.chamber, p.state, KYC.districtOrder(p)].join("|");
+    const unsorted = shown.filter((p, i) => i > 0 && seat(shown[i - 1]) === seat(p) &&
+      String(shown[i - 1].surname || shown[i - 1].name).localeCompare(String(p.surname || p.name)) > 0);
+    check("and within a seat by surname", shown.length > 10 && !unsorted.length,
+      unsorted.slice(0, 3).map((p) => p.name).join(", "));
     D.getElementById("sortButton").click();
     D.querySelector('#sortPanel [data-sort="age-desc"]').click();
     const first = D.querySelector("#results .card");
@@ -6892,14 +6913,146 @@ async function testSearchAndFilters() {
   suite("search — a member who left this Congress (GRID-08)", () => {
     if (!departed) { check("no departed members to test (a new Congress)", true); return; }
     const box = D.getElementById("officialResults");
-    check("is found, and says when they left", /Former members of this Congress/.test(box.textContent) &&
-      box.textContent.indexOf(departed.name) !== -1 && /Left Congress on/.test(box.textContent),
+    // The day is the record's end of the term, said as the record's: it can
+    // be a day from the House Clerk's (a death recorded the day before).
+    check("is found, with the day the record ends the term, said as the record's",
+      /Former members of this Congress/.test(box.textContent) &&
+      box.textContent.indexOf(departed.name) !== -1 &&
+      /congress-legislators ends the term on/.test(box.textContent) &&
+      !/Left Congress on/.test(box.textContent), box.textContent);
+    check("never a double period after a name that ends in one", !/\.\./.test(box.textContent),
       box.textContent);
+    check("nothing on the page says nothing matches", D.getElementById("noResults").hidden ||
+      cards().length > 0);
     check("and is never a profile, so never counted", !data.some((p) => p.id === departed.id));
     const holder = departed.holder && box.querySelector(`a[href="#/profile/${encodeURIComponent(departed.holder.id)}"]`);
     check("who holds the seat now is linked, when someone does", !departed.holder ||
       (!!holder && !!KYC.byId(departed.holder.id)));
   });
+
+  // A full name that names someone lists no namesakes beside them: "Mark
+  // Kelly" listed a governor, a lieutenant governor and six judges named
+  // Kelly under the senator's card, "Lindsey Graham" two judges above her.
+  const lastWord = (n) => KYC.searchFold(n).replace(/,/g, " ").split(" ")
+    .filter((w) => w && !/^(jr|sr|ii|iii|iv)$/.test(w)).pop();
+  const judges = window.kycJudgesIndex;
+  const judgeSurnames = new Set(judges.map((r) => lastWord(r[1])));
+  const namesake = data.find((p) => KYC.seated(p) && p.name.split(" ").length === 2 &&
+    judgeSurnames.has(lastWord(p.name)) &&
+    !judges.some((r) => { const s = KYC.nameScore(p.name, [r[1], r[4]]); return s >= 0 && s < 2; }));
+  const officialRows = () => [...D.querySelectorAll("#officialResults .official-name")]
+    .map((a) => a.textContent);
+  if (namesake) typeInto(window, D, namesake.name);
+  await settle(250);
+  suite("search — a full name lists no namesakes", () => {
+    check("the case exists to test", !!namesake);
+    check(`'${namesake && namesake.name}' lists no official who only shares the surname`,
+      cards().some((p) => p === namesake) &&
+        !officialRows().some((n) => KYC.nameScore(namesake.name, [n]) === 2),
+      officialRows().join(", "));
+  });
+  const goneNamesake = (KYC.meta().departed || []).find((row) =>
+    judgeSurnames.has(lastWord(row.name)) && !data.some((p) => {
+      const s = KYC.queryScore(p, row.name.toLowerCase());
+      return s >= 0 && s <= 1;
+    }));
+  if (goneNamesake) typeInto(window, D, goneNamesake.name);
+  await settle(250);
+  suite("search — a former member named in full comes before any namesake", () => {
+    if (!goneNamesake) { check("no former member shares a judge's surname (nothing to test)", true); return; }
+    check(`'${goneNamesake.name}' is listed first, and alone`, officialRows()[0] === goneNamesake.name &&
+      !officialRows().some((n) => KYC.nameScore(goneNamesake.name, [n]) === 2), officialRows().join(", "));
+  });
+  const judgeSurname = lastWord(judges[0][1]);
+  typeInto(window, D, "Zyxwq " + judgeSurname);
+  await settle(250);
+  suite("search — namesakes alone are said to be namesakes", () => {
+    const box = D.getElementById("officialResults");
+    check("the surname's judges are listed", !box.hidden && officialRows().length > 0, officialRows().join(", "));
+    check("and the box says nobody answers to the whole name", /Nobody below answers to/.test(box.textContent),
+      box.textContent.slice(0, 200));
+  });
+  // Officials only: the empty state's "Nothing matches" sat under them.
+  const loneOfficial = federal.offices.map((o) => o.holder).find((h) => h && h.name &&
+    !data.some((p) => KYC.queryScore(p, h.name.toLowerCase()) >= 0));
+  if (loneOfficial) typeInto(window, D, loneOfficial.name);
+  await settle(250);
+  suite("search — officials found, and no profile", () => {
+    check("the case exists to test", !!loneOfficial);
+    check("no 'Nothing matches' under them", D.getElementById("noResults").hidden &&
+      !D.getElementById("officialResults").hidden, label());
+    check("the line says where they are", /listed elsewhere on the site/.test(label()), label());
+    check("and no key to labels on cards there are none of", D.getElementById("statusLegend").hidden);
+  });
+  // Everyone found is out of the race: "No profiles matching" hid them.
+  const outOnly = data.find((p) => !KYC.seated(p) && KYC.cards.offBallot(p) &&
+    p.name.split(" ").length >= 2 &&
+    data.every((o) => KYC.queryScore(o, p.name.toLowerCase()) < 0 || (!KYC.seated(o) && KYC.cards.offBallot(o))));
+  if (outOnly) typeInto(window, D, outOnly.name);
+  await settle(250);
+  suite("search — a match out of the race is said to be hidden, with the switch", () => {
+    check("the case exists to test", !!outOnly);
+    const toggle = D.querySelector("#resultsLabel [data-out-toggle]");
+    check("the line counts them and offers to show them", /hidden/.test(label()) && !!toggle, label());
+    check("and does not also say nothing matches", D.getElementById("noResults").hidden);
+    if (toggle) toggle.click();
+    check("the switch shows them", cards().some((p) => p === outOnly), label());
+    const back = D.querySelector("#resultsLabel [data-out-toggle]");
+    if (back) back.click();
+  });
+  // A seat that does not exist is said not to, and a lone seat is at large.
+  const states = KYC.meta().states;
+  const many = Object.keys(states).find((c) => (states[c].house || 0) > 2 && !states[c].territory);
+  const lone = Object.keys(states).find((c) => states[c].house === 1 && !states[c].territory);
+  typeInto(window, D, `${many} ${states[many].house + 1}`);
+  await settle(250);
+  suite("search — a seat that does not exist", () => {
+    check(`'${many} ${states[many].house + 1}' says ${many} has no such district`,
+      /has no district/.test(label()) && label().indexOf(`(${many}-`) === -1, label());
+  });
+  typeInto(window, D, `${many} at large`);
+  await settle(250);
+  suite("search — no at-large seat in a state of districts", () => {
+    check("says so", /has no at-large seat/.test(label()) && label().indexOf(`(${many}-AL)`) === -1, label());
+  });
+  typeInto(window, D, `${lone} 1`);
+  await settle(250);
+  suite("search — a lone seat's '1' is named as the at-large seat", () => {
+    check(`'${lone} 1' reads (${lone}-AL)`, label().indexOf(`(${lone}-AL)`) !== -1 &&
+      label().indexOf(`(${lone}-1)`) === -1, label());
+  });
+  // A leadership post finds who holds it (GRID-05's "Speaker").
+  const leader = data.find((p) => KYC.seated(p) && (p.leadership || []).length);
+  if (leader) typeInto(window, D, leader.leadership[0]);
+  await settle(250);
+  suite("search — a leadership post finds who holds it", () => {
+    if (!leader) { check("no leadership posts recorded yet (a new Congress)", true); return; }
+    check(`'${leader.leadership[0]}' finds them`, cards().some((p) => p === leader), label());
+  });
+  // A territory's former member is titled as the place titles them.
+  const meta = KYC.meta();
+  const realDeparted = meta.departed;
+  meta.departed = (realDeparted || []).concat([{ id: "test-pr", name: "Zyxw Commissioner",
+    chamber: "House", state: "PR", district: 0, left: "2026-01-05", holder: null }]);
+  typeInto(window, D, "Zyxw Commissioner");
+  await settle(250);
+  suite("search — a territory's former member, in its own words (rule 75)", () => {
+    const text = D.getElementById("officialResults").textContent;
+    check("Puerto Rico's is a Resident Commissioner, never a Representative",
+      /Former Resident Commissioner from Puerto Rico/.test(text) && !/Representative, PR/.test(text), text);
+    check("and a seat nobody holds is never 'vacant' (rule 19)", !/vacant/i.test(text) &&
+      /seats nobody there now/.test(text), text);
+  });
+  meta.departed = realDeparted;
+  // An old link's value with no chip is labelled in words.
+  window.location.hash = "#/?election=contested";
+  await settle(250);
+  suite("search — an old election=contested link reads in words", () => {
+    const bar = D.getElementById("activeFilters").textContent;
+    check("never the raw value", !/\bcontested\b/.test(bar) && /besides the holder/.test(bar), bar);
+  });
+  window.location.hash = "#/";
+  await settle(250);
   typeInto(window, D, "");
   await settle(250);
   check("no errors", errors.length === 0, errors.join("\n"));
@@ -7491,6 +7644,23 @@ async function testFederal() {
     check("a name nobody has says so, and suggests the surname",
       /No judge matches that name; try the surname alone/.test(
         D.getElementById("judgeSearchCount").textContent));
+    // Namesakes are counted as namesakes: "Jim Smith" read "4 judges".
+    const first = window.kycJudgesIndex[0];
+    const last = first[1].replace(/,? (Jr|Sr|II|III)\.?$/, "").split(" ").pop();
+    input.value = "Zyxwq " + last;
+    input.dispatchEvent(new window.Event("input"));
+    const said = D.getElementById("judgeSearchCount").textContent;
+    check("judges found by the surname alone are said to be", new RegExp(
+      "No judge by that full name; \\d+ judges? with the surname " + last).test(said), said);
+    const exec = d.offices.map((o) => o.holder).find((h) => h && h.name &&
+      !window.kycJudgesIndex.some((row) => window.KYC.nameScore(h.name, [row[1], row[4]]) >= 0));
+    if (exec) {
+      input.value = exec.name;
+      input.dispatchEvent(new window.Event("input"));
+      const line = D.getElementById("judgeSearchCount").textContent;
+      check("an executive official found is not told to try the surname",
+        /^1 in the executive branch; no judge by that name$/.test(line), line);
+    }
     const index = window.kycJudgesIndex;
     const roving = index.find((row) => row[2].length > 1);
     if (roving) {

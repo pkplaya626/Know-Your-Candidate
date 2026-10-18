@@ -372,17 +372,22 @@ The two directories:
 - The grid's search reads a state's name or postal code as that state
   ("Kansas" is never Arkansas: words match where a word starts), a district
   however it is written as its race ("Ohio 9", "TX-35", "texas district 35",
-  "ny14", "AZ at large"; "TX-3" is never TX-30), and ranks the rest: the
-  name or an alias exactly, then a name, then the office or place, then the
-  profile's text, a card matched only there saying where. Officials who are
-  not candidates - the President, the Cabinet, the justices and judges,
-  governors and statewide officers - are listed apart, linking to their own
-  pages and never shown as profiles; their data is fetched the first time a
-  query is typed (`KYC.loadData`, from the stamped URLs in the page's
-  `<template id="onDemandData">`). Members who left this Congress
-  (`data/departed_members.json`, written by `congress` from
-  `legislators-historical`) are listed with the day they left and who holds
-  the seat now.
+  "ny14", "WY at large"; "TX-3" is never TX-30; a seat that does not exist,
+  "AZ at large" or "Ohio 99", is said not to), and ranks the rest: the
+  name or an alias exactly, then a name, then the office, a leadership post
+  or the place, then the profile's text, a card matched only there saying
+  where. Other officials - the President, the Cabinet, the justices and
+  judges, governors and statewide officers - are listed apart for the
+  office they hold, linking to their own pages and never shown as profiles
+  (one also running for Congress has a card as well); their data is
+  fetched the first time a query is typed (`KYC.loadData`, from the stamped
+  URLs in the page's `<template id="onDemandData">`). Members who left this
+  Congress (`data/departed_members.json`, written by `congress` from
+  `legislators-historical`) are listed with the day that record ends the
+  term, said as its own (it can be a day from the House Clerk's), and who
+  holds the seat now. A full name that names someone lists no one who
+  merely shares the surname; when nobody answers to it, the namesakes are
+  listed as namesakes.
 - What is on shows as removable chips with **Clear all**; the results line
   says how many out of the race are hidden, with the switch beside it; a
   collapsed key explains every status word on the cards, from the table

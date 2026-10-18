@@ -25,6 +25,8 @@
   var scores = new Map();
   // How many the filters match that the "out of the race" toggle hides.
   var hiddenOut = 0;
+  // The best score any profile the filters match had for the query.
+  var bestProfile = Infinity;
 
   /* ------------------------------------------------------------ filtering */
 
@@ -120,11 +122,15 @@
   }
 
   function matches(item) {
+    var ok = matchesFilters(item);
+    // The best a profile matched the query by, hidden or not: a full name
+    // that names a profile leaves the other officials' namesakes out.
+    if (ok && state.q) bestProfile = Math.min(bestProfile, score(item));
     if (state.eliminated === "hide" && hideable(item)) {
-      if (matchesFilters(item)) hiddenOut += 1;
+      if (ok) hiddenOut += 1;
       return false;
     }
-    return matchesFilters(item);
+    return ok;
   }
 
   /* -------------------------------------------------------------- sorting */
@@ -156,16 +162,19 @@
         rank(a) - rank(b) ||
         byState(a, b) ||
         (a.isCandidate ? 1 : 0) - (b.isCandidate ? 1 : 0) ||
-        a.name.localeCompare(b.name)
+        bySurname(a, b)
       );
     },
+    // Within a seat by surname, as the race sections list them: by first
+    // name, Amish Shah came before David Schweikert under "Listed by
+    // surname." in the races.
     region: function (a, b) {
       var chamber = function (x) { return x.chamber.indexOf("Senate") !== -1 ? 0 : 1; };
       return (
         chamber(a) - chamber(b) ||
         byState(a, b) ||
         KYC.districtOrder(a) - KYC.districtOrder(b) ||
-        a.name.localeCompare(b.name)
+        bySurname(a, b)
       );
     },
   };
@@ -295,9 +304,25 @@
     return text;
   }
 
-  function emptyLabel() {
-    return "No profiles" + (narrowed() || " match these filters") +
-      (narrowed() && activeFilters() ? " with these filters" : "");
+  /* What the line says when no card is shown, as markup: why a seat named
+   * does not exist; that the people found are out of the race, with the
+   * switch that shows them - "No profiles matching “Gulrez Khan”" hid the
+   * one person it had found; and that the officials found below are not
+   * profiles. */
+  function emptyLabel(officials) {
+    var note = state.q ? KYC.queryNote(state.q) : "";
+    var html = KYC.escapeHtml("No profiles" + (narrowed() || " match these filters") +
+      (narrowed() && activeFilters() ? " with these filters" : "") + (note ? ". " + note : "."));
+    if (hiddenOut && state.eliminated === "hide" && state.view !== "senate") {
+      html += " " + KYC.escapeHtml(plural(hiddenOut, "person", "people") + " out of the race " +
+        "(lost a primary, withdrew, or not on the ballot) " + (hiddenOut === 1 ? "matches" : "match") +
+        " and " + (hiddenOut === 1 ? "is" : "are") + " hidden.") + outToggle();
+    }
+    if (officials) {
+      html += " " + KYC.escapeHtml("The people found below are listed elsewhere on the site, " +
+        "each linked to the page about them.");
+    }
+    return html;
   }
 
   function plural(n, one, many) {
@@ -353,6 +378,12 @@
       parts.push(plural(unknown, "of them has", "of them have") + " a ballot status this site " +
         "does not know, so the sidebar does not count them");
     }
+    if (state.state === "all" && !state.q && election.renumbered) {
+      // The sidebar's "with a profile here" counts them; this chip, which
+      // is the filings, does not: they are under Sitting members.
+      parts.push("the sidebar also counts " + plural(election.renumbered, "member", "members") +
+        " running under a new district number, who are under Sitting members here");
+    }
     if (state.state === "all" && !state.q && election.challengersUnprofiled) {
       parts.push("the sidebar also counts " + election.challengersUnprofiled.toLocaleString() +
         " people on the ballot with no FEC filing over $5,000, and so no profile here");
@@ -362,18 +393,27 @@
         ".") + "</span>" : "";
   }
 
-  function renderSenate(grid, empty, label) {
+  function renderSenate(grid, empty, label, officials) {
     var view = KYC.senate.render(data, races, {
       matches: senateMatches,
       showOut: state.eliminated === "show",
     });
-    label.textContent = view.people
-      ? "Showing " + view.people.toLocaleString() + " profiles across " +
-        view.seats.toLocaleString() + " Senate seat" + (view.seats === 1 ? "" : "s") + narrowed()
-      : emptyLabel();
+    if (view.people) {
+      label.textContent = "Showing " + view.people.toLocaleString() + " profiles across " +
+        view.seats.toLocaleString() + " Senate seat" + (view.seats === 1 ? "" : "s") + narrowed();
+    } else {
+      renderLabel(label, emptyLabel(officials));
+    }
     grid.className = "senate-view";
     grid.innerHTML = view.html;
-    empty.hidden = view.people > 0;
+    empty.hidden = view.people > 0 || officials;
+    showLegend(view.people > 0);
+  }
+
+  /* The key to the labels, only over cards it explains. */
+  function showLegend(on) {
+    var slot = doc.getElementById("statusLegend");
+    if (slot) slot.hidden = !on;
   }
 
   function syncViewToggles() {
@@ -389,21 +429,25 @@
     var empty = doc.getElementById("noResults");
     var label = doc.getElementById("resultsLabel");
     renderActiveFilters();
-    renderOfficials();
+    var officials = renderOfficials();
 
     if (state.view === "senate" && KYC.senate) {
       if (observer) { observer.disconnect(); observer = null; }
-      renderSenate(grid, empty, label);
+      renderSenate(grid, empty, label, officials);
       return;
     }
 
     if (!visible.length) {
-      label.textContent = emptyLabel();
+      renderLabel(label, emptyLabel(officials));
       grid.innerHTML = "";
-      empty.hidden = false;
+      // "Nothing matches" under the official who did (GRID-07), or over a
+      // match the out-of-the-race switch hides: the line says which.
+      empty.hidden = officials || (hiddenOut > 0 && state.eliminated === "hide");
+      showLegend(false);
       return;
     }
     empty.hidden = true;
+    showLegend(true);
 
     if (state.view === "race") {
       if (observer) { observer.disconnect(); observer = null; }
@@ -490,22 +534,32 @@
    * typed (KYC.loadData). */
   var OFFICIAL_LIMIT = 8;
   var officialIndex = null;
-  var officialsWanted = false;
+  // The files asked for and not yet answered. One that fails to load is
+  // asked for again with the next query (KYC.loadData allows it).
+  var officialsPending = {};
 
   var OFFICIAL_FILES = [["federal.js", "kycFederal"], ["judiciary/index.js", "kycJudgesIndex"],
     ["stategov.js", "kycStateGov"]];
 
   function wantOfficials() {
-    if (officialsWanted) return;
-    officialsWanted = true;
-    var left = OFFICIAL_FILES.length;
     OFFICIAL_FILES.forEach(function (pair) {
-      KYC.loadData(pair[0], pair[1], function () {
-        left -= 1;
-        officialIndex = null;               // rebuilt with what arrived
-        if (!left || global[pair[1]]) renderOfficials();
+      var file = pair[0];
+      if (global[pair[1]] !== undefined || officialsPending[file]) return;
+      officialsPending[file] = true;
+      KYC.loadData(file, pair[1], function (ok) {
+        officialsPending[file] = false;
+        if (ok) officialsArrived();
       });
     });
+  }
+
+  /* A file that arrives after the list was drawn: the officials are
+   * matched again, and an empty list's line and empty state with them. */
+  function officialsArrived() {
+    officialIndex = null;
+    if (!listDrawn) return;
+    if (!visible.length || state.view === "senate") render();
+    else renderOfficials();
   }
 
   var KIND_ORDER = { executive: 0, justice: 1, governor: 2, officer: 3, judge: 4 };
@@ -552,12 +606,17 @@
       });
     }
     var courts = {};
-    ((federal || {}).courts || []).forEach(function (c) { courts[c.id] = c.name; });
+    ((federal || {}).courts || []).forEach(function (c) { courts[c.id] = c; });
     (global.kycJudgesIndex || []).forEach(function (row) {
       if (!row[2] || !row[2].length) return;
-      add({ id: row[0], name: row[1], alt: row[4], kind: "judge",
-            role: "Judge, " + row[2].map(function (c) { return courts[c] || c; }).join("; ") +
-              (row[3] === "senior" ? " (senior status)" : ""),
+      // The states their courts sit for, so a state filter keeps them.
+      var served = {};
+      row[2].forEach(function (c) {
+        ((courts[c] || {}).states || []).forEach(function (code) { served[code] = true; });
+      });
+      add({ id: row[0], name: row[1], alt: row[4], kind: "judge", states: served,
+            role: "Judge, " + row[2].map(function (c) { return (courts[c] || {}).name || c; })
+              .join("; ") + (row[3] === "senior" ? " (senior status)" : ""),
             href: "courts/" + row[2][0] + ".html#/official/" + encodeURIComponent(row[0]) });
     });
     var states = (global.kycStateGov || {}).states || {};
@@ -580,6 +639,10 @@
   }
   var officialsBuiltFrom = "";
 
+  /* `[{row, score}]` for the officials *state.q* names (KYC.nameScore; a
+   * state's name lists its governor and officers, at 1). A state filter
+   * keeps a state's own officers and the judges whose courts sit for it;
+   * the federal executive and the justices serve every state. */
   function officialMatches() {
     if (!state.q) return [];
     if (!officialIndex || officialsBuiltFrom !== officialsLoaded()) {
@@ -589,9 +652,12 @@
     var place = KYC.queryPlace(state.q);
     var hits = [];
     officialIndex.forEach(function (row) {
+      if (state.state !== "all") {
+        if (row.state && row.state !== state.state) return;
+        if (row.states && !row.states[state.state]) return;
+      }
       var s;
       if (place) {
-        // A state's name lists that state's governor and officers.
         s = !place.chamber && place.district === undefined && row.state === place.state ? 1 : -1;
       } else {
         s = KYC.nameScore(state.q, [row.name, row.alt]);
@@ -601,71 +667,127 @@
     return hits.sort(function (a, b) {
       return a.score - b.score || KIND_ORDER[a.row.kind] - KIND_ORDER[b.row.kind] ||
         a.row.name.localeCompare(b.row.name);
-    }).map(function (h) { return h.row; });
+    });
   }
 
   function departedMatches() {
     var rows = KYC.meta().departed || [];
     if (!state.q) return [];
     var place = KYC.queryPlace(state.q);
-    return rows.filter(function (row) {
+    var hits = [];
+    rows.forEach(function (row) {
+      if (state.state !== "all" && row.state !== state.state) return;
+      var s = 1;
       if (place) {
-        if (row.state !== place.state && !place.any) return false;
-        if (place.chamber && row.chamber !== place.chamber) return false;
-        return place.district === undefined || row.district === place.district ||
-          (place.district === 1 && row.district === 0);
+        if (row.state !== place.state && !place.any) return;
+        if (place.chamber && row.chamber !== place.chamber) return;
+        if (place.district !== undefined && row.district !== place.district &&
+            !(place.district === 1 && row.district === 0)) return;
+      } else {
+        s = KYC.nameScore(state.q, [row.name].concat(row.aliases || []));
       }
-      return KYC.nameScore(state.q, [row.name].concat(row.aliases || [])) >= 0;
+      if (s >= 0) hits.push({ row: row, score: s });
     });
+    return hits.sort(function (a, b) { return a.score - b.score; });
   }
 
+  /* Only the best kind of match among the officials and the members who
+   * left, and no surname-only namesake once a full name has named
+   * someone: "Lindsey Graham" listed two judges named Graham above her,
+   * and "Mark Kelly" a governor, a lieutenant governor and six judges
+   * beside his card. A word found only in part ("Roberts" in "Robertson")
+   * goes once one is found whole. */
+  function bestHits(found, gone) {
+    var best = Infinity;
+    found.concat(gone).forEach(function (h) { best = Math.min(best, h.score); });
+    var keep = function (h) {
+      if (h.score === 2) return best === 2 && bestProfile > 1;
+      if (h.score === 1.5) return best === 1.5;
+      return true;
+    };
+    return { found: found.filter(keep), gone: gone.filter(keep) };
+  }
+
+  /* The seat in the words the place gives it (rule 75): Puerto Rico's
+   * Resident Commissioner, a delegate, never a territory's "Representative". */
+  var WITH_THE = { DC: true, MP: true, VI: true };
+
   function seatWords(row) {
-    if (row.chamber === "Senate") return "U.S. Senator from " + KYC.stateName(row.state);
+    var name = KYC.stateName(row.state);
+    if (row.chamber === "Senate") return "U.S. Senator from " + name;
+    var title = ((KYC.meta().states || {})[row.state] || {}).delegateTitle;
+    if (title) return title + " from " + (WITH_THE[row.state] ? "the " : "") + name;
     return "U.S. Representative, " + row.state + "-" + (row.district ? row.district : "AL");
   }
 
+  /* The day is congress-legislators' end of the term, said as theirs: it
+   * can be a day from the chamber's own record (Doug LaMalfa's term ends
+   * there on January 5, 2026; the House Clerk records his death on January
+   * 6), and "Left Congress on" stated it as the fact. */
   function departedRow(row) {
+    var holder = row.holder ? String(row.holder.name) : "";
     var now = row.holder
-      ? 'the seat is now held by <a href="#/profile/' + KYC.escapeAttr(encodeURIComponent(row.holder.id)) +
-        '">' + KYC.escapeHtml(row.holder.name) + "</a>"
-      : "Congress’s membership list seats nobody there now";
+      ? "The seat is now held by " + '<a href="#/profile/' +
+        KYC.escapeAttr(encodeURIComponent(row.holder.id)) + '">' + KYC.escapeHtml(holder) + "</a>" +
+        (/\.$/.test(holder) ? "" : ".")
+      : "Congress’s membership list seats nobody there now.";
     return '<li class="official-row"><span class="official-name">' + KYC.escapeHtml(row.name) +
       '</span> <span class="official-role">Former ' + KYC.escapeHtml(seatWords(row)) +
-      ". Left Congress on " + KYC.escapeHtml(KYC.dateWords(row.left)) + "; " + now + ".</span></li>";
+      ". Left during this Congress; congress-legislators ends the term on " +
+      KYC.escapeHtml(KYC.dateWords(row.left)) + ". " + now + "</span></li>";
   }
 
+  function officialList(found) {
+    return '<h2 class="official-results-title">Other officials</h2>' +
+      '<p class="official-results-note">Listed for the office they hold now, each linked to ' +
+      "the page about it. Anyone also running for Congress has a profile card as well.</p>" +
+      '<ul class="official-list">' + found.slice(0, OFFICIAL_LIMIT).map(function (h) {
+        var row = h.row;
+        return '<li class="official-row"><a class="official-name" href="' +
+          KYC.escapeAttr(row.href) + '">' + KYC.escapeHtml(row.name) + "</a> " +
+          '<span class="official-role">' + KYC.escapeHtml(row.role) + "</span></li>";
+      }).join("") + "</ul>" +
+      (found.length > OFFICIAL_LIMIT
+        ? '<p class="official-results-note">' + (found.length - OFFICIAL_LIMIT).toLocaleString() +
+          ' more. The <a href="federal/index.html#courts">federal page</a> searches every judge, ' +
+          'and <a href="states/index.html">each state’s page</a> lists its officers.</p>'
+        : "");
+  }
+
+  function departedList(gone) {
+    return '<h2 class="official-results-title">Former members of this Congress</h2>' +
+      '<ul class="official-list">' + gone.map(function (h) { return departedRow(h.row); }).join("") +
+      "</ul>" +
+      '<p class="official-results-note">From the congress-legislators project’s record of past ' +
+      "members. It gives the day it ends each term, which can differ by a day from the House " +
+      "Clerk’s or the Senate’s record, and not why the member left.</p>";
+  }
+
+  /** Draws the officials and former members the query names; true when
+   *  there are any. */
   function renderOfficials() {
     var box = doc.getElementById("officialResults");
-    if (!box) return;
-    if (!state.q) { box.hidden = true; box.innerHTML = ""; return; }
+    if (!box) return false;
+    if (!state.q) { box.hidden = true; box.innerHTML = ""; return false; }
     wantOfficials();
-    var found = officialMatches();
-    var gone = departedMatches();
-    if (!found.length && !gone.length) { box.hidden = true; box.innerHTML = ""; return; }
-    var html = "";
-    if (found.length) {
-      html += '<h2 class="official-results-title">Other officials</h2>' +
-        '<p class="official-results-note">Not candidates for Congress: each opens the page ' +
-        "about them.</p>" +
-        '<ul class="official-list">' + found.slice(0, OFFICIAL_LIMIT).map(function (row) {
-          return '<li class="official-row"><a class="official-name" href="' +
-            KYC.escapeAttr(row.href) + '">' + KYC.escapeHtml(row.name) + "</a> " +
-            '<span class="official-role">' + KYC.escapeHtml(row.role) + "</span></li>";
-        }).join("") + "</ul>" +
-        (found.length > OFFICIAL_LIMIT
-          ? '<p class="official-results-note">' + (found.length - OFFICIAL_LIMIT).toLocaleString() +
-            ' more. The <a href="federal/index.html#courts">federal page</a> searches every judge, ' +
-            'and <a href="states/index.html">each state’s page</a> lists its officers.</p>'
-          : "");
-    }
-    if (gone.length) {
-      html += '<h2 class="official-results-title">Former members of this Congress</h2>' +
-        '<ul class="official-list">' + gone.map(departedRow).join("") + "</ul>" +
-        '<p class="official-results-note">From the congress-legislators project’s record ' +
-        "of past members, which gives the day a term ended, not why.</p>";
-    }
-    box.innerHTML = html;
+    var hits = bestHits(officialMatches(), departedMatches());
+    var found = hits.found;
+    var gone = hits.gone;
+    if (!found.length && !gone.length) { box.hidden = true; box.innerHTML = ""; return false; }
+    // The block with the better match first: a former member named in
+    // full above a judge found by a word.
+    var goneFirst = gone.length && (!found.length || gone[0].score < found[0].score);
+    var parts = [found.length ? officialList(found) : "", gone.length ? departedList(gone) : ""];
+    // Namesakes are listed as namesakes (bestHits keeps them only when
+    // nobody answers to the whole name).
+    var first = (goneFirst ? gone : found)[0];
+    var namesakes = first.score === 2
+      ? '<p class="official-results-note">Nobody below answers to “' + KYC.escapeHtml(typed()) +
+        "”: each shares the surname alone.</p>"
+      : "";
+    box.innerHTML = namesakes + (goneFirst ? parts[1] + parts[0] : parts[0] + parts[1]);
     box.hidden = false;
+    return true;
   }
 
   /* ----------------------------------------------------------- the list */
@@ -693,6 +815,7 @@
     syncChips();
     scores = new Map();
     hiddenOut = 0;
+    bestProfile = Infinity;
     visible = data.filter(matches);
     var order = SORTS[state.sort] || SORTS.region;
     // Best match first, then the chosen order (GRID-05): "Mike Johnson" put
@@ -756,9 +879,14 @@
   /* What is on, as chips that each take one thing off, and "Clear all"
    * (GRID-11, GRID-22): the toolbar's "All" reset the chamber only, beside
    * other filters still pressed, and on a phone the chips are folded away. */
+  /* Values with no chip any more, kept so links shared under them work:
+   * the bar read "On: contested ×". */
+  var LEGACY_CHIPS = { "election:contested": "Races with someone besides the holder running" };
+
   function chipText(group, value) {
     var chip = doc.querySelector('[data-group="' + group + '"][data-value="' + value + '"]');
-    return chip ? chip.textContent.replace(/\s+/g, " ").trim() : value;
+    return chip ? chip.textContent.replace(/\s+/g, " ").trim()
+      : LEGACY_CHIPS[group + ":" + value] || value;
   }
 
   function onFilters() {

@@ -435,9 +435,9 @@
     var courts = d.courts.filter(function (c) { return c.kind !== "supreme"; });
     var appeals = courts.filter(function (c) { return c.kind === "appeals"; });
     var body = circuitMapMarkup() + '<div class="fed-search">' +
-      '<label class="field-label" for="judgeSearch">Find a federal judge</label>' +
+      '<label class="field-label" for="judgeSearch">Find a federal judge or Cabinet officer</label>' +
       '<input id="judgeSearch" class="search-input" type="search" autocomplete="off" ' +
-      'placeholder="A judge’s name" aria-describedby="judgeSearchCount">' +
+      'placeholder="A name" aria-describedby="judgeSearchCount">' +
       '<p class="faint" id="judgeSearchCount" role="status"></p>' +
       '<ul class="fed-results" id="judgeResults"></ul></div>' +
       '<p class="guide-lede" id="courtsLede">Every sitting judge of each court whose judges are ' +
@@ -623,21 +623,36 @@
         status.textContent = index.length.toLocaleString("en-US") + " sitting Article III judges";
         return;
       }
+      var best = Infinity;
       var ranked = function (rows, names) {
         var hits = [];
         rows.forEach(function (row) {
           var s = KYC.nameScore(q, names(row));
           if (s >= 0) hits.push([s, row]);
+          if (s >= 0) best = Math.min(best, s);
         });
-        return hits.sort(function (a, b) { return a[0] - b[0]; }).map(function (h) { return h[1]; });
+        return hits.sort(function (a, b) { return a[0] - b[0]; });
       };
       var people = ranked(officials, function (o) { return [o.name]; });
-      var hits = ranked(index, function (row) { return [row[1], row[4]]; });
-      status.textContent = (hits.length === 0
-        ? "No judge matches that name; try the surname alone"
-        : hits.length + (hits.length === 1 ? " judge" : " judges") +
-          (hits.length > SEARCH_LIMIT ? ", the first " + SEARCH_LIMIT + " shown" : "")) +
-        (people.length ? "; " + people.length + " in the executive branch" : "");
+      var scored = ranked(index, function (row) { return [row[1], row[4]]; });
+      // A judge found by the surname alone is a namesake, not an answer:
+      // "Jim Smith" read "4 judges" as though four answered to the name.
+      // Listed only when nobody answers to the whole name, and said so.
+      var surnameOnly = best === 2;
+      var unwrap = function (h) { return h[1]; };
+      people = people.filter(function (h) { return h[0] < 2 || surnameOnly; }).map(unwrap);
+      var hits = scored.filter(function (h) { return h[0] < 2 || surnameOnly; }).map(unwrap);
+      var surname = q.trim().split(/\s+/).pop();
+      var count = function (n) { return n + (n === 1 ? " judge" : " judges"); };
+      var judges = hits.length === 0
+        ? (people.length ? "no judge by that name" : "No judge matches that name; try the surname alone")
+        : surnameOnly
+          ? "No judge by that full name; " + count(hits.length) + " with the surname " + surname
+          : count(hits.length);
+      if (hits.length > SEARCH_LIMIT) judges += ", the first " + SEARCH_LIMIT + " shown";
+      status.textContent = people.length
+        ? people.length + " in the executive branch; " + judges
+        : judges;
       list.innerHTML = people.map(function (o) {
         return '<li><a href="#/official/' + KYC.escapeAttr(encodeURIComponent(o.id)) + '">' +
           esc(o.name) + '</a> <span class="faint">' + esc(o.role) + "</span></li>";
