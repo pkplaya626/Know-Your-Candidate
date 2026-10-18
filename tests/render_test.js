@@ -4232,6 +4232,17 @@ async function testFindRep() {
     check("anything but a ZIP code is asked for again", /five-digit ZIP code/.test(bad.text), bad.text);
   });
 
+  // A ZIP code typed into the grid's search: no profile carries one.
+  const searched = await buildPage("index.html", { hash: "#/?q=45701" });
+  const searchOut = searched.D.querySelector("[data-findrep] .findrep-result");
+  await until(() => /ZIP 45701, Ohio/.test(searchOut.textContent));
+  suite("index.html — a ZIP code in the search (GRID-06)", () => {
+    check("is answered by the hero's panel, not 'try a state code' alone",
+      /ZIP 45701, Ohio/.test(searchOut.textContent) &&
+        searched.D.querySelector("[data-findrep] .findrep-zip").value === "45701",
+      searchOut.textContent.slice(0, 120));
+  });
+
   // The reader's location, on the home page.
   const here = await askHere("index.html", 39.33, -82.10, 25);
   const paris = await askHere("index.html", 48.8566, 2.3522, 25);

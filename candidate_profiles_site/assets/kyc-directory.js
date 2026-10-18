@@ -171,6 +171,17 @@
 
   /* Says what was searched for, so a reader who typed a name can tell a
    * miss from a filter they forgot was on. */
+  /* No profile carries a ZIP code: "85004" in the search found nobody and
+   * said to try a state code (GRID-06). A ZIP code is answered by "Find who
+   * represents you" in the hero instead, once per ZIP code typed. */
+  var askedZip = "";
+  function askZip() {
+    var m = /^(\d{5})$/.exec(state.q || "");
+    if (!m || m[1] === askedZip || !KYC.findRep) return;
+    askedZip = m[1];
+    KYC.findRep.ask(m[1]);
+  }
+
   function emptyLabel() {
     var typed = (doc.getElementById("searchInput") || {}).value || state.q;
     return state.q ? "No profiles match “" + typed.trim() + "” with these filters"
@@ -218,6 +229,7 @@
     if (!visible.length) {
       grid.innerHTML = "";
       empty.hidden = false;
+      askZip();
       return;
     }
     empty.hidden = true;

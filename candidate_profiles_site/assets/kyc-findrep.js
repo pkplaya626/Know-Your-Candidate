@@ -875,6 +875,17 @@
     });
   }
 
+  /** Look *zip5* up in the page's first panel, as if typed there: the
+   *  grid's search hands a ZIP code over (kyc-directory.js). */
+  function ask(zip5) {
+    var slot = doc.querySelector("[data-findrep][data-findrep-ready]");
+    if (!slot) return false;
+    slot.querySelector(".findrep-zip").value = zip5;
+    slot.querySelector("form").dispatchEvent(new global.Event("submit",
+      { bubbles: true, cancelable: true }));
+    return true;
+  }
+
   function mountAll(root) {
     Array.prototype.forEach.call((root || doc).querySelectorAll("[data-findrep]"), mount);
   }
@@ -892,6 +903,7 @@
     MAX_NEAR: MAX_NEAR,
     ROUGH_KM: ROUGH_KM,
     mount: mount,
+    ask: ask,
     mountAll: mountAll,
     where: where,
     zip: zip,
