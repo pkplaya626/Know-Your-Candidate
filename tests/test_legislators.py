@@ -1185,11 +1185,22 @@ class TestNamesOnTheRealRoster(unittest.TestCase):
         # No record, no change.
         self.assertEqual(legislators.display_name("Ann Smith", None), "Ann Smith")
 
+    def campaign_roster(self):
+        """The checks that name members by bioguide id describe the 119th
+        Congress's roster. From January 3 the snapshot is the 120th's (the CI
+        rehearsal builds one), some of them are not in it, and Andy Barr's
+        Senate run is over (rule 68): those checks stop there, while the
+        general ones above keep running on whichever roster is committed."""
+        from kyc import cycle
+        if cycle.snapshot_congress(self.snapshot) >= cycle.electing_congress():
+            self.skipTest("the committed snapshot is the new Congress's roster")
+
     def test_members_are_shown_by_the_name_they_go_by(self):
         """The roster's legal names read "John Reed" and "Bernard Sanders";
         congress-legislators, by bioguide id, records Jack and Bernie. The
         Kentucky Senate run read "Andy Barr" beside his member card's
         "Garland Barr", and the two were never linked."""
+        self.campaign_roster()
         self.assertEqual(self.members["R000122"]["name"], "Jack Reed")
         self.assertEqual(self.members["S000033"]["name"], "Bernie Sanders")
         self.assertEqual(self.members["C001087"]["name"], "Rick Crawford")
@@ -1203,15 +1214,18 @@ class TestNamesOnTheRealRoster(unittest.TestCase):
         self.assertEqual(fec.profile_key(self.members["R000122"]), "john reed|RI|S")
 
     def test_scott_franklin_and_french_hill(self):
+        self.campaign_roster()
         self.assertEqual(self.members["F000472"]["name"], "Scott Franklin")
         self.assertEqual(self.members["H001072"]["name"], "French Hill")
 
     def test_the_finance_cache_still_keys_on_the_roster_spelling(self):
         # A changed key would read as "nobody has looked" for every
         # re-displayed member.
+        self.campaign_roster()
         self.assertEqual(fec.profile_key(self.members["F000472"]), "c. franklin|FL|H")
 
     def test_voters_names_are_aliases(self):
+        self.campaign_roster()
         self.assertIn("James Clyburn", self.members["C000537"]["aliases"])
         # Now the name he is shown by; the suffixed form stays searchable.
         self.assertEqual(self.members["J000288"]["name"], "Hank Johnson")
