@@ -1997,6 +1997,43 @@
              acting: !!(h.page || {}).acting };
   }
 
+  /* --------------------------------------------------------- seat strip */
+
+  /* A legislative chamber as one square per seat. An area map gives a
+   * chamber of dense city districts to the party of its rural ones:
+   * Minnesota's House is 67 DFL to 66 Republican and its map is nearly all
+   * red (audit 2026-10-17, STATEGOV-23, VISUALS-22). *c* is a chamber's
+   * count as kyc/stategov.py makes it - {D, R, I, N, seats, listed} - for
+   * the state page, the legislatures directory and the legislature page
+   * alike, so the squares are the figures beside them (rule 73).
+   * Democrats fill from the left, Republicans from the right, everyone
+   * else between; a seat with nobody listed is an empty outline, never
+   * "vacant" (rule 51). The line marks half the seats. */
+  var SEAT_KINDS = [["D", "seat-d", "Democratic"], ["I", "seat-i", "independent or third-party"],
+    ["N", "seat-n", "nonpartisan"], ["", "seat-none", "with nobody listed"],
+    ["R", "seat-r", "Republican"]];
+
+  function seatStrip(c) {
+    if (!c || !c.seats) return "";
+    var unlisted = Math.max(0, c.seats - (c.listed || 0));
+    var rows = Math.max(1, Math.ceil(c.seats / 50));
+    var cols = Math.ceil(c.seats / rows);
+    var cells = [];
+    var said = [];
+    SEAT_KINDS.forEach(function (kind) {
+      var n = kind[0] ? (c[kind[0]] || 0) : unlisted;
+      if (n) said.push(n + " " + kind[2]);
+      for (var i = 0; i < n; i++) cells.push('<span class="seat ' + kind[1] + '"></span>');
+    });
+    var half = ((c.seats / 2) / rows / cols * 100).toFixed(2);
+    var label = c.seats + " seats, one square each: " + said.join(", ") + ". " +
+      (Math.floor(c.seats / 2) + 1) + " seats are more than half.";
+    return '<div class="seat-strip" role="img" aria-label="' + escapeAttr(label) + '" title="' +
+      escapeAttr(label) + '" style="--seat-cols:' + cols + ";--seat-rows:" + rows + '">' +
+      cells.join("") + '<span class="seat-half" aria-hidden="true" style="left:' + half +
+      '%"></span></div>';
+  }
+
   global.KYC = {
     // theme
     setTheme: setTheme,
@@ -2022,6 +2059,7 @@
     hasValue: hasValue,
     partyKey: partyKey,
     partyClass: partyClass,
+    seatStrip: seatStrip,
     // data
     byId: byId,
     runsElsewhere: runsElsewhere,

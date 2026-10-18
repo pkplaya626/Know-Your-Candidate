@@ -4834,13 +4834,121 @@ async function testLegislatures() {
       check("the jump list goes to another state's legislature",
         D.getElementById("stateJump").getAttribute("data-jump-to") === "legislature/{code}.html");
     });
+    /* Audit 2026-10-17: the cards dumped every page Open States read (up
+     * to eighteen raw URLs), dropped the district office's phone, and the
+     * map alone made a chamber look like its rural party's. */
+    suite("legislature/tx.html — a card, the seats and the ballot", () => {
+      const everyone = [].concat(...Object.values(state.chambers.lower.members), state.unplaced);
+      const withPage = everyone.find((p) => p.page);
+      const withPhone = everyone.find((p) => p.districtPhone);
+      const card = (p) => {
+        const id = Object.keys(state.chambers.lower.members).find((k) =>
+          state.chambers.lower.members[k].includes(p));
+        pick(D, window, id);
+        return D.getElementById("legPanelBody");
+      };
+      check("no member carries the source's raw link list", everyone.every((p) => !p.links && !p.social));
+      if (withPage) {
+        const body = card(withPage);
+        const links = [...body.querySelectorAll(".leg-person a[href^='http']")];
+        check("a card links one official page, labelled, never a raw address",
+          links.length === body.querySelectorAll(".leg-person").length &&
+          links.every((a) => a.textContent === "Official page"), links.map((a) => a.textContent).join(" | "));
+      }
+      if (withPhone) {
+        const body = card(withPhone);
+        check("the district office's phone is shown, labelled",
+          body.textContent.includes("District office: " + withPhone.districtPhone) &&
+          !!body.querySelector('a[href^="tel:"]'));
+      }
+      D.querySelector('.segmented [data-chamber="upper"]').click();
+      const c = state.chambers.upper;
+      const strip = D.querySelector("#legSeats .seat-strip");
+      check("a strip of one square per seat sits above the map",
+        !!strip && strip.querySelectorAll(".seat").length === c.seats &&
+        D.getElementById("legSeats").compareDocumentPosition(D.getElementById("legMap")) &
+          window.Node.DOCUMENT_POSITION_FOLLOWING);
+      check("its squares are the chamber's own count, nobody listed outlined (rule 51)",
+        strip.querySelectorAll(".seat-r").length === c.count.R &&
+        strip.querySelectorAll(".seat-d").length === c.count.D &&
+        strip.querySelectorAll(".seat-none").length === c.seats - c.listed);
+      check("and it says what it shows to a screen reader",
+        strip.getAttribute("role") === "img" && /seats, one square each/.test(strip.getAttribute("aria-label")));
+      const holds = D.querySelector("#legPanelBody .leg-holds");
+      check("the summary says who holds a majority, as the state page does",
+        !!holds && holds.textContent.startsWith(c.count.majority === "R" ? "Republican majority"
+          : c.count.majority === "D" ? "Democratic majority" : "No party holds"), holds && holds.textContent);
+      const ballot = D.querySelector("#legPanelBody .leg-ballot");
+      check("and which seats are on the Nov 3 ballot, from the state's record",
+        !!ballot && ballot.textContent.includes(c.ballot.basis) &&
+        !!ballot.querySelector(`a[href="${c.ballot.source}"]`), ballot && ballot.textContent);
+      const up = Object.keys(c.districts).find((id) => c.districts[id].up === true);
+      const off = Object.keys(c.districts).find((id) => c.districts[id].up === false);
+      if (up && off) {
+        pick(D, window, up);
+        const yes = D.querySelector("#legPanelBody .leg-ballot").textContent;
+        pick(D, window, off);
+        const no = D.querySelector("#legPanelBody .leg-ballot").textContent;
+        check("a district says whether its own seat is up",
+          /This seat (is|was) on the Nov 3, 2026 ballot/.test(yes) && /not up for regular election/.test(no),
+          yes + " / " + no);
+      }
+    });
   }
   {
-    const { D, errors } = await buildPage("legislature/ne.html");
+    const { window, D, errors } = await buildPage("legislature/ne.html");
     suite("legislature/ne.html — one chamber", () => {
       check("no page errors", errors.length === 0, errors.join(" | "));
       check("no chamber switch for a one-chamber legislature", !D.querySelector("[data-chamber]"));
       check("all 49 districts drawn", D.querySelectorAll("#legMap .district-statewide .region-shape").length === 49);
+      // Audit 2026-10-17, STATEGOV-06: one dark fill under a party legend
+      // that did not apply, with "nobody listed" folded into "nonpartisan".
+      const shown = [...D.querySelectorAll(".party-legend [data-key]")].filter((k) => !k.hidden)
+        .map((k) => k.getAttribute("data-key"));
+      const members = window.kycLegislature.NE.chambers.upper.members;
+      const empty = Object.keys(window.kycLegislature.NE.chambers.upper.districts).some((id) => !members[id]);
+      check("the legend names only what the map draws: nonpartisan, and nobody listed where there is one",
+        shown[0] === "n" && shown.length === (empty ? 2 : 1) && !shown.includes("r"), shown.join(","));
+      check("a nonpartisan district is not drawn as a seat with nobody listed",
+        [...D.querySelectorAll("#legMap .district-statewide .region-shape")].every((s, i) =>
+          /party-(n|none)\b/.test(s.getAttribute("class"))) &&
+        !!D.querySelector("#legMap .region-shape.party-n"));
+      check("the summary says the Legislature is elected without party labels",
+        /Elected without party labels/.test(D.getElementById("legPanelBody").textContent));
+      const summary = D.getElementById("legPanelBody").textContent;
+      check("its seats are counted as nonpartisan, not under a party's name",
+        /\d+ seats: \d+ nonpartisan/.test(summary), summary.slice(0, 80));
+      // STATEGOV-18: the term, only where the state's own record states it.
+      const c = window.kycLegislature.NE.chambers.upper;
+      check("the term is said where the state's record states it",
+        !c.termYears || summary.includes("Members serve " + c.termYears + "-year terms"), summary);
+    });
+  }
+  {
+    // A fusion ballot's lines are not parties (STATEGOV-21); a coalition
+    // runs Alaska's chambers (STATEGOV-05, rule 54).
+    const sg = {};
+    new Function("window", fs.readFileSync(path.join(SITE, "data/stategov.js"), "utf8"))(sg);
+    const ny = await buildPage("legislature/ny.html");
+    suite("legislature/ny.html — parties, not ballot lines", () => {
+      const line = ny.D.querySelector("#legPanelBody p").textContent;
+      const want = sg.kycStateGov.states.NY.upper;
+      check("the Senate's party line names no fusion line", !line.includes("/"), line);
+      const got = {};
+      [...line.matchAll(/(\d+) (Republican|Democratic)/g)].forEach((m) => { got[m[2][0]] = +m[1]; });
+      check("and counts each party as the state page does", got.D === want.D && got.R === want.R,
+        line + " vs " + JSON.stringify(want));
+      const fused = [].concat(...Object.values(ny.window.kycLegislature.NY.chambers.upper.members))
+        .find((p) => p.lines && p.lines.length);
+      check("a member's card names their party and, apart, their other lines",
+        !fused || (!fused.party.includes("/") && fused.lines.every((l) => !l.includes("/"))));
+    });
+    const ak = await buildPage("legislature/ak.html");
+    suite("legislature/ak.html — who runs the chambers", () => {
+      const s = sg.kycStateGov.states.AK;
+      const text = ak.D.getElementById("legPanelBody").textContent;
+      check("the coalition note is on the legislature page, as on the state page",
+        !s.note || (text.includes(s.note) && !!ak.D.querySelector(`#legPanelBody a[href="${s.noteSource}"]`)), text);
     });
   }
   {
@@ -4861,6 +4969,11 @@ async function testLegislatures() {
       [...line.matchAll(/(\d+) (Republican|Democratic|Independent)/g)].forEach((m) => { got[m[2][0]] = +m[1]; });
       check("the party line counts them too, as the state page does",
         ["R", "D", "I"].every((k) => (got[k] || 0) === (want[k] || 0)), line + " vs " + JSON.stringify(want));
+      // Audit 2026-10-17, STATEGOV-17: listed with no district at all.
+      const cards = [...D.querySelectorAll("#legPanelBody .leg-person")];
+      check("each floterial member's card names their district",
+        off.filter((p) => p.why === "floterial").every((p) => cards.some((card) =>
+          card.textContent.includes(p.name) && card.textContent.includes("Floterial district " + p.district))));
     });
   }
   {

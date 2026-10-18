@@ -719,6 +719,18 @@ def render_legislature_page(code, host, summary=None):
         ])
     from .legislature import STATE_NOTES
     note = STATE_NOTES.get(code)
+    # Each colour the map can draw, keyed so the page hides the ones a
+    # chamber does not use. Nebraska elects its Legislature without party
+    # labels: its map is one neutral, said in one line, and a seat with
+    # nobody listed is its own entry everywhere (audit 2026-10-17,
+    # STATEGOV-06).
+    keys = ([("n", "Nonpartisan: senators are elected without party labels")] if code == "NE" else
+            [("r", "Republican"), ("d", "Democratic"), ("i", "Independent or other"),
+             ("split", "Members of more than one party"), ("n", "Nonpartisan")])
+    keys.append(("none", "Nobody listed"))
+    legend = "\n".join(
+        f'                        <span class="key" data-key="{key}"><span class="swatch party-fill-{key}">'
+        f"</span>{_e(text)}</span>" for key, text in keys)
     main = "\n".join(line for line in [
         '            <div id="legislatureContent" class="state-page legislature-page">',
         '                <header class="state-hero">',
@@ -738,15 +750,14 @@ def render_legislature_page(code, host, summary=None):
         '                <div class="toolbar legislature-toolbar">',
         chambers,
         '                    <div class="party-legend" aria-label="Colours">',
-        '                        <span class="key"><span class="swatch party-fill-r"></span>Republican</span>',
-        '                        <span class="key"><span class="swatch party-fill-d"></span>Democratic</span>',
-        '                        <span class="key"><span class="swatch party-fill-i"></span>Independent or other</span>',
-        '                        <span class="key"><span class="swatch party-fill-split"></span>Members of more than one party</span>',
-        '                        <span class="key"><span class="swatch party-fill-none"></span>Nobody listed, or nonpartisan</span>',
+        legend,
         "                    </div>",
         "                </div>",
         '                <div class="leg-layout">',
-        '                    <div class="leg-map-card"><div id="legMap" class="leg-map">',
+        '                    <div class="leg-map-card">',
+        # One square per seat, above the map (kyc-legislature.js seats()).
+        '                    <div id="legSeats" class="leg-seats"></div>',
+        '                    <div id="legMap" class="leg-map">',
         '                        <p class="results-bar" role="status">Loading the map&hellip;</p>',
         "                    </div></div>",
         '                    <aside class="leg-panel" aria-live="polite">',

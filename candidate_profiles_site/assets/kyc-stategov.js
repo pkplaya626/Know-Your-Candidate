@@ -401,6 +401,8 @@
       '<span class="gov-chamber-name">' + KYC.escapeHtml(c.title) + "</span>" +
       '<span class="gov-chamber-seats">' + pills(c) + ' <span class="faint">of ' + seatWord(c.seats) +
       (unlisted > 0 ? "; " + unlisted + " with nobody listed" : "") + "</span></span>" +
+      // One square per seat, as on the legislature page (KYC.seatStrip).
+      (KYC.seatStrip ? KYC.seatStrip(c) : "") +
       '<span class="gov-chamber-holds">' + KYC.escapeHtml(holds) +
       (c.ncsl ? ' <span class="badge badge-warn">NCSL: ' +
         KYC.escapeHtml(c.ncsl === "none" ? "no majority" : PARTY[c.ncsl] + " majority") + "</span>" : "") +

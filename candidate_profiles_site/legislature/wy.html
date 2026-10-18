@@ -20,8 +20,8 @@
 <meta property="og:site_name" content="Know Your Candidate">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../assets/kyc.css?v=b4fbce4424">
-<script src="../assets/kyc.js?v=b804f1b0c7"></script>
+<link rel="stylesheet" href="../assets/kyc.css?v=4879caee14">
+<script src="../assets/kyc.js?v=4e214cff56"></script>
 </head>
 <body data-root="../" data-state="WY" data-page="legislature">
 
@@ -205,15 +205,18 @@
                         <button type="button" data-chamber="lower" aria-pressed="false">House of Representatives</button>
                     </div>
                     <div class="party-legend" aria-label="Colours">
-                        <span class="key"><span class="swatch party-fill-r"></span>Republican</span>
-                        <span class="key"><span class="swatch party-fill-d"></span>Democratic</span>
-                        <span class="key"><span class="swatch party-fill-i"></span>Independent or other</span>
-                        <span class="key"><span class="swatch party-fill-split"></span>Members of more than one party</span>
-                        <span class="key"><span class="swatch party-fill-none"></span>Nobody listed, or nonpartisan</span>
+                        <span class="key" data-key="r"><span class="swatch party-fill-r"></span>Republican</span>
+                        <span class="key" data-key="d"><span class="swatch party-fill-d"></span>Democratic</span>
+                        <span class="key" data-key="i"><span class="swatch party-fill-i"></span>Independent or other</span>
+                        <span class="key" data-key="split"><span class="swatch party-fill-split"></span>Members of more than one party</span>
+                        <span class="key" data-key="n"><span class="swatch party-fill-n"></span>Nonpartisan</span>
+                        <span class="key" data-key="none"><span class="swatch party-fill-none"></span>Nobody listed</span>
                     </div>
                 </div>
                 <div class="leg-layout">
-                    <div class="leg-map-card"><div id="legMap" class="leg-map">
+                    <div class="leg-map-card">
+                    <div id="legSeats" class="leg-seats"></div>
+                    <div id="legMap" class="leg-map">
                         <p class="results-bar" role="status">Loading the map&hellip;</p>
                     </div></div>
                     <aside class="leg-panel" aria-live="polite">
@@ -241,8 +244,8 @@
     </main>
 </div>
 
-<script src="../data/legislature/wy.js?v=586ba8182a"></script>
+<script src="../data/legislature/wy.js?v=e9f52e84e5"></script>
 <script src="../assets/kyc-regionmap.js?v=472b8b2a16"></script>
-<script src="../assets/kyc-legislature.js?v=d787a76a13"></script>
+<script src="../assets/kyc-legislature.js?v=ff5bd18259"></script>
 </body>
 </html>
