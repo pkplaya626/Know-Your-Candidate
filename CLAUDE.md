@@ -160,8 +160,8 @@ python build_profile_site.py tribes           # every tribal government and its 
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1566 tests, no dependencies
-npm install && npm test                       # 2011 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1577 tests, no dependencies
+npm install && npm test                       # 2037 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1295,11 +1295,26 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     cache, `data/voting_dates.json`, read from the election office's own
     pages, calendars and statutes and re-opened by a second reader. Every
     value the page shows carries its page's address and words
-    (`voting_dates.SHOWN`; a time or "postmarked" may stand on its date's
-    source), on the jurisdiction's own domain or an evidenced entry in
-    `OFFICIAL_ELSEWHERE`; a compiled table is refused wherever it appears
-    (rule 50), vote.gov included, and vote.gov's deadlines page is not
-    shown beside the state's own dates (rule 53). A December date the
+    (`voting_dates.SHOWN`; a time of day may stand on its date's source,
+    but "postmarked" or "received" only on a quote that says it), on the
+    jurisdiction's own domains (`JURISDICTION_DOMAINS`) or an evidenced
+    entry in `OFFICIAL_ELSEWHERE`: being on .gov is not enough, since
+    another state's office, a county and a federal guide all are. A
+    compiled table is refused wherever it appears (rule 50), vote.gov,
+    fvap.gov and usa.gov included, and vote.gov's deadlines page is not
+    shown beside the state's own dates (rule 53). Where a reader can
+    register and vote at once, a deadline before Election Day is the
+    regular one, never "the last day" or "open until": the first page told
+    Illinois readers on October 18 that it was the last day to register,
+    with grace-period registration open to November 3. Where the record
+    does not say whether there is same-day registration, the page gives
+    the deadline and claims nothing more. Where same-day registration
+    happens is the office's words, quoted and checked against a cited
+    quote; the researchers' summary had been shown. A date the office
+    gives as a rule ("15 days before the election", Guam's runoff on "the
+    fourteenth day" after it) is that rule counted on the calendar, and the
+    page says so; a counted date that lands where the office cannot act
+    (D.C.'s in-person deadline, a Sunday) is not shown. A December date the
     results reader also holds must be the same date in both. The pipeline
     writes the words; the page only decides, on the reader's own calendar
     day, which have passed: "Register to vote" then says when it closed,
