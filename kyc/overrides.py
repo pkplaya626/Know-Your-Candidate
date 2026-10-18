@@ -13,7 +13,8 @@ from urllib.parse import urlsplit
 # override put the Michigan candidate's portrait on the Alabama congressman's
 # profile.
 #
-# Empty, and an entry needs the file's own Commons page as evidence: checked
+# {(name, state): (the file's upload.wikimedia.org URL, date checked,
+# evidence)}, the evidence being the file's own Commons page. Empty: checked
 # on 2026-10-17 against the Commons API, 24 of the 25 URLs that stood here
 # named files that do not exist ("Roy_Cooper_official_photo.jpg",
 # "Mike_Rogers_official_portrait.jpg"), file names made up from the person's
@@ -353,6 +354,18 @@ YOUTUBE_LEGACY_NAMES = {
                 "/user/ 404; /@ is 'Senator Reverend Raphael Warnock'"),
 }
 
+# YouTube @handles in congress-legislators that YouTube answers 404 for,
+# with the handle the member's own House or Senate site links instead (None
+# drops the link when the office links none). {bioguide: (the source's
+# value, the handle the office links or None, date, what was seen)}. Applied
+# only while the source holds exactly that value; validate reports an entry
+# the source has moved past.
+YOUTUBE_HANDLE_CORRECTIONS = {
+    "H001100": ("@RepJeffHurd03", "@RepJeffHurd", "2026-10-17",
+                "youtube.com/@RepJeffHurd03 answers 404; hurd.house.gov links "
+                "youtube.com/@RepJeffHurd, which answers 200 with his floor speeches"),
+}
+
 # X handles in congress-legislators that X answers "User Profile Not Found"
 # for, where the file holds no twitter_id to link the account by instead
 # (an id follows a rename: x.com/i/user/827279765287559171 is Speaker
@@ -366,6 +379,26 @@ DEAD_X_HANDLES = {
                 "nonsense handle does, while x.com/SpeakerJohnson answers 200; "
                 "congress-legislators lists no twitter_id for him"),
 }
+
+# A ballot page's link that redirects to the person's own article under a
+# title without their surname (rule 33). Without an entry here such a link is
+# withheld: "any living person's article" would also let a redirect to a
+# spouse or a namesake through, and its infobox be quoted onto this profile.
+# {profile id: (the title the link must land on, date, evidence)}.
+ARTICLE_UNDER_ANOTHER_NAME = {
+    "FEC_H4FL20098": ("Uncle Luke", "2026-10-17",
+                      "FL-20's 2026 election page links 'Luther Campbell', which redirects to "
+                      "'Uncle Luke'; that article (Q3267867) opens 'Luther Roderick Campbell "
+                      "(born December 22, 1960), also known by his stage names Luke or "
+                      "Uncle Luke'"),
+}
+
+
+def article_alias(profile_id):
+    """The title a ballot link is known to land on for this profile, or None."""
+    entry = ARTICLE_UNDER_ANOTHER_NAME.get(profile_id)
+    return entry[0] if entry else None
+
 
 # Images on a campaign's own site that `enrich` would take as the candidate's
 # portrait but that are not one, keyed on the image URL: (date checked, what it

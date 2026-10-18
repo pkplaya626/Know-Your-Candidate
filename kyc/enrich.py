@@ -42,7 +42,7 @@ from concurrent.futures import ThreadPoolExecutor
 from . import overrides
 from .legislators import age_on
 from .normalize import fill_field, looks_like_date
-from .portraits import surname_of, title_is_about
+from .portraits import article_is_theirs, surname_of, title_is_about
 from .results import OFF_BALLOT
 
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "enrichment.json")
@@ -276,7 +276,7 @@ def link_targets(titles, log=print):
     return out
 
 
-def link_is_about(target, name):
+def link_is_about(target, name, alias=None):
     """True when a linked title leads to an article about this person: not
     to a section of another article, not to a list, election or party
     article, and to a title carrying their surname. "Brian McGinnis" leads
@@ -284,14 +284,16 @@ def link_is_about(target, name):
     Manley" to "2016 Green Party presidential primaries", and "John Cowan
     (Georgia politician)" to the district's section of the state's 2026
     House elections article; one candidate's link was the Cascade Party of
-    Washington's own article. A whole article about a living person whose
-    title lacks the surname is still theirs: "Luther Campbell" redirects to
-    "Uncle Luke", the article about him."""
+    Washington's own article. A title without the surname is theirs only as
+    *alias*, an evidenced ``overrides.ARTICLE_UNDER_ANOTHER_NAME`` entry
+    ("Luther Campbell" redirects to "Uncle Luke"): being a living person's
+    article is not enough, since a redirect to a spouse or a namesake is
+    one too."""
     if not target or target.get("missing") or target.get("fragment"):
         return False
     title = target.get("to") or ""
     return (bool(title) and not _TOPIC_TITLE.search(title)
-            and (title_is_about(title, name) or bool(target.get("living"))))
+            and (title_is_about(title, name) or (alias is not None and title == alias)))
 
 
 # ---------------------------------------------------------------- campaign site
@@ -1084,7 +1086,7 @@ def resolve_all(profiles, root=".", refresh=False, limit=None, log=print, worker
             continue
         title, text = got
         entry = people.setdefault(profile["id"], {})
-        if not title_is_about(title, profile["name"]):
+        if not article_is_theirs(title, profile):
             entry.pop("wiki", None)       # redirected to an article about someone else
             continue
         facts = wiki_facts(text)
@@ -1163,6 +1165,39 @@ def withdrawn(site):
     return bool(site) and site.get("safe") is False and site.get("reason") in (HIJACKED, PARKED)
 
 
+def withhold_links(profiles, cache):
+    """Withhold each ballot link that leads somewhere not this person's
+    article (:func:`link_is_about`); return how many were withheld.
+
+    Run before anything follows the link: :func:`kyc.portraits.apply_cache`
+    (and ``portraits`` resolving) take a challenger's portrait from the
+    article ``wikipedia`` names, so a link withheld after them had already
+    delivered the lead image of the article it was withheld for - a section
+    of another person's article whose title carries the surname, say. It is
+    safe to run twice: a withheld profile no longer has the link.
+    """
+    links = (cache or {}).get("links") or {}
+    withheld = 0
+    for profile in profiles:
+        title = profile.get("wikipedia")
+        if (title and profile.get("wikipediaVia") == "election-page" and title in links
+                and not link_is_about(links[title], profile["name"],
+                                      alias=overrides.article_alias(profile.get("id")))):
+            # Withheld, not followed; validate lists it. A title not yet
+            # checked stays (rule 8).
+            target = links[title]
+            profile["wikipediaWithheld"] = {
+                "title": title,
+                "landsOn": None if target.get("missing") else (
+                    target.get("to", "") + (f"#{target['fragment']}"
+                                            if target.get("fragment") else "")),
+            }
+            profile.pop("wikipedia", None)
+            profile.pop("wikipediaVia", None)
+            withheld += 1
+    return withheld
+
+
 def apply_cache(profiles, cache, as_of=None):
     """Fill empty fields of challengers still running from the cache.
 
@@ -1173,25 +1208,11 @@ def apply_cache(profiles, cache, as_of=None):
     the date every other age on the site is computed at.
     """
     people = (cache or {}).get("people") or {}
-    links = (cache or {}).get("links") or {}
     counts = collections.Counter()
+    withheld = withhold_links(profiles, cache)
+    if withheld:
+        counts["wikipedia_withheld"] += withheld
     for profile in profiles:
-        title = profile.get("wikipedia")
-        if (title and profile.get("wikipediaVia") == "election-page" and title in links
-                and not link_is_about(links[title], profile["name"])):
-            # The ballot page's link leads somewhere that is not this
-            # person's article. It is withheld, not followed; validate lists
-            # it. A title not yet checked stays (rule 8).
-            target = links[title]
-            profile["wikipediaWithheld"] = {
-                "title": title,
-                "landsOn": None if target.get("missing") else (
-                    target.get("to", "") + (f"#{target['fragment']}"
-                                            if target.get("fragment") else "")),
-            }
-            profile.pop("wikipedia", None)
-            profile.pop("wikipediaVia", None)
-            counts["wikipedia_withheld"] += 1
         entry = people.get(profile.get("id"))
         if not entry:
             continue

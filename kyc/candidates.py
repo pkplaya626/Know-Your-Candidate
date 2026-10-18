@@ -274,9 +274,20 @@ def filing_counts(cache, year=CYCLE):
     registration whose last report predates the cycle is not a 2026 filing,
     and a filing for a seat that is not on the ballot is not a filing for any
     race we show.
+
+    People, not registrations: a person :func:`registrations` folds (one
+    committee's money under several ids, or an evidenced same-person pair)
+    is counted once, as they are shown once. Arthur Purves's three
+    registrations made VA-11 read "22 filed" over a race listing him once
+    (rule 73: one formula for a count).
     """
+    rows = (cache or {}).get("candidates", [])
+    merged = registrations(rows, (cache or {}).get("committeeOf"))
+    folded = {other for others in merged.values() for other in others}
     counts = {}
-    for row in (cache or {}).get("candidates", []):
+    for row in rows:
+        if row["candidate_id"] in folded:
+            continue
         rid = race_id(row, year)
         if rid:
             counts[rid] = counts.get(rid, 0) + 1

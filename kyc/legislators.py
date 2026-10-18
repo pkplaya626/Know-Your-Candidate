@@ -219,7 +219,14 @@ def display_name(roster, person):
         return roster
     parts = person.get("nameParts") or {}
     if parts.get("nickname") or is_initial(words[0]):
-        return goes_by(person) or roster
+        # Without the record's generational suffix: no other member is
+        # shown with one ("Thomas Kean", not "Thomas Kean, Jr."), so "Hank
+        # Johnson, Jr." stood alone. The suffixed form stays a search alias.
+        shown = goes_by(person)
+        suffix = parts.get("suffix")
+        if shown and suffix and shown.endswith(f", {suffix}"):
+            shown = shown[:-len(f", {suffix}")]
+        return shown or roster
     match = _ROSTER_NICKNAME.match(roster)
     if match:
         return f"{match.group(2).strip()} {match.group(3)}"

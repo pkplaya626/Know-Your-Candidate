@@ -146,8 +146,8 @@ python build_profile_site.py oge              # the executive's financial report
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1243 tests, no dependencies
-npm install && npm test                       # 1510 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1249 tests, no dependencies
+npm install && npm test                       # 1515 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -262,9 +262,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     loans and transfers included, and a candidate's own loan is their own
     money. Read from four contribution types, Jefferson Shreve, whose
     $2,000,000 loan was 79% of what his campaign received, read "PACs 70%".
-    And a challenger's split is read from their own filing
-    (`fec.resolve_field`, the endpoint the incumbent's comes from), or
-    every challenger beside a member's breakdown read "No data".
+    Where an adjustment the FEC deducts leaves a category negative, the
+    shares are of the positive parts, and the profile says that sum
+    (`fundingBase`) beside the receipts: Shri Thanedar's add up to
+    $3,968,600 against $3,194,222 raised. And a challenger's split is read
+    from their own filing (`fec.resolve_field`, the endpoint the
+    incumbent's comes from), or every challenger beside a member's
+    breakdown read "No data"; the daily refresh re-reads the oldest of
+    them, a batch a day, and a stopped finance run warns and lets the
+    refresh go on to the results.
 
 20. **Check attribution, do not trust it.** An FEC candidate id encodes its
     own office and state, so `validate.check_finance` compares every figure
@@ -293,9 +299,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     cannot pick the wrong person; a title guess or a name search can, and
     "Michael Smith" resolves to a stranger. A portrait reaches a profile by
     an id - the Clerk's, congress.gov's and the Biographical Directory's
-    photographs by bioguide id, the article the bioguide mapping names - or
-    through the article the person's ballot page links (rule 33), and by no
-    other route, for members and curated rows as much as filed candidates.
+    photographs by bioguide id, the article the bioguide mapping names -
+    through the article the person's ballot page links (rule 33), from the
+    campaign site their own committee filed (rule 38), or as an evidenced
+    `CANDIDATE_PHOTOS` entry naming a served file, and by no other route,
+    for members and curated rows as much as filed candidates. A ballot link
+    withheld as leading elsewhere is withheld before any portrait is taken
+    from it (`enrich.withhold_links`).
     `title_is_about` rejects a resolved title that does not contain the
     person's surname - which is how a photograph of an Iran war protest ended
     up on Brian McGinnis's profile via a redirect. The guess came back
@@ -382,7 +392,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     section of another article, a list, an election or a party article is
     withheld (`wikipediaWithheld`) - "Brian McGinnis" leads to the protest,
     "Elijah Manley" to a party's 2016 primaries, and one candidate's link
-    was the Cascade Party of Washington's own article.
+    was the Cascade Party of Washington's own article. A title without the
+    surname is withheld too, even a living person's article (a spouse or a
+    namesake is one), unless `overrides.ARTICLE_UNDER_ANOTHER_NAME` records
+    it with evidence ("Luther Campbell" is "Uncle Luke"); the link, the
+    portrait, the infobox and the offices held all ask
+    `portraits.article_is_theirs`, so none of them disagrees.
 
 34. **Fifty-seven near-identical pages are generated, not maintained.** The
     state pages come from one template and carry nothing but a state code;
@@ -973,7 +988,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     him as two Republican nominees. Filers off every ballot have no
     committee in the campaigns cache, so a pair like Broden's in FL-1 is an
     evidenced `SAME_PERSON_FILINGS` entry, and `validate` warns on two
-    profiles under one name in one race (`same-name-in-race`). A
+    profiles under one name in one race (`same-name-in-race`). A race's
+    "filed in total" counts the person once too (`filing_counts` folds the
+    same registrations), or VA-11 read 22 filed with Purves three times. A
     results-page name that was ambiguous only between one person's
     registrations is theirs (`results._claim_unmatched`).
 

@@ -245,7 +245,16 @@ def social_handles(social, bioguide=None):
     if value and _CHANNEL_ID.match(value):
         out.setdefault("youtube_id", value)
         out.pop("youtube")
-    elif value and not value.startswith("@"):
+    elif value and value.startswith("@"):
+        # A handle YouTube answers 404 for, as the member's office links it
+        # instead (or dropped), while the source still holds exactly it.
+        fixed = overrides.YOUTUBE_HANDLE_CORRECTIONS.get(bioguide)
+        if fixed and fixed[0] == value:
+            if fixed[1]:
+                out["youtube"] = fixed[1]
+            else:
+                out.pop("youtube")
+    elif value:
         checked = overrides.YOUTUBE_LEGACY_NAMES.get(bioguide)
         if checked and checked[0] == value:
             if checked[1] == "handle":

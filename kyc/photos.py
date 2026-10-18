@@ -67,7 +67,7 @@ def candidate_photos(name, state):
 
     override = CANDIDATE_PHOTOS.get((str(name).strip(), state))
     if override:
-        urls.append(override)
+        urls.append(override[0])  # (url, date checked, evidence)
 
     urls.append(PLACEHOLDER)
     return urls

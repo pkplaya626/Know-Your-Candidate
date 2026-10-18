@@ -439,6 +439,18 @@ def title_is_about(title, name):
     return len(words) >= 3 and surname_of(" ".join(words[:-1])) in clean
 
 
+def article_is_theirs(title, profile):
+    """:func:`title_is_about`, or the title an evidenced
+    ``overrides.ARTICLE_UNDER_ANOTHER_NAME`` entry gives this profile - one
+    answer for the link check, the portrait, the infobox and the offices
+    held, so no two of them disagree about one article."""
+    from . import overrides
+
+    alias = overrides.article_alias(profile.get("id"))
+    return (title_is_about(title, profile.get("name") or "")
+            or (alias is not None and title == alias))
+
+
 def load_cache(root="."):
     path = os.path.join(root, CACHE_PATH)
     if not os.path.exists(path):
@@ -563,7 +575,7 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
         # need not contain the surname (married names, pen names). A ballot
         # page's link is trusted for the title but still checked after
         # redirects, the way McGinnis's protest photo taught.
-        if found and (key in by_bioguide or title_is_about(found[0], profile["name"])):
+        if found and (key in by_bioguide or article_is_theirs(found[0], profile)):
             resolved[key] = {
                 "url": found[1], "via": "wikipedia",
                 "title": found[0], "name": profile["name"],
@@ -692,7 +704,7 @@ def route_ok(profile, record):
         return True
     return ((profile.get("wikipediaVia") == "election-page"
              or profile.get("source") == "fec-field")
-            and title_is_about(record.get("title") or "", profile["name"]))
+            and article_is_theirs(record.get("title") or "", profile))
 
 
 def apply_cache(profiles, cache):

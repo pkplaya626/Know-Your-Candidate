@@ -119,6 +119,10 @@ def _build(args):
     # After the results: a challenger's portrait comes only through the
     # article their ballot page links, and that link - and the name on the
     # ballot the portrait cache is keyed on - arrives with them (rule 24).
+    # A link that leads somewhere else is withheld first, so it delivers no
+    # portrait either (rule 33).
+    enrichment = enrich.load_cache(args.root)
+    withheld = enrich.withhold_links(profiles, enrichment)
     cache = portraits.load_cache(args.root)
     if cache:
         stats["portraits"] = portraits.apply_cache(profiles, cache)
@@ -130,9 +134,10 @@ def _build(args):
 
     # After the results: who is still running, and the article and campaign
     # site their state's election page links, both arrive with them.
-    enrichment = enrich.load_cache(args.root)
     if enrichment:
         filled = enrich.apply_cache(profiles, enrichment, as_of=_age_date(stats))
+        if withheld:
+            filled["wikipedia_withheld"] += withheld
         stats["enriched"] = dict(sorted(filled.items()))
         print("  enrich: " + ", ".join(f"{n} {k}" for k, n in sorted(filled.items()))
               + f" (read {enrichment.get('checked')})")
@@ -404,6 +409,8 @@ def _portraits(args):
     fec.apply_cache(profiles, finance)
     results_mod.apply_cache(profiles, results_mod.load_cache(args.root),
                             field=screen_field(field, profiles, raw.get("record")))
+    # A ballot link that leads somewhere else is not resolved (rule 33).
+    enrich.withhold_links(profiles, enrich.load_cache(args.root))
     cache, _summary = portraits.resolve_all(
         profiles, root=args.root, refresh=args.refresh
     )
@@ -521,13 +528,18 @@ def _enrich(args):
     # Who is still running, and the article and site the election page links.
     results_mod.apply_cache(profiles, results_mod.load_cache(args.root),
                             field=screen_field(field, profiles, raw.get("record")))
-    portraits.apply_cache(profiles, portraits.load_cache(args.root))
     if args.check:
         cache = enrich.load_cache(args.root)
         if not cache:
             print(f"[error] no {enrich.CACHE_PATH}; run 'enrich' first.", file=sys.stderr)
             return 2
+        # As in build: a withheld link delivers no portrait (rule 33), and a
+        # campaign-site portrait is taken only where none came by id or link.
+        withheld = enrich.withhold_links(profiles, cache)
+        portraits.apply_cache(profiles, portraits.load_cache(args.root))
         filled = enrich.apply_cache(profiles, cache, as_of=_age_date(stats))
+        if withheld:
+            filled["wikipedia_withheld"] += withheld
         print("  enrich: " + ", ".join(f"{n} {k}" for k, n in sorted(filled.items())))
     else:
         cache, _counts = enrich.resolve_all(profiles, root=args.root, refresh=args.refresh,
@@ -613,7 +625,13 @@ def _finance(args):
                                         refresh=args.refresh, snapshot=snapshot,
                                         active_ids=active, record=raw.get("record"))
         if stats.get("stopped"):
-            return 1
+            # A stop keeps every figure already cached, dated as it was read,
+            # and the next run resumes. It is not fatal: the daily refresh
+            # runs the field and the results after this step, and a 429 here
+            # must not keep a day's results off the site.
+            print("  [warn] finance stopped early; cached figures kept, "
+                  "the next run resumes")
+            return 0
     # Then every challenger still on a ballot, by their own filing's id: who
     # that is comes from the results, as on the page.
     finance = fec.load_cache(args.root)
@@ -623,8 +641,11 @@ def _finance(args):
                             field=screen_field(field, profiles, raw.get("record")))
     _cache, stats = fec.resolve_field([p for p in profiles if enrich.running(p)],
                                       root=args.root, refresh=args.refresh, limit=args.limit)
+    if stats.get("stopped"):
+        print("  [warn] challengers' totals stopped early; cached figures kept, "
+              "the next run resumes")
     print(f"\n[ok] finance cache: {fec.CACHE_PATH}")
-    return 1 if stats.get("stopped") else 0
+    return 0
 
 
 def _congress(args):
@@ -1095,9 +1116,11 @@ def _verify(args):
     outcomes = results_mod.load_cache(args.root)
     stats["results"] = (results_mod.apply_cache(profiles, outcomes, field=field)
                         if outcomes else 0)
+    enrichment = enrich.load_cache(args.root)
+    enrich.withhold_links(profiles, enrichment)
     cache = portraits.load_cache(args.root)
     stats["portraits"] = portraits.apply_cache(profiles, cache) if cache else 0
-    enrich.apply_cache(profiles, enrich.load_cache(args.root), as_of=_age_date(stats))
+    enrich.apply_cache(profiles, enrichment, as_of=_age_date(stats))
     from . import history as history_mod
     history_mod.apply_cache(profiles, history_mod.load_cache(args.root),
                             snapshot=legislators.load_snapshot(args.root))

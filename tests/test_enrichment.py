@@ -390,9 +390,35 @@ class TestFec(unittest.TestCase):
             "transfers": 10000.0, "offsets": 556.0, "other_receipts": 100.0,
         }
         breakdown, line = fec.funding(record)
-        self.assertEqual(line, "Self-funded 79%, PACs 15%, Individual 6%, Transfers <1%, Other <1%")
-        self.assertEqual(breakdown["Self-funded"], 2000000.0)
+        self.assertEqual(line, "Self-funded (incl. loans) 79%, PACs 15%, Individual 6%, "
+                               "Transfers from other committees <1%, Other <1%")
+        self.assertEqual(breakdown["Self-funded (incl. loans)"], 2000000.0)
         self.assertNotIn("Party", breakdown)
+        self.assertIsNone(fec.funding_base(record, breakdown))
+        # Only a loan earns the words; a gift alone is "Self-funded".
+        _parts, gift = fec.funding({"receipts": 100.0, "individual_contributions": 90.0,
+                                    "self_funding": 10.0, "candidate_loans": 0})
+        self.assertEqual(gift, "Individual 90%, Self-funded 10%")
+        # No label holds the ", " the page splits pairs on.
+        self.assertFalse([label for label, _f in fec.FUNDING_PARTS if ", " in label])
+        self.assertNotIn(", ", fec.SELF_WITH_LOANS)
+
+    def test_a_negative_adjustment_says_what_the_shares_are_of(self):
+        """Shri Thanedar: loans $2,970,000 of $3,194,222 received, with other
+        receipts of -$774,378. The shares are of the positive parts, and the
+        profile says that sum, since it is not the receipts shown."""
+        record = {"receipts": 3194222.05, "individual_contributions": 912720.0,
+                  "pac_contributions": 85880.0, "party_contributions": 0,
+                  "self_funding": 0, "candidate_loans": 2970000.0, "other_loans": 0,
+                  "transfers": 0, "offsets": 0, "other_receipts": -774377.68}
+        breakdown, line = fec.funding(record)
+        self.assertNotIn("Other", breakdown)
+        self.assertEqual(fec.funding_base(record, breakdown), 3968600.0)
+        self.assertTrue(line.startswith("Self-funded (incl. loans) 75%"), line)
+        profile = {"name": "Shri Thanedar", "state": "MI", "chamber": "House", "quality": {}}
+        fec.apply_cache([profile], {fec.profile_key(profile): dict(record, candidate_id="H2MI13204")})
+        self.assertEqual(profile["fundingBase"], "$3,968,600.00")
+        self.assertEqual(profile["receipts"], "$3,194,222.05")
 
     def test_a_record_read_before_loans_were_has_no_split(self):
         # Its shares would be of the wrong total; finance reads it again.
@@ -402,7 +428,7 @@ class TestFec(unittest.TestCase):
     def test_refunds_never_push_a_share_past_the_whole(self):
         breakdown, line = fec.funding({"receipts": 50.0, "individual_contributions": 80.0,
                                        "candidate_loans": 20.0})
-        self.assertEqual(line, "Individual 80%, Self-funded 20%")
+        self.assertEqual(line, "Individual 80%, Self-funded (incl. loans) 20%")
 
     def test_profiles_without_fec_data_are_untouched(self):
         profile = {"name": "A B", "state": "TX", "chamber": "House",
@@ -1435,9 +1461,14 @@ class TestPeopleDataAudit(unittest.TestCase):
         self.assertFalse(about({"missing": True}, "Jane Doe"))
         self.assertTrue(about({"to": "David Brock Smith"}, "David Smith"))
         self.assertTrue(about({"to": "Adam Hamilton (pastor)"}, "Adam Hamilton"))
-        # A living person's whole article, under another name, is theirs.
-        self.assertTrue(about({"to": "Uncle Luke", "living": True}, "Luther Campbell"))
-        self.assertFalse(about({"to": "Uncle Luke"}, "Luther Campbell"))
+        # A living person's article under another name is theirs only by an
+        # evidenced alias: a redirect to a living spouse or namesake is one too.
+        self.assertFalse(about({"to": "Uncle Luke", "living": True}, "Luther Campbell"))
+        self.assertFalse(about({"to": "Jill Biden", "living": True}, "Joe Smith"))
+        self.assertTrue(about({"to": "Uncle Luke", "living": True}, "Luther Campbell",
+                              alias="Uncle Luke"))
+        self.assertFalse(about({"to": "Uncle Luke", "fragment": "Career"}, "Luther Campbell",
+                               alias="Uncle Luke"))
         self.assertFalse(about({"to": "2016 Green Party presidential primaries",
                                 "living": True}, "Elijah Manley"))
 
@@ -1483,6 +1514,46 @@ class TestPeopleDataAudit(unittest.TestCase):
         self.assertEqual(counts["wikipedia_withheld"], 1)
         issues = validate.check_wikipedia_withheld([withdrawn, fine])
         self.assertEqual([i.code for i in issues], ["wikipedia-not-about"])
+
+    def test_the_alias_is_one_answer_for_link_portrait_infobox_and_history(self):
+        from kyc import overrides
+        profile = {"id": "FEC_H4FL20098", "name": "Luther Campbell"}
+        self.assertEqual(overrides.article_alias("FEC_H4FL20098"), "Uncle Luke")
+        self.assertTrue(portraits.article_is_theirs("Uncle Luke", profile))
+        self.assertFalse(portraits.article_is_theirs("Uncle Luke",
+                                                     {"id": "X", "name": "Luther Campbell"}))
+        self.assertTrue(portraits.article_is_theirs("Luther Campbell (politician)",
+                                                    {"id": "X", "name": "Luther Campbell"}))
+        kept = self.running(id="FEC_H4FL20098", name="Luther Campbell",
+                            wikipedia="Luther Campbell", wikipediaVia="election-page")
+        enrich.withhold_links([kept], {"links": {"Luther Campbell": {
+            "to": "Uncle Luke", "fragment": None, "living": True}}})
+        self.assertEqual(kept["wikipedia"], "Luther Campbell")
+
+    def test_a_withheld_link_delivers_no_portrait(self):
+        # A redirect to a section of an article whose title carries the
+        # surname passes title_is_about; the link check withholds it, and it
+        # must do so before the portrait is applied.
+        profile = self.running(id="FEC_H6XX00001", name="Jane Doe", wikipedia="Jane Doe",
+                               wikipediaVia="election-page", photos=["placeholder"])
+        record = {"url": "https://upload.wikimedia.org/doe-family.jpg", "via": "wikipedia",
+                  "title": "Doe family", "linked": "Jane Doe", "name": "Jane Doe"}
+        cache = {portraits.profile_key(profile): record}
+        self.assertTrue(portraits.route_ok(profile, record))  # the hole, before withholding
+        withheld = enrich.withhold_links([profile], {"links": {"Jane Doe": {
+            "to": "Doe family", "fragment": "Jane Doe", "living": False}}})
+        self.assertEqual(withheld, 1)
+        portraits.apply_cache([profile], cache)
+        self.assertNotIn(record["url"], profile["photos"])
+        # And every command that applies portraits withholds first.
+        import inspect
+        from kyc import cli
+        for command in (cli._build, cli._enrich, cli._verify, cli._portraits):
+            source = inspect.getsource(command)
+            first = min(i for i in (source.find("portraits.apply_cache"),
+                                    source.find("portraits.resolve_all")) if i >= 0)
+            self.assertLess(source.find("enrich.withhold_links"), first, command.__name__)
+            self.assertGreaterEqual(source.find("enrich.withhold_links"), 0, command.__name__)
 
     # --- campaign sites (LINKS-11)
     def test_other_form_adds_or_drops_www(self):
@@ -1566,6 +1637,11 @@ class TestPeopleDataAudit(unittest.TestCase):
         self.assertEqual(social_handles({"youtube": "adamschiff"}, "S001150"),
                          {"youtube": "adamschiff"})
         self.assertEqual(social_handles({"youtube": "RepJackBergman"}, "B001301"), {})
+        # An @handle YouTube answers 404 for: the one the member's office links.
+        self.assertEqual(social_handles({"youtube": "@RepJeffHurd03"}, "H001100"),
+                         {"youtube": "@RepJeffHurd"})
+        self.assertEqual(social_handles({"youtube": "@RepJeffHurd03"}, "X000000"),
+                         {"youtube": "@RepJeffHurd03"})
 
     def test_an_x_account_is_linked_by_its_id_and_a_dead_handle_dropped(self):
         from kyc.profiles import social_handles
@@ -1584,6 +1660,10 @@ class TestPeopleDataAudit(unittest.TestCase):
         moved = {"legislators": [{"bioguide": "M001219", "social": {"twitter": "NewHandle"}}]}
         codes = [i.code for i in validate.check_member_link_overrides(moved)]
         self.assertIn("stale-link-override", codes)
+        fixed = {"legislators": [{"bioguide": "H001100", "social": {"youtube": "@RepJeffHurd"}}]}
+        issues = validate.check_member_link_overrides(fixed)
+        self.assertTrue(any("YOUTUBE_HANDLE_CORRECTIONS H001100" in line
+                            for i in issues for line in i.detail))
 
     # --- money (PROFILES-11)
     def test_a_negative_amount_puts_the_sign_first(self):
@@ -1617,4 +1697,56 @@ class TestPeopleDataAudit(unittest.TestCase):
         self.assertIn("fec:H6IN09242", saved)
         fec.apply_cache([profile], saved)
         self.assertEqual(profile["funding_sources"],
-                         "Individual 91%, Self-funded 6%, Party <1%")
+                         "Individual 91%, Self-funded (incl. loans) 6%, Party <1%")
+        self.assertTrue(saved["fec:H6IN09242"]["read"])
+
+    def test_a_refresh_rereads_only_old_challenger_totals_a_batch_at_a_time(self):
+        # The daily refresh must not re-read ~590 challengers every day.
+        import datetime
+        today = datetime.date(2026, 10, 17)
+        people = [{"id": f"FEC_H6XX{n:05d}", "source": "fec-field",
+                   "fecCandidateId": f"H6XX{n:05d}", "name": f"P{n}", "state": "XX",
+                   "chamber": "House (Candidate)"} for n in range(fec.FIELD_PER_RUN + 40)]
+        cache = {}
+        for n, person in enumerate(people):
+            age = 2 if n < 20 else 10 + n  # the first twenty were read this week
+            cache[fec.profile_key(person)] = {
+                "candidate_id": person["fecCandidateId"], "candidate_loans": 0,
+                "receipts": 1.0, "read": (today - datetime.timedelta(days=age)).isoformat()}
+        new = {"id": "FEC_H6XX99999", "source": "fec-field", "fecCandidateId": "H6XX99999",
+               "name": "New", "state": "XX", "chamber": "House (Candidate)"}
+        asked = []
+        with mock.patch.object(fec, "totals",
+                               side_effect=lambda cid: asked.append(cid) or None), \
+                mock.patch.object(fec, "load_cache", return_value=cache), \
+                mock.patch.object(fec, "save_cache"):
+            fec.resolve_field(people + [new], log=lambda *a: None, today=today)
+            self.assertEqual(asked, ["H6XX99999"])  # without --refresh, only the unread
+            asked.clear()
+            fec.resolve_field(people + [new], refresh=True, log=lambda *a: None, today=today)
+        self.assertEqual(asked[0], "H6XX99999")
+        self.assertEqual(len(asked), 1 + fec.FIELD_PER_RUN)
+        # Oldest first; nobody read this week.
+        self.assertEqual(asked[1], people[-1]["fecCandidateId"])
+        self.assertFalse({p["fecCandidateId"] for p in people[:20]} & set(asked))
+
+    def test_a_stopped_finance_run_does_not_fail_the_refresh(self):
+        # refresh.yml runs the field and the results after this step.
+        from types import SimpleNamespace
+        from kyc import cli
+        args = SimpleNamespace(root=ROOT, limit=None, refresh=True, field_only=False)
+        with mock.patch.object(cli, "_load", return_value={}), \
+                mock.patch.object(cli.legislators, "load_snapshot", return_value={}), \
+                mock.patch.object(cli, "build_profiles", return_value=([], {})), \
+                mock.patch.object(cli.candidates, "load_cache", return_value={}), \
+                mock.patch.object(fec, "resolve_all", return_value=({}, {"stopped": 1})):
+            self.assertEqual(cli._finance(args), 0)
+        with mock.patch.object(cli, "_load", return_value={}), \
+                mock.patch.object(cli.legislators, "load_snapshot", return_value={}), \
+                mock.patch.object(cli, "build_profiles", return_value=([], {})), \
+                mock.patch.object(cli.candidates, "load_cache", return_value={}), \
+                mock.patch.object(fec, "load_cache", return_value={}), \
+                mock.patch.object(cli.results_mod, "load_cache", return_value={}), \
+                mock.patch.object(fec, "resolve_field", return_value=({}, {"stopped": 1})):
+            self.assertEqual(cli._finance(SimpleNamespace(**{**vars(args),
+                                                             "field_only": True})), 0)

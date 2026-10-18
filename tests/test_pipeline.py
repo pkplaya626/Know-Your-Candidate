@@ -133,7 +133,8 @@ class TestPhotos(unittest.TestCase):
     def test_override_is_scoped_by_state(self):
         """Two different people sharing a name must not share a portrait."""
         url = "https://upload.wikimedia.org/wikipedia/commons/a/ab/Mike_Rogers_MI.jpg"
-        with mock.patch.dict("kyc.photos.CANDIDATE_PHOTOS", {("Mike Rogers", "MI"): url}):
+        with mock.patch.dict("kyc.photos.CANDIDATE_PHOTOS",
+                             {("Mike Rogers", "MI"): (url, "2026-10-17", "test")}):
             mi = candidate_photos("Mike Rogers", "MI")
             al = candidate_photos("Mike Rogers", "AL")
         self.assertEqual(mi[0], url)
@@ -142,9 +143,17 @@ class TestPhotos(unittest.TestCase):
     def test_no_hand_chosen_photo_is_a_made_up_file_name(self):
         # 24 of the 25 "hand-chosen" URLs named Commons files that do not
         # exist, made up from the person's name (2026-10-17). An entry now
-        # needs evidence; none stands.
-        from kyc import overrides
-        self.assertEqual(overrides.CANDIDATE_PHOTOS, {})
+        # names a served file, not a name lookup, with the date it was
+        # checked and the evidence that it is this person.
+        import datetime
+        from kyc import overrides, photos
+        for key, entry in overrides.CANDIDATE_PHOTOS.items():
+            self.assertEqual(len(entry), 3, key)
+            url, checked, evidence = entry
+            self.assertTrue(url.startswith("https://upload.wikimedia.org/"), key)
+            self.assertFalse(photos.is_guessed(url), key)
+            datetime.date.fromisoformat(checked)
+            self.assertTrue(str(evidence).strip(), key)
 
 
 class TestBuild(unittest.TestCase):

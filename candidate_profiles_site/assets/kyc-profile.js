@@ -511,12 +511,38 @@
     ["bluesky", "Bluesky", function (v) { return "https://bsky.app/profile/" + encodeURIComponent(v); }],
   ];
 
-  /** The handle a chip's tooltip names: "@SpeakerJohnson", never an id. */
+  /**
+   * A chip's tooltip. An account linked by its id names no handle: the id
+   * follows a rename, and the source's handle beside it may be the old one
+   * (Speaker Johnson's id leads to SpeakerJohnson; the source still says
+   * RepMikeJohnson, which X answers "not found" for and anyone could take).
+   */
   function handleTitle(social, key, value) {
-    if (key === "twitter_id") return social.twitter ? "@" + social.twitter : "";
-    if (key === "youtube_id") return social.youtube ? handleTitle(social, "youtube", social.youtube) : "";
+    if (key === "twitter_id") return "X account, linked by its id";
+    if (key === "youtube_id") return "YouTube channel, linked by its id";
     value = String(value);
     return value.charAt(0) === "@" ? value : "@" + value;
+  }
+
+  /**
+   * The funding split, each label kept on one line with its share ("Transfers
+   * from other committees <1%" broke between label and value at 390px), and,
+   * where adjustments brought the receipts below the parts, what the shares
+   * are of: Shri Thanedar's add up to $3,968,600 beside "Raised $3,194,222".
+   */
+  function fundingHtml(item) {
+    if (!item.fundingBreakdown || !KYC.hasValue(item, "funding_sources")) {
+      return KYC.renderField(item, "funding_sources");
+    }
+    var html = String(item.funding_sources).split(", ").map(function (pair) {
+      return '<span class="funding-part">' + KYC.escapeHtml(pair) + "</span>";
+    }).join(", ");
+    if (item.fundingBase) {
+      html += '<span class="funding-base">Shares of ' + KYC.escapeHtml(item.fundingBase) +
+        " received, before adjustments the FEC deducts to reach the " +
+        KYC.escapeHtml(item.receipts || "") + " raised.</span>";
+    }
+    return html;
   }
 
   function linkChip(url, label, title) {
@@ -778,7 +804,7 @@
       : "This site has not read this member\u2019s record of offices.");
     el("profileModalReceipts").innerHTML = KYC.renderField(item, "receipts", { source: true });
     el("profileModalSpent").innerHTML = KYC.renderField(item, "disbursements");
-    el("profileModalFunding").innerHTML = KYC.renderField(item, "funding_sources");
+    el("profileModalFunding").innerHTML = fundingHtml(item);
 
     var cashWrap = el("profileModalCashWrap");
     cashWrap.hidden = !item.cashOnHand;
@@ -804,7 +830,7 @@
     el("profileModalSource").textContent = item.financeSource
       ? "Finance figures from the FEC" +
         (item.financeAsOf ? ", through " + item.financeAsOf +
-          (KYC.filedAhead(item) ? " as the report gives it" : "") : "") +
+          (KYC.filedAhead(item) ? ", a date still to come" : "") : "") +
         (item.financeElection ? " (" + item.financeElection + " election period)" : "")
       : "";
   }

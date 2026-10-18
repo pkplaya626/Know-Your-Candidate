@@ -1089,6 +1089,11 @@ class TestNamesOnTheRealRoster(unittest.TestCase):
         people = self.snapshot["legislators"]
         self.assertTrue(all(p.get("nameParts", {}).get("last") for p in people))
 
+    def test_no_redisplayed_member_carries_a_comma_suffix(self):
+        odd = [p["name"] for mid, p in self.members.items()
+               if p["name"] != self.roster.get(mid) and ", " in p["name"]]
+        self.assertEqual(odd, [])
+
     def test_no_member_displays_as_a_bare_initial(self):
         initial_first = [p["name"] for p in self.members.values()
                          if legislators.is_initial(p["name"].split()[0])]
@@ -1122,6 +1127,11 @@ class TestNamesOnTheRealRoster(unittest.TestCase):
         # A recorded nickname.
         self.assertEqual(legislators.display_name("John Reed", person(
             first="John", last="Reed", nickname="Jack", official_full="Jack Reed")), "Jack Reed")
+        # Shown without the record's suffix, as every other member is; the
+        # suffixed form stays an alias.
+        self.assertEqual(legislators.display_name("Henry Johnson", person(
+            first="Henry", middle="C.", last="Johnson", suffix="Jr.", nickname="Hank",
+            official_full='Henry C. "Hank" Johnson, Jr.')), "Hank Johnson")
         # The roster's own parenthetical.
         self.assertEqual(legislators.display_name("Charles (Chuck) Edwards", person(
             first="Charles", last="Edwards", official_full="Chuck Edwards")), "Chuck Edwards")
@@ -1169,7 +1179,9 @@ class TestNamesOnTheRealRoster(unittest.TestCase):
 
     def test_voters_names_are_aliases(self):
         self.assertIn("James Clyburn", self.members["C000537"]["aliases"])
-        self.assertIn("Hank Johnson", self.members["J000288"]["aliases"])
+        # Now the name he is shown by; the suffixed form stays searchable.
+        self.assertEqual(self.members["J000288"]["name"], "Hank Johnson")
+        self.assertIn("Hank Johnson, Jr.", self.members["J000288"]["aliases"])
         self.assertIn("Lou Correa", self.members["C001110"]["aliases"])
 
     def test_aliases_never_repeat_the_display_name(self):

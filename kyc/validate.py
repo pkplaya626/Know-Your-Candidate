@@ -1091,8 +1091,8 @@ def check_outbound_urls(profiles):
 def check_member_link_overrides(snapshot):
     """The dated corrections to members' links still match what they correct.
 
-    ``MEMBER_CONTACT_FORMS``, ``YOUTUBE_LEGACY_NAMES`` and ``DEAD_X_HANDLES``
-    each apply only while congress-legislators holds exactly the value they
+    ``MEMBER_CONTACT_FORMS``, ``YOUTUBE_LEGACY_NAMES``,
+    ``YOUTUBE_HANDLE_CORRECTIONS`` and ``DEAD_X_HANDLES`` each apply only while congress-legislators holds exactly the value they
     were checked against; an entry the source has moved past is stale, and a
     YouTube legacy name nobody has checked is linked at /user/ unverified.
     """
@@ -1109,6 +1109,10 @@ def check_member_link_overrides(snapshot):
     for bioguide, (value, _shape, _why) in overrides.YOUTUBE_LEGACY_NAMES.items():
         if ((people.get(bioguide) or {}).get("social") or {}).get("youtube") != value:
             stale.append(f"YOUTUBE_LEGACY_NAMES {bioguide}: the source no longer holds {value!r}")
+    for bioguide, (value, _fixed, _date, _why) in overrides.YOUTUBE_HANDLE_CORRECTIONS.items():
+        if ((people.get(bioguide) or {}).get("social") or {}).get("youtube") != value:
+            stale.append(f"YOUTUBE_HANDLE_CORRECTIONS {bioguide}: the source no longer "
+                         f"holds {value!r}")
     for bioguide, (handle, _date, _why) in overrides.DEAD_X_HANDLES.items():
         social = (people.get(bioguide) or {}).get("social") or {}
         if social.get("twitter") != handle or social.get("twitter_id"):

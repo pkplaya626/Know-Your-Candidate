@@ -672,9 +672,10 @@
     var since = monthYear(item.financeSince);
     var through = monthYear(item.financeAsOf);
     // A report can give a coverage end still to come (filed "through
-    // December 31" in October): it is the filer's date, shown as filed, not
-    // as a period that has passed.
-    if (through && filedAhead(item)) through += " (as filed)";
+    // December 31" in October): it is the filer's date, and one sentence at
+    // the end says so, rather than a bare "(as filed)" that did not say why.
+    var ahead = through && filedAhead(item)
+      ? ". The report gives an end date still to come, " + through : "";
     var range = since && through ? ", " + since + " – " + through
       : through ? ", through " + through
       : since ? ", from " + since : "";
@@ -687,9 +688,9 @@
         // election period their challengers' totals are measured over.
         (item.chamber === "Senate"
           ? ". That is not a senator's whole six-year election period, so it is not comparable with a challenger's total"
-          : "");
+          : "") + ahead;
     }
-    if (!item.financeElection) return through ? "FEC figures through " + through : "";
+    if (!item.financeElection) return through ? "FEC figures through " + through + ahead : "";
 
     var text = "Raised for the " + item.financeElection + " election" + range;
     var startYear = +(String(item.financeSince || "").slice(0, 4));
@@ -701,7 +702,7 @@
         ? ". A Senate election period runs the whole six-year term, so this total goes back to " + startYear
         : ". This election period goes back to " + startYear;
     }
-    return text;
+    return text + ahead;
   }
 
   /** True when a field carries something worth showing at all. */

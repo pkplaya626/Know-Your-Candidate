@@ -312,8 +312,9 @@ async function testShared(page) {
     const ahead = { financeSource: "FEC", chamber: "House (Candidate)",
       financePeriod: "election", financeElection: 2026,
       financeSince: "2025-01-01", financeAsOf: "2099-12-31" };
-    check("a coverage end still to come is shown as filed",
-      KYC.financePeriod(ahead) === "Raised for the 2026 election, Jan 2025 – Dec 2099 (as filed)",
+    check("a coverage end still to come is said in one sentence",
+      KYC.financePeriod(ahead) === "Raised for the 2026 election, Jan 2025 – Dec 2099. " +
+        "The report gives an end date still to come, Dec 2099",
       KYC.financePeriod(ahead));
     check("a coverage end already passed is not marked",
       !KYC.filedAhead({ financeAsOf: "2000-06-30" }));
@@ -913,6 +914,10 @@ async function testDirectoryAsync() {
           ? "https://x.com/i/user/" + encodeURIComponent(member.social.twitter_id)
           : "https://x.com/" + encodeURIComponent(member.social.twitter))));
       check("only one X chip", links.filter((a) => /^https:\/\/x\.com\//.test(a.href)).length === 1);
+      // An id-linked chip names no handle: the source's may be the old one.
+      const byId = links.filter((a) => /^https:\/\/x\.com\/i\/user\//.test(a.href));
+      check("an X chip linked by id names no handle in its tooltip",
+        byId.every((a) => !/@/.test(a.title || "")), byId.map((a) => a.title).join(" | "));
       check("GovTrack is linked from the id, not the name",
         links.some((a) => a.href.endsWith("/congress/members/" + member.refs.govtrack)));
       check("every outbound link opens safely",
@@ -955,6 +960,33 @@ async function testDirectoryAsync() {
       KYC.profile.close();
       member.social = kept;
     });
+    // The funding split: each label on one line with its share, and what the
+    // shares are of when adjustments put the receipts below the parts.
+    const split = window.legislatorsData.find((p) => p.fundingBreakdown &&
+      Object.keys(p.fundingBreakdown).length > 1);
+    check("a profile with a funding split exists", !!split);
+    if (split) {
+      KYC.profile.open(split.id);
+      const box = D.getElementById("profileModalFunding");
+      const parts = [...box.querySelectorAll(".funding-part")].map((s) => s.textContent);
+      check("every funding pair is one unbreakable part",
+        parts.length === Object.keys(split.fundingBreakdown).length &&
+          parts.join(", ") === split.funding_sources, parts.join(" | "));
+      check("no base note where the shares are of the receipts shown",
+        !!split.fundingBase === !!box.querySelector(".funding-base"));
+      KYC.profile.close();
+      const kept = [split.fundingBase, split.receipts];
+      split.fundingBase = "$3,968,600.00";
+      split.receipts = "$3,194,222.05";
+      KYC.profile.open(split.id);
+      const note = D.querySelector("#profileModalFunding .funding-base");
+      check("a base above the receipts says what the shares are of",
+        note && /\$3,968,600\.00/.test(note.textContent) && /\$3,194,222\.05/.test(note.textContent),
+        note ? note.textContent : "no note");
+      KYC.profile.close();
+      [split.fundingBase, split.receipts] = kept;
+      if (kept[0] === undefined) delete split.fundingBase;
+    }
     const hostile = { id: "X_TEST", name: "Test", website: 'https://example.com/"><img src=x onerror=alert(1)>',
       isCandidate: true, social: { twitter: '"><b>x' } };
     // The renderer only ever sees data through the escaper; push one bad row

@@ -794,6 +794,10 @@ class TestRegistrations(unittest.TestCase):
         self.assertEqual(candidates.registrations(rows), {})
         same = {"H6VA11001": "C00959106", "H6VA11002": "C00959106"}
         self.assertEqual(candidates.registrations(rows, same), {"H6VA11002": ["H6VA11001"]})
+        # The race's "filed" count counts him once, as the race lists him.
+        other = self.filing("H6VA11003", 11, 100.0, "2026-02-01", name="DOE, JANE")
+        cache = {"candidates": rows + [other], "committeeOf": same}
+        self.assertEqual(candidates.filing_counts(cache), {"H-NV-11-2026": 2})  # the helper files in NV
         # A different name form on one committee still needs the same money.
         rows[1] = self.filing("H6VA11002", 11, 5142.86, "2026-02-01", name="PURVES, A G")
         self.assertEqual(candidates.registrations(rows, same), {})
