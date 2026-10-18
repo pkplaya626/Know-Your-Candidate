@@ -627,6 +627,48 @@
              rank: open.rank, off: false, unknown: true };
   }
 
+  /** Every status word a card can show for where someone stands in their
+   *  race, once each, from the tables above - so the key on the grid says
+   *  what the badges say, and a new status is in it the day it is added
+   *  (GRID-19: about seventeen badges were explained only by hover titles,
+   *  which a phone never shows). `[{cls, label, title}]`, in rank order.
+   *  The title is the badge's own, but where a status is read from more
+   *  than one kind of source the badge on a card names its source. */
+  function raceStatusLegend() {
+    var seen = {};
+    var out = [];
+    var add = function (spec, title) {
+      if (!spec || !spec.card || seen[spec.card]) return;
+      seen[spec.card] = true;
+      out.push({ cls: spec.cls, label: spec.card, title: title || spec.title || "",
+                 rank: spec.rank === undefined ? 9 : spec.rank });
+    };
+    var member = function (spec) {
+      var m = spec.member;
+      if (m) add({ cls: m.cls || spec.cls, card: m.card, rank: spec.rank }, m.title);
+    };
+    Object.keys(RACE_STATUS).forEach(function (status) {
+      var spec = RACE_STATUS[status];
+      add(spec);
+      member(spec);
+    });
+    var top = allParty("top-two");
+    add(top);
+    member(top);
+    add(LISTED.unlisted);
+    add(UNCONFIRMED);
+    add(APPOINTEE_LEAVING);
+    add(AWAITING, "After Election Day: on the November ballot, and the results this site last " +
+      "read had not marked a winner.");
+    [{ maybeNamed: ["a similar name"] }, { unprinted: { kind: "write-in" } },
+     { unprinted: { kind: "unopposed" } }, { ballotUnknown: true }].forEach(function (fake) {
+      fake.isCandidate = true;
+      var spec = unsettled(fake);
+      if (spec) add(spec);
+    });
+    return out.sort(function (a, b) { return a.rank - b.rank; });
+  }
+
   /** The filing profile of a member's run for another seat, when it is the
    *  race they contest (alsoRunningId), else null. Its money is that
    *  campaign's: shown beside the member's, labelled, never as theirs
@@ -1526,46 +1568,376 @@
       .replace(/\p{Mn}/gu, "").toLowerCase();
   }
 
-  function searchIndex(item) {
-    if (item.__search) return item.__search;
-    var parts = [];
-    SEARCH_FIELDS.forEach(function (field) {
-      if (item[field] && hasValue(item, field)) parts.push(String(item[field]));
-    });
-    // Other names the member's own record gives ("Jim Clyburn" for James
-    // Clyburn); derived in the pipeline from the bioguide-keyed record.
-    (item.aliases || []).forEach(function (alias) { parts.push(String(alias)); });
-    // The party's name as the chip says it: "Democratic" found 26 people
-    // and the Democratic chip 541, because the FEC's word is "Democrat".
-    if (item.party === "Democrat") parts.push("Democratic");
-    item.__search = foldText(parts.join(" "));
-    return item.__search;
+  /* What a search compares: folded (foldText), with periods made spaces so
+   * "J.D." is "J D" (and, through joinInitials, "JD") and "C. Franklin" is
+   * "C Franklin", curly apostrophes
+   * made straight, and spaces collapsed. */
+  function searchFold(text) {
+    return foldText(text).replace(/\./g, " ").replace(/[‘’]/g, "'")
+      .replace(/\s+/g, " ").trim();
   }
 
-  /* A query that is a state's whole name finds that state's people:
-   * "Pennsylvania" found 14 of its 61, the ones whose own text mentioned it.
-   * The whole name only, never a substring of another (rule 5): indexed as
-   * text, "virginia" found all of West Virginia and "kansas" Arkansas. */
+  /* "j d vance" and "jd vance" are one name: runs of single letters joined. */
+  function joinInitials(folded) {
+    return folded.replace(/\b([a-z]) (?=[a-z]\b)/g, "$1");
+  }
+
+  // The name fields, the place and office fields, and the rest: a query is
+  // ranked by the first tier its every word is found in (GRID-05).
+  var NAME_FIELDS = ["name"];
+  var OFFICE_FIELDS = ["state", "party", "district", "officeLabel", "contestLabel"];
+
+  function searchTiers(item) {
+    if (item.__tiers) return item.__tiers;
+    var names = [item.name].concat(item.aliases || []).filter(Boolean).map(String);
+    var office = [];
+    OFFICE_FIELDS.forEach(function (field) { if (item[field]) office.push(String(item[field])); });
+    if (item.state && item.state !== "N/A") office.push(stateName(item.state));
+    // The party's name as the chip says it: "Democratic" found 26 people
+    // and the Democratic chip 541, because the FEC's word is "Democrat".
+    if (item.party === "Democrat") office.push("Democratic");
+    var body = [];
+    SEARCH_FIELDS.forEach(function (field) {
+      if (NAME_FIELDS.indexOf(field) !== -1 || OFFICE_FIELDS.indexOf(field) !== -1) return;
+      if (item[field] && hasValue(item, field)) body.push(String(item[field]));
+    });
+    var name = searchFold(names.join(" · "));
+    item.__tiers = {
+      names: names.map(searchFold),
+      name: " " + name,
+      office: " " + name + " " + searchFold(office.join(" · ")),
+      all: " " + name + " " + searchFold(office.join(" · ")) + " " +
+        searchFold(body.join(" · ")),
+    };
+    return item.__tiers;
+  }
+
+  /** Everything a profile is searched by, folded: kept for callers that
+   *  want the whole text. */
+  function searchIndex(item) {
+    return searchTiers(item).all;
+  }
+
+  /* A word matches where a word starts, never inside one (rule 5):
+   * "kansas" is in "arkansas" as text, and the grid returned Arkansans for
+   * it (GRID-03). A word may be typed in part: "pelo" finds Pelosi. */
+  function escapeRegex(text) {
+    return String(text).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  function wordStart(term) {
+    return new RegExp("(?:^|[^a-z0-9])" + escapeRegex(term));
+  }
+
+  /* Names a reader types for a first name (FEDERAL-02): "Jim Boasberg",
+   * "Bill Pryor". Common English short forms only, so a short form finds
+   * the formal name and never the reverse; a query is still matched on
+   * the surname alone (nameScore). */
+  var NICKNAMES = {
+    al: ["albert", "alan", "allen", "alfred"], alex: ["alexander", "alexandra", "alejandro"],
+    andy: ["andrew"], ben: ["benjamin"], bill: ["william"], billy: ["william"],
+    bob: ["robert"], bobby: ["robert"], charlie: ["charles"], chris: ["christopher", "christine"],
+    chuck: ["charles"], dan: ["daniel"], danny: ["daniel"], dave: ["david"], dick: ["richard"],
+    don: ["donald"], doug: ["douglas"], drew: ["andrew"], ed: ["edward", "edwin", "edmund"],
+    fred: ["frederick"], greg: ["gregory"], hank: ["henry"], jack: ["john"], jake: ["jacob"],
+    jeff: ["jeffrey"], jerry: ["gerald", "jerome"], jim: ["james"], jimmy: ["james"],
+    joe: ["joseph"], jon: ["jonathan"], kate: ["katherine", "kathryn", "catherine"],
+    ken: ["kenneth"], larry: ["lawrence"], liz: ["elizabeth"], matt: ["matthew"],
+    mike: ["michael"], nick: ["nicholas"], pat: ["patrick", "patricia"], pete: ["peter"],
+    rick: ["richard", "frederick"], rob: ["robert"], ron: ["ronald"], sam: ["samuel"],
+    steve: ["stephen", "steven"], sue: ["susan"], ted: ["edward", "theodore"],
+    tim: ["timothy"], tom: ["thomas"], tony: ["anthony"], will: ["william"],
+  };
+
+  var SUFFIX_WORDS = { jr: true, sr: true, ii: true, iii: true, iv: true, v: true };
+
+  /* The last word of a folded name that is not a suffix: "pryor" of
+   * "william h pryor, jr". */
+  function lastName(folded) {
+    var words = folded.replace(/,/g, " ").split(" ").filter(Boolean);
+    while (words.length > 1 && SUFFIX_WORDS[words[words.length - 1]]) words.pop();
+    return words[words.length - 1] || "";
+  }
+
+  /** How well *query* names someone known as any of *names*: 0 for the
+   *  name itself, 1 for every word found at a word's start in one of the
+   *  names (a first name's short form counts: "Jim" for James), 2 for a
+   *  query whose last word is the surname ("Skip Rankin"), else -1. For
+   *  people a reader looks up by name: the judges, the officials. */
+  function nameScore(query, names) {
+    var q = searchFold(query);
+    if (!q) return -1;
+    var folded = (names || []).filter(Boolean).map(searchFold);
+    var joined = joinInitials(q);
+    if (folded.some(function (n) {
+      return n.replace(/,/g, "") === q || joinInitials(n.replace(/,/g, "")) === joined;
+    })) return 0;
+    var terms = q.split(" ");
+    var all = function (name) {
+      return terms.every(function (term, i) {
+        var forms = [term].concat(i === 0 && terms.length > 1 ? NICKNAMES[term] || [] : []);
+        return forms.some(function (form) { return wordStart(form).test(name); });
+      });
+    };
+    if (folded.some(function (n) { return all(n) || all(joinInitials(n)); })) return 1;
+    var last = terms[terms.length - 1];
+    if (terms.length > 1 && folded.some(function (n) { return lastName(n) === last; })) return 2;
+    return -1;
+  }
+
+  /* ----------------------------------------------------- query parsing */
+
+  /* A query that names a state or a seat is answered as one: "Ohio 9",
+   * "TX-35", "texas district 35", "ny14", "AZ at large" are a race, and
+   * "TX-3" is never TX-30 to TX-39; "Kansas" is Kansas's people, not
+   * everyone whose text mentions it (GRID-03, GRID-04). */
   var stateByName = null;
-  function stateNamed(query) {
+  function stateNames() {
     if (stateByName === null) {
       stateByName = {};
       var states = meta().states || {};
       Object.keys(states).forEach(function (code) {
-        stateByName[foldText(states[code].name || "")] = code;
+        stateByName[searchFold(states[code].name || "")] = code;
+      });
+      if (states.DC) {
+        ["washington dc", "washington d c", "d c"].forEach(function (n) { stateByName[n] = "DC"; });
+      }
+      if (states.VI) stateByName["us virgin islands"] = stateByName["u s virgin islands"] = "VI";
+    }
+    return stateByName;
+  }
+
+  /** The state *text* names, whole: its name or its postal code. */
+  function stateNamed(text) {
+    var folded = searchFold(text).replace(/-/g, " ").replace(/\s+/g, " ");
+    var byName = stateNames();
+    if (byName[folded]) return byName[folded];
+    var code = folded.toUpperCase();
+    return /^[A-Z]{2}$/.test(code) && (meta().states || {})[code] ? code : null;
+  }
+
+  var SEAT_REST = [
+    // "9", "9th", "district 9", "cd 9", "9th district", "congressional district 9"
+    [/^(?:(?:congressional )?(?:district|dist|cd) )?(\d{1,2})(?:st|nd|rd|th)?(?: (?:congressional )?district| cd)?$/,
+      function (m) { return { district: parseInt(m[1], 10) }; }],
+    [/^(?:at large|atlarge|al)(?: (?:district|seat))?$/, function () { return { district: 0 }; }],
+    [/^(?:us |u s )?(?:senate|senators?|senate race|senate seat)$/,
+      function () { return { chamber: "Senate" }; }],
+    [/^(?:us |u s )?(?:house|representatives?|reps?|house delegation|house members)$/,
+      function () { return { chamber: "House" }; }],
+  ];
+
+  /** *query* read as a place: `{state, chamber, district, any}` (any: a
+   *  district number with no state, "district 7"), or null for words. */
+  function parsePlace(query) {
+    var s = searchFold(query).replace(/[-–#,]/g, " ").replace(/'s\b/g, "")
+      .replace(/\s+/g, " ").trim();
+    if (!s) return null;
+    var whole = stateNamed(s);
+    if (whole) return { state: whole };
+    var compact = /^([a-z]{2}) ?(\d{1,2}|al)$/.exec(s);
+    var states = meta().states || {};
+    if (compact && states[compact[1].toUpperCase()]) {
+      return { state: compact[1].toUpperCase(), chamber: "House",
+               district: compact[2] === "al" ? 0 : parseInt(compact[2], 10) };
+    }
+    var any = /^(?:congressional )?(?:district|cd) (\d{1,2})$/.exec(s);
+    if (any) return { chamber: "House", district: parseInt(any[1], 10), any: true };
+    // The longest state name the query opens with, then what follows it.
+    var byName = stateNames();
+    var best = null;
+    Object.keys(byName).forEach(function (name) {
+      if (s.indexOf(name + " ") === 0 && (!best || name.length > best.length)) best = name;
+    });
+    var code = best ? byName[best] : null;
+    var rest = best ? s.slice(best.length + 1) : "";
+    if (!code) {
+      var two = /^([a-z]{2}) (.+)$/.exec(s);
+      if (two && states[two[1].toUpperCase()]) { code = two[1].toUpperCase(); rest = two[2]; }
+    }
+    if (!code) return null;
+    for (var i = 0; i < SEAT_REST.length; i++) {
+      var m = SEAT_REST[i][0].exec(rest);
+      if (m) {
+        var out = SEAT_REST[i][1](m);
+        out.state = code;
+        if (out.district !== undefined) out.chamber = "House";
+        return out;
+      }
+    }
+    return null;
+  }
+
+  /** The races a place names: a district's (a state with one at-large seat
+   *  answers its "1" too), or none. */
+  function placeRaces(place) {
+    if (!place || place.district === undefined) return [];
+    var races = global.kycRaces || [];
+    var house = races.filter(function (r) {
+      return r.chamber === "House" && (place.any || r.state === place.state);
+    });
+    var exact = house.filter(function (r) { return Number(r.district) === place.district; });
+    if (!exact.length && !place.any && place.district === 1 &&
+        house.length && house.every(function (r) { return Number(r.district) === 0; })) {
+      exact = house;
+    }
+    return exact;
+  }
+
+  /** "OH-9", "Ohio's House seats", "Kansas": what a place query asked for,
+   *  for the results line. */
+  function placeLabel(place) {
+    if (!place) return "";
+    if (place.district !== undefined) {
+      var seat = place.district === 0 ? "AL" : String(place.district);
+      return place.any ? "district " + seat + " in every state" : place.state + "-" + seat;
+    }
+    var name = stateName(place.state);
+    if (place.chamber === "Senate") return name + "’s Senate seats";
+    if (place.chamber === "House") return name + "’s House seats";
+    return name;
+  }
+
+  /* A compiled query, kept for the last query asked: the grid asks once per
+   * profile. */
+  var compiled = { query: null };
+
+  function compileQuery(query) {
+    if (compiled.query === query) return compiled;
+    var place = parsePlace(query);
+    var q = searchFold(query);
+    var terms = q ? q.split(" ").map(wordStart) : [];
+    var exact = q;
+    var seat = null;
+    if (place && place.district !== undefined) {
+      seat = new Set();
+      placeRaces(place).forEach(function (race) {
+        race.incumbentIds.concat(race.candidateIds).forEach(function (id) { seat.add(id); });
+        seat.add("race:" + race.id);
       });
     }
-    return stateByName[foldText(query).replace(/\s+/g, " ").trim()] || null;
+    var two = place && /^[a-z]{2}$/.test(q);
+    compiled = { query: query, place: place, seat: seat, terms: terms, exact: exact,
+                 two: two, label: placeLabel(place) };
+    return compiled;
+  }
+
+  function placeScore(c, item) {
+    var place = c.place;
+    if (c.seat) {
+      var rid = item.isCandidate ? item.raceId : (item.contestRaceId || item.raceId);
+      if (c.seat.has(item.id) || c.seat.has("race:" + rid) ||
+          c.seat.has("race:" + item.heldRaceId)) return 1;
+      // Whoever holds the seat now, if the race does not list them.
+      if (!item.isCandidate && !item.formerMember && item.state === place.state &&
+          !place.any && String(item.chamber).indexOf("House") !== -1 &&
+          item.districtNum === place.district) return 1;
+      return -1;
+    }
+    if (item.state !== place.state) return -1;
+    if (!place.chamber) return 1;
+    var running = item.isCandidate ? item.raceId : item.contestRaceId;
+    var prefix = place.chamber === "Senate" ? "S-" : "H-";
+    return String(item.chamber).indexOf(place.chamber) !== -1 ||
+      String(running || "").indexOf(prefix) === 0 ? 1 : -1;
+  }
+
+  /** How well *item* matches *query*: 0 its name or an alias exactly, 1
+   *  every word in its names, 2 in its names, place and office, 3 anywhere
+   *  in its text; a state or seat query is 1 for that place's people (and
+   *  2 for anyone else so named: "Virginia" is also Virginia Foxx); -1 for
+   *  no match. Words match where a word starts. */
+  function queryScore(item, query) {
+    if (!query) return 3;
+    var c = compileQuery(query);
+    var tiers = searchTiers(item);
+    var exact = tiers.names.some(function (n) {
+      return n === c.exact || joinInitials(n) === joinInitials(c.exact);
+    });
+    if (c.place) {
+      var at = placeScore(c, item);
+      if (at >= 0) return at;
+      if (c.seat) return -1;
+      // A postal code is a state, not the start of a name ("in", "me").
+      if (c.two) return exact ? 2 : -1;
+      return c.terms.every(function (t) { return t.test(tiers.name); }) ? 2 : -1;
+    }
+    if (exact) return 0;
+    var every = function (text) { return c.terms.every(function (t) { return t.test(text); }); };
+    if (every(tiers.name)) return 1;
+    if (every(tiers.office)) return 2;
+    return every(tiers.all) ? 3 : -1;
   }
 
   function matchesQuery(item, query) {
-    if (!query) return true;
-    var named = stateNamed(query);
-    if (named && item.state === named) return true;
-    var haystack = searchIndex(item);
-    return foldText(query).split(/\s+/).every(function (term) {
-      return !term || haystack.indexOf(term) !== -1;
-    });
+    return !query || queryScore(item, query) >= 0;
+  }
+
+  var SNIPPET_FIELDS = {
+    education: "Education", previous_professions: "Career", committees: "Committees",
+    platforms: "Platform", funding_sources: "Funding", voting_alignment: "Voting record",
+    campaignQuote: "Campaign", status: "Status",
+  };
+
+  /** Where a body-text match was found, for a card matched only there:
+   *  `{label, text}` with the words around the first hit, or null. Nothing
+   *  on a card said why "Speaker" found a "motivational speaker" (GRID-05). */
+  function searchSnippet(item, query) {
+    var c = compileQuery(query);
+    if (!c.terms.length) return null;
+    var tiers = searchTiers(item);
+    var term = c.terms.filter(function (t) { return !t.test(tiers.office); })[0] || c.terms[0];
+    var fields = Object.keys(SNIPPET_FIELDS);
+    for (var i = 0; i < fields.length; i++) {
+      var field = fields[i];
+      if (!item[field] || !hasValue(item, field)) continue;
+      var raw = String(item[field]);
+      // foldText keeps the length of composed text, so a position in it is
+      // a position in the original.
+      var folded = foldText(raw).replace(/[‘’]/g, "'");
+      var hit = term.exec(folded);
+      if (!hit) continue;
+      var at = hit.index + (hit[0].length && /[^a-z0-9]/.test(hit[0][0]) ? 1 : 0);
+      var from = Math.max(0, at - 30);
+      var to = Math.min(raw.length, at + 60);
+      return { label: SNIPPET_FIELDS[field],
+               text: (from ? "…" : "") + raw.slice(from, to).trim() + (to < raw.length ? "…" : "") };
+    }
+    return null;
+  }
+
+  /* --------------------------------------------------- data on demand */
+
+  /* A data file the page needs only sometimes - the officials the grid's
+   * search also looks through - is named, with its version stamp, in an
+   * inert <template id="onDemandData"> (so the build stamps it, rule 76)
+   * and loaded the first time it is wanted. *global* is the variable it
+   * assigns: one already there (a page that loads it anyway, a test) is
+   * used as it is. */
+  var demanded = {};
+  function loadData(file, name, done) {
+    if (global[name] !== undefined) { done(true); return; }
+    var waiting = demanded[file];
+    if (waiting) { waiting.push(done); return; }
+    var holder = doc.getElementById("onDemandData");
+    var tag = null;
+    if (holder && holder.content) {
+      tag = Array.prototype.filter.call(holder.content.querySelectorAll("script[src]"),
+        function (s) { return s.getAttribute("src").split("?")[0] === "data/" + file; })[0];
+    }
+    if (!tag) { done(false); return; }
+    demanded[file] = [done];
+    var script = doc.createElement("script");
+    var finish = function (ok) {
+      var calls = demanded[file] || [];
+      // A failed fetch can be asked for again.
+      demanded[file] = ok ? [] : null;
+      calls.forEach(function (fn) { fn(ok && global[name] !== undefined); });
+    };
+    script.onload = function () { finish(true); };
+    script.onerror = function () { finish(false); };
+    script.src = tag.getAttribute("src");
+    doc.head.appendChild(script);
   }
 
   function debounce(fn, wait) {
@@ -1753,6 +2125,17 @@
               election.challengersUnprofiled + " named on Wikipedia's results pages with no FEC " +
               "filing over $5,000"
             : running + " in all") + ".";
+        // The same split as page text: a title is a hover a phone and a
+        // keyboard never show, and the Challengers chip counts profiles
+        // only (GRID-12).
+        var split = doc.getElementById("challengerSplit");
+        if (split && election.challengersWithProfile !== undefined) {
+          split.textContent = "Of the " + running.toLocaleString() + " in these two rows, " +
+            election.challengersWithProfile.toLocaleString() + " have a profile here; " +
+            election.challengersUnprofiled.toLocaleString() + " are named by the published " +
+            "results with no FEC filing over $5,000, so have none.";
+          split.hidden = false;
+        }
       }
     }
   }
@@ -2246,6 +2629,15 @@
     ageOf: ageOf,
     generalElectionDay: generalElectionDay,
     matchesQuery: matchesQuery,
+    queryScore: queryScore,
+    queryPlace: function (query) { return compileQuery(query).place; },
+    queryLabel: function (query) { return compileQuery(query).label; },
+    searchSnippet: searchSnippet,
+    searchFold: searchFold,
+    nameScore: nameScore,
+    stateNamed: stateNamed,
+    loadData: loadData,
+    raceStatusLegend: raceStatusLegend,
     foldText: foldText,
     searchIndex: searchIndex,
     districtOrder: districtOrder,

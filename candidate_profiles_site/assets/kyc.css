@@ -4208,3 +4208,95 @@ button.local-county-link {
   /* 16px, or iOS zooms the page when the field is tapped (rule 44). */
   .fed-search input { font-size: 16px; }
 }
+
+/* ------------------------------------------ the grid's search and filters */
+/* The results line reads as a sentence with its switch inside it
+ * ("... 1,454 out of the race are hidden. Show them"), not as flex items
+ * spread across the bar (GRID-14). */
+#resultsLabel { display: block; }
+.results-note { display: block; margin-top: var(--s-1); font-weight: 400; }
+
+/* What is on, each one removable, and "Clear all" (GRID-11, GRID-22). */
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  margin: 0 0 var(--s-3);
+}
+.active-filters[hidden] { display: none; }
+.active-filters-label { font-size: var(--t-sm); color: var(--text-muted); font-weight: 600; }
+.chip-remove,
+.chip-clear { padding: var(--s-1) var(--s-3); }
+.chip-clear { background: transparent; border-color: var(--border); }
+
+/* Officials the search finds who are not candidates, and members who have
+ * left: links, set apart from the profiles (GRID-07, GRID-08). */
+.official-results {
+  margin: 0 0 var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+}
+.official-results-title { margin: 0; font-size: var(--t-md); font-weight: 700; }
+.official-results-note { margin: var(--s-1) 0 0; font-size: var(--t-xs); color: var(--text-muted); }
+.official-list + .official-results-note { margin-top: var(--s-2); }
+.official-list + .official-results-title,
+.official-results-note + .official-results-title { margin-top: var(--s-4); }
+.official-list { list-style: none; margin: var(--s-2) 0 0; padding: 0; display: grid; gap: var(--s-2); }
+.official-row { font-size: var(--t-sm); line-height: 1.45; }
+.official-name { font-weight: 700; }
+.official-row a { color: var(--accent); text-decoration: none; }
+.official-role { color: var(--text-muted); }
+@media (hover: hover) {
+  .official-row a:hover { text-decoration: underline; }
+}
+
+/* What a card says only in this view: an age, where a search matched. */
+.card-note { font-size: var(--t-xs); color: var(--text-muted); }
+.grid-divider {
+  grid-column: 1 / -1;
+  margin: var(--s-3) 0 0;
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--border);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* The races view by state, with a jump list (GRID-23). */
+.race-state-heading {
+  margin: var(--s-5) 0 var(--s-3);
+  font-size: var(--t-lg);
+  font-weight: 700;
+  scroll-margin-top: calc(var(--header-h) + var(--s-6));
+}
+.race-jump { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin: 0 0 var(--s-3); }
+.race-jump label { font-size: var(--t-sm); font-weight: 600; }
+.race-jump .select { width: auto; min-width: 12rem; }
+/* A holder running elsewhere, one line over the seat's people (RACES-18). */
+.race-held { margin: 0 0 var(--s-3); font-size: var(--t-sm); color: var(--text-muted); }
+
+/* The key to the cards' status words (GRID-19). */
+.status-legend { margin: 0 0 var(--s-4); font-size: var(--t-sm); }
+.status-legend > summary { cursor: pointer; color: var(--text-muted); font-weight: 600; }
+.legend-heading { margin: var(--s-3) 0 var(--s-2); font-size: var(--t-sm); font-weight: 700; }
+.legend-list { margin: 0; display: grid; gap: var(--s-2); }
+.legend-row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 14rem) minmax(0, 1fr);
+  gap: var(--s-3);
+  align-items: baseline;
+}
+.legend-row dt,
+.legend-row dd { margin: 0; }
+.legend-row dd { color: var(--text-muted); }
+.legend-note { margin: var(--s-3) 0 0; font-size: var(--t-xs); color: var(--text-faint); }
+@media (max-width: 560px) {
+  .legend-row { grid-template-columns: minmax(0, 1fr); gap: var(--s-1); }
+}
+@media (max-width: 1000px) {
+  /* 16px, or iOS zooms the page when the field is tapped (rule 44). */
+  .race-jump .select { font-size: 16px; }
+}

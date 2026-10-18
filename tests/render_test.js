@@ -111,6 +111,13 @@ function buildPage(page, opts) {
   // jsdom does not fetch <script src>, so inline every local script in
   // document order - exactly the order a browser would execute them in.
   let html = fs.readFileSync(path.join(SITE, page), "utf8");
+  // A <template>'s scripts are inert, named for loading on demand
+  // (KYC.loadData): kept as they are.
+  const inert = [];
+  html = html.replace(/<template[\s\S]*?<\/template>/g, (block) => {
+    inert.push(block);
+    return `<!--inert-${inert.length - 1}-->`;
+  });
   const sources = [...html.matchAll(/<script[^>]*\bsrc="([^"]+)"[^>]*><\/script>/g)];
   for (const [tag, src] of sources) {
     // Relative to the page: the state pages sit one directory down.
@@ -119,6 +126,7 @@ function buildPage(page, opts) {
     if (!fs.existsSync(file)) throw new Error(`${page} references a missing ${src}`);
     html = html.replace(tag, () => "<script>\n" + fs.readFileSync(file, "utf8") + "\n</script>");
   }
+  html = html.replace(/<!--inert-(\d+)-->/g, (m, i) => inert[Number(i)]);
 
   const dom = new JSDOM(html, {
     runScripts: "dangerously",
@@ -552,11 +560,14 @@ async function testDirectory() {
       !panel.hidden && button.getAttribute("aria-expanded") === "true" &&
       panel.querySelector('[aria-checked="true"]').getAttribute("data-sort") === "region");
     panel.querySelector('[data-sort="name"]').click();
+    // By surname, as each race lists its people: "Name, A to Z" read Aaron
+    // Bean, Aaron Flint, Aaron Gies (GRID-20).
     const names = [...D.querySelectorAll("#results .card")].slice(0, 6)
-      .map((c) => KYC.byId(c.getAttribute("data-id")).name);
-    check("picking an order closes the menu, sorts the cards and names the order",
+      .map((c) => KYC.byId(c.getAttribute("data-id")).surname);
+    check("picking an order closes the menu, sorts the cards by surname and names the order",
       panel.hidden && D.getElementById("sortLabel").textContent === "Name, A to Z" &&
-      names.length === 6 && names.every((n, i) => i === 0 || names[i - 1].localeCompare(n) <= 0) &&
+      names.length === 6 && names.every((n) => !!n) &&
+      names.every((n, i) => i === 0 || names[i - 1].localeCompare(n) <= 0) &&
       /Name, A to Z/.test(button.getAttribute("aria-label")), names.join(", "));
     check("and puts it in the address", /[?&]sort=name\b/.test(window.location.hash), window.location.hash);
     check("only one order is checked",
@@ -1107,7 +1118,7 @@ async function testDirectoryAsync() {
     };
     const saved = {};
     Object.keys(fields).forEach((k) => { saved[k] = host[k]; host[k] = fields[k]; });
-    delete host.__search;
+    delete host.__tiers;
     KYC.profile.open(host.id);
 
     const platform = D.getElementById("profileModalPlatform");
@@ -3330,7 +3341,7 @@ async function testPhoneMenus() {
   const label = D.getElementById("sortLabel").textContent;
   const hash = window.location.hash;
   const names = [...D.querySelectorAll("#results .card")].slice(0, 6)
-    .map((c) => window.KYC.byId(c.getAttribute("data-id")).name);
+    .map((c) => window.KYC.byId(c.getAttribute("data-id")).surname);
   D.getElementById("themeButton").click();
   await wait(50);
   D.getElementById("sortButton").click();
@@ -3368,7 +3379,7 @@ async function testBootSurvivesAFailure() {
   });
   // The first draw itself failing: never "Loading profiles..." over nothing.
   const broken = await buildPage("index.html", {
-    data: (w) => { w.KYC.matchesQuery = () => { throw new Error("rehearsed draw failure"); }; },
+    data: (w) => { w.KYC.districtOrder = () => { throw new Error("rehearsed draw failure"); }; },
   });
   await settle(50);
   suite("index.html — a draw that fails says so", () => {
@@ -3799,10 +3810,12 @@ async function testOdds() {
     window.dispatchEvent(new window.Event("hashchange"));
     D.getElementById("raceViewToggle").click();
     const tails = [...results.children].slice(-2);
+    const firstRace = [...results.children].findIndex((c) => c.classList.contains("race"));
     check("the race view ends with control of both chambers, after the races",
       tails.every((t) => t.classList.contains("odds-control")) &&
         /Senate/.test(tails[0].textContent) && /House/.test(tails[1].textContent) &&
-        results.firstElementChild.classList.contains("race"));
+        firstRace > 0 && firstRace < results.children.length - 2 &&
+        [...results.children].slice(0, firstRace).every((c) => !c.classList.contains("odds-control")));
     const sections = [...results.querySelectorAll("section.race")];
     const senate = sections.filter((s) => /^race-S-/.test(s.id));
     const house = sections.filter((s) => /^race-H-/.test(s.id));
@@ -4392,8 +4405,10 @@ async function testAndroidBack() {
   await new Promise((r) => setTimeout(r, 300));
   const wait = () => new Promise((r) => setTimeout(r, 120));
 
-  // Closing a profile returns to the list as it was drawn.
-  const card = D.querySelector("#results .card");
+  // Closing a profile returns to the list as it was drawn. A sitting
+  // member's card, whose term the dialog prints.
+  const card = [...D.querySelectorAll("#results .card")]
+    .find((c) => KYC.seated(KYC.byId(c.getAttribute("data-id"))));
   card.click();
   const opened = /#\/profile\//.test(window.location.hash);
   const sentinel = D.createElement("i");
@@ -6555,6 +6570,390 @@ async function testElectionNight() {
   });
 }
 
+/* The grid's search and its controls, as the audit of 2026-10-17 found
+ * them (GRID-03 to GRID-23, TECH-03, FEDERAL-02/03, RACES-18). */
+const typeInto = (window, D, words) => {
+  const input = D.getElementById("searchInput");
+  input.value = words;
+  input.dispatchEvent(new window.Event("input"));
+};
+
+function loadOfficials(window) {
+  ["federal.js", "judiciary/index.js", "stategov.js"].forEach((file) => {
+    window.eval(fs.readFileSync(path.join(SITE, "data", ...file.split("/")), "utf8"));
+  });
+}
+
+async function testSearchAndFilters() {
+  const { window, D, errors } = await buildPage("index.html");
+  await settle(50);
+  const KYC = window.KYC;
+  const data = window.legislatorsData;
+  const races = window.kycRaces;
+  const cards = () => [...D.querySelectorAll("#results .card")].map((c) => KYC.byId(c.getAttribute("data-id")));
+  const label = () => D.getElementById("resultsLabel").textContent.replace(/\s+/g, " ");
+  const matching = (q) => data.filter((p) => KYC.matchesQuery(p, q));
+  const raceOf = (p) => (p.isCandidate ? p.raceId : p.contestRaceId || p.raceId);
+
+  suite("search — a state's name is that state (GRID-03)", () => {
+    const names = KYC.meta().states;
+    // Every state whose name another state's contains: Kansas/Arkansas,
+    // Virginia/West Virginia.
+    const pairs = Object.keys(names).filter((a) => Object.keys(names).some((b) => b !== a &&
+      new RegExp("\\w" + names[a].name.toLowerCase()).test(names[b].name.toLowerCase())));
+    check("the case exists to test", pairs.length > 0, pairs.join(" "));
+    pairs.forEach((code) => {
+      const found = matching(names[code].name.toLowerCase());
+      const elsewhere = found.filter((p) => p.state !== code &&
+        KYC.queryScore(p, names[code].name.toLowerCase()) !== 2);
+      check(`"${names[code].name}" finds ${code}'s people and no other state's`,
+        found.some((p) => p.state === code) && !elsewhere.length,
+        elsewhere.slice(0, 3).map((p) => p.name + " " + p.state).join(", "));
+      check(`and every one of ${code}'s`, data.filter((p) => p.state === code)
+        .every((p) => KYC.matchesQuery(p, names[code].name)));
+    });
+    const blank = { id: "x", name: "Pat Example", state: "AR", quality: {},
+      platforms: "Arkansas Agriculture", officeLabel: "House • AR-1" };
+    check("a word matches where a word starts, never inside one",
+      !KYC.matchesQuery(blank, "kansas") && KYC.matchesQuery(blank, "agri") &&
+        !KYC.matchesQuery(blank, "griculture"));
+    check("a postal code alone is the state", matching("dc").every((p) => p.state === "DC") &&
+      matching("dc").length > 0);
+  });
+
+  suite("search — a district is its race (GRID-04)", () => {
+    // A state with a district 3 and districts 30-39: "TX-3" read as a prefix.
+    const tens = races.find((r) => r.chamber === "House" && r.district === 3 &&
+      races.some((o) => o.state === r.state && o.district >= 30));
+    check("the case exists to test", !!tens);
+    const code = tens.state;
+    const name = KYC.stateName(code);
+    const forms = [`${code}-3`, `${code.toLowerCase()}3`, `${code} 3`, `${name} 3`,
+      `${name} district 3`, `${name.toLowerCase()} 3rd district`, `${name}'s 3rd`, `${code}-03`];
+    forms.forEach((q) => {
+      const found = matching(q.toLowerCase());
+      const wrong = found.filter((p) => !(raceOf(p) === tens.id || p.heldRaceId === tens.id ||
+        tens.incumbentIds.concat(tens.candidateIds).indexOf(p.id) !== -1 ||
+        (KYC.seated(p) && p.state === code && p.districtNum === 3)));
+      check(`"${q}" is ${code}-3's race and nothing else`, found.length > 0 && !wrong.length,
+        wrong.slice(0, 4).map((p) => p.officeLabel).join(", "));
+    });
+    const people = new Set(tens.incumbentIds.concat(tens.candidateIds));
+    check("everyone in the race is found", [...people].every((id) =>
+      !KYC.byId(id) || KYC.matchesQuery(KYC.byId(id), `${code}-3`)));
+    const atLarge = races.find((r) => r.chamber === "House" && r.district === 0 &&
+      !races.some((o) => o.state === r.state && o.district > 0));
+    check("'at large' and the seat's '1' find an at-large race",
+      !!atLarge && ["at large", "AL", "1", "district 1"].every((rest) => {
+        const found = matching(`${atLarge.state} ${rest}`.toLowerCase());
+        return found.length > 0 && found.every((p) => p.state === atLarge.state);
+      }));
+    typeInto(window, D, `${name} district 3`);
+  });
+  await settle(250);
+  suite("search — typed in the box, a district names itself in the results line", () => {
+    check("the cards are the race's", cards().length > 0 && cards().every((p) => p.state ===
+      races.find((r) => r.chamber === "House" && r.district === 3 &&
+        races.some((o) => o.state === r.state && o.district >= 30)).state), label());
+    check("and the line says which seat it read", /\(([A-Z]{2})-3\)/.test(label()), label());
+  });
+
+  // A sitting member another profile's text names: "Mike Johnson" put a
+  // challenger whose text said "challenging Mike Johnson" first.
+  const named = data.find((p) => KYC.seated(p) && p.name.split(" ").length === 2 &&
+    data.some((o) => o !== p && KYC.queryScore(o, p.name.toLowerCase()) === 3));
+  if (named) typeInto(window, D, named.name);
+  await settle(250);
+  suite("search — the person whose name was typed comes first (GRID-05)", () => {
+    check("the case exists to test", !!named);
+    const shown = cards();
+    check(`'${named && named.name}' opens on them`, shown[0] === named,
+      shown.slice(0, 3).map((p) => p.name).join(", "));
+    const later = [...D.querySelectorAll("#results .card")].find((c) =>
+      KYC.queryScore(KYC.byId(c.getAttribute("data-id")), named.name.toLowerCase()) === 3);
+    check("a card found only in its text says where", !!later &&
+      !!later.querySelector(".card-note") && later.querySelector(".card-note").textContent.length > 4,
+      later && later.textContent);
+    const pat = { id: "a", name: "Pat Example", quality: {}, state: "OH", officeLabel: "House • OH-1" };
+    const sam = { id: "b", name: "Sam Other", quality: {}, state: "OH", officeLabel: "House • OH-2",
+      platforms: "Running against Pat Example" };
+    check("an exact name ranks above a mention", KYC.queryScore(pat, "pat example") <
+      KYC.queryScore(sam, "pat example"));
+    check("a name token ranks above an office", KYC.queryScore(pat, "example") <
+      KYC.queryScore(sam, "house"));
+    if (oldCongressSits(window) && KYC.byId("O000172")) {
+      check("an evidenced alias finds its member ('AOC')", KYC.queryScore(KYC.byId("O000172"), "aoc") === 0);
+    }
+  });
+
+  // GRID-09: Escape and the field's own clear reset the query.
+  const input = D.getElementById("searchInput");
+  input.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  await settle(50);
+  suite("search — Escape clears the query, not only the box (GRID-09)", () => {
+    check("the box is empty", input.value === "");
+    check("the address has no query", !/[?&]q=/.test(window.location.hash), window.location.hash);
+    check("and the line names none", !/“/.test(label()), label());
+  });
+  typeInto(window, D, "warren");
+  await settle(250);
+  input.value = "";
+  input.dispatchEvent(new window.Event("search"));
+  await settle(50);
+  suite("search — the field's clear button does too", () => {
+    check("the address has no query", !/[?&]q=/.test(window.location.hash), window.location.hash);
+  });
+
+  // GRID-14: the line says what is hidden, and shows it.
+  suite("the results line says who is hidden (GRID-14)", () => {
+    check("it says how many out of the race are hidden", /out of the race .*hidden/.test(label()), label());
+    const toggle = D.querySelector("#resultsLabel [data-out-toggle]");
+    check("with the switch beside it", !!toggle && /Show them/.test(toggle.textContent));
+    const before = cards().length;
+    toggle.click();
+    check("which shows them", /eliminated=show/.test(window.location.hash) && cards().length >= before,
+      window.location.hash);
+    D.querySelector("#resultsLabel [data-out-toggle]").click();
+    check("and hides them again", !/eliminated=show/.test(window.location.hash));
+  });
+
+  // GRID-11, GRID-22: what is on, removable; "Both chambers"; Clear all.
+  D.getElementById("stateSelect").value = "TX";
+  D.getElementById("stateSelect").dispatchEvent(new window.Event("change"));
+  D.querySelector('[data-group="chamber"][data-value="Senate"]').click();
+  suite("filters that are on are shown, and each comes off (GRID-11, GRID-22)", () => {
+    check("the chamber chip is 'Both chambers'",
+      D.querySelector('[data-group="chamber"][data-value="all"]').textContent.trim() === "Both chambers");
+    check("the Filters button counts the state", /\(2 on\)/.test(D.getElementById("filtersCount").textContent),
+      D.getElementById("filtersCount").textContent);
+    const bar = D.getElementById("activeFilters");
+    check("the state and the chamber are chips", !bar.hidden && /Texas/.test(bar.textContent) &&
+      /Senate/.test(bar.textContent), bar.textContent);
+    check("the results line names the state", /in Texas/.test(label()), label());
+    bar.querySelector('[data-clear="state"]').click();
+    check("one comes off", D.getElementById("stateSelect").value === "all" &&
+      /chamber=Senate/.test(window.location.hash) && !/state=/.test(window.location.hash));
+    D.querySelector('[data-group="party"][data-value="Democrat"]').click();
+    D.getElementById("activeFilters").querySelector('[data-clear="all"]').click();
+    check("Clear all clears everything", window.location.hash === "#/" &&
+      D.getElementById("activeFilters").hidden, window.location.hash);
+  });
+
+  // GRID-12: the sidebar's split is page text, and the chip says its count.
+  suite("the challenger counts say what they count (GRID-12)", () => {
+    const split = D.getElementById("challengerSplit");
+    check("the sidebar's split is visible text", !!split && !split.hidden &&
+      /have a profile here/.test(split.textContent), split && split.textContent);
+    D.querySelector('[data-group="role"][data-value="candidate"]').click();
+    check("the Challengers chip's line says what the sidebar adds",
+      /sidebar/.test(label()), label());
+    D.querySelector('[data-group="role"][data-value="candidate"]').click();
+  });
+
+  // GRID-13: "No challenger on the ballot" is the race heads' own test.
+  suite("'No challenger on the ballot' is what the race heads say (GRID-13)", () => {
+    D.querySelector('[data-group="election"][data-value="unchallenged"]').click();
+    const shown = cards();
+    const heads = new Set(races.filter((r) => r.settled && !r.contested && r.results).map((r) => r.id));
+    check("every card is in such a race", shown.every((p) =>
+      heads.has(p.isCandidate ? p.raceId : p.heldRaceId || p.raceId)), shown.length);
+    D.getElementById("raceViewToggle").click();
+    const sections = [...D.querySelectorAll("#results section.race")];
+    check("and each race's head says so", sections.every((s) => /No challenger on the ballot/.test(
+      s.querySelector(".race-head").textContent)), sections.length);
+    D.getElementById("raceViewToggle").click();
+    D.querySelector('[data-group="election"][data-value="unchallenged"]').click();
+  });
+
+  // GRID-20: by surname, by state name, ages printed.
+  suite("the sorts (GRID-20)", () => {
+    const shown = cards();
+    const states = shown.filter((p) => String(p.chamber).indexOf("Senate") !== -1)
+      .map((p) => KYC.stateName(p.state));
+    check("the default order is by state name", states.every((s, i) => i === 0 ||
+      states[i - 1].localeCompare(s) <= 0), states.slice(0, 4).join(", "));
+    D.getElementById("sortButton").click();
+    D.querySelector('#sortPanel [data-sort="age-desc"]').click();
+    const first = D.querySelector("#results .card");
+    check("an age sort prints the age", /Age \d+/.test(first.textContent), first.textContent);
+    const divider = D.querySelector("#results .grid-divider");
+    const unknown = data.some((p) => KYC.ageOf(p) === null && KYC.seated(p));
+    check("and says where the unknown ages start", !unknown ||
+      (!!divider && /No birthdate on record \([\d,]+\)/.test(divider.textContent)));
+    D.getElementById("sortButton").click();
+    D.querySelector('#sortPanel [data-sort="region"]').click();
+  });
+
+  // GRID-23, RACES-18, GRID-14: the races view.
+  D.getElementById("raceViewToggle").click();
+  suite("the races view (GRID-23, VISUALS-36, RACES-18)", () => {
+    const heads = [...D.querySelectorAll("#results .race-state-heading")].map((h) => h.textContent);
+    check("races are under their state's name, in order", heads.length > 40 &&
+      heads.every((h, i) => i === 0 || heads[i - 1].localeCompare(h) <= 0), heads.slice(0, 4).join(", "));
+    check("with a jump list", D.querySelectorAll("#raceJump option").length === heads.length + 1);
+    const ids = [...D.querySelectorAll("#results section.race")].map((s) => s.id.replace(/^race-/, ""));
+    const order = ids.map((id) => races.find((r) => r.id === id));
+    check("Senate before House within a state, then by district", order.every((r, i) => {
+      const p = order[i - 1];
+      if (!p || p.state !== r.state) return true;
+      return (p.chamber === "Senate" ? 0 : 1) < (r.chamber === "Senate" ? 0 : 1) ||
+        (p.chamber === r.chamber && (p.district || 0) <= (r.district || 0));
+    }));
+    check("the line counts races, not cards", /Showing [\d,]+ races?/.test(label()), label());
+    const folded = D.querySelector("#results details[data-out-race]");
+    check("the people out of a race are drawn when their list opens", !!folded &&
+      folded.querySelectorAll(".card").length === 0);
+    folded.open = true;
+    folded.dispatchEvent(new window.Event("toggle"));
+    check("and are there once it is", folded.querySelectorAll(".card").length > 0);
+    if (oldCongressSits(window)) {
+      const moved = races.filter((r) => r.holderMoved);
+      check("a moved holder exists to test", moved.length > 0);
+      moved.forEach((race) => {
+        const section = D.getElementById("race-" + race.id);
+        if (!section) return;
+        const line = section.querySelector(".race-held");
+        const holder = race.incumbentIds.map(KYC.byId).find((p) => p && p.contestRaceId &&
+          p.contestRaceId !== race.id);
+        check(`${race.id}: its holder is a line, not a card among those running`, !holder ||
+          (!!line && line.textContent.indexOf(holder.name) !== -1 &&
+            !section.querySelector(`.card-grid .card[data-id="${holder.id}"]`)),
+          line && line.textContent);
+      });
+    }
+  });
+  D.getElementById("raceViewToggle").click();
+
+  // GRID-19: the key says every word a card shows.
+  suite("the key to the labels (GRID-19)", () => {
+    const legend = D.querySelector("#statusLegend details.status-legend");
+    check("it is there, collapsed", !!legend && !legend.open);
+    const said = new Set([...legend.querySelectorAll("dt .badge")].map((b) => b.textContent));
+    const seen = new Set();
+    D.getElementById("raceViewToggle").click();
+    [...D.querySelectorAll("#results details")].forEach((d) => {
+      d.open = true;
+      d.dispatchEvent(new window.Event("toggle"));
+    });
+    [...D.querySelectorAll("#results .card .badge")].forEach((b) => {
+      if (!b.classList.contains("other-office")) seen.add(b.textContent.replace(/ – .* line$/, ""));
+    });
+    D.getElementById("raceViewToggle").click();
+    const missing = [...seen].filter((t) => !said.has(t) &&
+      !/^(Running for|Ran for|Running in|Seat up in) /.test(t));
+    check("every status word on a card is in the key", seen.size > 3 && !missing.length,
+      missing.join(" | "));
+  });
+
+  // GRID-07, FEDERAL-03, GRID-08: other officials, never profiles.
+  loadOfficials(window);
+  const federal = window.kycFederal;
+  const office = federal.offices.find((o) => o.holder && o.holder.name);
+  const surname = office.holder.name.replace(/,? (Jr|Sr|II|III)\.?$/, "").split(" ").pop();
+  typeInto(window, D, surname);
+  await settle(250);
+  suite("search — officials who are not candidates (GRID-07, FEDERAL-03)", () => {
+    const box = D.getElementById("officialResults");
+    const link = box && [...box.querySelectorAll("a")].find((a) =>
+      a.getAttribute("href") === "federal/index.html#/official/" + encodeURIComponent(office.holder.id));
+    check(`'${surname}' lists the ${office.office} apart, linking their dialog`, !box.hidden && !!link,
+      box.textContent);
+    check("never as a profile card (rule 27)", !box.querySelector(".card") &&
+      !cards().some((p) => p.id === office.holder.id));
+  });
+  const justice = federal.supremeCourt.members[0];
+  typeInto(window, D, justice.name.split(",")[0].split(" ").pop());
+  await settle(250);
+  suite("search — a justice, and a governor by their state", () => {
+    const box = D.getElementById("officialResults");
+    check("a justice's surname lists them", [...box.querySelectorAll("a")].some((a) =>
+      /#\/official\//.test(a.getAttribute("href")) && a.textContent === justice.name), box.textContent);
+  });
+  const govState = Object.keys(window.kycStateGov.states).find((c) =>
+    (window.kycStateGov.states[c].governor || {}).name);
+  typeInto(window, D, KYC.stateName(govState));
+  await settle(250);
+  suite("search — a state's name lists its governor", () => {
+    const box = D.getElementById("officialResults");
+    check("linked to the state's page", [...box.querySelectorAll("a")].some((a) =>
+      a.textContent === window.kycStateGov.states[govState].governor.name &&
+      /states\/[a-z]{2}\.html#state-government$/.test(a.getAttribute("href"))), box.textContent);
+  });
+  const departed = (KYC.meta().departed || [])[0];
+  if (departed) typeInto(window, D, departed.name);
+  await settle(250);
+  suite("search — a member who left this Congress (GRID-08)", () => {
+    if (!departed) { check("no departed members to test (a new Congress)", true); return; }
+    const box = D.getElementById("officialResults");
+    check("is found, and says when they left", /Former members of this Congress/.test(box.textContent) &&
+      box.textContent.indexOf(departed.name) !== -1 && /Left Congress on/.test(box.textContent),
+      box.textContent);
+    check("and is never a profile, so never counted", !data.some((p) => p.id === departed.id));
+    const holder = departed.holder && box.querySelector(`a[href="#/profile/${encodeURIComponent(departed.holder.id)}"]`);
+    check("who holds the seat now is linked, when someone does", !departed.holder ||
+      (!!holder && !!KYC.byId(departed.holder.id)));
+  });
+  typeInto(window, D, "");
+  await settle(250);
+  check("no errors", errors.length === 0, errors.join("\n"));
+
+  // The officials' data is fetched only when a query is typed, from the
+  // stamped URL the page names (rule 76).
+  const lazy = await buildPage("index.html");
+  await settle(50);
+  const template = lazy.D.getElementById("onDemandData");
+  const before = lazy.D.querySelectorAll("head script[src]").length;
+  typeInto(lazy.window, lazy.D, "zzz");
+  await settle(250);
+  suite("search — the officials' data comes on demand", () => {
+    const srcs = [...template.content.querySelectorAll("script")].map((s) => s.getAttribute("src"));
+    check("the page names each file with its version", srcs.length === 3 &&
+      srcs.every((s) => /^data\/[a-z/]+\.js\?v=[0-9a-f]{10}$/.test(s)), srcs.join(" "));
+    const added = [...lazy.D.querySelectorAll("head script[src]")].slice(before).map((s) => s.getAttribute("src"));
+    check("and fetches them when a query is typed", srcs.every((s) => added.indexOf(s) !== -1), added.join(" "));
+  });
+
+  // TECH-03: a query typed before the profiles arrived is kept.
+  const early = await buildPage("index.html", {
+    data: (w) => { w.document.getElementById("searchInput").value = "Warren"; },
+  });
+  await settle(50);
+  suite("search — a query typed while the page loads is kept (TECH-03)", () => {
+    check("the box still holds it", early.D.getElementById("searchInput").value === "Warren");
+    check("and the grid is searched for it", /q=warren/.test(early.window.location.hash) &&
+      /“Warren”/.test(early.D.getElementById("resultsLabel").textContent),
+      early.window.location.hash);
+  });
+}
+
+/* The federal page's judge search, as readers name judges (FEDERAL-02). */
+async function testJudgeSearch() {
+  const { window, D } = await buildPage("federal/index.html");
+  await settle(80);
+  const input = D.getElementById("judgeSearch");
+  const index = window.kycJudgesIndex;
+  const find = (q) => {
+    input.value = q;
+    input.dispatchEvent(new window.Event("input"));
+    return [...D.querySelectorAll("#judgeResults a")].map((a) => a.textContent);
+  };
+  suite("federal page — finding a judge by the name they go by (FEDERAL-02)", () => {
+    const william = index.find((r) => /^William [A-Z]/.test(r[1]));
+    const surname = william && william[1].replace(/,? Jr\.?$/, "").split(" ").pop();
+    check("a short first name finds the formal one ('Bill')", !!william &&
+      find("Bill " + surname).indexOf(william[1]) !== -1, william && william[1]);
+    const middle = index.find((r) => /^[A-Z][a-z]+ [A-Z][a-z]+ [A-Z][a-z]+$/.test(r[1]));
+    const parts = middle[1].split(" ");
+    check("an initial with a period finds the name ('J. Michelle Childs')",
+      find(parts[0][0] + ". " + parts[1] + " " + parts[2]).indexOf(middle[1]) !== -1, middle[1]);
+    check("a first name the table does not know still finds the surname ('Skip Rankin')",
+      find("Zebulon " + parts[2]).indexOf(middle[1]) !== -1);
+    const exec = window.kycFederal.offices.find((o) => o.holder && o.holder.name);
+    const shown = find(exec.holder.name);
+    check("the executive is found here too", shown[0] === exec.holder.name, shown.slice(0, 3).join(", "));
+  });
+}
+
 /* Ohio's special election after its winner is seated for the term to 2029:
  * the senator's next election moves to 2028, and the seat block must stay
  * with the 2026 specials, where its race is. */
@@ -7080,8 +7479,10 @@ async function testFederal() {
     check("the search is in the address", /q=/.test(window.location.hash), window.location.hash);
     input.value = "zzqxv nobody";
     input.dispatchEvent(new window.Event("input"));
-    check("a name nobody has says so, for the directory it searched",
-      /No Article III judge by that name in the directory/.test(
+    // Not "no such judge in the directory": the directory holds legal
+    // names, and a judge's usual name may not be one (FEDERAL-02).
+    check("a name nobody has says so, and suggests the surname",
+      /No judge matches that name; try the surname alone/.test(
         D.getElementById("judgeSearchCount").textContent));
     const index = window.kycJudgesIndex;
     const roving = index.find((row) => row[2].length > 1);
@@ -7689,6 +8090,8 @@ async function testFrame() {
   if (!only || only === "index.html") await testRenumbered();
   if (!only || only === "index.html") await testPhoneMenus();
   if (!only || only === "index.html") await testBootSurvivesAFailure();
+  if (!only || only === "index.html" || only === "search") await testSearchAndFilters();
+  if (!only || only === "federal" || only === "search") await testJudgeSearch();
   if (!only || only === "index.html") await testReseatedSpecial();
   if (!only || only === "index.html") await testFormerIncumbent();
   if (!only || only === "index.html") await testRecordPhase();

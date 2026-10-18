@@ -589,28 +589,59 @@
     if (!input) return;
     // A fifth entry is the directory's full name, where the name shown is
     // the one the judge goes by ("A. Joe Fish", "Allen Joe Fish").
-    var folded = index.map(function (row) { return KYC.foldText(row[1] + (row[4] ? " " + row[4] : "")); });
+    //
+    // Matched as the grid matches a name (KYC.nameScore): a short first
+    // name for the formal one, periods folded, or the surname alone. The
+    // index holds the directory's legal names, so "Jim Boasberg", "Bill
+    // Pryor" and "J. Michelle Childs" found nobody, and the page said no
+    // such judge was in the directory (FEDERAL-02). The executive and the
+    // justices are found here too, ahead of the judges, in this page's own
+    // dialog (FEDERAL-03).
+    var d = global.kycFederal || {};
+    var officials = [];
+    [d.president, d.vicePresident].forEach(function (p) {
+      if (p && p.id && p.name) officials.push({ id: p.id, name: p.name, role: p.office });
+    });
+    (d.offices || []).forEach(function (office) {
+      var h = office.holder;
+      if (h && h.id && h.name) {
+        var role = KYC.holderRole(office);
+        officials.push({ id: h.id, name: h.name,
+                         role: (role.acting ? "Acting " : "") + (role.title || office.office) });
+      }
+    });
 
     function run(typed) {
-      var words = KYC.foldText(input.value).split(/\s+/).filter(Boolean);
+      var q = input.value.trim();
       var list = el("judgeResults");
       var status = el("judgeSearchCount");
       // Only what the reader types goes in the address: on load it may be
       // a shared #/official/ link, which this must not overwrite.
-      if (typed) setParam("q", input.value.trim());
-      if (!words.length) {
+      if (typed) setParam("q", q);
+      if (!KYC.searchFold(q)) {
         list.innerHTML = "";
         status.textContent = index.length.toLocaleString("en-US") + " sitting Article III judges";
         return;
       }
-      var hits = [];
-      for (var i = 0; i < index.length; i += 1) {
-        if (words.every(function (w) { return folded[i].indexOf(w) !== -1; })) hits.push(index[i]);
-      }
-      status.textContent = hits.length === 0 ? "No Article III judge by that name in the directory" :
-        hits.length + (hits.length === 1 ? " judge" : " judges") +
-        (hits.length > SEARCH_LIMIT ? ", the first " + SEARCH_LIMIT + " shown" : "");
-      list.innerHTML = hits.slice(0, SEARCH_LIMIT).map(function (row) {
+      var ranked = function (rows, names) {
+        var hits = [];
+        rows.forEach(function (row) {
+          var s = KYC.nameScore(q, names(row));
+          if (s >= 0) hits.push([s, row]);
+        });
+        return hits.sort(function (a, b) { return a[0] - b[0]; }).map(function (h) { return h[1]; });
+      };
+      var people = ranked(officials, function (o) { return [o.name]; });
+      var hits = ranked(index, function (row) { return [row[1], row[4]]; });
+      status.textContent = (hits.length === 0
+        ? "No judge matches that name; try the surname alone"
+        : hits.length + (hits.length === 1 ? " judge" : " judges") +
+          (hits.length > SEARCH_LIMIT ? ", the first " + SEARCH_LIMIT + " shown" : "")) +
+        (people.length ? "; " + people.length + " in the executive branch" : "");
+      list.innerHTML = people.map(function (o) {
+        return '<li><a href="#/official/' + KYC.escapeAttr(encodeURIComponent(o.id)) + '">' +
+          esc(o.name) + '</a> <span class="faint">' + esc(o.role) + "</span></li>";
+      }).join("") + hits.slice(0, SEARCH_LIMIT).map(function (row) {
         var names = row[2].map(function (cid) { return (courts[cid] || { name: cid }).name; });
         return '<li><a href="' + KYC.escapeAttr("../courts/" + row[2][0] + ".html#/official/" +
           encodeURIComponent(row[0])) + '">' + esc(row[1]) + "</a> " +
