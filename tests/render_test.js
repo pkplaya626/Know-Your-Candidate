@@ -2749,17 +2749,24 @@ async function testPeopleWording() {
 
   // The map's state panel: a filer whose place on the ballot is not known
   // is not a challenger there either (RACES-04).
-  const map = await buildPage("map.html", { hash: "#/?state=FL&mode=house" });
+  // Asked of a state that still has such filers: Florida's certified list
+  // (rule 77) settled every one there.
+  const probe = await buildPage("map.html");
+  const unsettled = probe.window.legislatorsData.find((p) => p.isCandidate &&
+    /^House/.test(p.chamber) && (probe.window.KYC.standing(p, "short") || {}).unknown);
+  const code = unsettled ? unsettled.state : "FL";
+  probe.window.close();
+  const map = await buildPage("map.html", { hash: "#/?state=" + code + "&mode=house" });
   await settle(50);
   suite("map.html — an unsettled filer is not counted as a challenger (RACES-04)", () => {
     const M = map.window.KYC;
-    const fl = map.window.legislatorsData.filter((p) => p.state === "FL" && p.isCandidate &&
+    const fl = map.window.legislatorsData.filter((p) => p.state === code && p.isCandidate &&
       /^House/.test(p.chamber));
     const unknown = fl.filter((p) => (M.standing(p, "short") || {}).unknown);
     const running = fl.filter((p) => !M.offBallot(p.raceStatus) && !unknown.includes(p));
     const head = map.D.getElementById("showChallengers");
     const count = head ? Number(head.querySelector("span").textContent) : 0;
-    check("Florida has filers the results do not settle", unknown.length > 0);
+    check("a state has filers the results do not settle (" + code + ")", unknown.length > 0);
     check("the challenger count leaves them out", count === running.length, `${count} vs ${running.length}`);
     const unsure = map.D.getElementById("unsureRows");
     check("and they are listed apart, under their status",
@@ -3110,7 +3117,10 @@ async function testBallotCounts() {
     check("the strip equals the race headers added up",
       strip.length > 0 && stripSum === heads, `${strip.join(" + ")} vs ${heads}`);
     const national = window.kycBuildMeta.election.challengersOnBallot;
-    const all = races.reduce((n, r) => n + (r.candidateCount || 0) +
+    // A race with no primary whose ballot has not been read counts its
+    // filers as filed, not on the ballot (summary.ballot_known).
+    const known = (r) => !("primaryDate" in r && !r.primaryDate && r.settled === false);
+    const all = races.filter(known).reduce((n, r) => n + (r.candidateCount || 0) +
       ((r.results || {}).otherNominees || []).length, 0);
     check("and the national figure is every race's, added up", national === all, `${national} vs ${all}`);
   });
@@ -3145,8 +3155,25 @@ async function testBallotCounts() {
     check("the Senate view names them in words, not only in a badge's hover",
       !!section && names.every((n) => [...section.querySelectorAll(".race-note")]
         .some((p) => p.textContent.indexOf(n) !== -1)), seat && seat.id);
-    const unknown = W.legislatorsData.find((p) => p.ballotUnknown && !p.raceStatus);
+    const unknown = W.legislatorsData.find((p) => p.ballotUnknown && !p.raceStatus && !p.unprinted);
     const badge = unknown && W.KYC.cards.card(unknown);
+    // A filer a certified list names as a write-in is said to be one, on
+    // the list's word: Texas's two declared Senate write-ins read "the
+    // published results do not name them" (rule 77). Built here, so the
+    // check runs whatever the data holds.
+    const filed = W.legislatorsData.find((p) => p.isCandidate);
+    const writeIn = Object.assign({}, filed, { raceStatus: null, maybeNamed: null,
+      ballotUnknown: true, unprinted: { kind: "write-in", source: "Texas Secretary of State" } });
+    const wiCard = W.KYC.standing(writeIn, "card");
+    const wiLong = W.KYC.standing(writeIn, "long");
+    check("a certified write-in reads as one, credited to the list, and is not counted on the ballot",
+      !!wiCard && wiCard.label === "Write-in candidate" && wiLong.label === "Write-in candidate" &&
+        wiCard.unknown && /not printed/.test(wiCard.title) &&
+        /Texas Secretary of State/.test(wiCard.title) && !/do not name them/.test(wiCard.title),
+      wiCard && wiCard.label + " | " + wiCard.title);
+    const wiBadge = W.KYC.cards.card(writeIn);
+    check("a certified write-in's card says so", /Write-in candidate/.test(wiBadge) &&
+      !/Ballot status not known/.test(wiBadge));
     // A race whose only challenger's place on the ballot is not known says
     // that, never "No challenger on the ballot" or "0 challengers".
     const lone = Object.assign({}, W.kycRaces.find((r) => r.settled && r.results), {
@@ -5521,6 +5548,151 @@ function electionNight(window, meta) {
  * Secretary of State's qualified list is the ballot. The fixture marks one
  * race that way whatever the data holds, since after the count the results
  * page decides instead. */
+/* Rule 77: once a state certifies its November candidates, its list is the
+ * ballot. Read from the data as built: Alaska's at-large seat showed two of
+ * its four certified names and called the other two withdrawn; American
+ * Samoa, with no primary, read "0 challengers on the ballot" over six. */
+async function testCertifiedBallots() {
+  const ak = await buildPage("states/ak.html");
+  suite("states/ak.html — the Division of Elections' list is the November ballot", () => {
+    check("no page errors", ak.errors.length === 0, ak.errors.join(" | "));
+    const race = ak.window.kycRaces.find((r) => r.id === "H-AK-00-2026");
+    const res = (race && race.results) || {};
+    check("the at-large race is certified by the Division of Elections",
+      /Alaska Division of Elections/.test(res.certifiedBy || "") && res.certifiedComplete,
+      res.certifiedBy);
+    const section = ak.D.getElementById("race-H-AK-00-2026");
+    const shown = section ? [...section.querySelectorAll(".card")].filter((c) => !c.closest("details"))
+      .map((c) => c.textContent).join(" ") + " " +
+      [...section.querySelectorAll(".race-note")].map((n) => n.textContent).join(" ") : "";
+    check("Hafner and McDermott, promoted when four finishers withdrew, are on it",
+      /Hafner/.test(shown) && /McDermott/.test(shown), shown.slice(0, 400));
+    const folded = section ? [...section.querySelectorAll("details .card")].map((c) => c.textContent).join(" ") : "";
+    check("and neither is folded away as no longer running",
+      !/Hafner|McDermott/.test(folded), folded.slice(0, 300));
+    const note = section && [...section.querySelectorAll(".race-note")].find((n) =>
+      /Also on the November ballot/.test(n.textContent));
+    check("a name with no profile is credited to the list, with its party",
+      !note || (/per the Alaska Division of Elections/.test(note.textContent) &&
+        /\((Democrat|Democratic|Libertarian|Nonpartisan)\)/.test(note.textContent)),
+      note && note.textContent);
+  });
+
+  const as = await buildPage("states/as.html");
+  suite("states/as.html — a territory with no primary, after its list is read", () => {
+    check("no page errors", as.errors.length === 0, as.errors.join(" | "));
+    const strip = as.D.querySelector(".state-summary").textContent;
+    const race = as.window.kycRaces.find((r) => r.id === "H-AS-00-2026");
+    const res = (race && race.results) || {};
+    check("the race is the Election Office's certified list",
+      /American Samoa Election Office/.test(res.certifiedBy || ""), res.certifiedBy);
+    check("its challengers are counted on the ballot, never 0 over six certified",
+      !/\b0 challengers on the ballot/.test(strip) && /[1-9]\d* challengers? on the ballot/.test(strip),
+      strip);
+    // American Samoa holds no primary: its delegate, put on the ballot by
+    // the certified list, read "Renominated", credited to "the state's"
+    // list (rules 74 and 75).
+    const delegate = as.window.legislatorsData.find((p) => as.window.KYC.seated(p) &&
+      p.state === "AS" && p.raceStatusSource === "certified");
+    const card = delegate ? as.window.KYC.cards.card(delegate) : "";
+    const long = delegate ? as.window.KYC.raceStatusOf(delegate, "long") : null;
+    check("the delegate reads 'On the November ballot', never 'Renominated'",
+      !!delegate && /On the November ballot/.test(card) && !/Renominated/.test(card) &&
+        long && long.label === "On the November ballot",
+      card.replace(/\s+/g, " ").slice(0, 300));
+    check("and the list is never 'the state's'",
+      !!long && !/state's/.test(long.title) && /American Samoa Election Office/.test(long.title),
+      long && long.title);
+    // A name the list prints with no party is shown with none.
+    const note = as.window.KYC.cards.unprofiledNote(race) || "";
+    check("no party is added beside a name the list prints without one",
+      !/\((Democratic|Republican|Independent)\)/.test(note), note.slice(0, 300));
+  });
+
+  // A territory with no primary whose ballot has not been read counts its
+  // filers as filed, not as on the ballot (RACES-13).
+  const mp = await buildPage("states/mp.html");
+  suite("states/mp.html — no primary and no list read yet", () => {
+    const info = mp.window.kycBuildMeta.states.MP || {};
+    const strip = mp.D.querySelector(".state-summary").textContent;
+    check("filers are counted as filed, and never as on the ballot",
+      !info.challengersFiled || (new RegExp(info.challengersFiled + " challengers? filed; ballot list not checked")
+        .test(strip) && !/challengers? on the ballot/.test(strip)), strip);
+    check("the page writes Northern Mariana Islands' (rule 75)",
+      !/Islands's/.test(mp.D.body.textContent) && /Northern Mariana Islands' /.test(mp.D.body.textContent));
+  });
+  const vi = await buildPage("states/vi.html");
+  suite("states/vi.html — a plural name's possessive", () => {
+    check("never Virgin Islands's", !/Islands's/.test(vi.D.body.textContent));
+  });
+
+  // PERSONA-09: a nominee with no profile carries their party.
+  const withParty = (window) => window.kycRaces.find((r) => r.results &&
+    Object.keys(r.results.otherParties || {}).length && r.state !== "LA");
+  const probe = await buildPage("index.html");
+  const partyRace = withParty(probe.window);
+  probe.window.close();
+  if (partyRace) {
+    const page = await buildPage("states/" + partyRace.state.toLowerCase() + ".html");
+    suite(`states/${partyRace.state.toLowerCase()}.html — names with no profile carry their party`, () => {
+      const section = page.D.getElementById("race-" + partyRace.id);
+      const text = section ? section.textContent : "";
+      const parties = partyRace.results.otherParties;
+      check("each is printed with the party the ballot gives it",
+        Object.keys(parties).every((n) => text.indexOf(n + " (" + parties[n] + ")") !== -1),
+        JSON.stringify(parties));
+    });
+  } else {
+    suite("names with no profile carry their party", () => {
+      check("a race with a nominee who has no profile and a known party", false);
+    });
+  }
+
+  // PERSONA-20: the ballot's name, with the FEC's beneath it.
+  const named = await buildPage("index.html");
+  const renamed = named.window.legislatorsData.find((p) => p.fecName && p.fecName !== p.name);
+  named.window.close();
+  if (renamed) {
+    const page = await buildPage("index.html", { hash: "#/profile/" + renamed.id });
+    await settle();
+    suite("index.html — a candidate the ballot names differently from the FEC", () => {
+      const head = page.D.getElementById("profileModalName").textContent;
+      const fec = page.D.getElementById("profileModalFecName");
+      check("the dialog leads with the ballot's name", head === renamed.name, head);
+      check("and says what the FEC files them under", !!fec && !fec.hidden &&
+        fec.textContent === "Files with the FEC as " + renamed.fecName, fec && fec.textContent);
+    });
+  }
+
+  // RACES-05, FRESHNESS-12: an empty seat says who left, when, and that no
+  // special election has been called. Only while the old Congress sits: on
+  // January 3 the seats are filled (rule 68; the January rehearsal failed
+  // asking recordPhase(), which waits for a snapshot read after noon).
+  const tx = await buildPage("states/tx.html");
+  const vacancies = (tx.window.kycBuildMeta.states.TX || {}).vacancies || [];
+  if (oldCongressSits(tx.window)) {
+    suite("states/tx.html — an empty House seat says why", () => {
+      check("the build records TX-23's vacancy", vacancies.some((v) => v.district === 23),
+        JSON.stringify(vacancies));
+      const notes = [...tx.D.querySelectorAll("#delegation .state-note")].map((n) => n.textContent).join(" ");
+      check("the delegation says who left, when, and that no special election was called",
+        vacancies.every((v) => notes.indexOf("District " + v.district + ": Vacant since ") !== -1 &&
+          notes.indexOf("(" + v.name + " " + v.how + ")") !== -1) &&
+          /no special election called as of [A-Z][a-z]{2,4}\.? \d{1,2}, \d{4}/.test(notes), notes);
+    });
+    const fl = await buildPage("districts/fl.html", { hash: "#/?d=20" });
+    suite("districts/fl.html — the old map's empty FL-20", () => {
+      check("no page errors", fl.errors.length === 0, fl.errors.join(" | "));
+      const facts = [...fl.D.querySelectorAll(".district-fact")].filter((f) =>
+        /Vacant since April 21, 2026 \(Sheila Cherfilus-McCormick resigned\); no special election called as of Oct\. 17, 2026/.test(f.textContent));
+      const cards = [...fl.D.querySelectorAll(".plan-card")];
+      check("the old map's FL-20 says who left and when, and only it does",
+        facts.length === 1 && cards.length === 2 && cards[0].contains(facts[0]),
+        facts.length + " notes on " + cards.length + " maps");
+    });
+  }
+}
+
 function qualifiedRace(window) {
   const byId = Object.fromEntries(window.legislatorsData.map((p) => [p.id, p]));
   const race = window.kycRaces.find((r) => r.state === "LA" && r.chamber === "House" &&
@@ -6571,6 +6743,7 @@ async function testFederal() {
   if (!only || only === "states") await testStates();
   if (!only || only === "states") await testElectionNight();
   if (!only || only === "states") await testQualifiedBallot();
+if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "redistricting") await testRedistricting();
   if (!only || only === "redistricting") await testDistrictPages();
   if (!only || only === "redistricting") await testFindMyDistrict();

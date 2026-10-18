@@ -126,7 +126,7 @@ python build_profile_site.py geo              # regenerate map geometry only (bo
 python build_profile_site.py congress         # refresh membership (network)
 python build_profile_site.py field --check    # who is running, from the FEC
 python build_profile_site.py disclosures      # House and Senate disclosure links
-python build_profile_site.py results          # who is still in, from Wikipedia (and Louisiana's qualified list)
+python build_profile_site.py results          # who is still in, from Wikipedia (Louisiana's qualified list; the states' certified ballots)
 python build_profile_site.py record           # the frozen 2026 race record (--freeze writes it; refuses to overwrite)
 python build_profile_site.py campaigns        # campaign websites from FEC committees
 python build_profile_site.py enrich           # fill gaps; check every campaign site
@@ -146,8 +146,8 @@ python build_profile_site.py oge              # the executive's financial report
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1299 tests, no dependencies
-npm install && npm test                       # 1637 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1353 tests, no dependencies
+npm install && npm test                       # 1660 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1062,6 +1062,58 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (rule 41). And no one part of a page's start may stop the rest: the
     grid's start-up runs each step and its first draw on their own, draws
     what it can, and says on the page that something failed.
+
+77. **Once a state certifies its November candidates, its list is the
+    ballot.** A results page says who won a primary, not who is printed in
+    November. Audited on 2026-10-17, Alaska's at-large seat showed two
+    people on the ballot over a certified four, and called the two it left
+    out "withdrawn": four other top-four finishers had withdrawn and
+    promoted them. Alaska's certified Daniel J. Sullivan Jr. read "Not on
+    the 2026 primary ballot", thirteen qualified Florida candidates and
+    every Colorado minor-party and unaffiliated candidate were missing, and
+    American Samoa, which holds no primary, read "0 challengers on the
+    ballot" over six certified names. `kyc/certified.py` reads each list a
+    script can (Alaska, Florida, Colorado, American Samoa, Texas); a PDF
+    list is transcribed in `overrides.CERTIFIED_BALLOTS` with its document
+    and the day it was read. A party's list of its own nominees is not a
+    ballot: the state may refuse them. `results.certify_race` lays a list
+    over the page: whom it prints is on the ballot whatever the page said
+    ("On the November ballot", never "Renominated": a list is not a
+    primary); where it is the whole ballot, a filer it does not name is not
+    on it, unless a name it prints, or names unprinted (a write-in,
+    Florida's unopposed), that matched no filing may be theirs. Names are
+    matched as a results page's are (rule 62), with an apostrophe inside a
+    surname kept ("D'Arrigo") and a surname written with a space or a
+    hyphen one spelling ("Kim Varet", "Kim-Varet"), or one person's two
+    spellings on a page fit one filing twice and it reads "ambiguous" -
+    as New Jersey's "Natalie Rivera" and "Natalie Lynn Rivera" did, under
+    two headings' Withdrawn lists that the parser had gathered into one
+    "table" (it splits them back now). The name shown is chosen by its
+    source: an exact or evidenced match, a list's name for anyone it holds,
+    printed or not (Florida's "Yen Bailey" lost the primary; never a name
+    in capitals), and a page's only for a hyphen or a short form of the
+    filed first name. A person's article is the one a piped link names
+    over a bare link's redirect (NM-3's "Martin R. Zamora"). And a county
+    convention awards a ballot line, not a nomination: losing one never
+    outranks a Withdrawn list - six New Jersey filers who withdrew before
+    the primary read "Lost the primary". When the matcher began
+    settling names that used to be claimed, the Florida Senate nominee lost
+    "Gillespie" to the FEC's misspelling, and a page's "Matthew" replaced a
+    campaign's "Matt". A list's name keeps what it prints: Florida's
+    "Arias, V. Michael" has a first initial, not a suffix ("Michael Arias
+    V." was shown), and a suffix is no surname to the look-alike check of
+    rule 25, which lost Alaska's two Sullivans when one became "Daniel J.
+    Sullivan Jr.". A certified write-in is not printed, and is not read
+    as on the ballot or as left off it. Rule 64's limits hold: only the
+    name, party, office and what the list says of the person are kept, and
+    a failed read keeps the
+    last list. Short of a list, a minor-party or unaffiliated filer missing
+    from a page's November table is "ballot status not known", never off
+    the ballot: those tables are copied from the major parties' primaries.
+    And a primary winner missing from the November table beside a name a
+    letter from theirs ("Gegen", "Gegan") is undecided, never "withdrawn";
+    a seat whose primary was not its state's (Alabama's four August
+    districts) carries its own date in `overrides.SEAT_PRIMARY_DATES`.
 
 79. **A mark about an office sits on the office, and "not running" is a
     source's word.** "On the Nov 3, 2026 ballot" sat under Brian Kemp,

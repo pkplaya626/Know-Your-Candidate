@@ -659,6 +659,15 @@ def check_duplicate_people(profiles):
         normal = unicodedata.normalize("NFD", str(text))
         return "".join(c for c in normal if unicodedata.category(c) != "Mn").lower()
 
+    def words(name):
+        # A suffix is not a surname: Alaska's certified list prints "Daniel
+        # J. Sullivan Jr.", and read as "Jr." the pair beside Senator Dan
+        # Sullivan stopped being reported.
+        out = [w.strip(",") for w in fold(name).split()]
+        while len(out) > 1 and out[-1].rstrip(".") in ("jr", "sr", "ii", "iii", "iv"):
+            out.pop()
+        return out
+
     by_race = collections.defaultdict(list)
     for profile in profiles:
         if profile.get("raceId"):
@@ -668,7 +677,7 @@ def check_duplicate_people(profiles):
     for rid, people in sorted(by_race.items()):
         for i, first in enumerate(people):
             for second in people[i + 1:]:
-                a, b = fold(first["name"]).split(), fold(second["name"]).split()
+                a, b = words(first["name"]), words(second["name"])
                 if not a or not b or a[-1] != b[-1]:
                     continue
                 line = (f"{rid}: {first['name']} ({first['id']}) / "
@@ -1567,6 +1576,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_results(profiles, races)
     issues += check_winners(profiles, races)
     issues += check_member_filings(profiles, snapshot)
+    issues += check_seat_vacancies(profiles, snapshot)
     issues += check_former_wins((raw or {}).get("former"), (raw or {}).get("record"))
     issues += check_results_pages(results)
     issues += check_seats_contested(profiles)
@@ -1647,6 +1657,36 @@ def check_member_filings(profiles, snapshot):
     return [Issue("warn", "member-candidacy-id-missing",
                   f"{len(missing)} members' own candidacies for another seat are not among "
                   f"their FEC ids in congress-legislators", sorted(missing))]
+
+
+def check_seat_vacancies(profiles, snapshot=None):
+    """``overrides.SEAT_VACANCIES`` against the membership: an entry for a
+    seat someone sits in is stale (the page stops showing it, and the entry
+    should go), and one whose departed member the snapshot still seats is
+    wrong."""
+    from . import overrides
+    from .record import seated
+
+    sitting = {(p.get("state"), p.get("districtNum")) for p in profiles
+               if seated(p) and "House" in str(p.get("chamber") or "")}
+    seated_ids = {p.get("bioguide") for p in (snapshot or {}).get("legislators", [])}
+    stale, wrong = [], []
+    for (code, district), entry in sorted(overrides.SEAT_VACANCIES.items()):
+        if (code, district) in sitting:
+            stale.append(f"{code}-{district}: someone now sits in the seat {entry['name']} left")
+        if entry.get("bioguide") in seated_ids:
+            wrong.append(f"{code}-{district}: {entry['name']} ({entry['bioguide']}) is still "
+                         f"in the membership snapshot")
+    issues = []
+    if stale:
+        issues.append(Issue("warn", "seat-vacancy-filled",
+                            f"{len(stale)} overrides.SEAT_VACANCIES entries are for seats now "
+                            f"filled; remove them", stale))
+    if wrong:
+        issues.append(Issue("error", "seat-vacancy-seated",
+                            f"{len(wrong)} overrides.SEAT_VACANCIES entries name a member who "
+                            f"still sits", wrong))
+    return issues
 
 
 def check_former_wins(rows, record):

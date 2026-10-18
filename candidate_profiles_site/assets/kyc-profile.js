@@ -57,6 +57,7 @@
       '    <div class="modal-identity">',
       '      <span class="badge badge-neutral" id="profileModalChamber"></span>',
       '      <h2 class="modal-name" id="profileModalName"></h2>',
+      '      <p class="modal-aka" id="profileModalFecName" hidden></p>',
       '      <p class="modal-meta">',
       '        <span>' + KYC.icon("pin") +
       '          <span id="profileModalRegionLabel">Represents</span> <strong id="profileModalRegion"></strong>' +
@@ -808,6 +809,12 @@
 
   function render(item) {
     el("profileModalName").textContent = item.name;
+    // The name on the ballot, where the results page or the state's list
+    // settled it, with the registration it was matched to beneath: a
+    // reader who searches the FEC for "Bob Harvie" finds Robert J Harvie.
+    var fecName = el("profileModalFecName");
+    fecName.hidden = !(item.fecName && item.fecName !== item.name);
+    fecName.textContent = fecName.hidden ? "" : "Files with the FEC as " + item.fecName;
     // officeLabel is normalised in kyc/profiles.py. The pages used to rebuild
     // it from chamber + state + district in three separate places, which is
     // how "House • AL-District 3" and "House • TX-TX-32" once shipped.

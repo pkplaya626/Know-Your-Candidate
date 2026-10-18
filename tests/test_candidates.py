@@ -452,6 +452,17 @@ class TestDuplicateDetection(unittest.TestCase):
         self.assertEqual([i.code for i in issues], ["possible-duplicate-person"])
         self.assertEqual(issues[0].level, "warn")
 
+    def test_a_suffix_does_not_hide_the_pair(self):
+        # The certified list's "Daniel J. Sullivan Jr." beside Senator Dan
+        # Sullivan: read as surname "Jr.", the pair went unreported (rule 25).
+        pair = [self.person("A", "Dan Sullivan"),
+                self.person("B", "Daniel J. Sullivan Jr.")]
+        issues = validate.check_duplicate_people(pair)
+        self.assertEqual([i.code for i in issues], ["possible-duplicate-person"])
+        pair = [self.person("A", "John Smith Jr."), self.person("B", "John Smith")]
+        self.assertEqual([i.code for i in validate.check_duplicate_people(pair)],
+                         ["same-name-in-race"])
+
     def test_different_surnames_are_not_flagged(self):
         pair = [self.person("A", "Dan Sullivan"), self.person("B", "Dan Murkowski")]
         self.assertEqual(validate.check_duplicate_people(pair), [])

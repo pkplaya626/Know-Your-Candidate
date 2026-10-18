@@ -1021,10 +1021,19 @@ def _results(args):
         except Exception as exc:          # inconclusive: say so, conclude nothing
             print(f"  [warn] Louisiana's qualified list could not be read: {exc}")
             listed = None
-        print("Reading primary results from Wikipedia ...")
         previous = results_mod.load_cache(args.root)
+        # Each state's certified November ballot, where one is published
+        # (rule 77). A state whose list cannot be read keeps the last one
+        # read; it is never read as nobody being certified (rule 8).
+        from . import certified as certified_mod
+        print("Reading the states' certified November ballots ...")
+        ballots, unread = certified_mod.fetch(log=print)
+        for state in certified_mod.carry(ballots, unread, previous):
+            print(f"  [warn] kept {state}'s certified list read on "
+                  f"{ballots[state].get('fetched')}")
+        print("Reading primary results from Wikipedia ...")
         cache = results_mod.build(field, dates, today=datetime.date.today(), log=print,
-                                  aliases=aliases, qualified=listed)
+                                  aliases=aliases, qualified=listed, certified=ballots)
         kept = results_mod.carry_qualified(cache, previous)
         if kept:
             print(f"  [warn] kept the qualified list read on "

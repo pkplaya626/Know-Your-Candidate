@@ -525,6 +525,111 @@ OPEN_PRIMARY_SEATS = {
     },
 }
 
+# Seats whose 2026 primary was not the state's (results.seat_dates), keyed on
+# race id: {"primary", "runoff", "source"}. A per-state calendar cannot hold
+# them, and the four Alabama seats read "Primary held 2026-05-19" for a
+# primary held in August.
+#
+# Alabama: after the Supreme Court stayed the court-drawn map, Governor Ivey's
+# special primary proclamation of 2026-05-12 postponed the primaries for the
+# 1st, 2nd, 6th and 7th districts to a special primary on August 11, 2026,
+# under the Legislature's 2023 plan, with no runoff; the winners go to the
+# November 3 ballot (governor.alabama.gov newsroom, 2026-05-12; Alabama Public
+# Radio, 2026-08-10; read 2026-10-17).
+_AL_SPECIAL = {"primary": "2026-08-11", "runoff": None,
+               "source": "https://governor.alabama.gov/newsroom/2026/05/governor-ivey-celebrates-"
+                         "major-court-victory-in-states-redistricting-battle-calls-special-"
+                         "election-for-alabama-drawn-congressional-map/ (special primary "
+                         "proclamation of 2026-05-12; read 2026-10-17)"}
+SEAT_PRIMARY_DATES = {
+    "H-AL-01-2026": _AL_SPECIAL,
+    "H-AL-02-2026": _AL_SPECIAL,
+    "H-AL-06-2026": _AL_SPECIAL,
+    "H-AL-07-2026": _AL_SPECIAL,
+}
+
+# House seats left empty during the 119th Congress with no special election
+# to fill them, keyed (state, district): who left, the day their term ended
+# as congress-legislators' legislators-historical records it (the bioguide id
+# is the key into it), how, and whether a special election has been called,
+# each with the day it was checked. Shown on the delegation and the district
+# map (RACES-05, FRESHNESS-12) while nobody sits there. validate reports an
+# entry for a seat someone now sits in, and one whose member the snapshot
+# still seats; it cannot check `left`, which the build has no offline record
+# of (neither member is in Former_Members.csv), so check it by hand against
+# legislators-historical when adding an entry. Re-check `special` before
+# moving `checked`.
+SEAT_VACANCIES = {
+    ("FL", 20): {
+        "bioguide": "C001127", "name": "Sheila Cherfilus-McCormick", "left": "2026-04-21",
+        "how": "resigned", "special": "no special election called", "checked": "2026-10-17",
+        "source": "legislators-historical (term end 2026-04-21); House Press Gallery, party "
+                  "breakdown: resigned 04/21/26; Wikipedia, 119th United States Congress: no "
+                  "special election before the 2026 elections; read 2026-10-17",
+    },
+    ("TX", 23): {
+        "bioguide": "G000594", "name": "Tony Gonzales", "left": "2026-04-14",
+        "how": "resigned", "special": "no special election called", "checked": "2026-10-17",
+        "source": "legislators-historical (term end 2026-04-14); House Press Gallery, party "
+                  "breakdown: resigned 04/14/2026; Texas Tribune: the governor has called no "
+                  "special election; read 2026-10-17",
+    },
+}
+
+# Certified November ballots published only as a PDF, which the standard
+# library cannot read (kyc/certified.py reads the HTML ones), transcribed from
+# the document named, printed names only: name and party as the list gives
+# them, in its order. ``complete`` says the list is the whole ballot for its
+# races, so that a filer it does not name is not on the ballot (rule 77); a
+# list that is not (a party's own list of its nominees) only adds names.
+# Re-read the document before the election and move ``read``.
+CERTIFIED_BALLOTS = {
+    "IA": {
+        "source": "Iowa Secretary of State, Candidate List, November 3, 2026 General Election "
+                  "(last updated 8/14/2026)",
+        "url": "https://sos.iowa.gov/sites/default/files/2026-08/2026%20General%20-%20Candidate"
+               "%20List%20Database%20-%20All%20Elections_0.pdf",
+        "read": "2026-10-17", "complete": True,
+        "races": {
+            "S-IA-2026": [("Ashley Hinson", "Republican"), ("Josh Turek", "Democratic"),
+                          ("Thomas Laehn", "Libertarian")],
+            "H-IA-01-2026": [("Mariannette Miller-Meeks", "Republican"),
+                             ("Christina Bohannan", "Democratic"),
+                             ("Michael Bridgford", "No Party")],
+            # Rick Stewart: kept on the ballot by the State Objections Panel
+            # on June 15 (KCRG); the Cerro Gordo County list revised 9/3/2026
+            # prints the same four.
+            "H-IA-02-2026": [("Joe Mitchell", "Republican"), ("Lindsay James", "Democratic"),
+                             ("Rick Stewart", "Libertarian"), ("Dave Bushaw", "No Party")],
+            "H-IA-03-2026": [("Zach Nunn", "Republican"), ("Sarah Trone Garriott", "Democratic")],
+            "H-IA-04-2026": [("Chris McGowan", "Republican"), ("Dave Dawson", "Democratic")],
+        },
+    },
+    "NE": {
+        "source": "Nebraska Secretary of State, Final Statewide General Candidate List, "
+                  "November 3, 2026 General Election (9/11/2026)",
+        "url": "https://sos.nebraska.gov/sites/default/files/doc/elections/2026/"
+               "Final_Statewide_General_Candidate_Filing_List_9.11.26.pdf",
+        "read": "2026-10-17", "complete": True,
+        "races": {
+            # Mike Marvin suspended his campaign on August 21 and stays on
+            # the ballot (Nebraska Examiner via WOWT, 2026-09-02); the
+            # certified list prints him.
+            "S-NE-2026": [("Pete Ricketts", "Republican"), ("Mike Marvin", "Legal Marijuana NOW"),
+                          ("Robin Richards", "Nebraska Working People"),
+                          ("Chuck Conboy", "America First"), ("Dan Osborn", "By Petition")],
+            "H-NE-01-2026": [("Mike Flood", "Republican"), ("Chris Backemeyer", "Democratic"),
+                             ("Nik Sandman", "Libertarian"), ("Dan Hartong", "America First")],
+            "H-NE-02-2026": [("Brinker Harding", "Republican"), ("Denise Powell", "Democratic"),
+                             ("Eric Michael Foreman", "Libertarian")],
+            "H-NE-03-2026": [("Adrian Smith", "Republican"), ("Becky Kelly Stille", "Democratic"),
+                             ("David J. Else", "Legal Marijuana NOW"),
+                             ("Macey Budke", "Nebraska Working People"),
+                             ("Mark Cohen", "By Petition")],
+        },
+    },
+}
+
 # States whose federal general election goes to a runoff when no candidate wins
 # a majority, and when (state code: (date, evidence)). After Election Day the
 # results reader treats an unpartisan "Runoff results" table on these states'
