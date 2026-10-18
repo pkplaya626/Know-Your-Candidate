@@ -308,15 +308,15 @@
         title: "Won the 2026 primary for this seat." } },
     elected: { cls: "badge-money", rank: 0,
       card: "Elected", long: "Elected in November", mate: "Elected", short: "Elected",
-      title: "Won the November general election, per the published results.",
+      title: "Won the November general election, per Wikipedia's results page.",
       member: { card: "Re-elected", long: "Re-elected in November", mate: "Re-elected",
         short: "Re-elected",
-        title: "Won re-election to this seat in November, per the published results." } },
+        title: "Won re-election to this seat in November, per Wikipedia's results page." } },
     runoff: { cls: "badge-warn", rank: 1,
       card: "In the runoff", long: "In the general election runoff", mate: "In the runoff",
       short: "In runoff",
       title: "No candidate won a majority in November; in the runoff between the top two, " +
-        "per the published results." },
+        "per Wikipedia's results page." },
     advanced: { cls: "badge-warn", rank: 1,
       card: "In runoff", long: "In a primary runoff", mate: "In runoff", short: "In runoff",
       title: "Advanced to a primary runoff that has not yet been decided." },
@@ -331,17 +331,17 @@
     defeated: { cls: "badge-danger", rank: 3,
       card: "Lost in November", long: "Lost the November election", mate: "Lost in November",
       short: "Lost",
-      title: "Lost the November general election, per the published results.",
+      title: "Lost the November general election, per Wikipedia's results page.",
       member: { card: "Lost re-election", long: "Lost re-election in November",
         mate: "Lost re-election", short: "Lost re-election",
-        title: "Lost re-election to this seat in November, per the published results." } },
+        title: "Lost re-election to this seat in November, per Wikipedia's results page." } },
     eliminated: { cls: "badge-danger", rank: 4, off: true,
       card: "Lost primary", long: "Lost the 2026 primary", mate: "Lost primary",
       short: "Lost primary",
-      title: "Did not win the primary, per the published results." },
+      title: "Did not win the primary, per Wikipedia's results page." },
     withdrawn: { cls: "badge-neutral", rank: 5, off: true,
       card: "Withdrew", long: "Withdrew from the 2026 race", mate: "Withdrew", short: "Withdrew",
-      title: "Withdrew from the race, per the published results." },
+      title: "Withdrew from the race, per Wikipedia's results page." },
     unlisted: { cls: "badge-neutral", rank: 6, off: true,
       card: "Not on primary ballot", long: "Not on the 2026 primary ballot", mate: "Not on ballot",
       short: "Not on ballot",
@@ -361,7 +361,7 @@
   var UNCONFIRMED = { cls: "badge-neutral", rank: 6, off: true,
     card: "Not on the November ballot", long: "Not on the November ballot",
     mate: "Not on ballot", short: "Not on ballot",
-    title: "The published results put nobody of this name on the November ballot; a similar " +
+    title: "Wikipedia's results page puts nobody of this name on the November ballot; a similar " +
       "name they list lost or withdrew." };
 
   /* After Election Day, a nominee the results have not marked either way.
@@ -464,13 +464,34 @@
     });
   }
 
-  /** Who says who is on a race's ballot, for a sentence: "per the published
-   *  results", or the Secretary of State's qualified list where that is the
-   *  ballot (Louisiana's House seats before their count). */
+  /** Who says who is on a race's ballot, for a sentence: "per Wikipedia's
+   *  results page", or the Secretary of State's qualified list where that is
+   *  the ballot (Louisiana's House seats before their count). "Per the
+   *  published results" read as a state's certified count (TRUST-06). */
   function ballotSource(race) {
     return race && race.results && race.results.fromQualifiedList
       ? "per the Secretary of State's list of qualified candidates"
-      : "per the published results";
+      : "per Wikipedia's results page";
+  }
+
+  /** The link a race's head carries to the page its statuses were read from
+   *  (the pipeline's `results.sourceUrl`), so a reader can check a "Lost
+   *  the primary" against it: "Results: Wikipedia, read Oct. 17, 2026", or
+   *  the Secretary of State's list. "" when the race names no page. */
+  function resultsSourceHtml(race) {
+    var r = race && race.results;
+    if (!r || !/^https:\/\//.test(r.sourceUrl || "")) return "";
+    var asOf = (meta().election || {}).resultsAsOf;
+    var listed = !!r.fromQualifiedList;
+    var label = listed ? "Ballot: the Secretary of State's list"
+      : "Results: Wikipedia" + (asOf ? ", read " + dateWords(asOf) : "");
+    var title = listed
+      ? "The Secretary of State's list of candidates qualified for this seat"
+      : "The state's election results page on Wikipedia, which this site reads for who " +
+        "won, lost or withdrew. It is not the state's certified count.";
+    return '<a class="race-source" href="' + escapeAttr(r.sourceUrl) +
+      '" target="_blank" rel="noopener noreferrer" title="' + escapeAttr(title) + '">' +
+      escapeHtml(label) + "</a>";
   }
 
   /** True when the primary settled *status* out of the race. */
@@ -651,6 +672,60 @@
     var m = /^(\d{4})-(\d{2})/.exec(String(iso || ""));
     if (!m || +m[2] < 1 || +m[2] > 12) return "";
     return MONTHS[+m[2] - 1] + " " + m[1];
+  }
+
+  /* A day in words, one helper for every view: "2026-10-15" ->
+   * "Oct. 15, 2026", as the generated pages write it (kyc/pages.date_words)
+   * and as a candidate's term already read ("Jan. 3, 2027"). A member's
+   * dialog showed "Term 2025-01-03 - 2027-01-03" and "born 1965-06-15"
+   * beside it. Anything that is not an ISO date is returned as it was. */
+  var MONTH_WORDS = ["Jan.", "Feb.", "March", "April", "May", "June", "July", "Aug.",
+                     "Sept.", "Oct.", "Nov.", "Dec."];
+
+  function dateWords(iso) {
+    var text = String(iso == null ? "" : iso);
+    var m = /^(\d{4})-(\d{2})-(\d{2})(?:$|T)/.exec(text);
+    if (!m || +m[2] < 1 || +m[2] > 12 || +m[3] < 1 || +m[3] > 31) return text;
+    return MONTH_WORDS[+m[2] - 1] + " " + +m[3] + ", " + m[1];
+  }
+
+  /* --------------------------------------------------------- report a problem */
+
+  /* The public repository, where a reader reports an error: an issue form
+   * (.github/ISSUE_TEMPLATE/correction.yml) whose fields GitHub fills from
+   * the query parameters named for them. kyc/pages.py writes the same
+   * address into the generated footers (pages.REPO), and a test holds the
+   * two together. */
+  var REPO_URL = "https://github.com/pkplaya626/Know-Your-Candidate";
+
+  /** The issue form, filled in with the page and the profile it is about. */
+  function reportUrl(page, profile) {
+    var url = REPO_URL + "/issues/new?template=correction.yml";
+    if (page) url += "&page=" + encodeURIComponent(page);
+    if (profile) url += "&profile=" + encodeURIComponent(profile);
+    return url;
+  }
+
+  /* Every "Report a problem" link names the address the reader is on, the
+   * open profile's included, when it is followed: the footer's link was
+   * written before a profile opened over it, and the 404 page's cannot
+   * know the address it was served for. */
+  function aimReport(link) {
+    var href = global.location.href;
+    if (/^https?:/.test(href)) {
+      link.setAttribute("href", reportUrl(href, link.getAttribute("data-profile") || ""));
+    }
+  }
+
+  function initReportLinks() {
+    Array.prototype.forEach.call(doc.querySelectorAll("a[data-report]"), aimReport);
+    var aim = function (event) {
+      var link = event.target && event.target.closest && event.target.closest("a[data-report]");
+      if (link) aimReport(link);
+    };
+    doc.addEventListener("click", aim, true);
+    doc.addEventListener("focusin", aim);
+    doc.addEventListener("contextmenu", aim, true);
   }
 
   /** Plain text saying what period a profile's money covers, or "".
@@ -966,7 +1041,14 @@
   var router = {
     read: function () {
       var hash = global.location.hash.replace(/^#\/?/, "");
-      if (!hash) return { view: "list", params: {} };
+      if (!hash) {
+        // "index.html?q=..." - a search submitted with no script, or the
+        // address search engines are given (the page's SearchAction).
+        var asked = /[?&]q=([^&]*)/.exec(global.location.search || "");
+        var words = "";
+        try { words = asked ? decodeURIComponent(asked[1].replace(/\+/g, " ")) : ""; } catch (e) { /* malformed */ }
+        return { view: "list", params: words ? { q: words } : {} };
+      }
 
       // A person: a profile, or a federal official (kyc-official.js).
       var dialog = hash.match(/^(profile|official)\/(.+)$/);
@@ -1317,7 +1399,7 @@
             ? election.challengersWithProfile + " with a profile here" +
               (election.renumbered ? " (" + election.renumbered + " of them members running " +
                 "under a new district number)" : "") + ", " +
-              election.challengersUnprofiled + " named by the published results with no FEC " +
+              election.challengersUnprofiled + " named on Wikipedia's results pages with no FEC " +
               "filing over $5,000"
             : running + " in all") + ".";
       }
@@ -1516,15 +1598,40 @@
       });
     }
 
-    // Footer freshness stamp, from the build metadata.
-    var stamp = doc.getElementById("buildStamp");
-    if (stamp && meta().built) {
-      var built = new Date(meta().built);
-      if (!isNaN(built)) {
-        stamp.textContent = built.toISOString().slice(0, 10);
+    // The freshness stamps, from the build metadata: the footer's, and the
+    // sidebar's (the grid's infinite scroll keeps pushing its footer away),
+    // and when the results pages were last read.
+    var built = meta().built ? new Date(meta().built) : null;
+    if (built && !isNaN(built)) {
+      var stamps = [doc.getElementById("buildStamp")].concat(
+        Array.prototype.slice.call(doc.querySelectorAll("time[data-built]")));
+      stamps.forEach(function (stamp) {
+        if (!stamp) return;
+        stamp.textContent = dateWords(built.toISOString().slice(0, 10));
         stamp.setAttribute("datetime", built.toISOString());
-      }
+      });
     }
+    var resultsRead = (meta().election || {}).resultsAsOf;
+    Array.prototype.forEach.call(doc.querySelectorAll("time[data-results-as-of]"), function (el) {
+      if (!resultsRead) return;
+      el.textContent = dateWords(resultsRead);
+      el.setAttribute("datetime", resultsRead);
+      var wrap = el.closest("[data-results-read]");
+      if (wrap) wrap.hidden = false;
+    });
+
+    // The header's search on a page with no grid: the words go to the
+    // grid's own search, on the home page.
+    Array.prototype.forEach.call(doc.querySelectorAll("form[data-site-search]"), function (form) {
+      form.addEventListener("submit", function (event) {
+        var input = form.querySelector('input[name="q"]');
+        var words = input ? input.value.trim() : "";
+        event.preventDefault();
+        global.location.href = siteRoot() + "index.html" +
+          (words ? "#/?q=" + encodeURIComponent(words) : "");
+      });
+    });
+    initReportLinks();
 
     var countdown = doc.getElementById("electionCountdown");
     if (countdown) {
@@ -1688,6 +1795,10 @@
     formerText: formerText,
     ordinal: ordinal,
     ballotSource: ballotSource,
+    resultsSourceHtml: resultsSourceHtml,
+    dateWords: dateWords,
+    REPO_URL: REPO_URL,
+    reportUrl: reportUrl,
     offBallot: offBallot,
     onNovemberBallot: onNovemberBallot,
     meta: meta,

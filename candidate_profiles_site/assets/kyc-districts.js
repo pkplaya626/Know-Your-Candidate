@@ -1168,9 +1168,12 @@
     var canLocate = many && !!state.projection && !!(global.navigator && global.navigator.geolocation);
     if (canLocate) {
       html.push(
-        '<div class="districts-locate"><button type="button" class="btn" id="locateMe" title="',
-        "Your location is placed on this map on your device and is not sent anywhere.",
-        '">', KYC.icon("pin"), " Find my district</button>",
+        // Said beside the button, not only in its title: a phone, where the
+        // button is used, never shows a title (TRUST-10).
+        '<div class="districts-locate"><button type="button" class="btn" id="locateMe" ',
+        'aria-describedby="locateNote">', KYC.icon("pin"), " Find my district</button>",
+        '<span class="field-note" id="locateNote">Your location is placed on this map on your ',
+        "device and is never sent anywhere.</span>",
         '<p class="state-note" id="locateResult" role="status" aria-live="polite" hidden></p></div>'
       );
     }

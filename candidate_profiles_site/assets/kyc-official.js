@@ -22,6 +22,8 @@
   var dialog = null;
   var root = null;
   var current = null;
+  // The page's own title, put back when the dialog closes.
+  var baseTitle = null;
   var routed = false;
 
   function federal() {
@@ -163,8 +165,12 @@
       "  </header>",
       '  <div class="modal-body scroll-y" id="officialModalBody"></div>',
       '  <footer class="modal-footer">',
-      '    <span id="officialModalSource"></span>',
-      '    <span style="display:flex;gap:8px">',
+      '    <span class="modal-footer-notes"><span id="officialModalSource"></span>',
+      // The same way to report an error as a profile's (TRUST-03).
+      '    <a class="report-link" id="officialModalReport" data-report target="_blank"' +
+      ' rel="noopener noreferrer" href="' + KYC.escapeAttr(KYC.reportUrl()) + '">' +
+      KYC.icon("flag") + " Report a problem with this record</a></span>",
+      '    <span class="modal-footer-actions">',
       '      <button type="button" class="btn" id="officialModalCopy">' +
       KYC.icon("share") + " Copy link</button>",
       '      <button type="button" class="btn" data-close>Close</button>',
@@ -527,6 +533,11 @@
     ensure();
     current = id;
     render(id, found);
+    el("officialModalReport").setAttribute("data-profile", id);
+    // A tab or a bookmark names the person, as a profile's does (GRID-24).
+    if (baseTitle === null) baseTitle = doc.title;
+    var shown = el("officialModalName").textContent;
+    if (shown) doc.title = shown + " | Know Your Candidate";
     if (!(opts && opts.fromRoute)) KYC.router.writeOfficial(id);
     dialog.open();
     return !!found;
@@ -558,6 +569,7 @@
     dialog = KYC.createModal(root, {
       onClose: function () {
         current = null;
+        if (baseTitle !== null) doc.title = baseTitle;
         if (routed) {
           routed = false;
           return;

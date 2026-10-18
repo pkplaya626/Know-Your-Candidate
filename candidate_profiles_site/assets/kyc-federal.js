@@ -218,7 +218,7 @@
     var page = (holder && holder.page) || {};
     if (page.status === "confirmed") {
       return '<a href="' + KYC.escapeAttr(page.url) + '" target="_blank" rel="noopener noreferrer">' +
-        "Named there</a>" + (page.acting ? " (acting)" : "");
+        "Confirmed on its page</a>" + (page.acting ? " (acting)" : "");
     }
     if (page.status === "unconfirmed") return '<span class="faint">Not named there when last read</span>';
     if (page.status === "unreadable") return '<span class="faint">Could not be read</span>';

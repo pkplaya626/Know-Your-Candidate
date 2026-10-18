@@ -21,9 +21,13 @@
 <meta property="og:image:alt" content="Know Your Candidate">
 <meta property="og:site_name" content="Know Your Candidate">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="referrer" content="no-referrer">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/kyc.css?v=9203051e1f">
-<script src="assets/kyc.js?v=275dfa6f45"></script>
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="stylesheet" href="assets/kyc.css?v=447df54aa1">
+<script src="assets/kyc.js?v=60eaad2b00"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Know Your Candidate","url":"https://candidates.radicalrelay.us/","description":"A non-partisan directory of the U.S. Congress, the 2026 midterm races, and every state's government.","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://candidates.radicalrelay.us/index.html?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
 </head>
 <body>
 
@@ -171,6 +175,10 @@
                 <svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg>
                 Know Your Government
             </a>
+            <a class="nav-link" href="about.html" data-nav="about">
+                <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+                About &amp; sources
+            </a>
         </nav>
 
         <div class="sidebar-section">
@@ -190,7 +198,7 @@
             <time id="electionCountdown" class="badge badge-warn countdown"></time>
             <div class="stat-row"><span>Senate seats up</span>
                 <span class="value" id="senateSeatsUp"></span></div>
-            <div class="stat-row"><span>Defending</span>
+            <div class="stat-row"><span>Seats each party defends</span>
                 <span class="value" id="senateDefending"></span></div>
             <div class="stat-row"><span>House seats up</span>
                 <span class="value" id="houseSeatsUp"></span></div>
@@ -211,6 +219,7 @@
             </select>
             <a class="sidebar-link" id="stateSelectLink" href="states/index.html" hidden></a>
         </div>
+        <p class="sidebar-section sidebar-built">Data built <time data-built>&mdash;</time> &middot; <a href="about.html">About &amp; sources</a></p>
     </aside>
 
     <main class="app-main" id="mainContent">
@@ -256,7 +265,7 @@
                             data-optional aria-pressed="false"
                             title="Sitting members not running again for the seat they hold: retiring, running for another office, or beaten in a primary. A member running for the House again under a new district number is not among them.">Not seeking re-election</button>
                     <button type="button" class="chip" data-group="election" data-value="contested"
-                            data-optional aria-pressed="false">Contested races</button>
+                            data-optional aria-pressed="false">Races with a challenger</button>
                 </div>
 
                 <div class="chip-group" role="group" aria-label="Eliminated candidates">
@@ -274,7 +283,7 @@
                     </button>
                     <button type="button" class="chip" id="senateViewToggle" aria-pressed="false"
                             title="Every Senate seat, grouped by the year it is next on the ballot, with the candidates for each 2026 seat">
-                        Senate by class
+                        Senate seats by year
                     </button>
                 </div>
             </div>
@@ -317,10 +326,12 @@
 
             <footer class="site-footer">
                 <p><strong>Sources:</strong>
-                    roll-call ideology from Voteview DW-NOMINATE;
-                    campaign finance from the Federal Election Commission;
-                    rosters and portraits from Congress.gov,
-                    the <code>congress-legislators</code> dataset and Wikipedia.</p>
+                    membership, contact details and committee rosters from the
+                    <code>congress-legislators</code> dataset; the candidate field and
+                    campaign finance from the Federal Election Commission; primary results
+                    from each state's Wikipedia election page<span data-results-read hidden>,
+                    as last read on <time data-results-as-of></time></span>; voting records
+                    from Voteview; portraits from Congress.gov and Wikipedia.</p>
                 <p>Fields shown as <span class="kyc-absent">Not disclosed</span> have no
                     public filing behind them, and <span class="kyc-absent">No data</span>
                     means no source has been recorded, including where a roster held
@@ -332,19 +343,18 @@
                     (52&nbsp;U.S.C.&nbsp;&sect;30101(2)). Filings below that are still
                     counted per race, so a seat is never described as uncontested
                     when somebody has filed for it.</p>
-                <p>One page per state: <a href="states/index.html">states &amp; territories</a>.
-                    Non-partisan and independent. Data built
-                    <time id="buildStamp">—</time>.</p>
+                <p>One page per state: <a href="states/index.html">states &amp; territories</a>.</p>
+                <p class="footer-meta">Non-partisan and independent. Data built <time id="buildStamp">&mdash;</time>. <a href="about.html">About &amp; sources</a> &middot; <a href="https://github.com/pkplaya626/Know-Your-Candidate/issues/new?template=correction.yml" data-report target="_blank" rel="noopener noreferrer">Report a problem</a></p>
             </footer>
         </div>
     </main>
 </div>
 
-<script src="data/profiles.js?v=a5cc3f3ed2"></script>
+<script src="data/profiles.js?v=af53256cc4"></script>
 <script src="data/odds.js"></script>
-<script src="assets/kyc-odds.js?v=568b120d85"></script>
-<script src="assets/kyc-cards.js?v=cdbe0a8847"></script>
-<script src="assets/kyc-profile.js?v=4798d930e9"></script>
+<script src="assets/kyc-odds.js?v=3428dfe4a3"></script>
+<script src="assets/kyc-cards.js?v=4b22643612"></script>
+<script src="assets/kyc-profile.js?v=ad8edb36b0"></script>
 <script src="assets/kyc-senate.js?v=31956d60d6"></script>
 <script src="assets/kyc-directory.js?v=5514722f17"></script>
 </body>

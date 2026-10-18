@@ -459,7 +459,10 @@
         return n + KYC.cards.unprofiledNames(r).none.length;
       }, 0);
       if (unnamed) {
-        html += '<p class="panel-note">Also on the November ballot, per the published results, ' +
+        // Whose word it is: a state's qualified list, or the results pages.
+        var listed = stateRaces.every(function (r) { return r.results && r.results.fromQualifiedList; });
+        html += '<p class="panel-note">Also on the November ballot, ' +
+          (listed ? KYC.escapeHtml(KYC.ballotSource(stateRaces[0])) : "per Wikipedia’s results pages") + ", " +
           "with no profile here: " + unnamed + (unnamed === 1 ? " person" : " people") +
           '. <a href="' + KYC.escapeAttr(KYC.stateUrl(code)) + '">Each race on the ' +
           KYC.escapeHtml(KYC.stateName(code)) + " page \u203a</a></p>";
@@ -506,6 +509,11 @@
         );
       }
     );
+    // The footer names this view's sources: the national view of Congress
+    // named none (TECH-11). The state panels date their own.
+    Array.prototype.forEach.call(doc.querySelectorAll("[data-sources]"), function (line) {
+      line.hidden = (" " + line.getAttribute("data-sources") + " ").indexOf(" " + mode + " ") === -1;
+    });
     drawLegend();
     map.paint();
     if (selected) showPanel(selected);

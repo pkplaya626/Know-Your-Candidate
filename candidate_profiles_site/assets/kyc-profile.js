@@ -29,6 +29,8 @@
   var dialog = null;
   var root = null;
   var current = null;
+  // The page's own title, put back when the profile closes.
+  var baseTitle = null;
 
   /* ---------------------------------------------------------------- markup */
 
@@ -114,7 +116,7 @@
       '        <p class="note-box" id="profileModalFunding" style="margin-top:6px"></p>',
       "      </section>",
       '      <section class="panel">',
-      '        <h3 class="panel-head">' + KYC.icon("chart") + " Voting alignment</h3>",
+      '        <h3 class="panel-head">' + KYC.icon("chart") + " Voting record</h3>",
       '        <div class="note-box" id="profileModalVoting"></div>',
       "      </section>",
       '      <section class="panel">',
@@ -129,8 +131,14 @@
       "    </div>",
       "  </div>",
       '  <footer class="modal-footer">',
-      '    <span id="profileModalSource"></span>',
-      '    <span style="display:flex;gap:8px">',
+      '    <span class="modal-footer-notes"><span id="profileModalSource"></span>',
+      // A named person who is mislabelled, or a reader who sees it, needs a
+      // way to say so (TRUST-03): GitHub's issue form, filled in with this
+      // profile and the address (KYC.reportUrl, aimed as it is followed).
+      '    <a class="report-link" id="profileModalReport" data-report target="_blank"' +
+      ' rel="noopener noreferrer" href="' + KYC.escapeAttr(KYC.reportUrl()) + '">' +
+      KYC.icon("flag") + " Report a problem with this profile</a></span>",
+      '    <span class="modal-footer-actions">',
       '      <button type="button" class="btn" id="profileModalCopy">' +
       KYC.icon("share") + " Copy link</button>",
       '      <button type="button" class="btn" data-close>Close</button>',
@@ -259,16 +267,18 @@
       label ? '<span class="label">' + KYC.escapeHtml(label) + "</span>" : "",
       "    </span>",
       "  </div>",
-      '  <div class="ideology-track" role="img" aria-label="DW-NOMINATE first dimension ' +
+      '  <div class="ideology-track" role="img" aria-label="Left-right score ' +
       KYC.escapeAttr(value.toFixed(2)) + ' on a scale from -1 (left) to +1 (right)">',
       '    <span class="ideology-marker" style="left:' + pct.toFixed(2) + '%"></span>',
       "  </div>",
       '  <div class="ideology-axis"><span>-1.0 left</span>' +
       "<span>centre</span><span>right +1.0</span></div>",
-      '  <p class="held-source">Source: <a href="https://voteview.com/" target="_blank" ' +
-      'rel="noopener noreferrer">Voteview</a> DW-NOMINATE, first dimension' +
-      (congress ? ", from roll calls in the " + KYC.escapeHtml(congress) : "") +
-      ". A score places votes on a left-right scale; it is not a party label.</p>",
+      // In plain words (TRUST-17): the method's name stays, after what it is.
+      '  <p class="held-source">A left-right score of this member\u2019s roll-call votes' +
+      (congress ? " in the " + KYC.escapeHtml(congress) : "") +
+      ', from <a href="https://voteview.com/" target="_blank" rel="noopener noreferrer">' +
+      "Voteview</a> (its DW-NOMINATE method). It places votes on a scale; it is not a " +
+      "party label.</p>",
       "</div>",
     ].join("");
   }
@@ -662,10 +672,10 @@
     var badge = hasBirth ? KYC.sourceBadge(item, "birthdate") : "";
 
     if (hasAge && hasBirth) {
-      return KYC.escapeHtml(years + " (born " + item.birthdate + ")") + badge;
+      return KYC.escapeHtml(years + " (born " + KYC.dateWords(item.birthdate) + ")") + badge;
     }
     if (hasAge) return KYC.escapeHtml(years + " years old");
-    if (hasBirth) return KYC.escapeHtml(item.birthdate) + badge;
+    if (hasBirth) return KYC.escapeHtml(KYC.dateWords(item.birthdate)) + badge;
     return '<span class="kyc-absent">No data</span>';
   }
 
@@ -698,7 +708,7 @@
       if (i) term.appendChild(doc.createTextNode(" - "));
       var span = doc.createElement("span");
       span.className = "nowrap";
-      span.textContent = part;
+      span.textContent = KYC.dateWords(part);
       term.appendChild(span);
     });
 
@@ -728,21 +738,23 @@
     var disclosure = el("profileModalDisclosure");
     el("profileModalDisclosureField").hidden = !!item.isCandidate && !item.disclosureUrl;
     if (item.disclosureUrl) {
-      // The Senate's eFD shows its terms of use before the first report a
-      // visitor opens; the link says so rather than looking broken.
+      // The Senate's disclosure site shows its terms of use before the
+      // first report a visitor opens. That was said only in a hover title,
+      // which a phone never shows, so the link looked broken (TRUST-16):
+      // it is a visible line under the link now.
       var senate = item.disclosureSource === "senate-efd";
+      var filed = item.disclosureFiled ? " on " + KYC.dateWords(item.disclosureFiled) : "";
       disclosure.innerHTML =
         '<a class="disclosure-link" target="_blank" rel="noopener noreferrer" href="' +
         KYC.escapeAttr(item.disclosureUrl) + '" title="' +
         KYC.escapeAttr(senate
-          ? "Annual financial disclosure filed with the Secretary of the Senate" +
-            (item.disclosureFiled ? " on " + item.disclosureFiled : "") +
-            ". The Senate asks you to accept its terms of use first, then open the link again."
-          : "Annual financial disclosure filed with the Clerk of the House" +
-            (item.disclosureFiled ? " on " + item.disclosureFiled : "") + " (PDF)"
+          ? "Annual financial disclosure filed with the Secretary of the Senate" + filed
+          : "Annual financial disclosure filed with the Clerk of the House" + filed + " (PDF)"
         ) + '">' + KYC.icon("link") + " " +
-        KYC.escapeHtml(item.disclosureYear || "") +
-        (senate ? " disclosure (Senate eFD)" : " disclosure (PDF)") + "</a>";
+        KYC.escapeHtml((item.disclosureYear ? item.disclosureYear + " " : "") +
+          (senate ? "Senate financial disclosure" : "House financial disclosure (PDF)")) + "</a>" +
+        (senate ? '<span class="field-note">The Senate shows its terms of use first: ' +
+          "accept them, then open this link again.</span>" : "");
     } else {
       // A claim about this site, not about the member (rule 19): the
       // matcher misses compound surnames and other first names (Debbie
@@ -787,7 +799,7 @@
     // Every figure of money on the site is the FEC's (validate: finance-not-fec).
     el("profileModalSource").textContent = item.financeSource
       ? "Finance figures from the FEC" +
-        (item.financeAsOf ? ", through " + item.financeAsOf : "") +
+        (item.financeAsOf ? ", through " + KYC.dateWords(item.financeAsOf) : "") +
         (item.financeElection ? " (" + item.financeElection + " election period)" : "")
       : "";
   }
@@ -799,6 +811,10 @@
     ensure();
     current = item;
     render(item);
+    // A tab, a bookmark or a history entry names the person (GRID-24).
+    if (baseTitle === null) baseTitle = doc.title;
+    doc.title = item.name + " \u2013 " + item.officeLabel + " | Know Your Candidate";
+    el("profileModalReport").setAttribute("data-profile", item.id);
     if (!(opts && opts.fromRoute)) {
       KYC.router.writeProfile(item.id);
     } else if (item.id !== id) {
@@ -827,6 +843,7 @@
     dialog = KYC.createModal(root, {
       onClose: function () {
         current = null;
+        if (baseTitle !== null) doc.title = baseTitle;
         KYC.router.clearProfile();
       },
     });

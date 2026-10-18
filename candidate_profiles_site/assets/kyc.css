@@ -1470,6 +1470,94 @@ select optgroup {
 .site-footer strong { color: var(--text-muted); font-weight: 700; }
 .site-footer p + p { margin-top: var(--s-2); }
 
+/* The site's frame: where a page's facts come from, how fresh they are, and
+ * how to report one that is wrong. The sidebar's line is there because the
+ * grid's endless scroll keeps pushing its footer out of reach. */
+.footer-meta a,
+.sidebar-built a,
+.report-link {
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.sidebar-built {
+  font-size: var(--t-xs);
+  line-height: 1.5;
+  color: var(--text-faint);
+}
+.report-link { display: inline-flex; align-items: center; gap: var(--s-1); }
+.report-link .icon { width: 14px; height: 14px; }
+.field-note {
+  display: block;
+  margin-top: var(--s-1);
+  font-size: var(--t-xs);
+  line-height: 1.5;
+  color: var(--text-faint);
+}
+.race-source {
+  align-self: center;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.about-page .guide-section { margin-top: var(--s-6); }
+.about-page .guide-section p,
+.about-page .guide-section li { max-width: 72ch; line-height: 1.65; }
+.about-page .guide-section p + p,
+.about-page .guide-section ul { margin-top: var(--s-3); }
+.about-page .guide-section ul { padding-left: var(--s-5); }
+.about-page .guide-section li + li { margin-top: var(--s-2); }
+.about-table th,
+.about-table td { vertical-align: top; text-align: left; white-space: normal; }
+.about-table th[scope="row"] { position: static; min-width: 11em; }
+.about-table td:last-child { white-space: nowrap; }
+/* On a phone each source is a short block, not a table to scroll sideways. */
+@media (max-width: 760px) {
+  .about-table thead { display: none; }
+  .about-table,
+  .about-table tbody,
+  .about-table tr,
+  .about-table th,
+  .about-table td { display: block; }
+  .about-table tr { padding: var(--s-3) 0; border-bottom: 1px solid var(--border); }
+  .about-table th,
+  .about-table td { padding: 2px 0; border: 0; }
+  .about-table td::before {
+    content: attr(data-label) ": ";
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+}
+.search-page {
+  display: flex;
+  gap: var(--s-2);
+  max-width: 560px;
+  margin: var(--s-5) 0;
+}
+.search-page input {
+  flex: 1;
+  min-width: 0;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+  color: var(--text);
+  font: inherit;
+}
+#notFound .directory-list + .faint { margin-top: var(--s-4); }
+
+/* Room for what the page's script draws, kept until it has drawn (TECH-04):
+ * the footer painted in view and was then pushed off it, a layout shift of
+ * 0.6 on an at-large state's district page. Each rule holds only while the
+ * loading line is all there is, so a short result never leaves a gap. */
+.content:has(#results:empty):has(#noResults[hidden]) #results,
+#stateContent:has(> .results-bar:only-child),
+#districtsApp:has(> .results-bar:only-child) {
+  min-height: 100vh;
+}
+.balance:empty { min-height: 1.5em; }
+
 /* ============================================================ 12. modal */
 
 .modal {
@@ -1619,6 +1707,9 @@ select optgroup {
   font-size: var(--t-xs);
   color: var(--text-faint);
 }
+
+.modal-footer-notes { display: flex; flex-direction: column; gap: var(--s-1); min-width: 0; }
+.modal-footer-actions { display: flex; gap: var(--s-2); }
 
 /* Bounded scroll regions inside the modal. */
 .scroll-box {
@@ -3184,6 +3275,13 @@ select optgroup {
   letter-spacing: -0.01em;
 }
 .guide-panel { padding: var(--s-3) var(--s-4) var(--s-5); }
+/* The partisan map's sources, under the map: compact, so the map keeps its
+ * room. */
+.map-footer {
+  flex: none;
+  margin: 0;
+  padding: var(--s-2) var(--s-4) var(--s-3);
+}
 .guide-panel .guide-sources { margin-top: var(--s-2); }
 .guide-panel .guide-pager { margin-top: var(--s-5); }
 .guide-panel .guide-pager-link { min-width: 0; flex: 1; }
