@@ -2871,8 +2871,14 @@ def apply_cache(profiles, cache, field=None):
                     # The list names them - a certified write-in, or
                     # Florida's unopposed candidate - and prints them not:
                     # neither "on the November ballot" nor "not on the
-                    # state's certified list".
+                    # state's certified list". Counted as neither; the
+                    # page says which and whose list (``unprinted``):
+                    # "the results do not name them" was false of Texas's
+                    # two declared write-ins for the Senate.
                     profile["ballotUnknown"] = True
+                    profile["unprinted"] = {
+                        "kind": race["certifiedUnprinted"][candidate_id],
+                        "source": (race.get("certified") or {}).get("source", "")}
                     continue
                 maybe = [n for n in _maybe_named(profile, race)
                          if (race.get("unmatched") or {}).get(n) in NOVEMBER]

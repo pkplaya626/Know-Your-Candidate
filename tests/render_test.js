@@ -3155,8 +3155,25 @@ async function testBallotCounts() {
     check("the Senate view names them in words, not only in a badge's hover",
       !!section && names.every((n) => [...section.querySelectorAll(".race-note")]
         .some((p) => p.textContent.indexOf(n) !== -1)), seat && seat.id);
-    const unknown = W.legislatorsData.find((p) => p.ballotUnknown && !p.raceStatus);
+    const unknown = W.legislatorsData.find((p) => p.ballotUnknown && !p.raceStatus && !p.unprinted);
     const badge = unknown && W.KYC.cards.card(unknown);
+    // A filer a certified list names as a write-in is said to be one, on
+    // the list's word: Texas's two declared Senate write-ins read "the
+    // published results do not name them" (rule 77). Built here, so the
+    // check runs whatever the data holds.
+    const filed = W.legislatorsData.find((p) => p.isCandidate);
+    const writeIn = Object.assign({}, filed, { raceStatus: null, maybeNamed: null,
+      ballotUnknown: true, unprinted: { kind: "write-in", source: "Texas Secretary of State" } });
+    const wiCard = W.KYC.standing(writeIn, "card");
+    const wiLong = W.KYC.standing(writeIn, "long");
+    check("a certified write-in reads as one, credited to the list, and is not counted on the ballot",
+      !!wiCard && wiCard.label === "Write-in candidate" && wiLong.label === "Write-in candidate" &&
+        wiCard.unknown && /not printed/.test(wiCard.title) &&
+        /Texas Secretary of State/.test(wiCard.title) && !/do not name them/.test(wiCard.title),
+      wiCard && wiCard.label + " | " + wiCard.title);
+    const wiBadge = W.KYC.cards.card(writeIn);
+    check("a certified write-in's card says so", /Write-in candidate/.test(wiBadge) &&
+      !/Ballot status not known/.test(wiBadge));
     // A race whose only challenger's place on the ballot is not known says
     // that, never "No challenger on the ballot" or "0 challengers".
     const lone = Object.assign({}, W.kycRaces.find((r) => r.settled && r.results), {

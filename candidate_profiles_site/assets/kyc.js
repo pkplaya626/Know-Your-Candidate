@@ -566,6 +566,25 @@
           "this person under another spelling. Not confirmed here, so the race counts them " +
           "once, under that name." };
     }
+    var unprinted = item.unprinted;
+    if (unprinted && unprinted.kind) {
+      // Named on a certified list but not printed (rule 77): Texas's
+      // declared write-ins for the Senate read "the published results do
+      // not name them", which the state's own list did.
+      var source = unprinted.source ? " Source: " + unprinted.source + "." : "";
+      if (unprinted.kind === "unopposed") {
+        return { cls: "badge-neutral", rank: 2, off: false, unknown: true,
+          card: "Unopposed, not printed", long: "Unopposed in November, not printed",
+          mate: "Unopposed", short: "Unopposed",
+          title: "Unopposed in November. Florida does not print an uncontested race on the " +
+            "ballot." + source };
+      }
+      return { cls: "badge-neutral", rank: 2, off: false, unknown: true,
+        card: "Write-in candidate", long: "Write-in candidate", mate: "Write-in",
+        short: "Write-in",
+        title: "On the certified list of candidates as a write-in: not printed on the " +
+          "November ballot, though a voter can write their name in." + source };
+    }
     var noPrimary = !item.ballotUnknown && noPrimaryRace(item.raceId);
     if (item.ballotUnknown || noPrimary) {
       return { cls: "badge-neutral", rank: 2, off: false, unknown: true,

@@ -577,6 +577,10 @@ class TestOverlay(unittest.TestCase):
         results.apply_cache([person], {"races": {"H-CO-01-2026": race}})
         self.assertNotIn("raceStatus", person)        # not "not on the certified list"
         self.assertTrue(person["ballotUnknown"])
+        # ...and the page says the list names them as a write-in, never
+        # that "the published results do not name them".
+        self.assertEqual(person["unprinted"],
+                         {"kind": "write-in", "source": "Colorado Secretary of State"})
 
     def test_an_unprinted_name_may_be_a_page_nominee(self):
         # Florida prints no uncontested race. A page nominee the list names
