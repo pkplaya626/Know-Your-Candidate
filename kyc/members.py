@@ -233,7 +233,9 @@ def get(url, pause=PAUSE, render=chrome_dom):
 # What a link to an issues index says, best first: "Issues", "On the
 # Issues", "Key Issues"; then "Priorities", "Legislative priorities".
 _INDEX_TEXT = (
-    re.compile(r"^(?:(?:on|the|key|my|our|top)\s+)*issues(?:\s*(?:&|and)\s*legislation)?$", re.I),
+    # "Policy Issues" (Ocasio-Cortez's, over /legislation/climate ...).
+    re.compile(r"^(?:(?:on|the|key|my|our|top|policy)\s+)*issues(?:\s*(?:&|and)\s*legislation)?$",
+               re.I),
     re.compile(r"^(?:(?:my|our|key|legislative|top)\s+)*priorities$", re.I),
 )
 _INDEX_PATH = re.compile(r"^(?:issues|key-issues|priorities|legislative-priorities)$", re.I)
@@ -255,7 +257,7 @@ _NOT_A_TOPIC = re.compile(r"\b(?:news\s+alert|press\s+releases?|fact\s+sheet|faq
                           r"my\s+caucuses|travel\s+abroad|passports?|academy\s+nominations?|"
                           r"application\s+form|bills?\s+i\S*\s+(?:co-?)?sponsored|"
                           r"sponsored\s*/\s*co-?sponsored|\d{4}\s+in\s+review|annual\s+report)\b|"
-                          r"\boffices?$|"
+                          r"\boffices?$|\bupdates?$|current\s+legislation|^covid\b.*\bresources$|"
                           r"^(?:legislation|cpf(?:\s+requests?)?|grants?)$",
                           re.I)
 _TITLES = r"(?:president|vice\s+president|senator|sen|rep|representative|congressman|" \
@@ -404,8 +406,9 @@ class _Menus(html.parser.HTMLParser):
             self.stack[-1]["label"].append(data)
 
 
-_MENU_WORDS = re.compile(r"\b(?:toggle|sub-?menu|expand|collapse|show|open|menu|dropdown|"
-                         r"navigation)\b", re.I)
+# A menu's own controls, read with its label: Jeffries's "Open/Close Issues".
+_MENU_WORDS = re.compile(r"\b(?:toggle|sub-?menu|expand|collapse|show|open|close|menu|dropdown|"
+                         r"navigation)\b|/", re.I)
 
 
 def menus(markup):
@@ -418,6 +421,11 @@ def menus(markup):
         pass
     return [(" ".join(_MENU_WORDS.sub(" ", label).split()), href, children)
             for label, href, children in parser.found]
+
+
+def _menu_label(text):
+    """A menu link's words without the menu's own controls."""
+    return " ".join(_MENU_WORDS.sub(" ", text or "").split())
 
 
 class _Tree(html.parser.HTMLParser):
@@ -524,6 +532,7 @@ def menu_issues(markup, base, website, own, others):
     def is_index(href, label):
         last = urllib.parse.urlsplit(urllib.parse.urljoin(base, href or "")).path
         last = last.rstrip("/").rsplit("/", 1)[-1]
+        label = _menu_label(label)
         return any(p.match(label) for p in _INDEX_TEXT) or bool(href and _INDEX_PATH.match(last))
 
     for label, href, children in menus(markup) + nested_menus(markup, is_index):

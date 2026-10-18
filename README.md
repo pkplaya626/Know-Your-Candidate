@@ -1228,7 +1228,11 @@ campaign's own issues page), or for a member `congressional-directory`,
 issues their official website lists) - and the page shows it as a badge
 beside the value, with a tooltip saying exactly where it came from. A
 member's `platforms` whose site was read and lists no issues has the quality
-`not_listed`, shown as "Not listed on their official site". See
+`not_listed`, shown as "Not listed on their official site"; one whose site
+has an issues page this site could not read a list from in the page's own
+words (prose under tabs, a page drawn by script, a page recorded in
+`overrides.OFFICIAL_ISSUES_NOT_A_LIST`) has the quality `see_site`, shown as
+"On their official site's issues page" with that page linked. See
 [Filling the gaps](#filling-the-gaps).
 
 ## A member's biography and platform
@@ -1248,7 +1252,7 @@ tied to the member by id, never by a search on their name:
 |---|---|---|
 | Education, earlier careers | The [Official Congressional Directory](https://www.govinfo.gov/app/collection/cdir) (GovInfo, the latest edition for the sitting Congress): each member's "education:" and "professional history:" (with any "military service:"), in its words. An entry is joined to a member by the office web address printed under it, which must be the address `congress-legislators` lists for their bioguide id, and its printed name must carry their surname | The field, badged **Congressional Directory** |
 | Education or an occupation, where the Directory has none | The infobox of the Wikipedia article `congress-legislators` maps the bioguide id to, its title checked against the surname after redirects ("Politician" alone is not an earlier career, and is left out) | The field, badged **Wikipedia** |
-| The issues they work on | Their official website (the `.house.gov` / `.senate.gov` address `congress-legislators` lists): the page its home page links as "Issues" (or "Priorities"), read one level down - its links to its own issue pages, in their words - or the site's own "Issues" menu, or that page's list or headings. Nothing that names the member or anyone else ("Trump's One Big Beautiful Betrayal") | Bullets badged **Official site**, dated and linked to that page; "Not listed on their official site" where the site lists none |
+| The issues they work on | Their official website (the `.house.gov` / `.senate.gov` address `congress-legislators` lists): the page its home page links as "Issues" (or "Priorities"), read one level down - its links to its own issue pages, in their words - or the site's own "Issues" menu (a list or a panel of `<div>`s), or that page's list or headings, a heading every page carries (the offices' cities) excepted. A link is labelled by its first block of words (a card's title, not its blurb). Nothing that names the member or anyone else, a recent President or Vice President included ("Trump's One Big Beautiful Betrayal", "Repeal Obamacare"), and none of the site's furniture filed under Issues (Community Project Funding, Legislative Process, Bill Search, an office) | Bullets badged **Official site**, dated and linked to that page; "On their official site's issues page", linked, where the site has an issues page but no list could be read from it; "Not listed on their official site" where the site has none |
 | A contact form | The page the home page links as Contact (or Email me), fetched and seen to hold a form to write to the office - not a site search or a newsletter sign-up - or to lead to one; only where `congress-legislators` holds none | The *Contact form* chip, its title saying when it was checked |
 | Offices at home | `congress-legislators`' `legislators-district-offices`, by bioguide id: address, phone and hours | *District offices* (a senator's *State offices*), under a line saying a federal agency problem is casework for them |
 

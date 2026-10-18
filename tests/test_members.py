@@ -184,6 +184,15 @@ class TestTheIssuesTheirSiteLists(unittest.TestCase):
         site = "https://www.blackburn.senate.gov"
         self.assertEqual(members.menu_issues(markup, site + "/", site, "Marsha Blackburn", OTHERS),
                          ["Agriculture", "China", "Health Care", "Protecting Life"])
+        # A menu labelled "Policy Issues" (Ocasio-Cortez's), and one whose
+        # toggle reads "Open/Close Issues" (Jeffries's).
+        for label in ("Policy Issues", "Open/Close Issues"):
+            menu = (f'<ul><li><a href="#">{label}</a><ul>'
+                    '<li><a href="/legislation/climate">Climate</a></li>'
+                    '<li><a href="/legislation/housing">Housing</a></li>'
+                    '<li><a href="/legislation/healthcare">Healthcare</a></li></ul></li></ul>')
+            self.assertEqual(members.menu_issues(menu, site + "/", site, "Marsha Blackburn", OTHERS),
+                             ["Climate", "Housing", "Healthcare"], label)
         # A flat bar is not a menu of its first item.
         flat = ('<nav><a href="/issues">Issues</a><a href="/news">News</a>'
                 '<a href="/media">Media</a><a href="/videos">Videos</a></nav>')
