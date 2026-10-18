@@ -896,6 +896,39 @@ def _near_spellings(boxes):
     return alias
 
 
+def _hyphen_spellings(boxes):
+    """``{spelling: spelling kept}`` for one name written with a hyphen in
+    one table and a space in another.
+
+    CA-40's page lists "Esther Kim Varet" among the eliminated and its
+    results box says "[[Esther Kim-Varet]]", a redirect to her article,
+    "Esther Kim Varet". The spelling kept is the one more tables use; on a
+    tie, the one without the hyphen, since a hyphen the page writes only
+    sometimes is no evidence of how the person writes it. Names that share
+    a table are never merged.
+    """
+    tables, order, uses = [], [], collections.Counter()
+    for _title, rows in boxes:
+        names = {r["name"] for r in rows}
+        tables.append(names)
+        uses.update(names)
+        order.extend(r["name"] for r in rows if r["name"] not in order)
+    groups = {}
+    for name in order:
+        words = tuple(_sequence(name))
+        if len(words) >= 2:
+            groups.setdefault(words, []).append(name)
+    alias = {}
+    for names in groups.values():
+        if len(names) < 2:
+            continue
+        kept = sorted(names, key=lambda n: (-uses[n], n.count("-"), order.index(n)))[0]
+        for other in names:
+            if other != kept and not any(kept in t and other in t for t in tables):
+                alias[other] = kept
+    return alias
+
+
 def _canonical(boxes):
     """Rewrite every row's name to the first spelling seen for that person.
 
@@ -906,6 +939,7 @@ def _canonical(boxes):
     (:func:`_near_spellings`).
     """
     near = _near_spellings(boxes)
+    near.update({k: v for k, v in _hyphen_spellings(boxes).items() if k not in near})
     # Two names in one table are two people, however alike: a top-four
     # primary listed both Alaska Sullivans.
     tables = [{near.get(r["name"], r["name"]) for r in rows} for _title, rows in boxes]
@@ -1298,7 +1332,13 @@ def ballot_articles(boxes):
     for _, rows in _canonical(boxes):
         for row in rows:
             if row.get("article"):
-                articles.setdefault(row["name"], row["article"])
+                # A link titled as the name kept is the article, not a
+                # redirect another spelling links: "Esther Kim Varet" over
+                # the box's "Esther Kim-Varet".
+                if row["article"] == row["name"]:
+                    articles[row["name"]] = row["article"]
+                else:
+                    articles.setdefault(row["name"], row["article"])
     return articles
 
 
@@ -2580,9 +2620,34 @@ def _ballot_name(profile, race, cid):
         return (page, "election-page") if "-" in page and "-" not in mine else (None, None)
     ours, theirs = _tokens(mine), _tokens(page)
     if (len(ours) >= 2 and len(theirs) >= 2 and ours[-1] == theirs[-1]
-            and _shorter_given(theirs[0], ours[0])):
+            and _goes_by(theirs[:-1], ours[:-1], mine)):
         return page, "election-page"
     return None, page if _words(page) != _words(mine) else None
+
+
+_NICKNAME_MARKS = re.compile(r"\(([^()]+)\)|\"([^\"]+)\"|'([^']+)'")
+
+
+def _goes_by(page_given, filed_given, filed):
+    """Is the page's given name the one a filer goes by - the short form of
+    the filed first name ("Bob" for Robert), a later given name or its short
+    form ("Ashtyn Kennedy" for KENNEDY, KIMBERLY ASHTYN; "Jay Feely" for
+    FEELY, THOMAS JAMES), or the nickname the filing itself brackets
+    ("J.D. Ford" for "JAMES (J.D.) DAVID FORD")? Never the formal form of a
+    filed nickname: "Matthew Dunlap" for MATT."""
+    if not page_given or not filed_given or page_given[0] == filed_given[0]:
+        return False
+    for match in _NICKNAME_MARKS.finditer(filed or ""):
+        nick = _tokens(next(g for g in match.groups() if g) + " x")[:-1]
+        if nick and nick == page_given:
+            return True
+    first = page_given[0]
+    if len(first) < 2:
+        return False
+    if _shorter_given(first, filed_given[0]):
+        return True
+    return any(len(g) >= 2 and (first == g or _shorter_given(first, g))
+               for g in filed_given[1:])
 
 
 def apply_cache(profiles, cache, field=None):

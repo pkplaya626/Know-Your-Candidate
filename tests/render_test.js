@@ -4713,6 +4713,24 @@ async function testCertifiedBallots() {
     check("its challengers are counted on the ballot, never 0 over six certified",
       !/\b0 challengers on the ballot/.test(strip) && /[1-9]\d* challengers? on the ballot/.test(strip),
       strip);
+    // American Samoa holds no primary: its delegate, put on the ballot by
+    // the certified list, read "Renominated", credited to "the state's"
+    // list (rules 74 and 75).
+    const delegate = as.window.legislatorsData.find((p) => as.window.KYC.seated(p) &&
+      p.state === "AS" && p.raceStatusSource === "certified");
+    const card = delegate ? as.window.KYC.cards.card(delegate) : "";
+    const long = delegate ? as.window.KYC.raceStatusOf(delegate, "long") : null;
+    check("the delegate reads 'On the November ballot', never 'Renominated'",
+      !!delegate && /On the November ballot/.test(card) && !/Renominated/.test(card) &&
+        long && long.label === "On the November ballot",
+      card.replace(/\s+/g, " ").slice(0, 300));
+    check("and the list is never 'the state's'",
+      !!long && !/state's/.test(long.title) && /American Samoa Election Office/.test(long.title),
+      long && long.title);
+    // A name the list prints with no party is shown with none.
+    const note = as.window.KYC.cards.unprofiledNote(race) || "";
+    check("no party is added beside a name the list prints without one",
+      !/\((Democratic|Republican|Independent)\)/.test(note), note.slice(0, 300));
   });
 
   // A territory with no primary whose ballot has not been read counts its

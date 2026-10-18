@@ -999,16 +999,28 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     every Colorado minor-party and unaffiliated candidate were missing, and
     American Samoa, which holds no primary, read "0 challengers on the
     ballot" over six certified names. `kyc/certified.py` reads each list a
-    script can (Alaska, Florida, Colorado, American Samoa); a PDF list, or
-    a party's own list of its convention nominees, is transcribed in
-    `overrides.CERTIFIED_BALLOTS` with its document and the day it was
-    read. `results.certify_race` lays a list over the page: whom it prints
-    is on the ballot whatever the page said; where it is the whole ballot,
-    a filer it does not name is not on it, unless a name it prints that
-    matched no filing may be theirs. Names are matched as a results page's
-    are (rule 62). A certified write-in is not printed, and is not read as
-    on the ballot. Rule 64's limits hold: only the name, party, office and
-    what the list says of the person are kept, and a failed read keeps the
+    script can (Alaska, Florida, Colorado, American Samoa, Texas); a PDF
+    list is transcribed in `overrides.CERTIFIED_BALLOTS` with its document
+    and the day it was read. A party's list of its own nominees is not a
+    ballot: the state may refuse them. `results.certify_race` lays a list
+    over the page: whom it prints is on the ballot whatever the page said
+    ("On the November ballot", never "Renominated": a list is not a
+    primary); where it is the whole ballot, a filer it does not name is not
+    on it, unless a name it prints, or names unprinted (a write-in,
+    Florida's unopposed), that matched no filing may be theirs. Names are
+    matched as a results page's are (rule 62), with an apostrophe inside a
+    surname kept ("D'Arrigo") and a surname written with a space or a
+    hyphen one spelling ("Kim Varet", "Kim-Varet"), or one person's two
+    spellings on a page fit one filing twice and it reads "ambiguous". The
+    name shown is chosen by its source: an exact or evidenced match, a
+    list's printed name (never one in capitals), and a page's only for a
+    hyphen or a short form of the filed first name. When the matcher began
+    settling names that used to be claimed, the Florida Senate nominee lost
+    "Gillespie" to the FEC's misspelling, and a page's "Matthew" replaced a
+    campaign's "Matt". A certified write-in is not printed, and is not read
+    as on the ballot or as left off it. Rule 64's limits hold: only the
+    name, party, office and what the list says of the person are kept, and
+    a failed read keeps the
     last list. Short of a list, a minor-party or unaffiliated filer missing
     from a page's November table is "ballot status not known", never off
     the ballot: those tables are copied from the major parties' primaries.

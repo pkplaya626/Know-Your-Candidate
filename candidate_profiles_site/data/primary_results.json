@@ -1599,27 +1599,555 @@
    "url": "https://sos.nebraska.gov/sites/default/files/doc/elections/2026/Final_Statewide_General_Candidate_Filing_List_9.11.26.pdf"
   },
   "TX": {
-   "complete": false,
-   "curated": true,
+   "complete": true,
    "fetched": "2026-10-17",
    "races": {
+    "H-TX-01-2026": [
+     {
+      "kind": "ballot",
+      "name": "NATHANIEL MORAN",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "YOLANDA R. PRINCE",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-02-2026": [
+     {
+      "kind": "ballot",
+      "name": "SHAUN FINNIE",
+      "party": "Democratic"
+     },
+     {
+      "kind": "ballot",
+      "name": "STEVE TOTH",
+      "party": "Republican"
+     }
+    ],
+    "H-TX-03-2026": [
+     {
+      "kind": "ballot",
+      "name": "KEITH SELF",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "EVAN HUNT",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-04-2026": [
+     {
+      "kind": "ballot",
+      "name": "PAT FALLON",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "JASON PEARCE",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-05-2026": [
+     {
+      "kind": "ballot",
+      "name": "CHELSEY HOCKETT",
+      "party": "Democratic"
+     },
+     {
+      "kind": "ballot",
+      "name": "LANCE GOODEN",
+      "party": "Republican"
+     }
+    ],
+    "H-TX-06-2026": [
+     {
+      "kind": "ballot",
+      "name": "JAKE ELLZEY",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "DANNY MINTON",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-07-2026": [
+     {
+      "kind": "ballot",
+      "name": "LIZZIE PANNILL FLETCHER",
+      "party": "Democratic"
+     },
+     {
+      "kind": "ballot",
+      "name": "ALEXANDER HALE",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "ESPOIR NGABO",
+      "party": "Green"
+     }
+    ],
+    "H-TX-08-2026": [
+     {
+      "kind": "ballot",
+      "name": "LAURA JONES",
+      "party": "Democratic"
+     },
+     {
+      "kind": "ballot",
+      "name": "JESSICA HART STEINMANN",
+      "party": "Republican"
+     }
+    ],
+    "H-TX-09-2026": [
+     {
+      "kind": "ballot",
+      "name": "ALEX MEALER",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "LETICIA GUTIERREZ",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-10-2026": [
+     {
+      "kind": "ballot",
+      "name": "CHRIS GOBER",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "CAITLIN ROURK",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-11-2026": [
+     {
+      "kind": "ballot",
+      "name": "AUGUST PFLUGER",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "CLAIRE REYNOLDS",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-12-2026": [
+     {
+      "kind": "ballot",
+      "name": "ANGELA \"HELI\" RODRIGUEZ PRILLIMAN",
+      "party": "Democratic"
+     },
+     {
+      "kind": "ballot",
+      "name": "CRAIG GOLDMAN",
+      "party": "Republican"
+     }
+    ],
+    "H-TX-13-2026": [
+     {
+      "kind": "ballot",
+      "name": "RONNY JACKSON",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "MARK NAIR",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-14-2026": [
+     {
+      "kind": "ballot",
+      "name": "THURMAN BILL BARTIE",
+      "party": "Democratic"
+     },
+     {
+      "kind": "ballot",
+      "name": "RANDY WEBER",
+      "party": "Republican"
+     }
+    ],
+    "H-TX-15-2026": [
+     {
+      "kind": "ballot",
+      "name": "MONICA DE LA CRUZ",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "BOBBY PULIDO",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-16-2026": [
+     {
+      "kind": "ballot",
+      "name": "ADAM BAUMAN",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "VERONICA ESCOBAR",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-17-2026": [
+     {
+      "kind": "ballot",
+      "name": "PETE SESSIONS",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "CASEY SHEPARD",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-18-2026": [
+     {
+      "kind": "ballot",
+      "name": "RONALD DWAYNE WHITFIELD",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "CHRISTIAN DASHAUN MENEFEE",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-19-2026": [
+     {
+      "kind": "ballot",
+      "name": "TOM SELL",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "KYLE RABLE",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-20-2026": [
+     {
+      "kind": "ballot",
+      "name": "JOAQUIN CASTRO",
+      "party": "Democratic"
+     },
+     {
+      "kind": "ballot",
+      "name": "EDGARDO RAFAEL BAEZ",
+      "party": "Republican"
+     }
+    ],
+    "H-TX-21-2026": [
+     {
+      "kind": "ballot",
+      "name": "KRISTIN HOOK",
+      "party": "Democratic"
+     },
+     {
+      "kind": "ballot",
+      "name": "MARK TEIXEIRA",
+      "party": "Republican"
+     }
+    ],
+    "H-TX-22-2026": [
+     {
+      "kind": "ballot",
+      "name": "TREVER NEHLS",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "MARQUETTE GREENE-SCOTT",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-23-2026": [
+     {
+      "kind": "ballot",
+      "name": "KATY PADILLA STOUT",
+      "party": "Democratic"
+     },
+     {
+      "kind": "ballot",
+      "name": "BEN MENDOZA",
+      "party": "Independent"
+     },
+     {
+      "kind": "ballot",
+      "name": "BRANDON HERRERA",
+      "party": "Republican"
+     }
+    ],
+    "H-TX-24-2026": [
+     {
+      "kind": "ballot",
+      "name": "KEVIN BURGE",
+      "party": "Democratic"
+     },
+     {
+      "kind": "ballot",
+      "name": "BETH VAN DUYNE",
+      "party": "Republican"
+     }
+    ],
+    "H-TX-25-2026": [
+     {
+      "kind": "ballot",
+      "name": "ROGER WILLIAMS",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "DIONE SIMS",
+      "party": "Democratic"
+     }
+    ],
     "H-TX-26-2026": [
      {
       "kind": "ballot",
-      "name": "Phil Gray",
+      "name": "BRANDON GILL",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "STEVEN SHOOK",
+      "party": "Democratic"
+     },
+     {
+      "kind": "ballot",
+      "name": "PHIL GRAY",
       "party": "Libertarian"
+     }
+    ],
+    "H-TX-27-2026": [
+     {
+      "kind": "ballot",
+      "name": "MICHAEL CLOUD",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "TANYA LLOYD",
+      "party": "Democratic"
+     },
+     {
+      "kind": "write-in",
+      "name": "WAYNE RAASCH",
+      "party": ""
+     }
+    ],
+    "H-TX-28-2026": [
+     {
+      "kind": "ballot",
+      "name": "TANO E. TIJERINA",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "MARLÓN DURÁN",
+      "party": "Green"
+     },
+     {
+      "kind": "ballot",
+      "name": "HENRY CUELLAR",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-29-2026": [
+     {
+      "kind": "ballot",
+      "name": "SYLVIA GARCIA",
+      "party": "Democratic"
+     },
+     {
+      "kind": "ballot",
+      "name": "MARTHA FIERRO",
+      "party": "Republican"
+     }
+    ],
+    "H-TX-30-2026": [
+     {
+      "kind": "ballot",
+      "name": "EVERETT JACKSON",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "FREDERICK D. HAYNES III",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-31-2026": [
+     {
+      "kind": "ballot",
+      "name": "JOHN CARTER",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "JUSTIN EARLY",
+      "party": "Democratic"
+     },
+     {
+      "kind": "ballot",
+      "name": "GREG STOKER",
+      "party": "Green"
+     }
+    ],
+    "H-TX-32-2026": [
+     {
+      "kind": "ballot",
+      "name": "JACE YARBROUGH",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "DAN BARRIOS",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-33-2026": [
+     {
+      "kind": "write-in",
+      "name": "MICHELLE CRAIG",
+      "party": ""
+     },
+     {
+      "kind": "ballot",
+      "name": "COLIN ALLRED",
+      "party": "Democratic"
+     },
+     {
+      "kind": "ballot",
+      "name": "PATRICK DAVID GILLESPIE",
+      "party": "Republican"
      }
     ],
     "H-TX-34-2026": [
      {
       "kind": "ballot",
-      "name": "Chris Royal",
+      "name": "EDDIE ESPINOZA",
+      "party": "Green"
+     },
+     {
+      "kind": "ballot",
+      "name": "VICENTE GONZALEZ",
+      "party": "Democratic"
+     },
+     {
+      "kind": "ballot",
+      "name": "CHRIS ROYAL",
       "party": "Libertarian"
+     },
+     {
+      "kind": "ballot",
+      "name": "ERIC FLORES",
+      "party": "Republican"
+     }
+    ],
+    "H-TX-35-2026": [
+     {
+      "kind": "ballot",
+      "name": "CARLOS DE LA CRUZ",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "JOHNNY C. GARCIA",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-36-2026": [
+     {
+      "kind": "ballot",
+      "name": "BRIAN BABIN",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "RHONDA HART",
+      "party": "Democratic"
+     }
+    ],
+    "H-TX-37-2026": [
+     {
+      "kind": "ballot",
+      "name": "GREG CASAR",
+      "party": "Democratic"
+     },
+     {
+      "kind": "ballot",
+      "name": "LAUREN B. PEÑA",
+      "party": "Republican"
+     }
+    ],
+    "H-TX-38-2026": [
+     {
+      "kind": "ballot",
+      "name": "MELISSA MCDONOUGH",
+      "party": "Democratic"
+     },
+     {
+      "kind": "ballot",
+      "name": "JON BONCK",
+      "party": "Republican"
+     },
+     {
+      "kind": "ballot",
+      "name": "ALEX MCMENEMY",
+      "party": "Green"
+     }
+    ],
+    "S-TX-2026": [
+     {
+      "kind": "write-in",
+      "name": "AVERY AYERS",
+      "party": ""
+     },
+     {
+      "kind": "write-in",
+      "name": "BRADFORD \"BRAD\" HALL",
+      "party": ""
+     },
+     {
+      "kind": "ballot",
+      "name": "TED BROWN",
+      "party": "Libertarian"
+     },
+     {
+      "kind": "write-in",
+      "name": "JADE SIMMONS",
+      "party": ""
+     },
+     {
+      "kind": "write-in",
+      "name": "ZUL MOHAMED",
+      "party": ""
+     },
+     {
+      "kind": "ballot",
+      "name": "JAMES TALARICO",
+      "party": "Democratic"
+     },
+     {
+      "kind": "ballot",
+      "name": "KEN PAXTON",
+      "party": "Republican"
      }
     ]
    },
-   "source": "Libertarian Party of Texas, 2026 candidates (its convention nominees)",
-   "url": "https://www.lptexas.org/candidates"
+   "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+   "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
   }
  },
  "cycle": 2026,
@@ -2026,6 +2554,9 @@
     "H2AK00143": "nominee",
     "H4AK00164": "nominee"
    },
+   "certifiedUnprinted": {
+    "H2AK01182": "write-in"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -2033,10 +2564,16 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H2AK00143": "James C. \"Jim\" McDermott",
+    "H2AK01083": "Nick Begich",
+    "H4AK00164": "Eric Hafner",
+    "H6AK01092": "Bill Hill"
+   },
    "listParty": {
     "H2AK00143": "Libertarian",
     "H2AK01083": "Republican",
-    "H4AK00164": "Democrat",
+    "H4AK00164": "Democratic",
     "H6AK01092": "Nonpartisan"
    },
    "names": {
@@ -2334,7 +2871,7 @@
    },
    "ambiguous": [],
    "article": {
-    "H4AL06098": "Gary Palmer (politician)"
+    "H4AL06098": "Gary Palmer"
    },
    "decided": {
     "general": true,
@@ -2555,12 +3092,14 @@
    "label": {},
    "names": {
     "H4AR04048": "Bruce Westerman",
-    "H6AR04084": "James Russell"
+    "H6AR04084": "James Russell",
+    "H6AR04100": "Steven O'Donnell"
    },
    "page": "2026 United States House of Representatives elections in Arkansas",
    "party": {
     "H4AR04048": "republican",
-    "H6AR04084": "democratic"
+    "H6AR04084": "democratic",
+    "H6AR04100": "democratic"
    },
    "site": {
     "H4AR04048": "https://www.brucewesterman.com/",
@@ -2568,14 +3107,11 @@
    },
    "status": {
     "H4AR04048": "nominee",
-    "H6AR04084": "nominee"
+    "H6AR04084": "nominee",
+    "H6AR04100": "eliminated"
    },
-   "unmatched": {
-    "Steven O'Donnell": "eliminated"
-   },
-   "unmatchedParty": {
-    "Steven O'Donnell": "Democratic"
-   },
+   "unmatched": {},
+   "unmatchedParty": {},
    "unsure": []
   },
   "H-AS-00-2026": {
@@ -2601,6 +3137,20 @@
     "parties": []
    },
    "label": {},
+   "listNames": {
+    "H4AS00036": "Aumua Amata",
+    "H4AS00093": "Meleagi Suitonu Chapman",
+    "H6AS00064": "Tuifagaloa Dr. Afu Lefaoseu",
+    "H6AS01021": "Sandra King Young",
+    "H8AS00052": "Fualaau Rosie Tago Lancaster"
+   },
+   "listParty": {
+    "H4AS00036": "",
+    "H4AS00093": "",
+    "H6AS00064": "",
+    "H6AS01021": "",
+    "H8AS00052": ""
+   },
    "names": {
     "H4AS00036": "Aumua Amata",
     "H4AS00093": "Meleagi Suitonu Chapman",
@@ -4766,12 +5316,10 @@
   },
   "H-CA-40-2026": {
    "about": {},
-   "ambiguous": [
-    "Esther Kim Varet",
-    "Esther Kim-Varet"
-   ],
+   "ambiguous": [],
    "article": {
     "H2CA37023": "Ken Calvert",
+    "H6CA40309": "Esther Kim Varet",
     "H8CA39240": "Young Kim"
    },
    "decided": {
@@ -4784,6 +5332,7 @@
    "names": {
     "H0CA39049": "Francis Xavier Hoffman",
     "H2CA37023": "Ken Calvert",
+    "H6CA40309": "Esther Kim Varet",
     "H6CA40317": "Joe Kerr",
     "H6CA40325": "Christina Gagnier",
     "H6CA40333": "Paula Swift",
@@ -4799,6 +5348,7 @@
    "party": {
     "H0CA39049": "democratic",
     "H2CA37023": "republican",
+    "H6CA40309": "democratic",
     "H6CA40317": "democratic",
     "H6CA40341": "independent",
     "H6CA40382": "democratic",
@@ -4809,6 +5359,7 @@
    "status": {
     "H0CA39049": "eliminated",
     "H2CA37023": "nominee",
+    "H6CA40309": "eliminated",
     "H6CA40317": "eliminated",
     "H6CA40325": "withdrawn",
     "H6CA40333": "withdrawn",
@@ -4820,16 +5371,9 @@
     "H6CA41323": "eliminated",
     "H8CA39240": "nominee"
    },
-   "unmatched": {
-    "Esther Kim Varet": "eliminated",
-    "Esther Kim-Varet": "eliminated"
-   },
-   "unmatchedParty": {
-    "Esther Kim-Varet": "Democratic"
-   },
-   "unsure": [
-    "H6CA40309"
-   ]
+   "unmatched": {},
+   "unmatchedParty": {},
+   "unsure": []
   },
   "H-CA-41-2026": {
    "about": {},
@@ -5417,6 +5961,9 @@
    "certifiedIds": {
     "H6CO01356": "nominee"
    },
+   "certifiedUnprinted": {
+    "H4CO01187": "write-in"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5425,9 +5972,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6CO01273": "Melat Kiros",
+    "H6CO01331": "Christy Peterson",
+    "H6CO01356": "Shimon Blau"
+   },
    "listParty": {
-    "H6CO01273": "Democratic Party",
-    "H6CO01331": "Republican Party",
+    "H6CO01273": "Democratic",
+    "H6CO01331": "Republican",
     "H6CO01356": "Unaffiliated"
    },
    "names": {
@@ -5468,7 +6020,7 @@
     "Critter Milton": "nominee"
    },
    "unmatchedParty": {
-    "Chad Humphrey": "Libertarian Party",
+    "Chad Humphrey": "Libertarian",
     "Critter Milton": "Unity Party"
    },
    "unsure": []
@@ -5500,10 +6052,15 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H2CO03153": "Gaylon Kent",
+    "H6CO02206": "Kelley Anne Dennison",
+    "H8CO02160": "Joe Neguse"
+   },
    "listParty": {
-    "H2CO03153": "Libertarian Party",
-    "H6CO02206": "Republican Party",
-    "H8CO02160": "Democratic Party"
+    "H2CO03153": "Libertarian",
+    "H6CO02206": "Republican",
+    "H8CO02160": "Democratic"
    },
    "names": {
     "H2CO03153": "Gaylon Kent",
@@ -5555,9 +6112,13 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H4CO03357": "Jeff Hurd",
+    "H6CO03253": "Dwayne L. Romero"
+   },
    "listParty": {
-    "H4CO03357": "Republican Party",
-    "H6CO03253": "Democratic Party"
+    "H4CO03357": "Republican",
+    "H6CO03253": "Democratic"
    },
    "names": {
     "H4CO03357": "Jeff Hurd",
@@ -5591,7 +6152,7 @@
    },
    "unmatchedParty": {
     "Clifton Brown": "Unaffiliated",
-    "Cory Robertson": "Libertarian Party"
+    "Cory Robertson": "Libertarian"
    },
    "unsure": []
   },
@@ -5615,6 +6176,9 @@
    "certifiedIds": {
     "H4CO04215": "nominee"
    },
+   "certifiedUnprinted": {
+    "H6CO04277": "write-in"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5623,10 +6187,15 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H0CO03165": "Lauren Boebert",
+    "H4CO04215": "Douglas Mangeris",
+    "H6CO04202": "Eileen Laubacher"
+   },
    "listParty": {
-    "H0CO03165": "Republican Party",
-    "H4CO04215": "Libertarian Party",
-    "H6CO04202": "Democratic Party"
+    "H0CO03165": "Republican",
+    "H4CO04215": "Libertarian",
+    "H6CO04202": "Democratic"
    },
    "names": {
     "H0CO03165": "Lauren Boebert",
@@ -5677,6 +6246,9 @@
     "H4CO03340": "nominee",
     "H4CO05071": "nominee"
    },
+   "certifiedUnprinted": {
+    "H6CO05365": "write-in"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -5687,11 +6259,17 @@
    "label": {
     "H4CO05071": "American Constitution Party"
    },
+   "listNames": {
+    "H4CO03340": "Mark \"Marky Jr\" Elworth",
+    "H4CO05071": "Christopher Mitchell",
+    "H6CO05142": "Jeff Crank",
+    "H6CO05324": "Jessica Killin"
+   },
    "listParty": {
-    "H4CO03340": "Libertarian Party",
+    "H4CO03340": "Libertarian",
     "H4CO05071": "American Constitution Party",
-    "H6CO05142": "Republican Party",
-    "H6CO05324": "Democratic Party"
+    "H6CO05142": "Republican",
+    "H6CO05324": "Democratic"
    },
    "names": {
     "H4CO03340": "Mark \"Marky Jr\" Elworth",
@@ -5754,11 +6332,17 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6CO06116": "Samir Ezzeldin Witta",
+    "H6CO06165": "Jason Clark",
+    "H6CO06173": "Patty McMahon",
+    "H8CO06229": "Jason Crow"
+   },
    "listParty": {
     "H6CO06116": "Unaffiliated",
-    "H6CO06165": "Republican Party",
-    "H6CO06173": "Libertarian Party",
-    "H8CO06229": "Democratic Party"
+    "H6CO06165": "Republican",
+    "H6CO06173": "Libertarian",
+    "H8CO06229": "Democratic"
    },
    "names": {
     "H6CO06116": "Samir Ezzeldin Witta",
@@ -5820,10 +6404,15 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6CO07122": "Tim Bennett",
+    "H6CO07130": "Joe Krzeczkowski",
+    "H8CO07045": "Brittany Pettersen"
+   },
    "listParty": {
-    "H6CO07122": "Republican Party",
+    "H6CO07122": "Republican",
     "H6CO07130": "Unaffiliated",
-    "H8CO07045": "Democratic Party"
+    "H8CO07045": "Democratic"
    },
    "names": {
     "H6CO01240": "Amanda Capobianco",
@@ -5850,7 +6439,7 @@
     "Susan Hall": "nominee"
    },
    "unmatchedParty": {
-    "Dan \"Kilo\" Sallis": "Libertarian Party",
+    "Dan \"Kilo\" Sallis": "Libertarian",
     "Lawrence Kyle Clark": "American Constitution Party",
     "Susan Hall": "Unity Party"
    },
@@ -5885,9 +6474,13 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H4CO08034": "Gabe Evans",
+    "H6CO08013": "Manny Rutinel"
+   },
    "listParty": {
-    "H4CO08034": "Republican Party",
-    "H6CO08013": "Democratic Party"
+    "H4CO08034": "Republican",
+    "H6CO08013": "Democratic"
    },
    "names": {
     "H2CO08020": "Yadira Caraveo",
@@ -5930,7 +6523,7 @@
     "Dave Wood": "nominee"
    },
    "unmatchedParty": {
-    "Dave Wood": "Libertarian Party"
+    "Dave Wood": "Libertarian"
    },
    "unsure": []
   },
@@ -6294,6 +6887,11 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H4FL01197": "Gay Valimont",
+    "H6FL01390": "Jimmy Patronis",
+    "H6FL01549": "Tyler L. Davis"
+   },
    "listParty": {
     "H4FL01197": "Democratic",
     "H6FL01390": "Republican",
@@ -6355,6 +6953,10 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6FL02299": "Amanda Marie Green",
+    "H6FL02331": "Austin Rogers"
+   },
    "listParty": {
     "H6FL02299": "Democratic",
     "H6FL02331": "Republican"
@@ -6430,6 +7032,11 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H0FL03175": "Kat Cammack",
+    "H6FL03099": "Seth Harp",
+    "H6FL03149": "Mike Klein"
+   },
    "listParty": {
     "H0FL03175": "Republican",
     "H6FL03099": "Democratic",
@@ -6498,6 +7105,12 @@
    "label": {
     "H6FL04246": "Florida Forward Party"
    },
+   "listNames": {
+    "H2FL04211": "Aaron Bean",
+    "H4FL04068": "Todd Schaefer",
+    "H6FL04246": "Mike Sell",
+    "H6FL05193": "LaShonda \"L.J.\" Holloway"
+   },
    "listParty": {
     "H2FL04211": "Republican",
     "H4FL04068": "No Party Affiliation",
@@ -6553,6 +7166,9 @@
    },
    "certifiedHeld": [],
    "certifiedIds": {},
+   "certifiedUnprinted": {
+    "H6FL05292": "write-in"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -6561,6 +7177,10 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6FL04105": "John H. Rutherford",
+    "H6FL05250": "Rachel Grage"
+   },
    "listParty": {
     "H6FL04105": "Republican",
     "H6FL05250": "Democratic"
@@ -6620,6 +7240,10 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6FL06258": "Randy Fine",
+    "H6FL06340": "Eric Yonce"
+   },
    "listParty": {
     "H6FL06258": "Republican",
     "H6FL06340": "Democratic"
@@ -6669,7 +7293,7 @@
     "Purvi Bangdiwala": "withdrawn"
    },
    "unmatchedParty": {
-    "Andrew Parrott": "Libertarian Party of Florida"
+    "Andrew Parrott": "Libertarian"
    },
    "unsure": []
   },
@@ -6699,10 +7323,15 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6FL07215": "Bale Dalton",
+    "H6FL07231": "Ryan Elijah",
+    "H6FL07249": "Christopher Dennison"
+   },
    "listParty": {
     "H6FL07215": "Democratic",
     "H6FL07231": "Republican",
-    "H6FL07249": "Libertarian Party of Florida"
+    "H6FL07249": "Libertarian"
    },
    "names": {
     "H2FL07156": "Cory Mills",
@@ -6764,6 +7393,10 @@
     "parties": []
    },
    "label": {},
+   "listNames": {
+    "H4FL08168": "Mike Haridopolos",
+    "H6FL06399": "Jennifer Jenkins"
+   },
    "listParty": {
     "H4FL08168": "Republican",
     "H6FL06399": "Democratic"
@@ -6815,6 +7448,10 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6FL09179": "Darren Soto",
+    "H6FL09294": "Dan Green"
+   },
    "listParty": {
     "H6FL09179": "Democratic",
     "H6FL09294": "Republican"
@@ -6873,6 +7510,9 @@
    },
    "certifiedHeld": [],
    "certifiedIds": {},
+   "certifiedUnprinted": {
+    "H2FL10259": "unopposed"
+   },
    "decided": {
     "general": true,
     "parties": []
@@ -6928,8 +7568,13 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H4FL11089": "Ralph Groves",
+    "H6FL11332": "Joe Strada",
+    "H6FL11357": "James Pericola"
+   },
    "listParty": {
-    "H4FL11089": "Libertarian Party of Florida",
+    "H4FL11089": "Libertarian",
     "H6FL11332": "Republican",
     "H6FL11357": "Democratic"
    },
@@ -7004,6 +7649,11 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6FL09070": "Gus Michael Bilirakis",
+    "H6FL12231": "Branden Scrivener",
+    "H6FL15200": "Kimberly Overman"
+   },
    "listParty": {
     "H6FL09070": "Republican",
     "H6FL12231": "No Party Affiliation",
@@ -7052,7 +7702,9 @@
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
    "certifiedHeld": [],
-   "certifiedIds": {},
+   "certifiedIds": {
+    "H4FL13234": "nominee"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7060,13 +7712,20 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H0FL13158": "Anna Paulina Luna",
+    "H4FL13234": "Tony D'Arrigo",
+    "H6FL13312": "Leela Gray"
+   },
    "listParty": {
     "H0FL13158": "Republican",
+    "H4FL13234": "No Party Affiliation",
     "H6FL13312": "Democratic"
    },
    "names": {
     "H0FL13158": "Anna Paulina Luna",
     "H4FL13176": "John Liccione",
+    "H4FL13234": "Tony D'Arrigo",
     "H6FL13221": "Jeff Moore",
     "H6FL13239": "Earle Ford",
     "H6FL13247": "Reggie Paros",
@@ -7080,6 +7739,7 @@
    "party": {
     "H0FL13158": "republican",
     "H4FL13176": "democratic",
+    "H4FL13234": "independent",
     "H6FL13254": "democratic",
     "H6FL13312": "democratic"
    },
@@ -7087,6 +7747,7 @@
    "status": {
     "H0FL13158": "nominee",
     "H4FL13176": "eliminated",
+    "H4FL13234": "nominee",
     "H6FL13221": "withdrawn",
     "H6FL13239": "withdrawn",
     "H6FL13247": "withdrawn",
@@ -7096,12 +7757,8 @@
     "H6FL14138": "withdrawn",
     "H8FL13151": "withdrawn"
    },
-   "unmatched": {
-    "Tony D'Arrigo": "nominee"
-   },
-   "unmatchedParty": {
-    "Tony D'Arrigo": "No Party Affiliation"
-   },
+   "unmatched": {},
+   "unmatchedParty": {},
    "unsure": []
   },
   "H-FL-14-2026": {
@@ -7123,6 +7780,9 @@
    },
    "certifiedHeld": [],
    "certifiedIds": {},
+   "certifiedUnprinted": {
+    "H4FL14166": "write-in"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7130,10 +7790,15 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6FL11126": "Kathy Castor",
+    "H6FL14237": "Mike Beltran",
+    "H6FL14245": "Brian Lambert"
+   },
    "listParty": {
     "H6FL11126": "Democratic",
     "H6FL14237": "Republican",
-    "H6FL14245": "Libertarian Party of Florida"
+    "H6FL14245": "Libertarian"
    },
    "names": {
     "H2FL11125": "Gavriel Soriano",
@@ -7207,6 +7872,10 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H2FL15241": "Laurel Lee",
+    "H6FL15168": "Robert People"
+   },
    "listParty": {
     "H2FL15241": "Republican",
     "H6FL15168": "Democratic"
@@ -7262,6 +7931,11 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6FL06365": "Mark Davis",
+    "H6FL16141": "Sydney Gruters",
+    "H6FL16158": "Kelly Kirschner"
+   },
    "listParty": {
     "H6FL06365": "No Party Affiliation",
     "H6FL16141": "Republican",
@@ -7335,6 +8009,11 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H4FL17060": "Matthew Montavon",
+    "H6FL17081": "Michael J. Quirk",
+    "H8FL17053": "Greg Steube"
+   },
    "listParty": {
     "H4FL17060": "Democratic",
     "H6FL17081": "No Party Affiliation",
@@ -7388,6 +8067,11 @@
     "parties": []
    },
    "label": {},
+   "listNames": {
+    "H0FL15104": "Scott Franklin",
+    "H6FL18204": "Deva Simmons",
+    "H6FL18212": "Curtis Gibson"
+   },
    "listParty": {
     "H0FL15104": "Republican",
     "H6FL18204": "No Party Affiliation",
@@ -7443,6 +8127,11 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6FL19137": "Jim Schwartzel",
+    "H6FL19277": "Victor Arias",
+    "H6FL19319": "Seth Haskin"
+   },
    "listParty": {
     "H6FL19137": "Republican",
     "H6FL19277": "Democratic",
@@ -7542,6 +8231,11 @@
    "label": {
     "H6FL20119": "Independent Party of Florida"
    },
+   "listNames": {
+    "H4FL20023": "Debbie Wasserman Schultz",
+    "H6FL20119": "Kedner Maxime",
+    "H6FL20143": "Brent Andersen"
+   },
    "listParty": {
     "H4FL20023": "Democratic",
     "H6FL20119": "Independent Party of Florida",
@@ -7625,6 +8319,11 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6FL18097": "Brian Mast",
+    "H6FL21075": "James T. Martin",
+    "H6FL21109": "Alexander Cooke"
+   },
    "listParty": {
     "H6FL18097": "Republican",
     "H6FL21075": "Democratic",
@@ -7683,6 +8382,10 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6FL21059": "Pia Dandiya",
+    "H6FL22248": "Casey Askar"
+   },
    "listParty": {
     "H6FL21059": "Democratic",
     "H6FL22248": "Republican"
@@ -7760,6 +8463,10 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H2FL14053": "Lois Frankel",
+    "H2FL21132": "Deborah Adeimy"
+   },
    "listParty": {
     "H2FL14053": "Democratic",
     "H2FL21132": "Republican"
@@ -7822,6 +8529,9 @@
    "certifiedIds": {
     "H6FL24061": "unlisted"
    },
+   "certifiedUnprinted": {
+    "H2FL24052": "write-in"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7829,6 +8539,10 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6FL14203": "Te Mayonna Brown",
+    "H6FL24095": "Oliver G. Gilbert III"
+   },
    "listParty": {
     "H6FL14203": "Republican",
     "H6FL24095": "Democratic"
@@ -7896,6 +8610,9 @@
    },
    "certifiedHeld": [],
    "certifiedIds": {},
+   "certifiedUnprinted": {
+    "H6FL23105": "write-in"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -7904,10 +8621,15 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H2FL22171": "Jared Moskowitz",
+    "H6FL23188": "Scott Singer",
+    "H6FL25068": "Peter Jassenoff"
+   },
    "listParty": {
     "H2FL22171": "Democratic",
     "H6FL23188": "Republican",
-    "H6FL25068": "Libertarian Party of Florida"
+    "H6FL25068": "Libertarian"
    },
    "names": {
     "H2FL20043": "Joseph Kaufman",
@@ -7969,6 +8691,11 @@
     "parties": []
    },
    "label": {},
+   "listNames": {
+    "H2FL25018": "Mario Diaz-Balart",
+    "H6FL26058": "Nicole Locklin",
+    "H6FL26074": "Deborah Ann Meidinger Hosey"
+   },
    "listParty": {
     "H2FL25018": "Republican",
     "H6FL26058": "Democratic",
@@ -8023,6 +8750,10 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6FL27098": "Eliott Rodriguez",
+    "H8FL27185": "Maria Elvira Salazar"
+   },
    "listParty": {
     "H6FL27098": "Democratic",
     "H8FL27185": "Republican"
@@ -8080,6 +8811,11 @@
     "parties": []
    },
    "label": {},
+   "listNames": {
+    "H0FL26036": "Carlos A. Gimenez",
+    "H4FL28042": "Phil \"Felipe\" Ehr",
+    "H6FL28021": "Eddy Rojas"
+   },
    "listParty": {
     "H0FL26036": "Republican",
     "H4FL28042": "Democratic",
@@ -8966,6 +9702,11 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H2IA02111": "Christina Bohannan",
+    "H6IA01213": "Michael Bridgford",
+    "H8IA02043": "Mariannette Miller-Meeks"
+   },
    "listParty": {
     "H2IA02111": "Democratic",
     "H6IA01213": "No Party",
@@ -9034,6 +9775,11 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6IA02211": "Lindsay James",
+    "H6IA02237": "Joe Mitchell",
+    "H6IA02260": "Dave Bushaw"
+   },
    "listParty": {
     "H6IA02211": "Democratic",
     "H6IA02237": "Republican",
@@ -9108,6 +9854,10 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H2IA03119": "Zach Nunn",
+    "H6IA03268": "Sarah Trone Garriott"
+   },
    "listParty": {
     "H2IA03119": "Republican",
     "H6IA03268": "Democratic"
@@ -9158,6 +9908,10 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6IA04167": "Chris McGowan",
+    "H6IA04217": "Dave Dawson"
+   },
    "listParty": {
     "H6IA04167": "Republican",
     "H6IA04217": "Democratic"
@@ -14870,6 +15624,10 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H2NE01118": "Mike Flood",
+    "H6NE01143": "Chris Backemeyer"
+   },
    "listParty": {
     "H2NE01118": "Republican",
     "H6NE01143": "Democratic"
@@ -14931,6 +15689,11 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6NE02174": "Denise Powell",
+    "H6NE02208": "Brinker Harding",
+    "H6NE02273": "Eric Michael Foreman"
+   },
    "listParty": {
     "H6NE02174": "Democratic",
     "H6NE02208": "Republican",
@@ -15010,6 +15773,13 @@
    "label": {
     "H0NE03217": "Legal Marijuana NOW",
     "H6NE03206": "Nebraska Working People"
+   },
+   "listNames": {
+    "H0NE03217": "David J. Else",
+    "H6NE03115": "Adrian Smith",
+    "H6NE03180": "Becky Kelly Stille",
+    "H6NE03198": "Mark Cohen",
+    "H6NE03206": "Macey Budke"
    },
    "listParty": {
     "H0NE03217": "Legal Marijuana NOW",
@@ -15495,7 +16265,7 @@
     "H6NJ07243": "Beth Adubato",
     "H6NJ07250": "Tina Shah",
     "H6NJ07268": "Vale Mendoza",
-    "H6NJ07276": "Megan O'Rourke",
+    "H6NJ07276": "Megan O’Rourke",
     "H6NJ07284": "Sara Sooy",
     "H6NJ07300": "Randall Terry"
    },
@@ -15505,7 +16275,8 @@
     "H2NJ08265": "democratic",
     "H6NJ07201": "democratic",
     "H6NJ07235": "democratic",
-    "H6NJ07250": "democratic"
+    "H6NJ07250": "democratic",
+    "H6NJ07276": "democratic"
    },
    "site": {},
    "status": {
@@ -15517,16 +16288,14 @@
     "H6NJ07243": "withdrawn",
     "H6NJ07250": "eliminated",
     "H6NJ07268": "withdrawn",
-    "H6NJ07276": "withdrawn",
+    "H6NJ07276": "eliminated",
     "H6NJ07284": "withdrawn",
     "H6NJ07300": "withdrawn"
    },
    "unmatched": {
-    "Megan O’Rourke": "eliminated",
     "Seamus Patrick O'Toole": "nominee"
    },
    "unmatchedParty": {
-    "Megan O’Rourke": "Democratic",
     "Seamus Patrick O'Toole": "Stop Israel's Genocide"
    },
    "unsure": []
@@ -15893,7 +16662,7 @@
    "ambiguous": [],
    "article": {
     "H0NM03102": "Teresa Leger Fernández",
-    "H6NM03083": "Martin R. Zamora"
+    "H6NM03083": "Martin Zamora"
    },
    "decided": {
     "general": true,
@@ -20226,6 +20995,14 @@
    "article": {
     "H2TX01112": "Nathaniel Moran"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -20234,6 +21011,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H2TX01112": "NATHANIEL MORAN",
+    "H6TX01352": "YOLANDA R. PRINCE"
+   },
+   "listParty": {
+    "H2TX01112": "Republican",
+    "H6TX01352": "Democratic"
+   },
    "names": {
     "H2TX01112": "Nathaniel Moran",
     "H6TX01303": "Masika Ray",
@@ -20260,7 +21045,7 @@
     "H6TX01352": "nominee"
    },
    "unmatched": {
-    "Sonia Canciola": "nominee"
+    "Sonia Canciola": "unlisted"
    },
    "unmatchedParty": {
     "Sonia Canciola": "Independent"
@@ -20277,6 +21062,14 @@
     "H6TX08175": "Steve Toth",
     "H8TX02166": "Dan Crenshaw"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -20285,6 +21078,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6TX02251": "SHAUN FINNIE",
+    "H6TX08175": "STEVE TOTH"
+   },
+   "listParty": {
+    "H6TX02251": "Democratic",
+    "H6TX08175": "Republican"
+   },
    "names": {
     "H2TX08232": "Martin Etwop",
     "H6TX02236": "Nicholas Lee Plumb",
@@ -20325,6 +21126,14 @@
    "article": {
     "H2TX00064": "Keith Self"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -20333,6 +21142,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H2TX00064": "KEITH SELF",
+    "H6TX03234": "EVAN HUNT"
+   },
+   "listParty": {
+    "H2TX00064": "Republican",
+    "H6TX03234": "Democratic"
+   },
    "names": {
     "H2TX00064": "Keith Self",
     "H6TX03226": "Jordan Wheatley",
@@ -20365,6 +21182,14 @@
    "article": {
     "H0TX04219": "Pat Fallon"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -20373,6 +21198,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H0TX04219": "PAT FALLON",
+    "H6TX04174": "JASON PEARCE"
+   },
+   "listParty": {
+    "H0TX04219": "Republican",
+    "H6TX04174": "Democratic"
+   },
    "names": {
     "H0TX04219": "Pat Fallon",
     "H4TX04179": "Don Horn",
@@ -20406,6 +21239,14 @@
    "article": {
     "H8TX05144": "Lance Gooden"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -20414,6 +21255,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6TX05189": "CHELSEY HOCKETT",
+    "H8TX05144": "LANCE GOODEN"
+   },
+   "listParty": {
+    "H6TX05189": "Democratic",
+    "H8TX05144": "Republican"
+   },
    "names": {
     "H2TX05253": "Ruth Torres",
     "H6TX05189": "Chelsey Hockett",
@@ -20449,6 +21298,14 @@
    "article": {
     "H8TX06266": "Jake Ellzey"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -20457,6 +21314,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6TX25203": "DANNY MINTON",
+    "H8TX06266": "JAKE ELLZEY"
+   },
+   "listParty": {
+    "H6TX25203": "Democratic",
+    "H8TX06266": "Republican"
+   },
    "names": {
     "H2TX06392": "James Buford",
     "H6TX06229": "Brian Stahl",
@@ -20491,6 +21356,14 @@
    "article": {
     "H8TX07140": "Lizzie Fletcher"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -20499,6 +21372,16 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6TX07151": "ALEXANDER HALE",
+    "H6TX07177": "ESPOIR NGABO",
+    "H8TX07140": "LIZZIE PANNILL FLETCHER"
+   },
+   "listParty": {
+    "H6TX07151": "Republican",
+    "H6TX07177": "Green",
+    "H8TX07140": "Democratic"
+   },
    "names": {
     "H2TX07101": "Erin Montgomery",
     "H2TX07119": "Tina Blum Cohen",
@@ -20536,6 +21419,14 @@
    },
    "ambiguous": [],
    "article": {},
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -20544,6 +21435,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H0TX08145": "LAURA JONES",
+    "H6TX08209": "JESSICA HART STEINMANN"
+   },
+   "listParty": {
+    "H0TX08145": "Democratic",
+    "H6TX08209": "Republican"
+   },
    "names": {
     "H0TX08145": "Laura Jones",
     "H6TX02228": "Nick Tran",
@@ -20591,6 +21490,14 @@
     "H6TX09124": "Briscoe Cain",
     "H6TX09207": "Terry Virts"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -20599,6 +21506,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6TX09140": "ALEX MEALER",
+    "H6TX09231": "LETICIA GUTIERREZ"
+   },
+   "listParty": {
+    "H6TX09140": "Republican",
+    "H6TX09231": "Democratic"
+   },
    "names": {
     "H0TX09077": "Steve Stockman",
     "H4TX02181": "Peter Filler",
@@ -20668,6 +21583,14 @@
     "H6TX10254": "Sarah Eckhardt",
     "H6TX10262": "Sarah Eckhardt"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -20676,6 +21599,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6TX10221": "CHRIS GOBER",
+    "H6TX31102": "CAITLIN ROURK"
+   },
+   "listParty": {
+    "H6TX10221": "Republican",
+    "H6TX31102": "Democratic"
+   },
    "names": {
     "H0TX35064": "Jenny Garcia Sharon",
     "H6TX10155": "Philip Suarez",
@@ -20747,6 +21678,14 @@
    "article": {
     "H0TX11230": "August Pfluger"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -20755,6 +21694,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H0TX11230": "AUGUST PFLUGER",
+    "H6TX11112": "CLAIRE REYNOLDS"
+   },
+   "listParty": {
+    "H0TX11230": "Republican",
+    "H6TX11112": "Democratic"
+   },
    "names": {
     "H0TX11230": "August Pfluger",
     "H6TX11104": "Pedro Ruiz",
@@ -20785,6 +21732,14 @@
    "article": {
     "H4TX12065": "Craig Goldman"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -20793,6 +21748,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H4TX12065": "CRAIG GOLDMAN",
+    "H6TX12169": "ANGELA \"HELI\" RODRIGUEZ PRILLIMAN"
+   },
+   "listParty": {
+    "H4TX12065": "Republican",
+    "H6TX12169": "Democratic"
+   },
    "names": {
     "H4TX12065": "Craig Goldman",
     "H6TX12169": "Angela Rodriguez Prilliman",
@@ -20823,6 +21786,14 @@
    "article": {
     "H0TX13228": "Ronny Jackson"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -20831,6 +21802,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H0TX13228": "RONNY JACKSON",
+    "H6TX13159": "MARK NAIR"
+   },
+   "listParty": {
+    "H0TX13228": "Republican",
+    "H6TX13159": "Democratic"
+   },
    "names": {
     "H0TX13228": "Ronny Jackson",
     "H6TX13159": "Mark Nair",
@@ -20861,6 +21840,14 @@
    "article": {
     "H2TX14149": "Randy Weber"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -20869,6 +21856,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H2TX14149": "RANDY WEBER",
+    "H6TX14181": "THURMAN BILL BARTIE"
+   },
+   "listParty": {
+    "H2TX14149": "Republican",
+    "H6TX14181": "Democratic"
+   },
    "names": {
     "H2TX14149": "Randy Weber",
     "H6TX14140": "Jessica Forgy",
@@ -20909,6 +21904,14 @@
     "H0TX15124": "Monica De La Cruz",
     "H6TX15246": "Bobby Pulido"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -20917,6 +21920,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H0TX15124": "MONICA DE LA CRUZ",
+    "H6TX15246": "BOBBY PULIDO"
+   },
+   "listParty": {
+    "H0TX15124": "Republican",
+    "H6TX15246": "Democratic"
+   },
    "names": {
     "H0TX15124": "Monica De La Cruz",
     "H6TX15238": "Ada Cuellar",
@@ -20947,6 +21958,14 @@
    "article": {
     "H8TX16109": "Veronica Escobar"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -20955,6 +21974,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6TX16152": "ADAM BAUMAN",
+    "H8TX16109": "VERONICA ESCOBAR"
+   },
+   "listParty": {
+    "H6TX16152": "Republican",
+    "H8TX16109": "Democratic"
+   },
    "names": {
     "H2TX16250": "Deliris Montanez Berrios",
     "H6TX16152": "Adam Bauman",
@@ -21000,6 +22027,14 @@
    "article": {
     "H2TX03126": "Pete Sessions"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -21008,6 +22043,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H2TX03126": "PETE SESSIONS",
+    "H6TX17168": "CASEY SHEPARD"
+   },
+   "listParty": {
+    "H2TX03126": "Republican",
+    "H6TX17168": "Democratic"
+   },
    "names": {
     "H2TX03126": "Pete Sessions",
     "H6TX17143": "James Gordon Mitchell",
@@ -21045,6 +22088,14 @@
     "H4TX18138": "Amanda Edwards",
     "H6TX18232": "Christian Menefee"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -21053,6 +22104,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6TX18232": "CHRISTIAN DASHAUN MENEFEE",
+    "H6TX18497": "RONALD DWAYNE WHITFIELD"
+   },
+   "listParty": {
+    "H6TX18232": "Democratic",
+    "H6TX18497": "Republican"
+   },
    "names": {
     "H4TX09095": "Al Green",
     "H4TX18138": "Amanda Edwards",
@@ -21092,6 +22151,14 @@
     "Donald May"
    ],
    "article": {},
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -21100,6 +22167,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6TX19198": "KYLE RABLE",
+    "H6TX19206": "TOM SELL"
+   },
+   "listParty": {
+    "H6TX19198": "Democratic",
+    "H6TX19206": "Republican"
+   },
    "names": {
     "H4TX19318": "Ryan Zink",
     "H6TX19198": "Kyle Rable",
@@ -21149,6 +22224,14 @@
    "article": {
     "H2TX35011": "Joaquin Castro"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -21157,6 +22240,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H2TX35011": "JOAQUIN CASTRO",
+    "H6TX20113": "EDGARDO RAFAEL BAEZ"
+   },
+   "listParty": {
+    "H2TX35011": "Democratic",
+    "H6TX20113": "Republican"
+   },
    "names": {
     "H2TX35011": "Joaquin Castro",
     "H6TX20113": "Edgardo Baez",
@@ -21190,6 +22281,14 @@
    "article": {
     "H6TX21301": "Mark Teixeira"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -21198,6 +22297,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H4TX21108": "KRISTIN HOOK",
+    "H6TX21301": "MARK TEIXEIRA"
+   },
+   "listParty": {
+    "H4TX21108": "Democratic",
+    "H6TX21301": "Republican"
+   },
    "names": {
     "H4TX21108": "Kristin Hook",
     "H6TX21251": "Gary Taylor",
@@ -21264,6 +22371,14 @@
    "article": {
     "H6TX22275": "Jacey Jetton"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -21272,6 +22387,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H4TX22197": "MARQUETTE GREENE-SCOTT",
+    "H6TX22283": "TREVER NEHLS"
+   },
+   "listParty": {
+    "H4TX22197": "Democratic",
+    "H6TX22283": "Republican"
+   },
    "names": {
     "H0TX14184": "Robert Thomas",
     "H4TX22197": "Marquette Greene-Scott",
@@ -21317,6 +22440,16 @@
     "H4TX23120": "Brandon Herrera",
     "H4TX28046": "Quico Canseco"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {
+    "H6TX16111": "nominee"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -21325,6 +22458,16 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H4TX23120": "BRANDON HERRERA",
+    "H6TX16111": "BEN MENDOZA",
+    "H6TX23273": "KATY PADILLA STOUT"
+   },
+   "listParty": {
+    "H4TX23120": "Republican",
+    "H6TX16111": "Independent",
+    "H6TX23273": "Democratic"
+   },
    "names": {
     "H4TX23120": "Brandon Herrera",
     "H4TX23138": "Santos Limon",
@@ -21340,6 +22483,7 @@
     "H4TX23120": "republican",
     "H4TX23138": "democratic",
     "H4TX28046": "republican",
+    "H6TX16111": "independent",
     "H6TX23240": "democratic",
     "H6TX23257": "democratic",
     "H6TX23273": "democratic",
@@ -21350,6 +22494,7 @@
     "H4TX23120": "nominee",
     "H4TX23138": "eliminated",
     "H4TX28046": "eliminated",
+    "H6TX16111": "nominee",
     "H6TX23232": "withdrawn",
     "H6TX23240": "eliminated",
     "H6TX23257": "eliminated",
@@ -21374,6 +22519,14 @@
    "article": {
     "H0TX24209": "Beth Van Duyne"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -21382,6 +22535,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H0TX24209": "BETH VAN DUYNE",
+    "H6TX24172": "KEVIN BURGE"
+   },
+   "listParty": {
+    "H0TX24209": "Republican",
+    "H6TX24172": "Democratic"
+   },
    "names": {
     "H0TX24209": "Beth Van Duyne",
     "H6TX24172": "Kevin Burge",
@@ -21414,8 +22575,16 @@
    },
    "ambiguous": [],
    "article": {
-    "H2TX33040": "Roger Williams (Texas politician)"
+    "H2TX33040": "Roger Williams"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -21424,6 +22593,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H2TX33040": "ROGER WILLIAMS",
+    "H6TX25237": "DIONE SIMS"
+   },
+   "listParty": {
+    "H2TX33040": "Republican",
+    "H6TX25237": "Democratic"
+   },
    "names": {
     "H2TX33040": "Roger Williams",
     "H6TX25211": "William Marks",
@@ -21455,11 +22632,12 @@
     "H4TX26149": "Brandon Gill"
    },
    "certified": {
-    "complete": false,
+    "complete": true,
     "fetched": "2026-10-17",
-    "source": "Libertarian Party of Texas, 2026 candidates (its convention nominees)",
-    "url": "https://www.lptexas.org/candidates"
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
+   "certifiedHeld": [],
    "certifiedIds": {
     "H6TX01261": "nominee"
    },
@@ -21471,13 +22649,19 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H4TX26149": "BRANDON GILL",
+    "H6TX01261": "PHIL GRAY",
+    "H6TX26144": "STEVEN SHOOK"
+   },
    "listParty": {
-    "H6TX01261": "Libertarian"
+    "H4TX26149": "Republican",
+    "H6TX01261": "Libertarian",
+    "H6TX26144": "Democratic"
    },
    "names": {
     "H4TX26149": "Brandon Gill",
     "H4TX26172": "Ernest Lineberger",
-    "H6TX01261": "Phil Gray",
     "H6TX26144": "Steven Shook"
    },
    "page": "2026 United States House of Representatives elections in Texas",
@@ -21511,6 +22695,17 @@
    "article": {
     "H8TX27049": "Michael Cloud"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
+   "certifiedUnprinted": {
+    "H2TX05170": "write-in"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -21519,6 +22714,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H4TX27089": "TANYA LLOYD",
+    "H8TX27049": "MICHAEL CLOUD"
+   },
+   "listParty": {
+    "H4TX27089": "Democratic",
+    "H8TX27049": "Republican"
+   },
    "names": {
     "H2TX05170": "Wayne Raasch",
     "H4TX27089": "Tanya Lloyd",
@@ -21543,7 +22746,7 @@
     "H8TX27049": "nominee"
    },
    "unmatched": {
-    "Dan McQueen": "nominee"
+    "Dan McQueen": "unlisted"
    },
    "unmatchedParty": {
     "Dan McQueen": "Independent"
@@ -21559,6 +22762,16 @@
    "article": {
     "H2TX23082": "Henry Cuellar"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {
+    "H6TX28108": "nominee"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -21567,6 +22780,16 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H2TX23082": "HENRY CUELLAR",
+    "H6TX28108": "MARLÓN DURÁN",
+    "H6TX28124": "TANO E. TIJERINA"
+   },
+   "listParty": {
+    "H2TX23082": "Democratic",
+    "H6TX28108": "Green",
+    "H6TX28124": "Republican"
+   },
    "names": {
     "H2TX21185": "Ricardo Villarreal",
     "H2TX23082": "Henry Cuellar",
@@ -21578,6 +22801,7 @@
    "party": {
     "H2TX21185": "democratic",
     "H2TX23082": "democratic",
+    "H6TX28108": "green",
     "H6TX28124": "republican",
     "H6TX28132": "democratic",
     "H6TX28140": "republican"
@@ -21586,6 +22810,7 @@
    "status": {
     "H2TX21185": "eliminated",
     "H2TX23082": "nominee",
+    "H6TX28108": "nominee",
     "H6TX28124": "nominee",
     "H6TX28132": "eliminated",
     "H6TX28140": "eliminated"
@@ -21608,6 +22833,14 @@
     "H6TX18406": "Jarvis Johnson",
     "H8TX29052": "Sylvia Garcia"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -21616,6 +22849,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6TX29122": "MARTHA FIERRO",
+    "H8TX29052": "SYLVIA GARCIA"
+   },
+   "listParty": {
+    "H6TX29122": "Republican",
+    "H8TX29052": "Democratic"
+   },
    "names": {
     "H4TX18179": "Robert Slater",
     "H6TX18406": "Jarvis Johnson",
@@ -21651,6 +22892,14 @@
    "article": {
     "H6TX30245": "Frederick Haynes III"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -21659,6 +22908,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6TX30211": "EVERETT JACKSON",
+    "H6TX30245": "FREDERICK D. HAYNES III"
+   },
+   "listParty": {
+    "H6TX30211": "Republican",
+    "H6TX30245": "Democratic"
+   },
    "names": {
     "H0TX30115": "Nils Walker",
     "H4TX30109": "Sholdon Daniels",
@@ -21707,6 +22964,16 @@
     "H2TX31044": "John Carter (Texas politician)",
     "H6TX31078": "Valentina Gomez"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {
+    "H6TX31169": "nominee"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -21715,6 +22982,16 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H2TX31044": "JOHN CARTER",
+    "H6TX31094": "JUSTIN EARLY",
+    "H6TX31169": "GREG STOKER"
+   },
+   "listParty": {
+    "H2TX31044": "Republican",
+    "H6TX31094": "Democratic",
+    "H6TX31169": "Green"
+   },
    "names": {
     "H0TX31030": "Abhiram Garapati",
     "H2TX31044": "John Carter",
@@ -21738,6 +23015,7 @@
     "H6TX31128": "republican",
     "H6TX31136": "republican",
     "H6TX31144": "republican",
+    "H6TX31169": "green",
     "H6TX31177": "republican"
    },
    "site": {},
@@ -21751,6 +23029,7 @@
     "H6TX31128": "eliminated",
     "H6TX31136": "eliminated",
     "H6TX31144": "eliminated",
+    "H6TX31169": "nominee",
     "H6TX31177": "eliminated"
    },
    "unmatched": {
@@ -21773,6 +23052,14 @@
    "article": {
     "H6TX32159": "Ryan Binkley"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -21781,6 +23068,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6TX32217": "DAN BARRIOS",
+    "H6TX32225": "JACE YARBROUGH"
+   },
+   "listParty": {
+    "H6TX32217": "Democratic",
+    "H6TX32225": "Republican"
+   },
    "names": {
     "H2TX32182": "Darrell Day",
     "H6TX05163": "James Ussery",
@@ -21842,6 +23137,14 @@
     "H4TX32089": "Julie Johnson (politician)",
     "H8TX32098": "Colin Allred"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -21850,6 +23153,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H2TX33248": "PATRICK DAVID GILLESPIE",
+    "H8TX32098": "COLIN ALLRED"
+   },
+   "listParty": {
+    "H2TX33248": "Republican",
+    "H8TX32098": "Democratic"
+   },
    "names": {
     "H2TX06186": "Carlos Quintanilla",
     "H2TX33099": "Monte Mitchell",
@@ -21899,13 +23210,15 @@
     "H6TX15162": "Vicente Gonzalez (American politician)"
    },
    "certified": {
-    "complete": false,
+    "complete": true,
     "fetched": "2026-10-17",
-    "source": "Libertarian Party of Texas, 2026 candidates (its convention nominees)",
-    "url": "https://www.lptexas.org/candidates"
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
+   "certifiedHeld": [],
    "certifiedIds": {
-    "H0TX34059": "nominee"
+    "H0TX34059": "nominee",
+    "H6TX34106": "nominee"
    },
    "decided": {
     "general": true,
@@ -21915,11 +23228,19 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H0TX34059": "CHRIS ROYAL",
+    "H6TX15162": "VICENTE GONZALEZ",
+    "H6TX34080": "ERIC FLORES",
+    "H6TX34106": "EDDIE ESPINOZA"
+   },
    "listParty": {
-    "H0TX34059": "Libertarian"
+    "H0TX34059": "Libertarian",
+    "H6TX15162": "Democratic",
+    "H6TX34080": "Republican",
+    "H6TX34106": "Green"
    },
    "names": {
-    "H0TX34059": "Chris Royal",
     "H2TX34113": "Mayra Flores",
     "H2TX34220": "Gregory Kunkle",
     "H6TX15162": "Vicente Gonzalez",
@@ -21938,6 +23259,7 @@
     "H6TX34049": "republican",
     "H6TX34064": "democratic",
     "H6TX34080": "republican",
+    "H6TX34106": "green",
     "H6TX34114": "republican",
     "H6TX34130": "republican"
    },
@@ -21950,6 +23272,7 @@
     "H6TX34049": "eliminated",
     "H6TX34064": "eliminated",
     "H6TX34080": "nominee",
+    "H6TX34106": "nominee",
     "H6TX34114": "eliminated",
     "H6TX34130": "eliminated"
    },
@@ -21972,6 +23295,14 @@
    "article": {
     "H6TX35053": "John Lujan"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -21980,6 +23311,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H6TX35087": "CARLOS DE LA CRUZ",
+    "H6TX35095": "JOHNNY C. GARCIA"
+   },
+   "listParty": {
+    "H6TX35087": "Republican",
+    "H6TX35095": "Democratic"
+   },
    "names": {
     "H4TX28129": "Jay Furman",
     "H4TX35025": "Steven Wright",
@@ -22025,7 +23364,6 @@
    },
    "unmatched": {
     "Larry La Rose": "eliminated",
-    "Larry LaRose": "eliminated",
     "Mark Eberwine": "eliminated",
     "Randy Adams": "eliminated",
     "Rod Lindsch": "eliminated"
@@ -22047,6 +23385,14 @@
    "article": {
     "H6TX02079": "Brian Babin"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -22055,6 +23401,14 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H4TX14111": "RHONDA HART",
+    "H6TX02079": "BRIAN BABIN"
+   },
+   "listParty": {
+    "H4TX14111": "Democratic",
+    "H6TX02079": "Republican"
+   },
    "names": {
     "H2TX08125": "Jonathan Mitchell",
     "H4TX14111": "Rhonda Hart",
@@ -22089,6 +23443,14 @@
     "D000399": "Lloyd Doggett",
     "H2TX35144": "Greg Casar"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
    "decided": {
     "general": true,
     "parties": [
@@ -22097,12 +23459,19 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H2TX35144": "GREG CASAR",
+    "H6TX35038": "LAUREN B. PEÑA"
+   },
+   "listParty": {
+    "H2TX35144": "Democratic",
+    "H6TX35038": "Republican"
+   },
    "names": {
     "D000399": "Lloyd Doggett",
     "H2TX35144": "Greg Casar",
     "H6TX35038": "Lauren Peña",
     "H6TX37018": "Esther Fleharty",
-    "H6TX37026": "Ge'Neill Gary",
     "H6TX37059": "Janet Malzahn"
    },
    "page": "2026 United States House of Representatives elections in Texas",
@@ -22110,7 +23479,6 @@
     "H2TX35144": "democratic",
     "H6TX35038": "republican",
     "H6TX37018": "democratic",
-    "H6TX37026": "republican",
     "H6TX37059": "republican"
    },
    "site": {},
@@ -22119,11 +23487,14 @@
     "H2TX35144": "nominee",
     "H6TX35038": "nominee",
     "H6TX37018": "eliminated",
-    "H6TX37026": "eliminated",
     "H6TX37059": "eliminated"
    },
-   "unmatched": {},
-   "unmatchedParty": {},
+   "unmatched": {
+    "Ge'Neill Gary": "eliminated"
+   },
+   "unmatchedParty": {
+    "Ge'Neill Gary": "Republican"
+   },
    "unsure": []
   },
   "H-TX-38-2026": {
@@ -22137,6 +23508,16 @@
     "H6TX38115": "Larry Rubin",
     "H8TX29102": "Carmen María Montiel"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {
+    "H6TX38123": "nominee"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -22145,6 +23526,16 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "H4TX38011": "MELISSA MCDONOUGH",
+    "H6TX02244": "JON BONCK",
+    "H6TX38123": "ALEX MCMENEMY"
+   },
+   "listParty": {
+    "H4TX38011": "Democratic",
+    "H6TX02244": "Republican",
+    "H6TX38123": "Green"
+   },
    "names": {
     "H2TX18207": "Carmen María Montiel",
     "H2TX35193": "Jennifer Sundt",
@@ -22174,6 +23565,7 @@
     "H6TX38073": "republican",
     "H6TX38081": "republican",
     "H6TX38115": "republican",
+    "H6TX38123": "green",
     "H8TX29102": "republican"
    },
    "site": {
@@ -22193,6 +23585,7 @@
     "H6TX38073": "eliminated",
     "H6TX38081": "eliminated",
     "H6TX38115": "eliminated",
+    "H6TX38123": "nominee",
     "H8TX29102": "eliminated"
    },
    "unmatched": {
@@ -24110,6 +25503,9 @@
    "certifiedIds": {
     "S6AK00326": "nominee"
    },
+   "certifiedUnprinted": {
+    "S6AK00292": "write-in"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -24117,9 +25513,15 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "S4AK00214": "Dan S. Sullivan",
+    "S6AK00276": "Mary Peltola",
+    "S6AK00326": "Daniel J. Sullivan Jr.",
+    "S8AK00140": "Gerald L. Heikes"
+   },
    "listParty": {
     "S4AK00214": "Republican",
-    "S6AK00276": "Democrat",
+    "S6AK00276": "Democratic",
     "S6AK00326": "Republican",
     "S8AK00140": "Republican"
    },
@@ -24340,6 +25742,9 @@
    "certifiedIds": {
     "S6CO00556": "nominee"
    },
+   "certifiedUnprinted": {
+    "S4CO00429": "write-in"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -24351,9 +25756,15 @@
     "S6CO00556": "Forward Party",
     "S6CO00564": "Unity Party"
    },
+   "listNames": {
+    "S0CO00575": "John Hickenlooper",
+    "S6CO00507": "Mark Baisley",
+    "S6CO00556": "Bob Chew",
+    "S6CO00564": "Adam Withrow"
+   },
    "listParty": {
-    "S0CO00575": "Democratic Party",
-    "S6CO00507": "Republican Party",
+    "S0CO00575": "Democratic",
+    "S6CO00507": "Republican",
     "S6CO00556": "Forward Party",
     "S6CO00564": "Unity Party"
    },
@@ -24408,7 +25819,7 @@
     "Joshua William Kuebler": "withdrawn"
    },
    "unmatchedParty": {
-    "Blake Huber": "Libertarian Party",
+    "Blake Huber": "Libertarian",
     "Christopher Baum": "Approval Voting Party"
    },
    "unsure": [
@@ -24505,6 +25916,11 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "S6FL00640": "Ashley Moody",
+    "S6FL00830": "Angie Nixon",
+    "S6FL00863": "Neil J. Gillespie"
+   },
    "listParty": {
     "S6FL00640": "Republican",
     "S6FL00830": "Democratic",
@@ -24653,6 +26069,11 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "S6IA00181": "Thomas Laehn",
+    "S6IA00298": "Josh Turek",
+    "S6IA00314": "Ashley Hinson"
+   },
    "listParty": {
     "S6IA00181": "Libertarian",
     "S6IA00298": "Democratic",
@@ -25680,6 +27101,13 @@
     "S6NE00202": "America First",
     "S6NE00210": "Nebraska Working People"
    },
+   "listNames": {
+    "S4NE00207": "Dan Osborn",
+    "S6NE00129": "Pete Ricketts",
+    "S6NE00152": "Mike Marvin",
+    "S6NE00202": "Chuck Conboy",
+    "S6NE00210": "Robin Richards"
+   },
    "listParty": {
     "S4NE00207": "By Petition",
     "S6NE00129": "Republican",
@@ -26454,6 +27882,21 @@
     "S6TX00511": "Wesley Hunt",
     "S6TX00552": "Jasmine Crockett"
    },
+   "certified": {
+    "complete": true,
+    "fetched": "2026-10-17",
+    "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
+    "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
+   },
+   "certifiedHeld": [],
+   "certifiedIds": {},
+   "certifiedUnprinted": {
+    "S4TX00441": "write-in",
+    "S6TX00495": "write-in",
+    "S6TX00503": "write-in",
+    "S6TX00636": "write-in",
+    "S6TX00651": "write-in"
+   },
    "decided": {
     "general": true,
     "parties": [
@@ -26462,6 +27905,16 @@
     ]
    },
    "label": {},
+   "listNames": {
+    "S4TX00888": "TED BROWN",
+    "S6TX00388": "KEN PAXTON",
+    "S6TX00479": "JAMES TALARICO"
+   },
+   "listParty": {
+    "S4TX00888": "Libertarian",
+    "S6TX00388": "Republican",
+    "S6TX00479": "Democratic"
+   },
    "names": {
     "S0TX00365": "Virgil Bierschwale",
     "S2TX00106": "John Cornyn",

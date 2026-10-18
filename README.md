@@ -710,18 +710,34 @@ general-election candidates, its list is the ballot (rule 77):
 
 - `kyc/certified.py` reads the published lists: Alaska's Division of
   Elections, Florida's Division of Elections (federal offices), Colorado's
-  Secretary of State and American Samoa's Election Office. A list published
-  only as a PDF is transcribed in `overrides.CERTIFIED_BALLOTS` with its
-  document and the day it was read (Iowa, Nebraska), and so is a party's own
-  list of its convention nominees where the state publishes none (the
-  Libertarian Party of Texas); a party's list only adds names.
+  Secretary of State, American Samoa's Election Office and Texas's Secretary
+  of State (its qualified-candidate search, read from the JSON service the
+  page draws from: an accepted declaration in the general election is
+  printed, a rejected one never was). A list published only as a PDF is
+  transcribed in `overrides.CERTIFIED_BALLOTS` with its document and the day
+  it was read (Iowa, Nebraska). Only an election office's list is a ballot: a
+  party's list of its convention nominees is not, since the state may still
+  refuse them.
+- The name a profile shows comes from its source's authority: a name settled
+  word for word or by an evidenced `overrides.RESULT_NAMES` alias ("Neil J.
+  Gillespie", whom the FEC files as GILESPIE); a certified list's printed name
+  unless it differs only in case and full stops, drops a hyphen, or is printed
+  in capitals (Texas's is; "Daniel J. Sullivan Jr." is Alaska's); a results
+  page's only where it adds a hyphen or its first name is the short form of
+  the filed one ("Bob Harvie"). A page's formal form of a campaign's name
+  ("Matthew Dunlap" for Matt Dunlap) is an alias, never the name shown.
+- Party words beside a name with no profile are the site's ("Democratic",
+  "Libertarian") whatever the list prints, a party of another name as printed,
+  and none where the list prints none (American Samoa's).
 - A filing is matched to a listed name as a results page's name is (rule 62):
   the matcher, an evidenced `overrides.RESULT_NAMES` alias, or the filing's
   own words in any order, a bracketed nickname aside, unique in the race.
 - Someone the list prints is on the November ballot, whatever the page said:
-  "withdrawn" included. A certified write-in, and a Florida candidate
-  unopposed in November (Florida prints no uncontested race), is not read as
-  printed.
+  "withdrawn" included, and reads "On the November ballot" - never
+  "Renominated", since a list is not a primary. A certified write-in, and a
+  Florida candidate unopposed in November (Florida prints no uncontested
+  race), is not read as printed, nor as left off the list; an unmatched one
+  may still be a page nominee's other spelling and holds them.
 - Where the list is the whole ballot, a filer it does not name is "Not on the
   November ballot" - unless a name on it that matched no filing may be theirs
   (`maybeNamed`) - and a page name it does not print is not counted on it.
@@ -1995,7 +2011,7 @@ confirm it, and the answer stays above the map rather than scrolling away.
 | `refs` (`govtrack`, `opensecrets`, `votesmart`, `ballotpedia`) | Reference ids from `congress-legislators` | Sitting members |
 | `wikipedia` | The bioguide mapping for members; the state ballot page's own link for filed candidates (`wikipediaVia`) | Members, and candidates the ballot page links |
 | `aliases` | Other names a voter may search by, all from the member's own `congress-legislators` record (matched on bioguide id): `official_full` without its quoted nickname, nickname + surname (+ suffix), and the Wikipedia title without its disambiguator ("Jim Clyburn", "Hank Johnson"). Names that fold to the display name are dropped. Searched, never displayed as the name. For a filed candidate renamed to the ballot's spelling (`nameVia`), the FEC's filed form ("Mahesh Ganorkar", "Carlquist Lisa") | Sitting members whose record adds a name; filed candidates renamed from the ballot |
-| `nameVia` | `"election-page"` when the name shown is the results page's spelling for this filing, settled word for word, by the rule-62 matcher under another form of the given name ("Bob Harvie" for "HARVIE, ROBERT J"), or by an evidenced `overrides.RESULT_NAMES` entry ("Max Ganorkar", whose filing says Mahesh); `"certified-list"` when it is the state's certified list's | Filed candidates the results page names differently |
+| `nameVia` | `"election-page"` when the name shown is the results page's spelling for this filing, settled word for word, by an evidenced `overrides.RESULT_NAMES` entry ("Max Ganorkar", whose filing says Mahesh), or by the rule-62 matcher where the page adds a hyphen or uses the short form of the filed given name ("Bob Harvie" for "HARVIE, ROBERT J"; never the formal form of a filed nickname); `"certified-list"` when it is the certified list's printed name (never one printed in capitals) | Filed candidates the results page names differently |
 | `fecName` | The name the FEC files them under, set beside `nameVia`; the profile shows "Files with the FEC as ..." under the ballot's name | Filed candidates the results page names differently |
 | `raceStatusSourceName` | Set with `raceStatusSource: "certified"`: the certified list that set the status, or that does not name the person ("Alaska Division of Elections, 2026 General Election candidate list"), credited in the badge's title | Filers in states whose certified list was read |
 | `raceStatusUnconfirmed` | Set beside `raceStatus: "unlisted"` when the results page does not name the person but names someone similar who lost or withdrew. Off the November ballot either way, and shown as "Not on the November ballot", never "not on the primary ballot" | Filers in decided races |

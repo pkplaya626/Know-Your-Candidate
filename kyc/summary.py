@@ -277,8 +277,9 @@ def by_state(profiles, races=None):
         if entry is None:
             continue
         if counted and not ballot_known(race):
-            # No primary and no ballot read yet (a territory before its
-            # list is published): people have filed, and nobody can yet be
+            # No primary and no ballot read (a territory whose list this
+            # site has no reader for - which says nothing about whether one
+            # is published, rule 19): people have filed, and nobody can be
             # counted on the ballot. "0 challengers on the ballot" over six
             # filers read as an uncontested seat (rule 22).
             entry["challengersFiled"] = entry.get("challengersFiled", 0) + race.get(

@@ -272,11 +272,21 @@ class TestResolving(unittest.TestCase):
                                                  "withdrawn": False, "votes": None,
                                                  "party": None, "article": None}]))
         out = results.resolve_race(boxes)
-        self.assertEqual(out, {"Young Kim": "nominee", "Esther Kim-Varet": "eliminated"})
+        # One name, the one without the hyphen: each spelling is in one
+        # table, and the hyphenated one links a redirect to her article.
+        self.assertEqual(out, {"Young Kim": "nominee", "Esther Kim Varet": "eliminated"})
         rows = [{"candidate_id": "H6CA40309", "name": "VARET, ESTHER KIM"},
                 {"candidate_id": "H8CA39240", "name": "KIM, YOUNG"}]
         found, ambiguous = results.match_names(list(out), rows)
-        self.assertEqual(found["Esther Kim-Varet"], ["H6CA40309"])
+        self.assertEqual(found["Esther Kim Varet"], ["H6CA40309"])
+        # A page that writes the hyphen in more tables keeps it.
+        boxes = results.parse_boxes(box("Primary results", ("Young Kim", 100, True),
+                                        ("Ann Greene-Placentia", 50, True)) + "\n" +
+                                    box("General election", ("Ann Greene-Placentia", 0, False)))
+        boxes.append((results.ELIMINATED_LIST, [{"name": "Ann Greene Placentia", "won": False,
+                                                 "withdrawn": False, "votes": None,
+                                                 "party": None, "article": None}]))
+        self.assertIn("Ann Greene-Placentia", results.resolve_race(boxes))
         self.assertEqual(ambiguous, [])
         self.assertTrue(results._same_spelling("Esther Kim Varet", "Esther Kim-Varet"))
         # The given name must still fit.
@@ -875,6 +885,28 @@ class TestNamesThePageMayUse(unittest.TestCase):
         self.assertEqual(person["name"], "Matt Dunlap")
         self.assertNotIn("fecName", person)
         self.assertIn("Matthew Dunlap", person["aliases"])
+
+    def test_a_page_name_the_filer_goes_by_is_the_name_shown(self):
+        # A later given name, its short form, or the nickname the filing
+        # itself brackets is the name a campaign uses.
+        for page, filed_as in (("Ashtyn Kennedy", "Kimberly Ashtyn Kennedy"),
+                               ("Jay Feely", "Thomas James Feely"),
+                               ("Zuhdi Jasser", "M. Zuhdi Jasser"),
+                               ("J.D. Ford", "James (J.d.) David Ford"),
+                               ("Quico Canseco", "Francisco 'Quico' Raul Canseco")):
+            person = self.filer("H6AL06168", filed_as)
+            cache = self.cache({})
+            cache["races"]["H-NC-04-2026"].update(status={"H6AL06168": "nominee"},
+                                                  names={"H6AL06168": page})
+            results.apply_cache([person], cache)
+            self.assertEqual((person["name"], person["fecName"]), (page, filed_as))
+        # An initial is not a name anyone goes by.
+        person = self.filer("H6AL06168", "Kimberly Ashtyn Kennedy")
+        cache = self.cache({})
+        cache["races"]["H-NC-04-2026"].update(status={"H6AL06168": "nominee"},
+                                              names={"H6AL06168": "K. Kennedy"})
+        results.apply_cache([person], cache)
+        self.assertEqual(person["name"], "Kimberly Ashtyn Kennedy")
 
     def test_a_name_the_matcher_settled_keeps_the_pages_hyphen(self):
         # Once the matcher folded surnames (Black Wolf / BLACKWOLF), it
