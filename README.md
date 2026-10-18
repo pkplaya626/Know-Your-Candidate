@@ -25,7 +25,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… build --strict` | Refuse to write if validation finds an error |
 | `… build --json` | Emit the validation report as JSON |
 | `… verify` | Check the committed data still matches the sources |
-| `… congress` | Refresh the membership snapshot (with contact details, accounts and committee rosters) and report roster drift |
+| `… congress` | Refresh the membership snapshot (with contact details, accounts and committee rosters) and report roster drift; also writes `data/departed_members.json`, everyone `legislators-historical` says left the sitting Congress, for the grid's search |
 | `… congress --check` | Report drift from the committed snapshot; no network |
 | `… congress --apply` | Write the drift into the roster CSVs: add the newly seated, renew terms, archive whoever the records say left |
 | `… congress --apply --snapshot FILE` | The same from a given snapshot, with no download (a rehearsal; `--historical FILE` for legislators-historical) |
@@ -371,7 +371,32 @@ The two directories:
   counties, a numbered note under the table says why (rule 71).
 
 - `/` focuses the search box from anywhere on any page; Escape hands focus
-  back.
+  back, and on the grid clears the query too.
+- The grid's search reads a state's name or postal code as that state
+  ("Kansas" is never Arkansas: words match where a word starts), a district
+  however it is written as its race ("Ohio 9", "TX-35", "texas district 35",
+  "ny14", "WY at large"; "TX-3" is never TX-30; a seat that does not exist,
+  "AZ at large" or "Ohio 99", is said not to), and ranks the rest: the
+  name or an alias exactly, then a name, then the office, a leadership post
+  or the place, then the profile's text, a card matched only there saying
+  where. Other officials - the President, the Cabinet, the justices and
+  judges, governors and statewide officers - are listed apart for the
+  office they hold, linking to their own pages and never shown as profiles
+  (one also running for Congress has a card as well); their data is
+  fetched the first time a query is typed (`KYC.loadData`, from the stamped
+  URLs in the page's `<template id="onDemandData">`). Members who left this
+  Congress (`data/departed_members.json`, written by `congress` from
+  `legislators-historical`) are listed with the day that record ends the
+  term, said as its own (it can be a day from the House Clerk's), and who
+  holds the seat now. A full name that names someone lists no one who
+  merely shares the surname; when nobody answers to it, the namesakes are
+  listed as namesakes.
+- What is on shows as removable chips with **Clear all**; the results line
+  says how many out of the race are hidden, with the switch beside it; a
+  collapsed key explains every status word on the cards, from the table
+  that words them (`KYC.raceStatusLegend`). The races view lists races by
+  state, Senate before House, with a jump list, and draws the people out of
+  a race only when their list is opened.
 - The grid renders a screenful of cards and appends the rest as you scroll
   (a **Show more** button does the same without the observer), so the first
   paint no longer waits on 2,500 image elements. The result count is always
@@ -2372,7 +2397,8 @@ confirm it, and the answer stays above the map rather than scrolling away.
 | `refs` (`govtrack`, `opensecrets`, `votesmart`, `ballotpedia`) | Reference ids from `congress-legislators` | Sitting members |
 | `wikipedia` | The bioguide mapping for members; the state ballot page's own link for filed candidates (`wikipediaVia`), kept only while it leads, through its redirects, to a whole article about them (`enrich`) | Members, and candidates the ballot page links |
 | `wikipediaWithheld` | `{title, landsOn}`: a ballot-page link withheld because it leads to a section of another article, a list, an election or a party ("Brian McGinnis" redirects to a protest), or to a title without their surname that `overrides.ARTICLE_UNDER_ANOTHER_NAME` does not record. Not shown; `validate` lists it | Candidates whose ballot link is not their article |
-| `aliases` | Other names a voter may search by, all from the member's own `congress-legislators` record (matched on bioguide id): `official_full` without its quoted nickname, nickname + surname (+ suffix), and the Wikipedia title without its disambiguator ("Jim Clyburn", "Hank Johnson"). Names that fold to the display name are dropped. Searched, never displayed as the name. For a filed candidate renamed to the ballot's spelling (`nameVia`), the FEC's filed form ("Mahesh Ganorkar", "Carlquist Lisa") | Sitting members whose record adds a name; filed candidates renamed from the ballot |
+| `aliases` | Other names a voter may search by, all from the member's own `congress-legislators` record (matched on bioguide id): `official_full` without its quoted nickname, nickname + surname (+ suffix), and the Wikipedia title without its disambiguator ("Jim Clyburn", "Hank Johnson"), plus any evidenced, bioguide-keyed entry in `overrides.SEARCH_ALIASES` ("AOC"). Names that fold to the display name are dropped. Searched, never displayed as the name. For a filed candidate renamed to the ballot's spelling (`nameVia`), the FEC's filed form ("Mahesh Ganorkar", "Carlquist Lisa") | Sitting members whose record adds a name; filed candidates renamed from the ballot |
+| `surname` | The surname the person is listed under in their race (`races.surname`): Congress's record for a member, the FEC filing's ("WASSERMAN SCHULTZ, DEBBIE") where it ends the name shown, else the shown name's last word less a suffix. "Name, A to Z" sorts by it | Everyone |
 | `nameVia` | `"election-page"` when the name shown is the results page's spelling for this filing, settled word for word, by an evidenced `overrides.RESULT_NAMES` entry ("Max Ganorkar", whose filing says Mahesh), or by the rule-62 matcher where the page adds a hyphen or uses the short form of the filed given name ("Bob Harvie" for "HARVIE, ROBERT J"; never the formal form of a filed nickname); `"certified-list"` when it is the certified list's printed name (never one printed in capitals) | Filed candidates the results page names differently |
 | `fecName` | The name the FEC files them under, set beside `nameVia`; the profile shows "Files with the FEC as ..." under the ballot's name | Filed candidates the results page names differently |
 | `raceStatusSourceName` | Set with `raceStatusSource: "certified"`: the certified list that set the status, or that does not name the person ("Alaska Division of Elections, 2026 General Election candidate list"), credited in the badge's title | Filers in states whose certified list was read |

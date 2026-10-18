@@ -431,8 +431,9 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
         profile.update(_contact(person))
         # Names a voter may type instead: "Jim Clyburn" for James Clyburn.
         # Taken from the record matched on bioguide id, never from a name.
-        found = legislators.aliases(person, display,
-                                    extra=(name,) if display != name else ())
+        extra = ((name,) if display != name else ()) + tuple(
+            alias for alias, _evidence in overrides.SEARCH_ALIASES.get(bioguide, ()))
+        found = legislators.aliases(person, display, extra=extra)
         if found:
             profile["aliases"] = found
     if kind == "Senate":
