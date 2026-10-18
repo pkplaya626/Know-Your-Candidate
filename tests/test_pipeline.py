@@ -8,6 +8,7 @@ Standard library only:
 import os
 import sys
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -106,21 +107,53 @@ class TestPhotos(unittest.TestCase):
         self.assertIn("congress.gov", urls[0])
         self.assertEqual(urls[-1], PLACEHOLDER)
 
-    def test_member_without_bioguide_falls_back_to_wikipedia(self):
-        urls = member_photos("Jane Doe", "")
-        self.assertIn("wikipedia.org", urls[0])
+    def test_member_without_bioguide_has_the_silhouette(self):
+        # Nothing is looked for by name (rule 24).
+        self.assertEqual(member_photos("Jane Doe", ""), [PLACEHOLDER])
 
-    def test_middle_names_try_full_slug_first(self):
-        urls = member_photos("Ben Ray Lujan", "")
-        self.assertIn("Ben_Ray_Lujan", urls[0])
-        self.assertTrue(any("Ben_Lujan" in u for u in urls))
+    def test_no_chain_guesses_a_file_from_a_name(self):
+        """Special:FilePath/<Name>.jpg is whoever uploaded under the name:
+        "Justin_Murphy.jpg" is a rugby league player (CAND_40, the NJ
+        Republican Senate nominee), "David_Smith.jpg" an Olympic kayaker
+        (CAND_43, OR), and "Al_Green.jpg" the singer, behind Rep. Al Green's
+        official photographs (G000553)."""
+        chains = [candidate_photos("Justin Murphy", "NJ"), candidate_photos("David Smith", "OR"),
+                  member_photos("Al Green", "G000553"), member_photos("Ben Ray Lujan", "L000570")]
+        for chain in chains:
+            self.assertFalse([u for u in chain if "wikipedia.org/wiki/" in u], chain)
+            self.assertEqual(chain[-1], PLACEHOLDER)
+        self.assertEqual(candidate_photos("Justin Murphy", "NJ"), [PLACEHOLDER])
+
+    def test_the_directorys_photograph_replaces_its_dead_host(self):
+        # bioguideretro.congress.gov answered 404 for every member (2026-10-17).
+        chain = member_photos("Al Green", "G000553")
+        self.assertIn("https://bioguide.congress.gov/photo/G000553.jpg", chain)
+        self.assertFalse([u for u in chain if "bioguideretro" in u], chain)
 
     def test_override_is_scoped_by_state(self):
         """Two different people sharing a name must not share a portrait."""
-        mi = candidate_photos("Mike Rogers", "MI")
-        al = candidate_photos("Mike Rogers", "AL")
-        self.assertIn("upload.wikimedia.org", mi[0])
+        url = "https://upload.wikimedia.org/wikipedia/commons/a/ab/Mike_Rogers_MI.jpg"
+        with mock.patch.dict("kyc.photos.CANDIDATE_PHOTOS",
+                             {("Mike Rogers", "MI"): (url, "2026-10-17", "test")}):
+            mi = candidate_photos("Mike Rogers", "MI")
+            al = candidate_photos("Mike Rogers", "AL")
+        self.assertEqual(mi[0], url)
         self.assertNotEqual(mi[0], al[0])
+
+    def test_no_hand_chosen_photo_is_a_made_up_file_name(self):
+        # 24 of the 25 "hand-chosen" URLs named Commons files that do not
+        # exist, made up from the person's name (2026-10-17). An entry now
+        # names a served file, not a name lookup, with the date it was
+        # checked and the evidence that it is this person.
+        import datetime
+        from kyc import overrides, photos
+        for key, entry in overrides.CANDIDATE_PHOTOS.items():
+            self.assertEqual(len(entry), 3, key)
+            url, checked, evidence = entry
+            self.assertTrue(url.startswith("https://upload.wikimedia.org/"), key)
+            self.assertFalse(photos.is_guessed(url), key)
+            datetime.date.fromisoformat(checked)
+            self.assertTrue(str(evidence).strip(), key)
 
 
 class TestBuild(unittest.TestCase):

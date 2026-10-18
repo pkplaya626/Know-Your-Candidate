@@ -742,7 +742,7 @@ def resolve_titles(wanted, read=None, wiki_read=None):
     sitelink to a redirect, then an enwiki redirect - kept only when it is a
     person and the title it resolves to carries the person's surname
     (portraits.title_is_about, rule 33)."""
-    from .portraits import title_is_about
+    from .portraits import article_is_theirs
 
     read = read or _get
     wiki_read = wiki_read or read
@@ -789,7 +789,7 @@ def resolve_titles(wanted, read=None, wiki_read=None):
             continue
         qid, entity, resolved = hit
         human = any(_item(c.get("mainsnak")) == HUMAN for c in _claims(entity, "P31"))
-        if not human or not title_is_about(resolved, name):
+        if not human or not article_is_theirs(resolved, {"id": key, "name": name}):
             unresolved.append(f"{key}: {title} -> {resolved} ({qid}) is not this person")
             continue
         out[key] = qid

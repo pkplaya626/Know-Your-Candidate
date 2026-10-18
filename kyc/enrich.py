@@ -42,7 +42,7 @@ from concurrent.futures import ThreadPoolExecutor
 from . import overrides
 from .legislators import age_on
 from .normalize import fill_field, looks_like_date
-from .portraits import surname_of, title_is_about
+from .portraits import article_is_theirs, surname_of, title_is_about
 from .results import OFF_BALLOT
 
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "enrichment.json")
@@ -228,6 +228,74 @@ def fetch_articles(titles, log=print):
     return out
 
 
+# Titles that are about a topic, not a person: a list, an election, a party.
+_TOPIC_TITLE = re.compile(
+    r"^(?:list of|\d{4}\b)|\belections?\b|\bprimar(?:y|ies)\b|\bparty\b|\bcaucus(?:es)?\b",
+    re.I)
+
+
+def link_targets(titles, log=print):
+    """``{title: {"to": title it lands on, "fragment": section or None,
+    "living": in Category:Living people}}``.
+
+    Where a Wikipedia title actually leads, through every redirect; a title
+    with no article is ``{"missing": True}``. A batch that fails is reported
+    and skipped: nothing is concluded about the titles in it (rule 8).
+    """
+    from .portraits import _api
+
+    out = {}
+    titles = list(dict.fromkeys(t for t in titles if t))
+    for i in range(0, len(titles), 50):
+        batch = titles[i:i + 50]
+        try:
+            data = _api({"prop": "info|categories", "redirects": "1",
+                         "clcategories": "Category:Living people", "cllimit": "max",
+                         "titles": "|".join(batch)})
+        except Exception as exc:
+            log(f"    [warn] Wikipedia batch of {len(batch)} titles failed: {exc}")
+            continue
+        query = data.get("query") or {}
+        back, fragment = {}, {}
+        for hop in query.get("normalized") or []:
+            back[hop["to"]] = back.get(hop["from"], hop["from"])
+        for hop in query.get("redirects") or []:
+            origin = back.get(hop["from"], hop["from"])
+            back[hop["to"]] = origin
+            if hop.get("tofragment"):
+                fragment[origin] = hop["tofragment"]
+        for page in query.get("pages") or []:
+            if page.get("invalid"):
+                continue
+            origin = back.get(page["title"], page["title"])
+            if page.get("missing"):
+                out[origin] = {"missing": True}
+            else:
+                out[origin] = {"to": page["title"], "fragment": fragment.get(origin),
+                               "living": bool(page.get("categories"))}
+    return out
+
+
+def link_is_about(target, name, alias=None):
+    """True when a linked title leads to an article about this person: not
+    to a section of another article, not to a list, election or party
+    article, and to a title carrying their surname. "Brian McGinnis" leads
+    to "Protests against the 2026 Iran war#Washington D.C.", "Elijah
+    Manley" to "2016 Green Party presidential primaries", and "John Cowan
+    (Georgia politician)" to the district's section of the state's 2026
+    House elections article; one candidate's link was the Cascade Party of
+    Washington's own article. A title without the surname is theirs only as
+    *alias*, an evidenced ``overrides.ARTICLE_UNDER_ANOTHER_NAME`` entry
+    ("Luther Campbell" redirects to "Uncle Luke"): being a living person's
+    article is not enough, since a redirect to a spouse or a namesake is
+    one too."""
+    if not target or target.get("missing") or target.get("fragment"):
+        return False
+    title = target.get("to") or ""
+    return (bool(title) and not _TOPIC_TITLE.search(title)
+            and (title_is_about(title, name) or (alias is not None and title == alias)))
+
+
 # ---------------------------------------------------------------- campaign site
 
 class _Page(html.parser.HTMLParser):
@@ -394,8 +462,10 @@ _PARKED = re.compile(r"domain\s+(?:name\s+)?(?:is|may\s+be)\s+for\s+sale|buy\s+t
                      r"this\s+domain\s+(?:has\s+been\s+)?registered|"
                      r"future\s+home\s+of\s+something", re.I)
 # The machinery of a parking page, in its markup rather than its words.
+# privacykeeper: trevordforme.com's parking chain sent one browser on
+# 2026-10-17 to a "Security Check" page offering a software download.
 _PARKING_CODE = re.compile(r"parking-lander|LANDER_SYSTEM|sedoparking|parkingcrew|bodis\.com|"
-                           r"park\.godaddy|domainmarket|dan\.com/", re.I)
+                           r"park\.godaddy|domainmarket|dan\.com/|privacykeeper", re.I)
 _UNBUILT = re.compile(r"\b(?:coming\s+soon|under\s+construction|check\s+back\s+soon|"
                       r"launching\s+soon)\b", re.I)
 _GENERATIONAL = {"jr", "sr", "ii", "iii", "iv", "v"}
@@ -854,8 +924,49 @@ def portrait(page, base, profile):
     return [(u, hinted) for _, u, hinted in sorted(scored, key=lambda row: -row[0])]
 
 
+def other_form(url):
+    """The same address with "www." added or taken away, or None."""
+    try:
+        parts = urllib.parse.urlsplit(str(url or ""))
+    except ValueError:
+        return None
+    host = parts.hostname or ""
+    if not host or host.count(".") < 1:
+        return None
+    flipped = host[4:] if host.startswith("www.") else "www." + host
+    if flipped.count(".") < 1:
+        return None
+    return urllib.parse.urlunsplit(parts._replace(netloc=flipped))
+
+
 def read_site(profile, url, pause=1.0, extract=True, rivals=()):
-    """Everything a campaign site gives, as a cache record."""
+    """Everything a campaign site gives, as a cache record.
+
+    When the address as filed cannot be reached at all - no DNS record, a
+    TLS failure, a host error - the same site is tried with "www." added or
+    taken away, and that form is kept only if it passes every check here,
+    naming the candidate included (rule 38): Sen. Dan Sullivan's and Marty
+    Jackley's filed www. hosts failed on 2026-10-17 while their bare
+    domains served their campaigns, and Greg Landsman's was the reverse.
+    The record keeps the filed address as ``url`` and the one that works as
+    ``working``. A hijacked or parked answer is never retried: it is a
+    verdict, not a failure.
+    """
+    record = _read_one(profile, url, pause, extract, rivals)
+    unreachable = record["status"] is None or (record["safe"] is None
+                                               and (record["status"] or 0) >= 500)
+    alternate = other_form(url) if unreachable else None
+    if alternate and not overrides.blocked_campaign_host(alternate):
+        time.sleep(pause)
+        other = _read_one(profile, alternate, pause, extract, rivals)
+        if other["safe"] is SAFE:
+            other["working"] = alternate
+            other["url"] = url
+            return other
+    return record
+
+
+def _read_one(profile, url, pause=1.0, extract=True, rivals=()):
     final, status, markup = fetch(url)
     page = parse_page(markup)
     verdict, reason = assess(profile, url, final, status, page)
@@ -921,24 +1032,51 @@ def _keep(old, new):
     return new
 
 
+def unreachable(entry):
+    """True when the last read of a committee site reached nothing at all."""
+    site = (entry or {}).get("site") or {}
+    last = site.get("lastTry") or site
+    status = last.get("status")
+    return bool(site) and (status is None or status >= 500)
+
+
 def resolve_all(profiles, root=".", refresh=False, limit=None, log=print, workers=6,
-                today=None):
+                today=None, only_unreachable=False):
     """Read Wikipedia infoboxes and campaign sites for everyone still running.
 
     Returns ``(cache, counts)``. A person read within STALE_DAYS is skipped
-    unless *refresh*; an interrupted run resumes from the cache.
+    unless *refresh*; an interrupted run resumes from the cache. With
+    *only_unreachable*, only people whose committee site the last read could
+    not reach are read again (and every ballot link is checked).
     """
     cache = load_cache(root) or {}
     people = cache.setdefault("people", {})
     today = today or datetime.date.today()
     cutoff = (today - datetime.timedelta(days=STALE_DAYS)).isoformat()
     wanted = [p for p in profiles if running(p) or checked_site(p)]
-    todo = [p for p in wanted
-            if refresh or (people.get(p["id"]) or {}).get("checked", "") < cutoff]
+    if only_unreachable:
+        todo = [p for p in wanted if unreachable(people.get(p["id"]))]
+    else:
+        todo = [p for p in wanted
+                if refresh or (people.get(p["id"]) or {}).get("checked", "") < cutoff]
     if limit:
         todo = todo[:limit]
     log(f"  enrich: {len(todo)} of {len(wanted)} people to read "
         f"({sum(running(p) for p in wanted)} challengers still running)")
+
+    # Where every ballot-page link leads, for anyone it names, in or out of
+    # the race: a link that lands on a protest, a party or an election list
+    # is not their article (:func:`link_is_about`). One request per 50.
+    ballot_links = sorted({p["wikipedia"] for p in profiles
+                           if p.get("wikipediaVia") == "election-page" and p.get("wikipedia")})
+    if ballot_links:
+        found = link_targets(ballot_links, log=log)
+        links = cache.setdefault("links", {})
+        for title in ballot_links:
+            if title in found:
+                links[title] = dict(found[title], checked=today.isoformat())
+        for title in [t for t in links if t not in ballot_links]:
+            del links[title]
 
     linked = [p for p in todo if running(p) and p.get("wikipedia")]
     articles = fetch_articles([p["wikipedia"] for p in linked], log=log) if linked else {}
@@ -948,7 +1086,7 @@ def resolve_all(profiles, root=".", refresh=False, limit=None, log=print, worker
             continue
         title, text = got
         entry = people.setdefault(profile["id"], {})
-        if not title_is_about(title, profile["name"]):
+        if not article_is_theirs(title, profile):
             entry.pop("wiki", None)       # redirected to an article about someone else
             continue
         facts = wiki_facts(text)
@@ -1027,6 +1165,39 @@ def withdrawn(site):
     return bool(site) and site.get("safe") is False and site.get("reason") in (HIJACKED, PARKED)
 
 
+def withhold_links(profiles, cache):
+    """Withhold each ballot link that leads somewhere not this person's
+    article (:func:`link_is_about`); return how many were withheld.
+
+    Run before anything follows the link: :func:`kyc.portraits.apply_cache`
+    (and ``portraits`` resolving) take a challenger's portrait from the
+    article ``wikipedia`` names, so a link withheld after them had already
+    delivered the lead image of the article it was withheld for - a section
+    of another person's article whose title carries the surname, say. It is
+    safe to run twice: a withheld profile no longer has the link.
+    """
+    links = (cache or {}).get("links") or {}
+    withheld = 0
+    for profile in profiles:
+        title = profile.get("wikipedia")
+        if (title and profile.get("wikipediaVia") == "election-page" and title in links
+                and not link_is_about(links[title], profile["name"],
+                                      alias=overrides.article_alias(profile.get("id")))):
+            # Withheld, not followed; validate lists it. A title not yet
+            # checked stays (rule 8).
+            target = links[title]
+            profile["wikipediaWithheld"] = {
+                "title": title,
+                "landsOn": None if target.get("missing") else (
+                    target.get("to", "") + (f"#{target['fragment']}"
+                                            if target.get("fragment") else "")),
+            }
+            profile.pop("wikipedia", None)
+            profile.pop("wikipediaVia", None)
+            withheld += 1
+    return withheld
+
+
 def apply_cache(profiles, cache, as_of=None):
     """Fill empty fields of challengers still running from the cache.
 
@@ -1038,6 +1209,9 @@ def apply_cache(profiles, cache, as_of=None):
     """
     people = (cache or {}).get("people") or {}
     counts = collections.Counter()
+    withheld = withhold_links(profiles, cache)
+    if withheld:
+        counts["wikipedia_withheld"] += withheld
     for profile in profiles:
         entry = people.get(profile.get("id"))
         if not entry:
@@ -1046,6 +1220,15 @@ def apply_cache(profiles, cache, as_of=None):
         if committee and withdrawn(committee) and profile.get("campaignSite") == committee["url"]:
             profile.pop("campaignSite", None)
             counts["withdrawn"] += 1
+        working = (committee or {}).get("working")
+        if (working and committee.get("safe") is True
+                and profile.get("campaignSite") == committee["url"]
+                and not overrides.blocked_campaign_host(working)):
+            # The filed address fails and the same site answers, naming the
+            # candidate, with "www." added or taken away (read_site).
+            profile["campaignSite"] = working
+            committee = dict(committee, url=working)
+            counts["site_form"] += 1
         if not running(profile):
             continue
 
