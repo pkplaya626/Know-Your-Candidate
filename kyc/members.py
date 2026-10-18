@@ -48,6 +48,7 @@ import urllib.request
 
 from . import enrich
 from .normalize import fill_field
+from .overrides import OFFICIAL_ISSUES_NOT_A_LIST
 
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "members.json")
 OFFICES_URL = ("https://unitedstates.github.io/congress-legislators/"
@@ -1226,6 +1227,9 @@ def apply_cache(profiles, cache):
         # too, so a filter added after a read reaches the page without
         # waiting 27 days for the site to be read again.
         issues = [i for i in site.get("issues") or [] if not furniture(i)]
+        withheld = OFFICIAL_ISSUES_NOT_A_LIST.get(bioguide)
+        if withheld and withheld[1] == site.get("issuesUrl"):
+            issues = []             # read as a list, and not one (overrides)
         listed = len(issues) >= 3
         if listed and fill_field(profile, "platforms", "; ".join(issues), SITE_SOURCE):
             profile["officialIssuesUrl"] = site["issuesUrl"]
@@ -1278,6 +1282,14 @@ def problems(profiles, cache):
         out.append(("warn", "members-site-inconclusive",
                     f"{len(unsure)} members' official sites could not be read, so their "
                     "platform reads \"No data\"", unsure))
+    stale = [f"{b}: {url} (the site was last read from "
+             f"{(sites.get(b) or {}).get('issuesUrl') or 'no issues page'})"
+             for b, (_, url, _) in sorted(OFFICIAL_ISSUES_NOT_A_LIST.items())
+             if (sites.get(b) or {}).get("issuesUrl") != url]
+    if stale:
+        out.append(("warn", "members-override-stale",
+                    f"{len(stale)} entries in overrides.OFFICIAL_ISSUES_NOT_A_LIST no longer "
+                    "match the page read; check the site and drop or update them", stale))
     refused = [f"{b}: {e.get('requested')} -> {e.get('title')}"
                for b, e in sorted((cache.get("articles") or {}).items()) if e.get("refused")]
     if refused:

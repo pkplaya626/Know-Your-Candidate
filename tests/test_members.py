@@ -470,6 +470,25 @@ class TestApplied(unittest.TestCase):
         self.assertEqual(larsen["officialIssuesUrl"], "https://larsen.house.gov/issues/")
         self.assertNotIn("platforms", larsen.get("fieldSources", {}))
 
+    def test_a_page_recorded_as_no_list_is_linked_instead(self):
+        from kyc import overrides
+        larsen = member()
+        url = self.CACHE["sites"]["L000560"]["issuesUrl"]
+        saved = dict(overrides.OFFICIAL_ISSUES_NOT_A_LIST)
+        try:
+            members.OFFICIAL_ISSUES_NOT_A_LIST["L000560"] = ("2026-10-18", url, "fragments")
+            members.apply_cache([larsen], self.CACHE)
+            self.assertEqual(larsen["quality"]["platforms"], "see_site")
+            self.assertEqual(larsen["officialIssuesUrl"], url)
+            # Once the site is read from another page, the entry is reported.
+            moved = dict(self.CACHE, sites={"L000560": dict(self.CACHE["sites"]["L000560"],
+                                                            issuesUrl=url + "new")})
+            codes = [p[1] for p in members.problems([member()], moved)]
+            self.assertIn("members-override-stale", codes)
+        finally:
+            members.OFFICIAL_ISSUES_NOT_A_LIST.clear()
+            members.OFFICIAL_ISSUES_NOT_A_LIST.update(saved)
+
     def test_an_issues_page_with_no_list_read_is_linked_not_called_empty(self):
         # Senator Sanders's issues page is prose under tabs: there is a
         # page, and no list this reader can take in its words.

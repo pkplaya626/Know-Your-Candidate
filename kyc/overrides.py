@@ -552,6 +552,20 @@ NOT_A_PORTRAIT = {
         ("2026-10-02", "a hunting scene; no face at card size"),
 }
 
+# A member's official issues page whose list `members` reads but that is not
+# the page's list of issues, keyed on bioguide id: (date checked, the page
+# read, what it shows). The rules take a page's links or one level of its
+# headings in its words; a page that splits each title across two headings
+# passes them and reads as fragments. The page is linked instead ("On their
+# official site's issues page"). The refresh re-reads every site, so a
+# correction made by editing the cache would not last; members.problems
+# reports an entry whose page is no longer the one read.
+OFFICIAL_ISSUES_NOT_A_LIST = {
+    "L000575": ("2026-10-18", "https://www.lankford.senate.gov/issues/",
+                "each title is split over two headings: 'Protecting' over 'Life, Liberty & "
+                "Our Families', 'Bringing Down' over 'High Costs in Our Nation'"),
+}
+
 # The 2026 Senate seats are no longer typed here. A surname table matched
 # Darline Graham to Lindsey Graham's seat; the seats are now the frozen race
 # record, keyed on bioguide ids (kyc/record.py, data/record_2026.json).
