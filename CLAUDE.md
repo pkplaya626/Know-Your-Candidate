@@ -1387,19 +1387,26 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     id: education and careers from the Congressional Directory, joined on
     the office web address congress-legislators lists for the bioguide id
     and cross-checked against the printed surname (the Biographical
-    Directory refuses scripts); education from the infobox of the article
+    Directory answers a script 403 and headless Chrome a Cloudflare
+    challenge); education or an occupation from the infobox of the article
     the id maps to where the Directory has none; the platform from the
     official site's own issues list, one level, in its words, never a line
     naming the member or anyone else ("Trump's One Big Beautiful Betrayal"
     is a banner under Van Hollen's issues path). An "On The Issues" link
     can lead to a page whose children are a voting record (Matsui's
-    /legislative-work), so pages filed under an issues path win. A site
-    read that lists none is "Not listed on their official site", never "No
-    data" and never the typed text; a refusal concludes nothing until
-    headless Chrome has tried (rule 8). A contact page is linked only once a
-    fetch shows a form to write with: a soft 200 is not one. A challenger's
-    dialog leads with the race, then the money, the platform and the
-    biography, and its absences are said once (PROFILES-18).
+    /legislative-work), so pages filed under an issues path win. A link
+    is labelled by its first block of words: Cruz's issues are cards, and
+    read whole "Tax Reform Promote jobs, growth, and opportunity" passed as
+    an issue while the cards with longer blurbs were dropped, a partial list
+    that looked whole. The House template's furniture filed under Issues
+    (Community Project Funding, Legislative Process, Bill Search) is not an
+    issue. A site read that lists none is "Not listed on their official
+    site", never "No data" and never the typed text; a refusal concludes
+    nothing until headless Chrome has tried (rule 8). A contact page is
+    linked only once a fetch shows a form to write with, or the House's
+    shared form framed on the member's page: a soft 200 is not one. A
+    challenger's dialog leads with the race, then the money, the platform
+    and the biography, and its absences are said once (PROFILES-18).
 
 ## District maps
 

@@ -245,7 +245,11 @@ _NOT_A_TOPIC = re.compile(r"\b(?:news\s+alert|press\s+releases?|fact\s+sheet|faq
                           r"community\s+project\s+funding|funding\s+requests?|"
                           r"legislative\s+process|how\s+congress\s+works|bill\s+search|"
                           r"ethics\s+approval|covid(?:-19)?\s+resources|"
-                          r"congressionally\s+directed\s+spending)\b|"
+                          r"congressionally\s+directed\s+spending|project\s+requests?|"
+                          r"disclosure\s+page|legislative\s+action|committee\s+work|"
+                          r"my\s+caucuses|travel\s+abroad|passports?|academy\s+nominations?|"
+                          r"application\s+form|bills?\s+i\S*\s+(?:co-?)?sponsored|"
+                          r"sponsored\s*/\s*co-?sponsored|\d{4}\s+in\s+review)\b|"
                           r"^(?:legislation|cpf(?:\s+requests?)?|grants?)$",
                           re.I)
 _TITLES = r"(?:president|vice\s+president|senator|sen|rep|representative|congressman|" \
@@ -316,6 +320,14 @@ def _clean(text):
     text = " ".join(text.split())
     text = re.sub(r"^[^\w\"'“‘(]+|[\s»›→>]+$", "", text, flags=re.U)
     return enrich._NUMBERING.sub("", text.strip(" :.-–—|•#*")).strip(" :.-–—|•")
+
+
+def furniture(text):
+    """True when *text* is a site's furniture filed among its issues - a
+    label of the list, a funding-request page, a constituent service - not
+    an issue."""
+    text = _clean(text)
+    return bool(_LIST_LABEL.match(text) or _NOT_A_TOPIC.search(text))
 
 
 def topic(text, own, others):
@@ -1086,12 +1098,17 @@ def apply_cache(profiles, cache):
         site = sites.get(bioguide) or {}
         if not site or site.get("url") != profile.get("website") or profile.get("formerMember"):
             continue
-        if site.get("issues") and fill_field(profile, "platforms", "; ".join(site["issues"]),
-                                             SITE_SOURCE):
+        # What the furniture filter now refuses is dropped from a cached read
+        # too, so a filter added after a read reaches the page without
+        # waiting 27 days for the site to be read again.
+        issues = [i for i in site.get("issues") or [] if not furniture(i)]
+        listed = len(issues) >= 3
+        if listed and fill_field(profile, "platforms", "; ".join(issues), SITE_SOURCE):
             profile["officialIssuesUrl"] = site["issuesUrl"]
             profile["platformRead"] = site.get("read")
             counts["platform"] += 1
-        elif site.get("verdict") == "none" and profile.get("quality", {}).get("platforms"):
+        elif (site.get("verdict") == "none" or (site.get("verdict") == "listed" and not listed)) \
+                and profile.get("quality", {}).get("platforms"):
             # Read, and the site lists no issues: said as that, not as "No
             # data", which is a claim that nobody looked (rule 19).
             profile["quality"]["platforms"] = "not_listed"

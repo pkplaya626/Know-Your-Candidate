@@ -206,7 +206,12 @@ class TestTheIssuesTheirSiteLists(unittest.TestCase):
         for text in ("Community Project Funding", "CPF Requests", "Legislative Process",
                      "Bill Search", "How Congress Works", "Grants", "Ethics Approval",
                      "COVID-19 Resources", "Congressionally Directed Spending Requests",
-                     "Fiscal Year 2027 NDAA Community Project Funding Requests"):
+                     "Fiscal Year 2027 NDAA Community Project Funding Requests",
+                     "Project Requests", "Member-Designated Transportation Project Disclosure Page",
+                     "My Caucuses", "Committee Work", "Travel Abroad", "2019 in Review",
+                     "Bills I've Sponsored/Co-Sponsored", "Legislative Action",
+                     "Military Academy Nomination Application Form"):
+            self.assertTrue(members.furniture(text), text)
             self.assertEqual(members.topic(text, "Rick Larsen", OTHERS), "", text)
         for text in ("Natural Resources", "Water Resources", "Appropriations", "Small Business"):
             self.assertEqual(members.topic(text, "Rick Larsen", OTHERS), text, text)
@@ -392,6 +397,22 @@ class TestApplied(unittest.TestCase):
         self.assertEqual(moved["education"], "")
         self.assertNotIn("fieldSources", moved)
         self.assertNotIn("contactForm", moved)
+
+    def test_furniture_is_dropped_from_a_cached_read(self):
+        # A filter added after a read reaches the page at the next build.
+        larsen = member()
+        sites = {"L000560": dict(self.CACHE["sites"]["L000560"],
+                                 issues=["Agriculture", "Project Requests", "Health Care",
+                                         "Veterans"])}
+        members.apply_cache([larsen], dict(self.CACHE, sites=sites))
+        self.assertEqual(larsen["platforms"], "Agriculture; Health Care; Veterans")
+        # Fewer than three left is no list: the site was read and lists none.
+        larsen = member()
+        sites = {"L000560": dict(self.CACHE["sites"]["L000560"],
+                                 issues=["Agriculture", "Project Requests", "Committee Work"])}
+        members.apply_cache([larsen], dict(self.CACHE, sites=sites))
+        self.assertEqual(larsen["quality"]["platforms"], "not_listed")
+        self.assertNotIn("platforms", larsen.get("fieldSources", {}))
 
     def test_a_challenger_is_never_touched(self):
         challenger = member(id="H6WA02123", isCandidate=True)
