@@ -253,6 +253,9 @@ def _build(args):
     for level, code, message, detail in oge_mod.problems(oge_mod.load_cache(args.root),
                                                          federal_mod.load_cache(args.root)):
         issues.append(validate.Issue(level, code, message, detail))
+    departed_rows, departed_problems = _departed(args.root, snapshot, profiles)
+    for level, code, message, detail in departed_problems:
+        issues.append(validate.Issue(level, code, message, detail))
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -278,6 +281,7 @@ def _build(args):
                                 committees=legislators.load_committees(args.root),
                                 results=outcomes, snapshot=snapshot)
     summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root))
+    summary["departed"] = departed_rows
     path, size = emit.write_profiles(
         profiles, stats, args.root, races=race_list, summary=summary
     )
@@ -490,6 +494,14 @@ def _campaigns(args):
                                      refresh=args.refresh)
     print(f"\n[ok] campaigns cache: {campaigns.CACHE_PATH}")
     return 1 if stats.get("stopped") else 0
+
+
+def _departed(root, snapshot, profiles):
+    """The members who left the sitting Congress, for the grid's search,
+    and what is wrong with the list (kyc/departed.py)."""
+    from . import departed as departed_mod
+
+    return departed_mod.for_page(departed_mod.load_cache(root), snapshot, profiles)
 
 
 def _age_date(stats):
@@ -761,6 +773,23 @@ def _congress(args):
         except legislators.LegislatorsError as exc:
             print(f"  [warn] {exc}; nobody is archived this run")
     ended = legislators.departures(absent, snapshot, historical=historical)
+
+    # Everyone who has left the sitting Congress, for the grid's search
+    # (kyc/departed.py, GRID-08): from the same historical file, read when
+    # the membership was. A failed download keeps the last list (rule 8).
+    if not args.check and not args.snapshot:
+        from . import departed as departed_mod
+        if historical is None and not args.historical:
+            try:
+                historical = legislators.fetch(legislators.HISTORICAL_URL)
+            except legislators.LegislatorsError as exc:
+                print(f"  [warn] {exc}; the list of departed members is kept as it was")
+        if historical is not None:
+            data = departed_mod.build(historical, snapshot)
+            path = departed_mod.save_cache(data, args.root)
+            from .cycle import ordinal
+            print(f"  wrote {path} ({len(data['members'])} who left the "
+                  f"{ordinal(data['congress'])} Congress)")
 
     drift = legislators.reconcile(raw["members"], snapshot, ended=ended)
     print(f"\n  reconciliation: {drift.summary()}")
@@ -1178,6 +1207,7 @@ def _verify(args):
                                 results=outcomes,
                                 snapshot=legislators.load_snapshot(args.root))
     summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root))
+    summary["departed"] = _departed(args.root, legislators.load_snapshot(args.root), profiles)[0]
 
     problems = []
     from . import cycle as cycle_mod

@@ -336,6 +336,11 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
     from .legislators import by_bioguide
 
     people = by_bioguide(snapshot)
+    # The surname each person is listed under, for the grid's "Name, A to
+    # Z", which sorted by first name: Aaron Bean, Aaron Flint, Aaron Gies
+    # (audit 2026-10-17, GRID-20). The same surname the races order by.
+    for profile in profiles:
+        profile["surname"] = surname(profile, filed, people)
     for race in races.values():
         # One order for the people in a race, in every view that lists them:
         # the race view had them in build order (curated rows first, then
