@@ -1692,8 +1692,8 @@ async function testStates() {
     check("each opens in a new tab, without an opener",
       links.every((a) => a.target === "_blank" && /noopener/.test(a.rel)));
     check("it names NASS's Can I Vote and the dates it was listed and opened",
-      !!box.querySelector('a[href^="https://www.nass.org/"]') && /listed \d{4}-\d{2}-\d{2}/.test(box.textContent) &&
-        /each link opened \d{4}-\d{2}-\d{2}/.test(box.textContent), box.textContent);
+      !!box.querySelector('a[href^="https://www.nass.org/"]') && /listed (?:it|them) on \d{4}-\d{2}-\d{2}/.test(box.textContent) &&
+        /Each link opened \d{4}-\d{2}-\d{2}/.test(box.textContent), box.textContent);
     // Deadlines are vote.gov's, linked, never typed or called passed
     // (STATEGOV-11, PERSONA-03).
     check("registration deadlines link to vote.gov's page for the state, with no date typed",
@@ -2645,6 +2645,22 @@ async function testBallotCounts() {
   await settle(50);
   const W = index.window;
   const I = index.D;
+  /* The sidebar called open-seat candidates "Challengers on the ballot"
+   * after the state strips stopped (RACES-14, PR #94 review); on both
+   * pages that carry it, the two rows now add up to the national figure. */
+  const mapSidebar = await buildPage("map.html");
+  suite("index.html and map.html — the sidebar splits challengers from open-seat candidates", () => {
+    const e = W.kycBuildMeta.election;
+    [["index.html", I], ["map.html", mapSidebar.D]].forEach(([page, doc]) => {
+      const ch = doc.getElementById("challengerCount");
+      const open = doc.getElementById("openCandidateCount");
+      check(page + ": both rows, adding up to everyone on the ballot besides members running for their seat",
+        !!ch && !!open && e.openCandidates > 0 &&
+          Number(ch.textContent) + Number(open.textContent) === e.challengersOnBallot &&
+          Number(open.textContent) === e.openCandidates,
+        (ch && ch.textContent) + " + " + (open && open.textContent) + " vs " + e.challengersOnBallot);
+    });
+  });
   suite("index.html — the people the results name with no profile here", () => {
     const seat = W.kycRaces.find((r) => r.chamber === "Senate" &&
       KYC.cards && W.KYC.cards.unprofiledNames(r).none.length >= 2);

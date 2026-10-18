@@ -132,7 +132,8 @@
     }
     if (own.length) {
       out.push(quoted(own, labels) + (own.length === 1 ? " is " : " are ") +
-        (office ? "the " + outLink(office.url, office.name) + "'s own page" + (own.length === 1 ? "" : "s") +
+        (office ? "the " + outLink(office.url, office.name) + (/s$/.test(office.name) ? "'" : "'s") +
+          " own page" + (own.length === 1 ? "" : "s") +
           "; the National Association of Secretaries of State lists no territory."
         : KYC.escapeHtml(possessive(place)) + " election office's own page" +
           (own.length === 1 ? "" : "s") + ", as its site links " + (own.length === 1 ? "it." : "them.")));
