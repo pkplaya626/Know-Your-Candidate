@@ -330,9 +330,13 @@
         return { code: code, data: data, found: pointIn(data, lon, lat, marginKm) };
       }, function () { return null; });
     })).then(function (all) {
+      var failed = all.length - all.filter(Boolean).length;
       all = all.filter(Boolean);
       var hit = all.filter(function (a) { return inState(a.found); })[0] ||
         all.filter(function (a) { return a.found.cd.kind !== "none"; })[0];
+      // A state whose file did not load is not a state the point is not
+      // in: "not in any state" from a failed download is a silent error.
+      if (!hit && failed) throw new Error("a lookup file did not load");
       if (!hit) return { code: null, tried: codes.length, loaded: all.length };
       return legislatureOf(hit.code).then(function (leg) {
         hit.leg = leg;

@@ -22,7 +22,7 @@ const SITE = path.resolve(__dirname, "..", "candidate_profiles_site");
  * and nothing reaches the network: the pages load nothing from another host
  * (CLAUDE.md), and a stylesheet is nothing a test reads. *served* lists the
  * site's files a page asked for. */
-function siteResources(served) {
+function siteResources(served, refuse) {
   return {
     interceptors: [requestInterceptor((request) => {
       const u = new URL(request.url);
@@ -30,6 +30,7 @@ function siteResources(served) {
       if (/\.css$/.test(u.pathname)) return new Response("", { headers: { "Content-Type": "text/css" } });
       const file = path.join(SITE, ...decodeURIComponent(u.pathname).split("/").filter(Boolean));
       served.push(u.pathname + u.search);
+      if (refuse && refuse.test(u.pathname)) return new Response("", { status: 503 });
       if (!fs.existsSync(file) || !fs.statSync(file).isFile()) return new Response("", { status: 404 });
       return new Response(fs.readFileSync(file), {
         headers: { "Content-Type": "application/javascript; charset=utf-8" },
@@ -153,7 +154,7 @@ function buildPage(page, opts) {
   const served = [];
   const dom = new JSDOM(html, {
     runScripts: "dangerously",
-    resources: siteResources(served),
+    resources: siteResources(served, opts.refuse),
     url: "https://kyc.local/" + page + (opts.search || "") + (opts.hash || ""),
     pretendToBeVisual: true,
     virtualConsole: vc,
@@ -4419,6 +4420,18 @@ async function testFindMyDistrict() {
     check("opens OH-12 on the old map and OH-2 on the new",
       cards.length === 2 && /^OH-12 on the/.test((cards[0].querySelector(".district-fact-title") || {}).textContent) &&
         /^OH-2 on the/.test((cards[1].querySelector(".district-fact-title") || {}).textContent));
+  });
+
+  // The lookup file does not load: the page's own lines answer, with their
+  // wider margin - never "not in Pennsylvania" for a reader in it.
+  const offline = await buildPage("districts/pa.html", { setup: at(plat, plon), refuse: /\/lookup\// });
+  offline.D.getElementById("locateMe").click();
+  const offOut = offline.D.getElementById("locateResult");
+  await until(() => !/Finding your location/.test(offOut.textContent));
+  suite("districts/pa.html — when the finer lines do not load", () => {
+    check("Erie is still placed in PA-16, on the page's own lines",
+      /You are in PA-16\./.test(offOut.textContent) && !/not in Pennsylvania/.test(offOut.textContent),
+      offOut.textContent.slice(0, 160));
   });
 
   const paris = await located("districts/pa.html", 48.8566, 2.3522);
