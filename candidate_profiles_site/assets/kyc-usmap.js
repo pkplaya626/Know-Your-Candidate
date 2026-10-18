@@ -349,9 +349,10 @@
           // map; a faint fill names its own ink so the word stays legible.
           // A surface grey (a state with no value) takes the page's text
           // colour unless told otherwise: the inverse text was 1.15:1 on it
-          // in the light theme and 1.02:1 in the dark.
+          // in the light theme and 1.02:1 in the dark. The mid-tones and
+          // the other greys name theirs in kyc.css (KYC.fillInk).
           var surface = /--surface-|--none-fill/.test(shown.fill || "");
-          node.style.color = shown.ink || (surface ? "var(--text)" : "");
+          node.style.color = shown.ink || KYC.fillInk(shown.fill);
           // A grey box on the grey page needs an edge to be seen as a box.
           node.style.borderColor = surface && hatch === shown.fill ? "var(--text-faint)" : "";
           node.classList.toggle("is-selected", code === selected);

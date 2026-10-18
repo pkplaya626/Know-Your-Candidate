@@ -1500,10 +1500,22 @@ async function testMap() {
         !/0R, 0D/.test(dc.getAttribute("aria-label") || ""), dc && dc.getAttribute("aria-label"));
 
     D.querySelector('[data-mode="house"]').click();
-    check("House mode blends by delegation share",
-      /color-mix/.test(D.querySelector('[data-state="TX"]').style.fill),
-      D.querySelector('[data-state="TX"]').style.fill);
-    check("legend follows the mode", /All R/.test(D.getElementById("mapLegend").textContent));
+    // Five labelled steps, not a ramp with no values (VISUALS-09): a
+    // delegation with members of both parties is a majority's tint, or the
+    // hatched split when even, and its key says so.
+    const houseKeys = [...D.querySelectorAll("#mapLegend .swatch")].map((s) => s.getAttribute("data-fill"));
+    const mixed = [...D.querySelectorAll("#usMap .state")].filter((s) =>
+      /House: [1-9]\d*R, [1-9]\d*D/.test(s.getAttribute("aria-label") || ""));
+    check("House mode draws each delegation in a labelled step, by its majority",
+      mixed.length > 5 && mixed.every((s) => {
+        const m = /House: (\d+)R, (\d+)D/.exec(s.getAttribute("aria-label"));
+        const want = +m[1] > +m[2] ? "var(--party-r-tint)" : +m[1] < +m[2] ? "var(--party-d-tint)"
+          : KYC.svgFill("var(--split)");
+        return s.style.fill === want && houseKeys.indexOf(want) !== -1;
+      }),
+      mixed.slice(0, 3).map((s) => s.getAttribute("aria-label") + " " + s.style.fill).join(" | "));
+    check("legend follows the mode", /All R/.test(D.getElementById("mapLegend").textContent) &&
+      /R majority/.test(D.getElementById("mapLegend").textContent));
 
     D.querySelector('[data-mode="senate2026"]').click();
     check("2026 mode marks a state with no race", (() => {
@@ -1514,6 +1526,23 @@ async function testMap() {
     })());
     check("mode buttons announce their state",
       D.querySelector('[data-mode="senate2026"]').getAttribute("aria-pressed") === "true");
+    // Open seats and special elections were only in the hover text, which
+    // a touch reader never sees (RACES-21): an open seat is its party's
+    // tint, a special is outlined, and the legend has a key for each.
+    const senateRaces = window.kycRaces.filter((r) => r.chamber === "Senate");
+    const shapeOf = (code) => D.querySelector('#usMap .state[data-state="' + code + '"]');
+    const legend26 = D.getElementById("mapLegend").textContent;
+    const opens = senateRaces.filter((r) => r.openSeat);
+    check("an open seat is drawn in its party's tint, and the legend names it",
+      opens.every((r) => /-tint\)$/.test(shapeOf(r.state).style.fill) ||
+        /party-i-fill|vacant-fill/.test(shapeOf(r.state).style.fill)) &&
+        (!opens.length || /Open (Republican|Democratic) seat/.test(legend26)),
+      senateRaces.filter((r) => r.openSeat).map((r) => r.state + " " + shapeOf(r.state).style.fill).join(" | "));
+    check("a special election is outlined, and only a special",
+      [...D.querySelectorAll("#usMap .state")].every((s) => s.classList.contains("is-marked") ===
+        senateRaces.some((r) => r.special && r.state === s.getAttribute("data-state"))) &&
+        (!senateRaces.some((r) => r.special) || /Special election/.test(legend26)),
+      senateRaces.filter((r) => r.special).map((r) => r.state).join(", "));
     // John Cornyn and Bill Cassidy ran and lost; the label called them "not
     // running", like a retiree, while the panel beside it said "Lost primary".
     const label = (code) => (D.querySelector('#usMap [data-state="' + code + '"]') || {
@@ -3359,6 +3388,135 @@ function testContrast() {
     check("the party tag's label colour comes from the theme, not a literal",
       !/style\.color\s*=\s*["']#/.test(js) && /\.party-tag\s*\{[^}]*color:\s*var\(--text-inverse\)/.test(css));
   });
+  testColourVision(css);
+}
+
+/* ========================================================= colour vision */
+
+/* To a deuteranope the split lilac was the Democratic blue (0.8 apart in
+ * the dark theme), the light theme's Republican red and independent amber
+ * one olive (2.3), and the guide's teal and magenta 3.7 apart (audit
+ * 2026-10-17, VISUALS-03, -04, -07). Every map legend's fills are run
+ * through the Machado (2009) severity-1 matrices for protanopia,
+ * deuteranopia and tritanopia, in linear sRGB, and compared in OKLab (x100)
+ * in all three themes, from the tokens themselves. A pair two readers must
+ * tell apart by colour alone is 10 apart under protanopia and deuteranopia
+ * and 7 under tritanopia; a pair one side of which is hatched (split,
+ * none: KYC.svgFill) carries a second cue and needs 5. */
+function testColourVision(css) {
+  const block = (sel) => {
+    const i = css.indexOf(sel + " {");
+    const out = {};
+    for (const m of css.slice(i, css.indexOf("\n}", i)).matchAll(/--([\w-]+):\s*([^;]+);/g)) out[m[1]] = m[2].trim();
+    return out;
+  };
+  const base = block(":root");
+  const themes = {
+    dark: base,
+    amoled: Object.assign({}, base, block('[data-theme="amoled"]')),
+    light: Object.assign({}, base, block('[data-theme="light"]')),
+  };
+  const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const hex = (c) => "#" + c.map((v) => Math.round(v).toString(16).padStart(2, "0")).join("");
+  // A token's colour in a theme, through var() and color-mix(in srgb).
+  const resolve = (t, v, depth = 0) => {
+    v = v.trim();
+    if (depth > 20) throw new Error("token loop at " + v);
+    if (/^#[0-9a-f]{6}$/i.test(v)) return v.toLowerCase();
+    let m = v.match(/^var\(--([\w-]+)(?:,\s*(.+))?\)$/);
+    if (m) return resolve(t, t[m[1]] !== undefined ? t[m[1]] : m[2], depth + 1);
+    m = v.match(/^color-mix\(in srgb,\s*(.+?)\s+(\d+)%,\s*(.+)\)$/);
+    if (m) {
+      const a = rgb(resolve(t, m[1], depth + 1)), b = rgb(resolve(t, m[3], depth + 1)), w = +m[2] / 100;
+      return hex(a.map((x, i) => w * x + (1 - w) * b[i]));
+    }
+    throw new Error("cannot resolve " + v);
+  };
+  const MATRIX = {
+    protanopia: [[0.152286, 1.052583, -0.204868], [0.114503, 0.786281, 0.099216], [-0.003882, -0.048116, 1.051998]],
+    deuteranopia: [[0.367322, 0.860646, -0.227968], [0.280085, 0.672501, 0.047413], [-0.011820, 0.042940, 0.968881]],
+    tritanopia: [[1.255528, -0.076749, -0.178779], [-0.078411, 0.930809, 0.147602], [0.004733, 0.691367, 0.303900]],
+  };
+  const lin = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  const oklab = ([r, g, b]) => {
+    const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+    const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+    const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+    return [0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s,
+      1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s,
+      0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s];
+  };
+  const seen = (h, k) => {
+    const c = rgb(h).map(lin);
+    return oklab(MATRIX[k].map((row) => Math.min(1, Math.max(0, row[0] * c[0] + row[1] * c[1] + row[2] * c[2]))));
+  };
+  const apart = (a, b, k) => { const x = seen(a, k), y = seen(b, k); return 100 * Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]); };
+  const lum = (h) => {
+    const c = rgb(h).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  };
+  const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+  const HATCHED = new Set(["var(--split)", "var(--none-fill)", "color-mix(in srgb, var(--split) 70%, var(--surface-1))"]);
+  const mix70 = (k) => `color-mix(in srgb, var(--${k}) 70%, var(--surface-1))`;
+  // The fills each legend draws side by side, as the map modules name them.
+  const LEGENDS = {
+    "the partisan and state-government maps": ["var(--party-r)", "var(--party-d)", "var(--party-i-fill)",
+      "var(--party-r-tint)", "var(--party-d-tint)", "var(--split)", "var(--vacant-fill)",
+      "var(--none-fill)", "var(--nonpartisan-fill)", "var(--text)"],
+    "the district and legislature maps": [mix70("party-d"), mix70("party-r"), mix70("party-i-fill"),
+      mix70("split"), "color-mix(in srgb, var(--party-vacant) 35%, var(--surface-1))"],
+    "the guide's categories": ["var(--cat-1)", "var(--cat-2)", "var(--cat-3)", "var(--cat-4)",
+      "var(--cat-5)", "var(--none-fill)"],
+  };
+  suite("kyc.css — legend colours under colour-vision deficiency (Machado 2009)", () => {
+    for (const [name, t] of Object.entries(themes)) {
+      for (const [legend, fills] of Object.entries(LEGENDS)) {
+        const bad = [];
+        for (let i = 0; i < fills.length; i++) {
+          for (let j = i + 1; j < fills.length; j++) {
+            const a = resolve(t, fills[i]), b = resolve(t, fills[j]);
+            const hatched = HATCHED.has(fills[i]) || HATCHED.has(fills[j]);
+            for (const k of Object.keys(MATRIX)) {
+              const need = hatched ? (k === "tritanopia" ? 2 : 5) : (k === "tritanopia" ? 7 : 10);
+              const d = apart(a, b, k);
+              if (d < need) bad.push(`${fills[i]} ~ ${fills[j]} ${k} ${d.toFixed(1)}`);
+            }
+          }
+        }
+        check(`${name}: ${legend}`, bad.length === 0, bad.slice(0, 4).join(" | "));
+      }
+      // The count scale: each step a step of lightness from the next, the
+      // first well apart from "none" and from the page (GUIDE-16: 1.4:1).
+      const scale = [1, 2, 3, 4, 5].map((n) => resolve(t, `var(--scale-${n})`));
+      const steps = scale.slice(1).map((c, i) => Math.min(...Object.keys(MATRIX).map((k) => apart(c, scale[i], k))));
+      const floor = Math.min(...["none-fill", "surface-0"].flatMap((s) =>
+        Object.keys(MATRIX).map((k) => apart(scale[0], resolve(t, `var(--${s})`), k))));
+      check(`${name}: the count scale's steps, and its first against none and the page`,
+        steps.every((d) => d >= 5) && floor >= 10,
+        `steps ${steps.map((d) => d.toFixed(1)).join(" / ")}, first ${floor.toFixed(1)}`);
+      // A callout writes on these fills in the ink kyc.js names for them.
+      const inks = [["split", "split-ink"], ["party-r-tint", "text"], ["party-d-tint", "text"],
+        ["vacant-fill", "vacant-ink"], ["none-fill", "text"], ["nonpartisan-fill", "text-inverse"],
+        ["cat-1", "cat-1-ink"], ["cat-2", "cat-2-ink"], ["cat-3", "cat-3-ink"], ["cat-4", "cat-4-ink"]]
+        .map(([f, ink]) => [f, ratio(resolve(t, `var(--${f})`), resolve(t, `var(--${ink})`))]);
+      check(`${name}: a callout's word on its fill, 4.5:1`, inks.every((p) => p[1] >= 4.5),
+        inks.map((p) => `${p[0]} ${p[1].toFixed(2)}`).join(" / "));
+      // No status or money colour is a party's (VISUALS-06): "Lost primary"
+      // was the Republican red, "Open seat" the independents' amber, and a
+      // Democrat's "Spent" was in Republican red.
+      const parties = ["party-d", "party-r", "party-i", "party-i-fill", "split"].map((p) => resolve(t, `var(--${p})`));
+      // Compared as seen without a deficiency: these sit in badges and
+      // money tiles, never beside a party's fill in a legend.
+      const plain = (a, b) => { const x = oklab(rgb(a).map(lin)), y = oklab(rgb(b).map(lin));
+        return 100 * Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]); };
+      const shared = ["warn", "danger", "warn-text", "danger-text", "money-out", "money-in"]
+        .filter((s) => parties.some((p) => plain(resolve(t, `var(--${s})`), p) < 10));
+      check(`${name}: no status or money colour is a party's`, shared.length === 0, shared.join(", "));
+    }
+    const js = fs.readFileSync(path.join(SITE, "assets", "kyc.js"), "utf8");
+    check("the fills the tests call hatched are the ones kyc.js hatches",
+      /"var\(--split\)": "split", "var\(--none-fill\)": "none"/.test(js));
+  });
 }
 
 /* ================================================================== report */
@@ -4488,6 +4646,13 @@ async function testDistrictPages() {
   });
 
   const fl = await buildPage("districts/fl.html");
+  suite("districts/fl.html — the party legend", () => {
+    // "Democrat" as an adjective here, "Democratic" on every other legend
+    // (VISUALS-18): the party is an adjective on a map key.
+    const legend = fl.D.querySelector(".party-legend").textContent;
+    check("a key names the party as an adjective, as every other legend does",
+      /Democratic/.test(legend) && !/Democrat(?!ic)/.test(legend), legend);
+  });
   suite("districts/fl.html — a seat with no member", () => {
     const vacant = fl.window.kycRaces.filter((r) => r.state === "FL" && r.chamber === "House")
       .map((r) => r.district)

@@ -53,7 +53,7 @@
   /* "Split" and "divided" sit between the parties in lightness, not only in
    * hue: the old lilac was 0.8 from the Democratic blue to a deuteranope,
    * and every divided state read as Democratic (VISUALS-03). Where it fills
-   * a shape it is also hatched (--split-hatch, kyc.js hatchFill), a cue
+   * a shape it is also hatched (--split-hatch, KYC.svgFill), a cue
    * that is not colour at all. render_test.js runs the Machado protanopia,
    * deuteranopia and tritanopia matrices over these tokens. */
   --split: #8a5cd6;
@@ -67,6 +67,21 @@
    * fills a shape. */
   --none-fill: #2b313a;
   --none-hatch: #4a5361;
+  /* A vacant seat's fill on the partisan map: a grey at least 10 apart
+   * from every party fill under each simulation; the faint text grey was
+   * 8.3 from the Republican red to a protanope. */
+  --vacant-fill: var(--text-muted);
+  --vacant-ink: var(--text-inverse);
+  /* A body elected without party labels, or an office a state does not
+   * have, on the state-government map: a grey of its own, apart from the
+   * vacant grey, the hatched "none" and the text colour (a dispute). */
+  --nonpartisan-fill: #c4c8d4;
+  /* A party's colour lighter in weight: a House majority short of the
+   * whole delegation, an open Senate seat. A step of lightness from the
+   * party's own colour, which a reader who cannot see hue still tells
+   * apart; the page's text reads on it at 4.5:1. */
+  --party-r-tint: color-mix(in srgb, var(--party-r) 55%, var(--surface-1));
+  --party-d-tint: color-mix(in srgb, var(--party-d) 55%, var(--surface-1));
 
   --money-in: #46d17d;
   /* Money out is plain text: a Democrat's "Spent" was in Republican red. */
@@ -211,6 +226,11 @@
   --split-ink: var(--text);
   --none-fill: #d9dee6;
   --none-hatch: #9aa4b2;
+  --vacant-fill: #b0bac7;
+  --vacant-ink: var(--text);
+  --nonpartisan-fill: #303440;
+  --party-r-tint: #ca6762;
+  --party-d-tint: #7298c5;
 
   --money-in: #12703a;
   --money-in-text: #0e5c2f;

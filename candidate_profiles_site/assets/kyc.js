@@ -1604,6 +1604,20 @@
     return key ? "var(--hatch-" + key + ", " + fill + ")" : fill;
   }
 
+  /* The word's colour on a fill, where the callout's default (the inverse
+   * text) does not read: the mid-tones and the greys name their own ink,
+   * per theme, in kyc.css. */
+  var FILL_INK = {
+    "var(--split)": "var(--split-ink)",
+    "var(--party-r-tint)": "var(--text)",
+    "var(--party-d-tint)": "var(--text)",
+    "var(--vacant-fill)": "var(--vacant-ink)",
+    "var(--none-fill)": "var(--text)",
+  };
+  function fillInk(fill) {
+    return FILL_INK[fill] || (/--surface-/.test(fill || "") ? "var(--text)" : "");
+  }
+
   /** The same fill as an HTML background, for a legend swatch or a callout. */
   function swatchFill(fill) {
     var key = HATCHED[fill];
@@ -2694,6 +2708,7 @@
     hatchVars: hatchVars,
     svgFill: svgFill,
     swatchFill: swatchFill,
+    fillInk: fillInk,
     seatStrip: seatStrip,
     seatKey: seatKey,
     // data

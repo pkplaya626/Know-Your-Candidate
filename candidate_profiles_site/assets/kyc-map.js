@@ -85,7 +85,7 @@
 
   /* ---------------------------------------------------------------- fills */
 
-  var VACANT_FILL = "var(--text-faint)";
+  var VACANT_FILL = "var(--vacant-fill)";
   /* Nothing to show is the grey kept for that (--none-fill, hatched by
    * KYC.svgFill): the page's own surface made those states black holes in
    * the dark and AMOLED themes (VISUALS-19, RACES-17). */
@@ -95,11 +95,11 @@
   var I_FILL = "var(--party-i-fill)";
 
   /** A party's colour, lighter in weight: a majority short of the whole
-   *  delegation, or an open seat. Mixed toward the card, so it is a step of
-   *  lightness from the party's own colour, which a reader who cannot see
-   *  hue still tells apart. */
+   *  delegation, or an open seat (--party-r-tint, --party-d-tint in
+   *  kyc.css). A step of lightness from the party's own colour, which a
+   *  reader who cannot see hue still tells apart. */
   function tint(key) {
-    return "color-mix(in srgb, var(--party-" + key + ") 60%, var(--surface-1))";
+    return "var(--party-" + key + "-tint)";
   }
 
   /* The House view in five labelled steps. A continuous ramp from red
@@ -121,11 +121,9 @@
     return d > r ? HOUSE_STEPS[3] : d < r ? HOUSE_STEPS[1] : HOUSE_STEPS[2];
   }
 
-  /** The word's colour on a fill a callout is drawn in: the split and the
-   *  tints are mid-tones, where the page's text reads and the inverse does
-   *  not. */
+  /** The word's colour on a fill a callout is drawn in (kyc.js fillInk). */
   function inkFor(fill) {
-    return fill === SPLIT_FILL ? "var(--split-ink)" : /color-mix/.test(fill) ? "var(--text)" : "";
+    return KYC.fillInk(fill);
   }
 
   function stateMode() {

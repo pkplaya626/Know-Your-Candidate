@@ -27,14 +27,16 @@
     D: "var(--party-d)",
     I: "var(--party-i-fill)",
     split: "var(--split)",
-    nonpartisan: "color-mix(in srgb, var(--text-faint) 45%, var(--surface-2))",
+    /* A grey of its own (kyc.css): the faint mix it was sat 1.9 apart from
+     * the vacant grey to every reader in the light theme. */
+    nonpartisan: "var(--nonpartisan-fill)",
     /* An office that does not exist is the faintest grey; a vacancy is the
      * House view's vacant grey; sources that disagree are drawn in the text
      * colour itself, the strongest contrast any theme has, so the three
      * cannot be confused (the muted and faint greys were 1.27:1 in the
      * light theme). */
     disputed: "var(--text)",
-    vacant: "var(--text-faint)",
+    vacant: "var(--vacant-fill)",
     none: "var(--none-fill)",
   };
   /* An office the state does not have is drawn like a nonpartisan body: in
