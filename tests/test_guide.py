@@ -236,9 +236,12 @@ class TestDatedText(unittest.TestCase):
         from kyc import validate
 
         due = government.revisits("2026-11-04")
-        self.assertEqual([(slug, day) for slug, day, _what in due], [("elections", "2026-11-04")])
+        self.assertEqual([(slug, day) for slug, day, _what in due],
+                         [("states", "2026-11-04"), ("elections", "2026-11-04")])
         self.assertEqual([i.code for i in validate.check_guide("2027-02-01")], ["guide-revisit"])
-        self.assertEqual(len(validate.check_guide("2027-02-01")[0].detail), 3)
+        # Three on the elections page, two on the states page (its 2026
+        # ballot map, and Arizona's first lieutenant governor).
+        self.assertEqual(len(validate.check_guide("2027-02-01")[0].detail), 5)
         self.assertEqual(validate.check_guide("2026-10-16"), [])
 
 
@@ -301,6 +304,205 @@ class TestEveryLocalLinkResolves(unittest.TestCase):
         self.assertIn(f'href="index.html"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg> '
                       f'{pages.DISTRICTS_INDEX_NAME}</a>', html)
         self.assertTrue(os.path.exists(os.path.join(SITE, "districts", "index.html")))
+
+
+def _text_of(slug):
+    """A guide page's words, as a reader sees them: the tags stripped."""
+    html = government.render(slug, "example.org")
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html))
+
+
+class TestOneNamePerPage(unittest.TestCase):
+    """The navigation said "How the federal courts work" over a page titled
+    "The federal courts", "Elections" over "How elections work", and
+    "Overview" over "How American government is organized" (rule 75)."""
+
+    LINK = re.compile(r'<a\b[^>]*href="(?:\.\./)*government/([a-z]+)\.html"[^>]*>(.*?)</a>', re.S)
+
+    def test_title_heading_navigation_and_pager_use_the_one_name(self):
+        for slug in government.slugs():
+            html = government.render(slug, "example.org")
+            name = government.name(slug)
+            self.assertIn(f"<title>{name} — Know Your Candidate</title>", html.replace("&#x27;", "'"))
+            self.assertRegex(html, r"<h1[^>]*>" + re.escape(name) + "</h1>")
+            for other in government.slugs():
+                entry = re.search(r'<a class="nav-link nav-sub" href="' + other +
+                                  r'\.html"[^>]*>([^<]*)</a>', html)
+                self.assertEqual(entry.group(1), government.name(other), (slug, other))
+            for link in re.findall(r'class="guide-pager-link[^"]*"[^>]*href="([a-z]+)\.html">'
+                                   r"<span>[A-Za-z]+</span> ([^<]*)</a>", html):
+                self.assertEqual(link[1], government.name(link[0]), slug)
+
+    def test_every_link_to_a_whole_guide_page_says_its_name(self):
+        # Every generated page and every module that writes a link to one.
+        wrong = []
+        texts = []
+        for folder, _, files in os.walk(SITE):
+            for name in files:
+                if name.endswith((".html", ".js")) and "data" not in folder:
+                    with open(os.path.join(folder, name), encoding="utf-8") as handle:
+                        texts.append((name, handle.read()))
+        for name, text in texts:
+            for slug, inner in self.LINK.findall(text):
+                words = re.sub(r"<[^>]+>", "", inner).strip()
+                if words in ("Know Your Government",) and slug == "index":
+                    continue
+                if words != government.name(slug):
+                    wrong.append(f"{name}: {slug} '{words}'")
+        # The state page's link is drawn by its script from the name the
+        # generated page carries (pages._state_main), never a typed one.
+        with open(os.path.join(SITE, "assets", "kyc-state.js"), encoding="utf-8") as handle:
+            script = handle.read()
+        self.assertNotIn(government.name("states"), script)
+        page = pages.render_state("TX", "example.org")
+        self.assertIn(f'data-guide-name="{government.name("states")}"', page)
+        self.assertEqual(sorted(set(wrong)), [])
+
+    def test_the_index_is_named_as_the_sites_navigation_names_it(self):
+        self.assertEqual(government.name("index"), "Know Your Government")
+        self.assertIn(("guide", "government/index.html", "scroll", "Know Your Government"),
+                      [entry for _h, entries in pages.nav_groups() for entry in entries])
+
+
+class TestMapPagesText(unittest.TestCase):
+    """On the courts, states, local and tribal pages every section was a
+    closed <details> whose title was bare <summary> text: no heading for a
+    screen reader to list, and a map with five closed rows to land on."""
+
+    def test_each_section_title_is_a_heading_and_the_first_is_open(self):
+        for slug in ("courts", "states", "local", "tribal"):
+            html = government.render(slug, "example.org")
+            sections = re.findall(r'<details class="guide-more-section" id="[^"]+"( open)?>\s*'
+                                  r"<summary>(.*?)</summary>", html, re.S)
+            self.assertTrue(sections, slug)
+            self.assertEqual(sections[0][0], " open", slug)
+            self.assertTrue(all(not s[0] for s in sections[1:]), slug)
+            self.assertTrue(all(re.fullmatch(r'<h3 class="guide-more-heading">[^<]+</h3>', s[1])
+                                for s in sections), slug)
+            # A subheading inside a section ranks below the section's title.
+            folded = html[html.index('class="guide-more"'):]
+            self.assertNotIn('<h3 class="guide-subheading"', folded, slug)
+
+
+class TestCorrections(unittest.TestCase):
+    """The audit of 2026-10-17's corrections to the guide's text."""
+
+    def test_the_lieutenant_governor_count_is_the_maps(self):
+        from kyc import government_maps
+
+        text = _text_of("states")
+        count = len(government_maps.SENATE_PRESIDES["ltgov"])
+        self.assertIn(f"In {count} states the lieutenant governor is the president of the senate",
+                      text)
+        self.assertNotIn("about 26", text)
+        self.assertNotIn("{{", text)
+        presides = next(m for m in government_maps.modes()["states"] if m["id"] == "presides")
+        self.assertIn(f"In {count} states", presides["about"])
+
+    def test_an_unknown_figure_is_refused(self):
+        with self.assertRaises(ValueError):
+            government.inline("In {{no-such-count}} states", "states")
+
+    def test_the_overview_lists_every_part_of_the_site(self):
+        html = government.render("index", "example.org")
+        for page in ("index.html", "map.html", "federal/index.html", "states/index.html",
+                     "legislature/index.html", "counties/index.html"):
+            self.assertIn(f'href="../{page}"', html, page)
+        self.assertNotIn("follows one part of all this", html)
+
+    def test_tribal_jurisdiction_names_mcgirt_and_castro_huerta(self):
+        text = _text_of("tribal")
+        for words in ("Oklahoma v. Castro-Huerta", "McGirt v. Oklahoma", "18 U.S.C. 1151",
+                      "18 U.S.C. 1152", "Indian country is a term federal law defines"):
+            self.assertIn(words, text)
+        # The one-year limit is the 1986 amendment's, not the 1968 Act's.
+        self.assertIn("six months and a $500 fine", text)
+        self.assertIn("since a 1986 amendment one year and a $5,000 fine", text)
+
+    def test_maine_ranks_its_congressional_primaries(self):
+        text = _text_of("elections")
+        self.assertNotIn("state-level primaries", text)
+        self.assertIn("its primaries for Congress, governor and the legislature", text)
+        # Not "all its primaries": county offices' primaries are not ranked
+        # (21-A M.R.S. 723-A names the offices).
+        self.assertNotIn("all its primaries", text)
+
+    def test_portland_is_said_once(self):
+        text = _text_of("local")
+        self.assertNotIn("still using it", text)
+        self.assertIn("the largest city to keep it", text)
+
+    def test_legal_terms_are_defined_where_first_used(self):
+        self.assertIn("petty offenses (the least serious federal crimes", _text_of("courts"))
+        self.assertIn("tax deficiency, more tax than", _text_of("courts"))
+        congress = _text_of("congress")
+        self.assertIn("germane: on the subject of the bill", congress)
+        self.assertIn("any one senator can block by objecting", congress)
+        self.assertIn("one that would stand on state law alone", _text_of("index"))
+
+
+class TestNewSections(unittest.TestCase):
+    """What the audit found the guide never explained."""
+
+    def test_the_sections_exist_and_cite_sources(self):
+        wanted = {"congress": ("lawmaking", "districts", "reaching"),
+                  "executive": ("taking-part",), "states": ("taking-part",),
+                  "local": ("taking-part",),
+                  "elections": ("before", "funding", "running", "after")}
+        for slug, ids in wanted.items():
+            page = next(p for p in PAGES if p["slug"] == slug)
+            have = {s["id"]: s for s in page["sections"]}
+            for sid in ids:
+                self.assertIn(sid, have, f"{slug}#{sid}")
+                self.assertTrue(have[sid]["sources"], f"{slug}#{sid}")
+
+    def test_the_bill_flow_is_page_text(self):
+        html = government.render("congress", "example.org")
+        flow = html[html.index('<figure class="guide-flow">'):]
+        flow = flow[:flow.index("</figure>")]
+        self.assertNotIn("<svg", flow)
+        for step in ("Committee", "On the Senate floor", "three-fifths", "pocket", "Override"):
+            self.assertIn(step, flow)
+        # One chamber's floor, then the other chamber: never the House floor
+        # and the Senate floor as two steps followed by "the other chamber",
+        # which reads as a third passage.
+        titles = re.findall(r'<li class="guide-flow-step"><strong>(.*?)</strong>', flow)
+        self.assertNotIn("On the House floor", titles)
+        self.assertEqual(titles.index("The other chamber"),
+                         titles.index("On the floor of its chamber") + 1)
+
+    def test_every_redrawn_state_is_listed_from_the_table(self):
+        from kyc import districts
+
+        html = government.render("congress", "example.org")
+        listed = re.findall(r'<ul class="guide-list guide-redrawn">(.*?)</ul>', html, re.S)[0]
+        self.assertEqual(sorted(re.findall(r'href="\.\./districts/([a-z]{2})\.html"', listed)),
+                         sorted(c.lower() for c in districts.REDRAWN))
+
+    def test_the_timeline_keys_its_steps_to_the_sites_statuses(self):
+        html = government.render("elections", "example.org")
+        statuses = set(re.findall(r'class="badge guide-status" data-status="([a-z]+)"', html))
+        self.assertEqual(statuses, {"nominee", "awaiting", "elected", "defeated", "runoff"})
+        days = re.findall(r'<li data-date="(\d{4}-\d{2}-\d{2})">', html)
+        self.assertEqual(days, sorted(days))
+        self.assertEqual(days[-1], "2027-01-03")
+
+    def test_a_timeline_out_of_order_is_refused(self):
+        spec = {"items": [("2026-12-01", "Dec 1", "b", "b", []),
+                          ("2026-11-03", "Nov 3", "a", "a", [])]}
+        with self.assertRaises(ValueError):
+            government._timeline(spec, "elections", "")
+
+    def test_the_voting_link_and_jump_list_open_a_states_voting_section(self):
+        html = government.render("elections", "example.org")
+        self.assertIn('href="../states/index.html" data-voting-link>', html)
+        self.assertIn('data-jump-to="states/{code}.html#voting"', html)
+        self.assertIn("data-voting-picker", html)
+
+    def test_the_contribution_limit_and_threshold_are_the_statutes(self):
+        text = _text_of("elections")
+        self.assertIn("more than $5,000 (52 U.S.C. 30101(2))", text)
+        self.assertIn("up to $3,500 per election", text)
 
 
 if __name__ == "__main__":

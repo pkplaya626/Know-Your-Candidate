@@ -305,7 +305,62 @@ def _fec_ids(entry, chamber):
     return [i for i in _all_fec_ids(entry) if i.startswith(prefix)]
 
 
-def trim(entry, social=None):
+def leadership(entry, chamber, as_of=None):
+    """The member's party and chamber leadership posts held on *as_of*, as
+    congress-legislators records them (``leadership_roles``): ``[{"title",
+    "chamber", "start"}]``, the current chamber's only. The guide named the Speaker
+    and the floor leaders' jobs and never who held them (rule 48: from the
+    data, never typed).
+
+    The record opens one entry per post per Congress and leaves the current
+    one without an end until someone closes it, after the next Congress has
+    begun. So a post is held on *as_of* only when its entry began in the
+    Congress sitting then (``cycle.congress_start``): on January 4, 2027 the
+    119th's Speaker, still open-ended upstream, is not the 120th's, and
+    until the new posts are recorded nobody is shown holding one (rule 68).
+    A post with an end date before *as_of* is over."""
+    side = "senate" if chamber == "Senate" else "house"
+    roles = entry.get("leadership_roles") or []
+    opened = None
+    if as_of and roles:
+        from . import cycle
+        opened = cycle.congress_start(cycle.congress_for_date(as_of)).isoformat()
+    out = []
+    for role in roles:
+        title = (role.get("title") or "").strip()
+        start = str(role.get("start") or "")
+        end = str(role.get("end") or "")
+        if not title or (role.get("chamber") or "") != side:
+            continue
+        if end and (not as_of or end < as_of):
+            continue
+        if opened and (not start or start < opened):
+            continue
+        out.append({"title": title, "chamber": side, "start": start})
+    return out
+
+
+def held_posts(person, congress):
+    """The titles of the leadership posts a snapshot entry holds in the
+    *congress*th Congress: those whose record began on or after its first
+    day. Checked again at build time, against the Congress the snapshot is
+    of, because a snapshot carried into a new Congress (or the rehearsal's
+    fictional one) still holds the old Congress's open-ended posts, and a
+    re-elected Speaker passes every "is seated" test (rule 68). With no
+    Congress to check against, nobody holds one."""
+    if not congress:
+        return []
+    from . import cycle
+    from .overrides import LEADERSHIP_TITLES
+    opened = cycle.congress_start(congress).isoformat()
+    # A title the record words as something else is shown in the chamber's
+    # own words (overrides.LEADERSHIP_TITLES).
+    return [LEADERSHIP_TITLES.get(post["title"], (post["title"],))[0]
+            for post in (person or {}).get("leadership") or []
+            if str(post.get("start") or "") >= opened]
+
+
+def trim(entry, social=None, as_of=None):
     """Keep only the fields the pipeline actually reads.
 
     The full dataset is 1.4 MB of contact details and historical terms. The
@@ -366,6 +421,9 @@ def trim(entry, social=None):
     handles = (social or {}).get(person["bioguide"])
     if handles:
         person["social"] = handles
+    posts = leadership(entry, chamber, as_of)
+    if posts:
+        person["leadership"] = posts
     return person
 
 
@@ -376,15 +434,14 @@ def build_snapshot(rows, url=SOURCE_URL, fetched=None, social=None):
     be fetched - the snapshot is still valid without it.
     """
     handles = social_by_bioguide(social) if social else {}
-    people = [t for t in (trim(e, handles) for e in rows) if t]
+    fetched = fetched or datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+    people = [t for t in (trim(e, handles, as_of=fetched[:10]) for e in rows) if t]
     if not people:
         raise LegislatorsError("no usable legislators in the dataset")
     people.sort(key=lambda p: p["bioguide"])
     return {
         "source": url,
-        "fetched": fetched or datetime.datetime.now(
-            datetime.timezone.utc
-        ).isoformat(timespec="seconds"),
+        "fetched": fetched,
         "count": len(people),
         "legislators": people,
     }
@@ -535,15 +592,21 @@ def assignments(committees, bioguide):
     """A member's committees as ``[{name, title, side, rank, sub, parent, url}]``."""
     if not committees:
         return []
+    from .overrides import COMMITTEE_TITLES
+
     names = committees.get("committees") or {}
     out = []
     for seat in (committees.get("members") or {}).get((bioguide or "").upper(), []):
         info = names.get(seat["code"]) or {}
         parent = names.get(info.get("parent") or "", {})
+        # The body's own style where the rosters give the minority's lead
+        # the majority's title (overrides.COMMITTEE_TITLES).
+        title = seat.get("title")
+        styled = COMMITTEE_TITLES.get((seat["code"], seat.get("party"), title))
         out.append({
             "code": seat["code"],
             "name": info.get("name") or seat["code"],
-            "title": seat.get("title"),
+            "title": styled[0] if styled else title,
             # "majority" or "minority": which side's seat this is. A title
             # alone cannot say - "Vice Chairman" leads the minority on Senate
             # Ethics and Intelligence and is a majority post elsewhere.

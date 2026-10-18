@@ -12,6 +12,10 @@ territory is outside it), and ``check()`` refuses a value its legend does
 not define or a source the guide does not list. A fact true of a few states
 and unknown for the rest is not a map: it stays in the guide's text.
 
+A source about one state is cited only on that state's facts (``scoped``):
+Oklahoma's fact on choosing judges cited New Jersey's and Utah's courts,
+and Tennessee's senate president an Arizona amendment.
+
 Colours are categories, never parties: ``cat-1`` to ``cat-5`` are teal,
 magenta, lime, grey and the text colour (kyc.css), because red, blue, amber
 and purple already mean a party on this site.
@@ -49,6 +53,13 @@ SOURCES.update({
                      "Local Governments by Type and State",
                      "https://www2.census.gov/programs-surveys/gus/tables/2022/cog2022_cg2200org02.zip"),
 })
+
+
+def sources_for(mode, code):
+    """The sources a state's fact in *mode* cites: the general ones and its
+    own (kyc-guide.js reads the same ``scoped`` table)."""
+    scoped = mode.get("scoped") or {}
+    return [key for key in mode["sources"] if key not in scoped or code in scoped[key]]
 
 # Seats in each legislature (NCSL; Nebraska's one chamber is counted as its
 # Senate). They add up to NCSL's national total, 7,386 - check() holds them
@@ -190,6 +201,19 @@ PL280_EXCEPTIONS = {
     "MN": "Except the Red Lake Reservation.",
     "OR": "Except the Warm Springs Reservation.",
 }
+# Oklahoma v. Castro-Huerta, 597 U.S. 629 (2022), syllabus: "the Federal
+# Government and the State have concurrent jurisdiction to prosecute crimes
+# committed by non-Indians against Indians in Indian country."
+CASTRO_HUERTA = ("Since Oklahoma v. Castro-Huerta (2022), the state shares jurisdiction with "
+                 "the federal government over crimes non-Indians commit against Indians in "
+                 "Indian country.")
+# McGirt v. Oklahoma, 591 U.S. 894 (2020), syllabus: land reserved for the
+# Creek Nation "remains 'Indian country'" for the Major Crimes Act.
+PL280_NOTES = {
+    "OK": ("In McGirt v. Oklahoma (2020) the Supreme Court held that the Creek Nation's "
+           "reservation remains Indian country, where the state cannot prosecute Indians for "
+           "the crimes the Major Crimes Act covers."),
+}
 
 # 28 U.S.C. 41, and 48 U.S.C. 1824 for the Northern Mariana Islands.
 # American Samoa has no federal district court, so it is in no circuit.
@@ -278,7 +302,28 @@ def _legislature():
                   "four states, the General Assembly in New Jersey and the House of Delegates in "
                   "three. Pick a state to see its own."),
         "sources": ["ncsl-legislators", "nebraska", "nebraska-senators"],
+        "scoped": {"nebraska": ["NE"], "nebraska-senators": ["NE"]},
     }
+
+
+def figures():
+    """Counts the guide's text states, from the tables its maps draw (rule
+    73): ``{{ltgov-presides}}`` in a sentence is this table's count."""
+    from . import ballot2026
+    ballot = ballot2026.stats()
+    return {
+        "ltgov-presides": len(SENATE_PRESIDES["ltgov"]),
+        "no-ltgov": _word(len(SENATE_PRESIDES["none"])),
+        "governors-2026": ballot["governor"],
+        "chambers": ballot["chambers"],
+        "chambers-2026": ballot["chambersUp"],
+    }
+
+
+def _word(n):
+    """A small count as a sentence starts it."""
+    words = ("No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten")
+    return words[n] if n < len(words) else str(n)
 
 
 def _presides():
@@ -308,12 +353,14 @@ def _presides():
         "values": {code: of[code] for code in STATES},
         "facts": facts,
         "outside": "Not a state: this map covers the 50 state senates.",
-        "about": ("In about half the states the lieutenant governor is the president of the "
-                  "senate, presiding and breaking ties; elsewhere the senate elects its own "
-                  "president. Tennessee's and West Virginia's senates elect a leader whom the law "
-                  "also calls lieutenant governor, and five states have no lieutenant governor at "
-                  "all. As compiled by the Council of State Governments in 2022."),
+        "about": (f"In {len(SENATE_PRESIDES['ltgov'])} states the lieutenant governor is the "
+                  "president of the senate, presiding and breaking ties; elsewhere the senate "
+                  "elects its own president. Tennessee's and West Virginia's senates elect a "
+                  "leader whom the law also calls lieutenant governor, and "
+                  f"{_word(len(SENATE_PRESIDES['none'])).lower()} states have no lieutenant "
+                  "governor at all. As compiled by the Council of State Governments in 2022."),
         "sources": ["bots-4-14", "ncsl-leaders", "az-prop131"],
+        "scoped": {"az-prop131": ["AZ"]},
     }
 
 
@@ -349,6 +396,9 @@ def _judges():
                   "through October 2026: Maryland renamed its high court in 2022, and Utah "
                   "enlarged its own in 2026."),
         "sources": ["bots-5-1", "bots-5-6", "nj-supreme", "ut-sb134", "mo-plan"],
+        # The Missouri Plan is what a retention state's method is called.
+        "scoped": {"nj-supreme": ["NJ"], "ut-sb134": ["UT"],
+                   "mo-plan": [c for c in STATES if HIGH_COURTS[c][3] == "retention"]},
     }
 
 
@@ -417,6 +467,7 @@ def _circuits():
                   "A thirteenth court, the Federal Circuit, hears certain kinds of appeal (patents, "
                   "trade, money claims against the United States) from everywhere."),
         "sources": ["usc-28-41", "usc-48-1824", "usc-28-1295", "uscourts-structure"],
+        "scoped": {"usc-48-1824": ["MP"]},
     }
 
 
@@ -433,15 +484,18 @@ def _pl280():
             values[code] = "optional"
             facts[code] = ("The state later took on some jurisdiction over Indian country by "
                            "choice, under Public Law 280; how much varies, and some has since been "
-                           "returned.")
+                           "returned. " + CASTRO_HUERTA)
         else:
             values[code] = "no"
             # Not "tribal and federal courts only": since Oklahoma v.
-            # Castro-Huerta (2022) states share jurisdiction over many crimes
-            # by non-Indians in Indian country, PL-280 or not.
-            facts[code] = ("Not a Public Law 280 state. Jurisdiction in Indian country here is "
-                           "divided among tribal, federal and state governments by other laws "
-                           "and court decisions.")
+            # Castro-Huerta (2022) a state where federal law still applies in
+            # Indian country shares jurisdiction over crimes by non-Indians
+            # there (in the six mandatory states it holds it instead) - and the fact
+            # now says so, where it only said "other laws and court decisions".
+            facts[code] = ("Not a Public Law 280 state. " + CASTRO_HUERTA + " Other "
+                           "jurisdiction in Indian country here is divided among tribal, federal "
+                           "and state governments by other laws and court decisions. "
+                           + PL280_NOTES.get(code, ""))
     return {
         "id": "pl280",
         "label": "Public Law 280",
@@ -456,8 +510,14 @@ def _pl280():
         "about": ("Public Law 280 (1953) gave six states criminal jurisdiction over most of the "
                   "Indian country within them, in place of the federal government. Ten more states "
                   "later took on some jurisdiction by choice. It did not let states regulate or tax "
-                  "tribes (Bryan v. Itasca County, 1976)."),
-        "sources": ["usc-18-1162", "usc-28-1360", "bia-pl280", "bryan"],
+                  "tribes (Bryan v. Itasca County, 1976). In every other state the state now "
+                  "shares jurisdiction with the federal government over crimes non-Indians "
+                  "commit against Indians there (Oklahoma v. Castro-Huerta, 2022); in the six, "
+                  "the state holds it in place of the federal government."),
+        "sources": ["usc-18-1162", "usc-28-1360", "bia-pl280", "bryan", "castro-huerta",
+                    "mcgirt"],
+        "scoped": {"castro-huerta": [c for c in STATES if c not in PL280_MANDATORY],
+                   "mcgirt": ["OK"]},
     }
 
 
@@ -598,17 +658,183 @@ def _local(census_cache):
     return out
 
 
+# The shades of the tribal-governments map: how many governments the
+# directory lists with an office in the state. Fixed edges, so a weekly
+# re-read moves a state between shades only when its count crosses one.
+# The first shade is scale-2: scale-1 is 18% of the accent over the empty
+# fill, and "No office listed" beside "1–4" read as one colour in the dark
+# theme (rule 49 keeps none apart from a count).
+TRIBE_BINS = ((1, 4, "1–4", "scale-2"), (5, 19, "5–19", "scale-3"), (20, None, "20 or more", "scale-5"))
+
+
+def _tribes(cache):
+    """Tribal governments by the state of their office, and who leads each,
+    as the BIA's Tribal Leaders Directory lists them (kyc/tribes.py). The
+    count is the directory's rows for that state, never a count of nations
+    beside the Federal Register's 575 (rule 53), and no total is given."""
+    from . import tribes
+    name = _names()
+    found, _ = tribes.placed(cache)
+    edited = cache.get("edited")
+    as_of = f", as it stood on {_date_words(edited)}" if edited else ""
+    values, facts, lists = {}, {}, {}
+    for code in STATES:
+        here = sorted(found.get(code) or [], key=lambda e: e["name"].lower())
+        # A band, chapter or community the directory lists apart from any
+        # tribe row (the Ramah Navajo Chapter) is listed, but is not counted
+        # as a tribal government.
+        n = sum(1 for e in here if e["kind"] == tribes.TRIBE)
+        apart = len(here) - n
+        the = name(code)
+        if not here:
+            values[code] = "none"
+            facts[code] = (f"The directory lists no tribal government with its office in {the}. It "
+                           "lists each government in the one state its office is in.")
+            continue
+        values[code] = next(key for lo, hi, key, _ in
+                            ((lo, hi, f"b{i}", t) for i, (lo, hi, _, t) in enumerate(TRIBE_BINS))
+                            if max(n, 1) >= lo and (hi is None or max(n, 1) <= hi))
+        also = (f" It also lists {apart} {'band, chapter or community' if apart == 1 else 'bands, chapters or communities'} "
+                f"there apart from any tribe." if apart else "")
+        facts[code] = (f"The directory lists {n} tribal "
+                       f"{'government' if n == 1 else 'governments'} with an office in {the}"
+                       f"{as_of}, and who leads each.{also}")
+
+        def row(e, affiliates=()):
+            return [e["name"], e.get("leader") or "", e.get("title") or "",
+                    [row(a) for a in affiliates], bool(e.get("disputed"))]
+        lists[code] = [row(e, e["affiliates"]) for e in here]
+    return {
+        "id": "tribes",
+        "label": "Tribal governments",
+        "title": "Tribal governments by the state of their office",
+        "kind": "category",
+        "legend": [(f"b{i}", text, token) for i, (_, _, text, token) in enumerate(TRIBE_BINS)]
+                  + [("none", "No office listed", "none")],
+        "values": values,
+        "facts": facts,
+        "lists": lists,
+        "outside": "Not a state: this map covers the 50 states.",
+        "about": ("Each tribal government and its leader, as the Bureau of Indian Affairs' Tribal "
+                  "Leaders Directory lists them, under the state its office is in: a nation whose "
+                  "lands reach into several states is listed in one. Bands and communities the "
+                  "directory lists under a tribe are named with it. BIA updates the directory "
+                  "weekly and warns that tribal elections can change a leader before it does."),
+        "sources": ["bia-tld"],
+    }
+
+
+def _date_words(iso):
+    """"October 16, 2026" for "2026-10-16"."""
+    import datetime
+    day = datetime.date.fromisoformat(iso[:10])
+    return f"{day:%B} {day.day}, {day.year}"
+
+
+def _ballot():
+    """What each state elects on November 3, 2026 (kyc/ballot2026.py, each
+    value from the state's own record), coloured by whether the governor
+    and the legislature are on the ballot. The state's own sources are cited
+    on its fact alone."""
+    from . import ballot2026
+    titles = {"governor": "governor", "lt": "lieutenant governor", "ag": "attorney general",
+              "sos": "secretary of state"}
+    values, facts, scoped, sources = {}, {}, {}, []
+    for code in STATES:
+        record = ballot2026.for_state(code)
+        offices = [titles[o] for o in ballot2026.OFFICES if record["offices"][o]["up"]]
+        seats = []
+        for which in ("upper", "lower"):
+            chamber = record["chambers"].get(which)
+            if chamber and chamber["up"]:
+                seats.append((f"all {chamber['seats']} seats" if chamber["up"] == chamber["seats"]
+                              else f"{chamber['up']} of the {chamber['seats']} seats")
+                             + f" in the {chamber['name']}")
+        governor = record["offices"]["governor"]["up"]
+        values[code] = ("both" if governor and seats else "governor" if governor else
+                        "legislature" if seats else "neither")
+        # Only the four offices the table follows: Texas also elects a
+        # comptroller and commissioners, and "On the ballot: governor, ..."
+        # read as the whole list.
+        facts[code] = ((f"Of the four statewide offices this map follows, on the ballot: "
+                        f"{_join(offices)}." if offices else
+                        "None of the four statewide offices this map follows is on the ballot.")
+                       + (f" Legislative seats on the ballot: {_join(seats)}." if seats else
+                          " No regular legislative elections."))
+        # Each state's own records, cited on its fact alone, each named by
+        # what it supports: four links reading "Florida's own record
+        # (dos.elections.myflorida.com)" to four pages could not be told apart.
+        supports = {}
+        for field in ballot2026.OFFICES:
+            supports.setdefault(record["offices"][field]["source"], []).append(titles[field])
+        for chamber in record["chambers"].values():
+            supports.setdefault(chamber["source"], []).append(chamber["name"])
+        for url, items in supports.items():
+            key = "ballot-" + url
+            SOURCES.setdefault(key, (_host_title(code, url, items), url))
+            if key not in scoped:
+                sources.append(key)
+            scoped.setdefault(key, set()).add(code)
+    return {
+        "id": "ballot",
+        "label": "2026 ballot",
+        "title": "The governor, three other statewide offices and the legislature on the "
+                 "2026 ballot",
+        "kind": "category",
+        "legend": [
+            ("both", "Governor and legislative seats", "cat-1"),
+            ("legislature", "Legislative seats, no governor", "cat-3"),
+            ("governor", "Governor, no legislative seats", "cat-2"),
+            ("neither", "Neither", "cat-4"),
+        ],
+        "values": values,
+        "facts": facts,
+        "outside": "Not a state: this map covers the 50 states' own offices.",
+        "about": (f"{ballot2026.stats()['governor']} states elect a governor on November 3, "
+                  f"2026, and {ballot2026.stats()['chambersUp']} of the "
+                  f"{ballot2026.stats()['chambers']} state legislative chambers hold regular "
+                  "elections. Pick a state for which of four statewide offices (governor, "
+                  "lieutenant governor, attorney general and secretary of state) and which "
+                  "legislative seats it elects, each from the state's own constitution, "
+                  "statutes or election pages. Other statewide offices some states elect, such "
+                  "as a comptroller, a treasurer or judges, are not covered, and special "
+                  "elections to fill a vacancy are not counted."),
+        "sources": sources,
+        # Ninety-odd state records in one run of links filled the panel:
+        # with no state picked, the block says where they are instead.
+        "aboutSources": [],
+        "aboutNote": "each state's own constitution, statutes or election pages, cited on that "
+                     "state when you pick it.",
+        "scoped": {key: sorted(codes) for key, codes in scoped.items()},
+    }
+
+
+def _host_title(code, url, items=()):
+    """A state's record named by whose it is and what it supports: "Texas's
+    own record of the governor (sos.state.tx.us)"."""
+    from urllib.parse import urlsplit
+    from .pages import state_name
+    host = urlsplit(url).netloc
+    host = host[4:] if host.startswith("www.") else host
+    what = f" of the {_join(list(items))}" if items else ""
+    return f"{state_name(code)}'s own record{what} ({host})"
+
+
 def modes(root="."):
     """``{page slug: [mode, ...]}`` for every guide page that has a map."""
     from . import census
     found = {
-        "states": [_legislature(), _presides(), _veto(), _judges()],
+        "states": [_legislature(), _presides(), _veto(), _judges(), _ballot()],
         "courts": [_circuits()],
         "tribal": [_pl280()],
     }
     cache = census.load_cache(root)
     if cache:
         found["local"] = _local(cache)
+    from . import tribes
+    leaders = tribes.load_cache(root)
+    if leaders:
+        found["tribal"].append(_tribes(leaders))
     return found
 
 
@@ -631,7 +857,7 @@ def payload():
                 "outside": m.get("outside", ""),
                 "sources": list(m["sources"]),
             }
-            for key in ("labels", "links"):
+            for key in ("labels", "links", "scoped", "lists"):
                 if m.get(key):
                     entry[key] = m[key]
             out["modes"][m["id"]] = entry
@@ -668,6 +894,20 @@ def check():
             for key in m["sources"]:
                 if key not in SOURCES:
                     problems.append(f"{where}: unknown source {key!r}")
+            about = m.get("aboutSources", m["sources"])
+            if any(key not in m["sources"] for key in about):
+                problems.append(f"{where}: an about-block source is not among its sources")
+            if not about and not m.get("aboutNote"):
+                problems.append(f"{where}: the about block cites nothing")
+            for key, codes in (m.get("scoped") or {}).items():
+                if key not in m["sources"]:
+                    problems.append(f"{where}: scoped source {key!r} is not among its sources")
+                if not codes:
+                    problems.append(f"{where}: scoped source {key!r} names no state")
+            # Every state's fact cites at least one source.
+            for code in m["values"]:
+                if not sources_for(m, code):
+                    problems.append(f"{where}: {code}'s fact cites no source")
             for token in {t for _, _, t in m["legend"]}:
                 if token not in ("cat-1", "cat-2", "cat-3", "cat-4", "cat-5", "none",
                                  "scale-1", "scale-2", "scale-3", "scale-4", "scale-5"):
@@ -680,6 +920,12 @@ def check():
         problems.append("SENATE_PRESIDES must place each of the 50 states exactly once")
     if sorted(HIGH_COURTS) != STATES:
         problems.append("HIGH_COURTS must cover each of the 50 states exactly once")
-    if "local" not in modes():
+    found = modes()
+    if "local" not in found:
         problems.append("no data/census_governments.json: run 'python build_profile_site.py census'")
+    if not any(m["id"] == "tribes" for m in found["tribal"]):
+        problems.append("no data/tribal_leaders.json: run 'python build_profile_site.py tribes'")
+    else:
+        from . import tribes
+        problems += [f"tribal_leaders.json: {p}" for p in tribes.problems(tribes.load_cache())]
     return problems

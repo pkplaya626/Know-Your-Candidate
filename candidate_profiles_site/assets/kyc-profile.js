@@ -285,6 +285,20 @@
     ].join("");
   }
 
+  /* The party and chamber posts congress-legislators records for a sitting
+   * member's bioguide id (profile.leadership): the guide defined the
+   * Speaker and the floor leaders and the site never named them. Only
+   * while they sit (rule 68). */
+  function renderLeadership(item) {
+    var posts = KYC.seated(item) ? (item.leadership || []) : [];
+    if (!posts.length) return;
+    el("profileModalCommittees").insertAdjacentHTML("afterbegin",
+      '<div class="leadership-posts"><span class="dot"></span><span>Leadership: ' +
+      posts.map(function (title) {
+        return '<span class="badge badge-accent">' + KYC.escapeHtml(title) + "</span>";
+      }).join(" ") + "</span></div>");
+  }
+
   function renderCommittees(item) {
     var target = el("profileModalCommittees");
     var text = String(item.committees || "").trim();
@@ -955,6 +969,7 @@
     sitting = sitting && KYC.seated(sitting) && sitting.id !== item.id ? sitting : null;
     renderVoting(sitting || item);
     renderCommittees(sitting || item);
+    renderLeadership(sitting || item);
     if (sitting) {
       // In the filing's own name: "From Garland Barr's record" on Andy
       // Barr's Senate filing read as someone else's (the roster's name).

@@ -523,7 +523,7 @@ class TestStatePages(unittest.TestCase):
         # pages must not have changed by a character.
         from kyc import pages
         html = pages.render_state("TX", "example.org", {"states": {}})
-        self.assertIn('<div id="stateContent" class="state-page">', html)
+        self.assertIn('<div id="stateContent" class="state-page" data-guide-name="', html)
         self.assertEqual(emit.script_sources(html), list(emit.STATE_PAGE_REQUIREMENTS))
         self.assertIn("and Wikipedia.</p>\n                <p><strong>Who counts", html)
 
