@@ -254,6 +254,42 @@ def filer_named(data, listed):
     return "named" if same_filer(name, listed) else f"other: {name}"
 
 
+_POSITIONS = "other federal government positions held during the preceding 12 months"
+# Where the list ends: the next section of the report's first page.
+_POSITIONS_END = re.compile(r"(?i)^(?:names of congressional committees|electronic signature|"
+                            r"agency ethics official|date of|report year|.*\bpage$|\d+\.\s)")
+_SPAN = re.compile(r"\S.*?\(\s*\d{1,2}/\d{4}\s*[-–]\s*(?:\d{1,2}/\d{4}|present)\s*\)", re.I)
+# The reports whose first page carries the section.
+POSITION_KINDS = ("annual", "nominee", "entrant", "termination")
+
+
+def other_positions(data):
+    """The report's "Other Federal Government Positions Held During the
+    Preceding 12 Months", each entry in its own words with its dates
+    ("Acting Director, Institute of Museum and Library Services (3/2025 -
+    11/2025)"). None when the report has no such section or cannot be read
+    (rule 8); an empty list when it lists none."""
+    if data is None:
+        return None
+    strings = [s.strip() for s in pdf_strings(data)]
+    at = next((i for i, s in enumerate(strings) if s.lower().rstrip(": ") == _POSITIONS), None)
+    if at is None:
+        return None
+    text = []
+    for s in strings[at + 1:at + 60]:
+        if _POSITIONS_END.match(s):
+            break
+        if s:
+            text.append(s)
+    joined = " ".join(text)
+    # Words the entries-with-dates do not account for: the list is not read
+    # whole, so nothing is shown from it (rule 8) - never a partial list.
+    left = _SPAN.sub(" ", joined).strip(" ,;")
+    if left and left.lower() not in ("none", "n/a", "not applicable"):
+        return None
+    return [" ".join(m.group(0).split()) for m in _SPAN.finditer(joined)]
+
+
 # ------------------------------------------------------------------ build
 
 def attribute(rows, office, holder):
@@ -300,6 +336,9 @@ def build(executive, read=None, read_pdf=None, previous=None, today=None):
     read = read or _get
     read_pdf = read_pdf or (lambda url: _get(url, raw=True))
     checked = dict((previous or {}).get("checked") or {})
+    # Each filer-checked report's other federal positions, by its address,
+    # read once like its check (other_positions).
+    positions = dict((previous or {}).get("positions") or {})
     people, problems, searched = {}, [], {}
     since = ((executive.get("president") or {}).get("termStart") or "")[:10]
     bound = ((datetime.date.fromisoformat(since) - datetime.timedelta(days=TRANSITION_DAYS))
@@ -323,10 +362,15 @@ def build(executive, read=None, read_pdf=None, previous=None, today=None):
             generated = next((g for k, _p, _w, g in KINDS if k == doc["kind"]), False)
             if doc["url"] and generated:
                 # A file at an address never changes: a check is kept, a
-                # scan's "unreadable" too.
-                if doc["url"] not in checked:
+                # scan's "unreadable" too, and so is what it lists.
+                wants = doc["kind"] in POSITION_KINDS and doc["url"] not in positions \
+                    and checked.get(doc["url"]) in (None, "named")
+                if doc["url"] not in checked or wants:
                     try:
-                        checked[doc["url"]] = filer_named(read_pdf(doc["url"]), filed)
+                        data = read_pdf(doc["url"])
+                        checked[doc["url"]] = filer_named(data, filed)
+                        if doc["kind"] in POSITION_KINDS and checked[doc["url"]] == "named":
+                            positions[doc["url"]] = other_positions(data)
                     except OGEError:
                         # Unread is not unnamed (rule 8): link it, check it next time.
                         checked.pop(doc["url"], None)
@@ -345,13 +389,26 @@ def build(executive, read=None, read_pdf=None, previous=None, today=None):
             "source": INDEX_URL, "people": people, "problems": problems,
             # Only the checks of documents still listed are kept.
             "checked": {u: v for u, v in sorted(checked.items())
-                        if any(d["url"] == u for p in people.values() for d in p["documents"])}}
+                        if any(d["url"] == u for p in people.values() for d in p["documents"])},
+            "positions": {u: v for u, v in sorted(positions.items())
+                          if checked.get(u) == "named" and
+                          any(d["url"] == u for p in people.values() for d in p["documents"])}}
 
 
-def for_page(person):
+def holds_now(row, offices):
+    """True when an "other federal post" row is the office the person holds
+    now, acting or not ("Acting Attorney General, Department of Justice
+    (4/2026 - Present)" for the Attorney General): not another post."""
+    post = re.sub(r"(?i)^acting\s+", "", row.split(",")[0].split("(")[0]).strip().lower()
+    return any(post == (o or "").strip().lower() for o in offices)
+
+
+def for_page(person, positions=None, offices=()):
     """What the officials' dialog draws: the latest of each kind, linked,
     newest first; transaction reports counted with the latest linked; what
-    OGE releases only on request counted."""
+    OGE releases only on request counted. *offices* are the names of the
+    office the person holds now: a listed post that is that office is not
+    "other"."""
     if not person:
         return None
     if not person.get("filed"):
@@ -378,10 +435,25 @@ def for_page(person):
             "unchecked": doc.get("check") in (None, "unreadable") and doc["kind"] in
             {k for k, _p, _w, g in KINDS if g} or None,
         }.items() if v is not None})
+    # The federal posts their latest filer-checked report lists for the
+    # year before it, in its words (FEDERAL-18): quoted beside, never
+    # merged into, the offices two sources agree on (rule 69).
+    listed = None
+    for doc in linked:
+        found = (positions or {}).get(doc["url"])
+        if doc.get("check") == "named" and doc["kind"] in POSITION_KINDS and found is not None:
+            # "Present" in a row is the report's day, not today's: the
+            # page says so beside it (rule 69: "since 2013" frozen at the
+            # read).
+            listed = {"rows": [re.sub(r"\s+,", ",", r) for r in found if not holds_now(r, offices)],
+                      "date": doc["date"], "url": doc["url"],
+                      "words": next(w for k, _p, w, _g in KINDS if k == doc["kind"])}
+            break
     return {k: v for k, v in {
         "filed": person["filed"], "agency": person["agency"], "position": person["position"],
         "documents": shown,
         "onRequest": sum(1 for d in docs if d["request"]) or None,
+        "otherPositions": listed,
     }.items() if v is not None}
 
 

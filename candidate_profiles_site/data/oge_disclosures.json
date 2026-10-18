@@ -26,7 +26,6 @@
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/2C89623DC721F62585258D430031A32A/$FILE/Donald%20J.%20Trump%2010.20.2025%20278-T.pdf": "unreadable",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/322B8A28DB21CC9285258CFD002C0D0B/$FILE/Donald%20J.%20Trump%209.3.25%20278-T.pdf": "unreadable",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/3502A5AE0F0ACEB285258E7C002DB817/$FILE/Pete-Hegseth-2026-278ANNU.pdf": "named",
-  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/3742068B59ECA5BC85258C130032E5E3/$FILE/Burgum%2C%20Doug%20%20final278.pdf": "named",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/3743C3A1AEA32F4385258C150032F2B6/$FILE/Wright%2C%20Christopher%20Allen%20%20final278.pdf": "named",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/3A9FB168C78ABC2885258DCC002DDC8D/$FILE/Eric-Scott-Turner-01.16.2026-278T.pdf": "named",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/405E4EC4E27BE8D185258DF7002DD1C0/$FILE/Trump%2C%20Donald%20J.-05.08.2026-278T(2).pdf": "unreadable",
@@ -73,7 +72,6 @@
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/BF782DF3A2A5684F85258C58002C87DB/$FILE/Eric-Scott-Turner-03.04.2025-278T.pdf": "named",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/CD75555856A7D2E485258DE4002DD4A0/$FILE/Donald-J-Trump-4.20.2026-278T.pdf": "unreadable",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/CF8CA0328CB1970085258E7B002D9B7E/$FILE/Scott-Bessent-2026-278ANNU.pdf": "named",
-  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/DFE6C822A84970A185258E21002D9F28/$FILE/Doug-Collins-2026-278ANNU.pdf": "named",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/E02BB5E9D673CA7085258E04002DCCD7/$FILE/Marco-Rubio-2026-278ANNU.pdf": "named",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/E15FC684C226F64785258C8A002C72AC/$FILE/Douglas-J-Burgum-04.30.2025-278T.pdf": "named",
   "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/E590116FC9631E9885258E7A002DE209/$FILE/Donald-J-Trump-09.8.2026-278T.pdf": "unreadable",
@@ -976,18 +974,6 @@
     },
     {
      "amended": false,
-     "check": "named",
-     "date": "2025-01-15",
-     "kind": "nominee",
-     "label": "Nominee 278",
-     "office": true,
-     "request": false,
-     "title": "Secretary",
-     "url": "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/3742068B59ECA5BC85258C130032E5E3/$FILE/Burgum%2C%20Doug%20%20final278.pdf",
-     "year": null
-    },
-    {
-     "amended": false,
      "date": "2025-01-15",
      "kind": "ethics",
      "label": "Ethics Agreement",
@@ -1876,18 +1862,6 @@
    "documents": [
     {
      "amended": false,
-     "check": "named",
-     "date": "2026-06-25",
-     "kind": "annual",
-     "label": "Annual (2026)",
-     "office": true,
-     "request": false,
-     "title": "Secretary",
-     "url": "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/DFE6C822A84970A185258E21002D9F28/$FILE/Doug-Collins-2026-278ANNU.pdf",
-     "year": 2026
-    },
-    {
-     "amended": false,
      "date": "2025-05-07",
      "kind": "certification",
      "label": "Certification of Ethics Agreement Compliance",
@@ -1960,7 +1934,75 @@
    "refused": null
   }
  },
- "problems": [],
+ "positions": {
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/051A33BD9A3F9E0885258E4B002DD112/$FILE/Russell-Vought-2026-278ANNU.pdf": [
+   "Acting Director, Consumer Financial Protection Bureau (2/2025 - Present)",
+   "Acting Administrator , USAID (8/2025 - 11/2025)",
+   "Senior Advisor, USAID (11/2025 - Present)"
+  ],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/0CA606CC0FF3B54F85258C150032F16D/$FILE/Turner%2C%20Eric%20Scott%20%20final278.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/10C11027DC4E0DD085258E5F002DA955/$FILE/Sean-Duffy-2026-278ANNU.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/1562CD2295BCAD8385258C2A00320E73/$FILE/McMahon%2C%20Linda%20%20final278.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/17E740413EA73B3485258E29002D9F37/$FILE/Blanche%2C%20Todd%20%20final278.pdf": [
+   "Acting Librarian of Congress, Library of Congress (5/2025 - 12/2025)",
+   "Acting Attorney General, Department of Justice (4/2026 - Present)",
+   "Deputy Attorney General, Department of Justice (3/2025 - Present)"
+  ],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/18EEC1F42BF175A385258E27002DD95F/$FILE/Keith-Sonderling-2026-278ANNU.pdf": [
+   "Senior Advisor, Office of the Secretary of the Department of Labor, Department of Labor (1/2025 - 3/2025)",
+   "Acting Director, Institute of Museum and Library Services (3/2025 - 11/2025)",
+   "Acting Undersecretary of Commerce, Minority Business Development Authority (3/2025 - 11/2025)"
+  ],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/29FAFD2E18579CE285258C0F00336B70/$FILE/Rubio%2C%20Marco%20%20final278.pdf": [
+   "Senator, United States Senate (1/2011 - Present)"
+  ],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/2A0A8221E67D6C7885258C210032086E/$FILE/Greer%2C%20Jamieson%20%20final278.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/2BBE4FE7D861360885258C130032E94F/$FILE/Duffy%2C%20Sean%20%20final278.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/3502A5AE0F0ACEB285258E7C002DB817/$FILE/Pete-Hegseth-2026-278ANNU.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/3743C3A1AEA32F4385258C150032F2B6/$FILE/Wright%2C%20Christopher%20Allen%20%20final278.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/49D5550BCEB079A185258C0F00335A1B/$FILE/Bessent%2C%20Scott%20%20AMENDED%20final278.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/4E081D23F5CA89D385258C1000335CDF/$FILE/Collins%2C%20Douglas%20%20final278.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/6DC06006E0C3364C85258DBE00531737/$FILE/Mullin%2C%20Markwayne%20final278.pdf": [
+   "United States Senator, US Congress (1/2023 - Present)"
+  ],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/73C83ABF3FA5BB7585258E5A002DD055/$FILE/Brooke-L-Rollins-2026-278ANNU.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/7C8BAED3285A48DD85258E6D002DDCCB/$FILE/Linda-E-McMahon-2026-278ANNU.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/7EF92B7367FCF69785258E1B002DA16D/$FILE/Clayton%2C%20Walter%20Joseph%20%20final278.pdf": [
+   "Member, FDIC Systemic Resolution Advisory Committee (1/2022 - Present)",
+   "U.S. Attorney, Southern District of New York, Department of Justice (4/2025 - Present)"
+  ],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/801E9C2066B32CB985258E6E002DE53D/$FILE/John-L-Ratcliffe-2026-278ANNU.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/86CB873AEB79F48885258C150032ED18/$FILE/Rollins%2C%20Brooke%20%20final278.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/8D652EE08973ABCC85258C150032ECC8/$FILE/Ratcliffe%2C%20John%20%20final278.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/901766015D893E9D85258E4B002DD08C/$FILE/Eric-Scott-Turner-2026-278ANNU.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/9ECACD7C58633CBB85258E37002DED61/$FILE/Sonderling%2C%20Keith%20E.%20%20final278.pdf": [
+   "Acting Director, Institute of Museum and Library Services (3/2025 - 11/2025)",
+   "Acting Undersecretary of Commerce, Minority Business Development Authority (3/2025 - 11/2025)",
+   "Acting Secretary of Labor, Department of Labor (4/2026 - Present)",
+   "Acting Director, Office of Government Ethics (6/2026 - Present)"
+  ],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/A56222F259495B0D85258C1A00565073/$FILE/Kennedy%2C%20Jr.%2C%20Robert%20F.%20%20AMENDED%20final278.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/A91705E58BCA51B085258E73002D9F9B/$FILE/Todd-Blanche-2026-278ANNU.pdf": [
+   "Acting Librarian of Congress, Library of Congress (5/2025 - 12/2025)",
+   "Acting Attorney General, Department of Justice (4/2026 - Present)"
+  ],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/A9F88F6167796EF985258E04002DDA12/$FILE/Lee-Zeldin-2026-278ANNU.pdf": null,
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/AC841CF0E3B5807A85258C1C00320D21/$FILE/Lutnick%2C%20Howard%20%20final278.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/B4586F4FD7718EA485258C0F00336FAE/$FILE/Zeldin%2C%20Lee%20%20final278.pdf": null,
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/BA2811A174F47D3385258C11005A053B/$FILE/Hegseth%2C%20Pete%20%20final278.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/BAD2E88F1206E73B85258C0E00336E8A/$FILE/Vought%2C%20Russell%20%20final278.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/CF8CA0328CB1970085258E7B002D9B7E/$FILE/Scott-Bessent-2026-278ANNU.pdf": [],
+  "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/E02BB5E9D673CA7085258E04002DCCD7/$FILE/Marco-Rubio-2026-278ANNU.pdf": [
+   "Senator, United States Senate (1/2011 - 1/2025)",
+   "Acting National Security Advisor, Executive Office of the President (5/2025 - Present)",
+   "Archivist of the United States, National Archives and Records Administration (2/2025 - 2/2026)",
+   "Acting Administrator, United States Agency for International Development (2/2025 - 8/2025)"
+  ]
+ },
+ "problems": [
+  "Doug Burgum: Nominee 278 of 2025-01-15 names Burgum, Doug, not Burgum, Douglas J; not linked",
+  "Doug Collins: Annual (2026) of 2026-06-25 names Collins, Douglas A, not Collins, Doug; not linked"
+ ],
  "read": "2026-10-17",
  "source": "https://extapps2.oge.gov/201/Presiden.nsf/"
 }

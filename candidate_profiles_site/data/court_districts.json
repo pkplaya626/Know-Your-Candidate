@@ -1,0 +1,4932 @@
+{
+ "edition": "2024",
+ "read": "2026-10-18",
+ "source": "https://www.govinfo.gov/content/pkg/USCODE-2024-title28/html/USCODE-2024-title28-partI-chap5.htm",
+ "states": {
+  "AK": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Anchorage, Fairbanks, Juneau, Ketchikan, and Nome",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 81,
+   "single": true
+  },
+  "AL": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Colbert",
+        "Franklin",
+        "Lauderdale",
+        "Lawrence"
+       ],
+       "exceptions": [],
+       "held": "Florence",
+       "name": "Northwestern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Cullman",
+        "Jackson",
+        "Limestone",
+        "Madison",
+        "Marshall",
+        "Morgan"
+       ],
+       "exceptions": [],
+       "held": "Huntsville",
+       "name": "Northeastern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Blount",
+        "Jefferson",
+        "Shelby"
+       ],
+       "exceptions": [],
+       "held": "Birmingham",
+       "name": "Southern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Calhoun",
+        "Cherokee",
+        "Clay",
+        "Cleburne",
+        "DeKalb",
+        "Etowah",
+        "Saint Clair",
+        "Talladega"
+       ],
+       "exceptions": [],
+       "held": "Anniston",
+       "name": "Eastern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Bibb",
+        "Fayette",
+        "Greene",
+        "Lamar",
+        "Marion",
+        "Pickens",
+        "Sumter",
+        "Tuscaloosa",
+        "Walker",
+        "Winston"
+       ],
+       "exceptions": [],
+       "held": "Tuscaloosa",
+       "name": "Western",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Northern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Autauga",
+        "Barbour",
+        "Bullock",
+        "Butler",
+        "Chilton",
+        "Coosa",
+        "Covington",
+        "Crenshaw",
+        "Elmore",
+        "Lowndes",
+        "Montgomery",
+        "Pike"
+       ],
+       "exceptions": [],
+       "held": "Montgomery",
+       "name": "Northern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Coffee",
+        "Dale",
+        "Geneva",
+        "Henry",
+        "Houston"
+       ],
+       "exceptions": [],
+       "held": "Dothan",
+       "name": "Southern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Chambers",
+        "Lee",
+        "Macon",
+        "Randolph",
+        "Russell",
+        "Tallapoosa"
+       ],
+       "exceptions": [],
+       "held": "Opelika",
+       "name": "Eastern",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Middle",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Dallas",
+        "Hale",
+        "Marengo",
+        "Perry",
+        "Wilcox"
+       ],
+       "exceptions": [],
+       "held": "Selma",
+       "name": "Northern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Baldwin",
+        "Choctaw",
+        "Clarke",
+        "Conecuh",
+        "Escambia",
+        "Mobile",
+        "Monroe",
+        "Washington"
+       ],
+       "exceptions": [],
+       "held": "Mobile",
+       "name": "Southern",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Southern",
+     "portions": []
+    }
+   ],
+   "section": 81,
+   "single": false
+  },
+  "AR": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Cleburne",
+        "Cleveland",
+        "Conway",
+        "Dallas",
+        "Drew",
+        "Faulkner",
+        "Grant",
+        "Jefferson",
+        "Lincoln",
+        "Lonoke",
+        "Perry",
+        "Pope",
+        "Prairie",
+        "Pulaski",
+        "Saline",
+        "Stone",
+        "Van Buren",
+        "White",
+        "Yell"
+       ],
+       "exceptions": [],
+       "held": "Little Rock",
+       "name": "Central",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Arkansas",
+        "Chicot",
+        "Crittenden",
+        "Desha",
+        "Lee",
+        "Monroe",
+        "Phillips",
+        "St. Francis"
+       ],
+       "exceptions": [],
+       "held": "Helena",
+       "name": "Delta",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Clay",
+        "Craighead",
+        "Cross",
+        "Fulton",
+        "Greene",
+        "Independence",
+        "Izard",
+        "Jackson",
+        "Lawrence",
+        "Mississippi",
+        "Poinsett",
+        "Randolph",
+        "Sharp",
+        "Woodruff"
+       ],
+       "exceptions": [],
+       "held": "Jonesboro",
+       "name": "Northern",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Eastern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Hempstead",
+        "Howard",
+        "Lafayette",
+        "Little River",
+        "Miller",
+        "Nevada",
+        "Sevier"
+       ],
+       "exceptions": [],
+       "held": "Texarkana, and may be held anywhere within the Federal courthouse in Texarkana that is located astride the State line between Texas and Arkansas",
+       "name": "Texarkana",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Ashley",
+        "Bradley",
+        "Calhoun",
+        "Columbia",
+        "Ouachita",
+        "Union"
+       ],
+       "exceptions": [],
+       "held": "El Dorado",
+       "name": "El Dorado",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Crawford",
+        "Franklin",
+        "Johnson",
+        "Logan",
+        "Polk",
+        "Scott",
+        "Sebastian"
+       ],
+       "exceptions": [],
+       "held": "Fort Smith",
+       "name": "Fort Smith",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Baxter",
+        "Boone",
+        "Carroll",
+        "Marion",
+        "Newton",
+        "Searcy"
+       ],
+       "exceptions": [],
+       "held": "Harrison",
+       "name": "Harrison",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Benton",
+        "Madison",
+        "Washington"
+       ],
+       "exceptions": [],
+       "held": "Fayetteville",
+       "name": "Fayetteville",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Clark",
+        "Garland",
+        "Hot Springs",
+        "Montgomery",
+        "Pike"
+       ],
+       "exceptions": [],
+       "held": "Hot Springs",
+       "name": "Hot Springs",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Western",
+     "portions": []
+    }
+   ],
+   "section": 83,
+   "single": false
+  },
+  "AZ": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Flagstaff, Globe, Phoenix, Prescott, Tucson, and Yuma",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 82,
+   "single": true
+  },
+  "CA": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [
+      "Alameda",
+      "Contra Costa",
+      "Del Norte",
+      "Humboldt",
+      "Lake",
+      "Marin",
+      "Mendocino",
+      "Monterey",
+      "Napa",
+      "San Benito",
+      "Santa Clara",
+      "Santa Cruz",
+      "San Francisco",
+      "San Mateo",
+      "Sonoma"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Eureka, Oakland, San Francisco, and San Jose",
+     "name": "Northern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Alpine",
+      "Amador",
+      "Butte",
+      "Calaveras",
+      "Colusa",
+      "El Dorado",
+      "Fresno",
+      "Glenn",
+      "Inyo",
+      "Kern",
+      "Kings",
+      "Lassen",
+      "Madera",
+      "Mariposa",
+      "Merced",
+      "Modoc",
+      "Mono",
+      "Nevada",
+      "Placer",
+      "Plumas",
+      "Sacramento",
+      "San Joaquin",
+      "Shasta",
+      "Sierra",
+      "Siskiyou",
+      "Solano",
+      "Stanislaus",
+      "Sutter",
+      "Tehama",
+      "Trinity",
+      "Tulare",
+      "Tuolumne",
+      "Yolo",
+      "Yuba"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Bakersfield, Fresno, Redding, and Sacramento",
+     "name": "Eastern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Riverside and San Bernardino"
+       ],
+       "exceptions": [],
+       "held": "a suitable site in the city of Riverside, the city of San Bernardino, or not more than 5 miles from the boundary of either such city",
+       "name": "Eastern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Los Angeles",
+        "San Luis Obispo",
+        "Santa Barbara",
+        "Ventura"
+       ],
+       "exceptions": [],
+       "held": "Los Angeles",
+       "name": "Western",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Orange"
+       ],
+       "exceptions": [],
+       "held": "Santa Ana",
+       "name": "Southern",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Central",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Imperial and San Diego"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "San Diego and El Centro",
+     "name": "Southern",
+     "portions": []
+    }
+   ],
+   "section": 84,
+   "single": false
+  },
+  "CO": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Boulder, Colorado Springs, Denver, Durango, Grand Junction, Montrose, Pueblo, and Sterling",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 85,
+   "single": true
+  },
+  "CT": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Bridgeport, Hartford, New Haven, New London, and Waterbury",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 86,
+   "single": true
+  },
+  "DC": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Washington",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 88,
+   "single": true
+  },
+  "DE": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Wilmington",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 87,
+   "single": true
+  },
+  "FL": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [
+      "Alachua",
+      "Bay",
+      "Calhoun",
+      "Dixie",
+      "Escambia",
+      "Franklin",
+      "Gadsden",
+      "Gilchrist",
+      "Gulf",
+      "Holmes",
+      "Jackson",
+      "Jefferson",
+      "Lafayette",
+      "Leon",
+      "Levy",
+      "Liberty",
+      "Madison",
+      "Okaloosa",
+      "Santa Rosa",
+      "Taylor",
+      "Wakulla",
+      "Walton",
+      "Washington"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Gainesville, Marianna, Panama City, Pensacola, and Tallahassee",
+     "name": "Northern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Baker",
+      "Bradford",
+      "Brevard",
+      "Charlotte",
+      "Citrus",
+      "Clay",
+      "Collier",
+      "Columbia",
+      "De Soto",
+      "Duval",
+      "Flagler",
+      "Glades",
+      "Hamilton",
+      "Hardee",
+      "Hendry",
+      "Hernando",
+      "Hillsborough",
+      "Lake",
+      "Lee",
+      "Manatee",
+      "Marion",
+      "Nassau",
+      "Orange",
+      "Osceola",
+      "Pasco",
+      "Pinellas",
+      "Polk",
+      "Putnam",
+      "St. Johns",
+      "Sarasota",
+      "Seminole",
+      "Sumter",
+      "Suwannee",
+      "Union",
+      "Volusia"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Fernandina, Fort Myers, Jacksonville, Live Oak, Ocala, Orlando, Saint Petersburg, and Tampa",
+     "name": "Middle",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Broward",
+      "Dade",
+      "Highlands",
+      "Indian River",
+      "Martin",
+      "Monroe",
+      "Okeechobee",
+      "Palm Beach",
+      "St. Lucie"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Fort Lauderdale, Fort Pierce, Key West, Miami, and West Palm Beach",
+     "name": "Southern",
+     "portions": []
+    }
+   ],
+   "section": 89,
+   "single": false
+  },
+  "GA": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Banks",
+        "Barrow",
+        "Dawson",
+        "Fannin",
+        "Forsyth",
+        "Gilmer",
+        "Habersham",
+        "Hall",
+        "Jackson",
+        "Lumpkin",
+        "Pickens",
+        "Rabun",
+        "Stephens",
+        "Towns",
+        "Union",
+        "White"
+       ],
+       "exceptions": [],
+       "held": "Gainesville",
+       "name": "Gainesville",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Cherokee",
+        "Clayton",
+        "Cobb",
+        "De Kalb",
+        "Douglas",
+        "Fulton",
+        "Gwinnett",
+        "Henry",
+        "Newton",
+        "Rockdale"
+       ],
+       "exceptions": [],
+       "held": "Atlanta",
+       "name": "Atlanta",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Bartow",
+        "Catoosa",
+        "Chattooga",
+        "Dade",
+        "Floyd",
+        "Gordon",
+        "Murray",
+        "Paulding",
+        "Polk",
+        "Walker",
+        "Whitfield"
+       ],
+       "exceptions": [],
+       "held": "Rome",
+       "name": "Rome",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Carroll",
+        "Coweta",
+        "Fayette",
+        "Haralson",
+        "Heard",
+        "Meriwether",
+        "Pike",
+        "Spalding",
+        "Troup"
+       ],
+       "exceptions": [],
+       "held": "Newnan",
+       "name": "Newnan",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Northern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Clarke",
+        "Elbert",
+        "Franklin",
+        "Greene",
+        "Hart",
+        "Madison",
+        "Morgan",
+        "Oconee",
+        "Oglethorpe",
+        "Walton"
+       ],
+       "exceptions": [],
+       "held": "Athens",
+       "name": "Athens",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Baldwin",
+        "Bibb",
+        "Bleckley",
+        "Butts",
+        "Crawford",
+        "Hancock",
+        "Houston",
+        "Jasper",
+        "Jones",
+        "Lamar",
+        "Monroe",
+        "Peach",
+        "Pulaski",
+        "Putnam",
+        "Twiggs",
+        "Upson",
+        "Washington",
+        "Wilkinson"
+       ],
+       "exceptions": [],
+       "held": "Macon",
+       "name": "Macon",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Chattahoochee",
+        "Clay",
+        "Harris",
+        "Marion",
+        "Muscogee",
+        "Quitman",
+        "Randolph",
+        "Stewart",
+        "Talbot",
+        "Taylor"
+       ],
+       "exceptions": [],
+       "held": "Columbus",
+       "name": "Columbus",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Ben Hill",
+        "Crisp",
+        "Dooly",
+        "Lee",
+        "Macon",
+        "Schley",
+        "Sumter",
+        "Terrell",
+        "Webster",
+        "Wilcox"
+       ],
+       "exceptions": [],
+       "held": "Americus",
+       "name": "Americus",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Baker",
+        "Calhoun",
+        "Dougherty",
+        "Early",
+        "Miller",
+        "Mitchell",
+        "Turner",
+        "Worth"
+       ],
+       "exceptions": [],
+       "held": "Albany",
+       "name": "Albany",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Berrien",
+        "Clinch",
+        "Cook",
+        "Echols",
+        "Irwin",
+        "Lanier",
+        "Lowndes",
+        "Tift"
+       ],
+       "exceptions": [],
+       "held": "Valdosta",
+       "name": "Valdosta",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Brooks",
+        "Colquitt",
+        "Decatur",
+        "Grady",
+        "Seminole",
+        "Thomas"
+       ],
+       "exceptions": [],
+       "held": "Thomasville",
+       "name": "Thomasville",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Middle",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Burke",
+        "Columbia",
+        "Glascock",
+        "Jefferson",
+        "Lincoln",
+        "McDuffie",
+        "Richmond",
+        "Taliaferro",
+        "Warren",
+        "Wilkes"
+       ],
+       "exceptions": [],
+       "held": "Augusta",
+       "name": "Augusta",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Dodge",
+        "Johnson",
+        "Laurens",
+        "Montgomery",
+        "Telfair",
+        "Treutlen",
+        "Wheeler"
+       ],
+       "exceptions": [],
+       "held": "Dublin",
+       "name": "Dublin",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Bryan",
+        "Chatham",
+        "Effingham",
+        "Liberty"
+       ],
+       "exceptions": [],
+       "held": "Savannah",
+       "name": "Savannah",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Atkinson",
+        "Bacon",
+        "Brantley",
+        "Charlton",
+        "Coffee",
+        "Pierce",
+        "Ware"
+       ],
+       "exceptions": [],
+       "held": "Waycross",
+       "name": "Waycross",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Appling",
+        "Camden",
+        "Glynn",
+        "Jeff Davis",
+        "Long",
+        "McIntosh",
+        "Wayne"
+       ],
+       "exceptions": [],
+       "held": "Brunswick",
+       "name": "Brunswick",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Bulloch",
+        "Candler",
+        "Emanuel",
+        "Evans",
+        "Jenkins",
+        "Screven",
+        "Tattnall",
+        "Toombs"
+       ],
+       "exceptions": [],
+       "held": "Statesboro",
+       "name": "Statesboro",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Southern",
+     "portions": []
+    }
+   ],
+   "section": 90,
+   "single": false
+  },
+  "HI": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Honolulu",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 91,
+   "single": true
+  },
+  "IA": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Benton",
+        "Cedar",
+        "Grundy",
+        "Hardin",
+        "Iowa",
+        "Jones",
+        "Linn",
+        "Tama"
+       ],
+       "exceptions": [],
+       "held": "Cedar Rapids",
+       "name": "Cedar Rapids",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Allamakee",
+        "Black Hawk",
+        "Bremer",
+        "Buchanan",
+        "Chickasaw",
+        "Clayton",
+        "Delaware",
+        "Dubuque",
+        "Fayette",
+        "Floyd",
+        "Howard",
+        "Jackson",
+        "Mitchell",
+        "Winneshiek"
+       ],
+       "exceptions": [],
+       "held": "Dubuque and Waterloo",
+       "name": "Eastern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Buena Vista",
+        "Cherokee",
+        "Clay",
+        "Crawford",
+        "Dickinson",
+        "Ida",
+        "Lyon",
+        "Monona",
+        "O'Brien",
+        "Osceola",
+        "Plymouth",
+        "Sac",
+        "Sioux",
+        "Woodbury"
+       ],
+       "exceptions": [],
+       "held": "Sioux City",
+       "name": "Western",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Butler",
+        "Calhoun",
+        "Carroll",
+        "Cerro Gordo",
+        "Emmet",
+        "Franklin",
+        "Hamilton",
+        "Hancock",
+        "Humboldt",
+        "Kossuth",
+        "Palo Alto",
+        "Pocahontas",
+        "Webster",
+        "Winnebago",
+        "Worth",
+        "Wright"
+       ],
+       "exceptions": [],
+       "held": "Fort Dodge and Mason City",
+       "name": "Central",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Northern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Boone",
+        "Dallas",
+        "Greene",
+        "Guthrie",
+        "Jasper",
+        "Madison",
+        "Marion",
+        "Marshall",
+        "Polk",
+        "Poweshiek",
+        "Story",
+        "Warren"
+       ],
+       "exceptions": [],
+       "held": "Des Moines",
+       "name": "Central",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Des Moines",
+        "Henry",
+        "Lee",
+        "Louisa",
+        "Van Buren"
+       ],
+       "exceptions": [],
+       "held": "Keokuk",
+       "name": "Eastern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Audubon",
+        "Cass",
+        "Fremont",
+        "Harrison",
+        "Mills",
+        "Montgomery",
+        "Page",
+        "Pottawattamie",
+        "Shelby"
+       ],
+       "exceptions": [],
+       "held": "Council Bluffs",
+       "name": "Western",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Adair",
+        "Adams",
+        "Clarke",
+        "Decatur",
+        "Lucas",
+        "Ringgold",
+        "Taylor",
+        "Union",
+        "Wayne"
+       ],
+       "exceptions": [],
+       "held": "Creston",
+       "name": "Southern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Clinton",
+        "Johnson",
+        "Muscatine",
+        "Scott",
+        "Washington"
+       ],
+       "exceptions": [],
+       "held": "Davenport",
+       "name": "Davenport",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Appanoose",
+        "Davis",
+        "Jefferson",
+        "Keokuk",
+        "Mahaska",
+        "Monroe",
+        "Wapello"
+       ],
+       "exceptions": [],
+       "held": "Ottumwa",
+       "name": "Ottumwa",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Southern",
+     "portions": []
+    }
+   ],
+   "section": 95,
+   "single": false
+  },
+  "ID": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Boise, Coeur d'Alene, Moscow, and Pocatello",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 92,
+   "single": true
+  },
+  "IL": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Cook",
+        "Du Page",
+        "Grundy",
+        "Kane",
+        "Kendall",
+        "Lake",
+        "La Salle",
+        "Will"
+       ],
+       "exceptions": [],
+       "held": "Chicago and Wheaton",
+       "name": "Eastern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Boone",
+        "Carroll",
+        "De Kalb",
+        "Jo Daviess",
+        "Lee",
+        "McHenry",
+        "Ogle",
+        "Stephenson",
+        "Whiteside",
+        "Winnebago"
+       ],
+       "exceptions": [],
+       "held": "Freeport and Rockford",
+       "name": "Western",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Northern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Adams",
+      "Brown",
+      "Bureau",
+      "Cass",
+      "Champaign",
+      "Christian",
+      "Coles",
+      "De Witt",
+      "Douglas",
+      "Edgar",
+      "Ford",
+      "Fulton",
+      "Greene",
+      "Hancock",
+      "Henderson",
+      "Henry",
+      "Iroquois",
+      "Kankakee",
+      "Knox",
+      "Livingston",
+      "Logan",
+      "McDonough",
+      "McLean",
+      "Macoupin",
+      "Macon",
+      "Marshall",
+      "Mason",
+      "Menard",
+      "Mercer",
+      "Montgomery",
+      "Morgan",
+      "Moultrie",
+      "Peoria",
+      "Piatt",
+      "Pike",
+      "Putnam",
+      "Rock Island",
+      "Sangamon",
+      "Schuyler",
+      "Scott",
+      "Shelby",
+      "Stark",
+      "Tazewell",
+      "Vermilion",
+      "Warren",
+      "Woodford"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Champaign/Urbana, Danville, Peoria, Quincy, Rock Island, and Springfield",
+     "name": "Central",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Alexander",
+      "Bond",
+      "Calhoun",
+      "Clark",
+      "Clay",
+      "Clinton",
+      "Crawford",
+      "Cumberland",
+      "Edwards",
+      "Effingham",
+      "Fayette",
+      "Franklin",
+      "Gallatin",
+      "Hamilton",
+      "Hardin",
+      "Jackson",
+      "Jasper",
+      "Jefferson",
+      "Jersey",
+      "Johnson",
+      "Lawrence",
+      "Madison",
+      "Marion",
+      "Massac",
+      "Monroe",
+      "Perry",
+      "Pope",
+      "Pulaski",
+      "Randolph",
+      "Richland",
+      "St. Clair",
+      "Saline",
+      "Union",
+      "Wabash",
+      "Washington",
+      "Wayne",
+      "White",
+      "Williamson"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Alton, Benton, Cairo, and East Saint Louis",
+     "name": "Southern",
+     "portions": []
+    }
+   ],
+   "section": 93,
+   "single": false
+  },
+  "IN": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Adams",
+        "Allen",
+        "Blackford",
+        "De Kalb",
+        "Grant",
+        "Huntington",
+        "Jay",
+        "Lagrange",
+        "Noble",
+        "Steuben",
+        "Wells",
+        "Whitley"
+       ],
+       "exceptions": [],
+       "held": "Fort Wayne",
+       "name": "Fort Wayne",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Cass",
+        "Elkhart",
+        "Fulton",
+        "Kosciusko",
+        "La Porte",
+        "Marshall",
+        "Miami",
+        "Pulaski",
+        "St. Joseph",
+        "Starke",
+        "Wabash"
+       ],
+       "exceptions": [],
+       "held": "South Bend",
+       "name": "South Bend",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Benton",
+        "Carroll",
+        "Jasper",
+        "Lake",
+        "Newton",
+        "Porter",
+        "Tippecanoe",
+        "Warren",
+        "White"
+       ],
+       "exceptions": [],
+       "held": "Hammond and Lafayette",
+       "name": "Hammond",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Northern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Bartholomew",
+        "Boone",
+        "Brown",
+        "Clinton",
+        "Decatur",
+        "Delaware",
+        "Fayette",
+        "Fountain",
+        "Franklin",
+        "Hamilton",
+        "Hancock",
+        "Hendricks",
+        "Henry",
+        "Howard",
+        "Johnson",
+        "Madison",
+        "Marion",
+        "Monroe",
+        "Montgomery",
+        "Morgan",
+        "Randolph",
+        "Rush",
+        "Shelby",
+        "Tipton",
+        "Union",
+        "Wayne"
+       ],
+       "exceptions": [],
+       "held": "Indianapolis and Richmond",
+       "name": "Indianapolis",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Clay",
+        "Greene",
+        "Knox",
+        "Owen",
+        "Parke",
+        "Putnam",
+        "Sullivan",
+        "Vermilion",
+        "Vigo"
+       ],
+       "exceptions": [],
+       "held": "Terre Haute",
+       "name": "Terre Haute",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Davies",
+        "Dubois",
+        "Gibson",
+        "Martin",
+        "Perry",
+        "Pike",
+        "Posey",
+        "Spencer",
+        "Vanderburgh",
+        "Warrick"
+       ],
+       "exceptions": [],
+       "held": "Evansville",
+       "name": "Evansville",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Clark",
+        "Crawford",
+        "Dearborn",
+        "Floyd",
+        "Harrison",
+        "Jackson",
+        "Jefferson",
+        "Jennings",
+        "Lawrence",
+        "Ohio",
+        "Orange",
+        "Ripley",
+        "Scott",
+        "Switzerland",
+        "Washington"
+       ],
+       "exceptions": [],
+       "held": "New Albany",
+       "name": "New Albany",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Southern",
+     "portions": []
+    }
+   ],
+   "section": 94,
+   "single": false
+  },
+  "KS": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Kansas City, Lawrence, Leavenworth, Salina, Topeka, Hutchinson, Wichita, Dodge City, and Fort Scott",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 96,
+   "single": true
+  },
+  "KY": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [
+      "Anderson",
+      "Bath",
+      "Bell",
+      "Boone",
+      "Bourbon",
+      "Boyd",
+      "Boyle",
+      "Bracken",
+      "Breathitt",
+      "Campbell",
+      "Carroll",
+      "Carter",
+      "Clark",
+      "Clay",
+      "Elliott",
+      "Estill",
+      "Fayette",
+      "Fleming",
+      "Floyd",
+      "Franklin",
+      "Gallatin",
+      "Garrard",
+      "Grant",
+      "Greenup",
+      "Harlan",
+      "Harrison",
+      "Henry",
+      "Jackson",
+      "Jessamine",
+      "Johnson",
+      "Kenton",
+      "Knott",
+      "Knox",
+      "Laurel",
+      "Lawrence",
+      "Lee",
+      "Leslie",
+      "Letcher",
+      "Lewis",
+      "Lincoln",
+      "McCreary",
+      "Madison",
+      "Magoffin",
+      "Martin",
+      "Mason",
+      "Menifee",
+      "Mercer",
+      "Montgomery",
+      "Morgan",
+      "Nicholas",
+      "Owen",
+      "Owsley",
+      "Pendleton",
+      "Perry",
+      "Pike",
+      "Powell",
+      "Pulaski",
+      "Robertson",
+      "Rockcastle",
+      "Rowan",
+      "Scott",
+      "Shelby",
+      "Trimble",
+      "Wayne",
+      "Whitley",
+      "Wolfe",
+      "Woodford"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Ashland, Catlettsburg, Covington, Frankfort, Jackson, Lexington, London, Pikeville, and Richmond",
+     "name": "Eastern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Adair",
+      "Allen",
+      "Ballard",
+      "Barren",
+      "Breckenridge",
+      "Bullitt",
+      "Butler",
+      "Caldwell",
+      "Calloway",
+      "Carlisle",
+      "Casey",
+      "Christian",
+      "Clinton",
+      "Crittenden",
+      "Cumberland",
+      "Daviess",
+      "Edmonson",
+      "Fulton",
+      "Graves",
+      "Grayson",
+      "Green",
+      "Hancock",
+      "Hardin",
+      "Hart",
+      "Henderson",
+      "Hickman",
+      "Hopkins",
+      "Jefferson",
+      "Larue",
+      "Livingston",
+      "Logan",
+      "Lyon",
+      "McCracken",
+      "McLean",
+      "Marion",
+      "Marshall",
+      "Meade",
+      "Metcalfe",
+      "Monroe",
+      "Muhlenberg",
+      "Nelson",
+      "Ohio",
+      "Oldham",
+      "Russell",
+      "Simpson",
+      "Spencer",
+      "Taylor",
+      "Todd",
+      "Trigg",
+      "Union",
+      "Warren",
+      "Washington",
+      "Webster"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Bowling Green, Louisville, Owensboro, and Paducah",
+     "name": "Western",
+     "portions": []
+    }
+   ],
+   "section": 97,
+   "single": false
+  },
+  "LA": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [
+      "Assumption",
+      "Jefferson",
+      "Lafourche",
+      "Orleans",
+      "Plaquemines",
+      "Saint Bernard",
+      "Saint Charles",
+      "Saint James",
+      "Saint John the Baptist",
+      "Saint Tammany",
+      "Tangipahoa",
+      "Terrebonne",
+      "Washington"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "New Orleans, and Houma",
+     "name": "Eastern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Ascension",
+      "East Baton Rouge",
+      "East Feliciana",
+      "Iberville",
+      "Livingston",
+      "Pointe Coupee",
+      "Saint Helena",
+      "West Baton Rouge",
+      "West Feliciana"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Baton Rouge",
+     "name": "Middle",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Acadia",
+      "Allen",
+      "Avoyelles",
+      "Beauregard",
+      "Bienville",
+      "Bossier",
+      "Caddo",
+      "Calcasieu",
+      "Caldwell",
+      "Cameron",
+      "Catahoula",
+      "Claiborne",
+      "Concordia",
+      "Jefferson Davis",
+      "De Soto",
+      "East Carroll",
+      "Evangeline",
+      "Franklin",
+      "Grant",
+      "Iberia",
+      "Jackson",
+      "Lafayette",
+      "La Salle",
+      "Lincoln",
+      "Madison",
+      "Morehouse",
+      "Natchitoches",
+      "Ouachita",
+      "Rapides",
+      "Red River",
+      "Richland",
+      "Sabine",
+      "Saint Landry",
+      "Saint Martin",
+      "Saint Mary",
+      "Tensas",
+      "Union",
+      "Vermilion",
+      "Vernon",
+      "Webster",
+      "West Carroll",
+      "Winn"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Alexandria, Lafayette, Lake Charles, Monroe, Opelousas, and Shreveport",
+     "name": "Western",
+     "portions": []
+    }
+   ],
+   "section": 98,
+   "single": false
+  },
+  "MA": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Boston, New Bedford, Springfield, and Worcester",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 101,
+   "single": true
+  },
+  "MD": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [
+        "Baltimore"
+       ],
+       "counties": [
+        "Allegany",
+        "Anne Arundel",
+        "Baltimore",
+        "Caroline",
+        "Carroll",
+        "Cecil",
+        "Dorchester",
+        "Frederick",
+        "Garrett",
+        "Harford",
+        "Howard",
+        "Kent",
+        "Queen Anne's",
+        "Somerset",
+        "Talbot",
+        "Washington",
+        "Wicomico",
+        "Worcester"
+       ],
+       "exceptions": [],
+       "held": "Baltimore, Cumberland, and Denton",
+       "name": "Northern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Calvert",
+        "Charles",
+        "Montgomery",
+        "Prince George's",
+        "St. Mary's"
+       ],
+       "exceptions": [],
+       "held": "a suitable site in Montgomery or Prince George's County not more than five miles from the boundary of Montgomery and Prince George's Counties",
+       "name": "Southern",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 100,
+   "single": true
+  },
+  "ME": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Bangor and Portland",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 99,
+   "single": true
+  },
+  "MI": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Genesee",
+        "Jackson",
+        "Lapeer",
+        "Lenawee",
+        "Livingston",
+        "Macomb",
+        "Monroe",
+        "Oakland",
+        "Saint Clair",
+        "Sanilac",
+        "Shiawassee",
+        "Washtenaw",
+        "Wayne"
+       ],
+       "exceptions": [],
+       "held": "Ann Arbor, Detroit, Flint, and Port Huron",
+       "name": "Southern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Alcona",
+        "Alpena",
+        "Arenac",
+        "Bay",
+        "Cheboygan",
+        "Clare",
+        "Crawford",
+        "Gladwin",
+        "Gratiot",
+        "Huron",
+        "Iosco",
+        "Isabella",
+        "Midland",
+        "Montmorency",
+        "Ogemaw",
+        "Oscoda",
+        "Otsego",
+        "Presque Isle",
+        "Roscommon",
+        "Saginaw",
+        "Tuscola"
+       ],
+       "exceptions": [],
+       "held": "Bay City",
+       "name": "Northern",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Eastern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Allegan",
+        "Antrim",
+        "Barry",
+        "Benzie",
+        "Berrien",
+        "Branch",
+        "Calhoun",
+        "Cass",
+        "Charlevoix",
+        "Clinton",
+        "Eaton",
+        "Emmet",
+        "Grand Traverse",
+        "Hillsdale",
+        "Ingham",
+        "Ionia",
+        "Kalamazoo",
+        "Kalkaska",
+        "Kent",
+        "Lake",
+        "Leelanau",
+        "Manistee",
+        "Mason",
+        "Mecosta",
+        "Missaukee",
+        "Montcalm",
+        "Muskegon",
+        "Newaygo",
+        "Oceana",
+        "Osceola",
+        "Ottawa",
+        "Saint Joseph",
+        "Van Buren",
+        "Wexford"
+       ],
+       "exceptions": [],
+       "held": "Grand Rapids, Kalamazoo, Lansing, and Traverse City",
+       "name": "Southern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Alger",
+        "Baraga",
+        "Chippewa",
+        "Delta",
+        "Dickinson",
+        "Gogebic",
+        "Houghton",
+        "Iron",
+        "Keweenaw",
+        "Luce",
+        "Mackinac",
+        "Marquette",
+        "Menominee",
+        "Ontonagon",
+        "Schoolcraft"
+       ],
+       "exceptions": [],
+       "held": "Marquette and Sault Sainte Marie",
+       "name": "Northern",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Western",
+     "portions": []
+    }
+   ],
+   "section": 102,
+   "single": false
+  },
+  "MN": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Dodge",
+        "Fillmore",
+        "Houston",
+        "Mower",
+        "Olmsted",
+        "Steele",
+        "Wabasha",
+        "Winona"
+       ],
+       "exceptions": [],
+       "held": "Winona",
+       "name": "First",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Blue Earth",
+        "Brown",
+        "Cottonwood",
+        "Faribault",
+        "Freeborn",
+        "Jackson",
+        "Lac qui Parle",
+        "Le Sueur",
+        "Lincoln",
+        "Lyon",
+        "Martin",
+        "Murray",
+        "Nicollet",
+        "Nobles",
+        "Pipestone",
+        "Redwood",
+        "Rock",
+        "Sibley",
+        "Waseca",
+        "Watonwan",
+        "Yellow Medicine"
+       ],
+       "exceptions": [],
+       "held": "Mankato",
+       "name": "Second",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Chisago",
+        "Dakota",
+        "Goodhue",
+        "Ramsey",
+        "Rice",
+        "Scott",
+        "Washington"
+       ],
+       "exceptions": [],
+       "held": "Saint Paul",
+       "name": "Third",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Anoka",
+        "Carver",
+        "Chippewa",
+        "Hennepin",
+        "Isanti",
+        "Kandiyohi",
+        "McLeod",
+        "Meeker",
+        "Renville",
+        "Sherburne",
+        "Swift",
+        "Wright"
+       ],
+       "exceptions": [],
+       "held": "Minneapolis",
+       "name": "Fourth",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Aitkin",
+        "Benton",
+        "Carlton",
+        "Cass",
+        "Cook",
+        "Crow Wing",
+        "Itasca",
+        "Kanabec",
+        "Koochiching",
+        "Lake",
+        "Mille Lacs",
+        "Morrison",
+        "Pine",
+        "Saint Louis"
+       ],
+       "exceptions": [],
+       "held": "Duluth",
+       "name": "Fifth",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Becker",
+        "Beltrami",
+        "Big Stone",
+        "Clay",
+        "Clearwater",
+        "Douglas",
+        "Grant",
+        "Hubbard",
+        "Kittson",
+        "Lake of the Woods",
+        "Mahnomen",
+        "Marshall",
+        "Norman",
+        "Otter Tail",
+        "Pennington",
+        "Polk",
+        "Pope",
+        "Red Lake",
+        "Roseau",
+        "Stearns",
+        "Stevens",
+        "Todd",
+        "Traverse",
+        "Wadena",
+        "Wilkin"
+       ],
+       "exceptions": [],
+       "held": "Fergus Falls and Bemidji",
+       "name": "Sixth",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 103,
+   "single": true
+  },
+  "MO": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [
+        "Saint Louis"
+       ],
+       "counties": [
+        "Crawford",
+        "Dent",
+        "Franklin",
+        "Gasconade",
+        "Jefferson",
+        "Lincoln",
+        "Maries",
+        "Phelps",
+        "Saint Charles",
+        "Saint Francois",
+        "Saint Louis",
+        "Warren",
+        "Washington"
+       ],
+       "exceptions": [],
+       "held": "Saint Louis",
+       "name": "Eastern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Adair",
+        "Audrain",
+        "Chariton",
+        "Clark",
+        "Knox",
+        "Lewis",
+        "Linn",
+        "Macon",
+        "Marion",
+        "Monroe",
+        "Montgomery",
+        "Pike",
+        "Ralls",
+        "Randolph",
+        "Schuyler",
+        "Scotland",
+        "Shelby"
+       ],
+       "exceptions": [],
+       "held": "Hannibal",
+       "name": "Northern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Bollinger",
+        "Butler",
+        "Cape Girardeau",
+        "Carter",
+        "Dunklin",
+        "Iron",
+        "Madison",
+        "Mississippi",
+        "New Madrid",
+        "Pemiscot",
+        "Perry",
+        "Reynolds",
+        "Ripley",
+        "Saint Genevieve",
+        "Scott",
+        "Shannon",
+        "Stoddard",
+        "Wayne"
+       ],
+       "exceptions": [],
+       "held": "Cape Girardeau",
+       "name": "Southeastern",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Eastern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Bates",
+        "Carroll",
+        "Cass",
+        "Clay",
+        "Henry",
+        "Jackson",
+        "Johnson",
+        "Lafayette",
+        "Ray",
+        "Saint Clair",
+        "Saline"
+       ],
+       "exceptions": [],
+       "held": "Kansas City",
+       "name": "Western",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Barton",
+        "Barry",
+        "Jasper",
+        "Lawrence",
+        "McDonald",
+        "Newton",
+        "Stone",
+        "Vernon"
+       ],
+       "exceptions": [],
+       "held": "Joplin",
+       "name": "Southwestern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Andrew",
+        "Atchison",
+        "Buchanan",
+        "Caldwell",
+        "Clinton",
+        "Daviess",
+        "De Kalb",
+        "Gentry",
+        "Grundy",
+        "Harrison",
+        "Holt",
+        "Livingston",
+        "Mercer",
+        "Nodaway",
+        "Platte",
+        "Putnam",
+        "Sullivan",
+        "Worth"
+       ],
+       "exceptions": [],
+       "held": "Saint Joseph",
+       "name": "Saint Joseph",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Benton",
+        "Boone",
+        "Callaway",
+        "Camden",
+        "Cole",
+        "Cooper",
+        "Hickory",
+        "Howard",
+        "Miller",
+        "Moniteau",
+        "Morgan",
+        "Osage",
+        "Pettis"
+       ],
+       "exceptions": [],
+       "held": "Jefferson City",
+       "name": "Central",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Cedar",
+        "Christian",
+        "Dade",
+        "Dallas",
+        "Douglas",
+        "Greene",
+        "Howell",
+        "Laclede",
+        "Oregon",
+        "Ozark",
+        "Polk",
+        "Pulaski",
+        "Taney",
+        "Texas",
+        "Webster",
+        "Wright"
+       ],
+       "exceptions": [],
+       "held": "Springfield",
+       "name": "Southern",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Western",
+     "portions": []
+    }
+   ],
+   "section": 105,
+   "single": false
+  },
+  "MS": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Alcorn",
+        "Chickasaw",
+        "Choctaw",
+        "Clay",
+        "Itawamba",
+        "Lee",
+        "Lowndes",
+        "Monroe",
+        "Oktibbeha",
+        "Prentiss",
+        "Tishomingo",
+        "Webster",
+        "Winston"
+       ],
+       "exceptions": [],
+       "held": "Aberdeen, Ackerman, and Corinth",
+       "name": "Aberdeen",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Benton",
+        "Calhoun",
+        "DeSoto",
+        "Lafayette",
+        "Marshall",
+        "Panola",
+        "Pontotoc",
+        "Quitman",
+        "Tallahatchie",
+        "Tate",
+        "Tippah",
+        "Tunica",
+        "Union",
+        "Yalobusha"
+       ],
+       "exceptions": [],
+       "held": "Oxford",
+       "name": "Oxford",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Attala",
+        "Bolivar",
+        "Carroll",
+        "Coahoma",
+        "Grenada",
+        "Humphreys",
+        "Leflore",
+        "Montgomery",
+        "Sunflower",
+        "Washington"
+       ],
+       "exceptions": [],
+       "held": "Clarksdale, Cleveland, and Greenville",
+       "name": "Greenville",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Northern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Copiah",
+        "Hinds",
+        "Holmes",
+        "Issaquena",
+        "Kemper",
+        "Lauderdale",
+        "Leake",
+        "Madison",
+        "Neshoba",
+        "Newton",
+        "Noxubee",
+        "Rankin",
+        "Scott",
+        "Simpson",
+        "Sharkey",
+        "Smith",
+        "Warren",
+        "Yazoo"
+       ],
+       "exceptions": [],
+       "held": "Jackson",
+       "name": "Northern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "George",
+        "Greene",
+        "Hancock",
+        "Harrison",
+        "Jackson",
+        "Pearl River",
+        "Stone"
+       ],
+       "exceptions": [],
+       "held": "Gulfport",
+       "name": "Southern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Clarke",
+        "Covington",
+        "Forrest",
+        "Jasper",
+        "Jefferson Davis",
+        "Jones",
+        "Lamar",
+        "Lawrence",
+        "Marion",
+        "Perry",
+        "Wayne",
+        "Walthall"
+       ],
+       "exceptions": [],
+       "held": "Hattiesburg",
+       "name": "Eastern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Adams",
+        "Amite",
+        "Claiborne",
+        "Franklin",
+        "Jefferson",
+        "Lincoln",
+        "Pike",
+        "Wilkinson"
+       ],
+       "exceptions": [],
+       "held": "Natchez",
+       "name": "Western",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Southern",
+     "portions": []
+    }
+   ],
+   "section": 104,
+   "single": false
+  },
+  "MT": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Billings, Butte, Glasgow, Great Falls, Havre, Helena, Kalispell, Lewistown, Livingston, Miles City, and Missoula",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 106,
+   "single": true
+  },
+  "NC": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [
+      "Beaufort",
+      "Bertie",
+      "Bladen",
+      "Brunswick",
+      "Camden",
+      "Carteret",
+      "Chowan",
+      "Columbus",
+      "Craven",
+      "Cumberland",
+      "Currituck",
+      "Dare",
+      "Duplin",
+      "Edgecombe",
+      "Franklin",
+      "Gates",
+      "Granville",
+      "Greene",
+      "Halifax",
+      "Harnett",
+      "Hertford",
+      "Hyde",
+      "Johnston",
+      "Jones",
+      "Lenoir",
+      "Martin",
+      "Nash",
+      "New Hanover",
+      "Northampton",
+      "Onslow",
+      "Pamlico",
+      "Pasquotank",
+      "Pender",
+      "Perquimans",
+      "Pitt",
+      "Robeson",
+      "Sampson",
+      "Tyrrell",
+      "Vance",
+      "Wake",
+      "Warren",
+      "Washington",
+      "Wayne",
+      "Wilson"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Elizabeth City, Fayetteville, Greenville, New Bern, Raleigh, Wilmington, and Wilson",
+     "name": "Eastern",
+     "portions": [
+      "those portions of Hoke, Moore, Scotland, and Richmond counties encompassing the Fort Bragg Military Reservation and Camp Mackall, and that portion of Durham County encompassing the Federal Correctional Institution, Butner, North Carolina"
+     ]
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Alamance",
+      "Cabarrus",
+      "Caswell",
+      "Chatham",
+      "Davidson",
+      "Davie",
+      "Durham",
+      "Forsyth",
+      "Guilford",
+      "Hoke",
+      "Lee",
+      "Montgomery",
+      "Moore",
+      "Orange",
+      "Person",
+      "Randolph",
+      "Richmond",
+      "Rockingham",
+      "Rowan",
+      "Scotland",
+      "Stanly",
+      "Stokes",
+      "Surry",
+      "Yadkin"
+     ],
+     "divisions": [],
+     "exceptions": [
+      "excluding that portion of Durham County encompassing the Federal Correctional Institution, Butner, North Carolina",
+      "excluding that portion of Hoke County encompassing the Fort Bragg Military Reservation and Camp Mackall",
+      "excluding that portion of Moore County encompassing the Fort Bragg Military Reservation and Camp Mackall",
+      "excluding that portion of Richmond County encompassing the Fort Bragg Military Reservation and Camp Mackall",
+      "excluding that portion of Scotland County encompassing the Fort Bragg Military Reservation and Camp Mackall"
+     ],
+     "held": "Durham, Greensboro, and Winston-Salem",
+     "name": "Middle",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Alexander",
+      "Alleghany",
+      "Anson",
+      "Ashe",
+      "Avery",
+      "Buncombe",
+      "Burke",
+      "Caldwell",
+      "Catawba",
+      "Cherokee",
+      "Clay",
+      "Cleveland",
+      "Gaston",
+      "Graham",
+      "Haywood",
+      "Henderson",
+      "Iredell",
+      "Jackson",
+      "Lincoln",
+      "McDowell",
+      "Macon",
+      "Madison",
+      "Mecklenburg",
+      "Mitchell",
+      "Polk",
+      "Rutherford",
+      "Swain",
+      "Transylvania",
+      "Union",
+      "Watauga",
+      "Wilkes",
+      "Yancey"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Asheville, Bryson City, Charlotte, Shelby, and Statesville",
+     "name": "Western",
+     "portions": []
+    }
+   ],
+   "section": 113,
+   "single": false
+  },
+  "ND": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Bismarck, Fargo, Grand Forks, and Minot",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 114,
+   "single": true
+  },
+  "NE": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Lincoln, North Platte, and Omaha",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 107,
+   "single": true
+  },
+  "NH": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Concord and Littleton",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 109,
+   "single": true
+  },
+  "NJ": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Camden, Newark and Trenton",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 110,
+   "single": true
+  },
+  "NM": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Albuquerque, Las Cruces, Las Vegas, Roswell, Santa Fe, and Silver City",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 111,
+   "single": true
+  },
+  "NV": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Carson City, Elko, Las Vegas, Reno, Ely, and Lovelock",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 108,
+   "single": true
+  },
+  "NY": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [
+      "Albany",
+      "Broome",
+      "Cayuga",
+      "Chenango",
+      "Clinton",
+      "Columbia",
+      "Cortland",
+      "Delaware",
+      "Essex",
+      "Franklin",
+      "Fulton",
+      "Greene",
+      "Hamilton",
+      "Herkimer",
+      "Jefferson",
+      "Lewis",
+      "Madison",
+      "Montgomery",
+      "Oneida",
+      "Onondaga",
+      "Oswego",
+      "Otsego",
+      "Rensselaer",
+      "Saint Lawrence",
+      "Saratoga",
+      "Schenectady",
+      "Schoharie",
+      "Tioga",
+      "Tompkins",
+      "Ulster",
+      "Warren",
+      "Washington"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Albany, Auburn, Binghamton, Malone, Plattsburgh, Syracuse, Utica, Watertown, and Plattsburgh",
+     "name": "Northern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Bronx",
+      "Dutchess",
+      "New York",
+      "Orange",
+      "Putnam",
+      "Rockland",
+      "Sullivan",
+      "Westchester"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "New York, White Plains, and in the Middletown-Wallkill area of Orange County or such nearby location as may be deemed appropriate",
+     "name": "Southern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Kings",
+      "Nassau",
+      "Queens",
+      "Richmond",
+      "Suffolk"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Brooklyn, Hauppauge, Hempstead (including the village of Uniondale), and Central Islip",
+     "name": "Eastern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Allegany",
+      "Cattaraugus",
+      "Chautauqua",
+      "Chemung",
+      "Erie",
+      "Genesee",
+      "Livingston",
+      "Monroe",
+      "Niagara",
+      "Ontario",
+      "Orleans",
+      "Schuyler",
+      "Seneca",
+      "Steuben",
+      "Wayne",
+      "Wyoming",
+      "Yates"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Buffalo, Canandaigua, Elmira, Jamestown, and Rochester",
+     "name": "Western",
+     "portions": []
+    }
+   ],
+   "section": 112,
+   "single": false
+  },
+  "OH": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Ashland",
+        "Ashtabula",
+        "Carroll",
+        "Columbiana",
+        "Crawford",
+        "Cuyahoga",
+        "Geauga",
+        "Holmes",
+        "Lake",
+        "Lorain",
+        "Mahoning",
+        "Medina",
+        "Portage",
+        "Richland",
+        "Stark",
+        "Summit",
+        "Trumbull",
+        "Tuscarawas",
+        "Wayne"
+       ],
+       "exceptions": [],
+       "held": "Cleveland, Youngstown, and Akron",
+       "name": "Eastern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Allen",
+        "Auglaize",
+        "Defiance",
+        "Erie",
+        "Fulton",
+        "Hancock",
+        "Hardin",
+        "Henry",
+        "Huron",
+        "Lucas",
+        "Marion",
+        "Mercer",
+        "Ottawa",
+        "Paulding",
+        "Putnam",
+        "Sandusky",
+        "Seneca",
+        "Van Wert",
+        "Williams",
+        "Woods",
+        "Wyandot"
+       ],
+       "exceptions": [],
+       "held": "Lima and Toledo",
+       "name": "Western",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Northern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Adams",
+        "Brown",
+        "Butler",
+        "Champaign",
+        "Clark",
+        "Clermont",
+        "Clinton",
+        "Darke",
+        "Greene",
+        "Hamilton",
+        "Highland",
+        "Lawrence",
+        "Miami",
+        "Montgomery",
+        "Preble",
+        "Scioto",
+        "Shelby",
+        "Warren"
+       ],
+       "exceptions": [],
+       "held": "Cincinnati and Dayton",
+       "name": "Western",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Athens",
+        "Belmont",
+        "Coshocton",
+        "Delaware",
+        "Fairfield",
+        "Fayette",
+        "Franklin",
+        "Gallia",
+        "Guernsey",
+        "Harrison",
+        "Hocking",
+        "Jackson",
+        "Jefferson",
+        "Knox",
+        "Licking",
+        "Logan",
+        "Madison",
+        "Meigs",
+        "Monroe",
+        "Morgan",
+        "Morrow",
+        "Muskingum",
+        "Noble",
+        "Perry",
+        "Pickaway",
+        "Pike",
+        "Ross",
+        "Union",
+        "Vinton",
+        "Washington"
+       ],
+       "exceptions": [],
+       "held": "Columbus St. Clairsville, and Steubenville",
+       "name": "Eastern",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Southern",
+     "portions": []
+    }
+   ],
+   "section": 115,
+   "single": false
+  },
+  "OK": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [
+      "Craig",
+      "Creek",
+      "Delaware",
+      "Mayes",
+      "Nowata",
+      "Osage",
+      "Ottawa",
+      "Pawnee",
+      "Rogers",
+      "Tulsa",
+      "Washington"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Bartlesville, Miami, Pawhuska, Tulsa, and Vinita",
+     "name": "Northern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Adair",
+      "Atoka",
+      "Bryan",
+      "Carter",
+      "Cherokee",
+      "Choctaw",
+      "Coal",
+      "Haskell",
+      "Hughes",
+      "Johnston",
+      "Latimer",
+      "Le Flore Love",
+      "McCurtain",
+      "McIntosh",
+      "Marshall",
+      "Murray",
+      "Muskogee",
+      "Okfuskee",
+      "Okmulgee",
+      "Pittsburg",
+      "Pontotoc",
+      "Pushmataha",
+      "Seminole",
+      "Sequoyah",
+      "Wagoner"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Ada, Ardmore, Durant, Hugo, Muskogee, Okmulgee, Poteau, and S. McAlester",
+     "name": "Eastern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Alfalfa",
+      "Beaver",
+      "Beckham",
+      "Blaine",
+      "Caddo",
+      "Canadian",
+      "Cimarron",
+      "Cleveland",
+      "Comanche",
+      "Cotton",
+      "Custer",
+      "Dewey",
+      "Ellis",
+      "Garfield",
+      "Garvin",
+      "Grady",
+      "Grant",
+      "Greer",
+      "Harmon",
+      "Harper",
+      "Jackson",
+      "Jefferson",
+      "Kay",
+      "Kingfisher",
+      "Kiowa",
+      "Lincoln",
+      "Logan",
+      "McClain",
+      "Major",
+      "Noble",
+      "Oklahoma",
+      "Payne",
+      "Pottawatomie",
+      "Roger Mills",
+      "Stephens",
+      "Texas",
+      "Tillman",
+      "Washita",
+      "Woods",
+      "Woodward"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Chickasha, Enid, Guthrie, Lawton, Mangum, Oklahoma City, Pauls Valley, Ponca City, Shawnee, and Woodward",
+     "name": "Western",
+     "portions": []
+    }
+   ],
+   "section": 116,
+   "single": false
+  },
+  "OR": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Coquille, Eugene or Springfield, Klamath Falls, Medford, Pendleton, and Portland",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 117,
+   "single": true
+  },
+  "PA": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [
+      "Berks",
+      "Bucks",
+      "Chester",
+      "Delaware",
+      "Lancaster",
+      "Lehigh",
+      "Montgomery",
+      "Northampton",
+      "Philadelphia"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Allentown, Easton, Lancaster, Reading, and Philadelphia",
+     "name": "Eastern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Adams",
+      "Bradford",
+      "Cameron",
+      "Carbon",
+      "Centre",
+      "Clinton",
+      "Columbia",
+      "Cumberland",
+      "Dauphin",
+      "Franklin",
+      "Fulton",
+      "Huntingdon",
+      "Juniata",
+      "Lackawanna",
+      "Lebanon",
+      "Luzerne",
+      "Lycoming",
+      "Mifflin",
+      "Monroe",
+      "Montour",
+      "Northumberland",
+      "Perry",
+      "Pike",
+      "Potter",
+      "Schuylkill",
+      "Snyder",
+      "Sullivan",
+      "Susquehanna",
+      "Tioga",
+      "Union",
+      "Wayne",
+      "Wyoming",
+      "York"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Harrisburg, Lewisburg, Scranton, Wilkes-Barre, and Williamsport",
+     "name": "Middle",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Allegheny",
+      "Armstrong",
+      "Beaver",
+      "Bedford",
+      "Blair",
+      "Butler",
+      "Cambria",
+      "Clarion",
+      "Clearfield",
+      "Crawford",
+      "Elk",
+      "Erie",
+      "Fayette",
+      "Forest",
+      "Greene",
+      "Indiana",
+      "Jefferson",
+      "Lawrence",
+      "McKean",
+      "Mercer",
+      "Somerset",
+      "Venango",
+      "Warren",
+      "Washington",
+      "Westmoreland"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Erie, Johnstown, and Pittsburgh",
+     "name": "Western",
+     "portions": []
+    }
+   ],
+   "section": 118,
+   "single": false
+  },
+  "PR": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Mayaguez, Ponce, and San Juan",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 119,
+   "single": true
+  },
+  "RI": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Providence",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 120,
+   "single": true
+  },
+  "SC": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Berkeley",
+        "Charleston",
+        "Clarendon",
+        "Colleton",
+        "Dorchester",
+        "Georgetown"
+       ],
+       "exceptions": [],
+       "held": "Charleston",
+       "name": "Charleston",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Kershaw",
+        "Lee",
+        "Lexington",
+        "Richland",
+        "Sumter"
+       ],
+       "exceptions": [],
+       "held": "Columbia",
+       "name": "Columbia",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Chesterfield",
+        "Darlington",
+        "Dillon",
+        "Florence",
+        "Horry",
+        "Marion",
+        "Marlboro",
+        "Williamsburg"
+       ],
+       "exceptions": [],
+       "held": "Florence",
+       "name": "Florence",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Aiken",
+        "Allendale",
+        "Barnwell"
+       ],
+       "exceptions": [],
+       "held": "Aiken",
+       "name": "Aiken",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Bamberg",
+        "Calhoun",
+        "Orangeburg"
+       ],
+       "exceptions": [],
+       "held": "Orangeburg",
+       "name": "Orangeburg",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Greenville and Laurens"
+       ],
+       "exceptions": [],
+       "held": "Greenville",
+       "name": "Greenville",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Chester",
+        "Fairfield",
+        "Lancaster",
+        "York"
+       ],
+       "exceptions": [],
+       "held": "Rock Hill",
+       "name": "Rock Hill",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Abbeville",
+        "Edgefield",
+        "Greenwood",
+        "McCormick",
+        "Newberry",
+        "Saluda"
+       ],
+       "exceptions": [],
+       "held": "Greenwood",
+       "name": "Greenwood",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Anderson",
+        "Oconee",
+        "Pickens"
+       ],
+       "exceptions": [],
+       "held": "Anderson",
+       "name": "Anderson",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Cherokee",
+        "Spartanburg",
+        "Union"
+       ],
+       "exceptions": [],
+       "held": "Spartanburg",
+       "name": "Spartanburg",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Beaufort",
+        "Hampton",
+        "Jasper"
+       ],
+       "exceptions": [],
+       "held": "Beaufort",
+       "name": "Beaufort",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 121,
+   "single": true
+  },
+  "SD": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Brown",
+        "Campbell",
+        "Clark",
+        "Codington",
+        "Corson",
+        "Day",
+        "Deuel",
+        "Edmonds",
+        "Grant",
+        "Hamlin",
+        "McPherson",
+        "Marshall",
+        "Roberts",
+        "Spink",
+        "Walworth"
+       ],
+       "exceptions": [],
+       "held": "Aberdeen",
+       "name": "Northern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Aurora",
+        "Beadle",
+        "Bon Homme",
+        "Brookings",
+        "Brule",
+        "Charles Mix",
+        "Clay",
+        "Davison",
+        "Douglas",
+        "Hanson",
+        "Hutchinson",
+        "Kingsbury",
+        "Lake",
+        "Lincoln",
+        "McCook",
+        "Miner",
+        "Minnehaha",
+        "Moody",
+        "Sanborn",
+        "Turner",
+        "Union",
+        "Yankton"
+       ],
+       "exceptions": [],
+       "held": "Sioux Falls",
+       "name": "Southern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Buffalo",
+        "Dewey",
+        "Faulk",
+        "Gregory",
+        "Haakon",
+        "Hand",
+        "Hughes",
+        "Hyde",
+        "Jerauld",
+        "Jones",
+        "Lyman",
+        "Mellette",
+        "Potter",
+        "Stanley",
+        "Sully",
+        "Todd",
+        "Tripp",
+        "Ziebach"
+       ],
+       "exceptions": [],
+       "held": "Pierre",
+       "name": "Central",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Bennett",
+        "Butte",
+        "Custer",
+        "Fall River",
+        "Harding",
+        "Jackson",
+        "Lawrence",
+        "Meade",
+        "Pennington",
+        "Perkins",
+        "Shannon"
+       ],
+       "exceptions": [],
+       "held": "Deadwood and Rapid City",
+       "name": "Western",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 122,
+   "single": true
+  },
+  "TN": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Anderson",
+        "Blount",
+        "Campbell",
+        "Claiborne",
+        "Grainger",
+        "Jefferson",
+        "Knox",
+        "Loudon",
+        "Monroe",
+        "Morgan",
+        "Roane",
+        "Scott",
+        "Sevier",
+        "Union"
+       ],
+       "exceptions": [],
+       "held": "Knoxville",
+       "name": "Northern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Carter",
+        "Cocke",
+        "Greene",
+        "Hamblen",
+        "Hancock",
+        "Hawkins",
+        "Johnson",
+        "Sullivan",
+        "Unicoi",
+        "Washington"
+       ],
+       "exceptions": [],
+       "held": "Greenville",
+       "name": "Northeastern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Bledsoe",
+        "Bradley",
+        "Hamilton",
+        "McMinn",
+        "Marion",
+        "Meigs",
+        "Polk",
+        "Rhea",
+        "Sequatchie"
+       ],
+       "exceptions": [],
+       "held": "Chattanooga",
+       "name": "Southern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Bedford",
+        "Coffee",
+        "Franklin",
+        "Grundy",
+        "Lincoln",
+        "Moore",
+        "Van Buren",
+        "Warren"
+       ],
+       "exceptions": [],
+       "held": "Winchester",
+       "name": "Winchester",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Eastern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Cannon",
+        "Cheatham",
+        "Davidson",
+        "Dickson",
+        "Houston",
+        "Humphreys",
+        "Montgomery",
+        "Robertson",
+        "Rutherford",
+        "Stewart",
+        "Sumner",
+        "Trousdale",
+        "Williamson",
+        "Wilson"
+       ],
+       "exceptions": [],
+       "held": "Nashville",
+       "name": "Nashville",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Clay",
+        "Cumberland",
+        "De Kalb",
+        "Fentress",
+        "Jackson",
+        "Macon",
+        "Overton",
+        "Pickett",
+        "Putnam",
+        "Smith",
+        "White"
+       ],
+       "exceptions": [],
+       "held": "Cookeville",
+       "name": "Northeastern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Giles",
+        "Hickman",
+        "Lawrence",
+        "Lewis",
+        "Marshall",
+        "Maury",
+        "Wayne"
+       ],
+       "exceptions": [],
+       "held": "Columbia",
+       "name": "Columbia",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Middle",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Benton",
+        "Carroll",
+        "Chester",
+        "Crockett",
+        "Decatur",
+        "Dyer",
+        "Gibson",
+        "Hardeman",
+        "Hardin",
+        "Haywood",
+        "Henderson",
+        "Henry",
+        "Lake",
+        "McNairy",
+        "Madison",
+        "Obion",
+        "Perry",
+        "Weakley"
+       ],
+       "exceptions": [],
+       "held": "Jackson and Dyersburg",
+       "name": "Eastern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Fayette",
+        "Lauderdale",
+        "Shelby",
+        "Tipton"
+       ],
+       "exceptions": [],
+       "held": "Memphis",
+       "name": "Western",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Western",
+     "portions": []
+    }
+   ],
+   "section": 123,
+   "single": false
+  },
+  "TX": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Dallas",
+        "Ellis",
+        "Hunt",
+        "Johnson",
+        "Kaufman",
+        "Navarro",
+        "Rockwall"
+       ],
+       "exceptions": [],
+       "held": "Dallas",
+       "name": "Dallas",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Comanche",
+        "Erath",
+        "Hood",
+        "Jack",
+        "Palo Pinto",
+        "Parker",
+        "Tarrant",
+        "Wise"
+       ],
+       "exceptions": [],
+       "held": "Fort Worth",
+       "name": "Fort Worth",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Callahan",
+        "Eastland",
+        "Fisher",
+        "Haskell",
+        "Howard",
+        "Jones",
+        "Mitchell",
+        "Nolan",
+        "Shackleford",
+        "Stephens",
+        "Stonewall",
+        "Taylor",
+        "Throckmorton"
+       ],
+       "exceptions": [],
+       "held": "Abilene",
+       "name": "Abilene",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Brown",
+        "Coke",
+        "Coleman",
+        "Concho",
+        "Crockett",
+        "Glasscock",
+        "Irion",
+        "Menard",
+        "Mills",
+        "Reagan",
+        "Runnels",
+        "Schleicher",
+        "Sterling",
+        "Sutton",
+        "Tom Green"
+       ],
+       "exceptions": [],
+       "held": "San Angelo",
+       "name": "San Angelo",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Armstrong",
+        "Brisco",
+        "Carson",
+        "Castro",
+        "Childress",
+        "Collingsworth",
+        "Dallam",
+        "Deaf Smith",
+        "Donley",
+        "Gray",
+        "Hall",
+        "Hansford",
+        "Hartley",
+        "Hemphill",
+        "Hutchinson",
+        "Lipscomb",
+        "Moore",
+        "Ochiltree",
+        "Oldham",
+        "Parmer",
+        "Potter",
+        "Randall",
+        "Roberts",
+        "Sherman",
+        "Swisher",
+        "Wheeler"
+       ],
+       "exceptions": [],
+       "held": "Amarillo",
+       "name": "Amarillo",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Archer",
+        "Baylor",
+        "Clay",
+        "Cottle",
+        "Foard",
+        "Hardeman",
+        "King",
+        "Knox",
+        "Montague",
+        "Wichita",
+        "Wilbarger",
+        "Young"
+       ],
+       "exceptions": [],
+       "held": "Wichita Falls",
+       "name": "Wichita Falls",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Bailey",
+        "Borden",
+        "Cochran",
+        "Crosby",
+        "Dawson",
+        "Dickens",
+        "Floyd",
+        "Gaines",
+        "Garza",
+        "Hale",
+        "Hockley",
+        "Kent",
+        "Lamb",
+        "Lubbock",
+        "Lynn",
+        "Motley",
+        "Scurry",
+        "Terry",
+        "Yoakum"
+       ],
+       "exceptions": [],
+       "held": "Lubbock",
+       "name": "Lubbock",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Northern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Brazoria",
+        "Chambers",
+        "Galveston",
+        "Matagorda"
+       ],
+       "exceptions": [],
+       "held": "Galveston",
+       "name": "Galveston",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Austin",
+        "Brazos",
+        "Colorado",
+        "Fayette",
+        "Fort Bend",
+        "Grimes",
+        "Harris",
+        "Madison",
+        "Montgomery",
+        "San Jacinto",
+        "Walker",
+        "Waller",
+        "Wharton"
+       ],
+       "exceptions": [],
+       "held": "Houston and College Station",
+       "name": "Houston",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Jim Hogg",
+        "La Salle",
+        "McMullen",
+        "Webb",
+        "Zapata"
+       ],
+       "exceptions": [],
+       "held": "Laredo",
+       "name": "Laredo",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Cameron and Willacy"
+       ],
+       "exceptions": [],
+       "held": "Brownsville",
+       "name": "Brownsville",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Calhoun",
+        "DeWitt",
+        "Goliad",
+        "Jackson",
+        "Lavaca",
+        "Refugio",
+        "Victoria"
+       ],
+       "exceptions": [],
+       "held": "Victoria",
+       "name": "Victoria",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Aransas",
+        "Bee",
+        "Brooks",
+        "Duval",
+        "Jim Wells",
+        "Kenedy",
+        "Kleberg",
+        "Live Oak",
+        "Nueces",
+        "San Patricio"
+       ],
+       "exceptions": [],
+       "held": "Corpus Christi",
+       "name": "Corpus Christi",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Hidalgo and Starr"
+       ],
+       "exceptions": [],
+       "held": "McAllen",
+       "name": "McAllen",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Southern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Anderson",
+        "Cherokee",
+        "Gregg",
+        "Henderson",
+        "Panola",
+        "Rains",
+        "Rusk",
+        "Smith",
+        "Van Zandt",
+        "Wood"
+       ],
+       "exceptions": [],
+       "held": "",
+       "name": "Tyler",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Hardin",
+        "Jasper",
+        "Jefferson",
+        "Liberty",
+        "Newton",
+        "Orange"
+       ],
+       "exceptions": [],
+       "held": "",
+       "name": "Beaumont",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Collin",
+        "Cook",
+        "Delta",
+        "Denton",
+        "Fannin",
+        "Grayson",
+        "Hopkins",
+        "Lamar"
+       ],
+       "exceptions": [],
+       "held": "Sherman and Plano",
+       "name": "Sherman",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Camp",
+        "Cass",
+        "Harrison",
+        "Marion",
+        "Morris",
+        "Upshur"
+       ],
+       "exceptions": [],
+       "held": "Marshall",
+       "name": "Marshall",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Bowie",
+        "Franklin",
+        "Red River",
+        "Titus"
+       ],
+       "exceptions": [],
+       "held": "Texarkana, and may be held anywhere within the Federal courthouse in Texarkana that is located astride the State line between Texas and Arkansas",
+       "name": "Texarkana",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Angelina",
+        "Houston",
+        "Nacogdoches",
+        "Polk",
+        "Sabine",
+        "San Augustine",
+        "Shelby",
+        "Trinity",
+        "Tyler"
+       ],
+       "exceptions": [],
+       "held": "Lufkin",
+       "name": "Lufkin",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Eastern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Bastrop",
+        "Blanco",
+        "Burleson",
+        "Burnet",
+        "Caldwell",
+        "Gillespie",
+        "Hays",
+        "Kimble",
+        "Lampasas",
+        "Lee",
+        "Llano",
+        "Mason",
+        "McCulloch",
+        "San Saba",
+        "Travis",
+        "Washington",
+        "Williamson"
+       ],
+       "exceptions": [],
+       "held": "Austin",
+       "name": "Austin",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Bell",
+        "Bosque",
+        "Coryell",
+        "Falls",
+        "Freestone",
+        "Hamilton",
+        "Hill",
+        "Leon",
+        "Limestone",
+        "McLennan",
+        "Milam",
+        "Robertson",
+        "Somervell"
+       ],
+       "exceptions": [],
+       "held": "Waco",
+       "name": "Waco",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "El Paso"
+       ],
+       "exceptions": [],
+       "held": "El Paso",
+       "name": "El Paso",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Atascosa",
+        "Bandera",
+        "Bexar",
+        "Comal",
+        "Dimmit",
+        "Frio",
+        "Gonzales",
+        "Guadalupe",
+        "Karnes",
+        "Kendall",
+        "Kerr",
+        "Medina",
+        "Real",
+        "Wilson"
+       ],
+       "exceptions": [],
+       "held": "San Antonio",
+       "name": "San Antonio",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Edwards",
+        "Kinney",
+        "Maverick",
+        "Terrell",
+        "Uvalde",
+        "Val Verde",
+        "Zavalla"
+       ],
+       "exceptions": [],
+       "held": "Del Rio",
+       "name": "Del Rio",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Brewster",
+        "Culberson",
+        "Jeff Davis",
+        "Hudspeth",
+        "Loving",
+        "Pecos",
+        "Presidio",
+        "Reeves",
+        "Ward",
+        "Winkler"
+       ],
+       "exceptions": [],
+       "held": "Pecos and Alpine",
+       "name": "Pecos",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Andrews",
+        "Crane",
+        "Ector",
+        "Martin",
+        "Midland",
+        "Upton"
+       ],
+       "exceptions": [],
+       "held": "Midland. Court may be held, in the discretion of the court, in Odessa, when courtroom facilities are made available at no expense to the Government",
+       "name": "Midland-Odessa",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": "Western",
+     "portions": []
+    }
+   ],
+   "section": 124,
+   "single": false
+  },
+  "UT": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [
+      {
+       "cities": [],
+       "counties": [
+        "Box Elder",
+        "Cache",
+        "Davis",
+        "Morgan",
+        "Rich",
+        "Weber"
+       ],
+       "exceptions": [],
+       "held": "Salt Lake City and Ogden",
+       "name": "Northern",
+       "portions": []
+      },
+      {
+       "cities": [],
+       "counties": [
+        "Beaver",
+        "Carbon",
+        "Daggett",
+        "Duchesne",
+        "Emery",
+        "Garfield",
+        "Grand",
+        "Iron",
+        "Juab",
+        "Kane",
+        "Millard",
+        "Piute",
+        "Salt Lake",
+        "San Juan",
+        "Sanpete",
+        "Sevier",
+        "Summit",
+        "Tooele",
+        "Uintah",
+        "Utah",
+        "Wasatch",
+        "Washington",
+        "Wayne"
+       ],
+       "exceptions": [],
+       "held": "Salt Lake City, Provo, St. George, Moab, and Monticello",
+       "name": "Central",
+       "portions": []
+      }
+     ],
+     "exceptions": [],
+     "held": "",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 125,
+   "single": true
+  },
+  "VA": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [
+      "Accomac",
+      "Amelia",
+      "Arlington",
+      "Brunswick",
+      "Caroline",
+      "Charles City",
+      "Chesterfield",
+      "Dinwiddie",
+      "Elizabeth City",
+      "Essex",
+      "Fairfax",
+      "Fauquier",
+      "Gloucester",
+      "Goochland",
+      "Greensville",
+      "Hanover",
+      "Henrico",
+      "Isle of Wight",
+      "James City",
+      "King and Queen",
+      "King George",
+      "King William",
+      "Lancaster",
+      "Loudoun",
+      "Lunenburg",
+      "Mathews",
+      "Mecklenburg",
+      "Middlesex",
+      "Nansemond",
+      "New Kent",
+      "Norfolk",
+      "Northampton",
+      "Northumberland",
+      "Nottoway",
+      "Powhatan",
+      "Prince Edward",
+      "Prince George",
+      "Prince William",
+      "Princess Anne",
+      "Richmond",
+      "Southampton",
+      "Spotsylvania",
+      "Stafford",
+      "Surry",
+      "Sussex",
+      "Warwick",
+      "Westmoreland",
+      "York"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Alexandria, Newport News, Norfolk, and Richmond",
+     "name": "Eastern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Albemarle",
+      "Alleghany",
+      "Amherst",
+      "Appomattox",
+      "Augusta",
+      "Bath",
+      "Bedford",
+      "Bland",
+      "Botetourt",
+      "Buchanan",
+      "Buckingham",
+      "Campbell",
+      "Carroll",
+      "Charlotte",
+      "Clarke",
+      "Craig",
+      "Culpeper",
+      "Cumberland",
+      "Dickenson",
+      "Floyd",
+      "Fluvanna",
+      "Franklin",
+      "Frederick",
+      "Giles",
+      "Grayson",
+      "Greene",
+      "Halifax",
+      "Henry",
+      "Highland",
+      "Lee",
+      "Louisa",
+      "Madison",
+      "Montgomery",
+      "Nelson",
+      "Orange",
+      "Page",
+      "Patrick",
+      "Pittsylvania",
+      "Pulaski",
+      "Rappahannock",
+      "Roanoke",
+      "Rockbridge",
+      "Rockingham",
+      "Russell",
+      "Scott",
+      "Shenandoah",
+      "Smyth",
+      "Tazewell",
+      "Warren",
+      "Washington",
+      "Wise",
+      "Wythe"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Abingdon, Big Stone Gap, Charlottesville, Danville, Harrisonburg, Lynchburg, and Roanoke",
+     "name": "Western",
+     "portions": []
+    }
+   ],
+   "section": 127,
+   "single": false
+  },
+  "VT": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Bennington, Brattleboro, Burlington, Montpelier, Rutland, Saint Johnsbury, and Windsor",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 126,
+   "single": true
+  },
+  "WA": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [
+      "Adams",
+      "Asotin",
+      "Benton",
+      "Chelan",
+      "Columbia",
+      "Douglas",
+      "Ferry",
+      "Franklin",
+      "Garfield",
+      "Grant",
+      "Kittitas",
+      "Klickitat",
+      "Lincoln",
+      "Okanogan",
+      "Pend Oreille",
+      "Spokane",
+      "Stevens",
+      "Walla Walla",
+      "Whitman",
+      "Yakima"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Spokane, Yakima, Walla Walla, and Richland",
+     "name": "Eastern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Clallam",
+      "Clark",
+      "Cowlitz",
+      "Grays Harbor",
+      "Island",
+      "Jefferson",
+      "King",
+      "Kitsap",
+      "Lewis",
+      "Mason",
+      "Pacific",
+      "Pierce",
+      "San Juan",
+      "Skagit",
+      "Skamania",
+      "Snohomish",
+      "Thurston",
+      "Wahkiakum",
+      "Whatcom"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Bellingham, Seattle, Tacoma, Mount Vernon, and Vancouver",
+     "name": "Western",
+     "portions": []
+    }
+   ],
+   "section": 128,
+   "single": false
+  },
+  "WI": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [
+      "Brown",
+      "Calumet",
+      "Dodge",
+      "Door",
+      "Florence",
+      "Fond du Lac",
+      "Forest",
+      "Green Lake",
+      "Kenosha",
+      "Kewaunee",
+      "Langlade",
+      "Manitowoc",
+      "Marinette",
+      "Marquette",
+      "Menominee",
+      "Milwaukee",
+      "Oconto",
+      "Outagamie",
+      "Ozaukee",
+      "Racine",
+      "Shawano",
+      "Sheboygan",
+      "Walworth",
+      "Washington",
+      "Waukesha",
+      "Waupaca",
+      "Waushara",
+      "Winnebago"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Green Bay, Milwaukee, and Oshkosh",
+     "name": "Eastern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Adams",
+      "Ashland",
+      "Barron",
+      "Bayfield",
+      "Buffalo",
+      "Burnett",
+      "Chippewa",
+      "Clark",
+      "Columbia",
+      "Crawford",
+      "Dane",
+      "Douglas",
+      "Dunn",
+      "Eau Claire",
+      "Grant",
+      "Green",
+      "Iowa",
+      "Iron",
+      "Jackson",
+      "Jefferson",
+      "Juneau",
+      "La Crosse",
+      "Lafayette",
+      "Lincoln",
+      "Marathon",
+      "Monroe",
+      "Oneida",
+      "Pepin",
+      "Pierce",
+      "Polk",
+      "Portage",
+      "Price",
+      "Richland",
+      "Rock",
+      "Rusk",
+      "Saint Croix",
+      "Sauk",
+      "Sawyer",
+      "Taylor",
+      "Trempealeau",
+      "Vernon",
+      "Vilas",
+      "Washburn",
+      "Wood"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Eau Claire, La Crosse, Madison, Superior, and Wausau",
+     "name": "Western",
+     "portions": []
+    }
+   ],
+   "section": 130,
+   "single": false
+  },
+  "WV": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [
+      "Barbour",
+      "Berkeley",
+      "Braxton",
+      "Brooke",
+      "Calhoun",
+      "Doddridge",
+      "Gilmer",
+      "Grant",
+      "Hampshire",
+      "Hancock",
+      "Hardy",
+      "Harrison",
+      "Jefferson",
+      "Lewis",
+      "Marion",
+      "Marshall",
+      "Mineral",
+      "Monongalia",
+      "Morgan",
+      "Ohio",
+      "Pendleton",
+      "Pleasants",
+      "Pocahontas",
+      "Preston",
+      "Randolph",
+      "Ritchie",
+      "Taylor",
+      "Tucker",
+      "Tyler",
+      "Upshur",
+      "Webster",
+      "Wetzel"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Clarksburg, Elkins, Fairmont, Martinsburg, and Wheeling",
+     "name": "Northern",
+     "portions": []
+    },
+    {
+     "cities": [],
+     "counties": [
+      "Boone",
+      "Cabell",
+      "Clay",
+      "Fayette",
+      "Greenbrier",
+      "Jackson",
+      "Kanawha",
+      "Lincoln",
+      "Logan",
+      "McDowell",
+      "Mason",
+      "Mercer",
+      "Mingo",
+      "Monroe",
+      "Nicholas",
+      "Putnam",
+      "Raleigh",
+      "Roane",
+      "Summers",
+      "Wayne",
+      "Wirt",
+      "Wood",
+      "Wyoming"
+     ],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Beckley, Bluefield, Charleston, Huntington, Lewisburg, and Parkersburg",
+     "name": "Southern",
+     "portions": []
+    }
+   ],
+   "section": 129,
+   "single": false
+  },
+  "WY": {
+   "districts": [
+    {
+     "cities": [],
+     "counties": [],
+     "divisions": [],
+     "exceptions": [],
+     "held": "Casper, Cheyenne, Evanston, Lander, Jackson, and Sheridan",
+     "name": null,
+     "portions": []
+    }
+   ],
+   "section": 131,
+   "single": true
+  }
+ }
+}

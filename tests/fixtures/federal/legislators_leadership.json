@@ -1,0 +1,128 @@
+[
+ {
+  "id": {
+   "bioguide": "G000386"
+  },
+  "name": {
+   "first": "Charles",
+   "middle": "E.",
+   "last": "Grassley",
+   "nickname": "Chuck",
+   "official_full": "Chuck Grassley"
+  },
+  "leadership_roles": [
+   {
+    "title": "President Pro Tempore of the Senate",
+    "chamber": "senate",
+    "start": "2019-01-03",
+    "end": "2021-01-03"
+   },
+   {
+    "title": "President Pro Tempore of the Senate",
+    "chamber": "senate",
+    "start": "2021-01-03",
+    "end": "2021-01-20"
+   },
+   {
+    "title": "President Pro Tempore of the Senate",
+    "chamber": "senate",
+    "start": "2025-01-03"
+   }
+  ]
+ },
+ {
+  "id": {
+   "bioguide": "M001111"
+  },
+  "name": {
+   "first": "Patty",
+   "last": "Murray",
+   "official_full": "Patty Murray"
+  },
+  "leadership_roles": [
+   {
+    "title": "Assistant Senate Minority Leader",
+    "chamber": "senate",
+    "start": "2019-01-03",
+    "end": "2021-01-03"
+   },
+   {
+    "title": "Assistant Senate Minority Leader",
+    "chamber": "senate",
+    "start": "2021-01-03",
+    "end": "2021-01-20"
+   },
+   {
+    "title": "Assistant Senate Majority Leader",
+    "chamber": "senate",
+    "start": "2021-01-20",
+    "end": "2023-01-03"
+   },
+   {
+    "title": "President Pro Tempore of the Senate",
+    "chamber": "senate",
+    "start": "2021-01-03",
+    "end": "2025-01-03"
+   }
+  ]
+ },
+ {
+  "id": {
+   "bioguide": "C001101"
+  },
+  "name": {
+   "first": "Katherine",
+   "middle": "M.",
+   "last": "Clark",
+   "official_full": "Katherine M. Clark"
+  },
+  "leadership_roles": [
+   {
+    "title": "Assistant Speaker of the House",
+    "chamber": "house",
+    "start": "2021-01-03",
+    "end": "2023-01-03"
+   },
+   {
+    "title": "House Minority Whip",
+    "chamber": "house",
+    "start": "2023-01-03",
+    "end": "2025-01-03"
+   },
+   {
+    "title": "House Minority Whip",
+    "chamber": "house",
+    "start": "2025-01-03"
+   }
+  ]
+ },
+ {
+  "id": {
+   "bioguide": "J000299"
+  },
+  "name": {
+   "first": "Mike",
+   "last": "Johnson",
+   "official_full": "Mike Johnson"
+  },
+  "leadership_roles": [
+   {
+    "title": "House Republican Conference Vice Chair",
+    "chamber": "house",
+    "start": "2021-01-03",
+    "end": "2023-01-03"
+   },
+   {
+    "title": "Speaker of the House",
+    "chamber": "house",
+    "start": "2023-10-25",
+    "end": "2025-01-03"
+   },
+   {
+    "title": "Speaker of the House",
+    "chamber": "house",
+    "start": "2025-01-03"
+   }
+  ]
+ }
+]
