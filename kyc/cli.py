@@ -277,8 +277,9 @@ def _build(args):
     # Each state's legislature: districts and members, rewritten per state
     # only when its content changed.
     from . import legislature as legislature_mod
+    dropped = {}
     try:
-        legislatures = legislature_mod.build(args.root)
+        legislatures = legislature_mod.build(args.root, dropped=dropped)
     except legislature_mod.LegislatureError as exc:
         print(f"[error] {exc}", file=sys.stderr)
         return 2
@@ -287,6 +288,23 @@ def _build(args):
     print(f"[ok] state legislatures: {leg_stats['states']} states, {leg_stats['districts']:,} "
           f"districts, {leg_stats['placed']:,} members placed, {leg_stats['unplaced']} listed off "
           f"the map; {len(written_legs)} file(s) rewritten")
+    # Portraits left off the legislature pages: a search engine's thumbnail
+    # (reported upstream to Open States, never shown) or one confirmed
+    # missing by 'statelegs' (kyc/legislature.py _person).
+    for kind, why in (("thumbnail", "image-search thumbnails"),
+                      ("broken", "confirmed missing")):
+        found = {code: c[kind] for code, c in dropped.items() if c.get(kind)}
+        if found:
+            print(f"  [warn] legislator portraits left off, {why}: {sum(found.values())} ("
+                  + ", ".join(f"{code} {n}" for code, n in sorted(found.items())) + ")")
+    unlinked = {code: sum(1 for c in m["chambers"].values() for v in c["members"].values()
+                          for p in v if "page" not in p)
+                for code, m in legislatures.items()}
+    unlinked = {code: n for code, n in unlinked.items() if n}
+    if unlinked:
+        print(f"  legislators with no page on their legislature's own site "
+              f"(legislature.LEGISLATURE_HOSTS): {sum(unlinked.values())} ("
+              + ", ".join(f"{code} {n}" for code, n in sorted(unlinked.items())) + ")")
 
     # Each state's counties and their local governments.
     from . import counties as counties_mod
@@ -1692,12 +1710,14 @@ def _statelegs(args):
     """Every state legislator from Open States, matched to the district maps."""
     from . import statelegs
     from .government_maps import STATES
-    if args.check:
+    fetched = None
+    if args.check or args.images_only:
         cache = statelegs.load_cache(args.root)
         if not cache:
             print(f"[error] no {statelegs.CACHE_PATH}; run 'statelegs'", file=sys.stderr)
             return 2
         by_state = cache["states"]
+        fetched = cache.get("fetched")
     else:
         try:
             by_state = statelegs.fetch(STATES)
@@ -1717,6 +1737,21 @@ def _statelegs(args):
             reasons = sorted({why for _, why in unplaced})
             print(f"  {code}: {len(unplaced)} not placed on the map ({'; '.join(reasons)}): "
                   + ", ".join(sorted({r['district'] for r, _ in unplaced})[:6]))
+    if not args.check and not args.no_images:
+        # Each portrait, checked the tristate way: only a definite answer
+        # drops one from the page (rule 8).
+        images = statelegs.check_images(by_state, previous=statelegs.load_cache(args.root))
+    else:
+        images = {code: {"ok": 0, "broken": 0, "unknown": 0} for code in by_state}
+        for code, records in by_state.items():
+            for r in records:
+                if r.get("image"):
+                    images[code][r.get("imageStatus") or "unknown"] += 1
+    broken = {code: c["broken"] for code, c in images.items() if c["broken"]}
+    print(f"  portraits: {sum(c['ok'] for c in images.values()):,} load, "
+          f"{sum(broken.values())} confirmed missing and left off the page"
+          + (f" ({', '.join(f'{c} {n}' for c, n in sorted(broken.items()))})" if broken else "")
+          + f", {sum(c['unknown'] for c in images.values()):,} not checked or inconclusive")
     report = statelegs.seats_report(by_state)
     short = [f"{c} {ch} {n}/{s}" for c, v in report.items() for ch, (n, s) in v.items() if n < s]
     over = [f"{c} {ch} {n}/{s}" for c, v in report.items() for ch, (n, s) in v.items() if n > s]
@@ -1728,7 +1763,7 @@ def _statelegs(args):
         print(f"[error] more legislators than seats: {', '.join(over)}", file=sys.stderr)
         return 1
     if not args.check:
-        path = statelegs.save_cache(by_state, args.root)
+        path = statelegs.save_cache(by_state, args.root, fetched=fetched)
         print(f"[ok] wrote {path}")
     return 0
 
@@ -1932,6 +1967,10 @@ def build_parser():
     legs = add("statelegs", help="every state legislator, from Open States")
     legs.add_argument("--check", action="store_true",
                       help="match the committed cache to the district maps; no network")
+    legs.add_argument("--no-images", action="store_true",
+                      help="do not check whether each portrait loads")
+    legs.add_argument("--images-only", action="store_true",
+                      help="check the committed roster's portraits again; do not refetch it")
 
     census = add("census", help="count each state's local governments (Census of Governments)")
     census.add_argument("--check", action="store_true",
