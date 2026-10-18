@@ -89,10 +89,18 @@ def label_text(name):
 # "Official page" rather than a party's.
 LEGISLATURE_HOSTS = {
     "AK": ("akleg.gov",),
-    "AL": ("alison.legislature.state.al.us", "legislature.state.al.us"),
+    # Not the old ALIS pages (legislature.state.al.us/aliswww/), which
+    # Open States still links for 42 members: on 2026-10-17 http answered
+    # 301 to https, and https completed its handshake and then answered
+    # 504 Gateway Timeout after 60 seconds (and timed out twice for the
+    # PR #96 reviewer); the Internet Archive holds no capture of them that
+    # loaded since June 2018. The Legislature's members are on ALISON.
+    "AL": ("alison.legislature.state.al.us",),
     "AR": ("arkleg.state.ar.us", "arkansashouse.org", "senate.arkansas.gov"),
     "AZ": ("azleg.gov",),
-    "CA": ("assembly.ca.gov", "senate.ca.gov"),
+    # A senator's own site is a subdomain of the Senate's, by district
+    # and party ("sd14.senate.ca.gov", "sr01.senate.ca.gov").
+    "CA": ("assembly.ca.gov", "senate.ca.gov", ".senate.ca.gov"),
     "CO": ("leg.colorado.gov",),
     "CT": ("cga.ct.gov",),
     "DE": ("legis.delaware.gov",),
@@ -141,6 +149,36 @@ LEGISLATURE_HOSTS = {
     "WY": ("wyoleg.gov",),
 }
 
+# A party caucus's site, which is not the legislature's but is where some
+# legislatures' members have their only page: every Michigan legislator,
+# and 1 in 4 of California's, Connecticut's and Indiana's members, are
+# linked from no page on the legislature's host (audit 2026-10-17,
+# reviewer of PR #96). Shown only where no page on the legislature's own
+# site is linked, labelled with the caucus's name, and only for a page
+# whose address names the member or carries their district; each host
+# was read on 2026-10-17 and its own title names the caucus (gophouse.org,
+# asmrc.org and the Delaware sites refused a script, and are the caucuses'
+# addresses on the legislatures' own member lists).
+# ``(host, path prefix, chamber, the caucus's name)``; a host beginning
+# with "." is every subdomain of it (California's "a14.asmdc.org").
+CAUCUS_SITES = {
+    "AL": (("alsenaterepublicans.org", "/", "upper", "Alabama Senate Republican Caucus"),),
+    "CA": ((".asmdc.org", "/", "lower", "Assembly Democratic Caucus"),
+           (".asmrc.org", "/", "lower", "Assembly Republican Caucus")),
+    "CT": (("housedems.ct.gov", "/", "lower", "Connecticut House Democrats"),
+           ("cthousegop.com", "/", "lower", "Connecticut House Republicans"),
+           ("senatedems.ct.gov", "/", "upper", "Connecticut Senate Democrats"),
+           ("ctsenaterepublicans.com", "/", "upper", "Connecticut Senate Republicans")),
+    "DE": (("housedems.delaware.gov", "/members/", "lower", "Delaware House Democrats"),
+           ("senatedems.delaware.gov", "/members/", "upper", "Delaware Senate Democrats")),
+    "IN": (("indianahouserepublicans.com", "/members/", "lower", "Indiana House Republicans"),
+           ("indianasenaterepublicans.com", "/", "upper", "Indiana Senate Republicans"),
+           ("indianasenatedemocrats.org", "/", "upper", "Indiana Senate Democrats")),
+    "MI": (("housedems.com", "/", "lower", "Michigan House Democrats"),
+           ("gophouse.org", "/", "lower", "Michigan House Republicans"),
+           ("senatedems.com", "/", "upper", "Michigan Senate Democrats")),
+}
+
 # A file, a download or a page about something other than the member.
 _NOT_A_PAGE = re.compile(r"\.(pdf|txt|csv|docx?|xlsx?|jpe?g|png|gif)$|ftpdocument|/downloads?/"
                          r"|/documents/|[?&]sh=email|billsintro|/subscribe", re.I)
@@ -149,12 +187,21 @@ _NOT_A_PAGE = re.compile(r"\.(pdf|txt|csv|docx?|xlsx?|jpe?g|png|gif)$|ftpdocumen
 _MEMBER_WORDS = {"member", "members", "membership", "legislator", "legislators", "rep", "reps",
                  "representative", "representatives", "senator", "senators", "sen", "profile",
                  "detail", "details", "bio", "mem", "legislatorpage", "memberinfo", "district"}
-# A session a link is for: Illinois's General Assembly (GA=103), a year in
-# a query or as a path segment (".../membership/2024/", "?yr=2022"), a
-# biennium ("b2021_22", "li_2022", "ddBienniumSession=2019/2020F").
-_SESSION_YEAR = re.compile(r"(?:(?<=[/_=-])|(?<=[/_=]b))((?:199|20[0-4])\d)(?!\d)")
+# The session a link is for, read only where an address is known to name
+# one: a query key ("?yr=2022", "&year=2024", "ddBienniumSession=2019/2020F")
+# or a path segment after a word that takes a session ("/membership/2024/",
+# "/Legislators/2023/", "/legislative/2021/"), the
+# first segment ("docs.legis.wisconsin.gov/2023/"), or a biennium's own form
+# ("b2025_26", "69-2025", "li_2026", "/Senators/2022-2024/"). Any other four digits are an id:
+# Pennsylvania's "/bio/2009/sen-miller" is member 2009, not the 2009 session.
+_SESSION_KEYS = {"yr", "year", "session", "ddbienniumsession", "sessionyear"}
+_SESSION_AFTER = {"", "membership", "legislators", "legislative", "single"}
+_YEAR = r"(?:19[89]|20[0-4])\d"
+_SESSION_SEGMENT = re.compile(rf"({_YEAR})(?:[-_/]({_YEAR}|\d\d))?f?")
+_BIENNIUM = re.compile(rf"(?:b|li_|\d{{2,3}}-)({_YEAR})(?:[-_](\d\d|{_YEAR}))?|({_YEAR})-({_YEAR})")
 # A member's page about part of their work, after the page about them
-# (North Carolina links Biography, Committees, IntroducedBills and Votes).
+# (North Carolina links Biography, Committees, IntroducedBills and Votes;
+# Connecticut links only its list of a member's bills, CGAMemberBills).
 _ABOUT_ITS_WORK = {"votes", "committees", "introducedbills", "bills", "sponsoredbills",
                    "legislation", "news", "press", "cgamemberbills"}
 # The last part of a chamber's list of members, not one member's page.
@@ -165,17 +212,66 @@ _GENERIC = {"house", "senate", "assembly", "members", "member", "legislators", "
 # Island's ".../representatives/phillips/default.aspx" is his page.
 _CAUCUS = re.compile(r"/(house|senate)(dems|democrats|gop|republicans)\b|caucus", re.I)
 _INDEX_FILE = re.compile(r"^(default|index)\.\w+$")
-# A numbered General Assembly or Legislature in a query: Illinois's GA=103
-# pages return 404 now that the 104th sits, and Arizona links its 56th's
-# pages beside its 57th's.
-_ASSEMBLY = re.compile(r"[?&](GA|legislature)=(\d+)", re.I)
+# A numbered General Assembly or Legislature: Illinois's GA=103 pages return
+# 404 now that the 104th sits, Arizona links its 56th's pages beside its
+# 57th's, and Delaware its 150th's (/AssemblyMember/150/...) beside its
+# 153rd's.
+_ASSEMBLY = re.compile(r"[?&](GA|legislature)=(\d+)|/(AssemblyMember)/(\d+)/", re.I)
 # Words of an address that are no one's surname here.
 _URL_WORDS = {"http", "https", "www", "gov", "state", "aspx", "html", "default", "index",
               "page", "pages", "biography", "landing", "apps", "current", "upper", "lower",
               "general", "delegate", "search", "sponsor", "person", "home", "about", "legis",
               "single", "people", "lawmaker", "senators", "assemblymember", "assemblyman",
-              "assemblywoman", "roster", "legislative"}
+              "assemblywoman", "roster", "legislative", "members", "member", "house", "senate"}
 _SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
+
+# The chamber an address is for. Legislatures key pages by chamber, and
+# Open States keeps a senator's old House pages beside their Senate one:
+# Texas's Phil King (Senate District 10) was linked to house.texas.gov's
+# District 61 page, which shows whoever holds that House seat now; West
+# Virginia's Sen. Joey Garcia to "Delegate Garcia", another man (reviewer
+# of PR #96, 2026-10-17). Read from host labels ("house.texas.gov",
+# "flsenate.gov", "sd14.senate.ca.gov"), path words ("/house/Rep.asp",
+# "/H_Reps/", North Carolina's "/Biography/S/449", Wyoming's
+# "/Legislators/2025/H/") and the title in a query ("member=Delegate+Garcia",
+# "Chamber=H"). "Assembly" is a chamber only where the lower one is called
+# that: Delaware's /AssemblyMember/ and North Dakota's /assembly/69-2025/
+# are the whole legislature's.
+_LOWER_WORDS = {"house", "representative", "representatives", "rep", "reps", "h", "delegate",
+                "delegates", "alrepresentative", "hse"}
+_UPPER_WORDS = {"senate", "senator", "senators", "sen", "s", "smembers", "alsenator"}
+_QUERY_TITLES = {"delegate": "lower", "representative": "lower", "senator": "upper"}
+
+# Addresses keyed by district number, which show whoever holds that seat
+# now: Kentucky's Sen. Steve Rawlings (District 11) was linked to House
+# District 66's page, Louisiana's Sen. Brach Myers to House District 45's,
+# California's Sen. Anna Caballero (14) to Senate District 12's, Florida's
+# Sen. Ed Hooper (21) to District 16's. Each pattern was measured against
+# the members Open States lists (2026-10-17): it names the member's own
+# district on almost every link, and every miss was a past or other seat.
+# ``(pattern on host+path?query, lower-cased, the chamber when the pattern
+# carries none)``; a pattern's "c" group, an "h" or "s", is the chamber.
+_DISTRICT_IN_ADDRESS = tuple((re.compile(p), ch) for p, ch in (
+    (r"[?&](?:district|districtnumber)=(?P<c>[hs])?0*(?P<n>\d+)(?:&|$)", None),
+    (r"^senate\.texas\.gov/member\.php\?d=0*(?P<n>\d+)", "upper"),
+    (r"^arkansashouse\.org/district/0*(?P<n>\d+)", "lower"),
+    (r"^assembly\.ca\.gov/assemblymembers/0*(?P<n>\d+)", "lower"),
+    (r"^senate\.ca\.gov/sd0*(?P<n>\d+)\b", "upper"),
+    (r"^s[dr]0*(?P<n>\d+)\.senate\.ca\.gov", "upper"),
+    (r"^a0*(?P<n>\d+)\.asmdc\.org", "lower"),
+    (r"^ad0*(?P<n>\d+)\.asmrc\.org", "lower"),
+    (r"^cga\.ct\.gov/.*[?&]dist_code='?(?P<c>s)?0*(?P<n>\d+)", "lower"),
+    (r"^flsenate\.gov/senators/(?:\d{4}-\d{4}/)?s0*(?P<n>\d+)$", "upper"),
+    (r"^legislature\.maine\.gov/district0*(?P<n>\d+)$", "upper"),
+    (r"^(?:gc\.nh\.gov|gencourt\.state\.nh\.us)/senate/members/webpages/district0*(?P<n>\d+)\.aspx$",
+     "upper"),
+    (r"^leg\.state\.nv\.us/app/legislator/a/(?:assembly|senate)/current/0*(?P<n>\d+)$", None),
+    (r"^capitol\.tn\.gov/(?:house|senate)/members/(?P<c>[hs])0*(?P<n>\d+)\.html$", None),
+    (r"^legis\.wisconsin\.gov/(?:assembly|senate)/0*(?P<n>\d+)/", None),
+    (r"^house\.louisiana\.gov/h_reps/members(?:\.aspx)?\?id=0*(?P<n>\d+)", "lower"),
+    (r"^senate\.la\.gov/smembers(?:\.aspx)?\?id=0*(?P<n>\d+)", "upper"),
+    (r"^(?:house|senate)dems\.delaware\.gov/members/(?:house|senate)-district-0*(?P<n>\d+)", None),
+))
 
 
 def _words(text):
@@ -198,84 +294,320 @@ def _canonical(url):
     the host and a trailing slash do not make another page."""
     parts = urllib.parse.urlsplit(url)
     host = (parts.hostname or "").lower().removeprefix("www.")
-    return host + parts.path.rstrip("/").lower() + ("?" + parts.query.lower() if parts.query else "")
+    # A page drawn by script is named after "#": Montana's
+    # legislators.legmt.gov/#/legislator/134 is one member's.
+    return (host + parts.path.rstrip("/").lower() + ("?" + parts.query.lower() if parts.query else "")
+            + ("#" + parts.fragment.lower() if parts.fragment else ""))
 
 
-def _sessions(url):
+def _year(text, century_of=None):
+    if not text:
+        return None
+    if len(text) == 2 and century_of:
+        return century_of // 100 * 100 + int(text)
+    return int(text)
+
+
+def sessions(url):
+    """``[(first year, last year), ...]``: the sessions an address names,
+    where it is known to name one (``_SESSION_KEYS``, ``_SESSION_AFTER``,
+    ``_BIENNIUM``)."""
     parts = urllib.parse.urlsplit(url)
-    text = parts.path + ("?" + urllib.parse.unquote(parts.query) if parts.query else "")
-    return [int(y) for y in _SESSION_YEAR.findall(text)]
+    found = []
+    for key, value in urllib.parse.parse_qsl(parts.query):
+        if key.lower() in _SESSION_KEYS:
+            m = _SESSION_SEGMENT.search(value.lower())
+            if m:
+                first = int(m.group(1))
+                found.append((first, _year(m.group(2), first) or first))
+    segments = [s.lower() for s in parts.path.split("/")]
+    for i, segment in enumerate(segments[1:], 1):
+        m = _BIENNIUM.fullmatch(segment)
+        if m:
+            if m.group(3):
+                found.append((int(m.group(3)), int(m.group(4))))
+            else:
+                first = int(m.group(1))
+                found.append((first, _year(m.group(2), first) or first))
+            continue
+        if segments[i - 1] in _SESSION_AFTER and re.fullmatch(_YEAR, segment):
+            found.append((int(segment), int(segment)))
+    return found
 
 
-def official_page(code, links, year, assembly=None, name="", others=()):
-    """The member's page on their legislature's own site, or ``None``: one
-    link for the card, never the dump of every page Open States read.
+def chamber_of(code, url, names=()):
+    """``"upper"``, ``"lower"`` or ``None``: the chamber *url* is for, from
+    its host, its path's words and a title in its query, never from the
+    surnames in *names*. Both, or neither, is ``None``."""
+    parts = urllib.parse.urlsplit(url)
+    host = (parts.hostname or "").lower().removeprefix("www.")
+    assembly = LOWER_CHAMBER.get(code) == "Assembly"
+    found = set()
+    for label in host.split(".")[:-1]:
+        # South Carolina's "scstatehouse.gov" is the building, both chambers.
+        if label.endswith("house") and not label.endswith("statehouse"):
+            found.add("lower")
+        elif label.endswith("senate") or re.fullmatch(r"sd\d+", label):
+            found.add("upper")
+        elif assembly and label.endswith("assembly"):
+            found.add("lower")
+    # One letter is a chamber only as a segment of its own (North
+    # Carolina's "/Biography/S/449"), never inside one: Massachusetts's
+    # "/Profile/S_R1" is Rep. Sean Reid's.
+    path = urllib.parse.unquote(parts.path)
+    words = {w for w in _words(path) if len(w) > 1}
+    words |= {s for s in path.lower().split("/") if s in ("h", "s")}
+    for word in words - set(names):
+        if word in _LOWER_WORDS or (assembly and word in ("assembly", "assemblymembers")):
+            found.add("lower")
+        elif word in _UPPER_WORDS:
+            found.add("upper")
+    for key, value in urllib.parse.parse_qsl(parts.query):
+        if key.lower() == "chamber" and value.lower() in ("h", "s"):
+            found.add("lower" if value.lower() == "h" else "upper")
+        for word in set(_words(value)) - set(names):
+            if word in _QUERY_TITLES:
+                found.add(_QUERY_TITLES[word])
+    return found.pop() if len(found) == 1 else None
 
-    Kept only: a host in ``LEGISLATURE_HOSTS``; a page about one member,
-    not a file or the chamber's list ("/members/house"); a numbered
-    General Assembly's or Legislature's page only for the latest any member
-    of the state is linked for (*assembly*, ``latest_assembly``); and never
-    a page whose address names another member (*others*, their surnames)
-    and not this one (*name*): Open States lists Rhode Island's Bob
-    Phillips with Lauren Carson's page (rule 3). Of what is left: the
-    current session's page before a past one's (a session older than the
-    year before *year*, the roster's, is past, and of past pages the
-    latest), then a member page ("/members/...") before any other, then
-    one whose address names them, then the host's place in the table, then
-    the shorter address. A party caucus's pages are not the legislature's,
-    even on its host (Maine's "/housedems/kuhn")."""
+
+def districts_in(url):
+    """``[(chamber or None, district number), ...]`` that *url*'s address
+    is keyed by (``_DISTRICT_IN_ADDRESS``)."""
+    parts = urllib.parse.urlsplit(url)
+    text = ((parts.hostname or "").lower().removeprefix("www.") + parts.path.lower()
+            + ("?" + urllib.parse.unquote(parts.query).lower() if parts.query else ""))
+    out = []
+    for pattern, chamber in _DISTRICT_IN_ADDRESS:
+        for m in pattern.finditer(text):
+            letter = m.groupdict().get("c")
+            out.append(({"h": "lower", "s": "upper"}[letter] if letter else chamber, int(m.group("n"))))
+    return out
+
+
+def _own_district(code, chamber, district):
+    """The number a member's own district is written as in an address:
+    Kentucky's Senate pages number District 11 as 111."""
+    m = re.match(r"0*(\d+)", district or "")
+    if not m:
+        return None
+    n = int(m.group(1))
+    return n + 100 if code == "KY" and chamber == "upper" else n
+
+
+def _someone_elses(code, url, chamber, district, names, by_words=True):
+    """Whether *url* is keyed to another chamber or district than the
+    member's (*chamber*, *district*): a district-keyed page shows whoever
+    holds that seat now, never the member who once did. *by_words* false
+    reads only the district an address carries, not its chamber words."""
+    if code == "NE" or not chamber:
+        return False
+    if by_words and chamber_of(code, url, names) not in (None, chamber):
+        return True
+    own = _own_district(code, chamber, district)
+    for theirs, n in districts_in(url):
+        if theirs not in (None, chamber):
+            return True
+        if own is not None and n != own:
+            return True
+    return False
+
+
+def member_page(code, links, year, assembly=None, name="", others=(), chamber=None,
+                district=None, shared=()):
+    """The member's one page for the card, or ``None``: ``{"url", "kind"}``
+    with ``kind`` "member" (their page on the legislature's own site),
+    "work" (the legislature's page of their bills, Connecticut's only one)
+    or "caucus" (their page on their party caucus's site, with its
+    ``"caucus"`` name, only where the legislature's site has none), and a
+    past session's ``"session"`` ("2021", "2022-2024") where only a past
+    session's page is linked.
+
+    Never the dump of every page Open States read. Kept only: a host in
+    ``LEGISLATURE_HOSTS``; a page about one member, not a file or the
+    chamber's list ("/members/house"); a numbered General Assembly's or
+    Legislature's page only for the latest any member of the state is
+    linked for (*assembly*, ``latest_assembly``); never a page for the
+    other chamber or another district than the member's (*chamber*,
+    *district*), which shows whoever holds that seat now; never a page
+    whose address names another member (*others*, their surnames) and not
+    this one (*name*): Open States lists Rhode Island's Bob Phillips with
+    Lauren Carson's page (rule 3). Of what is left: the current session's
+    page before a past one's (a session ending before the year before
+    *year*, the roster's, is past; of past pages the latest), a member page
+    ("/members/...") before a page of their work and before any other,
+    a page linked for this member alone before one linked for several
+    (*shared*, canonical addresses), one whose address names them, then
+    the host's place in the table, then the shorter address. A party
+    caucus's pages are not the legislature's, even on its host (Maine's
+    "/housedems/kuhn")."""
     hosts = LEGISLATURE_HOSTS.get(code, ())
     assembly = assembly or {}
     if not isinstance(assembly, dict):
         assembly = {"ga": assembly}
     own = surname(name)
     others = set(others) - own
-    seen, ranked = set(), []
+    names = own | others
+    seen, ranked, caucus, lists = set(), [], [], []
     for url in links or ():
         parts = urllib.parse.urlsplit(url)
         host = (parts.hostname or "").lower().removeprefix("www.")
-        if parts.scheme not in ("http", "https") or host not in hosts:
+        if parts.scheme not in ("http", "https"):
             continue
         key = _canonical(url)
         address = parts.path + "?" + parts.query
-        if key in seen or _NOT_A_PAGE.search(address) or _CAUCUS.search(parts.path):
+        if key in seen or _NOT_A_PAGE.search(address):
             continue
         seen.add(key)
+        every = set(_words(urllib.parse.unquote(parts.path + " " + parts.query + " "
+                                                + parts.fragment)))
+        words = {w for w in every if len(w) >= 4 and w not in _URL_WORDS}
+        # Their own surname at any length ("/gee" is Rep. Fred Gee's).
+        mine = bool(every & own - _URL_WORDS)
+        if words & others and not mine:
+            continue
+        rank = _host_rank(hosts, host)
+        site = None if rank is not None else _caucus_site(code, host, parts.path or "/", chamber)
+        # A caucus's site is one chamber's (CAUCUS_SITES), whatever its
+        # paths say: Alabama's Senate Republicans file their senators under
+        # "/representatives/".
+        if _someone_elses(code, url, chamber, district, names, by_words=not site):
+            continue
+        if rank is None:
+            # A caucus's page must say whose it is: their name, or their
+            # district's number, which _someone_elses has checked.
+            named = mine or _run_together(parts.path, name)
+            if site and (named or districts_in(url)):
+                segments = [w for w in parts.path.lower().split("/") if w]
+                if not segments or segments[-1] not in _GENERIC:
+                    caucus.append((0 if named else 1, len(url), url, site))
+            continue
+        if _CAUCUS.search(parts.path):
+            continue
         # A page drawn by script names the member after "#" ("/#/legislator/1840").
         segments = [w for w in (parts.path + "/" + parts.fragment).lower().split("/") if w]
         if segments and _INDEX_FILE.match(segments[-1]):
             segments.pop()
-        if not parts.query and (not segments or segments[-1] in _GENERIC):
+        # California's senators' own sites are a district on the Senate's
+        # host ("sd14.senate.ca.gov/"), which says whose they are.
+        # A query names one member ("/Senators/Member?id=3"), unless it is
+        # a search of the list.
+        searched = not parts.query or any(k.lower() == "search"
+                                          for k, _v in urllib.parse.parse_qsl(parts.query))
+        if searched and (not segments or segments[-1] in _GENERIC) and not districts_in(url):
+            # The chamber's own member list, kept for a member the
+            # legislature's site has no page for (Alabama's
+            # "/senate-leaders-members", searched for them where Open
+            # States links it so: "?tab=1&search=Pettus"); never a list of
+            # no known chamber.
+            if segments and chamber and chamber_of(code, url, names) == chamber:
+                lists.append((0 if mine else 1, rank, len(url), url))
             continue
-        numbered = [(k.lower(), int(n)) for k, n in _ASSEMBLY.findall(url)]
-        if any(n < assembly.get(k, 0) for k, n in numbered):
+        if any(n < assembly.get(k, 0) for k, n in assembly_numbers(url)):
             continue
-        words = {w for w in _words(urllib.parse.unquote(parts.path + " " + parts.query + " "
-                                                        + parts.fragment))
-                 if len(w) >= 4 and w not in _URL_WORDS}
-        if words & others and not words & own:
-            continue
-        sessions = _sessions(url)
-        behind = max(0, year - 1 - sessions[0]) if sessions else 0
+        held = sessions(url)
+        last = max((b for _a, b in held), default=None)
+        behind = max(0, year - 1 - last) if last else 0
+        label = None
+        if behind:
+            first = min(a for a, b in held if b == last)
+            label = str(first) if first == last else f"{first}-{last}"
         stems = {re.sub(r"[.]" + chr(92) + "w+$", "", w) for w in segments}
-        kind = (2 if not stems & _MEMBER_WORDS else 1 if stems & _ABOUT_ITS_WORK else 0)
-        ranked.append((behind, kind, 0 if words & own else 1, hosts.index(host),
-                       len(parts.query.split("&")) if parts.query else 0, len(url), url))
-    if not ranked:
-        return None
-    return min(ranked)[-1]
+        kind = (1 if stems & _ABOUT_ITS_WORK else 0 if stems & _MEMBER_WORDS else 2)
+        ranked.append((behind, kind, 1 if key in shared else 0, 0 if mine else 1,
+                       rank, len(parts.query.split("&")) if parts.query else 0,
+                       len(url), url, label))
+    if ranked:
+        best = min(ranked)
+        out = {"url": best[7], "kind": "work" if best[1] == 1 else "member"}
+        if best[8]:
+            out["session"] = best[8]
+        return out
+    if caucus:
+        best = min(caucus)
+        return {"url": best[2], "kind": "caucus", "caucus": best[3]}
+    if lists:
+        return {"url": min(lists)[3], "kind": "list"}
+    return None
+
+
+def _run_together(path, name):
+    """Whether one segment of *path* runs the member's first and last names
+    together, the first before the last: Michigan House Republicans'
+    "/member/RepTomKunse/posts" is Tom Kunse's."""
+    words = _words(name)
+    last = "".join(sorted(surname(name), key=words.index))
+    if len(words) < 2 or len(last) < 3:
+        return False
+    for segment in urllib.parse.unquote(path).split("/"):
+        letters = "".join(_words(segment))
+        # Connecticut House Democrats' "/BrownM" is Marcus Brown's.
+        if letters == last + words[0][0]:
+            return True
+        at = letters.find(last)
+        # "RepJamesDeSana" is Jim DeSana's: a title, then a first name
+        # with his first name's initial, then his whole surname.
+        if at > 0 and re.fullmatch(r"(?:rep|sen|senator|representative)?" + words[0][0] + r"[a-z]*",
+                                   letters[:at]):
+            return True
+    return False
+
+
+def _host_rank(hosts, host):
+    """*host*'s place in a state's ``LEGISLATURE_HOSTS``, or ``None``; an
+    entry beginning with "." is every subdomain of it."""
+    for i, entry in enumerate(hosts):
+        if host == entry or (entry.startswith(".") and host.endswith(entry)):
+            return i
+    return None
+
+
+def _caucus_site(code, host, path, chamber):
+    for site, prefix, theirs, caucus_name in CAUCUS_SITES.get(code, ()):
+        if (host == site or (site.startswith(".") and host.endswith(site))) \
+                and path.lower().startswith(prefix) and (chamber in (None, theirs)):
+            return caucus_name
+    return None
+
+
+def official_page(code, links, year, assembly=None, name="", others=(), chamber=None,
+                  district=None, shared=()):
+    """The address of the member's page on the legislature's own site, or
+    ``None`` (``member_page``, without a caucus's)."""
+    page = member_page(code, links, year, assembly, name, others, chamber, district, shared)
+    return page["url"] if page and page["kind"] != "caucus" else None
+
+
+def assembly_numbers(url):
+    """``[("ga", 104), ...]``: the numbered General Assemblies and
+    Legislatures an address names."""
+    out = []
+    for m in _ASSEMBLY.finditer(url):
+        key = (m.group(1) or m.group(3)).lower()
+        out.append((key, int(m.group(2) or m.group(4))))
+    return out
 
 
 def latest_assembly(records):
     """``{"ga": 104, "legislature": 57}``: the latest numbered General
-    Assembly (Illinois's ``GA=``) and Legislature (Arizona's
-    ``legislature=``) among *records*' links."""
+    Assembly (Illinois's ``GA=``), Legislature (Arizona's
+    ``legislature=``) and Delaware General Assembly
+    (``/AssemblyMember/153/``) among *records*' links."""
     found = {}
     for r in records:
         for link in r.get("links", ()):
-            for k, n in _ASSEMBLY.findall(link):
-                found[k.lower()] = max(found.get(k.lower(), 0), int(n))
+            for k, n in assembly_numbers(link):
+                found[k] = max(found.get(k, 0), n)
     return found
+
+
+def shared_links(records):
+    """The canonical addresses Open States links for more than one member."""
+    count = {}
+    for r in records:
+        for key in {_canonical(link) for link in r.get("links", ())}:
+            count[key] = count.get(key, 0) + 1
+    return {k for k, n in count.items() if n > 1}
 
 
 def surnames(records):
@@ -312,11 +644,43 @@ def party_name(label):
     return (label or "").split("/")[0].strip()
 
 
-def _person(record, code="", year=0, assembly=None, dropped=None, others=()):
+def page_for(code, record, year=0, assembly=None, others=(), shared=()):
+    """``member_page`` for one roster record, by its chamber and district."""
+    return member_page(code, record.get("links"), year, assembly, record.get("name", ""), others,
+                       record.get("chamber"), record.get("district"), shared)
+
+
+def pages_for(code, roster, year):
+    """``{record id: page}`` for a state's roster, where no page is any two
+    members': a page chosen for two is neither's, since a page keyed by
+    number shows one person (North Carolina's Biography/S/449 is Sen. Dana
+    Jones's, and Open States lists it for Sen. Sophia Chitlik too). Returns
+    the pages and how many members lost one that way."""
+    assembly = latest_assembly(roster)
+    others = surnames(roster)
+    shared = shared_links(roster)
+    pages = {r["id"]: page_for(code, r, year, assembly, others, shared) for r in roster}
+    users = {}
+    for rid, page in pages.items():
+        # A chamber's member list is every member's, and says so.
+        if page and page["kind"] != "list":
+            users.setdefault(_canonical(page["url"]), []).append(rid)
+    withheld = 0
+    for ids in users.values():
+        if len(ids) > 1:
+            for rid in ids:
+                pages[rid] = None
+                withheld += 1
+    return pages, withheld
+
+
+def _person(record, code="", year=0, assembly=None, dropped=None, others=(), pages=None):
     """What the page shows of one legislator: their party and the other
     ballot lines they were elected on, the district office's phone labelled
-    as such, one official page, and a portrait that is neither a search
-    engine's thumbnail nor a file the source confirmed missing."""
+    as such, one page about them (``member_page``; *pages*, from
+    ``pages_for``, where the state's roster has been read whole), and a
+    portrait that is neither a search engine's thumbnail nor a file the
+    source confirmed missing."""
     keep = ("id", "name", "partyKey", "district", "email", "tribalSeat", "unicameral")
     out = {k: record[k] for k in keep if k in record}
     out["party"] = party_name(record.get("party"))
@@ -329,9 +693,16 @@ def _person(record, code="", year=0, assembly=None, dropped=None, others=()):
         out["address"] = record["address"]
     if record.get("districtPhone"):
         out["districtPhone"] = record["districtPhone"]
-    page = official_page(code, record.get("links"), year, assembly, record.get("name", ""), others)
+    page = pages.get(record["id"]) if pages is not None else page_for(
+        code, record, year, assembly, others)
     if page:
-        out["page"] = page
+        out["page"] = page["url"]
+        if page["kind"] == "work":
+            out["pageAbout"] = "bills"
+        if page.get("caucus"):
+            out["pageCaucus"] = page["caucus"]
+        if page.get("session"):
+            out["pageSession"] = page["session"]
     image = record.get("image")
     if image and search_thumbnail(image):
         if dropped is not None:
@@ -351,11 +722,12 @@ def build_state(code, root=".", places=None, roster=None, control=None, fetched=
     ``stategov.build``'s payload: its chambers' counts and who runs them;
     *fetched* the roster's date; *dropped* counts the portraits left off."""
     year = int(fetched[:4]) if fetched[:4].isdigit() else 0
-    assembly = latest_assembly(roster or [])
-    others = surnames(roster or [])
+    pages, withheld = pages_for(code, roster or [], year)
+    if dropped is not None and withheld:
+        dropped["sharedPage"] = withheld
 
     def person(record):
-        return _person(record, code, year, assembly, dropped, others)
+        return _person(record, code, year, dropped=dropped, pages=pages)
 
     topo = statelegs.load_map(code, root)
     if not topo:
@@ -610,3 +982,38 @@ def stats(maps):
                  for v in c["members"].values())
     unplaced = sum(len(m["unplaced"]) for m in maps.values())
     return {"states": len(maps), "districts": districts, "placed": people, "unplaced": unplaced}
+
+
+def link_report(root="."):
+    """``{what: {code: n}}``: what the legislature pages leave off or label
+    otherwise, counted from the roster alone so ``build --check`` can say
+    it: portraits that are a search engine's thumbnail ("thumbnail") or
+    confirmed missing ("broken"), members with no page ("noPage"), a page
+    on a caucus's site only ("caucus"), and pages withheld because two
+    members were given one ("sharedPage")."""
+    cache = statelegs.load_cache(root)
+    if not cache:
+        return {}
+    fetched = cache.get("fetched", "")
+    year = int(fetched[:4]) if fetched[:4].isdigit() else 0
+    out = {}
+
+    def add(what, code):
+        out.setdefault(what, {})[code] = out.get(what, {}).get(code, 0) + 1
+
+    for code, roster in sorted(cache["states"].items()):
+        pages, withheld = pages_for(code, roster, year)
+        if withheld:
+            out.setdefault("sharedPage", {})[code] = withheld
+        for r in roster:
+            image = r.get("image")
+            if image and search_thumbnail(image):
+                add("thumbnail", code)
+            elif image and r.get("imageStatus") == "broken":
+                add("broken", code)
+            page = pages.get(r["id"])
+            if not page:
+                add("noPage", code)
+            elif page["kind"] == "caucus":
+                add("caucus", code)
+    return out
