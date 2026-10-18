@@ -1183,6 +1183,10 @@ a.badge-link {
   color: var(--text-muted);
 }
 .odds-subhead .odds-faint { text-transform: none; letter-spacing: 0; font-weight: 500; }
+/* On a person's own profile the prices are closed until opened (TRUST-14). */
+.odds-collapsed > summary { cursor: pointer; }
+.odds-collapsed:not([open]) > summary { margin-bottom: 0; }
+.odds-collapsed[open] > summary { margin-bottom: var(--s-2); }
 .odds-faint { color: var(--text-faint); }
 .odds-market {
   display: grid;

@@ -242,6 +242,23 @@ async function testShared(page) {
       D.getElementById("themeButton").click();
       return !D.getElementById("themePanel").hidden;
     })());
+    // A role="menu" answers the keys a screen reader hands it (TECH-15).
+    const menuItems = [...D.querySelectorAll('#themePanel [role^="menuitem"]')];
+    const key = (k) => D.activeElement.dispatchEvent(new window.KeyboardEvent("keydown", { key: k, bubbles: true }));
+    check("the menu's arrows, Home and End move among its items, wrapping", (() => {
+      if (menuItems.length < 2) return false;
+      menuItems[0].focus();
+      key("ArrowDown");
+      const second = D.activeElement === menuItems[1];
+      key("End");
+      const last = D.activeElement === menuItems[menuItems.length - 1];
+      key("ArrowDown");
+      const wrapped = D.activeElement === menuItems[0];
+      key("ArrowUp");
+      const back = D.activeElement === menuItems[menuItems.length - 1];
+      key("Home");
+      return second && last && wrapped && back && D.activeElement === menuItems[0];
+    })(), `${menuItems.length} items`);
     check("theme menu closes on Escape", (() => {
       D.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
       return D.getElementById("themePanel").hidden;
@@ -4261,6 +4278,13 @@ async function testOdds() {
         !!slot.querySelector(".odds-compact .odds-market") &&
           D.getElementById("profileModalRace").compareDocumentPosition(slot) & 4,
         member.name);
+      // On a person's own profile, closed until opened, and saying the
+      // site takes nothing from the markets (TRUST-14).
+      const block = slot.querySelector("details.odds-collapsed");
+      check("closed until the reader opens them, under a heading that says what they are",
+        !!block && !block.open && /prediction markets/i.test(block.querySelector("summary").textContent));
+      check("and the note says the site has no relationship with the markets",
+        /no relationship with these markets and earns no money from them/.test(slot.textContent));
       KYC.profile.close();
     }
   });

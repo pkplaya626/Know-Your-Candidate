@@ -443,8 +443,10 @@
       return elsewhere(p) || !(KYC.cards && KYC.cards.offBallot(p));
     });
     el("profileModalRaceTitle").textContent = race.label;
-    // The markets on this race, compactly, after the people in it.
-    el("profileModalRaceOdds").innerHTML = KYC.odds ? KYC.odds.render(race, { compact: true }) : "";
+    // The markets on this race, compactly, after the people in it, and
+    // closed until the reader opens them (TRUST-14).
+    el("profileModalRaceOdds").innerHTML = KYC.odds
+      ? KYC.odds.render(race, { compact: true, collapsed: true }) : "";
     var row = function (p) {
       var role = KYC.seated(p) ? '<span class="badge badge-neutral">Member</span> '
         : p.formerMember ? '<span class="badge badge-neutral" title="' +

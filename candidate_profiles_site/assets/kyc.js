@@ -1377,12 +1377,35 @@
       }
     });
 
+    /* A role="menu" is announced as one, and a screen reader then hands the
+     * keys to the page: arrows, Home and End moved nothing (audit
+     * 2026-10-17, TECH-15). They move among the items, wrapping, as the
+     * APG menu-button pattern has them. */
+    function items() {
+      var marked = panel.querySelectorAll('[role^="menuitem"]');
+      var list = marked.length ? marked : panel.querySelectorAll(FOCUSABLE);
+      return Array.prototype.filter.call(list, function (node) {
+        return !node.disabled && !node.hidden && !node.closest("[hidden]");
+      });
+    }
+
     function onKey(event) {
       if (event.key === "Escape") {
         event.preventDefault();
         close();
         button.focus();
+        return;
       }
+      var move = { ArrowDown: 1, ArrowUp: -1, Home: "first", End: "last" }[event.key];
+      if (!move) return;
+      var list = items();
+      if (!list.length) return;
+      event.preventDefault();
+      var at = list.indexOf(doc.activeElement);
+      var next = move === "first" ? 0 : move === "last" ? list.length - 1
+        : at === -1 ? (move > 0 ? 0 : list.length - 1)
+        : (at + move + list.length) % list.length;
+      list[next].focus();
     }
 
     function onOutside(event) {
