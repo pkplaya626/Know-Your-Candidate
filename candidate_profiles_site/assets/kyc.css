@@ -2588,6 +2588,56 @@ a.badge-link {
   color: var(--text);
 }
 .vote-dates li + li { margin-top: var(--s-1); }
+.vote-src { color: var(--text-muted); }
+/* Where a date stands on the reader's calendar: words, never colour alone. */
+.vote-when {
+  display: inline-block;
+  padding: 0 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.vote-when.is-now { border-color: var(--accent); color: var(--text); }
+.vote-lead {
+  margin: 0 0 var(--s-3);
+  font-weight: 700;
+}
+/* VISUALS-25: the state's dates in order, as page text (rule 46). It wraps
+ * rather than scrolling sideways, so a phone shows every date. */
+.vote-cal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin: 0 0 var(--s-3);
+  padding: 0;
+  list-style: none;
+}
+.vote-cal-item {
+  display: flex;
+  flex-direction: column;
+  min-width: 6.5em;
+  max-width: 11em;
+  padding: var(--s-1) var(--s-2);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+}
+.vote-cal-date { font-weight: 700; font-size: var(--t-sm); white-space: nowrap; }
+.vote-cal-label { font-size: var(--t-xs); color: var(--text-muted); }
+.vote-cal-item.is-past { background: transparent; border-top-style: dotted; }
+.vote-cal-item.is-past .vote-cal-date { color: var(--text-muted); }
+.vote-cal-item.is-now,
+.vote-cal-item.is-election { border-top-color: var(--accent); }
+.vote-cal-item.is-today {
+  min-width: 0;
+  border-style: dashed;
+  border-top: 3px solid var(--accent);
+  background: transparent;
+}
+.vote-cal-item.is-today .vote-cal-label { color: var(--text); font-weight: 700; }
 .state-section { margin-bottom: var(--s-6); }
 .state-heading {
   display: flex;
