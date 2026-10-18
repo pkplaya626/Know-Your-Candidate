@@ -72,6 +72,22 @@
    "seats": 7,
    "url": "https://www.coloradojudicial.gov/supreme-court/supreme-court-judges-and-staff"
   },
+  "CT": {
+   "chief": "Raheem L. Mullins",
+   "listed": 7,
+   "members": [
+    "Raheem L. Mullins",
+    "Andrew J. McDonald",
+    "Gregory T. D’Auria",
+    "Steven D. Ecker",
+    "Joan K. Alexander",
+    "Nora R. Dannehy",
+    "William H. Bright, Jr."
+   ],
+   "read": "2026-10-18",
+   "seats": 7,
+   "url": "https://www.jud.ct.gov/external/supapp/supjustices.htm"
+  },
   "DE": {
    "chief": "Collins J. Seitz, Jr.",
    "listed": 5,
@@ -214,6 +230,38 @@
    ],
    "seats": 7,
    "url": "https://www.kycourts.gov/Courts/Supreme-Court/Pages/default.aspx"
+  },
+  "LA": {
+   "chief": "John L. Weimer",
+   "listed": 7,
+   "members": [
+    "John L. Weimer",
+    "William H. Burris",
+    "John Michael Guidry",
+    "Cade R. Cole",
+    "Jay B. McCallum",
+    "Jefferson Hughes",
+    "Piper D. Griffin"
+   ],
+   "read": "2026-10-18",
+   "seats": 7,
+   "url": "https://www.lasc.org/About/Biography"
+  },
+  "MA": {
+   "chief": "Kimberly S. Budd",
+   "listed": 7,
+   "members": [
+    "Kimberly S. Budd",
+    "Frank M. Gaziano",
+    "Scott L. Kafker",
+    "Dalila Argaez Wendlandt",
+    "Serge Georges, Jr.",
+    "Elizabeth N. Dewar",
+    "Gabrielle R. Wolohojian"
+   ],
+   "read": "2026-10-18",
+   "seats": 7,
+   "url": "https://www.mass.gov/info-details/supreme-judicial-court-justices"
   },
   "MD": {
    "chief": "Matthew Fader",
@@ -453,6 +501,20 @@
    "seats": 7,
    "url": "https://www.pacourts.us/courts/supreme-court/supreme-court-justices"
   },
+  "RI": {
+   "chief": "Paul A. Suttell",
+   "listed": 4,
+   "members": [
+    "Paul A. Suttell",
+    "William P. Robinson III",
+    "Erin Lynch Prata",
+    "Melissa A. Long"
+   ],
+   "read": "2026-10-18",
+   "revised": "2026-06-05",
+   "seats": 5,
+   "url": "https://www.courts.ri.gov/Public-Resources/Documents/JudicialRoster.pdf"
+  },
   "SC": {
    "chief": "John W. Kittredge",
    "listed": 4,
@@ -477,6 +539,20 @@
    ],
    "seats": 5,
    "url": "https://ujs.sd.gov/supreme-court/"
+  },
+  "TN": {
+   "chief": "Jeffrey S. Bivins",
+   "listed": 5,
+   "members": [
+    "Jeffrey S. Bivins",
+    "Sarah Campbell",
+    "Dwight E. Tarwater",
+    "Mary L. Wagner",
+    "Kyle Hixson"
+   ],
+   "read": "2026-10-18",
+   "seats": 5,
+   "url": "https://www.tncourts.gov/courts/supreme-court"
   },
   "TX": {
    "chief": "Jimmy Blacklock",
@@ -614,5 +690,5 @@
    "url": "https://www.wyocourts.gov/supreme-court/"
   }
  },
- "fetched": "2026-10-17T18:09:13+00:00"
+ "fetched": "2026-10-18T08:46:20+00:00"
 }

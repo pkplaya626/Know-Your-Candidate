@@ -520,7 +520,13 @@
         '<p class="faint">' + members.length + " of " + court.seats + " seats" +
         (short > 0 ? "; " + short + " with nobody listed by the court" : "") +
         (court.chief ? "" : "; the court lists no " + chiefTitle.toLowerCase()) + ". " +
-        link(court.url, "The court's roster") + "</p>";
+        link(court.url, "The court's roster") +
+        // Where the list came from, when it is not this week's read of the
+        // page: a roster file's own date, or a page read by hand because
+        // the site refuses automated reading (rule 57).
+        (court.revised ? ", dated " + KYC.escapeHtml(KYC.dayMonthYear(court.revised)) + "." : "") +
+        (court.readOn ? ", read by hand on " + KYC.escapeHtml(KYC.dayMonthYear(court.readOn)) +
+          ": the court's site refuses automated reading." : "") + "</p>";
     }
     return '<p class="panel-subhead">' + KYC.escapeHtml(court.name) + "</p>" + about + body +
       (court.note ? '<p class="faint">' + KYC.escapeHtml(court.note) + "</p>" : "");

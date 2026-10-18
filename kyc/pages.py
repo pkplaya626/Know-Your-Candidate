@@ -1479,7 +1479,9 @@ DATASETS = (
      "Lieutenant governors, secretaries of state, attorneys general", "refresh", "officers"),
     ("State legislators", '<a href="https://openstates.org/">Open States</a>',
      "Every state legislator and their district", "refresh", "openstates"),
-    ("State supreme courts", "Each court's own roster", "Each state's highest court",
+    ("State supreme courts",
+     "Each court's own roster; read by hand, and dated, where the court's site refuses "
+     "automated reading", "Each state's highest court",
      "refresh", "statecourts"),
     ("Voting information", '<a href="https://www.nass.org/can-I-vote">NASS Can I Vote</a>',
      "Each state's official pages to register, find a polling place and vote", "refresh",
