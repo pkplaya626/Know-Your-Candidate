@@ -1344,6 +1344,179 @@ class TestApplyEnrichment(unittest.TestCase):
         self.assertEqual(profile["quality"]["birthdate"], "unknown")
 
 
+class TestPhotoCredits(unittest.TestCase):
+    """Rule 87: every photograph says whose it is, and a Commons file on
+    what licence. 148 of 381 Wikimedia portraits were CC BY or CC BY-SA and
+    none was credited (TRUST-08)."""
+
+    FILE = ("https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/"
+            "Thomas_Feely.jpg/960px-Thomas_Feely.jpg")
+    INFO = {
+        "width": 2000, "height": 2500,
+        "descriptionurl": "https://commons.wikimedia.org/wiki/File:Thomas_Feely.jpg",
+        "extmetadata": {
+            "Artist": {"value": '<a href="//www.flickr.com/people/gageskidmore">Gage '
+                                'Skidmore</a> from Peoria, AZ, United States of America'},
+            "LicenseShortName": {"value": "CC BY-SA 3.0"},
+            "LicenseUrl": {"value": "https://creativecommons.org/licenses/by-sa/3.0"},
+            "AttributionRequired": {"value": "true"},
+        },
+    }
+
+    def test_the_credit_is_the_files_own_description_with_its_markup_gone(self):
+        credit = portraits.credit_of(self.INFO)
+        self.assertEqual(credit["by"], "Gage Skidmore from Peoria, AZ, United States of America")
+        self.assertEqual(credit["licence"], "CC BY-SA 3.0")
+        self.assertEqual(credit["licenceUrl"], "https://creativecommons.org/licenses/by-sa/3.0")
+        self.assertEqual(credit["file"], self.INFO["descriptionurl"])
+        self.assertTrue(credit["attribution"])
+        self.assertFalse(credit["nonFree"])
+        self.assertIsNone(portraits.credit_of({})["licence"])
+        self.assertEqual(portraits.plain_text("A &amp; <b>B</b>\n C"), "A & B C")
+
+    def test_only_uncredited_wikimedia_files_are_asked_about(self):
+        cache = {"a": {"url": self.FILE}, "b": {"url": self.FILE.replace("7f", "8e"),
+                                               "credit": {"licence": "CC0"}},
+                 "c": {"url": "https://clerk.house.gov/images/members/S001156.jpg"},
+                 "d": {"url": None}}
+        with mock.patch.object(portraits, "file_info",
+                               return_value={self.FILE: self.INFO}) as info:
+            self.assertEqual(portraits.credit_all(cache, log=lambda *a: None), 1)
+        self.assertEqual(info.call_args[0][0], [self.FILE])
+        self.assertEqual(cache["a"]["credit"]["licence"], "CC BY-SA 3.0")
+        self.assertNotIn("credit", cache["c"])
+
+    def test_a_profile_carries_its_portraits_credit_and_a_fair_use_file_is_not_shown(self):
+        member = {"id": "F000001", "isCandidate": False, "name": "Thomas Feely", "state": "AZ",
+                  "photos": ["placeholder"], "wikipedia": "Thomas Feely"}
+        key = portraits.profile_key(member)
+        record = {"url": self.FILE, "via": "wikipedia", "title": "Thomas Feely",
+                  "credit": portraits.credit_of(self.INFO)}
+        portraits.apply_cache([member], {key: record})
+        self.assertEqual(member["photoCredit"], {
+            "by": "Gage Skidmore from Peoria, AZ, United States of America",
+            "licence": "CC BY-SA 3.0",
+            "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+            "page": "https://commons.wikimedia.org/wiki/File:Thomas_Feely.jpg",
+            "via": "Wikimedia Commons"})
+        unfree = dict(member, photos=["placeholder"])
+        unfree.pop("photoCredit")
+        portraits.apply_cache([unfree], {key: dict(record, credit={"nonFree": True})})
+        self.assertEqual(unfree["photos"], ["placeholder"])
+        self.assertIsNone(unfree["photoSource"])
+
+    def test_government_and_campaign_photographs_say_whose(self):
+        house = {"id": "S001156", "name": "Linda Sanchez", "photoSource": "clerk.house.gov",
+                 "photos": ["https://clerk.house.gov/images/members/S001156.jpg", "placeholder"]}
+        nobody = {"id": "X", "name": "No One", "photos": ["placeholder"],
+                  "photoCredit": {"by": "stale"}}
+        campaign = {"id": "C", "name": "Jane Smith", "photoSource": "campaign-site",
+                    "photos": ["https://janesmith.com/jane.jpg", "placeholder"],
+                    "photoCredit": photos.campaign_credit("https://www.janesmith.com/")}
+        self.assertEqual(photos.assign_credits([house, nobody, campaign]), 2)
+        self.assertEqual(house["photoCredit"], {"by": "U.S. House of Representatives"})
+        self.assertNotIn("photoCredit", nobody)
+        self.assertEqual(campaign["photoCredit"]["by"], "the campaign's website (janesmith.com)")
+        self.assertEqual(campaign["photoCredit"]["page"], "https://www.janesmith.com/")
+        # Every first photograph a member's chain can start with is credited.
+        for url in photos.member_photos("Linda Sanchez", "S001156")[:-1]:
+            self.assertIsNotNone(photos.host_credit(url), url)
+
+    def test_an_uncredited_photograph_or_an_unlicensed_commons_file_fails(self):
+        shown = {"id": "A", "name": "A B", "photos": [self.FILE, "placeholder"],
+                 "photoCredit": portraits.commons_credit(portraits.credit_of(self.INFO))}
+        self.assertEqual(validate.check_photo_credits([shown]), [])
+        unlicensed = dict(shown, photoCredit=portraits.commons_credit(None))
+        bare = {"id": "C", "name": "C D", "photos": ["https://janesmith.com/x.jpg"]}
+        silhouette = {"id": "E", "name": "E F", "photos": ["placeholder"]}
+        issues = validate.check_photo_credits([unlicensed, bare, silhouette])
+        self.assertEqual(sorted(i.code for i in issues),
+                         ["photo-licence-missing", "photo-uncredited"])
+        self.assertTrue(all(i.level == "error" for i in issues))
+
+    def test_the_campaign_site_portrait_is_credited_to_the_site(self):
+        profile = _challenger(campaignSite="https://janesmith.com")
+        enrich.apply_cache([profile], TestApplyEnrichment().cache(
+            site=TestApplyEnrichment.SAFE_SITE), as_of=TestApplyEnrichment.AS_OF)
+        self.assertEqual(profile["photoCredit"], {"by": "the campaign's website (janesmith.com)",
+                                                  "page": "https://janesmith.com"})
+
+
+class TestPortraitWeights(unittest.TestCase):
+    """TECH-13: a 1.3 MB campaign PNG was downloaded for a 165px card."""
+
+    def test_the_caps(self):
+        self.assertEqual(photos.too_heavy(None), "")          # unknown is not too big
+        self.assertEqual(photos.too_heavy({"bytes": 120_000, "width": 600, "height": 750}), "")
+        self.assertIn("KB", photos.too_heavy({"bytes": 1_330_007, "width": 876, "height": 1024}))
+        self.assertIn("px", photos.too_heavy({"bytes": 90_000, "width": 1638, "height": 2048}))
+
+    def test_a_heavy_picture_is_passed_over_for_the_next_and_said(self):
+        heavy, light = "https://smith.com/smith-big.png", "https://smith.com/smith-head.jpg"
+        weights = {heavy: (True, {"bytes": 1_300_000, "width": 876, "height": 1024}),
+                   light: (True, {"bytes": 60_000, "width": 400, "height": 500})}
+        record = {}
+        with mock.patch.object(enrich, "portrait_check", side_effect=lambda u, h: weights[u]):
+            enrich.take_portrait(record, [(heavy, True), (light, False)])
+        self.assertEqual(record["portrait"], light)
+        self.assertEqual(record["portraitWeight"]["bytes"], 60_000)
+        self.assertEqual(record["portraitHeavy"][0]["url"], heavy)
+
+    def test_a_heavy_upload_is_taken_at_its_hosts_own_smaller_size(self):
+        big = ("https://images.squarespace-cdn.com/content/v1/abc/def/Jane+Smith+Headshot.png"
+               "?format=1500w")
+        small = enrich.smaller_form(big)
+        self.assertEqual(small, "https://images.squarespace-cdn.com/content/v1/abc/def/"
+                                "Jane+Smith+Headshot.png?format=500w")
+        self.assertIn("w=500", enrich.smaller_form("https://run.imgix.net/a/b.jpg?w=2048&q=75"))
+        # No resizing service: nothing guessed.
+        self.assertIsNone(enrich.smaller_form("https://smith.com/wp-content/smith-876x1024.png"))
+        weights = {big: (True, {"bytes": 5_100_000, "width": 1500, "height": 2300}),
+                   small: (True, {"bytes": 60_000, "width": 500, "height": 767})}
+        record = {}
+        with mock.patch.object(enrich, "portrait_check", side_effect=lambda u, h: weights[u]):
+            enrich.take_portrait(record, [(big, True)])
+        self.assertEqual(record["portrait"], small)
+        self.assertEqual(record["portraitHeavy"], [{"url": big, "why": "5100 KB, over 300 KB"}])
+
+    def test_a_cached_heavy_portrait_is_not_shown(self):
+        site = dict(TestApplyEnrichment.SAFE_SITE,
+                    portraitWeight={"bytes": 1_300_000, "width": 876, "height": 1024})
+        profile = _challenger(campaignSite="https://janesmith.com")
+        counts = enrich.apply_cache([profile], TestApplyEnrichment().cache(site=site),
+                                    as_of=TestApplyEnrichment.AS_OF)
+        self.assertEqual(profile["photos"], ["placeholder"])
+        self.assertEqual(counts["portrait_heavy"], 1)
+
+    def test_a_portrait_is_measured_from_its_first_bytes_and_the_size_the_server_gives(self):
+        png = (b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR" + (335).to_bytes(4, "big")
+               + (410).to_bytes(4, "big") + b"\x00" * 64)
+
+        class Response:
+            status = 206
+            headers = {"Content-Type": "image/png", "Content-Range": "bytes 0-65535/103089"}
+
+            def read(self, n):
+                return png
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+        with mock.patch.object(portraits.urllib.request, "urlopen", return_value=Response()):
+            self.assertEqual(portraits.measure("https://clerk.house.gov/images/members/G000607.jpg"),
+                             {"bytes": 103089, "width": 335, "height": 410})
+        with mock.patch.object(portraits.urllib.request, "urlopen", side_effect=OSError):
+            self.assertIsNone(portraits.measure("https://clerk.house.gov/x.jpg"))
+
+    def test_wikimedia_is_asked_only_for_standard_widths(self):
+        standard = {20, 40, 60, 120, 250, 330, 500, 960, 1280, 1920, 3840}
+        self.assertIn(portraits._THUMB_SIZE, standard)
+        self.assertGreaterEqual(portraits._api_gap, 1.0)   # one request a second
+
+
 class TestEnrichmentAgainstTheRealCache(unittest.TestCase):
     """The committed cache, applied the way the build applies it."""
 

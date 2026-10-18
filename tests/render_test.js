@@ -610,7 +610,8 @@ async function testDirectory() {
       img.setAttribute("data-profile", real.id);
       KYC.setPortrait(img, real, "116px");
       check("the dialog's portrait gets the sizes too",
-        img.getAttribute("srcset") === KYC.portraitSrcset(real) && img.getAttribute("sizes") === "116px");
+        img.getAttribute("srcset") === KYC.portraitSrcset(real, "116px") &&
+          img.getAttribute("sizes") === "116px");
       KYC.handleImageFallback(img, real.id);
       check("a size that fails is retried as the same photograph's plain URL",
         !img.hasAttribute("srcset") && !img.hasAttribute("sizes") &&
@@ -623,6 +624,87 @@ async function testDirectory() {
       check("the next profile's portrait does not keep the last one's sizes",
         !img.hasAttribute("srcset") && !img.hasAttribute("sizes"));
     }
+
+    // TECH-13: a 165px card on a 3x phone fetched a 494px original. No size
+    // wider than a 2x screen needs is offered; the smallest at least that
+    // wide is the last.
+    const four = { photos: ["https://u.test/x.jpg"], photoSet: [120, 250, 330, 494].map((w) =>
+      [w, "https://u.test/" + w + "px-x.jpg"]) };
+    const widths = (sizes) => KYC.portraitSrcset(four, sizes).split(", ").map((e) => e.split(" ")[1]);
+    check("a 165px card is offered sizes up to 330px, never the 494px original",
+      widths("165px").join() === "120w,250w,330w", widths("165px").join());
+    check("a 116px dialog portrait up to 250px", widths("116px").join() === "120w,250w",
+      widths("116px").join());
+    check("a 36px circle the smallest alone", widths("36px").join() === "120w", widths("36px").join());
+  });
+
+  suite("index.html — every portrait says whose photograph it is (rule 87)", () => {
+    // 148 of 381 Wikimedia portraits were CC BY or CC BY-SA, and none was
+    // credited; the footer credited every portrait to Congress.gov (TRUST-08).
+    const shown = window.legislatorsData.filter((p) => (p.photos || [])[0] &&
+      p.photos[0] !== "placeholder");
+    const bare = shown.filter((p) => !p.photoCredit || !(p.photoCredit.by || p.photoCredit.licence));
+    check("every profile that shows a photograph carries its credit", !bare.length,
+      bare.slice(0, 5).map((p) => p.id).join(","));
+    const unlicensed = shown.filter((p) => /wikimedia\.org/.test(p.photos[0]) &&
+      !(p.photoCredit || {}).licence);
+    check("and every Wikimedia one its licence", !unlicensed.length,
+      unlicensed.slice(0, 5).map((p) => p.id).join(","));
+
+    const line = () => D.getElementById("profileModalPhotoCredit");
+    const commons = shown.find((p) => (p.photoCredit || {}).via === "Wikimedia Commons" &&
+      p.photoCredit.by && p.photoCredit.licenceUrl && p.photoCredit.page);
+    check("a Commons portrait with an author and a licence link exists", !!commons);
+    if (commons) {
+      KYC.profile.open(commons.id);
+      const text = line().textContent;
+      check("the dialog credits its author, its licence and Commons",
+        !line().hidden && text.indexOf("Photo: " + commons.photoCredit.by + ", " +
+          commons.photoCredit.licence + ", via Wikimedia Commons") === 0, text);
+      check("linking the licence and the file's own page",
+        !!line().querySelector('a[href="' + commons.photoCredit.licenceUrl + '"]') &&
+          !!line().querySelector('a[href="' + commons.photoCredit.page + '"]'));
+      KYC.profile.close();
+    }
+
+    const house = shown.find((p) => p.photoSource === "clerk.house.gov" && p.photos.length > 2);
+    if (house) {
+      KYC.profile.open(house.id);
+      check("a House portrait is the House's",
+        line().textContent === "Photo: U.S. House of Representatives", line().textContent);
+      // A fallback that loads in the first one's place is another
+      // photograph, credited by the host that serves it.
+      const photo = D.getElementById("profileModalPhoto");
+      KYC.handleImageFallback(photo, house.id);
+      photo.dispatchEvent(new window.Event("load"));
+      const host = new URL(house.photos[1]).hostname;
+      check("a fallback photograph is credited to its own source",
+        line().textContent === "Photo: " + window.kycBuildMeta.photoCredits[host],
+        line().textContent);
+      KYC.profile.close();
+    }
+
+    const campaign = shown.find((p) => p.photoSource === "campaign-site");
+    if (campaign) {
+      KYC.profile.open(campaign.id);
+      check("a campaign's photograph is credited to its website, linked",
+        /^Photo: the campaign's website/.test(line().textContent) &&
+          !!line().querySelector("a[href^='https://']"), line().textContent);
+      KYC.profile.close();
+    }
+
+    const silhouette = window.legislatorsData.find((p) => (p.photos || [])[0] === "placeholder");
+    if (silhouette) {
+      KYC.profile.open(silhouette.id);
+      check("the silhouette is credited to no one", line().hidden && !line().textContent);
+      KYC.profile.close();
+    }
+
+    const hostile = KYC.photoCreditHtml({ by: '<img src=x onerror="1">', licence: "CC BY 4.0",
+      licenceUrl: "javascript:alert(1)", page: "https://commons.wikimedia.org/wiki/File:X.jpg",
+      via: "Wikimedia Commons" });
+    check("a credit is escaped, and links only http(s)",
+      !/<img/.test(hostile) && !/javascript:/.test(hostile) && /CC BY 4\.0/.test(hostile), hostile);
     const profileJs = fs.readFileSync(path.join(SITE, "assets", "kyc-profile.js"), "utf8");
     check("the dialog sets its portrait through setPortrait",
       /KYC\.setPortrait\(photo, item, "116px"\)/.test(profileJs) && !/photo\.src\s*=/.test(profileJs));
@@ -7121,6 +7203,10 @@ async function testFederal() {
       !!modal.querySelector('a[href^="https://www.senate.gov/"]'));
     check("and no party", !PARTY_WORDS.test(D.getElementById("officialModalMeta").textContent) &&
       !modal.querySelector(".party-tag"));
+    const credit = D.getElementById("officialModalPhotoCredit");
+    check("their photograph is credited under their name, as a profile's is (rule 87)",
+      office.holder.photo ? !credit.hidden && credit.textContent === "Photo: The White House"
+        : credit.hidden, credit.textContent);
     KYC.official.close();
     const record = d.offices.find((o) => o.holder && (o.holder.politicalHistory || {}).rows &&
       o.holder.politicalHistory.rows.some((r) => r.congress));

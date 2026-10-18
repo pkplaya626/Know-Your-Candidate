@@ -76,3 +76,84 @@ def candidate_photos(name, state):
 def is_guessed(url):
     """True for a URL that reaches a file by a name, not an id."""
     return any(marker in str(url or "") for marker in GUESSED_PHOTO_MARKERS)
+
+
+# Whose photograph a government portrait is, by the host that serves it. A
+# profile's credit names the source of the photograph it shows (TRUST-08):
+# the House's official portrait is the House's, not "Congress.gov", which is
+# what the footer said of every portrait before.
+HOST_CREDITS = {
+    "clerk.house.gov": "U.S. House of Representatives",
+    "www.congress.gov": "Congress.gov",
+    "unitedstates.github.io": "U.S. Government Publishing Office",
+    "bioguide.congress.gov": "Biographical Directory of the U.S. Congress",
+}
+
+# The heaviest single-file portrait taken from a campaign's site, and the
+# widest. The largest the page draws is a 165px card, 330px on a 2x screen;
+# one site's 1.3 MB, 876px PNG was downloaded for that card (TECH-13).
+MAX_PORTRAIT_BYTES = 300_000
+MAX_PORTRAIT_PX = 1200
+
+
+def too_heavy(weight):
+    """Why a measured portrait is too heavy to show, or ``""``. An unmeasured
+    one (``None``) is not: unknown is not too big (rule 8)."""
+    if not weight:
+        return ""
+    if (weight.get("bytes") or 0) > MAX_PORTRAIT_BYTES:
+        return f"{weight['bytes'] // 1000} KB, over {MAX_PORTRAIT_BYTES // 1000} KB"
+    if max(weight.get("width") or 0, weight.get("height") or 0) > MAX_PORTRAIT_PX:
+        return (f"{weight.get('width')}x{weight.get('height')}px, over "
+                f"{MAX_PORTRAIT_PX}px")
+    return ""
+
+
+def host_of(url):
+    import urllib.parse
+    try:
+        return (urllib.parse.urlsplit(str(url or "")).hostname or "").lower()
+    except ValueError:
+        return ""
+
+
+def host_credit(url):
+    """The credit for a government portrait at *url*, or ``None``."""
+    by = HOST_CREDITS.get(host_of(url))
+    return {"by": by} if by else None
+
+
+def campaign_credit(site):
+    """The credit for a photograph taken from the campaign's own site."""
+    host = host_of(site)
+    if host.startswith("www."):
+        host = host[4:]
+    return {"by": f"the campaign's website ({host})" if host else "the campaign's website",
+            "page": site or None}
+
+
+def assign_credits(profiles):
+    """Give every profile whose chain starts with a photograph the credit
+    for that photograph; returns how many have one.
+
+    A Wikimedia portrait's credit comes with it from the portrait cache
+    (``portraits.apply_cache``) and a campaign's from the enrichment cache
+    (``enrich.apply_cache``); a government portrait's is its host's. A
+    profile that shows the silhouette carries none."""
+    credited = 0
+    for profile in profiles:
+        first = (profile.get("photos") or [PLACEHOLDER])[0]
+        if first == PLACEHOLDER:
+            profile.pop("photoCredit", None)
+            continue
+        if profile.get("photoSource") in ("wikipedia", "cross-link", "campaign-site") \
+                and profile.get("photoCredit"):
+            credited += 1
+            continue
+        credit = host_credit(first)
+        if credit:
+            profile["photoCredit"] = credit
+            credited += 1
+        else:
+            profile.pop("photoCredit", None)
+    return credited

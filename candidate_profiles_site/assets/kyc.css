@@ -1713,6 +1713,14 @@ a.badge-link {
   font-size: var(--t-sm);
   color: var(--text-muted);
 }
+/* Whose photograph the portrait is, and on what licence (rule 87). */
+.modal-credit {
+  margin: 0;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+.modal-credit a { color: inherit; }
 /* The FEC's name for someone the ballot names otherwise (PERSONA-20). */
 .modal-aka {
   margin: 0;

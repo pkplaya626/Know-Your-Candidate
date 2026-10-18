@@ -76,7 +76,8 @@
 
   /** An official's picture: the White House's photo with the sizes it
    *  serves of that one file (rule 42), or a justice's official portrait.
-   *  ``{src, srcset, credit, source}``, or null. */
+   *  ``{src, srcset, credit}``, or null; ``credit`` is the one-line
+   *  credit ``KYC.photoCreditHtml`` prints (rule 87). */
   function picture(person) {
     if (!person) return null;
     if (person.photo) {
@@ -84,12 +85,12 @@
       return {
         src: sizes.length ? sizes[0][0] : person.photo,
         srcset: sizes.map(function (s) { return s[0] + " " + s[1] + "w"; }).join(", "),
-        credit: "Photo: The White House", source: null,
+        credit: { by: "The White House" },
       };
     }
     if (person.portrait && person.portrait.url) {
-      return { src: person.portrait.url, srcset: "", credit: "Portrait: " + person.portrait.credit,
-               source: person.portrait.source };
+      return { src: person.portrait.url, srcset: "",
+               credit: { by: person.portrait.credit, page: person.portrait.source } };
     }
     return null;
   }
@@ -163,6 +164,8 @@
       '      <span class="badge badge-neutral" id="officialModalKind"></span>',
       '      <h2 class="modal-name" id="officialModalName"></h2>',
       '      <p class="modal-meta" id="officialModalMeta"></p>',
+      // Whose photograph the portrait is (rule 87).
+      '      <p class="modal-credit" id="officialModalPhotoCredit" hidden></p>',
       "    </div>",
       "  </header>",
       '  <div class="modal-body scroll-y" id="officialModalBody"></div>',
@@ -510,15 +513,10 @@
     else if (found.kind === "leader") renderLeader(person);
     else if (found.kind === "officer") renderOfficer(person, found.office);
     else renderJudge(person);
-    // Whose picture it is: credited beside the record's own source.
-    if (pic) {
-      var credit = doc.createElement("span");
-      credit.className = "faint official-credit";
-      credit.innerHTML = "; " + (pic.source ? '<a href="' + KYC.escapeAttr(pic.source) +
-        '" target="_blank" rel="noopener noreferrer">' + KYC.escapeHtml(pic.credit) + "</a>"
-        : KYC.escapeHtml(pic.credit)) + ".";
-      el("officialModalSource").appendChild(credit);
-    }
+    // Whose picture it is, on its own line under the name, as a profile's.
+    var line = el("officialModalPhotoCredit");
+    line.innerHTML = pic ? KYC.photoCreditHtml(pic.credit) : "";
+    line.hidden = !line.innerHTML;
   }
 
   function open(id, opts) {
@@ -583,6 +581,7 @@
     // A portrait that will not load is dropped, never shown broken.
     el("officialModalPhoto").addEventListener("error", function () {
       el("officialModalPortrait").hidden = true;
+      el("officialModalPhotoCredit").hidden = true;
     });
     var copy = el("officialModalCopy");
     copy.addEventListener("click", function () {

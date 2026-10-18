@@ -525,7 +525,7 @@ class TestStatePages(unittest.TestCase):
         html = pages.render_state("TX", "example.org", {"states": {}})
         self.assertIn('<div id="stateContent" class="state-page" data-guide-name="', html)
         self.assertEqual(emit.script_sources(html), list(emit.STATE_PAGE_REQUIREMENTS))
-        self.assertIn("and Wikipedia.</p>\n                <p><strong>Who counts", html)
+        self.assertIn("photograph on the profile.</p>\n                <p><strong>Who counts", html)
 
     def test_the_sitemap_lists_the_district_maps_last(self):
         from kyc import pages

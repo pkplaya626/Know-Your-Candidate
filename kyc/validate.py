@@ -1090,6 +1090,40 @@ def check_photo_sets(profiles):
                   mixed)]
 
 
+def check_photo_credits(profiles):
+    """Every photograph a profile shows says whose it is, and a Commons
+    file says on what licence (rule 87).
+
+    148 of 381 Wikimedia portraits were CC BY or CC BY-SA, whose terms
+    require the author, the licence and a link beside the photograph, and
+    none was credited; the footer credited every portrait to Congress.gov.
+    A portrait with no credit, or a Commons portrait whose file's licence
+    was never read, fails: run ``portraits`` to read it."""
+    from .photos import PLACEHOLDER
+
+    uncredited, unlicensed = [], []
+    for p in profiles:
+        first = (p.get("photos") or [PLACEHOLDER])[0]
+        if first == PLACEHOLDER:
+            continue
+        credit = p.get("photoCredit") or {}
+        if wikimedia_file(first) and not credit.get("licence"):
+            unlicensed.append(f"{p['id']} ({p['name']}): {first}")
+        elif not credit.get("by") and not credit.get("licence"):
+            uncredited.append(f"{p['id']} ({p['name']}): {first}")
+    issues = []
+    if uncredited:
+        issues.append(Issue("error", "photo-uncredited",
+                            f"{len(uncredited)} portraits do not say whose photograph they are",
+                            uncredited))
+    if unlicensed:
+        issues.append(Issue("error", "photo-licence-missing",
+                            f"{len(unlicensed)} Wikimedia Commons portraits have no recorded "
+                            "licence; run 'portraits' to read their files' descriptions",
+                            unlicensed))
+    return issues
+
+
 def check_guessed_photos(profiles):
     """No portrait is reached by a name (rule 24), on any profile.
 
@@ -1593,6 +1627,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_fields(profiles)
     issues += check_placeholders(profiles)
     issues += check_photo_sets(profiles)
+    issues += check_photo_credits(profiles)
     issues += check_guessed_photos(profiles)
     issues += check_outbound_urls(profiles)
     issues += check_wikipedia_withheld(profiles)

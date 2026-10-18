@@ -1286,6 +1286,26 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     saying what it cannot tell, read page-side so `data/odds.js` stays the
     cache's (rule 41).
 
+87. **A photograph says whose it is, read from its source, and weighs
+    what a card needs.** 153 of 394 Wikimedia portraits were CC BY or
+    CC BY-SA, whose terms require the author, the licence and a link, and
+    none was credited; the footer gave every portrait to Congress.gov,
+    though the House's are the Clerk's and two dozen came from campaign
+    sites. `portraits` reads each Commons file's author and licence from
+    its own description page (`extmetadata`), never typed in; a non-free
+    file is not shown. Both dialogs print the credit under the name, a
+    government photograph names its host, a campaign's its website, and a
+    fallback that loads instead is credited by its own host.
+    `validate` fails a shown photograph with no credit and a Commons one
+    with no recorded licence. A portrait not on Wikimedia is weighed when
+    found: one campaign's was a 5 MB PNG for a 165px card. Over 300 KB or
+    1,200px it is taken at its host's own resizer's 500px, the same file
+    (rule 42), or passed over for the next picture, and the refusal is
+    kept. No srcset offers a size wider than a 2x screen needs. A state
+    officer's photograph comes only from their office or their
+    association's roster, matched by state, with the surname in the file
+    and the office-confirmed name (rule 56) - never a search.
+
 ## District maps
 
 `kyc/districts.REDRAWN` lists the states whose 2026 House map differs from

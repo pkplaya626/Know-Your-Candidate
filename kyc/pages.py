@@ -262,7 +262,9 @@ _CONGRESS_SOURCES = """\
                     as last read on <time data-results-as-of></time></span>; the November
                     ballot, where this site reads one, from the certified list of candidates
                     its election office publishes, credited on each race it sets; portraits
-                    from Congress.gov and Wikipedia.</p>
+                    from the House of Representatives, Congress.gov, Wikimedia Commons and
+                    candidates' campaign websites, each credited, with its licence, under the
+                    photograph on the profile.</p>
                 <p><strong>Who counts as a candidate:</strong> everyone the FEC records
                     as having raised or spent more than $5,000 for the 2026 cycle
                     (52&nbsp;U.S.C.&nbsp;&sect;30101(2)). People no longer in a race - beaten

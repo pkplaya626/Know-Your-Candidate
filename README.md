@@ -1035,6 +1035,35 @@ URL, and `validate` fails a `photoSet` that names another file.
 | `photos` | The fallback chain the page walks on a load error, ending in `"placeholder"` (the silhouette) |
 | `photoSource` | Where the first entry came from: `clerk.house.gov`, `congress.gov`, `wikipedia` (the article the bioguide mapping names, or the one the ballot page links), `cross-link` (the same person's other profile) or `campaign-site` |
 | `photoSet` | `[[width, url], ...]`, smallest first: sizes of the first entry's photograph for the page's `srcset`. Wikimedia portraits only |
+| `photoCredit` | Whose photograph the first entry is: `{by, licence, licenceUrl, page, via}`. A Commons file's author and licence as its own description page records them (`via: "Wikimedia Commons"`, `page` the file's page); a government portrait's host (`by: "U.S. House of Representatives"`); a campaign's website (`by`, `page` the site). Absent for the silhouette |
+
+### Credits and weights
+
+Every photograph the page shows says whose it is (rule 87). The profile and
+official dialogs print one line under the name: "Photo: Gage Skidmore, CC
+BY-SA 3.0, via Wikimedia Commons", the licence linked to its deed and
+"Wikimedia Commons" to the file's page. In October 2026, 153 of the 394
+Wikimedia portraits were CC BY or CC BY-SA, whose terms require exactly that,
+and none was credited. `portraits` reads each Commons file's `Artist`,
+`LicenseShortName` and `LicenseUrl` from its `extmetadata` (fifty files a
+request, one request a second), strips the markup from the author, and keeps
+them in the cache as `credit`; a file Wikipedia holds as non-free is not
+shown. A fallback photograph that loads in the first one's place is credited
+by its host, from `kycBuildMeta.photoCredits`. `validate` fails a photograph
+with no credit (`photo-uncredited`) and a Commons portrait with no recorded
+licence (`photo-licence-missing`).
+
+A portrait not on Wikimedia is one file at one size, so its weight is
+recorded when it is found: `bytes`, `width` and `height` in the portrait
+cache for the House Clerk's (50-100 KB, 335px), `portraitWeight` in the
+enrichment cache for a campaign's. A campaign image over 300 KB or 1,200px
+(`photos.MAX_PORTRAIT_BYTES`, `MAX_PORTRAIT_PX`) is not taken: Squarespace's
+and imgix's own resizers serve the same upload at 500px, and that is taken
+instead when it passes the same checks; otherwise the site's next picture is
+tried, and the refusal is kept as `portraitHeavy`. On 2026-10-18 that refused
+23 of 43 campaign portraits (one a 5 MB PNG), and 10 came back at 500px. The
+page offers a srcset no size wider than a 2x screen needs for the width it
+draws, so a 165px card stops at the 330px file.
 
 Set `"pinned": true` on a cache entry to stop the resolver overwriting a
 hand-corrected URL.

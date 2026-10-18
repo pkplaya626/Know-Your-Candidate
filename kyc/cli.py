@@ -166,6 +166,9 @@ def _build(args):
     else:
         print("  [warn] no enrichment cache; run 'enrich' to read candidates' "
               "articles and campaign sites")
+    # Whose photograph each portrait is, once every source has had its say.
+    from .photos import assign_credits
+    stats["photo_credits"] = assign_credits(profiles)
     # The offices each person has held, by id; a challenger's only while
     # their profile links the article they were read from (rule 20).
     from . import history as history_mod
@@ -1163,6 +1166,8 @@ def _verify(args):
     cache = portraits.load_cache(args.root)
     stats["portraits"] = portraits.apply_cache(profiles, cache) if cache else 0
     enrich.apply_cache(profiles, enrichment, as_of=_age_date(stats))
+    from .photos import assign_credits
+    stats["photo_credits"] = assign_credits(profiles)
     from . import history as history_mod
     history_mod.apply_cache(profiles, history_mod.load_cache(args.root),
                             snapshot=legislators.load_snapshot(args.root))
