@@ -32,17 +32,7 @@
 
   var ROMAN = { 1: "I", 2: "II", 3: "III" };
 
-  /* Nominees (and, after November, the winner) first, then a runoff still
-   * to be decided, then people whose primary has not been held, then who
-   * lost in November; the people the primary removed come last and only on
-   * request. The order is KYC.raceStatus's. */
-  var RUNNING = 2;
-
-  function rank(item) {
-    var spec = KYC.raceStatusOf(item, "short");
-    return spec ? spec.rank : RUNNING;
-  }
-
+  /* The people the primary removed come last and only on request. */
   function isOut(item) {
     return KYC.offBallot(KYC.contestStatus(item));
   }
@@ -57,37 +47,35 @@
       (a.holder ? a.holder.name : "").localeCompare(b.holder ? b.holder.name : "");
   }
 
-  /** Everyone running for *race* other than its sitting senator, in ballot
-   *  order. A member contesting the seat from elsewhere (contestRaceId) is
-   *  shown once, as their member profile; their separate filing profile
-   *  (alsoRunningId / incumbentId) is the same person and is dropped. */
+  /** Everyone running for *race* other than its sitting senator, in the
+   *  race's own order (the pipeline's: by surname). A member contesting the
+   *  seat from elsewhere is shown once, as the profile of their filing for
+   *  this seat - the one the race, the state page and the map list, with
+   *  this campaign's money (RACES-03: the view opened Mike Collins's House
+   *  profile, which reads "No House filing", where every other view opened
+   *  his Senate filing's). A member with no such filing is shown as
+   *  themselves. The holder's own filing is the holder. */
   function contenders(race, people, holder) {
     var seen = {};
     var shown = [];
-    var twins = {};
     var holderId = holder ? holder.id : null;
+    var listed = {};
+    race.candidateIds.forEach(function (id) { listed[id] = true; });
     function add(item) {
       if (!item || seen[item.id] || item.id === holderId) return;
+      if (holderId && (item.incumbentId === holderId || (holder && holder.alsoRunningId === item.id))) {
+        return;
+      }
       seen[item.id] = true;
       shown.push(item);
     }
-    (holder ? [holder] : []).concat(people.filter(function (p) {
-      return !p.isCandidate && p.contestRaceId === race.id && p.id !== holderId;
-    })).forEach(function (member) {
-      twins[member.id] = true;
-      if (member.alsoRunningId) twins[member.alsoRunningId] = true;
-      if (member !== holder) add(member);
-    });
-    race.candidateIds.forEach(function (id) {
-      var item = KYC.byId(id);
-      if (!item || twins[id] || (item.incumbentId && twins[item.incumbentId])) return;
-      add(item);
-    });
-    return shown.sort(function (a, b) {
-      return rank(a) - rank(b) ||
-        String(a.party).localeCompare(String(b.party)) ||
-        a.name.localeCompare(b.name);
-    });
+    race.candidateIds.forEach(function (id) { add(KYC.byId(id)); });
+    people.filter(function (p) {
+      return !p.isCandidate && p.contestRaceId === race.id && p.id !== holderId &&
+        !(p.alsoRunningId && listed[p.alsoRunningId]);
+    }).forEach(add);
+    var at = function (p) { return KYC.racePosition(p); };
+    return shown.sort(function (a, b) { return at(a) - at(b); });
   }
 
   /** The groups in reading order: each year's regular class, then that
@@ -216,7 +204,7 @@
                "Running for this seat (" + (running.length +
                  (race ? KYC.cards.unprofiledNames(race).none.length +
                    KYC.cards.unprofiledNames(race).maybe.length : 0)) + ")</p>" +
-               cards(running) + unlisted + "</div>");
+               cards(running) + unlisted + KYC.cards.orderNote(running, race) + "</div>");
     }
     if (row.length) html.push('<div class="senate-seat-row">', row.join(""), "</div>");
     // The markets after the people still running, before those who left

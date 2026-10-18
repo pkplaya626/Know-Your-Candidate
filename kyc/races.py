@@ -138,7 +138,86 @@ def assign(profiles):
     return profiles
 
 
-def build(profiles, filed_counts=None, results=None, dates=None, filed=None, record=None):
+def ballot_kind(race):
+    """How the race's ballot is decided, for a badge the reader can see:
+    ``primaryKind`` ("top-two", "top-four" or "open") and
+    ``generalRunoff`` (the date of a runoff after Nov 3 if no one has a
+    majority), each only where the race has one.
+
+    California's two-Democrat top-two ballots read like a misprint with
+    the rule only in a hover title (audit 2026-10-17, RACES-11), and
+    Georgia's and Louisiana's December rounds appeared on no state page
+    (PERSONA-06). Every value comes from a table that cites the statute:
+    ``results.ALL_PARTY_PRIMARIES``, ``overrides.OPEN_PRIMARY_SEATS`` and
+    ``overrides.GENERAL_RUNOFFS``; nothing is typed here.
+    """
+    from .overrides import GENERAL_RUNOFFS, OPEN_PRIMARY_SEATS
+    from .results import ALL_PARTY_PRIMARIES
+
+    out = {}
+    code = race["state"]
+    office = "S" if race["chamber"] == "Senate" else "H"
+    open_seat = OPEN_PRIMARY_SEATS.get((code, office, race.get("year", ELECTION_YEAR)))
+    if open_seat:
+        out["primaryKind"] = "open"
+        out["generalRunoff"] = open_seat.get("runoff")
+    elif code in ALL_PARTY_PRIMARIES:
+        out["primaryKind"] = ALL_PARTY_PRIMARIES[code][0]
+    if code in GENERAL_RUNOFFS and "generalRunoff" not in out:
+        out["generalRunoff"] = GENERAL_RUNOFFS[code][0]
+    return out
+
+
+_SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
+
+
+def _words(text):
+    import re
+    import unicodedata
+
+    text = re.sub(r"\([^)]*\)|\"[^\"]*\"|“[^”]*”", " ", str(text or ""))
+    folded = "".join(c for c in unicodedata.normalize("NFD", text)
+                     if unicodedata.category(c) != "Mn")
+    words = [w.strip(".,").lower() for w in folded.replace(",", " ").split()]
+    words = [w for w in words if w]
+    while len(words) > 1 and words[-1] in _SUFFIXES:
+        words.pop()
+    return words
+
+
+def surname(profile, filed=None, people=None):
+    """The surname *profile* is listed under in a race: the one Congress's
+    record gives a member (*people*, the snapshot by bioguide id), or the
+    one their FEC filing gives ("WASSERMAN SCHULTZ, DEBBIE"), when it ends
+    the name the page shows; otherwise the shown name's last word, less a
+    suffix. A filing under a legal name ("ARENHOLZ, ASHLEY HINSON") or with
+    its names swapped ("LISA, CARLQUIST") does not end the shown name, so
+    it never puts someone under a name the reader cannot see."""
+    shown = _words(profile.get("name"))
+    row = (filed or {}).get(profile.get("fecCandidateId")) or {}
+    candidates = [((people or {}).get(profile.get("id")) or {}).get("last")]
+    for name in (profile.get("filedName"), row.get("name")):
+        if name and "," in name:
+            candidates.append(name.split(",")[0])
+    for last in candidates:
+        words = _words(last)
+        if words and len(words) < len(shown) and shown[-len(words):] == words:
+            return " ".join(words)
+    return shown[-1] if shown else ""
+
+
+def order_people(ids, by_id, filed=None, people=None):
+    """*ids* in the one order every view lists a race's people in: by
+    surname, then by the whole name shown (TRUST-15). A race's sitting
+    member is listed first by the page, from ``incumbentIds``."""
+    def key(pid):
+        person = by_id.get(pid) or {}
+        return (surname(person, filed, people), " ".join(_words(person.get("name"))), pid)
+    return sorted(ids, key=key)
+
+
+def build(profiles, filed_counts=None, results=None, dates=None, filed=None, record=None,
+          snapshot=None):
     """Return the race list, most contested first.
 
     ``contested`` means somebody besides the incumbent is running: a
@@ -254,7 +333,17 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
             # incumbent, whatever the build could tell about them.
             holds(race_for(rid), profile)
 
+    from .legislators import by_bioguide
+
+    people = by_bioguide(snapshot)
     for race in races.values():
+        # One order for the people in a race, in every view that lists them:
+        # the race view had them in build order (curated rows first, then
+        # filings by registration) and the profile by first name, so North
+        # Carolina's Senate race read Cooper, Whatley, Dublin in one and
+        # Dublin, Whatley, Cooper in the other.
+        race["candidateIds"] = order_people(race["candidateIds"], by_id, filed, people)
+        race["incumbentIds"] = order_people(race["incumbentIds"], by_id, filed, people)
         # A special election (Florida's, Ohio's): from the frozen record, so it
         # stays one after the seat's winner is seated for the term to 2029.
         race["special"] = bool((frozen.get(race["id"]) or {}).get("special"))
@@ -296,6 +385,7 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
             slot = dates.get((race["state"], "S" if race["chamber"] == "Senate" else "H")) or {}
             race["primaryDate"] = slot.get("primary")
             race["runoffDate"] = slot.get("runoff")
+        race.update(ballot_kind(race))
         if results is not None:
             from .results import race_summary
             summary = race_summary(results, race["id"])

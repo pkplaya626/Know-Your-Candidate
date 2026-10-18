@@ -98,11 +98,171 @@ class TestCheck(unittest.TestCase):
             ballot2026.STATES = original
         self.assertEqual([i.level for i in issues], ["error"])
 
+    def test_a_next_year_for_an_office_on_the_ballot_fails(self):
+        nxt = dict(ballot2026.NEXT)
+        nxt[("GA", "governor")] = (2030, "https://sos.ga.gov/2026-offices-appear-ballot")
+        with self.assertRaises(ballot2026.Ballot2026Error) as caught:
+            ballot2026.check(next_=nxt)
+        self.assertIn("on the 2026 ballot, so no next year", str(caught.exception))
+
+    def test_a_next_year_must_follow_2026(self):
+        nxt = dict(ballot2026.NEXT)
+        nxt[("VA", "governor")] = (2025, nxt[("VA", "governor")][1])
+        with self.assertRaises(ballot2026.Ballot2026Error):
+            ballot2026.check(next_=nxt)
+
+    def test_an_open_seat_must_be_on_the_ballot(self):
+        seats = dict(ballot2026.OPEN_SEATS)
+        seats[("VA", "governor")] = ("Abigail Spanberger", "not-listed", None,
+                                     "https://law.lis.virginia.gov/vacode/title24.2/chapter2/section24.2-210/",
+                                     "a list")
+        with self.assertRaises(ballot2026.Ballot2026Error) as caught:
+            ballot2026.check(open_seats=seats)
+        self.assertIn("not on the 2026 ballot", str(caught.exception))
+
+    def test_a_term_limit_says_how_many_terms(self):
+        seats = dict(ballot2026.OPEN_SEATS)
+        holder, _why, _terms, source, cite = seats[("FL", "governor")]
+        seats[("FL", "governor")] = (holder, "term-limit", None, source, cite)
+        with self.assertRaises(ballot2026.Ballot2026Error):
+            ballot2026.check(open_seats=seats)
+
     def test_a_joint_ticket_is_elected_with_the_governor(self):
         def split(states):
             sel, up, note, src = states["OH"]["lt"]
             states["OH"]["lt"] = (sel, not up, note, src)
         self.assertIn("joint ticket", self.broken(split))
+
+
+class TestTerritories(unittest.TestCase):
+    """The governor2026 map called Guam, the Virgin Islands and the Northern
+    Mariana Islands "not covered" while each elects its governor on Nov 3
+    (audit 2026-10-17, RACES-07)."""
+
+    def test_three_territories_elect_a_governor_on_november_3(self):
+        up = sorted(c for c, e in ballot2026.TERRITORIES.items() if e["governor"][1])
+        self.assertEqual(up, ["GU", "MP", "VI"])
+
+    def test_american_samoa_and_puerto_rico_do_not(self):
+        for code in ("AS", "PR"):
+            self.assertFalse(ballot2026.TERRITORIES[code]["governor"][1], code)
+
+    def test_a_territory_record_says_it_is_one(self):
+        record = ballot2026.for_state("GU")
+        self.assertTrue(record["territory"])
+        self.assertEqual(sorted(record["offices"]), ["governor", "lt"])
+        self.assertEqual(record["chambers"], {})
+
+    def test_a_missing_territory_fails(self):
+        territories = dict(ballot2026.TERRITORIES)
+        territories.pop("GU")
+        with self.assertRaises(ballot2026.Ballot2026Error):
+            ballot2026.check(territories=territories)
+
+    def test_dc_has_no_record(self):
+        self.assertEqual(ballot2026.for_state("DC"), {})
+
+
+class TestNextElection(unittest.TestCase):
+    """Virginia's page said "No regular elections in 2026" with no year
+    (audit 2026-10-17, PERSONA-19). The year is the statute's, never a term
+    length's: Virginia's governor is next elected in 2029, its legislature
+    in 2027."""
+
+    def test_virginia(self):
+        record = ballot2026.for_state("VA")
+        self.assertEqual(record["offices"]["governor"]["next"]["year"], 2029)
+        self.assertEqual(record["chambers"]["upper"]["next"]["year"], 2027)
+        self.assertEqual(record["chambers"]["lower"]["next"]["year"], 2027)
+
+    def test_an_office_without_a_sourced_year_has_none(self):
+        # Delaware's governor: no record read gives the year, so none is shown.
+        self.assertNotIn("next", ballot2026.for_state("DE")["offices"]["governor"])
+
+    def test_an_office_on_the_ballot_has_no_next_year(self):
+        self.assertNotIn("next", ballot2026.for_state("GA")["offices"]["governor"])
+
+    def test_louisianas_october_election_from_a_record_that_names_the_year(self):
+        # R.S. 18:402 names no year and no legislator (PR #94 review); the
+        # Secretary of State's 2027 calendar names the year, in October.
+        for key in ("governor", "lt", "ag", "sos", "upper", "lower"):
+            year, source, month = ballot2026.NEXT[("LA", key)]
+            self.assertEqual((year, month), (2027, "October"), key)
+            self.assertIn("elections-calendar-2027", source)
+        record = ballot2026.for_state("LA")
+        self.assertEqual(record["chambers"]["upper"]["next"]["month"], "October")
+        self.assertNotIn("month", ballot2026.for_state("VA")["offices"]["governor"]["next"])
+
+    def test_a_month_must_be_a_month(self):
+        nxt = dict(ballot2026.NEXT)
+        nxt[("VA", "governor")] = (2029, nxt[("VA", "governor")][1], "Novembre")
+        with self.assertRaises(ballot2026.Ballot2026Error) as caught:
+            ballot2026.check(next_=nxt)
+        self.assertIn("is not a month", str(caught.exception))
+
+
+class TestOpenSeats(unittest.TestCase):
+    """"On the Nov 3, 2026 ballot" sat under Brian Kemp, Gavin Newsom and Tim
+    Walz, none of them on it (audit 2026-10-17, STATEGOV-01). An open seat
+    is said only from a cited source, and only about the person who holds
+    the office."""
+
+    def test_a_term_limited_governor(self):
+        seat, problem = ballot2026.open_seat("FL", "governor", "Ron DeSantis", 2)
+        self.assertIsNone(problem)
+        self.assertEqual(seat["text"], "Ron DeSantis is term-limited")
+        self.assertTrue(seat["source"].startswith("http"))
+
+    def test_someone_else_in_the_office_withholds_it(self):
+        seat, problem = ballot2026.open_seat("FL", "governor", "Someone Else", 1)
+        self.assertEqual(seat["why"], "unchecked")
+        self.assertEqual(seat["holder"], "Someone Else")
+        self.assertIn("withheld", problem)
+
+    def test_fewer_terms_than_the_limit_withholds_it(self):
+        seat, problem = ballot2026.open_seat("FL", "governor", "Ron DeSantis", 1)
+        self.assertEqual(seat["why"], "unchecked")
+        self.assertIn("NGA counts 1", problem)
+
+    def test_a_list_that_does_not_name_them(self):
+        seat, problem = ballot2026.open_seat("IA", "governor", "Kim Reynolds", 2)
+        self.assertIsNone(problem)
+        self.assertEqual(seat["text"], "Kim Reynolds is not on the list of candidates for this office")
+
+    def test_a_list_that_names_them(self):
+        seat, problem = ballot2026.open_seat("CA", "ag", "Rob Bonta")
+        self.assertIsNone(problem)
+        self.assertEqual(seat["why"], "listed")
+        self.assertEqual(seat["text"], "Rob Bonta is on the list of candidates for this office")
+
+    def test_no_entry_says_it_was_not_checked(self):
+        # Silence beside one office read as "running" once another office
+        # said "Open seat" (PR #94 review, rule 19).
+        seat, problem = ballot2026.open_seat("MN", "governor", "Tim Walz", 2)
+        self.assertIsNone(problem)
+        self.assertEqual(seat, {"holder": "Tim Walz", "why": "unchecked",
+                                "text": "Whether Tim Walz is running for this office is "
+                                        "not checked here"})
+
+    def test_an_office_with_no_named_holder_says_nothing(self):
+        self.assertEqual(ballot2026.open_seat("MN", "governor", None), (None, None))
+
+    def test_the_build_attaches_them_and_withholds_a_stale_one(self):
+        from kyc import stategov
+        payload, problems = stategov.build(".")
+        fl = payload["states"]["FL"]["ballot2026"]["offices"]["governor"]
+        self.assertEqual(fl["holderStatus"]["holder"], payload["states"]["FL"]["governor"]["name"])
+        self.assertEqual(fl["holderStatus"]["why"], "term-limit")
+        self.assertFalse([p for p in problems if "OPEN_SEATS" in p], problems)
+        # Every office on the ballot with a named holder says something
+        # about them; no office off the ballot does.
+        for code, state in payload["states"].items():
+            for key, item in ((state.get("ballot2026") or {}).get("offices") or {}).items():
+                holder = state["governor"] if key == "governor" else state.get(key) or {}
+                if item["up"] and holder.get("name"):
+                    self.assertIn("holderStatus", item, (code, key))
+                if not item["up"]:
+                    self.assertNotIn("holderStatus", item, (code, key))
 
 
 if __name__ == "__main__":

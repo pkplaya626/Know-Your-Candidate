@@ -52,15 +52,80 @@
       KYC.escapeHtml(label) + "</a>";
   }
 
+  /* Prices that add up to far more or less than a dollar (Kalshi's WY-AL
+   * read Gray 98% and Kinney 30%): a bar would rescale them into a split
+   * neither number says, so the
+   * prices are quoted as they are and say why there is no bar. The band is
+   * validate's odds-incoherent band. Read here, page-side, so data/odds.js
+   * stays a pure function of the cache (rule 41). */
+  var COHERENT = [0.85, 1.2];
+
+  function coherent(market) {
+    var sum = (market.outcomes || []).reduce(function (s, o) { return s + (o.price || 0); }, 0);
+    return { ok: sum >= COHERENT[0] && sum <= COHERENT[1], sum: sum };
+  }
+
+  /* An outcome that names a party, not a person: what a party-only market
+   * resolves on. */
+  var PARTY_LABEL = /^(?:(?:Democratic|Republican) [Pp]arty|Democrats?|Republicans?|Democratic|Independent|Other)$/;
+
+  function partyOnly(market) {
+    var outcomes = market.outcomes || [];
+    return outcomes.length > 0 && outcomes.every(function (o) {
+      return PARTY_LABEL.test(o.label) || !!o.mismatch;
+    });
+  }
+
+  var PLURAL = { Democrat: "Democrats", Republican: "Republicans" };
+
+  /** The one party everyone on the race's November ballot belongs to, or
+   *  "": California's top two can be two Democrats (CA-4, CA-11), and a
+   *  market on which party wins cannot tell them apart. Only once the
+   *  primary is settled, only from profiles, and never when the results
+   *  name someone on the ballot this site has no profile (and so no party)
+   *  for. */
+  function oneParty(race) {
+    if (!race || !race.settled || !KYC.byId) return "";
+    var res = race.results || {};
+    if ((res.otherNominees || []).length) return "";
+    var seen = {};
+    var parties = {};
+    var count = 0;
+    (race.incumbentIds || []).concat(race.candidateIds || []).forEach(function (id) {
+      var p = KYC.byId(id);
+      if (!p || seen[p.id]) return;
+      seen[p.id] = true;
+      if (!p.isCandidate && (p.contestRaceId || p.raceId) !== race.id) return;
+      var status = p.isCandidate ? p.raceStatus : KYC.contestStatus(p);
+      if (!KYC.onNovemberBallot(status)) return;
+      parties[p.party || ""] = true;
+      count += 1;
+    });
+    var keys = Object.keys(parties);
+    return count >= 2 && keys.length === 1 && PLURAL[keys[0]] ? keys[0] : "";
+  }
+
   /** One market: its outcomes as a bar and a legend, its source linked. */
-  function marketRow(market) {
+  function marketRow(market, race) {
     var source = SOURCE[market.source] || [market.source, market.source];
     var shown = (market.outcomes || []).filter(function (o) { return o.price >= FLOOR; });
     var hidden = (market.outcomes || []).length - shown.length;
     if (!shown.length) return "";
+    var check = coherent(market);
+    var same = partyOnly(market) ? oneParty(race) : "";
+    // Only what is measured: the sum. The site holds no trading volume, so
+    // it never says "thinly traded"; Kalshi's figures are last trades,
+    // which can be old, while Polymarket's are its displayed prices, and a
+    // sum short of 100% there may be an outcome it closed (PR #94 review).
+    var notes = (check.ok ? "" : '<p class="odds-flag">' +
+        (market.source === "kalshi" ? "These last-traded prices" : "These prices") + " add up to " +
+        Math.round(check.sum * 100) + "%, not 100%, so they are quoted without a bar" +
+        (market.source === "kalshi" ? "; they may be stale." : ".") + "</p>") +
+      (same ? '<p class="odds-flag">Everyone on this November ballot is a ' + KYC.escapeHtml(same) +
+        "; this market resolves on the party only, so it cannot tell them apart.</p>" : "");
     var total = shown.reduce(function (sum, o) { return sum + o.price; }, 0) || 1;
     var spoken = shown.map(function (o) { return o.label + " " + percent(o.price); }).join(", ");
-    var bar = shown.map(function (o) {
+    var bar = !check.ok ? "" : shown.map(function (o) {
       return '<span class="odds-seg odds-seg-' + party(o.party) + '" style="width:' +
         (100 * o.price / total).toFixed(1) + '%"></span>';
     }).join("");
@@ -78,11 +143,32 @@
     return '<div class="odds-market">' +
       '<span class="odds-source">' + link(market.url, source[0],
         source[1] + ": “" + (market.title || "") + "”") + "</span>" +
-      '<div class="odds-bar" role="img" aria-label="' +
-        KYC.escapeAttr(source[0] + ": " + spoken) + '">' + bar + "</div>" +
+      (bar ? '<div class="odds-bar" role="img" aria-label="' +
+        KYC.escapeAttr(source[0] + ": " + spoken) + '">' + bar + "</div>" : "") +
       '<div class="odds-legend">' + legend +
         (hidden ? '<span class="odds-item odds-faint">' + hidden + " more priced under 1%</span>" : "") +
-      "</div></div>";
+      "</div>" + notes + "</div>";
+  }
+
+  var MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July",
+                     "August", "September", "October", "November", "December"];
+
+  /** "October 4, 2026" -> "2026-10-04", or "" when it is not a date. */
+  function isoOf(text) {
+    var m = /^([A-Z][a-z]+) (\d{1,2}), (\d{4})$/.exec(String(text || "").trim());
+    var month = m ? MONTH_NAMES.indexOf(m[1]) : -1;
+    if (month < 0) return "";
+    return m[3] + "-" + (month < 9 ? "0" : "") + (month + 1) + "-" + (m[2].length < 2 ? "0" : "") + m[2];
+  }
+
+  /** The most recently updated average, for the one-line summary: the
+   *  aggregators are listed in a fixed order, and the first was often the
+   *  oldest (270toWin's Oct 4 beside averages of Oct 11; RACES-08). A row
+   *  with no readable date never wins over one with a date. */
+  function latest(rows) {
+    return rows.reduce(function (best, row) {
+      return isoOf(row.updated) > isoOf(best.updated) ? row : best;
+    }, rows[0]);
   }
 
   /** The polling averages, as each aggregator published them. */
@@ -114,19 +200,23 @@
     var odds = race && (data().races || {})[race.id];
     if (!odds) return "";
     opts = opts || {};
-    var markets = (odds.markets || []).map(marketRow).filter(Boolean);
+    var markets = (odds.markets || []).map(function (m) { return marketRow(m, race); })
+      .filter(Boolean);
     var polls = odds.polls && odds.polls.rows && odds.polls.rows.length ? odds.polls : null;
     if (!markets.length && !polls) return "";
     var pollHtml = "";
     if (polls && opts.compact) {
-      var first = polls.rows[0];
+      var first = latest(polls.rows);
+      var when = day(isoOf(first.updated));
       pollHtml = '<p class="odds-line"><span class="odds-source">Polls</span> ' +
         first.results.map(function (r) {
           return '<span class="party-' + party(r.party) + '">' + KYC.escapeHtml(r.label) + " " +
             r.pct.toFixed(1) + "</span>";
         }).join(" · ") +
         ' <span class="odds-faint">(' + link(first.url, first.aggregator) +
-        (polls.rows.length > 1 ? " + " + (polls.rows.length - 1) + " more" : "") + ")</span></p>";
+        (when ? ", updated " + KYC.escapeHtml(when) : "") +
+        (polls.rows.length > 1 ? "; " + (polls.rows.length - 1) + " more average" +
+          (polls.rows.length > 2 ? "s" : "") : "") + ")</span></p>";
     } else if (polls) {
       pollHtml = pollTable(polls);
     }
@@ -163,7 +253,7 @@
       '<p class="odds-subhead">Control of ' + KYC.escapeHtml(name) +
         " after November, by prediction market" + (finalPrices() ? ": final prices, from before the polls closed" : "") +
         ' <span class="odds-faint">as of ' + KYC.escapeHtml(day(data().asOf)) + "</span></p>" +
-      markets.map(marketRow).join("") +
+      markets.map(function (m) { return marketRow(m, null); }).join("") +
       '<p class="odds-note">What traders pay for a $1 contract on each party winning a majority. ' +
         "Not a poll, and not this site’s forecast." + (finalPrices() ? FINAL_NOTE : "") +
         "</p></section>";

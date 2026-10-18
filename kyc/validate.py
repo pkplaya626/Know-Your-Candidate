@@ -225,6 +225,24 @@ def check_overrides(profiles, raw):
                             f"{len(dead_ids)} id-keyed status overrides match no member",
                             dead_ids))
 
+    # Another office's nominee is a claim about a ballot: one whose member
+    # has gone shows nowhere, and after Election Day "nominee" is no longer
+    # the news - the result is, read from the same page.
+    dead_other = sorted(k for k in overrides.OTHER_OFFICE_NOMINEES if k not in member_ids)
+    if dead_other:
+        issues.append(Issue("warn", "stale-other-office",
+                            f"{len(dead_other)} overrides.OTHER_OFFICE_NOMINEES entries match "
+                            "no member", dead_other))
+    import datetime
+    from .cycle import CYCLE, general_election_day
+    if overrides.OTHER_OFFICE_NOMINEES and \
+            datetime.date.today() > general_election_day(CYCLE):
+        issues.append(Issue("warn", "other-office-after-election",
+                            f"{len(overrides.OTHER_OFFICE_NOMINEES)} members are shown as "
+                            "another office's nominee after Election Day; read each result "
+                            "from its source and replace or remove the entry",
+                            sorted(overrides.OTHER_OFFICE_NOMINEES)))
+
     candidate_keys = {
         (p["name"], p["state"]) for p in profiles if p["isCandidate"]
     }
@@ -1316,6 +1334,27 @@ def check_voting_links(cache):
         issues.append(Issue("warn", "voting-override-stale",
                             f"{len(stale)} overrides.VOTING_LINKS entries no longer match "
                             f"what NASS lists; each may be unneeded", stale))
+    # Where to read the count and the deadlines, for every state and D.C.
+    # (audit 2026-10-17, RACES-20, STATEGOV-11): curated in kyc/voting.py.
+    gaps += [f"{code}: no {kind} page" for code in sorted(voting.JURISDICTIONS)
+             for kind, table in (("results", voting.RESULTS), ("deadlines", voting.DEADLINES))
+             if code not in table]
+    gaps += [f"{code}: a December date in the overrides with no page that gives it "
+             f"(voting.KEY_DATE_SOURCES)" for code in voting.unsourced_key_dates()]
+    # A link never opened, or opened and not found live (a 403, a timeout:
+    # rule 8 concludes nothing from either): the page says it could not be
+    # reached, and this lists it, so "unknown" is never counted as checked.
+    checked = cache.get("links") or {}
+    unchecked = sorted(f"{code} {kind}: {link['url']} "
+                       f"({checked.get(link['url'], 'never opened')})"
+                       for code, links in voting.effective(cache).items()
+                       for kind, link in links.items()
+                       if checked.get(link["url"]) not in (voting.LIVE, voting.DEAD))
+    if unchecked:
+        issues.append(Issue("warn", "voting-links-unchecked",
+                            f"{len(unchecked)} voting links were not found live when last "
+                            f"opened, or never opened; run 'voting', and have a person open "
+                            f"any that stay unknown", unchecked))
     if gaps:
         issues.append(Issue("error", "voting-links-incomplete",
                             f"{len(gaps)} official voting pages are missing", gaps))

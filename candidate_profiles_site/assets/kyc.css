@@ -888,6 +888,12 @@ select optgroup {
   background: var(--surface-3);
   border-color: var(--border);
 }
+/* A badge that explains itself in the guide: underlined, so it reads as
+ * the link it is (a hover title cannot be reached by touch). */
+a.badge-link {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 .badge-accent {
   color: var(--accent);
   background: color-mix(in srgb, var(--accent) 14%, transparent);
@@ -1136,6 +1142,15 @@ select optgroup {
   color: var(--text-faint);
   line-height: 1.5;
 }
+/* What a market's prices cannot say: thin trading, or a party-only market
+ * over a ballot of one party. Muted text, not the warning colour: the note
+ * qualifies the prices, it does not raise an alarm. */
+.odds-flag {
+  margin: var(--s-1) 0 0;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
 .odds-compact { padding: var(--s-2) var(--s-3); }
 .odds-compact .odds-market { grid-template-columns: 5.5rem minmax(0, 1fr); }
 /* The compact rule has two classes, so the phone rule needs them too: with
@@ -1168,6 +1183,12 @@ select optgroup {
 
 .race-out {
   margin-top: var(--s-4);
+}
+/* How a race's people are ordered, said once under them (TRUST-15). */
+.race-order {
+  margin: var(--s-2) 0 0;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
 }
 .race-out > summary {
   cursor: pointer;
@@ -1668,6 +1689,10 @@ select optgroup {
   gap: var(--s-2);
 }
 .modal-meta strong { color: var(--text); font-weight: 600; }
+/* The cross-link's sentence is one flex item, so it wraps as a sentence:
+ * as separate items its text runs stood side by side in three narrow
+ * columns on a phone. */
+.modal-meta .cross-link-text { display: block; min-width: 0; }
 .modal-meta button {
   border: 0;
   background: none;
@@ -2507,6 +2532,13 @@ select optgroup {
 }
 .state-links .btn { text-decoration: none; }
 .vote-box .state-note { margin-top: var(--s-2); }
+.vote-dates {
+  margin: var(--s-3) 0 0;
+  padding-left: var(--s-5);
+  font-size: var(--t-sm);
+  color: var(--text);
+}
+.vote-dates li + li { margin-top: var(--s-1); }
 .state-section { margin-bottom: var(--s-6); }
 .state-heading {
   display: flex;
@@ -3671,11 +3703,28 @@ button.local-county-link {
   color: var(--text-muted);
   text-decoration: none;
 }
+/* The office's mark, never a person's status: it sits on the office's label
+ * line in a neutral style, apart from the yellow the race badges use for
+ * people (rule 79). */
 .gov-ballot-mark.up {
-  color: var(--warn-text);
-  background: color-mix(in srgb, var(--warn) 14%, transparent);
-  border-color: color-mix(in srgb, var(--warn) 34%, transparent);
+  color: var(--text);
+  background: var(--surface-2);
+  border-color: var(--border-strong);
   font-weight: 600;
+}
+.gov-office {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px var(--s-2);
+}
+.gov-office { margin: 0; }
+.gov-office .gov-ballot-mark { margin-top: 0; }
+.gov-holder-status { margin: 2px 0 0; font-size: var(--t-sm); color: var(--text-muted); }
+.gov-next {
+  margin-left: var(--s-1);
+  font-size: var(--t-xs);
+  color: var(--text-muted);
 }
 .gov-ballot-mark:focus-visible { text-decoration: underline; }
 @media (hover: hover) {

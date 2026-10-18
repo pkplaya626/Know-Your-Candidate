@@ -117,6 +117,45 @@ MEMBER_STATUS_BY_ID = {
                 "https://www.thegreenpapers.com/G26/LA"),
 }
 
+# Members who are on the November ballot for an office this site does not
+# cover, keyed on bioguide id: {bioguide: (what they are, source, checked)}.
+# Without it Byron Donalds, Florida's Republican nominee for governor, read
+# only "Not running for this seat in 2026", and Tommy Tuberville "Withdrew".
+# Each entry is the winner the results page marks with its `winning
+# candidate` template (rule 29), read from the article's wikitext on the day
+# given, never from memory; a nominee who later withdraws is taken out.
+# The profile drops an entry once its member starts a new term, `validate`
+# reports one whose member has gone (stale-other-office), and after Election
+# Day it reports them all, for the result to be read from the same page.
+# Until then the page says it in the past tense from the day after Election
+# Day ("Was the ..."), so a stale entry never reads as a race still to come.
+_GOV = "https://en.wikipedia.org/wiki/2026_{}_gubernatorial_election"
+OTHER_OFFICE_NOMINEES = {
+    # Republican primary results, May 19: Tuberville 85.4%.
+    "T000278": ("Republican nominee for Governor of Alabama",
+                _GOV.format("Alabama"), "2026-10-17"),
+    # Republican primary results, July 21: Biggs 74.0%.
+    "B001302": ("Republican nominee for Governor of Arizona",
+                _GOV.format("Arizona"), "2026-10-17"),
+    # Republican primary results, August 18: Donalds 47.8%.
+    "D000032": ("Republican nominee for Governor of Florida",
+                _GOV.format("Florida"), "2026-10-17"),
+    # Republican primary results, August 4: James 50.05%.
+    "J000307": ("Republican nominee for Governor of Michigan",
+                _GOV.format("Michigan"), "2026-10-17"),
+    # Republican primary results, August 6: Blackburn 43.6%. Her Senate
+    # seat is not up, so only her profile says it.
+    "B001243": ("Republican nominee for Governor of Tennessee",
+                _GOV.format("Tennessee"), "2026-10-17"),
+    # Republican primary results, August 11: Tiffany 95.32%.
+    "T000165": ("Republican nominee for Governor of Wisconsin",
+                _GOV.format("Wisconsin"), "2026-10-17"),
+    # Democratic primary results, August 1 (the Election System of the
+    # Virgin Islands' territorial summary): Plaskett and Potter 46.99%.
+    "P000610": ("Democratic nominee for Governor of the U.S. Virgin Islands",
+                _GOV.format("United_States_Virgin_Islands"), "2026-10-17"),
+}
+
 # FEC registrations that are one person although their totals differ, so the
 # exact same-committee signal (candidates.same_committee) cannot see it. Each
 # entry maps the registration folded away to (the one kept, the evidence).
@@ -247,6 +286,53 @@ VOTING_LINKS = {
     ("ND", "status"): (
         "https://www.sos.nd.gov/elections", None, None,
         "no registration to check; NASS lists the general Elections page"),
+    # Audit 2026-10-17, STATEGOV-10. Nevada's absentee link (a page under
+    # "voters-with-disabilities") is held: it answered 403 to a plain
+    # request and drew a blank page in headless Chrome, which concludes
+    # nothing (rule 8) until a person opens it.
+    ("DC", "absentee"): (
+        "https://www.dcboe.org/voters/casting-your-vote/voting-by-special-ballot",
+        "https://www.dcboe.org/voters/casting-your-vote/mail-ballot-instructions", None,
+        "NASS links 'Voting by Special Ballot', a ballot cast at the polls when a voter's "
+        "eligibility is in question; D.C. mails every voter a ballot, and this is the Board's "
+        "'Mail Ballot Instructions', linked from dcboe.org (title read 2026-10-17)"),
+    ("WY", "status"): (
+        "https://sos.wyo.gov/Elections/State/RegisteringToVote.aspx", None, None,
+        "NASS lists 'Registering to Vote in Wyoming' - the same page as 'register', with no "
+        "lookup on it - so 'Check your registration' led to no check (read 2026-10-17)"),
+}
+
+# Links on a state's government block that the rosters give wrongly, each
+# opened on 2026-10-17 (audit 2026-10-17, LINKS-08, LINKS-09):
+# {(state, office, field): (what the roster lists, or None for nothing;
+# what to show instead, or None to show nothing; evidence)}. office is
+# "governor", "lt", "ag" or "sos"; field is "website" or "bio". A dead
+# biography is dropped, never guessed at: the office's own home page is
+# already linked beside it ("Office"). An entry applies only while the
+# roster still lists what it replaces, and stategov reports one that no
+# longer matches, so the next refresh cannot put a dead link back silently.
+OFFICE_LINKS = {
+    ("ME", "sos", "bio"): ("https://www.maine.gov/sos/about/bio.html", None,
+                           "404 'Sorry, but I can't find that page'"),
+    ("LA", "sos", "bio"): ("https://www.sos.la.gov/OurOffice/LearnAboutNancyLandry/Pages/default.aspx",
+                           None, "404 'Oops! Page not found'"),
+    ("WV", "sos", "bio"): ("https://sos.wv.gov/about/Pages/KWBio.aspx", None,
+                           "404 'Page not found | WV Secretary of State'"),
+    ("VT", "sos", "bio"): ("https://sos.vermont.gov/secretary-s-desk/secretary-copeland-hanzas/", None,
+                           "404 'Page not found | Secretary of State'"),
+    ("KS", "sos", "bio"): ("https://sos.ks.gov/about-the-office/schwab-biography.html", None,
+                           "redirects to /messages/page404.html, 'Page Not Found', with status 200"),
+    ("AZ", "sos", "bio"): ("https://azsos.gov/about-office/about-secretary", None,
+                           "404 'Page not found | Arizona Secretary of State'"),
+    ("IN", "governor", "website"): ("https://www.in.gov/gov/index.htm", "https://www.in.gov/gov/",
+                                    "the NGA's link answers 404 'Governor Braun: Error - Page Not "
+                                    "Found'; /gov/ is 'Governor Braun: Governor Home'"),
+    # The NGA's pages for the two governors sworn in in January 2026 carry no
+    # website; each is the office's own, titled with the governor's office.
+    ("NJ", "governor", "website"): (None, "https://nj.gov/governor/",
+                                    "'Office of New Jersey Governor Mikie Sherrill'"),
+    ("VA", "governor", "website"): (None, "https://www.governor.virginia.gov/",
+                                    "'Governor of Virginia'"),
 }
 
 # Campaign websites that must never be linked, keyed on the host the FEC

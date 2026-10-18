@@ -22,8 +22,9 @@
 
   function raceBadge(item) {
     // "Renominated" is about the seat a member holds; a member on another
-    // seat's ballot is simply on it.
-    var spec = KYC.raceStatusOf(item, "card");
+    // seat's ballot is simply on it. A filer the results do not settle
+    // reads as the dialog and the map read them (KYC.standing).
+    var spec = KYC.standing(item, "card");
     if (!spec) return "";
     // A nominee on another line than their party's says so, or a primary
     // loser on a minor-party line reads as a second Democratic nominee.
@@ -55,35 +56,25 @@
      * district - is leaving this one, and the reader should see where they
      * went before anything else. */
     if (!item.isCandidate && item.contestLabel) {
-      return '<span class="badge badge-warn" title="' + KYC.escapeAttr(
-        "Filed for " + item.contestLabel + " in 2026; not seeking re-election to " +
-        item.officeLabel + "."
-      ) + '">Running for ' + KYC.escapeHtml(item.contestLabel.replace(/ • /, " ")) +
-        "</span>" + (raceBadge(item) ? " " + raceBadge(item) : "");
+      var line = KYC.contestLine(item);
+      return '<span class="badge ' + line.cls + '" title="' + KYC.escapeAttr(line.title) + '">' +
+        KYC.escapeHtml(line.label) + "</span>" + (raceBadge(item) ? " " + raceBadge(item) : "");
     }
     /* A sitting member the primary eliminated is leaving too, and a reader
-     * should see that before "seat up". */
+     * should see that before "seat up" - and where they are going, when a
+     * results page has made them another office's nominee. */
     if (!item.isCandidate && KYC.offBallot(item.raceStatus)) {
-      return raceBadge(item);
+      return raceBadge(item) + KYC.otherOfficeBadge(item, " ");
     }
     if (/retiring|not running|defeated|ineligible|resigned/.test(status)) {
-      return '<span class="badge badge-danger">Leaving in ’26</span>';
+      return '<span class="badge badge-danger">Leaving in ’26</span>' +
+        KYC.otherOfficeBadge(item, " ");
     }
     if (item.isCandidate) {
       /* The primary has been held and the published results do not name
        * them (an independent, a minor party's filer): not "the primary has
-       * not been held yet", and not counted as on the ballot. */
-      if (!item.raceStatus && item.maybeNamed && item.maybeNamed.length) {
-        return '<span class="badge badge-neutral" title="' + KYC.escapeAttr(
-          "Wikipedia's results page names " + item.maybeNamed.join(" and ") + ", who may be this " +
-          "person under another spelling. Not confirmed here, so the race counts them once, " +
-          "under that name.") + '">Result not matched</span>';
-      }
-      if (!item.raceStatus && item.ballotUnknown) {
-        return '<span class="badge badge-neutral" title="Filed with the FEC. The published ' +
-          'results of this race do not name them, so whether they are on the November ballot ' +
-          'is not known here.">Ballot status not known</span>';
-      }
+       * not been held yet", and not counted as on the ballot. raceBadge
+       * says so, as KYC.standing words it for every view. */
       return raceBadge(item) ||
         '<span class="badge badge-money" title="Filed with the FEC; the primary has not been held yet.">2026 challenger</span>';
     }
@@ -195,6 +186,114 @@
 
   /** The badges that summarise a race: its November result, open seat,
    *  primary date, how many are on the ballot, how many filed. */
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  /** "2026-12-01" -> "Dec 1". */
+  function shortDate(iso) {
+    var m = /^\d{4}-(\d{2})-(\d{2})$/.exec(String(iso || ""));
+    return m ? MONTHS[+m[1] - 1] + " " + (+m[2]) : "";
+  }
+
+  /* How the race's ballot is decided, visibly and linked to the guide that
+   * explains it: a top-two ballot of two Democrats read like a misprint
+   * with the rule only in a hover title (audit 2026-10-17, RACES-11), and
+   * Georgia's and Louisiana's December rounds were on no state page
+   * (PERSONA-06). The pipeline says which (races.ballot_kind, from tables
+   * citing each statute); nothing here knows a state. */
+  var KIND = {
+    "top-two": ["Top-two primary", "primaries",
+      "Every candidate ran on one primary ballot, and the two with the most votes go to November " +
+      "whatever their party."],
+    "top-four": ["Top-four primary", "primaries",
+      "Every candidate ran on one primary ballot, and the four with the most votes go to November " +
+      "whatever their party; November is decided by ranked-choice voting."],
+    "open": ["Open primary Nov 3", "primaries",
+      "Every candidate runs on one ballot on November 3; a candidate with a majority of the votes " +
+      "is elected."],
+  };
+
+  function guideLink(section, cls, title, text) {
+    return '<a class="badge ' + cls + '" href="' +
+      KYC.escapeAttr(KYC.siteRoot() + "government/elections.html#" + section) + '" title="' +
+      KYC.escapeAttr(title) + '">' + KYC.escapeHtml(text) + "</a>";
+  }
+
+  function todayIso() {
+    var now = new Date();
+    return now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
+      ("0" + now.getDate()).slice(-2);
+  }
+
+  /** Whether the race's primary has been held, and the words that say so.
+   *  A ballot read from a qualified list is not a held primary until its
+   *  date has passed. */
+  function primaryState(race) {
+    var listed = !!(race.results && race.results.fromQualifiedList);
+    var held = race.settled && (!listed || race.primaryDate < todayIso());
+    return {
+      held: held,
+      title: held && listed
+        ? "Primary held " + KYC.dateWords(race.primaryDate) +
+          (race.runoffDate ? "; runoff " + KYC.dateWords(race.runoffDate) : "") +
+          ". Its ballot was the Secretary of State's list of qualified candidates; no result " +
+          "has been read yet."
+        : held
+        ? "Primary held " + KYC.dateWords(race.primaryDate) +
+          (race.runoffDate ? "; runoff " + KYC.dateWords(race.runoffDate) : "") +
+          ". Results from the state's Wikipedia election page."
+        : "Primary scheduled for " + KYC.dateWords(race.primaryDate) + "." + (listed
+          ? " Who is on its ballot: the Secretary of State's list of qualified candidates."
+          : ""),
+    };
+  }
+
+  /* The badges follow the race through the election (rule 63): "Runoff
+   * Dec 1 if no majority" stayed on a race decided on November 3, and read
+   * in the future tense after December 1 (PR #94 review). A race with one
+   * marked winner has no December round; one the results send to a runoff
+   * says so without the "if"; a date that has passed is "held". And an
+   * open primary's date is said once, on its own badge: Louisiana's House
+   * heads read "Primary 2026-11-03" beside "Open primary Nov 3". */
+  function ballotKindBadges(race) {
+    var out = [];
+    var today = todayIso();
+    var kind = KIND[race.primaryKind];
+    if (kind) {
+      var title = kind[2];
+      var text = kind[0];
+      if (race.primaryKind === "open" && race.primaryDate) {
+        // The primary's own badge, folded in: one date, once.
+        var primary = primaryState(race);
+        text = (primary.held ? "Open primary held " : "Open primary ") + shortDate(race.primaryDate);
+        title = primary.title + " " + title;
+      }
+      out.push(guideLink(kind[1], "badge-neutral badge-link", title, text));
+    }
+    if (race.generalRunoff) {
+      var after = KYC.electionStatus().phase === "post-election" && race.settled;
+      var res = race.results || {};
+      if (after && namesWith(race, "elected", res.otherElected).length === 1) return out;
+      var going = after && namesWith(race, "runoff", res.otherRunoff).length > 0;
+      var when = shortDate(race.generalRunoff);
+      var held = race.generalRunoff < today;
+      var round = race.primaryKind === "open" ? "General " : "Runoff ";
+      out.push(guideLink("runoffs", "badge-neutral badge-link",
+        held
+          ? "The date set for a " + (race.primaryKind === "open" ? "general election" : "runoff") +
+            " if no candidate won a majority on November 3: " + when + "."
+          : going
+          ? "No candidate won a majority on November 3; the top two meet on " + when + "."
+          : race.primaryKind === "open"
+          ? "If no candidate wins a majority on November 3, the top two, of any party, meet on " +
+            when + "."
+          : "If no candidate wins a majority on November 3, the top two meet in a runoff on " +
+            when + ".",
+        round + (held ? (going ? "held " + when : when + ", if one was needed")
+          : going ? when : when + " if no majority")));
+    }
+    return out;
+  }
+
   function raceBadges(race) {
     var badges = [];
     var outcome = outcomeBadge(race);
@@ -232,32 +331,16 @@
         '">Holder running in ' + KYC.escapeHtml(race.holderMoved.to.replace(/^House • /, "")) +
         "</span>");
     }
-    if (race.primaryDate) {
-      // A ballot read from a qualified list is not a held primary.
-      var listed = !!(race.results && race.results.fromQualifiedList);
-      var now = new Date();
-      var today = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
-        ("0" + now.getDate()).slice(-2);
-      var past = race.primaryDate < today;
-      var held = race.settled && (!listed || past);
+    // An open primary's date is on its own badge (ballotKindBadges).
+    if (race.primaryDate && race.primaryKind !== "open") {
+      var primary = primaryState(race);
       badges.push(
-        '<span class="badge badge-neutral" title="' +
-        KYC.escapeAttr(held && listed
-          ? "Primary held " + KYC.dateWords(race.primaryDate) +
-            (race.runoffDate ? "; runoff " + KYC.dateWords(race.runoffDate) : "") +
-            ". Its ballot was the Secretary of State's list of qualified candidates; no result " +
-            "has been read yet."
-          : held
-          ? "Primary held " + KYC.dateWords(race.primaryDate) +
-            (race.runoffDate ? "; runoff " + KYC.dateWords(race.runoffDate) : "") +
-            ". Results from the state's Wikipedia election page."
-          : "Primary scheduled for " + KYC.dateWords(race.primaryDate) + "." + (listed
-            ? " Who is on its ballot: the Secretary of State's list of qualified candidates."
-            : "")) + '">' +
-        (held ? "Primary held " : "Primary ") + KYC.escapeHtml(KYC.dateWords(race.primaryDate)) +
+        '<span class="badge badge-neutral" title="' + KYC.escapeAttr(primary.title) + '">' +
+        (primary.held ? "Primary held " : "Primary ") + KYC.escapeHtml(KYC.dateWords(race.primaryDate)) +
         "</span>"
       );
     }
+    badges = badges.concat(ballotKindBadges(race));
 
     /* "No declared challenger" was a claim about our roster dressed up as
      * a fact about the race, and it was wrong for 372 of them. filedCount
@@ -340,7 +423,7 @@
     var running = people.filter(function (p) { return !offBallot(p); });
     var out = people.filter(offBallot);
     var body = '<div class="card-grid">' + running.map(card).join("") + "</div>" +
-      unprofiledNote(race);
+      unprofiledNote(race) + orderNote(running.length ? running : people, race, people.length);
     if (out.length) {
       body +=
         '<details class="race-out"><summary>' + out.length +
@@ -364,6 +447,18 @@
       odds,
       "</section>",
     ].join("");
+  }
+
+  /* How the people of a race are listed, under them, where there are two
+   * or more to order (TRUST-15). The order is the pipeline's
+   * (races.order_people); the sentence names the holder only when *people*
+   * opens with one (KYC.raceOrderNote). *count*, when given, is how many
+   * the whole list holds. */
+  function orderNote(people, race, count) {
+    var n = count === undefined ? people.length : count;
+    return n > 1
+      ? '<p class="race-order">' + KYC.escapeHtml(KYC.raceOrderNote(people, race)) + "</p>"
+      : "";
   }
 
   /* The people the published results put on the November ballot whom no
@@ -405,6 +500,7 @@
   KYC.cards = {
     unprofiledNames: unprofiledNames,
     unprofiledNote: unprofiledNote,
+    orderNote: orderNote,
     offBallot: offBallot,
     raceBadge: raceBadge,
     statusBadge: statusBadge,
