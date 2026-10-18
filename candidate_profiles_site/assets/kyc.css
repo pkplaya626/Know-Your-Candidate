@@ -3347,7 +3347,14 @@ a.badge-link {
 .guide-timeline-steps span { color: var(--text-muted); }
 .guide-timeline-steps .badge { margin-left: var(--s-1); }
 .guide-timeline-steps li.is-past { border-left-color: var(--border-strong); }
-.guide-timeline-steps li.is-past time::after { content: " ✓"; color: var(--text-muted); }
+.guide-timeline-steps time .guide-timeline-tag {
+  display: block;
+  font-weight: 600;
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.guide-timeline-steps li.is-next .guide-timeline-tag { color: var(--text); }
 .guide-timeline-steps li.is-next { border-left-color: var(--accent); background: var(--surface-2); }
 
 /* The elections page's state picker: opens that state's voting section. */
@@ -3610,6 +3617,15 @@ a.badge-link {
 }
 .guide-fact-list li + li { margin-top: var(--s-1); }
 .guide-fact-list ul { margin: var(--s-1) 0 0; padding-left: var(--s-4); }
+/* A long list's rest, on request. */
+.guide-fact-more { margin: 0 0 var(--s-2); font-size: var(--t-sm); }
+.guide-fact-more > summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
+  padding: var(--s-2) 0;
+}
+.guide-fact-more > .guide-fact-list { margin-top: 0; }
 
 /* The page's text, folded under the facts. */
 .guide-more { margin-top: var(--s-5); }

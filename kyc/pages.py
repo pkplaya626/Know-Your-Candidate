@@ -474,11 +474,17 @@ def render_page(**fields):
     fields["jump_label"] = "Jump to a state or territory" if whole else "Jump to a state"
     return _PAGE.substitute(search=search, **fields)
 
-# The state pages render everything from profiles.js on the client.
-_STATE_MAIN = """\
-            <div id="stateContent" class="state-page">
+# The state pages render everything from profiles.js on the client. The
+# guide page's name rides on the container, so the button the page draws to
+# it is called what the guide calls itself (rule 75), never retyped.
+_STATE_MAIN = string.Template("""\
+            <div id="stateContent" class="state-page" data-guide-name="$guide">
                 <p class="results-bar" role="status">Loading&hellip;</p>
-            </div>"""
+            </div>""")
+
+
+def _state_main():
+    return _STATE_MAIN.substitute(guide=_e(_guide_name("states")))
 
 _STATE_SCRIPTS = (
     "../data/profiles.js",
@@ -631,7 +637,7 @@ def render_state(code, host, summary=None):
         nav_current="states",
         nav_how="true",
         search_placeholder=_e(f"Search {name} profiles…"),
-        main=_STATE_MAIN,
+        main=_state_main(),
         scripts=_scripts(_STATE_SCRIPTS),
         crumbs=[_HOME, (section_name("states"), "states/index.html"), (name, page_path(code))],
     )
@@ -651,7 +657,7 @@ def render_states_index(host):
         page_kind="states",
         search_placeholder=_e("Search states…"),
         nav_current="states",
-        main=_STATE_MAIN,
+        main=_state_main(),
         crumbs=[_HOME, (section_name("states"), "states/index.html")],
         scripts=_scripts(_STATE_SCRIPTS),
     )

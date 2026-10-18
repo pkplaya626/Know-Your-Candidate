@@ -21,10 +21,11 @@
   // A majority's lead is titled Chair, Chairman, Chairwoman or Cochairman.
   var CHAIR = /^(co-?)?chair(man|woman)?$/i;
   var CHAMBERS = [
-    ["house", "House committees"],
-    ["senate", "Senate committees"],
-    ["joint", "Joint committees"],
-    ["other", "Caucuses and commissions"],
+    ["house", "House committees", "committee", "committees"],
+    ["senate", "Senate committees", "committee", "committees"],
+    ["joint", "Joint committees", "committee", "committees"],
+    // Not committees, so the note under them does not call them that.
+    ["other", "Caucuses and commissions", "body", "bodies"],
   ];
 
   /* A caucus or a commission on the rosters is not a committee of either
@@ -160,9 +161,10 @@
         ' <span class="faint">' + rows.length + "</span></h3>" +
         (unnamed ? '<p class="faint committees-unnamed" data-chamber="' + KYC.escapeAttr(chamber[0]) +
           '">' + (unnamed === rows.length
-            ? (unnamed === 1 ? "This committee’s roster gives" : "Each of these committees’ rosters gives")
-            : unnamed === 1 ? "One of these committees’ rosters gives"
-            : unnamed + " of these committees’ rosters give") +
+            ? (unnamed === 1 ? "This " + chamber[2] + "’s roster gives"
+              : "Each of these " + chamber[3] + "’ rosters gives")
+            : unnamed === 1 ? "One of these " + chamber[3] + "’ rosters gives"
+            : unnamed + " of these " + chamber[3] + "’ rosters give") +
           " no member of the minority a leading title, so no minority lead is shown for " +
           (unnamed === 1 ? "it" : "them") + ".</p>" : "") +
         '<div class="guide-table-wrap"><table class="guide-table guide-committees">' +
@@ -326,17 +328,7 @@
         // A view that names who is there (the tribal governments, each with
         // its leader) lists them under its fact, in its own view only.
         var rows = id === mode && m.lists && m.lists[code];
-        var listed = rows ? '<ul class="guide-fact-list">' + rows.map(function (row) {
-          var who = function (r) {
-            return r[1] ? ' <span class="faint">' + KYC.escapeHtml(r[1]) +
-              (r[2] ? ", " + KYC.escapeHtml(r[2]) : "") + "</span>"
-              : ' <span class="faint">no leader listed</span>';
-          };
-          return "<li>" + KYC.escapeHtml(row[0]) + who(row) +
-            (row[3] && row[3].length ? "<ul>" + row[3].map(function (sub) {
-              return "<li>" + KYC.escapeHtml(sub[0]) + who(sub) + "</li>";
-            }).join("") + "</ul>" : "") + "</li>";
-        }).join("") + "</ul>" : "";
+        var listed = rows ? factList(rows) : "";
         return '<div class="guide-fact' + (id === mode ? " is-current" : "") + '">' +
           '<p class="guide-fact-title">' +
           (e ? '<span class="swatch" style="background:' + fill(e.token) + '"></span>' : "") +
@@ -346,6 +338,34 @@
             '" target="_blank" rel="noopener noreferrer">' + KYC.escapeHtml(link[0]) + " ›</a></p>" : "") +
           (cited ? '<p class="guide-sources"><span>Sources:</span> ' + cited + "</p>" : "") + "</div>";
       }).join("");
+    }
+
+    /* Who is there, each with their leader as the source lists them. A
+     * leader the source marks as disputed says so in words. Alaska's 229
+     * governments were one list of 10,000px on a phone before anything
+     * else on the panel: past LIST_OPEN rows, the first LIST_SHOWN are
+     * shown and the rest open on request. */
+    var LIST_OPEN = 30, LIST_SHOWN = 20;
+    function factList(rows) {
+      var who = function (r) {
+        return (r[1] ? ' <span class="faint">' + KYC.escapeHtml(r[1]) +
+          (r[2] ? ", " + KYC.escapeHtml(r[2]) : "") + "</span>"
+          : ' <span class="faint">no leader listed</span>') +
+          (r[4] ? ' <span class="badge badge-neutral">leadership disputed</span>' : "");
+      };
+      var item = function (row) {
+        return "<li>" + KYC.escapeHtml(row[0]) + who(row) +
+          (row[3] && row[3].length ? "<ul>" + row[3].map(function (sub) {
+            return "<li>" + KYC.escapeHtml(sub[0]) + who(sub) + "</li>";
+          }).join("") + "</ul>" : "") + "</li>";
+      };
+      if (rows.length <= LIST_OPEN) {
+        return '<ul class="guide-fact-list">' + rows.map(item).join("") + "</ul>";
+      }
+      return '<ul class="guide-fact-list">' + rows.slice(0, LIST_SHOWN).map(item).join("") + "</ul>" +
+        '<details class="guide-fact-more"><summary>Show the other ' + (rows.length - LIST_SHOWN) +
+        " of " + rows.length + '</summary><ul class="guide-fact-list">' +
+        rows.slice(LIST_SHOWN).map(item).join("") + "</ul></details>";
     }
 
     function showHead() {
@@ -502,8 +522,9 @@
    * and never named. The principal posts first, in the order the page
    * explains them; a party's other posts (conference chairs, policy
    * committees) after. */
-  var LEAD_ORDER = [/^Speaker/, /^President Pro Tempore/, /Majority Leader$/, /Minority Leader$/,
-    /Majority Whip$/, /Minority Whip$/];
+  var LEAD_ORDER = [/^Speaker/, /^President Pro Tempore/, /^(House |Senate )?Majority Leader$/,
+    /^(House |Senate )?Minority Leader$/, /^(House |Senate )?Majority Whip$/,
+    /^(House |Senate )?Minority Whip$/];
 
   function leadRank(title) {
     for (var i = 0; i < LEAD_ORDER.length; i++) if (LEAD_ORDER[i].test(title)) return i;
@@ -597,9 +618,23 @@
       var next = false;
       Array.prototype.forEach.call(list.children, function (li) {
         var day = li.getAttribute("data-date") || "";
+        var isNext = !next && day >= today;
         li.classList.toggle("is-past", day < today);
-        li.classList.toggle("is-next", !next && day >= today);
+        li.classList.toggle("is-next", isNext);
         if (day >= today) next = true;
+        // In words, not only a border and a tick drawn by CSS: the
+        // highlighted step read as "today" (the figcaption says what each
+        // word means).
+        var old = li.querySelector(".guide-timeline-tag");
+        if (old) old.parentNode.removeChild(old);
+        var word = day < today ? "Done" : isNext ? "Next" : "";
+        var time = li.querySelector("time");
+        if (word && time) {
+          var tag = doc.createElement("span");
+          tag.className = "guide-timeline-tag";
+          tag.textContent = word;
+          time.appendChild(tag);
+        }
       });
     });
     Array.prototype.forEach.call(doc.querySelectorAll(".guide-status[data-status]"), function (chip) {

@@ -320,12 +320,13 @@ def leadership(entry, chamber, as_of=None):
     until the new posts are recorded nobody is shown holding one (rule 68).
     A post with an end date before *as_of* is over."""
     side = "senate" if chamber == "Senate" else "house"
+    roles = entry.get("leadership_roles") or []
     opened = None
-    if as_of:
+    if as_of and roles:
         from . import cycle
         opened = cycle.congress_start(cycle.congress_for_date(as_of)).isoformat()
     out = []
-    for role in entry.get("leadership_roles") or []:
+    for role in roles:
         title = (role.get("title") or "").strip()
         start = str(role.get("start") or "")
         end = str(role.get("end") or "")
@@ -350,8 +351,12 @@ def held_posts(person, congress):
     if not congress:
         return []
     from . import cycle
+    from .overrides import LEADERSHIP_TITLES
     opened = cycle.congress_start(congress).isoformat()
-    return [post["title"] for post in (person or {}).get("leadership") or []
+    # A title the record words as something else is shown in the chamber's
+    # own words (overrides.LEADERSHIP_TITLES).
+    return [LEADERSHIP_TITLES.get(post["title"], (post["title"],))[0]
+            for post in (person or {}).get("leadership") or []
             if str(post.get("start") or "") >= opened]
 
 

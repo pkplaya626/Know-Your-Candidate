@@ -66,13 +66,14 @@
    "title": "Chairman"
   },
   {
+   "disputed": true,
    "id": "018127fd-4cbd-43cf-9b15-b0a63758f0c1",
    "kind": "tribe",
-   "leader": "* Wilson Yargee / Sam Marshall",
+   "leader": "Wilson Yargee / Sam Marshall",
    "name": "Alabama-Quassarte Tribal Town",
    "region": "Eastern Oklahoma",
    "state": "OK",
-   "title": "*Chief (Subject to Tribal Leadership Dispute)"
+   "title": "Chief"
   },
   {
    "id": "50ada747-9480-4864-8c28-666fd38ca093",
@@ -412,6 +413,7 @@
    "kind": "affiliate",
    "leader": "Raymond Welch",
    "name": "Capitan Grande Band of Diegueno Mission Indians of California: Barona Group of Capitan Grande Band of Mission Indians of the Barona Reservation, California",
+   "parent": "8df267b9-0ea2-4a3e-8978-e033c458a2eb",
    "region": "Pacific",
    "state": "CA",
    "title": "Spokesman"
@@ -421,6 +423,7 @@
    "kind": "affiliate",
    "leader": "John Christman",
    "name": "Capitan Grande Band of Diegueno Mission Indians of California: Viejas (Baron Long) Group of Capitan Grande Band of Mission Indians of the Viejas Reservation, California",
+   "parent": "8df267b9-0ea2-4a3e-8978-e033c458a2eb",
    "region": "Pacific",
    "state": "CA",
    "title": "Chairman"
@@ -4739,13 +4742,14 @@
    "title": "Principal Chief"
   },
   {
+   "disputed": true,
    "id": "d7bfb7e0-6653-4f60-8f51-4c9756558452",
    "kind": "tribe",
-   "leader": "*Brent Brown/Nathan Anderson/Brent Smith",
+   "leader": "Brent Brown/Nathan Anderson/Brent Smith",
    "name": "Thlopthlocco Tribal Town",
    "region": "Eastern Oklahoma",
    "state": "OK",
-   "title": "*Town King (Subject to Tribal Leadership Dispute)"
+   "title": "Town King"
   },
   {
    "id": "56686e5c-e57a-44ab-9c46-8ba57528bd27",
@@ -5446,7 +5450,7 @@
    "title": "Governor"
   }
  ],
- "fetched": "2026-10-18T08:19:08+00:00",
+ "fetched": "2026-10-18T09:50:40+00:00",
  "service": "https://services1.arcgis.com/UxqqIfhng71wUT9x/arcgis/rest/services/TribalLeadership_Directory/FeatureServer/0",
  "source": "https://www.bia.gov/service/tribal-leaders-directory"
 }

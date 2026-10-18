@@ -734,19 +734,19 @@ CONGRESS = {
                         ("Committee", "It is referred to a committee, which can hold hearings "
                          "and mark it up: debate, amend and rewrite it. A bill the committee "
                          "does not report usually goes no further."),
-                        ("On the House floor", "For most major bills the Rules Committee "
-                         "proposes a special rule, setting the terms of debate and which "
-                         "amendments may be offered, which the House adopts before taking up "
-                         "the bill. The bill then passes by a simple majority."),
-                        ("On the Senate floor", "Debate has no time limit unless the Senate "
-                         "sets one, "
-                         "so opponents can hold a bill up by debating it at length or by other "
-                         "delays: a filibuster. Ending debate, called cloture, takes "
+                        ("On the floor of its chamber", "In the House, for most major bills "
+                         "the Rules Committee proposes a special rule, setting the terms of "
+                         "debate and which amendments may be offered, which the House adopts "
+                         "before taking up the bill; the bill then passes by a simple majority. "
+                         "On the Senate floor, debate has no time limit unless the Senate sets "
+                         "one, so opponents can hold a bill up by debating it at length or by "
+                         "other delays: a filibuster. Ending debate, called cloture, takes "
                          "three-fifths of the senators duly chosen and sworn, 60 when every seat "
                          "is filled. Most business moves instead by unanimous consent: an "
                          "agreement setting aside the rules to speed things up, which any one "
                          "senator can block by objecting."),
-                        ("The other chamber", "The bill goes through the same steps there."),
+                        ("The other chamber", "The bill then goes to the other chamber, through "
+                         "its own committee and its own floor in the same way."),
                         ("The same words", "Both chambers must pass identical text. Where their "
                          "versions differ, a conference committee of members of both may work "
                          "out a compromise, which then goes back to each for a vote."),
@@ -916,9 +916,10 @@ CONGRESS = {
                       "governor (2 U.S.C. 2a). A state with more than one seat elects its "
                       "representatives from districts established by law, one representative "
                       "to a district (2 U.S.C. 2c)."),
-                ("p", "Each state decides who draws its districts. Among the maps that "
-                      "changed for 2026 ([below](#redrawn)), legislatures passed most as laws, "
-                      "a commission adopted Ohio's, and a court drew Utah's."),
+                ("p", "Each state decides who draws its districts: in most a legislature "
+                      "passes the map as a law, in some a commission or a court draws it. Each "
+                      "map that changed for 2026 ([below](#redrawn)) says on its district page "
+                      "who drew it."),
                 ("p", "Federal law limits every map. Districts must be equal in population as "
                       "nearly as is practicable (Wesberry v. Sanders, 1964), and so must the "
                       "districts of both chambers of a state legislature (Reynolds v. Sims, "
@@ -980,10 +981,13 @@ CONGRESS = {
                       "one delegate, or Puerto Rico's resident commissioner, and no senators. "
                       "[Find yours by state](site:states/index.html) or on [the partisan "
                       "map](site:map.html): each member's profile here gives their office's "
-                      "phone number, address and contact form, as the congress-legislators "
-                      "project records them. The [House](https://www.house.gov/representatives/find-your-representative) "
+                      "phone number and address and their official website, as the "
+                      "congress-legislators project records them, and a contact form where that "
+                      "record lists one. For senators it mostly does; for representatives it "
+                      "rarely does, and a representative's form is on their own website. The "
+                      "[House](https://www.house.gov/representatives/find-your-representative) "
                       "and the [Senate](https://www.senate.gov/senators/senators-contact.htm) "
-                      "list them too."),
+                      "list their members too."),
                 ("p", "Members' offices also help the people they represent with federal "
                       "agencies, work called casework. Staff can ask an agency to look at a "
                       "case and move it through its normal steps, but cannot make it decide in "
@@ -2041,11 +2045,14 @@ TRIBAL = {
                     "choice: Arizona, Florida, Idaho, Iowa, Montana, Nevada, North Dakota, South "
                     "Dakota, Utah and Washington. Some jurisdiction has since been returned to "
                     "the federal government and the tribes.",
-                    "State, in every state: in Oklahoma v. Castro-Huerta (2022) the Supreme "
-                    "Court held 5-4 that the federal government and a state have concurrent "
-                    "jurisdiction to prosecute crimes non-Indians commit against Indians in "
-                    "Indian country, Public Law 280 or not, and that a state has criminal "
-                    "jurisdiction in Indian country unless it is preempted. Two years "
+                    "State, where federal law still applies: in Oklahoma v. Castro-Huerta "
+                    "(2022) the Supreme Court held 5-4 that the federal government and a state "
+                    "have concurrent jurisdiction to prosecute crimes non-Indians commit "
+                    "against Indians in Indian country, and that a state has criminal "
+                    "jurisdiction in Indian country unless it is preempted. That is so in "
+                    "every state but the six Public Law 280 names, where the General Crimes "
+                    "Act does not apply and the state holds that jurisdiction in place of the "
+                    "federal government (18 U.S.C. 1162). Two years "
                     "earlier, in McGirt v. Oklahoma (2020), the Court had held 5-4 that the "
                     "Creek Nation's reservation was never disestablished and remains Indian "
                     "country, so Oklahoma cannot prosecute Indians there for the crimes the "
@@ -2195,9 +2202,10 @@ ELECTIONS = {
                       "Within 15 days they must file a statement of candidacy with the Federal "
                       "Election Commission, naming a principal campaign committee, which "
                       "registers within 10 days more and reports what it raises and spends. "
-                      "This site draws the same line: a challenger has a profile once their "
-                      "filings pass $5,000, while each race's count of who has filed includes "
-                      "everyone, and a nominee under it is named all the same."),
+                      "This site takes its line from that sum, counting money raised only: a "
+                      "challenger has a profile once their campaign reports $5,000 or more "
+                      "raised, while each race's count of who has filed includes everyone, and "
+                      "a nominee under it is named all the same."),
                 ("p", "For the 2025-26 elections an individual may give a candidate's committee "
                       "up to $3,500 per election, a primary, general, runoff and special "
                       "election each counting separately, and a multicandidate PAC up to $5,000 "
@@ -2268,8 +2276,9 @@ ELECTIONS = {
             "heading": "Ranked-choice voting",
             "blocks": [
                 ("p", "Maine and Alaska decide their federal general elections by ranked-choice "
-                      "voting. Maine also uses it in all its primaries, those for Congress among "
-                      "them, but not in its general elections for governor or the legislature: "
+                      "voting. Maine also uses it in its primaries for Congress, governor and "
+                      "the legislature, but not in its general elections for governor or the "
+                      "legislature: "
                       "its Supreme Judicial Court has advised, in 2017 and again in April 2026, "
                       "that the state constitution requires those to be decided by plurality. "
                       "Voters rank the candidates in "
@@ -2370,7 +2379,8 @@ ELECTIONS = {
                             "At noon the terms of the members elected on November 3 begin "
                             "(Twentieth Amendment)."]),
                     ],
-                    "caption": "From the sources below. A step in the past is marked as done.",
+                    "caption": ("From the sources below. A step already past is marked Done, and "
+                                "the next one to come is marked Next."),
                 }),
             ],
             "sources": ["usc-2-7", "ca-sos-2026-dates", "ga-runoff-2026", "tx-sos-2026-calendar",

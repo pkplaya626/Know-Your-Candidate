@@ -1654,6 +1654,14 @@ async function testStates() {
       !!jump && !/state-government/.test(window.location.hash), window.location.hash);
   });
   const va = await buildPage("states/va.html");
+  suite("states/va.html — the guide's page is called what it calls itself", () => {
+    // The state page drew its button with a typed name; it takes the one
+    // the generated page carries, the guide page's own (rule 75).
+    const name = va.D.getElementById("stateContent").getAttribute("data-guide-name");
+    const button = [...va.D.querySelectorAll('#stateContent a.btn[href$="government/states.html"]')];
+    check("one button to the state-government guide, named as the guide names itself",
+      !!name && button.length === 1 && button[0].textContent.trim() === name, name);
+  });
   suite("states/va.html — a state that elects none of it in 2026", () => {
     const note = va.D.querySelector("#races .state-note");
     check("says none of the offices covered here is elected this year",
@@ -4633,6 +4641,11 @@ async function testGuide() {
           leaders.querySelector(".guide-person").getAttribute("data-id") === speaker.id &&
           /Speaker of the House/.test(leaders.querySelector(".guide-person").textContent)),
         leaders.textContent.slice(0, 120));
+      const houseTitles = [...leaders.querySelectorAll(".guide-person")].map((b) => b.textContent);
+      const lead = houseTitles.findIndex((t) => /(^|\s)House Minority Leader$/.test(t.trim()) && !/Assistant/.test(t));
+      const assistant = houseTitles.findIndex((t) => /Assistant House Minority Leader/.test(t));
+      check("the Minority Leader comes before the Assistant Minority Leader",
+        lead === -1 || assistant === -1 || lead < assistant, `${lead} ${assistant}`);
       const senateLeads = [...D.querySelectorAll('.guide-live[data-live="leaders-senate"] .guide-person')];
       check("every name in the Senate's list is a sitting senator holding that post",
         senateLeads.every((b) => {
@@ -4940,6 +4953,44 @@ async function testGuideMaps() {
     });
   }
   {
+    const { window, D } = await buildPage("government/tribal.html", { hash: "#/?mode=tribes&state=AK" });
+    suite("government/tribal.html — a long list opens on request", () => {
+      // Alaska's 229 governments were 10,000px on a phone before anything
+      // else on the panel.
+      const rows = window.kycGovernment.modes.tribes.lists.AK;
+      const fact = D.querySelector("#guideFacts .guide-fact.is-current");
+      const shown = fact.querySelectorAll(":scope > .guide-fact-list > li");
+      const more = fact.querySelector("details.guide-fact-more");
+      check("the first rows are shown and the rest fold under one control",
+        rows.length > 30 && shown.length === 20 && !!more && !more.open &&
+          more.querySelectorAll(":scope > .guide-fact-list > li").length === rows.length - 20 &&
+          new RegExp(`Show the other ${rows.length - 20} of ${rows.length}`).test(more.querySelector("summary").textContent),
+        `${shown.length} shown of ${rows.length}`);
+    });
+  }
+  {
+    const { window, D } = await buildPage("government/tribal.html", { hash: "#/?mode=tribes&state=OK" });
+    suite("government/tribal.html — the directory's marks are not shown as names", () => {
+      const fact = D.querySelector("#guideFacts .guide-fact.is-current");
+      const disputed = window.kycGovernment.modes.tribes.lists.OK.filter((r) => r[4]);
+      check("no asterisk or dispute note inside a leader's name or title",
+        !/\*/.test(fact.textContent) && !/Subject to Tribal Leadership Dispute/.test(fact.textContent),
+        fact.textContent.slice(0, 200));
+      check("a disputed leadership says so in words",
+        disputed.length > 0 && fact.querySelectorAll(".badge").length >= disputed.length &&
+          /leadership disputed/.test(fact.textContent), disputed.length);
+    });
+  }
+  {
+    const { D } = await buildPage("government/states.html", { hash: "#/?mode=ballot" });
+    suite("government/states.html — the ballot view's sources are each state's own", () => {
+      const about = D.querySelector('.guide-about[data-mode="ballot"] .guide-sources');
+      check("with no state picked, the panel does not cite every state's records",
+        !!about && !about.querySelector("a") && /cited on that state/.test(about.textContent),
+        about && about.textContent.slice(0, 160));
+    });
+  }
+  {
     const { window, D } = await buildPage("government/elections.html", {
       setup: (w) => w.localStorage.setItem("kycState", "TX") });
     const K = window.KYC;
@@ -4965,6 +5016,23 @@ async function testGuideMaps() {
       check("in December the steps passed are marked done and the next is Texas's canvass",
         D.querySelector(".guide-timeline-steps li.is-next").getAttribute("data-date") === "2026-12-07" &&
         D.querySelectorAll(".guide-timeline-steps li.is-past").length === 5);
+      // The highlighted step read as "today": each mark is a word, and the
+      // caption says what the words mean.
+      const tags = [...D.querySelectorAll(".guide-timeline-steps .guide-timeline-tag")];
+      const next = D.querySelector(".guide-timeline-steps li.is-next .guide-timeline-tag");
+      check("the next step says Next and each past step says Done, in words",
+        !!next && next.textContent === "Next" &&
+          tags.filter((t) => t.textContent === "Next").length === 1 &&
+          [...D.querySelectorAll(".guide-timeline-steps li.is-past")].every((li) =>
+            (li.querySelector(".guide-timeline-tag") || {}).textContent === "Done"),
+        tags.map((t) => t.textContent).join(","));
+      check("the caption says what Done and Next mean",
+        /marked Done/.test(D.querySelector(".guide-timeline figcaption").textContent) &&
+          /marked Next/.test(D.querySelector(".guide-timeline figcaption").textContent));
+      K.guide.initTimeline(new window.Date(Date.UTC(2026, 11, 6, 12)));
+      check("a second marking replaces the words, never adds to them",
+        [...D.querySelectorAll(".guide-timeline-steps li")].every((li) =>
+          li.querySelectorAll(".guide-timeline-tag").length <= 1));
     });
   }
   {

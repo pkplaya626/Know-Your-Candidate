@@ -656,10 +656,14 @@ def _map_main(page, modes, footer):
         lines.append(f'{pad}    <h3 class="guide-about-title">{html.escape(mode["title"], quote=False)}</h3>')
         lines.append(f'{pad}    <p>{inline(mode["about"], here)}</p>')
         links = []
-        for key in mode["sources"]:
+        # A view whose sources are each state's own cites them on the state
+        # (government_maps "aboutSources", "aboutNote"), not all at once here.
+        for key in mode.get("aboutSources", mode["sources"]):
             title, url = government_maps.SOURCES[key]
             links.append(f'<a href="{_e(url)}" target="_blank" rel="noopener noreferrer">'
                          f"{html.escape(title, quote=False)}</a>")
+        if mode.get("aboutNote"):
+            links.append(html.escape(mode["aboutNote"], quote=False))
         lines.append(f'{pad}    <p class="guide-sources"><span>Sources:</span> {"; ".join(links)}</p>')
         lines.append(f"{pad}</section>")
     lines.append(f'{pad}<div class="guide-more">')

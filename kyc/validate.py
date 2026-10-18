@@ -302,6 +302,12 @@ def check_committee_titles(profiles):
     if stale and any(p.get("committeeList") for p in profiles):
         issues.append(Issue("warn", "stale-committee-title",
                             f"{len(stale)} curated committee titles match no seat", stale))
+    held = {t for p in profiles for t in p.get("leadership") or []}
+    unheld = sorted(old for old, (new, _why) in overrides.LEADERSHIP_TITLES.items()
+                    if new not in held)
+    if unheld and held:
+        issues.append(Issue("warn", "stale-leadership-title",
+                            f"{len(unheld)} curated leadership titles match no post", unheld))
     return issues
 
 

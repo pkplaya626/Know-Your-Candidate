@@ -157,6 +157,17 @@ class TestTrim(unittest.TestCase):
             {"leadership": [{"title": "Speaker of the House", "chamber": "house"}]}, 119), [])
         self.assertEqual(legislators.held_posts(person, None), [])
 
+    def test_a_post_the_record_words_otherwise_is_shown_in_the_chambers_words(self):
+        # "Senate Republican Committee Chair" beside a Senate committee's
+        # chair read as one more; the Senate calls it the Republican
+        # Senatorial Committee's.
+        person = {"leadership": [{"title": "Senate Republican Committee Chair",
+                                  "chamber": "senate", "start": "2025-01-03"}]}
+        self.assertEqual(legislators.held_posts(person, 119),
+                         ["Republican Senatorial Committee Chair"])
+        for old, (new, why) in overrides.LEADERSHIP_TITLES.items():
+            self.assertTrue(new and why and old != new)
+
     def test_an_evidenced_id_congress_legislators_lacks_is_added(self):
         # Ashley Hinson's Senate filing, under her legal name (overrides).
         bioguide, (filing, _why) = next(iter(overrides.MEMBER_FEC_IDS.items()))

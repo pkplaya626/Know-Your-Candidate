@@ -78,6 +78,43 @@ class TestParse(unittest.TestCase):
         entries = tribes.parse(rows)
         self.assertNotIn("parent", next(e for e in entries if e["kind"] == tribes.AFFILIATE))
 
+    def test_an_unknown_component_is_an_error_not_a_band(self):
+        # Anything but the directory's two components was filed as a band.
+        with self.assertRaises(tribes.TribesError):
+            tribes.parse([row(1, "X Tribe", component="Nation")])
+
+    def test_a_band_named_after_a_colon_sits_under_its_tribe(self):
+        # The Capitan Grande Band's two groups were listed on their own and
+        # counted as California tribal governments; the Viejas group's own
+        # name has a parenthesis, so the split is at the first separator.
+        rows = [
+            row(1, "Capitan Grande Band of Diegueno Mission Indians of California (Barona "
+                   "Group of Capitan Grande Band of Mission Indians of the Barona Reservation, "
+                   "California; Viejas (Baron Long) Group of Capitan Grande Band of Mission "
+                   "Indians of the Viejas Reservation, California)", state="California",
+                first=None, last=None, title=None),
+            row(2, "Capitan Grande Band of Diegueno Mission Indians of California: Barona Group "
+                   "of Capitan Grande Band of Mission Indians of the Barona Reservation, "
+                   "California", component=AFFILIATE, state="California"),
+            row(3, "Capitan Grande Band of Diegueno Mission Indians of California: Viejas "
+                   "(Baron Long) Group of Capitan Grande Band of Mission Indians of the Viejas "
+                   "Reservation, California", component=AFFILIATE, state="California"),
+        ]
+        found, _ = tribes.placed({"entries": tribes.parse(rows)})
+        self.assertEqual(len(found["CA"]), 1)
+        self.assertEqual(len(found["CA"][0]["affiliates"]), 2)
+
+    def test_a_disputed_leadership_says_so_without_the_asterisks(self):
+        entry = tribes.parse([row(1, "Alabama-Quassarte Tribal Town", state="Oklahoma",
+                                  first="* Wilson Yargee / Sam Marshall", last=None,
+                                  title="*Chief (Subject to Tribal Leadership Dispute)")])[0]
+        self.assertEqual((entry["leader"], entry["title"], entry["disputed"]),
+                         ("Wilson Yargee / Sam Marshall", "Chief", True))
+        self.assertNotIn("disputed", tribes.parse([row(1, "A Tribe")])[0])
+        # An asterisk the directory has not explained is a change to look at.
+        with self.assertRaises(tribes.TribesError):
+            tribes.parse([row(1, "A Tribe", title="Chief * Acting")])
+
     def test_the_leader_is_named_without_the_salutation(self):
         entry = tribes.parse([row(1, "A Tribe", first="John", last="Smith", suffix="Jr.",
                                   salutation="The Honorable")])[0]
@@ -149,8 +186,19 @@ class TestTheMap(unittest.TestCase):
         self.assertNotRegex(self.mode["about"], r"\d{3}")
 
     def test_each_count_in_a_fact_is_its_list(self):
+        # Tribes only: a band listed apart from any tribe is named, and
+        # counted apart, never as a tribal government.
+        found, _ = tribes.placed(self.cache)
         for code, rows in self.mode["lists"].items():
-            self.assertIn(f"lists {len(rows)} tribal", self.mode["facts"][code])
+            n = sum(1 for e in found[code] if e["kind"] == tribes.TRIBE)
+            self.assertIn(f"lists {n} tribal", self.mode["facts"][code])
+            if n < len(rows):
+                self.assertIn(f"also lists {len(rows) - n} band", self.mode["facts"][code])
+
+    def test_no_name_or_title_carries_the_directorys_marks(self):
+        for e in self.cache["entries"]:
+            self.assertNotIn("*", (e.get("leader") or "") + (e.get("title") or ""), e["name"])
+            self.assertNotIn("Leadership Dispute", e.get("title") or "", e["name"])
 
 
 if __name__ == "__main__":

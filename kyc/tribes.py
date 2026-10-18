@@ -58,6 +58,15 @@ FIELDS = ("OBJECTID", "GlobalID", "tribefullname", "tribalcomponent", "salutatio
 PAGE = 500
 USER_AGENT = "KnowYourCandidate/1.0 (+https://candidates.radicalrelay.us)"
 TRIBE, AFFILIATE = "tribe", "affiliate"
+# The directory's two components, as its service lists them (distinct values
+# of ``tribalcomponent``, read 2026-10-18). Anything else is a change in the
+# source, refused rather than filed as a band (rule 53).
+COMPONENTS = {"Tribe": TRIBE, "Affiliate (band, community, village, island, etc...)": AFFILIATE}
+# The directory marks a disputed leadership with an asterisk on the leader's
+# name and title and this note after the title ("*Chief (Subject to Tribal
+# Leadership Dispute)"). The page says "leadership disputed" in words; the
+# asterisks and the note are not shown as part of a name.
+_DISPUTE = re.compile(r"\s*\(\s*subject to tribal leadership dispute\s*\)", re.I)
 _STATE_CODES = {name.title(): code for name, code in US_STATES.items()}
 _INVISIBLE = re.compile("[​‌‍⁠﻿]")
 
@@ -106,6 +115,17 @@ def leader(row):
     return name or None
 
 
+def _undisputed(text):
+    """*text* without the directory's dispute marks, and whether it had them."""
+    if not text:
+        return text, False
+    disputed = bool(_DISPUTE.search(text))
+    text = _DISPUTE.sub("", text)
+    starred = "*" in text
+    text = clean(text.strip("* ")) if starred else text
+    return text, disputed or starred
+
+
 def parse(rows):
     """The directory's rows as the cache's entries, in name order."""
     entries, seen = [], set()
@@ -119,20 +139,28 @@ def parse(rows):
             raise TribesError(f"id {ident} twice")
         seen.add(ident)
         component = clean(row.get("tribalcomponent")) or ""
+        if component not in COMPONENTS:
+            raise TribesError(f"{name}: unknown component {component!r} in the directory")
+        who, disputed_who = _undisputed(leader(row))
+        title, disputed_title = _undisputed(clean(row.get("jobtitle")))
+        if "*" in (who or "") + (title or ""):
+            raise TribesError(f"{name}: an asterisk inside a leader's name or title")
         state, came = state_code(row.get("state")), "office"
         if not state:
             state, came = state_code(row.get("mailingaddressstate")), "mailing"
         entry = {
             "id": ident,
             "name": name,
-            "kind": TRIBE if component == "Tribe" else AFFILIATE,
-            "leader": leader(row),
-            "title": clean(row.get("jobtitle")),
+            "kind": COMPONENTS[component],
+            "leader": who,
+            "title": title,
             "state": state,
             "region": clean(row.get("biaregion")),
         }
         if state and came == "mailing":
             entry["stateFrom"] = "mailing"
+        if disputed_who or disputed_title:
+            entry["disputed"] = True
         entries.append(entry)
     for e in entries:
         if e["kind"] == AFFILIATE:
@@ -143,21 +171,26 @@ def parse(rows):
 
 
 def _split(name, separators):
-    for sep in separators:
-        if sep in name:
-            base, rest = name.split(sep, 1)
-            return base, rest[:-1] if sep == " (" and rest.endswith(")") else rest
-    return name, ""
+    """*name* split at the first of *separators* to occur in it: "Capitan
+    Grande Band ... of California: Viejas (Baron Long) Group ..." splits at
+    the colon, not at the parenthesis inside the group's own name."""
+    found = [(name.index(sep), sep) for sep in separators if sep in name]
+    if not found:
+        return name, ""
+    at, sep = min(found)
+    base, rest = name[:at], name[at + len(sep):]
+    return base, rest[:-1] if sep == " (" and rest.endswith(")") else rest
 
 
 def _parent(affiliate, entries):
     """The one tribe row the directory names an affiliate under: the same
     name before its parenthesis ("Te-Moak Tribe of Western Shoshone Indians
-    of Nevada (Elko Band)") or dash ("Passamaquoddy Tribe - Pleasant
-    Point"), whose own parenthesis, where it has one, names the affiliate
+    of Nevada (Elko Band)"), dash ("Passamaquoddy Tribe - Pleasant
+    Point") or colon ("Capitan Grande Band of Diegueno Mission Indians of
+    California: Barona Group of ..."), whose own parenthesis, where it has one, names the affiliate
     ("(Four constituent bands: Battle Mountain Band; Elko Band; ...)").
     None unless exactly one row fits."""
-    base, part = _split(affiliate["name"], (" (", " - "))
+    base, part = _split(affiliate["name"], (" (", " - ", ": "))
     if not part:
         return None
     fits = []

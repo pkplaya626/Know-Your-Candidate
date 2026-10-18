@@ -721,6 +721,19 @@ COMMITTEE_TITLES = {
         "'Co-CHAIR (D - RI)' at the head of its home page"),
 }
 
+# A leadership post congress-legislators titles in words that read as
+# something else, shown in the chamber's own words. "Senate Republican
+# Committee Chair" sat beside Tim Scott's chair of the Banking Committee and
+# read as the chair of a Senate committee; it is the party's campaign
+# committee (the same title was Steve Daines's for 2023-24). Keyed on the
+# record's title, never a person; validate warns once no one holds it.
+LEADERSHIP_TITLES = {
+    "Senate Republican Committee Chair": (
+        "Republican Senatorial Committee Chair",
+        "senate.gov/senators/leadership.htm, 2026-10-18: 'Republican Senatorial Committee "
+        "Chair' Scott, Tim (R-SC), among the party leadership"),
+}
+
 # Phrases in a Status value that mean the incumbent is not on the 2026 ballot.
 NOT_SEEKING_MARKERS = ("retiring", "not running", "defeated", "ineligible", "resigned")
 

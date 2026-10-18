@@ -289,6 +289,9 @@
       return;
     }
     var name = info.name;
+    // The guide's page on state government, by the name it gives itself
+    // (pages._state_main): never retyped here (rule 75).
+    var guideName = target.getAttribute("data-guide-name") || "";
     doc.title = name + " — Know Your Candidate";
     // Every state links to its district map; a redrawn one says so.
     var districtMap = (KYC.meta().districtMaps || {})[code];
@@ -326,8 +329,8 @@
           code.toLowerCase() + ".html") + '">' + KYC.icon("landmark") + " State legislature</a>" +
           ' <a class="btn" href="' + KYC.escapeAttr(KYC.siteRoot() + "counties/" +
           code.toLowerCase() + ".html") + '">' + KYC.icon("layers") + " Counties &amp; local governments</a>" +
-          ' <a class="btn" href="' + KYC.escapeAttr(KYC.siteRoot() + "government/states.html") + '">' +
-          KYC.icon("scroll") + " How state governments work</a>"
+          (guideName ? ' <a class="btn" href="' + KYC.escapeAttr(KYC.siteRoot() + "government/states.html") +
+            '">' + KYC.icon("scroll") + " " + KYC.escapeHtml(guideName) + "</a>" : "")
         : "",
       "</p>",
       "</header>"

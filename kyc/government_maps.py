@@ -488,8 +488,9 @@ def _pl280():
         else:
             values[code] = "no"
             # Not "tribal and federal courts only": since Oklahoma v.
-            # Castro-Huerta (2022) states share jurisdiction over many crimes
-            # by non-Indians in Indian country, PL-280 or not - and the fact
+            # Castro-Huerta (2022) a state where federal law still applies in
+            # Indian country shares jurisdiction over crimes by non-Indians
+            # there (in the six mandatory states it holds it instead) - and the fact
             # now says so, where it only said "other laws and court decisions".
             facts[code] = ("Not a Public Law 280 state. " + CASTRO_HUERTA + " Other "
                            "jurisdiction in Indian country here is divided among tribal, federal "
@@ -509,9 +510,10 @@ def _pl280():
         "about": ("Public Law 280 (1953) gave six states criminal jurisdiction over most of the "
                   "Indian country within them, in place of the federal government. Ten more states "
                   "later took on some jurisdiction by choice. It did not let states regulate or tax "
-                  "tribes (Bryan v. Itasca County, 1976). Every state, Public Law 280 or not, now "
+                  "tribes (Bryan v. Itasca County, 1976). In every other state the state now "
                   "shares jurisdiction with the federal government over crimes non-Indians "
-                  "commit against Indians there (Oklahoma v. Castro-Huerta, 2022)."),
+                  "commit against Indians there (Oklahoma v. Castro-Huerta, 2022); in the six, "
+                  "the state holds it in place of the federal government."),
         "sources": ["usc-18-1162", "usc-28-1360", "bia-pl280", "bryan", "castro-huerta",
                     "mcgirt"],
         "scoped": {"castro-huerta": [c for c in STATES if c not in PL280_MANDATORY],
@@ -659,7 +661,10 @@ def _local(census_cache):
 # The shades of the tribal-governments map: how many governments the
 # directory lists with an office in the state. Fixed edges, so a weekly
 # re-read moves a state between shades only when its count crosses one.
-TRIBE_BINS = ((1, 4, "1–4", "scale-1"), (5, 19, "5–19", "scale-3"), (20, None, "20 or more", "scale-5"))
+# The first shade is scale-2: scale-1 is 18% of the accent over the empty
+# fill, and "No office listed" beside "1–4" read as one colour in the dark
+# theme (rule 49 keeps none apart from a count).
+TRIBE_BINS = ((1, 4, "1–4", "scale-2"), (5, 19, "5–19", "scale-3"), (20, None, "20 or more", "scale-5"))
 
 
 def _tribes(cache):
@@ -675,22 +680,30 @@ def _tribes(cache):
     values, facts, lists = {}, {}, {}
     for code in STATES:
         here = sorted(found.get(code) or [], key=lambda e: e["name"].lower())
-        n = len(here)
+        # A band, chapter or community the directory lists apart from any
+        # tribe row (the Ramah Navajo Chapter) is listed, but is not counted
+        # as a tribal government.
+        n = sum(1 for e in here if e["kind"] == tribes.TRIBE)
+        apart = len(here) - n
         the = name(code)
-        if not n:
+        if not here:
             values[code] = "none"
             facts[code] = (f"The directory lists no tribal government with its office in {the}. It "
                            "lists each government in the one state its office is in.")
             continue
         values[code] = next(key for lo, hi, key, _ in
                             ((lo, hi, f"b{i}", t) for i, (lo, hi, _, t) in enumerate(TRIBE_BINS))
-                            if n >= lo and (hi is None or n <= hi))
+                            if max(n, 1) >= lo and (hi is None or max(n, 1) <= hi))
+        also = (f" It also lists {apart} {'band, chapter or community' if apart == 1 else 'bands, chapters or communities'} "
+                f"there apart from any tribe." if apart else "")
         facts[code] = (f"The directory lists {n} tribal "
                        f"{'government' if n == 1 else 'governments'} with an office in {the}"
-                       f"{as_of}, and who leads each.")
-        lists[code] = [[e["name"], e.get("leader") or "", e.get("title") or "",
-                        [[a["name"], a.get("leader") or "", a.get("title") or ""]
-                         for a in e["affiliates"]]] for e in here]
+                       f"{as_of}, and who leads each.{also}")
+
+        def row(e, affiliates=()):
+            return [e["name"], e.get("leader") or "", e.get("title") or "",
+                    [row(a) for a in affiliates], bool(e.get("disputed"))]
+        lists[code] = [row(e, e["affiliates"]) for e in here]
     return {
         "id": "tribes",
         "label": "Tribal governments",
@@ -740,27 +753,33 @@ def _ballot():
         governor = record["offices"]["governor"]["up"]
         values[code] = ("both" if governor and seats else "governor" if governor else
                         "legislature" if seats else "neither")
-        parts = ([_join(offices)] if offices else []) + ([_join(seats)] if seats else [])
-        facts[code] = ("On the ballot: " + "; ".join(parts) + "." if parts else
-                       "No election for governor, lieutenant governor, attorney general or "
-                       "secretary of state, and no regular legislative elections, on the 2026 "
-                       "ballot.")
-        # Each state's own records, cited on its fact alone.
-        urls = []
+        # Only the four offices the table follows: Texas also elects a
+        # comptroller and commissioners, and "On the ballot: governor, ..."
+        # read as the whole list.
+        facts[code] = ((f"Of the four statewide offices this map follows, on the ballot: "
+                        f"{_join(offices)}." if offices else
+                        "None of the four statewide offices this map follows is on the ballot.")
+                       + (f" Legislative seats on the ballot: {_join(seats)}." if seats else
+                          " No regular legislative elections."))
+        # Each state's own records, cited on its fact alone, each named by
+        # what it supports: four links reading "Florida's own record
+        # (dos.elections.myflorida.com)" to four pages could not be told apart.
+        supports = {}
         for field in ballot2026.OFFICES:
-            urls.append(record["offices"][field]["source"])
+            supports.setdefault(record["offices"][field]["source"], []).append(titles[field])
         for chamber in record["chambers"].values():
-            urls.append(chamber["source"])
-        for url in dict.fromkeys(urls):
+            supports.setdefault(chamber["source"], []).append(chamber["name"])
+        for url, items in supports.items():
             key = "ballot-" + url
-            SOURCES.setdefault(key, (_host_title(code, url), url))
+            SOURCES.setdefault(key, (_host_title(code, url, items), url))
             if key not in scoped:
                 sources.append(key)
             scoped.setdefault(key, set()).add(code)
     return {
         "id": "ballot",
         "label": "2026 ballot",
-        "title": "What each state elects on November 3, 2026",
+        "title": "The governor, three other statewide offices and the legislature on the "
+                 "2026 ballot",
         "kind": "category",
         "legend": [
             ("both", "Governor and legislative seats", "cat-1"),
@@ -774,21 +793,31 @@ def _ballot():
         "about": (f"{ballot2026.stats()['governor']} states elect a governor on November 3, "
                   f"2026, and {ballot2026.stats()['chambersUp']} of the "
                   f"{ballot2026.stats()['chambers']} state legislative chambers hold regular "
-                  "elections. Pick a state for the statewide offices and the legislative seats "
-                  "it elects, each from the state's own constitution, statutes or election "
-                  "pages. Special elections to fill a vacancy are not counted."),
+                  "elections. Pick a state for which of four statewide offices (governor, "
+                  "lieutenant governor, attorney general and secretary of state) and which "
+                  "legislative seats it elects, each from the state's own constitution, "
+                  "statutes or election pages. Other statewide offices some states elect, such "
+                  "as a comptroller, a treasurer or judges, are not covered, and special "
+                  "elections to fill a vacancy are not counted."),
         "sources": sources,
+        # Ninety-odd state records in one run of links filled the panel:
+        # with no state picked, the block says where they are instead.
+        "aboutSources": [],
+        "aboutNote": "each state's own constitution, statutes or election pages, cited on that "
+                     "state when you pick it.",
         "scoped": {key: sorted(codes) for key, codes in scoped.items()},
     }
 
 
-def _host_title(code, url):
-    """A state's record named by whose it is: "Texas: sos.state.tx.us"."""
+def _host_title(code, url, items=()):
+    """A state's record named by whose it is and what it supports: "Texas's
+    own record of the governor (sos.state.tx.us)"."""
     from urllib.parse import urlsplit
     from .pages import state_name
     host = urlsplit(url).netloc
     host = host[4:] if host.startswith("www.") else host
-    return f"{state_name(code)}'s own record ({host})"
+    what = f" of the {_join(list(items))}" if items else ""
+    return f"{state_name(code)}'s own record{what} ({host})"
 
 
 def modes(root="."):
@@ -865,6 +894,11 @@ def check():
             for key in m["sources"]:
                 if key not in SOURCES:
                     problems.append(f"{where}: unknown source {key!r}")
+            about = m.get("aboutSources", m["sources"])
+            if any(key not in m["sources"] for key in about):
+                problems.append(f"{where}: an about-block source is not among its sources")
+            if not about and not m.get("aboutNote"):
+                problems.append(f"{where}: the about block cites nothing")
             for key, codes in (m.get("scoped") or {}).items():
                 if key not in m["sources"]:
                     problems.append(f"{where}: scoped source {key!r} is not among its sources")

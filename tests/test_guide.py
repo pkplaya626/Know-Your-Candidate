@@ -349,11 +349,13 @@ class TestOneNamePerPage(unittest.TestCase):
                     continue
                 if words != government.name(slug):
                     wrong.append(f"{name}: {slug} '{words}'")
-        # The state page's link, written by its script.
+        # The state page's link is drawn by its script from the name the
+        # generated page carries (pages._state_main), never a typed one.
         with open(os.path.join(SITE, "assets", "kyc-state.js"), encoding="utf-8") as handle:
             script = handle.read()
-        self.assertIn('government/states.html") + \'">\' +\n          KYC.icon("scroll") + " '
-                      + government.name("states") + "</a>", script)
+        self.assertNotIn(government.name("states"), script)
+        page = pages.render_state("TX", "example.org")
+        self.assertIn(f'data-guide-name="{government.name("states")}"', page)
         self.assertEqual(sorted(set(wrong)), [])
 
     def test_the_index_is_named_as_the_sites_navigation_names_it(self):
@@ -420,7 +422,10 @@ class TestCorrections(unittest.TestCase):
     def test_maine_ranks_its_congressional_primaries(self):
         text = _text_of("elections")
         self.assertNotIn("state-level primaries", text)
-        self.assertIn("all its primaries, those for Congress among them", text)
+        self.assertIn("its primaries for Congress, governor and the legislature", text)
+        # Not "all its primaries": county offices' primaries are not ranked
+        # (21-A M.R.S. 723-A names the offices).
+        self.assertNotIn("all its primaries", text)
 
     def test_portland_is_said_once(self):
         text = _text_of("local")
@@ -458,6 +463,13 @@ class TestNewSections(unittest.TestCase):
         self.assertNotIn("<svg", flow)
         for step in ("Committee", "On the Senate floor", "three-fifths", "pocket", "Override"):
             self.assertIn(step, flow)
+        # One chamber's floor, then the other chamber: never the House floor
+        # and the Senate floor as two steps followed by "the other chamber",
+        # which reads as a third passage.
+        titles = re.findall(r'<li class="guide-flow-step"><strong>(.*?)</strong>', flow)
+        self.assertNotIn("On the House floor", titles)
+        self.assertEqual(titles.index("The other chamber"),
+                         titles.index("On the floor of its chamber") + 1)
 
     def test_every_redrawn_state_is_listed_from_the_table(self):
         from kyc import districts

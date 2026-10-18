@@ -216,7 +216,18 @@ class TestEachFactCitesItsOwn(unittest.TestCase):
 
 class TestPublicLaw280(unittest.TestCase):
     """Every state's fact credited state jurisdiction in Indian country only
-    to Public Law 280; since Castro-Huerta (2022) every state shares some."""
+    to Public Law 280; since Castro-Huerta (2022) a state where federal law
+    still applies there shares some, and the six the law names hold it in
+    place of the federal government (18 U.S.C. 1162(c))."""
+
+    def test_castro_huerta_is_never_said_of_the_six_mandatory_states(self):
+        pl280 = _mode("pl280")
+        self.assertNotIn("Public Law 280 or not", pl280["about"])
+        self.assertNotIn("Every state", pl280["about"])
+        text = _text_of_tribal()
+        self.assertNotIn("in every state:", text)
+        self.assertNotIn("Public Law 280 or not", text)
+        self.assertIn("every state but the six Public Law 280 names", text)
 
     def test_every_state_not_named_in_the_law_cites_castro_huerta(self):
         pl280 = _mode("pl280")
@@ -255,6 +266,27 @@ class TestTheBallotMap(unittest.TestCase):
         self.assertIn("16 of the 31 seats in the Senate", mode["facts"]["TX"])
         self.assertIn(str(ballot2026.stats()["governor"]), mode["about"])
 
+    def test_the_fact_says_which_offices_it_follows_and_each_link_says_what_it_supports(self):
+        # "On the ballot: governor, lieutenant governor and attorney general"
+        # read as Texas's whole statewide ballot; it also elects a
+        # comptroller and commissioners.
+        mode = _mode("ballot")
+        self.assertIn("Of the four statewide offices this map follows", mode["facts"]["TX"])
+        self.assertIn("comptroller", mode["about"])
+        self.assertNotIn("What each state elects", mode["title"])
+        for code in government_maps.STATES:
+            titles = [government_maps.SOURCES[k][0] for k in government_maps.sources_for(mode, code)]
+            self.assertEqual(len(titles), len(set(titles)), code)
+        # With no state picked, the about block does not cite every state.
+        self.assertEqual(mode["aboutSources"], [])
+        self.assertTrue(mode["aboutNote"])
+        from kyc import government
+        html = government.render("states", "example.org")
+        block = html[html.index('<section class="guide-about" data-mode="ballot"'):]
+        block = block[:block.index("</section>")]
+        self.assertNotIn("own record", block)
+        self.assertIn("cited on that state", block)
+
     def test_the_text_states_the_tables_counts(self):
         from kyc import ballot2026
 
@@ -265,3 +297,9 @@ class TestTheBallotMap(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def _text_of_tribal():
+    from kyc import government_text
+    import json
+    return json.dumps(government_text.TRIBAL, ensure_ascii=False)
