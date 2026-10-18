@@ -834,6 +834,9 @@ def build_state(code, root=".", places=None, roster=None, control=None, fetched=
         "page": page_path(code),
         "viewBox": viewbox,
         "unitKm": round(D.EARTH_RADIUS_KM / fit.k, 6),
+        # Where a reader's location falls on these districts, placed on the
+        # device by "Find who represents me" (kyc-findrep.js).
+        "projection": D.projection_payload(albers, fit),
         "counties": D._counties(topo, raw_arcs, fit),
         "places": towns,
         "chambers": out_chambers,

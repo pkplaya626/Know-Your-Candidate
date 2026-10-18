@@ -253,6 +253,13 @@ def _build(args):
     for level, code, message, detail in oge_mod.problems(oge_mod.load_cache(args.root),
                                                          federal_mod.load_cache(args.root)):
         issues.append(validate.Issue(level, code, message, detail))
+    # "Find who represents me" answers from lookup_maps/: a ZIP code there
+    # naming a district the maps do not draw is an error (kyc/lookup.py).
+    from . import lookup as lookup_mod
+    try:
+        lookup_mod.build(args.root, district_maps=district_maps)
+    except lookup_mod.LookupMapError as exc:
+        issues.append(validate.Issue("error", "lookup-map", str(exc), ""))
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -330,6 +337,23 @@ def _build(args):
                                        set(localsites.targets(args.root))):
         print(f"  [warn] {problem}")
     written_local = emit.write_local(local_maps, args.root)
+
+    # Where a ZIP code or a location falls, for "Find who represents me":
+    # one file per state, checked against the maps, the county pages and the
+    # legislature pages it answers with; then the index that versions them.
+    try:
+        lookups = lookup_mod.build(args.root, local=local_maps, legislatures=legislatures,
+                                   district_maps=district_maps)
+    except lookup_mod.LookupMapError as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 2
+    written_lookup = emit.write_lookup(lookups, args.root)
+    emit.write_lookup_index(lookup_mod.index(lookups, emit.lookup_stamps(lookups, args.root)),
+                            args.root)
+    lookup_stats = lookup_mod.stats(lookups)
+    print(f"[ok] lookup: {lookup_stats['lookup_zips']:,} ZIP areas in "
+          f"{lookup_stats['lookup_states']} states and territories; "
+          f"{len(written_lookup)} file(s) rewritten")
     local_stats = counties_mod.stats(local_maps)
     print(f"[ok] counties: {local_stats['counties']:,} counties, {local_stats['governments']:,} "
           f"governments and school systems placed, {local_stats['unmatched']} under county areas "
@@ -1227,8 +1251,10 @@ def _verify(args):
         print(f"  ok  {emit.ODDS_FILE} matches odds.json ({odds_expected[:16]}...)")
 
     from . import legislature as legislature_mod
+    legislatures = None
     try:
-        stale_legs = emit.check_legislature(legislature_mod.build(args.root), args.root)
+        legislatures = legislature_mod.build(args.root)
+        stale_legs = emit.check_legislature(legislatures, args.root)
     except legislature_mod.LegislatureError as exc:
         problems.append(f"state legislatures unavailable: {exc}")
     else:
@@ -1239,8 +1265,10 @@ def _verify(args):
             print(f"  ok  {emit.LEGISLATURE_DIR}: every state matches its maps and roster")
 
     from . import counties as counties_mod
+    local_maps = None
     try:
-        stale_local = emit.check_local(counties_mod.build(args.root), args.root)
+        local_maps = counties_mod.build(args.root)
+        stale_local = emit.check_local(local_maps, args.root)
     except counties_mod.CountiesError as exc:
         problems.append(f"county pages unavailable: {exc}")
     else:
@@ -1322,6 +1350,21 @@ def _verify(args):
         else:
             print(f"  ok  {emit.DISTRICTS_DIR}: {len(district_maps)} maps match "
                   f"{districts_mod.MAPS_DIR}")
+
+        from . import lookup as lookup_mod
+        try:
+            lookups = lookup_mod.build(args.root, local=local_maps, legislatures=legislatures,
+                                       district_maps=district_maps)
+        except lookup_mod.LookupMapError as exc:
+            problems.append(f"lookup files unavailable: {exc}")
+        else:
+            stale_lookup = emit.check_lookup(lookups, args.root)
+            if stale_lookup:
+                problems.append(f"{len(stale_lookup)} lookup file(s) are {stale_lookup[0][1]}: "
+                                + ", ".join(os.path.basename(p) for p, _ in stale_lookup[:5]))
+            else:
+                print(f"  ok  {emit.LOOKUP_DIR}: {len(lookups)} states and the index match "
+                      f"{lookup_mod.LOOKUP_DIR}")
 
     for page, ok, note in emit.check_pages(args.root):
         if ok:
