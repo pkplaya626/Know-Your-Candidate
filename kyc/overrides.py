@@ -402,6 +402,39 @@ BLOCKED_CAMPAIGN_HOSTS = {
                           "'High Skill Dog Care', a business page; nothing about a campaign"),
 }
 
+# Local governments' websites, as the Census Bureau's 2022 listing gives them,
+# that must not be linked, keyed on the host (lower case; a key without
+# "www." also covers the "www." form). `localgov --check-sites` withdraws
+# what it finds on its own (data/local_sites.json, kyc/localsites.py); an
+# entry here is a person's look, which no later check undoes - the kind is
+# one of the check's verdicts. Each was opened in headless Chrome on
+# 2026-10-17 by the reader-side audit and again by its verifier (LINKS-07,
+# TRUST-07). The build warns about an entry no listed address matches.
+BLOCKED_LOCAL_HOSTS = {
+    "clintonct.com": ("gambling", "2026-10-17",
+                      "Town of Clinton, CT: redirects to id-pgdemoslot.com, 'Demo Slot'"),
+    "corralesnm.org": ("gambling", "2026-10-17",
+                       "Village of Corrales, NM: redirects to a 'Salju4d: Link Slot' page"),
+    "alvaok.org": ("gambling", "2026-10-17", "City of Alva, OK: a 'Sweepstakes Casinos' page"),
+    "mcgrathalaska.net": ("gambling", "2026-10-17",
+                          "City of McGrath, AK: redirects through two domains to laskar138, 'SLOT88'"),
+    "vermilionparishpolicejury.com": ("gambling", "2026-10-17",
+                                      "Parish of Vermilion, LA: an 'SBOBET88 ... Judi Bola' page"),
+    "haccga.com": ("gambling", "2026-10-17",
+                   "Clayton County Housing Authority, GA: redirects to qh88, a betting site"),
+    "bismarck.org": ("parked", "2026-10-17", "City of Bismarck, ND: an empty Sedo-parked page"),
+    "rutlandcity.com": ("expired", "2026-10-17",
+                        "City of Rutland, VT: 'This domain is expired'; a parking page of links"),
+    "northcodorustwp.com": ("for-sale", "2026-10-17",
+                            "Township of North Codorus, PA: a HugeDomains for-sale page"),
+    "imperialne.com": ("for-sale", "2026-10-17", "City of Imperial, NE: a HugeDomains for-sale page"),
+    "switzerlandcounty.com": ("for-sale", "2026-10-17",
+                              "County of Switzerland, IN: redirects to forsale.godaddy.com"),
+    "townofprovidencevillage.com": ("parked", "2026-10-17",
+                                    "Town of Providence Village, TX: a script sends visitors to "
+                                    "/lander, a registrar's parking page"),
+}
+
 # A member's contact-form address that congress-legislators holds in a form
 # no browser can open, keyed on bioguide id: {bioguide: (the source's value,
 # the address used instead, evidence)}. Applied only while the source still
