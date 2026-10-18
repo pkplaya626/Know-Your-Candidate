@@ -5221,11 +5221,12 @@ async function testCertifiedBallots() {
   }
 
   // RACES-05, FRESHNESS-12: an empty seat says who left, when, and that no
-  // special election has been called. Campaign season only: on January 3
-  // the seats are filled.
+  // special election has been called. Only while the old Congress sits: on
+  // January 3 the seats are filled (rule 68; the January rehearsal failed
+  // asking recordPhase(), which waits for a snapshot read after noon).
   const tx = await buildPage("states/tx.html");
   const vacancies = (tx.window.kycBuildMeta.states.TX || {}).vacancies || [];
-  if (!tx.window.KYC.recordPhase()) {
+  if (oldCongressSits(tx.window)) {
     suite("states/tx.html — an empty House seat says why", () => {
       check("the build records TX-23's vacancy", vacancies.some((v) => v.district === 23),
         JSON.stringify(vacancies));
