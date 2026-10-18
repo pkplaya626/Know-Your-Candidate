@@ -608,13 +608,18 @@ class TestTermDates(unittest.TestCase):
         self.assertEqual((found["term_start"], found["termEndYear"]),
                          ("2027-01-03 - 2029-01-03", 2029))
 
-    def test_an_appointees_term_ends_at_the_special_election(self):
+    def test_an_appointee_serves_until_the_special_elections_winner_is_sworn_in(self):
+        # Not "2025-01-21 - 2026-11-03 (special election)": that read as a
+        # term ending on Election Day, and the winners are seated in
+        # December (PROFILES-21).
         raw = entry(chamber="sen", start="2025-01-21", end="2026-11-03", senate_class=3)
         raw["terms"][-1].update({"how": "appointment", "end-type": "special-election"})
         snap = legislators.build_snapshot([raw], fetched="2026-10-16T00:00:00+00:00")
         row = roster_row(Chamber="Senate", District="", **{"Term Start": "2025-01-21"})
         profiles, _ = build_profiles({"members": [row], "candidates": []}, snapshot=snap)
-        self.assertEqual(profiles[0]["term_start"], "2025-01-21 - 2026-11-03 (special election)")
+        self.assertEqual(profiles[0]["term_start"],
+                         "2025-01-21 - until the winner of the 2026-11-03 special election "
+                         "is sworn in")
 
     def test_puerto_ricos_term_is_the_statutes(self):
         found = self.term(roster_row(State="PR", District="At-Large"), chamber="rep",
@@ -705,6 +710,35 @@ class TestANewCongress(unittest.TestCase):
         self.assertIs(legislators.committees_current(fresh, snap), fresh)
         self.assertIsNone(legislators.committees_current(stale, snap))
         self.assertIsNone(legislators.committees_current({"members": {}}, snap))
+
+    def test_another_offices_nomination_is_shown_with_its_source_until_the_term(self):
+        # Byron Donalds, Florida's Republican nominee for governor, read only
+        # "Not running for this seat"; Tuberville "Withdrew" (FRESHNESS-09).
+        overrides.OTHER_OFFICE_NOMINEES["X000001"] = (
+            "Republican nominee for Governor of Somewhere", "https://example.org/r", "2026-10-17")
+        try:
+            noted = self.build("2025-01-03")
+            renewed = self.build("2027-01-03")
+            issues = validate.check_overrides([noted], {})
+            gone = validate.check_overrides([], {})
+        finally:
+            del overrides.OTHER_OFFICE_NOMINEES["X000001"]
+        self.assertEqual(noted["otherOffice"], {
+            "text": "Republican nominee for Governor of Somewhere",
+            "source": "https://example.org/r", "checked": "2026-10-17"})
+        self.assertNotIn("otherOffice", renewed)
+
+        def stale(found):
+            return [d for i in found if i.code == "stale-other-office" for d in i.detail]
+        self.assertNotIn("X000001", stale(issues))
+        self.assertIn("X000001", stale(gone))
+
+    def test_every_other_office_nomination_is_sourced_and_dated(self):
+        for member_id, (text, source, checked) in overrides.OTHER_OFFICE_NOMINEES.items():
+            self.assertRegex(member_id, r"^[A-Z]\d{6}$")
+            self.assertRegex(text, r"^(Democratic|Republican|Independent) nominee for ")
+            self.assertTrue(source.startswith("https://"), member_id)
+            self.assertRegex(checked, r"^\d{4}-\d{2}-\d{2}$")
 
     def test_a_2026_status_note_does_not_outlive_the_term(self):
         overrides.MEMBER_STATUS_BY_ID["X000001"] = ("Retiring in 2026", "a test")

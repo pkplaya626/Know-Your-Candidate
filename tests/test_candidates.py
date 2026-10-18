@@ -272,6 +272,13 @@ class TestToProfiles(unittest.TestCase):
                                ("LIB", "Libertarian"), ("IND", "Independent")):
             self.assertEqual(candidates.party_label(filing(party=code)), expected)
 
+    def test_no_party_reads_as_a_party_status_not_missing_data(self):
+        # The FEC's "NNE" is no party: "None" on a card read like a gap, and
+        # a filing without the full name fell through to "Independent".
+        self.assertEqual(candidates.party_label(filing(party="NNE")), "No party")
+        self.assertEqual(candidates.party_label(dict(filing(party="NNE"), party_full="NONE")),
+                         "No party")
+
 
 class TestScreen(unittest.TestCase):
     """Registrations that list 2026 are not all 2026 candidacies."""
@@ -567,6 +574,21 @@ class TestCuratedRoster(unittest.TestCase):
         self.assertNotIn("net_worth", profile)
         self.assertEqual(profile["age"], "Unknown")
         self.assertFalse(profile["hasRealFinance"])
+
+    def test_a_rows_chamber_is_a_chamber_and_its_term_reads_like_everyones(self):
+        # "House (Primary Winner)" on four rows leaked a status into the
+        # chamber badge beside everyone else's "House (Candidate)", and the
+        # rows' "(If elected)" beside the field's "(if elected)" (PROFILES-26).
+        from kyc.profiles import _build_candidate
+
+        row = dict(self.ROW, **{"Chamber": "House (Primary Winner)",
+                                "Office / District": "TX-32", "FEC Candidate ID": "H8TX32098"})
+        profile = _build_candidate(row, 8)
+        self.assertEqual(profile["chamber"], "House (Candidate)")
+        self.assertEqual(profile["officeLabel"], "House • TX-32")
+        self.assertEqual(profile["term_start"], "Jan. 3, 2027 (if elected)")
+        typed = _build_candidate(dict(row, **{"Projected Start": "Jan. 3, 2027 (If elected)"}), 8)
+        self.assertEqual(typed["term_start"], "Jan. 3, 2027 (if elected)")
 
     def test_a_members_money_is_never_read_from_the_roster(self):
         from kyc.profiles import _build_member

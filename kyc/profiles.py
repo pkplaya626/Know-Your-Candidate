@@ -315,8 +315,10 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
 
     new_term = bool(person) and (person.get("termStart") or "") >= \
         general_election_day(CYCLE).isoformat()
+    other_office = None
     if not new_term:
         status = overrides.status_override(profile_id, status)
+        other_office = overrides.OTHER_OFFICE_NOMINEES.get(profile_id)
     not_seeking = overrides.is_not_seeking(status)
 
     # --- 2026 election derivation -------------------------------------
@@ -376,10 +378,12 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
     if person and person.get("termStart") and person.get("termEnd") and not statutory:
         term = f"{person['termStart']} - {person['termEnd']}"
         if person.get("endType") == "special-election":
-            # An appointee's term ends at the special election, and they
-            # serve on until its winner is seated: a bare date would read as
-            # a term already over through November.
-            term += " (special election)"
+            # An appointee serves until the special election's winner is
+            # sworn in - in December, not on Election Day. "2025-01-21 -
+            # 2026-11-03 (special election)" read as a term that ends with
+            # the vote (rule 65: the winners are seated in December).
+            term = (f"{person['termStart']} - until the winner of the "
+                    f"{person['termEnd']} special election is sworn in")
 
     profile = {
         "id": profile_id,
@@ -417,6 +421,12 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
     }
     if display != name:
         profile["rosterName"] = name
+    if other_office:
+        # On another office's November ballot, as the results page marks its
+        # winner (overrides.OTHER_OFFICE_NOMINEES): the page says where a
+        # member who is leaving the seat is going, with its source.
+        profile["otherOffice"] = {"text": other_office[0], "source": other_office[1],
+                                  "checked": other_office[2]}
     if person:
         profile.update(_contact(person))
         # Names a voter may type instead: "Jim Clyburn" for James Clyburn.
@@ -710,9 +720,10 @@ def _build_candidate(row, index, as_of=None):
     if kind == "House":
         district_num, district_label = parse_district(office, state)
 
-    chamber = chamber_raw
-    if "Candidate" not in chamber and "Winner" not in chamber:
-        chamber = f"{chamber} (Candidate)"
+    # The chamber is a chamber: the roster typed "House (Primary Winner)" on
+    # eight rows, a status that read as part of the office beside everyone
+    # else's "House (Candidate)" and outlived the results (PROFILES-26).
+    chamber = f"{kind} (Candidate)" if kind else chamber_raw
 
     profile = {
         # No positional fallback: CAND_3 was Andy Beshear's, and a new row
@@ -727,7 +738,9 @@ def _build_candidate(row, index, as_of=None):
         "districtNum": district_num,
         "officeLabel": office_label(chamber, state, district_label),
         "status": clean_str(row.get("Status"), "Candidate"),
-        "term_start": clean_str(row.get("Projected Start"), "Jan. 3, 2027 (If elected)"),
+        # One wording for every challenger's term, the FEC field's included.
+        "term_start": clean_str(row.get("Projected Start"), "Jan. 3, 2027 (if elected)")
+        .replace("(If elected)", "(if elected)"),
         "termEndYear": None,
         "electionYear": ELECTION_YEAR,
         "isCandidate": True,
@@ -789,10 +802,12 @@ def _link_keys(profile):
     return [k for k in keys if k]
 
 
-def _cross_link(profiles):
+def _cross_link(profiles, people=None):
     """Link a sitting member to their own 2026 candidacy for another seat.
 
-    Matched on name *and* state, so Rep. Mike Rogers (AL) is never linked to
+    First by id: a filing whose candidate id Congress's record (*people*,
+    the snapshot by bioguide) lists for a sitting member is theirs. Then
+    matched on name *and* state, so Rep. Mike Rogers (AL) is never linked to
     Senate candidate Mike Rogers (MI). A member with a candidacy elsewhere is
     not seeking re-election to the seat they hold - no state lets a person
     run for two federal offices at once - so the seat is open. Seven House
@@ -800,8 +815,10 @@ def _cross_link(profiles):
     was derived.
     """
     from . import races
+    from .record import seated
 
     members = {}
+    by_fec = {}
     for profile in profiles:
         if not profile["isCandidate"]:
             # The name shown and the roster's legal one: the FEC files a
@@ -810,12 +827,23 @@ def _cross_link(profiles):
                 key = _link_key(profile, name) if name else None
                 if key:
                     members.setdefault(key, profile)
+            # Every FEC id Congress's own record lists for a sitting member,
+            # either chamber (rule 17): Andy Barr's Kentucky Senate filing
+            # (S6KY00286) never met his member card, which the roster names
+            # "Garland Barr", so the Republican nominee read only "Not
+            # running for this seat".
+            if seated(profile):
+                for fec_id in (people or {}).get(profile["id"], {}).get("fecAll") or []:
+                    by_fec[fec_id] = profile
 
     links = 0
     for profile in profiles:
         if not profile["isCandidate"]:
             continue
-        held = next((members[k] for k in _link_keys(profile) if k in members), None)
+        ids = [profile.get("fecCandidateId")] + list(profile.get("otherFecIds") or [])
+        held = next((by_fec[i] for i in ids if i in by_fec), None)
+        if held is None:
+            held = next((members[k] for k in _link_keys(profile) if k in members), None)
         if held is None or held["chamber"] == profile["chamber"]:
             continue
         contest = races.race_id(profile["chamber"], profile["state"], profile.get("districtNum"))
@@ -1066,7 +1094,7 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
         apply_quality(profile)
 
     moved, reseated = _apply_filings(profiles, field, finance)
-    links = _cross_link(profiles)
+    links = _cross_link(profiles, people)
 
     # The page reads photo_url for the initial <img src>; keep it in step
     # with the head of the fallback chain.

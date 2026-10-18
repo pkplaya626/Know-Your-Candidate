@@ -225,6 +225,24 @@ def check_overrides(profiles, raw):
                             f"{len(dead_ids)} id-keyed status overrides match no member",
                             dead_ids))
 
+    # Another office's nominee is a claim about a ballot: one whose member
+    # has gone shows nowhere, and after Election Day "nominee" is no longer
+    # the news - the result is, read from the same page.
+    dead_other = sorted(k for k in overrides.OTHER_OFFICE_NOMINEES if k not in member_ids)
+    if dead_other:
+        issues.append(Issue("warn", "stale-other-office",
+                            f"{len(dead_other)} overrides.OTHER_OFFICE_NOMINEES entries match "
+                            "no member", dead_other))
+    import datetime
+    from .cycle import CYCLE, general_election_day
+    if overrides.OTHER_OFFICE_NOMINEES and \
+            datetime.date.today() > general_election_day(CYCLE):
+        issues.append(Issue("warn", "other-office-after-election",
+                            f"{len(overrides.OTHER_OFFICE_NOMINEES)} members are shown as "
+                            "another office's nominee after Election Day; read each result "
+                            "from its source and replace or remove the entry",
+                            sorted(overrides.OTHER_OFFICE_NOMINEES)))
+
     candidate_keys = {
         (p["name"], p["state"]) for p in profiles if p["isCandidate"]
     }
