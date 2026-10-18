@@ -25,7 +25,7 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<link rel="stylesheet" href="assets/kyc.css?v=2de0a134d4">
+<link rel="stylesheet" href="assets/kyc.css?v=bb1115b5b9">
 <script src="assets/kyc.js?v=e6e155c31b"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Know Your Candidate","url":"https://candidates.radicalrelay.us/","description":"A non-partisan directory of the U.S. Congress, the 2026 midterm races, and every state's government.","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://candidates.radicalrelay.us/index.html?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
 </head>
@@ -305,6 +305,9 @@
                 <p class="intro-text">Every member of Congress, and the 2026 candidates for it
                     from the FEC's register. Each state's page adds its governor, legislature,
                     high court and local governments.</p>
+                <!-- "Find who represents me": a ZIP code or a location, looked up on
+                     the device (assets/kyc-findrep.js writes the controls here). -->
+                <section class="findrep" id="findrep" data-findrep></section>
                 <!-- A form, not a select that navigates on change: arrow keys
                      and type-ahead left the page on the first key (WCAG 3.2.2). -->
                 <form class="intro-pick" id="introForm">
@@ -357,9 +360,11 @@
 
 <script src="data/profiles.js?v=7a36fcd957"></script>
 <script src="data/odds.js"></script>
+<script src="data/lookup/index.js?v=a7bd3b1d3f"></script>
 <script src="assets/kyc-odds.js?v=1852f17dc4"></script>
 <script src="assets/kyc-cards.js?v=1218805d59"></script>
 <script src="assets/kyc-profile.js?v=2d44b9532b"></script>
+<script src="assets/kyc-findrep.js?v=882dbf313b"></script>
 <script src="assets/kyc-senate.js?v=c6029e87b2"></script>
 <script src="assets/kyc-directory.js?v=2cf9154f5a"></script>
 </body>

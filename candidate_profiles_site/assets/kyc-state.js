@@ -351,6 +351,11 @@
         }).join("") + "</nav>");
     }
 
+    // "Find who represents me" (kyc-findrep.js), and beside it the way to
+    // the voting block below: a ZIP code or a location, answered at every
+    // level, before the page lists the whole delegation.
+    html.push('<section class="state-section findrep" id="findrep" data-findrep ' +
+      'data-findrep-state="' + KYC.escapeAttr(code) + '"></section>');
     html.push(votingBlock(code, name));
 
     /* Who holds the seats now. Senators first, then the House by district;
@@ -431,6 +436,7 @@
     }
 
     target.innerHTML = html.join("");
+    if (KYC.findRep) KYC.findRep.mountAll(target);
   }
 
   /** What else the state's November 3 ballot elects, from the same table the
@@ -525,8 +531,10 @@
       '<h1 class="state-title">States &amp; territories</h1>',
       '<p class="state-summary">One page each: who holds the seats, the 2026 races, and everyone who has filed.</p>',
       "</header>",
+      '<section class="state-section findrep" id="findrep" data-findrep></section>',
       '<div class="state-list" id="stateList">' + rows.join("") + "</div>",
     ].join("");
+    if (KYC.findRep) KYC.findRep.mountAll(target);
   }
 
   /* --------------------------------------------------------------- chrome */

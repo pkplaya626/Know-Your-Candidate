@@ -42,9 +42,11 @@ PAGE_REQUIREMENTS = {
         "assets/kyc.js",
         "data/profiles.js",
         "data/odds.js",
+        "data/lookup/index.js",
         "assets/kyc-odds.js",
         "assets/kyc-cards.js",
         "assets/kyc-profile.js",
+        "assets/kyc-findrep.js",
         "assets/kyc-senate.js",
         "assets/kyc-directory.js",
     ),
@@ -69,10 +71,12 @@ STATE_PAGE_REQUIREMENTS = (
     "../data/profiles.js",
     "../data/odds.js",
     "../data/stategov.js",
+    "../data/lookup/index.js",
     "../assets/kyc-odds.js",
     "../assets/kyc-cards.js",
     "../assets/kyc-profile.js",
     "../assets/kyc-stategov.js",
+    "../assets/kyc-findrep.js",
     "../assets/kyc-state.js",
 )
 
@@ -84,9 +88,11 @@ DISTRICT_PAGE_REQUIREMENTS = (
     "../data/profiles.js",
     "../data/odds.js",
     "../data/districts/{code}.js",
+    "../data/lookup/index.js",
     "../assets/kyc-odds.js",
     "../assets/kyc-cards.js",
     "../assets/kyc-profile.js",
+    "../assets/kyc-findrep.js",
     "../assets/kyc-districts.js",
 )
 
@@ -95,7 +101,9 @@ DISTRICT_PAGE_REQUIREMENTS = (
 LEGISLATURE_PAGE_REQUIREMENTS = (
     "../assets/kyc.js",
     "../data/legislature/{code}.js",
+    "../data/lookup/index.js",
     "../assets/kyc-regionmap.js",
+    "../assets/kyc-findrep.js",
     "../assets/kyc-legislature.js",
 )
 
@@ -125,7 +133,9 @@ COURT_PAGE_REQUIREMENTS = (
 COUNTIES_PAGE_REQUIREMENTS = (
     "../assets/kyc.js",
     "../data/local/{code}.js",
+    "../data/lookup/index.js",
     "../assets/kyc-regionmap.js",
+    "../assets/kyc-findrep.js",
     "../assets/kyc-local.js",
 )
 

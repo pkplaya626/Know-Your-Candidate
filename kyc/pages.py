@@ -491,10 +491,12 @@ _STATE_SCRIPTS = (
     "../data/profiles.js",
     "../data/odds.js",
     "../data/stategov.js",
+    "../data/lookup/index.js",
     "../assets/kyc-odds.js",
     "../assets/kyc-cards.js",
     "../assets/kyc-profile.js",
     "../assets/kyc-stategov.js",
+    "../assets/kyc-findrep.js",
     "../assets/kyc-state.js",
 )
 
@@ -502,11 +504,19 @@ _DISTRICT_SCRIPTS = (
     "../data/profiles.js",
     "../data/odds.js",
     "../data/districts/{code}.js",
+    "../data/lookup/index.js",
     "../assets/kyc-odds.js",
     "../assets/kyc-cards.js",
     "../assets/kyc-profile.js",
+    "../assets/kyc-findrep.js",
     "../assets/kyc-districts.js",
 )
+
+# "Find who represents me" on a state's legislature and county pages: the
+# panel (kyc-findrep.js) is written into this slot, first on the page.
+def _findrep_slot(code):
+    return (f'                <section class="state-section findrep" id="findrep" data-findrep '
+            f'data-findrep-state="{_e(code)}"></section>')
 
 
 def _e(text):
@@ -1051,6 +1061,7 @@ def render_legislature_page(code, host, summary=None, dates=None):
         f'                        <a class="btn" href="{_e(_learn("states"))}"><svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> {_e(_guide_name("states"))}</a>',
         "                    </p>",
         "                </header>",
+        _findrep_slot(code),
         '                <div class="toolbar legislature-toolbar">',
         chambers,
         '                    <div class="party-legend" aria-label="Colours">',
@@ -1086,7 +1097,8 @@ def render_legislature_page(code, host, summary=None, dates=None):
         "                    gives it.</p>",
     ])
     scripts = [s.replace("{code}", code.lower()) for s in (
-        "../data/legislature/{code}.js", "../assets/kyc-regionmap.js", "../assets/kyc-legislature.js")]
+        "../data/legislature/{code}.js", "../data/lookup/index.js", "../assets/kyc-regionmap.js",
+        "../assets/kyc-findrep.js", "../assets/kyc-legislature.js")]
     return render_page(
         title=_e(f"{title} — Know Your Candidate"),
         og_title=_e(f"{title}: every district and member"),
@@ -1377,6 +1389,7 @@ def render_counties_page(code, host, listed=None):
         f'                        <a class="btn" href="{_e(_learn("local"))}"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg> {_e(_guide_name("local"))}</a>',
         "                    </p>",
         "                </header>",
+        _findrep_slot(code),
         '                <div class="segmented" role="group" aria-label="Map view">',
         f'                    <button type="button" data-view="counties" aria-pressed="true">{_e(button)}</button>',
         '                    <button type="button" data-view="cities" aria-pressed="false">Cities &amp; towns</button>',
@@ -1420,7 +1433,8 @@ def render_counties_page(code, host, listed=None):
         + ".</p>",
     ])
     scripts = [s.replace("{code}", code.lower()) for s in (
-        "../data/local/{code}.js", "../assets/kyc-regionmap.js", "../assets/kyc-local.js")]
+        "../data/local/{code}.js", "../data/lookup/index.js", "../assets/kyc-regionmap.js",
+        "../assets/kyc-findrep.js", "../assets/kyc-local.js")]
     return render_page(
         title=_e(f"{title} — Know Your Candidate"),
         og_title=_e(title),
