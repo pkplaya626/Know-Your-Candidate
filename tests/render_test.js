@@ -5740,6 +5740,57 @@ async function testStateGov() {
     check("a court with no chief listed says so", /lists no chief justice/.test(utText), utText.slice(0, 120));
     check("no party is shown for a justice", ![...section.querySelectorAll(".gov-court-member")]
       .some((li) => li.querySelector('[class^="party-"]')));
+    check("a court read this week does not claim to be read by hand or dated",
+      !/read by hand|, dated /.test(section.textContent));
+  });
+
+  // STATEGOV-12: ten courts showed no one. Four sites refuse every automated
+  // reader, so their rosters were read by hand (overrides.COURT_ROSTERS) and
+  // the page must say so and when; Rhode Island's roster is a PDF with its
+  // own date. Asked of the data, not of named people.
+  const ny = await buildPage("states/ny.html");
+  const ri = await buildPage("states/ri.html");
+  suite("state pages — a court read by hand, or from a dated roster file", () => {
+    const court = ny.window.kycStateGov.states.NY.court;
+    const nyText = ny.D.getElementById("state-government").textContent;
+    const nyNames = [...ny.D.querySelectorAll("#state-government .gov-court-member")].map((li) => li.textContent);
+    check("New York's judges are listed, with the chief judge first",
+      !!court && court.members.length > 0 && nyNames.length === court.members.length &&
+      nyNames[0].indexOf(court.chief) === 0 && /Chief Judge$/.test(nyNames[0]), nyNames.join("; "));
+    check("and the page says they were read by hand, on which day, and why",
+      !!court.readOn && nyText.indexOf("read by hand on " + ny.window.KYC.dayMonthYear(court.readOn)) !== -1 &&
+      /refuses automated reading/.test(nyText), nyText.slice(0, 400));
+    const riCourt = ri.window.kycStateGov.states.RI.court;
+    const riText = ri.D.getElementById("state-government").textContent;
+    check("Rhode Island's roster carries the date the court's file gives it",
+      !!riCourt.revised && riText.indexOf("dated " + ri.window.KYC.dayMonthYear(riCourt.revised)) !== -1 &&
+      !/read by hand/.test(riText), riText.slice(0, 400));
+    // Review of #98: a link that opens a PDF says so before a tap starts a
+    // download; a page's link does not.
+    const pdfLinks = [...ri.D.querySelectorAll("#state-government a")].filter((a) =>
+      /\.pdf$/i.test(a.href) && /court's roster/.test(a.textContent));
+    check("a roster that is a PDF is labelled (PDF)",
+      pdfLinks.length > 0 && pdfLinks.every((a) => /\(PDF\)$/.test(a.textContent)),
+      pdfLinks.map((a) => a.textContent).join(" | "));
+    const txLinks = [...tx.D.querySelectorAll("#state-government a")].filter((a) => /court's roster/.test(a.textContent));
+    check("a roster that is a page is not", txLinks.length > 0 && txLinks.every((a) => !/PDF/.test(a.textContent)),
+      txLinks.map((a) => a.textContent).join(" | "));
+    // The seat line is a sentence however the roster was read.
+    const seatLines = [tx, ny, ri].map((p) => [...p.D.querySelectorAll("#state-government .gov-court + p.faint")]
+      .map((el) => el.textContent.trim())).flat();
+    check("each court's seat line ends as a sentence", seatLines.length >= 3 &&
+      seatLines.every((t) => /\.$/.test(t)), seatLines.join(" | "));
+    // The list of sources names each court with the day its roster was
+    // read, and a hand read as one; a court with no read day is not dated.
+    const txCourt = tx.window.kycStateGov.states.TX.court;
+    const txSources = tx.D.querySelector("#state-government .gov-sources").textContent;
+    const nySources = ny.D.querySelector("#state-government .gov-sources").textContent;
+    check("the sources name the court and the day its roster was read",
+      !!txCourt.read && txSources.indexOf(txCourt.name + ": the court's own roster (" +
+        tx.window.KYC.dateWords(txCourt.read) + ")") !== -1 && !/read by hand/.test(txSources), txSources);
+    check("and say a roster read by hand was",
+      nySources.indexOf(court.name + ": the court's own roster (read by hand, " +
+        ny.window.KYC.dateWords(court.readOn) + ")") !== -1, nySources);
   });
 
   const dc = await buildPage("states/dc.html");
