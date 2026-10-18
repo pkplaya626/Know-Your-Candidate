@@ -285,7 +285,10 @@ class TestEveryLocalLinkResolves(unittest.TestCase):
                     if ref.startswith(("http:", "https:", "data:", "mailto:")):
                         continue
                     target = ref.split("#")[0].split("?")[0]
-                    if target and not os.path.exists(os.path.join(folder, *target.split("/"))):
+                    # A URL from the root (the 404 page's) is the site's.
+                    base = SITE if target.startswith("/") else folder
+                    if target and not os.path.exists(
+                            os.path.join(base, *target.lstrip("/").split("/"))):
                         missing.append(f"{os.path.relpath(path, SITE)} -> {ref}")
         self.assertEqual(missing, [])
 

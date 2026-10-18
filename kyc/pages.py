@@ -56,11 +56,14 @@ _PAGE = string.Template("""\
 <meta property="og:image:alt" content="Know Your Candidate">
 <meta property="og:site_name" content="Know Your Candidate">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../assets/kyc.css">
-<script src="../assets/kyc.js"></script>
-</head>
-<body data-root="../" data-state="$code" data-page="$page_kind">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="${root}assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="${root}assets/apple-touch-icon.png">
+<link rel="manifest" href="${root}site.webmanifest">
+<link rel="stylesheet" href="${root}assets/kyc.css">
+<script src="${root}assets/kyc.js"></script>
+$jsonld</head>
+<body data-root="$root" data-state="$code" data-page="$page_kind">
 
 <a href="#stateMain" class="skip-link">Skip to content</a>
 <button type="button" class="sidebar-scrim" tabindex="-1" aria-hidden="true"></button>
@@ -71,10 +74,10 @@ _PAGE = string.Template("""\
         <svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg>
     </button>
 
-    <a class="brand" href="../index.html">
+    <a class="brand" href="${root}index.html">
         <svg class="icon" aria-hidden="true"><use href="#i-vote"/></svg>
         <span class="brand-name">Know Your Candidate</span>
-        <span class="brand-sub" data-congress>U.S. Congress</span>
+        $brand_sub
     </a>
 
 $search
@@ -121,6 +124,7 @@ $sidebar
                 <option value="">Choose a state&hellip;</option>$jump_options
             </select>
         </nav>
+$built
     </aside>
 
 $main_block
@@ -158,8 +162,19 @@ def nav_groups():
         )),
         ("Learn", (
             ("guide", "government/index.html", "scroll", "Know Your Government"),
+            ("about", "about.html", "info", "About & sources"),
         )),
     )
+
+
+def section_name(key):
+    """The navigation's name for the entry *key*: the one name a section
+    has in the sidebar, the header's tag and the breadcrumbs (rule 75)."""
+    for _heading, entries in nav_groups():
+        for entry_key, _path, _icon, label in entries:
+            if entry_key == key:
+                return label
+    raise KeyError(f"no navigation entry {key!r}")
 
 
 def nav_html(prefix="../", current=None, how="page"):
@@ -183,8 +198,10 @@ def nav_html(prefix="../", current=None, how="page"):
     return "\n".join(lines)
 
 
-# The search box in the header. A state's pages search its profiles; the
-# guide's pages carry no profiles to search, so they have none (as the map).
+# The search box in the header. A state's pages search its profiles; every
+# other page's box searches the grid's, on index.html (kyc.js sends the
+# words there), so the site's search does not vanish when a reader leaves
+# the Congress pages.
 _SEARCH = """\
     <div class="search">
         <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
@@ -192,6 +209,15 @@ _SEARCH = """\
         <input type="search" id="stateSearch" autocomplete="off" spellcheck="false"
                placeholder="$search_placeholder">
     </div>
+"""
+
+_SITE_SEARCH = """\
+    <form class="search" role="search" action="${root}index.html" data-site-search>
+        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <label class="sr-only" for="siteSearch">Search candidates and members of Congress</label>
+        <input type="search" id="siteSearch" name="q" autocomplete="off" spellcheck="false"
+               placeholder="Search candidates and members&hellip;" data-placeholder-short="Search&hellip;">
+    </form>
 """
 
 # The sidebar of every page that loads profiles.js: the chambers' balance,
@@ -224,19 +250,164 @@ _CONGRESS_SIDEBAR = """
         </div>
 """
 
-_CONGRESS_FOOTER = """\
+_CONGRESS_SOURCES = """\
                 <p><strong>Sources:</strong>
                     membership, contact details and committee rosters from the
                     <code>congress-legislators</code> dataset; the candidate field and
                     campaign finance from the Federal Election Commission; primary results
-                    from each state's Wikipedia election page; portraits from Congress.gov
-                    and Wikipedia.</p>
+                    from each state's Wikipedia election page<span data-results-read hidden>,
+                    as last read on <time data-results-as-of></time></span>; portraits from
+                    Congress.gov and Wikipedia.</p>
                 <p><strong>Who counts as a candidate:</strong> everyone the FEC records
                     as having raised or spent more than $5,000 for the 2026 cycle
                     (52&nbsp;U.S.C.&nbsp;&sect;30101(2)). People the primary removed stay on
-                    record and are shown under each race.</p>
-                <p>Non-partisan and independent. Data built
-                    <time id="buildStamp">&mdash;</time>.</p>"""
+                    record and are shown under each race.</p>"""
+
+
+# ------------------------------------------------------- the site's frame
+
+# The public repository: where the code and data live and where a reader
+# reports an error. kyc.js holds the same address (KYC.REPO_URL), and a test
+# holds the two together.
+REPO = "https://github.com/pkplaya626/Know-Your-Candidate"
+ISSUE_FORM = REPO + "/issues/new?template=correction.yml"
+
+_MONTHS = ("Jan.", "Feb.", "March", "April", "May", "June", "July", "Aug.", "Sept.",
+           "Oct.", "Nov.", "Dec.")
+
+
+def date_words(iso):
+    """``"2026-10-15T13:14:00+00:00"`` -> ``"Oct. 15, 2026"``, as the profile
+    writes a term ("Jan. 3, 2027"); anything that is not an ISO date -> ``""``."""
+    import re
+
+    match = re.match(r"(\d{4})-(\d{2})-(\d{2})", str(iso or ""))
+    if not match or not 1 <= int(match.group(2)) <= 12:
+        return ""
+    year, month, day = match.groups()
+    return f"{_MONTHS[int(month) - 1]} {int(day)}, {year}"
+
+
+def time_html(iso):
+    """A ``<time>`` for *iso*, in words; ``""`` for no date."""
+    words = date_words(iso)
+    return f'<time datetime="{_e(str(iso)[:10])}">{_e(words)}</time>' if words else ""
+
+
+def report_url(page=None, profile=None):
+    """The issue form for a correction, filled in with the page and the
+    profile it is about (GitHub fills a form field from the query parameter
+    of its id: .github/ISSUE_TEMPLATE/correction.yml)."""
+    from urllib.parse import quote
+
+    url = ISSUE_FORM
+    if page:
+        url += "&page=" + quote(page, safe="")
+    if profile:
+        url += "&profile=" + quote(profile, safe="")
+    return url
+
+
+# The tag beside the site's name, for a page that is not about Congress: the
+# section it belongs to. The federal hub's entry in the navigation is
+# "President & Cabinet", but the page holds the courts too, so its tag is
+# the whole branch's name, as its own kicker and sidebar call it.
+_SECTION_TAGS = {"executive": "Federal government"}
+
+
+def brand_sub(nav_current=None, congress=False):
+    """The tag beside the site's name: which part of the site this is. A
+    page that loads profiles.js names the Congress its data is of
+    (``data-congress``, filled by kyc.js); every other page names its
+    section as the navigation does (rule 75), never "U.S. Congress" over a
+    county, a court or the guide."""
+    if congress:
+        return '<span class="brand-sub" data-congress>U.S. Congress</span>'
+    name = _SECTION_TAGS.get(nav_current) or (section_name(nav_current) if nav_current else "")
+    return f'<span class="brand-sub">{_e(name)}</span>' if name else ""
+
+
+# The build's date in a footer, filled from profiles.js by kyc.js.
+BUILD_STAMP = 'Data built <time id="buildStamp">&mdash;</time>. '
+
+
+def footer_html(sources, root="../", built=None, page=None):
+    """A page's footer, the same on every page (rule 12): its own sources
+    (*sources*, markup, each with the date it was read), then one line - the
+    build stamp where the page loads it (*built* "stamp"), else the date
+    given - with links to About and to report a problem with this page."""
+    if built == "stamp":
+        when = BUILD_STAMP
+    else:
+        when = f"{read_words(built)}. " if built else ""
+    return "\n".join([sources, "                " + footer_meta(root, when, page)])
+
+
+def footer_meta(root="", when="", page=None):
+    """The last line of every page's footer: what the site is, how fresh
+    the page is (*when*, markup), and the links to About and to report a
+    problem. The two hand-maintained pages carry it too, written by this
+    (emit.check_nav holds them to it)."""
+    report = report_url(page)
+    return (f'<p class="footer-meta">Non-partisan and independent. {when}'
+            f'<a href="{_e(root)}about.html">{_e(section_name("about"))}</a> &middot; '
+            f'<a href="{_e(report)}" data-report target="_blank" rel="noopener noreferrer">'
+            "Report a problem</a></p>")
+
+
+def built_line(root="../", built=None):
+    """The sidebar's line saying how fresh the page's data is, with the way
+    to its sources: a grid of a thousand cards pushes the footer out of
+    reach (TRUST-04). *built* is "stamp" where the page loads profiles.js
+    (kyc.js fills it), a date, or None for a page with no data."""
+    if built == "stamp":
+        when = 'Data built <time data-built>&mdash;</time> &middot; '
+    else:
+        when = f"{read_words(built)} &middot; " if built else ""
+    return (f'        <p class="sidebar-section sidebar-built">{when}'
+            f'<a href="{_e(root)}about.html">{_e(section_name("about"))}</a></p>')
+
+
+def jsonld(data):
+    """A ``<script type="application/ld+json">`` block: data for search
+    engines, not code (emit.check_pages allows this type alone)."""
+    import json
+
+    text = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+    return ('<script type="application/ld+json">'
+            + text.replace("</", "<\\/") + "</script>\n")
+
+
+def website_jsonld(host):
+    """The home page's WebSite block, with the grid's search as its
+    SearchAction (kyc.js reads ``index.html?q=``). index.html is edited by
+    hand and carries exactly this (emit.check_nav)."""
+    root = f"https://{host}/"
+    return jsonld({
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Know Your Candidate",
+        "url": root,
+        "description": "A non-partisan directory of the U.S. Congress, the 2026 midterm "
+                       "races, and every state's government.",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {"@type": "EntryPoint",
+                       "urlTemplate": root + "index.html?q={search_term_string}"},
+            "query-input": "required name=search_term_string",
+        },
+    })
+
+
+def breadcrumbs(host, trail):
+    """BreadcrumbList for *trail*, ``[(name, path from the site's root)]``,
+    the site first. Names are the navigation's (section_name)."""
+    if not host:
+        return ""
+    items = [{"@type": "ListItem", "position": i + 1, "name": name,
+              "item": f"https://{host}/{path}"} for i, (name, path) in enumerate(trail)]
+    return jsonld({"@context": "https://schema.org", "@type": "BreadcrumbList",
+                   "itemListElement": items})
 
 
 # A reading page: one scrolling column, its footer at the end. A map page
@@ -254,16 +425,36 @@ $footer
 
 def render_page(**fields):
     """Fill the shared template. Each page kind passes what differs; the
-    profile pages share the Congress sidebar, footer and search box."""
+    profile pages share the Congress sidebar, footer and search box.
+
+    *root* is the way from the page to the site's root ("../" one folder
+    down, "" at the root, "/" for the 404 page GitHub serves at any depth);
+    *crumbs* the page's place in the site for search engines; *built* the
+    data's date for the sidebar and footer ("stamp" for the build's own)."""
+    root = fields.setdefault("root", "../")
+    congress = "sidebar" not in fields
+    built = fields.pop("built", "stamp" if congress else None)
+    page = fields.pop("page_url", None)
+    if page is None and fields.get("canonical", "").startswith("https:"):
+        page = html.unescape(fields["canonical"])
     if "main_block" not in fields:
         fields["main_block"] = _CONTENT_MAIN.substitute(
-            main=fields.pop("main"), footer=fields.pop("footer", _CONGRESS_FOOTER))
+            main=fields.pop("main"),
+            footer=footer_html(fields.pop("footer", _CONGRESS_SOURCES), root, built, page))
     search = fields.pop("search", None)
     if search is None:
         search = string.Template(_SEARCH).substitute(
             search_placeholder=fields.pop("search_placeholder"))
+    elif search == "":
+        search = string.Template(_SITE_SEARCH).substitute(root=root)
     fields.setdefault("sidebar", _CONGRESS_SIDEBAR)
-    fields["nav"] = nav_html("../", fields.pop("nav_current", None), fields.pop("nav_how", "page"))
+    current = fields.pop("nav_current", None)
+    fields["brand_sub"] = brand_sub(current, congress)
+    fields["nav"] = nav_html(root, current, fields.pop("nav_how", "page"))
+    fields["built"] = built_line(root, built)
+    host = html.unescape(fields.get("host") or "")
+    crumbs = fields.pop("crumbs", None)
+    fields["jsonld"] = breadcrumbs(host, crumbs) if crumbs else fields.get("jsonld", "")
     fields.setdefault("jump_options", "")
     fields.setdefault("jump_attrs", "")
     # An empty list is filled on the page with every state and territory; a
@@ -310,6 +501,94 @@ def _scripts(sources):
     return "\n".join(f'<script src="{_e(src)}"></script>' for src in sources)
 
 
+# The caches whose dates the footers print: (key, file under data/, the
+# fields that hold when it was read, first found wins). Each is the date the
+# source was read, so a rebuild of the same data writes the same page
+# (rule 18). Never odds.json: the odds job may change no page (rule 41).
+DATED_CACHES = (
+    ("congress", "../../congress_snapshot.json", ("fetched",)),
+    ("committees", "committees.json", ("fetched",)),
+    ("results", "primary_results.json", ("asOf",)),
+    ("openstates", "state_legislators.json", ("fetched",)),
+    ("ncsl", "partisan_composition.json", ("fetched",)),
+    ("governors", "executives.json", ("fetched",)),
+    ("officers", "statewide_officers.json", ("fetched",)),
+    ("statecourts", "courts.json", ("fetched",)),
+    ("voting", "voting_links.json", ("linksChecked", "fetched")),
+    ("census", "census_governments.json", ("fetched",)),
+    ("executive", "federal_executive.json", ("asOf", "fetched")),
+    ("judiciary", "judiciary.json", ("asOf", "fetched")),
+    ("vacancies", "judicial_vacancies.json", ("asOf", "read", "fetched")),
+    ("history", "political_history.json", ("read",)),
+    ("oge", "oge_disclosures.json", ("read",)),
+    ("enrichment", "enrichment.json", ("checked",)),
+)
+
+
+def data_dates(root="."):
+    """``{key: ISO date}``: when each dated cache was read, by its own
+    record. A cache that is missing or carries no date is left out, and the
+    page then names its source without a date rather than a wrong one."""
+    import json
+    import os
+
+    out = {}
+    base = os.path.join(root, "candidate_profiles_site", "data")
+    for key, name, fields in DATED_CACHES:
+        try:
+            with open(os.path.normpath(os.path.join(base, name)), encoding="utf-8") as handle:
+                data = json.load(handle)
+        except (OSError, ValueError):
+            continue
+        for field in fields:
+            if date_words((data or {}).get(field)):
+                out[key] = str(data[field])[:10]
+                break
+    return out
+
+
+def listing_date(code, root="."):
+    """When the Census listing of *code*'s local governments was read."""
+    import json
+    import os
+
+    try:
+        with open(os.path.join(root, "local_governments", f"{code.lower()}.json"),
+                  encoding="utf-8") as handle:
+            fetched = (json.load(handle) or {}).get("fetched")
+    except (OSError, ValueError):
+        return None
+    return str(fetched)[:10] if date_words(fetched) else None
+
+
+def _when(dates, key, before=", as read on "):
+    """", as read on <time>Oct. 15, 2026</time>" for a dated cache, else ""."""
+    iso = (dates or {}).get(key)
+    return f"{before}{time_html(iso)}" if iso else ""
+
+
+def _read_span(dates, *keys):
+    """``(earliest, latest)`` of the dates *keys* name, for the line saying
+    when the page's sources were read; ``None`` when none is dated. A page
+    of several sources never claims the latest read for all of them."""
+    found = [dates[k] for k in keys if (dates or {}).get(k)]
+    return (min(found), max(found)) if found else None
+
+
+def read_words(span):
+    """"Sources read on Oct. 15, 2026", or "... read Oct. 5 to Oct. 17,
+    2026" for a page of several; markup. Never "data as of": the Census of
+    Governments counted in 2022 and was read in 2026."""
+    first, last = span
+    if first == last:
+        return f"Sources read on {time_html(first)}"
+    return f"Sources read between {time_html(first)} and {time_html(last)}"
+
+
+# The first step of every page's breadcrumbs: the site.
+_HOME = ("Know Your Candidate", "")
+
+
 def render_state(code, host, summary=None):
     """The HTML for one state's page."""
     name = state_name(code)
@@ -344,6 +623,7 @@ def render_state(code, host, summary=None):
         search_placeholder=_e(f"Search {name} profiles…"),
         main=_STATE_MAIN,
         scripts=_scripts(_STATE_SCRIPTS),
+        crumbs=[_HOME, (section_name("states"), "states/index.html"), (name, page_path(code))],
     )
 
 
@@ -362,11 +642,12 @@ def render_states_index(host):
         search_placeholder=_e("Search states…"),
         nav_current="states",
         main=_STATE_MAIN,
+        crumbs=[_HOME, (section_name("states"), "states/index.html")],
         scripts=_scripts(_STATE_SCRIPTS),
     )
 
 
-def render_legislatures_index(host):
+def render_legislatures_index(host, dates=None):
     """Every state legislature, each linked to its page, with each chamber's
     seats by party and who holds a majority - drawn by
     ``assets/kyc-stategov.js`` from ``data/stategov.js``, the words of the
@@ -404,10 +685,10 @@ def render_legislatures_index(host):
     ])
     footer = "\n".join([
         "                <p><strong>Sources:</strong> members and their parties from Open States, as",
-        "                    each legislature publishes them. Which party holds each chamber is checked",
-        "                    against the National Conference of State Legislatures' figures and shown",
-        "                    only where the two agree. A seat with nobody listed counts for no one.</p>",
-        "                <p>Non-partisan and independent.</p>",
+        f"                    each legislature publishes them{_when(dates, 'openstates')}. Which party",
+        "                    holds each chamber is checked against the National Conference of State",
+        f"                    Legislatures' figures{_when(dates, 'ncsl')} and shown only where the two",
+        "                    agree. A seat with nobody listed counts for no one.</p>",
     ])
     return render_page(
         title=_e("State legislatures — Know Your Candidate"),
@@ -425,6 +706,8 @@ def render_legislatures_index(host):
         jump_attrs=' data-jump-to="legislature/{code}.html"',
         main=main,
         footer=footer,
+        built=_read_span(dates, "openstates", "ncsl"),
+        crumbs=[_HOME, (section_name("legislatures"), path)],
         scripts=_scripts(("../data/stategov.js", "../assets/kyc-stategov.js")),
     )
 
@@ -441,7 +724,7 @@ def _local_kinds():
             for key, _short, title, _one, plural in kinds]
 
 
-def render_counties_index(host, census=None):
+def render_counties_index(host, census=None, dates=None):
     """Every state's local governments, counted by kind as the Census of
     Governments counts them, each state linked to its counties page. A
     state with none of a kind (an "X" in the Census table) reads "none",
@@ -533,13 +816,13 @@ def render_counties_index(host, census=None):
     footer = "\n".join([
         "                <p><strong>Source:</strong> the U.S. Census Bureau's Census of Governments"
         + (f" ({_e(year)})" if year else "") + ", which counts every",
-        '                    local government by state and kind. "None" is a state with no',
+        f"                    local government by state and kind{_when(dates, 'census', '; its table read on ')}."
+        ' "None" is a state with no',
         "                    government of that kind: one with no county governments has none, and",
         "                    one with no independent school districts runs its schools as dependent",
         "                    systems of the state, a county or a city. County areas without a county",
         "                    government, and what governs them: "
         f'<a href="{_e(county_areas.SOURCES["isd"][1])}" rel="noopener">{_e(county_areas.SOURCES["isd"][0])}</a>.</p>',
-        "                <p>Non-partisan and independent.</p>",
     ])
     return render_page(
         title=_e("Counties & local governments — Know Your Candidate"),
@@ -557,6 +840,8 @@ def render_counties_index(host, census=None):
         jump_attrs=' data-jump-to="counties/{code}.html"',
         main=main,
         footer=footer,
+        built=_read_span(dates, "census"),
+        crumbs=[_HOME, (section_name("local"), path)],
         scripts="",
     )
 
@@ -673,6 +958,8 @@ def render_district_page(code, host, summary=None):
         search_placeholder=_e(f"Search {name} profiles…"),
         main=main,
         scripts=_scripts(scripts),
+        crumbs=[_HOME, (section_name("states"), "states/index.html"), (name, page_path(code)),
+                (headline, path)],
     )
 
 
@@ -685,7 +972,7 @@ _LEGISLATURE_SIDEBAR = """
 """
 
 
-def render_legislature_page(code, host, summary=None):
+def render_legislature_page(code, host, summary=None, dates=None):
     """A state's legislature: its Senate and House districts on a map, and
     the members who sit for them. The page carries the state code only;
     ``assets/kyc-legislature.js`` draws it from ``data/legislature/<st>.js``."""
@@ -756,14 +1043,14 @@ def render_legislature_page(code, host, summary=None):
         "            </div>",
     ] if line is not None)
     footer = "\n".join([
-        "                <p><strong>Sources:</strong> members, their parties, districts, contact",
-        "                    details and portraits from Open States (public domain), as each",
-        "                    legislature publishes them; district boundaries from the U.S. Census",
-        "                    Bureau's cartographic boundary files, as set for the 2024 elections.",
-        "                    A seat with nobody listed may be vacant, or Open States may be behind",
-        "                    a special election. The legislature is called by the name its state",
-        "                    constitution gives it.</p>",
-        "                <p>Non-partisan and independent.</p>",
+        "                <p><strong>Sources:</strong> members, their parties, districts and contact",
+        "                    details from Open States (its data is CC0), as each legislature publishes",
+        f"                    them{_when(dates, 'openstates')}; portraits as each legislature publishes",
+        "                    them, on its own site; district boundaries from the U.S. Census Bureau's",
+        "                    cartographic boundary files, as set for the 2024 elections. A seat with",
+        "                    nobody listed may be vacant, or Open States may be behind a special",
+        "                    election. The legislature is called by the name its state constitution",
+        "                    gives it.</p>",
     ])
     scripts = [s.replace("{code}", code.lower()) for s in (
         "../data/legislature/{code}.js", "../assets/kyc-regionmap.js", "../assets/kyc-legislature.js")]
@@ -784,6 +1071,8 @@ def render_legislature_page(code, host, summary=None):
         jump_attrs=' data-jump-to="legislature/{code}.html"',
         main=main,
         footer=footer,
+        built=_read_span(dates, "openstates"),
+        crumbs=[_HOME, (section_name("legislatures"), "legislature/index.html"), (title, path)],
         scripts=_scripts(scripts),
     )
 
@@ -802,17 +1091,43 @@ _FEDERAL_SIDEBAR = """
         </nav>
 """
 
-_FEDERAL_FOOTER = "\n".join([
-    "                <p><strong>Sources:</strong> the President and Vice President from",
-    "                    congress-legislators' record of their terms; the Cabinet as the White House",
-    "                    lists it, each officer checked on their office's own page and against the",
-    "                    Senate's roll-call vote confirming them; every Article III judge from the",
-    "                    Federal Judicial Center's Biographical Directory, and the Supreme Court's",
-    "                    members as the Court lists them; vacancies as the courts list them on",
-    "                    uscourts.gov. Judges are shown with the president who appointed them,",
-    "                    never with a party.</p>",
-    "                <p>Non-partisan and independent.</p>",
-])
+def _federal_footer(dates=None):
+    """The federal hub's sources, each dated as its cache records it."""
+    return "\n".join([
+        "                <p><strong>Sources:</strong> the President and Vice President from",
+        "                    congress-legislators' record of their terms; the Cabinet as the White House",
+        "                    lists it, each officer checked on their office's own page and against the",
+        f"                    Senate's roll-call vote confirming them{_when(dates, 'executive')}; every",
+        "                    Article III judge from the Federal Judicial Center's Biographical Directory,",
+        "                    and the Supreme Court's members as the Court lists them"
+        f"{_when(dates, 'judiciary')}; vacancies as the courts list them on",
+        f"                    uscourts.gov{_when(dates, 'vacancies')}. Judges are shown with the",
+        "                    president who appointed them, never with a party.</p>",
+    ])
+
+
+def _court_footer(court, dates=None):
+    """A court page's own sources: the judges' directory and the vacancy
+    lists, never the President's and the Cabinet's, which it does not show
+    (FEDERAL-14). A territorial court's judges are not in the directory."""
+    if court["kind"] == "supreme":
+        judges = ("                    the justices as the Supreme Court lists its members, with each",
+                  "                    one's record from the Federal Judicial Center's Biographical Directory")
+    elif court["kind"] == "territorial":
+        judges = ("                    the Federal Judicial Center's Biographical Directory, which lists",
+                  "                    Article III judges only, so this court's judges are not listed")
+    else:
+        judges = ("                    every sitting judge from the Federal Judicial Center's Biographical",
+                  "                    Directory")
+    return "\n".join([
+        "                <p><strong>Sources:</strong>",
+        *judges[:-1],
+        judges[-1] + f"{_when(dates, 'judiciary')}; vacancies, announced vacancies and",
+        "                    judicial emergencies as the courts list them on uscourts.gov"
+        f"{_when(dates, 'vacancies')}. Judges are shown with the president who appointed",
+        "                    them, never with a party.</p>",
+    ])
+
 
 def _jump(codes):
     """The "Jump to" list, written into the page: these pages load no build
@@ -831,7 +1146,7 @@ _FEDERAL_SCRIPTS = (
 )
 
 
-def render_federal_page(host, codes=()):
+def render_federal_page(host, codes=(), dates=None):
     """The federal government's hub: the President, the Vice President, the
     Cabinet, the Supreme Court and every federal court. The page carries no
     names; ``assets/kyc-federal.js`` draws it from ``data/federal.js``."""
@@ -869,7 +1184,9 @@ def render_federal_page(host, codes=()):
         nav_current="executive",
         jump_options=_jump(codes),
         main=main,
-        footer=_FEDERAL_FOOTER,
+        footer=_federal_footer(dates),
+        built=_read_span(dates, "executive", "judiciary", "vacancies"),
+        crumbs=[_HOME, ("Federal government", path)],
         scripts=_scripts(_FEDERAL_SCRIPTS),
     )
 
@@ -921,7 +1238,7 @@ def _court_description(court):
             f"commissioned, their senior status, and their background.")
 
 
-def render_court_page(court_id, host, codes=()):
+def render_court_page(court_id, host, codes=(), dates=None):
     """One federal court: its judges, the chief first, then active and senior
     judges. ``assets/kyc-federal.js`` draws it from the court's data file."""
     from .federal_courts import COURTS, KINDS
@@ -960,7 +1277,9 @@ def render_court_page(court_id, host, codes=()):
         nav_how="true",
         jump_options=_jump(codes),
         main=main,
-        footer=_FEDERAL_FOOTER,
+        footer=_court_footer(court, dates),
+        built=_read_span(dates, "judiciary", "vacancies"),
+        crumbs=[_HOME, (section_name("courts"), "courts/index.html"), (court["name"], path)],
         scripts=_scripts(scripts),
     )
 
@@ -974,7 +1293,7 @@ _COUNTIES_SIDEBAR = """
 """
 
 
-def render_counties_page(code, host):
+def render_counties_page(code, host, listed=None):
     """A state's counties and every local government in each. The page
     carries the state code only; ``assets/kyc-local.js`` draws it from
     ``data/local/<st>.js``."""
@@ -1038,7 +1357,8 @@ def render_counties_page(code, host):
     footer = "\n".join([
         "                <p><strong>Sources:</strong> every government, its county, website, city,",
         "                    population or enrollment, from the U.S. Census Bureau's 2022 Census of",
-        "                    Governments: Government Units listing, checked against the Bureau's",
+        "                    Governments: Government Units listing"
+        + (f", read on {time_html(listed)}" if listed else "") + ", checked against the Bureau's",
         "                    published counts for every state; county lines from its cartographic",
         "                    boundary file; every incorporated place and its legal form from its 2025",
         "                    place boundaries, joined to its government by name only where the join is",
@@ -1047,7 +1367,6 @@ def render_counties_page(code, host):
         "                <p><strong>Where there is no county government:</strong> "
         + "; ".join(f'<a href="{_e(url)}" rel="noopener">{_e(label)}</a>' for label, url in why)
         + ".</p>",
-        "                <p>Non-partisan and independent.</p>",
     ])
     scripts = [s.replace("{code}", code.lower()) for s in (
         "../data/local/{code}.js", "../assets/kyc-regionmap.js", "../assets/kyc-local.js")]
@@ -1068,8 +1387,466 @@ def render_counties_page(code, host):
         jump_attrs=' data-jump-to="counties/{code}.html"',
         main=main,
         footer=footer,
+        built=(listed, listed) if listed else None,
+        crumbs=[_HOME, (section_name("local"), "counties/index.html"), (name, path)],
         scripts=_scripts(scripts),
     )
+
+
+# ------------------------------------------------------ about, 404, folders
+
+# When the roster refresh runs (.github/workflows/refresh.yml's gate job):
+# every day in these spans, inclusive; before Election Day otherwise on
+# Mondays and Thursdays, after it on Mondays. test_about holds the two
+# together, so the About page cannot promise a schedule the workflow left.
+REFRESH_DAILY = (("2026-10-15", "2026-11-02"), ("2026-11-04", "2026-12-15"),
+                 ("2027-01-03", "2027-01-14"))
+# odds.yml's cron, in words (rule 41: it stops at the first poll closing).
+ODDS_TIMES = ("00:47", "12:47")
+
+# What each part of the site is built from: (what, source, what it covers,
+# when it is read again, the DATED_CACHES key of when it was last read).
+# "refresh" is the scheduled refresh above; README.md's field tables go
+# into each field.
+DATASETS = (
+    ("Members of Congress",
+     '<a href="https://github.com/unitedstates/congress-legislators">congress-legislators</a>',
+     "Every member: seat, party, term, contact details, ids for outbound links", "refresh",
+     "congress"),
+    ("Committee seats",
+     '<a href="https://github.com/unitedstates/congress-legislators">congress-legislators</a>',
+     "Each committee's members, with their rank and title", "refresh", "committees"),
+    ("Who is running, and their money",
+     '<a href="https://www.fec.gov/data/">Federal Election Commission</a>',
+     "Everyone registered for 2026; receipts, spending and cash on hand", "refresh", None),
+    ("Primary results and who is on the ballot",
+     "Each state's results page on Wikipedia; Louisiana's Secretary of State for its "
+     "qualified candidates",
+     "Who won, lost or withdrew; who is on the November ballot", "refresh", "results"),
+    ("Financial disclosures",
+     '<a href="https://disclosures-clerk.house.gov/">House Clerk</a> and '
+     '<a href="https://efdsearch.senate.gov/">Senate eFD</a>',
+     "A link to each member's latest annual report", "refresh", None),
+    ("Voting record", '<a href="https://voteview.com/">Voteview</a>',
+     "A left-to-right score from each member's roll-call votes", "manual", None),
+    ("Campaign websites and candidates' own words",
+     "Each committee's FEC filing; the article a race page links; the campaign's own site",
+     "Websites, and what a campaign says about itself, quoted", "refresh", "enrichment"),
+    ("Public offices held",
+     "congress-legislators; Wikidata, where the person's own Wikipedia article agrees",
+     "Offices each person has held, with years", "refresh", "history"),
+    ("Market prices and polling averages",
+     "Kalshi, Polymarket; each race's Wikipedia page for polling averages",
+     "Published prices and averages, never a forecast of this site's", "odds", None),
+    ("Governors and party control",
+     '<a href="https://www.nga.org/governors/">National Governors Association</a>; '
+     "Open States and the National Conference of State Legislatures",
+     "Every governor; which party holds each chamber, where the two agree", "refresh",
+     "governors"),
+    ("Statewide officers",
+     "NLGA, NASS, the attorneys general's associations, and each office's own site",
+     "Lieutenant governors, secretaries of state, attorneys general", "refresh", "officers"),
+    ("State legislators", '<a href="https://openstates.org/">Open States</a>',
+     "Every state legislator and their district", "refresh", "openstates"),
+    ("State supreme courts", "Each court's own roster", "Each state's highest court",
+     "refresh", "statecourts"),
+    ("Voting information", '<a href="https://www.nass.org/can-I-vote">NASS Can I Vote</a>',
+     "Each state's official pages to register, find a polling place and vote", "refresh",
+     "voting"),
+    ("President, Vice President and Cabinet",
+     "The White House, each office's own page, the Senate's roll calls",
+     "Who holds each office, and since when", "refresh", "executive"),
+    ("Executive financial reports",
+     '<a href="https://www.oge.gov/">Office of Government Ethics</a>',
+     "Reports filed by the President, Vice President and Cabinet", "refresh", "oge"),
+    ("Federal judges",
+     '<a href="https://www.fjc.gov/history/judges">Federal Judicial Center</a>; the Supreme Court',
+     "Every sitting Article III judge", "refresh", "judiciary"),
+    ("Judicial vacancies", '<a href="https://www.uscourts.gov/judges-judgeships/judicial-vacancies">uscourts.gov</a>',
+     "Vacancies, announced vacancies and judicial emergencies", "refresh", "vacancies"),
+    ("Local governments",
+     '<a href="https://www.census.gov/programs-surveys/cog.html">Census of Governments</a> (2022)',
+     "Every county, city, town, township, school district and special district", "fixed",
+     "census"),
+    ("Maps", "U.S. Census Bureau boundary files; each redrawn state's enacted plan",
+     "States, congressional and legislative districts, counties, places", "maps", None),
+    ("Know Your Government", "The primary sources each section cites",
+     "How government is organized, in plain words", "guide", None),
+)
+
+_WHEN_READ = {
+    "refresh": "Each scheduled refresh",
+    "odds": "Every 12 hours, until polls close",
+    "fixed": "Fixed: counted in 2022",
+    "maps": "When a map changes",
+    # Voteview's scores are read into the rosters by hand (`fetch`); the
+    # scheduled refresh does not run it.
+    "manual": "By hand, from time to time",
+    "guide": "Checked by hand; each page gives its date",
+}
+
+
+def _span_words(first, last):
+    """"Oct. 15 to Nov. 2, 2026"; across a year, both years."""
+    a, b = date_words(first), date_words(last)
+    if first[:4] == last[:4]:
+        return f"{a.rsplit(',', 1)[0]} to {b}"
+    return f"{a} to {b}"
+
+
+def schedule_words():
+    """The refresh schedule, in a sentence, from REFRESH_DAILY."""
+    spans = [_span_words(a, b) for a, b in REFRESH_DAILY]
+    return (f"The scheduled refresh runs every day from {spans[0]} and from {spans[1]}, the "
+            f"eve of the election and the six weeks after it, and from {spans[2]}, as the new "
+            "Congress is sworn in. On other days it runs on Mondays and Thursdays before "
+            "Election Day and on Mondays after it. Each run is published only once every "
+            "check passes. Market prices and polling averages are read every 12 hours, at "
+            f"{ODDS_TIMES[0]} and {ODDS_TIMES[1]} UTC, and stop when the first polls close on "
+            "Election Day: prices that move on early returns would read as results.")
+
+
+def _about_main(dates):
+    rows = []
+    for what, source, covers, when, key in DATASETS:
+        last = time_html(dates.get(key)) if key and dates.get(key) else "&ndash;"
+        rows.append("                        <tr>"
+                    f'<th scope="row">{_e(what)}</th><td data-label="Source">{source}</td>'
+                    f'<td data-label="Covers">{_e(covers)}</td>'
+                    f'<td data-label="Read again">{_e(_WHEN_READ[when])}</td>'
+                    f'<td data-label="Last read">{last}</td></tr>')
+    report = report_url()
+    repo = _e(REPO)
+    return "\n".join([
+        '            <article id="aboutContent" class="state-page guide-page about-page">',
+        '                <header class="state-hero">',
+        '                    <p class="state-kicker">About</p>',
+        f'                    <h1 class="state-title">{_e(section_name("about"))}</h1>',
+        '                    <p class="districts-lede">Who runs this site, where every fact on it comes',
+        "                        from, how often it is read again, and how to tell us when something is",
+        "                        wrong.</p>",
+        "                </header>",
+        '                <section class="guide-section" id="who">',
+        '                    <h2 class="state-heading">Who runs this site</h2>',
+        "                    <p>Know Your Candidate is an independent, non-partisan project. Its code",
+        f'                        and data are public, at <a href="{repo}">{repo}</a>, so anyone can',
+        "                        see how each fact was reached, and every change to them is recorded",
+        "                        there.</p>",
+        "                    <p>It is not affiliated with any campaign, party, candidate or government",
+        "                        office, takes no money from any of them, and carries no",
+        "                        advertising.</p>",
+        "                </section>",
+        '                <section class="guide-section" id="not-official">',
+        '                    <h2 class="state-heading">What this site is not</h2>',
+        "                    <p>It is not an official election source, and nothing on it is legal",
+        "                        advice. Before you register, request a ballot or vote, check with your",
+        "                        state's election office: each state's page here links its official",
+        '                        voting pages, and <a href="https://www.nass.org/can-I-vote">NASS Can',
+        "                        I Vote</a> lists every state's.</p>",
+        "                </section>",
+        '                <section class="guide-section" id="report">',
+        '                    <h2 class="state-heading">Report a problem</h2>',
+        "                    <p>This site makes claims about real, named people, and a wrong one",
+        "                        matters. If something is wrong, out of date or missing, or a page does",
+        f'                        not work for you, <a href="{_e(report)}" data-report target="_blank"',
+        '                        rel="noopener noreferrer">open a report on GitHub</a>. Every profile and',
+        "                        page has the same link, which fills in where you were. Please say what",
+        "                        is wrong and, if you can, where the right answer is published.</p>",
+        "                    <p>Reports and the corrections made from them are public: each is an",
+        "                        issue in the repository, and each fix a change anyone can read.</p>",
+        "                </section>",
+        '                <section class="guide-section" id="data">',
+        '                    <h2 class="state-heading">Where the data comes from</h2>',
+        "                    <p>Every fact is read from a source by a script, checked, and published",
+        "                        with that source named beside it. Where a source says nothing, the site",
+        "                        says so, rather than guessing. The repository's",
+        f'                        <a href="{repo}#readme">README</a> lists every field and where it comes',
+        "                        from.</p>",
+        '                    <div class="directory-scroll" tabindex="0" role="region" aria-label="Data sources">',
+        '                        <table class="directory-table about-table">',
+        '                            <thead><tr><th scope="col">Data</th><th scope="col">Source</th>'
+        '<th scope="col">Covers</th><th scope="col">Read again</th><th scope="col">Last read</th>'
+        "</tr></thead>",
+        "                            <tbody>",
+        *rows,
+        "                            </tbody>",
+        "                        </table>",
+        "                    </div>",
+        '                    <p id="schedule">' + _e(schedule_words()) + "</p>",
+        "                    <p><strong>Who counts as a candidate:</strong> everyone the FEC records as",
+        "                        having raised or spent more than $5,000 for the 2026 cycle",
+        "                        (52&nbsp;U.S.C.&nbsp;&sect;30101(2)). Everyone who has registered is",
+        "                        counted in each race, whatever they raised.</p>",
+        "                </section>",
+        '                <section class="guide-section" id="privacy">',
+        '                    <h2 class="state-heading">Privacy</h2>',
+        "                    <ul>",
+        "                        <li>No cookies, no analytics, no advertising trackers and no accounts.",
+        "                            The site does not know who you are.</li>",
+        "                        <li>Your browser keeps two settings for this site, on your device only:",
+        "                            the theme you picked and the last state you looked at, so the",
+        "                            navigation can offer it again. To clear them, clear this site's data",
+        "                            in your browser's settings.</li>",
+        "                        <li>Portraits and some images load from the sites that publish them:",
+        "                            Wikimedia Commons, the House Clerk, Congress.gov, state legislatures",
+        "                            and campaign sites. Those sites see your IP address when your browser",
+        "                            fetches an image, as any website would; this site asks your browser",
+        "                            not to tell them which page you were reading.</li>",
+        "                        <li>&#8220;Find my district&#8221; asks your browser for your location",
+        "                            and places it on the map on your device. It is never sent",
+        "                            anywhere.</li>",
+        "                        <li>The site is served by GitHub Pages, which receives your IP address",
+        "                            with each request, as any web host does; see",
+        '                            <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub&#8217;s',
+        "                            privacy statement</a>. Links out lead to other sites, whose own",
+        "                            policies apply.</li>",
+        "                    </ul>",
+        "                </section>",
+        '                <section class="guide-section" id="accessibility">',
+        '                    <h2 class="state-heading">Accessibility</h2>',
+        "                    <p>The site aims to meet the Web Content Accessibility Guidelines (WCAG)",
+        "                        2.2 at level AA. Every page is built and checked by automated tests on",
+        "                        each change: pages can be zoomed; every control works from a keyboard,",
+        "                        with a visible focus; dialogs hold the focus and return it when they",
+        "                        close; each page has a link to skip to its content; fields are large",
+        "                        enough on a phone that it does not zoom on its own; and the words on",
+        "                        the maps are page text, so they stay readable in forced dark modes.</p>",
+        "                    <p>Known limits: the maps are visual, so every map has a list beside or",
+        "                        below it that holds the same facts; documents this site links, such",
+        "                        as disclosure PDFs and the Senate's disclosure site, are their",
+        "                        publishers' and may not be accessible. If anything here is hard to use,",
+        f'                        <a href="{_e(report)}" target="_blank" rel="noopener noreferrer">tell us',
+        "                        with the same form</a>.</p>",
+        "                </section>",
+        '                <section class="guide-section" id="licence">',
+        '                    <h2 class="state-heading">Licence</h2>',
+        f'                    <p>The code is under the <a href="{repo}/blob/main/LICENSE">MIT',
+        "                        licence</a>. The data this project compiles is under",
+        f'                        <a href="{repo}/blob/main/LICENSE-DATA.md">Creative Commons Attribution',
+        "                        4.0</a> (CC BY 4.0): you may reuse it, with credit to Know Your",
+        "                        Candidate and the dates the data carries. Photographs, and the",
+        "                        datasets this project reads, keep their own owners' terms.</p>",
+        "                </section>",
+        "            </article>",
+    ])
+
+
+def render_about(host, dates=None, codes=()):
+    """about.html: who runs the site, where its data comes from, how to
+    report an error, privacy, accessibility and the licence (TRUST-02)."""
+    dates = dates or {}
+    path = "about.html"
+    canonical = f"https://{host}/{path}" if host else path
+    keys = sorted({key for *_rest, key in DATASETS if key and dates.get(key)})
+    name = section_name("about")
+    return render_page(
+        title=_e(f"{name} — Know Your Candidate"),
+        og_title=_e("About Know Your Candidate"),
+        description=_e("An independent, non-partisan project: who runs it, where every fact "
+                       "comes from and how often it is read, how to report an error, privacy, "
+                       "accessibility and the licence."),
+        canonical=_e(canonical),
+        host=_e(host or ""),
+        code="",
+        page_kind="about",
+        root="",
+        search="",
+        sidebar="",
+        nav_current="about",
+        jump_options=_jump(codes),
+        main=_about_main(dates),
+        footer="",
+        built=_read_span(dates, *keys),
+        crumbs=[_HOME, (name, path)],
+        scripts="",
+    )
+
+
+def render_404(host, codes=()):
+    """404.html: GitHub Pages serves it for any missing address, at any
+    depth, so every URL in it is from the site's root (TECH-06)."""
+    report = report_url()
+    main = "\n".join([
+        '            <div id="notFound" class="state-page directory-page">',
+        '                <header class="state-hero">',
+        '                    <p class="state-kicker">Know Your Candidate</p>',
+        '                    <h1 class="state-title">Page not found</h1>',
+        '                    <p class="districts-lede">There is no page at this address. It may have',
+        "                        moved, or the link may be mistyped. Search for a candidate or member",
+        "                        of Congress, or pick a section.</p>",
+        "                </header>",
+        '                <form class="search-page" role="search" action="/index.html" data-site-search>',
+        '                    <label class="sr-only" for="notFoundSearch">Search candidates and members of Congress</label>',
+        '                    <input type="search" id="notFoundSearch" name="q" autocomplete="off"',
+        '                           spellcheck="false" placeholder="Search candidates and members&hellip;">',
+        '                    <button type="submit" class="btn">Search</button>',
+        "                </form>",
+        '                <ul class="directory-list">',
+        *[f'                    <li class="directory-row"><a class="directory-name" href="/{_e(p)}">'
+          f"{_e(label)}</a></li>"
+          for _heading, entries in nav_groups() for _k, p, _i, label in entries],
+        "                </ul>",
+        f'                <p class="faint">If a link on this site brought you here, <a href="{_e(report)}"',
+        '                    target="_blank" rel="noopener noreferrer">please report it</a>.</p>',
+        "            </div>",
+    ])
+    return render_page(
+        title=_e("Page not found — Know Your Candidate"),
+        og_title=_e("Page not found"),
+        description=_e("There is no page at this address."),
+        canonical=_e(f"https://{host}/404.html" if host else "404.html"),
+        host=_e(host or ""),
+        code="",
+        page_kind="not-found",
+        root="/",
+        search="",
+        sidebar="",
+        jump_options=_jump(codes),
+        main=main,
+        footer="",
+        built=None,
+        page_url="",
+        jsonld='<meta name="robots" content="noindex">\n',
+        scripts="",
+    )
+
+
+def render_districts_index(host, summary=None, codes=()):
+    """districts/index.html: every state's district map, so the folder's
+    own address answers (TECH-06). Plain links; nothing to load."""
+    from .districts import REDRAWN, all_codes
+
+    path = "districts/index.html"
+    canonical = f"https://{host}/{path}" if host else path
+    states = ((summary or {}).get("states") or {})
+    rows = []
+    for code in sorted(all_codes(), key=state_name):
+        info = states.get(code) or {}
+        headline, _intro = district_page_text(code, info.get("house") or info.get("delegates"))
+        note = " &middot; redrawn for 2026" if code in REDRAWN else ""
+        rows.append(f'                    <li class="directory-row"><a class="directory-name" '
+                    f'href="{_e(code.lower())}.html">{_e(state_name(code))}</a>'
+                    f'<span class="directory-facts">{_e(headline)}{note}</span></li>')
+    main = "\n".join([
+        '            <div id="districtsDirectory" class="state-page directory-page">',
+        '                <header class="state-hero">',
+        '                    <p class="state-kicker">District maps</p>',
+        '                    <h1 class="state-title">Every state&#8217;s House districts</h1>',
+        '                    <p class="districts-lede">Each state&#8217;s congressional districts on a',
+        "                        map: who holds each seat and who is on the November ballot. Where a",
+        "                        state redrew its map for 2026, the old and new lines side by side.</p>",
+        '                    <p class="state-links">',
+        f'                        <a class="btn" href="{_e(_learn("congress#house"))}"><svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg> How the House works</a>',
+        '                        <a class="btn" href="../states/index.html"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> States &amp; territories</a>',
+        "                    </p>",
+        "                </header>",
+        '                <ul class="directory-list">',
+        *rows,
+        "                </ul>",
+        "            </div>",
+    ])
+    footer = "\n".join([
+        "                <p><strong>Sources:</strong> district lines from the U.S. Census Bureau's",
+        "                    boundary files and, for each redrawn state, the plan its legislature or",
+        "                    court enacted.</p>",
+    ])
+    return render_page(
+        title=_e("District maps — Know Your Candidate"),
+        og_title=_e("Every state's House districts on a map"),
+        description=_e("Every state's congressional districts on a map, with the old and new "
+                       "lines side by side where a state redrew them for 2026."),
+        canonical=_e(canonical),
+        host=_e(host or ""),
+        code="",
+        page_kind="districts-index",
+        search="",
+        sidebar="",
+        nav_current="states",
+        nav_how="true",
+        jump_options=_jump(codes),
+        main=main,
+        footer=footer,
+        built=None,
+        crumbs=[_HOME, (section_name("states"), "states/index.html"), ("District maps", path)],
+        scripts="",
+    )
+
+
+def render_courts_index(host, codes=(), dates=None):
+    """courts/index.html: every federal court, by kind, so the folder's own
+    address answers (TECH-06). Plain links; the hub holds the rest."""
+    from .federal_courts import COURTS, KINDS
+
+    path = "courts/index.html"
+    canonical = f"https://{host}/{path}" if host else path
+    groups = []
+    for kind in ("supreme", "appeals", "trade", "district", "territorial"):
+        ids = [cid for cid, court in COURTS.items() if court["kind"] == kind]
+        if not ids:
+            continue
+        heading = KINDS[kind] if len(ids) == 1 else KINDS[kind] + "s"
+        groups += [f'                <h2 class="state-heading">{_e(heading)}</h2>',
+                   '                <ul class="directory-list">',
+                   *[f'                    <li class="directory-row"><a class="directory-name" '
+                     f'href="{_e(cid)}.html">{_e(COURTS[cid]["name"])}</a></li>' for cid in ids],
+                   "                </ul>"]
+    main = "\n".join([
+        '            <div id="courtsDirectory" class="state-page directory-page">',
+        '                <header class="state-hero">',
+        f'                    <p class="state-kicker">{_e(section_name("courts"))}</p>',
+        '                    <h1 class="state-title">Every federal court</h1>',
+        '                    <p class="districts-lede">The Supreme Court, the courts of appeals and the',
+        "                        district courts, each with its sitting judges and its vacancies.</p>",
+        '                    <p class="state-links">',
+        '                        <a class="btn" href="../federal/index.html#courts"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg> The federal courts</a>',
+        f'                        <a class="btn" href="{_e(_learn("courts"))}"><svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg> How the federal courts work</a>',
+        "                    </p>",
+        "                </header>",
+        *groups,
+        "            </div>",
+    ])
+    return render_page(
+        title=_e("Every federal court — Know Your Candidate"),
+        og_title=_e("Every federal court"),
+        description=_e("Every federal court: the Supreme Court, the courts of appeals and the "
+                       "district courts, each with its judges and vacancies."),
+        canonical=_e(canonical),
+        host=_e(host or ""),
+        code="",
+        page_kind="courts-index",
+        search="",
+        sidebar=_FEDERAL_SIDEBAR,
+        nav_current="courts",
+        jump_options=_jump(codes),
+        main=main,
+        footer=_court_footer({"kind": "appeals"}, dates),
+        built=_read_span(dates, "judiciary", "vacancies"),
+        crumbs=[_HOME, (section_name("courts"), path)],
+        scripts="",
+    )
+
+
+def webmanifest():
+    """site.webmanifest: the name and icons a phone uses when the site is
+    added to its home screen. Relative URLs only: no hostname (rule 21)."""
+    import json
+
+    return json.dumps({
+        "name": "Know Your Candidate",
+        "short_name": "Know Your Candidate",
+        "description": "A non-partisan directory of the U.S. Congress, the 2026 midterm "
+                       "races, and every state's government.",
+        "start_url": "./index.html",
+        "scope": "./",
+        "display": "standalone",
+        "background_color": "#0d0f12",
+        "theme_color": "#0d0f12",
+        "icons": [
+            {"src": "assets/favicon.svg", "sizes": "any", "type": "image/svg+xml"},
+            {"src": "assets/apple-touch-icon.png", "sizes": "180x180", "type": "image/png"},
+            {"src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png"},
+        ],
+    }, indent=2) + "\n"
 
 
 def render_redirect(target, host):
@@ -1115,9 +1892,12 @@ def sitemap(host, codes, built=None, district_maps=(), guide=(), legislatures=()
 
     url("", "1.0")
     url("map.html", "0.8")
+    url("about.html", "0.4", "monthly")
     url("states/index.html", "0.8")
     for code in sorted(codes):
         url(page_path(code), "0.7")
+    if district_maps:
+        url("districts/index.html", "0.5", "monthly")
     for code in sorted(district_maps):
         url(f"districts/{code.lower()}.html", "0.6", "monthly")
     # The guide, in reading order.
@@ -1133,6 +1913,7 @@ def sitemap(host, codes, built=None, district_maps=(), guide=(), legislatures=()
         url(f"counties/{code.lower()}.html", "0.5", "monthly")
     if courts:
         url("federal/index.html", "0.7")
+        url("courts/index.html", "0.5")
     for court in courts:
         url(f"courts/{court}.html", "0.5")
     lines.append("</urlset>")

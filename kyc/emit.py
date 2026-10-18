@@ -135,6 +135,12 @@ COURT_PAGES_DIR = os.path.join(SITE_DIR, "courts")
 # Know Your Government, the guide: generated pages, one folder down. What
 # each loads depends on the page (kyc.government.scripts).
 GOVERNMENT_DIR = os.path.join(SITE_DIR, "government")
+# The site's frame, at its root: about.html, the page GitHub Pages serves for
+# any missing address (its URLs are from the root, as it is served at any
+# depth), and the manifest a phone reads to add the site to its home screen.
+ABOUT_FILE = os.path.join(SITE_DIR, "about.html")
+NOT_FOUND_FILE = os.path.join(SITE_DIR, "404.html")
+MANIFEST_FILE = os.path.join(SITE_DIR, "site.webmanifest")
 # The first district page lived here for a day; the address still answers.
 REDIRECTS = {os.path.join(SITE_DIR, "redistricting", "ca.html"): "../districts/ca.html"}
 SITEMAP_FILE = os.path.join(SITE_DIR, "sitemap.xml")
@@ -264,6 +270,10 @@ def render_state_pages(profiles, root=".", summary=None, stamp_from=None):
     from . import districts, government, pages
 
     host = canonical_host(root)
+    # When each source was read, for the footers that name it (rule 19:
+    # a page says when it looked, never only that it did).
+    dates = pages.data_dates(root)
+    codes = state_codes(profiles)
     out = {os.path.join(STATES_DIR, "index.html"): pages.render_states_index(host)}
     for code in state_codes(profiles):
         out[os.path.join(SITE_DIR, *pages.page_path(code).split("/"))] = (
@@ -271,26 +281,37 @@ def render_state_pages(profiles, root=".", summary=None, stamp_from=None):
     for code in districts.all_codes():
         out[os.path.join(SITE_DIR, *districts.page_path(code).split("/"))] = (
             pages.render_district_page(code, host, summary))
+    out[os.path.join(DISTRICT_PAGES_DIR, "index.html")] = pages.render_districts_index(
+        host, summary, codes)
     for path, target in REDIRECTS.items():
         out[path] = pages.render_redirect(target, host)
+    # The site's frame: who runs it and where its data comes from, the page
+    # GitHub Pages serves for any missing address, and the home-screen
+    # manifest.
+    out[ABOUT_FILE] = pages.render_about(host, dates, codes)
+    out[NOT_FOUND_FILE] = pages.render_404(host, codes)
+    out[MANIFEST_FILE] = pages.webmanifest()
     for relative, text in government.render_all(host, state_codes(profiles)).items():
         out[os.path.join(SITE_DIR, *relative.split("/"))] = text
     from . import census
     from .government_maps import STATES
-    out[os.path.join(LEGISLATURE_PAGES_DIR, "index.html")] = pages.render_legislatures_index(host)
+    out[os.path.join(LEGISLATURE_PAGES_DIR, "index.html")] = pages.render_legislatures_index(
+        host, dates)
     out[os.path.join(COUNTIES_PAGES_DIR, "index.html")] = pages.render_counties_index(
-        host, census.load_cache(root))
+        host, census.load_cache(root), dates)
     for code in STATES:
         out[os.path.join(LEGISLATURE_PAGES_DIR, f"{code.lower()}.html")] = (
-            pages.render_legislature_page(code, host, summary))
+            pages.render_legislature_page(code, host, summary, dates))
         out[os.path.join(COUNTIES_PAGES_DIR, f"{code.lower()}.html")] = (
-            pages.render_counties_page(code, host))
+            pages.render_counties_page(code, host, pages.listing_date(code, root)))
     from . import federal_courts
-    codes = state_codes(profiles)
-    out[os.path.join(FEDERAL_PAGES_DIR, "index.html")] = pages.render_federal_page(host, codes)
+    out[os.path.join(FEDERAL_PAGES_DIR, "index.html")] = pages.render_federal_page(
+        host, codes, dates)
+    out[os.path.join(COURT_PAGES_DIR, "index.html")] = pages.render_courts_index(
+        host, codes, dates)
     for cid in federal_courts.COURTS:
-        out[os.path.join(COURT_PAGES_DIR, f"{cid}.html")] = pages.render_court_page(cid, host,
-                                                                                    codes)
+        out[os.path.join(COURT_PAGES_DIR, f"{cid}.html")] = pages.render_court_page(
+            cid, host, codes, dates)
     # Each page's own code and data, at the versions it was built with
     # (kyc/assets.py), read from *stamp_from* - the root, unless a test
     # renders into a folder without them and says where they are.
@@ -628,11 +649,20 @@ CNAME_FILE = os.path.join(SITE_DIR, "CNAME")
 # the site tells search engines and social networks it lives somewhere it
 # does not. Six copies of a hostname across five files is precisely the kind
 # of thing that drifts silently after a rename.
+#
+# A page's every own address is matched, not only its canonical link: the
+# home page's structured data names the site and its search, and the share
+# card's source prints the host into the image (regenerate the PNG after a
+# rename). Outbound links to other sites are not the site's own and are not
+# matched: only canonical, og: and the JSON-LD's url fields.
+_OWN_URL = (r'(?:rel="canonical" href="|property="og:(?:url|image)" content="|'
+            r'"(?:url|urlTemplate|item)":")https://([^/"]+)')
 _HOST_REFERENCES = {
-    os.path.join(SITE_DIR, "index.html"): r'rel="canonical" href="https://([^/"]+)',
-    os.path.join(SITE_DIR, "map.html"): r'rel="canonical" href="https://([^/"]+)',
+    os.path.join(SITE_DIR, "index.html"): _OWN_URL,
+    os.path.join(SITE_DIR, "map.html"): _OWN_URL,
     os.path.join(SITE_DIR, "robots.txt"): r"Sitemap:\s*https://([^/\s]+)",
     os.path.join(SITE_DIR, "sitemap.xml"): r"<loc>https://([^/<]+)",
+    os.path.join("tools", "social-card.html"): r'<div class="host">([^<]+)</div>',
 }
 
 
@@ -695,6 +725,11 @@ def check_pages(root="."):
                         src.replace("{code}", code) for src in required)
 
     checks["federal/index.html"] = FEDERAL_PAGE_REQUIREMENTS
+    # The directories and the frame load nothing but the shared module.
+    checks["districts/index.html"] = ("../assets/kyc.js",)
+    checks["courts/index.html"] = ("../assets/kyc.js",)
+    checks["about.html"] = ("assets/kyc.js",)
+    checks["404.html"] = ("/assets/kyc.js",)
     checks["legislature/index.html"] = ("../assets/kyc.js", "../data/stategov.js",
                                         "../assets/kyc-stategov.js")
     checks["counties/index.html"] = ("../assets/kyc.js",)
@@ -726,8 +761,11 @@ def check_pages(root="."):
 
         page_dir = os.path.dirname(path)
         for src in required:
+            # A URL from the root ("/assets/kyc.js", the 404 page's) is the
+            # site directory's, wherever the page is served.
+            base = os.path.join(root, SITE_DIR) if src.startswith("/") else page_dir
             if src in loaded and not os.path.exists(
-                os.path.normpath(os.path.join(page_dir, *src.split("/")))
+                os.path.normpath(os.path.join(base, *src.lstrip("/").split("/")))
             ):
                 problems.append(f"{src} is referenced but does not exist")
 
@@ -760,4 +798,15 @@ def check_nav(root="."):
         out.append((f"{page} (navigation)", found == want,
                     "ok" if found == want else
                     "its navigation is not pages.nav_html(\"\", %r): copy it from there" % current))
+        # The frame every generated page has: the footer's last line (About,
+        # Report a problem) and the sidebar's freshness line. The home page
+        # also carries the site's structured data, with its search.
+        frame = [("footer", pages.footer_meta("", pages.BUILD_STAMP)),
+                 ("sidebar's freshness line", pages.built_line("", "stamp"))]
+        host = canonical_host(root)
+        if page == "index.html" and host:
+            frame.append(("structured data", pages.website_jsonld(host).strip()))
+        for what, line in frame:
+            out.append((f"{page} ({what})", line in text, "ok" if line in text else
+                        f"it does not carry the {what} kyc/pages.py writes: copy it from there"))
     return out
