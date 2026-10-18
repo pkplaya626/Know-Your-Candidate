@@ -4465,6 +4465,8 @@ async function testFindRep() {
     check("the state senator and representative, and the county", !!answerRow(here.out, "County") &&
       here.out.querySelectorAll('a[href^="legislature/oh.html#/?"]').length >= 2);
     check("never 'within about 0 km'", !/about 0 k?m/.test(here.text));
+    check("an inland point says nothing of a border or shore", !/border or shore/.test(here.text),
+      here.text.slice(-300));
     check("outside every state, it says so and names nothing",
       /not in any state/.test(paris.text) && !paris.out.querySelector(".findrep-row"), paris.text);
   });
