@@ -4880,11 +4880,33 @@ function mapDrawnAt(width) {
 async function testMapOnAPhone() {
   // Codes were 10 map units: a phone drew them 3.8px tall, at weight 800 on
   // a 2.5-unit halo. Now they are 11px at the width the map is drawn.
-  for (const width of [374, 900]) {
+  for (const width of [320, 360, 374, 390, 900]) {
     const page = await buildPage("map.html", { setup: mapDrawnAt(width) });
     suite(`map.html — the map drawn ${width}px wide`, () => {
       const D = page.D;
       check("no page errors", page.errors.length === 0, page.errors.join(" | "));
+      // No word sits on another (TECH-08): at 320-390px Mississippi's code
+      // sat on Alabama's and West Virginia's on the Vermont callout ("WV T").
+      // Boxes from where each word is placed, at 11px bold capitals' size.
+      const vb = D.getElementById("usMap").getAttribute("viewBox").split(" ").map(Number);
+      const height = width * vb[3] / vb[2];
+      const boxes = [...D.querySelectorAll("#mapLabels .map-label")]
+        .filter((s) => !s.classList.contains("territory-caption"))
+        .map((s) => {
+          const callout = s.classList.contains("map-callout");
+          const w = Math.max(callout ? 2.3 * 11 : 0, s.textContent.length * 6.8 + 4);
+          return { t: s.textContent, x: parseFloat(s.style.left) / 100 * width,
+            y: parseFloat(s.style.top) / 100 * height, w, h: callout ? 15 : 13 };
+        });
+      const overlaps = [];
+      boxes.forEach((a, i) => boxes.slice(i + 1).forEach((b) => {
+        if (Math.abs(a.x - b.x) * 2 < a.w + b.w - 1 && Math.abs(a.y - b.y) * 2 < a.h + b.h - 1) {
+          overlaps.push(a.t + "/" + b.t);
+        }
+      }));
+      check("no state's word covers another's", overlaps.length === 0, overlaps.join(", "));
+      check("and none runs off the screen", boxes.every((b) => b.x - b.w / 2 >= -1 && b.x + b.w / 2 <= width + 1),
+        boxes.filter((b) => b.x - b.w / 2 < -1 || b.x + b.w / 2 > width + 1).map((b) => b.t).join(", "));
       // Every word is page text over the map: inside the SVG, Samsung
       // Internet's dark mode lightened a code's dark halo with the code, and
       // every label bloomed.

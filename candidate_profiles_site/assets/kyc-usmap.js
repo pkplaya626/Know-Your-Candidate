@@ -124,8 +124,11 @@
       }
       function callout(code, cx, cy, cw) {
         var at = geo.states[code].label;
+        // The leader meets the box on the side that faces the state.
+        var x2 = at[0] < cx - cw / 2 ? cx - cw / 2 : at[0] > cx + cw / 2 ? cx + cw / 2 : at[0];
+        var y2 = x2 !== at[0] ? cy : at[1] < cy ? cy - h / 2 : cy + h / 2;
         lines.push('<line class="callout-line" x1="' + at[0] + '" y1="' + at[1] + '" x2="' +
-          (cx - cw / 2).toFixed(1) + '" y2="' + cy.toFixed(1) + '"/>');
+          x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '"/>');
         label(cx, cy, KYC.escapeHtml(awayText(code)), "map-callout",
           ' data-state="' + KYC.escapeAttr(code) + '"');
         placed.push({ x: cx, y: cy, w: cw, h: h });
@@ -135,6 +138,7 @@
       var column = [];
       var beside = [];
       var fits = [];
+      var demoted = [];
       Object.keys(geo.states).sort().forEach(function (code) {
         var shape = geo.states[code];
         parts.push(shapeMarkup(code, shape.name, shape.d));
@@ -169,28 +173,48 @@
             return;
           }
         }
-        (at[0] >= EAST ? column : beside).push(code);
+        demoted.push(code);
       });
 
       /* A callout beside its state, unless it would cover a word already
        * placed or reach the column of callouts in the Atlantic: then it
-       * joins that column. */
-      var colWidth = Math.max.apply(null, [size * 2.3].concat(column.concat(beside).map(calloutWidth)));
+       * joins that column. A state whose own word would not fit among its
+       * neighbours' tries below, left of and above its shape too, so its
+       * callout stays by it: at 320px Mississippi's and Florida's crossed
+       * the whole map to the Atlantic column. */
+      var colWidth = Math.max.apply(null, [size * 2.3].concat(column.concat(beside, demoted).map(calloutWidth)));
       var colLeft = box[2] - 6 / px - colWidth;
       var besideAt = [];
-      beside.forEach(function (code) {
+      function inMap(t, clearOfColumn) {
+        return t.x - t.w / 2 >= box[0] + 2 / px && t.y - h / 2 >= box[1] && t.y + h / 2 <= box[1] + box[3] &&
+          t.x + t.w / 2 < (clearOfColumn ? colLeft - 3 / px : box[0] + box[2] - 2 / px);
+      }
+      function place(code, near) {
         var shape = geo.states[code];
         var cw = calloutWidth(code);
-        var b = { x: shape.bounds[2] + 6 / px + cw / 2, y: shape.label[1], w: cw, h: h };
-        var tries = [0, -1, 1].map(function (dy) { return { x: b.x, y: b.y + dy * h, w: cw, h: h }; });
-        var spot = tries.filter(function (t) { return free(t) && t.x + cw / 2 < colLeft - 3 / px; })[0];
+        var b = shape.bounds;
+        var gapU = 6 / px;
+        var tries = [0, -1, 1].map(function (dy) {
+          return { x: b[2] + gapU + cw / 2, y: shape.label[1] + dy * h, w: cw, h: h, column: true };
+        });
+        if (near) {
+          tries = tries.concat([
+            { x: shape.label[0], y: b[3] + gapU / 2 + h / 2, w: cw, h: h },
+            { x: b[0] - gapU - cw / 2, y: shape.label[1], w: cw, h: h, column: true },
+            { x: shape.label[0], y: b[1] - gapU / 2 - h / 2, w: cw, h: h },
+          ]);
+        }
+        var spot = tries.filter(function (t) { return free(t) && inMap(t, t.column); })[0];
         if (spot) {
+          spot = { x: spot.x, y: spot.y, w: spot.w, h: spot.h };
           placed.push(spot);
           besideAt.push([code, spot]);
         } else {
           column.push(code);
         }
-      });
+      }
+      beside.forEach(function (code) { place(code, false); });
+      demoted.forEach(function (code) { place(code, true); });
       placed = placed.filter(function (b) { return besideAt.every(function (e) { return e[1] !== b; }); });
 
       fitted.forEach(function (f) {
@@ -202,6 +226,9 @@
       column.sort(function (a, b) { return geo.states[a].label[1] - geo.states[b].label[1]; })
         .forEach(function (code) {
           y = Math.max(geo.states[code].label[1], y + gap, COLUMN_TOP + h / 2);
+          // Below any state's own word the column would cover (at 320px
+          // the circuit map's "ME 1" sat on Pennsylvania's "3").
+          for (var n = 0; n < 12 && !free({ x: cx, y: y, w: colWidth, h: h }); n++) y += h / 2;
           callout(code, cx, y, colWidth);
         });
       besideAt.forEach(function (e) {
