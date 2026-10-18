@@ -273,7 +273,13 @@ def build(root="."):
     for code, office, theirs, ours in disputes:
         problems.append(f"{code}: NASS lists {theirs} as {office}, NLGA {ours}; neither is shown")
     problems.extend(officers.ag_problems(officer_cache.get("ag", {})))
-    problems.extend(courts.curated_problems())
+    # A roster typed in from a court's page is held to what a read one is
+    # (courts.read_court refuses it): one that does not fit its court stops
+    # the build. Age is a warning: a person must read the page again.
+    unfit = courts.curated_errors()
+    if unfit:
+        raise StateGovError("overrides.COURT_ROSTERS: " + "; ".join(unfit))
+    problems.extend(courts.curated_stale())
     problems.extend(courts.stale(court_cache))
     states = {}
     for code in sorted(governors):

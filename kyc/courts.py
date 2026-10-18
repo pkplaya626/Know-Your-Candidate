@@ -363,7 +363,14 @@ COURTS = {
         "format": "pdf",
         "dated": r"Revised\s+([A-Z][a-z]+ \d{1,2}, \d{4})",
         "section": [r"(?m)^Supreme Court - ", r"(?m)^Superior Court - "],
-        "item": r"(?m)^(?P<name>(?P<title>(?:Chief\s+)?Justice)\s+(?!\(Vacant\))[^\n]+)$",
+        # A name, and nothing else: a line joins every run of text along its
+        # baseline (pdf_lines), so a phone number or "Retired" set beside a
+        # name would otherwise be read as part of it. Every justice's line
+        # ("every") must be read as a name, or the read is refused.
+        "item": r"(?m)^(?P<name>(?P<title>(?:Chief +)?Justice) +(?!\(Vacant\))"
+                r"[A-Za-zÀ-ÖØ-öø-ÿ]"
+                r"[A-Za-zÀ-ÖØ-öø-ÿ.'’ -]*(?:, *(?:Jr|Sr)\.?)?)$",
+        "every": r"(?m)^(?:Chief +)?Justice +(?!\(Vacant\)$)[^\n]*$",
     },
 }
 
@@ -504,6 +511,13 @@ def pdf_lines(data):
 
 # ------------------------------------------------------- a browser's page
 
+def _host(url):
+    """A URL's host without a leading "www.": the same site either way."""
+    import urllib.parse
+    host = (urllib.parse.urlsplit(url).hostname or "").lower()
+    return host[4:] if host.startswith("www.") else host
+
+
 def read_with_browser(pages, root=".", out_dir=None):
     """``({code: html}, problems)`` for ``{code: url}``, each page as a
     headless Chrome drew it (``BROWSER_TOOL``). A page the browser could not
@@ -536,6 +550,13 @@ def read_with_browser(pages, root=".", out_dir=None):
         if entry.get("error") or not 200 <= int(entry.get("status") or 0) < 300:
             problems.append(f"{code}: the browser read {entry.get('status') or 'nothing'} "
                             f"{entry.get('error') or entry.get('title') or ''} from {pages[code]}".rstrip())
+            continue
+        # A redirect to another site answers 200 like the court would: the
+        # page read is the court's only while it is still on the court's host.
+        final = _host(entry.get("finalUrl") or "")
+        if final != _host(pages[code]):
+            problems.append(f"{code}: the browser was taken from {pages[code]} to "
+                            f"{entry.get('finalUrl') or 'nowhere it named'}; not read")
             continue
         with open(os.path.join(out_dir, f"{code}.html"), encoding="utf-8") as handle:
             found[code] = handle.read()
@@ -612,6 +633,14 @@ def extract(page, recipe):
         stop = re.search(end, rest)
         page = rest[:stop.start()] if stop else rest
     page = re.sub(r"<!--.*?-->", "", page, flags=re.S)
+    if recipe.get("every"):
+        # Each line the court writes for a member must read as a member: a
+        # line the item refuses is a layout the recipe has not seen, not a
+        # seat with nobody in it.
+        for line in re.finditer(recipe["every"], page, re.I):
+            if not re.search(recipe["item"], line.group(0), re.S | re.I):
+                raise CourtsError(f"a member's line the recipe does not read as a name: "
+                                  f"{line.group(0)!r}")
     out, seen = [], set()
     for match in re.finditer(recipe["item"], page, re.S | re.I):
         groups = {k: v for k, v in match.groupdict().items() if v}
@@ -720,6 +749,10 @@ def for_state(code, cache):
         if read:
             court.update(members=read["members"], chief=read["chief"], seats=read["seats"],
                          url=read["url"])
+            if read.get("read"):
+                # The day the court's roster was read, for the page's list
+                # of sources.
+                court["read"] = read["read"]
             if read.get("revised"):
                 court["revised"] = read["revised"]
         elif entry_code in curated():
@@ -753,14 +786,14 @@ def curated():
             for code, entry in COURT_ROSTERS.items()}
 
 
-def curated_problems(today=None):
+def curated_errors():
     """Every curated roster that does not fit its court, as a read roster
-    would be refused (more names than seats, a chief who is not a member,
-    a court with a recipe or no seats), and every one read by hand more
-    than ``STALE_DAYS`` ago. Errors and warnings alike are returned for the
-    build to print; the tests fail on the first kind."""
+    would be refused: more names than seats, a name twice, a chief who is
+    not a member, a court with a recipe or no seats, or no page and words
+    quoted from it. Each is an error that stops the build
+    (``stategov.build``), never a warning: a read roster that broke these
+    would not reach the page, and nor may one typed in."""
     from .government_maps import HIGH_COURTS
-    today = today or datetime.date.today()
     problems = []
     for code, roster in sorted(curated().items()):
         seats = HIGH_COURTS.get(code, ("", 0))[1]
@@ -773,7 +806,23 @@ def curated_problems(today=None):
             problems.append(f"{code}: the curated chief {roster['chief']} is not among its members")
         if not roster["url"].startswith("https://") or not roster["evidence"]:
             problems.append(f"{code}: a curated roster needs the court's page and what it says")
-        age = (today - datetime.date.fromisoformat(roster["read"])).days
+        try:
+            datetime.date.fromisoformat(roster["read"])
+        except (TypeError, ValueError):
+            problems.append(f"{code}: a curated roster needs the day it was read, as YYYY-MM-DD")
+    return problems
+
+
+def curated_stale(today=None):
+    """Every roster read by hand more than ``STALE_DAYS`` ago: a warning for
+    a person to read the court's page again."""
+    today = today or datetime.date.today()
+    problems = []
+    for code, roster in sorted(curated().items()):
+        try:
+            age = (today - datetime.date.fromisoformat(roster["read"])).days
+        except (TypeError, ValueError):
+            continue                             # curated_errors says so
         if age > STALE_DAYS:
             problems.append(f"{code}: the court's roster was read by hand {age} days ago "
                             f"({roster['read']}); read {roster['url']} again and update "
@@ -783,13 +832,14 @@ def curated_problems(today=None):
 
 def stale(cache, today=None):
     """A court whose members come from a read more than ``STALE_DAYS`` old:
-    the refresh kept its last good read (rule 8) every week since. A read
-    from before reads carried their day counts from the cache's."""
+    the refresh kept its last good read (rule 8) every run since. Each read
+    carries its own day, kept with it (kyc/cli.py): the cache's ``fetched``
+    is rewritten by every run, so a court that stopped reading would never
+    age by it, and a read with no day of its own is reported as such."""
     today = today or datetime.date.today()
-    fetched = str((cache or {}).get("fetched") or "")[:10]
     out = []
     for code, court in sorted(((cache or {}).get("courts") or {}).items()):
-        day = court.get("read") or fetched
+        day = str(court.get("read") or "")
         try:
             age = (today - datetime.date.fromisoformat(day)).days
         except ValueError:
@@ -811,6 +861,22 @@ def shrunk(before, after):
             f"(gone: {', '.join(sorted(set(before[code]['members']) - set(after[code]['members']))) or '-'})"
             for code in sorted(set(before) & set(after))
             if after[code]["listed"] < before[code]["listed"]]
+
+
+def changed(before, after):
+    """A court whose members differ from its last read with no fewer of
+    them (``shrunk`` reports the rest). A high court's roster changes a few
+    times a year; a recipe that has begun to read a neighbouring word into a
+    name ("Taft-CarterRetired" from a roster file's line) changes it too,
+    and looks entirely normal on the page. Either is for a person to see."""
+    out = []
+    for code in sorted(set(before) & set(after)):
+        gone = sorted(set(before[code]["members"]) - set(after[code]["members"]))
+        new = sorted(set(after[code]["members"]) - set(before[code]["members"]))
+        if (gone or new) and after[code]["listed"] >= before[code]["listed"]:
+            out.append(f"{code}: the court's members changed since the last read (gone: "
+                       f"{', '.join(gone) or '-'}; new: {', '.join(new) or '-'}); check the court's page")
+    return out
 
 
 def save_cache(courts, root="."):

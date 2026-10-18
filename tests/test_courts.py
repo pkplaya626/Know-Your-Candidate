@@ -113,6 +113,17 @@ class TestRecipes(unittest.TestCase):
         self.assertIn("OK: 8 members read, 9 last time", problems[0])
         self.assertIn("Travis Jett", problems[0])
 
+    def test_a_court_whose_members_changed_is_reported(self):
+        # Review of #98: a recipe that reads a neighbouring word into a name
+        # changes a member and keeps the count; so does a new justice.
+        before = {"RI": {"listed": 4, "members": ["A B", "Sarah Taft-Carter"]},
+                  "OK": {"listed": 9, "members": ["C D"]}, "TX": {"listed": 9, "members": ["E F"]}}
+        after = {"RI": {"listed": 4, "members": ["A B", "Sarah Taft-CarterRetired"]},
+                 "OK": {"listed": 8, "members": []}, "TX": {"listed": 9, "members": ["E F"]}}
+        self.assertEqual(courts.changed(before, after), [
+            "RI: the court's members changed since the last read (gone: Sarah Taft-Carter; "
+            "new: Sarah Taft-CarterRetired); check the court's page"])
+
     def test_a_page_that_does_not_fit_its_court_is_refused(self):
         saved = courts._get_bytes
         try:
@@ -204,6 +215,22 @@ class TestPdf(unittest.TestCase):
         with self.assertRaisesRegex(courts.CourtsError, "revised"):
             self._read(_pdf(RI_PAGE.replace(b"Revised June 5, 2026", b"Judicial Roster")))
 
+    def test_text_set_beside_a_name_is_not_part_of_it(self):
+        # Review of #98: pdf_lines joins every run along a baseline, so a
+        # phone number or a date set beside a name would have been read
+        # as part of it. Such a line is refused, not read and not dropped.
+        for beside in (b"401-222-3266", b"Ret. 2026"):
+            page = RI_PAGE.replace(b"(er)]TJ\n", b"(er)]TJ 200 0 Td (" + beside + b")Tj\n")
+            self.assertIn("Justice Sarah Taft-Carter" + beside.decode(), "\n".join(courts.pdf_lines(_pdf(page))))
+            with self.assertRaisesRegex(courts.CourtsError, "does not read as a name"):
+                self._read(_pdf(page))
+
+    def test_a_suffix_is_part_of_a_name(self):
+        page = RI_PAGE.replace(b"(aul A. Suttell)", b"(aul A. Suttell, Jr.)").replace(
+            b"( Keou)]TJ 13.5 0 Td (gh)Tj", b"( Keough III)]TJ")
+        got = self._read(_pdf(page))
+        self.assertEqual(got["members"][:2], ["Paul A. Suttell, Jr.", "Maureen Keough III"])
+
 
 class TestBrowser(unittest.TestCase):
     """The courts whose page a headless Chrome must draw."""
@@ -282,7 +309,8 @@ class TestBrowser(unittest.TestCase):
                     "fs.writeFileSync(dir + '/CT.html', '<li><a href=\"x\">Justice A B</a>');\n"
                     "fs.writeFileSync(dir + '/MA.html', 'Just a moment...');\n"
                     "fs.writeFileSync(dir + '/manifest.json', JSON.stringify({pages: {"
-                    "CT: {status: 200}, MA: {status: 403, title: 'Just a moment...'}}}));\n")
+                    "CT: {status: 200, finalUrl: 'https://a.example/'}, "
+                    "MA: {status: 403, title: 'Just a moment...', finalUrl: 'https://b.example/'}}}));\n")
             found, problems = courts.read_with_browser(
                 {"CT": "https://a.example/", "MA": "https://b.example/"}, root=root,
                 out_dir=os.path.join(root, "out"))
@@ -292,6 +320,34 @@ class TestBrowser(unittest.TestCase):
         self.assertEqual(len(problems), 1)
         self.assertIn("MA: the browser read 403", problems[0])
 
+    @unittest.skipUnless(shutil.which("node"), "needs Node")
+    def test_a_page_redirected_to_another_site_is_not_read(self):
+        # Review of #98: a redirect answers 200 like the court would. The
+        # same site with or without "www." is still the court's.
+        root = tempfile.mkdtemp()
+        try:
+            os.makedirs(os.path.join(root, "tools"))
+            with open(os.path.join(root, courts.BROWSER_TOOL), "w", encoding="utf-8") as handle:
+                handle.write(
+                    "import fs from 'node:fs';\n"
+                    "const dir = process.argv[3];\n"
+                    "fs.mkdirSync(dir, { recursive: true });\n"
+                    "for (const c of ['CT', 'MA', 'TN']) fs.writeFileSync(dir + '/' + c + '.html', 'x');\n"
+                    "fs.writeFileSync(dir + '/manifest.json', JSON.stringify({pages: {"
+                    "CT: {status: 200, finalUrl: 'https://www.court.example/justices'}, "
+                    "MA: {status: 200, finalUrl: 'https://slots.example/lander'}, "
+                    "TN: {status: 200}}}));\n")
+            found, problems = courts.read_with_browser(
+                {"CT": "https://court.example/justices", "MA": "https://www.mass.example/sjc",
+                 "TN": "https://tn.example/"}, root=root, out_dir=os.path.join(root, "out"))
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+        self.assertEqual(sorted(found), ["CT"])
+        self.assertEqual(len(problems), 2, problems)
+        self.assertTrue(problems[0].startswith("MA: the browser was taken from https://www.mass.example/sjc "
+                                               "to https://slots.example/lander"), problems)
+        self.assertTrue(problems[1].startswith("TN: the browser was taken"), problems)
+
 
 class TestCurated(unittest.TestCase):
     """Four courts' sites refuse every automated reader; their rosters were
@@ -300,10 +356,11 @@ class TestCurated(unittest.TestCase):
     def test_the_committed_rosters_fit_their_courts(self):
         for code, roster in courts.curated().items():
             day = datetime.date.fromisoformat(roster["read"])
-            self.assertEqual(courts.curated_problems(today=day), [], code)
+            self.assertEqual(courts.curated_stale(today=day), [], code)
             # The evidence quotes every name the roster lists.
             for name in roster["members"]:
                 self.assertIn(name.split()[-1], roster["evidence"], (code, name))
+        self.assertEqual(courts.curated_errors(), [])
 
     def test_a_hand_read_roster_is_checked_like_a_read_one(self):
         from kyc import overrides
@@ -315,7 +372,7 @@ class TestCurated(unittest.TestCase):
                 "NV": ("https://nvcourts.gov/x", "2026-10-18", ("A B", "C D"), "E F", "quoted"),
                 "MA": ("https://www.mass.gov/x", "2026-10-18", ("A B",), "", "quoted"),
                 "NY": ("https://www.nycourts.gov/x", "2026-10-18", ("A B",), "", "")})
-            problems = courts.curated_problems(today=datetime.date(2026, 10, 18))
+            problems = courts.curated_errors()
         finally:
             overrides.COURT_ROSTERS.clear()
             overrides.COURT_ROSTERS.update(saved)
@@ -329,9 +386,25 @@ class TestCurated(unittest.TestCase):
         roster = courts.curated()["NY"]
         day = datetime.date.fromisoformat(roster["read"])
         late = day + datetime.timedelta(days=courts.STALE_DAYS + 1)
-        self.assertEqual(courts.curated_problems(today=day + datetime.timedelta(days=courts.STALE_DAYS)), [])
+        self.assertEqual(courts.curated_stale(today=day + datetime.timedelta(days=courts.STALE_DAYS)), [])
         self.assertTrue(any(p.startswith("NY: the court's roster was read by hand")
-                            for p in courts.curated_problems(today=late)))
+                            for p in courts.curated_stale(today=late)))
+        # Age is a warning; it is not a roster that does not fit its court.
+        self.assertEqual(courts.curated_errors(), [])
+
+    def test_a_hand_read_roster_that_does_not_fit_stops_the_build(self):
+        # Review of #98: a read roster with more names than seats never
+        # reaches the page (read_court refuses it), so nor may a typed one.
+        from kyc import overrides
+        saved = dict(overrides.COURT_ROSTERS)
+        try:
+            url, read, members, chief, evidence = saved["NV"]
+            overrides.COURT_ROSTERS["NV"] = (url, read, members, "Someone Else", evidence)
+            with self.assertRaisesRegex(stategov.StateGovError, "NV: the curated chief Someone Else"):
+                stategov.build(ROOT)
+        finally:
+            overrides.COURT_ROSTERS.clear()
+            overrides.COURT_ROSTERS.update(saved)
 
     def test_the_page_says_a_roster_was_read_by_hand_and_when(self):
         court = courts.for_state("NY", {"courts": {}})["court"]
@@ -354,13 +427,47 @@ class TestStale(unittest.TestCase):
 
     def test_a_read_kept_too_long_is_reported(self):
         cache = {"fetched": "2026-10-18T00:00:00+00:00", "courts": {
-            "CT": {"read": "2026-08-01"}, "MA": {"read": "2026-10-10"}, "TX": {}}}
+            "CT": {"read": "2026-08-01"}, "MA": {"read": "2026-10-10"}}}
         problems = courts.stale(cache, today=datetime.date(2026, 10, 18))
         self.assertEqual(len(problems), 1)
         self.assertTrue(problems[0].startswith("CT: the court's roster was last read 78 days ago"))
-        # A read from before reads carried their day is as old as the cache.
-        late = courts.stale(cache, today=datetime.date(2026, 12, 31))
-        self.assertTrue(any(p.startswith("TX:") for p in late), late)
+        # A read with no day of its own is not dated by "fetched": every run
+        # rewrites that, so a court that stopped reading would never age.
+        cache["courts"] = {"MA": {"read": "2026-10-10"}, "TX": {}}
+        problems = courts.stale(cache, today=datetime.date(2026, 10, 18))
+        self.assertEqual(problems, ["TX: the cache does not say when the court's roster was read"])
+
+    def test_a_kept_read_keeps_its_day_across_runs(self):
+        # Review of #98: a court that fails every refresh keeps its last good
+        # read (rule 8) and its day - also one from before reads carried a
+        # day, which takes the day of the run that read it.
+        import argparse
+        import contextlib
+        import io
+        from kyc import cli
+        root = tempfile.mkdtemp()
+        saved = courts.fetch
+        try:
+            os.makedirs(os.path.join(root, os.path.dirname(courts.CACHE_PATH)))
+            court = {"members": ["A B"], "chief": "A B", "listed": 1, "seats": 7, "url": "u"}
+            with open(os.path.join(root, courts.CACHE_PATH), "w", encoding="utf-8") as handle:
+                json.dump({"fetched": "2026-08-01T10:00:00+00:00",
+                           "courts": {"CT": dict(court), "MA": dict(court, read="2026-07-01")}}, handle)
+            courts.fetch = lambda codes=None, pause=1.0, root=".": ({}, [])
+            out = io.StringIO()
+            for _ in range(2):
+                with contextlib.redirect_stdout(out), contextlib.redirect_stderr(io.StringIO()):
+                    self.assertEqual(cli._courts(argparse.Namespace(root=root, check=False)), 0)
+            cache = courts.load_cache(root)
+        finally:
+            courts.fetch = saved
+            shutil.rmtree(root, ignore_errors=True)
+        self.assertEqual(cache["courts"]["CT"]["read"], "2026-08-01")
+        self.assertEqual(cache["courts"]["MA"]["read"], "2026-07-01")
+        self.assertNotEqual(cache["fetched"][:10], "2026-08-01")
+        self.assertIn("CT: kept the last good read, of 2026-08-01", out.getvalue())
+        late = courts.stale(cache, today=datetime.date(2026, 10, 18))
+        self.assertEqual([p.split(":")[0] for p in late], ["CT", "MA"])
 
     def test_a_read_says_when_it_was_read(self):
         saved = courts._get_bytes
@@ -409,6 +516,12 @@ class TestCommitted(unittest.TestCase):
             if recipe.get("browser") or recipe.get("format") == "pdf":
                 self.assertIn(code, cache["courts"], code)
         self.assertTrue(cache["courts"]["RI"].get("revised"))
+
+    def test_every_read_carries_its_day(self):
+        cache = courts.load_cache(ROOT)
+        for code, court in cache["courts"].items():
+            datetime.date.fromisoformat(court.get("read") or "missing")
+        self.assertEqual(courts.stale(cache, today=datetime.date.fromisoformat(cache["fetched"][:10])), [])
 
     def test_every_roster_fits_its_court(self):
         for code, court in courts.load_cache(ROOT)["courts"].items():

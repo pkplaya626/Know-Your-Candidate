@@ -522,13 +522,14 @@
         '<p class="faint">' + members.length + " of " + court.seats + " seats" +
         (short > 0 ? "; " + short + " with nobody listed by the court" : "") +
         (court.chief ? "" : "; the court lists no " + chiefTitle.toLowerCase()) + ". " +
-        link(court.url, "The court's roster") +
+        // A roster file says so before a tap starts a download.
+        link(court.url, /\.pdf(?:[?#]|$)/i.test(court.url) ? "The court's roster (PDF)" : "The court's roster") +
         // Where the list came from, when it is not this week's read of the
         // page: a roster file's own date, or a page read by hand because
         // the site refuses automated reading (rule 57).
-        (court.revised ? ", dated " + KYC.escapeHtml(KYC.dayMonthYear(court.revised)) + "." : "") +
+        (court.revised ? ", dated " + KYC.escapeHtml(KYC.dayMonthYear(court.revised)) : "") +
         (court.readOn ? ", read by hand on " + KYC.escapeHtml(KYC.dayMonthYear(court.readOn)) +
-          ": the court's site refuses automated reading." : "") + "</p>";
+          ": the court's site refuses automated reading" : "") + ".</p>";
     }
     return '<p class="panel-subhead">' + KYC.escapeHtml(court.name) + "</p>" + about + body +
       (court.note ? '<p class="faint">' + KYC.escapeHtml(court.note) + "</p>" : "");
@@ -609,8 +610,18 @@
       // counts are Open States' own (stategov.filled_where_vacant reports
       // where the two counts part).
       (s.upper ? "Seats: " + source("openstates") + "." + (ncsl ? " Which party holds each chamber " +
-        "is checked against " + source("ncsl") + "." : "") : "") + "</p>";
+        "is checked against " + source("ncsl") + "." : "") : "") +
+      courtSource(s.court) + courtSource(s.criminalCourt) + "</p>";
     return html;
+  }
+
+  /** A court's line in the list of sources: whose roster, and the day it
+   * was read - by the refresh, or by hand. */
+  function courtSource(court) {
+    var day = court && (court.readOn || court.read);
+    if (!day || !court.members) return "";
+    return " " + KYC.escapeHtml(court.name) + ": the court's own roster (" +
+      (court.readOn ? "read by hand, " : "") + KYC.escapeHtml(KYC.dateWords(day)) + ").";
   }
 
   /* An NGA headshot that fails to load leaves the card without one, not a

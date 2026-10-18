@@ -16,6 +16,7 @@ off disk also works when served, and the render tests exercise both.
 import html
 import string
 
+from .courts import STALE_DAYS as COURT_STALE_DAYS
 from .normalize import TERRITORIES, US_STATES
 
 STATE_NAMES = {}
@@ -1491,9 +1492,9 @@ DATASETS = (
     ("State legislators", '<a href="https://openstates.org/">Open States</a>',
      "Every state legislator and their district", "refresh", "openstates"),
     ("State supreme courts",
-     "Each court's own roster; read by hand, and dated, where the court's site refuses "
-     "automated reading", "Each state's highest court",
-     "refresh", "statecourts"),
+     "Each court's own page or roster file. Where a court's site refuses automated reading, "
+     "a person reads its page; each state's page says how and on which day",
+     "Each state's highest court", "courts", "statecourts"),
     ("Voting information", '<a href="https://www.nass.org/can-I-vote">NASS Can I Vote</a>',
      "Each state's official pages to register, find a polling place and vote", "refresh",
      "voting"),
@@ -1520,6 +1521,9 @@ DATASETS = (
 
 _WHEN_READ = {
     "refresh": "Each scheduled refresh",
+    # The build warns once a roster read by hand is older than that.
+    "courts": "Each scheduled refresh; a roster read by hand, by a person within "
+              f"{COURT_STALE_DAYS} days",
     "odds": "Every 12 hours, until polls close",
     "fixed": "Fixed: counted in 2022",
     "maps": "When a map changes",
