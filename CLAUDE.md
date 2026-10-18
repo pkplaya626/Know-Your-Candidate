@@ -40,6 +40,7 @@ data/executives.json        ──┤   (every governor, from the NGA)
 data/statewide_officers.json ─┤   (lieutenant governors, secretaries of state, attorneys general)
 data/courts.json            ──┤   (each state's highest court, from the courts)
 data/voting_links.json      ──┤   (each state's official voting pages: NASS Can I Vote)
+data/voting_dates.json      ──┤   (each jurisdiction's key dates, from its own pages: hand-edited, kyc/voting_dates.py)
 data/federal_executive.json ──┤   (President, VP, Cabinet: White House, office pages, Senate votes)
 data/judiciary.json         ──┤   (every sitting federal judge: FJC directory; the Supreme Court's own list)
 data/judicial_vacancies.json ─┤   (vacancies, announced vacancies and emergencies: uscourts.gov)
@@ -106,7 +107,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `disclosures.json`, `primary_results.json`, `committees.json`,
   `campaigns.json`, `enrichment.json`, `odds.json`,
   `census_governments.json`, `state_legislators.json`, `executives.json`,
-  `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`,
+  `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`, `voting_dates.json`,
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
   `judge_links.json`, `court_districts.json`,
   `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json`, `local_sites.json`
@@ -167,8 +168,8 @@ python tools/fetch_legislative_maps.py        # state senate and house boundarie
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1636 tests, no dependencies
-npm install && npm test                       # 2182 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1672 tests, no dependencies
+npm install && npm test                       # 2232 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1345,6 +1346,44 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (`kyc/territorial_courts.py`, rule 57). And a count of judges by
     appointing President is a count of Presidents, in `--cat-*` colours,
     never a party's.
+
+84. **A date a reader acts on is the office's own, and is said passed on
+    the reader's day.** Seventeen days before the election every state page
+    offered "Register to vote" - Georgia's twelve days after its deadline -
+    and gave no early-voting or mail-ballot date, because typing dates in
+    was refused as drift. Each jurisdiction's dates are now a hand-edited
+    cache, `data/voting_dates.json`, read from the election office's own
+    pages, calendars and statutes and re-opened by a second reader. Every
+    value the page shows carries its page's address and words
+    (`voting_dates.SHOWN`; a time of day may stand on its date's source,
+    but "postmarked" or "received" only on a quote that says it), on the
+    jurisdiction's own domains (`JURISDICTION_DOMAINS`) or an evidenced
+    entry in `OFFICIAL_ELSEWHERE`: being on .gov is not enough, since
+    another state's office, a county and a federal guide all are. A
+    compiled table is refused wherever it appears (rule 50), vote.gov,
+    fvap.gov and usa.gov included, and vote.gov's deadlines page is not
+    shown beside the state's own dates (rule 53). Where a reader can
+    register and vote at once, a deadline before Election Day is the
+    regular one, never "the last day" or "open until": the first page told
+    Illinois readers on October 18 that it was the last day to register,
+    with grace-period registration open to November 3. Where the record
+    does not say whether there is same-day registration, the page gives
+    the deadline and claims nothing more. Where same-day registration
+    happens is the office's words, quoted and checked against a cited
+    quote; the researchers' summary had been shown. A date the office
+    gives as a rule ("15 days before the election", Guam's runoff on "the
+    fourteenth day" after it) is that rule counted on the calendar, and the
+    page says so; a counted date that lands where the office cannot act
+    (D.C.'s in-person deadline, a Sunday) is not shown. A December date the
+    results reader also holds must be the same date in both. The pipeline
+    writes the words; the page only decides, on the reader's own calendar
+    day, which have passed: "Register to vote" then says when it closed,
+    and from the day after the election only a ballot still arriving and a
+    runoff stay, the runoff in the past tense once gone (rule 63). A null
+    is a gap and says nothing; a researcher's note is never shown. A
+    runoff says what it decides (`RUNOFF_WORDS`): Arkansas's December 1 is
+    not a runoff for Congress. The cycle's dates are reread each cycle, and
+    `check` refuses a date outside it.
 
 ## District maps
 
