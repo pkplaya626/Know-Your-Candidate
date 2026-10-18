@@ -3690,6 +3690,56 @@ a.badge-link {
 /* A district's two parties, half and half: the split colour of the map. */
 .district-shape.party-split { fill: color-mix(in srgb, var(--split) 70%, var(--surface-1)); }
 .swatch.party-fill-split { background: color-mix(in srgb, var(--split) 70%, var(--surface-1)); }
+/* A seat elected without a party label (Nebraska's Legislature) is a
+ * neutral of its own, apart from a seat with nobody listed, which is left
+ * plain and outlined (audit 2026-10-17, STATEGOV-06). */
+.district-shape.party-n { fill: color-mix(in srgb, var(--text-muted) 45%, var(--surface-1)); }
+.legislature-page .district-shape.party-n { stroke: var(--surface-0); stroke-width: 1.4; }
+.swatch.party-fill-n { background: color-mix(in srgb, var(--text-muted) 45%, var(--surface-1)); }
+.swatch.party-fill-none { border-style: dashed; border-color: var(--text-muted); }
+.party-legend .key[hidden] { display: none; }
+
+/* One square per seat (KYC.seatStrip), filled from the left by column so it
+ * reads as a bar; a tick above and below marks half the seats. The tick
+ * stays off the squares: drawn through them it hid the one outlined seat of
+ * Minnesota's House at 390px (PR #96 review). */
+.seat-strip {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--seat-cols), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--seat-rows), auto);
+  grid-auto-flow: column;
+  gap: 2px;
+  max-width: calc(var(--seat-cols) * var(--s-4));
+  margin: var(--s-2) 0;
+}
+.seat {
+  aspect-ratio: 1;
+  border: 1px solid transparent;
+  border-radius: 1px;
+}
+.seat-d { background: var(--party-d); }
+.seat-r { background: var(--party-r); }
+.seat-i { background: var(--party-i); }
+.seat-n { background: color-mix(in srgb, var(--text-muted) 45%, var(--surface-1)); }
+.seat-none { background: transparent; border-color: var(--text-muted); }
+.seat-half {
+  position: absolute;
+  top: calc(-1 * var(--s-1) - 2px);
+  bottom: calc(-1 * var(--s-1) - 2px);
+  width: 2px;
+  margin-left: -1px;
+  background: linear-gradient(var(--text) 0 var(--s-1), transparent var(--s-1) calc(100% - var(--s-1)),
+    var(--text) calc(100% - var(--s-1)));
+}
+.seat-key { font-size: var(--t-xs); color: var(--text-muted); margin: 0 0 var(--s-2); }
+.leg-seats { margin: 0 0 var(--s-3); }
+.leg-seats .seat-strip { margin-top: var(--s-1); }
+.leg-holds { font-weight: 600; color: var(--text); }
+.leg-ballot a,
+.leg-page a { color: var(--accent); }
+.leg-lines { font-size: var(--t-xs); color: var(--text-muted); }
+.gov-chamber .seat-strip { margin: var(--s-1) 0; }
 /* The picked district: outlined over every fill. */
 .region-shape.is-focus { stroke: var(--text); stroke-width: 2.4; }
 
