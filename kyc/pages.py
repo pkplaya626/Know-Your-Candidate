@@ -220,6 +220,8 @@ _CONGRESS_SIDEBAR = """
                 <span class="value" id="houseSeatsUp"></span></div>
             <div class="stat-row"><span>Challengers on the ballot</span>
                 <span class="value" id="challengerCount"></span></div>
+            <div class="stat-row"><span>Candidates for open seats</span>
+                <span class="value" id="openCandidateCount"></span></div>
             <a class="sidebar-link learn-link" href="../government/elections.html">How elections work</a>
         </div>
 """

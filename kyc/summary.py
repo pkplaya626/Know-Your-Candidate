@@ -155,6 +155,10 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None):
     # results name with no profile here (rule 22).
     summary["election"]["challengersOnBallot"] = sum(
         s["challengersOnBallot"] for s in summary["states"].values())
+    # Of them, the people running for open seats, whom nobody is challenging:
+    # the sidebar shows the two apart, as the state strips do (RACES-14).
+    summary["election"]["openCandidates"] = sum(
+        s["openCandidates"] for s in summary["states"].values())
     if races is not None and any("candidateCount" in r for r in races):
         # Its two parts, each counted from the races, so the sidebar's
         # breakdown needs no subtraction: profiles still on the ballot
@@ -227,7 +231,7 @@ def by_state(profiles, races=None):
         entry = out.setdefault(code, {
             "name": state_name(code), "senators": 0, "house": 0, "delegates": 0,
             "seatsUp": 0, "open": 0, "renumbered": 0, "challengersOnBallot": 0,
-            "challengersOut": 0,
+            "challengersOut": 0, "openCandidates": 0,
             "races": 0, "territory": code in TERRITORIES,
             # The state's own delegation by party, for its sidebar. A
             # territory's delegate sits in the House, so counts there.
@@ -285,8 +289,14 @@ def by_state(profiles, races=None):
             entry["challengersFiled"] = entry.get("challengersFiled", 0) + race.get(
                 "candidateCount", 0)
         elif counted:
-            entry["challengersOnBallot"] += race.get("candidateCount", 0) + len(
+            listed = race.get("candidateCount", 0) + len(
                 (race.get("results") or {}).get("otherNominees") or [])
+            entry["challengersOnBallot"] += listed
+            if race.get("openSeat"):
+                # Of them, the people running for a seat nobody holds on its
+                # ballot: candidates, not challengers (RACES-14). The total
+                # stays the race headers' sum (rule 73); the page splits it.
+                entry["openCandidates"] += listed
         entry["races"] += 1
         entry["seatsUp"] += 1
         if race.get("holderMoved"):

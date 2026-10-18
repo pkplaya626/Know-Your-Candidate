@@ -1609,14 +1609,21 @@
     var challengers = doc.getElementById("challengerCount");
     if (challengers) {
       var running = election.challengersOnBallot;
+      // Open-seat candidates are nobody's challengers: the sidebar called
+      // them "Challengers on the ballot" after the state strips stopped
+      // (RACES-14). The two rows sum to the race headers' count (rule 73).
+      var open = election.openCandidates || 0;
       challengers.textContent = String(
-        running !== undefined ? running : (election.challengers || 0)
+        running !== undefined ? running - open : (election.challengers || 0)
       );
+      var openRow = doc.getElementById("openCandidateCount");
+      if (openRow) openRow.textContent = String(open);
       // The same count as every race header: everyone on the ballot but a
       // member running for the seat they hold, profile or not.
       if (running !== undefined) {
-        challengers.title = "Everyone on the 2026 ballot except members running for the seat " +
-          "they hold, open-seat candidates included: " +
+        challengers.title = "Everyone on the 2026 ballot for a seat whose holder is running for " +
+          "it, except that member. With the " + open + " candidates for open seats, " + running +
+          " people are on the ballot besides members running for the seat they hold: " +
           (election.challengersWithProfile !== undefined
             ? election.challengersWithProfile + " with a profile here" +
               (election.renumbered ? " (" + election.renumbered + " of them members running " +

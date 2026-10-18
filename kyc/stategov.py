@@ -222,6 +222,32 @@ def _governor(gov, problems=None):
     return out
 
 
+def office_links(code, entry):
+    """Apply ``overrides.OFFICE_LINKS`` to one state's offices, in place.
+    Returns a problem for each entry whose roster no longer lists what it
+    replaces: the roster changed, and the entry may now be unneeded."""
+    from .overrides import OFFICE_LINKS
+
+    problems = []
+    for (state, office, field), (listed, shown, _evidence) in sorted(OFFICE_LINKS.items()):
+        if state != code:
+            continue
+        holder = entry.get(office)
+        if not isinstance(holder, dict) or holder.get("none") or not holder.get("name"):
+            problems.append(f"{code} {office} {field}: overrides.OFFICE_LINKS names no holder here")
+            continue
+        if holder.get(field) != listed:
+            problems.append(f"{code} {office} {field}: the roster now lists "
+                            f"{holder.get(field) or 'nothing'}, not {listed or 'nothing'}; "
+                            f"overrides.OFFICE_LINKS may be unneeded")
+            continue
+        if shown:
+            holder[field] = shown
+        else:
+            holder.pop(field, None)
+    return problems
+
+
 # -------------------------------------------------------------------- build
 
 def build(root="."):
@@ -255,10 +281,23 @@ def build(root="."):
             # and courts are not covered rather than leaving them out silently.
             entry["territory"] = True
         entry.update(officers.for_state(code, officer_cache, disputes))
+        problems.extend(office_links(code, entry))
         entry.update(courts.for_state(code, court_cache))
-        if code in ballot2026.STATES:
-            # Which of these offices and seats are elected on November 3.
+        if code in ballot2026.STATES or code in ballot2026.TERRITORIES:
+            # Which of these offices and seats are elected on November 3, and
+            # for each office on it, whether a cited source says its holder
+            # is running - or, said in words, that nothing here checked.
             entry["ballot2026"] = ballot2026.for_state(code)
+            for key, item in entry["ballot2026"]["offices"].items():
+                if not item["up"]:
+                    continue
+                holder = entry["governor"] if key == "governor" else entry.get(key) or {}
+                seat, problem = ballot2026.open_seat(code, key, holder.get("name"),
+                                                     holder.get("terms"))
+                if problem:
+                    problems.append(problem)
+                if seat:
+                    item["holderStatus"] = seat
         if code in STATES:
             entry.update(_legislature(code, legislators.get(code, []), ncsl["states"].get(code),
                                       entry["governor"]["partyKey"], problems))

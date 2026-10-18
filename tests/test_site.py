@@ -561,6 +561,26 @@ class TestStatePages(unittest.TestCase):
                  {"id": "H-MI-01-2026", "state": "MI", "openSeat": False, "candidateCount": 0,
                   "results": {"otherNominees": ["E F"]}}]
         self.assertEqual(summary.by_state(people, races)["MI"]["challengersOnBallot"], 4)
+        # Of them, the open seat's are candidates, not challengers (audit
+        # 2026-10-17, RACES-14): the page splits the same total.
+        self.assertEqual(summary.by_state(people, races)["MI"]["openCandidates"], 3)
+
+    def test_a_race_says_how_its_ballot_is_decided(self):
+        # A top-two ballot of two Democrats read like a misprint with the rule
+        # only in a hover title (RACES-11), and Georgia's and Louisiana's
+        # December rounds were on no page (PERSONA-06). From the tables
+        # that cite each statute, never typed per race.
+        from kyc import races as races_mod
+        self.assertEqual(races_mod.ballot_kind({"state": "CA", "chamber": "House", "year": 2026}),
+                         {"primaryKind": "top-two"})
+        self.assertEqual(races_mod.ballot_kind({"state": "AK", "chamber": "Senate", "year": 2026}),
+                         {"primaryKind": "top-four"})
+        self.assertEqual(races_mod.ballot_kind({"state": "LA", "chamber": "House", "year": 2026}),
+                         {"primaryKind": "open", "generalRunoff": "2026-12-12"})
+        self.assertEqual(races_mod.ballot_kind({"state": "LA", "chamber": "Senate", "year": 2026}), {})
+        self.assertEqual(races_mod.ballot_kind({"state": "GA", "chamber": "Senate", "year": 2026}),
+                         {"generalRunoff": "2026-12-01"})
+        self.assertEqual(races_mod.ballot_kind({"state": "TX", "chamber": "House", "year": 2026}), {})
 
     def test_filers_with_no_primary_and_no_ballot_are_not_counted_on_it(self):
         # American Samoa read "0 challengers on the ballot" over a race card

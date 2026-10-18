@@ -869,10 +869,20 @@ STATES = {
             "https://www.capitol.tn.gov/senate/"),
         "ag": ("appointed", False,
             "appointed by the Tennessee Supreme Court for an 8-year term (Tenn. Const. art. VI, s5)",
-            "https://www.capitol.tn.gov/about/docs/tn-constitution.pdf"),
+            # The General Assembly's constitution PDF now answers "Page Not
+            # Found" as HTML (audit 2026-10-17, LINKS-08). The Secretary of
+            # State's 2023 printing of the constitution reads, art. VI, s.5:
+            # "An Attorney General and Reporter for the State, shall be
+            # appointed by the Judges of the Supreme Court and shall hold his
+            # office for a term of eight years" (read 2026-10-17; the
+            # courts' page cited before sits behind a browser check).
+            "https://publications.tnsosfiles.com/pub/2023%20TN%20Constitution.pdf"),
         "sos": ("chosen-by-legislature", False,
             "chosen by joint vote of the General Assembly (Tenn. Const. art. III, s17)",
-            "https://www.capitol.tn.gov/about/docs/tn-constitution.pdf"),
+            # The same printing, art. III, s.17: "A Secretary of State shall
+            # be appointed by joint vote of the General Assembly, and
+            # commissioned during the term of four years" (read 2026-10-17).
+            "https://publications.tnsosfiles.com/pub/2023%20TN%20Constitution.pdf"),
         "upper": ("Senate", 33, 17,
             "the 17 odd-numbered districts",
             "https://sos-prod.tnsosgovfiles.com/s3fs-public/document/TNSenate_Nov2026.pdf"),
@@ -1042,15 +1052,282 @@ STATES = {
     },
 }
 
+# The territories' governors, each from the territory's own record or the
+# federal law that sets its elections (audit 2026-10-17, RACES-07): the
+# governor2026 map called Guam, the Virgin Islands and the Northern Mariana
+# Islands "not covered" while each elects its governor on November 3. Only
+# the governor and lieutenant governor: the national associations list no
+# territory's attorney general or secretary of state as an elected office
+# this site covers. Checked 2026-10-17.
+TERRITORIES = {
+    "GU": {
+        "governor": ("elected", True,
+            "Elected with the lieutenant governor on one ticket at the general election "
+            "every four years from 1974 (48 U.S.C. 1422); a runoff if no ticket wins a majority",
+            "https://www.law.cornell.edu/uscode/text/48/1422"),
+        "lt": ("elected-jointly-with-governor", True,
+            "Elected on one ticket with the governor (48 U.S.C. 1422)",
+            "https://www.law.cornell.edu/uscode/text/48/1422"),
+    },
+    "VI": {
+        "governor": ("elected", True,
+            "Elected with the lieutenant governor on one ticket at the general election "
+            "every four years from 1974 (48 U.S.C. 1591); the Elections System's 2026 "
+            "candidate listing names the tickets",
+            "https://www.law.cornell.edu/uscode/text/48/1591"),
+        "lt": ("elected-jointly-with-governor", True,
+            "Elected on one ticket with the governor (48 U.S.C. 1591)",
+            "https://www.law.cornell.edu/uscode/text/48/1591"),
+    },
+    "MP": {
+        "governor": ("elected", True,
+            "Three governor and lieutenant governor tickets on the Commonwealth Election "
+            "Commission's certified 2026 list; each ticket is elected as a unit",
+            "https://www.votecnmi.gov.mp/candidate/2026-certified-candidates-listing"),
+        "lt": ("elected-jointly-with-governor", True,
+            "Elected on one ticket with the governor, as the Commission's certified list says",
+            "https://www.votecnmi.gov.mp/candidate/2026-certified-candidates-listing"),
+    },
+    "AS": {
+        "governor": ("elected", False,
+            "Elected in 2024 for a four-year term; the Election Office's 2026 midterm list "
+            "holds only the Delegate to Congress and the House of Representatives",
+            "https://www.aselectionoffice.gov/candidates-information/candidates-for-the-2026-midterm-election"),
+        "lt": ("elected-jointly-with-governor", False,
+            "Elected with the governor; not on the Election Office's 2026 midterm list",
+            "https://www.aselectionoffice.gov/candidates-information/candidates-for-the-2026-midterm-election"),
+    },
+    "PR": {
+        "governor": ("elected", False,
+            "Elected at Puerto Rico's general election of November 2024 for a four-year "
+            "term; the State Elections Commission holds no general election in 2026",
+            "https://ww2.ceepur.org/sites/ComisionEE/es-pr/Secretaria/INFORME-ESTADISTICO-ELECCIONES-GENERALES-2024.pdf"),
+        "lt": ("no-such-office", False,
+            "Puerto Rico has no lieutenant governor; the secretary of state is first in succession",
+            "https://ww2.ceepur.org/sites/ComisionEE/es-pr/Secretaria/INFORME-ESTADISTICO-ELECCIONES-GENERALES-2024.pdf"),
+    },
+}
+TERRITORY_CODES = ("AS", "GU", "MP", "PR", "VI")
+
+# When an office or chamber that is not on the 2026 ballot is next elected,
+# where the state's own record says so (audit 2026-10-17, PERSONA-19): "No
+# regular elections in 2026" left a reader to work out the year. Never
+# computed from a term length - Virginia's governor was elected in 2025 and
+# is next elected in 2029, its legislature in 2027 - so an entry without a
+# year here shows none. {(state, office or chamber): (year, source) or
+# (year, source, month)}; each source names the year, or the first year and
+# the cycle that give it. The month is given only where the election is not
+# in November (Louisiana's is in October), and the page then says "Next
+# election", since a runoff may follow.
+MONTHS = ("January", "February", "March", "April", "May", "June", "July", "August",
+          "September", "October", "November", "December")
+NEXT = {
+    # Va. Code 24.2-210: "at the general election in November 1997, and
+    # every fourth year thereafter"; 24.2-214 (Senate) "November 1995, and
+    # every four years"; 24.2-215 (House of Delegates) "every two years".
+    ("VA", "governor"): (2029, "https://law.lis.virginia.gov/vacode/title24.2/chapter2/section24.2-210/"),
+    ("VA", "lt"): (2029, "https://law.lis.virginia.gov/vacode/title24.2/chapter2/section24.2-210/"),
+    ("VA", "ag"): (2029, "https://law.lis.virginia.gov/vacode/title24.2/chapter2/section24.2-210/"),
+    ("VA", "upper"): (2027, "https://law.lis.virginia.gov/vacode/title24.2/chapter2/section24.2-214/"),
+    ("VA", "lower"): (2027, "https://law.lis.virginia.gov/vacode/title24.2/chapter2/section24.2-215/"),
+    # N.J. Const. art. XI, s.III, para. 1: a governor elected "in the year
+    # 1949 and every fourth year thereafter", with the lieutenant governor
+    # "conjointly" (art. V, s.I, para. 4). The Senate runs a 2-4-4 cycle
+    # (art. IV, s.II, para. 2: a two-year term after each census, then two
+    # four-year terms), last elected in 2023 for the four-year term to
+    # January 2028; the General Assembly serves two-year terms, last elected
+    # in 2025. Both are next elected in 2027.
+    ("NJ", "governor"): (2029, "https://www.njleg.state.nj.us/constitution"),
+    ("NJ", "lt"): (2029, "https://www.njleg.state.nj.us/constitution"),
+    ("NJ", "upper"): (2027, "https://www.njleg.state.nj.us/constitution"),
+    ("NJ", "lower"): (2027, "https://www.njleg.state.nj.us/constitution"),
+    # Kentucky's Election Schedule 2026-2036: the state officers in 2027.
+    ("KY", "governor"): (2027, "https://elect.ky.gov/Resources/Documents/Election%20Schedule%202026-2036.pdf"),
+    ("KY", "lt"): (2027, "https://elect.ky.gov/Resources/Documents/Election%20Schedule%202026-2036.pdf"),
+    ("KY", "ag"): (2027, "https://elect.ky.gov/Resources/Documents/Election%20Schedule%202026-2036.pdf"),
+    ("KY", "sos"): (2027, "https://elect.ky.gov/Resources/Documents/Election%20Schedule%202026-2036.pdf"),
+    # Louisiana: the Secretary of State's 2027 elections calendar lists the
+    # "Gubernatorial Primary" on October 9, 2027 and the "Gubernatorial
+    # General" on November 20 (read 2026-10-17). La. Const. art. IV, s.3(A)
+    # elects the governor, lieutenant governor, secretary of state and
+    # attorney general "at the time and place of voting for members of the
+    # legislature" (legis.la.gov/Legis/Law.aspx?d=206439, read 2026-10-17),
+    # so the same election chooses all six. R.S. 18:402, cited here before,
+    # names no year and no legislator (PR #94 review). October, not
+    # November: a candidate with a majority is elected then.
+    ("LA", "governor"): (2027, "https://www.sos.la.gov/media/byfpyc5f/elections-calendar-2027.pdf", "October"),
+    ("LA", "lt"): (2027, "https://www.sos.la.gov/media/byfpyc5f/elections-calendar-2027.pdf", "October"),
+    ("LA", "ag"): (2027, "https://www.sos.la.gov/media/byfpyc5f/elections-calendar-2027.pdf", "October"),
+    ("LA", "sos"): (2027, "https://www.sos.la.gov/media/byfpyc5f/elections-calendar-2027.pdf", "October"),
+    ("LA", "upper"): (2027, "https://www.sos.la.gov/media/byfpyc5f/elections-calendar-2027.pdf", "October"),
+    ("LA", "lower"): (2027, "https://www.sos.la.gov/media/byfpyc5f/elections-calendar-2027.pdf", "October"),
+    # Mississippi elects its governor, statewide officers and legislature
+    # together in odd years; last 2023.
+    ("MS", "governor"): (2027, "https://www.sos.ms.gov/sites/default/files/publications/Election%20Calendar_2026.pdf"),
+    ("MS", "lt"): (2027, "https://www.sos.ms.gov/sites/default/files/publications/Election%20Calendar_2026.pdf"),
+    ("MS", "ag"): (2027, "https://www.sos.ms.gov/sites/default/files/publications/Election%20Calendar_2026.pdf"),
+    ("MS", "sos"): (2027, "https://www.sos.ms.gov/sites/default/files/publications/Election%20Calendar_2026.pdf"),
+    ("MS", "upper"): (2027, "https://www.sos.ms.gov/sites/default/files/publications/Election%20Calendar_2026.pdf"),
+    ("MS", "lower"): (2027, "https://www.sos.ms.gov/sites/default/files/publications/Election%20Calendar_2026.pdf"),
+    # The Secretary of State's table of officeholders, with a "Next
+    # Election" column.
+    ("WV", "governor"): (2028, "https://sos.wv.gov/media/460/download?inline="),
+    ("WV", "ag"): (2028, "https://sos.wv.gov/media/460/download?inline="),
+    ("WV", "sos"): (2028, "https://sos.wv.gov/media/460/download?inline="),
+}
+
+# Offices on the ballot whose holder is not running for them, only where a
+# cited source says so (audit 2026-10-17, STATEGOV-01): the constitution's
+# term limit, read with the NGA's count of the governor's terms, or the
+# election office's certified list for the office, which does not name them.
+# Never inferred, and never from news: a term-limited officer may be on the
+# ballot for another office, and a holder absent from a list that is not a
+# candidate list is not "not running". {(state, office): (holder as the
+# rosters name them, "term-limit" | "not-listed" | "listed", terms the limit
+# needs or None, source, what the source is)}. "listed" is the other answer
+# the same list gives: the holder is on it, for this office. stategov drops
+# an entry, and says so, when the office's holder is someone else or the
+# NGA counts fewer terms.
+#
+# An office on the ballot with no entry here is said to be unchecked, by
+# name, on the page (``holder_status``): with an open-seat line beside
+# Alaska's governor, silence beside Georgia's read as "Brian Kemp is
+# running" (PR #94 review, rule 19). Checked 2026-10-17.
+OPEN_SEATS = {
+    ("AK", "governor"): ("Mike Dunleavy", "term-limit", 2,
+        "https://ltgov.alaska.gov/information/alaskas-constitution/",
+        "Alaska Const. art. III, s.5: no one elected for two full successive terms"),
+    ("AK", "lt"): ("Nancy Dahlstrom", "not-listed", None,
+        "https://www.elections.alaska.gov/candidates/?election=26genr",
+        "the Division of Elections' certified 2026 general election tickets"),
+    ("FL", "governor"): ("Ron DeSantis", "term-limit", 2,
+        "http://www.leg.state.fl.us/statutes/index.cfm?submenu=3#A4S05",
+        "Fla. Const. art. IV, s.5(b): no one who has served more than six years in two "
+        "consecutive terms"),
+    ("IA", "governor"): ("Kim Reynolds", "not-listed", None,
+        "https://sos.iowa.gov/sites/default/files/2026-08/2026%20General%20-%20Candidate%20List%20Database%20-%20All%20Elections_1.pdf",
+        "the Secretary of State's 2026 general election candidate list"),
+    ("IA", "lt"): ("Chris Cournoyer", "not-listed", None,
+        "https://sos.iowa.gov/sites/default/files/2026-08/2026%20General%20-%20Candidate%20List%20Database%20-%20All%20Elections_1.pdf",
+        "the Secretary of State's 2026 general election candidate list"),
+    ("MI", "governor"): ("Gretchen Whitmer", "term-limit", 2,
+        "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-Article-V-30",
+        "Mich. Const. art. V, s.30: no one elected more than two times"),
+    ("OH", "governor"): ("Mike DeWine", "term-limit", 2,
+        "https://codes.ohio.gov/ohio-constitution/section-3.2",
+        "Ohio Const. art. III, s.2: no one longer than two successive terms"),
+    ("SC", "governor"): ("Henry McMaster", "term-limit", 2,
+        "https://www.scstatehouse.gov/scconstitution/A04.pdf",
+        "S.C. Const. art. IV, s.3: no one elected for more than two successive terms"),
+    ("GU", "governor"): ("Lou Leon Guerrero", "term-limit", 2,
+        "https://www.law.cornell.edu/uscode/text/48/1422",
+        "48 U.S.C. 1422: no one elected for two full successive terms"),
+    ("VI", "governor"): ("Albert Bryan", "term-limit", 2,
+        "https://www.law.cornell.edu/uscode/text/48/1591",
+        "48 U.S.C. 1591: no one elected for two full successive terms"),
+    ("MP", "governor"): ("David M. Apatang", "not-listed", None,
+        "https://www.votecnmi.gov.mp/candidate/2026-certified-candidates-listing",
+        "the Commonwealth Election Commission's certified 2026 list"),
+    ("MP", "lt"): ("Dennis Mendiola", "not-listed", None,
+        "https://www.votecnmi.gov.mp/candidate/2026-certified-candidates-listing",
+        "the Commonwealth Election Commission's certified 2026 list"),
+    # Georgia's list of candidates on the November 3 ballot, the spreadsheet
+    # in the zip this page links ("November 2026 Federal and State
+    # Candidates.xlsx", read 2026-10-17): Governor Rick Jackson (R) and
+    # Keisha Lance Bottoms (D); Lieutenant Governor Greg Dolezal (R) and
+    # Josh McLaurin (D); Secretary of State Tim Fleming (R) and Penny Brown
+    # Reynolds (D); Attorney General Brian Strickland (R) and Tanya Miller
+    # (D). None of the four holders is on it (PERSONA-02).
+    ("GA", "governor"): ("Brian Kemp", "not-listed", None,
+        "https://sos.ga.gov/november-3-2026-general-election",
+        "the Secretary of State's list of candidates on the November 3 ballot"),
+    ("GA", "lt"): ("Burt Jones", "not-listed", None,
+        "https://sos.ga.gov/november-3-2026-general-election",
+        "the Secretary of State's list of candidates on the November 3 ballot"),
+    ("GA", "ag"): ("Chris Carr", "not-listed", None,
+        "https://sos.ga.gov/november-3-2026-general-election",
+        "the Secretary of State's list of candidates on the November 3 ballot"),
+    ("GA", "sos"): ("Brad Raffensperger", "not-listed", None,
+        "https://sos.ga.gov/november-3-2026-general-election",
+        "the Secretary of State's list of candidates on the November 3 ballot"),
+    # California's Official Certified List of Candidates, dated August 27,
+    # 2026 (read 2026-10-17): Governor Xavier Becerra and Steve Hilton;
+    # Lieutenant Governor Fiona Ma and Gloria Romero (Eleni Kounalakis is
+    # on it for Treasurer); Secretary of State Shirley N. Weber* and Attorney
+    # General Rob Bonta*, starred as incumbents (STATEGOV-01, RACES-09).
+    ("CA", "governor"): ("Gavin Newsom", "not-listed", None,
+        "https://elections.cdn.sos.ca.gov/statewide-elections/2026-general/cert-list-candidates.pdf",
+        "the Secretary of State's certified list of candidates"),
+    ("CA", "lt"): ("Eleni Kounalakis", "not-listed", None,
+        "https://elections.cdn.sos.ca.gov/statewide-elections/2026-general/cert-list-candidates.pdf",
+        "the Secretary of State's certified list of candidates"),
+    ("CA", "ag"): ("Rob Bonta", "listed", None,
+        "https://elections.cdn.sos.ca.gov/statewide-elections/2026-general/cert-list-candidates.pdf",
+        "the Secretary of State's certified list of candidates"),
+    ("CA", "sos"): ("Shirley Weber", "listed", None,
+        "https://elections.cdn.sos.ca.gov/statewide-elections/2026-general/cert-list-candidates.pdf",
+        "the Secretary of State's certified list of candidates"),
+    # Maine's 2026 General Candidate List (read 2026-10-17): its GOV rows are
+    # Rick Bennett (Independent), Robert B. Charles (R) and Hannah M.
+    # Pingree (D) (FRESHNESS-04).
+    ("ME", "governor"): ("Janet Mills", "not-listed", None,
+        "https://www.maine.gov/sos/sites/maine.gov.sos/files/inline-files/2026%20General%20Candidate%20List%20-%20FINAL.xlsx",
+        "the Secretary of State's 2026 general election candidate list"),
+}
+OPEN_REASONS = ("term-limit", "not-listed", "listed")
+
 
 class Ballot2026Error(ValueError):
     pass
 
 
-def check(states=None):
-    """Every rule the table must keep; raises with every breach at once."""
+def check(states=None, territories=None, next_=None, open_seats=None):
+    """Every rule the tables must keep; raises with every breach at once."""
     states = STATES if states is None else states
+    territories = TERRITORIES if territories is None else territories
+    next_ = NEXT if next_ is None else next_
+    open_seats = OPEN_SEATS if open_seats is None else open_seats
     problems = []
+    if sorted(territories) != sorted(TERRITORY_CODES):
+        problems.append(f"territories: {', '.join(sorted(territories))}, not "
+                        f"{', '.join(TERRITORY_CODES)}")
+    for code, entry in sorted(territories.items()):
+        if sorted(entry) != ["governor", "lt"]:
+            problems.append(f"{code}: a territory holds the governor and lieutenant governor only")
+            continue
+        problems.extend(_office_problems(code, entry))
+    every = dict(states, **territories)
+    for (code, key), value in sorted(next_.items()):
+        item = _item(every.get(code), key)
+        year, source, *rest = value
+        if len(rest) > 1 or (rest and rest[0] not in MONTHS):
+            problems.append(f"next {code} {key}: {rest!r} is not a month")
+        if item is None:
+            problems.append(f"next {code} {key}: no such office or chamber")
+            continue
+        if _is_up(key, item):
+            problems.append(f"next {code} {key}: on the 2026 ballot, so no next year")
+        if key in OFFICES and not item[0].startswith("elected"):
+            problems.append(f"next {code} {key}: {item[0]}, not elected")
+        if not isinstance(year, int) or not int(ELECTION[:4]) < year <= int(ELECTION[:4]) + 4:
+            problems.append(f"next {code} {key}: {year!r} is not a year after 2026 within a term")
+        problems.extend(_source_problems(code, f"next {key}", source))
+    for (code, key), value in sorted(open_seats.items()):
+        item = _item(every.get(code), key) if key in OFFICES else None
+        holder, why, terms, source, cite = value
+        if item is None:
+            problems.append(f"open seat {code} {key}: no such office")
+            continue
+        if not item[1]:
+            problems.append(f"open seat {code} {key}: the office is not on the 2026 ballot")
+        if why not in OPEN_REASONS:
+            problems.append(f"open seat {code} {key}: unknown reason {why!r}")
+        if (why == "term-limit") != isinstance(terms, int):
+            problems.append(f"open seat {code} {key}: a term limit needs the terms it counts, "
+                            f"and nothing else does")
+        if not holder or not cite:
+            problems.append(f"open seat {code} {key}: no holder or no description of the source")
+        problems.extend(_source_problems(code, f"open seat {key}", source))
     missing = sorted(set(STATE_CODES) - set(states))
     extra = sorted(set(states) - set(STATE_CODES))
     if missing:
@@ -1058,19 +1335,7 @@ def check(states=None):
     if extra:
         problems.append(f"not a state: {', '.join(extra)}")
     for code, entry in sorted(states.items()):
-        for office in OFFICES:
-            selection, up, note, source = entry[office]
-            if selection not in SELECTIONS:
-                problems.append(f"{code} {office}: unknown selection {selection!r}")
-            if up and selection not in ("elected", "elected-jointly-with-governor"):
-                problems.append(f"{code} {office}: {selection} yet on the ballot")
-            problems.extend(_source_problems(code, office, source))
-            if not note:
-                problems.append(f"{code} {office}: no note")
-        lt_sel, lt_up = entry["lt"][:2]
-        if lt_sel == "elected-jointly-with-governor" and lt_up != entry["governor"][1]:
-            problems.append(f"{code}: a joint ticket, but the lieutenant governor's "
-                            f"election differs from the governor's")
+        problems.extend(_office_problems(code, entry))
         upper_seats, lower_seats = SEATS[code]
         for which, seats in (("upper", upper_seats), ("lower", lower_seats)):
             chamber = entry[which]
@@ -1093,6 +1358,71 @@ def check(states=None):
     return True
 
 
+def _office_problems(code, entry):
+    problems = []
+    for office in OFFICES:
+        if office not in entry:
+            continue
+        selection, up, note, source = entry[office]
+        if selection not in SELECTIONS:
+            problems.append(f"{code} {office}: unknown selection {selection!r}")
+        if up and selection not in ("elected", "elected-jointly-with-governor"):
+            problems.append(f"{code} {office}: {selection} yet on the ballot")
+        problems.extend(_source_problems(code, office, source))
+        if not note:
+            problems.append(f"{code} {office}: no note")
+    lt_sel, lt_up = entry["lt"][:2]
+    if lt_sel == "elected-jointly-with-governor" and lt_up != entry["governor"][1]:
+        problems.append(f"{code}: a joint ticket, but the lieutenant governor's "
+                        f"election differs from the governor's")
+    return problems
+
+
+def _item(entry, key):
+    """An office's or a chamber's tuple in *entry*, or None."""
+    return (entry or {}).get(key) if key in OFFICES or key in ("upper", "lower") else None
+
+
+def _is_up(key, item):
+    return bool(item[1]) if key in OFFICES else bool(item[2])
+
+
+def open_seat(code, key, holder=None, terms=None):
+    """``(record, problem)``: what the page says about whether the holder of
+    an office on the ballot is running for it, as OPEN_SEATS records it.
+
+    Every office on the ballot with a named holder gets a record, so the
+    page never leaves one office silent beside another that says "Open
+    seat" (rule 19): ``why`` is "term-limit", "not-listed" or "listed" from
+    a cited source, or "unchecked" where OPEN_SEATS has nothing, which the
+    page says in words. None only when the office has no named holder.
+
+    The entry is withheld, the record is "unchecked" and the problem says
+    why, when the office's holder is not the person the entry names (they
+    have left, or the rosters name someone else) or when the NGA counts
+    fewer terms than the term limit needs: an open-seat line about the
+    wrong person, or one the limit does not reach, is worse than none.
+    """
+    unchecked = ({"holder": holder, "why": "unchecked",
+                  "text": f"Whether {holder} is running for this office is not checked here"}
+                 if holder else None)
+    value = OPEN_SEATS.get((code, key))
+    if not value:
+        return unchecked, None
+    name, why, need, source, cite = value
+    if holder != name:
+        return unchecked, (f"{code} {key}: OPEN_SEATS names {name}, but the office's holder "
+                           f"is {holder or 'not listed'}; the open-seat line is withheld")
+    if why == "term-limit" and (terms or 0) < need:
+        return unchecked, (f"{code} {key}: OPEN_SEATS says {name} is term-limited after "
+                           f"{need} terms; the NGA counts {terms or 0}; the open-seat line "
+                           f"is withheld")
+    text = (f"{name} is term-limited" if why == "term-limit"
+            else f"{name} is on the list of candidates for this office" if why == "listed"
+            else f"{name} is not on the list of candidates for this office")
+    return {"holder": name, "why": why, "text": text, "source": source, "cite": cite}, None
+
+
 def _source_problems(code, field, source):
     parts = urllib.parse.urlsplit(source or "")
     if parts.scheme not in ("http", "https") or not parts.netloc:
@@ -1103,22 +1433,36 @@ def _source_problems(code, field, source):
 
 
 def for_state(code):
-    """The page's record for *code*, or ``{}`` for a territory or D.C."""
-    entry = STATES.get(code)
+    """The page's record for *code*: a state's or a territory's, or ``{}``
+    for D.C. A territory's holds its governor and lieutenant governor only.
+    An office or chamber not up carries ``next`` where NEXT gives its year.
+    Open seats are not here: they depend on who holds the office, which
+    ``open_seat`` checks against the rosters."""
+    entry = STATES.get(code) or TERRITORIES.get(code)
     if not entry:
         return {}
     out = {"offices": {}, "chambers": {}}
     for office in OFFICES:
+        if office not in entry:
+            continue
         selection, up, note, source = entry[office]
         out["offices"][office] = {"selection": selection, "up": up, "note": note,
                                   "source": source}
     for which in ("upper", "lower"):
-        chamber = entry[which]
+        chamber = entry.get(which)
         if chamber is None:
             continue
         name, total, up, basis, source = chamber
         out["chambers"][which] = {"name": name, "seats": total, "up": up, "basis": basis,
                                   "source": source}
+    for (state, key), (year, source, *month) in NEXT.items():
+        if state != code:
+            continue
+        target = out["offices"].get(key) or out["chambers"].get(key)
+        if target is not None:
+            target["next"] = {"year": year, "source": source, **({"month": month[0]} if month else {})}
+    if code in TERRITORIES:
+        out["territory"] = True
     return out
 
 
