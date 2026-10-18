@@ -1,0 +1,183 @@
+{
+ "congress": 119,
+ "fetched": "2026-10-18T15:32:36+00:00",
+ "members": [
+  {
+   "aliases": [
+    "JD Vance"
+   ],
+   "bioguide": "V000137",
+   "chamber": "Senate",
+   "left": "2025-01-09",
+   "name": "J.D. Vance",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "OH",
+   "termStart": "2023-01-03"
+  },
+  {
+   "bioguide": "R000595",
+   "chamber": "Senate",
+   "left": "2025-01-20",
+   "name": "Marco Rubio",
+   "party": "Republican",
+   "senateClass": 3,
+   "state": "FL",
+   "termStart": "2023-01-03"
+  },
+  {
+   "aliases": [
+    "Mike Waltz"
+   ],
+   "bioguide": "W000823",
+   "chamber": "House",
+   "district": 6,
+   "left": "2025-01-20",
+   "name": "Michael Waltz",
+   "party": "Republican",
+   "state": "FL",
+   "termStart": "2025-01-03"
+  },
+  {
+   "bioguide": "T000489",
+   "chamber": "House",
+   "district": 18,
+   "left": "2025-03-04",
+   "name": "Sylvester Turner",
+   "party": "Democrat",
+   "state": "TX",
+   "termStart": "2025-01-03"
+  },
+  {
+   "aliases": [
+    "Raúl Grijalva"
+   ],
+   "bioguide": "G000551",
+   "chamber": "House",
+   "district": 7,
+   "left": "2025-03-13",
+   "name": "Raúl M. Grijalva",
+   "party": "Democrat",
+   "state": "AZ",
+   "termStart": "2025-01-03"
+  },
+  {
+   "aliases": [
+    "Gerry Connolly"
+   ],
+   "bioguide": "C001078",
+   "chamber": "House",
+   "district": 11,
+   "left": "2025-05-21",
+   "name": "Gerald E. Connolly",
+   "party": "Democrat",
+   "state": "VA",
+   "termStart": "2025-01-03"
+  },
+  {
+   "aliases": [
+    "Mark Green"
+   ],
+   "bioguide": "G000590",
+   "chamber": "House",
+   "district": 7,
+   "left": "2025-07-21",
+   "name": "Mark E. Green",
+   "party": "Republican",
+   "state": "TN",
+   "termStart": "2025-01-03"
+  },
+  {
+   "bioguide": "S001207",
+   "chamber": "House",
+   "district": 11,
+   "left": "2025-11-20",
+   "name": "Mikie Sherrill",
+   "party": "Democrat",
+   "state": "NJ",
+   "termStart": "2025-01-03"
+  },
+  {
+   "bioguide": "G000596",
+   "chamber": "House",
+   "district": 14,
+   "left": "2026-01-05",
+   "name": "Marjorie Taylor Greene",
+   "party": "Republican",
+   "state": "GA",
+   "termStart": "2025-01-03"
+  },
+  {
+   "bioguide": "L000578",
+   "chamber": "House",
+   "district": 1,
+   "left": "2026-01-05",
+   "name": "Doug LaMalfa",
+   "party": "Republican",
+   "state": "CA",
+   "termStart": "2025-01-03"
+  },
+  {
+   "bioguide": "M001190",
+   "chamber": "Senate",
+   "left": "2026-03-23",
+   "name": "Markwayne Mullin",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "OK",
+   "termStart": "2023-01-03"
+  },
+  {
+   "bioguide": "G000594",
+   "chamber": "House",
+   "district": 23,
+   "left": "2026-04-14",
+   "name": "Tony Gonzales",
+   "party": "Republican",
+   "state": "TX",
+   "termStart": "2025-01-03"
+  },
+  {
+   "bioguide": "S001193",
+   "chamber": "House",
+   "district": 14,
+   "left": "2026-04-14",
+   "name": "Eric Swalwell",
+   "party": "Democrat",
+   "state": "CA",
+   "termStart": "2025-01-03"
+  },
+  {
+   "bioguide": "C001127",
+   "chamber": "House",
+   "district": 20,
+   "left": "2026-04-21",
+   "name": "Sheila Cherfilus-McCormick",
+   "party": "Democrat",
+   "state": "FL",
+   "termStart": "2025-01-03"
+  },
+  {
+   "bioguide": "S001157",
+   "chamber": "House",
+   "district": 13,
+   "left": "2026-04-21",
+   "name": "David Scott",
+   "party": "Democrat",
+   "state": "GA",
+   "termStart": "2025-01-03"
+  },
+  {
+   "bioguide": "G000359",
+   "chamber": "Senate",
+   "left": "2026-07-11",
+   "name": "Lindsey Graham",
+   "party": "Republican",
+   "senateClass": 2,
+   "state": "SC",
+   "termStart": "2021-01-03"
+  }
+ ],
+ "membershipRead": "2026-10-18",
+ "source": "https://unitedstates.github.io/congress-legislators/legislators-historical.json"
+}

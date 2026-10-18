@@ -51,6 +51,7 @@ data/oge_disclosures.json   ──┤   (the executive's financial reports: Offi
 data/tribal_leaders.json    ──┤   (every tribal government and its leader: BIA Tribal Leaders Directory)
 data/local_sites.json       ──┤   (each local government's listed website, opened: localgov --check-sites)
 data/record_2026.json       ──┤   (the frozen 2026 race set: record --freeze)
+data/departed_members.json  ──┤   (who left this Congress: congress, from legislators-historical)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
                                              data/geo.js        (SVG path data for the map)
@@ -109,7 +110,8 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`, `voting_dates.json`,
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
   `judge_links.json`, `court_districts.json`,
-  `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json` and `local_sites.json` are caches, but
+  `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json`, `local_sites.json`
+  and `departed_members.json` are caches, but
   they *are* hand-editable. `stategov.js` is generated from the last five,
   with `kyc/ballot2026.py`: which state offices and legislative seats are on
   the 2026 ballot, a curated table citing each state's own record.
@@ -139,7 +141,7 @@ python build_profile_site.py congress --check # roster vs Congress (offline)
 python build_profile_site.py congress --apply # write the drift in: new members, new terms, departures
 python build_profile_site.py congress --apply --snapshot FILE  # the same from a file (a rehearsal)
 python build_profile_site.py geo              # regenerate map geometry only (both maps)
-python build_profile_site.py congress         # refresh membership (network)
+python build_profile_site.py congress         # refresh membership, and who has left this Congress (network)
 python build_profile_site.py field --check    # who is running, from the FEC
 python build_profile_site.py disclosures      # House and Senate disclosure links
 python build_profile_site.py results          # who is still in, from Wikipedia (Louisiana's qualified list; the states' certified ballots)
@@ -166,8 +168,8 @@ python tools/fetch_legislative_maps.py        # state senate and house boundarie
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1654 tests, no dependencies
-npm install && npm test                       # 2123 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1672 tests, no dependencies
+npm install && npm test                       # 2232 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -204,6 +206,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
 5. **Match longer state names first.** `"VIRGINIA" in "WEST VIRGINIA"` is true.
    Also: only read bare two-letter codes from the *original* casing, or
    uppercased prose turns "in", "or" and "me" into Indiana, Oregon and Maine.
+   The grid's search matched words as substrings, so "Kansas" returned
+   Arkansans first and "TX-3" all of TX-30 to TX-39 (audit 2026-10-17,
+   GRID-03/04). A search word matches where a word starts, and a query that
+   is a state's whole name or code, or a district however written, is that
+   place (`KYC.queryScore`), never text.
 
 6. **A filed `$0` is not missing data.** `fmt_curr(0)` returns `"$0.00"`.
 
@@ -366,6 +373,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     grid has a `role` filter and the map's delegation panel leads with who is
     seated. Any new view that lists people needs the same distinction, or it
     answers "who is running" when the reader asked "who represents me".
+    The grid's search finds officials who are not candidates (the Cabinet,
+    judges, governors) and members who left this Congress
+    (`data/departed_members.json`); they are listed apart as links, never as
+    profiles, so no count of who sits or runs can include them.
 
 28. **Only write fields the source actually knows.** `congress --apply` fills
     name, party, state, district, term and birthday. Education, net worth,
