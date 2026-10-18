@@ -573,7 +573,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     is the pole of what the page draws: a new map's district is labelled on
     its land (`geo.polylabel(..., within=)`). The grid search it replaced
     ignored its own bounding box and numbered FL-19 and OH-14 on their own
-    borders.
+    borders. No word may sit on another: at 320-390px the partisan map put
+    West Virginia's code on Vermont's callout ("WV T") and Mississippi's on
+    Alabama's, and two picked district numbers on Texas's map covered each
+    other. `kyc-usmap.js` moves a colliding code, then makes it a callout by
+    its own state before the Atlantic column; `testMapOnAPhone` checks
+    320-390px.
 
 44. **On a phone, the page scrolls.** A fixed body with a scrolling box
     inside kept Safari's toolbars on screen, broke tap-to-top, and pinned the
@@ -1384,6 +1389,34 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     runoff says what it decides (`RUNOFF_WORDS`): Arkansas's December 1 is
     not a runoff for Congress. The cycle's dates are reread each cycle, and
     `check` refuses a date outside it.
+
+88. **A colour that carries meaning is checked as a colour-blind reader
+    sees it, and is never the only cue.** The 2026-10-17 audit ran the
+    Machado matrices over the legends: to a deuteranope the split lilac was
+    the Democratic blue (0.8 apart in OKLab x100), so 21 divided
+    governments read as Democratic trifectas; the light theme's Republican
+    red and independent amber were one olive (2.3); the guide's teal and
+    magenta 3.7 apart erased the judges map's main distinction. So:
+    - `render_test.js` (`testColourVision`) runs protanopia, deuteranopia
+      and tritanopia over every legend's fills, in all three themes, from
+      the tokens. Two fills a reader must tell apart by colour alone are 10
+      apart (7 under tritanopia).
+    - Split, divided and "none" are hatched as well as coloured
+      (`KYC.svgFill`, one pattern fill per shape, rule 45), and that pair
+      needs 5.
+    - Grey means "none" and nothing else: no category is grey
+      (`--none-fill`, the Eleventh Circuit was).
+    - A fill is never also a text colour that needs 4.5:1. Light
+      `--party-i` is text; `--party-i-fill` fills. A callout writes on a
+      fill in the ink `KYC.fillInk` names for it.
+    - No status or money colour is a party's: "Lost primary" was the
+      Republican red, "Open seat" the independents' amber, a Democrat's
+      "Spent" red.
+    - A scale that is not about party (the ideology score) is drawn in
+      neutral ink.
+    - A distinction drawn only in a hover title does not exist for a
+      touch reader: an open Senate seat is its party's tint, a special
+      election is outlined, each with a legend key.
 
 ## District maps
 
