@@ -433,6 +433,26 @@ BLOCKED_LOCAL_HOSTS = {
     "townofprovidencevillage.com": ("parked", "2026-10-17",
                                     "Town of Providence Village, TX: a script sends visitors to "
                                     "/lander, a registrar's parking page"),
+    # Gambling seen in one passage of the page's text, which the check
+    # leaves for a person (localsites.STICKY); each looked at on 2026-10-18
+    # and its title or visible text read.
+    "ci.yorba-linda.ca.us": ("gambling", "2026-10-18",
+                             "City of Yorba Linda, CA: titled 'Bundaslot', Indonesian text offering "
+                             "'Kasino Live & Dealer Togel' and a 'Sportsbook'"),
+    "cityofpevely.org": ("gambling", "2026-10-18",
+                         "City of Pevely, MO: titled 'MANTIS88: inovasi baru! kapten game online', "
+                         "a product card reading 'Material: Slot Gacor'"),
+    "kennedale.net": ("gambling", "2026-10-18",
+                      "Kennedale ISD, TX: titled 'ZUMA78: Daftar sekarang', a login for 'RTP Slot'"),
+    "mooresvillealabama.com": ("gambling", "2026-10-18",
+                               "Town of Mooresville, AL: Indonesian text inserted in the page about "
+                               "'platform togel online'"),
+    "simontontexas.org": ("gambling", "2026-10-18",
+                          "City of Simonton, TX: posts headed 'Slot Naga Mahjong: Sensasi Bermain "
+                          "Game Slot Online'"),
+    "whitehallcitygov.com": ("gambling", "2026-10-18",
+                             "City of White Hall, IL: titled 'tiger227 ini sebuah permainan games "
+                             "online', 'Min Depo 20.000 ... Maxwin'"),
 }
 
 # A member's contact-form address that congress-legislators holds in a form

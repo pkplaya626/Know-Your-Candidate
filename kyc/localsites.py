@@ -137,7 +137,9 @@ _BOOKED_SLOT = re.compile(
 # the Ringtown Borough Municipal Authority's a funeral home.
 _BUSINESS = re.compile(
     r"chamber\s+of\s+commerce|homes?\s+for\s+sale|real\s+estate\s+(?:agents?|listings?|for\s+sale)|"
-    r"\brealty\b|\brealtors?\b|\bfuneral\b|\bcremation\b|\bmortuary\b", re.I)
+    r"\brealty\b|\brealtors?\b|\bfuneral\b|\bcremation\b|\bmortuary\b|"
+    # The City of Phoenix, Oregon's address opens "Phoenix Best Hotels".
+    r"\bbest\s+hotels\b", re.I)
 _FOR_SALE = re.compile(
     r"domain\s+(?:name\s+)?(?:is|may\s+be)\s+for\s+sale|buy\s+this\s+domain|"
     r"this\s+domain\s+is\s+for\s+sale|make\s+an\s+offer\s+on\s+this\s+domain|"

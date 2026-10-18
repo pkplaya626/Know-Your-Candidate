@@ -5329,7 +5329,13 @@ async function testCounties() {
       va.D.getElementById("localPanelTitle").textContent === "City of Alexandria");
     const label = va.D.querySelector('label[for="localFilter"]');
     check("its filter is not called a county's", !!label && !/county/i.test(label.textContent) &&
-      /City of Alexandria/.test(label.textContent), label && label.textContent);
+      /in the City of Alexandria$/.test(label.textContent), label && label.textContent);
+    // An independent city sorts under its own name, not among the C's.
+    const order = [...va.D.querySelectorAll("#countyRows [data-region]")].map((r) => r.getAttribute("data-region"));
+    const at = (fips) => order.indexOf(fips);
+    check("the list sorts the City of Richmond under R, between Rappahannock and Richmond County",
+      at("51157") < at("51760") && at("51760") < at("51159") && at("51033") < at("51059") &&
+      at("51510") < at("51013"), [at("51157"), at("51760"), at("51159")].join(" "));
     va.D.querySelector('#localRoster [data-region="51059"]')
       .dispatchEvent(new va.window.MouseEvent("click", { bubbles: true }));
     const body = va.D.getElementById("localPanelBody");
@@ -5338,12 +5344,31 @@ async function testCounties() {
     check("a Census abbreviation is written out, the listing's form in its title",
       !!schools && /Fairfax Co Schs/.test(schools.querySelector('[title^="Listed by"]').getAttribute("title")) &&
       !/Co Schs/.test(body.textContent), schools && schools.innerHTML);
+    // A browser shows only the innermost title: one per name, on the link.
+    check("a linked name carries one title, the listing's name and the link's check together",
+      [...body.querySelectorAll(".local-name a")].every((a) => !a.querySelector("[title]")) &&
+      [...body.querySelectorAll(".local-name a[title^='Listed by']")].every((a) =>
+        /Website as listed by the Census in 2022/.test(a.getAttribute("title"))));
+    // A link the check could not confirm says so on the row, for a phone.
+    const unsure = Object.values(va.window.kycLocal.VA.governments).flat()
+      .filter((r) => r[3] && /^unread /.test(r[7] || ""));
+    check("the data has links the check could not confirm", unsure.length > 0);
     check("the place line is the mailing address, said so",
       /mailing address in Fairfax/.test(body.textContent), body.textContent.slice(0, 300));
     // STATEGOV-08, PERSONA-16: who serves is an absence here, said once, with where to look.
     check("the panel says who holds office is not listed here, and where to look",
       /Who holds office in these governments is not listed here/.test(body.textContent) &&
       /own website/.test(body.textContent));
+    // Many listed bodies have appointed boards, and many sites list neither.
+    check("it does not claim every site names elected officials and their elections",
+      !/names its elected officials|when they are elected/.test(body.textContent) &&
+      /usually where its officials, and how they are chosen, are listed/.test(body.textContent));
+    const rowsVa = [...body.querySelectorAll(".local-item")];
+    const unconfirmed = rowsVa.filter((li) => /website not confirmed when checked/.test(li.textContent));
+    check("a row whose link the check could not confirm says so in words",
+      unconfirmed.every((li) => !!li.querySelector("a")) &&
+      rowsVa.filter((li) => li.querySelector("a") && /not confirmed/.test(li.querySelector("a").getAttribute("title")))
+        .length === unconfirmed.length, `${unconfirmed.length}`);
     va.window.location.hash = "#/";
   });
   await new Promise((resolve) => setTimeout(resolve, 30));
@@ -5367,18 +5392,18 @@ async function testCounties() {
     check("the Town of Clinton's old address, now a slot site, is not linked",
       !!item && !item.querySelector("a"), item && item.innerHTML);
     check("and its line says why, and when",
-      !!item && /website withdrawn: .*gambling site \(checked [A-Z][a-z]{2} \d{1,2}, \d{4}\)/.test(item.textContent),
+      !!item && /website withdrawn: .*gambling spam \(checked [A-Z][a-z]{2} \d{1,2}, \d{4}\)/.test(item.textContent),
       item && item.textContent);
     const links = [...CD.querySelectorAll("#localPanelBody .local-name a")];
     check("every link left says what it is: the Census's 2022 address, and whether it was checked",
-      links.length > 0 && links.every((a) => /^Website as listed by the Census in 2022/.test(a.getAttribute("title"))));
+      links.length > 0 && links.every((a) => /Website as listed by the Census in 2022/.test(a.getAttribute("title"))));
     const note = CD.querySelector("#localPanelBody .local-sites");
     check("the panel says what its websites are and when they were checked",
-      !!note && /listed in 2022/.test(note.textContent) && /withdrawn/.test(note.textContent),
+      !!note && /listed in 2022/.test(note.textContent) && /withdrawn, and each says why/.test(note.textContent),
       note && note.textContent);
     const all = Object.values(govs).flat();
     check("no withdrawn row keeps an address",
-      all.every((r) => !/^(dead|gone|parked|for-sale|expired|gambling|elsewhere) /.test(r[7] || "") || r[3] === ""));
+      all.every((r) => !/^(dead|gone|parked|for-sale|expired|gambling|elsewhere|business) /.test(r[7] || "") || r[3] === ""));
   });
   // VISUALS-14: county names on the map where they fit, as page text.
   const wi = await buildPage("counties/wi.html");
@@ -5408,6 +5433,18 @@ async function testCounties() {
     check("the cities filter sits above the list's grid, not in it",
       !!cityFilter && !cityFilter.closest(".leg-roster") && !!WD.querySelector("#cityRows.leg-roster") &&
       !WD.getElementById("localRoster").classList.contains("leg-roster"));
+  });
+  // VISUALS-14 review: Texas had room for one name, "Pecos", which read as
+  // the pick; picking Harris left "Pecos" the only word on the map.
+  const txNames = await buildPage("counties/tx.html", { hash: "#/?county=48201" });
+  suite("counties/tx.html — names only where a fair share fit; the pick always", () => {
+    const labels = [...txNames.D.querySelectorAll("#localMap .county-label")];
+    const all = Object.keys(txNames.window.kycLocal.TX.counties).length;
+    const focus = labels.filter((l) => l.classList.contains("is-focus"));
+    check("the picked county is named, room or not (rule 43)",
+      focus.length === 1 && focus[0].textContent === "Harris", labels.map((l) => l.textContent).join(" | "));
+    check("and no lone name of another county stands for the rest",
+      labels.length === 1 || labels.length - 1 >= 0.25 * all, `${labels.length} of ${all}`);
   });
   const once = await buildPage("counties/tx.html", { hash: "#/?county=48201" });
   let draws = 0;

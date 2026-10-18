@@ -157,8 +157,8 @@ python build_profile_site.py oge              # the executive's financial report
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1454 tests, no dependencies
-npm install && npm test                       # 1932 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1465 tests, no dependencies
+npm install && npm test                       # 1939 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1177,7 +1177,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     build withdraws gambling, parked, for-sale and expired pages, a page
     gone twice (404, 410), a host NXDOMAIN or without an address here and
     at both dns.google and Cloudflare (rule 35), and a cross-host redirect
-    to a page that does not name the body; the line says why and when,
+    to a page whose title and address carry no word of the body's name, or
+    to a business's page (a chamber of commerce, an estate agent, a funeral
+    home); the line says why and when,
     and every other link says it is the Census's 2022 address and when it
     was checked. A 403, 429, 5xx, timeout, sign-in or bot wall, a server's
     placeholder page and a SERVFAIL (a lame delegation) conclude nothing
@@ -1188,14 +1190,31 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     domains, because it asked a title for the listing's full name - and
     for the listing's abbreviations ("Ind", "Sch") as if they were words of
     it. A place's name alone is not enough: Alma's address opens its
-    chamber of commerce, Haverhill's an estate agent's listings. And 48
+    chamber of commerce, Haverhill's an estate agent's listings. The
+    second run went too far the other way: the page said "now leads to a
+    site that does not name it" of Las Virgenes Municipal Water District's
+    own lvmwd.gov, because the listing misspells it "Muncipal", and of the
+    Bartlett Fire District, the DesPlaines Valley mosquito district and
+    the Hoosic Valley schools. A word one slip from the listing's spelling,
+    or two words run together, now count; a page that names any part of
+    the body is not confirmed (`unread`), never claimed not to be it. And
+    48
     checks at once dropped about 4,700 lookups at this machine's resolver
     that dns.google answered: a local failure is looked up again before
-    it is believed. A gambling verdict is never cleared by a later run; a
-    person's finding goes in `overrides.BLOCKED_LOCAL_HOSTS`. The run of
-    2026-10-17/18 withdrew 7,664 of 39,447 governments' links: 5,090 dead,
-    1,179 gone, 513 elsewhere, 351 for sale, 257 gambling, 254 parked and
-    20 expired; 4,988 could not be read and stay linked, marked so.
+    it is believed. Gambling seen plainly (a title, a redirect target,
+    a page full of it) is never cleared by a later run; one match in a
+    page's text is withdrawn and waits for a person, because "Schedule your
+    slot online" on the Keansburg schools' blood-drive notice and "Secure
+    your 15-minute slot online" on the Landfill of North Iowa's were
+    shipped as gambling sites, for good. A person's finding goes in
+    `overrides.BLOCKED_LOCAL_HOSTS`. A look that concludes nothing never
+    undoes a withdrawal (`merge`). Domains keep lapsing (rule 39): the
+    weekly refresh looks at 6,000 addresses a run, oldest first, and the
+    build warns about any not looked at in 60 days. As of 2026-10-18, 7,366
+    of 39,447 governments' links are withdrawn: 5,090 dead, 1,179 gone,
+    351 for sale, 255 gambling, 254 parked, 208 elsewhere, 20 expired and
+    9 a business's; 5,269 could not be confirmed and stay linked, marked
+    so.
 
 79. **A mark about an office sits on the office, and "not running" is a
     source's word.** "On the Nov 3, 2026 ballot" sat under Brian Kemp,

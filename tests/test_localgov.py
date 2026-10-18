@@ -369,8 +369,9 @@ class TestSiteCheck(unittest.TestCase):
         clean = {"checked": "2026-10-19", "verdict": "ok"}
         self.assertEqual(localsites.merge(entry, clean, "2026-10-19"), clean)
         # And reported for a person to confirm.
-        found = localsites.problems({"sites": {"http://www.whitehallcitygov.com": entry}},
-                                    {"http://www.whitehallcitygov.com"}, today="2026-10-18")
+        # (White Hall's own host is now in BLOCKED_LOCAL_HOSTS: another's.)
+        found = localsites.problems({"sites": {"http://www.townofx.example": entry}},
+                                    {"http://www.townofx.example"}, today="2026-10-18")
         self.assertTrue(any("one passage" in p for p in found), found)
 
     def test_gambling_in_a_title_or_on_a_redirect_is_plain(self):

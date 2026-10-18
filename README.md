@@ -64,7 +64,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (1932 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (1939 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1962,24 +1962,37 @@ government is its mailing address, and is labelled so; the Census's
 function categories read in plain words ("Single-purpose district"). An
 independent city is named as its state names it ("City of Alexandria",
 "Baltimore City"), and Virginia's count reads "95 counties and 38
-independent cities". The map names a county where an 11px label fits at
-the width it is drawn (`labelRoom`, page text over the map, rule 46);
-every county is in the list under the map, which has a filter.
+independent cities"; the list under the map sorts the City of Richmond
+under R, and the map calls the county beside a city of the same name by its
+whole name ("Richmond County", "Baltimore County"). The map names counties
+where an 11px label fits at the width it is drawn (`labelRoom`, page text
+over the map, rule 46), and only where a quarter of them fit - a lone
+"Pecos" on Texas read as the pick; the picked county is always named.
+Every county is in the list under the map, which has a filter.
 
 The websites are the ones the Census listed in 2022, and in October 2026
 about one in a hundred led to gambling, parked or for-sale domains under a
 public body's name. `localgov --check-sites` opens every one (rule 78) and
 writes what it found to `data/local_sites.json`, address by address, with
 the day and the evidence. The build withdraws an address that is now
-gambling, parked, for sale or expired, that redirects to a site whose page
-does not name the government, that is gone (404 or 410, twice), or whose
-host does not exist (NXDOMAIN, or no address, here and at dns.google and
-Cloudflare); the government's line says why and when. Everything else is
-linked and labelled "Website as listed by the Census in 2022, checked
-Oct 17, 2026" (its own day), or as could not be read; a 403, a 429, a timeout or a bot wall
-concludes nothing. A person's own finding goes in
-`overrides.BLOCKED_LOCAL_HOSTS`, and a gambling verdict is never cleared by
-a later check.
+gambling, parked, for sale or expired, that redirects to a business's page
+(a chamber of commerce, an estate agent, a funeral home) or to a site whose
+title and address carry no word of the government's name, that is gone
+(404 or 410, twice), or whose host does not exist (NXDOMAIN, or no address,
+here and at dns.google and Cloudflare); the government's line says why and
+when. A redirect to a page that names part of it ("City of Greenfield" for
+the listing's Town of Greenfield) is the government's own site as often as
+not, and stays linked, marked "not confirmed". Everything else is linked and
+labelled "Website as listed by the Census in 2022, checked Oct 17, 2026"
+(its own day); a 403, a 429, a timeout or a bot wall concludes nothing, and
+a row whose link could not be confirmed says so in words. A person's own
+finding goes in `overrides.BLOCKED_LOCAL_HOSTS`. Gambling seen plainly - in
+a page's title, on a site a lapsed address now redirects to, or all over
+its text - is never cleared by a later check; seen once in a page's text it
+is withdrawn and reported for a person, since "Schedule your slot online"
+is English. A look that concludes nothing never undoes a withdrawal. The
+weekly refresh looks again at 6,000 addresses a run, oldest first, and the
+build warns about any not looked at in 60 days.
 
 ### Cities and towns
 
