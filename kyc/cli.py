@@ -148,7 +148,8 @@ def _build(args):
 
     race_list = races_mod.build(profiles, candidates.filing_counts(field),
                                 results=outcomes, dates=results_mod.load_dates(args.root),
-                                filed=candidates.filed_rows(field), record=raw.get("record"))
+                                filed=candidates.filed_rows(field), record=raw.get("record"),
+                                snapshot=snapshot)
     stats.update(races_mod.stats(race_list))
     markets = odds_mod.load_cache(args.root)
     if markets:
@@ -559,7 +560,8 @@ def _odds(args):
     screened = screen_field(field, profiles, raw.get("record"))
     race_list = races_mod.build(profiles, candidates.filing_counts(screened),
                                 results=outcomes, dates=results_mod.load_dates(args.root),
-                                filed=candidates.filed_rows(screened), record=raw.get("record"))
+                                filed=candidates.filed_rows(screened), record=raw.get("record"),
+                                snapshot=legislators.load_snapshot(args.root))
     by_id = {p["id"]: p for p in profiles}
 
     def people_of(race):
@@ -1089,6 +1091,7 @@ def _verify(args):
         profiles, candidates.filing_counts(field),
         results=outcomes, dates=results_mod.load_dates(args.root),
         filed=candidates.filed_rows(field), record=raw.get("record"),
+        snapshot=legislators.load_snapshot(args.root),
     )
     stats.update(races_mod.stats(race_list))
     summary = summary_mod.build(profiles, races=race_list,

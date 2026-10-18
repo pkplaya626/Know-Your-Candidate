@@ -117,6 +117,45 @@ MEMBER_STATUS_BY_ID = {
                 "https://www.thegreenpapers.com/G26/LA"),
 }
 
+# Members who are on the November ballot for an office this site does not
+# cover, keyed on bioguide id: {bioguide: (what they are, source, checked)}.
+# Without it Byron Donalds, Florida's Republican nominee for governor, read
+# only "Not running for this seat in 2026", and Tommy Tuberville "Withdrew".
+# Each entry is the winner the results page marks with its `winning
+# candidate` template (rule 29), read from the article's wikitext on the day
+# given, never from memory; a nominee who later withdraws is taken out.
+# The profile drops an entry once its member starts a new term, `validate`
+# reports one whose member has gone (stale-other-office), and after Election
+# Day it reports them all, for the result to be read from the same page.
+# Until then the page says it in the past tense from the day after Election
+# Day ("Was the ..."), so a stale entry never reads as a race still to come.
+_GOV = "https://en.wikipedia.org/wiki/2026_{}_gubernatorial_election"
+OTHER_OFFICE_NOMINEES = {
+    # Republican primary results, May 19: Tuberville 85.4%.
+    "T000278": ("Republican nominee for Governor of Alabama",
+                _GOV.format("Alabama"), "2026-10-17"),
+    # Republican primary results, July 21: Biggs 74.0%.
+    "B001302": ("Republican nominee for Governor of Arizona",
+                _GOV.format("Arizona"), "2026-10-17"),
+    # Republican primary results, August 18: Donalds 47.8%.
+    "D000032": ("Republican nominee for Governor of Florida",
+                _GOV.format("Florida"), "2026-10-17"),
+    # Republican primary results, August 4: James 50.05%.
+    "J000307": ("Republican nominee for Governor of Michigan",
+                _GOV.format("Michigan"), "2026-10-17"),
+    # Republican primary results, August 6: Blackburn 43.6%. Her Senate
+    # seat is not up, so only her profile says it.
+    "B001243": ("Republican nominee for Governor of Tennessee",
+                _GOV.format("Tennessee"), "2026-10-17"),
+    # Republican primary results, August 11: Tiffany 95.32%.
+    "T000165": ("Republican nominee for Governor of Wisconsin",
+                _GOV.format("Wisconsin"), "2026-10-17"),
+    # Democratic primary results, August 1 (the Election System of the
+    # Virgin Islands' territorial summary): Plaskett and Potter 46.99%.
+    "P000610": ("Democratic nominee for Governor of the U.S. Virgin Islands",
+                _GOV.format("United_States_Virgin_Islands"), "2026-10-17"),
+}
+
 # FEC registrations that are one person although their totals differ, so the
 # exact same-committee signal (candidates.same_committee) cannot see it. Each
 # entry maps the registration folded away to (the one kept, the evidence).
