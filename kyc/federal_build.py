@@ -171,6 +171,7 @@ def build(root="."):
     # the directory still lists as active: not counted active, and the row
     # says which source says what (vacancies.listed_senior).
     disagree = vacancies.listed_senior(openings, judges)
+    elevations = vacancies.pending_elevations(openings, judges)
     # Confirmed and not yet commissioned: listed apart on their court's
     # page, never among its judges or in its counts.
     pending = {}
@@ -219,6 +220,7 @@ def build(root="."):
     if trouble:
         raise FederalBuildError("28 U.S.C. 81-131 against the Census counties: " + "; ".join(trouble[:5]))
     divisions = court_districts.for_courts(placed)
+    covered = court_districts.covers(placed)
     index = []
     for cid, court in federal_courts.COURTS.items():
         held = courts["courts"][cid]
@@ -283,11 +285,18 @@ def build(root="."):
             listed = disagree.get((cid, i))
             if listed:
                 row["listedSenior"] = {"since": listed["since"]}
+            # Nominated to another court, as the announced list has it: said
+            # on the judge's own record too, not only on the court's table.
+            if i in elevations:
+                to = elevations[i]
+                row["nominatedTo"] = {"id": to["court"], "name": federal_courts.COURTS[to["court"]]["name"],
+                                      "nominated": to.get("nominated"), "asOf": openings["asOf"]}
             rows.append(row)
         per_court[cid] = {"id": cid, "listed": held["listed"], "judges": rows,
                           "vacancies": vacant.get(cid, []), "future": coming.get(cid, [])}
         if divisions.get(cid):
             per_court[cid]["divisions"] = divisions[cid]
+            per_court[cid]["covers"] = covered[cid]
         if pending.get(cid):
             per_court[cid]["pending"] = pending[cid]
         # A territorial court's judges, as its own site lists them
@@ -316,12 +325,13 @@ def build(root="."):
     from . import oge
     filed = (oge.load_cache(root) or {}).get("people") or {}
     listed = (oge.load_cache(root) or {}).get("positions") or {}
-    for key, person in [("president", payload["president"]),
-                        ("vicePresident", payload["vicePresident"])] + [
-            (o["key"], o["holder"]) for o in offices if o.get("holder")]:
+    for key, person, names in [("president", payload["president"], ("President",)),
+                               ("vicePresident", payload["vicePresident"], ("Vice President",))] + [
+            (o["key"], o["holder"], (o["office"], o["holder"].get("title")))
+            for o in offices if o.get("holder")]:
         found = filed.get(key)
         # Not read for this holder is not "nothing filed" (rule 19).
-        person["disclosures"] = (oge.for_page(found, listed)
+        person["disclosures"] = (oge.for_page(found, listed, names)
                                  if found and found["holder"] == person["name"]
                                  else {"notRead": True})
     if filed:
@@ -407,6 +417,53 @@ def former_officers(payload, people=None, as_of=None):
     return sorted(out.values(), key=lambda r: r["name"])
 
 
+SUCCESSION_OFFICERS = (("speaker", "Speaker of the House"),
+                       ("presidentProTempore", "President pro tempore of the Senate"))
+
+
+def congressional_officers(executive, snapshot):
+    """``({key: {"member": snapshot row} | {"missing": reason}}, problems)``
+    for the Speaker and the President pro tempore.
+
+    Each chamber chooses its officer anew in each Congress, and
+    congress-legislators records each choice as a role starting that day,
+    with no end until it ends. So a role that began before the snapshot's
+    Congress did is the last Congress's: on January 3 its Speaker would
+    otherwise stay second in line until the file is updated, which can take
+    two weeks (rule 68), and name the wrong person if the House changed
+    hands. Nobody is named then, and the build says so. The holder must
+    also be seated in the snapshot, by bioguide id (rule 17)."""
+    from . import cycle
+
+    seated = {m["bioguide"]: m for m in (snapshot or {}).get("legislators") or []}
+    try:
+        number = cycle.snapshot_congress(snapshot)
+    except cycle.CycleError:
+        number = None
+    began = cycle.congress_start(number).isoformat() if number else None
+    out, problems = {}, []
+    for key, role in SUCCESSION_OFFICERS:
+        held = (executive.get("succession") or {}).get(key)
+        member = seated.get((held or {}).get("bioguide"))
+        if not held:
+            out[key] = {"missing": "congress-legislators lists nobody in this office"}
+            problems.append(f"the line of succession names no {role}: congress-legislators lists none")
+        elif began and (held.get("since") or "") < began:
+            out[key] = {"missing": f"congress-legislators has not yet recorded the "
+                                   f"{cycle.ordinal(number)} Congress's {role.split(' of ')[0]}"}
+            problems.append(f"the line of succession names no {role}: congress-legislators' "
+                            f"holder {held['bioguide']} took the office {held.get('since')}, before the "
+                            f"{cycle.ordinal(number)} Congress began on {began}; run 'federal' once "
+                            f"it records the new Congress's choice")
+        elif not member:
+            out[key] = {"missing": "the holder congress-legislators lists is not a sitting member"}
+            problems.append(f"the line of succession names no {role}: {held['bioguide']} is not "
+                            f"in the membership snapshot")
+        else:
+            out[key] = {"member": member}
+    return out, problems
+
+
 def succession(payload, executive, snapshot):
     """``(line, problems)``: who stands in the line of presidential
     succession now - the Vice President; the Speaker and the President pro
@@ -415,19 +472,15 @@ def succession(payload, executive, snapshot):
     (rule 17); then the department heads in the order of 3 U.S.C. 19(d)(1).
     A congressional officer the snapshot does not seat is left out and
     reported, never guessed."""
-    line, problems = [{"role": "Vice President", "id": payload["vicePresident"]["id"],
-                       "name": payload["vicePresident"]["name"], "kind": "official"}], []
-    seated = {m["bioguide"]: m for m in (snapshot or {}).get("legislators") or []}
-    for key, role in (("speaker", "Speaker of the House"),
-                      ("presidentProTempore", "President pro tempore of the Senate")):
-        held = (executive.get("succession") or {}).get(key)
-        member = seated.get((held or {}).get("bioguide"))
-        if not held or not member:
-            problems.append(f"the line of succession names no {role}: "
-                            + ("congress-legislators lists none" if not held
-                               else f"{held['bioguide']} is not in the membership snapshot"))
-            line.append({"role": role, "kind": "missing"})
+    line = [{"role": "Vice President", "id": payload["vicePresident"]["id"],
+             "name": payload["vicePresident"]["name"], "kind": "official"}]
+    officers, problems = congressional_officers(executive, snapshot)
+    for key, role in SUCCESSION_OFFICERS:
+        found = officers[key]
+        if "missing" in found:
+            line.append({"role": role, "kind": "missing", "reason": found["missing"]})
             continue
+        member = found["member"]
         line.append({"role": role, "id": member["bioguide"], "name": member["name"],
                      "state": member["state"], "kind": "member"})
     departments = sorted((o for o in payload["offices"] if o["kind"] == "department"),

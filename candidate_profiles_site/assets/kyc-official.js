@@ -348,7 +348,12 @@
     if (!listed || !(listed.rows || []).length) return "";
     return panel("scroll", "Other federal posts, as their OGE report lists them",
       '<ul class="bullets oge-positions">' + listed.rows.map(function (row) {
-        return "<li>" + KYC.escapeHtml(row) + "</li>";
+        // "Present" is the report's day, not today's (rule 69): a post the
+        // report lists as held may have ended since.
+        return "<li>" + KYC.escapeHtml(row) + (/present\s*\)\s*$/i.test(row)
+          ? ' <span class="faint oge-present">(“Present” as of the report, posted ' +
+            KYC.escapeHtml(KYC.dateWords(listed.date)) + "; it may have ended since)</span>" : "") +
+          "</li>";
       }).join("") + "</ul>" +
       '<p class="held-source">In the words of their ' + outLink(listed.url,
         listed.words.charAt(0).toLowerCase() + listed.words.slice(1)) + ", filed with the " +
@@ -362,8 +367,8 @@
     el("officialModalMeta").innerHTML =
       "<span>" + KYC.icon("flag") + " " + KYC.escapeHtml(person.party || "") + "</span>" +
       "<span>" + KYC.icon("calendar") + " In office since <strong>" +
-      KYC.escapeHtml(person.since || "") + "</strong>; term ends <strong>" +
-      KYC.escapeHtml(person.until || "") + "</strong></span>";
+      KYC.escapeHtml(KYC.dateWords(person.since || "")) + "</strong>; term ends <strong>" +
+      KYC.escapeHtml(KYC.dateWords(person.until || "")) + "</strong></span>";
     var links = REFERENCE.filter(function (r) { return (person.links || {})[r[0]]; })
       .map(function (r) { return linkChip(r[2](person.links[r[0]]), r[1]); });
     el("officialModalBody").innerHTML =
@@ -427,8 +432,8 @@
     }
     el("officialModalBody").innerHTML =
       '<div class="modal-column">' +
-      '<p class="state-note" id="officialLeft">' + KYC.escapeHtml(leftText(last)) + ". They no " +
-      "longer hold this office; this is the record of their time in it since " +
+      '<p class="state-note" id="officialLeft">They no longer hold this office; this is the ' +
+      "record of their time in it since " +
       KYC.escapeHtml(since ? KYC.dateWords(since) : "the term began") + ".</p>" +
       panel("calendar", "In office this term", '<ol class="bullets fed-history">' + rows + "</ol>" +
         '<p class="faint">Confirmations from the Senate’s roll calls; who held the office from ' +
@@ -475,8 +480,10 @@
       "</div>" +
       '<div class="modal-column">' + disclosuresPanel(holder) +
       (officeLinks(office).length ? panel("link", "Links", '<div class="links-row">' +
-        officeLinks(office).join("") + "</div>" + '<p class="faint">The agency’s website and ' +
-        "contact page as USA.gov’s index of agencies lists them.</p>") : "") +
+        officeLinks(office).join("") + "</div>" + '<p class="faint">The agency’s website' +
+        ((office.site || {}).contact ? " and contact page" : "") +
+        " as USA.gov’s index of agencies lists " + ((office.site || {}).contact ? "them" : "it") +
+        ".</p>") : "") +
       panel("info", "Where this comes from", '<p class="note-box">Listed by the White House ' +
         "among the President’s Cabinet; checked on the office’s own page and " +
         "against the Senate’s roll-call votes. A Cabinet officer is shown without a " +
@@ -525,7 +532,7 @@
     // neither picked silently (kyc/vacancies.py listed_senior).
     var status = judge.retiredJustice ? "Retired justice, not a member of the Court" :
       judge.status === "senior" ? "Senior status" :
-      judge.listedSenior ? "Senior status from " + judge.listedSenior.since + " by the courts’ " +
+      judge.listedSenior ? "Senior status from " + KYC.dateWords(judge.listedSenior.since) + " by the courts’ " +
         "list of vacancies; the FJC directory still lists active service" : "Active service";
     el("officialModalMeta").innerHTML =
       "<span>" + KYC.icon("landmark") + " <strong>" +
@@ -541,13 +548,13 @@
     // The day a justice took the oath is the Court's; the commission, in
     // the seat above, is the directory's. Both are dated; they differ.
     if (judge.justice) {
-      bio += field("Took the oath", KYC.escapeHtml(judge.justice.oath || "") +
+      bio += field("Took the oath", KYC.escapeHtml(KYC.dateWords(judge.justice.oath || "")) +
           ' <span class="faint">(the Court’s list)</span>') +
         field("Appointed from", KYC.escapeHtml(judge.justice.stateAppointedFrom || ""));
     } else if (judge.courtService && judge.courtService.oath) {
-      bio += field("Took the oath", KYC.escapeHtml(judge.courtService.oath) +
+      bio += field("Took the oath", KYC.escapeHtml(KYC.dateWords(judge.courtService.oath)) +
           ' <span class="faint">(the Court’s list)</span>') +
-        (judge.courtService.ended ? field("Left the Court", KYC.escapeHtml(judge.courtService.ended)) : "");
+        (judge.courtService.ended ? field("Left the Court", KYC.escapeHtml(KYC.dateWords(judge.courtService.ended))) : "");
     }
     var education = (judge.education || []).map(function (e) {
       return "<li>" + KYC.escapeHtml([e.degree, e.school, e.year].filter(Boolean).join(", ")) + "</li>";
@@ -560,11 +567,18 @@
 
     var prior = (judge.prior || []).map(function (p) {
       return "<li>" + KYC.escapeHtml((p.title || "Judge") + ", " + p.court) + "<br>" +
-        KYC.escapeHtml([p.from, p.to].filter(Boolean).join(" to ")) + "</li>";
+        KYC.escapeHtml([p.from, p.to].filter(Boolean).map(KYC.dateWords).join(" to ")) + "</li>";
     }).join("");
 
+    var to = judge.nominatedTo;
+    var pending = to ? '<p class="state-note" id="officialNominated">Nominated to the ' +
+      '<a href="' + KYC.escapeAttr(courtUrl(to.id)) + '">' +
+      KYC.escapeHtml(String(to.name).replace(/^U\.S\. /, "")) + "</a>" +
+      (to.nominated ? " on " + KYC.escapeHtml(KYC.dateWords(to.nominated)) : "") +
+      ", pending in the Senate, as the courts’ list of announced vacancies has it on " +
+      KYC.escapeHtml(KYC.dateWords(to.asOf)) + ". Until confirmed, they serve on this court.</p>" : "";
     el("officialModalBody").innerHTML =
-      '<div class="modal-column">' +
+      '<div class="modal-column">' + pending +
       panel("landmark", seats.length > 1 ? "Seats held now" : "Seat",
         '<ul class="bullets">' + seatRows(judge) + "</ul>") +
       (prior ? panel("calendar", "Earlier federal judicial service", '<ul class="bullets">' + prior + "</ul>") : "") +

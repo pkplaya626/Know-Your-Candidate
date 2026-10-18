@@ -377,6 +377,22 @@ def government_host(url):
     return host.endswith((".gov", ".mil"))
 
 
+# Hosts USA.gov lists over plain http that answer the same pages over
+# https (checked 2026-10-18: each answered 200 at its https address,
+# without redirecting back). A host that redirects https to http - the
+# District of Colorado's court site - is not here, and keeps its own word.
+SERVES_HTTPS = {"www.ustr.gov", "www.sba.gov"}
+
+
+def _secure(url):
+    """*url* over https where its host is known to serve it."""
+    from urllib.parse import urlparse
+
+    if url and url.startswith("http://") and (urlparse(url).hostname or "").lower() in SERVES_HTTPS:
+        return "https://" + url[len("http://"):]
+    return url
+
+
 def parse_agency(page):
     """``{"url", "contact"}`` from an agency's USA.gov entry: the website and
     the contact page it lists, each only where it gives one and only on a
@@ -387,8 +403,8 @@ def parse_agency(page):
         return None
     contact = re.search(_FIELD.format(name="contact-link"), page)
     contact = html.unescape(contact.group(1)) if contact else None
-    return {"url": html.unescape(site.group(1)),
-            **({"contact": contact} if contact and government_host(contact) else {})}
+    return {"url": _secure(html.unescape(site.group(1))),
+            **({"contact": _secure(contact)} if contact and government_host(contact) else {})}
 
 
 def agency_sites(read, previous=None, log=print, pause=1.0):

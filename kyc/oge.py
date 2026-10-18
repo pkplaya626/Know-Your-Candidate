@@ -395,10 +395,20 @@ def build(executive, read=None, read_pdf=None, previous=None, today=None):
                           any(d["url"] == u for p in people.values() for d in p["documents"])}}
 
 
-def for_page(person, positions=None):
+def holds_now(row, offices):
+    """True when an "other federal post" row is the office the person holds
+    now, acting or not ("Acting Attorney General, Department of Justice
+    (4/2026 - Present)" for the Attorney General): not another post."""
+    post = re.sub(r"(?i)^acting\s+", "", row.split(",")[0].split("(")[0]).strip().lower()
+    return any(post == (o or "").strip().lower() for o in offices)
+
+
+def for_page(person, positions=None, offices=()):
     """What the officials' dialog draws: the latest of each kind, linked,
     newest first; transaction reports counted with the latest linked; what
-    OGE releases only on request counted."""
+    OGE releases only on request counted. *offices* are the names of the
+    office the person holds now: a listed post that is that office is not
+    "other"."""
     if not person:
         return None
     if not person.get("filed"):
@@ -432,7 +442,10 @@ def for_page(person, positions=None):
     for doc in linked:
         found = (positions or {}).get(doc["url"])
         if doc.get("check") == "named" and doc["kind"] in POSITION_KINDS and found is not None:
-            listed = {"rows": [re.sub(r"\s+,", ",", r) for r in found],
+            # "Present" in a row is the report's day, not today's: the
+            # page says so beside it (rule 69: "since 2013" frozen at the
+            # read).
+            listed = {"rows": [re.sub(r"\s+,", ",", r) for r in found if not holds_now(r, offices)],
                       "date": doc["date"], "url": doc["url"],
                       "words": next(w for k, _p, w, _g in KINDS if k == doc["kind"])}
             break

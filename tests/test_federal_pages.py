@@ -29,7 +29,14 @@ class TestTheBuild(unittest.TestCase):
         cls.payload, cls.courts, cls.search, cls.problems = built()
 
     def test_the_caches_have_no_errors(self):
-        self.assertEqual(self.problems, [])
+        problems = self.problems
+        from kyc import cycle, legislators
+        if cycle.snapshot_congress(legislators.load_snapshot(ROOT)) >= cycle.electing_congress():
+            # A new Congress whose officers congress-legislators has not yet
+            # recorded: the line of succession names nobody for them, and
+            # says so (rule 68). Only that is allowed.
+            problems = [p for p in problems if not p.startswith("the line of succession names no")]
+        self.assertEqual(problems, [])
 
     def test_every_court_has_a_file(self):
         self.assertEqual(set(self.courts), set(federal_courts.COURTS))
@@ -223,14 +230,39 @@ class TestWhoSits(unittest.TestCase):
         found = vacancies.listed_senior(self.CACHE, judges)
         self.assertEqual(list(found), [("tn-e", "fjc-1")])
 
-    def test_two_judges_of_one_surname_settle_nothing(self):
+    def test_two_judges_of_one_name_settle_nothing(self):
         judges = dict([_judge("fjc-1", "Varlan, Thomas", "tn-e"),
-                       _judge("fjc-9", "Varlan, Other", "tn-e")])
+                       _judge("fjc-9", "Varlan, Thomas", "tn-e")])
         self.assertEqual(vacancies.listed_senior(self.CACHE, judges), {})
+
+    def test_a_colleague_of_the_same_surname_is_never_moved(self):
+        # Rule 17: the judge the list has leaving is missing from the
+        # directory (as two are now), and an active colleague shares the
+        # surname. A surname match would have counted the colleague senior.
+        judges = dict([_judge("fjc-9", "Varlan, Margaret", "tn-e")])
+        self.assertEqual(vacancies.listed_senior(self.CACHE, judges), {})
+        both = dict(judges, **dict([_judge("fjc-1", "Varlan, Thomas", "tn-e")]))
+        self.assertEqual(list(vacancies.listed_senior(self.CACHE, both)), [("tn-e", "fjc-1")])
 
     def test_an_elevation_names_the_court_the_judge_is_nominated_to(self):
         self.assertEqual(vacancies.nominated_to(self.CACHE["future"][0], self.CACHE), "ca8")
         self.assertIsNone(vacancies.nominated_to(self.CACHE["future"][1], self.CACHE))
+
+    def test_the_nominated_judges_own_record_names_the_court(self):
+        # Domenico's dialog said only "Active service" while his court's
+        # table had him nominated to the Tenth Circuit.
+        judges = dict([_judge("fjc-5", "Rudofsky, Lee", "ar-e"), _judge("fjc-6", "Rudofsky, Ann", "ar-w")])
+        self.assertEqual(vacancies.pending_elevations(self.CACHE, judges),
+                         {"fjc-5": {"court": "ca8", "nominated": None}})
+
+    def test_the_committed_data_carries_each_pending_elevation(self):
+        _payload, courts, _, _ = built()
+        for cid, court in courts.items():
+            moving = {r["vacatedBy"]["name"] for r in court["future"] if r.get("nominatedTo")}
+            for judge in court["judges"]:
+                if judge.get("nominatedTo"):
+                    self.assertNotEqual(judge["nominatedTo"]["id"], cid)
+                    self.assertTrue(moving, (cid, judge["name"]))
 
     def test_the_committed_data_counts_varlan_senior_and_says_so(self):
         payload, courts, search, _ = built()
@@ -303,6 +335,50 @@ class TestThePages(unittest.TestCase):
         self.assertNotIn("senior status", description("scotus"))
         self.assertIn("justice", description("scotus"))
         self.assertIn("Every sitting judge", description("ca1"))
+
+    @staticmethod
+    def committed(path):
+        with open(os.path.join(ROOT, "candidate_profiles_site", path), encoding="utf-8") as handle:
+            return handle.read()
+
+    def test_a_territorial_page_credits_the_court_it_lists_judges_from(self):
+        # FEDERAL-06 listed the judges; the footer and the description still
+        # said they were not listed, and named no source for them.
+        _payload, courts, _, _ = built()
+        for cid in ("gu", "mp", "vi"):
+            own = courts[cid].get("courtList") or {}
+            if not own.get("judges"):
+                continue
+            html = self.committed(f"courts/{cid}.html")
+            footer = html[html.index("<strong>Sources:</strong>"):]
+            footer = footer[:footer.index("</p>")]
+            self.assertIn(f'href="{own["source"]}"', footer, cid)
+            self.assertNotIn("judges are not listed", footer, cid)
+            text = re.search(r'<meta name="description" content="([^"]*)"', html).group(1)
+            self.assertNotIn("not listed", text, cid)
+            chief = next((j["name"] for j in own["judges"] if j.get("chief")), None)
+            if chief:
+                self.assertIn(f"Chief judge: {chief}", text.replace("&#x27;", "'"), cid)
+
+    def test_the_plain_lists_say_which_source_says_what_and_date_in_words(self):
+        # The pre-rendered table named Varlan "Senior status" with no word on
+        # the directory, which still lists him active.
+        _payload, courts, _, _ = built()
+        iso = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
+        for cid, court in courts.items():
+            moved = [j for j in court["judges"] if j.get("listedSenior")]
+            html = self.committed(f"courts/{cid}.html")
+            static = html[html.index('<div class="fed-prerendered">'):]
+            static = static[:static.index("</div>")]
+            for judge in moved:
+                self.assertIn("Senior status by the courts&#8217; list (the FJC directory still "
+                              "lists active service)", static, cid)
+            self.assertNotRegex(static.replace('datetime="', ""), iso, cid)
+            if court["listed"] and court["judges"]:
+                self.assertIn('data-label="Appointed by"', static, cid)
+            description = re.search(r'<meta name="description" content="([^"]*)"', html).group(1)
+            self.assertNotRegex(description, iso, cid)
+            self.assertNotIn("needs JavaScript", static, cid)
 
     def test_no_page_calls_the_courts_it_links_the_article_iii_courts(self):
         """The hub's courts section holds the Article IV territorial courts."""

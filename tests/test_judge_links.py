@@ -169,6 +169,48 @@ class TestTheJoin(unittest.TestCase):
         two, problems = self.join(entity("Q1", "example-ann", images=[name, "Other.jpg"]))
         self.assertNotIn("portrait", two["100"])
 
+    def test_a_size_not_read_keeps_the_last_portrait_of_that_file(self):
+        # Rule 8: one 429 from Commons' imageinfo used to drop up to fifty
+        # working portraits until the next good run.
+        name = "Ann Example.jpg"
+        good, _ = self.join(entity("Q1", "example-ann", images=[name]))
+        last = {"100": good["100"]}
+        joined, problems = jl.join({"fjc-100": JUDGE}, {"100": "example-ann"},
+                                   wd(entity("Q1", "example-ann", images=[name])), {}, last)
+        self.assertEqual(joined["100"]["portrait"], good["100"]["portrait"])
+        self.assertIn("last portrait read is kept", problems[0])
+        # Not a portrait of another file: the item's image changed, so the
+        # old one is not kept.
+        other, problems = jl.join({"fjc-100": JUDGE}, {"100": "example-ann"},
+                                  wd(entity("Q1", "example-ann", images=["Ann Example 2.jpg"])), {}, last)
+        self.assertNotIn("portrait", other["100"])
+        self.assertIn("not shown", problems[0])
+        # And without a last read, nothing is shown.
+        none, _ = jl.join({"fjc-100": JUDGE}, {"100": "example-ann"},
+                          wd(entity("Q1", "example-ann", images=[name])), {})
+        self.assertNotIn("portrait", none["100"])
+
+    def test_a_page_not_read_keeps_the_last_entry(self):
+        last = {"100": {"wikidata": "Q1", "wikipedia": "Ann Example"}}
+        joined, _ = jl.join({"fjc-100": JUDGE}, {}, {}, {}, last)
+        self.assertEqual(joined, last)
+
+    def test_a_refresh_whose_sizes_fail_keeps_the_portraits(self):
+        import tempfile
+        name = "Ann Example.jpg"
+        good, _ = self.join(entity("Q1", "example-ann", images=[name]))
+        with tempfile.TemporaryDirectory() as root:
+            os.makedirs(os.path.join(root, os.path.dirname(jl.CACHE_PATH)))
+            jl.save_cache({"slugs": {"100": "example-ann"}, "judges": {"100": good["100"]}}, root)
+            original = jl.fetch_wikidata
+            jl.fetch_wikidata = lambda *a, **k: wd(entity("Q1", "example-ann", images=[name]))
+            try:
+                cache = jl.refresh({"judges": {"fjc-100": JUDGE}}, root, read=lambda url: "",
+                                   sizes_of=lambda urls: {}, log=None)
+            finally:
+                jl.fetch_wikidata = original
+        self.assertEqual(cache["judges"]["100"]["portrait"], good["100"]["portrait"])
+
     def test_a_judge_without_an_id_on_wikidata_has_nothing(self):
         joined, problems = jl.join({"fjc-100": JUDGE}, {}, {}, {})
         self.assertEqual((joined, problems), ({}, []))

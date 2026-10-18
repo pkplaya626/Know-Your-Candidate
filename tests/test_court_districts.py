@@ -62,6 +62,10 @@ class TestTheStatute(unittest.TestCase):
         self.assertNotIn("Moore", eastern["counties"])
         self.assertIn("Durham", middle["counties"])
         self.assertTrue(any("Butner" in e for e in middle["exceptions"]))
+        # ... and are kept apart, in the statute's words, to say where the
+        # excepted part is.
+        self.assertTrue(any("Durham" in p and "Butner" in p for p in eastern["portions"]))
+        self.assertEqual(middle["portions"], [])
 
     def test_a_missing_comma_in_the_code_is_an_evidenced_alias(self):
         oklahoma = cd.parse_state(self.sections["Oklahoma"][1])
@@ -155,6 +159,38 @@ class TestTheCommittedTable(unittest.TestCase):
                 self.assertEqual(set(entry["counties"]),
                                  {f for f, e in self.placed.items() if e["state"] == code}, code)
 
+    def test_the_district_holding_an_excepted_part_is_named(self):
+        # Durham's Butner part and four counties' Fort Bragg parts are in the
+        # Eastern District, which the statute's own words say; the county
+        # page names it (it said only "another district").
+        for fips in ("37063", "37093", "37125", "37153", "37165"):
+            self.assertEqual(self.placed[fips]["exceptTo"], "nc-e", fips)
+        nc = cd.county_courts(ROOT)["NC"]
+        self.assertEqual(nc["counties"]["37063"][3], "nc-e")
+        self.assertEqual(nc["names"]["nc-e"], "Eastern District of North Carolina")
+        self.assertFalse([f for f, e in self.placed.items() if e.get("exceptTo") and not e.get("except")])
+
+    def test_a_city_placed_by_its_neighbours_says_so(self):
+        va = cd.county_courts(ROOT)["VA"]["counties"]
+        self.assertEqual(va["51680"][-1], "neighbours")           # Lynchburg
+        self.assertNotEqual(va["51650"][-1], "neighbours")        # Hampton: Elizabeth City, by name
+
+    def test_a_courts_areas_in_its_states_words(self):
+        # Rule 75: "13 counties" for Louisiana's parishes, "30 counties" for
+        # Alaska's boroughs and census areas.
+        covers = cd.covers(self.placed)
+        self.assertRegex(covers["la-e"], r"^\d+ parishes$")
+        self.assertRegex(covers["ak"], r"^\d+ boroughs and census areas$")
+        self.assertRegex(covers["va-e"], r"^\d+ counties and \d+ independent cities$")
+        self.assertRegex(covers["mo-e"], r"^\d+ counties and 1 independent city$")
+        self.assertRegex(covers["ct"], r"^\d+ planning regions$")
+        for cid, text in covers.items():
+            total = sum(int(n) for n in __import__("re").findall(r"\d+", text))
+            self.assertEqual(total, sum(1 for e in self.placed.values() if e["court"] == cid), cid)
+        names = [n for u in cd.for_courts(self.placed)["va-e"] for n in u["counties"]]
+        self.assertIn("City of Alexandria", names)
+        self.assertNotIn("Alexandria city", names)
+
     def test_a_courts_divisions_hold_its_counties(self):
         courts = cd.for_courts(self.placed)
         self.assertEqual(sum(len(u["counties"]) for u in courts["tx-s"]),
@@ -172,6 +208,9 @@ class TestTheCourtsOwnSites(unittest.TestCase):
         try:
             court_info.SITES["ak"] = "https://akd-uscourts.example.com"
             self.assertTrue(court_info.check())
+            # And every build says so, not only this test.
+            from kyc import validate
+            self.assertIn("court-sites", [i.code for i in validate.check_judiciary(None)])
         finally:
             court_info.SITES["ak"] = kept
 

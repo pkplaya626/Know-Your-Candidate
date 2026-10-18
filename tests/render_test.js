@@ -7216,6 +7216,23 @@ async function testFederalAudit() {
     const rows = list ? list.querySelectorAll("tbody tr").length : 0;
     check("every vacancy, now and announced, has a row", rows === d.vacancies.rows.length,
       `${rows} rows, ${d.vacancies.rows.length} vacancies`);
+    // In the courts' tables' order: by circuit, then by the name shown -
+    // never by the hidden code (the District of Alaska before Alabama's).
+    const circuits = d.courts.filter((c) => c.kind === "appeals").map((c) => c.circuit);
+    const byId = Object.fromEntries(d.courts.map((c) => [c.id, c]));
+    const shown = (tr) => tr.querySelector("th a").getAttribute("href").replace(/^.*\//, "").replace(/\.html$/, "");
+    [...list.querySelectorAll("table")].forEach((t) => {
+      const keys = [...t.querySelectorAll("tbody tr")].map((tr) => {
+        const c = byId[shown(tr)];
+        return [circuits.indexOf(c.circuit), c.kind === "appeals" ? 0 : 1, tr.querySelector("th a").textContent];
+      });
+      check("the " + t.querySelector("caption").textContent + " table is in the courts' order",
+        keys.every((k, i) => i === 0 || (keys[i - 1][0] < k[0] || (keys[i - 1][0] === k[0] &&
+          (keys[i - 1][1] < k[1] || (keys[i - 1][1] === k[1] && keys[i - 1][2] <= k[2]))))),
+        keys.map((k) => k[2]).slice(0, 8).join(" | "));
+    });
+    check("no empty Nominated cell", ![...list.querySelectorAll('[data-label="Nominated"]')]
+      .some((c) => !c.textContent.trim()));
     const summary = D.getElementById("vacancySummary").textContent;
     check("the summary counts the nominees for announced vacancies too",
       !d.vacancies.futureNominees || summary.indexOf((d.vacancies.totals.nominees + d.vacancies.futureNominees) +
@@ -7283,6 +7300,15 @@ async function testFederalAudit() {
       d.succession.filter((p) => p.kind === "member").every((p) =>
         !!D.querySelector('#succession a[href="../index.html#/profile/' + p.id + '"]')));
     check("the acting-officer caveat is said", /3 U\.S\.C\. 19\(e\)/.test(D.getElementById("succession").textContent));
+    const lede = D.querySelector("#succession .guide-lede").textContent;
+    check("the Vice President succeeds by the Constitution, the rest by the statute",
+      /First the Vice President \(the 25th Amendment\)/.test(lede) &&
+      !/if the office and the Vice Presidency were both empty \(3 U\.S\.C\. 19\)/.test(lede), lede);
+    check("an office nobody is named for says why",
+      d.succession.filter((p) => p.kind === "missing").every((p) => !p.reason ||
+        line.some((li) => li.textContent.indexOf(p.reason) !== -1)));
+    check("no date on a Cabinet card is left as 2025-01-24",
+      !/\b\d{4}-\d{2}-\d{2}\b/.test(D.getElementById("cabinet").textContent));
     // FEDERAL-13: no bare "Since 2025" beside an exact confirmation date.
     const rough = d.offices.filter((o) => (o.history || []).some((r) => r.current && r.start &&
       r.start.shown && r.start.shown.precision !== "day" && !r.actingNote));
@@ -7307,6 +7333,11 @@ async function testFederalAudit() {
         section && section.textContent.slice(0, 200));
       const held = [...D.querySelectorAll("#officialModal .panel-head")]
         .find((h) => /Public offices held/.test(h.textContent));
+      const items = section ? [...section.querySelectorAll(".oge-positions li")] : [];
+      check("'Present' is dated as the report's, never as today's",
+        items.every((li) => !/Present\)/.test(li.textContent) ||
+          /“Present” as of the report, posted [A-Z]/.test(li.textContent)),
+        items.map((li) => li.textContent).join(" | "));
       check("and never merged into the offices two sources agree on", !!held &&
         !poster.holder.disclosures.otherPositions.rows.some((r) =>
           held.closest("section").textContent.indexOf(r) !== -1));
@@ -7323,7 +7354,10 @@ async function testFederalAudit() {
       const body = D.getElementById("officialModalBody").textContent;
       check("their record opens with a banner saying they left",
         D.getElementById("officialModalName").textContent === bondi.name &&
-        /^(Left office|Acting service ended)/.test(D.getElementById("officialLeft").textContent) &&
+        /^They no longer hold this office/.test(D.getElementById("officialLeft").textContent) &&
+        /(Left office|Acting service ended)/.test(D.getElementById("officialModalMeta").textContent) &&
+        // Said once: the subheading has the day, the banner does not repeat it.
+        !/Left office/.test(D.getElementById("officialLeft").textContent) &&
         !/Nobody here by this link/.test(body), body.slice(0, 200));
       window.KYC.official.close();
     }
@@ -7393,6 +7427,60 @@ async function testFederalAudit() {
       /Harris County/.test(block.textContent), block && block.textContent.slice(0, 300));
   });
 
+  const ISO = /\b\d{4}-\d{2}-\d{2}\b/;
+  const lae2 = lae;
+  suite("courts/la-e.html — the areas in Louisiana's words", () => {
+    const block = lae2.D.getElementById("this-court");
+    const covers = block && [...block.querySelectorAll(".fed-fact")].find((f) => /Covers/.test(f.textContent));
+    const summaries = block ? [...block.querySelectorAll(".fed-counties summary")].map((x) => x.textContent) : [];
+    check("parishes, never counties", !!covers && /\d+ parishes/.test(covers.textContent) &&
+      !/count(y|ies)/.test(covers.textContent) && summaries.length > 0 &&
+      summaries.every((x) => /^\d+ parish(es)?$/.test(x)), (covers && covers.textContent) + " | " + summaries.join(" | "));
+    check("a site of a district court mentions jury service", /jury service/.test(block.textContent));
+  });
+  const ca9 = await buildPage("courts/ca9.html");
+  await settle(50);
+  suite("courts/ca9.html — an appellate court's website", () => {
+    const block = ca9.D.getElementById("this-court");
+    check("no jury service at a court that holds no jury trials", !!block &&
+      !/jury service/.test(block.textContent) && /opinions, the docket/.test(block.textContent),
+      block && block.textContent.slice(0, 200));
+  });
+  const cod = await buildPage("courts/co.html");
+  await settle(50);
+  suite("courts/co.html — one division, and a judge nominated to another court", () => {
+    const { window: w, D: doc, errors: errs } = cod;
+    check("no page errors", errs.length === 0, errs.join(" | "));
+    const items = [...doc.querySelectorAll("#this-court .fed-divisions > li")];
+    check("an undivided court's list begins with a capital", items.length === 1 &&
+      /^Court is held at /.test(items[0].textContent), items.map((i) => i.textContent.slice(0, 40)).join(" | "));
+    const nominated = w.kycCourt.co.judges.filter((j) => j.nominatedTo);
+    check("the committed data has a judge nominated to the Tenth Circuit", nominated.length === 1 &&
+      nominated[0].nominatedTo.id === "ca10");
+    nominated.forEach((j) => {
+      w.KYC.official.open(j.id);
+      const note = doc.getElementById("officialNominated");
+      check("their own record says so, dated in words", !!note &&
+        /Nominated to the Court of Appeals for the Tenth Circuit/.test(note.textContent) &&
+        /pending in the Senate/.test(note.textContent) && !ISO.test(note.textContent) &&
+        !!note.querySelector('a[href$="ca10.html"]'), note && note.textContent);
+      w.KYC.official.close();
+    });
+    const empty = [...doc.querySelectorAll('#vacancies [data-label="Nominated"]')]
+      .filter((c) => !c.textContent.trim());
+    check("no empty Nominated cell", empty.length === 0);
+  });
+  suite("courts/tn-e.html — dates in words in the dialog", () => {
+    const { window: w, D: doc } = tne;
+    const moved = w.kycCourt["tn-e"].judges.filter((j) => j.listedSenior);
+    moved.forEach((j) => {
+      w.KYC.official.open(j.id);
+      const meta = doc.getElementById("officialModalMeta").textContent;
+      check("the listed senior status is dated in words", !ISO.test(meta) && /Senior status from [A-Z]/.test(meta), meta);
+      w.KYC.official.close();
+    });
+  });
+
   const county = await buildPage("counties/tx.html", { hash: "#/?county=48201" });
   await settle(50);
   suite("counties/tx.html — which federal court covers a county (FEDERAL-08)", () => {
@@ -7410,6 +7498,19 @@ async function testFederalAudit() {
     check("says part of it is in another district, in the statute's words",
       !!line && /Middle District of North Carolina/.test(line.textContent) && /Butner/.test(line.textContent),
       line && line.textContent);
+    check("and names that district, linked",
+      !!line && /Part of it \(the Federal Correctional Institution, Butner/.test(line.textContent) &&
+      /is in the Eastern District of North Carolina/.test(line.textContent) &&
+      !!line.querySelector('a[href="../courts/nc-e.html"]'), line && line.textContent);
+  });
+  const richmond = await buildPage("counties/va.html", { hash: "#/?county=51760" });
+  await settle(50);
+  suite("counties/va.html — an independent city the statute does not name", () => {
+    const line = richmond.D.querySelector("#localPanelBody .local-court");
+    const placed = (richmond.window.kycCourtCounties.VA.counties || {})["51760"] || [];
+    check("says it is placed by the land around it, when it is", !!line && (placed[4] === "neighbours"
+      ? /The statute does not name this city/.test(line.textContent)
+      : !/The statute does not name this city/.test(line.textContent)), line && line.textContent);
   });
 
   const state = await buildPage("states/tx.html");

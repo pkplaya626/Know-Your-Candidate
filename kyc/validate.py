@@ -1583,6 +1583,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_guide()
     issues += check_ballot2026()
     issues += check_federal(federal)
+    issues += check_succession(federal, snapshot)
     issues += check_judiciary(judiciary)
     issues += check_vacancies(vacancies, judiciary)
     issues += check_history(history, profiles)
@@ -1734,14 +1735,32 @@ def check_federal(cache):
             for level, code, message, detail in federal.problems(cache)]
 
 
+def check_succession(cache, snapshot):
+    """The Speaker and the President pro tempore in the line of succession
+    (kyc/federal_build.py): an office the federal page cannot fill - none
+    recorded, a holder chosen before the sitting Congress began, or one not
+    seated - is a warning, so the page's "Nobody listed" is never silent."""
+    if cache is None or snapshot is None:
+        return []
+    from . import federal_build
+
+    _officers, problems = federal_build.congressional_officers(cache, snapshot)
+    return [Issue("warn", "succession-unnamed",
+                  f"the federal page names nobody for {len(problems)} congressional office(s) "
+                  f"in the line of succession", problems)] if problems else []
+
+
 def check_judiciary(cache):
     """The federal judiciary cache (kyc/judiciary.py), when the caller
     supplies one: every court present, nine justices and no retired one
-    among them, and no judge with a party."""
-    from . import federal_courts, judiciary
+    among them, and no judge with a party; and each court's own website on
+    a host of the judiciary's own (kyc/court_info.py)."""
+    from . import court_info, federal_courts, judiciary
 
     issues = [Issue("error", "federal-courts", f"the court table: {p}")
               for p in federal_courts.check()]
+    issues += [Issue("error", "court-sites", f"the courts' websites: {p}")
+               for p in court_info.check()]
     if cache is not None:
         issues += [Issue(level, code, message, detail)
                    for level, code, message, detail in judiciary.problems(cache)]

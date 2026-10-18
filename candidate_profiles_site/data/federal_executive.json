@@ -2308,7 +2308,7 @@
   "sba": {
    "contact": "https://www.sba.gov/about-sba/organization/contact-sba",
    "source": "https://www.usa.gov/agencies/small-business-administration",
-   "url": "http://www.sba.gov/"
+   "url": "https://www.sba.gov/"
   },
   "state": {
    "source": "https://www.usa.gov/agencies/u-s-department-of-state",
@@ -2329,9 +2329,9 @@
    "url": "https://usun.usmission.gov/"
   },
   "ustr": {
-   "contact": "http://www.ustr.gov/about-us/contact-us",
+   "contact": "https://www.ustr.gov/about-us/contact-us",
    "source": "https://www.usa.gov/agencies/u-s-trade-representative",
-   "url": "http://www.ustr.gov/"
+   "url": "https://www.ustr.gov/"
   },
   "veterans": {
    "contact": "https://www.va.gov/contact-us/",

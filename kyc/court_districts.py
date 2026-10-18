@@ -141,13 +141,17 @@ def names(listed):
 
 
 def _places(units):
-    """``(counties, cities)`` of a "comprises ..." clause: "the counties of
-    A, B and C, and the city of D"."""
+    """``(counties, cities, exceptions, portions)`` of a "comprises ..."
+    clause: "the counties of A, B and C, and the city of D"."""
     units = re.sub(r"\s+and concurrently with .*$", "", units)
     # "those portions of Hoke, Moore ... counties encompassing Fort Bragg":
     # part of a county another district holds; that county's own entry
-    # carries the exception in the statute's words.
-    units = re.sub(r",?\s+(?:and )?(?:those|that) portions? of [^()]*$", "", units)
+    # carries the exception in the statute's words, and this district's
+    # words say where the part is.
+    portion = re.search(r",?\s+(?:and )?((?:those|that) portions? of [^()]*)$", units)
+    portions = [portion.group(1).strip()] if portion else []
+    if portion:
+        units = units[:portion.start()]
     city = re.search(r",?\s+and the [Cc]ity of (.+)$", units)
     cities = []
     if city:
@@ -156,9 +160,9 @@ def _places(units):
     units = re.sub(r"^" + _LIST_OF, "", units.strip())
     single = re.fullmatch(r"([A-Z][\w .'-]+?) County", units.strip())
     if single:
-        return [single.group(1)], cities, []
+        return [single.group(1)], cities, [], portions
     counties, exceptions = names(units)
-    return counties, cities, exceptions
+    return counties, cities, exceptions, portions
 
 
 _NEXT = (r"(?= Court (?:for|shall)\b| \(\w+\) | (?:Northern|Southern|Eastern|Western|Middle|"
@@ -175,7 +179,7 @@ def _title(name):
 
 def _unit(name=None):
     return {"name": name, "divisions": [], "counties": [], "cities": [], "exceptions": [],
-            "held": ""}
+            "portions": [], "held": ""}
 
 
 def parse_state(body):
@@ -198,14 +202,16 @@ def parse_state(body):
                 districts.append(current)
                 last[("district", name)] = current
                 if not _DIVISIONS.match(what):
-                    current["counties"], current["cities"], current["exceptions"] = _places(what)
+                    (current["counties"], current["cities"], current["exceptions"],
+                     current["portions"]) = _places(what)
             else:
                 if current is None:
                     current = _unit()
                     districts.append(current)
                 division = _unit(name)
                 del division["divisions"]
-                division["counties"], division["cities"], division["exceptions"] = _places(what)
+                (division["counties"], division["cities"], division["exceptions"],
+                 division["portions"]) = _places(what)
                 current["divisions"].append(division)
                 last[("division", name)] = division
         else:
@@ -345,6 +351,25 @@ def join(code, parsed, counties, neighbours=None):
         for division in district["divisions"]:
             place(division["counties"], division["cities"], cid, division["name"],
                   division["held"] or district["held"], division["exceptions"])
+    # Where an excepted part goes: the one other district whose own words
+    # ("that portion of Durham County encompassing ...") name the county.
+    holders = {}
+    for district in parsed["districts"]:
+        cid = court_id(code, None if parsed["single"] else district["name"])
+        for unit in [district] + district["divisions"]:
+            for words in unit.get("portions") or []:
+                holders.setdefault(cid, []).append(fold(words))
+    for fips, entry in out.items():
+        if not entry.get("except"):
+            continue
+        county = fold(counties[fips])
+        to = [cid for cid, texts in holders.items()
+              if cid != entry["court"] and any(county in t for t in texts)]
+        if len(to) == 1:
+            entry["exceptTo"] = to[0]
+        else:
+            problems.append(f"{code}: 28 U.S.C. keeps part of {counties[fips]} out of {entry['court']} "
+                            f"and names {len(to)} other districts for it")
     if parsed["single"]:
         cid = code.lower()
         held = parsed["districts"][0]["held"] if parsed["districts"] else ""
@@ -421,20 +446,52 @@ def table(cache, root="."):
     return out, problems
 
 
+def area_words(code, fips_list):
+    """``"13 parishes"``, ``"50 counties and 14 independent cities"``: a
+    count of a state's areas in the words the state uses for them (rule 75,
+    kyc/county_areas.py), an independent city counted as a city."""
+    from . import county_areas
+
+    one, many, _button = county_areas.words(code)
+    cities = sum(1 for f in fips_list if (county_areas.AREAS.get(f) or (None, None))[1]
+                 == county_areas.INDEPENDENT)
+    rest = len(fips_list) - cities
+    parts = ([f"{rest} {one if rest == 1 else many}"] if rest else []) + \
+        ([f"{cities} independent {'city' if cities == 1 else 'cities'}"] if cities else [])
+    return " and ".join(parts)
+
+
 def for_courts(placed):
-    """``{court id: [{"division", "held", "counties": [names]}]}``: each
-    court's divisions (one unnamed unit for a court with none), with the
-    counties in each by their Census names, for the court's page."""
-    out = {}
-    for _fips, entry in sorted(placed.items(), key=lambda kv: kv[1]["name"]):
+    """``{court id: [{"division", "held", "counties": [names], "areas"}]}``:
+    each court's divisions (one unnamed unit for a court with none), with
+    the areas in each by the names their state gives them, and their count
+    in its words (:func:`area_words`), for the court's page."""
+    from . import county_areas
+
+    out, fips_of = {}, {}
+    for fips, entry in sorted(placed.items(), key=lambda kv: kv[1]["name"]):
         units = out.setdefault(entry["court"], [])
         unit = next((u for u in units if u["division"] == entry["division"]), None)
         if unit is None:
             unit = {"division": entry["division"], "held": entry["held"], "counties": []}
             units.append(unit)
-        unit["counties"].append(entry["name"] + (" (part: " + entry["except"] + ")"
-                                                 if entry.get("except") else ""))
+        fips_of.setdefault(id(unit), []).append(fips)
+        unit["counties"].append(county_areas.local_name(fips, entry["name"]) +
+                                (" (part: " + entry["except"] + ")" if entry.get("except") else ""))
+    for cid, units in out.items():
+        code = placed[fips_of[id(units[0])][0]]["state"]
+        for unit in units:
+            unit["areas"] = area_words(code, fips_of[id(unit)])
     return out
+
+
+def covers(placed):
+    """``{court id: "64 counties and 31 independent cities"}``: everything a
+    court covers, in :func:`area_words`."""
+    by_court = {}
+    for fips, entry in placed.items():
+        by_court.setdefault(entry["court"], (entry["state"], []))[1].append(fips)
+    return {cid: area_words(code, fips_list) for cid, (code, fips_list) in by_court.items()}
 
 
 def for_state(code, placed, names):
@@ -448,11 +505,14 @@ def for_state(code, placed, names):
     for fips, entry in sorted(placed.items()):
         if entry["state"] != code:
             continue
-        row = [entry["court"], entry["division"] or "", entry.get("except") or ""]
+        row = [entry["court"], entry["division"] or "", entry.get("except") or "",
+               entry.get("exceptTo") or "", "neighbours" if entry.get("byNeighbours") else ""]
         while row[-1] == "":
             row.pop()
         rows[fips] = row
-        used[entry["court"]] = names[entry["court"]].replace("U.S. District Court for the ", "")
+        for cid in (entry["court"], entry.get("exceptTo")):
+            if cid:
+                used[cid] = names[cid].replace("U.S. District Court for the ", "")
     out = {"names": dict(sorted(used.items()))}
     shapes = {tuple(row) for row in rows.values()}
     if len(shapes) == 1 and len(next(iter(shapes))) == 1:

@@ -232,6 +232,19 @@ class TestTheAgenciesOwnSites(unittest.TestCase):
         self.assertIsNone(federal.parse_agency(page.replace("https://www.defense.gov/\"",
                                                             "https://defense.example.com/\"")))
 
+    def test_a_host_known_to_serve_https_is_linked_over_it(self):
+        page = fixture("usagov_defense.html").replace("https://www.defense.gov/\"", "http://www.ustr.gov/\"")
+        self.assertEqual(federal.parse_agency(page)["url"], "https://www.ustr.gov/")
+        # Any other plain-http host keeps the address USA.gov gives.
+        page = fixture("usagov_defense.html").replace("https://www.defense.gov/\"", "http://www.example.gov/\"")
+        self.assertEqual(federal.parse_agency(page)["url"], "http://www.example.gov/")
+
+    def test_no_committed_site_is_plain_http_where_https_is_served(self):
+        cache = federal.load_cache(ROOT)
+        for key, site in ((cache or {}).get("sites") or {}).items():
+            for url in (site["url"], site.get("contact")):
+                self.assertEqual(federal._secure(url), url, key)
+
     def test_every_committed_site_is_on_a_government_host(self):
         cache = federal.load_cache(ROOT)
         for key, site in ((cache or {}).get("sites") or {}).items():
@@ -278,6 +291,51 @@ class TestTheLineOfSuccession(unittest.TestCase):
         found, problems = federal.parse_succession(rows, "2026-10-17")
         self.assertNotIn("speaker", found)
         self.assertTrue(problems)
+
+    @staticmethod
+    def snapshot(term_start, members=("J000299", "G000386")):
+        rows = [{"bioguide": b, "name": b, "state": "LA", "chamber": "House",
+                 "termStart": term_start} for b in members]
+        rows += [{"bioguide": f"H{i:06d}", "name": "x", "state": "TX", "chamber": "House",
+                  "termStart": term_start} for i in range(10)]
+        return {"legislators": rows}
+
+    def executive(self):
+        found, _ = federal.parse_succession(self.rows(), "2026-10-17")
+        return {"succession": found}
+
+    def test_the_speaker_of_the_sitting_congress_is_named(self):
+        from kyc import federal_build
+        officers, problems = federal_build.congressional_officers(
+            self.executive(), self.snapshot("2025-01-03"))
+        self.assertEqual(problems, [])
+        self.assertEqual(officers["speaker"]["member"]["bioguide"], "J000299")
+
+    def test_the_last_congresss_speaker_is_not_named_after_january_3(self):
+        # congress-legislators records the 119th Congress's Speaker with no
+        # end date; on January 3 the 120th sits and has chosen its own, which
+        # the file may not record for two weeks (rule 68). Still seated in
+        # the House, he is not shown as second in line.
+        from kyc import federal_build
+        officers, problems = federal_build.congressional_officers(
+            self.executive(), self.snapshot("2027-01-03"))
+        self.assertEqual(set(officers["speaker"]), {"missing"})
+        self.assertEqual(set(officers["presidentProTempore"]), {"missing"})
+        self.assertIn("120th Congress's Speaker", officers["speaker"]["missing"])
+        self.assertEqual(len(problems), 2)
+        self.assertTrue(all("before the 120th Congress began" in p for p in problems))
+        # And the build reports it: never silent.
+        from kyc import validate
+        issues = validate.check_succession(self.executive(), self.snapshot("2027-01-03"))
+        self.assertEqual([i.code for i in issues], ["succession-unnamed"])
+
+    def test_a_holder_not_seated_is_not_named(self):
+        from kyc import federal_build
+        officers, problems = federal_build.congressional_officers(
+            self.executive(), self.snapshot("2025-01-03", members=("G000386",)))
+        self.assertIn("missing", officers["speaker"])
+        self.assertIn("member", officers["presidentProTempore"])
+        self.assertEqual(len(problems), 1)
 
 
 class TestTheBuildsWord(unittest.TestCase):

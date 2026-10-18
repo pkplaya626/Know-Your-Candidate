@@ -13,6 +13,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from kyc import federal_offices, oge  # noqa: E402
 
+ROOT = os.path.join(os.path.dirname(__file__), "..")
+
 FILE = "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/{}/$FILE/{}.pdf"
 
 
@@ -260,6 +262,37 @@ class TestOtherFederalPositions(unittest.TestCase):
         self.assertEqual(listed["url"], named["url"])
         unchecked = dict(person, documents=[dict(named, check="unreadable")])
         self.assertNotIn("otherPositions", oge.for_page(unchecked, positions))
+
+    def test_the_office_held_now_is_not_another_post(self):
+        # Sonderling, confirmed Secretary of Labor on 2026-09-30, read as
+        # "Acting Secretary of Labor ... (4/2026 - Present)" under "Other
+        # federal posts"; Mullin's "United States Senator, US Congress
+        # (1/2023 - Present)" is another post, and stays - the page says
+        # "Present" is the report's day.
+        named = dict(oge.document(LABOR_NOMINEE), title="Secretary", office=True, check="named")
+        person = {"holder": "Keith Sonderling", "filed": "Sonderling, Keith",
+                  "agency": "Department of Labor", "position": "Secretary", "documents": [named]}
+        rows = ["Acting Director, Office of Government Ethics (6/2026 - Present)",
+                "Acting Secretary of Labor, Department of Labor (4/2026 - Present)",
+                "United States Senator, US Congress (1/2023 - Present)"]
+        listed = oge.for_page(person, {named["url"]: rows}, ("Secretary of Labor",))["otherPositions"]
+        self.assertEqual(listed["rows"], [rows[0], rows[2]])
+        self.assertFalse(oge.holds_now("Deputy Attorney General, Department of Justice (1/2025 - 4/2026)",
+                                       ("Attorney General",)))
+        self.assertTrue(oge.holds_now("Acting Attorney General, Department of Justice (4/2026 - Present)",
+                                      ("Attorney General",)))
+
+    def test_the_built_page_never_lists_the_office_held_now(self):
+        try:
+            from kyc import federal_build
+            payload = federal_build.build(ROOT)[0]
+        except Exception as exc:  # noqa: BLE001 - no caches committed
+            self.skipTest(str(exc))
+        for office in payload["offices"]:
+            holder = office.get("holder") or {}
+            listed = (holder.get("disclosures") or {}).get("otherPositions") or {}
+            for row in listed.get("rows") or []:
+                self.assertFalse(oge.holds_now(row, (office["office"], holder.get("title"))), row)
 
 
 LABOR_NOMINEE = row("Sonderling, Keith", "Department of Labor", "Secretary", "2026-07-17",

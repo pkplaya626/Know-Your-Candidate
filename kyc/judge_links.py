@@ -264,12 +264,21 @@ def surname(judge):
 
 # ------------------------------------------------------------- the join
 
-def join(judges, slugs, wikidata, sizes):
+def file_page(url):
+    """The Commons page of an upload URL: what a portrait credits."""
+    return ("https://commons.wikimedia.org/wiki/File:"
+            + urllib.parse.quote(urllib.parse.unquote(url.rsplit("/", 1)[-1])))
+
+
+def join(judges, slugs, wikidata, sizes, previous=None):
     """``({nid: {"wikidata", "wikipedia"?, "portrait"?}}, problems)``.
 
     *judges* is ``{id: record}`` (judiciary.json's), *slugs* ``{nid:
     slug}``, *wikidata* :func:`read_wikidata`'s, *sizes* ``{upload url:
-    (width, height)}``."""
+    (width, height)}``, *previous* the last cache's ``judges``. A size that
+    could not be read concludes nothing (rule 8): the last portrait read of
+    the same file is kept, and a judge whose page was not read keeps the
+    last entry whole."""
     from . import overrides
     from .portraits import thumb_set, title_is_about
 
@@ -277,7 +286,12 @@ def join(judges, slugs, wikidata, sizes):
     for judge in judges.values():
         nid = judge.get("nid") or judge["id"].replace("fjc-", "")
         slug = slugs.get(nid)
-        if not slug or slug not in wikidata:
+        if not slug:
+            # The FJC page was never read for an id: nothing concluded.
+            if (previous or {}).get(nid):
+                out[nid] = previous[nid]
+            continue
+        if slug not in wikidata:
             continue
         items = wikidata[slug]
         name = judge.get("name") or ""
@@ -317,7 +331,13 @@ def join(judges, slugs, wikidata, sizes):
             elif url in overrides.NOT_A_PORTRAIT:
                 problems.append(f"{name}: {url} is in overrides.NOT_A_PORTRAIT; not shown")
             elif not size:
-                problems.append(f"{name}: the size of {url} could not be read; not shown")
+                kept = ((previous or {}).get(nid) or {}).get("portrait")
+                if kept and kept.get("source") == file_page(url):
+                    entry["portrait"] = kept
+                    problems.append(f"{name}: the size of {url} could not be read; "
+                                    f"the last portrait read is kept")
+                else:
+                    problems.append(f"{name}: the size of {url} could not be read; not shown")
             elif size[0] > size[1] * WIDEST:
                 problems.append(f"{name}: {url} is wider than a portrait ({size[0]}x{size[1]}); "
                                 f"not shown as a portrait")
@@ -326,8 +346,7 @@ def join(judges, slugs, wikidata, sizes):
                 entry["portrait"] = {
                     "url": photo_set[0][1], "set": photo_set,
                     "credit": "Wikimedia Commons",
-                    "source": "https://commons.wikimedia.org/wiki/File:"
-                              + urllib.parse.quote(urllib.parse.unquote(url.rsplit("/", 1)[-1])),
+                    "source": file_page(url),
                 }
         elif item["images"]:
             problems.append(f"{name}: {qid} has {len(item['images'])} images; none shown")
@@ -353,7 +372,7 @@ def refresh(judiciary_cache, root=".", read=None, sizes_of=None, log=print, limi
         from .portraits import image_sizes
         sizes_of = image_sizes
     sizes = sizes_of(wanted)
-    joined, problems = join(judges, slugs, wikidata, sizes)
+    joined, problems = join(judges, slugs, wikidata, sizes, previous.get("judges"))
     cache = {"read": datetime.date.today().isoformat(),
              "sources": {"fjc": "https://www.fjc.gov/history/judges",
                          "wikidata": "https://www.wikidata.org/wiki/Property:P2736"},
@@ -362,6 +381,25 @@ def refresh(judiciary_cache, root=".", read=None, sizes_of=None, log=print, limi
              "problems": problems, "unread": unread}
     save_cache(cache, root)
     return cache
+
+
+def problems(cache):
+    """What a build says about the cache: ``[(level, code, message,
+    detail)]`` - every link and portrait the checks withheld, and the
+    judges' pages still to be read."""
+    if not cache:
+        return []
+    out = []
+    if cache.get("problems"):
+        out.append(("warn", "judge-links-withheld",
+                    f"{len(cache['problems'])} judges' Wikipedia links, Wikidata items or portraits "
+                    f"are withheld by the checks in kyc/judge_links.py (read {cache.get('read')})",
+                    list(cache["problems"])))
+    if cache.get("unread"):
+        out.append(("warn", "judge-links-unread",
+                    f"{cache['unread']} judges' FJC pages could not be read for their id; "
+                    f"'judiciary' tries them again", []))
+    return out
 
 
 def for_judge(cache, nid):

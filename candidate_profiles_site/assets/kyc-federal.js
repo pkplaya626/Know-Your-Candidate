@@ -224,6 +224,11 @@
     return p ? esc(p.name) : '<span class="faint">None yet</span>';
   }
 
+  /** The day of a nomination, or a dash where there is none to date. */
+  function nominatedText(r) {
+    return r.nominated ? day(r.nominated) : '<span class="faint">—</span>';
+  }
+
   /** The judge a vacancy names, and - where the list implies they still
    *  serve but the directory lists nobody of that name on this court - a
    *  note saying only that (kyc/vacancies.py), never why. */
@@ -259,7 +264,7 @@
             cell("Why", reasonText(r, "")) +
             cell("Vacant since", day(r.since || "")) +
             cell("Nominee", personText(r.nominee)) +
-            cell("Nominated", day(r.nominated || "")) + "</tr>";
+            cell("Nominated", nominatedText(r)) + "</tr>";
         }));
     }
     if (later.length) {
@@ -271,7 +276,7 @@
               cell("Announced", day(r.announced || "")) +
               cell("Leaves", r.vacancyDate ? day(r.vacancyDate) : '<span class="faint">Not yet set</span>') +
               cell("Nominee", personText(r.nominee)) +
-              cell("Nominated", day(r.nominated || "")) + "</tr>";
+              cell("Nominated", nominatedText(r)) + "</tr>";
           }));
     }
     return section("vacancies", "Vacancies", body);
@@ -348,7 +353,7 @@
     // why the start is not (FEDERAL-13).
     var rough = now && now.start && now.start.shown && now.start.shown.precision !== "day";
     if (start && rough && !acting) {
-      start = (now.confirmed ? "Confirmed " + now.confirmed.date + "; took office in " : "") + start +
+      start = (now.confirmed ? "Confirmed " + KYC.dateWords(now.confirmed.date) + "; took office in " : "") + start +
         " (" + KYC.official.precisionNote(now.start.shown) + ")";
     } else if (start) {
       start = "Since " + start;
@@ -381,15 +386,18 @@
       } else if (p.kind === "official" && p.id) {
         who = person(p.id, p.name) + (p.acting ? ' <span class="badge badge-warn">Acting</span>' : "");
       } else {
-        who = '<span class="faint">Nobody listed</span>';
+        // Never a guess: who is not named, and why (kyc/federal_build.py).
+        who = '<span class="faint">Nobody listed' + (p.reason ? ": " + esc(p.reason) : "") + "</span>";
       }
       return '<li value="' + (i + 1) + '"><span class="fed-succession-role">' + esc(p.role) +
         "</span> " + who + "</li>";
     });
     return section("succession", "The line of succession",
-      '<p class="guide-lede">Who would act as President, in order, if the office and the ' +
-      "Vice Presidency were both empty (" + source("https://www.law.cornell.edu/uscode/text/3/19",
-        "3 U.S.C. 19") + "). The Speaker and the President pro tempore are from " +
+      '<p class="guide-lede">Who would become or act as President, in order. First the Vice ' +
+      "President (" + source("https://constitution.congress.gov/constitution/amendment-25/",
+        "the 25th Amendment") + "); then, if the Presidency and the Vice Presidency are both " +
+      "empty, the officers " + source("https://www.law.cornell.edu/uscode/text/3/19", "3 U.S.C. 19") +
+      " names, from the Speaker on. The Speaker and the President pro tempore are from " +
       source((d.sources.executive || {}).leadership ||
         "https://unitedstates.github.io/congress-legislators/legislators-current.json",
         "congress-legislators’ record of leadership roles") + ", each checked against the " +
@@ -689,10 +697,25 @@
           ? (r.vacancyDate ? day(r.vacancyDate) : '<span class="faint">Not yet set</span>')
           : day(r.since || "")) +
         cell("Nominee", personText(r.nominee)) +
-        cell("Nominated", day(r.nominated || "")) + "</tr>";
+        cell("Nominated", nominatedText(r)) + "</tr>";
     }
-    var now = rows.filter(function (r) { return !r.future; });
-    var later = rows.filter(function (r) { return r.future; });
+    var circuits = (d.courts || []).filter(function (c) { return c.kind === "appeals"; })
+      .map(function (c) { return c.circuit; });
+    function key(r) {
+      var c = courts[r.court] || {};
+      var at = circuits.indexOf(c.circuit);
+      return [at < 0 ? circuits.length : at, c.kind === "appeals" ? 0 : 1, c.name ? shortName(c) : r.court];
+    }
+    function order(a, b) {
+      var x = key(a), y = key(b);
+      for (var i = 0; i < x.length; i++) {
+        if (x[i] < y[i]) return -1;
+        if (x[i] > y[i]) return 1;
+      }
+      return 0;
+    }
+    var now = rows.filter(function (r) { return !r.future; }).sort(order);
+    var later = rows.filter(function (r) { return r.future; }).sort(order);
     return '<div class="fed-vacancy-list" id="vacancy-list">' +
       '<h3 class="panel-subhead">Vacancies and nominees</h3>' +
       '<p class="faint">As ' + source(v.sources.current, "the courts list them") + ", as of " +
@@ -915,10 +938,10 @@
     if (!court || !mine) {
       // The names written into the page stay: only the full view is missing.
       var kept = target.querySelector(".fed-prerendered");
-      target.innerHTML = '<p class="results-bar" role="status">This court’s ' +
+      target.innerHTML = '<p class="results-bar" role="status"><span>This court’s ' +
         (kept ? "full page" : "judges") + " could not be loaded. Reload the page, or see " +
         source((d.sources.judiciary || {}).directory || "https://www.fjc.gov/history/judges",
-          "the Federal Judicial Center’s directory") + ".</p>";
+          "the Federal Judicial Center’s directory") + ".</span></p>";
       if (kept) target.appendChild(kept);
       return;
     }
@@ -1010,12 +1033,20 @@
    *  websites, kyc/court_info.py), where to look up a case, and - for a
    *  district court - the counties it covers and where it sits, division
    *  by division, as 28 U.S.C. 81-131 draw them (kyc/court_districts.py). */
+  var SITE_HOLDS = {
+    district: "dockets, jury service, local rules, the clerk’s office",
+    territorial: "dockets, jury service, local rules, the clerk’s office",
+    trade: "opinions, the docket, rules, the clerk’s office",
+    appeals: "opinions, the docket, rules, the clerk’s office",
+    supreme: "opinions, the docket, rules, the clerk’s office",
+  };
+
   function thisCourt(d, court, mine) {
     var host = court.site ? court.site.replace(/^https?:\/\//, "").replace(/\/.*$/, "") : "";
+    var holds = SITE_HOLDS[court.kind] || "opinions, the docket, the clerk’s office";
     var html = '<div class="fed-court-facts">' +
       (court.site ? '<p class="fed-fact"><span class="fed-fact-label">Website</span> ' +
-        source(court.site, host) + ' <span class="faint">(dockets, jury service, local rules, ' +
-        "the clerk’s office)</span></p>" : "") +
+        source(court.site, host) + ' <span class="faint">(' + esc(holds) + ")</span></p>" : "") +
       '<p class="fed-fact"><span class="fed-fact-label">Find a case</span> ' +
       (court.kind === "supreme"
         ? source("https://www.supremecourt.gov/docket/docket.aspx", "the Court’s docket search")
@@ -1024,21 +1055,23 @@
           " (free copies of some, from the Free Law Project)") + "</p>";
     var units = mine.divisions || [];
     if (units.length) {
-      var count = units.reduce(function (n, u) { return n + u.counties.length; }, 0);
       var named = units.some(function (u) { return u.division; });
-      html += '<p class="fed-fact"><span class="fed-fact-label">Covers</span> ' + count +
-        (count === 1 ? " county" : " counties and county equivalents") +
+      // The areas in the words their state uses (parishes, boroughs and
+      // census areas, independent cities: kyc/court_districts.area_words).
+      html += '<p class="fed-fact"><span class="fed-fact-label">Covers</span> ' + esc(mine.covers) +
         (named ? " in " + units.length + " divisions" : "") + "</p>" +
         '<ul class="fed-divisions">' + units.map(function (u) {
           return "<li>" + (u.division ? "<strong>" + esc(u.division) + " Division</strong>: " : "") +
-            (u.held ? "court is held at " + esc(u.held) + ". " : "") +
-            '<details class="fed-counties"><summary>' + u.counties.length +
-            (u.counties.length === 1 ? " county" : " counties") + "</summary>" +
+            (u.held ? (u.division ? "court is held at " : "Court is held at ") + esc(u.held) + ". " : "") +
+            '<details class="fed-counties"><summary>' + esc(u.areas) + "</summary>" +
             esc(u.counties.join(", ")) + "</details></li>";
         }).join("") + "</ul>" +
         '<p class="faint">From ' + source(d.statute || "https://www.govinfo.gov/app/collection/uscode",
           "28 U.S.C. 81-131") + " (the 2024 edition, with the amendments enacted since), joined to " +
-        "the Census Bureau’s counties by name.</p>";
+        "the Census Bureau’s counties by name." + ((court.states || []).indexOf("VA") !== -1
+          ? " The statute names a district for few of Virginia’s independent cities (28 U.S.C. " +
+            "127(c) puts each in the district of the land it lies in); the others are listed " +
+            "here where every county and city around them is in this district." : "") + "</p>";
     }
     return section("this-court", "This court", html + "</div>");
   }

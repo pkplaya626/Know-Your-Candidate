@@ -1,6 +1,6 @@
 {
  "edition": "2024",
- "read": "2026-10-17",
+ "read": "2026-10-18",
  "source": "https://www.govinfo.gov/content/pkg/USCODE-2024-title28/html/USCODE-2024-title28-partI-chap5.htm",
  "states": {
   "AK": {
@@ -11,7 +11,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Anchorage, Fairbanks, Juneau, Ketchikan, and Nome",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 81,
@@ -33,7 +34,8 @@
        ],
        "exceptions": [],
        "held": "Florence",
-       "name": "Northwestern"
+       "name": "Northwestern",
+       "portions": []
       },
       {
        "cities": [],
@@ -47,7 +49,8 @@
        ],
        "exceptions": [],
        "held": "Huntsville",
-       "name": "Northeastern"
+       "name": "Northeastern",
+       "portions": []
       },
       {
        "cities": [],
@@ -58,7 +61,8 @@
        ],
        "exceptions": [],
        "held": "Birmingham",
-       "name": "Southern"
+       "name": "Southern",
+       "portions": []
       },
       {
        "cities": [],
@@ -74,7 +78,8 @@
        ],
        "exceptions": [],
        "held": "Anniston",
-       "name": "Eastern"
+       "name": "Eastern",
+       "portions": []
       },
       {
        "cities": [],
@@ -92,12 +97,14 @@
        ],
        "exceptions": [],
        "held": "Tuscaloosa",
-       "name": "Western"
+       "name": "Western",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Northern"
+     "name": "Northern",
+     "portions": []
     },
     {
      "cities": [],
@@ -121,7 +128,8 @@
        ],
        "exceptions": [],
        "held": "Montgomery",
-       "name": "Northern"
+       "name": "Northern",
+       "portions": []
       },
       {
        "cities": [],
@@ -134,7 +142,8 @@
        ],
        "exceptions": [],
        "held": "Dothan",
-       "name": "Southern"
+       "name": "Southern",
+       "portions": []
       },
       {
        "cities": [],
@@ -148,12 +157,14 @@
        ],
        "exceptions": [],
        "held": "Opelika",
-       "name": "Eastern"
+       "name": "Eastern",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Middle"
+     "name": "Middle",
+     "portions": []
     },
     {
      "cities": [],
@@ -170,7 +181,8 @@
        ],
        "exceptions": [],
        "held": "Selma",
-       "name": "Northern"
+       "name": "Northern",
+       "portions": []
       },
       {
        "cities": [],
@@ -186,12 +198,14 @@
        ],
        "exceptions": [],
        "held": "Mobile",
-       "name": "Southern"
+       "name": "Southern",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Southern"
+     "name": "Southern",
+     "portions": []
     }
    ],
    "section": 81,
@@ -228,7 +242,8 @@
        ],
        "exceptions": [],
        "held": "Little Rock",
-       "name": "Central"
+       "name": "Central",
+       "portions": []
       },
       {
        "cities": [],
@@ -244,7 +259,8 @@
        ],
        "exceptions": [],
        "held": "Helena",
-       "name": "Delta"
+       "name": "Delta",
+       "portions": []
       },
       {
        "cities": [],
@@ -266,12 +282,14 @@
        ],
        "exceptions": [],
        "held": "Jonesboro",
-       "name": "Northern"
+       "name": "Northern",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Eastern"
+     "name": "Eastern",
+     "portions": []
     },
     {
      "cities": [],
@@ -290,7 +308,8 @@
        ],
        "exceptions": [],
        "held": "Texarkana, and may be held anywhere within the Federal courthouse in Texarkana that is located astride the State line between Texas and Arkansas",
-       "name": "Texarkana"
+       "name": "Texarkana",
+       "portions": []
       },
       {
        "cities": [],
@@ -304,7 +323,8 @@
        ],
        "exceptions": [],
        "held": "El Dorado",
-       "name": "El Dorado"
+       "name": "El Dorado",
+       "portions": []
       },
       {
        "cities": [],
@@ -319,7 +339,8 @@
        ],
        "exceptions": [],
        "held": "Fort Smith",
-       "name": "Fort Smith"
+       "name": "Fort Smith",
+       "portions": []
       },
       {
        "cities": [],
@@ -333,7 +354,8 @@
        ],
        "exceptions": [],
        "held": "Harrison",
-       "name": "Harrison"
+       "name": "Harrison",
+       "portions": []
       },
       {
        "cities": [],
@@ -344,7 +366,8 @@
        ],
        "exceptions": [],
        "held": "Fayetteville",
-       "name": "Fayetteville"
+       "name": "Fayetteville",
+       "portions": []
       },
       {
        "cities": [],
@@ -357,12 +380,14 @@
        ],
        "exceptions": [],
        "held": "Hot Springs",
-       "name": "Hot Springs"
+       "name": "Hot Springs",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Western"
+     "name": "Western",
+     "portions": []
     }
    ],
    "section": 83,
@@ -376,7 +401,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Flagstaff, Globe, Phoenix, Prescott, Tucson, and Yuma",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 82,
@@ -406,7 +432,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Eureka, Oakland, San Francisco, and San Jose",
-     "name": "Northern"
+     "name": "Northern",
+     "portions": []
     },
     {
      "cities": [],
@@ -449,7 +476,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Bakersfield, Fresno, Redding, and Sacramento",
-     "name": "Eastern"
+     "name": "Eastern",
+     "portions": []
     },
     {
      "cities": [],
@@ -462,7 +490,8 @@
        ],
        "exceptions": [],
        "held": "a suitable site in the city of Riverside, the city of San Bernardino, or not more than 5 miles from the boundary of either such city",
-       "name": "Eastern"
+       "name": "Eastern",
+       "portions": []
       },
       {
        "cities": [],
@@ -474,7 +503,8 @@
        ],
        "exceptions": [],
        "held": "Los Angeles",
-       "name": "Western"
+       "name": "Western",
+       "portions": []
       },
       {
        "cities": [],
@@ -483,12 +513,14 @@
        ],
        "exceptions": [],
        "held": "Santa Ana",
-       "name": "Southern"
+       "name": "Southern",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Central"
+     "name": "Central",
+     "portions": []
     },
     {
      "cities": [],
@@ -498,7 +530,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "San Diego and El Centro",
-     "name": "Southern"
+     "name": "Southern",
+     "portions": []
     }
    ],
    "section": 84,
@@ -512,7 +545,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Boulder, Colorado Springs, Denver, Durango, Grand Junction, Montrose, Pueblo, and Sterling",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 85,
@@ -526,7 +560,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Bridgeport, Hartford, New Haven, New London, and Waterbury",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 86,
@@ -540,7 +575,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Washington",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 88,
@@ -554,7 +590,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Wilmington",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 87,
@@ -592,7 +629,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Gainesville, Marianna, Panama City, Pensacola, and Tallahassee",
-     "name": "Northern"
+     "name": "Northern",
+     "portions": []
     },
     {
      "cities": [],
@@ -636,7 +674,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Fernandina, Fort Myers, Jacksonville, Live Oak, Ocala, Orlando, Saint Petersburg, and Tampa",
-     "name": "Middle"
+     "name": "Middle",
+     "portions": []
     },
     {
      "cities": [],
@@ -654,7 +693,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Fort Lauderdale, Fort Pierce, Key West, Miami, and West Palm Beach",
-     "name": "Southern"
+     "name": "Southern",
+     "portions": []
     }
    ],
    "section": 89,
@@ -688,7 +728,8 @@
        ],
        "exceptions": [],
        "held": "Gainesville",
-       "name": "Gainesville"
+       "name": "Gainesville",
+       "portions": []
       },
       {
        "cities": [],
@@ -706,7 +747,8 @@
        ],
        "exceptions": [],
        "held": "Atlanta",
-       "name": "Atlanta"
+       "name": "Atlanta",
+       "portions": []
       },
       {
        "cities": [],
@@ -725,7 +767,8 @@
        ],
        "exceptions": [],
        "held": "Rome",
-       "name": "Rome"
+       "name": "Rome",
+       "portions": []
       },
       {
        "cities": [],
@@ -742,12 +785,14 @@
        ],
        "exceptions": [],
        "held": "Newnan",
-       "name": "Newnan"
+       "name": "Newnan",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Northern"
+     "name": "Northern",
+     "portions": []
     },
     {
      "cities": [],
@@ -769,7 +814,8 @@
        ],
        "exceptions": [],
        "held": "Athens",
-       "name": "Athens"
+       "name": "Athens",
+       "portions": []
       },
       {
        "cities": [],
@@ -795,7 +841,8 @@
        ],
        "exceptions": [],
        "held": "Macon",
-       "name": "Macon"
+       "name": "Macon",
+       "portions": []
       },
       {
        "cities": [],
@@ -813,7 +860,8 @@
        ],
        "exceptions": [],
        "held": "Columbus",
-       "name": "Columbus"
+       "name": "Columbus",
+       "portions": []
       },
       {
        "cities": [],
@@ -831,7 +879,8 @@
        ],
        "exceptions": [],
        "held": "Americus",
-       "name": "Americus"
+       "name": "Americus",
+       "portions": []
       },
       {
        "cities": [],
@@ -847,7 +896,8 @@
        ],
        "exceptions": [],
        "held": "Albany",
-       "name": "Albany"
+       "name": "Albany",
+       "portions": []
       },
       {
        "cities": [],
@@ -863,7 +913,8 @@
        ],
        "exceptions": [],
        "held": "Valdosta",
-       "name": "Valdosta"
+       "name": "Valdosta",
+       "portions": []
       },
       {
        "cities": [],
@@ -877,12 +928,14 @@
        ],
        "exceptions": [],
        "held": "Thomasville",
-       "name": "Thomasville"
+       "name": "Thomasville",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Middle"
+     "name": "Middle",
+     "portions": []
     },
     {
      "cities": [],
@@ -904,7 +957,8 @@
        ],
        "exceptions": [],
        "held": "Augusta",
-       "name": "Augusta"
+       "name": "Augusta",
+       "portions": []
       },
       {
        "cities": [],
@@ -919,7 +973,8 @@
        ],
        "exceptions": [],
        "held": "Dublin",
-       "name": "Dublin"
+       "name": "Dublin",
+       "portions": []
       },
       {
        "cities": [],
@@ -931,7 +986,8 @@
        ],
        "exceptions": [],
        "held": "Savannah",
-       "name": "Savannah"
+       "name": "Savannah",
+       "portions": []
       },
       {
        "cities": [],
@@ -946,7 +1002,8 @@
        ],
        "exceptions": [],
        "held": "Waycross",
-       "name": "Waycross"
+       "name": "Waycross",
+       "portions": []
       },
       {
        "cities": [],
@@ -961,7 +1018,8 @@
        ],
        "exceptions": [],
        "held": "Brunswick",
-       "name": "Brunswick"
+       "name": "Brunswick",
+       "portions": []
       },
       {
        "cities": [],
@@ -977,12 +1035,14 @@
        ],
        "exceptions": [],
        "held": "Statesboro",
-       "name": "Statesboro"
+       "name": "Statesboro",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Southern"
+     "name": "Southern",
+     "portions": []
     }
    ],
    "section": 90,
@@ -996,7 +1056,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Honolulu",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 91,
@@ -1022,7 +1083,8 @@
        ],
        "exceptions": [],
        "held": "Cedar Rapids",
-       "name": "Cedar Rapids"
+       "name": "Cedar Rapids",
+       "portions": []
       },
       {
        "cities": [],
@@ -1044,7 +1106,8 @@
        ],
        "exceptions": [],
        "held": "Dubuque and Waterloo",
-       "name": "Eastern"
+       "name": "Eastern",
+       "portions": []
       },
       {
        "cities": [],
@@ -1066,7 +1129,8 @@
        ],
        "exceptions": [],
        "held": "Sioux City",
-       "name": "Western"
+       "name": "Western",
+       "portions": []
       },
       {
        "cities": [],
@@ -1090,12 +1154,14 @@
        ],
        "exceptions": [],
        "held": "Fort Dodge and Mason City",
-       "name": "Central"
+       "name": "Central",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Northern"
+     "name": "Northern",
+     "portions": []
     },
     {
      "cities": [],
@@ -1119,7 +1185,8 @@
        ],
        "exceptions": [],
        "held": "Des Moines",
-       "name": "Central"
+       "name": "Central",
+       "portions": []
       },
       {
        "cities": [],
@@ -1132,7 +1199,8 @@
        ],
        "exceptions": [],
        "held": "Keokuk",
-       "name": "Eastern"
+       "name": "Eastern",
+       "portions": []
       },
       {
        "cities": [],
@@ -1149,7 +1217,8 @@
        ],
        "exceptions": [],
        "held": "Council Bluffs",
-       "name": "Western"
+       "name": "Western",
+       "portions": []
       },
       {
        "cities": [],
@@ -1166,7 +1235,8 @@
        ],
        "exceptions": [],
        "held": "Creston",
-       "name": "Southern"
+       "name": "Southern",
+       "portions": []
       },
       {
        "cities": [],
@@ -1179,7 +1249,8 @@
        ],
        "exceptions": [],
        "held": "Davenport",
-       "name": "Davenport"
+       "name": "Davenport",
+       "portions": []
       },
       {
        "cities": [],
@@ -1194,12 +1265,14 @@
        ],
        "exceptions": [],
        "held": "Ottumwa",
-       "name": "Ottumwa"
+       "name": "Ottumwa",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Southern"
+     "name": "Southern",
+     "portions": []
     }
    ],
    "section": 95,
@@ -1213,7 +1286,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Boise, Coeur d'Alene, Moscow, and Pocatello",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 92,
@@ -1239,7 +1313,8 @@
        ],
        "exceptions": [],
        "held": "Chicago and Wheaton",
-       "name": "Eastern"
+       "name": "Eastern",
+       "portions": []
       },
       {
        "cities": [],
@@ -1257,12 +1332,14 @@
        ],
        "exceptions": [],
        "held": "Freeport and Rockford",
-       "name": "Western"
+       "name": "Western",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Northern"
+     "name": "Northern",
+     "portions": []
     },
     {
      "cities": [],
@@ -1317,7 +1394,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Champaign/Urbana, Danville, Peoria, Quincy, Rock Island, and Springfield",
-     "name": "Central"
+     "name": "Central",
+     "portions": []
     },
     {
      "cities": [],
@@ -1364,7 +1442,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Alton, Benton, Cairo, and East Saint Louis",
-     "name": "Southern"
+     "name": "Southern",
+     "portions": []
     }
    ],
    "section": 93,
@@ -1394,7 +1473,8 @@
        ],
        "exceptions": [],
        "held": "Fort Wayne",
-       "name": "Fort Wayne"
+       "name": "Fort Wayne",
+       "portions": []
       },
       {
        "cities": [],
@@ -1413,7 +1493,8 @@
        ],
        "exceptions": [],
        "held": "South Bend",
-       "name": "South Bend"
+       "name": "South Bend",
+       "portions": []
       },
       {
        "cities": [],
@@ -1430,12 +1511,14 @@
        ],
        "exceptions": [],
        "held": "Hammond and Lafayette",
-       "name": "Hammond"
+       "name": "Hammond",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Northern"
+     "name": "Northern",
+     "portions": []
     },
     {
      "cities": [],
@@ -1473,7 +1556,8 @@
        ],
        "exceptions": [],
        "held": "Indianapolis and Richmond",
-       "name": "Indianapolis"
+       "name": "Indianapolis",
+       "portions": []
       },
       {
        "cities": [],
@@ -1490,7 +1574,8 @@
        ],
        "exceptions": [],
        "held": "Terre Haute",
-       "name": "Terre Haute"
+       "name": "Terre Haute",
+       "portions": []
       },
       {
        "cities": [],
@@ -1508,7 +1593,8 @@
        ],
        "exceptions": [],
        "held": "Evansville",
-       "name": "Evansville"
+       "name": "Evansville",
+       "portions": []
       },
       {
        "cities": [],
@@ -1531,12 +1617,14 @@
        ],
        "exceptions": [],
        "held": "New Albany",
-       "name": "New Albany"
+       "name": "New Albany",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Southern"
+     "name": "Southern",
+     "portions": []
     }
    ],
    "section": 94,
@@ -1550,7 +1638,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Kansas City, Lawrence, Leavenworth, Salina, Topeka, Hutchinson, Wichita, Dodge City, and Fort Scott",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 96,
@@ -1632,7 +1721,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Ashland, Catlettsburg, Covington, Frankfort, Jackson, Lexington, London, Pikeville, and Richmond",
-     "name": "Eastern"
+     "name": "Eastern",
+     "portions": []
     },
     {
      "cities": [],
@@ -1694,7 +1784,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Bowling Green, Louisville, Owensboro, and Paducah",
-     "name": "Western"
+     "name": "Western",
+     "portions": []
     }
    ],
    "section": 97,
@@ -1722,7 +1813,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "New Orleans, and Houma",
-     "name": "Eastern"
+     "name": "Eastern",
+     "portions": []
     },
     {
      "cities": [],
@@ -1740,7 +1832,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Baton Rouge",
-     "name": "Middle"
+     "name": "Middle",
+     "portions": []
     },
     {
      "cities": [],
@@ -1791,7 +1884,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Alexandria, Lafayette, Lake Charles, Monroe, Opelousas, and Shreveport",
-     "name": "Western"
+     "name": "Western",
+     "portions": []
     }
    ],
    "section": 98,
@@ -1805,7 +1899,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Boston, New Bedford, Springfield, and Worcester",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 101,
@@ -1843,7 +1938,8 @@
        ],
        "exceptions": [],
        "held": "Baltimore, Cumberland, and Denton",
-       "name": "Northern"
+       "name": "Northern",
+       "portions": []
       },
       {
        "cities": [],
@@ -1856,12 +1952,14 @@
        ],
        "exceptions": [],
        "held": "a suitable site in Montgomery or Prince George's County not more than five miles from the boundary of Montgomery and Prince George's Counties",
-       "name": "Southern"
+       "name": "Southern",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 100,
@@ -1875,7 +1973,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Bangor and Portland",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 99,
@@ -1906,7 +2005,8 @@
        ],
        "exceptions": [],
        "held": "Ann Arbor, Detroit, Flint, and Port Huron",
-       "name": "Southern"
+       "name": "Southern",
+       "portions": []
       },
       {
        "cities": [],
@@ -1935,12 +2035,14 @@
        ],
        "exceptions": [],
        "held": "Bay City",
-       "name": "Northern"
+       "name": "Northern",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Eastern"
+     "name": "Eastern",
+     "portions": []
     },
     {
      "cities": [],
@@ -1986,7 +2088,8 @@
        ],
        "exceptions": [],
        "held": "Grand Rapids, Kalamazoo, Lansing, and Traverse City",
-       "name": "Southern"
+       "name": "Southern",
+       "portions": []
       },
       {
        "cities": [],
@@ -2009,12 +2112,14 @@
        ],
        "exceptions": [],
        "held": "Marquette and Sault Sainte Marie",
-       "name": "Northern"
+       "name": "Northern",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Western"
+     "name": "Western",
+     "portions": []
     }
    ],
    "section": 102,
@@ -2040,7 +2145,8 @@
        ],
        "exceptions": [],
        "held": "Winona",
-       "name": "First"
+       "name": "First",
+       "portions": []
       },
       {
        "cities": [],
@@ -2069,7 +2175,8 @@
        ],
        "exceptions": [],
        "held": "Mankato",
-       "name": "Second"
+       "name": "Second",
+       "portions": []
       },
       {
        "cities": [],
@@ -2084,7 +2191,8 @@
        ],
        "exceptions": [],
        "held": "Saint Paul",
-       "name": "Third"
+       "name": "Third",
+       "portions": []
       },
       {
        "cities": [],
@@ -2104,7 +2212,8 @@
        ],
        "exceptions": [],
        "held": "Minneapolis",
-       "name": "Fourth"
+       "name": "Fourth",
+       "portions": []
       },
       {
        "cities": [],
@@ -2126,7 +2235,8 @@
        ],
        "exceptions": [],
        "held": "Duluth",
-       "name": "Fifth"
+       "name": "Fifth",
+       "portions": []
       },
       {
        "cities": [],
@@ -2159,12 +2269,14 @@
        ],
        "exceptions": [],
        "held": "Fergus Falls and Bemidji",
-       "name": "Sixth"
+       "name": "Sixth",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 103,
@@ -2197,7 +2309,8 @@
        ],
        "exceptions": [],
        "held": "Saint Louis",
-       "name": "Eastern"
+       "name": "Eastern",
+       "portions": []
       },
       {
        "cities": [],
@@ -2222,7 +2335,8 @@
        ],
        "exceptions": [],
        "held": "Hannibal",
-       "name": "Northern"
+       "name": "Northern",
+       "portions": []
       },
       {
        "cities": [],
@@ -2248,12 +2362,14 @@
        ],
        "exceptions": [],
        "held": "Cape Girardeau",
-       "name": "Southeastern"
+       "name": "Southeastern",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Eastern"
+     "name": "Eastern",
+     "portions": []
     },
     {
      "cities": [],
@@ -2276,7 +2392,8 @@
        ],
        "exceptions": [],
        "held": "Kansas City",
-       "name": "Western"
+       "name": "Western",
+       "portions": []
       },
       {
        "cities": [],
@@ -2292,7 +2409,8 @@
        ],
        "exceptions": [],
        "held": "Joplin",
-       "name": "Southwestern"
+       "name": "Southwestern",
+       "portions": []
       },
       {
        "cities": [],
@@ -2318,7 +2436,8 @@
        ],
        "exceptions": [],
        "held": "Saint Joseph",
-       "name": "Saint Joseph"
+       "name": "Saint Joseph",
+       "portions": []
       },
       {
        "cities": [],
@@ -2339,7 +2458,8 @@
        ],
        "exceptions": [],
        "held": "Jefferson City",
-       "name": "Central"
+       "name": "Central",
+       "portions": []
       },
       {
        "cities": [],
@@ -2363,12 +2483,14 @@
        ],
        "exceptions": [],
        "held": "Springfield",
-       "name": "Southern"
+       "name": "Southern",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Western"
+     "name": "Western",
+     "portions": []
     }
    ],
    "section": 105,
@@ -2399,7 +2521,8 @@
        ],
        "exceptions": [],
        "held": "Aberdeen, Ackerman, and Corinth",
-       "name": "Aberdeen"
+       "name": "Aberdeen",
+       "portions": []
       },
       {
        "cities": [],
@@ -2421,7 +2544,8 @@
        ],
        "exceptions": [],
        "held": "Oxford",
-       "name": "Oxford"
+       "name": "Oxford",
+       "portions": []
       },
       {
        "cities": [],
@@ -2439,12 +2563,14 @@
        ],
        "exceptions": [],
        "held": "Clarksdale, Cleveland, and Greenville",
-       "name": "Greenville"
+       "name": "Greenville",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Northern"
+     "name": "Northern",
+     "portions": []
     },
     {
      "cities": [],
@@ -2474,7 +2600,8 @@
        ],
        "exceptions": [],
        "held": "Jackson",
-       "name": "Northern"
+       "name": "Northern",
+       "portions": []
       },
       {
        "cities": [],
@@ -2489,7 +2616,8 @@
        ],
        "exceptions": [],
        "held": "Gulfport",
-       "name": "Southern"
+       "name": "Southern",
+       "portions": []
       },
       {
        "cities": [],
@@ -2509,7 +2637,8 @@
        ],
        "exceptions": [],
        "held": "Hattiesburg",
-       "name": "Eastern"
+       "name": "Eastern",
+       "portions": []
       },
       {
        "cities": [],
@@ -2525,12 +2654,14 @@
        ],
        "exceptions": [],
        "held": "Natchez",
-       "name": "Western"
+       "name": "Western",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Southern"
+     "name": "Southern",
+     "portions": []
     }
    ],
    "section": 104,
@@ -2544,7 +2675,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Billings, Butte, Glasgow, Great Falls, Havre, Helena, Kalispell, Lewistown, Livingston, Miles City, and Missoula",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 106,
@@ -2603,7 +2735,10 @@
      "divisions": [],
      "exceptions": [],
      "held": "Elizabeth City, Fayetteville, Greenville, New Bern, Raleigh, Wilmington, and Wilson",
-     "name": "Eastern"
+     "name": "Eastern",
+     "portions": [
+      "those portions of Hoke, Moore, Scotland, and Richmond counties encompassing the Fort Bragg Military Reservation and Camp Mackall, and that portion of Durham County encompassing the Federal Correctional Institution, Butner, North Carolina"
+     ]
     },
     {
      "cities": [],
@@ -2642,7 +2777,8 @@
       "excluding that portion of Scotland County encompassing the Fort Bragg Military Reservation and Camp Mackall"
      ],
      "held": "Durham, Greensboro, and Winston-Salem",
-     "name": "Middle"
+     "name": "Middle",
+     "portions": []
     },
     {
      "cities": [],
@@ -2683,7 +2819,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Asheville, Bryson City, Charlotte, Shelby, and Statesville",
-     "name": "Western"
+     "name": "Western",
+     "portions": []
     }
    ],
    "section": 113,
@@ -2697,7 +2834,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Bismarck, Fargo, Grand Forks, and Minot",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 114,
@@ -2711,7 +2849,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Lincoln, North Platte, and Omaha",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 107,
@@ -2725,7 +2864,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Concord and Littleton",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 109,
@@ -2739,7 +2879,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Camden, Newark and Trenton",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 110,
@@ -2753,7 +2894,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Albuquerque, Las Cruces, Las Vegas, Roswell, Santa Fe, and Silver City",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 111,
@@ -2767,7 +2909,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Carson City, Elko, Las Vegas, Reno, Ely, and Lovelock",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 108,
@@ -2814,7 +2957,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Albany, Auburn, Binghamton, Malone, Plattsburgh, Syracuse, Utica, Watertown, and Plattsburgh",
-     "name": "Northern"
+     "name": "Northern",
+     "portions": []
     },
     {
      "cities": [],
@@ -2831,7 +2975,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "New York, White Plains, and in the Middletown-Wallkill area of Orange County or such nearby location as may be deemed appropriate",
-     "name": "Southern"
+     "name": "Southern",
+     "portions": []
     },
     {
      "cities": [],
@@ -2845,7 +2990,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Brooklyn, Hauppauge, Hempstead (including the village of Uniondale), and Central Islip",
-     "name": "Eastern"
+     "name": "Eastern",
+     "portions": []
     },
     {
      "cities": [],
@@ -2871,7 +3017,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Buffalo, Canandaigua, Elmira, Jamestown, and Rochester",
-     "name": "Western"
+     "name": "Western",
+     "portions": []
     }
    ],
    "section": 112,
@@ -2908,7 +3055,8 @@
        ],
        "exceptions": [],
        "held": "Cleveland, Youngstown, and Akron",
-       "name": "Eastern"
+       "name": "Eastern",
+       "portions": []
       },
       {
        "cities": [],
@@ -2937,12 +3085,14 @@
        ],
        "exceptions": [],
        "held": "Lima and Toledo",
-       "name": "Western"
+       "name": "Western",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Northern"
+     "name": "Northern",
+     "portions": []
     },
     {
      "cities": [],
@@ -2972,7 +3122,8 @@
        ],
        "exceptions": [],
        "held": "Cincinnati and Dayton",
-       "name": "Western"
+       "name": "Western",
+       "portions": []
       },
       {
        "cities": [],
@@ -3010,12 +3161,14 @@
        ],
        "exceptions": [],
        "held": "Columbus St. Clairsville, and Steubenville",
-       "name": "Eastern"
+       "name": "Eastern",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Southern"
+     "name": "Southern",
+     "portions": []
     }
    ],
    "section": 115,
@@ -3041,7 +3194,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Bartlesville, Miami, Pawhuska, Tulsa, and Vinita",
-     "name": "Northern"
+     "name": "Northern",
+     "portions": []
     },
     {
      "cities": [],
@@ -3075,7 +3229,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Ada, Ardmore, Durant, Hugo, Muskogee, Okmulgee, Poteau, and S. McAlester",
-     "name": "Eastern"
+     "name": "Eastern",
+     "portions": []
     },
     {
      "cities": [],
@@ -3124,7 +3279,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Chickasha, Enid, Guthrie, Lawton, Mangum, Oklahoma City, Pauls Valley, Ponca City, Shawnee, and Woodward",
-     "name": "Western"
+     "name": "Western",
+     "portions": []
     }
    ],
    "section": 116,
@@ -3138,7 +3294,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Coquille, Eugene or Springfield, Klamath Falls, Medford, Pendleton, and Portland",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 117,
@@ -3162,7 +3319,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Allentown, Easton, Lancaster, Reading, and Philadelphia",
-     "name": "Eastern"
+     "name": "Eastern",
+     "portions": []
     },
     {
      "cities": [],
@@ -3204,7 +3362,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Harrisburg, Lewisburg, Scranton, Wilkes-Barre, and Williamsport",
-     "name": "Middle"
+     "name": "Middle",
+     "portions": []
     },
     {
      "cities": [],
@@ -3238,7 +3397,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Erie, Johnstown, and Pittsburgh",
-     "name": "Western"
+     "name": "Western",
+     "portions": []
     }
    ],
    "section": 118,
@@ -3252,7 +3412,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Mayaguez, Ponce, and San Juan",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 119,
@@ -3266,7 +3427,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Providence",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 120,
@@ -3290,7 +3452,8 @@
        ],
        "exceptions": [],
        "held": "Charleston",
-       "name": "Charleston"
+       "name": "Charleston",
+       "portions": []
       },
       {
        "cities": [],
@@ -3303,7 +3466,8 @@
        ],
        "exceptions": [],
        "held": "Columbia",
-       "name": "Columbia"
+       "name": "Columbia",
+       "portions": []
       },
       {
        "cities": [],
@@ -3319,7 +3483,8 @@
        ],
        "exceptions": [],
        "held": "Florence",
-       "name": "Florence"
+       "name": "Florence",
+       "portions": []
       },
       {
        "cities": [],
@@ -3330,7 +3495,8 @@
        ],
        "exceptions": [],
        "held": "Aiken",
-       "name": "Aiken"
+       "name": "Aiken",
+       "portions": []
       },
       {
        "cities": [],
@@ -3341,7 +3507,8 @@
        ],
        "exceptions": [],
        "held": "Orangeburg",
-       "name": "Orangeburg"
+       "name": "Orangeburg",
+       "portions": []
       },
       {
        "cities": [],
@@ -3350,7 +3517,8 @@
        ],
        "exceptions": [],
        "held": "Greenville",
-       "name": "Greenville"
+       "name": "Greenville",
+       "portions": []
       },
       {
        "cities": [],
@@ -3362,7 +3530,8 @@
        ],
        "exceptions": [],
        "held": "Rock Hill",
-       "name": "Rock Hill"
+       "name": "Rock Hill",
+       "portions": []
       },
       {
        "cities": [],
@@ -3376,7 +3545,8 @@
        ],
        "exceptions": [],
        "held": "Greenwood",
-       "name": "Greenwood"
+       "name": "Greenwood",
+       "portions": []
       },
       {
        "cities": [],
@@ -3387,7 +3557,8 @@
        ],
        "exceptions": [],
        "held": "Anderson",
-       "name": "Anderson"
+       "name": "Anderson",
+       "portions": []
       },
       {
        "cities": [],
@@ -3398,7 +3569,8 @@
        ],
        "exceptions": [],
        "held": "Spartanburg",
-       "name": "Spartanburg"
+       "name": "Spartanburg",
+       "portions": []
       },
       {
        "cities": [],
@@ -3409,12 +3581,14 @@
        ],
        "exceptions": [],
        "held": "Beaufort",
-       "name": "Beaufort"
+       "name": "Beaufort",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 121,
@@ -3447,7 +3621,8 @@
        ],
        "exceptions": [],
        "held": "Aberdeen",
-       "name": "Northern"
+       "name": "Northern",
+       "portions": []
       },
       {
        "cities": [],
@@ -3477,7 +3652,8 @@
        ],
        "exceptions": [],
        "held": "Sioux Falls",
-       "name": "Southern"
+       "name": "Southern",
+       "portions": []
       },
       {
        "cities": [],
@@ -3503,7 +3679,8 @@
        ],
        "exceptions": [],
        "held": "Pierre",
-       "name": "Central"
+       "name": "Central",
+       "portions": []
       },
       {
        "cities": [],
@@ -3522,12 +3699,14 @@
        ],
        "exceptions": [],
        "held": "Deadwood and Rapid City",
-       "name": "Western"
+       "name": "Western",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 122,
@@ -3559,7 +3738,8 @@
        ],
        "exceptions": [],
        "held": "Knoxville",
-       "name": "Northern"
+       "name": "Northern",
+       "portions": []
       },
       {
        "cities": [],
@@ -3577,7 +3757,8 @@
        ],
        "exceptions": [],
        "held": "Greenville",
-       "name": "Northeastern"
+       "name": "Northeastern",
+       "portions": []
       },
       {
        "cities": [],
@@ -3594,7 +3775,8 @@
        ],
        "exceptions": [],
        "held": "Chattanooga",
-       "name": "Southern"
+       "name": "Southern",
+       "portions": []
       },
       {
        "cities": [],
@@ -3610,12 +3792,14 @@
        ],
        "exceptions": [],
        "held": "Winchester",
-       "name": "Winchester"
+       "name": "Winchester",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Eastern"
+     "name": "Eastern",
+     "portions": []
     },
     {
      "cities": [],
@@ -3641,7 +3825,8 @@
        ],
        "exceptions": [],
        "held": "Nashville",
-       "name": "Nashville"
+       "name": "Nashville",
+       "portions": []
       },
       {
        "cities": [],
@@ -3660,7 +3845,8 @@
        ],
        "exceptions": [],
        "held": "Cookeville",
-       "name": "Northeastern"
+       "name": "Northeastern",
+       "portions": []
       },
       {
        "cities": [],
@@ -3675,12 +3861,14 @@
        ],
        "exceptions": [],
        "held": "Columbia",
-       "name": "Columbia"
+       "name": "Columbia",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Middle"
+     "name": "Middle",
+     "portions": []
     },
     {
      "cities": [],
@@ -3710,7 +3898,8 @@
        ],
        "exceptions": [],
        "held": "Jackson and Dyersburg",
-       "name": "Eastern"
+       "name": "Eastern",
+       "portions": []
       },
       {
        "cities": [],
@@ -3722,12 +3911,14 @@
        ],
        "exceptions": [],
        "held": "Memphis",
-       "name": "Western"
+       "name": "Western",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Western"
+     "name": "Western",
+     "portions": []
     }
    ],
    "section": 123,
@@ -3752,7 +3943,8 @@
        ],
        "exceptions": [],
        "held": "Dallas",
-       "name": "Dallas"
+       "name": "Dallas",
+       "portions": []
       },
       {
        "cities": [],
@@ -3768,7 +3960,8 @@
        ],
        "exceptions": [],
        "held": "Fort Worth",
-       "name": "Fort Worth"
+       "name": "Fort Worth",
+       "portions": []
       },
       {
        "cities": [],
@@ -3789,7 +3982,8 @@
        ],
        "exceptions": [],
        "held": "Abilene",
-       "name": "Abilene"
+       "name": "Abilene",
+       "portions": []
       },
       {
        "cities": [],
@@ -3812,7 +4006,8 @@
        ],
        "exceptions": [],
        "held": "San Angelo",
-       "name": "San Angelo"
+       "name": "San Angelo",
+       "portions": []
       },
       {
        "cities": [],
@@ -3846,7 +4041,8 @@
        ],
        "exceptions": [],
        "held": "Amarillo",
-       "name": "Amarillo"
+       "name": "Amarillo",
+       "portions": []
       },
       {
        "cities": [],
@@ -3866,7 +4062,8 @@
        ],
        "exceptions": [],
        "held": "Wichita Falls",
-       "name": "Wichita Falls"
+       "name": "Wichita Falls",
+       "portions": []
       },
       {
        "cities": [],
@@ -3893,12 +4090,14 @@
        ],
        "exceptions": [],
        "held": "Lubbock",
-       "name": "Lubbock"
+       "name": "Lubbock",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Northern"
+     "name": "Northern",
+     "portions": []
     },
     {
      "cities": [],
@@ -3914,7 +4113,8 @@
        ],
        "exceptions": [],
        "held": "Galveston",
-       "name": "Galveston"
+       "name": "Galveston",
+       "portions": []
       },
       {
        "cities": [],
@@ -3935,7 +4135,8 @@
        ],
        "exceptions": [],
        "held": "Houston and College Station",
-       "name": "Houston"
+       "name": "Houston",
+       "portions": []
       },
       {
        "cities": [],
@@ -3948,7 +4149,8 @@
        ],
        "exceptions": [],
        "held": "Laredo",
-       "name": "Laredo"
+       "name": "Laredo",
+       "portions": []
       },
       {
        "cities": [],
@@ -3957,7 +4159,8 @@
        ],
        "exceptions": [],
        "held": "Brownsville",
-       "name": "Brownsville"
+       "name": "Brownsville",
+       "portions": []
       },
       {
        "cities": [],
@@ -3972,7 +4175,8 @@
        ],
        "exceptions": [],
        "held": "Victoria",
-       "name": "Victoria"
+       "name": "Victoria",
+       "portions": []
       },
       {
        "cities": [],
@@ -3990,7 +4194,8 @@
        ],
        "exceptions": [],
        "held": "Corpus Christi",
-       "name": "Corpus Christi"
+       "name": "Corpus Christi",
+       "portions": []
       },
       {
        "cities": [],
@@ -3999,12 +4204,14 @@
        ],
        "exceptions": [],
        "held": "McAllen",
-       "name": "McAllen"
+       "name": "McAllen",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Southern"
+     "name": "Southern",
+     "portions": []
     },
     {
      "cities": [],
@@ -4026,7 +4233,8 @@
        ],
        "exceptions": [],
        "held": "",
-       "name": "Tyler"
+       "name": "Tyler",
+       "portions": []
       },
       {
        "cities": [],
@@ -4040,7 +4248,8 @@
        ],
        "exceptions": [],
        "held": "",
-       "name": "Beaumont"
+       "name": "Beaumont",
+       "portions": []
       },
       {
        "cities": [],
@@ -4056,7 +4265,8 @@
        ],
        "exceptions": [],
        "held": "Sherman and Plano",
-       "name": "Sherman"
+       "name": "Sherman",
+       "portions": []
       },
       {
        "cities": [],
@@ -4070,7 +4280,8 @@
        ],
        "exceptions": [],
        "held": "Marshall",
-       "name": "Marshall"
+       "name": "Marshall",
+       "portions": []
       },
       {
        "cities": [],
@@ -4082,7 +4293,8 @@
        ],
        "exceptions": [],
        "held": "Texarkana, and may be held anywhere within the Federal courthouse in Texarkana that is located astride the State line between Texas and Arkansas",
-       "name": "Texarkana"
+       "name": "Texarkana",
+       "portions": []
       },
       {
        "cities": [],
@@ -4099,12 +4311,14 @@
        ],
        "exceptions": [],
        "held": "Lufkin",
-       "name": "Lufkin"
+       "name": "Lufkin",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Eastern"
+     "name": "Eastern",
+     "portions": []
     },
     {
      "cities": [],
@@ -4133,7 +4347,8 @@
        ],
        "exceptions": [],
        "held": "Austin",
-       "name": "Austin"
+       "name": "Austin",
+       "portions": []
       },
       {
        "cities": [],
@@ -4154,7 +4369,8 @@
        ],
        "exceptions": [],
        "held": "Waco",
-       "name": "Waco"
+       "name": "Waco",
+       "portions": []
       },
       {
        "cities": [],
@@ -4163,7 +4379,8 @@
        ],
        "exceptions": [],
        "held": "El Paso",
-       "name": "El Paso"
+       "name": "El Paso",
+       "portions": []
       },
       {
        "cities": [],
@@ -4185,7 +4402,8 @@
        ],
        "exceptions": [],
        "held": "San Antonio",
-       "name": "San Antonio"
+       "name": "San Antonio",
+       "portions": []
       },
       {
        "cities": [],
@@ -4200,7 +4418,8 @@
        ],
        "exceptions": [],
        "held": "Del Rio",
-       "name": "Del Rio"
+       "name": "Del Rio",
+       "portions": []
       },
       {
        "cities": [],
@@ -4218,7 +4437,8 @@
        ],
        "exceptions": [],
        "held": "Pecos and Alpine",
-       "name": "Pecos"
+       "name": "Pecos",
+       "portions": []
       },
       {
        "cities": [],
@@ -4232,12 +4452,14 @@
        ],
        "exceptions": [],
        "held": "Midland. Court may be held, in the discretion of the court, in Odessa, when courtroom facilities are made available at no expense to the Government",
-       "name": "Midland-Odessa"
+       "name": "Midland-Odessa",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": "Western"
+     "name": "Western",
+     "portions": []
     }
    ],
    "section": 124,
@@ -4261,7 +4483,8 @@
        ],
        "exceptions": [],
        "held": "Salt Lake City and Ogden",
-       "name": "Northern"
+       "name": "Northern",
+       "portions": []
       },
       {
        "cities": [],
@@ -4292,12 +4515,14 @@
        ],
        "exceptions": [],
        "held": "Salt Lake City, Provo, St. George, Moab, and Monticello",
-       "name": "Central"
+       "name": "Central",
+       "portions": []
       }
      ],
      "exceptions": [],
      "held": "",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 125,
@@ -4360,7 +4585,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Alexandria, Newport News, Norfolk, and Richmond",
-     "name": "Eastern"
+     "name": "Eastern",
+     "portions": []
     },
     {
      "cities": [],
@@ -4421,7 +4647,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Abingdon, Big Stone Gap, Charlottesville, Danville, Harrisonburg, Lynchburg, and Roanoke",
-     "name": "Western"
+     "name": "Western",
+     "portions": []
     }
    ],
    "section": 127,
@@ -4435,7 +4662,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Bennington, Brattleboro, Burlington, Montpelier, Rutland, Saint Johnsbury, and Windsor",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 126,
@@ -4470,7 +4698,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Spokane, Yakima, Walla Walla, and Richland",
-     "name": "Eastern"
+     "name": "Eastern",
+     "portions": []
     },
     {
      "cities": [],
@@ -4498,7 +4727,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Bellingham, Seattle, Tacoma, Mount Vernon, and Vancouver",
-     "name": "Western"
+     "name": "Western",
+     "portions": []
     }
    ],
    "section": 128,
@@ -4541,7 +4771,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Green Bay, Milwaukee, and Oshkosh",
-     "name": "Eastern"
+     "name": "Eastern",
+     "portions": []
     },
     {
      "cities": [],
@@ -4594,7 +4825,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Eau Claire, La Crosse, Madison, Superior, and Wausau",
-     "name": "Western"
+     "name": "Western",
+     "portions": []
     }
    ],
    "section": 130,
@@ -4641,7 +4873,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Clarksburg, Elkins, Fairmont, Martinsburg, and Wheeling",
-     "name": "Northern"
+     "name": "Northern",
+     "portions": []
     },
     {
      "cities": [],
@@ -4673,7 +4906,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Beckley, Bluefield, Charleston, Huntington, Lewisburg, and Parkersburg",
-     "name": "Southern"
+     "name": "Southern",
+     "portions": []
     }
    ],
    "section": 129,
@@ -4687,7 +4921,8 @@
      "divisions": [],
      "exceptions": [],
      "held": "Casper, Cheyenne, Evanston, Lander, Jackson, and Sheridan",
-     "name": null
+     "name": null,
+     "portions": []
     }
    ],
    "section": 131,

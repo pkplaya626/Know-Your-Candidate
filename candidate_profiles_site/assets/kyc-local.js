@@ -359,11 +359,22 @@
     var s = (global.kycCourtCounties || {})[code];
     var c = s && (s.all || (s.counties || {})[fips]);
     if (!c || !s.names[c[0]]) return "";
+    // [court, division, the statute's exception, the district that part is
+    // in, "neighbours" when placed by the areas around it]
+    // (kyc/court_districts.for_state).
+    var part = c[2] && /encompassing (.+)$/.exec(c[2]);
+    var to = c[3] && s.names[c[3]];
     return '<p class="local-court">Federal district court: <a href="../courts/' +
       KYC.escapeAttr(c[0]) + '.html">' + KYC.escapeHtml(s.names[c[0]]) + "</a>" +
       (c[1] ? ", " + KYC.escapeHtml(c[1]) + " Division" : "") +
-      (c[2] ? '<br><span class="faint">The statute keeps part of it in another district: ' +
-        KYC.escapeHtml(c[2]) + ".</span>" : "") + "</p>";
+      (c[2] ? '<br><span class="faint">' + (part && to
+        ? "Part of it (" + KYC.escapeHtml(part[1]) + ") is in the " +
+          '<a href="../courts/' + KYC.escapeAttr(c[3]) + '.html">' + KYC.escapeHtml(to) + "</a>, by the statute."
+        : "The statute keeps part of it in another district, in its words “" + KYC.escapeHtml(c[2]) + "”.") +
+        "</span>" : "") +
+      (c[4] === "neighbours" ? '<br><span class="faint">The statute does not name this city. ' +
+        "28 U.S.C. 127(c) puts an independent city in the district of the land it lies in, and " +
+        "every county and city around it is in this one.</span>" : "") + "</p>";
   }
 
   function showCounty(fips) {

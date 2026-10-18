@@ -253,6 +253,11 @@ def _build(args):
     for level, code, message, detail in oge_mod.problems(oge_mod.load_cache(args.root),
                                                          federal_mod.load_cache(args.root)):
         issues.append(validate.Issue(level, code, message, detail))
+    # What the judges' Wikipedia and portrait join withheld (kyc/judge_links.py):
+    # said by every build, not only by the refresh that found it.
+    from . import judge_links as judge_links_mod
+    for level, code, message, detail in judge_links_mod.problems(judge_links_mod.load_cache(args.root)):
+        issues.append(validate.Issue(level, code, message, detail))
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -360,10 +365,14 @@ def _build(args):
     # What is wrong with either cache is validate's to report.
     from . import federal_build
     try:
-        fed_payload, fed_courts, fed_search, _ = federal_build.build(args.root)
+        fed_payload, fed_courts, fed_search, fed_problems = federal_build.build(args.root)
     except federal_build.FederalBuildError as exc:
         print(f"[error] {exc}", file=sys.stderr)
         return 2
+    # What the pages leave out and why (an office in the line of succession
+    # nobody can be named for): said here as well as by validate.
+    for problem in fed_problems:
+        print(f"  [warn] federal pages: {problem}")
     fed_written = emit.write_federal(fed_payload, fed_courts, fed_search, args.root)
     from . import court_districts
     county_courts = court_districts.county_courts(args.root)

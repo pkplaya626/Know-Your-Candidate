@@ -163,8 +163,8 @@ python tools/fetch_legislative_maps.py        # state senate and house boundarie
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1550 tests, no dependencies
-npm install && npm test                       # 2016 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # TESTS tests, no dependencies
+npm install && npm test                       # CHECKS real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1000,6 +1000,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     generator plus `congress --apply --snapshot`, never committed. Their filing is folded in only by the FEC id Congress's
     record lists for them, a curated row's id kept as `otherIds`; without
     that id both profiles stay and `seated-unlinked` says so (rule 25).
+    The same holds for the line of succession: congress-legislators
+    records a Speaker's and a President pro tempore's role with no end
+    date, so on January 3 the 119th Congress's would have stayed second and
+    third in line until the file caught up. A role that began before the
+    snapshot's Congress did names nobody, and the build says so
+    (`federal_build.congressional_officers`, `succession-unnamed`).
     Linking is not folding: a sitting member's filing for the other chamber
     is found by any id Congress's record lists for them (the roster's
     "Garland Barr" never met Andy Barr's Senate filing), and the member's
@@ -1057,7 +1063,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     someone else is not linked; a scan (the President's and the Vice
     President's reports are) concludes nothing (rule 8) and is linked and
     marked "not checked". A holder with no row reads "OGE's index lists
-    no report", never "not filed" (rule 19).
+    no report", never "not filed" (rule 19). A report's "Present" is the
+    day it was filed, not today's (rule 69's "since 2013"): the page dates
+    it, and a post that is the office the person now holds ("Acting
+    Attorney General" for the Attorney General) is not "another post".
 
 71. **A map that draws a county the counts say has no government says
     why.** The counties directory and the guide's map read "none" for
@@ -1296,7 +1305,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Whaley's FJC id on the basketball player Robert Whaley, born 1982, and
     the surname check passed his photograph and article; fourteen more
     items' years disagreed with the directory's on the first full read.
-    What disagrees, or cannot be checked, gives nothing. The
+    What disagrees, or cannot be checked, gives nothing; a size Commons
+    did not answer for keeps the last portrait read of the same file
+    (rule 8). A vacancy's judge is found on its court by surname *and*
+    first given name (`vacancies.judge_of`): two of the list's departing
+    judges are not in the directory, and a surname alone would have moved
+    a colleague of that name to senior status. The
     territorial courts'
     judges, whom the directory does not hold, come from each court's own
     site through a recipe that refuses more names than seats or two chiefs
