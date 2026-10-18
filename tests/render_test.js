@@ -1571,6 +1571,28 @@ async function testMap() {
       ![...D.querySelectorAll("#usMap .state")].some((s) =>
         /Democrat seat/.test(s.getAttribute("aria-label") || "")));
     D.querySelector('[data-mode="senate"]').click();
+    // On a phone the ten views are one menu (TECH-14): three rows of
+    // buttons took the first 330-385px of the screen above the map.
+    const menu = D.getElementById("mapModeSelect");
+    const buttons = [...D.querySelectorAll(".map-views button[data-mode]")].map((b) => b.getAttribute("data-mode"));
+    check("the phone's view menu offers every view the buttons do, in their groups",
+      !!menu && [...menu.options].map((o) => o.value).join() === buttons.join() &&
+        menu.querySelectorAll("optgroup").length === D.querySelectorAll(".map-view-group").length,
+      menu && [...menu.options].map((o) => o.value).join());
+    menu.value = "trifecta";
+    menu.dispatchEvent(new window.Event("change", { bubbles: true }));
+    check("picking a view from the menu switches the map and the address",
+      D.querySelector('[data-mode="trifecta"]').getAttribute("aria-pressed") === "true" &&
+        /mode=trifecta/.test(window.location.hash), window.location.hash);
+    D.querySelector('[data-mode="house"]').click();
+    check("and a button press shows in the menu", menu.value === "house", menu.value);
+    check("each group of buttons says what it is, on the page",
+      [...D.querySelectorAll(".map-view-group")].every((g) => {
+        const kicker = g.querySelector(".map-view-kicker");
+        return kicker && kicker.textContent.trim() &&
+          g.querySelector(".segmented").getAttribute("aria-labelledby") === kicker.id;
+      }));
+    D.querySelector('[data-mode="senate"]').click();
   });
 
   suite("map.html — delegation panel", () => {
@@ -3389,6 +3411,27 @@ function testContrast() {
       !/style\.color\s*=\s*["']#/.test(js) && /\.party-tag\s*\{[^}]*color:\s*var\(--text-inverse\)/.test(css));
   });
   testColourVision(css);
+  testMotion();
+}
+
+/* Six scrollIntoView calls passed { behavior: "smooth" }, which overrides
+ * the stylesheet's reduced-motion rule, so picking a district or a county
+ * animated a long scroll for a reader who had asked for less motion
+ * (TECH-16). Every one asks KYC.scrollBehavior(). */
+function testMotion() {
+  const dir = path.join(SITE, "assets");
+  const literal = fs.readdirSync(dir).filter((f) => f.endsWith(".js") && f !== "kyc.js")
+    .filter((f) => /behavior:\s*["']smooth["']/.test(fs.readFileSync(path.join(dir, f), "utf8")));
+  const kyc = fs.readFileSync(path.join(dir, "kyc.js"), "utf8");
+  const fn = (kyc.match(/function scrollBehavior\(\) \{[\s\S]*?\n  \}/) || [""])[0];
+  // eslint-disable-next-line no-new-func
+  const run = (reduce) => new Function("global", fn + "; return scrollBehavior();")(
+    { matchMedia: (q) => ({ matches: reduce && /prefers-reduced-motion: reduce/.test(q) }) });
+  suite("assets — a scroll the page makes honours reduced motion", () => {
+    check("no module asks for a smooth scroll outright", literal.length === 0, literal.join(", "));
+    check("KYC.scrollBehavior() is 'auto' for a reader who asked for less motion, 'smooth' otherwise",
+      !!fn && run(true) === "auto" && run(false) === "smooth");
+  });
 }
 
 /* ========================================================= colour vision */

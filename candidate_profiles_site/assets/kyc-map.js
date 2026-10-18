@@ -654,6 +654,9 @@
         );
       }
     );
+    // A phone's one menu of views (TECH-14, VISUALS-12).
+    var picker = doc.getElementById("mapModeSelect");
+    if (picker) picker.value = mode;
     // The footer names this view's sources: the national view of Congress
     // named none (TECH-11). The state panels date their own.
     Array.prototype.forEach.call(doc.querySelectorAll("[data-sources]"), function (line) {
@@ -722,6 +725,10 @@
       var button = event.target.closest("[data-mode]");
       if (button) setMode(button.getAttribute("data-mode"));
     });
+    var modePicker = doc.getElementById("mapModeSelect");
+    if (modePicker) {
+      modePicker.addEventListener("change", function () { setMode(modePicker.value); });
+    }
 
     doc.getElementById("delegation").addEventListener("click", function (event) {
       var row = event.target.closest("[data-id]");

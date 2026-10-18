@@ -2089,6 +2089,9 @@ a.badge-link {
 /* The map's state panel before a state is picked: no empty grey pill
  * (VISUALS-11). */
 #panelCounts:empty { display: none; }
+/* Brought up after a tap on a phone (kyc-usmap.js reveal), below the
+ * sticky header. */
+.detail-panel { scroll-margin-top: calc(var(--header-h) + var(--s-2)); }
 
 /* Every state is a focusable button in the SVG, so the map is operable
    from the keyboard rather than mouse-only. */
@@ -4135,7 +4138,32 @@ button.local-county-link {
 .map-views {
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-end;
   gap: var(--s-2);
+}
+/* Each group of views says what it is (VISUALS-12): three bare rows did
+ * not say why "2026 races" and "2026 governor's races" were apart. */
+.map-view-group,
+.map-mode-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.map-view-kicker {
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+/* On a phone the ten views are one menu: three boxed rows of buttons took
+ * the first 330-385px of the screen above the map (TECH-14, RACES-17). */
+.map-mode-pick { display: none; }
+@media (max-width: 760px) {
+  .map-views { width: 100%; margin-left: 0; }
+  .map-view-group { display: none; }
+  .map-mode-pick { display: flex; width: 100%; }
+  .map-mode-pick .select { width: 100%; }
 }
 
 .stategov { padding: var(--s-2) var(--s-1); }

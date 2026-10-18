@@ -388,12 +388,15 @@
     }
 
     /** On a phone the panel follows the map down the page. After a tap,
-     *  bring it into view if none of it shows. */
+     *  bring it up when its people would start below the fold. */
     function reveal() {
       var panel = doc.querySelector(".detail-panel");
       if (!panel || !global.matchMedia || !global.matchMedia("(max-width: 1000px)").matches) return;
-      if (panel.getBoundingClientRect().top > global.innerHeight - 80) {
-        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      // Not only when none of it shows: with its heading on screen and its
+      // people below the fold, the page did not move (RACES-17). Below the
+      // screen's middle, the panel comes up to the top.
+      if (panel.getBoundingClientRect().top > global.innerHeight * 0.5) {
+        panel.scrollIntoView({ behavior: KYC.scrollBehavior(), block: "start" });
       }
     }
 

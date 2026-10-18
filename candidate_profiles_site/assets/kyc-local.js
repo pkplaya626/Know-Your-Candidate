@@ -695,7 +695,7 @@
    * there (194 ms of a 450 ms pin on Minnesota at 6x). */
   function reveal(node) {
     (global.requestAnimationFrame || global.setTimeout)(function () {
-      node.scrollIntoView({ behavior: "smooth", block: "start" });
+      node.scrollIntoView({ behavior: KYC.scrollBehavior(), block: "start" });
     });
   }
 
@@ -758,13 +758,13 @@
       if (!row) return;
       if (row.hasAttribute("data-city")) pickCity(row.getAttribute("data-city"));
       else pick(row.getAttribute("data-region"));
-      el("localMap").scrollIntoView({ behavior: "smooth", block: "start" });
+      el("localMap").scrollIntoView({ behavior: KYC.scrollBehavior(), block: "start" });
     });
     el("localPanelBody").addEventListener("click", function (event) {
       var city = event.target.closest("[data-city]");
       if (city) {
         pickCity(city.getAttribute("data-city"));
-        if (narrow()) el("localMap").scrollIntoView({ behavior: "smooth", block: "start" });
+        if (narrow()) el("localMap").scrollIntoView({ behavior: KYC.scrollBehavior(), block: "start" });
         return;
       }
       var county = event.target.closest("[data-county]");

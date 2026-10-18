@@ -1141,7 +1141,7 @@
     var scope = cards[card === undefined ? cards.length - 1 : card] || doc;
     var fact = scope.querySelector(".district-fact.is-focus");
     if (fact && fact.getBoundingClientRect().top > global.innerHeight - 80) {
-      fact.scrollIntoView({ behavior: "smooth", block: "start" });
+      fact.scrollIntoView({ behavior: KYC.scrollBehavior(), block: "start" });
     }
   }
 

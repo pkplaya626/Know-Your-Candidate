@@ -1604,6 +1604,17 @@
     return key ? "var(--hatch-" + key + ", " + fill + ")" : fill;
   }
 
+  /* A scroll the page makes for the reader animates only for a reader who
+   * has not asked for less motion: an explicit { behavior: "smooth" }
+   * overrides the stylesheet's reduced-motion rule (audit 2026-10-17,
+   * TECH-16). Every scrollIntoView the modules make passes this. */
+  function scrollBehavior() {
+    try {
+      if (global.matchMedia && global.matchMedia("(prefers-reduced-motion: reduce)").matches) return "auto";
+    } catch (e) { /* no media queries: the default */ }
+    return "smooth";
+  }
+
   /* The word's colour on a fill, where the callout's default (the inverse
    * text) does not read: the mid-tones and the greys name their own ink,
    * per theme, in kyc.css. */
@@ -2709,6 +2720,7 @@
     svgFill: svgFill,
     swatchFill: swatchFill,
     fillInk: fillInk,
+    scrollBehavior: scrollBehavior,
     seatStrip: seatStrip,
     seatKey: seatKey,
     // data
