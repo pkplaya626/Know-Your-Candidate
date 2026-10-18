@@ -117,7 +117,10 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   edited by hand, and `verify` fails when one on disk is not what the
   template would write.
 - Shared page behaviour belongs in `assets/`, not in a page. Neither page
-  contains an inline `<script>` block.
+  contains an inline `<script>` block of code. The one inline block allowed
+  is structured data (`<script type="application/ld+json">`, written by
+  `pages.jsonld`), and `emit.inline_script_problems` fails any other, or one
+  that does not parse as JSON.
 
 ## Commands
 
@@ -152,8 +155,8 @@ python build_profile_site.py oge              # the executive's financial report
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1302 tests, no dependencies
-npm install && npm test                       # 1796 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1308 tests, no dependencies
+npm install && npm test                       # 1815 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -738,7 +741,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     the same words whether the results list a retiring member as withdrawn
     or not at all - the two read differently side by side in the Senate
     view - and only the hover, which cites its source, differs; an
-    appointee, never elected to the seat, is "Not running in 2026".
+    appointee, never elected to the seat, is "Not running in 2026". A
+    future year speaks of the seat: a senator's card says "Seat up in
+    2028", never "On the ballot in 2028", because the data knows when the
+    term ends, not who will run.
 
 62. **A refused name match is not an absence, and an unsettled person is
     never counted on the ballot.** The results page writes people as they
@@ -1076,7 +1082,7 @@ That check found a retirement note keyed `"Dick Durbin"` when the roster says
 
 - One stylesheet (`assets/kyc.css`) and one behaviour module per concern in
   `assets/`. Nothing duplicated between the two pages; neither page has an
-  inline `<script>`.
+  inline `<script>` but structured data (`application/ld+json`).
 - Colours come from CSS custom properties (`--party-d`, `--money-in`, …), never
   hex literals, so all three themes stay consistent. The map's continuous
   House scale uses `color-mix()` against those same properties, which is why

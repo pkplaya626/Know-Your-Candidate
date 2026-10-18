@@ -62,7 +62,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (1796 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (1815 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -188,7 +188,9 @@ page, so it is written by one set of helpers in `kyc/pages.py`, and
   with, or money from, any campaign, party, candidate or government office,
   and no advertising; not an official election source or legal advice. A
   table of every dataset - its source, what it covers, when it is read again
-  and when it was last read (`pages.DATASETS`, dated from each cache) - and the
+  and when it was last read (`pages.DATASETS`, dated from each cache, or
+  saying where a reader finds the date, `_NO_READ_DATE`), the member rosters'
+  hand-kept biographies and the editorial decisions among them - and the
   refresh schedule (`pages.REFRESH_DAILY`, `ODDS_TIMES`; a test holds them to
   `refresh.yml`'s gate and `odds.yml`'s cron). Privacy as the code behaves:
   no cookies, analytics or accounts; two settings in `localStorage` (the theme
@@ -201,22 +203,35 @@ page, so it is written by one set of helpers in `kyc/pages.py`, and
   dialog link GitHub's issue form (`.github/ISSUE_TEMPLATE/correction.yml`),
   its `page` and `profile` fields filled from the query string. The link is
   aimed as it is followed (`KYC.reportUrl`), so it names the profile open at
-  the time.
+  the time. About says the form needs a free GitHub account.
+- **Where a status was read**: a race's card, the profile dialog's race and
+  the map's state panel link the results page (`KYC.resultsSourceHtml`), with
+  "not the state's certified count" as page text; names the results give with
+  no profile are credited to their own source, the results pages or a
+  Secretary of State's list, counted apart.
 - **Each page's own sources, dated** (`pages.footer_html`): a legislature page
   dates Open States, a county page the Census listing, a court page the
   Federal Judicial Center and uscourts.gov, each from the cache's own record of
-  when it was read (`pages.data_dates`; never `odds.json`, rule 41). The
-  sidebar repeats it in one line with the link to About, because the grid's
-  endless scroll keeps its footer out of reach.
+  when it was read (`pages.data_dates`; never `odds.json`, rule 41). A
+  footer whose sources each carry their date (`footer_dated`: the federal hub
+  and the courts) does not repeat it in its last line. The sidebar repeats it
+  in one line with the link to About, because the grid's endless scroll keeps
+  its footer out of reach. "Data built" is the reader's own calendar day of
+  the build (`KYC.localDay`), never a UTC date in their future.
 - **The header's tag names the section** (`pages.brand_sub`, from the
   navigation's own names, rule 75); only a page that loads `profiles.js` says
   which Congress.
 - `404.html`, which GitHub Pages serves for any missing address at any depth
   (so its URLs start at the root), with the search and every section;
-  `districts/index.html` and `courts/index.html`, so those folders answer.
+  `districts/index.html` ("District maps", linked from each district page)
+  and `courts/index.html` ("Federal courts", where the navigation's entry of
+  that name leads), so those folders answer. map.html's footer follows the
+  state panel in the page, so a phone reads the panel first; on a wide screen
+  a grid (`.map-body`) puts it under the map.
 - Structured data: a `WebSite` with the grid's search (`index.html?q=`, which
   the router reads) on the home page, a `BreadcrumbList` on every generated
-  page. Never `Person` markup.
+  page. Never `Person` markup. These blocks are the only inline `<script>`
+  a page may carry (`emit.inline_script_problems`).
 - `site.webmanifest`, `assets/apple-touch-icon.png` and `assets/icon-512.png`
   (from `tools/app-icon.html`), and the share card
   `assets/social-card.png` (from `tools/social-card.html`, whose hostname
