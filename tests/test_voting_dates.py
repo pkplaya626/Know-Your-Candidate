@@ -78,15 +78,37 @@ class TestSources(unittest.TestCase):
         self.assertFalse(voting_dates.official_source("https://www.votecnmi.gov.mp/x", "GU")[0])
         self.assertFalse(voting_dates.official_source("https://example.com/x", "TX")[0])
 
+    def test_a_gov_host_counts_only_for_its_own_jurisdiction(self):
+        # PR #102 review: any .gov host passed for every jurisdiction -
+        # another state's office, a county, a federal guide.
+        for url, code in (("https://sos.ga.gov/x", "FL"), ("https://www.sos.la.gov/x", "TX"),
+                          ("https://effinghamcountyil.gov/x.pdf", "IL"),
+                          ("https://www.clarkcountynv.gov/x", "NV"),
+                          ("https://www.govinfo.gov/content/pkg/USCODE-2024-title48/x", "TX")):
+            self.assertFalse(voting_dates.official_source(url, code)[0], (url, code))
+        for url in ("https://www.fvap.gov/texas", "https://www.usa.gov/how-to-vote"):
+            ok, why = voting_dates.official_source(url, "TX")
+            self.assertFalse(ok, url)
+            self.assertIn("rule 50", why)
+        for url, code in (("https://sos.ga.gov/x", "GA"), ("https://dos.fl.gov/x", "FL"),
+                          ("https://www.leg.state.nv.us/NRS/x", "NV"),
+                          ("https://www.govinfo.gov/content/pkg/USCODE-2024-title48/x", "GU")):
+            self.assertTrue(voting_dates.official_source(url, code)[0], (url, code))
+
+    def test_every_jurisdiction_has_its_own_domains(self):
+        self.assertEqual(set(voting_dates.JURISDICTION_DOMAINS), voting_dates.JURISDICTIONS)
+
     def test_an_archived_official_page_counts_and_says_so(self):
         ok, label = voting_dates.official_source(
             "http://web.archive.org/web/20261004203000/https://gec.guam.gov/2026-important-dates/", "GU")
         self.assertTrue(ok)
-        self.assertEqual(label, "gec.guam.gov, as archived 2026-10-04")
+        # In brackets: the page separates sources with semicolons, and a
+        # comma inside a label ran one source into the next.
+        self.assertEqual(label, "gec.guam.gov (archived 2026-10-04)")
 
     def test_a_file_on_a_shared_host_counts_only_for_the_office_it_is_listed_for(self):
         url = next(iter(voting_dates.OFFICIAL_ELSEWHERE))
-        owner = voting_dates.OFFICIAL_ELSEWHERE[url][0]
+        owner = voting_dates.OFFICIAL_ELSEWHERE[url][0][0]
         self.assertTrue(voting_dates.official_source(url + "view", owner)[0])
         self.assertFalse(voting_dates.official_source(url + "view", "TX")[0])
         self.assertFalse(voting_dates.official_source("https://drive.google.com/file/d/other/view", owner)[0])
@@ -157,6 +179,23 @@ class TestProblems(unittest.TestCase):
         self.assertNotIn("TX", page["states"])
         self.assertIn("GA", page["states"])
 
+    def test_a_postmark_or_receipt_rule_needs_words_that_say_it(self):
+        # PR #102 review: South Dakota's "the form must arrive by then"
+        # stood on a quote that gave only the date.
+        rec = record("TX")
+        for s in rec["sources"]:
+            if s["field"] in ("registration.mail.deadline", "registration.mail.rule"):
+                s["quote"] = "Voter registration deadline: October 5, 2026"
+        self.assertProblem(with_state("TX", rec), "no quote it stands on says so")
+        rec["registration"]["mail"]["rule"] = None
+        self.assertEqual(voting_dates.problems(with_state("TX", rec)), [])
+
+    def test_where_same_day_registration_happens_is_the_offices_words(self):
+        # The research's summary was shown as if it were the office's.
+        rec = record("WI")
+        rec["registration"]["sameDay"]["where"] = "at the voter's polling place on Election Day"
+        self.assertProblem(with_state("WI", rec), "is not in the office's words")
+
     def test_no_cache_is_an_error(self):
         self.assertEqual([i.code for i in validate.check_voting_dates(None)], ["voting-dates-missing"])
 
@@ -187,6 +226,55 @@ class TestThePage(unittest.TestCase):
         self.assertTrue(self.page["states"]["NC"]["register"]["sameDay"])
         self.assertTrue(self.lines("NC", "sameday"))
         self.assertFalse(self.lines("GA", "sameday"))
+
+    def test_a_same_day_states_deadline_is_never_the_last_chance(self):
+        # PR #102 review: Illinois read "Today is the last day to register"
+        # while grace-period registration ran to November 3, and every
+        # same-day state's earlier deadlines read "Last day to register".
+        for code, entry in self.page["states"].items():
+            if not (entry.get("register") or {}).get("sameDay"):
+                continue
+            for line in entry["lines"]:
+                if line["k"] == "register" and line["d"] < voting_dates.ELECTION:
+                    self.assertTrue(line["t"].startswith("Regular deadline to register"), (code, line))
+                    self.assertNotIn("closes", line["s"], code)
+        illinois = self.page["states"]["IL"]["register"]
+        self.assertEqual((illinois["by"], illinois["sameDay"]), ("2026-10-18", True))
+
+    def test_the_same_day_words_are_quoted_from_the_linked_source(self):
+        entry = self.page["states"]["WI"]
+        line = self.lines("WI", "sameday")[0]
+        self.assertIn("“Voters can register to vote at their polling place on Election Day", line["t"])
+        self.assertEqual([entry["urls"][i] for i in line["src"]],
+                         ["https://myvote.wi.gov/en-us/Voter-Deadlines"])
+
+    def test_nevada_registers_online_through_election_day(self):
+        # NRS 293.560(1)(a)(3); October 20 is only the last day to be mailed
+        # a ballot (NRS 293.5837(2)).
+        register = self.page["states"]["NV"]["register"]
+        self.assertEqual((register["by"], register["how"]), ("2026-11-03", "online"))
+        self.assertEqual([l["d"] for l in self.lines("NV", "mailreg")], ["2026-10-20"])
+
+    def test_north_carolinas_same_day_registration_ends_with_early_voting(self):
+        self.assertEqual(self.page["states"]["NC"]["register"]["through"], "2026-10-31")
+        self.assertEqual(self.lines("NC", "sameday")[0]["d"], "2026-10-31")
+
+    def test_a_ballot_still_arriving_after_election_day_is_kept(self):
+        # PR #102 review: the Virgin Islands count ballots received by
+        # November 13, and the line went at midnight on Election Day.
+        line = self.lines("VI", "return")[0]
+        self.assertEqual(line["d"], "2026-11-13")
+        self.assertTrue(line["keep"])
+        self.assertNotIn("keep", self.lines("GA", "return")[0])
+
+    def test_a_local_runoffs_strip_label_says_so_and_turns_past(self):
+        self.assertTrue(self.lines("MS", "runoff")[0]["s"].startswith("Judicial"))
+        self.assertTrue(self.lines("AR", "runoff")[0]["s"].startswith("Local"))
+        self.assertEqual(self.lines("GA", "runoff")[0]["sp"], "Runoff date")
+
+    def test_wisconsins_early_voting_is_set_by_each_clerk(self):
+        early = self.lines("WI", "early")[0]
+        self.assertIn("each local election office sets", early["t"])
 
     def test_late_arriving_mail_ballots_are_kept_after_election_day(self):
         arrive = self.lines("CA", "arrive")

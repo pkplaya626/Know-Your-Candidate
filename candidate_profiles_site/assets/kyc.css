@@ -2629,12 +2629,16 @@ a.badge-link {
 .vote-cal-label { font-size: var(--t-xs); color: var(--text-muted); }
 .vote-cal-item.is-past { background: transparent; border-top-style: dotted; }
 .vote-cal-item.is-past .vote-cal-date { color: var(--text-muted); }
-.vote-cal-item.is-now,
-.vote-cal-item.is-election { border-top-color: var(--accent); }
+/* Three marks, three meanings: a window under way carries the accent bar;
+ * Election Day a thicker one and a bold label; today is a dashed box with
+ * a bar in the text colour (PR #102 review: one blue bar meant all three). */
+.vote-cal-item.is-now { border-top-color: var(--accent); }
+.vote-cal-item.is-election { border-top: 6px solid var(--accent); }
+.vote-cal-item.is-election .vote-cal-label { color: var(--text); font-weight: 700; }
 .vote-cal-item.is-today {
   min-width: 0;
   border-style: dashed;
-  border-top: 3px solid var(--accent);
+  border-top: 3px solid var(--text);
   background: transparent;
 }
 .vote-cal-item.is-today .vote-cal-label { color: var(--text); font-weight: 700; }

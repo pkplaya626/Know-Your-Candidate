@@ -149,35 +149,74 @@
     var links = (line.src || []).map(function (i) {
       return mine.urls[i] ? outLink(mine.urls[i], mine.labels[i] || mine.urls[i]) : "";
     }).filter(Boolean);
-    return links.length ? ' <span class="vote-src">(' + links.join(", ") + ")</span>" : "";
+    // Semicolons between sources: an archived page's label carries its own
+    // date in brackets, and commas ran one label into the next.
+    return links.length ? ' <span class="vote-src">(' + links.join("; ") + ")</span>" : "";
   }
 
   /* The sentence a reader came for: can I still register for November 3?
-   * Said only until Election Day, and only from the record's own dates. */
+   * Said only until Election Day, and only from the record's own dates.
+   * Where a reader can register and vote at once, a deadline before
+   * Election Day is the regular one, never "the last day" and never
+   * "open until": Illinois's page told readers on October 18 that it was
+   * the last day to register, with grace-period registration running to
+   * November 3 (PR #102 review). Where the record does not say whether
+   * there is same-day registration, the deadline is said and nothing
+   * more. */
   function registrationLead(info, place) {
     var reg = info.mine.register;
     if (!reg || info.after || !reg.by) return "";
     var day = longDate(reg.by);
+    var t = info.today;
+    var how = " (" + reg.how + ")";
     var text;
-    if (info.today < reg.by) {
-      text = "Registration for November 3 is open until " + day + " (" + reg.how + ").";
-    } else if (info.today === reg.by) {
-      text = "Today is the last day to register for November 3 (" + reg.how + ").";
-    } else if (reg.sameDay) {
-      text = "The deadline to register ahead of November 3 was " + day +
-        "; same-day registration, where and when " + place + " offers it, is below.";
+    if (reg.sameDay) {
+      var until = reg.through ? ", until " + longDate(reg.through) : "";
+      var then = "you can still register and vote at the same time" + until +
+        "; where and when " + place + " offers it is below.";
+      if (reg.by >= info.election) {
+        text = t < reg.by ? "You can still register for November 3, through Election Day" + how + "."
+          : "Today, Election Day, you can still register" + how + ".";
+      } else if (reg.through && t > reg.through) {
+        text = "The regular deadline to register for November 3 was " + day +
+          ", and same-day registration ended on " + longDate(reg.through) + ".";
+      } else if (t < reg.by) {
+        text = "The regular deadline to register for November 3 is " + day + how + "; after it " + then;
+      } else if (t === reg.by) {
+        text = "Today is the regular deadline to register for November 3" + how + "; after it " + then;
+      } else {
+        text = "The regular deadline to register for November 3 was " + day + "; " + then;
+      }
     } else if (reg.sameDay === false) {
-      text = "Registration for November 3 closed on " + day + ".";
+      text = t < reg.by ? "Registration for November 3 is open until " + day + how + "."
+        : t === reg.by ? "Today is the last day to register for November 3" + how + "."
+        : "Registration for November 3 closed on " + day + ".";
     } else {
-      text = "The deadline to register for November 3 was " + day + ".";
+      text = t < reg.by ? "The deadline to register for November 3 is " + day + how + "."
+        : t === reg.by ? "Today is the deadline to register for November 3" + how + "."
+        : "The deadline to register for November 3 was " + day + ".";
     }
     return '<p class="vote-lead">' + KYC.escapeHtml(text) + "</p>";
   }
 
-  /** Has registration for November 3 closed with no same-day route? */
+  /* What the "Register to vote" button adds once registration for
+   * November 3 has closed, or "" while it is open. Only where the record
+   * says there is no same-day route, or that the route has ended: New
+   * York's record says neither, and its lead only gives the deadline. */
   function registrationClosed(info) {
     var reg = info && info.mine.register;
-    return !!(reg && reg.by && !reg.sameDay && !info.after && info.today > reg.by);
+    if (!reg || !reg.by || info.after) return "";
+    if (reg.sameDay === false && info.today > reg.by) return "closed for Nov 3 on " + shortDate(reg.by);
+    if (reg.sameDay && reg.through && info.today > reg.through) {
+      return "same-day registration ended " + shortDate(reg.through);
+    }
+    return "";
+  }
+
+  /** A button's label with a note: "Registration package (PDF; closed ...)". */
+  function withNote(label, note) {
+    if (!note) return label;
+    return /\)$/.test(label) ? label.slice(0, -1) + "; " + note + ")" : label + " (" + note + ")";
   }
 
   /* VISUALS-25: the dates as a strip, in order, Election Day among them and
@@ -185,29 +224,39 @@
    * phone rather than scrolling the page sideways. */
   function calendarStrip(info) {
     var items = info.lines.filter(function (l) { return l.d; }).map(function (l) {
-      return { d: l.d, e: l.e, s: l.s, line: l };
+      return { d: l.d, e: l.e, s: l.s, sp: l.sp, line: l };
     });
     if (!items.length) return "";
     items.push({ d: info.election, s: "Election Day", election: true });
     items.sort(function (a, b) { return a.d < b.d ? -1 : a.d > b.d ? 1 : 0; });
     var html = [];
     var marked = false;
+    // Today has a mark of its own wherever it falls, first included (the
+    // strip of a state whose first date was tomorrow had none), unless a
+    // date of the strip is today itself.
+    var onToday = items.some(function (item) { return item.d === info.today && !item.e; });
+    function today() {
+      marked = true;
+      html.push('<li class="vote-cal-item is-today" aria-label="Today, ' +
+        KYC.escapeAttr(longDate(info.today)) + '"><span class="vote-cal-date">' +
+        KYC.escapeHtml(shortDate(info.today)) + '</span><span class="vote-cal-label">Today</span></li>');
+    }
     items.forEach(function (item) {
       var end = item.e || item.d;
-      if (!marked && info.today < item.d && info.today > items[0].d) {
-        html.push('<li class="vote-cal-item is-today" aria-label="Today, ' +
-          KYC.escapeAttr(longDate(info.today)) + '"><span class="vote-cal-date">' +
-          KYC.escapeHtml(shortDate(info.today)) + '</span><span class="vote-cal-label">Today</span></li>');
-        marked = true;
-      }
-      var cls = end < info.today ? " is-past"
+      if (!marked && !onToday && info.today < item.d) today();
+      var past = end < info.today;
+      var cls = past ? " is-past"
         : (item.d <= info.today && info.today <= end ? " is-now" : "");
       var date = shortDate(item.d) + (item.e ? "–" + shortDate(item.e).replace(
         shortDate(item.d).split(" ")[0] + " ", "") : "");
+      // A date gone is named for what it was ("Runoff date"), never what
+      // may still happen on it ("Runoff, if needed").
+      var label = past && item.sp ? item.sp : item.s;
       html.push('<li class="vote-cal-item' + cls + (item.election ? " is-election" : "") + '">' +
         '<span class="vote-cal-date">' + KYC.escapeHtml(date) + "</span>" +
-        '<span class="vote-cal-label">' + KYC.escapeHtml(item.s || "") + "</span></li>");
+        '<span class="vote-cal-label">' + KYC.escapeHtml(label || "") + "</span></li>");
     });
+    if (!marked && !onToday) today();
     return '<ol class="vote-cal" aria-label="Key dates, in order">' + html.join("") + "</ol>";
   }
 
@@ -294,9 +343,7 @@
         var label = labels[v[0]] || v[1];
         // Never offered as open once it has closed (STATEGOV-11): the
         // form still registers a reader for later elections.
-        if (v[0] === "register" && closed) {
-          label += " (closed for Nov 3 on " + shortDate(info.mine.register.by) + ")";
-        }
+        if (v[0] === "register") label = withNote(label, closed);
         return '<a class="btn" target="_blank" rel="noopener noreferrer" href="' +
           KYC.escapeAttr(links[v[0]]) + '" data-kind="' + KYC.escapeAttr(v[0]) + '"' +
           (v[0] === "register" && closed ? ' data-closed="true"' : "") + ">" +
@@ -312,10 +359,16 @@
   function datesNote(all, info) {
     if (!info || !info.lines.length) return "";
     var d = all._dates || {};
-    return "Each date is the election office's own, read from the page linked beside it" +
-      (d.read ? " on " + KYC.escapeHtml(d.read) : "") +
+    // Not every date is printed as a date: where the office or its law
+    // gives a rule ("15 days before the election", Guam's runoff "on the
+    // fourteenth day" after it), the date is that rule counted on the 2026
+    // calendar, and the page says so (PR #102 review).
+    return "Each date is from the election office's own page or the law, linked beside it" +
+      (d.read ? ", read on " + KYC.escapeHtml(d.read) : "") +
       (d.checked ? " and checked again on " + KYC.escapeHtml(d.checked) : "") +
-      "; whether a date has passed is counted on your device's calendar. ";
+      "; where the source gives a rule, such as “15 days before the election”, the date " +
+      "is that rule counted on the 2026 calendar. Whether a date has passed is counted on your " +
+      "device's calendar. ";
   }
 
   /* A non-voting member's title, as summary.py gives it: Puerto Rico's

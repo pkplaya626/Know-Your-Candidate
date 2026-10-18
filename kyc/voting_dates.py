@@ -20,7 +20,12 @@ null: the state's own links stay beside it.
 - a value the page shows needs a source entry for its own field (a
   qualifier - a time of day, "postmarked", where same-day registration
   happens - may stand on its value's source), on the jurisdiction's own
-  official domain (``official_source``);
+  domains (``JURISDICTION_DOMAINS``) or an evidenced page elsewhere
+  (``OFFICIAL_ELSEWHERE``): any .gov host is not enough, since another
+  state's office, a county and a federal guide are all on .gov;
+- "postmarked" and "received" must be said in a quote they stand on
+  (``RULE_WORDS``), and where same-day registration happens is the office's
+  own words, quoted (``where_problems``);
 - a compiled table is a lead, never a source (rule 50): NCSL, Ballotpedia,
   Wikipedia, vote.gov, Vote.org and the like are refused wherever they
   appear;
@@ -60,26 +65,66 @@ JURISDICTIONS = frozenset(US_STATES.values())
 # name before any domain test could accept it.
 COMPILED_HOSTS = ("ncsl.org", "ballotpedia.org", "wikipedia.org", "vote.gov", "vote.org",
                   "usvotefoundation.org", "canivote.org", "nass.org", "eac.gov",
-                  "votinginfoproject.org", "rockthevote.org", "headcount.org")
+                  "votinginfoproject.org", "rockthevote.org", "headcount.org",
+                  # The federal government's state-by-state guides: fvap.gov's
+                  # for voters abroad, usa.gov's for everyone.
+                  "fvap.gov", "usa.gov")
 
-# Official pages on a domain that is not the office's own, each by its
-# address and with what makes it the office's: {url prefix: (code, label,
-# evidence)}. Read 2026-10-17 and 2026-10-18 by the researchers.
+# Official pages on a domain that is not the jurisdiction's own, each by its
+# address and with what makes it the jurisdiction's: {url prefix: (codes,
+# label, evidence)}. A county's page or a federal one counts only here,
+# for the jurisdictions listed: being on .gov makes a page a government's,
+# not this jurisdiction's (PR #102 review: sos.ga.gov passed for Florida).
 OFFICIAL_ELSEWHERE = {
     "https://drive.google.com/file/d/1h6Rb8t-XaocN-TfM7Q2CVHgExEXO2ARS/": (
-        "AS", "American Samoa Election Office's 2026 calendar",
+        ("AS",), "American Samoa Election Office's 2026 calendar",
         "the calendar embedded on https://www.aselectionoffice.gov/calendar"),
     "https://drive.google.com/file/d/1KsY2DpP753FVksT3Yg_EF6JI476E9hdI/": (
-        "AS", "American Samoa Election Office's absentee ballot form",
+        ("AS",), "American Samoa Election Office's absentee ballot form",
         "ASG Form EO-08, linked from https://www.aselectionoffice.gov/absentee-voting"),
     "https://docs.google.com/forms/d/e/1FAIpQLSeH9yVWrIrhA2dcHdCrF-a0g2c8qFBpCZe5CwxA2Kch-ZAwpw/": (
-        "GU", "Guam Election Commission's online registration form",
+        ("GU",), "Guam Election Commission's online registration form",
         "embedded on the Commission's 'Register online' page, https://gec.guam.gov/register/"),
+    # Title 48 of the U.S. Code is the territories' organic law: Guam's
+    # Organic Act sets its governor's runoff (48 U.S.C. 1422), and chapter
+    # 16 its Delegate's and American Samoa's (48 U.S.C. 1712, 1731).
+    "https://www.govinfo.gov/content/pkg/USCODE-2024-title48/": (
+        ("AS", "GU"), "govinfo.gov (48 U.S.C.)",
+        "the Code as the Government Publishing Office publishes it; Title 48 governs elections "
+        "in the territories"),
+    # The Court's opinion on counting mail ballots that arrive after
+    # Election Day, cited only in the researchers' notes, never shown.
+    "https://www.supremecourt.gov/opinions/25pdf/24-1260_": (
+        ("AK", "CA"), "supremecourt.gov",
+        "the Supreme Court's slip opinion on counting mail ballots received after Election Day"),
 }
-# Election offices whose own domain is neither .gov nor state.<xx>.us.
-# voting.OFFICIAL_HOSTS holds the rest (the CNMI's and Puerto Rico's).
-OFFICIAL_DOMAINS = {
-    "kssos.org": "KS",          # the Kansas Secretary of State's publications host
+
+# Each jurisdiction's own government domains: its election office's, its
+# legislature's and its general state domain. A host counts for a
+# jurisdiction only when it is one of these or under one (a state.<xx>.us
+# host counts for <xx>), or is listed in voting.OFFICIAL_HOSTS for it.
+JURISDICTION_DOMAINS = {
+    "AK": ("alaska.gov",), "AL": ("alabama.gov", "alabamavotes.gov"),
+    "AR": ("arkansas.gov",), "AS": ("aselectionoffice.gov", "americansamoa.gov"),
+    "AZ": ("azsos.gov", "azleg.gov", "az.gov"), "CA": ("ca.gov",),
+    "CO": ("coloradosos.gov", "colorado.gov"), "CT": ("ct.gov",), "DC": ("dc.gov",),
+    "DE": ("delaware.gov",), "FL": ("fl.gov", "registertovoteflorida.gov", "flsenate.gov"),
+    "GA": ("ga.gov", "georgia.gov"), "GU": ("guam.gov", "guamcourts.gov"),
+    "HI": ("hawaii.gov",), "IA": ("iowa.gov",), "ID": ("idaho.gov", "voteidaho.gov"),
+    "IL": ("il.gov", "illinois.gov", "ilga.gov"), "IN": ("in.gov",),
+    "KS": ("ks.gov", "ksrevisor.gov", "kssos.org"), "KY": ("ky.gov",), "LA": ("la.gov",),
+    "MA": ("mass.gov", "malegislature.gov"), "MD": ("maryland.gov",), "ME": ("maine.gov",),
+    "MI": ("michigan.gov",), "MN": ("mn.gov",), "MO": ("mo.gov",), "MP": ("gov.mp",),
+    "MS": ("ms.gov",), "MT": ("mt.gov", "votemt.gov", "sosmt.gov", "legmt.gov"),
+    "NC": ("nc.gov", "ncsbe.gov", "ncleg.gov"), "ND": ("nd.gov",), "NE": ("nebraska.gov",),
+    "NH": ("nh.gov",), "NJ": ("nj.gov",), "NM": ("nm.gov", "nmlegis.gov"), "NV": ("nv.gov",),
+    "NY": ("ny.gov",), "OH": ("ohiosos.gov", "ohio.gov"), "OK": ("oklahoma.gov", "ok.gov"),
+    "OR": ("oregon.gov", "oregonlegislature.gov"), "PA": ("pa.gov",), "PR": ("pr.gov",),
+    "RI": ("ri.gov",), "SC": ("sc.gov", "scvotes.gov", "scstatehouse.gov"),
+    "SD": ("sd.gov", "sdsos.gov", "sdlegislature.gov"), "TN": ("tn.gov",),
+    "TX": ("texas.gov", "votetexas.gov"), "UT": ("utah.gov",), "VA": ("virginia.gov",),
+    "VI": ("vivote.gov", "vi.gov"), "VT": ("vermont.gov",), "WA": ("wa.gov",),
+    "WI": ("wi.gov", "wisconsin.gov"), "WV": ("wv.gov",), "WY": ("wyo.gov", "wyoming.gov"),
 }
 
 # A value the page shows, and the source fields that may stand for it: a
@@ -92,10 +137,22 @@ SHOWN = {
     "registration.mail.deadline": (),
     "registration.mail.rule": ("registration.mail.deadline",),
     "registration.inPerson.deadline": (),
+    # The last day a new registrant is still mailed a ballot, where
+    # registration itself runs on (Nevada's online registration runs
+    # through Election Day; from the fourteenth day before, a new
+    # registrant votes in person).
+    "registration.mailedBallotBy": (),
     "registration.sameDay.available": (),
+    # The office's own words, quoted (``where_problems``), never a summary.
     "registration.sameDay.where": ("registration.sameDay.available",),
+    # The last day same-day registration is offered, where it ends before
+    # Election Day (North Carolina's is at early-voting sites only).
+    "registration.sameDay.through": (),
     "earlyVoting.start": (),
     "earlyVoting.end": (),
+    # Each local office sets its own days within the window (Wisconsin's
+    # "possibly through November 1").
+    "earlyVoting.setLocally": (),
     "mail.allMail": (),
     # Where every voter is mailed a ballot, nobody needs an excuse.
     "mail.noExcuse": ("mail.allMail",),
@@ -109,7 +166,18 @@ SHOWN = {
 }
 # Flags shown only when true: false says nothing on the page.
 SHOWN_WHEN_TRUE = {"noElection", "registration.none", "registration.sameDay.available",
-                   "mail.allMail"}
+                   "mail.allMail", "earlyVoting.setLocally"}
+
+# "Postmarked by then" and "must arrive by then" are claims of their own:
+# each must be said in a quote the value stands on (its own source or a
+# stand-in's), not merely beside a date (PR #102 review: South Dakota's
+# "received" stood on a quote that said only the date).
+RULE_WORDS = {
+    "postmarked": re.compile(r"postmark", re.I),
+    "received": re.compile(r"receiv|receipt|arriv|\breach|in the hands of|in (?:the )?possession"
+                           r"|deliver(?:y|ed) to", re.I),
+}
+RULES = ("registration.mail.rule", "mail.requestDeadline.rule", "mail.returnDeadline.rule")
 
 # What a runoff in the record decides, in words the page shows beside its
 # date, each from the record's runoff source and note: Arkansas's and
@@ -137,7 +205,15 @@ RUNOFF_WORDS = {
     "VI": ("Runoff, if one is needed, for Governor and Lieutenant Governor or for Delegate",
            "The date set for any runoff for Governor and Lieutenant Governor or for Delegate"),
 }
-RUNOFF_SHORT = {"LA": "House general, if needed"}
+# The calendar strip's labels for a runoff, before and after its date: a
+# strip that said only "Runoff, if needed" over Mississippi's judges'
+# runoff read as a runoff for Congress (PR #102 review).
+RUNOFF_SHORT = {
+    "AR": ("Local runoff, if needed", "Local runoff date"),
+    "LA": ("House general, if needed", "House general date"),
+    "MS": ("Judicial, school board runoff, if needed", "Judicial, school board runoff date"),
+}
+RUNOFF_SHORT_DEFAULT = ("Runoff, if needed", "Runoff date")
 
 _DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 # A time of day as the record gives it; anything longer ("7:00 pm (postmark);
@@ -196,21 +272,21 @@ def official_source(url, code):
     if inner:
         ok, label = official_source(inner[0], code)
         stamp = inner[1]
-        return ok, (f"{label}, as archived {stamp[:4]}-{stamp[4:6]}-{stamp[6:8]}" if ok else label)
-    for prefix, (owner, label, _evidence) in OFFICIAL_ELSEWHERE.items():
+        return ok, (f"{label} (archived {stamp[:4]}-{stamp[4:6]}-{stamp[6:8]})" if ok else label)
+    for prefix, (owners, label, _evidence) in OFFICIAL_ELSEWHERE.items():
         if url.startswith(prefix):
-            return (owner == code), (label if owner == code else f"{owner}'s page, not {code}'s")
+            return (code in owners), (label if code in owners
+                                      else f"{'/'.join(owners)}'s page, not {code}'s")
     host = _host(url)
     label = host[4:] if host.startswith("www.") else host
     state = re.search(r"\.state\.([a-z]{2})\.us$", host)
     if state:
         return (state.group(1) == code.lower()), label
-    if host.endswith(".gov"):
+    domains = list(JURISDICTION_DOMAINS.get(code, ())) + [
+        d for d, owner in voting.OFFICIAL_HOSTS.items() if owner == code]
+    if any(host == d or host.endswith("." + d) for d in domains):
         return True, label
-    for domain, owner in list(OFFICIAL_DOMAINS.items()) + list(voting.OFFICIAL_HOSTS.items()):
-        if host == domain or host.endswith("." + domain):
-            return (owner == code), label
-    return False, f"{host} is not an election office's own domain"
+    return False, f"{host} is not {code}'s own domain"
 
 
 def _sources(record, field):
@@ -255,6 +331,18 @@ def state_problems(code, record, runoffs):
             continue
         if path not in fields and not fields & set(stand_ins):
             out.append(f"{code} {path}: shown with no source")
+    for path in RULES:
+        rule = get(record, path)
+        if rule is None:
+            continue
+        if rule not in RULE_WORDS:
+            out.append(f"{code} {path}: {rule!r} is neither 'postmarked' nor 'received'")
+            continue
+        quotes = [s.get("quote") or "" for s in record.get("sources") or []
+                  if s.get("field") in (path,) + SHOWN[path]]
+        if not any(RULE_WORDS[rule].search(q) for q in quotes):
+            out.append(f"{code} {path}: {rule!r}, but no quote it stands on says so")
+    out += where_problems(code, record)
     out += _date_problems(code, record)
     date = get(record, "runoff.date")
     if date and code not in RUNOFF_WORDS:
@@ -265,6 +353,37 @@ def state_problems(code, record, runoffs):
         out.append(f"{code}: the overrides hold a December date of {runoffs[code]}, the record "
                    f"{date}; two sources of one date must agree (rule 53)")
     return out
+
+
+def _plain(text):
+    """Text compared as words: case, spacing, curly quotes and dashes aside."""
+    text = str(text or "").translate({0x2018: "'", 0x2019: "'", 0x201C: '"', 0x201D: '"',
+                                      0x2013: "-", 0x2014: "-", 0xA0: " "})
+    return re.sub(r"\s+", " ", text).strip().lower()
+
+
+def where_excerpts(where):
+    """The office's words a ``sameDay.where`` quotes: excerpts joined by " ... "."""
+    return [part.strip() for part in str(where or "").split(" ... ") if part.strip()]
+
+
+def _where_sources(record):
+    return [s for s in record.get("sources") or []
+            if s.get("field") in ("registration.sameDay.where", "registration.sameDay.available")]
+
+
+def where_problems(code, record):
+    """Where same-day registration happens is shown in the office's words:
+    each excerpt of ``where`` must be in a quote of a same-day source. The
+    first record held a researcher's summary there, and the page showed it
+    (PR #102 review)."""
+    where = _shown(record, "registration.sameDay.where")
+    if not where:
+        return []
+    quotes = [_plain(s.get("quote")) for s in _where_sources(record)]
+    return [f"{code} registration.sameDay.where: {part!r} is not in the office's words quoted "
+            f"for same-day registration" for part in where_excerpts(where)
+            if not any(_plain(part) in q for q in quotes)]
 
 
 def _date_problems(code, record):
@@ -287,7 +406,8 @@ def _date_problems(code, record):
         return value
 
     for path in ("registration.online.deadline", "registration.mail.deadline",
-                 "registration.inPerson.deadline", "mail.requestDeadline.date"):
+                 "registration.inPerson.deadline", "registration.mailedBallotBy",
+                 "registration.sameDay.through", "mail.requestDeadline.date"):
         value = day(path)
         if value and value > ELECTION:
             out.append(f"{code} {path}: {value} is after the election")
@@ -311,6 +431,9 @@ def _date_problems(code, record):
     if get(record, "registration.online.deadline") and get(
             record, "registration.online.available") is not True:
         out.append(f"{code} registration.online: a deadline for registration not offered online")
+    if get(record, "registration.sameDay.through") and get(
+            record, "registration.sameDay.available") is not True:
+        out.append(f"{code} registration.sameDay.through: an end to same-day registration not offered")
     return out
 
 
@@ -349,10 +472,12 @@ class _Links:
     def __init__(self, code, record):
         self.code, self.record, self.urls, self.labels = code, record, [], []
 
-    def of(self, *fields):
+    def of(self, *fields, want=None):
         out = []
         for field in fields:
             for source in _sources(self.record, field):
+                if want is not None and not want(source):
+                    continue
                 url = source["url"]
                 ok, label = official_source(url, self.code)
                 if not ok:
@@ -409,33 +534,78 @@ def lines(code, record, place):
     if person:
         by_date.setdefault(person, []).append(("in person", "in person",
                                                "registration.inPerson.deadline"))
+    # Whether a reader who misses a deadline can still register and vote at
+    # once: True, False, or None where the record does not say. In a
+    # same-day state a deadline before Election Day is the *regular*
+    # deadline, never the last chance: the first page told Illinois readers
+    # "Today is the last day to register" on a day grace-period
+    # registration ran on to November 3 (PR #102 review).
+    same = True if _shown(record, "registration.sameDay.available") else (
+        False if get(reg, "sameDay.available") is False else None)
     every = len(by_date) == 1 and len(next(iter(by_date.values()))) == 3
     for date, methods in sorted(by_date.items()):
-        out.append({"k": "register", "d": date,
-                    "t": "Last day to register to vote " + _join([m[1] for m in methods]),
-                    "s": "Registration closes" if every
-                    else "Register " + " / ".join(m[0] if m[0] != "mail" else "by mail"
-                                                  for m in methods),
+        how = _join([m[1] for m in methods])
+        short = " / ".join(m[0] if m[0] != "mail" else "by mail" for m in methods)
+        if same and date < ELECTION:
+            words = (f"Regular deadline to register {how}; after it you can still register "
+                     f"and vote at the same time (below)")
+            label = "Regular deadline to register" + ("" if every else f": {short}")
+        elif same is None:
+            words = f"Deadline to register to vote {how}"
+            label = "Registration deadline" if every else f"Register {short}"
+        else:
+            words = f"Last day to register to vote {how}"
+            label = "Registration closes" if every else f"Register {short}"
+        out.append({"k": "register", "d": date, "t": words, "s": label,
                     "src": links.of(*[m[2] for m in methods])})
+    mailed_by = _shown(record, "registration.mailedBallotBy")
+    if mailed_by:
+        out.append({"k": "mailreg", "d": mailed_by,
+                    "t": "Last day to register and still be mailed a ballot; a voter who "
+                         "registers after it votes in person",
+                    "s": "Register to be mailed a ballot",
+                    "src": links.of("registration.mailedBallotBy")})
     register = None
     if by_date:
         last = max(by_date)
         register = {"by": last, "how": _join([m[0] if m[0] != "mail" else "by mail"
                                               for m in by_date[last]])}
-    if _shown(record, "registration.sameDay.available"):
+    if same:
         where = _shown(record, "registration.sameDay.where")
-        out.append({"k": "sameday",
-                    "t": "Same-day registration: you can register and vote at the same time" +
-                         (f" - {where}" if where else ""),
-                    "src": links.of("registration.sameDay.available", "registration.sameDay.where")})
+        excerpts = where_excerpts(where)
+        through = _shown(record, "registration.sameDay.through")
+        # The office's own words, quoted; never a summary of them.
+        quote = ("; in the office's words, " + " … ".join(
+            f"“{part.rstrip('.')}”" for part in excerpts)) if excerpts else ""
+        line = {"k": "sameday",
+                "t": "Same-day registration: you can register and vote at the same time" +
+                     (", until this day" if through else "") + quote}
+        if through:
+            line.update({"d": through, "s": "Same-day registration ends",
+                         "p": "Same-day registration ended on this day" + quote})
+        quoted = [_plain(p) for p in excerpts]
+        line["src"] = links.of(
+            "registration.sameDay.where", "registration.sameDay.available",
+            want=(lambda s: any(p in _plain(s.get("quote")) for p in quoted)) if quoted else None)
+        out.append(line)
         register = dict(register or {}, sameDay=True)
-    elif register is not None and get(reg, "sameDay.available") is False:
+        if through:
+            register["through"] = through
+    elif register is not None and same is False:
         register["sameDay"] = False
 
     start, end = _shown(record, "earlyVoting.start"), _shown(record, "earlyVoting.end")
     if start and end:
-        out.append({"k": "early", "d": start, "e": end, "t": "In-person early voting",
-                    "s": "Early voting", "src": links.of("earlyVoting.start", "earlyVoting.end")})
+        # Wisconsin's window is the earliest and latest a municipal clerk may
+        # offer, not days every clerk is open (PR #102 review).
+        local = _shown(record, "earlyVoting.setLocally")
+        out.append({"k": "early", "d": start, "e": end,
+                    "t": "In-person early voting" + (
+                        ", on the days and hours each local election office sets: it may start "
+                        "later or end sooner than these dates" if local else ""),
+                    "s": "Early voting" + (" (local days)" if local else ""),
+                    "src": links.of("earlyVoting.start", "earlyVoting.end")
+                    + (links.of("earlyVoting.setLocally") if local else [])})
 
     if _shown(record, "mail.allMail"):
         out.append({"k": "allmail", "t": "Every registered voter is mailed a ballot without "
@@ -473,19 +643,27 @@ def lines(code, record, place):
                         "s": "Mailed ballots arrive by",
                         "src": links.of("mail.returnDeadline.receivedBy")})
     elif get(record, "mail.returnDeadline.rule") == "received" and (returned or received):
-        out.append({"k": "return", "d": returned or received,
-                    "t": "Mail ballots must arrive at the election office by " +
-                         (time + " on " if time else "") + "this day",
-                    "s": "Mail ballots due",
-                    "src": links.of("mail.returnDeadline.date" if returned
-                                    else "mail.returnDeadline.receivedBy",
-                                    "mail.returnDeadline.receivedBy")})
+        due = returned or received
+        line = {"k": "return", "d": due,
+                "t": "Mail ballots must arrive at the election office by " +
+                     (time + " on " if time else "") + "this day",
+                "s": "Mail ballots due",
+                "src": links.of("mail.returnDeadline.date" if returned
+                                else "mail.returnDeadline.receivedBy",
+                                "mail.returnDeadline.receivedBy")}
+        if due > ELECTION:
+            # Ballots still arriving after Election Day are still news then
+            # (the Virgin Islands count those received by November 13).
+            line.update({"keep": True,
+                         "p": "The last day for mail ballots to arrive at the election office"})
+        out.append(line)
 
     runoff = _shown(record, "runoff.date")
     if runoff and code in RUNOFF_WORDS:
         before, after = RUNOFF_WORDS[code]
+        short, short_past = RUNOFF_SHORT.get(code, RUNOFF_SHORT_DEFAULT)
         out.append({"k": "runoff", "d": runoff, "t": before, "p": after, "keep": True,
-                    "s": RUNOFF_SHORT.get(code, "Runoff, if needed"), "src": links.of("runoff.date")})
+                    "s": short, "sp": short_past, "src": links.of("runoff.date")})
     return out, register, links
 
 

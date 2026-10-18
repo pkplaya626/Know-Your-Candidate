@@ -671,7 +671,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "at the county elections office, a vote center or a polling place (conditional voter registration, October 20 through November 3)"
+     "where": "register and vote at their county elections office, polling place, or vote center"
     }
    },
    "earlyVoting": {
@@ -785,7 +785,7 @@
     }
    ],
    "notes": "Every active registered voter is mailed a ballot (counties begin mailing by October 5), so there is no request deadline for an ordinary voter; a voter who did not receive one can ask the county for a replacement. Return a ballot by mail postmarked on or before November 3 and received by November 10, or drop it at any drop box, vote center, polling place or county elections office in California by 8:00 p.m. on November 3. The Secretary of State recommends mailing at least 7 days before Election Day (its vote-by-mail page says five) and asking for a hand postmark if mailing on Election Day. The Secretary of State's pages read on 2026-10-17 still state the 7-day receipt window; Watson v. RNC (June 29, 2026) upheld a state's power to count ballots postmarked by Election Day and received afterward. Polls are open 7:00 a.m. to 8:00 p.m. The Secretary of State's quick-facts sheet is marked 'Updated 07/2026' and the general election calendar 'Rev: 09/24/2026'.",
-   "verified": "VERIFIED 2026-10-17 (second skeptic pass): every value re-read on sos.ca.gov (general election page, key dates, registration, same-day, vote-by-mail, calendar Rev 09/24/2026, quick facts Updated 07/2026); no corrections."
+   "verified": "VERIFIED 2026-10-17 (second skeptic pass): every value re-read on sos.ca.gov (general election page, key dates, registration, same-day, vote-by-mail, calendar Rev 09/24/2026, quick facts Updated 07/2026); no corrections. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "CO": {
    "election": "2026-11-03",
@@ -806,7 +806,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "in person at a Voter Service and Polling Center in the voter's county, through Election Day"
+     "where": "To receive a ballot, the applicant must visit a Voter Service and Polling Center"
     }
    },
    "earlyVoting": {
@@ -902,7 +902,7 @@
     }
    ],
    "notes": "Every active registered voter is mailed a ballot (county clerks must send them by October 9), so there is no request deadline; a voter can get a replacement from the county clerk or vote in person at a Voter Service and Polling Center. Ballots must be received by the county clerk (at a drop box, drop-off location or polling center, or by mail) by 7:00 p.m. on November 3; postmarks do not count, so Watson v. RNC does not change Colorado's deadline. Drop boxes accept ballots from 22 days before the election (October 12) through Election Day. Polls (Voter Service and Polling Centers) are open 7:00 a.m. to 7:00 p.m. on Election Day. Military and overseas ballots must be sent by 7:00 p.m. on Election Day and received by the close of business on the 8th day after. Whether a mailed registration form counts by postmark or by receipt is not stated on the pages read, so registration.mail.rule is left null. The calendar is marked 'Last updated: 07/31/2026'.",
-   "verified": "VERIFIED 2026-10-17 (second skeptic pass): every value re-read on coloradosos.gov (2026 calendar last updated 07/31/2026, registration and mail-ballot FAQs); no corrections; registration.mail.rule stays null."
+   "verified": "VERIFIED 2026-10-17 (second skeptic pass): every value re-read on coloradosos.gov (2026 calendar last updated 07/31/2026, registration and mail-ballot FAQs); no corrections; registration.mail.rule stays null. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "CT": {
    "election": "2026-11-03",
@@ -923,7 +923,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "at the town's designated Same Day Registration location (not the polling place), during all early voting hours (October 19 to November 1) and on Election Day from 6:00 a.m. to 8:00 p.m."
+     "where": "Same-Day Registration (SDR) is not available at your polling place but is available at a designated SDR location in each town, beginning at 6 am and ending at 8 pm on Election Day. SDR is available during the hours of Early Voting as well"
     }
    },
    "earlyVoting": {
@@ -1043,7 +1043,7 @@
     }
    ],
    "notes": "Absentee voting no longer requires an excuse (Public Act 26-42). Request online at MyVote.CT.gov/absentee or on paper from the town clerk; the request deadline is Monday, November 2 (absentee ballots are not issued on Election Day except emergency and overseas ballots). Return the ballot to the town clerk by mail or in the town's drop box; it must be received by 8:00 p.m. on November 3, so postmarks do not count and Watson v. RNC does not change the deadline. A voter returning their own ballot in person: the statute (C.G.S. 9-140b(a)(2), as amended by Public Act 26-42) and the Secretary of the State's election calendar (rev. 05.28.26) say it must reach the town clerk by the day before the election, Monday, November 2, while the Secretary's absentee page and 2026 brochure say 'directly to your Town Clerk no later than 8 p.m. on Election Day'; the two disagree, so a voter should hand-deliver by November 2 to be safe. A family member or designee returning it in person has until 8:00 p.m. on November 3. A missing signature on the return envelope can be cured in person at the town clerk's office until 8:00 p.m. on Election Day. Polls are open 6:00 a.m. to 8:00 p.m. The Secretary of the State's election calendar (rev. 05.28.26) and the voter-facing deadline sheet (file dated October 5, 2026) agree that the registration cut-off, by mail included, is Friday, October 16. People whose age, citizenship or residence qualification matured after October 16 can register at a limited session on November 2 (9:00 a.m.-5:00 p.m.).",
-   "verified": "VERIFIED 2026-10-17 (second skeptic pass): values unchanged; notes corrected - a voter hand-returning their own absentee ballot must reach the town clerk by Mon Nov 2 per C.G.S. 9-140b(a)(2) as amended by PA 26-42 and the SOTS calendar, which the SOTS brochure (8 p.m. Election Day) contradicts; both cited."
+   "verified": "VERIFIED 2026-10-17 (second skeptic pass): values unchanged; notes corrected - a voter hand-returning their own absentee ballot must reach the town clerk by Mon Nov 2 per C.G.S. 9-140b(a)(2) as amended by PA 26-42 and the SOTS calendar, which the SOTS brochure (8 p.m. Election Day) contradicts; both cited. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "DC": {
    "election": "2026-11-03",
@@ -1059,12 +1059,12 @@
      "rule": "received"
     },
     "inPerson": {
-     "deadline": "2026-10-25",
+     "deadline": null,
      "note": "In person at the Board or a voter registration agency: 'no later than the day before the start of the early voting period'. Early voting starts October 26, so this is computed as October 25 (a Sunday; the Board's office is open Monday to Friday). After that, register at an Early Vote Center or an Election Day Vote Center (same-day registration)."
     },
     "sameDay": {
      "available": true,
-     "where": "at Early Vote Centers (October 26 to November 1) and at Vote Centers on Election Day, with proof of residence"
+     "where": "Period during which qualified electors may register and cast ballots at Early Vote Centers ... On Election Day, between the hours of 7:00 a.m. to 8:00 p.m., qualified electors may register to vote and cast full ballots in person at Vote Centers"
     }
    },
    "earlyVoting": {
@@ -1111,7 +1111,7 @@
      "pageUpdated": null
     },
     {
-     "field": "registration.inPerson.deadline",
+     "field": "registration.inPerson.note",
      "url": "https://www.dcboe.org/voters/register-to-vote/register-update-voter-registration",
      "quote": "If you submit your application in person at the Board of Elections or another voter registration agency, your application should be received no later than the day before the start of the early voting period.",
      "pageUpdated": null
@@ -1173,7 +1173,7 @@
     }
    ],
    "notes": "Every active registered voter is mailed a ballot automatically; only a voter who will be away from their DC address must request one (received by October 19). Mail ballot drop boxes are open from October 9 at 11:00 a.m. until 8:00 p.m. on November 3. Election Day Vote Centers are open 7:00 a.m. to 8:00 p.m. October 13 was also the last day to change party affiliation. First-time voters who registered by mail or online must include a copy of ID with a mailed ballot. The Board's home page announces Ranked Choice Voting ('Rank your Candidates in Order of Preference'). The Board's calendar is revision 10/1/2026, after Watson v. RNC (June 29, 2026), and still lists mailed ballots postmarked by Election Day and received by November 13; the online registration page gives no time of day for its deadline. The calendar says it 'is subject to change'.",
-   "verified": "CONFIRMED: every DC value re-read on dcboe.org (calendar Rev. 10/1/2026, registration, mail-ballot pages); inPerson 2026-10-25 is the Board's rule (day before early voting) computed, noted as a Sunday; no corrections. | Second pass 2026-10-17 (resumed skeptic): every quote re-matched against the cited official page or PDF (HTML re-fetched fresh tonight), day offsets recomputed; no value changed."
+   "verified": "CONFIRMED: every DC value re-read on dcboe.org (calendar Rev. 10/1/2026, registration, mail-ballot pages); inPerson 2026-10-25 is the Board's rule (day before early voting) computed, noted as a Sunday; no corrections. | Second pass 2026-10-17 (resumed skeptic): every quote re-matched against the cited official page or PDF (HTML re-fetched fresh tonight), day offsets recomputed; no value changed. REVIEW 2026-10-18 (PR #102): the in-person deadline (a Sunday counted from 'the day before the start of the early voting period') is no longer shown; same-day registration at Early Vote Centers follows it. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "DE": {
    "election": "2026-11-03",
@@ -1343,7 +1343,7 @@
     "allMail": false,
     "requestDeadline": {
      "date": "2026-10-22",
-     "rule": "received"
+     "rule": null
     },
     "returnDeadline": {
      "date": "2026-11-03",
@@ -1443,7 +1443,7 @@
     }
    ],
    "notes": "The request deadline (October 22) is 5:00 p.m. and is the deadline to have a ballot mailed; a voter can still pick up their own vote-by-mail ballot at the Supervisor of Elections office through Election Day (a designee picking one up from the start of mandatory early voting needs an emergency affidavit, Form DS-DE 162). Ballots may be returned to secure drop boxes at Supervisor of Elections offices until 7:00 p.m. local time on Election Day, and at early voting sites during early voting. Overseas voters only get a 10-day extension for the general election if the ballot is postmarked or dated by Election Day. Signature cures are due by 5:00 p.m. on the 2nd day after the election. The vote-by-mail page was last updated January 14, 2026, before Watson v. RNC (June 29, 2026); Florida already required receipt by 7:00 p.m. on Election Day. The 2026 dates page was last updated August 22, 2025. Registration closed October 5; there is no same-day registration.",
-   "verified": "CONFIRMED: every FL value re-read on dos.fl.gov (election dates, vote-by-mail, early voting) and registertovoteflorida.gov; optional early-voting days (Oct 19 / Nov 1) correctly computed from the 15th/2nd-day rule; no corrections. | Second pass 2026-10-17 (resumed skeptic): every quote re-matched against the cited official page or PDF (HTML re-fetched fresh tonight), day offsets recomputed; no value changed."
+   "verified": "CONFIRMED: every FL value re-read on dos.fl.gov (election dates, vote-by-mail, early voting) and registertovoteflorida.gov; optional early-voting days (Oct 19 / Nov 1) correctly computed from the 15th/2nd-day rule; no corrections. | Second pass 2026-10-17 (resumed skeptic): every quote re-matched against the cited official page or PDF (HTML re-fetched fresh tonight), day offsets recomputed; no value changed. REVIEW 2026-10-18 (PR #102): 'received' on the mail-ballot application deadline is dropped: no quoted source says it."
   },
   "GA": {
    "election": "2026-11-03",
@@ -1805,7 +1805,7 @@
     },
     "mail": {
      "deadline": "2026-10-26",
-     "rule": "received"
+     "rule": null
     },
     "inPerson": {
      "deadline": "2026-11-03",
@@ -1813,7 +1813,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "at voter service centers in the voter's county, October 20 to November 3 (excluding Sundays), including Election Day until 7:00 p.m."
+     "where": "same day voter registration is available at voter service centers, to register and vote in-person, beginning 10 days prior and through election day"
     }
    },
    "earlyVoting": {
@@ -1910,7 +1910,7 @@
     }
    ],
    "notes": "Hawaii conducts elections by mail: every registered voter is mailed a ballot automatically (General Election ballots were to arrive by October 16), so no request is needed. The October 27 date is only the deadline to ask that a ballot be sent to an alternate address; the page does not say whether that request must be received or postmarked. Voted ballots must be received (not postmarked) by the County Elections Division or a ballot drop box by 7:00 p.m. on November 3; the 2026 General Election voter guide (file dated October 13, 2026, after Watson v. RNC) says the same and warns to allow for USPS delivery time. Paper registration applications are due at the County Elections Division by 4:30 p.m. on October 26; the Office of Elections says voters 'may register online at any time' but does not say whether an online registration after October 26 brings a mail ballot, so the online deadline is left null. After October 26, register and vote in person at a voter service center (same-day registration). Hawaii voters do not declare a party when registering.",
-   "verified": "CONFIRMED with a note completed: all HI values re-read on elections.hawaii.gov (dates page, registration, voter service centers) and the 2026 General voter guide PDF (Oct 13); online deadline correctly left null; reduced-day centers list completed (Oahu's Wahiawa, Kaneohe). | Second pass 2026-10-17 (resumed skeptic): every quote re-matched against the cited official page or PDF (HTML re-fetched fresh tonight), day offsets recomputed; no value changed."
+   "verified": "CONFIRMED with a note completed: all HI values re-read on elections.hawaii.gov (dates page, registration, voter service centers) and the 2026 General voter guide PDF (Oct 13); online deadline correctly left null; reduced-day centers list completed (Oahu's Wahiawa, Kaneohe). | Second pass 2026-10-17 (resumed skeptic): every quote re-matched against the cited official page or PDF (HTML re-fetched fresh tonight), day offsets recomputed; no value changed. REVIEW 2026-10-18 (PR #102): 'received' on the mail registration deadline is dropped: no quoted source says it. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "IA": {
    "election": "2026-11-03",
@@ -1931,7 +1931,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "at the polls on Election Day (proof of identity and residence)"
+     "where": "at the polls on Election Day"
     }
    },
    "earlyVoting": {
@@ -2034,7 +2034,7 @@
     }
    ],
    "notes": "Any registered voter may vote absentee. Requests for a mailed ballot must be received by the county auditor by 5:00 p.m. CT on October 19; voted ballots must be received by the county auditor by 8:00 p.m. CT on November 3 (postmarks do not count; USPS advises mailing at least a week ahead). Voted absentee ballots cannot be dropped off at a polling place, only at the county auditor's office; a voter who still holds one on Election Day can surrender it at the polls and vote a regular ballot. Polls are open 7:00 a.m. to 8:00 p.m. CT. Iowa already required receipt by the close of polls before Watson v. RNC (June 29, 2026); the Secretary of State's release is dated September 15, 2026. The pre-registration deadline (October 19) applies to every method; the Secretary of State's pages do not give a time of day for online registration or say whether a mailed registration counts by postmark, so those are left null. Voters casting ballots under UOCAVA or Iowa Code chapter 9E should follow their ballot instructions.",
-   "verified": "CONFIRMED: every IA value re-read on voterready.iowa.gov, sos.iowa.gov (registration, absentee voting) and the Secretary's Sept 15, 2026 release; Oct 14 (20 days) and Oct 19 (15 days) check out; source added for the notes; no corrections. | Second pass 2026-10-17 (resumed skeptic): every quote re-matched against the cited official page or PDF (HTML re-fetched fresh tonight), day offsets recomputed; no value changed."
+   "verified": "CONFIRMED: every IA value re-read on voterready.iowa.gov, sos.iowa.gov (registration, absentee voting) and the Secretary's Sept 15, 2026 release; Oct 14 (20 days) and Oct 19 (15 days) check out; source added for the notes; no corrections. | Second pass 2026-10-17 (resumed skeptic): every quote re-matched against the cited official page or PDF (HTML re-fetched fresh tonight), day offsets recomputed; no value changed. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "ID": {
    "election": "2026-11-03",
@@ -2055,7 +2055,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "when voting in person at early voting or at the voter's designated polling place on Election Day (photo ID and proof of residence required)"
+     "where": "Qualified individuals may register and vote at their designated polling place on election day"
     }
    },
    "earlyVoting": {
@@ -2151,7 +2151,7 @@
     }
    ],
    "notes": "Absentee ballot applications are due (received) by 5:00 p.m. local time on October 23, and voted ballots must be received by the county clerk by 8:00 p.m. local time on November 3; postmarks do not count, and the voter adds postage when mailing. A new absentee request is needed each calendar year. Hospitalized voters whose stay began after 5:00 p.m. October 23 may apply for an emergency absentee ballot through 5:00 p.m. November 2. Polls are open 8 a.m. to 8 p.m. local time (Idaho spans two time zones). The calendar gives 5:00 p.m. for registrations received by the clerk; the online deadline is stated only as '11 days before an election', so its time of day is left null. The pages carry no 'updated' date; Idaho already required receipt by 8 p.m. on Election Day before Watson v. RNC (June 29, 2026).",
-   "verified": "CONFIRMED: every ID value re-read on voteidaho.gov (calendar, registration, general election, casting your ballot); 11-days-before = Oct 23 correct; no corrections. | Second pass 2026-10-17 (resumed skeptic): every quote re-matched against the cited official page or PDF (HTML re-fetched fresh tonight), day offsets recomputed; no value changed."
+   "verified": "CONFIRMED: every ID value re-read on voteidaho.gov (calendar, registration, general election, casting your ballot); 11-days-before = Oct 23 correct; no corrections. | Second pass 2026-10-17 (resumed skeptic): every quote re-matched against the cited official page or PDF (HTML re-fetched fresh tonight), day offsets recomputed; no value changed. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "IL": {
    "election": "2026-11-03",
@@ -2164,7 +2164,7 @@
     },
     "mail": {
      "deadline": "2026-10-06",
-     "rule": "postmarked"
+     "rule": null
     },
     "inPerson": {
      "deadline": "2026-10-06",
@@ -2172,7 +2172,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "grace period registration and voting at the office of the election authority or a location it designates, October 7 through November 3; whether a voter can register and vote at their polling place on Election Day depends on the election authority"
+     "where": "grace period registration and voting in the office of the election authority or at locations designated for this purpose by the election authority"
     }
    },
    "earlyVoting": {
@@ -2219,36 +2219,6 @@
      "pageUpdated": null
     },
     {
-     "field": "registration.mail.deadline",
-     "url": "https://effinghamcountyil.gov/wp-content/uploads/2025/07/2026-Election-Campaign-Finance-Calendar.pdf",
-     "quote": "TUESDAY, OCTOBER 6, 2026 CLOSE OF REGISTRATION Last day for regular registration or transfer of registration within the offices of the election authority. ... A mail registration application shall be deemed timely filed if postmarked prior to the close of registration.",
-     "pageUpdated": "Amended on July 9, 2025"
-    },
-    {
-     "field": "registration.inPerson.deadline",
-     "url": "https://effinghamcountyil.gov/wp-content/uploads/2025/07/2026-Election-Campaign-Finance-Calendar.pdf",
-     "quote": "CLOSE OF REGISTRATION Last day for regular registration or transfer of registration within the offices of the election authority. Grace period registration and voting will be available after this date.",
-     "pageUpdated": "Amended on July 9, 2025"
-    },
-    {
-     "field": "registration.sameDay.available",
-     "url": "https://effinghamcountyil.gov/wp-content/uploads/2025/07/2026-Election-Campaign-Finance-Calendar.pdf",
-     "quote": "GRACE PERIOD REGISTRATION AND VOTING – LAST DAY Last day of grace period registration and voting in the office of the election authority or at locations designated for this purpose by the election authority. Please contact the election authority to determine the availability of grace period registration and voting in the polling place on Election Day.",
-     "pageUpdated": "Amended on July 9, 2025"
-    },
-    {
-     "field": "earlyVoting.start",
-     "url": "https://effinghamcountyil.gov/wp-content/uploads/2025/07/2026-Election-Campaign-Finance-Calendar.pdf",
-     "quote": "THURSDAY, SEPTEMBER 24, 2026 ... EARLY VOTING – OFFICE OF ELECTION AUTHORITY First day for early voting at the office of the election authority and temporary locations designated by the election authority.",
-     "pageUpdated": "Amended on July 9, 2025"
-    },
-    {
-     "field": "earlyVoting.end",
-     "url": "https://effinghamcountyil.gov/wp-content/uploads/2025/07/2026-Election-Campaign-Finance-Calendar.pdf",
-     "quote": "MONDAY, NOVEMBER 2, 2026 EARLY VOTING – LAST DAY Last day for early voting at the office of the election authority and permanent locations designated by the election authority.",
-     "pageUpdated": "Amended on July 9, 2025"
-    },
-    {
      "field": "earlyVoting.note",
      "url": "https://www.elections.il.gov/Main/CalendarEventsAll.aspx",
      "quote": "10/19/2026 EARLY VOTING – PERMANENT POLLING PLACES GENERAL ELECTION First day for early voting at permanent polling places other than the office of the election authority. These permanent polling places are to be open on holidays, Saturdays, and Sundays.",
@@ -2265,12 +2235,6 @@
      "url": "https://www.elections.il.gov/NewDocDisplay.aspx?%2fM0cs48zOKUVo8NHFkkNhVwyxu6isYxmJ%2bGs6YFATVXPZF6r1FbitENUkm%2fywKrEQArnBU6aOPGahVJq1yE9PG9ksIX8KZJgTJ0G5ME8mTXm2phBu7K0HRGxGCxNtZaL%2b1iPXZ9SlCSPTm68r48uJcHoU8RSIsyrXM3nKvqxLmJAufgl412N%2fQ%3d%3d",
      "quote": "The Illinois Election Code allows voters to apply for a mail ballot up to five days before an election, which this year means through March 12 for the General Primary and October 29 for the General Election.",
      "pageUpdated": "Rev. 8/2026"
-    },
-    {
-     "field": "mail.requestDeadline.rule",
-     "url": "https://effinghamcountyil.gov/wp-content/uploads/2025/07/2026-Election-Campaign-Finance-Calendar.pdf",
-     "quote": "THURSDAY, OCTOBER 29, 2026 VOTE BY MAIL – LAST DAY TO RECEIVE APPLICATION BY MAIL Last day for the election authority to receive applications by mail for a vote by mail ballot from any registered voter within the confines of the United States.",
-     "pageUpdated": "Amended on July 9, 2025"
     },
     {
      "field": "mail.returnDeadline.date",
@@ -2325,10 +2289,28 @@
      "quote": "11/2/2026 VOTE BY MAIL – LAST DAY TO APPLY IN PERSON ... 11/3/2026 GENERAL ELECTION ... POLLS OPEN 6:00 AM - 7:00 PM",
      "pageUpdated": null,
      "addedBy": "skeptic 2026-10-17: the Board's own live calendar, searched 09/01/2026-11/30/2026, confirms the date read from the county copy"
+    },
+    {
+     "field": "registration.mail.deadline",
+     "url": "https://www.elections.il.gov/agencyforms/1%20ELECTION%20CALENDAR/2026%20Abbreviated%20Calendar%207.7.2025%20Amended.pdf",
+     "quote": "October 6, 2026 Close of Voter Registration Last day for regular registration or transfer of registration within the office of the election authority.",
+     "pageUpdated": null
+    },
+    {
+     "field": "registration.mail.deadline",
+     "url": "https://www.elections.il.gov/Downloads/VotingAndRegistrationSystems/PDF/R-19.pdf",
+     "quote": "Mail or deliver this application to your County Clerk or Board of Election Commissioners no later than 28 days before the next election.",
+     "pageUpdated": null
+    },
+    {
+     "field": "registration.sameDay.available",
+     "url": "https://www.elections.il.gov/agencyforms/1%20ELECTION%20CALENDAR/2026%20Abbreviated%20Calendar%207.7.2025%20Amended.pdf",
+     "quote": "October 7, 2026 Grace Period Registration and Voting Begins for the General Election First day of grace period registration and voting at the office of the election authority or at a location designated for this purpose by the election authority.",
+     "pageUpdated": null
     }
    ],
    "notes": "A mailed ballot must be postmarked (or, with no postmark, carry a certification date) on or before November 3 and arrive at the election authority by November 17; a ballot left in a secure drop box (where offered) must be in by 7:00 p.m. on November 3. Mail ballots cannot be dropped off at polling places or early voting sites. The State Board's 2026 Vote-By-Mail FAQ is revision 8/2026, after Watson v. RNC (June 29, 2026), and still gives the November 17 arrival deadline for postmarked ballots. Requests: by mail or online, received by October 29; in person at the election authority through November 2. Mail registration closed October 6 (postmarked by then); online registration closes 11:59 p.m. October 18; after October 6, grace period registration and voting is in person at the election authority. Polls are open 6:00 a.m. to 7:00 p.m. on November 3, and every election authority runs at least one Election Day vote center open to all its voters. Chicago and Cook County may have their own area and precinct registration arrangements. The full 2026 Election & Campaign Finance Calendar cited here is the State Board's own document (amended July 9, 2025), read from the copy posted by the Effingham County Clerk because the Board's site serves it only through a script; its dates match the Board's live calendar page for October 18 and 19 and the Board's 8/2026 FAQ.",
-   "verified": "CONFIRMED: every IL value re-read (ova.elections.il.gov, the State Board's live calendar searched Sept-Nov 2026, the Board's Vote-By-Mail FAQ Rev. 8/2026, the Board's 2026 calendar via Effingham County); Board live-calendar citations added beside the county copy; no corrections. | Second pass 2026-10-17 (resumed skeptic): every quote re-matched against the cited official page or PDF (HTML re-fetched fresh tonight), day offsets recomputed; no value changed."
+   "verified": "CONFIRMED: every IL value re-read (ova.elections.il.gov, the State Board's live calendar searched Sept-Nov 2026, the Board's Vote-By-Mail FAQ Rev. 8/2026, the Board's 2026 calendar via Effingham County); Board live-calendar citations added beside the county copy; no corrections. | Second pass 2026-10-17 (resumed skeptic): every quote re-matched against the cited official page or PDF (HTML re-fetched fresh tonight), day offsets recomputed; no value changed. REVIEW 2026-10-18 (PR #102): the county calendar (effinghamcountyil.gov) is not the State Board's; removed. The mail deadline cites the Board's 2026 abbreviated calendar and form R-19 (both read today); R-19 says 'mail or deliver ... no later than 28 days before', so 'postmarked' is dropped. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "IN": {
    "election": "2026-11-03",
@@ -2513,7 +2495,7 @@
     "allMail": false,
     "requestDeadline": {
      "date": "2026-10-27",
-     "rule": "received"
+     "rule": null
     },
     "returnDeadline": {
      "date": "2026-11-03",
@@ -2595,7 +2577,7 @@
     }
    ],
    "notes": "Mail-ballot return is under a court order, not settled law. The 2025 statute (SB 4, K.S.A. 25-1132(b)) requires mailed ballots to arrive by 7:00 p.m. on Election Day, and the Secretary of State's 2026 General Election Dates sheet still says 'All mail ballots must be received on Election Day. NEW IN 2026'. A Douglas County district court's statewide temporary injunction (July 2026) restored the three-day grace period, and the Court of Appeals denied the Secretary's renewed stay motion for the general election; the Secretary's Advance Voting Information page says ballots postmarked by Election Day count if they arrive by the last postal delivery on Friday, November 6. That page post-dates Watson v. RNC (June 29, 2026) in that it describes post-primary litigation, but it does not mention Watson. Because the merits are still undecided, voters should return ballots in person or to a drop box before polls close (7:00 p.m. Central, 6:00 p.m. in Mountain-time counties, K.S.A. 25-106, unless the county sets other hours). The mail-ballot request deadline (October 27) and the end of in-person advance voting (noon, November 2) are computed from the statute; news reports also give October 27, but no Secretary of State page printing those dates was found. Mail-ballot applications require a Kansas driver's license or nondriver ID number or a copy of photo ID. A 2026 SOS dates sheet variant (2026-General-Election-Dates-2.pdf) omits the 'received on Election Day' line.",
-   "verified": "VERIFIED by skeptic 2026-10-17: re-opened the SOS 10/13 and 10/14 press releases, the Advance Voting Information page (injunction: postmarked by Election Day, arrives by Friday Nov 6; renewed stay denied), the 2026 General Election Dates sheet (rendered: Oct 13, Oct 14, Oct 27, Nov 3) and K.S.A. 25-2311, 25-1122; every value follows. Oct 27 request deadline and noon Nov 2 end are statutory computations, correctly applied.\n RE-CHECKED 2026-10-17 (second resume): spot re-read of key official pages agrees; Watson v. RNC (June 29, 2026) upheld state receipt grace periods, so postmark rules stand. No value changed."
+   "verified": "VERIFIED by skeptic 2026-10-17: re-opened the SOS 10/13 and 10/14 press releases, the Advance Voting Information page (injunction: postmarked by Election Day, arrives by Friday Nov 6; renewed stay denied), the 2026 General Election Dates sheet (rendered: Oct 13, Oct 14, Oct 27, Nov 3) and K.S.A. 25-2311, 25-1122; every value follows. Oct 27 request deadline and noon Nov 2 end are statutory computations, correctly applied.\n RE-CHECKED 2026-10-17 (second resume): spot re-read of key official pages agrees; Watson v. RNC (June 29, 2026) upheld state receipt grace periods, so postmark rules stand. No value changed. REVIEW 2026-10-18 (PR #102): 'received' on the mail-ballot application deadline is dropped: no quoted source says it."
   },
   "KY": {
    "election": "2026-11-03",
@@ -2630,7 +2612,7 @@
     "allMail": false,
     "requestDeadline": {
      "date": "2026-10-20",
-     "rule": "received"
+     "rule": null
     },
     "returnDeadline": {
      "date": "2026-11-03",
@@ -2725,7 +2707,7 @@
     }
    ],
    "notes": "Kentucky's mail-in absentee ballot is not no-excuse: a voter must fit one of the reasons the State Board lists (absence from the county on Election Day and all in-person absentee days, age, disability or illness, military/overseas, student living outside the county, and others). The mail request portal closes at 11:59 p.m. on October 20; after that, a voter (or spouse) with a medical emergency within 14 days of the election may submit a notarized paper application. A mail ballot must reach the county clerk before 6:00 p.m. local time on Election Day; a postmark does not count, so Watson v. RNC (June 29, 2026) does not change Kentucky's rule. The calendar PDF is dated October 6, 2025, before that decision. Polls are open 6 a.m. to 6 p.m. local time. Photo ID is required to vote in person.",
-   "verified": "VERIFIED by skeptic 2026-10-17: re-opened the 2026 Election Calendar PDF (Final Version 10_6_2025), the SBE home page's 2026 General Election Dates box (same dates, added as a source), the absentee eligibility page and the registration page; every value follows (registration 10/5 with 4 p.m. online cut-off, mail portal closes 10/20 11:59 p.m., no-excuse in person 10/29-31, mail ballots received before 6 p.m. 11/3, excuse required).\n RE-CHECKED 2026-10-17 (second resume): spot re-read of key official pages agrees; Watson v. RNC (June 29, 2026) upheld state receipt grace periods, so postmark rules stand. No value changed."
+   "verified": "VERIFIED by skeptic 2026-10-17: re-opened the 2026 Election Calendar PDF (Final Version 10_6_2025), the SBE home page's 2026 General Election Dates box (same dates, added as a source), the absentee eligibility page and the registration page; every value follows (registration 10/5 with 4 p.m. online cut-off, mail portal closes 10/20 11:59 p.m., no-excuse in person 10/29-31, mail ballots received before 6 p.m. 11/3, excuse required).\n RE-CHECKED 2026-10-17 (second resume): spot re-read of key official pages agrees; Watson v. RNC (June 29, 2026) upheld state receipt grace periods, so postmark rules stand. No value changed. REVIEW 2026-10-18 (PR #102): 'received' on the mail-ballot application deadline is dropped: no quoted source says it."
   },
   "LA": {
    "election": "2026-11-03",
@@ -2760,7 +2742,7 @@
     "allMail": false,
     "requestDeadline": {
      "date": "2026-10-30",
-     "rule": "received"
+     "rule": null
     },
     "returnDeadline": {
      "date": "2026-11-02",
@@ -2842,7 +2824,7 @@
     }
    ],
    "notes": "Louisiana's November 3 ballot is unusual: it is the U.S. Senate general election and an open (all-candidate) primary for U.S. Representative; per Act 7 of the 2026 Regular Session, U.S. Representative is not a closed party office for the November and December cycle. Absentee voting by mail requires a qualifying reason (military and overseas voters excepted). Voted absentee ballots must reach the parish Registrar of Voters by 4:30 p.m. on Monday, November 2, the day before Election Day; military, overseas and hospitalized voters' ballots may arrive by Election Day. Receipt-based rule, so Watson v. RNC (June 29, 2026) does not move it. The 4:30 p.m. October 30 request deadline also applies. Polls open 6 a.m.-8 p.m. on November 3. The online registration cut-off time is not stated on the Secretary of State's pages.",
-   "verified": "VERIFIED by skeptic 2026-10-17: re-opened sos.la.gov election-dates (Nov 3 and Dec 12 sections), the voter-registration FAQ, ways-to-vote and the Election Quick Facts PDF (Last-Modified 2026-10-15); every value follows: Oct 5 in person/mail, Oct 13 online, early voting Oct 20-27 excl. Oct 25, request Oct 30 4:30 p.m., received Nov 2 4:30 p.m., excuse required, U.S. House general Dec 12.\n RE-CHECKED 2026-10-17 (second resume): spot re-read of key official pages agrees; Watson v. RNC (June 29, 2026) upheld state receipt grace periods, so postmark rules stand. No value changed."
+   "verified": "VERIFIED by skeptic 2026-10-17: re-opened sos.la.gov election-dates (Nov 3 and Dec 12 sections), the voter-registration FAQ, ways-to-vote and the Election Quick Facts PDF (Last-Modified 2026-10-15); every value follows: Oct 5 in person/mail, Oct 13 online, early voting Oct 20-27 excl. Oct 25, request Oct 30 4:30 p.m., received Nov 2 4:30 p.m., excuse required, U.S. House general Dec 12.\n RE-CHECKED 2026-10-17 (second resume): spot re-read of key official pages agrees; Watson v. RNC (June 29, 2026) upheld state receipt grace periods, so postmark rules stand. No value changed. REVIEW 2026-10-18 (PR #102): 'received' on the mail-ballot application deadline is dropped: no quoted source says it."
   },
   "MA": {
    "election": "2026-11-03",
@@ -2992,7 +2974,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "at an early voting center (October 22-29) or at your polling place on Election Day, in the county where you live, with a document proving where you live"
+     "where": "you can still register to vote by visiting an early voting center during early voting or a polling place on election day in the county where you live"
     }
    },
    "earlyVoting": {
@@ -3088,7 +3070,7 @@
     }
    ],
    "notes": "Mail-in ballots returned by mail must be postmarked on or before Election Day and reach the local board by 10:00 a.m. on Friday, November 13, 2026 (the State Board's 2026 Election Calendar, 'Extended Mail-In Ballot Deadline'); by hand or in a State Board drop box they are due by 8:00 p.m. on November 3. The calendar is dated 2/24/2026, before Watson v. RNC (June 29, 2026); the State Board's 2026 election page and canvassing page, read 2026-10-17, still describe the postmark rule and the 2nd-Friday receipt window and do not mention that decision. Mail-ballot requests: by mail or fax or online for a mailed ballot, received by October 27; for a ballot downloaded online, by October 30; in person at the local board until 8:00 p.m. on November 3. Registration by mail must be received (not postmarked) by 5:00 p.m. October 13. After that, a voter can still register and vote the same day at an early voting center in their county (October 22-29) or at their polling place on Election Day, with a document proving where they live. Polls open 7:00 a.m.-8:00 p.m.",
-   "verified": "VERIFIED by skeptic 2026-10-17: re-opened elections.maryland.gov/elections/2026 (early voting Oct 22-29 7-8, requests received Oct 27/Oct 30, postmarked or drop box by 8 p.m. Nov 3), the early-voting and mail-in pages, the Voting Pocket Guide PDF (registration Oct 13: mail received 5 p.m., online 11:59 p.m., in person 5 p.m.; same-day at early voting or polling place) and the 2026 Election Calendar PDF (Friday Nov 13 10 a.m. extended mail-in deadline); every value follows.\n RE-CHECKED 2026-10-17 (second resume): spot re-read of key official pages agrees; Watson v. RNC (June 29, 2026) upheld state receipt grace periods, so postmark rules stand. No value changed."
+   "verified": "VERIFIED by skeptic 2026-10-17: re-opened elections.maryland.gov/elections/2026 (early voting Oct 22-29 7-8, requests received Oct 27/Oct 30, postmarked or drop box by 8 p.m. Nov 3), the early-voting and mail-in pages, the Voting Pocket Guide PDF (registration Oct 13: mail received 5 p.m., online 11:59 p.m., in person 5 p.m.; same-day at early voting or polling place) and the 2026 Election Calendar PDF (Friday Nov 13 10 a.m. extended mail-in deadline); every value follows.\n RE-CHECKED 2026-10-17 (second resume): spot re-read of key official pages agrees; Watson v. RNC (June 29, 2026) upheld state receipt grace periods, so postmark rules stand. No value changed. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "ME": {
    "election": "2026-11-03",
@@ -3109,7 +3091,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "in person with your municipal registrar or clerk (town office or city hall) through the close of polls on Election Day"
+     "where": "Registering in person: Close of the polls on Election Day"
     }
    },
    "earlyVoting": {
@@ -3231,7 +3213,7 @@
     }
    ],
    "notes": "Any registered voter may vote absentee without a reason. Request a ballot online, by phone, or in writing from the municipal clerk by close of business Thursday, October 29 (the guide's wording is 'received 3 business days before Election Day ... unless special circumstances exist'). Return it to the municipal clerk by mail, in person, or in the municipality's drop box (where one exists) so it is received by 8:00 p.m. on November 3; postmarks do not count, so Watson v. RNC (June 29, 2026) does not change Maine's deadline (the Secretary's October 5, 2026 release restates the receipt rule). The Secretary's USPS advice: return a mailed ballot at least 7 days before Election Day. A voter whose absentee ballot has not arrived can go to the polls on November 3, have it cancelled and vote in person. New as of December 31, 2025, any voter may apply for ongoing absentee voter status. Registration: online until 5:00 p.m. October 13; by mail or third person, received by the town by close of business October 13; at the BMV until October 27; in person with the registrar through the close of polls on Election Day (someone registering in Maine for the first time must show an identity document that also establishes their Maine residence, as the voter guide lists). Polls open between 6:00 and 10:00 a.m. depending on the town and all close at 8:00 p.m. The voter-guide and absentee-guide pages carry no updated date.",
-   "verified": "VERIFIED by skeptic 2026-10-17: re-opened the State of Maine Voter Guide, the absentee guide, the absentee-voting page and the 8/03 and 10/05/2026 releases; every value follows (online 5 p.m. Oct 13, mail received Oct 13, in person through close of polls, in-person absentee Oct 5-29, request by close of business Thursday Oct 29, received by 8 p.m. Nov 3 regardless of postmark). Added a source for the notes' ongoing-absentee-status claim, which the cited pages did not carry.\n RE-CHECKED 2026-10-17 (second resume): spot re-read of key official pages agrees; Watson v. RNC (June 29, 2026) upheld state receipt grace periods, so postmark rules stand. No value changed."
+   "verified": "VERIFIED by skeptic 2026-10-17: re-opened the State of Maine Voter Guide, the absentee guide, the absentee-voting page and the 8/03 and 10/05/2026 releases; every value follows (online 5 p.m. Oct 13, mail received Oct 13, in person through close of polls, in-person absentee Oct 5-29, request by close of business Thursday Oct 29, received by 8 p.m. Nov 3 regardless of postmark). Added a source for the notes' ongoing-absentee-status claim, which the cited pages did not carry.\n RE-CHECKED 2026-10-17 (second resume): spot re-read of key official pages agrees; Watson v. RNC (June 29, 2026) upheld state receipt grace periods, so postmark rules stand. No value changed. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "MI": {
    "election": "2026-11-03",
@@ -3252,7 +3234,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "at your local city or township clerk's office (not at the polling place), with proof of residency, until 8:00 p.m. on Election Day"
+     "where": "Voters in line by 8 p.m. on Election Day have the right to register to vote in person at their local clerk's office"
     }
    },
    "earlyVoting": {
@@ -3348,7 +3330,7 @@
     }
    ],
    "notes": "Mail (absentee) ballots are available to every registered voter. Request online or by mail so the clerk receives it by 5:00 p.m. Friday, October 30 (the Department's page states only the rule, 'the Friday before Election Day'; the date is computed); a voter registered at their current address can apply in person at the clerk's office until 4:00 p.m. Monday, November 2, and a voter who registers or updates their address at the clerk's office can get and cast an absentee ballot there until 8:00 p.m. on Election Day. A ballot must be in the voter's own city or township drop box, or received by their clerk, by 8:00 p.m. on November 3; postmarks do not count. A mail ballot can also be returned at an early voting site before Election Day. The Department's October 6, 2026 release, after Watson v. RNC (June 29, 2026), says the U.S. Supreme Court ruled Michigan voters can continue to cast mail ballots in November, and the October 13 release restates the 8:00 p.m. receipt rule. Registration: online through Monday, October 19 (the release gives no time of day); by mail postmarked at least 15 days before Election Day (October 19, computed from the rule); after that, in person at the clerk's office with proof of residency, up to and on Election Day.",
-   "verified": "VERIFIED by skeptic 2026-10-17: re-opened the Department of State's Oct 6 and Oct 13, 2026 releases (online registration through Oct 19; early voting sites Oct 24-Nov 1, at least 8 hours a day; ballots received by 8 p.m. Election Day) and the register-to-vote, early-in-person-voting and absentee-voting pages (15-day postmark rule, in-person registration through 8 p.m. Election Day, 5 p.m. Friday request deadline = Oct 30, 4 p.m. Monday in person); every value follows.\n RE-CHECKED 2026-10-17 (second resume): spot re-read of key official pages agrees; Watson v. RNC (June 29, 2026) upheld state receipt grace periods, so postmark rules stand. No value changed."
+   "verified": "VERIFIED by skeptic 2026-10-17: re-opened the Department of State's Oct 6 and Oct 13, 2026 releases (online registration through Oct 19; early voting sites Oct 24-Nov 1, at least 8 hours a day; ballots received by 8 p.m. Election Day) and the register-to-vote, early-in-person-voting and absentee-voting pages (15-day postmark rule, in-person registration through 8 p.m. Election Day, 5 p.m. Friday request deadline = Oct 30, 4 p.m. Monday in person); every value follows.\n RE-CHECKED 2026-10-17 (second resume): spot re-read of key official pages agrees; Watson v. RNC (June 29, 2026) upheld state receipt grace periods, so postmark rules stand. No value changed. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "MN": {
    "election": "2026-11-03",
@@ -3369,7 +3351,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "at your polling place on Election Day (with proof of residence), or when voting early by absentee ballot"
+     "where": "You can register on Election Day"
     }
    },
    "earlyVoting": {
@@ -3383,7 +3365,7 @@
     "allMail": false,
     "requestDeadline": {
      "date": "2026-11-02",
-     "rule": "received"
+     "rule": null
     },
     "returnDeadline": {
      "date": "2026-11-03",
@@ -3495,7 +3477,7 @@
     }
    ],
    "notes": "Most of the Secretary of State's web pages (sos.mn.gov) could not be read on 2026-10-17: a scripted request is sent to a Radware bot check and the headless browser could not resolve the host; the 'Vote early by mail' page was read and agrees (ballots mailed from Friday, September 18; last day to return Tuesday, November 3). Dates here come from the Secretary of State's own 2026 PDFs (the 'Vote Early by Absentee Ballot' flyer and the 2026 Voter Participation Toolkit) and from Minnesota Statutes on the Revisor's site; the times of day (5:00 p.m. and 11:59 p.m. on October 13, 8:00 p.m. and 5:00 p.m. on Election Day) and the November 2 request deadline are from statute, with the date computed from the rule. Any voter may vote absentee without a reason; the voter needs a witness (a U.S. citizen at least 18, or a notary). A mailed ballot must be received by 8:00 p.m. on November 3, so postmarks do not count and Watson v. RNC (June 29, 2026) does not change Minnesota's rule; the statute allows return by mail, in person to the county auditor or municipal clerk who sent the ballot (by 5:00 p.m. on Election Day, Minn. Stat. 203B.08 as amended in 2025), or in a designated drop box (Minn. Stat. 203B.082). Some small towns and precincts vote entirely by mail (Minn. Stat. 204B.45): their registered voters are mailed a ballot automatically. Polls close at 8:00 p.m.; a voter in line by then may vote. Minn. Stat. 201.061 subd. 3 (Election Day registration) was amended in the 2026 session (Laws 2026, ch. 97, art. 1, s. 10); the amendment concerns proof of residence (vouching by residential-facility employees) and does not change any date here, but this was not checked against the Secretary's current pages. The Secretary of State recommends applying for a mail ballot well before the legal deadline: the 'Vote early by mail' page says 'Recommended you apply before: Tuesday, October 20', while the printed 2026 flyer says 'Recommended you apply before Friday, October 2'; neither is a deadline.",
-   "verified": "VERIFIED 2026-10-17: researched this session from official sources (see sources).RE-CHECKED 2026-10-17 (resume): re-opened Minn. Stat. 201.061, 203B.04, 203B.08 (5:00 p.m. in-person return, 8:00 p.m. receipt; 2025 c 39 amendments), 203B.085 and the SOS flyer/toolkit PDFs; read SOS 'Vote early by mail' page (Sept 18 / apply before Oct 20 recommended / last day to return Nov 3) and added it as a source; other sos.mn.gov pages still behind Radware bot wall. No value changed.\n RE-CHECKED 2026-10-17 (second resume): spot re-read of key official pages agrees; Watson v. RNC (June 29, 2026) upheld state receipt grace periods, so postmark rules stand. No value changed."
+   "verified": "VERIFIED 2026-10-17: researched this session from official sources (see sources).RE-CHECKED 2026-10-17 (resume): re-opened Minn. Stat. 201.061, 203B.04, 203B.08 (5:00 p.m. in-person return, 8:00 p.m. receipt; 2025 c 39 amendments), 203B.085 and the SOS flyer/toolkit PDFs; read SOS 'Vote early by mail' page (Sept 18 / apply before Oct 20 recommended / last day to return Nov 3) and added it as a source; other sos.mn.gov pages still behind Radware bot wall. No value changed.\n RE-CHECKED 2026-10-17 (second resume): spot re-read of key official pages agrees; Watson v. RNC (June 29, 2026) upheld state receipt grace periods, so postmark rules stand. No value changed. REVIEW 2026-10-18 (PR #102): 'received' on the mail-ballot application deadline is dropped: no quoted source says it. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "MO": {
    "election": "2026-11-03",
@@ -3975,7 +3957,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "in person at the location designated by the county election administrator (late registration, through 8:00 p.m. on Election Day); late registrants must obtain their ballot in person there"
+     "where": "8:00 p.m.: Deadline to register or change voter information and vote in this election. Late registrants must obtain their ballot in person from the location designated by the county election administrator"
     }
    },
    "earlyVoting": {
@@ -3989,7 +3971,7 @@
     "allMail": false,
     "requestDeadline": {
      "date": "2026-11-02",
-     "rule": "received"
+     "rule": null
     },
     "returnDeadline": {
      "date": "2026-11-03",
@@ -4083,7 +4065,7 @@
     }
    ],
    "notes": "Absentee ballots must be received by the county election office, or dropped off at a polling place in the voter's county, before 8:00 p.m. on Election Day; a postmark does not count. The Secretary of State advises mailing at least one week before Election Day. Watson v. RNC (June 29, 2026) does not change Montana's receipt rule. Absentee ballots were mailed to voters on the absentee list on October 9. A voter prevented from voting at the polls by an illness or health emergency arising after 5:00 p.m. Friday, October 30, may request a special absentee ballot until the polls close. Polls are open 7:00 a.m. to 8:00 p.m. (polling places with fewer than 400 net registered voters must open by noon). A court order bars Montana from implementing SB 490 (statewide registration and voting on the Saturday before the election, October 31); the Secretary of State's online calendar still lists 'Election Offices Open (8:00 a.m. to 5:00 p.m.)' on October 31 beside that notice, so voters should confirm Saturday hours with their county; because of the order, late registration remains available until 8:00 p.m. on Election Day rather than closing at noon. The Secretary of State's absentee page (votemt.gov/absentee-ballot) asks voters to add their birth year on the return envelope but says the birth-year requirement is not currently enforced. Montana has no online voter registration; the application must be returned to the county election administrator. The 2026 start date for in-person absentee voting is read from the calendar's grouping of 30-day items under 'Monday, October 5*'; counties set office hours.",
-   "verified": "SKEPTIC 2026-10-17 (third pass, sources re-fetched into research/sk8): MT confirmed: votemt.gov calendar event details (Oct 5 5:00 pm close, Oct 9 ballots sent, Oct 31 SB 490 notice), 2026 Federal Election Calendar PDF (Last-Modified 2026-10-15; registration until 8 p.m. Election Day by court order), MCA 13-13-201/211. No change."
+   "verified": "SKEPTIC 2026-10-17 (third pass, sources re-fetched into research/sk8): MT confirmed: votemt.gov calendar event details (Oct 5 5:00 pm close, Oct 9 ballots sent, Oct 31 SB 490 notice), 2026 Federal Election Calendar PDF (Last-Modified 2026-10-15; registration until 8 p.m. Election Day by court order), MCA 13-13-201/211. No change. REVIEW 2026-10-18 (PR #102): 'received' on the mail-ballot application deadline is dropped: no quoted source says it. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "NC": {
    "election": "2026-11-03",
@@ -4104,7 +4086,8 @@
     },
     "sameDay": {
      "available": true,
-     "where": "at early voting sites in the voter's county during the early voting period (October 15-31); not on Election Day for most voters"
+     "where": "Although same-day registration is available for voters during early voting, same-day registration is not available for most voters on Election Day",
+     "through": "2026-10-31"
     }
    },
    "earlyVoting": {
@@ -4235,10 +4218,22 @@
      "quote": "According to state law, only you, or your near relative or legal guardian may mail or hand-deliver the Return Envelope. ... If you need assistance returning your ballot due to disability, these restrictions do not apply, and you may ask any person you choose to return your ballot.",
      "pageUpdated": null,
      "addedBy": "skeptic 2026-10-17"
+    },
+    {
+     "field": "registration.sameDay.through",
+     "url": "https://www.ncsbe.gov/voting/vote-early-person",
+     "quote": "Individuals who are not registered to vote in a county may register and immediately vote at that same site. This process is called “same-day registration.” Find more information at Register in Person During Early Voting. Although same-day registration is available for voters during early voting, same-day registration is not available for most voters on Election Day.",
+     "pageUpdated": null
+    },
+    {
+     "field": "registration.sameDay.through",
+     "url": "https://www.ncsbe.gov/voting/vote-early-person",
+     "quote": "In-person early voting period: Starts: Thursday, Oct. 15. Ends: 3 p.m. Saturday, Oct. 31.",
+     "pageUpdated": null
     }
    ],
    "notes": "A mailed absentee ballot must be received by the county board of elections by 7:30 p.m. on Election Day (November 3); the State Board says the old three-day postmark grace period no longer applies. Ballots can also be handed in at the county board office or at an early voting site in the county while it is open, but not at an Election Day polling place. Only the voter, a near relative or a legal guardian may return the ballot (voters needing help because of a disability may choose anyone). Return postage for the 2026 general election is $1.98. Absentee ballots began going out September 4. Same-day registration is available only at early voting sites during early voting (October 15 to 3:00 p.m. October 31); a voter can also update a name or address within the county there. Election Day polls are open 6:30 a.m. to 7:30 p.m. and voters are asked for photo ID. Online registration is through the DMV for existing DMV customers. Registration and absentee deadlines differ for military and overseas voters.",
-   "verified": "SKEPTIC 2026-10-17: NC confirmed against ncsbe.gov (voter dates & deadlines calendar, upcoming-election, registration deadlines, vote early in person, vote by mail and its detailed-instructions Return tab read from the hidden tab text); deadlines Oct 9 (25 days, postmarked), Oct 15-31 (3 pm), Oct 20 5 pm request, Nov 3 7:30 pm receipt all recomputed; no value changed, sources added for the postage and who-may-return notes."
+   "verified": "SKEPTIC 2026-10-17: NC confirmed against ncsbe.gov (voter dates & deadlines calendar, upcoming-election, registration deadlines, vote early in person, vote by mail and its detailed-instructions Return tab read from the hidden tab text); deadlines Oct 9 (25 days, postmarked), Oct 15-31 (3 pm), Oct 20 5 pm request, Nov 3 7:30 pm receipt all recomputed; no value changed, sources added for the postage and who-may-return notes. REVIEW 2026-10-18 (PR #102): registration.sameDay.through October 31, the last day of early voting, the only time NCSBE offers same-day registration to most voters. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "ND": {
    "election": "2026-11-03",
@@ -4499,7 +4494,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "at the voter's polling place on Election Day (must be in line by the time polls close)"
+     "where": "You can register to vote at your local polling location on election day. You must be in line at your polling place by the time polls close to be able to register and vote"
     }
    },
    "earlyVoting": {
@@ -4513,7 +4508,7 @@
     "allMail": false,
     "requestDeadline": {
      "date": "2026-11-02",
-     "rule": "received"
+     "rule": null
     },
     "returnDeadline": {
      "date": "2026-11-03",
@@ -4589,7 +4584,7 @@
     }
    ],
    "notes": "Absentee ballots require one of the listed reasons (out of town, religious observance, disability or illness, employment or caregiving commitment during all polling hours, certain confinement, Address Confidentiality Program or domestic-violence protective order, or a National Weather Service winter storm warning for Election Day). The application must be returned with the required proof of identity. Ballots returned by mail or by a delivery agent must be received by the town/city/ward clerk by 5:00 p.m. on Election Day; a postmark does not count, and Watson v. RNC (June 29, 2026), which let states count ballots that arrive after Election Day, does not change New Hampshire's own receipt rule. A voter returning the ballot in person must do so by 5:00 p.m. Monday, November 2. The Secretary of State's absentee page notes that the Postal Service recommends mailing the ballot at least one week before the election, so voters relying on the mail should request a ballot more than two weeks before Election Day. A request for a ballot to be mailed must reach the clerk by 12:00 p.m. (noon) on Monday, November 2. Before-election registration closes at each town's supervisors-of-the-checklist session between October 21 and October 28, so no single statewide date is given. Voters unable to register in person for a qualified reason may register by absentee; a mailed request for an absentee registration application must be received by the local clerk by noon the day before the election. New Hampshire has no online voter registration. Polling hours are set locally (RSA 659:4). On October 2, 2026, a federal court order changed how student ID cards may be used as proof of identity when registering; see the Secretary of State's Register to Vote page.",
-   "verified": "SKEPTIC 2026-10-17 (third pass, sources re-fetched into research/sk8): NH confirmed: SOS register-vote (Oct 2 student-ID court notice), registration-deadlines and absentee pages, 2026-2027 political calendar (sessions Oct 21-28; noon Nov 2 mail request; 5 pm Nov 3 receipt). No change."
+   "verified": "SKEPTIC 2026-10-17 (third pass, sources re-fetched into research/sk8): NH confirmed: SOS register-vote (Oct 2 student-ID court notice), registration-deadlines and absentee pages, 2026-2027 political calendar (sessions Oct 21-28; noon Nov 2 mail request; 5 pm Nov 3 receipt). No change. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary. REVIEW 2026-10-18 (PR #102): 'received' on the mail-ballot application deadline is dropped: no quoted source says it."
   },
   "NJ": {
    "election": "2026-11-03",
@@ -4739,7 +4734,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "at County Clerk offices and early voting sites during early voting (October 6-31), and at all voting locations on Election Day"
+     "where": "You can register to vote or update your existing registration and vote on the same day at your County Clerk's Office ... Same Day Registration is available at all voting locations"
     }
    },
    "earlyVoting": {
@@ -4835,7 +4830,7 @@
     }
    ],
    "notes": "Mailed (absentee) ballots must be received by 7:00 p.m. on Election Day; a postmark does not count. They can also be dropped off at the County Clerk's office, any early voting or Election Day location in the voter's county, a mobile voting location, or an official drop box. The Secretary of State's advisory of October 13, 2026 (after Watson v. RNC) restates the 7:00 p.m. receipt rule. Mailed ballots began going out October 6. Only the voter, an immediate family member, or a person with whom the voter has a continuing personal relationship may deliver the voter's ballot. A voter who requested a mailed ballot but has not returned it can still vote in person by signing an affidavit cancelling the mailed ballot. The Secretary of State's pages say the mail-ballot application deadline is October 20 but not whether it is a receipt or postmark deadline; the dates sheet's dates are printed as images in the PDF and were read from a rendering of it (re-checked 2026-10-17: OCT 6, OCT 17, OCT 20, OCT 31, NOV 3); every date except the October 31 end of early voting is also in the text of the Secretary of State's October 13 advisory. Polls are open 7:00 a.m. to 7:00 p.m.",
-   "verified": "SKEPTIC 2026-10-17 (third pass, sources re-fetched into research/sk8): NM confirmed: rendered the SOS Important Dates PDF (OCT 6/17/20/31, NOV 3) and read the Oct 13 Voter Information Advisory and same-day/absentee pages. No change."
+   "verified": "SKEPTIC 2026-10-17 (third pass, sources re-fetched into research/sk8): NM confirmed: rendered the SOS Important Dates PDF (OCT 6/17/20/31, NOV 3) and read the Oct 13 Voter Information Advisory and same-day/absentee pages. No change. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "NV": {
    "election": "2026-11-03",
@@ -4843,8 +4838,8 @@
     "none": false,
     "online": {
      "available": true,
-     "deadline": "2026-10-20",
-     "time": "11:59 pm"
+     "deadline": "2026-11-03",
+     "time": null
     },
     "mail": {
      "deadline": "2026-10-06",
@@ -4856,8 +4851,9 @@
     },
     "sameDay": {
      "available": true,
-     "where": "in person at any early voting site (October 17-30) or Election Day polling place in the voter's county; or online October 21-November 3, after which the voter must vote in person (provisional ballot) with a Nevada DMV license or ID"
-    }
+     "where": "an elector may register to vote in person at any polling place for early voting by personal appearance ... an elector may register to vote in person on the day of the election at any polling place"
+    },
+    "mailedBallotBy": "2026-10-20"
    },
    "earlyVoting": {
     "available": true,
@@ -4897,40 +4893,16 @@
      "pageUpdated": "Rev. 9/9/2026"
     },
     {
-     "field": "registration.online.deadline",
+     "field": "registration.mailedBallotBy",
      "url": "https://www.leg.state.nv.us/NRS/NRS-293.html#NRS293Sec5837",
      "quote": "NRS 293.5837 ... 2. If an elector submits an application to register to vote pursuant to this section less than 14 days before the election, the elector may vote only in person: (a) During the period for early voting, at any polling place for early voting by personal appearance in the county or city, as applicable, in which the elector is eligible to vote; or (b) On the day of the election",
      "pageUpdated": "Rev. 9/9/2026"
-    },
-    {
-     "field": "registration.online.deadline",
-     "url": "https://www.clarkcountynv.gov/adobe/assets/urn:aaid:aem:0bc2af3f-1bc5-4789-9f0c-8f2cfc2b3404/original/as/Notice-RegClose-26G.pdf",
-     "quote": "A qualified elector who possesses a Nevada driver's license or DMV-issued identification Card, and wishes to receive a mail ballot, may register or update his/her voter registration information online until 11:59 p.m., on October 20, 2026, exclusively at www.RegistertoVote.NV.gov, (Nevada Secretary of State website). Those qualified electors who register online from October 21, 2026, to November 3, 2026, will not receive a mail ballot, must vote in person at an Early Voting site or on Election Day at a Vote Center, may only vote a provisional ballot",
-     "pageUpdated": "Dated September 15, 2026 (Clark County Registrar of Voters' statutory notice; PDF Last-Modified 2026-10-07)"
-    },
-    {
-     "field": "registration.online.time",
-     "url": "https://www.clarkcountynv.gov/adobe/assets/urn:aaid:aem:0bc2af3f-1bc5-4789-9f0c-8f2cfc2b3404/original/as/Notice-RegClose-26G.pdf",
-     "quote": "may register or update his/her voter registration information online until 11:59 p.m., on October 20, 2026",
-     "pageUpdated": "Dated September 15, 2026 (Clark County Registrar of Voters' statutory notice; PDF Last-Modified 2026-10-07)"
     },
     {
      "field": "registration.sameDay.available",
      "url": "https://www.leg.state.nv.us/NRS/NRS-293.html#NRS293Sec560",
      "quote": "(3) By computer using the system established by the Secretary of State pursuant to NRS 293.671, is the day of the primary election, presidential preference primary election or general election.",
      "pageUpdated": "Rev. 9/9/2026"
-    },
-    {
-     "field": "registration.inPerson.deadline",
-     "url": "https://www.clarkcountynv.gov/adobe/assets/urn:aaid:aem:0bc2af3f-1bc5-4789-9f0c-8f2cfc2b3404/original/as/Notice-RegClose-26G.pdf",
-     "quote": "Through the mail, government agencies, or in person voter registration application to: Clark County Election Center ... Tuesday, October 6, 2026 (Deadline)",
-     "pageUpdated": "Dated September 15, 2026 (Clark County Registrar of Voters' statutory notice; PDF Last-Modified 2026-10-07)"
-    },
-    {
-     "field": "earlyVoting.start",
-     "url": "https://www.clarkcountynv.gov/adobe/assets/urn:aaid:aem:0bc2af3f-1bc5-4789-9f0c-8f2cfc2b3404/original/as/Notice-RegClose-26G.pdf",
-     "quote": "Same Day Registration (In-Person), must have a valid Nevada DMV issued ID, Driver's License, or Nevada Tribal Identification Card (per NRS 232.006) October 17-November 3 at all Early Voting sites, during voting hours, and on Election Day at all Vote Centers, by close of polls",
-     "pageUpdated": "Dated September 15, 2026 (Clark County Registrar of Voters' statutory notice; PDF Last-Modified 2026-10-07)"
     },
     {
      "field": "registration.sameDay.available",
@@ -4979,10 +4951,16 @@
      "url": "https://www.leg.state.nv.us/NRS/NRS-293.html#NRS293Sec273",
      "quote": "NRS 293.273 ... 1. Except as otherwise provided in NRS 293.305, at all elections held under the provisions of this title, the polls must open at 7 a.m. and close at 7 p.m.",
      "pageUpdated": "Rev. 9/9/2026"
+    },
+    {
+     "field": "registration.online.deadline",
+     "url": "https://www.leg.state.nv.us/NRS/NRS-293.html#NRS293Sec560",
+     "quote": "(3) By computer using the system established by the Secretary of State pursuant to NRS 293.671, is the day of the primary election, presidential preference primary election or general election.",
+     "pageUpdated": null
     }
    ],
    "notes": "The Nevada Secretary of State's websites (nvsos.gov, registertovote.nv.gov) refused every automated request on 2026-10-17 (Incapsula block; connection closed), so no Secretary of State page could be read. Values come from the Nevada Revised Statutes on the Legislature's site (revised 9/9/2026), with 2026 dates computed from the statutory rules (fourth Tuesday before November 3 = October 6; third Saturday before = October 17; Friday before = October 30; 14 days before = October 20; fourth day after = Saturday, November 7), and they agree with the Clark County Registrar of Voters' published notice of close of registration for the 2026 general election (dated September 15, 2026), which gives October 6, October 20 (11:59 p.m., online) and October 17 for the start of early voting. Verify against nvsos.gov before publishing. Online registration: the statute keeps online registration open through Election Day (NRS 293.560), but anyone who registers or updates online fewer than 14 days before the election (from October 21) gets no mail ballot and can vote only in person, at an early voting site or on Election Day, on a provisional ballot, showing a Nevada DMV license or ID (NRS 293.5837; Clark County notice). So the online deadline shown is October 20, 11:59 p.m.; October 21-November 3 online registration is part of same-day registration. Nevada mails a ballot to every active registered voter (unless they opted out at least 60 days before the election) and to anyone who registers or updates their registration by 14 days before the election (October 20); there is no application deadline for that ballot, so requestDeadline is null. People who register through same-day registration do not receive a mail ballot. A mailed ballot must be postmarked on or before November 3 and received by the county clerk by 5:00 p.m. on November 7; a ballot with an unreadable postmark counts if received by 5:00 p.m. on the third day after the election (November 6). Ballots delivered by hand or to a drop box (every polling place, including early voting sites, has one) must arrive before polls close at 7:00 p.m. on Election Day (NRS 293.273). Watson v. RNC (June 29, 2026) held that the federal Election Day statutes do not bar counting ballots postmarked by Election Day and received afterward, so Nevada's post-Election-Day receipt deadline stands. Early voting sites and hours are set by each county clerk.",
-   "verified": "SKEPTIC 2026-10-17 (third pass, sources re-fetched into research/sk8): NV confirmed against NRS 293 (Rev. 9/9/2026: 293.560, .3568, .269911, .269921 4th-day receipt, .5837) and the Clark County close-of-registration notice; nvsos.gov still refuses automated requests (Incapsula), so no SOS page was read. No change."
+   "verified": "SKEPTIC 2026-10-17 (third pass, sources re-fetched into research/sk8): NV confirmed against NRS 293 (Rev. 9/9/2026: 293.560, .3568, .269911, .269921 4th-day receipt, .5837) and the Clark County close-of-registration notice; nvsos.gov still refuses automated requests (Incapsula), so no SOS page was read. No change. REVIEW 2026-10-18 (PR #102): online registration runs through Election Day (NRS 293.560(1)(a)(3)); October 20 is the last day to register and still be mailed a ballot (NRS 293.5837(2)), now registration.mailedBallotBy. Clark County's notice is a county's, not the state's: removed; every value it carried is also the statute's. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "NY": {
    "election": "2026-11-03",
@@ -5977,7 +5955,7 @@
     "allMail": false,
     "requestDeadline": {
      "date": "2026-10-23",
-     "rule": "received"
+     "rule": null
     },
     "returnDeadline": {
      "date": "2026-11-03",
@@ -6077,7 +6055,7 @@
     }
    ],
    "notes": "Absentee voting is by qualifying reason only (for example a physical disability, age 65 or older, or work, caregiving or travel that prevents voting during the whole early voting period and on Election Day); early voting is open to every voter. An absentee application must be returned to the county voter registration and elections office by 5:00 p.m. Friday, October 23, and the ballot must be RECEIVED by that office by 7:00 p.m. on Election Day; the Commission advises mailing it at least a week before. The voter's oath on the return envelope must be signed and witnessed by anyone 18 or older, and Photo ID is required to return a ballot in person. The October 7 release is after Watson v. RNC and states the receipt deadline. Registration closed October 4 online and by fax or email (received), October 5 by mail (postmarked); most county offices closed at 5:00 p.m. October 2 for in-person registration. No same-day registration: a voter must be registered at least 30 days before the election. Election results begin to appear after 7:00 p.m. on Election Day.",
-   "verified": "SKEPTIC 2026-10-17: SC confirmed against scvotes.gov (2026 prep page, Sept 30 and Oct 7/14 releases, early-voting page): Oct 4 online/fax/email (received), Oct 5 mail (postmarked), most offices closed Oct 2 in person; early voting Oct 19-31; excuse-only absentee, application by 5 pm Oct 23, ballot received by 7 pm Nov 3; no value changed."
+   "verified": "SKEPTIC 2026-10-17: SC confirmed against scvotes.gov (2026 prep page, Sept 30 and Oct 7/14 releases, early-voting page): Oct 4 online/fax/email (received), Oct 5 mail (postmarked), most offices closed Oct 2 in person; early voting Oct 19-31; excuse-only absentee, application by 5 pm Oct 23, ballot received by 7 pm Nov 3; no value changed. REVIEW 2026-10-18 (PR #102): 'received' on the mail-ballot application deadline is dropped: no quoted source says it."
   },
   "SD": {
    "election": "2026-11-03",
@@ -6090,7 +6068,7 @@
     },
     "mail": {
      "deadline": "2026-10-19",
-     "rule": "received"
+     "rule": null
     },
     "inPerson": {
      "deadline": "2026-10-19",
@@ -6112,7 +6090,7 @@
     "allMail": false,
     "requestDeadline": {
      "date": "2026-11-02",
-     "rule": "received"
+     "rule": null
     },
     "returnDeadline": {
      "date": "2026-11-03",
@@ -6224,7 +6202,7 @@
     }
    ],
    "notes": "Any registered voter may vote absentee (SDCL 12-19-1). Mail the original signed application to the County Auditor; applications by fax or email are accepted only from military and overseas voters. A request must be made before 5:00 p.m. local time on Monday, November 2, and the voted ballot must be RECEIVED by the county auditor before the polls close at 7:00 p.m. local time on November 3; the Secretary of State's FAQ says a ballot postmarked by Election Day but received after the polls close is not counted. A voter confined by sickness or disability can get a ballot through an authorized messenger, applied for before 3:00 p.m. on Election Day. Registration closes at 5:00 p.m. local time on October 19 (received by the County Auditor, with an original signature; no fax or email). The Secretary of State describes no online registration, so online is marked unavailable from its instructions. SB 175 (effective March 26, 2026): a new voter who does not provide documentary proof of citizenship at registration is registered as a federal-only voter. South Dakota spans two time zones, so \"local time\" differs by county.",
-   "verified": "SKEPTIC 2026-10-17: SD confirmed against sdsos.gov (2026 Election Information page, July 14 election calendar PDF, register, absentee and FAQ pages) and SDCL 12-19-1: Oct 19 5 pm registration (received, no online), absentee from Sept 18 to 5 pm Nov 2, ballot received before polls close 7 pm Nov 3; no value changed."
+   "verified": "SKEPTIC 2026-10-17: SD confirmed against sdsos.gov (2026 Election Information page, July 14 election calendar PDF, register, absentee and FAQ pages) and SDCL 12-19-1: Oct 19 5 pm registration (received, no online), absentee from Sept 18 to 5 pm Nov 2, ballot received before polls close 7 pm Nov 3; no value changed. REVIEW 2026-10-18 (PR #102): 'received' on the mail-ballot application deadline is dropped: no quoted source says it. REVIEW 2026-10-18 (PR #102): 'received' on the mail registration deadline is dropped: no quoted source says it."
   },
   "TN": {
    "election": "2026-11-03",
@@ -6546,7 +6524,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "in person at early voting locations and at Election Day polling locations (vote centers), with two forms of valid ID; the voter casts a provisional ballot"
+     "where": "If you miss the deadline, you may still register in person at an early voting location or on Election Day with two forms of identification"
     }
    },
    "earlyVoting": {
@@ -6678,7 +6656,7 @@
     }
    ],
    "notes": "Utah votes by mail: every active registered voter is mailed a ballot automatically, between October 13 and October 27. A mailed ballot must be RECEIVED by the county clerk by 8:00 p.m. on Election Day, November 3; the Lieutenant Governor's pamphlet says ballots received after November 3 are not counted regardless of postmark (this is Utah's own receipt deadline and is unaffected by Watson v. RNC). Drop boxes close at 8:00 p.m. on November 3. The voter must sign the declaration on the return envelope. The \"request ballot by October 27, 5 p.m.\" deadline is for a voter who needs to request a ballot (it does not apply to military and overseas voters); the pages read do not say whether that request must be received or postmarked. Registration by 5:00 p.m. October 23 (online or received by the clerk) gets a mailed ballot; after that a voter can register in person at early voting or on Election Day with ID and proof of residence, on a provisional ballot. Early voting dates and hours vary by county. Polls are open 7 a.m. to 8 p.m.",
-   "verified": "SKEPTIC 2026-10-17: UT confirmed against vote.utah.gov (current election page, registration and mail pages, the Sept 29 voter information pamphlet and the 2026 election calendar PDF): registration by 5 pm Oct 23 (online or received), same-day in person with ID and proof of residence (provisional), all-mail with ballots from Oct 13, request by 5 pm Oct 27, ballot received by 8 pm Nov 3 regardless of postmark, early voting Oct 20-30 (county hours vary); no value changed."
+   "verified": "SKEPTIC 2026-10-17: UT confirmed against vote.utah.gov (current election page, registration and mail pages, the Sept 29 voter information pamphlet and the 2026 election calendar PDF): registration by 5 pm Oct 23 (online or received), same-day in person with ID and proof of residence (provisional), all-mail with ballots from Oct 13, request by 5 pm Oct 27, ballot received by 8 pm Nov 3 regardless of postmark, early voting Oct 20-30 (county hours vary); no value changed. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "VA": {
    "election": "2026-11-03",
@@ -6699,7 +6677,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "in person at the local registrar's office (and on Election Day), from October 24 through Election Day; anyone registering and voting at the same time casts a provisional ballot"
+     "where": "Oct. 24 – Same-day registration begins. Anyone registering and voting at the same time will have to cast a provisional ballot"
     }
    },
    "earlyVoting": {
@@ -6831,7 +6809,7 @@
     }
    ],
    "notes": "Any registered voter may vote absentee by mail without a reason; the request must be RECEIVED by the local registrar by 5:00 p.m. Friday, October 23. A mailed ballot counts if it is postmarked on or before November 3 and received by the general registrar by noon on Friday, November 6; a ballot that arrives after Election Day without a postmark is not counted, so the Department advises asking for a postmark at a post office counter. Ballots can also be returned in person to the registrar's office, at designated drop-off locations during early voting, or at polling places on Election Day (by 7:00 p.m.). The Department's 2026 pages give this postmark rule; the news release giving the dates was last modified September 11, 2026, after Watson v. RNC, which upheld post-Election-Day receipt deadlines. A voter hospitalized or with a family emergency after the deadline can request an emergency absentee ballot until 2:00 p.m. on November 2. Registration closes October 23 (online, mailed applications postmarked, delivered applications received by 5:00 p.m.); from October 24 through Election Day a voter can register in person and vote a provisional ballot. On the ballot: U.S. Senate, all 11 House seats, a House of Delegates District 20 special election, local offices and three proposed constitutional amendments.",
-   "verified": "SKEPTIC 2026-10-17: VA confirmed against elections.virginia.gov (upcoming-elections calendar, how-to-register, absentee page, Sept 11 2026 release): registration Oct 23 (online; mailed postmarked; delivered received by 5 pm), same-day provisional from Oct 24, early voting Sept 18 to 5 pm Oct 31 with Oct 18/24/25/31 weekend days, no-excuse absentee requested by 5 pm Oct 23 (received), mailed ballot postmarked by Nov 3 and received by noon Nov 6; ballot contents confirmed from the release; no value changed."
+   "verified": "SKEPTIC 2026-10-17: VA confirmed against elections.virginia.gov (upcoming-elections calendar, how-to-register, absentee page, Sept 11 2026 release): registration Oct 23 (online; mailed postmarked; delivered received by 5 pm), same-day provisional from Oct 24, early voting Sept 18 to 5 pm Oct 31 with Oct 18/24/25/31 weekend days, no-excuse absentee requested by 5 pm Oct 23 (received), mailed ballot postmarked by Nov 3 and received by noon Nov 6; ballot contents confirmed from the release; no value changed. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "VI": {
    "election": "2026-11-03",
@@ -6999,7 +6977,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "at the polling place during polling hours on Election Day, and at the town or city clerk's office during business hours on any day before"
+     "where": "eligible persons may register to vote on any day up to and including the day of the election"
     }
    },
    "earlyVoting": {
@@ -7013,7 +6991,7 @@
     "allMail": true,
     "requestDeadline": {
      "date": "2026-11-02",
-     "rule": "received"
+     "rule": null
     },
     "returnDeadline": {
      "date": "2026-11-03",
@@ -7122,10 +7100,16 @@
      "url": "https://sos.vermont.gov/elections/voters/registration",
      "quote": "If you are registering to vote in Vermont for the first time by mail or online, you must include a photocopy of an acceptable form of ID.",
      "pageUpdated": null
+    },
+    {
+     "field": "mail.returnDeadline.rule",
+     "url": "https://legislature.vermont.gov/statutes/section/17/051/02543",
+     "quote": "(d)(1) All early voter absentee ballots returned as follows shall be counted: ... (C) by mail to the town clerk’s office before the close of the polls on the day of the election; and (D) by hand delivery to the presiding officer at the voter’s polling place before the closing of the polls at 7:00 p.m.",
+     "pageUpdated": null
     }
    ],
    "notes": "Vermont mails a general-election ballot to every active registered voter automatically (the October 7 release says they have been mailed). A ballot must be RECEIVED: at the town or city clerk's office before it closes on Monday, November 2 (by mail or in person; the Secretary of State recommends mailing by October 20), in an official drop box in the voter's town before Election Day, or brought to the polling place before 7:00 p.m. on November 3. Polls close at 7:00 p.m. and open between 5 and 10 a.m. depending on the town. A voter who comes to the polls without the mailed ballot signs an Affidavit of No Ballot Cast and gets a new one. The clerk notifies a voter whose returned ballot is defective (for example, an unsigned certificate) so it can be fixed. Requests for an early or absentee ballot (for voters not mailed one, or a replacement) are taken until 5:00 p.m. or the clerk's closing on November 2; a sick or disabled voter can have a ballot delivered on Election Day by two justices of the peace if requested by 5 p.m. the day before. There is no registration deadline: a person can register online, at the clerk's office, or at the polls on Election Day; first-time registrants by mail or online must include a copy of an acceptable ID and take the voter's oath. Mail registration deadline is null because there is none.",
-   "verified": "SKEPTIC 2026-10-17: VT confirmed against sos.vermont.gov (registration and early/absentee pages, Oct 7 ballot-mailing release) and the July 1 2026 elections calendar PDF v1.2: no registration deadline (online, clerk or at the polls), ballots mailed to all active voters, early voting from Sept 19 to the clerk's close Nov 2, requests to 5 pm Nov 2, ballot received by the clerk before close Nov 2 or at the polls by 7 pm Nov 3; no value changed (quote misses were encoding of dashes in the PDF)."
+   "verified": "SKEPTIC 2026-10-17: VT confirmed against sos.vermont.gov (registration and early/absentee pages, Oct 7 ballot-mailing release) and the July 1 2026 elections calendar PDF v1.2: no registration deadline (online, clerk or at the polls), ballots mailed to all active voters, early voting from Sept 19 to the clerk's close Nov 2, requests to 5 pm Nov 2, ballot received by the clerk before close Nov 2 or at the polls by 7 pm Nov 3; no value changed (quote misses were encoding of dashes in the PDF). REVIEW 2026-10-18 (PR #102): 17 V.S.A. 2543(d)(1) cited for the receipt rule of mailed ballots (read today). REVIEW 2026-10-18 (PR #102): 'received' on the mail-ballot application deadline is dropped: no quoted source says it. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "WA": {
    "election": "2026-11-03",
@@ -7146,7 +7130,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "in person at a county elections office or voting center, until 8:00 p.m. on Election Day"
+     "where": "You can register in person until 8 p.m. on Election Day to participate in that election"
     }
    },
    "earlyVoting": {
@@ -7266,7 +7250,7 @@
     }
    ],
    "notes": "Washington votes by mail: every registered voter is mailed a ballot (by October 16), and no request is needed, so requestDeadline is null. Return the ballot by 8:00 p.m. on November 3 in an official drop box (guaranteed on time), in person at a county elections office or voting center, or by mail postmarked on or before Election Day; the Secretary of State recommends mailing more than a week early because USPS may not postmark a ballot on the day it is collected (a post office clerk can hand-stamp it). After Watson v. RNC the Secretary of State says Washington's rule is unchanged: a mailed ballot received after Election Day counts if postmarked by Election Day. The pages read do not state the last day such a ballot can arrive, so receivedBy is null (general elections are certified 21 days after Election Day). The voter must sign the return envelope; the county compares the signature with the registration record. Registration online or by mail must be received by Monday, October 26; after that a person can register in person at a county elections office or voting center until 8:00 p.m. on Election Day. A person registering without ID can do so, but the ballot is not counted until a qualifying ID is given to the county.",
-   "verified": "SKEPTIC 2026-10-17: WA confirmed against sos.wa.gov (Dates and Deadlines 2026, registration page, voting-by-mail FAQ, federal-impacts page, Oct 16 2026 release): all-mail with ballots out by Oct 16, online/mail registration received by Oct 26 and in person until 8 pm Nov 3, return by 8 pm Nov 3 in a drop box or postmarked by Election Day (no stated arrival cut-off, receivedBy null); no value changed."
+   "verified": "SKEPTIC 2026-10-17: WA confirmed against sos.wa.gov (Dates and Deadlines 2026, registration page, voting-by-mail FAQ, federal-impacts page, Oct 16 2026 release): all-mail with ballots out by Oct 16, online/mail registration received by Oct 26 and in person until 8 pm Nov 3, return by 8 pm Nov 3 in a drop box or postmarked by Election Day (no stated arrival cut-off, receivedBy null); no value changed. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "WI": {
    "election": "2026-11-03",
@@ -7287,14 +7271,15 @@
     },
     "sameDay": {
      "available": true,
-     "where": "at the voter's polling place on Election Day, November 3, 7:00 a.m. to 8:00 p.m., with proof of residence"
+     "where": "Voters can register to vote at their polling place on Election Day, November 3, 2026"
     }
    },
    "earlyVoting": {
     "available": true,
     "start": "2026-10-20",
     "end": "2026-11-01",
-    "note": "Wisconsin's early voting is in-person absentee voting at the municipal clerk's office or a designated alternate site. It may begin October 20 and may run through Sunday, November 1; each municipality sets its own dates and hours, and some offices end earlier or offer no extra hours. Check MyVote or the municipal clerk."
+    "note": "Wisconsin's early voting is in-person absentee voting at the municipal clerk's office or a designated alternate site. It may begin October 20 and may run through Sunday, November 1; each municipality sets its own dates and hours, and some offices end earlier or offer no extra hours. Check MyVote or the municipal clerk.",
+    "setLocally": true
    },
    "mail": {
     "noExcuse": true,
@@ -7419,10 +7404,22 @@
      "pageUpdated": null,
      "reread": "2026-10-18",
      "addedBy": "2026-10-18: myvote.wi.gov answered a Cloudflare bot check to a script that day (rule 8: inconclusive), so the Elections Commission's own 2026-2027 calendar is cited beside it"
+    },
+    {
+     "field": "earlyVoting.setLocally",
+     "url": "https://myvote.wi.gov/en-us/Voter-Deadlines",
+     "quote": "October 20, 2026, possibly through November 1, 2026-In-Person Absentee Voting period- Voters can possibly request and vote an absentee ballot in-person in their municipal clerk's office through November 1, 2026. Office hours vary by municipality. Some municipal offices may not offer additional in-person absentee hours",
+     "pageUpdated": null
+    },
+    {
+     "field": "earlyVoting.setLocally",
+     "url": "https://elections.wi.gov/sites/default/files/documents/2026_2027%20Election%20Calendar_0.pdf",
+     "quote": "1-Nov Last day for electors (except hospitalized electors and sequestered jurors) to make application in person for absentee ballots. Final date set by municipality. In person absentee voting can end before this date.",
+     "pageUpdated": null
     }
    ],
    "notes": "Any registered voter may vote absentee without a reason; a copy of photo ID must accompany the request. A by-mail request must be RECEIVED by the municipal clerk by 5:00 p.m. Thursday, October 29 (indefinitely confined voters and military voters at home: 5:00 p.m. Friday, October 30; military voters away from home and hospitalized voters: 5:00 p.m. on Election Day). The completed ballot must be RECEIVED by the municipal clerk, or delivered to the polling place or absentee counting location, by 8:00 p.m. on November 3; a postmark does not extend this, so mail it well ahead. In-person absentee (early) voting can start October 20 and can run until Sunday, November 1, but each municipality sets its own schedule. Registration by mail (postmarked) and online (11:59 p.m.) closed October 14; voters can still register in person at the municipal clerk's office until 5:00 p.m. October 30, or at their polling place on Election Day (polls 7:00 a.m. to 8:00 p.m.), with proof of residence. The WEC's calendar PDF was published October 2025; its 2026 dates agree with MyVote's current deadlines page. Wisconsin's receipt deadline is Election Day itself, so Watson v. RNC does not change it.",
-   "verified": "SKEPTIC 2026-10-18: WI confirmed against myvote.wi.gov deadlines page, elections.wi.gov (2026 dates, absentee page) and the WEC 2026-2027 calendar PDF: registration by mail (postmarked) and online (11:59 pm) Oct 14, in clerk's office 5 pm Oct 30, Election Day registration at the polls; in-person absentee Oct 20 to as late as Nov 1; no-excuse absentee requested (received) by 5 pm Oct 29; ballot received by 8 pm Nov 3; no value changed."
+   "verified": "SKEPTIC 2026-10-18: WI confirmed against myvote.wi.gov deadlines page, elections.wi.gov (2026 dates, absentee page) and the WEC 2026-2027 calendar PDF: registration by mail (postmarked) and online (11:59 pm) Oct 14, in clerk's office 5 pm Oct 30, Election Day registration at the polls; in-person absentee Oct 20 to as late as Nov 1; no-excuse absentee requested (received) by 5 pm Oct 29; ballot received by 8 pm Nov 3; no value changed. REVIEW 2026-10-18 (PR #102): earlyVoting.setLocally: the window is the earliest and latest a clerk may offer ('possibly through November 1'; 'Final date set by municipality'). REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   },
   "WV": {
    "election": "2026-11-03",
@@ -7621,7 +7618,7 @@
     },
     "sameDay": {
      "available": true,
-     "where": "at the polling place on Election Day; and in person at the county clerk's office October 20 to November 2, where the voter casts an absentee ballot at the same time"
+     "where": "You may register and vote at your polling place on Election Day"
     }
    },
    "earlyVoting": {
@@ -7736,7 +7733,7 @@
     }
    ],
    "notes": "Wyoming has no online voter registration. Regular registration (in person at the county clerk, or by a notarized mailed application with copies of ID, proof of citizenship and proof of residency) closed Monday, October 19, per the Secretary of State's 2026 Key Election Dates and its election calendar; the 2026 Voter Guide states the rule as 'not less than (14) days before an election' (14 days before is October 20), and no official page says whether a mailed application must be postmarked or received by then, so that rule is left blank. After October 19 a voter can still register in person at the county clerk's office and vote absentee there through November 2, or register and vote at the polling place on Election Day (polls 7:00 a.m. to 7:00 p.m.). Registration now requires proof of U.S. citizenship and Wyoming residency. Any registered voter may vote absentee without an excuse; requests are taken by phone, mail, email, online or in person any time in 2026 except on Election Day itself (so through November 2). Completed absentee ballots must be RECEIVED by the county clerk by 7:00 p.m. on November 3; ballots arriving later are not counted, and the Secretary of State warns in-county mail can take up to seven days. Wyoming's receipt deadline is Election Day itself, so Watson v. RNC does not change it.",
-   "verified": "SKEPTIC 2026-10-18: WY confirmed against sos.wyo.gov (2026 Key Election Dates, 2026 Election Calendar, 2026 Voter Guide, absentee and registration pages): no online registration, regular registration closed Oct 19 with in-person registration plus absentee vote Oct 20-Nov 2 and Election Day registration, no-excuse absentee Oct 6-Nov 2, requests until the day before the election, ballots received by 7 pm Nov 3; no value changed."
+   "verified": "SKEPTIC 2026-10-18: WY confirmed against sos.wyo.gov (2026 Key Election Dates, 2026 Election Calendar, 2026 Voter Guide, absentee and registration pages): no online registration, regular registration closed Oct 19 with in-person registration plus absentee vote Oct 20-Nov 2 and Election Day registration, no-excuse absentee Oct 6-Nov 2, requests until the day before the election, ballots received by 7 pm Nov 3; no value changed. REVIEW 2026-10-18 (PR #102): sameDay.where is now the office's own words, quoted, in place of a summary."
   }
  }
 }
