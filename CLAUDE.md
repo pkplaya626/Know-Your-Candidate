@@ -146,8 +146,8 @@ python build_profile_site.py oge              # the executive's financial report
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1226 tests, no dependencies
-npm install && npm test                       # 1558 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1279 tests, no dependencies
+npm install && npm test                       # 1579 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1042,7 +1042,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     printed or not (Florida's "Yen Bailey" lost the primary; never a name
     in capitals), and a page's only for a hyphen or a short form of the
     filed first name. A person's article is the one a piped link names
-    over a bare link's redirect (NM-3's "Martin R. Zamora"). When the matcher began
+    over a bare link's redirect (NM-3's "Martin R. Zamora"). And a county
+    convention awards a ballot line, not a nomination: losing one never
+    outranks a Withdrawn list - six New Jersey filers who withdrew before
+    the primary read "Lost the primary". When the matcher began
     settling names that used to be claimed, the Florida Senate nominee lost
     "Gillespie" to the FEC's misspelling, and a page's "Matthew" replaced a
     campaign's "Matt". A certified write-in is not printed, and is not read

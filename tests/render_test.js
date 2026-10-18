@@ -2430,17 +2430,24 @@ async function testPeopleWording() {
 
   // The map's state panel: a filer whose place on the ballot is not known
   // is not a challenger there either (RACES-04).
-  const map = await buildPage("map.html", { hash: "#/?state=FL&mode=house" });
+  // Asked of a state that still has such filers: Florida's certified list
+  // (rule 77) settled every one there.
+  const probe = await buildPage("map.html");
+  const unsettled = probe.window.legislatorsData.find((p) => p.isCandidate &&
+    /^House/.test(p.chamber) && (probe.window.KYC.standing(p, "short") || {}).unknown);
+  const code = unsettled ? unsettled.state : "FL";
+  probe.window.close();
+  const map = await buildPage("map.html", { hash: "#/?state=" + code + "&mode=house" });
   await settle(50);
   suite("map.html — an unsettled filer is not counted as a challenger (RACES-04)", () => {
     const M = map.window.KYC;
-    const fl = map.window.legislatorsData.filter((p) => p.state === "FL" && p.isCandidate &&
+    const fl = map.window.legislatorsData.filter((p) => p.state === code && p.isCandidate &&
       /^House/.test(p.chamber));
     const unknown = fl.filter((p) => (M.standing(p, "short") || {}).unknown);
     const running = fl.filter((p) => !M.offBallot(p.raceStatus) && !unknown.includes(p));
     const head = map.D.getElementById("showChallengers");
     const count = head ? Number(head.querySelector("span").textContent) : 0;
-    check("Florida has filers the results do not settle", unknown.length > 0);
+    check("a state has filers the results do not settle (" + code + ")", unknown.length > 0);
     check("the challenger count leaves them out", count === running.length, `${count} vs ${running.length}`);
     const unsure = map.D.getElementById("unsureRows");
     check("and they are listed apart, under their status",
@@ -5226,7 +5233,7 @@ async function testCertifiedBallots() {
       check("the delegation says who left, when, and that no special election was called",
         vacancies.every((v) => notes.indexOf("District " + v.district + ": Vacant since ") !== -1 &&
           notes.indexOf("(" + v.name + " " + v.how + ")") !== -1) &&
-          /no special election called as of [A-Z][a-z]{2} \d{1,2}, \d{4}/.test(notes), notes);
+          /no special election called as of [A-Z][a-z]{2,4}\.? \d{1,2}, \d{4}/.test(notes), notes);
     });
     const fl = await buildPage("districts/fl.html", { hash: "#/?d=20" });
     suite("districts/fl.html — the old map's empty FL-20", () => {

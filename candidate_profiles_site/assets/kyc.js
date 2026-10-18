@@ -440,10 +440,11 @@
       mate: "Not on ballot", short: "Not on ballot",
       title: "Filed with the FEC but not on the certified list of candidates for the " +
         "November 3 ballot.",
-      member: { cls: "badge-danger", card: "Not running for this seat",
-        long: "Not running for this seat in 2026", short: "Leaving seat",
+      // The one wording a leaving member has, whichever source says so
+      // (RACES-10).
+      member: MEMBER_LEAVING({
         title: "Not on the certified list of candidates for this seat; not seeking " +
-          "re-election to it." } },
+          "re-election to it." }) },
     withdrawn: { title: "Withdrew, per the certified list of candidates." },
     eliminated: { title: "Lost the primary, per the certified list of candidates." },
   };

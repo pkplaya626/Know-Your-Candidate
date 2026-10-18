@@ -16133,7 +16133,7 @@
    },
    "site": {},
    "status": {
-    "H6NJ01220": "eliminated",
+    "H6NJ01220": "withdrawn",
     "H6NJ02228": "eliminated",
     "H6NJ02236": "eliminated",
     "H6NJ02244": "eliminated",
@@ -16233,11 +16233,11 @@
    },
    "site": {},
    "status": {
-    "H6NJ04216": "eliminated",
+    "H6NJ04216": "withdrawn",
     "H6NJ04224": "eliminated",
     "H6NJ04240": "withdrawn",
     "H6NJ04257": "nominee",
-    "H6NJ04265": "eliminated",
+    "H6NJ04265": "withdrawn",
     "H8NJ04014": "nominee"
    },
    "unmatched": {
@@ -16287,7 +16287,7 @@
    },
    "unmatched": {
     "John Aslanian": "withdrawn",
-    "Sandy Gajapathy": "eliminated"
+    "Sandy Gajapathy": "withdrawn"
    },
    "unmatchedParty": {
     "Sandy Gajapathy": "Republican"
@@ -16391,7 +16391,7 @@
     "H6NJ07243": "withdrawn",
     "H6NJ07250": "eliminated",
     "H6NJ07268": "withdrawn",
-    "H6NJ07276": "eliminated",
+    "H6NJ07276": "withdrawn",
     "H6NJ07284": "withdrawn",
     "H6NJ07300": "withdrawn"
    },
@@ -23578,6 +23578,7 @@
     "H2TX35144": "Greg Casar",
     "H6TX35038": "Lauren Peña",
     "H6TX37018": "Esther Fleharty",
+    "H6TX37026": "Ge'Neill Gary",
     "H6TX37059": "Janet Malzahn"
    },
    "page": "2026 United States House of Representatives elections in Texas",
@@ -23585,6 +23586,7 @@
     "H2TX35144": "democratic",
     "H6TX35038": "republican",
     "H6TX37018": "democratic",
+    "H6TX37026": "republican",
     "H6TX37059": "republican"
    },
    "site": {},
@@ -23593,14 +23595,11 @@
     "H2TX35144": "nominee",
     "H6TX35038": "nominee",
     "H6TX37018": "eliminated",
+    "H6TX37026": "eliminated",
     "H6TX37059": "eliminated"
    },
-   "unmatched": {
-    "Ge'Neill Gary": "eliminated"
-   },
-   "unmatchedParty": {
-    "Ge'Neill Gary": "Republican"
-   },
+   "unmatched": {},
+   "unmatchedParty": {},
    "unsure": []
   },
   "H-TX-38-2026": {
@@ -27432,9 +27431,9 @@
     "S4NJ00185": "nominee",
     "S4NJ00532": "nominee",
     "S6NJ00354": "withdrawn",
-    "S6NJ00388": "eliminated",
-    "S6NJ00396": "eliminated",
-    "S6NJ00404": "eliminated",
+    "S6NJ00388": "withdrawn",
+    "S6NJ00396": "withdrawn",
+    "S6NJ00404": "withdrawn",
     "S6NJ00412": "eliminated",
     "S6NJ00420": "eliminated",
     "S6NJ00438": "eliminated",
