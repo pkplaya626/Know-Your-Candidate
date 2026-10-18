@@ -217,6 +217,20 @@ class TestIndex(unittest.TestCase):
         voting["OH"].pop("status")
         self.assertEqual(lookup.index(payloads, {}, voting)["states"]["OH"]["check"], "https://p/")
 
+    def test_a_place_is_named_in_its_own_words_and_an_island_has_no_state_line(self):
+        # The panel said "How to vote in District of Columbia" beside a state
+        # page reading "Voting in the District of Columbia", and told a
+        # reader by Puerto Rico's shore "if you live across the state line"
+        # (rule 75; PR #104 review).
+        payloads = {code: {"zips": {}, "box": [0, 0, 1, 1]} for code in ("DC", "PR", "HI", "OH")}
+        states = lookup.index(payloads, {}, {})["states"]
+        self.assertEqual(states["DC"]["place"], "the District of Columbia")
+        self.assertNotIn("place", states["OH"])
+        self.assertTrue(states["PR"]["alone"])
+        self.assertTrue(states["HI"]["alone"])
+        self.assertNotIn("alone", states["DC"])
+        self.assertNotIn("alone", states["OH"])
+
     def test_the_page_reads_the_states_words_from_the_index(self):
         with open(os.path.join(ROOT, emit.SITE_DIR, "assets", "kyc-findrep.js"),
                   encoding="utf-8") as handle:

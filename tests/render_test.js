@@ -4465,6 +4465,8 @@ async function testFindRep() {
     check("the state senator and representative, and the county", !!answerRow(here.out, "County") &&
       here.out.querySelectorAll('a[href^="legislature/oh.html#/?"]').length >= 2);
     check("never 'within about 0 km'", !/about 0 k?m/.test(here.text));
+    check("an inland point says nothing of a border or shore", !/border or shore/.test(here.text),
+      here.text.slice(-300));
     check("outside every state, it says so and names nothing",
       /not in any state/.test(paris.text) && !paris.out.querySelector(".findrep-row"), paris.text);
   });
@@ -4550,6 +4552,23 @@ async function testFindRepReview(legPage, coPage) {
       !!answerRow(sanJuan.out, "Municipio"), sanJuan.text.slice(0, 300));
     check("D.C. is its own county-equivalent: no row for it", /ZIP 20001/.test(dc.text) &&
       !answerRow(dc.out, "County"), dc.text.slice(0, 300));
+    check("and is 'the District of Columbia' in a sentence, as its state page says",
+      /How to vote in the District of Columbia/.test(dc.text) &&
+        !/in District of Columbia\b/.test(dc.text), dc.text.slice(-300));
+  });
+
+  // Never "the state" of a territory: no state line on an island, and no
+  // "your state's own lookup" where none is linked (rule 75).
+  const sanJuanHere = await askHere("index.html", 18.4655, -66.1057, 25);
+  const samoa = await askZip("index.html", "96799");
+  suite("index.html — a territory's edge is its shore", () => {
+    const hit = sanJuanHere;
+    check("San Juan, by the shore, is answered for Puerto Rico", /Your location, Puerto Rico/.test(hit.text),
+      hit.text.slice(0, 120));
+    check("with no word of a state line or another side to live on",
+      !/state line|other side of that line|border or shore/.test(hit.text), hit.text.slice(-400));
+    check("American Samoa's answer sends no one to 'your state's own lookup'",
+      /ZIP 96799, American Samoa/.test(samoa.text) && !/your state/.test(samoa.text), samoa.text.slice(-300));
   });
 
   // The legislature's members in the legislature page's words.
@@ -4599,7 +4618,7 @@ async function testFindRepReview(legPage, coPage) {
     check("Kansas City, Missouri, a block from Kansas, is answered for Missouri", inMissouri,
       kc.text.slice(0, 120));
     check("and says it is near the state's border, which a district line note would not",
-      /Missouri's border or shore/.test(kc.text) && /If you live across the state line/.test(kc.text),
+      /Missouri's border or shore/.test(kc.text) && /If you live on the other side of that line/.test(kc.text),
       kc.text.slice(-500));
     check("with Missouri's file refused, the neighbour's edge is not answered: it did not load",
       !inMissouri || (/did not load/.test(failedOut.textContent) &&
@@ -4765,6 +4784,28 @@ async function testFindMyDistrict() {
     check("a distance under a kilometre is said in metres",
       athens.window.KYC.findRep.distance(30) === "about 30 m" &&
         athens.window.KYC.findRep.distance(2500) === "about 2.5 km");
+  });
+
+  // South Houston with a fix good to 2.5 km: four districts in reach on the
+  // map members were elected on, one on the 2026 map. The crowded sentence
+  // lists the crowded map's districts and names that map, and the other map
+  // still says where the reader is (PR #104 review: it listed the 2026
+  // map's districts as though they were the crowded ones).
+  const houston = await located("districts/tx.html", 29.60, -95.28, 2500);
+  const houstonHit = await houston.window.KYC.findRep.where(-95.28, 29.60, 2500, "TX");
+  suite("districts/tx.html — crowded on one map only", () => {
+    const reachOf = (f) => f.inside.concat(f.near);
+    const old = houstonHit.code ? reachOf(houstonHit.found.cd) : [];
+    const now = houstonHit.code ? reachOf(houstonHit.found.next) : [];
+    check("the point is crowded on the old map and not the new (a real test)",
+      old.length > 3 && now.length > 0 && now.length <= 3, old.join(",") + " / " + now.join(","));
+    const said = /several districts meet \(([^)]*)\)/.exec(houston.text);
+    check("the crowded districts are the old map's, and the sentence names that map",
+      !!said && /^on the map members were elected on, /.test(said[1]) &&
+        old.every((n) => new RegExp("\\bTX-" + n + "\\b").test(said[1])), houston.text.slice(0, 240));
+    check("and the 2026 map's own district is said beside it",
+      now.every((n) => new RegExp("On the map for 2026, you [^.]*\\bTX-" + n + "\\b").test(houston.text)),
+      houston.text.slice(0, 400));
   });
   const shared = await buildPage("districts/oh.html", { hash: "#/?d=2&was=12" });
   suite("districts/oh.html — a shared link with both maps' districts", () => {

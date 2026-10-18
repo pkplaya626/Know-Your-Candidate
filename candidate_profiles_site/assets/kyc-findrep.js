@@ -218,6 +218,12 @@
     return placeOf(code).name || KYC.stateName(code);
   }
 
+  /** The name in a sentence: "How to vote in the District of Columbia",
+   *  as the state page's voting block says it (rule 75). */
+  function placeWords(code) {
+    return placeOf(code).place || nameOf(code);
+  }
+
   /** One state's lookup file, decoded: its shapes as rings of degrees. */
   function lookupOf(code) {
     var have = (global.kycLookup || {})[code];
@@ -677,12 +683,16 @@
   function officialLookup(code) {
     var url = placeOf(code).check;
     return url ? '<a href="' + KYC.escapeAttr(url) + '" target="_blank" rel="noopener noreferrer">' +
-      "Check with " + KYC.escapeHtml(KYC.possessive(nameOf(code))) + " own lookup &rsaquo;</a>" : "";
+      "Check with " + KYC.escapeHtml(KYC.possessive(placeWords(code))) + " own lookup &rsaquo;</a>" : "";
+  }
+
+  function voteWords(code) {
+    return KYC.icon("vote") + " How to vote in " + KYC.escapeHtml(placeWords(code));
   }
 
   function voteLink(code) {
     return '<a class="btn" href="' + KYC.escapeAttr(KYC.stateUrl(code) + "#voting") + '">' +
-      KYC.icon("vote") + " How to vote in " + KYC.escapeHtml(nameOf(code)) + "</a>";
+      voteWords(code) + "</a>";
   }
 
   /** The plan a seat is held under, and the plan of the 2026 race: a
@@ -712,7 +722,7 @@
    *  show none (they load no profiles.js). */
   function redrawnNote(code, data) {
     if (!data.next || KYC.recordPhase() || !people().length) return "";
-    return KYC.escapeHtml(KYC.possessive(nameOf(code))) + " House map was redrawn for 2026: " +
+    return KYC.escapeHtml(KYC.possessive(placeWords(code))) + " House map was redrawn for 2026: " +
       "the representative is the one elected on the old map, the race is on the new one.";
   }
 
@@ -732,7 +742,7 @@
       // the first would take its state for theirs.
       out.push('<p class="findrep-note findrep-crosses">ZIP ' + KYC.escapeHtml(code5) +
         " crosses a state line: " + list(found.map(function (f) {
-          return pct(landIn(f.entry)) + " of its land is in " + KYC.escapeHtml(nameOf(f.code));
+          return pct(landIn(f.entry)) + " of its land is in " + KYC.escapeHtml(placeWords(f.code));
         })) + ". Each state's answer is below, and every share in them is of the whole ZIP " +
         "area. Use your location to know which is yours.</p>");
     }
@@ -758,14 +768,16 @@
       if (map) notes.push('<a href="' + KYC.escapeAttr(map) + '">See it on the district map &rsaquo;</a>');
       out.push(answer(head, code, rows, notes) + sourcesNote(data));
     });
+    // Every state the ZIP reaches has its own lookup to check with, where
+    // the site holds one; "your state's own lookup" was said in American
+    // Samoa, which is no state and has none linked (rule 75).
+    var checks = found.map(function (f) { return officialLookup(f.code); }).filter(Boolean);
     var caveat = split
       ? "A ZIP code can cross district lines, and this one does. The shares are of the ZIP " +
         "area's land, not its people, so they cannot say which side your home is on: use your " +
-        "location for an exact answer, or your state's own lookup."
+        "location for an exact answer" + (checks.length ? ", or the official lookup." : ".")
       : "The Census Bureau's ZIP Code Tabulation Areas follow ZIP codes closely but not " +
         "exactly; a few addresses fall outside their ZIP code's area.";
-    // Every state the ZIP reaches has its own lookup to check with.
-    var checks = found.map(function (f) { return officialLookup(f.code); }).filter(Boolean);
     return out.join("") + '<p class="findrep-note">' + caveat + " " + checks.join(" ") + "</p>";
   }
 
@@ -793,13 +805,17 @@
    *  state line or the shore, or several districts at once. */
   function pointNotes(hit, levels, accuracy) {
     var notes = [];
-    var name = KYC.escapeHtml(nameOf(hit.code));
+    var name = KYC.escapeHtml(placeWords(hit.code));
     var crowded = unique(levels.filter(function (l) { return reach(l.f).length > MAX_NEAR; })
       .map(function (l) { return l.many; }));
     var lines = levels.filter(function (l) { return l.f && l.f.kind === "line"; });
     var lineWords = unique(lines.map(function (l) { return l.line; }));
     var leg = lines.some(function (l) { return l.leg; });
-    var edge = levels.some(function (l) { return !l.leg && l.f && (l.f.kind === "edge" || l.f.kind === "out"); });
+    var inside = inState(hit.found);
+    // Near the shore of a place no state meets across a land line (Puerto
+    // Rico, Hawaii), there is no other side to be on: nothing to say.
+    var edge = levels.some(function (l) { return !l.leg && l.f && (l.f.kind === "edge" || l.f.kind === "out"); }) &&
+      !(inside && placeOf(hit.code).alone);
     var browser = accuracy >= 100 ? ", and your browser placed you to within " + distance(accuracy) : "";
     if (crowded.length) {
       notes.push("You are where several " + list(crowded) + " meet; the boundaries here cannot " +
@@ -812,10 +828,12 @@
           "legislature's districts, which this site draws more coarsely)" : "") + browser + ".");
     }
     if (edge) {
-      notes.push(inState(hit.found)
+      // "the state line" is a state's: the District of Columbia's is not one.
+      notes.push(inside
         ? "You are within " + distance(hit.marginKm * 1000) + " of " + KYC.escapeHtml(
-          KYC.possessive(nameOf(hit.code))) + " border or shore. If you live across the state " +
-          "line, this is not your answer: type your ZIP code, or check with your state."
+          KYC.possessive(placeWords(hit.code))) + " border or shore. If you live on the other " +
+          "side of that line, this is not your answer: type your ZIP code, or check with the " +
+          "election office where you live."
         : "Your location is at the edge of " + name + " or just outside it, by these " +
           "boundaries; the nearest districts are listed.");
     }
@@ -877,8 +895,7 @@
     // the button goes to the state page's (PR #104 review).
     var vote = code
       ? '<a class="btn" href="' + KYC.escapeAttr(doc.getElementById("voting") ? "#voting"
-        : KYC.stateUrl(code) + "#voting") + '">' + KYC.icon("vote") + " How to vote in " +
-        KYC.escapeHtml(nameOf(code)) + "</a>"
+        : KYC.stateUrl(code) + "#voting") + '">' + voteWords(code) + "</a>"
       : voteHome(slot.hasAttribute("data-findrep-list"));
     slot.innerHTML =
       '<h2 class="findrep-title" id="' + uid + 'Title">' + KYC.icon("pin") +
@@ -978,8 +995,7 @@
     return '<a class="btn" data-findrep-vote href="' + KYC.escapeAttr(known
       ? KYC.stateUrl(code) + "#voting" : KYC.siteRoot() + "states/index.html") + '"' +
       (!known && listHere ? " hidden" : "") + ">" +
-      KYC.icon("vote") + " How to vote in " + KYC.escapeHtml(known ? nameOf(code) : "your state") +
-      "</a>";
+      (known ? voteWords(code) : KYC.icon("vote") + " How to vote in your state") + "</a>";
   }
 
   /** A reader's state, remembered in this browser for the sidebar and the
@@ -990,7 +1006,7 @@
     Array.prototype.forEach.call(doc.querySelectorAll("[data-findrep-vote]"), function (a) {
       a.hidden = false;
       a.setAttribute("href", KYC.stateUrl(code) + "#voting");
-      a.innerHTML = KYC.icon("vote") + " How to vote in " + KYC.escapeHtml(nameOf(code));
+      a.innerHTML = voteWords(code);
     });
   }
 

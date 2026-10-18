@@ -374,8 +374,17 @@
       return (found.length > 1 ? "on " + names[i] + ", " : "") + seats(r);
     }).filter(Boolean);
     if (crowded.length) {
+      // The map that is not crowded still says where the reader is on it:
+      // crowded on the old map alone, the 2026 map's one district stood
+      // unsaid beside four of the old map's.
+      var rest = found.length < 2 ? "" : found.map(function (f, i) {
+        if (reaches[i].length > MAX_FOCUS) return "";
+        var s = f.kind === "none" ? names[i] + " does not reach this point."
+          : "on " + names[i] + ", " + phrase(f) + ".";
+        return " " + s.charAt(0).toUpperCase() + s.slice(1);
+      }).join("");
       return { html: "You are where several districts meet (" + crowded.join("; ") + "); the " +
-        "boundaries this page holds cannot tell which you are in." + check +
+        "boundaries this page holds cannot tell which you are in." + rest + check +
         whoHere(now, reach), focus: picks.focus, was: picks.was };
     }
     var phrases = found.map(phrase);

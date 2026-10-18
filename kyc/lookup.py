@@ -42,6 +42,12 @@ WHOLE = 0.99
 TERRITORY_AREAS = {"PR": "municipio", "AS": "district or island", "MP": "municipality",
                    "VI": "island", "DC": None, "GU": None}
 
+# The places no other state or territory meets across a land line. A
+# location near their edge is near the shore (or Canada): it cannot be in a
+# neighbour's districts, so the answer never says "if you live across the
+# state line" there (rule 75; PR #104 review: Puerto Rico read it).
+NO_NEIGHBOUR = frozenset({"AK", "HI", "PR", "GU", "VI", "AS", "MP"})
+
 
 class LookupMapError(RuntimeError):
     """Raised when a lookup file is missing or disagrees with the maps."""
@@ -236,15 +242,26 @@ def build(root=".", codes=None, local=None, legislatures=None, district_maps=Non
 
 
 def place_info(codes, voting=None):
-    """``{code: {name, map?, check?}}``: what the answer says of each state
-    on any page, profiles.js loaded or not - the legislature and county
-    pages load none (PR #104 review): its name, its district map page
+    """``{code: {name, place?, alone?, map?, check?}}``: what the answer
+    says of each state on any page, profiles.js loaded or not - the
+    legislature and county pages load none (PR #104 review): its name, its
+    name in a sentence (``place``, where that differs), whether another
+    state meets it across a land line (``alone`` where none does), its
+    district map page
     (``districts.index``) and its own lookup page from *voting*
     (``voting.for_page``), the one "Check with Ohio's own lookup" links."""
+    from .voting_dates import PLACES
     maps = D.index()
     out = {}
     for code in sorted(codes):
         entry = {"name": state_name(code)}
+        # A sentence's words where the short name is not the place's own:
+        # "How to vote in the District of Columbia", as its state page's
+        # voting block says (rule 75).
+        if code in PLACES:
+            entry["place"] = PLACES[code]
+        if code in NO_NEIGHBOUR:
+            entry["alone"] = True
         if code in maps:
             entry["map"] = {"page": maps[code]["page"], "redrawn": bool(maps[code]["redrawn"])}
         links = (voting or {}).get(code) or {}
