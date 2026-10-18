@@ -141,6 +141,78 @@ class TestCrossLink(unittest.TestCase):
         self.assertEqual(_cross_link([rogers, other]), 0)
         self.assertTrue(rogers["seekingReelection2026"])
 
+    def test_a_filing_congress_lists_for_the_member_is_theirs_whatever_the_name(self):
+        # The roster names Andy Barr "Garland Barr", so his Kentucky Senate
+        # filing never met his member card, which read only "Not running for
+        # this seat" while he was the Republican nominee. Congress's own
+        # record lists the filing's id for him.
+        def pair():
+            barr = member("B001282", "Garland Barr", "KY", 6, party="Republican",
+                          fec="H0KY06104")
+            senate = candidate("CAND_36", "Andy Barr", "KY", chamber="Senate",
+                               party="Republican", fec="S6KY00286")
+            return barr, senate
+        barr, senate = pair()
+        self.assertEqual(_cross_link([barr, senate]), 0)
+        barr, senate = pair()
+        people = {"B001282": {"fecAll": ["H0KY06104", "S6KY00286"]}}
+        self.assertEqual(_cross_link([barr, senate], people), 1)
+        self.assertEqual(barr["alsoRunningId"], "CAND_36")
+        self.assertEqual(barr["contestRaceId"], "S-KY-2026")
+        self.assertEqual(senate["incumbentId"], "B001282")
+        # A member who has left is not linked by their old ids.
+        barr, senate = pair()
+        barr["formerMember"] = {"left": "2026-09-01"}
+        self.assertEqual(_cross_link([barr, senate], people), 0)
+
+
+class TestRaceOrder(unittest.TestCase):
+    """One order for the people in a race, in every view (TRUST-15): the race
+    view listed them in build order (curated rows first) and the profile by
+    first name, so one race read Cooper, Whatley, Dublin in one and Dublin,
+    Whatley, Cooper in the other."""
+
+    def test_by_surname_not_by_first_name_or_build_order(self):
+        people = [candidate("CAND_1", "Roy Cooper", "NC", chamber="Senate"),
+                  candidate("CAND_2", "Michael Whatley", "NC", chamber="Senate"),
+                  candidate("FEC_S6NC1", "Michael Louis Dublin Jr.", "NC", chamber="Senate"),
+                  candidate("FEC_S6NC2", "Don Brown", "NC", chamber="Senate")]
+        by_id = {p["id"]: p for p in people}
+        self.assertEqual([by_id[i]["name"] for i in races.order_people(list(by_id), by_id)],
+                         ["Don Brown", "Roy Cooper", "Michael Louis Dublin Jr.",
+                          "Michael Whatley"])
+
+    def test_a_surname_of_two_words_is_one_surname(self):
+        # Filed "WASSERMAN SCHULTZ, DEBBIE": under W, not under S.
+        dws = candidate("W1", "Debbie Wasserman Schultz", "FL", district=20, fec="H1")
+        spalding = candidate("S1", "Carla Spalding", "FL", district=20, fec="H2")
+        filed = {"H1": {"name": "WASSERMAN SCHULTZ, DEBBIE"}, "H2": {"name": "SPALDING, CARLA"}}
+        by_id = {"W1": dws, "S1": spalding}
+        self.assertEqual(races.order_people(["W1", "S1"], by_id, filed), ["S1", "W1"])
+        self.assertEqual(races.surname(dws, filed), "wasserman schultz")
+
+    def test_a_filed_name_the_page_does_not_show_is_not_used(self):
+        # A legal name ("ARENHOLZ, ASHLEY HINSON") or swapped names ("LISA,
+        # CARLQUIST") would put someone under a surname the reader cannot see.
+        hinson = candidate("CAND_17", "Ashley Hinson", "IA", chamber="Senate", fec="S1")
+        carlquist = candidate("X1", "Lisa Carlquist", "UT", district=1, fec="H9")
+        filed = {"S1": {"name": "ARENHOLZ, ASHLEY HINSON"}, "H9": {"name": "LISA, CARLQUIST"}}
+        self.assertEqual(races.surname(hinson, filed), "hinson")
+        self.assertEqual(races.surname(carlquist, filed), "carlquist")
+
+    def test_a_member_is_under_the_surname_congress_records(self):
+        # "Earl L. 'Buddy' Carter": the record's surname, not a nickname.
+        carter = member("C001103", "Earl L. “Buddy” Carter", "GA", 1)
+        self.assertEqual(races.surname(carter, people={"C001103": {"last": "Carter"}}), "carter")
+
+    def test_the_built_race_is_ordered(self):
+        holder = member("C001103", "Earl Carter", "GA", 1, party="Republican")
+        zed = candidate("FEC_H6GA1", "Ann Zed", "GA", district=1)
+        abe = candidate("FEC_H6GA2", "Zoe Abe", "GA", district=1)
+        race = {r["id"]: r for r in races.build([holder, zed, abe])}["H-GA-01-2026"]
+        self.assertEqual(race["incumbentIds"], ["C001103"])
+        self.assertEqual(race["candidateIds"], ["FEC_H6GA2", "FEC_H6GA1"])
+
 
 class TestRacesWithContests(unittest.TestCase):
     def test_a_member_contesting_another_seat_is_in_both_races(self):

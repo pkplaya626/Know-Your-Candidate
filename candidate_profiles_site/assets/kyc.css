@@ -1169,6 +1169,12 @@ select optgroup {
 .race-out {
   margin-top: var(--s-4);
 }
+/* How a race's people are ordered, said once under them (TRUST-15). */
+.race-order {
+  margin: var(--s-2) 0 0;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
 .race-out > summary {
   cursor: pointer;
   padding: var(--s-2) var(--s-3);
@@ -1586,6 +1592,10 @@ select optgroup {
   gap: var(--s-2);
 }
 .modal-meta strong { color: var(--text); font-weight: 600; }
+/* The cross-link's sentence is one flex item, so it wraps as a sentence:
+ * as separate items its text runs stood side by side in three narrow
+ * columns on a phone. */
+.modal-meta .cross-link-text { display: block; min-width: 0; }
 .modal-meta button {
   border: 0;
   background: none;

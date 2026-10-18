@@ -165,8 +165,31 @@
       if (race.settled) return KYC.onNovemberBallot(status) || status === "advanced";
       return !KYC.offBallot(status);
     }).sort(function (a, b) {
-      return (a.isCandidate ? 1 : 0) - (b.isCandidate ? 1 : 0) || a.name.localeCompare(b.name);
+      // Members first, then the race's own order (by surname, TRUST-15).
+      return (a.isCandidate ? 1 : 0) - (b.isCandidate ? 1 : 0) ||
+        KYC.racePosition(a) - KYC.racePosition(b);
     });
+  }
+
+  /** Filers in a new district's race whom the published results do not
+   *  settle (KYC.standing's `unknown`): not on the ballot as far as this
+   *  page can say, and not dropped either - the map and the state page
+   *  list them, and the district page left them out (RACES-04). */
+  function unsure(n) {
+    var race = raceOf[n];
+    if (!race || !race.settled) return [];
+    return race.candidateIds.map(KYC.byId).filter(function (p) {
+      var spec = p && KYC.standing(p, "card");
+      return !!(spec && spec.unknown);
+    });
+  }
+
+  function unsureCards(n) {
+    var people = unsure(n);
+    return people.length
+      ? '<p class="district-fact-label">Filed; ballot status not known</p><div class="card-grid">' +
+        people.map(KYC.cards.card).join("") + "</div>"
+      : "";
   }
 
   /** Members holding one of this state's districts and running in another,
@@ -954,7 +977,7 @@
         ? '<p class="district-fact-label">' + who + '</p><div class="card-grid">' +
           people.map(KYC.cards.card).join("") + "</div>"
         : '<p class="district-fact-label">' + who + ": nobody with a profile here</p>") +
-      (unfiled.length ? KYC.cards.unprofiledNote(race, "state-note") : "") +
+      (unfiled.length ? KYC.cards.unprofiledNote(race, "state-note") : "") + unsureCards(n) +
       flowLine("Where its area came from:", came, "old") +
       (race
         ? '<p class="district-flow"><a class="race-state-link" href="' +
@@ -988,7 +1011,7 @@
           ? '<p class="district-fact-label">' + who + '</p><div class="card-grid">' +
             people.map(KYC.cards.card).join("") + "</div>"
           : '<p class="district-fact-label">' + who + ": nobody with a profile here</p>") +
-      (unfiled.length ? KYC.cards.unprofiledNote(race, "state-note") : "") +
+      (unfiled.length ? KYC.cards.unprofiledNote(race, "state-note") : "") + unsureCards(n) +
       (race
         ? '<p class="district-flow"><a class="race-state-link" href="' +
           KYC.escapeAttr(KYC.stateUrl(code) + "#race-" + race.id) + '">The ' +

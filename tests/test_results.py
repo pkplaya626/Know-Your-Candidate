@@ -1188,6 +1188,65 @@ class TestWithdrawals(unittest.TestCase):
                          ["Graham Platner", "David Costello"])
         self.assertEqual(len(lists), 1)
 
+    def test_two_headings_withdrawn_lists_are_not_one_table(self):
+        # New Jersey's Senate page, read 2026-10-17: "Natalie Rivera" under
+        # the Republican primary's Withdrawn heading, "Natalie Lynn Rivera"
+        # under the independents'. Gathered into one "Withdrawn list" they
+        # shared a table, so they were two people who both fitted her one
+        # filing (RIVERA, NATALIE) and the filing read "ambiguous" - where
+        # main had it "eliminated".
+        text = "\n".join([
+            "===Republican convention===",
+            box("Atlantic County Republican Convention", ("Alex Zdan", 50, True),
+                ("Natalie Rivera", 5, False)),
+            "====Withdrawn====", "* Natalie Rivera, activist",
+            "===Independents===", "====Withdrawn====",
+            "* Natalie Lynn Rivera (Together for NJ), activist",
+        ])
+        boxes = results.parse_boxes(text) + results.candidate_lists(text)
+        out = results.resolve_race(boxes)
+        self.assertEqual(out, {"Alex Zdan": "nominee", "Natalie Rivera": "eliminated"})
+        rows = [{"candidate_id": "S6NJ00396", "name": "RIVERA, NATALIE"},
+                {"candidate_id": "S6NJ00412", "name": "ZDAN, ALEX"}]
+        found, ambiguous = results.match_names(list(out), rows)
+        self.assertEqual((found["Natalie Rivera"], ambiguous), (["S6NJ00396"], []))
+        # Two alike names under one heading are still two people.
+        text = "====Withdrawn====\n* Dan Sullivan, a\n* Daniel Sullivan, b\n"
+        boxes = results.candidate_lists(text)
+        self.assertEqual(results._canonical(boxes)[0][1][1]["name"], "Daniel Sullivan")
+
+    def test_a_piped_link_names_the_article_over_a_bare_one(self):
+        # NM-3's primary table links "[[Martin R. Zamora|Martin Zamora]]" and
+        # its November box a bare "[[Martin Zamora]]", a redirect. Taking the
+        # bare one moved his profile off the article his offices were read
+        # from (history-stale).
+        text = "\n".join([
+            "{{Election box begin no change | title=Republican primary results}}",
+            "{{Election box winning candidate with party link|party=Republican Party "
+            "|candidate=[[Martin R. Zamora|Martin Zamora]]|votes=10|percentage=100}}",
+            "{{Election box end}}",
+            "{{Election box begin no change | title=2026 New Mexico's 3rd congressional "
+            "district election}}",
+            "{{Election box candidate with party link|party=Republican Party "
+            "|candidate=[[Martin Zamora]]|votes=0|percentage=0}}",
+            "{{Election box end}}",
+        ])
+        self.assertEqual(results.ballot_articles(results.parse_boxes(text)),
+                         {"Martin Zamora": "Martin R. Zamora"})
+        # Two bare links: the one titled as the spelling kept (CA-40).
+        text = "\n".join([
+            "{{Election box begin no change | title=Primary results}}",
+            "{{Election box candidate with party link|party=Democratic Party "
+            "|candidate=[[Esther Kim-Varet]]|votes=10|percentage=10}}",
+            "{{Election box end}}",
+        ])
+        boxes = results.parse_boxes(text)
+        boxes.append((results.ELIMINATED_LIST, [{"name": "Esther Kim Varet", "won": False,
+                                                 "withdrawn": False, "votes": None,
+                                                 "party": None, "article": "Esther Kim Varet",
+                                                 "list": 0}]))
+        self.assertEqual(results.ballot_articles(boxes), {"Esther Kim Varet": "Esther Kim Varet"})
+
 
 class TestEliminatedButRunningOn(unittest.TestCase):
     """An "Eliminated" list is about one party's contest. Connecticut's page,

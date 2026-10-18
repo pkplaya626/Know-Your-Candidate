@@ -767,7 +767,10 @@ def candidate_lists(text):
             continue
         out.setdefault(kind, []).append({
             "name": bullet["name"], "won": False, "withdrawn": kind != ELIMINATED_LIST,
-            "votes": None, "party": None, "article": link_target(bullet["raw"])})
+            "votes": None, "party": None, "article": link_target(bullet["raw"]),
+            # Which heading's list: one kind's list gathers every heading of
+            # the page, and two of them are not one table (_tables).
+            "list": bullet["heading"].start()})
     return [(kind, rows) for kind, rows in out.items()]
 
 
@@ -858,6 +861,27 @@ def _same_spelling(a, b):
     return any(_given_fits(x, y) for x in a[:-1] for y in b[:-1])
 
 
+def _tables(boxes, near=None):
+    """The set of names each table holds, for "names that share a table are
+    two people". A candidate-list pseudo-table gathers one kind of list from
+    every heading on the page, so it is split back into its headings: New
+    Jersey's Senate page lists "Natalie Rivera" as withdrawn from the
+    Republican primary and "Natalie Lynn Rivera" as withdrawn as an
+    independent, and read as one table the two were two people who both
+    fitted her one filing, which then read "ambiguous"."""
+    near = near or {}
+    out = []
+    for title, rows in boxes:
+        if title in LIST_TITLES:
+            groups = {}
+            for r in rows:
+                groups.setdefault(r.get("list"), set()).add(near.get(r["name"], r["name"]))
+            out.extend(groups.values())
+        else:
+            out.append({near.get(r["name"], r["name"]) for r in rows})
+    return out
+
+
 def _near_spellings(boxes):
     """``{spelling: spelling kept}`` for one person written a letter apart.
 
@@ -872,11 +896,9 @@ def _near_spellings(boxes):
     once was, left GA-9's Democratic primary winner Caitlyn Gegen "withdrawn"
     beside a November nominee spelt "Caitlyn Gegan" with no profile.
     """
-    tables, order, uses = [], [], collections.Counter()
+    tables, order, uses = _tables(boxes), [], collections.Counter()
     for _title, rows in boxes:
-        names = {r["name"] for r in rows}
-        tables.append(names)
-        uses.update(names)
+        uses.update({r["name"] for r in rows})
         order.extend(r["name"] for r in rows if r["name"] not in order)
     ranked = sorted(order, key=lambda n: (-uses[n], order.index(n)))
     alias = {}
@@ -907,11 +929,9 @@ def _hyphen_spellings(boxes):
     sometimes is no evidence of how the person writes it. Names that share
     a table are never merged.
     """
-    tables, order, uses = [], [], collections.Counter()
+    tables, order, uses = _tables(boxes), [], collections.Counter()
     for _title, rows in boxes:
-        names = {r["name"] for r in rows}
-        tables.append(names)
-        uses.update(names)
+        uses.update({r["name"] for r in rows})
         order.extend(r["name"] for r in rows if r["name"] not in order)
     groups = {}
     for name in order:
@@ -942,7 +962,7 @@ def _canonical(boxes):
     near.update({k: v for k, v in _hyphen_spellings(boxes).items() if k not in near})
     # Two names in one table are two people, however alike: a top-four
     # primary listed both Alaska Sullivans.
-    tables = [{near.get(r["name"], r["name"]) for r in rows} for _title, rows in boxes]
+    tables = _tables(boxes, near)
     seen = []
     out = []
     for title, rows in boxes:
@@ -1328,17 +1348,23 @@ def _final_winners(primaries, runoffs, has_runoff):
 
 def ballot_articles(boxes):
     """``{name: article title}`` for every ballot line that links one."""
-    articles = {}
-    for _, rows in _canonical(boxes):
-        for row in rows:
-            if row.get("article"):
-                # A link titled as the name kept is the article, not a
-                # redirect another spelling links: "Esther Kim Varet" over
-                # the box's "Esther Kim-Varet".
-                if row["article"] == row["name"]:
-                    articles[row["name"]] = row["article"]
-                else:
-                    articles.setdefault(row["name"], row["article"])
+    # Which link names the article, when one person's rows link more than
+    # one title:
+    # 0. a piped link, whose title an editor wrote apart from the text
+    #    shown: NM-3's "[[Martin R. Zamora|Martin Zamora]]" over a bare
+    #    "[[Martin Zamora]]", a redirect;
+    # 1. a bare link titled as the spelling kept: CA-40's "[[Esther Kim
+    #    Varet]]" over the box's "[[Esther Kim-Varet]]", a redirect;
+    # 2. otherwise the first seen.
+    articles, rank = {}, {}
+    for (_title, raw), (_same, fixed) in zip(boxes, _canonical(boxes)):
+        for before, row in zip(raw, fixed):
+            if not row.get("article"):
+                continue
+            name, title = row["name"], row["article"]
+            order = 0 if title != before["name"] else 1 if title == name else 2
+            if name not in articles or order < rank[name]:
+                articles[name], rank[name] = title, order
     return articles
 
 
@@ -1940,10 +1966,13 @@ def certify_race(race, spec, rows, aliases=None):
                               else _cased(name)))
             continue
         for cid in cids:
+            # The state's spelling, whatever the entry says of them: Florida
+            # lists "Yen Bailey" as having lost the primary, the FEC "BAILEY,
+            # HUY-YEN CAM", and the page's own spelling was popped above.
+            race.setdefault("listNames", {})[cid] = name          # as printed
+            if not name.isupper():
+                names[cid] = name
             if kind == BALLOT:
-                race.setdefault("listNames", {})[cid] = name      # as printed
-                if not name.isupper():
-                    names[cid] = name
                 # Printed beside a name with no profile, in the site's words
                 # for the five parties and the list's for any other:
                 # Colorado's "Unaffiliated", not "Independent". A list that

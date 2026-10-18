@@ -395,6 +395,9 @@ PARTY_NAMES = {
     "LIB": "Libertarian", "GRE": "Green", "CON": "Constitution",
     "DFL": "Democratic-Farmer Labor", "NPA": "No Party Affiliation",
     "OTH": "Other", "UNK": "Unknown", "W": "Write-in",
+    # The FEC's "NNE" is its code for no party; its full name, "NONE", read
+    # as "None" on a card - like missing data (GRID-21).
+    "NNE": "No party",
 }
 
 

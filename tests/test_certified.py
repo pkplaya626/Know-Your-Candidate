@@ -544,6 +544,27 @@ class TestOverlay(unittest.TestCase):
             race, status={"S6AK00326": "nominee"})}})
         self.assertEqual(same["name"], "Daniel J Sullivan")
 
+    def test_a_list_names_everyone_it_holds_not_only_the_printed(self):
+        # Florida's list holds FL-2's primary losers too. It writes "Yen
+        # Bailey", the FEC "BAILEY, HUY-YEN CAM"; the list's entry took the
+        # page's spelling away, and recording only printed names left her
+        # under the FEC's form, where main had shown "Yen Bailey".
+        rows = [row("H4FL02138", "BAILEY, HUY-YEN CAM", "FL", 2, "DEM"),
+                row("H6FL02299", "GREEN, AMANDA MARIE", "FL", 2, "DEM")]
+        page = {"page": "x", "status": {"H6FL02299": "nominee"}, "party": {},
+                "unmatched": {"Yen Bailey": "eliminated"}, "ambiguous": [],
+                "decided": {"general": True, "parties": ["democratic"]}}
+        race = results.certify_race(page, spec([("Yen Bailey", "Democratic", "lost-primary"),
+                                                ("Amanda Marie Green", "Democratic", "ballot")],
+                                               source="Florida Division of Elections"), rows)
+        self.assertEqual(race["status"]["H4FL02138"], "eliminated")
+        self.assertNotIn("Yen Bailey", race["unmatched"])
+        self.assertNotIn("H4FL02138", race["listParty"])       # printed beside no one
+        bailey = filer("H4FL02138", "Huy-Yen Cam Bailey", "FL", 2, "Democrat")
+        results.apply_cache([bailey], {"races": {"H-FL-02-2026": race}})
+        self.assertEqual((bailey["name"], bailey["fecName"], bailey["raceStatus"]),
+                         ("Yen Bailey", "Huy-Yen Cam Bailey", "eliminated"))
+
     def test_a_certified_write_in_is_neither_on_nor_off_the_ballot(self):
         rows = [row("H4CO01187", "WREN, JOHN", "CO", 1, "IND")]
         race = results.certify_race(None, spec([("Jane Doe", "Democratic Party", "ballot"),
