@@ -269,6 +269,42 @@ def check_overrides(profiles, raw):
     return issues
 
 
+_CHAIR_TITLE = re.compile(r"^(co-?)?chair(man|woman|person)?$", re.I)
+
+
+def check_committee_titles(profiles):
+    """A minority seat titled as a committee's chair, and a curated title
+    (overrides.COMMITTEE_TITLES) that no seat carries any more.
+
+    The rosters titled the narcotics caucus's minority lead "Chairman", and
+    the guide's table showed two chairmen of one panel. A minority seat
+    leads its side as ranking member or vice chair; a chair title there is
+    the rosters' word for a body that styles it otherwise, and needs the
+    body's own word, with evidence, before it is shown as anything else.
+    """
+    issues = []
+    styled = {(code, side, new) for (code, side, _old), (new, _why)
+              in overrides.COMMITTEE_TITLES.items()}
+    seen, odd = set(), []
+    for p in profiles:
+        for seat in p.get("committeeList") or []:
+            key = (seat.get("code"), seat.get("side"), seat.get("title"))
+            seen.add(key)
+            if (seat.get("side") == "minority" and _CHAIR_TITLE.match(seat.get("title") or "")
+                    and key not in styled):
+                odd.append(f"{p['name']}: {seat['code']} {seat['title']}")
+    if odd:
+        issues.append(Issue("warn", "committee-minority-chair",
+                            f"{len(odd)} minority seats carry a chair's title; record the "
+                            "body's own style in overrides.COMMITTEE_TITLES", sorted(odd)))
+    stale = sorted(f"{code} {side} {new}" for code, side, new in styled
+                   if (code, side, new) not in seen)
+    if stale and any(p.get("committeeList") for p in profiles):
+        issues.append(Issue("warn", "stale-committee-title",
+                            f"{len(stale)} curated committee titles match no seat", stale))
+    return issues
+
+
 def check_identity(profiles):
     """Every profile needs a unique, non-empty id and a name.
 
@@ -1557,6 +1593,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_member_link_overrides(snapshot)
     issues += check_future_coverage(profiles)
     issues += check_overrides(profiles, raw)
+    issues += check_committee_titles(profiles)
     issues += check_campaign_blocklist(campaigns)
     issues += check_campaign_sites(profiles, enrichment)
     issues += check_portrait_overrides(enrichment)

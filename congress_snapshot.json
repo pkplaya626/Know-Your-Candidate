@@ -1,6 +1,6 @@
 {
  "count": 539,
- "fetched": "2026-10-17T19:58:19+00:00",
+ "fetched": "2026-10-17T21:04:52+00:00",
  "legislators": [
   {
    "ballotpedia": "Robert B. Aderholt",
@@ -195,6 +195,12 @@
    "govtrack": 412615,
    "how": null,
    "last": "Aguilar",
+   "leadership": [
+    {
+     "chamber": "house",
+     "title": "House Democratic Caucus Chair"
+    }
+   ],
    "name": "Pete Aguilar",
    "nameParts": {
     "first": "Pete",
@@ -684,6 +690,12 @@
    "govtrack": 400013,
    "how": null,
    "last": "Baldwin",
+   "leadership": [
+    {
+     "chamber": "senate",
+     "title": "Senate Democratic Conference Secretary"
+    }
+   ],
    "name": "Tammy Baldwin",
    "nameParts": {
     "first": "Tammy",
@@ -903,6 +915,12 @@
    "govtrack": 412251,
    "how": null,
    "last": "Barrasso",
+   "leadership": [
+    {
+     "chamber": "senate",
+     "title": "Senate Majority Whip"
+    }
+   ],
    "name": "John Barrasso",
    "nameParts": {
     "first": "John",
@@ -1249,6 +1267,12 @@
    "govtrack": 412598,
    "how": null,
    "last": "Booker",
+   "leadership": [
+    {
+     "chamber": "senate",
+     "title": "Senate Democratic Strategic Communications Committee Chair"
+    }
+   ],
    "name": "Cory A. Booker",
    "nameParts": {
     "first": "Cory",
@@ -2766,6 +2790,12 @@
    "govtrack": 400061,
    "how": null,
    "last": "Capito",
+   "leadership": [
+    {
+     "chamber": "senate",
+     "title": "Senate Republican Policy Committee Chair"
+    }
+   ],
    "name": "Shelley Moore Capito",
    "nameParts": {
     "first": "Shelley",
@@ -3549,6 +3579,12 @@
    "govtrack": 412508,
    "how": null,
    "last": "Cotton",
+   "leadership": [
+    {
+     "chamber": "senate",
+     "title": "Senate Republican Conference Chair"
+    }
+   ],
    "name": "Tom Cotton",
    "nameParts": {
     "first": "Tom",
@@ -3679,6 +3715,12 @@
    "govtrack": 412600,
    "how": null,
    "last": "Clark",
+   "leadership": [
+    {
+     "chamber": "house",
+     "title": "House Minority Whip"
+    }
+   ],
    "name": "Katherine M. Clark",
    "nameParts": {
     "first": "Katherine",
@@ -3894,6 +3936,12 @@
    "govtrack": 412681,
    "how": null,
    "last": "Cortez Masto",
+   "leadership": [
+    {
+     "chamber": "senate",
+     "title": "Senate Democratic Outreach Vice Chair"
+    }
+   ],
    "name": "Catherine Cortez Masto",
    "nameParts": {
     "first": "Catherine",
@@ -4989,6 +5037,12 @@
    "govtrack": 300038,
    "how": null,
    "last": "Durbin",
+   "leadership": [
+    {
+     "chamber": "senate",
+     "title": "Senate Minority Whip"
+    }
+   ],
    "name": "Richard J. Durbin",
    "nameParts": {
     "first": "Richard",
@@ -5744,6 +5798,12 @@
    "govtrack": 412639,
    "how": null,
    "last": "Emmer",
+   "leadership": [
+    {
+     "chamber": "house",
+     "title": "House Majority Whip"
+    }
+   ],
    "name": "Tom Emmer",
    "nameParts": {
     "first": "Tom",
@@ -7157,6 +7217,12 @@
    "govtrack": 300048,
    "how": null,
    "last": "Grassley",
+   "leadership": [
+    {
+     "chamber": "senate",
+     "title": "President Pro Tempore of the Senate"
+    }
+   ],
    "name": "Chuck Grassley",
    "nameParts": {
     "first": "Charles",
@@ -9166,6 +9232,12 @@
    "govtrack": 412748,
    "how": null,
    "last": "Hern",
+   "leadership": [
+    {
+     "chamber": "house",
+     "title": "House Republican Policy Committee Chair"
+    }
+   ],
    "name": "Kevin Hern",
    "nameParts": {
     "first": "Kevin",
@@ -10074,6 +10146,12 @@
    "govtrack": 412561,
    "how": null,
    "last": "Jeffries",
+   "leadership": [
+    {
+     "chamber": "house",
+     "title": "House Minority Leader"
+    }
+   ],
    "name": "Hakeem S. Jeffries",
    "nameParts": {
     "first": "Hakeem",
@@ -10204,6 +10282,12 @@
    "govtrack": 412706,
    "how": null,
    "last": "Johnson",
+   "leadership": [
+    {
+     "chamber": "house",
+     "title": "Speaker of the House"
+    }
+   ],
    "name": "Mike Johnson",
    "nameParts": {
     "first": "Mike",
@@ -10656,6 +10740,12 @@
    "govtrack": 412242,
    "how": null,
    "last": "Klobuchar",
+   "leadership": [
+    {
+     "chamber": "senate",
+     "title": "Senate Democratic Steering Committee Chair"
+    }
+   ],
    "name": "Amy Klobuchar",
    "nameParts": {
     "first": "Amy",
@@ -11972,6 +12062,12 @@
    "govtrack": 412464,
    "how": null,
    "last": "Lankford",
+   "leadership": [
+    {
+     "chamber": "senate",
+     "title": "Senate Republican Conference Vice Chair"
+    }
+   ],
    "name": "James Lankford",
    "nameParts": {
     "first": "James",
@@ -12058,6 +12154,12 @@
    "govtrack": 412616,
    "how": null,
    "last": "Lieu",
+   "leadership": [
+    {
+     "chamber": "house",
+     "title": "House Democratic Caucus Vice Chair"
+    }
+   ],
    "name": "Ted Lieu",
    "nameParts": {
     "first": "Ted",
@@ -13110,6 +13212,12 @@
    "govtrack": 456827,
    "how": null,
    "last": "McClain",
+   "leadership": [
+    {
+     "chamber": "house",
+     "title": "House Republican Conference Chair"
+    }
+   ],
    "name": "Lisa C. McClain",
    "nameParts": {
     "first": "Lisa",
@@ -13416,6 +13524,12 @@
    "govtrack": 412194,
    "how": null,
    "last": "Murphy",
+   "leadership": [
+    {
+     "chamber": "senate",
+     "title": "Senate Democratic Conference Deputy Secretary"
+    }
+   ],
    "name": "Christopher Murphy",
    "nameParts": {
     "first": "Christopher",
@@ -15726,6 +15840,12 @@
    "govtrack": 412761,
    "how": null,
    "last": "Neguse",
+   "leadership": [
+    {
+     "chamber": "house",
+     "title": "Assistant House Minority Leader"
+    }
+   ],
    "name": "Joe Neguse",
    "nameParts": {
     "first": "Joe",
@@ -17856,6 +17976,12 @@
    "govtrack": 400357,
    "how": null,
    "last": "Sanders",
+   "leadership": [
+    {
+     "chamber": "senate",
+     "title": "Senate Democratic Outreach Chair"
+    }
+   ],
    "name": "Bernard Sanders",
    "nameParts": {
     "first": "Bernard",
@@ -17900,6 +18026,12 @@
    "govtrack": 300087,
    "how": null,
    "last": "Schumer",
+   "leadership": [
+    {
+     "chamber": "senate",
+     "title": "Senate Minority Leader"
+    }
+   ],
    "name": "Charles E. Schumer",
    "nameParts": {
     "first": "Charles",
@@ -18506,6 +18638,12 @@
    "govtrack": 412261,
    "how": null,
    "last": "Scalise",
+   "leadership": [
+    {
+     "chamber": "house",
+     "title": "House Majority Leader"
+    }
+   ],
    "name": "Steve Scalise",
    "nameParts": {
     "first": "Steve",
@@ -18639,6 +18777,12 @@
    "govtrack": 412471,
    "how": null,
    "last": "Scott",
+   "leadership": [
+    {
+     "chamber": "senate",
+     "title": "Senate Republican Committee Chair"
+    }
+   ],
    "name": "Tim Scott",
    "nameParts": {
     "first": "Tim",
@@ -18855,6 +18999,12 @@
    "govtrack": 412507,
    "how": null,
    "last": "Schatz",
+   "leadership": [
+    {
+     "chamber": "senate",
+     "title": "Senate Democratic Conference Deputy Secretary"
+    }
+   ],
    "name": "Brian Schatz",
    "nameParts": {
     "first": "Brian",
@@ -20179,6 +20329,12 @@
    "govtrack": 400546,
    "how": null,
    "last": "Thune",
+   "leadership": [
+    {
+     "chamber": "senate",
+     "title": "Senate Majority Leader"
+    }
+   ],
    "name": "John Thune",
    "nameParts": {
     "first": "John",
@@ -21958,6 +22114,12 @@
    "govtrack": 412321,
    "how": null,
    "last": "Warner",
+   "leadership": [
+    {
+     "chamber": "senate",
+     "title": "Senate Democratic Conference Vice Chair"
+    }
+   ],
    "name": "Mark R. Warner",
    "nameParts": {
     "first": "Mark",
@@ -22261,6 +22423,12 @@
    "govtrack": 412542,
    "how": null,
    "last": "Warren",
+   "leadership": [
+    {
+     "chamber": "senate",
+     "title": "Senate Democratic Conference Vice Chair"
+    }
+   ],
    "name": "Elizabeth Warren",
    "nameParts": {
     "first": "Elizabeth",

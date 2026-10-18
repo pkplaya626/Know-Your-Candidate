@@ -429,6 +429,10 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
                                   "checked": other_office[2]}
     if person:
         profile.update(_contact(person))
+        # Speaker, floor leader, whip: the posts congress-legislators lists
+        # for this bioguide id now (legislators.leadership), never typed.
+        if person.get("leadership"):
+            profile["leadership"] = [post["title"] for post in person["leadership"]]
         # Names a voter may type instead: "Jim Clyburn" for James Clyburn.
         # Taken from the record matched on bioguide id, never from a name.
         found = legislators.aliases(person, display,

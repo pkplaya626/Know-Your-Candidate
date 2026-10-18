@@ -97,6 +97,23 @@ class TestTrim(unittest.TestCase):
         self.assertEqual(trimmed["fec"], [])
         self.assertEqual(trimmed["fecAll"], ["H2WA01054"])
 
+    def test_leadership_posts_held_now_in_this_chamber_are_kept(self):
+        # The guide defined the Speaker's job and never said who holds it.
+        person = entry(chamber="rep", district=4)
+        person["leadership_roles"] = [
+            {"title": "Speaker of the House", "chamber": "house", "start": "2025-01-03"},
+            {"title": "House Republican Conference Vice Chair", "chamber": "house",
+             "start": "2021-01-03", "end": "2023-01-03"},
+            {"title": "Senate Majority Whip", "chamber": "senate", "start": "2025-01-03"},
+        ]
+        trimmed = legislators.trim(person, as_of="2026-10-17")
+        self.assertEqual(trimmed["leadership"],
+                         [{"title": "Speaker of the House", "chamber": "house"}])
+        # A post whose end has not come is held.
+        person["leadership_roles"][1]["end"] = "2027-01-03"
+        self.assertEqual(len(legislators.trim(person, as_of="2026-10-17")["leadership"]), 2)
+        self.assertNotIn("leadership", legislators.trim(entry(chamber="rep", district=4)))
+
     def test_an_evidenced_id_congress_legislators_lacks_is_added(self):
         # Ashley Hinson's Senate filing, under her legal name (overrides).
         bioguide, (filing, _why) = next(iter(overrides.MEMBER_FEC_IDS.items()))

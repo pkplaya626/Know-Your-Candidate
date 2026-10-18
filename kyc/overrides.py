@@ -704,6 +704,23 @@ PLACE_GOVERNMENTS = {
                 "Randolph Town city"),
 }
 
+# A committee seat's title as the body itself styles it, where the rosters
+# give the minority's lead the majority's title. Keyed on the committee's
+# code, the side and the rosters' own title, never on a person: (code,
+# side, rosters' title) -> (title, evidence). congress-legislators titles
+# both leads of the Senate Caucus on International Narcotics Control
+# "Chairman", so the guide's committee table showed two chairmen of one
+# panel and the minority's lead's profile read "(Chairman)". Checked
+# 2026-10-17: the caucus's own site, drugcaucus.senate.gov, styles its
+# majority lead "Chairman" and its minority lead "Co-Chair". validate
+# warns on any other minority seat titled as a chair, and on an entry here
+# that matches no seat.
+COMMITTEE_TITLES = {
+    ("SCNC", "minority", "Chairman"): (
+        "Co-Chair", "drugcaucus.senate.gov, 2026-10-17: 'Chairman (R - TX)' and "
+        "'Co-CHAIR (D - RI)' at the head of its home page"),
+}
+
 # Phrases in a Status value that mean the incumbent is not on the 2026 ballot.
 NOT_SEEKING_MARKERS = ("retiring", "not running", "defeated", "ineligible", "resigned")
 
