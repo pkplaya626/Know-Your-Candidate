@@ -28,6 +28,7 @@ from . import (
     validate,
     voteview,
     voting as voting_mod,
+    voting_dates as voting_dates_mod,
 )
 from .profiles import build_profiles, screen_field
 from . import federal as federal_mod
@@ -248,7 +249,8 @@ def _build(args):
                           federal=federal_mod.load_cache(args.root),
                           judiciary=judiciary_mod.load_cache(args.root),
                           vacancies=vacancies_mod.load_cache(args.root),
-                          history=lineage)
+                          history=lineage,
+                          voting_dates=voting_dates_mod.load(args.root))
     from . import oge as oge_mod
     for level, code, message, detail in oge_mod.problems(oge_mod.load_cache(args.root),
                                                          federal_mod.load_cache(args.root)):
@@ -277,7 +279,8 @@ def _build(args):
     summary = summary_mod.build(profiles, races=race_list,
                                 committees=legislators.load_committees(args.root),
                                 results=outcomes, snapshot=snapshot)
-    summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root))
+    summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root),
+                                          voting_dates_mod.load(args.root))
     path, size = emit.write_profiles(
         profiles, stats, args.root, races=race_list, summary=summary
     )
@@ -1177,7 +1180,8 @@ def _verify(args):
                                 committees=legislators.load_committees(args.root),
                                 results=outcomes,
                                 snapshot=legislators.load_snapshot(args.root))
-    summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root))
+    summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root),
+                                          voting_dates_mod.load(args.root))
 
     problems = []
     from . import cycle as cycle_mod
