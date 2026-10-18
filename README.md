@@ -1667,28 +1667,36 @@ Until 2026-10-18 ten courts were listed with no members. Now:
   Chrome through `tools/read_court_pages.mjs` (Node 22 or later, no
   dependencies; Chrome from `$CHROME` or the usual install paths). The
   reader keeps a page that answered with an error status, such as a bot
-  wall's 403, out of the read. A run with no Node or no Chrome reads none of
+  wall's 403, out of the read, and a page that ended on another host than
+  the court's (a redirect answers 200 too). A run with no Node or no Chrome reads none of
   them, says so, and each keeps its last good read (rule 8). The weekly
   refresh installs Node 24 for it.
 - Rhode Island publishes its roster only as a PDF. `courts.pdf_lines`
   reads the file's own text with `zlib` alone. The recipe reads the Supreme
   Court's block, skips "Justice (Vacant)", and takes the date the file says
-  it was revised, which the page shows ("dated June 5, 2026"). A response
-  that is not a PDF is refused (rule 52).
+  it was revised, which the page shows ("dated June 5, 2026"). The link says
+  "(PDF)". A name is letters, spaces and punctuation alone: a justice's line
+  that holds anything else (a phone number set on the same baseline) is
+  refused, not read into the name. A response that is not a PDF is refused
+  (rule 52).
 - Missouri's, New Hampshire's, Nevada's and New York's sites refuse every
   automated reader, a headless Chrome included (Cloudflare, Akamai, and
   Missouri's notice forbidding scrapers). Their rosters were read by hand
   from the court's own page in an ordinary windowed Chrome, and are kept in
   `overrides.COURT_ROSTERS` with the day they were read and the page's
-  words. The build checks each against its seats and chief as it would a
-  read roster. The page says "read by hand on" that day.
+  words. The build fails on one that does not fit its seats and chief, as
+  a read roster would be refused. The page says "read by hand on" that day.
 - Alabama's site resets every connection, from a browser too. Alabama is
   the one court left in `courts.UNREADABLE`: its page names the court and
   says why its members are not listed.
 
-Every read carries its day (`read`). The build warns about a court kept at
-its last good read, or a roster read by hand, more than `courts.STALE_DAYS`
-(45) days ago. Nothing is taken from Wikipedia or Ballotpedia.
+Every read carries its day (`read`), and a court kept at its last good read
+keeps that day, never the cache's `fetched`, which every run rewrites. The
+build warns about a court kept at its last good read, or a roster read by
+hand, more than `courts.STALE_DAYS` (45) days ago, and `courts` reports any
+court whose members changed since its last read. The list of sources under
+each state's government names its court and the day its roster was read.
+Nothing is taken from Wikipedia or Ballotpedia.
 
 ## The federal executive
 

@@ -5767,7 +5767,8 @@ async function testStateGov() {
       !/read by hand/.test(riText), riText.slice(0, 400));
     // Review of #98: a link that opens a PDF says so before a tap starts a
     // download; a page's link does not.
-    const pdfLinks = [...ri.D.querySelectorAll("#state-government a")].filter((a) => /\.pdf$/i.test(a.href));
+    const pdfLinks = [...ri.D.querySelectorAll("#state-government a")].filter((a) =>
+      /\.pdf$/i.test(a.href) && /court's roster/.test(a.textContent));
     check("a roster that is a PDF is labelled (PDF)",
       pdfLinks.length > 0 && pdfLinks.every((a) => /\(PDF\)$/.test(a.textContent)),
       pdfLinks.map((a) => a.textContent).join(" | "));

@@ -756,9 +756,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
 
     A run with no Chrome keeps each court's last good read (rule 8), and the
     build warns once a read, kept or by hand, is `courts.STALE_DAYS` old.
-    Count what a new recipe reads against the page: Louisiana's first read
-    five of seven, and Tennessee's missed a justice whose card linked his
-    old court.
+    Each read carries its own `read` day, kept with it: dated by the cache's
+    `fetched`, which every run rewrites, a court that never read again
+    would never have aged. A hand-read roster that does not fit its court
+    stops the build (`curated_errors`), as a read one never reaches the
+    page. A browser page is read only on the court's own host, a PDF line
+    only as a name and nothing beside it, and any change in a court's
+    members is reported (`changed`). Count what a new recipe reads against
+    the page: Louisiana's first read five of seven, and Tennessee's missed
+    a justice whose card linked his old court.
 
 58. **A shapefile says its own encoding.** `read_dbf` decoded every layer
     as Latin-1, dBase's default, and the Census writes UTF-8 and says so in
