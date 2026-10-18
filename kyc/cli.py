@@ -45,6 +45,28 @@ def _load(args):
     return raw
 
 
+def _legislature_links(root):
+    """Print what the legislature pages leave off or label otherwise
+    (``legislature.link_report``): portraits that are a search engine's
+    thumbnail - not yet reported to Open States - or that 'statelegs'
+    confirmed missing, members with no page, a page on a party caucus's
+    site only, and pages withheld because two members were given one."""
+    from . import legislature as legislature_mod
+    report = legislature_mod.link_report(root)
+    for kind, why, warn in (
+            ("thumbnail", "legislator portraits left off, image-search thumbnails", True),
+            ("broken", "legislator portraits left off, confirmed missing", True),
+            ("sharedPage", "legislator pages withheld, the same page given to two members", True),
+            ("noPage", "legislators with no page to link, on the legislature's site or a caucus's "
+                       "(legislature.LEGISLATURE_HOSTS, CAUCUS_SITES)", False),
+            ("caucus", "legislators linked only to a party caucus's page "
+                       "(legislature.CAUCUS_SITES)", False)):
+        found = report.get(kind) or {}
+        if found:
+            print(f"  {'[warn] ' if warn else ''}{why}: {sum(found.values())} ("
+                  + ", ".join(f"{code} {n}" for code, n in sorted(found.items())) + ")")
+
+
 def _build(args):
     raw = _load(args)
     if raw is None:
@@ -246,6 +268,9 @@ def _build(args):
 
     if args.check:
         if not args.json:
+            # What the legislature pages leave off, here too, where a
+            # reviewer looks (PR #96 review).
+            _legislature_links(args.root)
             print("\n[check] validation only, nothing written.")
         return 1 if errors else 0
 
@@ -288,23 +313,7 @@ def _build(args):
     print(f"[ok] state legislatures: {leg_stats['states']} states, {leg_stats['districts']:,} "
           f"districts, {leg_stats['placed']:,} members placed, {leg_stats['unplaced']} listed off "
           f"the map; {len(written_legs)} file(s) rewritten")
-    # Portraits left off the legislature pages: a search engine's thumbnail
-    # (reported upstream to Open States, never shown) or one confirmed
-    # missing by 'statelegs' (kyc/legislature.py _person).
-    for kind, why in (("thumbnail", "image-search thumbnails"),
-                      ("broken", "confirmed missing")):
-        found = {code: c[kind] for code, c in dropped.items() if c.get(kind)}
-        if found:
-            print(f"  [warn] legislator portraits left off, {why}: {sum(found.values())} ("
-                  + ", ".join(f"{code} {n}" for code, n in sorted(found.items())) + ")")
-    unlinked = {code: sum(1 for c in m["chambers"].values() for v in c["members"].values()
-                          for p in v if "page" not in p)
-                for code, m in legislatures.items()}
-    unlinked = {code: n for code, n in unlinked.items() if n}
-    if unlinked:
-        print(f"  legislators with no page on their legislature's own site "
-              f"(legislature.LEGISLATURE_HOSTS): {sum(unlinked.values())} ("
-              + ", ".join(f"{code} {n}" for code, n in sorted(unlinked.items())) + ")")
+    _legislature_links(args.root)
 
     # Each state's counties and their local governments.
     from . import counties as counties_mod

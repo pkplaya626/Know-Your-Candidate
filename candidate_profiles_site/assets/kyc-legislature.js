@@ -134,23 +134,71 @@
       seatLine(p) +
       (contact.length ? '<p class="leg-contact">' + contact.join(" · ") + "</p>" : "") +
       (p.address ? '<p class="leg-contact">Capitol office: ' + KYC.escapeHtml(p.address) + "</p>" : "") +
-      // One page on the legislature's own site, never the dump of every
-      // page Open States read (LINKS-04, STATEGOV-16).
-      (p.page ? '<p class="leg-page">' + link(p.page, "Official page") +
-        ' <span class="faint">' + KYC.escapeHtml(host(p.page)) + "</span></p>" : "") +
+      // One page, never the dump of every page Open States read (LINKS-04,
+      // STATEGOV-16), labelled as what it is (pageLink).
+      pageLink(p) +
       "</div></article>";
+  }
+
+  /** The member's one page, called what it is (kyc/legislature.py
+   *  member_page): their page on the legislature's site, the legislature's
+   *  list of their bills (Connecticut links no other), their page on a
+   *  party caucus's site (every Michigan legislator's only page), the
+   *  chamber's member list, or a past session's page - never all of them
+   *  "Official page". A member with none says so. */
+  function pageLink(p) {
+    if (!p.page) {
+      return '<p class="leg-page faint">Open States links no page for this member on the ' +
+        "legislature's site.</p>";
+    }
+    var text = p.pageKind === "bills" ? "Bills on the legislature's site"
+      : p.pageKind === "caucus" ? "Party caucus page" + (p.pageCaucus ? ": " + p.pageCaucus : "")
+      : p.pageKind === "list" ? "On the " + current().title + " member list"
+      : p.pageSession ? "Page on the legislature's site, " + p.pageSession + " session"
+      : "Official page";
+    return '<p class="leg-page">' + link(p.page, text) +
+      ' <span class="faint">' + KYC.escapeHtml(host(p.page)) + "</span></p>";
   }
 
   /* -------------------------------------------------------- 2026 ballot */
 
   function nextLine(b) {
     if (!b.next) return "";
-    return " " + link(b.next.source, (b.next.month ? "Next election: " + b.next.month : "Next elected: November") +
+    return " " + link(b.next.source, "Next regular election: " + (b.next.month || "November") +
       " " + b.next.year);
   }
 
+  function plainName(name) { return String(name).replace(/^0+(?=\d)/, ""); }
+
+  /** What the state's record says beyond "all" or "none", and beyond the
+   *  term the next line states: "all" alone says nothing the count did not
+   *  ("The state's record: all." read on Connecticut's page), and "all
+   *  (2-year terms)" repeated the term line under it. */
+  function basisText(c) {
+    var t = String(c.ballot.basis || "").replace(/^(none regular|none|all)\b:?\s*/i, "").trim();
+    if (c.termYears) {
+      var n = String(c.termYears);
+      t = t.replace(new RegExp("\\s*\\(" + n + "-year terms\\)"), "")
+        .replace(new RegExp(",\\s*" + n + "-year terms\\b"), "")
+        .replace(new RegExp("\\b" + n + "-year terms,?\\s*"), "");
+    }
+    t = t.replace(/^\((.*)\)$/, "$1").replace(/\(\s*\)/g, "").replace(/^[\s,;]+|[\s,;]+$/g, "");
+    return t ? t.charAt(0).toUpperCase() + t.slice(1) + "." : "";
+  }
+
+  /** The chamber's districts with an election for the rest of a term
+   *  (kyc/legislature.specials), from the same record. */
+  function specialLine(c) {
+    var list = (c.specials || []).map(plainName);
+    if (!list.length) return "";
+    return (list.length === 1 ? "District " : "Districts ") + andList(list) + (c.ballot.up ? " also " : " ") +
+      (list.length === 1 ? (after() ? "had" : "has") : (after() ? "had" : "have")) +
+      " a special election for the rest of a term on the Nov 3, 2026 ballot.";
+  }
+
   /** The chamber's seats on the November 3 ballot, in the state's own
-   *  record's words, linked to it. Regular elections only. */
+   *  record's words, linked to it: the regular elections, then any special
+   *  election for the rest of a term. */
   function chamberBallot(c) {
     var b = c.ballot;
     if (!b) return "";
@@ -158,24 +206,35 @@
     var head = !b.up ? "No regular elections for the " + c.title + " in 2026."
       : b.up === b.seats ? "All " + b.seats + " seats " + was + " on the Nov 3, 2026 ballot."
       : b.up + " of the " + b.seats + " seats " + was + " on the Nov 3, 2026 ballot.";
-    return '<p class="leg-ballot">' + KYC.escapeHtml(head) + ' <span class="faint">' +
-      KYC.escapeHtml("The state's record: " + b.basis + ". A special election to fill an " +
-        "unexpired term is not counted.") + "</span> " +
-      link(b.source, "Source") + (!b.up ? nextLine(b) : "") + "</p>" +
+    var more = basisText(c);
+    var special = specialLine(c);
+    return '<p class="leg-ballot">' + KYC.escapeHtml(head) +
+      (special ? " " + KYC.escapeHtml(special) : "") +
+      (more ? ' <span class="faint">' + KYC.escapeHtml("The state's record: " + more) + "</span>" : "") +
+      " " + link(b.source, "Source") + (!b.up ? nextLine(b) : "") + "</p>" +
       (c.termYears ? '<p class="leg-term">Members serve ' + KYC.escapeHtml(String(c.termYears)) +
         "-year terms, as the state's record says.</p>" : "");
   }
 
-  /** One district's seat on the ballot, where the record names it. */
+  /** One district's seat on the ballot, where the record names it. A
+   *  district the record names for a special election is on the ballot,
+   *  and its panel says so first (rule 74; PR #96 review: Kansas Senate 24
+   *  read "not up for regular election" over a seat on the ballot). */
   function districtBallot(id) {
     var c = current();
     var d = c.districts[id];
-    if (!c.ballot || !d || d.up === undefined) return chamberBallot(c);
-    var text = d.up ? "This seat " + (after() ? "was" : "is") + " on the Nov 3, 2026 ballot."
-      : "This seat " + (after() ? "was" : "is") + " not up for regular election in 2026.";
-    return '<p class="leg-ballot">' + KYC.escapeHtml(text) + ' <span class="faint">' +
-      KYC.escapeHtml("The state's record: " + c.ballot.basis + ".") + "</span> " +
-      link(c.ballot.source, "Source") + (!d.up ? nextLine(c.ballot) : "") + "</p>";
+    if (!c.ballot || !d || (d.up === undefined && !d.special)) return chamberBallot(c);
+    var is = after() ? "was" : "is";
+    var text = d.special
+      ? "A special election for the rest of a term in this district " + is + " on the Nov 3, 2026 ballot." +
+        (d.up === true ? " So " + is + " its regular election."
+          : d.up === false ? " It " + (after() ? "had" : "has") + " no regular election in 2026." : "")
+      : d.up ? "This seat " + is + " on the Nov 3, 2026 ballot."
+      : "This seat " + is + " not up for regular election in 2026.";
+    var more = basisText(c);
+    return '<p class="leg-ballot">' + KYC.escapeHtml(text) +
+      (more ? ' <span class="faint">' + KYC.escapeHtml("The state's record: " + more) + "</span>" : "") +
+      " " + link(c.ballot.source, "Source") + (!d.up && !d.special ? nextLine(c.ballot) : "") + "</p>";
   }
 
   function showDistrict(id) {
@@ -240,9 +299,7 @@
   /** The chamber as one square per seat, above its map (STATEGOV-23). */
   function seats() {
     var c = current();
-    el("legSeats").innerHTML = KYC.seatStrip(c.count) +
-      '<p class="faint">Each square is a seat, by party; an outline is a seat with nobody listed. ' +
-      "The line marks half the seats.</p>";
+    el("legSeats").innerHTML = KYC.seatStrip(c.count) + KYC.seatKey([c.count]);
   }
 
   function roster() {

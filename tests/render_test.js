@@ -4880,8 +4880,14 @@ async function testLegislatures() {
           : c.count.majority === "D" ? "Democratic majority" : "No party holds"), holds && holds.textContent);
       const ballot = D.querySelector("#legPanelBody .leg-ballot");
       check("and which seats are on the Nov 3 ballot, from the state's record",
-        !!ballot && ballot.textContent.includes(c.ballot.basis) &&
+        !!ballot && ballot.textContent.includes(`${c.ballot.up} of the ${c.ballot.seats} seats`) &&
         !!ballot.querySelector(`a[href="${c.ballot.source}"]`), ballot && ballot.textContent);
+      // PR #96 review: "The state's record: all." and a special-election
+      // sentence on every chamber said nothing the count did not.
+      check("the record is quoted only where it says more than the count",
+        !/The state's record: (all|none)\b/i.test(ballot.textContent) &&
+        !/A special election to fill an unexpired term is not counted/.test(ballot.textContent),
+        ballot.textContent);
       const up = Object.keys(c.districts).find((id) => c.districts[id].up === true);
       const off = Object.keys(c.districts).find((id) => c.districts[id].up === false);
       if (up && off) {
@@ -4949,6 +4955,99 @@ async function testLegislatures() {
       const text = ak.D.getElementById("legPanelBody").textContent;
       check("the coalition note is on the legislature page, as on the state page",
         !s.note || (text.includes(s.note) && !!ak.D.querySelector(`#legPanelBody a[href="${s.noteSource}"]`)), text);
+    });
+  }
+  {
+    /* PR #96 review: districts with a special election for the rest of a
+     * term opened with "This seat is not up for regular election in 2026"
+     * over a seat on the Nov 3 ballot (Kansas Senate 24, Nebraska 41). */
+    for (const [file, st, name] of [["legislature/ks.html", "KS", "24"], ["legislature/ne.html", "NE", "41"]]) {
+      const { window, D, errors } = await buildPage(file);
+      suite(`${file} — a special election puts district ${name} on the ballot`, () => {
+        check("no page errors", errors.length === 0, errors.join(" | "));
+        const c = window.kycLegislature[st].chambers.upper;
+        const id = Object.keys(c.districts).find((k) => c.districts[k].name.replace(/^0+/, "") === name);
+        check("the district is marked from the state's record", !!id && c.districts[id].special === true,
+          JSON.stringify(id && c.districts[id]));
+        const summary = D.querySelector("#legPanelBody .leg-ballot").textContent;
+        check("the chamber's ballot line names it", summary.includes("special election for the rest of a term") &&
+          new RegExp("\\b" + name + "\\b").test(summary), summary);
+        pick(D, window, id);
+        const text = D.querySelector("#legPanelBody .leg-ballot").textContent;
+        check("its panel says its seat is on the ballot, first, and never 'not up'",
+          /^A special election for the rest of a term in this district (is|was) on the Nov 3, 2026 ballot/.test(text) &&
+          !/not up for regular election/.test(text), text);
+      });
+      if (st === "NE") {
+        suite("legislature/ne.html — a strip with no parties draws no majority tick", () => {
+          const strip = D.querySelector("#legSeats .seat-strip");
+          const key = D.querySelector("#legSeats .seat-key").textContent;
+          const c = window.kycLegislature.NE.chambers.upper;
+          check("no tick and no 'half' where nobody holds a party's seats",
+            !strip.querySelector(".seat-half") && !/half/.test(key) && !/half/.test(strip.getAttribute("aria-label")), key);
+          check("an outline is explained only where a seat is outlined",
+            /outlined/.test(key) === (c.seats > c.listed), key);
+        });
+      }
+    }
+  }
+  {
+    /* PR #96 review: every link read "Official page", Connecticut's list of
+     * a member's bills and nothing at all for Michigan's legislators, whose
+     * only pages are on their caucuses' sites. */
+    for (const [file, st] of [["legislature/mi.html", "MI"], ["legislature/ct.html", "CT"],
+                              ["legislature/al.html", "AL"], ["legislature/in.html", "IN"]]) {
+      const { window, D, errors } = await buildPage(file);
+      suite(`${file} — a member's link says what it is`, () => {
+        check("no page errors", errors.length === 0, errors.join(" | "));
+        const s = window.kycLegislature[st];
+        const want = { member: /^(Official page|Page on the legislature's site, \d{4}(-\d{4})? session)$/,
+                       bills: /^Bills on the legislature's site$/, caucus: /^Party caucus page: \S/,
+                       list: /^On the .+ member list$/ };
+        const seen = {};
+        for (const which of Object.keys(s.chambers)) {
+          const btn = D.querySelector(`.segmented [data-chamber="${which}"]`);
+          if (btn) btn.click();
+          const members = s.chambers[which].members;
+          for (const id of Object.keys(members)) {
+            const p = members[id].find((m) => !seen[m.pageKind || "none"]);
+            if (!p) continue;
+            seen[p.pageKind || "none"] = true;
+            pick(D, window, id);
+            const card = [...D.querySelectorAll("#legPanelBody .leg-person")].find((el) =>
+              el.querySelector(".leg-name").textContent === p.name);
+            const a = card && card.querySelector(".leg-page a");
+            if (p.page) {
+              check(`a ${p.pageKind} link is labelled as one`, !!a && want[p.pageKind].test(a.textContent) &&
+                a.getAttribute("href") === p.page, a && a.textContent);
+            } else {
+              check("a member with no page says so", !a && /links no page for this member/.test(card.textContent));
+            }
+          }
+        }
+        const kinds = { MI: "caucus", CT: "bills", AL: "list", IN: "member" };
+        check(`the state's own kind of page is among them (${kinds[st]})`, !!seen[kinds[st]], Object.keys(seen).join(","));
+      });
+    }
+  }
+  {
+    // The key that reads the strips, once on a state page and the directory.
+    const st = await buildPage("states/mn.html");
+    suite("states/mn.html — the seat strips have a key", () => {
+      const keys = st.D.querySelectorAll(".seat-key");
+      check("one key under the chambers", keys.length === 1 && /Republicans from the left/.test(keys[0].textContent),
+        `${keys.length}`);
+      const strip = st.D.querySelector(".gov-chamber .seat-strip");
+      const cells = [...strip.querySelectorAll(".seat")];
+      check("Republicans fill from the left, as the counts beside them read",
+        cells[0].classList.contains("seat-r") && cells[cells.length - 1].classList.contains("seat-d"));
+    });
+    const dir = await buildPage("legislature/index.html");
+    suite("legislature/index.html — one key for every strip", () => {
+      const keys = dir.D.querySelectorAll(".seat-key");
+      check("one key, above the list", keys.length === 1 &&
+        !!(keys[0].compareDocumentPosition(dir.D.querySelector(".directory-list")) &
+          dir.window.Node.DOCUMENT_POSITION_FOLLOWING), `${keys.length}`);
     });
   }
   {

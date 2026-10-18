@@ -276,7 +276,16 @@ class TestOfficialPage(unittest.TestCase):
         for code, hosts in legislature.LEGISLATURE_HOSTS.items():
             seen = {(urllib.parse.urlsplit(link).hostname or "").lower().removeprefix("www.")
                     for r in cache["states"][code] for link in r.get("links", ())}
-            self.assertFalse(set(hosts) - seen, code)
+            # ".senate.ca.gov" is every subdomain of it ("sd14.senate.ca.gov").
+            stale = {h for h in hosts if not any(s == h or (h.startswith(".") and s.endswith(h))
+                                                 for s in seen)}
+            self.assertFalse(stale, code)
+        for code, sites in legislature.CAUCUS_SITES.items():
+            seen = {(urllib.parse.urlsplit(link).hostname or "").lower().removeprefix("www.")
+                    for r in cache["states"][code] for link in r.get("links", ())}
+            for site in sites:
+                self.assertTrue(any(s == site[0] or (site[0].startswith(".") and s.endswith(site[0]))
+                                    for s in seen), (code, site[0]))
 
 
 class TestPerson(unittest.TestCase):
@@ -396,6 +405,155 @@ class TestSeatsUp(unittest.TestCase):
             [str(n) for n in range(1, 51)])), {})
         # A list naming a district the map does not have.
         self.assertEqual(legislature.seats_up("AK", "upper", self.districts("ABCDEFGHIJKLMNOPQRZT")), {})
+
+    def test_a_special_election_marks_its_district(self):
+        # PR #96 review: these districts' seats are on the Nov 3 ballot for
+        # the rest of a term, and their panels read "not up".
+        def named(code, chamber, names):
+            ds = self.districts(names)
+            return [ds[i]["name"] for i in legislature.specials(code, chamber, ds)]
+        self.assertEqual(named("CO", "upper", [str(n) for n in range(1, 36)]), ["17", "21", "29", "31"])
+        self.assertEqual(named("NM", "upper", [f"{n:03d}" for n in range(1, 43)]), ["033"])
+        self.assertEqual(named("KS", "upper", [str(n) for n in range(1, 41)]), ["24", "25"])
+        self.assertEqual(named("NE", "upper", [str(n) for n in range(1, 50)]), ["41"])
+        self.assertEqual(named("HI", "upper", [str(n) for n in range(1, 26)]), ["19"])
+        self.assertEqual(named("ND", "lower", [str(n) for n in range(1, 48)]), ["20", "26", "42"])
+        # "4-year terms", "2-year" and "2026" are not districts.
+        self.assertEqual(named("MN", "upper", [str(n) for n in range(1, 68)]), [])
+        self.assertEqual(named("TX", "upper", [str(n) for n in range(1, 32)]), [])
+
+    def test_a_special_in_no_district_on_the_map_fails(self):
+        from unittest import mock
+        from kyc import ballot2026
+        entry = ("Senate", 10, 5, "the 5 odd-numbered districts; District 12 also has a special election",
+                 "https://example.gov")
+        with mock.patch.dict(ballot2026.STATES, {"ZZ": {"upper": entry}}):
+            with self.assertRaises(legislature.LegislatureError):
+                legislature.specials("ZZ", "upper", self.districts([str(n) for n in range(1, 11)]))
+        entry = ("Senate", 10, 5, "the 5 odd-numbered districts; a special election too", "https://x.gov")
+        with mock.patch.dict(ballot2026.STATES, {"ZZ": {"upper": entry}}):
+            with self.assertRaises(legislature.LegislatureError):
+                legislature.specials("ZZ", "upper", self.districts([str(n) for n in range(1, 11)]))
+
+    def test_floterial_only_where_the_statute_says(self):
+        # RSA 662:5: a floterial district overlays base districts. A name
+        # the statute does not make one is unmatched, and reported.
+        self.assertEqual(len(legislature.NH_FLOTERIAL), 39)
+        row = {"chamber": "lower", "district": "Belknap 8"}
+        self.assertEqual(legislature.unplaced_why("NH", row), "floterial")
+        self.assertEqual(legislature.unplaced_why("NH", dict(row, district="Belknap 08x")), "unmatched")
+        self.assertEqual(legislature.unplaced_why("NH", dict(row, district="Belknap 3")), "unmatched")
+        self.assertEqual(legislature.unplaced_why("NH", dict(row, chamber="upper")), "unmatched")
+        self.assertEqual(legislature.unplaced_why("ME", {"chamber": "lower", "tribalSeat": True}), "tribal")
+
+
+class TestTheMembersOwnPage(unittest.TestCase):
+    """The card's one page is about this member, in their chamber and
+    district (reviewer of PR #96, 2026-10-17): Open States keeps a
+    senator's old House pages, and many legislatures key a page by district
+    number, so the old page shows whoever holds that seat now."""
+
+    def page(self, code, links, chamber, district, name="", year=2026, **kw):
+        return legislature.member_page(code, links, year, name=name, chamber=chamber,
+                                       district=district, **kw)
+
+    def test_another_chamber_or_district_is_someone_elses(self):
+        cases = [
+            # Kentucky's Sen. Steve Rawlings: House District 66 is T.J. Roberts's.
+            ("KY", "upper", "11", "Steve Rawlings",
+             ["https://legislature.ky.gov/Legislators/Pages/Legislator-Profile.aspx?DistrictNumber=66",
+              "https://legislature.ky.gov/Legislators/Pages/Legislator-Profile.aspx?DistrictNumber=111"]),
+            # Louisiana's Sen. Brach Myers: House ID=45 is Annie Spell's.
+            ("LA", "upper", "23", "Brach Myers",
+             ["https://house.louisiana.gov/H_Reps/members?ID=45", "https://senate.la.gov/smembers?ID=23"]),
+            # Texas's Sen. Phil King: House District 61's page.
+            ("TX", "upper", "10", "Phil King",
+             ["https://house.texas.gov/members/member-page/?district=61",
+              "https://senate.texas.gov/member.php?d=10"]),
+            # California's Sen. Anna Caballero: Senate District 12 is Shannon Grove's.
+            ("CA", "upper", "14", "Anna Caballero",
+             ["https://senate.ca.gov/sd12", "https://sd14.senate.ca.gov/"]),
+            # Florida's Sen. Ed Hooper: s16 is Darryl Rouson's.
+            ("FL", "upper", "21", "Ed Hooper",
+             ["https://www.flsenate.gov/Senators/s16", "https://www.flsenate.gov/Senators/s21"]),
+            # West Virginia's Sen. Joey Garcia: "Delegate Garcia" is Rick Garcia.
+            ("WV", "upper", "13", "Joey Garcia",
+             ["https://www.wvlegislature.gov/House/lawmaker.cfm?member=Delegate%20Garcia",
+              "https://www.wvlegislature.gov/Senate1/lawmaker.cfm?member=Senator%20Garcia"]),
+        ]
+        for code, chamber, district, name, links in cases:
+            page = self.page(code, links, chamber, district, name)
+            self.assertEqual(page["url"], links[1], name)
+            self.assertIsNone(self.page(code, links[:1], chamber, district, name), name)
+        # A query after the district does not hide it.
+        self.assertIsNone(self.page("FL", ["https://www.flsenate.gov/Senators/s16?pref=full"],
+                                    "upper", "21", "Ed Hooper"))
+
+    def test_one_page_given_to_two_members_is_neithers(self):
+        # North Carolina's Biography/S/449 is Sen. Dana Jones's; Open States
+        # lists it for Sen. Sophia Chitlik too, beside her own.
+        roster = [{"id": "1", "name": "Dana Jones", "chamber": "upper", "district": "31",
+                   "links": ["https://www.ncleg.gov/Members/Biography/S/449"]},
+                  {"id": "2", "name": "Sophia Chitlik", "chamber": "upper", "district": "22",
+                   "links": ["https://www.ncleg.gov/Members/Biography/S/449",
+                             "https://www.ncleg.gov/Members/Biography/S/452"]}]
+        pages, withheld = legislature.pages_for("NC", roster, 2026)
+        self.assertEqual(pages["1"]["url"], roster[0]["links"][0])
+        self.assertEqual(pages["2"]["url"], roster[1]["links"][1])
+        self.assertEqual(withheld, 0)
+        roster[1]["links"] = roster[1]["links"][:1]
+        pages, withheld = legislature.pages_for("NC", roster, 2026)
+        self.assertEqual((pages["1"], pages["2"], withheld), (None, None, 2))
+
+    def test_each_kind_of_page_is_labelled_as_what_it_is(self):
+        # Connecticut links only the legislature's list of a member's bills.
+        ct = self.page("CT", ["https://www.cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27S01%27",
+                              "https://www.senatedems.ct.gov/fonfara"], "upper", "1", "John Fonfara")
+        self.assertEqual(ct["kind"], "work")
+        # Every Michigan legislator's only page is on their caucus's site.
+        mi = self.page("MI", ["https://housedems.com/karen-whitsett"], "lower", "4", "Karen Whitsett")
+        self.assertEqual((mi["kind"], mi["caucus"]), ("caucus", "Michigan House Democrats"))
+        # A caucus's page must say whose it is.
+        self.assertIsNone(self.page("MI", ["https://housedems.com/news"], "lower", "4", "Karen Whitsett"))
+        # A past session's page is labelled with its session.
+        indiana = self.page("IN", ["https://iga.in.gov/legislative/2021/legislators/legislator_david_niezgodski_1"],
+                            "upper", "10", "David Niezgodski")
+        self.assertEqual(indiana["session"], "2021")
+        # Pennsylvania's "/bio/2009/" is a member id, not a session.
+        self.assertEqual(legislature.sessions("https://www.palegis.us/senate/members/bio/2009/sen-miller"), [])
+        # Alabama's old ALIS pages are not on a host the legislature serves now.
+        self.assertIsNone(self.page("AL", ["http://www.legislature.state.al.us/aliswww/ISD/ALSenator.aspx?"
+                                           "NAME=Kelley&OID_SPONSOR=100&OID_PERSON=7700&SESSNAME="],
+                                    "upper", "12", "Keith Kelley"))
+        # What the card shows for each.
+        record = {"id": "x", "name": "John Fonfara", "party": "Democratic", "partyKey": "D",
+                  "chamber": "upper", "district": "1"}
+        out = legislature._person(record, "CT", 2026, pages={"x": ct})
+        self.assertEqual((out["page"], out["pageKind"]), (ct["url"], "bills"))
+        out = legislature._person(record, "MI", 2026, pages={"x": mi})
+        self.assertEqual((out["pageKind"], out["pageCaucus"]), ("caucus", "Michigan House Democrats"))
+        out = legislature._person(record, "IN", 2026, pages={"x": indiana})
+        self.assertEqual((out["pageKind"], out["pageSession"]), ("member", "2021"))
+
+    def test_no_chosen_page_is_another_chamber_or_district(self):
+        cache = statelegs.load_cache(ROOT)
+        if not cache:
+            self.skipTest("no state_legislators.json")
+        year = int(cache["fetched"][:4])
+        for code, roster in cache["states"].items():
+            pages, _withheld = legislature.pages_for(code, roster, year)
+            used = {}
+            for r in roster:
+                page = pages.get(r["id"])
+                if not page:
+                    continue
+                self.assertFalse(legislature._someone_elses(code, page["url"], r["chamber"], r.get("district"),
+                                                            set(), by_words=page["kind"] != "caucus"),
+                                 (code, r["name"], page["url"]))
+                if page["kind"] != "list":
+                    key = legislature._canonical(page["url"])
+                    self.assertNotIn(key, used, (code, r["name"], used.get(key)))
+                    used[key] = r["name"]
 
 
 class TestImageCheck(unittest.TestCase):

@@ -252,8 +252,11 @@ _QUERY_TITLES = {"delegate": "lower", "representative": "lower", "senator": "upp
 # ``(pattern on host+path?query, lower-cased, the chamber when the pattern
 # carries none)``; a pattern's "c" group, an "h" or "s", is the chamber.
 _DISTRICT_IN_ADDRESS = tuple((re.compile(p), ch) for p, ch in (
-    (r"[?&](?:district|districtnumber)=(?P<c>[hs])?0*(?P<n>\d+)(?:&|$)", None),
+    # Missouri's House links one page as "MemberDetails.aspx?\district=103".
+    (r"[?&]\\?(?:district|districtnumber)=(?P<c>[hs])?0*(?P<n>\d+)(?:&|$)", None),
     (r"^senate\.texas\.gov/member\.php\?d=0*(?P<n>\d+)", "upper"),
+    (r"^legis\.delaware\.gov/legislature\.nsf/bydistrict/(?:representative|senator)0*(?P<n>\d+)$",
+     None),
     (r"^arkansashouse\.org/district/0*(?P<n>\d+)", "lower"),
     (r"^assembly\.ca\.gov/assemblymembers/0*(?P<n>\d+)", "lower"),
     (r"^senate\.ca\.gov/sd0*(?P<n>\d+)\b", "upper"),
@@ -261,7 +264,7 @@ _DISTRICT_IN_ADDRESS = tuple((re.compile(p), ch) for p, ch in (
     (r"^a0*(?P<n>\d+)\.asmdc\.org", "lower"),
     (r"^ad0*(?P<n>\d+)\.asmrc\.org", "lower"),
     (r"^cga\.ct\.gov/.*[?&]dist_code='?(?P<c>s)?0*(?P<n>\d+)", "lower"),
-    (r"^flsenate\.gov/senators/(?:\d{4}-\d{4}/)?s0*(?P<n>\d+)$", "upper"),
+    (r"^flsenate\.gov/senators/(?:\d{4}-\d{4}/)?s0*(?P<n>\d+)(?:\?|$)", "upper"),
     (r"^legislature\.maine\.gov/district0*(?P<n>\d+)$", "upper"),
     (r"^(?:gc\.nh\.gov|gencourt\.state\.nh\.us)/senate/members/webpages/district0*(?P<n>\d+)\.aspx$",
      "upper"),
@@ -644,6 +647,10 @@ def party_name(label):
     return (label or "").split("/")[0].strip()
 
 
+# ``member_page``'s kinds, as the page data names them.
+PAGE_KINDS = {"member": "member", "work": "bills", "caucus": "caucus", "list": "list"}
+
+
 def page_for(code, record, year=0, assembly=None, others=(), shared=()):
     """``member_page`` for one roster record, by its chamber and district."""
     return member_page(code, record.get("links"), year, assembly, record.get("name", ""), others,
@@ -696,9 +703,12 @@ def _person(record, code="", year=0, assembly=None, dropped=None, others=(), pag
     page = pages.get(record["id"]) if pages is not None else page_for(
         code, record, year, assembly, others)
     if page:
+        # The card labels the link as what it is (PR #96 review): the
+        # member's page on the legislature's site, the legislature's list of
+        # their bills, their page on a party caucus's site, or the chamber's
+        # member list - and a past session's page as one.
         out["page"] = page["url"]
-        if page["kind"] == "work":
-            out["pageAbout"] = "bills"
+        out["pageKind"] = PAGE_KINDS[page["kind"]]
         if page.get("caucus"):
             out["pageCaucus"] = page["caucus"]
         if page.get("session"):
@@ -788,6 +798,9 @@ def build_state(code, root=".", places=None, roster=None, control=None, fetched=
         ballot = (ballot2026.for_state(code).get("chambers") or {}).get(chamber)
         for district_id, up in seats_up(code, chamber, found).items():
             found[district_id]["up"] = up
+        on_special = specials(code, chamber, found)
+        for district_id in on_special:
+            found[district_id]["special"] = True
         out_chambers[chamber] = {
             "title": chamber_title(code, chamber),
             "seats": seats,
@@ -804,6 +817,9 @@ def build_state(code, root=".", places=None, roster=None, control=None, fetched=
         }
         if ballot:
             out_chambers[chamber]["ballot"] = ballot
+        if on_special:
+            # In the record's order, which is the districts' own.
+            out_chambers[chamber]["specials"] = [found[i]["name"] for i in on_special]
         years = term_years(code, chamber)
         if years:
             out_chambers[chamber]["termYears"] = years
@@ -904,10 +920,11 @@ def unplaced_why(code, record):
     """Why a member is not on the map: "tribal" (Maine's non-voting
     representatives of tribal nations), "floterial" (New Hampshire's
     districts that overlay others) or "unmatched" (no boundary of that
-    name: reported by ``statelegs``)."""
+    name: reported by ``statelegs``). Floterial only where RSA 662:5 makes
+    the district one (``NH_FLOTERIAL``)."""
     if record.get("tribalSeat"):
         return "tribal"
-    if code == "NH" and record["chamber"] == "lower":
+    if code == "NH" and record["chamber"] == "lower" and record.get("district") in NH_FLOTERIAL:
         return "floterial"
     return "unmatched"
 
@@ -974,6 +991,70 @@ def seats_up(code, chamber, districts):
     if len(chosen) * int(per) != up:
         return {}
     return {i: i in chosen for i in districts}
+
+
+# Words in a ballot2026 record that speak of an election for the rest of a
+# term, beside the regular ones: "plus 17,21,29,31 for 2-year vacancy
+# remainders", "District 41 also has a 2-year special", "only districts 24
+# and 25 are on the 2026 ballot" (Kansas's Senate, none of it regular).
+_SPECIAL_WORDS = re.compile(r"special|vacanc|unexpired|remainder|\bonly districts?\b", re.I)
+
+
+def specials(code, chamber, districts):
+    """``[district id, ...]``: the districts the state's own record
+    (``ballot2026``) names for an election to the rest of a term on the
+    Nov 3, 2026 ballot, in the record's order. A district on the ballot for
+    the rest of a term is on the ballot: reviewers of PR #96 found Kansas
+    Senate 24, Nebraska 41, New Mexico Senate 33 and Oklahoma Senate 17
+    reading "This seat is not up for regular election in 2026" over a seat
+    on the ballot, the special mentioned only in faint text below (rule 74).
+
+    Read from the record's clauses after its regular part (``seats_up``
+    reads that), less its term lengths ("2-year", "for 2 years") and
+    years. A clause that speaks of a special but names no district on this
+    map is an error, never an unmarked district: a mark missing over a
+    seat on the ballot looks entirely normal."""
+    entry = (ballot2026.STATES.get(code) or {}).get(chamber)
+    if not entry or not districts:
+        return []
+    basis = entry[3]
+    clauses = re.split(r"[(;]", basis)[1:]
+    by_name = {statelegs.norm(d["name"]): i for i, d in districts.items()}
+    out = []
+    for clause in clauses:
+        if not _SPECIAL_WORDS.search(clause):
+            continue
+        text = re.sub(r"\b\d+-year\b|\b\d+ years?\b|\b(?:19|20)\d\d\b", " ", clause)
+        numbers = re.findall(r"\b\d+\b", text)
+        if not numbers:
+            raise LegislatureError(f"{code} {chamber}: the 2026 record names a special election "
+                                   f"but no district: {clause.strip()!r}")
+        for number in numbers:
+            found = by_name.get(statelegs.norm(number))
+            if found is None:
+                raise LegislatureError(f"{code} {chamber}: the 2026 record's special election in "
+                                       f"district {number} is not a district on the map")
+            if found not in out:
+                out.append(found)
+    return out
+
+
+# New Hampshire's floterial House districts: each is the union of base
+# districts it overlays, so no boundary of its own is drawn. Read from RSA
+# 662:5, the apportionment as it stands (gc.nh.gov/rsa/html/LXIII/662/
+# 662-5.htm, read 2026-10-18): every district whose towns and wards are
+# exactly those of two or more other districts of its county. A member
+# Open States places in a district not listed here is "unmatched" and
+# reported, never called floterial (reviewer of PR #96): a misspelt or
+# renamed base district would otherwise read as an overlay.
+NH_FLOTERIAL = frozenset(
+    ["Belknap 8", "Carroll 7", "Carroll 8", "Coos 7", "Grafton 17", "Grafton 18",
+     "Sullivan 7", "Sullivan 8"]
+    + [f"Cheshire {n}" for n in (15, 16, 17, 18)]
+    + [f"Hillsborough {n}" for n in (37, 38, 39, 40, 41, 44, 45)]
+    + [f"Merrimack {n}" for n in range(25, 31)]
+    + [f"Rockingham {n}" for n in range(31, 41)]
+    + [f"Strafford {n}" for n in range(18, 22)])
 
 
 def stats(maps):
