@@ -602,7 +602,10 @@ supplies, so they stay empty and the provenance layer reports them as
 *No data*. For anyone still in a race, background, education, age, what the
 campaign says it stands for and a portrait are filled where the person's own
 sources say so - see [Filling the gaps](#filling-the-gaps) - each credited to
-its source.
+its source. A sitting member's education, earlier careers and the issues they
+work on come from the Congressional Directory, the article their id maps to and
+their official website, each badged - never the rosters' typed columns; see
+[A member's biography and platform](#a-members-biography-and-platform).
 
 They also carry **no portrait**. Portrait resolution for a member goes through
 the authoritative bioguide→Wikipedia mapping and cannot pick the wrong person.
@@ -1244,7 +1247,7 @@ tied to the member by id, never by a search on their name:
 | What | From | Shown as |
 |---|---|---|
 | Education, earlier careers | The [Official Congressional Directory](https://www.govinfo.gov/app/collection/cdir) (GovInfo, the latest edition for the sitting Congress): each member's "education:" and "professional history:" (with any "military service:"), in its words. An entry is joined to a member by the office web address printed under it, which must be the address `congress-legislators` lists for their bioguide id, and its printed name must carry their surname | The field, badged **Congressional Directory** |
-| Education, where the Directory has none | The infobox of the Wikipedia article `congress-legislators` maps the bioguide id to, its title checked against the surname after redirects | The field, badged **Wikipedia** |
+| Education or an occupation, where the Directory has none | The infobox of the Wikipedia article `congress-legislators` maps the bioguide id to, its title checked against the surname after redirects ("Politician" alone is not an earlier career, and is left out) | The field, badged **Wikipedia** |
 | The issues they work on | Their official website (the `.house.gov` / `.senate.gov` address `congress-legislators` lists): the page its home page links as "Issues" (or "Priorities"), read one level down - its links to its own issue pages, in their words - or the site's own "Issues" menu, or that page's list or headings. Nothing that names the member or anyone else ("Trump's One Big Beautiful Betrayal") | Bullets badged **Official site**, dated and linked to that page; "Not listed on their official site" where the site lists none |
 | A contact form | The page the home page links as Contact (or Email me), fetched and seen to hold a form to write to the office - not a site search or a newsletter sign-up - or to lead to one; only where `congress-legislators` holds none | The *Contact form* chip, its title saying when it was checked |
 | Offices at home | `congress-legislators`' `legislators-district-offices`, by bioguide id: address, phone and hours | *District offices* (a senator's *State offices*), under a line saying a federal agency problem is casework for them |

@@ -138,6 +138,68 @@ def readable(status, page):
             and not _GATE.search(page.title + " " + page.body[:400]))
 
 
+class _Anchors(html.parser.HTMLParser):
+    """Each link's ``(href, label)``, where a link whose words are laid out
+    in blocks - a card's title over its blurb, Senator Cruz's "Tax Reform"
+    over "Promote jobs, growth, and opportunity" - is labelled by its first
+    block alone. Read as one run of words, the card was an "issue" eight
+    words long, and the cards whose blurbs ran longer were dropped, leaving
+    a partial list that looked whole."""
+
+    _BLOCKS = ("h1", "h2", "h3", "h4", "h5", "h6", "p", "div", "br", "li")
+    _SKIP = ("script", "style", "noscript", "template", "svg")
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.links, self._href, self._chunks, self._skip = [], None, None, 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self._SKIP:
+            self._skip += 1
+        elif tag == "a":
+            self._href, self._chunks = dict(attrs).get("href") or "", [[]]
+        elif self._chunks is not None and tag in self._BLOCKS:
+            self._chunks.append([])
+
+    def handle_startendtag(self, tag, attrs):
+        if tag == "br" and self._chunks is not None:
+            self._chunks.append([])
+
+    def handle_endtag(self, tag):
+        if tag in self._SKIP:
+            self._skip = max(self._skip - 1, 0)
+        elif tag == "a" and self._chunks is not None:
+            blocks = [" ".join("".join(c).split()) for c in self._chunks]
+            blocks = [b for b in blocks if b]
+            self.links.append((self._href, blocks[0] if blocks else ""))
+            self._href, self._chunks = None, None
+        elif self._chunks is not None and tag in self._BLOCKS:
+            self._chunks.append([])
+
+    def handle_data(self, data):
+        if not self._skip and self._chunks is not None:
+            self._chunks[-1].append(data)
+
+
+def anchors(markup):
+    """``[(href, label)]`` for every link of *markup* (see :class:`_Anchors`)."""
+    parser = _Anchors()
+    try:
+        parser.feed(markup or "")
+        parser.close()
+    except Exception:            # a malformed page still yields what it had
+        pass
+    return parser.links
+
+
+def parse(markup):
+    """:func:`kyc.enrich.parse_page`, with each link labelled as
+    :func:`anchors` reads it."""
+    page = enrich.parse_page(markup)
+    page.links = anchors(markup)
+    return page
+
+
 def get(url, pause=PAUSE, render=chrome_dom):
     """``(final url, status, page, how, markup)`` for one official page.
 
@@ -148,14 +210,14 @@ def get(url, pause=PAUSE, render=chrome_dom):
     verdict (rule 8).
     """
     final, status, markup = enrich.fetch(url)
-    page = enrich.parse_page(markup)
+    page = parse(markup)
     if readable(status, page):
         return final, status, page, "http", markup
     if status is not None and 400 <= status < 500 and status not in (401, 403, 429):
         return final, status, page, None, markup
     time.sleep(pause)
     rendered = render(url) if render else ""
-    shown = enrich.parse_page(rendered)
+    shown = parse(rendered)
     if rendered and readable(200, shown):
         return url, 200, shown, "chrome", rendered
     return final, status, page, None, markup
@@ -179,7 +241,12 @@ _NOT_A_TOPIC = re.compile(r"\b(?:news\s+alert|press\s+releases?|fact\s+sheet|faq
                           r"frequently\s+asked|click\s+here|read\s+more|learn\s+more|"
                           r"(?:co-?)?sponsored\s+(?:legislation|bills)|voting\s+record|"
                           r"votes?\s+and\s+legislation|links?\s+to|committee\s+assignments|"
-                          r"caucus\s+memberships?|committees\s+and\s+caucuses)\b|^legislation$",
+                          r"caucus\s+memberships?|committees\s+and\s+caucuses|"
+                          r"community\s+project\s+funding|funding\s+requests?|"
+                          r"legislative\s+process|how\s+congress\s+works|bill\s+search|"
+                          r"ethics\s+approval|covid(?:-19)?\s+resources|"
+                          r"congressionally\s+directed\s+spending)\b|"
+                          r"^(?:legislation|cpf(?:\s+requests?)?|grants?)$",
                           re.I)
 _TITLES = r"(?:president|vice\s+president|senator|sen|rep|representative|congressman|" \
           r"congresswoman|speaker|leader|governor|gov|secretary)\.?"
@@ -255,7 +322,8 @@ def topic(text, own, others):
     """*text* as an issue, or ``""`` when it is furniture, a label of the
     list, a banner, a sentence, or names someone."""
     text = _clean(text)
-    if not (3 <= len(text) <= 60) or len(text.split()) > 8:
+    short = len(text) == 2 and text.isalpha() and text.isupper()     # "AI"
+    if not (3 <= len(text) <= 60 or short) or len(text.split()) > 8:
         return ""
     if "{" in text or "}" in text or text.endswith(("?", "!")) or enrich._DANGLING.search(text):
         return ""
@@ -406,6 +474,16 @@ def listed_issues(page, index_url, own, others):
     return []
 
 
+def home_issues(page, home_url, own, others):
+    """The issue pages a home page links directly under its own ``/issues/``
+    (or ``/priorities/``) path, one item per page, in the links' words."""
+    for path in ("/issues", "/priorities"):
+        items = listed_issues(page, urllib.parse.urljoin(home_url, path), own, others)
+        if items:
+            return items
+    return []
+
+
 def page_issues(page, index_url, home, own, others):
     """An issues page whose issue pages sit at the top of the site
     (DesJarlais's /issues lists /agriculture, /health-care): the links that
@@ -443,11 +521,18 @@ def heading_issues(page, own, others):
 
 # ------------------------------------------------------------- contact pages
 
+# "Contact", "Contact Steny", "Contact Steny's Office", "Email Chris": a
+# link's words name a way to write; whether it leads to one is checked by
+# fetching it (holds_form), never assumed from the words.
 _CONTACT_TEXT = re.compile(
-    r"^(?:contact(?:\s+(?:me|us|(?:the\s+)?(?:office|senator|congress\w*|rep\w*)|"
-    r"(?:my|our)\s+office))?|e-?mail\s+(?:me|us|(?:the\s+)?(?:senator|congress\w*|rep\w*))|"
-    r"write\s+(?:to\s+)?(?:me|us|the\s+\w+)|send\s+(?:me\s+)?(?:an\s+)?(?:e-?mail|message))$", re.I)
-_CONTACT_PATH = re.compile(r"^(?:contact(?:-(?:me|us))?|email-me|write-to-\w+|e-?mail)$", re.I)
+    r"^(?:contact(?:\s+[\w'’.]+){0,3}|e-?mail(?:\s+[\w'’.]+){1,2}|"
+    r"write\s+(?:to\s+)?(?:me|us|the\s+\w+|[\w'’.]+)|"
+    r"send\s+(?:me\s+)?(?:an\s+)?(?:e-?mail|message)|get\s+in\s+touch)$", re.I)
+# Words that make a "Contact ..." link something other than a way to write.
+_CONTACT_NOT = re.compile(r"\b(?:information|info|tracing|lenses?|sign\s*up|newsletter|"
+                          r"subscribe|press|media)\b", re.I)
+_CONTACT_PATH = re.compile(r"^(?:contact(?:-[\w-]+)?|email-me|write-to-[\w-]+|e-?mail|get-in-touch)$",
+                           re.I)
 _FORM = re.compile(r"<form\b([^>]*)>(.*?)</form\s*>", re.I | re.S)
 _FIELD = re.compile(r"<textarea\b|<(?:input|select)\b[^>]*\b(?:name|id)\s*=\s*[\"'][^\"']*"
                     r"(?:zip|postal|address|email|message|subject|first|last|phone|topic)", re.I)
@@ -467,7 +552,7 @@ def contact_links(page, base, website):
             continue
         text = " ".join((text or "").split())
         last = urllib.parse.urlsplit(target).path.rstrip("/").rsplit("/", 1)[-1]
-        if _CONTACT_TEXT.match(text) and target not in by_text:
+        if _CONTACT_TEXT.match(text) and not _CONTACT_NOT.search(text) and target not in by_text:
             by_text.append(target)
         elif _CONTACT_PATH.match(last) and target not in by_path:
             by_path.append(target)
@@ -491,6 +576,11 @@ def holds_form(markup, url, website):
     for src in _FORM_FRAME.findall(markup or ""):
         target = urllib.parse.urljoin(url, src)
         if own_host(target, website) and "form" in enrich.host_of(target) + target.lower():
+            return True
+        # The House's shared constituent-mail form (Clyburn's "Get In Touch"
+        # frames iqconnect.house.gov/iqextranet/EForm.aspx), on a page of the
+        # member's own site.
+        if enrich.host_of(target) == "iqconnect.house.gov" and "/eform" in target.lower():
             return True
     return False
 
@@ -516,7 +606,7 @@ def contact_page(page, base, website, pause=PAUSE, fetch=_markup_of):
             inconclusive = inconclusive or status is None or status in (401, 403, 429) \
                 or (status or 0) >= 500
             continue
-        shown = enrich.parse_page(markup)
+        shown = parse(markup)
         if _LOST.search(shown.title):
             continue
         if holds_form(markup, final, website):
@@ -527,6 +617,7 @@ def contact_page(page, base, website, pause=PAUSE, fetch=_markup_of):
             text = " ".join((text or "").split())
             if (not href or href.startswith(("#", "mailto:", "tel:"))
                     or not own_host(target, website) or not _CONTACT_TEXT.match(text)
+                    or _CONTACT_NOT.search(text)
                     or target.rstrip("/") == final.rstrip("/")):
                 continue
             time.sleep(pause)
@@ -593,6 +684,13 @@ def read_site(profile, others, pause=PAUSE, render=chrome_dom, fetch=_markup_of,
             if items:
                 record.update(issues=items, issuesUrl=where, how="headings")
                 break
+    if not record.get("issues") and not pages:
+        # No issues index at all, but the home page links its own issue
+        # pages (Hoyer's "Issues" section is an anchor on the home page over
+        # /issues/federal-employees, /issues/environment ...): those links.
+        items = home_issues(page, final, name, others)
+        if items:
+            record.update(issues=items, issuesUrl=final, how="home")
     if record.get("issues"):
         record["verdict"] = "listed"
     elif inconclusive:

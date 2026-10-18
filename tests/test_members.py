@@ -180,6 +180,49 @@ class TestTheIssuesTheirSiteLists(unittest.TestCase):
                             ("Larsen Legislation", True), ("Rick's priorities", True)):
             self.assertEqual(members.names_someone(text, "Rick Larsen", OTHERS), named, text)
 
+    def test_a_card_is_labelled_by_its_title_not_its_blurb(self):
+        # Senator Cruz's issues are cards: an icon, a title, a blurb. Read
+        # as one run of words "Tax Reform Promote jobs, growth, and
+        # opportunity" passed as an issue, and the cards whose blurbs ran
+        # longer were dropped - a partial list that looked whole.
+        card = ('<a href="/about/issues/{slug}"><div class="icon"><img alt="{t} icon"></div>'
+                '<div class="label">{t}</div><div class="description"><p>{blurb}</p></div></a>')
+        markup = "".join(card.format(slug=s, t=t, blurb=b) for s, t, b in (
+            ("ai", "AI", "Keep America first in artificial intelligence"),
+            ("tax-reform", "Tax Reform", "Promote jobs, growth, and opportunity"),
+            ("constitution", "Constitution and Bill of Rights",
+             "Protect life, liberty, and the pursuit of happiness for every American"),
+            ("veterans", "Veterans", "Honor those who served")))
+        page = members.parse(markup)
+        items = members.listed_issues(page, "https://www.cruz.senate.gov/about/issues",
+                                      "Ted Cruz", OTHERS)
+        self.assertEqual(items, ["AI", "Tax Reform", "Constitution and Bill of Rights", "Veterans"])
+        # A link written inline keeps all its words.
+        self.assertEqual(members.anchors('<a href="/x">Health <b>&amp;</b> Human Services</a>'),
+                         [("/x", "Health & Human Services")])
+
+    def test_the_sites_furniture_is_not_an_issue(self):
+        # Filed under the House template's Issues menu, and not an issue.
+        for text in ("Community Project Funding", "CPF Requests", "Legislative Process",
+                     "Bill Search", "How Congress Works", "Grants", "Ethics Approval",
+                     "COVID-19 Resources", "Congressionally Directed Spending Requests",
+                     "Fiscal Year 2027 NDAA Community Project Funding Requests"):
+            self.assertEqual(members.topic(text, "Rick Larsen", OTHERS), "", text)
+        for text in ("Natural Resources", "Water Resources", "Appropriations", "Small Business"):
+            self.assertEqual(members.topic(text, "Rick Larsen", OTHERS), text, text)
+
+    def test_a_home_page_that_links_its_issue_pages(self):
+        # Hoyer's site has no issues index: its "Issues" link is an anchor
+        # on the home page, over its own /issues/... pages.
+        markup = ('<a href="/#issues-front">Issues</a>'
+                  '<a href="/issues/federal-employees">Federal Employees</a>'
+                  '<a href="/issues/jobs-economy">Jobs &amp; the Economy</a>'
+                  '<a href="/media/press-releases/x">Hoyer Statement</a>'
+                  '<a href="/issues/environment">Environment</a>')
+        self.assertEqual(members.home_issues(members.parse(markup), "https://hoyer.house.gov",
+                                             "Steny Hoyer", OTHERS),
+                         ["Federal Employees", "Jobs & the Economy", "Environment"])
+
     def test_the_index_is_the_link_that_says_issues_before_one_that_says_priorities(self):
         home = self.page('<a href="/about/priorities">Priorities</a>'
                          '<a href="/issues/">On the Issues</a>'
@@ -212,6 +255,21 @@ class TestTheContactPage(unittest.TestCase):
                                            site + "/contact", site))
         self.assertFalse(members.holds_form('<iframe src="https://forms.example.com/contact">',
                                             site + "/contact", site))
+        # The House's shared constituent-mail form, framed on the member's
+        # own page (Clyburn's "Get In Touch").
+        self.assertTrue(members.holds_form(
+            '<iframe\n title="Get In Touch"\n src="https://iqconnect.house.gov/iqextranet/'
+            'EForm.aspx?__cid=SC06JC&amp;__fid=100020&amp;iframe=Y">', site + "/get-in-touch/", site))
+
+    def test_a_contact_link_is_found_by_the_words_a_site_uses(self):
+        site = "https://hoyer.house.gov"
+        home = enrich.parse_page('<a href="//hoyer.house.gov/help/contact-stenys-office">Contact Steny</a>'
+                                 '<a href="/contact/newsletter-subscribe">Signup For Newsletter</a>'
+                                 '<a href="/contact/offices">Office Contact Information</a>'
+                                 '<a href="/get-in-touch/">Get In Touch</a>')
+        self.assertEqual(members.contact_links(home, site + "/", site),
+                         ["https://hoyer.house.gov/help/contact-stenys-office",
+                          "https://hoyer.house.gov/get-in-touch/"])
 
     def test_a_contact_index_is_followed_to_its_form(self):
         site = "https://pocan.house.gov"
