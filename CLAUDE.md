@@ -162,7 +162,7 @@ python tools/fetch_legislative_maps.py        # state senate and house boundarie
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
 python -m unittest discover tests             # 1559 tests, no dependencies
-npm install && npm test                       # 2068 real-DOM checks (needs jsdom)
+npm install && npm test                       # 2069 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
