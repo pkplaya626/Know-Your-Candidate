@@ -126,6 +126,13 @@ class TestParsing(unittest.TestCase):
         self.assertEqual(amended["title"], "Laken Riley Act")
         self.assertEqual(amended["amendment"], "S.Amdt. 14 (To expand the list of offenses.)")
 
+    def test_a_house_amendment_in_the_clerks_words(self):
+        self.assertEqual(rollcalls._amendment_words("Amendment 3 Scott of Virginia Amendment No. 3"),
+                         "Scott of Virginia Amendment No. 3")
+        self.assertEqual(rollcalls._amendment_words("Amendment 1 Foxx of North Carolina Amendment"),
+                         "Amendment 1: Foxx of North Carolina Amendment")
+        self.assertEqual(rollcalls._amendment_words(""), "")
+
     def test_the_senate_vote_menu(self):
         raw = (b"<vote_summary><congress>119</congress><session>2</session><votes>"
                b"<vote><vote_number>00002</vote_number></vote>"

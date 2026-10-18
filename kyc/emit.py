@@ -726,7 +726,10 @@ def inline_script_problems(html):
 
 def script_sources(html):
     """Every ``<script src="...">`` in *html*, in document order, without the
-    version stamp a local asset's URL carries (kyc/assets.py)."""
+    version stamp a local asset's URL carries (kyc/assets.py). Not those
+    named inert in a ``<template>``, which the page never runs as it loads
+    (:func:`on_demand_sources`)."""
+    html = re.sub(r"<template\b.*?</template>", "", html, flags=re.S)
     return [src.split("?v=")[0] for src in re.findall(r'<script[^>]*\bsrc="([^"]+)"', html)]
 
 

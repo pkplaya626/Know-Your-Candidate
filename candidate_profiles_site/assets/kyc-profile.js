@@ -450,13 +450,18 @@
   function voteRow(roll, cast, data) {
     // [id, date, question, measure, title, detail, result, url]
     var missed = cast === data.notVoting;
+    // The measure and its title as the record gives them; a vote with
+    // neither (an election of the Speaker, a quorum call) is headed by its
+    // question, which is then not said twice.
+    var headline = roll[4] || (roll[3] ? "" : roll[2]);
+    var question = headline === roll[2] ? "" : roll[2];
     return '<li class="vote-row"><span class="vote-cast' + (missed ? " vote-missed" : "") + '">' +
       KYC.escapeHtml(cast) + '</span><span class="vote-body"><span class="vote-what">' +
       (roll[3] ? "<strong>" + KYC.escapeHtml(roll[3]) + "</strong> " : "") +
-      KYC.escapeHtml(roll[4] || roll[2]) + "</span>" +
+      KYC.escapeHtml(headline) + "</span>" +
       (roll[5] ? '<span class="vote-detail">' + KYC.escapeHtml(roll[5]) + "</span>" : "") +
       '<span class="vote-meta"><span class="nowrap">' + KYC.escapeHtml(KYC.dateWords(roll[1])) +
-      "</span> &middot; " + KYC.escapeHtml(roll[2]) +
+      "</span>" + (question ? " &middot; " + KYC.escapeHtml(question) : "") +
       (roll[6] ? " &middot; " + KYC.escapeHtml(roll[6]) : "") + " &middot; " +
       outLink(roll[7], "Official record") + "</span></span></li>";
   }

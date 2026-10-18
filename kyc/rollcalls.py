@@ -188,6 +188,8 @@ def parse_house(raw, year, roll, congress):
     if not date.startswith(str(year)):
         raise RollCallError(f"{what}: dated {date}")
     clock = meta.find("action-time")
+    # "Amendment 3 Scott of Virginia Amendment No. 3": the number and the
+    # Clerk's words for whose it is (shown by _amendment_words).
     amendment = " ".join(x for x in (_text(meta, "amendment-num") and
                                      "Amendment " + _text(meta, "amendment-num"),
                                      _text(meta, "amendment-author")) if x)
@@ -553,6 +555,20 @@ def _serving(person, chamber, date):
                for t in person["terms"])
 
 
+def _amendment_words(text):
+    """A House amendment as the page says it: the Clerk's words for it
+    ("Scott of Virginia Amendment No. 3") where they carry its number,
+    else the number before them ("Amendment 1: Foxx of North Carolina
+    Amendment")."""
+    match = re.match(r"^Amendment (\S+) (.+)$", text or "")
+    if not match:
+        return text or ""
+    number, words = match.groups()
+    if re.search(r"\bNo\.? " + re.escape(number) + r"\b", words):
+        return words
+    return f"Amendment {number}: {words}"
+
+
 def _roll_row(chamber, congress, roll):
     if chamber == "house":
         rid = f"{roll['year']}-{roll['n']}"
@@ -565,7 +581,7 @@ def _roll_row(chamber, congress, roll):
             # Counted from the record's own lines: the Clerk's totals are the
             # same lines added up.
             result = f"{result} ({yes}-{no})"
-        detail = roll.get("amendment") or ""
+        detail = _amendment_words(roll.get("amendment"))
     else:
         rid = f"{roll['session']}-{roll['n']}"
         url = SENATE_PAGE.format(congress=congress, session=roll["session"], vote=roll["n"])
