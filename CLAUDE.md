@@ -40,9 +40,12 @@ data/executives.json        ──┤   (every governor, from the NGA)
 data/statewide_officers.json ─┤   (lieutenant governors, secretaries of state, attorneys general)
 data/courts.json            ──┤   (each state's highest court, from the courts)
 data/voting_links.json      ──┤   (each state's official voting pages: NASS Can I Vote)
+data/voting_dates.json      ──┤   (each jurisdiction's key dates, from its own pages: hand-edited, kyc/voting_dates.py)
 data/federal_executive.json ──┤   (President, VP, Cabinet: White House, office pages, Senate votes)
 data/judiciary.json         ──┤   (every sitting federal judge: FJC directory; the Supreme Court's own list)
 data/judicial_vacancies.json ─┤   (vacancies, announced vacancies and emergencies: uscourts.gov)
+data/judge_links.json       ──┤   (judges' articles and portraits: FJC slug -> Wikidata P2736)
+data/court_districts.json   ──┤   (which district court covers each county: 28 U.S.C. 81-131)
 data/political_history.json ──┤   (public offices held: congress-legislators; Wikidata the article confirms)
 data/oge_disclosures.json   ──┤   (the executive's financial reports: Office of Government Ethics, by office)
 data/tribal_leaders.json    ──┤   (every tribal government and its leader: BIA Tribal Leaders Directory)
@@ -56,6 +59,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/stategov.js   (governors, chamber control, trifectas)
                                              data/legislature/*.js (one state legislature per state)
                                              data/local/*.js    (one state's counties and governments)
+                                             data/courtcounties.js (each county's federal district court)
                                              data/districts/*.js (one district map per state)
                                              states/*.html      (generated, one per state)
                                              districts/*.html   (generated, one per state)
@@ -102,8 +106,9 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `disclosures.json`, `primary_results.json`, `committees.json`,
   `campaigns.json`, `enrichment.json`, `odds.json`,
   `census_governments.json`, `state_legislators.json`, `executives.json`,
-  `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`,
+  `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`, `voting_dates.json`,
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
+  `judge_links.json`, `court_districts.json`,
   `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json` and `local_sites.json` are caches, but
   they *are* hand-editable. `stategov.js` is generated from the last five,
   with `kyc/ballot2026.py`: which state offices and legislative seats are on
@@ -151,21 +156,23 @@ python build_profile_site.py officers         # lieutenant governors (NLGA), sec
 python build_profile_site.py courts           # each state's highest court, from the court's own roster
 python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
 python build_profile_site.py federal          # the President, VP and Cabinet (White House, office pages, Senate roll calls)
-python build_profile_site.py judiciary        # every sitting federal judge (FJC) and the Supreme Court as the Court lists it
+python build_profile_site.py judiciary        # every sitting federal judge (FJC) and the Supreme Court as the Court lists it;
+                                              # the territorial courts' judges from their own sites; judges' Wikidata links
 python build_profile_site.py vacancies        # vacancies in the federal courts, as uscourts.gov lists them
 python build_profile_site.py history          # public offices each person has held (congress-legislators, Wikidata, Wikipedia)
 python build_profile_site.py oge              # the executive's financial reports (Office of Government Ethics), by office
 python build_profile_site.py tribes           # every tribal government and its leader (BIA Tribal Leaders Directory)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
+python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1541 tests, no dependencies
-npm install && npm test                       # 1987 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1654 tests, no dependencies
+npm install && npm test                       # 2123 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`,
-`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts. Run the
+`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -1011,6 +1018,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     generator plus `congress --apply --snapshot`, never committed. Their filing is folded in only by the FEC id Congress's
     record lists for them, a curated row's id kept as `otherIds`; without
     that id both profiles stay and `seated-unlinked` says so (rule 25).
+    The federal page's line of succession meets the leadership posts' test:
+    congress-legislators records a Speaker's and a President pro tempore's role with no end
+    date, so on January 3 the 119th Congress's would have stayed second and
+    third in line until the file caught up. A role that began before the
+    snapshot's Congress did names nobody, and the build says so
+    (`federal_build.congressional_officers`, `succession-unnamed`).
     Linking is not folding: a sitting member's filing for the other chamber
     is found by any id Congress's record lists for them (the roster's
     "Garland Barr" never met Andy Barr's Senate filing), and the member's
@@ -1068,7 +1081,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     someone else is not linked; a scan (the President's and the Vice
     President's reports are) concludes nothing (rule 8) and is linked and
     marked "not checked". A holder with no row reads "OGE's index lists
-    no report", never "not filed" (rule 19).
+    no report", never "not filed" (rule 19). A report's "Present" is the
+    day it was filed, not today's (rule 69's "since 2013"): the page dates
+    it, and a post that is the office the person now holds ("Acting
+    Attorney General" for the Attorney General) is not "another post".
 
 71. **A map that draws a county the counts say has no government says
     why.** The counties directory and the guide's map read "none" for
@@ -1285,6 +1301,78 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Democrats, or last prices that add up to 128%, is quoted with a note
     saying what it cannot tell, read page-side so `data/odds.js` stays the
     cache's (rule 41).
+
+82. **Who sits on a court is two sources' word, said side by side, and what
+    has not happened is in the future tense.** The 2026-10-17 audit found
+    the Eastern District of Tennessee counting Judge Varlan active - the
+    FJC's directory had not recorded the senior status uscourts.gov's
+    vacancy list dated 2026-10-05 - so five active judges and a vacancy
+    filled a five-seat court. A judge the courts' list has on senior status
+    by a date on or before its own as-of date is counted senior, and the row,
+    the dialog and the hub say which source says what
+    (`vacancies.listed_senior`); neither is picked silently. The announced
+    list is the future: "Will take senior status", "Nominated to the Fifth
+    Circuit" - never "Took senior status" or "Appointed to another court"
+    for three district judges who were only nominees. A confirmed judge
+    with no commission is listed apart and counted nowhere. A judge's
+    portrait and article come only through the FJC's own canonical slug
+    for their `nid` and the Wikidata item carrying it (P2736), the item's
+    label and the article's title checked for the surname and its year of
+    birth for the directory's (`kyc/judge_links.py`); never a name search.
+    An id is not proof on its own: Wikidata carried Judge Robert H.
+    Whaley's FJC id on the basketball player Robert Whaley, born 1982, and
+    the surname check passed his photograph and article; fourteen more
+    items' years disagreed with the directory's on the first full read.
+    What disagrees, or cannot be checked, gives nothing; a size Commons
+    did not answer for keeps the last portrait read of the same file
+    (rule 8). A vacancy's judge is found on its court by surname *and*
+    first given name (`vacancies.judge_of`): two of the list's departing
+    judges are not in the directory, and a surname alone would have moved
+    a colleague of that name to senior status. The
+    territorial courts'
+    judges, whom the directory does not hold, come from each court's own
+    site through a recipe that refuses more names than seats or two chiefs
+    (`kyc/territorial_courts.py`, rule 57). And a count of judges by
+    appointing President is a count of Presidents, in `--cat-*` colours,
+    never a party's.
+
+84. **A date a reader acts on is the office's own, and is said passed on
+    the reader's day.** Seventeen days before the election every state page
+    offered "Register to vote" - Georgia's twelve days after its deadline -
+    and gave no early-voting or mail-ballot date, because typing dates in
+    was refused as drift. Each jurisdiction's dates are now a hand-edited
+    cache, `data/voting_dates.json`, read from the election office's own
+    pages, calendars and statutes and re-opened by a second reader. Every
+    value the page shows carries its page's address and words
+    (`voting_dates.SHOWN`; a time of day may stand on its date's source,
+    but "postmarked" or "received" only on a quote that says it), on the
+    jurisdiction's own domains (`JURISDICTION_DOMAINS`) or an evidenced
+    entry in `OFFICIAL_ELSEWHERE`: being on .gov is not enough, since
+    another state's office, a county and a federal guide all are. A
+    compiled table is refused wherever it appears (rule 50), vote.gov,
+    fvap.gov and usa.gov included, and vote.gov's deadlines page is not
+    shown beside the state's own dates (rule 53). Where a reader can
+    register and vote at once, a deadline before Election Day is the
+    regular one, never "the last day" or "open until": the first page told
+    Illinois readers on October 18 that it was the last day to register,
+    with grace-period registration open to November 3. Where the record
+    does not say whether there is same-day registration, the page gives
+    the deadline and claims nothing more. Where same-day registration
+    happens is the office's words, quoted and checked against a cited
+    quote; the researchers' summary had been shown. A date the office
+    gives as a rule ("15 days before the election", Guam's runoff on "the
+    fourteenth day" after it) is that rule counted on the calendar, and the
+    page says so; a counted date that lands where the office cannot act
+    (D.C.'s in-person deadline, a Sunday) is not shown. A December date the
+    results reader also holds must be the same date in both. The pipeline
+    writes the words; the page only decides, on the reader's own calendar
+    day, which have passed: "Register to vote" then says when it closed,
+    and from the day after the election only a ballot still arriving and a
+    runoff stay, the runoff in the past tense once gone (rule 63). A null
+    is a gap and says nothing; a researcher's note is never shown. A
+    runoff says what it decides (`RUNOFF_WORDS`): Arkansas's December 1 is
+    not a runoff for Congress. The cycle's dates are reread each cycle, and
+    `check` refuses a date outside it.
 
 87. **A photograph says whose it is, read from its source, and weighs
     what a card needs.** 153 of 394 Wikimedia portraits were CC BY or
