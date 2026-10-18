@@ -1063,7 +1063,9 @@
         '<ul class="fed-divisions">' + units.map(function (u) {
           return "<li>" + (u.division ? "<strong>" + esc(u.division) + " Division</strong>: " : "") +
             (u.held ? (u.division ? "court is held at " : "Court is held at ") + esc(u.held) + ". " : "") +
-            '<details class="fed-counties"><summary>' + esc(u.areas) + "</summary>" +
+            // An undivided court's count is on the Covers line already.
+            '<details class="fed-counties"><summary>' + (named ? esc(u.areas) : "List them by name") +
+            "</summary>" +
             esc(u.counties.join(", ")) + "</details></li>";
         }).join("") + "</ul>" +
         '<p class="faint">From ' + source(d.statute || "https://www.govinfo.gov/app/collection/uscode",

@@ -7435,7 +7435,7 @@ async function testFederalAudit() {
     const summaries = block ? [...block.querySelectorAll(".fed-counties summary")].map((x) => x.textContent) : [];
     check("parishes, never counties", !!covers && /\d+ parishes/.test(covers.textContent) &&
       !/count(y|ies)/.test(covers.textContent) && summaries.length > 0 &&
-      summaries.every((x) => /^\d+ parish(es)?$/.test(x)), (covers && covers.textContent) + " | " + summaries.join(" | "));
+      summaries.every((x) => /^(\d+ parish(es)?|List them by name)$/.test(x)), (covers && covers.textContent) + " | " + summaries.join(" | "));
     check("a site of a district court mentions jury service", /jury service/.test(block.textContent));
   });
   const ca9 = await buildPage("courts/ca9.html");

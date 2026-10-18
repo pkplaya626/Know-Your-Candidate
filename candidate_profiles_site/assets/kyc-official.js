@@ -576,7 +576,7 @@
       KYC.escapeHtml(String(to.name).replace(/^U\.S\. /, "")) + "</a>" +
       (to.nominated ? " on " + KYC.escapeHtml(KYC.dateWords(to.nominated)) : "") +
       ", pending in the Senate, as the courts’ list of announced vacancies has it on " +
-      KYC.escapeHtml(KYC.dateWords(to.asOf)) + ". Until confirmed, they serve on this court.</p>" : "";
+      KYC.escapeHtml(KYC.dateWords(to.asOf)) + ". Meanwhile they sit on this court.</p>" : "";
     el("officialModalBody").innerHTML =
       '<div class="modal-column">' + pending +
       panel("landmark", seats.length > 1 ? "Seats held now" : "Seat",
