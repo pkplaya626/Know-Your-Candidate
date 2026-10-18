@@ -6776,10 +6776,17 @@ async function testSearchAndFilters() {
     D.querySelector('#sortPanel [data-sort="age-desc"]').click();
     const first = D.querySelector("#results .card");
     check("an age sort prints the age", /Age \d+/.test(first.textContent), first.textContent);
+    // The cards come a window at a time: draw them all.
+    while (D.getElementById("gridMore")) D.getElementById("gridMore").click();
     const divider = D.querySelector("#results .grid-divider");
-    const unknown = data.some((p) => KYC.ageOf(p) === null && KYC.seated(p));
+    const unknown = cards().some((p) => KYC.ageOf(p) === null);
     check("and says where the unknown ages start", !unknown ||
       (!!divider && /No birthdate on record \([\d,]+\)/.test(divider.textContent)));
+    const after = [...D.querySelectorAll("#results .grid-divider ~ .card")]
+      .map((c) => KYC.byId(c.getAttribute("data-id")));
+    check("everyone after it has no age, and everyone before it one", !divider ||
+      (after.length > 0 && after.every((p) => KYC.ageOf(p) === null) &&
+        cards().length - after.length === cards().filter((p) => KYC.ageOf(p) !== null).length));
     D.getElementById("sortButton").click();
     D.querySelector('#sortPanel [data-sort="region"]').click();
   });
