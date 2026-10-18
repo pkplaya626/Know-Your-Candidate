@@ -25,9 +25,11 @@ id that ended on an error page. So:
   the state's own page and the evidence, at read time, so the weekly re-read
   cannot put a dead link back; and a dead link with no override is not shown.
 
-No date or deadline is typed in anywhere: those change, and the state's page
-is where a reader should read them. A page that lists anything but the 50
-states and D.C. once each is refused, never written half.
+No date or deadline is typed in here. The dates are each jurisdiction's own,
+read from its election office's pages with the words that give each one,
+in ``kyc/voting_dates.py`` (audit 2026-10-17, STATEGOV-11, PERSONA-03). A
+page that lists anything but the 50 states and D.C. once each is refused,
+never written half.
 
     python build_profile_site.py voting            # refresh (network)
     python build_profile_site.py voting --check    # report from the cache
@@ -170,9 +172,10 @@ SAMPLE_BALLOTS = {
 # registration deadlines as the state sets them ("29 days before Election
 # Day"), and says where a state registers on Election Day. vote.gov is the
 # General Services Administration's site, run with the Election Assistance
-# Commission; the page calls it the federal government's voting site. No date is typed here: a deadline that
-# changes is vote.gov's and the state's to say, and this site never calls
-# one passed (STATEGOV-11, PERSONA-03).
+# Commission; the page calls it the federal government's voting site. It is
+# a compiled table (rule 50), so it is shown only where the jurisdiction's
+# own record (kyc/voting_dates.py) does not say when registration closes:
+# two sources of one deadline beside each other may disagree (rule 53).
 VOTE_GOV = "https://vote.gov/register"
 DEADLINES = {code: f"{VOTE_GOV}/{slug}" for code, slug in {
     "AK": "alaska", "AL": "alabama", "AR": "arkansas", "AS": "american-samoa", "AZ": "arizona",
@@ -221,56 +224,11 @@ TERRITORY_LINKS = {
     "PR": {"register": ("https://ww2.ceepur.org/Home/ServiciosElector",
                         "Voter services (in Spanish)")},
 }
-# A second round in December, on the page of the state that holds one
-# (audit 2026-10-17, PERSONA-06, FRESHNESS-11): Georgia's page never
-# mentioned its December 1 runoff, Louisiana's never its December 12 House
-# round. The dates are the overrides' (GENERAL_RUNOFFS, OPEN_PRIMARY_SEATS),
-# where the results reader uses them; this names the state's own page that
-# gives each, and validate fails a date with none.
-KEY_DATE_SOURCES = {
-    "GA": ("Georgia.gov, General election runoff, December 1, 2026",
-           "https://georgia.gov/events/2026-12-01/election-day-general-election-runoff"),
-    "LA": ("Louisiana Secretary of State, release of May 14, 2026 on the fall House races",
-           "https://www.sos.la.gov/media/dcvl5ojl/051426-fall-house-races.pdf"),
-}
-
-
-def key_dates():
-    """``{code: [{"date", "text", "source", "cite"}]}`` from the overrides'
-    December dates. A state with no KEY_DATE_SOURCES entry is left out here
-    and reported by ``unsourced_key_dates``."""
-    from .overrides import GENERAL_RUNOFFS, OPEN_PRIMARY_SEATS
-
-    out = {}
-    for code, (date, _evidence) in sorted(GENERAL_RUNOFFS.items()):
-        if code in KEY_DATE_SOURCES:
-            label, url = KEY_DATE_SOURCES[code]
-            out.setdefault(code, []).append({
-                "date": date, "source": url, "cite": label,
-                "text": "If no candidate for an office wins a majority of the votes on "
-                        "November 3, the top two meet in a runoff",
-                # Said once the date has passed (rule 63): what the date
-                # was, never what will happen on it.
-                "past": "The date set for a runoff in any race no candidate won with a "
-                        "majority of the votes on November 3"})
-    for (code, office, _cycle), seat in sorted(OPEN_PRIMARY_SEATS.items()):
-        if code in KEY_DATE_SOURCES and seat.get("runoff"):
-            label, url = KEY_DATE_SOURCES[code]
-            chamber = "U.S. House" if office == "H" else "U.S. Senate"
-            out.setdefault(code, []).append({
-                "date": seat["runoff"], "source": url, "cite": label,
-                "text": f"The {chamber} vote on November 3 is an open primary; a seat no "
-                        f"candidate wins with a majority is decided at a general election",
-                "past": f"The date set for a general election for any {chamber} seat no "
-                        f"candidate won with a majority in the November 3 open primary"})
-    return out
-
-
-def unsourced_key_dates():
-    from .overrides import GENERAL_RUNOFFS, OPEN_PRIMARY_SEATS
-    codes = set(GENERAL_RUNOFFS) | {code for (code, _o, _c), seat in OPEN_PRIMARY_SEATS.items()
-                                    if seat.get("runoff")}
-    return sorted(codes - set(KEY_DATE_SOURCES))
+# The dates themselves - registration, early voting, mail ballots, and a
+# second round in December (Georgia's December 1 runoff, Louisiana's
+# December 12 House round: PERSONA-06, FRESHNESS-11) - are each
+# jurisdiction's own, in kyc/voting_dates.py, which also holds the
+# December dates to the overrides the results reader uses.
 
 
 # Each territory's election office, by the name its own site gives it
@@ -503,17 +461,25 @@ def dead_links(cache):
                   for kind, link in links.items() if status.get(link["url"]) == DEAD)
 
 
-def for_page(cache):
-    """The build meta's ``voting``: ``{code: {kind: url}}``, labels apart.
+def for_page(cache, dates=None):
+    """The build meta's ``voting``: ``{code: {kind: url}}``, labels apart,
+    with each jurisdiction's own dates (``voting_dates``) under ``_dates``.
 
     A link found dead is left out rather than sent to a reader, until an
-    override replaces it.
+    override replaces it. vote.gov's deadlines page is left out wherever the
+    jurisdiction's own record gives its deadlines: a compiled table beside
+    the state's own dates is a second source that may disagree (rules 50
+    and 53).
     """
+    from . import voting_dates
+
     if not cache:
         return {}
     status = cache.get("links") or {}
     out, labels, nass, unreached = {}, {}, {}, {}
     for code, links in effective(cache).items():
+        if voting_dates.deadlines_known(dates, code):
+            links = {kind: link for kind, link in links.items() if kind != "deadlines"}
         out[code] = {kind: link["url"] for kind, link in links.items()
                      if status.get(link["url"]) != DEAD}
         named = {kind: link["label"] for kind, link in links.items() if link.get("label")}
@@ -530,7 +496,7 @@ def for_page(cache):
     out["_labels"] = labels
     out["_nass"] = nass
     out["_unreached"] = unreached
-    out["_keyDates"] = key_dates()
+    out["_dates"] = voting_dates.for_page(dates)
     out["_territories"] = {code: {"url": url, "name": name}
                            for code, (url, name) in TERRITORY_SOURCES.items()}
     out["_voteGov"] = VOTE_GOV

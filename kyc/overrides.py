@@ -159,6 +159,20 @@ MEMBER_FEC_IDS = {
                              "her legal name, Arenholz"),
 }
 
+# Names a reader searches a member by that congress-legislators does not
+# record (its name.nickname covers "Jim Clyburn"), keyed on bioguide id
+# (rules 3 and 17), each with where the name is given as theirs. Search
+# only: never displayed as the person's name. "AOC" found only a candidate
+# whose text said "endorsed by AOC" (audit 2026-10-17, GRID-05); "MTG" found
+# nobody (GRID-08). validate reports a key that is neither a profile nor a
+# departed member the page lists.
+SEARCH_ALIASES = {
+    "O000172": (("AOC", "Wikipedia, Alexandria Ocasio-Cortez, first sentence: \"also known as "
+                        "AOC\"; read 2026-10-18"),),
+    "G000596": (("MTG", "Wikipedia, Marjorie Taylor Greene, first sentence: \"also known by her "
+                        "initials MTG\"; read 2026-10-18"),),
+}
+
 SAME_PERSON_FILINGS = {
     # NV-3: the results page links both registrations to one article,
     # [[Martin O'Donnell]], and their receipts and disbursements differ by the

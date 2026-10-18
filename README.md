@@ -25,7 +25,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… build --strict` | Refuse to write if validation finds an error |
 | `… build --json` | Emit the validation report as JSON |
 | `… verify` | Check the committed data still matches the sources |
-| `… congress` | Refresh the membership snapshot (with contact details, accounts and committee rosters) and report roster drift |
+| `… congress` | Refresh the membership snapshot (with contact details, accounts and committee rosters) and report roster drift; also writes `data/departed_members.json`, everyone `legislators-historical` says left the sitting Congress, for the grid's search |
 | `… congress --check` | Report drift from the committed snapshot; no network |
 | `… congress --apply` | Write the drift into the roster CSVs: add the newly seated, renew terms, archive whoever the records say left |
 | `… congress --apply --snapshot FILE` | The same from a given snapshot, with no download (a rehearsal; `--historical FILE` for legislators-historical) |
@@ -66,7 +66,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (2073 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (2232 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -369,7 +369,32 @@ The two directories:
   counties, a numbered note under the table says why (rule 71).
 
 - `/` focuses the search box from anywhere on any page; Escape hands focus
-  back.
+  back, and on the grid clears the query too.
+- The grid's search reads a state's name or postal code as that state
+  ("Kansas" is never Arkansas: words match where a word starts), a district
+  however it is written as its race ("Ohio 9", "TX-35", "texas district 35",
+  "ny14", "WY at large"; "TX-3" is never TX-30; a seat that does not exist,
+  "AZ at large" or "Ohio 99", is said not to), and ranks the rest: the
+  name or an alias exactly, then a name, then the office, a leadership post
+  or the place, then the profile's text, a card matched only there saying
+  where. Other officials - the President, the Cabinet, the justices and
+  judges, governors and statewide officers - are listed apart for the
+  office they hold, linking to their own pages and never shown as profiles
+  (one also running for Congress has a card as well); their data is
+  fetched the first time a query is typed (`KYC.loadData`, from the stamped
+  URLs in the page's `<template id="onDemandData">`). Members who left this
+  Congress (`data/departed_members.json`, written by `congress` from
+  `legislators-historical`) are listed with the day that record ends the
+  term, said as its own (it can be a day from the House Clerk's), and who
+  holds the seat now. A full name that names someone lists no one who
+  merely shares the surname; when nobody answers to it, the namesakes are
+  listed as namesakes.
+- What is on shows as removable chips with **Clear all**; the results line
+  says how many out of the race are hidden, with the switch beside it; a
+  collapsed key explains every status word on the cards, from the table
+  that words them (`KYC.raceStatusLegend`). The races view lists races by
+  state, Senate before House, with a jump list, and draws the people out of
+  a race only when their list is opened.
 - The grid renders a screenful of cards and appends the rest as you scroll
   (a **Show more** button does the same without the observer), so the first
   paint no longer waits on 2,500 image elements. The result count is always
@@ -1530,8 +1555,9 @@ they run the state's elections; and each chamber's seats by party.
 | Lieutenant governors, and who is first in line where there is none | National Lieutenant Governors Association, members | `officers` writes `data/statewide_officers.json` |
 | Secretaries of state: party, elected or appointed, chief election official, contact | National Association of Secretaries of State, membership roster | `officers` |
 | Attorneys general: who holds the office | The office's own website, linked from USA.gov's page for the state | `officers` |
-| How to vote: registration status, polling place, absentee and early voting, registering | Each state's own pages, as NASS's "Can I Vote" (nass.org/can-I-vote) lists them; no date or deadline is typed in. Shown as "Voting in <State>" on the state page | `voting` writes `data/voting_links.json` |
-| Official results, sample ballots, registration deadlines, territories | `voting.RESULTS` (every state and D.C.) and `voting.SAMPLE_BALLOTS` (where the election office links a statewide one), each the office's own page; vote.gov's page for each state and territory for deadlines, linked and never typed; the territories' election offices (`voting.TERRITORY_LINKS`); Georgia's December 1 runoff and Louisiana's December 12 House round from `overrides.GENERAL_RUNOFFS` and `OPEN_PRIMARY_SEATS`, each with the state's page that gives it (`voting.KEY_DATE_SOURCES`) | curated in `kyc/voting.py`; opened by `voting` with NASS's links |
+| How to vote: registration status, polling place, absentee and early voting, registering | Each state's own pages, as NASS's "Can I Vote" (nass.org/can-I-vote) lists them. Shown as "Voting in <State>" on the state page | `voting` writes `data/voting_links.json` |
+| Key dates: registration deadlines (online, by mail, in person), same-day registration, early voting, mail-ballot application and return deadlines, a late-arriving ballot's last day, runoffs | Each jurisdiction's election office: its pages, calendars and statutes, read 2026-10-17 and every value re-opened by a second researcher. Every value shown carries the page's address and its words, on the jurisdiction's own domains; a compiled table (NCSL, Ballotpedia, Wikipedia, vote.gov, Vote.org, fvap.gov, usa.gov) is refused as a source. Where same-day registration exists, a deadline before Election Day is called the regular deadline, and where it happens is quoted in the office's words. Shown in words and as a calendar strip in "Voting in <State>", each line linked, and marked passed on the reader's own calendar day; "Register to vote" says when registration closed. From the day after the election only a ballot still arriving and a runoff stay | hand-edited `data/voting_dates.json`, checked by `kyc/voting_dates.py` |
+| Official results, sample ballots, registration deadlines, territories | `voting.RESULTS` (every state and D.C.) and `voting.SAMPLE_BALLOTS` (where the election office links a statewide one), each the office's own page; vote.gov's page for deadlines only where the jurisdiction's own record (above) does not say when registration closes; the territories' election offices (`voting.TERRITORY_LINKS`) | curated in `kyc/voting.py`; opened by `voting` with NASS's links |
 | Attorneys general: party | Republican and Democratic Attorneys General Associations, members | `officers` |
 
 A party holds a chamber when it has more than half of **all** its seats; a
@@ -2294,7 +2320,8 @@ confirm it, and the answer stays above the map rather than scrolling away.
 | `refs` (`govtrack`, `opensecrets`, `votesmart`, `ballotpedia`) | Reference ids from `congress-legislators` | Sitting members |
 | `wikipedia` | The bioguide mapping for members; the state ballot page's own link for filed candidates (`wikipediaVia`), kept only while it leads, through its redirects, to a whole article about them (`enrich`) | Members, and candidates the ballot page links |
 | `wikipediaWithheld` | `{title, landsOn}`: a ballot-page link withheld because it leads to a section of another article, a list, an election or a party ("Brian McGinnis" redirects to a protest), or to a title without their surname that `overrides.ARTICLE_UNDER_ANOTHER_NAME` does not record. Not shown; `validate` lists it | Candidates whose ballot link is not their article |
-| `aliases` | Other names a voter may search by, all from the member's own `congress-legislators` record (matched on bioguide id): `official_full` without its quoted nickname, nickname + surname (+ suffix), and the Wikipedia title without its disambiguator ("Jim Clyburn", "Hank Johnson"). Names that fold to the display name are dropped. Searched, never displayed as the name. For a filed candidate renamed to the ballot's spelling (`nameVia`), the FEC's filed form ("Mahesh Ganorkar", "Carlquist Lisa") | Sitting members whose record adds a name; filed candidates renamed from the ballot |
+| `aliases` | Other names a voter may search by, all from the member's own `congress-legislators` record (matched on bioguide id): `official_full` without its quoted nickname, nickname + surname (+ suffix), and the Wikipedia title without its disambiguator ("Jim Clyburn", "Hank Johnson"), plus any evidenced, bioguide-keyed entry in `overrides.SEARCH_ALIASES` ("AOC"). Names that fold to the display name are dropped. Searched, never displayed as the name. For a filed candidate renamed to the ballot's spelling (`nameVia`), the FEC's filed form ("Mahesh Ganorkar", "Carlquist Lisa") | Sitting members whose record adds a name; filed candidates renamed from the ballot |
+| `surname` | The surname the person is listed under in their race (`races.surname`): Congress's record for a member, the FEC filing's ("WASSERMAN SCHULTZ, DEBBIE") where it ends the name shown, else the shown name's last word less a suffix. "Name, A to Z" sorts by it | Everyone |
 | `nameVia` | `"election-page"` when the name shown is the results page's spelling for this filing, settled word for word, by an evidenced `overrides.RESULT_NAMES` entry ("Max Ganorkar", whose filing says Mahesh), or by the rule-62 matcher where the page adds a hyphen or uses the short form of the filed given name ("Bob Harvie" for "HARVIE, ROBERT J"; never the formal form of a filed nickname); `"certified-list"` when it is the certified list's printed name (never one printed in capitals) | Filed candidates the results page names differently |
 | `fecName` | The name the FEC files them under, set beside `nameVia`; the profile shows "Files with the FEC as ..." under the ballot's name | Filed candidates the results page names differently |
 | `raceStatusSourceName` | Set with `raceStatusSource: "certified"`: the certified list that set the status, or that does not name the person ("Alaska Division of Elections, 2026 General Election candidate list"), credited in the badge's title | Filers in states whose certified list was read |
