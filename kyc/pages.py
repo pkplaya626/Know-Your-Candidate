@@ -732,7 +732,9 @@ _UNNAMED_LEAD = {"Chair": "No chair named in the rosters",
 
 
 def party_key(person):
-    """"d", "r", "i" or "vacant", as ``KYC.partyKey`` reads a profile."""
+    """"d", "r", "i" or "vacant", as ``KYC.partyKey`` reads a profile: the
+    same test for the pages the build writes (rule 12). test_guide runs the
+    page's function beside this one, so change both together."""
     if not person:
         return "i"
     if person.get("party") == "Vacant" or person.get("status") == "Vacant":

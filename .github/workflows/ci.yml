@@ -87,7 +87,7 @@ jobs:
 
       - name: Every shipped script parses
         run: |
-          for f in candidate_profiles_site/assets/*.js candidate_profiles_site/data/*.js candidate_profiles_site/data/districts/*.js; do
+          for f in candidate_profiles_site/assets/*.js candidate_profiles_site/data/*.js candidate_profiles_site/data/people/*.js candidate_profiles_site/data/districts/*.js; do
             node --check "$f" || exit 1
           done
 

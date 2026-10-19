@@ -353,6 +353,137 @@ class TestPeopleFiles(unittest.TestCase):
         self.assertIn("../data/people/ca.js", note)
 
 
+def _js_functions(text):
+    """``{name: body}`` for each top-level function of a page module (two
+    spaces in, inside its wrapper), strings and comments blanked so a word
+    in prose or a URL ("en.wikipedia.org") is not read as a field."""
+    import re
+
+    text = re.sub(r"/\*.*?\*/", lambda m: "\n" * m.group(0).count("\n"), text, flags=re.S)
+    text = re.sub(r'"(?:\\.|[^"\\\n])*"|\'(?:\\.|[^\'\\\n])*\'', '""', text)
+    text = re.sub(r"//[^\n]*", "", text)
+    out, name = {}, None
+    for line in text.split("\n"):
+        m = re.match(r"  function (\w+)\(", line)
+        if m:
+            name = m.group(1)
+        if name:
+            out[name] = out.get(name, "") + line + "\n"
+    return out
+
+
+def index_field_reads(modules, kyc_text, leaves_out, fold_drawn, fold_entries, safe_helpers):
+    """Where a module that draws from the index (rule 94) reads a field the
+    index leaves out, outside the race folds that load the state's file
+    first: ``[(module, function, what)]``. *modules* is ``{name: text}``;
+    kyc.js's helpers that read such a field (and those that call them) count
+    as reads wherever another module calls them."""
+    import re
+
+    fields = "|".join(sorted(leaves_out))
+    read = re.compile(r"\b\w+\.(%s)\b" % fields)
+    kyc = _js_functions(kyc_text)
+    readers = {n for n, body in kyc.items() if read.search(body)} - set(safe_helpers)
+    while True:
+        more = {n for n, body in kyc.items() if n not in readers and n not in safe_helpers
+                and any(re.search(r"(?<![\w.])%s\(" % r, body) for r in readers)}
+        if not more:
+            break
+        readers |= more
+    exported = dict(re.findall(r"^    (\w+): (\w+),?$", kyc_text, re.M))
+    via_kyc = {key for key, fn in exported.items() if fn in readers}
+    out = []
+    for module, text in modules.items():
+        allowed = set(fold_drawn.get(module, ())) | set(fold_entries.get(module, ()))
+        functions = _js_functions(text)
+        for fn, body in functions.items():
+            if fn in allowed:
+                continue
+            for m in read.finditer(body):
+                out.append((module, fn, m.group(0)))
+            for key in via_kyc:
+                if re.search(r"\bKYC\.%s\(" % key, body):
+                    out.append((module, fn, "KYC." + key))
+            # A fold's own helpers are reached only from a fold.
+            for helper in set(fold_drawn.get(module, ())) - set(fold_entries.get(module, ())):
+                if re.search(r"(?<![\w.])%s\(" % helper, body):
+                    out.append((module, fn, helper + "()"))
+        for entry in fold_entries.get(module, ()):
+            if not re.search(r"(?<![\w.])fold\(", functions.get(entry, "")):
+                out.append((module, entry, "does not draw through fold()"))
+        for other in modules:
+            if other == module:
+                continue
+            for helper in set(fold_drawn.get(module, ())) - set(fold_entries.get(module, ())):
+                if re.search(r"\bKYC\.cards\.%s\(" % helper, modules[other]):
+                    out.append((other, "?", "KYC.cards." + helper))
+    return out
+
+
+class TestTheIndexDrawsNothingItLeavesOut(unittest.TestCase):
+    """Rule 94: a page holding only the index draws every card, filter and
+    map from it, so a view that read a field the index leaves out would say
+    "No data" about a real person and fail nothing. testPeopleSplit compares
+    a sample of views; this reads every module those pages load."""
+
+    PAGES = ("index.html", "map.html", os.path.join("states", "index.html"))
+    # The dialog opens a record only once its state's file is in
+    # (openWhenLoaded); the state-government panels draw offices, never a
+    # profile.
+    EXEMPT = {"kyc-profile.js", "kyc-stategov.js"}
+    # The race folds (kyc-cards.js fold()) draw their body only once
+    # KYC.peopleFull says the race's state is whole.
+    FOLD_DRAWN = {"kyc-cards.js": ("moneyBlock", "moneyRow", "outsideLine", "outsideOtherLine",
+                                   "compareTable", "compareCell", "platformFrom")}
+    FOLD_ENTRIES = {"kyc-cards.js": ("moneyBlock", "compareBlock")}
+    # Reads a history record's own `wikipedia`, not the profile's.
+    SAFE_HELPERS = ("officesHeld",)
+
+    def modules(self):
+        import re
+
+        site = os.path.join(ROOT, "candidate_profiles_site")
+        names = set()
+        for page in self.PAGES:
+            with open(os.path.join(site, page), encoding="utf-8") as f:
+                html = f.read()
+            self.assertIn("data/people/index.js", html, page)
+            names |= set(re.findall(r'<script src="(?:\.\./)?assets/(kyc[\w-]*\.js)', html))
+        texts = {}
+        for name in sorted(names):
+            with open(os.path.join(site, "assets", name), encoding="utf-8") as f:
+                texts[name] = f.read()
+        return texts
+
+    def check(self, modules):
+        return index_field_reads(
+            {n: t for n, t in modules.items() if n not in self.EXEMPT and n != "kyc.js"},
+            modules["kyc.js"], emit.INDEX_LEAVES_OUT, self.FOLD_DRAWN, self.FOLD_ENTRIES,
+            self.SAFE_HELPERS)
+
+    def test_no_view_drawn_from_the_index_reads_what_it_leaves_out(self):
+        self.assertEqual(self.check(self.modules()), [])
+
+    def test_the_exempt_modules_are_what_they_say(self):
+        modules = self.modules()
+        self.assertIn("openWhenLoaded", modules["kyc-profile.js"])
+        stategov = modules.get("kyc-stategov.js", "")
+        for api in ("KYC.people(", "KYC.byId(", "legislatorsData", "kycRaces"):
+            self.assertNotIn(api, stategov)
+
+    def test_the_guard_finds_a_card_reading_money(self):
+        modules = self.modules()
+        modules["kyc-cards.js"] += ("\n  function card2(item) {\n"
+                                    "    return item.receipts + KYC.moneyAmount(item, 'x') +"
+                                    " moneyRow(item);\n  }\n")
+        modules["kyc-map.js"] += "\n  function x(p) { return KYC.cards.compareCell(p); }\n"
+        found = {(m, f, what) for m, f, what in self.check(modules)}
+        self.assertIn(("kyc-cards.js", "card2", "item.receipts"), found)
+        self.assertIn(("kyc-cards.js", "card2", "KYC.moneyAmount"), found)
+        self.assertIn(("kyc-cards.js", "card2", "moneyRow()"), found)
+        self.assertIn(("kyc-map.js", "?", "KYC.cards.compareCell"), found)
+
+
 class TestChamberScores(unittest.TestCase):
     """The ticks beside a member's own left-right score are every sitting
     member of the chamber's, counted by the build: a state page holds its

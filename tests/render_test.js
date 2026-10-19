@@ -12078,14 +12078,32 @@ async function testPeopleSplit() {
     });
     built.window.close();
   }
-  {
-    // Nobody by that id: the grid says nothing opened, as before.
-    const built = await buildPage("index.html", { people: "index", hash: "#/profile/X_NOBODY" });
-    await settle(150);
-    suite("index.html#/profile/ — an id nobody has", () => {
-      check("no dialog, and the grid drawn", built.D.getElementById("profileModal") === null ||
-        built.D.getElementById("profileModal").hidden, "");
+  // Nobody by that id (a stale or mistyped shared link): every page says
+  // the same sentence. The grid used to drop it silently, the map to open
+  // nothing under the address, and a state page to say this.
+  for (const page of ["index.html", "map.html"]) {
+    const built = await buildPage(page, { people: "index", hash: "#/profile/X_NOBODY" });
+    await until(() => /No profile on this site has the id/.test(
+      (built.D.getElementById("profileModalWaiting") || {}).textContent || ""), 6000);
+    const modal = built.D.getElementById("profileModal");
+    const line = built.D.getElementById("profileModalWaiting");
+    suite(page + "#/profile/ — an id nobody has", () => {
+      check("says no profile has it", !!modal && !modal.hidden && !!line && !line.hidden &&
+        /No profile on this site has the id X_NOBODY\./.test(line.textContent),
+        line ? line.textContent : "no dialog");
+      check("names no one in the dialog's heading", !!modal &&
+        built.D.getElementById("profileModalName").textContent === "Profile");
       check("no state's file loaded for it", servedPeople(built).length === 0, servedPeople(built).join(" "));
+      if (page === "index.html") {
+        check("the grid drawn under it", built.D.querySelectorAll("#grid .card, .card").length > 0);
+      }
+    });
+    // Closing it leaves the address for the page itself.
+    built.window.KYC.profile.close();
+    await settle(30);
+    suite(page + "#/profile/ — closing the not-found line", () => {
+      check("the address no longer names the id", !/X_NOBODY/.test(built.window.location.hash),
+        built.window.location.hash);
     });
     built.window.close();
   }
@@ -12139,7 +12157,8 @@ async function testPeopleSplit() {
     suite("a people file from another build", () => {
       check("is refused: nothing it holds reaches the page",
         built.window.legislatorsData.length === before && !KYC.byId("X_STALE"));
-      check("and the page can say why", /updated while the page was loading/.test(KYC.peopleProblem()),
+      check("and the page says why, for a page opened before the update",
+        /updated since this page was opened\. Reload the page/.test(KYC.peopleProblem()),
         KYC.peopleProblem());
     });
     built.window.close();

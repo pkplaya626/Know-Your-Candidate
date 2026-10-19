@@ -1576,7 +1576,7 @@
         open(id, opts);
         return;
       }
-      showWaiting("No profile on this site has the id " + KYC.escapeHtml(id) + ".");
+      showNobody(id);
     }, function () {
       if (waitingFor !== token) return;
       waitingFor = null;
@@ -1587,12 +1587,29 @@
     return true;
   }
 
+  /* A link to an id nobody on the site has - a stale or mistyped shared
+   * link - says so in the dialog, on every page alike: the grid used to
+   * drop it silently, the map to keep it in the address and open nothing,
+   * and a state page to say this sentence. */
+  function showNobody(id) {
+    el("profileModalName").textContent = "Profile";
+    showWaiting("No profile on this site has the id " + KYC.escapeHtml(id) + ".");
+  }
+
   function open(id, opts) {
     var item = KYC.byId(id);
     if (!item) {
-      // Nobody by that id among everyone the page holds, or no way to look
-      // further: as before, the caller hears that nothing opened.
-      if (KYC.indexHeld() || !KYC.canLoadPeople("people/index.js")) return false;
+      // Nobody by that id among everyone the page holds: an address says
+      // so; a click on something that names no one opens nothing.
+      if (KYC.indexHeld() || !KYC.canLoadPeople("people/index.js")) {
+        if (!(opts && opts.fromRoute)) return false;
+        ensure();
+        current = null;
+        waitingFor = null;
+        showNobody(id);
+        if (!dialog.isOpen()) dialog.open();
+        return true;
+      }
       return openWhenLoaded(id, opts, null);
     }
     if (!KYC.isFull(item)) return openWhenLoaded(id, opts, item);

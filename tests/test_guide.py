@@ -315,6 +315,28 @@ class TestCongressPageNamesItsMembers(unittest.TestCase):
         # Without the profiles the page says what it holds, as before.
         self.assertIn('data-live="committees"', government.render("congress", "example.org", ["TX"]))
 
+    @unittest.skipUnless(__import__("shutil").which("node"), "needs Node")
+    def test_the_party_mark_is_the_one_the_pages_draw(self):
+        # pages.party_key is KYC.partyKey for the page the build writes
+        # (rule 12): run the page's own function on the same people.
+        import json
+        import subprocess
+
+        with open(os.path.join(SITE, "assets", "kyc.js"), encoding="utf-8") as f:
+            js = f.read()
+        body = re.search(r"\n  function partyKey\(item\) \{\n.*?\n  \}\n", js, re.S)
+        self.assertIsNotNone(body, "KYC.partyKey moved: point this test and pages.party_key at it")
+        people = [None, {}, {"party": ""}, {"party": "Democratic"}, {"party": "Democrat"},
+                  {"party": "Democratic-Farmer-Labor"}, {"party": "Democratic/Working Families"},
+                  {"party": "Republican"}, {"party": "republican"}, {"party": "Independent"},
+                  {"party": "Libertarian"}, {"party": "Vacant"},
+                  {"party": "Republican", "status": "Vacant"}, {"party": None}]
+        script = body.group(0) + "\nprocess.stdout.write(JSON.stringify(" + json.dumps(people) + \
+            ".map(partyKey)));\n"
+        out = subprocess.run(["node", "-e", script], capture_output=True, text=True, timeout=60)
+        self.assertEqual(out.returncode, 0, out.stderr)
+        self.assertEqual(json.loads(out.stdout), [pages.party_key(p) for p in people])
+
 
 class TestDatedText(unittest.TestCase):
     """Static prose about a dated event reads as still to come long after it

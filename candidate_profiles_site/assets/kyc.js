@@ -295,8 +295,8 @@
    *  page, or "": a file from another build than the page's own. */
   function peopleProblem() {
     return refusedPeople.length
-      ? "This site's data was updated while the page was loading, so the page holds an " +
-        "older copy than some of its files. Reload the page to see the current data."
+      ? "This site's data has been updated since this page was opened. Reload the page " +
+        "to see the current version."
       : "";
   }
 
@@ -1849,7 +1849,9 @@
   /* ============================================================== helpers */
 
   /** The party bucket a profile displays as. One definition; the pages each
-   *  had their own and they disagreed about Democratic-Farmer Labor. */
+   *  had their own and they disagreed about Democratic-Farmer Labor. The
+   *  pages the build writes use kyc/pages.py party_key, the same test in
+   *  Python; test_guide runs this one beside it, so change both together. */
   function partyKey(item) {
     if (!item) return "i";
     if (item.party === "Vacant" || item.status === "Vacant") return "vacant";

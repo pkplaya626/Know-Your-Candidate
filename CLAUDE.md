@@ -189,8 +189,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1944 tests, no dependencies
-npm install && npm test                       # 2865 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1948 tests, no dependencies
+npm install && npm test                       # 2872 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1778,9 +1778,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     state and district pages. What the index leaves out is a list,
     `emit.INDEX_LEAVES_OUT`: fields only the dialog or a race's money and
     comparison folds show, and fields no page reads; a new field is in the
-    index until it is named there, and `testPeopleSplit` draws every view
-    of the grid, the map and the state pages from the index and from
-    everyone's whole records and fails where they differ. A card's record is
+    index until it is named there. `testPeopleSplit` draws a sample of the
+    grid's, the map's and the state pages' views from the index and from
+    everyone's whole records and fails where they differ, and
+    `TestTheIndexDrawsNothingItLeavesOut` reads every module those pages
+    load and fails on a read of a left-out field, or of a kyc.js helper that
+    reads one, outside the folds that wait for the state's file. A card's
+    one-line office (`politicalHistory`) is a card field. A card's record is
     never shown as a person's whole record: the dialog, a race's money and
     its comparison load the state's file first (`KYC.loadPeople`, one
     promise per file, named stamped in `onDemandData`), say so while they
@@ -1790,7 +1794,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     file is taken in as it is assigned (`kycPeopleFile`, kyc.js), filling
     the index's record, never replacing it, and refused when it names
     another build than the page's figures, which the page then says (rule
-    34). A state's file must hold everyone its races and people point at,
+    34): a tab opened before a deploy reads that the site was updated since
+    it was opened, not that it was loading. A link to an id nobody here
+    has says so in the dialog, on every page alike. A state's file must hold everyone its races and people point at,
     or the build stops (`emit.split_problems`). A figure about the whole
     chamber is the build's, not a page's sum: the dialog's left-right ticks
     are `chamberScores`, counted from every profile, since a state page
