@@ -17,8 +17,8 @@ Oklahoma's fact on choosing judges cited New Jersey's and Utah's courts,
 and Tennessee's senate president an Arizona amendment.
 
 Colours are categories, never parties: ``cat-1`` to ``cat-5`` are teal,
-magenta, lime, grey and the text colour (kyc.css), because red, blue, amber
-and purple already mean a party on this site.
+magenta, olive, deep green and the text colour (kyc.css), because red, blue, amber
+and purple already mean a party on this site, and grey means "none".
 """
 
 from . import geo
@@ -463,7 +463,8 @@ def _circuits():
                          "The D.C. Circuit's site", CIRCUIT_SITES[v])
                   for code, v in values.items() if v in CIRCUIT_SITES},
         "about": ("The country's federal district courts are grouped into twelve regional "
-                  "circuits, each with a court of appeals. The number on each state is its circuit. "
+                  "circuits, each with a court of appeals. The number on each state is its circuit; "
+                  "the four colors only tell neighboring circuits apart and do not group them. "
                   "A thirteenth court, the Federal Circuit, hears certain kinds of appeal (patents, "
                   "trade, money claims against the United States) from everywhere."),
         "sources": ["usc-28-41", "usc-48-1824", "usc-28-1295", "uscourts-structure"],
@@ -661,9 +662,10 @@ def _local(census_cache):
 # The shades of the tribal-governments map: how many governments the
 # directory lists with an office in the state. Fixed edges, so a weekly
 # re-read moves a state between shades only when its count crosses one.
-# The first shade is scale-2: scale-1 is 18% of the accent over the empty
+# The first shade is scale-2: scale-1 was 18% of the accent over the empty
 # fill, and "No office listed" beside "1–4" read as one colour in the dark
-# theme (rule 49 keeps none apart from a count).
+# theme (rule 49 keeps none apart from a count). scale-1 is 40% now and
+# "none" is hatched, but the three shades keep their steps apart.
 TRIBE_BINS = ((1, 4, "1–4", "scale-2"), (5, 19, "5–19", "scale-3"), (20, None, "20 or more", "scale-5"))
 
 

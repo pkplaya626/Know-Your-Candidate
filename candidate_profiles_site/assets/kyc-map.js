@@ -68,10 +68,14 @@
   /** Who held the state's 2026 Senate seat, from its race: a senator who
    *  has since left still defends it for their party, and the record names
    *  them even with no profile here. */
-  function senateDefender(code) {
-    var race = (global.kycRaces || []).filter(function (r) {
+  function senateRace(code) {
+    return (global.kycRaces || []).filter(function (r) {
       return r.chamber === "Senate" && r.state === code;
-    })[0];
+    })[0] || null;
+  }
+
+  function senateDefender(code) {
+    var race = senateRace(code);
     if (!race) return null;
     var holder = race.incumbentIds.map(KYC.byId).filter(Boolean)[0];
     if (holder) return holder;
@@ -81,19 +85,48 @@
 
   /* ---------------------------------------------------------------- fills */
 
-  var VACANT_FILL = "var(--text-faint)";
-  var NONE_FILL = "var(--surface-2)";
+  var VACANT_FILL = "var(--vacant-fill)";
+  /* Nothing to show is the grey kept for that (--none-fill, hatched by
+   * KYC.svgFill): the page's own surface made those states black holes in
+   * the dark and AMOLED themes (VISUALS-19, RACES-17). */
+  var NONE_FILL = "var(--none-fill)";
   var UNKNOWN_FILL = "var(--surface-3)";
+  var SPLIT_FILL = "var(--split)";
+  var I_FILL = "var(--party-i-fill)";
 
-  function mix(demShare) {
-    // 0 = wholly Republican, 1 = wholly Democratic; the midpoint reads as the
-    // split colour rather than a muddy blend of the two party colours.
-    var pct = Math.round(Math.max(0, Math.min(1, demShare)) * 100);
-    if (pct >= 50) {
-      return "color-mix(in srgb, var(--party-d) " + ((pct - 50) * 2) +
-        "%, var(--split))";
-    }
-    return "color-mix(in srgb, var(--party-r) " + ((50 - pct) * 2) + "%, var(--split))";
+  /** A party's colour, lighter in weight: a majority short of the whole
+   *  delegation, or an open seat (--party-r-tint, --party-d-tint in
+   *  kyc.css). A step of lightness from the party's own colour, which a
+   *  reader who cannot see hue still tells apart. */
+  function tint(key) {
+    return "var(--party-" + key + "-tint)";
+  }
+
+  /* The House view in five labelled steps. A continuous ramp from red
+   * through purple to blue had no values on it, so a reader could learn a
+   * delegation's split only by clicking each state, and to a deuteranope
+   * its Democratic half was one colour (VISUALS-09, VISUALS-03). An even
+   * delegation is the hatched split. */
+  var HOUSE_STEPS = [
+    ["allR", "var(--party-r)", "All R"],
+    ["majR", tint("r"), "R majority"],
+    ["even", SPLIT_FILL, "Even"],
+    ["majD", tint("d"), "D majority"],
+    ["allD", "var(--party-d)", "All D"],
+  ];
+
+  /* *seats* counts every seat, independents' and vacant ones too: "All R"
+   * is said only of a delegation whose every seat is Republican, never of
+   * two Republicans beside an independent or an empty seat. */
+  function houseStep(d, r, seats) {
+    if (r === seats) return HOUSE_STEPS[0];
+    if (d === seats) return HOUSE_STEPS[4];
+    return d > r ? HOUSE_STEPS[3] : d < r ? HOUSE_STEPS[1] : HOUSE_STEPS[2];
+  }
+
+  /** The word's colour on a fill a callout is drawn in (kyc.js fillInk). */
+  function inkFor(fill) {
+    return KYC.fillInk(fill);
   }
 
   function stateMode() {
@@ -112,10 +145,11 @@
       if (!seats) fill = NONE_FILL;
       else if (s.r === seats) fill = "var(--party-r)";
       else if (s.d === seats) fill = "var(--party-d)";
-      else if (s.i === seats) fill = "var(--party-i)";
-      else fill = "var(--split)";
+      else if (s.i === seats) fill = I_FILL;
+      else fill = SPLIT_FILL;
       return {
         fill: fill,
+        ink: inkFor(fill),
         // D.C. and the territories elect no senators: "0R, 0D" read as a
         // count of senators found.
         text: !seats ? code + ": no senators (not a state)" :
@@ -129,11 +163,12 @@
       var fill2;
       if (!held && h.vacant) fill2 = VACANT_FILL;
       else if (!held) fill2 = NONE_FILL;
-      else if (h.i === held) fill2 = "var(--party-i)";
-      else if (!(h.d + h.r)) fill2 = "var(--party-i)";
-      else fill2 = mix(h.d / (h.d + h.r));
+      else if (h.i === held) fill2 = I_FILL;
+      else if (!(h.d + h.r)) fill2 = I_FILL;
+      else fill2 = houseStep(h.d, h.r, held + (h.vacant || 0))[1];
       return {
         fill: fill2,
+        ink: inkFor(fill2),
         text: code + " House: " + h.r + "R, " + h.d + "D" +
           (h.i ? ", " + h.i + "I" : "") + (h.vacant ? ", " + h.vacant + " vacant" : ""),
       };
@@ -154,9 +189,18 @@
     // An appointee was never elected or nominated to the seat: never
     // "re-elected", "renominated" or "lost re-election" (KYC.raceStatusOf).
     var own = !defender.appointed && !defender.raceRole;
+    // An open seat is the party's colour lighter in weight; a special
+    // election is outlined (RACES-21). Both were only in the hover text,
+    // which a touch reader never sees.
+    var race = senateRace(code) || {};
+    var fill3 = key === "vacant" ? VACANT_FILL : race.openSeat && key !== "i" ? tint(key)
+      : key === "i" ? I_FILL : "var(--party-" + key + ")";
     return {
-      fill: key === "vacant" ? VACANT_FILL : "var(--party-" + key + ")",
-      text: code + ": 2026 Senate race — " + party + " seat (" +
+      fill: fill3,
+      ink: inkFor(fill3),
+      special: !!race.special,
+      text: code + ": 2026 Senate race — " + (race.special ? "special election, " : "") +
+        (race.openSeat ? "open " : "") + party + " seat (" +
         defender.name + (status === "eliminated" ? " lost the primary" :
           status === "advanced" ? " in a primary runoff" :
           status === "elected" ? (own ? " re-elected" : " elected") :
@@ -179,6 +223,8 @@
   var map = KYC.usmap.create({
     look: appearance,
     onSelect: function (code) { select(code); },
+    // A special election's state is outlined (RACES-21).
+    marked: function (code) { return mode === "senate2026" && !!appearance(code).special; },
   });
 
   /* --------------------------------------------------------------- legend */
@@ -191,16 +237,48 @@
     senate: [
       ["var(--party-r)", "Both Republican"],
       ["var(--party-d)", "Both Democratic"],
-      ["var(--split)", "Split, or one independent"],
-      ["var(--party-i)", "Both independent", "allIndependent"],
+      [SPLIT_FILL, "Split, or one independent"],
+      [I_FILL, "Both independent", "allIndependent"],
       [NONE_FILL, "No senators (D.C. and territories)"],
     ],
     senate2026: [
+      // "Open" is the race's own word: no member who holds the seat is on
+      // its ballot. The other key claims nothing about who is running.
       ["var(--party-r)", "Republican seat up"],
+      [tint("r"), "Open Republican seat", "open:r"],
       ["var(--party-d)", "Democratic seat up"],
+      [tint("d"), "Open Democratic seat", "open:d"],
+      ["special", "Special election (dashed outline)", "special"],
       [NONE_FILL, "No race in 2026"],
     ],
   };
+
+  /** Is a legend key's fill drawn on some state? Only keys the map uses. */
+  function legendShown(entry) {
+    var want = entry[2];
+    if (!want) return true;
+    if (want === "allIndependent") return allIndependent("senate");
+    var races = (global.kycRaces || []).filter(function (r) { return r.chamber === "Senate"; });
+    if (want === "special") return races.some(function (r) { return r.special; });
+    return races.some(function (r) {
+      var held = senateDefender(r.state);
+      return r.openSeat && held && KYC.partyKey(held) === want.split(":")[1];
+    });
+  }
+
+  /** A legend key's swatch, drawn as the map draws its fill (hatched where
+   *  the map hatches), naming that fill in data-fill. */
+  function swatch(fill) {
+    /* The key is the map's own dash, on a shape wide enough to show it: a
+     * dashed border on a 10px square drew as a solid box, the look of the
+     * picked state's outline. */
+    if (fill === "special") {
+      return '<svg class="swatch swatch-special" data-fill="special" viewBox="0 0 26 12"' +
+        ' aria-hidden="true" focusable="false"><rect x="1" y="1" width="24" height="10"/></svg>';
+    }
+    return '<span class="swatch" data-fill="' + KYC.escapeAttr(KYC.svgFill(fill)) +
+      '" style="background:' + KYC.swatchFill(fill) + '"></span>';
+  }
 
   /* Does any state's delegation in *chamber* consist only of independents? */
   function allIndependent(chamber) {
@@ -215,30 +293,26 @@
     var target = doc.getElementById("mapLegend");
     if (stateMode()) {
       target.innerHTML = KYC.stategov.legend(mode).map(function (entry) {
-        return '<span class="key"><span class="swatch" style="background:' +
-          entry[0] + '"></span>' + KYC.escapeHtml(entry[1]) + "</span>";
+        return '<span class="key">' + swatch(entry[0]) + KYC.escapeHtml(entry[1]) + "</span>";
       }).join("");
       return;
     }
     if (mode === "house") {
-      target.innerHTML = [
-        '<span class="key"><span class="party-r">All R</span>',
-        '<span class="ramp" style="background:linear-gradient(to right,',
-        "var(--party-r),var(--split),var(--party-d))\"></span>",
-        '<span class="party-d">All D</span></span>',
-        allIndependent("house")
-          ? '<span class="key"><span class="swatch" style="background:var(--party-i)"></span>' +
-            "All independent</span>" : "",
-        '<span class="key"><span class="swatch" style="background:var(--text-faint)">',
-        "</span>Vacant</span>",
-      ].join("");
+      // Each step says what it counts: "R majority" is more Republican
+      // than Democratic members, short of all of them.
+      target.innerHTML = HOUSE_STEPS.map(function (step) {
+        return '<span class="key" data-step="' + step[0] + '">' + swatch(step[1]) +
+          KYC.escapeHtml(step[2]) + "</span>";
+      }).join("") +
+        (allIndependent("house")
+          ? '<span class="key">' + swatch(I_FILL) + "All independent</span>" : "") +
+        '<span class="key">' + swatch(VACANT_FILL) + "Vacant</span>";
       return;
     }
     target.innerHTML = LEGENDS[mode]
-      .filter(function (entry) { return !entry[2] || allIndependent("senate"); })
+      .filter(legendShown)
       .map(function (entry) {
-        return '<span class="key"><span class="swatch" style="background:' +
-          entry[0] + '"></span>' + KYC.escapeHtml(entry[1]) + "</span>";
+        return '<span class="key">' + swatch(entry[0]) + KYC.escapeHtml(entry[1]) + "</span>";
       })
       .join("");
   }
@@ -338,9 +412,7 @@
     return [
       '<button type="button" class="person-row" data-id="',
       KYC.escapeAttr(item.id), '">',
-      '<img ', KYC.portraitAttrs(item, "38px"),
-      ' alt="" loading="lazy" decoding="async" data-photo-idx="0" data-profile="',
-      KYC.escapeAttr(item.id), '">',
+      KYC.portraitThumb(item, "38px"),
       '<span class="who">',
       '<span class="name">', KYC.escapeHtml(item.name), "</span>",
       '<span class="office">', KYC.escapeHtml(item.officeLabel), "</span>",
@@ -435,22 +507,97 @@
     }).sort(order);
     var unsure = people.filter(function (x) { return x.isCandidate && unknown(x); }).sort(order);
     var out = people.filter(function (x) { return x.isCandidate && KYC.offBallot(x.raceStatus); });
+    var outNote = out.length
+      ? ' <span class="faint" title="Lost the primary, withdrew, or were not on the primary ballot">' +
+        out.length + " out</span>"
+      : "";
+    var stateRaces = (global.kycRaces || []).filter(function (r) {
+      return r.state === code && (mode === "house" ? r.chamber === "House" : r.chamber === "Senate");
+    });
+    /* The pages the statuses in the panel were read from, linked, as a
+     * race's head links its own (TRUST-06): one link per page, since a
+     * state's House races share one results page. */
+    var seenSource = {};
+    var sources = stateRaces.map(function (r) {
+      var url = r.results && r.results.sourceUrl;
+      if (!url || seenSource[url]) return "";
+      seenSource[url] = true;
+      return KYC.resultsSourceHtml(r);
+    }).filter(Boolean);
+    var sourceLine = sources.length ? '<p class="panel-note race-results">' + sources.join(" ") + "</p>" : "";
+    var unsureBlock = unsure.length
+      ? '<button type="button" class="panel-subhead expander" id="showUnsure"' +
+        ' aria-expanded="false" aria-controls="unsureRows">' +
+        KYC.icon("chevron") + " Filed; ballot status not known <span>" + unsure.length +
+        "</span></button>" +
+        '<div id="unsureRows" hidden>' + unsure.map(personRow).join("") + "</div>"
+      : "";
 
     /* Texas has 37 representatives and 191 filed challengers. Listing all 228
      * in one scroll buries the delegation the reader clicked the state to
      * see, so the challengers sit behind a count they can open. */
     var html = "";
-    if (mode === "senate2026" && KYC.odds) {
-      var seatRace = (global.kycRaces || []).filter(function (r) {
-        return r.chamber === "Senate" && r.state === code;
-      })[0];
-      if (seatRace) html += KYC.odds.render(seatRace, { compact: true });
+    /* The 2026 race view leads with the race: everyone in it, listed in the
+     * race's own order, the seat's holder too while the race has them, then
+     * what the markets quote, then whoever holds the seat and is not in
+     * the race. Texas led with John Cornyn, "Lost primary", and folded its
+     * two nominees away under "2026 challengers" (VISUALS-10); the first
+     * race-first list then took only filers, and left every renominated
+     * senator out of "Still in the race" and its count. The delegation
+     * views keep who is seated first (rule 27). */
+    var raceFirst = mode === "senate2026";
+    var listed = {};
+    if (raceFirst) {
+      var raceOf = {};
+      stateRaces.forEach(function (r) { raceOf[r.id] = r; });
+      var holdsThisRace = function (x) {
+        return stateRaces.some(function (r) {
+          return (r.incumbentIds || []).indexOf(x.id) !== -1 || r.winnerId === x.id;
+        });
+      };
+      var inRace = function (x) {
+        if (KYC.offBallot(x.raceStatus) || unknown(x)) return false;
+        if (x.isCandidate) return true;
+        // A holder running for another seat is in that race, not this one.
+        if (!holdsThisRace(x) || (x.contestRaceId && !raceOf[x.contestRaceId])) return false;
+        return !!(x.raceStatus || x.seekingReelection2026);
+      };
+      var racePeople = people.filter(inRace).sort(order);
+      racePeople.forEach(function (x) { listed[x.id] = true; });
+      // One formula with the race's own count (rule 73): the people the
+      // results put on the ballot with no profile here are in it too.
+      var unprofiled = 0;
+      stateRaces.forEach(function (r) {
+        var u = KYC.cards.unprofiledNames(r);
+        unprofiled += u.none.length + u.maybe.length;
+      });
+      var inCount = racePeople.length + unprofiled;
+      // After Election Day the list holds who won and who lost (rule 63):
+      // never "still in the race".
+      var heading = KYC.electionStatus().phase === "post-election"
+        ? "On the November ballot" : "Still in the race";
+      if (inCount) {
+        html += '<p class="panel-subhead race-people">' + heading + " <span>" + inCount + "</span>" +
+          outNote + "</p>" + racePeople.map(personRow).join("") +
+          (stateRaces.length === 1 ? KYC.cards.orderNote(racePeople, stateRaces[0]) : "");
+      } else if (out.length) {
+        html += '<p class="panel-subhead race-people">Nobody listed as still in the race' + outNote + "</p>";
+      }
+      html += stateRaces.map(function (r) { return KYC.cards.unprofiledNote(r, "panel-note"); }).join("");
+      // Before the markets and the holder, beside the statuses they back.
+      html += unsureBlock + sourceLine;
+      if (KYC.odds) {
+        html += stateRaces.map(function (r) {
+          return KYC.odds.render(r, { compact: true, collapsed: true });
+        }).join("");
+      }
     }
-    if (seated.length) {
+    var seatedRest = seated.filter(function (x) { return !listed[x.id]; });
+    if (seatedRest.length) {
       html += '<p class="panel-subhead">' +
         (mode === "senate2026" ? "Seat held by" : "Currently seated") +
-        " <span>" + seated.length + "</span></p>" +
-        seated.map(personRow).join("");
+        " <span>" + seatedRest.length + "</span></p>" +
+        seatedRest.map(personRow).join("");
     }
     if (former.length) {
       html += '<p class="panel-subhead">' +
@@ -465,75 +612,52 @@
         KYC.escapeAttr(KYC.siteRoot() + districtMap.page) + '">' +
         (districtMap.redrawn ? "Old and new district lines \u203a" : "District map \u203a") + "</a></p>";
     }
-    if (running.length) {
-      html +=
-        '<button type="button" class="panel-subhead expander" id="showChallengers"' +
-        ' aria-expanded="false" aria-controls="challengerRows">' +
-        KYC.icon("chevron") + " 2026 challengers <span>" + running.length + "</span>" +
-        (out.length
-          ? ' <span class="faint" title="Lost the primary, withdrew, or were not on the primary ballot">' +
-            out.length + " out</span>"
-          : "") +
-        "</button>" +
-        '<div id="challengerRows" hidden>' + running.map(personRow).join("") + "</div>";
-    } else if (out.length) {
-      html += '<p class="panel-subhead">No challenger still on the ballot ' +
-        '<span title="Lost the primary, withdrew, or were not on the primary ballot">' +
-        out.length + " out</span></p>";
-    }
-    if (unsure.length) {
-      html +=
-        '<button type="button" class="panel-subhead expander" id="showUnsure"' +
-        ' aria-expanded="false" aria-controls="unsureRows">' +
-        KYC.icon("chevron") + " Filed; ballot status not known <span>" + unsure.length +
-        "</span></button>" +
-        '<div id="unsureRows" hidden>' + unsure.map(personRow).join("") + "</div>";
-    }
-    // The people the results put on the ballot with no profile here: by
-    // name for the state's Senate seat, counted for its House seats, with
-    // the state page that lists them race by race. Only the view's own
-    // chamber: the Senate view counted Hawaii's House nominees under a
-    // Senate heading (audit 2026-10-17, RACES-06).
-    var stateRaces = (global.kycRaces || []).filter(function (r) {
-      return r.state === code && (mode === "house" ? r.chamber === "House" : r.chamber === "Senate");
-    });
-    if (mode === "senate2026") {
-      html += stateRaces.map(function (r) { return KYC.cards.unprofiledNote(r, "panel-note"); }).join("");
+    if (raceFirst) {
+      // The race's people, its unsettled filers and its source are above.
     } else {
-      /* Whose word each name is, counted apart (rules 64 and 77): once the
+      if (running.length) {
+        html +=
+          '<button type="button" class="panel-subhead expander" id="showChallengers"' +
+          ' aria-expanded="false" aria-controls="challengerRows">' +
+          KYC.icon("chevron") + " 2026 challengers <span>" + running.length + "</span>" + outNote +
+          "</button>" +
+          '<div id="challengerRows" hidden>' + running.map(personRow).join("") + "</div>";
+      } else if (out.length) {
+        html += '<p class="panel-subhead">No challenger still on the ballot ' +
+          '<span title="Lost the primary, withdrew, or were not on the primary ballot">' +
+          out.length + " out</span></p>";
+      }
+      html += unsureBlock;
+      /* The people the results put on the ballot with no profile here,
+       * counted for the state's House seats, with the state page that lists
+       * them race by race (the 2026 Senate view names them, above). Only the
+       * view's own chamber: the Senate view counted Hawaii's House nominees
+       * under a Senate heading (audit 2026-10-17, RACES-06).
+       *
+       * Whose word each name is, counted apart (rules 64 and 77): once the
        * count has begun, some of Louisiana's districts read from the results
        * pages while others are still the Secretary of State's list, and a
        * state's certified list sets some races and not others. One sentence
        * crediting one source would credit the others' names to it. */
       var bySource = {};
-      var order = [];
+      var sourceOrder = [];
       stateRaces.forEach(function (r) {
         var n = KYC.cards.unprofiledNames(r).none.length;
         if (!n) return;
         var source = KYC.ballotSource(r);
-        if (!(source in bySource)) { bySource[source] = 0; order.push(source); }
+        if (!(source in bySource)) { bySource[source] = 0; sourceOrder.push(source); }
         bySource[source] += n;
       });
-      var people = function (n) { return n + (n === 1 ? " person" : " people"); };
-      var parts = order.map(function (source) { return people(bySource[source]) + " " + source; });
+      var counted = function (n) { return n + (n === 1 ? " person" : " people"); };
+      var parts = sourceOrder.map(function (source) { return counted(bySource[source]) + " " + source; });
       if (parts.length) {
         html += '<p class="panel-note">Also on the November ballot, with no profile here: ' +
           KYC.escapeHtml(parts.join(", and ")) +
           '. <a href="' + KYC.escapeAttr(KYC.stateUrl(code)) + '">Each race on the ' +
           KYC.escapeHtml(KYC.stateName(code)) + " page \u203a</a></p>";
       }
+      html += sourceLine;
     }
-    /* The pages the statuses above were read from, linked, as a race's
-     * head links its own (TRUST-06): one link per page, since a state's
-     * House races share one results page. */
-    var seenSource = {};
-    var sources = stateRaces.map(function (r) {
-      var url = r.results && r.results.sourceUrl;
-      if (!url || seenSource[url]) return "";
-      seenSource[url] = true;
-      return KYC.resultsSourceHtml(r);
-    }).filter(Boolean);
-    if (sources.length) html += '<p class="panel-note race-results">' + sources.join(" ") + "</p>";
     list.innerHTML = html;
     list.scrollTop = 0;
 
@@ -576,6 +700,9 @@
         );
       }
     );
+    // A phone's one menu of views (TECH-14, VISUALS-12).
+    var picker = doc.getElementById("mapModeSelect");
+    if (picker) picker.value = mode;
     // The footer names this view's sources: the national view of Congress
     // named none (TECH-11). The state panels date their own.
     Array.prototype.forEach.call(doc.querySelectorAll("[data-sources]"), function (line) {
@@ -594,10 +721,22 @@
   function initStatePicker() {
     var picker = doc.getElementById("mapStateSelect");
     if (!picker) return;
-    map.codes().sort().forEach(function (code) {
+    // D.C. is both a shape and a tile in the territory strip; it was listed
+    // twice, and every option was a bare code (VISUALS-V2). Named and in
+    // name order, as every other picker on the site.
+    var seen = {};
+    map.codes().filter(function (code) {
+      if (seen[code]) return false;
+      seen[code] = true;
+      return true;
+    }).map(function (code) {
+      return { code: code, name: KYC.stateName(code) || map.name(code) };
+    }).sort(function (a, b) {
+      return a.name.replace(/^the /i, "").localeCompare(b.name.replace(/^the /i, ""));
+    }).forEach(function (place) {
       var option = doc.createElement("option");
-      option.value = code;
-      option.textContent = code;
+      option.value = place.code;
+      option.textContent = place.name + " (" + place.code + ")";
       picker.appendChild(option);
     });
     picker.addEventListener("change", function () {
@@ -632,6 +771,10 @@
       var button = event.target.closest("[data-mode]");
       if (button) setMode(button.getAttribute("data-mode"));
     });
+    var modePicker = doc.getElementById("mapModeSelect");
+    if (modePicker) {
+      modePicker.addEventListener("change", function () { setMode(modePicker.value); });
+    }
 
     doc.getElementById("delegation").addEventListener("click", function (event) {
       var row = event.target.closest("[data-id]");

@@ -880,6 +880,25 @@
     return !first || first === "placeholder" ? SILHOUETTE : first;
   }
 
+  /** Has the build found a portrait for *item* (rule 24: none is guessed)? */
+  function hasPortrait(item) {
+    return portraitSrc(item) !== SILHOUETTE;
+  }
+
+  /** "Mary Gay Scanlon" -> "MS", "Ralph Abraham Jr." -> "RA": the letters
+   *  a card shows in a disc where there is no portrait. A race of six grey
+   *  silhouettes was the largest thing on its cards and said nothing
+   *  (audit 2026-10-17, VISUALS-16). */
+  function monogram(name) {
+    var words = String(name || "").replace(/\([^)]*\)|"[^"]*"/g, " ")
+      .split(/[\s,]+/).filter(function (w) {
+        return w && !/^(jr|sr|ii|iii|iv|v|md|phd|dr|mr|mrs|ms)\.?$/i.test(w) && /\p{L}/u.test(w);
+      });
+    if (!words.length) return "";
+    var letter = function (w) { return (w.match(/\p{L}/u) || [""])[0].toUpperCase(); };
+    return words.length === 1 ? letter(words[0]) : letter(words[0]) + letter(words[words.length - 1]);
+  }
+
   /* Sizes of the first portrait for a srcset, when the build found several
    * of the same photograph: the browser then fetches one sharp at this
    * screen's density, rather than a 960px original for a 38px circle. */
@@ -914,6 +933,20 @@
     return 'src="' + escapeAttr(portraitSrc(item)) + '"' + (set
       ? ' srcset="' + escapeAttr(set) + '" sizes="' + escapeAttr(sizes) + '"'
       : "");
+  }
+
+  /** A small round portrait for a row - the map's panel, a profile's race -
+   *  or, where the build found none, the person's initials in a disc of the
+   *  same size. The cards had the disc and the rows kept grey silhouettes
+   *  (VISUALS-16); one helper draws it for every row (rule 12). *sizes* is
+   *  the width it is drawn at, e.g. "38px". */
+  function portraitThumb(item, sizes) {
+    if (!hasPortrait(item)) {
+      return '<span class="thumb-monogram" aria-hidden="true">' +
+        escapeHtml(monogram(item && item.name)) + "</span>";
+    }
+    return "<img " + portraitAttrs(item, sizes) + ' alt="" loading="lazy" decoding="async"' +
+      ' data-photo-idx="0" data-profile="' + escapeAttr(item.id) + '">';
   }
 
   /** Point an existing <img> at a profile's portrait - the dialog reuses one
@@ -1458,12 +1491,35 @@
       }
     });
 
+    /* A role="menu" is announced as one, and a screen reader then hands the
+     * keys to the page: arrows, Home and End moved nothing (audit
+     * 2026-10-17, TECH-15). They move among the items, wrapping, as the
+     * APG menu-button pattern has them. */
+    function items() {
+      var marked = panel.querySelectorAll('[role^="menuitem"]');
+      var list = marked.length ? marked : panel.querySelectorAll(FOCUSABLE);
+      return Array.prototype.filter.call(list, function (node) {
+        return !node.disabled && !node.hidden && !node.closest("[hidden]");
+      });
+    }
+
     function onKey(event) {
       if (event.key === "Escape") {
         event.preventDefault();
         close();
         button.focus();
+        return;
       }
+      var move = { ArrowDown: 1, ArrowUp: -1, Home: "first", End: "last" }[event.key];
+      if (!move) return;
+      var list = items();
+      if (!list.length) return;
+      event.preventDefault();
+      var at = list.indexOf(doc.activeElement);
+      var next = move === "first" ? 0 : move === "last" ? list.length - 1
+        : at === -1 ? (move > 0 ? 0 : list.length - 1)
+        : (at + move + list.length) % list.length;
+      list[next].focus();
     }
 
     function onOutside(event) {
@@ -1637,6 +1693,87 @@
 
   function partyClass(item) {
     return "party-" + partyKey(item);
+  }
+
+  /* ------------------------------------------------------------- hatches */
+
+  /* "Split" and "none" are told apart from the colours around them by a
+   * hatch as well as a colour, a cue that does not depend on seeing hue:
+   * to a deuteranope the old split lilac was the Democratic blue, and every
+   * divided state read as Democratic (audit 2026-10-17, VISUALS-03). A map
+   * draws the patterns in its own SVG at its own scale (hatchDefs) and
+   * names them on the SVG as custom properties (hatchVars); a shape's fill
+   * then names the property with its plain colour as the fallback
+   * (svgFill), so a map with no patterns still draws the colour. One fill
+   * per shape, no clip or mask (rule 45). */
+  var HATCHES = {
+    "split": ["var(--split)", "var(--split-hatch)", 0.4],
+    "split-soft": ["color-mix(in srgb, var(--split) 70%, var(--surface-1))",
+      "color-mix(in srgb, var(--split-hatch) 70%, var(--surface-1))", 0.4],
+    "none": ["var(--none-fill)", "var(--none-hatch)", 0.22],
+  };
+  var HATCHED = { "var(--split)": "split", "var(--none-fill)": "none" };
+
+  /** The patterns, *unit* map units apart (about 6px on screen), with ids
+   *  that begin with *prefix*. */
+  function hatchDefs(prefix, unit) {
+    var u = (+unit || 6).toFixed(2);
+    var w = function (share) { return (unit * share).toFixed(2); };
+    return "<defs>" + Object.keys(HATCHES).map(function (key) {
+      var h = HATCHES[key];
+      return '<pattern id="' + prefix + "hatch-" + key + '" patternUnits="userSpaceOnUse" width="' +
+        u + '" height="' + u + '" patternTransform="rotate(45)">' +
+        '<rect width="' + u + '" height="' + u + '" style="fill:' + h[0] + '"/>' +
+        '<rect width="' + w(h[2]) + '" height="' + u + '" style="fill:' + h[1] + '"/></pattern>';
+    }).join("") + "</defs>";
+  }
+
+  /** The style that names the patterns for the shapes inside an SVG. */
+  function hatchVars(prefix) {
+    return Object.keys(HATCHES).map(function (key) {
+      return "--hatch-" + key + ":url(#" + prefix + "hatch-" + key + ")";
+    }).join(";");
+  }
+
+  /** A shape's fill: a hatched colour names its pattern, the colour after. */
+  function svgFill(fill) {
+    var key = HATCHED[fill];
+    return key ? "var(--hatch-" + key + ", " + fill + ")" : fill;
+  }
+
+  /* A scroll the page makes for the reader animates only for a reader who
+   * has not asked for less motion: an explicit { behavior: "smooth" }
+   * overrides the stylesheet's reduced-motion rule (audit 2026-10-17,
+   * TECH-16). Every scrollIntoView the modules make passes this. */
+  function scrollBehavior() {
+    try {
+      if (global.matchMedia && global.matchMedia("(prefers-reduced-motion: reduce)").matches) return "auto";
+    } catch (e) { /* no media queries: the default */ }
+    return "smooth";
+  }
+
+  /* The word's colour on a fill, where the callout's default (the inverse
+   * text) does not read: the mid-tones and the greys name their own ink,
+   * per theme, in kyc.css. */
+  var FILL_INK = {
+    "var(--split)": "var(--split-ink)",
+    "var(--party-r-tint)": "var(--text)",
+    "var(--party-d-tint)": "var(--text)",
+    "var(--vacant-fill)": "var(--vacant-ink)",
+    "var(--none-fill)": "var(--text)",
+  };
+  function fillInk(fill) {
+    return FILL_INK[fill] || (/--surface-/.test(fill || "") ? "var(--text)" : "");
+  }
+
+  /** The same fill as an HTML background, for a legend swatch or a callout. */
+  function swatchFill(fill) {
+    var key = HATCHED[fill];
+    if (!key) return fill;
+    var h = HATCHES[key];
+    var edge = (5 * h[2]).toFixed(1);
+    return "repeating-linear-gradient(135deg, " + h[1] + " 0 " + edge + "px, " + h[0] + " " +
+      edge + "px 5px)";
   }
 
   /* Search across everything a voter might reasonably type, not just name
@@ -2715,6 +2852,12 @@
     hasValue: hasValue,
     partyKey: partyKey,
     partyClass: partyClass,
+    hatchDefs: hatchDefs,
+    hatchVars: hatchVars,
+    svgFill: svgFill,
+    swatchFill: swatchFill,
+    fillInk: fillInk,
+    scrollBehavior: scrollBehavior,
     seatStrip: seatStrip,
     seatKey: seatKey,
     // data
@@ -2750,6 +2893,9 @@
     portraitSrc: portraitSrc,
     portraitSrcset: portraitSrcset,
     portraitAttrs: portraitAttrs,
+    hasPortrait: hasPortrait,
+    monogram: monogram,
+    portraitThumb: portraitThumb,
     setPortrait: setPortrait,
     shownPhotoCredit: shownPhotoCredit,
     cappedSrcset: cappedSrcset,

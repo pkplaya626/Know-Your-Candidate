@@ -597,7 +597,10 @@
       );
     }
 
-    /* The 2026 races, one section each, in ballot order. */
+    /* The 2026 races, one section each, in ballot order. Each race's
+     * markets are closed until opened (cards.raceSection): as tall as its
+     * people, they made California's page about 60 screens long on a phone
+     * (VISUALS-15). */
     var raceHtml = senateRaces.concat(houseRaces).map(function (race) {
       var people = peopleIn(race);
       return cards.raceSection(race, people, { title: districtLabel(race), stateLink: false,

@@ -25,17 +25,19 @@
   var FILL = {
     R: "var(--party-r)",
     D: "var(--party-d)",
-    I: "var(--party-i)",
+    I: "var(--party-i-fill)",
     split: "var(--split)",
-    nonpartisan: "color-mix(in srgb, var(--text-faint) 45%, var(--surface-2))",
+    /* A grey of its own (kyc.css): the faint mix it was sat 1.9 apart from
+     * the vacant grey to every reader in the light theme. */
+    nonpartisan: "var(--nonpartisan-fill)",
     /* An office that does not exist is the faintest grey; a vacancy is the
      * House view's vacant grey; sources that disagree are drawn in the text
      * colour itself, the strongest contrast any theme has, so the three
      * cannot be confused (the muted and faint greys were 1.27:1 in the
      * light theme). */
     disputed: "var(--text)",
-    vacant: "var(--text-faint)",
-    none: "var(--surface-2)",
+    vacant: "var(--vacant-fill)",
+    none: "var(--none-fill)",
   };
   /* An office the state does not have is drawn like a nonpartisan body: in
    * neither party's colour, and apart from "not covered". */
@@ -85,7 +87,7 @@
       // The colour is the sitting governor's party, who may not be running:
       // the legend says whose party it is, not who is on the ballot.
       [FILL.R, "Governor's election Nov 3, 2026 (current governor: Republican)"],
-      [FILL.D, "Governor's election Nov 3, 2026 (current governor: Democrat)"],
+      [FILL.D, "Governor's election Nov 3, 2026 (current governor: Democratic)"],
       [FILL.none, "No governor's election in 2026"],
       // D.C. elects a mayor, not a governor: never the grey above, which
       // would say it holds no election at all.

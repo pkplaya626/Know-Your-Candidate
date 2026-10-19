@@ -276,6 +276,23 @@ async function testShared(page) {
       D.getElementById("themeButton").click();
       return !D.getElementById("themePanel").hidden;
     })());
+    // A role="menu" answers the keys a screen reader hands it (TECH-15).
+    const menuItems = [...D.querySelectorAll('#themePanel [role^="menuitem"]')];
+    const key = (k) => D.activeElement.dispatchEvent(new window.KeyboardEvent("keydown", { key: k, bubbles: true }));
+    check("the menu's arrows, Home and End move among its items, wrapping", (() => {
+      if (menuItems.length < 2) return false;
+      menuItems[0].focus();
+      key("ArrowDown");
+      const second = D.activeElement === menuItems[1];
+      key("End");
+      const last = D.activeElement === menuItems[menuItems.length - 1];
+      key("ArrowDown");
+      const wrapped = D.activeElement === menuItems[0];
+      key("ArrowUp");
+      const back = D.activeElement === menuItems[menuItems.length - 1];
+      key("Home");
+      return second && last && wrapped && back && D.activeElement === menuItems[0];
+    })(), `${menuItems.length} items`);
     check("theme menu closes on Escape", (() => {
       D.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
       return D.getElementById("themePanel").hidden;
@@ -472,8 +489,10 @@ async function testDirectory() {
       more.click();
       return cards().length > before;
     })(), `${cards().length} after Show more`);
+    // A card with no portrait has no image to load, only its initials.
     check("portraits lazy-load",
-      grid.querySelectorAll('img[loading="lazy"]').length === cards().length);
+      grid.querySelectorAll('img[loading="lazy"]').length ===
+        [...cards()].filter((c) => !c.classList.contains("card-no-photo")).length);
     check("cards are buttons, not clickable divs",
       [...cards()].every((c) => c.tagName === "BUTTON"));
     check("no inline onclick handlers anywhere",
@@ -652,6 +671,23 @@ async function testDirectory() {
     check("a srcset is escaped like everything else",
       !/"onerror/.test(KYC.portraitAttrs(
         { photos: ["https://u.test/x.jpg"], photoSet: [[120, 'https://u.test/"onerror="1']] }, "38px")));
+
+    // A race of six grey silhouettes said nothing (VISUALS-16): no
+    // portrait is a disc of initials, and no portrait is guessed (rule 24).
+    const bare = window.legislatorsData.find((p) => !KYC.hasPortrait(p));
+    const pictured = window.legislatorsData.find((p) => KYC.hasPortrait(p));
+    const holder = D.createElement("div");
+    holder.innerHTML = KYC.cards.card(bare) + KYC.cards.card(pictured);
+    const [bareCard, picturedCard] = holder.querySelectorAll(".card");
+    check("a card with no portrait shows the person's initials in a disc, and no silhouette",
+      !!bare && !bareCard.querySelector("img") &&
+        bareCard.querySelector(".card-monogram").textContent === KYC.monogram(bare.name) &&
+        KYC.monogram(bare.name).length >= 1, bare && bare.name);
+    check("a card with a portrait keeps it", !!picturedCard.querySelector(".card-photo img"));
+    check("initials skip suffixes, nicknames and punctuation",
+      KYC.monogram("Ralph Abraham Jr.") === "RA" && KYC.monogram('James "Jim" O\'Brien') === "JO" &&
+        KYC.monogram("Mary Gay Scanlon") === "MS" && KYC.monogram("Ana Ortiz (write-in)") === "AO",
+      [KYC.monogram("Ralph Abraham Jr."), KYC.monogram('James "Jim" O\'Brien')].join(" "));
 
     const real = window.legislatorsData.find((p) => p.photoSet && p.photos.length > 1);
     check("the build lists sizes for Wikimedia portraits", !!real);
@@ -1560,6 +1596,14 @@ async function testDirectoryAsync() {
       const onBallot = [...D.querySelectorAll("#profileModalRace > .race-mate")];
       check("people still on the ballot come first, the rest are folded",
         onBallot.every((r) => !KYC.cards.offBallot(KYC.byId(r.getAttribute("data-goto")))));
+      // The race list kept grey silhouettes after the cards had initials
+      // (VISUALS-16 review): one helper draws every row's (KYC.portraitThumb).
+      const bare = rows.filter((r) => !KYC.hasPortrait(KYC.byId(r.getAttribute("data-goto"))));
+      check("a race-mate with no portrait shows initials, never a silhouette",
+        bare.every((r) => !r.querySelector("img") && r.querySelector(".thumb-monogram") &&
+          r.querySelector(".thumb-monogram").textContent === KYC.monogram(KYC.byId(r.getAttribute("data-goto")).name)) &&
+          rows.filter((r) => !bare.includes(r)).every((r) => !!r.querySelector("img")),
+        `${bare.length} of ${rows.length} without a portrait`);
       const first = rows[0];
       first.click();
       check("clicking a race-mate opens their profile",
@@ -1675,7 +1719,18 @@ async function testDirectoryAsync() {
       /DW-NOMINATE/.test(p.voting_alignment || ""));
     KYC.profile.open(independent.id);
     const voting = D.getElementById("profileModalVoting").textContent;
+    const ticks = D.querySelectorAll("#profileModalVoting .ideology-peer").length;
     KYC.profile.close();
+    // The track was a blue-to-red gradient under a caption saying the score
+    // is not a party label (TRUST-12, VISUALS-05): neutral ink, with every
+    // sitting member of the chamber as a tick to read the score against.
+    const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+    const track = (css.match(/\n\.ideology-track\s*\{[^}]*\}/) || [""])[0];
+    check("the score's track is drawn in no party's colour",
+      !!track && !/--party-|--split|gradient/.test(track), track.replace(/\s+/g, " "));
+    check("and the chamber's members are ticks on it, counted in words",
+      ticks > 50 && /Each tick is a sitting member of the (House|Senate)/.test(voting) &&
+        /\d+ of \d+ score further left, \d+ further right/.test(voting), `${ticks} ticks`);
     check("an independent's score is in the scale's words, with its source and Congress",
       /of centre|near the centre/.test(voting) && !/Republican|Democrat/.test(voting) &&
         /Voteview/.test(voting) && /\d+(st|nd|rd|th) Congress/.test(voting), voting.replace(/\s+/g, " "));
@@ -1827,7 +1882,8 @@ async function testMap() {
     check("Senate mode fills states", !!senateFill, senateFill);
     // Every key is a fill some state is drawn in, and every fill has a key:
     // "Independent" matched no state, and D.C.'s grey had no key.
-    const keys = [...D.querySelectorAll("#mapLegend .swatch")].map((s) => s.style.background);
+    // A key names the fill it stands for (data-fill), hatched or not.
+    const keys = [...D.querySelectorAll("#mapLegend .swatch")].map((s) => s.getAttribute("data-fill"));
     const fills = new Set([...D.querySelectorAll("#usMap .state")].map((s) => s.style.fill));
     check("each Senate key is a fill a state is drawn in, and each fill has a key",
       keys.every((k) => fills.has(k)) && [...fills].every((f) => keys.indexOf(f) !== -1),
@@ -1846,10 +1902,22 @@ async function testMap() {
         !/0R, 0D/.test(dc.getAttribute("aria-label") || ""), dc && dc.getAttribute("aria-label"));
 
     D.querySelector('[data-mode="house"]').click();
-    check("House mode blends by delegation share",
-      /color-mix/.test(D.querySelector('[data-state="TX"]').style.fill),
-      D.querySelector('[data-state="TX"]').style.fill);
-    check("legend follows the mode", /All R/.test(D.getElementById("mapLegend").textContent));
+    // Five labelled steps, not a ramp with no values (VISUALS-09): a
+    // delegation with members of both parties is a majority's tint, or the
+    // hatched split when even, and its key says so.
+    const houseKeys = [...D.querySelectorAll("#mapLegend .swatch")].map((s) => s.getAttribute("data-fill"));
+    const mixed = [...D.querySelectorAll("#usMap .state")].filter((s) =>
+      /House: [1-9]\d*R, [1-9]\d*D/.test(s.getAttribute("aria-label") || ""));
+    check("House mode draws each delegation in a labelled step, by its majority",
+      mixed.length > 5 && mixed.every((s) => {
+        const m = /House: (\d+)R, (\d+)D/.exec(s.getAttribute("aria-label"));
+        const want = +m[1] > +m[2] ? "var(--party-r-tint)" : +m[1] < +m[2] ? "var(--party-d-tint)"
+          : KYC.svgFill("var(--split)");
+        return s.style.fill === want && houseKeys.indexOf(want) !== -1;
+      }),
+      mixed.slice(0, 3).map((s) => s.getAttribute("aria-label") + " " + s.style.fill).join(" | "));
+    check("legend follows the mode", /All R/.test(D.getElementById("mapLegend").textContent) &&
+      /R majority/.test(D.getElementById("mapLegend").textContent));
 
     D.querySelector('[data-mode="senate2026"]').click();
     check("2026 mode marks a state with no race", (() => {
@@ -1860,6 +1928,39 @@ async function testMap() {
     })());
     check("mode buttons announce their state",
       D.querySelector('[data-mode="senate2026"]').getAttribute("aria-pressed") === "true");
+    // Open seats and special elections were only in the hover text, which
+    // a touch reader never sees (RACES-21): an open seat is its party's
+    // tint, a special is outlined, and the legend has a key for each.
+    const senateRaces = window.kycRaces.filter((r) => r.chamber === "Senate");
+    const shapeOf = (code) => D.querySelector('#usMap .state[data-state="' + code + '"]');
+    const legend26 = D.getElementById("mapLegend").textContent;
+    const opens = senateRaces.filter((r) => r.openSeat);
+    check("an open seat is drawn in its party's tint, and the legend names it",
+      opens.every((r) => /-tint\)$/.test(shapeOf(r.state).style.fill) ||
+        /party-i-fill|vacant-fill/.test(shapeOf(r.state).style.fill)) &&
+        (!opens.length || /Open (Republican|Democratic) seat/.test(legend26)),
+      senateRaces.filter((r) => r.openSeat).map((r) => r.state + " " + shapeOf(r.state).style.fill).join(" | "));
+    check("a special election is outlined, and only a special",
+      [...D.querySelectorAll("#usMap .state")].every((s) => s.classList.contains("is-marked") ===
+        senateRaces.some((r) => r.special && r.state === s.getAttribute("data-state"))) &&
+        (!senateRaces.some((r) => r.special) || /Special election/.test(legend26)),
+      senateRaces.filter((r) => r.special).map((r) => r.state).join(", "));
+    // The key was a 2px dashed border on a 10px square, which draws solid -
+    // the look of a picked state's outline, so a reader who tapped Texas saw
+    // it drawn like the key for a special election.
+    const specialKey = D.querySelector('#mapLegend [data-fill="special"]');
+    const mapCss = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+    const ruleFor = (sel) => (mapCss.match(new RegExp("\\n" + sel.replace(/[.[\]"=]/g, "\\$&") + "\\s*\\{([^}]*)\\}")) || ["", ""])[1];
+    check("the special-election key draws the map's dash, wide enough to show it",
+      !senateRaces.some((r) => r.special) || (!!specialKey && specialKey.tagName.toLowerCase() === "svg" &&
+        !!specialKey.querySelector("rect") && /stroke-dasharray:\s*5 3/.test(ruleFor(".map-legend .swatch-special rect")) &&
+        /stroke-dasharray:\s*5 3/.test(ruleFor(".state.is-marked")) && /dashed outline/.test(legend26)),
+      specialKey ? specialKey.outerHTML.slice(0, 80) : "no key");
+    check("a picked state's outline is solid and thicker than a special's dash",
+      /stroke-dasharray:\s*none/.test(ruleFor('.state[aria-pressed="true"]')) &&
+        parseFloat((ruleFor('.state[aria-pressed="true"]').match(/stroke-width:\s*([\d.]+)/) || [])[1]) >
+        parseFloat((ruleFor(".state.is-marked").match(/stroke-width:\s*([\d.]+)/) || [])[1]),
+      ruleFor('.state[aria-pressed="true"]').replace(/\s+/g, " "));
     // John Cornyn and Bill Cassidy ran and lost; the label called them "not
     // running", like a retiree, while the panel beside it said "Lost primary".
     const label = (code) => (D.querySelector('#usMap [data-state="' + code + '"]') || {
@@ -1878,13 +1979,37 @@ async function testMap() {
         !/renominated|re-elected|re-election/.test(label(p.state))),
       appointees.map((p) => label(p.state)).join(" | "));
     // White on the empty grey was 1.15:1 (light) and dark on dark 1.02:1.
-    const greys = [...D.querySelectorAll(".map-callout")].filter((c) => /surface/.test(c.style.background || ""));
+    // "None" is hatched now, and the hatch is the callout's edge.
+    const greys = [...D.querySelectorAll(".map-callout")].filter((c) => /none-fill|surface/.test(c.style.background || ""));
     check("a callout on the empty grey takes the page's text colour and an edge",
-      greys.length > 0 && greys.every((c) => c.style.color === "var(--text)" && /text-faint/.test(c.style.borderColor || "")),
+      greys.length > 0 && greys.every((c) => c.style.color === "var(--text)" &&
+        (c.classList.contains("is-hatched") || /text-faint/.test(c.style.borderColor || ""))),
       greys.length + " grey callouts");
     check("party is an adjective in the label, as in the legend",
       ![...D.querySelectorAll("#usMap .state")].some((s) =>
         /Democrat seat/.test(s.getAttribute("aria-label") || "")));
+    D.querySelector('[data-mode="senate"]').click();
+    // On a phone the ten views are one menu (TECH-14): three rows of
+    // buttons took the first 330-385px of the screen above the map.
+    const menu = D.getElementById("mapModeSelect");
+    const buttons = [...D.querySelectorAll(".map-views button[data-mode]")].map((b) => b.getAttribute("data-mode"));
+    check("the phone's view menu offers every view the buttons do, in their groups",
+      !!menu && [...menu.options].map((o) => o.value).join() === buttons.join() &&
+        menu.querySelectorAll("optgroup").length === D.querySelectorAll(".map-view-group").length,
+      menu && [...menu.options].map((o) => o.value).join());
+    menu.value = "trifecta";
+    menu.dispatchEvent(new window.Event("change", { bubbles: true }));
+    check("picking a view from the menu switches the map and the address",
+      D.querySelector('[data-mode="trifecta"]').getAttribute("aria-pressed") === "true" &&
+        /mode=trifecta/.test(window.location.hash), window.location.hash);
+    D.querySelector('[data-mode="house"]').click();
+    check("and a button press shows in the menu", menu.value === "house", menu.value);
+    check("each group of buttons says what it is, on the page",
+      [...D.querySelectorAll(".map-view-group")].every((g) => {
+        const kicker = g.querySelector(".map-view-kicker");
+        return kicker && kicker.textContent.trim() &&
+          g.querySelector(".segmented").getAttribute("aria-labelledby") === kicker.id;
+      }));
     D.querySelector('[data-mode="senate"]').click();
   });
 
@@ -1905,6 +2030,106 @@ async function testMap() {
     check("House mode lists the whole delegation",
       D.querySelectorAll("#delegation .person-row").length > 20,
       `${D.querySelectorAll("#delegation .person-row").length} rows`);
+
+    // The 2026 race view leads with the race: Texas's led with John
+    // Cornyn, "Lost primary", and folded its nominees away under "2026
+    // challengers" (VISUALS-10). The delegation views keep who is seated
+    // first (rule 27).
+    D.querySelector('[data-mode="senate2026"]').click();
+    const panel = D.getElementById("delegation");
+    const race26 = window.kycRaces.find((r) => r.chamber === "Senate" && r.state === "TX");
+    const stillIn = [...panel.querySelectorAll(".panel-subhead")].find((h) => /Still in the race/.test(h.textContent));
+    const heldBy = [...panel.querySelectorAll(".panel-subhead")].find((h) => /held by|Seat held/i.test(h.textContent));
+    check("the 2026 race view lists the people still in the race first, open",
+      !!race26 && !!stillIn && !panel.querySelector("#showChallengers") &&
+        (!heldBy || (stillIn.compareDocumentPosition(heldBy) & 4)) &&
+        [...panel.querySelectorAll(".person-row")].filter((r) => !r.closest("[hidden]")).length >= 2,
+      [...panel.querySelectorAll(".panel-subhead")].map((h) => h.textContent.trim()).join(" | "));
+
+    /* The rows under the race's heading: up to the next heading or block. */
+    const raceRows = () => {
+      const head = panel.querySelector(".panel-subhead.race-people");
+      const rows = [];
+      for (let el = head && head.nextElementSibling; el; el = el.nextElementSibling) {
+        if (!el.classList.contains("person-row")) break;
+        rows.push(el);
+      }
+      return { head, rows };
+    };
+    const pick = (code) => D.querySelector('#usMap [data-state="' + code + '"]')
+      .dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    // The first race-first list took only filers: every renominated senator
+    // - 25 of the 35 seats - was left out of "Still in the race" and its
+    // count, and named only under "Seat held by", below the markets.
+    const renominated = window.kycRaces.filter((r) => r.chamber === "Senate" && !r.special)
+      .map((r) => ({ race: r, holder: KYC.byId(r.incumbentIds[0]) }))
+      .filter((x) => x.holder && KYC.seated(x.holder) && x.holder.raceStatus === "nominee" &&
+        !x.holder.contestRaceId);
+    if (oldCongressSits(window) && renominated.length) {
+      const failed = [];
+      renominated.forEach(({ race, holder }) => {
+        pick(race.state);
+        const { head, rows } = raceRows();
+        const ids = rows.map((r) => r.getAttribute("data-id"));
+        const unprofiled = KYC.cards.unprofiledNames(race);
+        const count = head && parseInt(head.querySelector("span").textContent, 10);
+        const heldBy = [...panel.querySelectorAll(".panel-subhead")].find((h) => /Seat held by/.test(h.textContent));
+        const twice = heldBy && [...panel.querySelectorAll('.person-row[data-id="' + holder.id + '"]')].length > 1;
+        if (!head || ids[0] !== holder.id || count !== ids.length + unprofiled.none.length + unprofiled.maybe.length ||
+            twice) {
+          failed.push(race.state + ": " + (head ? head.textContent.trim() : "no heading") + " [" + ids.join(",") + "]");
+        }
+      });
+      check("a renominated senator is in the race's list, first, and in its count", failed.length === 0,
+        failed.slice(0, 4).join(" | ") || renominated.length + " seats");
+      // The heading says what the list holds once the votes are cast (rule 63).
+      pick(renominated[0].race.state);
+      check("the race's heading is 'Still in the race' before Election Day",
+        /^Still in the race/.test(raceRows().head.textContent.trim()), raceRows().head.textContent);
+    }
+    pick("TX");
+    // The unsettled filers and the page their statuses come from sit with
+    // the race, before the markets and the seat's holder.
+    const kids = [...panel.children];
+    const at = (sel) => kids.findIndex((el) => el.matches(sel));
+    const markets = at(".odds");
+    check("the race's source and its unsettled filers come before its markets",
+      markets === -1 || ((at(".race-results") === -1 || at(".race-results") < markets) &&
+        (at("#showUnsure") === -1 || at("#showUnsure") < markets)),
+      kids.map((el) => el.className || el.tagName).join(" | "));
+    // Beside the people the markets are closed until opened (TRUST-14).
+    check("the panel's markets are closed until opened",
+      [...panel.querySelectorAll(".odds")].every((o) => o.tagName === "DETAILS" && !o.open),
+      [...panel.querySelectorAll(".odds")].map((o) => o.tagName).join(","));
+    // A row with no portrait shows the person's initials, as a card does,
+    // never a grey silhouette (VISUALS-16).
+    D.querySelector('[data-mode="house"]').click();
+    const opener = D.getElementById("showChallengers");
+    if (opener) opener.click();
+    const panelRows = [...panel.querySelectorAll(".person-row")];
+    const silhouettes = panelRows.filter((r) => {
+      const img = r.querySelector("img");
+      return img && !KYC.hasPortrait(KYC.byId(r.getAttribute("data-id")));
+    });
+    const discs = panelRows.filter((r) => r.querySelector(".thumb-monogram"));
+    check("a panel row with no portrait shows initials, never a silhouette",
+      silhouettes.length === 0 && discs.every((r) => r.querySelector(".thumb-monogram").textContent ===
+        KYC.monogram(KYC.byId(r.getAttribute("data-id")).name)),
+      `${silhouettes.length} silhouettes, ${discs.length} discs of ${panelRows.length} rows`);
+    D.querySelector('[data-mode="senate"]').click();
+  });
+
+  suite("map.html — the state picker and the empty panel", () => {
+    // D.C. was listed twice, and every option a bare code (VISUALS-V2).
+    const options = [...D.querySelectorAll("#mapStateSelect option")].filter((o) => o.value);
+    const values = options.map((o) => o.value);
+    check("each place once, by name and code",
+      new Set(values).size === values.length && values.length === 56 &&
+        options.every((o) => o.textContent === KYC.stateName(o.value) + " (" + o.value + ")"),
+      `${values.length} options; ${options.slice(0, 3).map((o) => o.textContent).join(", ")}`);
+    const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+    // A blank grey pill sat in the panel before a state was picked (VISUALS-11).
+    check("the panel's counts take no room while empty", /#panelCounts:empty\s*\{\s*display:\s*none/.test(css));
   });
 
   suite("map.html — the delegation panel leads with who holds the seat", () => {
@@ -3703,6 +3928,196 @@ function testContrast() {
     check("the party tag's label colour comes from the theme, not a literal",
       !/style\.color\s*=\s*["']#/.test(js) && /\.party-tag\s*\{[^}]*color:\s*var\(--text-inverse\)/.test(css));
   });
+  testColourVision(css);
+  testMotion();
+  testPhoneRules(css);
+}
+
+/* A phone's first screen and its width. jsdom has no layout, so these
+ * assert the rules; a CDP sweep of every page at 320px measured them. */
+function testPhoneRules(css) {
+  const media = (max) => [...css.matchAll(new RegExp("@media \\(max-width: " + max + "px\\) \\{([\\s\\S]*?)\\n\\}", "g"))]
+    .map((m) => m[1]).join("\n");
+  const phone = media(600);
+  suite("kyc.css — a phone's first screen, and nothing wider than it", () => {
+    // California's first senator started at 1,147px under seven badges, six
+    // full-width buttons and four jump chips (TECH-14, VISUALS-02).
+    check("a page's links and its jump chips each take one row that scrolls sideways",
+      /\.state-links,\s*\.jump-row\.state-parts\s*\{[^}]*flex-wrap:\s*nowrap;[^}]*overflow-x:\s*auto/.test(phone));
+    check("a state's figures read as one line of text", /\.state-summary \.badge\s*\{[^}]*display:\s*inline/.test(phone));
+    // California's page was about 60 screens of portrait tiles (VISUALS-15).
+    check("a state page's people are rows on a phone, not portrait tiles",
+      /#stateContent \.card\s*\{[^}]*flex-direction:\s*row/.test(phone) &&
+        /#stateContent \.card-photo\s*\{[^}]*width:\s*52px/.test(phone));
+    const stateJs = fs.readFileSync(path.join(SITE, "assets", "kyc-state.js"), "utf8");
+    // Closed at every width since (TRUST-14 review): the same prices were
+    // open on a desktop state page and closed on a phone.
+    check("and its races' markets are closed there, at every width", !/collapsedOdds/.test(stateJs) &&
+      /collapsed:\s*opts\.collapsedOdds !== false/.test(fs.readFileSync(path.join(SITE, "assets", "kyc-cards.js"), "utf8")));
+    check("the map's ten views are one menu on a phone",
+      /\.map-view-group\s*\{\s*display:\s*none;?\s*\}/.test(media(760)) &&
+        /\.map-mode-pick\s*\{[^}]*display:\s*flex/.test(media(760)));
+    // A 260px phone laid out at 287px, cutting off the profile's close
+    // button (PERSONA-21); Indiana's record, one unbreakable word, at 434px.
+    check("the home page's state menu is capped by the screen, not the column",
+      /\.intro-pick \.select\s*\{[^}]*max-width:\s*min\(20rem, calc\(100vw - 3rem\)\)/.test(css));
+    check("a legislature's quoted record wraps anywhere", /\.leg-ballot\s*\{\s*overflow-wrap:\s*anywhere/.test(css));
+  });
+}
+
+/* Six scrollIntoView calls passed { behavior: "smooth" }, which overrides
+ * the stylesheet's reduced-motion rule, so picking a district or a county
+ * animated a long scroll for a reader who had asked for less motion
+ * (TECH-16). Every one asks KYC.scrollBehavior(). */
+function testMotion() {
+  const dir = path.join(SITE, "assets");
+  const literal = fs.readdirSync(dir).filter((f) => f.endsWith(".js") && f !== "kyc.js")
+    .filter((f) => /behavior:\s*["']smooth["']/.test(fs.readFileSync(path.join(dir, f), "utf8")));
+  const kyc = fs.readFileSync(path.join(dir, "kyc.js"), "utf8");
+  const fn = (kyc.match(/function scrollBehavior\(\) \{[\s\S]*?\n  \}/) || [""])[0];
+  // eslint-disable-next-line no-new-func
+  const run = (reduce) => new Function("global", fn + "; return scrollBehavior();")(
+    { matchMedia: (q) => ({ matches: reduce && /prefers-reduced-motion: reduce/.test(q) }) });
+  suite("assets — a scroll the page makes honours reduced motion", () => {
+    check("no module asks for a smooth scroll outright", literal.length === 0, literal.join(", "));
+    check("KYC.scrollBehavior() is 'auto' for a reader who asked for less motion, 'smooth' otherwise",
+      !!fn && run(true) === "auto" && run(false) === "smooth");
+  });
+}
+
+/* ========================================================= colour vision */
+
+/* To a deuteranope the split lilac was the Democratic blue (0.8 apart in
+ * the dark theme), the light theme's Republican red and independent amber
+ * one olive (2.3), and the guide's teal and magenta 3.7 apart (audit
+ * 2026-10-17, VISUALS-03, -04, -07). Every map legend's fills are run
+ * through the Machado (2009) severity-1 matrices for protanopia,
+ * deuteranopia and tritanopia, in linear sRGB, and compared in OKLab (x100)
+ * in all three themes, from the tokens themselves. A pair two readers must
+ * tell apart by colour alone is 10 apart under protanopia and deuteranopia
+ * and 7 under tritanopia; a pair one side of which is hatched (split,
+ * none: KYC.svgFill) carries a second cue and needs 5. */
+function testColourVision(css) {
+  const block = (sel) => {
+    const i = css.indexOf(sel + " {");
+    const out = {};
+    for (const m of css.slice(i, css.indexOf("\n}", i)).matchAll(/--([\w-]+):\s*([^;]+);/g)) out[m[1]] = m[2].trim();
+    return out;
+  };
+  const base = block(":root");
+  const themes = {
+    dark: base,
+    amoled: Object.assign({}, base, block('[data-theme="amoled"]')),
+    light: Object.assign({}, base, block('[data-theme="light"]')),
+  };
+  const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const hex = (c) => "#" + c.map((v) => Math.round(v).toString(16).padStart(2, "0")).join("");
+  // A token's colour in a theme, through var() and color-mix(in srgb).
+  const resolve = (t, v, depth = 0) => {
+    v = v.trim();
+    if (depth > 20) throw new Error("token loop at " + v);
+    if (/^#[0-9a-f]{6}$/i.test(v)) return v.toLowerCase();
+    let m = v.match(/^var\(--([\w-]+)(?:,\s*(.+))?\)$/);
+    if (m) return resolve(t, t[m[1]] !== undefined ? t[m[1]] : m[2], depth + 1);
+    m = v.match(/^color-mix\(in srgb,\s*(.+?)\s+(\d+)%,\s*(.+)\)$/);
+    if (m) {
+      const a = rgb(resolve(t, m[1], depth + 1)), b = rgb(resolve(t, m[3], depth + 1)), w = +m[2] / 100;
+      return hex(a.map((x, i) => w * x + (1 - w) * b[i]));
+    }
+    throw new Error("cannot resolve " + v);
+  };
+  const MATRIX = {
+    protanopia: [[0.152286, 1.052583, -0.204868], [0.114503, 0.786281, 0.099216], [-0.003882, -0.048116, 1.051998]],
+    deuteranopia: [[0.367322, 0.860646, -0.227968], [0.280085, 0.672501, 0.047413], [-0.011820, 0.042940, 0.968881]],
+    tritanopia: [[1.255528, -0.076749, -0.178779], [-0.078411, 0.930809, 0.147602], [0.004733, 0.691367, 0.303900]],
+  };
+  const lin = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  const oklab = ([r, g, b]) => {
+    const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+    const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+    const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+    return [0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s,
+      1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s,
+      0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s];
+  };
+  const seen = (h, k) => {
+    const c = rgb(h).map(lin);
+    return oklab(MATRIX[k].map((row) => Math.min(1, Math.max(0, row[0] * c[0] + row[1] * c[1] + row[2] * c[2]))));
+  };
+  const apart = (a, b, k) => { const x = seen(a, k), y = seen(b, k); return 100 * Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]); };
+  const lum = (h) => {
+    const c = rgb(h).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  };
+  const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+  const HATCHED = new Set(["var(--split)", "var(--none-fill)", "color-mix(in srgb, var(--split) 70%, var(--surface-1))"]);
+  const mix70 = (k) => `color-mix(in srgb, var(--${k}) 70%, var(--surface-1))`;
+  // The fills each legend draws side by side, as the map modules name them.
+  const LEGENDS = {
+    "the partisan and state-government maps": ["var(--party-r)", "var(--party-d)", "var(--party-i-fill)",
+      "var(--party-r-tint)", "var(--party-d-tint)", "var(--split)", "var(--vacant-fill)",
+      "var(--none-fill)", "var(--nonpartisan-fill)", "var(--text)"],
+    "the district and legislature maps": [mix70("party-d"), mix70("party-r"), mix70("party-i-fill"),
+      mix70("split"), "color-mix(in srgb, var(--party-vacant) 35%, var(--surface-1))"],
+    "the guide's categories": ["var(--cat-1)", "var(--cat-2)", "var(--cat-3)", "var(--cat-4)",
+      "var(--cat-5)", "var(--none-fill)"],
+  };
+  suite("kyc.css — legend colours under colour-vision deficiency (Machado 2009)", () => {
+    for (const [name, t] of Object.entries(themes)) {
+      for (const [legend, fills] of Object.entries(LEGENDS)) {
+        const bad = [];
+        for (let i = 0; i < fills.length; i++) {
+          for (let j = i + 1; j < fills.length; j++) {
+            const a = resolve(t, fills[i]), b = resolve(t, fills[j]);
+            const hatched = HATCHED.has(fills[i]) || HATCHED.has(fills[j]);
+            for (const k of Object.keys(MATRIX)) {
+              const need = hatched ? (k === "tritanopia" ? 2 : 5) : (k === "tritanopia" ? 7 : 10);
+              const d = apart(a, b, k);
+              if (d < need) bad.push(`${fills[i]} ~ ${fills[j]} ${k} ${d.toFixed(1)}`);
+            }
+          }
+        }
+        check(`${name}: ${legend}`, bad.length === 0, bad.slice(0, 4).join(" | "));
+      }
+      // The count scale: each step a step of lightness from the next, the
+      // first well apart from "none" and from the page (GUIDE-16: 1.4:1).
+      const scale = [1, 2, 3, 4, 5].map((n) => resolve(t, `var(--scale-${n})`));
+      const steps = scale.slice(1).map((c, i) => Math.min(...Object.keys(MATRIX).map((k) => apart(c, scale[i], k))));
+      const floor = Math.min(...["none-fill", "surface-0"].flatMap((s) =>
+        Object.keys(MATRIX).map((k) => apart(scale[0], resolve(t, `var(--${s})`), k))));
+      check(`${name}: the count scale's steps, and its first against none and the page`,
+        steps.every((d) => d >= 5) && floor >= 10,
+        `steps ${steps.map((d) => d.toFixed(1)).join(" / ")}, first ${floor.toFixed(1)}`);
+      // A callout writes on these fills in the ink kyc.js names for them.
+      const inks = [["split", "split-ink"], ["party-r-tint", "text"], ["party-d-tint", "text"],
+        ["vacant-fill", "vacant-ink"], ["none-fill", "text"], ["nonpartisan-fill", "text-inverse"],
+        ["cat-1", "cat-1-ink"], ["cat-2", "cat-2-ink"], ["cat-3", "cat-3-ink"], ["cat-4", "cat-4-ink"]]
+        .map(([f, ink]) => [f, ratio(resolve(t, `var(--${f})`), resolve(t, `var(--${ink})`))]);
+      // Grey means "none": the Eleventh Circuit drawn in it read as missing
+      // data (VISUALS-08). Every category has a hue (OKLab chroma).
+      const greyish = [1, 2, 3, 4].filter((n) => {
+        const [, a, b] = oklab(rgb(resolve(t, `var(--cat-${n})`)).map(lin));
+        return Math.hypot(a, b) < 0.05;
+      });
+      check(`${name}: no guide category is grey`, greyish.length === 0, greyish.map((n) => "cat-" + n).join(", "));
+      check(`${name}: a callout's word on its fill, 4.5:1`, inks.every((p) => p[1] >= 4.5),
+        inks.map((p) => `${p[0]} ${p[1].toFixed(2)}`).join(" / "));
+      // No status or money colour is a party's (VISUALS-06): "Lost primary"
+      // was the Republican red, "Open seat" the independents' amber, and a
+      // Democrat's "Spent" was in Republican red.
+      const parties = ["party-d", "party-r", "party-i", "party-i-fill", "split"].map((p) => resolve(t, `var(--${p})`));
+      // Compared as seen without a deficiency: these sit in badges and
+      // money tiles, never beside a party's fill in a legend.
+      const plain = (a, b) => { const x = oklab(rgb(a).map(lin)), y = oklab(rgb(b).map(lin));
+        return 100 * Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]); };
+      const shared = ["warn", "danger", "warn-text", "danger-text", "money-out", "money-in"]
+        .filter((s) => parties.some((p) => plain(resolve(t, `var(--${s})`), p) < 10));
+      check(`${name}: no status or money colour is a party's`, shared.length === 0, shared.join(", "));
+    }
+    const js = fs.readFileSync(path.join(SITE, "assets", "kyc.js"), "utf8");
+    check("the fills the tests call hatched are the ones kyc.js hatches",
+      /"var\(--split\)": "split", "var\(--none-fill\)": "none"/.test(js));
+  });
 }
 
 /* ================================================================== report */
@@ -4404,7 +4819,18 @@ async function testOdds() {
         !!slot.querySelector(".odds-compact .odds-market") &&
           D.getElementById("profileModalRace").compareDocumentPosition(slot) & 4,
         member.name);
+      // On a person's own profile, closed until opened, and saying the
+      // site takes nothing from the markets (TRUST-14).
+      const block = slot.querySelector("details.odds-collapsed");
+      check("closed until the reader opens them, under a heading that says what they are",
+        !!block && !block.open && /prediction markets/i.test(block.querySelector("summary").textContent));
+      check("and the note says the site has no relationship with the markets",
+        /no relationship with these markets and earns no money from them/.test(slot.textContent));
       KYC.profile.close();
+      // A state page on a phone closes each race's markets too (VISUALS-15).
+      const race = window.kycRaces.find((r) => r.id === member.raceId);
+      const html = KYC.cards.raceSection(race, [member], { fullOdds: true, collapsedOdds: true });
+      check("a race section can show its markets closed", /<details class="odds odds-compact odds-collapsed"/.test(html));
     }
   });
 }
@@ -5391,6 +5817,20 @@ async function testDistrictPages() {
   });
 
   const fl = await buildPage("districts/fl.html");
+  suite("districts/fl.html — the party legend", () => {
+    // "Democrat" as an adjective here, "Democratic" on every other legend
+    // (VISUALS-18): the party is an adjective on a map key.
+    const legend = fl.D.querySelector(".party-legend").textContent;
+    check("a key names the party as an adjective, as every other legend does",
+      /Democratic/.test(legend) && !/Democrat(?!ic)/.test(legend), legend);
+    // A 72-character address ran off a 320px screen (TECH-07): a source's
+    // address is a link named by its host.
+    const sources = fl.D.querySelector(".districts-sources");
+    const link = sources && sources.querySelector('a[href^="https://edr.state.fl.us/"]');
+    check("a source's address is a link named by its host, not printed whole",
+      !!link && link.textContent === "edr.state.fl.us" && !/https?:\/\//.test(sources.textContent),
+      sources && sources.textContent.slice(0, 200));
+  });
   suite("districts/fl.html — a seat with no member", () => {
     const vacant = fl.window.kycRaces.filter((r) => r.state === "FL" && r.chamber === "House")
       .map((r) => r.district)
@@ -5618,11 +6058,59 @@ function mapDrawnAt(width) {
 async function testMapOnAPhone() {
   // Codes were 10 map units: a phone drew them 3.8px tall, at weight 800 on
   // a 2.5-unit halo. Now they are 11px at the width the map is drawn.
-  for (const width of [374, 900]) {
+  for (const width of [320, 360, 374, 390, 900]) {
     const page = await buildPage("map.html", { setup: mapDrawnAt(width) });
     suite(`map.html — the map drawn ${width}px wide`, () => {
       const D = page.D;
       check("no page errors", page.errors.length === 0, page.errors.join(" | "));
+      // No word sits on another (TECH-08): at 320-390px Mississippi's code
+      // sat on Alabama's and West Virginia's on the Vermont callout ("WV T").
+      // Boxes from where each word is placed, at 11px bold capitals' size.
+      const vb = D.getElementById("usMap").getAttribute("viewBox").split(" ").map(Number);
+      const height = width * vb[3] / vb[2];
+      const boxes = [...D.querySelectorAll("#mapLabels .map-label")]
+        .filter((s) => !s.classList.contains("territory-caption"))
+        .map((s) => {
+          const callout = s.classList.contains("map-callout");
+          const w = Math.max(callout ? 2.3 * 11 : 0, s.textContent.length * 6.8 + 4);
+          return { t: s.textContent, x: parseFloat(s.style.left) / 100 * width,
+            y: parseFloat(s.style.top) / 100 * height, w, h: callout ? 15 : 13 };
+        });
+      const overlaps = [];
+      boxes.forEach((a, i) => boxes.slice(i + 1).forEach((b) => {
+        if (Math.abs(a.x - b.x) * 2 < a.w + b.w - 1 && Math.abs(a.y - b.y) * 2 < a.h + b.h - 1) {
+          overlaps.push(a.t + "/" + b.t);
+        }
+      }));
+      check("no state's word covers another's", overlaps.length === 0, overlaps.join(", "));
+      // The first collision pass cleared every overlap by sending inland
+      // states to the Atlantic column: Kentucky's line ran 136px across the
+      // map at 390px, Indiana's 166px at 320px. A code moved within its
+      // state stays in the box the build measured clear of its edges, and
+      // only the small coastal states (labelRoom under 7) join the column.
+      const geo = page.window.kycGeo.states;
+      const unit = width / vb[2];
+      const screen = (p) => [(p[0] - vb[0]) * unit, (p[1] - vb[1]) * unit];
+      const placedOff = [], farAway = [];
+      D.querySelectorAll("#mapLabels .map-label").forEach((s) => {
+        const code = s.getAttribute("data-state") || s.textContent;
+        const shape = geo[code];
+        if (!shape || !shape.label || s.classList.contains("territory-label")) return;
+        const x = parseFloat(s.style.left) / 100 * width, y = parseFloat(s.style.top) / 100 * height;
+        const [lx, ly] = screen(shape.label);
+        const room = (shape.labelRoom || 0) * unit;
+        if (s.classList.contains("state-code")) {
+          if (Math.abs(x - lx) > 1.75 * room + 0.5 || Math.abs(y - ly) > room + 0.5) placedOff.push(code);
+        } else if ((shape.labelRoom || 0) >= 7 && Math.hypot(x - lx, y - ly) > 75) {
+          farAway.push(code + " " + Math.round(Math.hypot(x - lx, y - ly)) + "px");
+        }
+      });
+      check("a code moved to clear another stays on its own state's land", placedOff.length === 0,
+        placedOff.join(", "));
+      check("a large state's callout stays beside it, never across the map", farAway.length === 0,
+        farAway.join(", "));
+      check("and none runs off the screen", boxes.every((b) => b.x - b.w / 2 >= -1 && b.x + b.w / 2 <= width + 1),
+        boxes.filter((b) => b.x - b.w / 2 < -1 || b.x + b.w / 2 > width + 1).map((b) => b.t).join(", "));
       // Every word is page text over the map: inside the SVG, Samsung
       // Internet's dark mode lightened a code's dark halo with the code, and
       // every label bloomed.
@@ -5666,6 +6154,62 @@ async function testMapOnAPhone() {
 }
 
 async function testDistrictsOnAPhone() {
+  // Two picked districts' numbers printed on top of each other on Texas's
+  // statewide map at 390px: "37" 6px from "35" and covering it (RACES-24).
+  for (const width of [302, 360, 620]) {
+    const page = await buildPage("districts/tx.html", { hash: "#/?d=35,37", setup: drawnAt(width) });
+    await settle(50);
+    suite(`districts/tx.html#/?d=35,37 — the picked numbers drawn ${width}px wide`, () => {
+      const layer = page.D.querySelector(".district-statewide + .map-labels");
+      const vb = page.D.querySelector(".district-statewide").getAttribute("viewBox").split(" ").map(Number);
+      const height = width * vb[3] / vb[2];
+      const boxes = [...(layer ? layer.querySelectorAll(".is-focus") : [])].map((s) => {
+        const size = parseFloat(s.style.fontSize);
+        const w = (s.textContent.length * 0.6 + 0.44) * size;
+        return { t: s.textContent, x: parseFloat(s.style.left) / 100 * width,
+          y: parseFloat(s.style.top) / 100 * height, w, h: size * 1.24 };
+      });
+      const hit = (a, b) => Math.abs(a.x - b.x) * 2 < a.w + b.w && Math.abs(a.y - b.y) * 2 < a.h + b.h;
+      check("both picked districts are numbered, neither on the other",
+        boxes.length === 2 && !hit(boxes[0], boxes[1]),
+        boxes.map((b) => `${b.t}@${b.x.toFixed(0)},${b.y.toFixed(0)}`).join(" "));
+      // The first fix stepped "37" a line up, onto district 11's land, with
+      // nothing joining it to its own (rule 43). A picked number is on its
+      // district, or a callout with a line from its district's own point.
+      const plan = page.window.kycDistricts.TX.plans[0];
+      const ringsOf = (d) => String(d).split("M").map((part) => {
+        const nums = (part.match(/-?\d+(?:\.\d+)?/g) || []).map(Number);
+        const ring = [];
+        let x = nums[0], y = nums[1];
+        if (nums.length >= 2) ring.push([x, y]);
+        for (let i = 2; i + 1 < nums.length; i += 2) { x += nums[i]; y += nums[i + 1]; ring.push([x, y]); }
+        return ring;
+      }).filter((r) => r.length > 2);
+      const inside = (rings, x, y) => {
+        let hit = false;
+        rings.forEach((ring) => {
+          for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+            const [xi, yi] = ring[i], [xj, yj] = ring[j];
+            if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) hit = !hit;
+          }
+        });
+        return hit;
+      };
+      const svgMap = page.D.querySelector(".district-statewide");
+      const wrong = [...(layer ? layer.querySelectorAll(".is-focus") : [])].filter((s) => {
+        const n = s.textContent;
+        const x = vb[0] + parseFloat(s.style.left) / 100 * vb[2];
+        const y = vb[1] + parseFloat(s.style.top) / 100 * vb[3];
+        if (inside(ringsOf(plan.districts[n].d), x, y)) return false;
+        const line = svgMap.querySelector('.pick-leader[data-district="' + n + '"]');
+        const at = plan.districts[n].at;
+        return !(s.classList.contains("is-callout") && line &&
+          Math.abs(+line.getAttribute("x1") - at[0]) < 0.01 && Math.abs(+line.getAttribute("y1") - at[1]) < 0.01);
+      }).map((s) => s.textContent);
+      check("each picked number is on its own district, or joined to it by a line", wrong.length === 0,
+        wrong.join(", "));
+    });
+  }
   // Numbers were sized for a 620px map and scaled with it: on a phone every
   // one was 4px tall. They are 11px at the width the map is drawn, written
   // where they fit, and every district is numbered somewhere.
@@ -5996,9 +6540,16 @@ async function testGuideMaps() {
       }
       // A faint fill writes its callout in the theme's text colour.
       const faint = [...D.querySelectorAll("#mapLabels .map-callout")]
-        .filter((c) => /scale-[123]|cat-4|surface-2/.test(c.style.background));
+        .filter((c) => /scale-[123]|none-fill|surface-2/.test(c.style.background));
       check("callouts on faint fills use the light ink", faint.every((c) => c.style.color === "var(--text)"),
         `${faint.length} faint callouts`);
+      // A category's callout writes in the ink kyc.css names for it, the
+      // colour that reads on it in each theme.
+      const cats = [...D.querySelectorAll("#mapLabels .map-callout")]
+        .filter((c) => /var\(--cat-[1-4]\)/.test(c.style.background));
+      check("a category's callout uses its own ink", cats.every((c) =>
+        c.style.color === "var(--" + c.style.background.match(/cat-[1-4]/)[0] + "-ink)"),
+        cats.filter((c) => !/-ink/.test(c.style.color)).map((c) => c.textContent).join(", "));
     });
   }
 
@@ -7004,7 +7555,7 @@ async function testStateGov() {
     check("a governor's election is drawn in the governor's party, and no other state is",
       up.length > 0 && stateCodes.every((c) => up.indexOf(c) !== -1
         ? shape(c).style.fill === "var(--party-" + data.states[c].governor.partyKey.toLowerCase() + ")"
-        : shape(c).style.fill === "var(--surface-2)"),
+        : shape(c).style.fill === window.KYC.svgFill("var(--none-fill)")),
       up.length + " up");
     check("its label says whether the governor is elected on Nov 3",
       /elected on Nov 3/.test(shape(up[0]).getAttribute("aria-label")) &&
@@ -7028,7 +7579,7 @@ async function testStateGov() {
     });
     const pr = D.querySelector('#usMap [data-state="PR"]');
     check("Puerto Rico, which elected its governor in 2024, is drawn as no election",
-      !!pr && pr.style.fill === "var(--surface-2)" &&
+      !!pr && pr.style.fill === window.KYC.svgFill("var(--none-fill)") &&
         /no governor's election in 2026/.test(pr.getAttribute("aria-label")),
       pr && pr.getAttribute("aria-label"));
 
@@ -7039,7 +7590,10 @@ async function testStateGov() {
       painted === counted && counted > 0, `${painted} painted, ${counted} in the data`);
     check("a state without a trifecta is divided", (() => {
       const divided = stateCodes.filter((c) => data.states[c].trifecta === "divided");
-      return divided.length > 0 && divided.every((c) => shape(c).style.fill === "var(--split)");
+      // Hatched as well as coloured: to a deuteranope the split colour
+      // alone was the Democratic blue (VISUALS-03).
+      return divided.length > 0 && divided.every((c) =>
+        shape(c).style.fill === window.KYC.svgFill("var(--split)") && /hatch-split/.test(shape(c).style.fill));
     })());
 
     window.location.hash = "#/?state=GU&mode=legislature";
@@ -8776,12 +9330,25 @@ async function testFederal() {
       svg && `${svg.querySelectorAll("[data-state]").length}`);
     check("no word is SVG text (rule 46)", !!svg && !svg.querySelector("text"));
     // The territory strip's own caption is the map's, not a state's.
-    const words = [...D.querySelectorAll("#circuitLabels .map-label")].map((s) => s.textContent)
-      .filter((w) => !/Territories/.test(w));
+    const labels = [...D.querySelectorAll("#circuitLabels .map-label")]
+      .filter((s) => !/Territories/.test(s.textContent));
     const circuits = new Set(d.courts.filter((c) => c.token).map((c) => c.circuit).concat(["–"]));
-    check("each state carries its circuit's number, never its code", words.length >= 50 &&
-      words.every((w) => circuits.has(w)) && words.includes("5") && words.includes("9"),
-      words.filter((w) => !circuits.has(w)).slice(0, 5).join(", "));
+    // On its shape a state carries the number alone; a word drawn away from
+    // its shape (a callout, a territory's tile) names the place as well:
+    // the Northeast's callouts read "2, 1, 1, 1, 2" and the territories
+    // "1, 3, 9, 9" with nothing saying which was which (VISUALS-17).
+    const away = (s) => s.classList.contains("map-callout") || s.classList.contains("territory-label");
+    const inside = labels.filter((s) => !away(s)).map((s) => s.textContent);
+    const outside = labels.filter(away).map((s) => s.textContent);
+    check("each state carries its circuit's number, never its code", inside.length >= 30 &&
+      inside.every((w) => circuits.has(w)) && inside.includes("5") && inside.includes("9"),
+      inside.filter((w) => !circuits.has(w)).slice(0, 5).join(", "));
+    check("a callout or a territory's tile names its place beside the number",
+      // D.C.'s circuit is named "DC" itself, so its word is the code once.
+      outside.length >= 6 && outside.every((w) => w === "DC" ||
+        (/^[A-Z]{2} \S+$/.test(w) && circuits.has(w.slice(3)))) &&
+        ["PR", "GU", "VI", "MP"].every((t) => outside.some((w) => w.indexOf(t + " ") === 0)),
+      outside.join(", "));
     const texas = svg && svg.querySelector('[data-state="TX"]');
     if (texas) texas.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
     const panel = D.getElementById("circuitPanel");

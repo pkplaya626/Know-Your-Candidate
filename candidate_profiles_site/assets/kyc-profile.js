@@ -322,6 +322,9 @@
     var inner = ((text.match(/\(([^)]+)\)/) || [])[1] || "").split(";");
     var label = inner[0].trim();
     var congress = (inner[1] || "").trim();
+    var peers = chamberScores(item, congress);
+    var left = peers.filter(function (v) { return v < value; }).length;
+    var right = peers.filter(function (v) { return v > value; }).length;
 
     target.innerHTML = [
       '<div class="ideology">',
@@ -333,10 +336,22 @@
       "  </div>",
       '  <div class="ideology-track" role="img" aria-label="Left-right score ' +
       KYC.escapeAttr(value.toFixed(2)) + ' on a scale from -1 (left) to +1 (right)">',
+      peers.map(function (v) {
+        return '<span class="ideology-peer" style="left:' +
+          Math.max(0, Math.min(100, ((v + 1) / 2) * 100)).toFixed(1) + '%"></span>';
+      }).join(""),
       '    <span class="ideology-marker" style="left:' + pct.toFixed(2) + '%"></span>',
       "  </div>",
       '  <div class="ideology-axis"><span>-1.0 left</span>' +
       "<span>centre</span><span>right +1.0</span></div>",
+      // Against the whole chamber, never one party's members: an
+      // independent has no party to be compared with (VISUALS-05).
+      peers.length > 1
+        ? '  <p class="ideology-place">Each tick is a sitting member of the ' +
+          KYC.escapeHtml(chamberWord(item)) + " with a score" +
+          (congress ? " for the " + KYC.escapeHtml(congress) : "") + ": " + left + " of " +
+          peers.length + " score further left, " + right + " further right.</p>"
+        : "",
       // In plain words (TRUST-17): the method's name stays, after what it is.
       '  <p class="held-source">A left-right score of this member\u2019s roll-call votes' +
       (congress ? " in the " + KYC.escapeHtml(congress) : "") +
@@ -345,6 +360,27 @@
       "party label.</p>",
       "</div>",
     ].join("");
+  }
+
+  function chamberWord(item) {
+    return /Senate/.test(item.chamber || "") ? "Senate" : "House";
+  }
+
+  /** The scores of every sitting member of *item*'s chamber, *item*'s own
+   *  among them, for the same Congress as *item*'s own score. */
+  function chamberScores(item, congress) {
+    var chamber = chamberWord(item);
+    var out = [];
+    (global.legislatorsData || []).forEach(function (p) {
+      if (!KYC.seated(p) || chamberWord(p) !== chamber || !/Senate|House/.test(p.chamber || "")) return;
+      var t = String(p.voting_alignment || "");
+      var m = t.match(/DW-NOMINATE:\s*([+-]?\d+(?:\.\d+)?)/i);
+      if (!m) return;
+      var theirs = (((t.match(/\(([^)]+)\)/) || [])[1] || "").split(";")[1] || "").trim();
+      if (theirs !== congress) return;
+      out.push(parseFloat(m[1]));
+    });
+    return out;
   }
 
   /* The party and chamber posts congress-legislators records for a sitting
@@ -469,8 +505,10 @@
       return elsewhere(p) || !(KYC.cards && KYC.cards.offBallot(p));
     });
     el("profileModalRaceTitle").textContent = race.label;
-    // The markets on this race, compactly, after the people in it.
-    el("profileModalRaceOdds").innerHTML = KYC.odds ? KYC.odds.render(race, { compact: true }) : "";
+    // The markets on this race, compactly, after the people in it, and
+    // closed until the reader opens them (TRUST-14).
+    el("profileModalRaceOdds").innerHTML = KYC.odds
+      ? KYC.odds.render(race, { compact: true, collapsed: true }) : "";
     var row = function (p) {
       var role = KYC.seated(p) ? '<span class="badge badge-neutral">Member</span> '
         : p.formerMember ? '<span class="badge badge-neutral" title="' +
@@ -492,8 +530,7 @@
           (there ? " &middot; " + KYC.escapeHtml(there.label) : "") + "</span>";
       }
       return '<button type="button" class="race-mate" data-goto="' + KYC.escapeAttr(p.id) + '">' +
-        '<img ' + KYC.portraitAttrs(p, "36px") + ' alt="" loading="lazy" ' +
-        'data-photo-idx="0" data-profile="' + KYC.escapeAttr(p.id) + '">' +
+        KYC.portraitThumb(p, "36px") +
         '<span class="race-mate-body"><span class="race-mate-name">' + KYC.escapeHtml(p.name) +
         '</span><span class="race-mate-meta"><span class="' + KYC.partyClass(p) + '">' +
         KYC.escapeHtml(p.party) + "</span> " + role + status + "</span></span></button>";

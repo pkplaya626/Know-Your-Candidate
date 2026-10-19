@@ -23,8 +23,8 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<link rel="stylesheet" href="assets/kyc.css?v=4ad83ec098">
-<script src="assets/kyc.js?v=ffceeeeb59"></script>
+<link rel="stylesheet" href="assets/kyc.css?v=1a08e48e8f">
+<script src="assets/kyc.js?v=7cbe6fe962"></script>
 </head>
 <body>
 
@@ -186,24 +186,55 @@
         <div class="toolbar">
             <div class="map-legend" id="mapLegend" aria-live="polite"></div>
             <div class="map-views push-right">
-                <div class="segmented" role="group" aria-label="Congress">
-                    <button type="button" data-mode="senate" aria-pressed="true">Senate</button>
-                    <button type="button" data-mode="senate2026" aria-pressed="false">
-                        <svg class="icon icon-sm" aria-hidden="true"><use href="#i-flag"/></svg>
-                        2026 races
-                    </button>
-                    <button type="button" data-mode="house" aria-pressed="false">House</button>
+                <!-- On a phone the ten views are one menu, so the map starts on the first screen. -->
+                <label class="map-mode-pick">
+                    <span class="map-view-kicker">Map view</span>
+                    <select id="mapModeSelect" class="select">
+                        <optgroup label="U.S. Congress">
+                            <option value="senate">Senate</option>
+                            <option value="senate2026">2026 Senate races</option>
+                            <option value="house">House</option>
+                        </optgroup>
+                        <optgroup label="Statewide offices">
+                            <option value="governor">Governors</option>
+                            <option value="lt">Lieutenant governors</option>
+                            <option value="ag">Attorneys general</option>
+                            <option value="sos">Secretaries of state</option>
+                            <option value="governor2026">2026 governor's races</option>
+                        </optgroup>
+                        <optgroup label="Party control of state government">
+                            <option value="legislature">Legislatures</option>
+                            <option value="trifecta">Trifectas</option>
+                        </optgroup>
+                    </select>
+                </label>
+                <div class="map-view-group">
+                    <span class="map-view-kicker" id="mapViewsCongress">U.S. Congress</span>
+                    <div class="segmented" role="group" aria-labelledby="mapViewsCongress">
+                        <button type="button" data-mode="senate" aria-pressed="true">Senate</button>
+                        <button type="button" data-mode="senate2026" aria-pressed="false">
+                            <svg class="icon icon-sm" aria-hidden="true"><use href="#i-flag"/></svg>
+                            2026 races
+                        </button>
+                        <button type="button" data-mode="house" aria-pressed="false">House</button>
+                    </div>
                 </div>
-                <div class="segmented" role="group" aria-label="Statewide offices">
-                    <button type="button" data-mode="governor" aria-pressed="false">Governors</button>
-                    <button type="button" data-mode="lt" aria-pressed="false">Lt. governors</button>
-                    <button type="button" data-mode="ag" aria-pressed="false">Attorneys general</button>
-                    <button type="button" data-mode="sos" aria-pressed="false">Secretaries of state</button>
-                    <button type="button" data-mode="governor2026" aria-pressed="false">2026 governor's races</button>
+                <div class="map-view-group">
+                    <span class="map-view-kicker" id="mapViewsOffices">Statewide offices</span>
+                    <div class="segmented" role="group" aria-labelledby="mapViewsOffices">
+                        <button type="button" data-mode="governor" aria-pressed="false">Governors</button>
+                        <button type="button" data-mode="lt" aria-pressed="false">Lt. governors</button>
+                        <button type="button" data-mode="ag" aria-pressed="false">Attorneys general</button>
+                        <button type="button" data-mode="sos" aria-pressed="false">Secretaries of state</button>
+                        <button type="button" data-mode="governor2026" aria-pressed="false">2026 governor's races</button>
+                    </div>
                 </div>
-                <div class="segmented" role="group" aria-label="Party control of state government">
-                    <button type="button" data-mode="legislature" aria-pressed="false">Legislatures</button>
-                    <button type="button" data-mode="trifecta" aria-pressed="false">Trifectas</button>
+                <div class="map-view-group">
+                    <span class="map-view-kicker" id="mapViewsControl">Party control of state government</span>
+                    <div class="segmented" role="group" aria-labelledby="mapViewsControl">
+                        <button type="button" data-mode="legislature" aria-pressed="false">Legislatures</button>
+                        <button type="button" data-mode="trifecta" aria-pressed="false">Trifectas</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -263,12 +294,12 @@
 <script src="data/odds.js"></script>
 <script src="data/stategov.js?v=8a1deba302"></script>
 <script src="data/lookup/index.js?v=c61492c380"></script>
-<script src="assets/kyc-odds.js?v=1852f17dc4"></script>
-<script src="assets/kyc-cards.js?v=a67ab65c61"></script>
-<script src="assets/kyc-profile.js?v=ad748ddcd9"></script>
-<script src="assets/kyc-stategov.js?v=dd94f8a786"></script>
-<script src="assets/kyc-findrep.js?v=708ec7448e"></script>
-<script src="assets/kyc-usmap.js?v=d1ac1c1524"></script>
-<script src="assets/kyc-map.js?v=96e414509e"></script>
+<script src="assets/kyc-odds.js?v=3aa55fa0e2"></script>
+<script src="assets/kyc-cards.js?v=77437ecc42"></script>
+<script src="assets/kyc-profile.js?v=b7be222fa4"></script>
+<script src="assets/kyc-stategov.js?v=1dc4c6524d"></script>
+<script src="assets/kyc-findrep.js?v=904968445e"></script>
+<script src="assets/kyc-usmap.js?v=77eb08148c"></script>
+<script src="assets/kyc-map.js?v=4e41efa1b2"></script>
 </body>
 </html>

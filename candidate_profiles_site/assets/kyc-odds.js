@@ -220,16 +220,32 @@
     } else if (polls) {
       pollHtml = pollTable(polls);
     }
-    return '<section class="odds' + (opts.compact ? " odds-compact" : "") + '" aria-label="' +
-      KYC.escapeAttr("Prediction markets and polling averages for " + (race.label || "this race")) + '">' +
-      '<p class="odds-subhead">' + (finalPrices() ? FINAL_HEAD : "Prediction markets") +
-        ' <span class="odds-faint">as of ' + KYC.escapeHtml(day(data().asOf)) + "</span></p>" +
-      markets.join("") + pollHtml +
+    var head = (finalPrices() ? FINAL_HEAD : "Prediction markets") +
+      ' <span class="odds-faint">as of ' + KYC.escapeHtml(day(data().asOf)) + "</span>";
+    var body = markets.join("") + pollHtml +
       '<p class="odds-note">A market price is what traders pay for a contract worth $1 if that ' +
         "outcome happens. It is not a poll, and not this site’s forecast. Polling averages " +
-        "are each aggregator’s own." + (finalPrices() ? FINAL_NOTE : "") + "</p>" +
-      "</section>";
+        "are each aggregator’s own." + (finalPrices() ? FINAL_NOTE : "") + " " + NO_TIES + "</p>";
+    var label = KYC.escapeAttr("Prediction markets and polling averages for " + (race.label || "this race"));
+    /* On a person's own profile the prices sit closed under a heading the
+     * reader opens: a challenger's page that showed "2%" before anything
+     * else about the race read as a verdict on them (TRUST-14). Every
+     * price is still quoted as published when opened (rule 40). */
+    if (opts.collapsed) {
+      return '<details class="odds odds-compact odds-collapsed" aria-label="' + label + '">' +
+        '<summary class="odds-subhead">' +
+          // From Election Day the closed block's own words say final (rule 41).
+          (finalPrices() ? FINAL_HEAD : "What prediction markets say about this race") +
+          ' <span class="odds-faint">as of ' + KYC.escapeHtml(day(data().asOf)) + "</span></summary>" +
+        body + "</details>";
+    }
+    return '<section class="odds' + (opts.compact ? " odds-compact" : "") + '" aria-label="' + label + '">' +
+      '<p class="odds-subhead">' + head + "</p>" + body + "</section>";
   }
+
+  /* The markets are trading platforms; the site quotes them and takes
+   * nothing from them, and says so where it quotes them (TRUST-14). */
+  var NO_TIES = "This site has no relationship with these markets and earns no money from them.";
 
   /* From Election Day on, these are the last prices read before the first
    * polls closed (odds.yml stops there), and the page says so: prices that
@@ -256,7 +272,7 @@
       markets.map(function (m) { return marketRow(m, null); }).join("") +
       '<p class="odds-note">What traders pay for a $1 contract on each party winning a majority. ' +
         "Not a poll, and not this site’s forecast." + (finalPrices() ? FINAL_NOTE : "") +
-        "</p></section>";
+        " " + NO_TIES + "</p></section>";
   }
 
   KYC.odds = { render: render, control: control, percent: percent, finalPrices: finalPrices };

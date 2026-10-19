@@ -151,9 +151,13 @@
         return '<rect class="inset-outline" x="' + b[0] + '" y="' + b[1] + '" width="' + b[2] +
           '" height="' + b[3] + '"/>';
       }).join("") : "";
+      // Each view its own hatches, about 6px apart at its scale: a district
+      // of more than one party is hatched as well as coloured (VISUALS-03).
+      var hatch = prefix + "v" + (++views) + "-";
       return '<div class="map-frame"><svg class="district-map ' + cls + '" viewBox="' +
         frame.map(function (v) { return (+v).toFixed(1); }).join(" ") + '" role="img" aria-label="' +
-        KYC.escapeAttr(label) + '"><g class="district-shapes">' + shapes(frame) + "</g>" + mesh +
+        KYC.escapeAttr(label) + '" style="' + KYC.hatchVars(hatch) + '">' +
+        KYC.hatchDefs(hatch, 6 / px) + '<g class="district-shapes">' + shapes(frame) + "</g>" + mesh +
         outline + lines + dots(frame, px) + "</svg>" + labels(frame, px, mine) + "</div>";
     }
 
@@ -171,6 +175,7 @@
     }
 
     var drawn = false;
+    var views = 0;
     // With no words on the regions, a pick changes nothing but which shape
     // and dot are marked, so it can mark them in place. A view that hides
     // its labels (the county map's cities view) counts as unlabelled.
