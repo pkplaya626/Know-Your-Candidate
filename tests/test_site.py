@@ -968,7 +968,9 @@ class TestStatePages(unittest.TestCase):
         self.assertIn('<div id="stateContent" class="state-page" data-guide-name="', html)
         self.assertEqual(emit.script_sources(html),
                          [src.replace("{code}", "tx") for src in emit.STATE_PAGE_REQUIREMENTS])
-        self.assertIn("with its author and licence.</p>\n                <p><strong>Who counts", html)
+        # Its footer names the statewide questions' source too (rule 95).
+        self.assertIn("official text and source, read by hand.</p>\n                <p><strong>Who counts",
+                      html)
 
     def test_the_sitemap_lists_the_district_maps_last(self):
         from kyc import pages

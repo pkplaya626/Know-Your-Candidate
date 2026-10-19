@@ -193,8 +193,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2002 tests, no dependencies
-npm install && npm test                       # 3041 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2011 tests, no dependencies
+npm install && npm test                       # 3051 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1888,9 +1888,18 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     says what a yes or a no vote does in its own words, and no colour
     suggests a side; a record field the cache does not define (a "yes
     means" of the site's own) is refused. "None" is said only with what
-    shows it, quoted: the office's sentence (Illinois, Oregon), the
-    proclamation calling the election for offices only (Texas), or the
-    official ballots, which print every statewide question (`noneFrom`).
+    shows it, quoted: the office's sentence (Illinois, Oregon), an office's
+    list of its ballots' questions, or the official ballots, which print
+    every statewide question (`noneFrom`), named as the ballot read - often
+    one county's - never "the official sample ballots" as though every one
+    had been. A proclamation calling the election for offices is no basis:
+    Texas's first "none" rested on one, which would not name an amendment
+    election that its own resolution sets. A shown title is the document's
+    own name: the researchers' "linked from https://..." asides were link
+    text on the page, and a title carrying an address or a note is refused.
+    A question on every ballot that each town or city decides for itself
+    (New Hampshire's HB 1300 question, with "[name of municipality]" in its
+    text) is `local`, listed apart and never counted as statewide.
     Where no official source says either way (American Samoa, Maine,
     Pennsylvania, Puerto Rico), the page says this site has not found an
     official list and links the election office, never "none" (rule 19):
@@ -1898,9 +1907,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     second reader set it back. A measure decided at an earlier 2026
     election, or taken off by a court, is not listed. "Statewide" is a
     state's word (rule 75): the District's are District-wide, a
-    territory's Territory-wide. From the day after Election Day each reads
-    "Was on the Nov 3, 2026 ballot" beside the state's results page; this
-    site reads no result of a ballot question.
+    territory's Territory-wide, and neither is told of a county's questions.
+    From the day after Election Day the heading and lead are in the past
+    tense beside the state's results page - "that were on the ballot" only
+    over a list, never over "none" or "not found" - and this site reads no
+    result of a ballot question.
 
 ## District maps
 

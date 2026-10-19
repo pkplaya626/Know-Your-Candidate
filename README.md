@@ -71,7 +71,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (3041 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (3051 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1996,8 +1996,9 @@ The statewide ballot measures on each jurisdiction's November 3, 2026 ballot
 jurisdiction by jurisdiction on 2026-10-19 from each election office's own
 list - its qualified or certified measures, its voter guide, the official
 sample ballots - and re-opened by a second reader (`verified`). Ballotpedia,
-NCSL, news and advocacy sites were leads, never sources (rule 50). 148
-measures in 41 jurisdictions; 11 whose official record shows none; 4
+NCSL, news and advocacy sites were leads, never sources (rule 50). 147
+statewide measures in 41 jurisdictions, and New Hampshire's HB 1300
+question, on every ballot but decided town by town; 11 whose official record shows none; 4
 (American Samoa, Maine, Pennsylvania, Puerto Rico) where no official source
 says either way. Measures decided at an earlier 2026 election (Alaska's
 Ballot Measure 1, Missouri's August amendments, Alabama's May amendments)
@@ -2014,7 +2015,8 @@ and Your ballot load; one implementation draws both (`KYC.ballot`).
 | Its kind (constitutional amendment, statute, bond, referendum on a law, advisory question, constitutional convention question) and who put it on the ballot (the legislature by its own name, a citizens' petition, the constitution), or "not recorded here" | the source | `.kind`, `.origin` (`kind`, `origin`, `kindWords`, `originWords`) |
 | What the quoted text is, where it is not the ballot's own wording (California's guide summaries) | the source | `textNote`, `.note` |
 | "Its page in the voter guide", "Source (read <day>)" | the office | `.guide`, `.source` (`voterGuide`, `source.url`) |
-| "No statewide question is on the Nov 3, 2026 ballot", and what shows it: the office's sentence, the proclamation calling the election, or the official ballots, quoted and linked | the office | `none.from`, `none.words` (`noneFrom`, `noneWords`) |
+| "No statewide question is on the Nov 3, 2026 ballot", and what shows it: the office's sentence, quoted; its list of its ballots' questions; or "This site read <the ballot> on <day>, and it prints no statewide question", naming the ballot read | the office | `none.from`, `none.words` (`noneFrom`, `noneWords`) |
+| "One more question is on every ballot, but is not one statewide decision: each town or city votes on it for itself", listed apart and not counted, with how each ballot fills in its text | the measure's source | `.local` (`local`, with its `textNote`) |
 | "This site has not found an official list of statewide questions ... and does not say there are none", with the election office's own site | the office | `office` |
 
 The page never says what a yes or a no vote does in its own words - where
@@ -2022,9 +2024,12 @@ the official text says so (Arizona's, Ohio's), it is quoted - and nothing is
 coloured by side. Local questions are "not listed here", with the state's
 sample ballot where its office links one. "Statewide" is a state's word: the
 District's are "District-wide", a territory's "Territory-wide", and Puerto
-Rico, which holds no election that day, lists none. From the day after
-Election Day each reads "Was on the Nov 3, 2026 ballot", beside the state's
-own results page: this site reads no result of a ballot question.
+Rico, which holds no election that day, lists none; neither the District
+nor a territory is told of a county's questions. A list's or guide's title is
+the document's own name. From the day after Election Day the heading and the
+lead are in the past tense, beside the state's own results page ("that were
+on the ballot" only over a list, never over "none" or "not found"): this site
+reads no result of a ballot question.
 
 `ballot_measures.problems`, run by `build --check`
 (`validate.check_ballot_measures`), by `verify` and by every build (which
@@ -2035,7 +2040,9 @@ ballots, an office's file store) or is unquoted, a "none" without the words
 or ballots it rests on, a "not found" that lists anything or names no
 office, a kind or origin the page cannot word without the record's own, any
 field the record does not define (a "yes means" of the site's own has none),
-a measure listed twice, and a date outside the cycle.
+a measure listed twice, a shown title that carries an address or a
+researcher's note, a `local` question without its `textNote` or a list of
+only local ones, and a date outside the cycle.
 
 ## State high courts
 
