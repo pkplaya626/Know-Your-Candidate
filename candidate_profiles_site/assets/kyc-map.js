@@ -21,7 +21,7 @@
   var doc = global.document;
   var KYC = global.KYC;
 
-  var data = global.legislatorsData || [];
+  var data = KYC.people();
 
   var mode = "senate";
   var selected = "";
@@ -72,7 +72,7 @@
    *  has since left still defends it for their party, and the record names
    *  them even with no profile here. */
   function senateRace(code) {
-    return (global.kycRaces || []).filter(function (r) {
+    return KYC.races().filter(function (r) {
       return r.chamber === "Senate" && r.state === code;
     })[0] || null;
   }
@@ -261,7 +261,7 @@
     var want = entry[2];
     if (!want) return true;
     if (want === "allIndependent") return allIndependent("senate");
-    var races = (global.kycRaces || []).filter(function (r) { return r.chamber === "Senate"; });
+    var races = KYC.races().filter(function (r) { return r.chamber === "Senate"; });
     if (want === "special") return races.some(function (r) { return r.special; });
     return races.some(function (r) {
       var held = senateDefender(r.state);
@@ -433,7 +433,7 @@
    *  nextElection, from the term), not "Nothing to show" (RACES-06). */
   function noSenateRace(code) {
     var name = KYC.escapeHtml(KYC.stateName(code));
-    var senators = (global.legislatorsData || []).filter(function (p) {
+    var senators = data.filter(function (p) {
       return p.state === code && KYC.seated(p) && /Senate/.test(p.chamber) && p.nextElection;
     }).sort(function (a, b) { return a.nextElection - b.nextElection; });
     if (!senators.length) return "No U.S. Senate election in " + name + " in 2026.";
@@ -514,7 +514,7 @@
       ? ' <span class="faint" title="Lost the primary, withdrew, or were not on the primary ballot">' +
         out.length + " out</span>"
       : "";
-    var stateRaces = (global.kycRaces || []).filter(function (r) {
+    var stateRaces = KYC.races().filter(function (r) {
       return r.state === code && (mode === "house" ? r.chamber === "House" : r.chamber === "Senate");
     });
     /* The pages the statuses in the panel were read from, linked, as a

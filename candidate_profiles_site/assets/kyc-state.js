@@ -11,8 +11,8 @@
 
   var doc = global.document;
   var KYC = global.KYC;
-  var data = global.legislatorsData || [];
-  var races = global.kycRaces || [];
+  var data = KYC.people();
+  var races = KYC.races();
   var cards = KYC.cards;
 
   var code = doc.body.getAttribute("data-state") || "";
@@ -807,8 +807,8 @@
 
   KYC.ready(function () {
     if (!data.length) {
-      el("stateContent").innerHTML =
-        '<p class="results-bar">Profile data did not load. Run: python build_profile_site.py</p>';
+      el("stateContent").innerHTML = '<p class="results-bar">' + KYC.escapeHtml(KYC.peopleProblem() ||
+        "Profile data did not load. Run: python build_profile_site.py") + "</p>";
       return;
     }
     KYC.profile.ensure();

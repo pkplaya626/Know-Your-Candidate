@@ -5,8 +5,8 @@
   var doc = global.document;
   var KYC = global.KYC;
 
-  var data = global.legislatorsData || [];
-  var races = global.kycRaces || [];
+  var data = KYC.people();
+  var races = KYC.races();
 
   var state = {
     q: "",
@@ -1422,7 +1422,8 @@
 
   KYC.ready(function () {
     if (!data.length) {
-      doc.getElementById("resultsLabel").textContent =
+      // A file from another build is refused, and said (rule 94).
+      doc.getElementById("resultsLabel").textContent = KYC.peopleProblem() ||
         "Profile data did not load. Run: python build_profile_site.py";
       return;
     }

@@ -111,7 +111,7 @@ class TestSectionTags(unittest.TestCase):
 
     def test_the_congress_tag_only_where_profiles_load(self):
         html = pages.render_state("TX", "example.org")
-        self.assertIn("data/profiles.js", html)
+        self.assertIn("data/people/meta.js", html)
         self.assertEqual(self.tag(html)[0], " data-congress")
 
     def test_the_section_names_are_the_navigations(self):

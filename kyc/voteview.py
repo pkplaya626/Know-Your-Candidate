@@ -11,6 +11,7 @@ dependencies (this previously required pandas).
 import csv
 import io
 import os
+import re
 import urllib.error
 import urllib.request
 
@@ -99,6 +100,45 @@ def describe(dim1, congress=None):
         label = "well right of centre"
     tail = f"; {_ordinal(congress)} Congress" if congress else ""
     return f"DW-NOMINATE: {dim1:+.2f} ({label}{tail})"
+
+
+_DESCRIBED = re.compile(r"DW-NOMINATE:\s*([+-]?\d+(?:\.\d+)?)", re.I)
+
+
+def read_described(text):
+    """``(score, "119th Congress")`` from a string :func:`describe` wrote,
+    as the profile dialog reads it (assets/kyc-profile.js): the score, and
+    the Congress the parenthesis names after its ";" ("" when none). None
+    for a profile with no score."""
+    found = _DESCRIBED.search(str(text or ""))
+    if not found:
+        return None
+    inner = re.search(r"\(([^)]+)\)", str(text))
+    congress = (inner.group(1).split(";") + [""])[1].strip() if inner else ""
+    return float(found.group(1)), congress
+
+
+def chamber_scores(profiles):
+    """``{"House"|"Senate": {"119th Congress": [score, ...]}}``: every
+    sitting member's score, by chamber and by the Congress it is of - the
+    ticks the profile dialog draws beside a member's own. Counted here, from
+    every profile, rather than on the page: a state page holds its own
+    state's people only (rule 94), and its dialog would have placed a
+    senator among their own delegation as though it were the chamber."""
+    from .record import seated
+
+    out = {}
+    for p in profiles:
+        chamber = str(p.get("chamber") or "")
+        if not seated(p) or not re.search("Senate|House", chamber):
+            continue
+        read = read_described(p.get("voting_alignment"))
+        if read is None:
+            continue
+        word = "Senate" if "Senate" in chamber else "House"
+        out.setdefault(word, {}).setdefault(read[1], []).append(read[0])
+    return {word: {congress: sorted(scores) for congress, scores in sorted(by.items())}
+            for word, by in sorted(out.items())}
 
 
 def build_alignment_map(rows=None):

@@ -1926,6 +1926,13 @@ a.badge-link {
   border: 1px solid var(--border);
 }
 
+/* In the dialog's place while a person's record loads (rule 94). */
+.modal-waiting {
+  margin: 0;
+  padding: var(--s-6) var(--s-5);
+  padding-right: calc(var(--s-6) + 44px);
+  color: var(--text-muted);
+}
 .modal-header {
   display: flex;
   align-items: center;
@@ -3946,6 +3953,7 @@ a.badge-link {
   color: var(--text);
   font: inherit;
   text-align: left;
+  text-decoration: none;
   cursor: pointer;
 }
 .guide-person .name { color: var(--accent); font-weight: 600; }

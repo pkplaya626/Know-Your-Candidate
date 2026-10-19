@@ -419,7 +419,29 @@
   /* ========================================================== the people */
 
   function people() {
-    return global.legislatorsData || [];
+    return KYC.people();
+  }
+
+  /** A promise that the page holds the people of each state in *codes*,
+   *  where it holds people at all: a state page holds its own state's only
+   *  (rule 94), and an answer in another state - a ZIP code across the
+   *  line, a reader's location - loads that state's file first. Resolves to
+   *  the codes whose file did not load, which the answer must not be drawn
+   *  without: "no members" from a failed download is a silent error. */
+  function peopleFor(codes) {
+    if (!people().length) return Promise.resolve([]);
+    var wanted = (codes || []).filter(function (c, i, all) {
+      return c && all.indexOf(c) === i && !KYC.peopleHeld(c);
+    });
+    return Promise.all(wanted.map(function (c) {
+      return KYC.loadPeople(c).then(function (ok) { return ok ? null : c; });
+    })).then(function (failed) { return failed.filter(Boolean); });
+  }
+
+  function peopleFailed(failed) {
+    return '<p class="findrep-note">' + KYC.escapeHtml(KYC.peopleProblem() ||
+      "The members of Congress for " + failed.map(nameOf).join(" and ") +
+      " did not load. Check your connection and try again.") + "</p>";
   }
 
   function stateInfo(code) {
@@ -445,7 +467,7 @@
   }
 
   function races() {
-    return global.kycRaces || [];
+    return KYC.races();
   }
 
   function houseRace(code, n) {
@@ -972,8 +994,16 @@
       }
       show('<p class="findrep-note">Looking up ' + KYC.escapeHtml(m[1]) + "&hellip;</p>");
       zip(m[1]).then(function (found) {
-        show(zipAnswer(m[1], found));
-        remember(found.length === 1 ? found[0].code : "");
+        return peopleFor(found.map(function (f) { return f.code; })).then(function (failed) {
+          return { found: found, failed: failed };
+        });
+      }).then(function (got) {
+        if (got.failed.length) {
+          show(peopleFailed(got.failed));
+          return;
+        }
+        show(zipAnswer(m[1], got.found));
+        remember(got.found.length === 1 ? got.found[0].code : "");
       }, function () {
         show('<p class="findrep-note">The ZIP code lookup did not load. Check your connection ' +
           "and try again.</p>");
@@ -993,8 +1023,16 @@
             return;
           }
           where(pos.coords.longitude, pos.coords.latitude, acc).then(function (hit) {
-            show(pointAnswer(hit, acc));
-            remember(hit.code || "");
+            return peopleFor([hit.code]).then(function (failed) {
+              return { hit: hit, failed: failed };
+            });
+          }).then(function (got) {
+            if (got.failed.length) {
+              show(peopleFailed(got.failed));
+              return;
+            }
+            show(pointAnswer(got.hit, acc));
+            remember(got.hit.code || "");
           }, function () {
             show('<p class="findrep-note">The lookup did not load. Check your connection and ' +
               "try again.</p>");

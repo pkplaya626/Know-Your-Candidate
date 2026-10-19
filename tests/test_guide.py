@@ -175,11 +175,16 @@ class TestGuidePages(unittest.TestCase):
     def test_only_a_page_with_people_loads_the_profiles(self):
         for page in PAGES:
             html = government.render(page["slug"], "example.org", ["TX"])
-            loads = "../data/profiles.js" in emit.script_sources(html)
+            loaded = emit.script_sources(html)
+            loads = "../data/people/meta.js" in loaded
             self.assertEqual(loads, bool(page.get("people")), page["slug"])
             # Such a page shows the chambers' balance, as a state page does;
             # the others have no build metadata to fill it from.
             self.assertEqual('id="senateBalance"' in html, loads, page["slug"])
+            # Its members are written in by the build: no guide page loads
+            # anyone's profile, neither the index nor a state's (rule 94).
+            self.assertEqual([src for src in loaded if "data/people/" in src and
+                              not src.endswith("people/meta.js")], [], page["slug"])
 
     def test_a_page_without_people_carries_its_own_jump_list(self):
         html = government.render("index", "example.org", ["TX", "AK", "DC"])
@@ -223,6 +228,92 @@ class TestGuidePages(unittest.TestCase):
         self.assertEqual(len(guide), len(government.slugs()))
         for page in guide:
             self.assertEqual(results[page], (True, "ok"), page)
+
+
+class TestCongressPageNamesItsMembers(unittest.TestCase):
+    """Who chairs each committee and who leads each chamber, written into
+    the guide's Congress page by the build from the profiles: the page loads
+    no profile data (rule 94). It drew them on the page from all 6.7 MB of
+    profiles.js."""
+
+    COMMITTEES = {"HSAG": {"name": "House Committee on Agriculture", "chamber": "house",
+                           "url": "https://agriculture.house.gov/"},
+                  "SSFI": {"name": "Senate Committee on Finance", "chamber": "senate"},
+                  "SCNC": {"name": "Senate Caucus on International Narcotics Control",
+                           "chamber": "senate"},
+                  "HSAG01": {"name": "Subcommittee", "parent": "HSAG"}}
+
+    def person(self, pid, chamber, party, seats=(), **extra):
+        base = {"id": pid, "name": f"Member {pid}", "chamber": chamber, "party": party,
+                "state": "TX", "isCandidate": False,
+                "committeeList": [dict(zip(("code", "title", "side"), s)) for s in seats]}
+        base.update(extra)
+        return base
+
+    def people(self):
+        return [
+            self.person("H1", "House", "Republican", [("HSAG", "Chairman", "majority"),
+                                                      ("HSAG01", "Chair", "majority")]),
+            self.person("H2", "House", "Democrat", [("HSAG", "Ranking Member", "minority")],
+                        leadership=["House Minority Leader"]),
+            self.person("S1", "Senate", "Republican", [("SSFI", "Chairman", "majority"),
+                                                       ("SCNC", "Chairman", "majority")],
+                        leadership=["Senate Majority Leader"]),
+            self.person("S2", "Senate", "Democrat", [("SCNC", "Co-Chair", "minority")]),
+            self.person("C1", "House", "Democrat", [("HSAG", "Chairman", "majority")],
+                        isCandidate=True),
+        ]
+
+    def test_each_committee_has_its_chair_and_minority_lead(self):
+        html = pages.committees_html(self.people(), self.COMMITTEES)
+        self.assertIn('href="../index.html#/profile/H1"', html)
+        self.assertIn('href="../index.html#/profile/H2"', html)
+        # A candidate holds no seat; a subcommittee is not listed.
+        self.assertNotIn("profile/C1", html)
+        self.assertNotIn(">Subcommittee<", html)
+        # A caucus is listed apart, and its minority lead is its Co-Chair.
+        self.assertIn("Caucuses and commissions", html)
+        self.assertIn("Co-Chair", html)
+        # A committee whose roster titles no minority member says so.
+        self.assertIn("No minority lead named in the rosters", html)
+        self.assertIn("no member of the minority a leading title", html)
+
+    def test_one_chamber_pending_the_other_listed(self):
+        people = self.people()
+        for p in people:
+            if p["chamber"] == "Senate":
+                p["committeeList"] = []
+                p["committeesPending"] = 120
+        html = pages.committees_html(people, self.COMMITTEES)
+        self.assertIn("House committees", html)
+        self.assertIn("Senate committee assignments for the 120th Congress have not been "
+                      "published yet", html)
+        self.assertNotIn("profile/S1", html)
+
+    def test_the_leaders_from_their_posts_or_said_not_recorded(self):
+        html = pages.leaders_html(self.people(), "senate", 119)
+        self.assertIn('href="../index.html#/profile/S1"', html)
+        self.assertIn("Senate Majority Leader", html)
+        none = pages.leaders_html([dict(p, leadership=[]) for p in self.people()], "senate", 119)
+        self.assertNotIn("guide-person", none)
+        self.assertIn("lists nobody in a Senate leadership post for the 119th Congress yet", none)
+        self.assertIn('href="https://www.senate.gov/senators/leadership.htm"', none)
+
+    def test_names_are_text_not_markup(self):
+        people = self.people()
+        people[0]["name"] = "<script>alert(1)</script>"
+        self.assertNotIn("<script>", pages.committees_html(people, self.COMMITTEES))
+
+    def test_the_page_carries_them_and_nothing_fills_them_later(self):
+        html = government.render("congress", "example.org", ["TX"],
+                                 members=(self.people(), {"committees": self.COMMITTEES,
+                                                          "congress": 119}))
+        for key in ("committees", "leaders-senate", "leaders-house"):
+            self.assertIn(f'data-built-from="{key}"', html)
+            self.assertNotIn(f'data-live="{key}"', html)
+        self.assertIn('href="../index.html#/profile/S1"', html)
+        # Without the profiles the page says what it holds, as before.
+        self.assertIn('data-live="committees"', government.render("congress", "example.org", ["TX"]))
 
 
 class TestDatedText(unittest.TestCase):

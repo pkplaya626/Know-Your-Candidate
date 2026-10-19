@@ -51,6 +51,8 @@
       '  <button class="btn-icon modal-close" data-close aria-label="Close profile">',
       KYC.icon("x"),
       "  </button>",
+      // In the dialog's place while a person's record loads (rule 94).
+      '  <p class="modal-waiting" id="profileModalWaiting" role="status" hidden></p>',
       '  <header class="modal-header">',
       '    <div class="modal-portrait">',
       '      <img id="profileModalPhoto" data-photo-idx="0" src="" alt="">',
@@ -357,20 +359,14 @@
   }
 
   /** The scores of every sitting member of *item*'s chamber, *item*'s own
-   *  among them, for the same Congress as *item*'s own score. */
+   *  among them, for the same Congress as *item*'s own score: counted by
+   *  the build from every profile (kyc/voteview.chamber_scores), since a
+   *  state page holds its own state's people only (rule 94) and would have
+   *  placed a senator among their own delegation as though it were the
+   *  Senate. */
   function chamberScores(item, congress) {
-    var chamber = chamberWord(item);
-    var out = [];
-    (global.legislatorsData || []).forEach(function (p) {
-      if (!KYC.seated(p) || chamberWord(p) !== chamber || !/Senate|House/.test(p.chamber || "")) return;
-      var t = String(p.voting_alignment || "");
-      var m = t.match(/DW-NOMINATE:\s*([+-]?\d+(?:\.\d+)?)/i);
-      if (!m) return;
-      var theirs = (((t.match(/\(([^)]+)\)/) || [])[1] || "").split(";")[1] || "").trim();
-      if (theirs !== congress) return;
-      out.push(parseFloat(m[1]));
-    });
-    return out;
+    var all = KYC.meta().chamberScores || {};
+    return ((all[chamberWord(item)] || {})[congress] || []).slice();
   }
 
   /* ------------------------------------------------------ how they voted */
@@ -705,7 +701,7 @@
     var target = el("profileModalRace");
     var raceId = item.contestRaceId || item.raceId;
     var race = null;
-    (global.kycRaces || []).some(function (r) {
+    KYC.races().some(function (r) {
       if (r.id === raceId) { race = r; return true; }
       return false;
     });
@@ -1538,11 +1534,72 @@
       : "";
   }
 
+  /* The person the dialog is waiting for, while their state's file loads:
+   * a later open or a close supersedes it. */
+  var waitingFor = null;
+
+  /** The dialog's own parts, or a line in their place while the person's
+   *  record loads (*text*), or after it failed to. */
+  function showWaiting(text) {
+    var dialogEl = root.querySelector(".modal-dialog");
+    Array.prototype.forEach.call(dialogEl.children, function (child) {
+      if (child.id === "profileModalWaiting" || child.hasAttribute("data-close")) return;
+      child.hidden = !!text;
+    });
+    var line = el("profileModalWaiting");
+    line.hidden = !text;
+    line.innerHTML = text || "";
+    root.setAttribute("aria-busy", text && /^Loading/.test(line.textContent) ? "true" : "false");
+  }
+
+  /* A card the grid or the map holds is the index's record of the person
+   * (rule 94): their whole record, every field this dialog shows, is in
+   * their state's file, loaded the first time one of its people is opened.
+   * Until it is in, the dialog says so and draws nothing from the card: a
+   * field missing from it would read as "No data" about a real person. A
+   * link to someone the page does not hold at all - an id on a state page
+   * of another state - finds them in the index of everyone first. */
+  function openWhenLoaded(id, opts, item) {
+    ensure();
+    current = null;
+    var token = waitingFor = { id: id };
+    var who = item ? KYC.escapeHtml(item.name) + "&rsquo;s profile" : "this profile";
+    // The dialog's name while its parts are hidden (aria-labelledby).
+    el("profileModalName").textContent = item ? item.name : "Profile";
+    showWaiting("Loading " + who + "&hellip;");
+    if (!dialog.isOpen()) dialog.open();
+    KYC.loadPerson(id).then(function (person) {
+      if (waitingFor !== token) return;
+      waitingFor = null;
+      if (person) {
+        showWaiting("");
+        open(id, opts);
+        return;
+      }
+      showWaiting("No profile on this site has the id " + KYC.escapeHtml(id) + ".");
+    }, function () {
+      if (waitingFor !== token) return;
+      waitingFor = null;
+      showWaiting(KYC.escapeHtml(KYC.peopleProblem() ||
+        (item ? item.name + "\u2019s profile" : "This profile") +
+        " did not load. Check the connection and open it again."));
+    });
+    return true;
+  }
+
   function open(id, opts) {
     var item = KYC.byId(id);
-    if (!item) return false;
+    if (!item) {
+      // Nobody by that id among everyone the page holds, or no way to look
+      // further: as before, the caller hears that nothing opened.
+      if (KYC.indexHeld() || !KYC.canLoadPeople("people/index.js")) return false;
+      return openWhenLoaded(id, opts, null);
+    }
+    if (!KYC.isFull(item)) return openWhenLoaded(id, opts, item);
 
     ensure();
+    waitingFor = null;
+    showWaiting("");
     current = item;
     render(item);
     // A tab, a bookmark or a history entry names the person (GRID-24).
@@ -1578,6 +1635,7 @@
     dialog = KYC.createModal(root, {
       onClose: function () {
         current = null;
+        waitingFor = null;
         if (baseTitle !== null) doc.title = baseTitle;
         KYC.router.clearProfile();
       },

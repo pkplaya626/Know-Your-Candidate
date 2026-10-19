@@ -9,7 +9,7 @@ their words in ``government_text``.
 The words are static and say so: every section cites the sources it was
 checked against, and the footer gives the date they were checked. Anything
 that is a fact about the people the site covers - who chairs a committee -
-is not typed here; the page renders it from profiles.js (``assets/kyc-guide.js``).
+is not typed here; the build writes it from the profiles (``pages.committees_html``).
 
 The build refuses a guide with a link to a page, section or state that does
 not exist, or a section citing a source the guide does not list: a primer
@@ -28,18 +28,19 @@ FOLDER = "government"
 SITE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                     "candidate_profiles_site")
 
-# What each guide page loads. Most need only the shared module; a page that
-# shows people loads them the way a state page does, so a name opens the
-# same profile dialog.
+# What each guide page loads. Most need only the shared module. A page that
+# names members of Congress has them written into it by the build (the
+# committee leads and the chambers' leaders, kyc/pages.py), each a link to
+# the person's profile on the grid, and loads only the build's figures for
+# its sidebar: no profile data (rule 94).
 _PLAIN_SCRIPTS = ("../assets/kyc-guide.js",)
 _PEOPLE_SCRIPTS = (
-    "../data/profiles.js",
-    "../data/odds.js",
-    "../assets/kyc-odds.js",
-    "../assets/kyc-cards.js",
-    "../assets/kyc-profile.js",
+    "../data/people/meta.js",
     "../assets/kyc-guide.js",
 )
+# The blocks written from the profiles, by the key the guide's text gives
+# them: ("live", key, what the page says without them).
+PRERENDERED = ("committees", "leaders-senate", "leaders-house")
 # A page with a map draws it the way the partisan map is drawn: the state
 # shapes, then what the guide says about each state, then the shared map.
 _MAP_SCRIPTS = (
@@ -702,8 +703,39 @@ def jump_options(codes):
                    f"({_e(c)})</option>" for c in named)
 
 
-def render(slug, host, codes=()):
-    """The HTML for one guide page."""
+def _prerendered(key, people):
+    """The markup a pre-rendered block holds, from *people* (``(profiles,
+    summary)``), or None to keep the block's own words."""
+    if not people:
+        return None
+    profiles, summary = people
+    if key == "committees":
+        return pages.committees_html(profiles, (summary or {}).get("committees"))
+    chamber = key.split("-", 1)[1]
+    return pages.leaders_html(profiles, chamber, (summary or {}).get("congress"))
+
+
+_LIVE_BLOCK = re.compile(r'(?P<pad>[ ]*)<div class="guide-live" data-live="(?P<key>[a-z-]+)">\n'
+                         r'[ ]*<p class="results-bar" role="status">.*?</p>\n[ ]*</div>')
+
+
+def _fill_prerendered(text, people):
+    """*text* with each pre-rendered block's words replaced by the people
+    it names. Nothing on the page fills them later."""
+    def one(match):
+        key = match.group("key")
+        body = _prerendered(key, people) if key in PRERENDERED else None
+        if body is None:
+            return match.group(0)
+        pad = match.group("pad")
+        return (f'{pad}<div class="guide-live guide-built" data-built-from="{_e(key)}">\n'
+                f"{pad}    {body}\n{pad}</div>")
+    return _LIVE_BLOCK.sub(one, text)
+
+
+def render(slug, host, codes=(), members=None):
+    """The HTML for one guide page. *members*, ``(profiles, summary)``,
+    fills the blocks that name members (:data:`PRERENDERED`)."""
     page = _page(slug)
     path = page_path(slug)
     canonical = f"https://{host}/{path}" if host else path
@@ -717,7 +749,7 @@ def render(slug, host, codes=()):
     crumbs = [pages._HOME, (pages.section_name("guide"), page_path("index"))]
     if slug != "index":
         crumbs.append((name(slug), path))
-    return pages.render_page(
+    text = pages.render_page(
         title=_e(f"{name(slug)} — Know Your Candidate"),
         og_title=_e(name(slug)),
         description=_e(page["description"]),
@@ -738,11 +770,12 @@ def render(slug, host, codes=()):
         scripts=pages._scripts(scripts(slug)),
         **layout,
     )
+    return _fill_prerendered(text, members) if members else text
 
 
-def render_all(host, codes=()):
+def render_all(host, codes=(), members=None):
     """``{path inside the site: html}`` for every guide page."""
-    return {page_path(slug): render(slug, host, codes) for slug in slugs()}
+    return {page_path(slug): render(slug, host, codes, members) for slug in slugs()}
 
 
 # -------------------------------------------------------------- validation

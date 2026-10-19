@@ -57,13 +57,17 @@ jobs:
       - name: A rebuild is byte-for-byte reproducible
         env:
           SOURCE_DATE_EPOCH: "1000000000"
+        # The people files are rewritten only when their content changes, so
+        # each build here starts without them: both write every one.
         run: |
+          rm -rf candidate_profiles_site/data/people
           python build_profile_site.py > /dev/null
-          cp candidate_profiles_site/data/profiles.js "$RUNNER_TEMP/profiles.1.js"
+          cp -r candidate_profiles_site/data/people "$RUNNER_TEMP/people.1"
           cp candidate_profiles_site/data/geo.js "$RUNNER_TEMP/geo.1.js"
           cp -r candidate_profiles_site/data/districts "$RUNNER_TEMP/districts.1"
+          rm -rf candidate_profiles_site/data/people
           python build_profile_site.py > /dev/null
-          cmp "$RUNNER_TEMP/profiles.1.js" candidate_profiles_site/data/profiles.js
+          diff -r "$RUNNER_TEMP/people.1" candidate_profiles_site/data/people
           cmp "$RUNNER_TEMP/geo.1.js" candidate_profiles_site/data/geo.js
           diff -r "$RUNNER_TEMP/districts.1" candidate_profiles_site/data/districts
           echo "ok: two builds at the same epoch are identical"
