@@ -208,18 +208,26 @@
 
   var MARKS = ["poll-dot-fill", "poll-dot-ring", "poll-dot-square", "poll-dot-diamond"];
 
+  /* The narrowest axis the dots are drawn on, in points. */
+  var SPAN = 30;
+
   /** Each aggregator's average as dots on one shared axis, one row each:
    *  a party's colour and, for whoever cannot tell the colours apart, a
-   *  shape per candidate, named in the key. The axis spans only the
-   *  figures shown, rounded out to fives, and says so in its ticks. Every
-   *  number is page text in the table or line beside it. */
+   *  shape per candidate, named in the key. The axis spans the figures
+   *  shown, rounded out to fives, and never less than thirty points: on a
+   *  ten-point axis Maine's 49.7 against 47.4 looked like a wide gap (PR
+   *  #111 review). Every number is page text in the table beside it. */
   function pollDots(rows, key) {
     if (!rows.length) return "";
     var all = [];
     rows.forEach(function (row) { row.results.forEach(function (r) { all.push(r.pct); }); });
     var lo = Math.max(0, Math.floor((Math.min.apply(null, all) - 2) / 5) * 5);
     var hi = Math.min(100, Math.ceil((Math.max.apply(null, all) + 2) / 5) * 5);
-    if (hi - lo < 10) hi = Math.min(100, lo + 10);
+    if (hi - lo < SPAN) {
+      lo = Math.max(0, Math.floor(((lo + hi) / 2 - SPAN / 2) / 5) * 5);
+      hi = Math.min(100, lo + SPAN);
+      lo = Math.min(lo, hi - SPAN);
+    }
     var at = function (v) { return (100 * (v - lo) / (hi - lo)).toFixed(2) + "%"; };
     var names = ordered(rows[0].results, key);
     var mark = function (r) {
@@ -227,7 +235,7 @@
       return MARKS[(i < 0 ? names.length : i) % MARKS.length];
     };
     var ticks = [];
-    for (var t = lo; t <= hi; t += 5) ticks.push(t);
+    for (var t = lo; t <= hi; t += (hi - lo > SPAN ? 10 : 5)) ticks.push(t);
     var body = rows.map(function (row) {
       var spoken = row.aggregator + ": " + ordered(row.results, key).map(function (r) {
         return r.label + " " + r.pct.toFixed(1) + "%";
@@ -303,7 +311,7 @@
         ' <span class="odds-faint">(' + link(first.url, first.aggregator) +
         (when ? ", updated " + KYC.escapeHtml(when) : "") +
         (polls.rows.length > 1 ? "; " + (polls.rows.length - 1) + " more average" +
-          (polls.rows.length > 2 ? "s" : "") : "") + ")</span></p>" + pollDots([first], key);
+          (polls.rows.length > 2 ? "s" : "") : "") + ")</span></p>";
     } else if (polls) {
       pollHtml = pollTable(polls, key);
     }

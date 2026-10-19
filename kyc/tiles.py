@@ -151,7 +151,7 @@ def house(root="."):
             # The band above each block that holds its code, and the
             # narrowest a block's slot is: the page places each state's
             # button over both.
-            "band": LABEL_BAND, "slot": LABEL_COLS,
+            "band": LABEL_BAND, "slot": LABEL_COLS, "gap": GAP,
             "states": {c: blocks[c] for c in sorted(blocks)}}
 
 
@@ -174,9 +174,19 @@ def check(layout, seats_by_state=None):
     codes = sorted(states)
     for i, a in enumerate(codes):
         for b in codes[i + 1:]:
+            (pl, pr), (ql, qr) = slot_span(states[a]), slot_span(states[b])
             p, q = states[a], states[b]
             # Each block's slot, its code's band above it included.
-            if (p["x"] < q["x"] + max(q["cols"], LABEL_COLS) and q["x"] < p["x"] + max(p["cols"], LABEL_COLS)
+            if (pl < qr and ql < pr
                     and p["y"] - LABEL_BAND < q["y"] + q["rows"] and q["y"] - LABEL_BAND < p["y"] + p["rows"]):
                 problems.append(f"{a} and {b} overlap")
     return problems
+
+
+def slot_span(block):
+    """``(left, right)`` of the slot a block is centred in, as the page
+    draws its button: a block narrower than ``LABEL_COLS`` sits in the
+    middle of its slot, so its own ``x`` is not the slot's left edge."""
+    slot = max(block["cols"], LABEL_COLS)
+    left = block["x"] - (slot - block["cols"]) / 2
+    return left, left + slot

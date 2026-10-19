@@ -2839,7 +2839,7 @@
     var counted = [["R", c.R], ["I", c.I], ["D", c.D]].filter(function (p) { return p[1]; })
       .map(function (p) {
         return p[1] + " " + WORDS[p[0]][p[1] === 1 ? 0 : 1] +
-          (up ? " (" + upOf(p[0]) + " of their seats " + verb + " on the Nov 3, 2026 ballot)" : "");
+          (upOf(p[0]) ? " (" + upOf(p[0]) + " of their seats " + verb + " on the Nov 3, 2026 ballot)" : "");
       });
     if (vacant) counted.push(vacant + " vacant");
     var half = chamber === "senate"
@@ -2934,8 +2934,10 @@
     var states = Object.keys(layout.states).sort();
     var html = states.map(function (code) {
       var b = layout.states[code];
+      var gap = layout.gap || 0;
       var slot = Math.max(b.cols, layout.slot || 2);
-      var left = b.x - (slot - b.cols) / 2;
+      var reach = slot + gap;
+      var left = b.x - (slot - b.cols) / 2 - gap / 2;
       var top = b.y - layout.band;
       var cells = seatedCells(b);
       var tally = { r: 0, d: 0, i: 0, vacant: 0 };
@@ -2956,14 +2958,14 @@
       return '<button type="button" class="ht-state' + (opts.selected === code ? " is-selected" : "") +
         '" data-state="' + attr(code) + '" aria-pressed="' + String(opts.selected === code) +
         '" aria-label="' + attr(label) + '" style="left:' + share(left, W) + ";top:" + share(top, H) +
-        ";width:" + share(slot, W) + ";height:" + share(layout.band + b.rows, H) + '">' +
+        ";width:" + share(reach, W) + ";height:" + share(layout.band + b.rows, H) + '">' +
         '<span class="ht-code" style="height:' + share(layout.band, layout.band + b.rows) + '">' +
         esc(code) + "</span>" +
-        '<span class="ht-block" style="width:' + share(b.cols, slot) + ";height:" +
+        '<span class="ht-block" style="width:' + share(b.cols, reach) + ";height:" +
         share(b.rows, layout.band + b.rows) + ";grid-template-columns:repeat(" + b.cols +
         ",1fr);grid-template-rows:repeat(" + b.rows + ',1fr)">' + squares + "</span></button>";
     }).join("");
-    return '<div class="house-tiles" style="padding-bottom:' + share(H, W) + ";--ht-ratio:" +
+    return '<div class="house-tiles" style="aspect-ratio:' + W + " / " + H + ";--ht-ratio:" +
       (W / H).toFixed(4) + '">' + html + "</div>";
   }
 
@@ -3007,8 +3009,8 @@
         (cells[n][0] + 1) + ";grid-row:" + (cells[n][1] + 1) + '" title="' + attr(r.label || "District " + n) +
         '"><span class="sr-only">District </span>' + esc(n) + "</a>";
     }).join("");
-    return '<p class="dt-caption">House races: a square per district, laid out roughly where each ' +
-      "district lies, north at the top.</p>" +
+    return '<p class="dt-caption">House races: a square per district, in bands from the state’s ' +
+      "north to its south, west to east within each band.</p>" +
       '<nav class="district-tiles jump-row" aria-label="Jump to a House race, districts laid out as on the map"' +
       ' style="--dt-cols:' + b.cols + ";--dt-rows:" + b.rows + '">' + links + "</nav>";
   }

@@ -1874,9 +1874,11 @@ async function testStates() {
     const sg = mnGov.window.kycStateGov.states.MN;
     const up = Object.keys(sg.ballot2026.offices).filter((k) => sg.ballot2026.offices[k].up);
     const lines = [...gov.querySelectorAll(".gov-holder-unchecked")].map((p) => p.textContent);
+    // The glance at the top repeats the governor's line (rule 79); the
+    // section's own lines are one per office.
+    const own = [...gov.querySelectorAll(".gov-holder-status")].filter((p) => !p.closest(".state-glance"));
     check("every office on the ballot carries a holder line",
-      up.length >= 4 && gov.querySelectorAll(".gov-holder-status").length === up.length,
-      up.join(",") + " / " + gov.querySelectorAll(".gov-holder-status").length);
+      up.length >= 4 && own.length === up.length, up.join(",") + " / " + own.length);
     check("Tim Walz's office says it was not checked, and claims nothing either way",
       lines.indexOf("Whether " + sg.governor.name + " is running for this office is not checked here.") !== -1 &&
         !gov.querySelector(".gov-open-seat"), lines.join(" | "));
@@ -9823,6 +9825,38 @@ async function testCharts() {
         .querySelector('[class*="party-"], .bb-seg'));
       check("the ballot mark is the office's, never the holder's (rule 79)",
         !/Abbott[^.]*on the Nov 3/.test(glance.textContent) && /This office (is|was) on the Nov 3/.test(glance.textContent));
+      // Rule 79 in the glance as in the section below it: the mark above a
+      // governor's name with no word of whether they run read as "Brian Kemp
+      // is running" (PR #111 review). Every state, from the data.
+      const sg = window.KYC.stategov;
+      const html = (s) => { const d = D.createElement("div"); d.innerHTML = s; return d; };
+      const status = (el) => [...el.querySelectorAll(".gov-holder-status")].map((p) => p.textContent);
+      const codes = Object.keys(window.kycStateGov.states);
+      const differ = codes.filter((c) => {
+        const g = sg.glance(c);
+        if (!g) return false;
+        const card = html(sg.render(c)).querySelector(".gov-card");
+        return String(status(html(g))) !== String(card ? status(card) : []);
+      });
+      check("every state's glance says whether its governor runs, in the section's words", differ.length === 0,
+        differ.join(" "));
+      const after = window.KYC.electionStatus(2026).phase === "post-election";
+      const said = (why) => codes.filter((c) => {
+        const b = window.kycStateGov.states[c].ballot2026;
+        const st = b && b.offices && b.offices.governor && b.offices.governor.up && b.offices.governor.holderStatus;
+        return st && st.why === why;
+      });
+      const open = said("term-limit").concat(said("not-listed"));
+      check("a governor's open seat is said in the glance", after || open.length === 0 ||
+        open.every((c) => /Open seat: /.test(html(sg.glance(c)).textContent)), open.join(" "));
+      const unchecked = said("unchecked");
+      check("an unchecked holder says so in the glance", after || unchecked.length === 0 ||
+        unchecked.every((c) => /not checked/.test(html(sg.glance(c)).textContent)), unchecked.join(" "));
+      const territories = codes.filter((c) => window.kycStateGov.states[c].territory && sg.glance(c));
+      check("a territory's glance never calls its officers statewide (rule 75)", territories.every((c) =>
+        !/Statewide/.test(html(sg.glance(c)).textContent)), territories.join(" "));
+      check("the glance counts regular-election seats, as the section's mark does",
+        !/ \d+ seats on the Nov 3|all seats on the Nov 3/.test(glance.textContent));
     });
   }
 
@@ -9843,6 +9877,29 @@ async function testCharts() {
       const trial = courts.filter((c) => c.kind === "district" || c.kind === "territorial");
       check("the count of district courts is the courts' own",
         D.querySelector(".cl-total").textContent.indexOf(trial.length + " district courts") === 0);
+      // Rule 82: a judge the courts' list has on senior status while the
+      // directory counts them active is said, never folded in silently
+      // (PR #111 review: the Sixth Circuit's line credited 61 to the
+      // directory, which counts 62). Every circuit, from the data.
+      const silent = courts.filter((c) => c.kind === "appeals").filter((c) => {
+        const mine = trial.filter((t) => t.circuit === c.circuit && t.listed);
+        const n = mine.reduce((k, t) => k + (t.listedSenior || 0), 0);
+        const node = D.querySelector(`.court-ladder a.cl-node[href$="/${c.id}.html"]`);
+        const sub = D.querySelector(`.court-ladder a.cl-sub[href="#districts-${c.id}"]`);
+        const said = (el) => !!el && /senior by the courts’ list of vacancies/.test(el.textContent);
+        return (n > 0 && !said(sub)) || (c.listedSenior > 0 && !said(node));
+      });
+      check("every circuit line holding a judge senior by the courts' list says so", silent.length === 0,
+        silent.map((c) => c.id).join(" "));
+      const total = trial.filter((t) => t.listed).reduce((k, t) => k + (t.listedSenior || 0), 0);
+      check("the total line says so too", !total ||
+        /senior by the courts’ list of vacancies/.test(D.querySelector(".cl-total").textContent));
+      check("the caption does not credit the adjusted counts to the directory alone",
+        !/as the directory counts them/.test(D.querySelector(".court-ladder figcaption").textContent));
+      const fed = D.querySelector(".court-ladder .cl-note");
+      check("the Federal Circuit's line names the district courts' patent appeals and cites the statute",
+        !fed || (/patent cases from every district court/.test(fed.textContent) &&
+          /uscode\/text\/28\/1295$/.test(fed.querySelector("a").getAttribute("href"))));
     });
   }
 
@@ -9859,6 +9916,10 @@ async function testCharts() {
         [...fig.querySelectorAll(".bt-name")].filter((n) => n.textContent).length ===
           new Set(dated.map((j) => j.seats.filter((s) => s.court === "ca9")[0].appointedBy)).size);
       check("one neutral ink: no party anywhere in it", !!fig && !fig.querySelector('[class*="party-"]'));
+      const years = [...fig.querySelectorAll(".bt-ticks span")].map((s) => +s.textContent);
+      const latest = Math.max(...dated.map((j) => +j.seats.filter((s) => s.court === "ca9")[0].commissioned.slice(0, 4)));
+      check("the axis ends where the bench does, never years ahead", years.length > 1 &&
+        Math.max(...years) <= latest + 1, `${years.join(",")} for ${latest}`);
     });
   }
 
@@ -9924,6 +9985,22 @@ async function testCharts() {
       check("every race with polling averages draws a dot row per aggregator", checked === raceIds.length &&
         checked > 0, `${checked} of ${raceIds.length}`);
       check("the candidates come in the market bars' order", inOrder === checked, `${inOrder} of ${checked}`);
+      // A ten-point axis made 49.7 against 47.4 look like a wide gap (PR
+      // #111 review); the compact line already prints its two figures.
+      const narrow = raceIds.filter((id) => {
+        const race = (window.kycRaces || []).find((r) => r.id === id);
+        if (!race) return false;
+        const box = D.createElement("div");
+        box.innerHTML = KYC.odds.render(race, {});
+        const ticks = [...box.querySelectorAll(".poll-ticks span")].map((s) => parseFloat(s.textContent));
+        return ticks.length < 2 || Math.max(...ticks) - Math.min(...ticks) < 30;
+      });
+      check("every poll axis spans at least thirty points", narrow.length === 0, narrow.join(" "));
+      const compact = raceIds.map((id) => (window.kycRaces || []).find((r) => r.id === id)).filter(Boolean)
+        .filter((race) => { const b = D.createElement("div"); b.innerHTML = KYC.odds.render(race, { compact: true });
+          return !!b.querySelector(".poll-dots"); });
+      check("the compact panel prints the line, not a one-row chart of it", compact.length === 0,
+        compact.map((r) => r.id).join(" "));
     });
   }
 }

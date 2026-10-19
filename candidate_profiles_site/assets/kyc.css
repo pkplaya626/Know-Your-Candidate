@@ -4546,6 +4546,25 @@ button.local-county-link {
   padding: var(--s-3) var(--s-4) 0; }
 .map-balance[hidden] { display: none; }
 .map-balance .balance-bar { margin-bottom: var(--s-3); }
+/* On a laptop the map's column is a fixed height, so every line above the
+ * map is taken from it (PR #111 review: VT, NH and CT fell to callouts).
+ * The layout choice, the bar and its title share one row; the note sits
+ * under the bar. */
+@media (min-width: 1001px) {
+  .map-balance { display: flex; align-items: center; gap: var(--s-4); padding: var(--s-2) var(--s-4) 0; }
+  .map-balance .map-layout { flex: none; }
+  .map-balance .balance-bar {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--s-3);
+    margin: 0;
+  }
+  .map-balance .bb-title { grid-column: 1; }
+  .map-balance .bb-track { grid-column: 2; margin: 0; }
+  .map-balance .bb-note { grid-column: 1 / -1; margin: 2px 0 0; }
+}
 
 /* The House, one square per seat (KYC.houseTiles): each state a button,
  * placed by percentage from kyc/tiles.py, its code page text above its
@@ -4554,7 +4573,7 @@ button.local-county-link {
  * scroll inside it, as the map letterboxes. A phone scrolls the page. */
 .map-tiles { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: var(--s-3) var(--s-4) var(--s-4); }
 .map-tiles[hidden] { display: none; }
-.house-tiles { position: relative; width: 100%; max-width: 920px; height: 0; margin: 0 auto; }
+.house-tiles { position: relative; width: 100%; max-width: 920px; height: auto; margin: 0 auto; }
 /* On a wide screen, as wide as fits the height left under the bar, the
  * way the map letterboxes (--ht-ratio is the layout's width over height). */
 @media (min-width: 1001px) {
@@ -4655,7 +4674,8 @@ button.local-county-link {
 @media (hover: hover) {
   .tp-tile:hover { border-color: var(--accent); background: var(--surface-3); }
 }
-/* Under the code, never over a letter of it. */
+/* Under the code, never over a letter of it; in the corner on a phone,
+ * where the tile is too short for both. */
 .tp-dot {
   position: absolute;
   bottom: 3px;
@@ -4665,6 +4685,9 @@ button.local-county-link {
   height: 5px;
   border-radius: 50%;
   background: var(--text);
+}
+@media (max-width: 600px) {
+  .tp-dot { top: 2px; right: 2px; bottom: auto; left: auto; margin-left: 0; width: 4px; height: 4px; }
 }
 .tp-key { margin: var(--s-2) 0 0; font-size: var(--t-xs); color: var(--text-muted); }
 .tp-dot-key { position: static; display: inline-block; margin: 0 var(--s-1) 0 0; vertical-align: 1px; }

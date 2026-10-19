@@ -134,11 +134,14 @@
     var id = court.id;
     var rows = [];
     var byName = {};
+    var undated = 0;
+    var unappointed = 0;
     judges.forEach(function (j) {
       var seat = (j.seats || []).filter(function (s) { return s.court === id; })[0] || {};
       var when = id === "scotus" ? oathOf(j) : seat.commissioned;
       var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(when || ""));
-      if (!m || !seat.appointedBy) return;
+      if (!m) { undated += 1; return; }
+      if (!seat.appointedBy) { unappointed += 1; return; }
       var at = +m[1] + (+m[2] - 1) / 12 + (+m[3] - 1) / 365;
       if (!byName[seat.appointedBy]) {
         byName[seat.appointedBy] = { name: seat.appointedBy, dots: [] };
@@ -151,14 +154,20 @@
     rows.sort(function (a, b) { return a.dots[0].at - b.dots[0].at; });
     var all = [];
     rows.forEach(function (r) { r.dots.forEach(function (d) { all.push(d.at); }); });
-    var first = Math.floor(Math.min.apply(null, all) / 5) * 5;
-    var last = Math.max(Math.ceil((Math.max.apply(null, all) + 0.01) / 5) * 5, first + 10);
+    // The axis ends at the year after the latest commission, never in the
+    // future (it read 2030 on the Court of International Trade's page), and
+    // reaches back at least ten years.
+    var last = Math.ceil(Math.max.apply(null, all) + 0.01);
+    var first = Math.min(Math.floor(Math.min.apply(null, all) / 5) * 5, last - 10);
     var x = function (v) { return (100 * (v - first) / (last - first)).toFixed(2) + "%"; };
+    var step = last - first > 30 ? 10 : 5;
     var ticks = [];
-    for (var t = first; t <= last; t += (last - first > 30 ? 10 : 5)) ticks.push(t);
-    var counted = judges.length === all.length ? "" : " " + (judges.length - all.length) +
-      " with no commission date in the directory " + (judges.length - all.length === 1 ? "is" : "are") +
-      " not drawn.";
+    for (var t = Math.ceil(first / step) * step; t <= last; t += step) ticks.push(t);
+    var notDrawn = function (n, why) {
+      return n ? n + " with no " + why + " in the directory " + (n === 1 ? "is" : "are") + " not drawn." : "";
+    };
+    var counted = [notDrawn(undated, id === "scotus" ? "oath date" : "commission date"),
+      notDrawn(unappointed, "appointing President")].filter(Boolean).join(" ");
     return '<figure class="bench-timeline">' +
       "<figcaption>" + (id === "scotus" ? "The justices, by the year each took the oath"
         : "Active judges, by the year each was commissioned to this court") + "</figcaption>" +
@@ -186,7 +195,7 @@
       }).join("") + "</ul>" +
       '<div class="bt-axis" aria-hidden="true"><span class="bt-name"></span><span class="bt-ticks">' +
       ticks.map(function (v) { return '<span style="left:' + x(v) + '">' + v + "</span>"; }).join("") +
-      "</span></div>" + (counted ? '<p class="faint">' + esc(counted.trim()) + "</p>" : "") + "</figure>";
+      "</span></div>" + (counted ? '<p class="faint">' + esc(counted) + "</p>" : "") + "</figure>";
   }
 
   /** The federal courts as a ladder (VISUALS-29): the Supreme Court over
@@ -211,6 +220,23 @@
     };
     var trials = courts.filter(function (c) { return c.kind === "district" || c.kind === "territorial"; });
     var sum = function (list, key) { return list.reduce(function (n, c) { return n + (c[key] || 0); }, 0); };
+    /* A judge the courts' list of vacancies has on senior status while the
+     * FJC directory still counts them active is counted senior here, as in
+     * the courts' table below, and every figure that holds one says so
+     * (rule 82): the first ladder credited 61 active judges in the Sixth
+     * Circuit's district courts to "the directory", which counts 62. */
+    var listedNote = function (n) {
+      return n ? "the FJC directory counts " + n + " more active, senior by the courts’ list of vacancies" : "";
+    };
+    var unlisted = function (list) {
+      var n = list.filter(function (c) { return !c.listed; }).length;
+      return n ? "not counting the " + (n === 1 ? "territorial court’s" : plural(n, "territorial court") + "’") +
+        " Article IV judges, outside the directory" : "";
+    };
+    var aside = function () {
+      var said = Array.prototype.filter.call(arguments, Boolean);
+      return said.length ? " (" + said.join("; ") + ")" : "";
+    };
     var rung = function (c, label, facts) {
       var open = gaps(c);
       return '<a class="cl-node" href="' + KYC.escapeAttr("../courts/" + c.id + ".html") + '">' +
@@ -218,38 +244,47 @@
         '<span class="cl-facts">' + esc(facts) + "</span>" +
         (open ? '<span class="cl-open">' + esc(open) + "</span>" : "") + "</a>";
     };
+    var vacant = function (list, now) {
+      var open = sum(list, "vacancies");
+      var future = sum(list, "future");
+      return [open ? plural(open, "vacancy", "vacancies") + (now ? " now" : "") : "",
+        future ? future + " announced" : ""].filter(Boolean).join(", ");
+    };
     var circuitCards = appeals.map(function (c) {
       var mine = below(c);
-      var label = shortName(c).replace(/ Circuit$/, "");
       var listed = mine.filter(function (x) { return x.listed; });
-      var open = sum(mine, "vacancies");
+      var open = vacant(mine);
       return '<li class="cl-circuit">' +
-        rung(c, label, c.active + " active, " + c.senior + " senior") +
+        rung(c, shortName(c), c.active + " active, " + c.senior + " senior" + aside(listedNote(c.listedSenior))) +
         (mine.length
           ? '<a class="cl-sub" href="#districts-' + KYC.escapeAttr(c.id) + '">' +
-            esc(plural(mine.length, "district court")) + ": " +
-            esc(sum(listed, "active") + " active" + (listed.length < mine.length ? " in the directory" : "") +
-              (open ? ", " + plural(open, "vacancy", "vacancies") : "")) + "</a>"
+            esc(plural(mine.length, "district court") + ": " + sum(listed, "active") + " active" +
+              (open ? ", " + open : "") + aside(listedNote(sum(listed, "listedSenior")), unlisted(mine))) + "</a>"
           : c.circuit === "Federal"
-            ? '<span class="cl-sub cl-note">No district courts: its appeals come from the ' +
-              "Court of International Trade and national bodies</span>" : "") + "</li>";
+            // Checked against the statute (rule 48): the Federal Circuit
+            // hears every district court's patent appeals, so "no district
+            // courts" alone was wrong (PR #111 review).
+            ? '<span class="cl-sub cl-note">No district courts of its own: it hears appeals by subject, ' +
+              "among them patent cases from every district court, and appeals from the Court of " +
+              "International Trade, the Court of Federal Claims and some federal agencies (" +
+              '<a href="https://www.law.cornell.edu/uscode/text/28/1295" target="_blank" ' +
+              'rel="noopener noreferrer">28 U.S.C. 1295</a>)</span>' : "") + "</li>";
     }).join("");
-    var openTrial = sum(trials, "vacancies");
+    var listedTrials = trials.filter(function (c) { return c.listed; });
+    var openTrial = vacant(trials, true);
     return '<figure class="court-ladder">' +
-      "<figcaption>How the federal courts are arranged, with each court’s judges as the " +
-      "directory counts them and its vacancies as the courts list them. Each box opens " +
-      "that court’s page.</figcaption>" +
+      "<figcaption>How the federal courts are arranged. Judges are counted from the Federal " +
+      "Judicial Center’s directory, except that a judge the courts’ list of vacancies has on " +
+      "senior status is counted senior, and said so; vacancies are the courts’ list’s. Each box " +
+      "opens that court’s page.</figcaption>" +
       '<div class="cl-top">' + rung(top, "Supreme Court", top.active + " justices") + "</div>" +
-      '<p class="cl-step" aria-hidden="true">hears appeals from</p>' +
+      '<p class="cl-step" aria-hidden="true">hears appeals from the ' +
+        esc(plural(appeals.length, "court of appeals", "courts of appeals")) + "</p>" +
       '<ol class="cl-circuits">' + circuitCards + "</ol>" +
       '<p class="cl-step" aria-hidden="true">each hears appeals from the district courts under it</p>' +
       '<p class="cl-total">' + esc(plural(trials.length, "district court") + " in all: " +
-        sum(trials.filter(function (c) { return c.listed; }), "active") + " active judges in the directory" +
-        (openTrial ? ", " + plural(openTrial, "vacancy", "vacancies") + " now" : "")) +
-      (function (n) {
-        return n ? esc(" (the " + plural(n, "territorial court") + "’ judges serve under Article IV, " +
-          "outside the directory, and are not counted here)") : "";
-      })(trials.filter(function (c) { return !c.listed; }).length) + ".</p>" +
+        sum(listedTrials, "active") + " active judges" + (openTrial ? ", " + openTrial : "") +
+        aside(listedNote(sum(listedTrials, "listedSenior")), unlisted(trials))) + ".</p>" +
       "</figure>";
   }
 

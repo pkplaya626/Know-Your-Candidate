@@ -582,15 +582,17 @@
           '<button type="button" data-layout="map" aria-pressed="' + String(!squares) + '">A map</button>' +
           '<button type="button" data-layout="tiles" aria-pressed="' + String(squares) +
           '">One square per seat</button></div></div>' : "") +
-      // On a phone, the one-line form: the map stays near the first screen.
+      // The one-line form at every width: the sidebar carries the full key,
+      // and the full bar here took the map 110-150px on a laptop (PR #111
+      // review), pushing Vermont and Connecticut into callouts.
       KYC.balanceBar(chamber, { title: chamber === "senate" ? "The Senate now" : "The House now",
-        compact: !!(global.matchMedia && global.matchMedia("(max-width: 1000px)").matches) });
+        compact: true });
     stage.hidden = squares;
     tiles.hidden = !squares;
     if (squares) {
       tiles.innerHTML = KYC.houseTiles({ selected: selected }) +
-        '<p class="bb-note">Each square is a voting seat, coloured by who sits for it, placed ' +
-        "roughly where its district lies within its state. Pick a state for its delegation.</p>";
+        '<p class="bb-note">Each square is a voting seat, coloured by who sits for it, in bands ' +
+        "from its state’s north to its south. Pick a state for its delegation.</p>";
       // The key says what the squares are, in place of the map's ramp.
       doc.getElementById("mapLegend").innerHTML = KYC.houseTilesKey();
     } else {

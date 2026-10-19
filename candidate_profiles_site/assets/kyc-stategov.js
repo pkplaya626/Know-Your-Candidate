@@ -742,7 +742,7 @@
       chamberBar(c) + '<span class="glance-facts">' + pills(c) +
       (c.seats - c.listed > 0 ? ' <span class="faint">· ' + (c.seats - c.listed) + " nobody listed</span>" : "") +
       (up && up.up ? ' <span class="faint">· ' + (up.up === up.seats ? "all" : up.up + " of " + up.seats) +
-        " seats on the Nov 3, 2026 ballot</span>" : "") + "</span></li>";
+        " regular-election seats on the Nov 3, 2026 ballot</span>" : "") + "</span></li>";
   }
 
   function glanceCourt(court) {
@@ -770,10 +770,15 @@
       '<p class="glance-label">Governor' + (govUp && govUp.up
         ? ' <span class="glance-mark">This office ' + (after() ? "was" : "is") +
           " on the Nov 3, 2026 ballot</span>" : "") + "</p>" +
+      // Whether the holder is running, in the section's own words (rule
+      // 79): the mark above a governor's name with nothing beside it read
+      // as "Brian Kemp is running" (PR #111 review).
+      openSeat(code, "governor") +
       '<p class="glance-who">' + KYC.escapeHtml(gov.name) + ' <span class="party-' +
       KYC.escapeAttr(String(gov.partyKey || "i").toLowerCase()) + '">(' + KYC.escapeHtml(gov.party) +
       ")</span></p>" +
-      (s.lt || s.ag || s.sos ? '<p class="faint">Statewide officers below.</p>' : "") + "</div>";
+      (s.lt || s.ag || s.sos ? '<p class="faint">' + (s.territory ? "Territorial" : "Statewide") +
+        " officers below.</p>" : "") + "</div>";
     var leg = '<div class="glance-box"><p class="glance-kind">Legislature</p>' + (s.upper
       ? '<ul class="glance-list">' + glanceChamber(s.upper, code, "upper") +
         (s.lower ? glanceChamber(s.lower, code, "lower") : "") + "</ul>" +

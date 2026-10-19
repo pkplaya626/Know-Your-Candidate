@@ -61,6 +61,38 @@ class TestBlocks(unittest.TestCase):
         self.assertTrue(any("overlap" in p for p in problems))
         self.assertTrue(any("2 squares for 3 seats" in p for p in problems))
 
+    def test_check_measures_a_narrow_block_by_the_slot_it_is_centred_in(self):
+        # A one-seat block sits in the middle of a two-square slot, so its x
+        # is half a square right of the slot's edge (PR #111 review): the
+        # first check measured from x and missed an overlap on the left.
+        one = {"cols": 1, "rows": 1, "cells": {"0": [0, 0]}}
+        left = {"states": {
+            "AA": {"x": 0, "y": 2, "cols": 2, "rows": 1, "cells": {"1": [0, 0], "2": [1, 0]}},
+            "BB": dict(one, x=2.3, y=2),  # its slot starts at 1.8, inside AA's 0-2
+        }}
+        self.assertTrue(any("overlap" in p for p in tiles.check(left)))
+        clear = {"states": {
+            "AA": {"x": 0, "y": 2, "cols": 2, "rows": 1, "cells": {"1": [0, 0], "2": [1, 0]}},
+            "BB": dict(one, x=2.6, y=2),  # slot 2.1-4.1
+            "CC": dict(one, x=4.5, y=2),  # slot 4.0-6.0, overlapping BB's
+        }}
+        problems = tiles.check(clear)
+        self.assertFalse(any("AA and BB" in p for p in problems))
+        self.assertTrue(any("BB and CC" in p for p in problems))
+        self.assertEqual(tiles.slot_span(one | {"x": 2.5}), (2.0, 4.0))
+
+    def test_the_layout_says_the_gap_the_page_widens_each_button_by(self):
+        layout = tiles.house(ROOT)
+        self.assertEqual(layout["gap"], tiles.GAP)
+        # Each block's slot widened by half the gap either side still
+        # touches no neighbour's in its row.
+        for a, p in layout["states"].items():
+            for b, q in layout["states"].items():
+                if a < b and p["y"] == q["y"]:
+                    (pl, pr), (ql, qr) = tiles.slot_span(p), tiles.slot_span(q)
+                    g = tiles.GAP / 2
+                    self.assertFalse(pl - g < qr + g - 1e-9 and ql - g < pr + g - 1e-9, (a, b))
+
 
 class TestHouseLayout(unittest.TestCase):
     @classmethod
