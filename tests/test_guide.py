@@ -102,7 +102,8 @@ class TestNavigation(unittest.TestCase):
         html = pages.render_counties_index("", {"year": "2022", "states": {
             "CT": {"county": None, "municipal": 30, "township": 149, "school": 17,
                    "special": 336, "total": 532}}})
-        row = re.search(r"Connecticut</a></th>(.*?)</tr>", html).group(1)
+        # The state's cell holds its bar of kinds (VISUALS-32) after its name.
+        row = re.search(r"Connecticut</a>.*?</th>(.*?)</tr>", html).group(1)
         self.assertIn('<td class="faint" title="No county governments.">none<sup>', row)
         self.assertNotIn("<td>0</td>", row)
         # And says why, in a note under the table the cell links to.

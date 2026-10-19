@@ -67,7 +67,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (2357 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (2410 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -2535,6 +2535,26 @@ rather than reading 433 as a full chamber.
 They used to be literal text in both pages — `53 R | 47 D/I`, `35`, `435` —
 with a copy-pasted counting function per page and nothing tying either to the
 rosters they described.
+
+## Charts
+
+Every chart draws a figure the build already counts, as boxes and page text
+(never SVG text, rule 46), coloured from the theme's tokens: a party's colour
+only for who holds a seat, `--cat-*` for kinds that are not parties, and one
+neutral ink for judges, races and navigation (audit 2026-10-17).
+
+| Chart | Where | From |
+|---|---|---|
+| Balance of power: each chamber as one bar, Republicans from the left and Democrats from the right, the Senate seats on the 2026 ballot hatched in their holder's colour, a tick at half | every sidebar; above the map in its views of Congress | `kycBuildMeta.senate` / `.house`; `senate.up` (seated senators in a 2026 race's seat, by state and class; sent only while the cycle is a campaign) |
+| The House, one square per voting seat, each state a button | the map's House view, "One square per seat" (`#/?mode=house&layout=tiles`) | `kycBuildMeta.houseTiles`, laid out by `kyc/tiles.py` from the district maps' label points: north to south, then west to east, within each state's block; `cells2026` for a redrawn state, used once the Congress the 2026 election chose sits |
+| A state's House races as squares laid out as the districts lie | a state page's 2026 races, with four or more districts | `houseTiles` (the 2026 plan) and `kycRaces` |
+| The states as a map-like grid of links, a dot where a Senate seat is on the 2026 ballot | States & territories | `kycBuildMeta.stateGrid` (`tiles.STATE_GRID`) |
+| A state's government at a glance: governor, each chamber's seats, the high court's size and selection (no party) | a state page's State government | `data/stategov.js` |
+| Funding sources as one bar | the profile's campaign finance | `fundingBreakdown`, of `fundingBase` or the receipts |
+| Polling averages as dots on one axis, a row per aggregator, in the market bars' candidate order | every race's markets block | `data/odds.js` |
+| The federal courts as a ladder | Federal government, the federal courts | `data/federal.js` |
+| A court's active bench by year commissioned, a row per appointing President | each federal court's page | `data/judiciary/<court>.js` |
+| Local governments by kind, a Census "X" said as "None" under the bar (rule 49) | Counties & local governments | `census_governments.json` (`pages.local_bar`) |
 
 ## Validation
 

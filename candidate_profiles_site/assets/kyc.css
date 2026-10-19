@@ -4590,8 +4590,10 @@ button.local-county-link {
 .ht-d { background: var(--party-d); }
 .ht-i { background: var(--party-i); }
 .ht-vacant { background: transparent; box-shadow: inset 0 0 0 1px var(--text-muted); }
-.ht-state:hover .ht-code,
 .ht-state.is-selected .ht-code { color: var(--text); text-decoration: underline; }
+@media (hover: hover) {
+  .ht-state:hover .ht-code { color: var(--text); text-decoration: underline; }
+}
 .ht-state.is-selected .ht-block { outline: 2px solid var(--text); outline-offset: 2px; }
 .ht-state:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
 .map-legend .swatch.ht-vacant { background: transparent; border-color: var(--text-muted); }
@@ -4622,8 +4624,10 @@ button.local-county-link {
   font-weight: 700;
   text-decoration: none;
 }
-.dt-seat:hover,
 .dt-seat:focus-visible { border-color: var(--accent); background: var(--surface-3); }
+@media (hover: hover) {
+  .dt-seat:hover { border-color: var(--accent); background: var(--surface-3); }
+}
 
 /* The states as a grid of links (KYC.statePicker). */
 .tile-picker { margin: 0 0 var(--s-4); }
@@ -4647,8 +4651,10 @@ button.local-county-link {
   font-weight: 700;
   text-decoration: none;
 }
-.tp-tile:hover,
 .tp-tile:focus-visible { border-color: var(--accent); background: var(--surface-3); }
+@media (hover: hover) {
+  .tp-tile:hover { border-color: var(--accent); background: var(--surface-3); }
+}
 /* Under the code, never over a letter of it. */
 .tp-dot {
   position: absolute;
@@ -4727,8 +4733,10 @@ button.local-county-link {
   text-decoration: none;
   text-align: center;
 }
-.cl-node:hover,
 .cl-node:focus-visible { border-color: var(--accent); background: var(--surface-2); }
+@media (hover: hover) {
+  .cl-node:hover { border-color: var(--accent); background: var(--surface-2); }
+}
 .cl-name { font-weight: 700; font-size: var(--t-sm); }
 .cl-facts { font-size: var(--t-xs); color: var(--text-muted); }
 .cl-open { font-size: var(--t-xs); font-weight: 700; color: var(--warn-text); }

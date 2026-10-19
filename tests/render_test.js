@@ -8978,7 +8978,8 @@ async function testFederalAudit() {
       !D.querySelector('#courts .badge[title]'));
     // A court with announced vacancies only: not "None listed" (ca5).
     const announced = d.courts.find((c) => !c.vacancies && c.future);
-    const row = announced && D.querySelector('#courts a[href="../courts/' + announced.id + '.html"]').closest("tr");
+    // The court's row in its table: the ladder above links the court first.
+    const row = announced && D.querySelector('#courts tr a[href="../courts/' + announced.id + '.html"]').closest("tr");
     check("a court with only announced vacancies says so in its row", !announced ||
       (/announced/.test(row.querySelector('[data-label="Vacancies"]').textContent) &&
        !/None listed/.test(row.textContent)), row && row.textContent);
