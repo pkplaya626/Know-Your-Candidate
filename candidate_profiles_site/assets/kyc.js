@@ -2508,6 +2508,33 @@
     });
   }
 
+  /* The drawer's close, once initShell has wired it. */
+  var drawerClose = null;
+
+  /** Close the drawer on a narrow screen, if it is open, then run *then*.
+   *  Closing steps back off the history entry the drawer pushed, and a
+   *  browser restores that entry's scroll position as it does: anything
+   *  that scrolls the page (a link caught to reveal a panel on this page)
+   *  waits for that step, or the restore undoes it. */
+  function closeDrawer(then) {
+    var open = !!(doc.body && doc.body.classList.contains("sidebar-open"));
+    var stepping = open && !!(history.state && history.state.kycDrawer);
+    if (stepping && then) {
+      var done = false;
+      var run = function () {
+        if (done) return;
+        done = true;
+        global.removeEventListener("popstate", run);
+        global.setTimeout(then, 0);
+      };
+      global.addEventListener("popstate", run);
+      // A browser that never reports the step still gets there.
+      global.setTimeout(run, 400);
+    }
+    if (open && drawerClose) drawerClose();
+    if (!stepping && then) then();
+  }
+
   function initShell() {
     if (doc.body && !doc.getElementById("kyc-sprite")) {
       var holder = doc.createElement("div");
@@ -2535,6 +2562,7 @@
             (sidebar && sidebar.contains(doc.activeElement))) toggle.focus();
       }
     };
+    drawerClose = closeSidebar;
     if (toggle) {
       toggle.addEventListener("click", function () {
         if (doc.body.classList.contains("sidebar-open")) return closeSidebar();
@@ -2992,6 +3020,7 @@
     // behaviour
     createModal: createModal,
     createMenu: createMenu,
+    closeDrawer: closeDrawer,
     router: router,
     electionStatus: electionStatus,
     ageOf: ageOf,

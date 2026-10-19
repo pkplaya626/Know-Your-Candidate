@@ -3116,17 +3116,17 @@ const settle = (ms) => new Promise((r) => setTimeout(r, ms || 150));
  * of legislatures and of local governments, and Know Your Government's
  * links to what it explains. */
 async function testNavigation() {
-  const GROUPS = ["Elections 2026", "Federal", "State", "Local", "Learn"];
+  const GROUPS = ["Start here", "Elections 2026", "Federal", "State", "Local", "Learn"];
   const grid = await buildPage("index.html");
   await settle(50);
   suite("the sidebar, by level of government", () => {
     const { D, window } = grid;
     const heads = [...D.querySelectorAll(".site-nav .nav-group")].map((h) => h.textContent.trim());
-    check("five groups, from elections to learning", JSON.stringify(heads) === JSON.stringify(GROUPS),
-      heads.join(" | "));
+    check("six groups, from finding who represents you to learning",
+      JSON.stringify(heads) === JSON.stringify(GROUPS), heads.join(" | "));
     const keys = [...D.querySelectorAll(".site-nav [data-nav]")].map((a) => a.getAttribute("data-nav"));
-    check("ten places to go, About & sources last", keys.join(",") ===
-      "candidates,races,congress,executive,courts,states,legislatures,local,guide,about",
+    check("eleven places to go, the lookup first and About & sources last", keys.join(",") ===
+      "findrep,candidates,races,congress,executive,courts,states,legislatures,local,guide,about",
       keys.join(","));
     check("the grid is Candidates",
       D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav") === "candidates");
@@ -6190,6 +6190,51 @@ async function testDrawerBack() {
       "the grid was redrawn");
     check("closing it with a tap takes its entry off again", popped && shut);
     check("filters still write the address", filtered, window.location.hash);
+  });
+}
+
+/* The drawer's "Find who represents you" (PERSONA-04): every page's, to
+ * the home page's panel. On the home page itself the link is caught: the
+ * grid's router would read "#findrep" as a view and clear the filters. */
+async function testFindRepNav() {
+  const arrived = await buildPage("index.html", { hash: "#findrep" });
+  await settle(300);
+  const home = await buildPage("index.html", { hash: "#/?party=Republican" });
+  await settle(300);
+  const { window, D } = home;
+  const sentinel = D.createElement("i");
+  sentinel.id = "findrepSentinel";
+  D.getElementById("results").appendChild(sentinel);
+  D.querySelector(".sidebar-toggle").click();
+  const opened = D.body.classList.contains("sidebar-open");
+  const link = D.querySelector('.site-nav a[data-nav="findrep"]');
+  const click = new window.MouseEvent("click", { bubbles: true, cancelable: true, button: 0 });
+  link.dispatchEvent(click);
+  await settle(500);
+  const about = await buildPage("about.html");
+  const state = await buildPage("states/oh.html");
+  suite("the drawer's Find who represents you (PERSONA-04)", () => {
+    check("no page errors", arrived.errors.length === 0 && home.errors.length === 0,
+      arrived.errors.concat(home.errors).join(" | "));
+    check("it opens the list, first, on every page: the home page's panel",
+      about.D.querySelector(".site-nav a[data-nav]").getAttribute("href") === "index.html#findrep" &&
+        state.D.querySelector(".site-nav a[data-nav]").getAttribute("href") === "../index.html#findrep" &&
+        /Find who represents you/.test(link.textContent));
+    check("named as the panel is (rule 75)", link.textContent.trim() ===
+      arrived.D.querySelector("[data-findrep] .findrep-title").textContent.trim());
+    check("arriving from another page puts the reader in the ZIP code field",
+      !!arrived.D.activeElement && arrived.D.activeElement.classList.contains("findrep-zip"),
+      arrived.D.activeElement && arrived.D.activeElement.outerHTML.slice(0, 80));
+    check("and drops the fragment, so the grid does not read it as a view",
+      /^(#\/)?$/.test(arrived.window.location.hash), arrived.window.location.hash);
+    check("on the home page the link is caught, not followed", opened && click.defaultPrevented);
+    check("the drawer closes", !D.body.classList.contains("sidebar-open"));
+    check("the reader's filters and grid stay as they were",
+      /party=Republican/.test(window.location.hash) && !!D.getElementById("findrepSentinel"),
+      window.location.hash);
+    check("and the ZIP code field has the focus",
+      !!D.activeElement && D.activeElement.classList.contains("findrep-zip"),
+      D.activeElement && D.activeElement.outerHTML.slice(0, 80));
   });
 }
 
@@ -11754,6 +11799,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "redistricting") await testDistrictPages();
   if (!only || only === "redistricting") await testFindMyDistrict();
   if (!only || only === "findrep") await testFindRep();
+  if (!only || only === "findrep") await testFindRepNav();
   if (!only || only === "redistricting") await testDistrictsOnAPhone();
   if (!only || only === "links") await testInterlinks();
   if (!only || only === "links") await testNavigation();
