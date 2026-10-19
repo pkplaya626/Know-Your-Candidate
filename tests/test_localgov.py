@@ -525,6 +525,54 @@ class TestSiteCheck(unittest.TestCase):
         finally:
             shutil.rmtree(tmp)
 
+    def test_a_run_stops_itself_on_its_time_budget(self):
+        # The refresh of 2026-10-19: the check ran to its step's 45-minute
+        # limit and was killed; threads still finishing saved the cache
+        # after the next step had read it, and verify found 17 county files
+        # stale. Now no address is opened once the budget is spent, and the
+        # cache is saved once, with what was done.
+        import tempfile, shutil
+        tmp = tempfile.mkdtemp()
+        try:
+            os.makedirs(os.path.join(tmp, os.path.dirname(localsites.CACHE_PATH)))
+            sites = {f"http://{c}.org": {"checked": f"2026-01-0{i + 1}", "verdict": "ok"}
+                     for i, c in enumerate("abcde")}
+            localsites.save_cache({"sites": sites}, tmp)
+            now = [0.0]
+            looked, said = [], []
+
+            def check(url, names, gate, today):
+                looked.append(url)
+                now[0] += 60.0           # each look takes a minute
+                return {"checked": today, "verdict": "parked"}
+            real = localsites.targets
+            localsites.targets = lambda root, codes=None: {u: ["Town of X"] for u in sites}
+            try:
+                localsites.check_all(tmp, workers=1, log=said.append, check=check,
+                                     max_seconds=150, clock=lambda: now[0], refresh=True)
+            finally:
+                localsites.targets = real
+            # Opened at 0, 60 and 120 seconds; at 180 the budget is spent.
+            self.assertEqual(looked, ["http://a.org", "http://b.org", "http://c.org"])
+            saved = localsites.load_cache(tmp)["sites"]
+            self.assertEqual([u for u, e in sorted(saved.items()) if e["verdict"] == "parked"],
+                             looked)
+            self.assertEqual(saved["http://d.org"], sites["http://d.org"])
+            self.assertTrue(any("2 left for the next run" in line for line in said), said)
+        finally:
+            shutil.rmtree(tmp)
+
+    def test_the_refresh_gives_the_check_a_budget_inside_its_step(self):
+        import re
+        with open(os.path.join(ROOT, ".github", "workflows", "refresh.yml"), encoding="utf-8") as handle:
+            text = handle.read()
+        step = text[text.index("- name: Look again at local governments' listed websites"):]
+        step = step[:step.index("\n\n")]
+        budget = float(re.search(r"--max-minutes (\d+(?:\.\d+)?)", step).group(1))
+        limit = float(re.search(r"timeout-minutes: (\d+)", step).group(1))
+        # Room for the looks already open when the budget is spent.
+        self.assertLessEqual(budget, limit - 8)
+
     def test_the_build_warns_when_the_checks_grow_old(self):
         cache = {"sites": {"http://a.org": {"checked": "2026-10-17", "verdict": "ok"}}}
         self.assertFalse([p for p in localsites.problems(cache, {"http://a.org"}, today="2026-12-01")

@@ -34,7 +34,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… census` | Count each state's local governments from the Census of Governments (`--check` reads the cache) |
 | `… statelegs` | Every state legislator from Open States, matched to the district maps, each portrait checked (`--check` re-matches the cache; `--images-only` checks the portraits again without refetching; `--no-images` skips them) |
 | `… localgov` | Every local government from the Census listing, checked against the published counts |
-| `… localgov --check-sites` | Open every website the listing gives a local government - many hosts at once, one request at a time per host - and record what each is now in `data/local_sites.json` (hand-editable; a stopped run resumes; `--recheck VERDICT` looks again at one kind, `--states`, `--limit`) |
+| `… localgov --check-sites` | Open every website the listing gives a local government - many hosts at once, one request at a time per host - and record what each is now in `data/local_sites.json` (hand-editable; a stopped run resumes; `--recheck VERDICT` looks again at one kind, `--states`, `--limit`, and `--max-minutes`, a time budget after which it opens nothing new, saves and stops) |
 | `… executives` | Every governor from the NGA, and NCSL's count of each legislature's parties (`--check` reports the caches) |
 | `… officers` | Every lieutenant governor (NLGA) and secretary of state (NASS), cross-checked where the rosters overlap |
 | `… federal` | The President, the Vice President and the Cabinet: who holds each office, from the White House's pages, each office's own page and the Senate's roll-call votes (`--check` reports the cache) |
