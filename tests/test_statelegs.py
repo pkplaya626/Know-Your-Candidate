@@ -397,10 +397,36 @@ class TestSeatsUp(unittest.TestCase):
         self.assertIsNone(legislature.term_years("MN", "upper"))     # a 2-4-4 cycle
         self.assertIsNone(legislature.term_years("TX", "upper"))     # the record does not say
 
+    def test_a_seat_in_each_district_and_seats_in_each_of_a_parity(self):
+        # PR #115 review: these records name the districts, and the Your
+        # ballot page called a North Dakota House reader's seat unknown.
+        # West Virginia: "one of the two seats in each of the 17 districts".
+        wv = legislature.seats_up("WV", "upper", self.districts([str(n) for n in range(1, 18)]))
+        self.assertEqual(len(wv), 17)
+        self.assertTrue(all(wv.values()))
+        # North Dakota's House: "2 seats in each of the 24 odd-numbered
+        # districts", over a map whose even District 4 is 4A and 4B.
+        names = [str(n) for n in range(1, 48) if n != 4] + ["4A", "4B"]
+        nd = legislature.seats_up("ND", "lower", self.districts(names))
+        up = {self.districts(names)[i]["name"] for i, v in nd.items() if v}
+        self.assertEqual(up, {str(n) for n in range(1, 48, 2)})
+        self.assertEqual(len(nd), 48)
+        # An odd subdistrict holds part of its number's seats: nothing.
+        odd = [str(n) for n in range(1, 48) if n != 9] + ["9A", "9B"]
+        self.assertEqual(legislature.seats_up("ND", "lower", self.districts(odd)), {})
+        # And the words a district's seats take.
+        self.assertEqual(legislature.district_seats("WV", "upper", self.districts(
+            [str(n) for n in range(1, 18)])), "one-of-several")
+        self.assertIsNone(legislature.district_seats("ND", "lower", self.districts(names)))
+        self.assertEqual(legislature.district_seats("ND", "upper", self.districts(
+            [str(n) for n in range(1, 48)])), "one")
+        self.assertEqual(legislature.district_seats("AZ", "lower", self.districts(
+            [str(n) for n in range(1, 31)])), "several")
+
     def test_words_that_do_not_resolve_mark_nothing(self):
-        # "one of the two seats in each of the 17 districts"; "25 of 50".
-        self.assertEqual(legislature.seats_up("WV", "upper", self.districts(
-            [str(n) for n in range(1, 18)])), {})
+        # "25 of 50"; "17 seats, as the State Board ... lists the offices".
+        self.assertEqual(legislature.seats_up("AR", "upper", self.districts(
+            [str(n) for n in range(1, 36)])), {})
         self.assertEqual(legislature.seats_up("MT", "upper", self.districts(
             [str(n) for n in range(1, 51)])), {})
         # A list naming a district the map does not have.

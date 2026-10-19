@@ -3077,6 +3077,13 @@ a.badge-link {
   background: var(--surface-1);
 }
 .ballot-result { display: grid; gap: var(--s-5); }
+/* A ZIP code in the address: the answer's room held from first paint
+ * (kyc.js marks it), so the footer does not jump when it is drawn. */
+html.has-zip .ballot-result[hidden] { display: grid !important; }
+html.has-zip .ballot-result { min-height: 100vh; }
+/* A share in a sentence flows with it; the column width is the lookup
+ * list's. */
+.ballot-share .findrep-share { display: inline; min-width: 0; }
 .ballot-state { display: grid; gap: var(--s-4); }
 .ballot-place { margin: 0; font-size: var(--t-xl); font-weight: 700; overflow-wrap: anywhere; }
 .ballot-when { margin: 0; font-weight: 600; }
@@ -3117,6 +3124,7 @@ a.badge-link {
 .ballot-offlist li + li { margin-top: var(--s-1); }
 .ballot-more { margin: 0; font-size: var(--t-sm); }
 .ballot-actions { margin: 0; }
+.ballot-state > .ballot-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
 .ballot-print-row { margin: 0; }
 .ballot-contest .gov-candidates { margin-top: 0; }
 @media (max-width: 999px) {

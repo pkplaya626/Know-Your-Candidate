@@ -2098,7 +2098,7 @@ def render_ballot_page(host):
         '                <section class="state-section findrep ballot-ask" id="ballotAsk" data-ballot-ask></section>',
         '                <div class="ballot-result" id="ballotResult" role="status" aria-live="polite" hidden></div>',
         "                <noscript><p>This page looks your ZIP code up in your browser, and needs",
-        "                    JavaScript to do it. Each state's page lists its races without it.</p></noscript>",
+        "                    JavaScript to do it, as the rest of this site does.</p></noscript>",
         "            </div>",
     ])
     return render_page(

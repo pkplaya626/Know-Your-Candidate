@@ -11781,16 +11781,27 @@ async function testBallot() {
       const id = c.li.id.replace(/^contest-/, "");
       const section = D2.getElementById("race-" + id);
       if (!section) return differ.push(id + ": no section");
-      const theirs = [...section.querySelectorAll(":scope > .card-grid .card-name")].map((n) => n.textContent);
-      const ours = [...c.li.querySelectorAll(".ballot-person .link-button")].map((n) => n.textContent);
-      if (JSON.stringify(theirs) !== JSON.stringify(ours)) differ.push(id + ": " + ours + " / " + theirs);
+      // The ballot lists those on it first and those whose ballot status
+      // is not known apart (PR #115 review), each in the section's order.
+      const theirCards = [...section.querySelectorAll(":scope > .card-grid .card")];
+      const theirs = theirCards.map((n) => n.querySelector(".card-name").textContent);
+      const listed = [...c.li.querySelectorAll(".ballot-people:not(.ballot-unsure) .ballot-person .link-button")]
+        .map((n) => n.textContent);
+      const unsure = [...c.li.querySelectorAll(".ballot-unsure .ballot-person .link-button")].map((n) => n.textContent);
+      const ours = listed.concat(unsure);
+      const expect = theirs.filter((n) => listed.includes(n)).concat(theirs.filter((n) => unsure.includes(n)));
+      if (JSON.stringify(expect) !== JSON.stringify(ours) || ours.length !== theirs.length) {
+        differ.push(id + ": " + ours + " / " + theirs);
+      }
       const head = section.querySelector(".race-head");
       if (JSON.stringify(badgeWords(head)) !== JSON.stringify(badgeWords(c.li.querySelector(".ballot-badges")))) {
         differ.push(id + " badges: " + badgeWords(c.li.querySelector(".ballot-badges")) + " / " + badgeWords(head));
       }
-      const theirStatus = [...section.querySelectorAll(":scope > .card-grid .card")].map((n) =>
-        badgeWords(n).join("+"));
-      const ourStatus = [...c.li.querySelectorAll(".ballot-person")].map((n) => badgeWords(n).join("+"));
+      const statusOf = {};
+      theirCards.forEach((n) => { statusOf[n.querySelector(".card-name").textContent] = badgeWords(n).join("+"); });
+      const theirStatus = ours.map((n) => statusOf[n]);
+      const ourStatus = [...c.li.querySelectorAll(".ballot-people:not(.ballot-unsure) .ballot-person, .ballot-unsure .ballot-person")]
+        .map((n) => badgeWords(n).join("+"));
       if (JSON.stringify(theirStatus) !== JSON.stringify(ourStatus)) differ.push(id + " status: " + ourStatus + " / " + theirStatus);
     });
     check("each race lists the race section's people, in its order, with its status words and counts",
@@ -11956,6 +11967,163 @@ async function testBallot() {
     check("every federal race says its result or that none has been read",
       contestsOf(after.out).filter((c) => /ballot-federal/.test(c.li.className) && !/ballot-off/.test(c.li.className))
         .every((c) => /Won by|Going to a runoff|Awaiting result/.test(c.li.querySelector(".ballot-badges").textContent)));
+  });
+
+  // PR #115 review: every race's card, in every state, lists under "On your
+  // ballot" only the people the lookup's answer lists (KYC.stillRunning);
+  // a filer whose ballot status is not known after the primary is named
+  // apart, and a holder off the ballot by their own status, never among
+  // those who "lost the primary, withdrew, or were not on the primary
+  // ballot".
+  suite("Your ballot: every race lists only who is on it, the rest apart", () => {
+    const { window } = tx;
+    const KYC = window.KYC;
+    const D = window.document;
+    const bad = [], holders = [], unsureSeen = [], lookup = [];
+    const codes = [...new Set(window.kycRaces.map((r) => r.state))];
+    codes.forEach((code) => {
+      const districts = window.kycRaces.filter((r) => r.state === code && r.chamber === "House")
+        .map((r) => r.district);
+      const box = D.createElement("div");
+      box.innerHTML = KYC.ballot.stateBallot(code, { head: code, race: districts, upper: [], lower: [], notes: [] });
+      box.querySelectorAll(".ballot-contest[id^='contest-']").forEach((li) => {
+        const race = window.kycRaces.find((r) => "contest-" + r.id === li.id);
+        if (!race) return;
+        li.querySelectorAll(".ballot-people:not(.ballot-unsure) .ballot-person [data-id]").forEach((b) => {
+          const p = KYC.byId(b.getAttribute("data-id"));
+          if (!p || !KYC.stillRunning(race, p)) bad.push(race.id + ": " + b.textContent);
+        });
+        li.querySelectorAll(".ballot-unsure .ballot-person [data-id]").forEach((b) => {
+          unsureSeen.push(race.id);
+          const p = KYC.byId(b.getAttribute("data-id"));
+          if (!p || KYC.stillRunning(race, p) || KYC.offBallot(p.raceStatus)) bad.push(race.id + " (apart): " + b.textContent);
+        });
+        // A holder off this ballot, not running elsewhere, is named with
+        // their status.
+        race.incumbentIds.map(KYC.byId).filter(Boolean).forEach((p) => {
+          if (p.isCandidate || !KYC.offBallot(p.raceStatus)) return;
+          if (p.contestRaceId && p.contestRaceId !== race.id && p.contestLabel) return;
+          const line = li.querySelector('.ballot-holder [data-id="' + p.id + '"]');
+          if (!line || !line.parentNode.querySelector(".badge")) holders.push(race.id + ": " + p.name);
+        });
+        // The count of people out never counts a holder named above it.
+        const outLine = (li.textContent.match(/\d+( other)? (?:person|people) no longer in this race/) || [""])[0];
+        if (outLine && li.querySelector(".ballot-holder") && !/ other /.test(outLine)) {
+          bad.push(race.id + ": holder counted among those out");
+        }
+        // The same people as the lookup's answer for this race.
+        const ids = [...li.querySelectorAll(".ballot-people:not(.ballot-unsure) .ballot-person [data-id]")]
+          .map((b) => b.getAttribute("data-id")).sort();
+        const theirs = KYC.findRep.running(race).map((p) => p.id).sort();
+        if (JSON.stringify(ids) !== JSON.stringify(theirs)) lookup.push(race.id + ": " + ids + " / " + theirs);
+      });
+    });
+    check("each person under 'On your ballot' is on it, by the lookup's own test", bad.length === 0,
+      bad.slice(0, 8).join(" | "));
+    check("each seat's holder off the ballot is named with their own status", holders.length === 0,
+      holders.slice(0, 8).join(" | "));
+    check("each race lists the same people as the lookup's answer for it", lookup.length === 0,
+      lookup.slice(0, 6).join(" | "));
+    check("(a filer whose status is not known exists to test with, or none does)",
+      unsureSeen.length > 0 || !oldCongressSits(window));
+  });
+
+  // PR #115 review: West Virginia's Senate and North Dakota's House name
+  // the districts up; Virginia's legislature is not up at all.
+  const nd = await ballotFor("#/?zip=58501");
+  const wv = await ballotFor("#/?zip=25301");
+  const va = await ballotFor("#/?zip=23219");
+  const az = await ballotFor("#/?zip=85004");
+  const mt = await ballotFor("#/?zip=59601");
+  suite("Your ballot: each legislative seat, in the record's words", () => {
+    const legOf = (b) => contestsOf(b.out).filter((c) => /ballot-legislature/.test(c.li.className));
+    const ndHouse = legOf(nd).find((c) => /House/.test(c.office));
+    check("North Dakota's House: whether the seat is up, never 'not known'",
+      !!ndHouse && !/not known here/.test(ndHouse.li.textContent) &&
+      /(on the Nov 3, 2026 ballot|no regular election in 2026|not up for regular election)/.test(ndHouse.li.textContent),
+      ndHouse && ndHouse.li.textContent.slice(0, 300));
+    const wvSenate = legOf(wv).find((c) => /Senate/.test(c.office));
+    check("West Virginia's Senate: one of each district's seats is up",
+      !!wvSenate && /One of this district's seats is on the Nov 3, 2026 ballot|special election/.test(wvSenate.li.textContent) &&
+      !/not known here/.test(wvSenate.li.textContent), wvSenate && wvSenate.li.textContent.slice(0, 300));
+    const azHouse = legOf(az).find((c) => /House/.test(c.office));
+    check("Arizona's House, two members a district: 'this district's seats', never 'this seat'",
+      !!azHouse && /This district's seats are on the Nov 3, 2026 ballot/.test(azHouse.li.textContent) &&
+      !/This seat is/.test(azHouse.li.textContent), azHouse && azHouse.li.textContent.slice(0, 300));
+    const mtSenate = legOf(mt).find((c) => /Senate/.test(c.office));
+    check("Montana's Senate: not known on each row, the chamber's count said once, the gap this site's",
+      !!mtSenate && [...mtSenate.li.querySelectorAll(".ballot-seat-row")].every((r) =>
+        /is not known here/.test(r.textContent) && !/seats are on the Nov 3/.test(r.textContent)) &&
+        (mtSenate.li.textContent.match(/of the 50 seats are on the Nov 3, 2026 ballot/g) || []).length === 1 &&
+        /This site's record of the 2026 ballot gives how many/.test(mtSenate.li.textContent) &&
+        !/The state's record gives how many/.test(mtSenate.li.textContent) && !/\( |\s\)/.test(mtSenate.li.textContent),
+      mtSenate && mtSenate.li.textContent.slice(0, 400));
+    const vaLeg = legOf(va);
+    check("Virginia's legislature, not up: drawn as off this ballot, and out of the order line",
+      vaLeg.length > 0 && vaLeg.every((c) => /ballot-off/.test(c.li.className)) &&
+      !/then the state legislature/.test(va.text), va.text.match(/Congress first[^.]*\./));
+    check("a chamber with a seat up is a contest, not drawn as off it",
+      legOf(az).every((c) => !/ballot-off/.test(c.li.className)) && /then the state legislature/.test(az.text));
+  });
+
+  suite("Your ballot: a statewide office's holder is named as the holder", () => {
+    const { window } = az;
+    const sg = window.KYC.stategov;
+    const states = window.kycStateGov.states;
+    const missed = [];
+    let seen = 0;
+    Object.keys(states).forEach((code) => {
+      ["governor", "lt", "ag", "sos"].forEach((k) => {
+        const item = sg.ballotOf(code) && sg.ballotOf(code).offices[k];
+        const status = item && item.up && item.holderStatus;
+        if (!status || !status.holder || status.text.indexOf(status.holder) === -1) return;
+        seen += 1;
+        const line = sg.openSeat(code, k, { role: true });
+        if (!/[Tt]he holder, /.test(line) || /Open seat: The/.test(line)) missed.push(code + " " + k + ": " + line);
+      });
+    });
+    check("on the ballot page, every holder line says who the holder is", seen > 0 && missed.length === 0,
+      missed.slice(0, 4).join(" | "));
+    const gov = contestsOf(az.out).find((c) => c.office === "Governor");
+    const st = states.AZ.ballot2026.offices.governor.holderStatus;
+    check("Arizona's governor card", !gov || !st || !st.holder ||
+      gov.li.textContent.indexOf("he holder, " + st.holder + ",") !== -1, gov && gov.li.textContent.slice(0, 300));
+  });
+
+  suite("Your ballot: the answer's room is held, and let go when it is drawn", () => {
+    check("kyc.js marks an address with a ZIP code before first paint",
+      /classList\.add\("has-zip"\)/.test(fs.readFileSync(path.join(SITE, "assets", "kyc.js"), "utf8")));
+    check("the stylesheet holds the room", /html\.has-zip \.ballot-result \{ min-height/.test(
+      fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8")));
+    check("and the drawn answer lets it go", !az.window.document.documentElement.classList.contains("has-zip"));
+    check("the ways to an exact answer on a row of their own, out of the sentence",
+      !!tx.out.querySelector(".ballot-state > .ballot-actions [data-ballot-locate]") &&
+      !tx.out.querySelector(".findrep-note [data-ballot-locate]"));
+  });
+
+  const guam = gu;
+  suite("Your ballot: Guam's sample ballot, said once", () => {
+    check("never 'links no sample ballot' over a list that is one",
+      !/This site links no sample ballot/.test(guam.text) &&
+      (!/sample ballot/.test((contestsOf(guam.out).find((c) => c.office === "Governor") || { li: { textContent: "" } }).li.textContent) ||
+        /the candidate lists above cite/.test(guam.text)), (guam.text.match(/.{60}no sample ballot.{80}/) || [""])[0]);
+  });
+
+  const azAfter = await ballotFor("#/?zip=85004", { now: "2026-11-05T12:00:00" });
+  const prAfter = await ballotFor("#/?zip=00601", { now: "2026-11-05T12:00:00" });
+  suite("Your ballot: after Election Day, every line in the past tense", () => {
+    check("'Who was on the ballot for this seat is', never '... are'",
+      /Who was on the ballot for (this seat|these seats|this district) is not listed here/.test(azAfter.text) &&
+      !/Who was on the ballot for [a-z' ]+ are not listed/.test(azAfter.text), (azAfter.text.match(/Who was on.{60}/) || [""])[0]);
+    check("the unlisted contests in the past tense",
+      /Also on the ballot, not listed here/.test(azAfter.text) && /may also have held/.test(azAfter.text) &&
+      !/may also hold/.test(azAfter.text) && !/Also on your ballot/.test(azAfter.text));
+    check("the order line in the past tense", /may have listed them in another order/.test(azAfter.text));
+    check("Puerto Rico keeps its no-election line under a neutral heading",
+      /Puerto Rico in 2026/.test(prAfter.text) && !/Key dates in Puerto Rico/.test(prAfter.text) &&
+      (prAfter.out.querySelector(".ballot-dates").textContent.match(/No election is held in Puerto Rico/) || []).length === 1 &&
+      !/What was on the ballot/.test(prAfter.text) && /The offices this site covers/.test(prAfter.text),
+      prAfter.text.slice(0, 300));
   });
 
   // The ways in: the lookup's answer, each state's voting block, the home page.

@@ -552,7 +552,7 @@ def write_lookup_index(payload, root="."):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     text = (
         _BANNER.format(source="lookup_maps/*.json, data/lookup/*.js, data/legislature/*.js, "
-                       "data/voting_links.json",
+                       "data/voting_links.json, data/voting_dates.json",
                        built=build_timestamp())
         + f"window.kycLookupIndex = {_json(payload)};\n"
         + 'window.kycLookupIndexMeta = {"signature":"' + signature + '"};\n'

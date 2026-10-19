@@ -832,6 +832,9 @@ def build_state(code, root=".", places=None, roster=None, control=None, fetched=
         }
         if ballot:
             out_chambers[chamber]["ballot"] = ballot
+            each = district_seats(code, chamber, found)
+            if each:
+                out_chambers[chamber]["districtSeats"] = each
         if on_special:
             # In the record's order, which is the districts' own.
             out_chambers[chamber]["specials"] = [found[i]["name"] for i in on_special]
@@ -972,10 +975,17 @@ def seats_up(code, chamber, districts):
     list ("districts A, C, E", "11 districts: 2, 8, 9") or rule ("the 20
     even-numbered districts") must name districts on this map, as many as
     the seats it says are up - a district of two seats counting twice - or
-    nothing is marked: West Virginia elects "one of the two seats in each
-    of the 17 districts" and Montana "25 of 50", which no district list
-    shows. A special election is not a regular one and is never marked;
-    the chamber's line quotes the record, specials and all."""
+    nothing is marked: Montana's "25 of 50" and Arkansas's "17 seats"
+    show no district. A special election is not a regular one and is never
+    marked; the chamber's line quotes the record, specials and all.
+
+    West Virginia's Senate elects "one of the two seats in each of the 17
+    districts", so every district has a seat up, and North Dakota's House
+    "2 seats in each of the 24 odd-numbered districts", whose map also
+    holds the even District 4 as subdistricts 4A and 4B. Both once marked
+    nothing, and the Your ballot page told a reader in North Dakota's
+    House District 2 that whether their seat was up was not known, over
+    the record that says (PR #115 review)."""
     entry = (ballot2026.STATES.get(code) or {}).get(chamber)
     if not entry or not districts:
         return {}
@@ -984,15 +994,30 @@ def seats_up(code, chamber, districts):
         return {i: False for i in districts}
     if up == total:
         return {i: True for i in districts}
-    per = total / len(districts)
+    head = re.split(r"[(;]", basis)[0]
+    each = re.search(r"\bone of the (?:two|(\d+)) seats in each of the (\d+) districts\b", head)
+    if each:
+        n, seats = int(each.group(2)), int(each.group(1) or 2)
+        if n != len(districts) or up != n or total != n * seats:
+            return {}
+        return {i: True for i in districts}
+    stated = re.search(r"\b(\d+) seats in each of\b", head)
+    per = int(stated.group(1)) if stated else total / len(districts)
     if per != int(per):
         return {}
-    head = re.split(r"[(;]", basis)[0]
     rule = re.search(r"\bthe (\d+) (even|odd)-numbered districts\b", head)
     if rule:
         parity = 0 if rule.group(2) == "even" else 1
-        chosen = {i for i, d in districts.items()
-                  if d["name"].isdigit() and int(d["name"]) % 2 == parity}
+        chosen = set()
+        for i, d in districts.items():
+            number = re.fullmatch(r"(\d+)([A-Z]?)", d["name"])
+            if not number or int(number.group(1)) % 2 != parity:
+                continue
+            if number.group(2):
+                # A subdistrict ("4A") holds some of its number's seats,
+                # how many the record does not say.
+                return {}
+            chosen.add(i)
         if len(chosen) != int(rule.group(1)):
             return {}
     else:
@@ -1012,6 +1037,34 @@ def seats_up(code, chamber, districts):
     if len(chosen) * int(per) != up:
         return {}
     return {i: i in chosen for i in districts}
+
+
+def district_seats(code, chamber, districts):
+    """How a district's seats stand on the ballot, for the words a page
+    says of one district: ``"one"`` (each district holds one seat),
+    ``"several"`` (each holds more than one, and those up are all up),
+    ``"one-of-several"`` (one of each district's seats is up: West
+    Virginia's Senate), or None where the record and the map do not say.
+    Arizona's House elects two members a district, and its page said
+    "This seat is on the Nov 3, 2026 ballot" (PR #115 review)."""
+    entry = (ballot2026.STATES.get(code) or {}).get(chamber)
+    if not entry or not districts:
+        return None
+    total, basis = entry[1], entry[3]
+    head = re.split(r"[(;]", basis)[0]
+    if re.search(r"\bone of the (?:two|\d+) seats in each of\b", head):
+        return "one-of-several"
+    stated = re.search(r"\b(\d+) seats in each of\b", head)
+    if stated:
+        # North Dakota's "2 seats in each" is of its numbered districts;
+        # its subdistricts 4A and 4B hold one each.
+        if any(re.fullmatch(r"\d+[A-Z]", d["name"]) for d in districts.values()):
+            return None
+        return "one" if stated.group(1) == "1" else "several"
+    per = total / len(districts)
+    if per != int(per):
+        return None
+    return "one" if per == 1 else "several"
 
 
 # Words in a ballot2026 record that speak of an election for the rest of a

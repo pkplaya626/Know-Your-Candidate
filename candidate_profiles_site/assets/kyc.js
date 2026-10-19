@@ -841,6 +841,19 @@
     return !!NOVEMBER[status];
   }
 
+  /** Whether *p* is among the people still in *race* as the lookup's answer
+   *  and the Your ballot page list them: once the primary has settled the
+   *  race, only those on the November ballot or through to it; before it,
+   *  anyone the primary has not removed. A filer the results do not settle
+   *  after the primary (ballotUnknown) is not counted on the ballot (rule
+   *  74), so neither view lists them as on it (PR #115 review: IL-4's card
+   *  counted 5 on the ballot over 7 names). */
+  function stillRunning(race, p) {
+    var status = p.isCandidate ? p.raceStatus : contestStatus(p);
+    if (race && race.settled) return onNovemberBallot(status) || status === "advanced";
+    return !offBallot(status);
+  }
+
   /* Portraits are resolved and checked at build time, so this runtime chain
    * is a safety net rather than the primary mechanism. */
   function handleImageFallback(img, profileId) {
@@ -2719,6 +2732,18 @@
   initTheme();
   ready(initShell);
 
+  /* An address that carries a ZIP code (the Your ballot page's
+   * "#/?zip=30303") will draw an answer once the data has loaded: marked
+   * now, before first paint, so the page holds the answer's room and the
+   * footer does not jump down under the reader when it comes (PR #115
+   * review: a layout shift of 0.15-0.28 on a throttled phone). The page's
+   * module takes the mark off when its answer is drawn. */
+  try {
+    if (/[?&]zip=\d{5}\b/.test(String(global.location.hash || "")) && doc.documentElement) {
+      doc.documentElement.classList.add("has-zip");
+    }
+  } catch (e) { /* no location: nothing to hold */ }
+
   /* ---------------------------------------------------------- offices held */
 
   /* The public offices a person has held (kyc/history.py): service in
@@ -2976,6 +3001,7 @@
     reportUrl: reportUrl,
     offBallot: offBallot,
     onNovemberBallot: onNovemberBallot,
+    stillRunning: stillRunning,
     meta: meta,
     recordPhase: recordPhase,
     portraitSrc: portraitSrc,

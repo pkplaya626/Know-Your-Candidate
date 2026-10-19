@@ -469,9 +469,7 @@
       if (!p || seen[p.id]) return false;
       seen[p.id] = true;
       if (!p.isCandidate && (p.contestRaceId || p.raceId) !== race.id) return false;
-      var status = p.isCandidate ? p.raceStatus : KYC.contestStatus(p);
-      if (race.settled) return KYC.onNovemberBallot(status) || status === "advanced";
-      return !KYC.offBallot(status);
+      return KYC.stillRunning(race, p);
     }).sort(function (a, b) {
       // Members first, then the race's own order (by surname, TRUST-15).
       return (a.isCandidate ? 1 : 0) - (b.isCandidate ? 1 : 0) ||

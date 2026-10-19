@@ -209,18 +209,31 @@
    *  re-election"), and, for any other office on the ballot, that this was
    *  not checked. One office silent beside another that said "Open seat"
    *  read as "the holder is running" (PR #94 review, rule 19). Said only
-   *  until the election: after it, the office has a winner. */
-  function openSeat(code, key) {
+   *  until the election: after it, the office has a winner.
+   *
+   *  *opts.role*: the line stands where no holder block is above it (the
+   *  Your ballot page), so it says who the holder is - "the holder, Katie
+   *  Hobbs, is among the candidates" - or one candidate stood above the
+   *  list, singled out for no stated reason (PR #115 review). */
+  function openSeat(code, key, opts) {
     var b = ballot(code);
     var item = b && b.offices[key];
     var status = item && item.up && item.holderStatus;
     if (!status || after()) return "";
+    var text = status.text;
+    var at = status.holder ? text.indexOf(status.holder) : -1;
+    var opens = status.why === "listed" || status.why === "unchecked";
+    if (opts && opts.role && at !== -1) {
+      // A sentence's first word in capitals; after "Open seat:", not.
+      var the = at === 0 && opens ? "The holder, " : "the holder, ";
+      text = text.slice(0, at) + the + status.holder + "," + text.slice(at + status.holder.length);
+    }
     if (status.why === "unchecked") {
-      return '<p class="gov-holder-status gov-holder-unchecked">' + KYC.escapeHtml(status.text) +
+      return '<p class="gov-holder-status gov-holder-unchecked">' + KYC.escapeHtml(text) +
         ".</p>";
     }
     return '<p class="gov-holder-status' + (status.why === "listed" ? "" : " gov-open-seat") + '">' +
-      (status.why === "listed" ? "" : "Open seat: ") + KYC.escapeHtml(status.text) + " (" +
+      (status.why === "listed" ? "" : "Open seat: ") + KYC.escapeHtml(text) + " (" +
       link(status.source, status.cite) + ")" +
       (status.then ? " and " + KYC.escapeHtml(status.then.text) + " (" +
         link(status.then.source, status.then.cite) + ")" : "") + ".</p>";

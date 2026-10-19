@@ -420,7 +420,10 @@
         .replace(new RegExp(",\\s*" + n + "-year terms\\b"), "")
         .replace(new RegExp("\\b" + n + "-year terms,?\\s*"), "");
     }
-    t = t.replace(/^\((.*)\)$/, "$1").replace(/\(\s*\)/g, "").replace(/^[\s,;]+|[\s,;]+$/g, "");
+    // "25 of 50 (staggered 4-year terms)" less its term is "(staggered)",
+    // never "(staggered )".
+    t = t.replace(/^\((.*)\)$/, "$1").replace(/\(\s*\)/g, "").replace(/\s+\)/g, ")")
+      .replace(/^[\s,;]+|[\s,;]+$/g, "");
     return t ? t.charAt(0).toUpperCase() + t.slice(1) + "." : "";
   }
 
@@ -469,6 +472,27 @@
    *  district the record names for a special election is on the ballot,
    *  and its panel says so first (rule 74; PR #96 review: Kansas Senate 24
    *  read "not up for regular election" over a seat on the ballot). */
+  /** The words for one district's regular election, by how its seats
+   *  stand (kyc/legislature.district_seats): Arizona's House elects two a
+   *  district, West Virginia's Senate one of each district's two, and
+   *  "This seat" fitted neither (PR #115 review). */
+  function regularWords(c, up) {
+    var past = after();
+    var is = past ? "was" : "is", are = past ? "were" : "are";
+    var kind = c.districtSeats;
+    if (kind === "one") {
+      return up ? "This seat " + is + " on the Nov 3, 2026 ballot."
+        : "This seat " + is + " not up for regular election in 2026.";
+    }
+    if (kind === "several" || (kind === "one-of-several" && !up)) {
+      return up ? "This district's seats " + are + " on the Nov 3, 2026 ballot."
+        : "This district's seats " + are + " not up for regular election in 2026.";
+    }
+    if (kind === "one-of-several") return "One of this district's seats " + is + " on the Nov 3, 2026 ballot.";
+    return up ? "This district's regular election " + is + " on the Nov 3, 2026 ballot."
+      : "This district " + (past ? "had" : "has") + " no regular election in 2026.";
+  }
+
   function seatBallot(c, id) {
     var d = c.districts[id];
     if (!c.ballot || !d || (d.up === undefined && !d.special)) return chamberBallot(c);
@@ -477,8 +501,7 @@
       ? "A special election for the rest of a term in this district " + is + " on the Nov 3, 2026 ballot." +
         (d.up === true ? " So " + is + " its regular election."
           : d.up === false ? " It " + (after() ? "had" : "has") + " no regular election in 2026." : "")
-      : d.up ? "This seat " + is + " on the Nov 3, 2026 ballot."
-      : "This seat " + is + " not up for regular election in 2026.";
+      : regularWords(c, !!d.up);
     var more = basisText(c);
     return '<p class="leg-ballot">' + KYC.escapeHtml(text) +
       (more ? ' <span class="faint">' + KYC.escapeHtml("The state's record: " + more) + "</span>" : "") +
@@ -492,8 +515,9 @@
   var UNLISTED = "special elections for vacant seats, other statewide, judicial and local " +
     "contests, and ballot measures, which this site does not list";
 
-  function dcContests() {
-    return "Your ballot may also hold the District's own contests, such as for mayor, attorney " +
+  function dcContests(past) {
+    return "Your ballot may also " + (past ? "have held" : "hold") +
+      " the District's own contests, such as for mayor, attorney " +
       "general, the D.C. Council, the State Board of Education and Advisory Neighborhood " +
       "Commissions, which this site does not list (" +
       '<a href="https://www.dcboe.org/elections/2026-elections" target="_blank" ' +
@@ -583,21 +607,48 @@
   function raceCard(code, race, title, seat, lead) {
     var all = race.incumbentIds.concat(race.candidateIds).map(KYC.byId).filter(Boolean);
     var split = KYC.cards.racePeople(race, all);
-    var running = split.running;
+    // Under "On your ballot", only the people the lookup's answer lists
+    // (KYC.stillRunning): a filer the results do not settle after the
+    // primary is not counted on the ballot (rule 74), and listed among
+    // those on it they made IL-4's card name 7 under a count of 5 (PR #115
+    // review). They are named apart, as not known.
+    var running = split.running.filter(function (p) { return KYC.stillRunning(race, p); });
+    var unsure = split.running.filter(function (p) { return running.indexOf(p) === -1; });
     var none = !running.length && !(((race.results || {}).otherNominees || []).length);
     var name = stateInfo(code).name || KYC.stateName(code);
+    // The seat's holder off this ballot is named with their own status
+    // ("Not running for re-election", rule 61), never counted among the
+    // people who "lost the primary, withdrew, or were not on the primary
+    // ballot".
+    var holders = split.out.filter(function (p) {
+      return !p.isCandidate && race.incumbentIds.indexOf(p.id) !== -1;
+    });
+    var gone = split.out.filter(function (p) { return holders.indexOf(p) === -1; });
     var body = (lead || "") +
       '<p class="ballot-badges">' + KYC.cards.raceBadges(race) + "</p>" +
       split.moved.map(KYC.cards.heldByLine).join("") +
+      holders.map(function (p) {
+        return '<p class="race-held ballot-holder">Held by <button type="button" class="link-button" ' +
+          'data-id="' + KYC.escapeAttr(p.id) + '">' + esc(p.name) + "</button> " +
+          KYC.cards.statusBadge(p) + "</p>";
+      }).join("") +
       (running.length ? '<ul class="ballot-people">' + running.map(personRow).join("") + "</ul>" : "") +
-      (none ? '<p class="ballot-note">Nobody with a profile here is in this race.</p>' : "") +
+      (none ? '<p class="ballot-note">Nobody with a profile here is ' +
+        (unsure.length ? "known to be on this ballot" : "in this race") + ".</p>" : "") +
       KYC.cards.unprofiledNote(race, "ballot-note") +
       KYC.cards.orderNote(running.length ? running : split.people, race, split.people.length) +
-      (split.out.length
-        ? '<p class="ballot-note">' + split.out.length + (split.out.length === 1 ? " person" : " people") +
+      (unsure.length
+        ? '<p class="ballot-note ballot-unsure-note">Filed for this seat; whether ' +
+          (unsure.length === 1 ? "this person is" : "these people are") + " on the " +
+          (held() ? "" : "November ") + "ballot is not known here:</p>" +
+          '<ul class="ballot-people ballot-unsure">' + unsure.map(personRow).join("") + "</ul>"
+        : "") +
+      (gone.length
+        ? '<p class="ballot-note">' + gone.length + (holders.length ? " other" : "") +
+          (gone.length === 1 ? " person" : " people") +
           " no longer in this race - lost the primary, withdrew, or " +
-          (split.out.length === 1 ? "was" : "were") + " not on the primary ballot - " +
-          (split.out.length === 1 ? "is" : "are") + " listed on the " + esc(name) + " page.</p>"
+          (gone.length === 1 ? "was" : "were") + " not on the primary ballot - " +
+          (gone.length === 1 ? "is" : "are") + " listed on the " + esc(name) + " page.</p>"
         : "") +
       '<p class="ballot-more"><a href="' + KYC.escapeAttr(KYC.stateUrl(code) + "#race-" + race.id) +
         '">This race on the ' + esc(name) + " page &rsaquo;</a></p>";
@@ -672,7 +723,7 @@
     var place = stateInfo(code).name || KYC.stateName(code);
     var cards = up.map(function (k) {
       return contest("ballot-statewide", sg.titles[k], place,
-        '<p class="gov-office">' + sg.officeMark(code, k) + "</p>" + sg.openSeat(code, k) +
+        '<p class="gov-office">' + sg.officeMark(code, k) + "</p>" + sg.openSeat(code, k, { role: true }) +
         sg.candidatesBlock(code, k), "contest-" + code + "-" + k);
     });
     var notUp = keys.filter(function (k) {
@@ -698,20 +749,24 @@
     var leg = ctx.leg;
     if (!leg) {
       if (!ctx.legFailed) return [];
-      return [contest("ballot-legislature", "State legislature", "",
+      var failed = [contest("ballot-legislature", "State legislature", "",
         '<p class="ballot-note">Its districts did not load. <a href="' +
         KYC.escapeAttr(KYC.siteRoot() + "legislature/" + code.toLowerCase() + ".html") +
         '">Find your district on the legislature page &rsaquo;</a></p>')];
+      failed.anyUp = true;   // not known, so never said to be off it
+      return failed;
     }
     var name = KYC.findRep.nameOf(code);
     var pageUrl = KYC.siteRoot() + leg.page;
     var sample = sampleLink(code);
     var past = held();
-    return ["upper", "lower"].filter(function (ch) { return leg.chambers[ch]; }).map(function (ch) {
+    var anyUp = false;
+    var cards = ["upper", "lower"].filter(function (ch) { return leg.chambers[ch]; }).map(function (ch) {
       var c = leg.chambers[ch];
       var parts = ctx[ch] || [];
       var title = name + " " + c.title;
       if (!parts.length) {
+        anyUp = true;
         return contest("ballot-legislature", title, "", '<p class="ballot-note">Your district was not ' +
           'found on its district map; <a href="' + KYC.escapeAttr(pageUrl) +
           '">pick it on the legislature page &rsaquo;</a></p>' + chamberBallot(c));
@@ -726,11 +781,18 @@
         var up = seatUp(c, id);
         if (up !== false) maybe = true;
         if (up === null) unknown = true;
+        // A district the record cannot place says so on its own row, and
+        // the chamber's count is said once, above the rows, never repeated
+        // under each (PR #115 review: Montana's Senate).
+        var says = up !== null ? seatBallot(c, id)
+          : '<p class="leg-ballot">Whether this district ' + (past ? "had" : "has") +
+            " a seat on the Nov 3, 2026 ballot is not known here.</p>";
         return '<div class="ballot-seat-row"><p class="ballot-seat-name">' +
           (share !== null ? '<span class="findrep-share">' + KYC.findRep.pct(share) + "</span> " : "") +
           '<a class="ballot-district" href="' + KYC.escapeAttr(href) + '">' +
-          esc(KYC.findRep.districtName(c, id)) + "</a></p>" + seatBallot(c, id) + "</div>";
+          esc(KYC.findRep.districtName(c, id)) + "</a></p>" + says + "</div>";
       });
+      if (maybe) anyUp = true;
       var lead = several ? (ctx.zip
         ? '<p class="ballot-share">ZIP ' + esc(ctx.zip) + " touches " + parts.length +
           " of its districts; the shares are of its land.</p>"
@@ -738,18 +800,26 @@
           "location.</p>") : "";
       var notes = [];
       if (unknown) {
-        notes.push("The state's record gives how many seats are up, not which districts' they " +
-          "are, so whether " + (several ? "each of these" : "this one") + " is on your ballot is not " +
-          "known here.");
+        // The gap is this site's, not the state's: its record of the 2026
+        // ballot gives a count, or words that name no district on the map
+        // (Montana's "25 of 50", Illinois's senate groups).
+        notes.push("This site's record of the " + cycleYear() + " ballot gives how many of the " +
+          "chamber's seats are up, not which districts' they are.");
       }
       if (maybe) {
-        notes.push((past ? "Who was on the ballot for " : "The candidates for ") +
-          (several ? "these seats" : "this seat") + " are not listed here" +
+        var what = several ? "these seats" : c.districtSeats === "one" ? "this seat" : "this district";
+        notes.push((past ? "Who was on the ballot for " + what + " is not listed here"
+          : "The candidates for " + what + " are not listed here") +
           (sample ? ": " + sample + "." : past && resultsLink(code) ? "; " + resultsLink(code) + "." : "."));
       }
-      return contest("ballot-legislature", title, "", lead + rows.join("") +
+      // A chamber with no seat of the reader's up is not a contest on this
+      // ballot, and is drawn as the other offices not on it are.
+      return contest("ballot-legislature" + (maybe ? "" : " ballot-off"), title, "", lead +
+        (unknown ? chamberBallot(c) : "") + rows.join("") +
         (notes.length ? '<p class="ballot-note">' + notes.join(" ") + "</p>" : ""));
     });
+    cards.anyUp = anyUp;
+    return cards;
   }
 
   /* -------------------------------------------- one state's whole ballot */
@@ -761,11 +831,22 @@
     var info = datesFor(all, code);
     var place = placeName(code);
     var list = keyDates(info);
+    // A place whose own record holds no election on November 3 keeps that
+    // line after the day too: from it, the dates drop every line not still
+    // news, and Puerto Rico's section was a heading over nothing (PR #115
+    // review).
+    var none = noElection(code);
+    if (none && !(info && info.lines.some(function (l) { return l.k === "none"; }))) {
+      list = '<ul class="vote-dates"><li data-kind="none">' + esc(none.t) + "." +
+        (info ? lineSources(info.mine, none) : "") + "</li></ul>";
+    }
+    var heading = none ? place.charAt(0).toUpperCase() + place.slice(1) + " in " + cycleYear()
+      : "Key dates in " + place;
     return '<section class="ballot-section ballot-dates" aria-label="' +
-      KYC.escapeAttr("Key dates in " + place) + '">' +
-      '<h3 class="ballot-heading">Key dates in ' + esc(place) + "</h3>" +
+      KYC.escapeAttr(heading) + '">' +
+      '<h3 class="ballot-heading">' + esc(heading) + "</h3>" +
       (info ? registrationLead(info, place) + calendarStrip(info) : "") + list +
-      (list ? '<p class="state-note">' + datesNote(all, info) + "</p>" : "") +
+      (list && datesNote(all, info) ? '<p class="state-note">' + datesNote(all, info) + "</p>" : "") +
       '<p class="state-links ballot-actions">' + KYC.findRep.voteLink(code) +
         (sampleLink(code, "btn") ? " " + sampleLink(code, "btn") : "") + "</p>" +
       "</section>";
@@ -780,23 +861,47 @@
     // ballot "may also hold" more: what else it holds is not recorded here
     // (rule 19).
     var none = noElection(code);
+    // From the day after the election, in the past tense like the rest of
+    // the page (PR #115 review).
+    var past = held();
+    var hold = past ? "may also have held" : "may also hold";
     var words = none
-      ? esc(none.t) + ", as its election office's own record says (the key dates above link it)."
+      ? esc(none.t) + ", as its election office's own record says (linked above)."
       : !anything
-      ? "Nothing this site covers is on " + esc(KYC.possessive(placeName(code))) + " " +
-        cycleYear() + " ballot. Whether any other contest is, this site does not record."
-      : code === "DC" ? dcContests()
-      : info.territory ? esc(TERRITORY_UNLISTED)
-      : "Your ballot may also hold " + esc(UNLISTED) + ".";
+      ? "Nothing this site covers " + (past ? "was" : "is") + " on " +
+        esc(KYC.possessive(placeName(code))) + " " + cycleYear() + " ballot. Whether any other " +
+        "contest " + (past ? "was" : "is") + ", this site does not record."
+      : code === "DC" ? dcContests(past)
+      : info.territory ? esc(TERRITORY_UNLISTED.replace("may also hold", hold))
+      : "Your ballot " + hold + " " + esc(UNLISTED) + ".";
     var sample = sampleLink(code);
+    // A candidate list above that is itself a sample ballot (Guam's
+    // territorial offices) is named, or "no sample ballot" contradicted
+    // the source line of the card above it (PR #115 review).
+    var cited = !sample && citedSampleBallot(code);
     return '<section class="ballot-section ballot-unlisted">' +
-      '<h3 class="ballot-heading">' + (anything ? "Also on your ballot, not listed here"
-        : "The rest of your ballot") + "</h3>" +
+      '<h3 class="ballot-heading">' + (!anything ? "The rest of your ballot"
+        : past ? "Also on the ballot, not listed here" : "Also on your ballot, not listed here") + "</h3>" +
       '<p class="ballot-note">' + words + " " + (sample
         ? "The election office links a sample ballot, every contest on it: " + sample + "."
-        : "This site links no sample ballot for " + place + "; its election office's pages " +
-          'are under <a href="' + KYC.escapeAttr(KYC.stateUrl(code) + "#voting") +
+        : "This site's voting links hold no sample ballot for " + place +
+          (cited ? " (the candidate lists above cite " + link(cited.url, cited.source) + ")" : "") +
+          "; its election office's pages are under " +
+          '<a href="' + KYC.escapeAttr(KYC.stateUrl(code) + "#voting") +
           '">how to vote in ' + place + "</a>.") + "</p></section>";
+  }
+
+  /** The first statewide candidate list on this ballot whose own source is
+   *  a sample ballot (rule 91's words for it), or null. */
+  function citedSampleBallot(code) {
+    var b = KYC.stategov && KYC.stategov.ballotOf(code);
+    if (!b) return null;
+    var found = null;
+    OFFICES.forEach(function (k) {
+      var list = b.offices[k] && b.offices[k].up && b.offices[k].candidates;
+      if (!found && list && list.url && /sample ballot/i.test(list.source || "")) found = list;
+    });
+    return found;
   }
 
   /** The line under a state's heading: when the election is, or, from the
@@ -836,24 +941,33 @@
     var statewideUp = !!offices && OFFICES.some(function (k) {
       return offices.offices[k] && offices.offices[k].up;
     });
-    var anything = KYC.findRep.senateRaces(code).length > 0 || legislature.length > 0 ||
+    // A legislature whose seats in reach are none of them up is not part of
+    // this ballot's order (Virginia's, New Jersey's, PR #115 review).
+    var anything = KYC.findRep.senateRaces(code).length > 0 || !!legislature.anyUp ||
       ctx.race.some(function (part) {
         return KYC.findRep.houseRace(code, Array.isArray(part) ? part[0] : part);
       }) || statewideUp;
     var order = ["Congress"];
     if (statewideUp) order.push(wide(code).toLowerCase() + " offices");
-    if (legislature.length) order.push("the state legislature");
+    if (legislature.anyUp) order.push("the state legislature");
+    var past = held();
+    // A place that holds no election on November 3 has no ballot to speak
+    // of, before the day or after it.
+    var heading = noElection(code) ? "The offices this site covers"
+      : past ? "What was on the ballot" : "On your ballot";
     return '<article class="ballot-state" data-state="' + KYC.escapeAttr(code) + '">' +
       '<h2 class="ballot-place">' + ctx.head + "</h2>" +
       whenLine(code) +
       (ctx.notes && ctx.notes.length ? '<p class="findrep-note">' + ctx.notes.join(" ") + "</p>" : "") +
+      (ctx.actions ? '<p class="ballot-actions">' + ctx.actions + "</p>" : "") +
       datesSection(code) +
       '<section class="ballot-section">' +
-        '<h3 class="ballot-heading">' + (held() ? "What was on the ballot" : "On your ballot") + "</h3>" +
+        '<h3 class="ballot-heading">' + heading + "</h3>" +
         (order.length > 1 ? '<p class="ballot-note">' + esc(order.length === 2
           ? order[0] + " first, then " + order[1]
           : order[0] + " first, then " + order[1] + ", then " + order[2]) +
-          ". Your printed ballot may list them in another order.</p>" : "") +
+          (past ? ". Your printed ballot may have listed them in another order.</p>"
+            : ". Your printed ballot may list them in another order.</p>") : "") +
         '<ol class="ballot-list">' + cards.join("") + "</ol>" +
       "</section>" +
       unlistedSection(code, anything) +
@@ -887,13 +1001,16 @@
         "lines: each district it touches is listed with the share of the ZIP area's land in it. " +
         "The shares are of land, not people, so they cannot say which side your home is on. " +
         "For an exact answer, use your location" + (check ? " or the official lookup" : "") +
-        ".</span>" + locateButton() + (check ? " " + check : "")] : [];
+        ".</span>"] : [];
+      // The ways to an exact answer on a row of their own: inline, the
+      // button broke the sentence on a phone (PR #115 review).
+      var actions = split ? (locateButton() + (check ? " " + check : "")).trim() : "";
       out.push(stateBallot(f.code, {
         head: "Your ballot: ZIP " + esc(zip5) + ", " + esc(KYC.findRep.nameOf(f.code)) +
           (crosses ? " (" + KYC.findRep.pct(KYC.findRep.landIn(f.entry)) + " of its land)" : ""),
         zip: zip5, race: parts.race, upper: parts.upper, lower: parts.lower,
         leg: f.leg, legFailed: f.legFailed, redrawn: !!f.data.next && !KYC.recordPhase(),
-        notes: notes,
+        notes: notes, actions: actions,
       }));
     });
     return out.join("") + printRow();
@@ -929,10 +1046,13 @@
 
   function result() { return doc.getElementById("ballotResult"); }
 
-  function show(html) {
+  /** Draws *html* as the answer; with *pending*, a word that the answer is
+   *  on its way, which keeps the room kyc.js held for it. */
+  function show(html, pending) {
     var out = result();
     out.hidden = false;
     out.innerHTML = html;
+    if (!pending) doc.documentElement.classList.remove("has-zip");
   }
 
   function note(text) { return '<p class="findrep-note">' + text + "</p>"; }
@@ -944,7 +1064,7 @@
     // The ZIP code in the address, so a copied link shows this list; a
     // fragment is never sent to a server.
     if (write) KYC.router.writeFilters({ zip: zip5 });
-    show(note("Looking up " + esc(zip5) + "&hellip;"));
+    show(note("Looking up " + esc(zip5) + "&hellip;"), true);
     var ticket = ++page.ticket;
     return KYC.findRep.zip(zip5).then(function (found) {
       if (ticket !== page.ticket) return;
@@ -1021,6 +1141,7 @@
 
   function route() {
     var r = KYC.router.read();
+    if (!/^\d{5}$/.test((r.params || {}).zip || "")) doc.documentElement.classList.remove("has-zip");
     if (r.view === "profile") {
       if (KYC.profile.open(r.id, { fromRoute: true })) return;
     } else if (KYC.profile.isOpen()) {
