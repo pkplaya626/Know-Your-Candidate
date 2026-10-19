@@ -11089,6 +11089,45 @@ async function testSharePages() {
   });
   state.window.close();
 
+  // A shared race's link (r/<raceId>.html sends a reader to the race on its
+  // state page) lands on the race, and is held there while what is drawn
+  // above it goes on growing, until the reader moves: on a phone it was
+  // left 3,000px above CA-22 (PR #121 review). jsdom lays nothing out, so
+  // the jumps themselves are counted.
+  const target = races.filter((r) => r.state === "CA").slice(-1)[0] || races[races.length - 1];
+  const sizes = [];
+  const jumps = [];
+  const landed = await buildPage("states/" + target.state.toLowerCase() + ".html", {
+    hash: "#race-" + target.id,
+    setup: (w) => {
+      w.ResizeObserver = function (cb) {
+        const me = { cb, on: false };
+        sizes.push(me);
+        this.observe = () => { me.on = true; };
+        this.disconnect = () => { me.on = false; };
+      };
+      w.HTMLElement.prototype.scrollIntoView = function () { jumps.push(this.id); };
+    },
+  });
+  await settle();
+  const first = jumps.slice();
+  const grow = () => sizes.forEach((o) => { if (o.on) o.cb([]); });
+  grow();
+  const held = jumps.length;
+  landed.window.dispatchEvent(new landed.window.WheelEvent("wheel", { deltaY: -100 }));
+  grow();
+  suite("a shared race's link lands on its race (PR #121 review)", () => {
+    check("it jumps to the race once the page is drawn", first.length === 1 &&
+      first[0] === "race-" + target.id, first.join());
+    check("and again when what is above it grows", held === 2 && jumps[1] === "race-" + target.id,
+      jumps.join());
+    check("until the reader scrolls, and then never again", jumps.length === 2 &&
+      sizes.every((o) => !o.on), jumps.join());
+    check("the fragment is dropped from the address", landed.window.location.hash === "",
+      landed.window.location.hash);
+  });
+  landed.window.close();
+
   // A state page whose people did not load keeps its plain lists.
   const broken = await buildPage("states/vt.html", { block: ["data/people/vt.js"] });
   suite("a state page whose data did not load", () => {

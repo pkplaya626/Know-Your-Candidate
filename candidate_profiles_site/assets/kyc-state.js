@@ -363,11 +363,45 @@
     if (!m) return;
     var section = doc.getElementById(m[1]);
     if (!section) return;
-    if (section.scrollIntoView) section.scrollIntoView({ block: "start" });
+    var jump = function () {
+      if (section.scrollIntoView) section.scrollIntoView({ block: "start" });
+    };
+    jump();
+    holdPlace(jump);
     if (m[2] && m[1] === "findrep" && KYC.findRep) KYC.findRep.ask(m[2]);
     if (global.history && global.history.replaceState) {
       global.history.replaceState(global.history.state, "", global.location.pathname + global.location.search);
     }
+  }
+
+  /* What is drawn above a section goes on growing for a moment after the
+   * jump - portraits, the voting block, the district squares - and a shared
+   * race's link (r/<raceId>.html, rule 96) left a phone 3,000px above
+   * CA-22, on CA-19's money, with the fragment already dropped (PR #121
+   * review). So the jump is made again each time the page's content
+   * changes size, until the reader scrolls, taps or types, or the page has
+   * been drawing for HOLD_MS. */
+  var HOLD_MS = 10000;
+  var HOLD_STOPS = ["wheel", "touchstart", "pointerdown", "keydown"];
+
+  function holdPlace(jump) {
+    var Observer = global.ResizeObserver;
+    var content = el("stateContent");
+    if (!Observer || !content) return;
+    var done = false;
+    var observer = new Observer(function () { if (!done) jump(); });
+    var stop = function () {
+      if (done) return;
+      done = true;
+      observer.disconnect();
+      clearTimeout(timer);
+      HOLD_STOPS.forEach(function (name) { global.removeEventListener(name, stop, true); });
+    };
+    var timer = setTimeout(stop, HOLD_MS);
+    HOLD_STOPS.forEach(function (name) {
+      global.addEventListener(name, stop, { capture: true, passive: true });
+    });
+    observer.observe(content);
   }
 
   /* ---------------------------------------------------------- all states */
