@@ -1423,7 +1423,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Energy; Health; Veterans", each "news and information related to")
     were eighteen members' platforms while Figures's identical page read
     "Not listed", so a list of nothing but those links the page, for
-    everyone (`stock_list`), and "Congress" is never an issue; a heading
+    everyone (`stock_list`), and "Congress" is never an issue - a page
+    listing them among the member's own is quoted whole, since Schrier's
+    gives both the same card and blurb and nothing tells a default kept
+    from one chosen; a home page is never called "their issues page"
+    (Stansbury's was), and too few issue pages linked from it read "On
+    their official website" (`see_home`); a heading
     broken by `</br>` was cut to "Sponsored &", and a line ending in "&" or
     a comma is not taken; one issue spelled twice is listed once; a home
     page's own issue links were shown as the list when Hoyer's unlinked

@@ -698,19 +698,14 @@ class TestApplied(unittest.TestCase):
         self.assertEqual(larsen["platforms"], "Economy; Energy; Health; National Security; "
                                               "Veterans; Jobs, Economy, and Fiscal Responsibility")
         self.assertNotIn("platformFeatured", larsen)
-        # The whole stock set over a member's own (Schrier's page): only
-        # theirs is their list, and too few of them link the page.
-        own = ["Environment", "Agriculture", "Salmon Recovery"]
-        stock = ["Economy", "Education", "Energy", "Health", "Veterans"]
-        self.assertEqual(members.without_stock(stock + own), own)
-        for issues, shown in ((stock + own, "; ".join(own)), (stock + own[:2], None)):
-            larsen = member()
-            sites = {"L000560": dict(self.CACHE["sites"]["L000560"], issues=issues)}
-            members.apply_cache([larsen], dict(self.CACHE, sites=sites))
-            if shown:
-                self.assertEqual(larsen["platforms"], shown)
-            else:
-                self.assertEqual(larsen["quality"]["platforms"], "see_site")
+        # The stock set among a member's own (Schrier's page gives each the
+        # same card and blurb): the page lists them all, and is quoted whole.
+        issues = ["Economy", "Education", "Energy", "Health", "Veterans", "Environment",
+                  "Agriculture"]
+        larsen = member()
+        sites = {"L000560": dict(self.CACHE["sites"]["L000560"], issues=["Congress"] + issues)}
+        members.apply_cache([larsen], dict(self.CACHE, sites=sites))
+        self.assertEqual(larsen["platforms"], "; ".join(issues))
 
     def test_a_home_page_is_never_called_an_issues_page(self):
         # Stansbury's home page featured three issue pages; with COVID's
