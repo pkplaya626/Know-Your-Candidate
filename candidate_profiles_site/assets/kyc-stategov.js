@@ -482,8 +482,10 @@
       var links = [off.website ? link(off.website, "Office") : "", off.office ? link(off.office, "Office") : "",
         off.bio ? link(off.bio, "Biography") : ""].filter(Boolean);
       var contact = [off.phone, off.email, off.address].filter(Boolean).map(KYC.escapeHtml);
+      // A holder without a photograph keeps the photograph's column, an
+      // empty circle, so the names line up down the card (STATEGOV-13).
       body = (off.photo ? '<img class="gov-officer-photo" src="' + KYC.escapeAttr(off.photo) +
-          '" alt="" width="40" height="40" loading="lazy" decoding="async">' : "") +
+          '" alt="" width="40" height="40" loading="lazy" decoding="async">' : NO_PHOTO) +
         '<p class="gov-officer-name">' + who(off) + "</p>" +
         (off.title.toLowerCase() !== label.toLowerCase()
           ? '<p class="faint">' + KYC.escapeHtml(off.title) + "</p>" : "") +
@@ -633,8 +635,29 @@
       // where the two counts part).
       (s.upper ? "Seats: " + source("openstates") + "." + (ncsl ? " Which party holds each chamber " +
         "is checked against " + source("ncsl") + "." : "") : "") +
-      courtSource(s.court) + courtSource(s.criminalCourt) + "</p>";
+      courtSource(s.court) + courtSource(s.criminalCourt) + photoSources(s) + "</p>";
     return html;
+  }
+
+  /** Whose each photograph on the card is (rule 87): the roster's
+   *  association, or the office whose page it was taken from. */
+  function photoSources(s) {
+    var gov = s.governor || {};
+    var rows = [["governor", gov.headshot && gov.headshotBy, gov.headshotPage]];
+    [["lieutenant governor", s.lt], ["attorney general", s.ag], ["secretary of state", s.sos]]
+      .forEach(function (pair) {
+        var off = pair[1] || {};
+        // Only a row that draws its holder's photograph (officerRow's last
+        // branch) credits one.
+        var drawn = off.photo && !(off.disputed || off.unlisted || off.unconfirmed ||
+          off.vacant || off.none || off.notMember);
+        rows.push([pair[0], drawn && off.photoBy, off.photoPage]);
+      });
+    var said = rows.filter(function (row) { return row[1]; }).map(function (row) {
+      return KYC.escapeHtml(row[0].toLowerCase()) + ", " +
+        (row[2] ? link(row[2], row[1]) : KYC.escapeHtml(row[1]));
+    });
+    return said.length ? " Photographs: " + said.join("; ") + "." : "";
   }
 
   /** A court's line in the list of sources: whose roster, and the day it
@@ -646,12 +669,20 @@
       (court.readOn ? "read by hand, " : "") + KYC.escapeHtml(KYC.dateWords(day)) + ").";
   }
 
+  /* The empty circle a named officer's row shows without a photograph. */
+  var NO_PHOTO = '<span class="gov-officer-photo gov-officer-nophoto" aria-hidden="true"></span>';
+
   /* An NGA headshot that fails to load leaves the card without one, not a
    * broken image. Error events do not bubble, so this listens on capture. */
   global.document.addEventListener("error", function (event) {
     var img = event.target;
-    if (img && img.classList &&
-        (img.classList.contains("gov-portrait") || img.classList.contains("gov-officer-photo"))) {
+    if (img && img.classList && img.classList.contains("gov-officer-photo")) {
+      // The row keeps its column, as a holder never pictured does.
+      var holder = global.document.createElement("span");
+      holder.className = "gov-officer-photo gov-officer-nophoto";
+      holder.setAttribute("aria-hidden", "true");
+      img.replaceWith(holder);
+    } else if (img && img.classList && img.classList.contains("gov-portrait")) {
       img.remove();
     }
   }, true);

@@ -16,7 +16,10 @@
  * which stops at the shore.
  *
  * Which districts are picked out lives in the address (#/?d=3,6), so every
- * view can be shared.
+ * view can be shared. In a redrawn state each map has its own: d= is the
+ * 2026 map's, was= the old map's where it differs (#/?d=2&was=12), since a
+ * reader in Athens, Ohio is in OH-12 on one and OH-2 on the other
+ * (PERSONA-01).
  *
  * Once the Congress the cycle elects is sitting (KYC.recordPhase), its
  * members sit for a redrawn state's new map: the new map is drawn in their
@@ -55,7 +58,15 @@
   var LABEL_ROOM = 6.5;
   var NUMBER_PX = 11;
 
-  var focus = [];
+  /* The picked districts of each map, by plan key: a click picks one
+   * number on both, Find my district picks each map's own. */
+  var focusBy = {};
+  /* The reader's own point, in map units, once Find my district placed it. */
+  var pin = null;
+
+  function focusOf(plan) {
+    return focusBy[plan.key] || [];
+  }
 
   function el(id) {
     return doc.getElementById(id);
@@ -154,21 +165,8 @@
    *  who holds the old seat of that number but is running elsewhere. Once
    *  the primary is decided, only those on the November ballot. */
   function running(n) {
-    var race = raceOf[n];
-    if (!race) return [];
-    var seen = {};
-    return race.incumbentIds.concat(race.candidateIds).map(KYC.byId).filter(function (p) {
-      if (!p || seen[p.id]) return false;
-      seen[p.id] = true;
-      if (!p.isCandidate && (p.contestRaceId || p.raceId) !== race.id) return false;
-      var status = p.isCandidate ? p.raceStatus : KYC.contestStatus(p);
-      if (race.settled) return KYC.onNovemberBallot(status) || status === "advanced";
-      return !KYC.offBallot(status);
-    }).sort(function (a, b) {
-      // Members first, then the race's own order (by surname, TRUST-15).
-      return (a.isCandidate ? 1 : 0) - (b.isCandidate ? 1 : 0) ||
-        KYC.racePosition(a) - KYC.racePosition(b);
-    });
+    // One implementation, shared with "Find who represents me" (rule 12).
+    return KYC.findRep.running(raceOf[n]);
   }
 
   /** Filers in a new district's race whom the published results do not
@@ -250,110 +248,63 @@
   /** A district's rings, replayed from its relative path data. */
   function ringsOf(plan, n) {
     var key = plan.key + "-" + n;
-    if (ringCache[key]) return ringCache[key];
-    var rings = [];
-    String(plan.districts[n].d).split("M").forEach(function (part) {
-      var nums = part.match(/-?\d+(?:\.\d+)?/g);
-      if (!nums || nums.length < 2) return;
-      var x = +nums[0], y = +nums[1];
-      var ring = [[x, y]];
-      for (var i = 2; i + 1 < nums.length; i += 2) {
-        x += +nums[i];
-        y += +nums[i + 1];
-        ring.push([x, y]);
-      }
-      rings.push(ring);
-    });
-    ringCache[key] = rings;
-    return rings;
-  }
-
-  /** Even-odd point in polygon, so a hole counts as outside. */
-  function contains(rings, x, y) {
-    var hit = false;
-    rings.forEach(function (ring) {
-      for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-        var xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
-        if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) hit = !hit;
-      }
-    });
-    return hit;
+    if (!ringCache[key]) ringCache[key] = KYC.place.pathRings(plan.districts[n].d);
+    return ringCache[key];
   }
 
   /* --------------------------------------------------- find my district */
 
-  /* A reader's location is placed on the map here, on the device: it is
-   * never sent anywhere. The maps are Census cartographic boundaries
-   * (1:5,000,000), simplified again for display, so within this distance of
-   * a line the map cannot say which side a home is on, and says so. */
-  var NEAR_KM = 3;
+  /* A reader's location is placed on the device: it is never sent
+   * anywhere. It is placed on the lookup file's boundaries (kyc/lookup.py):
+   * the Census Bureau's at 1:500,000 and each redrawn state's own plan,
+   * within KYC.findRep.NEAR_KM of a line said to be near it. The page's own
+   * drawing is 1:5,000,000 and simplified again; within 3 km of its lines it
+   * could not tell a reader which side they were on, which in a big city
+   * was nearly everyone (RACES-01). It is used only when the lookup file
+   * cannot be loaded, with its own wider margin. */
+  var COARSE_NEAR_KM = 3;
 
   /** Where a longitude and latitude fall on this state's map, by the
    *  projection the build drew it with (kyc/districts.py), or null. */
   function project(lon, lat) {
-    var p = state && state.projection;
-    if (!p) return null;
-    var rad = Math.PI / 180;
-    var phi0 = p.parallels[0] * rad, phi1 = p.parallels[1] * rad;
-    var n = (Math.sin(phi0) + Math.sin(phi1)) / 2;
-    var c = 1 + Math.sin(phi0) * (2 * n - Math.sin(phi0));
-    var r0 = Math.sqrt(c) / n;
-    var d = ((lon - p.meridian + 180) % 360 + 360) % 360 - 180;
-    var lam = d * rad * n;
-    var r = Math.sqrt(c - 2 * n * Math.sin(lat * rad)) / n;
-    var x = r * Math.sin(lam), y = r0 - r * Math.cos(lam);
-    return [p.pad + p.k * (x - p.minX), p.pad + p.k * (p.maxY - y)];
+    return KYC.place.project(state && state.projection, lon, lat);
   }
 
-  /** Shortest distance from a point to a district's boundary. */
-  function edgeDistance(rings, x, y) {
-    var best = Infinity;
-    rings.forEach(function (ring) {
-      for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-        var ax = ring[j][0], ay = ring[j][1], bx = ring[i][0], by = ring[i][1];
-        var dx = bx - ax, dy = by - ay;
-        var len = dx * dx + dy * dy;
-        var t = len ? Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / len)) : 0;
-        var ex = ax + t * dx - x, ey = ay + t * dy - y;
-        best = Math.min(best, Math.sqrt(ex * ex + ey * ey));
-      }
-    });
-    return best;
-  }
-
-  /** On each map, where a location falls: ``[{plan, kind, inside, near}]``,
-   *  or null when the map has no projection. *accuracy* is the browser's own
-   *  estimate in metres; the margin grows by it, since a fix 2 km off is a
-   *  home 2 km away.
-   *
-   *  kind is
-   *  - "in": inside one district, no line within the margin;
-   *  - "line": within the margin of a line between two or more districts;
-   *  - "edge": inside one district, near a line no other district shares -
-   *    the state line or the shore, so possibly outside the state;
-   *  - "out": inside no district but near one: at the edge or outside;
-   *  - "none": nowhere near this map. */
+  /** On each map, where a location falls on the page's own lines:
+   *  ``[{plan, kind, inside, near}]``, or null when the map has no
+   *  projection - the fallback when the lookup file does not load.
+   *  *accuracy* is the browser's own estimate in metres; the margin grows
+   *  by it, since a fix 2 km off is a home 2 km away. The kinds are
+   *  KYC.place.classify's: "in", "line", "edge", "out", "none". */
   function locate(lon, lat, accuracy) {
     var at = project(lon, lat);
     if (!at) return null;
     var extra = isFinite(accuracy) && accuracy > 0 ? accuracy / 1000 : 0;
-    var margin = (NEAR_KM + extra) / state.unitKm;
+    var margin = (COARSE_NEAR_KM + extra) / state.unitKm;
     return state.plans.map(function (plan) {
-      var inside = [], near = [], ownEdge = false;
+      var shapes = {};
       numbers(plan).forEach(function (n) {
-        var rings = ringsOf(plan, n);
-        var dist = edgeDistance(rings, at[0], at[1]);
-        if (contains(rings, at[0], at[1])) {
-          inside.push(n);
-          if (dist <= margin) ownEdge = true;
-        } else if (dist <= margin) {
-          near.push(n);
-        }
+        shapes[n] = { rings: ringsOf(plan, n), box: plan.districts[n].box };
       });
-      var kind = inside.length + near.length >= 2 ? "line"
-        : inside.length === 1 ? (ownEdge ? "edge" : "in")
-        : near.length ? "out" : "none";
-      return { plan: plan, kind: kind, inside: inside, near: near };
+      var found = KYC.place.classify(shapes, at[0], at[1], margin, 1, 1, margin, margin);
+      return { plan: plan, kind: found.kind, inside: found.inside.map(Number),
+               near: found.near.map(Number) };
+    });
+  }
+
+  /** The same from the lookup file's finer lines: a Promise of the same
+   *  list, or of null when the point is in no state the file covers. */
+  function locateFine(lon, lat, accuracy) {
+    return KYC.findRep.where(lon, lat, accuracy, code).then(function (hit) {
+      if (!hit.code) return state.plans.map(function (plan) {
+        return { plan: plan, kind: "none", inside: [], near: [] };
+      });
+      var keys = redrawn() ? ["cd", "next"] : ["cd"];
+      return state.plans.map(function (plan, i) {
+        var f = hit.found[keys[i]];
+        return { plan: plan, kind: f.kind, inside: f.inside.map(Number),
+                 near: f.near.map(Number) };
+      });
     });
   }
 
@@ -384,25 +335,59 @@
     return "this map does not reach your location";
   }
 
+  /** Who represents a reader placed in *now* (the map members sit under)
+   *  and votes in *next* (the 2026 race's), by name: the House member, the
+   *  race, the senators (PERSONA-18). The same rows as "Find who represents
+   *  me" (rule 12). */
+  function whoHere(now, next) {
+    return '<dl class="findrep-list locate-people">' +
+      KYC.findRep.federalRows(code, now, next).join("") + "</dl>";
+  }
+
   /** What a location means on this page, in words, and the districts to
-   *  show. Never a district the map cannot vouch for. */
-  function located(found, accuracy) {
+   *  show on each map. Never a district the map cannot vouch for. *nearKm*
+   *  is the margin the lines were read with. */
+  function located(found, accuracy, nearKm) {
     var check = lookupLink();
     var main = found[found.length - 1];          // the map for 2026
-    var km = isFinite(accuracy) ? Math.round(accuracy / 100) / 10 : null;
-    var reach = main.inside.concat(main.near);
-    if ((km !== null && km > ROUGH_KM) || reach.length > MAX_FOCUS) {
-      return { html: "Your browser shared only an approximate location" +
-        (km !== null ? " (to within about " + km + " km)" : "") +
-        ", too rough to place in a district. Pick your district below." + check, focus: null };
+    var reaches = found.map(function (f) { return f.inside.concat(f.near); });
+    var reach = reaches[reaches.length - 1];
+    // Each map's own districts: OH-12 on the old map, OH-2 on the new.
+    var picks = { focus: reach.slice(0, MAX_FOCUS), was: reaches[0].slice(0, MAX_FOCUS) };
+    var now = reaches[redrawn() && KYC.recordPhase() ? reaches.length - 1 : 0];
+    if (isFinite(accuracy) && accuracy / 1000 > ROUGH_KM) {
+      return { html: "Your browser shared only an approximate location (to within " +
+        KYC.findRep.distance(accuracy) + "), too rough to place in a district. Pick your " +
+        "district below." + check, focus: null };
     }
     if (main.kind === "none") {
       return { html: "That location is not in " + KYC.escapeHtml(state.name) + ". " +
         '<a href="' + KYC.escapeAttr(KYC.siteRoot() + "states/index.html") +
         '">Find your state &rsaquo;</a>', focus: null };
     }
-    var phrases = found.map(phrase);
     var names = ["the map members were elected on", "the map for 2026"];
+    // A precise fix where more districts meet than the page can show is
+    // not an approximate location: say where it is (RACES-02), naming the
+    // districts of the map they meet on, not the other map's.
+    var crowded = reaches.map(function (r, i) {
+      if (r.length <= MAX_FOCUS) return "";
+      return (found.length > 1 ? "on " + names[i] + ", " : "") + seats(r);
+    }).filter(Boolean);
+    if (crowded.length) {
+      // The map that is not crowded still says where the reader is on it:
+      // crowded on the old map alone, the 2026 map's one district stood
+      // unsaid beside four of the old map's.
+      var rest = found.length < 2 ? "" : found.map(function (f, i) {
+        if (reaches[i].length > MAX_FOCUS) return "";
+        var s = f.kind === "none" ? names[i] + " does not reach this point."
+          : "on " + names[i] + ", " + phrase(f) + ".";
+        return " " + s.charAt(0).toUpperCase() + s.slice(1);
+      }).join("");
+      return { html: "You are where several districts meet (" + crowded.join("; ") + "); the " +
+        "boundaries this page holds cannot tell which you are in." + rest + check +
+        whoHere(now, reach), focus: picks.focus, was: picks.was };
+    }
+    var phrases = found.map(phrase);
     var first;
     if (found.length === 1 || phrases[0] === phrases[1]) {
       first = (found.length > 1 ? "On both maps, " : "") + phrases[0] + ".";
@@ -416,11 +401,14 @@
     var unsure = found.some(function (f) { return f.kind !== "in" && f.kind !== "none"; });
     var lines = [first];
     if (unsure) {
-      lines.push("The map is simplified, so it cannot say exactly where a line runs" +
-        (km !== null && km >= 1 ? ", and your browser's location is accurate to about " + km + " km" : "") +
+      lines.push("Within " + KYC.findRep.distance(nearKm * 1000) + " of a line the boundaries " +
+        "this page holds cannot say which side you are on" +
+        (isFinite(accuracy) && accuracy >= 100
+          ? ", and your browser placed you to within " + KYC.findRep.distance(accuracy) : "") +
         ".");
     }
-    return { html: lines.join(" ") + check, focus: reach.slice(0, MAX_FOCUS) };
+    return { html: lines.join(" ") + check + whoHere(now, reach),
+             focus: picks.focus, was: picks.was };
   }
 
   function findMe() {
@@ -430,25 +418,38 @@
     out.textContent = "Finding your location…";
     button.disabled = true;
     global.navigator.geolocation.getCurrentPosition(function (pos) {
-      button.disabled = false;
       var accuracy = pos.coords.accuracy;
-      var found = locate(pos.coords.longitude, pos.coords.latitude, accuracy);
-      if (!found) {
-        out.innerHTML = "This map cannot place a location. Pick your district below." + lookupLink();
-        return;
+      var lon = pos.coords.longitude, lat = pos.coords.latitude;
+      function answer(found, nearKm) {
+        button.disabled = false;
+        if (!found) {
+          out.innerHTML = "This map cannot place a location. Pick your district below." + lookupLink();
+          return;
+        }
+        var said = located(found, accuracy, nearKm);
+        out.innerHTML = said.html;
+        // The reader's point, on every view of both maps.
+        pin = said.focus ? project(lon, lat) : null;
+        // The answer stays where it is, above the map, with its caveat and
+        // the lookup link: revealing the district card scrolled them away on
+        // a phone.
+        if (said.focus && said.focus.length) setFocus(said.focus, null, said.was);
+        else render();
       }
-      var said = located(found, accuracy);
-      out.innerHTML = said.html;
-      // The answer stays where it is, above the map, with its caveat and
-      // the lookup link: revealing the district card scrolled them away on
-      // a phone.
-      if (said.focus && said.focus.length) setFocus(said.focus);
+      // The margin in words is the lines' own; the browser's accuracy,
+      // which widens it, is said apart.
+      locateFine(lon, lat, accuracy).then(function (found) {
+        answer(found, KYC.findRep.NEAR_KM);
+      }, function () {
+        // The finer lines did not load: the page's own, with their margin.
+        answer(locate(lon, lat, accuracy), COARSE_NEAR_KM);
+      });
     }, function (err) {
       button.disabled = false;
       out.innerHTML = (err && err.code === 1
         ? "Your browser did not share a location."
         : "Your location could not be found.") + " Pick your district below." + lookupLink();
-    }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 });
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
   }
 
   function within(point, frame, margin) {
@@ -495,7 +496,7 @@
     for (var i = 0; i < size; i++) {
       for (var j = 0; j < size; j++) {
         var at = i * size + j;
-        inside[at] = contains(rings, xs[i], ys[j]);
+        inside[at] = KYC.place.contains(rings, xs[i], ys[j]);
         nearX[at] = inside[at] ? NaN : xs[i];
         nearY[at] = inside[at] ? NaN : ys[j];
       }
@@ -585,9 +586,19 @@
     return "kycd-" + plan.key + "-" + n;
   }
 
-  function focusClass(n) {
-    var at = focus.indexOf(n);
+  function focusClass(plan, n) {
+    var at = focusOf(plan).indexOf(n);
     return at === -1 ? "" : " is-focus focus-" + (at + 1);
+  }
+
+  /** The reader's point, where Find my district placed it: a ringed dot
+   *  over every line, sized for the screen. */
+  function pinMark(frame, px) {
+    if (!pin || !within(pin, frame, 0)) return "";
+    return '<g class="reader-pin"><circle class="reader-pin-halo" cx="' + pin[0].toFixed(2) +
+      '" cy="' + pin[1].toFixed(2) + '" r="' + (8 / px).toFixed(3) + '"/>' +
+      '<circle class="reader-pin-dot" cx="' + pin[0].toFixed(2) + '" cy="' + pin[1].toFixed(2) +
+      '" r="' + (4.5 / px).toFixed(3) + '"/></g>';
   }
 
   /** The party a district is drawn in: its sitting member's, on the map
@@ -624,7 +635,7 @@
       return meets(plan.districts[n].box, frame);
     }).map(function (n) {
       return '<use href="#' + pathId(plan, n) + '" class="district-shape party-' +
-        partyOf(plan, n) + focusClass(n) + '" data-district="' + n + '"><title>' +
+        partyOf(plan, n) + focusClass(plan, n) + '" data-district="' + n + '"><title>' +
         KYC.escapeHtml(tip(plan, n)) + "</title></use>";
     }).join("");
   }
@@ -632,20 +643,22 @@
   /** The picked districts' outlines, drawn over every fill so a district
    *  keeps its party colour and is still found at a glance. */
   function focusLines(plan) {
-    return clipped(plan, focus.map(function (n) {
+    var mine = focusOf(plan);
+    return clipped(plan, mine.map(function (n, i) {
       return '<use href="#' + pathId(plan, n) + '" class="district-focus-halo"/>' +
-        '<use href="#' + pathId(plan, n) + '" class="district-focus focus-' +
-        (focus.indexOf(n) + 1) + '"/>';
+        '<use href="#' + pathId(plan, n) + '" class="district-focus focus-' + (i + 1) + '"/>';
     }).join(""));
   }
 
   /** A map: the SVG, and its labels over it. *px* is screen pixels per
    *  map unit at the width the map is drawn. */
-  function svg(frame, cls, label, body, labels, px) {
+  function svg(plan, frame, cls, label, body, labels, px) {
+    var marked = pinMark(frame, px);
     return '<div class="map-frame"><svg class="district-map ' + cls +
-      (focus.length ? " has-focus" : "") + '" viewBox="' + frame.map(function (v) {
+      (focusOf(plan).length ? " has-focus" : "") + '" viewBox="' + frame.map(function (v) {
         return v.toFixed(1);
-      }).join(" ") + '" role="img" aria-label="' + KYC.escapeAttr(label) + '">' + body + "</svg>" +
+      }).join(" ") + '" role="img" aria-label="' + KYC.escapeAttr(label +
+        (marked ? ", with your location marked" : "")) + '">' + body + marked + "</svg>" +
       labelLayer(frame, px, labels || []) + "</div>";
   }
 
@@ -670,6 +683,7 @@
      * line up, with no line, onto district 11's land: a number on another
      * district's land reads as that district's. */
     var placedPicks = [];
+    var focus = focusOf(plan);
     // The other districts' numbers drawn here: a number that moves must not
     // land on one of them either (a callout hid TX-21's "21" at 390px).
     var others = numbers(plan).filter(function (n) {
@@ -695,7 +709,7 @@
         for (var j = 0; j <= steps; j++) {
           var x = box[0] + (box[2] - box[0]) * i / steps;
           var y = box[1] + (box[3] - box[1]) * j / steps;
-          if (contains(rings, x, y)) spots.push([x, y, Math.hypot(x - at[0], y - at[1])]);
+          if (KYC.place.contains(rings, x, y)) spots.push([x, y, Math.hypot(x - at[0], y - at[1])]);
         }
       }
       spots.sort(function (a, b) { return a[2] - b[2]; });
@@ -722,10 +736,10 @@
     });
     var labels = numbers(plan).map(function (n) {
       var district = plan.districts[n];
-      var picked = focus.indexOf(n) !== -1;
+      var picked = focusOf(plan).indexOf(n) !== -1;
       if (!picked && !fitsAt(district, px)) return null;
       var at = picked && spotOf[n] ? spotOf[n].at : district.at;
-      return text("district-num" + focusClass(n) + (picked && spotOf[n] && spotOf[n].leader
+      return text("district-num" + focusClass(plan, n) + (picked && spotOf[n] && spotOf[n].leader
         ? " is-callout" : ""), at[0], at[1], (picked ? 15 : NUMBER_PX) / px, numLabel(n));
     });
     // A callout's line, from its district's own label point to the number.
@@ -742,7 +756,7 @@
       return '<rect class="inset-outline" x="' + b[0] + '" y="' + b[1] + '" width="' + b[2] +
         '" height="' + b[3] + '"/>';
     }).join("");
-    return svg(frame, "district-statewide",
+    return svg(plan, frame, "district-statewide",
       "All " + state.seats + " districts on the " + plan.title,
       '<g class="district-shapes">' + clipped(plan, shapes(plan, frame)) + "</g>" +
       '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan) + lines + leaders,
@@ -783,39 +797,41 @@
     // is numbered only where that collides with nothing.
     var labels = mine.map(function (n) {
       var district = plan.districts[n];
-      var picked = focus.indexOf(n) !== -1;
+      var picked = focusOf(plan).indexOf(n) !== -1;
       if (!picked && !fitsAt(district, px)) return null;
       var size = (picked ? 13 : NUMBER_PX) / px;
       placed.push(textBox(district.at[0], district.at[1], numLabel(n), size, "middle"));
-      return text("district-num" + focusClass(n), district.at[0], district.at[1], size,
+      return text("district-num" + focusClass(plan, n), district.at[0], district.at[1], size,
                   numLabel(n));
     }).concat(others.map(function (n) {
       var at = labelAt(plan, n, frame, 9 / px);
       if (!at || at[2] * px < LABEL_ROOM + 0.5) return null;
-      var size = (focus.indexOf(n) !== -1 ? 13 : NUMBER_PX) / px;
+      var size = (focusOf(plan).indexOf(n) !== -1 ? 13 : NUMBER_PX) / px;
       var box = textBox(at[0], at[1], numLabel(n), size, "middle");
       if (collides(box, placed)) return null;
       placed.push(box);
-      return text("district-num" + focusClass(n), at[0], at[1], size, numLabel(n));
+      return text("district-num" + focusClass(plan, n), at[0], at[1], size, numLabel(n));
     }));
     return '<figure class="inset" style="width:' + Math.round(width) + 'px">' +
-      svg(frame, "district-inset", inset.title + " on the " + plan.title,
+      svg(plan, frame, "district-inset", inset.title + " on the " + plan.title,
         '<g class="district-shapes">' + clipped(plan, shapes(plan, frame)) + "</g>" +
         '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan),
         labels, px) +
       "<figcaption>" + KYC.escapeHtml(inset.title) + "</figcaption></figure>";
   }
 
-  /** The frame for the close-up: where the picked districts run under the
-   *  new map, padded, and never so small that simplified lines look blocky
-   *  or so narrow that the two close-ups stop being comparable. */
+  /** The frame for the close-up: where the picked districts run on both
+   *  maps - each map's own picks - padded, and never so small that
+   *  simplified lines look blocky or so narrow that the two close-ups stop
+   *  being comparable. Both close-ups share it. */
   function closeupFrame() {
-    var plan = newPlan();
     var box = null;
-    focus.forEach(function (n) {
-      var b = plan.districts[n].box;
-      box = box ? [Math.min(box[0], b[0]), Math.min(box[1], b[1]),
-                   Math.max(box[2], b[2]), Math.max(box[3], b[3])] : b.slice();
+    state.plans.forEach(function (plan) {
+      focusOf(plan).forEach(function (n) {
+        var b = plan.districts[n].box;
+        box = box ? [Math.min(box[0], b[0]), Math.min(box[1], b[1]),
+                     Math.max(box[2], b[2]), Math.max(box[3], b[3])] : b.slice();
+      });
     });
     var w = box[2] - box[0], h = box[3] - box[1];
     var cx = (box[0] + box[2]) / 2, cy = (box[1] + box[3]) / 2;
@@ -851,15 +867,17 @@
       return fits(box, frame) && !collides(box, placed);
     }
 
+    var mine = focusOf(plan);
+
     function number(n) {
-      var picked = focus.indexOf(n) !== -1;
+      var picked = mine.indexOf(n) !== -1;
       var at = labelAt(plan, n, frame, 20 / px);
       if (!at || (!picked && at[2] * px < 16)) return;
       var size = (picked ? 30 : 17) / px;
       var box = textBox(at[0], at[1], numLabel(n), size, "middle");
       if (!picked && collides(box, placed)) return;
       placed.push(box);
-      marks.push(text("district-num" + focusClass(n), at[0], at[1], size, numLabel(n)));
+      marks.push(text("district-num" + focusClass(plan, n), at[0], at[1], size, numLabel(n)));
       spots[n] = [at[0], at[1], size];
     }
 
@@ -925,7 +943,7 @@
 
     // The picked districts' numbers; then the biggest towns, so a reader
     // can find where they live; then who is running where; then the rest.
-    focus.forEach(number);
+    mine.forEach(number);
     var inView = (state.places || []).filter(function (place) {
       return within([place[1], place[2]], frame, 12 / px);
     });
@@ -941,9 +959,9 @@
     reserved.forEach(function (pair) {
       if (!town(pair[0], pair[1])) placed.splice(placed.indexOf(pair[1]), 1);
     });
-    focus.forEach(captionFor);
+    mine.forEach(captionFor);
     numbers(plan).filter(function (n) {
-      return focus.indexOf(n) === -1 && meets(plan.districts[n].box, frame);
+      return mine.indexOf(n) === -1 && meets(plan.districts[n].box, frame);
     }).sort(function (a, b) {
       return plan.districts[b].area - plan.districts[a].area;
     }).forEach(number);
@@ -964,14 +982,15 @@
       marks.unshift(text("county-name", county[1], county[2], size, words));
     });
 
-    var ghosts = other ? clipped(other, focus.map(function (n) {
+    // The other map's picked districts, dashed: where this map's lines
+    // put the districts the reader is in on the other.
+    var ghosts = other ? clipped(other, focusOf(other).map(function (n, i) {
       return '<use href="#' + pathId(other, n) + '" class="district-ghost-halo"/>' +
-        '<use href="#' + pathId(other, n) + '" class="district-ghost focus-' +
-        (focus.indexOf(n) + 1) + '"/>';
+        '<use href="#' + pathId(other, n) + '" class="district-ghost focus-' + (i + 1) + '"/>';
     }).join("")) : "";
 
-    return svg(frame, "district-closeup",
-      "Close-up of " + focus.map(seat).join(", ") + " on the " + plan.title,
+    return svg(plan, frame, "district-closeup",
+      "Close-up of " + mine.map(seat).join(", ") + " on the " + plan.title,
       '<g class="district-shapes">' + clipped(plan, shapes(plan, frame)) + "</g>" +
       '<use href="#kycd-counties" class="county-line"/>' +
       '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan) +
@@ -1011,7 +1030,7 @@
     var went = state.flows.filter(function (f) { return f[0] === n && f[3] >= MIN_SHARE; })
       .map(function (f) { return [f[1], f[3]]; })
       .sort(function (a, b) { return b[1] - a[1]; });
-    return '<section class="district-fact' + focusClass(n) + '">' +
+    return '<section class="district-fact' + focusClass(plan, n) + '">' +
       '<h4 class="district-fact-title"><span class="focus-swatch"></span>' +
       KYC.escapeHtml(seat(n)) + " on the " + KYC.escapeHtml(plan.title) + "</h4>" +
       (held.length
@@ -1036,7 +1055,7 @@
     var unfiled = res && res.otherNominees && res.otherNominees.length ? res.otherNominees : [];
     var who = rec ? "In the " + raceYear(race) + " race" :
       race && race.settled ? "On the November ballot" : "Running";
-    return '<section class="district-fact' + focusClass(n) + '">' +
+    return '<section class="district-fact' + focusClass(plan, n) + '">' +
       '<h4 class="district-fact-title"><span class="focus-swatch"></span>' +
       KYC.escapeHtml(seat(n)) + " on the " + KYC.escapeHtml(plan.title) + "</h4>" +
       (rec
@@ -1068,7 +1087,7 @@
     var unfiled = res && res.otherNominees && res.otherNominees.length ? res.otherNominees : [];
     var who = KYC.recordPhase() ? "In the " + raceYear(race) + " race" :
       race && race.settled ? "On the November ballot" : "Running in 2026";
-    return '<section class="district-fact' + focusClass(n) + '">' +
+    return '<section class="district-fact' + focusClass(plan, n) + '">' +
       '<h4 class="district-fact-title"><span class="focus-swatch"></span>' +
       KYC.escapeHtml(seat(n)) + "</h4>" +
       (held.length
@@ -1114,12 +1133,13 @@
       "</h3>" + statewide(plan) +
       (state.insets.length
         ? '<h3 class="plan-panel-title">Where districts are small</h3>' + insets(plan) : "");
-    if (focus.length) {
+    var mine = focusOf(plan);
+    if (mine.length) {
       if (!whole) {
         body += '<h3 class="plan-panel-title">Close-up: ' +
-          KYC.escapeHtml(focus.map(seat).join(", ")) + "</h3>" + closeup(plan);
+          KYC.escapeHtml(mine.map(seat).join(", ")) + "</h3>" + closeup(plan);
       }
-      body += '<div class="district-facts">' + focus.map(function (n) {
+      body += '<div class="district-facts">' + mine.map(function (n) {
         if (!redrawn()) return factOnly(plan, n);
         return index === 0 ? factOld(plan, n) : factNew(plan, n);
       }).join("") + "</div>";
@@ -1132,11 +1152,13 @@
     var expected = expectedWidth();
     if (expected) drawnAt = expected;
     el("planGrid").innerHTML = state.plans.map(planCard).join("");
+    var picked = focusOf(newPlan());
+    var same = !redrawn() || focusOf(state.plans[0]).join(",") === picked.join(",");
     Array.prototype.forEach.call(doc.querySelectorAll(".mover-group"), function (button) {
       button.setAttribute("aria-pressed",
-        String(button.getAttribute("data-focus") === focus.join(",")));
+        String(same && button.getAttribute("data-focus") === picked.join(",")));
     });
-    el("districtPick").value = focus.length === 1 ? String(focus[0]) : "";
+    el("districtPick").value = same && picked.length === 1 ? String(picked[0]) : "";
     // Text sizes depend on the drawn width, which only layout knows. One
     // redraw at most, so a width that flickers cannot loop.
     var measured = mapWidth();
@@ -1215,18 +1237,23 @@
     }
   }
 
-  function setFocus(list, opts) {
-    focus = list.slice(0, MAX_FOCUS);
+  /** Pick *list* on the 2026 map, and *was* on the old one - the same
+   *  numbers when it is not given: a click on district 6 picks 6 on both. */
+  function setFocus(list, opts, was) {
+    focusBy = {};
+    focusBy[newPlan().key] = list.slice(0, MAX_FOCUS);
+    if (redrawn()) focusBy[state.plans[0].key] = (was || list).slice(0, MAX_FOCUS);
     render();
     if (!(opts && opts.fromRoute)) {
-      KYC.router.writeFilters({ d: focus.join(",") });
+      var now = focusOf(newPlan()).join(","), old = focusOf(state.plans[0]).join(",");
+      KYC.router.writeFilters({ d: now, was: old !== now ? old : "" });
     }
   }
 
-  function parseFocus(value) {
+  function parseFocus(value, plan) {
     var seen = {};
     var valid = {};
-    numbers(newPlan()).forEach(function (n) { valid[n] = true; });
+    numbers(plan || newPlan()).forEach(function (n) { valid[n] = true; });
     return String(value || "").split(",").map(function (s) {
       return /^\s*\d+\s*$/.test(s) ? parseInt(s, 10) : NaN;
     }).filter(function (n) {
@@ -1276,7 +1303,7 @@
         'aria-describedby="locateNote">', KYC.icon("pin"), " Find my district</button>",
         '<span class="field-note" id="locateNote">Your location is placed on this map on your ',
         "device and is never sent anywhere.</span>",
-        '<p class="state-note" id="locateResult" role="status" aria-live="polite" hidden></p></div>'
+        '<div class="state-note" id="locateResult" role="status" aria-live="polite" hidden></div></div>'
       );
     }
     html.push(
@@ -1298,7 +1325,7 @@
     if (redrawn()) {
       html.push(
         '<label class="districts-toggle"><input type="checkbox" id="ghostToggle" checked> ',
-        "Dashed: the same districts' lines on the other map</label>"
+        "Dashed: the picked districts on the other map</label>"
       );
     }
     html.push("</div>");
@@ -1400,6 +1427,7 @@
       var n = parseInt(shape.getAttribute("data-district"), 10);
       var compare = el("compareToggle");
       if (event.shiftKey || event.ctrlKey || event.metaKey || (compare && compare.checked)) {
+        var focus = focusOf(newPlan());
         var next = focus.indexOf(n) === -1 ? focus.concat([n])
           : focus.filter(function (m) { return m !== n; });
         setFocus(next.length > MAX_FOCUS ? next.slice(1) : next);
@@ -1433,7 +1461,12 @@
     if (KYC.profile.isOpen()) KYC.profile.close();
     var wanted = parseFocus(route.params.d);
     if (!wanted.length) wanted = defaults;
-    if (wanted.join(",") !== focus.join(",")) setFocus(wanted, { fromRoute: true });
+    var was = redrawn() ? parseFocus(route.params.was, state.plans[0]) : [];
+    if (!was.length) was = wanted;
+    if (wanted.join(",") !== focusOf(newPlan()).join(",") ||
+        (redrawn() && was.join(",") !== focusOf(state.plans[0]).join(","))) {
+      setFocus(wanted, { fromRoute: true }, was);
+    }
   }
 
   KYC.districtMap = { project: project, locate: locate };
@@ -1470,7 +1503,9 @@
 
     var initial = KYC.router.read();
     var wanted = initial.view === "list" ? parseFocus(initial.params.d) : [];
-    setFocus(wanted.length ? wanted : defaults, { fromRoute: true });
+    var was = initial.view === "list" && redrawn()
+      ? parseFocus(initial.params.was, state.plans[0]) : [];
+    setFocus(wanted.length ? wanted : defaults, { fromRoute: true }, was.length ? was : null);
     if (initial.view === "profile") KYC.profile.open(initial.id, { fromRoute: true });
     KYC.router.onChange(function () { applyRoute(KYC.router.read(), defaults); });
   });

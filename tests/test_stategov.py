@@ -274,12 +274,48 @@ class TestControl(unittest.TestCase):
             with self.assertRaises(stategov.StateGovError):
                 stategov.build(empty)
 
-    def test_a_heavy_or_unmeasured_headshot_is_left_off(self):
+    def test_a_heavy_headshot_is_shown_smaller_and_an_unmeasured_one_not_at_all(self):
+        """TECH-13: 27 of the NGA's 55 headshots weighed 320 KB-7.6 MB, for a
+        40-72px circle; a 1 MB cap let 25 of them through."""
         base = {"name": "A", "party": "Republican", "partyKey": "R", "profile": "p", "terms": [],
                 "headshot": "https://www.nga.org/x.jpg"}
-        self.assertIn("headshot", stategov._governor(dict(base, headshotBytes=400_000)))
-        self.assertNotIn("headshot", stategov._governor(dict(base, headshotBytes=7_617_284)))
+        light = {"bytes": 120_000, "width": 800, "height": 800}
+        heavy = {"bytes": 981_392, "width": 2000, "height": 3000}
+        small = ("https://i0.wp.com/www.nga.org/x.jpg?w=500&ssl=1",
+                 {"bytes": 50_450, "width": 500, "height": 750})
+        self.assertEqual(stategov._governor(dict(base, headshotWeight=light))["headshot"],
+                         base["headshot"])
+        self.assertNotIn("headshot", stategov._governor(dict(base, headshotWeight=heavy)))
+        self.assertNotIn("headshot", stategov._governor(dict(base, headshotBytes=400_000)))
         self.assertNotIn("headshot", stategov._governor(dict(base, headshotBytes=None)))
+        shown = stategov._governor(dict(base, headshotWeight=heavy, headshotSmall=small[0],
+                                        headshotSmallWeight=small[1]))
+        self.assertEqual(shown["headshot"], small[0])
+        self.assertEqual(shown["headshotBy"], "National Governors Association")
+
+    def test_a_headshot_is_weighed_and_found_smaller_in_the_same_file(self):
+        from unittest import mock
+        url = "https://www.nga.org/wp-content/uploads/2019/01/Gov-Mike-DeWine.jpg"
+        photon = "https://i0.wp.com/www.nga.org/wp-content/uploads/2019/01/Gov-Mike-DeWine.jpg"
+        weights = {url: {"bytes": 7_617_284, "width": 3930, "height": 4912},
+                   photon + "?w=500&ssl=1": {"bytes": 47_104, "width": 500, "height": 624}}
+        gov = {"headshot": url}
+        with mock.patch.object(executives.time, "sleep"):
+            executives.weigh_headshot(gov, weigh=weights.get)
+        self.assertEqual(gov["headshotSmall"], photon + "?w=500&ssl=1")
+        self.assertEqual(stategov.headshot(gov), photon + "?w=500&ssl=1")
+        # Unreadable now: the last weights read of the same file stand (rule 8).
+        again = {"headshot": url}
+        with mock.patch.object(executives.time, "sleep"):
+            executives.weigh_headshot(again, old=gov, weigh=lambda u: None)
+        self.assertEqual(again["headshotSmall"], gov["headshotSmall"])
+        # A resizer answering with some other picture is not taken.
+        odd = {"headshot": url}
+        with mock.patch.object(executives.time, "sleep"):
+            executives.weigh_headshot(odd, weigh=lambda u: weights[url] if u == url else
+                                      {"bytes": 9_000, "width": 500, "height": 500})
+        self.assertNotIn("headshotSmall", odd)
+        self.assertEqual(stategov.headshot(odd), "")
 
 
 class TestNcsl(unittest.TestCase):
@@ -337,11 +373,20 @@ class TestCommitted(unittest.TestCase):
                 self.assertTrue(ours.get("note") or ours["trifecta"] == "disputed", code)
 
     def test_no_headshot_on_the_page_is_heavier_than_the_cap(self):
+        from kyc.photos import too_heavy
         cache = executives.load_cache(ROOT)["governors"]
         payload, _ = stategov.build(ROOT)
         for code, entry in payload["states"].items():
-            if entry["governor"].get("headshot"):
-                self.assertLessEqual(cache[code]["headshotBytes"], stategov.HEADSHOT_MAX_BYTES, code)
+            # The NGA's; a governor's own office's is weighed in its
+            # overrides.OFFICER_PHOTOS entry (TestOfficerPhotos).
+            shown = entry["governor"].get("headshot")
+            if shown and not entry["governor"].get("headshotPage"):
+                gov = cache[code]
+                weight = (gov.get("headshotWeight") if shown == gov["headshot"]
+                          else gov.get("headshotSmallWeight"))
+                self.assertIn(shown, (gov["headshot"], gov.get("headshotSmall")), code)
+                self.assertEqual(too_heavy(weight), "", code)
+                self.assertIsNotNone(weight, code)
 
 
 class TestOfficeLinks(unittest.TestCase):
@@ -370,6 +415,77 @@ class TestOfficeLinks(unittest.TestCase):
     def test_the_build_applies_every_entry(self):
         _payload, problems = stategov.build(ROOT)
         self.assertFalse([p for p in problems if "OFFICE_LINKS" in p], problems)
+
+
+class TestOfficerPhotos(unittest.TestCase):
+    """STATEGOV-13: no attorney general had a photograph, and two governors,
+    a lieutenant governor and six secretaries of state had none."""
+
+    def entry(self, **who):
+        from kyc.overrides import OFFICER_PHOTOS
+        (code, office), photo = next((k, v) for k, v in sorted(OFFICER_PHOTOS.items())
+                                     if k[1] == who.get("office", "sos"))
+        return code, office, photo
+
+    def test_a_photograph_is_given_while_the_roster_names_its_person(self):
+        code, office, photo = self.entry()
+        entry = {office: {"name": photo["name"]}}
+        self.assertEqual(stategov.officer_photos(code, entry), [])
+        self.assertEqual(entry[office]["photo"], photo["photo"])
+        self.assertEqual(entry[office]["photoBy"], photo["by"])
+        self.assertEqual(entry[office]["photoPage"], photo["page"])
+
+    def test_a_new_holder_gets_no_ones_photograph_and_it_is_said(self):
+        code, office, _photo = self.entry()
+        entry = {office: {"name": "Somebody Else"}}
+        problems = stategov.officer_photos(code, entry)
+        self.assertNotIn("photo", entry[office])
+        self.assertTrue(problems and "no photograph is shown" in problems[0], problems)
+        unconfirmed = {office: {"name": _photo["name"], "unconfirmed": True}}
+        stategov.officer_photos(code, unconfirmed)
+        self.assertNotIn("photo", unconfirmed[office])
+
+    def test_a_governors_photograph_is_a_headshot_and_the_roster_s_own_stands(self):
+        from unittest import mock
+
+        from kyc import overrides
+        code, photo = "ZZ", overrides._officer_photo(
+            "Pat Doe", "https://gov.example.gov/doe.jpg", "https://gov.example.gov/",
+            "Office of the Governor", (60_000, 320, 320), "The governor's home page.")
+        patch = mock.patch.dict(overrides.OFFICER_PHOTOS, {(code, "governor"): photo})
+        patch.start()
+        self.addCleanup(patch.stop)
+        entry = {"governor": {"name": photo["name"]}}
+        stategov.officer_photos(code, entry)
+        self.assertEqual(entry["governor"]["headshot"], photo["photo"])
+        own = {"governor": {"name": photo["name"], "headshot": "https://www.nga.org/x.jpg"}}
+        problems = stategov.officer_photos(code, own)
+        self.assertEqual(own["governor"]["headshot"], "https://www.nga.org/x.jpg")
+        self.assertTrue(problems and "may be unneeded" in problems[0], problems)
+
+    def test_every_entry_is_a_light_photograph_carrying_its_evidence(self):
+        from kyc.overrides import OFFICER_PHOTOS
+        from kyc.photos import too_heavy
+        for (code, office), photo in OFFICER_PHOTOS.items():
+            with self.subTest(code=code, office=office):
+                self.assertIn(office, ("governor", "lt", "ag", "sos"))
+                self.assertTrue(photo["photo"].startswith("https://"))
+                self.assertTrue(photo["page"].startswith("https://"))
+                self.assertTrue(photo["by"] and photo["evidence"])
+                self.assertRegex(photo["checked"], r"^\d{4}-\d{2}-\d{2}$")
+                self.assertEqual(too_heavy(photo["weight"]), "")
+                self.assertLessEqual(photo["weight"]["bytes"], 300_000)
+
+    def test_no_headshot_or_photograph_is_shown_uncredited(self):
+        payload, _ = stategov.build(ROOT)
+        for code, entry in payload["states"].items():
+            gov = entry["governor"]
+            if gov.get("headshot"):
+                self.assertTrue(gov.get("headshotBy"), code)
+            for office in ("lt", "ag", "sos"):
+                person = entry.get(office) or {}
+                if person.get("photo"):
+                    self.assertTrue(person.get("photoBy"), (code, office))
 
 
 if __name__ == "__main__":

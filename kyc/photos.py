@@ -15,6 +15,8 @@ nominees. Behind every member's official sources sat the same guess -
 "Al_Green.jpg" is the singer - one outage away from the page (rule 24).
 """
 
+import re
+
 from .normalize import is_missing
 from .overrides import CANDIDATE_PHOTOS
 
@@ -76,3 +78,192 @@ def candidate_photos(name, state):
 def is_guessed(url):
     """True for a URL that reaches a file by a name, not an id."""
     return any(marker in str(url or "") for marker in GUESSED_PHOTO_MARKERS)
+
+
+# Whose photograph a government portrait is, by the host that serves it. A
+# profile's credit names the source of the photograph it shows (TRUST-08):
+# the House's official portrait is the House's, not "Congress.gov", which is
+# what the footer said of every portrait before.
+HOST_CREDITS = {
+    "clerk.house.gov": "U.S. House of Representatives",
+    "www.congress.gov": "Congress.gov",
+    "unitedstates.github.io": "U.S. Government Publishing Office",
+    "bioguide.congress.gov": "Biographical Directory of the U.S. Congress",
+}
+
+# The heaviest single-file portrait taken from a campaign's site, and the
+# widest. The largest the page draws is a 165px card, 330px on a 2x screen;
+# one site's 1.3 MB, 876px PNG was downloaded for that card (TECH-13).
+MAX_PORTRAIT_BYTES = 300_000
+MAX_PORTRAIT_PX = 1200
+
+
+def too_heavy(weight):
+    """Why a measured portrait is too heavy to show, or ``""``. An unmeasured
+    one (``None``) is not: unknown is not too big (rule 8)."""
+    if not weight:
+        return ""
+    if (weight.get("bytes") or 0) > MAX_PORTRAIT_BYTES:
+        return f"{weight['bytes'] // 1000} KB, over {MAX_PORTRAIT_BYTES // 1000} KB"
+    if max(weight.get("width") or 0, weight.get("height") or 0) > MAX_PORTRAIT_PX:
+        return (f"{weight.get('width')}x{weight.get('height')}px, over "
+                f"{MAX_PORTRAIT_PX}px")
+    return ""
+
+
+def host_of(url):
+    import urllib.parse
+    try:
+        return (urllib.parse.urlsplit(str(url or "")).hostname or "").lower()
+    except ValueError:
+        return ""
+
+
+def host_credit(url):
+    """The credit for a government portrait at *url*, or ``None``."""
+    by = HOST_CREDITS.get(host_of(url))
+    return {"by": by} if by else None
+
+
+def campaign_credit(site):
+    """The credit for a photograph taken from the campaign's own site."""
+    host = host_of(site)
+    if host.startswith("www."):
+        host = host[4:]
+    return {"by": f"the campaign's website ({host})" if host else "the campaign's website",
+            "page": site or None}
+
+
+def assign_credits(profiles):
+    """Give every profile whose chain starts with a photograph the credit
+    for that photograph; returns how many have one.
+
+    A Wikimedia portrait's credit comes with it from the portrait cache
+    (``portraits.apply_cache``) and a campaign's from the enrichment cache
+    (``enrich.apply_cache``); a government portrait's is its host's. A
+    profile that shows the silhouette carries none."""
+    credited = 0
+    for profile in profiles:
+        first = (profile.get("photos") or [PLACEHOLDER])[0]
+        if first == PLACEHOLDER:
+            profile.pop("photoCredit", None)
+            continue
+        if profile.get("photoSource") in ("wikipedia", "cross-link", "campaign-site") \
+                and profile.get("photoCredit"):
+            credited += 1
+            continue
+        credit = host_credit(first)
+        if credit:
+            profile["photoCredit"] = credit
+            credited += 1
+        else:
+            profile.pop("photoCredit", None)
+    return credited
+
+
+SMALLER_WIDTH = 500
+# The widths a heavy file is asked for, widest first: 500px is sharp in any
+# box the pages draw, 330px is a 165px card on a 2x screen, and a PNG that
+# is still too heavy at 500 usually is not at 330.
+SMALLER_WIDTHS = (500, 330)
+PHOTON_HOSTS = ("i0.wp.com", "i1.wp.com", "i2.wp.com", "i3.wp.com")
+SQUARESPACE_WIDTHS = (100, 300, 500, 750, 1000, 1500, 2500)
+
+
+def host_resized(url, width=SMALLER_WIDTH):
+    """*url* at *width* pixels wide from its host's own resizing service, or
+    ``None``. Squarespace's image CDN (``format=500w``), imgix and
+    WordPress.com's Photon (``w=500``, on ``i0.wp.com`` and its siblings)
+    serve any upload at a width asked for: the same file, so the same
+    photograph (rule 42), checked again for shape and weight before it is
+    taken."""
+    import urllib.parse
+
+    try:
+        parts = urllib.parse.urlsplit(str(url or ""))
+    except ValueError:
+        return None
+    host = (parts.hostname or "").lower()
+    query = urllib.parse.parse_qsl(parts.query, keep_blank_values=True)
+    if host == "images.squarespace-cdn.com":
+        # Squarespace serves a fixed set of widths and the original for any
+        # other: the widest of its set no wider than asked.
+        width = max((w for w in SQUARESPACE_WIDTHS if w <= width), default=SQUARESPACE_WIDTHS[0])
+        query = [(k, v) for k, v in query if k != "format"] + [("format", f"{width}w")]
+    elif host.endswith(".imgix.net") or host in PHOTON_HOSTS:
+        query = [(k, v) for k, v in query if k not in ("w", "resize", "fit")] + [("w", str(width))]
+    else:
+        return None
+    smaller = urllib.parse.urlunsplit(parts._replace(query=urllib.parse.urlencode(query)))
+    return smaller if smaller != url else None
+
+
+def photon_form(url, width=SMALLER_WIDTH):
+    """*url* at *width* pixels wide through WordPress.com's public image
+    resizer (Photon, ``i0.wp.com/<host>/<path>?w=``), or ``None``.
+
+    Photon fetches the very file at that address and scales it, so what it
+    serves is the same photograph (rule 42), and it answers 404 for a file
+    that is not there, never another image. It is used for a file whose own
+    host has no resizer: eleven November nominees' only portraits were
+    campaign uploads of 1-2.6 MB or 2,048px, and 27 governors' NGA
+    headshots ran 320 KB to 7.6 MB for a 40px circle (TECH-13). Only a plain
+    https address of an image file is asked for: Photon drops a query
+    string, which could name another file."""
+    import urllib.parse
+
+    try:
+        parts = urllib.parse.urlsplit(str(url or ""))
+    except ValueError:
+        return None
+    host = (parts.hostname or "").lower()
+    if (parts.scheme != "https" or not host or parts.query or parts.port
+            or host in PHOTON_HOSTS or host.endswith(".imgix.net")
+            or host == "images.squarespace-cdn.com"
+            or not re.search(r"\.(?:jpe?g|png|gif|webp)$", parts.path, re.I)):
+        return None
+    return f"https://i0.wp.com/{host}{parts.path}?w={int(width)}&ssl=1"
+
+
+def smaller_form(url, width=SMALLER_WIDTH):
+    """*url* at *width* pixels wide: from its host's own resizer
+    (:func:`host_resized`), or else through Photon (:func:`photon_form`);
+    ``None`` when neither serves it. Nothing is guessed - no size suffix a
+    host might have generated - and whatever comes back is weighed and
+    checked for shape before it is used."""
+    return host_resized(url, width) or photon_form(url, width)
+
+
+def smaller_forms(url):
+    """:func:`smaller_form` at each of :data:`SMALLER_WIDTHS`, widest first."""
+    out = []
+    for width in SMALLER_WIDTHS:
+        form = smaller_form(url, width)
+        if form and form not in out:
+            out.append(form)
+    return out
+
+
+def same_shape(original, smaller):
+    """Whether *smaller* (a weight: ``{"bytes", "width", "height"}``) is
+    *original* scaled down: narrower, at the same proportions to within 2%
+    (a resizer rounds a pixel). A resizer that answered with some other
+    image - a placeholder, an error picture - has some other shape."""
+    try:
+        ratio = original["width"] / original["height"]
+        scaled = smaller["width"] / smaller["height"]
+    except (KeyError, TypeError, ZeroDivisionError):
+        return False
+    return smaller["width"] < original["width"] and abs(scaled - ratio) <= 0.02 * ratio
+
+
+def lighter_form(url, weight, weigh):
+    """``(form, its weight)``: the widest of :func:`smaller_forms` of *url*
+    that is within the caps (:func:`too_heavy`) and is the same picture
+    scaled (:func:`same_shape` against *weight*, the original's), or
+    ``None``. *weigh* reads a URL's weight, ``None`` when it cannot."""
+    for form in smaller_forms(url):
+        found = weigh(form)
+        if found and not too_heavy(found) and same_shape(weight, found):
+            return form, found
+    return None
