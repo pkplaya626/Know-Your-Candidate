@@ -334,7 +334,10 @@ def stale_name_forms(states):
         entry = states.get(code) or {}
         holder = (entry.get(key) or {}).get("name")
         item = ((entry.get("ballot2026") or {}).get("offices") or {}).get(key) or {}
-        names = [p["name"] for p in (item.get("candidates") or {}).get("candidates", ())]
+        # The list's own form: the page shows "Joseph Lombardo", printed as
+        # "Lombardo, Joseph".
+        names = [p.get("printed") or p["name"]
+                 for p in (item.get("candidates") or {}).get("candidates", ())]
         if holder != name or form not in names:
             out.append(f"{code} {key}: overrides.STATEWIDE_NAME_FORMS is for {name} as "
                        f"'{form}'; the rosters name {holder or 'nobody'} and the list "
@@ -362,10 +365,8 @@ def holder_line(code, key, holder, terms, listed):
         if status["why"] == "listed":
             return ballot2026.unchecked(holder), (
                 f"{code} {key}: OPEN_SEATS says {holder} is term-limited; "
-                f"{status['cite']}'s list names them; neither is shown")
-        return dict(seat, then={"text": "is not on the " + ("certified " if status["certified"]
-                                                           else "") +
-                                "list of candidates for this office",
+                f"{status['cite']} names them; neither is shown")
+        return dict(seat, then={"text": "is not among the candidates for this office",
                                 "source": status["source"], "cite": status["cite"]}), problem
     if seat and seat["why"] in ("not-listed", "listed") and seat["why"] != status["why"]:
         return ballot2026.unchecked(holder), (
@@ -450,7 +451,7 @@ def build(root="."):
                     item["holderStatus"] = status
                 if listed:
                     item["candidates"] = statewide.for_page(
-                        listed, status.get("name") if status and status["why"] == "listed"
+                        code, listed, status.get("name") if status and status["why"] == "listed"
                         else None)
         if code in STATES:
             entry.update(_legislature(code, legislators.get(code, []), ncsl["states"].get(code),

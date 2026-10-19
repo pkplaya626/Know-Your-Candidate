@@ -649,10 +649,12 @@
     if (territory) {
       // A territory's own record covers its governor only (ballot2026.TERRITORIES):
       // its legislature and local offices are not in it, and are said so.
+      var named = KYC.stategov && KYC.stategov.listsCandidates(code);
       return (list
         ? "Of the territorial offices this site covers, the same ballot also elects the " +
           KYC.escapeHtml(list.replace(/^the /, "")) + " (see " +
-          '<a class="state-jump" href="#state-government">Territorial government</a>). '
+          '<a class="state-jump" href="#state-government">Territorial government</a>' +
+          (named ? ", which lists the candidates for " + KYC.escapeHtml(named) : "") + "). "
         : list === "" ? KYC.escapeHtml(name) + " does not elect its governor in 2026. " : "") +
         "Your ballot may also hold territorial and local contests, such as for the " +
         "legislature, which this site does not list.";
@@ -673,8 +675,8 @@
       KYC.escapeHtml(list) + " (see " +
       '<a class="state-jump" href="#state-government">State government</a>). It may also hold ' +
       rest + ". " + (listed
-        ? "This site lists the candidates for Congress here, and those for the governor and " +
-          "statewide officers under State government; not those for the legislature."
+        ? "This site lists the candidates for Congress here, and those for " +
+          KYC.escapeHtml(listed) + " under State government; not those for the legislature."
         : "This site lists the candidates for Congress only.");
   }
 

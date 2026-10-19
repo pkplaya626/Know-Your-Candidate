@@ -691,7 +691,12 @@
      * linked to the state page that lists them. Never to a profile card of
      * the same name: the list gives no id that says it is the same person
      * (rule 25). A holder the list names is already listed above, for the
-     * office they hold. */
+     * office they hold. The name is the one the page shows; the list's own
+     * form ("Lombardo, Joseph") still finds them. From the day after the
+     * election it is in the past tense, as the state page's block is: this
+     * site names no state winner, and a new governor's row beside "Was a
+     * candidate" is two true things, not one person counted twice. */
+    var past = KYC.electionStatus(2026).phase === "post-election";
     Object.keys(states).forEach(function (code) {
       var offices = (states[code].ballot2026 || {}).offices || {};
       STATE_OFFICES.forEach(function (pair) {
@@ -699,9 +704,11 @@
         if (!item || !item.up || !item.candidates) return;
         item.candidates.candidates.forEach(function (c) {
           if (c.holder && namedHolder(states[code][pair[0]])) return;
-          add({ name: c.name, state: code, kind: "candidate",
-                role: (c.writeIn ? "Write-in candidate for " : "Candidate for ") + pair[1] + ", " +
-                  KYC.stateName(code) + " (Nov 3, 2026 ballot)",
+          var what = (c.writeIn ? "write-in candidate for " : "candidate for ") + pair[1] + ", " +
+            KYC.stateName(code);
+          add({ name: c.name, alt: c.printed, state: code, kind: "candidate",
+                role: past ? "Was a " + what + ", on the Nov 3, 2026 ballot"
+                  : what.charAt(0).toUpperCase() + what.slice(1) + " (Nov 3, 2026 ballot)",
                 href: KYC.stateUrl(code) + "#state-government" });
         });
       });
@@ -814,18 +821,35 @@
       KYC.escapeHtml(KYC.dateWords(row.left)) + ". " + now + "</span></li>";
   }
 
+  function officialRows(hits) {
+    return '<ul class="official-list">' + hits.map(function (h) {
+      var row = h.row;
+      return '<li class="official-row"><a class="official-name" href="' +
+        KYC.escapeAttr(row.href) + '">' + KYC.escapeHtml(row.name) + "</a> " +
+        '<span class="official-role">' + KYC.escapeHtml(row.role) + "</span></li>";
+    }).join("") + "</ul>";
+  }
+
+  /* Officials, then the statewide candidates under their own heading: a
+   * candidate who holds no office is not an "official" (PR #109 review). */
   function officialList(found) {
-    return '<h2 class="official-results-title">Other officials</h2>' +
-      '<p class="official-results-note">Listed for the office they hold now, or the statewide ' +
-      "office they are a candidate for, each linked to the page about it. Anyone also running " +
-      "for Congress has a profile card as well; a candidate here is not matched to a card by " +
-      "name.</p>" +
-      '<ul class="official-list">' + found.slice(0, OFFICIAL_LIMIT).map(function (h) {
-        var row = h.row;
-        return '<li class="official-row"><a class="official-name" href="' +
-          KYC.escapeAttr(row.href) + '">' + KYC.escapeHtml(row.name) + "</a> " +
-          '<span class="official-role">' + KYC.escapeHtml(row.role) + "</span></li>";
-      }).join("") + "</ul>" +
+    var shown = found.slice(0, OFFICIAL_LIMIT);
+    var held = shown.filter(function (h) { return h.row.kind !== "candidate"; });
+    var running = shown.filter(function (h) { return h.row.kind === "candidate"; });
+    var past = KYC.electionStatus(2026).phase === "post-election";
+    return (held.length
+      ? '<h2 class="official-results-title">Other officials</h2>' +
+        '<p class="official-results-note">Listed for the office they hold now, each linked to ' +
+        "the page about it. Anyone also running for Congress has a profile card as well.</p>" +
+        officialRows(held)
+      : "") +
+      (running.length
+        ? '<h2 class="official-results-title official-candidates-title">Statewide candidates ' +
+          (past ? "who were " : "") + "on the Nov 3, 2026 ballot</h2>" +
+          '<p class="official-results-note">As each election office’s list names them, each ' +
+          "linked to the state page that lists them. A candidate here is not matched to a " +
+          "profile card by name: the lists carry no id.</p>" + officialRows(running)
+        : "") +
       (found.length > OFFICIAL_LIMIT
         ? '<p class="official-results-note">' + (found.length - OFFICIAL_LIMIT).toLocaleString() +
           ' more. The <a href="federal/index.html#courts">federal page</a> searches every judge, ' +

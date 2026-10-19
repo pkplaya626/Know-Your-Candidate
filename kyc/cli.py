@@ -399,7 +399,8 @@ def _build(args):
     listed = statewide_mod.stats(statewide_mod.load(args.root))
     print(f"[ok] statewide candidates: {listed['candidates']} on the ballot and "
           f"{listed['writeIns']} write-ins for {listed['offices']} offices; "
-          f"{listed['uncertified']} list(s) not certified")
+          f"{listed['certified']} list(s) whose own words certify them, "
+          f"{listed['notState']} not the state's own")
 
     # The federal executive and courts (kyc/federal_build.py): one file for
     # the hub, one per court, each rewritten only when what it says changed.

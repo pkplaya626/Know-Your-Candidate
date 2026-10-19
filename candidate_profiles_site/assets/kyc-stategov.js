@@ -226,16 +226,23 @@
 
   /* ------------------------------------------- the candidates on the ballot */
 
-  /* A write-in's "party" that says only that it is a write-in is dropped in
-   * the pipeline (statewide.for_page); what is left is as the list prints it. */
+  /* One candidate as the pipeline writes them (statewide.for_page): the
+   * name first name first and in ordinary capitals, with the list's own
+   * form on hover (`printed`); the party in words, never the list's code;
+   * a write-in's "party" that says only that it is a write-in dropped. A
+   * candidate with a record of their own (Pennsylvania's lieutenant
+   * governors) is linked to it. */
   function candidateRow(person, key) {
     // A joint ticket: the governor's list names the running mate for
     // lieutenant governor, and the lieutenant governor's the governor.
     var mate = !person.runningMate ? ""
       : key === "lt" ? ", running with " + KYC.escapeHtml(person.runningMate) + " for governor"
       : ", with " + KYC.escapeHtml(person.runningMate) + " for lieutenant governor";
-    return '<li class="gov-candidate"><span class="gov-candidate-name">' + KYC.escapeHtml(person.name) +
-      "</span>" +
+    var name = person.record ? link(person.record, person.name) : KYC.escapeHtml(person.name);
+    return '<li class="gov-candidate"><span class="gov-candidate-name"' +
+      (person.printed ? ' title="' + KYC.escapeAttr("The list prints: " + person.printed) + '"' : "") +
+      ">" + name + "</span>" +
+      (person.surnameOnly ? ' <span class="faint">(the list gives a surname only)</span>' : "") +
       (person.party ? ' <span class="gov-candidate-party">(' + KYC.escapeHtml(person.party) + ")</span>" : "") +
       mate +
       (person.ballotName ? '<span class="faint">; printed on the ballot as “' +
@@ -276,24 +283,31 @@
     var printed = list.candidates.filter(function (p) { return !p.writeIn; });
     var writeIns = list.candidates.filter(function (p) { return p.writeIn; });
     var row = function (p) { return candidateRow(p, key); };
-    var credit = (list.certified ? "Certified by the " : "Listed by the ") + link(list.url, list.by) +
+    // The document is named as what it is - "the Florida Division of
+    // Elections’ candidate listing", "Clark County Registrar of Voters’
+    // notice of general election" - and called certified only where its
+    // own words say so (statewide.source_words; PR #109 review).
+    var credit = "Source: " + link(list.url, list.source) +
       " (read " + KYC.escapeHtml(KYC.dateWords(list.read)) + ")" +
       (list.writeIns && list.writeIns.url !== list.url
-        ? "; write-in candidates from " + link(list.writeIns.url, "the " + list.writeIns.by +
-          "’s list of them") + " (read " + KYC.escapeHtml(KYC.dateWords(list.writeIns.read)) + ")"
+        ? "; write-in candidates: " + link(list.writeIns.url, list.writeIns.source) +
+          " (read " + KYC.escapeHtml(KYC.dateWords(list.writeIns.read)) + ")"
         : "") + ".";
+    var recased = list.candidates.some(function (p) { return p.printed; });
     return '<div class="gov-candidates">' +
       '<p class="gov-candidates-head">' + (past ? "Candidates who were on the Nov 3, 2026 ballot"
         : "Candidates on the Nov 3, 2026 ballot") + "</p>" +
-      (list.uncertified ? '<p class="gov-candidates-uncertified">Not a certified statewide list. ' +
-        KYC.escapeHtml(list.uncertified) + ".</p>" : "") +
+      (list.notStateList ? '<p class="gov-candidates-uncertified">Not the state’s own list. ' +
+        KYC.escapeHtml(list.notStateList) + ".</p>" : "") +
       '<ul class="gov-candidate-list">' + printed.map(row).join("") + "</ul>" +
       (writeIns.length
         ? '<p class="gov-candidates-head gov-writein-head">Write-in candidates (' +
           (past ? "their names were" : "names") + " not printed on the ballot)</p>" +
           '<ul class="gov-candidate-list gov-writein-list">' + writeIns.map(row).join("") + "</ul>"
         : "") +
-      '<p class="faint gov-candidates-source">Listed by surname, not in ballot order. ' + credit +
+      '<p class="faint gov-candidates-source">In surname order, not ballot order. ' +
+        (recased ? "Names are written first name first, in ordinary capitals and without a " +
+          "title the ballot prints; the list writes them its own way. " : "") + credit +
         (past ? resultsLine(code) : "") + "</p></div>";
   }
 
@@ -390,9 +404,10 @@
       // off (rule 91): said in words; the colour stays the sitting
       // governor's party, as the legend says.
       var hs = ballot(code).offices.governor.holderStatus;
-      var open = !after() && hs && hs.holder === gov.name &&
-        (hs.why === "not-listed" || (hs.why === "term-limit" && hs.then))
-        ? "; open seat: " + gov.name + " is not on the list of candidates" : "";
+      var said = hs && (hs.why === "not-listed" ? hs : hs.why === "term-limit" ? hs.then : null);
+      // The list is named, as every other such claim on the site names it.
+      var open = !after() && hs && hs.holder === gov.name && said
+        ? "; open seat: " + gov.name + " is not among the candidates on " + said.cite : "";
       return ballot(code).offices.governor.up
         ? { fill: FILL[gov.partyKey] || FILL.I,
             text: name + ": the governor " +
@@ -718,8 +733,8 @@
         "election office, linked from each mark (checked " +
         KYC.escapeHtml(KYC.dateWords((data.sources.ballot2026 || [])[2] || "")) + "). " +
         (["governor", "lt", "ag", "sos"].some(function (k) { return (ballotItem(code, k) || {}).candidates; })
-          ? "The candidates for each office on it: the election office's own list, credited under " +
-            "the office. " : "") : "") +
+          ? "The candidates for each office on it: an election office's list, named under the " +
+            "office as the document it is. " : "") : "") +
       // Only which party holds each chamber is compared with NCSL; the seat
       // counts are Open States' own (stategov.filled_where_vacant reports
       // where the two counts part).
@@ -805,12 +820,16 @@
     if (global.document.getElementById("legislatureDirectory")) directory();
   });
 
-  /** Does the state's page list candidates for any office on its ballot? */
+  /** The offices on the state's ballot whose candidates its page lists, in
+   *  words ("the attorney general and secretary of state"), or "". The
+   *  sentence that says so named "the governor" in states that elect none
+   *  (PR #109 review). */
   function listsCandidates(code) {
-    return ["governor", "lt", "ag", "sos"].some(function (k) {
+    var offices = ["governor", "lt", "ag", "sos"].filter(function (k) {
       var item = ballotItem(code, k);
       return !!(item && item.up && item.candidates);
-    });
+    }).map(function (k) { return BALLOT_WORD[k]; });
+    return offices.length ? "the " + andList(offices) : "";
   }
 
   KYC.stategov = {

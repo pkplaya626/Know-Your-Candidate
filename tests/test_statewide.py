@@ -20,9 +20,10 @@ LIST = "https://sos.ga.gov/a-list.pdf"
 def office(**over):
     """A synthetic Georgia governor's list that keeps every rule."""
     out = {
-        "title": "Governor", "certified": True,
+        "title": "Governor", "certified": False,
         "list": {"url": LIST, "title": "A list", "quote": "Governor | Pat Example | R",
-                 "by": "Georgia Secretary of State", "dated": None, "read": "2026-10-18"},
+                 "by": "Georgia Secretary of State", "dated": None, "read": "2026-10-18",
+                 "kind": "candidate list"},
         "holderResearched": "Brian Kemp", "holderOnList": False,
         "candidates": [
             {"name": "Pat Example", "surname": "Example", "party": "R", "runningMate": None,
@@ -85,9 +86,57 @@ class TestTheCache(unittest.TestCase):
         self.assertIn("no quote", found)
         self.assertIn("is not a date", found)
 
-    def test_a_list_that_is_not_certified_says_why(self):
-        self.assertIn("must say why", self.broken(
-            lambda c: c["states"]["GA"]["offices"]["lt"].update(certified=False)))
+    def test_a_list_names_the_kind_of_document_it_is(self):
+        self.assertIn("the source has no kind", self.broken(
+            lambda c: c["states"]["GA"]["offices"]["lt"]["list"].pop("kind")))
+
+    # "Certified" is the document's word, never the researcher's (PR #109
+    # review: a county's sample ballot read "Certified by" the county).
+    def test_certified_needs_the_documents_own_words(self):
+        self.assertIn("needs the document's own words", self.broken(
+            lambda c: c["states"]["GA"]["offices"]["lt"].update(certified=True)))
+
+        def unrecorded(c):
+            c["states"]["GA"]["offices"]["lt"].update(certified=True,
+                                                      certifiedQuote="certified by nobody")
+        self.assertIn("needs the document's own words", self.broken(unrecorded))
+
+        def stray(c):
+            c["states"]["CA"]["offices"]["lt"]["certified"] = False
+        found = self.broken(stray)
+        self.assertIn("'certifiedQuote' on a list not marked certified", found)
+        self.assertIn("says certified; the list is not marked so", found)
+
+    def test_a_county_list_is_never_the_states_certification(self):
+        def county(c):
+            o = c["states"]["NV"]["offices"]["governor"]
+            o.update(certified=True, certifiedQuote="certified Notice")
+            o["notes"] = (o.get("notes") or "") + " certified Notice"
+        self.assertIn("is not the state's election office", self.broken(county))
+
+    def test_a_list_that_is_not_the_states_says_why(self):
+        self.assertIn("says why ('notStateList')", self.broken(
+            lambda c: c["states"]["NV"]["offices"]["ag"].pop("notStateList")))
+        self.assertIn("'notStateList' on the state's own list", self.broken(
+            lambda c: c["states"]["GA"]["offices"]["ag"].update(notStateList="why")))
+
+    def test_an_elsewhere_entry_no_list_uses_is_reported(self):
+        with mock.patch.dict("kyc.overrides.STATEWIDE_LISTS_ELSEWHERE",
+                             {"https://www.example-county.gov/": (("FL",), "A county", False,
+                                                                  "evidence")}):
+            found = " | ".join(statewide.problems(self.cache))
+        self.assertIn("https://www.example-county.gov/ is no list's source", found)
+
+    def test_a_party_code_with_no_words_is_refused(self):
+        def code(c):
+            c["states"]["GA"]["offices"]["lt"]["candidates"][0]["party"] = "XYZ"
+        self.assertIn("party 'XYZ' is a code the page cannot spell out", self.broken(code))
+
+    def test_a_record_of_ones_own_is_an_election_offices(self):
+        def record(c):
+            c["states"]["GA"]["offices"]["lt"]["candidates"][0]["record"] = \
+                "https://ballotpedia.org/Someone"
+        self.assertIn("is not an election office's", self.broken(record))
 
     def test_no_portrait_money_or_platform_for_these_people(self):
         def photo(c):
@@ -114,11 +163,17 @@ class TestTheCache(unittest.TestCase):
         self.assertIn("is not on the list", found)
         self.assertIn("says nothing of why", found)
 
-    def test_every_list_that_is_not_certified_says_so(self):
+    def test_every_list_not_the_states_says_so_and_is_never_certified(self):
+        seen = 0
         for code, entry in self.cache["states"].items():
             for key, o in entry["offices"].items():
-                if not o["certified"]:
-                    self.assertTrue(o["uncertified"].strip(), (code, key))
+                if statewide.not_the_states(o["list"]):
+                    seen += 1
+                    self.assertTrue(o["notStateList"].strip(), (code, key))
+                    self.assertFalse(o["certified"], (code, key))
+                if o["certified"]:
+                    self.assertIn("certif", o["certifiedQuote"].lower(), (code, key))
+        self.assertTrue(seen)
 
 
 class TestNames(unittest.TestCase):
@@ -136,6 +191,48 @@ class TestNames(unittest.TestCase):
                                                   "Governor Sarah Huckabee Sanders"))
         self.assertTrue(statewide.same_given_name("Raúl Torrez", "RAUL TORREZ"))
 
+    def test_a_hyphen_and_a_space_are_one_spelling(self):
+        # Rule 77: "Kim-Varet" and "Kim Varet".
+        self.assertTrue(statewide.has_surname("Kim-Varet", "Jane Kim Varet"))
+        self.assertTrue(statewide.has_surname("Varet", "Jane Kim-Varet"))
+        self.assertTrue(statewide.has_surname("Kreiss-Tomkins", "Kreiss-Tomkins, Jonathan S."))
+        self.assertFalse(statewide.has_surname("Kim-Varet", "Varet Kim"))
+
+    def test_names_shown_first_name_first_in_ordinary_capitals(self):
+        shown = statewide.display_name
+        self.assertEqual(shown("Ford, Aaron D."), "Aaron D. Ford")
+        self.assertEqual(shown("JOSH SHAPIRO"), "Josh Shapiro")
+        self.assertEqual(shown("JEFF McLAUGHLIN"), "Jeff McLaughlin")
+        self.assertEqual(shown("SAMUEL ISAIAH KANE, SR"), "Samuel Isaiah Kane Sr.")
+        self.assertEqual(shown("Leland Jake Olinger, II"), "Leland Jake Olinger II")
+        self.assertEqual(shown("ADA, Vicente A."), "Vicente A. Ada")
+        self.assertEqual(shown("Governor Sarah Huckabee Sanders"), "Sarah Huckabee Sanders")
+        self.assertEqual(shown("State Senator Fred Love"), "Fred Love")
+        self.assertEqual(shown("Greer, Ramadhani “Ram” (Registered Democrat)"),
+                         "Ramadhani “Ram” Greer (Registered Democrat)")
+        # Mixed case is the list's own: kept.
+        self.assertEqual(shown("JB Pritzker"), "JB Pritzker")
+        self.assertEqual(shown("Kreiss-Tomkins, Jonathan S. “JKT”"),
+                         "Jonathan S. “JKT” Kreiss-Tomkins")
+        self.assertEqual(shown("AMANDA LÓPEZ ASKIN"), "Amanda López Askin")
+        # Florida's "Arias, V. Michael": a first initial, not a suffix (rule 77).
+        self.assertEqual(shown("Arias, V. Michael"), "V. Michael Arias")
+
+    def test_parties_in_words(self):
+        words = statewide.party_words
+        self.assertEqual(words("NV", "IAP"), "Independent American Party")
+        self.assertEqual(words("NV", "NPP"), "No Political Party")
+        self.assertEqual(words("FL", "NPA"), "No Party Affiliation")
+        self.assertEqual(words("PA", "DEM"), "Democratic")
+        self.assertEqual(words("GA", "R"), "Republican")
+        self.assertEqual(words("VT", "FREEDOM AND UNITY"), "Freedom and Unity")
+        self.assertEqual(words("TX", "GREEN"), "Green")
+        self.assertEqual(words("ND", "Democratic-NPL"), "Democratic-NPL")
+        self.assertEqual(words("IN", "Write-In (National Socialist American Workers')", True),
+                         "National Socialist American Workers'")
+        self.assertIsNone(words("FL", "WRI", True))
+        self.assertEqual(words("XX", "QQQ"), "QQQ")   # refused by problems()
+
     def test_a_different_given_name_is_not(self):
         # Rule 56: "Joe" is not a prefix of "Joseph"; that takes an evidenced
         # form (overrides.STATEWIDE_NAME_FORMS).
@@ -151,9 +248,10 @@ class TestHolderStatus(unittest.TestCase):
         status, problem = statewide.holder_status("GA", "governor", office(), "Brian Kemp")
         self.assertIsNone(problem)
         self.assertEqual(status["why"], "not-listed")
-        self.assertEqual(status["text"],
-                         "Brian Kemp is not on the certified list of candidates for this office")
-        self.assertEqual((status["source"], status["cite"]), (LIST, "Georgia Secretary of State"))
+        self.assertEqual(status["text"], "Brian Kemp is not among the candidates for this office")
+        # The document named as what it is.
+        self.assertEqual((status["source"], status["cite"]),
+                         (LIST, "the Georgia Secretary of State’s candidate list"))
 
     def test_a_holder_on_the_list_is_on_it_never_running_for_re_election(self):
         entry = office(holderResearched="Pat Example", holderOnList=True)
@@ -162,13 +260,29 @@ class TestHolderStatus(unittest.TestCase):
         self.assertIsNone(problem)
         self.assertEqual(status["why"], "listed")
         self.assertNotIn("re-election", status["text"])
-        self.assertEqual(status["text"],
-                         "Pat Example is on the certified list of candidates for this office")
+        self.assertEqual(status["text"], "Pat Example is among the candidates for this office")
 
-    def test_a_list_not_certified_does_not_say_certified(self):
-        status, _ = statewide.holder_status(
-            "GA", "governor", office(certified=False, uncertified="a county's"), "Brian Kemp")
-        self.assertEqual(status["text"], "Brian Kemp is not on the list of candidates for this office")
+    def test_a_list_is_never_called_certified_by_the_holder_line(self):
+        entry = office()
+        entry["list"]["kind"] = "official sample ballot"
+        status, _ = statewide.holder_status("GA", "governor", entry, "Brian Kemp")
+        self.assertNotIn("certified", status["text"] + status["cite"])
+        self.assertEqual(status["cite"], "the Georgia Secretary of State’s official sample ballot")
+
+    def test_a_holder_spelled_with_a_hyphen_is_still_found(self):
+        # A carrier the list writes "Kim-Varet" is never read as absent for
+        # a holder the roster writes "Kim Varet": unsettled, not "not listed".
+        entry = office(holderResearched="Jane Kim Varet")
+        entry["candidates"][0].update(name="Jane Kim-Varet", surname="Kim-Varet")
+        status, problem = statewide.holder_status("GA", "governor", entry, "Jane Kim Varet")
+        self.assertIsNone(status)
+        self.assertIn("may or may not be", problem)
+
+    def test_a_holders_own_record_is_the_source(self):
+        entry = office(holderResearched="Pat Example", holderOnList=True)
+        entry["candidates"][0].update(holder=True, record="https://sos.ga.gov/record/1")
+        status, _ = statewide.holder_status("GA", "governor", entry, "Pat Example")
+        self.assertEqual(status["source"], "https://sos.ga.gov/record/1")
 
     def test_a_namesake_settles_nothing(self):
         # A candidate carrying the holder's surname whom the list does not
@@ -215,8 +329,7 @@ class TestHolderLine(unittest.TestCase):
         self.assertIsNone(problem)
         self.assertEqual(status["why"], "term-limit")
         self.assertEqual(status["text"], "Ron DeSantis is term-limited")
-        self.assertEqual(status["then"]["text"],
-                         "is not on the certified list of candidates for this office")
+        self.assertEqual(status["then"]["text"], "is not among the candidates for this office")
 
     def test_a_term_limited_holder_the_list_names_is_shown_as_neither(self):
         entry = office(holderResearched="Ron DeSantis", holderOnList=True)
@@ -240,13 +353,26 @@ class TestThePage(unittest.TestCase):
             {"name": "Bo Able", "surname": "Able", "party": None, "runningMate": None,
              "writeIn": True, "holder": False},
         ]
-        page = statewide.for_page(entry)
+        page = statewide.for_page("GA", entry)
         self.assertEqual([p["name"] for p in page["candidates"]],
                          ["Pat Example", "Lee Sample", "Bo Able", "Ann Zed"])
         # A write-in's "party" that only says it is a write-in is dropped.
         self.assertNotIn("party", page["candidates"][3])
-        self.assertEqual(page["candidates"][0]["party"], "R")
+        self.assertEqual(page["candidates"][0]["party"], "Republican")
         self.assertEqual(page["by"], "Georgia Secretary of State")
+        self.assertEqual(page["source"], "the Georgia Secretary of State’s candidate list")
+
+    def test_the_lists_own_form_stays_beside_the_name_shown(self):
+        entry = office()
+        entry["candidates"][0].update(name="EXAMPLE, PAT", runningMate="DOE, JAN")
+        entry["candidates"].append({"name": "James", "surname": "James", "party": None,
+                                    "runningMate": None, "writeIn": False, "holder": False})
+        rows = {p["name"]: p for p in statewide.for_page("GA", entry)["candidates"]}
+        self.assertEqual(rows["Pat Example"]["printed"], "EXAMPLE, PAT")
+        self.assertEqual(rows["Pat Example"]["runningMate"], "Jan Doe")
+        self.assertNotIn("printed", rows["Lee Sample"])
+        # Massachusetts prints its independent ticket by surnames only.
+        self.assertTrue(rows["James"]["surnameOnly"])
 
     def test_the_build_lists_every_office_on_the_ballot(self):
         payload, problems = stategov.build(".")
@@ -260,13 +386,55 @@ class TestThePage(unittest.TestCase):
                     # The list's words only: never a portrait, a figure or a
                     # profile id (rules 24, 25, 27).
                     self.assertLessEqual(set(person), {"name", "party", "runningMate",
-                                                       "ballotName", "writeIn", "holder"})
+                                                       "ballotName", "writeIn", "holder",
+                                                       "printed", "surnameOnly", "record"})
+                    # Never a name in capitals (rule 77), never a party code.
+                    self.assertNotEqual(person["name"], person["name"].upper(), person)
+                    self.assertNotIn(",", person["name"].split("(")[0], person)
                 # With a list in hand, "not checked" is said only where the
                 # list did not settle the holder, and the build says why.
                 status = item.get("holderStatus") or {}
                 if status.get("why") == "unchecked":
                     self.assertTrue([p for p in problems if p.startswith(f"{code} {key}:")],
                                     (code, key))
+
+
+
+class TestMembersOnAList(unittest.TestCase):
+    """A sitting member whose name a statewide list carries is a lead, never
+    a join (rule 25): Amy Klobuchar was on Minnesota's governor ballot while
+    her profile said nothing of it (PR #109 review)."""
+
+    MEMBER = {"bioguide": "X000001", "state": "GA", "name": "Pat Example",
+              "nameParts": {"first": "Pat", "last": "Example", "official_full": "Pat Example"}}
+
+    def cache(self):
+        return {"states": {"GA": {"offices": {"governor": office()}}}}
+
+    def test_a_member_on_a_list_with_no_note_is_a_lead(self):
+        leads = statewide.member_leads(self.cache(), [self.MEMBER], set())
+        self.assertEqual(len(leads), 1)
+        self.assertIn("X000001", leads[0])
+
+    def test_a_noted_member_or_another_state_is_not(self):
+        self.assertEqual(statewide.member_leads(self.cache(), [self.MEMBER], {"X000001"}), [])
+        self.assertEqual(statewide.member_leads(self.cache(), [dict(self.MEMBER, state="AL")],
+                                                set()), [])
+
+    def test_a_namesake_with_another_given_name_is_not(self):
+        other = dict(self.MEMBER, name="Chris Example",
+                     nameParts={"first": "Chris", "last": "Example"})
+        self.assertEqual(statewide.member_leads(self.cache(), [other], set()), [])
+
+    def test_every_member_on_the_lists_is_noted(self):
+        import json
+        from kyc import cycle, overrides
+        with open("congress_snapshot.json", encoding="utf-8") as handle:
+            snapshot = json.load(handle)
+        if cycle.snapshot_congress(snapshot) >= cycle.electing_congress():
+            self.skipTest("the lists are the 2026 campaign's")
+        self.assertEqual(statewide.member_leads(statewide.load("."), snapshot["legislators"],
+                                                set(overrides.OTHER_OFFICE_NOMINEES)), [])
 
 
 if __name__ == "__main__":

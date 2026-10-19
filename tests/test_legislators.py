@@ -807,7 +807,8 @@ class TestANewCongress(unittest.TestCase):
     def test_every_other_office_nomination_is_sourced_and_dated(self):
         for member_id, (text, source, checked) in overrides.OTHER_OFFICE_NOMINEES.items():
             self.assertRegex(member_id, r"^[A-Z]\d{6}$")
-            self.assertRegex(text, r"^(Democratic|Republican|Independent) nominee for ")
+            self.assertRegex(
+                text, r"^(Democratic|Democratic-Farmer-Labor|Republican|Independent) nominee for ")
             self.assertTrue(source.startswith("https://"), member_id)
             self.assertRegex(checked, r"^\d{4}-\d{2}-\d{2}$")
 
