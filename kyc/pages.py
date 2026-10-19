@@ -502,6 +502,14 @@ NOSCRIPT = ("The maps, filters and search on this site need JavaScript, which th
             "is not running. What this page lists in plain text is here without it.")
 
 
+# The legislature pages draw every member from their state's file, and say
+# so: the general line promised "what this page lists in plain text" over a
+# page that lists nobody without a script (PR #121 review).
+LEGISLATURE_NOSCRIPT = ("The district map and the members who sit for each district need "
+                        "JavaScript, which this browser is not running, and this page lists "
+                        "none of them without it.")
+
+
 def noscript_html(words=None):
     """The ``<noscript>`` line the frame carries, before the header."""
     return (f'<noscript><p class="noscript-note" role="note">{words or _e(NOSCRIPT)}'
@@ -1427,6 +1435,12 @@ def render_district_page(code, host, summary=None):
         scripts=_scripts(scripts),
         crumbs=[_HOME, (section_name("states"), "states/index.html"), (name, page_path(code)),
                 (headline, path)],
+        # What this page holds is all drawn: say so, and where the same
+        # people are in plain text (PR #121 review).
+        noscript=(f"The district map, and who sits for each district, need JavaScript, which "
+                  f"this browser is not running. Without it, "
+                  f'<a href="../{_e(page_path(code))}">{_e(_possessive(name))} page</a> lists its '
+                  "members of Congress and its races in plain text."),
     )
 
 
@@ -1554,6 +1568,7 @@ def render_legislature_page(code, host, summary=None, dates=None):
         built=_read_span(dates, "openstates"),
         crumbs=[_HOME, (section_name("legislatures"), "legislature/index.html"), (title, path)],
         scripts=_scripts(scripts),
+        noscript=_e(LEGISLATURE_NOSCRIPT),
     )
 
 
@@ -2022,6 +2037,8 @@ def render_counties_page(code, host, listed=None):
         built=(listed, listed) if listed else None,
         crumbs=[_HOME, (section_name("local"), "counties/index.html"), (name, path)],
         scripts=_scripts(scripts),
+        noscript=_e(f"The map of {many} and the governments in each need JavaScript, which "
+                    "this browser is not running, and this page lists none of them without it."),
     )
 
 

@@ -1265,7 +1265,7 @@
       var campaign = KYC.contestStatus(item) === "nominee" &&
         KYC.electionStatus().phase !== "post-election";
       var title = line ? "On the general election ballot on the " + line + " line. " +
-        (campaign ? "Source: the state's Wikipedia election results page." : race.title)
+        (campaign ? "Source: Wikipedia's election results page." : race.title)
         : race.title;
       pieces.push('<span class="badge ' + race.cls + '" title="' +
         KYC.escapeAttr(title) + '">' + KYC.escapeHtml(label) +

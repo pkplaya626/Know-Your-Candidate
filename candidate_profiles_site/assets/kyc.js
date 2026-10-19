@@ -413,7 +413,8 @@
    * renomination, a November win a re-election. `off` takes someone out of
    * the race, behind a toggle. Someone who lost in November was on the
    * ballot, and stays in view beside the person who beat them. */
-  var SOURCE = " Source: the state's Wikipedia election results page.";
+  // Never "the state's": a territory's, or D.C.'s, is not (rule 75).
+  var SOURCE = " Source: Wikipedia's election results page.";
   /* A sitting member leaving the seat they hold, in the same words whether
    * the results list them as withdrawn or do not list them: only the title,
    * which cites its source, differs. */

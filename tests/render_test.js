@@ -10888,6 +10888,13 @@ async function testSharePages() {
     return spec.label + (!p.isCandidate && p.contestLabel ? " for " + p.contestLabel : "") +
       (line ? " \u2013 " + line + " line" : "");
   };
+  // The source a status's long title credits: its words after "Source:".
+  const creditOf = (spec) => {
+    const title = (spec && spec.title) || "";
+    const at = title.lastIndexOf(" Source: ");
+    return at === -1 ? null : title.slice(at + 9).replace(/\.$/, "");
+  };
+  const pageNow = new window.Date();
   const byId = new Map(people.map((p) => [p.id, p]));
   const split = (race) => {
     const ids = race.incumbentIds.concat(race.candidateIds);
@@ -10903,9 +10910,20 @@ async function testSharePages() {
     check("the index page loads", errors.length === 0, errors.join(" | "));
     const pFiles = new Set(fs.readdirSync(path.join(SITE, "p")));
     const rFiles = new Set(fs.readdirSync(path.join(SITE, "r")));
+    // Besides each profile's own page, only a page kept at an id a profile
+    // answers to (a merged filing, a filer since seated), pointing at it.
+    const strays = [...pFiles].filter((f) => {
+      const id = f.replace(/\.html$/, "");
+      if (people.some((p) => p.id === id)) return false;
+      const owner = KYC.byId(id);
+      const html = read("p/" + f) || "";
+      return !(owner && owner.id !== id &&
+        html.indexOf('/p/' + owner.id + '.html">') !== -1 &&
+        html.indexOf('id="shareView" href="../index.html#/profile/' + owner.id + '"') !== -1);
+    });
     check("a share page for every profile, and none for anyone else",
-      pFiles.size === people.length && people.every((p) => pFiles.has(p.id + ".html")),
-      `${pFiles.size} pages, ${people.length} profiles`);
+      people.every((p) => pFiles.has(p.id + ".html")) && strays.length === 0,
+      `${pFiles.size} pages, ${people.length} profiles; ${strays.slice(0, 4)}`);
     check("a share page for every race, and none for any other",
       rFiles.size === races.length && races.every((r) => rFiles.has(r.id + ".html")),
       `${rFiles.size} pages, ${races.length} races`);
@@ -10919,7 +10937,22 @@ async function testSharePages() {
       const want = words(p);
       if (shown !== want) wrong.push(`${p.id}: "${shown}" for "${want}"`);
       const desc = /<meta name="description" content="([^"]*)">/.exec(html);
-      if (want && !(desc && unescapeHtml(desc[1]).indexOf(want) !== -1)) wrong.push(`${p.id}: description`);
+      const spec = KYC.standing(p, "long");
+      if (spec && !(desc && unescapeHtml(desc[1]).indexOf(spec.label) !== -1)) wrong.push(`${p.id}: description`);
+      // Who says so: the source the dialog's badge credits (rule 19).
+      const credit = /<p class="share-source faint">Source: (.*?)\.<\/p>/.exec(html);
+      const said = credit ? unescapeHtml(credit[1]) : null;
+      if (said !== creditOf(spec)) wrong.push(`${p.id}: source "${said}" for "${creditOf(spec)}"`);
+      if (said && !(desc && unescapeHtml(desc[1]).indexOf(", per " + said) !== -1)) wrong.push(`${p.id}: description's source`);
+      // Where a member leaving is going, and when a seat not up is next up.
+      const other = KYC.otherOffice(p, pageNow);
+      const otherShown = /<p class="share-other">(.*?)\. <span/.exec(html);
+      if ((other ? other.text : null) !== (otherShown ? unescapeHtml(otherShown[1]) : null)) {
+        wrong.push(`${p.id}: other office "${otherShown && otherShown[1]}"`);
+      }
+      const next = KYC.seated(p) && !p.seatUp2026 && p.electionYear ? "Seat up in " + p.electionYear : null;
+      const nextShown = /<p class="share-next">(.*?)<\/p>/.exec(html);
+      if (next !== (nextShown ? nextShown[1] : null)) wrong.push(`${p.id}: "${nextShown && nextShown[1]}" for "${next}"`);
       // A portrait only by a sourced route (rule 24): never a fallback's.
       const img = (/<meta property="og:image" content="([^"]*)">/.exec(html) || [])[1];
       const url = img ? unescapeHtml(img) : "";
@@ -10946,6 +10979,19 @@ async function testSharePages() {
       const same = (got, want) => got.map((x) => x.id).join() === want.map((p) => p.id).join() &&
         got.every((x, i) => x.standing === words(want[i]));
       if (!same(running, s.running)) raceWrong.push(`${race.id}: running ${running.map((x) => x.id)}`);
+      // The seat's holder is marked while they sit in it (rule 67).
+      const marked = [...html.matchAll(/<li data-id="([^"]+)">[^\n]*?<span class="share-holder">/g)]
+        .map((m) => unescapeHtml(m[1]));
+      const holders = s.running.filter((p) => race.incumbentIds.indexOf(p.id) !== -1 && KYC.seated(p)).map((p) => p.id);
+      if (marked.join() !== holders.join()) raceWrong.push(`${race.id}: holder ${marked} for ${holders}`);
+      const credits = [];
+      s.moved.concat(s.running, s.out).forEach((p) => {
+        const c = creditOf(KYC.standing(p, "long"));
+        if (c && credits.indexOf(c) === -1) credits.push(c);
+      });
+      const sources = /<p class="share-source faint">Where each stands: per (.*?)\.<\/p>/.exec(html);
+      const andList = (w) => w.length < 2 ? w.join("") : w.slice(0, -1).join(", ") + " and " + w[w.length - 1];
+      if ((sources ? unescapeHtml(sources[1]) : "") !== andList(credits)) raceWrong.push(`${race.id}: sources`);
       if (!same(out, s.out)) raceWrong.push(`${race.id}: out ${out.map((x) => x.id)}`);
       s.moved.forEach((p) => {
         if (html.indexOf('<p class="race-held">Held by <a href="../p/' + p.id + '.html">') === -1) {
@@ -10970,6 +11016,43 @@ async function testSharePages() {
     const sizes = [...pFiles].concat([...rFiles].map((f) => "r:" + f)).map((f) =>
       fs.statSync(path.join(SITE, f.startsWith("r:") ? "r" : "p", f.replace(/^r:/, ""))).size);
     check("each share page is small", Math.max(...sizes) < 8000, `largest ${Math.max(...sizes)} bytes`);
+  });
+
+  // Every case of the status table, on both sides (PR #121 review). The
+  // people in today's data hold only some statuses: "elected", "defeated",
+  // "runoff" and every post-election word would first meet the page code on
+  // the night a November result was read, and a word changed in kyc.js
+  // alone would have held that refresh. The pipeline's answers are in
+  // tests/fixtures/share_status_words.json (share.status_table; test_share
+  // checks the file is current); each is asked of the page code here.
+  const table = JSON.parse(fs.readFileSync(path.join(__dirname, "fixtures", "share_status_words.json"), "utf8"));
+  const CAMPAIGN_DAY = new window.Date(2026, 9, 1, 12);
+  const AFTER_DAY = new window.Date(2026, 10, 5, 12);
+  suite("share pages' status words — every case, asked of the page code (rule 96)", () => {
+    const off = [];
+    table.statuses.forEach((row) => {
+      const [status, allParty, source, own, appointed, unconfirmed, minor, post, label, gone] = row;
+      const spec = KYC.raceStatus(status, "long", { own: !!own, appointed: !!appointed,
+        unconfirmed: !!unconfirmed, minor: !!minor, allParty: allParty || undefined,
+        source: source || undefined, now: post ? AFTER_DAY : CAMPAIGN_DAY });
+      if (!spec || spec.label !== label || !!spec.off !== !!gone) {
+        off.push(`${row.slice(0, 8).join("/")}: "${spec && spec.label}" for "${label}"`);
+      }
+    });
+    check("every status, member or not, appointed, unconfirmed, minor-party, all-party, " +
+      "certified or qualified, before and after Election Day", table.statuses.length > 1000 &&
+      off.length === 0, off.slice(0, 4).join(" | ") || `${table.statuses.length} cases`);
+    const credited = table.credits.filter(([status, source, name, credit]) =>
+      creditOf(KYC.raceStatus(status, "long", { source: source || undefined,
+        sourceName: name || undefined, now: CAMPAIGN_DAY })) !== credit);
+    check("and the source each credits", credited.length === 0,
+      credited.slice(0, 4).map((r) => r.join("/")).join(" | "));
+    const filers = table.filers.filter(([fake, label, credit]) => {
+      const spec = KYC.standing(Object.assign({ isCandidate: true, id: "FAKE" }, fake), "long");
+      return !spec || spec.label !== label || creditOf(spec) !== credit;
+    });
+    check("and each filer the results do not settle", table.filers.length >= 4 && filers.length === 0,
+      filers.map((r) => JSON.stringify(r)).join(" | "));
   });
 
   suite("state pages — written with their names before the script draws (TECH-10)", () => {

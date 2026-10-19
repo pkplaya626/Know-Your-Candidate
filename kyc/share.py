@@ -22,6 +22,9 @@ that changes nobody's status rewrites none of these 3,000 files (rule 18).
 """
 
 import html
+import itertools
+import json
+import os
 from urllib.parse import urlparse
 
 PROFILE_DIR = "p"
@@ -156,6 +159,113 @@ def _race_status(status, own=False, unconfirmed=False, appointed=False, source=N
     return (mine.get("long") or spec.get("long"), bool(spec.get("off")))
 
 
+# Where the dialog's long title says a status came from (its " Source: ..."),
+# by the same steps as KYC.raceStatus.
+# Never "the state's": a territory's, or D.C.'s, is not (rule 75).
+_WIKIPEDIA = "Wikipedia's election results page"
+_INQUIRY = "the Secretary of State's Candidate Inquiry"
+_CERTIFIED_LIST = "the certified list of candidates"
+
+
+def _race_source(status, source=None, source_name=None):
+    """KYC.raceStatus's source for *status*: the words after "Source:" in
+    the dialog's long title, or None for no status."""
+    if status not in _RACE_STATUS:
+        return None
+    if status == "qualified" or source == "qualified":
+        return _INQUIRY
+    if source == "certified" and status in _CERTIFIED:
+        return source_name or _CERTIFIED_LIST
+    return _WIKIPEDIA
+
+
+def status_source(item, by_id):
+    """Who says where *item* stands, as the profile dialog's badge credits
+    it: a results page, a state's certified list, the Secretary of State's
+    list, or a certified list's write-in line; None where the dialog names
+    no source (a filer the results do not settle)."""
+    if not item:
+        return None
+    record = item if _own_record(item) else (by_id.get(item.get("alsoRunningId") or "") or {})
+    status = contest_status(item, by_id)
+    if status in _RACE_STATUS:
+        return _race_source(status, record.get("raceStatusSource"),
+                            record.get("raceStatusSourceName"))
+    unprinted = item.get("unprinted") or {}
+    if (item.get("isCandidate") and not item.get("raceStatus") and not item.get("maybeNamed")
+            and unprinted.get("kind") and unprinted.get("source")):
+        return str(unprinted["source"])
+    return None
+
+
+# Every case the status table has, for the render suite to compare with
+# KYC.raceStatus and KYC.standing (tests/fixtures/share_status_words.json):
+# a word changed on one side fails on the day it changes, not on the night
+# the first November result is read.
+STATUS_TABLE = os.path.join(os.path.dirname(__file__), "..", "tests", "fixtures",
+                            "share_status_words.json")
+_FILERS = (
+    {"maybeNamed": ["A Similar Name"]},
+    {"unprinted": {"kind": "write-in", "source": "the Texas Secretary of State"}},
+    {"unprinted": {"kind": "unopposed", "source": "the Florida Division of Elections"}},
+    {"unprinted": {"kind": "write-in"}},
+    {"ballotUnknown": True},
+)
+
+
+def status_table():
+    """``{"statuses": [...], "filers": [...]}``: what :func:`_race_status`
+    and :func:`_race_source` say for every combination of status and
+    option, and what :func:`standing` says for each kind of filer the
+    results do not settle."""
+    words = []
+    for status in sorted(_RACE_STATUS):
+        # A top-four primary's words are a top-two's in the long form.
+        for all_party in (None, "top-two"):
+            for source in (None, "certified", "qualified"):
+                for flags in itertools.product((0, 1), repeat=5):
+                    own, appointed, unconfirmed, minor, post = flags
+                    label, off = _race_status(status, own=bool(own), unconfirmed=bool(unconfirmed),
+                                              appointed=bool(appointed), source=source,
+                                              all_party=all_party, minor=bool(minor),
+                                              post_election=bool(post))
+                    words.append([status, all_party, source] + list(flags) + [label, int(off)])
+    credits = [[status, source, name, _race_source(status, source, name)]
+               for status in sorted(_RACE_STATUS)
+               for source, name in ((None, None), ("certified", None),
+                                    ("certified", "the Test Division of Elections"),
+                                    ("qualified", None))]
+    filers = []
+    for fake in _FILERS:
+        item = dict(fake, isCandidate=True, id="FAKE")
+        spec = standing(item, {}, {})
+        filers.append([fake, spec[0] if spec else None, status_source(item, {})])
+    return {"words": ["status", "allParty", "source", "own", "appointed", "unconfirmed",
+                      "minor", "post", "label", "off"],
+            "statuses": words, "credits": credits, "filers": filers}
+
+
+def status_table_text():
+    """The fixture's text: one row a line, so a change reads as a diff."""
+    table = status_table()
+    lines = ["{", f'"words": {json.dumps(table["words"])},']
+    for key in ("statuses", "credits", "filers"):
+        rows = table[key]
+        lines.append(f'"{key}": [')
+        lines += [json.dumps(row, ensure_ascii=False, separators=(",", ":"))
+                  + ("," if i < len(rows) - 1 else "") for i, row in enumerate(rows)]
+        lines.append("]," if key != "filers" else "]")
+    lines += ["}", ""]
+    return "\n".join(lines)
+
+
+def write_status_table(path=STATUS_TABLE):
+    """Rewrite the fixture after a change to the words here (and the same
+    change in kyc.js): ``python -c "from kyc import share; share.write_status_table()"``."""
+    with open(path, "w", encoding="utf-8", newline="") as handle:
+        handle.write(status_table_text())
+
+
 def _no_primary_race(race_id, races_by_id):
     """KYC's noPrimaryRace: a race whose calendar names no primary (null,
     not absent) and for which no results were read."""
@@ -202,17 +312,18 @@ def standing(item, by_id, races_by_id, post_election=False):
     return (words, False) if words else None
 
 
-def status_words(item, by_id, races_by_id, post_election=False):
+def status_words(item, by_id, races_by_id, post_election=False, seat=None):
     """Where *item* stands, as the profile dialog's badge says it: the
     standing, "for <seat>" when a member runs for another, and the ballot
     line when it is not their party's. None for someone with no 2026 race
-    (a senator whose seat is not up)."""
+    (a senator whose seat is not up). *seat* writes the other seat's label
+    for prose (:func:`seat_phrase`); the dialog's own is the label."""
     spec = standing(item, by_id, races_by_id, post_election)
     if not spec:
         return None
     words = spec[0]
     if not item.get("isCandidate") and item.get("contestLabel"):
-        words += " for " + item["contestLabel"]
+        words += " for " + ((seat or (lambda label: label))(item["contestLabel"]))
     line = ballot_line(item, by_id)
     if line:
         words += " – " + line + " line"
@@ -316,8 +427,9 @@ ul {{ padding-left: 1.25rem; }}
 _SITE_CARD = "assets/social-card.png"
 
 
-def _page(host, path, **fields):
-    canonical = f"https://{host}/{path}" if host else path
+def _page(host, path, canonical_path=None, **fields):
+    canonical_path = canonical_path or path
+    canonical = f"https://{host}/{canonical_path}" if host else canonical_path
     image = fields.pop("image", None)
     if image:
         size, card, alt = "", "summary", fields.pop("image_alt")
@@ -335,24 +447,112 @@ def _state_page(code):
     return f"../states/{str(code).lower()}.html"
 
 
-def describe(person, by_id, races_by_id, post=False):
-    """``(og title, description, status words)`` for a profile's share page:
-    "<Name> (<party>), candidate for House • AK-AL: Not on the 2026 primary
-    ballot." The office is the profile's own label (rule 4), never rebuilt."""
+def _seat_parts(label):
+    """``"House • AL-4"`` -> ``("U.S. House", "AL-4")``; ``"Senate • AL"`` ->
+    ``("U.S. Senate", "Alabama")``; an at-large seat -> ``"Alaska (at
+    large)"``. None for a label of another shape. The label is read, never
+    rebuilt (rule 4): only the bullet a card uses is put into words."""
+    from .pages import state_name
+
+    chamber, _, seat = str(label or "").partition(" • ")
+    if chamber not in ("House", "Senate") or not seat:
+        return None
+    if chamber == "Senate":
+        return "U.S. Senate", state_name(seat)
+    if seat.endswith("-AL"):
+        return "U.S. House", f"{state_name(seat[:-3])} (at large)"
+    return "U.S. House", seat
+
+
+def seat_phrase(label):
+    """A seat in prose, for a sentence an unfurl shows: "the U.S. Senate in
+    Alabama", "the U.S. House in AL-4". "Senate • AL" is a card's label; in
+    a sentence in Slack or iMessage the bullet read as a glitch."""
+    parts = _seat_parts(label)
+    return f"the {parts[0]} in {parts[1]}" if parts else str(label or "")
+
+
+def _role(person):
     from .record import seated
 
+    parts = _seat_parts(person.get("officeLabel"))
+    if not parts:
+        office = person.get("officeLabel") or ""
+        return ("candidate for " if person.get("isCandidate")
+                else "member for " if seated(person) else "former member for ") + office
+    body, where = parts
+    if person.get("isCandidate"):
+        return f"candidate for the {body} in {where}"
+    return ("member" if seated(person) else "former member") + f" of the {body} for {where}"
+
+
+def other_office(person, post=False):
+    """KYC.otherOffice's words: where a member leaving their seat is going,
+    from the curated, sourced ``otherOffice``; in the past tense once the
+    results read are November's (``post``), as the dialog is from the day
+    after Election Day. None for anyone else."""
+    other = (not person.get("isCandidate") and person.get("otherOffice")) or None
+    if not other or not other.get("text"):
+        return None
+    return ("Was the " if post else "") + other["text"]
+
+
+def seat_up(person):
+    """The dialog's "Seat up in <year>": a seated member whose seat is not
+    on the 2026 ballot, said of the seat, never the person (rule 61)."""
+    from .record import seated
+
+    if seated(person) and not person.get("seatUp2026") and person.get("electionYear"):
+        return f"Seat up in {person['electionYear']}"
+    return None
+
+
+def describe(person, by_id, races_by_id, post=False):
+    """``(og title, description, status words)`` for a profile's share page:
+    "<Name> (<party>), candidate for the U.S. House in AK-AL: Not on the
+    2026 primary ballot, per Wikipedia's election results page."
+    The status words are the dialog's (:func:`status_words`), with the
+    source its badge credits; the seat is in words, since a card's bullet
+    reads as a glitch in an unfurl."""
     name, party = person.get("name") or "", person.get("party") or ""
-    role = ("candidate for" if person.get("isCandidate")
-            else "member for" if seated(person) else "former member for")
     status = status_words(person, by_id, races_by_id, post)
+    prose = status_words(person, by_id, races_by_id, post, seat=seat_phrase)
     lead = f"{name} ({party})" if party else name
-    office = person.get("officeLabel") or ""
-    description = f"{lead}, {role} {office}" + (f": {status}." if status else ".")
+    said = []
+    if prose:
+        source = status_source(person, by_id)
+        said.append(prose + (f", per {source}" if source else ""))
+    other = other_office(person, post)
+    if other:
+        said.append(other)
+    if not said and seat_up(person):
+        said.append("seat up in " + str(person["electionYear"]))
+    description = f"{lead}, {_role(person)}" + (": " + "; ".join(said) + "." if said else ".")
     return lead, description, status
 
 
-def render_profile(person, host, by_id, races_by_id, post=False):
-    """``p/<id>.html``."""
+def _race_link_words(person, race, by_id, races_by_id, post):
+    """"The race" for someone in it; "The seat's 2026 race" for a member
+    who is not (Byron Donalds's FL-19, which he is leaving to run for
+    governor), and for a former member."""
+    spec = standing(person, by_id, races_by_id, post)
+    running = person.get("isCandidate") or race["id"] == person.get("contestRaceId")
+    if running or (spec and not spec[1] and not person.get("formerMember")):
+        return "The race"
+    return f"The seat’s {race.get('year') or 2026} race"
+
+
+def race_name(race):
+    """A race's label, and that it is a special election where it is one
+    (Florida's and Ohio's Senate seats, for the rest of a term)."""
+    label = race.get("label") or race["id"]
+    return label + (" (special election)" if race.get("special") else "")
+
+
+def render_profile(person, host, by_id, races_by_id, post=False, alias=None):
+    """``p/<id>.html``; with *alias*, the same page at ``p/<alias>.html``
+    for an id the person's profile once had (rule 25's merged filings, a
+    filer since seated), its canonical address their own page's."""
     from .pages import _possessive, state_name
 
     pid = person["id"]
@@ -360,12 +560,25 @@ def render_profile(person, host, by_id, races_by_id, post=False):
     body = [f"<p>{_e(person.get('party') or '')} &middot; {_e(person.get('officeLabel') or '')}</p>"]
     if status:
         body.append(f'<p class="share-status"><strong>{_e(status)}</strong></p>')
+        source = status_source(person, by_id)
+        if source:
+            body.append(f'<p class="share-source faint">Source: {_e(source)}.</p>')
+    other = other_office(person, post)
+    if other:
+        found = person["otherOffice"]
+        body.append(f'<p class="share-other">{_e(other)}. <span class="faint">Source: '
+                    f'<a href="{_e(found.get("source") or "")}">the election&#x27;s Wikipedia page</a>, '
+                    f"which marks the primary&#x27;s winner (read {_e(found.get('checked') or '')}).</span></p>")
+    if seat_up(person):
+        body.append(f'<p class="share-next">{_e(seat_up(person))}</p>')
     race = races_by_id.get(person.get("contestRaceId") or person.get("raceId") or "")
     if race:
-        body.append(f'<p>The race: <a href="../{_e(race_path(race["id"]))}">{_e(race["label"])}</a></p>')
+        body.append(f'<p>{_e(_race_link_words(person, race, by_id, races_by_id, post))}: '
+                    f'<a href="../{_e(race_path(race["id"]))}">{_e(race_name(race))}</a></p>')
     photo = og_photo(person)
     return _page(
-        host, profile_path(pid),
+        host, profile_path(alias or pid),
+        canonical_path=profile_path(pid),
         title=_e(f"{person.get('name')} — Know Your Candidate"),
         description=_e(description),
         og_type="profile",
@@ -437,19 +650,48 @@ def unprofiled(race):
     return [n for n in names if not maybe.get(n)], [(n, maybe[n]) for n in names if maybe.get(n)]
 
 
-def _item(person, by_id, races_by_id, post, root, indent):
+HOLDER_MARK = "holds the seat"
+
+
+def holds(race, person):
+    """*person* holds the seat *race* is for, and sits in it now (rule 67:
+    a record incumbent who has left holds nothing)."""
+    from .record import seated
+
+    return person["id"] in (race.get("incumbentIds") or []) and seated(person)
+
+
+def _item(person, by_id, races_by_id, post, root, indent, race=None):
     status = status_words(person, by_id, races_by_id, post)
     party = f" ({_e(person['party'])})" if person.get("party") else ""
+    mark = f', <span class="share-holder">{HOLDER_MARK}</span>' if race and holds(race, person) else ""
     return (f'{indent}<li data-id="{_e(person["id"])}"><a href="{root}'
-            f'{_e(profile_path(person["id"]))}">{_e(person.get("name") or "")}</a>{party}'
+            f'{_e(profile_path(person["id"]))}">{_e(person.get("name") or "")}</a>{party}{mark}'
             + (f': <span class="share-standing">{_e(status)}</span>' if status else "") + "</li>")
+
+
+def race_sources(race, by_id):
+    """Who says where the people a race lists stand, each once, in the
+    order they are first met: the credit the dialog's badge gives each."""
+    moved, running, out = split_people(race, by_id)
+    seen = []
+    for person in moved + running + out:
+        source = status_source(person, by_id)
+        if source and source not in seen:
+            seen.append(source)
+    return seen
+
+
+def _and(words):
+    return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1]
 
 
 def race_list_html(race, by_id, races_by_id, post=False, root="../", indent=""):
     """A race's people as plain lists, each linked to their share page with
     where they stand, split as the race's section on a state page splits
-    them: the holder running elsewhere, the people still in it, those no
-    longer in it, and the November names with no profile here."""
+    them: the holder running elsewhere, the people still in it (the
+    holder marked), those no longer in it, the November names with no
+    profile here, and who says where each stands."""
     moved, running, out = split_people(race, by_id)
     rows = []
     for person in moved:
@@ -457,7 +699,7 @@ def race_list_html(race, by_id, races_by_id, post=False, root="../", indent=""):
                     f'{_e(profile_path(person["id"]))}">{_e(person.get("name") or "")}</a>, who '
                     f"{_e(held_words(person, by_id))}.</p>")
     rows.append(f'{indent}<ul class="share-list" data-race="{_e(race["id"])}">')
-    rows += [_item(p, by_id, races_by_id, post, root, indent + "    ") for p in running]
+    rows += [_item(p, by_id, races_by_id, post, root, indent + "    ", race) for p in running]
     rows.append(f"{indent}</ul>")
     none, maybe = unprofiled(race)
     parties = ((race.get("results") or {}).get("otherParties")) or {}
@@ -479,12 +721,21 @@ def race_list_html(race, by_id, races_by_id, post=False, root="../", indent=""):
                  f'{indent}<ul class="share-list share-out" data-race-out="{_e(race["id"])}">']
         rows += [_item(p, by_id, races_by_id, post, root, indent + "    ") for p in out]
         rows.append(f"{indent}</ul>")
+    sources = race_sources(race, by_id)
+    if sources:
+        rows.append(f'{indent}<p class="share-source faint">Where each stands: per '
+                    f"{_e(_and(sources))}.</p>")
     return "\n".join(rows)
 
 
+def _what(race):
+    year = race.get("year") or ""
+    return f"the {year} special election" if race.get("special") else f"the {year} race"
+
+
 def describe_race(race, by_id, races_by_id, post=False):
-    """A race's share description: the seat, who holds it, and who is still
-    in it with where each stands."""
+    """A race's share description: the seat, who holds it, who is still in
+    it with where each stands, and who says so."""
     label = race.get("label") or race["id"]
     moved, running, _out = split_people(race, by_id)
     held = ""
@@ -494,14 +745,21 @@ def describe_race(race, by_id, races_by_id, post=False):
         held = f"Held by {person.get('name')}, who {held_words(person, by_id)}."
     inc = race.get("incumbent") or {}
     if not held and inc.get("seated") and inc.get("name"):
-        held = f"Held by {inc['name']}" + (f" ({inc['party']})." if inc.get("party") else ".")
+        # Under their profile's name where they have one, as the list
+        # below names them: "David G. Valadao" beside "David Valadao".
+        holder = next((p for p in running if holds(race, p)), None)
+        name = (holder or {}).get("name") or inc["name"]
+        held = f"Held by {name}" + (f" ({inc['party']})." if inc.get("party") else ".")
     people = []
     for person in running:
-        status = status_words(person, by_id, races_by_id, post)
+        status = status_words(person, by_id, races_by_id, post, seat=seat_phrase)
         people.append(f"{person.get('name')}" + (f" ({person['party']})" if person.get("party")
                                                   else "") + (f": {status}" if status else ""))
-    return " ".join(filter(None, [f"The {race.get('year') or ''} race for {label}.", held,
-                                  "; ".join(people) + "." if people else ""]))
+    sources = race_sources(race, by_id)
+    return " ".join(filter(None, [
+        f"{_what(race)[0].upper()}{_what(race)[1:]} for {label}.", held,
+        "; ".join(people) + "." if people else "",
+        f"Per {_and(sources)}." if sources and people else ""]))
 
 
 def render_race(race, host, by_id, races_by_id, post=False):
@@ -512,15 +770,16 @@ def render_race(race, host, by_id, races_by_id, post=False):
     year = race.get("year") or ""
     state = race.get("state") or ""
     whose = _possessive(state_name(state))
+    what = _what(race)
     return _page(
         host, race_path(race["id"]),
-        title=_e(f"{label}, {year} — Know Your Candidate"),
+        title=_e(f"{label}, {year}{' special election' if race.get('special') else ''} — Know Your Candidate"),
         description=_e(describe_race(race, by_id, races_by_id, post)),
         og_type="website",
-        og_title=_e(f"{label}: the {year} race"),
+        og_title=_e(f"{label}: {what}"),
         image=None,
         kind="race",
-        heading=_e(f"{label}: the {year} race"),
+        heading=_e(f"{label}: {what}"),
         body=race_list_html(race, by_id, races_by_id, post),
         view=_e(f"{_state_page(state)}#race-{race['id']}"),
         view_words=_e(f"Open this race on {whose} page"),
@@ -541,3 +800,36 @@ def render_all(profiles, races, host, summary=None):
     for race in races:
         out[race_path(race["id"])] = render_race(race, host, by_id, races_by_id, post)
     return out
+
+
+def aliases(profiles):
+    """``{old id: profile}``: the ids a profile answers to besides its own,
+    as ``KYC.byId`` resolves them - every merged filing (``otherFecIds``,
+    rule 25), a member's own filing (a filer since seated), a curated id
+    (``otherIds``) - first come first served, and never a real profile's
+    id."""
+    real = {p["id"] for p in profiles}
+    out = {}
+    for person in profiles:
+        fec = person.get("fecCandidateId")
+        own = [fec] if fec and person["id"] != "FEC_" + fec else []
+        names = (["FEC_" + other for other in (person.get("otherFecIds") or []) + own]
+                 + list(person.get("otherIds") or []))
+        for alias in names:
+            if alias not in real and alias not in out:
+                out[alias] = person
+    return out
+
+
+def render_aliases(profiles, races, host, summary=None):
+    """``{p/<old id>.html: html}``: a profile's share page at every id it
+    answers to besides its own. Written only over a page already there
+    (``emit.write_state_pages``): when filings fold or a filer is seated,
+    the id a link was shared under stops being a profile's, and its page
+    would have become a 404. Its canonical address is the profile's own
+    page, and it is not in the sitemap."""
+    by_id = {p["id"]: p for p in profiles}
+    races_by_id = {r["id"]: r for r in races or []}
+    post = post_election(summary)
+    return {profile_path(alias): render_profile(person, host, by_id, races_by_id, post, alias=alias)
+            for alias, person in aliases(profiles).items()}

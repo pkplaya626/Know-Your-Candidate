@@ -629,9 +629,11 @@ def render_state_pages(profiles, root=".", summary=None, stamp_from=None, races=
     return {path: assets.stamp(text, stamp_from or root) for path, text in out.items()}
 
 
-def _orphans(rendered, root):
+def _orphans(rendered, root, kept=()):
     """Share pages on disk that *rendered* does not hold: a profile or race
-    the data no longer has. Only when the share pages were rendered."""
+    the data no longer has. Only when the share pages were rendered. A page
+    at an id a profile still answers to (*kept*, :func:`_alias_pages`) is
+    not one."""
     if not any(os.path.dirname(rel) in SHARE_DIRS for rel in rendered):
         return []
     out = []
@@ -641,27 +643,46 @@ def _orphans(rendered, root):
             continue
         for name in sorted(os.listdir(directory)):
             relative = os.path.join(folder, name)
-            if name.endswith(".html") and relative not in rendered:
+            if name.endswith(".html") and relative not in rendered and relative not in kept:
                 out.append(relative)
     return out
 
 
+def _alias_pages(profiles, root, summary, stamp_from, races):
+    """``{relative path: html}`` for a share page at every id a profile
+    answers to besides its own (``share.aliases``), stamped as the rest
+    are. Each is written only over a page already on disk: when filings
+    fold (rule 25) or a filer is seated, the id a link was shared under
+    stops being a profile's, and the build deleted its page - a 404 for
+    everyone the link had been sent to (PR #121 review)."""
+    if races is None:
+        return {}
+    from . import assets, share
+
+    host = canonical_host(root)
+    return {os.path.join(SITE_DIR, *rel.split("/")): assets.stamp(text, stamp_from or root)
+            for rel, text in share.render_aliases(profiles, races, host, summary).items()}
+
+
 def write_state_pages(profiles, root=".", summary=None, stamp_from=None, races=None):
     """Write one page per state plus the directory, and every other page
-    :func:`render_state_pages` renders; remove share pages no profile or
-    race has any longer. Returns the paths written. A page whose text is
-    already on disk is not rewritten: 3,000 share pages that did not change
-    keep their modification times."""
+    :func:`render_state_pages` renders; keep a share page at an id its
+    profile still answers to, as that profile's; remove share pages no
+    profile or race has any longer. Returns the paths written. A page whose
+    text is already on disk is not rewritten: 3,000 share pages that did
+    not change keep their modification times."""
     written = []
     rendered = render_state_pages(profiles, root, summary, stamp_from, races)
-    for relative, text in rendered.items():
+    kept = {rel: text for rel, text in _alias_pages(profiles, root, summary, stamp_from, races).items()
+            if os.path.exists(os.path.join(root, rel))}
+    for relative, text in list(rendered.items()) + list(kept.items()):
         path = os.path.join(root, relative)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         if os.path.dirname(relative) in SHARE_DIRS and _same(path, text):
             continue
         _atomic_write(path, text)
         written.append(path)
-    for relative in _orphans(rendered, root):
+    for relative in _orphans(rendered, root, kept):
         os.remove(os.path.join(root, relative))
     return written
 
@@ -683,7 +704,9 @@ def check_state_pages(profiles, root=".", summary=None, stamp_from=None, races=N
     """
     stale = []
     rendered = render_state_pages(profiles, root, summary, stamp_from, races)
-    for relative, text in rendered.items():
+    kept = {rel: text for rel, text in _alias_pages(profiles, root, summary, stamp_from, races).items()
+            if os.path.exists(os.path.join(root, rel))}
+    for relative, text in list(rendered.items()) + list(kept.items()):
         path = os.path.join(root, relative)
         if not os.path.exists(path):
             stale.append((relative, "missing"))
@@ -691,7 +714,7 @@ def check_state_pages(profiles, root=".", summary=None, stamp_from=None, races=N
         with open(path, "r", encoding="utf-8") as handle:
             if handle.read() != text:
                 stale.append((relative, "stale"))
-    stale += [(relative, "orphaned") for relative in _orphans(rendered, root)]
+    stale += [(relative, "orphaned") for relative in _orphans(rendered, root, kept)]
     return stale
 
 

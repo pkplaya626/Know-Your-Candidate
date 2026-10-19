@@ -110,6 +110,30 @@ class TestStatusWords(unittest.TestCase):
         self.assertFalse(share.post_election({}))
 
 
+class TestStatusTable(unittest.TestCase):
+    """The words a page without scripts shows, for every case the status
+    table has, are in tests/fixtures/share_status_words.json, which the
+    render suite asks the page code (KYC.raceStatus) about, row by row: a
+    word changed on one side fails the day it changes, not the night a
+    November result is first read (PR #121 review)."""
+
+    def test_the_fixture_is_this_codes(self):
+        with open(share.STATUS_TABLE, encoding="utf-8", newline="") as handle:
+            on_disk = handle.read()
+        self.assertEqual(on_disk, share.status_table_text(),
+                         'regenerate: python -c "from kyc import share; share.write_status_table()" '
+                         "after making the same change in assets/kyc.js")
+
+    def test_it_holds_every_status_and_the_november_words(self):
+        table = share.status_table()
+        labels = {row[-2] for row in table["statuses"]}
+        for words in ("Elected in November", "Re-elected in November", "Lost re-election in November",
+                      "In the general election runoff", "On the November ballot: awaiting result",
+                      "Advanced to the November ballot", "Not on the November 3 open-primary ballot"):
+            self.assertIn(words, labels)
+        self.assertEqual({row[0] for row in table["statuses"]}, set(share._RACE_STATUS))
+
+
 class TestSharePhoto(unittest.TestCase):
     """A share image is a photograph that came by a sourced route (rule 24),
     or the site's card: never a URL from a fallback chain."""
@@ -152,8 +176,12 @@ class TestSharePages(unittest.TestCase):
         self.assertIn('<link rel="canonical" href="https://example.org/p/X000001.html">', page)
         self.assertIn('<meta property="og:url" content="https://example.org/p/X000001.html">', page)
         self.assertIn("<title>Test Member — Know Your Candidate</title>", page)
-        self.assertIn('content="Test Member (Republican), member for House • TX-3: Renominated for 2026."',
-                      page)
+        # The seat in words, and who says where they stand (PR #121 review):
+        # "member for House • TX-3" read as a glitch in an unfurl.
+        self.assertIn('content="Test Member (Republican), member of the U.S. House for TX-3: '
+                      'Renominated for 2026, per Wikipedia&#x27;s election results page."', page)
+        self.assertIn('<p class="share-source faint">Source: Wikipedia&#x27;s election results '
+                      'page.</p>', page)
         self.assertIn('<a id="shareView" href="../index.html#/profile/X000001">', page)
         self.assertIn('<a href="../r/H-TX-03-2026.html">TX-3 — U.S. House</a>', page)
         self.assertIn('<script src="../assets/kyc-share.js"></script>', page)
@@ -166,10 +194,14 @@ class TestSharePages(unittest.TestCase):
         self.assertLess(len(page.encode("utf-8")), 4000)
 
     def test_a_candidate_and_a_former_member_say_so(self):
-        self.assertIn("(Republican), candidate for House • TX-3",
+        self.assertIn("(Republican), candidate for the U.S. House in TX-3",
                       self.page(person(id="FEC_1", isCandidate=True)))
-        self.assertIn("former member for House • TX-3",
+        self.assertIn("former member of the U.S. House for TX-3",
                       self.page(person(formerMember={"left": "2026-12-01"})))
+        self.assertIn("member of the U.S. Senate for Texas",
+                      self.page(person(chamber="Senate", officeLabel="Senate • TX")))
+        self.assertIn("member of the U.S. House for Alaska (at large)",
+                      self.page(person(state="AK", officeLabel="House • AK-AL")))
 
     def test_a_territory_is_not_the_state(self):
         page = self.page(person(state="GU", officeLabel="House • GU-AL"))
@@ -194,6 +226,70 @@ class TestSharePages(unittest.TestCase):
         description = re.search(r'<meta name="description" content="([^"]*)"', page).group(1)
         self.assertIn("Ann Able (Democrat): On the November ballot.", description)
         self.assertNotIn("Bo Bee", description)
+
+    def test_where_a_member_leaving_is_going_and_when_a_seat_not_up_is_next(self):
+        other = {"text": "Republican nominee for Governor of Texas",
+                 "source": "https://en.wikipedia.org/wiki/2026_Texas_gubernatorial_election",
+                 "checked": "2026-10-17"}
+        leaving = person(raceStatus="unlisted", otherOffice=other)
+        page = self.page(leaving)
+        self.assertIn('<p class="share-other">Republican nominee for Governor of Texas.', page)
+        self.assertIn("Not running for re-election in 2026, per Wikipedia&#x27;s election results "
+                      "page; Republican nominee for Governor of Texas.", page)
+        # Not a race he is in: the seat's.
+        self.assertIn("The seat’s 2026 race: <a", page)
+        after = share.render_profile(leaving, "example.org", {"X000001": leaving},
+                                     {"H-TX-03-2026": race()}, post=True)
+        self.assertIn("Was the Republican nominee for Governor of Texas", after)
+        senator = person(chamber="Senate", officeLabel="Senate • TX", raceId=None, raceStatus=None,
+                         seatUp2026=False, electionYear=2030)
+        page = self.page(senator)
+        self.assertIn('<p class="share-next">Seat up in 2030</p>', page)
+        self.assertIn("member of the U.S. Senate for Texas: seat up in 2030.", page)
+        self.assertNotIn("share-next", self.page(person(seatUp2026=True, electionYear=2026)))
+
+    def test_each_status_credits_its_source(self):
+        by_id = {}
+        self.assertEqual(share.status_source(person(), by_id), "Wikipedia's election results page")
+        self.assertEqual(share.status_source(person(raceStatusSource="certified",
+                                                    raceStatusSourceName="the Test Division"), by_id),
+                         "the Test Division")
+        self.assertEqual(share.status_source(person(raceStatus="qualified", isCandidate=True,
+                                                    raceStatusSource="qualified"), by_id),
+                         "the Secretary of State's Candidate Inquiry")
+        self.assertEqual(share.status_source(person(isCandidate=True, raceStatus=None,
+                                                    unprinted={"kind": "write-in", "source": "the list"}),
+                                             by_id), "the list")
+        self.assertIsNone(share.status_source(person(isCandidate=True, raceStatus=None,
+                                                     ballotUnknown=True), by_id))
+        # A member running elsewhere: their filing's source.
+        member = person(raceStatus="unlisted", contestRaceId="S-TX-2026",
+                        contestLabel="Senate • TX", alsoRunningId="FEC_S1")
+        filing = person(id="FEC_S1", isCandidate=True, raceId="S-TX-2026", raceStatus="nominee",
+                        raceStatusSource="certified", raceStatusSourceName="the Texas list")
+        self.assertEqual(share.status_source(member, {"FEC_S1": filing}), "the Texas list")
+        self.assertIn("On the November ballot for the U.S. Senate in Texas, per the Texas list.",
+                      share.describe(member, {"FEC_S1": filing, member["id"]: member}, {})[1])
+
+    def test_a_race_marks_its_holder_and_says_who_says_where_each_stands(self):
+        challenger = person(id="FEC_A", name="Ann Able", isCandidate=True, party="Democrat",
+                            raceStatusSource="certified", raceStatusSourceName="the Texas list")
+        holder = person(name="Test M. Member")
+        r = race(candidateIds=["FEC_A"], special=True,
+                 incumbent={"name": "Test Middle Member", "party": "Republican", "seated": True})
+        by_id = {p["id"]: p for p in (holder, challenger)}
+        page = share.render_race(r, "example.org", by_id, {r["id"]: r})
+        self.assertIn('<a href="../p/X000001.html">Test M. Member</a> (Republican), '
+                      '<span class="share-holder">holds the seat</span>: ', page)
+        self.assertNotIn('Ann Able</a> (Democrat), <span class="share-holder">', page)
+        self.assertIn("Where each stands: per Wikipedia&#x27;s election results page and the "
+                      "Texas list.", page)
+        self.assertIn("<h1>TX-3 — U.S. House: the 2026 special election</h1>", page)
+        description = share.describe_race(r, by_id, {r["id"]: r})
+        # The holder under the name the list gives them, not the record's.
+        self.assertIn("Held by Test M. Member (Republican).", description)
+        self.assertTrue(description.endswith("Per Wikipedia's election results page and the Texas list."),
+                        description)
 
     def test_a_holder_who_has_left_holds_nothing(self):
         r = race(incumbent={"name": "Gone Member", "party": "Republican", "seated": False},
@@ -263,8 +359,43 @@ class TestSharePagesAreBuiltAndVerified(unittest.TestCase):
             self.assertFalse(os.path.exists(os.path.join(site, "p", "GONE.html")))
             self.assertEqual(emit.check_state_pages(people, tmp, summary, ROOT, races), [])
 
-    def test_the_committed_share_pages_are_this_builds(self):
-        # verify's own comparison, over the real site, is in the CI gate;
+    def test_a_page_shared_under_an_id_the_profile_no_longer_has_stays(self):
+        # Filings fold (rule 25) and filers are seated: the id a link was
+        # shared under stops being a profile's. Its page is kept, as the
+        # profile's, pointing at its own page - never a 404 - and no page is
+        # made for an id nobody shared.
+        people = [person(), person(id="FEC_A", isCandidate=True, name="Ann Able",
+                                   otherFecIds=["H6TX03999"], fecCandidateId="H6TX03111")]
+        races = [race(candidateIds=["FEC_A"])]
+        summary = {"states": {}}
+        self.assertEqual(sorted(share.aliases(people)), ["FEC_H6TX03111", "FEC_H6TX03999"])
+        with tempfile.TemporaryDirectory() as tmp:
+            os.makedirs(os.path.join(tmp, emit.SITE_DIR, "p"))
+            with open(os.path.join(tmp, emit.CNAME_FILE), "w", encoding="utf-8") as f:
+                f.write("example.org\n")
+            old = os.path.join(tmp, emit.SITE_DIR, "p", "FEC_H6TX03999.html")
+            with open(old, "w", encoding="utf-8") as f:
+                f.write("<!DOCTYPE html><title>Ann Able, before the fold</title>")
+            emit.write_state_pages(people, tmp, summary=summary, stamp_from=ROOT, races=races)
+            pages_dir = os.path.join(tmp, emit.SITE_DIR, "p")
+            self.assertEqual(sorted(os.listdir(pages_dir)),
+                             ["FEC_A.html", "FEC_H6TX03999.html", "X000001.html"])
+            with open(old, encoding="utf-8") as f:
+                kept = f.read()
+            self.assertIn('<link rel="canonical" href="https://example.org/p/FEC_A.html">', kept)
+            self.assertIn('<a id="shareView" href="../index.html#/profile/FEC_A">', kept)
+            self.assertEqual(emit.check_state_pages(people, tmp, summary, ROOT, races), [])
+            with open(os.path.join(tmp, emit.SITE_DIR, "sitemap.xml"), encoding="utf-8") as f:
+                self.assertNotIn("FEC_H6TX03999", f.read())
+            # A hand edit to it is seen like any other.
+            with open(old, "a", encoding="utf-8") as f:
+                f.write("<!-- by hand -->")
+            self.assertEqual(emit.check_state_pages(people, tmp, summary, ROOT, races),
+                             [(os.path.join(emit.SITE_DIR, "p", "FEC_H6TX03999.html"), "stale")])
+
+    def test_the_share_folders_are_committed(self):
+        # Whether the committed pages are this build's is verify's question,
+        # asked of the real site in the CI gate (emit.check_state_pages);
         # here, only that the folders exist and hold pages.
         site = os.path.join(ROOT, emit.SITE_DIR)
         self.assertGreater(len(os.listdir(os.path.join(site, "p"))), 500)
@@ -313,6 +444,20 @@ class TestPlainStatePages(unittest.TestCase):
         ballot = pages.render_ballot_page("example.org")
         self.assertEqual(ballot.count("<noscript>"), 1)
         self.assertIn("looks your ZIP code up in your browser", ballot)
+
+    def test_a_page_that_lists_nothing_without_a_script_says_so(self):
+        # The general line promised "what this page lists in plain text"
+        # over a legislature or a county page that lists nobody without it.
+        for html in (pages.render_legislature_page("NE", "example.org"),
+                     pages.render_counties_page("LA", "example.org")):
+            note = re.search(r"<noscript>(.*?)</noscript>", html).group(1)
+            self.assertIn("this page lists none of them without it", note)
+            self.assertNotIn("in plain text", note)
+        self.assertIn("The map of parishes", pages.render_counties_page("LA", "example.org"))
+        note = re.search(r"<noscript>(.*?)</noscript>",
+                         pages.render_district_page("AK", "example.org")).group(1)
+        self.assertIn('<a href="../states/ak.html">Alaska&#x27;s page</a> lists its members of '
+                      "Congress and its races in plain text", note)
 
     def test_the_hand_maintained_pages_say_it_too(self):
         for name in ("index.html", "map.html"):

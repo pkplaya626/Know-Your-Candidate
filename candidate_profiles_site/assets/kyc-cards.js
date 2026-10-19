@@ -278,7 +278,7 @@
     var won = namesWith(race, "elected", res.otherElected);
     if (won.length === 1) {
       return '<span class="badge badge-money" title="' + KYC.escapeAttr(
-        "Marked as the winner on the state's Wikipedia election results page.") +
+        "Marked as the winner on Wikipedia's election results page.") +
         '">Won by ' + KYC.escapeHtml(won[0]) + "</span>";
     }
     var runoff = namesWith(race, "runoff", res.otherRunoff);
