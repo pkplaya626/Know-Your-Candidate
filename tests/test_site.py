@@ -1448,6 +1448,18 @@ class TestRefreshWorkflow(unittest.TestCase):
         self.assertIn('branch="refresh/congress-$(date -u +%Y-%m-%d)-${{ github.run_id }}"',
                       self.text)
 
+    def test_a_state_roster_that_cannot_be_read_stops_nothing_else(self):
+        # 2026-10-19: one association's page did not resolve in DNS, the
+        # four state-government commands ran as one step, and the whole
+        # daily refresh failed. Each is its own step now and keeps the
+        # committed cache when its source cannot be read (rule 8).
+        import re
+        steps = re.split(r"\n      - ", self.text)
+        for command in ("executives", "officers", "statelegs", "courts"):
+            step = [s for s in steps if f"build_profile_site.py {command}\n" in s + "\n"]
+            self.assertEqual(len(step), 1, command)
+            self.assertIn("continue-on-error: true", step[0], command)
+
     def test_runs_twice_a_week_then_daily_into_the_election_and_through_the_runoffs(self):
         self.assertIn('cron: "20 7 * * *"', self.text)
         self.assertIn('"2026-11-03"', self.text)
