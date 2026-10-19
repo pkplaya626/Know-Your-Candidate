@@ -128,7 +128,10 @@ class TestGuideMaps(unittest.TestCase):
         # 2026-10-17, GUIDE-31): the number is the key, and the text says so.
         about = government_maps._circuits()["about"]
         self.assertIn("The number on each state is its circuit", about)
-        self.assertIn("only tell neighbouring circuits apart and do not group them", about)
+        self.assertIn("only tell neighboring circuits apart and do not group them", about)
+        # The site's reader-facing text spells it "color" everywhere else.
+        self.assertNotIn("colour", about)
+        self.assertNotIn("neighbour", about)
 
     def test_every_state_is_in_one_circuit_and_samoa_in_none(self):
         values = government_maps._circuits()["values"]

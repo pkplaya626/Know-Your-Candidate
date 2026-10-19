@@ -917,6 +917,20 @@
       : "");
   }
 
+  /** A small round portrait for a row - the map's panel, a profile's race -
+   *  or, where the build found none, the person's initials in a disc of the
+   *  same size. The cards had the disc and the rows kept grey silhouettes
+   *  (VISUALS-16); one helper draws it for every row (rule 12). *sizes* is
+   *  the width it is drawn at, e.g. "38px". */
+  function portraitThumb(item, sizes) {
+    if (!hasPortrait(item)) {
+      return '<span class="thumb-monogram" aria-hidden="true">' +
+        escapeHtml(monogram(item && item.name)) + "</span>";
+    }
+    return "<img " + portraitAttrs(item, sizes) + ' alt="" loading="lazy" decoding="async"' +
+      ' data-photo-idx="0" data-profile="' + escapeAttr(item.id) + '">';
+  }
+
   /** Point an existing <img> at a profile's portrait - the dialog reuses one
    *  element, so a srcset left by the last profile must go. */
   function setPortrait(img, item, sizes) {
@@ -2800,6 +2814,7 @@
     portraitAttrs: portraitAttrs,
     hasPortrait: hasPortrait,
     monogram: monogram,
+    portraitThumb: portraitThumb,
     setPortrait: setPortrait,
     handleImageFallback: handleImageFallback,
     SILHOUETTE: SILHOUETTE,

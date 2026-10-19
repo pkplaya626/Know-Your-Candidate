@@ -468,8 +468,7 @@
           (there ? " &middot; " + KYC.escapeHtml(there.label) : "") + "</span>";
       }
       return '<button type="button" class="race-mate" data-goto="' + KYC.escapeAttr(p.id) + '">' +
-        '<img ' + KYC.portraitAttrs(p, "36px") + ' alt="" loading="lazy" ' +
-        'data-photo-idx="0" data-profile="' + KYC.escapeAttr(p.id) + '">' +
+        KYC.portraitThumb(p, "36px") +
         '<span class="race-mate-body"><span class="race-mate-name">' + KYC.escapeHtml(p.name) +
         '</span><span class="race-mate-meta"><span class="' + KYC.partyClass(p) + '">' +
         KYC.escapeHtml(p.party) + "</span> " + role + status + "</span></span></button>";

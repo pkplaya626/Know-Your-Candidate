@@ -1249,6 +1249,14 @@ async function testDirectoryAsync() {
       const onBallot = [...D.querySelectorAll("#profileModalRace > .race-mate")];
       check("people still on the ballot come first, the rest are folded",
         onBallot.every((r) => !KYC.cards.offBallot(KYC.byId(r.getAttribute("data-goto")))));
+      // The race list kept grey silhouettes after the cards had initials
+      // (VISUALS-16 review): one helper draws every row's (KYC.portraitThumb).
+      const bare = rows.filter((r) => !KYC.hasPortrait(KYC.byId(r.getAttribute("data-goto"))));
+      check("a race-mate with no portrait shows initials, never a silhouette",
+        bare.every((r) => !r.querySelector("img") && r.querySelector(".thumb-monogram") &&
+          r.querySelector(".thumb-monogram").textContent === KYC.monogram(KYC.byId(r.getAttribute("data-goto")).name)) &&
+          rows.filter((r) => !bare.includes(r)).every((r) => !!r.querySelector("img")),
+        `${bare.length} of ${rows.length} without a portrait`);
       const first = rows[0];
       first.click();
       check("clicking a race-mate opens their profile",
@@ -1590,6 +1598,22 @@ async function testMap() {
         senateRaces.some((r) => r.special && r.state === s.getAttribute("data-state"))) &&
         (!senateRaces.some((r) => r.special) || /Special election/.test(legend26)),
       senateRaces.filter((r) => r.special).map((r) => r.state).join(", "));
+    // The key was a 2px dashed border on a 10px square, which draws solid -
+    // the look of a picked state's outline, so a reader who tapped Texas saw
+    // it drawn like the key for a special election.
+    const specialKey = D.querySelector('#mapLegend [data-fill="special"]');
+    const mapCss = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+    const ruleFor = (sel) => (mapCss.match(new RegExp("\\n" + sel.replace(/[.[\]"=]/g, "\\$&") + "\\s*\\{([^}]*)\\}")) || ["", ""])[1];
+    check("the special-election key draws the map's dash, wide enough to show it",
+      !senateRaces.some((r) => r.special) || (!!specialKey && specialKey.tagName.toLowerCase() === "svg" &&
+        !!specialKey.querySelector("rect") && /stroke-dasharray:\s*5 3/.test(ruleFor(".map-legend .swatch-special rect")) &&
+        /stroke-dasharray:\s*5 3/.test(ruleFor(".state.is-marked")) && /dashed outline/.test(legend26)),
+      specialKey ? specialKey.outerHTML.slice(0, 80) : "no key");
+    check("a picked state's outline is solid and thicker than a special's dash",
+      /stroke-dasharray:\s*none/.test(ruleFor('.state[aria-pressed="true"]')) &&
+        parseFloat((ruleFor('.state[aria-pressed="true"]').match(/stroke-width:\s*([\d.]+)/) || [])[1]) >
+        parseFloat((ruleFor(".state.is-marked").match(/stroke-width:\s*([\d.]+)/) || [])[1]),
+      ruleFor('.state[aria-pressed="true"]').replace(/\s+/g, " "));
     // John Cornyn and Bill Cassidy ran and lost; the label called them "not
     // running", like a retiree, while the panel beside it said "Lost primary".
     const label = (code) => (D.querySelector('#usMap [data-state="' + code + '"]') || {
@@ -1674,6 +1698,77 @@ async function testMap() {
         (!heldBy || (stillIn.compareDocumentPosition(heldBy) & 4)) &&
         [...panel.querySelectorAll(".person-row")].filter((r) => !r.closest("[hidden]")).length >= 2,
       [...panel.querySelectorAll(".panel-subhead")].map((h) => h.textContent.trim()).join(" | "));
+
+    /* The rows under the race's heading: up to the next heading or block. */
+    const raceRows = () => {
+      const head = panel.querySelector(".panel-subhead.race-people");
+      const rows = [];
+      for (let el = head && head.nextElementSibling; el; el = el.nextElementSibling) {
+        if (!el.classList.contains("person-row")) break;
+        rows.push(el);
+      }
+      return { head, rows };
+    };
+    const pick = (code) => D.querySelector('#usMap [data-state="' + code + '"]')
+      .dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    // The first race-first list took only filers: every renominated senator
+    // - 25 of the 35 seats - was left out of "Still in the race" and its
+    // count, and named only under "Seat held by", below the markets.
+    const renominated = window.kycRaces.filter((r) => r.chamber === "Senate" && !r.special)
+      .map((r) => ({ race: r, holder: KYC.byId(r.incumbentIds[0]) }))
+      .filter((x) => x.holder && KYC.seated(x.holder) && x.holder.raceStatus === "nominee" &&
+        !x.holder.contestRaceId);
+    if (oldCongressSits(window) && renominated.length) {
+      const failed = [];
+      renominated.forEach(({ race, holder }) => {
+        pick(race.state);
+        const { head, rows } = raceRows();
+        const ids = rows.map((r) => r.getAttribute("data-id"));
+        const unprofiled = KYC.cards.unprofiledNames(race);
+        const count = head && parseInt(head.querySelector("span").textContent, 10);
+        const heldBy = [...panel.querySelectorAll(".panel-subhead")].find((h) => /Seat held by/.test(h.textContent));
+        const twice = heldBy && [...panel.querySelectorAll('.person-row[data-id="' + holder.id + '"]')].length > 1;
+        if (!head || ids[0] !== holder.id || count !== ids.length + unprofiled.none.length + unprofiled.maybe.length ||
+            twice) {
+          failed.push(race.state + ": " + (head ? head.textContent.trim() : "no heading") + " [" + ids.join(",") + "]");
+        }
+      });
+      check("a renominated senator is in the race's list, first, and in its count", failed.length === 0,
+        failed.slice(0, 4).join(" | ") || renominated.length + " seats");
+      // The heading says what the list holds once the votes are cast (rule 63).
+      pick(renominated[0].race.state);
+      check("the race's heading is 'Still in the race' before Election Day",
+        /^Still in the race/.test(raceRows().head.textContent.trim()), raceRows().head.textContent);
+    }
+    pick("TX");
+    // The unsettled filers and the page their statuses come from sit with
+    // the race, before the markets and the seat's holder.
+    const kids = [...panel.children];
+    const at = (sel) => kids.findIndex((el) => el.matches(sel));
+    const markets = at(".odds");
+    check("the race's source and its unsettled filers come before its markets",
+      markets === -1 || ((at(".race-results") === -1 || at(".race-results") < markets) &&
+        (at("#showUnsure") === -1 || at("#showUnsure") < markets)),
+      kids.map((el) => el.className || el.tagName).join(" | "));
+    // Beside the people the markets are closed until opened (TRUST-14).
+    check("the panel's markets are closed until opened",
+      [...panel.querySelectorAll(".odds")].every((o) => o.tagName === "DETAILS" && !o.open),
+      [...panel.querySelectorAll(".odds")].map((o) => o.tagName).join(","));
+    // A row with no portrait shows the person's initials, as a card does,
+    // never a grey silhouette (VISUALS-16).
+    D.querySelector('[data-mode="house"]').click();
+    const opener = D.getElementById("showChallengers");
+    if (opener) opener.click();
+    const panelRows = [...panel.querySelectorAll(".person-row")];
+    const silhouettes = panelRows.filter((r) => {
+      const img = r.querySelector("img");
+      return img && !KYC.hasPortrait(KYC.byId(r.getAttribute("data-id")));
+    });
+    const discs = panelRows.filter((r) => r.querySelector(".thumb-monogram"));
+    check("a panel row with no portrait shows initials, never a silhouette",
+      silhouettes.length === 0 && discs.every((r) => r.querySelector(".thumb-monogram").textContent ===
+        KYC.monogram(KYC.byId(r.getAttribute("data-id")).name)),
+      `${silhouettes.length} silhouettes, ${discs.length} discs of ${panelRows.length} rows`);
     D.querySelector('[data-mode="senate"]').click();
   });
 
@@ -3508,8 +3603,10 @@ function testPhoneRules(css) {
       /#stateContent \.card\s*\{[^}]*flex-direction:\s*row/.test(phone) &&
         /#stateContent \.card-photo\s*\{[^}]*width:\s*52px/.test(phone));
     const stateJs = fs.readFileSync(path.join(SITE, "assets", "kyc-state.js"), "utf8");
-    check("and its races' markets are closed there", /collapsedOdds: phone/.test(stateJs) &&
-      /matchMedia\("\(max-width: 600px\)"\)/.test(stateJs));
+    // Closed at every width since (TRUST-14 review): the same prices were
+    // open on a desktop state page and closed on a phone.
+    check("and its races' markets are closed there, at every width", !/collapsedOdds/.test(stateJs) &&
+      /collapsed:\s*opts\.collapsedOdds !== false/.test(fs.readFileSync(path.join(SITE, "assets", "kyc-cards.js"), "utf8")));
     check("the map's ten views are one menu on a phone",
       /\.map-view-group\s*\{\s*display:\s*none;?\s*\}/.test(media(760)) &&
         /\.map-mode-pick\s*\{[^}]*display:\s*flex/.test(media(760)));
@@ -5080,6 +5177,32 @@ async function testMapOnAPhone() {
         }
       }));
       check("no state's word covers another's", overlaps.length === 0, overlaps.join(", "));
+      // The first collision pass cleared every overlap by sending inland
+      // states to the Atlantic column: Kentucky's line ran 136px across the
+      // map at 390px, Indiana's 166px at 320px. A code moved within its
+      // state stays in the box the build measured clear of its edges, and
+      // only the small coastal states (labelRoom under 7) join the column.
+      const geo = page.window.kycGeo.states;
+      const unit = width / vb[2];
+      const screen = (p) => [(p[0] - vb[0]) * unit, (p[1] - vb[1]) * unit];
+      const placedOff = [], farAway = [];
+      D.querySelectorAll("#mapLabels .map-label").forEach((s) => {
+        const code = s.getAttribute("data-state") || s.textContent;
+        const shape = geo[code];
+        if (!shape || !shape.label || s.classList.contains("territory-label")) return;
+        const x = parseFloat(s.style.left) / 100 * width, y = parseFloat(s.style.top) / 100 * height;
+        const [lx, ly] = screen(shape.label);
+        const room = (shape.labelRoom || 0) * unit;
+        if (s.classList.contains("state-code")) {
+          if (Math.abs(x - lx) > 1.75 * room + 0.5 || Math.abs(y - ly) > room + 0.5) placedOff.push(code);
+        } else if ((shape.labelRoom || 0) >= 7 && Math.hypot(x - lx, y - ly) > 75) {
+          farAway.push(code + " " + Math.round(Math.hypot(x - lx, y - ly)) + "px");
+        }
+      });
+      check("a code moved to clear another stays on its own state's land", placedOff.length === 0,
+        placedOff.join(", "));
+      check("a large state's callout stays beside it, never across the map", farAway.length === 0,
+        farAway.join(", "));
       check("and none runs off the screen", boxes.every((b) => b.x - b.w / 2 >= -1 && b.x + b.w / 2 <= width + 1),
         boxes.filter((b) => b.x - b.w / 2 < -1 || b.x + b.w / 2 > width + 1).map((b) => b.t).join(", "));
       // Every word is page text over the map: inside the SVG, Samsung
@@ -5144,6 +5267,41 @@ async function testDistrictsOnAPhone() {
       check("both picked districts are numbered, neither on the other",
         boxes.length === 2 && !hit(boxes[0], boxes[1]),
         boxes.map((b) => `${b.t}@${b.x.toFixed(0)},${b.y.toFixed(0)}`).join(" "));
+      // The first fix stepped "37" a line up, onto district 11's land, with
+      // nothing joining it to its own (rule 43). A picked number is on its
+      // district, or a callout with a line from its district's own point.
+      const plan = page.window.kycDistricts.TX.plans[0];
+      const ringsOf = (d) => String(d).split("M").map((part) => {
+        const nums = (part.match(/-?\d+(?:\.\d+)?/g) || []).map(Number);
+        const ring = [];
+        let x = nums[0], y = nums[1];
+        if (nums.length >= 2) ring.push([x, y]);
+        for (let i = 2; i + 1 < nums.length; i += 2) { x += nums[i]; y += nums[i + 1]; ring.push([x, y]); }
+        return ring;
+      }).filter((r) => r.length > 2);
+      const inside = (rings, x, y) => {
+        let hit = false;
+        rings.forEach((ring) => {
+          for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+            const [xi, yi] = ring[i], [xj, yj] = ring[j];
+            if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) hit = !hit;
+          }
+        });
+        return hit;
+      };
+      const svgMap = page.D.querySelector(".district-statewide");
+      const wrong = [...(layer ? layer.querySelectorAll(".is-focus") : [])].filter((s) => {
+        const n = s.textContent;
+        const x = vb[0] + parseFloat(s.style.left) / 100 * vb[2];
+        const y = vb[1] + parseFloat(s.style.top) / 100 * vb[3];
+        if (inside(ringsOf(plan.districts[n].d), x, y)) return false;
+        const line = svgMap.querySelector('.pick-leader[data-district="' + n + '"]');
+        const at = plan.districts[n].at;
+        return !(s.classList.contains("is-callout") && line &&
+          Math.abs(+line.getAttribute("x1") - at[0]) < 0.01 && Math.abs(+line.getAttribute("y1") - at[1]) < 0.01);
+      }).map((s) => s.textContent);
+      check("each picked number is on its own district, or joined to it by a line", wrong.length === 0,
+        wrong.join(", "));
     });
   }
   // Numbers were sized for a 620px map and scaled with it: on a phone every

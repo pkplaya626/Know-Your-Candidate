@@ -115,9 +115,12 @@
     ["allD", "var(--party-d)", "All D"],
   ];
 
-  function houseStep(d, r) {
-    if (!d) return HOUSE_STEPS[0];
-    if (!r) return HOUSE_STEPS[4];
+  /* *seats* counts every seat, independents' and vacant ones too: "All R"
+   * is said only of a delegation whose every seat is Republican, never of
+   * two Republicans beside an independent or an empty seat. */
+  function houseStep(d, r, seats) {
+    if (r === seats) return HOUSE_STEPS[0];
+    if (d === seats) return HOUSE_STEPS[4];
     return d > r ? HOUSE_STEPS[3] : d < r ? HOUSE_STEPS[1] : HOUSE_STEPS[2];
   }
 
@@ -162,7 +165,7 @@
       else if (!held) fill2 = NONE_FILL;
       else if (h.i === held) fill2 = I_FILL;
       else if (!(h.d + h.r)) fill2 = I_FILL;
-      else fill2 = houseStep(h.d, h.r)[1];
+      else fill2 = houseStep(h.d, h.r, held + (h.vacant || 0))[1];
       return {
         fill: fill2,
         ink: inkFor(fill2),
@@ -245,7 +248,7 @@
       [tint("r"), "Open Republican seat", "open:r"],
       ["var(--party-d)", "Democratic seat up"],
       [tint("d"), "Open Democratic seat", "open:d"],
-      ["special", "Special election (outlined)", "special"],
+      ["special", "Special election (dashed outline)", "special"],
       [NONE_FILL, "No race in 2026"],
     ],
   };
@@ -266,7 +269,13 @@
   /** A legend key's swatch, drawn as the map draws its fill (hatched where
    *  the map hatches), naming that fill in data-fill. */
   function swatch(fill) {
-    if (fill === "special") return '<span class="swatch swatch-special" data-fill="special"></span>';
+    /* The key is the map's own dash, on a shape wide enough to show it: a
+     * dashed border on a 10px square drew as a solid box, the look of the
+     * picked state's outline. */
+    if (fill === "special") {
+      return '<svg class="swatch swatch-special" data-fill="special" viewBox="0 0 26 12"' +
+        ' aria-hidden="true" focusable="false"><rect x="1" y="1" width="24" height="10"/></svg>';
+    }
     return '<span class="swatch" data-fill="' + KYC.escapeAttr(KYC.svgFill(fill)) +
       '" style="background:' + KYC.swatchFill(fill) + '"></span>';
   }
@@ -403,9 +412,7 @@
     return [
       '<button type="button" class="person-row" data-id="',
       KYC.escapeAttr(item.id), '">',
-      '<img ', KYC.portraitAttrs(item, "38px"),
-      ' alt="" loading="lazy" decoding="async" data-photo-idx="0" data-profile="',
-      KYC.escapeAttr(item.id), '">',
+      KYC.portraitThumb(item, "38px"),
       '<span class="who">',
       '<span class="name">', KYC.escapeHtml(item.name), "</span>",
       '<span class="office">', KYC.escapeHtml(item.officeLabel), "</span>",
@@ -500,33 +507,97 @@
     }).sort(order);
     var unsure = people.filter(function (x) { return x.isCandidate && unknown(x); }).sort(order);
     var out = people.filter(function (x) { return x.isCandidate && KYC.offBallot(x.raceStatus); });
+    var outNote = out.length
+      ? ' <span class="faint" title="Lost the primary, withdrew, or were not on the primary ballot">' +
+        out.length + " out</span>"
+      : "";
+    var stateRaces = (global.kycRaces || []).filter(function (r) {
+      return r.state === code && (mode === "house" ? r.chamber === "House" : r.chamber === "Senate");
+    });
+    /* The pages the statuses in the panel were read from, linked, as a
+     * race's head links its own (TRUST-06): one link per page, since a
+     * state's House races share one results page. */
+    var seenSource = {};
+    var sources = stateRaces.map(function (r) {
+      var url = r.results && r.results.sourceUrl;
+      if (!url || seenSource[url]) return "";
+      seenSource[url] = true;
+      return KYC.resultsSourceHtml(r);
+    }).filter(Boolean);
+    var sourceLine = sources.length ? '<p class="panel-note race-results">' + sources.join(" ") + "</p>" : "";
+    var unsureBlock = unsure.length
+      ? '<button type="button" class="panel-subhead expander" id="showUnsure"' +
+        ' aria-expanded="false" aria-controls="unsureRows">' +
+        KYC.icon("chevron") + " Filed; ballot status not known <span>" + unsure.length +
+        "</span></button>" +
+        '<div id="unsureRows" hidden>' + unsure.map(personRow).join("") + "</div>"
+      : "";
 
     /* Texas has 37 representatives and 191 filed challengers. Listing all 228
      * in one scroll buries the delegation the reader clicked the state to
      * see, so the challengers sit behind a count they can open. */
     var html = "";
-    /* The 2026 race view leads with the race: the people still in it,
-     * listed, then what the markets quote, then who holds the seat. Texas
-     * led with John Cornyn, "Lost primary", and folded its two nominees
-     * away under "2026 challengers" (VISUALS-10). The delegation views
-     * keep who is seated first (rule 27). */
+    /* The 2026 race view leads with the race: everyone in it, listed in the
+     * race's own order, the seat's holder too while the race has them, then
+     * what the markets quote, then whoever holds the seat and is not in
+     * the race. Texas led with John Cornyn, "Lost primary", and folded its
+     * two nominees away under "2026 challengers" (VISUALS-10); the first
+     * race-first list then took only filers, and left every renominated
+     * senator out of "Still in the race" and its count. The delegation
+     * views keep who is seated first (rule 27). */
     var raceFirst = mode === "senate2026";
-    if (raceFirst && running.length) {
-      html += '<p class="panel-subhead">Still in the race <span>' + running.length + "</span>" +
-        (out.length
-          ? ' <span class="faint" title="Lost the primary, withdrew, or were not on the primary ballot">' +
-            out.length + " out</span>"
-          : "") + "</p>" + running.map(personRow).join("");
+    var listed = {};
+    if (raceFirst) {
+      var raceOf = {};
+      stateRaces.forEach(function (r) { raceOf[r.id] = r; });
+      var holdsThisRace = function (x) {
+        return stateRaces.some(function (r) {
+          return (r.incumbentIds || []).indexOf(x.id) !== -1 || r.winnerId === x.id;
+        });
+      };
+      var inRace = function (x) {
+        if (KYC.offBallot(x.raceStatus) || unknown(x)) return false;
+        if (x.isCandidate) return true;
+        // A holder running for another seat is in that race, not this one.
+        if (!holdsThisRace(x) || (x.contestRaceId && !raceOf[x.contestRaceId])) return false;
+        return !!(x.raceStatus || x.seekingReelection2026);
+      };
+      var racePeople = people.filter(inRace).sort(order);
+      racePeople.forEach(function (x) { listed[x.id] = true; });
+      // One formula with the race's own count (rule 73): the people the
+      // results put on the ballot with no profile here are in it too.
+      var unprofiled = 0;
+      stateRaces.forEach(function (r) {
+        var u = KYC.cards.unprofiledNames(r);
+        unprofiled += u.none.length + u.maybe.length;
+      });
+      var inCount = racePeople.length + unprofiled;
+      // After Election Day the list holds who won and who lost (rule 63):
+      // never "still in the race".
+      var heading = KYC.electionStatus().phase === "post-election"
+        ? "On the November ballot" : "Still in the race";
+      if (inCount) {
+        html += '<p class="panel-subhead race-people">' + heading + " <span>" + inCount + "</span>" +
+          outNote + "</p>" + racePeople.map(personRow).join("") +
+          (stateRaces.length === 1 ? KYC.cards.orderNote(racePeople, stateRaces[0]) : "");
+      } else if (out.length) {
+        html += '<p class="panel-subhead race-people">Nobody listed as still in the race' + outNote + "</p>";
+      }
+      html += stateRaces.map(function (r) { return KYC.cards.unprofiledNote(r, "panel-note"); }).join("");
+      // Before the markets and the holder, beside the statuses they back.
+      html += unsureBlock + sourceLine;
+      if (KYC.odds) {
+        html += stateRaces.map(function (r) {
+          return KYC.odds.render(r, { compact: true, collapsed: true });
+        }).join("");
+      }
     }
-    if (raceFirst && KYC.odds) {
-      var seatRace = senateRace(code);
-      if (seatRace) html += KYC.odds.render(seatRace, { compact: true });
-    }
-    if (seated.length) {
+    var seatedRest = seated.filter(function (x) { return !listed[x.id]; });
+    if (seatedRest.length) {
       html += '<p class="panel-subhead">' +
         (mode === "senate2026" ? "Seat held by" : "Currently seated") +
-        " <span>" + seated.length + "</span></p>" +
-        seated.map(personRow).join("");
+        " <span>" + seatedRest.length + "</span></p>" +
+        seatedRest.map(personRow).join("");
     }
     if (former.length) {
       html += '<p class="panel-subhead">' +
@@ -541,77 +612,52 @@
         KYC.escapeAttr(KYC.siteRoot() + districtMap.page) + '">' +
         (districtMap.redrawn ? "Old and new district lines \u203a" : "District map \u203a") + "</a></p>";
     }
-    if (raceFirst && running.length) {
-      // Listed above.
-    } else if (running.length) {
-      html +=
-        '<button type="button" class="panel-subhead expander" id="showChallengers"' +
-        ' aria-expanded="false" aria-controls="challengerRows">' +
-        KYC.icon("chevron") + " 2026 challengers <span>" + running.length + "</span>" +
-        (out.length
-          ? ' <span class="faint" title="Lost the primary, withdrew, or were not on the primary ballot">' +
-            out.length + " out</span>"
-          : "") +
-        "</button>" +
-        '<div id="challengerRows" hidden>' + running.map(personRow).join("") + "</div>";
-    } else if (out.length) {
-      html += '<p class="panel-subhead">No challenger still on the ballot ' +
-        '<span title="Lost the primary, withdrew, or were not on the primary ballot">' +
-        out.length + " out</span></p>";
-    }
-    if (unsure.length) {
-      html +=
-        '<button type="button" class="panel-subhead expander" id="showUnsure"' +
-        ' aria-expanded="false" aria-controls="unsureRows">' +
-        KYC.icon("chevron") + " Filed; ballot status not known <span>" + unsure.length +
-        "</span></button>" +
-        '<div id="unsureRows" hidden>' + unsure.map(personRow).join("") + "</div>";
-    }
-    // The people the results put on the ballot with no profile here: by
-    // name for the state's Senate seat, counted for its House seats, with
-    // the state page that lists them race by race. Only the view's own
-    // chamber: the Senate view counted Hawaii's House nominees under a
-    // Senate heading (audit 2026-10-17, RACES-06).
-    var stateRaces = (global.kycRaces || []).filter(function (r) {
-      return r.state === code && (mode === "house" ? r.chamber === "House" : r.chamber === "Senate");
-    });
-    if (mode === "senate2026") {
-      html += stateRaces.map(function (r) { return KYC.cards.unprofiledNote(r, "panel-note"); }).join("");
+    if (raceFirst) {
+      // The race's people, its unsettled filers and its source are above.
     } else {
-      /* Whose word each name is, counted apart (rules 64 and 77): once the
+      if (running.length) {
+        html +=
+          '<button type="button" class="panel-subhead expander" id="showChallengers"' +
+          ' aria-expanded="false" aria-controls="challengerRows">' +
+          KYC.icon("chevron") + " 2026 challengers <span>" + running.length + "</span>" + outNote +
+          "</button>" +
+          '<div id="challengerRows" hidden>' + running.map(personRow).join("") + "</div>";
+      } else if (out.length) {
+        html += '<p class="panel-subhead">No challenger still on the ballot ' +
+          '<span title="Lost the primary, withdrew, or were not on the primary ballot">' +
+          out.length + " out</span></p>";
+      }
+      html += unsureBlock;
+      /* The people the results put on the ballot with no profile here,
+       * counted for the state's House seats, with the state page that lists
+       * them race by race (the 2026 Senate view names them, above). Only the
+       * view's own chamber: the Senate view counted Hawaii's House nominees
+       * under a Senate heading (audit 2026-10-17, RACES-06).
+       *
+       * Whose word each name is, counted apart (rules 64 and 77): once the
        * count has begun, some of Louisiana's districts read from the results
        * pages while others are still the Secretary of State's list, and a
        * state's certified list sets some races and not others. One sentence
        * crediting one source would credit the others' names to it. */
       var bySource = {};
-      var order = [];
+      var sourceOrder = [];
       stateRaces.forEach(function (r) {
         var n = KYC.cards.unprofiledNames(r).none.length;
         if (!n) return;
         var source = KYC.ballotSource(r);
-        if (!(source in bySource)) { bySource[source] = 0; order.push(source); }
+        if (!(source in bySource)) { bySource[source] = 0; sourceOrder.push(source); }
         bySource[source] += n;
       });
-      var people = function (n) { return n + (n === 1 ? " person" : " people"); };
-      var parts = order.map(function (source) { return people(bySource[source]) + " " + source; });
+      var counted = function (n) { return n + (n === 1 ? " person" : " people"); };
+      var parts = sourceOrder.map(function (source) { return counted(bySource[source]) + " " + source; });
       if (parts.length) {
         html += '<p class="panel-note">Also on the November ballot, with no profile here: ' +
           KYC.escapeHtml(parts.join(", and ")) +
           '. <a href="' + KYC.escapeAttr(KYC.stateUrl(code)) + '">Each race on the ' +
           KYC.escapeHtml(KYC.stateName(code)) + " page \u203a</a></p>";
       }
+      html += sourceLine;
     }
-    /* The pages the statuses above were read from, linked, as a race's
-     * head links its own (TRUST-06): one link per page, since a state's
-     * House races share one results page. */
-    var seenSource = {};
-    var sources = stateRaces.map(function (r) {
-      var url = r.results && r.results.sourceUrl;
-      if (!url || seenSource[url]) return "";
-      seenSource[url] = true;
-      return KYC.resultsSourceHtml(r);
-    }).filter(Boolean);
-    if (sources.length) html += '<p class="panel-note race-results">' + sources.join(" ") + "</p>";
     list.innerHTML = html;
     list.scrollTop = 0;
 

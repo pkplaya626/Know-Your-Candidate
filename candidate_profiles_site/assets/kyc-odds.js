@@ -233,7 +233,9 @@
      * price is still quoted as published when opened (rule 40). */
     if (opts.collapsed) {
       return '<details class="odds odds-compact odds-collapsed" aria-label="' + label + '">' +
-        '<summary class="odds-subhead">What prediction markets say about this race' +
+        '<summary class="odds-subhead">' +
+          // From Election Day the closed block's own words say final (rule 41).
+          (finalPrices() ? FINAL_HEAD : "What prediction markets say about this race") +
           ' <span class="odds-faint">as of ' + KYC.escapeHtml(day(data().asOf)) + "</span></summary>" +
         body + "</details>";
     }

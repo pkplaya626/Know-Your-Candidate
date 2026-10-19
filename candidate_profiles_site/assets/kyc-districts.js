@@ -661,33 +661,60 @@
     var frame = state.viewBox.slice();
     var px = drawnAt / frame[2];
     /* The picked districts' larger numbers are placed in the order they
-     * were picked, and one that would cover another steps a line or a
-     * width aside, staying inside its district's box: on Texas's map at
-     * 390px, TX-35's and TX-37's sat 6px apart and "37" hid "35"
-     * (RACES-24). Failing that it stays at its own point. The outline
-     * marks the picked district itself, so its number may sit beside it. */
+     * were picked, each on its own district's land (rule 43): on Texas's
+     * map at 390px, TX-35's and TX-37's sat 6px apart and "37" hid "35"
+     * (RACES-24). One that would cover another moves to the nearest other
+     * point inside its district; where its district has no such point - a
+     * city district smaller than its number - it becomes a callout beside
+     * it, with a line to its own label point. The first fix stepped "37" a
+     * line up, with no line, onto district 11's land: a number on another
+     * district's land reads as that district's. */
     var placedPicks = [];
+    // The other districts' numbers drawn here: a number that moves must not
+    // land on one of them either (a callout hid TX-21's "21" at 390px).
+    var others = numbers(plan).filter(function (n) {
+      return focus.indexOf(n) === -1 && fitsAt(plan.districts[n], px);
+    }).map(function (n) {
+      var at = plan.districts[n].at;
+      return textBox(at[0], at[1], numLabel(n), NUMBER_PX / px, "middle");
+    });
     function pickedAt(n, size) {
       var district = plan.districts[n];
       var at = district.at;
-      var box = textBox(at[0], at[1], numLabel(n), size, "middle");
-      var w = box[2] - box[0], h = box[3] - box[1];
-      var tries = [[0, 0], [0, h], [0, -h], [w, 0], [-w, 0], [w, h], [-w, h], [w, -h], [-w, -h],
-        [0, 2 * h], [0, -2 * h]];
-      for (var i = 0; i < tries.length; i++) {
-        var x = at[0] + tries[i][0] * 1.05, y = at[1] + tries[i][1] * 1.05;
-        var b = textBox(x, y, numLabel(n), size, "middle");
-        // By its district: within a label's size of the district's box,
-        // since a district can be smaller than its picked number.
-        var inside = x >= district.box[0] - w && x <= district.box[2] + w &&
-          y >= district.box[1] - h && y <= district.box[3] + h;
-        if ((i === 0 || inside) && !collides(b, placedPicks)) {
-          placedPicks.push(b);
-          return [x, y];
+      var label = numLabel(n);
+      var free = function (x, y, clearOfOthers) {
+        var b = textBox(x, y, label, size, "middle");
+        if (collides(b, placedPicks) || (clearOfOthers && collides(b, others))) return false;
+        placedPicks.push(b);
+        return true;
+      };
+      if (free(at[0], at[1], false)) return { at: at };
+      var rings = ringsOf(plan, n);
+      var box = district.box, steps = 16, spots = [];
+      for (var i = 0; i <= steps; i++) {
+        for (var j = 0; j <= steps; j++) {
+          var x = box[0] + (box[2] - box[0]) * i / steps;
+          var y = box[1] + (box[3] - box[1]) * j / steps;
+          if (contains(rings, x, y)) spots.push([x, y, Math.hypot(x - at[0], y - at[1])]);
         }
       }
-      placedPicks.push(box);
-      return at;
+      spots.sort(function (a, b) { return a[2] - b[2]; });
+      for (i = 0; i < spots.length; i++) {
+        if (free(spots[i][0], spots[i][1], true)) return { at: [spots[i][0], spots[i][1]] };
+      }
+      var own = textBox(at[0], at[1], label, size, "middle");
+      var w = own[2] - own[0], h = own[3] - own[1];
+      var tries = [[0, 2], [0, -2], [1.4, 0], [-1.4, 0], [1.4, 1.6], [-1.4, 1.6], [1.4, -1.6],
+        [-1.4, -1.6], [0, 3.2], [0, -3.2], [2.4, 0], [-2.4, 0]];
+      // Clear of every number first; failing that, clear of the picked ones.
+      for (var pass = 0; pass < 2; pass++) {
+        for (i = 0; i < tries.length; i++) {
+          var cx = at[0] + tries[i][0] * w, cy = at[1] + tries[i][1] * h;
+          if (free(cx, cy, pass === 0)) return { at: [cx, cy], leader: true };
+        }
+      }
+      placedPicks.push(own);
+      return { at: at };
     }
     var spotOf = {};
     focus.forEach(function (n) {
@@ -697,10 +724,19 @@
       var district = plan.districts[n];
       var picked = focus.indexOf(n) !== -1;
       if (!picked && !fitsAt(district, px)) return null;
-      var at = picked && spotOf[n] ? spotOf[n] : district.at;
-      return text("district-num" + focusClass(n), at[0], at[1],
-                  (picked ? 15 : NUMBER_PX) / px, numLabel(n));
+      var at = picked && spotOf[n] ? spotOf[n].at : district.at;
+      return text("district-num" + focusClass(n) + (picked && spotOf[n] && spotOf[n].leader
+        ? " is-callout" : ""), at[0], at[1], (picked ? 15 : NUMBER_PX) / px, numLabel(n));
     });
+    // A callout's line, from its district's own label point to the number.
+    var leaders = focus.map(function (n) {
+      var spot = spotOf[n];
+      if (!spot || !spot.leader) return "";
+      var from = plan.districts[n].at;
+      return '<line class="pick-leader" data-district="' + KYC.escapeAttr(String(n)) + '" x1="' +
+        from[0].toFixed(2) + '" y1="' + from[1].toFixed(2) + '" x2="' + spot.at[0].toFixed(2) +
+        '" y2="' + spot.at[1].toFixed(2) + '"/>';
+    }).join("");
     var lines = state.insets.map(function (inset) {
       var b = inset.box;
       return '<rect class="inset-outline" x="' + b[0] + '" y="' + b[1] + '" width="' + b[2] +
@@ -709,7 +745,7 @@
     return svg(frame, "district-statewide",
       "All " + state.seats + " districts on the " + plan.title,
       '<g class="district-shapes">' + clipped(plan, shapes(plan, frame)) + "</g>" +
-      '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan) + lines,
+      '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan) + lines + leaders,
       labels, px);
   }
 

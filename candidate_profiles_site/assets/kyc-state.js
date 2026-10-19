@@ -592,14 +592,14 @@
       );
     }
 
-    /* The 2026 races, one section each, in ballot order. On a phone each
-     * race's markets are closed until opened: as tall as its people, they
-     * made California's page about 60 screens long (VISUALS-15). */
-    var phone = !!(global.matchMedia && global.matchMedia("(max-width: 600px)").matches);
+    /* The 2026 races, one section each, in ballot order. Each race's
+     * markets are closed until opened (cards.raceSection): as tall as its
+     * people, they made California's page about 60 screens long on a phone
+     * (VISUALS-15). */
     var raceHtml = senateRaces.concat(houseRaces).map(function (race) {
       var people = peopleIn(race);
       return cards.raceSection(race, people, { title: districtLabel(race), stateLink: false,
-                                               fullOdds: true, collapsedOdds: phone });
+                                               fullOdds: true });
     }).join("");
     if (raceHtml) {
       /* Texas has 38 districts; a row of jump chips saves the scroll. */

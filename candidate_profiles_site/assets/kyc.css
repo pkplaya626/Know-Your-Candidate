@@ -2155,9 +2155,12 @@ a.badge-link {
   stroke: var(--accent);
   stroke-width: 2.5;
 }
+/* The picked state: a thick solid line, never the dashed one that marks
+ * a special election (.is-marked), which keeps its dashes when picked. */
 .state[aria-pressed="true"] {
   stroke: var(--text);
-  stroke-width: 2.5;
+  stroke-width: 3.5;
+  stroke-dasharray: none;
 }
 /* A state in the contiguous block is outlined by its neighbours. A
    territory in the strip below has none, so it needs a border of its own or
@@ -2210,9 +2213,19 @@ a.badge-link {
   stroke-width: 2;
   stroke-dasharray: 5 3;
 }
+.state.is-marked[aria-pressed="true"] { stroke-width: 3.5; stroke-dasharray: 5 3; }
 .map-legend .swatch-special {
-  background: transparent;
-  border: 2px dashed var(--text);
+  width: 26px;
+  height: 12px;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+}
+.map-legend .swatch-special rect {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 2;
+  stroke-dasharray: 5 3;
 }
 /* A territory's code and the strip's caption sit on the page itself. */
 .us-map-labels .territory-label {
@@ -2338,7 +2351,8 @@ a.badge-link {
 @media (hover: hover) {
   .person-row:hover { background: var(--surface-3); }
 }
-.person-row img {
+.person-row img,
+.person-row .thumb-monogram {
   grid-area: photo;
   width: 38px;
   height: 38px;
@@ -2920,13 +2934,27 @@ a.badge-link {
 @media (hover: hover) {
   .race-mate:hover .race-mate-name { color: var(--accent); }
 }
-.race-mate img {
+.race-mate img,
+.race-mate .thumb-monogram {
   flex: none;
   width: 36px;
   height: 36px;
   border-radius: 50%;
   object-fit: cover;
   background: var(--surface-3);
+}
+/* No portrait: the person's initials in a disc of the portrait's size,
+ * as the cards draw them (KYC.portraitThumb, VISUALS-16). */
+.thumb-monogram {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  font-size: var(--t-sm);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  line-height: 1;
 }
 .race-mate-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .race-mate-name { font-weight: 600; }
@@ -3181,6 +3209,14 @@ a.badge-link {
   stroke-width: 1;
   stroke-dasharray: 3 2;
   vector-effect: non-scaling-stroke;
+}
+/* A picked district's number set beside a district too small for it,
+ * joined to its own label point (kyc-districts.js statewide, RACES-24). */
+.pick-leader {
+  stroke: var(--text);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
 }
 /* The other map's lines for the picked districts, dashed, on a halo so a
  * line stays visible where it crosses a fill of its own colour. */

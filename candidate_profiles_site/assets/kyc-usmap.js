@@ -41,6 +41,11 @@
   /* East of this x, a state that does not fit goes to the Atlantic column,
    * which starts south of Long Island and Cape Cod. */
   var EAST = 780;
+  /* The small states the column is for, Vermont to Delaware, by the room
+   * the build measured at their label point (labelRoom, in map units):
+   * Florida and Maine are east of the line too, and a large state's code
+   * goes beside it, never across the map to the column. */
+  var SMALL_ROOM = 7;
   var COLUMN_TOP = 212;
 
   function create(opts) {
@@ -98,8 +103,11 @@
         var bw = Math.max(minWidth || 0, String(text).length * CHAR + PAD);
         return { x: x, y: y, w: bw, h: size * 1.3 };
       }
+      // With a pixel to spare each way: a callout's border drew 1px onto a
+      // code the boxes said it cleared (Vermont's on Maine's at 320px).
+      var SPARE = 1.2 / px;
       function hits(a, b) {
-        return Math.abs(a.x - b.x) * 2 < a.w + b.w && Math.abs(a.y - b.y) * 2 < a.h + b.h;
+        return Math.abs(a.x - b.x) * 2 < a.w + b.w + SPARE && Math.abs(a.y - b.y) * 2 < a.h + b.h + SPARE;
       }
       var placed = [];
       function free(b) {
@@ -117,7 +125,9 @@
       }
 
       // A callout: the state's word in a box of its colour, joined to it.
-      var h = size * 1.4;
+      // A callout as tall as it draws: 1.3 lines, and a border each side of
+      // up to 2px (a hatched fill's, .map-callout.is-hatched).
+      var h = size * 1.3 + 4 / px;
       var lines = [];
       function calloutWidth(code) {
         return Math.max(size * 2.3, awayText(code).length * CHAR + PAD);
@@ -149,7 +159,7 @@
           fits.push(code);
         } else if (inStrip.indexOf(code) === -1) {
           // D.C. is named in the strip below, so it needs no callout.
-          (shape.label[0] >= EAST ? column : beside).push(code);
+          (shape.label[0] >= EAST && (shape.labelRoom || 0) < SMALL_ROOM ? column : beside).push(code);
         }
       });
 
@@ -157,16 +167,22 @@
        * code sat on Alabama's and Arkansas's, and West Virginia's callout on
        * Vermont's and New Hampshire's, so one read "WV T". The roomiest
        * states keep their place; a code that would cover one already placed
-       * moves half a line up or down, and failing that becomes a callout. */
+       * moves within its own state - inside the box the build measured as
+       * clear of its edges (labelRoom: half as tall, 1.75 times as wide), so
+       * its centre never leaves its land - and failing that becomes a
+       * callout beside it. */
       var fitted = [];
+      var NUDGE = [[0, 0], [0, -0.5], [0, 0.5], [-0.5, 0], [0.5, 0], [0, -0.95], [0, 0.95],
+        [-0.95, 0], [0.95, 0], [-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [0.5, 0.5],
+        [-0.95, -0.95], [0.95, -0.95], [-0.95, 0.95], [0.95, 0.95]];
       fits.sort(function (a, b) {
         return (geo.states[b].labelRoom || 0) - (geo.states[a].labelRoom || 0) || (a < b ? -1 : 1);
       }).forEach(function (code) {
         var at = geo.states[code].label;
+        var room = geo.states[code].labelRoom || 0;
         var text = labelText(code);
-        var tries = [[0, 0], [0, -0.55], [0, 0.55], [-0.35, 0], [0.35, 0], [0, -1.1], [0, 1.1]];
-        for (var i = 0; i < tries.length; i++) {
-          var b = boxAt(at[0] + tries[i][0] * CHAR * 2, at[1] + tries[i][1] * size * 1.3, text);
+        for (var i = 0; i < NUDGE.length; i++) {
+          var b = boxAt(at[0] + NUDGE[i][0] * room * 1.75, at[1] + NUDGE[i][1] * room, text);
           if (free(b)) {
             placed.push(b);
             fitted.push([code, b]);
@@ -179,9 +195,13 @@
       /* A callout beside its state, unless it would cover a word already
        * placed or reach the column of callouts in the Atlantic: then it
        * joins that column. A state whose own word would not fit among its
-       * neighbours' tries below, left of and above its shape too, so its
-       * callout stays by it: at 320px Mississippi's and Florida's crossed
-       * the whole map to the Atlantic column. */
+       * neighbours tries below, left of and above its shape too, and then
+       * further out around its own point, so its callout stays by it: at
+       * 320px Mississippi's and Florida's crossed the whole map to the
+       * Atlantic column, and the first collision pass sent Indiana's, West
+       * Virginia's, Kentucky's and South Carolina's there on lines 130 to
+       * 170px long. Only a state east of the column's edge (Vermont to
+       * Delaware) joins it when nothing near is free. */
       var colWidth = Math.max.apply(null, [size * 2.3].concat(column.concat(beside, demoted).map(calloutWidth)));
       var colLeft = box[2] - 6 / px - colWidth;
       var besideAt = [];
@@ -203,6 +223,16 @@
             { x: b[0] - gapU - cw / 2, y: shape.label[1], w: cw, h: h, column: true },
             { x: shape.label[0], y: b[1] - gapU / 2 - h / 2, w: cw, h: h },
           ]);
+          // Then rings around its own point, nearest first: a short line
+          // across a neighbour is easier to follow than a long one across
+          // the map.
+          [1.6, 2.4, 3.2, 4.2].forEach(function (k) {
+            for (var a = 0; a < 16; a++) {
+              var t = a * Math.PI / 8;
+              tries.push({ x: shape.label[0] + Math.cos(t) * k * cw * 0.75,
+                           y: shape.label[1] + Math.sin(t) * k * h, w: cw, h: h, column: true });
+            }
+          });
         }
         var spot = tries.filter(function (t) { return free(t) && inMap(t, t.column); })[0];
         if (spot) {
@@ -213,12 +243,17 @@
           column.push(code);
         }
       }
-      beside.forEach(function (code) { place(code, false); });
+      beside.forEach(function (code) { place(code, true); });
       demoted.forEach(function (code) { place(code, true); });
       placed = placed.filter(function (b) { return besideAt.every(function (e) { return e[1] !== b; }); });
 
       fitted.forEach(function (f) {
         label(f[1].x, f[1].y, KYC.escapeHtml(labelText(f[0])), "state-code");
+      });
+      // The callouts beside their states first, so the column steps past
+      // them as it does past the codes (Maine's beside Vermont's at 320px).
+      besideAt.forEach(function (e) {
+        callout(e[0], e[1].x, e[1].y, e[1].w);
       });
       var gap = h + 3 / px;
       var cx = box[2] - 6 / px - colWidth / 2;
@@ -231,9 +266,6 @@
           for (var n = 0; n < 12 && !free({ x: cx, y: y, w: colWidth, h: h }); n++) y += h / 2;
           callout(code, cx, y, colWidth);
         });
-      besideAt.forEach(function (e) {
-        callout(e[0], e[1].x, e[1].y, e[1].w);
-      });
 
       // Territories are not in the atlas - three of them sit thousands of miles
       // outside the frame - so they get a strip of schematic shapes, at least

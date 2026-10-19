@@ -464,7 +464,7 @@ def _circuits():
                   for code, v in values.items() if v in CIRCUIT_SITES},
         "about": ("The country's federal district courts are grouped into twelve regional "
                   "circuits, each with a court of appeals. The number on each state is its circuit; "
-                  "the four colours only tell neighbouring circuits apart and do not group them. "
+                  "the four colors only tell neighboring circuits apart and do not group them. "
                   "A thirteenth court, the Federal Circuit, hears certain kinds of appeal (patents, "
                   "trade, money claims against the United States) from everywhere."),
         "sources": ["usc-28-41", "usc-48-1824", "usc-28-1295", "uscourts-structure"],

@@ -576,9 +576,17 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     borders. No word may sit on another: at 320-390px the partisan map put
     West Virginia's code on Vermont's callout ("WV T") and Mississippi's on
     Alabama's, and two picked district numbers on Texas's map covered each
-    other. `kyc-usmap.js` moves a colliding code, then makes it a callout by
-    its own state before the Atlantic column; `testMapOnAPhone` checks
-    320-390px.
+    other. Clearing an overlap must not move a word off its own land: the
+    first fix sent Kentucky's, Indiana's and West Virginia's codes to the
+    Atlantic column on lines up to 170px long, and stepped Texas's "37"
+    onto district 11. `kyc-usmap.js` moves a colliding code only within
+    the box the build measured clear of its state's edges (`labelRoom`),
+    then makes it a callout beside its own state; only the small coastal
+    states (`SMALL_ROOM`) join the column. A picked district's number
+    moves to another point inside its district, or becomes a callout with
+    a line to its own label point (`pick-leader`), clear of the numbers
+    already drawn. `testMapOnAPhone` and `testDistrictsOnAPhone` check
+    both.
 
 44. **On a phone, the page scrolls.** A fixed body with a scrolling box
     inside kept Safari's toolbars on screen, broke tap-to-top, and pinned the
@@ -1146,7 +1154,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     races' own sum (`summary.by_state`), and a figure that reads as what
     it is not carries its note from one table (`government_maps.COUNT_NOTES`).
     Say what a second source checks: "checked against NCSL" was read as
-    covering the seat counts, when only control was compared.
+    covering the seat counts, when only control was compared. A race's
+    people include its holder: the map's first race-first panel listed
+    only filers under "Still in the race", so 25 renominated senators -
+    Susan Collins, Jon Ossoff - were missing from the list and its count,
+    and named only under "Seat held by", below the markets.
 
 74. **A status word must describe the race it badges, and what that race
     decided.** California's and Washington's top two and Alaska's top
@@ -1416,7 +1428,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
       neutral ink.
     - A distinction drawn only in a hover title does not exist for a
       touch reader: an open Senate seat is its party's tint, a special
-      election is outlined, each with a legend key.
+      election is outlined, each with a legend key. A key is drawn as
+      the map draws it: a 2px dashed border on a 10px square drew solid,
+      the look of a picked state's outline, so the special-election key
+      is the map's own dash on an SVG wide enough to show it, and a
+      picked state's line is solid and thicker.
 
 ## District maps
 

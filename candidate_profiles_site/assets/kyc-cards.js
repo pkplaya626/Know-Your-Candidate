@@ -542,8 +542,13 @@
       '" title="' + KYC.escapeAttr("Everything about " + KYC.stateName(race.state)) + '">' +
       KYC.escapeHtml(KYC.stateName(race.state)) + " &rsaquo;</a>";
     // The people first, then the markets: a reader came for who is running,
-    // and 61% of House market blocks only show a 95-99% favourite.
-    var odds = KYC.odds ? KYC.odds.render(race, { compact: !opts.fullOdds, collapsed: !!opts.collapsedOdds }) : "";
+    // and 61% of House market blocks only show a 95-99% favourite. Beside
+    // the people the markets are closed until opened, at every width and in
+    // every view (TRUST-14): open on a desktop state page and in the map's
+    // panel, closed on a phone and on a profile, the same prices read as a
+    // verdict in some places and not others.
+    var odds = KYC.odds ? KYC.odds.render(race, { compact: !opts.fullOdds,
+                                                  collapsed: opts.collapsedOdds !== false }) : "";
     return [
       '<section class="race" id="', KYC.escapeAttr("race-" + race.id), '">',
       '<div class="race-head"><h3 class="race-title">',
