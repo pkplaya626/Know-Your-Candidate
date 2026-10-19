@@ -4500,7 +4500,9 @@ button.local-county-link {
 .race-last[open] > summary::before,
 .race-compare[open] > summary::before { transform: rotate(90deg); }
 .race-extra .race-note,
-.race-mates .race-extra-note {
+.race-money .race-note,
+.race-last .race-note,
+.race-compare .race-note {
   margin: var(--s-2) 0;
   font-size: var(--t-xs);
   color: var(--text-muted);
