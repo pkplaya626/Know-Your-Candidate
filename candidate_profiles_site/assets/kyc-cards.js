@@ -179,7 +179,7 @@
   function contactOf(item) {
     if (!item || !KYC.seated(item)) return null;
     var who = item.name + "’s office";
-    if (item.contactForm) {
+    if (item.contactForm && /^https?:\/\//i.test(item.contactForm)) {
       return { href: item.contactForm, external: true, label: "Contact office",
         title: "Write to " + who + ": " + (item.contactFormVia === "official-site"
           ? "the contact page their official website links" +
