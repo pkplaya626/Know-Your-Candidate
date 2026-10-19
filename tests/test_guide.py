@@ -488,6 +488,19 @@ class TestNewSections(unittest.TestCase):
                           ("end-3-then", "law")])
         self.assertIn("two-thirds of the other", flow)
 
+    def test_the_bill_flow_on_a_phone_puts_neither_chamber_first(self):
+        # Narrow, the stages are numbered top to bottom: the two tracks share
+        # a number (1 and 2 read as House first), and the caption holds in
+        # both layouts (it said "drawn side by side" under a vertical list).
+        html = government.render("congress", "example.org")
+        flow = html[html.index('<figure class="guide-billflow" data-billflow>'):]
+        caption = re.search(r"<figcaption>(.*?)</figcaption>", flow, re.S).group(1)
+        self.assertIn("in either order", caption)
+        self.assertNotIn("side by side", caption)
+        with open(os.path.join(SITE, "assets", "kyc.css"), encoding="utf-8") as handle:
+            css = handle.read()
+        self.assertRegex(css, r"\.billflow-track \+ \.billflow-track \{ counter-increment: none; \}")
+
     def test_a_bill_result_names_one_of_two_outcomes(self):
         spec = {"tracks": [("A", [("x", "y")]), ("B", [("x", "y")])], "joined": ("j", ""),
                 "president": ("p", ""), "answers": "a",
@@ -497,7 +510,28 @@ class TestNewSections(unittest.TestCase):
 
     def test_the_congress_page_was_checked_when_its_bill_flow_was_drawn(self):
         page = next(p for p in PAGES if p["slug"] == "congress")
-        self.assertGreaterEqual(page.get("reviewed", government.REVIEWED), "2026-10-19")
+        sections = {s["id"]: s for s in page["sections"]}
+        for sid in ("lawmaking", "reaching"):
+            self.assertGreaterEqual(sections[sid].get("reviewed", page.get(
+                "reviewed", government.REVIEWED)), "2026-10-19", sid)
+
+    def test_a_section_read_again_alone_says_its_own_day(self):
+        # Only the bill flow and the contact paragraph were read again on
+        # 2026-10-19: the page's date stays the rest's, and those two say
+        # theirs beside their sources (a page-wide date claimed every
+        # section had been).
+        page = next(p for p in PAGES if p["slug"] == "congress")
+        html = government.render("congress", "example.org")
+        own = [s for s in page["sections"] if s.get("reviewed")]
+        self.assertTrue(own)
+        for section in own:
+            block = html.split(f'id="{section["id"]}"', 1)[1].split("</section>", 1)[0]
+            self.assertIn(f'Sources, checked on <time datetime="{section["reviewed"]}"', block)
+        others = [s for s in page["sections"] if not s.get("reviewed")]
+        block = html.split(f'id="{others[0]["id"]}"', 1)[1].split("</section>", 1)[0]
+        self.assertIn("<span>Sources:</span>", block)
+        self.assertIn("unless it gives its own day.", html)
+        self.assertIn(f'<time datetime="{page.get("reviewed", government.REVIEWED)}"', html)
 
     def test_every_redrawn_state_is_listed_from_the_table(self):
         from kyc import districts

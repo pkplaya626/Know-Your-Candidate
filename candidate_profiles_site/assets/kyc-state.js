@@ -771,7 +771,12 @@
       }
       Array.prototype.forEach.call(doc.querySelectorAll("#stateContent .card"), function (c) {
         var item = KYC.byId(c.getAttribute("data-id"));
-        c.hidden = !!q && !(item && KYC.matchesQuery(item, q));
+        // A sitting member's card sits in a cell beside its contact link
+        // (KYC.cards.card): hide the cell, or the link stays on screen with
+        // no name beside it.
+        var cell = (c.parentNode && c.parentNode.classList &&
+          c.parentNode.classList.contains("card-cell")) ? c.parentNode : c;
+        cell.hidden = !!q && !(item && KYC.matchesQuery(item, q));
       });
     }, 120);
     input.addEventListener("input", run);

@@ -604,8 +604,7 @@ def _main(page):
         lines.extend(_after(here, sid, pad + "    "))
         if not section.get("sources"):
             raise ValueError(f"{here}#{sid}: a section with no sources")
-        lines.append(f'{pad}    <p class="guide-sources"><span>Sources:</span> '
-                     f'{_sources(section["sources"], here)}</p>')
+        lines.append(_sources_line(section, here, pad + "    "))
         lines.append(f"{pad}</section>")
     lines.extend(_pager(here))
     lines.append("            </article>")
@@ -660,8 +659,7 @@ def _section_lines(section, here, pad, collapsed, first=False):
     for block in section["blocks"]:
         lines.extend(_block(block, here, pad + "    ", level=4 if collapsed else 3))
     lines.extend(_after(here, sid, pad + "    ", level=4 if collapsed else 3))
-    lines.append(f'{pad}    <p class="guide-sources"><span>Sources:</span> '
-                 f'{_sources(section["sources"], here)}</p>')
+    lines.append(_sources_line(section, here, pad + "    "))
     if collapsed:
         lines.append(f"{pad}</details>")
     return lines
@@ -745,13 +743,26 @@ def _map_main(page, modes, footer):
     return "\n".join(lines)
 
 
+def _sources_line(section, here, pad):
+    """A section's sources, and the day they were read when it is not the
+    page's: a section re-read alone (VISUALS-31's bill flow) carries its own
+    ``reviewed``, so the page's date never claims the rest was read again."""
+    own = section.get("reviewed")
+    label = (f"Sources, checked on {pages.time_html(own)}:" if own else "Sources:")
+    return (f'{pad}<p class="guide-sources"><span>{label}</span> '
+            f'{_sources(section["sources"], here)}</p>')
+
+
 def _footer(page):
-    # A page checked on another day than the rest of the guide says so.
+    # A page checked on another day than the rest of the guide says so, and
+    # a section checked on another day than its page says so where it is.
     reviewed = page.get("reviewed", REVIEWED)
+    own = any(s.get("reviewed") for s in page.get("sections") or ())
     return "\n".join([
         "                <p><strong>About this guide:</strong> a plain-language summary of how",
         "                    American government is organized. Each section lists the sources",
-        f"                    it was checked against, on {pages.time_html(reviewed)}.",
+        f"                    it was checked against, on {pages.time_html(reviewed)}"
+        + (" unless it gives its own day." if own else "."),
         "                    It describes offices and institutions; where it names who holds",
         "                    one today, that comes from the same data as the rest of the site.",
         "                    It is not legal advice.</p>",

@@ -204,7 +204,9 @@
       (c.external ? ' target="_blank" rel="noopener noreferrer"' : "") +
       ' title="' + KYC.escapeAttr(c.title) + '" aria-label="' +
       KYC.escapeAttr(c.label.replace(/ office$/, "") + " " + item.name + "’s office") + '">' +
-      (c.external ? KYC.icon("share", "icon-sm") : "") + KYC.escapeHtml(c.label) + "</a>";
+      // One look for both forms of the action, and not the dialog's
+      // "Copy link" arrow: an envelope for a form, a handset for a call.
+      KYC.icon(c.external ? "mail" : "phone", "icon-sm") + KYC.escapeHtml(c.label) + "</a>";
   }
 
   /* Every interpolation is escaped. The previous version put item.name,

@@ -83,16 +83,34 @@ class TestWhoIsShownOne(unittest.TestCase):
         posts = {post for person in snapshot["legislators"]
                  for post in legislators.held_posts(person, sitting)}
         self.assertFalse(sorted(p for p in posts if pay.is_paid_kind(p) and p not in pay.POSTS))
-        if sitting != pay.CONGRESS:
-            self.skipTest("the membership is of another Congress than the table's")
-        # Every post the table names is held by someone now.
-        self.assertEqual(sorted(set(pay.POSTS) - posts), [])
+
+    def test_a_post_nobody_holds_warns_and_never_fails(self):
+        # A leader can die or resign before congress-legislators records a
+        # successor: the build says so, and nothing fails (no test asserts
+        # that every post is held in the committed snapshot).
+        people = [member("A000001", leadership=["Speaker of the House"])]
+        pay.apply(people, pay.CONGRESS)
+        found = [(s, c, i) for s, c, _m, i in pay.problems(people, pay.CONGRESS,
+                                                            datetime.date(pay.YEAR, 10, 1))]
+        self.assertEqual([(s, c) for s, c, _i in found], [("warn", "pay-post-unheld")])
+        self.assertNotIn("Speaker of the House", found[0][2])
+        self.assertIn("Senate Majority Leader", found[0][2])
+
+    def test_the_page_sentence_is_the_reports(self):
+        # "The rates have not changed since 2009." is the report's "These
+        # levels have remained unchanged since 2009", and nothing more: 2009
+        # brought a raise, so "denied every year since 2009" said too much.
+        self.assertIn(f"remained unchanged since {pay.SINCE}.", pay.SOURCES[0]["quote"])
+        self.assertIn(str(pay.SINCE), pay.STOOD)
+        self.assertEqual(pay.for_page(pay.CONGRESS)["stood"], pay.STOOD)
 
     def test_the_page_names_no_figure_of_its_own(self):
         with open(os.path.join(ROOT, "candidate_profiles_site", "assets", "kyc-profile.js"),
                   encoding="utf-8") as handle:
             script = handle.read()
         self.assertFalse(re.findall(r"1[79]\d,\d00|223,500", script))
+        # Nor a claim about the rates' history: that is pay.STOOD's.
+        self.assertFalse(re.findall(r"since (19|20)\d\d|denied by law", script))
 
 
 if __name__ == "__main__":

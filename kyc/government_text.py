@@ -687,11 +687,11 @@ INDEX = {
 
 CONGRESS = {
     "slug": "congress",
-    # Checked again on 2026-10-19, when the bill's path was drawn as two
-    # chambers' tracks (VISUALS-31) and the contact paragraph revised: Article
-    # I, Section 7, the House's legislative process page, the Senate's
-    # glossary and cloture page, read that day.
-    "reviewed": "2026-10-19",
+    # The page as a whole is the guide's REVIEWED. Two sections were read
+    # again on 2026-10-19 and carry that day themselves: the bill's path,
+    # drawn as two chambers' tracks (VISUALS-31; Article I, Section 7, the
+    # House's legislative process page, the Senate's glossary and cloture
+    # page), and the contact paragraph, revised for the cards' contact links.
     # Not "Congress": the site's navigation has that entry, for its members.
     "people": True,
     "title": "How Congress works",
@@ -732,6 +732,7 @@ CONGRESS = {
         {
             "id": "lawmaking",
             "heading": "How a bill becomes law",
+            "reviewed": "2026-10-19",
             "blocks": [
                 ("p", "A bill can start in either chamber, except that a bill for raising "
                       "revenue must start in the House (Article I, Section 7). It passes one "
@@ -792,8 +793,8 @@ CONGRESS = {
                           "law.", ("It is law", "law"))),
                     ],
                     "caption": ("The path Article I, Section 7 sets, through each chamber's "
-                                "rules. The chambers are drawn side by side, but a bill passes "
-                                "one and then the other."),
+                                "rules. A bill passes one chamber and then the other, in either "
+                                "order."),
                 }),
                 ("h3", "The exception: budget reconciliation"),
                 ("p", "One kind of bill cannot be filibustered. Under the Congressional Budget "
@@ -1006,6 +1007,7 @@ CONGRESS = {
         {
             "id": "reaching",
             "heading": "Reaching your members",
+            "reviewed": "2026-10-19",
             "blocks": [
                 ("p", "Everyone in a state has one representative, for the district they live "
                       "in, and two senators. The District of Columbia and each territory elect "
@@ -1017,8 +1019,8 @@ CONGRESS = {
                       "congress-legislators project records them, and a contact form: the one "
                       "that record lists, which for senators it mostly does, or else the "
                       "contact page their official website links, opened and seen to hold a "
-                      "form. Each sitting member's card links the same form, or their "
-                      "office's phone where there is none. The "
+                      "form. Each sitting member's card links the same form or, where there is "
+                      "none, the phone number of one of their offices. The "
                       "[House](https://www.house.gov/representatives/find-your-representative) "
                       "and the [Senate](https://www.senate.gov/senators/senators-contact.htm) "
                       "list their members too."),

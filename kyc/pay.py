@@ -3,9 +3,8 @@
 A reader's question on a member's profile (PROFILES-25), answered from a
 small table read from the sources below, never from a search. The salary is
 not the member's: it is the rate the law sets for the post, $174,000 for
-every senator, representative, delegate and the resident commissioner since
-2009, when appropriations acts began denying the annual adjustment each
-year. Four kinds of post are paid more, and congress-legislators records who
+every senator, representative, delegate and the resident commissioner,
+"unchanged since 2009" in the report's words. Four kinds of post are paid more, and congress-legislators records who
 holds them (``legislators.held_posts``): the Speaker, the President pro
 tempore, and the majority and minority leaders of each chamber.
 
@@ -40,6 +39,13 @@ POSTS = {
     "House Majority Leader": 193400,
     "House Minority Leader": 193400,
 }
+
+# What the report says of how long the rates have stood, in its words
+# ("These levels have remained unchanged since 2009."): the page shows this
+# sentence, never one of its own. Move it with the figures, and keep it what
+# the quote says (tests/test_pay.py).
+SINCE = 2009
+STOOD = f"The rates have not changed since {SINCE}."
 
 # Where each figure was read, and on which day. The report is the source of
 # every figure; the Senate's page agrees on the members' and its leaders'.
@@ -112,7 +118,7 @@ def for_page(sitting):
     None where :func:`apply` gave nobody a figure."""
     if not applies(sitting):
         return None
-    return {"year": YEAR, "member": MEMBER,
+    return {"year": YEAR, "member": MEMBER, "stood": STOOD,
             "sources": [{"title": s["title"], "url": s["url"], "read": s["read"]} for s in SOURCES]}
 
 
@@ -133,4 +139,14 @@ def problems(profiles, sitting, today=None):
                     "report (RL30064) again, then move YEAR, CONGRESS and the figures", []))
     elif applies(sitting) and not any(p.get("pay") for p in profiles):
         out.append(("error", "pay-missing", "no sitting member has a salary line", []))
+    elif applies(sitting):
+        # A post nobody holds is a vacancy congress-legislators has not filled
+        # yet, or a title it has renamed to one is_paid_kind does not read: a
+        # warning to look, never a failed build or test (a leader can die).
+        held = {p["pay"].get("post") for p in profiles if p.get("pay")}
+        unheld = sorted(set(POSTS) - held)
+        if unheld:
+            out.append(("warn", "pay-post-unheld",
+                        f"{len(unheld)} posts in kyc/pay.POSTS are held by no sitting member: a "
+                        "vacancy, or a title congress-legislators now spells differently", unheld))
     return out

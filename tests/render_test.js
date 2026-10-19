@@ -3067,8 +3067,33 @@ async function testStates() {
   await new Promise((r) => setTimeout(r, 200));
   suite("states/tx.html — search (after debounce)", () => {
     const cards = [...D.querySelectorAll("#stateContent .card")];
-    check("no card matches nonsense", cards.every((c) => c.hidden), `${cards.filter((c) => !c.hidden).length} shown`);
+    const shown = (n) => !n.closest("[hidden]");
+    check("no card matches nonsense", cards.every((c) => !shown(c)), `${cards.filter(shown).length} shown`);
+    // A sitting member's card sits in a cell with its contact link (GRID-16):
+    // hiding the card alone left rows of "Contact office" with no name.
+    // (A race's "Held by" line names its holder beside the link, and the
+    // search never hid it.)
+    const contacts = [...D.querySelectorAll("#stateContent .card-cell > .card-contact")];
+    check("nor is a member's contact link left without its card",
+      contacts.every((a) => !shown(a)),
+      `${contacts.filter(shown).length} shown`);
   });
+  const input = D.getElementById("stateSearch");
+  const one = [...D.querySelectorAll("#stateContent .card-cell > .card[data-id]")][0];
+  const target = one && window.KYC.byId(one.getAttribute("data-id"));
+  input.value = target ? target.name : "";
+  input.dispatchEvent(new window.Event("input", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 200));
+  suite("states/tx.html — search finds a member with their contact link", () => {
+    const cell = one && one.parentNode;
+    // Texas's delegation has offices on record; a membership read before
+    // any is recorded has no cell to look at.
+    check("the member's card and its contact link show together",
+      !one || (!cell.closest("[hidden]") && !!cell.querySelector(".card-contact")));
+  });
+  input.value = "";
+  input.dispatchEvent(new window.Event("input", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 200));
 
   const index = await testShared("states/index.html");
   suite("states/index.html — the directory of states", () => {
@@ -6320,7 +6345,13 @@ async function testPayLine() {
   };
   const plain = people.find((p) => KYC.seated(p) && p.pay && !p.pay.post);
   const leader = people.find((p) => KYC.seated(p) && p.pay && p.pay.post);
-  const challenger = people.find((p) => p.isCandidate);
+  const memberOf = (p) => {
+    const m = p.isCandidate && p.incumbentId ? KYC.byId(p.incumbentId) : null;
+    return m && m.id !== p.id && KYC.seated(m) ? m : null;
+  };
+  const challenger = people.find((p) => p.isCandidate && !memberOf(p));
+  // A sitting member's filing for another seat is the same person (PROFILES-03).
+  const running = people.find((p) => memberOf(p) && memberOf(p).pay);
   const former = people.find((p) => p.formerMember);
   suite("index.html — what the job pays (PROFILES-25)", () => {
     check("no page errors", errors.length === 0, errors.join(" | "));
@@ -6337,10 +6368,21 @@ async function testPayLine() {
       !!a && !a.hidden && a.text.indexOf("$" + meta.member.toLocaleString("en-US") + " a year in " +
         meta.year) !== -1 && /the law sets for a member of Congress/.test(a.text) &&
         a.html.indexOf(meta.sources[0].url) !== -1 && /read on/.test(a.text), a && a.text);
+    check("what it says of the rates' history is the table's sentence, from the report",
+      !!a && !!meta.stood && a.text.indexOf(meta.stood) !== -1 && !/denied/.test(a.text), a && a.text);
     const b = leader && open(leader);
-    check("a post paid more says the post's rate, by the post's name",
+    // "Other members are paid $174,000" was wrong on a leader's profile:
+    // the other leaders are paid more too.
+    check("a post paid more says the post's rate, by the post's name, and whose rate is a member's",
       !b || (!b.hidden && b.text.indexOf("$" + leader.pay.amount.toLocaleString("en-US")) !== -1 &&
-        b.text.indexOf(leader.pay.post) !== -1), b && b.text);
+        b.text.indexOf(leader.pay.post) !== -1 && !/Other members/.test(b.text) &&
+        b.text.indexOf("A member who is not the Speaker, the President pro tempore or a majority " +
+          "or minority leader is paid $" + meta.member.toLocaleString("en-US")) !== -1), b && b.text);
+    const c = running && open(running);
+    check("a sitting member's filing for another seat shows the member's pay, credited to their record",
+      !running || (!c.hidden && c.text.indexOf("$" + memberOf(running).pay.amount
+        .toLocaleString("en-US")) !== -1 && /record as the member for/.test(c.text)),
+      running ? running.id + ": " + c.text : "");
     check("a challenger's profile names no salary (rule 27)", !challenger || open(challenger).hidden);
     check("nor a former member's", !former || open(former).hidden);
   });

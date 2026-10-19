@@ -1180,6 +1180,10 @@ a.badge-link {
   /* Under the row's words, not its portrait. */
   #stateContent .card-cell .card-contact { margin-left: calc(52px + var(--s-3)); }
 }
+@media (max-width: 560px) {
+  /* A district box's rows have a 64px portrait (the .district-fact rule). */
+  .district-fact .card-cell .card-contact { margin-left: calc(64px + var(--s-3)); }
+}
 
 /* Public offices held (KYC.officesHeld): newest first, the years beside the
  * office, the place under it. */
@@ -3835,6 +3839,9 @@ a.badge-link {
   position: relative;
   margin: 0 0 var(--s-3) var(--s-6);
 }
+/* The two chambers are one stage, in either order: numbered 1 and 2 they
+ * read as the House first, which the text says is not so. */
+.billflow-track + .billflow-track { counter-increment: none; }
 .billflow-stage::before {
   content: counter(billflow);
   position: absolute;
