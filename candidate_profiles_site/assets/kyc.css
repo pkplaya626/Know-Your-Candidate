@@ -1920,6 +1920,34 @@ a.badge-link {
 .funding-part {
   white-space: nowrap;
 }
+/* The same shares as one bar (VISUALS-24), in category tones, each part
+ * named beside its swatch below it. */
+.funding-bar {
+  display: flex;
+  gap: 2px;
+  height: 12px;
+  margin: var(--s-1) 0 var(--s-2);
+}
+.fs-seg { flex: 0 1 auto; min-width: 2px; height: 100%; border-radius: 2px; }
+.fs-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: var(--s-1);
+  border-radius: 2px;
+  vertical-align: -1px;
+}
+.fs-ind { background-color: var(--cat-1); }
+.fs-pac { background-color: var(--cat-2); }
+.fs-party { background-color: var(--cat-3); }
+.fs-self { background-color: var(--cat-5); }
+.fs-xfer { background-color: var(--cat-4); }
+.fs-loan {
+  background-color: var(--cat-4);
+  background-image: repeating-linear-gradient(135deg, transparent 0 2px,
+    color-mix(in srgb, var(--surface-1) 70%, transparent) 2px 4px);
+}
+.fs-other { background-color: transparent; box-shadow: inset 0 0 0 1px var(--text-muted); }
 
 .funding-base {
   display: block;
@@ -4634,3 +4662,38 @@ button.local-county-link {
 }
 .tp-key { margin: var(--s-2) 0 0; font-size: var(--t-xs); color: var(--text-muted); }
 .tp-dot-key { position: static; display: inline-block; margin: 0 var(--s-1) 0 0; vertical-align: 1px; }
+
+/* Polling averages as dots on one axis (kyc-odds.js pollDots): a row per
+ * aggregator, a shape per candidate as well as the party's colour. */
+.poll-dots { margin: var(--s-1) 0 var(--s-2); font-size: var(--t-xs); color: var(--text-muted); }
+.poll-key, .poll-rows { margin: 0; padding: 0; list-style: none; }
+.poll-key { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-3); margin-bottom: var(--s-1); }
+.poll-key li { display: inline-flex; align-items: center; gap: var(--s-1); color: var(--text); }
+.poll-key .poll-dot { position: static; margin: 0; }
+.poll-row, .poll-axis { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); align-items: center;
+  gap: var(--s-2); }
+.poll-row { min-height: 20px; }
+.poll-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.poll-track { position: relative; height: 20px; border-bottom: 1px solid var(--border); }
+.poll-dot {
+  position: absolute;
+  top: 50%;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+}
+.poll-dot-ring {
+  background-image: radial-gradient(circle, var(--surface-1) 0 2.5px, transparent 3px);
+}
+.poll-dot-square { border-radius: 1px; }
+.poll-dot-diamond { border-radius: 1px; transform: rotate(45deg) scale(0.85); }
+.poll-ticks { position: relative; height: 14px; }
+.poll-ticks span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+/* The end ticks stay inside the axis, never past the panel's edge. */
+.poll-ticks span:first-child { transform: none; }
+.poll-ticks span:last-child { transform: translateX(-100%); }
+@media (max-width: 560px) {
+  .poll-row, .poll-axis { grid-template-columns: 5.5rem minmax(0, 1fr); }
+}

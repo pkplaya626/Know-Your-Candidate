@@ -584,12 +584,54 @@
    * where adjustments brought the receipts below the parts, what the shares
    * are of: Shri Thanedar's add up to $3,968,600 beside "Raised $3,194,222".
    */
+  /* Each kind of receipt's tone (VISUALS-24): category colours, never a
+   * party's, in a fixed order whoever the candidate is. The minor kinds are
+   * told apart by a hatch and an outline as well as by tone, and every one
+   * is named beside its share, so no colour has to be read alone. */
+  var FUNDING_TONES = [
+    [/^Individual/, "fs-ind"], [/^PACs/, "fs-pac"], [/^Party/, "fs-party"],
+    [/^Self-funded/, "fs-self"], [/^Bank and other loans/, "fs-loan"],
+    [/^Transfers/, "fs-xfer"], [/^Other/, "fs-other"],
+  ];
+
+  function fundingTone(label) {
+    for (var i = 0; i < FUNDING_TONES.length; i++) {
+      if (FUNDING_TONES[i][0].test(label)) return FUNDING_TONES[i][1];
+    }
+    return "fs-other";
+  }
+
+  function dollars(text) {
+    var n = parseFloat(String(text || "").replace(/[$,]/g, ""));
+    return isFinite(n) ? n : 0;
+  }
+
+  /** The breakdown as one bar, each part as wide as its share of what the
+   *  shares are of: the receipts, or - where an adjustment the FEC deducts
+   *  left them below the parts - the parts' own sum (kyc/fec.py funding). */
+  function fundingBar(item) {
+    var parts = item.fundingBreakdown || {};
+    var labels = Object.keys(parts).filter(function (k) { return parts[k] > 0; })
+      .sort(function (a, b) { return parts[b] - parts[a]; });
+    if (!labels.length) return "";
+    var sum = labels.reduce(function (n, k) { return n + parts[k]; }, 0);
+    var total = Math.max(sum, item.fundingBase ? dollars(item.fundingBase) : dollars(item.receipts));
+    return '<span class="funding-bar" role="img" aria-label="' +
+      KYC.escapeAttr("Funding sources: " + item.funding_sources) + '">' +
+      labels.map(function (k) {
+        return '<span class="fs-seg ' + fundingTone(k) + '" style="width:' +
+          (100 * parts[k] / total).toFixed(3) + '%"></span>';
+      }).join("") + "</span>";
+  }
+
   function fundingHtml(item) {
     if (!item.fundingBreakdown || !KYC.hasValue(item, "funding_sources")) {
       return KYC.renderField(item, "funding_sources");
     }
-    var html = String(item.funding_sources).split(", ").map(function (pair) {
-      return '<span class="funding-part">' + KYC.escapeHtml(pair) + "</span>";
+    var html = fundingBar(item) + String(item.funding_sources).split(", ").map(function (pair) {
+      var label = pair.replace(/ (?:<1|\d+)%$/, "");
+      return '<span class="funding-part"><span class="fs-swatch ' + fundingTone(label) +
+        '" aria-hidden="true"></span>' + KYC.escapeHtml(pair) + "</span>";
     }).join(", ");
     if (item.fundingBase) {
       html += '<span class="funding-base">Shares of ' + KYC.escapeHtml(item.fundingBase) +
