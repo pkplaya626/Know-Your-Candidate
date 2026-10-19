@@ -71,7 +71,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (3005 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (3041 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1989,6 +1989,54 @@ Murphy" is not Governor Bill Lee). A holder the list writes with another
 given name ("Lombardo, Joseph") is settled only by
 `overrides.STATEWIDE_NAME_FORMS`, with evidence.
 
+### Statewide questions
+
+The statewide ballot measures on each jurisdiction's November 3, 2026 ballot
+(rule 95): `data/ballot_measures.json`, a hand-edited cache researched
+jurisdiction by jurisdiction on 2026-10-19 from each election office's own
+list - its qualified or certified measures, its voter guide, the official
+sample ballots - and re-opened by a second reader (`verified`). Ballotpedia,
+NCSL, news and advocacy sites were leads, never sources (rule 50). 148
+measures in 41 jurisdictions; 11 whose official record shows none; 4
+(American Samoa, Maine, Pennsylvania, Puerto Rico) where no official source
+says either way. Measures decided at an earlier 2026 election (Alaska's
+Ballot Measure 1, Missouri's August amendments, Alabama's May amendments)
+and those a court removed are not listed; the research notes name them.
+`kyc/ballot_measures.py` writes `data/measures.js`, which the state pages
+and Your ballot load; one implementation draws both (`KYC.ballot`).
+
+| Shown | Source | Field (`kycMeasures.<code>` in `measures.js`; the cache's in brackets) |
+|-------|--------|-------|
+| "<n> statewide questions are on the Nov 3, 2026 ballot, as <office> lists them: <list>, read <day>" | the office's list | `has`, `by`, `list`, `read` (`hasMeasures`, `by`, `listSource`, `read`) |
+| "Official voter information: <guide>" | the office's guide | `guide` (`voterGuide`) |
+| Each measure's designation, and its title where the state prints one (Alabama, Missouri and Tennessee print none) | the measure's source | `measures[].designation`, `.title` |
+| Its official text, quoted, folded after about four lines ("Read the whole text") and printed whole; "Cut where marked" where the source cuts it | the measure's source | `.text`, `.cut` (`question`) |
+| Its kind (constitutional amendment, statute, bond, referendum on a law, advisory question, constitutional convention question) and who put it on the ballot (the legislature by its own name, a citizens' petition, the constitution), or "not recorded here" | the source | `.kind`, `.origin` (`kind`, `origin`, `kindWords`, `originWords`) |
+| What the quoted text is, where it is not the ballot's own wording (California's guide summaries) | the source | `textNote`, `.note` |
+| "Its page in the voter guide", "Source (read <day>)" | the office | `.guide`, `.source` (`voterGuide`, `source.url`) |
+| "No statewide question is on the Nov 3, 2026 ballot", and what shows it: the office's sentence, the proclamation calling the election, or the official ballots, quoted and linked | the office | `none.from`, `none.words` (`noneFrom`, `noneWords`) |
+| "This site has not found an official list of statewide questions ... and does not say there are none", with the election office's own site | the office | `office` |
+
+The page never says what a yes or a no vote does in its own words - where
+the official text says so (Arizona's, Ohio's), it is quoted - and nothing is
+coloured by side. Local questions are "not listed here", with the state's
+sample ballot where its office links one. "Statewide" is a state's word: the
+District's are "District-wide", a territory's "Territory-wide", and Puerto
+Rico, which holds no election that day, lists none. From the day after
+Election Day each reads "Was on the Nov 3, 2026 ballot", beside the state's
+own results page: this site reads no result of a ballot question.
+
+`ballot_measures.problems`, run by `build --check`
+(`validate.check_ballot_measures`), by `verify` and by every build (which
+writes no `measures.js` from a cache that breaks a rule), fails a measure or
+list that is not the jurisdiction's own official page (its domains, or an
+evidenced `overrides.MEASURE_SOURCES_ELSEWHERE` entry: a county's official
+ballots, an office's file store) or is unquoted, a "none" without the words
+or ballots it rests on, a "not found" that lists anything or names no
+office, a kind or origin the page cannot word without the record's own, any
+field the record does not define (a "yes means" of the site's own has none),
+a measure listed twice, and a date outside the cycle.
+
 ## State high courts
 
 Every state page's "State government" section, and the map's state panel,
@@ -2660,8 +2708,9 @@ contest:
 | U.S. House (or the Delegate, the Resident Commissioner) | the ZIP area's districts on the 2026 map | the same, one card per district with its share of the ZIP area's land where there are several, and the location offered for an exact answer |
 | Governor, lieutenant governor, attorney general, secretary of state | `ballot2026` and the election office's list (rule 91) | the office's mark, its holder line (naming the holder as the holder) and its listed candidates, write-ins apart, as the state page shows them; the offices not on this ballot with their record's words |
 | State senate and house | the lookup's legislative districts, `legislature.seats_up`, `legislature.district_seats` | whether each district's seat is on the ballot, in the legislature page's words and in the words its count of seats gives ("this seat", "this district's seats", "one of this district's seats"); where this site's record names no district, that is said on the row; its candidates are not listed here; a chamber with no seat in reach up is drawn as off the ballot |
+| Statewide questions | `data/measures.js` (rule 95) | the same list as the state page's "Statewide questions" section, last, as a printed ballot puts them; a "none" or "not found" card drawn as off the ballot |
 
-Then what the site does not list (ballot measures, local and judicial
+Then what the site does not list (local ballot questions, local and judicial
 contests, the legislature's candidates), with the state's own sample ballot
 where its election office links one, and, at the top, the state's key dates
 as its voting block gives them, a date said passed on the reader's own day.

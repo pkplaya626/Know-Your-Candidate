@@ -84,6 +84,167 @@ async function until(test, ms) {
   return test();
 }
 
+/* ============================================== the statewide questions */
+
+/* The statewide questions on each ballot (kyc-ballot.js, rule 95): every
+ * state page said the ballot also held "ballot measures, which this site
+ * does not list" (audit 2026-10-17, RACES-16, STATEGOV-14, PERSONA-08). */
+async function testMeasures() {
+  const officialText = (li) => [...li.querySelectorAll(".measure-text p")].map((p) => p.textContent).join("\n");
+  const ca = await buildPage("states/ca.html");
+  await settle(50);
+  suite("states/ca.html — the statewide questions, in their official words", () => {
+    const { window, D, errors } = ca;
+    const rec = window.kycMeasures.CA;
+    const section = D.getElementById("measures");
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("its own section, named as its jump chip names it", !!section &&
+      section.querySelector("h2").textContent === "Statewide questions on the Nov 3, 2026 ballot" &&
+      !!D.querySelector('.state-parts a[href="#measures"]') &&
+      D.querySelector('.state-parts a[href="#measures"]').textContent === window.KYC.ballot.measuresName("CA"));
+    const items = section ? [...section.querySelectorAll("li.measure")] : [];
+    check("every measure the record lists, in its order", rec.has === true && items.length === rec.measures.length &&
+      items.every((li, i) => li.querySelector(".measure-name").firstChild.textContent.trim() === rec.measures[i].designation),
+      items.length + " / " + rec.measures.length);
+    check("each quoted exactly as the record holds it", items.every((li, i) =>
+      officialText(li) === rec.measures[i].text.split(/\n+/).join("\n")));
+    check("each says what kind it is and who put it on the ballot", items.every((li, i) =>
+      li.querySelector(".measure-kind").textContent.indexOf(rec.measures[i].kind) === 0 &&
+      /Put on the ballot by (the Legislature|a citizens' petition)/.test(li.querySelector(".measure-kind").textContent)));
+    check("each links its source and its voter guide page, outside the site", items.every((li, i) => {
+      const hrefs = [...li.querySelectorAll(".measure-links a")].map((a) => a.getAttribute("href"));
+      return hrefs.includes(rec.measures[i].source) && (!rec.measures[i].guide || hrefs.includes(rec.measures[i].guide)) &&
+        [...li.querySelectorAll(".measure-links a")].every((a) => a.target === "_blank" && /noopener/.test(a.rel));
+    }));
+    check("the list is credited to the office that publishes it, and dated",
+      /as the California Secretary of State lists them/.test(section.textContent) &&
+      !!section.querySelector('.measures-lead a[href="' + rec.list.url + '"]') && /read Oct\. 19, 2026/.test(section.textContent));
+    check("a text that is not the ballot's own wording says what it is",
+      /summary in the Official Voter Information Guide, not the label printed on the ballot/.test(section.textContent));
+    check("no colour, badge or word of the site's own takes a side", !section.querySelector(".badge, [style], .party, [class*=yes], [class*=oppose], [class*=support]") &&
+      /does not say what a yes or a no vote does/.test(section.textContent));
+    check("local questions are not listed here, and said so", /Local questions .* are not listed here/.test(section.textContent));
+    const note = D.querySelector("#races .state-note");
+    check("the race list's note points to them, and no longer calls them unlisted",
+      !!note && !!note.querySelector('a[href="#measures"]') && !/ballot measures, which/.test(note.textContent),
+      note && note.textContent);
+  });
+
+  /* Folding: a long text shows its first lines and opens in place. */
+  const az = await buildPage("states/az.html");
+  await settle(50);
+  suite("states/az.html — a long official text is folded after its first lines", () => {
+    const { window, D } = az;
+    const items = [...D.querySelectorAll("#measures li.measure")];
+    const long = items.filter((li, i) => window.kycMeasures.AZ.measures[i].text.length > 320);
+    const short = items.filter((li, i) => window.kycMeasures.AZ.measures[i].text.length <= 320);
+    check("each long one is folded, with the button that opens it", long.length > 0 && long.every((li) =>
+      li.querySelector(".measure-text.is-folded") && li.querySelector("button[data-measure-more]")
+        .getAttribute("aria-expanded") === "false"), long.length + " long");
+    check("a short one is whole, with no button", short.every((li) =>
+      !li.querySelector(".is-folded") && !li.querySelector("[data-measure-more]")));
+    const li = long[0];
+    const button = li && li.querySelector("[data-measure-more]");
+    const text = button && D.getElementById(button.getAttribute("aria-controls"));
+    if (button) button.click();
+    check("'Read the whole text' opens it in place", !!text && !text.classList.contains("is-folded") &&
+      button.getAttribute("aria-expanded") === "true" && button.textContent === "Show less");
+    if (button) button.click();
+    check("and folds it again", !!text && text.classList.contains("is-folded") &&
+      button.textContent === "Read the whole text");
+    const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+    check("a folded text is printed whole, without its button", /\.measure-text\.is-folded \{ max-height: none; overflow: visible;/.test(css) &&
+      /\.measure-more \{ display: none !important; \}/.test(css));
+    check("a long word or address wraps at a phone's width", /\.measure-text \{[^}]*overflow-wrap: anywhere/.test(css) &&
+      /\.measure-name \{[^}]*overflow-wrap: anywhere/.test(css));
+  });
+
+  const tx = await buildPage("states/tx.html");
+  const me = await buildPage("states/me.html");
+  const dc = await buildPage("states/dc.html");
+  const mp = await buildPage("states/mp.html");
+  const gu = await buildPage("states/gu.html");
+  const pr = await buildPage("states/pr.html");
+  await settle(50);
+  suite("state pages — none, not found, the District and the territories", () => {
+    const sec = (p) => p.D.getElementById("measures");
+    const t = (p) => (sec(p) || { textContent: "" }).textContent;
+    check("Texas: none, with the quoted words of the document that shows it",
+      /No statewide question is on the Nov 3, 2026 ballot\./.test(t(tx)) &&
+      t(tx).indexOf("“" + tx.window.kycMeasures.TX.none.words + "”") !== -1 &&
+      !!sec(tx).querySelector('a[href="' + tx.window.kycMeasures.TX.list.url + '"]') &&
+      !sec(tx).querySelector("li.measure"), t(tx).slice(0, 300));
+    check("Maine: not found, never 'none', and the election office's own site",
+      /has not found an official list of statewide questions/.test(t(me)) && /does not say there are none/.test(t(me)) &&
+      !/No statewide question is/.test(t(me)) &&
+      !!sec(me).querySelector('a[href^="https://www.maine.gov/"]'), t(me).slice(0, 300));
+    check("the District's questions are its own, not a state's",
+      /^District-wide questions on the Nov 3, 2026 ballot/.test(sec(dc) ? sec(dc).querySelector("h2").textContent : "") &&
+      sec(dc).querySelectorAll("li.measure").length === dc.window.kycMeasures.DC.measures.length);
+    check("a territory's are territory-wide; who put one on the ballot, where not recorded, is said so",
+      /^Territory-wide questions/.test(sec(mp) ? sec(mp).querySelector("h2").textContent : "") &&
+      /Who put it on the ballot is not recorded here/.test(t(mp)) && /No territory-wide question is on/.test(t(gu)),
+      t(mp).slice(0, 200));
+    check("a place with no election that day lists no questions", !sec(pr));
+  });
+
+  const caAfter = await buildPage("states/ca.html", { now: "2026-11-05T09:00:00" });
+  const txAfter = await buildPage("states/tx.html", { now: "2026-11-05T09:00:00" });
+  await settle(50);
+  suite("state pages after Election Day — the questions in the past tense, no result of our own", () => {
+    const section = caAfter.D.getElementById("measures");
+    const text = section ? section.textContent : "";
+    const results = ((caAfter.window.kycBuildMeta.voting || {}).CA || {}).results;
+    check("the heading and the lead are in the past tense",
+      /questions that were on the Nov 3, 2026 ballot/.test(section.querySelector("h2").textContent) &&
+      /questions were on the Nov 3, 2026 ballot/.test(text));
+    check("each 'Was on the Nov 3, 2026 ballot'", [...section.querySelectorAll("li.measure")].every((li) =>
+      /Was on the Nov 3, 2026 ballot/.test(li.textContent)));
+    check("the state's own results, and no result said here", /does not read the results of ballot questions/.test(text) &&
+      (!results || !!section.querySelector('.measures-results a[href="' + results + '"]')) &&
+      !/\b(passed|failed|approved|rejected)\b/i.test(section.querySelector(".measures-results").textContent));
+    check("a 'none' is in the past tense too", /No statewide question was on the Nov 3, 2026 ballot/.test(
+      txAfter.D.getElementById("measures").textContent));
+  });
+
+  /* Your ballot: a card after the state offices, the same list. */
+  const caBallot = await ballotFor("#/?zip=94103");
+  suite("Your ballot: the statewide questions after the state offices", () => {
+    const { window, out, errors } = caBallot;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const cards = [...out.querySelectorAll(".ballot-list > .ballot-contest")];
+    const card = out.querySelector(".ballot-contest.ballot-measures");
+    check("one card, last in the list", !!card && cards[cards.length - 1] === card &&
+      card.querySelector(".ballot-office").textContent.trim() === "Statewide questions");
+    check("the order note names them", /then the statewide questions/.test(out.textContent));
+    const items = card ? [...card.querySelectorAll("li.measure")] : [];
+    check("the same list as the state page's", items.length === window.kycMeasures.CA.measures.length &&
+      items.every((li, i) => officialText(li) === window.kycMeasures.CA.measures[i].text.split(/\n+/).join("\n")));
+    check("each measure's heading sits under the card's", items.every((li) => li.querySelector("h5.measure-name")));
+    check("only local questions are left unlisted", /local ballot questions/.test(out.textContent) &&
+      !/, and ballot measures,/.test(out.textContent));
+    window.dispatchEvent(new window.Event("beforeprint"));
+    check("in print mode the list is all there, folded texts included (the stylesheet opens them)",
+      out.querySelectorAll("li.measure .measure-text").length === items.length);
+    window.dispatchEvent(new window.Event("afterprint"));
+  });
+
+  const txBallot = await ballotFor("#/?zip=75036");
+  const meBallot = await ballotFor("#/?zip=04101");
+  const caBallotAfter = await ballotFor("#/?zip=94103", { now: "2026-11-05T12:00:00" });
+  suite("Your ballot: none, not found, and after the day", () => {
+    const card = (b) => b.out.querySelector(".ballot-contest.ballot-measures");
+    check("Texas: a card drawn as off this ballot, saying none", !!card(txBallot) &&
+      /ballot-off/.test(card(txBallot).className) && /No statewide question is on/.test(card(txBallot).textContent) &&
+      !/then the statewide questions/.test(txBallot.out.textContent));
+    check("Maine: not found, never none", !!card(meBallot) &&
+      /has not found an official list/.test(card(meBallot).textContent) &&
+      !/No statewide question is/.test(card(meBallot).textContent));
+    check("after the day, in the past tense", !!card(caBallotAfter) &&
+      [...card(caBallotAfter).querySelectorAll("li.measure")].every((li) => /Was on the Nov 3, 2026 ballot/.test(li.textContent)));
+  });
+}
+
 /* ------------------------------------------------------------------ setup */
 
 /* The page reads the clock: after Election Day a nominee reads "Awaiting
@@ -2297,7 +2458,7 @@ async function testStates() {
     const marks = gov ? [...gov.querySelectorAll(".gov-ballot-mark")] : [];
     check("the race list says what else the ballot elects",
       !!note && /Of the state offices this site covers, the same ballot also elects the governor/
-        .test(note.textContent) && /ballot measures, which this site does not list/.test(note.textContent) &&
+        .test(note.textContent) && /local ballot questions, which this site does not list/.test(note.textContent) &&
         note.textContent.indexOf("This site lists the candidates for Congress here, and those for " +
           window.KYC.stategov.listsCandidates("TX") + " under State government; not those for the " +
           "legislature") !== -1 && /^the governor/.test(window.KYC.stategov.listsCandidates("TX")),
@@ -3053,7 +3214,10 @@ async function testStates() {
     // where each part starts, and every link lands on a section.
     const parts = [...D.querySelectorAll(".state-parts a")];
     check("an 'On this page' row links every part of the page",
-      parts.length === 4 && parts.every((a) => !!D.getElementById(a.getAttribute("href").slice(1))),
+      // The four parts, and the statewide questions where the record has
+      // any word on them (rule 95: Texas's is "none").
+      parts.length === 4 + (window.kycMeasures && window.kycMeasures.TX ? 1 : 0) &&
+      parts.every((a) => !!D.getElementById(a.getAttribute("href").slice(1))),
       parts.map((a) => a.getAttribute("href")).join(" "));
     // Left in the address, a fragment sent the reader back to the section
     // when a profile closed. A jump scrolls and leaves the address alone.
@@ -12142,9 +12306,9 @@ async function testBallot() {
     check("the caveat, and the way to an exact answer: the reader's location",
       /crosses district lines/.test(tx.text) &&
       !!out.querySelector(".ballot-state [data-ballot-locate]"));
-    const order = cards.map((c) => c.li.className.match(/ballot-(federal|statewide|legislature)/)[1]);
-    const rank = { federal: 0, statewide: 1, legislature: 2 };
-    check("in ballot order: Congress, statewide offices, the legislature",
+    const order = cards.map((c) => c.li.className.match(/ballot-(federal|statewide|legislature|measures)/)[1]);
+    const rank = { federal: 0, statewide: 1, legislature: 2, measures: 3 };
+    check("in ballot order: Congress, statewide offices, the legislature, the questions",
       order.every((k, i) => !i || rank[order[i - 1]] <= rank[k]) && order[0] === "federal" &&
       order.indexOf("statewide") !== -1 && order.indexOf("legislature") !== -1, order.join(","));
     check("the Senate first among them", cards[0].office === "U.S. Senate");
@@ -12198,8 +12362,8 @@ async function testBallot() {
       /not up for regular election in 2026/.test(senate.textContent), senate.textContent.slice(0, 200));
     check("legislative candidates are not listed here, and said so",
       /candidates for (this seat|these seats) are not listed here/.test(tx.text));
-    check("ballot measures and local contests: not listed here",
-      /Also on your ballot, not listed here/.test(tx.text) && /ballot measures/.test(tx.text));
+    check("local ballot questions and local contests: not listed here",
+      /Also on your ballot, not listed here/.test(tx.text) && /local ballot questions/.test(tx.text));
     check("the key dates, passed ones said passed on the reader's day",
       !!out.querySelector(".ballot-dates .vote-dates") && /Passed/.test(out.querySelector(".ballot-dates").textContent));
     check("and the way to how to vote in Texas", !!out.querySelector('.ballot-dates a[href$="states/tx.html#voting"]'));
@@ -13069,6 +13233,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "redistricting") await testFindMyDistrict();
   if (!only || only === "findrep") await testFindRep();
   if (!only || only === "ballot" || only === "findrep") await testBallot();
+  if (!only || only === "ballot" || only === "states") await testMeasures();
   if (!only || only === "findrep") await testFindRepNav();
   if (!only || only === "index.html") await testContactActions();
   if (!only || only === "index.html") await testPayLine();

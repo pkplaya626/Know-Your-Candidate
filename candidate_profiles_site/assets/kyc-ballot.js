@@ -612,7 +612,8 @@
   }
 
   /** What a "none" rests on, in the record's words, with its source. */
-  function noneLine(rec) {
+  function noneLine(code, rec) {
+    var scope = questionScope(code).toLowerCase();
     var src = rec.list ? link(rec.list.url, rec.list.title) + ", read " +
       esc(KYC.dateWords(rec.read)) : "";
     var basis = (rec.none || {}).from;
@@ -626,9 +627,9 @@
     }
     if (basis === "list") {
       return "The " + esc(rec.by) + "'s list of the questions on its ballots holds none that " +
-        "is statewide: " + src + ". A statewide question would be on every ballot.";
+        "is " + scope + ": " + src + ". A " + scope + " question would be on every ballot.";
     }
-    return "The official sample ballots print none: " + src + ". A statewide question would " +
+    return "The official sample ballots print none: " + src + ". A " + scope + " question would " +
       "be printed on every ballot.";
   }
 
@@ -664,7 +665,7 @@
     } else if (rec.has === false) {
       out.push('<p class="measures-lead">No ' + scope + " question " + (past ? "was" : "is") +
         " on the Nov 3, 2026 ballot.</p>");
-      out.push('<p class="measures-source">' + noneLine(rec) + "</p>");
+      out.push('<p class="measures-source">' + noneLine(code, rec) + "</p>");
     } else {
       out.push('<p class="measures-lead">This site ' + (past ? "did" : "has") + " not " +
         (past ? "find" : "found") + " an official list of " + scope + " questions on the " +
