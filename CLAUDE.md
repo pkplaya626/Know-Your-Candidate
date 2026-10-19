@@ -173,8 +173,8 @@ python tools/fetch_legislative_maps.py        # state senate and house boundarie
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1672 tests, no dependencies
-npm install && npm test                       # 2232 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1701 tests, no dependencies
+npm install && npm test                       # 2259 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1406,11 +1406,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     nobody anything (`votes-unattributed`). The Clerk writes a delegate's
     state "XX" in the Committee of the Whole's roll calls; that passes only
     for a member who sits for D.C. or a territory. Read on 2026-10-18, the
-    Clerk listed the Speaker in 172 of 253 roll calls: one he does not vote
-    in names him nowhere. Counted as missed, he would have read as absent
-    from a third of the House's votes, so only a record's "Not Voting" is
-    missed, the rest is said apart with the House's own rule quoted (Rule
-    I, clause 7; Rule III, clause 3(a)). The Clerk answers a roll call it
+    Clerk listed the Speaker in 522 of the 676 roll calls held: one he does
+    not vote in names him nowhere. Counted as missed, he would have read as
+    absent from 154 of the House's votes, so only a record's "Not Voting"
+    is missed, the rest is said apart with the House's own rule quoted
+    (Rule I, clause 7; Rule III, clause 3(a)). A "Not Voting" dated after a
+    member left (David Scott, listed the day after) is nobody's. The Clerk answers a roll call it
     has not posted with HTTP 200 and an "Error sanitizing file" note: not
     a file (rule 52), and it ends the run there without concluding
     anything (rule 8). Nothing is chosen: no "key votes", which would be an

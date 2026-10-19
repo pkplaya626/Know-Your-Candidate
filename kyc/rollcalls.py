@@ -655,7 +655,12 @@ def chamber_payload(cache, chamber, problems=None):
                 bioguide = bioguide_of(vid)
                 person = members[bioguide]
                 if not _serving(person, title, roll["date"]):
-                    outside.setdefault(bioguide, []).append(roll["date"])
+                    # Never shown. A vote cast outside a term is reported; a
+                    # "Not Voting" is the record still listing a seat's
+                    # member a day after they left (David Scott, who left on
+                    # 2026-04-21, is listed on the 22nd), and claims nothing.
+                    if cast != NOT_VOTING:
+                        outside.setdefault(bioguide, []).append(roll["date"])
                     continue
                 row = strings.setdefault(bioguide, [NOT_LISTED] * len(rolls))
                 row[index] = codes[cast]

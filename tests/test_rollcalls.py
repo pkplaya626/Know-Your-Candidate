@@ -201,6 +201,16 @@ class TestAttribution(unittest.TestCase):
         self.assertEqual(payload["members"]["A000370"]["votes"], "YN")
         self.assertIn("votes-outside-term", [p[1] for p in problems])
 
+    def test_a_not_voting_listing_after_a_member_left_is_not_theirs_and_not_warned(self):
+        payload, problems = self.build([
+            (house_xml(1, date="4-Mar-2025", votes=[("T000488", "Turner (TX)", "D", "TX", "Yea")]),
+             2025, 1),
+            (house_xml(2, date="6-Mar-2025", votes=[("T000488", "Turner (TX)", "D", "TX",
+                                                     "Not Voting")]), 2025, 2)])
+        entry = payload["members"]["T000488"]
+        self.assertEqual((entry["votes"], entry["notVoting"]), ("Y.", 0))
+        self.assertEqual(problems, [])
+
     def test_a_member_who_left_keeps_the_votes_they_cast(self):
         payload, _ = self.build([
             (house_xml(1, date="3-Feb-2025", votes=[("T000488", "Turner (TX)", "D", "TX", "Yea")]),
