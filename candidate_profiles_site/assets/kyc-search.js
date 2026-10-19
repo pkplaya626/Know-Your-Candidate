@@ -648,6 +648,12 @@
     var p = phrase(ctx.ws);
     if (!LOCAL.test(p)) return [];
     var where;
+    if (ctx.state && have("search") && !(index().counties || {})[ctx.state]) {
+      // The District and the territories have no county page here.
+      return [block("offices", "Local offices", [], { note: esc("This site names no local officials, " +
+        "and has no county page for " + placeWords(ctx.state) + ". ") +
+        link(statePage(ctx.state), KYC.stateName(ctx.state) + "'s page") + esc(" lists what it does cover.") })];
+    }
     if (counties.length === 1) {
       where = link(counties[0].href, counties[0].name.replace(/,.*$/, "") + "'s page");
     } else if (ctx.state && (index().counties || {})[ctx.state]) {

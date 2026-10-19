@@ -10012,6 +10012,11 @@ async function testSearchAnswers() {
     check("said, and the county pages linked", /names no local officials/.test(text()) &&
       hrefs().indexOf("counties/index.html") !== -1, text().slice(0, 200));
   });
+  await ask("DC mayor");
+  suite("search answers — a local office where there is no county page", () => {
+    check("the District's own page, never the county pages", hrefs().join(" ") === "states/dc.html" &&
+      /no county page for the District of Columbia/.test(text()), hrefs().join(" ") + " | " + text());
+  });
 
   const committee = (index.committees || []).find((c) => / Armed Services$/.test(c[1]));
   await ask("Armed Services");
