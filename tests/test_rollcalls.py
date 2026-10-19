@@ -528,9 +528,15 @@ class TestFiles(unittest.TestCase):
             self.assertIn("window.kycVotesHouse = ", handle.read())
 
     def test_a_page_that_opens_profiles_names_the_vote_files(self):
-        html = pages._scripts(("../data/profiles.js", "../assets/kyc-profile.js"))
-        self.assertEqual(emit.on_demand_sources(html),
-                         ["../data/votes/house.js", "../data/votes/senate.js"])
+        html = pages._scripts(("../data/people/tx.js", "../assets/kyc-profile.js"))
+        lazy = emit.on_demand_sources(html)
+        self.assertEqual(lazy[:2], ["../data/votes/house.js", "../data/votes/senate.js"])
+        # And the people files it does not load (rule 94): the index and
+        # every other state's, never its own.
+        self.assertIn("../data/people/index.js", lazy)
+        self.assertIn("../data/people/ca.js", lazy)
+        self.assertNotIn("../data/people/tx.js", lazy)
+        self.assertEqual(len(lazy), 2 + len(emit.people_codes()))
         # A page without the dialog names none.
         self.assertNotIn("onDemandData", pages._scripts(("../assets/kyc-guide.js",)))
 

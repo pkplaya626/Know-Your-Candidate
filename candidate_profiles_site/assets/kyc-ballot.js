@@ -392,7 +392,7 @@
       : list.slice(0, -1).join(", ") + " and " + list[list.length - 1];
   }
 
-  /* The legislature pages load no profiles.js, so the year is the one the
+  /* The legislature pages load no people files, so the year is the one the
    * record is of: these seats are the 2026 ballot's (kyc/ballot2026.py). */
   function after() {
     return KYC.electionStatus(2026).phase === "post-election";
@@ -1068,8 +1068,18 @@
     var ticket = ++page.ticket;
     return KYC.findRep.zip(zip5).then(function (found) {
       if (ticket !== page.ticket) return;
-      show(zipBallot(zip5, found));
-      if (found.length === 1) KYC.findRep.remember(found[0].code);
+      // The page holds no one's records until an answer needs them (rule
+      // 94): the answer's states first, and a state whose file did not
+      // load is said by name, never drawn as a ballot with nobody on it.
+      return KYC.findRep.peopleFor(found.map(function (f) { return f.code; })).then(function (failed) {
+        if (ticket !== page.ticket) return;
+        if (failed.length) {
+          show(KYC.findRep.peopleFailed(failed, "The races and candidates"));
+          return;
+        }
+        show(zipBallot(zip5, found));
+        if (found.length === 1) KYC.findRep.remember(found[0].code);
+      });
     }, function () {
       if (ticket !== page.ticket) return;
       show(note("The ZIP code lookup did not load. Check your connection and try again."));
@@ -1098,8 +1108,15 @@
       }
       KYC.findRep.where(pos.coords.longitude, pos.coords.latitude, acc).then(function (hit) {
         if (ticket !== page.ticket) return;
-        show(pointBallot(hit, acc));
-        if (hit.code) KYC.findRep.remember(hit.code);
+        return KYC.findRep.peopleFor([hit.code]).then(function (failed) {
+          if (ticket !== page.ticket) return;
+          if (failed.length) {
+            show(KYC.findRep.peopleFailed(failed, "The races and candidates"));
+            return;
+          }
+          show(pointBallot(hit, acc));
+          if (hit.code) KYC.findRep.remember(hit.code);
+        });
       }, function () {
         if (ticket !== page.ticket) return;
         show(note("The lookup did not load. Check your connection and try again."));
@@ -1160,7 +1177,9 @@
   function start() {
     var root = doc.getElementById("ballotPage");
     if (!root) return;
-    if (!(global.legislatorsData || []).length || !KYC.findRep) {
+    // The page loads the build's figures, and each answer's people when it
+    // is asked for (rule 94): without the figures nothing can be drawn.
+    if (!KYC.meta().signature || !KYC.findRep) {
       show(note("The site's data did not load. Reload the page to try again."));
       return;
     }

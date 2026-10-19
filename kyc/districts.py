@@ -25,7 +25,7 @@ and never edited by hand:
 * ``places.json`` - incorporated places from the Census Gazetteer, ranked by
   population, each placed on its own largest piece of land.
 
-Everything a reader is told about *people* comes from ``profiles.js``; the
+Everything a reader is told about *people* comes from the people files (``data/people/``); the
 emitted files are a pure function of the geometry, and their signatures say so.
 """
 

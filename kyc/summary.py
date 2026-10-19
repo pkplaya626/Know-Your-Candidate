@@ -205,6 +205,11 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None, ro
         # cycle elects sits, no seat in it is "on the 2026 ballot" any more.
         summary["senate"]["up"] = seated_up(senate, races)
     summary["districtMaps"] = district_maps()
+    # Each chamber's left-right scores, for the ticks beside a member's own
+    # in the profile dialog, which opens on pages holding one state's people
+    # (rule 94).
+    from .voteview import chamber_scores
+    summary["chamberScores"] = chamber_scores(profiles)
     # Where each state sits on the tile maps: the States & territories
     # picker and the House's one square per seat (kyc/tiles.py).
     from . import tiles

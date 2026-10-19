@@ -816,7 +816,7 @@
     var shown = ballotPeople(race, people);
     if (!shown.length) return "";
     return fold("race-money", "Money in the race", opts, (opts.scope || "race") + ":money:" + race.id,
-      function () {
+      race.state, function () {
         var max = 0;
         shown.forEach(function (p) {
           MONEY.forEach(function (spec) {
@@ -841,23 +841,51 @@
   /* A race's fold: drawn now when it opens on arrival, else when the reader
    * opens it (fillFold). The grid's races view holds 475 races, and drawn
    * at once their money and last results nearly doubled its markup, which
-   * GRID-14 had cut to 2.5 MB. */
+   * GRID-14 had cut to 2.5 MB.
+   *
+   * A fold about the race's people (*state*, the race's) needs their whole
+   * records: the grid and the map hold everyone's card only, and the money
+   * and the ballot side by side are in the state's own file (rule 94),
+   * loaded when the fold opens. Never drawn from the cards, where every
+   * figure would read "No data". */
   var lazyFolds = {};
 
-  function fold(cls, summary, opts, key, body) {
-    var eager = opts.open || !opts.lazy;
-    if (!eager) lazyFolds[key] = body;
-    return '<details class="' + cls + '"' + (opts.open ? " open" : "") +
+  function fold(cls, summary, opts, key, state, body) {
+    var ready = !state || KYC.peopleFull(state);
+    var eager = ready && (opts.open || !opts.lazy);
+    if (!eager) lazyFolds[key] = { body: body, state: ready ? null : state };
+    return '<details class="' + cls + '"' + (eager && opts.open ? " open" : "") +
       (eager ? "" : ' data-fold="' + KYC.escapeAttr(key) + '"') + "><summary>" +
       KYC.escapeHtml(summary) + '</summary><div class="fold-body">' + (eager ? body() : "") +
       "</div></details>";
   }
 
   function fillFold(details) {
-    var body = lazyFolds[details.getAttribute("data-fold")];
+    var entry = lazyFolds[details.getAttribute("data-fold")];
     var target = details.querySelector(".fold-body");
-    if (!body || !target || target.childElementCount) return;
-    target.innerHTML = body();
+    if (!entry || !target || target.childElementCount) return;
+    if (!entry.state || KYC.peopleFull(entry.state)) {
+      target.innerHTML = entry.body();
+      return;
+    }
+    target.innerHTML = '<p class="race-note" role="status">Loading ' +
+      KYC.escapeHtml(KYC.stateName(entry.state)) + "&rsquo;s campaigns&hellip;</p>";
+    KYC.loadPeople(entry.state).then(function (ok) {
+      if (ok) {
+        target.innerHTML = entry.body();
+        return;
+      }
+      // Said, and asked again the next time the fold opens.
+      target.innerHTML = '<p class="race-note kyc-absent" role="status">' +
+        KYC.escapeHtml(KYC.peopleProblem() || "The campaigns\u2019 figures did not load. " +
+          "Close this and open it again to retry.") + "</p>";
+      var again = function () {
+        if (details.open) return;
+        details.removeEventListener("toggle", again);
+        target.innerHTML = "";
+      };
+      details.addEventListener("toggle", again);
+    });
   }
 
   /* ------------------------------------------------ compare the ballot */
@@ -994,7 +1022,7 @@
     if (ballotPeople(race, people).length < 2) return "";
     // Always drawn when opened: a table per race is markup no one asked for.
     return fold("race-compare", "Compare the ballot", { lazy: true },
-      (opts.scope || "race") + ":compare:" + race.id,
+      (opts.scope || "race") + ":compare:" + race.id, race.state,
       function () { return compareTable(race, people, opts.attr, opts.self); });
   }
 
@@ -1136,7 +1164,7 @@
     var last = race && race.lastElection;
     if (!last) return "";
     return fold("race-last", lastTimeSummary(race, last, opts.now), opts,
-      (opts.scope || "race") + ":last:" + race.id,
+      (opts.scope || "race") + ":last:" + race.id, null,
       function () { return lastTimeBody(race, last); });
   }
 

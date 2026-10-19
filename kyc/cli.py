@@ -296,6 +296,10 @@ def _build(args):
         lookup_mod.build(args.root, district_maps=district_maps)
     except lookup_mod.LookupMapError as exc:
         issues.append(validate.Issue("error", "lookup-map", str(exc), ""))
+    # The people are written one state to a file (rule 94): someone whose
+    # race or seat is filed under another state would be missing from it.
+    for problem in emit.split_problems(profiles, race_list):
+        issues.append(validate.Issue("error", "people-split", problem, ""))
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -325,10 +329,9 @@ def _build(args):
     summary["departed"] = departed_rows
     from . import seat_history as seat_history_mod
     summary["lastElectionSources"] = seat_history_mod.page_sources()
-    path, size = emit.write_profiles(
-        profiles, stats, args.root, races=race_list, summary=summary
-    )
-    print(f"\n[ok] wrote {path} ({size / 1024:.0f} KB)")
+    people_files = emit.write_people(profiles, stats, args.root, races=race_list, summary=summary)
+    print(f"\n[ok] wrote {people_files[0][0]} and {len(people_files) - 1} people file(s) under "
+          f"{emit.PEOPLE_DIR} ({sum(size for _, size in people_files) / 1024:.0f} KB)")
 
     # Each chamber's roll calls, before any page that names them is stamped.
     vote_files = emit.write_votes(rollcalls.payloads(roll_calls), args.root)
@@ -1452,6 +1455,14 @@ def _verify(args):
         )
     else:
         print(f"  ok  {emit.DATA_FILE} matches the rosters ({expected[:16]}...)")
+    # Each state's people and the index of everyone, from the same build
+    # (rule 94): a stale one would put another build beside this one.
+    stale_people = emit.check_people(profiles, race_list, summary, args.root)
+    if stale_people:
+        problems.append(f"{len(stale_people)} people file(s) are not this build's: "
+                        + "; ".join(f"{os.path.basename(p)} {why}" for p, why in stale_people[:6]))
+    else:
+        print(f"  ok  {emit.PEOPLE_DIR}: the index and every state's file are this build's")
 
     from . import rollcalls
     stale_votes = emit.check_votes(rollcalls.payloads(rollcalls.load_cache(args.root)), args.root)

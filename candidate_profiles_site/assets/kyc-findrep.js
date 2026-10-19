@@ -27,7 +27,7 @@
  * more coarsely, so their margin is wider by what that file records
  * (``lineErrorKm``, kyc/legislature.py), and the answer gives both margins.
  *
- * The pages without profiles.js (the legislature and county pages) still
+ * The pages without people files (the legislature and county pages) still
  * name each state, link its district map and its own lookup: those words
  * come from the lookup index (``states``, kyc/lookup.place_info), never
  * KYC.meta(), which is empty there.
@@ -213,7 +213,7 @@
   }
 
   /** "Ohio", never "OH": the legislature and county pages load no
-   *  profiles.js, so KYC.stateName would give the code there. */
+   *  people files, so KYC.stateName would give the code there. */
   function nameOf(code) {
     return placeOf(code).name || KYC.stateName(code);
   }
@@ -419,7 +419,34 @@
   /* ========================================================== the people */
 
   function people() {
-    return global.legislatorsData || [];
+    return KYC.people();
+  }
+
+  /** A promise that the page holds the people of each state in *codes*,
+   *  where it holds people at all: a state page holds its own state's only
+   *  (rule 94), and an answer in another state - a ZIP code across the
+   *  line, a reader's location - loads that state's file first. Resolves to
+   *  the codes whose file did not load, which the answer must not be drawn
+   *  without: "no members" from a failed download is a silent error. The
+   *  ballot page holds no one until an answer needs them, and names every
+   *  people file on demand: it loads the answer's states as well. */
+  function peopleFor(codes) {
+    if (!people().length && !KYC.canLoadPeople("people/index.js")) return Promise.resolve([]);
+    var wanted = (codes || []).filter(function (c, i, all) {
+      return c && all.indexOf(c) === i && !KYC.peopleHeld(c);
+    });
+    return Promise.all(wanted.map(function (c) {
+      return KYC.loadPeople(c).then(function (ok) { return ok ? null : c; });
+    })).then(function (failed) { return failed.filter(Boolean); });
+  }
+
+  /** Why an answer is not drawn: the page's data is of another build, or
+   *  *failed*'s files did not load. *what* names what is missing ("The
+   *  members of Congress", the ballot page's "The races and candidates"). */
+  function peopleFailed(failed, what) {
+    return '<p class="findrep-note">' + KYC.escapeHtml(KYC.peopleProblem() ||
+      (what || "The members of Congress") + " for " + failed.map(nameOf).join(" and ") +
+      " did not load. Check your connection and try again.") + "</p>";
   }
 
   function stateInfo(code) {
@@ -445,7 +472,7 @@
   }
 
   function races() {
-    return global.kycRaces || [];
+    return KYC.races();
   }
 
   function houseRace(code, n) {
@@ -755,7 +782,7 @@
 
   /** "Ohio's House map was redrawn for 2026 ...", only where the answer
    *  shows the House rows it explains: the legislature and county pages
-   *  show none (they load no profiles.js). */
+   *  show none (they load no people files). */
   function redrawnNote(code, data) {
     if (!data.next || KYC.recordPhase() || !people().length) return "";
     return KYC.escapeHtml(KYC.possessive(placeWords(code))) + " House map was redrawn for 2026: " +
@@ -1014,8 +1041,16 @@
       }
       show('<p class="findrep-note">Looking up ' + KYC.escapeHtml(m[1]) + "&hellip;</p>");
       zip(m[1]).then(function (found) {
-        show(zipAnswer(m[1], found));
-        remember(found.length === 1 ? found[0].code : "");
+        return peopleFor(found.map(function (f) { return f.code; })).then(function (failed) {
+          return { found: found, failed: failed };
+        });
+      }).then(function (got) {
+        if (got.failed.length) {
+          show(peopleFailed(got.failed));
+          return;
+        }
+        show(zipAnswer(m[1], got.found));
+        remember(got.found.length === 1 ? got.found[0].code : "");
       }, function () {
         show('<p class="findrep-note">The ZIP code lookup did not load. Check your connection ' +
           "and try again.</p>");
@@ -1035,8 +1070,16 @@
             return;
           }
           where(pos.coords.longitude, pos.coords.latitude, acc).then(function (hit) {
-            show(pointAnswer(hit, acc));
-            remember(hit.code || "");
+            return peopleFor([hit.code]).then(function (failed) {
+              return { hit: hit, failed: failed };
+            });
+          }).then(function (got) {
+            if (got.failed.length) {
+              show(peopleFailed(got.failed));
+              return;
+            }
+            show(pointAnswer(got.hit, acc));
+            remember(got.hit.code || "");
           }, function () {
             show('<p class="findrep-note">The lookup did not load. Check your connection and ' +
               "try again.</p>");
@@ -1189,6 +1232,9 @@
     canLocate: canLocate,
     remember: remember,
     noElection: noElection,
+    // The people of the answer's states, loaded before it is drawn (rule 94).
+    peopleFor: peopleFor,
+    peopleFailed: peopleFailed,
   };
 
   KYC.ready(function () {
