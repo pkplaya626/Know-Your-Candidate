@@ -650,11 +650,102 @@
     });
   }
 
+  /* --------------------------------------------------------- bill's path */
+
+  /* How a bill becomes law (VISUALS-31, kyc/government.py _billflow): the
+   * boxes are page text; this draws only the lines between them, as one
+   * SVG path under the boxes, from where each box falls. Only where the
+   * stylesheet shows the lines (a wide figure); on a phone the stages are
+   * a numbered list and nothing is drawn. Redrawn when the figure's size
+   * changes, at most once a frame. */
+  var BILL_LINKS = function (figure) {
+    var pairs = [];
+    var node = function (id) { return figure.querySelector('[data-node="' + id + '"]'); };
+    [0, 1].forEach(function (t) {
+      var steps = figure.querySelectorAll('[data-node^="t' + t + '-"]');
+      for (var s = 1; s < steps.length; s++) pairs.push([steps[s - 1], steps[s]]);
+      if (steps.length) pairs.push([steps[steps.length - 1], node("joined")]);
+    });
+    pairs.push([node("joined"), node("president")]);
+    Array.prototype.forEach.call(figure.querySelectorAll('[data-node^="end-"]'), function (end) {
+      var id = end.getAttribute("data-node");
+      pairs.push(/-then$/.test(id) ? [node(id.replace(/-then$/, "")), end] : [node("president"), end]);
+    });
+    return pairs.filter(function (p) { return p[0] && p[1]; });
+  };
+
+  /** The path's data for *figure*: an elbow from the bottom of each box to
+   *  the top of the next, with an arrowhead, in the figure's own pixels. */
+  function billPath(figure) {
+    var origin = figure.getBoundingClientRect();
+    var r = function (el) {
+      var b = el.getBoundingClientRect();
+      return { left: b.left - origin.left, right: b.right - origin.left,
+               top: b.top - origin.top, bottom: b.bottom - origin.top };
+    };
+    var round = function (n) { return Math.round(n * 10) / 10; };
+    return BILL_LINKS(figure).map(function (pair) {
+      var a = r(pair[0]), b = r(pair[1]);
+      var ax = (a.left + a.right) / 2;
+      // Into the target where it lies under the source, else its nearest
+      // edge: the two tracks meet the joined box at its ends.
+      var bx = Math.min(Math.max(ax, b.left + 12), b.right - 12);
+      // Fanning out to narrower boxes (the president's answers), each line
+      // ends at its box's middle.
+      if (b.right - b.left < a.right - a.left - 1) bx = (b.left + b.right) / 2;
+      var ay = a.bottom, by = b.top;
+      if (by <= ay) return "";
+      var d = "M" + round(ax) + " " + round(ay);
+      if (Math.abs(ax - bx) > 0.5) {
+        var mid = round((ay + by) / 2);
+        d += "V" + mid + "H" + round(bx);
+      }
+      d += "V" + round(by - 1);
+      return d + "M" + round(bx - 5) + " " + round(by - 7) + "L" + round(bx) + " " +
+        round(by - 1) + "L" + round(bx + 5) + " " + round(by - 7);
+    }).join("");
+  }
+
+  function initBillFlow() {
+    Array.prototype.forEach.call(doc.querySelectorAll("[data-billflow]"), function (figure) {
+      var svg = figure.querySelector(".billflow-lines");
+      if (!svg) return;
+      var pending = false;
+      var draw = function () {
+        pending = false;
+        var shown = global.getComputedStyle && global.getComputedStyle(svg).display !== "none";
+        var path = svg.querySelector("path");
+        if (!shown) {
+          if (path) path.setAttribute("d", "");
+          return;
+        }
+        if (!path) {
+          path = doc.createElementNS("http://www.w3.org/2000/svg", "path");
+          svg.appendChild(path);
+        }
+        var box = figure.getBoundingClientRect();
+        svg.setAttribute("viewBox", "0 0 " + Math.round(box.width) + " " + Math.round(box.height));
+        svg.setAttribute("width", String(Math.round(box.width)));
+        svg.setAttribute("height", String(Math.round(box.height)));
+        path.setAttribute("d", billPath(figure));
+      };
+      var later = function () {
+        if (pending) return;
+        pending = true;
+        (global.requestAnimationFrame || global.setTimeout)(draw);
+      };
+      draw();
+      if (global.ResizeObserver) new global.ResizeObserver(later).observe(figure);
+      else global.addEventListener("resize", later);
+    });
+  }
+
   var LIVE = { committees: renderCommittees, executive: renderExecutive, cabinet: renderCabinet,
                justices: renderJustices,
                "leaders-senate": function (t) { renderLeaders(t, "senate"); },
                "leaders-house": function (t) { renderLeaders(t, "house"); } };
-  KYC.guide = { live: LIVE, initTimeline: initTimeline };
+  KYC.guide = { live: LIVE, initTimeline: initTimeline, initBillFlow: initBillFlow,
+               billPath: billPath };
 
   function applyRoute(route) {
     if (!KYC.profile) return;
@@ -671,6 +762,7 @@
     safely(initMap);
     safely(initVoting);
     safely(function () { initTimeline(); });
+    safely(initBillFlow);
     var blocks = doc.querySelectorAll(".guide-live[data-live]");
     Array.prototype.forEach.call(blocks, function (block) {
       var fill = LIVE[block.getAttribute("data-live")];

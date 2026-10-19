@@ -1151,6 +1151,9 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
             if p["seatUp2026"] and not p["isCandidate"] and not p["seekingReelection2026"]
         ),
     }
+    # What the job pays, by the post each member holds (kyc/pay.py).
+    from . import pay as pay_mod
+    pay_mod.apply(profiles, sitting)
     # Whose photograph each chain starts with; the portrait and enrichment
     # caches replace the first photograph later, and the build credits again.
     assign_credits(profiles)

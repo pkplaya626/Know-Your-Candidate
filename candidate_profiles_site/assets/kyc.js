@@ -43,6 +43,8 @@
     columns: "M4 4h16v16H4zM12 4v16",
     link: "M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1",
     share: "M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 15V3M8 7l4-4 4 4",
+    mail: "M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM3 7l9 6 9-6",
+    phone: "M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2z",
     filter: "M3 5h18l-7 8v6l-4 2v-8z",
     print: "M6 9V3h12v6M6 17H4a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2M6 14h12v7H6z",
     sort: "M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4",
@@ -2522,6 +2524,33 @@
     });
   }
 
+  /* The drawer's close, once initShell has wired it. */
+  var drawerClose = null;
+
+  /** Close the drawer on a narrow screen, if it is open, then run *then*.
+   *  Closing steps back off the history entry the drawer pushed, and a
+   *  browser restores that entry's scroll position as it does: anything
+   *  that scrolls the page (a link caught to reveal a panel on this page)
+   *  waits for that step, or the restore undoes it. */
+  function closeDrawer(then) {
+    var open = !!(doc.body && doc.body.classList.contains("sidebar-open"));
+    var stepping = open && !!(history.state && history.state.kycDrawer);
+    if (stepping && then) {
+      var done = false;
+      var run = function () {
+        if (done) return;
+        done = true;
+        global.removeEventListener("popstate", run);
+        global.setTimeout(then, 0);
+      };
+      global.addEventListener("popstate", run);
+      // A browser that never reports the step still gets there.
+      global.setTimeout(run, 400);
+    }
+    if (open && drawerClose) drawerClose();
+    if (!stepping && then) then();
+  }
+
   function initShell() {
     if (doc.body && !doc.getElementById("kyc-sprite")) {
       var holder = doc.createElement("div");
@@ -2549,6 +2578,7 @@
             (sidebar && sidebar.contains(doc.activeElement))) toggle.focus();
       }
     };
+    drawerClose = closeSidebar;
     if (toggle) {
       toggle.addEventListener("click", function () {
         if (doc.body.classList.contains("sidebar-open")) return closeSidebar();
@@ -3019,6 +3049,7 @@
     // behaviour
     createModal: createModal,
     createMenu: createMenu,
+    closeDrawer: closeDrawer,
     router: router,
     electionStatus: electionStatus,
     ageOf: ageOf,

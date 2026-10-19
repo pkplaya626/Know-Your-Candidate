@@ -1110,6 +1110,41 @@
     Array.prototype.forEach.call((root || doc).querySelectorAll("[data-findrep]"), mount);
   }
 
+  /* The drawer's "Find who represents you" (pages.nav_groups, PERSONA-04)
+   * is index.html#findrep. Read before any page module runs: the grid's
+   * router reads a bare "#findrep" as a view of no filters. */
+  var arrived = global.location.hash === "#findrep";
+
+  /** The page's own address, "index.html" and "/" alike. */
+  function pathOf(path) {
+    return String(path || "").replace(/\/index\.html$/, "/");
+  }
+
+  /* Followed on the page that holds the panel, the link would be a
+   * navigation the grid's router reads as a view, clearing the reader's
+   * filters and redrawing the grid. It is caught: the drawer closes and
+   * the panel is brought into view with the ZIP code field focused. */
+  function catchNavLink(event) {
+    var a = event.target && event.target.closest && event.target.closest('a[data-nav="findrep"]');
+    if (!a || event.defaultPrevented || event.button || event.metaKey || event.ctrlKey ||
+        event.shiftKey || event.altKey) return;
+    if (pathOf(a.pathname) !== pathOf(global.location.pathname)) return;
+    if (!doc.querySelector("[data-findrep][data-findrep-ready]")) return;
+    event.preventDefault();
+    KYC.closeDrawer(reveal);
+  }
+
+  /* Arrived from another page's drawer: the panel, and the fragment
+   * dropped, so closing a profile later does not jump the reader back. */
+  function arrive() {
+    if (!arrived || !reveal()) return;
+    arrived = false;
+    if (global.history && global.history.replaceState) {
+      global.history.replaceState(global.history.state, "",
+        global.location.pathname + global.location.search);
+    }
+  }
+
   KYC.place = {
     project: project,
     pathRings: pathRings,
@@ -1165,5 +1200,7 @@
         a.innerHTML = KYC.icon("vote") + " See what was on your ballot";
       });
     }
+    arrive();
+    doc.addEventListener("click", catchNavLink);
   });
 })(window);

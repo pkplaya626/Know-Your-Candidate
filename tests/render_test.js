@@ -3067,8 +3067,33 @@ async function testStates() {
   await new Promise((r) => setTimeout(r, 200));
   suite("states/tx.html — search (after debounce)", () => {
     const cards = [...D.querySelectorAll("#stateContent .card")];
-    check("no card matches nonsense", cards.every((c) => c.hidden), `${cards.filter((c) => !c.hidden).length} shown`);
+    const shown = (n) => !n.closest("[hidden]");
+    check("no card matches nonsense", cards.every((c) => !shown(c)), `${cards.filter(shown).length} shown`);
+    // A sitting member's card sits in a cell with its contact link (GRID-16):
+    // hiding the card alone left rows of "Contact office" with no name.
+    // (A race's "Held by" line names its holder beside the link, and the
+    // search never hid it.)
+    const contacts = [...D.querySelectorAll("#stateContent .card-cell > .card-contact")];
+    check("nor is a member's contact link left without its card",
+      contacts.every((a) => !shown(a)),
+      `${contacts.filter(shown).length} shown`);
   });
+  const input = D.getElementById("stateSearch");
+  const one = [...D.querySelectorAll("#stateContent .card-cell > .card[data-id]")][0];
+  const target = one && window.KYC.byId(one.getAttribute("data-id"));
+  input.value = target ? target.name : "";
+  input.dispatchEvent(new window.Event("input", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 200));
+  suite("states/tx.html — search finds a member with their contact link", () => {
+    const cell = one && one.parentNode;
+    // Texas's delegation has offices on record; a membership read before
+    // any is recorded has no cell to look at.
+    check("the member's card and its contact link show together",
+      !one || (!cell.closest("[hidden]") && !!cell.querySelector(".card-contact")));
+  });
+  input.value = "";
+  input.dispatchEvent(new window.Event("input", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 200));
 
   const index = await testShared("states/index.html");
   suite("states/index.html — the directory of states", () => {
@@ -3116,17 +3141,17 @@ const settle = (ms) => new Promise((r) => setTimeout(r, ms || 150));
  * of legislatures and of local governments, and Know Your Government's
  * links to what it explains. */
 async function testNavigation() {
-  const GROUPS = ["Elections 2026", "Federal", "State", "Local", "Learn"];
+  const GROUPS = ["Start here", "Elections 2026", "Federal", "State", "Local", "Learn"];
   const grid = await buildPage("index.html");
   await settle(50);
   suite("the sidebar, by level of government", () => {
     const { D, window } = grid;
     const heads = [...D.querySelectorAll(".site-nav .nav-group")].map((h) => h.textContent.trim());
-    check("five groups, from elections to learning", JSON.stringify(heads) === JSON.stringify(GROUPS),
-      heads.join(" | "));
+    check("six groups, from finding who represents you to learning",
+      JSON.stringify(heads) === JSON.stringify(GROUPS), heads.join(" | "));
     const keys = [...D.querySelectorAll(".site-nav [data-nav]")].map((a) => a.getAttribute("data-nav"));
-    check("eleven places to go, About & sources last", keys.join(",") ===
-      "candidates,ballot,races,congress,executive,courts,states,legislatures,local,guide,about",
+    check("twelve places to go, the lookup first and About & sources last", keys.join(",") ===
+      "findrep,candidates,ballot,races,congress,executive,courts,states,legislatures,local,guide,about",
       keys.join(","));
     check("the grid is Candidates",
       D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav") === "candidates");
@@ -6190,6 +6215,240 @@ async function testDrawerBack() {
       "the grid was redrawn");
     check("closing it with a tap takes its entry off again", popped && shut);
     check("filters still write the address", filtered, window.location.hash);
+  });
+}
+
+/* The drawer's "Find who represents you" (PERSONA-04): every page's, to
+ * the home page's panel. On the home page itself the link is caught: the
+ * grid's router would read "#findrep" as a view and clear the filters. */
+async function testFindRepNav() {
+  const arrived = await buildPage("index.html", { hash: "#findrep" });
+  await settle(300);
+  const home = await buildPage("index.html", { hash: "#/?party=Republican" });
+  await settle(300);
+  const { window, D } = home;
+  const sentinel = D.createElement("i");
+  sentinel.id = "findrepSentinel";
+  D.getElementById("results").appendChild(sentinel);
+  D.querySelector(".sidebar-toggle").click();
+  const opened = D.body.classList.contains("sidebar-open");
+  const link = D.querySelector('.site-nav a[data-nav="findrep"]');
+  const click = new window.MouseEvent("click", { bubbles: true, cancelable: true, button: 0 });
+  link.dispatchEvent(click);
+  await settle(500);
+  const about = await buildPage("about.html");
+  const state = await buildPage("states/oh.html");
+  suite("the drawer's Find who represents you (PERSONA-04)", () => {
+    check("no page errors", arrived.errors.length === 0 && home.errors.length === 0,
+      arrived.errors.concat(home.errors).join(" | "));
+    check("it opens the list, first, on every page: the home page's panel",
+      about.D.querySelector(".site-nav a[data-nav]").getAttribute("href") === "index.html#findrep" &&
+        state.D.querySelector(".site-nav a[data-nav]").getAttribute("href") === "../index.html#findrep" &&
+        /Find who represents you/.test(link.textContent));
+    check("named as the panel is (rule 75)", link.textContent.trim() ===
+      arrived.D.querySelector("[data-findrep] .findrep-title").textContent.trim());
+    check("arriving from another page puts the reader in the ZIP code field",
+      !!arrived.D.activeElement && arrived.D.activeElement.classList.contains("findrep-zip"),
+      arrived.D.activeElement && arrived.D.activeElement.outerHTML.slice(0, 80));
+    check("and drops the fragment, so the grid does not read it as a view",
+      /^(#\/)?$/.test(arrived.window.location.hash), arrived.window.location.hash);
+    check("on the home page the link is caught, not followed", opened && click.defaultPrevented);
+    check("the drawer closes", !D.body.classList.contains("sidebar-open"));
+    check("the reader's filters and grid stay as they were",
+      /party=Republican/.test(window.location.hash) && !!D.getElementById("findrepSentinel"),
+      window.location.hash);
+    check("and the ZIP code field has the focus",
+      !!D.activeElement && D.activeElement.classList.contains("findrep-zip"),
+      D.activeElement && D.activeElement.outerHTML.slice(0, 80));
+  });
+}
+
+/* GRID-16: a sitting member's card, and a race their seat is in, say how
+ * to reach their office; nobody else's does (rule 27). */
+async function testContactActions() {
+  const page = await buildPage("index.html", { hash: "#/?view=race&state=OH" });
+  await settle(300);
+  const { window, D, errors } = page;
+  const KYC = window.KYC;
+  const people = window.legislatorsData;
+  const seated = people.filter((p) => KYC.seated(p));
+  const others = people.filter((p) => !KYC.seated(p));
+  const html = (p) => {
+    const box = D.createElement("div");
+    box.innerHTML = KYC.cards.card(p);
+    return box;
+  };
+  const wrong = [];
+  seated.forEach((p) => {
+    const a = html(p).querySelector(".card-cell > a.card-contact");
+    const want = p.contactForm || (p.phone ? "tel:" + String(p.phone).replace(/[^\d+]/g, "") : null);
+    if (!want ? !!a : !a || a.getAttribute("href") !== want) wrong.push(p.id);
+  });
+  const leaked = others.filter((p) => html(p).querySelector(".card-contact")).map((p) => p.id);
+  const sample = seated.find((p) => p.contactForm) || seated[0];
+  const link = sample && html(sample).querySelector("a.card-contact");
+  const phoneOnly = Object.assign({}, sample, { contactForm: null, phone: "202-555-0100" });
+  const call = html(phoneOnly).querySelector("a.card-contact");
+  const campaign = Object.assign({}, sample, { contactForm: null, phone: null, districtOffices: null,
+    campaignSite: "https://example.org/" });
+  suite("index.html — a way to reach a member's office, on the card (GRID-16)", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("every sitting member's card carries their office's contact form, else its phone",
+      seated.length > 0 && wrong.length === 0, wrong.slice(0, 5).join(", "));
+    check("beside the card's button, never inside it (a link in a button is not operable)",
+      !!link && !link.closest("button") && !!link.parentNode.querySelector("button.card[data-id]"));
+    check("a form opens safely in a new tab and is named for whose office it is",
+      !!link && link.getAttribute("target") === "_blank" && /noopener/.test(link.getAttribute("rel")) &&
+        link.getAttribute("aria-label") === "Contact " + sample.name + "’s office" &&
+        /official website|congress-legislators/.test(link.getAttribute("title")));
+    check("a phone is a call to the Washington office, with the number in its title",
+      !!call && call.getAttribute("href") === "tel:2025550100" && /Washington: 202-555-0100/.test(
+        call.getAttribute("title")) && call.textContent.trim() === "Call office");
+    check("a campaign site is never offered as the office's contact",
+      !html(campaign).querySelector(".card-contact"));
+    check("no challenger's or former member's card carries one (rule 27)", leaked.length === 0,
+      leaked.slice(0, 5).join(", "));
+    const raced = [...D.querySelectorAll("section.race .card-cell > a.card-contact")];
+    check("the race view's cards carry it too", raced.length > 0);
+  });
+  if (!oldCongressSits(window)) return;
+  // A holder running for another seat is a line above the race, not a card.
+  const moved = seated.find((p) => p.contestRaceId && p.heldRaceId &&
+    p.contestRaceId !== p.heldRaceId && p.contestLabel);
+  const race = moved && window.kycRaces.find((r) => r.id === moved.heldRaceId);
+  if (!race) return;
+  const box = D.createElement("div");
+  box.innerHTML = KYC.cards.raceSection(race, people.filter((p) =>
+    (race.incumbentIds || []).indexOf(p.id) !== -1 || p.contestRaceId === race.id));
+  const held = box.querySelector(".race-held");
+  suite("index.html — a race whose holder runs elsewhere still says how to reach them (GRID-16)", () => {
+    check("the Held by line carries the holder's office contact",
+      !!held && !!held.querySelector("a.card-contact"), held ? held.innerHTML.slice(0, 200) : moved.id);
+  });
+}
+
+/* PROFILES-25: what the job pays, on a sitting member's profile, as the
+ * law sets it for their post (kyc/pay.py), with its source. */
+async function testPayLine() {
+  const page = await buildPage("index.html");
+  await settle(300);
+  const { window, D, errors } = page;
+  const KYC = window.KYC;
+  const meta = window.kycBuildMeta.pay;
+  const people = window.legislatorsData;
+  const open = (p) => {
+    window.location.hash = "#/profile/" + encodeURIComponent(p.id);
+    window.dispatchEvent(new window.HashChangeEvent("hashchange"));
+    const field = D.getElementById("profileModalPayField");
+    return { hidden: !field || field.hidden, text: field ? field.textContent : "",
+             html: field ? field.innerHTML : "" };
+  };
+  const plain = people.find((p) => KYC.seated(p) && p.pay && !p.pay.post);
+  const leader = people.find((p) => KYC.seated(p) && p.pay && p.pay.post);
+  const memberOf = (p) => {
+    const m = p.isCandidate && p.incumbentId ? KYC.byId(p.incumbentId) : null;
+    return m && m.id !== p.id && KYC.seated(m) ? m : null;
+  };
+  const challenger = people.find((p) => p.isCandidate && !memberOf(p));
+  // A sitting member's filing for another seat is the same person (PROFILES-03).
+  const running = people.find((p) => memberOf(p) && memberOf(p).pay);
+  const former = people.find((p) => p.formerMember);
+  suite("index.html — what the job pays (PROFILES-25)", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    if (!meta) {
+      // Another Congress than the table's: nobody has a figure (kyc/pay.py).
+      check("no member carries a figure without the table's year",
+        people.every((p) => !p.pay), "");
+      return;
+    }
+    check("every sitting member has a figure, and nobody else",
+      people.every((p) => !!p.pay === (KYC.seated(p) && !p.isCandidate)));
+    const a = plain && open(plain);
+    check("a member's profile says the salary the law sets, for the year, with its source",
+      !!a && !a.hidden && a.text.indexOf("$" + meta.member.toLocaleString("en-US") + " a year in " +
+        meta.year) !== -1 && /the law sets for a member of Congress/.test(a.text) &&
+        a.html.indexOf(meta.sources[0].url) !== -1 && /read on/.test(a.text), a && a.text);
+    check("what it says of the rates' history is the table's sentence, from the report",
+      !!a && !!meta.stood && a.text.indexOf(meta.stood) !== -1 && !/denied/.test(a.text), a && a.text);
+    const b = leader && open(leader);
+    // "Other members are paid $174,000" was wrong on a leader's profile:
+    // the other leaders are paid more too.
+    check("a post paid more says the post's rate, by the post's name, and whose rate is a member's",
+      !b || (!b.hidden && b.text.indexOf("$" + leader.pay.amount.toLocaleString("en-US")) !== -1 &&
+        b.text.indexOf(leader.pay.post) !== -1 && !/Other members/.test(b.text) &&
+        b.text.indexOf("A member who is not the Speaker, the President pro tempore or a majority " +
+          "or minority leader is paid $" + meta.member.toLocaleString("en-US")) !== -1), b && b.text);
+    const c = running && open(running);
+    check("a sitting member's filing for another seat shows the member's pay, credited to their record",
+      !running || (!c.hidden && c.text.indexOf("$" + memberOf(running).pay.amount
+        .toLocaleString("en-US")) !== -1 && /record as the member for/.test(c.text)),
+      running ? running.id + ": " + c.text : "");
+    check("a challenger's profile names no salary (rule 27)", !challenger || open(challenger).hidden);
+    check("nor a former member's", !former || open(former).hidden);
+  });
+  // Read in a later year than the table's: no figure, rather than a stale one.
+  const later = await buildPage("index.html", { now: "2027-02-01T12:00:00Z" });
+  await settle(300);
+  const sitting = later.window.legislatorsData.find((p) => later.window.KYC.seated(p) && p.pay);
+  suite("index.html — what the job pays, read in a later year", () => {
+    later.window.location.hash = "#/profile/" + (sitting ? sitting.id : "");
+    later.window.dispatchEvent(new later.window.HashChangeEvent("hashchange"));
+    const field = later.D.getElementById("profileModalPayField");
+    check("the line is not shown once the reader's year is past the table's",
+      !sitting || !field || field.hidden);
+  });
+}
+
+/* VISUALS-31: how a bill becomes law, as two chambers' tracks meeting. The
+ * words are page text; the lines are one SVG path with no text (rule 46),
+ * drawn from where the boxes fall. jsdom lays nothing out, so the boxes are
+ * given a wide figure's places and the stylesheet's "lines shown". */
+async function testBillFlow() {
+  const page = await buildPage("government/congress.html");
+  await settle(100);
+  const { window, D, errors } = page;
+  const figure = D.querySelector("[data-billflow]");
+  const svg = figure && figure.querySelector("svg.billflow-lines");
+  // A wide layout: the tracks side by side, each box 60px tall with 30px gaps.
+  const place = {};
+  const at = (x, y, w) => ({ left: x, right: x + w, top: y, bottom: y + 60, width: w, height: 60 });
+  [0, 1].forEach((t) => [0, 1, 2].forEach((s) => { place[`t${t}-${s}`] = at(t * 500, s * 90, 450); }));
+  place.joined = at(250, 300, 450);
+  place.president = at(250, 390, 450);
+  [0, 1, 2, 3].forEach((e) => { place[`end-${e}`] = at(e * 240, 500, 220); });
+  place["end-3-then"] = at(720, 590, 220);
+  [...figure.querySelectorAll("[data-node]")].forEach((n) => {
+    n.getBoundingClientRect = () => place[n.getAttribute("data-node")];
+  });
+  figure.getBoundingClientRect = () => at(0, 0, 950);
+  const real = window.getComputedStyle;
+  window.getComputedStyle = (el, ...rest) => (el === svg ? { display: "block" } : real(el, ...rest));
+  window.KYC.guide.initBillFlow();
+  window.getComputedStyle = real;
+  const d = (svg.querySelector("path") || { getAttribute: () => "" }).getAttribute("d");
+  suite("government/congress.html — how a bill becomes law, drawn (VISUALS-31)", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("the House's and the Senate's steps, as page text",
+      [...figure.querySelectorAll(".billflow-track .billflow-head")].map((h) => h.textContent)
+        .join("|") === "In the House|In the Senate" &&
+        figure.querySelectorAll('.billflow-track [data-node]').length === 6);
+    check("meeting at one text, then the president and four answers, the veto's override under it",
+      !!figure.querySelector('[data-node="joined"]') && !!figure.querySelector('[data-node="president"]') &&
+        figure.querySelectorAll(".billflow-end").length === 4 &&
+        !!figure.querySelector('.billflow-end:last-child [data-node="end-3-then"]'));
+    check("each answer says what it makes of the bill, in words",
+      [...figure.querySelectorAll(".billflow-result")].map((r) => r.textContent).join("|") ===
+        "It is law|It is law, as if signed|It is not law|It is law");
+    check("the lines are SVG with no text in it (rule 46), hidden from assistive technology",
+      !!svg && svg.getAttribute("aria-hidden") === "true" && !svg.querySelector("text") &&
+        svg.querySelectorAll("*").length === 1);
+    // 4 steps within the tracks, 2 into the joined box, 1 to the president,
+    // 4 to the answers, 1 to the override: 12 lines, each with an arrowhead.
+    check("one path: a line and an arrowhead for each of the 12 links", (d.match(/M/g) || []).length === 24, d);
+    check("a track meets the joined box inside its edge",
+      d.indexOf("M225 240V270H262V299") !== -1 && d.indexOf("M725 240V270H688V299") !== -1, d);
+    check("the president fans out to each answer's top",
+      [110, 350, 590, 830].every((x) => d.indexOf("H" + x + "V499") !== -1), d);
   });
 }
 
@@ -12154,6 +12413,7 @@ async function testBallot() {
   if (!only || only === "money") await testRaceMoney();
   if (!only || only === "charts") await testCharts();
   if (!only || only === "guide") await testGuide();
+  if (!only || only === "guide") await testBillFlow();
   if (!only || only === "federal") await testFederal();
   if (!only || only === "legislature") await testLegislatures();
   if (!only || only === "counties") await testCounties();
@@ -12186,6 +12446,9 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "redistricting") await testFindMyDistrict();
   if (!only || only === "findrep") await testFindRep();
   if (!only || only === "ballot" || only === "findrep") await testBallot();
+  if (!only || only === "findrep") await testFindRepNav();
+  if (!only || only === "index.html") await testContactActions();
+  if (!only || only === "index.html") await testPayLine();
   if (!only || only === "redistricting") await testDistrictsOnAPhone();
   if (!only || only === "links") await testInterlinks();
   if (!only || only === "links") await testNavigation();

@@ -149,6 +149,15 @@ def nav_groups():
     from .cycle import CYCLE
 
     return (
+        # "Who represents me" had no way in from the drawer: the lookup is
+        # the home page's first panel, and nothing on any other page said it
+        # existed (PERSONA-04). On the home page the link is caught and the
+        # panel revealed without a navigation (kyc-findrep.js), since the
+        # grid's router would read "#findrep" as a view and clear the
+        # reader's filters; from any other page it opens the home page there.
+        ("Start here", (
+            ("findrep", "index.html#findrep", "pin", "Find who represents you"),
+        )),
         (f"Elections {CYCLE}", (
             ("candidates", "index.html", "user", "Candidates"),
             ("ballot", BALLOT_PATH, "vote", "Your ballot"),

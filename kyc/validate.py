@@ -311,6 +311,20 @@ def check_committee_titles(profiles):
     return issues
 
 
+def check_pay(profiles, snapshot=None, today=None):
+    """What the job pays (kyc/pay.py): a post paid more under a title the
+    table does not hold would read as paid a member's rate, and a table
+    whose year has passed is stale."""
+    from . import cycle, pay
+
+    try:
+        sitting = cycle.snapshot_congress(snapshot) if snapshot else None
+    except cycle.CycleError:
+        sitting = None
+    return [Issue(severity, code, message, items)
+            for severity, code, message, items in pay.problems(profiles, sitting, today)]
+
+
 def check_identity(profiles):
     """Every profile needs a unique, non-empty id and a name.
 
@@ -1663,6 +1677,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_future_coverage(profiles)
     issues += check_overrides(profiles, raw)
     issues += check_committee_titles(profiles)
+    issues += check_pay(profiles, snapshot)
     issues += check_campaign_blocklist(campaigns)
     issues += check_campaign_sites(profiles, enrichment)
     issues += check_portrait_overrides(enrichment)

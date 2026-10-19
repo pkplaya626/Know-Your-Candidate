@@ -406,7 +406,8 @@ class TestBallotPage(unittest.TestCase):
 
     def test_it_is_in_the_navigation_beside_the_candidates(self):
         keys = [k for _h, entries in self.pages.nav_groups() for k, *_rest in entries]
-        self.assertEqual(keys[:3], ["candidates", "ballot", "races"])
+        # "Start here" (PERSONA-04, #114) opens the list with the lookup.
+        self.assertEqual(keys[:4], ["findrep", "candidates", "ballot", "races"])
         self.assertIn('href="ballot.html" data-nav="ballot" aria-current="page"', self.html)
 
     def test_it_loads_its_data_then_the_modules_in_order(self):
