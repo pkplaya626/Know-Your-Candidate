@@ -18456,33 +18456,6 @@
    "wikipedia": "Michael H. Simon"
   },
   "1393731": {
-   "portrait": {
-    "by": "JPOfanboy",
-    "credit": "Wikimedia Commons",
-    "creditForm": 2,
-    "licence": "CC BY-SA 4.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-    "set": [
-     [
-      120,
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/JPO_Photo.jpg/120px-JPO_Photo.jpg"
-     ],
-     [
-      250,
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/JPO_Photo.jpg/250px-JPO_Photo.jpg"
-     ],
-     [
-      330,
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/JPO_Photo.jpg/330px-JPO_Photo.jpg"
-     ],
-     [
-      500,
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/JPO_Photo.jpg/500px-JPO_Photo.jpg"
-     ]
-    ],
-    "source": "https://commons.wikimedia.org/wiki/File:JPO_Photo.jpg",
-    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/JPO_Photo.jpg/120px-JPO_Photo.jpg"
-   },
    "wikidata": "Q6106759",
    "wikipedia": "J. Paul Oetken"
   },
@@ -28403,7 +28376,7 @@
   "James Ray Knepp, II: https://upload.wikimedia.org/wikipedia/commons/0/00/James_Knepp.jpg is wider than a portrait (1059x608); not shown as a portrait",
   "Joseph Dawson, III: https://upload.wikimedia.org/wikipedia/commons/5/5f/Joseph_Dawson_III_(Judge).jpg is wider than a portrait (914x647); not shown as a portrait"
  ],
- "read": "2026-10-18",
+ "read": "2026-10-19",
  "slugs": {
   "10226111": "neals-julien-xavier",
   "10229116": "rodriguez-regina-marie",
