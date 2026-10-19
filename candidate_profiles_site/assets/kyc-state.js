@@ -665,10 +665,17 @@
         "general, secretary of state or regular legislative seats is elected in 2026; the " +
         "ballot may still hold " + rest + ".";
     }
+    // The statewide offices' candidates are listed under State government
+    // from the election office's own list (rule 91); the legislature's are
+    // not, and the sentence says which.
+    var listed = KYC.stategov && KYC.stategov.listsCandidates(code);
     return "Of the state offices this site covers, the same ballot also elects " +
       KYC.escapeHtml(list) + " (see " +
       '<a class="state-jump" href="#state-government">State government</a>). It may also hold ' +
-      rest + ". This site lists the candidates for Congress only.";
+      rest + ". " + (listed
+        ? "This site lists the candidates for Congress here, and those for the governor and " +
+          "statewide officers under State government; not those for the legislature."
+        : "This site lists the candidates for Congress only.");
   }
 
   /* A link to a section of this page ("#state-government", from the guide)

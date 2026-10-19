@@ -4161,6 +4161,29 @@ button.local-county-link {
 .gov-office { margin: 0; }
 .gov-office .gov-ballot-mark { margin-top: 0; }
 .gov-holder-status { margin: 2px 0 0; font-size: var(--t-sm); color: var(--text-muted); }
+/* The candidates the election office lists for an office on the ballot
+ * (rule 91): plain text in the office's row, no party colours and no
+ * portraits, credited to the list beneath them. */
+.gov-candidates {
+  margin: var(--s-2) 0 var(--s-3);
+  padding-left: var(--s-3);
+  border-left: 2px solid var(--border);
+  font-size: var(--t-sm);
+}
+.gov-candidates p { margin: 0 0 2px; }
+.gov-candidates-head {
+  font-size: var(--t-xs);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.gov-candidates .gov-writein-head { margin-top: var(--s-2); }
+.gov-candidate-list { list-style: none; margin: 0 0 var(--s-1); padding: 0; }
+.gov-candidate { padding: 1px 0; overflow-wrap: anywhere; }
+.gov-candidate-name { font-weight: 600; color: var(--text); }
+.gov-candidate-party { color: var(--text-muted); }
+.gov-candidates-uncertified,
+.gov-candidates-none { color: var(--text-muted); }
+.gov-candidates-source { font-size: var(--t-xs); }
 .gov-next {
   margin-left: var(--s-1);
   font-size: var(--t-xs);

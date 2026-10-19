@@ -619,7 +619,7 @@
     else renderOfficials();
   }
 
-  var KIND_ORDER = { executive: 0, justice: 1, governor: 2, officer: 3, judge: 4 };
+  var KIND_ORDER = { executive: 0, justice: 1, governor: 2, officer: 3, judge: 4, candidate: 5 };
   var STATE_OFFICES = [["governor", "Governor"], ["lt", "Lieutenant Governor"],
     ["ag", "Attorney General"], ["sos", "Secretary of State"]];
 
@@ -684,6 +684,26 @@
         add({ name: off.name, state: code, kind: pair[0] === "governor" ? "governor" : "officer",
               role: (off.title || pair[1]) + ", " + KYC.stateName(code),
               href: KYC.stateUrl(code) + "#state-government" });
+      });
+    });
+    /* The candidates each election office lists for a statewide office on
+     * the Nov 3 ballot (kyc/statewide.py, rule 91), as the list names them,
+     * linked to the state page that lists them. Never to a profile card of
+     * the same name: the list gives no id that says it is the same person
+     * (rule 25). A holder the list names is already listed above, for the
+     * office they hold. */
+    Object.keys(states).forEach(function (code) {
+      var offices = (states[code].ballot2026 || {}).offices || {};
+      STATE_OFFICES.forEach(function (pair) {
+        var item = offices[pair[0]];
+        if (!item || !item.up || !item.candidates) return;
+        item.candidates.candidates.forEach(function (c) {
+          if (c.holder && namedHolder(states[code][pair[0]])) return;
+          add({ name: c.name, state: code, kind: "candidate",
+                role: (c.writeIn ? "Write-in candidate for " : "Candidate for ") + pair[1] + ", " +
+                  KYC.stateName(code) + " (Nov 3, 2026 ballot)",
+                href: KYC.stateUrl(code) + "#state-government" });
+        });
       });
     });
     return rows;
@@ -796,8 +816,10 @@
 
   function officialList(found) {
     return '<h2 class="official-results-title">Other officials</h2>' +
-      '<p class="official-results-note">Listed for the office they hold now, each linked to ' +
-      "the page about it. Anyone also running for Congress has a profile card as well.</p>" +
+      '<p class="official-results-note">Listed for the office they hold now, or the statewide ' +
+      "office they are a candidate for, each linked to the page about it. Anyone also running " +
+      "for Congress has a profile card as well; a candidate here is not matched to a card by " +
+      "name.</p>" +
       '<ul class="official-list">' + found.slice(0, OFFICIAL_LIMIT).map(function (h) {
         var row = h.row;
         return '<li class="official-row"><a class="official-name" href="' +

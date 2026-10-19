@@ -322,15 +322,75 @@ def office_links(code, entry):
     return problems
 
 
+def stale_name_forms(states):
+    """An ``overrides.STATEWIDE_NAME_FORMS`` entry whose holder the rosters
+    no longer name, or whose list no longer prints that name, settles
+    nothing: reported, so it is removed rather than left to match someone
+    else."""
+    from .overrides import STATEWIDE_NAME_FORMS
+
+    out = []
+    for (code, key, name), (form, _evidence) in sorted(STATEWIDE_NAME_FORMS.items()):
+        entry = states.get(code) or {}
+        holder = (entry.get(key) or {}).get("name")
+        item = ((entry.get("ballot2026") or {}).get("offices") or {}).get(key) or {}
+        names = [p["name"] for p in (item.get("candidates") or {}).get("candidates", ())]
+        if holder != name or form not in names:
+            out.append(f"{code} {key}: overrides.STATEWIDE_NAME_FORMS is for {name} as "
+                       f"'{form}'; the rosters name {holder or 'nobody'} and the list "
+                       f"{'prints' if form in names else 'does not print'} that name")
+    return out
+
+
+def holder_line(code, key, holder, terms, listed):
+    """``(record, problem)``: what an office on the ballot says about its
+    holder. The election office's list of candidates answers wherever it is
+    in hand (``statewide.holder_status``); a term limit in
+    ``ballot2026.OPEN_SEATS`` stays as the reason, the list beside it. The
+    two must agree: a term-limited holder the list names, or a list entry
+    that does not settle the holder, is reported and the line says it was
+    not checked. With no list, OPEN_SEATS alone answers, as before."""
+    from . import ballot2026, statewide
+
+    seat, seat_problem = ballot2026.open_seat(code, key, holder, terms)
+    if not listed or not holder:
+        return seat, seat_problem
+    status, problem = statewide.holder_status(code, key, listed, holder)
+    if status is None:
+        return ballot2026.unchecked(holder), problem
+    if seat and seat["why"] == "term-limit":
+        if status["why"] == "listed":
+            return ballot2026.unchecked(holder), (
+                f"{code} {key}: OPEN_SEATS says {holder} is term-limited; "
+                f"{status['cite']}'s list names them; neither is shown")
+        return dict(seat, then={"text": "is not on the " + ("certified " if status["certified"]
+                                                           else "") +
+                                "list of candidates for this office",
+                                "source": status["source"], "cite": status["cite"]}), problem
+    if seat and seat["why"] in ("not-listed", "listed") and seat["why"] != status["why"]:
+        return ballot2026.unchecked(holder), (
+            f"{code} {key}: OPEN_SEATS says {seat['why']}; the list of candidates says "
+            f"{status['why']}; neither is shown")
+    return status, problem or seat_problem
+
+
 # -------------------------------------------------------------------- build
 
 def build(root="."):
     """``(payload, problems)``: what ``data/stategov.js`` holds, and every
     disagreement between the sources."""
-    from . import ballot2026, courts, executives, officers, statelegs
+    from . import ballot2026, courts, executives, officers, statelegs, statewide
     exec_cache, leg_cache, ncsl, officer_cache = (
         executives.load_cache(root), statelegs.load_cache(root), load_ncsl(root),
         officers.load_cache(root))
+    # The statewide candidates are a hand-edited cache: one that breaks its
+    # rules stops the build, as a hand-read court roster does (rule 91).
+    lists = statewide.load(root)
+    if lists is None:
+        raise StateGovError(f"no {statewide.CACHE_PATH}")
+    unfit = statewide.problems(lists)
+    if unfit:
+        raise StateGovError(f"{statewide.CACHE_PATH}: " + "; ".join(unfit))
     for cache, path, command in ((exec_cache, executives.CACHE_PATH, "executives"),
                                  (leg_cache, statelegs.CACHE_PATH, "statelegs"),
                                  (ncsl, NCSL_CACHE, "executives"),
@@ -373,19 +433,25 @@ def build(root="."):
             entry["federalCourts"] = federal_for_state(code)
         if code in ballot2026.STATES or code in ballot2026.TERRITORIES:
             # Which of these offices and seats are elected on November 3, and
-            # for each office on it, whether a cited source says its holder
-            # is running - or, said in words, that nothing here checked.
+            # for each office on it, who the election office lists as its
+            # candidates and whether its holder is among them - or, said in
+            # words, that nothing here checked.
             entry["ballot2026"] = ballot2026.for_state(code)
             for key, item in entry["ballot2026"]["offices"].items():
                 if not item["up"]:
                     continue
                 holder = entry["governor"] if key == "governor" else entry.get(key) or {}
-                seat, problem = ballot2026.open_seat(code, key, holder.get("name"),
-                                                     holder.get("terms"))
+                listed = statewide.office(lists, code, key)
+                status, problem = holder_line(code, key, holder.get("name"), holder.get("terms"),
+                                              listed)
                 if problem:
                     problems.append(problem)
-                if seat:
-                    item["holderStatus"] = seat
+                if status:
+                    item["holderStatus"] = status
+                if listed:
+                    item["candidates"] = statewide.for_page(
+                        listed, status.get("name") if status and status["why"] == "listed"
+                        else None)
         if code in STATES:
             entry.update(_legislature(code, legislators.get(code, []), ncsl["states"].get(code),
                                       entry["governor"]["partyKey"], problems))
@@ -398,6 +464,7 @@ def build(root="."):
     if missing:
         problems.append(f"no governor for {', '.join(missing)}")
     problems.extend(unpictured(states))
+    problems.extend(stale_name_forms(states))
     payload = {
         "states": states,
         "sources": {

@@ -916,8 +916,64 @@ COURT_ROSTERS = {
            "Cloudflare answers a headless Chrome 'Just a moment...'."),
 }
 
+# Lists of the statewide candidates (data/statewide_candidates.json, rule
+# 91) published by an election office on a host that is not the
+# jurisdiction's own domain (voting_dates.JURISDICTION_DOMAINS): a county's
+# election office where the state's own list could not be read or does not
+# exist, a state agency's file store, or the office's vendor. {url prefix:
+# (codes, who publishes it, evidence)}. Being a .gov host is not enough: a
+# list counts here only for the jurisdictions named. Read 2026-10-18.
+STATEWIDE_LISTS_ELSEWHERE = {
+    "https://votepulaskiar.gov/": (
+        ("AR",), "Pulaski County Board of Election Commissioners",
+        "the county board's Notice of Election for November 3, 2026 (PDF, Last-Modified "
+        "2026-10-05); Arkansas's Secretary of State publishes no list of the November "
+        "candidates, and its candidate search (candidates.arkansas.gov) names the same people "
+        "for these offices"),
+    "https://storageccec.blob.core.usgovcloudapi.net/public/docs/": (
+        ("AZ",), "Arizona Citizens Clean Elections Commission",
+        "the Commission's 2026 Voter Education Guide, the state's candidate statement pamphlet "
+        "(PDF, Last-Modified 2026-09-11); the Secretary of State's listing is behind a bot "
+        "check, and Pima County's official candidate list (updated 9/9/2026) agrees on every "
+        "name and running mate"),
+    "https://www.miamidade.gov/elections/": (
+        ("FL",), "Miami-Dade County Supervisor of Elections",
+        "the county's official sample ballot for November 3, 2026; the Division of Elections' "
+        "own listing (dos.elections.myflorida.com, read 2026-10-18) lists the same tickets as "
+        "qualified"),
+    "https://drive.google.com/file/d/1RKr3bLuivj8n0n29XKbQVHEgdUYwILMN/": (
+        ("GU",), "Guam Election Commission",
+        "'2026 General Election Sample Ballot', linked by that name from the Commission's home "
+        "page, https://gec.guam.gov/"),
+    "https://mi-boe.entellitrak.com/etk-mi-boe-prod/": (
+        ("MI",), "Michigan Department of State",
+        "the Bureau of Elections' Official Candidate Listing, linked as '2026 November General "
+        "Candidate Listing' from https://www.michigan.gov/sos/elections"),
+    "https://www.clarkcountynv.gov/": (
+        ("NV",), "Clark County Registrar of Voters",
+        "the Registrar's certified Notice of General Election, which lists every contest on "
+        "Clark County's ballot, statewide ones included; nvsos.gov refused every request "
+        "(an Incapsula block), so the Secretary of State's own list could not be read"),
+    "https://sos-prod.tnsosgovfiles.com/": (
+        ("TN",), "Tennessee Secretary of State",
+        "the Division of Elections' file store, linked as PDF from "
+        "https://sos.tn.gov/elections/2026-candidate-lists"),
+}
+
+# A holder whose name the list of candidates prints with another given name,
+# where only a short form and its full form differ (rule 56: a different
+# first name is never taken on a surname alone). {(state, office, holder as
+# the rosters name them): (the list's name, evidence)}.
+STATEWIDE_NAME_FORMS = {
+    ("NV", "governor", "Joe Lombardo"): (
+        "Lombardo, Joseph",
+        "the Governor's own site, gov.nv.gov (read 2026-10-18), links his account "
+        "twitter.com/JosephMLombardo; the Clark County notice prints 'Lombardo, Joseph REP' "
+        "for Governor, and both researchers read it as the governor"),
+}
+
 # Phrases in a Status value that mean the incumbent is not on the 2026 ballot.
-NOT_SEEKING_MARKERS = ("retiring", "not running", "defeated", "ineligible", "resigned")
+NOT_SEEKING_MARKERS =("retiring", "not running", "defeated", "ineligible", "resigned")
 
 
 def status_override(member_id, current):
